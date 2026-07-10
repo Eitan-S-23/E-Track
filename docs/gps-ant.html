@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X-TRACK · 技术文档</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #e8e8e8;
+      --text: #1a1a1a;
+      --muted: #888;
+      --accent: #2d6be4;
+      --accent-light: #eef3fd;
+      --tag-bg: #f0f0f0;
+      --sidebar-w: 260px;
+      --header-h: 52px;
+      --radius: 6px;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── Header ── */
+    #header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    #menu-toggle {
+      width: 36px; height: 36px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 4px;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    #menu-toggle:hover { background: var(--tag-bg); }
+    #menu-toggle span {
+      display: block;
+      width: 16px; height: 1.5px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    body.menu-open #menu-toggle span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+    body.menu-open #menu-toggle span:nth-child(2) { opacity: 0; }
+    body.menu-open #menu-toggle span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+    #brand {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -.2px;
+      color: var(--text);
+    }
+    #brand sup {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    .header-meta {
+      margin-left: auto;
+      display: flex; gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      position: fixed;
+      top: var(--header-h); left: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      transform: translateX(0);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 90;
+      padding: 16px 0 32px;
+    }
+    body:not(.menu-open) #sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 20px 4px;
+    }
+    .sidebar-link {
+      display: block;
+      padding: 6px 20px;
+      color: #444;
+      text-decoration: none;
+      font-size: 13px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .sidebar-link:hover {
+      color: var(--accent);
+      background: var(--accent-light);
+      border-left-color: var(--accent);
+    }
+    .sidebar-link.active {
+      color: var(--accent);
+      background: var(--accent-light);
+      border-left-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Main ── */
+    #main {
+      margin-top: var(--header-h);
+      margin-left: var(--sidebar-w);
+      transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: calc(100vh - var(--header-h));
+    }
+    body:not(.menu-open) #main { margin-left: 0; }
+
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* ── Sections ── */
+    section { margin-bottom: 64px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 24px 0 10px;
+    }
+
+    p { color: #444; margin-bottom: 12px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Hero ── */
+    .hero-desc {
+      font-size: 16px;
+      color: #555;
+      max-width: 600px;
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+    .tag {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--tag-bg);
+      color: #555;
+    }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .card-icon {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f5f5f5;
+      border: 1px solid var(--border);
+      font-weight: 600;
+      color: #555;
+    }
+    td {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      color: #444;
+      vertical-align: top;
+    }
+    tr:hover td { background: #fafafa; }
+    .td-code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: #f8f8f8;
+      color: #c0392b;
+    }
+
+    /* ── Code ── */
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: var(--radius);
+      padding: 20px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.7;
+      margin: 16px 0;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s;
+      color: #cdd6f4;
+      padding: 0;
+    }
+    pre:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { background: rgba(255,255,255,0.18); }
+    .copy-btn.copied { color: #a6e3a1; border-color: #a6e3a1; }
+    code {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      background: #f3f3f3;
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: #c0392b;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    /* ── Arch diagram ── */
+    .arch {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 16px 0;
+    }
+    .arch-layer {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .arch-layer:last-child { border-bottom: none; }
+    .arch-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 110px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .arch-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .arch-chip {
+      font-size: 11.5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--tag-bg);
+      color: #444;
+    }
+    .arch-layer.l1 { background: #eef3fd; }
+    .arch-layer.l1 .arch-chip { background: #d0e1fd; color: #1a4db7; }
+    .arch-layer.l2 { background: #f0faf5; }
+    .arch-layer.l2 .arch-chip { background: #c2edd8; color: #1a6648; }
+    .arch-layer.l3 { background: #fdf8ee; }
+    .arch-layer.l3 .arch-chip { background: #fae6b0; color: #7a5200; }
+    .arch-layer.l4 { background: #fdf3f0; }
+    .arch-layer.l4 .arch-chip { background: #f9cfc8; color: #8b1c0e; }
+    .arch-layer.l5 { background: #f8f0fe; }
+    .arch-layer.l5 .arch-chip { background: #e1c7fc; color: #5b1fa3; }
+
+    /* ── Stats ── */
+    .stats { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 24px;
+      min-width: 120px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -.5px;
+    }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Flow ── */
+    .flow {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 16px 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px dashed #eee;
+    }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .flow-text { font-size: 13px; color: #444; }
+    .flow-text strong { color: var(--text); }
+
+    /* ── Notice ── */
+    .notice {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 12px 16px;
+      margin: 16px 0;
+      font-size: 13px;
+      color: #335;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Pipeline（坐标转换流程图）── */
+    .pipeline { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .pipeline-step { display: flex; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #eee; }
+    .pipeline-step:last-child { border-bottom: none; }
+    .pipeline-step:nth-child(odd) { background: var(--surface); }
+    .pipeline-step:nth-child(even) { background: #f8f8f8; }
+    .pipeline-num {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
+      color: #fff; font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .pipeline-content { flex: 1; min-width: 0; }
+    .pipeline-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .pipeline-desc { font-size: 13px; color: #555; margin-bottom: 6px; }
+    .pipeline-out {
+      display: inline-block; font-size: 11.5px; font-family: var(--mono);
+      color: var(--accent); background: var(--accent-light);
+      border-radius: 4px; padding: 2px 8px; margin: 4px 0;
+    }
+    .pipeline-file { font-size: 11px; font-family: var(--mono); color: var(--muted); margin-top: 6px; }
+
+    /* ── Sidebar sublink ── */
+    .sidebar-sublink {
+      display: block; padding: 3px 20px 3px 30px;
+      color: #888; text-decoration: none; font-size: 12px;
+      border-left: 2px solid transparent; transition: all 0.15s;
+    }
+    .sidebar-sublink:hover { color: var(--accent); background: var(--accent-light); border-left-color: var(--accent); }
+    .sidebar-sublink.active { color: var(--accent); background: var(--accent-light); border-left-color: var(--accent); }
+
+    /* ── Collapsible sidebar item ── */
+    .sidebar-expand-row { display: flex; align-items: stretch; }
+    .sidebar-expand-row .sidebar-link { flex: 1; padding-right: 2px; }
+    .sidebar-chevron {
+      width: 28px; flex-shrink: 0; margin-right: 6px;
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 18px; font-weight: 300;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 3px; padding: 0; line-height: 1;
+      transition: transform 0.22s ease, color 0.15s, background 0.15s;
+    }
+    .sidebar-chevron:hover { color: var(--accent); background: var(--accent-light); }
+    .sidebar-expandable.open .sidebar-chevron { transform: rotate(90deg); }
+    .sidebar-submenu {
+      overflow: hidden; max-height: 0;
+      transition: max-height 0.28s ease-in-out;
+    }
+    .sidebar-expandable.open .sidebar-submenu { max-height: 400px; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .content { padding: 28px 18px 60px; }
+      h1 { font-size: 24px; }
+      .stats { gap: 10px; }
+      .card-grid { grid-template-columns: 1fr 1fr; }
+      .arch-layer { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body class="menu-open">
+
+<!-- Header -->
+<header id="header">
+  <button id="menu-toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div id="brand">X-TRACK <sup>AT32F435 · GPS Tracker</sup></div>
+  <div class="header-meta">
+    <span class="badge">v2.7</span>
+    <span class="badge">MIT</span>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<nav id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">概览</div>
+    <a class="sidebar-link active" href="#overview">项目简介</a>
+    <a class="sidebar-link" href="#stats">项目统计</a>
+    <a class="sidebar-link" href="#platforms">多平台支持</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">硬件</div>
+    <a class="sidebar-link" href="#hardware">MCU 平台</a>
+    <a class="sidebar-link" href="#peripherals">外设配置</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">软件架构</div>
+    <a class="sidebar-link" href="#arch">系统架构</a>
+    <a class="sidebar-link" href="#mvp-overview">MVP 架构总览</a>
+    <a class="sidebar-link" href="#page-manager">PageManager 路由</a>
+    <a class="sidebar-link" href="#lifecycle">页面生命周期</a>
+    <a class="sidebar-link" href="#datacenter">DataCenter 机制</a>
+    <a class="sidebar-link" href="#ui-pages">各页面实现</a>
+    <a class="sidebar-link" href="#dataproc">数据处理层</a>
+    <a class="sidebar-link" href="#hal">硬件抽象层</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">核心功能</div>
+    <div class="sidebar-expandable open" id="exp-livemap">
+      <div class="sidebar-expand-row">
+        <a class="sidebar-link" href="#livemap">LiveMap 地图渲染</a>
+        <button class="sidebar-chevron" onclick="toggleExpand('exp-livemap')" title="展开/收起">›</button>
+      </div>
+      <div class="sidebar-submenu">
+        <a class="sidebar-sublink" href="#livemap-arch">▸ 模块架构 (MVC)</a>
+        <a class="sidebar-sublink" href="#livemap-tiles">▸ SD卡瓦片文件结构</a>
+        <a class="sidebar-sublink" href="#livemap-coord">▸ 坐标转换流水线</a>
+        <a class="sidebar-sublink" href="#livemap-viewport">▸ 视口-瓦片容器计算</a>
+        <a class="sidebar-sublink" href="#livemap-loop">▸ 100ms 主刷新循环</a>
+        <a class="sidebar-sublink" href="#livemap-render">▸ 瓦片加载与渲染</a>
+        <a class="sidebar-sublink" href="#livemap-track">▸ 轨迹记录与显示</a>
+        <a class="sidebar-sublink" href="#livemap-perf">▸ 性能优化策略</a>
+      </div>
+    </div>
+    <a class="sidebar-link" href="#sdio">SDIO / SdFat</a>
+    <a class="sidebar-link" href="#gps">GPS 处理</a>
+    <a class="sidebar-link" href="#usb">USB MSC</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">参考</div>
+    <a class="sidebar-link" href="#libraries">第三方库</a>
+    <a class="sidebar-link" href="#config">关键配置</a>
+    <a class="sidebar-link" href="#build">编译构建</a>
+    <a class="sidebar-link" href="#docs">技术文档</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main id="main">
+<div class="content">
+
+  <!-- ── Hero ── -->
+  <section id="overview">
+    <div class="section-label">Project Overview</div>
+    <h1>X-TRACK</h1>
+    <p class="hero-desc">
+      基于 AT32F435RGT7 微控制器的 GPS 运动追踪设备固件，集成实时地图显示、轨迹记录、多传感器融合导航，
+      采用 LVGL v8 图形界面框架，支持嵌入式、PC 模拟器及 Linux 三平台运行。
+    </p>
+    <div class="hero-tags">
+      <span class="tag">AT32F435 · Cortex-M4</span>
+      <span class="tag">LVGL v8</span>
+      <span class="tag">GPS 追踪</span>
+      <span class="tag">实时地图</span>
+      <span class="tag">SdFat · SDIO</span>
+      <span class="tag">USB MSC</span>
+      <span class="tag">IMU · 磁力计</span>
+      <span class="tag">蓝牙</span>
+      <span class="tag">C++ · Arduino API</span>
+    </div>
+    <div class="notice">
+      原始项目: <a href="https://github.com/FASTSHIFT/X-TRACK" target="_blank">FASTSHIFT/X-TRACK</a> &nbsp;·&nbsp;
+      作者: _VIFEXTech &nbsp;·&nbsp; License: MIT &nbsp;·&nbsp; 本分支针对 AT32F435RGT7 + SDIO 进行适配
+    </div>
+  </section>
+
+  <!-- ── Stats ── -->
+  <section id="stats">
+    <h2>项目统计</h2>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">959</div><div class="stat-label">源文件 (C/C++)</div></div>
+      <div class="stat"><div class="stat-num">306<span style="font-size:16px">KB</span></div><div class="stat-label">固件大小</div></div>
+      <div class="stat"><div class="stat-num">7</div><div class="stat-label">UI 页面</div></div>
+      <div class="stat"><div class="stat-num">26</div><div class="stat-label">HAL 驱动模块</div></div>
+      <div class="stat"><div class="stat-num">16</div><div class="stat-label">第三方库</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">运行平台</div></div>
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label">技术文档</div></div>
+    </div>
+  </section>
+
+  <!-- ── Platforms ── -->
+  <section id="platforms">
+    <h2>多平台支持</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>平台</th><th>位置</th><th>编译工具</th><th>用途</th></tr>
+        <tr>
+          <td><strong>嵌入式 AT32</strong></td>
+          <td class="td-code">MDK-ARM_F435/</td>
+          <td>Keil uVision 5+ (ARMCC v6)</td>
+          <td>实机运行，输出 Track.bin</td>
+        </tr>
+        <tr>
+          <td><strong>PC 模拟器</strong></td>
+          <td class="td-code">Simulator/</td>
+          <td>Visual Studio 2019+</td>
+          <td>完整功能模拟，GPS 回放，无需硬件</td>
+        </tr>
+        <tr>
+          <td><strong>Linux</strong></td>
+          <td class="td-code">Linux/ · LinuxSDL2/</td>
+          <td>GCC + Make / CMake</td>
+          <td>桌面测试，SDL2 渲染</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Hardware ── -->
+  <section id="hardware">
+    <h2>MCU 平台</h2>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">AT32F435RGT7</div>
+        <div class="card-desc">ARM Cortex-M4，最高 288MHz 运行</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💾</div>
+        <div class="card-title">存储</div>
+        <div class="card-desc">Flash 1MB · SRAM 288KB · QSPI Flash 16MB</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📺</div>
+        <div class="card-title">显示</div>
+        <div class="card-desc">ST7789 · 240×320 · SPI + DMA</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <div class="card-title">通信</div>
+        <div class="card-desc">GPS UART · 蓝牙 BLE · USB MSC</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗂️</div>
+        <div class="card-title">存储卡</div>
+        <div class="card-desc">SDIO 4-bit · 25MHz · EDMA 加速</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧭</div>
+        <div class="card-title">传感器</div>
+        <div class="card-desc">LSM6DSM (IMU) · LIS3MDL (磁力计)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Peripherals ── -->
+  <section id="peripherals">
+    <h2>外设配置</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>外设</th><th>接口</th><th>引脚 / 参数</th><th>说明</th></tr>
+        <tr><td>LCD 屏幕</td><td>SPI1</td><td class="td-code">PA5/PA7/PA4/PB0/PB11/PB10</td><td>ST7789, 240×320, DMA 传输</td></tr>
+        <tr><td>触摸屏</td><td>SPI2</td><td class="td-code">PB13/PB15/PB14/PB12, IRQ:PC6</td><td>XPT2046, 中断驱动</td></tr>
+        <tr><td>GPS</td><td>UART2</td><td class="td-code">PA2(TX) · PA3(RX)</td><td>NMEA 解析, TinyGPSPlus</td></tr>
+        <tr><td>蓝牙 BLE</td><td>UART1</td><td class="td-code">PA9(TX) · PA10(RX)</td><td>无线通信</td></tr>
+        <tr><td>SD 卡</td><td>SDIO</td><td class="td-code">PC0-5, 4-bit, 25MHz</td><td>EDMA1 CH4 DMA 加速</td></tr>
+        <tr><td>调试串口</td><td>UART5</td><td class="td-code">PB8(RX) · PB9(TX)</td><td>SEGGER RTT 日志</td></tr>
+        <tr><td>编码器</td><td>GPIO</td><td class="td-code">PB4(A) · PB5(B) · PA15(Push)</td><td>旋转菜单控制</td></tr>
+        <tr><td>蜂鸣器</td><td>TIM3 PWM</td><td class="td-code">PC7</td><td>音效反馈</td></tr>
+        <tr><td>IMU</td><td>I2C1</td><td class="td-code">PB6(SCL) · PB7(SDA)</td><td>LSM6DSM, 6 轴</td></tr>
+        <tr><td>磁力计</td><td>I2C1</td><td>同 IMU</td><td>LIS3MDL, 3 轴</td></tr>
+        <tr><td>QSPI Flash</td><td>QSPI</td><td>内部</td><td>W25Q128, 16MB</td></tr>
+        <tr><td>电池检测</td><td>ADC</td><td class="td-code">PA0</td><td>模拟电压采样</td></tr>
+        <tr><td>充电检测</td><td>GPIO</td><td class="td-code">PH2</td><td>充电状态</td></tr>
+        <tr><td>电源控制</td><td>GPIO</td><td class="td-code">PD2</td><td>总电源使能</td></tr>
+        <tr><td>SD 卡检测</td><td>GPIO</td><td class="td-code">PA8 (低有效)</td><td>热插拔检测</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Architecture ── -->
+  <section id="arch">
+    <h2>系统架构</h2>
+    <div class="arch">
+      <div class="arch-layer l1">
+        <div class="arch-name">UI 应用层</div>
+        <div class="arch-items">
+          <span class="arch-chip">LiveMap</span>
+          <span class="arch-chip">Dialplate</span>
+          <span class="arch-chip">SystemInfos</span>
+          <span class="arch-chip">FileBrowser</span>
+          <span class="arch-chip">StartUp</span>
+          <span class="arch-chip">Menu</span>
+          <span class="arch-chip">StatusBar</span>
+        </div>
+      </div>
+      <div class="arch-layer l2">
+        <div class="arch-name">数据处理层</div>
+        <div class="arch-items">
+          <span class="arch-chip">DP_GPS</span>
+          <span class="arch-chip">DP_Recorder</span>
+          <span class="arch-chip">DP_SportStatus</span>
+          <span class="arch-chip">DP_TrackFilter</span>
+          <span class="arch-chip">DP_Storage</span>
+          <span class="arch-chip">DP_Power</span>
+          <span class="arch-chip">DP_SysConfig</span>
+          <span class="arch-chip">DataCenter (Pub/Sub)</span>
+        </div>
+      </div>
+      <div class="arch-layer l3">
+        <div class="arch-name">HAL 抽象层</div>
+        <div class="arch-items">
+          <span class="arch-chip">Display</span>
+          <span class="arch-chip">SD_Card</span>
+          <span class="arch-chip">GPS</span>
+          <span class="arch-chip">USB</span>
+          <span class="arch-chip">IMU</span>
+          <span class="arch-chip">MAG</span>
+          <span class="arch-chip">W25Q128</span>
+          <span class="arch-chip">Encoder</span>
+          <span class="arch-chip">Power</span>
+          <span class="arch-chip">Audio · Clock · ...</span>
+        </div>
+      </div>
+      <div class="arch-layer l4">
+        <div class="arch-name">平台驱动层</div>
+        <div class="arch-items">
+          <span class="arch-chip">at32_sdio.c</span>
+          <span class="arch-chip">SPI</span>
+          <span class="arch-chip">UART</span>
+          <span class="arch-chip">Timer</span>
+          <span class="arch-chip">EDMA</span>
+          <span class="arch-chip">Arduino API</span>
+        </div>
+      </div>
+      <div class="arch-layer l5">
+        <div class="arch-name">MCU 硬件</div>
+        <div class="arch-items">
+          <span class="arch-chip">AT32F435RGT7</span>
+          <span class="arch-chip">LCD</span>
+          <span class="arch-chip">SD 卡</span>
+          <span class="arch-chip">GPS 模块</span>
+          <span class="arch-chip">LSM6DSM</span>
+          <span class="arch-chip">LIS3MDL</span>
+          <span class="arch-chip">USB</span>
+          <span class="arch-chip">BLE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MVP Overview ── -->
+  <section id="mvp-overview">
+    <h2>MVP 架构总览</h2>
+    <p>项目的每个 UI 页面都由三个独立的类构成，严格遵循 MVP 模式，各层职责边界清晰、互不侵入。</p>
+
+    <div class="arch" style="margin-bottom:20px">
+      <div class="arch-layer l1">
+        <div class="arch-name">Presenter（控制器）</div>
+        <div style="font-size:13px;color:#444;padding:4px 0">
+          继承 <code>PageBase</code>，实现全部生命周期回调；持有 View 和 Model 实例；处理用户输入事件；通过 <code>_Manager-&gt;Push/Pop/Replace</code> 驱动页面路由。
+        </div>
+      </div>
+      <div class="arch-layer l2">
+        <div class="arch-name">View（视图层）</div>
+        <div style="font-size:13px;color:#444;padding:4px 0">
+          仅负责 LVGL 控件的创建、布局、样式和动画时间线；通过公开的 <code>ui.*</code> 成员让 Presenter 直接操作控件；不持有任何业务逻辑。
+        </div>
+      </div>
+      <div class="arch-layer l3">
+        <div class="arch-name">Model（数据层）</div>
+        <div style="font-size:13px;color:#444;padding:4px 0">
+          创建 DataCenter <code>Account</code>，<code>Subscribe</code> 所需的数据发布者；通过 <code>Pull</code> 主动拉取数据，或通过 <code>SetEventCallback</code> 被动接收推送；通过 <code>Notify</code> 向发布者发送命令。
+        </div>
+      </div>
+    </div>
+
+    <h3>文件命名规范</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>文件</th><th>角色</th><th>示例</th></tr>
+        <tr><td><code>PageName.h/.cpp</code></td><td>Presenter</td><td><code>Dialplate.h</code></td></tr>
+        <tr><td><code>PageNameView.h/.cpp</code></td><td>View</td><td><code>DialplateView.h</code></td></tr>
+        <tr><td><code>PageNameModel.h/.cpp</code></td><td>Model</td><td><code>DialplateModel.h</code></td></tr>
+      </table>
+    </div>
+
+    <h3>AppFactory 工厂模式</h3>
+    <p><code>AppFactory::CreatePage(name)</code> 是唯一的对象创建入口，通过字符串名称实例化对应页面类，将注册与实现解耦。</p>
+    <pre><code>// AppFactory.cpp
+#define APP_CLASS_MATCH(className) \
+    do{ if(strcmp(name, #className)==0) return new Page::className; }while(0)
+
+PageBase* AppFactory::CreatePage(const char* name)
+{
+    APP_CLASS_MATCH(Template);
+    APP_CLASS_MATCH(LiveMap);
+    APP_CLASS_MATCH(Dialplate);
+    APP_CLASS_MATCH(SystemInfos);
+    APP_CLASS_MATCH(Startup);
+    return nullptr;
+}</code></pre>
+
+    <h3>页面注册与启动</h3>
+    <pre><code>PageManager manager(new AppFactory());
+
+// Install(类名, 路由名)
+manager.Install("Startup",     "Pages/Startup");
+manager.Install("Dialplate",   "Pages/Dialplate");
+manager.Install("LiveMap",     "Pages/LiveMap");
+manager.Install("SystemInfos", "Pages/SystemInfos");
+
+// 全局动画：向左覆盖，500ms ease-out
+manager.SetGlobalLoadAnimType(PageManager::LOAD_ANIM_OVER_LEFT, 500, lv_anim_path_ease_out);
+
+// 推入首页
+manager.Push("Pages/Startup");</code></pre>
+  </section>
+
+  <!-- ── PageManager ── -->
+  <section id="page-manager">
+    <h2>PageManager 路由机制</h2>
+    <p>PageManager 维护一个 <strong>页面池</strong>（已注册的所有页面）和一个 <strong>页面栈</strong>（当前活跃的页面历史），所有路由操作最终都调用内部的 <code>SwitchTo()</code>。</p>
+
+    <h3>四种路由操作</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>方法</th><th>行为</th><th>栈变化</th><th>实际使用场景</th></tr>
+        <tr>
+          <td><code>Push(name)</code></td>
+          <td>压入新页面，旧页面保留在栈内（可缓存）</td>
+          <td>栈 +1</td>
+          <td>Dialplate → LiveMap / SystemInfos</td>
+        </tr>
+        <tr>
+          <td><code>Pop()</code></td>
+          <td>弹出当前页面，恢复上一页面</td>
+          <td>栈 -1</td>
+          <td>LiveMap 按下 slider 或 root 触发 LEAVE 事件</td>
+        </tr>
+        <tr>
+          <td><code>Replace(name)</code></td>
+          <td>替换栈顶页面，旧页面被强制卸载</td>
+          <td>栈不变</td>
+          <td>StartUp 2 秒计时器后替换为 Dialplate</td>
+        </tr>
+        <tr>
+          <td><code>BackHome()</code></td>
+          <td>强制清空页面栈，回到最底层页面</td>
+          <td>栈清空</td>
+          <td>从深层页面一键返回首页</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3>Push 核心实现</h3>
+    <pre><code>bool PageManager::Push(const char* name, const PageBase::Stash_t* stash)
+{
+#ifdef MSC_USE_SD_CARD
+    // 防止 USB 连接时进入 LiveMap（避免 SDIO 死锁）
+    if (strcmp(name, "Pages/LiveMap") == 0 && HAL::USB_IsPlugged()) {
+        PM_LOG_WARN("LiveMap blocked: USB connected");
+        return false;
+    }
+#endif
+    if (!SwitchAnimStateCheck()) return false;   // 动画进行中则拒绝
+    if (FindPageInStack(name)) return false;     // 防止重复入栈
+    PageBase* base = FindPageInPool(name);
+    if (!base) return false;
+
+    base->priv.IsDisableAutoCache = base->priv.ReqDisableAutoCache;
+    _PageStack.push(base);
+    return SwitchTo(base, true /*isEnterAct*/, stash);
+}</code></pre>
+
+    <h3>Pop 核心实现</h3>
+    <pre><code>bool PageManager::Pop()
+{
+    if (!SwitchAnimStateCheck()) return false;
+    PageBase* top = GetStackTop();
+    if (!top) return false;
+
+    if (!top->priv.IsDisableAutoCache) {
+        top->priv.IsCached = false;  // 关闭自动缓存，页面将被卸载
+    }
+    _PageStack.pop();
+    top = GetStackTop();             // 取出下一页面
+    return SwitchTo(top, false /*isEnterAct*/, nullptr);
+}</code></pre>
+
+    <h3>动画系统</h3>
+    <p>内置 10 种页面切换动画，每个页面可在 <code>onCustomAttrConfig()</code> 中覆盖全局默认动画：</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>类型</th><th>效果描述</th></tr>
+        <tr><td><code>LOAD_ANIM_OVER_LEFT/RIGHT/TOP/BOTTOM</code></td><td>新页覆盖旧页，从指定方向滑入（旧页不动）</td></tr>
+        <tr><td><code>LOAD_ANIM_MOVE_LEFT/RIGHT/TOP/BOTTOM</code></td><td>新页推动旧页，两页同时移动</td></tr>
+        <tr><td><code>LOAD_ANIM_FADE_ON</code></td><td>新页淡入，旧页淡出</td></tr>
+        <tr><td><code>LOAD_ANIM_NONE</code></td><td>无动画（如 Startup、Dialplate 使用此模式）</td></tr>
+      </table>
+    </div>
+    <pre><code>// 自定义动画示例（在 onCustomAttrConfig 中设置）
+void Template::onCustomAttrConfig()
+{
+    // 从底部弹入，1000ms，弹簧曲线
+    SetCustomLoadAnimType(
+        PageManager::LOAD_ANIM_OVER_BOTTOM,
+        1000,
+        lv_anim_path_bounce
+    );
+}
+
+// Startup 和 Dialplate 使用无动画
+void Startup::onCustomAttrConfig()
+{
+    SetCustomCacheEnable(false);
+    SetCustomLoadAnimType(PageManager::LOAD_ANIM_NONE);
+}</code></pre>
+
+    <h3>Stash 跨页参数传递</h3>
+    <p>通过两个宏实现轻量级的页面间参数传递，不需要全局变量：</p>
+    <pre><code>// 发送方（调用 Push/Replace 时附带参数）
+Template::Param_t param;
+param.time  = 2000;
+param.color = lv_color_red();
+_Manager->Push("Pages/Template", &PAGE_STASH_MAKE(param));
+
+// 接收方（在 onViewWillAppear 中弹出参数）
+void Template::onViewWillAppear()
+{
+    Param_t param;
+    param.color = lv_color_white();  // 设置默认值
+    param.time  = 1000;
+    PAGE_STASH_POP(param);           // 覆盖为传入值（若有）
+
+    lv_obj_set_style_bg_color(_root, param.color, LV_PART_MAIN);
+    timer = lv_timer_create(onTimerUpdate, param.time, this);
+}</code></pre>
+  </section>
+
+  <!-- ── Lifecycle ── -->
+  <section id="lifecycle">
+    <h2>页面生命周期</h2>
+    <p>每个页面由状态机驱动，共 8 个状态，对应 9 个可覆写的虚函数回调：</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num" style="background:#aaa">0</div>
+        <div class="flow-text"><strong>PAGE_STATE_IDLE</strong> — 页面已注册但未加载，对象存在于页面池中</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text"><strong>PAGE_STATE_LOAD</strong> → 创建 LVGL 根对象 → 调用 <code>onViewLoad()</code>（创建 Model、View、注册事件）→ <code>onViewDidLoad()</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text"><strong>PAGE_STATE_WILL_APPEAR</strong> → 调用 <code>onViewWillAppear()</code>（设置焦点、弹出 Stash 参数、启动进入动画）→ 启动页面切换动画</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text"><strong>PAGE_STATE_DID_APPEAR</strong> → 调用 <code>onViewDidAppear()</code>（创建周期定时器、注册 SD 卡事件等）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text"><strong>PAGE_STATE_ACTIVITY</strong> — 页面交互活跃期，事件回调持续触发</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-text"><strong>PAGE_STATE_WILL_DISAPPEAR</strong> → 调用 <code>onViewWillDisappear()</code>（清理焦点组、删除定时器、触发退出动画）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-text"><strong>PAGE_STATE_DID_DISAPPEAR</strong> → 调用 <code>onViewDidDisappear()</code>（注销回调、释放 Model）→ 若已缓存则跳回 WILL_APPEAR，否则进入 UNLOAD</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">7</div>
+        <div class="flow-text"><strong>PAGE_STATE_UNLOAD</strong> → 调用 <code>onViewUnload()</code>（删除 View LVGL 对象、释放 Stash）→ <code>onViewDidUnload()</code> → 异步删除根对象 → 回到 IDLE</div>
+      </div>
+    </div>
+
+    <h3>缓存机制</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>设置</th><th>行为</th><th>用途</th></tr>
+        <tr>
+          <td>默认（自动缓存）</td>
+          <td>第一次加载后保留 LVGL 对象，Pop 后直接从 WILL_APPEAR 恢复</td>
+          <td>大多数频繁访问的页面</td>
+        </tr>
+        <tr>
+          <td><code>SetCustomCacheEnable(false)</code></td>
+          <td>每次 Pop 后都完整执行 UNLOAD，下次重新加载</td>
+          <td>Startup（一次性）、LiveMap（实时刷新）</td>
+        </tr>
+        <tr>
+          <td><code>SetCustomAutoCacheEnable(false)</code></td>
+          <td>由开发者手动控制缓存使能</td>
+          <td>需精确控制内存的场景</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── DataCenter ── -->
+  <section id="datacenter">
+    <h2>DataCenter 数据总线机制</h2>
+    <p>DataCenter 是全局单例数据总线，所有数据生产者和消费者以 <strong>Account（账户）</strong> 形式接入，通过发布-订阅模式实现完全解耦的数据流通。</p>
+
+    <h3>Account 三种数据交互模式</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>方法</th><th>方向</th><th>描述</th><th>典型用途</th></tr>
+        <tr>
+          <td><code>account-&gt;Pull("GPS", &amp;gps, sizeof(gps))</code></td>
+          <td>订阅者 → 发布者</td>
+          <td>主动拉取：订阅者按需读取发布者最新数据</td>
+          <td>SystemInfosModel 读取 GPS/MAG/IMU 一次性展示</td>
+        </tr>
+        <tr>
+          <td><code>SetEventCallback(onEvent)</code></td>
+          <td>发布者 → 订阅者（推送）</td>
+          <td>被动接收：发布者发布时回调订阅者 <code>onEvent</code></td>
+          <td>DialplateModel 被动接收 SportStatus 实时更新</td>
+        </tr>
+        <tr>
+          <td><code>account-&gt;Notify("Recorder", &amp;cmd, sizeof(cmd))</code></td>
+          <td>订阅者 → 发布者（命令）</td>
+          <td>通知：订阅者向发布者发送控制命令</td>
+          <td>DialplateModel 控制 Recorder 开始/暂停/停止</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3>Account 工作原理（以 DialplateModel 为例）</h3>
+    <pre><code>// Model 初始化：创建账户并建立订阅关系
+void DialplateModel::Init()
+{
+    // 账户名 "DialplateModel"，缓冲区大小 0（不发布数据，只订阅）
+    account = new Account("DialplateModel", DataProc::Center(), 0, this);
+
+    account->Subscribe("SportStatus");  // 接收运动数据（被动推送）
+    account->Subscribe("Recorder");     // 控制录轨（Notify 命令）
+    account->Subscribe("StatusBar");    // 控制状态栏（Notify 命令）
+    account->Subscribe("GPS");          // 拉取 GPS 状态（Pull）
+    account->Subscribe("MusicPlayer");  // 触发音效（Notify 命令）
+
+    account->SetEventCallback(onEvent); // 注册推送接收回调
+}
+
+// 被动推送回调：SportStatus 发布者每秒发布一次时自动触发
+int DialplateModel::onEvent(Account* account, Account::EventParam_t* param)
+{
+    if (param->event != Account::EVENT_PUB_PUBLISH) {
+        return Account::RES_UNSUPPORTED_REQUEST;
+    }
+    if (strcmp(param->tran->ID, "SportStatus") != 0) {
+        return Account::RES_PARAM_ERROR;
+    }
+    // 将发布者推送的数据复制到本地缓存
+    DialplateModel* self = (DialplateModel*)account->UserData;
+    memcpy(&self->sportStatusInfo, param->data_p, param->size);
+    return Account::RES_OK;
+}
+
+// 主动拉取：检查 GPS 卫星数
+bool DialplateModel::GetGPSReady()
+{
+    HAL::GPS_Info_t gps;
+    if (account->Pull("GPS", &gps, sizeof(gps)) != Account::RES_OK)
+        return false;
+    return (gps.satellites > 0);
+}
+
+// Notify 命令：控制录轨模块
+void DialplateModel::RecorderCommand(RecCmd_t cmd)
+{
+    DataProc::Recorder_Info_t recInfo;
+    DATA_PROC_INIT_STRUCT(recInfo);
+    recInfo.cmd = (DataProc::Recorder_Cmd_t)cmd;
+    recInfo.time = 1000;
+    account->Notify("Recorder", &recInfo, sizeof(recInfo));
+
+    // 同时更新状态栏显示
+    DataProc::StatusBar_Info_t statInfo;
+    DATA_PROC_INIT_STRUCT(statInfo);
+    statInfo.cmd = DataProc::STATUS_BAR_CMD_SET_LABEL_REC;
+    switch (cmd) {
+    case REC_START:
+    case REC_CONTINUE: statInfo.param.labelRec.show = true;  statInfo.param.labelRec.str = "REC";   break;
+    case REC_PAUSE:    statInfo.param.labelRec.show = true;  statInfo.param.labelRec.str = "PAUSE"; break;
+    case REC_STOP:     statInfo.param.labelRec.show = false; break;
+    }
+    account->Notify("StatusBar", &statInfo, sizeof(statInfo));
+}</code></pre>
+
+    <h3>各页面订阅的数据源</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>页面 Model</th><th>订阅的 Account</th><th>交互方式</th></tr>
+        <tr>
+          <td>StartupModel</td>
+          <td>MusicPlayer, StatusBar</td>
+          <td>Notify（播放音乐、显示状态栏）</td>
+        </tr>
+        <tr>
+          <td>DialplateModel</td>
+          <td>SportStatus, GPS, Recorder, StatusBar, MusicPlayer</td>
+          <td>Pull（GPS）+ Push回调（SportStatus）+ Notify（Recorder/Music/StatusBar）</td>
+        </tr>
+        <tr>
+          <td>LiveMapModel</td>
+          <td>GPS, SportStatus, SysConfig, StatusBar</td>
+          <td>Pull（GPS 坐标）+ Push回调（SportStatus）</td>
+        </tr>
+        <tr>
+          <td>SystemInfosModel</td>
+          <td>SportStatus, GPS, MAG, IMU, Clock, Power, Storage, StatusBar</td>
+          <td>Pull（全部传感器，展示时一次性读取）</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── UI Pages (per-page) ── -->
+  <section id="ui-pages">
+    <h2>各页面实现详解</h2>
+
+    <!-- StartUp -->
+    <h3>StartUp — 启动页</h3>
+    <p>最简单的页面示例：无缓存、无动画、用 <code>lv_timer</code> 延迟 2 秒后通过 <code>Replace</code> 跳转到主页。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>生命周期</th><th>做了什么</th></tr>
+        <tr><td><code>onCustomAttrConfig</code></td><td><code>SetCustomCacheEnable(false)</code> + <code>LOAD_ANIM_NONE</code>（无缓存、无动画）</td></tr>
+        <tr><td><code>onViewLoad</code></td><td>Model.Init()、禁用编码器、View.Create()、创建 2 秒一次性定时器</td></tr>
+        <tr><td><code>onViewWillAppear</code></td><td>PlayMusic("Startup")、启动 LVGL 动画时间线（logo 宽度 + 位置动画）</td></tr>
+        <tr><td><code>onViewDidAppear</code></td><td><code>lv_obj_fade_out(_root, 500, 1500)</code>（1.5 秒后淡出）</td></tr>
+        <tr><td><code>onViewDidDisappear</code></td><td>SetStatusBarAppear(true)（展示顶部状态栏）</td></tr>
+        <tr><td><code>onViewUnload</code></td><td>View.Delete()、恢复编码器、Model.Deinit()</td></tr>
+        <tr><td><code>onTimer</code>（2s）</td><td><code>_Manager-&gt;Replace("Pages/Dialplate")</code></td></tr>
+      </table>
+    </div>
+    <pre><code>// StartUpView.cpp —— LVGL 动画时间线示例
+void StartupView::Create(lv_obj_t* root)
+{
+    lv_obj_t* cont = lv_obj_create(root);
+    lv_obj_set_size(cont, 110, 50);
+    lv_obj_set_style_border_color(cont, lv_color_hex(0xff931e), 0);  // 橙色下边框
+    lv_obj_set_style_border_side(cont, LV_BORDER_SIDE_BOTTOM, 0);
+    lv_obj_set_style_border_width(cont, 3, 0);
+    lv_obj_center(cont);
+    ui.cont = cont;
+
+    lv_obj_t* label = lv_label_create(cont);
+    lv_obj_set_style_text_font(label, ResourcePool::GetFont("agencyb_36"), 0);
+    lv_label_set_text(label, VERSION_FIRMWARE_NAME);  // "X-TRACK"
+    lv_obj_center(label);
+    ui.labelLogo = label;
+
+    ui.anim_timeline = lv_anim_timeline_create();
+    lv_anim_timeline_wrapper_t wrapper[] = {
+        // t=0ms：容器宽度从 0 → 110（展开效果）
+        {0,   cont,  LV_ANIM_EXEC(width), 0, 110, 500, lv_anim_path_ease_out, true},
+        // t=500ms：logo 从底部弹入中心
+        {500, label, LV_ANIM_EXEC(y), 50, lv_obj_get_y(label), 500, lv_anim_path_ease_out, true},
+        LV_ANIM_TIMELINE_WRAPPER_END
+    };
+    lv_anim_timeline_add_wrapper(ui.anim_timeline, wrapper);
+}</code></pre>
+
+    <!-- Dialplate -->
+    <h3>Dialplate — 仪表盘（主页）</h3>
+    <p>项目的核心交互页面，集成运动数据展示、录轨状态机和编码器导航。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>生命周期</th><th>做了什么</th></tr>
+        <tr><td><code>onCustomAttrConfig</code></td><td><code>LOAD_ANIM_NONE</code>（从 StartUp 切过来无动画）</td></tr>
+        <tr><td><code>onViewLoad</code></td><td>Model.Init()、View.Create()（创建速度区/信息区/按钮区）、为三个按钮挂载事件</td></tr>
+        <tr><td><code>onViewWillAppear</code></td><td>恢复编码器焦点（记住上次焦点）、设置状态栏透明样式、调用 Update() 初刷、启动进入动画</td></tr>
+        <tr><td><code>onViewDidAppear</code></td><td>创建 1000ms 周期定时器，持续调用 Update()</td></tr>
+        <tr><td><code>onViewWillDisappear</code></td><td>记录当前焦点、清除焦点组、删除定时器</td></tr>
+        <tr><td><code>onViewUnload</code></td><td>Model.Deinit()、View.Delete()</td></tr>
+      </table>
+    </div>
+    <pre><code>// ── View 布局（三层结构）──
+void DialplateView::Create(lv_obj_t* root)
+{
+    BottomInfo_Create(root);  // 底部：4 个信息格（AVG / Time / Trip / Calorie）
+    TopInfo_Create(root);     // 顶部：大字速度 + 单位（深灰圆角容器，y=-36 超出屏幕）
+    BtnCont_Create(root);     // 底部按钮条：locate / start / menu 三个圆角按钮
+
+    // 进入动画时间线
+    lv_anim_timeline_wrapper_t wrapper[] = {
+        // t=0：速度容器从屏幕外上方滑入
+        {0,   ui.topInfo.cont,    LV_ANIM_EXEC(y), -142, y_tar_top,    500, lv_anim_path_ease_out, true},
+        // t=200：信息区从顶部滑入并淡入
+        {200, ui.bottomInfo.cont, LV_ANIM_EXEC(y), -120, y_tar_bottom, 500, lv_anim_path_ease_out, true},
+        {200, ui.bottomInfo.cont, LV_ANIM_EXEC(opa_scale), LV_OPA_TRANSP, LV_OPA_COVER, 500, lv_anim_path_ease_out, true},
+        // t=500/600/700：三个按钮依次从高度 0 展开
+        {500, ui.btnCont.btnMap,  LV_ANIM_EXEC(height), 0, 31, 500, lv_anim_path_ease_out, true},
+        {600, ui.btnCont.btnRec,  LV_ANIM_EXEC(height), 0, 31, 500, lv_anim_path_ease_out, true},
+        {700, ui.btnCont.btnMenu, LV_ANIM_EXEC(height), 0, 31, 500, lv_anim_path_ease_out, true},
+        LV_ANIM_TIMELINE_WRAPPER_END
+    };
+}
+
+// ── 录轨状态机 ──
+void Dialplate::onRecord(bool longPress)
+{
+    switch (recState) {
+    case RECORD_STATE_READY:
+        if (longPress) {
+            if (!Model.GetGPSReady()) { Model.PlayMusic("Error"); return; }
+            Model.PlayMusic("Connect");
+            Model.RecorderCommand(Model.REC_START);
+            SetBtnRecImgSrc("pause");
+            recState = RECORD_STATE_RUN;
+        }
+        break;
+    case RECORD_STATE_RUN:
+        if (!longPress) {
+            Model.PlayMusic("UnstableConnect");
+            Model.RecorderCommand(Model.REC_PAUSE);
+            SetBtnRecImgSrc("start");
+            recState = RECORD_STATE_PAUSE;
+        }
+        break;
+    case RECORD_STATE_PAUSE:
+        if (longPress)  { /* → STOP */ Model.RecorderCommand(Model.REC_READY_STOP); recState = RECORD_STATE_STOP; }
+        else            { /* → RUN  */ Model.RecorderCommand(Model.REC_CONTINUE);   recState = RECORD_STATE_RUN;  }
+        break;
+    case RECORD_STATE_STOP:
+        if (longPress)  { /* → READY */ Model.RecorderCommand(Model.REC_STOP);     recState = RECORD_STATE_READY; }
+        else            { /* → RUN   */ Model.RecorderCommand(Model.REC_CONTINUE); recState = RECORD_STATE_RUN;   }
+        break;
+    }
+}
+
+// ── 页面跳转 ──
+void Dialplate::onBtnClicked(lv_obj_t* btn)
+{
+    if (btn == View.ui.btnCont.btnMap)  _Manager->Push("Pages/LiveMap");
+    if (btn == View.ui.btnCont.btnMenu) _Manager->Push("Pages/SystemInfos");
+}</code></pre>
+
+    <!-- LiveMap -->
+    <h3>LiveMap — 实时地图</h3>
+    <p>最复杂的页面：100ms 轮询 GPS、动态加载地图瓦片、实时绘制轨迹线，并处理 SD 卡热插拔。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>生命周期</th><th>做了什么</th></tr>
+        <tr><td><code>onCustomAttrConfig</code></td><td><code>SetCustomCacheEnable(false)</code>（地图需实时更新，不缓存）</td></tr>
+        <tr><td><code>onViewLoad</code></td><td>计算瓦片容器大小、View.Create(tileNum)、配置 TrackPointFilter + TrackLineFilter 回调</td></tr>
+        <tr><td><code>onViewWillAppear</code></td><td>Model.Init()、获取箭头主题、预加载地图瓦片到 LVGL 缓存（<code>_lv_img_cache_open</code>）</td></tr>
+        <tr><td><code>onViewDidAppear</code></td><td>创建 <strong>100ms</strong> 定时器（<code>Update()</code>）、注册 SD 卡热插拔回调、设置编码器控制 slider</td></tr>
+        <tr><td><code>onViewWillDisappear</code></td><td>删除定时器、隐藏地图容器、淡出动画 250ms</td></tr>
+        <tr><td><code>onViewDidDisappear</code></td><td>注销 SD 卡回调、Model.Deinit()</td></tr>
+        <tr><td><code>onViewUnload</code></td><td>View.Delete()</td></tr>
+      </table>
+    </div>
+    <pre><code>// 100ms 定时更新主循环
+void LiveMap::Update()
+{
+    if (lv_tick_elaps(priv.lastMapUpdateTime) >= CONFIG_GPS_REFR_PERIOD) {
+        CheckPosition();     // 检查 GPS 坐标变化，必要时刷新瓦片
+        SportInfoUpdate();   // 更新速度/里程/时间标签
+        priv.lastMapUpdateTime = lv_tick_get();
+    } else if (lv_tick_elaps(priv.lastContShowTime) >= 3000) {
+        lv_obj_add_state(View.ui.zoom.cont, LV_STATE_USER_1); // 隐藏缩放控件
+    }
+}
+
+// SD 卡热插拔：清空 LVGL 图片缓存，避免脏缓存
+HAL::SD_SetEventCallback([](bool isInsert) {
+    if (isInsert) lv_img_cache_invalidate_src(NULL);
+});
+
+// 退出：按下 slider 或触摸信息区均触发 Pop
+if (code == LV_EVENT_LEAVE || code == LV_EVENT_PRESSED)
+    instance->_Manager->Pop();</code></pre>
+
+    <!-- SystemInfos -->
+    <h3>SystemInfos — 系统信息</h3>
+    <p>只读信息展示页面，Model 层通过 <code>Pull</code> 一次性拉取多个传感器数据源。</p>
+    <pre><code>// SystemInfosModel 订阅了 8 个数据源，全部用 Pull 读取
+void SystemInfosModel::Init()
+{
+    account = new Account("SystemInfosModel", DataProc::Center(), 0, this);
+    account->Subscribe("SportStatus");  account->Subscribe("GPS");
+    account->Subscribe("MAG");          account->Subscribe("IMU");
+    account->Subscribe("Clock");        account->Subscribe("Power");
+    account->Subscribe("Storage");      account->Subscribe("StatusBar");
+}
+
+// 各数据读取示例
+void SystemInfosModel::GetBatteryInfo(int* usage, float* voltage, char* state, uint32_t len)
+{
+    HAL::Power_Info_t power = { 0 };
+    account->Pull("Power", &power, sizeof(power));
+    *usage   = power.usage;
+    *voltage = power.voltage / 1000.0f;
+    strncpy(state, power.isCharging ? "CHARGE" : "DISCHARGE", len);
+}</code></pre>
+  </section>
+
+  <!-- ── DataProc ── -->
+  <section id="dataproc">
+    <h2>数据处理层 (DataProc)</h2>
+    <p>DataProc 层的各模块均以 DataCenter <strong>Account 发布者</strong> 身份存在，定期将传感器数据 <code>Commit</code> + <code>Publish</code> 广播给所有订阅者（UI Model 层）。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>模块</th><th>发布的数据结构</th><th>功能说明</th></tr>
+        <tr><td><code>DP_GPS</code></td><td><code>HAL::GPS_Info_t</code></td><td>GPS 数据接收、WGS84/GCJ02/BD09 坐标转换、有效性校验</td></tr>
+        <tr><td><code>DP_Recorder</code></td><td>接收 Notify 命令</td><td>轨迹自动记录到 SD 卡 (GPX 格式)，接收 START/PAUSE/CONTINUE/STOP 命令</td></tr>
+        <tr><td><code>DP_TrackFilter</code></td><td>—</td><td>TrackLineFilter（屏幕像素级）+ TrackPointFilter（地理坐标级）双级滤波</td></tr>
+        <tr><td><code>DP_SportStatus</code></td><td><code>HAL::SportStatus_Info_t</code></td><td>实时速度、里程累计、单次时间、平均速度、卡路里，每秒发布</td></tr>
+        <tr><td><code>DP_Clock</code></td><td><code>HAL::Clock_Info_t</code></td><td>RTC 时间管理，GPS 时间自动校准</td></tr>
+        <tr><td><code>DP_IMU</code></td><td><code>HAL::IMU_Info_t</code></td><td>LSM6DSM 6 轴惯性数据（ax/ay/az/gx/gy/gz）+ 步数统计</td></tr>
+        <tr><td><code>DP_MAG</code></td><td><code>HAL::MAG_Info_t</code></td><td>LIS3MDL 磁力计数据（x/y/z），辅助方向角计算</td></tr>
+        <tr><td><code>DP_Storage</code></td><td><code>DataProc::Storage_Basic_Info_t</code></td><td>SD 卡容量、类型、检测状态；配置文件 JSON 读写</td></tr>
+        <tr><td><code>DP_Power</code></td><td><code>HAL::Power_Info_t</code></td><td>电池电量百分比、电压、充电状态，低电告警，自动关机</td></tr>
+        <tr><td><code>DP_SysConfig</code></td><td>接收 Notify 命令</td><td>系统配置管理：地图坐标系、箭头主题、地图路径等</td></tr>
+        <tr><td><code>DP_TzConv</code></td><td>—</td><td>坐标系互转：WGS84 ↔ GCJ02（高德）↔ BD09（百度）</td></tr>
+        <tr><td><code>DP_MusicPlayer</code></td><td>接收 Notify 命令</td><td>接收音乐名称，驱动 HAL 蜂鸣器播放对应音效</td></tr>
+        <tr><td><code>StatusBar</code></td><td>接收 Notify 命令</td><td>控制顶部状态栏样式/显示/REC 标签，Notify CMD 驱动</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── HAL ── -->
+  <section id="hal">
+    <h2>硬件抽象层 (HAL)</h2>
+    <p>26 个 HAL 驱动模块位于 <code>USER/HAL/</code>，全部基于 Arduino 兼容 API 实现，屏蔽底层寄存器差异，为上层提供统一接口。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>驱动文件</th><th>功能</th><th>关键接口</th></tr>
+        <tr><td><code>HAL_SD_CARD.cpp</code></td><td>SDIO SD 卡初始化与热插拔检测</td><td><code>SD_Init()</code>, <code>SD_GetReady()</code></td></tr>
+        <tr><td><code>HAL_GPS.cpp</code></td><td>GPS NMEA 解析与数据获取</td><td><code>GPS_GetInfo()</code>, <code>GPS_LocationIsValid()</code></td></tr>
+        <tr><td><code>HAL_GPS_Simulator.cpp</code></td><td>GPX 文件回放，模拟 GPS 运动</td><td><code>GPS_Sim_Update()</code></td></tr>
+        <tr><td><code>HAL_USB.cpp</code></td><td>USB MSC 大容量存储 + 热插拔</td><td><code>USB_IsPlugged()</code>, <code>USB_Connect()</code></td></tr>
+        <tr><td><code>HAL_Display.cpp</code></td><td>ST7789 LCD 驱动，SPI + DMA</td><td><code>Display_SendPixels()</code></td></tr>
+        <tr><td><code>HAL_IMU.cpp</code></td><td>LSM6DSM 6 轴 IMU 初始化</td><td><code>IMU_GetInfo()</code></td></tr>
+        <tr><td><code>HAL_MAG.cpp</code></td><td>LIS3MDL 磁力计</td><td><code>MAG_GetInfo()</code></td></tr>
+        <tr><td><code>HAL_W25Q128.cpp</code></td><td>QSPI Flash 操作</td><td><code>Qspi_Init()</code></td></tr>
+        <tr><td><code>HAL_Encoder.cpp</code></td><td>旋转编码器读取</td><td><code>Encoder_GetKey()</code>, <code>Encoder_GetDiff()</code></td></tr>
+        <tr><td><code>HAL_Power.cpp</code></td><td>电源管理与关机</td><td><code>Power_Shutdown()</code>, <code>Power_Update()</code></td></tr>
+        <tr><td><code>HAL_Clock.cpp</code></td><td>RTC 时钟读写</td><td><code>Clock_GetInfo()</code>, <code>Clock_SetInfo()</code></td></tr>
+        <tr><td><code>HAL_Buzz.cpp</code></td><td>蜂鸣器 PWM 音效</td><td><code>Buzz_Tone(freq, ms)</code></td></tr>
+        <tr><td><code>HAL_Backlight.cpp</code></td><td>LCD 背光 PWM 调节</td><td><code>Backlight_SetValue(val)</code></td></tr>
+        <tr><td><code>HAL_FaultHandle.cpp</code></td><td>HardFault 异常捕获与栈回溯</td><td>cm_backtrace 集成</td></tr>
+        <tr><td><code>HAL_Memory.cpp</code></td><td>堆栈内存统计</td><td><code>Memory_DumpInfo()</code></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── LiveMap ── -->
+  <section id="livemap">
+    <h2>LiveMap 地图渲染</h2>
+    <p>LiveMap 是整个项目的核心页面，实现从 <strong>GPS 硬件输出的经纬度</strong>，经过坐标系转换、Web墨卡托投影，到从 SD 卡读取地图瓦片文件，最终通过 LVGL 渲染到 LCD 屏幕的完整链路。本节对各环节的源码实现进行逐层详细说明。</p>
+
+    <!-- ───── 1. 模块架构 ───── -->
+    <h3 id="livemap-arch">模块架构（MVC）</h3>
+    <p>LiveMap 遵循 MVP 架构，核心功能由六个模块协作完成：</p>
+    <div class="arch">
+      <div class="arch-layer l1">
+        <div class="arch-name">控制器</div>
+        <div class="arch-items">
+          <span class="arch-chip">LiveMap.cpp — Presenter</span>
+          <span class="arch-chip">100ms 定时循环 CheckPosition()</span>
+          <span class="arch-chip">事件路由 onEvent()</span>
+          <span class="arch-chip">SD卡热插拔 SD_SetEventCallback()</span>
+        </div>
+      </div>
+      <div class="arch-layer l2">
+        <div class="arch-name">视图层</div>
+        <div class="arch-items">
+          <span class="arch-chip">LiveMapView.cpp — View</span>
+          <span class="arch-chip">瓦片图片矩阵 imgTiles[]</span>
+          <span class="arch-chip">GPS方向箭头 imgArrow</span>
+          <span class="arch-chip">轨迹折线 lv_poly_line</span>
+          <span class="arch-chip">缩放滑块 zoom.slider</span>
+        </div>
+      </div>
+      <div class="arch-layer l3">
+        <div class="arch-name">数据层</div>
+        <div class="arch-items">
+          <span class="arch-chip">LiveMapModel.cpp — Model</span>
+          <span class="arch-chip">Account::Pull("GPS")</span>
+          <span class="arch-chip">SportStatus 推送接收</span>
+          <span class="arch-chip">TrackFilter 管理</span>
+        </div>
+      </div>
+      <div class="arch-layer l4">
+        <div class="arch-name">坐标算法层</div>
+        <div class="arch-items">
+          <span class="arch-chip">MapConv.cpp — 地理坐标 ↔ 像素坐标</span>
+          <span class="arch-chip">TileSystem.cpp — Web墨卡托投影</span>
+          <span class="arch-chip">GPS_Transform.c — WGS-84 → GCJ-02</span>
+          <span class="arch-chip">TileConv.cpp — 视口-瓦片容器管理</span>
+        </div>
+      </div>
+      <div class="arch-layer l5">
+        <div class="arch-name">存储层</div>
+        <div class="arch-items">
+          <span class="arch-chip">SdFat — FAT 文件系统</span>
+          <span class="arch-chip">SDIO2 — 4-bit 25MHz</span>
+          <span class="arch-chip">EDMA1 CH4 — DMA 硬件加速</span>
+          <span class="arch-chip">/MAP/{level}/{tileX}/{tileY}.bin</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>页面生命周期</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>生命周期回调</th><th>做了什么</th></tr>
+        <tr><td><code>onCustomAttrConfig</code></td><td><code>SetCustomCacheEnable(false)</code>——地图需实时更新，每次进入都重新加载，不使用 LVGL 页面缓存</td></tr>
+        <tr><td><code>onViewLoad</code></td><td>初始化 TileConv（256px 瓦片、屏幕视口尺寸）→ 计算所需瓦片数量 → <code>View.Create(tileNum)</code> 创建 LVGL 对象 → 配置 TrackPointFilter 和 TrackLineFilter 输出回调</td></tr>
+        <tr><td><code>onViewWillAppear</code></td><td>Model.Init()（建立 DataCenter 订阅）→ 读取箭头主题 → 调用 <code>MapTileContPreload()</code> 预热 LVGL 图片缓存</td></tr>
+        <tr><td><code>onViewDidAppear</code></td><td>创建 <strong>100ms</strong> 周期 LVGL 定时器（驱动 Update()）→ 注册 SD 卡热插拔回调 → 设置编码器焦点到缩放滑块</td></tr>
+        <tr><td><code>onViewWillDisappear</code></td><td>删除定时器 → 隐藏地图容器 → 淡出动画 250ms</td></tr>
+        <tr><td><code>onViewDidDisappear</code></td><td>注销 SD 卡回调（防悬空指针）→ Model.Deinit()</td></tr>
+        <tr><td><code>onViewUnload</code></td><td>View.Delete()——释放 LVGL 对象和瓦片图片数组内存</td></tr>
+      </table>
+    </div>
+
+    <!-- ───── 2. SD卡地图文件结构 ───── -->
+    <h3 id="livemap-tiles">SD卡地图文件结构</h3>
+    <p>地图以预先切片的<strong>瓦片（Tile）</strong>形式离线存储在 SD 卡上。每张瓦片是 256×256 像素的图片文件，按"缩放级别 / 列号 / 行号"的三级目录组织。</p>
+    <pre><code>SD卡根目录
+└── MAP/                          ← 地图根目录（CONFIG_MAP_DIR_PATH_DEFAULT = "/MAP"）
+     └── {缩放级别}/               ← 整数，0~19，默认 16
+          └── {tileX}/            ← 瓦片列号 = pixelX / 256
+               └── {tileY}.bin   ← 瓦片行号 = pixelY / 256
+
+示例（北京天安门，级别16）：
+  /MAP/16/27387/14029.bin         ← 256×256 像素，RGB565 格式，131,072 字节</code></pre>
+
+    <p>文件路径由 <code>MapConv::ConvertMapPath()</code>（<code>MapConv.cpp:99</code>）生成：</p>
+    <pre><code>int MapConv::ConvertMapPath(int32_t x, int32_t y, char* path, uint32_t len)
+{
+    int32_t tileX = x / priv.tileSize;   // 全局像素X / 256 → 瓦片列号
+    int32_t tileY = y / priv.tileSize;   // 全局像素Y / 256 → 瓦片行号
+    snprintf(path, len, "%s/%d/%d/%d.%s",
+             dirPath,       // 静态成员："/MAP"
+             priv.level,    // 当前缩放级别（0~19）
+             tileX, tileY,
+             extName);      // 静态成员："bin"（或编译宏 CONFIG_MAP_IMG_PNG_ENABLE 切换为 "png"）
+}</code></pre>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>参数</th><th>默认值</th><th>说明</th></tr>
+        <tr><td>地图目录 <code>dirPath</code></td><td class="td-code">/MAP</td><td>静态成员，所有 MapConv 实例共享；通过 <code>SetDirPath()</code> 全局修改</td></tr>
+        <tr><td>文件扩展名 <code>extName</code></td><td class="td-code">bin</td><td>通过 <code>SetExtName()</code> 修改；编译宏 <code>CONFIG_MAP_IMG_PNG_ENABLE=1</code> 时切换为 <code>png</code></td></tr>
+        <tr><td>瓦片尺寸</td><td class="td-code">256 × 256 px</td><td>固定值，与 Bing Maps 瓦片系统标准一致</td></tr>
+        <tr><td>缩放范围</td><td class="td-code">0 ~ 19</td><td><code>levelMin=0</code>，<code>levelMax=19</code>，默认 16 级；通过滑块实时调节</td></tr>
+        <tr><td>.bin 格式</td><td>RGB565，16位/像素</td><td>无压缩，直接对应 LCD 颜色格式，无需解码，读取后可立即渲染</td></tr>
+        <tr><td>.png 格式</td><td>PNG 压缩</td><td>文件更小，传输数据量少，但需软件解码，增加 CPU 负载</td></tr>
+      </table>
+    </div>
+    <div class="notice">
+      地图瓦片需预先通过 PC 工具（如 MOBAC、BigMapPlus、Mobile Atlas Creator 等）下载并按上述目录结构写入 SD 卡。PC 模拟器版本将地图放置于 <code>Simulator/MAP/</code> 目录，路径结构完全相同。
+    </div>
+
+    <!-- ───── 3. 坐标转换流水线 ───── -->
+    <h3 id="livemap-coord">GPS坐标转换流水线</h3>
+    <p>GPS 模块输出 WGS-84 标准经纬度。地图显示需经过最多三步转换，最终得到用于构造 SD 卡文件路径的像素坐标。整个流程在 <code>MapConv::ConvertMapCoordinate()</code>（<code>MapConv.cpp:57</code>）中串联。</p>
+
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipeline-num">1</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">GPS 硬件输出 — WGS-84 经纬度</div>
+          <div class="pipeline-desc">GPS 模块通过 UART2（PA2/PA3，波特率可配）持续输出 NMEA-0183 格式语句（GPRMC、GPGGA 等）。<code>TinyGPSPlus</code> 库实时解析语句，<code>DP_GPS</code> 模块在卫星数 ≥ 3 时将数据发布到 DataCenter。<code>LiveMapModel::GetGPS_Info()</code> 通过 <code>Account::Pull("GPS", &amp;info)</code> 主动拉取；若 GPS 无效（<code>isVaild == false</code>），自动回退到系统配置的默认坐标。</div>
+          <div class="pipeline-out">输出：wgLat（WGS-84纬度°）, wgLon（WGS-84经度°）</div>
+          <div class="pipeline-file">HAL_GPS.cpp → TinyGPSPlus → DP_GPS.cpp → Account::Pull("GPS")</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">2</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">WGS-84 → GCJ-02 偏移纠偏（可选，中国大陆区域地图）</div>
+          <div class="pipeline-desc">中国法规要求国内地图服务（高德、腾讯等）使用 GCJ-02 坐标系（俗称"火星坐标"），其与 WGS-84 存在随机偏移（在中国大陆约 100~700 米）。通过 <code>MapConv::SetCoordTransformEnable(true)</code> 启用此步骤；使用 OpenStreetMap 等 WGS-84 地图时应关闭。</div>
+          <pre style="margin:8px 0"><code>// GPS_Transform.c:25 — 以(35°N, 105°E)中国地理中心为参考原点
+dLat = transformLat(wgLon - 105.0, wgLat - 35.0)   // 纬度偏差（弧度）
+dLon = transformLon(wgLon - 105.0, wgLat - 35.0)   // 经度偏差（弧度）
+
+// transformLat/transformLon：含多个正弦项的经验拟合函数
+// 用WGS-84椭球体参数转换为角度偏差
+// a=6378245.0（长半轴），ee=0.00669342162296594323（第一偏心率平方）
+magic  = 1 - ee × sin²(wgLat × π/180)
+dLat   = dLat × 180 / ((a×(1-ee)) / (magic×√magic) × π)
+dLon   = dLon × 180 / (a / √magic × cos(wgLat×π/180) × π)
+
+mgLat  = wgLat + dLat   // GCJ-02纬度
+mgLon  = wgLon + dLon   // GCJ-02经度</code></pre>
+          <div class="pipeline-out">输出：mgLat（GCJ-02纬度°）, mgLon（GCJ-02经度°）</div>
+          <div class="pipeline-file">GPS_Transform.c → GPS_Transform(wgLat, wgLon, &amp;mgLat, &amp;mgLon)</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">3</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">Web墨卡托投影 — 经纬度 → 全局像素坐标</div>
+          <div class="pipeline-desc">采用 <strong>Bing Maps 标准 Web墨卡托投影</strong>（等角保形投影，EPSG:3857），将球面经纬度映射到正方形平面像素坐标系。该投影保证经线等间距，但高纬度地区面积失真严重（有效纬度范围 ±85.05°）。</div>
+          <pre style="margin:8px 0"><code>// TileSystem.cpp:45 — TileSystem::LatLongToPixelXY()
+
+x = (longitude + 180) / 360                              // 经度 → [0, 1]，线性映射
+sinLat = sin(latitude × π / 180)
+y = 0.5 − ln((1 + sinLat) / (1 − sinLat)) / (4 × π)   // 纬度 → [0, 1]，Mercator公式
+
+mapSize = 256 × 2^level   // 全球地图总像素尺寸（级别16：16,777,216 px）
+
+pixelX = (int)(x × mapSize + 0.5)   // 四舍五入，向右为正
+pixelY = (int)(y × mapSize + 0.5)   // 向下为正（符合屏幕坐标系）</code></pre>
+          <div class="pipeline-out">输出：pixelX, pixelY（全局像素坐标，int32_t）</div>
+          <div class="pipeline-file">TileSystem.cpp:45 → TileSystem::LatLongToPixelXY(lat, lon, level, &amp;pixelX, &amp;pixelY)</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">4</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">像素坐标 → 瓦片行列号 → SD卡文件路径</div>
+          <div class="pipeline-desc">全局像素坐标整除256得到瓦片行列号，再拼接目录结构生成 SD 卡文件路径，供 LVGL 加载图片。</div>
+          <pre style="margin:8px 0"><code>tileX = pixelX / 256   // 整除，C语言整数除法直接截断小数部分
+tileY = pixelY / 256
+
+path  = "/MAP/{level}/{tileX}/{tileY}.bin"
+// 例（北京天安门，级别16）：/MAP/16/27387/14029.bin</code></pre>
+          <div class="pipeline-out">输出：SD卡文件路径字符串（最长 64 字节）</div>
+          <div class="pipeline-file">MapConv.cpp:99 → MapConv::ConvertMapPath(pixelX, pixelY, path, len)</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Web墨卡托投影关键参数对照表</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>缩放级别</th><th>全球像素总尺寸</th><th>地面分辨率（纬度30°）</th><th>单张256px瓦片覆盖</th></tr>
+        <tr><td>0</td><td>256 × 256</td><td>~78,271 m/px</td><td>全球</td></tr>
+        <tr><td>10</td><td>262,144 × 262,144</td><td>~76.4 m/px</td><td>~19.6 km × 19.6 km</td></tr>
+        <tr><td>16（默认）</td><td>16,777,216 × 16,777,216</td><td>~1.19 m/px</td><td>~305 m × 305 m</td></tr>
+        <tr><td>18</td><td>67,108,864 × 67,108,864</td><td>~0.30 m/px</td><td>~76 m × 76 m</td></tr>
+        <tr><td>19（最大）</td><td>134,217,728 × 134,217,728</td><td>~0.15 m/px</td><td>~38 m × 38 m</td></tr>
+      </table>
+    </div>
+    <div class="notice">
+      纬度限制：Web墨卡托投影在纬度 ±90° 时 Y 值趋向无穷，实现中将有效纬度限制为 ±85.05112878°（<code>TileSystem.cpp:11</code>）。全球像素坐标系以左上角（经度 -180°、纬度 +85.05°）为原点，X 向右、Y 向下增大。
+    </div>
+
+    <!-- ───── 4. 视口-瓦片容器计算 ───── -->
+    <h3 id="livemap-viewport">视口-瓦片容器计算（TileConv）</h3>
+    <p><code>TileConv</code>（<code>TileConv.cpp</code>）负责计算当前屏幕视口所覆盖的最小完整瓦片集合（称为"瓦片容器"），并维护各 LVGL 图片对象与全局像素坐标之间的位置关系。</p>
+
+    <pre><code>全局像素坐标系（原点：地图左上角）
+                 focusX, focusY  ← GPS当前位置（全局像素坐标）
+                       │
+         ┌─────────────┼─────────────┐  ← 屏幕视口（240×320 px）
+         │             │             │    viewHalfWidth  = 120
+         │             │             │    viewHalfHeight = 160
+         │         GPS箭头           │
+         │                           │
+         └───────────────────────────┘
+               ↑ 视口左上角 = (focusX-120, focusY-160)
+               ↓ 向下对齐到256的整数倍边界（FixTile，向下取整）
+
+┌──────────┬──────────┬──────────┐  ← 瓦片容器（比视口多覆盖1圈）
+│  tile 0  │  tile 1  │  tile 2  │    容器宽 = (240/256+2)×256 = 768 px（3列）
+│  256×256 │  256×256 │  256×256 │    容器高 = (320/256+2)×256 = 512 px（2行）
+├──────────┼──────────┼──────────┤    共 3×2 = 6 张瓦片
+│  tile 3  │  tile 4  │  tile 5  │
+│          │    ↑     │          │    GPS箭头始终在容器内某处
+│          │ 焦点像素 │          │
+└──────────┴──────────┴──────────┘
+    ↑ 左上角坐标 = FixTile(viewLeft, false)，对齐到256边界</code></pre>
+
+    <p><code>TileConv::SetFocusPos()</code> 的完整计算逻辑（<code>TileConv.cpp:34</code>）：</p>
+    <pre><code>void TileConv::SetFocusPos(int32_t x, int32_t y)
+{
+    priv.pointFocus = {x, y};   // 记录焦点（GPS全局像素坐标）
+
+    // ① 计算视口四角（全局像素坐标）
+    priv.pointView[0] = {x - viewHalfWidth,  y - viewHalfHeight};  // 左上
+    priv.pointView[1] = {x + viewHalfWidth,  y - viewHalfHeight};  // 右上
+    priv.pointView[2] = {x - viewHalfWidth,  y + viewHalfHeight};  // 左下
+    priv.pointView[3] = {x + viewHalfWidth,  y + viewHalfHeight};  // 右下
+
+    // ② 计算瓦片容器尺寸（额外多2个瓦片，防止边缘露白）
+    int32_t tileContW = (viewWidth  / 256 + 2) * 256;  // 240→768，320→512
+    int32_t tileContH = (viewHeight / 256 + 2) * 256;
+
+    // ③ 容器左上角：视口左上角所在位置向下对齐到256的整数倍边界
+    priv.pointTileCont[0].x = FixTile(priv.pointView[0].x, false);  // false=向下取整
+    priv.pointTileCont[0].y = FixTile(priv.pointView[0].y, false);
+    // 其余三角 = 左上角坐标 + 容器固定尺寸
+    priv.pointTileCont[1] = {tileContLeft + tileContW, tileContTop};
+    priv.pointTileCont[2] = {tileContLeft, tileContTop + tileContH};
+    priv.pointTileCont[3] = {tileContLeft + tileContW, tileContTop + tileContH};
+}
+
+// FixTile()：将坐标对齐到256整数倍边界
+int32_t TileConv::FixTile(int32_t x, bool up)
+{
+    int32_t r = x % 256;
+    int32_t ret = x - r;       // 向下取整（去掉余数）
+    if (up) ret += 256;        // 向上取整
+    return ret;
+}</code></pre>
+
+    <p>获取第 <code>i</code> 张瓦片的全局像素坐标（<code>TileConv.cpp:81</code>）：</p>
+    <pre><code>void TileConv::GetTilePos(uint32_t index, Point_t* pos)
+{
+    // 按行优先（row-major）展开：index = row × widthInTiles + col
+    int32_t widthInTiles = (tileContWidth / 256);   // 如 768/256 = 3
+    pos->x = tileContLeft + 256 * (index % widthInTiles);  // 列偏移
+    pos->y = tileContTop  + 256 * (index / widthInTiles);  // 行偏移
+}</code></pre>
+
+    <p>地图容器（LVGL 对象）的屏幕位置更新（<code>LiveMap.cpp:282</code>）——实现地图随 GPS 平移的"反向滚动"效果：</p>
+    <pre><code>// GetOffset()：计算任意全局像素坐标相对于瓦片容器左上角的偏移
+// offset = (point.x - tileContLeft, point.y - tileContTop)
+
+// 地图容器在屏幕上的位置：
+// 负号使地图反向移动，从而让焦点（GPS位置）始终出现在屏幕中心
+baseX = (LV_HOR_RES - CONFIG_LIVE_MAP_VIEW_WIDTH)  / 2  // 视口在屏幕上的X起点
+baseY = (LV_VER_RES - CONFIG_LIVE_MAP_VIEW_HEIGHT) / 2  // 视口在屏幕上的Y起点
+
+mapContX = baseX - (viewLeft - tileContLeft)   // = baseX - tileContOffset.x
+mapContY = baseY - (viewTop  - tileContTop)    // = baseY - tileContOffset.y
+
+// GPS箭头位置（相对于瓦片容器对象）：
+focusOffset = (focusX - tileContLeft, focusY - tileContTop)
+arrowX = focusOffset.x - arrowWidth  / 2   // 居中于GPS像素点
+arrowY = focusOffset.y - arrowHeight / 2</code></pre>
+
+    <!-- ───── 5. 100ms 主刷新循环 ───── -->
+    <h3 id="livemap-loop">100ms 主刷新循环</h3>
+    <p>页面出现后（<code>onViewDidAppear</code>）创建一个 100ms 周期的 LVGL 定时器，每次触发 <code>Update()</code>（<code>LiveMap.cpp:173</code>）：</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text"><strong>lv_timer 100ms 触发 Update()</strong><br>
+          若距上次地图更新 ≥ <code>CONFIG_GPS_REFR_PERIOD</code>（默认 1000ms）→ 执行 <code>CheckPosition()</code> + <code>SportInfoUpdate()</code>；<br>
+          若距上次交互操作 ≥ 3000ms → 缩放控件以 CSS 过渡动画滑出屏幕隐藏</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text"><strong>获取 GPS 数据</strong>（<code>CheckPosition()</code> 入口，<code>LiveMap.cpp:213</code>）<br>
+          <code>Model.GetGPS_Info(&amp;gpsInfo)</code> → <code>Account::Pull("GPS", &amp;info)</code>；<br>
+          若 GPS 信号无效（<code>info.isVaild == false</code>），则自动回退到 <code>SysConfig</code> 中配置的默认坐标（默认：北京天安门 39.907°N, 116.391°E）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text"><strong>读取缩放级别</strong><br>
+          <code>mapLevelCurrent = lv_slider_get_value(View.ui.zoom.slider)</code>；<br>
+          若与 <code>mapConv.GetLevel()</code> 不同 → <code>refreshMap = true</code>，<code>mapConv.SetLevel(level)</code> 更新级别（同时约束在 0~19 范围内）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text"><strong>执行坐标转换流水线</strong><br>
+          <code>mapConv.ConvertMapCoordinate(lon, lat, &amp;mapX, &amp;mapY)</code>（<code>MapConv.cpp:57</code>）；<br>
+          内部依次执行：[可选] GPS_Transform() → TileSystem::LatLongToPixelXY() → 输出全局像素坐标 (mapX, mapY)</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-text"><strong>更新视口焦点，计算新的瓦片容器</strong><br>
+          <code>tileConv.SetFocusPos(mapX, mapY)</code>——重新计算视口四角坐标和瓦片容器的左上角全局坐标</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-text"><strong>检测瓦片容器是否发生位移</strong>（<code>LiveMap.cpp:342</code>）<br>
+          比较瓦片 [0] 当前全局坐标与上次记录的坐标：<code>pos.x != lastTileContOriPoint.x || pos.y != lastTileContOriPoint.y</code>；<br>
+          若不同 → <code>refreshMap = true</code>（GPS 移动超过一个瓦片边界，或缩放级别改变）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">7</div>
+        <div class="flow-text"><strong>若 refreshMap：重载所有瓦片 + 预热缓存 + 重绘轨迹</strong><br>
+          <code>MapTileContReload()</code>：遍历全部瓦片 → 计算各自全局坐标 → 生成 SD 卡路径 → <code>lv_img_set_src()</code>（触发 LVGL 读文件）；<br>
+          <code>MapTileContPreload()</code>：对每张瓦片调用 <code>_lv_img_cache_open()</code> 预热 LVGL 图片缓存，避免下次渲染时的 IO 延迟；<br>
+          若轨迹激活：<code>TrackLineReload()</code>——清空折线 → 从 PointContainer 重播所有历史点并重新换算坐标</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">8</div>
+        <div class="flow-text"><strong>每次都执行：更新地图容器位置 + 更新箭头</strong>（<code>MapTileContUpdate()</code>，<code>LiveMap.cpp:282</code>）<br>
+          ① <code>tileConv.GetTileContainerOffset(&amp;offset)</code> → 计算地图容器在屏幕上的新位置 → <code>View.SetMapContPos(x, y)</code>（地图跟随 GPS 平移）；<br>
+          ② <code>tileConv.GetFocusOffset(&amp;offset)</code> → GPS 像素点在容器内的坐标 → <code>View.SetImgArrowStatus(x, y, course)</code>（更新箭头位置和旋转角度）；<br>
+          ③ 若轨迹激活：<code>View.SetLineActivePoint(offset.x, offset.y)</code>——更新活跃线段终点到当前GPS位置</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">9</div>
+        <div class="flow-text"><strong>若轨迹激活：喂入新轨迹点</strong><br>
+          <code>Model.pointFilter.PushPoint(mapX, mapY)</code>；<br>
+          距离超过阈值（默认 2px）时，滤波器回调触发 → <code>TrackLineAppendToEnd(x, y)</code> → 坐标转换为容器内偏移 → 追加到 LVGL 折线末尾</div>
+      </div>
+    </div>
+
+    <!-- ───── 6. 瓦片加载与渲染 ───── -->
+    <h3 id="livemap-render">瓦片加载与LVGL渲染</h3>
+    <p>每张瓦片对应屏幕上一个预创建的 LVGL 图片对象（<code>lv_img_t</code>），在视图创建时按瓦片容器的行列布局静态排列。刷新时只更新图片源路径，不重建对象。</p>
+    <pre><code>// LiveMap.cpp:309 — MapTileContReload()
+void LiveMap::MapTileContReload()
+{
+    for (uint32_t i = 0; i &lt; View.ui.map.tileNum; i++)
+    {
+        TileConv::Point_t pos;
+        Model.tileConv.GetTilePos(i, &amp;pos);           // 获取第i张瓦片的全局像素坐标
+
+        char path[64];
+        Model.mapConv.ConvertMapPath(pos.x, pos.y, path, sizeof(path));
+        // 生成路径如: "/MAP/16/27387/14029.bin"
+
+        View.SetMapTileSrc(i, path);                   // → lv_img_set_src(imgTiles[i], path)
+        // LVGL 收到新路径后，在下一渲染帧时通过文件系统驱动读取 SD 卡
+    }
+}</code></pre>
+
+    <p>完整的数据读取链路（从路径字符串到像素显示）：</p>
+    <div class="arch">
+      <div class="arch-layer l1">
+        <div class="arch-name">LVGL 缓存层</div>
+        <div class="arch-items">
+          <span class="arch-chip">lv_img_set_src(path) — 设置图片源</span>
+          <span class="arch-chip">_lv_img_cache_open() — 查询图片缓存</span>
+          <span class="arch-chip">缓存命中 → 直接使用RAM中的像素数据渲染</span>
+        </div>
+      </div>
+      <div class="arch-layer l2">
+        <div class="arch-name">文件系统层</div>
+        <div class="arch-items">
+          <span class="arch-chip">lv_fs_open() — LVGL FS 抽象接口</span>
+          <span class="arch-chip">lv_port_fs_sdfat.cpp — LVGL↔SdFat 适配层</span>
+          <span class="arch-chip">SdFat::open() / read() — FAT 文件读取</span>
+        </div>
+      </div>
+      <div class="arch-layer l3">
+        <div class="arch-name">硬件传输层</div>
+        <div class="arch-items">
+          <span class="arch-chip">SDIO2 — 4-bit 25MHz 命令/响应</span>
+          <span class="arch-chip">EDMA1 Channel4 — DMA 搬运，不占CPU</span>
+          <span class="arch-chip">SD卡物理读取：256×256×2 = 131,072 字节/张</span>
+        </div>
+      </div>
+      <div class="arch-layer l4">
+        <div class="arch-name">解码 &amp; 合成层</div>
+        <div class="arch-items">
+          <span class="arch-chip">.bin → RGB565 直接映射，无需解码</span>
+          <span class="arch-chip">.png → 软件解码器（libpng，CPU密集）</span>
+          <span class="arch-chip">LVGL 渲染引擎：瓦片矩阵 + 橙色轨迹线 + 方向箭头 合成</span>
+        </div>
+      </div>
+      <div class="arch-layer l5">
+        <div class="arch-name">显示输出</div>
+        <div class="arch-items">
+          <span class="arch-chip">disp_flush_cb() — LVGL 刷新回调</span>
+          <span class="arch-chip">HAL::Display_SendPixels()</span>
+          <span class="arch-chip">SPI1 + DMA → ST7789 LCD 240×320</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───── 7. 轨迹记录与显示 ───── -->
+    <h3 id="livemap-track">轨迹记录与显示</h3>
+
+    <h4 style="font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--text)">轨迹点过滤（TrackPointFilter）</h4>
+    <p>GPS 更新频率较高，不加过滤会产生大量密集冗余点。<code>TrackPointFilter</code> 采用<strong>距离阈值过滤</strong>：只有当新点与上一个已输出点的像素距离超过阈值时，才将其传递给下游（<code>LiveMap.cpp:64</code>）：</p>
+    <pre><code>// 配置：距离阈值 = CONFIG_TRACK_FILTER_OFFSET_THRESHOLD（默认 2px）
+Model.pointFilter.SetOffsetThreshold(CONFIG_TRACK_FILTER_OFFSET_THRESHOLD);
+
+// 过滤器输出回调：过滤通过的点追加到 LVGL 折线末尾
+Model.pointFilter.SetOutputPointCallback(
+    [](TrackPointFilter* filter, const TrackPointFilter::Point_t* point) {
+        LiveMap* instance = (LiveMap*)filter->userData;
+        instance->TrackLineAppendToEnd((int32_t)point->x, (int32_t)point->y);
+    });
+
+// 每次 CheckPosition() 末尾喂入当前 GPS 像素坐标
+// LiveMap.cpp:258
+Model.pointFilter.PushPoint(mapX, mapY);</code></pre>
+
+    <h4 style="font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--text)">全局像素 → 瓦片容器内相对坐标</h4>
+    <p>LVGL 折线的点坐标是相对于瓦片容器 LVGL 对象（<code>ui.map.cont</code>）的。因此必须将全局像素坐标转换为容器内偏移（<code>LiveMap.cpp:372</code>）：</p>
+    <pre><code>void LiveMap::TrackLineAppendToEnd(int32_t x, int32_t y)
+{
+    TileConv::Point_t offset;
+    TileConv::Point_t curPoint = {x, y};
+    Model.tileConv.GetOffset(&amp;offset, &amp;curPoint);
+    // GetOffset(): offset = (point.x - tileContLeft, point.y - tileContTop)
+    // 即：GPS全局像素坐标 减去 瓦片容器左上角坐标 = 容器内相对坐标
+
+    View.ui.track.lineTrack->append_to_end(
+        (lv_coord_t)offset.x,
+        (lv_coord_t)offset.y);
+}</code></pre>
+
+    <h4 style="font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--text)">缩放级别切换时的历史轨迹坐标重算</h4>
+    <p>历史轨迹点以某一缩放级别的全局像素坐标存储（通过 <code>PointContainer</code> 压缩存储差分坐标）。切换缩放级别时，所有历史点的坐标必须按新级别重新换算（<code>MapConv.cpp:81</code>）：</p>
+    <pre><code>// 原理：mapSize = 256 × 2^level，级别每增加1，全局像素坐标翻倍
+// 因此不同级别间的换算可用位移运算代替浮点乘除
+void MapConv::ConvertMapLevelPos(int32_t* destX, int32_t* destY,
+                                  int32_t srcX, int32_t srcY, int srcLevel)
+{
+    int diffLevel = srcLevel - GetLevel();
+    if (diffLevel &gt;= 0)
+        { *destX = srcX &gt;&gt; diffLevel; *destY = srcY &gt;&gt; diffLevel; }  // 缩小：右移
+    else
+        { *destX = srcX &lt;&lt; -diffLevel; *destY = srcY &lt;&lt; -diffLevel; }  // 放大：左移
+}
+
+// 调用位置（LiveMapModel.cpp:111）：
+// TrackReload() 遍历 PointContainer 时，对每个存储点调用此函数
+// 将记录时的级别(info.level) → 当前显示级别(mapConv.GetLevel()) 转换</code></pre>
+
+    <h4 style="font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--text)">轨迹线渲染样式</h4>
+    <div class="table-wrap">
+      <table>
+        <tr><th>元素</th><th>LVGL 对象</th><th>颜色</th><th>说明</th></tr>
+        <tr><td>历史轨迹</td><td><code>lv_poly_line</code>（自定义）</td><td style="color:#ff931e;font-weight:600">■ #ff931e（橙色）</td><td>线宽 5px，圆角端点；存储所有经过 TrackPointFilter 过滤后的轨迹点</td></tr>
+        <tr><td>活跃线段</td><td><code>lv_line</code>（标准）</td><td style="color:#ff931e;font-weight:600">■ #ff931e（橙色）</td><td>连接折线末尾最后一个存储点与当前 GPS 实时位置，实现平滑延伸效果</td></tr>
+        <tr><td>GPS方向箭头</td><td><code>lv_img</code>（支持旋转）</td><td>主题可配置</td><td>位置 = 焦点偏移，旋转角 = GPS 输出的 course（航向角，单位°）</td></tr>
+      </table>
+    </div>
+
+    <h4 style="font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--text)">SD卡热插拔处理</h4>
+    <p>LiveMap 在 <code>onViewDidAppear()</code> 中注册 SD 卡插入事件回调（<code>LiveMap.cpp:124</code>）：</p>
+    <pre><code>HAL::SD_SetEventCallback([](bool isInsert) {
+    if (isInsert) {
+        // 清空所有 LVGL 图片缓存（传 NULL 表示清空全部）
+        // 原因：SD卡未插入时，瓦片加载会失败并在缓存中留下"失败"记录
+        //       若不清除，插入后 LVGL 会直接使用失败状态，不会重新读取文件
+        lv_img_cache_invalidate_src(NULL);
+        // 下一次 CheckPosition() 循环会自动检测到瓦片需要重载并重新读卡
+    }
+});
+// 页面消失时立即注销，防止悬空指针
+// onViewDidDisappear(): HAL::SD_SetEventCallback(nullptr);</code></pre>
+
+    <!-- ───── 8. 性能优化 ───── -->
+    <h3 id="livemap-perf">性能优化策略</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>优化策略</th><th>实现位置</th><th>效果说明</th></tr>
+        <tr>
+          <td>瓦片容器变更检测</td>
+          <td><code>GetIsMapTileContChanged()</code><br><code>LiveMap.cpp:342</code></td>
+          <td>仅当瓦片容器左上角坐标发生变化时才调用 <code>MapTileContReload()</code>；GPS 在单个瓦片内移动时，不触发文件系统读取，只更新地图容器和箭头的像素位置</td>
+        </tr>
+        <tr>
+          <td>LVGL 图片缓存预热</td>
+          <td><code>MapTileContPreload()</code><br><code>_lv_img_cache_open()</code></td>
+          <td>在 <code>onViewWillAppear</code> 和每次 <code>MapTileContReload</code> 后调用；将当前所有可见瓦片预加载到 LVGL RAM 缓存，减少渲染时的等待</td>
+        </tr>
+        <tr>
+          <td>轨迹点距离过滤</td>
+          <td><code>TrackPointFilter</code><br>2px 像素距离阈值</td>
+          <td>过滤 GPS 微小抖动和密集采样点，减少 LVGL 折线顶点数量，降低折线渲染的 CPU 开销</td>
+        </tr>
+        <tr>
+          <td>EDMA 硬件 DMA 读卡</td>
+          <td><code>at32_sdio.c</code><br>EDMA1 Channel4</td>
+          <td>SDIO2 数据搬运由 DMA 完成，CPU 在等待期间可继续执行 LVGL 渲染逻辑；理论带宽 ~12.5 MB/s，读一张 256×256×2=128KB 瓦片约 10ms</td>
+        </tr>
+        <tr>
+          <td>.bin 格式零解码</td>
+          <td><code>LiveMapView.cpp:10</code><br>编译宏选择</td>
+          <td>RGB565 原始数据直接对应 ST7789 LCD 颜色格式，无需任何软件解码，节省大量 CPU 时间（相比 PNG 解码约快 10×）</td>
+        </tr>
+        <tr>
+          <td>级别换算位移运算</td>
+          <td><code>ConvertMapLevelPos()</code><br><code>MapConv.cpp:81</code></td>
+          <td>用 <code>&gt;&gt;</code>/<code>&lt;&lt;</code> 位移代替浮点乘除，在 Cortex-M4 上每次换算节省数十个时钟周期；轨迹重载时调用数百次，累积效果明显</td>
+        </tr>
+        <tr>
+          <td>瓦片矩阵静态预创建</td>
+          <td><code>LiveMapView.cpp:77</code><br><code>onViewLoad()</code></td>
+          <td>页面加载时一次性分配所有 LVGL 瓦片图片对象；刷新时只修改图片源路径，无需反复创建/销毁对象，避免 LVGL 堆碎片化</td>
+        </tr>
+        <tr>
+          <td>箭头位置变更检测</td>
+          <td><code>LiveMapView::SetImgArrowStatus()</code></td>
+          <td>缓存上次的像素坐标和旋转角；仅当新值与缓存值不同时才调用 LVGL API 更新，减少不必要的重绘脏区标记</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ───── 完整数据流 ───── -->
+    <h3>完整数据流示意图</h3>
+    <pre><code>GPS 硬件（UART2 PA2/PA3）
+  │  NMEA-0183 语句（GPRMC/GPGGA）
+  ▼
+TinyGPSPlus 解析 → DP_GPS（DataProc）→ Account::Publish("GPS")
+  │  发布频率：1Hz（实机）
+  ▼
+LiveMapModel::GetGPS_Info()          ← Account::Pull("GPS", &info)
+  │  wgLat, wgLon（WGS-84经纬度）
+  ▼
+MapConv::ConvertMapCoordinate(lon, lat, &mapX, &mapY)
+  ├──[可选] GPS_Transform()          WGS-84 → GCJ-02（中国地图偏移纠偏）
+  └── TileSystem::LatLongToPixelXY() Web墨卡托投影 → 全局像素坐标
+             │  mapX, mapY（int32_t，全局像素）
+  ▼
+TileConv::SetFocusPos(mapX, mapY)
+  │  计算覆盖视口的最小完整瓦片集合（容器左上角 + 宽高）
+  ▼
+[容器位移检测] → 若瓦片容器位移或缩放级别改变：
+  │
+  ├─ MapConv::ConvertMapPath(tilePixelX, tilePixelY)
+  │    │  "/MAP/16/{tileX}/{tileY}.bin"
+  │    ▼
+  │  lv_img_set_src() → SdFat → SDIO2 → EDMA1 CH4 → SD卡
+  │    │  256×256×2 = 131,072 字节 RGB565 原始像素
+  │    ▼
+  │  LVGL 图片缓存（RAM）
+  │
+  └─ TrackLineReload() → 重播历史点 + ConvertMapLevelPos() 换算坐标
+       │  更新 lv_poly_line 折线顶点
+       ▼
+
+[每次 CheckPosition() 均执行]
+  ├─ SetMapContPos()：地图容器位置偏移 → 地图跟随 GPS 平移
+  ├─ SetImgArrowStatus()：箭头位置 + 旋转角（course°）
+  └─ SetLineActivePoint()：活跃线段终点 = 当前 GPS 位置
+
+  ▼
+LVGL 渲染引擎：合成「瓦片矩阵 + 橙色轨迹折线 + GPS方向箭头」
+  ▼
+disp_flush_cb() → HAL::Display_SendPixels() → SPI1 DMA → ST7789 LCD（240×320）</code></pre>
+
+  </section>
+
+  <!-- ── SDIO ── -->
+  <section id="sdio">
+    <h2>SDIO / SdFat 工作原理</h2>
+    <p>项目使用 <strong>SDIO2 硬件接口</strong>（非 SPI 模式），配合 <strong>SdFat v2</strong> 库实现高速 SD 卡访问，EDMA 硬件加速数据传输。</p>
+
+    <h3>初始化链</h3>
+    <pre><code>HAL::SD_Init()
+  └─ SdFatSdioEX::begin()
+      └─ sd_init()               ← AT32 SdFat 适配层
+          └─ SDIO2 硬件初始化    ← PC0~PC5 引脚, 4-bit, 25MHz
+              └─ EDMA1 CH4 配置 ← DMA 通道绑定 SDIO2 RX/TX
+                  └─ SD 卡识别  ← SD1 / SD2 / SDHC / SDXC</code></pre>
+
+    <h3>技术参数</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>参数</th><th>值</th></tr>
+        <tr><td>硬件接口</td><td>SDIO2 (非 SPI)</td></tr>
+        <tr><td>总线宽度</td><td>4-bit</td></tr>
+        <tr><td>时钟频率</td><td>25 MHz</td></tr>
+        <tr><td>理论速率</td><td>~12.5 MB/s</td></tr>
+        <tr><td>DMA</td><td>EDMA1 Channel4</td></tr>
+        <tr><td>文件系统</td><td>FAT16 / FAT32 (SdFat v2)</td></tr>
+        <tr><td>长文件名</td><td>支持 LFN</td></tr>
+        <tr><td>卡检测引脚</td><td>PA8 (低电平有卡)</td></tr>
+        <tr><td>支持卡类型</td><td>SD1 / SD2 / SDHC / SDXC</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── GPS ── -->
+  <section id="gps">
+    <h2>GPS 处理</h2>
+    <p>通过 UART2 接收 NMEA 语句，使用 <strong>TinyGPSPlus</strong> 库解析，支持 <strong>GPS 模拟器</strong>（回放 GPX 文件）便于开发测试。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>特性</th><th>说明</th></tr>
+        <tr><td>数据更新率</td><td>1 秒 (实机) / 可配</td></tr>
+        <tr><td>NMEA 解析</td><td>TinyGPSPlus，支持 GPRMC / GPGGA 等</td></tr>
+        <tr><td>GPS 模拟器</td><td><code>HAL_GPS_Simulator.cpp</code>，回放 .gpx 文件</td></tr>
+        <tr><td>坐标转换</td><td>WGS84 → GCJ02 → BD09 (DP_TzConv)</td></tr>
+        <tr><td>默认坐标</td><td>39.907415°N, 116.391332°E (北京天安门)</td></tr>
+        <tr><td>轨迹格式</td><td>保存为 GPX 文件到 SD 卡 <code>/Track/</code> 目录</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── USB ── -->
+  <section id="usb">
+    <h2>USB MSC 大容量存储</h2>
+    <p>连接 USB 时，设备枚举为大容量存储设备，PC 可直接读写 SD 卡文件，支持热插拔。</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text">USB 接入，<code>USB_IsPlugged()</code> 检测</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text">挂起 LVGL 渲染，停止 SD 卡应用层访问</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text"><code>USB_Connect()</code> 枚举为 USB MSC 设备</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text">PC 通过 SCSI 命令读写 SD 卡扇区</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-text">USB 拔出，重新挂载 SdFat，恢复应用运行</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Libraries ── -->
+  <section id="libraries">
+    <h2>第三方库</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>库名</th><th>版本</th><th>用途</th></tr>
+        <tr><td><strong>LVGL</strong></td><td>v8.x</td><td>嵌入式 GUI 框架，驱动所有 UI 渲染</td></tr>
+        <tr><td><strong>SdFat</strong></td><td>v2.x</td><td>SD 卡 FAT 文件系统，高性能 SDIO 支持</td></tr>
+        <tr><td><strong>TinyGPSPlus</strong></td><td>最新</td><td>NMEA GPS 语句解析</td></tr>
+        <tr><td><strong>ArduinoJson</strong></td><td>v6.x</td><td>配置文件 JSON 序列化/反序列化</td></tr>
+        <tr><td><strong>Adafruit_ST7789</strong></td><td>适配版</td><td>ST7789 LCD 初始化</td></tr>
+        <tr><td><strong>LSM6DSM</strong></td><td>官方</td><td>IMU 传感器驱动 (6 轴)</td></tr>
+        <tr><td><strong>LIS3MDL</strong></td><td>官方</td><td>磁力计驱动 (3 轴)</td></tr>
+        <tr><td><strong>W25Q128</strong></td><td>自定义</td><td>QSPI Flash 驱动</td></tr>
+        <tr><td><strong>USB_MSC</strong></td><td>自定义</td><td>USB 大容量存储类实现</td></tr>
+        <tr><td><strong>Bluetooth</strong></td><td>自定义</td><td>BLE 蓝牙通信</td></tr>
+        <tr><td><strong>ButtonEvent</strong></td><td>—</td><td>按钮事件处理 (单击/长按/双击)</td></tr>
+        <tr><td><strong>MillisTaskManager</strong></td><td>—</td><td>毫秒级任务调度器</td></tr>
+        <tr><td><strong>cm_backtrace</strong></td><td>官方</td><td>HardFault 异常栈回溯</td></tr>
+        <tr><td><strong>XPT2046</strong></td><td>—</td><td>电阻触摸屏驱动</td></tr>
+        <tr><td><strong>EEPROM</strong></td><td>Arduino</td><td>字节级持久存储</td></tr>
+        <tr><td><strong>segger_rtt</strong></td><td>官方</td><td>实时调试日志输出</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Config ── -->
+  <section id="config">
+    <h2>关键配置宏</h2>
+    <p>主要配置位于 <code>USER/App/Config/Config.h</code> 和 <code>USER/HAL/HAL_Config.h</code>。</p>
+    <pre><code>/* ── GPS 配置 ── */
+#define CONFIG_GPS_REFR_PERIOD          1000        // GPS 刷新周期 (ms)
+#define CONFIG_GPS_USE_SIMULATOR        1           // 启用 GPS 模拟器 (1=开, 0=关)
+#define CONFIG_GPS_LATITUDE_DEFAULT     39.907415   // 默认纬度
+#define CONFIG_GPS_LONGITUDE_DEFAULT    116.391332  // 默认经度
+
+/* ── 地图配置 ── */
+#define CONFIG_LIVE_MAP_LEVEL_DEFAULT   16          // 初始缩放级别
+#define CONFIG_MAP_DIR_PATH_DEFAULT     "/MAP"      // SD 卡地图目录
+#define CONFIG_MAP_EXT_NAME_DEFAULT     "bin"       // 瓦片格式 (bin / png)
+
+/* ── 轨迹配置 ── */
+#define CONFIG_TRACK_FILTER_OFFSET_THRESHOLD  2    // 轨迹滤波阈值 (像素)
+#define CONFIG_TRACK_RECORD_FILE_DIR_NAME     "Track"
+
+/* ── 屏幕配置 ── */
+#define CONFIG_SCREEN_HOR_RES           240         // 水平分辨率
+#define CONFIG_SCREEN_VER_RES           320         // 垂直分辨率
+
+/* ── SD 卡 ── */
+#define CONFIG_SD_CD_PIN                PA8         // 卡检测引脚
+
+/* ── 调试 ── */
+#define CONFIG_MONKEY_TEST_ENABLE       0           // 自动化压力测试</code></pre>
+  </section>
+
+  <!-- ── Build ── -->
+  <section id="build">
+    <h2>编译构建</h2>
+
+    <h3>嵌入式 (Keil MDK)</h3>
+    <pre><code># 打开 Keil 项目
+MDK-ARM_F435/proj.uvprojx
+
+# 编译器: ARM Compiler v6 (ARMCC v6)
+# 优化: -O2 Cortex-M4
+# 输出: MDK-ARM_F435/Track.bin (306KB)</code></pre>
+
+    <h3>PC 模拟器 (Visual Studio)</h3>
+    <pre><code># 打开解决方案
+Simulator/LVGL.Simulator.sln
+
+# 支持架构: x86 / x64 / ARM / ARM64
+# 运行: 直接 F5 启动模拟器
+# 地图文件放置到: Simulator/MAP/</code></pre>
+
+    <h3>Linux / Linux SDL2</h3>
+    <pre><code>cd Linux/
+make -j$(nproc)
+./xtrack /dev/input/event0
+
+# 或 SDL2 版本
+cd LinuxSDL2/
+make -j$(nproc)
+./xtrack</code></pre>
+
+    <h3>目录结构速查</h3>
+    <pre><code>AT32F435RGT7_SDIO/
+├── MDK-ARM_F435/          # Keil 嵌入式项目
+│   ├── proj.uvprojx
+│   ├── Platform/Core/     # MCU 底层驱动 (at32_sdio.c 等)
+│   └── Track.bin          # 编译输出固件
+├── USER/                  # 用户应用代码
+│   ├── App/               # 应用层 (Pages / DataProc / Utils)
+│   ├── HAL/               # 硬件抽象层 (26 个模块)
+│   ├── lv_port/           # LVGL 移植接口
+│   └── main.cpp
+├── Libraries/             # 第三方库 (16 个)
+├── Simulator/             # PC 模拟器 (Visual Studio)
+├── Linux/                 # Linux 移植
+├── LinuxSDL2/             # Linux SDL2 版本
+├── Doc/                   # 芯片数据手册
+├── PCB/                   # PCB 设计文件
+└── Tools/                 # 工具脚本</code></pre>
+  </section>
+
+  <!-- ── Docs ── -->
+  <section id="docs">
+    <h2>技术文档</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>文档</th><th>内容</th></tr>
+        <tr>
+          <td><code>LiveMap渲染流程技术文档.md</code></td>
+          <td>完整的 GPS → 地图瓦片 → LCD 渲染链路分析，性能优化策略，调用链追踪</td>
+        </tr>
+        <tr>
+          <td><code>SDIO和SDFAT工作原理技术文档.md</code></td>
+          <td>SDIO2 硬件初始化详解，SdFat v2 集成，EDMA 加速配置，常见故障排查</td>
+        </tr>
+        <tr>
+          <td><code>USB_MSC_Debug_Guide.md</code></td>
+          <td>USB MSC 大容量存储调试，热插拔支持，QSPI Flash 集成，Cortex-M4 调试技巧</td>
+        </tr>
+        <tr>
+          <td><code>性能优化总结.md</code></td>
+          <td>GPS 模拟器速度修复，GPX 文件解析优化，LiveMap 帧率提升</td>
+        </tr>
+        <tr>
+          <td><code>Doc/RM_AT32F435_437_V2.07_CH.pdf</code></td>
+          <td>AT32F435/437 参考手册 (中文版，18MB)</td>
+        </tr>
+        <tr>
+          <td><code>Doc/lsm6dsm.pdf</code></td>
+          <td>LSM6DSM IMU 数据手册</td>
+        </tr>
+        <tr>
+          <td><code>Doc/lis3mdl.pdf</code></td>
+          <td>LIS3MDL 磁力计数据手册</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  X-TRACK &nbsp;·&nbsp; AT32F435RGT7 + SDIO &nbsp;·&nbsp; 基于 <a href="https://github.com/FASTSHIFT/X-TRACK" target="_blank">FASTSHIFT/X-TRACK</a> &nbsp;·&nbsp; MIT License
+</footer>
+</main>
+
+<script>
+  // ── Menu Toggle ──
+  const toggle = document.getElementById('menu-toggle');
+  toggle.addEventListener('click', () => {
+    document.body.classList.toggle('menu-open');
+  });
+
+  // ── Active link on scroll ──
+  const sections = document.querySelectorAll('section[id], h3[id]');
+  const links = document.querySelectorAll('.sidebar-link, .sidebar-sublink');
+
+  function updateActive() {
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.getBoundingClientRect().top;
+      if (top <= 80) current = sec.id;
+    });
+    links.forEach(a => {
+      const isActive = a.getAttribute('href') === '#' + current;
+      a.classList.toggle('active', isActive);
+      if (isActive) a.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+  }
+
+  document.getElementById('main').addEventListener('scroll', updateActive);
+  window.addEventListener('scroll', updateActive);
+
+  // ── Copy button ──
+  document.querySelectorAll('pre').forEach(pre => {
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.title = '复制代码';
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    btn.addEventListener('click', () => {
+      const code = pre.querySelector('code') ? pre.querySelector('code').innerText : pre.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        }, 2000);
+      });
+    });
+    pre.appendChild(btn);
+  });
+
+  // ── Smooth scroll（含 sublink）──
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // On mobile, close menu after click
+      if (window.innerWidth < 700) document.body.classList.remove('menu-open');
+    });
+  });
+
+  // ── Collapsible sidebar toggle ──
+  function toggleExpand(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USB MSC 调试指南 · AT32F435RGT7</title>
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --border: #e8e8e8;
+  --text: #1a1a1a;
+  --muted: #888;
+  --accent: #2d6be4;
+  --accent-light: #eef3fd;
+  --tag-bg: #f0f0f0;
+  --sidebar-w: 260px;
+  --header-h: 52px;
+  --radius: 6px;
+  --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.7; }
+#header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 16px; z-index: 100; }
+#menu-toggle { width: 36px; height: 36px; background: none; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; flex-shrink: 0; transition: background 0.15s; }
+#menu-toggle:hover { background: var(--tag-bg); }
+#menu-toggle span { display: block; width: 16px; height: 1.5px; background: var(--text); border-radius: 2px; transition: transform 0.2s, opacity 0.2s; }
+body.menu-open #menu-toggle span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+body.menu-open #menu-toggle span:nth-child(2) { opacity: 0; }
+body.menu-open #menu-toggle span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+#brand { font-size: 15px; font-weight: 600; letter-spacing: -.2px; color: var(--text); }
+#brand sup { font-size: 10px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+.header-meta { margin-left: auto; display: flex; gap: 8px; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--accent-light); color: var(--accent); font-weight: 500; }
+#sidebar { position: fixed; top: var(--header-h); left: 0; bottom: 0; width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; transform: translateX(0); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); z-index: 90; padding: 16px 0 32px; }
+body:not(.menu-open) #sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+.sidebar-section { margin-bottom: 8px; }
+.sidebar-section-title { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); padding: 8px 20px 4px; }
+.sidebar-link { display: block; padding: 6px 20px; color: #444; text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all 0.15s; }
+.sidebar-link:hover { color: var(--accent); background: var(--accent-light); border-left-color: var(--accent); }
+.sidebar-link.active { color: var(--accent); background: var(--accent-light); border-left-color: var(--accent); font-weight: 500; }
+.sidebar-sublink { display: block; padding: 3px 20px 3px 30px; color: #888; text-decoration: none; font-size: 12px; border-left: 2px solid transparent; transition: all 0.15s; }
+.sidebar-sublink:hover, .sidebar-sublink.active { color: var(--accent); background: var(--accent-light); border-left-color: var(--accent); }
+#main { margin-top: var(--header-h); margin-left: var(--sidebar-w); transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1); min-height: calc(100vh - var(--header-h)); }
+body:not(.menu-open) #main { margin-left: 0; }
+.content { max-width: 900px; margin: 0 auto; padding: 48px 32px 80px; }
+section { margin-bottom: 64px; }
+.section-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+h1 { font-size: 32px; font-weight: 700; letter-spacing: -.5px; line-height: 1.2; margin-bottom: 16px; }
+h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+p { color: #444; margin-bottom: 12px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.hero-desc { font-size: 16px; color: #555; max-width: 600px; line-height: 1.8; margin-bottom: 28px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+.tag { font-size: 12px; padding: 4px 10px; border-radius: 20px; background: var(--tag-bg); color: #555; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.card-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 12px; background: #f5f5f5; border: 1px solid var(--border); font-weight: 600; color: #555; }
+td { padding: 8px 12px; border: 1px solid var(--border); color: #444; vertical-align: top; }
+tr:hover td { background: #fafafa; }
+.td-code { font-family: var(--mono); font-size: 12px; background: #f8f8f8; color: #c0392b; }
+pre { background: #1e1e2e; color: #cdd6f4; border-radius: var(--radius); padding: 20px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; margin: 16px 0; position: relative; }
+.copy-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s, background 0.15s; color: #cdd6f4; padding: 0; }
+pre:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { background: rgba(255,255,255,0.18); }
+.copy-btn.copied { color: #a6e3a1; border-color: #a6e3a1; }
+code { font-family: var(--mono); font-size: 12.5px; background: #f3f3f3; border-radius: 3px; padding: 1px 5px; color: #c0392b; }
+pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+.arch { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+.arch-layer { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+.arch-layer:last-child { border-bottom: none; }
+.arch-name { font-size: 12px; font-weight: 600; color: var(--muted); min-width: 110px; text-transform: uppercase; letter-spacing: .5px; }
+.arch-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.arch-chip { font-size: 11.5px; padding: 3px 10px; border-radius: 20px; background: var(--tag-bg); color: #444; }
+.arch-layer.l1 { background: #eef3fd; } .arch-layer.l1 .arch-chip { background: #d0e1fd; color: #1a4db7; }
+.arch-layer.l2 { background: #f0faf5; } .arch-layer.l2 .arch-chip { background: #c2edd8; color: #1a6648; }
+.arch-layer.l3 { background: #fdf8ee; } .arch-layer.l3 .arch-chip { background: #fae6b0; color: #7a5200; }
+.arch-layer.l4 { background: #fdf3f0; } .arch-layer.l4 .arch-chip { background: #f9cfc8; color: #8b1c0e; }
+.arch-layer.l5 { background: #f8f0fe; } .arch-layer.l5 .arch-chip { background: #e1c7fc; color: #5b1fa3; }
+.stats { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 24px; min-width: 120px; text-align: center; }
+.stat-num { font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: -.5px; }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.flow { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin: 16px 0; }
+.flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px dashed #eee; }
+.flow-step:last-child { border-bottom: none; }
+.flow-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.flow-text { font-size: 13px; color: #444; }
+.flow-text strong { color: var(--text); }
+.notice { border-left: 3px solid var(--accent); background: var(--accent-light); border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: #335; }
+.notice.warn { border-left-color: #e67e22; background: #fef9f0; color: #7a4500; }
+.notice.ok { border-left-color: #27ae60; background: #f0faf5; color: #1a5c38; }
+.notice.err { border-left-color: #e74c3c; background: #fef0f0; color: #7a1a1a; }
+footer { text-align: center; padding: 32px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); }
+.pipeline { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+.pipeline-step { display: flex; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #eee; }
+.pipeline-step:last-child { border-bottom: none; }
+.pipeline-step:nth-child(odd) { background: var(--surface); }
+.pipeline-step:nth-child(even) { background: #f8f8f8; }
+.pipeline-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.pipeline-content { flex: 1; min-width: 0; }
+.pipeline-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.pipeline-desc { font-size: 13px; color: #555; margin-bottom: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+@media (max-width: 700px) { .content { padding: 28px 18px 60px; } h1 { font-size: 24px; } .stats { gap: 10px; } .card-grid { grid-template-columns: 1fr 1fr; } .arch-layer { flex-direction: column; align-items: flex-start; gap: 8px; } }
+</style>
+</head>
+<body class="menu-open">
+
+<div id="header">
+  <button id="menu-toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div id="brand">USB MSC 调试指南<sup>AT32F435RGT7 · W25Q128 QSPI</sup></div>
+  <div class="header-meta">
+    <span class="badge">USB MSC</span>
+    <span class="badge">调试记录</span>
+  </div>
+</div>
+
+<nav id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Overview</div>
+    <a class="sidebar-link" href="#overview">问题概述</a>
+    <a class="sidebar-link" href="#tools">调试工具</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Debug Process</div>
+    <a class="sidebar-link" href="#problem1">问题1 USB初始化</a>
+    <a class="sidebar-link" href="#problem2">问题2 MSC格式化</a>
+    <a class="sidebar-link" href="#problem3">问题3 热拔插数据丢失</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Summary</div>
+    <a class="sidebar-link" href="#summary">经验总结</a>
+    <a class="sidebar-sublink" href="#summary-debug-method">调试方法</a>
+    <a class="sidebar-sublink" href="#summary-cpp">C++ 注意事项</a>
+    <a class="sidebar-sublink" href="#summary-dma">DMA 编程顺序</a>
+    <a class="sidebar-sublink" href="#summary-priority">中断优先级原则</a>
+    <a class="sidebar-sublink" href="#summary-registers">调试寄存器速查</a>
+    <a class="sidebar-sublink" href="#summary-checklist">修复清单</a>
+    <a class="sidebar-sublink" href="#summary-files">相关文件清单</a>
+  </div>
+</nav>
+
+<div id="main">
+<div class="content">
+
+  <!-- Hero / Overview -->
+  <section id="overview">
+    <div class="section-label">AT32F435RGT7 · ARM Cortex-M4</div>
+    <h1>USB MSC + QSPI Flash<br>卡死问题调试指南</h1>
+    <p class="hero-desc">本文档记录了在 AT32F435RGT7 平台上实现 USB MSC（大容量存储类），以外部 W25Q128 QSPI Flash（16MB）作为存储介质时，遇到的三个卡死/数据丢失问题的完整调试过程与解决方案。</p>
+    <div class="hero-tags">
+      <span class="tag">AT32F435RGT7</span>
+      <span class="tag">ARM Cortex-M4</span>
+      <span class="tag">USB MSC</span>
+      <span class="tag">W25Q128</span>
+      <span class="tag">QSPI Flash</span>
+      <span class="tag">EDMA</span>
+      <span class="tag">中断优先级</span>
+      <span class="tag">C++ extern "C"</span>
+    </div>
+
+    <h2>问题概述</h2>
+
+    <div class="arch">
+      <div class="arch-layer l1">
+        <div class="arch-name">硬件平台</div>
+        <div class="arch-items">
+          <span class="arch-chip">AT32F435RGT7</span>
+          <span class="arch-chip">ARM Cortex-M4</span>
+          <span class="arch-chip">W25Q128 QSPI Flash (16MB)</span>
+        </div>
+      </div>
+      <div class="arch-layer l2">
+        <div class="arch-name">功能需求</div>
+        <div class="arch-items">
+          <span class="arch-chip">USB MSC (Mass Storage Class)</span>
+          <span class="arch-chip">外部 QSPI Flash 作为存储介质</span>
+        </div>
+      </div>
+      <div class="arch-layer l4">
+        <div class="arch-name">硬件约束</div>
+        <div class="arch-items">
+          <span class="arch-chip">PA9 引脚未连接 USB VBUS</span>
+          <span class="arch-chip">无硬件 VBUS 检测能力</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>主要问题</h3>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text"><strong>USB初始化时程序卡死</strong> — C++ 名称修饰导致中断处理函数无法链接到向量表</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text"><strong>USB MSC格式化时程序卡死</strong> — 中断优先级死锁：USB 中断内等待低优先级 EDMA 中断</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text"><strong>USB热拔插后文件系统数据丢失，需要重新格式化</strong> — Flash 写入未实现读-改-写，同扇区数据被覆盖</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Debug Tools -->
+  <section id="tools">
+    <h2>调试工具与方法</h2>
+
+    <h3 id="tools-xpsr">ARM Cortex-M4 关键寄存器</h3>
+
+    <h3>xPSR (Program Status Register)</h3>
+    <p><strong>地址</strong>: CPU核心寄存器 &nbsp;|&nbsp; <strong>关键字段</strong>: IPSR (Exception Number) — 位 [8:0] &nbsp;|&nbsp; <strong>用途</strong>: 识别当前正在执行的异常/中断</p>
+    <pre><code>xPSR 格式:
+[31:27] N, Z, C, V, Q flags
+[26:10] Reserved
+[9]     ICI/IT
+[8:0]   IPSR - Exception Number (异常编号)</code></pre>
+
+    <p><strong>异常编号到IRQ的转换</strong>:</p>
+    <pre><code class="language-c">IRQ_Number = Exception_Number - 16</code></pre>
+
+    <h3>LR (Link Register)</h3>
+    <p><strong>用途</strong>: 识别异常返回类型</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>LR 关键值</th><th>含义</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="td-code">0xFFFFFFF9</td><td>返回到 Handler 模式，使用 MSP</td></tr>
+          <tr><td class="td-code">0xFFFFFFFD</td><td>返回到 Thread 模式，使用 MSP</td></tr>
+          <tr><td class="td-code">0xFFFFFFF1</td><td>返回到 Thread 模式，使用 PSP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>NVIC ISPR (Interrupt Set-Pending Register)</h3>
+    <p><strong>地址</strong>: <code>0xE000E200</code> (ISPR0), <code>0xE000E204</code> (ISPR1), ... &nbsp;|&nbsp; <strong>用途</strong>: 查看哪个中断正在挂起（pending）</p>
+    <pre><code>每个位对应一个IRQ:
+Bit 0 = IRQ 0
+Bit 1 = IRQ 1
+...
+Bit 31 = IRQ 31</code></pre>
+
+    <h3 id="tools-flow">调试步骤流程图</h3>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text"><strong>程序卡死</strong> — 查看 PC 指针，判断是否在 startup.s:428 (<code>B .</code>)</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text"><strong>进入默认中断处理函数 (Weak Handler)</strong> — PC 指向无限循环说明卡在弱符号</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text"><strong>读取 xPSR 寄存器</strong> — 提取 IPSR 字段（位 [8:0]）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text"><strong>计算 IRQ = IPSR - 16</strong> — 转换为 IRQ 编号</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-text"><strong>查找 startup.s 向量表</strong> — 定位中断源，找到对应的处理函数符号名</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-text"><strong>检查该中断处理函数是否正确链接</strong> — 检查 extern "C" 声明、符号名称、链接器输出</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem 1 -->
+  <section id="problem1">
+    <h2>问题1: USB初始化时卡死</h2>
+
+    <div class="notice err"><strong>根本原因:</strong> C++ 名称修饰 (Name Mangling) — HAL_USB.cpp 是 C++ 文件，未使用 <code>extern "C"</code>，编译器修饰了函数名，链接器找不到 <code>OTGFS1_IRQHandler</code> 符号，回退到弱符号死循环。</div>
+
+    <h3>现象</h3>
+    <pre><code>程序执行到 Usb_Init() 后卡死
+调试器显示PC = startup_at32f435_437.s:428</code></pre>
+
+    <p>startup.s:428 代码:</p>
+    <pre><code class="language-asm">Default_Handler PROC
+                EXPORT  EDMA_Stream1_IRQHandler        [WEAK]
+                EXPORT  OTGFS1_IRQHandler              [WEAK]
+                ; ... 其他弱符号
+
+EDMA_Stream1_IRQHandler
+OTGFS1_IRQHandler
+                ; ... 其他处理函数
+                B       .                ; 无限循环 ← 卡死在这里
+                ENDP</code></pre>
+
+    <h3 id="p1-step1">调试步骤1: 检查NVIC挂起寄存器</h3>
+    <p><strong>操作</strong>: 在调试器中查看内存地址 <code>0xE000E200</code></p>
+
+    <p><strong>第一次读取结果</strong>:</p>
+    <pre><code>0xE000E200: 00 00 00 00 20 00 00 00</code></pre>
+
+    <p><strong>分析</strong>:</p>
+    <ul style="color:#444;margin:0 0 12px 20px;">
+      <li>ISPR1 (<code>0xE000E204</code>) = <code>0x20</code> = <code>0b00100000</code></li>
+      <li>Bit 5 = 1 → IRQ 37 挂起</li>
+      <li>查找向量表: IRQ 37 = <code>USART1_IRQHandler</code></li>
+    </ul>
+
+    <div class="notice warn"><strong>问题定位:</strong> PA9 在代码中被配置为 <code>OTG_PIN_VBUS</code>（USB VBUS 检测），但硬件上 PA9 未连接 VBUS，而是用于 USART1_TX，导致 USART1 意外触发中断。</div>
+
+    <p><strong>解决方案</strong>:</p>
+    <pre><code class="language-c">// usb_conf.h
+#define USB_VBUS_IGNORE  // PA9 not connected to VBUS, must ignore VBUS detection</code></pre>
+
+    <h3 id="p1-step2">调试步骤2: 再次卡死，ISPR全0</h3>
+    <p><strong>第二次读取结果</strong>:</p>
+    <pre><code>0xE000E200: 00 00 00 00 00 00 00 00</code></pre>
+
+    <div class="notice warn"><strong>问题:</strong> ISPR 全 0，说明中断已进入处理，但处理函数未正确执行。</div>
+
+    <h3 id="p1-step3">调试步骤3: 读取xPSR和LR寄存器</h3>
+    <p><strong>读取结果</strong>:</p>
+    <pre><code>xPSR = 0x81000053
+LR   = 0xFFFFFFF9</code></pre>
+
+    <p><strong>xPSR 分析</strong>:</p>
+    <pre><code>0x81000053 = 0b1000 0001 0000 0000 0000 0101 0011
+             │└─┬─┘│                    └──┬──┘
+             │  │  │                       │
+             N  Z  C,V flags              IPSR = 0x53</code></pre>
+
+    <p><strong>计算 Exception Number</strong>:</p>
+    <pre><code>IPSR = 0x53 = 83 (十进制)
+IRQ_Number = 83 - 16 = 67</code></pre>
+
+    <p><strong>查找 startup.s 向量表</strong>:</p>
+    <pre><code class="language-asm">; Line 125 in startup.s
+DCD     OTGFS1_IRQHandler         ; IRQ 67 (Exception 83)</code></pre>
+
+    <p><strong>LR 分析</strong>:</p>
+    <pre><code>LR = 0xFFFFFFF9
+→ 异常返回到Handler模式，使用MSP
+→ 说明是在主程序（非中断嵌套）中触发的USB中断</code></pre>
+
+    <div class="notice err"><strong>问题定位:</strong> <code>OTGFS1_IRQHandler</code> 被调用，但跳转到了默认的弱处理函数（死循环）。</div>
+
+    <h3 id="p1-step4">调试步骤4: 检查符号链接</h3>
+    <p><strong>查看链接器符号表</strong>:</p>
+    <pre><code>HAL_USB.cpp 中定义:
+void OTG_IRQ_HANDLER(void) { ... }
+
+编译后符号:
+_Z15OTG_IRQ_HANDLERv    // C++ name mangling!</code></pre>
+
+    <pre><code>startup.s 需要的符号:
+OTGFS1_IRQHandler      // C linkage</code></pre>
+
+    <div class="notice err">
+      <strong>根本原因: C++ 名称修饰 (Name Mangling)</strong><br>
+      HAL_USB.cpp 是 C++ 文件，未使用 <code>extern "C"</code>，编译器应用了名称修饰。<br>
+      链接器找不到 <code>OTGFS1_IRQHandler</code> 符号，使用弱符号的默认处理函数（死循环）。
+    </div>
+
+    <h3 id="p1-solution">解决方案1: 修复USB中断处理函数链接</h3>
+    <p><strong>HAL_USB.cpp</strong>: 添加 <code>extern "C"</code> 声明</p>
+    <pre><code class="language-cpp">// 添加 extern "C" 声明
+extern "C" void OTG_IRQ_HANDLER(void)
+{
+  usbd_irq_handler(&amp;otg_core_struct);
+}
+
+extern "C" void usb_gpio_config(void) { ... }
+extern "C" void usb_clock48m_select(usb_clk48_s clk_s) { ... }</code></pre>
+
+    <p><strong>UsbMsc.h</strong>: 函数声明包裹在 <code>extern "C"</code> 块中</p>
+    <pre><code class="language-c">#ifdef __cplusplus
+extern "C" {
+#endif
+
+void OTG_IRQ_HANDLER(void);
+void usb_gpio_config(void);
+void usb_clock48m_select(usb_clk48_s clk_s);
+// ... 其他函数声明
+
+#ifdef __cplusplus
+}
+#endif</code></pre>
+
+    <div class="notice ok"><strong>测试结果:</strong> USB 初始化不再卡死，电脑能识别 U 盘。</div>
+  </section>
+
+  <!-- Problem 2 -->
+  <section id="problem2">
+    <h2>问题2: USB MSC格式化时卡死</h2>
+
+    <div class="notice err"><strong>根本原因:</strong> 中断优先级死锁 — USB 中断（优先级1）在其上下文中调用 QSPI 写入并等待 EDMA 完成标志，而 EDMA 中断（优先级2，更低）无法抢占 USB 中断，造成永久等待。</div>
+
+    <h3>现象</h3>
+    <pre><code>USB初始化正常，电脑识别为U盘
+格式化U盘时，程序卡死
+调试发现卡在: while(qspi_dma_transfer_done == 0);</code></pre>
+
+    <h3 id="p2-step1">调试步骤1: 检查QSPI DMA中断处理函数</h3>
+    <p>问题发现: <code>qspi_cmd_en25qh128a.cpp</code> 是 C++ 文件，<code>EDMA_Stream1_IRQHandler</code> 缺少 <code>extern "C"</code>。</p>
+    <pre><code class="language-cpp">// 缺少 extern "C"
+void EDMA_Stream1_IRQHandler(void)
+{
+  // ... 中断处理代码
+}</code></pre>
+
+    <p><strong>解决方案</strong>: 添加 <code>extern "C"</code></p>
+    <pre><code class="language-cpp">extern "C" void EDMA_Stream1_IRQHandler(void)
+{
+  // ... 中断处理代码
+}</code></pre>
+
+    <div class="notice err"><strong>测试结果:</strong> 仍然卡死。</div>
+
+    <h3 id="p2-step2">调试步骤2: 断点调试中断处理函数</h3>
+    <div class="notice warn">
+      断点调试发现 <code>EDMA_Stream1_IRQHandler</code> 函数是触发了的，且程序在 <code>qspi_data_write</code> 函数的 <code>while(qspi_dma_transfer_done == 0)</code> 循环与 <code>EDMA_Stream1_IRQHandler</code> 函数中反复循环执行。
+    </div>
+    <p><strong>分析</strong>: 中断确实触发，但主循环仍无法退出，说明 <code>qspi_dma_transfer_done</code> 未被正确设置。</p>
+
+    <h3 id="p2-step3">调试步骤3: 分析中断处理函数逻辑</h3>
+    <p><strong>原始代码</strong>:</p>
+    <pre><code class="language-cpp">void EDMA_Stream1_IRQHandler(void)
+{
+  /* half transfer complete */
+  if(edma_flag_get(EDMA_HDT1_FLAG) != RESET)
+  {
+    edma_flag_clear(EDMA_HDT1_FLAG);
+    qspi_current_buffer = 1 - qspi_current_buffer;
+    // ⚠️ 没有设置 qspi_dma_transfer_done = 1
+  }
+
+  /* full transfer complete */
+  if(edma_flag_get(EDMA_FDT1_FLAG) != RESET)
+  {
+    edma_flag_clear(EDMA_FDT1_FLAG);
+    qspi_dma_transfer_done = 1;  // ✅ 只有这里设置标志
+  }
+}</code></pre>
+
+    <div class="notice warn"><strong>问题分析:</strong> 半传输中断 (EDMA_HDT_INT) 在传输 50% 时触发，处理只清除标志不设置完成标志。如果半传输中断一直触发，完整传输中断可能无法正常处理。</div>
+
+    <p><strong>解决方案2: 禁用半传输中断</strong></p>
+    <pre><code class="language-cpp">void qspi_edma_init(void)
+{
+  // ...
+
+  /* enable edma transfer complete and error interrupts (disable half transfer) */
+  edma_interrupt_enable(QSPI_EDMA_STREAM, EDMA_FDT_INT, TRUE);
+  edma_interrupt_enable(QSPI_EDMA_STREAM, EDMA_HDT_INT, FALSE);  // 禁用半传输中断
+  edma_interrupt_enable(QSPI_EDMA_STREAM, EDMA_DTERR_INT, TRUE);
+}</code></pre>
+
+    <div class="notice err"><strong>测试结果:</strong> 仍然卡死。</div>
+
+    <h3 id="p2-step4">调试步骤4: 检查DMA配置顺序</h3>
+    <div class="notice err"><strong>发现问题:</strong> DMA 参数在流禁用之前配置，DMA 控制器在启用状态下被重新配置，导致未定义行为，参数可能无法正确写入硬件寄存器。</div>
+
+    <p><strong>错误代码</strong>:</p>
+    <pre><code class="language-cpp">/* 错误顺序 */
+edma_data_number_set(QSPI_EDMA_STREAM, chunk);           // 1. 先配置参数
+edma_memory_addr_set(QSPI_EDMA_STREAM, addr, EDMA_MEMORY_0);
+edma_stream_enable(QSPI_EDMA_STREAM, FALSE);             // 2. 后禁用流</code></pre>
+
+    <p><strong>解决方案3: 修正DMA配置顺序</strong></p>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipeline-num">1</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">禁用 EDMA 流</div>
+          <div class="pipeline-desc">在重新配置前必须先禁用流</div>
+          <pre><code class="language-cpp">edma_stream_enable(QSPI_EDMA_STREAM, FALSE);</code></pre>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">2</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">等待流完全禁用</div>
+          <div class="pipeline-desc">检查 EN 位，确保流已停止</div>
+          <pre><code class="language-cpp">while(QSPI_EDMA_STREAM-&gt;ctrl &amp; 0x01);</code></pre>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">3</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">配置 DMA 参数</div>
+          <div class="pipeline-desc">在流禁用状态下配置传输参数</div>
+          <pre><code class="language-cpp">edma_data_number_set(QSPI_EDMA_STREAM, chunk);
+edma_memory_addr_set(QSPI_EDMA_STREAM, (uint32_t)current_buffer, EDMA_MEMORY_0);</code></pre>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">4</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">清除所有 EDMA 标志</div>
+          <div class="pipeline-desc">避免上次传输残留标志影响本次判断</div>
+          <pre><code class="language-cpp">edma_flag_clear(EDMA_FDT1_FLAG);
+edma_flag_clear(EDMA_HDT1_FLAG);
+edma_flag_clear(EDMA_DTERR1_FLAG);</code></pre>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">5</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">设置 QSPI DMA 阈值</div>
+          <div class="pipeline-desc"></div>
+          <pre><code class="language-cpp">qspi_dma_tx_threshold_set(QSPI1, QSPI_DMA_FIFO_THOD_WORD08);</code></pre>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">6</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">清除传输完成标志</div>
+          <div class="pipeline-desc">重置软件状态变量</div>
+          <pre><code class="language-cpp">qspi_dma_transfer_done = 0;</code></pre>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">7</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">使能 QSPI DMA</div>
+          <div class="pipeline-desc"></div>
+          <pre><code class="language-cpp">qspi_dma_enable(QSPI1, TRUE);</code></pre>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">8</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">使能 EDMA 流，开始传输</div>
+          <div class="pipeline-desc">最后一步才启动流，此时所有参数已就绪</div>
+          <pre><code class="language-cpp">edma_stream_enable(QSPI_EDMA_STREAM, TRUE);</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice err"><strong>测试结果:</strong> 仍然卡死。</div>
+
+    <h3 id="p2-step5">调试步骤5: 添加调试计数器</h3>
+    <pre><code class="language-cpp">/* Debug: track interrupt trigger count */
+static volatile uint32_t edma_irq_count = 0;   // 总中断次数
+static volatile uint32_t edma_fdt_count = 0;   // 完整传输次数
+static volatile uint32_t edma_hdt_count = 0;   // 半传输次数
+static volatile uint32_t edma_err_count = 0;   // 错误次数
+
+extern "C" void EDMA_Stream1_IRQHandler(void)
+{
+  edma_irq_count++;
+
+  if(edma_flag_get(EDMA_HDT1_FLAG) != RESET) {
+    edma_hdt_count++;
+    // ...
+  }
+
+  if(edma_flag_get(EDMA_FDT1_FLAG) != RESET) {
+    edma_fdt_count++;
+    // ...
+  }
+
+  if(edma_flag_get(EDMA_DTERR1_FLAG) != RESET) {
+    edma_err_count++;
+    // ...
+  }
+}</code></pre>
+
+    <p><strong>调试结果</strong>:</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">256</div>
+        <div class="stat-label">edma_irq_count (0x100)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">256</div>
+        <div class="stat-label">edma_fdt_count (0x100)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">QSPI 独立测试通过率</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">16</div>
+        <div class="stat-label">Sector 0-15 全部 PASS</div>
+      </div>
+    </div>
+
+    <div class="notice ok">
+      <strong>关键发现:</strong><br>
+      QSPI DMA 功能完全正常（独立测试 100% 通过），已成功完成 256 次 DMA 传输。<br>
+      但在 USB MSC 格式化时仍然卡死。<br>
+      <strong>结论:</strong> 问题不在 QSPI，而在 USB 调用场景。
+    </div>
+
+    <h3 id="p2-step6">调试步骤6: 分析中断优先级死锁</h3>
+    <p><strong>当前优先级配置</strong>:</p>
+    <pre><code class="language-cpp">// HAL_USB.cpp
+nvic_irq_enable(OTG_IRQ, 1, 0);           // USB优先级 = 1 (高)
+
+// qspi_cmd_en25qh128a.cpp
+nvic_irq_enable(EDMA_Stream1_IRQn, 2, 0); // EDMA优先级 = 2 (低)</code></pre>
+
+    <p><strong>死锁时间线分析</strong>:</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T1</div>
+        <div class="flow-text"><strong>USB 中断触发</strong>（优先级 1）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T2</div>
+        <div class="flow-text"><strong>USB 中断处理函数执行</strong></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T3</div>
+        <div class="flow-text"><strong>在 USB 中断上下文中调用</strong> <code>qspi_data_write()</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T4</div>
+        <div class="flow-text"><code>qspi_data_write()</code> <strong>启动 DMA 传输</strong></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T5</div>
+        <div class="flow-text"><strong>进入等待循环:</strong> <code>while(qspi_dma_transfer_done == 0);</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#888;">T6</div>
+        <div class="flow-text">DMA 硬件完成传输</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#888;">T7</div>
+        <div class="flow-text">EDMA 中断请求产生（优先级 2）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T8</div>
+        <div class="flow-text"><strong>EDMA 中断无法抢占正在执行的 USB 中断</strong>（EDMA 优先级更低）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T9</div>
+        <div class="flow-text">USB 中断继续在 while 循环中等待</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#e74c3c;">T10</div>
+        <div class="flow-text"><strong>EDMA 中断继续挂起，无法执行 → 死锁</strong>: USB 等待 EDMA 设置标志，EDMA 等待 USB 退出</div>
+      </div>
+    </div>
+
+    <div class="notice err">
+      <strong>ARM Cortex-M4 中断优先级规则:</strong><br>
+      数字越小，优先级越高。高优先级中断可以抢占低优先级中断。低优先级中断无法抢占高优先级中断。
+    </div>
+
+    <div class="notice warn">
+      <strong>为什么独立测试成功？</strong><br>
+      独立测试在<strong>主循环（Thread 模式）</strong>中执行，没有中断嵌套，EDMA 中断可以正常触发。<br>
+      USB MSC 在<strong>USB 中断上下文（Handler 模式）</strong>中调用，触发中断优先级死锁。
+    </div>
+
+    <h3 id="p2-solution">解决方案4: 调整中断优先级</h3>
+    <pre><code class="language-cpp">// qspi_cmd_en25qh128a.cpp
+/* enable edma stream1 nvic interrupt - priority 0 (HIGHEST) */
+nvic_irq_enable(EDMA_Stream1_IRQn, 0, 0);  // 优先级改为0</code></pre>
+
+    <p><strong>修复后优先级配置</strong>:</p>
+    <div class="arch">
+      <div class="arch-layer l1">
+        <div class="arch-name">优先级 0 (最高)</div>
+        <div class="arch-items">
+          <span class="arch-chip">EDMA_Stream1 (QSPI DMA)</span>
+          <span class="arch-chip">可抢占其他所有中断</span>
+        </div>
+      </div>
+      <div class="arch-layer l2">
+        <div class="arch-name">优先级 1</div>
+        <div class="arch-items">
+          <span class="arch-chip">OTGFS1 (USB)</span>
+        </div>
+      </div>
+      <div class="arch-layer l3">
+        <div class="arch-name">优先级 2+</div>
+        <div class="arch-items">
+          <span class="arch-chip">其他外设中断</span>
+        </div>
+      </div>
+    </div>
+
+    <p><strong>修复后执行流程</strong>:</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">T1~T5</div>
+        <div class="flow-text">同上，USB 中断中调用 <code>qspi_data_write()</code>，进入等待</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">T6</div>
+        <div class="flow-text">DMA 硬件完成传输</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">T7</div>
+        <div class="flow-text">EDMA 中断请求产生（优先级 0）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#27ae60;">T8</div>
+        <div class="flow-text"><strong>EDMA 中断抢占 USB 中断</strong>（优先级更高）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#27ae60;">T9</div>
+        <div class="flow-text">执行 <code>EDMA_Stream1_IRQHandler</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#27ae60;">T10</div>
+        <div class="flow-text">设置 <code>qspi_dma_transfer_done = 1</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#27ae60;">T11</div>
+        <div class="flow-text">EDMA 中断返回，恢复 USB 中断执行</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#27ae60;">T12</div>
+        <div class="flow-text"><code>while(qspi_dma_transfer_done == 0)</code> 退出</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#27ae60;">T13</div>
+        <div class="flow-text">USB 处理继续</div>
+      </div>
+    </div>
+
+    <div class="notice ok"><strong>测试结果: 问题完全解决！USB MSC 格式化正常工作。</strong></div>
+  </section>
+
+  <!-- Problem 3 -->
+  <section id="problem3">
+    <h2>问题3: USB热拔插后需要重新格式化</h2>
+
+    <div class="notice err"><strong>根本原因:</strong> Flash 写入未实现读-改-写 (Read-Modify-Write)。每次写入 512 字节时都擦除整个 4KB 扇区，同一扇区中先前写入的文件系统元数据被破坏。</div>
+
+    <h3>现象</h3>
+    <pre><code>✅ U盘可以正常格式化并读写文件
+❌ 每次重新插拔USB后，U盘都需要重新格式化
+❌ 之前写入的文件系统数据丢失</code></pre>
+    <p><strong>预期行为</strong>: 格式化一次后，后续热拔插应保持文件系统数据。</p>
+
+    <h3 id="p3-step1">调试步骤1: 检查Flash是否为非易失性存储</h3>
+    <div class="notice ok">W25Q128 是 SPI NOR Flash，属于<strong>非易失性存储</strong>，断电后数据应该保持。问题不在硬件层面，而在软件实现。</div>
+
+    <h3 id="p3-step2">调试步骤2: 分析Flash写入逻辑</h3>
+    <p><strong>原始代码问题</strong> (msc_diskio.cpp:127-157):</p>
+    <pre><code class="language-cpp">usb_sts_type msc_disk_write(uint8_t lun, uint64_t addr, uint8_t *buf, uint32_t len)
+{
+  // 退出XIP模式
+  qspi_xip_enable(QSPI1, FALSE);
+
+  // 计算受影响的扇区
+  sector_start = (uint32_t)addr / QSPI_FLASH_SECTOR_SIZE;
+  sector_end = ((uint32_t)addr + len - 1) / QSPI_FLASH_SECTOR_SIZE;
+
+  // 擦除所有受影响的扇区
+  for(i = sector_start; i &lt;= sector_end; i++) {
+    qspi_erase(i * QSPI_FLASH_SECTOR_SIZE);  // 擦除4KB扇区
+  }
+
+  // 只写入新数据
+  qspi_data_write((uint32_t)addr, len, buf);  // 可能只有512字节
+
+  // 重新进入XIP模式
+  en25qh128a_qspi_xip_init();
+}</code></pre>
+
+    <h3 id="p3-step3">调试步骤3: 识别问题根源</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>参数</th><th>大小</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Flash 扇区大小</td><td>4KB (4096 字节)</td></tr>
+          <tr><td>USB 块大小</td><td>512 字节</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>USB 文件系统通常以 512 字节块为单位更新数据，但 Flash 擦除最小单位是 4KB 扇区。</p>
+
+    <p><strong>错误流程示例</strong>:</p>
+    <pre><code>时间T1: 写入地址0x000，长度512字节（FAT表第一部分）
+  → 擦除扇区0 (0x000-0xFFF，4KB)
+  → 写入0x000-0x1FF (512字节)
+  → ✅ 0x000-0x1FF = FAT数据
+  → ⚠️  0x200-0xFFF = 0xFF (擦除后的默认值)
+
+时间T2: 写入地址0x200，长度512字节（FAT表第二部分）
+  → 再次擦除扇区0 (0x000-0xFFF，4KB)  ❌
+  → 写入0x200-0x3FF (512字节)
+  → ❌ 0x000-0x1FF = 0xFF (T1写入的数据被擦除！)
+  → ✅ 0x200-0x3FF = 新数据
+  → ⚠️  0x400-0xFFF = 0xFF
+
+时间T3: 写入地址0x400，长度512字节（目录项）
+  → 再次擦除扇区0 (0x000-0xFFF，4KB)  ❌
+  → 写入0x400-0x5FF (512字节)
+  → ❌ 0x000-0x3FF = 0xFF (T1和T2的数据全部丢失！)
+  → ✅ 0x400-0x5FF = 新数据
+  → ⚠️  0x600-0xFFF = 0xFF</code></pre>
+
+    <div class="notice err">
+      <strong>根本原因:</strong><br>
+      每次写入都擦除整个扇区，但只写入部分数据。同一扇区中先前写入的文件系统元数据（FAT 表、目录项等）被破坏，导致文件系统损坏，需要重新格式化。
+    </div>
+
+    <h3 id="p3-solution">解决方案: 实现读-改-写 (Read-Modify-Write)</h3>
+    <p><strong>正确的 Flash 写入流程</strong>: 对于每个受影响的扇区：</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text"><strong>读取整个扇区（4KB）到缓冲区</strong></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text"><strong>修改缓冲区中需要更新的部分</strong></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text"><strong>擦除扇区</strong></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text"><strong>写回整个扇区（4KB）</strong></div>
+      </div>
+    </div>
+
+    <p><strong>修复后的代码</strong> (msc_diskio.cpp:127-178):</p>
+    <pre><code class="language-cpp">usb_sts_type msc_disk_write(uint8_t lun, uint64_t addr, uint8_t *buf, uint32_t len)
+{
+  static uint8_t sector_buffer[QSPI_FLASH_SECTOR_SIZE];  // 4KB缓冲区
+  uint32_t sector_addr;
+  uint32_t offset_in_sector;
+  uint32_t bytes_to_write;
+  uint32_t total_written = 0;
+
+  if(lun == 0)
+  {
+    qspi_xip_enable(QSPI1, FALSE);
+
+    /* 按扇区处理，使用读-改-写策略 */
+    while(total_written &lt; len)
+    {
+      /* 计算当前扇区地址和偏移 */
+      sector_addr = ((uint32_t)addr + total_written) &amp; ~(QSPI_FLASH_SECTOR_SIZE - 1);
+      offset_in_sector = ((uint32_t)addr + total_written) % QSPI_FLASH_SECTOR_SIZE;
+      bytes_to_write = QSPI_FLASH_SECTOR_SIZE - offset_in_sector;
+
+      if(bytes_to_write &gt; (len - total_written))
+        bytes_to_write = len - total_written;
+
+      /* Step 1: 通过XIP读取整个扇区 */
+      en25qh128a_qspi_xip_init();
+      memcpy(sector_buffer, (uint8_t *)(QSPI1_MEM_BASE + sector_addr), QSPI_FLASH_SECTOR_SIZE);
+      qspi_xip_enable(QSPI1, FALSE);
+
+      /* Step 2: 在缓冲区中修改需要更新的部分 */
+      memcpy(sector_buffer + offset_in_sector, buf + total_written, bytes_to_write);
+
+      /* Step 3: 擦除扇区 */
+      qspi_erase(sector_addr);
+
+      /* Step 4: 写回整个修改后的扇区 */
+      qspi_data_write(sector_addr, QSPI_FLASH_SECTOR_SIZE, sector_buffer);
+
+      total_written += bytes_to_write;
+    }
+
+    en25qh128a_qspi_xip_init();
+    return USB_OK;
+  }
+
+  return USB_FAIL;
+}</code></pre>
+
+    <p><strong>修复后的写入流程</strong>:</p>
+    <pre><code>时间T1: 写入地址0x000，长度512字节
+  → 读取扇区0 (0x000-0xFFF) 到缓冲区
+  → 修改缓冲区[0x000-0x1FF]
+  → 擦除扇区0
+  → 写回完整扇区 (4KB)
+  → ✅ 整个扇区数据完整
+
+时间T2: 写入地址0x200，长度512字节
+  → 读取扇区0 (包含T1写入的数据) 到缓冲区  ✅
+  → 修改缓冲区[0x200-0x3FF]
+  → 擦除扇区0
+  → 写回完整扇区 (4KB)
+  → ✅ T1的数据保留，T2的数据写入
+
+时间T3: 写入地址0x400，长度512字节
+  → 读取扇区0 (包含T1和T2的数据) 到缓冲区  ✅
+  → 修改缓冲区[0x400-0x5FF]
+  → 擦除扇区0
+  → 写回完整扇区 (4KB)
+  → ✅ T1、T2、T3的数据全部保留</code></pre>
+
+    <h3>关键改进</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">读取整个扇区</div>
+        <div class="card-desc">写入前先把 4KB 扇区读到 RAM 缓冲区</div>
+      </div>
+      <div class="card">
+        <div class="card-title">缓冲区修改</div>
+        <div class="card-desc">在 RAM 中修改目标数据，不影响其他数据</div>
+      </div>
+      <div class="card">
+        <div class="card-title">写回完整扇区</div>
+        <div class="card-desc">擦除后写回完整 4KB，保护所有数据</div>
+      </div>
+      <div class="card">
+        <div class="card-title">元数据持久化</div>
+        <div class="card-desc">FAT 表、目录项等文件系统元数据正确保存</div>
+      </div>
+    </div>
+
+    <div class="notice ok"><strong>测试结果: 热拔插后数据保持，无需重新格式化。</strong></div>
+  </section>
+
+  <!-- Summary -->
+  <section id="summary">
+    <h2>经验总结</h2>
+
+    <div class="card-grid" style="margin-bottom:32px;">
+      <div class="card">
+        <div class="card-title">调试方法</div>
+        <div class="card-desc">xPSR/LR/ISPR 寄存器定位卡死中断源，识别中断优先级死锁特征</div>
+      </div>
+      <div class="card">
+        <div class="card-title">C++ 注意事项</div>
+        <div class="card-desc">中断处理函数、C 接口函数必须添加 extern "C" 防止名称修饰</div>
+      </div>
+      <div class="card">
+        <div class="card-title">DMA 编程顺序</div>
+        <div class="card-desc">先禁用流并等待停止，再配置参数、清标志，最后启动流</div>
+      </div>
+      <div class="card">
+        <div class="card-title">中断优先级设计</div>
+        <div class="card-desc">DMA 完成中断优先级必须高于调用者中断，防止死锁</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Flash 读-改-写</div>
+        <div class="card-desc">512 字节写入需保护同扇区其他 3.5KB 数据不被擦除</div>
+      </div>
+      <div class="card">
+        <div class="card-title">调试寄存器速查</div>
+        <div class="card-desc">xPSR、LR、PC、ISPR、IABR、IPR 的地址与用途</div>
+      </div>
+    </div>
+
+    <h3 id="summary-debug-method">1. 调试方法总结</h3>
+    <h3>程序卡死在默认中断处理函数时的调试流程</h3>
+    <pre><code>┌─────────────────────────┐
+│  程序卡死在 B . 死循环   │
+└───────────┬─────────────┘
+            ↓
+┌─────────────────────────┐
+│  读取 xPSR 寄存器        │
+│  提取 IPSR[8:0]          │
+└───────────┬─────────────┘
+            ↓
+┌─────────────────────────┐
+│  计算 IRQ = IPSR - 16    │
+└───────────┬─────────────┘
+            ↓
+┌─────────────────────────┐
+│  查找 startup.s 向量表   │
+│  定位中断源               │
+└───────────┬─────────────┘
+            ↓
+┌─────────────────────────┐
+│  检查中断处理函数是否:    │
+│  1. 正确声明 extern "C"  │
+│  2. 符号名称匹配         │
+│  3. 正确链接到向量表     │
+└─────────────────────────┘</code></pre>
+
+    <h3>中断优先级死锁的识别特征</h3>
+    <div class="notice ok">
+      <strong>识别方法:</strong><br>
+      1. 中断确实在触发（断点能进入 ISR）<br>
+      2. 主循环仍然卡在等待标志<br>
+      3. 独立测试正常，在其他中断上下文调用时失败<br>
+      4. 等待的中断优先级低于调用者中断优先级
+    </div>
+    <div class="notice warn"><strong>危险模式:</strong> 在中断处理函数中等待另一个中断设置标志。</div>
+
+    <h3 id="summary-cpp">2. C++ 嵌入式开发注意事项</h3>
+    <h3>extern "C" 使用规则</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>场景</th><th>是否需要 extern "C"</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>中断处理函数</td><td>必须</td></tr>
+          <tr><td>被 C 代码调用的 C++ 函数</td><td>必须</td></tr>
+          <tr><td>被汇编代码引用的符号</td><td>必须</td></tr>
+          <tr><td>C++ 类成员函数</td><td>不需要</td></tr>
+          <tr><td>仅在 C++ 内部使用的函数</td><td>不需要</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>正确模式 — 头文件 (.h)</strong>:</p>
+    <pre><code class="language-c">#ifdef __cplusplus
+extern "C" {
+#endif
+
+void IRQ_Handler(void);
+void callback_function(void);
+
+#ifdef __cplusplus
+}
+#endif</code></pre>
+
+    <p><strong>正确模式 — 实现文件 (.cpp)</strong>:</p>
+    <pre><code class="language-cpp">extern "C" void IRQ_Handler(void)
+{
+    // 中断处理代码
+}
+
+extern "C" void callback_function(void)
+{
+    // C接口函数
+}</code></pre>
+
+    <h3 id="summary-dma">3. DMA 编程顺序</h3>
+    <p><strong>标准 DMA 配置流程</strong>:</p>
+    <pre><code class="language-cpp">// 1. 禁用DMA流
+DMA_Stream-&gt;CR &amp;= ~DMA_SxCR_EN;
+
+// 2. 等待流完全禁用
+while(DMA_Stream-&gt;CR &amp; DMA_SxCR_EN);
+
+// 3. 配置DMA参数
+DMA_Stream-&gt;NDTR = size;
+DMA_Stream-&gt;M0AR = buffer_addr;
+DMA_Stream-&gt;PAR = peripheral_addr;
+
+// 4. 清除所有标志
+DMA_LIFCR/HIFCR = clear_all_flags;
+
+// 5. 配置外设DMA请求
+
+// 6. 使能DMA流
+DMA_Stream-&gt;CR |= DMA_SxCR_EN;</code></pre>
+
+    <h3 id="summary-priority">4. 中断优先级设计原则</h3>
+    <h3>优先级分配策略</h3>
+    <div class="arch">
+      <div class="arch-layer l1">
+        <div class="arch-name">优先级 0-1</div>
+        <div class="arch-items">
+          <span class="arch-chip">时间关键型中断</span>
+          <span class="arch-chip">DMA 完成</span>
+          <span class="arch-chip">ADC 采样</span>
+        </div>
+      </div>
+      <div class="arch-layer l2">
+        <div class="arch-name">优先级 2-4</div>
+        <div class="arch-items">
+          <span class="arch-chip">通信外设</span>
+          <span class="arch-chip">USB</span>
+          <span class="arch-chip">UART</span>
+          <span class="arch-chip">SPI</span>
+        </div>
+      </div>
+      <div class="arch-layer l3">
+        <div class="arch-name">优先级 5-7</div>
+        <div class="arch-items">
+          <span class="arch-chip">低速外设</span>
+          <span class="arch-chip">GPIO</span>
+          <span class="arch-chip">定时器</span>
+        </div>
+      </div>
+      <div class="arch-layer l4">
+        <div class="arch-name">优先级 8-15</div>
+        <div class="arch-items">
+          <span class="arch-chip">后台任务</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>死锁预防规则</h3>
+    <div class="notice err">
+      <strong>禁止模式:</strong>
+    </div>
+    <pre><code class="language-cpp">void High_Priority_IRQ(void)  // 优先级高
+{
+    start_dma();
+    while(!dma_done);  // ❌ 等待低优先级中断设置标志 → 死锁
+}
+
+void Low_Priority_DMA_IRQ(void)  // 优先级低
+{
+    dma_done = 1;  // 无法抢占高优先级中断 → 永远不执行
+}</code></pre>
+
+    <p><strong>正确模式1: 调整优先级</strong></p>
+    <pre><code class="language-cpp">// DMA中断优先级 &gt; 调用者优先级
+nvic_irq_enable(DMA_IRQ, 0, 0);    // DMA最高优先级
+nvic_irq_enable(USB_IRQ, 1, 0);    // USB次高优先级</code></pre>
+
+    <p><strong>正确模式2: 使用状态机</strong></p>
+    <pre><code class="language-cpp">void High_Priority_IRQ(void)
+{
+    start_dma();
+    state = WAITING_DMA;  // 设置状态，返回
+}
+
+void Low_Priority_DMA_IRQ(void)
+{
+    dma_done = 1;
+    state = DMA_COMPLETE;
+}
+
+void main_loop(void)
+{
+    if(state == DMA_COMPLETE) {
+        // 处理完成事件
+    }
+}</code></pre>
+
+    <h3 id="summary-registers">5. 常用调试寄存器速查</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>寄存器</th><th>地址</th><th>用途</th><th>如何使用</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>xPSR</strong></td>
+            <td class="td-code">CPU寄存器</td>
+            <td>获取当前异常号</td>
+            <td>在调试器查看，提取 IPSR 字段</td>
+          </tr>
+          <tr>
+            <td><strong>LR</strong></td>
+            <td class="td-code">CPU寄存器</td>
+            <td>异常返回类型</td>
+            <td>检查是否嵌套中断</td>
+          </tr>
+          <tr>
+            <td><strong>PC</strong></td>
+            <td class="td-code">CPU寄存器</td>
+            <td>当前执行地址</td>
+            <td>定位卡死位置</td>
+          </tr>
+          <tr>
+            <td><strong>ISPR0-7</strong></td>
+            <td class="td-code">0xE000E200+</td>
+            <td>中断挂起状态</td>
+            <td>查看哪些中断 pending</td>
+          </tr>
+          <tr>
+            <td><strong>IABR0-7</strong></td>
+            <td class="td-code">0xE000E300+</td>
+            <td>中断激活状态</td>
+            <td>查看哪些中断正在执行</td>
+          </tr>
+          <tr>
+            <td><strong>IPR0-59</strong></td>
+            <td class="td-code">0xE000E400+</td>
+            <td>中断优先级</td>
+            <td>检查优先级配置</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="summary-checklist">6. 本项目修复清单</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>修复项</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>添加 USB_VBUS_IGNORE（PA9 硬件约束）</td><td>已完成</td></tr>
+          <tr><td>USB 中断处理函数添加 extern "C"</td><td>已完成</td></tr>
+          <tr><td>QSPI EDMA 中断处理函数添加 extern "C"</td><td>已完成</td></tr>
+          <tr><td>禁用 EDMA 半传输中断</td><td>已完成</td></tr>
+          <tr><td>修正 DMA 配置顺序（先禁用再配置）</td><td>已完成</td></tr>
+          <tr><td>调整 EDMA 中断优先级为最高 (0 &gt; USB 的 1)</td><td>已完成</td></tr>
+          <tr><td>添加调试计数器方便问题定位</td><td>已完成</td></tr>
+          <tr><td>实现 Flash 读-改-写避免数据丢失</td><td>已完成</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="summary-files">7. 相关文件清单</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>文件</th><th>修改内容</th><th>行号</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>usb_conf.h</code></td>
+            <td>定义 USB_VBUS_IGNORE</td>
+            <td>198</td>
+          </tr>
+          <tr>
+            <td><code>HAL_USB.cpp</code></td>
+            <td>所有 USB 函数添加 extern "C"</td>
+            <td>56, 148, 211, 223, 233, 244</td>
+          </tr>
+          <tr>
+            <td><code>UsbMsc.h</code></td>
+            <td>函数声明添加 extern "C" 块</td>
+            <td>33-74</td>
+          </tr>
+          <tr>
+            <td><code>qspi_cmd_en25qh128a.cpp</code></td>
+            <td>EDMA 中断处理添加 extern "C"</td>
+            <td>165</td>
+          </tr>
+          <tr>
+            <td><code>qspi_cmd_en25qh128a.cpp</code></td>
+            <td>禁用半传输中断</td>
+            <td>153</td>
+          </tr>
+          <tr>
+            <td><code>qspi_cmd_en25qh128a.cpp</code></td>
+            <td>修正 DMA 配置顺序</td>
+            <td>320-345, 369-394</td>
+          </tr>
+          <tr>
+            <td><code>qspi_cmd_en25qh128a.cpp</code></td>
+            <td>调整 EDMA 优先级为 0</td>
+            <td>157</td>
+          </tr>
+          <tr>
+            <td><code>qspi_cmd_en25qh128a.cpp</code></td>
+            <td>添加调试计数器</td>
+            <td>46-50, 168-215</td>
+          </tr>
+          <tr>
+            <td><code>msc_diskio.cpp</code></td>
+            <td>实现读-改-写逻辑</td>
+            <td>127-178</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>参考资料</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">ARM Cortex-M4 TRM</div>
+        <div class="card-desc">xPSR 寄存器详细说明、异常模型和中断优先级</div>
+      </div>
+      <div class="card">
+        <div class="card-title">AT32F435/437 Reference Manual</div>
+        <div class="card-desc">EDMA（Enhanced DMA）编程、USB OTG 控制器配置</div>
+      </div>
+      <div class="card">
+        <div class="card-title">C++ ABI for ARM</div>
+        <div class="card-desc">名称修饰规则、extern "C" 链接规范</div>
+      </div>
+    </div>
+
+    <p style="margin-top:24px;font-size:12px;color:var(--muted);">文档版本: 1.0 &nbsp;|&nbsp; 最后更新: 2025-12-20 &nbsp;|&nbsp; 作者: Claude Code 调试会话记录</p>
+  </section>
+
+</div><!-- .content -->
+
+<footer>USB MSC 调试指南 · AT32F435RGT7 · W25Q128 QSPI Flash</footer>
+
+</div><!-- #main -->
+
+<script>
+const toggle = document.getElementById('menu-toggle');
+toggle.addEventListener('click', () => { document.body.classList.toggle('menu-open'); });
+const sections = document.querySelectorAll('section[id], h3[id]');
+const links = document.querySelectorAll('.sidebar-link, .sidebar-sublink');
+function updateActive() {
+  let current = '';
+  sections.forEach(sec => { const top = sec.getBoundingClientRect().top; if (top <= 80) current = sec.id; });
+  links.forEach(a => { const isActive = a.getAttribute('href') === '#' + current; a.classList.toggle('active', isActive); if (isActive) a.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+}
+document.getElementById('main').addEventListener('scroll', updateActive);
+window.addEventListener('scroll', updateActive);
+document.querySelectorAll('pre').forEach(pre => {
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn'; btn.title = '复制代码';
+  btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  btn.addEventListener('click', () => {
+    const code = pre.querySelector('code') ? pre.querySelector('code').innerText : pre.innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+    });
+  });
+  pre.appendChild(btn);
+});
+links.forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (window.innerWidth < 700) document.body.classList.remove('menu-open');
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "trace-update-admin-staging",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2026-06-28",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "ENVIRONMENT": "staging",
+    "APP_ID": "trace"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "trace-update-staging",
+      "database_id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+      "migrations_dir": "../migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RELEASES_BUCKET",
+      "bucket_name": "trace-update-staging-releases"
+    }
+  ]
+}

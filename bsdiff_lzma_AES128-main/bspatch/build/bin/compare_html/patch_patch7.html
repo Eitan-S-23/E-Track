@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件比较结果</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        h1, h2, h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+        
+        .file-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 6px;
+        }
+        
+        .file-info h2 {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+        
+        .file-info p {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        
+        .summary {
+            margin: 30px 0;
+        }
+        
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .summary-table th, .summary-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .summary-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .summary-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .comparison {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow: hidden;
+            border-radius: 6px;
+        }
+        
+        .comparison th, .comparison td {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+        
+        .comparison th {
+            background-color: var(--secondary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .offset-column {
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa;
+            z-index: 5;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .diff {
+            background-color: rgba(231, 76, 60, 0.1);
+            transition: background-color 0.2s;
+        }
+        
+        .diff:hover {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+        
+        .same {
+            background-color: rgba(46, 204, 113, 0.05);
+        }
+        
+        .same:hover {
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .back-to-top:hover {
+            opacity: 1;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .comparison th, .comparison td,
+            .summary-table th, .summary-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文件比较结果</h1>
+        <div class="file-info">
+            <h3>比较范围: <span style="font-family: monospace;">0x00000000</span> - <span style="font-family: monospace;">0x0000078A</span></h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">            <div class="file-info">
+                <h2>patch.bin</h2>
+                <p><strong>类型:</strong> bin</p>
+                <p><strong>大小:</strong> 1,930 字节</p>
+            </div>
+            <div class="file-info">
+                <h2>patch7.bin</h2>
+                <p><strong>类型:</strong> bin</p>
+                <p><strong>大小:</strong> 1,930 字节</p>
+            </div>
+        </div>        <div class="summary">
+            <h2>差异汇总</h2>
+            <p style="color: var(--success-color); font-weight: bold;">所有文件内容完全一致，未发现差异</p>        </div>
+        
+        <div>
+            <h2>详细比较结果</h2>
+            <div style="overflow-x: auto;">
+                <table class="comparison">
+                    <tr>
+                        <th>偏移量</th>
+                        <th>patch.bin</th>
+                        <th>patch7.bin</th>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000000</td>
+                        <td>D0 62 C1 2C 00 00 07 62 4C 0B 06 00 60 0B 06 00</td>
+                        <td>D0 62 C1 2C 00 00 07 62 4C 0B 06 00 60 0B 06 00</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000010</td>
+                        <td>28 36 F5 74 C0 89 18 9A 02 00 10 00 00 00 00 00</td>
+                        <td>28 36 F5 74 C0 89 18 9A 02 00 10 00 00 00 00 00</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000020</td>
+                        <td>38 0C 06 00 00 00 00 00 00 3E 17 F6 1D 69 22 19</td>
+                        <td>38 0C 06 00 00 00 00 00 00 3E 17 F6 1D 69 22 19</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000030</td>
+                        <td>D7 36 6A 1C 5F B2 D6 4E 14 6F D3 2E D7 A3 00 4F</td>
+                        <td>D7 36 6A 1C 5F B2 D6 4E 14 6F D3 2E D7 A3 00 4F</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000040</td>
+                        <td>82 9E 06 9B 75 0A DE 83 C9 E0 06 BE 44 39 C5 EF</td>
+                        <td>82 9E 06 9B 75 0A DE 83 C9 E0 06 BE 44 39 C5 EF</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000050</td>
+                        <td>97 1B F1 DD D9 20 40 7F 37 F9 93 C4 B1 23 6D BF</td>
+                        <td>97 1B F1 DD D9 20 40 7F 37 F9 93 C4 B1 23 6D BF</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000060</td>
+                        <td>4D 87 95 40 C5 FD 09 5F 3C 51 69 5D 6C 30 8A F3</td>
+                        <td>4D 87 95 40 C5 FD 09 5F 3C 51 69 5D 6C 30 8A F3</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000070</td>
+                        <td>B2 80 70 7F 03 00 6C E0 57 C8 BF AA DC 02 9C 96</td>
+                        <td>B2 80 70 7F 03 00 6C E0 57 C8 BF AA DC 02 9C 96</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000080</td>
+                        <td>26 33 6E 21 F1 C7 39 86 1D F1 75 20 01 F7 22 EC</td>
+                        <td>26 33 6E 21 F1 C7 39 86 1D F1 75 20 01 F7 22 EC</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000090</td>
+                        <td>0E 28 3D 01 17 A0 83 41 37 6D C6 E5 8E 33 48 04</td>
+                        <td>0E 28 3D 01 17 A0 83 41 37 6D C6 E5 8E 33 48 04</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000000A0</td>
+                        <td>AD 55 C3 88 17 BE EC 59 E1 50 D1 A6 A6 0C B4 E1</td>
+                        <td>AD 55 C3 88 17 BE EC 59 E1 50 D1 A6 A6 0C B4 E1</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000000B0</td>
+                        <td>E8 3E 5F CF 5E 82 39 B1 42 A2 D4 7E 4B 65 DE B8</td>
+                        <td>E8 3E 5F CF 5E 82 39 B1 42 A2 D4 7E 4B 65 DE B8</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000000C0</td>
+                        <td>F0 AA 72 85 BF B8 A4 13 E3 05 8E E0 E3 CE 43 34</td>
+                        <td>F0 AA 72 85 BF B8 A4 13 E3 05 8E E0 E3 CE 43 34</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000000D0</td>
+                        <td>80 58 50 0B 22 E5 62 CF 72 E1 7F DB 8C 62 CA 3C</td>
+                        <td>80 58 50 0B 22 E5 62 CF 72 E1 7F DB 8C 62 CA 3C</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000000E0</td>
+                        <td>0A CB E7 1B 02 7E 23 1E 6D A5 FB E0 B4 2B 41 3D</td>
+                        <td>0A CB E7 1B 02 7E 23 1E 6D A5 FB E0 B4 2B 41 3D</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000000F0</td>
+                        <td>89 75 61 06 73 42 74 77 BF C2 74 F9 BD 66 18 99</td>
+                        <td>89 75 61 06 73 42 74 77 BF C2 74 F9 BD 66 18 99</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000100</td>
+                        <td>A2 34 19 94 11 CB 7C 7F 26 B8 B5 55 91 0C 2E AE</td>
+                        <td>A2 34 19 94 11 CB 7C 7F 26 B8 B5 55 91 0C 2E AE</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000110</td>
+                        <td>16 D2 78 C0 99 4E 29 7E CB 3D 05 40 FE 6F 29 F4</td>
+                        <td>16 D2 78 C0 99 4E 29 7E CB 3D 05 40 FE 6F 29 F4</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000120</td>
+                        <td>67 BC 21 53 21 24 55 DA E2 6A 60 FF FB 7D 93 D5</td>
+                        <td>67 BC 21 53 21 24 55 DA E2 6A 60 FF FB 7D 93 D5</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000130</td>
+                        <td>0B 3B 1C 16 F5 BF 5A C3 83 3F C7 4D 4E 83 08 02</td>
+                        <td>0B 3B 1C 16 F5 BF 5A C3 83 3F C7 4D 4E 83 08 02</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000140</td>
+                        <td>74 9A 70 05 39 73 48 4D D8 34 08 65 4B 5F B0 32</td>
+                        <td>74 9A 70 05 39 73 48 4D D8 34 08 65 4B 5F B0 32</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000150</td>
+                        <td>80 7E 70 83 C0 28 5C 5B A0 47 23 CD 63 EC 39 B7</td>
+                        <td>80 7E 70 83 C0 28 5C 5B A0 47 23 CD 63 EC 39 B7</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000160</td>
+                        <td>81 9C 0D C8 E0 44 FB 27 FD 8A 56 E7 1D 2E 32 59</td>
+                        <td>81 9C 0D C8 E0 44 FB 27 FD 8A 56 E7 1D 2E 32 59</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000170</td>
+                        <td>3C DD 10 57 09 C9 B1 2C C1 FC 20 AD 50 3A 5F B6</td>
+                        <td>3C DD 10 57 09 C9 B1 2C C1 FC 20 AD 50 3A 5F B6</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000180</td>
+                        <td>EB 68 B6 73 13 7C 1D 31 95 D0 D6 38 75 AF B0 A5</td>
+                        <td>EB 68 B6 73 13 7C 1D 31 95 D0 D6 38 75 AF B0 A5</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000190</td>
+                        <td>07 0B F4 D2 21 A8 27 BC 7F 2F 9F 42 10 6E 45 18</td>
+                        <td>07 0B F4 D2 21 A8 27 BC 7F 2F 9F 42 10 6E 45 18</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000001A0</td>
+                        <td>B5 B4 9F E0 35 0F 45 29 50 5E 8E ED 33 70 FA 1E</td>
+                        <td>B5 B4 9F E0 35 0F 45 29 50 5E 8E ED 33 70 FA 1E</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000001B0</td>
+                        <td>FF 86 07 3B 05 D0 CC 22 94 8F 2C DB 9F 8B B5 F2</td>
+                        <td>FF 86 07 3B 05 D0 CC 22 94 8F 2C DB 9F 8B B5 F2</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000001C0</td>
+                        <td>C6 F1 41 96 EC 88 C5 42 EC 57 7B 6D 03 D4 FD 0F</td>
+                        <td>C6 F1 41 96 EC 88 C5 42 EC 57 7B 6D 03 D4 FD 0F</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000001D0</td>
+                        <td>07 06 31 71 C7 EB F6 E6 9D 3F 11 38 36 E1 62 E7</td>
+                        <td>07 06 31 71 C7 EB F6 E6 9D 3F 11 38 36 E1 62 E7</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000001E0</td>
+                        <td>7D 94 30 D7 F1 E9 8A 9B 20 00 F5 EE 22 ED 7E 66</td>
+                        <td>7D 94 30 D7 F1 E9 8A 9B 20 00 F5 EE 22 ED 7E 66</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000001F0</td>
+                        <td>E4 6C 56 25 3F AD 4F 21 5A D5 F0 A4 15 5B D6 DE</td>
+                        <td>E4 6C 56 25 3F AD 4F 21 5A D5 F0 A4 15 5B D6 DE</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000200</td>
+                        <td>96 7D 7B 80 BD AA 36 B9 C0 96 37 7C E1 6A E7 3C</td>
+                        <td>96 7D 7B 80 BD AA 36 B9 C0 96 37 7C E1 6A E7 3C</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000210</td>
+                        <td>7D A7 EB 5C 6E 65 66 51 3C 62 BE 30 B3 D5 D5 77</td>
+                        <td>7D A7 EB 5C 6E 65 66 51 3C 62 BE 30 B3 D5 D5 77</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000220</td>
+                        <td>2D 84 61 00 06 87 2A C4 D5 94 71 B9 DA F3 3F F8</td>
+                        <td>2D 84 61 00 06 87 2A C4 D5 94 71 B9 DA F3 3F F8</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000230</td>
+                        <td>D8 04 62 D5 F3 9C 2D 11 04 59 4A 9E F9 1A 44 E3</td>
+                        <td>D8 04 62 D5 F3 9C 2D 11 04 59 4A 9E F9 1A 44 E3</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000240</td>
+                        <td>79 CF 3B DD CC FC 9A 7D B8 14 8C CE C0 02 2C 4B</td>
+                        <td>79 CF 3B DD CC FC 9A 7D B8 14 8C CE C0 02 2C 4B</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000250</td>
+                        <td>06 97 69 0F C2 E6 B5 08 F9 A3 5C 23 97 0A 6F 34</td>
+                        <td>06 97 69 0F C2 E6 B5 08 F9 A3 5C 23 97 0A 6F 34</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000260</td>
+                        <td>6E 7D C2 1A C0 B2 A1 3E C4 D7 41 EE 1B 64 63 92</td>
+                        <td>6E 7D C2 1A C0 B2 A1 3E C4 D7 41 EE 1B 64 63 92</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000270</td>
+                        <td>D1 92 07 20 61 D7 16 6A ED 00 AB 72 45 B5 3A E0</td>
+                        <td>D1 92 07 20 61 D7 16 6A ED 00 AB 72 45 B5 3A E0</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000280</td>
+                        <td>DA D3 2F 5F F6 1B 14 86 D3 D3 DC 1C DE B8 6A BA</td>
+                        <td>DA D3 2F 5F F6 1B 14 86 D3 D3 DC 1C DE B8 6A BA</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000290</td>
+                        <td>2F DA CE BB 02 F0 92 A2 6E 10 38 CF 11 48 2B 57</td>
+                        <td>2F DA CE BB 02 F0 92 A2 6E 10 38 CF 11 48 2B 57</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000002A0</td>
+                        <td>E0 F5 2A AA EA 00 77 03 48 6B 9A EC 79 5C A6 F9</td>
+                        <td>E0 F5 2A AA EA 00 77 03 48 6B 9A EC 79 5C A6 F9</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000002B0</td>
+                        <td>7B 77 67 F8 07 85 5C 8C D9 DC E0 10 1A 2E 3B 56</td>
+                        <td>7B 77 67 F8 07 85 5C 8C D9 DC E0 10 1A 2E 3B 56</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000002C0</td>
+                        <td>81 E8 7E 6D 02 79 A0 AF BA 2C 0C F8 DF FD 45 9C</td>
+                        <td>81 E8 7E 6D 02 79 A0 AF BA 2C 0C F8 DF FD 45 9C</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000002D0</td>
+                        <td>9C 46 16 80 27 7A C9 5C B2 E8 48 F2 3E 65 93 D9</td>
+                        <td>9C 46 16 80 27 7A C9 5C B2 E8 48 F2 3E 65 93 D9</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000002E0</td>
+                        <td>4C 52 FB 02 C8 2B 02 64 AD BB FF 7F 03 67 A2 BB</td>
+                        <td>4C 52 FB 02 C8 2B 02 64 AD BB FF 7F 03 67 A2 BB</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000002F0</td>
+                        <td>5C 4E F3 79 FC 9D 4D EA 12 37 CE 01 70 A5 FA EC</td>
+                        <td>5C 4E F3 79 FC 9D 4D EA 12 37 CE 01 70 A5 FA EC</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000300</td>
+                        <td>44 16 99 6F 74 86 03 C0 64 F1 4F CF 47 35 89 D2</td>
+                        <td>44 16 99 6F 74 86 03 C0 64 F1 4F CF 47 35 89 D2</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000310</td>
+                        <td>72 F3 5D 85 ED 4F EC 79 2D E5 BC 3F 37 3F 38 99</td>
+                        <td>72 F3 5D 85 ED 4F EC 79 2D E5 BC 3F 37 3F 38 99</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000320</td>
+                        <td>A9 D8 18 E7 32 D8 E4 26 05 B3 D6 62 0C 94 4E F3</td>
+                        <td>A9 D8 18 E7 32 D8 E4 26 05 B3 D6 62 0C 94 4E F3</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000330</td>
+                        <td>1C 99 9F EB E6 9E 3A 40 61 F1 39 00 8B 38 A6 B6</td>
+                        <td>1C 99 9F EB E6 9E 3A 40 61 F1 39 00 8B 38 A6 B6</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000340</td>
+                        <td>85 AB 33 57 96 30 68 55 23 9F 5F DA 1D 6B 91 E2</td>
+                        <td>85 AB 33 57 96 30 68 55 23 9F 5F DA 1D 6B 91 E2</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000350</td>
+                        <td>5C D8 A6 2A 81 F1 09 70 6C 28 7E C2 C7 70 9E CB</td>
+                        <td>5C D8 A6 2A 81 F1 09 70 6C 28 7E C2 C7 70 9E CB</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000360</td>
+                        <td>67 3A AC 4F BB DB 2D 87 D0 E7 DB 92 A9 58 8F CF</td>
+                        <td>67 3A AC 4F BB DB 2D 87 D0 E7 DB 92 A9 58 8F CF</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000370</td>
+                        <td>C4 7D D9 F1 12 8A BE 22 1B FA A2 3F 1F BC 01 28</td>
+                        <td>C4 7D D9 F1 12 8A BE 22 1B FA A2 3F 1F BC 01 28</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000380</td>
+                        <td>4A C8 83 27 55 A9 05 19 BE 22 67 55 95 D9 8D 53</td>
+                        <td>4A C8 83 27 55 A9 05 19 BE 22 67 55 95 D9 8D 53</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000390</td>
+                        <td>1B 1B 8D 2C BB FD 05 87 E6 96 B5 05 61 E1 13 F3</td>
+                        <td>1B 1B 8D 2C BB FD 05 87 E6 96 B5 05 61 E1 13 F3</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000003A0</td>
+                        <td>28 A1 36 2A 7C 92 0D D5 1A 81 EC A8 FD 5B B5 EA</td>
+                        <td>28 A1 36 2A 7C 92 0D D5 1A 81 EC A8 FD 5B B5 EA</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000003B0</td>
+                        <td>BE 67 0C 09 C4 12 45 1E E7 DF 61 2A 3D 93 85 13</td>
+                        <td>BE 67 0C 09 C4 12 45 1E E7 DF 61 2A 3D 93 85 13</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000003C0</td>
+                        <td>F4 A3 61 5E 48 FE 8A 12 93 2D 3E D4 A9 11 90 A3</td>
+                        <td>F4 A3 61 5E 48 FE 8A 12 93 2D 3E D4 A9 11 90 A3</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000003D0</td>
+                        <td>7E BA 8A 55 B9 4F C6 66 0C 2D 25 74 3E 40 61 98</td>
+                        <td>7E BA 8A 55 B9 4F C6 66 0C 2D 25 74 3E 40 61 98</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000003E0</td>
+                        <td>0E F8 55 32 15 66 B8 C5 9A 2D CD 16 A1 E1 42 70</td>
+                        <td>0E F8 55 32 15 66 B8 C5 9A 2D CD 16 A1 E1 42 70</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000003F0</td>
+                        <td>02 F6 3B CC 97 57 F2 AE B4 01 0B 6B DA 79 49 CE</td>
+                        <td>02 F6 3B CC 97 57 F2 AE B4 01 0B 6B DA 79 49 CE</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000400</td>
+                        <td>6C 5C 61 13 95 B1 A9 4D E2 7C 34 63 78 8F 2F 50</td>
+                        <td>6C 5C 61 13 95 B1 A9 4D E2 7C 34 63 78 8F 2F 50</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000410</td>
+                        <td>7F 1C E6 83 AF 84 F4 C2 1E 54 78 EC 93 CA F8 EA</td>
+                        <td>7F 1C E6 83 AF 84 F4 C2 1E 54 78 EC 93 CA F8 EA</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000420</td>
+                        <td>C5 FE 1C 99 BE 48 24 C3 77 B2 CC 78 26 31 4E D8</td>
+                        <td>C5 FE 1C 99 BE 48 24 C3 77 B2 CC 78 26 31 4E D8</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000430</td>
+                        <td>CB 83 00 5A D0 46 5C 8C 7D 86 E6 2B 9D 70 C7 32</td>
+                        <td>CB 83 00 5A D0 46 5C 8C 7D 86 E6 2B 9D 70 C7 32</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000440</td>
+                        <td>C6 8A D7 E3 67 C5 3F 96 48 3D 49 65 67 DE 3E AB</td>
+                        <td>C6 8A D7 E3 67 C5 3F 96 48 3D 49 65 67 DE 3E AB</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000450</td>
+                        <td>CC 5C F1 51 2F C3 2D F2 04 D6 10 40 7A B1 48 8C</td>
+                        <td>CC 5C F1 51 2F C3 2D F2 04 D6 10 40 7A B1 48 8C</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000460</td>
+                        <td>5E 22 F8 51 54 8C 7A 5F 63 4F 54 ED 20 39 42 63</td>
+                        <td>5E 22 F8 51 54 8C 7A 5F 63 4F 54 ED 20 39 42 63</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000470</td>
+                        <td>27 08 C8 4F 8E 87 35 1A 26 36 41 7F 3F 8E 35 49</td>
+                        <td>27 08 C8 4F 8E 87 35 1A 26 36 41 7F 3F 8E 35 49</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000480</td>
+                        <td>67 8D A8 73 1A C4 E5 01 89 DE 0B 87 A4 11 11 20</td>
+                        <td>67 8D A8 73 1A C4 E5 01 89 DE 0B 87 A4 11 11 20</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000490</td>
+                        <td>44 AC AA 69 06 1D A9 0F 2C 4F C5 72 D7 EC 2C 25</td>
+                        <td>44 AC AA 69 06 1D A9 0F 2C 4F C5 72 D7 EC 2C 25</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000004A0</td>
+                        <td>AB 1E 10 C2 8C 5A 76 83 5D B2 AB C0 D5 D9 31 AA</td>
+                        <td>AB 1E 10 C2 8C 5A 76 83 5D B2 AB C0 D5 D9 31 AA</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000004B0</td>
+                        <td>43 24 BE 10 9E F6 02 7E F4 17 9B 1A 7F 50 AA 61</td>
+                        <td>43 24 BE 10 9E F6 02 7E F4 17 9B 1A 7F 50 AA 61</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000004C0</td>
+                        <td>D9 A6 E3 33 66 79 29 57 A2 4F EE 24 D7 89 37 19</td>
+                        <td>D9 A6 E3 33 66 79 29 57 A2 4F EE 24 D7 89 37 19</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000004D0</td>
+                        <td>21 21 3C 8A 0D DB A1 7B E6 03 A0 8A CF 11 66 2A</td>
+                        <td>21 21 3C 8A 0D DB A1 7B E6 03 A0 8A CF 11 66 2A</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000004E0</td>
+                        <td>2B 27 F3 37 99 B6 EE 4F 71 00 15 C5 43 4D 73 17</td>
+                        <td>2B 27 F3 37 99 B6 EE 4F 71 00 15 C5 43 4D 73 17</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000004F0</td>
+                        <td>CA DB 05 DE 95 2F 85 84 9B 4E 44 5C D5 D8 9E F9</td>
+                        <td>CA DB 05 DE 95 2F 85 84 9B 4E 44 5C D5 D8 9E F9</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000500</td>
+                        <td>F8 54 E2 09 06 32 56 E6 10 7D CE 38 E4 F0 F5 54</td>
+                        <td>F8 54 E2 09 06 32 56 E6 10 7D CE 38 E4 F0 F5 54</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000510</td>
+                        <td>1A C4 B3 17 1E 69 84 A3 44 BE B2 8F 5D 51 E6 E1</td>
+                        <td>1A C4 B3 17 1E 69 84 A3 44 BE B2 8F 5D 51 E6 E1</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000520</td>
+                        <td>BC A4 5A A8 CD 55 DF CD 7A 7B B8 65 0E BA 48 0F</td>
+                        <td>BC A4 5A A8 CD 55 DF CD 7A 7B B8 65 0E BA 48 0F</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000530</td>
+                        <td>7D 13 E9 F6 AB 4F 06 21 5F F0 E8 34 6D 7D 4C 3A</td>
+                        <td>7D 13 E9 F6 AB 4F 06 21 5F F0 E8 34 6D 7D 4C 3A</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000540</td>
+                        <td>8F 89 EB F5 A8 EC B6 45 B6 28 2F A5 F4 75 54 9D</td>
+                        <td>8F 89 EB F5 A8 EC B6 45 B6 28 2F A5 F4 75 54 9D</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000550</td>
+                        <td>1F 67 D8 03 C9 AB 54 73 A9 D5 21 71 DA 06 B2 E7</td>
+                        <td>1F 67 D8 03 C9 AB 54 73 A9 D5 21 71 DA 06 B2 E7</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000560</td>
+                        <td>FB AF 3C 89 B7 EB 17 9B 35 6F 91 D3 B8 E9 25 A3</td>
+                        <td>FB AF 3C 89 B7 EB 17 9B 35 6F 91 D3 B8 E9 25 A3</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000570</td>
+                        <td>D4 82 D7 EF 6E 31 C0 45 6C 32 88 BF 3A 9B 56 39</td>
+                        <td>D4 82 D7 EF 6E 31 C0 45 6C 32 88 BF 3A 9B 56 39</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000580</td>
+                        <td>E3 7E DE BC E2 C6 08 9F 9A 38 EB A6 82 26 39 4A</td>
+                        <td>E3 7E DE BC E2 C6 08 9F 9A 38 EB A6 82 26 39 4A</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000590</td>
+                        <td>62 35 44 DF 06 CB 7B 34 FD E9 0F E1 B6 B6 27 7E</td>
+                        <td>62 35 44 DF 06 CB 7B 34 FD E9 0F E1 B6 B6 27 7E</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000005A0</td>
+                        <td>C4 D9 32 76 F4 64 05 92 D4 19 C4 F3 49 52 16 69</td>
+                        <td>C4 D9 32 76 F4 64 05 92 D4 19 C4 F3 49 52 16 69</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000005B0</td>
+                        <td>F0 EB 7A D2 70 BA 84 CA AE E9 1D 14 C4 55 F7 D9</td>
+                        <td>F0 EB 7A D2 70 BA 84 CA AE E9 1D 14 C4 55 F7 D9</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000005C0</td>
+                        <td>6E DC F7 3D 68 0B 5F 5D DB ED 8B 38 67 B2 B7 7E</td>
+                        <td>6E DC F7 3D 68 0B 5F 5D DB ED 8B 38 67 B2 B7 7E</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000005D0</td>
+                        <td>E4 C3 B1 19 E6 04 66 BB 84 F0 D2 26 1E 1D E9 C8</td>
+                        <td>E4 C3 B1 19 E6 04 66 BB 84 F0 D2 26 1E 1D E9 C8</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000005E0</td>
+                        <td>09 64 A4 1A F0 14 FC 66 50 C2 1D B2 38 21 EB 73</td>
+                        <td>09 64 A4 1A F0 14 FC 66 50 C2 1D B2 38 21 EB 73</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000005F0</td>
+                        <td>25 0E 79 80 35 3B AA D2 97 0C 9E 2E 29 8B 67 5B</td>
+                        <td>25 0E 79 80 35 3B AA D2 97 0C 9E 2E 29 8B 67 5B</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000600</td>
+                        <td>D4 68 DE 2D 15 29 2C C7 FF EE 7D E9 10 AF D3 63</td>
+                        <td>D4 68 DE 2D 15 29 2C C7 FF EE 7D E9 10 AF D3 63</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000610</td>
+                        <td>4B F6 E4 FA 2F AB 24 70 94 E5 98 F6 1B 0C 03 C8</td>
+                        <td>4B F6 E4 FA 2F AB 24 70 94 E5 98 F6 1B 0C 03 C8</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000620</td>
+                        <td>E1 12 62 D6 EF 9E E5 22 87 A0 A7 E2 7D 30 00 0A</td>
+                        <td>E1 12 62 D6 EF 9E E5 22 87 A0 A7 E2 7D 30 00 0A</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000630</td>
+                        <td>D4 BF 8E A2 B2 B6 77 1C 54 A3 19 25 F4 A8 F9 7D</td>
+                        <td>D4 BF 8E A2 B2 B6 77 1C 54 A3 19 25 F4 A8 F9 7D</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000640</td>
+                        <td>4C D2 46 2C 51 E0 F4 8F 90 8B 07 D5 B8 77 3F 09</td>
+                        <td>4C D2 46 2C 51 E0 F4 8F 90 8B 07 D5 B8 77 3F 09</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000650</td>
+                        <td>88 4F AC 0E D7 71 98 BE 55 63 3F 7A 45 9C 1B A1</td>
+                        <td>88 4F AC 0E D7 71 98 BE 55 63 3F 7A 45 9C 1B A1</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000660</td>
+                        <td>CA 2F 45 28 28 46 0F A9 FC 7C DE FB 9A 30 2E 56</td>
+                        <td>CA 2F 45 28 28 46 0F A9 FC 7C DE FB 9A 30 2E 56</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000670</td>
+                        <td>C0 8F 85 F3 82 C2 04 B3 86 79 4B 01 D3 01 8A 74</td>
+                        <td>C0 8F 85 F3 82 C2 04 B3 86 79 4B 01 D3 01 8A 74</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000680</td>
+                        <td>FB D4 96 3C 49 4E F2 B2 B0 45 FC 5C 94 56 2E 0B</td>
+                        <td>FB D4 96 3C 49 4E F2 B2 B0 45 FC 5C 94 56 2E 0B</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000690</td>
+                        <td>06 E5 1C DF 62 1B 40 BB 86 83 1F 6E B4 2B 93 87</td>
+                        <td>06 E5 1C DF 62 1B 40 BB 86 83 1F 6E B4 2B 93 87</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000006A0</td>
+                        <td>65 54 C4 57 F7 F5 C1 36 4E E3 0E 1E D2 FD 56 F5</td>
+                        <td>65 54 C4 57 F7 F5 C1 36 4E E3 0E 1E D2 FD 56 F5</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000006B0</td>
+                        <td>69 C0 D4 67 AE 24 DE 97 98 9F D2 0E 6F 78 61 C9</td>
+                        <td>69 C0 D4 67 AE 24 DE 97 98 9F D2 0E 6F 78 61 C9</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000006C0</td>
+                        <td>6B 4E 62 CB 52 73 EF 3E B2 BE A9 D5 7F 8E 45 18</td>
+                        <td>6B 4E 62 CB 52 73 EF 3E B2 BE A9 D5 7F 8E 45 18</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000006D0</td>
+                        <td>FB 26 F5 42 AD 9E B8 6A 4B 28 8D E7 D5 BA BA 28</td>
+                        <td>FB 26 F5 42 AD 9E B8 6A 4B 28 8D E7 D5 BA BA 28</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000006E0</td>
+                        <td>65 2B 6A A1 AB D7 2A 18 FA 91 21 77 D9 32 2F 4E</td>
+                        <td>65 2B 6A A1 AB D7 2A 18 FA 91 21 77 D9 32 2F 4E</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000006F0</td>
+                        <td>41 11 27 DA 65 CE 39 10 4B 82 F5 FE 51 D1 AB C9</td>
+                        <td>41 11 27 DA 65 CE 39 10 4B 82 F5 FE 51 D1 AB C9</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000700</td>
+                        <td>7E 9F 24 26 45 07 4E E8 66 36 39 EF 9E 7B 08 37</td>
+                        <td>7E 9F 24 26 45 07 4E E8 66 36 39 EF 9E 7B 08 37</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000710</td>
+                        <td>6C D9 E6 76 0E AE A5 B8 B4 EA 92 33 DE 94 79 33</td>
+                        <td>6C D9 E6 76 0E AE A5 B8 B4 EA 92 33 DE 94 79 33</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000720</td>
+                        <td>01 A6 EC 5B 1F 95 09 C1 57 4C BE 76 43 AF 0D C6</td>
+                        <td>01 A6 EC 5B 1F 95 09 C1 57 4C BE 76 43 AF 0D C6</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000730</td>
+                        <td>F7 7D FE 32 D7 12 30 F5 D5 CD 2D 5F EA 35 39 25</td>
+                        <td>F7 7D FE 32 D7 12 30 F5 D5 CD 2D 5F EA 35 39 25</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000740</td>
+                        <td>DC A2 E9 6F 5E 7B F3 D2 2B 3C E8 D8 6A BB 68 A2</td>
+                        <td>DC A2 E9 6F 5E 7B F3 D2 2B 3C E8 D8 6A BB 68 A2</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000750</td>
+                        <td>D7 53 A0 34 22 66 17 A1 F2 CE 5D 15 CD EF 53 1E</td>
+                        <td>D7 53 A0 34 22 66 17 A1 F2 CE 5D 15 CD EF 53 1E</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000760</td>
+                        <td>83 8B 3B FC 4E C8 D3 C4 7F 4A A6 84 A6 15 F0 A1</td>
+                        <td>83 8B 3B FC 4E C8 D3 C4 7F 4A A6 84 A6 15 F0 A1</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000770</td>
+                        <td>D8 F0 53 A4 4D 4C 01 F3 F9 8D 60 C1 EA 4B CD 40</td>
+                        <td>D8 F0 53 A4 4D 4C 01 F3 F9 8D 60 C1 EA 4B CD 40</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x00000780</td>
+                        <td>55 14 6E C7 4E FF BE 81 2E 43</td>
+                        <td>55 14 6E C7 4E FF BE 81 2E 43</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <a href="#" class="back-to-top" title="回到顶部">↑</a>
+    
+    <script>
+        // 高亮相同行
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.comparison tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseover', function() {
+                    const id = this.id;
+                    if (id) {
+                        document.querySelectorAll(`tr[id="${id}"]`).forEach(r => {
+                            r.style.backgroundColor = r.classList.contains('diff') ? 
+                                'rgba(231, 76, 60, 0.3)' : 'rgba(46, 204, 113, 0.2)';
+                        });
+                    }
+                });
+                
+                row.addEventListener('mouseout', function() {
+                    const id = this.id;
+                    if (id) {
+                        document.querySelectorAll(`tr[id="${id}"]`).forEach(r => {
+                            r.style.backgroundColor = '';
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

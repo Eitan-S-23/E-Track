@@ -1,0 +1,26 @@
+CMakeFiles/bsdiff.dir/lzma/7zAlloc.c.obj: \
+ D:\SU\Github\c-cpp\bsdiff\bsdiff_lzma\bsdiff_lzma_AES128_best\bsdiff\lzma\7zAlloc.c \
+ D:\SU\Github\c-cpp\bsdiff\bsdiff_lzma\bsdiff_lzma_AES128_best\bsdiff\lzma\Precomp.h \
+ D:\SU\Github\c-cpp\bsdiff\bsdiff_lzma\bsdiff_lzma_AES128_best\bsdiff\lzma\Compiler.h \
+ D:/install/MSYS2/mingw64/include/stdlib.h \
+ D:/install/MSYS2/mingw64/include/corecrt.h \
+ D:/install/MSYS2/mingw64/include/_mingw.h \
+ D:/install/MSYS2/mingw64/include/_mingw_mac.h \
+ D:/install/MSYS2/mingw64/include/_mingw_secapi.h \
+ D:/install/MSYS2/mingw64/include/vadefs.h \
+ D:/install/MSYS2/mingw64/include/sdks/_mingw_ddk.h \
+ D:/install/MSYS2/mingw64/include/corecrt_wstdlib.h \
+ D:/install/MSYS2/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/limits.h \
+ D:/install/MSYS2/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/syslimits.h \
+ D:/install/MSYS2/mingw64/include/limits.h \
+ D:/install/MSYS2/mingw64/include/crtdefs.h \
+ D:/install/MSYS2/mingw64/include/sec_api/stdlib_s.h \
+ D:/install/MSYS2/mingw64/include/malloc.h \
+ D:/install/MSYS2/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mm_malloc.h \
+ D:/install/MSYS2/mingw64/include/errno.h \
+ D:\SU\Github\c-cpp\bsdiff\bsdiff_lzma\bsdiff_lzma_AES128_best\bsdiff\lzma\7zAlloc.h \
+ D:\SU\Github\c-cpp\bsdiff\bsdiff_lzma\bsdiff_lzma_AES128_best\bsdiff\lzma\7zTypes.h \
+ D:/install/MSYS2/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stddef.h \
+ D:/install/MSYS2/mingw64/include/stddef.h \
+ D:/install/MSYS2/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
+ D:/install/MSYS2/mingw64/include/stdint.h

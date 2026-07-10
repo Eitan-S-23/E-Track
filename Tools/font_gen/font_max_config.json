@@ -1,0 +1,13 @@
+{
+  "_description": "Dedicated ASCII font config for the Dialplate MAX panel.",
+  "ttf": "../AGENCYB.TTF",
+  "fonts": [
+    {
+      "output": "../../USER/App/Resource/Font/font_agencyb_12.c",
+      "size": 12,
+      "bpp": 4,
+      "include_ascii": true,
+      "chars": ""
+    }
+  ]
+}

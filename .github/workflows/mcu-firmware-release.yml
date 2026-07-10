@@ -1,0 +1,184 @@
+name: MCU Firmware Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      firmware_path:
+        description: "Path to the firmware file in the repository, for example firmware/igpsport-bsc300.bin"
+        required: true
+        type: string
+      device_model:
+        description: "Device model key used by the app, for example igpsport-bsc300"
+        required: true
+        type: string
+      version_name:
+        description: "Firmware version name, for example 1.2.0"
+        required: true
+        type: string
+      version_code:
+        description: "Monotonic firmware version code, for example 120"
+        required: true
+        type: string
+      release_tag:
+        description: "Optional GitHub Release tag; defaults to mcu-<device_model>-v<version_name>"
+        required: false
+        type: string
+      release_notes:
+        description: "Firmware release notes shown in the app/admin"
+        required: false
+        type: string
+      target_hardware:
+        description: "Optional hardware description, for example BSC300"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish-firmware:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare firmware asset
+        id: firmware
+        shell: bash
+        env:
+          FIRMWARE_PATH: ${{ github.event.inputs.firmware_path }}
+          DEVICE_MODEL: ${{ github.event.inputs.device_model }}
+          VERSION_NAME: ${{ github.event.inputs.version_name }}
+          RELEASE_TAG_INPUT: ${{ github.event.inputs.release_tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f "${FIRMWARE_PATH}" ]]; then
+            echo "::error title=Firmware file missing::${FIRMWARE_PATH} does not exist."
+            exit 1
+          fi
+
+          safe_model="$(printf '%s' "${DEVICE_MODEL}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g')"
+          version_name="${VERSION_NAME#v}"
+          release_tag="${RELEASE_TAG_INPUT:-mcu-${safe_model}-v${version_name}}"
+
+          mkdir -p firmware-release-assets
+          cp "${FIRMWARE_PATH}" "firmware-release-assets/$(basename "${FIRMWARE_PATH}")"
+
+          echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
+          echo "assets_dir=firmware-release-assets" >> "$GITHUB_OUTPUT"
+          echo "firmware_file=firmware-release-assets/$(basename "${FIRMWARE_PATH}")" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update GitHub firmware release
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.firmware.outputs.release_tag }}
+          RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
+        run: |
+          set -euo pipefail
+
+          notes="${RELEASE_NOTES:-MCU firmware release ${RELEASE_TAG}}"
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release edit "${RELEASE_TAG}" --target "${GITHUB_SHA}" --notes "${notes}"
+            for asset_path in firmware-release-assets/*; do
+              gh release delete-asset "${RELEASE_TAG}" "$(basename "${asset_path}")" -y >/dev/null 2>&1 || true
+            done
+          else
+            gh release create "${RELEASE_TAG}" --target "${GITHUB_SHA}" --title "${RELEASE_TAG}" --notes "${notes}"
+          fi
+          gh release upload "${RELEASE_TAG}" firmware-release-assets/* --clobber
+
+      - name: Build Cloudflare firmware metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/build-firmware-release-metadata.mjs \
+            --assets-dir "${{ steps.firmware.outputs.assets_dir }}" \
+            --firmware-file "${{ steps.firmware.outputs.firmware_file }}" \
+            --release-tag "${{ steps.firmware.outputs.release_tag }}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --commit-sha "${GITHUB_SHA}" \
+            --repository "${GITHUB_REPOSITORY}" \
+            --device-model "${{ github.event.inputs.device_model }}" \
+            --version-name "${{ github.event.inputs.version_name }}" \
+            --version-code "${{ github.event.inputs.version_code }}" \
+            --release-notes "${{ github.event.inputs.release_notes }}" \
+            --target-hardware "${{ github.event.inputs.target_hardware }}" \
+            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
+
+      - name: Upload firmware metadata artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-firmware-release-metadata
+          path: firmware-release-assets/cloudflare-firmware-release-metadata.json
+          retention-days: 7
+
+      - name: Check Cloudflare firmware registration configuration
+        id: cloudflare_config
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" && -n "${CLOUDFLARE_API_TOKEN:-}" && -n "${TRACE_UPDATE_SERVICE_URL:-}" && -n "${TRACE_DEPLOY_TOKEN:-}" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::error title=Cloudflare firmware registration unavailable::Set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, TRACE_UPDATE_SERVICE_URL, and TRACE_DEPLOY_TOKEN secrets."
+            exit 1
+          fi
+
+      - name: Install Cloudflare upload tooling
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        run: npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+      - name: Deploy Cloudflare update service
+        if: steps.cloudflare_config.outputs.enabled == 'true' && vars.TRACE_UPDATE_SERVICE_AUTO_DEPLOY == 'true'
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_WRANGLER_ENV: ${{ vars.TRACE_UPDATE_SERVICE_WRANGLER_ENV || 'staging' }}
+          TRACE_UPDATE_SERVICE_D1_DATABASE: ${{ vars.TRACE_UPDATE_SERVICE_D1_DATABASE || 'trace-update-staging' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          npx wrangler d1 migrations apply "${TRACE_UPDATE_SERVICE_D1_DATABASE}" \
+            --env "${TRACE_UPDATE_SERVICE_WRANGLER_ENV}" \
+            --remote
+          npx wrangler deploy --env "${TRACE_UPDATE_SERVICE_WRANGLER_ENV}"
+
+      - name: Upload Cloudflare R2 firmware asset
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET || 'trace-update-staging-releases' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs \
+            --assets-dir firmware-release-assets \
+            --metadata firmware-release-assets/cloudflare-firmware-release-metadata.json \
+            --bucket "${TRACE_R2_BUCKET}" \
+            --wrangler-cwd app/bluetooth_flutter_Trace/cloudflare/update-service/worker \
+            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
+
+      - name: Register Cloudflare firmware candidate
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs firmware-release-assets/cloudflare-firmware-release-metadata.json

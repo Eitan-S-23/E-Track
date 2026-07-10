@@ -1,0 +1,7 @@
+name: vcdiff_decoder
+description: Trace-local patched VCDIFF decoder.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"

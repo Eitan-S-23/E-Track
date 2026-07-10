@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiveMap 渲染流程技术文档 · X-Track v2.7</title>
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --border: #e8e8e8;
+      --text: #1a1a1a; --muted: #888; --accent: #2d6be4;
+      --accent-light: #eef3fd; --tag-bg: #f0f0f0;
+      --sidebar-w: 260px; --header-h: 52px; --radius: 6px;
+      --mono: 'JetBrains Mono','Fira Code','Cascadia Code','Courier New',monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.7; }
+    #header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 16px; z-index: 100; }
+    #menu-toggle { width: 36px; height: 36px; background: none; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; flex-shrink: 0; transition: background .15s; }
+    #menu-toggle:hover { background: var(--tag-bg); }
+    #menu-toggle span { display: block; width: 16px; height: 1.5px; background: var(--text); border-radius: 2px; transition: transform .2s, opacity .2s; }
+    body.menu-open #menu-toggle span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+    body.menu-open #menu-toggle span:nth-child(2) { opacity: 0; }
+    body.menu-open #menu-toggle span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+    #brand { font-size: 15px; font-weight: 600; letter-spacing: -.2px; color: var(--text); }
+    #brand sup { font-size: 10px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+    .header-meta { margin-left: auto; display: flex; gap: 8px; }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--accent-light); color: var(--accent); font-weight: 500; }
+    #sidebar { position: fixed; top: var(--header-h); left: 0; bottom: 0; width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; transform: translateX(0); transition: transform .25s cubic-bezier(.4,0,.2,1); z-index: 90; padding: 16px 0 32px; }
+    body:not(.menu-open) #sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-section-title { font-size: 10px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding: 8px 20px 4px; }
+    .sidebar-link { display: block; padding: 6px 20px; color: #444; text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all .15s; }
+    .sidebar-link:hover, .sidebar-link.active { color: var(--accent); background: var(--accent-light); border-left-color: var(--accent); font-weight: 500; }
+    .sidebar-sublink { display: block; padding: 3px 20px 3px 30px; color: #888; text-decoration: none; font-size: 12px; border-left: 2px solid transparent; transition: all .15s; }
+    .sidebar-sublink:hover, .sidebar-sublink.active { color: var(--accent); background: var(--accent-light); border-left-color: var(--accent); }
+    #main { margin-top: var(--header-h); margin-left: var(--sidebar-w); transition: margin-left .25s cubic-bezier(.4,0,.2,1); min-height: calc(100vh - var(--header-h)); }
+    body:not(.menu-open) #main { margin-left: 0; }
+    .content { max-width: 900px; margin: 0 auto; padding: 48px 32px 80px; }
+    section { margin-bottom: 64px; }
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+    h1 { font-size: 32px; font-weight: 700; letter-spacing: -.5px; line-height: 1.2; margin-bottom: 16px; }
+    h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+    h4 { font-size: 13px; font-weight: 600; margin: 16px 0 8px; color: #555; }
+    p { color: #444; margin-bottom: 12px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { color: #444; margin-bottom: 4px; }
+    strong { color: var(--text); }
+    .hero-desc { font-size: 16px; color: #555; max-width: 640px; line-height: 1.8; margin-bottom: 28px; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+    .tag { font-size: 12px; padding: 4px 10px; border-radius: 20px; background: var(--tag-bg); color: #555; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 12px; margin: 16px 0; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .card-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 12px; background: #f5f5f5; border: 1px solid var(--border); font-weight: 600; color: #555; }
+    td { padding: 8px 12px; border: 1px solid var(--border); color: #444; vertical-align: top; }
+    tr:hover td { background: #fafafa; }
+    .td-code { font-family: var(--mono); font-size: 12px; background: #f8f8f8; color: #c0392b; }
+    pre { background: #1e1e2e; color: #cdd6f4; border-radius: var(--radius); padding: 20px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; margin: 16px 0; position: relative; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s, background .15s; color: #cdd6f4; padding: 0; }
+    pre:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { background: rgba(255,255,255,.18); }
+    .copy-btn.copied { color: #a6e3a1; border-color: #a6e3a1; }
+    code { font-family: var(--mono); font-size: 12.5px; background: #f3f3f3; border-radius: 3px; padding: 1px 5px; color: #c0392b; }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    .arch { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .arch-layer { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+    .arch-layer:last-child { border-bottom: none; }
+    .arch-name { font-size: 12px; font-weight: 600; color: var(--muted); min-width: 120px; text-transform: uppercase; letter-spacing: .5px; }
+    .arch-items { display: flex; flex-wrap: wrap; gap: 6px; }
+    .arch-chip { font-size: 11.5px; padding: 3px 10px; border-radius: 20px; background: var(--tag-bg); color: #444; }
+    .arch-layer.l1 { background: #eef3fd; } .arch-layer.l1 .arch-chip { background: #d0e1fd; color: #1a4db7; }
+    .arch-layer.l2 { background: #f0faf5; } .arch-layer.l2 .arch-chip { background: #c2edd8; color: #1a6648; }
+    .arch-layer.l3 { background: #fdf8ee; } .arch-layer.l3 .arch-chip { background: #fae6b0; color: #7a5200; }
+    .arch-layer.l4 { background: #fdf3f0; } .arch-layer.l4 .arch-chip { background: #f9cfc8; color: #8b1c0e; }
+    .arch-layer.l5 { background: #f8f0fe; } .arch-layer.l5 .arch-chip { background: #e1c7fc; color: #5b1fa3; }
+    .stats { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 24px; min-width: 120px; text-align: center; }
+    .stat-num { font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: -.5px; }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .flow { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin: 16px 0; }
+    .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px dashed #eee; }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .flow-text { font-size: 13px; color: #444; }
+    .flow-text strong { color: var(--text); }
+    .notice { border-left: 3px solid var(--accent); background: var(--accent-light); border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: #335; }
+    .notice.warn { border-left-color: #e67e22; background: #fef9f0; color: #7a4500; }
+    .notice.ok { border-left-color: #27ae60; background: #f0faf5; color: #1a5c38; }
+    .notice.err { border-left-color: #e74c3c; background: #fef0f0; color: #7a1a1a; }
+    footer { text-align: center; padding: 32px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); }
+    .pipeline { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .pipeline-step { display: flex; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #eee; }
+    .pipeline-step:last-child { border-bottom: none; }
+    .pipeline-step:nth-child(odd) { background: var(--surface); }
+    .pipeline-step:nth-child(even) { background: #f8f8f8; }
+    .pipeline-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .pipeline-content { flex: 1; min-width: 0; }
+    .pipeline-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .pipeline-desc { font-size: 13px; color: #555; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+    @media (max-width: 700px) { .content { padding: 28px 18px 60px; } h1 { font-size: 24px; } .stats { gap: 10px; } .card-grid { grid-template-columns: 1fr 1fr; } .arch-layer { flex-direction: column; align-items: flex-start; gap: 8px; } }
+  </style>
+</head>
+<body class="menu-open">
+
+<header id="header">
+  <button id="menu-toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div id="brand">LiveMap 渲染流程 <sup>X-Track v2.7 · AT32F435RGT7</sup></div>
+  <div class="header-meta">
+    <span class="badge">LVGL 8.x</span>
+    <span class="badge">ST7789</span>
+    <span class="badge">SDIO</span>
+  </div>
+</header>
+
+<nav id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">概览</div>
+    <a class="sidebar-link active" href="#overview">文档概述</a>
+    <a class="sidebar-link" href="#arch">1. 总体架构</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">GPS与轨迹</div>
+    <a class="sidebar-link" href="#gps">2. GPS位置变化检测</a>
+    <a class="sidebar-link" href="#track">3. GPS轨迹线绘制</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">地图瓦片</div>
+    <a class="sidebar-link" href="#tilepath">4. 瓦片路径计算</a>
+    <a class="sidebar-link" href="#lvglfs">5. LVGL文件系统层</a>
+    <a class="sidebar-link" href="#sdfat">6. SdFat SD卡读取</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">渲染管线</div>
+    <a class="sidebar-link" href="#imgcache">7. LVGL图片缓存</a>
+    <a class="sidebar-link" href="#imgdecode">8. LVGL图片解码</a>
+    <a class="sidebar-link" href="#render">9. LVGL渲染刷新</a>
+    <a class="sidebar-link" href="#dispdrv">10. 显示驱动层</a>
+    <a class="sidebar-link" href="#hw">11. 硬件显示输出</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">性能与参考</div>
+    <a class="sidebar-link" href="#perf">12. 性能优化要点</a>
+    <a class="sidebar-link" href="#callchain">13. 完整调用链</a>
+    <a class="sidebar-link" href="#troubleshoot">14. 常见问题排查</a>
+  </div>
+</nav>
+
+<main id="main">
+<div class="content">
+
+<!-- ── 概述 ── -->
+<section id="overview">
+  <div class="section-label">Technical Document</div>
+  <h1>LiveMap GPS渲染完整流程</h1>
+  <p class="hero-desc">
+    本文档详细描述 X-Track 项目中，GPS位置发生变化时，从检测变化到最终在屏幕上显示地图和轨迹的完整数据流与渲染流程。
+  </p>
+  <div class="hero-tags">
+    <span class="tag">AT32F435RGT7 · 288 MHz</span>
+    <span class="tag">LVGL 8.x</span>
+    <span class="tag">ST7789 240×240</span>
+    <span class="tag">Web Mercator 投影</span>
+    <span class="tag">SDIO 12.5 MB/s</span>
+    <span class="tag">RGB565 BIN 瓦片</span>
+    <span class="tag">LRU 图片缓存</span>
+    <span class="tag">SPI+DMA 双缓冲</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">30ms</div><div class="stat-label">GPS更新周期</div></div>
+    <div class="stat"><div class="stat-num">60 FPS</div><div class="stat-label">理论最高帧率</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">瓦片缓存数量</div></div>
+    <div class="stat"><div class="stat-num">128KB</div><div class="stat-label">单张瓦片大小</div></div>
+    <div class="stat"><div class="stat-num">29步</div><div class="stat-label">完整渲染调用链</div></div>
+  </div>
+  <div class="notice">
+    文档版本 v1.1 &nbsp;·&nbsp; 生成时间 2025-12-19 &nbsp;·&nbsp; 适用平台 AT32F435RGT7
+  </div>
+</section>
+
+<!-- ── 1. 总体架构 ── -->
+<section id="arch">
+  <h2>1. 总体架构</h2>
+  <p>系统分 8 层，从 GPS 检测到屏幕像素输出，形成完整的渲染管线：</p>
+  <div class="arch">
+    <div class="arch-layer l1">
+      <div class="arch-name">GPS 检测</div>
+      <div class="arch-items">
+        <span class="arch-chip">LiveMap::Update()</span>
+        <span class="arch-chip">CheckPosition()</span>
+        <span class="arch-chip">30ms 周期</span>
+      </div>
+    </div>
+    <div class="arch-layer l2">
+      <div class="arch-name">轨迹 &amp; 瓦片</div>
+      <div class="arch-items">
+        <span class="arch-chip">TrackLineFilter</span>
+        <span class="arch-chip">lv_poly_line</span>
+        <span class="arch-chip">MapConv</span>
+        <span class="arch-chip">TileConv</span>
+      </div>
+    </div>
+    <div class="arch-layer l3">
+      <div class="arch-name">LVGL 图片控件</div>
+      <div class="arch-items">
+        <span class="arch-chip">SetMapTileSrc()</span>
+        <span class="arch-chip">lv_img_set_src()</span>
+        <span class="arch-chip">_lv_img_cache_open()</span>
+      </div>
+    </div>
+    <div class="arch-layer l4">
+      <div class="arch-name">文件系统</div>
+      <div class="arch-items">
+        <span class="arch-chip">LVGL FS Driver</span>
+        <span class="arch-chip">SdFat Library</span>
+        <span class="arch-chip">SdioCard_AT32</span>
+      </div>
+    </div>
+    <div class="arch-layer l5">
+      <div class="arch-name">渲染 &amp; 显示</div>
+      <div class="arch-items">
+        <span class="arch-chip">lv_refr_now()</span>
+        <span class="arch-chip">disp_flush_cb()</span>
+        <span class="arch-chip">SPI+DMA</span>
+        <span class="arch-chip">ST7789</span>
+      </div>
+    </div>
+  </div>
+  <h3>系统分层架构图</h3>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│                   GPS位置变化检测                        │
+│        (LiveMap::Update → CheckPosition)                │
+└──────────────────────┬──────────────────────────────────┘
+                       ├─────────────────┐
+                       ▼                 ▼
+┌─────────────────────────────┐  ┌──────────────────────┐
+│    GPS轨迹线绘制             │  │  地图瓦片路径计算    │
+│ (TrackLineFilter →           │  │ (MapConv, TileConv)  │
+│  lv_poly_line)               │  └──────────┬───────────┘
+└─────────────────┬────────────┘             │
+                  │             ┌────────────┘
+                  │             ▼
+                  │  ┌─────────────────────────────┐
+                  │  │  LVGL图片缓存查询           │
+                  │  │  (_lv_img_cache_open)       │
+                  │  └──────────┬──────────────────┘
+                  │             ▼
+                  │  ┌─────────────────────────────┐
+                  │  │  LVGL文件系统层             │
+                  │  │  (lv_fs_open → fs_open)     │
+                  │  └──────────┬──────────────────┘
+                  │             ▼
+                  │  ┌─────────────────────────────┐
+                  │  │  SdFat + SDIO 硬件读取      │
+                  │  └──────────┬──────────────────┘
+                  └─────────────┴────────────────────┐
+                                ▼
+┌─────────────────────────────────────────────────────────┐
+│            LVGL渲染引擎                                  │
+│    (lv_refr_now → 绘制地图+轨迹+箭头)                   │
+└──────────────────────┬──────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│            ST7789 SPI+DMA → 屏幕显示                     │
+└─────────────────────────────────────────────────────────┘</code></pre>
+</section>
+
+<!-- ── 2. GPS位置变化检测 ── -->
+<section id="gps">
+  <h2>2. GPS位置变化检测</h2>
+  <p>文件位置：<code>USER/App/Pages/LiveMap/LiveMap.cpp</code></p>
+
+  <h3>2.1 主更新循环（每30ms调用一次）</h3>
+<pre><code>// 代码位置：LiveMap.cpp:154-166
+void LiveMap::Update()
+{
+    if (lv_tick_elaps(priv.lastMapUpdateTime) >= CONFIG_GPS_REFR_PERIOD)
+    {
+        CheckPosition();          // ← 检查GPS位置变化
+        SportInfoUpdate();        // 更新速度、距离、时间显示
+        priv.lastMapUpdateTime = lv_tick_get();
+    }
+    else if (lv_tick_elaps(priv.lastContShowTime) >= 3000)
+    {
+        lv_obj_add_state(View.ui.zoom.cont, LV_STATE_USER_1);
+    }
+}</code></pre>
+  <div class="notice">
+    <strong>CONFIG_GPS_REFR_PERIOD</strong>：GPS更新周期，默认 <strong>30ms</strong>（在 <code>Config.h:41</code> 定义）
+  </div>
+
+  <h3>2.2 位置检查逻辑</h3>
+<pre><code>// 代码位置：LiveMap.cpp:194-242
+void LiveMap::CheckPosition()
+{
+    bool refreshMap = false;
+
+    // 1. 获取GPS信息
+    HAL::GPS_Info_t gpsInfo;
+    Model.GetGPS_Info(&gpsInfo);
+
+    // 2. 检查地图缩放等级是否改变
+    mapLevelCurrent = lv_slider_get_value(View.ui.zoom.slider);
+    if (mapLevelCurrent != Model.mapConv.GetLevel())
+    {
+        refreshMap = true;
+        Model.mapConv.SetLevel(mapLevelCurrent);
+    }
+
+    // 3. 将GPS经纬度转换为地图坐标
+    int32_t mapX, mapY;
+    Model.mapConv.ConvertMapCoordinate(
+        gpsInfo.longitude, gpsInfo.latitude,
+        &mapX, &mapY
+    );
+    Model.tileConv.SetFocusPos(mapX, mapY);
+
+    // 4. 检查地图瓦片容器是否需要更新
+    if (GetIsMapTileContChanged())
+        refreshMap = true;
+
+    // 5. 如果需要刷新地图，重新加载瓦片
+    if (refreshMap)
+    {
+        TileConv::Rect_t rect;
+        Model.tileConv.GetTileContainer(&rect);
+        Area_t area = { rect.x, rect.y,
+                        rect.x + rect.width - 1,
+                        rect.y + rect.height - 1 };
+        onMapTileContRefresh(&area, mapX, mapY);
+    }
+
+    // 6. 更新地图容器位置和箭头（每次都调用，内部有缓存）
+    MapTileContUpdate(mapX, mapY, gpsInfo.course);
+}</code></pre>
+
+  <h3>2.3 GPS信息数据结构</h3>
+<pre><code>// GPS信息结构（HAL_Def.h）
+typedef struct
+{
+    bool     isVaild;
+    double   longitude;   // 经度
+    double   latitude;    // 纬度
+    float    altitude;    // 海拔
+    float    speed;       // 速度 (km/h)
+    float    course;      // 航向角度
+    uint8_t  satellites;  // 卫星数量
+    Clock_Info_t clock;   // 时间信息
+} GPS_Info_t;</code></pre>
+</section>
+
+<!-- ── 3. GPS轨迹线绘制机制 ── -->
+<section id="track">
+  <h2>3. GPS轨迹线绘制机制</h2>
+
+  <h3>3.1 轨迹系统核心组件</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">lv_poly_line</div>
+      <div class="card-desc">多段线渲染类，基于LVGL line控件，管理多条不连续线段</div>
+    </div>
+    <div class="card">
+      <div class="card-title">TrackLineFilter</div>
+      <div class="card-desc">轨迹线过滤器，负责区域裁剪 + START/APPEND/END/RESET事件生成</div>
+    </div>
+    <div class="card">
+      <div class="card-title">TrackPointFilter</div>
+      <div class="card-desc">轨迹点过滤器，点采样 + 距离过滤，减少冗余点</div>
+    </div>
+  </div>
+
+  <h3>3.2 lv_poly_line 数据结构</h3>
+<pre><code>class lv_poly_line
+{
+public:
+    typedef struct
+    {
+        lv_obj_t* line;                  // LVGL line对象
+        std::vector&lt;lv_point_t&gt; points; // 线段的所有点
+    } single_line_t;
+
+private:
+    std::vector&lt;single_line_t&gt; poly_line;  // 多段线数组
+    uint32_t current_index;                 // 当前活动线段索引
+    lv_style_t* styleLine;                  // 线条样式
+    lv_obj_t* parent;                       // 父容器
+};</code></pre>
+  <div class="notice">
+    <strong>为什么需要多段线？</strong> 轨迹可能跨越多个不连续区域，当轨迹移出可视区域时结束当前线段，移回时开始新线段。每个 <code>single_line_t</code> 代表一段连续的可见轨迹。
+  </div>
+
+  <h3>3.3 lv_poly_line 关键方法</h3>
+<pre><code>// 开始新线段
+void lv_poly_line::start()
+{
+    if (current_index >= poly_line.size()) add_line();
+    single_line_t* sl = &poly_line[current_index];
+    lv_obj_clear_flag(sl->line, LV_OBJ_FLAG_HIDDEN);
+    lv_line_set_points(sl->line, nullptr, 0);  // 清空点
+}
+
+// 添加点到当前线段
+void lv_poly_line::append(const lv_point_t* point)
+{
+    poly_line[current_index].points.push_back(*point);
+}
+
+// 结束当前线段，提交给LVGL
+void lv_poly_line::stop()
+{
+    single_line_t* sl = &poly_line[current_index];
+    lv_line_set_points(sl->line, get_points(sl), sl->points.size());
+    current_index++;
+}
+
+// 实时追加到最后一条线段（GPS实时更新）
+void lv_poly_line::append_to_end(const lv_point_t* point)
+{
+    single_line_t* sl = get_end_line();
+    sl->points.push_back(*point);
+    lv_line_set_points(sl->line, get_points(sl), sl->points.size());
+}
+
+// 重置所有线段
+void lv_poly_line::reset()
+{
+    current_index = 0;
+    for (auto& sl : poly_line) {
+        lv_line_set_points(sl.line, nullptr, 0);
+        sl.points.clear();
+        lv_obj_add_flag(sl.line, LV_OBJ_FLAG_HIDDEN);
+    }
+}</code></pre>
+
+  <h3>3.4 TrackLineFilter 核心算法</h3>
+<pre><code>void TrackLineFilter::PushPoint(const Point_t* point)
+{
+    if (GetIsPointInArea(&priv.clipArea, point))
+    {
+        if (!priv.inArea)
+        {
+            // 点刚进入区域 → 发送START_LINE事件
+            const Point_t* p = priv.pointCnt > 0 ? &priv.prePoint : point;
+            SendEvent(EVENT_START_LINE, p);
+            priv.inArea = true;
+        }
+        OutputPoint(point);  // → EVENT_APPEND_POINT
+    }
+    else
+    {
+        if (priv.inArea)
+        {
+            // 点刚离开区域 → 发送END_LINE事件
+            SendEvent(EVENT_END_LINE, point);
+            priv.lineCount++;
+            priv.inArea = false;
+        }
+    }
+    priv.prePoint = *point;
+    priv.pointCnt++;
+}</code></pre>
+
+  <h3>3.5 轨迹重新加载</h3>
+<pre><code>void LiveMap::TrackLineReload(const Area_t* area, int32_t x, int32_t y)
+{
+    Model.lineFilter.SetClipArea(area);
+    Model.lineFilter.Reset();
+
+    // 从DataProc加载所有历史轨迹点
+    Model.TrackReload([](TrackPointFilter* filter,
+                         const TrackPointFilter::Point_t* point)
+    {
+        LiveMap* inst = (LiveMap*)filter->userData;
+        inst->Model.lineFilter.PushPoint(point->x, point->y);
+    }, this);
+
+    Model.lineFilter.PushPoint(x, y);  // 当前GPS位置
+    Model.lineFilter.PushEnd();
+}</code></pre>
+
+  <h3>3.6 轨迹事件处理</h3>
+<pre><code>void LiveMap::onTrackLineEvent(TrackLineFilter* filter, TrackLineFilter::Event_t* event)
+{
+    lv_poly_line* lineTrack = instance->View.ui.track.lineTrack;
+    switch (event->code)
+    {
+    case EVENT_START_LINE:
+        lineTrack->start();
+        instance->TrackLineAppend(event->point->x, event->point->y);
+        break;
+    case EVENT_APPEND_POINT:
+        instance->TrackLineAppend(event->point->x, event->point->y);
+        break;
+    case EVENT_END_LINE:
+        if (event->point) instance->TrackLineAppend(event->point->x, event->point->y);
+        lineTrack->stop();
+        break;
+    case EVENT_RESET:
+        lineTrack->reset();
+        break;
+    }
+}</code></pre>
+
+  <h3>3.7 轨迹线样式</h3>
+<pre><code>// LiveMapView.cpp:67-71
+lv_style_set_line_color(&ui.styleLine, lv_color_hex(0xff931e)); // 橙色
+lv_style_set_line_width(&ui.styleLine, 5);                      // 5像素宽
+lv_style_set_line_opa(&ui.styleLine, LV_OPA_COVER);
+lv_style_set_line_rounded(&ui.styleLine, true);                 // 圆角</code></pre>
+
+  <h3>3.8 性能优化</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>优化策略</th><th>效果</th></tr>
+      <tr><td>区域裁剪（TrackLineFilter）</td><td>10,000点 → ~50点，减少 <strong>99.5%</strong> 渲染点数</td></tr>
+      <tr><td>实时追加 <code>append_to_end()</code></td><td>0.1ms vs 重建10ms，提升 <strong>100倍</strong></td></tr>
+      <tr><td>多段线管理</td><td>支持不连续轨迹，避免单对象过多点</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ── 4. 地图瓦片路径计算 ── -->
+<section id="tilepath">
+  <h2>4. 地图瓦片路径计算</h2>
+  <p>文件位置：<code>USER/App/Utils/MapConv/MapConv.cpp</code></p>
+
+  <h3>4.1 Web墨卡托投影转换</h3>
+<pre><code>// MapConv.cpp:38-63
+void MapConv::ConvertMapCoordinate(
+    double longitude, double latitude,
+    int32_t* mapX, int32_t* mapY)
+{
+    double x = (longitude + 180.0) / 360.0;
+    double sinLatitude = sin(latitude * M_PI / 180.0);
+    double y = 0.5 - log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * M_PI);
+
+    uint32_t mapSize = (uint32_t)priv.tileSize &lt;&lt; priv.level;
+    *mapX = (int32_t)(Clip(x, 0.0, 1.0) * mapSize);
+    *mapY = (int32_t)(Clip(y, 0.0, 1.0) * mapSize);
+}</code></pre>
+  <div class="notice">Web墨卡托投影是大部分在线地图的标准。<code>level=16</code> 表示街道级别缩放。</div>
+
+  <h3>4.2 瓦片文件路径生成</h3>
+<pre><code>// MapConv.cpp:99-113
+int MapConv::ConvertMapPath(int32_t x, int32_t y, char* path, uint32_t len)
+{
+    int32_t tileX = x / priv.tileSize;  // 每个瓦片256像素
+    int32_t tileY = y / priv.tileSize;
+    // 格式：/MAP/{level}/{tileX}/{tileY}.bin
+    return snprintf(path, len, "%s/%d/%d/%d.%s",
+                    dirPath, priv.level, tileX, tileY, extName);
+}</code></pre>
+  <p>示例路径：<code>/MAP/16/54321/23456.bin</code></p>
+
+  <h3>4.3 瓦片容器计算（TileConv）</h3>
+<pre><code>// TileConv.cpp:34-73
+void TileConv::SetFocusPos(int32_t x, int32_t y)
+{
+    // 视图240×240，瓦片256×256，需要2×2=4个瓦片
+    const int32_t tileContWidth  = (priv.viewWidth  / tileSize + 2) * tileSize; // 512
+    const int32_t tileContHeight = (priv.viewHeight / tileSize + 2) * tileSize; // 512
+
+    // 对齐到瓦片边界
+    priv.pointTileCont[0].x = FixTile(priv.pointView[0].x, false);
+    priv.pointTileCont[0].y = FixTile(priv.pointView[0].y, false);
+    priv.pointTileCont[1] = { priv.pointTileCont[0].x + tileContWidth,  priv.pointTileCont[0].y };
+    priv.pointTileCont[2] = { priv.pointTileCont[0].x,                  priv.pointTileCont[0].y + tileContHeight };
+    priv.pointTileCont[3] = { priv.pointTileCont[0].x + tileContWidth,  priv.pointTileCont[0].y + tileContHeight };
+}</code></pre>
+
+  <h3>4.4 瓦片布局示意图</h3>
+<pre><code>屏幕视图：240×240像素   瓦片大小：256×256像素   瓦片容器：512×512像素
+
+┌─────────────┬─────────────┐
+│   瓦片0     │   瓦片1     │
+│  (256×256)  │  (256×256)  │
+│    ┌──────────────┐       │
+│    │  可视区域    │       │
+│    │  (240×240)   │       │
+├────┤              ├───────┤
+│    └──────────────┘       │
+│   瓦片2     │   瓦片3     │
+│  (256×256)  │  (256×256)  │
+└─────────────┴─────────────┘</code></pre>
+</section>
+
+<!-- ── 5. LVGL文件系统层 ── -->
+<section id="lvglfs">
+  <h2>5. LVGL文件系统层</h2>
+  <p>文件位置：<code>USER/lv_port/lv_port_fs_sdfat.cpp</code></p>
+
+  <h3>5.1 文件系统驱动注册</h3>
+<pre><code>// lv_port_fs_sdfat.cpp:51-81
+void lv_port_fs_init(void)
+{
+    fs_init();  // 初始化SD卡
+
+    static lv_fs_drv_t fs_drv;
+    lv_fs_drv_init(&fs_drv);
+
+    fs_drv.letter      = '/';           // 驱动器符号
+    fs_drv.ready_cb    = fs_ready;
+    fs_drv.open_cb     = fs_open;
+    fs_drv.close_cb    = fs_close;
+    fs_drv.read_cb     = fs_read;
+    fs_drv.write_cb    = fs_write;
+    fs_drv.seek_cb     = fs_seek;
+    fs_drv.tell_cb     = fs_tell;
+    fs_drv.dir_open_cb = fs_dir_open;
+    fs_drv.dir_read_cb = fs_dir_read;
+
+    lv_fs_drv_register(&fs_drv);
+}</code></pre>
+
+  <h3>5.2 文件打开回调</h3>
+<pre><code>// lv_port_fs_sdfat.cpp:104-135
+static void* fs_open(lv_fs_drv_t* drv, const char* path, lv_fs_mode_t mode)
+{
+    oflag_t oflag = (mode == LV_FS_MODE_WR) ? O_WRONLY : O_RDONLY;
+
+    file_t* file_p = new file_t;   // file_t = SdFile
+    if (!file_p->open(path, oflag))
+    {
+        delete file_p;
+        return NULL;
+    }
+    return file_p;  // 返回文件句柄给LVGL
+}</code></pre>
+
+  <h3>5.3 文件读取回调</h3>
+<pre><code>// lv_port_fs_sdfat.cpp:163-175
+static lv_fs_res_t fs_read(lv_fs_drv_t* drv, void* file_p,
+                            void* buf, uint32_t btr, uint32_t* br)
+{
+    int ret = SD_FILE(file_p)->read(buf, btr);  // ← SdFile::read()
+    if (ret &lt; 0) return LV_FS_RES_FS_ERR;
+    *br = ret;
+    return LV_FS_RES_OK;
+}</code></pre>
+</section>
+
+<!-- ── 6. SdFat SD卡读取 ── -->
+<section id="sdfat">
+  <h2>6. SdFat SD卡读取</h2>
+  <p>文件位置：<code>Libraries/SdFat/src/SdCard/SdioCard_AT32.cpp</code></p>
+
+  <h3>6.1 SDIO单块读取</h3>
+<pre><code>// SdioCard_AT32.cpp:99-106
+bool SdioCard::readBlock(uint32_t lba, uint8_t* dst)
+{
+    sd_error_status_type status = sd_block_read(dst, (long long)lba * 512, 512);
+    if (status != SD_OK) { transfer_error = status; return false; }
+    transfer_error = SD_OK;
+    return true;
+}
+
+// SdioCard_AT32.cpp:109-116
+bool SdioCard::readBlocks(uint32_t lba, uint8_t* dst, size_t nb)
+{
+    sd_error_status_type status = sd_mult_blocks_read(dst, (long long)lba * 512, 512, nb);
+    if (status != SD_OK) { transfer_error = status; return false; }
+    return true;
+}</code></pre>
+
+  <h3>6.2 SDIO性能对比</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>接口</th><th>时钟</th><th>位宽</th><th>理论速度</th><th>实际速度</th></tr>
+      <tr><td><strong>SDIO</strong></td><td>25 MHz</td><td>4-bit 并行</td><td>12.5 MB/s</td><td>10–15 MB/s</td></tr>
+      <tr><td>SPI</td><td>24 MHz</td><td>1-bit 串行</td><td>3 MB/s</td><td>~2.5 MB/s</td></tr>
+    </table>
+  </div>
+  <div class="notice ok">SDIO 比 SPI 快约 <strong>4–5 倍</strong>，是地图实时渲染的关键加速因素。</div>
+</section>
+
+<!-- ── 7. LVGL图片缓存机制 ── -->
+<section id="imgcache">
+  <h2>7. LVGL图片缓存机制</h2>
+
+  <h3>7.1 缓存配置</h3>
+<pre><code>// lv_conf.h:166
+#define LV_IMG_CACHE_DEF_SIZE   3  // 缓存3个地图瓦片</code></pre>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">缓存瓦片数</div></div>
+    <div class="stat"><div class="stat-num">128KB</div><div class="stat-label">单瓦片大小</div></div>
+    <div class="stat"><div class="stat-num">384KB</div><div class="stat-label">总缓存占用RAM</div></div>
+  </div>
+
+  <h3>7.2 LRU缓存打开流程</h3>
+<pre><code>// lv_img_cache.c:63-141
+_lv_img_cache_entry_t* _lv_img_cache_open(const void* src, lv_color_t color, int32_t frame_id)
+{
+    _lv_img_cache_entry_t* cache = LV_GC_ROOT(_lv_img_cache_array);
+
+    // 1. 老化所有缓存项（LRU）
+    for (i = 0; i &lt; entry_cnt; i++)
+        if (cache[i].life > INT32_MIN + LV_IMG_CACHE_AGING)
+            cache[i].life -= LV_IMG_CACHE_AGING;  // 每次减1
+
+    // 2. 查找缓存（路径字符串匹配）
+    for (i = 0; i &lt; entry_cnt; i++) {
+        if (lv_img_cache_match(src, cache[i].dec_dsc.src)) {
+            // 缓存命中！增加生命值
+            cached_src->life += cached_src->dec_dsc.time_to_open * LV_IMG_CACHE_LIFE_GAIN;
+            return cached_src;  // ← 直接返回，不需要重新加载！
+        }
+    }
+
+    // 3. 缓存未命中，替换生命值最低的项
+    cached_src = &cache[0];
+    for (i = 1; i &lt; entry_cnt; i++)
+        if (cache[i].life &lt; cached_src->life) cached_src = &cache[i];
+
+    // 4. 关闭旧图片，打开新图片
+    if (cached_src->dec_dsc.src) lv_img_decoder_close(&cached_src->dec_dsc);
+    uint32_t t = lv_tick_get();
+    lv_img_decoder_open(&cached_src->dec_dsc, src, color, frame_id);
+    cached_src->dec_dsc.time_to_open = lv_tick_elaps(t);  // 记录打开耗时
+
+    return cached_src;
+}</code></pre>
+  <div class="notice">
+    <strong>LRU变种策略：</strong>打开耗时越长的图片（如大图）生命值权重越高，保留越久；打开快的小图可以快速重新加载，优先被替换。
+  </div>
+</section>
+
+<!-- ── 8. LVGL图片解码 ── -->
+<section id="imgdecode">
+  <h2>8. LVGL图片解码</h2>
+
+  <h3>8.1 图片格式</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>属性</th><th>值</th><th>说明</th></tr>
+      <tr><td>扩展名</td><td class="td-code">.bin</td><td>在 Config.h:59 定义</td></tr>
+      <tr><td>格式</td><td>原始 RGB565</td><td>无压缩，无文件头，直接内存拷贝</td></tr>
+      <tr><td>大小</td><td>256×256×2 = 131,072 字节</td><td>每个瓦片固定 128KB</td></tr>
+      <tr><td>颜色格式</td><td>LV_IMG_CF_TRUE_COLOR</td><td>ST7789显示器原生格式，零转换</td></tr>
+    </table>
+  </div>
+
+  <h3>8.2 BIN格式解码流程</h3>
+<pre><code>lv_res_t bin_decoder_open(lv_img_decoder_dsc_t* dsc, const void* src)
+{
+    lv_fs_file_t file;
+    lv_fs_open(&file, src, LV_FS_MODE_RD);    // ← 调用LVGL文件系统
+
+    uint32_t file_size;
+    lv_fs_seek(&file, 0, LV_FS_SEEK_END);
+    lv_fs_tell(&file, &file_size);             // = 131,072 字节
+    lv_fs_seek(&file, 0, LV_FS_SEEK_SET);
+
+    uint8_t* img_data = lv_mem_alloc(file_size);
+    uint32_t bytes_read;
+    lv_fs_read(&file, img_data, file_size, &bytes_read);  // ← 从SD卡读取
+    lv_fs_close(&file);
+
+    dsc->img_data = img_data;
+    dsc->header.w = 256;
+    dsc->header.h = 256;
+    dsc->header.cf = LV_IMG_CF_TRUE_COLOR;
+    return LV_RES_OK;
+}</code></pre>
+
+  <h3>8.3 RGB565格式</h3>
+<pre><code>15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+R  R  R  R  R  G  G  G  G  G  G  B  B  B  B  B
+└────5位红色────┘ └───6位绿色───┘ └───5位蓝色──┘</code></pre>
+</section>
+
+<!-- ── 9. LVGL渲染刷新机制 ── -->
+<section id="render">
+  <h2>9. LVGL渲染刷新机制</h2>
+
+  <h3>9.1 渲染配置</h3>
+<pre><code>// lv_conf.h:90
+#define LV_DISP_DEF_REFR_PERIOD 16  // 16ms = 62.5 FPS（理论最大值）</code></pre>
+
+  <h3>9.2 脏区域刷新机制</h3>
+<pre><code>// lv_refr.c（伪代码）
+void lv_refr_now(lv_disp_t* disp)
+{
+    // 1. 收集脏区域（Dirty Rectangles）
+    lv_area_t dirty_areas[LV_INV_BUF_SIZE];
+    uint32_t dirty_count = collect_dirty_areas(dirty_areas);
+
+    // 2. 合并重叠区域
+    merge_overlapping_areas(dirty_areas, &dirty_count);
+
+    // 3. 对每个脏区域渲染
+    for (uint32_t i = 0; i &lt; dirty_count; i++) {
+        lv_color_t* buf = draw_buf->buf_act;
+        draw_objects_in_area(&dirty_areas[i], buf);
+
+        // 4. flush回调发送到屏幕
+        disp->driver->flush_cb(disp->driver, &dirty_areas[i], buf);
+        while (disp->driver->flushing);  // 等待flush完成
+    }
+}</code></pre>
+  <div class="notice">
+    <strong>只重绘脏区域！</strong> GPS位置变化 → 地图容器移动 + 轨迹线更新 → 标记脏区域 → 只重绘变化区域，不重绘整个屏幕。
+  </div>
+
+  <h3>9.3 双缓冲机制</h3>
+<pre><code>// lv_port_disp.cpp:32-51
+void lv_port_disp_init()
+{
+    // 两个半屏缓冲区（各57,600字节 = 240×120×2）
+    static lv_color_t lv_disp_buf1[SCREEN_BUFFER_SIZE];  // 240×120像素
+    static lv_color_t lv_disp_buf2[SCREEN_BUFFER_SIZE];
+
+    static lv_disp_draw_buf_t disp_buf;
+    lv_disp_draw_buf_init(&disp_buf, lv_disp_buf1, lv_disp_buf2, SCREEN_BUFFER_SIZE);
+
+    static lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.hor_res  = 240;
+    disp_drv.ver_res  = 240;
+    disp_drv.flush_cb = disp_flush_cb;
+    disp_drv.wait_cb  = disp_wait_cb;
+    disp_drv.draw_buf = &disp_buf;
+    lv_disp_drv_register(&disp_drv);
+}</code></pre>
+<pre><code>时间线：
+┌────────┬────────┬────────┬────────┐
+│ 阶段1  │ 阶段2  │ 阶段3  │ 阶段4  │
+├────────┼────────┼────────┼────────┤
+│LVGL渲染│LVGL渲染│        │LVGL渲染│
+│→ buf1  │→ buf2  │        │→ buf1  │
+├────────┼────────┼────────┼────────┤
+│        │DMA传输 │DMA传输 │        │
+│        │buf1→屏 │buf2→屏 │        │
+└────────┴────────┴────────┴────────┘
+LVGL渲染和DMA传输并行，提高效率！</code></pre>
+</section>
+
+<!-- ── 10. 显示驱动层 ── -->
+<section id="dispdrv">
+  <h2>10. 显示驱动层</h2>
+  <p>文件位置：<code>MDK-ARM_F435/Platform/lv_port/lv_port_disp.cpp</code></p>
+
+  <h3>10.1 Flush回调函数</h3>
+<pre><code>// lv_port_disp.cpp:9-20
+static void disp_flush_cb(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* color_p)
+{
+    disp_drv_p = disp;  // 保存驱动指针，供DMA完成回调使用
+
+    const lv_coord_t w   = area->x2 - area->x1 + 1;
+    const lv_coord_t h   = area->y2 - area->y1 + 1;
+    const uint32_t   len = w * h;
+
+    HAL::Display_SetAddrWindow(area->x1, area->y1, area->x2, area->y2);
+    HAL::Display_SendPixels((uint16_t*)color_p, len);  // ← DMA异步传输
+
+    // 不在这里调用lv_disp_flush_ready()
+    // 而是在DMA完成中断中调用（异步）
+}</code></pre>
+
+  <h3>10.2 DMA完成回调</h3>
+<pre><code>// lv_port_disp.cpp:22-25
+static void disp_send_finish_callback()
+{
+    lv_disp_flush_ready(disp_drv_p);  // ← 通知LVGL传输完成，切换双缓冲
+}
+
+// 注册回调
+HAL::Display_SetSendFinishCallback(disp_send_finish_callback);</code></pre>
+</section>
+
+<!-- ── 11. 硬件显示输出 ── -->
+<section id="hw">
+  <h2>11. 硬件显示输出</h2>
+  <p>文件位置：<code>MDK-ARM_F435/Platform/HAL/HAL_Display.cpp</code></p>
+
+  <h3>11.1 ST7789命令序列</h3>
+<pre><code>// HAL_Display.cpp:186-189
+void HAL::Display_SetAddrWindow(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
+{
+    screen.setAddrWindow(x0, y0, x1, y1);  // ← Adafruit_ST7789库
+}
+
+// Adafruit_ST7789::setAddrWindow伪代码
+writeCommand(ST77XX_CASET);  // 0x2A - 设置列地址
+writeData16(x0); writeData16(x1);
+writeCommand(ST77XX_RASET);  // 0x2B - 设置行地址
+writeData16(y0); writeData16(y1);
+writeCommand(ST77XX_RAMWR);  // 0x2C - 开始写入像素</code></pre>
+
+  <h3>11.2 SPI+DMA数据传输</h3>
+<pre><code>// HAL_Display.cpp:191-197
+void HAL::Display_SendPixels(const uint16_t* pixels, uint32_t len)
+{
+    digitalWrite_LOW(CONFIG_SCREEN_CS_PIN);   // 片选使能
+    digitalWrite_HIGH(CONFIG_SCREEN_DC_PIN);  // 数据模式
+    Display_SPI_DMA_Send(pixels, len * sizeof(uint16_t));
+}
+
+// HAL_Display.cpp:57-78
+static void Display_SPI_DMA_Send(const void* buf, uint32_t size)
+{
+    if (size > DISP_DMA_MAX_SIZE)
+    {
+        // DMA最大65535字节，大数据分批传输
+        Disp_DMA_TragetPoint  = (uint8_t*)buf + size;
+        Disp_DMA_CurrentPoint = (uint8_t*)buf + DISP_DMA_MAX_SIZE;
+        size = DISP_DMA_MAX_SIZE;
+    }
+    else { Disp_DMA_CurrentPoint = Disp_DMA_TragetPoint = NULL; }
+
+    dma_channel_enable(DISP_DMA_CHANNEL, FALSE);
+    DISP_DMA_CHANNEL->maddr = (uint32_t)buf;
+    DISP_DMA_CHANNEL->dtcnt_bit.cnt = size;
+    dma_channel_enable(DISP_DMA_CHANNEL, TRUE);  // 启动DMA
+}</code></pre>
+
+  <h3>11.3 DMA中断处理</h3>
+<pre><code>// HAL_Display.cpp:80-99
+extern "C" void DMA1_Channel3_IRQHandler(void)
+{
+    if (dma_flag_get(DMA1_FDT3_FLAG) != RESET)
+    {
+        dma_flag_clear(DMA1_FDT3_FLAG);
+        if (Disp_DMA_CurrentPoint &lt; Disp_DMA_TragetPoint)
+            // 继续传输剩余数据
+            Display_SPI_DMA_Send(Disp_DMA_CurrentPoint,
+                                 Disp_DMA_TragetPoint - Disp_DMA_CurrentPoint);
+        else
+        {
+            digitalWrite_HIGH(CONFIG_SCREEN_CS_PIN);  // 片选失能
+            if (Disp_Callback) Disp_Callback();       // ← 调用disp_send_finish_callback()
+        }
+    }
+}</code></pre>
+
+  <h3>11.4 SPI传输性能</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>指标</th><th>值</th></tr>
+      <tr><td>SPI时钟</td><td>约40–60 MHz（受ST7789限制）</td></tr>
+      <tr><td>实际传输速度</td><td>约5–6 MB/s</td></tr>
+      <tr><td>半屏数据量</td><td>240×120×2 = 57,600 字节</td></tr>
+      <tr><td>半屏传输时间</td><td>约 <strong>11.5ms</strong></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ── 12. 性能优化要点 ── -->
+<section id="perf">
+  <h2>12. 性能优化要点</h2>
+
+  <h3>12.1 已实现的优化</h3>
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-num">1</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">LVGL图片缓存（LV_IMG_CACHE_DEF_SIZE = 3）</div>
+        <div class="pipeline-desc">避免重复从SD卡读取相同瓦片，每次命中节省约8–10ms读取时间。代码位置：<code>lv_conf.h:166</code></div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">2</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">地图瓦片预加载（MapTileContPreload）</div>
+        <div class="pipeline-desc">视图切换时预先加载瓦片到缓存，调用 <code>_lv_img_cache_open()</code> 预热。代码位置：<code>LiveMap.cpp:306-327</code></div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">3</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">位置缓存（避免无意义更新）</div>
+        <div class="pipeline-desc">箭头位置/角度有缓存（≥1度才旋转），地图容器位置有缓存。代码位置：<code>LiveMapView.h:64-95</code></div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">4</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">禁用透明屏幕支持（LV_COLOR_SCREEN_TRANSP = 0）</div>
+        <div class="pipeline-desc">使用快速颜色混合算法，帧率从15–20 FPS 提升至 <strong>50–60 FPS（3–4倍）</strong>。代码位置：<code>lv_conf.h:40</code></div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">5</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">SDIO接口（替代SPI）</div>
+        <div class="pipeline-desc">SD卡读取速度从3 MB/s → 15 MB/s（<strong>5倍</strong>），是地图实时渲染的关键。代码位置：<code>SdioCard_AT32.cpp</code></div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">6</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">双缓冲机制</div>
+        <div class="pipeline-desc">LVGL渲染和DMA传输并行，两个57KB缓冲区交替使用，大幅提升吞吐量。代码位置：<code>lv_port_disp.cpp:36-40</code></div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">7</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">轨迹线区域裁剪</div>
+        <div class="pipeline-desc">只渲染可视区域内的轨迹点，减少 <strong>99%以上</strong>的轨迹点渲染量。代码位置：<code>TrackLineFilter.cpp:57-81</code></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>12.2 理论性能极限</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>阶段</th><th>时间</th><th>说明</th></tr>
+      <tr><td>GPS更新</td><td>~0.5ms</td><td>GPS数据读取和坐标转换</td></tr>
+      <tr><td>瓦片路径计算</td><td>~0.1ms</td><td>字符串拼接</td></tr>
+      <tr><td>缓存查询</td><td>~0.2ms</td><td>遍历3个缓存项</td></tr>
+      <tr><td>SD卡读取</td><td>0–10ms</td><td>缓存命中0ms，未命中10ms</td></tr>
+      <tr><td>图片解码</td><td>~0ms</td><td>BIN格式无需解码</td></tr>
+      <tr><td>轨迹线更新</td><td>~0.5ms</td><td>追加新点到lv_poly_line</td></tr>
+      <tr><td>LVGL渲染</td><td>5–8ms</td><td>渲染地图+轨迹+箭头到缓冲区</td></tr>
+      <tr><td>DMA传输</td><td>11ms</td><td>半屏57KB数据</td></tr>
+      <tr><td><strong>总计</strong></td><td><strong>17–30ms</strong></td><td><strong>33–59 FPS</strong></td></tr>
+    </table>
+  </div>
+  <div class="notice ok">
+    <strong>最佳情况（缓存全命中）</strong>：约6ms，理论166 FPS，实际受 <code>LV_DISP_DEF_REFR_PERIOD=16ms</code> 限制为 60 FPS。
+  </div>
+  <div class="notice warn">
+    <strong>最坏情况（缓存全未命中）</strong>：4个瓦片 × 10ms = 40ms + 渲染8ms + 传输11ms = 总计 59ms ≈ <strong>17 FPS</strong>。
+  </div>
+</section>
+
+<!-- ── 13. 完整调用链 ── -->
+<section id="callchain">
+  <h2>13. 完整调用链</h2>
+
+  <h3>13.1 GPS位置变化 → 屏幕显示（29步）</h3>
+<pre><code>1.  主循环（每30ms）
+    ↓
+2.  LiveMap::Update() [LiveMap.cpp:154]
+    ↓
+3.  LiveMap::CheckPosition() [LiveMap.cpp:194]
+    ↓
+4.  HAL::GPS_GetInfo(&gpsInfo) [HAL_GPS.cpp:89]
+    ↓
+5.  MapConv::ConvertMapCoordinate(lng, lat, &mapX, &mapY)
+    [MapConv.cpp:38] → Web墨卡托投影
+    ↓
+6.  TileConv::SetFocusPos(mapX, mapY)
+    [TileConv.cpp:34] → 计算需要的4个瓦片
+    ↓
+7.  GetIsMapTileContChanged() [LiveMap.cpp:215]
+    ↓
+8.  onMapTileContRefresh(&area, mapX, mapY) [如果瓦片改变]
+    ├─ 9a. MapTileContReload() → lv_img_set_src() → 图片加载
+    └─ 9b. TrackLineReload() → lineFilter → lv_poly_line
+    ↓
+10. [地图瓦片加载]
+    lv_img_set_src() → _lv_img_cache_open() → lv_img_decoder_open()
+    → lv_fs_open() → SdFile::open() → SDIO读取 → RGB565数据
+    ↓
+11. [实时GPS追加轨迹]
+    TrackLineAppendToEnd(x, y) → lv_poly_line::append_to_end()
+    → lv_line_set_points()
+    ↓
+12. MapTileContUpdate(mapX, mapY, gpsInfo.course) [LiveMap.cpp:260]
+    View.SetMapContPos() → 地图容器位置（有缓存）
+    View.SetImgArrowStatus() → 箭头位置和角度（有缓存）
+    ↓
+13. lv_obj_invalidate() → 标记对象为"脏"
+    ↓
+14. 等待下一个渲染周期（16ms）
+    ↓
+15. lv_timer_handler() [主循环调用]
+    ↓
+16. lv_refr_now(disp) → LVGL渲染引擎
+    ↓
+17. 收集脏区域（Dirty Rectangles），合并重叠区域
+    ↓
+18. 渲染地图+轨迹+箭头到双缓冲区
+    ├─ 从dsc->img_data拷贝RGB565数据（地图瓦片）
+    ├─ 绘制lv_line对象（轨迹线，橙色5像素宽）
+    └─ 绘制lv_img对象（箭头，可旋转）
+    ↓
+19. disp_flush_cb(disp, area, color_p) [lv_port_disp.cpp:9]
+    ↓
+20. HAL::Display_SetAddrWindow(x1, y1, x2, y2)
+    ↓
+21. ST7789命令序列：CASET(0x2A) → RASET(0x2B) → RAMWR(0x2C)
+    ↓
+22. HAL::Display_SendPixels(pixels, len)
+    ↓
+23. Display_SPI_DMA_Send(pixels, len*2)
+    ↓
+24. DMA配置并启动
+    DISP_DMA_CHANNEL->maddr = pixels
+    dma_channel_enable(DISP_DMA_CHANNEL, TRUE)
+    ↓
+25. DMA自动传输（CPU空闲）
+    RAM → SPI1->dt寄存器 → ST7789 GRAM
+    ↓
+26. DMA1_Channel3_IRQHandler() [传输完成中断]
+    ↓
+27. disp_send_finish_callback()
+    ↓
+28. lv_disp_flush_ready(disp_drv_p) → 通知LVGL，切换双缓冲区
+    ↓
+29. ✅ 屏幕显示更新完成！</code></pre>
+
+  <h3>13.2 渲染时序图</h3>
+<pre><code>时间线 (ms) →
+0        10       20       30       40       50
+│────────┼────────┼────────┼────────┼────────│
+│
+├─ GPS更新 (0.5ms)
+├─ 坐标转换 (0.1ms)
+├─ 检查瓦片 (0.2ms)
+│
+├─ 缓存查询 (0.2ms)
+│  └─ 命中！→ 0ms
+│  └─ 未命中 → SDIO读取 (8-10ms)
+│
+├─ 轨迹线更新 (0.5ms)
+│
+├─ LVGL渲染 (5-8ms)
+│  ├─ 收集脏区域
+│  ├─ 渲染地图瓦片
+│  ├─ 渲染轨迹线（橙色5px）
+│  └─ 渲染箭头（可旋转）
+│
+├─ DMA传输 (11ms)
+│  └─ 57KB数据 → ST7789
+│
+└─ 显示完成 ✓   总计：17-30ms (33-59 FPS)</code></pre>
+</section>
+
+<!-- ── 14. 常见问题排查 ── -->
+<section id="troubleshoot">
+  <h2>14. 常见问题排查</h2>
+
+  <h3>14.1 帧率低于预期（15–20 FPS）</h3>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-text"><strong>LV_COLOR_SCREEN_TRANSP = 1</strong> — 检查 <code>lv_conf.h:40</code>，改为0，可提升3–4倍帧率</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-text"><strong>图片缓存禁用</strong> — 检查 <code>lv_conf.h:166</code> LV_IMG_CACHE_DEF_SIZE，设置为3或更大</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-text"><strong>频繁重绘</strong> — 检查是否每帧都调用 <code>lv_img_set_src()</code>，添加路径缓存</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-text"><strong>SD卡使用SPI而非SDIO</strong> — 切换到SDIO接口，速度提升5倍</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-text"><strong>轨迹线未裁剪</strong> — 确保调用 <code>TrackLineFilter::SetClipArea()</code></div>
+    </div>
+  </div>
+
+  <h3>14.2 地图瓦片加载失败（显示空白）</h3>
+<pre><code>// 1. 检查SD卡挂载
+bool ready = HAL::SD_GetReady();
+// 如果返回false，SD卡未就绪
+
+// 2. 检查文件路径格式
+// 正确：/MAP/16/54321/23456.bin
+// 错误：MAP/16/54321/23456.bin（缺少前导斜杠）
+
+// 3. 检查文件是否存在
+lv_fs_file_t file;
+lv_fs_res_t res = lv_fs_open(&file, path, LV_FS_MODE_RD);
+// res != LV_FS_RES_OK → 文件不存在或无法打开
+
+// 4. 检查文件大小（应为131,072字节）
+uint32_t size;
+lv_fs_seek(&file, 0, LV_FS_SEEK_END);
+lv_fs_tell(&file, &size);</code></pre>
+
+  <h3>14.3 轨迹线不显示或错位</h3>
+<pre><code>// 1. 检查TrackLineFilter回调
+Model.lineFilter.SetOutputPointCallback(onTrackLineEvent);
+// 确保回调函数已设置
+
+// 2. 检查裁剪区域（应为512×512瓦片容器大小）
+TrackLineFilter::Area_t area = {
+    .x0 = rect.x,
+    .y0 = rect.y,
+    .x1 = rect.x + rect.width  - 1,
+    .y1 = rect.y + rect.height - 1
+};</code></pre>
+
+  <h3>14.4 软件旋转性能问题</h3>
+  <div class="notice warn">
+    <strong>lv_img_set_angle()</strong> 软件旋转需逐像素计算，每次约3–5ms。已通过1度角度阈值 + 缓存上次角度来优化，避免不必要的旋转计算。
+  </div>
+</section>
+
+</div>
+
+<footer>
+  LiveMap 渲染流程技术文档 &nbsp;·&nbsp; X-Track v2.7 &nbsp;·&nbsp; AT32F435RGT7 &nbsp;·&nbsp; v1.1 &nbsp;·&nbsp; 2025-12-19
+</footer>
+</main>
+
+<script>
+  const toggle = document.getElementById('menu-toggle');
+  toggle.addEventListener('click', () => { document.body.classList.toggle('menu-open'); });
+
+  const sections = document.querySelectorAll('section[id], h3[id]');
+  const links = document.querySelectorAll('.sidebar-link, .sidebar-sublink');
+
+  function updateActive() {
+    let current = '';
+    sections.forEach(sec => { if (sec.getBoundingClientRect().top <= 80) current = sec.id; });
+    links.forEach(a => {
+      const active = a.getAttribute('href') === '#' + current;
+      a.classList.toggle('active', active);
+      if (active) a.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+  }
+  document.getElementById('main').addEventListener('scroll', updateActive);
+  window.addEventListener('scroll', updateActive);
+
+  document.querySelectorAll('pre').forEach(pre => {
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.title = '复制代码';
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    btn.addEventListener('click', () => {
+      const code = pre.querySelector('code') ? pre.querySelector('code').innerText : pre.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        }, 2000);
+      });
+    });
+    pre.appendChild(btn);
+  });
+
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.innerWidth < 700) document.body.classList.remove('menu-open');
+    });
+  });
+</script>
+</body>
+</html>

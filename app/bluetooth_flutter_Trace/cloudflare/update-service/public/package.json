@@ -1,0 +1,14 @@
+{
+  "name": "@trace/update-service-public",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260628.1",
+    "typescript": "6.0.3",
+    "wrangler": "4.105.0"
+  }
+}

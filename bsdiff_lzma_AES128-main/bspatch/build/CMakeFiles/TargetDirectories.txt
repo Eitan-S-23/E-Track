@@ -1,0 +1,3 @@
+D:/SU/Github/c-cpp/bsdiff/bsdiff_lzma/bsdiff_lzma_AES128_best/bspatch/build/CMakeFiles/bspatch.dir
+D:/SU/Github/c-cpp/bsdiff/bsdiff_lzma/bsdiff_lzma_AES128_best/bspatch/build/CMakeFiles/edit_cache.dir
+D:/SU/Github/c-cpp/bsdiff/bsdiff_lzma/bsdiff_lzma_AES128_best/bspatch/build/CMakeFiles/rebuild_cache.dir

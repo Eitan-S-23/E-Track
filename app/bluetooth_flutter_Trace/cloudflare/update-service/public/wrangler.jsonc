@@ -1,0 +1,50 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "trace-update-public-staging",
+  "pages_build_output_dir": "./site",
+  "compatibility_date": "2026-06-28",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "ENVIRONMENT": "staging",
+    "APP_ID": "trace",
+    "GITHUB_OWNER": "Eitan-S-23",
+    "GITHUB_REPO": "Trace",
+    "MANIFEST_CACHE_TTL_SECONDS": "60",
+    "DOWNLOAD_TOKEN_TTL_SECONDS": "300",
+    "DOWNLOAD_TOKEN_KEY_VERSION": "staging-public",
+    "RATE_LIMIT_WINDOW_SECONDS": "60",
+    "RATE_LIMIT_MAX_REQUESTS": "60",
+    "ENABLE_DIRECT_ADMIN_API": "false"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "trace-update-staging",
+      "database_id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+      "migrations_dir": "../migrations"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "MANIFEST_CACHE",
+      "id": "fe3b08f2e0774072a44bdf140c44174a"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RELEASES_BUCKET",
+      "bucket_name": "trace-update-staging-releases"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "RATE_LIMITER",
+        "class_name": "RateLimiter",
+        "script_name": "trace-update-service-staging"
+      }
+    ]
+  }
+}

@@ -1,0 +1,747 @@
+name: Build APK and EXE Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Create a GitHub Release after the build"
+        required: true
+        type: boolean
+        default: false
+      release_tag:
+        description: "Optional release tag, for example v1.0.0"
+        required: false
+        type: string
+      replace_existing_release:
+        description: "Dangerous: replace assets on an existing GitHub Release"
+        required: true
+        type: boolean
+        default: false
+
+env:
+  PUB_HOSTED_URL: https://pub.dev
+  FLUTTER_STORAGE_BASE_URL: https://storage.googleapis.com
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      docs_changed: ${{ steps.paths.outputs.docs_changed }}
+      app_build_required: ${{ steps.paths.outputs.app_build_required }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect docs and app build inputs
+        id: paths
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          docs_changed=false
+          app_build_required=false
+
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" || "${REF_NAME}" == refs/tags/v* ]]; then
+            app_build_required=true
+          else
+            base_sha=""
+            if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+              base_sha="${PR_BASE_SHA}"
+            elif [[ "${EVENT_NAME}" == "push" && "${BEFORE_SHA}" != "0000000000000000000000000000000000000000" ]]; then
+              base_sha="${BEFORE_SHA}"
+            fi
+
+            if [[ -z "${base_sha}" ]]; then
+              app_build_required=true
+            else
+              changed_paths="$(git diff --name-only "${base_sha}" "${CURRENT_SHA}")"
+              if grep -q '^app/bluetooth_flutter_Trace/docs/' <<< "${changed_paths}"; then
+                docs_changed=true
+              fi
+              if grep -Eq '^app/bluetooth_flutter_Trace/(pubspec[.]yaml|pubspec[.]lock|analysis_options[.]yaml|lib/|android/|windows/|assets/|third_party/)' <<< "${changed_paths}"; then
+                app_build_required=true
+              fi
+            fi
+          fi
+
+          echo "docs_changed=${docs_changed}" >> "$GITHUB_OUTPUT"
+          echo "app_build_required=${app_build_required}" >> "$GITHUB_OUTPUT"
+
+  android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/bluetooth_flutter_Trace
+    needs:
+      - changes
+    if: needs.changes.outputs.app_build_required == 'true'
+    outputs:
+      fixed_signing_configured: ${{ steps.android_release_signing.outputs.fixed_signing_configured }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.12"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Restore Android Gradle wrapper
+        working-directory: app/bluetooth_flutter_Trace/android
+        shell: bash
+        run: |
+          printf 'flutter.sdk=%s\n' "$FLUTTER_ROOT" > local.properties
+          gradle wrapper --gradle-version 8.12 --distribution-type all
+
+      - name: Configure Android release signing
+        id: android_release_signing
+        shell: bash
+        env:
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+          SIDELOAD_KEYSTORE_BASE64: ${{ secrets.SIDELOAD_KEYSTORE_BASE64 }}
+          SIDELOAD_KEYSTORE_PASSWORD: ${{ secrets.SIDELOAD_KEYSTORE_PASSWORD }}
+          SIDELOAD_KEY_ALIAS: ${{ secrets.SIDELOAD_KEY_ALIAS }}
+          SIDELOAD_KEY_PASSWORD: ${{ secrets.SIDELOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          android_release_signing_present=false
+          sideload_signing_present=false
+
+          if [[ -n "${ANDROID_RELEASE_KEYSTORE_BASE64:-}" || -n "${ANDROID_RELEASE_KEYSTORE_PASSWORD:-}" || -n "${ANDROID_RELEASE_KEY_ALIAS:-}" || -n "${ANDROID_RELEASE_KEY_PASSWORD:-}" ]]; then
+            android_release_signing_present=true
+          fi
+
+          if [[ -n "${SIDELOAD_KEYSTORE_BASE64:-}" || -n "${SIDELOAD_KEYSTORE_PASSWORD:-}" || -n "${SIDELOAD_KEY_ALIAS:-}" || -n "${SIDELOAD_KEY_PASSWORD:-}" ]]; then
+            sideload_signing_present=true
+          fi
+
+          if [[ "${android_release_signing_present}" == "false" && "${sideload_signing_present}" == "false" ]]; then
+            echo "::warning title=Android release signing::No fixed signing secrets are configured; release APK will use CI debug signing and cannot reliably update previous CI APKs."
+            echo "fixed_signing_configured=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${android_release_signing_present}" == "true" ]]; then
+            keystore_base64="${ANDROID_RELEASE_KEYSTORE_BASE64:?Missing ANDROID_RELEASE_KEYSTORE_BASE64 secret}"
+            keystore_password="${ANDROID_RELEASE_KEYSTORE_PASSWORD:?Missing ANDROID_RELEASE_KEYSTORE_PASSWORD secret}"
+            key_alias="${ANDROID_RELEASE_KEY_ALIAS:?Missing ANDROID_RELEASE_KEY_ALIAS secret}"
+            key_password="${ANDROID_RELEASE_KEY_PASSWORD:?Missing ANDROID_RELEASE_KEY_PASSWORD secret}"
+          else
+            keystore_base64="${SIDELOAD_KEYSTORE_BASE64:?Missing SIDELOAD_KEYSTORE_BASE64 secret}"
+            keystore_password="${SIDELOAD_KEYSTORE_PASSWORD:?Missing SIDELOAD_KEYSTORE_PASSWORD secret}"
+            key_alias="${SIDELOAD_KEY_ALIAS:?Missing SIDELOAD_KEY_ALIAS secret}"
+            key_password="${SIDELOAD_KEY_PASSWORD:?Missing SIDELOAD_KEY_PASSWORD secret}"
+          fi
+
+          if ! printf '%s' "${keystore_base64}" | base64 --decode > android/release-keystore.jks; then
+            rm -f android/release-keystore.jks
+            echo "::error title=Android release signing::Failed to decode fixed signing keystore secret."
+            exit 1
+          fi
+
+          {
+            printf 'storePassword=%s\n' "${keystore_password}"
+            printf 'keyPassword=%s\n' "${key_password}"
+            printf 'keyAlias=%s\n' "${key_alias}"
+            printf 'storeFile=%s\n' "release-keystore.jks"
+          } > android/key.properties
+
+          chmod 600 android/release-keystore.jks android/key.properties
+          echo "Android release signing configured with a fixed keystore."
+          echo "fixed_signing_configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Analyze project
+        continue-on-error: true
+        run: flutter analyze
+
+      - name: Clear cached Flutter Android artifacts
+        shell: bash
+        run: |
+          rm -rf "$HOME/.gradle/caches/modules-2/files-2.1/io.flutter"
+          rm -rf "$HOME/.gradle/caches"/transforms-*
+
+      - name: Build release APK
+        shell: bash
+        env:
+          TRACE_PUBLIC_UPDATE_SERVICE_URL: ${{ vars.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
+        run: |
+          set +e
+          build_args=(apk --release --target-platform=android-arm,android-arm64)
+          echo "Android release APK targets ARM ABIs only to keep the sideload package smaller."
+          if [[ -n "${TRACE_PUBLIC_UPDATE_SERVICE_URL:-}" ]]; then
+            update_service_url="${TRACE_PUBLIC_UPDATE_SERVICE_URL%/}"
+            build_args+=(--dart-define="TRACE_CLOUDFLARE_UPDATE_MANIFEST_URL=${update_service_url}/api/public/latest")
+            build_args+=(--dart-define="TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=${update_service_url}/api/public/firmware/latest")
+            echo "Cloudflare public update manifest URL is configured for this APK."
+          else
+            echo "Cloudflare update manifest URL is not configured; APK will use the legacy GitHub latest manifest and no default firmware endpoint."
+          fi
+          if [[ -n "${TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64:-}" ]]; then
+            build_args+=(--dart-define="TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64=${TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64}")
+            echo "Cloudflare update payload public key is configured for this APK."
+          else
+            echo "Cloudflare update payload public key is not configured; signed Cloudflare manifests will fail closed."
+          fi
+
+          flutter build "${build_args[@]}" 2>&1 | tee android-build.log
+          status=${PIPESTATUS[0]}
+
+          if [[ "$status" -ne 0 ]]; then
+            summary="$(grep -Ei "FAILURE|Exception|error|Could not|Execution failed|AAPT|R8|D8|Gradle task|Target .* failed|What went wrong" android-build.log | tail -n 30)"
+            if [[ -z "$summary" ]]; then
+              summary="$(tail -n 40 android-build.log)"
+            fi
+            summary="${summary//'%'/'%25'}"
+            summary="${summary//$'\n'/'%0A'}"
+            summary="${summary//$'\r'/'%0D'}"
+            echo "::error title=Android release build failed::${summary}"
+          fi
+
+          exit "$status"
+
+      - name: Prepare Android release asset
+        shell: bash
+        run: |
+          mkdir -p release
+          cp build/app/outputs/flutter-apk/app-release.apk release/ble-monitor-android.apk
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: app/bluetooth_flutter_Trace/release/ble-monitor-android.apk
+          if-no-files-found: error
+
+  windows:
+    name: Build Windows EXE
+    runs-on: windows-2022
+    defaults:
+      run:
+        working-directory: app/bluetooth_flutter_Trace
+    needs:
+      - changes
+    if: needs.changes.outputs.app_build_required == 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze project
+        continue-on-error: true
+        run: flutter analyze
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Prepare Windows release assets
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath release/ble-monitor-windows.zip -Force
+          Copy-Item build/windows/x64/runner/Release/ble_monitor.exe release/ble-monitor-windows.exe -Force
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: |
+            app/bluetooth_flutter_Trace/release/ble-monitor-windows.zip
+            app/bluetooth_flutter_Trace/release/ble-monitor-windows.exe
+          if-no-files-found: error
+
+  pages:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+    if: github.event_name != 'pull_request' && needs.changes.outputs.docs_changed == 'true'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload static page
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/bluetooth_flutter_Trace/docs
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/bluetooth_flutter_Trace
+    needs:
+      - changes
+      - android
+      - windows
+    if: needs.changes.outputs.app_build_required == 'true' && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish_release) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')))
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Enforce fixed Android release signing
+        shell: bash
+        env:
+          FIXED_SIGNING_CONFIGURED: ${{ needs.android.outputs.fixed_signing_configured }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${FIXED_SIGNING_CONFIGURED}" != "true" ]]; then
+            echo "::error title=Android release signing required::Formal GitHub Releases and Cloudflare candidates require fixed Android release signing secrets."
+            exit 1
+          fi
+
+      - name: Download Android build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: app/bluetooth_flutter_Trace/release-assets
+
+      - name: Download Windows build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-exe
+          path: app/bluetooth_flutter_Trace/release-assets
+
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        env:
+          MANUAL_RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+          PUBLISH_RELEASE: ${{ github.event.inputs.publish_release }}
+        run: |
+          version_line="$(grep -E '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')"
+          version_name="${version_line%%+*}"
+          if [[ -z "${version_name}" || "${version_name}" == "${version_line}" ]]; then
+            echo "::error title=Release tag resolution::pubspec.yaml version must include a semantic version and +versionCode."
+            exit 1
+          fi
+          pubspec_tag="v${version_name}"
+
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            tag="${GITHUB_REF_NAME}"
+          elif [[ -n "${MANUAL_RELEASE_TAG}" ]]; then
+            tag="${MANUAL_RELEASE_TAG}"
+          elif [[ "${GITHUB_EVENT_NAME}" == "push" && ( "${GITHUB_REF}" == "refs/heads/main" || "${GITHUB_REF}" == "refs/heads/master" ) ]]; then
+            tag="${pubspec_tag}"
+          elif [[ "${PUBLISH_RELEASE}" == "true" ]]; then
+            tag="${pubspec_tag}"
+          else
+            short_sha="${GITHUB_SHA::7}"
+            tag="build-${GITHUB_RUN_NUMBER}-${short_sha}"
+          fi
+
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Guard immutable GitHub Release
+        id: release_guard
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+          REPLACE_EXISTING_RELEASE: ${{ github.event.inputs.replace_existing_release || 'false' }}
+          AUTO_RELEASE_ON_PUSH: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            if [[ "${REPLACE_EXISTING_RELEASE}" != "true" ]]; then
+              if [[ "${AUTO_RELEASE_ON_PUSH}" == "true" ]]; then
+                echo "skip_release=true" >> "$GITHUB_OUTPUT"
+                echo "::notice title=Release already exists::${RELEASE_TAG} already exists. Automatic push release preparation was skipped; bump pubspec.yaml to prepare a new Cloudflare candidate."
+                exit 0
+              fi
+              echo "::error title=Release already exists::${RELEASE_TAG} already exists. Bump pubspec.yaml and use a new tag. Replacing an existing release changes APK hashes and breaks incremental updates for already-installed clients."
+              exit 1
+            fi
+            echo "skip_release=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Replacing existing release::${RELEASE_TAG} will have its assets replaced. This can break incremental updates for clients that installed the previous APK from this tag."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "skip_release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install xdelta3
+        if: steps.release_guard.outputs.skip_release != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xdelta3
+
+      - name: Prepare Android incremental update metadata
+        if: steps.release_guard.outputs.skip_release != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          apk_path="release-assets/ble-monitor-android.apk"
+          if [[ ! -f "${apk_path}" ]]; then
+            echo "Android APK not found; skipping update metadata."
+            exit 0
+          fi
+
+          version_line="$(grep -E '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')"
+          version_name="${version_line%%+*}"
+          version_code="${version_line##*+}"
+          if [[ -z "${version_name}" || -z "${version_code}" || "${version_name}" == "${version_code}" ]]; then
+            echo "::error title=Android update metadata::pubspec.yaml version must include +versionCode."
+            exit 1
+          fi
+          if ! [[ "${version_code}" =~ ^[0-9]+$ ]]; then
+            echo "::error title=Android update metadata::versionCode must be numeric after CR/LF normalization."
+            exit 1
+          fi
+
+          previous_dir="$(mktemp -d)"
+          patch_metadata_dir="${previous_dir}/patch-metadata"
+          mkdir -p "${patch_metadata_dir}"
+          release_count=0
+          patch_source_count=0
+          max_patch_sources="${TRACE_MAX_INCREMENTAL_SOURCE_RELEASES:-2}"
+          vcdiff_min_source_version_code="${TRACE_VCDIFF_MIN_SOURCE_VERSION_CODE:-41}"
+
+          while IFS= read -r previous_tag; do
+            if [[ -z "${previous_tag}" ]]; then
+              continue
+            fi
+
+            release_count=$((release_count + 1))
+            release_dir="${previous_dir}/release-${release_count}"
+            mkdir -p "${release_dir}"
+
+            echo "Preparing incremental patch candidate from ${previous_tag}."
+            gh release download "${previous_tag}" \
+              --pattern "ble-monitor-android.apk" \
+              --pattern "ble-monitor-update.json" \
+              --dir "${release_dir}" || true
+
+            previous_apk="${release_dir}/ble-monitor-android.apk"
+            previous_manifest="${release_dir}/ble-monitor-update.json"
+            if [[ ! -f "${previous_apk}" || ! -f "${previous_manifest}" ]]; then
+              echo "Release ${previous_tag} is missing APK or update manifest; skipping."
+              continue
+            fi
+
+            previous_version_code="$(
+              python -c "import json,sys; print(int(json.load(open(sys.argv[1], encoding='utf-8'))['versionCode']))" "${previous_manifest}"
+            )"
+            previous_version_code="${previous_version_code//$'\r'/}"
+            if ! [[ "${previous_version_code}" =~ ^[0-9]+$ ]]; then
+              echo "::error title=Android update metadata::Previous release versionCode is invalid after CR/LF normalization."
+              exit 1
+            fi
+            if (( previous_version_code >= version_code )); then
+              echo "Release ${previous_tag} versionCode ${previous_version_code} is not older than current ${version_code}; skipping."
+              continue
+            fi
+            if (( previous_version_code < vcdiff_min_source_version_code )); then
+              echo "Release ${previous_tag} versionCode ${previous_version_code} predates VCDIFF-capable clients; using full APK fallback instead of a legacy tracepatch."
+              break
+            fi
+
+            previous_apk_sha="$(
+              python -c "import hashlib,sys; h=hashlib.sha256(); f=open(sys.argv[1], 'rb'); [h.update(c) for c in iter(lambda: f.read(1024*1024), b'')]; print(h.hexdigest())" "${previous_apk}"
+            )"
+            old_sha_prefix="${previous_apk_sha:0:12}"
+            vcdiff_patch_path="release-assets/ble-monitor-android-from-${previous_version_code}-${old_sha_prefix}-to-${version_code}.vcdiff"
+            vcdiff_patch_metadata="${patch_metadata_dir}/${previous_version_code}-${old_sha_prefix}-vcdiff.json"
+
+            if [[ -f "${vcdiff_patch_metadata}" ]]; then
+              echo "Patch for versionCode ${previous_version_code} and APK ${old_sha_prefix} already exists; skipping duplicate."
+              continue
+            fi
+
+            python "${GITHUB_WORKSPACE}/.github/scripts/create_vcdiff_patch.py" \
+              "${previous_apk}" \
+              "${apk_path}" \
+              "${vcdiff_patch_path}" \
+              --from-version-code "${previous_version_code}" \
+              --to-version-code "${version_code}" \
+              --metadata-output "${vcdiff_patch_metadata}"
+
+            patch_source_count=$((patch_source_count + 1))
+            if (( patch_source_count >= max_patch_sources )); then
+              echo "Prepared ${patch_source_count} VCDIFF source release(s); stopping incremental patch search."
+              break
+            fi
+          done < <(
+            gh release list --exclude-drafts --exclude-pre-releases --limit 20 --json tagName \
+              --jq '.[].tagName' | grep -vx "${RELEASE_TAG}" || true
+          )
+
+          if [[ "${patch_source_count}" -eq 0 ]]; then
+            echo "No compatible VCDIFF source release found; publishing metadata without patch."
+          fi
+
+          python - <<'PY' "${apk_path}" "${version_name}" "${version_code}" "${RELEASE_TAG}" "${patch_metadata_dir}" "release-assets/ble-monitor-update.json"
+          import hashlib
+          import json
+          import sys
+          from pathlib import Path
+
+          apk_path = Path(sys.argv[1])
+          version_name = sys.argv[2]
+          version_code = int(sys.argv[3])
+          release_tag = sys.argv[4]
+          patch_metadata_path = Path(sys.argv[5]) if sys.argv[5] else None
+          output_path = Path(sys.argv[6])
+
+          def sha256_file(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          patches = []
+          if patch_metadata_path and patch_metadata_path.exists():
+              metadata_files = (
+                  sorted(patch_metadata_path.glob("*.json"))
+                  if patch_metadata_path.is_dir()
+                  else [patch_metadata_path]
+              )
+              for metadata_file in metadata_files:
+                  patches.append(json.loads(metadata_file.read_text(encoding="utf-8")))
+          def patch_format_priority(patch: dict) -> int:
+              algorithm = str(patch.get("patchFormat") or patch.get("algorithm") or "tracepatch").lower()
+              return 0 if algorithm == "tracepatch" else 1
+
+          patches.sort(
+              key=lambda patch: (
+                  patch["fromVersionCode"],
+                  patch["oldSha256"],
+                  patch_format_priority(patch),
+                  patch["assetName"],
+              )
+          )
+
+          manifest = {
+              "schemaVersion": 1,
+              "platform": "android",
+              "versionName": version_name,
+              "versionCode": version_code,
+              "releaseTag": release_tag,
+              "apkAssetName": "ble-monitor-android.apk",
+              "apkSha256": sha256_file(apk_path),
+              "apkSize": apk_path.stat().st_size,
+              "patches": patches,
+          }
+          output_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+          PY
+
+      - name: Create or update GitHub Release
+        if: steps.release_guard.outputs.skip_release != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+          RELEASE_EXISTS: ${{ steps.release_guard.outputs.exists }}
+          AUTO_RELEASE_ON_PUSH: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/trace-release-notes.md
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          release_flags=()
+          if [[ "${AUTO_RELEASE_ON_PUSH}" == "true" ]]; then
+            release_flags+=(--latest=false)
+          fi
+
+          git log -1 --pretty=%B "${GITHUB_SHA}" > "${RELEASE_NOTES_PATH}"
+          if ! grep -q '[^[:space:]]' "${RELEASE_NOTES_PATH}"; then
+            printf 'Automated build from workflow run %s for commit %s.\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA}" > "${RELEASE_NOTES_PATH}"
+          fi
+
+          if [[ "${RELEASE_EXISTS}" == "true" ]]; then
+            gh release edit "${RELEASE_TAG}" --target "${GITHUB_SHA}" --notes-file "${RELEASE_NOTES_PATH}"
+            for asset_path in release-assets/*; do
+              if [[ -f "${asset_path}" ]]; then
+                gh release delete-asset "${RELEASE_TAG}" "$(basename "${asset_path}")" -y >/dev/null 2>&1 || true
+              fi
+            done
+          else
+            gh release create "${RELEASE_TAG}" \
+              --target "${GITHUB_SHA}" \
+              --title "Trace ${RELEASE_TAG}" \
+              --notes-file "${RELEASE_NOTES_PATH}" \
+              "${release_flags[@]}"
+          fi
+
+          gh release upload "${RELEASE_TAG}" release-assets/* --clobber
+
+      - name: Build Cloudflare candidate metadata
+        if: steps.release_guard.outputs.skip_release != 'true'
+        env:
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+          FIXED_SIGNING_CONFIGURED: ${{ needs.android.outputs.fixed_signing_configured }}
+          TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64 }}
+          TRACE_UPDATE_PAYLOAD_KEY_VERSION: ${{ vars.TRACE_UPDATE_PAYLOAD_KEY_VERSION || 'staging' }}
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/trace-release-notes.md
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node cloudflare/update-service/scripts/build-github-release-metadata.mjs \
+            --assets-dir release-assets \
+            --release-tag "${RELEASE_TAG}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --commit-sha "${GITHUB_SHA}" \
+            --repository "${GITHUB_REPOSITORY}" \
+            --release-notes-file "${RELEASE_NOTES_PATH}" \
+            --fixed-signing-configured "${FIXED_SIGNING_CONFIGURED}" \
+            --output release-assets/cloudflare-release-metadata.json \
+            --allow-placeholder-signature
+
+      - name: Upload Cloudflare candidate metadata artifact
+        if: steps.release_guard.outputs.skip_release != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-release-metadata
+          path: app/bluetooth_flutter_Trace/release-assets/cloudflare-release-metadata.json
+          retention-days: 7
+
+      - name: Check Cloudflare registration configuration
+        if: steps.release_guard.outputs.skip_release != 'true'
+        id: cloudflare_config
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" && -n "${CLOUDFLARE_API_TOKEN:-}" && -n "${TRACE_UPDATE_SERVICE_URL:-}" && -n "${TRACE_DEPLOY_TOKEN:-}" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Cloudflare registration skipped::Set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, TRACE_UPDATE_SERVICE_URL, and TRACE_DEPLOY_TOKEN repository secrets to upload R2 assets and register the candidate from CI."
+          fi
+
+      - name: Install Cloudflare upload tooling
+        if: steps.release_guard.outputs.skip_release != 'true' && steps.cloudflare_config.outputs.enabled == 'true'
+        run: npm ci --prefix cloudflare/update-service/worker
+
+      - name: Deploy Cloudflare update service
+        if: steps.release_guard.outputs.skip_release != 'true' && steps.cloudflare_config.outputs.enabled == 'true' && vars.TRACE_UPDATE_SERVICE_AUTO_DEPLOY == 'true'
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_WRANGLER_ENV: ${{ vars.TRACE_UPDATE_SERVICE_WRANGLER_ENV || 'staging' }}
+          TRACE_UPDATE_SERVICE_D1_DATABASE: ${{ vars.TRACE_UPDATE_SERVICE_D1_DATABASE || 'trace-update-staging' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          npx wrangler d1 migrations apply "${TRACE_UPDATE_SERVICE_D1_DATABASE}" \
+            --env "${TRACE_UPDATE_SERVICE_WRANGLER_ENV}" \
+            --remote
+          npx wrangler deploy --env "${TRACE_UPDATE_SERVICE_WRANGLER_ENV}"
+
+      - name: Upload Cloudflare R2 assets
+        if: steps.release_guard.outputs.skip_release != 'true' && steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET || 'trace-update-staging-releases' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node cloudflare/update-service/scripts/upload-r2-assets.mjs \
+            --assets-dir release-assets \
+            --metadata release-assets/cloudflare-release-metadata.json \
+            --bucket "${TRACE_R2_BUCKET}" \
+            --wrangler-cwd cloudflare/update-service/worker \
+            --output release-assets/cloudflare-release-metadata.json
+
+      - name: Register Cloudflare candidate
+        if: steps.release_guard.outputs.skip_release != 'true' && steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node cloudflare/update-service/scripts/register-release.mjs release-assets/cloudflare-release-metadata.json

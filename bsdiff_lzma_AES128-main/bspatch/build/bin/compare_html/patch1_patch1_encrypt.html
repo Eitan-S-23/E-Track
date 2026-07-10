@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件比较结果</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        h1, h2, h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+        
+        .file-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 6px;
+        }
+        
+        .file-info h2 {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+        
+        .file-info p {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        
+        .summary {
+            margin: 30px 0;
+        }
+        
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .summary-table th, .summary-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .summary-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .summary-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .comparison {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow: hidden;
+            border-radius: 6px;
+        }
+        
+        .comparison th, .comparison td {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+        
+        .comparison th {
+            background-color: var(--secondary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .offset-column {
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa;
+            z-index: 5;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .diff {
+            background-color: rgba(231, 76, 60, 0.1);
+            transition: background-color 0.2s;
+        }
+        
+        .diff:hover {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+        
+        .same {
+            background-color: rgba(46, 204, 113, 0.05);
+        }
+        
+        .same:hover {
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .back-to-top:hover {
+            opacity: 1;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .comparison th, .comparison td,
+            .summary-table th, .summary-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文件比较结果</h1>
+        <div class="file-info">
+            <h3>比较范围: <span style="font-family: monospace;">0x00000000</span> - <span style="font-family: monospace;">0x000006C5</span></h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">            <div class="file-info">
+                <h2>patch1.bin</h2>
+                <p><strong>类型:</strong> bin</p>
+                <p><strong>大小:</strong> 1,717 字节</p>
+            </div>
+            <div class="file-info">
+                <h2>patch1_encrypt.bin</h2>
+                <p><strong>类型:</strong> bin</p>
+                <p><strong>大小:</strong> 1,733 字节</p>
+            </div>
+        </div>        <div class="summary">
+            <h2>差异汇总</h2>
+            <p>共发现 <span style="color: var(--warning-color); font-weight: bold;">108</span> 处差异</p>
+            <table class="summary-table">
+                <tr>
+                    <th>偏移量</th>
+                    <th>说明</th>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000000">0x00000000</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000010">0x00000010</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000020">0x00000020</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000030">0x00000030</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000040">0x00000040</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000050">0x00000050</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000060">0x00000060</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000070">0x00000070</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000080">0x00000080</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000090">0x00000090</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000000A0">0x000000A0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000000B0">0x000000B0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000000C0">0x000000C0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000000D0">0x000000D0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000000E0">0x000000E0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000000F0">0x000000F0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000100">0x00000100</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000110">0x00000110</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000120">0x00000120</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000130">0x00000130</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000140">0x00000140</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000150">0x00000150</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000160">0x00000160</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000170">0x00000170</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000180">0x00000180</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000190">0x00000190</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000001A0">0x000001A0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000001B0">0x000001B0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000001C0">0x000001C0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000001D0">0x000001D0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000001E0">0x000001E0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000001F0">0x000001F0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000200">0x00000200</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000210">0x00000210</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000220">0x00000220</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000230">0x00000230</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000240">0x00000240</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000250">0x00000250</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000260">0x00000260</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000270">0x00000270</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000280">0x00000280</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000290">0x00000290</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000002A0">0x000002A0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000002B0">0x000002B0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000002C0">0x000002C0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000002D0">0x000002D0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000002E0">0x000002E0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000002F0">0x000002F0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000300">0x00000300</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000310">0x00000310</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000320">0x00000320</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000330">0x00000330</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000340">0x00000340</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000350">0x00000350</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000360">0x00000360</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000370">0x00000370</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000380">0x00000380</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000390">0x00000390</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000003A0">0x000003A0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000003B0">0x000003B0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000003C0">0x000003C0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000003D0">0x000003D0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000003E0">0x000003E0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000003F0">0x000003F0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000400">0x00000400</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000410">0x00000410</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000420">0x00000420</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000430">0x00000430</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000440">0x00000440</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000450">0x00000450</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000460">0x00000460</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000470">0x00000470</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000480">0x00000480</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000490">0x00000490</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000004A0">0x000004A0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000004B0">0x000004B0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000004C0">0x000004C0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000004D0">0x000004D0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000004E0">0x000004E0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000004F0">0x000004F0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000500">0x00000500</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000510">0x00000510</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000520">0x00000520</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000530">0x00000530</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000540">0x00000540</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000550">0x00000550</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000560">0x00000560</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000570">0x00000570</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000580">0x00000580</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000590">0x00000590</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000005A0">0x000005A0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000005B0">0x000005B0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000005C0">0x000005C0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000005D0">0x000005D0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000005E0">0x000005E0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000005F0">0x000005F0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000600">0x00000600</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000610">0x00000610</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000620">0x00000620</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000630">0x00000630</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000640">0x00000640</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000650">0x00000650</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000660">0x00000660</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000670">0x00000670</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000680">0x00000680</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x00000690">0x00000690</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000006A0">0x000006A0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+                <tr>
+                    <td><a href="#0x000006B0">0x000006B0</a></td>
+                    <td>文件 patch1_encrypt.bin 与其他文件在此位置有差异</td>
+                </tr>
+            </table>        </div>
+        
+        <div>
+            <h2>详细比较结果</h2>
+            <div style="overflow-x: auto;">
+                <table class="comparison">
+                    <tr>
+                        <th>偏移量</th>
+                        <th>patch1.bin</th>
+                        <th>patch1_encrypt.bin</th>
+                    </tr>
+                    <tr class="diff" id="0x00000000">
+                        <td class="offset-column">0x00000000</td>
+                        <td>E5 5D 80 83 00 00 06 8D 58 0B 06 00 34 0B 06 00</td>
+                        <td>D0 0C 4F 51 6B F2 1D 00 DD C1 85 DF 00 00 00 00</td>
+                    </tr>
+                    <tr class="diff" id="0x00000010">
+                        <td class="offset-column">0x00000010</td>
+                        <td>99 D7 0B F5 4A DC C7 BB 02 00 10 00 00 00 00 00</td>
+                        <td>FC AB 92 41 09 5F 42 8D DC 8F 7D C1 1E 40 FC 5B</td>
+                    </tr>
+                    <tr class="diff" id="0x00000020">
+                        <td class="offset-column">0x00000020</td>
+                        <td>0C 0C 06 00 00 00 00 00 00 58 02 4E CB AD 16 AB</td>
+                        <td>2F 3D A0 09 0B E8 D7 33 A2 10 22 F0 C1 87 82 ED</td>
+                    </tr>
+                    <tr class="diff" id="0x00000030">
+                        <td class="offset-column">0x00000030</td>
+                        <td>E2 2C 68 A9 5C 84 DD 40 82 A1 29 35 37 16 56 92</td>
+                        <td>E2 15 A9 94 A0 AE F8 AF 91 47 86 02 57 98 ED 6A</td>
+                    </tr>
+                    <tr class="diff" id="0x00000040">
+                        <td class="offset-column">0x00000040</td>
+                        <td>5B AD F6 EE FF 68 19 63 34 2B BA 9D AF A6 12 82</td>
+                        <td>BD 1E 92 B2 DD DC 6F 1D B2 6D 1A 9F 17 84 67 60</td>
+                    </tr>
+                    <tr class="diff" id="0x00000050">
+                        <td class="offset-column">0x00000050</td>
+                        <td>45 17 BB E7 C1 4A 94 8C 85 EE FA 44 88 61 F6 81</td>
+                        <td>68 8F 57 A7 DD A9 4D 1F 7E 97 38 B1 32 CA 18 76</td>
+                    </tr>
+                    <tr class="diff" id="0x00000060">
+                        <td class="offset-column">0x00000060</td>
+                        <td>FD AA DE D2 33 B6 E7 8B 09 CE B0 C1 BB 93 02 28</td>
+                        <td>FC F9 7B AF 80 7D FD 8C ED F3 A7 83 55 35 12 E4</td>
+                    </tr>
+                    <tr class="diff" id="0x00000070">
+                        <td class="offset-column">0x00000070</td>
+                        <td>49 76 62 84 E0 CE C4 AC 47 02 72 06 00 D1 5C F9</td>
+                        <td>12 7B E6 94 79 8D 23 3A 86 14 D2 3D A7 B8 94 FA</td>
+                    </tr>
+                    <tr class="diff" id="0x00000080">
+                        <td class="offset-column">0x00000080</td>
+                        <td>7A 94 85 0A 06 E9 59 24 CD 09 C1 86 FC D3 A7 CF</td>
+                        <td>05 95 F8 72 FB 17 7F 60 D9 57 DC EE 0F 1C 33 B4</td>
+                    </tr>
+                    <tr class="diff" id="0x00000090">
+                        <td class="offset-column">0x00000090</td>
+                        <td>A7 10 D2 82 56 04 EF 81 61 CF BE 9B 1F 99 48 B7</td>
+                        <td>C5 25 15 4B EF 31 59 D3 16 6D 4E 2D 3B 07 1B 36</td>
+                    </tr>
+                    <tr class="diff" id="0x000000A0">
+                        <td class="offset-column">0x000000A0</td>
+                        <td>02 3B 4D 3C 3D 78 19 7C F6 14 CC AD 0E D1 6A CA</td>
+                        <td>66 A0 B3 04 67 7A FA BA 69 86 2F 51 11 EE 39 BC</td>
+                    </tr>
+                    <tr class="diff" id="0x000000B0">
+                        <td class="offset-column">0x000000B0</td>
+                        <td>0A 70 C2 BF 2F 38 9B D7 0C 9D 14 4F 7C 6D 55 6C</td>
+                        <td>A7 7F 12 5C CD 7A A2 34 09 FC 40 38 AD 91 A9 69</td>
+                    </tr>
+                    <tr class="diff" id="0x000000C0">
+                        <td class="offset-column">0x000000C0</td>
+                        <td>F4 79 B4 6F 2A B5 55 14 5B BC AE 40 9A B7 F6 3B</td>
+                        <td>8C 29 0E B2 B7 53 6B 72 CF 4F 52 B8 5B B8 CE CC</td>
+                    </tr>
+                    <tr class="diff" id="0x000000D0">
+                        <td class="offset-column">0x000000D0</td>
+                        <td>C5 5D E8 55 56 57 7A 6A F8 C5 81 DD 69 52 49 1C</td>
+                        <td>23 70 FB 71 4A 03 C8 92 4E 34 D0 36 BD 09 49 F7</td>
+                    </tr>
+                    <tr class="diff" id="0x000000E0">
+                        <td class="offset-column">0x000000E0</td>
+                        <td>43 D6 FF 85 8D 35 05 39 F7 2C 63 50 97 98 BD 56</td>
+                        <td>DC 37 F8 77 9F AD C7 29 83 0F 8C 39 53 88 9E 61</td>
+                    </tr>
+                    <tr class="diff" id="0x000000F0">
+                        <td class="offset-column">0x000000F0</td>
+                        <td>3C 09 B6 66 D2 1F 1A 2C 10 36 B6 2C B2 59 C3 FA</td>
+                        <td>7E 65 14 78 D1 95 F6 65 D1 C7 31 CE BF F1 BE 3F</td>
+                    </tr>
+                    <tr class="diff" id="0x00000100">
+                        <td class="offset-column">0x00000100</td>
+                        <td>4B A0 EA 1A D8 06 39 71 B3 6F EA 49 DF E2 4E B3</td>
+                        <td>5E 04 5A 62 75 E4 7E 89 55 D2 7D 6D 01 C4 78 5B</td>
+                    </tr>
+                    <tr class="diff" id="0x00000110">
+                        <td class="offset-column">0x00000110</td>
+                        <td>AE E7 58 46 11 5D 38 07 A6 97 AE 14 21 B8 0C A0</td>
+                        <td>19 D8 92 0D AE 92 24 FE 04 AA 3E CB D3 66 8E EC</td>
+                    </tr>
+                    <tr class="diff" id="0x00000120">
+                        <td class="offset-column">0x00000120</td>
+                        <td>1E AE 84 92 C9 C6 FF 17 2F 9D 10 C6 17 1D 45 E7</td>
+                        <td>DC 47 6D 9C 82 FF 69 47 82 C8 77 08 B0 41 78 47</td>
+                    </tr>
+                    <tr class="diff" id="0x00000130">
+                        <td class="offset-column">0x00000130</td>
+                        <td>26 D3 6E 69 70 83 EB 09 04 C4 76 93 C7 7B 0A 74</td>
+                        <td>D7 03 0D 3B 0F 13 0C DA 59 AD 8E 08 13 9F 2D 20</td>
+                    </tr>
+                    <tr class="diff" id="0x00000140">
+                        <td class="offset-column">0x00000140</td>
+                        <td>58 1A A9 23 63 FB A4 D6 ED 27 33 0B CE 1B 1F 74</td>
+                        <td>16 17 89 79 25 C9 BE 94 AF ED 70 69 D5 FE F0 AF</td>
+                    </tr>
+                    <tr class="diff" id="0x00000150">
+                        <td class="offset-column">0x00000150</td>
+                        <td>98 90 74 C7 2A 0C 8D 4A E7 9F 20 92 C9 AB 74 D7</td>
+                        <td>80 E5 93 33 F2 4E 31 9A AB 54 D7 93 8C 4F B6 39</td>
+                    </tr>
+                    <tr class="diff" id="0x00000160">
+                        <td class="offset-column">0x00000160</td>
+                        <td>0B B4 CB 59 70 91 4F 6E 1C 57 CB 29 97 20 73 74</td>
+                        <td>FC 7D 09 41 ED 59 3C 03 6B 6C 15 BE 01 7E 48 5B</td>
+                    </tr>
+                    <tr class="diff" id="0x00000170">
+                        <td class="offset-column">0x00000170</td>
+                        <td>45 FD 57 8E DF 1C D3 59 5F F3 2E D6 30 13 E5 79</td>
+                        <td>FB 15 C8 0A 48 6B 4F B2 97 A0 FE D0 4D BD C3 D5</td>
+                    </tr>
+                    <tr class="diff" id="0x00000180">
+                        <td class="offset-column">0x00000180</td>
+                        <td>52 E5 08 0B 4C 6B DB B7 BB B6 05 BF B3 75 FB B6</td>
+                        <td>01 F8 B9 8C 3C 0A FD AC 57 2C F9 9E 83 E0 F1 C0</td>
+                    </tr>
+                    <tr class="diff" id="0x00000190">
+                        <td class="offset-column">0x00000190</td>
+                        <td>41 E0 2F 77 99 CD AE 77 2A 43 29 0A 3C 7F EE 5B</td>
+                        <td>0D 8B 55 57 40 AA 66 6A 2D B7 9C BF C1 B4 85 05</td>
+                    </tr>
+                    <tr class="diff" id="0x000001A0">
+                        <td class="offset-column">0x000001A0</td>
+                        <td>75 FE 28 C9 87 8B 6D 59 28 28 8D 88 E5 0C A1 BA</td>
+                        <td>67 36 17 7D 82 54 09 0A 11 7E 44 E3 1B C7 11 C4</td>
+                    </tr>
+                    <tr class="diff" id="0x000001B0">
+                        <td class="offset-column">0x000001B0</td>
+                        <td>D8 14 A9 87 C7 01 18 8F D2 08 63 9F A6 94 12 B3</td>
+                        <td>F4 9D 0B BB F0 A1 0F 20 46 2C 0C 7F 18 B4 61 76</td>
+                    </tr>
+                    <tr class="diff" id="0x000001C0">
+                        <td class="offset-column">0x000001C0</td>
+                        <td>BB 37 0A AC C2 9F 9F CC 39 3D 68 B5 3B 32 75 F2</td>
+                        <td>0E BE E1 83 94 E6 93 34 70 F9 CD C6 4A B8 64 06</td>
+                    </tr>
+                    <tr class="diff" id="0x000001D0">
+                        <td class="offset-column">0x000001D0</td>
+                        <td>DC 43 B2 C6 91 0B F5 BE 98 18 13 91 37 40 49 EC</td>
+                        <td>6F C9 04 CE 84 BA BA 40 7F 47 3F 7B 02 72 2E 0C</td>
+                    </tr>
+                    <tr class="diff" id="0x000001E0">
+                        <td class="offset-column">0x000001E0</td>
+                        <td>D9 23 D1 3E 63 0D DC 85 1D C9 AE E0 7B EB 30 78</td>
+                        <td>C4 59 2F CE B7 E6 34 75 52 D9 32 C6 5A 78 4F 70</td>
+                    </tr>
+                    <tr class="diff" id="0x000001F0">
+                        <td class="offset-column">0x000001F0</td>
+                        <td>61 2C A7 90 BD 1B 39 5D 9C 75 64 EA 7C 16 78 6A</td>
+                        <td>F2 66 1A B6 F5 BE B1 63 95 FE 49 90 A9 7C EA 66</td>
+                    </tr>
+                    <tr class="diff" id="0x00000200">
+                        <td class="offset-column">0x00000200</td>
+                        <td>D1 F0 68 F3 B8 EE 51 AC A8 25 7C 69 EC 43 58 A7</td>
+                        <td>BF 1D 4E 19 1E 47 93 81 54 DF 50 ED 1C 3C 29 42</td>
+                    </tr>
+                    <tr class="diff" id="0x00000210">
+                        <td class="offset-column">0x00000210</td>
+                        <td>40 67 C0 6F DD EA C5 D0 01 2A 58 65 86 49 3B 8C</td>
+                        <td>D9 FF 30 18 85 2B 1A 27 4C 47 3C B0 C7 0D 92 DD</td>
+                    </tr>
+                    <tr class="diff" id="0x00000220">
+                        <td class="offset-column">0x00000220</td>
+                        <td>2F 45 C4 4B 58 A1 9A 28 4E 4A E0 49 6C 57 B1 45</td>
+                        <td>F1 30 86 50 96 24 F4 89 B5 CA 9F 10 0E C7 89 44</td>
+                    </tr>
+                    <tr class="diff" id="0x00000230">
+                        <td class="offset-column">0x00000230</td>
+                        <td>64 87 7E 5A 44 EC 4E 4B 05 B7 0A 3B 4B 4B 58 BF</td>
+                        <td>91 F9 B4 ED E0 8B 75 4A 99 3B 8F 5D 45 15 78 4A</td>
+                    </tr>
+                    <tr class="diff" id="0x00000240">
+                        <td class="offset-column">0x00000240</td>
+                        <td>B3 42 5D 02 01 5B 9B 47 E6 A9 EB F3 33 93 05 AF</td>
+                        <td>46 43 37 A7 9D BA 57 5D 62 E7 A1 78 9D BF 54 60</td>
+                    </tr>
+                    <tr class="diff" id="0x00000250">
+                        <td class="offset-column">0x00000250</td>
+                        <td>A9 D4 C3 AD BD 0B FD 60 41 C3 90 F1 83 D8 34 9A</td>
+                        <td>80 67 BD 56 69 23 C4 F9 BF 06 16 90 E7 B9 86 5F</td>
+                    </tr>
+                    <tr class="diff" id="0x00000260">
+                        <td class="offset-column">0x00000260</td>
+                        <td>BF C3 5C 1F 34 EA 16 DE F8 B8 D3 1A 4B B2 47 2B</td>
+                        <td>09 B9 C8 2F 55 23 84 D4 95 42 74 A9 6D E8 B5 07</td>
+                    </tr>
+                    <tr class="diff" id="0x00000270">
+                        <td class="offset-column">0x00000270</td>
+                        <td>EC A0 79 C5 52 A9 A1 28 35 0C D2 CF C6 5D 1B 7C</td>
+                        <td>B8 8C 2A 5B 58 FF 7E FB F8 B9 81 DC CA E9 04 41</td>
+                    </tr>
+                    <tr class="diff" id="0x00000280">
+                        <td class="offset-column">0x00000280</td>
+                        <td>D9 D3 B1 F8 4D A3 07 BE 0D EA D2 E0 9C 07 2D 3E</td>
+                        <td>8D 19 9B 45 09 38 12 60 39 B8 F9 13 4F C7 3F 0B</td>
+                    </tr>
+                    <tr class="diff" id="0x00000290">
+                        <td class="offset-column">0x00000290</td>
+                        <td>7C 8E 52 74 7B 88 38 21 11 05 F8 AF 7F 4A 7D 99</td>
+                        <td>04 00 9B 20 52 94 F6 6D EB E7 15 28 C6 F4 06 BB</td>
+                    </tr>
+                    <tr class="diff" id="0x000002A0">
+                        <td class="offset-column">0x000002A0</td>
+                        <td>4E 47 F1 30 ED D8 66 6E 54 1C 66 DA D2 37 F1 19</td>
+                        <td>8D 29 84 08 9C 99 7B 48 E5 52 67 EF 36 32 BA 76</td>
+                    </tr>
+                    <tr class="diff" id="0x000002B0">
+                        <td class="offset-column">0x000002B0</td>
+                        <td>8A DA 00 14 58 A5 3B 0B 72 C9 38 BE 5F 15 76 D8</td>
+                        <td>6A 6D FA 7E 7D 23 16 11 07 6B 19 98 2B AB 23 53</td>
+                    </tr>
+                    <tr class="diff" id="0x000002C0">
+                        <td class="offset-column">0x000002C0</td>
+                        <td>4B 5E 3C F0 A4 A2 79 84 66 A8 AD 21 43 44 85 30</td>
+                        <td>6E 6C B0 DD B3 68 50 DD E4 8A 55 5E E4 CF 6A 6C</td>
+                    </tr>
+                    <tr class="diff" id="0x000002D0">
+                        <td class="offset-column">0x000002D0</td>
+                        <td>9F F8 D5 3F 8B 58 3D D2 27 30 DC 00 B4 25 89 E4</td>
+                        <td>65 C6 A4 80 12 4F 5A 64 6B 68 2E A4 BE C1 80 BF</td>
+                    </tr>
+                    <tr class="diff" id="0x000002E0">
+                        <td class="offset-column">0x000002E0</td>
+                        <td>15 8F 0C F5 F2 FA DD B4 2A BF E3 F3 D3 5B 2C 88</td>
+                        <td>0A 72 44 70 1E 98 8D DF 56 A8 9F 36 46 45 DB 32</td>
+                    </tr>
+                    <tr class="diff" id="0x000002F0">
+                        <td class="offset-column">0x000002F0</td>
+                        <td>54 5F 85 38 01 B6 5C 0B 57 BA 75 59 CB D1 57 36</td>
+                        <td>A8 E7 D6 9D 71 DA 7F 4A C2 28 AA 80 2D C0 92 21</td>
+                    </tr>
+                    <tr class="diff" id="0x00000300">
+                        <td class="offset-column">0x00000300</td>
+                        <td>E1 90 30 B9 49 18 FE ED AF 56 18 96 99 13 D5 CB</td>
+                        <td>60 E5 76 6F CD 83 87 EB 74 C2 93 34 C5 C2 60 81</td>
+                    </tr>
+                    <tr class="diff" id="0x00000310">
+                        <td class="offset-column">0x00000310</td>
+                        <td>7D EC E4 50 B3 45 87 80 58 D7 A8 30 2C 44 02 58</td>
+                        <td>44 99 C6 65 8F 2A BA 44 D4 76 6C CA C1 26 A6 A5</td>
+                    </tr>
+                    <tr class="diff" id="0x00000320">
+                        <td class="offset-column">0x00000320</td>
+                        <td>C0 1F 0E E9 7D 06 68 C8 48 75 59 F7 C0 25 46 C5</td>
+                        <td>26 39 C5 EF 72 3E 0D BB 0E 46 9F D7 41 03 01 7D</td>
+                    </tr>
+                    <tr class="diff" id="0x00000330">
+                        <td class="offset-column">0x00000330</td>
+                        <td>51 42 2B 8A 39 CF 05 C7 95 72 B8 E0 33 E7 6E 0F</td>
+                        <td>DD 7B 7C CE E5 33 34 F1 21 62 EF 1A 10 D4 7E 05</td>
+                    </tr>
+                    <tr class="diff" id="0x00000340">
+                        <td class="offset-column">0x00000340</td>
+                        <td>46 17 8A FF E2 FB D1 C9 B0 3F A0 61 B0 0E B3 01</td>
+                        <td>79 58 06 05 3E 1E 52 B0 0F 2E F7 FD 60 F3 EA 89</td>
+                    </tr>
+                    <tr class="diff" id="0x00000350">
+                        <td class="offset-column">0x00000350</td>
+                        <td>32 A3 3B 95 F3 F2 A2 84 7E 07 53 96 30 34 58 3C</td>
+                        <td>08 A2 57 2D A9 8B EF 31 81 9E 8F 68 FD 08 45 C7</td>
+                    </tr>
+                    <tr class="diff" id="0x00000360">
+                        <td class="offset-column">0x00000360</td>
+                        <td>7B A7 47 8A F4 FF F2 E6 E6 95 76 9B A0 58 B7 CA</td>
+                        <td>4C F6 59 3F 9A DB EC E1 E6 BA C4 55 87 88 62 C1</td>
+                    </tr>
+                    <tr class="diff" id="0x00000370">
+                        <td class="offset-column">0x00000370</td>
+                        <td>A6 DA 53 C6 D5 BC 1B EF 20 E2 FE E7 BA E5 44 FA</td>
+                        <td>B0 BB 59 B5 A9 C6 5D 07 12 CC 72 88 27 7C A6 13</td>
+                    </tr>
+                    <tr class="diff" id="0x00000380">
+                        <td class="offset-column">0x00000380</td>
+                        <td>E2 3F 7B 25 CC AF DA 18 9C D9 DB D9 B5 E4 BD 22</td>
+                        <td>6D 64 FC B8 1C 59 35 F8 59 93 23 47 D3 16 61 8D</td>
+                    </tr>
+                    <tr class="diff" id="0x00000390">
+                        <td class="offset-column">0x00000390</td>
+                        <td>33 B7 2E 8D DA 84 89 DE 55 0B 29 BE 8A 25 EB DE</td>
+                        <td>F7 C1 FA 83 8D AC 8C 84 C5 A3 84 3E 93 81 82 EE</td>
+                    </tr>
+                    <tr class="diff" id="0x000003A0">
+                        <td class="offset-column">0x000003A0</td>
+                        <td>A3 B3 23 33 48 D0 55 52 15 58 F8 21 53 29 9F B7</td>
+                        <td>68 2B 6E 63 17 13 C8 48 E0 56 F0 AE 0C B6 98 50</td>
+                    </tr>
+                    <tr class="diff" id="0x000003B0">
+                        <td class="offset-column">0x000003B0</td>
+                        <td>43 93 EC 00 7F 9D 11 F4 B9 91 5A 37 EB 8B 83 06</td>
+                        <td>6F 4C 06 56 55 52 05 21 62 C2 55 38 A0 74 76 32</td>
+                    </tr>
+                    <tr class="diff" id="0x000003C0">
+                        <td class="offset-column">0x000003C0</td>
+                        <td>52 C8 78 AE D6 C1 97 09 98 F2 EE 5E DA 2C A5 A1</td>
+                        <td>B5 6B 54 94 1A 51 13 52 5E 67 20 9B 57 55 62 96</td>
+                    </tr>
+                    <tr class="diff" id="0x000003D0">
+                        <td class="offset-column">0x000003D0</td>
+                        <td>78 C3 A8 1D 7D E4 95 58 E9 05 2E DE 95 CC CD BD</td>
+                        <td>13 E7 30 C7 00 3C 7C 8F 7A 3B 9A 64 BC D2 17 43</td>
+                    </tr>
+                    <tr class="diff" id="0x000003E0">
+                        <td class="offset-column">0x000003E0</td>
+                        <td>E9 A0 6B 82 18 81 EF 92 E9 FE 2B D2 96 BB AF 93</td>
+                        <td>EF B6 4F 5E 56 EE FB 29 CE 70 EB 95 A4 77 ED 02</td>
+                    </tr>
+                    <tr class="diff" id="0x000003F0">
+                        <td class="offset-column">0x000003F0</td>
+                        <td>FE CE F8 C4 F4 E4 60 97 AC 72 50 8B 87 11 5E CD</td>
+                        <td>39 8B CB 41 66 28 A0 EA 70 E1 03 6F 18 76 3E 77</td>
+                    </tr>
+                    <tr class="diff" id="0x00000400">
+                        <td class="offset-column">0x00000400</td>
+                        <td>9C AC 94 34 23 6C 42 72 19 71 ED 73 34 92 5F D5</td>
+                        <td>83 AD BF C3 B3 53 8A B4 A6 8C F6 2C 18 48 8D 56</td>
+                    </tr>
+                    <tr class="diff" id="0x00000410">
+                        <td class="offset-column">0x00000410</td>
+                        <td>F9 98 D8 18 F4 07 45 F8 9B 32 35 55 D8 51 45 13</td>
+                        <td>10 83 0C 11 E8 BB 74 4A E1 33 11 5B 0D 27 AF 76</td>
+                    </tr>
+                    <tr class="diff" id="0x00000420">
+                        <td class="offset-column">0x00000420</td>
+                        <td>CB DB 93 CA 85 77 EC 97 9C 05 D2 2C F3 23 58 92</td>
+                        <td>C3 71 B6 16 D4 A7 AF 98 B1 04 47 0D 91 E0 75 28</td>
+                    </tr>
+                    <tr class="diff" id="0x00000430">
+                        <td class="offset-column">0x00000430</td>
+                        <td>C8 F4 FA 63 8A E1 84 DC 09 A5 9A EB F5 4F BB 07</td>
+                        <td>AE 76 4E CD AB 34 CF B1 82 1A E4 60 F1 D2 9F F8</td>
+                    </tr>
+                    <tr class="diff" id="0x00000440">
+                        <td class="offset-column">0x00000440</td>
+                        <td>C2 82 ED B1 0F 6F FF 8D 31 52 60 E0 4B 84 E5 EA</td>
+                        <td>5C C7 C1 E5 96 90 32 47 4A E1 DC A5 1D E8 31 73</td>
+                    </tr>
+                    <tr class="diff" id="0x00000450">
+                        <td class="offset-column">0x00000450</td>
+                        <td>3D 0A B5 05 FB 8C 4D 31 FC 46 13 0A 7B 97 74 92</td>
+                        <td>AE 7E 0A 0D 16 48 98 5C E2 3A 32 47 5B 83 7E 81</td>
+                    </tr>
+                    <tr class="diff" id="0x00000460">
+                        <td class="offset-column">0x00000460</td>
+                        <td>C7 0D 36 8A C4 4C BC 6B 78 BB 16 61 26 9D 90 6F</td>
+                        <td>A9 A2 9E 5B 7A 67 E8 04 5D 68 9B DD 94 65 49 0A</td>
+                    </tr>
+                    <tr class="diff" id="0x00000470">
+                        <td class="offset-column">0x00000470</td>
+                        <td>B5 03 D7 A4 DA 1B BD F8 D1 9D 81 B0 67 B3 9F E6</td>
+                        <td>57 BD 5B 4E 63 DB 0F 41 DC FE A8 9B D3 4F 3D 1A</td>
+                    </tr>
+                    <tr class="diff" id="0x00000480">
+                        <td class="offset-column">0x00000480</td>
+                        <td>93 AB 9C F4 C9 FC 8D 5B B0 41 B1 12 11 48 E2 78</td>
+                        <td>44 C9 4F B6 1F 34 C8 0C 50 07 37 F4 CE C7 9E 53</td>
+                    </tr>
+                    <tr class="diff" id="0x00000490">
+                        <td class="offset-column">0x00000490</td>
+                        <td>4A C7 3B 15 30 E0 DF E8 ED 99 97 F5 E3 D7 59 C9</td>
+                        <td>2F A5 26 73 54 1A F7 EF 27 14 EE 39 59 49 53 FC</td>
+                    </tr>
+                    <tr class="diff" id="0x000004A0">
+                        <td class="offset-column">0x000004A0</td>
+                        <td>AD EE E2 35 77 99 86 59 B7 61 BB 1C 29 D8 33 0B</td>
+                        <td>CF FE D6 47 DC BC 22 55 A5 C6 46 28 73 58 B3 04</td>
+                    </tr>
+                    <tr class="diff" id="0x000004B0">
+                        <td class="offset-column">0x000004B0</td>
+                        <td>9F 5E F2 DA EC D9 50 B8 13 D6 FB 41 D3 7A A2 9E</td>
+                        <td>8C 4A 91 D2 20 96 07 E7 16 69 47 AD 5D 32 A2 8B</td>
+                    </tr>
+                    <tr class="diff" id="0x000004C0">
+                        <td class="offset-column">0x000004C0</td>
+                        <td>24 D0 14 12 E2 C4 87 68 C6 52 60 F1 55 52 DB C0</td>
+                        <td>F7 62 5E F8 91 DB 47 12 5C 1A ED 46 A7 68 81 00</td>
+                    </tr>
+                    <tr class="diff" id="0x000004D0">
+                        <td class="offset-column">0x000004D0</td>
+                        <td>51 61 84 25 30 A3 67 3A 9C F6 2F 93 12 87 3D 0F</td>
+                        <td>9A 63 A3 EE 6C A1 F7 3B 8D 82 B9 C2 00 F1 0B AB</td>
+                    </tr>
+                    <tr class="diff" id="0x000004E0">
+                        <td class="offset-column">0x000004E0</td>
+                        <td>20 DF 23 D0 73 C2 6F 5B 32 C3 B5 B4 E4 1D DB 94</td>
+                        <td>D0 E3 DE 0E E6 43 73 06 9E 25 2A 31 A1 CC D8 87</td>
+                    </tr>
+                    <tr class="diff" id="0x000004F0">
+                        <td class="offset-column">0x000004F0</td>
+                        <td>E8 9E C7 44 82 B6 72 3D 8C 6B 02 5E A9 DF 5D DA</td>
+                        <td>77 AB 90 4A 13 39 70 99 33 B6 09 8B 1D AD BF F2</td>
+                    </tr>
+                    <tr class="diff" id="0x00000500">
+                        <td class="offset-column">0x00000500</td>
+                        <td>04 C2 4E 0B ED 6C EA 43 22 4A D4 06 0A 85 C8 5A</td>
+                        <td>ED 33 93 17 E8 7A 92 51 9A F0 CD D9 A1 82 DF 92</td>
+                    </tr>
+                    <tr class="diff" id="0x00000510">
+                        <td class="offset-column">0x00000510</td>
+                        <td>6A 1D 24 36 2B A6 A5 37 4A D1 1F E0 6D 7C 4D 3D</td>
+                        <td>CB 72 EC 69 35 F4 74 C7 3E 80 34 47 3E FF 01 4E</td>
+                    </tr>
+                    <tr class="diff" id="0x00000520">
+                        <td class="offset-column">0x00000520</td>
+                        <td>01 FD 58 B2 95 56 F8 89 19 BB 1B 06 A3 7A 91 88</td>
+                        <td>55 6F A2 A8 DA A7 6D 1D 41 AC F0 81 D8 C6 E9 5A</td>
+                    </tr>
+                    <tr class="diff" id="0x00000530">
+                        <td class="offset-column">0x00000530</td>
+                        <td>D1 55 7D CB B6 BD D1 D6 A8 F4 F0 14 4C 1F 41 8F</td>
+                        <td>3D 73 80 12 20 C2 A2 5C 59 11 4B 16 9A 11 44 76</td>
+                    </tr>
+                    <tr class="diff" id="0x00000540">
+                        <td class="offset-column">0x00000540</td>
+                        <td>59 5A 8F 4A 0F 8A D5 7F D3 A3 AE D2 81 9F 72 CC</td>
+                        <td>C7 0E CE 73 CF D1 DB E4 D0 3E 00 E8 94 72 4E 75</td>
+                    </tr>
+                    <tr class="diff" id="0x00000550">
+                        <td class="offset-column">0x00000550</td>
+                        <td>9D 56 3C D3 1E 7B B6 7C 40 60 0A D2 EE 34 43 C0</td>
+                        <td>22 03 92 02 9C EA D3 81 F0 FD 1D BA E4 59 0D AE</td>
+                    </tr>
+                    <tr class="diff" id="0x00000560">
+                        <td class="offset-column">0x00000560</td>
+                        <td>36 35 A3 F6 17 B0 7A EC 62 D2 CF 30 39 5F C3 47</td>
+                        <td>1F 23 C7 34 83 40 1E 72 53 08 83 B3 13 F8 94 6C</td>
+                    </tr>
+                    <tr class="diff" id="0x00000570">
+                        <td class="offset-column">0x00000570</td>
+                        <td>AB 7A 1B 33 85 15 15 0E 16 D6 05 A4 32 12 BD 8C</td>
+                        <td>EF 9B E5 E8 B5 25 EA 1E 7F 09 1F 4A DA BB 7E 84</td>
+                    </tr>
+                    <tr class="diff" id="0x00000580">
+                        <td class="offset-column">0x00000580</td>
+                        <td>87 92 68 73 3B 8D 45 B4 80 C5 0C 5D B4 D4 2B 0C</td>
+                        <td>40 AB 8A 88 F3 FF D0 1C 05 B3 CB 8F FC 0B BD 3F</td>
+                    </tr>
+                    <tr class="diff" id="0x00000590">
+                        <td class="offset-column">0x00000590</td>
+                        <td>43 EB 37 E7 62 25 7B 55 A7 C0 1B 33 D5 B9 7F 40</td>
+                        <td>C1 74 31 B5 2F 7A 3E F7 6A 21 83 2E 21 FB 33 0B</td>
+                    </tr>
+                    <tr class="diff" id="0x000005A0">
+                        <td class="offset-column">0x000005A0</td>
+                        <td>73 B8 4F F0 25 F0 6B 8B C1 AE 81 05 EB 9D DB 9D</td>
+                        <td>29 FD 82 58 CA AF 33 2B 79 75 8D 44 7C 7F E2 8D</td>
+                    </tr>
+                    <tr class="diff" id="0x000005B0">
+                        <td class="offset-column">0x000005B0</td>
+                        <td>18 1D BA 8A 18 71 51 AC D9 10 07 45 3F D0 8F D2</td>
+                        <td>77 8A 54 A5 14 4D 28 67 CF 79 0C 06 18 25 D7 03</td>
+                    </tr>
+                    <tr class="diff" id="0x000005C0">
+                        <td class="offset-column">0x000005C0</td>
+                        <td>E0 AF B3 68 F9 11 03 85 15 3E 3E AD B9 AB EB 27</td>
+                        <td>82 F0 2C AD F5 A4 73 20 92 7B C8 4F 3B E7 D4 7D</td>
+                    </tr>
+                    <tr class="diff" id="0x000005D0">
+                        <td class="offset-column">0x000005D0</td>
+                        <td>50 C4 F2 35 81 C9 73 99 67 6C A2 9C 8D B3 03 ED</td>
+                        <td>2B 51 72 D5 8C 61 57 EE CE F8 4A 41 F2 56 30 05</td>
+                    </tr>
+                    <tr class="diff" id="0x000005E0">
+                        <td class="offset-column">0x000005E0</td>
+                        <td>BA DC 9D C0 06 98 4D 98 FD D8 AF D5 90 0F C4 25</td>
+                        <td>1A 99 6C A1 0D BD 80 B9 55 07 E3 1E D7 7A 6E 34</td>
+                    </tr>
+                    <tr class="diff" id="0x000005F0">
+                        <td class="offset-column">0x000005F0</td>
+                        <td>53 F8 F5 90 29 B5 7C 41 A5 CE 6D F5 36 4B C0 00</td>
+                        <td>5B 7C A8 60 94 6B E9 F9 66 9E F7 9B 03 41 14 CE</td>
+                    </tr>
+                    <tr class="diff" id="0x00000600">
+                        <td class="offset-column">0x00000600</td>
+                        <td>5C 01 4C 79 CB 29 9E 9B A1 5F 67 BA 0B 95 82 8A</td>
+                        <td>01 9B DC 03 BB 46 1E 9A A6 76 28 32 B0 F3 DF 70</td>
+                    </tr>
+                    <tr class="diff" id="0x00000610">
+                        <td class="offset-column">0x00000610</td>
+                        <td>B8 16 EB 18 97 9B 44 45 BB 9A BE 81 FF DB 5B 57</td>
+                        <td>7E 57 36 02 68 9F C5 31 4D EB C1 22 76 F5 64 20</td>
+                    </tr>
+                    <tr class="diff" id="0x00000620">
+                        <td class="offset-column">0x00000620</td>
+                        <td>6B 4E AE 09 03 87 B5 36 8D C4 51 C1 C3 5E 4D 86</td>
+                        <td>17 6E C3 52 9F 92 EA 23 1A 57 E1 9E 93 E5 0D 83</td>
+                    </tr>
+                    <tr class="diff" id="0x00000630">
+                        <td class="offset-column">0x00000630</td>
+                        <td>6A CB 8F F2 77 52 8F 3E 20 5A 3D 92 0B 63 72 BD</td>
+                        <td>57 16 98 A7 17 22 4C 4F D8 8D 52 F6 4D A6 6C 85</td>
+                    </tr>
+                    <tr class="diff" id="0x00000640">
+                        <td class="offset-column">0x00000640</td>
+                        <td>D4 C5 CE F4 AC 32 64 67 E3 8B 3D DD 2A 27 41 C0</td>
+                        <td>B3 21 76 59 B1 A3 8D 1E A8 A8 9C AC DD 64 9E 07</td>
+                    </tr>
+                    <tr class="diff" id="0x00000650">
+                        <td class="offset-column">0x00000650</td>
+                        <td>46 85 09 4E CA 86 28 5C 94 A8 EF 2A 48 E6 0A 6D</td>
+                        <td>D0 1D 7C 61 4D 4D 2B 4A EE 27 88 C3 BC 81 00 A8</td>
+                    </tr>
+                    <tr class="diff" id="0x00000660">
+                        <td class="offset-column">0x00000660</td>
+                        <td>3F 4F D8 4C A7 4A A5 A6 2B D2 0C 0F C2 0D AE 0C</td>
+                        <td>53 F9 1B 19 72 D8 10 2F 38 E0 5C EF 19 7B 93 17</td>
+                    </tr>
+                    <tr class="diff" id="0x00000670">
+                        <td class="offset-column">0x00000670</td>
+                        <td>5A B6 33 B3 AB DC 43 FD 7F B0 61 52 DF CD 57 03</td>
+                        <td>1A E3 56 A9 FC A8 54 9F E3 78 C8 66 7E D5 B5 CE</td>
+                    </tr>
+                    <tr class="diff" id="0x00000680">
+                        <td class="offset-column">0x00000680</td>
+                        <td>10 57 ED 50 7B 96 B0 83 C7 55 59 D0 01 85 0A 6F</td>
+                        <td>CC D6 E5 71 72 0B 53 10 E7 2F 0C 10 ED B0 27 3E</td>
+                    </tr>
+                    <tr class="diff" id="0x00000690">
+                        <td class="offset-column">0x00000690</td>
+                        <td>3A 4D AB 93 87 0C C6 3B 3A 89 0D 65 7C FA 81 11</td>
+                        <td>6F EA 73 58 DE 8D D7 5A 24 7D 84 2C 91 3F 2F C7</td>
+                    </tr>
+                    <tr class="diff" id="0x000006A0">
+                        <td class="offset-column">0x000006A0</td>
+                        <td>3E 30 EA 3B 83 61 51 73 E3 8D 03 2C 85 AB 46 45</td>
+                        <td>10 E7 92 2D 49 FC A5 AE 15 72 8B DC FC 85 57 C1</td>
+                    </tr>
+                    <tr class="diff" id="0x000006B0">
+                        <td class="offset-column">0x000006B0</td>
+                        <td>FF 65 C3 4E 00</td>
+                        <td>8D 7D E4 D7 38 DC 67 72 CF 9F 85 BB E3 66 5C 36</td>
+                    </tr>
+                    <tr class="same">
+                        <td class="offset-column">0x000006C0</td>
+                        <td></td>
+                        <td>E7 A0 50 B4 B6</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <a href="#" class="back-to-top" title="回到顶部">↑</a>
+    
+    <script>
+        // 高亮相同行
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.comparison tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseover', function() {
+                    const id = this.id;
+                    if (id) {
+                        document.querySelectorAll(`tr[id="${id}"]`).forEach(r => {
+                            r.style.backgroundColor = r.classList.contains('diff') ? 
+                                'rgba(231, 76, 60, 0.3)' : 'rgba(46, 204, 113, 0.2)';
+                        });
+                    }
+                });
+                
+                row.addEventListener('mouseout', function() {
+                    const id = this.id;
+                    if (id) {
+                        document.querySelectorAll(`tr[id="${id}"]`).forEach(r => {
+                            r.style.backgroundColor = '';
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

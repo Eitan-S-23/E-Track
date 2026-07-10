@@ -1,0 +1,79 @@
+<svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="山地骑行插图">
+  <defs>
+    <linearGradient id="sky" x1="320" y1="0" x2="320" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c7f2ff"/>
+      <stop offset="0.55" stop-color="#eaffef"/>
+      <stop offset="1" stop-color="#f8fff7"/>
+    </linearGradient>
+    <linearGradient id="hillA" x1="0" y1="123" x2="550" y2="350" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5fae83"/>
+      <stop offset="1" stop-color="#c9e58a"/>
+    </linearGradient>
+    <linearGradient id="hillB" x1="640" y1="108" x2="90" y2="347" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6ab7ce"/>
+      <stop offset="1" stop-color="#d7eda8"/>
+    </linearGradient>
+    <linearGradient id="road" x1="350" y1="223" x2="604" y2="344" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dfd7cc"/>
+    </linearGradient>
+    <filter id="riderShadow" x="150" y="214" width="260" height="108" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur_2_1"/>
+    </filter>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#sky)"/>
+
+  <path d="M0 132C42 109 78 129 115 152C158 179 192 181 235 143C278 105 315 90 366 130C413 167 470 154 514 121C559 88 601 83 640 119V360H0V132Z" fill="#b9deea"/>
+  <path d="M0 188C43 156 82 141 136 164C188 186 214 194 276 160C342 124 398 126 455 165C511 204 571 179 640 143V360H0V188Z" fill="url(#hillB)"/>
+  <path d="M0 248C68 213 126 217 192 233C260 250 312 227 379 198C459 163 545 181 640 222V360H0V248Z" fill="url(#hillA)"/>
+  <path d="M-8 298C80 260 165 258 258 271C342 283 426 294 640 238V360H-8V298Z" fill="#acd86d"/>
+  <path d="M0 330C151 291 276 307 378 318C480 329 556 316 640 294V360H0V330Z" fill="#eef5d4"/>
+
+  <path d="M482 208C545 218 596 238 650 269L651 318C586 274 533 251 470 241C419 233 377 239 343 257L333 239C372 216 423 199 482 208Z" fill="#cfc7bd"/>
+  <path d="M483 217C539 226 589 245 641 276" stroke="url(#road)" stroke-width="16" stroke-linecap="round"/>
+  <path d="M456 235C517 242 573 262 640 303" stroke="#f8fafc" stroke-width="6" stroke-linecap="round" stroke-dasharray="24 22"/>
+
+  <g opacity="0.45">
+    <circle cx="49" cy="284" r="20" fill="#6fb05f"/>
+    <circle cx="78" cy="273" r="26" fill="#7aba68"/>
+    <circle cx="103" cy="288" r="22" fill="#69a95d"/>
+    <rect x="44" y="288" width="82" height="30" rx="15" fill="#5f9f58"/>
+  </g>
+
+  <g filter="url(#riderShadow)" opacity="0.2">
+    <ellipse cx="275" cy="272" rx="98" ry="20" fill="#102033"/>
+  </g>
+
+  <g transform="translate(170 111)">
+    <circle cx="74" cy="180" r="45" stroke="#0d1720" stroke-width="7"/>
+    <circle cx="229" cy="180" r="45" stroke="#0d1720" stroke-width="7"/>
+    <circle cx="74" cy="180" r="35" stroke="#1f2937" stroke-width="2" opacity="0.34"/>
+    <circle cx="229" cy="180" r="35" stroke="#1f2937" stroke-width="2" opacity="0.34"/>
+    <path d="M74 180H133L165 132L191 180H229M133 180L113 129H166M133 180L191 180" stroke="#111827" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M166 129L188 112H213" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+    <path d="M108 129H84" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+    <path d="M153 81C138 88 126 111 119 131L150 139C159 124 169 112 180 103L153 81Z" fill="#74c85f"/>
+    <path d="M143 133L121 165M177 104L211 139" stroke="#15212c" stroke-width="12" stroke-linecap="round"/>
+    <path d="M121 165L103 174M211 139L226 159" stroke="#f2c5a5" stroke-width="10" stroke-linecap="round"/>
+    <path d="M147 83C167 76 186 81 201 98L184 116C170 107 158 103 143 104L147 83Z" fill="#2d974e"/>
+    <path d="M192 96L210 110" stroke="#f2c5a5" stroke-width="11" stroke-linecap="round"/>
+    <path d="M215 110L240 108" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="145" cy="64" r="17" fill="#f3c6a6"/>
+    <path d="M126 59C136 38 169 42 174 59C160 58 145 60 132 69L126 59Z" fill="#0f2a2f"/>
+    <path d="M123 58C135 44 158 40 177 50" stroke="#13a765" stroke-width="7" stroke-linecap="round"/>
+    <path d="M165 69L181 73" stroke="#0f2a2f" stroke-width="5" stroke-linecap="round"/>
+    <path d="M107 133L96 118" stroke="#f2c5a5" stroke-width="10" stroke-linecap="round"/>
+    <path d="M96 118L114 99" stroke="#15212c" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.85">
+    <path d="M51 320c6-15 14-15 20 0" stroke="#f4d75f" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="36" cy="309" r="5" fill="#f4d75f"/>
+    <circle cx="585" cy="284" r="5" fill="#f4d75f"/>
+    <circle cx="604" cy="279" r="4" fill="#f4d75f"/>
+    <circle cx="566" cy="296" r="4" fill="#f4d75f"/>
+  </g>
+</svg>

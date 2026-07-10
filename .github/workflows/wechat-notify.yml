@@ -1,0 +1,55 @@
+name: GitHub Push to WeChat Notification
+
+on:
+  push:
+    branches: ["*"]
+
+jobs:
+  send-wechat-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Send WeChat Notification
+        run: |
+          # 核心：关闭严格模式，忽略所有命令错误
+          set +e
+
+          # 1. 基础信息（保底赋值）
+          BRANCH="${{ github.ref_name }}"
+          ACTOR="${{ github.actor }}"
+          ACTOR_URL="https://github.com/${ACTOR:-unknown}"
+          REPO="${{ github.repository }}"
+          REPO_URL="https://github.com/${REPO:-unknown}"
+          COMMIT_MSG="${{ github.event.head_commit.message || '无提交说明' }}"
+          # 只显示前8位commit ID，更简洁
+          COMMIT_ID="${{ github.sha }}"
+          COMMIT_SHORT_ID="${COMMIT_ID:0:8}"
+          TIME=$(date -d '+8 hours' +'%Y-%m-%d %H:%M:%S')
+
+          # 2. 文件变更统计（关键修复：强制清理所有特殊字符，确保是纯数字）
+          # 使用tr删除所有非数字字符，awk确保最终输出是数字（兜底0）
+          MODIFIED=$(git diff --name-status HEAD^ HEAD 2>/dev/null | grep -c '^M' | tr -cd '0-9' | awk '{print $0+0}')
+          ADDED=$(git diff --name-status HEAD^ HEAD 2>/dev/null | grep -c '^A' | tr -cd '0-9' | awk '{print $0+0}')
+          DELETED=$(git diff --name-status HEAD^ HEAD 2>/dev/null | grep -c '^D' | tr -cd '0-9' | awk '{print $0+0}')
+          # 清理变更文件中的换行/特殊字符
+          FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null | head -5 | tr '\n' '|' | sed -e 's/|$//' -e 's/[^a-zA-Z0-9\/._|-]//g' || echo "无变更")
+
+          # 3. 构造内容（使用printf避免转义问题，统一换行符）
+          CONTENT=$(printf "✨ GitHub代码推送通知 ✨\n------------------------\n📂 推送分支：%s\n⏰ 推送时间：%s\n👤 推送者：%s（%s）\n\n📦 仓库信息：%s（私有）\n🔗 仓库链接：%s\n\n✏️ 提交说明：%s\n📝 提交ID：%s\n\n📁 文件变更：%s新增 + %s修改 + %s删除\n📄 变更文件：%s" \
+            "$BRANCH" "$TIME" "$ACTOR" "$ACTOR_URL" "$REPO" "$REPO_URL" "$COMMIT_MSG" "$COMMIT_SHORT_ID" "$ADDED" "$MODIFIED" "$DELETED" "$FILES")
+
+          # 4. 发送请求（关键：用jq处理JSON转义，避免特殊字符导致格式错误）
+          # 先安装jq（确保JSON格式正确）
+          sudo apt-get update && sudo apt-get install -y jq
+          # 用jq构造正确的JSON，自动转义特殊字符
+          PAYLOAD=$(jq -n --arg content "$CONTENT" '{"msgtype":"text","text":{"content":$content}}')
+          curl -s -X POST "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=${{ secrets.WECHAT_WEBHOOK_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
+
+          # 强制返回成功，避免exit code 1
+          exit 0

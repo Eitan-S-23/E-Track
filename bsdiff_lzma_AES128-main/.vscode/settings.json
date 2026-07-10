@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "cpuarch.h": "c",
+    "lzfind.h": "c",
+    "interface.h": "c",
+    "alloc.h": "c"
+  }
+}

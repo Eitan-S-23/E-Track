@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f8fafc" />
+    <title>骑行分享页 - 打开骑行软件</title>
+    <meta
+      name="description"
+      content="在浏览器中打开后将自动唤起骑行软件，继续查看完整骑行记录。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="骑行分享页 - 打开骑行软件" />
+    <meta
+      property="og:description"
+      content="打开骑行软件查看完整骑行记录。微信中请先选择在浏览器打开。"
+    />
+    <meta property="og:url" content="https://eitan-s-23.github.io/Trace/" />
+    <meta
+      property="og:image"
+      content="https://eitan-s-23.github.io/Trace/assets/share-card.svg"
+    />
+    <link rel="icon" href="assets/share-card.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-mode="in-app">
+    <aside class="wechat-guide" id="wechatGuide" hidden>
+      <div class="wechat-guide__arrow" aria-hidden="true"></div>
+      <p>当前应用内置浏览器无法完整查看。</p>
+      <strong>请点击右上角 “...”，选择“在浏览器中打开”。</strong>
+    </aside>
+
+    <main class="page-shell">
+      <header class="page-header">
+        <h1>骑行分享页 · 打开骑行软件</h1>
+        <p>在浏览器中打开后将自动唤起骑行软件，继续查看完整骑行记录</p>
+      </header>
+
+      <section class="guide-panel" aria-label="打开骑行软件说明">
+        <article class="guide-column guide-column--left">
+          <h2>在微信/其他应用中打开</h2>
+          <p>无法完整查看，提示在浏览器中打开</p>
+
+          <div class="phone phone--wechat" aria-label="微信中打开示意">
+            <div class="phone-status">
+              <strong>9:41</strong>
+              <span class="ios-icons" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </span>
+            </div>
+
+            <div class="wechat-topbar">
+              <strong>微信</strong>
+              <span aria-hidden="true">...</span>
+            </div>
+
+            <div class="wechat-share">
+              <div class="scene scene--soft">
+                <div class="app-icon" aria-hidden="true">
+                  <svg viewBox="0 0 48 48">
+                    <path d="M16 31a7 7 0 1 1-7-7 7 7 0 0 1 7 7Zm23 0a7 7 0 1 1-7-7 7 7 0 0 1 7 7ZM14 31h8l7-16h-6m1 0h6l5 16m-13 0 10-9" />
+                  </svg>
+                </div>
+                <strong>骑行记录分享</strong>
+                <img src="assets/ride-scene.svg" alt="" />
+              </div>
+
+              <div class="wechat-instruction">
+                <h3>请在浏览器中打开</h3>
+                <p>为了给您提供更好的浏览体验</p>
+                <p>请点击右上角 ··· 选择 “在浏览器中打开”</p>
+                <button class="wechat-open-button" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 7h9v9M17 7 7 17M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+                  </svg>
+                  在浏览器中打开
+                </button>
+                <span>暂不打开，继续停留</span>
+              </div>
+            </div>
+
+            <footer>© 骑行软件</footer>
+          </div>
+        </article>
+
+        <div class="guide-chevron" aria-hidden="true"></div>
+
+        <article class="instruction-board" aria-label="如何在浏览器中打开">
+          <h2>如何在浏览器中打开?</h2>
+
+          <div class="method-card">
+            <div class="method-title">
+              <span class="wechat-symbol" aria-hidden="true"></span>
+              <strong>在微信中</strong>
+            </div>
+            <div class="method-visual method-visual--wechat">
+              <span></span>
+              <span></span>
+              <span class="is-active"></span>
+            </div>
+            <p>点击右上角 “...”</p>
+            <p>选择 “在浏览器中打开”</p>
+          </div>
+
+          <div class="method-card">
+            <div class="method-title">
+              <span class="share-symbol" aria-hidden="true"></span>
+              <strong>在其他应用中</strong>
+            </div>
+            <div class="method-visual method-visual--share">
+              <span class="share-box" aria-hidden="true"></span>
+              <span></span>
+              <span></span>
+            </div>
+            <p>点击分享按钮</p>
+            <p>选择 “在浏览器中打开”</p>
+          </div>
+        </article>
+
+        <div class="guide-chevron" aria-hidden="true"></div>
+
+        <article class="guide-column guide-column--right">
+          <h2>在浏览器中打开</h2>
+          <p>自动检测并尝试唤起骑行软件</p>
+
+          <div class="phone phone--browser" aria-label="浏览器中打开示意">
+            <div class="phone-status">
+              <strong>9:41</strong>
+              <span class="ios-icons" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </span>
+            </div>
+
+            <div class="browser-bar">
+              <span class="lock-icon" aria-hidden="true"></span>
+              <span>ride.example.com</span>
+              <span class="reload-icon" aria-hidden="true"></span>
+            </div>
+
+            <div class="browser-scene">
+              <div class="app-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="M16 31a7 7 0 1 1-7-7 7 7 0 0 1 7 7Zm23 0a7 7 0 1 1-7-7 7 7 0 0 1 7 7ZM14 31h8l7-16h-6m1 0h6l5 16m-13 0 10-9" />
+                </svg>
+              </div>
+              <strong>骑行记录分享</strong>
+              <img src="assets/ride-scene.svg" alt="" />
+            </div>
+
+            <div class="open-panel">
+              <div class="status-row">
+                <span class="loader" aria-hidden="true"></span>
+                <strong id="openStatus" role="status" aria-live="polite">
+                  正在打开骑行软件...
+                </strong>
+              </div>
+              <p>若未自动打开，请点击下方按钮</p>
+              <button class="open-app-button" id="openAppButton" type="button">
+                打开骑行软件
+              </button>
+              <a class="help-link" id="downloadAndroid" href="#">
+                无法打开？点击下载或查看详情
+                <span aria-hidden="true"></span>
+              </a>
+            </div>
+
+            <nav class="safari-toolbar" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </nav>
+          </div>
+        </article>
+      </section>
+
+      <section class="success-panel" aria-label="成功唤起骑行软件">
+        <header>
+          <h2>成功唤起骑行软件</h2>
+          <p>即将跳转至骑行软件，查看完整记录</p>
+        </header>
+
+        <div class="success-card">
+          <div class="success-card__body">
+            <div class="success-check" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="m14 25 8 8 14-18" />
+              </svg>
+            </div>
+            <h3>已在骑行软件中打开</h3>
+            <p>正在跳转到骑行软件...</p>
+          </div>
+          <button class="success-tip" id="copyLinkButton" type="button">
+            <span aria-hidden="true"></span>
+            若未跳转，请手动打开骑行软件查看
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

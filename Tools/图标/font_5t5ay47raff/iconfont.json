@@ -1,0 +1,142 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "134672",
+      "name": "里程",
+      "font_class": "licheng1",
+      "unicode": "e64f",
+      "unicode_decimal": 58959
+    },
+    {
+      "icon_id": "1104501",
+      "name": "地图类_地图",
+      "font_class": "dituleiditu",
+      "unicode": "e9c0",
+      "unicode_decimal": 59840
+    },
+    {
+      "icon_id": "1799649",
+      "name": "时速",
+      "font_class": "shisu",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "3775887",
+      "name": "传感器",
+      "font_class": "chuanganqi",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "4438260",
+      "name": "菜单",
+      "font_class": "caidan",
+      "unicode": "e651",
+      "unicode_decimal": 58961
+    },
+    {
+      "icon_id": "8288873",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e851",
+      "unicode_decimal": 59473
+    },
+    {
+      "icon_id": "8609709",
+      "name": "导航",
+      "font_class": "daohang",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "9671945",
+      "name": "心率",
+      "font_class": "xinshuai",
+      "unicode": "e8bf",
+      "unicode_decimal": 59583
+    },
+    {
+      "icon_id": "10168524",
+      "name": "直行",
+      "font_class": "zhihang",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "11855594",
+      "name": "亮度",
+      "font_class": "liangdu",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "13601906",
+      "name": "返回",
+      "font_class": "fanhui",
+      "unicode": "e501",
+      "unicode_decimal": 58625
+    },
+    {
+      "icon_id": "19264986",
+      "name": "记录",
+      "font_class": "jilu",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "20531541",
+      "name": "卫星",
+      "font_class": "30kejichuangxin-weixing",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "21828259",
+      "name": "海拔",
+      "font_class": "haiba",
+      "unicode": "e69b",
+      "unicode_decimal": 59035
+    },
+    {
+      "icon_id": "23863267",
+      "name": "详情",
+      "font_class": "xiangqing",
+      "unicode": "e62d",
+      "unicode_decimal": 58925
+    },
+    {
+      "icon_id": "24536810",
+      "name": "igw-l-sun",
+      "font_class": "igw-l-sun",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "40654732",
+      "name": "向右转",
+      "font_class": "xiangyouzhuan",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    },
+    {
+      "icon_id": "40654735",
+      "name": "向左转",
+      "font_class": "xiangzuozhuan",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "42133907",
+      "name": "爬升",
+      "font_class": "pasheng",
+      "unicode": "e6f2",
+      "unicode_decimal": 59122
+    }
+  ]
+}

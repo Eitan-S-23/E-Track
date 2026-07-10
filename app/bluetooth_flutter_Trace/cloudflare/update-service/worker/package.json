@@ -1,0 +1,25 @@
+{
+  "name": "@trace/update-service-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cf-typegen": "wrangler types --include-runtime false worker-configuration.d.ts",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "bootstrap:staging": "node ../scripts/bootstrap-staging.mjs"
+  },
+  "dependencies": {
+    "hono": "4.12.27"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.16.20",
+    "@cloudflare/workers-types": "4.20260628.1",
+    "@emnapi/core": "1.11.1",
+    "@emnapi/runtime": "1.11.1",
+    "@types/node": "24.0.7",
+    "typescript": "6.0.3",
+    "vitest": "4.1.9",
+    "wrangler": "4.105.0"
+  }
+}
