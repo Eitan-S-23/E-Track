@@ -1,0 +1,279 @@
+name: MCU Firmware Build
+
+# 单片机固件 GCC 构建工作流（monorepo 路径隔离）：
+# - push 到 main/master 且固件相关路径变更 → 构建 + （Secrets 齐全时）自动注册 CF nightly 候选
+# - workflow_dispatch(publish=true) → 构建 + GitHub Release + 注册 CF 正式候选
+# - 仅固件路径触发本工作流；Flutter 侧由 build.yml 的 changes job 隔离，互不触发
+# - 正式发布后在 CF admin 端将候选晋升为 stable 渠道当前版本
+# 现有 mcu-firmware-release.yml 保留为"手动上传已编译 bin"的后备通道。
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "USER/**"
+      - "ArduinoAPI/**"
+      - "Libraries/**"
+      - "MDK-ARM_F435/**"
+      - "vendor/**"
+      - "Simulator/LVGL.Simulator/lv_conf.h"
+      - ".github/workflows/firmware-build.yml"
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - "USER/**"
+      - "ArduinoAPI/**"
+      - "Libraries/**"
+      - "MDK-ARM_F435/**"
+      - "vendor/**"
+      - "Simulator/LVGL.Simulator/lv_conf.h"
+      - ".github/workflows/firmware-build.yml"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "构建成功后创建 GitHub Release 并注册 Cloudflare 正式候选"
+        required: true
+        type: boolean
+        default: false
+      version_name:
+        description: "固件版本名（如 2.8.0）；留空则取 Version.h 的 VERSION_SOFTWARE + 构建号"
+        required: false
+        type: string
+      release_notes:
+        description: "发布说明（app/admin 展示）"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: firmware-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVICE_MODEL: e-track-at32f435
+  TARGET_HARDWARE: AT32F435RGT7
+  CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: Build firmware (arm-none-eabi-gcc)
+    runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.version.outputs.version_name }}
+      version_code: ${{ steps.version.outputs.version_code }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      sha256: ${{ steps.artifacts.outputs.sha256 }}
+      bin_size: ${{ steps.artifacts.outputs.bin_size }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Arm GNU Toolchain 13.3.Rel1
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: "13.3.Rel1"
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Extract firmware version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION_NAME: ${{ github.event.inputs.version_name }}
+        run: |
+          set -euo pipefail
+
+          # 版本名：手动输入优先，否则取 Version.h 的 VERSION_SOFTWARE（去 v 前缀）
+          base_version="$(sed -n 's/^#define VERSION_SOFTWARE\s*"v\?\([^"]*\)"/\1/p' USER/App/Version.h | head -n1)"
+          if [[ -z "${base_version}" ]]; then
+            echo "::error title=Version missing::USER/App/Version.h VERSION_SOFTWARE not found"
+            exit 1
+          fi
+          # version_code = 主*1000+次（Q5 锁定规则，对齐 CF firmware_releases.version_code；v2.8→2008）
+          major="$(cut -d. -f1 <<< "${base_version}")"
+          minor="$(cut -d. -f2 <<< "${base_version}")"
+          version_code=$(( major * 1000 + minor ))
+          build_number="$(git rev-list --count HEAD)"
+          if [[ -n "${INPUT_VERSION_NAME:-}" ]]; then
+            version_name="${INPUT_VERSION_NAME#v}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version_name="${base_version}"
+          else
+            # push 自动构建：nightly 版本名带构建号便于区分，version_code 不变（候选不晋升不影响设备）
+            version_name="${base_version}-nightly.${build_number}"
+          fi
+
+          echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${version_code}" >> "$GITHUB_OUTPUT"
+          echo "build_number=${build_number}" >> "$GITHUB_OUTPUT"
+          echo "固件版本: v${version_name} (code ${version_code}, build ${build_number})"
+
+      - name: Configure (CMake + Ninja)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S "${CMAKE_PROJECT_DIR}" -B "${CMAKE_PROJECT_DIR}/build-ci" \
+            -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+
+      - name: Build firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build "${CMAKE_PROJECT_DIR}/build-ci" --target X_Track --parallel
+
+      - name: Generate bin/hex and checksums
+        id: artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${CMAKE_PROJECT_DIR}/build-ci"
+
+          arm-none-eabi-objcopy -O binary X-Track.elf X-Track.bin
+          arm-none-eabi-objcopy -O ihex   X-Track.elf X-Track.hex
+          arm-none-eabi-size --format=berkeley X-Track.elf
+
+          sha256="$(sha256sum X-Track.bin | awk '{print $1}')"
+          bin_size="$(stat -c%s X-Track.bin)"
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+          echo "bin_size=${bin_size}" >> "$GITHUB_OUTPUT"
+          echo "X-Track.bin: ${bin_size} bytes, sha256=${sha256}"
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ steps.version.outputs.version_name }}
+          path: |
+            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.bin
+            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.hex
+            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.elf
+            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.map
+          retention-days: 30
+          if-no-files-found: error
+
+  register-cloudflare:
+    name: Register firmware to Cloudflare
+    runs-on: ubuntu-latest
+    needs: build
+    # push 到默认分支 → 自动注册 nightly 候选；dispatch publish=true → 注册所选渠道
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download firmware artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware-${{ needs.build.outputs.version_name }}
+          path: firmware-release-assets
+
+      - name: Check Cloudflare configuration
+        id: cloudflare_config
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" && -n "${CLOUDFLARE_API_TOKEN:-}" && -n "${TRACE_UPDATE_SERVICE_URL:-}" && -n "${TRACE_DEPLOY_TOKEN:-}" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+              echo "::error title=Cloudflare secrets missing::publish=true 需要配置 CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN / TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN"
+              exit 1
+            fi
+            echo "::warning title=Cloudflare secrets missing::跳过 CF 注册（push 自动注册为可选行为）"
+          fi
+
+      - name: Create GitHub Release
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_NAME: ${{ needs.build.outputs.version_name }}
+          BUILD_NUMBER: ${{ needs.build.outputs.build_number }}
+          RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
+        run: |
+          set -euo pipefail
+          # 正式发布用版本 tag；push 自动构建用 nightly tag（按构建号唯一）+ prerelease 标记
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            release_tag="mcu-${DEVICE_MODEL}-v${VERSION_NAME}"
+            extra_flags=()
+          else
+            release_tag="mcu-${DEVICE_MODEL}-nightly-${BUILD_NUMBER}"
+            extra_flags=(--prerelease)
+          fi
+          notes="${RELEASE_NOTES:-MCU firmware ${release_tag} (${GITHUB_SHA})}"
+          if gh release view "${release_tag}" >/dev/null 2>&1; then
+            gh release edit "${release_tag}" --target "${GITHUB_SHA}" --notes "${notes}"
+          else
+            gh release create "${release_tag}" --target "${GITHUB_SHA}" --title "${release_tag}" --notes "${notes}" "${extra_flags[@]}"
+          fi
+          gh release upload "${release_tag}" firmware-release-assets/X-Track.bin firmware-release-assets/X-Track.hex --clobber
+          echo "RELEASE_TAG=${release_tag}" >> "$GITHUB_ENV"
+
+      - name: Build Cloudflare firmware metadata
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/build-firmware-release-metadata.mjs \
+            --assets-dir firmware-release-assets \
+            --firmware-file firmware-release-assets/X-Track.bin \
+            --release-tag "${RELEASE_TAG}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --commit-sha "${GITHUB_SHA}" \
+            --repository "${GITHUB_REPOSITORY}" \
+            --device-model "${DEVICE_MODEL}" \
+            --version-name "${{ needs.build.outputs.version_name }}" \
+            --version-code "${{ needs.build.outputs.version_code }}" \
+            --release-notes "${{ github.event.inputs.release_notes || format('CI build {0}', github.sha) }}" \
+            --target-hardware "${TARGET_HARDWARE}" \
+            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
+
+      - name: Install Cloudflare upload tooling
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        run: npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+      - name: Upload Cloudflare R2 firmware asset
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET || 'trace-update-staging-releases' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs \
+            --assets-dir firmware-release-assets \
+            --metadata firmware-release-assets/cloudflare-firmware-release-metadata.json \
+            --bucket "${TRACE_R2_BUCKET}" \
+            --wrangler-cwd app/bluetooth_flutter_Trace/cloudflare/update-service/worker \
+            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
+
+      - name: Register Cloudflare firmware candidate
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs \
+            firmware-release-assets/cloudflare-firmware-release-metadata.json

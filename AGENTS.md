@@ -720,3 +720,24 @@ Before reporting success:
 - Report the `Program Size` line from the successful link.
 - If warnings exist, say warnings were present and errors were zero. Do not hide
   warnings as success details.
+
+## OTA 执行规约（强制,适用一切 OTA 相关任务）
+
+凡涉及 bootloader、升级包(.etu)、BLE 帧协议、staging/BCB、SD 升级页、
+firmware CI 或 CF 固件后台的任务,任何 agent 必须遵守:
+
+1. **先读看板再动手**:`PLAN-OTA-EXEC.md` 是唯一任务与状态源,按其 §0 规则
+   认领任务卡(状态置"进行中"+认领标识)后才可改代码;不越卡内"范围"改文件。
+2. **契约只读**:`PLAN-OTA.md` 与 `docs/ota-binary-contracts.md` 为冻结契约。
+   发现矛盾或不可实现 → 该卡置"阻塞"并在看板 §9 变更登记表登记,然后停止;
+   **禁止就地修改契约继续实现**。
+3. **完成必须附证据**:命令+关键输出、产物路径+时间戳、哈希或截图;长输出
+   落盘 `docs/ota-exec-notes/<卡ID>-*.md`。无证据不得置"完成";验收命令由
+   非实现会话执行(实现者不自验收)。
+4. **research 落盘**:编码前检索/分析结论写入 `docs/ota-exec-notes/`,
+   不许只留在会话回复里。
+5. **提交收口**:子 agent 不执行 `git commit/push/merge`,由主会话在用户
+   确认后小步收口。
+6. **会话收尾**:结束前回写看板任务卡状态并在其 §10 会话日志追加一行。
+7. 真机操作(J-Link 烧录/RTT/断电注错)一律沿用本文件既有流程与防坑清单;
+   开工前先读复审报告 `.claude/verification-report-ota-plan.md`(已知坑)。

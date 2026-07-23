@@ -1,0 +1,113 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "AT32F435RGT7 / ST-Link / OpenOCD",
+            "cwd": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "serverpath": "openocd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "executable": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/X-Track.elf",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/artery/at32f4x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build GCC Debug"
+        },
+        {
+            "name": "AT32F435RGT7 / J-Link / OpenOCD",
+            "cwd": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "serverpath": "openocd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "executable": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/X-Track.elf",
+            "configFiles": [
+                "interface/jlink.cfg",
+                "target/artery/at32f4x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build GCC Debug"
+        },
+        {
+            "name": "AT32F435RGT7 / DAPLink / OpenOCD",
+            "cwd": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "serverpath": "openocd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "executable": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/X-Track.elf",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/artery/at32f4x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build GCC Debug"
+        },
+        {
+            "name": "AT32F435RGT7 / Nu-Link / OpenOCD",
+            "cwd": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "serverpath": "openocd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "executable": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/X-Track.elf",
+            "configFiles": [
+                "interface/nulink.cfg",
+                "target/artery/at32f4x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build GCC Debug"
+        },
+        {
+            "name": "AT32F435RGT7 / ULINK / OpenOCD",
+            "cwd": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "serverpath": "openocd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "executable": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/X-Track.elf",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/artery/at32f4x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build GCC Debug"
+        },
+        {
+            "name": "AT32F435RGT7 / J-Link / GDB Server",
+            "cwd": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCL.exe",
+            "device": "AT32F435RGT7",
+            "interface": "swd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "executable": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/X-Track.elf",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build GCC Debug"
+        },
+        {
+            "name": "Cortex-M4 / J-Link / Fallback",
+            "cwd": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCL.exe",
+            "device": "Cortex-M4",
+            "interface": "swd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "executable": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/X-Track.elf",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build GCC Debug"
+        }
+    ]
+}

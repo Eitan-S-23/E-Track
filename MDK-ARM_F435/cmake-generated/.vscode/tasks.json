@@ -1,0 +1,801 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure GCC Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S",
+                "${workspaceFolder}",
+                "-B",
+                "${workspaceFolder}/build-gcc",
+                "-G",
+                "Ninja",
+                "-DCMAKE_BUILD_TYPE=Debug"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Build GCC Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build-gcc",
+                "--target",
+                "X_Track_artifacts",
+                "--parallel"
+            ],
+            "dependsOn": "Configure GCC Debug",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Rebuild GCC Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build-gcc",
+                "--target",
+                "X_Track_artifacts",
+                "--clean-first",
+                "--parallel"
+            ],
+            "dependsOn": "Configure GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean GCC Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build-gcc",
+                "--target",
+                "clean"
+            ],
+            "dependsOn": "Configure GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Configure GCC Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S",
+                "${workspaceFolder}",
+                "-B",
+                "${workspaceFolder}/build-gcc-release",
+                "-G",
+                "Ninja",
+                "-DCMAKE_BUILD_TYPE=Release"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Build GCC Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build-gcc-release",
+                "--target",
+                "X_Track_artifacts",
+                "--parallel"
+            ],
+            "dependsOn": "Configure GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Rebuild GCC Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build-gcc-release",
+                "--target",
+                "X_Track_artifacts",
+                "--clean-first",
+                "--parallel"
+            ],
+            "dependsOn": "Configure GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean GCC Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build-gcc-release",
+                "--target",
+                "clean"
+            ],
+            "dependsOn": "Configure GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ST-Link ELF",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ST-Link HEX",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ST-Link BIN",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Start ST-Link OpenOCD GDB Server",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": {
+                "owner": "openocd",
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 0,
+                        "location": 0,
+                        "message": 0
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": ".*Listening on port 3333 for gdb connections.*"
+                }
+            }
+        },
+        {
+            "label": "Flash ST-Link ELF Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ST-Link HEX Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ST-Link BIN Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash DAPLink ELF",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash DAPLink HEX",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash DAPLink BIN",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Start DAPLink OpenOCD GDB Server",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": {
+                "owner": "openocd",
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 0,
+                        "location": 0,
+                        "message": 0
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": ".*Listening on port 3333 for gdb connections.*"
+                }
+            }
+        },
+        {
+            "label": "Flash DAPLink ELF Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash DAPLink HEX Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash DAPLink BIN Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash Nu-Link ELF",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/nulink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash Nu-Link HEX",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/nulink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash Nu-Link BIN",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/nulink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Nu-Link OpenOCD GDB Server",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/nulink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": {
+                "owner": "openocd",
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 0,
+                        "location": 0,
+                        "message": 0
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": ".*Listening on port 3333 for gdb connections.*"
+                }
+            }
+        },
+        {
+            "label": "Flash Nu-Link ELF Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/nulink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash Nu-Link HEX Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/nulink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash Nu-Link BIN Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/nulink.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ULINK ELF",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ULINK HEX",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ULINK BIN",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "Start ULINK OpenOCD GDB Server",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": {
+                "owner": "openocd",
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 0,
+                        "location": 0,
+                        "message": 0
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": ".*Listening on port 3333 for gdb connections.*"
+                }
+            }
+        },
+        {
+            "label": "Flash ULINK ELF Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.elf} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ULINK HEX Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.hex} verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash ULINK BIN Release",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/artery/at32f4x.cfg",
+                "-c",
+                "program {${workspaceFolder}/build-gcc-release/X-Track.bin} 0x08000000 verify reset exit"
+            ],
+            "dependsOn": "Build GCC Release",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash J-Link ELF",
+            "type": "shell",
+            "command": "JLink.exe",
+            "args": [
+                "-device",
+                "AT32F435RGT7",
+                "-if",
+                "SWD",
+                "-speed",
+                "1000",
+                "-CommanderScript",
+                "${workspaceFolder}/.vscode/jlink_flash_elf.jlink"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash J-Link HEX",
+            "type": "shell",
+            "command": "JLink.exe",
+            "args": [
+                "-device",
+                "AT32F435RGT7",
+                "-if",
+                "SWD",
+                "-speed",
+                "1000",
+                "-CommanderScript",
+                "${workspaceFolder}/.vscode/jlink_flash_hex.jlink"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash J-Link BIN",
+            "type": "shell",
+            "command": "JLink.exe",
+            "args": [
+                "-device",
+                "AT32F435RGT7",
+                "-if",
+                "SWD",
+                "-speed",
+                "1000",
+                "-CommanderScript",
+                "${workspaceFolder}/.vscode/jlink_flash_bin.jlink"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash J-Link ELF Release",
+            "type": "shell",
+            "command": "JLink.exe",
+            "args": [
+                "-device",
+                "AT32F435RGT7",
+                "-if",
+                "SWD",
+                "-speed",
+                "1000",
+                "-CommanderScript",
+                "${workspaceFolder}/.vscode/jlink_flash_elf_release.jlink"
+            ],
+            "dependsOn": "Build GCC Release",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash J-Link HEX Release",
+            "type": "shell",
+            "command": "JLink.exe",
+            "args": [
+                "-device",
+                "AT32F435RGT7",
+                "-if",
+                "SWD",
+                "-speed",
+                "1000",
+                "-CommanderScript",
+                "${workspaceFolder}/.vscode/jlink_flash_hex_release.jlink"
+            ],
+            "dependsOn": "Build GCC Release",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash J-Link BIN Release",
+            "type": "shell",
+            "command": "JLink.exe",
+            "args": [
+                "-device",
+                "AT32F435RGT7",
+                "-if",
+                "SWD",
+                "-speed",
+                "1000",
+                "-CommanderScript",
+                "${workspaceFolder}/.vscode/jlink_flash_bin_release.jlink"
+            ],
+            "dependsOn": "Build GCC Release",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Start J-Link GDB Server",
+            "type": "shell",
+            "command": "JLinkGDBServerCL.exe",
+            "args": [
+                "-device",
+                "AT32F435RGT7",
+                "-if",
+                "SWD",
+                "-speed",
+                "1000",
+                "-port",
+                "2331",
+                "-singlerun"
+            ],
+            "dependsOn": "Build GCC Debug",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false
+            },
+            "problemMatcher": {
+                "owner": "jlink",
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 0,
+                        "location": 0,
+                        "message": 0
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*J-Link GDB Server.*",
+                    "endsPattern": ".*Listening on TCP/IP port 2331.*"
+                }
+            }
+        }
+    ]
+}

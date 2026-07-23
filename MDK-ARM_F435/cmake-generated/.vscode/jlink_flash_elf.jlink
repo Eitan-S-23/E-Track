@@ -1,0 +1,5 @@
+r
+loadfile build-gcc/X-Track.elf
+r
+g
+q

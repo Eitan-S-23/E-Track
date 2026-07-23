@@ -8,7 +8,6 @@
 extern "C" void xtrack_img_line_cache_invalidate(void);
 extern "C" void xtrack_img_line_cache_reset_stats(void);
 extern "C" void xtrack_img_line_cache_get_stats(uint32_t* hits, uint32_t* misses, uint32_t* readBytes, uint32_t* sdCycles);
-extern "C" uint32_t system_core_clock;
 /* lv_port_disp.cpp 导出的 LVGL 刷新周期耗时统计（C++ 链接） */
 void lv_port_disp_get_refr_stats(uint32_t* timeMs, uint32_t* cnt, uint32_t* px);
 void lv_port_disp_reset_refr_stats(void);

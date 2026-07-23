@@ -87,3 +87,11 @@ app/**/generated-images/
 # Hardware-tool caches and automatic backups
 *.si4project/
 *.eprj_backup
+
+# GCC/CMake firmware build products (keil_uvprojx2cmake generated project)
+MDK-ARM_F435/cmake-generated/build-gcc/
+MDK-ARM_F435/cmake-generated/build-gcc-release/
+MDK-ARM_F435/cmake-generated/build-ci-test/
+MDK-ARM_F435/cmake-generated/build-ci-rel/
+/build-gcc/
+/compile_commands.json

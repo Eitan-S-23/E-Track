@@ -1,0 +1,14 @@
+{
+    "cmake.generator": "Ninja",
+    "cmake.buildDirectory": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc",
+    "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/MDK-ARM_F435/cmake-generated/build-gcc/compile_commands.json",
+    "C_Cpp.default.browse.path": [
+        "${workspaceFolder}"
+    ],
+    "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": false,
+    "cmake.sourceDirectory": "${workspaceFolder}/MDK-ARM_F435/cmake-generated",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}"
+    ]
+}

@@ -1,0 +1,5 @@
+r
+loadfile build-gcc/X-Track.bin 0x08000000
+r
+g
+q
