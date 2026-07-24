@@ -1,6 +1,6 @@
 # PLAN-OTA.md — E-Track 单片机 BLE/SD OTA 全链路方案
 
-> 版本:**v1.3(2026-07-23,审查收敛冻结版)**。历程:v1.0 → v1.1 自审 12 项 → v1.2 A 组 8 项重写 → v1.2.1 codex 18 条 → v1.2.2 修 R3 五高危(R4 同意)→ v1.2.3 C 组 10 条 → v1.2.4 修 R6 六高危 → v1.2.5 修 R7 阻断二项 → **R8 codex 复审"同意收敛"**,其 5 条实现验收项已固化进 §2.3/§5.1/§8-P4。**本版为 P0 契约冻结基线**;"同意收敛"指方案层面(codex 未跑构建/真机),实现与生产发布按 §8 各阶段验收。v1 威胁模型(不防主动伪造)为已接受的产品风险(§0.2)。
+> 版本:**v1.3.1(2026-07-24,PRE-1 修订)**。历程:v1.0 → v1.1 自审 12 项 → v1.2 A 组 8 项重写 → v1.2.1 codex 18 条 → v1.2.2 修 R3 五高危(R4 同意)→ v1.2.3 C 组 10 条 → v1.2.4 修 R6 六高危 → v1.2.5 修 R7 阻断二项 → **R8 codex 复审"同意收敛"**,其 5 条实现验收项已固化进 §2.3/§5.1/§8-P4 → **v1.3.1:version_code 编码重定义(补充 D)**。**v1.3 为 P0 契约冻结基线**;v1.3.1 仅修订 version_code 公式与单调性说明。"同意收敛"指方案层面(codex 未跑构建/真机),实现与生产发布按 §8 各阶段验收。v1 威胁模型(不防主动伪造)为已接受的产品风险(§0.2)。
 > 决策历史与验证记录见 `PLAN-OTA-DRAFT.md`;两轮审查记录见 `PLAN-OTA-REVIEW-LOG.md`。
 > **实施顺序:P0(契约冻结+基建)→ P1(bootloader)→ P2(MCU App)→ P3(BLE+Flutter)→ P4(CI/CF)→ P5(联调)。P0 未完成不得进入 P1/P2。**
 
@@ -107,6 +107,7 @@ off size field
 74  18  pad 0xFF
 92  4   header_crc32
 ```
+- **version_code 编码(u32,PRE-1 冻结)**:`version_code = major*10000 + minor*100 + patch`。`version_name` 为 ASCIIZ,规范形如 `X.Y.Z`(可带可选 `v` 前缀;两段式 `X.Y` 等价 `X.Y.0`;CI nightly 可在其后追加 `-nightly.<n>`,编码只取连字符前数字段)。约束:`minor`/`patch` ∈ 0..99(保证无碰撞),结果必须落入 u32。示例:`2.8.0→20800`、`2.8.1→20801`、`2.7`/`2.7.0→20700`。**单调迁移**:历史旧公式 `major*1000+minor` 产物(如 `v2.7→2007`)严格小于同版本新编码(`2.7.0→20700`),故设备侧 `target_vcode > cur_vcode` 向后兼容;旧公式作废,CI/CF/fw_header/.etu 一律用新公式。MCU OTA 拒绝 `target_vcode ≤ cur_vcode`(§4),故 patch 位必须进入编码——`2.8.0` 与 `2.8.1` 不得同码。
 - **位置 0x400 而非 0x200**:GCC 向量表实测 0x20C(X-Track.map `.isr_vector`),0x200 会覆盖末 3 个向量;0x400 同时是 VTOR 对齐边界。**`FW_HEADER_OFFSET=0x400` 为四方共享常量(linker/CI 注入器/boot 解析/recovery 校验唯一来源,P0 契约文档定义,全文其他数字引用一律以此为准)**。linker 定义专用 `.fw_header` 段 @ ORIGIN+0x400,并 `ASSERT(SIZEOF(.isr_vector) <= 0x400)` 防回归。
 - **校验依赖消解(固定填充顺序,boot/CI/vectors 三方一致)**:
   1. `image_sha256` = 全镜像 SHA-256,计算时 **image_sha256 与 header_crc32 两字段均按全零参与**;
@@ -183,7 +184,8 @@ cmd:0x00 GET_INFO{} → 0x80 INFO{model(8B ASCIIZ),hw_rev,layout_id,boot_ver,cur
 
 ### 6.1 firmware-build.yml(v1.2 修订核心)
 - **nightly(push master+paths)**:GCC 构建 → 仅上传 Actions artifact(14 天)。**不建 Release、不注册 CF**——D1 `UNIQUE(app_id,device_model,version_code)` 与 worker `FORMAL_RELEASE_REQUIRED`(firmware.ts:157)决定 nightly 注册不可行,显式放弃。
-- **正式发布(workflow_dispatch)**:输入 version_name/version_code/notes → **GitHub environment `firmware-production` 保护(需人工审批)** → 校验 vcode>CF 现值 → **制包顺序(消解 fw_header 依赖)**:①构建含占位头 app.bin → ②`etu_pack.py --finalize` 回填 fw_header(SHA 双零法+CRC,§3.1 顺序)得最终 app.bin → ③以最终 app.bin 产 full.etu + patch.etu(基=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→ ④**bspatch 自验**:补丁应用于基版 bin,输出与最终 app.bin 逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)→ ⑤产 recovery 资产 `recovery-vX.Y.Z.bin`(最终 app.bin+尾部 8B:len u32+crc32 u32)→ ⑥GitHub Release(full/patch/recovery 三资产)→ 复用 `mcu-firmware-release.yml` 链(R2+worker 注册,isFormalRelease=true)。
+- **version_code 计算**:由**有效** `version_name`(手动 `workflow_dispatch` 输入优先,否则 `USER/App/Version.h` 的 `VERSION_SOFTWARE`)按 §3.1 公式编码;禁止再使用旧公式 `major*1000+minor`。映射验收:`2.8.0→20800`、`2.8.1→20801`;旧产物 `2007(v2.7 旧码) < 20700(2.7.0 新码)`,单调性向后成立。
+- **正式发布(workflow_dispatch)**:输入 version_name/notes(version_code **由 §3.1 公式从 version_name 推导,不单独手填**) → **GitHub environment `firmware-production` 保护(需人工审批)** → 校验 vcode>CF 现值 → **制包顺序(消解 fw_header 依赖)**:①构建含占位头 app.bin → ②`etu_pack.py --finalize` 回填 fw_header(SHA 双零法+CRC,§3.1 顺序)得最终 app.bin → ③以最终 app.bin 产 full.etu + patch.etu(基=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→ ④**bspatch 自验**:补丁应用于基版 bin,输出与最终 app.bin 逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)→ ⑤产 recovery 资产 `recovery-vX.Y.Z.bin`(最终 app.bin+尾部 8B:len u32+crc32 u32)→ ⑥GitHub Release(full/patch/recovery 三资产)→ 复用 `mcu-firmware-release.yml` 链(R2+worker 注册,isFormalRelease=true)。
 - paths 过滤与 Flutter build.yml 互不触发(已验证)。
 
 ### 6.2 CF 后台(v1.2.3 缺口重估)

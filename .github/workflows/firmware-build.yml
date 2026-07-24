@@ -100,10 +100,6 @@ jobs:
             echo "::error title=Version missing::USER/App/Version.h VERSION_SOFTWARE not found"
             exit 1
           fi
-          # version_code = 主*1000+次（Q5 锁定规则，对齐 CF firmware_releases.version_code；v2.8→2008）
-          major="$(cut -d. -f1 <<< "${base_version}")"
-          minor="$(cut -d. -f2 <<< "${base_version}")"
-          version_code=$(( major * 1000 + minor ))
           build_number="$(git rev-list --count HEAD)"
           if [[ -n "${INPUT_VERSION_NAME:-}" ]]; then
             version_name="${INPUT_VERSION_NAME#v}"
@@ -112,6 +108,28 @@ jobs:
           else
             # push 自动构建：nightly 版本名带构建号便于区分，version_code 不变（候选不晋升不影响设备）
             version_name="${base_version}-nightly.${build_number}"
+          fi
+
+          # version_code = major*10000 + minor*100 + patch (u32; PRE-1 / PLAN-OTA.md §3.1)
+          # Examples: 2.8.0→20800, 2.8.1→20801; legacy old-formula 2007(v2.7) < 20700(2.7.0).
+          # Encode from the effective release name so version_name and version_code cannot diverge.
+          encode_src="${version_name%%-*}"
+          encode_src="${encode_src#v}"
+          if [[ ! "${encode_src}" =~ ^([0-9]+)\.([0-9]+)(\.([0-9]+))?$ ]]; then
+            echo "::error title=Invalid version::version_name must start with major.minor[.patch]: ${version_name}"
+            exit 1
+          fi
+          major="${BASH_REMATCH[1]}"
+          minor="${BASH_REMATCH[2]}"
+          patch="${BASH_REMATCH[4]:-0}"
+          if (( 10#${minor} > 99 || 10#${patch} > 99 )); then
+            echo "::error title=Invalid version::minor and patch must be 0..99 for version_code encoding"
+            exit 1
+          fi
+          version_code=$(( 10#${major} * 10000 + 10#${minor} * 100 + 10#${patch} ))
+          if (( version_code < 0 || version_code > 4294967295 )); then
+            echo "::error title=Invalid version::version_code overflows u32 for ${version_name}"
+            exit 1
           fi
 
           echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"
