@@ -24,7 +24,7 @@
 
 | 阶段 | 内容 | 状态 | 进度 | 开工门槛 |
 |---|---|---|---|---|
-| PRE | 前置修正(复审产物) | 待办 | 0/4 | 无 |
+| PRE | 前置修正(复审产物) | 进行中 | 1/4 | 无 |
 | P0 | 契约冻结+基建 | 待办 | 0/6 | PRE-1/2/3 完成 |
 | P1 | bootloader | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
 | P2 | MCU App 升级链 | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
@@ -44,12 +44,23 @@
 ## 2. PRE 前置修正(来自复审报告,先于一切)
 
 #### PRE-1 version_code 编码重定义(契约修订)
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 完成 ｜ 认领: Codex / 2026-07-24 ｜ 更新: 2026-07-24(实现完成,验收通过)
 - 目标: 编码从 `major*1000+minor` 改为 `major*10000+minor*100+patch`(u32);在 `PLAN-OTA.md` 头部追加 v1.3.1 修订记录并更新 §3.1/§6.1 相关表述;同步 `firmware-build.yml` 计算与注释(现 :103-106)。旧公式产物 2007 < 新公式 2.7.0=20700,单调性向后成立,须在文档中写明。
 - 输入: `.claude/verification-report-ota-plan.md` 补充 D;PLAN-OTA.md §3.1/§4/§6.1。
 - 范围: `PLAN-OTA.md`、`.github/workflows/firmware-build.yml`。
 - 验收: 2.8.0/2.8.1 映射为 20800/20801 且文档与 workflow 公式一致;全仓 grep 无残留旧公式表述。
-- 证据: —
+- 证据:
+  - research: `docs/ota-exec-notes/PRE-1-version-code.md`
+  - `PLAN-OTA.md` 升 v1.3.1;§3.1 冻结 `major*10000+minor*100+patch`;§6.1 写明由有效 version_name 推导;迁移 `2007 < 20700`
+  - `.github/workflows/firmware-build.yml` version step 改为同公式,从有效 version_name 编码(含 nightly 去后缀、minor/patch 0..99、u32 上界)
+  - 本地映射: `2.8.0=>20800` `2.8.1=>20801` `2.7=>20700` `2.7-nightly.N=>20700`;`ACCEPTANCE_OK`
+  - 旧公式 active 实现已清;残留仅迁移说明/历史草稿/任务卡表述(见 research)
+  - 验收: 验收人 Claude(主会话,非实现者)/2026-07-24;按 §0.3 独立复核:
+    1. 公式复算(PowerShell 镜像 workflow 逻辑):`2.8.0=>20800` `2.8.1=>20801` `2.7=>20700` `2.7.0=>20700` `2.7-nightly.N=>20700` `2.8.1-nightly.9=>20801`;单调性 `2007<20700` 成立(ACCEPTANCE_OK)。
+    2. firmware-build.yml:113-129 公式与新 §3.1/§6.1 一致;从有效 version_name 编码(nightly 去后缀、minor/patch 0..99 校验、u32 上界校验、非法格式 ::error exit 1)。
+    3. PLAN-OTA.md 头部已升 v1.3.1;§3.1:110/§6.1:187 公式与映射写明且一致。
+    4. 全仓 grep 旧公式 `major*1000+minor`:active/normative 路径=0(仅 workflow 注释提及"禁止再使用"与历史/审计/任务卡表述,research 已注明属 PRE-1 写范围外)。
+    结论: 通过。
 
 #### PRE-2 RAM 基线口径修正(契约修订)
 状态: 待办 ｜ 认领: — ｜ 更新: —
@@ -303,3 +314,6 @@
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
 
 - 2026-07-23 ｜ 主会话(Claude) ｜ 创建看板 v1.0;AGENTS.md 增"OTA 执行规约" ｜ 复审结论已并入 PRE 卡与相关卡红线,报告见 `.claude/verification-report-ota-plan.md`
+
+- 2026-07-24 ｜ Codex ｜ PRE-1 ｜ 认领并实现 version_code 新编码(PLAN-OTA.md v1.3.1 + firmware-build.yml);证据已填,待非实现会话验收
+- 2026-07-24 ｜ 主会话(Claude) ｜ PRE-1(验收) ｜ 按 §0.3 独立复核:公式复算+grep+文档一致性,通过;卡置完成,PRE 1/4
