@@ -25,7 +25,7 @@
 | 阶段 | 内容 | 状态 | 进度 | 开工门槛 |
 |---|---|---|---|---|
 | PRE | 前置修正(复审产物) | 完成 | 4/4 | 无 |
-| P0 | 契约冻结+基建 | 进行中 | 1/6 | PRE-1/2/3 完成 |
+| P0 | 契约冻结+基建 | 进行中 | 2/6 | PRE-1/2/3 完成 |
 | P1 | bootloader | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
 | P2 | MCU App 升级链 | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
 | P3 | BLE+Flutter | 待办 | 0/5 | P2-1/2 完成 |
@@ -168,12 +168,27 @@
   - 验收: Codex / 2026-07-24 按 §0.3 独立复核通过;详见 `docs/ota-exec-notes/P0-1-acceptance-2026-07-24.md` 最终复验记录。字段表尺寸/连续性、R4-1..R4-5、R8-1..R8-5、PRE-1 编码、fw_header/ETU/BCB/ETRJ/BLE 样例长度与 CRC 全部通过;卡置 `完成`。
 
 #### P0-2 打包工具 `tools/etu_pack.py` / `tools/etu_unpack.py`
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 完成 ｜ 认领: Claude(实现 agent) / 2026-07-24 ｜ 更新: 2026-07-25(非实现会话复验通过)
 - 目标: `--finalize` fw_header 回填(SHA 双零法+CRC,严格按 §3.1 顺序);.etu 组包(AES-CTR nonce **每包随机**、payload_crc32、40B 内层头解析后逐字段规范化重写);§2.2 三处上限检查的制包端(超限拒绝);unpack 做逆向解析+校验,供三方比对。
 - 输入: P0-1 契约文档;`bsdiff_lzma_AES128-main/` 工具与 4 个已知坑(PLAN-OTA-DRAFT.md)。
 - 范围: `tools/etu_pack.py`、`tools/etu_unpack.py`(新建)。
 - 验收: pack→unpack 往返字节一致;同输入两次打包 nonce 不同;超限输入被拒并给明确错误。
-- 证据: —
+- 证据:
+  - research+实现记录+自检输出: `docs/ota-exec-notes/P0-2-etu-pack.md`
+  - 产物: `tools/etu_pack.py`(18475B, sha256[:16]=60034884b7ff6e89);`tools/etu_unpack.py`(17358B, sha256[:16]=1cc363894e5a717b);mtime 2026-07-24 23:10/23:11
+  - 契约 §8 样例 CRC 交叉校验:全量外层头 60B→0x14D0AA63(=契约 §8.2);ETRJ 40B→0xC0178C87(=契约 §8.5);✅ 一致
+  - (1) finalize+全量 pack→unpack 往返:app-finalized.bin↔cand-full.bin `cmp` 一致 → `ROUNDTRIP_FULL_OK`;image_sha256=e9ed5739221d7a704c6b74c73f6b3680b1099db270075c9a72ab35704384b9cd 双向一致;`--verify-fw-header` 通过(header_crc32+SHA 双零法)
+  - (2) 差分 pack→unpack 往返:toy-new.bin↔cand-patch.bin `cmp` 一致 → `ROUNDTRIP_PATCH_OK`;candidate_sha256=a47d58b237e294c206a09e57ee4442feccf5ae0fe3673c63ba22ba43eaf5f752(双向一致);base_sha8(etu/old)一致=c8f5d0341d54d951
+  - (3) nonce 每包随机:同输入两次 pack-full nonce a5a78854.../b4994fd2... 不同(`NONCE_DIFFER=True`),header_crc32 随之不同
+  - (4) 超限/损坏拒绝(rc=1+stderr):① pack-full app=1MB>960KB → `[err] image_len=1048576 超 960KB`;② unpack 改外层头 CRC 1B → `[err] 外层头 header_crc32 不匹配`;③ unpack 改 payload 1B → `[err] payload_crc32 不匹配`
+  - 实现口径:finalize 按 §1.2(SHA 双零法→header_crc32);pack-full LZMA-Alone(5B props+u64 LE size+流)+AES-128-CTR(nonce 16B 外层头,CTR counter BE increment,env OTA_AES_KEY 优先/vendor 示例 key 开发并 warn);pack-patch 调 `bsdiff.exe -aes 0` 取原生 40B 头+LZMA 流,按 §2.3 规范化重写(BE hcrc/psize/ocrc/ncrc,LE osize/nsize/orig,pad 显式 0x00×3,ph_hcrc 置零重算);三处上限检查(image_len>0xF0000/.etu>0x180000 拒);unpack 纯 Python 解 LZMA-Alone/RAW+自实现 bspatch(不依赖 bspatch.exe)
+  - 范围限定:vendor C 工具与本 .etu 互操作=P0-3;CI finalize 正式链=P4-1;真机/App 解析=P2-2;本卡仅 pack/unpack Python 自包自解闭环
+  - OTA 规约遵守:未 commit/push(留主会话);不自验收置完成;契约文档与 PLAN-OTA.md 未动
+  - 验收: Codex(非实现会话) / 2026-07-24 按卡内标准独立复核未通过;全量与差分 pack→unpack 均逐字节一致(`8569c5b70087bd6ed154dfe6e752961a36a2faeafc4a8281e34668baa0bf17f3`),同输入两次 full nonce `7a11aeb119d1a06089d3dabe385315f1`/`ec4d36aa749a4339ccf8b1558aaf7988` 不同,finalize/full/patch 超限均 rc=1 且有明确错误;但 `--finalize` 将 `ETFW` 写在镜像 `0x00`,冻结契约要求的 `FW_HEADER_OFFSET=0x400` 仍为 `a5a5a5a5`,真实头 CRC/SHA 双零复算均失败且 `0..0x3ff` 向量区被改写;详见 `docs/ota-exec-notes/P0-2-acceptance-2026-07-24.md`;卡打回保持 `进行中`,未置完成
+  - 整改: `build_fw_header`/`cmd_finalize` 头读自 `image[0x400:0x460]`、回填 `image[0x400:0x460]`,SHA 双零法置零镜像内 `0x400+40..71`/`0x400+92..95`,`image_len`=整镜像(含 0x400 向量表+头);`etu_unpack.py verify_fw_header` 同步按 0x400 偏移校验(magic/CRC/SHA 双零/image_len);前置长度校验改 `0x400+96`;`FW_HEADER_OFFSET=0x400` 两文件均已实际使用
+  - 整改回归(夹具 0..0x3ff 向量表哨兵+0x400 占位 `0xa5`+本体,12KB):① `finalize` 后 `image[0:4]`=向量表哨兵(非 ETFW)、`image[0x400:0x404]`=`45544657`(ETFW)、`0..0x3ff` 与 sentinel 一致 ✅;② 0x400 处 header_crc32 stored=`7e5774ad`=calc、image_sha256 双零 stored=`a61b2143…`=calc、image_len=12288 一致 ✅;③ `pack-full`+`unpack --verify-fw-header`+`cmp` → `ROUNDTRIP_FULL_OK`,candidate 0x400=ETFW、VT 区与原 app 一致、image_sha256 双向 `221e444c…` ✅;④ `pack-patch`(toy-new)+`unpack --old`+`cmp` → `ROUNDTRIP_PATCH_OK`;差分 candidate 套真实头 `--verify-fw-header` 通过+cmp 一致,无头差分 candidate `--verify-fw-header` 正确拒绝 `magic 非 ETFW(got a5a5a5a5)` ✅;⑤ 同输入两次 pack-full nonce `bbe66fa6…`/`e7a7b7d8…` `NONCE_DIFFER=True`;⑥ 超限 983041B>960KB:finalize/pack-full/pack-patch 三入口 rc=1;短于 0x400+96(100B):finalize rc=1;损坏外层头/payload:unpack rc=1 + 明确 stderr ✅
+  - 产物(整改后): `tools/etu_pack.py`(19085B, sha256[:16]=6539f67897956be5, mtime 2026-07-24 23:52:30);`tools/etu_unpack.py`(17826B, sha256[:16]=100cacd8343eee97, mtime 2026-07-24 23:53:50);`git diff --check` 通过;未 commit/push;契约与 PLAN-OTA.md 未动;待非实现会话重新验收
+  - 验收: Codex(非实现会话) / 2026-07-25 按卡内标准复验通过;新夹具 20480B finalize 后真实 `0x400` 头 magic=`ETFW`,header CRC stored/calc=`dfe44766`,SHA 双零法通过,image_len=20480;`0..0x3ff` 向量区及 `0x460..end` 均保持;全量与差分 pack→unpack 均 rc=0 且逐字节一致(SHA256=`8ba6159ec6c8098a4f4048f99f2d3ddc34a8a5c1936cd4186dd23dfb06303e0e`);两次 full nonce `da1421f329ea0ba7896a41f5e372a8d2`/`f22c5f7ac3d43fb423d6408b41f3449c` 不同;finalize/full/patch 超限均 rc=1,短镜像及损坏外层头/payload 均 rc=1 且有明确错误;详见 `docs/ota-exec-notes/P0-2-acceptance-2026-07-25.md`;卡置 `完成`
 
 #### P0-3 golden vectors `tests/ota-vectors/`
 状态: 待办 ｜ 认领: — ｜ 更新: —
@@ -411,3 +426,7 @@
 - 2026-07-24 ｜ Codex ｜ P0-1(二次整改) ｜ 修 §8.1:build_ts 标量改 0x66851E00、补 hw_rev=01000000、image_len 字节改 60000000;实现侧按 §1.1 严格重建 92B 复算 CRC=0xFE1DCBD1 一致;契约正文未动;待非实现会话再次独立验收
 - 2026-07-24 ｜ Codex(非实现会话,复验) ｜ P0-1(验收打回) ｜ ACK/结构/R4-R8/PRE-1 已通过;发现 fw_header §8.1 标量与 LE 字节不一致且缺 hw_rev/image_len 规范字节,样例仍不能直接复算 CRC;卡保持进行中
 - 2026-07-24 ｜ Codex(非实现会话,最终验收) ｜ P0-1(验收通过) ｜ 独立复核字段布局、R4/R8 对号、PRE-1 编码及全部数值样例 CRC/长度均通过;卡置完成,P0 进度 1/6
+- 2026-07-24 ｜ Claude(实现 agent) ｜ P0-2 ｜ 认领并实现 tools/etu_pack.py + tools/etu_unpack.py(fw_header finalize/.etu 全量+差分组包/AES-CTR 随机 nonce/40B 内层头规范化/三处上限/逆向解析校验);自检 pack↔unpack 全量+差分往返字节一致、nonce 每包随机、超限与损坏均 rc=1 拒;契约 §8 样例 CRC 交叉一致;待非实现会话验收,未 commit/push
+- 2026-07-24 ｜ Codex(非实现会话,验收) ｜ P0-2(验收打回) ｜ 独立执行全量/差分往返、nonce 随机性、finalize/full/patch 超限拒绝均通过;但发现 finalize/verify_fw_header 实际使用镜像 `0x00` 而非冻结的 `FW_HEADER_OFFSET=0x400`,真实头未回填且向量区被覆盖;详见 `docs/ota-exec-notes/P0-2-acceptance-2026-07-24.md`;卡保持 `进行中`
+- 2026-07-25 ｜ Codex(非实现会话,复验) ｜ P0-2(验收通过) ｜ 独立复核 finalize/verify_fw_header 已统一使用 `FW_HEADER_OFFSET=0x400`;真实头 CRC/SHA/image_len、向量区保护、全量/差分往返、nonce 随机、超限/损坏拒绝全部通过;详见 `docs/ota-exec-notes/P0-2-acceptance-2026-07-25.md`;卡置 `完成`,P0 进度 2/6
+- 2026-07-24 ｜ Claude(实现 agent) ｜ P0-2(整改) ｜ 按验收打回修正:`build_fw_header/cmd_finalize` 与 `verify_fw_header` 改按 `FW_HEADER_OFFSET=0x400` 读写,SHA 双零法置零镜像内 0x400+40..71/0x400+92..95,前置长度校验改 0x400+96;回归全量/差分往返+0x404 头落位+VT 区不动+nonce 随机+超限/短镜像/损坏 rc=1 全过;详见 `docs/ota-exec-notes/P0-2-etu-pack.md` §6;未 commit/push,待非实现会话重新验收
