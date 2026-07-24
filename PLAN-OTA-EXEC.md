@@ -24,7 +24,7 @@
 
 | 阶段 | 内容 | 状态 | 进度 | 开工门槛 |
 |---|---|---|---|---|
-| PRE | 前置修正(复审产物) | 进行中 | 2/4 | 无 |
+| PRE | 前置修正(复审产物) | 进行中 | 3/4 | 无 |
 | P0 | 契约冻结+基建 | 待办 | 0/6 | PRE-1/2/3 完成 |
 | P1 | bootloader | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
 | P2 | MCU App 升级链 | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
@@ -82,12 +82,25 @@
     结论: 通过。
 
 #### PRE-3 firmware-build.yml 与 §6.1 对齐
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 完成 ｜ 认领: Codex / 2026-07-24 ｜ 更新: 2026-07-24(实现完成,验收通过)
 - 目标: 删除 push 事件触发 `register-cloudflare` 的条件分支(push 仅构建+上传 artifact,保留 `workflow_dispatch publish=true` 注册链);artifact 保留期改 14 天对齐 §6.1;push 不再创建 GitHub Release。`isFormalRelease: true` 硬编码在此对齐后语义正确(只剩正式链走注册),无需改脚本。
 - 输入: 复审报告补充 A/B;PLAN-OTA.md:185;firmware-build.yml:161/:169-171。
 - 范围: `.github/workflows/firmware-build.yml`。
 - 验收: yaml 语法校验通过;push 路径的 job 条件不再含注册;`retention-days: 14`。
-- 证据: —
+- 证据:
+  - research: `docs/ota-exec-notes/PRE-3-firmware-build-align.md`
+  - `register-cloudflare.if` = 仅 `workflow_dispatch && publish=='true'`(已去 push)
+  - artifact `retention-days: 14`;文件头注释改为 push 仅 artifact/不建 Release/不注册 CF
+  - Release 步骤去掉 nightly tag/prerelease 分支;Secrets 缺失对正式链硬失败
+  - 校验: PyYAML safe_load OK;register_if 无 push;`ACCEPTANCE_OK`
+  - 验收: 验收人 Claude(主会话,非实现者)/2026-07-24;按 §0.3 独立复核(yaml 用 PyYAML 解析):
+    1. yaml 语法:safe_load 成功,结构合法。
+    2. `register-cloudflare.if`=`github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'`(workflow:190),无 `push` 分支 → push 路径不再注册 CF。
+    3. artifact `retention-days: 14`(workflow:180),对齐 §6.1。
+    4. Release 步骤(workflow:230-237)仅正式 tag `mcu-${DEVICE_MODEL}-v${VERSION_NAME}`,无 nightly tag/prerelease 分支(grep 命中 nightly/prerelease 字样仅出现在注释行 :229 及 build step version_name 注释 :109-111,非实际分支)。
+    5. Secrets 缺失路径已硬失败(`::error`+`exit 1`,workflow:216-217),原 push-optional warning 已删,符合"仅正式链走注册"语义。
+    6. 头部注释(workflow:4)与 job 注释(workflow:188)均写明 push 仅 artifact/不建 Release/不注册 CF,与 §6.1 一致。
+    结论: 通过。
 
 #### PRE-4 构建基础设施与 OTA 文档入库
 状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **需用户确认提交**
@@ -329,5 +342,8 @@
 - 2026-07-24 ｜ Codex ｜ PRE-1 ｜ 认领并实现 version_code 新编码(PLAN-OTA.md v1.3.1 + firmware-build.yml);证据已填,待非实现会话验收
 - 2026-07-24 ｜ 主会话(Claude) ｜ PRE-1(验收) ｜ 按 §0.3 独立复核:公式复算+grep+文档一致性,通过;卡置完成,PRE 1/4
 - 2026-07-24 ｜ 主会话(Claude) ｜ PRE-2(验收) ｜ 按 §0.3 独立复核:linker/LiveMap 代码核对+§1/§9 口径+grep 残留,通过;卡置完成,PRE 2/4
+- 2026-07-24 ｜ 主会话(Claude) ｜ PRE-3(验收) ｜ 按 §0.3 独立复核:PyYAML 解析+register.if 无 push+retention=14+Release 无 nightly/prerelease+Secrets 硬失败,通过;卡置完成,PRE 3/4
 
 - 2026-07-24 ｜ Codex ｜ PRE-2 ｜ 认领并修正 RAM 基线口径(PLAN-OTA.md v1.3.2 §1/§9);overlay 评估项已写验收定义;待非实现会话验收
+
+- 2026-07-24 ｜ Codex ｜ PRE-3 ｜ 认领并对齐 firmware-build.yml 与 §6.1(去 push 注册/artifact 14d/正式链独享 Release);待非实现会话验收
