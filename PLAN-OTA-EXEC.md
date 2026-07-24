@@ -103,7 +103,7 @@
     结论: 通过。
 
 #### PRE-4 构建基础设施与 OTA 文档入库
-状态: 进行中 ｜ 认领: Codex / 2026-07-24 ｜ 更新: 2026-07-24(打回重做中:GCC include/正式链门槛已本地修,待推送验绿) ｜ **需用户确认提交**
+状态: 进行中 ｜ 认领: Codex / 2026-07-24 ｜ 更新: 2026-07-24(实现已推送 f914854,Actions 绿证已回填,待 §0.3 非实现会话验收) ｜ **待验收**
 - 目标: 将当前 untracked 的构建输入与方案文档提交入库:`CMakeLists.txt`、`cmake/`、`vendor/`、`MDK-ARM_F435/cmake-generated/`、`.github/workflows/firmware-build.yml`(PRE-3 修正后)、`PLAN-OTA.md`、`PLAN-OTA-DRAFT.md`、`PLAN-OTA-REVIEW-LOG.md`、`PLAN-OTA-EXEC.md`、`PLAN-OTA-GUIDE.md`。vendor/ 体积较大,提交前向用户报告体积。
 - 依赖: PRE-1/2/3 完成后一并提交。
 - 验收: `git ls-files` 含上述路径;(推送后)Actions 干净 checkout 构建绿。
@@ -132,6 +132,10 @@
     3. 失败为 **Linux GCC 编译错误**(非生成 CMake 缺失): `Libraries/Bluetooth/Bluetooth.h:5 fatal error: HAL\HAL.h: No such file or directory`。反斜杠 include 在 Keil/Windows 可通过,Linux arm-none-eabi-gcc 不能。
     4. 本地已改手写源码 include `\`→`/`(BT/USB/HAL 相关,未手改 cmake-generated);`firmware-build.yml` BUILD_DIR=/tmp/etfw 规避长路径。需推送后再 dispatch 取绿。
     5. 卡保持 **进行中**,禁止置完成。
+  - 推送后 Actions 绿证(Codex/2026-07-24, f914854;主会话文档收口回填):
+    1. MCU Firmware Build success: https://github.com/Eitan-S-23/E-Track/actions/runs/30083347995 （push@f914854; Build firmware/Generate bin-hex/Upload artifact 全 success; Register CF skipped 符合 §6.1）
+    2. Build APK and EXE Release success: https://github.com/Eitan-S-23/E-Track/actions/runs/30083348008 （Create GitHub Release skipped; 无签名 Secrets 下 main push 不再红）
+    3. 入库类证据仍有效(107 tracked)。闭合条件 A+B **实现侧证据已齐**,卡保持 **进行中/待验收**;**禁止**实现会话或提交收口会话自验收置完成——须另起 §0.3 非实现会话独立验收后再置完成。
 
 ---
 
@@ -376,3 +380,5 @@
 - 2026-07-24 ｜ 主会话(Claude) ｜ PRE-4(验收) ｜ 按 §0.3 独立复核:git ls-files 107/107 全在库+vendor 体积+origin/main 已同步,入库类通过;Actions 绿为兜底待证;卡置完成,PRE 4/4
 - 2026-07-24 ｜ 主会话(Claude) ｜ PRE-4(验收打回) ｜ 用户质疑 Actions release 失败仍通过;复核 run 30073428519 签名 Secrets 缺失导致 Create Release 红,且 MCU Firmware Build 零 runs;撤回完成→进行中,PRE 3/4
 - 2026-07-24 ｜ Codex ｜ PRE-4(打回重做) ｜ 修 build.yml 正式链门槛;dispatch MCU run 30080113197 红(GCC include 反斜杠);本地改 include+/tmp 构建目录,待用户确认提交推送后再验绿
+- 2026-07-24 ｜ Codex ｜ PRE-4(打回重做) ｜ 提交 f914854 并推送;MCU run 30083347995 绿 + app run 30083348008 绿(Release skipped);待非实现会话验收
+- 2026-07-24 ｜ 主会话(Claude) ｜ PRE-4(文档收口) ｜ 回填 Actions 绿证+AGENTS GCC CI 防坑;卡保持进行中/待验收(3/4),不自验收置完成;docs 提交并 push

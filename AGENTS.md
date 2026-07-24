@@ -741,3 +741,68 @@ firmware CI 或 CF 固件后台的任务,任何 agent 必须遵守:
 6. **会话收尾**:结束前回写看板任务卡状态并在其 §10 会话日志追加一行。
 7. 真机操作(J-Link 烧录/RTT/断电注错)一律沿用本文件既有流程与防坑清单;
    开工前先读复审报告 `.claude/verification-report-ota-plan.md`(已知坑)。
+
+## GCC / Linux CI 源码可移植防坑（PRE-4 实测,2026-07-24）
+
+OTA 与固件 CI 走 **Ubuntu + arm-none-eabi-gcc + Ninja**,本机日常开发走 **Keil AC5 /
+Windows**。两边都能编过,才算 clean-checkout 绿。PRE-4 打回后的首轮
+`MCU Firmware Build` 失败根因不是缺 vendor、也不是生成脚本没跑,而是源码
+include 路径分隔符不可移植。
+
+### 反斜杠 `#include`（硬失败）
+
+- **现象(CI)**:
+  ```text
+  Libraries/Bluetooth/Bluetooth.h:5:10: fatal error: HAL\HAL.h: No such file or directory
+  ```
+  configure 已成功,失败发生在编译 `Bluetooth.cpp` 等翻译单元。
+- **根因**:源码写了 Windows 风格
+  ```c
+  #include "HAL\HAL.h"
+  #include "USB_MSC\usb_conf.h"
+  #include "middlewares\usb_drivers\inc\usbd_core.h"
+  ```
+  Keil AC5 / 本机 Windows GCC 常能解析 `\`;**Linux GCC 把 `\` 当普通字符,
+  不当路径分隔符**,于是找不到头文件。
+- **改法**:手写源码里的 include **一律用 POSIX 正斜杠** `/`。Keil 同样接受:
+  ```c
+  #include "HAL/HAL.h"
+  #include "USB_MSC/usb_conf.h"
+  #include "middlewares/usb_drivers/inc/usbd_core.h"
+  ```
+- **波及面(本仓库已踩过)**:`Libraries/Bluetooth/**`、`Libraries/USB_MSC/**`、
+  `MDK-ARM_F435/Platform/middlewares/usb_drivers/**`、`USER/HAL/HAL_USB.cpp`
+  等**手写源**,不是 `cmake-generated`。
+- **禁止误判**:
+  - 不要因为 CI 红就去手改 `MDK-ARM_F435/cmake-generated/CMakeLists.txt`
+    (该目录由 `keil_uvprojx2cmake.py` 生成,手改会被下次生成覆盖;可移植性
+    问题应改生成脚本或手写源,见 `.claude/prompt-keil2cmake-portable.md`)。
+  - 本机 Windows `build-gcc` 绿 **不能**证明 Linux CI 绿;反斜杠 include 是
+    典型的"本机过、CI 挂"。
+- **提交前自检**(改过 include / 新增跨目录头文件时):
+  ```powershell
+  # 在 Libraries / USER / Platform 手写源中查找 include 路径里的反斜杠
+  rg -n --glob "!**/build*/**" --glob "!**/.git/**" --glob "!**/vendor/**" "#include.*\\" Libraries USER MDK-ARM_F435/Platform
+  ```
+  有命中则先改成 `/` 再声称 CI 可过。本机 Windows 编过不算数。
+
+### 构建目录过深（次要,可变硬失败）
+
+- **现象**:CMake 警告 `CMAKE_OBJECT_PATH_MAX` / object path too long;个别
+  目标在 Linux runner 上对象路径超限。
+- **根因**:构建树落在
+  `MDK-ARM_F435/cmake-generated/build-ci/...` 时前缀过长(runner 工作区本身
+  已深),再叠加源在仓库上级相对路径时更容易顶满默认上限。
+- **改法(workflow 侧,勿手改生成物)**:CI 使用短构建目录,例如
+  `BUILD_DIR=/tmp/etfw`,并在 configure 时带上合理的
+  `-DCMAKE_OBJECT_PATH_MAX=1024`。本仓库 `.github/workflows/firmware-build.yml`
+  已按此处理;本地 VSCode `build-gcc` 路径约定不要为此破坏。
+
+### 与 OTA 看板的关系
+
+- `MCU Firmware Build` 的"干净 checkout 构建绿"是 PRE-4 及后续 CI 卡的验收
+  硬条件;仅 `git ls-files` 入库不够。
+- 证据与复盘详见 `docs/ota-exec-notes/PRE-4-actions-green-rework.md`。
+- 实现 agent 修完后按 OTA 规约**不自行 commit/push**;由主会话收口,非实现
+  会话验收。
+

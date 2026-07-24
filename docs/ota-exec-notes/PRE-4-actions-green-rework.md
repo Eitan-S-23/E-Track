@@ -107,3 +107,25 @@ gh run view 30080113197
 rg '#include .*\\' Libraries USER/HAL MDK-ARM_F435/Platform
 # after local rewrite: no remaining backslash includes in those trees
 ```
+
+## Post-push verification (2026-07-24)
+
+Commit: `f914854` on `main`
+
+- MCU Firmware Build: SUCCESS
+  https://github.com/Eitan-S-23/E-Track/actions/runs/30083347995
+  - Build firmware / Generate bin-hex / Upload artifact: success
+  - Register firmware to Cloudflare: skipped (push path, expected)
+- Build APK and EXE Release: SUCCESS
+  https://github.com/Eitan-S-23/E-Track/actions/runs/30083348008
+  - Create GitHub Release: skipped
+  - No signing-secret hard-fail on ordinary main push
+
+Closure A+B implementer-side satisfied; PRE-4 remains awaiting independent acceptance.
+
+## Project memory
+
+Durable agent-facing write-up (do not rely on this note alone):
+
+- `AGENTS.md` section **GCC / Linux CI 源码可移植防坑（PRE-4 实测,2026-07-24）**
+
