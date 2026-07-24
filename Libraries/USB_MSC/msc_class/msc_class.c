@@ -21,9 +21,9 @@
   *
   **************************************************************************
   */
-#include "middlewares\usb_drivers\inc\usbd_core.h"
-#include "USB_MSC\msc_class\msc_class.h"
-#include "USB_MSC\msc_class\msc_desc.h"
+#include "middlewares/usb_drivers/inc/usbd_core.h"
+#include "USB_MSC/msc_class/msc_class.h"
+#include "USB_MSC/msc_class/msc_desc.h"
 #include "msc_bot_scsi.h"
 
 /** @addtogroup AT32F435_437_middlewares_usbd_class

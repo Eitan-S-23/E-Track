@@ -59,6 +59,8 @@ env:
   DEVICE_MODEL: e-track-at32f435
   TARGET_HARDWARE: AT32F435RGT7
   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+  # Short build tree avoids CMAKE_OBJECT_PATH_MAX warnings on Linux runners.
+  BUILD_DIR: /tmp/etfw
   BUILD_TYPE: Release
 
 jobs:
@@ -142,21 +144,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cmake -S "${CMAKE_PROJECT_DIR}" -B "${CMAKE_PROJECT_DIR}/build-ci" \
-            -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+          cmake -S "${CMAKE_PROJECT_DIR}" -B "${BUILD_DIR}" \
+            -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_OBJECT_PATH_MAX=1024
 
       - name: Build firmware
         shell: bash
         run: |
           set -euo pipefail
-          cmake --build "${CMAKE_PROJECT_DIR}/build-ci" --target X_Track --parallel
+          cmake --build "${BUILD_DIR}" --target X_Track --parallel
 
       - name: Generate bin/hex and checksums
         id: artifacts
         shell: bash
         run: |
           set -euo pipefail
-          cd "${CMAKE_PROJECT_DIR}/build-ci"
+          cd "${BUILD_DIR}"
 
           arm-none-eabi-objcopy -O binary X-Track.elf X-Track.bin
           arm-none-eabi-objcopy -O ihex   X-Track.elf X-Track.hex
@@ -173,10 +176,10 @@ jobs:
         with:
           name: firmware-${{ steps.version.outputs.version_name }}
           path: |
-            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.bin
-            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.hex
-            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.elf
-            ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.map
+            ${{ env.BUILD_DIR }}/X-Track.bin
+            ${{ env.BUILD_DIR }}/X-Track.hex
+            ${{ env.BUILD_DIR }}/X-Track.elf
+            ${{ env.BUILD_DIR }}/X-Track.map
           retention-days: 14
           if-no-files-found: error
 

@@ -1,6 +1,6 @@
 #include "HAL/HAL.h"
-#include "USB_MSC\UsbMsc.h"
-#include "USB_MSC\msc_diskio.h"
+#include "USB_MSC/UsbMsc.h"
+#include "USB_MSC/msc_diskio.h"
 
 /* usb global struct define */
 otg_core_type otg_core_struct;

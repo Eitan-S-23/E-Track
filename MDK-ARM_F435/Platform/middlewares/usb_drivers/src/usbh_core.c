@@ -21,10 +21,10 @@
   *
   **************************************************************************
   */
-#include "middlewares\usb_drivers\inc\usbh_core.h"
-#include "middlewares\usb_drivers\inc\usb_core.h"
-#include "middlewares\usb_drivers\inc\usbh_ctrl.h"
-#include "USB_MSC\usb_conf.h"
+#include "middlewares/usb_drivers/inc/usbh_core.h"
+#include "middlewares/usb_drivers/inc/usb_core.h"
+#include "middlewares/usb_drivers/inc/usbh_ctrl.h"
+#include "USB_MSC/usb_conf.h"
 
 /** @addtogroup AT32F435_437_middlewares_usbh_drivers
   * @{

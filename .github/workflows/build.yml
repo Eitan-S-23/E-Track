@@ -338,6 +338,9 @@ jobs:
         uses: actions/deploy-pages@v4
 
   release:
+    # Formal release/CF only on tag v* or workflow_dispatch(publish_release=true).
+    # main/master push builds artifacts only; never enters Create Release without explicit publish.
+    # PRE-4 rework: avoids hard-fail when fixed Android signing secrets are absent on ordinary pushes.
     name: Create GitHub Release
     runs-on: ubuntu-latest
     defaults:
@@ -347,7 +350,10 @@ jobs:
       - changes
       - android
       - windows
-    if: needs.changes.outputs.app_build_required == 'true' && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish_release) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')))
+    if: >-
+      needs.changes.outputs.app_build_required == 'true' &&
+      (startsWith(github.ref, 'refs/tags/v') ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish_release))
 
     steps:
       - name: Checkout repository

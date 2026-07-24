@@ -31,11 +31,11 @@ extern "C" {
 #endif
 
 
-#include "middlewares\usb_drivers\inc\usb_std.h"
-#include "USB_MSC\usb_conf.h"
+#include "middlewares/usb_drivers/inc/usb_std.h"
+#include "USB_MSC/usb_conf.h"
 
 #ifdef USE_OTG_DEVICE_MODE
-#include "middlewares\usb_drivers\inc\usbd_core.h"
+#include "middlewares/usb_drivers/inc/usbd_core.h"
 #endif
 #ifdef USE_OTG_HOST_MODE
 #include "usbh_core.h"

@@ -29,8 +29,8 @@
 extern "C" {
 #endif
 
-#include "middlewares\usb_drivers\inc\usb_std.h"
-#include "middlewares\usb_drivers\inc\usbd_core.h"
+#include "middlewares/usb_drivers/inc/usb_std.h"
+#include "middlewares/usb_drivers/inc/usbd_core.h"
 
 /** @addtogroup AT32F435_437_middlewares_usbd_class
   * @{

@@ -32,7 +32,7 @@ extern "C" {
 
 
 /* includes ------------------------------------------------------------------*/
-#include "USB_MSC\usb_conf.h"
+#include "USB_MSC/usb_conf.h"
 
 /** @addtogroup AT32F435_437_middlewares_usb_drivers
   * @{

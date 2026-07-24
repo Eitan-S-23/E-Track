@@ -22,10 +22,10 @@
   **************************************************************************
   */
 #include "stdio.h"
-#include "middlewares\usb_drivers\inc\usb_std.h"
-#include "middlewares\usb_drivers\inc\usbd_sdr.h"
-#include "middlewares\usb_drivers\inc\usbd_core.h"
-#include "USB_MSC\msc_class\msc_desc.h"
+#include "middlewares/usb_drivers/inc/usb_std.h"
+#include "middlewares/usb_drivers/inc/usbd_sdr.h"
+#include "middlewares/usb_drivers/inc/usbd_core.h"
+#include "USB_MSC/msc_class/msc_desc.h"
 
 /** @addtogroup AT32F435_437_middlewares_usbd_class
   * @{

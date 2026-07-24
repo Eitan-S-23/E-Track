@@ -2,7 +2,7 @@
 #define __TinyBTPlus_h
 
 #include "Arduino.h"
-#include "HAL\HAL.h"
+#include "HAL/HAL.h"
 
 #define _BT_VERSION "1.0.0" // software version of this library
 

@@ -22,7 +22,7 @@
   **************************************************************************
   */
 #include "msc_diskio.h"
-#include "msc_class\msc_bot_scsi.h"
+#include "msc_class/msc_bot_scsi.h"
 #include <string.h>
 
 #ifdef MSC_USE_SD_CARD

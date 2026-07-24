@@ -23,12 +23,12 @@
   */
 
 #include "HAL/HAL.h"
-#include "USB_MSC\usb_conf.h"
-#include "middlewares\usb_drivers\inc\usbd_core.h"
-#include "middlewares\usb_drivers\inc\usb_core.h"
-#include "middlewares\usb_drivers\inc\usbd_int.h"
-#include "USB_MSC\msc_class\msc_class.h"
-#include "USB_MSC\msc_class\msc_desc.h"
+#include "USB_MSC/usb_conf.h"
+#include "middlewares/usb_drivers/inc/usbd_core.h"
+#include "middlewares/usb_drivers/inc/usb_core.h"
+#include "middlewares/usb_drivers/inc/usbd_int.h"
+#include "USB_MSC/msc_class/msc_class.h"
+#include "USB_MSC/msc_class/msc_desc.h"
 
 #ifdef __cplusplus
 extern "C" {

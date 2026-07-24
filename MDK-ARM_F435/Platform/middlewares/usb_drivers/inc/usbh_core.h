@@ -30,8 +30,8 @@
 extern "C" {
 #endif
 
-#include "USB_MSC\usb_conf.h"
-#include "middlewares\usb_drivers\inc\usb_std.h"
+#include "USB_MSC/usb_conf.h"
+#include "middlewares/usb_drivers/inc/usb_std.h"
 
 /** @addtogroup AT32F435_437_middlewares_usbh_drivers
   * @{
