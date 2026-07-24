@@ -24,7 +24,7 @@
 
 | 阶段 | 内容 | 状态 | 进度 | 开工门槛 |
 |---|---|---|---|---|
-| PRE | 前置修正(复审产物) | 进行中 | 1/4 | 无 |
+| PRE | 前置修正(复审产物) | 进行中 | 2/4 | 无 |
 | P0 | 契约冻结+基建 | 待办 | 0/6 | PRE-1/2/3 完成 |
 | P1 | bootloader | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
 | P2 | MCU App 升级链 | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
@@ -63,12 +63,23 @@
     结论: 通过。
 
 #### PRE-2 RAM 基线口径修正(契约修订)
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 完成 ｜ 认领: Codex / 2026-07-24 ｜ 更新: 2026-07-24(实现完成,验收通过)
 - 目标: 修正 PLAN-OTA.md §1/§9 的"总 RAM 384KB/82.96%/余 65KB"口径:如实记录 EOPB0 已扩展 512KB、GCC 链接划分 RAM 352KB + RW_IRAM2 160KB、`snapshotBuf` 恰好占满 RW_IRAM2(LiveMap.cpp:43-45);把"`.sram_ext` 160KB 升级期 overlay 复用"列为 §9 待评估项(由 P0-6 裁决)。实测数字由 P0-6/P2-6 回填,本卡只改口径与占位。
 - 输入: 复审报告补充 C;generated_linker.ld:12-13;LiveMap.cpp:40-45。
 - 范围: `PLAN-OTA.md` §1/§9。
 - 验收: 文档不再出现与代码矛盾的 384KB 总量表述;overlay 评估项有明确验收定义。
-- 证据: —
+- 证据:
+  - research: `docs/ota-exec-notes/PRE-2-ram-baseline.md`
+  - `PLAN-OTA.md` 升 v1.3.2;§1 MCU 行改为 EOPB0 512KB + RAM 352KB + RW_IRAM2 160KB + snapshotBuf 163840B 占满;旧 384/82.96/65 口径标作废
+  - §9 拆为:RAM 基线(待 P0-6/P2-6 回填数字)、`.sram_ext` overlay 待评估(A 采纳契约化 / B 不采纳+原因,裁决=P0-6,禁止隐式挪用)、升级态峰值预算数字占位(不再写 60KB≤65KB)
+  - 核对: `MDK-ARM_F435/cmake-generated/cmake/generated_linker.ld` MEMORY;LiveMap.cpp SNAPSHOT 256×320
+  - 验收: 验收人 Claude(主会话,非实现者)/2026-07-24;按 §0.3 独立复核:
+    1. 代码核对:generated_linker.ld:12-13 实测 `RAM ORIGIN=0x20000000 LENGTH=0x58000`(352KB)+`RW_IRAM2 ORIGIN=0x20058000 LENGTH=0x28000`(160KB),合计 0x80000=512KB;LiveMap.cpp:`snapshotBuf[SNAPSHOT_W*SNAPSHOT_H]` SNAPSHOT_W=256/SNAPSHOT_H=320,RGB565=163840B=0x28000 恰占满 RW_IRAM2;`.sram_ext (NOLOAD)` 落 RW_IRAM2。与 research 记录一致。
+    2. §1(:29)MCU 行已改为 EOPB0 512KB + 352+160 划分 + snapshotBuf 占满,旧 "384KB/82.96%/65KB" 标口径作废,峰值留 P0-6/P2-6 回填。
+    3. §9 拆为三条(:217-219):RAM 基线(作废旧分母,实测待回填)+ .sram_ext overlay 待评估(裁决权 P0-6,验收定义 A 采纳/B 不采纳二选一,禁止隐式挪用)+ 升级态峰值预算占位(不再写 60KB≤65KB)。
+    4. 头部已升 v1.3.2(含 PRE-2 修订说明)。
+    5. 全文 grep:384KB/82.96%/「60KB≤65KB」类矛盾口径在 §1/§9 已消除(仅 §9 作废说明处保留指向性引用,符合"标作废"语义)。
+    结论: 通过。
 
 #### PRE-3 firmware-build.yml 与 §6.1 对齐
 状态: 待办 ｜ 认领: — ｜ 更新: —
@@ -317,3 +328,6 @@
 
 - 2026-07-24 ｜ Codex ｜ PRE-1 ｜ 认领并实现 version_code 新编码(PLAN-OTA.md v1.3.1 + firmware-build.yml);证据已填,待非实现会话验收
 - 2026-07-24 ｜ 主会话(Claude) ｜ PRE-1(验收) ｜ 按 §0.3 独立复核:公式复算+grep+文档一致性,通过;卡置完成,PRE 1/4
+- 2026-07-24 ｜ 主会话(Claude) ｜ PRE-2(验收) ｜ 按 §0.3 独立复核:linker/LiveMap 代码核对+§1/§9 口径+grep 残留,通过;卡置完成,PRE 2/4
+
+- 2026-07-24 ｜ Codex ｜ PRE-2 ｜ 认领并修正 RAM 基线口径(PLAN-OTA.md v1.3.2 §1/§9);overlay 评估项已写验收定义;待非实现会话验收
