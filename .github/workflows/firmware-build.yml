@@ -1,7 +1,7 @@
 name: MCU Firmware Build
 
 # 单片机固件 GCC 构建工作流（monorepo 路径隔离）：
-# - push 到 main/master 且固件相关路径变更 → 构建 + （Secrets 齐全时）自动注册 CF nightly 候选
+# - push 到 main/master 且固件相关路径变更 → 仅构建 + 上传 Actions artifact（14 天；不建 Release、不注册 CF）
 # - workflow_dispatch(publish=true) → 构建 + GitHub Release + 注册 CF 正式候选
 # - 仅固件路径触发本工作流；Flutter 侧由 build.yml 的 changes job 隔离，互不触发
 # - 正式发布后在 CF admin 端将候选晋升为 stable 渠道当前版本
@@ -107,6 +107,7 @@ jobs:
             version_name="${base_version}"
           else
             # push 自动构建：nightly 版本名带构建号便于区分，version_code 不变（候选不晋升不影响设备）
+            # （PRE-3：push 仅 artifact，不注册 CF；nightly 名仍用于 artifact 区分）
             version_name="${base_version}-nightly.${build_number}"
           fi
 
@@ -176,17 +177,17 @@ jobs:
             ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.hex
             ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.elf
             ${{ env.CMAKE_PROJECT_DIR }}/build-ci/X-Track.map
-          retention-days: 30
+          retention-days: 14
           if-no-files-found: error
 
   register-cloudflare:
     name: Register firmware to Cloudflare
     runs-on: ubuntu-latest
     needs: build
-    # push 到默认分支 → 自动注册 nightly 候选；dispatch publish=true → 注册所选渠道
+    # PRE-3 / PLAN-OTA.md §6.1：仅 workflow_dispatch publish=true 走正式注册链；
+    # push/PR 永不进入本 job（nightly 不建 Release、不注册 CF）。
     if: >-
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'
 
     steps:
       - name: Checkout repository
@@ -212,11 +213,8 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-              echo "::error title=Cloudflare secrets missing::publish=true 需要配置 CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN / TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN"
-              exit 1
-            fi
-            echo "::warning title=Cloudflare secrets missing::跳过 CF 注册（push 自动注册为可选行为）"
+            echo "::error title=Cloudflare secrets missing::publish=true 需要配置 CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN / TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN"
+            exit 1
           fi
 
       - name: Create GitHub Release
@@ -225,23 +223,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION_NAME: ${{ needs.build.outputs.version_name }}
-          BUILD_NUMBER: ${{ needs.build.outputs.build_number }}
           RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
         run: |
           set -euo pipefail
-          # 正式发布用版本 tag；push 自动构建用 nightly tag（按构建号唯一）+ prerelease 标记
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            release_tag="mcu-${DEVICE_MODEL}-v${VERSION_NAME}"
-            extra_flags=()
-          else
-            release_tag="mcu-${DEVICE_MODEL}-nightly-${BUILD_NUMBER}"
-            extra_flags=(--prerelease)
-          fi
+          # 仅正式发布链进入本 job：版本 tag，非 prerelease
+          release_tag="mcu-${DEVICE_MODEL}-v${VERSION_NAME}"
           notes="${RELEASE_NOTES:-MCU firmware ${release_tag} (${GITHUB_SHA})}"
           if gh release view "${release_tag}" >/dev/null 2>&1; then
             gh release edit "${release_tag}" --target "${GITHUB_SHA}" --notes "${notes}"
           else
-            gh release create "${release_tag}" --target "${GITHUB_SHA}" --title "${release_tag}" --notes "${notes}" "${extra_flags[@]}"
+            gh release create "${release_tag}" --target "${GITHUB_SHA}" --title "${release_tag}" --notes "${notes}"
           fi
           gh release upload "${release_tag}" firmware-release-assets/X-Track.bin firmware-release-assets/X-Track.hex --clobber
           echo "RELEASE_TAG=${release_tag}" >> "$GITHUB_ENV"
