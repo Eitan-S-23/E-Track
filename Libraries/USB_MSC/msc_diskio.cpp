@@ -32,13 +32,8 @@
 extern SdFatSdioEX SD;  // Defined in HAL_SD_CARD.cpp
 
 #elif defined(MSC_USE_QSPI_FLASH)
-/* QSPI Flash backend */
-extern "C" {
-void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf);
-void qspi_erase(uint32_t sec_addr);
-void qspi_xip_enable(qspi_type* qspi_x, confirm_state new_state);
-void en25qh128a_qspi_xip_init(void);
-}
+/* QSPI Flash backend；签名以 W25Q128 契约安全化头为准（P0-5：带超时/错误返回）。 */
+#include "W25Q128/qspi_cmd_en25qh128a.h"
 #else
 #error "No storage backend selected! Define either MSC_USE_SD_CARD or MSC_USE_QSPI_FLASH in msc_diskio.h"
 #endif

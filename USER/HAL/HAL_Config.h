@@ -29,6 +29,21 @@
 
 #  define CONFIG_EEPROM_ENABLE  1
 
+/* OTA BCB 安全写压测入口（P0-4，契约 §3.3）。
+ * 置 1 时 HAL_Init 在 EEPROM 探活后跑 1000 次 BCB 区写+读回，RTT 输出统计。
+ * 默认 0；真机验收时由 J-Link 下行命令置位或临时改 1 烧录取证。 */
+#ifndef CONFIG_EEPROM_BCB_STRESS
+#  define CONFIG_EEPROM_BCB_STRESS 0
+#endif
+
+/* OTA QSPI 自检压测入口（P0-5，契约 §0.4/§0.5）。
+ * 置 1 时 Qspi_Init 在 JEDEC 判定后跑 1000 次读/写/擦（仅限自检保留区
+ * 0x7F0000..0x7FFFFF，永不触碰文件系统/OTA 分区），RTT 输出零错统计。
+ * 默认 0；真机验收时临时改 1 烧录取证，取证后复位为 0。 */
+#ifndef CONFIG_QSPI_SELFTEST_ENABLE
+#  define CONFIG_QSPI_SELFTEST_ENABLE 0
+#endif
+
 /* Sensors */
 #define CONFIG_SENSOR_ENABLE        1
 

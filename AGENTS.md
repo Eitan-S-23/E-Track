@@ -48,7 +48,7 @@ handling. Use the per-step commands in "Preferred Incremental Build" /
 
 ## F435 Project Facts
 
-- Workspace root: `D:\github\my\AT32F435RGT7_SDIO`
+- Workspace root: `D:\github\my\E-Track`
 - Keil project: `MDK-ARM_F435\proj.uvprojx`
 - Target name: `X-Track`
 - Compiler: ARM Compiler 5, not AC6
@@ -79,7 +79,7 @@ Use Keil's incremental build command first:
 
 ```powershell
 $uv4 = 'D:\install\keil5 mdk\UV4\UV4.exe'
-$project = 'D:\github\my\AT32F435RGT7_SDIO\MDK-ARM_F435\proj.uvprojx'
+$project = 'D:\github\my\E-Track\MDK-ARM_F435\proj.uvprojx'
 & $uv4 -b $project -t 'X-Track'
 ```
 
@@ -123,7 +123,7 @@ Use this PowerShell pattern to recompile one source from `proj_X-Track.dep`.
 Change only `$source` when another file is stale:
 
 ```powershell
-$projectDir = 'D:\github\my\AT32F435RGT7_SDIO\MDK-ARM_F435'
+$projectDir = 'D:\github\my\E-Track\MDK-ARM_F435'
 $source = '..\USER\HAL\HAL.cpp'
 $dep = Join-Path $projectDir 'Objects\proj_X-Track.dep'
 $armcc = 'D:\install\keil5 mdk\ARM\ARMCC\bin\armcc.exe'
@@ -165,7 +165,7 @@ Pop-Location
 After object compilation, relink and regenerate images:
 
 ```powershell
-Push-Location 'D:\github\my\AT32F435RGT7_SDIO\MDK-ARM_F435'
+Push-Location 'D:\github\my\E-Track\MDK-ARM_F435'
 & 'D:\install\keil5 mdk\ARM\ARMCC\bin\armlink.exe' --via '.\Objects\X-Track.lnp'
 if ($LASTEXITCODE -ne 0) { throw "armlink failed: $LASTEXITCODE" }
 
@@ -253,6 +253,9 @@ Conventions:
      `Stop-Process -Name JLinkRTTLogger -Force -ErrorAction SilentlyContinue`。
      采集必须带明确超时，超时后再次确认无残留 logger；多个 logger 会抢同一个
      RTT 读指针，导致日志缺行、串行或读到旧固件输出。
+   - 验收判定依赖的输出必须直接使用 `SEGGER_RTT_printf`（或其他 RTT API）。
+     `CONFIG_DEBUG_SERIAL` 固定为 `Serial5` UART，`JLinkRTTLogger` 无法采集；
+     烧录前静态核对预期标记确实走 RTT 通道，不能用“日志没有错误行”推定通过。
 3. **RTT 下行命令控制设备**（`USER\App\App.cpp`，宏
    `CONFIG_RTT_DEBUG_CMD_ENABLE`，生产固件置 0 整体移除）：
    固件 100ms 轮询 down channel 0 行命令：`ping` / `livemap` / `dialplate`

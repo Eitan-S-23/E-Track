@@ -23,6 +23,7 @@
   */
 
 #include "HAL/HAL.h"
+#include "W25Q128/qspi_cmd_en25qh128a.h"
 
 /** @addtogroup AT32F435_periph_examples
   * @{
@@ -100,6 +101,10 @@ FALSE,0,0x66,QSPI_CMD_INSLEN_1_BYTE,0,QSPI_CMD_ADRLEN_0_BYTE,0,0,QSPI_OPERATE_MO
 /* en25qh128a cmd rst parameters */
 static const qspi_cmd_type en25qh128a_rst_para = {
 FALSE,0,0x99,QSPI_CMD_INSLEN_1_BYTE,0,QSPI_CMD_ADRLEN_0_BYTE,0,0,QSPI_OPERATE_MODE_111,QSPI_RSTSC_HW_AUTO,FALSE,TRUE};
+
+/* en25qh128a/w25q RDID(0x9F) 命令口读 3 字节参数（命令口读：无地址、读状态关、写数据关，data_counter=3） */
+static const qspi_cmd_type qspi_rdid_para = {
+FALSE,0,0x9F,QSPI_CMD_INSLEN_1_BYTE,0,QSPI_CMD_ADRLEN_0_BYTE,3,0,QSPI_OPERATE_MODE_111,QSPI_RSTSC_HW_AUTO,FALSE,FALSE};
 
 /* en25qh128a xip init parameters */
 static const qspi_xip_type en25qh128a_xip_init_para = {
@@ -215,9 +220,103 @@ extern "C" void EDMA_Stream1_IRQHandler(void)
   }
 }
 
-void qspi_busy_check(void);
-void qspi_write_enable(void);
-void qspi_cmd_send(qspi_cmd_type* qspi_cmd_struct);
+/* 内部前置声明 */
+qspi_status_t qspi_busy_check(void);
+qspi_status_t qspi_write_enable(void);
+qspi_status_t qspi_cmd_send(qspi_cmd_type* qspi_cmd_struct);
+static qspi_status_t qspi_cmd_send_ex(qspi_cmd_type* qspi_cmd_struct, uint32_t timeout_ms);
+
+/**
+  * @brief  带超时地等待某个 QSPI 标志置位（fail-closed：超时返错，绝不死循环）
+  * @param  flag: 待等待的标志位
+  * @param  timeout_ms: 超时毫秒数（基于 millis()）
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
+  */
+static qspi_status_t qspi_wait_flag(uint32_t flag, uint32_t timeout_ms)
+{
+  uint32_t start = millis();
+  while(qspi_flag_get(QSPI1, flag) == RESET)
+  {
+    if((millis() - start) >= timeout_ms)
+      return QSPI_ERR_TIMEOUT;
+  }
+  return QSPI_OK;
+}
+
+/**
+  * @brief  带超时地等待 DMA 传输完成（ISR 置 qspi_dma_transfer_done；fail-closed）
+  * @param  timeout_ms: 超时毫秒数
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
+  */
+static qspi_status_t qspi_wait_dma_done(uint32_t timeout_ms)
+{
+  uint32_t start = millis();
+  while(qspi_dma_transfer_done == 0)
+  {
+    if((millis() - start) >= timeout_ms)
+    {
+      /* 超时兜底：停流、关 DMA，避免残留 DMA 打断后续外设 */
+      edma_stream_enable(QSPI_EDMA_STREAM, FALSE);
+      qspi_dma_enable(QSPI1, FALSE);
+      return QSPI_ERR_TIMEOUT;
+    }
+  }
+  return QSPI_OK;
+}
+
+/**
+  * @brief  带超时地等待 EDMA stream 完全停用（EN 位清零）
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
+  */
+static qspi_status_t qspi_wait_stream_disabled(uint32_t timeout_ms)
+{
+  uint32_t start = millis();
+  while(QSPI_EDMA_STREAM->ctrl & 0x01)
+  {
+    if((millis() - start) >= timeout_ms)
+      return QSPI_ERR_TIMEOUT;
+  }
+  return QSPI_OK;
+}
+
+/**
+  * @brief  地址区间是否越界或触碰自检保留区（契约 §0.4/§0.5）
+  * @retval true 合法；false 越界或触自检区
+  */
+static bool qspi_range_ok(uint32_t addr, uint32_t len)
+{
+  uint32_t end;
+  if(len == 0)
+    return false;
+  /* 溢出与容量上界检查 */
+  if(addr >= QSPI_FLASH_CAPACITY)
+    return false;
+  end = addr + len;
+  if(end < addr || end > QSPI_FLASH_CAPACITY)
+    return false;
+  /* 自检保留区 0x7F0000..0x7FFFFF 永久避让：区间不得与之相交 */
+  if(addr < (QSPI_SELFTEST_ADDR + QSPI_SELFTEST_SIZE) &&
+     QSPI_SELFTEST_ADDR < end)
+    return false;
+  return true;
+}
+
+/**
+  * @brief  自检区间检查：区间必须完整落在自检保留区 0x7F0000..0x7FFFFF 内
+  * @retval true 合法（仅自检 API 使用）；false 越界
+  */
+static bool qspi_range_selftest_ok(uint32_t addr, uint32_t len)
+{
+  uint32_t end;
+  if(len == 0)
+    return false;
+  if(addr < QSPI_SELFTEST_ADDR)
+    return false;
+  end = addr + len;
+  if(end < addr || end > (QSPI_SELFTEST_ADDR + QSPI_SELFTEST_SIZE))
+    return false;
+  return true;
+}
 
 /**
   * @brief  setup link list nodes for chained DMA transfers
@@ -264,20 +363,21 @@ static void qspi_setup_link_list(uint8_t* buf, uint32_t total_len, uint32_t* nod
 }
 
 /**
-  * @brief  qspi write data with double buffer and link list support
-  * @param  addr: the address for write
-  * @param  total_len: the length for write
-  * @param  buf: the pointer for write data
-  * @retval none
+  * @brief  qspi 写核心（不含区间策略；调用方负责区间检查）
+  * @param  addr/total_len/buf: 同 qspi_data_write
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
   */
-void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
+static qspi_status_t qspi_data_write_core(uint32_t addr, uint32_t total_len, uint8_t* buf)
 {
  uint32_t i, len;
  uint32_t node_count = 0;
+ qspi_status_t st;
 
  do
  {
-   qspi_write_enable();
+   st = qspi_write_enable();
+   if(st != QSPI_OK)
+     return st;
     /* send up to 256 bytes at one time, and only one page */
     len = (addr / FLASH_PAGE_PROGRAM_SIZE + 1) * FLASH_PAGE_PROGRAM_SIZE - addr;
     if(total_len < len)
@@ -295,7 +395,9 @@ void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
      qspi_cpu_transfer_count++;
      for(i = 0; i < len; ++i)
      {
-       while(qspi_flag_get(QSPI1, QSPI_TXFIFORDY_FLAG) == RESET);
+       st = qspi_wait_flag(QSPI_TXFIFORDY_FLAG, QSPI_FIFO_TIMEOUT_MS);
+       if(st != QSPI_OK)
+         return st;
        qspi_byte_write(QSPI1, *buf++);
      }
    }
@@ -320,7 +422,9 @@ void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
        edma_stream_enable(QSPI_EDMA_STREAM, FALSE);
 
        /* STEP 2: Wait for stream to be fully disabled (check EN bit) */
-       while(QSPI_EDMA_STREAM->ctrl & 0x01);
+       st = qspi_wait_stream_disabled(QSPI_DMA_TIMEOUT_MS);
+       if(st != QSPI_OK)
+         return st;
 
        /* STEP 3: Configure DMA parameters while stream is disabled */
        edma_data_number_set(QSPI_EDMA_STREAM, chunk);
@@ -344,7 +448,9 @@ void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
        edma_stream_enable(QSPI_EDMA_STREAM, TRUE);
 
        /* wait for dma transfer complete */
-       while(qspi_dma_transfer_done == 0);
+       st = qspi_wait_dma_done(QSPI_DMA_TIMEOUT_MS);
+       if(st != QSPI_OK)
+         return st;
 
        transferred += chunk;
        buffer_index = 1 - buffer_index;  // toggle buffer to reduce cache conflicts
@@ -367,7 +473,12 @@ void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
        edma_stream_enable(QSPI_EDMA_STREAM, FALSE);
 
        /* STEP 2: Wait for stream to be fully disabled (check EN bit) */
-       while(QSPI_EDMA_STREAM->ctrl & 0x01);
+       st = qspi_wait_stream_disabled(QSPI_DMA_TIMEOUT_MS);
+       if(st != QSPI_OK)
+       {
+         edma_link_list_enable(EDMA_STREAM1_LL, FALSE);
+         return st;
+       }
 
        /* STEP 3: Configure first transfer parameters while stream is disabled */
        edma_data_number_set(QSPI_EDMA_STREAM, edma_link_nodes[0].dtcnt);
@@ -391,10 +502,13 @@ void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
        edma_stream_enable(QSPI_EDMA_STREAM, TRUE);
 
        /* wait for all linked transfers complete */
-       while(qspi_dma_transfer_done == 0);
+       st = qspi_wait_dma_done(QSPI_DMA_TIMEOUT_MS);
 
        /* disable link list mode */
        edma_link_list_enable(EDMA_STREAM1_LL, FALSE);
+
+       if(st != QSPI_OK)
+         return st;
      }
    }
 
@@ -404,77 +518,164 @@ void qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
      buf += len;  // buf already advanced in CPU mode
 
    /* wait command completed */
-   while(qspi_flag_get(QSPI1, QSPI_CMDSTS_FLAG) == RESET);
+   st = qspi_wait_flag(QSPI_CMDSTS_FLAG, QSPI_CMD_TIMEOUT_MS);
+   if(st != QSPI_OK)
+     return st;
    qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
 
-   qspi_busy_check();
+   /* wait for page program completion（覆盖写周期，长超时） */
+   st = qspi_busy_check();
+   if(st != QSPI_OK)
+     return st;
 
  }while(total_len);
+
+ return QSPI_OK;
 }
 
 /**
-  * @brief  qspi erase data
-  * @param  sec_addr: the sector address for erase
-  * @retval none
+  * @brief  qspi write data（生产路径，区间策略：拒绝越界/自检保留区）
+  * @retval QSPI_OK / QSPI_ERR_PARAM / QSPI_ERR_REGION / QSPI_ERR_TIMEOUT
   */
-void qspi_erase(uint32_t sec_addr)
+qspi_status_t qspi_data_write(uint32_t addr, uint32_t total_len, uint8_t* buf)
 {
-  qspi_write_enable();
+  if(buf == NULL)
+    return QSPI_ERR_PARAM;
+  /* 越界或触碰自检保留区一律 fail-closed 拒绝 */
+  if(!qspi_range_ok(addr, total_len))
+    return QSPI_ERR_REGION;
+  return qspi_data_write_core(addr, total_len, buf);
+}
+
+/**
+  * @brief  qspi write data（自检专用，区间策略：仅允许落在自检保留区内）
+  * @retval QSPI_OK / QSPI_ERR_PARAM / QSPI_ERR_REGION / QSPI_ERR_TIMEOUT
+  */
+qspi_status_t qspi_data_write_selftest(uint32_t addr, uint32_t total_len, uint8_t* buf)
+{
+  if(buf == NULL)
+    return QSPI_ERR_PARAM;
+  if(!qspi_range_selftest_ok(addr, total_len))
+    return QSPI_ERR_REGION;
+  return qspi_data_write_core(addr, total_len, buf);
+}
+
+/**
+  * @brief  qspi 擦除核心（不含区间策略检查；4KB 扇区擦除）
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT（fail-closed，绝不死循环）
+  */
+static qspi_status_t qspi_erase_core(uint32_t sec_addr)
+{
+  qspi_status_t st;
+
+  st = qspi_write_enable();
+  if(st != QSPI_OK)
+    return st;
 
   en25qh128a_cmd_config = en25qh128a_erase_para;
-  en25qh128a_cmd_config.address_code = sec_addr; 
-  qspi_cmd_send(&en25qh128a_cmd_config);
+  en25qh128a_cmd_config.address_code = sec_addr;
+  st = qspi_cmd_send(&en25qh128a_cmd_config);
+  if(st != QSPI_OK)
+    return st;
 
-  qspi_busy_check();
+  /* 擦除周期长，用 busy 长超时 */
+  return qspi_busy_check();
 }
 
 /**
-  * @brief  qspi check busy
-  * @param  none
-  * @retval none
+  * @brief  qspi erase data（生产路径，4KB 扇区擦除）
+  * @param  sec_addr: the sector address for erase
+  * @retval QSPI_OK 成功；QSPI_ERR_REGION 越界/触自检区；QSPI_ERR_TIMEOUT 忙等超时
   */
-void qspi_busy_check(void)
+qspi_status_t qspi_erase(uint32_t sec_addr)
 {
-  qspi_cmd_send((qspi_cmd_type*)&en25qh128a_rdsr_para);
+  /* 擦除粒度 4KB；越界或触碰自检保留区 fail-closed 拒绝 */
+  if(!qspi_range_ok(sec_addr, QSPI_DMA_BUFFER_SIZE))
+    return QSPI_ERR_REGION;
+  return qspi_erase_core(sec_addr);
 }
 
 /**
-  * @brief  qspi write enable
-  * @param  none
-  * @retval none
+  * @brief  qspi erase data（自检专用，仅允许自检保留区内）
+  * @retval QSPI_OK / QSPI_ERR_REGION / QSPI_ERR_TIMEOUT
   */
-void qspi_write_enable(void)
+qspi_status_t qspi_erase_selftest(uint32_t sec_addr)
 {
-  qspi_cmd_send((qspi_cmd_type*)&en25qh128a_wren_para);
+  if(!qspi_range_selftest_ok(sec_addr, QSPI_DMA_BUFFER_SIZE))
+    return QSPI_ERR_REGION;
+  return qspi_erase_core(sec_addr);
 }
 
 /**
-  * @brief  qspi cmd kick and wait completed
+  * @brief  qspi check busy（RDSR 自动轮询，带超时）
+  * @param  none
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
+  */
+qspi_status_t qspi_busy_check(void)
+{
+  /* RDSR 自动轮询覆盖擦写周期，用较长的 busy 超时 fail-closed */
+  return qspi_cmd_send_ex((qspi_cmd_type*)&en25qh128a_rdsr_para, QSPI_BUSY_TIMEOUT_MS);
+}
+
+/**
+  * @brief  qspi write enable（带超时）
+  * @param  none
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
+  */
+qspi_status_t qspi_write_enable(void)
+{
+  return qspi_cmd_send((qspi_cmd_type*)&en25qh128a_wren_para);
+}
+
+/**
+  * @brief  qspi cmd kick and wait completed（可指定超时；fail-closed）
   * @param  qspi_cmd_struct: the pointer for qspi_cmd_type parameter
-  * @retval none
+  * @param  timeout_ms: 命令完成超时毫秒数
+  * @retval QSPI_OK / QSPI_ERR_PARAM / QSPI_ERR_TIMEOUT
   */
-void qspi_cmd_send(qspi_cmd_type* qspi_cmd_struct)
+static qspi_status_t qspi_cmd_send_ex(qspi_cmd_type* qspi_cmd_struct, uint32_t timeout_ms)
 {
+  qspi_status_t st;
+
+  if(qspi_cmd_struct == NULL)
+    return QSPI_ERR_PARAM;
+
   /* kick command */
   qspi_cmd_operation_kick(QSPI1, qspi_cmd_struct);
 
-  /* wait command completed */
-  while(qspi_flag_get(QSPI1, QSPI_CMDSTS_FLAG) == RESET);
+  /* wait command completed（带超时，绝不死循环） */
+  st = qspi_wait_flag(QSPI_CMDSTS_FLAG, timeout_ms);
+  if(st != QSPI_OK)
+    return st;
   qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
+  return QSPI_OK;
+}
+
+/**
+  * @brief  qspi cmd kick and wait completed（命令口短超时；fail-closed）
+  * @param  qspi_cmd_struct: the pointer for qspi_cmd_type parameter
+  * @retval QSPI_OK / QSPI_ERR_PARAM / QSPI_ERR_TIMEOUT
+  */
+qspi_status_t qspi_cmd_send(qspi_cmd_type* qspi_cmd_struct)
+{
+  return qspi_cmd_send_ex(qspi_cmd_struct, QSPI_CMD_TIMEOUT_MS);
 }
 
 /**
   * @brief  set QE bit in status register-2 for W25Q128
   * @param  none
-  * @retval none
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
   * @note   directly write SR1=0x00 (no protection) and SR2=0x02 (QE bit set)
   */
-void qspi_set_qe_bit(void)
+qspi_status_t qspi_set_qe_bit(void)
 {
   qspi_cmd_type wrsr_cmd;
+  qspi_status_t st;
 
   /* write enable */
-  qspi_write_enable();
+  st = qspi_write_enable();
+  if(st != QSPI_OK)
+    return st;
 
   /* write both status registers: SR1=0x00, SR2=0x02 (QE bit set) */
   wrsr_cmd = w25q128_wrsr_para;
@@ -482,36 +683,144 @@ void qspi_set_qe_bit(void)
   qspi_cmd_operation_kick(QSPI1, &wrsr_cmd);
 
   /* write SR1=0x00 (no write protection) */
-  while(qspi_flag_get(QSPI1, QSPI_TXFIFORDY_FLAG) == RESET);
+  st = qspi_wait_flag(QSPI_TXFIFORDY_FLAG, QSPI_FIFO_TIMEOUT_MS);
+  if(st != QSPI_OK)
+    return st;
   qspi_byte_write(QSPI1, 0x00);
 
   /* write SR2=0x02 (QE bit set, bit 1 = 1) */
-  while(qspi_flag_get(QSPI1, QSPI_TXFIFORDY_FLAG) == RESET);
+  st = qspi_wait_flag(QSPI_TXFIFORDY_FLAG, QSPI_FIFO_TIMEOUT_MS);
+  if(st != QSPI_OK)
+    return st;
   qspi_byte_write(QSPI1, 0x02);
 
   /* wait command completed */
-  while(qspi_flag_get(QSPI1, QSPI_CMDSTS_FLAG) == RESET);
+  st = qspi_wait_flag(QSPI_CMDSTS_FLAG, QSPI_CMD_TIMEOUT_MS);
+  if(st != QSPI_OK)
+    return st;
   qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
 
-  /* wait for write completion */
-  qspi_busy_check();
+  /* wait for write completion（写状态寄存器周期，长超时） */
+  return qspi_busy_check();
 }
 
-void en25qh128a_qspi_xip_init(void)
+/**
+  * @brief  复位外部 flash（RSTEN 0x66 + RST 0x99），退出上一轮遗留的
+  *         连续读/XIP 模式，使命令口 1-1-1 指令（如 RDID 0x9F）可被识别。
+  * @note   暖复位（J-Link NRST）后 QSPI 控制器寄存器复位，但 flash 芯片
+  *         仍保持上次 en25qh128a_qspi_xip_init 设置的连续读模式；此时未复位
+  *         直接发 RDID 会读到 0x000000。必须先在命令口态发复位序列。
+  * @retval QSPI_OK / QSPI_ERR_TIMEOUT
+  */
+qspi_status_t qspi_flash_reset(void)
 {
+  qspi_status_t st;
+
+  /* 确保控制器处于命令口模式 */
+  qspi_xip_enable(QSPI1, FALSE);
+
+  st = qspi_cmd_send((qspi_cmd_type*)&en25qh128a_rsten_para);
+  if(st != QSPI_OK)
+    return st;
+  st = qspi_cmd_send((qspi_cmd_type*)&en25qh128a_rst_para);
+  if(st != QSPI_OK)
+    return st;
+
+  /* flash tRST 恢复时间（数据手册 ~30us），给足余量 */
+  delay_us(100);
+  return QSPI_OK;
+}
+
+/**
+  * @brief  读 JEDEC ID(RDID 0x9F)，命令口 3 字节读
+  * @param  id: 出参，manuf<<16 | mem_type<<8 | capacity
+  * @retval QSPI_OK / QSPI_ERR_PARAM / QSPI_ERR_TIMEOUT
+  * @note   调用前必须已复位 flash 退出连续读模式（见 qspi_flash_reset），
+  *         否则暖复位后读到 0x000000。
+  */
+qspi_status_t qspi_read_jedec_id(uint32_t* id)
+{
+  qspi_cmd_type cmd;
+  qspi_status_t st;
+  uint8_t b[3];
+  int i;
+
+  if(id == NULL)
+    return QSPI_ERR_PARAM;
+
+  cmd = qspi_rdid_para;
+  qspi_cmd_operation_kick(QSPI1, &cmd);
+
+  /* 小定长读的正确姿势：先等命令完成（CMDSTS），此时硬件已把全部 dcnt 字节
+   * 时钟进 RXFIFO；再从数据寄存器逐字节 drain。
+   * 不依赖 RXFIFORDY：该 ready 标志按 RX FIFO 阈值触发（复位默认阈值 = 最小
+   * 档 WORD08 = 8 word = 32B），3 字节 RDID 永远达不到阈值，若逐字节等
+   * RXFIFORDY 会在首字节就超时、id 归零（真机复验的 JEDEC=0 根因）。
+   * TXFIFORDY 是“FIFO 有空位”一开始即真，故写路径逐字节轮询可行，读路径不对称。 */
+  st = qspi_wait_flag(QSPI_CMDSTS_FLAG, QSPI_CMD_TIMEOUT_MS);
+  if(st != QSPI_OK)
+    return st;
+  qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
+
+  /* 命令完成后 RXFIFO 内已有 3 字节，逐字节 drain 数据寄存器 */
+  for(i = 0; i < 3; i++)
+    b[i] = qspi_byte_read(QSPI1);
+
+  *id = ((uint32_t)b[0] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[2];
+  return QSPI_OK;
+}
+
+/**
+  * @brief  JEDEC ID 是否在 OTA 白名单内（契约 §0.7）
+  * @param  id: qspi_read_jedec_id 读出的值
+  * @retval true 在白名单；false 不识别（调用方应置 OTA 禁用旗标）
+  */
+bool qspi_jedec_is_whitelisted(uint32_t id)
+{
+  return (id == QSPI_JEDEC_W25Q128) ||
+         (id == QSPI_JEDEC_EN25QH128A) ||
+         (id == QSPI_JEDEC_EN25QH64A) ||
+         (id == QSPI_JEDEC_W25Q64);
+}
+
+/**
+  * @brief  超时路径注错自检：在不 kick 任何命令时等待 CMDSTS。
+  *         正常固件里 CMDSTS 保持 RESET，故本调用必须在 timeout_ms 后
+  *         返回 QSPI_ERR_TIMEOUT（证明 fail-closed 生效，绝不死循环）。
+  * @param  timeout_ms: 注错等待时限
+  * @retval 期望恒为 QSPI_ERR_TIMEOUT
+  */
+qspi_status_t qspi_probe_timeout(uint32_t timeout_ms)
+{
+  /* 先清一次 CMDSTS，确保等待期间标志为 RESET */
+  qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
+  return qspi_wait_flag(QSPI_CMDSTS_FLAG, timeout_ms);
+}
+
+qspi_status_t en25qh128a_qspi_xip_init(void)
+{
+  qspi_status_t st;
+
   /* switch to command-port mode */
   qspi_xip_enable(QSPI1, FALSE);
 
   /* system reset */
-  qspi_cmd_send((qspi_cmd_type*)&en25qh128a_rsten_para);
-  qspi_cmd_send((qspi_cmd_type*)&en25qh128a_rst_para);
+  st = qspi_cmd_send((qspi_cmd_type*)&en25qh128a_rsten_para);
+  if(st != QSPI_OK)
+    return st;
+  st = qspi_cmd_send((qspi_cmd_type*)&en25qh128a_rst_para);
+  if(st != QSPI_OK)
+    return st;
 
   /* set QE bit for W25Q128 to enable quad SPI */
-  qspi_set_qe_bit();
+  st = qspi_set_qe_bit();
+  if(st != QSPI_OK)
+    return st;
 
   /* initial xip */
   qspi_xip_init(QSPI1, (qspi_xip_type*)&en25qh128a_xip_init_para);
   qspi_xip_enable(QSPI1, TRUE);
+  return QSPI_OK;
 }
 
 /**
