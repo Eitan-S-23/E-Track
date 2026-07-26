@@ -26,7 +26,7 @@
 |---|---|---|---|---|
 | PRE | 前置修正(复审产物) | 完成 | 4/4 | 无 |
 | P0 | 契约冻结+基建 | 完成 | 6/6 | P0-4/P0-5 独立真机复核通过；P1/P2 方案硬门槛重开 |
-| P1 | bootloader | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
+| P1 | bootloader | 进行中 | 0/6 | P0 已 6/6,门槛已开;P1-2 方案冻结完成、实现待做 |
 | P2 | MCU App 升级链 | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
 | P3 | BLE+Flutter | 待办 | 0/5 | P2-1/2 完成 |
 | P4 | CI/CF | 待办 | 0/4 | P0 完成(可与 P1/P2 并行) |
@@ -315,11 +315,64 @@
 - 证据: —
 
 #### P1-2 App 重定位双链接
-状态: 待办 ｜ 认领: — ｜ 更新: —
-- 目标: App GCC linker ORIGIN=0x08010000/LENGTH=960K;`system_at32f435_437.c` 的 `VECT_TAB_OFFSET` 改 0x10000(现为 0,SystemInit:100 会重写 VTOR);新增 `.fw_header` 段 @ORIGIN+0x400 + `ASSERT(SIZEOF(.isr_vector)<=0x400)`;App 启动期读 VTOR 与预期比对自检。AC5 工程仅本地对照,OTA 产物一律 GCC(§7)。
-- 范围: `MDK-ARM_F435/cmake-generated/cmake/generated_linker.ld`(或其生成源)、`system_at32f435_437.c`、启动自检代码。
-- 验收: GCC map 显示 `.fw_header` 落位 0x08010400;isr_vector 尺寸断言在;VTOR 自检代码在。
-- 证据: —
+状态: 进行中 ｜ 认领: Claude(方案冻结会话) / 2026-07-26 ｜ 更新: 2026-07-27(方案 v3 已冻结,实现未开始)
+- 目标: 建立 target 矩阵与受控 linker/scatter 源,使 GCC 与 AC5 的 App 使用**完全相同**的地址/VTOR/fw_header/RAM overlay 语义:
+  - App(GCC 与 AC5 双侧) linker ORIGIN=0x08010000/LENGTH=0xF0000;`.fw_header` 段 @ORIGIN+0x400(96B,KEEP/FIXED)+ `ASSERT(SIZEOF(.isr_vector)<=0x400)`;overlay 边界按契约 §10 双侧一致;
+  - `system_at32f435_437.c` 的 `VECT_TAB_OFFSET` 由**按 target 的编译期宏**选择(Boot/Legacy=0,App=0x10000),禁止全局硬改(该文件被 GCC/AC5 共用);
+  - App 启动期 VTOR 自检:**落点冻结为 `USER/main.cpp` 的 `main()` 首行、`Core_Init()` 之前**(实读 `mcu_core.c:26`→`Delay_Init()`→`delay.c:42 SysTick_Config()`,晚于此点 SysTick 已起跑;`SEGGER_RTT_Init()` 在 `setup()` 才执行,自检时 RTT 尚未初始化),失败行为见下"VTOR 自检"条;
+  - 地址/偏移数值收敛到**实现侧单一来源** `Libraries/OTA/ota_layout.h`(规范数值的唯一权威来源仍是 `docs/ota-binary-contracts.md` §0.4/§10;本头只是把已冻结契约值转成 GCC ld / AC5 sct / C / 烧录脚本可共享的宏,**不得**新增、改写或取代契约值)。
+  - OTA/CI 正式产物一律 GCC(§7);AC5 App 为同布局的本地硬件调试与对照目标,不是"近似固件"。
+- target 矩阵(已冻结,**五个 target 全部入矩阵,不存在矩阵外目标**;详见 decision 文档 §1):
+  | 逻辑 target | 工具链 | 工程内 target 名 | Flash | VTOR | 用途 |
+  |---|---|---|---|---|---|
+  | X-Track-Boot | GCC | CMake `X_Track_Boot` | 0x08000000/0x10000 | 0x08000000(`VECT_TAB_OFFSET=0`) | boot(P1-1 消费本卡受控源) |
+  | X-Track-App-GCC | GCC | CMake `X_Track_App_GCC` | 0x08010000/0xF0000 | 0x08010000 | **OTA/CI 正式产物** |
+  | X-Track-App-AC5 | AC5 | Keil `X-Track-App-AC5` | 0x08010000/0xF0000 | 0x08010000 | 本地硬件调试/对照,语义与 App-GCC 完全相同 |
+  | X-Track-Legacy-GCC | GCC | CMake `X_Track`(现有,名不改) | 0x08000000/0x100000 | 0x08000000(`VECT_TAB_OFFSET=0`) | **兼容目标**:保 `.vscode/tasks.json` 与 PRE-4 已绿 CI 切换期不断裂;**不得用于 OTA 构建/发布/验收**;退役条件见下 |
+  | X-Track-Legacy-AC5 | AC5 | Keil `X-Track`(物理名不改) | 0x08000000/0x100000 | 0x08000000(`VECT_TAB_OFFSET=0`) | 仅迁移过渡,**不得用于 OTA 验收** |
+  Legacy(AC5) 保持物理名 `X-Track` 是因为 `build_f435.ps1`/AGENTS.md 全套 AC5 应急链路按该名派生 dep/lnp/map;隔离靠输出目录与文件名保证。
+  `X-Track-Legacy-GCC` 退役条件(不在本卡执行):P1-5 bootstrap 通过 + `.vscode/tasks.json` 切到 App/Boot target 后,由独立卡移除,届时矩阵回到四行。
+- VTOR 自检(冻结,详见 decision 文档 §3.1):落点 `USER/main.cpp` `main()` 首行、`Core_Init()` **之前**;不匹配时 fail-closed 按序执行 ①`__disable_irq()` ②写一级取证标记 `g_ota_vtor_actual`/`g_ota_vtor_expected`(专用 `.ota_vtor_noinit`:GCC=`NOLOAD`+`KEEP()`,AC5=显式 section selector+`UNINIT`+`zero_init/used`/真实写引用,4B 对齐,至少 8B,不落 overlay;J-Link 只按当前 map 地址直读) + 二级尽力 `SEGGER_RTT_Init()`+`SEGGER_RTT_printf` 辅助行 ③`for(;;) __WFI()` 停机,**不继续启动、不自纠 VTOR、不复位、不喂狗**。证据判定以一级标记和双侧 map 段/符号为准,禁止另写绝对 RAM 地址。
+- 受控源决策(方案二选一,已选**方案 2**):新增版本控制的稳定 linker/scatter 源,由 CMake/Keil target 显式引用。不纳管转换脚本(`keil_uvprojx2cmake.py` 不在仓库内,且 OTA 布局不来自 uvprojx 内存对话框)。
+  - 新增受控源: `Libraries/OTA/ota_layout.h`、`Libraries/OTA/fw_header_placeholder.c`、`Libraries/OTA/ota_vtor_check.{c,h}`、`cmake/linker/x-track-app-gcc.ld.S`、`cmake/linker/x-track-boot-gcc.ld.S`、`MDK-ARM_F435/scatter/X-Track-App-AC5.sct`。
+  - **禁止**:把 `MDK-ARM_F435/cmake-generated/cmake/generated_linker.ld` 或 `MDK-ARM_F435/Objects/X-Track.sct` 改成永久 App 源(前者会被下次转换覆盖,后者未被 git 跟踪且可被 uVision 重生成);禁止让根 `CMakeLists.txt`/根 `cmake/generated_linker.ld`(RAM 口径已漂移 0x60000)参与 OTA 产物。
+- 产物隔离(冻结,禁止新旧 target 共用 `X-Track.*`):
+  - GCC: `X_Track_App_GCC` → `<build>/app-gcc/X-Track-App-GCC.{elf,hex,bin,map}`;`X_Track_Boot` → `<build>/boot/X-Track-Boot.*`;现有 `X_Track`(legacy) 产物名与 `.vscode/tasks.json` 依赖保持不变。
+  - AC5: `X-Track-App-AC5` → `Objects-App-AC5\`、`Listings-App-AC5\`、`proj_X-Track-App-AC5.dep`/`X-Track-App-AC5.lnp`、`X-Track-App-AC5.axf/.hex`、`Track-App-AC5.bin`;legacy 全部沿用现名。
+  - `build_f435.ps1` 加 `-Target`(默认 `X-Track`,保持 AGENTS.md 现有命令零改动)派生上述路径,不改其 dep/lnp 复用机制。
+  - 烧录脚本: 新增 `Tools/jlink/flash-boot.jlink`、`flash-app-gcc.jlink`、`flash-app-ac5.jlink`(`.jlink` 不支持宏,是烧录脚本域唯一允许写地址字面量处,须注明来源 `ota_layout.h`);现有 `.vscode/jlink_flash_*.jlink` 留给 legacy。
+- CI 正式发布保护(冻结,详见 decision 文档 §4.1.1):P1-2 只切**普通构建目标**为 `X_Track_App_GCC`,同轮**必须**给正式发布链加闭锁。`register-cloudflare` job 的 `if` 保持现有 `workflow_dispatch && publish=='true'`;**不得**把 `vars.OTA_BOOT_CHAIN_READY` 并入 `if`(否则 job 静默 skipped,无法输出错误)。改为 job 首步读取该变量,未精确为 `true` 时输出 `::error` 并 `exit 1`;因此 `publish=true` 必须明确硬失败,而不是跳过。解锁时机:**P1-5 bootstrap 真机通过 + P4-1 制包链演练绿之后**,由 P4-1 卡置该 variable,不在本卡解锁。
+  产物语义(禁止混用):`X-Track-App-GCC.bin` 是**唯一**可 finalize 的正式镜像(`--finalize` 就地回填 0x400 头,之后才有合法 `ETFW`/双零 SHA/CRC);`.hex`/`.elf` 永远是**占位头**产物(`objcopy` 不回写 finalize 结果),仅供调试与 legacy 烧录。**禁止把占位头 hex/elf 当正式恢复资产发布**——其 `0x400` 处 magic 非 `ETFW`,必被 boot 拒绝。recovery 资产按契约 §6 取 finalize 后 bin + 尾 8B。
+- 范围: 新增 `Libraries/OTA/**`、`cmake/linker/**`、`MDK-ARM_F435/scatter/**`、`Tools/jlink/**`;修改 `MDK-ARM_F435/cmake-generated/CMakeLists.txt`、`MDK-ARM_F435/proj.uvprojx`、`MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c`、`MDK-ARM_F435/build_f435.ps1`、`USER/main.cpp`(VTOR 自检落点)、`.github/workflows/firmware-build.yml`(切受控 App linker + 发布闭锁,否则继续产旧布局假绿)。**不改** startup 文件(向量表由 linker/scatter 定位)、**不改**根 `CMakeLists.txt` 与根 `cmake/generated_linker.ld`(历史副本,第 13 步只做引用反查与证据落盘)、不改冻结契约。
+- 验收(扩展矩阵,A1-A9d 全部留证后方可置完成;A10 明确不属 P1-2):
+  1. **A1** GCC App `FLASH ORIGIN=0x08010000/LENGTH=0xF0000`(map + 预处理后 .ld 的 MEMORY 块)。
+  2. **A2** AC5 App 同址同长(`LR_IROM1 Base 0x08010000 / Max 0x000f0000` map 摘录)。
+  3. **A3** `.isr_vector` 起于 0x08010000 且尺寸 ≤0x400,双侧有硬断言(人为超限须链接失败可复现)。
+  4. **A4** `.fw_header` 落位 0x08010400、大小恰 96B(双侧 map + 符号地址)。
+  5. **A5** raw bin header 位于文件 offset 0x400:占位态 0xFF;经 `Tools/etu_pack.py --finalize` 后 `0x400..0x403=="ETFW"`、`--verify-fw-header` 通过(双零 SHA+header CRC32),且 `0x000..0x3FF` 向量区逐字节不变。
+  6. **A6** VTOR 口径:Boot/Legacy `VECT_TAB_OFFSET=0`(实际 VTOR=0x08000000),App `VECT_TAB_OFFSET=0x10000`(实际 VTOR=0x08010000)。静态:宏展开与实际值对号;自检位于 `USER/main.cpp` 的 `Core_Init()` **之前**;GCC map 显示 `.ota_vtor_noinit`=`NOLOAD`,AC5 map 显示对应区=`UNINIT`,两侧均有段地址/大小与 `g_ota_vtor_actual`/`g_ota_vtor_expected` 符号。运行时:①受控启动读到 `SCB->VTOR=0x08010000` 且不停机;②人为注错后停在 `__WFI()` 并按当前 map 地址 `mem32` 复读两个标记,随后立即恢复源码。
+  7. **A7** GCC/AC5 主 RAM `0x20000000/0x58000` 与 overlay `0x20058000/0x28000` 边界一致,GCC 有 overlay 尺寸 ASSERT,与契约 §10.1/§10.2 对号。
+  8. **A8** 各 target 产物完全隔离:构建 App 后 legacy `Objects\X-Track.axf`/`<build>/X-Track.bin` 时间戳与哈希不变。
+  9. **A9** 无字面量漂移——全仓 grep 不可执行,只按 decision §5.1 的 16 个受控路径判定:新文件查全文,既有文件只查相对 `HEAD` 的新增/修改行;覆盖 `0x08000000`/`0x08010000`/`0x10000`/`0xF0000`/主 RAM/overlay/`0x400` 全部模式。精确 allowlist:①`ota_layout.h` 唯一实现侧转录点;②`proj.uvprojx` 新 App-AC5 target 中无法预处理的 IROM/TextAddress XML 字段(用 XML 查询与 layout 对号,设备级 FlashDriver 全片范围除外);③`Tools/jlink/*.jlink`;④P0-2 冻结的 `etu_pack.py`/`etu_unpack.py`;⑤`.md`。其余受控新增内容必须用 `OTA_*` 宏,证据须运行 decision §5.1 的完整 PowerShell 检查并输出 PASS。
+  10. **A9b** CI 只构建受控 App linker:`firmware-build.yml` 目标为 `X_Track_App_GCC`,干净 checkout run 绿并输出 `X-Track-App-GCC.bin` size/sha256;构建后自动断言 A1/A3/A4/A5,失败即停止。
+  11. **A9c 正式发布闭锁(P1-2 阶段强制)**:job `if` 只保留 `workflow_dispatch && publish=='true'`;首步读取 `vars.OTA_BOOT_CHAIN_READY`,未精确为 `true` 时输出 `::error` 并硬失败,不得静默 skipped。解锁时机:P1-5 bootstrap 真机通过 + P4-1 演练绿后,由 P4-1 置变量;P1-2 不得自行解锁。
+  12. **A9d 产物语义(禁止误发)**:`X-Track-App-GCC.bin` 是唯一可 finalize 的正式镜像载体;构建直出 bin 与 `.hex`/`.elf`/`.map` 均为占位头,只有 `etu_pack.py --finalize` 后的 bin 可入 `.etu`/作 recovery 资产。发布路径必须引用 finalized bin,占位头 hex/elf 禁止作为正式恢复资产。
+  13. **A10 明确排除**:普通 J-Link `r`+`g` 启动 App **不作为** P1-2 完整启动验收(复位仍从 0x08000000 取 MSP/PC)。P1-2 只允许 debugger 显式设置 MSP/VTOR/PC 的受限启动,并须在证据中标注"受限调试启动,非正常启动链";真实启动证据属 P1-4/P1-5。
+  允许双工具链不同的只有:编译参数表达、LD/scatter 语法、代码尺寸、map 排版与调试信息。
+- 证据:
+  - 方案冻结决策(v3,2026-07-27,不含实现): `docs/ota-exec-notes/P1-2-target-linker-decision-2026-07-26.md`
+    (§0 现状实读证据表;§1 五 target 穷举矩阵;§2 受控源方案 2 + `ota_layout.h` 实现侧单一来源;§3/§3.1 VTOR 宏选择、启动前自检与 `.ota_vtor_noinit` 双工具链语义;§4/§4.1.1 产物隔离、首步发布门闩与 bin/hex 语义;§5 A1-A9d 完成门槛+A10 排除+A9 完整脚本;§6 下一轮 13 步;§8 v2/v3 修订记录)
+  - 主会话方案审查整改(第二轮,2026-07-26,仍不含实现): 六条审查意见逐条收敛,详见 decision 文档 §8
+    1. A9 口径改为**仅受控文件集内**判定(全仓 grep 不可执行:`0x400` 实测 45 个合法命中,含 vendor/CMSIS、`at32f435_437_flash.c`、PNGdec zlib、F403A 旧工程),改宏名 + 精确 allowlist,vendor/第三方/无关业务常量不纳入
+    2. 矩阵补第五个 target:现有 GCC CMake `X_Track` 正式定义为 **X-Track-Legacy-GCC(兼容目标,不得用于 OTA)**,并写明退役条件(P1-5+tasks.json 切换后由独立卡移除),消除矩阵外模糊目标
+    3. VTOR 自检落点冻结为 `USER/main.cpp` `main()` 内 `Core_Init()` **之前**(实读 `mcu_core.c:26`→`delay.c:42 SysTick_Config`);失败行为冻结为 `__disable_irq`→写一级标记→二级 RTT 补打→`for(;;)__WFI()` 停机,不自纠/不复位/不喂狗
+    4. 删除原实施步骤 13(改根 `CMakeLists.txt`/根 `cmake/generated_linker.ld`),不动历史副本,改为引用反查取证(`firmware-build.yml:61`+`tasks.json` 均指向 `cmake-generated`,根副本引用数=0);范围矛盾消除,实施步数 14→13
+    5. 新增 CI 正式发布保护与 finalized bin/占位头 hex/elf 的语义分工(具体可执行门闩语义由 v3 收口)
+    6. 术语修正:`docs/ota-binary-contracts.md` 仍是**规范数值唯一权威来源**,`Libraries/OTA/ota_layout.h` 表述为**实现侧单一来源**(仅把已冻结契约值转成四方可共享的宏,不新增/不改写/不取代契约)
+  - 主会话二次复核收口(v3,2026-07-27,仍不含实现):①发布门闩改为 job 首步硬失败,不再把变量并入 `if`;②实施顺序统一 13 步;③完成门槛统一 A1-A9d,A10 明确排除;④A9 覆盖 16 个受控路径并补 uvprojx/jlink/etu 结构化校验;⑤`.ota_vtor_noinit` 冻结为 GCC `NOLOAD`/AC5 `UNINIT` 且要求 map 段/符号证据。
+  - 前序技术分析: `docs/ota-exec-notes/P1-P2-layout-toolchain-issues-2026-07-26.md`(其 §0「P0 4/6、不可认领」为历史快照,只沿用技术分析)
+  - 本轮未改任何 linker/scatter/CMake/uvprojx/system/startup 实现文件;未改 `PLAN-OTA.md` 与 `docs/ota-binary-contracts.md`;未 commit/push(留主会话)
+  - 实现与 A1-A9d 取证留后续会话;按 §0.3 由非实现会话验收
 
 #### P1-3 搬运/回滚/试启动状态机
 状态: 待办 ｜ 认领: — ｜ 更新: —
@@ -544,4 +597,6 @@
 - 2026-07-26 ｜ 当前实现会话(收尾) ｜ P0-4/P0-5 复审回归 ｜ 补修 legacy `EEPROM_WritePage` 跨 0xFF 回绕、QSPI-MSC 保留区大小断言；默认 SD 后端最终 AC5 0E0W（Code=263496），可选 QSPI-MSC 0E0W（Code=264764），BCB 27/27 与 vectors 9/9 复验通过。证据改为可跟踪 Markdown；状态仍进行中，待非实现会话复核。
 - 2026-07-26 ｜ Codex(非实现会话) ｜ P0-4(独立复核) ｜ 全新组合 stress+selftest 构建/烧录/RTT 闭环取得 BCBSTRESS 1000/1000 零错，宿主 27/27 PASS；恢复默认宏=0 后重建、回刷、运行态复读和 logger 清理均通过，卡置完成，P0 6/6。
 - 2026-07-26 ｜ Codex(非实现会话) ｜ P0-5(独立复核) ｜ 全新 RTT 取得白名单 JEDEC 0xEF4018、OTA enabled、注错 rc=1 PASS、自检 1000/1000；运行态 disabled=0/JEDEC 一致，默认固件恢复并复读通过，卡置完成，P1/P2 硬门槛重开。
+- 2026-07-26 ｜ Claude(方案冻结会话) ｜ P1-2(认领·方案冻结) ｜ 认领 P1-2 置进行中,本轮只冻结方案不写实现:target 矩阵(Boot/App-GCC/App-AC5/Legacy)、受控 linker/scatter 源选**方案 2**、VTOR 按 target 宏选择、产物/dep/lnp/烧录脚本命名隔离;决策落盘 `docs/ota-exec-notes/P1-2-target-linker-decision-2026-07-26.md`;当时草案仍有验收编号/14 步等口径待主会话收敛;未动实现与冻结契约,未 commit/push
 - 2026-07-26 ｜ 主会话(Claude,提交收口) ｜ P0-4/P0-5/看板 ｜ 用户授权收口;审查报告 `docs/ota-exec-notes/P0-final-review-2026-07-26.md`(91 分/通过);还原 30+ 个仅 CRLF 触碰文件后按三步小步提交(1398d5c P0-4 整改 / 7e108d2 P0-5 整改 / 270e389 看板+证据)并 push;MCU Firmware Build run 30199252471/30199252465 干净 checkout **success**(Register CF skipped 符合 §6.1);P0 6/6 收口完成,P1/P2 门槛开
+- 2026-07-27 ｜ 主会话(Codex,方案二次复核) ｜ P1-2(v3 冻结收口) ｜ 不写实现;修正 CI 门闩为 job 首步硬失败、实施顺序统一 13 步、完成门槛统一 A1-A9d(A10 排除)、A9 扩为 16 个受控路径+uvprojx/jlink/etu 结构化校验、`.ota_vtor_noinit` 冻结为 GCC NOLOAD/AC5 UNINIT 并要求 map 段/符号证据;待提交推送后才进入实现。
