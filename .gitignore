@@ -93,5 +93,11 @@ MDK-ARM_F435/cmake-generated/build-gcc/
 MDK-ARM_F435/cmake-generated/build-gcc-release/
 MDK-ARM_F435/cmake-generated/build-ci-test/
 MDK-ARM_F435/cmake-generated/build-ci-rel/
+MDK-ARM_F435/cmake-generated/build-pre4-verify/
 /build-gcc/
 /compile_commands.json
+
+# Local OTA verification scratch
+/.cache/
+/.local-archive/
+/.claude/test_bcb_arbiter.exe
