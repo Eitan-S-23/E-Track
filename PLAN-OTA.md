@@ -1,6 +1,6 @@
 # PLAN-OTA.md — E-Track 单片机 BLE/SD OTA 全链路方案
 
-> 版本:**v1.3.2(2026-07-24,PRE-1/PRE-2 修订)**。历程:v1.0 → v1.1 自审 12 项 → v1.2 A 组 8 项重写 → v1.2.1 codex 18 条 → v1.2.2 修 R3 五高危(R4 同意)→ v1.2.3 C 组 10 条 → v1.2.4 修 R6 六高危 → v1.2.5 修 R7 阻断二项 → **R8 codex 复审"同意收敛"**,其 5 条实现验收项已固化进 §2.3/§5.1/§8-P4 → **v1.3.1:version_code 编码重定义(补充 D)** → **v1.3.2:RAM 基线口径修正(补充 C)**。**v1.3 为 P0 契约冻结基线**;v1.3.1/v1.3.2 为看板 PRE 授权的契约补丁。"同意收敛"指方案层面(codex 未跑构建/真机),实现与生产发布按 §8 各阶段验收。v1 威胁模型(不防主动伪造)为已接受的产品风险(§0.2)。
+> 版本:**v1.3.3(2026-07-26,P0-6 RAM/overlay 回填)**。历程:v1.0 → v1.1 自审 12 项 → v1.2 A 组 8 项重写 → v1.2.1 codex 18 条 → v1.2.2 修 R3 五高危(R4 同意)→ v1.2.3 C 组 10 条 → v1.2.4 修 R6 六高危 → v1.2.5 修 R7 阻断二项 → **R8 codex 复审"同意收敛"**,其 5 条实现验收项已固化进 §2.3/§5.1/§8-P4 → **v1.3.1:version_code 编码重定义(补充 D)** → **v1.3.2:RAM 基线口径修正(补充 C)** → **v1.3.3:P0-6 实测 RAM 基线、16KB 字典与显式 `.sram_ext` overlay 裁决**。**v1.3 为 P0 契约冻结基线**;v1.3.1/v1.3.2/v1.3.3 为看板授权的契约补丁。"同意收敛"指方案层面(codex 未跑构建/真机),实现与生产发布按 §8 各阶段验收。v1 威胁模型(不防主动伪造)为已接受的产品风险(§0.2)。
 > 决策历史与验证记录见 `PLAN-OTA-DRAFT.md`;两轮审查记录见 `PLAN-OTA-REVIEW-LOG.md`。
 > **实施顺序:P0(契约冻结+基建)→ P1(bootloader)→ P2(MCU App)→ P3(BLE+Flutter)→ P4(CI/CF)→ P5(联调)。P0 未完成不得进入 P1/P2。**
 
@@ -26,7 +26,7 @@
 
 | 项 | 事实 | 来源 |
 |---|---|---|
-| MCU | AT32F435RGT7:内部 flash 1MB(sector 4KB);**片上 RAM 经 EOPB0 扩展为 512KB**(非"仅 384KB")。GCC 链接划分:`RAM` 352KB(`0x20000000`/`LENGTH=0x58000`)+`RW_IRAM2` 160KB(`0x20058000`/`LENGTH=0x28000`=`.sram_ext`)。LiveMap `snapshotBuf[256×320]`(RGB565=163,840B=`0x28000`)静态占满 `RW_IRAM2`,不随页面卸载释放。旧表述"总 RAM 384KB / 占用 82.96% / 余 ~65KB"口径作废(分母与是否含 `.sram_ext` 均不自洽),升级态峰值数字由 **P0-6/P2-6 以真实 map 回填** | generated_linker.ld(MDK-ARM_F435/cmake-generated);LiveMap.cpp:40-45;复审补充 C |
+| MCU | AT32F435RGT7:内部 flash 1MB(sector 4KB);**片上 RAM 经 EOPB0 扩展为 512KB**(非"仅 384KB")。GCC 链接划分:`RAM` 352KB(`0x20000000`/`LENGTH=0x58000`)+`RW_IRAM2` 160KB(`0x20058000`/`LENGTH=0x28000`=`.sram_ext`)。LiveMap `snapshotBuf[256×320]`(RGB565=163,840B=`0x28000`)静态占满 `RW_IRAM2`,不随页面卸载释放。旧表述"总 RAM 384KB / 占用 82.96% / 余 ~65KB"口径作废(分母与是否含 `.sram_ext` 均不自洽);升级态峰值数字按 **P0-6 已冻结预算、P2-6 真机水位**执行 | generated_linker.ld(MDK-ARM_F435/cmake-generated);LiveMap.cpp:40-45;复审补充 C |
 | 外部 flash | PCB 网表 = W25Q128JVSIQ(16MiB);用户口头 = 实焊 8MB 兼容片;代码注释矛盾 → **运行时读 JEDEC ID 定容量,分区表固定用前 8MiB 保守窗口,白名单按实读 ID** | Trace.enet:2169、HAL_W25Q128.cpp:58 |
 | QSPI 驱动 | **已在生产链**:`HAL_Init()` 开机即调 `Qspi_Init()`(HAL.cpp:88),且自检**擦写窗口末尾 64KB**(0x7F0000 起)→ P0 改 `CONFIG_QSPI_SELFTEST_ENABLE` 默认 0,该 64KB 永久划为自检保留区 | HAL_W25Q128.cpp:58-66 |
 | EEPROM | AT24C02 256B(页 8B,写周期 ~5ms);**byte 255 = 0x55 初始化魔数(现有逻辑,勿动)**;现有驱动多字节写无页边界/无 ACK polling/忽略返回值(EEPROM.cpp:46)→ **P0 重写安全写接口后方可承载 BCB** | Libraries/EEPROM |
@@ -214,9 +214,9 @@ cmd:0x00 GET_INFO{} → 0x80 INFO{model(8B ASCIIZ),hw_rev,layout_id,boot_ver,cur
 | P5 联调 | 双通道回归、故障注入矩阵、文档 | **注入点=每个持久化提交点/擦写/窗口 ACK/重连**,每例输出状态轨迹+最终版本哈希+"可启动或进恢复"二判;弱信号/低电/满 staging/降级/坏包/错板全过 | 3-5d |
 
 ## 9. 风险与开口项
-- **RAM 基线(PRE-2 口径,实测数字待回填)**:权威总量 = **EOPB0 扩展后 512KB** = 主 `RAM` 352KB + `RW_IRAM2`/`.sram_ext` 160KB(见 §1)。**已作废**:以"总 384KB / 82.96% / 余 ~65KB"为分母的升级态余量论证(分母错误,且未说明是否含被 `snapshotBuf` 占满的 160KB)。常态主 RAM 占用%、升级态峰值、字典 16KB vs 8KB 取舍 → **P0-6 用当前 GCC/AC5 map + 升级路径水位实测回填本条与契约文档**;P2-6 在真机升级路径复核峰值。
-- **`.sram_ext` 160KB 升级期 overlay 复用(§9 待评估,裁决权 = P0-6)**:机会——升级独占页若显式 overlay 复用 `.sram_ext`(LiveMap 不在场时)承载 LZMA 字典/状态 + bspatch 堆 + I/O,则 ~60KB 级 OTA 工作集可离开主 RAM 紧张区。**验收定义(P0-6 必须二选一写清)**:(A) **采纳**——契约化:触发条件(进入升级独占页)、与 LiveMap/`snapshotBuf` 的互斥、退出/失败时恢复规则、禁止隐式挪用、linker/段属性要求;(B) **不采纳**——写明原因,升级缓冲仅使用主 RAM/堆,并给出 P0-6 回填后的峰值预算表。在裁决前**禁止**实现侧偷偷占用 `.sram_ext`。
-- **升级态峰值内存预算(P2 实测验收,R6-4 闭环;数字占位)**:工作集组成仍按:LZMA 字典(候选 16KB,若超限降 8KB 且制包端同步)+ LZMA 解码状态 + bspatch 堆 + BLE/staging I/O + 栈余量。各分量 KB 数与"是否 ≤ 可用余量"的不等式 **待 P0-6 回填**(本卡不编造 60KB≤65KB 类结论)。P0 契约文档列各分配来源(堆/静态池/是否 overlay);P2 以 StackInfo+堆水位(+若采纳 overlay 则含段占用)实测确认。
+- **RAM 基线(P0-6 实测回填)**:权威总量 = **EOPB0 扩展后 512KB** = 主 `RAM` 352KB + `RW_IRAM2`/`.sram_ext` 160KB。当前 AC5 map 的 `RW_IRAM1` 高水位为 `313528B/360448B`(86.98%),余 `46920B`(45.82KiB);GCC Release map 的主 RAM 高水位为 `286232B/360448B`(79.41%),余 `74216B`(72.48KiB)。两条 map 均显示 `.sram_ext`/`RW_IRAM2` `163840B/163840B`(100%),由 `snapshotBuf` 静态占满。map、构建产物哈希与计算摘录见 `docs/ota-exec-notes/P0-6-ram-baseline-overlay.md`。
+- **`.sram_ext` 升级独占 overlay(裁决 = A,采纳)**:升级解密/解压/bspatch 前进入显式 `OTA_EXCLUSIVE` 所有权,暂停 LiveMap、关闭刷新/地图文件并使 `snapshotBuf` 失效;同一物理区 `[0x20058000,0x20080000)` 只能由 LiveMap 的 `.sram_ext` 或 OTA 的 `.ota_overlay` 其中一方占用,禁止隐式 malloc/别名挪用。失败/取消时擦除 OTA 池、释放所有权、重新初始化 LiveMap(不得恢复旧快照字节);成功时清理后重启。GCC/AC5 linker 必须把两者放在同一 160KB NOLOAD overlay 并断言不超界,分配失败直接终止 OTA,不得退回无界主堆。完整触发、互斥、恢复、段边界和错误规则见 `docs/ota-binary-contracts.md` §10。
+- **升级态峰值预算(P0-6 设计上限,P2-6 真机闭环)**:保留 `lc=2,lp=0,pb=0` 的 **16KB** 字典。已知工作集 `35492B`(CLzmaDec 100 + 概率表 10112 + 字典 16384 + 两个 1KB 流式缓冲 + 单个 4KB 活跃窗口 + AES 上下文/计数器 192 + 解析/流状态 512 + hash/allocator **固定设计上限** 2048;该项不是 P0-6 运行时实测值);加对齐/保护量后 OTA overlay 池上限定为 `40960B`(40KiB),160KB 区仍余 `122880B`。主 RAM 另保留 `8192B` OTA 调用栈:AC5 余量至少 `38728B`,GCC 至少 `66024B`。若不采用 overlay,按同一 `5468B` 对齐/保护量计算,AC5 的 16KB 字典会超 `2232B`;8KB 仍余 `5960B`但牺牲压缩余量,故不选。P2-6 必须用 StackInfo、堆/overlay 水位实测；超出 `40960B` 才能按变更登记把字典降为 8KB并同步制包端。
 - BLE 吞吐待实测,协议已留提速参数位。
 - recovery 槽启用与否 P1 按坏块率定。
 - **boot 单级不可变**:v1 接受(家用单台+J-Link 在手+boot 仅"校验/搬运/回滚"极简);现场 boot 缺陷=J-Link 重刷。二级 boot A/B 不做(空间不允许),风险留档。

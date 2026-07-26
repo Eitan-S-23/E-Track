@@ -1,6 +1,6 @@
 # ota-binary-contracts.md — OTA 五契约字节级定义（实现唯一依据）
 
-> 版本:**v1.0(2026-07-24,P0-1 产出)**。本文档是 fw_header / .etu / BCB / ETSL+ETRJ / BLE 帧五组二进制契约的**唯一定义点**;`PLAN-OTA.md` v1.3.2 为其只读输入。产出后本文档同样冻结:任何字段、数值、端序、CRC 覆盖范围的改动只允许走 `PLAN-OTA-EXEC.md` §9 变更登记回审,禁止就地修改。
+> 版本:**v1.1(2026-07-26,P0-6 内存契约补充)**。本文档是 fw_header / .etu / BCB / ETSL+ETRJ / BLE 帧五组二进制契约的**唯一定义点**;`PLAN-OTA.md` v1.3.3 为其只读输入。P0-6 新增的 MCU RAM/升级工作集契约见 §10。产出后本文档同样冻结:任何字段、数值、端序、CRC 覆盖范围或内存契约的改动只允许走 `PLAN-OTA-EXEC.md` §9 变更登记回审,禁止就地修改。
 > 规则:方案(`PLAN-OTA.md`)引用的每个字段/数值在本文档**有且仅有一处定义**;其他文档与代码一律引用本文档,不复制字段表。
 
 ---
@@ -471,6 +471,61 @@ dc500000 00000000 00000000 00000000 ffffffffffffffffffffffff 00000000 ac7b7f50
 
 ## 9. 引用关系
 
-- 上游(只读):`PLAN-OTA.md` v1.3.2 §1/§2/§3/§4/§5.1/§6.1;`PLAN-OTA-REVIEW-LOG.md` R4/R8。
+- 上游(只读):`PLAN-OTA.md` v1.3.3 §1/§2/§3/§4/§5.1/§6.1/§9;`PLAN-OTA-REVIEW-LOG.md` R4/R8。
 - 下游(必须引用本文档,不得另定字段):`tools/etu_pack.py` / `tools/etu_unpack.py`(P0-2)、`tests/ota-vectors/`(P0-3)、`Libraries/EEPROM/eeprom_bcb.c`(P0-4)、bootloader 与 App 解析代码(P1/P2)、BLE 帧层(P3)、CI finalize 脚本(P4)。
 - `FW_HEADER_OFFSET=0x400`、version_code 新编码、CRC 参数、状态码表如有改动需求 → `PLAN-OTA-EXEC.md` §9 变更登记,禁止就地修改。
+
+## 10. MCU RAM 与 OTA 工作集契约(P0-6)
+
+本节冻结升级路径的内存归属与预算;它不实现 P2 状态机,但 P2/P3 的代码必须按本节分配,不得用“当前堆还能分配”替代边界检查。
+
+### 10.1 物理区与当前基线
+
+| 区域 | 地址范围(左闭右开) | 大小 | 常态所有者 |
+|---|---|---:|---|
+| 主 `RAM`/`RW_IRAM1` | `0x20000000..0x20058000` | 352KiB | 固件数据、RAMCODE、堆/栈 |
+| `RW_IRAM2`/`.sram_ext` | `0x20058000..0x20080000` | 160KiB | LiveMap `snapshotBuf` |
+
+P0-6 当前工作树的链接基线如下;高水位按执行区末端计算,不是把 `RW Data+ZI Data` 简单相加:
+
+| 工具链 | 主 RAM 高水位 | 已用/容量 | 剩余 | `.sram_ext` |
+|---|---|---:|---:|---:|
+| AC5 | `0x2004c8b8` | `313528/360448B` (86.98%) | `46920B` (45.82KiB) | `163840/163840B` |
+| GCC Release | `0x20045e18` (`._user_heap_stack` 末端) | `286232/360448B` (79.41%) | `74216B` (72.48KiB) | `163840/163840B` |
+
+`snapshotBuf` 为 `256*320*2=163840B`,当前静态占满整个 `RW_IRAM2`;页面卸载不会释放它。以上数字与构建产物/时间戳/哈希的完整摘录见 `docs/ota-exec-notes/P0-6-ram-baseline-overlay.md`。
+
+### 10.2 OTA 独占 overlay(A:采纳)
+
+升级解密、解压、差分合成开始前,App 必须取得 `OTA_EXCLUSIVE` 所有权。该所有权把同一物理区 `[0x20058000,0x20080000)` 从 LiveMap 的 `.sram_ext` 切换为 OTA 的 `.ota_overlay`;两者不是两个可同时存在的数组:
+
+1. **触发**:用户从普通页面进入 FirmwareUpdate/`APPLY_PREPARE`,且 `.etu` 外层头、JEDEC 能力、版本/布局前置检查已通过;在启动 LZMA/bspatch 前完成 acquire。
+2. **互斥**:acquire 前停止 LVGL refresh/timer、关闭地图文件、卸载 LiveMap,并把 `snapshot_valid` 置假;owner 为 OTA 时禁止任何 `snapshotBuf` 读写、地图回调和隐式 `malloc` 别名。owner 为 LiveMap 时 OTA acquire 直接失败。
+3. **段边界**:GCC linker 的 `RW_IRAM2` 必须保持 `ORIGIN=0x20058000,LENGTH=0x28000`,`.sram_ext` 与 `.ota_overlay` 均为 `NOLOAD` 的互斥 overlay,并以 `ASSERT(SIZEOF(overlay)<=0x28000)` 拒绝越界;AC5 scatter 的对应 execution region 必须是同一地址/大小并在 map 中可审计。P2 实现应导出等价的 start/end 符号,禁止把 OTA 池放进主 RAM 的无界堆。
+4. **退出/恢复**:成功或失败离开 OTA 前清零池内密钥、压缩状态和 I/O 数据并 release;成功路径随后重启进入 boot,失败/取消/超时路径重新初始化 LiveMap 并强制生成新快照,不得恢复旧 `snapshotBuf` 字节。复位/掉电不保留 owner 状态,启动初始化按 LiveMap 常态路径执行。
+5. **分配失败**:overlay acquire、固定池切分或任一 LZMA 分配失败都必须在写 candidate/BCB 前终止,返回 `ERR_BUSY` 或 `ERR_FLASH`(按失败点),清理会话;禁止退回无界主堆、覆盖 `snapshotBuf` 或继续半成品合成。
+
+### 10.3 OTA 工作集上限
+
+当前制包参数固定 `lc=2,lp=0,pb=0`;P0-6 的 ARM ABI 探针得到 `sizeof(CLzmaDec)=100B`,`sizeof(CLzmaProb)=2B`,`numProbs=5056`,故概率表为 `10112B`。`LzmaDec_Allocate` 实际请求的字典为 8KiB/16KiB 原值(不会隐式扩大)。P0-6 选择 16KiB 字典,并冻结以下设计上限:
+
+本预算依赖 P2 的流式适配:old 镜像从内部 Flash XIP 读、patch 从 QSPI/staging 流读、new 结果按 1KiB 块写 candidate;**不得**把 old/new/完整 patch 或完整解密包复制到 RAM。参考 `bspatch_patch()` 的整包参数仅是移植输入,不改变本节的流式内存契约。
+
+| 分配项 | 字节 | 归属/依据 |
+|---|---:|---|
+| `CLzmaDec` | 100 | ARM GCC/AC5 ABI 探针 |
+| LZMA 概率表 | 10112 | `numProbs=1984+(0x300<<(lc+lp))=5056`,`CLzmaProb=uint16` |
+| LZMA dictionary | 16384 | 16KiB,allocator 实测 |
+| LZMA 解压输出缓冲 | 1024 | `DCOMPRESS_BUFFER_SIZE` |
+| bspatch 差分/extra 写缓冲 | 1024 | 与解压缓冲分开,流式写 candidate |
+| 单个 BLE/staging 活跃窗口 | 4096 | 4KiB 当前块;密文/明文原地复用,不得双倍计算 |
+| AES-CTR context + counter | 192 | `AES_ctx` 176B + 16B counter;函数临时量由栈预算覆盖 |
+| parser/vFile/控制流元数据 | 512 | `vFile`、8B 控制读取、3×u64 控制值及对齐余量 |
+| hash/CRC context 与 allocator 开销 | 2048 | P2 固定池的设计上限(非 P0-6 运行时实测),不可突破 |
+| **已知工作集小计** | **35492** | — |
+| 对齐/保护量 | 5468 | 向 4KiB 取整并保留越界哨兵 |
+| **OTA overlay 池上限** | **40960 (40KiB)** | `OTA_POOL_CEILING` |
+
+主 RAM 另保留 `8192B` OTA 调用栈(`OTA_STACK_RESERVE`,含当前 linker 的最小栈而非额外无界增长)。因此 overlay 采纳后,AC5 仍至少有 `46920-8192=38728B`,GCC 至少有 `74216-8192=66024B` 主 RAM 余量;160KiB overlay 尚余 `163840-40960=122880B`。不采用 overlay 时,按同一 `5468B` 对齐/保护量计算,AC5 的 16KiB 字典会超出 `2232B`;8KiB 可余 `5960B`,但不作为 v1 方案。
+
+P2-6 必须在真机以 StackInfo、固定池水位和失败注入复核上述上限;只有实测超过 `40960B` 才能通过 `PLAN-OTA-EXEC.md` §9 变更登记降为 8KiB字典,并同步 `etu_pack.py`/CI 参数。任何未取得 `OTA_EXCLUSIVE` 的路径不得启动 LZMA/bspatch。
