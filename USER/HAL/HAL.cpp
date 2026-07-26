@@ -84,6 +84,10 @@ void HAL::HAL_Init()
 	EEPROM_Read(1, &buf, 1);
 	CONFIG_DEBUG_SERIAL.printf("EEPROM_Read: %d\r\n", buf);
 	BT_printf("%d\r\n",buf);
+#if CONFIG_EEPROM_BCB_STRESS
+    // P0-4 真机压测：1000 次 BCB 区写+读回+仲裁+commit，RTT 输出统计。
+    EEPROM_BCBStress_Run(1000);
+#endif
     Audio_Init();
 	Qspi_Init();
 

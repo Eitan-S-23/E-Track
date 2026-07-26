@@ -51,7 +51,16 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$projectDir = 'D:\github\my\AT32F435RGT7_SDIO\MDK-ARM_F435'
+# Self-locate the MDK-ARM_F435 dir this script lives in, so each repo clone
+# builds its OWN tree. The old hard-coded D:\github\my\AT32F435RGT7_SDIO path
+# forced a cross-repo file sync that silently clobbered divergent work.
+# $PSScriptRoot is empty under -Command "& 'script'"; fall back to the
+# invocation path, then to the current dir, before giving up.
+$scriptDir =
+  if ($PSScriptRoot) { $PSScriptRoot }
+  elseif ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path }
+  else { (Get-Location).Path }
+$projectDir = $scriptDir
 $binDir     = 'D:\install\keil5 mdk\ARM\ARMCC\bin'
 $armcc      = Join-Path $binDir 'armcc.exe'
 $armasm     = Join-Path $binDir 'armasm.exe'

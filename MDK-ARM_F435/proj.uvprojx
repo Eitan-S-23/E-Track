@@ -4268,6 +4268,11 @@
               <FilePath>..\Libraries\EEPROM\EEPROM.cpp</FilePath>
             </File>
             <File>
+              <FileName>eeprom_bcb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\EEPROM\eeprom_bcb.c</FilePath>
+            </File>
+            <File>
               <FileName>XPT2046.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Libraries\XPT2046\XPT2046.cpp</FilePath>

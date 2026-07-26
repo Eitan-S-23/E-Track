@@ -75,9 +75,19 @@ void EEPROM_WritePage(uint8_t reg, uint8_t* buf, uint16_t len);
 void EEPROM_Write(uint8_t reg, uint8_t buf);
 void EEPROM_Read(uint8_t reg, uint8_t* buf, uint16_t len);
 uint8_t EEPROM_Check();
+/* OTA BCB 安全写（P0-4，契约 §3）：返回 true 仅当逐页写+ACK polling+读回比对全过。 */
+bool EEPROM_WriteBufferSafe(uint8_t reg, const uint8_t* buf, uint16_t len);
+bool EEPROM_ReadBufferSafe(uint8_t reg, uint8_t* buf, uint16_t len);
+/* P0-4 真机压测：CONFIG_EEPROM_BCB_STRESS=1 时在 HAL_Init 内调用，RTT 输出统计。 */
+void EEPROM_BCBStress_Run(uint32_t iterations);
 
 /* W25Q128 */
 void Qspi_Init(void);
+/* OTA 禁用旗标（P0-5，契约 §0.7）：开机 JEDEC ID 不在白名单时返回 true。
+ * 既有功能（XIP 读、文件系统）不受影响，仅 OTA 链路据此拒绝升级。
+ * JEDEC ID 编码为 manuf<<16 | mem_type<<8 | capacity，未识别为 0。 */
+bool Qspi_IsOtaDisabled(void);
+uint32_t Qspi_GetJedecId(void);
 
 /* USB MSC with Hotplug Support */
 bool USB_IsPlugged(void);

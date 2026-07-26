@@ -62,6 +62,7 @@ set(PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/Bluetooth/Bluetooth.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/ButtonEvent/ButtonEvent.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/EEPROM/EEPROM.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/EEPROM/eeprom_bcb.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/LIS3MDL/LIS3MDL.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/LSM6DSM/LSM6DSM.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/MillisTaskManager/MillisTaskManager.cpp"
