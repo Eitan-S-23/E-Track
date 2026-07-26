@@ -139,16 +139,17 @@ qspi_erase / qspi_data_write / en25qh128a_qspi_xip_init` 由 `void`→`int`
   所有裸 `while(...==RESET);` 换成带超时等待;新增 `qspi_read_jedec_id`(RDID 0x9F
   命令口 3B 读)、`qspi_jedec_is_whitelisted`。
 - `USER/HAL/HAL_Config.h`:`CONFIG_QSPI_SELFTEST_ENABLE` 默认 0。
-- `USER/HAL/HAL_W25Q128.cpp`:`Qspi_Init` 早期(XIP 关)读 JEDEC → 白名单置
-  `g_qspi_ota_disabled`(默认 true=fail-closed);selftest gated(仅动
-  `0x7F0000` 保留区,走 `*_selftest` API);始终 `en25qh128a_qspi_xip_init()`
-  收尾保证既有 XIP 读功能不受影响;`HAL::Qspi_IsOtaDisabled/Qspi_GetJedecId` 暴露。
+- `USER/HAL/HAL_W25Q128.cpp`:`Qspi_Init` 早期(XIP 关)读 JEDEC；仅当 reset、
+  白名单、自检(若启用)和最终 `en25qh128a_qspi_xip_init()` 全部成功时才清除
+  `g_qspi_ota_disabled`(默认 true=fail-closed)，无论 JEDEC 是否命中都继续尝试
+  XIP 以保持既有读功能；`HAL::Qspi_IsOtaDisabled/Qspi_GetJedecId` 暴露。
   `Qspi_SelfTest` = 注错超时子测(`qspi_probe_timeout(5ms)` 必返 ERR_TIMEOUT)+
   1000 次轮转 16 扇区“擦→写(内容含迭代号)→XIP 读回 memcmp→回命令口”,
   全程 `SEGGER_RTT_printf(0,...)` 输出 `QSPISELF: inject.../start.../done ok=/fail=`。
 - `USER/App/Common/HAL/HAL.h`:`Qspi_IsOtaDisabled()`/`Qspi_GetJedecId()` 声明。
-- `Libraries/USB_MSC/msc_diskio.cpp`:QSPI 后端分支(当前未编译)本地 `void`
-  声明改为 `#include "W25Q128/qspi_cmd_en25qh128a.h"`,防将来切后端签名撞 UB。
+- `Libraries/USB_MSC/msc_diskio.cpp`:QSPI 后端排除末尾 64KB 自检区并逐项传播
+  XIP/擦除/写入错误；`qspi_cmd_en25qh128a.h` 的 C/C++ linkage 已修正，临时
+  切换 `MSC_USE_QSPI_FLASH` 完成 AC5 编译验证。
 
 ### 6.2 关键实现口径
 - 错误码取正数 `QSPI_OK=0/ERR_TIMEOUT=1/ERR_PARAM=2/ERR_REGION=3/ERR_VERIFY=4`。
@@ -273,3 +274,19 @@ whitelisted, OTA enabled`(走 RTT);②运行态 `g_qspi_ota_disabled=0`;
   命令完成但读到全零(需查 flash 是否真在命令口态、片选/时钟或 dcnt 语义)。
 - 注错 `inject timeout rc=1 (PASS)` 与 `QSPISELF: done ok=1000 fail=0 / 1000` 应持续通过。
 - 采后恢复 flag=0 重建默认固件并回刷。
+
+## 9. 收口后复审整改（2026-07-26）
+
+- `HAL::Qspi_Init` 现在只有在 flash reset、JEDEC 白名单、（启用时）完整自检和最终 XIP 初始化全部返回 `QSPI_OK` 后才清除 `g_qspi_ota_disabled`；任一步失败均保持 OTA disabled，同时仍尝试初始化 XIP 以保留既有读路径。
+- `qspi_selftest_cycle` 检查 XIP 初始化返回值，`Qspi_SelfTest` 汇总注错与 1000 次循环结果，失败不会被吞掉。
+- 可选 `MSC_USE_QSPI_FLASH` 后端不再暴露末尾 64KB 自检保留区，并对 XIP/擦除/写入/收尾初始化逐项传播错误；同时修正 QSPI 头文件的 C/C++ linkage，使该后端可被 AC5 编译。
+- 验证：默认 AC5、`CONFIG_QSPI_SELFTEST_ENABLE=1`、`CONFIG_EEPROM_BCB_STRESS=1` 均通过；临时启用 QSPI MSC 后端编译通过，随后恢复生产 SD 配置。该阶段旧真机日志不再作为当前版本验收证据；当前实现会话回归见 §10，仍待非实现会话独立复核。
+
+## 10. 当前实现会话真机复验（2026-07-26）
+
+组合固件 RTT 取得 `QSPISELF: inject timeout rc=1 (PASS)`、
+`QSPISELF: done ok=1000 fail=0 / 1000` 和
+`QSPI: JEDEC=0xEF4018 whitelisted, OTA enabled`；运行态
+`g_qspi_ota_disabled=0`、JEDEC `0xEF4018`。可跟踪证据见
+`docs/ota-exec-notes/P0-final-combined-rtt-2026-07-26.md`。复验后两个开关恢复
+为 0，默认固件重建并回刷；本节仍属于实现会话证据，待非实现会话复核。

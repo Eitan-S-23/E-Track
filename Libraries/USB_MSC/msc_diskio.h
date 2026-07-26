@@ -44,7 +44,7 @@ extern "C" {
 /**
   * @brief USB MSC Storage Media Selection
   * Uncomment one of the following to select the storage backend:
-  * - MSC_USE_QSPI_FLASH: Use external W25Q128 QSPI Flash (16MB)
+  * - MSC_USE_QSPI_FLASH: Use the usable QSPI storage window
   * - MSC_USE_SD_CARD:    Use SD Card via SDIO
   */
 #define MSC_USE_SD_CARD           /* Use SD Card as USB MSC storage */
@@ -64,7 +64,9 @@ extern "C" {
 #ifndef QSPI1_MEM_BASE
 #define QSPI1_MEM_BASE                   0x90000000  /* QSPI1 memory mapped base address */
 #endif
-#define QSPI_FLASH_TOTAL_SIZE            (8 * 1024 * 1024)  /* 16MB (128Mbit) */
+#define QSPI_FLASH_TOTAL_SIZE            (8 * 1024 * 1024)  /* configured address window */
+#define QSPI_FLASH_RESERVED_SIZE         (64 * 1024)       /* permanent self-test area */
+#define QSPI_FLASH_USABLE_SIZE           (QSPI_FLASH_TOTAL_SIZE - QSPI_FLASH_RESERVED_SIZE)
 #define QSPI_FLASH_SECTOR_SIZE           4096        /* 4KB per sector */
 #define QSPI_FLASH_BLOCK_SIZE            512         /* 512 bytes per block (USB standard) */
 

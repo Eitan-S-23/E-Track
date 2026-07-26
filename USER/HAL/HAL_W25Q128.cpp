@@ -106,7 +106,9 @@ static qspi_status_t qspi_selftest_cycle(uint32_t sector, uint32_t iter)
         return st;
 
     /* 读回验证需 XIP 内存映射，比对后回命令口供下一轮擦写 */
-    en25qh128a_qspi_xip_init();
+    st = en25qh128a_qspi_xip_init();
+    if(st != QSPI_OK)
+        return st;
     memcpy(qspi_selftest_rbuf, (uint8_t*)QSPI1_MEM_BASE + addr, QSPI_SELFTEST_SECTOR_SIZE);
     qspi_xip_enable(QSPI1, FALSE);
 
@@ -115,14 +117,17 @@ static qspi_status_t qspi_selftest_cycle(uint32_t sector, uint32_t iter)
     return QSPI_OK;
 }
 
-static void Qspi_SelfTest(void)
+static bool Qspi_SelfTest(void)
 {
     uint32_t ok = 0, fail = 0;
+    bool all_ok = true;
 
     /* 注错子测：未 kick 命令时等 CMDSTS，必须超时返错而非死循环（fail-closed 证明） */
     qspi_status_t inj = qspi_probe_timeout(10u);
     SEGGER_RTT_printf(0, "QSPISELF: inject timeout rc=%d (%s)\r\n",
                       (int)inj, (inj == QSPI_ERR_TIMEOUT) ? "PASS" : "FAIL");
+    if(inj != QSPI_ERR_TIMEOUT)
+        all_ok = false;
 
     SEGGER_RTT_printf(0, "QSPISELF: start %d iters @0x%06X (reserved)\r\n",
                       QSPI_SELFTEST_ITERS, (unsigned)QSPI_SELFTEST_BASE);
@@ -138,6 +143,7 @@ static void Qspi_SelfTest(void)
         else
         {
             fail++;
+            all_ok = false;
             SEGGER_RTT_printf(0, "QSPISELF: iter=%lu sec=%lu rc=%d\r\n",
                               (unsigned long)n, (unsigned long)sector, (int)st);
         }
@@ -145,6 +151,7 @@ static void Qspi_SelfTest(void)
 
     SEGGER_RTT_printf(0, "QSPISELF: done ok=%lu fail=%lu / %d\r\n",
                       (unsigned long)ok, (unsigned long)fail, QSPI_SELFTEST_ITERS);
+    return all_ok && (fail == 0);
 }
 #endif /* CONFIG_QSPI_SELFTEST_ENABLE */
 
@@ -180,9 +187,44 @@ void HAL::Qspi_Init(void)
 	 * “验收判定依赖输出必须走 RTT API”红线）。 */
 	g_qspi_jedec_id = 0;
 	g_qspi_ota_disabled = true;
-	qspi_flash_reset();
-	qspi_status_t jedec_rc = qspi_read_jedec_id(&g_qspi_jedec_id);
-	if(jedec_rc == QSPI_OK && qspi_jedec_is_whitelisted(g_qspi_jedec_id))
+	qspi_status_t reset_rc = qspi_flash_reset();
+	qspi_status_t jedec_rc = reset_rc;
+	bool jedec_ok = false;
+	if(reset_rc == QSPI_OK)
+	{
+		jedec_rc = qspi_read_jedec_id(&g_qspi_jedec_id);
+		jedec_ok = (jedec_rc == QSPI_OK) &&
+		           qspi_jedec_is_whitelisted(g_qspi_jedec_id);
+	}
+	else
+	{
+		SEGGER_RTT_printf(0, "QSPI: flash reset rc=%d\r\n", (int)reset_rc);
+	}
+	if(!jedec_ok)
+	{
+		/* rc distinguishes reset/read timeout from a non-whitelisted ID. */
+		SEGGER_RTT_printf(0, "QSPI: JEDEC=0x%06X rc=%d NOT whitelisted, OTA disabled\r\n",
+		                  (unsigned)g_qspi_jedec_id, (int)jedec_rc);
+	}
+
+#if CONFIG_QSPI_SELFTEST_ENABLE
+	/* 自检默认 0；开启时仅动自检保留区 0x7F0000-0x7FFFFF，不碰文件系统/OTA 分区 */
+	bool selftest_ok = false;
+	if(jedec_ok)
+	{
+		selftest_ok = Qspi_SelfTest();
+	}
+	else
+	{
+		SEGGER_RTT_printf(0, "QSPISELF: skipped because JEDEC gate failed\r\n");
+	}
+#else
+	bool selftest_ok = true;
+#endif
+
+	/* 进入 XIP 内存映射模式，供 USB/文件系统直读（既有功能） */
+	qspi_status_t xip_rc = en25qh128a_qspi_xip_init();
+	if(jedec_ok && selftest_ok && xip_rc == QSPI_OK)
 	{
 		g_qspi_ota_disabled = false;
 		SEGGER_RTT_printf(0, "QSPI: JEDEC=0x%06X whitelisted, OTA enabled\r\n",
@@ -190,18 +232,11 @@ void HAL::Qspi_Init(void)
 	}
 	else
 	{
-		/* rc 用于区分“读超时”(rc=1)与“读到全零”(rc=0 但 id=0)，
-		 * 便于真机诊断 RDID 命令口链路失败模式。 */
-		SEGGER_RTT_printf(0, "QSPI: JEDEC=0x%06X rc=%d NOT whitelisted, OTA disabled\r\n",
-		                  (unsigned)g_qspi_jedec_id, (int)jedec_rc);
+		g_qspi_ota_disabled = true;
+		if(xip_rc != QSPI_OK)
+		{
+			SEGGER_RTT_printf(0, "QSPI: XIP init rc=%d, OTA disabled\r\n", (int)xip_rc);
+		}
 	}
-
-#if CONFIG_QSPI_SELFTEST_ENABLE
-	/* 自检默认 0；开启时仅动自检保留区 0x7F0000-0x7FFFFF，不碰文件系统/OTA 分区 */
-	Qspi_SelfTest();
-#endif
-
-	/* 进入 XIP 内存映射模式，供 USB/文件系统直读（既有功能） */
-	en25qh128a_qspi_xip_init();
 }
 

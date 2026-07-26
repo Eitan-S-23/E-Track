@@ -25,8 +25,10 @@
 
 
 
-extern "C" {
 #include "HAL/HAL.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 /** @addtogroup AT32F435_periph_examples
   * @{
   */
@@ -55,7 +57,7 @@ typedef enum
 #define QSPI_BUSY_TIMEOUT_MS             2000u
 
 /* 容量与自检保留区（契约 §0.4：EXT_SELFTEST=0x7F0000 64KB 永久避让）。 */
-#define QSPI_FLASH_CAPACITY              (8u * 1024u * 1024u)  /* 8MB (128Mbit) */
+#define QSPI_FLASH_CAPACITY              (8u * 1024u * 1024u)  /* contracted 8MB window */
 #define QSPI_SELFTEST_ADDR               0x7F0000u
 #define QSPI_SELFTEST_SIZE               0x10000u              /* 64KB */
 
@@ -173,7 +175,9 @@ void qspi_get_transfer_stats(uint32_t* cpu_count, uint32_t* double_buffer_count,
   * @retval none
   */
 void qspi_reset_transfer_stats(void);
+#ifdef __cplusplus
 }
+#endif
 
 /**
   * @}

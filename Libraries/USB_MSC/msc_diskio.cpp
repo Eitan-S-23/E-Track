@@ -48,6 +48,36 @@ extern SdFatSdioEX SD;  // Defined in HAL_SD_CARD.cpp
 uint32_t sector_size = 512;  // USB standard 512 bytes per block
 uint32_t msc_flash_size = 0; // Will be set dynamically
 
+#ifdef MSC_USE_QSPI_FLASH
+typedef char qspi_msc_capacity_match[
+  (QSPI_FLASH_TOTAL_SIZE == QSPI_FLASH_CAPACITY) ? 1 : -1];
+typedef char qspi_msc_selftest_start_match[
+  (QSPI_FLASH_USABLE_SIZE == QSPI_SELFTEST_ADDR) ? 1 : -1];
+typedef char qspi_msc_selftest_size_match[
+  (QSPI_FLASH_RESERVED_SIZE == QSPI_SELFTEST_SIZE) ? 1 : -1];
+
+static bool qspi_msc_xip_ready = false;
+
+static bool qspi_msc_range_valid(uint64_t addr, uint32_t len)
+{
+  if(addr > (uint64_t)QSPI_FLASH_USABLE_SIZE)
+    return false;
+  return (uint64_t)len <= ((uint64_t)QSPI_FLASH_USABLE_SIZE - addr);
+}
+
+static bool qspi_msc_enter_xip(void)
+{
+  qspi_msc_xip_ready = (en25qh128a_qspi_xip_init() == QSPI_OK);
+  return qspi_msc_xip_ready;
+}
+
+static void qspi_msc_leave_xip(void)
+{
+  qspi_xip_enable(QSPI1, FALSE);
+  qspi_msc_xip_ready = false;
+}
+#endif
+
 uint8_t scsi_inquiry[MSC_SUPPORT_MAX_LUN][SCSI_INQUIRY_DATA_LENGTH] =
 {
 #ifdef MSC_USE_SD_CARD
@@ -101,6 +131,9 @@ uint8_t *get_inquiry(uint8_t lun)
   */
 usb_sts_type msc_disk_capacity(uint8_t lun, uint32_t *blk_nbr, uint32_t *blk_size)
 {
+  if(blk_nbr == NULL || blk_size == NULL)
+    return USB_FAIL;
+
   /* LUN 0 maps to selected storage backend */
   if(lun == 0)
   {
@@ -117,8 +150,9 @@ usb_sts_type msc_disk_capacity(uint8_t lun, uint32_t *blk_nbr, uint32_t *blk_siz
       return USB_FAIL;  // SD card not ready or not inserted
     }
 #elif defined(MSC_USE_QSPI_FLASH)
-    /* W25Q128: 16MB total, 512 bytes per block */
-    *blk_nbr = QSPI_FLASH_TOTAL_SIZE / QSPI_FLASH_BLOCK_SIZE;
+    /* Exclude the permanent 64KB self-test reservation from the LUN. */
+    msc_flash_size = QSPI_FLASH_USABLE_SIZE;
+    *blk_nbr = QSPI_FLASH_USABLE_SIZE / QSPI_FLASH_BLOCK_SIZE;
     *blk_size = QSPI_FLASH_BLOCK_SIZE;
     return USB_OK;
 #endif
@@ -161,6 +195,19 @@ usb_sts_type msc_disk_read(uint8_t lun, uint64_t addr, uint8_t *read_buf, uint32
 
 #elif defined(MSC_USE_QSPI_FLASH)
     /* QSPI Flash: Read from XIP (memory mapped mode) */
+    if((len > 0 && read_buf == NULL) || (len % QSPI_FLASH_BLOCK_SIZE) != 0 ||
+       !qspi_msc_range_valid(addr, len))
+    {
+      return USB_FAIL;
+    }
+    if(len == 0)
+    {
+      return USB_OK;
+    }
+    if(!qspi_msc_xip_ready && !qspi_msc_enter_xip())
+    {
+      return USB_FAIL;
+    }
     memcpy(read_buf, (uint8_t *)(QSPI1_MEM_BASE + (uint32_t)addr), len);
     return USB_OK;
 #endif
@@ -207,9 +254,20 @@ usb_sts_type msc_disk_write(uint8_t lun, uint64_t addr, uint8_t *buf, uint32_t l
 		uint32_t sector_addr;
 		uint32_t offset_in_sector;
 		uint32_t bytes_to_write;
-		uint32_t total_written = 0;
+    uint32_t total_written = 0;
+    qspi_status_t st;
 
-    qspi_xip_enable(QSPI1, FALSE);
+    if((len % QSPI_FLASH_BLOCK_SIZE) != 0 ||
+       !qspi_msc_range_valid(addr, len) || (len > 0 && buf == NULL))
+    {
+      return USB_FAIL;
+    }
+    if(len == 0)
+    {
+      return USB_OK;
+    }
+
+    qspi_msc_leave_xip();
 
     /* 按扇区处理，使用读-改-写策略 */
     while(total_written < len)
@@ -223,23 +281,40 @@ usb_sts_type msc_disk_write(uint8_t lun, uint64_t addr, uint8_t *buf, uint32_t l
         bytes_to_write = len - total_written;
 
       /* Step 1: 通过XIP读取整个扇区 */
-      en25qh128a_qspi_xip_init();
+      if(!qspi_msc_enter_xip())
+      {
+        (void)qspi_msc_enter_xip();
+        return USB_FAIL;
+      }
       memcpy(sector_buffer, (uint8_t *)(QSPI1_MEM_BASE + sector_addr), QSPI_FLASH_SECTOR_SIZE);
-      qspi_xip_enable(QSPI1, FALSE);
+      qspi_msc_leave_xip();
 
       /* Step 2: 在缓冲区中修改需要更新的部分 */
       memcpy(sector_buffer + offset_in_sector, buf + total_written, bytes_to_write);
 
       /* Step 3: 擦除扇区 */
-      qspi_erase(sector_addr);
+      st = qspi_erase(sector_addr);
+      if(st != QSPI_OK)
+      {
+        (void)qspi_msc_enter_xip();
+        return USB_FAIL;
+      }
 
       /* Step 4: 写回整个修改后的扇区 */
-      qspi_data_write(sector_addr, QSPI_FLASH_SECTOR_SIZE, sector_buffer);
+      st = qspi_data_write(sector_addr, QSPI_FLASH_SECTOR_SIZE, sector_buffer);
+      if(st != QSPI_OK)
+      {
+        (void)qspi_msc_enter_xip();
+        return USB_FAIL;
+      }
 
       total_written += bytes_to_write;
     }
 
-    en25qh128a_qspi_xip_init();
+    if(!qspi_msc_enter_xip())
+    {
+      return USB_FAIL;
+    }
 
     return USB_OK;
 #endif
