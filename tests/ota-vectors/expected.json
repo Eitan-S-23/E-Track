@@ -1,0 +1,151 @@
+{
+  "contract_version": "ota-binary-contracts v1.0",
+  "generated_at": "2026-07-24T17:05:45.968236+00:00",
+  "aes_key_source": "vendor default 2b7e1516...(dev only, contract §0.6)",
+  "fw_header_offset": 1024,
+  "fw_header_size": 96,
+  "toys": {
+    "toy-old.bin": {
+      "version_name": "2.7.0",
+      "version_code": 20700
+    },
+    "toy-new.bin": {
+      "version_name": "2.8.0",
+      "version_code": 20800
+    }
+  },
+  "vectors": {
+    "toy-old.bin": {
+      "size": 4096,
+      "file_sha256": "3081fa0afc5bb2f3a7d456a249cd8f07d9517d257e581e9562bf3eb102eadb1b",
+      "fw_header": {
+        "magic": "45544657",
+        "header_ver": 1,
+        "version_code": 20700,
+        "version_name": "2.7.0",
+        "build_ts": 1720000000,
+        "hw_rev": 1,
+        "image_len": 4096,
+        "image_sha256": "e025e0683ea00f5cd00161b7fede2251ffb40b9cacba6bbafb6b39e2702aa944",
+        "layout_id": 1,
+        "min_boot_ver": 1,
+        "pad": "ffffffffffffffffffffffffffffffffffff",
+        "header_crc32": "3cdcaefa"
+      }
+    },
+    "toy-new.bin": {
+      "size": 4096,
+      "file_sha256": "f68f357c708c2d65e6b1547648e955ea47949d81bd52f2cded684a8f640e21c3",
+      "fw_header": {
+        "magic": "45544657",
+        "header_ver": 1,
+        "version_code": 20800,
+        "version_name": "2.8.0",
+        "build_ts": 1721000000,
+        "hw_rev": 1,
+        "image_len": 4096,
+        "image_sha256": "5b508eea3c3604ef42b5895d44b1df540a21e910bd00b184ff31ab80f0c824df",
+        "layout_id": 1,
+        "min_boot_ver": 1,
+        "pad": "ffffffffffffffffffffffffffffffffffff",
+        "header_crc32": "1a0e6ba7"
+      }
+    },
+    "toy-full.etu": {
+      "size": 748,
+      "package_sha256": "d8e26e51cf574570d69842b6dcc926c7becb2f050a2f996702c1075fc1617bfc",
+      "outer_header": {
+        "magic": "45545531",
+        "header_len": 64,
+        "flags": "0b00",
+        "alg_id": 1,
+        "key_id": 1,
+        "aes_nonce": "be8b8912cfe0a50d75706c8903c3fd03",
+        "payload_len": 684,
+        "payload_crc32": "654bd5b8",
+        "target_vcode": 20800,
+        "base_vcode": 0,
+        "hw_rev": 1,
+        "layout_id": 1,
+        "min_boot_ver": 1,
+        "base_sha8": "0000000000000000",
+        "header_crc32": "300789d6"
+      },
+      "image_sha256": "5b508eea3c3604ef42b5895d44b1df540a21e910bd00b184ff31ab80f0c824df",
+      "kind": "full"
+    },
+    "toy-patch.etu": {
+      "size": 213,
+      "package_sha256": "bf1ac6c9708110b4c100b62e7d735e493a22c2a6e89cd24594427ef80663eb6e",
+      "outer_header": {
+        "magic": "45545531",
+        "header_len": 64,
+        "flags": "0700",
+        "alg_id": 1,
+        "key_id": 1,
+        "aes_nonce": "bc75e1b3fe38039082a6efa67074e4b6",
+        "payload_len": 149,
+        "payload_crc32": "784ab959",
+        "target_vcode": 20800,
+        "base_vcode": 20700,
+        "hw_rev": 1,
+        "layout_id": 1,
+        "min_boot_ver": 1,
+        "base_sha8": "3081fa0afc5bb2f3",
+        "header_crc32": "82151cc5"
+      },
+      "image_sha256": "5b508eea3c3604ef42b5895d44b1df540a21e910bd00b184ff31ab80f0c824df",
+      "kind": "patch",
+      "patch_inner": {
+        "ph_hcrc": "f21b9bb4",
+        "ph_psize": 109,
+        "ph_osize": 4096,
+        "ph_nsize": 4096,
+        "ph_ocrc": "37562fa9",
+        "ph_ncrc": "46c4f6e1",
+        "ph_lzma_props": "0200100000",
+        "pad": "000000",
+        "ph_original_size": 4120
+      }
+    }
+  },
+  "seq_arbiter_cases": [
+    {
+      "name": "A_newer",
+      "a_seq": 5,
+      "b_seq": 3,
+      "a_valid": true,
+      "b_valid": true,
+      "expect": "A"
+    },
+    {
+      "name": "B_wrap_newer",
+      "a_seq": 65530,
+      "b_seq": 5,
+      "a_valid": true,
+      "b_valid": true,
+      "expect": "B"
+    },
+    {
+      "name": "equal_both_valid",
+      "a_seq": 7,
+      "b_seq": 7,
+      "a_valid": true,
+      "b_valid": true,
+      "expect": "A"
+    },
+    {
+      "name": "only_B_valid",
+      "a_seq": 9,
+      "b_seq": 8,
+      "a_valid": false,
+      "b_valid": true,
+      "expect": "B"
+    }
+  ],
+  "contract_samples_regression": {
+    "etw_full_outer_header_crc32_be_bytes": "63aad014",
+    "etw_full_outer_header_crc32_u32": "14d0aa63",
+    "etrj_hdr_crc32_u32": "c0178c87"
+  }
+}
