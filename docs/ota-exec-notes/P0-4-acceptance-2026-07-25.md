@@ -1,7 +1,7 @@
 # P0-4 独立验收记录（2026-07-25）
 
 验收人：Codex（非实现会话）
-最终结论：**通过，P0-4 置“完成”**（见 §8）。  
+历史结论（2026-07-25）：**通过，P0-4 置“完成”**（见 §8）。2026-07-26 收口后复审整改见 §9；当前卡重新进入“进行中”，实现会话真机回归已完成，等待非实现会话独立复核。
 过程摘要：首轮因 J-Link 未枚举不通过（§1-§6）；复验因压测输出走 Serial5 而非 RTT 不通过（§7）；RTT 通道整改后真机 1000 次压测 `ok=1000 fail=0` 通过（§8）。PC 单测、契约样例、GCC/AC5 构建与 `build_f435.ps1` 自定位复核均通过。
 
 ## 1. PC 仲裁单测
@@ -155,3 +155,79 @@ BCBSTRESS: done ok=1000 fail=0 / 1000
 取证后已将 `CONFIG_EEPROM_BCB_STRESS` 恢复为 `0`，以 `-AutoStale` 重建默认固件：0 warning / 0 error，`Program Size: Code=265736 RO-data=288288 RW-data=1236 ZI-data=461584`。默认 AXF/HEX/BIN SHA256 分别为 `615A0F3E07D1FF67212EE1B813444940F8D52B1972ECBD605FCDBD11AE0597B4`、`02BB1DA5C9B804092E8A4ACF8AF5ECCC3AD196F06846DD83432E63EB3FA510C1`、`9BF4A54CDB9FA7DB07BCD7A1B0C339424D2248CB854B93D3100DA23368B02572`；默认固件已重新烧录、复位运行，最终 map 不含压测符号，无残留 J-Link/logger 进程。
 
 结论：**P0-4 独立验收通过，可置“完成”**。
+
+## 9. 收口后复审整改（2026-07-26）
+
+本节 supersede §8 的状态结论，不抹除历史取证。
+
+- 修复 `bcb_commit` 未强制 `seq+1`：核心重新仲裁活动块，拒绝陈旧 `active_now`，普通事务自动生成 `active.seq + 1`；双坏 bootstrap 只能显式传 `BCB_ARBITER_NONE`。
+- 修复 byte `0xFF` 保护：`WriteBuffer` 拒绝触及保留魔数，`EEPROM_Check` 改走专用 `EnsureInitMagic` 初始化路径。
+- 旧 `EEPROM_WritePage` 改为整段委托 `WriteBuffer`，非法范围在首个写事务前拒绝，避免地址递增跨 `0xFF` 后回绕至 `0x00`。
+- 修复压测清理：stress 结束后恢复原逻辑 BCB，不再留下 APPLYING/STAGED。
+- 宿主 BCB 测试扩展为 27 个断言，覆盖核心自动递增、读回失配注入、陈旧活动块、仲裁 I/O 失败和 bootstrap，`-Wall -Wextra -Werror` 通过。
+- `EEPROM_Init` 现在传播魔数探活失败；`EnsureInitMagic` 在读失败时不再盲写保留字节。
+- AC5 默认、stress=1、默认恢复构建均通过（0 error/0 warning）。实现会话随后完成当前版本真机复验，详见 §10；看板仍需非实现会话复核后才可置“完成”。
+
+## 10. 当前实现会话真机复验（2026-07-26）
+
+本节是当前实现会话的回归证据，不替代看板规则要求的非实现会话验收。
+
+- 组合开关：`CONFIG_EEPROM_BCB_STRESS=1`、`CONFIG_QSPI_SELFTEST_ENABLE=1`；AC5 构建 0 error/0 warning，`Program Size: Code=267084 RO-data=288316 RW-data=1248 ZI-data=462604`。
+- 烧录：`AT32F435RGT7` / SWD 1000 kHz，Flash Verify `O.K.`；当前 map `_SEGGER_RTT=0x2004cf68`，`mem8` 签名为 `SEGGER RTT`。
+- 单 logger 可跟踪证据：[P0-final-combined-rtt-2026-07-26.md](P0-final-combined-rtt-2026-07-26.md)：`BCBSTRESS: done ok=1000 fail=0 / 1000`、注错 `PASS`、`QSPISELF: done ok=1000 fail=0 / 1000`、`QSPI: JEDEC=0xEF4018 whitelisted, OTA enabled`。
+- 停止 logger 后无残留进程；J-Link 运行态 `mem8 0x20005a6c 8` 为 `00 00 00 00 18 40 EF 00`（`g_qspi_ota_disabled=0`、JEDEC `0xEF4018`）。
+- 复验后两个开关均恢复 `0`，默认固件重建并回刷：`Program Size: Code=263496 RO-data=288312 RW-data=1244 ZI-data=453392`；默认 map 无 selftest 引用，RTT 地址回到 `0x2004af68`，运行态仍为 `disabled=0 / JEDEC=0xEF4018`。
+
+## 11. 2026-07-26 独立复核（复审整改后）
+
+本节由非实现会话在当前未提交工作区全新构建、烧录和采集；不使用 `P0-final-combined-rtt-2026-07-26.md` 或任何 2026-07-25 日志作为证据。
+
+### 第零步：宿主仲裁测试
+
+在 `tests/bcb` 执行：
+
+```text
+gcc -Wall -Wextra -Werror -I../../Libraries/EEPROM ../../Libraries/EEPROM/eeprom_bcb.c test_bcb_arbiter.c
+```
+
+实际运行结果为 27 个断言全部 `PASS`，摘要 `=== summary: 0 failure(s) ===`；覆盖核心 `seq+1`、提交期读回失配、陈旧 active、仲裁 I/O 失败和显式 bootstrap。
+
+### 取证构建、烧录与 RTT
+
+临时仅将 `CONFIG_EEPROM_BCB_STRESS` 与 `CONFIG_QSPI_SELFTEST_ENABLE` 置 `1`（`rg -n "CONFIG_EEPROM_BCB_STRESS|CONFIG_QSPI_SELFTEST_ENABLE" USER/HAL/HAL_Config.h` 确认位置为 `USER/HAL/HAL_Config.h:35-44`），执行：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& 'MDK-ARM_F435\build_f435.ps1' -AutoStale"
+```
+
+armlink/fromelf exit `0`，`0 Error 0 Warning`；`Program Size: Code=267084 RO-data=288316 RW-data=1248 ZI-data=462604`。
+组合产物：`X-Track.axf` 6787320 bytes（2026-07-26 17:26:22），`X-Track.hex` 1563103 bytes、`Track.bin` 555700 bytes（均 17:26:23）。
+
+按 `AT32F435RGT7`、`-If SWD`、`-Speed 1000`、`h -> loadfile -> r -> g -> qc` 烧录；Flash download 557056 bytes，Verify `O.K.`。严格解析当前 map 的命令为 `Select-String -LiteralPath MDK-ARM_F435/Listings/X-Track.map -Pattern '^\s*_SEGGER_RTT\s+'`，得到 `_SEGGER_RTT=0x2004cf68`；`mem8 0x2004cf68 16` 前 10 字节为 `53 45 47 47 45 52 20 52 54 54`（`SEGGER RTT`）。
+
+实际烧录命令及 command file：
+
+```powershell
+JLink.exe -Device AT32F435RGT7 -If SWD -Speed 1000 -AutoConnect 1 -ExitOnError 1 -CommandFile p0-45-flash-acceptance.jlink
+# p0-45-flash-acceptance.jlink: h; loadfile "...\MDK-ARM_F435\Objects\X-Track.hex"; r; g; qc
+```
+
+停止残留 logger 后只启动一个 `JLinkRTTLogger`（`CORTEX-M4`、SWD 1000 kHz、RTT channel 0），原始输出落盘于 [`P0-4-P0-5-independent-rtt-2026-07-26.log`](P0-4-P0-5-independent-rtt-2026-07-26.log)，长度 300 bytes，SHA-256=`236474D0B4391933EED607AE099B6F1E078C26BDFB211AF661EA8BB344FFE5C5`：
+
+```powershell
+JLinkRTTLogger.exe -Device CORTEX-M4 -If SWD -Speed 1000 -RTTAddress 0x2004CF68 -RTTChannel 0 docs/ota-exec-notes/P0-4-P0-5-independent-rtt-2026-07-26.log
+```
+
+```text
+Reset: NRST SW
+BCBSTRESS: start 1000 iters
+BCBSTRESS: done ok=1000 fail=0 / 1000
+```
+
+日志大小写敏感检查无 `commit rc=`、`arbiter NONE`、`bootstrap commit FAIL`、`seq mismatch` 或非零失败行。
+
+### 恢复现场
+
+两个取证宏均恢复 `0`，再次执行 `-AutoStale`：armlink/fromelf exit `0`，`0 Error 0 Warning`，`Program Size: Code=263496 RO-data=288312 RW-data=1244 ZI-data=453392`。默认产物时间为 AXF 2026-07-26 17:44:37、HEX/BIN 17:44:38；map 中 `BCBSTRESS|QSPISELF|EEPROM_BCBStress_Run|Qspi_SelfTest` 命中数为 `0`。默认 HEX 重新烧录并 Verify `O.K.`，map 新 RTT 地址 `0x2004af68` 签名有效；按 `mem8 0x20005a6c 8` 复读得到 `00 00 00 00 18 40 EF 00`，即 `disabled=0 / JEDEC=0xEF4018`，无残留 `JLinkRTTLogger`。
+
+结论：**P0-4 独立复核通过，满足 1000 次 BCB 写+读回零错及错误行排除条件。**

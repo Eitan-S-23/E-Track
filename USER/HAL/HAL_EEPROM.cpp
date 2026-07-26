@@ -9,11 +9,12 @@ bool HAL::EEPROM_Init()
     CONFIG_DEBUG_SERIAL.print("EEPROM: init...");
 
     bool success = at24c.Init();
+    if(success && EEPROM_Check() != 0)
+    {
+        success = false;
+    }
 
     CONFIG_DEBUG_SERIAL.println(success ? "success" : "failed");
-
-    if(EEPROM_Check())
-        CONFIG_DEBUG_SERIAL.print("EEPROM: read failed...");
 
     return success;
 }
@@ -25,10 +26,9 @@ void HAL::EEPROM_Read(uint8_t reg, uint8_t* buf, uint16_t len)
 
 void HAL::EEPROM_WritePage(uint8_t reg, uint8_t* buf, uint16_t len)
 {
-    for(int i = 0; i < len; i++)
-    {
-       at24c.WriteByte(reg++, buf[i]);
-    }
+    // Preserve the legacy void API, but preflight the entire range so a write
+    // crossing 0xFF cannot wrap around and modify byte 0x00.
+    (void)at24c.WriteBuffer(reg, buf, len);
 }
 
 void HAL::EEPROM_Write(uint8_t reg, uint8_t buf)
@@ -51,24 +51,9 @@ bool HAL::EEPROM_ReadBufferSafe(uint8_t reg, uint8_t* buf, uint16_t len)
 
 uint8_t HAL::EEPROM_Check(void)
 {
-    // byte 255 (0xFF) = 0x55 初始化魔数（契约 §0.4/§3.3 保持不动）。
-    // 首次上电若非 0x55 则写 0x55 + 读回确认，作为 EEPROM 探活。
-    u8 buf;
-    EEPROM_Read(255, &buf, 1);
-    if((buf) == 0X55)
-    {
-        return 0;
-    }
-    else
-    {
-        EEPROM_Write(255, 0X55);
-        delay_ms(5);
-        EEPROM_Read(255, &buf, 1);
-        if((buf) == 0X55)
-            return 0;
-        else
-            return 1;
-    }
+    // General writes reject byte 0xFF. Only this initialization path may
+    // create the reserved 0x55 marker, with ACK polling and readback verify.
+    return at24c.EnsureInitMagic() ? 0 : 1;
 }
 
 #if CONFIG_EEPROM_BCB_STRESS
@@ -102,13 +87,17 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
     bcb_t cur;
     if(active == BCB_ARBITER_A || active == BCB_ARBITER_B)
     {
-        bcb_arbiter(&hal, &cur);
+        bcb_arbiter_result_t confirmed = bcb_arbiter(&hal, &cur);
+        if(confirmed != active)
+        {
+            SEGGER_RTT_printf(0, "BCBSTRESS: initial arbiter read FAIL%c%c", 13, 10);
+            return;
+        }
     }
     else
     {
         bcb_make_idle(&cur, 20700u);
-        // 写入 B（非活动，双坏时任选一块），使 A 成为“另一块”待续。
-        if(bcb_commit(&hal, BCB_ARBITER_A, &cur) != 0)
+        if(bcb_commit(&hal, BCB_ARBITER_NONE, &cur) != BCB_COMMIT_OK)
         {
             SEGGER_RTT_printf(0, "BCBSTRESS: bootstrap commit FAIL\r\n");
             return;
@@ -121,18 +110,22 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
         }
     }
 
+    // Preserve the logical BCB contents so the stress mode never leaves the
+    // device in APPLYING/STAGED after the measurement completes.
+    bcb_t baseline = cur;
     uint32_t ok = 0, fail = 0;
     for(uint32_t i = 0; i < iterations; i++)
     {
-        // 模拟 STAGED/APPLYING 原子事务：seq+1 + state/copy_phase 切换 + resume_block。
+        uint16_t expected_seq = (uint16_t)(cur.seq + 1u);
+        // Caller supplies state only. A stale seq proves the core owns seq+1.
         bcb_t next = cur;
-        next.seq = (uint16_t)(cur.seq + 1u);
+        next.seq = cur.seq;
         next.state = (i & 1) ? BCB_STATE_APPLYING : BCB_STATE_STAGED;
         next.copy_phase = (i & 1) ? BCB_COPY_APPLY : BCB_COPY_NONE;
         next.resume_block = (uint16_t)(i & 0x1F);
 
         int rc = bcb_commit(&hal, active, &next);
-        if(rc != 0)
+        if(rc != BCB_COMMIT_OK)
         {
             fail++;
             SEGGER_RTT_printf(0, "BCBSTRESS: i=%lu commit rc=%d\r\n",
@@ -154,13 +147,36 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
                               (unsigned long)i);
             break;
         }
-        if(cur.seq != next.seq)
+        if(cur.seq != expected_seq)
         {
             fail++;
             SEGGER_RTT_printf(0, "BCBSTRESS: i=%lu seq mismatch got=%u want=%u\r\n",
-                              (unsigned long)i, cur.seq, next.seq);
+                              (unsigned long)i, cur.seq, expected_seq);
         }
         ok++;
+    }
+
+    if(active == BCB_ARBITER_A || active == BCB_ARBITER_B)
+    {
+        int restore_rc = bcb_commit(&hal, active, &baseline);
+        if(restore_rc != BCB_COMMIT_OK)
+        {
+            fail++;
+            SEGGER_RTT_printf(0, "BCBSTRESS: restore rc=%d\r\n", restore_rc);
+        }
+        else
+        {
+            bcb_arbiter_result_t restored = bcb_arbiter(&hal, &cur);
+            if((restored != BCB_ARBITER_A && restored != BCB_ARBITER_B) ||
+               cur.state != baseline.state ||
+               cur.copy_phase != baseline.copy_phase ||
+               cur.resume_block != baseline.resume_block ||
+               cur.cur_vcode != baseline.cur_vcode)
+            {
+                fail++;
+                SEGGER_RTT_printf(0, "BCBSTRESS: restore verification FAIL\r\n");
+            }
+        }
     }
 
     SEGGER_RTT_printf(0, "BCBSTRESS: done ok=%lu fail=%lu / %lu\r\n",

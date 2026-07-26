@@ -14,7 +14,10 @@
  *   5. only_A_valid (B 损坏)                  → A
  *   6. both_invalid                           → NONE (recovery)
  *   7. crc_corrupted (magic/schema 对但 crc 坏) → 视为损坏
- *   8. commit 单次事务: 非活动块写入+读回比对,seq 递增后活动性转移
+ *   8. commit 单次事务: 核心生成 seq+1 后活动性转移
+ *   9. commit 读回失配返回错误并回退
+ *  10. 陈旧活动块拒绝、11. 仲裁 I/O 失败、12. 显式 bootstrap、
+ *  13. 字段序列化/反序列化
  *
  * 输出: 每场景 PASS/FAIL, 末尾汇总。
  */
@@ -39,7 +42,28 @@ static int mem_read(uint8_t reg, uint8_t* buf, uint16_t len)
     return 0;
 }
 
+static int mem_write_corrupt(uint8_t reg, const uint8_t* buf, uint16_t len)
+{
+    int rc = mem_write(reg, buf, len);
+    if (rc == 0 && len == BCB_SIZE)
+    {
+        /* Simulate a byte becoming corrupt between write and commit readback. */
+        mem_eeprom[reg + 5] ^= 0x01;
+    }
+    return rc;
+}
+
+static int mem_read_fail(uint8_t reg, uint8_t* buf, uint16_t len)
+{
+    (void)reg;
+    (void)buf;
+    (void)len;
+    return -1;
+}
+
 static const bcb_hal_t hal = { mem_write, mem_read };
+static const bcb_hal_t corrupting_hal = { mem_write_corrupt, mem_read };
+static const bcb_hal_t read_failing_hal = { mem_write, mem_read_fail };
 
 static int failures = 0;
 
@@ -126,14 +150,14 @@ int main(void)
     bcb_arbiter_result_t r = bcb_arbiter(&hal, &active);
     check("8a. initial active is A", r == BCB_ARBITER_A && active.seq == 5);
 
-    /* 构造 STAGED→APPLYING 原子事务 (§3.4 R4-1): state/APPLYING, copy_phase/APPLY, resume_block=0, seq+1 */
+    /* Leave a stale seq deliberately: bcb_commit must derive active.seq+1. */
     bcb_t next = active;
     next.state = BCB_STATE_APPLYING;
     next.copy_phase = BCB_COPY_APPLY;
     next.resume_block = 0;
-    next.seq = (uint16_t)(active.seq + 1u);
+    next.seq = active.seq;
     int rc = bcb_commit(&hal, BCB_ARBITER_A, &next);
-    check("8b. commit returns 0", rc == 0);
+    check("8b. commit returns 0", rc == BCB_COMMIT_OK);
 
     /* commit 后非活动块 B 应为合法且 seq=6/APPLYING/copy_phase=APPLY/resume_block=0 */
     bcb_t after;
@@ -142,23 +166,53 @@ int main(void)
     check("8d. state APPLIED atomically",
           after.state == BCB_STATE_APPLYING && after.copy_phase == BCB_COPY_APPLY && after.resume_block == 0);
 
-    /* 场景 9: 读回失配检测 —— 模拟 write 成功但 read 回错 (注入: write 后人为破坏目标块) */
+    /* 场景 9: 在 bcb_commit 写入后立即破坏目标块，必须命中读回失配。 */
     memset(mem_eeprom, 0xFF, sizeof(mem_eeprom));
     place_valid_bcb(BCB_A_ADDR, 5, BCB_STATE_CONFIRMED, 20700);
     corrupt_block(BCB_B_ADDR);
     bcb_t active9;
     bcb_arbiter(&hal, &active9);
     bcb_t next9 = active9;
-    next9.seq = (uint16_t)(active9.seq + 1u);
-    /* 先把目标块 B 弄成"写成功后失配": 用一个包装 write 立即翻转一字节 */
-    /* 这里直接验证 bcb_is_valid 对 crc 坏块判 0 已覆盖;此场景用 mem_write 注入对应字节再读 */
-    /* 简化:人为在 commit 后翻转 B 一字节,确认下次仲裁不会误选 */
-    bcb_commit(&hal, BCB_ARBITER_A, &next9);
-    mem_eeprom[BCB_B_ADDR + 5] ^= 0x01; /* 翻 state 字节但不动 crc → crc 校验失败 */
+    next9.seq = 0;
+    int rc9 = bcb_commit(&corrupting_hal, BCB_ARBITER_A, &next9);
+    check("9a. commit detects readback mismatch", rc9 == BCB_COMMIT_ERR_VERIFY);
     bcb_arbiter_result_t r9 = bcb_arbiter(&hal, NULL);
-    check("9. tampered B invalid -> falls back to A", r9 == BCB_ARBITER_A);
+    check("9b. tampered B invalid -> falls back to A", r9 == BCB_ARBITER_A);
 
-    /* 场景 10: 序列化/反序列化 64B 严格契约 §3.1 字段 offset 对号 */
+    /* 场景 10: stale active selector must be rejected before any write. */
+    memset(mem_eeprom, 0xFF, sizeof(mem_eeprom));
+    place_valid_bcb(BCB_A_ADDR, 12, BCB_STATE_CONFIRMED, 20700);
+    corrupt_block(BCB_B_ADDR);
+    uint8_t before10[sizeof(mem_eeprom)];
+    memcpy(before10, mem_eeprom, sizeof(before10));
+    bcb_t next10;
+    bcb_arbiter(&hal, &next10);
+    int rc10 = bcb_commit(&hal, BCB_ARBITER_B, &next10);
+    check("10a. stale active selector rejected", rc10 == BCB_COMMIT_ERR_ACTIVE);
+    check("10b. rejected commit writes nothing",
+          memcmp(before10, mem_eeprom, sizeof(before10)) == 0);
+
+    /* 场景 11: arbitration I/O failure must not be reported as stale active. */
+    uint8_t before11[sizeof(mem_eeprom)];
+    memcpy(before11, mem_eeprom, sizeof(before11));
+    int rc11 = bcb_commit(&read_failing_hal, BCB_ARBITER_A, &next10);
+    check("11a. arbiter read failure is explicit", rc11 == BCB_COMMIT_ERR_ARBITER);
+    check("11b. arbiter failure writes nothing",
+          memcmp(before11, mem_eeprom, sizeof(before11)) == 0);
+
+    /* 场景 12: both-invalid bootstrap is explicit and starts at A/seq=0. */
+    memset(mem_eeprom, 0xFF, sizeof(mem_eeprom));
+    bcb_t bootstrap;
+    bcb_make_idle(&bootstrap, 20700);
+    bootstrap.seq = 1234;
+    int rc12 = bcb_commit(&hal, BCB_ARBITER_NONE, &bootstrap);
+    bcb_t after12;
+    bcb_arbiter_result_t r12 = bcb_arbiter(&hal, &after12);
+    check("12a. explicit bootstrap succeeds", rc12 == BCB_COMMIT_OK);
+    check("12b. bootstrap active A with seq 0",
+          r12 == BCB_ARBITER_A && after12.seq == 0);
+
+    /* 场景 13: 序列化/反序列化 64B 严格契约 §3.1 字段 offset 对号 */
     {
         bcb_t b;
         bcb_make_idle(&b, 20800);
@@ -172,29 +226,29 @@ int main(void)
         uint8_t raw[BCB_SIZE];
         bcb_serialize(&b, raw);
         /* magic ETBC at off 0..3 = 45 54 42 43 */
-        check("10a. magic ETBC bytes 45 54 42 43",
+        check("13a. magic ETBC bytes 45 54 42 43",
               raw[0]==0x45 && raw[1]==0x54 && raw[2]==0x42 && raw[3]==0x43);
         /* schema at off 4 = 1 */
-        check("10b. schema_ver at off 4 = 1", raw[4] == 1);
+        check("13b. schema_ver at off 4 = 1", raw[4] == 1);
         /* state STAGED=1 at off 5 */
-        check("10c. state STAGED at off 5 = 1", raw[5] == BCB_STATE_STAGED);
+        check("13c. state STAGED at off 5 = 1", raw[5] == BCB_STATE_STAGED);
         /* seq=1 LE at off 8..9 = 01 00 */
-        check("10d. seq LE at off 8 = 01 00", raw[8]==0x01 && raw[9]==0x00);
+        check("13d. seq LE at off 8 = 01 00", raw[8]==0x01 && raw[9]==0x00);
         /* cand_addr=0x1000 LE at off 12..15 = 00 10 00 00 */
-        check("10e. cand_addr LE at off 12", raw[12]==0x00 && raw[13]==0x10 && raw[14]==0x00 && raw[15]==0x00);
+        check("13e. cand_addr LE at off 12", raw[12]==0x00 && raw[13]==0x10 && raw[14]==0x00 && raw[15]==0x00);
         /* pad 0xFF at off 44..55 */
         int pad_ok = 1;
         for (int i = 44; i < 56; i++) if (raw[i] != 0xFF) pad_ok = 0;
-        check("10f. pad 0xFF at off 44..55", pad_ok);
+        check("13f. pad 0xFF at off 44..55", pad_ok);
         /* crc32 at off 60..63 = bcb_crc32(raw,60) LE */
         uint32_t crc = bcb_crc32(raw, 60);
-        check("10g. crc32 off 60 matches region 0..59",
+        check("13g. crc32 off 60 matches region 0..59",
               raw[60]==(uint8_t)(crc&0xFF) && raw[61]==(uint8_t)(crc>>8&0xFF) &&
               raw[62]==(uint8_t)(crc>>16&0xFF) && raw[63]==(uint8_t)(crc>>24&0xFF));
         /* round-trip deserialize */
         bcb_t d;
         bcb_deserialize(raw, &d);
-        check("10h. deserialize roundtrip seq/state/cur_vcode",
+        check("13h. deserialize roundtrip seq/state/cur_vcode",
               d.seq==1 && d.state==BCB_STATE_STAGED && d.cur_vcode==20700 && d.cand_vcode==20800);
     }
 

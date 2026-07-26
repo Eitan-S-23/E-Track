@@ -12,6 +12,11 @@
 // EEPROM 单次写周期 tWR（datasheet 5ms）。ACK polling 上限 10ms。
 #define EEPROM_ACK_POLL_MS    10
 
+// byte 0xFF is reserved for the one-time EEPROM presence marker.
+#define EEPROM_CAPACITY_BYTES   256u
+#define EEPROM_INIT_MAGIC_ADDR  0xFFu
+#define EEPROM_INIT_MAGIC_VALUE 0x55u
+
 class EEPROM
 {
 public:
@@ -22,9 +27,12 @@ public:
     bool Init(uint8_t addr = EEPROM_I2C_ADDRESS);
 
     // 安全多字节写：逐 8B 页写 + 每页 ACK polling（≤10ms）+ 全块读回比对。
-    // 任何一页 NACK/超时/读回失配均返回 false。reg+len 不得跨越 EEPROM 容量。
-    // 注意：调用方禁止写 reg=255（0xFF 处为 0x55 初始化魔数，契约 §0.4/§3.3 保持不动）。
+    // 非空写必须完整落在 0x00..0xFE；0xFF 为初始化魔数保留地址。
     bool WriteBuffer(uint8_t reg, const uint8_t* buf, uint16_t len);
+
+    // 检查保留魔数，并仅在缺失时通过底层单页路径初始化。此函数是 byte 0xFF
+    // 唯一允许的写入口。
+    bool EnsureInitMagic(void);
 
     // 多字节读。返回 true 仅当 Wire 事务全成且读齐 len 字节。
     bool ReadBytes(uint8_t reg, uint8_t* buf, uint16_t len);

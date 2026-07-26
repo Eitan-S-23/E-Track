@@ -45,7 +45,7 @@
 - **每页 ACK polling ≤10ms**：写后用循环 `beginTransmission(addr)+endTransmission()` 探活（Atmel 推荐的 ACK poll），上限 10ms（约 5ms tWR + 容差），超时返回错误。
 - **错误返回**：所有写 API 返回 `bool`，NACK/超时/读回失配返回 `false`。
 - **全块读回比对**：`WriteBuffer` 全部页写完后，`ReadBytes` 整块读回逐字节比对，不符返回 `false`。
-- **保持魔数不动**：禁止任何本卡代码写 reg=255。
+- **保持魔数不动**：通用安全写事务拒绝触及 reg=255；仅 `EEPROM::EnsureInitMagic()` 可在首次初始化时写入 0x55 并读回确认。
 - 保持向后兼容旧 API（`WriteByte`/`ReadBytes`/`Init`）签名不变以免破坏 HAL.cpp:78-85 现有探活读——但内部改为调用新安全路径，并补返回值透传给上层（HAL::EEPROM_* 现为 void，本卡仅修驱动层；HAL 层 wrapper 暂保留 void 以不扩大改动面，但新增 `HAL::EEPROM_WriteBufferSafe` 给 OTA 用）。
 
 ### 2.2 BCB 层（新 `Libraries/EEPROM/eeprom_bcb.c/.h`，纯 C）
@@ -53,7 +53,7 @@
 - crc32 用契约 §0.2 CRC32-IEEE（zlib 同参数）。**复用既有 crc32**：仓库已有 `bsdiff_lzma_AES128-main/bsdiff/lib/crc32.c`（契约 §0.2 注明表首项一致），但该路径在 vendor 树深处、boot 不可达。**裁决**：在 `eeprom_bcb.c` 内自带一份独立实现（CRC32-IEEE 查表，~256B 表），与契约 §0.2 + P0-2 `etu_pack.py` `zlib.crc32` 三方一致。已在 P0-3 acceptance 通过 RAW_CONTRACT_AUDIT 校验过算法一致性。
 - **seq 仲裁**（§3.2）：`(int16)(a.seq - b.seq) > 0` 者新；相等且双合法取 A；单合法取合法者；双坏返回 None（recovery）。实现为 `bcb_arbiter(a, b, out_active)` 返回 0/-1。
 - **单次事务**（§3.2 写序 + §3.4 R4-1）：
-  `bcb_commit(new_bcb)` = 计算 seq+1 → 整 64B 序列化 → 调注入的页写回调写非活动块 → 读回 64B 比对 → 通过即生效。一次事务内不得分字段多次写（R4-1 ROLLBACK 首转 `copy_phase=2+resume_block=0` 必须原子）。
+  `bcb_commit(active_now,new_bcb)` 重新仲裁并验证活动块，由核心计算 `active.seq+1` → 整 64B 序列化 → 调注入的页写回调写非活动块 → 读回 64B 比对 → 通过即生效。双坏 bootstrap 显式传 `BCB_ARBITER_NONE` 并写 A/seq=0；一次事务内不得分字段多次写（R4-1 ROLLBACK 首转 `copy_phase=2+resume_block=0` 必须原子）。
 - **boot/App 注入端口**：`eeprom_bcb` 不直接调 Wire，而是通过 `bcb_hal_t` 接口注入 `{ write_buffer(reg,buf,len)→bool; read_buffer(reg,buf,len)→bool }`。App 侧在 HAL_EEPROM.cpp 实例化适配器；boot 侧（P1）用自己的 I2C 实现注入。
 
 ### 2.3 PC 侧仲裁单测（不依赖真机的部分）
@@ -88,7 +88,7 @@
   - `bcb_make_idle`：bootstrap 初始 IDLE 块。
   - `bcb_hal_t` 注入端口 { write_buffer, read_buffer }，boot（无 Wire）与 App 各自实现。
   - 静态断言用可移植负数组下标（AC5 --c99 不支持 C11 _Static_assert）。
-- `USER/HAL/HAL_EEPROM.cpp`：新增 `EEPROM_WriteBufferSafe`/`EEPROM_ReadBufferSafe`（OTA 链路安全 API）；`EEPROM_Check` 保持 0x55 魔数逻辑；`EEPROM_BCBStress_Run`（`CONFIG_EEPROM_BCB_STRESS` 守卫，内嵌本文件以复用 --cpp11 组配置，避免新页面组 --cpp11 坑与 build_f435 -NewSources 同名 .o 冲突）。
+- `USER/HAL/HAL_EEPROM.cpp`：新增 `EEPROM_WriteBufferSafe`/`EEPROM_ReadBufferSafe`（OTA 链路安全 API）；`EEPROM_Check` 通过 `EnsureInitMagic` 保持 0x55 魔数逻辑；`EEPROM_BCBStress_Run`（`CONFIG_EEPROM_BCB_STRESS` 守卫，内嵌本文件以复用 --cpp11 组配置，避免新页面组 --cpp11 坑与 build_f435 -NewSources 同名 .o 冲突）。
 - `USER/App/Common/HAL/HAL.h`：加 3 个 API 声明（压测声明不加守卫，裸原型无害；曾误加 `#if` 守卫导致 HAL.h 见不到 flag→压测链接失败，已修）。
 - `USER/HAL/HAL_Config.h`：`CONFIG_EEPROM_BCB_STRESS` 默认 0。
 - `USER/HAL/HAL.cpp`：HAL_Init 末尾守卫调用 `EEPROM_BCBStress_Run(1000)`。
@@ -137,3 +137,20 @@
 **回归**:stress=1 编译 0E0W(`Program Size: Code=265736`);复位 stress=0 后默认固件重建 0E0W(同 Program Size);产物 mtime 2026-07-25 17:48。PC 单测不受影响(纯 C,不涉 RTT)。
 
 **待验收会话重新取证**:置 `CONFIG_EEPROM_BCB_STRESS=1` 重新烧录,RTT logger 应收到 `BCBSTRESS: start 1000 iters` ... `BCBSTRESS: done ok=1000 fail=0 / 1000`;采后复位 flag=0。
+
+## 8. 收口后复审整改（2026-07-26）
+
+- `bcb_commit` 现在先重新仲裁并验证 `active_now`，普通事务由核心强制生成 `active.seq + 1`，忽略调用方提供的 stale seq；双坏 bootstrap 必须显式传 `BCB_ARBITER_NONE`，固定写 A/seq=0。
+- `EEPROM::WriteBuffer` 拒绝任何触及 0xFF 的非空写；`EEPROM::EnsureInitMagic` 是唯一允许初始化 0x55 的路径，并执行 ACK polling 与读回确认。
+- 旧 `HAL::EEPROM_WritePage` 不再逐字节递增地址，而是整段委托安全入口，跨 0xFF 的请求在写入前拒绝，避免 uint8 地址回绕到 0x00。
+- stress 路径不再手工递增 seq，压测结束后恢复原逻辑 BCB，避免持久留下 APPLYING/STAGED。
+- 宿主测试扩展为 27 个断言，覆盖 stale seq、读回失配、陈旧活动块、仲裁 I/O 失败、bootstrap；`gcc -std=c99 -Wall -Wextra -Werror` 通过。
+- AC5 默认、`CONFIG_EEPROM_BCB_STRESS=1` 和默认恢复构建均通过，均为 0 error/0 warning。当前实现会话真机回归见 §9；仍需非实现会话复核。
+
+## 9. 当前实现会话真机复验（2026-07-26）
+
+组合固件同时开启 EEPROM stress 与 QSPI selftest，RTT 取得
+`BCBSTRESS: done ok=1000 fail=0 / 1000`；实现会话原始日志见
+`docs/ota-exec-notes/P0-final-combined-rtt-2026-07-26.md`。本次日志证明当前
+`bcb_commit` 核心自动递增、读回校验和 stress 收尾路径在板上完成；仍需非实现会话
+按 §0.3 复核后才能将卡置为完成。

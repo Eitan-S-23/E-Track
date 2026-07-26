@@ -59,14 +59,14 @@ bool EEPROM::WriteBuffer(uint8_t reg, const uint8_t* buf, uint16_t len)
         return false;
     }
 
-    // 禁止触及 0xFF 处的 0x55 初始化魔数（契约 §0.4/§3.3 保持不动）。
     if (len == 0)
     {
         lastOk = true;
         return true;
     }
-    // 越界检查：reg+len 不得跨越 256B EEPROM 容量。
-    if ((uint16_t)reg + len > 256u)
+    // End is exclusive. A value above 0xFF means the write touches the
+    // reserved marker byte or crosses the physical EEPROM boundary.
+    if ((uint16_t)reg + len > EEPROM_INIT_MAGIC_ADDR)
     {
         return false;
     }
@@ -117,6 +117,38 @@ bool EEPROM::WriteBuffer(uint8_t reg, const uint8_t* buf, uint16_t len)
     return true;
 }
 
+bool EEPROM::EnsureInitMagic(void)
+{
+    uint8_t value = 0;
+    if (!ReadBytes(EEPROM_INIT_MAGIC_ADDR, &value, 1))
+    {
+        return false;
+    }
+    if (value == EEPROM_INIT_MAGIC_VALUE)
+    {
+        return true;
+    }
+
+    lastOk = false;
+    value = EEPROM_INIT_MAGIC_VALUE;
+    if (!WritePageRaw(EEPROM_INIT_MAGIC_ADDR, &value, 1))
+    {
+        return false;
+    }
+    if (!WaitAckPoll(Address))
+    {
+        return false;
+    }
+
+    uint8_t readback = 0;
+    if (!ReadBytes(EEPROM_INIT_MAGIC_ADDR, &readback, 1))
+    {
+        return false;
+    }
+    lastOk = (readback == EEPROM_INIT_MAGIC_VALUE);
+    return lastOk;
+}
+
 bool EEPROM::ReadBytes(uint8_t reg, uint8_t* buf, uint16_t len)
 {
     lastOk = false;
@@ -129,7 +161,7 @@ bool EEPROM::ReadBytes(uint8_t reg, uint8_t* buf, uint16_t len)
         lastOk = true;
         return true;
     }
-    if ((uint16_t)reg + len > 256u)
+    if ((uint16_t)reg + len > EEPROM_CAPACITY_BYTES)
     {
         return false;
     }

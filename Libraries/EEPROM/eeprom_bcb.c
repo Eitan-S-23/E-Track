@@ -236,35 +236,68 @@ int bcb_commit(const bcb_hal_t* hal,
 {
     if (!hal || !hal->write_buffer || !hal->read_buffer || !new_bcb)
     {
-        return -1;
+        return BCB_COMMIT_ERR_PARAM;
+    }
+    if (new_bcb->magic != BCB_MAGIC || new_bcb->schema_ver != BCB_SCHEMA_VER)
+    {
+        return BCB_COMMIT_ERR_PARAM;
+    }
+    if (active_now != BCB_ARBITER_NONE &&
+        active_now != BCB_ARBITER_A &&
+        active_now != BCB_ARBITER_B)
+    {
+        return BCB_COMMIT_ERR_PARAM;
     }
 
-    /* 非活动块地址 = 另一块。 */
-    uint8_t target_addr = (active_now == BCB_ARBITER_A) ? BCB_B_ADDR : BCB_A_ADDR;
+    bcb_t active;
+    bcb_arbiter_result_t observed = bcb_arbiter(hal, &active);
+    if (observed == BCB_ARBITER_ERROR)
+    {
+        return BCB_COMMIT_ERR_ARBITER;
+    }
+    uint8_t target_addr;
+    bcb_t transaction = *new_bcb;
 
-    /* 1. 整 64B 序列化 (含 seq+1 与 crc32, 已由调用方在 new_bcb 内置好 seq)。 */
+    if (active_now == BCB_ARBITER_NONE)
+    {
+        if (observed != BCB_ARBITER_NONE)
+        {
+            return BCB_COMMIT_ERR_ACTIVE;
+        }
+        target_addr = BCB_A_ADDR;
+        transaction.seq = 0;
+    }
+    else
+    {
+        if (observed != active_now)
+        {
+            return BCB_COMMIT_ERR_ACTIVE;
+        }
+        target_addr = (active_now == BCB_ARBITER_A) ? BCB_B_ADDR : BCB_A_ADDR;
+        transaction.seq = (uint16_t)(active.seq + 1u);
+    }
+    /* The core owns seq advancement; callers only provide the next state. */
     uint8_t buf[BCB_SIZE];
-    bcb_serialize(new_bcb, buf);
+    bcb_serialize(&transaction, buf);
 
-    /* 2. 写非活动块整 64B (HAL 内部逐页 + ACK polling + 写后读回比对)。 */
+    /* 写非活动块整 64B (HAL 内部逐页 + ACK polling + 写后读回比对)。 */
     if (hal->write_buffer(target_addr, buf, BCB_SIZE) != 0)
     {
-        return -2;  /* 页写/ACK/读回失败 */
+        return BCB_COMMIT_ERR_WRITE;
     }
 
-    /* 3. 独立读回 64B 逐字节比对 (契约 §3.3, 不依赖 write_buffer 内部读回)。 */
+    /* 独立读回 64B 逐字节比对 (契约 §3.3, 不依赖 write_buffer 内部读回)。 */
     uint8_t readback[BCB_SIZE];
     if (hal->read_buffer(target_addr, readback, BCB_SIZE) != 0)
     {
-        return -3;
+        return BCB_COMMIT_ERR_READBACK;
     }
     if (memcmp(readback, buf, BCB_SIZE) != 0)
     {
-        return -4;  /* 读回失配 */
+        return BCB_COMMIT_ERR_VERIFY;
     }
 
-    /* 4. 通过即该块生效,活动性转移至 target (下次仲裁 seq 大者胜)。 */
-    return 0;
+    return BCB_COMMIT_OK;
 }
 
 void bcb_make_idle(bcb_t* out, uint32_t cur_vcode)

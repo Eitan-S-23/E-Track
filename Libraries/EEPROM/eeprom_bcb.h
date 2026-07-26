@@ -93,6 +93,16 @@ typedef enum bcb_arbiter_result_t {
     BCB_ARBITER_ERROR  = -1,  /* HAL 读写失败 */
 } bcb_arbiter_result_t;
 
+/* bcb_commit return values. All failures require the caller to re-run
+ * arbitration before deciding the next action. */
+#define BCB_COMMIT_OK             0
+#define BCB_COMMIT_ERR_PARAM     -1
+#define BCB_COMMIT_ERR_ACTIVE    -2
+#define BCB_COMMIT_ERR_WRITE     -3
+#define BCB_COMMIT_ERR_READBACK  -4
+#define BCB_COMMIT_ERR_VERIFY    -5
+#define BCB_COMMIT_ERR_ARBITER   -6
+
 /* ---- 公共 API ---- */
 
 /* CRC32-IEEE (契约 §0.2, 与 zlib.crc32 / vendor crc32.c 同参数)。 */
@@ -118,19 +128,21 @@ bcb_arbiter_result_t bcb_arbiter(const bcb_hal_t* hal,
                                  bcb_t* out_active);
 
 /* 单次安全写事务 (契约 §3.2 写序 + §3.4 R4-1 原子写):
- *   1. 在内存中把 new_bcb 整 64B 序列化 (含 seq+1、crc32);
- *   2. 经 HAL 写【非活动块】整 64B (逐页 + ACK polling);
- *   3. 经 HAL 读回 64B 逐字节比对;
- *   4. 通过即该块生效,活动性随之转移。
+ *   1. 重新仲裁当前活动块，并由核心强制设置 seq=active.seq+1;
+ *   2. 在内存中把 new_bcb 整 64B 序列化 (含 crc32);
+ *   3. 经 HAL 写【非活动块】整 64B (逐页 + ACK polling);
+ *   4. 经 HAL 读回 64B 逐字节比对，通过即生效。
  * 不允许分字段多次写 (R4-1 ROLLBACK 首转必须原子)。
- * active_now: 当前活动块 (BCB_ARBITER_A/B);非活动块地址 = 另一块。
- * 返回 0 成功。 */
+ * active_now: 当前活动块 (BCB_ARBITER_A/B)。双块均坏的首次初始化必须传
+ * BCB_ARBITER_NONE，此时核心强制 seq=0 并写 A。其他值拒绝。
+ * new_bcb->seq 由核心覆盖，调用方不得依赖其输入值。
+ * 返回 BCB_COMMIT_OK 或 BCB_COMMIT_ERR_*。 */
 int bcb_commit(const bcb_hal_t* hal,
                bcb_arbiter_result_t active_now,
                const bcb_t* new_bcb);
 
 /* 便捷构造: 初始化一份全新 IDLE BCB (首次烧录 bootstrap 用)。
- * seq=0, state=IDLE, boot_try=3, copy_phase=NONE。返回带 crc 的 bcb_t。 */
+ * seq=0, state=IDLE, boot_try=3, copy_phase=NONE；CRC 在序列化时生成。 */
 void bcb_make_idle(bcb_t* out, uint32_t cur_vcode);
 
 #ifdef __cplusplus
