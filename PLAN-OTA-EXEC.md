@@ -544,3 +544,4 @@
 - 2026-07-26 ｜ 当前实现会话(收尾) ｜ P0-4/P0-5 复审回归 ｜ 补修 legacy `EEPROM_WritePage` 跨 0xFF 回绕、QSPI-MSC 保留区大小断言；默认 SD 后端最终 AC5 0E0W（Code=263496），可选 QSPI-MSC 0E0W（Code=264764），BCB 27/27 与 vectors 9/9 复验通过。证据改为可跟踪 Markdown；状态仍进行中，待非实现会话复核。
 - 2026-07-26 ｜ Codex(非实现会话) ｜ P0-4(独立复核) ｜ 全新组合 stress+selftest 构建/烧录/RTT 闭环取得 BCBSTRESS 1000/1000 零错，宿主 27/27 PASS；恢复默认宏=0 后重建、回刷、运行态复读和 logger 清理均通过，卡置完成，P0 6/6。
 - 2026-07-26 ｜ Codex(非实现会话) ｜ P0-5(独立复核) ｜ 全新 RTT 取得白名单 JEDEC 0xEF4018、OTA enabled、注错 rc=1 PASS、自检 1000/1000；运行态 disabled=0/JEDEC 一致，默认固件恢复并复读通过，卡置完成，P1/P2 硬门槛重开。
+- 2026-07-26 ｜ 主会话(Claude,提交收口) ｜ P0-4/P0-5/看板 ｜ 用户授权收口;审查报告 `.claude/verification-report-p0-review.md`(91 分/通过);还原 30+ 个仅 CRLF 触碰文件后按三步小步提交(1398d5c P0-4 整改 / 7e108d2 P0-5 整改 / 270e389 看板+证据)并 push;MCU Firmware Build run 30199252471/30199252465 干净 checkout **success**(Register CF skipped 符合 §6.1);P0 6/6 收口完成,P1/P2 门槛开
