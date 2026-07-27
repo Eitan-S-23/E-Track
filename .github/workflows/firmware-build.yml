@@ -17,6 +17,9 @@ on:
       - "ArduinoAPI/**"
       - "Libraries/**"
       - "MDK-ARM_F435/**"
+      - "boot/**"
+      - "cmake/**"
+      - "tests/boot/**"
       - "vendor/**"
       - "Simulator/LVGL.Simulator/lv_conf.h"
       - ".github/workflows/firmware-build.yml"
@@ -29,6 +32,9 @@ on:
       - "ArduinoAPI/**"
       - "Libraries/**"
       - "MDK-ARM_F435/**"
+      - "boot/**"
+      - "cmake/**"
+      - "tests/boot/**"
       - "vendor/**"
       - "Simulator/LVGL.Simulator/lv_conf.h"
       - ".github/workflows/firmware-build.yml"
@@ -152,7 +158,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cmake --build "${BUILD_DIR}" --target X_Track_App_GCC --parallel
+          cmake --build "${BUILD_DIR}" --target X_Track_App_GCC X_Track_Boot --parallel
+
+      - name: Test Boot fw_header validator vectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/boot/test_fw_header_vectors.py
+          python3 tests/boot/test_boot_protocols.py
 
       - name: Validate OTA App layout
         shell: bash
@@ -265,6 +278,12 @@ jobs:
           )
           PY
 
+      - name: Validate OTA Boot skeleton
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/boot/validate_boot_artifact.py --build-dir "${BUILD_DIR}"
+
       - name: Report firmware artifacts
         id: artifacts
         shell: bash
@@ -289,6 +308,20 @@ jobs:
             ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.hex
             ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.elf
             ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.map
+          retention-days: 14
+          if-no-files-found: error
+
+      # Keep the App artifact rooted at app-gcc/ so the gated release job's
+      # existing firmware-release-assets/X-Track-App-GCC.bin path stays stable.
+      - name: Upload Boot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: boot-${{ steps.version.outputs.version_name }}
+          path: |
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.bin
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.hex
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.elf
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.map
           retention-days: 14
           if-no-files-found: error
 

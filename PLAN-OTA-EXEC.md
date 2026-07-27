@@ -308,11 +308,15 @@
 ## 4. P1 bootloader(估时 5-7d;门槛:P0 全部完成)
 
 #### P1-1 boot 工程骨架与 fw_header 统一校验
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex(实现会话) / 2026-07-27 ｜ 更新: 2026-07-27(本地实现与证据完成,待 clean-checkout CI/独立验收)
 - 目标: 64KB boot 工程(GCC,ORIGIN=0x08000000,VECT_TAB_OFFSET=0):BCB 仲裁读、QSPI 槽头读(带超时,失败 fail-closed 跳过外部槽分支)、内 flash 编程、CRC32+SHA-256、按键检测(≥3s 恢复模式)、恢复模式 UART-Ymodem 接收(§5.3 传输层 len/CRC);fw_header 统一校验全项(§3.1:header_crc→SHA 双零重算→hw_rev→layout_id→min_boot_ver→向量表范围)。**boot 永不含 LZMA/bspatch/BLE/AES(方案红线)**。
 - 范围: 新 boot 目录(契约文档定名,建议 `boot/`)。
 - 验收: boot.bin ≤64KB;校验项与 §3.1 清单逐条对号;golden vectors 中坏头/坏 SHA 样本全部被拒。
-- 证据: —
+- 证据(实现会话本地完成,待 clean-checkout CI 与非实现会话独立验收):
+  - Release Boot=`10452B/64KB`,Flash=`0x08000000/0x10000`,vector=`0x08000000/0x20c`,RAM=`5664B`;ELF 仅 `R E`+`RW` LOAD、无 RWX;显式源/包含/宏与 map 红线检查 `P1_1_BOOT_ASSERTIONS=PASS`。
+  - 同一 MCU C 校验器 host vectors=`16/16 PASS`,覆盖 magic/header_crc/header_ver/image_len/SHA/hw/layout/min_boot/MSP/reset/version ASCIIZ+零填充/pad;当前 finalized App `560988B` 被接受,双零 SHA=`0c5deb06...c83c4d`,header CRC=`6ced5e47`。
+  - BCB 宿主回归=`27/27 PASS`;Ymodem+ETSL 宿主回归=`19/19 PASS`,覆盖 CRC 重传、重复包幂等、sink 失败取消、marker/type/padding/长度负例;recovery 尾部=`5c8f0800a96ee452`,传输 len/CRC 与后置 fw_header 两层校验分离。
+  - 官方 `AT32F435_1024.FLM` `DevDscr@0x410=00080000 00000000` 证实擦除粒度 2KB;4KB 逻辑块改为连续擦 2 个 sector并全块 `0xFF` 验证。完整证据:`docs/ota-exec-notes/P1-1-implementation-evidence-2026-07-27.md`。
 
 #### P1-2 App 重定位双链接
 状态: 完成 ｜ 认领: Codex(实现会话) / 2026-07-27 ｜ 更新: 2026-07-27(非实现会话独立验收 A1-A9d 通过,A10 排除)
@@ -613,3 +617,4 @@
 - 2026-07-27 ｜ Codex(实现会话) ｜ P1-2(实现与本地取证) ｜ 完成五 target 受控布局、GCC/AC5 App 隔离产物、VTOR fail-closed、自定义 linker/scatter、CI App 目标与发布门闩;双工具链构建/map/0x404 向量负例/finalize/双向隔离通过;GCC 受限调试启动匹配路径稳定、注错路径停在 WFI 并写对标记,随后回刷 legacy;证据 `docs/ota-exec-notes/P1-2-implementation-evidence-2026-07-27.md`;卡保持进行中,待 A9b/A9c 与非实现会话验收。
 - 2026-07-27 ｜ Codex(实现会话,CI 收口) ｜ P1-2(A9b/A9c) ｜ 实现/证据提交 `b41cbb2`/`f854a80` 已推 main;push run `30254991608` clean-checkout success,App-GCC bin 561064B/SHA256 `f15aacb8...693fb5`,A1/A3/A4/A5 自动断言 PASS;dispatch publish=true run `30255464620` 构建成功后在 `OTA_BOOT_CHAIN_READY` 首步按预期硬失败,未执行 finalize/Release/R2/CF;卡继续 `进行中`,只待非实现会话独立验收。
 - 2026-07-27 ｜ Codex(非实现会话,独立验收) ｜ P1-2(验收通过) ｜ 按冻结矩阵独立复核 A1-A9d:双工具链布局/map/ELF/AXF、向量负例、header finalize 往返、VTOR 受限调试证据、产物隔离、A9 完整脚本及 GitHub runs `30254991608`/`30255464620` 全部通过;A10 明确排除且未用普通 reset/run 判定 App 启动;卡置 `完成`,P1 进度 1/6,P1-1 可启动;仅回写看板,未修改实现。
+- 2026-07-27 ｜ Codex(实现会话) ｜ P1-1(实现与本地取证) ｜ 完成独立 GCC Boot 骨架、统一 fw_header/BCB/QSPI/ETSL/内 Flash/Ymodem recovery;修正 AT32 2KB 擦除粒度与 Ymodem 两层确认边界;Boot 10452B,header 16/16、协议 19/19、BCB 27/27 全过;证据 `docs/ota-exec-notes/P1-1-implementation-evidence-2026-07-27.md`;卡保持进行中,待 push CI 与非实现会话验收。

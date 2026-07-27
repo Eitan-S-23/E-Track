@@ -37,6 +37,10 @@ set(APP_ARTIFACT_STAMP "${APP_OUTPUT_DIR}/X-Track-App-GCC.artifacts.stamp")
 set(BOOT_LINKER_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../cmake/linker/x-track-boot-gcc.ld.S")
 set(BOOT_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/boot")
 set(BOOT_LINKER_SCRIPT "${BOOT_OUTPUT_DIR}/x-track-boot-gcc.ld")
+set(BOOT_MAP_FILE "${BOOT_OUTPUT_DIR}/X-Track-Boot.map")
+set(BOOT_HEX_FILE "${BOOT_OUTPUT_DIR}/X-Track-Boot.hex")
+set(BOOT_BIN_FILE "${BOOT_OUTPUT_DIR}/X-Track-Boot.bin")
+set(BOOT_ARTIFACT_STAMP "${BOOT_OUTPUT_DIR}/X-Track-Boot.artifacts.stamp")
 
 add_custom_command(
     OUTPUT "${APP_LINKER_SCRIPT}"
@@ -51,7 +55,6 @@ add_custom_command(
 )
 add_custom_target(X_Track_App_GCC_linker_script DEPENDS "${APP_LINKER_SCRIPT}")
 
-# P1-1 will attach bootloader sources to this controlled linker-script target.
 add_custom_command(
     OUTPUT "${BOOT_LINKER_SCRIPT}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${BOOT_OUTPUT_DIR}"
@@ -63,7 +66,7 @@ add_custom_command(
     COMMENT "Preprocessing controlled OTA Boot linker script"
     VERBATIM
 )
-add_custom_target(X_Track_Boot DEPENDS "${BOOT_LINKER_SCRIPT}")
+add_custom_target(X_Track_Boot_linker_script DEPENDS "${BOOT_LINKER_SCRIPT}")
 
 set(KEIL_OPTIMIZATION_FLAG "-Os")
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
@@ -462,10 +465,33 @@ list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
 )
 
+set(BOOT_PROJECT_SOURCES
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_runtime.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_crc32.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_sha256.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_fw_header.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_slot.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_ymodem.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_recovery.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_main.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/platform/at32/boot_platform_at32.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/EEPROM/eeprom_bcb.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../cmake/startup_at32f435_437_gcc.S"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/system_at32f435_437.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_crm.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_flash.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_usart.c"
+)
+
 add_executable(X_Track ${PROJECT_SOURCES})
 add_executable(X_Track_App_GCC ${APP_PROJECT_SOURCES})
 add_dependencies(X_Track_App_GCC X_Track_App_GCC_linker_script)
 set_property(TARGET X_Track_App_GCC APPEND PROPERTY LINK_DEPENDS "${APP_LINKER_SCRIPT}")
+add_executable(X_Track_Boot ${BOOT_PROJECT_SOURCES})
+add_dependencies(X_Track_Boot X_Track_Boot_linker_script)
+set_property(TARGET X_Track_Boot APPEND PROPERTY LINK_DEPENDS "${BOOT_LINKER_SCRIPT}")
 
 set_target_properties(X_Track PROPERTIES
     OUTPUT_NAME "X-Track"
@@ -477,10 +503,19 @@ set_target_properties(X_Track_App_GCC PROPERTIES
     SUFFIX ".elf"
     RUNTIME_OUTPUT_DIRECTORY "$<1:${APP_OUTPUT_DIR}>"
 )
+set_target_properties(X_Track_Boot PROPERTIES
+    OUTPUT_NAME "X-Track-Boot"
+    SUFFIX ".elf"
+    RUNTIME_OUTPUT_DIRECTORY "$<1:${BOOT_OUTPUT_DIR}>"
+)
 
-set(FIRMWARE_TARGETS
+set(APP_FIRMWARE_TARGETS
     X_Track
     X_Track_App_GCC
+)
+set(FIRMWARE_TARGETS
+    ${APP_FIRMWARE_TARGETS}
+    X_Track_Boot
 )
 
 set_property(SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/StorageService/StorageService.cpp" APPEND PROPERTY
@@ -488,7 +523,7 @@ set_property(SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/StorageServi
     "-I${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/ArduinoJson/src"
 )
 
-foreach(FIRMWARE_TARGET IN LISTS FIRMWARE_TARGETS)
+foreach(FIRMWARE_TARGET IN LISTS APP_FIRMWARE_TARGETS)
 target_include_directories(${FIRMWARE_TARGET} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/cmake/compat-includes"
     "${CMAKE_CURRENT_LIST_DIR}/../../ArduinoAPI"
@@ -552,6 +587,23 @@ target_compile_definitions(${FIRMWARE_TARGET} PRIVATE
     "AT32F435RGT7"
 )
 endforeach()
+
+target_include_directories(X_Track_Boot PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/include"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/_X-Track"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7"
+    "${CMAKE_CURRENT_LIST_DIR}/../../vendor/CMSIS/Include"
+    "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Peripherals/inc"
+    "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Device/Include"
+)
+
+target_compile_definitions(X_Track_Boot PRIVATE
+    "_RTE_"
+    "__AT32F435_437__"
+    "AT32F435RGT7"
+    "OTA_TARGET_BOOT"
+)
 
 target_compile_definitions(X_Track_App_GCC PRIVATE
     "OTA_TARGET_APP"
@@ -645,6 +697,13 @@ target_compile_options(${FIRMWARE_TARGET} PRIVATE
 )
 endforeach()
 
+# Boot is pure C and must match the GNU runtime ABI rather than the AC5
+# compatibility setting used by the legacy/App targets.
+target_compile_options(X_Track_Boot PRIVATE
+    -fno-short-wchar
+    -Werror
+)
+
 target_link_options(X_Track PRIVATE
     -mfloat-abi=hard
     -mthumb
@@ -691,6 +750,24 @@ target_link_options(X_Track_App_GCC PRIVATE
     -u _printf_float
 )
 
+target_link_options(X_Track_Boot PRIVATE
+    -mfloat-abi=hard
+    -mthumb
+    -mfpu=fpv4-sp-d16
+    -mcpu=cortex-m4
+    -mlittle-endian
+    -T${BOOT_LINKER_SCRIPT}
+    "-L${BOOT_OUTPUT_DIR}"
+    -Wl,--gc-sections
+    -Wl,--relax
+    -Wl,--require-defined=Reset_Handler
+    -Wl,-Map=${BOOT_MAP_FILE}
+    -Wl,--print-memory-usage
+    -nostartfiles
+    -specs=nano.specs
+    -specs=nosys.specs
+)
+
 target_link_libraries(X_Track PRIVATE
     "m"
 )
@@ -705,6 +782,15 @@ add_custom_command(TARGET X_Track_App_GCC POST_BUILD
     COMMAND "${CMAKE_SIZE}" --format=berkeley "$<TARGET_FILE:X_Track_App_GCC>"
     COMMAND "${CMAKE_COMMAND}" -E touch "${APP_ARTIFACT_STAMP}"
     COMMENT "Generating isolated OTA App artifacts"
+    VERBATIM
+)
+
+add_custom_command(TARGET X_Track_Boot POST_BUILD
+    COMMAND "${CMAKE_OBJCOPY}" -O ihex "$<TARGET_FILE:X_Track_Boot>" "${BOOT_HEX_FILE}"
+    COMMAND "${CMAKE_OBJCOPY}" -O binary "$<TARGET_FILE:X_Track_Boot>" "${BOOT_BIN_FILE}"
+    COMMAND "${CMAKE_SIZE}" --format=berkeley "$<TARGET_FILE:X_Track_Boot>"
+    COMMAND "${CMAKE_COMMAND}" -E touch "${BOOT_ARTIFACT_STAMP}"
+    COMMENT "Generating isolated OTA Boot artifacts"
     VERBATIM
 )
 
