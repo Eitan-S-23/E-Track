@@ -1,8 +1,10 @@
 # P1-1 Boot skeleton implementation evidence (2026-07-27)
 
 > Implementer: Codex implementation session.
-> Status: implementation and clean-checkout CI evidence are complete; independent acceptance is pending.
-> The card remains `进行中`. This implementation session must not mark it `完成`.
+> Status: implementation, clean-checkout CI, and independent acceptance are complete.
+> Independent acceptance: Codex non-implementation session, 2026-07-28, from clean
+> `origin/main=03217f9bb911531cb9ad0be92762f08fc87319ce`.
+> The card is accepted and may be marked `完成`.
 > P1-4/P1-5 are not implemented, so Boot intentionally holds and no normal reset/run handoff was attempted.
 
 ## 1. Scope and dependency isolation
@@ -124,7 +126,8 @@ sink failure abort/CAN behavior, and the ETSL cases listed above.
 
 ### 5.1 AT32 erase-unit correction
 
-The official installed Keil Flash algorithm declares 2 KiB erase sectors:
+The official installed Keil Flash algorithm declares 2 KiB erase sectors. The descriptor is at
+ELF virtual address `0x410` (file offset `0x444`), not raw file offset `0x410`:
 
 ```text
 AT32F435_1024.FLM DevDscr @ 0x410: 00080000 00000000
@@ -189,5 +192,125 @@ artifact hashes above are the clean-checkout reference values.
 - P1-4 handoff and P1-5 bootstrap are not part of this card and are not implemented here.
 - Boot ends in `boot_platform_hold()` after inspection/recovery, so this implementation was not
   flashed or used for ordinary reset/run startup acceptance.
-- A separate non-implementation session must independently review this evidence and the current
-  source before changing P1-1 from `进行中` to `完成`.
+
+## 8. Independent acceptance (2026-07-28)
+
+### 8.1 Baseline and method
+
+- Acceptance was performed in a separate worktree created directly from clean
+  `origin/main=03217f9bb911531cb9ad0be92762f08fc87319ce`. The starting worktree was clean.
+- `git diff b478393..03217f9` contains only the evidence/board closeout; the P1-1 implementation
+  under test is the exact `b4783931053d6995009ec2352b64566ba6ea9596` source.
+- No implementation-session build directory was reused. CMake configured a fresh Release tree and
+  built `X_Track_App_GCC` plus `X_Track_Boot` with Windows Arm GNU Toolchain 13.3.Rel1 (GCC 13.3.1).
+- P1-4/P1-5 remained excluded. No flash operation and no ordinary J-Link reset/run startup claim
+  were made.
+
+### 8.2 Boot layout, vectors, RAM, permissions, and dependency redlines
+
+The fresh build and independent artifact validator passed:
+
+```text
+P1_1_BOOT_ASSERTIONS=PASS bin=10452 vector=0x08000000/0x20c
+                              msp=0x20058000 reset=0x08001aa5
+```
+
+Independent `readelf -lW` inspection showed the same loadable layout locally and in the downloaded
+CI ELF:
+
+```text
+entry 0x08001aa5
+LOAD 0x08000000 filesz/memsz 0x28d0  R E
+LOAD 0x20000000 filesz 0x0004 memsz 0x0420  RW
+LOAD 0x20000420 filesz 0x0000 memsz 0x1200  RW
+```
+
+There is no RWX LOAD segment. Flash use is `10452/65536` bytes. RAM use is
+`.data 4 + .bss 1052 + heap/stack reservation 4608 = 5664` bytes. The vector table is at the Boot
+origin and its initial MSP is the top of the contracted main RAM. The explicit Boot source/include/
+definition sets and the linked map contain no LZMA, bspatch, Bluetooth/TinyBT, AES, Arduino,
+SdFat, or SEGGER RTT dependency. Boot compiles with `-Werror`; the fresh dual-target build retained
+the App target's pre-existing warnings, but produced no Boot warning or error.
+
+Fresh local Boot hashes were:
+
+```text
+X-Track-Boot.bin  10452  eff3edbe72f7799636d175963e54c3dd35be358419b1fa83cf9c4d9a0d065170
+X-Track-Boot.hex  29470  51c10477dd8eff4f956c1c6fcf72a5351c8d5391f5df7c3362594184d75ebaad
+X-Track-Boot.elf  29636  53f9774ee4b7deb24bab1e33dcdc3e73bd5ef6fcc50078956ecf1d9fcb37312a
+```
+
+### 8.3 Unified `fw_header` and host suites
+
+- The same Boot C validator sources passed all 16 golden cases: valid image; bad magic/header CRC/
+  header version/image length/SHA/hardware/layout/minimum Boot/MSP/Reset_Handler; top-of-RAM MSP;
+  invalid version ASCIIZ forms; and dirty header padding.
+- A fresh `X-Track-App-GCC.bin` was finalized through `Tools/etu_pack.py`, accepted by
+  `Tools/etu_unpack.verify_fw_header`, and then accepted by the independently compiled
+  `boot_fw_header_validate()` host executable. Result: `image_len=561164`, stored/recomputed
+  double-zero SHA-256
+  `e0f6dbdaabb925020f3fbbc6cab93fbe57f025385fc4a09730f581273544d899`, and stored/recomputed
+  header CRC32 `df9393ee`.
+- Ymodem/ETSL host suite: `19 checks, 0 failure(s)`. It exercised 1 KiB and 128-byte packets,
+  DATA CRC retry, duplicate idempotence, sink failure/CAN, and ETSL marker/type/padding/length
+  rejection.
+- Shared BCB host suite: all `27/27` checks passed, including wrap arbitration, equal-seq A choice,
+  both-invalid handling, `seq+1` commit ownership, readback failure, stale active rejection, and
+  bootstrap.
+
+### 8.4 QSPI, internal Flash, and physical recovery
+
+- QSPI command completion is bounded by `BOOT_QSPI_TIMEOUT_MS=100`. Initialization disables XIP,
+  sends `0x66/0x99`, reads JEDEC with `0x9F`, and applies the frozen whitelist. `boot_main.c` enters
+  the external candidate branch only when initialization and the slot-header read both succeed;
+  failure skips that branch fail-closed.
+- The installed official `AT32F435_1024.FLM` is an ELF. Its `DevDscr` section starts at virtual
+  address `0x370` / file offset `0x3A4`; therefore the first sector descriptor at virtual address
+  `0x410` maps to file offset `0x444`, not raw file offset `0x410`. The bytes are
+  `00 08 00 00 00 00 00 00`, proving sector size `0x800` (2 KiB) from address zero.
+- Fresh Boot disassembly contains two `flash_sector_erase` calls, the second at `address+0x800`,
+  followed by a complete `0x1000`-byte `0xFFFFFFFF` verification loop. Programming is constrained
+  to the App interval, word-aligned, and followed by readback comparison.
+- PA15 is configured input/pull-up and treated as active low. The compiled loop compares elapsed
+  milliseconds against 2999 with an unsigned `>` branch, which accepts only elapsed time
+  `>=3000 ms` while the key remains continuously asserted.
+
+### 8.5 Clean-checkout CI and artifact isolation
+
+GitHub run `30283525908` was queried independently. It is a successful push run for
+`headSha=b4783931053d6995009ec2352b64566ba6ea9596`; build, the two Boot host suites, App layout,
+Boot assertions, and both upload steps succeeded. The Cloudflare registration job was skipped as
+required for a push run.
+
+The downloaded artifacts are isolated and contain exactly four files each:
+
+```text
+firmware-2.7-nightly.32: X-Track-App-GCC.{bin,hex,elf,map}
+boot-2.7-nightly.32:     X-Track-Boot.{bin,hex,elf,map}
+```
+
+The CI Boot binary is `10452` bytes with SHA-256
+`7989a7299b426eff0df644902d8d3bf1a3ba462b01f10ebdf6f6006a68821a1e`.
+
+### 8.6 Windows/CI Boot hash difference
+
+The local and CI binaries have identical length, entry point, program headers, loadable section
+sizes, and all source-controlled symbol addresses. Of 224 common defined symbols, exactly three
+addresses differ:
+
+```text
+Windows: memcmp 0x08002418, memset 0x08002438, memcpy 0x08002448
+CI:      memset 0x08002418, memcpy 0x08002428, memcmp 0x08002444
+```
+
+Each function body is byte-identical between toolchains. The binaries differ in 97 bytes total.
+Every differing byte is accounted for by the reordered contiguous newlib block
+`0x08002418..0x08002464` or by one of 22 `BL`/`B.W` call sites whose branch displacement targets
+one of those three functions; unexplained differing bytes: `0`. This independently confirms that
+the local/CI Boot binary hash difference is caused by newlib `memset`/`memcpy`/`memcmp` link order
+and the resulting branch offsets, not by a source, layout, or behavior change.
+
+### 8.7 Decision
+
+All P1-1 acceptance items pass. P1-1 may be marked `完成`, and P1 progress may advance to `2/6`.
+P1-4 handoff and P1-5 bootstrap remain outside this card and require their own later evidence.
