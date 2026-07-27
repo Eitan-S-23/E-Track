@@ -26,6 +26,7 @@ int boot_platform_qspi_read(uint32_t address, uint8_t *dst, size_t len);
 int boot_platform_flash_erase_4k(uint32_t address);
 int boot_platform_flash_program(uint32_t address, const uint8_t *src, size_t len);
 int boot_platform_flash_read(uint32_t address, uint8_t *dst, size_t len);
+int boot_platform_watchdog_start(void);
 
 void boot_platform_hold(void);
 

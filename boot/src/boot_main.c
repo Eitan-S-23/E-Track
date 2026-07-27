@@ -1,4 +1,5 @@
 #include "boot_fw_header.h"
+#include "boot_handoff.h"
 #include "boot_platform.h"
 #include "boot_recovery.h"
 #include "boot_state_machine.h"
@@ -30,6 +31,20 @@ static int eeprom_write(uint8_t address, const uint8_t *src, uint16_t len)
 {
     return boot_platform_eeprom_write(address, src, len);
 }
+
+#if defined(BOOT_HANDOFF_TEST_CLEAR_BCB)
+static int clear_test_bcb(void)
+{
+    uint8_t blank[BCB_SIZE];
+
+    memset(blank, 0xFF, sizeof(blank));
+    if (eeprom_write(BCB_A_ADDR, blank, sizeof(blank)) != 0)
+    {
+        return -1;
+    }
+    return eeprom_write(BCB_B_ADDR, blank, sizeof(blank));
+}
+#endif
 
 static int state_external_read(void *ctx, uint32_t address,
                                uint8_t *dst, size_t len)
@@ -121,6 +136,14 @@ int main(void)
         boot_platform_hold();
     }
 
+#if defined(BOOT_HANDOFF_TEST_CLEAR_BCB)
+    if (clear_test_bcb() != 0)
+    {
+        boot_platform_log("BOOT: test BCB clear failed\r\n");
+        boot_platform_hold();
+    }
+#endif
+
     memset(&state_io, 0, sizeof(state_io));
     state_io.bcb_hal = &bcb_hal;
     state_io.external_read = state_external_read;
@@ -135,29 +158,43 @@ int main(void)
         {
             boot_platform_hold();
         }
-        boot_platform_log("BOOT: recovery verified; P1-4 handoff not installed\r\n");
-        boot_platform_hold();
     }
-
-    g_boot_p1_qspi_result = boot_platform_qspi_init();
-    state_io.external_available = g_boot_p1_qspi_result == 0;
-    if (!state_io.external_available)
+    else
     {
-        boot_platform_log("BOOT: QSPI unavailable, external slot branch skipped\r\n");
-    }
-
-    g_boot_p1_bcb_result = bcb_arbiter(&bcb_hal, NULL);
-    g_boot_p1_state_status = boot_state_machine_run(&state_io, &outcome);
-    publish_outcome(&outcome);
-    if (outcome.action == BOOT_STATE_ACTION_PHYSICAL_RECOVERY)
-    {
-        if (receive_physical_recovery(&state_io, &outcome, 0) != 0)
+        g_boot_p1_qspi_result = boot_platform_qspi_init();
+        state_io.external_available = g_boot_p1_qspi_result == 0;
+        if (!state_io.external_available)
         {
-            boot_platform_hold();
+            boot_platform_log("BOOT: QSPI unavailable, external slot branch skipped\r\n");
+        }
+
+        g_boot_p1_bcb_result = bcb_arbiter(&bcb_hal, NULL);
+        g_boot_p1_state_status = boot_state_machine_run(&state_io, &outcome);
+        publish_outcome(&outcome);
+        if (outcome.action == BOOT_STATE_ACTION_PHYSICAL_RECOVERY)
+        {
+            if (receive_physical_recovery(&state_io, &outcome, 0) != 0)
+            {
+                boot_platform_hold();
+            }
         }
     }
 
-    boot_platform_log("BOOT: P1-4 handoff not installed; holding\r\n");
+    if (outcome.action == BOOT_STATE_ACTION_JUMP_APP)
+    {
+        if (outcome.bcb.state == BCB_STATE_TEST_BOOT &&
+            boot_platform_watchdog_start() != 0)
+        {
+            boot_platform_log("BOOT: TEST_BOOT watchdog start failed\r\n");
+            boot_platform_hold();
+        }
+#if defined(BOOT_HANDOFF_TEST_INJECT_PENDING)
+        boot_handoff_test_inject_pending();
+#endif
+        boot_handoff_to_app();
+    }
+
+    boot_platform_log("BOOT: no valid App handoff action\r\n");
     boot_platform_hold();
     return 0;
 }

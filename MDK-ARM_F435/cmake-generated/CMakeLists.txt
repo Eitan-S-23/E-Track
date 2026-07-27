@@ -475,6 +475,7 @@ set(BOOT_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_ymodem.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_recovery.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_main.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/platform/at32/boot_handoff_at32.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/platform/at32/boot_platform_at32.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/EEPROM/eeprom_bcb.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../cmake/startup_at32f435_437_gcc.S"
@@ -484,6 +485,7 @@ set(BOOT_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_usart.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c"
 )
 
 add_executable(X_Track ${PROJECT_SOURCES})
@@ -605,6 +607,24 @@ target_compile_definitions(X_Track_Boot PRIVATE
     "AT32F435RGT7"
     "OTA_TARGET_BOOT"
 )
+
+option(BOOT_HANDOFF_TEST_INJECT_PENDING
+       "Inject SysTick and one external pending IRQ before the Boot handoff"
+       OFF)
+if(BOOT_HANDOFF_TEST_INJECT_PENDING)
+    target_compile_definitions(X_Track_Boot PRIVATE
+        "BOOT_HANDOFF_TEST_INJECT_PENDING"
+    )
+endif()
+
+option(BOOT_HANDOFF_TEST_CLEAR_BCB
+       "Invalidate both BCB records before the handoff hardware test"
+       OFF)
+if(BOOT_HANDOFF_TEST_CLEAR_BCB)
+    target_compile_definitions(X_Track_Boot PRIVATE
+        "BOOT_HANDOFF_TEST_CLEAR_BCB"
+    )
+endif()
 
 target_compile_definitions(X_Track_App_GCC PRIVATE
     "OTA_TARGET_APP"

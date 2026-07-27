@@ -18,7 +18,8 @@ enum
     BOOT_QSPI_TIMEOUT_MS = 100,
     BOOT_FLASH_ERASE_UNIT_SIZE = 2048,
     BOOT_FLASH_COPY_BLOCK_SIZE = 4096,
-    BOOT_QSPI_READ_CHUNK = 32
+    BOOT_QSPI_READ_CHUNK = 32,
+    BOOT_TEST_WATCHDOG_RELOAD = 1561
 };
 
 static volatile uint32_t g_boot_millis;
@@ -662,6 +663,16 @@ int boot_platform_flash_read(uint32_t address, uint8_t *dst, size_t len)
         return -1;
     }
     memcpy(dst, (const void *)(uintptr_t)address, len);
+    return 0;
+}
+
+int boot_platform_watchdog_start(void)
+{
+    wdt_register_write_enable(TRUE);
+    wdt_divider_set(WDT_CLK_DIV_256);
+    wdt_reload_value_set(BOOT_TEST_WATCHDOG_RELOAD);
+    wdt_enable();
+    wdt_counter_reload();
     return 0;
 }
 

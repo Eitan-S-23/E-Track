@@ -284,6 +284,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/boot/validate_boot_artifact.py --build-dir "${BUILD_DIR}"
+          python3 tests/boot/validate_boot_handoff.py --build-dir "${BUILD_DIR}"
 
       - name: Report firmware artifacts
         id: artifacts

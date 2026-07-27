@@ -403,10 +403,10 @@
 - 证据: `docs/ota-exec-notes/P1-3-implementation-evidence-2026-07-28.md`;PC flash/EEPROM 仿真 `96/96 PASS`,含全部 apply/rollback 持久化边界、各断点重入、坏 candidate/backup、recovery fallback、try 耗尽及写后读回失败;fresh GCC Release Boot=`13656B`,无 RWX/红线依赖,既有 header `16/16`、Ymodem/ETSL `19/19`、BCB `27/27` 全绿。真机 STAGED→CONFIRMED 待 P1-5 链路完成后回填;本卡保持 `进行中`。
 
 #### P1-4 boot→App 交接跳转
-状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(依赖批次认领)
+状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(实现与静态/构建证据完成,待 P1-5 真机回填)
 - 目标: §4 字级契约:ICER/ICPR 全清+SCB->ICSR PENDSTCLR/PENDSVCLR、SysTick 停、PRIMASK/BASEPRI/FAULTMASK/CONTROL 交接值、VTOR=0x08010000→DSB+ISB→MSP→DSB+ISB→跳向量[1];不用 PRIMASK 屏蔽做跳转。
 - 验收: 注错(跳转前人为挂起 SysTick/外设中断 pending)后 App 正常运行;真机 boot↔App 往返稳定。
-- 证据: —
+- 证据: docs/ota-exec-notes/P1-4-implementation-evidence-2026-07-28.md;最终跳转前重新执行统一 fw_header/vector 校验,反汇编断言确认 8 组 ICER 后 8 组 ICPR、四掩码寄存器归零、VTOR/双 barrier/MSP/双 barrier/BX 顺序且无 cpsid;fresh GCC Release Boot=14208B,注错变体=14252B,既有 16/19/27 与 P1-3 96 项回归全绿。SysTick+外设 pending 注错及重复普通 reset 真机证据待 P1-5 部署链完成后回填;本卡保持进行中。
 
 #### P1-5 J-Link bootstrap 脚本与文档
 状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(依赖批次认领)

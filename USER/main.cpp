@@ -102,6 +102,9 @@ static void setup()
     SEGGER_RTT_Init();
     SEGGER_RTT_SetFlagsUpBuffer(0, SEGGER_RTT_MODE_NO_BLOCK_TRIM);
     SEGGER_RTT_printf(0, "\r\n========================================\r\n");
+#if defined(OTA_TARGET_APP)
+    ota_handoff_report();
+#endif
     PrintResetReason();
 #if defined(OTA_TARGET_APP) && defined(__GNUC__) && !defined(__CC_ARM)
     /* Match the converted GCC target: HAL display setup starts an LVGL animation. */
@@ -140,6 +143,7 @@ static void loop()
 int main(void)
 {
 #if defined(OTA_TARGET_APP)
+    ota_handoff_capture();
     ota_vtor_check();
 #endif
     Core_Init();
