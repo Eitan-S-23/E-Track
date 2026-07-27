@@ -1,7 +1,7 @@
 # P1-1 Boot skeleton implementation evidence (2026-07-27)
 
 > Implementer: Codex implementation session.
-> Status: local implementation evidence is complete; clean-checkout CI and independent acceptance are pending.
+> Status: implementation and clean-checkout CI evidence are complete; independent acceptance is pending.
 > The card remains `进行中`. This implementation session must not mark it `完成`.
 > P1-4/P1-5 are not implemented, so Boot intentionally holds and no normal reset/run handoff was attempted.
 
@@ -47,7 +47,7 @@ RAM used    5664 bytes / 360448 bytes (1.57%)
 `arm-none-eabi-readelf -lW` reports only an `R E` Flash LOAD segment and `RW` RAM LOAD
 segments. There is no RWX LOAD segment.
 
-Final SHA-256 values:
+Local Windows GNU 13.3.1 SHA-256 values:
 
 ```text
 X-Track-Boot.bin eff3edbe72f7799636d175963e54c3dd35be358419b1fa83cf9c4d9a0d065170
@@ -153,11 +153,41 @@ python -m py_compile: PASS
 git diff --check: exit 0 (only the repository's existing LF/CRLF warning)
 ```
 
+### 6.1 Clean-checkout CI
+
+Implementation commit `b4783931053d6995009ec2352b64566ba6ea9596` was pushed to
+`origin/main`. GitHub Actions `MCU Firmware Build` run `30283525908` completed
+`success` from a clean checkout:
+
+```text
+Build firmware:                         PASS
+P1_1_FW_HEADER_VECTORS:                 PASS cases=16
+P1_1_BOOT_PROTOCOLS:                    PASS checks=19
+P1_1_BOOT_ASSERTIONS:                   PASS bin=10452 vector=0x08000000/0x20c
+Upload firmware artifact:               PASS firmware-2.7-nightly.32 (4 files)
+Upload Boot artifact:                   PASS boot-2.7-nightly.32 (4 files)
+Register firmware to Cloudflare:        SKIPPED (push run; release gate unchanged)
+```
+
+The downloaded clean-checkout Boot artifact contains:
+
+```text
+X-Track-Boot.bin  10452 bytes  7989a7299b426eff0df644902d8d3bf1a3ba462b01f10ebdf6f6006a68821a1e
+X-Track-Boot.hex  29470 bytes  d1c16844ea7bcc206ced0325e8a99866f042d76a3be7f69fe76695867f12131e
+X-Track-Boot.elf  29632 bytes  673f1107d410c32edfdbfbfd5747ca6fcf19c768af8f81991a3f6f215245fb2f
+X-Track-Boot.map  91631 bytes  5b77f44908164400eb814f5440d0f89dbb9e0838eb8150b9f8ac8dc4466bab9e
+```
+
+The Windows and Linux GNU 13.3.1 Boot binaries have the same size and layout but
+different hashes. Binary/symbol comparison localized the difference to the linked
+newlib `memset`/`memcpy`/`memcmp` ordering and the resulting branch offsets; the
+source-controlled Boot code and all layout assertions are unchanged. The CI Linux
+artifact hashes above are the clean-checkout reference values.
+
 ## 7. Explicit exclusions and next evidence
 
 - P1-4 handoff and P1-5 bootstrap are not part of this card and are not implemented here.
 - Boot ends in `boot_platform_hold()` after inspection/recovery, so this implementation was not
   flashed or used for ordinary reset/run startup acceptance.
-- The clean-checkout GitHub Actions run ID/result must be appended after push.
 - A separate non-implementation session must independently review this evidence and the current
   source before changing P1-1 from `进行中` to `完成`.
