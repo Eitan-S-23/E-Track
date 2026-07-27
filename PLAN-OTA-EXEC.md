@@ -26,7 +26,7 @@
 |---|---|---|---|---|
 | PRE | 前置修正(复审产物) | 完成 | 4/4 | 无 |
 | P0 | 契约冻结+基建 | 完成 | 6/6 | P0-4/P0-5 独立真机复核通过；P1/P2 方案硬门槛重开 |
-| P1 | bootloader | 进行中 | 0/6 | P0 已 6/6,门槛已开;P1-2 实现与本地证据完成,待 CI/独立验收 |
+| P1 | bootloader | 进行中 | 0/6 | P0 已 6/6,门槛已开;P1-2 实现/CI 证据完成,待独立验收 |
 | P2 | MCU App 升级链 | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
 | P3 | BLE+Flutter | 待办 | 0/5 | P2-1/2 完成 |
 | P4 | CI/CF | 待办 | 0/4 | P0 完成(可与 P1/P2 并行) |
@@ -315,7 +315,7 @@
 - 证据: —
 
 #### P1-2 App 重定位双链接
-状态: 进行中 ｜ 认领: Codex(实现会话) / 2026-07-27 ｜ 更新: 2026-07-27(实现与本地 A1-A9d 取证完成,待 CI 与独立验收)
+状态: 进行中 ｜ 认领: Codex(实现会话) / 2026-07-27 ｜ 更新: 2026-07-27(实现、本地取证与 A9b/A9c 完成,待独立验收)
 - 目标: 建立 target 矩阵与受控 linker/scatter 源,使 GCC 与 AC5 的 App 使用**完全相同**的地址/VTOR/fw_header/RAM overlay 语义:
   - App(GCC 与 AC5 双侧) linker ORIGIN=0x08010000/LENGTH=0xF0000;`.fw_header` 段 @ORIGIN+0x400(96B,KEEP/FIXED)+ `ASSERT(SIZEOF(.isr_vector)<=0x400)`;overlay 边界按契约 §10 双侧一致;
   - `system_at32f435_437.c` 的 `VECT_TAB_OFFSET` 由**按 target 的编译期宏**选择(Boot/Legacy=0,App=0x10000),禁止全局硬改(该文件被 GCC/AC5 共用);
@@ -375,7 +375,8 @@
   - 实现证据: `docs/ota-exec-notes/P1-2-implementation-evidence-2026-07-27.md`
     (双工具链 map/负例/finalize/产物隔离、GCC 受限调试启动 VTOR 正负路径、legacy 回刷、A9 完整脚本;明确 A10 不属本卡)
   - 本地结果:GCC App Flash/RAM/overlay=`561144/286240/163840B`;AC5 App `Code=263620 RO=288408 RW=1244 ZI=453400`;legacy `Code=263496 RO=288312 RW=1244 ZI=453392`;双向构建产物哈希不互相改写
-  - 待办:A9b 干净 checkout push CI、A9c `publish=true` 门闩硬失败实跑、非实现会话按 §0.3 独立验收;三者完成前保持 `进行中`,不得启动 P1-1
+  - 提交/CI:`b41cbb2`(实现)+`f854a80`(证据/看板);A9b push run `30254991608` success,CI bin=`561064B`/SHA256=`f15aacb8...693fb5`,布局断言 PASS;A9c dispatch run `30255464620` 按预期在 boot-chain 首步硬失败,后续 finalize/Release/R2/CF 全跳过
+  - 待办:非实现会话按 §0.3 独立验收;通过并置 `完成` 前不得启动 P1-1
 
 #### P1-3 搬运/回滚/试启动状态机
 状态: 待办 ｜ 认领: — ｜ 更新: —
@@ -604,3 +605,4 @@
 - 2026-07-26 ｜ 主会话(Claude,提交收口) ｜ P0-4/P0-5/看板 ｜ 用户授权收口;审查报告 `docs/ota-exec-notes/P0-final-review-2026-07-26.md`(91 分/通过);还原 30+ 个仅 CRLF 触碰文件后按三步小步提交(1398d5c P0-4 整改 / 7e108d2 P0-5 整改 / 270e389 看板+证据)并 push;MCU Firmware Build run 30199252471/30199252465 干净 checkout **success**(Register CF skipped 符合 §6.1);P0 6/6 收口完成,P1/P2 门槛开
 - 2026-07-27 ｜ 主会话(Codex,方案二次复核) ｜ P1-2(v3 冻结收口) ｜ 不写实现;修正 CI 门闩为 job 首步硬失败、实施顺序统一 13 步、完成门槛统一 A1-A9d(A10 排除)、A9 扩为 16 个受控路径+uvprojx/jlink/etu 结构化校验、`.ota_vtor_noinit` 冻结为 GCC NOLOAD/AC5 UNINIT 并要求 map 段/符号证据;待提交推送后才进入实现。
 - 2026-07-27 ｜ Codex(实现会话) ｜ P1-2(实现与本地取证) ｜ 完成五 target 受控布局、GCC/AC5 App 隔离产物、VTOR fail-closed、自定义 linker/scatter、CI App 目标与发布门闩;双工具链构建/map/0x404 向量负例/finalize/双向隔离通过;GCC 受限调试启动匹配路径稳定、注错路径停在 WFI 并写对标记,随后回刷 legacy;证据 `docs/ota-exec-notes/P1-2-implementation-evidence-2026-07-27.md`;卡保持进行中,待 A9b/A9c 与非实现会话验收。
+- 2026-07-27 ｜ Codex(实现会话,CI 收口) ｜ P1-2(A9b/A9c) ｜ 实现/证据提交 `b41cbb2`/`f854a80` 已推 main;push run `30254991608` clean-checkout success,App-GCC bin 561064B/SHA256 `f15aacb8...693fb5`,A1/A3/A4/A5 自动断言 PASS;dispatch publish=true run `30255464620` 构建成功后在 `OTA_BOOT_CHAIN_READY` 首步按预期硬失败,未执行 finalize/Release/R2/CF;卡继续 `进行中`,只待非实现会话独立验收。

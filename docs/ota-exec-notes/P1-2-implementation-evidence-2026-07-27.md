@@ -1,7 +1,7 @@
 # P1-2 App relocation implementation evidence (2026-07-27)
 
 > Implementer: Codex implementation session.
-> Status: local implementation and evidence collection complete; A9b/A9c CI runs and independent acceptance are still pending.
+> Status: implementation, local evidence, A9b, and A9c are complete; independent acceptance is still pending.
 > This card remains `进行中`. It must not be marked `完成` by this implementation session.
 > A10 is explicitly excluded: all App runtime checks below are restricted debugger starts, not the normal boot chain.
 
@@ -268,10 +268,18 @@ The only additional output was Git's existing LF-to-CRLF working-copy warning fo
 - Local Ninja in this managed sandbox can hang before launching its first job, including a linker-only custom target. Exact generated compile/link commands succeed. Clean-checkout GitHub Actions is the A9b authority.
 - GCC link succeeds but emits the existing newlib syscall and short-wchar compatibility warnings; errors are zero. These warnings are not hidden as success detail.
 
-## 8. Pending CI and independent acceptance
+## 8. CI evidence and pending independent acceptance
 
-- A9b clean-checkout push run: pending implementation commit/push.
-- A9c `workflow_dispatch publish=true` with `OTA_BOOT_CHAIN_READY` unset: pending implementation commit/push.
-- Implementation commit: pending.
+- Commits: implementation `b41cbb2`, evidence/board `f854a80`.
+- A9b clean-checkout push run `30254991608`: **success** at `f854a80`. The build produced
+  `X-Track-App-GCC.bin` at 561064 bytes with SHA-256
+  `f15aacb821c56da4bf6c53eaaa8ee0e142cab823b88663c209b7a17517693fb5`.
+- A9b layout assertion:
+  `OTA_LAYOUT_ASSERTIONS=PASS flash=0x08010000/0xf0000 vector=0x08010000/0x20c header=0x08010400/96`.
+  The job completed with the repository's existing GCC warnings and zero errors; artifact upload succeeded.
+- A9c `workflow_dispatch publish=true` run `30255464620`: expected **failure** with
+  `OTA_BOOT_CHAIN_READY` unset. The App build passed, then `register-cloudflare` failed in its first step with
+  `App starts at the OTA App origin and cannot boot from reset until P1-5 bootstrap and P4-1 release rehearsal pass`.
+  Checkout, finalize, GitHub Release, R2 upload, and Cloudflare registration were all skipped.
 - Independent non-implementation acceptance A1-A9d: pending.
 - P1-2 remains `进行中`; P1-1 must not start until independent acceptance passes and the card is marked `完成`.
