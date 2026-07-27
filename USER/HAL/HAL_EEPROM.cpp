@@ -1,8 +1,23 @@
 #include "HAL.h"
 #include "EEPROM/EEPROM.h"
 #include "EEPROM/eeprom_bcb.h"
+#include "OTA/ota_confirm.h"
 
 static EEPROM at24c;
+
+extern "C" {
+    static int bcb_app_write(uint8_t reg, const uint8_t* buf, uint16_t len)
+    {
+        return HAL::EEPROM_WriteBufferSafe(reg, buf, len) ? 0 : -1;
+    }
+
+    static int bcb_app_read(uint8_t reg, uint8_t* buf, uint16_t len)
+    {
+        return HAL::EEPROM_ReadBufferSafe(reg, buf, len) ? 0 : -1;
+    }
+}
+
+static const bcb_hal_t bcb_app_hal = { bcb_app_write, bcb_app_read };
 
 bool HAL::EEPROM_Init()
 {
@@ -56,6 +71,28 @@ uint8_t HAL::EEPROM_Check(void)
     return at24c.EnsureInitMagic() ? 0 : 1;
 }
 
+bool HAL::OTA_ConfirmBoot()
+{
+    bcb_t confirmed;
+    int rc = ota_confirm_test_boot(&bcb_app_hal, &confirmed);
+
+    if(rc == OTA_CONFIRM_COMMITTED)
+    {
+        SEGGER_RTT_printf(0, "OTA: TEST_BOOT confirmed vcode=%lu\r\n",
+                          (unsigned long)confirmed.cur_vcode);
+        return true;
+    }
+    if(rc == OTA_CONFIRM_ALREADY_CONFIRMED)
+    {
+        SEGGER_RTT_printf(0, "OTA: BCB already CONFIRMED vcode=%lu\r\n",
+                          (unsigned long)confirmed.cur_vcode);
+        return true;
+    }
+
+    SEGGER_RTT_printf(0, "OTA: confirm deferred rc=%d\r\n", rc);
+    return false;
+}
+
 #if CONFIG_EEPROM_BCB_STRESS
 // P0-4: OTA BCB 真机压测（契约 §3.2/§3.3/§3.4）。
 // CONFIG_EEPROM_BCB_STRESS=1 时由 HAL_Init 末尾调用；用 BCB-A/B 两块区
@@ -65,29 +102,16 @@ uint8_t HAL::EEPROM_Check(void)
 //  RTTCMD、LiveMap stat 行的项目惯例一致）。
 // 内嵌于本文件（而非独立编译单元）以复用 HAL_EEPROM 已在 Keil 工程内的
 // --cpp11 编译配置，避免新增页面组的 --cpp11 坑与 build_f435 -NewSources 同名 .o 冲突。
-extern "C" {
-    static int bcb_app_write(uint8_t reg, const uint8_t* buf, uint16_t len)
-    {
-        return HAL::EEPROM_WriteBufferSafe(reg, buf, len) ? 0 : -1;
-    }
-    static int bcb_app_read(uint8_t reg, uint8_t* buf, uint16_t len)
-    {
-        return HAL::EEPROM_ReadBufferSafe(reg, buf, len) ? 0 : -1;
-    }
-}
-
 void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
 {
-    static const bcb_hal_t hal = { bcb_app_write, bcb_app_read };
-
     SEGGER_RTT_printf(0, "BCBSTRESS: start %lu iters\r\n", (unsigned long)iterations);
 
     // 先仲裁出当前活动块（首次通常双坏→NONE，则写初始 IDLE bootstrap）。
-    bcb_arbiter_result_t active = bcb_arbiter(&hal, NULL);
+    bcb_arbiter_result_t active = bcb_arbiter(&bcb_app_hal, NULL);
     bcb_t cur;
     if(active == BCB_ARBITER_A || active == BCB_ARBITER_B)
     {
-        bcb_arbiter_result_t confirmed = bcb_arbiter(&hal, &cur);
+        bcb_arbiter_result_t confirmed = bcb_arbiter(&bcb_app_hal, &cur);
         if(confirmed != active)
         {
             SEGGER_RTT_printf(0, "BCBSTRESS: initial arbiter read FAIL%c%c", 13, 10);
@@ -97,12 +121,12 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
     else
     {
         bcb_make_idle(&cur, 20700u);
-        if(bcb_commit(&hal, BCB_ARBITER_NONE, &cur) != BCB_COMMIT_OK)
+        if(bcb_commit(&bcb_app_hal, BCB_ARBITER_NONE, &cur) != BCB_COMMIT_OK)
         {
             SEGGER_RTT_printf(0, "BCBSTRESS: bootstrap commit FAIL\r\n");
             return;
         }
-        active = bcb_arbiter(&hal, &cur);
+        active = bcb_arbiter(&bcb_app_hal, &cur);
         if(active != BCB_ARBITER_A && active != BCB_ARBITER_B)
         {
             SEGGER_RTT_printf(0, "BCBSTRESS: bootstrap arbiter NONE\r\n");
@@ -124,13 +148,13 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
         next.copy_phase = (i & 1) ? BCB_COPY_APPLY : BCB_COPY_NONE;
         next.resume_block = (uint16_t)(i & 0x1F);
 
-        int rc = bcb_commit(&hal, active, &next);
+        int rc = bcb_commit(&bcb_app_hal, active, &next);
         if(rc != BCB_COMMIT_OK)
         {
             fail++;
             SEGGER_RTT_printf(0, "BCBSTRESS: i=%lu commit rc=%d\r\n",
                               (unsigned long)i, rc);
-            active = bcb_arbiter(&hal, &cur);
+            active = bcb_arbiter(&bcb_app_hal, &cur);
             if(active != BCB_ARBITER_A && active != BCB_ARBITER_B)
             {
                 SEGGER_RTT_printf(0, "BCBSTRESS: arbiter lost, abort\r\n");
@@ -139,7 +163,7 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
             continue;
         }
 
-        active = bcb_arbiter(&hal, &cur);
+        active = bcb_arbiter(&bcb_app_hal, &cur);
         if(active != BCB_ARBITER_A && active != BCB_ARBITER_B)
         {
             fail++;
@@ -158,7 +182,7 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
 
     if(active == BCB_ARBITER_A || active == BCB_ARBITER_B)
     {
-        int restore_rc = bcb_commit(&hal, active, &baseline);
+        int restore_rc = bcb_commit(&bcb_app_hal, active, &baseline);
         if(restore_rc != BCB_COMMIT_OK)
         {
             fail++;
@@ -166,7 +190,7 @@ void HAL::EEPROM_BCBStress_Run(uint32_t iterations)
         }
         else
         {
-            bcb_arbiter_result_t restored = bcb_arbiter(&hal, &cur);
+            bcb_arbiter_result_t restored = bcb_arbiter(&bcb_app_hal, &cur);
             if((restored != BCB_ARBITER_A && restored != BCB_ARBITER_B) ||
                cur.state != baseline.state ||
                cur.copy_phase != baseline.copy_phase ||

@@ -397,19 +397,19 @@
     结论:通过;P1-2 置 `完成`,P1 进度 1/6,P1-1 可启动。
 
 #### P1-3 搬运/回滚/试启动状态机
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(依赖批次认领)
 - 目标: §4 全部状态转移:STAGED→APPLYING(copy_phase=1,resume_block=0)逐 4KB 块"擦→写→读回→resume_block++ 持久化",重入续搬绝不整区擦;TEST_BOOT try=3 先持久化 try-- 再跳;三连失败→ROLLBACK(首转原子写 copy_phase=2+resume_block=0,R4-①)同法续搬,完成后同样过 fw_header 全项校验;backup 无效→recovery 槽→恢复模式;STAGED→CONFIRMED 期间 backup 槽锁定。
 - 验收: 状态机单测(可 PC 侧仿真 flash 层)覆盖每个转移与每个断点重入;真机走通 STAGED→CONFIRMED。
-- 证据: —
+- 证据: `docs/ota-exec-notes/P1-3-implementation-evidence-2026-07-28.md`;PC flash/EEPROM 仿真 `96/96 PASS`,含全部 apply/rollback 持久化边界、各断点重入、坏 candidate/backup、recovery fallback、try 耗尽及写后读回失败;fresh GCC Release Boot=`13656B`,无 RWX/红线依赖,既有 header `16/16`、Ymodem/ETSL `19/19`、BCB `27/27` 全绿。真机 STAGED→CONFIRMED 待 P1-5 链路完成后回填;本卡保持 `进行中`。
 
 #### P1-4 boot→App 交接跳转
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(依赖批次认领)
 - 目标: §4 字级契约:ICER/ICPR 全清+SCB->ICSR PENDSTCLR/PENDSVCLR、SysTick 停、PRIMASK/BASEPRI/FAULTMASK/CONTROL 交接值、VTOR=0x08010000→DSB+ISB→MSP→DSB+ISB→跳向量[1];不用 PRIMASK 屏蔽做跳转。
 - 验收: 注错(跳转前人为挂起 SysTick/外设中断 pending)后 App 正常运行;真机 boot↔App 往返稳定。
 - 证据: —
 
 #### P1-5 J-Link bootstrap 脚本与文档
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(依赖批次认领)
 - 目标: §7 一次性部署脚本:烧 boot@0x08000000、重定位 app@0x08010000、boot 首启 BCB 自动初始化 CONFIRMED(cur_vcode 读自 fw_header)、(可选)写 recovery 槽;recovery 资产 J-Link 直刷脚本须剥离尾部 8B(R4-⑤)。沿用 AGENTS.md J-Link 流程(设备全名 AT32F435RGT7、SWD 1000kHz)。
 - 范围: `tools/`(脚本)+ `docs/`(bootstrap 手册)。
 - 验收: 真机从纯 AC5 旧布局一键迁移到 boot+app 新布局并正常开机。

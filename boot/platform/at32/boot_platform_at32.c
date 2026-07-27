@@ -653,6 +653,18 @@ int boot_platform_flash_program(uint32_t address, const uint8_t *src, size_t len
     return memcmp((const void *)(uintptr_t)address, src, len) == 0 ? 0 : -1;
 }
 
+int boot_platform_flash_read(uint32_t address, uint8_t *dst, size_t len)
+{
+    if ((dst == NULL && len != 0u) || address < OTA_APP_ORIGIN ||
+        address > OTA_APP_ORIGIN + OTA_APP_LENGTH ||
+        len > OTA_APP_ORIGIN + OTA_APP_LENGTH - address)
+    {
+        return -1;
+    }
+    memcpy(dst, (const void *)(uintptr_t)address, len);
+    return 0;
+}
+
 void boot_platform_hold(void)
 {
     for (;;)

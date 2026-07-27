@@ -78,6 +78,8 @@ uint8_t EEPROM_Check();
 /* OTA BCB 安全写（P0-4，契约 §3）：返回 true 仅当逐页写+ACK polling+读回比对全过。 */
 bool EEPROM_WriteBufferSafe(uint8_t reg, const uint8_t* buf, uint16_t len);
 bool EEPROM_ReadBufferSafe(uint8_t reg, uint8_t* buf, uint16_t len);
+/* P1-3: after 30 seconds of healthy App runtime, commit TEST_BOOT -> CONFIRMED. */
+bool OTA_ConfirmBoot();
 /* P0-4 真机压测：CONFIG_EEPROM_BCB_STRESS=1 时在 HAL_Init 内调用，RTT 输出统计。 */
 void EEPROM_BCBStress_Run(uint32_t iterations);
 

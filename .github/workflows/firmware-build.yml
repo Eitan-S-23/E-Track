@@ -166,6 +166,7 @@ jobs:
           set -euo pipefail
           python3 tests/boot/test_fw_header_vectors.py
           python3 tests/boot/test_boot_protocols.py
+          python3 tests/boot/test_boot_state_machine.py
 
       - name: Validate OTA App layout
         shell: bash

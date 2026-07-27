@@ -28,6 +28,34 @@
 
 #if defined(OTA_TARGET_APP)
 #include "OTA/ota_vtor_check.h"
+
+enum
+{
+    OTA_CONFIRM_DELAY_MS = 30000,
+    OTA_CONFIRM_RETRY_MS = 1000
+};
+
+static uint32_t g_ota_confirm_start_ms;
+static uint32_t g_ota_confirm_last_attempt_ms;
+static bool g_ota_confirm_done;
+
+static void OTA_ConfirmUpdate()
+{
+    uint32_t now;
+
+    if(g_ota_confirm_done)
+    {
+        return;
+    }
+    now = millis();
+    if((uint32_t)(now - g_ota_confirm_start_ms) < OTA_CONFIRM_DELAY_MS ||
+       (uint32_t)(now - g_ota_confirm_last_attempt_ms) < OTA_CONFIRM_RETRY_MS)
+    {
+        return;
+    }
+    g_ota_confirm_last_attempt_ms = now;
+    g_ota_confirm_done = HAL::OTA_ConfirmBoot();
+}
 #endif
 
 
@@ -96,6 +124,9 @@ static void loop()
 {
     HAL::HAL_Update();
     lv_task_handler();
+#if defined(OTA_TARGET_APP)
+    OTA_ConfirmUpdate();
+#endif
     __wfi();
 }
 
@@ -113,5 +144,10 @@ int main(void)
 #endif
     Core_Init();
     setup();
+#if defined(OTA_TARGET_APP)
+    g_ota_confirm_start_ms = millis();
+    g_ota_confirm_last_attempt_ms = g_ota_confirm_start_ms;
+    g_ota_confirm_done = false;
+#endif
     for(;;)loop();
 }
