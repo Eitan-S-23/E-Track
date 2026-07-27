@@ -32,10 +32,18 @@
 
 #include "at32f435_437.h"
 
+#if defined(OTA_TARGET_APP)
+#include "OTA/ota_layout.h"
+#endif
+
 /** @addtogroup AT32F435_437_system_private_defines
   * @{
   */
-#define VECT_TAB_OFFSET                  0x0 /*!< vector table base offset field. this value must be a multiple of 0x400. */
+#if defined(OTA_TARGET_APP)
+#define VECT_TAB_OFFSET                  OTA_APP_VECTOR_OFFSET
+#else
+#define VECT_TAB_OFFSET                  0x0
+#endif
 /**
   * @}
   */

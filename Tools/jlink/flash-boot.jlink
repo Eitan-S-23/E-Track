@@ -1,0 +1,6 @@
+// Address source: Libraries/OTA/ota_layout.h (OTA_BOOT_ORIGIN).
+h
+loadfile MDK-ARM_F435/cmake-generated/build-gcc/boot/X-Track-Boot.bin 0x08000000
+r
+g
+qc

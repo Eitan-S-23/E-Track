@@ -21,7 +21,10 @@ Simulator/LVGL.Simulator/.SystemSaveBackup.json
 # Keil MDK build products and user-local settings
 MDK-ARM_*/Objects/
 MDK-ARM_*/Listings/
+MDK-ARM_*/Objects-*/
+MDK-ARM_*/Listings-*/
 MDK-ARM_*/Track.bin
+MDK-ARM_*/Track-*.bin
 MDK-ARM_*/JLinkLog.txt
 MDK-ARM_*/JLinkSettings.ini
 MDK-ARM_*/EventRecorderStub.scvd

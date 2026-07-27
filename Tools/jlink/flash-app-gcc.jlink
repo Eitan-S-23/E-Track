@@ -1,0 +1,6 @@
+// Address source: Libraries/OTA/ota_layout.h (OTA_APP_ORIGIN).
+h
+loadfile MDK-ARM_F435/cmake-generated/build-gcc/app-gcc/X-Track-App-GCC.bin 0x08010000
+r
+g
+qc

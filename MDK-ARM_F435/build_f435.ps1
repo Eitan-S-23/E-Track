@@ -1,5 +1,5 @@
 <#
-  build_f435.ps1 - AT32F435 (X-Track) firmware manual incremental build (AC5)
+  build_f435.ps1 - AT32F435 firmware manual incremental build (AC5)
 
   Why: when uVision (UV4.exe) runs as a GUI single instance, "UV4 -b" is
   unreliable (may use the stale in-memory project and skip changed files).
@@ -18,6 +18,7 @@
       -Sources '..\USER\App\Pages\Dialplate\DialplateView.cpp','..\USER\App\Pages\Dialplate\Dialplate.cpp'
 
   Params:
+    -Target        Keil target name. Defaults to X-Track.
     -Sources       Sources to recompile that already exist in the dep file
                    (use the EXACT path string from the dep; note its casing).
     -NewSources    Files not yet in the dep: each item is 'src|template'.
@@ -43,6 +44,7 @@
     - Abort on any non-zero exit code; print Program Size and output timestamps.
 #>
 param(
+  [string]   $Target = 'X-Track',
   [string[]] $Sources = @(),
   [string[]] $NewSources = @(),
   [string[]] $ExtraLinkObjs = @(),
@@ -66,10 +68,53 @@ $armcc      = Join-Path $binDir 'armcc.exe'
 $armasm     = Join-Path $binDir 'armasm.exe'
 $armlink    = Join-Path $binDir 'armlink.exe'
 $fromelf    = Join-Path $binDir 'fromelf.exe'
-$dep        = Join-Path $projectDir 'Objects\proj_X-Track.dep'
-$lnp        = Join-Path $projectDir 'Objects\X-Track.lnp'
 $uvprojx    = Join-Path $projectDir 'proj.uvprojx'
 $repoRoot   = Split-Path -Parent $projectDir
+
+function Convert-ProjectPath([string]$path) {
+  $result = $path.Trim().Replace('/', '\')
+  while ($result.StartsWith('.\')) { $result = $result.Substring(2) }
+  return $result.TrimEnd('\')
+}
+
+if (-not (Test-Path -LiteralPath $uvprojx)) { throw ("project not found: {0}" -f $uvprojx) }
+$projectXml = [xml](Get-Content -LiteralPath $uvprojx -Raw)
+$targetNodes = @($projectXml.Project.Targets.Target | Where-Object { $_.TargetName -eq $Target })
+if ($targetNodes.Count -ne 1) { throw ("Keil target not found or duplicated: {0}" -f $Target) }
+$targetNode = $targetNodes[0]
+$targetCommon = $targetNode.TargetOption.TargetCommonOption
+$objectDirRel = Convert-ProjectPath $targetCommon.OutputDirectory
+$listingDirRel = Convert-ProjectPath $targetCommon.ListingPath
+$outputName = [string]$targetCommon.OutputName
+if (-not $objectDirRel -or -not $listingDirRel -or -not $outputName) {
+  throw ("target paths/output name incomplete: {0}" -f $Target)
+}
+
+$depRel = Join-Path $objectDirRel ("proj_{0}.dep" -f $Target)
+$lnpRel = Join-Path $objectDirRel ("{0}.lnp" -f $outputName)
+$axfRel = Join-Path $objectDirRel ("{0}.axf" -f $outputName)
+$hexRel = Join-Path $objectDirRel ("{0}.hex" -f $outputName)
+$mapRel = Join-Path $listingDirRel ("{0}.map" -f $outputName)
+$afterMake = [string]$targetCommon.AfterMake.UserProg1Name
+$binMatch = [regex]::Match($afterMake, '--bin\s+-o\s+"(?<path>[^"]+)"')
+if (-not $binMatch.Success) { throw ("target bin output not found in AfterMake: {0}" -f $Target) }
+$binRel = Convert-ProjectPath $binMatch.Groups['path'].Value
+
+$dep = Join-Path $projectDir $depRel
+$lnp = Join-Path $projectDir $lnpRel
+$axf = Join-Path $projectDir $axfRel
+$hex = Join-Path $projectDir $hexRel
+$map = Join-Path $projectDir $mapRel
+$bin = Join-Path $projectDir $binRel
+$lnpArg = '.\' + $lnpRel
+$axfArg = '.\' + $axfRel
+$hexArg = '.\' + $hexRel
+
+foreach ($required in @($dep, $lnp)) {
+  if (-not (Test-Path -LiteralPath $required)) {
+    throw ("Keil generated file missing for target {0}: {1}. Run UV4 -b first." -f $Target, $required)
+  }
+}
 
 function Split-KeilArgs([string]$s) {
   $tokens = New-Object System.Collections.Generic.List[string]
@@ -100,7 +145,7 @@ function Get-DepCmd([string]$src) {
 
 function Get-ObjPath([string]$src) {
   $base = [IO.Path]::GetFileNameWithoutExtension($src).ToLowerInvariant()
-  return (Join-Path $projectDir ("Objects\{0}.o" -f $base))
+  return (Join-Path (Join-Path $projectDir $objectDirRel) ("{0}.o" -f $base))
 }
 
 function Compile-One([string]$src, [string]$cmd) {
@@ -121,7 +166,7 @@ function Add-Unique([string[]]$items, [string]$item) {
 
 function Get-NewSourceObject([string]$src) {
   $base = [IO.Path]::GetFileNameWithoutExtension($src)
-  return (".\Objects\{0}.o" -f $base)
+  return ('.\' + (Join-Path $objectDirRel ("{0}.o" -f $base)))
 }
 
 function Get-ProjectSourceTemplate([string]$src) {
@@ -182,11 +227,11 @@ function Find-FontTemplate([string]$src) {
   return $null
 }
 
-if (Test-Path -LiteralPath $uvprojx) {
-  $projectText = Get-Content -LiteralPath $uvprojx -Raw
+if ($targetNode) {
   $projectSources = @(
-    [regex]::Matches($projectText, '<FilePath>(?<path>[^<]+\.(?:c|cpp|s))</FilePath>', 'IgnoreCase') |
-      ForEach-Object { $_.Groups['path'].Value } |
+    $targetNode.SelectNodes('./Groups/Group/Files/File/FilePath') |
+      ForEach-Object { $_.InnerText } |
+      Where-Object { $_ -match '\.(?:c|cpp|s)$' } |
       Where-Object { $_ -notmatch '\\lvgl\\(demos|examples|tests)\\' } |
       Sort-Object -Unique
   )
@@ -271,7 +316,7 @@ if ($AutoFonts) {
   $addedCompile = 0
   foreach ($name in $fontNames) {
     $src = ("..\USER\App\Resource\Font\font_{0}.c" -f $name)
-    $obj = (".\Objects\font_{0}.o" -f $name)
+    $obj = Get-NewSourceObject $src
     $absSrc = [IO.Path]::GetFullPath((Join-Path $projectDir $src))
     if (-not (Test-Path -LiteralPath $absSrc)) { throw ("imported font source not found: {0}" -f $src) }
 
@@ -313,26 +358,24 @@ foreach ($pair in $NewSources) {
   Compile-One $src $cmd
 }
 
-# 3) Link (reuse all inputs/options from X-Track.lnp; append objs not in lnp)
-Write-Host "[LINK] armlink --via X-Track.lnp" -ForegroundColor Cyan
+# 3) Link (reuse all inputs/options from the selected target lnp)
+Write-Host ("[LINK] armlink --via {0}" -f $lnpRel) -ForegroundColor Cyan
 Push-Location $projectDir
 try {
-  $linkArgs = @('--via', '.\Objects\X-Track.lnp') + $ExtraLinkObjs
+  $linkArgs = @('--via', $lnpArg) + $ExtraLinkObjs
   & $armlink @linkArgs
   if ($LASTEXITCODE -ne 0) { throw ("armlink failed: {0}" -f $LASTEXITCODE) }
 
-  & $fromelf --i32combined --output '.\Objects\X-Track.hex' '.\Objects\X-Track.axf'
+  & $fromelf --i32combined --output $hexArg $axfArg
   if ($LASTEXITCODE -ne 0) { throw ("fromelf hex failed: {0}" -f $LASTEXITCODE) }
 
-  & $fromelf --bin -o 'Track.bin' '.\Objects\X-Track.axf'
+  & $fromelf --bin -o $binRel $axfArg
   if ($LASTEXITCODE -ne 0) { throw ("fromelf bin failed: {0}" -f $LASTEXITCODE) }
 } finally { Pop-Location }
 
 # 4) Report output timestamps
 Write-Host "`n[OUTPUTS]" -ForegroundColor Green
-Get-Item (Join-Path $projectDir 'Objects\X-Track.axf'),
-         (Join-Path $projectDir 'Objects\X-Track.hex'),
-         (Join-Path $projectDir 'Track.bin') |
+Get-Item $axf, $hex, $bin, $map |
   Select-Object Name, Length, @{N='LastWriteTime';E={$_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')}} |
   Format-Table -AutoSize
-Write-Host "[OK] build complete (armlink/fromelf exit code 0)" -ForegroundColor Green
+Write-Host ("[OK] target {0} build complete (armlink/fromelf exit code 0)" -f $Target) -ForegroundColor Green

@@ -1,0 +1,41 @@
+#! armcc -E
+#include "../../Libraries/OTA/ota_layout.h"
+
+LR_IROM1 OTA_APP_ORIGIN OTA_APP_LENGTH
+{
+  ER_VECTORS OTA_APP_ORIGIN FIXED OTA_VECTOR_MAX
+  {
+    *.o (RESET, +First)
+  }
+
+  ER_FW_HEADER (OTA_APP_ORIGIN + OTA_FW_HEADER_OFFSET) FIXED OTA_FW_HEADER_SIZE
+  {
+    * (.fw_header)
+  }
+
+  ER_IROM1 (OTA_APP_ORIGIN + OTA_FW_HEADER_OFFSET + OTA_FW_HEADER_SIZE) FIXED
+      (OTA_APP_LENGTH - OTA_FW_HEADER_OFFSET - OTA_FW_HEADER_SIZE)
+  {
+    *(InRoot$$Sections)
+    .ANY (+RO)
+    .ANY (+XO)
+  }
+
+  RW_IRAM1 OTA_RAM_ORIGIN (OTA_RAM_LENGTH - OTA_VTOR_EVIDENCE_SIZE)
+  {
+    *.o (RAMCODE)
+    lv_tlsf.o
+    font_bahnschrift_13.o
+    .ANY (+RW +ZI)
+  }
+
+  RW_OTA_VTOR_NOINIT +0 UNINIT OTA_VTOR_EVIDENCE_SIZE
+  {
+    * (.ota_vtor_noinit)
+  }
+
+  RW_IRAM2 OTA_OVERLAY_ORIGIN UNINIT OTA_OVERLAY_LENGTH
+  {
+    * (.sram_ext)
+  }
+}

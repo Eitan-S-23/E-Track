@@ -24,6 +24,47 @@ set(ELF_FILE "X-Track.elf")
 set(HEX_FILE "X-Track.hex")
 set(BIN_FILE "X-Track.bin")
 set(ARTIFACT_STAMP "X-Track.artifacts.stamp")
+
+# OTA App artifacts are isolated from the generated legacy target.
+set(OTA_LAYOUT_HEADER "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_layout.h")
+set(APP_LINKER_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../cmake/linker/x-track-app-gcc.ld.S")
+set(APP_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/app-gcc")
+set(APP_LINKER_SCRIPT "${APP_OUTPUT_DIR}/x-track-app-gcc.ld")
+set(APP_MAP_FILE "${APP_OUTPUT_DIR}/X-Track-App-GCC.map")
+set(APP_HEX_FILE "${APP_OUTPUT_DIR}/X-Track-App-GCC.hex")
+set(APP_BIN_FILE "${APP_OUTPUT_DIR}/X-Track-App-GCC.bin")
+set(APP_ARTIFACT_STAMP "${APP_OUTPUT_DIR}/X-Track-App-GCC.artifacts.stamp")
+set(BOOT_LINKER_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../cmake/linker/x-track-boot-gcc.ld.S")
+set(BOOT_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/boot")
+set(BOOT_LINKER_SCRIPT "${BOOT_OUTPUT_DIR}/x-track-boot-gcc.ld")
+
+add_custom_command(
+    OUTPUT "${APP_LINKER_SCRIPT}"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${APP_OUTPUT_DIR}"
+    COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
+        "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
+        "${APP_LINKER_SOURCE}"
+        -o "${APP_LINKER_SCRIPT}"
+    DEPENDS "${APP_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
+    COMMENT "Preprocessing controlled OTA App linker script"
+    VERBATIM
+)
+add_custom_target(X_Track_App_GCC_linker_script DEPENDS "${APP_LINKER_SCRIPT}")
+
+# P1-1 will attach bootloader sources to this controlled linker-script target.
+add_custom_command(
+    OUTPUT "${BOOT_LINKER_SCRIPT}"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${BOOT_OUTPUT_DIR}"
+    COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
+        "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
+        "${BOOT_LINKER_SOURCE}"
+        -o "${BOOT_LINKER_SCRIPT}"
+    DEPENDS "${BOOT_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
+    COMMENT "Preprocessing controlled OTA Boot linker script"
+    VERBATIM
+)
+add_custom_target(X_Track_Boot DEPENDS "${BOOT_LINKER_SCRIPT}")
+
 set(KEIL_OPTIMIZATION_FLAG "-Os")
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
     set(KEIL_OPTIMIZATION_FLAG "-Oz")
@@ -411,11 +452,35 @@ set(PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/cmake/gcc_runtime_compat.c"
 )
 
+set(APP_PROJECT_SOURCES ${PROJECT_SOURCES})
+list(REMOVE_ITEM APP_PROJECT_SOURCES
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/sources/main_a9708ebbea20.cpp"
+)
+list(APPEND APP_PROJECT_SOURCES
+    "${CMAKE_CURRENT_LIST_DIR}/../../USER/main.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/fw_header_placeholder.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
+)
+
 add_executable(X_Track ${PROJECT_SOURCES})
+add_executable(X_Track_App_GCC ${APP_PROJECT_SOURCES})
+add_dependencies(X_Track_App_GCC X_Track_App_GCC_linker_script)
+set_property(TARGET X_Track_App_GCC APPEND PROPERTY LINK_DEPENDS "${APP_LINKER_SCRIPT}")
+
 set_target_properties(X_Track PROPERTIES
     OUTPUT_NAME "X-Track"
     SUFFIX ".elf"
     RUNTIME_OUTPUT_DIRECTORY "$<1:${CMAKE_CURRENT_BINARY_DIR}>"
+)
+set_target_properties(X_Track_App_GCC PROPERTIES
+    OUTPUT_NAME "X-Track-App-GCC"
+    SUFFIX ".elf"
+    RUNTIME_OUTPUT_DIRECTORY "$<1:${APP_OUTPUT_DIR}>"
+)
+
+set(FIRMWARE_TARGETS
+    X_Track
+    X_Track_App_GCC
 )
 
 set_property(SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/StorageService/StorageService.cpp" APPEND PROPERTY
@@ -423,7 +488,8 @@ set_property(SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/StorageServi
     "-I${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/ArduinoJson/src"
 )
 
-target_include_directories(X_Track PRIVATE
+foreach(FIRMWARE_TARGET IN LISTS FIRMWARE_TARGETS)
+target_include_directories(${FIRMWARE_TARGET} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/cmake/compat-includes"
     "${CMAKE_CURRENT_LIST_DIR}/../../ArduinoAPI"
     "${CMAKE_CURRENT_LIST_DIR}/../Platform/Core"
@@ -478,12 +544,17 @@ target_include_directories(X_Track PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Device/Include"
 )
 
-target_compile_definitions(X_Track PRIVATE
+target_compile_definitions(${FIRMWARE_TARGET} PRIVATE
     "ARDUINO=111"
     "LIBRARY_VERSION"
     "_RTE_"
     "__AT32F435_437__"
     "AT32F435RGT7"
+)
+endforeach()
+
+target_compile_definitions(X_Track_App_GCC PRIVATE
+    "OTA_TARGET_APP"
 )
 
 # 根据当前工具链推导 GCC C++ multilib 头文件目录。
@@ -538,12 +609,13 @@ if(NOT EXISTS "${ARM_GXX_MULTILIB_STDINC}/bits/c++config.h")
     endif()
 endif()
 
-target_include_directories(X_Track SYSTEM PRIVATE
+foreach(FIRMWARE_TARGET IN LISTS FIRMWARE_TARGETS)
+target_include_directories(${FIRMWARE_TARGET} SYSTEM PRIVATE
     "$<$<COMPILE_LANGUAGE:CXX>:${ARM_GXX_MULTILIB_STDINC}>"
     "$<$<COMPILE_LANGUAGE:CXX>:${ARM_GXX_TARGET_STDINC}>"
 )
 
-target_compile_options(X_Track PRIVATE
+target_compile_options(${FIRMWARE_TARGET} PRIVATE
     "$<$<COMPILE_LANGUAGE:C,CXX>:-include>"
     "$<$<COMPILE_LANGUAGE:C,CXX>:${CMAKE_CURRENT_LIST_DIR}/cmake/gcc_compat.h>"
     -mfloat-abi=hard
@@ -571,6 +643,7 @@ target_compile_options(X_Track PRIVATE
     $<$<COMPILE_LANGUAGE:ASM>:-x>
     $<$<COMPILE_LANGUAGE:ASM>:assembler-with-cpp>
 )
+endforeach()
 
 target_link_options(X_Track PRIVATE
     -mfloat-abi=hard
@@ -595,8 +668,44 @@ target_link_options(X_Track PRIVATE
     -u _printf_float
 )
 
+target_link_options(X_Track_App_GCC PRIVATE
+    -mfloat-abi=hard
+    -mthumb
+    -mfpu=fpv4-sp-d16
+    -mcpu=cortex-m4
+    -mlittle-endian
+    "$<$<AND:$<BOOL:${KEIL_GCC_ENABLE_LTO}>,$<NOT:$<CONFIG:Debug>>>:-flto>"
+    "$<$<AND:$<BOOL:${KEIL_GCC_ENABLE_LTO}>,$<NOT:$<CONFIG:Debug>>>:-flto-partition=1to1>"
+    "$<$<AND:$<BOOL:${KEIL_GCC_ENABLE_LTO}>,$<NOT:$<CONFIG:Debug>>>:-Wl,--undefined=vApplicationHardFaultDump>"
+    "$<$<AND:$<BOOL:${KEIL_GCC_ENABLE_LTO}>,$<NOT:$<CONFIG:Debug>>>:-Wl,--undefined=vApplicationHardFaultHook>"
+    "$<$<AND:$<BOOL:${KEIL_GCC_ENABLE_LTO}>,$<NOT:$<CONFIG:Debug>>>:-Wl,--undefined=vApplicationHardFaultTrace>"
+    -T${APP_LINKER_SCRIPT}
+    "-L${APP_OUTPUT_DIR}"
+    -Wl,--gc-sections
+    -Wl,--relax
+    -Wl,--require-defined=Reset_Handler
+    -Wl,-Map=${APP_MAP_FILE}
+    -Wl,--print-memory-usage
+    -specs=nano.specs
+    -specs=nosys.specs
+    -u _printf_float
+)
+
 target_link_libraries(X_Track PRIVATE
     "m"
+)
+
+target_link_libraries(X_Track_App_GCC PRIVATE
+    "m"
+)
+
+add_custom_command(TARGET X_Track_App_GCC POST_BUILD
+    COMMAND "${CMAKE_OBJCOPY}" -O ihex "$<TARGET_FILE:X_Track_App_GCC>" "${APP_HEX_FILE}"
+    COMMAND "${CMAKE_OBJCOPY}" -O binary "$<TARGET_FILE:X_Track_App_GCC>" "${APP_BIN_FILE}"
+    COMMAND "${CMAKE_SIZE}" --format=berkeley "$<TARGET_FILE:X_Track_App_GCC>"
+    COMMAND "${CMAKE_COMMAND}" -E touch "${APP_ARTIFACT_STAMP}"
+    COMMENT "Generating isolated OTA App artifacts"
+    VERBATIM
 )
 
 add_custom_target(X_Track_artifacts ALL

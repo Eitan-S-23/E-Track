@@ -26,6 +26,10 @@
 #include "lvgl/lvgl.h"
 #include "lv_port/lv_port.h"
 
+#if defined(OTA_TARGET_APP)
+#include "OTA/ota_vtor_check.h"
+#endif
+
 
 #if LV_USE_DEMO_BENCHMARK
 
@@ -71,9 +75,14 @@ static void setup()
     SEGGER_RTT_SetFlagsUpBuffer(0, SEGGER_RTT_MODE_NO_BLOCK_TRIM);
     SEGGER_RTT_printf(0, "\r\n========================================\r\n");
     PrintResetReason();
-    HAL::HAL_Init();
-
+#if defined(OTA_TARGET_APP) && defined(__GNUC__) && !defined(__CC_ARM)
+    /* Match the converted GCC target: HAL display setup starts an LVGL animation. */
     lv_init();
+    HAL::HAL_Init();
+#else
+    HAL::HAL_Init();
+    lv_init();
+#endif
     lv_port_init();
 
     App_Init();
@@ -99,6 +108,9 @@ static void loop()
   */
 int main(void)
 {
+#if defined(OTA_TARGET_APP)
+    ota_vtor_check();
+#endif
     Core_Init();
     setup();
     for(;;)loop();

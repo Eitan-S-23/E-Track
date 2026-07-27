@@ -152,34 +152,143 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cmake --build "${BUILD_DIR}" --target X_Track --parallel
+          cmake --build "${BUILD_DIR}" --target X_Track_App_GCC --parallel
 
-      - name: Generate bin/hex and checksums
+      - name: Validate OTA App layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import re
+          from pathlib import Path
+
+          layout_text = Path("Libraries/OTA/ota_layout.h").read_text(encoding="ascii")
+
+          def macro(name):
+              match = re.search(
+                  rf"(?m)^\s*#define\s+{re.escape(name)}\s+(0x[0-9A-Fa-f]+|[0-9]+)\b",
+                  layout_text,
+              )
+              if not match:
+                  raise SystemExit(f"layout macro missing: {name}")
+              return int(match.group(1), 0)
+
+          app_origin = macro("OTA_APP_ORIGIN")
+          app_length = macro("OTA_APP_LENGTH")
+          header_offset = macro("OTA_FW_HEADER_OFFSET")
+          header_size = macro("OTA_FW_HEADER_SIZE")
+          vector_max = macro("OTA_VECTOR_MAX")
+          ram_origin = macro("OTA_RAM_ORIGIN")
+          ram_length = macro("OTA_RAM_LENGTH")
+          overlay_origin = macro("OTA_OVERLAY_ORIGIN")
+          overlay_length = macro("OTA_OVERLAY_LENGTH")
+          evidence_size = macro("OTA_VTOR_EVIDENCE_SIZE")
+
+          output_dir = Path(os.environ["BUILD_DIR"]) / "app-gcc"
+          map_text = (output_dir / "X-Track-App-GCC.map").read_text(
+              encoding="utf-8", errors="replace"
+          )
+          linker_text = (output_dir / "x-track-app-gcc.ld").read_text(
+              encoding="utf-8", errors="strict"
+          )
+          raw_bin = (output_dir / "X-Track-App-GCC.bin").read_bytes()
+
+          def map_region(name):
+              match = re.search(
+                  rf"(?m)^{re.escape(name)}\s+(0x[0-9A-Fa-f]+)\s+(0x[0-9A-Fa-f]+)\s+",
+                  map_text,
+              )
+              if not match:
+                  raise SystemExit(f"map region missing: {name}")
+              return tuple(int(value, 16) for value in match.groups())
+
+          def map_section(name):
+              match = re.search(
+                  rf"(?m)^{re.escape(name)}\s+(0x[0-9A-Fa-f]+)\s+(0x[0-9A-Fa-f]+)",
+                  map_text,
+              )
+              if not match:
+                  raise SystemExit(f"map section missing: {name}")
+              return tuple(int(value, 16) for value in match.groups())
+
+          if map_region("FLASH") != (app_origin, app_length):
+              raise SystemExit("A1: FLASH region mismatch")
+          if map_region("RAM") != (ram_origin, ram_length):
+              raise SystemExit("A7: RAM region mismatch")
+          if map_region("RW_IRAM2") != (overlay_origin, overlay_length):
+              raise SystemExit("A7: overlay region mismatch")
+
+          vector = map_section(".isr_vector")
+          header = map_section(".fw_header")
+          evidence = map_section(".ota_vtor_noinit")
+          overlay = map_section(".sram_ext")
+          if vector[0] != app_origin or vector[1] > vector_max:
+              raise SystemExit("A3: vector placement/size mismatch")
+          if header != (app_origin + header_offset, header_size):
+              raise SystemExit("A4: firmware header placement/size mismatch")
+          if evidence[1] < evidence_size:
+              raise SystemExit("A6: VTOR evidence section too small")
+          if not (ram_origin <= evidence[0] and evidence[0] + evidence[1] <= ram_origin + ram_length):
+              raise SystemExit("A6: VTOR evidence section escaped main RAM")
+          if overlay != (overlay_origin, overlay_length):
+              raise SystemExit("A7: overlay section mismatch")
+          if "g_ota_vtor_actual" not in map_text or "g_ota_vtor_expected" not in map_text:
+              raise SystemExit("A6: VTOR evidence symbols missing")
+
+          linker_flash = re.search(
+              r"FLASH\s+\(rx\)\s*:\s*ORIGIN\s*=\s*(0x[0-9A-Fa-f]+)\s*,\s*LENGTH\s*=\s*(0x[0-9A-Fa-f]+)",
+              linker_text,
+          )
+          if not linker_flash or tuple(int(value, 16) for value in linker_flash.groups()) != (
+              app_origin,
+              app_length,
+          ):
+              raise SystemExit("A1: preprocessed linker MEMORY mismatch")
+          if "ASSERT(SIZEOF(.isr_vector) <= " not in linker_text:
+              raise SystemExit("A3: vector size ASSERT missing")
+
+          header_bytes = raw_bin[header_offset:header_offset + header_size]
+          if len(header_bytes) != header_size or header_bytes != bytes([0xFF]) * header_size:
+              raise SystemExit("A5: raw firmware header is not the placeholder")
+          if len(raw_bin) > app_length:
+              raise SystemExit("A5: raw App image exceeds contracted Flash length")
+
+          prefix_sha = hashlib.sha256(raw_bin[:header_offset]).hexdigest()
+          print(
+              "OTA_LAYOUT_ASSERTIONS=PASS "
+              f"flash={app_origin:#010x}/{app_length:#x} "
+              f"vector={vector[0]:#010x}/{vector[1]:#x} "
+              f"header={header[0]:#010x}/{header[1]} "
+              f"raw_prefix_sha256={prefix_sha}"
+          )
+          PY
+
+      - name: Report firmware artifacts
         id: artifacts
         shell: bash
         run: |
           set -euo pipefail
-          cd "${BUILD_DIR}"
+          cd "${BUILD_DIR}/app-gcc"
 
-          arm-none-eabi-objcopy -O binary X-Track.elf X-Track.bin
-          arm-none-eabi-objcopy -O ihex   X-Track.elf X-Track.hex
-          arm-none-eabi-size --format=berkeley X-Track.elf
+          arm-none-eabi-size --format=berkeley X-Track-App-GCC.elf
 
-          sha256="$(sha256sum X-Track.bin | awk '{print $1}')"
-          bin_size="$(stat -c%s X-Track.bin)"
+          sha256="$(sha256sum X-Track-App-GCC.bin | awk '{print $1}')"
+          bin_size="$(stat -c%s X-Track-App-GCC.bin)"
           echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
           echo "bin_size=${bin_size}" >> "$GITHUB_OUTPUT"
-          echo "X-Track.bin: ${bin_size} bytes, sha256=${sha256}"
+          echo "X-Track-App-GCC.bin: ${bin_size} bytes, sha256=${sha256}"
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware-${{ steps.version.outputs.version_name }}
           path: |
-            ${{ env.BUILD_DIR }}/X-Track.bin
-            ${{ env.BUILD_DIR }}/X-Track.hex
-            ${{ env.BUILD_DIR }}/X-Track.elf
-            ${{ env.BUILD_DIR }}/X-Track.map
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.bin
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.hex
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.elf
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.map
           retention-days: 14
           if-no-files-found: error
 
@@ -193,6 +302,17 @@ jobs:
       github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'
 
     steps:
+      - name: Block release until OTA boot chain is ready
+        shell: bash
+        env:
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+        run: |
+          set -euo pipefail
+          if [[ "${OTA_BOOT_CHAIN_READY:-}" != "true" ]]; then
+            echo "::error title=OTA boot chain not ready::App starts at the OTA App origin and cannot boot from reset until P1-5 bootstrap and P4-1 release rehearsal pass"
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -201,6 +321,36 @@ jobs:
         with:
           name: firmware-${{ needs.build.outputs.version_name }}
           path: firmware-release-assets
+
+      - name: Finalize firmware header for release
+        shell: bash
+        env:
+          APP_BIN: firmware-release-assets/X-Track-App-GCC.bin
+          VERSION_NAME: ${{ needs.build.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          build_ts="$(git show -s --format=%ct "${GITHUB_SHA}")"
+          python3 Tools/etu_pack.py finalize \
+            --app "${APP_BIN}" \
+            --ver-name "${VERSION_NAME}" \
+            --build-ts "${build_ts}"
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path("Tools").resolve()))
+          from etu_unpack import verify_fw_header
+
+          app = Path(os.environ["APP_BIN"])
+          image = app.read_bytes()
+          verify_fw_header(image, "release")
+          print(
+              "RELEASE_FW_HEADER=FINALIZED "
+              f"size={len(image)} sha256={hashlib.sha256(image).hexdigest()}"
+          )
+          PY
 
       - name: Check Cloudflare configuration
         id: cloudflare_config
@@ -237,7 +387,7 @@ jobs:
           else
             gh release create "${release_tag}" --target "${GITHUB_SHA}" --title "${release_tag}" --notes "${notes}"
           fi
-          gh release upload "${release_tag}" firmware-release-assets/X-Track.bin firmware-release-assets/X-Track.hex --clobber
+          gh release upload "${release_tag}" firmware-release-assets/X-Track-App-GCC.bin --clobber
           echo "RELEASE_TAG=${release_tag}" >> "$GITHUB_ENV"
 
       - name: Build Cloudflare firmware metadata
@@ -247,7 +397,7 @@ jobs:
           set -euo pipefail
           node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/build-firmware-release-metadata.mjs \
             --assets-dir firmware-release-assets \
-            --firmware-file firmware-release-assets/X-Track.bin \
+            --firmware-file firmware-release-assets/X-Track-App-GCC.bin \
             --release-tag "${RELEASE_TAG}" \
             --run-id "${GITHUB_RUN_ID}" \
             --commit-sha "${GITHUB_SHA}" \

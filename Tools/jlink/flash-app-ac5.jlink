@@ -1,0 +1,6 @@
+// Address source: Libraries/OTA/ota_layout.h (OTA_APP_ORIGIN).
+h
+loadfile MDK-ARM_F435/Track-App-AC5.bin 0x08010000
+r
+g
+qc
