@@ -139,9 +139,11 @@ def main() -> int:
     assert "Assert-P1NormalResetEvidence" in common_text
     assert "repo-default-hex" in deploy_text and "selected-legacy" in deploy_text
     assert "CFSR is nonzero" in common_text
+    assert deploy_text.count("-WaitMilliseconds 90000") == 2
+    assert deploy_text.count("-TimeoutSeconds 30") == 2
     assert not (ROOT / "boot" / "include" / "boot_bootstrap.h").exists()
     assert not (ROOT / "boot" / "src" / "boot_bootstrap.c").exists()
-    checks += 7
+    checks += 9
 
     with FlatWorkspace() as work:
         image = make_image()

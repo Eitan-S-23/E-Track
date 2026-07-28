@@ -136,11 +136,11 @@ try {
     $mapPath = Join-Path $buildDirectory 'app-gcc\X-Track-App-GCC.map'
     $rttAddress = Get-P1MapRttAddress -MapPath $mapPath
 
-    $firstResetLog = Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'ordinary-reset' -WaitMilliseconds 30000 -RttAddress $rttAddress
+    $firstResetLog = Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'ordinary-reset' -WaitMilliseconds 90000 -RttAddress $rttAddress
     $firstReset = Assert-P1NormalResetEvidence -LogPath $firstResetLog
     Test-P1RttSignature -Address $rttAddress -RunDirectory $RunDirectory -Label 'first-rtt-signature' | Out-Null
     $firstRttPath = Join-Path $RunDirectory 'ordinary-reset-rtt.log'
-    Invoke-P1RttCapture -Address $rttAddress -OutputPath $firstRttPath -TimeoutSeconds 15 | Out-Null
+    Invoke-P1RttCapture -Address $rttAddress -OutputPath $firstRttPath -TimeoutSeconds 30 | Out-Null
     $firstRtt = Get-Content -LiteralPath $firstRttPath -Raw
     if ($firstRtt -notmatch 'OTA: HANDOFF vtor=0x08010000') {
         throw 'Ordinary reset RTT evidence lacks the Boot-to-App handoff line'
@@ -149,11 +149,11 @@ try {
         throw 'First Boot did not establish CONFIRMED with cur_vcode from fw_header'
     }
 
-    $finalResetLog = Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'final-ordinary-reset' -WaitMilliseconds 30000 -RttAddress $rttAddress
+    $finalResetLog = Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'final-ordinary-reset' -WaitMilliseconds 90000 -RttAddress $rttAddress
     $finalReset = Assert-P1NormalResetEvidence -LogPath $finalResetLog
     Test-P1RttSignature -Address $rttAddress -RunDirectory $RunDirectory -Label 'final-rtt-signature' | Out-Null
     $finalRttPath = Join-Path $RunDirectory 'final-ordinary-reset-rtt.log'
-    Invoke-P1RttCapture -Address $rttAddress -OutputPath $finalRttPath -TimeoutSeconds 15 | Out-Null
+    Invoke-P1RttCapture -Address $rttAddress -OutputPath $finalRttPath -TimeoutSeconds 30 | Out-Null
     $finalRtt = Get-Content -LiteralPath $finalRttPath -Raw
     if ($finalRtt -notmatch 'OTA: HANDOFF vtor=0x08010000') {
         throw 'Final ordinary reset RTT evidence lacks the Boot-to-App handoff line'

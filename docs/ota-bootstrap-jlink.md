@@ -43,7 +43,8 @@ The script creates a unique `.cache\p1-5-bootstrap-*` run directory and:
    does not install or modify an external recovery slot.
 6. Programs Boot at `0x08000000` and finalized App at `0x08010000`, then
    requires two distinct `VerifyBin` success results.
-7. Performs two ordinary MCU resets. Each reset must report a PC inside the App
+7. Performs two ordinary MCU resets with a 90-second stabilization window and
+   a bounded 30-second RTT capture. Each reset must report a PC inside the App
    partition, `VTOR=0x08010000`, and exact `CFSR=0x00000000`.
 8. Re-resolves `_SEGGER_RTT` from the fresh App map, verifies the
    `SEGGER RTT` RAM signature, and requires a current
