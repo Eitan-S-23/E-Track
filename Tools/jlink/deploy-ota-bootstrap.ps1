@@ -162,12 +162,11 @@ try {
         throw 'Final ordinary reset RTT evidence lacks the CONFIRMED App vcode'
     }
 
-    Write-Output (
-        'P1_5_NORMAL_RESET=PASS pc=0x{0:X8} vtor=0x{1:X8} cfsr=0x{2:X8} ' +
-        'final_pc=0x{3:X8} rtt=0x{4:X8} cur_vcode={5}' -f
-        $firstReset.PC, $firstReset.VTOR, $firstReset.CFSR,
-        $finalReset.PC, $rttAddress, $expectedVcode
-    )
+    Write-Output (Format-P1NormalResetPassLine `
+        -PC $firstReset.PC -VTOR $firstReset.VTOR -CFSR $firstReset.CFSR `
+        -FinalPC $finalReset.PC -FinalVTOR $finalReset.VTOR `
+        -FinalCFSR $finalReset.CFSR -RttAddress $rttAddress `
+        -CurVcode $expectedVcode)
     Write-Output "P1_5_DEPLOYMENT=PASS run_directory=$RunDirectory"
 }
 catch {

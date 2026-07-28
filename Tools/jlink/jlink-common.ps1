@@ -313,6 +313,43 @@ function Assert-P1NormalResetEvidence {
     }
 }
 
+function Format-P1NormalResetPassLine {
+    param(
+        [Parameter(Mandatory = $true)][uint32]$PC,
+        [Parameter(Mandatory = $true)][uint32]$VTOR,
+        [Parameter(Mandatory = $true)][uint32]$CFSR,
+        [Parameter(Mandatory = $true)][uint32]$FinalPC,
+        [Parameter(Mandatory = $true)][uint32]$FinalVTOR,
+        [Parameter(Mandatory = $true)][uint32]$FinalCFSR,
+        [Parameter(Mandatory = $true)][uint32]$RttAddress,
+        [Parameter(Mandatory = $true)][string]$CurVcode
+    )
+    $format = (
+        'P1_5_NORMAL_RESET=PASS pc=0x{0:X8} vtor=0x{1:X8} cfsr=0x{2:X8} ' +
+        'final_pc=0x{3:X8} final_vtor=0x{4:X8} final_cfsr=0x{5:X8} ' +
+        'rtt=0x{6:X8} cur_vcode={7}'
+    )
+    return $format -f $PC, $VTOR, $CFSR, $FinalPC, $FinalVTOR,
+        $FinalCFSR, $RttAddress, $CurVcode
+}
+
+function Format-P1RecoveryFlashPassLine {
+    param(
+        [Parameter(Mandatory = $true)][string]$Container,
+        [Parameter(Mandatory = $true)][string]$StrippedApp,
+        [Parameter(Mandatory = $true)][uint32]$PC,
+        [Parameter(Mandatory = $true)][uint32]$VTOR,
+        [Parameter(Mandatory = $true)][uint32]$CFSR,
+        [Parameter(Mandatory = $true)][uint32]$RttAddress
+    )
+    $format = (
+        'P1_5_RECOVERY_FLASH=PASS container={0} stripped={1} pc=0x{2:X8} ' +
+        'vtor=0x{3:X8} cfsr=0x{4:X8} rtt=0x{5:X8} source_preserved=1'
+    )
+    return $format -f $Container, $StrippedApp, $PC, $VTOR, $CFSR,
+        $RttAddress
+}
+
 function Stop-P1RttLogger {
     Get-Process -Name 'JLinkRTTLogger' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Milliseconds 250

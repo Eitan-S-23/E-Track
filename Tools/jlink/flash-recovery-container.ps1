@@ -71,12 +71,10 @@ try {
         $containerHashAfter -ne $containerHashBefore) {
         throw 'Recovery source container changed during deployment'
     }
-    Write-Output (
-        'P1_5_RECOVERY_FLASH=PASS container={0} stripped={1} pc=0x{2:X8} ' +
-        'vtor=0x{3:X8} cfsr=0x{4:X8} rtt=0x{5:X8} source_preserved=1' -f
-        $container, $strippedApp, $resetEvidence.PC, $resetEvidence.VTOR,
-        $resetEvidence.CFSR, $rttAddress
-    )
+    Write-Output (Format-P1RecoveryFlashPassLine `
+        -Container $container -StrippedApp $strippedApp `
+        -PC $resetEvidence.PC -VTOR $resetEvidence.VTOR `
+        -CFSR $resetEvidence.CFSR -RttAddress $rttAddress)
 }
 catch {
     $failure = $_

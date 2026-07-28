@@ -141,9 +141,13 @@ def main() -> int:
     assert "CFSR is nonzero" in common_text
     assert deploy_text.count("-WaitMilliseconds 90000") == 2
     assert deploy_text.count("-TimeoutSeconds 30") == 2
+    assert "Format-P1NormalResetPassLine" in common_text
+    assert "Format-P1NormalResetPassLine" in deploy_text
+    assert "Format-P1RecoveryFlashPassLine" in common_text
+    assert "Format-P1RecoveryFlashPassLine" in recovery_flash_text
     assert not (ROOT / "boot" / "include" / "boot_bootstrap.h").exists()
     assert not (ROOT / "boot" / "src" / "boot_bootstrap.c").exists()
-    checks += 9
+    checks += 13
 
     with FlatWorkspace() as work:
         image = make_image()
@@ -320,6 +324,35 @@ def main() -> int:
                 f"$e=Assert-P1NormalResetEvidence -LogPath '{ps_quote(good_log)}'; "
                 "if($e.PC -ne 0x08012345 -or $e.VTOR -ne 0x08010000 "
                 "-or $e.CFSR -ne 0){throw 'parsed evidence mismatch'}"
+            )
+            run_powershell(powershell, script)
+            powershell_checks += 1
+
+            script = (
+                f"$ErrorActionPreference='Stop'; . '{common}'; "
+                "$line=Format-P1NormalResetPassLine "
+                "-PC 0x08012345 -VTOR 0x08010000 -CFSR 0 "
+                "-FinalPC 0x08023456 -FinalVTOR 0x08010000 -FinalCFSR 0 "
+                "-RttAddress 0x20044E04 -CurVcode '20802'; "
+                "$expected='P1_5_NORMAL_RESET=PASS pc=0x08012345 "
+                "vtor=0x08010000 cfsr=0x00000000 final_pc=0x08023456 "
+                "final_vtor=0x08010000 final_cfsr=0x00000000 "
+                "rtt=0x20044E04 cur_vcode=20802'; "
+                "if($line -ne $expected){throw \"normal reset line mismatch: $line\"}"
+            )
+            run_powershell(powershell, script)
+            powershell_checks += 1
+
+            script = (
+                f"$ErrorActionPreference='Stop'; . '{common}'; "
+                "$line=Format-P1RecoveryFlashPassLine "
+                "-Container 'recovery.bin' -StrippedApp 'app.bin' "
+                "-PC 0x08034567 -VTOR 0x08010000 -CFSR 0 "
+                "-RttAddress 0x20044E04; "
+                "$expected='P1_5_RECOVERY_FLASH=PASS container=recovery.bin "
+                "stripped=app.bin pc=0x08034567 vtor=0x08010000 "
+                "cfsr=0x00000000 rtt=0x20044E04 source_preserved=1'; "
+                "if($line -ne $expected){throw \"recovery line mismatch: $line\"}"
             )
             run_powershell(powershell, script)
             powershell_checks += 1
