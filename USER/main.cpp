@@ -143,8 +143,8 @@ static void loop()
 int main(void)
 {
 #if defined(OTA_TARGET_APP)
-    ota_handoff_capture();
     ota_vtor_check();
+    ota_handoff_capture();
 #endif
     Core_Init();
     setup();

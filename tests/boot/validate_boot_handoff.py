@@ -47,6 +47,25 @@ def function_body(disassembly: str, name: str) -> str:
 
 
 def validate(build_dir: Path, objdump: Path | None) -> None:
+    app_main = (ROOT / "USER/main.cpp").read_text(
+        encoding="utf-8", errors="strict"
+    )
+    main_match = re.search(
+        r"(?ms)^int main\(void\)\s*\{(?P<body>.*?)^\}", app_main
+    )
+    if not main_match:
+        raise SystemExit("P1-4: App main() body missing")
+    main_body = re.sub(r"\s+", " ", main_match.group("body"))
+    vtor_check = main_body.find("ota_vtor_check();")
+    handoff_capture = main_body.find("ota_handoff_capture();")
+    core_init = main_body.find("Core_Init();")
+    if vtor_check < 0 or handoff_capture < 0 or core_init < 0:
+        raise SystemExit("P1-4: App startup calls are incomplete")
+    if not (vtor_check < handoff_capture < core_init):
+        raise SystemExit(
+            "P1-4: ota_vtor_check() must be the first App startup call"
+        )
+
     source = (ROOT / "boot/platform/at32/boot_handoff_at32.c").read_text(
         encoding="ascii"
     )
