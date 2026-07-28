@@ -274,10 +274,13 @@ function Get-P1LogHex32 {
         [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor
         [System.Text.RegularExpressions.RegexOptions]::Multiline
     )
-    if ($matches.Count -ne 1) {
-        throw "Expected exactly one $Label value in the J-Link reset log, found $($matches.Count)"
+    if ($matches.Count -eq 0) {
+        throw "Expected at least one $Label value in the J-Link reset log"
     }
-    return [Convert]::ToUInt32($matches[0].Groups[1].Value, 16)
+    return [Convert]::ToUInt32(
+        $matches[$matches.Count - 1].Groups[1].Value,
+        16
+    )
 }
 
 function Assert-P1NormalResetEvidence {

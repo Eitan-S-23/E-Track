@@ -294,7 +294,8 @@ def main() -> int:
             bad_cfsr_log = work / "reset-bad-cfsr.log"
             bad_pc_log = work / "reset-bad-pc.log"
             good_log.write_text(
-                "PC = 08012345, CycleCnt = 00000000\n"
+                "PC = 08000020, CycleCnt = 00000000\n"
+                "PC = 08012345, CycleCnt = 00000001\n"
                 "E000ED08 = 08010000\n"
                 "E000ED28 = 00000000\n",
                 encoding="ascii",
