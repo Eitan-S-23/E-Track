@@ -1,9 +1,9 @@
 # P1-3 implementation evidence (2026-07-28)
 
 > Implementer: Codex dependency-batch implementation session.
-> Status: implementation and host/build evidence are complete. Hardware
-> STAGED-to-CONFIRMED evidence will be backfilled after the P1-5 bootstrap path
-> is installed. This card remains `进行中` and requires independent acceptance.
+> Status: implementation and evidence are complete, including real-MCU
+> STAGED-to-CONFIRMED evidence through the P1-5 bootstrap path. This card
+> remains in progress and requires independent acceptance.
 
 ## 1. Scope and frozen contracts
 
@@ -12,9 +12,8 @@ and Boot state-machine contracts without changing their byte layouts or
 constants. P2 receive/decrypt/decompress logic and the P1-6 physical 20-point
 power-loss matrix are not included.
 
-Implementation commit: the P1-3 implementation commit containing this document.
-Its exact SHA is recorded by the final evidence closeout commit after all three
-dependency-batch cards have independent implementation commits.
+Implementation commit:
+6ea38d7b8914bcc46559f3b723d06d0ad0d47c79.
 
 ## 2. State machine implementation
 
@@ -170,12 +169,92 @@ X-Track-App-GCC.map 2152362  10d5953709ec6366b91e884959b461c19e5ea63a95fa188d7f9
 
 The workflow upload definitions remain two independent four-file artifacts.
 
-## 7. Hardware evidence and exclusions
+## 7. Real-MCU STAGED-to-CONFIRMED evidence
 
-No ordinary reset/run startup claim is made by this P1-3 commit. The required
-real-MCU STAGED-to-CONFIRMED trace depends on the exact P1-4 handoff and P1-5
-bootstrap installation. It will be appended to this document after that path is
-operational, while the evidence remains attributed to P1-3.
+Hardware evidence directory:
 
-P1-4 handoff, P1-5 deployment, P2 OTA transport/decrypt/decompress, and the P1-6
-20-point physical power-loss matrix are explicitly excluded from this commit.
+~~~text
+D:\github\my\E-Track\.cache\p1-3-hardware-20260728\
+  commit-7b8638b-staged-confirmed
+~~~
+
+The production v2.8.0 and candidate v2.8.1 assets were prepared from the same
+fresh P1-5 GCC build and both passed the complete host validator:
+
+~~~text
+v2.8.0  len=563036
+sha256=f9615a62fdccd4f4e7d0f6ac8cc78e672b02780096602bcf30dc09198755be2c
+
+v2.8.1  len=563036
+sha256=1d870ce448486b52bc5a8fa497e36b84cf0bbebf181603abfb63f1cdc51a5916
+fw_header double-zero sha256=
+  1d870ce448486b52bc5a8fa497e36b84cf0bbebf181603abfb63f1cdc51a5916
+header_crc32=0xbadb35b6
+~~~
+
+Slot preparation used the authenticated NOLOAD bootstrap command path:
+
+~~~text
+pre-stage BCB:
+  state=4 cur_vcode=20800
+
+install-backup-v20800:
+  progress=138/138 image_vcode=20800 image_len=563036
+  image_crc32=221449039
+
+install-candidate-v20801:
+  progress=138/138 image_vcode=20801 image_len=563036
+  image_crc32=221449039
+
+STAGED:
+  active=2 state=1 boot_try=3 copy_phase=0 resume_block=0
+  cur_vcode=20800 cand_vcode=20801 backup_vcode=20800
+~~~
+
+The final accepted run used a 180-second full slot-validation window followed
+by one uninterrupted 240-second ordinary MCU reset window. The final register,
+RTT, and BCB evidence was:
+
+~~~text
+P1_3_UNINTERRUPTED_WINDOW=PASS seconds=240
+  vtor=0x08010000 cfsr=0x00000000
+
+OTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0
+  systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000
+OTA: TEST_BOOT confirmed vcode=20801
+
+CONFIRMED snapshot:
+  active=2 state=4 boot_try=0 copy_phase=0 resume_block=0
+  cur_vcode=20801 cand_vcode=20801 backup_vcode=20800
+
+P1_3_STAGED_TO_CONFIRMED=PASS cur_vcode=20801
+~~~
+
+The backup version remained v20800 from STAGED through confirmation. The host
+suite separately checks that every byte of the backup slot remains unchanged
+through this interval.
+
+## 8. Diagnostic injection and exclusions
+
+An earlier diagnostic run intentionally interrupted the apply path. At 25
+seconds it proved the first atomic boundary:
+
+~~~text
+state=2 copy_phase=1 resume_block=0
+cur_vcode=20800 cand_vcode=20801 backup_vcode=20800
+~~~
+
+A later J-Link reset happened while the PC was in
+flash_operation_status_get during a live internal-Flash operation. The next
+snapshot returned active=0xFFFFFFFF, which is BCB_ARBITER_ERROR (EEPROM I/O
+failure), not proof of double-invalid BCB records. This is an injected
+mid-Flash condition belonging to the excluded P1-6 fault/power matrix and is
+not counted as a pass. The validated direct-recovery path restored v2.8.0 and
+BCB CONFIRMED/20800 before the final uninterrupted run. P1-5 follow-up commit
+88879f99f68b43dc3497ac0575d86691968c44e3 makes the host result parser reject
+such a snapshot instead of printing a transport-level PASS.
+
+No P1-6 20-point power-loss matrix, physical power interruption, P2 transport,
+decryption, decompression, or patching work was performed. Rollback and all
+reset-boundary behavior remain covered by the deterministic 96-check host
+suite; this implementation session does not claim independent acceptance.

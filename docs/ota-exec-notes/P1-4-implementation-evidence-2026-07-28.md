@@ -1,10 +1,13 @@
 # P1-4 implementation evidence (2026-07-28)
 
 > Implementer: Codex dependency-batch implementation session.
-> Status: implementation, disassembly assertions, host regressions, and fresh
-> GCC build evidence are complete. Pending-IRQ injection and repeated normal
-> reset hardware evidence will be backfilled through the P1-5 deployment path.
-> This card remains in progress and requires independent acceptance.
+> Status: implementation and evidence are complete, including pending-IRQ
+> injection and repeated normal-reset hardware evidence through the P1-5
+> deployment path. This card remains in progress and requires independent
+> acceptance.
+
+Implementation commit:
+3fe2e006ebd155a2315d0a02f9ff6b96df3d8524.
 
 ## 1. Frozen handoff contract
 
@@ -146,7 +149,7 @@ X-Track-App-GCC.elf 810688   2bef7e636dcd800538475e566cdda55819a76d384f0e003c92f
 X-Track-App-GCC.map 2242101  4601c0c7642d6d5a23da715e5e10e8f2fe1467e90d19466946837c8522647881
 ~~~
 
-## 8. Regressions and pending hardware evidence
+## 8. Regressions and real-MCU evidence
 
 ~~~text
 P1_1_FW_HEADER_VECTORS=PASS cases=16
@@ -155,7 +158,61 @@ P0_4_BCB=PASS checks=27 failures=0
 P1_3_STATE_MACHINE=PASS checks=96 failures=0
 ~~~
 
-No normal-reset startup claim is made by this implementation commit. The
-required injection run and repeated Boot-to-App normal resets will be recorded
-after P1-5 installs finalized Boot and App images. P1-6 physical power-cut
-testing remains explicitly excluded.
+The final combined production build after P1-5 remained below the Boot limit:
+
+~~~text
+P1_1_BOOT_ASSERTIONS=PASS bin=16844 vector=0x08000000/0x20c
+  msp=0x20058000 reset=0x0800327d
+P1_4_BOOT_HANDOFF_ASSERTIONS=PASS nvic_banks=8 primask=0 basepri=0
+  faultmask=0 control=0 vtor=0x08010000 branch=MSP/DSB/ISB/BX
+~~~
+
+Pending injection was rebuilt from the combined source with
+BOOT_HANDOFF_TEST_INJECT_PENDING=ON:
+
+~~~text
+X-Track-Boot.bin 16892
+sha256=a5736865903c9f4a92313a7f83debe733aa423696f7bc7c47ee12462c1dbb5f7
+~~~
+
+Disassembly showed the injection helper is called immediately before
+boot_handoff_to_app, and the linked handoff still passed the full validator.
+The injection Boot and finalized v2.8.1 App were then flashed and started by an
+ordinary reset. App early capture reported:
+
+~~~text
+OTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0
+  systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000
+P1_4_PENDING_INJECTION=PASS vtor=0x08010000 cfsr=0x00000000
+~~~
+
+Thus the artificially pending SysTick and external NVIC ISPR[0] condition did
+not leak into App. The production Boot was then reflashed and verified. Live
+App vector words and three independent ordinary-reset runs were:
+
+~~~text
+P1_4_APP_VECTOR=PASS msp=0x20058000 reset=0x0801B3B9
+P1_4_REPEAT_1=PASS pc=0x080176CE vtor=0x08010000 cfsr=0x00000000
+P1_4_REPEAT_2=PASS pc=0x080176D0 vtor=0x08010000 cfsr=0x00000000
+P1_4_REPEAT_3=PASS pc=0x080176CC vtor=0x08010000 cfsr=0x00000000
+P1_4_REPEATED_BOOT_APP=PASS count=3
+~~~
+
+Each run independently checked the live SEGGER RTT signature at 0x20044E04
+and captured the zero-state handoff line with one bounded logger. The final
+production ordinary reset again produced VTOR=0x08010000, CFSR=0, and the same
+handoff line. No JLinkRTTLogger process remained.
+
+Hardware evidence directories:
+
+~~~text
+D:\github\my\E-Track\.cache\p1-4-hardware-20260728\
+  commit-7b8638b-pending-injection
+D:\github\my\E-Track\.cache\p1-4-hardware-20260728\
+  commit-7b8638b-production-repeats
+~~~
+
+The App build retains the repository's known short-wchar, newlib syscall, and
+App RWX warnings. Boot remained warning-fatal and has no RWX LOAD segment.
+P1-6 physical power-cut testing remains explicitly excluded, and this
+implementation session does not claim independent acceptance.

@@ -397,23 +397,23 @@
     结论:通过;P1-2 置 `完成`,P1 进度 1/6,P1-1 可启动。
 
 #### P1-3 搬运/回滚/试启动状态机
-状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(依赖批次认领)
+状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(实现与证据完成，待非实现会话独立验收)
 - 目标: §4 全部状态转移:STAGED→APPLYING(copy_phase=1,resume_block=0)逐 4KB 块"擦→写→读回→resume_block++ 持久化",重入续搬绝不整区擦;TEST_BOOT try=3 先持久化 try-- 再跳;三连失败→ROLLBACK(首转原子写 copy_phase=2+resume_block=0,R4-①)同法续搬,完成后同样过 fw_header 全项校验;backup 无效→recovery 槽→恢复模式;STAGED→CONFIRMED 期间 backup 槽锁定。
 - 验收: 状态机单测(可 PC 侧仿真 flash 层)覆盖每个转移与每个断点重入;真机走通 STAGED→CONFIRMED。
-- 证据: `docs/ota-exec-notes/P1-3-implementation-evidence-2026-07-28.md`;PC flash/EEPROM 仿真 `96/96 PASS`,含全部 apply/rollback 持久化边界、各断点重入、坏 candidate/backup、recovery fallback、try 耗尽及写后读回失败;fresh GCC Release Boot=`13656B`,无 RWX/红线依赖,既有 header `16/16`、Ymodem/ETSL `19/19`、BCB `27/27` 全绿。真机 STAGED→CONFIRMED 待 P1-5 链路完成后回填;本卡保持 `进行中`。
+- 证据: `docs/ota-exec-notes/P1-3-implementation-evidence-2026-07-28.md`;实现提交 `6ea38d7b8914bcc46559f3b723d06d0ad0d47c79`;PC flash/EEPROM 仿真 `96/96 PASS`,既有 header `16/16`、Ymodem/ETSL `19/19`、BCB `27/27` 全绿;最终组合 Boot=`16844B`,无 RWX/红线依赖。真机 backup/candidate 各 `138/138` 安装,STAGED=`cur20800/cand20801/backup20800`,不间断普通 reset 240s 后 RTT `OTA: TEST_BOOT confirmed vcode=20801`,BCB=`CONFIRMED/cur20801`;中途 mid-Flash reset 仅按 P1-6 排除注错记录,未伪报通过。本卡保持 `进行中`,待独立验收。
 
 #### P1-4 boot→App 交接跳转
-状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(实现与静态/构建证据完成,待 P1-5 真机回填)
+状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(实现与证据完成，待非实现会话独立验收)
 - 目标: §4 字级契约:ICER/ICPR 全清+SCB->ICSR PENDSTCLR/PENDSVCLR、SysTick 停、PRIMASK/BASEPRI/FAULTMASK/CONTROL 交接值、VTOR=0x08010000→DSB+ISB→MSP→DSB+ISB→跳向量[1];不用 PRIMASK 屏蔽做跳转。
 - 验收: 注错(跳转前人为挂起 SysTick/外设中断 pending)后 App 正常运行;真机 boot↔App 往返稳定。
-- 证据: docs/ota-exec-notes/P1-4-implementation-evidence-2026-07-28.md;最终跳转前重新执行统一 fw_header/vector 校验,反汇编断言确认 8 组 ICER 后 8 组 ICPR、四掩码寄存器归零、VTOR/双 barrier/MSP/双 barrier/BX 顺序且无 cpsid;fresh GCC Release Boot=14208B,注错变体=14252B,既有 16/19/27 与 P1-3 96 项回归全绿。SysTick+外设 pending 注错及重复普通 reset 真机证据待 P1-5 部署链完成后回填;本卡保持进行中。
+- 证据: `docs/ota-exec-notes/P1-4-implementation-evidence-2026-07-28.md`;实现提交 `3fe2e006ebd155a2315d0a02f9ff6b96df3d8524`;统一 fw_header/vector 校验与反汇编断言通过(8 组 ICER→8 组 ICPR、四掩码归零、VTOR/双 barrier/MSP/双 barrier/BX、无 cpsid)。组合注错 Boot=`16892B`/SHA256 `a5736865...b5f7`;真机人为 pending SysTick+外设 IRQ 后 App 早期观测 systick/ICSR/ISER/ISPR 全 0;实际向量 MSP=`0x20058000`/Reset=`0x0801B3B9`;生产 Boot 三次普通 reset 均 VTOR=`0x08010000`、CFSR=0、RTT handoff 正常。本卡保持 `进行中`,待独立验收。
 
 #### P1-5 J-Link bootstrap 脚本与文档
-状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(依赖批次认领)
+状态: 进行中 ｜ 认领: Codex(实现会话,P1-3/P1-4/P1-5 依赖批次) / 2026-07-28 ｜ 更新: 2026-07-28(实现与证据完成，待非实现会话独立验收)
 - 目标: §7 一次性部署脚本:烧 boot@0x08000000、重定位 app@0x08010000、boot 首启 BCB 自动初始化 CONFIRMED(cur_vcode 读自 fw_header)、(可选)写 recovery 槽;recovery 资产 J-Link 直刷脚本须剥离尾部 8B(R4-⑤)。沿用 AGENTS.md J-Link 流程(设备全名 AT32F435RGT7、SWD 1000kHz)。
 - 范围: `tools/`(脚本)+ `docs/`(bootstrap 手册)。
 - 验收: 真机从纯 AC5 旧布局一键迁移到 boot+app 新布局并正常开机。
-- 证据: —
+- 证据: `docs/ota-exec-notes/P1-5-implementation-evidence-2026-07-28.md`;实现提交 `7b8638b7f48aaa82dc9fdd09636a0992d6b35ce2`,真机发现修复 `1be13ec08b7957566a1e41c8c83bf0b23ae4711b`/`88879f99f68b43dc3497ac0575d86691968c44e3`;bootstrap 宿主 `101/101`,资产/命令工具 `12/12`;从纯 AC5 普通 reset VTOR=`0x08000000` 一键迁移,finalized App/Boot VerifyBin、BCB 首启 `CONFIRMED/cur20800`、recovery `138/138`、普通 reset VTOR=`0x08010000`+RTT 通过;recovery 容器 `563044B→563036B` 精确剥离 8B 后直刷通过,legacy 产物保留。本卡保持 `进行中`,待独立验收。
 
 #### P1-6 注错试验与断电矩阵
 状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **部分需用户物理配合**
@@ -628,3 +628,4 @@
 - 2026-07-27 ｜ Codex(实现会话) ｜ P1-1(实现与本地取证) ｜ 完成独立 GCC Boot 骨架、统一 fw_header/BCB/QSPI/ETSL/内 Flash/Ymodem recovery;修正 AT32 2KB 擦除粒度与 Ymodem 两层确认边界;Boot 10452B,header 16/16、协议 19/19、BCB 27/27 全过;证据 `docs/ota-exec-notes/P1-1-implementation-evidence-2026-07-27.md`;卡保持进行中,待 push CI 与非实现会话验收。
 - 2026-07-28 ｜ Codex(实现会话,CI 收口) ｜ P1-1(clean-checkout CI) ｜ 实现提交 `b478393` 已推 main;push run `30283525908` success,header 16/16、协议 19/19、Boot/App 布局断言全绿,App/Boot 独立 artifact 各 4 件上传成功;CI Boot bin 10452B/SHA256 `7989a729...821a1e`;卡继续 `进行中`,只待非实现会话独立验收。
 - 2026-07-28 ｜ Codex(非实现会话,独立验收) ｜ P1-1(验收通过) ｜ 从 `origin/main=03217f9` 独立 clean worktree fresh 构建、重跑 header 16/16、Ymodem/ETSL 19/19、BCB 27/27,复核 Boot 布局/向量/RAM/无 RWX/红线依赖、QSPI fail-closed、FLM 2KB×2 擦除、PA15 3s、CI 两组四件套;本地/CI Boot 的 97 个差异字节全部归因 newlib `memset/memcpy/memcmp` 排序和 22 个分支位移,未解释差异=0;P1-4/P1-5 排除且未用普通 reset/run;卡置 `完成`,P1 进度 `2/6`,未修改实现。
+- 2026-07-28 ｜ Codex(实现会话,依赖批次) ｜ P1-3/P1-4/P1-5 ｜ 三卡独立实现提交 `6ea38d7`/`3fe2e00`/`7b8638b`,P1-5 真机发现修复 `1be13ec`/`88879f9`;宿主 16/19/27/96/101/12 全绿,final fresh GCC Boot 16844B;完成 legacy→Boot+App 一键迁移、recovery 尾 8B 剥离直刷、STAGED→TEST_BOOT→CONFIRMED v20801、pending IRQ 注错与 3 次生产普通 reset 真机证据;P1-6 mid-Flash/物理断电矩阵明确排除。三卡均保持 `进行中`,标记“实现与证据完成，待非实现会话独立验收”,P1 总进度保持 `2/6`。
