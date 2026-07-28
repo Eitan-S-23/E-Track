@@ -144,6 +144,21 @@ def main() -> int:
     assert "P1_5_BOOTSTRAP_RESULT=PASS" in result.stdout
     checks += 1
 
+    failed_snapshot = bytearray(done)
+    struct.pack_into("<I", failed_snapshot, 8, 4)
+    struct.pack_into("<I", failed_snapshot, 52, 0xFFFFFFFF)
+    struct.pack_into(
+        "<I",
+        failed_snapshot,
+        96,
+        zlib.crc32(failed_snapshot[36:96]) & 0xFFFFFFFF,
+    )
+    failed_snapshot_file = work.with_name(work.name + "-failed-snapshot.bin")
+    failed_snapshot_file.write_bytes(failed_snapshot)
+    result = run("result", "--input", str(failed_snapshot_file), expect=1)
+    assert "BCB arbitration I/O failed" in result.stderr
+    checks += 1
+
     print(f"P1_5_PREPARE_TOOL=PASS checks={checks}")
     return 0
 

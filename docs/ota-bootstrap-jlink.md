@@ -62,7 +62,8 @@ timeout, saves exactly 128 bytes, and rejects a missing result magic or CRC.
 The Boot result is never accepted based on a textual J-Link message alone.
 Install operations and stage-slots use a 180-second window because staging
 revalidates both complete slot images before its atomic BCB commit. Short BCB
-operations retain the 10-second window.
+operations retain the 10-second window. A snapshot-bcb result with a BCB
+arbitration I/O error is rejected even if the command transport completed.
 
 ## Direct recovery-container flash
 

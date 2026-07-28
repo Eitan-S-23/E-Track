@@ -71,6 +71,7 @@ OFF_IMAGE_CRC = 92
 OFF_RESULT_CRC = 96
 
 STATUS_PASS = 2
+BCB_ARBITER_ERROR_U32 = 0xFFFFFFFF
 
 COMMANDS = {
     "clear-bcb": (1, 0),
@@ -300,6 +301,12 @@ def cmd_result(args: argparse.Namespace) -> int:
         "image_len": u32(result, OFF_IMAGE_LEN),
         "image_crc32": u32(result, OFF_IMAGE_CRC),
     }
+    opcode = u32(result, OFF_OPCODE)
+    if (
+        opcode == COMMANDS["snapshot-bcb"][0]
+        and values["active"] == BCB_ARBITER_ERROR_U32
+    ):
+        raise ValidationError("snapshot-bcb BCB arbitration I/O failed")
     outcome = "PASS" if status == STATUS_PASS else "FAIL"
     print(
         f"P1_5_BOOTSTRAP_RESULT={outcome} status={status} "
