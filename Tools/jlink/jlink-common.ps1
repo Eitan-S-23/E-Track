@@ -146,7 +146,7 @@ function Invoke-P1BootstrapCommand {
         [int]$WaitMilliseconds = 0
     )
     if ($WaitMilliseconds -eq 0) {
-        if ($Operation -like 'install-*') {
+        if ($Operation -like 'install-*' -or $Operation -eq 'stage-slots') {
             $WaitMilliseconds = 180000
         } else {
             $WaitMilliseconds = 10000

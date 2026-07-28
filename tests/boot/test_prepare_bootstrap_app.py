@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOL = ROOT / "Tools" / "jlink" / "prepare-bootstrap-app.py"
+JLINK_COMMON = ROOT / "Tools" / "jlink" / "jlink-common.ps1"
 LAYOUT_TEXT = (ROOT / "Libraries/OTA/ota_layout.h").read_text(encoding="ascii")
 
 
@@ -76,6 +77,13 @@ def make_image() -> bytes:
 
 def main() -> int:
     checks = 0
+    common_text = JLINK_COMMON.read_text(encoding="ascii")
+    assert (
+        "if ($Operation -like 'install-*' -or $Operation -eq 'stage-slots')"
+        in common_text
+    )
+    checks += 1
+
     cache = ROOT / ".cache"
     cache.mkdir(exist_ok=True)
     work = cache / f"p1-5-tool-{os.getpid()}"

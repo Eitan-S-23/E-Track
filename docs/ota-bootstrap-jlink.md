@@ -60,6 +60,9 @@ install-recovery, stage-slots, and snapshot-bcb. The common PowerShell layer
 writes the command to 0x20058000, resets and runs Boot, waits with a bounded
 timeout, saves exactly 128 bytes, and rejects a missing result magic or CRC.
 The Boot result is never accepted based on a textual J-Link message alone.
+Install operations and stage-slots use a 180-second window because staging
+revalidates both complete slot images before its atomic BCB commit. Short BCB
+operations retain the 10-second window.
 
 ## Direct recovery-container flash
 
