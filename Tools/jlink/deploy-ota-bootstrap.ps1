@@ -2,7 +2,6 @@
 param(
     [string]$Version = '2.8.0',
     [long]$BuildTimestamp = 0,
-    [switch]$InstallRecovery,
     [string]$LegacyHex = '',
     [string]$RunDirectory = ''
 )
@@ -36,29 +35,42 @@ $cmakeSource = Join-Path $script:P1RepoRoot 'MDK-ARM_F435\cmake-generated'
 $armToolchain = 'D:\singlechip\gcc+gdb+openocd\tools\arm-gnu-toolchain-13.3.rel1-ming'
 $makeProgram = 'D:\install\mingw64\bin\make.exe'
 $legacyManifest = Join-Path $RunDirectory 'legacy-preserved.txt'
+$preservedLegacyHex = ''
+$deviceModified = $false
 
 Assert-P1File $legacyHex
 if (Test-Path -LiteralPath $buildDirectory) {
     throw "Fresh build directory already exists: $buildDirectory"
 }
+
 try {
     [System.IO.Directory]::CreateDirectory($legacyDirectory) | Out-Null
-    $legacyFiles = @(
-        $legacyHex,
-        (Join-Path $legacyObjectDirectory 'X-Track.axf'),
-        (Join-Path $legacyObjectDirectory 'X-Track.hex'),
-        (Join-Path $script:P1RepoRoot 'MDK-ARM_F435\Track.bin')
+    $preservedLegacyHex = Copy-P1PreservedArtifact -SourcePath $legacyHex -DestinationDirectory $legacyDirectory -Role 'selected-legacy'
+    $repositoryArtifacts = @(
+        [pscustomobject]@{
+            Path = Join-Path $legacyObjectDirectory 'X-Track.axf'
+            Role = 'repo-default-axf'
+        },
+        [pscustomobject]@{
+            Path = Join-Path $legacyObjectDirectory 'X-Track.hex'
+            Role = 'repo-default-hex'
+        },
+        [pscustomobject]@{
+            Path = Join-Path $script:P1RepoRoot 'MDK-ARM_F435\Track.bin'
+            Role = 'repo-default-bin'
+        }
     )
-    foreach ($legacyFile in $legacyFiles) {
-        if (Test-Path -LiteralPath $legacyFile -PathType Leaf) {
-            Copy-Item -LiteralPath $legacyFile -Destination $legacyDirectory -Force
+    foreach ($artifact in $repositoryArtifacts) {
+        if (Test-Path -LiteralPath $artifact.Path -PathType Leaf) {
+            Copy-P1PreservedArtifact -SourcePath $artifact.Path -DestinationDirectory $legacyDirectory -Role $artifact.Role | Out-Null
         }
     }
     Get-ChildItem -LiteralPath $legacyDirectory -File |
         Get-FileHash -Algorithm SHA256 |
         ForEach-Object { '{0}  {1}' -f $_.Hash, $_.Path } |
         Set-Content -LiteralPath $legacyManifest -Encoding ASCII
-    Write-Output "P1_5_LEGACY_SNAPSHOT=PASS directory=$legacyDirectory"
+    $selectedHash = (Get-FileHash -LiteralPath $preservedLegacyHex -Algorithm SHA256).Hash
+    Write-Output "P1_5_LEGACY_SNAPSHOT=PASS selected=$preservedLegacyHex sha256=$selectedHash"
 
     [System.IO.Directory]::CreateDirectory($buildDirectory) | Out-Null
     Invoke-P1Native -FilePath (Get-Command cmake.exe).Source -Arguments @(
@@ -111,61 +123,67 @@ try {
         '{0}  {1}' -f $hash.Hash, $hash.Path
     } | Set-Content -LiteralPath $artifactManifest -Encoding ASCII
     Write-Output "P1_5_FRESH_RELEASE=PASS build=$buildDirectory"
+    Write-Output "P1_5_EXTERNAL_RECOVERY_SLOT=NOT_INSTALLED asset=$recoveryAsset"
 
+    $deviceModified = $true
     Invoke-P1FlashBootAndApp -BootBin $bootBin -AppBin $deployApp -RunDirectory $RunDirectory | Out-Null
-    Invoke-P1BootstrapCommand -Operation 'clear-bcb' -RunDirectory $RunDirectory -Label 'clear-bcb' | Out-Null
-    if ($InstallRecovery) {
-        Invoke-P1BootstrapCommand -Operation 'install-recovery' -RunDirectory $RunDirectory -Label 'install-recovery' | Out-Null
-    }
 
-    $mapPath = Join-Path $buildDirectory 'app-gcc\X-Track-App-GCC.map'
-    $rttAddress = Get-P1MapRttAddress -MapPath $mapPath
-    Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'ordinary-reset' -WaitMilliseconds 30000 -RttAddress $rttAddress | Out-Null
-    Test-P1RttSignature -Address $rttAddress -RunDirectory $RunDirectory -Label 'first-rtt-signature' | Out-Null
-    Invoke-P1RttCapture -Address $rttAddress -OutputPath (Join-Path $RunDirectory 'ordinary-reset-rtt.log') -TimeoutSeconds 15 | Out-Null
-    $resetLog = Get-Content -LiteralPath (Join-Path $RunDirectory 'ordinary-reset.log') -Raw
-    $expectedVtor = '{0:X8}' -f $script:P1AppAddress
-    if ($resetLog -notmatch ('E000ED08\s*=\s*' + $expectedVtor)) {
-        throw "Ordinary reset did not leave VTOR at 0x$expectedVtor"
-    }
-    $rttLog = Get-Content -LiteralPath (Join-Path $RunDirectory 'ordinary-reset-rtt.log') -Raw
-    if ($rttLog -notmatch 'OTA: HANDOFF vtor=0x08010000') {
-        throw 'Ordinary reset RTT evidence lacks the Boot-to-App handoff line'
-    }
-    Invoke-P1BootstrapCommand -Operation 'snapshot-bcb' -RunDirectory $RunDirectory -Label 'first-boot-bcb' | Out-Null
     $assetLog = Get-Content -LiteralPath (Join-Path $RunDirectory 'asset-prepare.log') -Raw
-    $snapshotLog = Get-Content -LiteralPath (Join-Path $RunDirectory 'first-boot-bcb-result.log') -Raw
-    if ($assetLog -notmatch 'vcode=(\d+)') {
+    if ($assetLog -notmatch 'P1_5_APP_PREPARE=PASS .*vcode=(\d+)') {
         throw 'Prepared App evidence lacks version_code'
     }
     $expectedVcode = $Matches[1]
-    if ($snapshotLog -notmatch 'state=4' -or
-        $snapshotLog -notmatch ('cur_vcode=' + $expectedVcode + '(\s|$)')) {
-        throw 'First Boot did not persist CONFIRMED with cur_vcode from fw_header'
+    $mapPath = Join-Path $buildDirectory 'app-gcc\X-Track-App-GCC.map'
+    $rttAddress = Get-P1MapRttAddress -MapPath $mapPath
+
+    $firstResetLog = Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'ordinary-reset' -WaitMilliseconds 30000 -RttAddress $rttAddress
+    $firstReset = Assert-P1NormalResetEvidence -LogPath $firstResetLog
+    Test-P1RttSignature -Address $rttAddress -RunDirectory $RunDirectory -Label 'first-rtt-signature' | Out-Null
+    $firstRttPath = Join-Path $RunDirectory 'ordinary-reset-rtt.log'
+    Invoke-P1RttCapture -Address $rttAddress -OutputPath $firstRttPath -TimeoutSeconds 15 | Out-Null
+    $firstRtt = Get-Content -LiteralPath $firstRttPath -Raw
+    if ($firstRtt -notmatch 'OTA: HANDOFF vtor=0x08010000') {
+        throw 'Ordinary reset RTT evidence lacks the Boot-to-App handoff line'
     }
-    Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'final-ordinary-reset' -WaitMilliseconds 30000 -RttAddress $rttAddress | Out-Null
+    if ($firstRtt -notmatch ('OTA: BCB already CONFIRMED vcode=' + [regex]::Escape($expectedVcode) + '\b')) {
+        throw 'First Boot did not establish CONFIRMED with cur_vcode from fw_header'
+    }
+
+    $finalResetLog = Invoke-P1NormalReset -RunDirectory $RunDirectory -Label 'final-ordinary-reset' -WaitMilliseconds 30000 -RttAddress $rttAddress
+    $finalReset = Assert-P1NormalResetEvidence -LogPath $finalResetLog
     Test-P1RttSignature -Address $rttAddress -RunDirectory $RunDirectory -Label 'final-rtt-signature' | Out-Null
-    $finalResetLog = Get-Content -LiteralPath (Join-Path $RunDirectory 'final-ordinary-reset.log') -Raw
-    if ($finalResetLog -notmatch 'E000ED08\s*=\s*08010000') {
-        throw 'Final ordinary reset did not leave VTOR at 0x08010000'
+    $finalRttPath = Join-Path $RunDirectory 'final-ordinary-reset-rtt.log'
+    Invoke-P1RttCapture -Address $rttAddress -OutputPath $finalRttPath -TimeoutSeconds 15 | Out-Null
+    $finalRtt = Get-Content -LiteralPath $finalRttPath -Raw
+    if ($finalRtt -notmatch 'OTA: HANDOFF vtor=0x08010000') {
+        throw 'Final ordinary reset RTT evidence lacks the Boot-to-App handoff line'
     }
-    Write-Output ("P1_5_NORMAL_RESET=PASS vtor=0x{0:X8} rtt=0x{1:X8}" -f $script:P1AppAddress, $rttAddress)
+    if ($finalRtt -notmatch ('OTA: BCB already CONFIRMED vcode=' + [regex]::Escape($expectedVcode) + '\b')) {
+        throw 'Final ordinary reset RTT evidence lacks the CONFIRMED App vcode'
+    }
+
+    Write-Output (
+        'P1_5_NORMAL_RESET=PASS pc=0x{0:X8} vtor=0x{1:X8} cfsr=0x{2:X8} ' +
+        'final_pc=0x{3:X8} rtt=0x{4:X8} cur_vcode={5}' -f
+        $firstReset.PC, $firstReset.VTOR, $firstReset.CFSR,
+        $finalReset.PC, $rttAddress, $expectedVcode
+    )
     Write-Output "P1_5_DEPLOYMENT=PASS run_directory=$RunDirectory"
 }
 catch {
     $failure = $_
     Write-Warning ("P1-5 deployment failed: " + $failure.Exception.Message)
-    try {
-        $preservedLegacyHex = Join-Path $legacyDirectory (Split-Path -Leaf $legacyHex)
-        $recoveryHex = if (Test-Path -LiteralPath $preservedLegacyHex) {
-            $preservedLegacyHex
-        } else {
-            $legacyHex
+    if ($deviceModified) {
+        try {
+            if ([string]::IsNullOrWhiteSpace($preservedLegacyHex) -or
+                -not (Test-Path -LiteralPath $preservedLegacyHex -PathType Leaf)) {
+                throw 'The selected preserved legacy HEX is unavailable'
+            }
+            Invoke-P1LegacyRecovery -LegacyHex $preservedLegacyHex -RunDirectory $RunDirectory
         }
-        Invoke-P1LegacyRecovery -LegacyHex $recoveryHex -RunDirectory $RunDirectory
-    }
-    catch {
-        Write-Warning ("Legacy recovery also failed: " + $_.Exception.Message)
+        catch {
+            Write-Warning ("Legacy recovery also failed: " + $_.Exception.Message)
+        }
     }
     throw $failure
 }

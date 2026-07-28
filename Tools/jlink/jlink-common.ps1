@@ -35,14 +35,47 @@ $script:P1Device = 'AT32F435RGT7'
 $script:P1SpeedKHz = 1000
 $script:P1BootAddress = Get-P1LayoutMacro 'OTA_BOOT_ORIGIN'
 $script:P1AppAddress = Get-P1LayoutMacro 'OTA_APP_ORIGIN'
-$script:P1BootstrapAddress = Get-P1LayoutMacro 'OTA_OVERLAY_ORIGIN'
-$script:P1BootstrapLength = Get-P1LiteralMacro -Path (Join-Path $script:P1RepoRoot 'boot\include\boot_bootstrap.h') -Name 'BOOT_BOOTSTRAP_COMMAND_SIZE'
+$script:P1AppLength = Get-P1LayoutMacro 'OTA_APP_LENGTH'
 
 function Assert-P1File {
     param([Parameter(Mandatory = $true)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         throw "Required file is absent: $Path"
     }
+}
+
+function Copy-P1PreservedArtifact {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)][string]$DestinationDirectory,
+        [Parameter(Mandatory = $true)]
+        [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9._-]*$')]
+        [string]$Role
+    )
+    Assert-P1File $SourcePath
+    $source = (Resolve-Path $SourcePath).Path
+    [System.IO.Directory]::CreateDirectory($DestinationDirectory) | Out-Null
+    $sourceHash = Get-FileHash -LiteralPath $source -Algorithm SHA256
+    $sourceLength = (Get-Item -LiteralPath $source).Length
+    $targetName = '{0}-{1}-{2}' -f $Role, $sourceHash.Hash.ToLowerInvariant(),
+        [System.IO.Path]::GetFileName($source)
+    $target = Join-Path $DestinationDirectory $targetName
+    if ([string]::Equals(
+            [System.IO.Path]::GetFullPath($source),
+            [System.IO.Path]::GetFullPath($target),
+            [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Preserved artifact destination resolves to its source: $source"
+    }
+    if (Test-Path -LiteralPath $target) {
+        throw "Preserved artifact destination already exists: $target"
+    }
+    Copy-Item -LiteralPath $source -Destination $target
+    $targetHash = Get-FileHash -LiteralPath $target -Algorithm SHA256
+    $targetLength = (Get-Item -LiteralPath $target).Length
+    if ($targetLength -ne $sourceLength -or $targetHash.Hash -ne $sourceHash.Hash) {
+        throw "Preserved artifact readback mismatch: $target"
+    }
+    return (Resolve-Path $target).Path
 }
 
 function ConvertTo-P1NativeArgument {
@@ -138,45 +171,6 @@ function Invoke-P1JLink {
     ) -LogPath $LogPath -TimeoutSeconds $TimeoutSeconds
 }
 
-function Invoke-P1BootstrapCommand {
-    param(
-        [Parameter(Mandatory = $true)][ValidateSet('clear-bcb', 'install-candidate', 'install-backup', 'install-recovery', 'stage-slots', 'snapshot-bcb')][string]$Operation,
-        [Parameter(Mandatory = $true)][string]$RunDirectory,
-        [string]$Label = $Operation,
-        [int]$WaitMilliseconds = 0
-    )
-    if ($WaitMilliseconds -eq 0) {
-        if ($Operation -like 'install-*' -or $Operation -eq 'stage-slots') {
-            $WaitMilliseconds = 180000
-        } else {
-            $WaitMilliseconds = 10000
-        }
-    }
-    $tool = Join-Path $script:P1RepoRoot 'Tools\jlink\prepare-bootstrap-app.py'
-    $commandBin = Join-Path $RunDirectory ($Label + '-command.bin')
-    $resultBin = Join-Path $RunDirectory ($Label + '-result.bin')
-    $commandFile = Join-Path $RunDirectory ($Label + '.jlink')
-    $commandLog = Join-Path $RunDirectory ($Label + '.log')
-    $prepareLog = Join-Path $RunDirectory ($Label + '-command.log')
-    $resultLog = Join-Path $RunDirectory ($Label + '-result.log')
-    Invoke-P1Python -Arguments @($tool, 'command', '--operation', $Operation, '--output', $commandBin) -LogPath $prepareLog | Out-Null
-    Write-P1JLinkCommandFile -Path $commandFile -Lines @(
-        'h',
-        ('loadbin "{0}", 0x{1:X8}' -f $commandBin, $script:P1BootstrapAddress),
-        'r',
-        'g',
-        ('Sleep {0}' -f $WaitMilliseconds),
-        'h',
-        ('savebin "{0}", 0x{1:X8}, 0x{2:X}' -f $resultBin, $script:P1BootstrapAddress, $script:P1BootstrapLength),
-        'qc'
-    )
-    $timeoutSeconds = [Math]::Ceiling($WaitMilliseconds / 1000.0) + 60
-    Invoke-P1JLink -CommandFile $commandFile -LogPath $commandLog -TimeoutSeconds $timeoutSeconds | Out-Null
-    Invoke-P1Python -Arguments @($tool, 'result', '--input', $resultBin) -LogPath $resultLog | Out-Null
-    Get-Content -LiteralPath $resultLog
-    return $resultBin
-}
-
 function Invoke-P1FlashBootAndApp {
     param(
         [Parameter(Mandatory = $true)][string]$BootBin,
@@ -197,8 +191,9 @@ function Invoke-P1FlashBootAndApp {
     )
     Invoke-P1JLink -CommandFile $commandFile -LogPath $logPath -TimeoutSeconds 180 | Out-Null
     $log = Get-Content -LiteralPath $logPath -Raw
-    if ($log -notmatch 'Verify successful\.') {
-        throw "J-Link VerifyBin did not report success. See $logPath"
+    $verifyCount = [regex]::Matches($log, 'Verify successful\.').Count
+    if ($verifyCount -ne 2) {
+        throw "J-Link did not report both Boot and App VerifyBin successes. See $logPath"
     }
     Write-Output ('P1_5_FLASH_VERIFY=PASS boot=0x{0:X8} app=0x{1:X8}' -f $script:P1BootAddress, $script:P1AppAddress)
     return $logPath
@@ -220,7 +215,8 @@ function Invoke-P1FlashApp {
         'qc'
     )
     Invoke-P1JLink -CommandFile $commandFile -LogPath $logPath -TimeoutSeconds 180 | Out-Null
-    if ((Get-Content -LiteralPath $logPath -Raw) -notmatch 'Verify successful\.') {
+    $log = Get-Content -LiteralPath $logPath -Raw
+    if ([regex]::Matches($log, 'Verify successful\.').Count -ne 1) {
         throw "J-Link App VerifyBin did not report success. See $logPath"
     }
     Write-Output ('P1_5_APP_FLASH_VERIFY=PASS app=0x{0:X8} trailer_written=0' -f $script:P1AppAddress)
@@ -264,6 +260,54 @@ function Invoke-P1NormalReset {
     $timeoutSeconds = [Math]::Ceiling($WaitMilliseconds / 1000.0) + 60
     Invoke-P1JLink -CommandFile $commandFile -LogPath $logPath -TimeoutSeconds $timeoutSeconds | Out-Null
     return $logPath
+}
+
+function Get-P1LogHex32 {
+    param(
+        [Parameter(Mandatory = $true)][string]$Text,
+        [Parameter(Mandatory = $true)][string]$Pattern,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+    $matches = [regex]::Matches(
+        $Text,
+        $Pattern,
+        [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor
+        [System.Text.RegularExpressions.RegexOptions]::Multiline
+    )
+    if ($matches.Count -ne 1) {
+        throw "Expected exactly one $Label value in the J-Link reset log, found $($matches.Count)"
+    }
+    return [Convert]::ToUInt32($matches[0].Groups[1].Value, 16)
+}
+
+function Assert-P1NormalResetEvidence {
+    param(
+        [Parameter(Mandatory = $true)][string]$LogPath,
+        [uint32]$ExpectedVtor = $script:P1AppAddress
+    )
+    Assert-P1File $LogPath
+    $log = Get-Content -LiteralPath $LogPath -Raw
+    $pc = Get-P1LogHex32 -Text $log -Pattern '^\s*PC\s*=\s*(?:0x)?([0-9A-Fa-f]{8})\b' -Label 'PC'
+    $vtor = Get-P1LogHex32 -Text $log -Pattern '^\s*E000ED08\s*=\s*(?:0x)?([0-9A-Fa-f]{8})\b' -Label 'VTOR'
+    $cfsr = Get-P1LogHex32 -Text $log -Pattern '^\s*E000ED28\s*=\s*(?:0x)?([0-9A-Fa-f]{8})\b' -Label 'CFSR'
+    $appEnd = [uint64]$script:P1AppAddress + [uint64]$script:P1AppLength
+
+    if ([uint64]$pc -lt [uint64]$script:P1AppAddress -or
+        [uint64]$pc -ge $appEnd) {
+        throw ('Ordinary reset PC is outside the App partition: 0x{0:X8}' -f $pc)
+    }
+    if ($vtor -ne $ExpectedVtor) {
+        throw ('Ordinary reset VTOR mismatch: got 0x{0:X8}, expected 0x{1:X8}' -f $vtor, $ExpectedVtor)
+    }
+    if ($cfsr -ne 0) {
+        throw ('Ordinary reset CFSR is nonzero: 0x{0:X8}' -f $cfsr)
+    }
+
+    return [pscustomobject]@{
+        PC = $pc
+        VTOR = $vtor
+        CFSR = $cfsr
+    }
 }
 
 function Stop-P1RttLogger {

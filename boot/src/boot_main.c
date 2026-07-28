@@ -1,5 +1,4 @@
 #include "boot_fw_header.h"
-#include "boot_bootstrap.h"
 #include "boot_handoff.h"
 #include "boot_platform.h"
 #include "boot_recovery.h"
@@ -22,7 +21,6 @@ volatile int32_t g_boot_p1_state_status;
 volatile uint32_t g_boot_p1_state_action;
 volatile uint32_t g_boot_p1_state_value;
 volatile uint32_t g_boot_p1_state_resume;
-volatile int32_t g_boot_p1_bootstrap_result;
 
 static int eeprom_read(uint8_t address, uint8_t *dst, uint16_t len)
 {
@@ -75,53 +73,6 @@ static int state_internal_program(void *ctx, uint32_t address,
     return boot_platform_flash_program(address, src, len);
 }
 
-static int bootstrap_eeprom_write(void *ctx, uint8_t address,
-                                  const uint8_t *src, uint16_t len)
-{
-    (void)ctx;
-    return boot_platform_eeprom_write(address, src, len);
-}
-
-static int bootstrap_eeprom_read(void *ctx, uint8_t address,
-                                 uint8_t *dst, uint16_t len)
-{
-    (void)ctx;
-    return boot_platform_eeprom_read(address, dst, len);
-}
-
-static int bootstrap_internal_read(void *ctx, uint32_t address,
-                                   uint8_t *dst, size_t len)
-{
-    (void)ctx;
-    return boot_platform_flash_read(address, dst, len);
-}
-
-static int bootstrap_external_init(void *ctx)
-{
-    (void)ctx;
-    return boot_platform_qspi_init();
-}
-
-static int bootstrap_external_erase(void *ctx, uint32_t address)
-{
-    (void)ctx;
-    return boot_platform_qspi_erase_4k(address);
-}
-
-static int bootstrap_external_program(void *ctx, uint32_t address,
-                                      const uint8_t *src, size_t len)
-{
-    (void)ctx;
-    return boot_platform_qspi_program(address, src, len);
-}
-
-static int bootstrap_external_read(void *ctx, uint32_t address,
-                                   uint8_t *dst, size_t len)
-{
-    (void)ctx;
-    return boot_platform_qspi_read(address, dst, len);
-}
-
 static void state_log(void *ctx, const char *text)
 {
     (void)ctx;
@@ -168,16 +119,6 @@ static int receive_physical_recovery(const boot_state_io_t *io,
 int main(void)
 {
     static const bcb_hal_t bcb_hal = {eeprom_write, eeprom_read};
-    static const boot_bootstrap_io_t bootstrap_io = {
-        bootstrap_eeprom_write,
-        bootstrap_eeprom_read,
-        bootstrap_internal_read,
-        bootstrap_external_init,
-        bootstrap_external_erase,
-        bootstrap_external_program,
-        bootstrap_external_read,
-        NULL
-    };
     boot_state_io_t state_io;
     boot_state_outcome_t outcome;
 
@@ -189,17 +130,9 @@ int main(void)
     g_boot_p1_state_action = BOOT_STATE_ACTION_HOLD;
     g_boot_p1_state_value = 0xFFFFFFFFu;
     g_boot_p1_state_resume = 0u;
-    g_boot_p1_bootstrap_result = BOOT_BOOTSTRAP_NO_REQUEST;
 
     if (boot_platform_init() != 0)
     {
-        boot_platform_hold();
-    }
-
-    g_boot_p1_bootstrap_result = boot_bootstrap_process(&bootstrap_io);
-    if (g_boot_p1_bootstrap_result == BOOT_BOOTSTRAP_HOLD)
-    {
-        boot_platform_log("BOOT: bootstrap result ready; halted\r\n");
         boot_platform_hold();
     }
 

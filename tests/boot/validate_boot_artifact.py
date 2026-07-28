@@ -40,8 +40,6 @@ def validate(build_dir: Path) -> None:
     vector_max = parse_macro(layout_text, "OTA_VECTOR_MAX")
     ram_origin = parse_macro(layout_text, "OTA_RAM_ORIGIN")
     ram_length = parse_macro(layout_text, "OTA_RAM_LENGTH")
-    overlay_origin = parse_macro(layout_text, "OTA_OVERLAY_ORIGIN")
-    overlay_length = parse_macro(layout_text, "OTA_OVERLAY_LENGTH")
 
     output_dir = build_dir / "boot"
     map_text = (output_dir / "X-Track-Boot.map").read_text(
@@ -56,11 +54,6 @@ def validate(build_dir: Path) -> None:
         raise SystemExit("P1-1: Boot FLASH region mismatch")
     if map_pair(map_text, "RAM", r"\s+") != (ram_origin, ram_length):
         raise SystemExit("P1-1: Boot RAM region mismatch")
-    if map_pair(map_text, "OTA_CMD", r"\s+") != (
-        overlay_origin,
-        overlay_length,
-    ):
-        raise SystemExit("P1-5: Boot bootstrap overlay region mismatch")
     vector = map_pair(map_text, ".isr_vector", "")
     if vector[0] != boot_origin or vector[1] > vector_max:
         raise SystemExit("P1-1: Boot vector placement/size mismatch")
@@ -80,31 +73,12 @@ def validate(build_dir: Path) -> None:
         "bcb_arbiter",
         "boot_ymodem_receive",
         "boot_platform_qspi_read",
-        "boot_platform_qspi_erase_4k",
-        "boot_platform_qspi_program",
         "boot_platform_flash_program",
         "boot_platform_recovery_key_held",
-        "boot_bootstrap_process",
     )
     missing = [symbol for symbol in required_symbols if symbol not in map_text]
     if missing:
         raise SystemExit(f"P1-1: required Boot symbols missing: {missing}")
-
-    bootstrap_section = re.search(
-        r"(?m)^\.boot_bootstrap_noinit\s*\n\s*"
-        r"(0x[0-9A-Fa-f]+)\s+(0x[0-9A-Fa-f]+)",
-        map_text,
-    )
-    bootstrap_symbol = re.search(
-        r"(?m)^\s*(0x[0-9A-Fa-f]+)\s+g_boot_bootstrap_command\s*$",
-        map_text,
-    )
-    if not bootstrap_section or tuple(
-        int(value, 16) for value in bootstrap_section.groups()
-    ) != (overlay_origin, 128):
-        raise SystemExit("P1-5: bootstrap command section placement drifted")
-    if not bootstrap_symbol or int(bootstrap_symbol.group(1), 16) != overlay_origin:
-        raise SystemExit("P1-5: bootstrap command symbol placement drifted")
 
     cmake_text = (ROOT / "MDK-ARM_F435/cmake-generated/CMakeLists.txt").read_text(
         encoding="utf-8"

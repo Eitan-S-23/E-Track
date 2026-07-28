@@ -1,103 +1,104 @@
 # P1-5 J-Link Bootstrap
 
-This document describes the one-time migration from the legacy AC5 layout to
-the OTA Boot plus relocated GCC App layout. It is an implementation procedure,
-not a change to the frozen binary contracts.
+This procedure performs the one-time migration from the legacy AC5 layout to
+the OTA Boot plus relocated GCC App layout. P1-5 is tool and documentation
+work only. It does not add a production Boot command channel, QSPI write API,
+OTA receive path, decryption, decompression, patching, or a new binary
+contract.
 
 ## Prerequisites
 
-- A clean hardware connection using the onboard J-Link.
-- SEGGER J-Link V8.18 with device AT32F435RGT7.
-- SWD speed exactly 1000 kHz.
-- Power and the board's SD card in a stable state. A J-Link halt can interrupt
-  SDIO; if the card becomes unavailable, power-cycle or reinsert the card
-  before continuing.
-- No JLinkRTTViewer window and no stale JLinkRTTLogger process.
-- A legacy MDK-ARM_F435\Objects\X-Track.hex artifact. The deployment script
-  copies the legacy hex, axf, hex, and bin into its run directory before any
-  flash operation.
+- Use SEGGER J-Link V8.18 with device `AT32F435RGT7`.
+- Use SWD at exactly `1000 kHz`.
+- Close JLinkRTTViewer. The scripts terminate stale JLinkRTTLogger processes
+  before and after every bounded capture.
+- Supply the explicitly selected legacy HEX. The default is
+  `MDK-ARM_F435\Objects\X-Track.hex`.
+- Start from a pure legacy device whose two BCB records are blank or invalid.
+  The production Boot already handles that condition by validating the App and
+  atomically creating `CONFIRMED` with `cur_vcode` from its verified
+  `fw_header`. The deployment tool does not clear or rewrite EEPROM.
+- Keep power and the SD card stable. A J-Link halt can interrupt SDIO; recover
+  the card by power cycling or reinserting it before retrying.
 
-## One-time migration
+## One-Time Migration
 
 Run from the repository root:
 
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\jlink\deploy-ota-bootstrap.ps1 -Version 2.8.0 -InstallRecovery
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\jlink\deploy-ota-bootstrap.ps1 -Version 2.8.0 -LegacyHex .\MDK-ARM_F435\Objects\X-Track.hex
+```
 
-The script creates a unique .cache\p1-5-bootstrap-* directory and performs
-these steps:
+The script creates a unique `.cache\p1-5-bootstrap-*` run directory and:
 
-1. Preserve the legacy artifacts and their SHA-256 manifest.
-2. Configure and build a fresh GCC Release X_Track_App_GCC and X_Track_Boot
-   pair.
-3. Finalize a copy of the App with Tools\etu_pack.py; the raw build output is
-   never mutated.
-4. Run prepare-bootstrap-app.py, which validates every fw_header field, the
-   double-zero SHA, header CRC, vector MSP/Reset_Handler range, and generates a
-   recovery container when requested.
-5. Program and verifybin Boot at 0x08000000 and the finalized App at
-   0x08010000.
-6. Clear both BCB records through the authenticated 128-byte NOLOAD bootstrap
-   command. On the next ordinary reset Boot validates the App and creates a
-   CONFIRMED BCB with cur_vcode read from the validated header.
-7. With -InstallRecovery, ask Boot to copy the validated internal App into the
-   recovery slot. Boot erases and verifies each 4 KiB block and writes the ETSL
-   commit marker last; the host does not construct or bypass that header.
-8. Perform an ordinary MCU reset, re-resolve _SEGGER_RTT from the current App
-   map, verify the SEGGER RTT signature by mem8, and collect one bounded RTT
-   log. The script requires a VTOR=0x08010000 handoff line and a BCB line.
+1. Copies the selected legacy HEX to a
+   `selected-legacy-<sha256>-<basename>` file before any device write.
+2. Copies repository-default legacy artifacts under separate
+   `repo-default-*` names. They are audit assets and are never selected for
+   rollback.
+3. Builds fresh GCC Release `X_Track_App_GCC` and `X_Track_Boot` targets.
+4. Finalizes a copy of the App and validates the complete frozen `fw_header`,
+   double-zero SHA-256, header CRC32, MSP, and Reset_Handler contracts.
+5. Generates a recovery container as a retained host artifact only. The script
+   does not install or modify an external recovery slot.
+6. Programs Boot at `0x08000000` and finalized App at `0x08010000`, then
+   requires two distinct `VerifyBin` success results.
+7. Performs two ordinary MCU resets. Each reset must report a PC inside the App
+   partition, `VTOR=0x08010000`, and exact `CFSR=0x00000000`.
+8. Re-resolves `_SEGGER_RTT` from the fresh App map, verifies the
+   `SEGGER RTT` RAM signature, and requires a current
+   `OTA: HANDOFF vtor=0x08010000` line.
+9. Requires `OTA: BCB already CONFIRMED vcode=<fw_header version_code>`.
+   This is the evidence that a blank/double-bad BCB was initialized from the
+   validated App rather than from host-supplied metadata.
 
-P1_5_DEPLOYMENT=PASS is emitted only after the ordinary reset evidence is
-present. A restricted debugger start is not accepted as this evidence.
+`P1_5_DEPLOYMENT=PASS` is emitted only after every gate above passes. A
+debugger-forced MSP/PC start is not accepted.
 
-## Bootstrap command utility
+## Asset Preparation
 
-The command protocol is generated and checked by the Python tool:
+`prepare-bootstrap-app.py` intentionally exposes only `prepare` and
+`verify`:
 
-    python .\Tools\jlink\prepare-bootstrap-app.py command --operation snapshot-bcb --output .cache\snapshot-command.bin
+```powershell
+python .\Tools\jlink\prepare-bootstrap-app.py prepare --input .\app.finalized.bin --input-kind app --output .\app.deploy.bin --recovery-output .\recovery-v2.8.0.bin
+python .\Tools\jlink\prepare-bootstrap-app.py verify --input .\recovery-v2.8.0.bin --input-kind recovery
+```
 
-Supported operations are clear-bcb, install-candidate, install-backup,
-install-recovery, stage-slots, and snapshot-bcb. The common PowerShell layer
-writes the command to 0x20058000, resets and runs Boot, waits with a bounded
-timeout, saves exactly 128 bytes, and rejects a missing result magic or CRC.
-The Boot result is never accepted based on a textual J-Link message alone.
-Install operations and stage-slots use a 180-second window because staging
-revalidates both complete slot images before its atomic BCB commit. Short BCB
-operations retain the 10-second window. A snapshot-bcb result with a BCB
-arbitration I/O error is rejected even if the command transport completed.
+The tool rejects all input/output and App/recovery output path collisions
+before writing. It reads back every generated file and verifies that the
+source asset remains byte-identical.
 
-## Direct recovery-container flash
+## Direct Recovery-Container Flash
 
-For a physical recovery asset produced by CI:
+Direct J-Link flashing of a CI recovery container requires the matching App
+map so the RTT address is not guessed:
 
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\jlink\flash-recovery-container.ps1 -RecoveryContainer .\recovery-v2.8.0.bin
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\jlink\flash-recovery-container.ps1 -RecoveryContainer .\recovery-v2.8.0.bin -AppMap .\X-Track-App-GCC.map -LegacyHex .\MDK-ARM_F435\Objects\X-Track.hex
+```
 
-The tool requires a valid final 8-byte image_len + crc32 trailer, verifies the
-complete App, writes a separate recovery-stripped-app.bin, and flashes only
-that file at 0x08010000. The trailer is therefore never written into the App
-partition. It emits P1_5_RECOVERY_TRAILER_STRIPPED=PASS only after confirming
-the prepared image is exactly 8 bytes shorter, then requires an ordinary reset
-to leave VTOR at 0x08010000. The original container is not changed. On failure
-the preserved legacy hex is used as the automatic recovery flash.
+The script validates the recovery trailer, writes a separate
+`recovery-stripped-app.bin`, and confirms that the source length and
+SHA-256 are unchanged. The stripped file must be exactly eight bytes shorter,
+so the recovery container trailer is never written into the App partition.
 
-This direct path assumes the P1-5 Boot is already installed. The normal
-deployment path's -InstallRecovery option is preferred for populating the
-external recovery slot.
+This path assumes the production Boot is already installed. It does not clear
+BCB and does not install an external recovery slot. PASS requires App-range
+PC, the expected VTOR, exact zero CFSR, the map-derived RTT signature, and a
+current Boot-to-App handoff line.
 
-## Failure handling and evidence
+## Failure Handling
 
-Every run directory retains:
+No script deletes legacy or generated artifacts. If a failure occurs before
+the first device write, the MCU is left untouched. If a failure occurs after a
+device write begins, rollback uses only the hash-named copy of the explicitly
+selected legacy HEX. A basename-colliding repository default can therefore
+never replace the rollback source.
 
-- the preserved legacy artifacts and SHA-256 manifest;
-- fresh CMake configure/build logs;
-- raw, finalized, deployed, and recovery asset hashes;
-- J-Link command files and logs;
-- bootstrap command/result binaries and parsed CRC/status output;
-- RTT signature, ordinary-reset, and bounded logger output.
+Every run directory retains manifests, build logs, raw/finalized/deployed
+assets, J-Link command logs, reset register evidence, RTT signature checks,
+and bounded RTT captures. Investigate those files before retrying.
 
-If any build, validation, VerifyBin, bootstrap, or ordinary-reset assertion
-fails, the deployment script does not delete OTA artifacts. It attempts to
-reflash the preserved legacy hex and then rethrows the original failure.
-Investigate the run directory before retrying.
-
-The procedure does not perform the P1-6 physical power-loss matrix. It also
-does not add OTA receive, decryption, decompression, or patching behavior.
+The external recovery-slot installer and the P1-6 physical power-loss matrix
+are outside this procedure.

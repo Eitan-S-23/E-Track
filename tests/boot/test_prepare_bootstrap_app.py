@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Host checks for the P1-5 asset and bootstrap command utility."""
+"""Host checks for the tool-only P1-5 deployment utilities."""
 
 from __future__ import annotations
 
 import hashlib
 import os
 import re
+import shutil
 import struct
 import subprocess
 import sys
@@ -16,6 +17,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 TOOL = ROOT / "Tools" / "jlink" / "prepare-bootstrap-app.py"
 JLINK_COMMON = ROOT / "Tools" / "jlink" / "jlink-common.ps1"
+DEPLOY = ROOT / "Tools" / "jlink" / "deploy-ota-bootstrap.ps1"
+RECOVERY_FLASH = ROOT / "Tools" / "jlink" / "flash-recovery-container.ps1"
 LAYOUT_TEXT = (ROOT / "Libraries/OTA/ota_layout.h").read_text(encoding="ascii")
 
 
@@ -38,6 +41,29 @@ RAM_END = parse_layout_macro("OTA_OVERLAY_ORIGIN") + parse_layout_macro(
 IMAGE_LENGTH = FW_OFFSET + 0x200
 
 
+class FlatWorkspace:
+    def __init__(self) -> None:
+        self.cache = ROOT / ".cache"
+        self.cache.mkdir(exist_ok=True)
+        self.prefix = f"p1-5-tool-{os.getpid()}"
+        self.paths: list[Path] = []
+
+    def track(self, path: Path) -> Path:
+        if path not in self.paths:
+            self.paths.append(path)
+        return path
+
+    def __truediv__(self, name: str) -> Path:
+        return self.track(self.cache / f"{self.prefix}-{name}")
+
+    def __enter__(self) -> FlatWorkspace:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        for path in reversed(self.paths):
+            path.unlink(missing_ok=True)
+
+
 def run(*args: str, expect: int = 0) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         [sys.executable, str(TOOL), *args],
@@ -48,6 +74,28 @@ def run(*args: str, expect: int = 0) -> subprocess.CompletedProcess[str]:
     if result.returncode != expect:
         raise AssertionError(
             f"unexpected exit {result.returncode} (expected {expect})\n"
+            f"stdout={result.stdout}\nstderr={result.stderr}"
+        )
+    return result
+
+
+def ps_quote(path: Path) -> str:
+    return str(path.resolve()).replace("'", "''")
+
+
+def run_powershell(
+    executable: str, script: str, expect: int = 0
+) -> subprocess.CompletedProcess[str]:
+    script = "Import-Module Microsoft.PowerShell.Utility; " + script
+    result = subprocess.run(
+        [executable, "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode != expect:
+        raise AssertionError(
+            f"unexpected PowerShell exit {result.returncode} (expected {expect})\n"
             f"stdout={result.stdout}\nstderr={result.stderr}"
         )
     return result
@@ -75,91 +123,260 @@ def make_image() -> bytes:
     return bytes(image)
 
 
+def make_recovery(image: bytes) -> bytes:
+    return image + struct.pack("<II", len(image), zlib.crc32(image) & 0xFFFFFFFF)
+
+
 def main() -> int:
     checks = 0
     common_text = JLINK_COMMON.read_text(encoding="ascii")
-    assert (
-        "if ($Operation -like 'install-*' -or $Operation -eq 'stage-slots')"
-        in common_text
-    )
-    checks += 1
+    deploy_text = DEPLOY.read_text(encoding="ascii")
+    recovery_flash_text = RECOVERY_FLASH.read_text(encoding="ascii")
+    combined_scripts = common_text + deploy_text + recovery_flash_text
 
-    cache = ROOT / ".cache"
-    cache.mkdir(exist_ok=True)
-    work = cache / f"p1-5-tool-{os.getpid()}"
-    app = work.with_name(work.name + "-app.bin")
-    prepared = work.with_name(work.name + "-prepared.bin")
-    recovery = work.with_name(work.name + "-recovery.bin")
-    app.write_bytes(make_image())
+    assert "Invoke-P1BootstrapCommand" not in combined_scripts
+    assert "InstallRecovery" not in deploy_text
+    assert "Assert-P1NormalResetEvidence" in common_text
+    assert "repo-default-hex" in deploy_text and "selected-legacy" in deploy_text
+    assert "CFSR is nonzero" in common_text
+    assert not (ROOT / "boot" / "include" / "boot_bootstrap.h").exists()
+    assert not (ROOT / "boot" / "src" / "boot_bootstrap.c").exists()
+    checks += 7
 
-    result = run(
-        "prepare",
-        "--input",
-        str(app),
-        "--input-kind",
-        "app",
-        "--output",
-        str(prepared),
-        "--recovery-output",
-        str(recovery),
-    )
-    assert "P1_5_APP_PREPARE=PASS" in result.stdout
-    assert prepared.read_bytes() == app.read_bytes()
-    assert len(recovery.read_bytes()) == IMAGE_LENGTH + 8
-    checks += 3
+    with FlatWorkspace() as work:
+        image = make_image()
+        recovery_bytes = make_recovery(image)
+        app = work / "app.bin"
+        prepared = work / "prepared.bin"
+        recovery = work / "recovery.bin"
+        app.write_bytes(image)
 
-    result = run("verify", "--input", str(recovery), "--input-kind", "recovery")
-    assert "P1_5_APP_VERIFY=PASS" in result.stdout
-    checks += 1
+        result = run(
+            "prepare",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--output",
+            str(prepared),
+            "--recovery-output",
+            str(recovery),
+        )
+        assert "P1_5_APP_PREPARE=PASS" in result.stdout
+        assert "source_preserved=1" in result.stdout
+        assert prepared.read_bytes() == image
+        assert recovery.read_bytes() == recovery_bytes
+        assert app.read_bytes() == image
+        checks += 5
 
-    command = work.with_name(work.name + "-command.bin")
-    result = run(
-        "command",
-        "--operation",
-        "install-recovery",
-        "--output",
-        str(command),
-    )
-    raw_command = command.read_bytes()
-    assert len(raw_command) == 128
-    assert struct.unpack_from("<I", raw_command, 0)[0] == 0x424A5445
-    assert struct.unpack_from("<I", raw_command, 32)[0] == (
-        zlib.crc32(raw_command[:32]) & 0xFFFFFFFF
-    )
-    assert "P1_5_BOOTSTRAP_COMMAND=PASS" in result.stdout
-    checks += 4
+        result = run("verify", "--input", str(app), "--input-kind", "app")
+        assert "kind=app" in result.stdout
+        result = run("verify", "--input", str(recovery), "--input-kind", "recovery")
+        assert "kind=recovery" in result.stdout
+        checks += 2
 
-    bad_recovery = work.with_name(work.name + "-bad-recovery.bin")
-    bad_recovery.write_bytes(recovery.read_bytes()[:-1] + b"\x00")
-    run("verify", "--input", str(bad_recovery), "--input-kind", "recovery", expect=1)
-    checks += 1
+        auto_prepared = work / "auto-prepared.bin"
+        run(
+            "prepare",
+            "--input",
+            str(recovery),
+            "--input-kind",
+            "auto",
+            "--output",
+            str(auto_prepared),
+        )
+        assert auto_prepared.read_bytes() == image
+        assert recovery.read_bytes() == recovery_bytes
+        checks += 2
 
-    done = bytearray(128)
-    struct.pack_into("<I", done, 0, 0x444A5445)
-    struct.pack_into("<II", done, 36, 2, 0)
-    struct.pack_into("<I", done, 96, zlib.crc32(done[36:96]) & 0xFFFFFFFF)
-    result_file = work.with_name(work.name + "-result.bin")
-    result_file.write_bytes(done)
-    result = run("result", "--input", str(result_file))
-    assert "P1_5_BOOTSTRAP_RESULT=PASS" in result.stdout
-    checks += 1
+        bad_recovery = work / "bad-recovery.bin"
+        bad_recovery.write_bytes(recovery_bytes[:-1] + b"\x00")
+        result = run(
+            "verify",
+            "--input",
+            str(bad_recovery),
+            "--input-kind",
+            "recovery",
+            expect=1,
+        )
+        assert "recovery trailer" in result.stderr
+        checks += 1
 
-    failed_snapshot = bytearray(done)
-    struct.pack_into("<I", failed_snapshot, 8, 4)
-    struct.pack_into("<I", failed_snapshot, 52, 0xFFFFFFFF)
-    struct.pack_into(
-        "<I",
-        failed_snapshot,
-        96,
-        zlib.crc32(failed_snapshot[36:96]) & 0xFFFFFFFF,
-    )
-    failed_snapshot_file = work.with_name(work.name + "-failed-snapshot.bin")
-    failed_snapshot_file.write_bytes(failed_snapshot)
-    result = run("result", "--input", str(failed_snapshot_file), expect=1)
-    assert "BCB arbitration I/O failed" in result.stderr
-    checks += 1
+        bad_header = work / "bad-header.bin"
+        corrupted = bytearray(image)
+        corrupted[FW_OFFSET] ^= 0xFF
+        bad_header.write_bytes(corrupted)
+        result = run(
+            "verify",
+            "--input",
+            str(bad_header),
+            "--input-kind",
+            "app",
+            expect=1,
+        )
+        assert "fw_header magic" in result.stderr
+        checks += 1
 
-    print(f"P1_5_PREPARE_TOOL=PASS checks={checks}")
+        app_before = app.read_bytes()
+        result = run(
+            "prepare",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--output",
+            str(app),
+            expect=1,
+        )
+        assert "input and output paths must differ" in result.stderr
+        assert app.read_bytes() == app_before
+        checks += 2
+
+        recovery_before = recovery.read_bytes()
+        result = run(
+            "prepare",
+            "--input",
+            str(recovery),
+            "--input-kind",
+            "recovery",
+            "--output",
+            str(recovery),
+            expect=1,
+        )
+        assert "input and output paths must differ" in result.stderr
+        assert recovery.read_bytes() == recovery_before
+        checks += 2
+
+        collision_output = work / "collision-output.bin"
+        result = run(
+            "prepare",
+            "--input",
+            str(recovery),
+            "--input-kind",
+            "recovery",
+            "--output",
+            str(collision_output),
+            "--recovery-output",
+            str(recovery),
+            expect=1,
+        )
+        assert "recovery output must differ from input" in result.stderr
+        assert not collision_output.exists()
+        assert recovery.read_bytes() == recovery_before
+        checks += 3
+
+        same_outputs = work / "same-output.bin"
+        result = run(
+            "prepare",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--output",
+            str(same_outputs),
+            "--recovery-output",
+            str(same_outputs),
+            expect=1,
+        )
+        assert "recovery output must differ from App output" in result.stderr
+        assert not same_outputs.exists()
+        checks += 2
+
+        result = run("command", expect=2)
+        assert "invalid choice" in result.stderr
+        checks += 1
+
+        powershell = shutil.which("powershell.exe") or shutil.which("pwsh")
+        powershell_checks = 0
+        if powershell is not None:
+            common = ps_quote(JLINK_COMMON)
+            good_log = work / "reset-good.log"
+            bad_cfsr_log = work / "reset-bad-cfsr.log"
+            bad_pc_log = work / "reset-bad-pc.log"
+            good_log.write_text(
+                "PC = 08012345, CycleCnt = 00000000\n"
+                "E000ED08 = 08010000\n"
+                "E000ED28 = 00000000\n",
+                encoding="ascii",
+            )
+            bad_cfsr_log.write_text(
+                good_log.read_text(encoding="ascii").replace(
+                    "E000ED28 = 00000000", "E000ED28 = 00010000"
+                ),
+                encoding="ascii",
+            )
+            bad_pc_log.write_text(
+                good_log.read_text(encoding="ascii").replace(
+                    "PC = 08012345", "PC = 08000010"
+                ),
+                encoding="ascii",
+            )
+
+            script = (
+                f"$ErrorActionPreference='Stop'; . '{common}'; "
+                f"$e=Assert-P1NormalResetEvidence -LogPath '{ps_quote(good_log)}'; "
+                "if($e.PC -ne 0x08012345 -or $e.VTOR -ne 0x08010000 "
+                "-or $e.CFSR -ne 0){throw 'parsed evidence mismatch'}"
+            )
+            run_powershell(powershell, script)
+            powershell_checks += 1
+
+            result = run_powershell(
+                powershell,
+                f"$ErrorActionPreference='Stop'; . '{common}'; "
+                f"Assert-P1NormalResetEvidence -LogPath '{ps_quote(bad_cfsr_log)}'",
+                expect=1,
+            )
+            assert "CFSR is nonzero" in (result.stdout + result.stderr)
+            powershell_checks += 1
+
+            result = run_powershell(
+                powershell,
+                f"$ErrorActionPreference='Stop'; . '{common}'; "
+                f"Assert-P1NormalResetEvidence -LogPath '{ps_quote(bad_pc_log)}'",
+                expect=1,
+            )
+            assert "outside the App partition" in (result.stdout + result.stderr)
+            powershell_checks += 1
+
+            collision_name = f"p1-5-legacy-collision-{os.getpid()}.hex"
+            selected = work.track(ROOT / ".cache" / collision_name)
+            repository_default = work.track(
+                ROOT / "Tools" / "jlink" / collision_name
+            )
+            preserved_dir = ROOT / ".cache"
+            selected.write_bytes(b"SELECTED-LEGACY")
+            repository_default.write_bytes(b"REPOSITORY-DEFAULT")
+            selected_hash = hashlib.sha256(selected.read_bytes()).hexdigest()
+            default_hash = hashlib.sha256(repository_default.read_bytes()).hexdigest()
+            selected_copy = work.track(
+                preserved_dir
+                / f"selected-legacy-{selected_hash}-{collision_name}"
+            )
+            default_copy = work.track(
+                preserved_dir
+                / f"repo-default-hex-{default_hash}-{collision_name}"
+            )
+            script = (
+                f"$ErrorActionPreference='Stop'; . '{common}'; "
+                f"Copy-P1PreservedArtifact -SourcePath '{ps_quote(selected)}' "
+                f"-DestinationDirectory '{ps_quote(preserved_dir)}' "
+                "-Role 'selected-legacy' | Out-Null; "
+                f"Copy-P1PreservedArtifact -SourcePath '{ps_quote(repository_default)}' "
+                f"-DestinationDirectory '{ps_quote(preserved_dir)}' "
+                "-Role 'repo-default-hex' | Out-Null"
+            )
+            run_powershell(powershell, script)
+            assert selected_copy.exists() and default_copy.exists()
+            assert selected_copy.read_bytes() == b"SELECTED-LEGACY"
+            assert default_copy.read_bytes() == b"REPOSITORY-DEFAULT"
+            powershell_checks += 3
+
+        checks += powershell_checks
+        print(
+            f"P1_5_PREPARE_TOOL=PASS checks={checks} "
+            f"powershell_checks={powershell_checks}"
+        )
     return 0
 
 
