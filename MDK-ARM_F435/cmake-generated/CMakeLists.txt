@@ -471,6 +471,7 @@ set(BOOT_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_sha256.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_fw_header.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_slot.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_bootstrap.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_state_machine.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_ymodem.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_recovery.c"

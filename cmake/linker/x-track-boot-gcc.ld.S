@@ -11,6 +11,7 @@ MEMORY
 {
   FLASH (rx) : ORIGIN = OTA_BOOT_ORIGIN, LENGTH = OTA_BOOT_LENGTH
   RAM (xrw)  : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH
+  OTA_CMD (rw) : ORIGIN = OTA_OVERLAY_ORIGIN, LENGTH = OTA_OVERLAY_LENGTH
 }
 
 SECTIONS
@@ -117,6 +118,18 @@ SECTIONS
     KEEP(*(SORT(.log_filter_data*)))
     PROVIDE(__stop_log_filter_data = .);
   } > RAM AT > FLASH
+
+  .boot_bootstrap_noinit (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.boot_bootstrap_noinit))
+    . = ALIGN(4);
+  } > OTA_CMD
+
+  ASSERT(ADDR(.boot_bootstrap_noinit) == OTA_OVERLAY_ORIGIN,
+         "Boot bootstrap command is not at the OTA overlay origin")
+  ASSERT(SIZEOF(.boot_bootstrap_noinit) == 128,
+         "Boot bootstrap command size drifted")
 
   .bss :
   {

@@ -16,6 +16,8 @@ enum
     BOOT_EEPROM_RESERVED_ADDR = 0xFF,
     BOOT_I2C_ACK_TIMEOUT_MS = 10,
     BOOT_QSPI_TIMEOUT_MS = 100,
+    BOOT_QSPI_BUSY_TIMEOUT_MS = 2000,
+    BOOT_QSPI_PAGE_SIZE = 256,
     BOOT_FLASH_ERASE_UNIT_SIZE = 2048,
     BOOT_FLASH_COPY_BLOCK_SIZE = 4096,
     BOOT_QSPI_READ_CHUNK = 32,
@@ -477,6 +479,93 @@ static int qspi_send(uint8_t instruction)
 static int qspi_read_command(uint8_t instruction,
                              uint32_t address,
                              qspi_cmd_adrlen_type address_len,
+                             uint8_t *dst, size_t len);
+
+static int qspi_wait_ready(uint32_t timeout_ms)
+{
+    uint32_t start = boot_platform_millis();
+    uint8_t status;
+
+    do
+    {
+        if (qspi_read_command(0x05u, 0u, QSPI_CMD_ADRLEN_0_BYTE,
+                              &status, sizeof(status)) != 0)
+        {
+            return -1;
+        }
+        if ((status & 1u) == 0u)
+        {
+            return 0;
+        }
+    } while ((uint32_t)(boot_platform_millis() - start) < timeout_ms);
+    return -1;
+}
+
+static int qspi_address_command(uint8_t instruction, uint32_t address)
+{
+    qspi_cmd_type command;
+
+    memset(&command, 0, sizeof(command));
+    command.instruction_code = instruction;
+    command.instruction_length = QSPI_CMD_INSLEN_1_BYTE;
+    command.address_code = address;
+    command.address_length = QSPI_CMD_ADRLEN_3_BYTE;
+    command.operation_mode = QSPI_OPERATE_MODE_111;
+    command.read_status_config = QSPI_RSTSC_HW_AUTO;
+    command.read_status_enable = FALSE;
+    command.write_data_enable = TRUE;
+    qspi_cmd_operation_kick(QSPI1, &command);
+    if (qspi_wait_flag(QSPI_CMDSTS_FLAG, BOOT_QSPI_TIMEOUT_MS) != 0)
+    {
+        return -1;
+    }
+    qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
+    return 0;
+}
+
+static int qspi_program_page(uint32_t address,
+                             const uint8_t *src, size_t len)
+{
+    qspi_cmd_type command;
+    size_t index;
+
+    if (len == 0u || len > BOOT_QSPI_PAGE_SIZE ||
+        (address & (BOOT_QSPI_PAGE_SIZE - 1u)) + len > BOOT_QSPI_PAGE_SIZE ||
+        qspi_send(0x06u) != 0)
+    {
+        return -1;
+    }
+
+    memset(&command, 0, sizeof(command));
+    command.instruction_code = 0x02u;
+    command.instruction_length = QSPI_CMD_INSLEN_1_BYTE;
+    command.address_code = address;
+    command.address_length = QSPI_CMD_ADRLEN_3_BYTE;
+    command.data_counter = (uint32_t)len;
+    command.operation_mode = QSPI_OPERATE_MODE_111;
+    command.read_status_config = QSPI_RSTSC_HW_AUTO;
+    command.read_status_enable = FALSE;
+    command.write_data_enable = TRUE;
+    qspi_cmd_operation_kick(QSPI1, &command);
+    for (index = 0u; index < len; ++index)
+    {
+        if (qspi_wait_flag(QSPI_TXFIFORDY_FLAG, BOOT_QSPI_TIMEOUT_MS) != 0)
+        {
+            return -1;
+        }
+        qspi_byte_write(QSPI1, src[index]);
+    }
+    if (qspi_wait_flag(QSPI_CMDSTS_FLAG, BOOT_QSPI_TIMEOUT_MS) != 0)
+    {
+        return -1;
+    }
+    qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
+    return qspi_wait_ready(BOOT_QSPI_BUSY_TIMEOUT_MS);
+}
+
+static int qspi_read_command(uint8_t instruction,
+                             uint32_t address,
+                             qspi_cmd_adrlen_type address_len,
                              uint8_t *dst,
                              size_t len)
 {
@@ -580,6 +669,47 @@ int boot_platform_qspi_read(uint32_t address, uint8_t *dst, size_t len)
         }
         if (qspi_read_command(0x03u, address + (uint32_t)offset,
                               QSPI_CMD_ADRLEN_3_BYTE, dst + offset, take) != 0)
+        {
+            return -1;
+        }
+        offset += take;
+    }
+    return 0;
+}
+
+int boot_platform_qspi_erase_4k(uint32_t address)
+{
+    if ((address & (BOOT_FLASH_COPY_BLOCK_SIZE - 1u)) != 0u ||
+        address >= OTA_EXT_SELFTEST ||
+        address > OTA_EXT_SELFTEST - BOOT_FLASH_COPY_BLOCK_SIZE ||
+        qspi_send(0x06u) != 0 || qspi_address_command(0x20u, address) != 0)
+    {
+        return -1;
+    }
+    return qspi_wait_ready(BOOT_QSPI_BUSY_TIMEOUT_MS);
+}
+
+int boot_platform_qspi_program(uint32_t address,
+                               const uint8_t *src, size_t len)
+{
+    size_t offset = 0u;
+
+    if ((src == NULL && len != 0u) || address >= OTA_EXT_SELFTEST ||
+        len > OTA_EXT_SELFTEST - address)
+    {
+        return -1;
+    }
+    while (offset < len)
+    {
+        size_t take = BOOT_QSPI_PAGE_SIZE -
+                      ((address + (uint32_t)offset) &
+                       (BOOT_QSPI_PAGE_SIZE - 1u));
+        if (take > len - offset)
+        {
+            take = len - offset;
+        }
+        if (qspi_program_page(address + (uint32_t)offset,
+                              src + offset, take) != 0)
         {
             return -1;
         }
