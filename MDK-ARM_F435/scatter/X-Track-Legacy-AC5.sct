@@ -1,0 +1,23 @@
+LR_IROM1 0x08000000 0x00100000
+{
+  ER_IROM1 0x08000000 0x00100000
+  {
+    *.o (RESET, +First)
+    *(InRoot$$Sections)
+    .ANY (+RO)
+    .ANY (+XO)
+  }
+
+  RW_IRAM1 0x20000000 0x00058000
+  {
+    *.o (RAMCODE)
+    lv_tlsf.o
+    font_bahnschrift_13.o
+    .ANY (+RW +ZI)
+  }
+
+  RW_IRAM2 0x20058000 UNINIT 0x00028000
+  {
+    * (.sram_ext)
+  }
+}
