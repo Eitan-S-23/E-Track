@@ -1,10 +1,12 @@
 # P1-5 J-Link Bootstrap
 
 This procedure performs the one-time migration from the legacy AC5 layout to
-the OTA Boot plus relocated GCC App layout. P1-5 is tool and documentation
-work only. It does not add a production Boot command channel, QSPI write API,
-OTA receive path, decryption, decompression, patching, or a new binary
-contract.
+the OTA Boot plus relocated GCC App layout. P1-5 runtime and deployment
+functionality is tool and documentation work only. The separately registered
+legacy AC5 project/scatter prerequisite only makes the pre-migration image
+reproducible; it adds no production Boot feature or binary contract. P1-5 does
+not add a production Boot command channel, QSPI write API, OTA receive path,
+decryption, decompression, or patching.
 
 ## Prerequisites
 
@@ -50,8 +52,10 @@ The script creates a unique `.cache\p1-5-bootstrap-*` run directory and:
    `SEGGER RTT` RAM signature, and requires a current
    `OTA: HANDOFF vtor=0x08010000` line.
 9. Requires `OTA: BCB already CONFIRMED vcode=<fw_header version_code>`.
-   This is the evidence that a blank/double-bad BCB was initialized from the
-   validated App rather than from host-supplied metadata.
+   Together with the separately recorded blank/double-bad BCB starting-state
+   precondition, this proves that Boot established the record from the
+   validated App rather than from host-supplied metadata. The script itself
+   never clears or synthesizes BCB data.
 
 `P1_5_DEPLOYMENT=PASS` is emitted only after every gate above passes. A
 debugger-forced MSP/PC start is not accepted.
