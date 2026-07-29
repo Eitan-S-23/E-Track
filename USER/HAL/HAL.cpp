@@ -1,4 +1,5 @@
 #include "HAL.h"
+#include "HAL/HAL_OTA_Staging.h"
 #include "App/Version.h"
 #include "MillisTaskManager/MillisTaskManager.h"
 
@@ -90,6 +91,14 @@ void HAL::HAL_Init()
 #endif
     Audio_Init();
 	Qspi_Init();
+#if defined(P2_1_TEST_ENABLE)
+    if(OTA_StagingEvidenceRun())
+    {
+        while(1)
+        {
+        }
+    }
+#endif
 
 	// USB needs QSPI XIP mode, so init after Qspi_Init
 	CONFIG_DEBUG_SERIAL.printf("USB: Initializing...\r\n");

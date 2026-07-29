@@ -42,11 +42,20 @@ set(BOOT_HEX_FILE "${BOOT_OUTPUT_DIR}/X-Track-Boot.hex")
 set(BOOT_BIN_FILE "${BOOT_OUTPUT_DIR}/X-Track-Boot.bin")
 set(BOOT_ARTIFACT_STAMP "${BOOT_OUTPUT_DIR}/X-Track-Boot.artifacts.stamp")
 
+option(P2_1_TEST_ENABLE
+       "Enable the evidence-only P2-1 staging reset harness"
+       OFF)
+set(P2_1_LINKER_DEFINES)
+if(P2_1_TEST_ENABLE)
+    list(APPEND P2_1_LINKER_DEFINES "-DP2_1_TEST_ENABLE=1")
+endif()
+
 add_custom_command(
     OUTPUT "${APP_LINKER_SCRIPT}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${APP_OUTPUT_DIR}"
     COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
         "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
+        ${P2_1_LINKER_DEFINES}
         "${APP_LINKER_SOURCE}"
         -o "${APP_LINKER_SCRIPT}"
     DEPENDS "${APP_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
@@ -60,6 +69,7 @@ add_custom_command(
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${BOOT_OUTPUT_DIR}"
     COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
         "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
+        ${P2_1_LINKER_DEFINES}
         "${BOOT_LINKER_SOURCE}"
         -o "${BOOT_LINKER_SCRIPT}"
     DEPENDS "${BOOT_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
@@ -443,6 +453,7 @@ set(PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_IMU.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_MAG.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_Memory.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_OTA_Staging.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_SD_CARD.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_USB.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_W25Q128.cpp"
@@ -462,6 +473,7 @@ list(REMOVE_ITEM APP_PROJECT_SOURCES
 list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/main.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/fw_header_placeholder.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_staging.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
 )
 
@@ -629,6 +641,9 @@ endif()
 target_compile_definitions(X_Track_App_GCC PRIVATE
     "OTA_TARGET_APP"
 )
+if(P2_1_TEST_ENABLE)
+    target_compile_definitions(X_Track_App_GCC PRIVATE "P2_1_TEST_ENABLE")
+endif()
 
 # 根据当前工具链推导 GCC C++ multilib 头文件目录。
 execute_process(

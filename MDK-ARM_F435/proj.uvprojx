@@ -3324,6 +3324,16 @@
               <FileType>8</FileType>
               <FilePath>..\USER\HAL\HAL_GPS_Simulator.cpp</FilePath>
             </File>
+            <File>
+              <FileName>HAL_OTA_Staging.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\USER\HAL\HAL_OTA_Staging.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>HAL_OTA_Staging.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\HAL\HAL_OTA_Staging.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4718,6 +4728,21 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>ota_staging.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_staging.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_staging.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_staging.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_p2_1_test.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_p2_1_test.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -8047,6 +8072,16 @@
               <FileType>8</FileType>
               <FilePath>..\USER\HAL\HAL_GPS_Simulator.cpp</FilePath>
             </File>
+            <File>
+              <FileName>HAL_OTA_Staging.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\USER\HAL\HAL_OTA_Staging.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>HAL_OTA_Staging.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\HAL\HAL_OTA_Staging.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -9344,6 +9379,21 @@
               <FileName>ota_vtor_check.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Libraries\OTA\ota_vtor_check.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_staging.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_staging.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_staging.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_staging.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_p2_1_test.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_p2_1_test.h</FilePath>
             </File>
           </Files>
         </Group>

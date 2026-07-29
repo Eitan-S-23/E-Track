@@ -10,7 +10,12 @@ _Min_Stack_Size = 0x1000;
 MEMORY
 {
   FLASH (rx) : ORIGIN = OTA_BOOT_ORIGIN, LENGTH = OTA_BOOT_LENGTH
+#if defined(P2_1_TEST_ENABLE)
+  RAM (xrw)  : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH - 0x80
+  P2_1_CTRL (rw) : ORIGIN = OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x80, LENGTH = 0x80
+#else
   RAM (xrw)  : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH
+#endif
 }
 
 SECTIONS
@@ -117,6 +122,21 @@ SECTIONS
     KEEP(*(SORT(.log_filter_data*)))
     PROVIDE(__stop_log_filter_data = .);
   } > RAM AT > FLASH
+
+#if defined(P2_1_TEST_ENABLE)
+  .p2_1_control (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __p2_1_control_start__ = .;
+    . = . + 0x80;
+    __p2_1_control_end__ = .;
+  } > P2_1_CTRL
+
+  ASSERT(ADDR(.p2_1_control) == OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x80,
+         "P2-1 control address drifted")
+  ASSERT(SIZEOF(.p2_1_control) == 0x80,
+         "P2-1 control size drifted")
+#endif
 
   .bss :
   {
