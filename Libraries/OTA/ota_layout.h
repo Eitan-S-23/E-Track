@@ -13,6 +13,7 @@
 #define OTA_RAM_LENGTH        0x58000
 #define OTA_OVERLAY_ORIGIN    0x20058000
 #define OTA_OVERLAY_LENGTH    0x28000
+#define OTA_OVERLAY_WORKSPACE_LENGTH 0xA000
 #define OTA_VTOR_EVIDENCE_SIZE 8
 #define OTA_EXT_CANDIDATE     0x000000
 #define OTA_EXT_BACKUP        0x100000
@@ -38,6 +39,10 @@
 
 #if (OTA_RAM_ORIGIN + OTA_RAM_LENGTH) != OTA_OVERLAY_ORIGIN
 #error "Main RAM and OTA overlay regions must be contiguous"
+#endif
+
+#if OTA_OVERLAY_WORKSPACE_LENGTH > OTA_OVERLAY_LENGTH
+#error "The OTA workspace must fit inside the shared overlay region"
 #endif
 
 #if (OTA_EXT_CANDIDATE + OTA_EXT_SLOT_LENGTH) != OTA_EXT_BACKUP || \

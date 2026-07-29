@@ -68,7 +68,14 @@ typedef enum
     BOOT_FW_ERR_VECTOR_RESET
 } boot_fw_result_t;
 
+#define BOOT_FW_VALIDATE_VECTORS 0x00000001u
+
 void boot_fw_default_expectations(boot_fw_expectations_t *out);
+boot_fw_result_t boot_fw_header_validate_ex(
+    const boot_image_reader_t *reader,
+    const boot_fw_expectations_t *expected,
+    uint32_t validation_flags,
+    boot_fw_header_t *out_header);
 boot_fw_result_t boot_fw_header_validate(const boot_image_reader_t *reader,
                                          const boot_fw_expectations_t *expected,
                                          boot_fw_header_t *out_header);

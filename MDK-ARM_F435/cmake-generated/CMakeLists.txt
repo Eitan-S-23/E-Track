@@ -45,9 +45,18 @@ set(BOOT_ARTIFACT_STAMP "${BOOT_OUTPUT_DIR}/X-Track-Boot.artifacts.stamp")
 option(P2_1_TEST_ENABLE
        "Enable the evidence-only P2-1 staging reset harness"
        OFF)
-set(P2_1_LINKER_DEFINES)
+option(P2_2_TEST_ENABLE
+       "Enable the evidence-only P2-2 package harness"
+       OFF)
+if(P2_1_TEST_ENABLE AND P2_2_TEST_ENABLE)
+    message(FATAL_ERROR "P2-1 and P2-2 evidence harnesses are mutually exclusive")
+endif()
+set(APP_LINKER_DEFINES)
 if(P2_1_TEST_ENABLE)
-    list(APPEND P2_1_LINKER_DEFINES "-DP2_1_TEST_ENABLE=1")
+    list(APPEND APP_LINKER_DEFINES "-DP2_1_TEST_ENABLE=1")
+endif()
+if(P2_2_TEST_ENABLE)
+    list(APPEND APP_LINKER_DEFINES "-DP2_2_TEST_ENABLE=1")
 endif()
 
 add_custom_command(
@@ -55,7 +64,7 @@ add_custom_command(
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${APP_OUTPUT_DIR}"
     COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
         "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
-        ${P2_1_LINKER_DEFINES}
+        ${APP_LINKER_DEFINES}
         "${APP_LINKER_SOURCE}"
         -o "${APP_LINKER_SCRIPT}"
     DEPENDS "${APP_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
@@ -69,7 +78,7 @@ add_custom_command(
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${BOOT_OUTPUT_DIR}"
     COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
         "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
-        ${P2_1_LINKER_DEFINES}
+        ${APP_LINKER_DEFINES}
         "${BOOT_LINKER_SOURCE}"
         -o "${BOOT_LINKER_SCRIPT}"
     DEPENDS "${BOOT_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
@@ -472,9 +481,17 @@ list(REMOVE_ITEM APP_PROJECT_SOURCES
 )
 list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/main.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_OTA_Package.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/fw_header_placeholder.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_keys.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_package.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_staging.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_crc32.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_sha256.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_fw_header.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../bsdiff_lzma_AES128-main/bspatch/AES128_CTR/aes_core.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../bsdiff_lzma_AES128-main/bspatch/lzma/LzmaDec.c"
 )
 
 set(BOOT_PROJECT_SOURCES
@@ -613,6 +630,12 @@ target_include_directories(X_Track_Boot PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Device/Include"
 )
 
+target_include_directories(X_Track_App_GCC PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/../../boot/include"
+    "${CMAKE_CURRENT_LIST_DIR}/../../bsdiff_lzma_AES128-main/bspatch/AES128_CTR"
+    "${CMAKE_CURRENT_LIST_DIR}/../../bsdiff_lzma_AES128-main/bspatch/lzma"
+)
+
 target_compile_definitions(X_Track_Boot PRIVATE
     "_RTE_"
     "__AT32F435_437__"
@@ -643,6 +666,9 @@ target_compile_definitions(X_Track_App_GCC PRIVATE
 )
 if(P2_1_TEST_ENABLE)
     target_compile_definitions(X_Track_App_GCC PRIVATE "P2_1_TEST_ENABLE")
+endif()
+if(P2_2_TEST_ENABLE)
+    target_compile_definitions(X_Track_App_GCC PRIVATE "P2_2_TEST_ENABLE")
 endif()
 
 # 根据当前工具链推导 GCC C++ multilib 头文件目录。

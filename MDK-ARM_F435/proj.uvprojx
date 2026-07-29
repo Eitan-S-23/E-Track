@@ -5088,7 +5088,7 @@
               <MiscControls>--gnu  --diag_warning=4017</MiscControls>
               <Define>LIBRARY_VERSION,ARDUINO=111,__AT32F435_437__,OTA_TARGET_APP</Define>
               <Undefine></Undefine>
-              <IncludePath>..\ArduinoAPI;.\Platform\Core;.\Platform;..\Libraries;..\Libraries\SdFat\src;..\USER\App;..\USER;..\Simulator\LVGL.Simulator;..\segger_rtt</IncludePath>
+              <IncludePath>..\ArduinoAPI;.\Platform\Core;.\Platform;..\Libraries;..\Libraries\SdFat\src;..\USER\App;..\USER;..\Simulator\LVGL.Simulator;..\segger_rtt;..\boot\include;..\bsdiff_lzma_AES128-main\bspatch\AES128_CTR;..\bsdiff_lzma_AES128-main\bspatch\lzma</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -9371,6 +9371,16 @@
               <FilePath>..\Libraries\OTA\fw_header_placeholder.c</FilePath>
             </File>
             <File>
+              <FileName>HAL_OTA_Package.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\USER\HAL\HAL_OTA_Package.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>HAL_OTA_Package.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\HAL\HAL_OTA_Package.h</FilePath>
+            </File>
+            <File>
               <FileName>ota_vtor_check.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\OTA\ota_vtor_check.c</FilePath>
@@ -9394,6 +9404,81 @@
               <FileName>ota_p2_1_test.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Libraries\OTA\ota_p2_1_test.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_keys.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_keys.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_keys.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_keys.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_package.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_package.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_package.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_package.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_p2_2_test.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_p2_2_test.h</FilePath>
+            </File>
+            <File>
+              <FileName>boot_crc32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\boot\src\boot_crc32.c</FilePath>
+            </File>
+            <File>
+              <FileName>boot_sha256.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\boot\src\boot_sha256.c</FilePath>
+            </File>
+            <File>
+              <FileName>boot_fw_header.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\boot\src\boot_fw_header.c</FilePath>
+            </File>
+            <File>
+              <FileName>boot_crypto.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\boot\include\boot_crypto.h</FilePath>
+            </File>
+            <File>
+              <FileName>boot_fw_header.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\boot\include\boot_fw_header.h</FilePath>
+            </File>
+            <File>
+              <FileName>aes_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsdiff_lzma_AES128-main\bspatch\AES128_CTR\aes_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>tiny_AES_decrypt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\bsdiff_lzma_AES128-main\bspatch\AES128_CTR\tiny_AES_decrypt.h</FilePath>
+            </File>
+            <File>
+              <FileName>LzmaDec.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsdiff_lzma_AES128-main\bspatch\lzma\LzmaDec.c</FilePath>
+            </File>
+            <File>
+              <FileName>LzmaDec.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\bsdiff_lzma_AES128-main\bspatch\lzma\LzmaDec.h</FilePath>
+            </File>
+            <File>
+              <FileName>7zTypes.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\bsdiff_lzma_AES128-main\bspatch\lzma\7zTypes.h</FilePath>
             </File>
           </Files>
         </Group>

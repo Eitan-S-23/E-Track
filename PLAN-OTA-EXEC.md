@@ -439,10 +439,10 @@
 - 证据: 实现、宿主回归、有效 r3 真机断点重入、GCC/AC5 构建及生产固件恢复见 `docs/ota-exec-notes/P2-1-implementation-evidence-2026-07-29.md`;r1/r2 明确排除;本卡保持 `进行中`,待非实现会话独立验收。
 
 #### P2-2 .etu 解析 + AES-CTR + LZMA-Alone 解包
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex(实现会话) / 2026-07-29 ｜ 更新: 2026-07-29(实现、回归、r3 真机证据与生产恢复完成,待非实现会话验收)
 - 目标: 按契约文档逐字段解析(**禁 struct memcpy**);校验链 §4:头 CRC→payload_crc32→hw_rev→layout_id→min_boot_ver→target_vcode>cur_vcode(降级拒绝);全量:解密→LZMA-Alone 解压→candidate 直写,offset+len 逐次钳制(§3.2);candidate 全镜像 SHA 复核(双零法)。AES key 走 `ota_keys.c` 编译期注入,库内示例 key 仅开发。
 - 验收: toy-full.etu 真机/PC 仿真解包结果与 expected.json 一致;坏包样本全部被正确拒绝且 BCB 不动。
-- 证据: —
+- 证据: 研究设计见 `docs/ota-exec-notes/P2-2-etu-full-package-research-2026-07-29.md`;实现、102 项宿主回归、有效 r3 四用例真机证据、GCC/AC5 构建及生产恢复见 `docs/ota-exec-notes/P2-2-implementation-evidence-2026-07-29.md`;r1/r2 明确排除;本卡保持 `进行中`,待非实现会话独立验收。
 
 #### P2-3 bspatch 流式集成
 状态: 待办 ｜ 认领: — ｜ 更新: —

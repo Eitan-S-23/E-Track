@@ -168,6 +168,7 @@ jobs:
           python3 tests/boot/test_boot_protocols.py
           python3 tests/boot/test_boot_state_machine.py
           python3 tests/ota/test_ota_staging.py
+          python3 tests/ota/test_ota_package.py
 
       - name: Validate OTA App layout
         shell: bash
@@ -199,6 +200,7 @@ jobs:
           ram_length = macro("OTA_RAM_LENGTH")
           overlay_origin = macro("OTA_OVERLAY_ORIGIN")
           overlay_length = macro("OTA_OVERLAY_LENGTH")
+          workspace_length = macro("OTA_OVERLAY_WORKSPACE_LENGTH")
           evidence_size = macro("OTA_VTOR_EVIDENCE_SIZE")
 
           output_dir = Path(os.environ["BUILD_DIR"]) / "app-gcc"
@@ -239,6 +241,7 @@ jobs:
           header = map_section(".fw_header")
           evidence = map_section(".ota_vtor_noinit")
           overlay = map_section(".sram_ext")
+          ota_overlay = map_section(".ota_overlay")
           if vector[0] != app_origin or vector[1] > vector_max:
               raise SystemExit("A3: vector placement/size mismatch")
           if header != (app_origin + header_offset, header_size):
@@ -249,6 +252,8 @@ jobs:
               raise SystemExit("A6: VTOR evidence section escaped main RAM")
           if overlay != (overlay_origin, overlay_length):
               raise SystemExit("A7: overlay section mismatch")
+          if ota_overlay != (overlay_origin, workspace_length):
+              raise SystemExit("A7: OTA workspace overlay mismatch")
           if "g_ota_vtor_actual" not in map_text or "g_ota_vtor_expected" not in map_text:
               raise SystemExit("A6: VTOR evidence symbols missing")
 

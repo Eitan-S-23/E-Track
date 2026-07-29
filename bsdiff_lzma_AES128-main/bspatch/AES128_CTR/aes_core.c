@@ -171,7 +171,6 @@ static void add_round_key(uint8_t *state, const uint8_t *round_key, uint8_t roun
  */
 static void key_expansion(uint8_t *round_key, const uint8_t *key)
 {
-    uint8_t k = 0;
     uint8_t temp[4]; // 用于存储临时值
 
     // 密钥的前16个字节就是原始密钥
@@ -224,7 +223,7 @@ static void key_expansion(uint8_t *round_key, const uint8_t *key)
  * @param ctx AES上下文
  * @param key 加密密钥(16字节)
  */
-void AES_init_ctx(AES_ctx *ctx, const uint8_t key[16])
+void AES_init_ctx(AES_ctx *ctx, const uint8_t *key)
 {
     key_expansion((uint8_t *)ctx->round_key, key);
 }

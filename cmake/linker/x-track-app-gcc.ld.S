@@ -10,7 +10,10 @@ _Min_Stack_Size = 0x1000;
 MEMORY
 {
   FLASH (rx)     : ORIGIN = OTA_APP_ORIGIN, LENGTH = OTA_APP_LENGTH
-#if defined(P2_1_TEST_ENABLE)
+#if defined(P2_2_TEST_ENABLE)
+  RAM (xrw)      : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH - 0x800
+  P2_2_CTRL (rw) : ORIGIN = OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x800, LENGTH = 0x800
+#elif defined(P2_1_TEST_ENABLE)
   RAM (xrw)      : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH - 0x80
   P2_1_CTRL (rw) : ORIGIN = OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x80, LENGTH = 0x80
 #else
@@ -162,7 +165,20 @@ SECTIONS
   ASSERT(SIZEOF(.ota_vtor_noinit) >= OTA_VTOR_EVIDENCE_SIZE,
          "VTOR evidence section must hold both 32-bit markers")
 
-#if defined(P2_1_TEST_ENABLE)
+#if defined(P2_2_TEST_ENABLE)
+  .p2_2_control (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __p2_2_control_start__ = .;
+    . = . + 0x800;
+    __p2_2_control_end__ = .;
+  } > P2_2_CTRL
+
+  ASSERT(ADDR(.p2_2_control) == OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x800,
+         "P2-2 control address drifted")
+  ASSERT(SIZEOF(.p2_2_control) == 0x800,
+         "P2-2 control size drifted")
+#elif defined(P2_1_TEST_ENABLE)
   .p2_1_control (NOLOAD) :
   {
     . = ALIGN(4);
@@ -191,17 +207,41 @@ SECTIONS
     . = ALIGN(8);
   } > RAM
 
-  .sram_ext (NOLOAD) :
+  OVERLAY ORIGIN(RW_IRAM2) : NOCROSSREFS
   {
-    . = ALIGN(4);
-    *(.sram_ext)
-    *(.sram_ext.*)
-    . = ALIGN(4);
+    .sram_ext
+    {
+      . = ALIGN(8);
+      *(.sram_ext)
+      *(.sram_ext.*)
+      . = ALIGN(8);
+    }
+
+    .ota_overlay
+    {
+      . = ALIGN(8);
+      __ota_overlay_start__ = .;
+      KEEP(*(.ota_overlay))
+      KEEP(*(.ota_overlay.*))
+      . = ALIGN(8);
+      __ota_overlay_end__ = .;
+    }
   } > RW_IRAM2
 
+  ASSERT(ADDR(.sram_ext) == OTA_OVERLAY_ORIGIN,
+         "LiveMap overlay address drifted")
   ASSERT(SIZEOF(.sram_ext) <= LENGTH(RW_IRAM2),
          "SRAM overlay exceeds the contracted region")
-#if defined(P2_1_TEST_ENABLE)
+  ASSERT(ADDR(.ota_overlay) == OTA_OVERLAY_ORIGIN,
+         "OTA workspace address drifted")
+  ASSERT(SIZEOF(.ota_overlay) == OTA_OVERLAY_WORKSPACE_LENGTH,
+         "OTA workspace size drifted")
+#if defined(P2_2_TEST_ENABLE)
+  ASSERT(ORIGIN(RAM) + LENGTH(RAM) == ORIGIN(P2_2_CTRL),
+         "Main RAM and P2-2 control region are not contiguous")
+  ASSERT(ORIGIN(P2_2_CTRL) + LENGTH(P2_2_CTRL) == ORIGIN(RW_IRAM2),
+         "P2-2 control and overlay regions are not contiguous")
+#elif defined(P2_1_TEST_ENABLE)
   ASSERT(ORIGIN(RAM) + LENGTH(RAM) == ORIGIN(P2_1_CTRL),
          "Main RAM and P2-1 control region are not contiguous")
   ASSERT(ORIGIN(P2_1_CTRL) + LENGTH(P2_1_CTRL) == ORIGIN(RW_IRAM2),
