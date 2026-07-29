@@ -42,11 +42,20 @@ set(BOOT_HEX_FILE "${BOOT_OUTPUT_DIR}/X-Track-Boot.hex")
 set(BOOT_BIN_FILE "${BOOT_OUTPUT_DIR}/X-Track-Boot.bin")
 set(BOOT_ARTIFACT_STAMP "${BOOT_OUTPUT_DIR}/X-Track-Boot.artifacts.stamp")
 
+option(P1_6_TEST_ENABLE
+       "Enable the evidence-only P1-6 command block and checkpoints"
+       OFF)
+set(P1_6_LINKER_DEFINES)
+if(P1_6_TEST_ENABLE)
+    list(APPEND P1_6_LINKER_DEFINES "-DP1_6_TEST_ENABLE=1")
+endif()
+
 add_custom_command(
     OUTPUT "${APP_LINKER_SCRIPT}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${APP_OUTPUT_DIR}"
     COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
         "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
+        ${P1_6_LINKER_DEFINES}
         "${APP_LINKER_SOURCE}"
         -o "${APP_LINKER_SCRIPT}"
     DEPENDS "${APP_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
@@ -60,6 +69,7 @@ add_custom_command(
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${BOOT_OUTPUT_DIR}"
     COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
         "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
+        ${P1_6_LINKER_DEFINES}
         "${BOOT_LINKER_SOURCE}"
         -o "${BOOT_LINKER_SCRIPT}"
     DEPENDS "${BOOT_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
@@ -487,6 +497,11 @@ set(BOOT_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_usart.c"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c"
 )
+if(P1_6_TEST_ENABLE)
+    list(APPEND BOOT_PROJECT_SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_p1_6_test.c"
+    )
+endif()
 
 add_executable(X_Track ${PROJECT_SOURCES})
 add_executable(X_Track_App_GCC ${APP_PROJECT_SOURCES})
@@ -629,6 +644,10 @@ endif()
 target_compile_definitions(X_Track_App_GCC PRIVATE
     "OTA_TARGET_APP"
 )
+if(P1_6_TEST_ENABLE)
+    target_compile_definitions(X_Track_Boot PRIVATE "P1_6_TEST_ENABLE")
+    target_compile_definitions(X_Track_App_GCC PRIVATE "P1_6_TEST_ENABLE")
+endif()
 
 # 根据当前工具链推导 GCC C++ multilib 头文件目录。
 execute_process(

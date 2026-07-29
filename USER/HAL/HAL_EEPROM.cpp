@@ -2,6 +2,7 @@
 #include "EEPROM/EEPROM.h"
 #include "EEPROM/eeprom_bcb.h"
 #include "OTA/ota_confirm.h"
+#include "OTA/ota_p1_6_test.h"
 
 static EEPROM at24c;
 
@@ -18,6 +19,48 @@ extern "C" {
 }
 
 static const bcb_hal_t bcb_app_hal = { bcb_app_write, bcb_app_read };
+
+#if defined(P1_6_TEST_ENABLE)
+static void p1_6_capture_confirmed_bcb(const bcb_t& confirmed)
+{
+    uint8_t raw[BCB_SIZE];
+    bcb_t observed;
+    bcb_arbiter_result_t active;
+
+    if(HAL::EEPROM_ReadBufferSafe(BCB_A_ADDR, raw, sizeof(raw)))
+    {
+        for(uint32_t i = 0; i < sizeof(raw); i++)
+        {
+            ota_p1_6_control()[OTA_P1_6_OFF_BCB_A_RAW + i] = raw[i];
+        }
+    }
+    if(HAL::EEPROM_ReadBufferSafe(BCB_B_ADDR, raw, sizeof(raw)))
+    {
+        for(uint32_t i = 0; i < sizeof(raw); i++)
+        {
+            ota_p1_6_control()[OTA_P1_6_OFF_BCB_B_RAW + i] = raw[i];
+        }
+    }
+
+    active = bcb_arbiter(&bcb_app_hal, &observed);
+    ota_p1_6_write_u32(OTA_P1_6_OFF_ACTIVE, (uint32_t)active);
+    if(active == BCB_ARBITER_A || active == BCB_ARBITER_B)
+    {
+        ota_p1_6_write_u32(OTA_P1_6_OFF_STATE, observed.state);
+        ota_p1_6_write_u32(OTA_P1_6_OFF_BOOT_TRY, observed.boot_try);
+        ota_p1_6_write_u32(OTA_P1_6_OFF_COPY_PHASE, observed.copy_phase);
+        ota_p1_6_write_u32(OTA_P1_6_OFF_RESUME_BLOCK, observed.resume_block);
+        ota_p1_6_write_u32(OTA_P1_6_OFF_SEQ, observed.seq);
+        ota_p1_6_write_u32(OTA_P1_6_OFF_CUR_VCODE, observed.cur_vcode);
+        ota_p1_6_write_u32(OTA_P1_6_OFF_CAND_VCODE, observed.cand_vcode);
+        ota_p1_6_write_u32(OTA_P1_6_OFF_BACKUP_VCODE,
+                           observed.backup_vcode);
+    }
+    ota_p1_6_write_u32(OTA_P1_6_OFF_APP_VCODE, confirmed.cur_vcode);
+    ota_p1_6_write_u32(OTA_P1_6_OFF_APP_RESULT,
+                       OTA_P1_6_APP_RESULT_VALID);
+}
+#endif
 
 bool HAL::EEPROM_Init()
 {
@@ -78,6 +121,16 @@ bool HAL::OTA_ConfirmBoot()
 
     if(rc == OTA_CONFIRM_COMMITTED)
     {
+#if defined(P1_6_TEST_ENABLE)
+        if(ota_p1_6_checkpoint_matches(OTA_P1_6_CP_APP_CONFIRMED,
+                                       confirmed.cur_vcode,
+                                       confirmed.state))
+        {
+            p1_6_capture_confirmed_bcb(confirmed);
+        }
+#endif
+        ota_p1_6_checkpoint(OTA_P1_6_CP_APP_CONFIRMED,
+                            confirmed.cur_vcode, confirmed.state);
         SEGGER_RTT_printf(0, "OTA: TEST_BOOT confirmed vcode=%lu\r\n",
                           (unsigned long)confirmed.cur_vcode);
         return true;

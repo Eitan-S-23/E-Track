@@ -1,6 +1,7 @@
 #include "boot_state_machine.h"
 
 #include "boot_crypto.h"
+#include "boot_p1_6_test.h"
 #include "boot_slot.h"
 #include "OTA/ota_layout.h"
 
@@ -262,7 +263,13 @@ static int begin_rollback(const boot_state_io_t *io,
     next.boot_try = 0u;
     next.copy_phase = BCB_COPY_ROLLBACK;
     next.resume_block = 0u;
-    return commit_record(io, active, current, &next);
+    if (commit_record(io, active, current, &next) != 0)
+    {
+        return -1;
+    }
+    boot_p1_6_checkpoint(OTA_P1_6_CP_ROLLBACK_COMMITTED,
+                         current->copy_phase, current->resume_block);
+    return 0;
 }
 
 static int initialize_recovery_rollback(const boot_state_io_t *io,
@@ -385,13 +392,22 @@ static boot_state_status_t copy_source(const boot_state_io_t *io,
         {
             return BOOT_STATE_STATUS_COPY;
         }
-        if (io->internal_erase_4k(io->ctx, target_address) != 0 ||
-            io->internal_program(io->ctx, target_address,
+        boot_p1_6_checkpoint(OTA_P1_6_CP_COPY_BEFORE_ERASE,
+                             current->copy_phase, block);
+        if (io->internal_erase_4k(io->ctx, target_address) != 0)
+        {
+            return BOOT_STATE_STATUS_COPY;
+        }
+        boot_p1_6_checkpoint(OTA_P1_6_CP_COPY_AFTER_ERASE,
+                             current->copy_phase, block);
+        if (io->internal_program(io->ctx, target_address,
                                  g_copy_block, sizeof(g_copy_block)) != 0 ||
             verify_programmed_block(io, target_address, g_copy_block) != 0)
         {
             return BOOT_STATE_STATUS_COPY;
         }
+        boot_p1_6_checkpoint(OTA_P1_6_CP_COPY_AFTER_READBACK,
+                             current->copy_phase, block);
 
         next = *current;
         next.resume_block = (uint16_t)(block + 1u);
@@ -399,6 +415,8 @@ static boot_state_status_t copy_source(const boot_state_io_t *io,
         {
             return BOOT_STATE_STATUS_COMMIT;
         }
+        boot_p1_6_checkpoint(OTA_P1_6_CP_COPY_RESUME_COMMITTED,
+                             current->copy_phase, current->resume_block);
     }
     return BOOT_STATE_STATUS_OK;
 }
@@ -589,6 +607,8 @@ boot_state_status_t boot_state_machine_run(const boot_state_io_t *io,
                 }
                 continue;
             }
+            boot_p1_6_checkpoint(OTA_P1_6_CP_CANDIDATE_VALIDATED,
+                                 current.copy_phase, current.resume_block);
             {
                 bcb_t next = current;
                 next.state = BCB_STATE_APPLYING;
@@ -599,6 +619,8 @@ boot_state_status_t boot_state_machine_run(const boot_state_io_t *io,
                 {
                     return return_hold(BOOT_STATE_STATUS_COMMIT, &current, outcome);
                 }
+                boot_p1_6_checkpoint(OTA_P1_6_CP_APPLYING_COMMITTED,
+                                     current.copy_phase, current.resume_block);
             }
             continue;
 
@@ -630,6 +652,8 @@ boot_state_status_t boot_state_machine_run(const boot_state_io_t *io,
             {
                 return return_hold(copy_result, &current, outcome);
             }
+            boot_p1_6_checkpoint(OTA_P1_6_CP_APPLY_COPY_COMPLETE,
+                                 current.copy_phase, current.resume_block);
             app_result = validate_internal_app(io, &app_header);
             if (app_result != BOOT_FW_OK ||
                 !internal_matches_source(&app_header, &source))
@@ -650,6 +674,8 @@ boot_state_status_t boot_state_machine_run(const boot_state_io_t *io,
                 {
                     return return_hold(BOOT_STATE_STATUS_COMMIT, &current, outcome);
                 }
+                boot_p1_6_checkpoint(OTA_P1_6_CP_TEST_BOOT_COMMITTED,
+                                     current.copy_phase, current.boot_try);
             }
             continue;
 
@@ -679,6 +705,8 @@ boot_state_status_t boot_state_machine_run(const boot_state_io_t *io,
                 {
                     return return_hold(BOOT_STATE_STATUS_COMMIT, &current, outcome);
                 }
+                boot_p1_6_checkpoint(OTA_P1_6_CP_TRY_DECREMENT_COMMITTED,
+                                     current.boot_try, current.copy_phase);
             }
             return return_jump(&current, &app_header, outcome);
 
@@ -769,6 +797,8 @@ boot_state_status_t boot_state_machine_run(const boot_state_io_t *io,
             {
                 return return_hold(BOOT_STATE_STATUS_COMMIT, &current, outcome);
             }
+            boot_p1_6_checkpoint(OTA_P1_6_CP_ROLLBACK_CONFIRMED,
+                                 current.copy_phase, current.resume_block);
             continue;
         }
 

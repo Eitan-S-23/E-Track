@@ -1,5 +1,8 @@
 #include "boot_fw_header.h"
 #include "boot_handoff.h"
+#if defined(P1_6_TEST_ENABLE)
+#include "boot_p1_6_test.h"
+#endif
 #include "boot_platform.h"
 #include "boot_recovery.h"
 #include "boot_state_machine.h"
@@ -136,6 +139,13 @@ int main(void)
         boot_platform_hold();
     }
 
+#if defined(P1_6_TEST_ENABLE)
+    if (boot_p1_6_process_command() == BOOT_P1_6_HOLD)
+    {
+        boot_platform_hold();
+    }
+#endif
+
 #if defined(BOOT_HANDOFF_TEST_CLEAR_BCB)
     if (clear_test_bcb() != 0)
     {
@@ -173,6 +183,11 @@ int main(void)
         publish_outcome(&outcome);
         if (outcome.action == BOOT_STATE_ACTION_PHYSICAL_RECOVERY)
         {
+#if defined(P1_6_TEST_ENABLE)
+            boot_p1_6_checkpoint(OTA_P1_6_CP_PHYSICAL_RECOVERY,
+                                 (uint32_t)outcome.status,
+                                 outcome.bcb.state);
+#endif
             if (receive_physical_recovery(&state_io, &outcome, 0) != 0)
             {
                 boot_platform_hold();

@@ -10,7 +10,12 @@ _Min_Stack_Size = 0x1000;
 MEMORY
 {
   FLASH (rx)     : ORIGIN = OTA_APP_ORIGIN, LENGTH = OTA_APP_LENGTH
+#if defined(P1_6_TEST_ENABLE)
+  RAM (xrw)      : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH - 0x200
+  P1_6_CTRL (rw) : ORIGIN = OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x200, LENGTH = 0x200
+#else
   RAM (xrw)      : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH
+#endif
   RW_IRAM2 (xrw) : ORIGIN = OTA_OVERLAY_ORIGIN, LENGTH = OTA_OVERLAY_LENGTH
 }
 
@@ -157,6 +162,21 @@ SECTIONS
   ASSERT(SIZEOF(.ota_vtor_noinit) >= OTA_VTOR_EVIDENCE_SIZE,
          "VTOR evidence section must hold both 32-bit markers")
 
+#if defined(P1_6_TEST_ENABLE)
+  .p1_6_control (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __p1_6_control_start__ = .;
+    . = . + 0x200;
+    __p1_6_control_end__ = .;
+  } > P1_6_CTRL
+
+  ASSERT(ADDR(.p1_6_control) == OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x200,
+         "P1-6 control address drifted")
+  ASSERT(SIZEOF(.p1_6_control) == 0x200,
+         "P1-6 control size drifted")
+#endif
+
   .stack (NOLOAD) :
   {
     . = ALIGN(8);
@@ -181,8 +201,15 @@ SECTIONS
 
   ASSERT(SIZEOF(.sram_ext) <= LENGTH(RW_IRAM2),
          "SRAM overlay exceeds the contracted region")
+#if defined(P1_6_TEST_ENABLE)
+  ASSERT(ORIGIN(RAM) + LENGTH(RAM) == ORIGIN(P1_6_CTRL),
+         "Main RAM and P1-6 control region are not contiguous")
+  ASSERT(ORIGIN(P1_6_CTRL) + LENGTH(P1_6_CTRL) == ORIGIN(RW_IRAM2),
+         "P1-6 control and overlay regions are not contiguous")
+#else
   ASSERT(ORIGIN(RAM) + LENGTH(RAM) == ORIGIN(RW_IRAM2),
          "Main RAM and overlay regions are not contiguous")
+#endif
 
   ._user_heap_stack :
   {
