@@ -2,6 +2,9 @@
 #include "Config/Config.h"
 #include "lvgl/lvgl.h"
 #include "HAL/HAL.h"
+#if defined(OTA_TARGET_APP)
+#include "HAL/HAL_OTA_Package.h"
+#endif
 #include <string.h>
 
 #ifdef ARDUINO
@@ -36,11 +39,13 @@ using namespace Page;
 #define SNAPSHOT_H 320
 #define SNAPSHOT_TILE_SIZE 256
 
-#ifdef ARDUINO
+#if defined(ARDUINO) && defined(__CC_ARM)
 /* 150KB 大缓冲,置于分散加载 RW_IRAM2(.sram_ext, UNINIT)——
  * 由低 384K 尾部 + EOPB0 扩展出的高 128K 拼成的连续区,内容不被
  * __main 清零,依 snapValid 控制首次填充 */
 __attribute__((section(".sram_ext"), zero_init))
+#elif defined(ARDUINO) && defined(__GNUC__) && !defined(_WIN32)
+__attribute__((section(".sram_ext,\"aw\",%nobits @"), aligned(8)))
 #endif
 static lv_color_t snapshotBuf[SNAPSHOT_W * SNAPSHOT_H];
 
@@ -48,6 +53,9 @@ static lv_img_dsc_t snapshotDsc;
 static int32_t snapshotOriginX;   /* 快照左上角对应的地图全局像素坐标 */
 static int32_t snapshotOriginY;
 static bool snapshotValid = false;
+#if defined(OTA_TARGET_APP)
+static bool snapshotOwned = false;
+#endif
 
 /* 打开失败瓦片的短期负缓存：缺瓦片区域（地图边缘/未下载）若每行重试
  * open，每次失败都是一趟 FAT 目录遍历，实测把 LVGL 主循环拖到 1/4 速。
@@ -263,6 +271,12 @@ static void Snapshot_Update(int32_t dispX, int32_t dispY,
                             uint16_t phaseXFp, uint16_t phaseYFp,
                             LiveMapModel& model, LiveMapView& view)
 {
+#if defined(OTA_TARGET_APP)
+    if (!snapshotOwned)
+    {
+        return;
+    }
+#endif
     /* 视口左上角(全局像素);快照 X 原点向下对齐到 16px 网格,
      * 视口相对快照的偏差 0..15px 由 16px 水平 margin 吸收 */
     int32_t viewX = dispX - SNAPSHOT_VIEW_W / 2;
@@ -391,6 +405,11 @@ void LiveMap::onViewLoad()
     View.SetMapTile(tileSize, rect.width / tileSize);
 
 #if CONFIG_LIVE_MAP_SNAPSHOT_ENABLE
+#if defined(OTA_TARGET_APP)
+    snapshotOwned = HAL::OTA_OverlayAcquireLiveMap();
+    if (snapshotOwned)
+    {
+#endif
     /* 快照模式 tileNum=0,SetMapTile 依 tileNum 算出的容器高度为 0,
      * 会使全部子对象(快照/箭头/线条)被可见性裁剪而不绘制;
      * 容器尺寸必须直接取瓦片容器矩形 */
@@ -405,6 +424,9 @@ void LiveMap::onViewLoad()
     snapshotDsc.data = (const uint8_t*)snapshotBuf;
     View.SetSnapshotSrc(&snapshotDsc);
     snapshotValid = false;
+#if defined(OTA_TARGET_APP)
+    }
+#endif
 #endif
 
 #if CONFIG_LIVE_MAP_DEBUG_ENABLE
@@ -596,7 +618,14 @@ void LiveMap::onViewUnload()
 
 void LiveMap::onViewDidUnload()
 {
-
+#if CONFIG_LIVE_MAP_SNAPSHOT_ENABLE && defined(OTA_TARGET_APP)
+    if (snapshotOwned)
+    {
+        snapshotValid = false;
+        snapshotOwned = false;
+        HAL::OTA_OverlayReleaseLiveMap();
+    }
+#endif
 }
 
 void LiveMap::AttachEvent(lv_obj_t* obj)

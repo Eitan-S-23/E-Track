@@ -102,9 +102,11 @@ void boot_fw_default_expectations(boot_fw_expectations_t *out)
     out->app_end = OTA_APP_ORIGIN + OTA_APP_LENGTH;
 }
 
-boot_fw_result_t boot_fw_header_validate(const boot_image_reader_t *reader,
-                                         const boot_fw_expectations_t *expected,
-                                         boot_fw_header_t *out_header)
+boot_fw_result_t boot_fw_header_validate_ex(
+    const boot_image_reader_t *reader,
+    const boot_fw_expectations_t *expected,
+    uint32_t validation_flags,
+    boot_fw_header_t *out_header)
 {
     uint8_t raw[OTA_FW_HEADER_SIZE];
     uint8_t hash_chunk[FW_HASH_CHUNK_SIZE];
@@ -117,6 +119,7 @@ boot_fw_result_t boot_fw_header_validate(const boot_image_reader_t *reader,
     size_t i;
 
     if (reader == NULL || reader->read == NULL || expected == NULL ||
+        (validation_flags & ~BOOT_FW_VALIDATE_VECTORS) != 0u ||
         expected->ram_start >= expected->ram_end ||
         expected->app_start >= expected->app_end)
     {
@@ -204,23 +207,26 @@ boot_fw_result_t boot_fw_header_validate(const boot_image_reader_t *reader,
         return BOOT_FW_ERR_MIN_BOOT_VERSION;
     }
 
-    if (reader->read(reader->ctx, 0u, vectors, sizeof(vectors)) != 0)
+    if ((validation_flags & BOOT_FW_VALIDATE_VECTORS) != 0u)
     {
-        return BOOT_FW_ERR_READ;
-    }
-    parsed.initial_msp = read_le32(vectors);
-    parsed.reset_handler = read_le32(vectors + 4u);
+        if (reader->read(reader->ctx, 0u, vectors, sizeof(vectors)) != 0)
+        {
+            return BOOT_FW_ERR_READ;
+        }
+        parsed.initial_msp = read_le32(vectors);
+        parsed.reset_handler = read_le32(vectors + 4u);
 
-    if (parsed.initial_msp < expected->ram_start ||
-        parsed.initial_msp > expected->ram_end)
-    {
-        return BOOT_FW_ERR_VECTOR_MSP;
-    }
-    if ((parsed.reset_handler & 1u) == 0u ||
-        (parsed.reset_handler & ~1u) < expected->app_start ||
-        (parsed.reset_handler & ~1u) >= expected->app_end)
-    {
-        return BOOT_FW_ERR_VECTOR_RESET;
+        if (parsed.initial_msp < expected->ram_start ||
+            parsed.initial_msp > expected->ram_end)
+        {
+            return BOOT_FW_ERR_VECTOR_MSP;
+        }
+        if ((parsed.reset_handler & 1u) == 0u ||
+            (parsed.reset_handler & ~1u) < expected->app_start ||
+            (parsed.reset_handler & ~1u) >= expected->app_end)
+        {
+            return BOOT_FW_ERR_VECTOR_RESET;
+        }
     }
     if (!is_zero_padded_string(raw + FW_VERSION_NAME_OFF, FW_VERSION_NAME_LEN))
     {
@@ -236,6 +242,15 @@ boot_fw_result_t boot_fw_header_validate(const boot_image_reader_t *reader,
         *out_header = parsed;
     }
     return BOOT_FW_OK;
+}
+
+boot_fw_result_t boot_fw_header_validate(const boot_image_reader_t *reader,
+                                         const boot_fw_expectations_t *expected,
+                                         boot_fw_header_t *out_header)
+{
+    return boot_fw_header_validate_ex(reader, expected,
+                                      BOOT_FW_VALIDATE_VECTORS,
+                                      out_header);
 }
 
 const char *boot_fw_result_name(boot_fw_result_t result)

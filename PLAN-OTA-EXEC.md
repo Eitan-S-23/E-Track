@@ -27,7 +27,7 @@
 | PRE | 前置修正(复审产物) | 完成 | 4/4 | 无 |
 | P0 | 契约冻结+基建 | 完成 | 6/6 | P0-4/P0-5 独立真机复核通过；P1/P2 方案硬门槛重开 |
 | P1 | bootloader | 进行中 | 5/6 | P0 已 6/6,门槛已开;P1-1/P1-2/P1-3/P1-4/P1-5 独立验收通过,仅 P1-6 待完成 |
-| P2 | MCU App 升级链 | 待办 | 0/6 | **P0 全部完成(方案硬门槛)** |
+| P2 | MCU App 升级链 | 进行中 | 2/6 | **P0 全部完成(方案硬门槛)** |
 | P3 | BLE+Flutter | 待办 | 0/5 | P2-1/2 完成 |
 | P4 | CI/CF | 待办 | 0/4 | P0 完成(可与 P1/P2 并行) |
 | P5 | 联调验收 | 待办 | 0/3 | P1-P4 全部完成 |
@@ -433,16 +433,16 @@
 ## 5. P2 MCU App 升级链(估时 4-6d;门槛:P0 全部完成;验收:P0 打包器产物真机 SD 升级闭环)
 
 #### P2-1 staging 写入与接收日志
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 完成 ｜ 认领: Codex(实现会话) / 2026-07-29 ｜ 更新: 2026-07-30(独立验收通过并收口)
 - 目标: §2.3 staging 页布局(ETSL+ETRJ+block_bitmap):ETRJ 先写读回;接收期只动位图;**重传已部分写入块前先扇区擦除,写完读回后才清位(R8-1)**;包终验后 ETSL 字段先写读回、commit_marker 最后单独写(R8-2);新 package_sha256 才整页重建。
 - 验收: golden vectors 驱动的写入/重入单测;真机断点重入(J-Link 复位)后位图与 durable_off 一致。
-- 证据: —
+- 证据: 实现、宿主回归、有效 r3 真机断点重入、GCC/AC5 构建及生产固件恢复见 `docs/ota-exec-notes/P2-1-implementation-evidence-2026-07-29.md`;独立验收、manifest/hash 审计与 `59/59` 离线复核见 `docs/ota-exec-notes/P2-1-P2-2-acceptance-2026-07-30.md`;收口提交 `docs(ota): accept P2-1 and P2-2`。
 
 #### P2-2 .etu 解析 + AES-CTR + LZMA-Alone 解包
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 完成 ｜ 认领: Codex(实现会话) / 2026-07-29 ｜ 更新: 2026-07-30(独立验收通过并收口)
 - 目标: 按契约文档逐字段解析(**禁 struct memcpy**);校验链 §4:头 CRC→payload_crc32→hw_rev→layout_id→min_boot_ver→target_vcode>cur_vcode(降级拒绝);全量:解密→LZMA-Alone 解压→candidate 直写,offset+len 逐次钳制(§3.2);candidate 全镜像 SHA 复核(双零法)。AES key 走 `ota_keys.c` 编译期注入,库内示例 key 仅开发。
 - 验收: toy-full.etu 真机/PC 仿真解包结果与 expected.json 一致;坏包样本全部被正确拒绝且 BCB 不动。
-- 证据: —
+- 证据: 研究设计见 `docs/ota-exec-notes/P2-2-etu-full-package-research-2026-07-29.md`;实现、102 项宿主回归、有效 r3 四用例真机证据、GCC/AC5 构建及生产恢复见 `docs/ota-exec-notes/P2-2-implementation-evidence-2026-07-29.md`;独立验收、manifest/hash 审计、`112/112` 离线复核及 short-workspace delta 判定见 `docs/ota-exec-notes/P2-1-P2-2-acceptance-2026-07-30.md`;收口提交 `docs(ota): accept P2-1 and P2-2`。
 
 #### P2-3 bspatch 流式集成
 状态: 待办 ｜ 认领: — ｜ 更新: —
@@ -641,3 +641,5 @@
 - 2026-07-28 ｜ Codex(非实现会话,联合独立验收) ｜ P1-5 ｜ 测试与底层 bootstrap/recovery 机制通过，但 legacy 资产碰撞、CFSR 假阳性、recovery 原地破坏、范围越界及 fresh legacy AC5 构建失败构成阻断;验收不通过,卡保持 `进行中`。
 - 2026-07-28 ｜ Codex(实现会话,验收整改) ｜ P1-4/P1-5 ｜ P1-4 恢复 App VTOR 首调用并加回归断言;P1-5 撤销越界生产命令协议/`101/101`,修 legacy role+SHA 回退、最终 PC/VTOR/CFSR/RTT/vcode 谓词、recovery 路径碰撞与源保护、fresh AC5 前置;宿主 `16/19/27/96/42`、fresh GCC/AC5、纯 legacy 一键迁移和 recovery 尾 8B 直刷真机留证。两卡仍 `进行中`，标记“整改实现与证据完成，待非实现会话独立复验”，P1 保持 `3/6`。
 - 2026-07-28 ｜ Codex(非实现会话,整改联合复验) ｜ P1-4/P1-5 ｜ 基线 `035d96e6` fresh checkout 重跑 `16/19/27/96/42`+真实 PowerShell `8/8`、fresh GCC/AC5、Boot 布局/handoff、CI 双四件套及普通 reset/recovery 真机闭环;P1-4 首调用整改与 P1-5 五项阻断全部关闭,两卡置 `完成`,P1 更新 `5/6`;P1-6 未实施。
+- 2026-07-30 ｜ Codex(独立收口会话) ｜ P2-1/P2-2 ｜ 持久化独立验收结论与 manifest/hash 审计:P2-1 `59/59`、P2-2 `112/112`,两卡置 `完成`,P2 更新 `2/6`;未运行板卡命令,未 push。
+- 2026-07-30 ｜ Codex(集成收口会话) ｜ P1-6/P2-1/P2-2 ｜ 以共同基线 `bd9f4da` 合并 Checkout A `9a2f27f` 与 Checkout B `2374519`;统一状态为 P1 `5/6`、P1-6 `进行中`、P2 `2/6`;三处 CMake/linker 冲突按互斥 harness 联合解决,组合宿主回归、四模式配置和 fresh GCC Boot/App 构建通过;未运行板卡命令,未 push。
