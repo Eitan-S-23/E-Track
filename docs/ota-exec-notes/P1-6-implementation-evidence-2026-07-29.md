@@ -102,10 +102,13 @@ Evidence root:
 .cache/p1-6-auto-evidence-20260729-r3
 ```
 
-Every `row-XX/row-summary.json` contains the pre-injection raw BCB A/B bytes,
-arbitrated fields, slot/version/hash evidence, checkpoint and injection
-mechanism, each reset trajectory, final App version, raw SHA-256, double-zero
-SHA-256, header CRC32, and one terminal classification.
+Every `row-XX` evidence bundle is audited by reading `row-summary.json`
+together with the adjacent `row-manifest.json`. The summary records the
+execution, raw BCB observations and arbitrated fields along the trajectory,
+checkpoint and injection mechanism, final App hashes, and terminal
+classification. The manifest records the candidate, backup, and recovery slot
+identities, versions, and hashes. Together they provide the complete evidence
+set for each matrix row.
 
 | ID | Injection and observed trajectory | Final |
 |---|---|---|
