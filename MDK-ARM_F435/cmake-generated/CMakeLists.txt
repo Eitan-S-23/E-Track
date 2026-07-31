@@ -51,6 +51,9 @@ option(P2_1_TEST_ENABLE
 option(P2_2_TEST_ENABLE
        "Enable the evidence-only P2-2 package harness"
        OFF)
+option(P2_3_TEST_ENABLE
+       "Enable the evidence-only P2-3 patch harness"
+       OFF)
 if(P2_1_TEST_ENABLE AND P2_2_TEST_ENABLE)
     message(FATAL_ERROR "P2-1 and P2-2 evidence harnesses are mutually exclusive")
 endif()
@@ -59,6 +62,15 @@ if(P1_6_TEST_ENABLE AND P2_1_TEST_ENABLE)
 endif()
 if(P1_6_TEST_ENABLE AND P2_2_TEST_ENABLE)
     message(FATAL_ERROR "P1-6 and P2-2 evidence harnesses are mutually exclusive")
+endif()
+if(P1_6_TEST_ENABLE AND P2_3_TEST_ENABLE)
+    message(FATAL_ERROR "P1-6 and P2-3 evidence harnesses are mutually exclusive")
+endif()
+if(P2_1_TEST_ENABLE AND P2_3_TEST_ENABLE)
+    message(FATAL_ERROR "P2-1 and P2-3 evidence harnesses are mutually exclusive")
+endif()
+if(P2_2_TEST_ENABLE AND P2_3_TEST_ENABLE)
+    message(FATAL_ERROR "P2-2 and P2-3 evidence harnesses are mutually exclusive")
 endif()
 set(OTA_TEST_LINKER_DEFINES)
 if(P1_6_TEST_ENABLE)
@@ -69,6 +81,9 @@ if(P2_1_TEST_ENABLE)
 endif()
 if(P2_2_TEST_ENABLE)
     list(APPEND OTA_TEST_LINKER_DEFINES "-DP2_2_TEST_ENABLE=1")
+endif()
+if(P2_3_TEST_ENABLE)
+    list(APPEND OTA_TEST_LINKER_DEFINES "-DP2_3_TEST_ENABLE=1")
 endif()
 
 add_custom_command(
@@ -497,6 +512,7 @@ list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/fw_header_placeholder.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_keys.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_package.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_patch.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_staging.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_crc32.c"
@@ -690,6 +706,9 @@ if(P2_1_TEST_ENABLE)
 endif()
 if(P2_2_TEST_ENABLE)
     target_compile_definitions(X_Track_App_GCC PRIVATE "P2_2_TEST_ENABLE")
+endif()
+if(P2_3_TEST_ENABLE)
+    target_compile_definitions(X_Track_App_GCC PRIVATE "P2_3_TEST_ENABLE")
 endif()
 
 # 根据当前工具链推导 GCC C++ multilib 头文件目录。

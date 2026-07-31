@@ -95,6 +95,12 @@ void HAL::HAL_Init()
 #if defined(P2_1_TEST_ENABLE) && defined(P2_2_TEST_ENABLE)
 #error "P2-1 and P2-2 evidence harnesses are mutually exclusive"
 #endif
+#if defined(P2_1_TEST_ENABLE) && defined(P2_3_TEST_ENABLE)
+#error "P2-1 and P2-3 evidence harnesses are mutually exclusive"
+#endif
+#if defined(P2_2_TEST_ENABLE) && defined(P2_3_TEST_ENABLE)
+#error "P2-2 and P2-3 evidence harnesses are mutually exclusive"
+#endif
 #if defined(P2_1_TEST_ENABLE)
     if(OTA_StagingEvidenceRun())
     {
@@ -106,6 +112,15 @@ void HAL::HAL_Init()
 #if defined(P2_2_TEST_ENABLE)
     HAL_OTA_PackageEvidenceReady();
     if(OTA_PackageEvidenceRun())
+    {
+        while(1)
+        {
+        }
+    }
+#endif
+#if defined(P2_3_TEST_ENABLE)
+    HAL_OTA_PatchEvidenceReady();
+    if(OTA_PatchEvidenceRun())
     {
         while(1)
         {

@@ -9426,9 +9426,24 @@
               <FilePath>..\Libraries\OTA\ota_package.h</FilePath>
             </File>
             <File>
+              <FileName>ota_patch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_patch.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_patch.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_patch.h</FilePath>
+            </File>
+            <File>
               <FileName>ota_p2_2_test.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Libraries\OTA\ota_p2_2_test.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_p2_3_test.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_p2_3_test.h</FilePath>
             </File>
             <File>
               <FileName>boot_crc32.c</FileName>

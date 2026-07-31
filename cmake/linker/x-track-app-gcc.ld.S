@@ -16,6 +16,9 @@ MEMORY
 #elif defined(P2_2_TEST_ENABLE)
   RAM (xrw)      : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH - 0x800
   P2_2_CTRL (rw) : ORIGIN = OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x800, LENGTH = 0x800
+#elif defined(P2_3_TEST_ENABLE)
+  RAM (xrw)      : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH - 0x800
+  P2_3_CTRL (rw) : ORIGIN = OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x800, LENGTH = 0x800
 #elif defined(P2_1_TEST_ENABLE)
   RAM (xrw)      : ORIGIN = OTA_RAM_ORIGIN, LENGTH = OTA_RAM_LENGTH - 0x80
   P2_1_CTRL (rw) : ORIGIN = OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x80, LENGTH = 0x80
@@ -194,6 +197,19 @@ SECTIONS
          "P2-2 control address drifted")
   ASSERT(SIZEOF(.p2_2_control) == 0x800,
          "P2-2 control size drifted")
+#elif defined(P2_3_TEST_ENABLE)
+  .p2_3_control (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __p2_3_control_start__ = .;
+    . = . + 0x800;
+    __p2_3_control_end__ = .;
+  } > P2_3_CTRL
+
+  ASSERT(ADDR(.p2_3_control) == OTA_RAM_ORIGIN + OTA_RAM_LENGTH - 0x800,
+         "P2-3 control address drifted")
+  ASSERT(SIZEOF(.p2_3_control) == 0x800,
+         "P2-3 control size drifted")
 #elif defined(P2_1_TEST_ENABLE)
   .p2_1_control (NOLOAD) :
   {
@@ -262,6 +278,11 @@ SECTIONS
          "Main RAM and P2-2 control region are not contiguous")
   ASSERT(ORIGIN(P2_2_CTRL) + LENGTH(P2_2_CTRL) == ORIGIN(RW_IRAM2),
          "P2-2 control and overlay regions are not contiguous")
+#elif defined(P2_3_TEST_ENABLE)
+  ASSERT(ORIGIN(RAM) + LENGTH(RAM) == ORIGIN(P2_3_CTRL),
+         "Main RAM and P2-3 control region are not contiguous")
+  ASSERT(ORIGIN(P2_3_CTRL) + LENGTH(P2_3_CTRL) == ORIGIN(RW_IRAM2),
+         "P2-3 control and overlay regions are not contiguous")
 #elif defined(P2_1_TEST_ENABLE)
   ASSERT(ORIGIN(RAM) + LENGTH(RAM) == ORIGIN(P2_1_CTRL),
          "Main RAM and P2-1 control region are not contiguous")

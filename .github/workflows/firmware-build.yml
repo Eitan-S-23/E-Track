@@ -169,6 +169,7 @@ jobs:
           python3 tests/boot/test_boot_state_machine.py
           python3 tests/ota/test_ota_staging.py
           python3 tests/ota/test_ota_package.py
+          python3 tests/ota/test_ota_patch.py
 
       - name: Validate OTA App layout
         shell: bash
