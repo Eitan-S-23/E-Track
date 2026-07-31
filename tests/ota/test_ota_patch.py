@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def _load_unpack_module():
-    sys.path.insert(0, str(ROOT / "tools"))
+    sys.path.insert(0, str(ROOT / "Tools"))
     import etu_unpack  # type: ignore
 
     return etu_unpack
