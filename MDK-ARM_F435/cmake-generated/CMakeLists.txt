@@ -509,10 +509,13 @@ list(REMOVE_ITEM APP_PROJECT_SOURCES
 list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/main.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/HAL_OTA_Package.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/OtaUpdate/OtaUpdate.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/fw_header_placeholder.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_keys.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_package.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_patch.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_sd.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_staging.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_crc32.c"
