@@ -169,6 +169,9 @@ void App_Init()
     manager.Install("Startup",     "Pages/Startup");
     manager.Install("RouteSelect", "Pages/RouteSelect");
     manager.Install("RouteImport", "Pages/RouteImport");
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+    manager.Install("FirmwareUpdate", "Pages/FirmwareUpdate");
+#endif
 
     manager.SetGlobalLoadAnimType(PageManager::LOAD_ANIM_OVER_LEFT);
 

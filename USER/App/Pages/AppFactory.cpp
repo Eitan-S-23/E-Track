@@ -29,6 +29,9 @@
 #include "StartUp/StartUp.h"
 #include "RouteSelect/RouteSelect.h"
 #include "RouteImport/RouteImport.h"
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+#include "FirmwareUpdate/FirmwareUpdate.h"
+#endif
 
 #define APP_CLASS_MATCH(className)\
 do{\
@@ -48,6 +51,9 @@ PageBase* AppFactory::CreatePage(const char* name)
     APP_CLASS_MATCH(Startup);
     APP_CLASS_MATCH(RouteSelect);
     APP_CLASS_MATCH(RouteImport);
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+    APP_CLASS_MATCH(FirmwareUpdate);
+#endif
 
     return nullptr;
 }

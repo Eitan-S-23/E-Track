@@ -370,6 +370,15 @@
     <Filter Include="App\Pages\Startup">
       <UniqueIdentifier>{a9f7a372-994a-40ce-ad80-ef374e6e28fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="App\Pages\FirmwareUpdate">
+      <UniqueIdentifier>{bb53ca76-b4d9-4c70-98af-b3069bf8c2fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App\Utils\OtaUpdate">
+      <UniqueIdentifier>{df81fa85-ff5a-48a1-8f56-a59bf6a77139}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OTA">
+      <UniqueIdentifier>{f32619f6-a3ee-4e9e-bf65-fbb00dcbb5e4}</UniqueIdentifier>
+    </Filter>
     <Filter Include="HAL">
       <UniqueIdentifier>{83526f90-0302-468a-b87c-d5988d8c85c0}</UniqueIdentifier>
     </Filter>
@@ -824,6 +833,21 @@
     </ClInclude>
     <ClInclude Include="..\..\USER\App\Pages\RouteSelect\RouteSelect.h">
       <Filter>App\Pages\RouteSelect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\USER\App\Pages\FirmwareUpdate\FirmwareUpdate.h">
+      <Filter>App\Pages\FirmwareUpdate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\USER\App\Utils\OtaUpdate\OtaUpdate.h">
+      <Filter>App\Utils\OtaUpdate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Libraries\OTA\ota_sd.h">
+      <Filter>OTA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Libraries\OTA\ota_staging.h">
+      <Filter>OTA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\boot\include\boot_crypto.h">
+      <Filter>OTA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\USER\App\Pages\_Template\Template.h">
       <Filter>App\Pages\_Template</Filter>
@@ -1810,6 +1834,24 @@
     </ClCompile>
     <ClCompile Include="..\..\USER\App\Pages\RouteSelect\RouteSelect.cpp">
       <Filter>App\Pages\RouteSelect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\USER\App\Pages\FirmwareUpdate\FirmwareUpdate.cpp">
+      <Filter>App\Pages\FirmwareUpdate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\USER\App\Utils\OtaUpdate\OtaUpdate.cpp">
+      <Filter>App\Utils\OtaUpdate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Libraries\OTA\ota_sd.c">
+      <Filter>OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Libraries\OTA\ota_staging.c">
+      <Filter>OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\boot\src\boot_crc32.c">
+      <Filter>OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\boot\src\boot_sha256.c">
+      <Filter>OTA</Filter>
     </ClCompile>
     <ClCompile Include="..\..\USER\App\Pages\_Template\Template.cpp">
       <Filter>App\Pages\_Template</Filter>

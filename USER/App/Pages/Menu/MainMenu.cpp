@@ -39,7 +39,11 @@ struct SettingItem
 #define TXT_DISPLAY         "\xE6\x98\xBE\xE7\xA4\xBA\xE8\xAE\xBE\xE7\xBD\xAE"
 #define TXT_SENSOR          "\xE4\xBC\xA0\xE6\x84\x9F\xE5\x99\xA8\xE8\xAE\xBE\xE7\xBD\xAE"
 #define TXT_SYSTEM          "\xE7\xB3\xBB\xE7\xBB\x9F\xE8\xAE\xBE\xE7\xBD\xAE"
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+#define TXT_ABOUT           "\xE6\x96\x87\xE4\xBB\xB6\xE7\xAE\xA1\xE7\x90\x86"
+#else
 #define TXT_ABOUT           "\xE5\x85\xB3\xE4\xBA\x8E\xE8\xAE\xBE\xE5\xA4\x87"
+#endif
 #define TXT_NAV_MODE        "\xE5\xAF\xBC\xE8\x88\xAA\xE6\xA8\xA1\xE5\xBC\x8F"
 #define TXT_MAP_NAV         "\xE5\x9C\xB0\xE5\x9B\xBE\xE5\xAF\xBC\xE8\x88\xAA"
 #define TXT_ROUTE_PLAN      "\xE8\xB7\xAF\xE7\xBA\xBF\xE8\xA7\x84\xE5\x88\x92"
@@ -706,9 +710,16 @@ void MainMenu::OpenAction(int action)
     switch (action)
     {
     case MENU_ACTION_DEVICE:
-    case MENU_ACTION_ABOUT:
         SetStatusBarAppear(true);
         _Manager->Push("Pages/SystemInfos");
+        break;
+    case MENU_ACTION_ABOUT:
+        SetStatusBarAppear(true);
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+        _Manager->Push("Pages/FirmwareUpdate");
+#else
+        _Manager->Push("Pages/SystemInfos");
+#endif
         break;
     case MENU_ACTION_RECORDS:
         ShowRecordsPage();

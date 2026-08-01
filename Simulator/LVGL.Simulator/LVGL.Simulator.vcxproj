@@ -64,14 +64,14 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization Condition="'$(Configuration)'=='Release'">MinSpace</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(ProjectDir)..\..\USER\App</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(ProjectDir)..\..\USER\App</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\..\USER\App;$(ProjectDir)..\..\USER\App\Utils\ArduinoJson\src;$(ProjectDir)..\..\Libraries;$(ProjectDir)..\..\boot\include</AdditionalIncludeDirectories>
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ProgramDatabase</DebugInformationFormat>
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</MultiProcessorCompilation>
@@ -104,6 +104,11 @@
     <ClInclude Include="..\..\USER\App\Pages\Page.h" />
     <ClInclude Include="..\..\USER\App\Pages\RouteImport\RouteImport.h" />
     <ClInclude Include="..\..\USER\App\Pages\RouteSelect\RouteSelect.h" />
+    <ClInclude Include="..\..\USER\App\Pages\FirmwareUpdate\FirmwareUpdate.h" />
+    <ClInclude Include="..\..\USER\App\Utils\OtaUpdate\OtaUpdate.h" />
+    <ClInclude Include="..\..\Libraries\OTA\ota_sd.h" />
+    <ClInclude Include="..\..\Libraries\OTA\ota_staging.h" />
+    <ClInclude Include="..\..\boot\include\boot_crypto.h" />
     <ClInclude Include="..\..\USER\App\Pages\Startup\Startup.h" />
     <ClInclude Include="..\..\USER\App\Pages\Startup\StartupModel.h" />
     <ClInclude Include="..\..\USER\App\Pages\Startup\StartupView.h" />
@@ -320,6 +325,12 @@
     <ClCompile Include="..\..\USER\App\Pages\Menu\MainMenu.cpp" />
     <ClCompile Include="..\..\USER\App\Pages\RouteImport\RouteImport.cpp" />
     <ClCompile Include="..\..\USER\App\Pages\RouteSelect\RouteSelect.cpp" />
+    <ClCompile Include="..\..\USER\App\Pages\FirmwareUpdate\FirmwareUpdate.cpp" />
+    <ClCompile Include="..\..\USER\App\Utils\OtaUpdate\OtaUpdate.cpp" />
+    <ClCompile Include="..\..\Libraries\OTA\ota_sd.c" />
+    <ClCompile Include="..\..\Libraries\OTA\ota_staging.c" />
+    <ClCompile Include="..\..\boot\src\boot_crc32.c" />
+    <ClCompile Include="..\..\boot\src\boot_sha256.c" />
     <ClCompile Include="..\..\USER\App\Pages\Startup\Startup.cpp" />
     <ClCompile Include="..\..\USER\App\Pages\Startup\StartupModel.cpp" />
     <ClCompile Include="..\..\USER\App\Pages\Startup\StartupView.cpp" />
