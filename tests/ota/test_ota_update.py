@@ -112,13 +112,15 @@ def main() -> int:
             "truncate",
             "second-pass-replace",
             "unavailable",
+            "stage-before-apply",
+            "begin-non-confirmed",
         ):
             subprocess.run(
                 [str(executable), scenario, str(original), str(replacement)],
                 cwd=ROOT,
                 check=True,
             )
-        print("P2_4_OTA_UPDATE=PASS scenarios=5")
+        print("P2_4_OTA_UPDATE=PASS scenarios=7")
     return 0
 
 
