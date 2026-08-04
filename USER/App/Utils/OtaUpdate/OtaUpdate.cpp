@@ -1,9 +1,13 @@
 #include "OtaUpdate.h"
 
+#include "OTA/ota_backup.h"
+#include "EEPROM/eeprom_bcb.h"
+
 #include "Version.h"
 
 #if defined(OTA_TARGET_APP)
 #include "HAL/HAL_OTA_Package.h"
+#include "HAL/HAL_OTA_Backup.h"
 #include "HAL/HAL_OTA_Staging.h"
 #include "boot_fw_header.h"
 #endif
@@ -205,6 +209,9 @@ Session::Session()
     : fileOpen(false),
       deviceReady(false),
       confirmationValid(false),
+      candidateReady(false),
+      candidateTargetVcode(0u),
+      candidateImageLen(0u),
       currentImageLen(0u),
       filePosition(0u),
       confirmedPackageLen(0u)
@@ -214,6 +221,10 @@ Session::Session()
     memset(&packageInfo, 0, sizeof(packageInfo));
     memset(&transfer, 0, sizeof(transfer));
     memset(confirmedPackageSha256, 0, sizeof(confirmedPackageSha256));
+    memset(candidateImageSha8, 0, sizeof(candidateImageSha8));
+#if defined(_WIN32)
+    simulatorBcbState = BCB_STATE_CONFIRMED;
+#endif
     selectedPath[0] = '\0';
     lastError[0] = '\0';
 }
@@ -289,7 +300,10 @@ ota_sd_result_t Session::Inspect(const char* path,
         SetError("inspect", "argument");
         return OTA_SD_ERR_ARGUMENT;
     }
+    /* 新一次选包会替换随后 Apply 的候选身份来源：清空旧 candidate-ready，
+     * 防止 Stage 把上一次 Apply 的候选绑定到新包上。 */
     InvalidateConfirmation();
+    InvalidateCandidate();
     CloseFile();
     strcpy(selectedPath, path);
     if (!OpenSelectedFile(&size))
@@ -345,6 +359,13 @@ ota_sd_result_t Session::Begin(const char* path)
         SetError("begin", "argument");
         return OTA_SD_ERR_ARGUMENT;
     }
+    /* P2-5 阻断 3：任何 staging 擦除前，活动 BCB 必须为 CONFIRMED。
+     * TEST_BOOT/STAGED/APPLYING/ROLLBACK/IDLE 全部零 QSPI/EEPROM 副作用拒绝。 */
+    result = RequireConfirmedBcb();
+    if (result != OTA_SD_OK)
+    {
+        return result;
+    }
     if (!confirmationValid || strcmp(path, selectedPath) != 0)
     {
         SetError("begin", "confirmation");
@@ -354,6 +375,8 @@ ota_sd_result_t Session::Begin(const char* path)
     memcpy(confirmedSha256, confirmedPackageSha256,
            sizeof(confirmedSha256));
     confirmationValid = false;
+    /* 新传输取代旧的 candidate-ready：Apply 成功才重新置位。 */
+    InvalidateCandidate();
     CloseFile();
     if (!OpenSelectedFile(&size))
     {
@@ -401,6 +424,7 @@ ota_sd_result_t Session::Step(uint32_t byteBudget)
     if (result < 0)
     {
         SetError("stage", ota_sd_result_name(result));
+        InvalidateCandidate();
         CloseFile();
     }
     else if (result == OTA_SD_STAGED)
@@ -418,8 +442,18 @@ bool Session::Apply()
         SetError("apply", "not_staged");
         return false;
     }
+    /* P2-5 阻断 3：candidate prepare/write 前再次确认 CONFIRMED。 */
+    if (RequireConfirmedBcb() != OTA_SD_OK)
+    {
+        InvalidateCandidate();
+        return false;
+    }
 
 #if defined(_WIN32)
+    candidateReady = true;
+    candidateTargetVcode = packageInfo.target_vcode;
+    candidateImageLen = currentImageLen;
+    memset(candidateImageSha8, 0, sizeof(candidateImageSha8));
     lastError[0] = '\0';
     return true;
 #else
@@ -434,9 +468,16 @@ bool Session::Apply()
         if (result != OTA_PACKAGE_OK ||
             info.target_vcode != packageInfo.target_vcode)
         {
+            InvalidateCandidate();
             SetError("full", ota_package_result_name(result));
             return false;
         }
+        /* 绑定本次 Apply 的 candidate 身份（阻断 4）：vcode/image_len/sha8 */
+        candidateReady = true;
+        candidateTargetVcode = info.target_vcode;
+        candidateImageLen = info.image_len;
+        memcpy(candidateImageSha8, info.image_sha256,
+               sizeof(candidateImageSha8));
     }
     else if (packageInfo.kind == OTA_SD_KIND_PATCH)
     {
@@ -450,9 +491,15 @@ bool Session::Apply()
         if (result != OTA_PATCH_OK ||
             info.target_vcode != packageInfo.target_vcode)
         {
+            InvalidateCandidate();
             SetError("patch", ota_patch_result_name(result));
             return false;
         }
+        candidateReady = true;
+        candidateTargetVcode = info.target_vcode;
+        candidateImageLen = info.image_len;
+        memcpy(candidateImageSha8, info.image_sha256,
+               sizeof(candidateImageSha8));
     }
     else
     {
@@ -469,7 +516,70 @@ void Session::Close()
     CloseFile();
     memset(&transfer, 0, sizeof(transfer));
     InvalidateConfirmation();
+    InvalidateCandidate();
     selectedPath[0] = '\0';
+}
+
+ota_sd_result_t Session::Stage()
+{
+    ota_backup_info_t info;
+    ota_backup_result_t result;
+    ota_sd_result_t gate;
+
+    CloseFile();
+    if (transfer.phase != OTA_SD_PHASE_COMPLETE)
+    {
+        SetError("stage", "not_staged");
+        return OTA_SD_ERR_STAGED_COMMIT;
+    }
+    /* P2-5 阻断 4：仅本次成功 Apply 的 candidate 可提交；Begin/Close/Apply
+     * 失败会清除 candidateReady，禁止仅凭 transfer.phase==COMPLETE 提交旧
+     * candidate。同时再核活动 BCB 仍为 CONFIRMED。 */
+    if (!candidateReady)
+    {
+        SetError("stage", "candidate_not_applied");
+        return OTA_SD_ERR_STAGED_COMMIT;
+    }
+    gate = RequireConfirmedBcb();
+    if (gate != OTA_SD_OK)
+    {
+        return gate;
+    }
+
+#if defined(_WIN32)
+    /* 模拟器不驱动真实 QSPI/EEPROM：与 Apply() 一致返回成功，UI 可截图；
+     * 真实提交逻辑由宿主测试与真机覆盖。 */
+    (void)info;
+    (void)result;
+    lastError[0] = '\0';
+    return OTA_SD_OK;
+#else
+    memset(&info, 0, sizeof(info));
+    result = HAL::OTA_BackupStage(&info);
+    if (result == OTA_BACKUP_ERR_COMMIT_AMBIGUOUS)
+    {
+        /* 提交后状态 unknown：禁止覆盖 candidate/backup，提示用户重启复核。 */
+        SetError("stage", "commit_unknown");
+        return OTA_SD_ERR_COMMIT_UNKNOWN;
+    }
+    if (result != OTA_BACKUP_OK)
+    {
+        SetError("stage", ota_backup_result_name(result));
+        return OTA_SD_ERR_STAGED_COMMIT;
+    }
+    /* 核对 STAGED 提交的正是本次 Apply 的 candidate（身份三元一致）。 */
+    if (info.candidate_vcode != candidateTargetVcode ||
+        info.candidate_len != candidateImageLen ||
+        memcmp(info.candidate_sha8, candidateImageSha8,
+               sizeof(candidateImageSha8)) != 0)
+    {
+        InvalidateCandidate();
+        SetError("stage", "identity_mismatch");
+        return OTA_SD_ERR_FILE_CHANGED;
+    }
+    lastError[0] = '\0';
+    return OTA_SD_OK;
+#endif
 }
 
 uint32_t Session::CurrentVersionCode() const
@@ -543,6 +653,39 @@ void Session::InvalidateConfirmation()
     confirmationValid = false;
     confirmedPackageLen = 0u;
     memset(confirmedPackageSha256, 0, sizeof(confirmedPackageSha256));
+}
+
+#if defined(_WIN32)
+void Session::SetSimulatorBcbState(uint8_t state)
+{
+    simulatorBcbState = state;
+}
+#endif
+
+void Session::InvalidateCandidate()
+{
+    candidateReady = false;
+    candidateTargetVcode = 0u;
+    candidateImageLen = 0u;
+    memset(candidateImageSha8, 0, sizeof(candidateImageSha8));
+}
+
+ota_sd_result_t Session::RequireConfirmedBcb()
+{
+    uint8_t state;
+
+#if defined(_WIN32)
+    /* 模拟器无真实 EEPROM：使用宿主注入状态（默认 CONFIRMED，测试可改写）。 */
+    state = simulatorBcbState;
+#else
+    state = HAL::OTA_GetBcbState();
+#endif
+    if (state != BCB_STATE_CONFIRMED)
+    {
+        SetError("gate", "bcb_not_confirmed");
+        return OTA_SD_ERR_BUSY;
+    }
+    return OTA_SD_OK;
 }
 
 void Session::CloseFile()

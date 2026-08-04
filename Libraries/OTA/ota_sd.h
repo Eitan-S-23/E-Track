@@ -44,7 +44,10 @@ typedef enum ota_sd_result_t
     OTA_SD_ERR_PACKAGE_LENGTH = -14,
     OTA_SD_ERR_PAYLOAD_CRC = -15,
     OTA_SD_ERR_STAGING = -16,
-    OTA_SD_ERR_FILE_CHANGED = -17
+    OTA_SD_ERR_FILE_CHANGED = -17,
+    OTA_SD_ERR_STAGED_COMMIT = -18, /* P2-5：backup/STAGED 提交失败（含 BCB=STAGED 提交；BCB 提交态以 Session Stage 结果为准） */
+    OTA_SD_ERR_BUSY = -19,          /* P2-5：活动 BCB 非 CONFIRMED（TEST_BOOT/STAGED 等）拒绝发起新 OTA，零副作用 */
+    OTA_SD_ERR_COMMIT_UNKNOWN = -20 /* P2-5：BCB=STAGED 提交后读回不确定（unknown），禁止覆盖 candidate/backup */
 } ota_sd_result_t;
 
 typedef enum ota_sd_phase_t

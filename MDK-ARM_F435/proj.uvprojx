@@ -9446,6 +9446,36 @@
               <FilePath>..\Libraries\OTA\ota_sd.h</FilePath>
             </File>
             <File>
+              <FileName>ota_backup.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_backup.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_backup.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_backup.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_confirm_health.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_confirm_health.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_confirm_health.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_confirm_health.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_slot_header.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_slot_header.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_slot_header.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_slot_header.h</FilePath>
+            </File>
+            <File>
               <FileName>ota_p2_2_test.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Libraries\OTA\ota_p2_2_test.h</FilePath>

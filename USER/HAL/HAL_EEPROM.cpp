@@ -3,6 +3,8 @@
 #include "EEPROM/eeprom_bcb.h"
 #include "OTA/ota_confirm.h"
 #include "OTA/ota_p1_6_test.h"
+#include "HAL/HAL_OTA_Backup.h"
+#include "at32f435_437.h"
 
 static EEPROM at24c;
 
@@ -112,6 +114,41 @@ uint8_t HAL::EEPROM_Check(void)
     // General writes reject byte 0xFF. Only this initialization path may
     // create the reserved 0x55 marker, with ACK polling and readback verify.
     return at24c.EnsureInitMagic() ? 0 : 1;
+}
+
+/* boot 在 TEST_BOOT 起动独立看门狗的参数（boot_platform_at32.c:26/802-810
+ * reload=1561、div=WDT_CLK_DIV_256）。App 侧只读核对该参数，不重设。 */
+#define OTA_BOOT_TEST_WATCHDOG_DIV    WDT_CLK_DIV_256
+#define OTA_BOOT_TEST_WATCHDOG_RELOAD 1561u
+
+const bcb_hal_t *HAL::OTA_GetBcbHal(void)
+{
+    return &bcb_app_hal;
+}
+
+uint8_t HAL::OTA_GetBcbState(void)
+{
+    bcb_t active;
+    bcb_arbiter_result_t result = bcb_arbiter(&bcb_app_hal, &active);
+
+    if(result != BCB_ARBITER_A && result != BCB_ARBITER_B)
+    {
+        return 0xFFu;
+    }
+    return active.state;
+}
+
+void HAL::OTA_WatchdogFeed(void)
+{
+    wdt_counter_reload();
+}
+
+int HAL::OTA_WatchdogIsConfigured(void)
+{
+    /* boot 起动后寄存器保持其值；复位后恢复默认（div=0/rld=0xFFF）。
+     * 精确匹配 boot 的 TEST_BOOT 参数即视为“独立看门狗在跑”。 */
+    return (int)(WDT->div_bit.div == (uint32_t)OTA_BOOT_TEST_WATCHDOG_DIV &&
+                 WDT->rld_bit.rld == (uint32_t)OTA_BOOT_TEST_WATCHDOG_RELOAD);
 }
 
 bool HAL::OTA_ConfirmBoot()

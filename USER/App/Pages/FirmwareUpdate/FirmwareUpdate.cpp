@@ -14,6 +14,7 @@ using namespace Page;
 #define TXT_START_IMPORT "\xE5\xBC\x80\xE5\xA7\x8B\xE5\xAF\xBC\xE5\x85\xA5"
 #define TXT_IMPORTING    "\xE5\xAF\xBC\xE5\x85\xA5\xE4\xB8\xAD"
 #define TXT_READY        "\xE5\xB7\xB2\xE5\xB0\xB1\xE7\xBB\xAA"
+#define TXT_STAGED_READY "\xE5\xB7\xB2\xE5\xB0\xB1\xE7\xBB\xAA\xEF\xBC\x8C\xE5\x85\xB3\xE6\x9C\xBA\xE5\x90\x8E\xE5\xBC\x80\xE6\x9C\xBA"
 #define TXT_FAILED       "\xE5\xAF\xBC\xE5\x85\xA5\xE5\xA4\xB1\xE8\xB4\xA5"
 #define TXT_BACK         "\xE8\xBF\x94\xE5\x9B\x9E"
 #define TXT_PATH_LONG    "PATH TOO LONG"
@@ -204,6 +205,7 @@ FirmwareUpdate::FirmwareUpdate()
       pendingAsync(false),
       deviceReady(false),
       applyPending(false),
+      stagePending(false),
       resultSuccess(false),
       rowCount(0),
       mode(MODE_BROWSER)
@@ -807,6 +809,7 @@ void FirmwareUpdate::StartImport()
     }
 
     applyPending = false;
+    stagePending = false;
     resultSuccess = false;
     lv_obj_add_flag(confirmPanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(backButton, LV_OBJ_FLAG_HIDDEN);
@@ -839,7 +842,25 @@ void FirmwareUpdate::RunWorkStep()
     if (applyPending)
     {
         applyPending = false;
-        FinishImport(updater.Apply());
+        /* P2-5：candidate 合成校验成功后进入 backup 自拷 + STAGED 提交，
+         * 不再把 “candidate ready” 当作整项成功。 */
+        if (updater.Apply())
+        {
+            lv_bar_set_value(progressBar, 96, LV_ANIM_OFF);
+            lv_label_set_text(progressLabel, "96");
+            lv_label_set_text(workDetailLabel, "BACKUP + STAGED");
+            stagePending = true;
+        }
+        else
+        {
+            FinishImport(false);
+        }
+        return;
+    }
+    if (stagePending)
+    {
+        stagePending = false;
+        FinishImport(updater.Stage() == OTA_SD_OK);
         return;
     }
 
@@ -874,12 +895,13 @@ void FirmwareUpdate::FinishImport(bool success)
     }
     if (success)
     {
-        lv_label_set_text(workStatusLabel, TXT_READY);
+        /* STAGED 已原子提交且读回通过，才允许显示成功并提示重启 */
+        lv_label_set_text(workStatusLabel, TXT_STAGED_READY);
         lv_obj_set_style_text_color(workStatusLabel,
                                     lv_color_hex(0x52f58a), 0);
         lv_bar_set_value(progressBar, 100, LV_ANIM_OFF);
         lv_label_set_text(progressLabel, "100");
-        lv_label_set_text(workDetailLabel, "CANDIDATE READY");
+        lv_label_set_text(workDetailLabel, "STAGED COMMIT OK");
     }
     else
     {

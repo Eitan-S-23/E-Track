@@ -1,6 +1,7 @@
 #include "HAL/HAL_OTA_Package.h"
 
 #include "HAL/HAL.h"
+#include "HAL/HAL_OTA_Backup.h"
 #if defined(P2_2_TEST_ENABLE)
 #include "EEPROM/eeprom_bcb.h"
 #include "OTA/ota_p2_2_test.h"
@@ -251,6 +252,102 @@ static int base_read(void *ctx, uint32_t offset,
     }
     memcpy(dst, (const void *)(uintptr_t)(OTA_APP_ORIGIN + offset), len);
     return 0;
+}
+
+/* ---- P2-5 backup/STAGED 槽 IO（candidate/backup 两槽域 + XIP + QSPI 双门） ---- */
+
+static int backup_slot_range_ok(uint32_t address, uint32_t len,
+                                int allow_zero_len)
+{
+    uint32_t slot_start;
+    uint32_t slot_end;
+    int in_candidate;
+    int in_backup;
+
+    /* 仅放行 candidate/backup 两槽域（OTA_EXT_CANDIDATE==0，无需 < 下界检查，
+     * 避免 AC5 #186-D pointless comparison with zero）。 */
+    in_candidate = address < OTA_EXT_CANDIDATE + OTA_EXT_SLOT_LENGTH;
+    in_backup = address >= OTA_EXT_BACKUP &&
+                address < OTA_EXT_BACKUP + OTA_EXT_SLOT_LENGTH;
+    if (!in_candidate && !in_backup)
+    {
+        return 0;
+    }
+    slot_start = in_backup ? OTA_EXT_BACKUP : OTA_EXT_CANDIDATE;
+    slot_end = slot_start + OTA_EXT_SLOT_LENGTH;
+    if (len == 0u)
+    {
+        return allow_zero_len && address >= slot_start &&
+               address <= slot_end;
+    }
+    return address <= slot_end && len <= slot_end - address;
+}
+
+static int backup_flash_read(void *ctx, uint32_t address,
+                             uint8_t *dst, uint32_t len)
+{
+    (void)ctx;
+    if (dst == 0 || !backup_slot_range_ok(address, len, 0) ||
+        HAL::Qspi_IsOtaDisabled())
+    {
+        return -1;
+    }
+    memcpy(dst, (const void *)(QSPI1_MEM_BASE + address), len);
+    return 0;
+}
+
+static int backup_flash_erase_4k(void *ctx, uint32_t address)
+{
+    qspi_status_t result;
+    int restore_result;
+
+    (void)ctx;
+    if ((address & (OTA_SLOT_HEADER_SIZE - 1u)) != 0u ||
+        !backup_slot_range_ok(address, OTA_SLOT_HEADER_SIZE, 0) ||
+        HAL::Qspi_IsOtaDisabled())
+    {
+        return -1;
+    }
+    qspi_xip_enable(QSPI1, FALSE);
+    result = qspi_erase(address);
+    restore_result = qspi_restore_xip();
+    return result == QSPI_OK && restore_result == 0 ? 0 : -1;
+}
+
+static int backup_flash_program(void *ctx, uint32_t address,
+                                const uint8_t *src, uint32_t len)
+{
+    qspi_status_t result;
+    int restore_result;
+
+    (void)ctx;
+    if (src == 0 || len == 0u ||
+        !backup_slot_range_ok(address, len, 0) ||
+        HAL::Qspi_IsOtaDisabled())
+    {
+        return -1;
+    }
+    qspi_xip_enable(QSPI1, FALSE);
+    result = qspi_data_write(address, len, (uint8_t *)src);
+    restore_result = qspi_restore_xip();
+    return result == QSPI_OK && restore_result == 0 ? 0 : -1;
+}
+
+ota_backup_result_t HAL::OTA_BackupStage(ota_backup_info_t *out)
+{
+    ota_backup_io_t io;
+
+    if (Qspi_IsOtaDisabled() || qspi_restore_xip() != 0)
+    {
+        return OTA_BACKUP_ERR_DISABLED;
+    }
+    memset(&io, 0, sizeof(io));
+    io.ctx = 0;
+    io.app_read = base_read;
+    io.flash_read = backup_flash_read;
+    io.flash_erase_4k = backup_flash_erase_4k;
+    io.flash_program = backup_flash_program;
+    return ota_backup_stage(&io, HAL::OTA_GetBcbHal(), out);
 }
 
 ota_package_result_t HAL::OTA_PackageApplyStaging(

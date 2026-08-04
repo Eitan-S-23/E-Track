@@ -77,6 +77,7 @@ private:
     bool pendingAsync;
     bool deviceReady;
     bool applyPending;
+    bool stagePending;
     bool resultSuccess;
     uint8_t rowCount;
     ViewMode mode;
