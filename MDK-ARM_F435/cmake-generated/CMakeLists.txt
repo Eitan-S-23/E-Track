@@ -549,6 +549,8 @@ set(BOOT_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_usart.c"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../Platform/Core/at32f435_437_clock.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c"
 )
 if(P1_6_TEST_ENABLE)
     list(APPEND BOOT_PROJECT_SOURCES
@@ -664,6 +666,7 @@ target_include_directories(X_Track_Boot PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/_X-Track"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7"
+    "${CMAKE_CURRENT_LIST_DIR}/../Platform/Core"
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/CMSIS/Include"
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Peripherals/inc"
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Device/Include"

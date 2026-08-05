@@ -104,12 +104,28 @@ void HAL::Power_Init()
     memset(&Power, 0, sizeof(Power));
     Power.AutoLowPowerTimeout = 60;
 
+#if defined(OTA_TARGET_APP)
+    /* P1-7 缺陷 B：由 boot 交接进入时，boot 的 configure_power_hold() 已完成
+     * "拉低→1000ms→拉高" 防抖并锁存 POWER_EN(PD2)。此处若再重做一遍
+     * "拉低→1s→拉高"，会在 boot 已锁存后主动撤除供电保持 1 秒（与
+     * Power_EventMonitor() 的关机动作相同），电池供电下设备会在此刻关机。
+     *
+     * 故 OTA 路径只确保 PD2 维持高电平，不再拉低。vendor gpio_init() 只改
+     * cfgr/omode/odrvr/pull、不碰 ODT，因此 pinMode(OUTPUT) 不会改变 boot
+     * 已置高的 ODT；随后立即 digitalWrite(HIGH) 兜底，保证任意时刻无低电平
+     * 样本。legacy 路径（非 OTA_TARGET_APP）仍保留原防抖序列（唯一锁存点）。 */
+    CONFIG_DEBUG_SERIAL.printf("Power: hold[%dms]...\r\n", CONFIG_POWER_WAIT_TIME);
+    pinMode(CONFIG_POWER_EN_PIN, OUTPUT);
+    digitalWrite(CONFIG_POWER_EN_PIN, HIGH);
+    CONFIG_DEBUG_SERIAL.println("Power: ON");
+#else
     CONFIG_DEBUG_SERIAL.printf("Power: Waiting[%dms]...\r\n", CONFIG_POWER_WAIT_TIME);
     pinMode(CONFIG_POWER_EN_PIN, OUTPUT);
     digitalWrite(CONFIG_POWER_EN_PIN, LOW);
     delay(CONFIG_POWER_WAIT_TIME);
     digitalWrite(CONFIG_POWER_EN_PIN, HIGH);
     CONFIG_DEBUG_SERIAL.println("Power: ON");
+#endif
 
     Power_ADC_Init(BATT_ADC);
     pinMode(CONFIG_BAT_DET_PIN, INPUT_ANALOG);
