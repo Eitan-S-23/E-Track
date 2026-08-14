@@ -2,6 +2,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $script:P1RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+. (Join-Path $script:P1RepoRoot 'Tools\provenance\worktree_guard.ps1')
+$script:P1RepoRoot = Assert-ActiveWorktree $script:P1RepoRoot
 
 function Get-P1LiteralMacro {
     param(
@@ -54,7 +56,7 @@ function Copy-P1PreservedArtifact {
     )
     Assert-P1File $SourcePath
     $source = (Resolve-Path $SourcePath).Path
-    [System.IO.Directory]::CreateDirectory($DestinationDirectory) | Out-Null
+    $DestinationDirectory = New-WorktreeDirectory -RepoRoot $script:P1RepoRoot -DirectoryPath $DestinationDirectory
     $sourceHash = Get-FileHash -LiteralPath $source -Algorithm SHA256
     $sourceLength = (Get-Item -LiteralPath $source).Length
     $targetName = '{0}-{1}-{2}' -f $Role, $sourceHash.Hash.ToLowerInvariant(),
@@ -97,8 +99,7 @@ function Invoke-P1Native {
         [int]$TimeoutSeconds = 120
     )
     Assert-P1File $FilePath
-    $logDirectory = Split-Path -Parent $LogPath
-    [System.IO.Directory]::CreateDirectory($logDirectory) | Out-Null
+    $LogPath = Assert-WorktreeFileOutput -RepoRoot $script:P1RepoRoot -FilePath $LogPath
     $argumentLine = ($Arguments | ForEach-Object {
         ConvertTo-P1NativeArgument ([string]$_)
     }) -join ' '
@@ -154,7 +155,7 @@ function Write-P1JLinkCommandFile {
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][string[]]$Lines
     )
-    [System.IO.Directory]::CreateDirectory((Split-Path -Parent $Path)) | Out-Null
+    $Path = Assert-WorktreeFileOutput -RepoRoot $script:P1RepoRoot -FilePath $Path
     [System.IO.File]::WriteAllLines($Path, $Lines, [System.Text.ASCIIEncoding]::new())
 }
 
@@ -407,7 +408,9 @@ function Invoke-P1RttCapture {
     Stop-P1RttLogger
     $stdoutPath = $OutputPath + '.stdout'
     $stderrPath = $OutputPath + '.stderr'
-    [System.IO.Directory]::CreateDirectory((Split-Path -Parent $OutputPath)) | Out-Null
+    $OutputPath = Assert-WorktreeFileOutput -RepoRoot $script:P1RepoRoot -FilePath $OutputPath
+    $stdoutPath = Assert-WorktreeFileOutput -RepoRoot $script:P1RepoRoot -FilePath $stdoutPath
+    $stderrPath = Assert-WorktreeFileOutput -RepoRoot $script:P1RepoRoot -FilePath $stderrPath
     $arguments = @(
         '-Device', 'CORTEX-M4', '-If', 'SWD', '-Speed',
         [string]$script:P1SpeedKHz, '-RTTAddress', ('0x{0:X8}' -f $Address),
