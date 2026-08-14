@@ -5,6 +5,7 @@
  *   - 30 秒前不确认、无 hal_ready 不确认、loop 数不足不确认、
  *     wdt 未配置不确认、未喂狗不确认；
  *   - 全部条件满足后才 ready；
+ *   - Boot WDT 经 HAL_Init 重配置后仍被识别，错误元组不放行；
  *   - CONFIRMED 已存时由调用方幂等（本模块只判据，幂等由 HAL 层）；
  *   - CONFIRMED 提交失败按受控间隔重试（retry_ok 时序）。
  */
@@ -172,6 +173,34 @@ static void t_feed_after_confirmed(void)
     }
 }
 
+/* C14 真实寄存器转换回归：Boot 先写 DIV_256/1561，随后 HAL_Init 的
+ * WDG_Init(10000) 选择 DIV_128 并写 reload=3124。两者都表示同一个已启动
+ * IWDG；旧实现只接受前者，导致 TEST_BOOT 健康门在 HAL 初始化后永久关闭。 */
+static void t_watchdog_config_transition(void)
+{
+    uint32_t div_code = 6u;
+    uint32_t reload = 1561u;
+
+    check("C14 boot WDT tuple accepted",
+          ota_confirm_watchdog_config_matches(div_code, reload, 10000u));
+
+    div_code = 5u;
+    reload = 3124u;
+    check("C14 HAL-reconfigured WDT tuple accepted",
+          ota_confirm_watchdog_config_matches(div_code, reload, 10000u));
+
+    check("C14 reset-default tuple rejected",
+          !ota_confirm_watchdog_config_matches(0u, 0x0FFFu, 10000u));
+    check("C14 adjacent App reload rejected",
+          !ota_confirm_watchdog_config_matches(5u, 3123u, 10000u));
+    check("C14 wrong App divider rejected",
+          !ota_confirm_watchdog_config_matches(4u, 3124u, 10000u));
+    check("C14 App tuple rejected when App WDT disabled",
+          !ota_confirm_watchdog_config_matches(5u, 3124u, 0u));
+    check("C14 Boot tuple accepted when App WDT disabled",
+          ota_confirm_watchdog_config_matches(6u, 1561u, 0u));
+}
+
 /* C13 跨 OTA_ConfirmUpdate() 编排的确认后喂狗回归（独立验收 F1 打回后补）。
  *
  * 缺陷回顾：OTA_ConfirmUpdate() 在确认成功的同一圈把 g_ota_state_snapshot 改写为
@@ -215,7 +244,8 @@ static void t_feed_after_confirm_through_orchestration(void)
         }
         int hal_wdt_configured(void)
         {
-            return 1;   /* boot 起动参数在寄存器中保持 */
+            /* HAL_Init 已把 Boot tuple 改为 App tuple，修复后仍应识别。 */
+            return ota_confirm_watchdog_config_matches(5u, 3124u, 10000u);
         }
         void hal_feed(void)
         {
@@ -323,6 +353,7 @@ int main(void)
     t_confirm_health();
     t_real_ordering();
     t_feed_after_confirmed();
+    t_watchdog_config_transition();
     t_feed_after_confirm_through_orchestration();
     printf("P2_5_OTA_CONFIRM_HEALTH checks=%d failures=%d\n",
            checks, failures);

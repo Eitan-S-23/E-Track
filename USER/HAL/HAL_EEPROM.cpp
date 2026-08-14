@@ -2,6 +2,7 @@
 #include "EEPROM/EEPROM.h"
 #include "EEPROM/eeprom_bcb.h"
 #include "OTA/ota_confirm.h"
+#include "OTA/ota_confirm_health.h"
 #include "OTA/ota_p1_6_test.h"
 #include "HAL/HAL_OTA_Backup.h"
 #include "at32f435_437.h"
@@ -116,11 +117,6 @@ uint8_t HAL::EEPROM_Check(void)
     return at24c.EnsureInitMagic() ? 0 : 1;
 }
 
-/* boot 在 TEST_BOOT 起动独立看门狗的参数（boot_platform_at32.c:26/802-810
- * reload=1561、div=WDT_CLK_DIV_256）。App 侧只读核对该参数，不重设。 */
-#define OTA_BOOT_TEST_WATCHDOG_DIV    WDT_CLK_DIV_256
-#define OTA_BOOT_TEST_WATCHDOG_RELOAD 1561u
-
 const bcb_hal_t *HAL::OTA_GetBcbHal(void)
 {
     return &bcb_app_hal;
@@ -145,10 +141,17 @@ void HAL::OTA_WatchdogFeed(void)
 
 int HAL::OTA_WatchdogIsConfigured(void)
 {
-    /* boot 起动后寄存器保持其值；复位后恢复默认（div=0/rld=0xFFF）。
-     * 精确匹配 boot 的 TEST_BOOT 参数即视为“独立看门狗在跑”。 */
-    return (int)(WDT->div_bit.div == (uint32_t)OTA_BOOT_TEST_WATCHDOG_DIV &&
-                 WDT->rld_bit.rld == (uint32_t)OTA_BOOT_TEST_WATCHDOG_RELOAD);
+    uint32_t app_timeout_ms = 0u;
+
+#if CONFIG_WATCH_DOG_ENABLE
+    app_timeout_ms = (uint32_t)CONFIG_WATCH_DOG_TIMEOUT;
+#endif
+    /* Boot starts TEST_BOOT with DIV_256/1561. HAL_Init later calls WDG_Init
+     * and rewrites the still-running IWDG to the App timeout tuple. */
+    return ota_confirm_watchdog_config_matches(
+        (uint32_t)WDT->div_bit.div,
+        (uint32_t)WDT->rld_bit.rld,
+        app_timeout_ms);
 }
 
 bool HAL::OTA_ConfirmBoot()

@@ -47,6 +47,13 @@ void ota_confirm_health_tick(ota_confirm_health_t *health,
 /* 每喂一次独立看门狗调用一次（TEST_BOOT 期间）。 */
 void ota_confirm_health_feed(ota_confirm_health_t *health);
 
+/* Match a readable AT32 WDT divider/reload tuple against either the Boot
+ * TEST_BOOT setup or the tuple selected by WDG_Init(app_timeout_ms). Boot
+ * starts the IWDG, but HAL_Init may reconfigure the still-running peripheral. */
+int ota_confirm_watchdog_config_matches(uint32_t div_code,
+                                        uint32_t reload,
+                                        uint32_t app_timeout_ms);
+
 /* 全部条件满足返回 1：
  *   start_valid && hal_ready &&
  *   (now - start) >= window_ms && loop_count >= min_loops &&

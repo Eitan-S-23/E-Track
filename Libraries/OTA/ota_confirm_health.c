@@ -8,6 +8,51 @@
  */
 #include "OTA/ota_confirm_health.h"
 
+enum
+{
+    OTA_CONFIRM_WDT_CLOCK_HZ = 40000u,
+    OTA_CONFIRM_WDT_MAX_RELOAD = 0x0FFFu,
+    OTA_CONFIRM_WDT_DIV_COUNT = 7u,
+    OTA_CONFIRM_BOOT_WDT_DIV_CODE = 6u,
+    OTA_CONFIRM_BOOT_WDT_RELOAD = 1561u
+};
+
+int ota_confirm_watchdog_config_matches(uint32_t div_code,
+                                        uint32_t reload,
+                                        uint32_t app_timeout_ms)
+{
+    uint32_t code;
+
+    if (div_code == OTA_CONFIRM_BOOT_WDT_DIV_CODE &&
+        reload == OTA_CONFIRM_BOOT_WDT_RELOAD)
+    {
+        return 1;
+    }
+    if (app_timeout_ms == 0u)
+    {
+        return 0;
+    }
+
+    /* Keep this selection order aligned with Platform/Core/wdg.c:WDG_Init. */
+    for (code = 0u; code < OTA_CONFIRM_WDT_DIV_COUNT; ++code)
+    {
+        uint32_t divider = 4u << code;
+        uint32_t reload_value =
+            (uint32_t)(((uint64_t)app_timeout_ms * OTA_CONFIRM_WDT_CLOCK_HZ) /
+                       divider / 1000u);
+
+        if (reload_value <= OTA_CONFIRM_WDT_MAX_RELOAD)
+        {
+            if (reload_value == 0u)
+            {
+                return 0;
+            }
+            return div_code == code && reload == reload_value - 1u;
+        }
+    }
+    return 0;
+}
+
 void ota_confirm_health_init(ota_confirm_health_t *health,
                              uint32_t now_ms)
 {

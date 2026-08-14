@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#if !defined(_WIN32)
+#include "wdg.h"
+#endif
 
 using namespace Page;
 
@@ -18,15 +21,18 @@ using namespace Page;
 #define TXT_FAILED       "\xE5\xAF\xBC\xE5\x85\xA5\xE5\xA4\xB1\xE8\xB4\xA5"
 #define TXT_BACK         "\xE8\xBF\x94\xE5\x9B\x9E"
 #define TXT_PATH_LONG    "PATH TOO LONG"
+#define TXT_SCAN_LIMIT "MORE FILES EXIST\nNOT ALL SHOWN"
 #define ICON_BACK        "\xEE\x94\x81"
 
 #define STATUS_BAR_H     25
 #define TITLE_Y          29
 #define PATH_Y           50
+#define PANEL_Y          56
 #define LIST_X           8
 #define LIST_Y           72
 #define LIST_W           (LV_HOR_RES - LIST_X * 2)
 #define LIST_H           204
+#define LIST_H_MESSAGE   174
 #define ROW_H            38
 #define BACK_X           7
 #define BACK_Y           (LV_VER_RES - 36)
@@ -165,6 +171,8 @@ namespace
         lv_obj_add_style(button, &btnStyle, 0);
         lv_obj_add_style(button, &btnFocusedStyle, LV_STATE_FOCUSED);
         lv_obj_add_style(button, &btnFocusedStyle, LV_STATE_PRESSED);
+        lv_obj_set_style_layout(button, 0, 0);
+        lv_obj_set_style_pad_all(button, 0, 0);
         ApplyFocusTransition(button);
         lv_obj_clear_flag(button, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_add_flag(button, LV_OBJ_FLAG_CLICKABLE);
@@ -172,8 +180,11 @@ namespace
         lv_obj_t* label = lv_label_create(button);
         lv_obj_set_style_text_font(label, ResourcePool::GetFont("cn_16"), 0);
         lv_obj_set_style_text_color(label, lv_color_white(), 0);
+        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_width(label, LV_PCT(100));
+        lv_obj_add_flag(label, LV_OBJ_FLAG_IGNORE_LAYOUT);
         lv_label_set_text(label, text);
-        lv_obj_center(label);
+        lv_obj_align(label, LV_ALIGN_CENTER, 0, 1);
     }
 }
 
@@ -202,6 +213,7 @@ FirmwareUpdate::FirmwareUpdate()
       resultButton(nullptr),
       workTimer(nullptr),
       pendingGoUp(false),
+      pendingBack(false),
       pendingAsync(false),
       deviceReady(false),
       applyPending(false),
@@ -250,14 +262,8 @@ void FirmwareUpdate::onViewWillDisappear()
 
 void FirmwareUpdate::onViewUnload()
 {
-    ClearGroup();
-    if (workTimer != nullptr)
-    {
-        lv_timer_del(workTimer);
-        workTimer = nullptr;
-    }
+    ReleaseUI();
     updater.Close();
-    focusHalo = nullptr;
 }
 
 void FirmwareUpdate::CreateUI()
@@ -294,8 +300,6 @@ void FirmwareUpdate::CreateUI()
 
     CreateFocusHalo();
     CreateBrowserUI();
-    CreateConfirmUI();
-    CreateWorkUI();
 }
 
 void FirmwareUpdate::CreateBrowserUI()
@@ -329,6 +333,9 @@ void FirmwareUpdate::CreateBrowserUI()
     msgLabel = lv_label_create(_root);
     lv_obj_set_style_text_font(msgLabel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(msgLabel, lv_color_hex(0x00eaff), 0);
+    lv_obj_set_style_text_align(msgLabel, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(msgLabel, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(msgLabel, LV_HOR_RES - 24);
     lv_label_set_text(msgLabel, "");
     lv_obj_align(msgLabel, LV_ALIGN_BOTTOM_MID, 0, -37);
 
@@ -372,7 +379,7 @@ void FirmwareUpdate::CreateConfirmUI()
 {
     confirmPanel = lv_obj_create(_root);
     lv_obj_remove_style_all(confirmPanel);
-    lv_obj_set_pos(confirmPanel, 10, 43);
+    lv_obj_set_pos(confirmPanel, 10, PANEL_Y);
     lv_obj_set_size(confirmPanel, LV_HOR_RES - 20, 234);
     lv_obj_set_style_bg_color(confirmPanel, lv_color_hex(0x031116), 0);
     lv_obj_set_style_bg_opa(confirmPanel, LV_OPA_COVER, 0);
@@ -441,7 +448,7 @@ void FirmwareUpdate::CreateWorkUI()
 {
     workPanel = lv_obj_create(_root);
     lv_obj_remove_style_all(workPanel);
-    lv_obj_set_pos(workPanel, 10, 43);
+    lv_obj_set_pos(workPanel, 10, PANEL_Y);
     lv_obj_set_size(workPanel, LV_HOR_RES - 20, 234);
     lv_obj_set_style_bg_color(workPanel, lv_color_hex(0x031116), 0);
     lv_obj_set_style_bg_opa(workPanel, LV_OPA_COVER, 0);
@@ -563,13 +570,24 @@ void FirmwareUpdate::LoadFiles()
     }
 
     bool pathTooLong = false;
+    uint16_t scanCount = 0u;
     char name[LV_FS_MAX_FN_LENGTH];
-    while (rowCount < ROW_MAX)
+
+    /* Every returned entry consumes the scan bound, including hidden and
+     * non-ETU files. Feed the watchdog periodically without re-entering LVGL. */
+    while (rowCount < ROW_MAX && scanCount < SCAN_MAX)
     {
         if (lv_fs_dir_read(&dir, name) != LV_FS_RES_OK || name[0] == '\0')
         {
             break;
         }
+        ++scanCount;
+#if !defined(_WIN32)
+        if ((scanCount & 0x1Fu) == 0u)
+        {
+            WDG_ReloadCounter();
+        }
+#endif
         if (IsHiddenEntry(name))
         {
             continue;
@@ -588,9 +606,28 @@ void FirmwareUpdate::LoadFiles()
         }
         AddRow(clean, path, isDir, false);
     }
+
+    /* Hitting a bound is not sufficient to claim truncation. Probe once so
+     * an exactly full directory does not show a false warning. */
+    bool moreEntries = false;
+    if (rowCount >= ROW_MAX || scanCount >= SCAN_MAX)
+    {
+        char probe[LV_FS_MAX_FN_LENGTH];
+        if (lv_fs_dir_read(&dir, probe) == LV_FS_RES_OK &&
+            probe[0] != '\0')
+        {
+            moreEntries = true;
+        }
+    }
     lv_fs_dir_close(&dir);
 
-    if (rowCount == 0u || (rowCount == 1u && rows[0].isUp))
+    /* SetBrowserMessage is last-write-wins. Truncation must beat TXT_EMPTY,
+     * while an unavailable device remains the highest-priority message. */
+    if (moreEntries)
+    {
+        SetBrowserMessage(TXT_SCAN_LIMIT, "");
+    }
+    else if (rowCount == 0u || (rowCount == 1u && rows[0].isUp))
     {
         SetBrowserMessage(pathTooLong ? TXT_PATH_LONG : TXT_EMPTY, "");
     }
@@ -598,6 +635,7 @@ void FirmwareUpdate::LoadFiles()
     {
         SetBrowserMessage(TXT_PATH_LONG, "");
     }
+
     if (!deviceReady)
     {
         SetBrowserMessage(TXT_FILE_INVALID, updater.LastError());
@@ -666,6 +704,7 @@ void FirmwareUpdate::RequestEnterPath(const char* path)
     }
     strcpy(pendingPath, path);
     pendingGoUp = false;
+    pendingBack = false;
     if (!pendingAsync)
     {
         pendingAsync = true;
@@ -677,6 +716,19 @@ void FirmwareUpdate::RequestGoUp()
 {
     pendingPath[0] = '\0';
     pendingGoUp = true;
+    pendingBack = false;
+    if (!pendingAsync)
+    {
+        pendingAsync = true;
+        lv_async_call(onAsyncAction, this);
+    }
+}
+
+void FirmwareUpdate::RequestBack()
+{
+    pendingPath[0] = '\0';
+    pendingGoUp = false;
+    pendingBack = true;
     if (!pendingAsync)
     {
         pendingAsync = true;
@@ -687,6 +739,13 @@ void FirmwareUpdate::RequestGoUp()
 void FirmwareUpdate::RunPendingAction()
 {
     pendingAsync = false;
+    if (pendingBack)
+    {
+        pendingBack = false;
+        ReleaseUI();
+        _Manager->Pop();
+        return;
+    }
     if (pendingGoUp)
     {
         pendingGoUp = false;
@@ -762,6 +821,11 @@ void FirmwareUpdate::SelectRow(uint8_t index)
 
 void FirmwareUpdate::ShowConfirm(const Row_t& row)
 {
+    if (confirmPanel == nullptr)
+    {
+        CreateConfirmUI();
+    }
+
     char currentVersion[20];
     char targetVersion[20];
 
@@ -781,6 +845,7 @@ void FirmwareUpdate::ShowConfirm(const Row_t& row)
                           ? "PATCH" : "FULL");
     lv_label_set_text(currentVersionLabel, currentVersion);
     lv_label_set_text(targetVersionLabel, targetVersion);
+    lv_obj_add_flag(pathLabel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(confirmPanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(backButton, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(confirmPanel);
@@ -791,6 +856,7 @@ void FirmwareUpdate::ShowConfirm(const Row_t& row)
 void FirmwareUpdate::HideConfirm()
 {
     lv_obj_add_flag(confirmPanel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(pathLabel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(backButton, LV_OBJ_FLAG_HIDDEN);
     mode = MODE_BROWSER;
     RefreshGroup();
@@ -801,11 +867,17 @@ void FirmwareUpdate::StartImport()
     if (updater.Begin(selectedPath) != OTA_SD_OK)
     {
         lv_obj_add_flag(confirmPanel, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(pathLabel, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(backButton, LV_OBJ_FLAG_HIDDEN);
         mode = MODE_BROWSER;
         SetBrowserMessage(TXT_FILE_INVALID, updater.LastError());
         RefreshGroup();
         return;
+    }
+
+    if (workPanel == nullptr)
+    {
+        CreateWorkUI();
     }
 
     applyPending = false;
@@ -984,7 +1056,50 @@ void FirmwareUpdate::Back()
     {
         return;
     }
-    _Manager->Pop();
+    RequestBack();
+}
+
+void FirmwareUpdate::ReleaseUI()
+{
+    ClearGroup();
+    if (workTimer != nullptr)
+    {
+        lv_timer_del(workTimer);
+        workTimer = nullptr;
+    }
+    pendingGoUp = false;
+    pendingBack = false;
+    pendingAsync = false;
+    pendingPath[0] = '\0';
+    if (_root != nullptr)
+    {
+        lv_obj_clean(_root);
+    }
+    titleLabel = nullptr;
+    pathLabel = nullptr;
+    msgLabel = nullptr;
+    detailLabel = nullptr;
+    backButton = nullptr;
+    focusHalo = nullptr;
+    list = nullptr;
+    confirmPanel = nullptr;
+    confirmNameLabel = nullptr;
+    confirmKindLabel = nullptr;
+    currentVersionLabel = nullptr;
+    targetVersionLabel = nullptr;
+    cancelButton = nullptr;
+    startButton = nullptr;
+    workPanel = nullptr;
+    workStatusLabel = nullptr;
+    workNameLabel = nullptr;
+    workKindLabel = nullptr;
+    progressBar = nullptr;
+    progressLabel = nullptr;
+    workDetailLabel = nullptr;
+    resultButton = nullptr;
+    rowCount = 0u;
+    memset(rows, 0, sizeof(rows));
+    mode = MODE_BROWSER;
 }
 
 void FirmwareUpdate::RefreshGroup()
@@ -1084,6 +1199,13 @@ void FirmwareUpdate::ClearGroup()
 void FirmwareUpdate::SetBrowserMessage(const char* message,
                                        const char* detail)
 {
+    if (list != nullptr)
+    {
+        lv_obj_set_height(
+            list,
+            message != nullptr && message[0] != '\0'
+                ? LIST_H_MESSAGE : LIST_H);
+    }
     if (msgLabel != nullptr)
     {
         lv_label_set_text(msgLabel, message != nullptr ? message : "");

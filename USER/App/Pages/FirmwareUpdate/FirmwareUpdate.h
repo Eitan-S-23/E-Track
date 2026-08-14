@@ -23,7 +23,8 @@ public:
 private:
     enum
     {
-        ROW_MAX = 24
+        ROW_MAX = 24,
+        SCAN_MAX = 256
     };
 
     enum ViewMode
@@ -74,6 +75,7 @@ private:
     char selectedPath[NAV_PATH_MAX];
     char selectedName[NAV_ROUTE_NAME_MAX];
     bool pendingGoUp;
+    bool pendingBack;
     bool pendingAsync;
     bool deviceReady;
     bool applyPending;
@@ -98,6 +100,7 @@ private:
     void GoUp();
     void RequestEnterPath(const char* path);
     void RequestGoUp();
+    void RequestBack();
     void RunPendingAction();
     void ShowConfirm(const Row_t& row);
     void HideConfirm();
@@ -105,6 +108,7 @@ private:
     void RunWorkStep();
     void FinishImport(bool success);
     void Back();
+    void ReleaseUI();
     void RefreshGroup();
     void ClearGroup();
     void SetBrowserMessage(const char* message, const char* detail);

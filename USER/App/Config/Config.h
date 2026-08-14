@@ -154,7 +154,7 @@
  * down channel 0 的行命令并执行（ping/livemap/dialplate/back），配合
  * J-Link 实现无人值守的页面控制与性能测量。生产固件置 0 整体移除。 */
 #ifndef CONFIG_RTT_DEBUG_CMD_ENABLE
-#  define CONFIG_RTT_DEBUG_CMD_ENABLE         1
+#  define CONFIG_RTT_DEBUG_CMD_ENABLE         0
 #endif
 
 #endif
