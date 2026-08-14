@@ -16,7 +16,7 @@
 3. **验收分离**:置 `完成` 前,验收命令须由非实现会话执行(另起 agent 或主会话跑验收),验收者在证据栏追加一行"验收人+结果"。
 4. **阻塞**:发现契约矛盾、不可实现、依赖缺失 → 状态置 `阻塞`,在卡内追加"阻塞记录:"一行写明,同时在 §9 变更登记表登记,然后**停止该卡**。禁止就地修改契约文档继续实现。
 5. **research 落盘**:编码前检索/上下文分析结论一律写 `docs/ota-exec-notes/<卡ID>-<主题>.md`,不许只留在会话回复里(会话会被压缩,文件不会)。
-6. **提交收口**:子 agent 不执行 `git commit/push/merge`;由主会话在用户确认后按小步提交收口。
+6. **提交收口**:子 agent 不执行 `git commit/push/merge`;由主会话在用户确认后按小步提交收口。PR/远端合并后必须按 `AGENTS.md` 的“Git / Worktree 收口规约”同步主 worktree，验证 `HEAD == origin/main`；合并后新增的 CI 证据、看板记录或修正文档也必须落入 `main`，否则不得宣告收口完成。
 7. **会话收尾**:每个工作会话结束前,回写所动任务卡的状态,并在 §10 会话日志追加一行。
 8. 状态取值固定四种:`待办` / `进行中` / `阻塞` / `完成`。
 
@@ -675,3 +675,4 @@
 - 2026-08-01 ｜ Codex(非实现会话,独立整改复验) ｜ P2-4(仍不通过) ｜ 独立复核确认 F1 已关闭且宿主实时 reader 下追加/截断均 fail-closed；但 MCU SdFat `seekEnd()` 仅使用打开时缓存 `m_fileSize`，目标侧新增长度回调并不实时，旧真机正常成功链不足以覆盖整改场景。宿主 `29/29`、合法同长度替换/全 IO 计数/实际追加截断临时探针、fresh GCC/AC5、模拟器重建/真实 Startup/两次启动均完成；卡保持 `进行中`，P2 保持 `3/6`；详见 `docs/ota-exec-notes/P2-4-acceptance-2026-08-01.md`；未改实现/P2-3/冻结契约，未 commit/push。
 - 2026-08-01 ｜ Codex(非实现会话,真机记录更正) ｜ P2-4 ｜ 披露复验过程中曾两次刷入临时 harness，均仅得到 `P2_4_REMEDIATION_HW: open_fail`，不作为整改通过证据；随后将当前 AC5 raw bin finalize 为 v20800 生产 App 并回刷，同一 halted J-Link 会话整镜像 `Verify successful`，生产 RTT 地址 `0x2004B3D0` 签名有效，`PC=0x08040288/VTOR=0x08010000/CFSR=0` 且无 `P2_4_*`，无残留进程。F3 阻断不变，卡保持 `进行中`、P2 `3/6`；未 commit/push。
 - 2026-08-01 ｜ Codex(非实现会话,F3 独立整改复验) ｜ P2-4(验收通过) ｜ 真实 `Session`+SdFat 缓存句柄回归 `5/5` 与核心 `29/29` 全绿；同路径合法替换在 staging 擦除前拒绝，追加/截断/第二遍替换 fail-closed，路径失效不复用旧句柄；实际 LVGL/SdFat close/reopen 语义、确认快照、`packageInfo` 不覆盖均独立对号。fresh GCC `594936B`(631 warning/0 error)、AC5 `587364B`(0W0E)、模拟器重建/两次 Startup、冻结契约/P2-3 零 diff、生产 PC/VTOR/CFSR/RTT 探针均通过；旧真机 SD 成功链判定足够复用。卡置 `完成`，P2 更新 `4/6`；未 commit/push。
+- 2026-08-06 ｜ Codex(流程修订) ｜ Git/worktree 收口漏洞修复 ｜ 补充 PR/远端合并后定位主 worktree、仅 fast-forward、校验 `HEAD == origin/main`、保护未跟踪文件及合并后证据必须落入 `main` 的强制规则；未修改任何任务卡状态。
