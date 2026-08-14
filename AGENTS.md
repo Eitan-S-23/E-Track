@@ -724,6 +724,24 @@ Before reporting success:
 - If warnings exist, say warnings were present and errors were zero. Do not hide
   warnings as success details.
 
+## Git / Worktree 收口规约（强制）
+
+当提交通过 PR、远端 merge 或其他 worktree 更新 `main` 后，负责收口的主会话
+必须在宣告收口完成前执行以下闭环：
+
+1. 运行 `git fetch --prune origin`，再用 `git worktree list --porcelain` 定位实际
+   检出 `refs/heads/main` 的主 worktree；不得把当前特性 worktree 当作主分支。
+2. 主 worktree 不得有未处理的 tracked 改动。确认无未跟踪文件覆盖风险后，在该
+   worktree 执行 `git merge --ff-only origin/main`；若分支分叉、文件冲突或写入
+   边界不允许，必须停止并报告，禁止用 reset/强制覆盖代替同步。
+3. 同步后必须核对 `git rev-parse HEAD` 与 `git rev-parse origin/main` 完全一致，
+   且 `git status --short --branch` 不再显示 ahead/behind。未跟踪文件必须保留并
+   在收口结果中如实说明。
+4. 项目进度必须从已同步的主 worktree 中读取。仅更新 `origin/main` 引用不会移动
+   本地 `main`，不得据此假定本地主分支已经同步。
+5. PR 合并后新增的 CI 证据、看板记录或修正文档，必须通过后续提交/PR 落入
+   `main`；禁止只留在已合并的特性分支上却宣告收口完成。
+
 ## OTA 执行规约（强制,适用一切 OTA 相关任务）
 
 凡涉及 bootloader、升级包(.etu)、BLE 帧协议、staging/BCB、SD 升级页、
@@ -740,7 +758,8 @@ firmware CI 或 CF 固件后台的任务,任何 agent 必须遵守:
 4. **research 落盘**:编码前检索/分析结论写入 `docs/ota-exec-notes/`,
    不许只留在会话回复里。
 5. **提交收口**:子 agent 不执行 `git commit/push/merge`,由主会话在用户
-   确认后小步收口。
+   确认后小步收口；PR/远端合并后必须完成上节 Git/worktree 收口闭环，未完成
+   不得宣告该卡或阶段已收口。
 6. **会话收尾**:结束前回写看板任务卡状态并在其 §10 会话日志追加一行。
 7. 真机操作(J-Link 烧录/RTT/断电注错)一律沿用本文件既有流程与防坑清单;
    开工前先读复审报告 `.claude/verification-report-ota-plan.md`(已知坑)。

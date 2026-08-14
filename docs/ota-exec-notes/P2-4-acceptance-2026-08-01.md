@@ -368,3 +368,28 @@ P2_4_OTA_SD_ALL=PASS core_checks=29 adapter_scenarios=5
 
 最终处置：P2-4 置 `完成`，P2 更新为 `4/6`；保留 §1-§7 的历史拒绝与更正记录，
 不覆盖旧证据。未 commit/push。
+
+## 9. 提交、合并与 Main CI 收口
+
+本节只归档 P2-4 已通过独立验收后的提交、合并与主干 CI 结果，不重新验收 P2-4，
+不修改卡片 `完成`、P2 `4/6` 状态，也不认领或实现 P2-5。
+
+- P2-4 已验证提交为
+  `8ccc1d0c6f5beb554393e2240d52616f236cf8ec`；PR #1 使用 merge commit 合入
+  `main`，merge SHA 为 `614a3fc759768c4e00764e9b6e254574b93d89f0`。该 merge
+  commit 的第二父提交仍为上述已验证提交，未 squash 或 rebase。
+- `main` 的 `MCU Firmware Build` run `30703282359` 以 merge SHA
+  `614a3fc759768c4e00764e9b6e254574b93d89f0` 为 head，结论为 `success`。
+- App artifact `firmware-2.7-nightly.63` 中 `X-Track-App-GCC.bin` 为
+  `594956B`，SHA-256
+  `12B59FFBC8F72FEBA6D2866A1D59A0AE23C931774ECCD408F2C706A9F5E6DF72`。
+- Boot artifact `boot-2.7-nightly.63` 中 `X-Track-Boot.bin` 为 `14236B`，
+  SHA-256
+  `435C332E1A3FAEDCD262D05E639784BF6173FE680DAA3343949CFBAD52B9E4AA`。
+- CI 的 OTA App 布局断言通过：`flash=0x08010000/0xf0000`、
+  `vector=0x08010000/0x20c`、`header=0x08010400/96`；下载后的 App 再检查确认
+  96B raw fw_header placeholder 全为 `0xFF`。Boot artifact 与 handoff 断言也通过。
+- 构建日志含 `635` 行 `warning:`、`0` 行 `error:`；其中 3 行是 P2-4 新对象命中的
+  仓库既有 2-byte/4-byte `wchar_t` 链接告警类别，未伪装为零告警构建。
+- `Register firmware to Cloudflare` 与 `Create GitHub Release` job 均为
+  `skipped`；合并后的 Release 审计新增数为 `0`，未正式发布、未注册 Cloudflare。
