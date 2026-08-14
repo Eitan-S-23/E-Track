@@ -2021,12 +2021,14 @@ sd_error_status_type command_error(void)
   sd_error_status_type status = SD_OK;
   uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(timeout--)
+  while(timeout > 0)
   {
     if(sdio_flag_get(SDIOx, SDIO_CMDCMPL_FLAG) != RESET)
     {
       break;
     }
+
+    timeout--;
   }
 
   if(timeout == 0)
@@ -2050,7 +2052,7 @@ sd_error_status_type command_rsp7_error(void)
   uint32_t sts_reg = 0;
   uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(timeout--)
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
 
@@ -2058,6 +2060,8 @@ sd_error_status_type command_rsp7_error(void)
     {
       break;
     }
+
+    timeout--;
   }
 
   if((timeout == 0) || (sts_reg & SDIO_CMDTIMEOUT_FLAG))
@@ -2086,8 +2090,9 @@ sd_error_status_type command_rsp1_error(uint8_t cmd)
 {
   uint32_t sts_reg = 0;
   uint32_t rsp_cmd = 0;
+  uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(1)
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
 
@@ -2095,9 +2100,11 @@ sd_error_status_type command_rsp1_error(uint8_t cmd)
     {
       break;
     }
+
+    timeout--;
   }
 
-  if(sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
+  if((timeout == 0) || sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
   {
     sdio_flag_clear(SDIOx, SDIO_CMDTIMEOUT_FLAG);
     last_error = SD_CMD_RSP_TIMEOUT;
@@ -2131,8 +2138,9 @@ sd_error_status_type command_rsp1_error(uint8_t cmd)
 sd_error_status_type command_rsp3_error(void)
 {
   uint32_t sts_reg = 0;;
+  uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(1)
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
 
@@ -2140,9 +2148,11 @@ sd_error_status_type command_rsp3_error(void)
     {
       break;
     }
+
+    timeout--;
   }
 
-  if(sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
+  if((timeout == 0) || sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
   {
     sdio_flag_clear(SDIOx, SDIO_CMDTIMEOUT_FLAG);
     return SD_CMD_RSP_TIMEOUT;
@@ -2164,7 +2174,7 @@ sd_error_status_type command_rsp2_error(void)
   uint32_t sts_reg;
   uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(timeout--)
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
 
@@ -2172,6 +2182,8 @@ sd_error_status_type command_rsp2_error(void)
     {
       break;
     }
+
+    timeout--;
   }
 
   if((timeout == 0) || sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
@@ -2201,8 +2213,9 @@ sd_error_status_type command_rsp2_error(void)
 sd_error_status_type command_rsp4_error(uint8_t cmd)
 {
   uint32_t sts_reg = 0, rsp_cmd = 0;
+  uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(1)
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
 
@@ -2210,9 +2223,11 @@ sd_error_status_type command_rsp4_error(uint8_t cmd)
     {
       break;
     }
+
+    timeout--;
   }
 
-  if(sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
+  if((timeout == 0) || sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
   {
     sdio_flag_clear(SDIOx, SDIO_CMDTIMEOUT_FLAG);
     return SD_CMD_RSP_TIMEOUT;
@@ -2244,8 +2259,9 @@ sd_error_status_type command_rsp4_error(uint8_t cmd)
 sd_error_status_type command_rsp5_error(uint8_t cmd)
 {
   uint32_t sts_reg = 0, rsp_cmd = 0, response = 0;
+  uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(1)
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
 
@@ -2253,9 +2269,11 @@ sd_error_status_type command_rsp5_error(uint8_t cmd)
     {
       break;
     }
+
+    timeout--;
   }
 
-  if(sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
+  if((timeout == 0) || sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
   {
     sdio_flag_clear(SDIOx, SDIO_CMDTIMEOUT_FLAG);
 
@@ -2308,8 +2326,9 @@ sd_error_status_type command_rsp6_error(uint8_t cmd, uint16_t *prca)
 {
   sd_error_status_type status = SD_OK;
   uint32_t sts_reg, rsp_cmd = 0, response = 0;
+  uint32_t timeout = SDIO_CMD0TIMEOUT;
 
-  while(1)
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
 
@@ -2317,9 +2336,11 @@ sd_error_status_type command_rsp6_error(uint8_t cmd, uint16_t *prca)
     {
       break;
     }
+
+    timeout--;
   }
 
-  if(sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
+  if((timeout == 0) || sdio_flag_get(SDIOx, SDIO_CMDTIMEOUT_FLAG) != RESET)
   {
     sdio_flag_clear(SDIOx, SDIO_CMDTIMEOUT_FLAG);
     return SD_CMD_RSP_TIMEOUT;
@@ -2549,6 +2570,7 @@ sd_error_status_type sd_switch(uint32_t mode, uint32_t group, uint8_t value, uin
 sd_error_status_type check_card_programming(uint8_t *p_status)
 {
   volatile uint32_t response = 0, sts_reg = 0, rsp_cmd = 0;
+  uint32_t timeout = SDIO_CMD0TIMEOUT;
 
   /* send cmd13 */
   sdio_command_init_struct.argument = (uint32_t)(rca << 16);
@@ -2561,11 +2583,21 @@ sd_error_status_type check_card_programming(uint8_t *p_status)
   /* enable ccsm */
   sdio_command_state_machine_enable(SDIOx, TRUE);
 
-  sts_reg = SDIOx->sts;
-
-  while(!(sts_reg & (SDIO_CMDFAIL_FLAG | SDIO_CMDTIMEOUT_FLAG | SDIO_CMDRSPCMPL_FLAG)))
+  while(timeout > 0)
   {
     sts_reg = SDIOx->sts;
+
+    if(sts_reg & (SDIO_CMDFAIL_FLAG | SDIO_CMDTIMEOUT_FLAG | SDIO_CMDRSPCMPL_FLAG))
+    {
+      break;
+    }
+
+    timeout--;
+  }
+
+  if(timeout == 0)
+  {
+    return SD_CMD_RSP_TIMEOUT;
   }
 
   if(sdio_flag_get(SDIOx, SDIO_CMDFAIL_FLAG) != RESET)

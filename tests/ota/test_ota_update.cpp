@@ -200,6 +200,60 @@ namespace
                    ? 0
                    : 42;
     }
+
+    /* P2-5：Stage-before-Apply —— 未 Apply 不得提交旧 candidate（阻断 4） */
+    int RunStageBeforeApply(const std::vector<uint8_t>& original)
+    {
+        OtaUpdate::Session session;
+        ota_sd_result_t result;
+
+        if (!PrepareTransfer(&session, original))
+        {
+            return 50;
+        }
+        result = RunUntilDone(&session);
+        if (result != OTA_SD_STAGED)
+        {
+            return 51;
+        }
+        /* 未调用 Apply()，直接 Stage：必须拒绝（candidate 未绑定） */
+        result = session.Stage();
+        std::printf("STAGE_BEFORE_APPLY result=%s error=%s\n",
+                    ota_sd_result_name(result), session.LastError());
+        return result == OTA_SD_ERR_STAGED_COMMIT &&
+                       std::strcmp(session.LastError(),
+                                   "stage:candidate_not_applied") == 0
+                   ? 0
+                   : 52;
+    }
+
+    /* P2-5：非 CONFIRMED 在 Begin 前零副作用拒绝（阻断 3） */
+    int RunBeginNonConfirmed(const std::vector<uint8_t>& original)
+    {
+        OtaUpdate::Session session;
+        ota_sd_package_info_t info;
+
+        SetBackingFile(original, (uint32_t)original.size());
+        if (!session.InitializeDevice() ||
+            session.Inspect(kSelectedPath, &info) != OTA_SD_OK)
+        {
+            return 60;
+        }
+        /* 模拟 TEST_BOOT 活动态：Begin 必须在任何 staging 擦除外拒绝 */
+        session.SetSimulatorBcbState(3u);   /* BCB_STATE_TEST_BOOT */
+        {
+            ota_sd_result_t begin = session.Begin(kSelectedPath);
+            std::printf("BEGIN_NON_CONFIRMED begin=%s error=%s opens=%lu\n",
+                        ota_sd_result_name(begin), session.LastError(),
+                        (unsigned long)backingFile.openCount);
+            /* openCount 在 Inspect 已自增；Begin 应不再打开文件（零副作用） */
+            return begin == OTA_SD_ERR_BUSY &&
+                           std::strcmp(session.LastError(),
+                                       "gate:bcb_not_confirmed") == 0
+                       ? 0
+                       : 61;
+        }
+    }
 }
 
 extern "C" lv_fs_res_t lv_fs_open(lv_fs_file_t* file, const char* path,
@@ -346,6 +400,14 @@ int main(int argc, char** argv)
     if (scenario == "unavailable")
     {
         return RunUnavailableAfterFirstPass(original);
+    }
+    if (scenario == "stage-before-apply")
+    {
+        return RunStageBeforeApply(original);
+    }
+    if (scenario == "begin-non-confirmed")
+    {
+        return RunBeginNonConfirmed(original);
     }
     std::fprintf(stderr, "unknown scenario\n");
     return 3;

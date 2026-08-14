@@ -617,6 +617,9 @@ const char *ota_sd_result_name(ota_sd_result_t result)
     case OTA_SD_ERR_PAYLOAD_CRC: return "payload_crc";
     case OTA_SD_ERR_STAGING: return "staging";
     case OTA_SD_ERR_FILE_CHANGED: return "file_changed";
+    case OTA_SD_ERR_STAGED_COMMIT: return "staged_commit";
+    case OTA_SD_ERR_BUSY: return "busy";
+    case OTA_SD_ERR_COMMIT_UNKNOWN: return "commit_unknown";
     default: return "unknown";
     }
 }

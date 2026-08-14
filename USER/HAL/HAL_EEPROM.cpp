@@ -2,7 +2,10 @@
 #include "EEPROM/EEPROM.h"
 #include "EEPROM/eeprom_bcb.h"
 #include "OTA/ota_confirm.h"
+#include "OTA/ota_confirm_health.h"
 #include "OTA/ota_p1_6_test.h"
+#include "HAL/HAL_OTA_Backup.h"
+#include "at32f435_437.h"
 
 static EEPROM at24c;
 
@@ -112,6 +115,43 @@ uint8_t HAL::EEPROM_Check(void)
     // General writes reject byte 0xFF. Only this initialization path may
     // create the reserved 0x55 marker, with ACK polling and readback verify.
     return at24c.EnsureInitMagic() ? 0 : 1;
+}
+
+const bcb_hal_t *HAL::OTA_GetBcbHal(void)
+{
+    return &bcb_app_hal;
+}
+
+uint8_t HAL::OTA_GetBcbState(void)
+{
+    bcb_t active;
+    bcb_arbiter_result_t result = bcb_arbiter(&bcb_app_hal, &active);
+
+    if(result != BCB_ARBITER_A && result != BCB_ARBITER_B)
+    {
+        return 0xFFu;
+    }
+    return active.state;
+}
+
+void HAL::OTA_WatchdogFeed(void)
+{
+    wdt_counter_reload();
+}
+
+int HAL::OTA_WatchdogIsConfigured(void)
+{
+    uint32_t app_timeout_ms = 0u;
+
+#if CONFIG_WATCH_DOG_ENABLE
+    app_timeout_ms = (uint32_t)CONFIG_WATCH_DOG_TIMEOUT;
+#endif
+    /* Boot starts TEST_BOOT with DIV_256/1561. HAL_Init later calls WDG_Init
+     * and rewrites the still-running IWDG to the App timeout tuple. */
+    return ota_confirm_watchdog_config_matches(
+        (uint32_t)WDT->div_bit.div,
+        (uint32_t)WDT->rld_bit.rld,
+        app_timeout_ms);
 }
 
 bool HAL::OTA_ConfirmBoot()

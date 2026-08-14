@@ -98,10 +98,12 @@ static void publish_outcome(const boot_state_outcome_t *outcome)
 }
 
 static int receive_physical_recovery(const boot_state_io_t *io,
-                                     boot_state_outcome_t *outcome,
-                                     int key_already_held)
+                                     boot_state_outcome_t *outcome)
 {
-    while (!key_already_held && !boot_platform_recovery_key_held())
+    /* 进入此函数说明状态机已判定 App/backup/recovery 全部不可用。
+     * 契约 PLAN-OTA.md §0.2：裸恢复必须有物理在场证明，故在此等待用户
+     * 持续按住恢复键 >=3s（BOOT_RECOVERY_HOLD_MS）后才开始 YMODEM 接收。 */
+    while (!boot_platform_recovery_key_held())
     {
         boot_platform_log("BOOT: hold recovery key for 3 seconds\r\n");
         boot_platform_delay_ms(100u);
@@ -162,36 +164,37 @@ int main(void)
     state_io.internal_program = state_internal_program;
     state_io.log = state_log;
 
-    if (boot_platform_recovery_key_held())
+    /* P1-7 开机键冲突修复：恢复模式入口只由状态机判定，开机不再无条件预检恢复键。
+     * PA15 同时是编码器 push 键（整机唯一物理开机键）与 boot 恢复键，而电源自锁
+     * （configure_power_hold 拉低 PD2 1000ms 后拉高）要求开机时按键必须持续按住
+     * >=1s。原先在状态机之前调用 boot_platform_recovery_key_held() 做无条件预检，
+     * 该时刻按键必然处于按下态，于是直接进入 receive_physical_recovery() 的
+     * YMODEM 等待循环（无超时无出口），表现为 USB 供电按开机键数十分钟不开机；
+     * 而 J-Link 直供绕过自锁、PA15 保持上拉高，反而能正常启动。
+     * 契约 PLAN-OTA.md §4/§5.3：物理恢复的"按住 >=3s"是 App/backup/recovery 全部
+     * 无效之后才要求的必要条件，不是开机首要检测项。故此处只走正常引导路径，
+     * 仅当 outcome.action 判定为 PHYSICAL_RECOVERY 时才等待按键（见下方分支），
+     * 此时设备已完成电源自锁，用户可松开按键再按 3 秒确认物理在场。 */
+    g_boot_p1_qspi_result = boot_platform_qspi_init();
+    state_io.external_available = g_boot_p1_qspi_result == 0;
+    if (!state_io.external_available)
     {
-        if (receive_physical_recovery(&state_io, &outcome, 1) != 0)
+        boot_platform_log("BOOT: QSPI unavailable, external slot branch skipped\r\n");
+    }
+
+    g_boot_p1_bcb_result = bcb_arbiter(&bcb_hal, NULL);
+    g_boot_p1_state_status = boot_state_machine_run(&state_io, &outcome);
+    publish_outcome(&outcome);
+    if (outcome.action == BOOT_STATE_ACTION_PHYSICAL_RECOVERY)
+    {
+#if defined(P1_6_TEST_ENABLE)
+        boot_p1_6_checkpoint(OTA_P1_6_CP_PHYSICAL_RECOVERY,
+                             (uint32_t)outcome.status,
+                             outcome.bcb.state);
+#endif
+        if (receive_physical_recovery(&state_io, &outcome) != 0)
         {
             boot_platform_hold();
-        }
-    }
-    else
-    {
-        g_boot_p1_qspi_result = boot_platform_qspi_init();
-        state_io.external_available = g_boot_p1_qspi_result == 0;
-        if (!state_io.external_available)
-        {
-            boot_platform_log("BOOT: QSPI unavailable, external slot branch skipped\r\n");
-        }
-
-        g_boot_p1_bcb_result = bcb_arbiter(&bcb_hal, NULL);
-        g_boot_p1_state_status = boot_state_machine_run(&state_io, &outcome);
-        publish_outcome(&outcome);
-        if (outcome.action == BOOT_STATE_ACTION_PHYSICAL_RECOVERY)
-        {
-#if defined(P1_6_TEST_ENABLE)
-            boot_p1_6_checkpoint(OTA_P1_6_CP_PHYSICAL_RECOVERY,
-                                 (uint32_t)outcome.status,
-                                 outcome.bcb.state);
-#endif
-            if (receive_physical_recovery(&state_io, &outcome, 0) != 0)
-            {
-                boot_platform_hold();
-            }
         }
     }
 

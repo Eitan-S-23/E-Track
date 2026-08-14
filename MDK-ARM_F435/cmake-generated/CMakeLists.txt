@@ -12,6 +12,7 @@ set(CMAKE_OBJECT_PATH_MAX 140)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
+include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/reproducible_build.cmake")
 
 # Target Device: -AT32F435RGT7
 # Vendor: ArteryTek
@@ -126,10 +127,7 @@ else()
 endif()
 set(KEIL_GCC_CACHED_PROJECT_LTO_DEFAULT "${KEIL_GCC_PROJECT_LTO_DEFAULT}" CACHE INTERNAL "Last generated Keil LTO default" FORCE)
 find_program(KEIL_GCC_COMPILER_CACHE NAMES sccache ccache)
-if(KEIL_GCC_COMPILER_CACHE)
-    set(CMAKE_C_COMPILER_LAUNCHER "${KEIL_GCC_COMPILER_CACHE}")
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${KEIL_GCC_COMPILER_CACHE}")
-endif()
+p2_5_configure_reproducible_compiler_launchers()
 foreach(KEIL_LANGUAGE C CXX ASM)
     set(CMAKE_${KEIL_LANGUAGE}_FLAGS_DEBUG "")
     set(CMAKE_${KEIL_LANGUAGE}_FLAGS_RELEASE "")
@@ -513,10 +511,13 @@ list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../USER/App/Utils/OtaUpdate/OtaUpdate.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/fw_header_placeholder.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_keys.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_backup.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_package.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_patch.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_sd.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_slot_header.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_staging.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_confirm_health.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_crc32.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_sha256.c"
@@ -546,6 +547,8 @@ set(BOOT_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_usart.c"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../Platform/Core/at32f435_437_clock.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c"
 )
 if(P1_6_TEST_ENABLE)
     list(APPEND BOOT_PROJECT_SOURCES
@@ -661,6 +664,7 @@ target_include_directories(X_Track_Boot PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/_X-Track"
     "${CMAKE_CURRENT_LIST_DIR}/../RTE/Device/-AT32F435RGT7"
+    "${CMAKE_CURRENT_LIST_DIR}/../Platform/Core"
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/CMSIS/Include"
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Peripherals/inc"
     "${CMAKE_CURRENT_LIST_DIR}/../../vendor/AT32F435_437_DFP/Device/Include"

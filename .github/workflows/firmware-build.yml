@@ -72,6 +72,7 @@ env:
   # Short build tree avoids CMAKE_OBJECT_PATH_MAX warnings on Linux runners.
   BUILD_DIR: /tmp/etfw
   BUILD_TYPE: Release
+  SOURCE_DATE_EPOCH: "1786320000"
 
 jobs:
   build:

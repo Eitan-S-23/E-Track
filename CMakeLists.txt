@@ -12,6 +12,8 @@ set(CMAKE_OBJECT_PATH_MAX 140)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/reproducible_build.cmake")
+p2_5_configure_reproducible_compiler_launchers()
 
 # Target Device: -AT32F435RGT7
 # Vendor: ArteryTek

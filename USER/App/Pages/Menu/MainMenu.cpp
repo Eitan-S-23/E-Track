@@ -716,7 +716,17 @@ void MainMenu::OpenAction(int action)
     case MENU_ACTION_ABOUT:
         SetStatusBarAppear(true);
 #if defined(OTA_TARGET_APP) || defined(_WIN32)
-        _Manager->Push("Pages/FirmwareUpdate");
+        {
+            /* Keep MainMenu in the stack, but release its heavy LVGL tree once
+             * the firmware page has finished entering. */
+            bool wasCached = priv.IsCached;
+            priv.IsCached = false;
+            bool ok = _Manager->Push("Pages/FirmwareUpdate");
+            if (!ok)
+            {
+                priv.IsCached = wasCached;
+            }
+        }
 #else
         _Manager->Push("Pages/SystemInfos");
 #endif

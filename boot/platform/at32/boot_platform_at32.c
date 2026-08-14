@@ -3,6 +3,7 @@
 #include "OTA/ota_layout.h"
 
 #include "at32f435_437.h"
+#include "at32f435_437_clock.h"
 
 #include <string.h>
 
@@ -116,6 +117,14 @@ static void configure_eeprom_gpio(void)
 
 int boot_platform_init(void)
 {
+    /* P1-7 缺陷 A：boot 以 288 MHz 运行（原为 HICK 复位默认 8.07 MHz，全镜像
+     * SHA-256 被放大 36 倍致启动 15.5s）。必须放在第一行：
+     * ① system_clock_config() 内部调 crm_reset()，会清掉此前所有
+     *    crm_periph_clock_enable()，故必须先于任何外设时钟使能；
+     * ② SysTick_Config() 取 system_core_clock 变量值，若先配 SysTick 再提主频，
+     *    boot 内全部毫秒计时被压缩 36 倍（BOOT_RECOVERY_HOLD_MS=3000 实际变
+     *    ≈83ms，破坏契约"持续按住 ≥3s"）。顺序：时钟 → 读频 → SysTick → 外设。 */
+    system_clock_config();
     system_core_clock_update();
     g_boot_millis = 0u;
     if (SysTick_Config(system_core_clock / 1000u) != 0u)
@@ -125,6 +134,10 @@ int boot_platform_init(void)
 
     configure_power_hold();
     configure_recovery_key();
+    /* P1-7：提频到 288 MHz 后，PA15 内部上拉到稳定需要时间；若上拉未稳定即
+     * 检测 recovery key，可能把"未按住"误判为"按住"而误入恢复模式。加 2ms
+     * 稳定延时（相对 288 MHz 主频可忽略，但保证 PA15 读值可靠）。 */
+    boot_platform_delay_ms(2u);
     configure_uart();
     configure_eeprom_gpio();
     boot_platform_log("BOOT: P1-1 skeleton\r\n");
