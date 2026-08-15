@@ -1,131 +1,192 @@
 # Agent Build Guide
 
-This repository contains Keil MDK projects for the AT32F435/AT32F403A firmware.
-Agents must follow this guide when asked to compile the F435 firmware.
+The production F435 firmware is built with GCC through the generated CMake
+project. Keil ARM Compiler 5 remains an auxiliary path for local hardware
+debugging, toolchain comparison, and compatibility checks. Agents must not
+promote AC5 artifacts to OTA or CI release artifacts.
 
 ## Default Build Entry Point (firmware and/or simulator)
 
-**Default action:** when asked to compile the MCU firmware, the LVGL
-simulator, or both, run the one-click batch file instead of hand-assembling
-the per-step commands below:
+**Default action:** when asked to compile the MCU firmware and simulator, run
+the one-click batch file instead of hand-assembling the per-step commands:
 
 ```bat
 build_f435_and_simulator.bat --no-pause
 ```
 
-- The batch runs, in order:
-  `MDK-ARM_F435\build_f435.ps1 -AutoStale -AutoFonts` (firmware) then
-  MSBuild on `Simulator\LVGL.Simulator.sln` (simulator). It self-locates the
-  repo root via `%~dp0`, so it works from any working directory.
+- The default batch runs, in order: CMake configure, GCC targets
+  `X_Track_App_GCC` and `X_Track_Boot`, then MSBuild on
+  `Simulator\LVGL.Simulator.sln`. This matches
+  `.github/workflows/firmware-build.yml`; AC5 is not part of the default path.
+- The GCC configure is Release/Ninja with `SOURCE_DATE_EPOCH=1786320000` and
+  `CMAKE_OBJECT_PATH_MAX=1024`, matching CI.
+- The batch self-locates the repo root via `%~dp0` and redirects controllable
+  temporary/cache outputs to repo-local `.cache` directories.
 - `--no-pause` skips the trailing interactive `pause`, suitable for
   non-interactive agent runs.
-- Outputs are identical to the per-step build: firmware
-  `MDK-ARM_F435\Track.bin`, `MDK-ARM_F435\Objects\X-Track.{axf,hex}`; simulator
-  `Simulator\Output\Debug\x64\LVGL.Simulator.exe`.
-- Acceptance criteria are the same as the sections below: `armlink`/`fromelf`
-  exit code 0, record the `Program Size` line and output timestamps; if
-  warnings exist, say so (warnings present, errors zero) — do not disguise
-  warnings as success detail.
+- `--with-ac5` adds auxiliary `X-Track-App-AC5` after the GCC build and before
+  the simulator build. `--ac5-only` builds only `X-Track-App-AC5`.
+- `--legacy` selects the old-layout AC5 target `X-Track` and is valid only with
+  `--with-ac5` or `--ac5-only`; prefer `--ac5-only --legacy` for an isolated
+  compatibility check. Legacy output must never be used for OTA acceptance.
+- Default production outputs are:
+  `MDK-ARM_F435\cmake-generated\build-gcc-release\app-gcc\X-Track-App-GCC.{elf,hex,bin,map}`
+  and
+  `MDK-ARM_F435\cmake-generated\build-gcc-release\boot\X-Track-Boot.{elf,hex,bin,map}`.
+  Simulator output is `Simulator\Output\Debug\x64\LVGL.Simulator.exe`.
+- Default acceptance requires successful CMake configure/build and simulator
+  build, the GCC size output, final artifact timestamps and SHA-256 values, and
+  an explicit warning/error count. Warnings must not be hidden as success
+  detail.
 - From a bash shell a `.bat` runs directly
   (`./build_f435_and_simulator.bat --no-pause`); if argument parsing looks
   wrong, use `cmd //c build_f435_and_simulator.bat --no-pause`.
 
-**When to fall back to the per-step / precise commands below:** the one-click
-batch always uses `-AutoStale` and cannot do precise incremental or new-source
-handling. Use the per-step commands in "Preferred Incremental Build" /
-"Reliable Manual Incremental Fallback" (firmware) and "LVGL Simulator"
-(simulator) when any of these apply:
+CI-aligned GCC firmware-only commands:
 
-1. Only a few known sources changed and you want to recompile just those —
-   use `build_f435.ps1 -Sources ...` to save time.
-2. You only need firmware **or** only need the simulator — the one-click batch
-   builds both, so a single-side need should use the matching per-step command.
-3. New project files were added whose dep entries Keil has not generated yet —
-   use `build_f435.ps1 -NewSources ... -ExtraLinkObjs ...`.
-4. A widely-included header such as `lv_conf.h` changed — the one-click batch
-   is fine (`-AutoStale` rebuilds all dependents); if only the firmware side
-   matters, the per-step command also requires `-AutoStale`, never relink-only.
+```powershell
+$env:SOURCE_DATE_EPOCH = '1786320000'
+cmake -S .\MDK-ARM_F435\cmake-generated `
+  -B .\MDK-ARM_F435\cmake-generated\build-gcc-release `
+  -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OBJECT_PATH_MAX=1024
+cmake --build .\MDK-ARM_F435\cmake-generated\build-gcc-release `
+  --target X_Track_App_GCC X_Track_Boot --parallel
+```
 
-## F435 Project Facts
+**When to use a narrower command:**
+
+1. For GCC firmware only, run the same CMake configure/build commands documented
+   above and omit MSBuild. Build both production targets unless the task is
+   explicitly App-only or Boot-only.
+2. For simulator only, use the command in "LVGL Simulator".
+3. For local Keil/J-Link work, use `--ac5-only` or the AC5-specific sections
+   below. Only a few known AC5 sources changed: use
+   `build_f435.ps1 -Target X-Track-App-AC5 -Sources ...`. New AC5 sources: use
+   `-Target X-Track-App-AC5 -NewSources ... -ExtraLinkObjs ...`.
+4. A widely included header such as `lv_conf.h` changed: rebuild all GCC
+   dependents through CMake. If AC5 evidence is also required, use
+   `build_f435.ps1 -Target X-Track-App-AC5 -AutoStale`; never use a relink-only
+   result.
+
+## F435 Build Matrix
 
 - Workspace root: `D:\github\my\E-Track`
+- Production CMake source: `MDK-ARM_F435\cmake-generated`
+- Production CMake build: `MDK-ARM_F435\cmake-generated\build-gcc-release`
+- Production targets: `X_Track_App_GCC` and `X_Track_Boot`
+- Production compiler: GNU Arm Embedded GCC
+- `X-Track-App-GCC` is the sole OTA/CI App artifact. `X-Track-Boot` is the
+  matching boot artifact.
 - Keil project: `MDK-ARM_F435\proj.uvprojx`
-- Target name: `X-Track`
-- Compiler: ARM Compiler 5, not AC6
+- Auxiliary AC5 target: `X-Track-App-AC5`
+- Legacy AC5 compatibility target: `X-Track`
+- Keil compiler: ARM Compiler 5, not AC6
 - Installed uVision path observed on this machine: `D:\install\keil5 mdk\UV4\UV4.exe`
 - Installed AC5 tools observed on this machine: `D:\install\keil5 mdk\ARM\ARMCC\bin`
-- Main outputs:
-  - `MDK-ARM_F435\Objects\X-Track.axf`
-  - `MDK-ARM_F435\Objects\X-Track.hex`
-  - `MDK-ARM_F435\Track.bin`
-  - `MDK-ARM_F435\Listings\X-Track.map`
+- Auxiliary AC5 outputs:
+  - `MDK-ARM_F435\Objects-App-AC5\X-Track-App-AC5.axf`
+  - `MDK-ARM_F435\Objects-App-AC5\X-Track-App-AC5.hex`
+  - `MDK-ARM_F435\Track-App-AC5.bin`
+  - `MDK-ARM_F435\Listings-App-AC5\X-Track-App-AC5.map`
+
+## Clean Worktree AC5 Bootstrap
+
+`MDK-ARM_F435\build_f435.ps1 -Target X-Track-App-AC5 -BootstrapIfNeeded` is
+the supported clean-worktree AC5 entry. Bootstrap runs when generated metadata
+is missing/empty or the `proj.uvprojx` content hash changed:
+
+- `MDK-ARM_F435\Objects-App-AC5\proj_X-Track-App-AC5.dep`
+- `MDK-ARM_F435\Objects-App-AC5\X-Track-App-AC5.lnp`
+- `MDK-ARM_F435\Objects-App-AC5\proj_X-Track-App-AC5.uvprojx.sha256`
+
+For pre-hash metadata, the script uses mtime once to establish compatibility,
+then writes the ignored target-specific SHA-256 stamp. Later timestamp-only
+or line-ending-only changes do not start UV4; actual project content changes
+do. After UV4, the script also removes trailing whitespace that uVision adds to
+the tracked target `RTE_Components.h`, without reverting semantic RTE changes.
+
+The bootstrap phase runs `UV4.exe -b <project> -t <target>` with a log under
+the target object directory. It must produce a parseable build summary with
+zero errors and fresh, non-empty metadata. The normal `AutoStale`, project/font
+discovery, `armlink`, and `fromelf` phases then run as before.
+
+Generated `Objects*`, `Listings*`, `dep`, and `lnp` files remain ignored. Never
+commit them, hand-write replacement compiler flags, or make every incremental
+build run a full uVision build. The Legacy target uses the analogous
+`Objects\proj_X-Track.dep`, `Objects\X-Track.lnp`, and project hash stamp paths.
 
 ## Address Decoding
 
 When decoding crash, HardFault, backtrace, PC, LR, or call-stack addresses for
-this project, use the repository-local addr2line first:
+the production firmware, use the repository-local addr2line with the matching
+GCC ELF first:
 
 ```powershell
-.\Tools\addr2line.exe -e .\MDK-ARM_F435\Objects\X-Track.axf -a -f -C <address>
+.\Tools\addr2line.exe -e .\MDK-ARM_F435\cmake-generated\build-gcc-release\app-gcc\X-Track-App-GCC.elf -a -f -C <address>
 ```
 
-If diagnosing an older copied AXF, replace the `-e` argument with that exact
-AXF file. Do not prefer a globally installed `addr2line` while
+For an AC5/J-Link build, use the exact matching
+`Objects-App-AC5\X-Track-App-AC5.axf` instead. If diagnosing an older copied
+ELF/AXF, replace `-e` with that exact artifact. Do not prefer a globally
+installed `addr2line` while
 `Tools\addr2line.exe` is available.
 
-## Preferred Incremental Build
+## AC5 Preferred Incremental Build
 
 Use Keil's incremental build command first:
 
 ```powershell
 $uv4 = 'D:\install\keil5 mdk\UV4\UV4.exe'
 $project = 'D:\github\my\E-Track\MDK-ARM_F435\proj.uvprojx'
-& $uv4 -b $project -t 'X-Track'
+& $uv4 -b $project -t 'X-Track-App-AC5'
 ```
 
 If `UV4.exe` is already running, uVision behaves as a single instance. The
 command can return before the build finishes, and `-o some.log` may not create a
 log file. In that case, do not assume the build failed or succeeded from the
-process return alone. Monitor `MDK-ARM_F435\Objects` and the final outputs until
-file timestamps stop changing.
+process return alone. Monitor `MDK-ARM_F435\Objects-App-AC5` and the final
+outputs until file timestamps stop changing.
 
 Useful monitor command:
 
 ```powershell
-Get-ChildItem .\MDK-ARM_F435\Objects -File |
+Get-ChildItem .\MDK-ARM_F435\Objects-App-AC5 -File |
   Sort-Object LastWriteTime -Descending |
   Select-Object -First 20 Name,Length,LastWriteTime
 ```
 
-## Reliable Manual Incremental Fallback
+## AC5 Reliable Manual Incremental Fallback
 
 If `UV4.exe -b` does not rebuild the changed file, use the Keil-generated
 dependency and link files instead of guessing compiler flags:
 
-- Compile commands are stored in `MDK-ARM_F435\Objects\proj_X-Track.dep`.
-- Link input and linker options are stored in `MDK-ARM_F435\Objects\X-Track.lnp`.
+- Compile commands are stored in
+  `MDK-ARM_F435\Objects-App-AC5\proj_X-Track-App-AC5.dep`.
+- Link input and linker options are stored in
+  `MDK-ARM_F435\Objects-App-AC5\X-Track-App-AC5.lnp`.
 - Use `armcc.exe` for `.c` and `.cpp` files.
 - Use `armasm.exe` for `.s` files.
 - After any object file is rebuilt, always rerun `armlink.exe` and `fromelf.exe`.
 
-Do not compare changed source files only against `X-Track.axf`. Relinking
+Do not compare changed source files only against `X-Track-App-AC5.axf`. Relinking
 refreshes the `.axf` timestamp and can hide stale object files. Compare each
 source/header dependency against its own `.o` file.
 
 Example that proved necessary for `USER\HAL\HAL.cpp`:
 
 - Source: `USER\HAL\HAL.cpp`
-- Object: `MDK-ARM_F435\Objects\hal.o`
+- Object: `MDK-ARM_F435\Objects-App-AC5\hal.o`
 - If `USER\HAL\HAL.cpp` is newer than `hal.o`, recompile `HAL.cpp` using the
-  exact command recorded in `proj_X-Track.dep`, then relink.
+  exact command recorded in `proj_X-Track-App-AC5.dep`, then relink.
 
-Use this PowerShell pattern to recompile one source from `proj_X-Track.dep`.
+Use this PowerShell pattern to recompile one source from
+`proj_X-Track-App-AC5.dep`.
 Change only `$source` when another file is stale:
 
 ```powershell
 $projectDir = 'D:\github\my\E-Track\MDK-ARM_F435'
 $source = '..\USER\HAL\HAL.cpp'
-$dep = Join-Path $projectDir 'Objects\proj_X-Track.dep'
+$dep = Join-Path $projectDir 'Objects-App-AC5\proj_X-Track-App-AC5.dep'
 $armcc = 'D:\install\keil5 mdk\ARM\ARMCC\bin\armcc.exe'
 $armasm = 'D:\install\keil5 mdk\ARM\ARMCC\bin\armasm.exe'
 
@@ -166,13 +227,13 @@ After object compilation, relink and regenerate images:
 
 ```powershell
 Push-Location 'D:\github\my\E-Track\MDK-ARM_F435'
-& 'D:\install\keil5 mdk\ARM\ARMCC\bin\armlink.exe' --via '.\Objects\X-Track.lnp'
+& 'D:\install\keil5 mdk\ARM\ARMCC\bin\armlink.exe' --via '.\Objects-App-AC5\X-Track-App-AC5.lnp'
 if ($LASTEXITCODE -ne 0) { throw "armlink failed: $LASTEXITCODE" }
 
-& 'D:\install\keil5 mdk\ARM\ARMCC\bin\fromelf.exe' --i32combined --output '.\Objects\X-Track.hex' '.\Objects\X-Track.axf'
+& 'D:\install\keil5 mdk\ARM\ARMCC\bin\fromelf.exe' --i32combined --output '.\Objects-App-AC5\X-Track-App-AC5.hex' '.\Objects-App-AC5\X-Track-App-AC5.axf'
 if ($LASTEXITCODE -ne 0) { throw "fromelf hex failed: $LASTEXITCODE" }
 
-& 'D:\install\keil5 mdk\ARM\ARMCC\bin\fromelf.exe' --bin -o 'Track.bin' '.\Objects\X-Track.axf'
+& 'D:\install\keil5 mdk\ARM\ARMCC\bin\fromelf.exe' --bin -o 'Track-App-AC5.bin' '.\Objects-App-AC5\X-Track-App-AC5.axf'
 if ($LASTEXITCODE -ne 0) { throw "fromelf bin failed: $LASTEXITCODE" }
 Pop-Location
 ```
@@ -185,23 +246,24 @@ Program Size: Code=224788 RO-data=87780 RW-data=1088 ZI-data=263256
 
 The exact values may change after code changes.
 
-### build_f435.ps1 Quick Usage
+### AC5 build_f435.ps1 Quick Usage
 
 `MDK-ARM_F435\build_f435.ps1` wraps the dep/lnp reuse above. Prefer it over
 hand-running armcc/armlink for incremental firmware builds.
 
 - Recompile specific already-known sources:
   ```powershell
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& 'MDK-ARM_F435\build_f435.ps1' -Sources @('..\USER\App\Pages\Dialplate\Dialplate.cpp','..\USER\HAL\HAL.cpp')"
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& 'MDK-ARM_F435\build_f435.ps1' -Target 'X-Track-App-AC5' -Sources @('..\USER\App\Pages\Dialplate\Dialplate.cpp','..\USER\HAL\HAL.cpp')"
   ```
 - Auto-pick every stale source (source/header newer than its own `.o`): pass
   `-AutoStale` and omit `-Sources`.
 - New project files Keil has not generated dep entries for yet: use
   `-NewSources 'src|template'` (borrows a same-kind compile command, swaps the
   base name) and `-ExtraLinkObjs '.\Objects\<base>.o'` to append the new object
-  to the link. Example (new image C array borrowing `img_src_battery.c`):
+  to the link. For the AC5 App target, use the `Objects-App-AC5` path. Example
+  (new image C array borrowing `img_src_battery.c`):
   ```powershell
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& 'MDK-ARM_F435\build_f435.ps1' -NewSources @('..\USER\App\Resource\Image\img_src_foo.c|..\USER\App\Resource\Image\img_src_battery.c') -ExtraLinkObjs @('.\Objects\img_src_foo.o')"
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& 'MDK-ARM_F435\build_f435.ps1' -Target 'X-Track-App-AC5' -NewSources @('..\USER\App\Resource\Image\img_src_foo.c|..\USER\App\Resource\Image\img_src_battery.c') -ExtraLinkObjs @('.\Objects-App-AC5\img_src_foo.o')"
   ```
 
 Conventions:
@@ -211,7 +273,7 @@ Conventions:
   Chinese-locale system, so non-ASCII comments/strings break tokenization. Put
   Chinese explanations in `.md`.
 - Judge staleness by source/header vs its own `.o`, never against
-  `X-Track.axf` (relink refreshes the axf and hides stale objects).
+  `X-Track-App-AC5.axf` (relink refreshes the axf and hides stale objects).
 - 本机**可以**通过板载 J-Link 直接烧录与调试 MCU（旧结论"cannot flash"已作废，
   2026-07-03 实测），完整闭环流程见下节 "J-Link 自动烧录与 RTT 闭环调试"。
 
@@ -225,7 +287,7 @@ Conventions:
    ```
    JLink.exe -Device AT32F435RGT7 -If SWD -Speed 1000 -AutoConnect 1
      -ExitOnError 1 -CommandFile <脚本>
-   脚本内容: h → loadfile "<绝对路径>\X-Track.hex" → r → g → qc
+   脚本内容: h → loadfile "<绝对路径>\X-Track-App-AC5.hex" → r → g → qc
    ```
    - 设备名必须用**全名 AT32F435RGT7**（V8.18 内置 Artery 支持；缩写名如
      AT32F435RG 会弹 GUI 选择框导致命令行挂死）。
@@ -240,10 +302,11 @@ Conventions:
    timeout <秒> JLinkRTTLogger.exe -Device CORTEX-M4 -If SWD -Speed 1000
      -RTTAddress <addr> -RTTChannel 0 <输出文件>
    ```
-   - RTT 控制块地址每次链接后可能变化，必须从
-     `MDK-ARM_F435\Listings\X-Track.map` 查 `_SEGGER_RTT` 符号。
+   - RTT 控制块地址每次链接后可能变化。烧录 `X-Track-App-AC5.hex` 后必须从
+     `MDK-ARM_F435\Listings-App-AC5\X-Track-App-AC5.map` 查 `_SEGGER_RTT` 符号；
+     若烧录其他目标，必须改用该目标本次链接生成的精确 map。
    - 地址必须用严格符号行解析，不要从上下文里抓第一个十六进制数：
-     `Select-String -LiteralPath 'MDK-ARM_F435\Listings\X-Track.map' -Pattern '^\s*_SEGGER_RTT\s+'`。
+     `Select-String -LiteralPath 'MDK-ARM_F435\Listings-App-AC5\X-Track-App-AC5.map' -Pattern '^\s*_SEGGER_RTT\s+'`。
      用 J-Link `mem8 <RTT> 16` 读到 `53 45 47 47 45 52 20 52 54 54`
      (`SEGGER RTT`) 后，才允许把该地址用于 logger 或 down channel。
    - 采集用泛型 `CORTEX-M4` 设备名即可（只读 RAM，无需 flash 算法）。
@@ -348,7 +411,7 @@ the error only surfaced when an `-AutoStale` incremental build actually
 recompiled them.
 
 Diagnosis: check whether the compile command recorded for that `.cpp` in
-`Objects\proj_X-Track.dep` contains `--cpp11`. After normalizing away
+`Objects-App-AC5\proj_X-Track-App-AC5.dep` contains `--cpp11`. After normalizing away
 timestamps and base names, a char-by-char diff against `Dialplate.cpp`'s
 command should differ only by `--cpp11`.
 
@@ -507,9 +570,9 @@ project also compiles against this same file.
   screen after flashing while the simulator still ran normally. Restore and
   keep the ARDUINO/LVGL built-in pool at `128U * 1024U` unless device memory is
   re-profiled and the firmware is tested on hardware.
-- After any `lv_conf.h` change, rebuild firmware with `build_f435.ps1
-  -AutoStale` so all source files depending on the header are recompiled. A
-  relink or single-source compile is not sufficient.
+- After any `lv_conf.h` change, rebuild AC5 firmware with `build_f435.ps1
+  -Target X-Track-App-AC5 -AutoStale` so all source files depending on the
+  header are recompiled. A relink or single-source compile is not sufficient.
 
 ### Navigation / GPX Import / File Browser Lessons Learned
 
@@ -671,14 +734,15 @@ When adding a new generated font file such as `font_iconfont_16.c`, also:
 - Add the source file to `Simulator\LVGL.Simulator\LVGL.Simulator.vcxproj`.
 - Add the source file to `Simulator\LVGL.Simulator\LVGL.Simulator.vcxproj.filters`.
 - Add the source file to `MDK-ARM_F435\proj.uvprojx`.
-- If `MDK-ARM_F435\Objects\proj_X-Track.dep` and `X-Track.lnp` do not yet
-  include the new file, compile it using `build_f435.ps1 -NewSources` and link
-  with `-ExtraLinkObjs`.
+- If `MDK-ARM_F435\Objects-App-AC5\proj_X-Track-App-AC5.dep` and
+  `X-Track-App-AC5.lnp` do not yet
+  include the new file, compile it using `build_f435.ps1 -Target
+  X-Track-App-AC5 -NewSources` and link with `-ExtraLinkObjs`.
 
 Example for a new font borrowed from an existing iconfont compile command:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& '.\MDK-ARM_F435\build_f435.ps1' -Sources @('..\USER\App\Pages\Dialplate\DialplateView.cpp','..\USER\App\Resource\ResourcePool.cpp') -NewSources @('..\USER\App\Resource\Font\font_iconfont_16.c|..\USER\App\Resource\Font\font_iconfont_20.c') -ExtraLinkObjs @('.\Objects\font_iconfont_16.o','.\Objects\font_agencyb_12.o')"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& '.\MDK-ARM_F435\build_f435.ps1' -Target 'X-Track-App-AC5' -Sources @('..\USER\App\Pages\Dialplate\DialplateView.cpp','..\USER\App\Resource\ResourcePool.cpp') -NewSources @('..\USER\App\Resource\Font\font_iconfont_16.c|..\USER\App\Resource\Font\font_iconfont_20.c') -ExtraLinkObjs @('.\Objects-App-AC5\font_iconfont_16.o','.\Objects-App-AC5\font_agencyb_12.o')"
 ```
 
 ### Dialplate MAX Spectrum Rules
@@ -704,9 +768,11 @@ For Dialplate UI changes, use this order:
 3. Run `.claude\cap.ps1`.
 4. Inspect `.claude\sim_new.png` visually.
 5. Kill/check simulator processes if needed.
-6. Build F435 firmware with `build_f435.ps1`.
-7. Report simulator status, firmware `Program Size`, output timestamps, and
-   whether warnings/errors occurred.
+6. Build the GCC App and Boot targets through CMake. Add an AC5 build only when
+   the task requires Keil/J-Link evidence.
+7. Report simulator status, GCC size output, artifact timestamps/hashes, and
+   whether warnings/errors occurred. If AC5 was requested, also report its
+   `Program Size`.
 
 If the simulator screenshot is white, do not immediately assume the UI change
 is correct. Rerun capture once, then run the simulator directly from
@@ -717,10 +783,13 @@ processes.
 
 Before reporting success:
 
-- Confirm `armlink.exe` returned exit code 0.
-- Confirm both `fromelf.exe` commands returned exit code 0.
-- Report the final timestamps for `X-Track.axf`, `X-Track.hex`, and `Track.bin`.
-- Report the `Program Size` line from the successful link.
+- Confirm the GCC CMake configure and build returned exit code 0 for both
+  `X_Track_App_GCC` and `X_Track_Boot`.
+- Report GCC App/Boot `.elf`, `.hex`, `.bin`, and `.map` timestamps, sizes, and
+  SHA-256 values, plus the `arm-none-eabi-size` output.
+- If AC5 was explicitly requested, confirm `armlink.exe` and both
+  `fromelf.exe` commands returned exit code 0; report AC5 output timestamps and
+  the `Program Size` line.
 - If warnings exist, say warnings were present and errors were zero. Do not hide
   warnings as success details.
 
@@ -742,19 +811,56 @@ Before reporting success:
 5. PR 合并后新增的 CI 证据、看板记录或修正文档，必须通过后续提交/PR 落入
    `main`；禁止只留在已合并的特性分支上却宣告收口完成。
 
+## 独立验收执行规约（强制）
+
+任何需要独立验收的任务都必须遵守
+`docs/acceptance-execution-contract.md`：
+
+1. 验收前在 `docs/acceptance-contracts/` 冻结并审批版本化合同；`.claude`
+   prompt 不能作为唯一标准。执行中改变条件必须升版本重新审批。
+2. 任务状态与单轮验收结果分离。单轮结果只允许 `PASS`、`PRODUCT_FAIL`、
+   `HARNESS_FAIL`、`EVIDENCE_GAP`、`ENV_BLOCKED`；验收者不得覆盖实现认领人。
+3. 合同必须包含 `Production`、`Validation`、`Governance` 三类 manifest，并让每项
+   判据显式引用输入组、命令和产物。发生证据复用时，使用校验器比较前后轮合同/矩阵并
+   生成 `rerun-plan.json`；不得人工填写“全部未失效”。复验只比较内部稳定
+   `ManifestSHA256`，JSON 文件哈希仅校验证据完整性；mtime、绝对 worktree、无关 `HEAD`
+   或 manifest 保存位置变化不得触发产品复验。profile 范围只由
+   `Tools/provenance/manifest_profiles.json` 定义；Production 必须覆盖实际 GCC 输入，
+   包括 `MDK-ARM_F435/RTE/Device/-AT32F435RGT7/**` 和 `RTE/_X-Track/**`，但不得把
+   AC5 专用 `_X-Track-App-AC5` 或旧 CGU7 目录混入 GCC 失效范围。
+4. PASS/FAIL 都必须绑定原始证据和实际观测值。实际执行的 PASS/FAIL 必须存在合同要求的
+   命令记录；PASS 以及产品/harness FAIL 还必须绑定真实产物。校验器会读取文件复核路径、
+   大小和 SHA-256。harness 必须 fail-closed，禁止常量 PASS、无条件汇总字段或用“没有
+   错误日志”推定通过。
+5. 性能门禁必须来自产品 SLA、协议契约或明确安全比例；禁止把历史测量值加极小
+   余量后反向冻结为门槛。
+6. 收口提交紧凑证据包：合同、矩阵、分类 manifest、命令/退出码、产物哈希、
+   决定性原始日志和视觉证据哈希。默认不保留完整构建目录或重复源码副本。
+7. 使用 `python Tools/acceptance/validate_bundle.py --contract <path>
+   --matrix <path> --repo-root <本轮精确Git-worktree>` 校验最终合同与证据矩阵。校验器会
+   从该 worktree 重新枚举并读取每个 profile 的真实文件，manifest 仅自洽不算通过。若
+   矩阵含 `REUSED`，还必须传入 `--previous-contract`、`--previous-matrix` 和
+   `--previous-repo-root <上一轮精确worktree>`；当前矩阵必须绑定上一矩阵文件 SHA-256
+   及包内 rerun plan 路径/SHA-256。上一判据只有在其自身为 `EXECUTED PASS` 时可复用，
+   禁止相同矩阵、相同轮次或链式 `REUSED` 自证。相同冻结合同可跨轮次复用；合同内容改变
+   时必须保持同一 `task_id`、版本加一并用 `parent_contract_sha256` 绑定上一合同。校验
+   失败不得宣告通过。
+8. 验收 schema、校验器、manifest 或 AC5 构建规约变化必须通过
+   `.github/workflows/acceptance-governance.yml`；不得以本地测试通过代替 CI 接线。
+
 ## OTA 执行规约（强制,适用一切 OTA 相关任务）
 
 凡涉及 bootloader、升级包(.etu)、BLE 帧协议、staging/BCB、SD 升级页、
 firmware CI 或 CF 固件后台的任务,任何 agent 必须遵守:
 
-1. **先读看板再动手**:`PLAN-OTA-EXEC.md` 是唯一任务与状态源,按其 §0 规则
+1. **先读看板与验收合同**:`PLAN-OTA-EXEC.md` 是唯一任务与状态源,按其 §0 规则
    认领任务卡(状态置"进行中"+认领标识)后才可改代码;不越卡内"范围"改文件。
 2. **契约只读**:`PLAN-OTA.md` 与 `docs/ota-binary-contracts.md` 为冻结契约。
    发现矛盾或不可实现 → 该卡置"阻塞"并在看板 §9 变更登记表登记,然后停止;
    **禁止就地修改契约继续实现**。
 3. **完成必须附证据**:命令+关键输出、产物路径+时间戳、哈希或截图;长输出
    落盘 `docs/ota-exec-notes/<卡ID>-*.md`。无证据不得置"完成";验收命令由
-   非实现会话执行(实现者不自验收)。
+   非实现会话执行(实现者不自验收),并通过上节合同/矩阵校验。
 4. **research 落盘**:编码前检索/分析结论写入 `docs/ota-exec-notes/`,
    不许只留在会话回复里。
 5. **提交收口**:子 agent 不执行 `git commit/push/merge`,由主会话在用户

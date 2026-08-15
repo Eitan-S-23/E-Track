@@ -4,7 +4,7 @@
   Why: when uVision (UV4.exe) runs as a GUI single instance, "UV4 -b" is
   unreliable (may use the stale in-memory project and skip changed files).
   This script does not guess compiler flags. It reuses Keil-generated
-  Objects\proj_X-Track.dep (per-file compile command) and Objects\X-Track.lnp
+  the target-specific Objects* dep file (per-file compile command) and lnp file
   (link inputs + options): recompile each source -> armlink -> fromelf hex/bin.
   See repo AGENTS.md for the rationale and the rules agents must follow.
 
@@ -18,7 +18,7 @@
       -Sources '..\USER\App\Pages\Dialplate\DialplateView.cpp','..\USER\App\Pages\Dialplate\Dialplate.cpp'
 
   Params:
-    -Target        Keil target name. Defaults to X-Track.
+    -Target        Keil target name. Defaults to X-Track-App-AC5.
     -Sources       Sources to recompile that already exist in the dep file
                    (use the EXACT path string from the dep; note its casing).
     -NewSources    Files not yet in the dep: each item is 'src|template'.
@@ -32,6 +32,13 @@
     -AutoFonts     Scan ResourcePool.cpp IMPORT_FONT(name) entries, then append
                    missing font_name.o link inputs and compile font_name.c when
                    the source is not yet in the Keil dep file.
+    -BootstrapIfNeeded
+                   Run one blocking UV4 build when dep/lnp metadata is missing,
+                   empty, or the normalized proj.uvprojx content changed.
+                   Legacy metadata uses mtime once. Fails if UV4 is running.
+    -UV4Path       uVision executable used only for metadata bootstrap.
+    -BootstrapTimeoutSeconds
+                   Maximum time to wait for the bootstrap UV4 process.
     The script also scans proj.uvprojx for newly added project sources that are
     not yet present in the Keil-generated dep/lnp files, compiles them from a
     same-extension template, and appends their object files for this link.
@@ -44,12 +51,16 @@
     - Abort on any non-zero exit code; print Program Size and output timestamps.
 #>
 param(
-  [string]   $Target = 'X-Track',
+  [string]   $Target = 'X-Track-App-AC5',
   [string[]] $Sources = @(),
   [string[]] $NewSources = @(),
   [string[]] $ExtraLinkObjs = @(),
   [switch]   $AutoStale,
-  [switch]   $AutoFonts
+  [switch]   $AutoFonts,
+  [switch]   $BootstrapIfNeeded,
+  [string]   $UV4Path = 'D:\install\keil5 mdk\UV4\UV4.exe',
+  [ValidateRange(30, 3600)]
+  [int]      $BootstrapTimeoutSeconds = 900
 )
 
 $ErrorActionPreference = 'Stop'
@@ -68,6 +79,7 @@ $armcc      = Join-Path $binDir 'armcc.exe'
 $armasm     = Join-Path $binDir 'armasm.exe'
 $armlink    = Join-Path $binDir 'armlink.exe'
 $fromelf    = Join-Path $binDir 'fromelf.exe'
+$uv4        = $UV4Path
 $uvprojx    = Join-Path $projectDir 'proj.uvprojx'
 $repoRoot   = Split-Path -Parent $projectDir
 
@@ -106,15 +118,168 @@ $axf = Join-Path $projectDir $axfRel
 $hex = Join-Path $projectDir $hexRel
 $map = Join-Path $projectDir $mapRel
 $bin = Join-Path $projectDir $binRel
+$metadataProjectHash = Join-Path $projectDir (Join-Path $objectDirRel ("proj_{0}.uvprojx.sha256" -f $Target))
 $lnpArg = '.\' + $lnpRel
 $axfArg = '.\' + $axfRel
 $hexArg = '.\' + $hexRel
 
-foreach ($required in @($dep, $lnp)) {
-  if (-not (Test-Path -LiteralPath $required)) {
-    throw ("Keil generated file missing for target {0}: {1}. Run UV4 -b first." -f $Target, $required)
+function Get-ProjectFileHash {
+  $text = [IO.File]::ReadAllText($uvprojx)
+  $normalized = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+  $bytes = [Text.Encoding]::UTF8.GetBytes($normalized)
+  $sha256 = [Security.Cryptography.SHA256]::Create()
+  try {
+    $digest = $sha256.ComputeHash($bytes)
+    return ([BitConverter]::ToString($digest)).Replace('-', '')
+  } finally {
+    $sha256.Dispose()
   }
 }
+
+function Update-KeilMetadataProjectHash {
+  $currentHash = Get-ProjectFileHash
+  $recordedHash = ''
+  if (Test-Path -LiteralPath $metadataProjectHash -PathType Leaf) {
+    $recordedHash = (Get-Content -LiteralPath $metadataProjectHash -Raw).Trim().ToUpperInvariant()
+  }
+  if ($recordedHash -ne $currentHash) {
+    Set-Content -LiteralPath $metadataProjectHash -Value $currentHash -Encoding Ascii -NoNewline
+  }
+}
+
+function Normalize-UVisionGeneratedWhitespace {
+  $rteComponents = Join-Path $projectDir ("RTE\_{0}\RTE_Components.h" -f $Target)
+  if (-not (Test-Path -LiteralPath $rteComponents -PathType Leaf)) { return }
+  $text = [IO.File]::ReadAllText($rteComponents)
+  $normalized = [regex]::Replace(
+    $text,
+    '[ \t]+(?=\r?$)',
+    '',
+    [Text.RegularExpressions.RegexOptions]::Multiline
+  )
+  if ($normalized -ne $text) {
+    [IO.File]::WriteAllText($rteComponents, $normalized, [Text.Encoding]::ASCII)
+  }
+}
+
+function Get-KeilMetadataProblems([switch]$IgnoreProjectHash) {
+  $problems = New-Object System.Collections.Generic.List[string]
+  $projectTime = (Get-Item -LiteralPath $uvprojx).LastWriteTimeUtc
+  $metadataReady = $true
+  foreach ($required in @($dep, $lnp)) {
+    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+      $problems.Add(("missing: {0}" -f $required))
+      $metadataReady = $false
+      continue
+    }
+    $item = Get-Item -LiteralPath $required
+    if ($item.Length -le 0) {
+      $problems.Add(("empty: {0}" -f $required))
+      $metadataReady = $false
+    }
+  }
+
+  if ($metadataReady) {
+    if (-not $IgnoreProjectHash -and (Test-Path -LiteralPath $metadataProjectHash -PathType Leaf)) {
+      $recordedHash = (Get-Content -LiteralPath $metadataProjectHash -Raw).Trim().ToUpperInvariant()
+      if ($recordedHash -notmatch '^[0-9A-F]{64}$') {
+        $problems.Add(("invalid project hash stamp: {0}" -f $metadataProjectHash))
+      } elseif ($recordedHash -ne (Get-ProjectFileHash)) {
+        $problems.Add(("proj.uvprojx content hash changed: {0}" -f $uvprojx))
+      }
+    } else {
+      foreach ($required in @($dep, $lnp)) {
+        if ((Get-Item -LiteralPath $required).LastWriteTimeUtc -lt $projectTime) {
+          $problems.Add(("older than proj.uvprojx: {0}" -f $required))
+        }
+      }
+    }
+  }
+  return @($problems.ToArray())
+}
+
+function Invoke-KeilMetadataBootstrap {
+  if (-not (Test-Path -LiteralPath $uv4 -PathType Leaf)) {
+    throw ("UV4 executable not found: {0}" -f $uv4)
+  }
+
+  $uv4ProcessName = [IO.Path]::GetFileNameWithoutExtension($uv4)
+  $running = @(Get-Process -Name $uv4ProcessName -ErrorAction SilentlyContinue)
+  if ($running.Count -gt 0) {
+    throw ("UV4 is already running ({0} process(es)). Close uVision and rerun to avoid single-instance asynchronous builds." -f $running.Count)
+  }
+
+  $objectDir = Join-Path $projectDir $objectDirRel
+  $listingDir = Join-Path $projectDir $listingDirRel
+  [IO.Directory]::CreateDirectory($objectDir) | Out-Null
+  [IO.Directory]::CreateDirectory($listingDir) | Out-Null
+  $bootstrapLog = Join-Path $objectDir 'uv4-bootstrap.log'
+  if (Test-Path -LiteralPath $bootstrapLog) {
+    Remove-Item -LiteralPath $bootstrapLog -Force
+  }
+
+  Write-Host ("[BOOTSTRAP] UV4 -b {0} -t {1}" -f $uvprojx, $Target) -ForegroundColor Yellow
+  $argumentLine = '-b "{0}" -t "{1}" -o "{2}"' -f $uvprojx, $Target, $bootstrapLog
+  $process = Start-Process -FilePath $uv4 -ArgumentList $argumentLine `
+    -WorkingDirectory $projectDir -WindowStyle Hidden -PassThru
+  Write-Host ("[BOOTSTRAP] waiting for UV4 pid {0} (timeout {1}s)" -f $process.Id, $BootstrapTimeoutSeconds) -ForegroundColor Yellow
+  try {
+    $timeoutMs = [int]($BootstrapTimeoutSeconds * 1000)
+    if (-not $process.WaitForExit($timeoutMs)) {
+      $taskkill = Join-Path $env:SystemRoot 'System32\taskkill.exe'
+      & $taskkill /PID $process.Id /T /F | Out-Host
+      throw ("UV4 bootstrap timed out after {0}s; terminated process tree {1}. See partial log: {2}" -f $BootstrapTimeoutSeconds, $process.Id, $bootstrapLog)
+    }
+    $process.WaitForExit()
+    $uv4Exit = $process.ExitCode
+  } finally {
+    $process.Dispose()
+  }
+  Normalize-UVisionGeneratedWhitespace
+
+  if (-not (Test-Path -LiteralPath $bootstrapLog -PathType Leaf)) {
+    throw ("UV4 bootstrap did not create its log (exit {0}): {1}" -f $uv4Exit, $bootstrapLog)
+  }
+  $bootstrapText = Get-Content -LiteralPath $bootstrapLog -Raw
+  $summaries = [regex]::Matches(
+    $bootstrapText,
+    '(?im)(?<errors>\d+)\s+Error\(s\),\s+(?<warnings>\d+)\s+Warning\(s\)'
+  )
+  if ($summaries.Count -eq 0) {
+    throw ("UV4 bootstrap log has no build summary (exit {0}): {1}" -f $uv4Exit, $bootstrapLog)
+  }
+  $summary = $summaries[$summaries.Count - 1]
+  $errorCount = [int]$summary.Groups['errors'].Value
+  $warningCount = [int]$summary.Groups['warnings'].Value
+  if ($errorCount -ne 0) {
+    throw ("UV4 bootstrap failed: {0} error(s), {1} warning(s), exit {2}. See {3}" -f $errorCount, $warningCount, $uv4Exit, $bootstrapLog)
+  }
+  if ($uv4Exit -ne 0 -and -not ($uv4Exit -eq 1 -and $warningCount -gt 0)) {
+    throw ("UV4 bootstrap returned unexpected exit {0} with zero reported errors. See {1}" -f $uv4Exit, $bootstrapLog)
+  }
+
+  $remaining = @(Get-KeilMetadataProblems -IgnoreProjectHash)
+  if ($remaining.Count -gt 0) {
+    throw ("UV4 bootstrap left invalid metadata: {0}" -f ($remaining -join '; '))
+  }
+  Update-KeilMetadataProjectHash
+  Write-Host ("[BOOTSTRAP] metadata ready: 0 error(s), {0} warning(s)" -f $warningCount) -ForegroundColor Green
+}
+
+$metadataProblems = @(Get-KeilMetadataProblems)
+if ($metadataProblems.Count -gt 0) {
+  if (-not $BootstrapIfNeeded) {
+    throw ("Keil generated metadata is unavailable or stale for target {0}: {1}. Rerun with -BootstrapIfNeeded." -f $Target, ($metadataProblems -join '; '))
+  }
+  Invoke-KeilMetadataBootstrap
+}
+
+foreach ($required in @($dep, $lnp)) {
+  if (-not (Test-Path -LiteralPath $required -PathType Leaf) -or (Get-Item -LiteralPath $required).Length -le 0) {
+    throw ("Keil generated metadata is invalid after bootstrap check: {0}" -f $required)
+  }
+}
+Update-KeilMetadataProjectHash
 
 function Split-KeilArgs([string]$s) {
   $tokens = New-Object System.Collections.Generic.List[string]

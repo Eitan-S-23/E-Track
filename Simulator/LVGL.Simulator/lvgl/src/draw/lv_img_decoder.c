@@ -20,10 +20,16 @@
 
 #ifdef ARDUINO
 #define XTRACK_IMG_LINE_CACHE_ENABLE 1
+#if defined(__CC_ARM)
+#define XTRACK_IMG_LINE_CACHE_DYNAMIC 1
+#else
+#define XTRACK_IMG_LINE_CACHE_DYNAMIC 0
+#endif
 #define XTRACK_IMG_LINE_CACHE_CNT 3
 /* 16 行/条（8KB）：读粒度加倍使 SD 事务数减半，把命令/NAC/FAT 固定开销
- * 摊到两倍数据上。总 RAM 不变（3x8KB=24KB）。跨帧命中率仍≈0（LRU 悬崖），
- * 收益全部来自单帧内事务开销的摊薄。 */
+ * 摊到两倍数据上。GCC 保持静态缓存；仅 AC5 从 LVGL 池按需分配以满足其
+ * RW_IRAM1 分区约束；
+ * 跨帧命中率仍≈0（LRU 悬崖），收益来自单帧内事务开销的摊薄。 */
 #define XTRACK_IMG_LINE_CACHE_ROWS 16
 #define XTRACK_IMG_LINE_CACHE_MAX_WIDTH 256
 #define XTRACK_IMG_LINE_CACHE_MAX_BYTES \
@@ -35,6 +41,7 @@
 #define XTRACK_DWT_CYCCNT  (*(volatile uint32_t *)0xE0001004U)
 #else
 #define XTRACK_IMG_LINE_CACHE_ENABLE 0
+#define XTRACK_IMG_LINE_CACHE_DYNAMIC 0
 #endif
 
 /**********************
@@ -79,13 +86,19 @@ static lv_res_t xtrack_img_line_cache_read(lv_img_decoder_built_in_data_t * user
                                            lv_coord_t len,
                                            uint8_t px_bytes,
                                            uint8_t * buf);
+static xtrack_img_line_cache_entry_t * xtrack_img_line_cache_get(void);
 #endif
 
 /**********************
  *  STATIC VARIABLES
  **********************/
 #if XTRACK_IMG_LINE_CACHE_ENABLE
+#if XTRACK_IMG_LINE_CACHE_DYNAMIC
+static xtrack_img_line_cache_entry_t * xtrack_img_line_cache;
+static uint8_t xtrack_img_line_cache_alloc_warned;
+#else
 static xtrack_img_line_cache_entry_t xtrack_img_line_cache[XTRACK_IMG_LINE_CACHE_CNT];
+#endif
 static uint32_t xtrack_img_line_cache_age;
 static uint32_t xtrack_img_line_cache_hits;
 static uint32_t xtrack_img_line_cache_misses;
@@ -127,7 +140,14 @@ void _lv_img_decoder_init(void)
 void xtrack_img_line_cache_invalidate(void)
 {
 #if XTRACK_IMG_LINE_CACHE_ENABLE
+#if XTRACK_IMG_LINE_CACHE_DYNAMIC
+    if(xtrack_img_line_cache != NULL) {
+        lv_memset_00(xtrack_img_line_cache,
+                     sizeof(xtrack_img_line_cache_entry_t) * XTRACK_IMG_LINE_CACHE_CNT);
+    }
+#else
     lv_memset_00(xtrack_img_line_cache, sizeof(xtrack_img_line_cache));
+#endif
     xtrack_img_line_cache_age = 0;
 #endif
 }
@@ -157,6 +177,18 @@ void xtrack_img_line_cache_get_stats(uint32_t * hits, uint32_t * misses, uint32_
     if(sd_cycles) *sd_cycles = 0;
 #endif
 }
+
+#if XTRACK_IMG_LINE_CACHE_ENABLE && XTRACK_IMG_LINE_CACHE_DYNAMIC
+void xtrack_img_line_cache_release(void)
+{
+    if(xtrack_img_line_cache != NULL) {
+        lv_mem_free(xtrack_img_line_cache);
+        xtrack_img_line_cache = NULL;
+    }
+    xtrack_img_line_cache_age = 0;
+    xtrack_img_line_cache_alloc_warned = 0;
+}
+#endif
 
 /**
  * Get information about an image.
@@ -594,6 +626,32 @@ void lv_img_decoder_built_in_close(lv_img_decoder_t * decoder, lv_img_decoder_ds
  **********************/
 
 #if XTRACK_IMG_LINE_CACHE_ENABLE
+static xtrack_img_line_cache_entry_t * xtrack_img_line_cache_get(void)
+{
+#if XTRACK_IMG_LINE_CACHE_DYNAMIC
+    if(xtrack_img_line_cache == NULL) {
+        if(xtrack_img_line_cache_alloc_warned != 0) {
+            return NULL;
+        }
+        uint32_t cache_size = sizeof(xtrack_img_line_cache_entry_t) * XTRACK_IMG_LINE_CACHE_CNT;
+        xtrack_img_line_cache = lv_mem_alloc(cache_size);
+        if(xtrack_img_line_cache == NULL) {
+            if(xtrack_img_line_cache_alloc_warned == 0) {
+                LV_LOG_WARN("Image line cache disabled: LVGL pool has no contiguous 24KB block");
+                xtrack_img_line_cache_alloc_warned = 1;
+            }
+            return NULL;
+        }
+        lv_memset_00(xtrack_img_line_cache, cache_size);
+        xtrack_img_line_cache_alloc_warned = 0;
+    }
+
+    return xtrack_img_line_cache;
+#else
+    return xtrack_img_line_cache;
+#endif
+}
+
 static uint32_t xtrack_img_line_cache_hash(const char * str)
 {
     uint32_t hash = 2166136261UL;
@@ -640,13 +698,18 @@ static lv_res_t xtrack_img_line_cache_read(lv_img_decoder_built_in_data_t * user
         return LV_RES_INV;
     }
 
+    xtrack_img_line_cache_entry_t * cache = xtrack_img_line_cache_get();
+    if(cache == NULL) {
+        return LV_RES_INV;
+    }
+
     uint32_t hash = xtrack_img_line_cache_hash((const char *)dsc->src);
     xtrack_img_line_cache_entry_t * free_entry = NULL;
-    xtrack_img_line_cache_entry_t * oldest_entry = &xtrack_img_line_cache[0];
+    xtrack_img_line_cache_entry_t * oldest_entry = &cache[0];
 
     uint32_t i;
     for(i = 0; i < XTRACK_IMG_LINE_CACHE_CNT; i++) {
-        xtrack_img_line_cache_entry_t * entry = &xtrack_img_line_cache[i];
+        xtrack_img_line_cache_entry_t * entry = &cache[i];
         if(entry->valid && entry->hash == hash && entry->y_start == y_start &&
            entry->width == width && entry->row_cnt == row_cnt && entry->px_bytes == px_bytes) {
             entry->age = ++xtrack_img_line_cache_age;

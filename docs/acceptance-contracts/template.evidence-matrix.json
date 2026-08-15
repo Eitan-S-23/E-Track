@@ -1,0 +1,25 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "TASK-v1",
+  "contract_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "round_id": "YYYYMMDD-HHMMSS",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "FUNC-1",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Replace with the observation or the reason it was not observed."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

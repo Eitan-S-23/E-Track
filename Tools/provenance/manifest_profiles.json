@@ -1,0 +1,104 @@
+{
+  "schema": "etrack-manifest-profiles-v1",
+  "exclude_path_regex": "(^|/)(build[^/]*|Output|Objects|Listings|\\.vs|__pycache__)(/|$)",
+  "profiles": {
+    "Legacy": {
+      "root_patterns": [
+        "ArduinoAPI/",
+        "Libraries/",
+        "USER/",
+        "boot/",
+        "bsdiff_lzma_AES128-main/",
+        "cmake/",
+        "MDK-ARM_F435/Platform/",
+        "MDK-ARM_F435/cmake-generated/cmake/",
+        "Simulator/LVGL.Simulator/",
+        "Tools/",
+        "tests/",
+        "segger_rtt/",
+        "vendor/"
+      ],
+      "top_files": [
+        "AGENTS.md",
+        "CMakeLists.txt",
+        "build_f435_and_simulator.bat",
+        "MDK-ARM_F435/build_f435.ps1",
+        "MDK-ARM_F435/proj.uvprojx"
+      ],
+      "exclude_prefixes": [
+        "Tools/provenance/"
+      ],
+      "required_paths": []
+    },
+    "Production": {
+      "root_patterns": [
+        ".github/scripts/",
+        "ArduinoAPI/",
+        "Libraries/",
+        "USER/",
+        "boot/",
+        "bsdiff_lzma_AES128-main/",
+        "cmake/",
+        "MDK-ARM_F435/Platform/",
+        "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/",
+        "MDK-ARM_F435/RTE/_X-Track/",
+        "MDK-ARM_F435/cmake-generated/cmake/",
+        "Simulator/LVGL.Simulator/",
+        "segger_rtt/",
+        "vendor/"
+      ],
+      "top_files": [
+        ".github/workflows/firmware-build.yml",
+        "CMakeLists.txt",
+        "build_f435_and_simulator.bat",
+        "MDK-ARM_F435/build_f435.ps1",
+        "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
+        "MDK-ARM_F435/proj.uvprojx",
+        "Tools/etu_pack.py"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": [
+        ".github/workflows/firmware-build.yml",
+        "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
+        "build_f435_and_simulator.bat"
+      ]
+    },
+    "Validation": {
+      "root_patterns": [
+        "Tools/",
+        "tests/"
+      ],
+      "top_files": [
+        ".github/workflows/acceptance-governance.yml",
+        "docs/acceptance-contracts/template.contract.json",
+        "docs/acceptance-contracts/template.evidence-matrix.json"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": [
+        ".github/workflows/acceptance-governance.yml",
+        "docs/acceptance-contracts/template.contract.json",
+        "docs/acceptance-contracts/template.evidence-matrix.json",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/provenance/source_manifest.ps1",
+        "Tools/provenance/worktree_guard.ps1",
+        "tests/ota/test_acceptance_bundle.py"
+      ]
+    },
+    "Governance": {
+      "root_patterns": [],
+      "top_files": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md",
+        "PLAN-OTA-EXEC.md",
+        "docs/acceptance-execution-contract.md"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": [
+        "AGENTS.md",
+        "PLAN-OTA-EXEC.md",
+        "docs/acceptance-execution-contract.md"
+      ]
+    }
+  }
+}

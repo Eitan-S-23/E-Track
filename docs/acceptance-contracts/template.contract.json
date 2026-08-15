@@ -1,0 +1,93 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "TASK-v1",
+  "version": 1,
+  "task_id": "TASK",
+  "parent_contract_sha256": null,
+  "status": "DRAFT",
+  "approved_by": "",
+  "approved_at": "",
+  "implementation_ref": "",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_json_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_json_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_json_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "external_inputs": [],
+  "commands": [
+    {
+      "id": "CMD-FUNC-1",
+      "description": "Run the command that directly observes FUNC-1.",
+      "command": "replace-with-the-exact-command",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-FIRMWARE",
+      "description": "The exact firmware artifact used by FUNC-1.",
+      "path": "artifacts/firmware.bin"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "FUNC-1",
+      "description": "Replace with a frozen, observable requirement.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-FUNC-1"
+      ],
+      "artifact_ids": [
+        "ART-FIRMWARE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": []
+}

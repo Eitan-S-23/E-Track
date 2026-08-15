@@ -8,17 +8,20 @@
 > - `PLAN-OTA-GUIDE.md` = 用户视角驾驶手册(派单话术/人工点/放行判定,给用户看,agent 无需读)
 > - `.claude/verification-report-ota-plan.md` = 复审报告(开工前必读,已知坑清单)
 > - `AGENTS.md` = 编译/烧录/RTT/防坑权威流程(所有真机操作照此执行)
+> - `docs/acceptance-execution-contract.md` = 独立验收合同、结果分类、证据失效与复验规则
 
 ## 0. 看板操作规则(细则;强制条款见 AGENTS.md 规约)
 
-1. **认领**:把任务卡"状态"从 `待办` 改 `进行中`,填"认领"(agent 标识+日期)。一个会话一次只认领一张卡;不越卡"范围"改文件。
-2. **完成**:必须先在"证据"栏填入可核查内容(命令+关键输出摘录、产物路径+时间戳、哈希、截图路径;长输出落盘 `docs/ota-exec-notes/<卡ID>-*.md` 后填链接),才允许置 `完成`。空证据的"完成"视为未完成。
-3. **验收分离**:置 `完成` 前,验收命令须由非实现会话执行(另起 agent 或主会话跑验收),验收者在证据栏追加一行"验收人+结果"。
-4. **阻塞**:发现契约矛盾、不可实现、依赖缺失 → 状态置 `阻塞`,在卡内追加"阻塞记录:"一行写明,同时在 §9 变更登记表登记,然后**停止该卡**。禁止就地修改契约文档继续实现。
-5. **research 落盘**:编码前检索/上下文分析结论一律写 `docs/ota-exec-notes/<卡ID>-<主题>.md`,不许只留在会话回复里(会话会被压缩,文件不会)。
-6. **提交收口**:子 agent 不执行 `git commit/push/merge`;由主会话在用户确认后按小步提交收口。PR/远端合并后必须按 `AGENTS.md` 的“Git / Worktree 收口规约”同步主 worktree，验证 `HEAD == origin/main`；合并后新增的 CI 证据、看板记录或修正文档也必须落入 `main`，否则不得宣告收口完成。
-7. **会话收尾**:每个工作会话结束前,回写所动任务卡的状态,并在 §10 会话日志追加一行。
-8. 状态取值固定四种:`待办` / `进行中` / `阻塞` / `完成`。
+1. **认领**:把任务卡"状态"从 `待办` 改 `进行中`,填"认领"(实现 agent 标识+日期)。一个会话一次只认领一张卡;不越卡"范围"改文件。验收者不得覆盖实现认领人。
+2. **验收合同**:独立验收前必须按 `docs/acceptance-execution-contract.md` 在 `docs/acceptance-contracts/` 冻结、审批版本化合同。执行中新增或改变门禁必须升版本重新审批,不得靠临时 prompt 漂移合同。
+3. **完成**:必须先在"证据"栏填入可核查内容(命令+关键输出摘录、产物路径+时间戳、哈希、截图路径;长输出落盘 `docs/ota-exec-notes/<卡ID>-*.md` 后填链接),并通过合同/矩阵校验,才允许置 `完成`。空证据的"完成"视为未完成。
+4. **验收分离**:置 `完成` 前,验收命令须由非实现会话执行(另起 agent 或主会话跑验收),验收者在证据栏追加"验收人+轮次+单轮结果",不得改写实现认领。
+5. **结果分类**:单轮验收结果固定为 `PASS` / `PRODUCT_FAIL` / `HARNESS_FAIL` / `EVIDENCE_GAP` / `ENV_BLOCKED`。产品失败通常保持 `进行中` 进入整改;harness、证据或环境问题只失效相应证据,不得自动触发无关全量回归。复用证据必须由校验器对本轮/上一轮精确 Git worktree 重算 manifest,并由当前矩阵绑定上一矩阵与 rerun plan 的 SHA-256;禁止相同矩阵、相同轮次或链式 `REUSED` 自证。
+6. **阻塞**:仅发现契约矛盾、不可实现、必需外部依赖缺失时,状态置 `阻塞`,在卡内追加"阻塞记录:"并在 §9 登记,然后**停止该卡**。普通产品缺陷、harness 失败和证据缺口不使用 `阻塞`。
+7. **research 落盘**:编码前检索/上下文分析结论一律写 `docs/ota-exec-notes/<卡ID>-<主题>.md`,不许只留在会话回复里(会话会被压缩,文件不会)。
+8. **提交收口**:子 agent 不执行 `git commit/push/merge`;由主会话在用户确认后按小步提交收口。PR/远端合并后必须按 `AGENTS.md` 的“Git / Worktree 收口规约”同步主 worktree，验证 `HEAD == origin/main`；合并后新增的 CI 证据、看板记录或修正文档也必须落入 `main`，否则不得宣告收口完成。
+9. **会话收尾**:每个工作会话结束前,回写所动任务卡的状态,并在 §10 会话日志追加一行。
+10. 任务状态取值固定四种:`待办` / `进行中` / `阻塞` / `完成`;不得把单轮验收结果写入状态字段。
 
 ## 1. 阶段状态总表
 
@@ -502,7 +505,7 @@
   - F3 独立整改复验(通过):验收人 Codex(非实现会话)/2026-08-01;独立复核真实 `Session`+SdFat 缓存句柄模型 `5/5` 与核心 `29/29`，确认同路径合法替换在 staging 擦除前 `file_changed`，追加/截断及第二遍同长度替换均 fail-closed，路径失效时 open/close 计数相等且不复用旧句柄。实际 LVGL/SdFat 源码对号确认 close 后对象被删除且 `file_d/drv` 清空，重开会从目录项刷新 `m_fileSize`;确认快照绑定路径/长度/头信息/整包 SHA，`Begin()` 不覆盖 `packageInfo`。fresh GCC/AC5、模拟器 `/t:Rebuild`、两次真实 Startup、冻结契约/P2-3 零 diff 与生产无刷写探针全部通过；旧真机 SD 成功链覆盖未改集成层，判定足够复用，无需重植 harness。卡置 `完成`，P2 更新 `4/6`;详见 `docs/ota-exec-notes/P2-4-acceptance-2026-08-01.md` §8；未 commit/push。
 
 #### P2-5 backup 自拷与 STAGED 提交
-状态: 完成 ｜ 认领: Codex(独立验收会话) / 2026-08-14 ｜ 更新: 2026-08-14(R3 独立验收通过；P2 5/6)
+状态: 完成 ｜ 认领: Claude(实现会话) / 2026-08-02 ｜ 更新: 2026-08-14(R3 独立验收通过；P2 5/6)
 - 目标: candidate 复核通过后:当前版自拷 backup(读回 CRC、槽头 marker-last)→BCB=STAGED→UI 提示重启;仅 CONFIRMED 态允许自拷(backup 锁定规则);App 自检(HAL 全初始化+主循环 30s+IWDG 正常)后写 CONFIRMED;TEST_BOOT 期间拒绝发起新 OTA。
 - 验收: 真机完整一轮 SD 升级:STAGED→重启→APPLYING→TEST_BOOT→CONFIRMED,RTT 全程留痕。
 - 证据: `docs/ota-exec-notes/P2-5-closures-2026-08-02.md`(实现与验证留痕);宿主 `108/108`(P2-5 backup)+`17/17`(confirm health,含 C13 编排级回归)+Session 场景 7/7;GCC App `598680B`/Boot `14236B`(哈希与 P2-3 一致),AC5 `0E0W`/`Code=300908`,`git diff --check` 干净;真机 RTT 链留待非实现验收会话。
@@ -759,3 +762,7 @@
 - 2026-08-14 ｜ Codex(实现/整改接管会话) ｜ P2-5(R4 实现整改完成,等待独立验收) ｜ 明确停止“harness 未稳定即反复全量回归”的低效循环；冻结生产源码 2945/2945 哈希一致，复用已绑定的 12 组宿主、fresh GCC/模拟器、Startup 12/12 和六 fixture。最终生产 v20800 以 FPB+DWT 独立测得根目录 3/3、F4ACC 3/3，最坏 36.577ms/47.136ms/输入上界 910.740ms；Flash 前后 38 块均匹配，终态 v20800/CONFIRMED/Dialplate/SDReady=1/CFSR=0。修复验证 runner 的断点句柄和 Flash 瞬态复读判定，不改产品实现；下一轮只需定向独立时序、当轮真机视觉和一次完整 OTA，不得无条件重跑全部测试。报告 `docs/ota-exec-notes/P2-5-F4-fix-remediation-2026-08-09-r4.md`，入口 `.claude/prompt-P2-5-verification-r3.md`；P2-5 继续阻塞、P2 继续 4/6，未 commit/push/merge/rebase/reset/checkout/stash。
 - 2026-08-14 ｜ Codex(新的非实现独立验收会话) ｜ P2-5(验收通过) ｜ 依 R3 哈希门控复核生产 manifest `2945/2945`、绑定产物与既有原始日志，未重复全量回归；独立 Attempt 05 时序根/F4ACC 各 `3/3`，最坏 `36.628/47.103/910.773ms`，Flash 前后 `38/38`。用户当轮九项屏幕/交互均确认正常并保存录像；完整 OTA 取得 `STAGED`、同周期 `TEST_BOOT confirmed vcode=20801`、二次复位 `BCB already CONFIRMED vcode=20801`，终态健康且复位后屏幕正常。首次复位过早采到 Boot `i2c_delay` 被裁定为 harness 等待不足，非产品失败。矩阵全项通过，报告 `docs/ota-exec-notes/P2-5-F4-independent-acceptance-2026-08-10-r6.md`，证据 `.acceptance-p2-5-f4/20260814-091824/`；P2-5 置 `完成`，P2 更新 `5/6`；未改生产实现，未 commit/push/merge/rebase/reset/checkout/stash。
 - 2026-08-14 ｜ Codex(主会话/统一收口) ｜ P2-5(main 收口) ｜ 先确认 R6 非实现独立验收正式 PASS，再将流程规则 `6bcbf8d`、P2-4 最终 CI 补证 `388cb23` 和 P2-5 PR #2 以 merge commit `309cc1e1f47f51bcaea9ce034e139e7f470013ef` 汇入 `main`；PR <https://github.com/Eitan-S-23/E-Track/pull/2> 的 post-merge MCU run `31777803114` 成功，日志 `634 warning / 0 error`，App `598848B`/SHA `2DDEFC95463FC4971563C477DBB337A555E133D2B41EB8B471B8F8779E0EDF14`，Boot `14724B`/SHA `3554E193F498D23210F5EF32E09DE64575B7CD39104FAFCC950740E5E8A7EC34`；APK/EXE run `31777803106` 路径检测成功，APK/EXE/Pages/Release 按条件 skipped，Cloudflare 注册 skipped。合并前 12 条宿主命令全绿，本地 GCC 在补齐 `SOURCE_DATE_EPOCH=1786320000` 后 `634 warning / 0 error`，模拟器 `102 warning / 0 error`；AC5 因历史缺 `MDK-ARM_F435/Objects/X-Track.lnp` 在编译前退出 1。审计 `p2-4-20260731` 的 `858edf8` 后未 cherry-pick，仅补 main 缺失证据；首次 `fetch --prune`/worktree 列表/`ff-only` 后 `HEAD == origin/main == 309cc1e` 且无 ahead/behind，既有未跟踪文件未触碰。完整记录见 `docs/ota-exec-notes/P2-5-main-closeout-2026-08-14.md`。
+- 2026-08-14 ｜ Codex(验收治理/AC5 基础设施整改) ｜ 不重开 P2-5 产品卡；新增版本化验收合同、五类单轮结果、分类 manifest/失效矩阵、紧凑证据包和 fail-closed 校验器，并修正 Governance manifest 自引用及分类 manifest 未实读的缺口。默认一键入口改为 `X-Track-App-AC5 -BootstrapIfNeeded`，在项目内无 `dep/lnp` 副本首次自举 `468.719s`、UV4 `0E0W`、模拟器 `102W0E`，第二次固件增量 `33.763s` 且 `[BOOTSTRAP]=0`；将 24,624B LiveMap 静态行缓存改为 LVGL 池按需分配后 AC5 链接通过，`Program Size: Code=301084 RO-data=289372 RW-data=1332 ZI-data=532248`，`RW_IRAM1=351504/360440`、余 8,936B。专项 `27/27`、Python/PowerShell/XML/JSON/模板 CLI/`git diff --check` 全通过；清理 5,152 文件、863,690,647B 项目内临时产物，未操作 J-Link/SD/项目外路径。完整记录见 `docs/ota-exec-notes/acceptance-governance-ac5-bootstrap-2026-08-14.md`。
+- 2026-08-15 ｜ Codex(构建角色纠错/去重整改) ｜ 对上一条“AC5 默认入口”作正式纠正：依 P1-2 冻结决策和 GitHub Actions，默认 `build_f435_and_simulator.bat --no-pause` 恢复为 GCC `X_Track_App_GCC` + `X_Track_Boot` + 模拟器，AC5 仅由 `--with-ac5` / `--ac5-only` 显式触发，`--legacy` 只选择辅助旧布局目标。默认链最终 `332.640s`、`583W0E`、`[AC5]/[BOOTSTRAP]=0`、对象路径风险 0，App `598756B`/SHA `74837669...C16BC`，Boot `14724B`/SHA `5842FF3E...F6594`；CMake 尊重 `CMAKE_OBJECT_PATH_MAX=1024`。LiveMap 24,624B 动态缓存限制到 `__CC_ARM`，GCC 恢复静态缓存，主 RAM `348352/360448B`、余 `12096B`。AC5 自举由 target 级 `proj.uvprojx` SHA-256 门控：纯 mtime 曾误耗 `377.2s`，修复后 `--ac5-only` `33.2s` 且 `[BOOTSTRAP]=0`，`Program Size` 与 `RW_IRAM1=351504/360440B` 保持。专项 `31/31`、Python/PowerShell/XML/JSON/模板 CLI/`git diff --check` 全通过；P2-5 产品卡不重开，完整记录同上。
+- 2026-08-15 ｜ Codex(验收治理第二轮整改) ｜ 接受独立审查提出的五项缺口，不重开 P2-5 产品卡。验收合同/矩阵升级 v2，强制三类 manifest、精确命令/预期退出码、真实产物路径、实际观测值和判据依赖；校验器现复核命令替换、失败退出、输出证据、产物路径/大小/SHA，并能比较前后轮合同自动生成和强制执行最小 rerun plan。Production manifest 补实际 GCC CMake 入口；新增轻量 Acceptance Governance CI，避免纯治理改动触发完整固件构建；AC5 默认目标与 RTT map 指令统一到 App-AC5。专项扩展为 `40/40`，本轮未改 GCC 生产配置/固件源码，按失效矩阵不重复完整 GCC/AC5 构建；记录见 `docs/ota-exec-notes/acceptance-governance-ac5-bootstrap-2026-08-14.md` §6。
+- 2026-08-15 ｜ Codex(验收治理第三轮整改) ｜ 修复复验被绝对 worktree、无关 `HEAD`、mtime 和 manifest 包装哈希误触发的问题：正式 manifest v2 将 JSON 完整性哈希与稳定文件集合 `ManifestSHA256` 分离，绑定 JSON 移除根目录/提交号/时间字段，复验仅比较相对路径+长度+内容哈希。校验器新增 manifest 全结构/必需入口/文本清单复算、同任务直接合同谱系、performance basis 和产品/harness FAIL provenance 门禁；PowerShell 路径守卫改为 Linux/Windows 双平台，固件 CI 排除纯治理测试。不同根目录、不同 HEAD、mtime 变化夹具保持逐字节相同 manifest；专项 `51/51`，未改生产固件输入，未重跑 GCC/AC5/模拟器。P2-5 保持完成；详见同整改记录 §7。
