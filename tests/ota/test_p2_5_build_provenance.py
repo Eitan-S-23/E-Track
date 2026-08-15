@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import ast
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import shutil
@@ -8,6 +10,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -17,6 +20,7 @@ PROFILE_CONFIG = ROOT / "Tools" / "provenance" / "manifest_profiles.json"
 VALIDATOR_PATH = ROOT / "Tools" / "acceptance" / "validate_bundle.py"
 REPRO = ROOT / "cmake" / "reproducible_build.cmake"
 FIRMWARE_WORKFLOW = ROOT / ".github" / "workflows" / "firmware-build.yml"
+ACCEPTANCE_WORKFLOW = ROOT / ".github" / "workflows" / "acceptance-governance.yml"
 GCC_REPRO_TEST = ROOT / "tests" / "ota" / "test_ota_gcc_reproducibility.py"
 POWERSHELL = shutil.which("powershell.exe") or shutil.which("pwsh")
 VALIDATOR_SPEC = importlib.util.spec_from_file_location("provenance_validator", VALIDATOR_PATH)
@@ -31,6 +35,15 @@ def repo_local_temp_env(directory):
     return env
 
 
+def load_gcc_repro_module():
+    spec = importlib.util.spec_from_file_location("gcc_reproducibility_test", GCC_REPRO_TEST)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Cannot load GCC reproducibility test: {GCC_REPRO_TEST}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 class P25BuildProvenanceTests(unittest.TestCase):
     def test_release_requires_source_date_epoch(self):
         text = REPRO.read_text(encoding="ascii")
@@ -39,9 +52,65 @@ class P25BuildProvenanceTests(unittest.TestCase):
         self.assertIn('MATCHES "^[0-9]+$"', text)
         workflow = FIRMWARE_WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("python3 tests/ota/test_ota_gcc_reproducibility.py", workflow)
-        reproducibility_test = GCC_REPRO_TEST.read_text(encoding="ascii")
-        self.assertNotIn("skipTest", reproducibility_test)
-        self.assertIn("GNU Arm compiler is required", reproducibility_test)
+        governance = ACCEPTANCE_WORKFLOW.read_text(encoding="utf-8")
+        self.assertEqual(
+            2,
+            governance.count('"tests/ota/test_ota_gcc_reproducibility.py"'),
+        )
+
+    def test_gcc_reproducibility_forbids_skip_apis(self):
+        source = GCC_REPRO_TEST.read_text(encoding="ascii")
+        tree = ast.parse(source, filename=str(GCC_REPRO_TEST))
+        forbidden = {
+            "SkipTest",
+            "expectedFailure",
+            "skip",
+            "skipIf",
+            "skipTest",
+            "skipUnless",
+        }
+        violations = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id in forbidden:
+                violations.append((node.lineno, node.id))
+            elif isinstance(node, ast.Attribute) and node.attr in forbidden:
+                violations.append((node.lineno, node.attr))
+        self.assertEqual([], violations)
+
+    def test_gcc_reproducibility_missing_compiler_is_failure(self):
+        module = load_gcc_repro_module()
+        with mock.patch.object(module, "find_arm_gcc", return_value=None):
+            result = unittest.TestResult()
+            module.load_suite().run(result)
+
+        self.assertEqual(1, result.testsRun)
+        self.assertEqual([], result.skipped)
+        self.assertEqual([], result.errors)
+        self.assertEqual(1, len(result.failures))
+        self.assertIn("GNU Arm compiler is required", result.failures[0][1])
+
+    def test_gcc_reproducibility_runner_rejects_nonexecuted_results(self):
+        module = load_gcc_repro_module()
+
+        class SkippedFixture(unittest.TestCase):
+            def runTest(self):
+                self.skipTest("fixture skip")
+
+        class ExpectedFailureFixture(unittest.TestCase):
+            @unittest.expectedFailure
+            def runTest(self):
+                self.fail("fixture expected failure")
+
+        suites = {
+            "empty": unittest.TestSuite(),
+            "skipped": unittest.TestSuite([SkippedFixture()]),
+            "expected-failure": unittest.TestSuite([ExpectedFailureFixture()]),
+        }
+        for name, suite in suites.items():
+            with self.subTest(name=name):
+                stream = io.StringIO()
+                self.assertEqual(1, module.run_suite(suite=suite, stream=stream))
+                self.assertIn("FAIL-CLOSED:", stream.getvalue())
 
     def test_manifest_protocol_is_explicit(self):
         text = MANIFEST.read_text(encoding="ascii")

@@ -3,12 +3,14 @@ import hashlib
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+EXPECTED_TEST_COUNT = 1
 WINDOWS_ARM_GCC = Path(
     r"D:\singlechip\gcc+gdb+openocd\tools\arm-gnu-toolchain-13.3.rel1-ming\bin\arm-none-eabi-gcc.exe"
 )
@@ -64,5 +66,27 @@ class GccReproducibilityTests(unittest.TestCase):
             self.assertIn(b"00:00:00", data)
 
 
+def load_suite():
+    return unittest.defaultTestLoader.loadTestsFromTestCase(GccReproducibilityTests)
+
+
+def run_suite(suite=None, stream=None):
+    runner = unittest.TextTestRunner(stream=stream, verbosity=1)
+    result = runner.run(load_suite() if suite is None else suite)
+    invalid_outcomes = []
+    if result.testsRun != EXPECTED_TEST_COUNT:
+        invalid_outcomes.append(
+            f"expected {EXPECTED_TEST_COUNT} executed test, observed {result.testsRun}"
+        )
+    if result.skipped:
+        invalid_outcomes.append(f"{len(result.skipped)} skipped")
+    if result.expectedFailures:
+        invalid_outcomes.append(f"{len(result.expectedFailures)} expected failure")
+    if invalid_outcomes:
+        runner.stream.writeln("FAIL-CLOSED: " + ", ".join(invalid_outcomes))
+        return 1
+    return 0 if result.wasSuccessful() else 1
+
+
 if __name__ == "__main__":
-    unittest.main()
+    sys.exit(run_suite())
