@@ -16,6 +16,8 @@ MANIFEST = ROOT / "Tools" / "provenance" / "source_manifest.ps1"
 PROFILE_CONFIG = ROOT / "Tools" / "provenance" / "manifest_profiles.json"
 VALIDATOR_PATH = ROOT / "Tools" / "acceptance" / "validate_bundle.py"
 REPRO = ROOT / "cmake" / "reproducible_build.cmake"
+FIRMWARE_WORKFLOW = ROOT / ".github" / "workflows" / "firmware-build.yml"
+GCC_REPRO_TEST = ROOT / "tests" / "ota" / "test_ota_gcc_reproducibility.py"
 POWERSHELL = shutil.which("powershell.exe") or shutil.which("pwsh")
 VALIDATOR_SPEC = importlib.util.spec_from_file_location("provenance_validator", VALIDATOR_PATH)
 VALIDATOR = importlib.util.module_from_spec(VALIDATOR_SPEC)
@@ -35,6 +37,11 @@ class P25BuildProvenanceTests(unittest.TestCase):
         self.assertIn('CMAKE_BUILD_TYPE STREQUAL "Release"', text)
         self.assertIn("Release firmware builds require SOURCE_DATE_EPOCH", text)
         self.assertIn('MATCHES "^[0-9]+$"', text)
+        workflow = FIRMWARE_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("python3 tests/ota/test_ota_gcc_reproducibility.py", workflow)
+        reproducibility_test = GCC_REPRO_TEST.read_text(encoding="ascii")
+        self.assertNotIn("skipTest", reproducibility_test)
+        self.assertIn("GNU Arm compiler is required", reproducibility_test)
 
     def test_manifest_protocol_is_explicit(self):
         text = MANIFEST.read_text(encoding="ascii")
@@ -381,30 +388,6 @@ class P25BuildProvenanceTests(unittest.TestCase):
             self.assertNotEqual(summaries[0]["RepoRoot"], summaries[1]["RepoRoot"])
             self.assertNotEqual(summaries[0]["Head"], summaries[1]["Head"])
             self.assertEqual(summaries[0]["ManifestSHA256"], summaries[1]["ManifestSHA256"])
-
-    def test_gcc_date_time_follow_source_date_epoch(self):
-        compiler = os.environ.get("ARM_GCC") or shutil.which("arm-none-eabi-gcc")
-        if not compiler:
-            compiler = r"D:\singlechip\gcc+gdb+openocd\tools\arm-gnu-toolchain-13.3.rel1-ming\bin\arm-none-eabi-gcc.exe"
-        if not Path(compiler).is_file():
-            self.skipTest("GNU Arm compiler is unavailable")
-
-        source = 'const char d[] = __DATE__; const char t[] = __TIME__;\n'
-        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".gcc-stamp-test-") as temp_dir:
-            temp = Path(temp_dir)
-            src = temp / "stamp.c"
-            obj1 = temp / "stamp1.o"
-            obj2 = temp / "stamp2.o"
-            src.write_text(source, encoding="ascii", newline="\n")
-            env = repo_local_temp_env(temp)
-            env["SOURCE_DATE_EPOCH"] = "0"
-            subprocess.run([compiler, "-c", str(src), "-o", str(obj1)], check=True, env=env)
-            subprocess.run([compiler, "-c", str(src), "-o", str(obj2)], check=True, env=env)
-            self.assertEqual(hashlib.sha256(obj1.read_bytes()).digest(), hashlib.sha256(obj2.read_bytes()).digest())
-            data = obj1.read_bytes()
-            self.assertIn(b"Jan  1 1970", data)
-            self.assertIn(b"00:00:00", data)
-
 
 if __name__ == "__main__":
     unittest.main()

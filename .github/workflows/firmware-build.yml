@@ -108,6 +108,15 @@ jobs:
       - name: Install OTA host test dependencies
         run: python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0
 
+      - name: Verify reproducible GCC timestamps
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          ARM_GCC: arm-none-eabi-gcc
+        run: |
+          set -euo pipefail
+          python3 tests/ota/test_ota_gcc_reproducibility.py
+
       - name: Extract firmware version
         id: version
         shell: bash
