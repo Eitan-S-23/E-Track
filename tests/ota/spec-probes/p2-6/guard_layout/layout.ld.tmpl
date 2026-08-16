@@ -1,0 +1,92 @@
+/* 外置 guard 布局最小复刻脚本（Spec 侧链接验证用，非生产脚本）。
+ *
+ * 设计要点（这是本轮裁定的核心）：
+ *   - 段定位只用「常量算术」：_estack 与两个契约常量。
+ *   - 四个栈符号全部由「实际输出段」的 ADDR/SIZEOF 派生，不再独立算术定义。
+ *   - ASSERT 拿「段的实测 ADDR/SIZEOF」与「契约常量」比对，不是拿符号比符号。
+ * 这样符号无法与段脱钩，段被挪位/改长/留空洞都会被链接期打死。
+ *
+ * 双@围起的大写标识符是占位符，由 run.py 替换，用于生成正例与 7 类负例。
+ */
+
+OTA_STACK_RESERVE    = @@STACK_LEN@@;
+OTA_STACK_GUARD_SIZE = @@GUARD_LEN@@;
+_Min_Heap_Size       = @@HEAP_LEN@@;
+
+MEMORY
+{
+  RAM (rwx) : ORIGIN = 0x20000000, LENGTH = 352K
+}
+
+_estack = ORIGIN(RAM) + LENGTH(RAM);
+
+ENTRY(_start)
+
+SECTIONS
+{
+  .text 0x20000000 : { KEEP(*(.text*)) } > RAM
+
+  .bss : { *(.bss*) *(COMMON) } > RAM
+
+  ._user_heap_stack :
+  {
+    . = ALIGN(8);
+    . = . + _Min_Heap_Size;
+    . = ALIGN(8);
+  } > RAM
+
+  /* guard 区：栈区之外、紧贴其低地址侧。段内只用相对长度。 */
+  .ota_stack_guard @@GUARD_ADDR@@ (NOLOAD) :
+  {
+    KEEP(*(.ota_stack_guard))
+    . = @@GUARD_FILL@@;
+  } > RAM
+
+  /* 8192B 可用栈区：RAM 顶部。 */
+  .ota_stack @@STACK_ADDR@@ (NOLOAD) :
+  {
+    KEEP(*(.ota_stack))
+    . = @@STACK_FILL@@;
+  } > RAM
+}
+
+/* 符号由实际输出段派生（不得改回独立常量算术）。 */
+__StackLimit      = ADDR(.ota_stack);
+__StackTop        = ADDR(.ota_stack) + SIZEOF(.ota_stack);
+__StackGuardStart = ADDR(.ota_stack_guard);
+__StackGuardEnd   = ADDR(.ota_stack_guard) + SIZEOF(.ota_stack_guard);
+
+/* armlink 兼容别名（$$Base 低地址 / $$Limit 高地址，方向不得接反）。 */
+STACK$$Base  = __StackLimit;
+STACK$$Limit = __StackTop;
+
+/* ---- 段级 ASSERT：全部锚在实际输出段上 ---- */
+
+ASSERT(SIZEOF(.ota_stack) == OTA_STACK_RESERVE,
+  "A1: OTA stack section size must equal OTA_STACK_RESERVE")
+
+ASSERT(SIZEOF(.ota_stack_guard) == OTA_STACK_GUARD_SIZE,
+  "A2: OTA stack guard section size must equal OTA_STACK_GUARD_SIZE")
+
+ASSERT(ADDR(.ota_stack) + SIZEOF(.ota_stack) == _estack,
+  "A3: OTA stack section must end exactly at _estack")
+
+ASSERT(ADDR(.ota_stack_guard) + SIZEOF(.ota_stack_guard) == ADDR(.ota_stack),
+  "A4: OTA stack guard must be immediately below the stack area with no gap")
+
+ASSERT(ADDR(._user_heap_stack) + SIZEOF(._user_heap_stack) <= ADDR(.ota_stack_guard),
+  "A5: Data/heap region overlaps the OTA stack guard area")
+
+/* ---- 符号自洽 ASSERT：防止后续把符号改回与段脱钩的独立算术 ---- */
+
+ASSERT(__StackLimit == ADDR(.ota_stack),
+  "A6: __StackLimit must be derived from ADDR(.ota_stack)")
+
+ASSERT(__StackGuardStart == ADDR(.ota_stack_guard),
+  "A7: __StackGuardStart must be derived from ADDR(.ota_stack_guard)")
+
+ASSERT(__StackGuardEnd == __StackLimit,
+  "A8: __StackGuardEnd must equal __StackLimit")
+
+ASSERT(__StackTop == _estack,
+  "A9: __StackTop must equal _estack")

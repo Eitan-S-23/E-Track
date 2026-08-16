@@ -10,6 +10,8 @@ on:
       - "Tools/provenance/**"
       - "docs/acceptance-contracts/**"
       - "docs/acceptance-execution-contract.md"
+      - "docs/ota-prompts/**"
+      - "tests/ota/spec-probes/**"
       - "tests/ota/test_acceptance_bundle.py"
       - "tests/ota/test_ac5_ram_budget.py"
       - "tests/ota/test_f435_build_bootstrap.py"
@@ -30,6 +32,8 @@ on:
       - "Tools/provenance/**"
       - "docs/acceptance-contracts/**"
       - "docs/acceptance-execution-contract.md"
+      - "docs/ota-prompts/**"
+      - "tests/ota/spec-probes/**"
       - "tests/ota/test_acceptance_bundle.py"
       - "tests/ota/test_ac5_ram_budget.py"
       - "tests/ota/test_f435_build_bootstrap.py"
@@ -68,3 +72,25 @@ jobs:
           python3 tests/ota/test_ac5_ram_budget.py
           python3 tests/ota/test_f435_build_bootstrap.py
           python3 tests/ota/test_p2_5_build_provenance.py
+
+      # Spec 探针刻意放在本工作流而不是 firmware-build.yml：探针只需要
+      # arm-none-eabi-gcc/nm/objdump 与宿主 gcc，不需要完整固件构建链，
+      # 挂到固件工作流会让每次改探针都跑一次全量 App+Boot 构建。
+      # 版本必须与 firmware-build.yml 的 13.3.Rel1 一致：探针里的栈帧字节数、
+      # `.su` 数值、内联折叠结论都绑定到具体工具链版本，换版即须重新裁定基线。
+      - name: Install Arm GNU Toolchain 13.3.Rel1
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: "13.3.Rel1"
+
+      # rc=1（harness 失败）与 rc=2（真实工具链缺失）都让本步骤失败：
+      # 按验收合同，ENV_BLOCKED 不得记 PASS，CI 上更不允许当成绿灯。
+      - name: Run P2-6 spec probes
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          set -euo pipefail
+          arm-none-eabi-gcc --version | head -n1
+          gcc --version | head -n1
+          python3 tests/ota/spec-probes/p2-6/run_all.py
