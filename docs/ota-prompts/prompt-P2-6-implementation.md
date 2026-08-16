@@ -4,7 +4,16 @@
 > `docs/ota-prompts/prompt-template-implementation.md` 撰写，落盘时间 2026-08-15。
 > 实现会话直接读本文件开工，不需要用户复述背景。
 >
-> **状态：草案，待复核（2026-08-16）。尚未冻结，尚未派单。**
+> **状态：已冻结（2026-08-16）。**
+> 冻结依据：Acceptance Governance 在 Ubuntu 上取得正式远端通过
+> —— PR #3 / run `31948667013` / 候选提交 `68b929b`，「Run P2-6 spec probes」
+> 步骤实际输出 harness 自检 **20/20** + 探针 **8/8 PASS**，
+> 「Run governance regression tests」输出 `Ran 45 tests ... OK`（远端 0 跳过）。
+> 远端工具链：`arm-none-eabi-gcc 13.3.1 20240614`（Arm GNU Toolchain 13.3.Rel1
+> Build arm-13.24）+ 宿主 `gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1)`。
+> 本文件自此为**只读判据源**：判据需要改动必须先在 `PLAN-OTA-EXEC.md` §9 变更
+> 登记表登记，并重新走「整改 → 远端 CI 通过 → 再冻结」；**不得就地改判据继续
+> 实现**。发现判据矛盾或不可实现 → 把 P2-6 置「阻塞」并停止（见 §0 规约）。
 > 2026-08-16 按独立复核裁定整改：外置 guard 布局（§4.2 第 1/4/5 条）、
 > 删除「峰值恰等 8192B 一律 HARNESS_FAIL」并改为 §4.8 的 measurement-validity
 > 判据、AC5 定为 auxiliary（§4.1/§4.6/§7）、`P2_6_TEST_ENABLE` 不进 linker
