@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import ast
 import contextlib
 import copy
 import hashlib
@@ -6,6 +7,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -893,6 +895,357 @@ class AcceptanceBundleTests(unittest.TestCase):
             self.assertEqual(1, result)
             self.assertIn("current and previous matrix files must be different", stderr)
             self.assertIn("round_id must be different", stderr)
+
+
+class GovernancePromptScopeTests(unittest.TestCase):
+    """守护 docs/ota-prompts/ 不再脱离 Governance profile 与治理 workflow。
+
+    P2-6 派单前置复审发现:派单提示词此前放在 `.claude/`,既不在任何 manifest
+    profile 内,也不触发 Acceptance Governance,提示词可被静默替换而无人发现。
+    本组测试把「规范文件受治理」变成可执行断言,防止目录被移回或从 profile 摘除。
+    """
+
+    PROMPT_DIR = "docs/ota-prompts/"
+    REQUIRED_TEMPLATES = (
+        "docs/ota-prompts/prompt-template-acceptance.md",
+        "docs/ota-prompts/prompt-template-implementation.md",
+    )
+    # OTA 派单规范文件:卡提示词与两份模板。不含与 OTA 无关的一次性工具提示词。
+    #
+    # 识别口径按「卡号前缀」而非「-implementation/-acceptance 后缀」:P2-6 派单前置
+    # 复审发现 `.claude/prompt-p2-3-bspatch.md` 这类自定义后缀的卡提示词能绕过后缀
+    # 白名单,静默停留在不受 manifest 与治理 CI 约束的目录里。凡带 `PRE`/`P<数字>`
+    # 卡号的 prompt 一律视为派单提示词;不带卡号的工具提示词
+    # (如 `prompt-keil2cmake-portable.md`)不受本约束。
+    DISPATCH_PROMPT_RE = re.compile(
+        r"^prompt-(?:template-(?:implementation|acceptance)"
+        r"|(?:PRE|P\d+)(?:[-_][^/\\]*)?)\.md$",
+        re.IGNORECASE,
+    )
+    @staticmethod
+    def enumerate_repo_markdown():
+        """全仓枚举 .md(已跟踪 + 未跟踪未忽略),返回 posix 相对路径列表。
+
+        用 `git ls-files -co --exclude-standard` 而不是若干目录的 rglob:
+        P2-6 派单前置第三轮复核指出,按目录白名单扫描(`.claude` 全树 +
+        仓库顶层 + `docs/` 顶层)漏掉任意嵌套位置 —— `docs/archive/`、
+        `notes/`、`scripts/prompts/` 下的派单提示词照样能绕过治理。实测把
+        `prompt-P9-7-bspatch.md` 放进 `notes/deep/` 时,旧口径零命中而
+        `git ls-files` 命中。
+
+        `-z` 保证含中文的仓库路径不被 git 的 quotepath 转义,因此按字节读
+        再解码。枚举失败必须抛错(fail-closed):静默返回空列表会让
+        stray 检查退化成恒真断言。
+        """
+        proc = subprocess.run(
+            ["git", "ls-files", "-co", "--exclude-standard", "-z", "--", "*.md"],
+            cwd=ROOT,
+            capture_output=True,
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(
+                "git ls-files 枚举失败,无法判定派单提示词位置: "
+                + proc.stderr.decode("utf-8", "replace")
+            )
+        return [
+            chunk.decode("utf-8")
+            for chunk in proc.stdout.split(b"\0")
+            if chunk
+        ]
+
+    @classmethod
+    def find_stray_dispatch_prompts(cls, paths):
+        """从全仓 .md 列表里挑出落在 docs/ota-prompts/ 之外的派单提示词。"""
+        return sorted(
+            path
+            for path in paths
+            if not path.startswith(cls.PROMPT_DIR)
+            and cls.DISPATCH_PROMPT_RE.match(path.rsplit("/", 1)[-1])
+        )
+
+    def test_prompt_dir_is_in_governance_profile(self):
+        governance = VALIDATOR.PROFILE_DEFINITIONS["Governance"]
+        self.assertIn(
+            self.PROMPT_DIR,
+            governance["root_patterns"],
+            "Governance profile 必须覆盖 docs/ota-prompts/,否则提示词不受指纹绑定",
+        )
+        for template in self.REQUIRED_TEMPLATES:
+            self.assertIn(
+                template,
+                governance["required_paths"],
+                f"{template} 必须是 Governance 的 required_paths,缺失时 manifest 可静默漏掉模板",
+            )
+
+    def test_prompt_files_are_enumerated_by_governance_profile(self):
+        paths = set(VALIDATOR._profile_paths(ROOT, "Governance"))
+        tracked = {
+            path
+            for path in paths
+            if path.startswith(self.PROMPT_DIR)
+        }
+        self.assertTrue(
+            tracked,
+            "Governance profile 实际枚举结果里没有任何 docs/ota-prompts/ 文件",
+        )
+        on_disk = {
+            f"{self.PROMPT_DIR}{item.name}"
+            for item in (ROOT / "docs" / "ota-prompts").glob("*.md")
+        }
+        self.assertEqual(
+            on_disk,
+            tracked,
+            "docs/ota-prompts/ 下的 .md 必须全部被 Governance profile 枚举到",
+        )
+
+    def test_governance_workflow_watches_prompt_dir(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "acceptance-governance.yml"
+        ).read_text(encoding="utf-8")
+        occurrences = workflow.count('- "docs/ota-prompts/**"')
+        self.assertEqual(
+            2,
+            occurrences,
+            "acceptance-governance.yml 的 push 与 pull_request 都必须监听 docs/ota-prompts/**",
+        )
+
+    def test_dispatch_prompts_do_not_live_outside_governed_dir(self):
+        stray = self.find_stray_dispatch_prompts(self.enumerate_repo_markdown())
+        self.assertEqual(
+            [],
+            stray,
+            "派单提示词必须放在 docs/ota-prompts/ 下,"
+            "其余任何位置(`.claude/`、仓库顶层、`docs/` 任意子目录、"
+            "`notes/`、`scripts/` 等)都不受治理 CI 与 manifest 约束",
+        )
+
+    def test_repo_wide_enumeration_reaches_nested_dirs(self):
+        """负例:确认枚举口径真能覆盖任意深度,而不是只扫几个白名单目录。
+
+        没有这条断言时,把 enumerate_repo_markdown 退回浅层 glob 仍会让上一个
+        测试全绿 —— 「零 stray」只证明搜索范围写窄了。探针文件放在仓库内的深层
+        临时目录(未被 gitignore,因此必须被 `git ls-files -co` 看见),
+        用完即删;同类测试在 unittest 下串行执行,不会互相误判。
+        """
+        with tempfile.TemporaryDirectory(
+            dir=ROOT, prefix=".dispatch-scope-probe-"
+        ) as tmp:
+            probe = Path(tmp) / "docs" / "archive" / "prompt-P9-7-bspatch.md"
+            probe.parent.mkdir(parents=True, exist_ok=True)
+            probe.write_text("probe\n", encoding="utf-8")
+            rel = probe.relative_to(ROOT).as_posix()
+
+            enumerated = self.enumerate_repo_markdown()
+            self.assertIn(
+                rel,
+                enumerated,
+                "git ls-files 全仓枚举必须看见深层嵌套的 .md,"
+                "否则派单提示词可藏进任意子目录绕过治理",
+            )
+            self.assertGreaterEqual(
+                rel.count("/"),
+                3,
+                "探针必须位于足够深的嵌套目录才有鉴别力",
+            )
+            self.assertIn(
+                rel,
+                self.find_stray_dispatch_prompts(enumerated),
+                "深层嵌套的自定义后缀卡提示词必须被判为 stray",
+            )
+
+    def test_dispatch_prompt_pattern_has_discriminating_power(self):
+        """负例:确认该正则真能识别自定义后缀的卡提示词,且不误伤工具提示词。
+
+        没有这组断言时,正则写窄(例如只认 `-implementation`/`-acceptance` 后缀)
+        仍会让上一个测试全绿,「零命中」只证明搜索条件写错了。
+        """
+        must_match = (
+            "prompt-P2-6-implementation.md",
+            "prompt-P1-7-acceptance.md",
+            "prompt-PRE-4-implementation.md",
+            "prompt-p2-3-bspatch.md",  # 实际出现过的自定义后缀
+            "prompt-P2-6.md",  # 无后缀
+            "prompt-P10-1-implementation.md",  # 两位卡号
+            "prompt-template-implementation.md",
+            "prompt-template-acceptance.md",
+        )
+        for name in must_match:
+            with self.subTest(name=name):
+                self.assertIsNotNone(
+                    self.DISPATCH_PROMPT_RE.match(name),
+                    f"{name} 应被识别为派单提示词",
+                )
+        must_not_match = (
+            "prompt-keil2cmake-portable.md",  # 与 OTA 无关的一次性工具提示词
+            "verification-report-ota-plan.md",
+            "context-summary-dialplate-hud.md",
+            "prompt-P2-6-implementation.txt",
+        )
+        for name in must_not_match:
+            with self.subTest(name=name):
+                self.assertIsNone(
+                    self.DISPATCH_PROMPT_RE.match(name),
+                    f"{name} 不应被判为派单提示词(会误伤非 OTA 文件)",
+                )
+
+
+class SpecProbeCiWiringTests(unittest.TestCase):
+    """守护 P2-6 Spec 探针的远端 CI 接线(2026-08-16 定向复核阻断 2)。
+
+    此前 8 组探针只在本机跑过:`acceptance-governance.yml` 既不监听
+    `tests/ota/spec-probes/**`,执行步骤里也没有 `run_all.py`;`firmware-build.yml`
+    同样不监听该目录。后果是「远端 Acceptance Governance 变绿」不能证明探针通过,
+    而且以后单独修改探针不会触发任何 workflow —— 探针可被静默改坏或删空。
+
+    探针刻意挂在治理工作流而不是固件工作流:它们只需要 arm-none-eabi 工具链与
+    宿主 gcc,不需要完整 App+Boot 构建。本组测试把「路径过滤 + 固定工具链版本 +
+    执行命令」三件事变成可执行断言,任一被移除即本地与 CI 双红。
+    """
+
+    WORKFLOW = ROOT / ".github" / "workflows" / "acceptance-governance.yml"
+    FIRMWARE_WORKFLOW = ROOT / ".github" / "workflows" / "firmware-build.yml"
+    PROBE_PATH_FILTER = '- "tests/ota/spec-probes/**"'
+    TOOLCHAIN_ACTION = "carlosperate/arm-none-eabi-gcc-action@v1"
+    TOOLCHAIN_RELEASE = "13.3.Rel1"
+    PROBE_COMMAND = "python3 tests/ota/spec-probes/p2-6/run_all.py"
+    PROBE_DIR = "tests/ota/spec-probes/"
+    AGGREGATOR = "tests/ota/spec-probes/p2-6/run_all.py"
+    SELFTEST = "tests/ota/spec-probes/p2-6/selftest/classification_selftest.py"
+    # 探针条目数与 run_all.py 的冻结值必须一致。只靠 run_all.py 自己的
+    # `EXPECTED_PROBE_COUNT` 门禁不够:同时把 PROBES 删到 1 项、把冻结值改成 1,
+    # 运行期门禁依然通过,CI 会以「1/1 通过」变绿。这里在治理侧再钉一次真值。
+    EXPECTED_PROBE_COUNT = 8
+
+    @classmethod
+    def setUpClass(cls):
+        cls.workflow = cls.WORKFLOW.read_text(encoding="utf-8")
+
+    def parse_run_all_constants(self):
+        """静态解析 run_all.py 的 PROBES 与 EXPECTED_PROBE_COUNT(不导入模块)。
+
+        用 ast 而不是 import:导入会执行 `_probe_env` 的 stdout 重配置等副作用,
+        治理测试不应被被测 harness 改变自身运行环境。
+        """
+        source = (ROOT / self.AGGREGATOR).read_text(encoding="utf-8")
+        values = {}
+        for node in ast.parse(source).body:
+            if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+                continue
+            target = node.targets[0]
+            if isinstance(target, ast.Name) and target.id in (
+                "PROBES",
+                "EXPECTED_PROBE_COUNT",
+            ):
+                values[target.id] = ast.literal_eval(node.value)
+        missing = {"PROBES", "EXPECTED_PROBE_COUNT"} - set(values)
+        self.assertEqual(
+            set(),
+            missing,
+            f"run_all.py 缺少顶层常量 {sorted(missing)},探针条目数无法被静态核对",
+        )
+        return values["PROBES"], values["EXPECTED_PROBE_COUNT"]
+
+    def test_governance_workflow_watches_spec_probe_dir(self):
+        occurrences = self.workflow.count(self.PROBE_PATH_FILTER)
+        self.assertEqual(
+            2,
+            occurrences,
+            "acceptance-governance.yml 的 push 与 pull_request 都必须监听 "
+            "tests/ota/spec-probes/**,否则单独改探针不触发任何 workflow",
+        )
+
+    def test_governance_workflow_pins_toolchain_used_by_probes(self):
+        self.assertIn(
+            self.TOOLCHAIN_ACTION,
+            self.workflow,
+            "治理工作流必须安装 arm-none-eabi 工具链,"
+            "否则探针只会以 ENV_BLOCKED 收场(rc=2),证明不了任何 Spec 结论",
+        )
+        self.assertIn(
+            f'release: "{self.TOOLCHAIN_RELEASE}"',
+            self.workflow,
+            f"工具链版本必须固定为 {self.TOOLCHAIN_RELEASE}:"
+            "探针里的栈帧字节数、.su 数值、内联折叠结论都绑定到具体版本",
+        )
+        for floating in ('release: "latest"', "release: latest"):
+            self.assertNotIn(
+                floating,
+                self.workflow,
+                "不得使用浮动版本:工具链一升级,冻结的数值基线会无声漂移",
+            )
+        firmware = self.FIRMWARE_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn(
+            f'release: "{self.TOOLCHAIN_RELEASE}"',
+            firmware,
+            "治理工作流与固件工作流必须用同一工具链版本,"
+            "否则探针结论与生产固件不是同一编译器行为",
+        )
+
+    def test_governance_workflow_runs_probe_aggregator(self):
+        self.assertIn(
+            self.PROBE_COMMAND,
+            self.workflow,
+            f"治理工作流必须执行 {self.PROBE_COMMAND};"
+            "只监听路径不执行等于没有接线",
+        )
+        self.assertTrue(
+            (ROOT / self.AGGREGATOR).is_file(),
+            f"{self.AGGREGATOR} 必须实际存在,workflow 不得指向已改名/已删除的入口",
+        )
+
+    def test_toolchain_install_precedes_probe_run(self):
+        install_at = self.workflow.find(self.TOOLCHAIN_ACTION)
+        run_at = self.workflow.find(self.PROBE_COMMAND)
+        self.assertNotEqual(-1, install_at)
+        self.assertNotEqual(-1, run_at)
+        self.assertLess(
+            install_at,
+            run_at,
+            "工具链安装步骤必须排在探针执行步骤之前,"
+            "顺序颠倒时 arm-none-eabi-gcc 不在 PATH 上,整轮只会得到 ENV_BLOCKED",
+        )
+
+    def test_probe_sources_are_enumerated_by_validation_profile(self):
+        paths = set(VALIDATOR._profile_paths(ROOT, "Validation"))
+        for required in (self.AGGREGATOR, self.SELFTEST):
+            self.assertIn(
+                required,
+                paths,
+                f"{required} 必须被 Validation profile 枚举到,"
+                "否则探针与自检可被替换而不改变任何 manifest 指纹",
+            )
+        on_disk = {
+            path.relative_to(ROOT).as_posix()
+            for path in (ROOT / "tests" / "ota" / "spec-probes").rglob("*")
+            if path.is_file() and "__pycache__" not in path.parts
+        }
+        self.assertEqual(
+            set(),
+            on_disk - paths,
+            "探针目录下的文件必须全部落在 Validation profile 内(生成物不得入库)",
+        )
+
+    def test_probe_entries_match_frozen_count_and_exist(self):
+        probes, frozen = self.parse_run_all_constants()
+        self.assertEqual(
+            self.EXPECTED_PROBE_COUNT,
+            frozen,
+            "run_all.py 的 EXPECTED_PROBE_COUNT 被改动:"
+            "同时下调冻结值与条目数会让运行期门禁失效",
+        )
+        self.assertEqual(
+            self.EXPECTED_PROBE_COUNT,
+            len(probes),
+            f"PROBES 必须保持 {self.EXPECTED_PROBE_COUNT} 项",
+        )
+        for name, relative, _purpose in probes:
+            with self.subTest(probe=name):
+                script = ROOT / "tests" / "ota" / "spec-probes" / "p2-6" / relative
+                self.assertTrue(
+                    script.is_file(),
+                    f"探针 {name} 的脚本 {relative} 不存在:"
+                    "缺脚本时 run_all.py 会记 HARNESS_FAIL,但入库前就该被拦住",
+                )
 
 
 if __name__ == "__main__":

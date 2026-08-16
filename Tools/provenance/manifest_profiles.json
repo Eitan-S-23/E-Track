@@ -86,7 +86,9 @@
       ]
     },
     "Governance": {
-      "root_patterns": [],
+      "root_patterns": [
+        "docs/ota-prompts/"
+      ],
       "top_files": [
         ".github/copilot-instructions.md",
         "AGENTS.md",
@@ -97,7 +99,9 @@
       "required_paths": [
         "AGENTS.md",
         "PLAN-OTA-EXEC.md",
-        "docs/acceptance-execution-contract.md"
+        "docs/acceptance-execution-contract.md",
+        "docs/ota-prompts/prompt-template-acceptance.md",
+        "docs/ota-prompts/prompt-template-implementation.md"
       ]
     }
   }
