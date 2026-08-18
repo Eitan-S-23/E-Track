@@ -10,6 +10,8 @@ on:
       - "Tools/provenance/**"
       - "docs/acceptance-contracts/**"
       - "docs/acceptance-execution-contract.md"
+      - "docs/ota-cross-system-contracts.md"
+      - "docs/ota-spec-decisions.md"
       - "docs/ota-prompts/**"
       - "tests/ota/spec-probes/**"
       - "tests/ota/test_acceptance_bundle.py"
@@ -32,6 +34,8 @@ on:
       - "Tools/provenance/**"
       - "docs/acceptance-contracts/**"
       - "docs/acceptance-execution-contract.md"
+      - "docs/ota-cross-system-contracts.md"
+      - "docs/ota-spec-decisions.md"
       - "docs/ota-prompts/**"
       - "tests/ota/spec-probes/**"
       - "tests/ota/test_acceptance_bundle.py"
@@ -66,6 +70,7 @@ jobs:
         shell: bash
         env:
           PYTHONDONTWRITEBYTECODE: "1"
+          OTA_REQUIRE_SYMLINK_TEST: "1"
         run: |
           set -euo pipefail
           python3 tests/ota/test_acceptance_bundle.py
