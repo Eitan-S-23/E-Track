@@ -109,4 +109,4 @@ task_id: P4-4
 
 ## 阻断性决策
 
-- `OTA-DEC-008`：rehearsal/production 隔离、证据与 release gate。
+- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。

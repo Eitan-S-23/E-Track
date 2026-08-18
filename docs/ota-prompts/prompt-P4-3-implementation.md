@@ -123,6 +123,4 @@ UI 控件布局、reason 输入组件、handler/service 内部命名和 audit he
 
 ## 阻断性决策
 
-- `OTA-DEC-007`：资产保留、引用保护与删除治理。
-- `OTA-DEC-011`：Admin release action 幂等范围、持久化与 recovery 重试窗口。
-- `OTA-DEC-012`：下载 token v2、排他 expiry 与 v1 cutover。
+- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。

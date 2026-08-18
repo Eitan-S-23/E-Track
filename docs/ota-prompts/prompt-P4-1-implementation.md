@@ -130,7 +130,4 @@ task_id: P4-1
 
 ## 阻断性决策
 
-- `OTA-DEC-002`：跨系统镜像身份摘要域与 full fallback 边界。
-- `OTA-DEC-006`：正式资产命名与版本格式。
-- `OTA-DEC-008`：rehearsal/production 隔离、证据与 release gate。
-- `OTA-DEC-009`：P4 任务顺序与 schema fixture 边界。
+- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。

@@ -1,14 +1,14 @@
-# P2-6 后 OTA 跨系统合同候选
+# P2-6 后 OTA 跨系统合同
 
-本文是 MCU、Flutter、HTTP、D1、GitHub Actions、R2 和 admin 之间的共享规范候选。本文不覆盖 `docs/ota-binary-contracts.md` 的 BLE/.etu 字节定义，也不改变 `PLAN-OTA.md` 或 `PLAN-OTA-EXEC.md` 的任务范围。
+本文是 MCU、Flutter、HTTP、D1、GitHub Actions、R2 和 admin 之间的冻结共享规范。本文不覆盖 `docs/ota-binary-contracts.md` 的 BLE/.etu 字节定义，也不改变 `PLAN-OTA.md` 或 `PLAN-OTA-EXEC.md` 的任务范围。
 
-- 规范层级：冻结候选，须经独立复核后才能提升成熟度。
-- 本轮新增条款成熟度：`DRAFT_PENDING_REVIEW`。
+- 规范层级：用户批准的冻结规范；冻结授权记录在 `docs/ota-spec-decisions.md` 记录 9。
+- 本轮新增条款成熟度：`FROZEN`。
 - 二进制协议唯一来源：`docs/ota-binary-contracts.md`，本文只引用其章节和语义，不复制字节偏移表。
 - 任务状态唯一来源：`PLAN-OTA-EXEC.md` 的 P2-6 后 readiness 矩阵；本文不保存任务级 readiness 或派单资格。
-- 决策过程索引：`docs/ota-spec-decisions.md`。`OTA-DEC-001` 至 `OTA-DEC-012` 已记录用户裁定并传播到本文，但决定状态仍为 `PROPOSED`，本文及其条款仍为 `DRAFT_PENDING_REVIEW`，不得据此宣告冻结或派单。
+- 决策过程索引：`docs/ota-spec-decisions.md`。`OTA-DEC-001` 至 `OTA-DEC-012` 均为 `DECIDED`，对应裁定已传播到本文。本文冻结只授权符合 readiness 与依赖条件的任务派单，不授权生产部署；生产部署仍须等待 P5 验收。
 
-文中“必须”“不得”“仅”表示规范性候选条款；“例如”“建议实现”“当前入口”属于非规范性说明。任何标有“阻断决定”的条款，在所列决定仍为 `OPEN` 或 `PROPOSED` 时都只用于冻结评审，不构成实现、派单或生产变更授权。
+文中“必须”“不得”“仅”表示冻结规范性条款；“例如”“建议实现”“当前入口”属于非规范性说明。各条款的“裁定依据”只保留决定来源和审计链，不再构成决定阻断；实现和派单资格仍以 `PLAN-OTA-EXEC.md` readiness 矩阵为唯一来源。
 
 ## 1. 范围与非目标
 
@@ -28,32 +28,32 @@
 - 不重新声明 `docs/ota-binary-contracts.md` 的帧、payload、状态码数值、`.etu` 或 recovery 字节布局。
 - 不修改 v1 威胁模型；固件内容在 v1 仍不具备抗主动伪造签名保证。
 - 不定义 v2 灰度、Ed25519、BLE 直刷内部 Flash 或 Boot A/B。
-- 不创建任何版本化 acceptance contract，也不宣告本文已冻结。
+- 不创建任何版本化 acceptance contract；本文冻结不等于完成 P5 验收或获得生产部署授权。
 
 ## 2. 接口矩阵
 
-所有行的 `clause_maturity` 均取其所引用条款的最低成熟度。`interface_completeness` 只允许 `COMPLETE`、`INCOMPLETE` 或 `BLOCKED_BY_DECISION`；只要 `blocking_decisions` 中存在状态为 `OPEN` 或 `PROPOSED` 的决定，该行即为 `BLOCKED_BY_DECISION`，不得作为实现授权。
+所有行的 `clause_maturity` 均取其所引用条款的最低成熟度。`interface_completeness` 只允许 `COMPLETE`、`INCOMPLETE` 或 `BLOCKED_BY_DECISION`。本轮决定均已冻结，因此所有当前接口行为 `COMPLETE`，`clause_maturity=FROZEN`，`blocking_decisions` 为空；未来若出现新的 `OPEN` 或 `PROPOSED` 决定，必须重新传播决定阻断并降低对应接口成熟度。
 
 | Producer | Consumer | 传输介质 | 条款 ID | schema 或结构引用 | 生命周期所有者 | 错误语义 | 幂等规则 | 兼容规则 | interface_completeness | clause_maturity | blocking_decisions | affected_tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| MCU OTA identity provider | Flutter OTA domain | BLE `INFO` | `OTA-XC-INFO-MAPPING`, `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-DEVICE-MODEL` | `docs/ota-binary-contracts.md` §5.2.1 + `DeviceOtaInfo` | MCU 负责真实值，Flutter 负责解析和不可变快照 | 二进制状态码只引用 §5.7；格式错误不得构造 DTO | `GET_INFO` 只读，可安全重试 | 未知 model/hash/protocol fail closed | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-001`, `OTA-DEC-002` | `P3-2`, `P3-3`, `P3-5`, `P5-1` |
-| Flutter OTA domain | Worker latest API | HTTPS query | `OTA-XC-CLOUD-QUERY-MAPPING`, `OTA-XC-HTTP-LATEST` | `FirmwareLatestQuery` | Flutter 生成，Worker 校验 | `OTA-XC-HTTP-ERROR` | 相同查询无副作用 | `OTA-XC-COMPATIBILITY`, `OTA-XC-UNKNOWN-FIELDS` | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-001`, `OTA-DEC-002`, `OTA-DEC-004`, `OTA-DEC-012` | `P3-3`, `P4-2`, `P3-5`, `P5-1` |
-| Worker latest API | Flutter OTA domain | HTTPS JSON | `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION` | `FirmwareLatestResponse` | Worker | `OTA-XC-HTTP-ERROR` | 只读 | schema v2 可加可选字段；download 只签 token v2 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-002`, `OTA-DEC-004`, `OTA-DEC-012` | `P3-3`, `P4-2`, `P3-5`, `P5-1` |
-| Worker/R2 | Flutter downloader | HTTPS binary | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-RESUME` | 选中 asset 的原始文件字节 | Worker 校验授权，R2 保存不可变对象，Flutter 校验长度和摘要 | `OTA-XC-HTTP-ERROR` | 单区间 `bytes=N-`；partial 绑定资产身份 | token v2；v1 仅有界兼容既有 public URL | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-005`, `OTA-DEC-012` | `P3-3`, `P3-5`, `P4-2`, `P4-3`, `P5-1`, `P5-2` |
-| Flutter BLE transport | MCU BLE transport | FFF2 下行/FFF1 上行 | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING`, `OTA-XC-FLUTTER-TRANSPORT` | `docs/ota-binary-contracts.md` §5 | Flutter 管发送窗口，MCU 管 session/staging durable 状态 | 状态码唯一来源为二进制合同 §5.7 | 已提交 DATA 重传按 §5.5 幂等 | proto/max window 由 `INFO` 协商 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-003` | `P3-1`, `P3-3`, `P3-4`, `P3-5`, `P5-1`, `P5-2` |
-| GitHub Actions release job | metadata builder | 文件 + JSON | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-RELEASE-METADATA` | `FirmwareReleaseRegistration` | release job | 任一步非零即整链失败 | 相同输入产生相同 canonical metadata | schema v2；未知资产 kind 拒绝 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-002`, `OTA-DEC-004`, `OTA-DEC-006`, `OTA-DEC-008`, `OTA-DEC-009` | `P4-1`, `P4-2`, `P4-4` |
-| GitHub Actions R2 uploader | R2 immutable object | Wrangler/R2 object write | `OTA-XC-R2-UPLOAD`, `OTA-XC-R2-IMMUTABILITY` | `R2AssetUploadResult` | uploader 负责 put、HEAD/readback 和机器结果 | 失败输出稳定 JSON 且不得继续注册 | 同 key 同长度/摘要为 `ALREADY_PRESENT` | 媒体类型、长度和 RFC 9530 摘要稳定 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-006`, `OTA-DEC-007`, `OTA-DEC-008` | `P4-1`, `P4-2`, `P4-4` |
-| register client | Worker register API | HTTPS JSON | `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-METADATA`, `OTA-XC-SECURITY` | `FirmwareReleaseRegistration` / `FirmwareReleaseRegistrationResult` | Worker | `OTA-XC-HTTP-ERROR` | 完全相同 metadata 重放返回 200 | schema v2；未知字段拒绝 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-002`, `OTA-DEC-004`, `OTA-DEC-006`, `OTA-DEC-008`, `OTA-DEC-009` | `P4-1`, `P4-2`, `P4-4` |
-| register API | D1/R2 | D1 batch + R2 HEAD/readback | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-STATE`, `OTA-XC-D1-MIGRATION`, `OTA-XC-R2-IMMUTABILITY` | release、asset、channel、audit 记录 | Worker | 验证失败不产生 ready release | `OTA-XC-IDEMPOTENCY` | manifest 可验证记录进入 v2；其余 legacy 隔离 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-002`, `OTA-DEC-004`, `OTA-DEC-006`, `OTA-DEC-007`, `OTA-DEC-008`, `OTA-DEC-009`, `OTA-DEC-010`, `OTA-DEC-011` | `P4-1`, `P4-2` |
-| D1 latest state | Worker latest API | D1 query | `OTA-XC-ASSET-SELECTION`, `OTA-XC-D1-RETENTION` | ready release + available assets + channel revision | Worker | 不完整/不可用资产不得返回 | 只读 | recovery 永不自动分发；引用保护后才可清理 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-002`, `OTA-DEC-007` | `P3-3`, `P3-5`, `P4-2`, `P4-3`, `P5-1`, `P5-2` |
-| admin operator | firmware channel/release | Access-authenticated HTTPS | `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-IDEMPOTENCY`, `OTA-XC-D1-RETENTION` | `FirmwareAdminListResponse`, `FirmwareAdminChannelMutationRequest/Result`, `FirmwareAdminReleaseActionRequest/Result`, `FirmwareAdminRecoveryDownloadResult` | admin API | `OTA-XC-HTTP-ERROR`；CAS/幂等冲突不得部分更新 | channel 使用 expectedRevision；release action 使用 `Idempotency-Key` | channel 只指向 ready；recovery 仅 token v2 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-007`, `OTA-DEC-011`, `OTA-DEC-012` | `P4-2`, `P4-3`, `P5-2` |
-| GitHub environment/secrets | release job | Actions secret/variable | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | `firmware-rehearsal` / `firmware-production` environment | 仓库 owner/发布责任人 | 缺项或证据不一致必须硬失败 | 配置重放不产生资产 | rehearsal 与 production 凭据和资源隔离 | `BLOCKED_BY_DECISION` | `DRAFT_PENDING_REVIEW` | `OTA-DEC-008` | `P4-1`, `P4-4` |
+| MCU OTA identity provider | Flutter OTA domain | BLE `INFO` | `OTA-XC-INFO-MAPPING`, `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-DEVICE-MODEL` | `docs/ota-binary-contracts.md` §5.2.1 + `DeviceOtaInfo` | MCU 负责真实值，Flutter 负责解析和不可变快照 | 二进制状态码只引用 §5.7；格式错误不得构造 DTO | `GET_INFO` 只读，可安全重试 | 未知 model/hash/protocol fail closed | `COMPLETE` | `FROZEN` | — | `P3-2`, `P3-3`, `P3-5`, `P5-1` |
+| Flutter OTA domain | Worker latest API | HTTPS query | `OTA-XC-CLOUD-QUERY-MAPPING`, `OTA-XC-HTTP-LATEST` | `FirmwareLatestQuery` | Flutter 生成，Worker 校验 | `OTA-XC-HTTP-ERROR` | 相同查询无副作用 | `OTA-XC-COMPATIBILITY`, `OTA-XC-UNKNOWN-FIELDS` | `COMPLETE` | `FROZEN` | — | `P3-3`, `P4-2`, `P3-5`, `P5-1` |
+| Worker latest API | Flutter OTA domain | HTTPS JSON | `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION` | `FirmwareLatestResponse` | Worker | `OTA-XC-HTTP-ERROR` | 只读 | schema v2 可加可选字段；download 只签 token v2 | `COMPLETE` | `FROZEN` | — | `P3-3`, `P4-2`, `P3-5`, `P5-1` |
+| Worker/R2 | Flutter downloader | HTTPS binary | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-RESUME` | 选中 asset 的原始文件字节 | Worker 校验授权，R2 保存不可变对象，Flutter 校验长度和摘要 | `OTA-XC-HTTP-ERROR` | 单区间 `bytes=N-`；partial 绑定资产身份 | token v2；v1 仅有界兼容既有 public URL | `COMPLETE` | `FROZEN` | — | `P3-3`, `P3-5`, `P4-2`, `P4-3`, `P5-1`, `P5-2` |
+| Flutter BLE transport | MCU BLE transport | FFF2 下行/FFF1 上行 | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING`, `OTA-XC-FLUTTER-TRANSPORT` | `docs/ota-binary-contracts.md` §5 | Flutter 管发送窗口，MCU 管 session/staging durable 状态 | 状态码唯一来源为二进制合同 §5.7 | 已提交 DATA 重传按 §5.5 幂等 | proto/max window 由 `INFO` 协商 | `COMPLETE` | `FROZEN` | — | `P3-1`, `P3-3`, `P3-4`, `P3-5`, `P5-1`, `P5-2` |
+| GitHub Actions release job | metadata builder | 文件 + JSON | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-RELEASE-METADATA` | `FirmwareReleaseRegistration` | release job | 任一步非零即整链失败 | 相同输入产生相同 canonical metadata | schema v2；未知资产 kind 拒绝 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
+| GitHub Actions R2 uploader | R2 immutable object | Wrangler/R2 object write | `OTA-XC-R2-UPLOAD`, `OTA-XC-R2-IMMUTABILITY` | `R2AssetUploadResult` | uploader 负责 put、HEAD/readback 和机器结果 | 失败输出稳定 JSON 且不得继续注册 | 同 key 同长度/摘要为 `ALREADY_PRESENT` | 媒体类型、长度和 RFC 9530 摘要稳定 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
+| register client | Worker register API | HTTPS JSON | `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-METADATA`, `OTA-XC-SECURITY` | `FirmwareReleaseRegistration` / `FirmwareReleaseRegistrationResult` | Worker | `OTA-XC-HTTP-ERROR` | 完全相同 metadata 重放返回 200 | schema v2；未知字段拒绝 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
+| register API | D1/R2 | D1 batch + R2 HEAD/readback | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-STATE`, `OTA-XC-D1-MIGRATION`, `OTA-XC-R2-IMMUTABILITY` | release、asset、channel、audit 记录 | Worker | 验证失败不产生 ready release | `OTA-XC-IDEMPOTENCY` | manifest 可验证记录进入 v2；其余 legacy 隔离 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2` |
+| D1 latest state | Worker latest API | D1 query | `OTA-XC-ASSET-SELECTION`, `OTA-XC-D1-RETENTION` | ready release + available assets + channel revision | Worker | 不完整/不可用资产不得返回 | 只读 | recovery 永不自动分发；引用保护后才可清理 | `COMPLETE` | `FROZEN` | — | `P3-3`, `P3-5`, `P4-2`, `P4-3`, `P5-1`, `P5-2` |
+| admin operator | firmware channel/release | Access-authenticated HTTPS | `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-IDEMPOTENCY`, `OTA-XC-D1-RETENTION` | `FirmwareAdminListResponse`, `FirmwareAdminChannelMutationRequest/Result`, `FirmwareAdminReleaseActionRequest/Result`, `FirmwareAdminRecoveryDownloadResult` | admin API | `OTA-XC-HTTP-ERROR`；CAS/幂等冲突不得部分更新 | channel 使用 expectedRevision；release action 使用 `Idempotency-Key` | channel 只指向 ready；recovery 仅 token v2 | `COMPLETE` | `FROZEN` | — | `P4-2`, `P4-3`, `P5-2` |
+| GitHub environment/secrets | release job | Actions secret/variable | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | `firmware-rehearsal` / `firmware-production` environment | 仓库 owner/发布责任人 | 缺项或证据不一致必须硬失败 | 配置重放不产生资产 | rehearsal 与 production 凭据和资源隔离 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-4` |
 
 ## 3. 设备身份与字段映射
 
 ### OTA-XC-INFO-MAPPING
 
-阻断决定：`OTA-DEC-001`、`OTA-DEC-002`。
+裁定依据：`OTA-DEC-001`、`OTA-DEC-002`。
 
 MCU 必须从当前运行镜像、Boot 常量和 BLE 协议实现读取真实身份；不得由 Flutter 页面、广播名或 Cloudflare 默认值代填。`INFO` 的字节布局和字段宽度只引用 `docs/ota-binary-contracts.md` §5.2.1。
 
@@ -73,7 +73,7 @@ MCU、Dart、JSON、SQL 的摘要字符串统一为 64 个小写十六进制字�
 
 ### OTA-XC-DEVICE-MODEL
 
-阻断决定：`OTA-DEC-001`。
+裁定依据：`OTA-DEC-001`。
 
 `INFO.model` 的正式线端值固定为 7 个 ASCII 字符 `E-Track`，8 字节线格式精确为 `E-Track\0`。Flutter 必须通过显式不可变映射表将其映射为 Cloudflare `deviceModel=e-track-at32f435`。
 
@@ -85,7 +85,7 @@ MCU、Dart、JSON、SQL 的摘要字符串统一为 64 个小写十六进制字�
 
 ### OTA-XC-IMAGE-IDENTITY
 
-阻断决定：`OTA-DEC-002`。
+裁定依据：`OTA-DEC-002`。
 
 跨系统差分基版身份必须在以下位置使用同一 SHA-256 域：`INFO.image_sha256`、Flutter `currentImageSha256`、latest `currentImageSha`、patch `baseImageSha256`、release `targetImageSha256` 和 P3/P5 最终核验值。
 
@@ -109,7 +109,7 @@ MCU、Dart、JSON、SQL 的摘要字符串统一为 64 个小写十六进制字�
 
 ### OTA-XC-FLUTTER-DEVICE-DTO
 
-阻断决定：`OTA-DEC-001`、`OTA-DEC-002`。
+裁定依据：`OTA-DEC-001`、`OTA-DEC-002`。
 
 Flutter 必须建立不可变 `DeviceOtaInfo` 领域对象，至少包含 `wireModel`、`deviceModel`、`hardwareRevision`、`layoutId`、`bootVersion`、`currentVersionCode`、`currentImageSha256`、`protocolVersion` 和 `maxWindowSegments`。
 
@@ -121,7 +121,7 @@ Flutter 必须建立不可变 `DeviceOtaInfo` 领域对象，至少包含 `wireM
 
 ### OTA-XC-CLOUD-QUERY-MAPPING
 
-阻断决定：`OTA-DEC-001`、`OTA-DEC-002`、`OTA-DEC-004`。
+裁定依据：`OTA-DEC-001`、`OTA-DEC-002`、`OTA-DEC-004`。
 
 latest 请求由 `DeviceOtaInfo` 和本机 App 版本生成：
 
@@ -144,7 +144,7 @@ latest 请求由 `DeviceOtaInfo` 和本机 App 版本生成：
 
 ### OTA-XC-HTTP-LATEST
 
-阻断决定：`OTA-DEC-004`、`OTA-DEC-012`。
+裁定依据：`OTA-DEC-004`、`OTA-DEC-012`。
 
 公开入口为 `GET /api/public/firmware/latest`。请求参数集合由 `OTA-XC-CLOUD-QUERY-MAPPING` 定义；未知参数按 `OTA-XC-UNKNOWN-FIELDS` 拒绝。
 
@@ -206,7 +206,7 @@ latest 的处理顺序固定为：参数校验和限流 → 加载有效 channel
 
 ### OTA-XC-ASSET-SELECTION
 
-阻断决定：`OTA-DEC-002`。
+裁定依据：`OTA-DEC-002`。
 
 Worker 只从 channel 当前指向的 `ready` release 选包：
 
@@ -222,7 +222,7 @@ patch 的 `base_image_sha256 == currentImageSha` 比较必须使用 `OTA-XC-IMAG
 
 ### OTA-XC-HTTP-DOWNLOAD
 
-阻断决定：`OTA-DEC-012`。
+裁定依据：`OTA-DEC-012`。
 
 公开下载入口为签名 URL `GET /api/public/firmware/download`。token v2 的 query 集合精确为 `tokenVersion=2`、`assetId`、`releaseId`、`kind`、`purpose`、`expiresAt`、`keyVersion`、`signature`；任一参数缺失、空值、重复或出现未知参数都必须拒绝。
 
@@ -264,7 +264,7 @@ keyVersion
 
 ### OTA-XC-HTTP-RESUME
 
-阻断决定：`OTA-DEC-005`。
+裁定依据：`OTA-DEC-005`。
 
 HTTP 恢复只支持单区间 `Range: bytes=N-`。多区间、suffix range、非十进制边界或其他非法 Range 返回 HTTP 400 `INVALID_PARAMETER`；服务器收到 `N >= sizeBytes` 时返回 HTTP 416。
 
@@ -335,7 +335,7 @@ HTTP 恢复只支持单区间 `Range: bytes=N-`。多区间、suffix range、非
 
 ### OTA-XC-D1-RELEASE
 
-阻断决定：`OTA-DEC-002`、`OTA-DEC-004`、`OTA-DEC-008`。
+裁定依据：`OTA-DEC-002`、`OTA-DEC-004`、`OTA-DEC-008`。
 
 `firmware_releases` 是版本级记录。目标 migration 必须按下表建立或补齐字段；表中“校验”同时包含 D1 `CHECK`/FK/UNIQUE 和写入前的严格格式校验，不能只依赖 TypeScript 类型。
 
@@ -373,7 +373,7 @@ HTTP 恢复只支持单区间 `Range: bytes=N-`。多区间、suffix range、非
 
 ### OTA-XC-D1-ASSET
 
-阻断决定：`OTA-DEC-002`、`OTA-DEC-006`、`OTA-DEC-007`。
+裁定依据：`OTA-DEC-002`、`OTA-DEC-006`、`OTA-DEC-007`。
 
 `firmware_release_assets` 是文件级记录：
 
@@ -402,7 +402,7 @@ HTTP 恢复只支持单区间 `Range: bytes=N-`。多区间、suffix range、非
 
 ### OTA-XC-D1-STATE
 
-阻断决定：`OTA-DEC-009`。
+裁定依据：`OTA-DEC-009`。
 
 release 状态只允许 `draft`、`ready`、`disabled`：
 
@@ -472,7 +472,7 @@ Admin release action 的 audit 映射固定如下：
 
 ### OTA-XC-D1-MIGRATION
 
-阻断决定：`OTA-DEC-010`、`OTA-DEC-011`。
+裁定依据：`OTA-DEC-010`、`OTA-DEC-011`。
 
 迁移必须新增表/列，不得原地丢失旧单资产记录。旧 release 只有通过 `manifestSchemaVersion=1` 的版本化、不可变 backfill manifest 才可进入 v2。每条 manifest 必须绑定并提供：
 
@@ -498,7 +498,7 @@ manifest 必须由 Cloudflare/D1 迁移责任人与 OTA 发布链审查人批准
 
 ### OTA-XC-D1-RETENTION
 
-阻断决定：`OTA-DEC-007`。
+裁定依据：`OTA-DEC-007`。
 
 保留范围为 `(appId, deviceModel)`。正式 release 按 `version_code` 降序计算“最近 10 个”，不得使用可变 `updated_at`；年龄从创建后不可改写的 `firmware_releases.created_at` 计算。
 
@@ -517,7 +517,7 @@ recovery 永不进入 cleaner 候选。用户另行授权 recovery 删除时，�
 
 ### OTA-XC-R2-IMMUTABILITY
 
-阻断决定：`OTA-DEC-006`、`OTA-DEC-007`、`OTA-DEC-008`。
+裁定依据：`OTA-DEC-006`、`OTA-DEC-007`、`OTA-DEC-008`。
 
 R2 key 必须由 appId/deviceModel/versionCode/releaseTag/asset fileName 确定，并且写入后不可变：
 
@@ -538,7 +538,7 @@ R2 key 必须由 appId/deviceModel/versionCode/releaseTag/asset fileName 确定�
 
 ### OTA-XC-ADMIN-IDEMPOTENCY
 
-阻断决定：`OTA-DEC-011`。
+裁定依据：`OTA-DEC-011`。
 
 Admin channel mutation 继续使用 `expectedRevision` 和同值 stop/resume 规则；本条只处理没有 revision 的 release action：`disable` 与 `recovery-download`。
 
@@ -614,7 +614,7 @@ Cloudflare Cron 每小时在独立事务中处理 `state=completed AND retained_
 
 ### OTA-XC-HTTP-ADMIN
 
-阻断决定：`OTA-DEC-011`、`OTA-DEC-012`。
+裁定依据：`OTA-DEC-011`、`OTA-DEC-012`。
 
 P4-3 对外的 firmware admin HTTP 名称固定为现有 `/api/admin/firmware/...` 路由的以下扩展，不得另建同义 endpoint：
 
@@ -826,7 +826,7 @@ firmware channel 的旧 `rollback` 动作统一改名为 `retract`/“撤回”�
 
 ### OTA-XC-ASSET-NAMING
 
-阻断决定：`OTA-DEC-006`。
+裁定依据：`OTA-DEC-006`。
 
 正式版本必须匹配 `^(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)$`。minor 和 patch 范围为 `0..99`，所有段禁止前导零，不允许 prerelease 后缀；按冻结公式生成的 versionCode 必须落入 u32。
 
@@ -864,7 +864,7 @@ P4-1 必须把现有脚本扩展成一次处理资产数组的确定性链。规
 
 ### OTA-XC-RELEASE-METADATA
 
-阻断决定：`OTA-DEC-002`、`OTA-DEC-004`、`OTA-DEC-006`、`OTA-DEC-008`、`OTA-DEC-009`。
+裁定依据：`OTA-DEC-002`、`OTA-DEC-004`、`OTA-DEC-006`、`OTA-DEC-008`、`OTA-DEC-009`。
 
 注册 metadata 使用 `schemaVersion: 2`，顶层包含 release 身份和 `assets` 数组。候选结构：
 
@@ -914,7 +914,7 @@ P4-1 必须把现有脚本扩展成一次处理资产数组的确定性链。规
 
 ### OTA-XC-SCHEMA-FIXTURE
 
-阻断决定：`OTA-DEC-009`。
+裁定依据：`OTA-DEC-009`。
 
 P4-2 拥有 `schemaVersion=2` 的 versioned schema fixture。fixture 的唯一权威来源是 `OTA-XC-RELEASE-METADATA` 与 `OTA-XC-HTTP-REGISTER`，不得从 P4-1 未完成的实际输出反向定义 schema。
 
@@ -927,7 +927,7 @@ fixture 最低覆盖：完整 full/patch/recovery 注册成功、完全相同 ca
 
 ### OTA-XC-R2-UPLOAD
 
-阻断决定：`OTA-DEC-006`、`OTA-DEC-008`。
+裁定依据：`OTA-DEC-006`、`OTA-DEC-008`。
 
 P4-1 继续通过 CI uploader 调用 Wrangler/R2 对象写入，不新增 public 上传端点。对下游稳定的是 uploader 的输入、R2 HTTP metadata、机器结果和退出码；Wrangler 的人类可读 stdout 不是合同。
 
@@ -961,7 +961,7 @@ P4-1 继续通过 CI uploader 调用 Wrangler/R2 对象写入，不新增 public
 
 ### OTA-XC-HTTP-REGISTER
 
-阻断决定：`OTA-DEC-002`、`OTA-DEC-004`、`OTA-DEC-006`、`OTA-DEC-008`、`OTA-DEC-009`。
+裁定依据：`OTA-DEC-002`、`OTA-DEC-004`、`OTA-DEC-006`、`OTA-DEC-008`、`OTA-DEC-009`。
 
 CI 注册入口固定为 `POST /api/ci/firmware/releases`，仅接受 HTTPS：
 
@@ -986,7 +986,7 @@ CI 注册入口固定为 `POST /api/ci/firmware/releases`，仅接受 HTTPS：
 
 ### OTA-XC-RELEASE-GATE
 
-阻断决定：`OTA-DEC-008`。
+裁定依据：`OTA-DEC-008`。
 
 正式发布 job 必须继续满足：仅 `workflow_dispatch && publish=true` 进入、`firmware-production` environment 审批、`OTA_BOOT_CHAIN_READY` 未精确为 `true` 时首步硬失败且不得静默 skip。
 
@@ -1021,7 +1021,7 @@ MCU 与 Flutter 都必须有可测试的状态转换日志，但日志不得包�
 
 ### OTA-XC-BLE-TUNING
 
-阻断决定：`OTA-DEC-003`。
+裁定依据：`OTA-DEC-003`。
 
 P3-4 必须在 `115200..921600` 候选波特率中评估同一组 baud/timeout/retry 参数，并选择满足全部门槛的最高稳定档。不得从未来实测结果反向修改以下门槛，也不得从不同参数组合拼接通过结论。
 
@@ -1062,7 +1062,7 @@ Flutter transport 必须：
 
 ### OTA-XC-COMPATIBILITY
 
-阻断决定：`OTA-DEC-001`、`OTA-DEC-004`。
+裁定依据：`OTA-DEC-001`、`OTA-DEC-004`。
 
 HTTP schema v2 和 BLE `proto_ver` 是不同版本域，不得混用。Worker response `schemaVersion=2`；Flutter 接受同 major schema 的新增可选字段，但 required 字段缺失即失败。BLE protocolVersion 不受支持时按二进制合同的协议错误终止。
 
@@ -1223,7 +1223,7 @@ public-ota
 - staging R2 全字节 readback 必须分别得到上述三组 size/SHA。production D1、R2、channel 和 GitHub Release 的 vector 快照均为 canonical JSON `[]`，前后 SHA-256 都精确为 `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`。
 - implementer=`implementer@example.invalid`、reviewer=`reviewer@example.invalid`、gateSetter=`owner@example.invalid`，三者中 reviewer 不得等于 implementer；缺 reviewer 明确批准时 gate 保持 false，合法批准后 owner 才可置 true。任一受治理输入语义变化后预期 gate 立即恢复 false。
 
-以上向量仍为 `DRAFT_PENDING_REVIEW` 候选；用户裁定已补齐具体期望，但只有独立复核后才能进入冻结评审或派单。
+以上向量属于 `FROZEN` 合同的一部分；它们授权未来实现和验收按固定输入复算，但不构成 P5 通过或生产部署证据。
 
 ## 10. 非规范性实现入口
 

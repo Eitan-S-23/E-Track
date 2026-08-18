@@ -129,9 +129,4 @@ OTA domain service 至少区分 idle、queryingDevice、checkingLatest、downloa
 
 ## 阻断性决策
 
-- `OTA-DEC-001`：线端设备名称与云端机型映射。
-- `OTA-DEC-002`：跨系统镜像身份摘要域与 full fallback 边界。
-- `OTA-DEC-003`：BLE 性能门槛、统计口径与候选参数组合。
-- `OTA-DEC-004`：App 版本查询范围与阻断语义。
-- `OTA-DEC-005`：HTTP 单区间恢复、partial 身份与保留窗口。
-- `OTA-DEC-012`：下载 token v2、排他 expiry 与 v1 cutover。
+- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。

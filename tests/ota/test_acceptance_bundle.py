@@ -1388,6 +1388,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         rows = self.readiness_rows()
         self.assertEqual(self.post_p26_task_ids(), [row["task_id"] for row in rows], "readiness 必须镜像看板正文原顺序")
         self.assertEqual([str(index) for index in range(1, len(rows) + 1)], [row["顺序"] for row in rows])
+        dispatchable = set()
         for row in rows:
             with self.subTest(task=row["task_id"]):
                 self.assertIn(row["type"], set(self.TYPE_BY_SUFFIX.values()))
@@ -1395,8 +1396,18 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 self.assertIn(row["governance_maturity"], {"DRAFT_PENDING_REVIEW", "REVIEWED", "FROZEN"})
                 self.assertIn(row["dependency_state"], {"SATISFIED", "BLOCKED_BY_DEPENDENCY", "NOT_APPLICABLE"})
                 self.assertIn(row["dispatch_eligibility"], {"DISPATCHABLE", "NOT_DISPATCHABLE"})
-                self.assertEqual("DRAFT_PENDING_REVIEW", row["governance_maturity"])
-                self.assertEqual("NOT_DISPATCHABLE", row["dispatch_eligibility"])
+                expected_content = "DEFERRED_ACCEPTANCE" if row["type"] == "ACCEPTANCE" else "READY"
+                self.assertEqual(expected_content, row["content_readiness"])
+                self.assertEqual("FROZEN", row["governance_maturity"])
+                expected_dispatch = (
+                    "DISPATCHABLE"
+                    if row["content_readiness"] == "READY"
+                    and row["dependency_state"] in {"SATISFIED", "NOT_APPLICABLE"}
+                    else "NOT_DISPATCHABLE"
+                )
+                self.assertEqual(expected_dispatch, row["dispatch_eligibility"])
+                if row["dispatch_eligibility"] == "DISPATCHABLE":
+                    dispatchable.add(row["task_id"])
                 self.assertTrue(bool(row["prompt_path"]) ^ bool(row["spec_block_reason"]))
 
                 target = self.prompt_target(row)
@@ -1410,6 +1421,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 type_section = text.split("## 任务类型", 1)[1].split("## ", 1)[0]
                 declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
                 self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
+        self.assertEqual({"P3-1", "P3-2", "P4-2"}, dispatchable, "冻结后首批派单集合必须精确受控")
 
     def test_prompt_paths_and_task_ids_are_unique_in_both_directions(self):
         rows = self.readiness_rows()
@@ -1506,6 +1518,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         statuses = re.findall(r"(?m)^- 状态：`([A-Z_]+)`。$", self.decisions)
         self.assertEqual(len(ids), len(statuses), "每项决定必须恰有一个状态")
         self.assertTrue(set(statuses) <= {"OPEN", "PROPOSED", "DECIDED", "SUPERSEDED"})
+        self.assertEqual({"DECIDED"}, set(statuses), "用户冻结授权后十二项决定必须全部为 DECIDED")
         status_by_decision = dict(zip(ids, statuses))
 
         reference_text = self.contract + "\n" + self.board
@@ -1515,22 +1528,22 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         self.assertEqual(set(), refs - set(ids), "合同或提示词引用了不存在的 decision_id")
 
         board_ids = set(re.findall(r"(?m)^#### ((?:PRE|P\d+)-\d+)\b", self.board))
-        blocked_by_decision = {}
+        affected_by_decision = {}
         current_decision = None
         for line in self.decisions.splitlines():
             heading = re.match(r"^## (OTA-DEC-\d{3})\b", line)
             if heading:
                 current_decision = heading.group(1)
                 continue
-            if not line.startswith("- 受阻任务："):
+            if not line.startswith("- 受影响任务："):
                 continue
-            self.assertIsNotNone(current_decision, "受阻任务字段必须位于 decision_id 标题下")
-            blocked = set(re.findall(r"`((?:PRE|P\d+)-\d+)`", line))
-            self.assertTrue(blocked, "决策受阻任务字段不能为空")
-            self.assertEqual(set(), blocked - board_ids, "决策引用了看板中不存在的任务")
-            self.assertNotIn(current_decision, blocked_by_decision, "每项决定只能有一个受阻任务字段")
-            blocked_by_decision[current_decision] = blocked
-        self.assertEqual(set(ids), set(blocked_by_decision), "每项决定必须恰有一个受阻任务字段")
+            self.assertIsNotNone(current_decision, "受影响任务字段必须位于 decision_id 标题下")
+            affected = set(re.findall(r"`((?:PRE|P\d+)-\d+)`", line))
+            self.assertTrue(affected, "决策受影响任务字段不能为空")
+            self.assertEqual(set(), affected - board_ids, "决策引用了看板中不存在的任务")
+            self.assertNotIn(current_decision, affected_by_decision, "每项决定只能有一个受影响任务字段")
+            affected_by_decision[current_decision] = affected
+        self.assertEqual(set(ids), set(affected_by_decision), "每项决定必须恰有一个受影响任务字段")
 
         routed_task_ids = {row["task_id"] for row, _target, _text in self.prompt_records()}
         prompt_blocking = {decision_id: set() for decision_id in ids}
@@ -1542,10 +1555,21 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         expected_prompt_blocking = self.expected_active_prompt_blocking(
             ids,
             status_by_decision,
-            blocked_by_decision,
+            affected_by_decision,
             routed_task_ids,
         )
-        self.assertEqual(expected_prompt_blocking, prompt_blocking, "决策受阻任务必须与现有提示词阻断章节双向一致")
+        self.assertEqual(expected_prompt_blocking, prompt_blocking, "未决决定必须与提示词阻断章节双向一致")
+
+    def test_freeze_authorization_and_contract_maturity_are_locked(self):
+        authorization = (
+            "批准 OTA-DEC-001 至 OTA-DEC-012，授权冻结规范并进入首批实现；"
+            "生产部署仍须等待 P5 验收。"
+        )
+        self.assertIn("### 记录 9", self.decisions)
+        self.assertEqual(1, self.decisions.count(authorization))
+        self.assertIn("本轮新增条款成熟度：`FROZEN`", self.contract)
+        self.assertNotIn("DRAFT_PENDING_REVIEW", self.contract)
+        self.assertNotIn("阻断决定：", self.contract)
 
     def test_decision_status_transition_releases_prompt_blocking(self):
         decision_id = "OTA-DEC-999"
@@ -1604,7 +1628,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         self.assertTrue(self.proposed_decision_requirement_violations(forced_nested_without_id, active))
         self.assertEqual([], self.proposed_decision_requirement_violations(neutral, active))
 
-    def test_open_decision_references_are_neutral_and_only_in_blocking_sections(self):
+    def test_frozen_decisions_leave_no_prompt_blockers(self):
         decision_statuses = dict(
             re.findall(
                 r"(?ms)^## (OTA-DEC-\d{3})\b.*?^- 状态：`([A-Z_]+)`。$",
@@ -1616,10 +1640,13 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
             for decision_id, status in decision_statuses.items()
             if status in self.ACTIVE_DECISION_STATUSES
         }
+        self.assertEqual(set(), active)
         for row, target, text in self.prompt_records():
             with self.subTest(task=row["task_id"]):
                 violations = self.proposed_decision_requirement_violations(text, active)
-                self.assertEqual([], violations, f"{target.name} 把开放决定写到了执行要求中")
+                self.assertEqual([], violations, f"{target.name} 把未决决定写到了执行要求中")
+                blocking_section = text.split("## 阻断性决策", 1)[1]
+                self.assertNotRegex(blocking_section, r"OTA-DEC-\d{3}")
 
     def test_task_status_fields_only_appear_in_board_matrix(self):
         files = [self.CONTRACT, self.DECISIONS]
@@ -1641,12 +1668,12 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
 
         allowed_reference = (
             "按 `PLAN-OTA-EXEC.md` readiness 矩阵的 `P3-1` 行执行；"
-            "该行的 content_readiness=NEEDS_DECISION。"
+            "该行的 content_readiness=READY。"
         )
         self.assertEqual([], self.prompt_task_status_value_violations(allowed_reference))
         self.assertEqual(
-            [(1, "NEEDS_DECISION", "content_readiness=NEEDS_DECISION")],
-            self.prompt_task_status_value_violations("content_readiness=NEEDS_DECISION"),
+            [(1, "READY", "content_readiness=READY")],
+            self.prompt_task_status_value_violations("content_readiness=READY"),
         )
         self.assertEqual(
             [(1, "READY_FOR_REVIEW", "状态=READY_FOR_REVIEW")],
@@ -1788,6 +1815,8 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
             for decision_id, status in decision_statuses.items()
             if status in {"OPEN", "PROPOSED"}
         }
+        self.assertEqual({"DECIDED"}, set(decision_statuses.values()))
+        self.assertEqual(set(), blocking_decisions)
         clause_matches = list(re.finditer(r"(?m)^### (OTA-XC-[A-Z0-9-]+)$", self.contract))
         clause_sections = {}
         for index, match in enumerate(clause_matches):
@@ -1808,7 +1837,9 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
             affected_tasks = set(re.findall(r"(?:PRE|P\d+)-\d+", row["affected_tasks"]))
             clauses = set(re.findall(r"OTA-XC-[A-Z0-9-]+", row["条款 ID"]))
             self.assertIn(completeness, {"COMPLETE", "INCOMPLETE", "BLOCKED_BY_DECISION"})
-            self.assertEqual("DRAFT_PENDING_REVIEW", maturity)
+            self.assertEqual("COMPLETE", completeness)
+            self.assertEqual("FROZEN", maturity)
+            self.assertEqual(set(), decisions, "冻结接口矩阵不得保留决定阻断")
             self.assertEqual(set(), decisions - known_decisions, "接口矩阵引用了不存在的决定")
             self.assertEqual(set(), decisions - blocking_decisions, "接口矩阵只能把 OPEN/PROPOSED 决定列为阻断")
             self.assertEqual(set(), affected_tasks - board_ids, "接口矩阵引用了不存在的任务")
@@ -1882,7 +1913,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         for token in audit_tokens:
             self.assertIn(token, audit, f"Admin audit 合同缺少 {token}")
 
-    def test_admin_idempotency_and_download_token_migrations_are_decision_blocked(self):
+    def test_admin_idempotency_and_download_token_migrations_are_decision_governed(self):
         admin_idempotency = self.contract.split("### OTA-XC-ADMIN-IDEMPOTENCY", 1)[1].split("### ", 1)[0]
         for token in (
             "OTA-DEC-011",
