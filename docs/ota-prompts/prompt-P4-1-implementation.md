@@ -26,7 +26,7 @@ task_id: P4-1
 - 看板显式依赖 `PRE-3`、`PRE-4`、`P0-2` 已完成。
 - `P1-5` bootstrap 已完成，但 `OTA_BOOT_CHAIN_READY` 解锁仍受 P4-1 演练顺序约束。
 - `P4-2` 必须先提供由 `OTA-XC-SCHEMA-FIXTURE` 约束的真实 register API、多资产 D1 model 和 ready 语义；依赖方向固定为 `P4-2 -> P4-1`。
-- P4-1 与 `P3-5` 之间不建立自动依赖。资产命名、镜像摘要域和 rehearsal/production gate 的用户裁定已传播到共享合同，但仍须独立复核。
+- P4-1 与 `P3-5` 之间不建立自动依赖。资产命名、镜像摘要域和 rehearsal/production gate 的用户裁定已传播到并冻结在共享合同。
 
 ## 权威合同
 
@@ -92,7 +92,7 @@ task_id: P4-1
 - 禁止移除 `firmware-production` environment 或人工审批。
 - 禁止用 `--force` 覆盖不同 digest 的 R2/GitHub 正式资产。
 - 禁止 nightly 建 Release、注册 D1 或接触生产 secrets。
-- 禁止在共享候选合同未独立复核、`P4-2` 未完成，或 rehearsal/production 审批条件未满足时创建正式 release。
+- 禁止在共享合同发生未重新冻结的变更、`P4-2` 未完成，或 rehearsal/production 审批条件未满足时创建正式 release。
 - 禁止建立临时 register stub、第二 schema 或把 D1 ready 排除出完成判据。
 
 ## 必须新增或调整的测试
@@ -106,7 +106,7 @@ task_id: P4-1
 
 ## 完成判据
 
-- 共享合同独立复核后的 rehearsal 路径生成 full/patch/recovery，所有 hash/size 与 metadata 一致。
+- 在共享冻结合同下的 rehearsal 路径生成 full/patch/recovery，所有 hash/size 与 metadata 一致。
 - patch 对上一正式最终 App 自验逐字节一致，recovery 验证通过。
 - GitHub Release 精确含三类正式资产，R2 对象与 Release/metadata 同字节。
 - register 后 D1 release 达到 P4-2 的 ready 门槛；失败路径无 ready 残留。
@@ -114,7 +114,7 @@ task_id: P4-1
 
 ## 停止条件
 
-- 镜像摘要、正式资产命名或 rehearsal/production gate 的共享候选条款尚未独立复核时停止正式发布动作。
+- 镜像摘要、正式资产命名或 rehearsal/production gate 的共享条款发生未重新冻结的变更时停止正式发布动作。
 - `P4-2` 的真实 schema/register/D1 ready 链未完成时停止，不建立临时 stub 或兼容双写。
 - 无法取得可验证的上一正式 finalized App bin 时不得生成 patch 或用近似基版替代。
 - Worker 仍只接受单资产或不能原子 ready 时停止注册，不做兼容双写。

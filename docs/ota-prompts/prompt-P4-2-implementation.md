@@ -25,7 +25,7 @@ task_id: P4-2
 
 - P0/P1/P2 的 package、header、R2 基础已存在。
 - 本卡不依赖 `P4-1`。P4-2 拥有 `schemaVersion=2` 的 versioned schema fixture，并基于共享 release/register 合同先实现和验证 register/latest/D1。
-- model、摘要、App 兼容、Range、保留策略、旧数据 identity 回填、Admin 幂等和 token v2 的用户裁定已传播到共享合同；相关条款仍须独立复核。
+- model、摘要、App 兼容、Range、保留策略、旧数据 identity 回填、Admin 幂等和 token v2 的用户裁定已传播到并冻结在共享合同。
 
 ## 权威合同
 
@@ -122,7 +122,7 @@ task_id: P4-2
 
 ## 停止条件
 
-- 任一受影响共享条款尚未独立复核且 schema/API 必须选择唯一语义时停止该部分。
+- 任一受影响共享条款发生未重新冻结的变更且 schema/API 必须选择唯一语义时停止该部分。
 - D1 运行环境无法提供所需原子性时先给出最小复现和替代设计评审，不用多次非原子写冒充事务。
 - 发现现有数据缺少 `OTA-XC-D1-MIGRATION` 所列任一权威字段来源时 fail closed，保持 legacy 隔离并报告精确记录；不得以 asset digest、0、空串或环境默认值补齐。
 - 需要双写两套长期 schema 才能上线时停止并提交架构复核，不得新增第二真相源。
