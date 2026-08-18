@@ -578,6 +578,7 @@
 
 #### P3-5 真机 BLE 闭环
 状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **需用户操作手机**
+- 依赖: P3-1、P3-2、P3-3、P3-4、P4-2；与 P4-1 无自动依赖。
 - 目标: 手机 APP→查询→下载→BLE 传输→MCU 升级→重连 GET_INFO 确认新版本;断连×10 续传成功(§8)。
 - 验收: 每轮的 durable_off 恢复记录+最终版本哈希;10/10 通过。
 - 证据: —
@@ -589,12 +590,13 @@
 #### P4-1 firmware-build.yml 正式发布链
 状态: 待办 ｜ 认领: — ｜ 更新: —
 - 目标: §6.1 制包顺序①-⑥:构建占位头 app.bin→`etu_pack.py --finalize`→full.etu+patch.etu(基版=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→**bspatch 自验逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)**→recovery 资产(app.bin+尾 8B)→GitHub Release 三资产→注册链;`firmware-production` environment 人工审批;vcode>CF 现值校验;PRE-1 新编码。
-- 依赖: PRE-3/4、P0-2。
+- 依赖: PRE-3/4、P0-2、P4-2；P4-2 是前置任务，P4-1 不得先行。
 - 验收: dispatch 演练一轮全绿;Release 含三资产且哈希与 metadata 一致。
 - 证据: —
 
 #### P4-2 D1 多资产模型与 latest 选包
 状态: 待办 ｜ 认领: — ｜ 更新: —
+- 依赖: P0 阶段门槛已完成；不依赖 P4-1。
 - 目标: §6.2-1/2:新迁移 `firmware_release_assets`(kind∈{full,patch,recovery};`base_image_sha256 NOT NULL` 哨兵 `''`+CHECK+唯一键 `(release_id,kind,base_image_sha256)`);release 增 draft/ready 原子门槛(事务内校验恰一 full+R2 digest 全过才 ready,渠道晋升仅接受 ready);latest 增 `currentImageSha` 选包(patch 匹配否则退 full);注册脚本改资产数组;recovery 不自动分发;旧单资产数据迁移回填 full。
 - 验收: **SQL 实测:同 release 插第二个 full 被拒、同基版第二个 patch 被拒、缺 full 置 ready 被拒(R8-5)**;latest 三场景(匹配 patch/退 full/无更新)接口测试绿。
 - 证据: —
@@ -633,12 +635,37 @@
 - 验收: 文档齐,§9 开口项无悬空。
 - 证据: —
 
+<!-- post-p2-6-readiness:start -->
+## 8.1 P2-6 后 OTA Spec readiness 矩阵
+
+本矩阵是 P2-6 后任务状态的唯一来源。`prompt_path` 与 `spec_block_reason` 严格二选一。用户已批准 `OTA-DEC-001` 至 `OTA-DEC-012`，共享合同成熟度为 `FROZEN`：P3/P4 任务的内容状态为 `READY`，P5 验收任务为 `DEFERRED_ACCEPTANCE`。派单资格由内容状态、规范成熟度和实际依赖共同派生；当前首批仅 `P3-1`、`P3-2`、`P4-2` 为 `DISPATCHABLE`。生产部署仍须等待 P5 验收，不因规范冻结而解锁。
+
+依赖方向统一解释为“前置任务 -> 后置任务”。用户裁定固定新增 `P4-2 -> P4-1`、`P4-2 -> P3-5`；P4-1 与 P3-5 之间无自动依赖，P4-2 不依赖 P4-1。
+
+| 顺序 | task_id | type | prompt_path | spec_block_reason | contract_refs | content_readiness | governance_maturity | dependency_state | blocking_dependencies | dispatch_eligibility | aggregation_basis |
+|---:|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | P3-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-1-implementation.md |  | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 2 | P3-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-2-implementation.md |  | `OTA-XC-INFO-MAPPING`, `OTA-XC-DEVICE-MODEL`, `OTA-XC-IMAGE-IDENTITY` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 3 | P3-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-3-implementation.md |  | `OTA-XC-FLUTTER-DEVICE-DTO`, `OTA-XC-HTTP-LATEST`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-1、P3-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-1, P3-2 |
+| 4 | P3-4 | EXPERIMENT | docs/ota-prompts/prompt-P3-4-experiment.md |  | `OTA-XC-BLE-TUNING`, `OTA-XC-TEST-VECTORS` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-1 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-1 |
+| 5 | P3-5 | INTEGRATION | docs/ota-prompts/prompt-P3-5-integration.md |  | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT`, `OTA-XC-D1-STATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-1、P3-2、P3-3、P3-4、P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-1, P3-2, P3-3, P3-4, P4-2 |
+| 6 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
+| 7 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 8 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
+| 9 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1、P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1, P4-2 |
+| 10 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
+| 11 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
+| 12 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
+
+<!-- post-p2-6-readiness:end -->
+
 ---
 
 ## 9. 契约变更登记表(回审通道)
 
 | 日期 | 发起(卡ID/agent) | 冲突点 | 提议 | 处置(用户/审查结论) | 状态 |
 |---|---|---|---|---|---|
+| 2026-08-18 | P2-6 后冻结 / 用户 | 十二项产品决定已完成独立复核，但仍处于候选状态，所有后续任务不可派单 | 将 OTA-DEC-001 至 OTA-DEC-012 转为 DECIDED，冻结共享合同，并仅解锁依赖已满足的首批任务 | 用户明确批准全部十二项决定并授权冻结规范、进入首批实现；生产部署继续由 P5 验收阻断 | 已批准/冻结 |
 | 2026-07-28 | P1-5 / Codex 实现会话 | 卡冻结范围为 `tools/`+`docs/`，但独立验收要求 fresh legacy AC5 `X-Track` 可构建；旧工程因 OTA-App-only 源泄漏和生成 scatter 依赖而失败 | 仅允许 `MDK-ARM_F435/proj.uvprojx` 显式排除 OTA-App-only 源并新增受控 `X-Track-Legacy-AC5.sct`；测试文件可随证据更新；不得改变任何冻结二进制契约或生产 Boot 功能 | 非实现会话复核确认生产 Boot/workflow/CMake/linker 均恢复 P1-4 基线，fresh legacy AC5 `0E0W` 且只消费受控 scatter；最小前置不改变冻结契约，予以接受 | 已接受/闭合 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)

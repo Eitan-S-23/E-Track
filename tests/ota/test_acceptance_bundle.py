@@ -22,10 +22,18 @@ CONTRACT_TEMPLATE = ROOT / "docs" / "acceptance-contracts" / "template.contract.
 MATRIX_TEMPLATE = ROOT / "docs" / "acceptance-contracts" / "template.evidence-matrix.json"
 MANIFEST_SCRIPT = ROOT / "Tools" / "provenance" / "source_manifest.ps1"
 POWERSHELL = shutil.which("powershell.exe") or shutil.which("pwsh")
+SYMLINK_TEST_REQUIRED_ENV = "OTA_REQUIRE_SYMLINK_TEST"
 
 SPEC = importlib.util.spec_from_file_location("acceptance_validator", VALIDATOR_PATH)
 VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
+
+
+def symlink_security_test_required():
+    return (
+        os.environ.get(SYMLINK_TEST_REQUIRED_ENV) == "1"
+        or os.environ.get("GITHUB_ACTIONS", "").lower() == "true"
+    )
 
 
 def valid_contract():
@@ -826,6 +834,8 @@ class AcceptanceBundleTests(unittest.TestCase):
             try:
                 link.symlink_to(outside_dir, target_is_directory=True)
             except OSError as exc:
+                if symlink_security_test_required():
+                    self.fail(f"symlink creation is required in governance CI: {exc}")
                 self.skipTest(f"symlink creation is unavailable: {exc}")
 
             result, _, stderr = run_main(
@@ -849,6 +859,27 @@ class AcceptanceBundleTests(unittest.TestCase):
             self.assertEqual(1, result)
             self.assertIn("link or reparse point", stderr)
             self.assertFalse((outside_dir / "rerun-plan.json").exists())
+
+    def test_symlink_security_requirement_detection(self):
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(symlink_security_test_required())
+        with mock.patch.dict(os.environ, {SYMLINK_TEST_REQUIRED_ENV: "1"}, clear=True):
+            self.assertTrue(symlink_security_test_required())
+        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True):
+            self.assertTrue(symlink_security_test_required())
+
+    def test_governance_ci_requires_symlink_security_case(self):
+        workflow = (ROOT / ".github" / "workflows" / "acceptance-governance.yml").read_text(
+            encoding="utf-8"
+        )
+        governance_step = workflow.split("- name: Run governance regression tests", 1)[1].split(
+            "- name:", 1
+        )[0]
+        self.assertEqual(
+            1,
+            governance_step.count(f'{SYMLINK_TEST_REQUIRED_ENV}: "1"'),
+            "Governance CI 必须把 symlink 安全用例设为不可跳过",
+        )
 
     def test_rerun_plan_output_walks_parent_chain_without_symlink_privilege(self):
         with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
@@ -1087,6 +1118,858 @@ class GovernancePromptScopeTests(unittest.TestCase):
                     self.DISPATCH_PROMPT_RE.match(name),
                     f"{name} 不应被判为派单提示词(会误伤非 OTA 文件)",
                 )
+
+
+class PostP26SpecGovernanceTests(unittest.TestCase):
+    """机械守护 P2-6 后共享合同、唯一提示词和 readiness 路由。"""
+
+    CONTRACT = ROOT / "docs" / "ota-cross-system-contracts.md"
+    DECISIONS = ROOT / "docs" / "ota-spec-decisions.md"
+    BOARD = ROOT / "PLAN-OTA-EXEC.md"
+    PROMPT_ROOT = ROOT / "docs" / "ota-prompts"
+    MANIFEST_PROFILES = ROOT / "Tools" / "provenance" / "manifest_profiles.json"
+    WORKFLOW = ROOT / ".github" / "workflows" / "acceptance-governance.yml"
+    MATRIX_START = "<!-- post-p2-6-readiness:start -->"
+    MATRIX_END = "<!-- post-p2-6-readiness:end -->"
+    TYPE_BY_SUFFIX = {
+        "implementation": "IMPLEMENTATION",
+        "experiment": "EXPERIMENT",
+        "integration": "INTEGRATION",
+        "acceptance": "ACCEPTANCE",
+    }
+    PROMPT_FILENAME_HINT_RE = re.compile(
+        r"^prompt-(P\d+-\d+)(?:-.*)?\.md$",
+        re.IGNORECASE,
+    )
+    PROMPT_FILENAME_SHAPE_RE = re.compile(
+        r"^prompt-(P\d+-\d+)-(implementation|experiment|integration|acceptance)\.md$",
+        re.IGNORECASE,
+    )
+    PROPAGATED_CONSUMER_CLAUSES = frozenset(
+        {
+            "OTA-XC-ASSET-SELECTION",
+            "OTA-XC-ADMIN-IDEMPOTENCY",
+            "OTA-XC-HTTP-ADMIN",
+            "OTA-XC-HTTP-DOWNLOAD",
+            "OTA-XC-HTTP-LATEST",
+            "OTA-XC-HTTP-REGISTER",
+            "OTA-XC-HTTP-RESUME",
+        }
+    )
+    ACTIVE_DECISION_STATUSES = frozenset({"OPEN", "PROPOSED"})
+    DECISION_REQUIREMENT_RE = re.compile(
+        r"必须|不得|只能|应当|固定为|先.{0,80}再|\b(?:must|shall|required)\b",
+        re.IGNORECASE,
+    )
+    DECISION_CANDIDATE_RE = re.compile(r"推荐方案|候选方案|方案\s*[A-Z]\b", re.IGNORECASE)
+    REQUIRED_PROMPT_SECTIONS = (
+        "任务类型",
+        "Readiness 引用",
+        "非目标",
+        "前置依赖",
+        "权威合同",
+        "现有组件和代码入口",
+        "输入输出与调用方向",
+        "状态机与生命周期所有者",
+        "错误、超时、重试、取消、恢复与幂等",
+        "允许修改范围",
+        "禁止修改与生产红线",
+        "必须新增或调整的测试",
+        "完成判据",
+        "停止条件",
+        "后续证据",
+        "Luna 可自行决定",
+        "阻断性决策",
+    )
+    TASK_STATUS_FIELDS = (
+        "content_readiness",
+        "governance_maturity",
+        "dependency_state",
+        "dispatch_eligibility",
+    )
+    TASK_STATUS_VALUES = frozenset(
+        {
+            "READY",
+            "NEEDS_DECISION",
+            "DEFERRED_ACCEPTANCE",
+            "DRAFT_PENDING_REVIEW",
+            "REVIEWED",
+            "FROZEN",
+            "SATISFIED",
+            "BLOCKED_BY_DEPENDENCY",
+            "NOT_APPLICABLE",
+            "DISPATCHABLE",
+            "NOT_DISPATCHABLE",
+        }
+    )
+    TASK_STATUS_ALIASES = frozenset(
+        {
+            "READY_FOR_REVIEW",
+        }
+    )
+    TASK_STATUS_TOKEN_RE = re.compile(
+        r"(?<![A-Z0-9_])(?:"
+        + "|".join(
+            re.escape(value)
+            for value in sorted(
+                TASK_STATUS_VALUES | TASK_STATUS_ALIASES,
+                key=lambda value: (-len(value), value),
+            )
+        )
+        + r")(?![A-Z0-9_])"
+    )
+    PLAN_READINESS_REFERENCE_RE = re.compile(
+        r"`PLAN-OTA-EXEC\.md`[^\n]*(?:readiness|矩阵)[^\n]*(?:行|row)",
+        re.IGNORECASE,
+    )
+
+    @classmethod
+    def setUpClass(cls):
+        cls.board = cls.BOARD.read_text(encoding="utf-8")
+        cls.contract = cls.CONTRACT.read_text(encoding="utf-8")
+        cls.decisions = cls.DECISIONS.read_text(encoding="utf-8")
+
+    @classmethod
+    def expected_active_prompt_blocking(cls, decision_ids, statuses, declared_blocking, routed_task_ids):
+        return {
+            decision_id: (
+                declared_blocking[decision_id] & routed_task_ids
+                if statuses[decision_id] in cls.ACTIVE_DECISION_STATUSES
+                else set()
+            )
+            for decision_id in decision_ids
+        }
+
+    @classmethod
+    def markdown_logical_blocks(cls, text):
+        blocks = []
+        section = None
+        start_line = None
+        parts = []
+        list_indent = None
+
+        def flush():
+            nonlocal start_line, parts, list_indent
+            if parts:
+                blocks.append((start_line, section, " ".join(parts)))
+            start_line = None
+            parts = []
+            list_indent = None
+
+        for line_number, raw_line in enumerate(text.splitlines(), 1):
+            stripped = raw_line.strip()
+            if raw_line.startswith("## "):
+                flush()
+                section = raw_line[3:].strip()
+                continue
+            if not stripped:
+                flush()
+                continue
+            if re.match(r"^#{1,6}\s+", stripped):
+                flush()
+                continue
+            list_match = re.match(r"^(?P<indent>\s*)(?:[-+*]|\d+\.)\s+", raw_line)
+            if list_match and (
+                start_line is None
+                or list_indent is None
+                or len(list_match.group("indent").expandtabs(4)) <= list_indent
+            ):
+                flush()
+                list_indent = len(list_match.group("indent").expandtabs(4))
+            if start_line is None:
+                start_line = line_number
+            parts.append(stripped)
+        flush()
+        return blocks
+
+    @classmethod
+    def proposed_decision_requirement_violations(cls, text, active_decision_ids):
+        violations = []
+        for line_number, section, block in cls.markdown_logical_blocks(text):
+            if cls.DECISION_CANDIDATE_RE.search(block) and cls.DECISION_REQUIREMENT_RE.search(block):
+                violations.append((line_number, block))
+                continue
+            references = set(re.findall(r"OTA-DEC-\d{3}", block)) & active_decision_ids
+            if not references:
+                continue
+            if section != "阻断性决策" or cls.DECISION_REQUIREMENT_RE.search(block):
+                violations.append((line_number, block))
+        return violations
+
+    @classmethod
+    def readiness_rows(cls):
+        if cls.board.count(cls.MATRIX_START) != 1 or cls.board.count(cls.MATRIX_END) != 1:
+            raise AssertionError("PLAN-OTA-EXEC.md 必须恰有一个 P2-6 后 readiness 矩阵")
+        block = cls.board.split(cls.MATRIX_START, 1)[1].split(cls.MATRIX_END, 1)[0]
+        table = [line for line in block.splitlines() if line.startswith("|")]
+        if len(table) < 3:
+            raise AssertionError("readiness 矩阵表缺失")
+        header = [cell.strip() for cell in table[0].strip("|").split("|")]
+        rows = []
+        for line in table[2:]:
+            cells = [cell.strip() for cell in line.strip("|").split("|")]
+            if len(cells) != len(header):
+                raise AssertionError(f"readiness 行列数错误: {line}")
+            rows.append(dict(zip(header, cells)))
+        return rows
+
+    @classmethod
+    def post_p26_task_ids(cls):
+        before_matrix = cls.board.split(cls.MATRIX_START, 1)[0]
+        board_ids = re.findall(r"(?m)^#### (P\d+-\d+)\b", before_matrix)
+        if board_ids.count("P2-6") != 1:
+            raise AssertionError("看板正文必须恰有一个 P2-6 标题")
+        task_ids = board_ids[board_ids.index("P2-6") + 1 :]
+        if not task_ids or len(task_ids) != len(set(task_ids)):
+            raise AssertionError("P2-6 后任务标题缺失或重复")
+        return task_ids
+
+    @classmethod
+    def prompt_target(cls, row):
+        rel = row["prompt_path"]
+        reason = row["spec_block_reason"]
+        if not rel:
+            if not reason:
+                raise AssertionError(f"{row['task_id']} 缺少 prompt_path 和 spec_block_reason")
+            return None
+        if reason:
+            raise AssertionError(f"{row['task_id']} 不得同时填写 prompt_path 和 spec_block_reason")
+        if rel.startswith(("/", "./")) or "\\" in rel or "//" in rel or ".." in rel.split("/"):
+            raise AssertionError(f"非法 prompt_path: {rel}")
+        target = (ROOT / Path(*rel.split("/"))).resolve()
+        prompt_root = cls.PROMPT_ROOT.resolve()
+        if target.parent != prompt_root and prompt_root not in target.parents:
+            raise AssertionError(f"prompt_path 越出 docs/ota-prompts: {rel}")
+        return target
+
+    @classmethod
+    def prompt_records(cls):
+        records = []
+        for row in cls.readiness_rows():
+            target = cls.prompt_target(row)
+            if target is None:
+                continue
+            if not target.is_file():
+                raise AssertionError(f"readiness 引用的提示词不存在: {row['prompt_path']}")
+            records.append((row, target, target.read_text(encoding="utf-8")))
+        return records
+
+    @classmethod
+    def prompt_task_status_value_violations(cls, text):
+        violations = []
+        for line_number, raw_line in enumerate(text.splitlines(), 1):
+            matches = list(cls.TASK_STATUS_TOKEN_RE.finditer(raw_line))
+            if not matches:
+                continue
+            if cls.PLAN_READINESS_REFERENCE_RE.search(raw_line):
+                continue
+            for match in matches:
+                violations.append((line_number, match.group(0), raw_line.strip()))
+        return violations
+
+    @staticmethod
+    def markdown_table_row(text, label):
+        rows = [line for line in text.splitlines() if line.startswith(f"| `{label}` |")]
+        if len(rows) != 1:
+            raise AssertionError(f"合同表格必须恰有一行 `{label}`: {rows}")
+        cells = [cell.strip() for cell in rows[0].strip("|").split("|")]
+        if len(cells) != 4:
+            raise AssertionError(f"合同表格 `{label}` 列数错误: {rows[0]}")
+        return cells
+
+    @staticmethod
+    def contract_vector_row(text, vector_id):
+        rows = [line for line in text.splitlines() if line.startswith(f"| `{vector_id}` |")]
+        if len(rows) != 1:
+            raise AssertionError(f"合同向量必须恰有一行 `{vector_id}`: {rows}")
+        return rows[0]
+
+    def test_readiness_matrix_mirrors_board_order_and_derives_dispatch(self):
+        rows = self.readiness_rows()
+        self.assertEqual(self.post_p26_task_ids(), [row["task_id"] for row in rows], "readiness 必须镜像看板正文原顺序")
+        self.assertEqual([str(index) for index in range(1, len(rows) + 1)], [row["顺序"] for row in rows])
+        dispatchable = set()
+        for row in rows:
+            with self.subTest(task=row["task_id"]):
+                self.assertIn(row["type"], set(self.TYPE_BY_SUFFIX.values()))
+                self.assertIn(row["content_readiness"], {"READY", "NEEDS_DECISION", "DEFERRED_ACCEPTANCE"})
+                self.assertIn(row["governance_maturity"], {"DRAFT_PENDING_REVIEW", "REVIEWED", "FROZEN"})
+                self.assertIn(row["dependency_state"], {"SATISFIED", "BLOCKED_BY_DEPENDENCY", "NOT_APPLICABLE"})
+                self.assertIn(row["dispatch_eligibility"], {"DISPATCHABLE", "NOT_DISPATCHABLE"})
+                expected_content = "DEFERRED_ACCEPTANCE" if row["type"] == "ACCEPTANCE" else "READY"
+                self.assertEqual(expected_content, row["content_readiness"])
+                self.assertEqual("FROZEN", row["governance_maturity"])
+                expected_dispatch = (
+                    "DISPATCHABLE"
+                    if row["content_readiness"] == "READY"
+                    and row["dependency_state"] in {"SATISFIED", "NOT_APPLICABLE"}
+                    else "NOT_DISPATCHABLE"
+                )
+                self.assertEqual(expected_dispatch, row["dispatch_eligibility"])
+                if row["dispatch_eligibility"] == "DISPATCHABLE":
+                    dispatchable.add(row["task_id"])
+                self.assertTrue(bool(row["prompt_path"]) ^ bool(row["spec_block_reason"]))
+
+                target = self.prompt_target(row)
+                if target is None:
+                    continue
+                name_match = self.PROMPT_FILENAME_SHAPE_RE.fullmatch(target.name)
+                self.assertIsNotNone(name_match, f"提示词文件名不符合任务类型命名规则: {target.name}")
+                self.assertEqual(row["task_id"], name_match.group(1).upper())
+                self.assertEqual(row["type"], self.TYPE_BY_SUFFIX[name_match.group(2).lower()])
+                text = target.read_text(encoding="utf-8")
+                type_section = text.split("## 任务类型", 1)[1].split("## ", 1)[0]
+                declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
+                self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
+        self.assertEqual({"P3-1", "P3-2", "P4-2"}, dispatchable, "冻结后首批派单集合必须精确受控")
+
+    def test_prompt_paths_and_task_ids_are_unique_in_both_directions(self):
+        rows = self.readiness_rows()
+        expected_ids = set(self.post_p26_task_ids())
+        normalized = set()
+        referenced = {}
+        for row in rows:
+            target = self.prompt_target(row)
+            if target is None:
+                continue
+            rel = row["prompt_path"]
+            key = os.path.normcase(str(target))
+            self.assertNotIn(key, normalized, f"prompt_path 规范化后重复: {rel}")
+            normalized.add(key)
+            self.assertTrue(target.is_file(), f"readiness 引用的提示词不存在: {rel}")
+
+            text = target.read_text(encoding="utf-8")
+            ids = re.findall(r"(?m)^task_id: (?P<id>\S+)$", text)
+            self.assertEqual([row["task_id"]], ids, f"{rel} 必须恰有一个匹配 task_id")
+            name_match = self.PROMPT_FILENAME_HINT_RE.fullmatch(target.name)
+            self.assertIsNotNone(name_match, f"提示词文件名缺少任务 ID: {target.name}")
+            self.assertEqual(row["task_id"], name_match.group(1).upper())
+            referenced[row["task_id"]] = target
+
+        reverse = {}
+        for path in self.PROMPT_ROOT.rglob("*.md"):
+            if path.name.lower().startswith("prompt-template-"):
+                continue
+            text = path.read_text(encoding="utf-8")
+            ids = re.findall(r"(?m)^task_id: (?P<id>\S+)$", text)
+            name_id_match = self.PROMPT_FILENAME_HINT_RE.fullmatch(path.name)
+            shape_match = self.PROMPT_FILENAME_SHAPE_RE.fullmatch(path.name)
+            filename_id = name_id_match.group(1).upper() if name_id_match else None
+            declared_expected = [task_id for task_id in ids if task_id in expected_ids]
+            if filename_id not in expected_ids and not declared_expected:
+                continue
+            self.assertIsNotNone(shape_match, f"P2-6 后提示词文件名非法: {path.relative_to(ROOT)}")
+            task_id = filename_id
+            self.assertEqual([task_id], ids, f"后续任务文件 {path.name} 缺少合法 task_id")
+            reverse.setdefault(task_id, []).append(path.resolve())
+        self.assertEqual(set(referenced), set(reverse), "有提示词路由的任务必须与反向枚举完全一致")
+        for task_id in referenced:
+            self.assertEqual([referenced[task_id]], reverse[task_id], f"{task_id} 存在第二份竞争提示词")
+
+    def test_reverse_prompt_hint_recognizes_bare_task_filename(self):
+        bare = self.PROMPT_FILENAME_HINT_RE.fullmatch("prompt-P3-1.md")
+        self.assertIsNotNone(bare, "裸任务文件名也必须进入反向治理枚举")
+        self.assertEqual("P3-1", bare.group(1).upper())
+        self.assertIsNone(
+            self.PROMPT_FILENAME_SHAPE_RE.fullmatch("prompt-P3-1.md"),
+            "裸任务文件名只能作为非法候选被发现，不能冒充正式命名",
+        )
+
+    def test_prompts_have_required_sections_without_copying_normative_schemas(self):
+        forbidden = (
+            r"(?i)CREATE\s+TABLE",
+            r"(?i)ALTER\s+TABLE",
+            r"```json",
+            r"```sql",
+            r"\|\s*off\s*\|\s*size\s*\|",
+            r'"schemaVersion"\s*:',
+        )
+        for row, _target, text in self.prompt_records():
+            task_id = row["task_id"]
+            task_type = row["type"]
+            rel = row["prompt_path"]
+            with self.subTest(task=task_id):
+                for section in self.REQUIRED_PROMPT_SECTIONS:
+                    self.assertIn(f"## {section}", text, f"{rel} 缺少章节 {section}")
+                target_heading = "## 验收范围" if task_type == "ACCEPTANCE" else "## 目标"
+                self.assertIn(target_heading, text)
+                if task_type == "ACCEPTANCE":
+                    self.assertIn("## 正式 acceptance contract 前置", text)
+                for pattern in forbidden:
+                    self.assertIsNone(re.search(pattern, text), f"{rel} 复制了共享 schema/DDL/字节表")
+
+    def test_stable_clause_ids_are_defined_once_and_all_references_exist(self):
+        definitions = re.findall(r"(?m)^### (OTA-XC-[A-Z0-9-]+)$", self.contract)
+        self.assertTrue(definitions, "跨系统合同没有稳定条款 ID")
+        self.assertEqual(len(definitions), len(set(definitions)), "稳定条款定义 ID 重复")
+        reference_text = self.contract + "\n" + self.decisions + "\n" + self.board
+        for _row, _target, text in self.prompt_records():
+            reference_text += "\n" + text
+        references = set(re.findall(r"OTA-XC-[A-Z0-9-]+", reference_text))
+        self.assertEqual(set(), references - set(definitions), "存在未定义的稳定条款引用")
+
+    def test_decision_ids_are_monotonic_and_references_are_valid(self):
+        headings = re.findall(r"(?m)^## (OTA-DEC-(\d{3}))\b", self.decisions)
+        ids = [decision_id for decision_id, _number in headings]
+        numbers = [int(number) for _decision_id, number in headings]
+        self.assertEqual(len(ids), len(set(ids)), "decision_id 重复")
+        self.assertEqual(sorted(numbers), numbers, "decision_id 必须单调递增且不重排")
+        self.assertTrue(ids)
+        statuses = re.findall(r"(?m)^- 状态：`([A-Z_]+)`。$", self.decisions)
+        self.assertEqual(len(ids), len(statuses), "每项决定必须恰有一个状态")
+        self.assertTrue(set(statuses) <= {"OPEN", "PROPOSED", "DECIDED", "SUPERSEDED"})
+        self.assertEqual({"DECIDED"}, set(statuses), "用户冻结授权后十二项决定必须全部为 DECIDED")
+        status_by_decision = dict(zip(ids, statuses))
+
+        reference_text = self.contract + "\n" + self.board
+        for _row, _target, text in self.prompt_records():
+            reference_text += "\n" + text
+        refs = set(re.findall(r"OTA-DEC-\d{3}", reference_text))
+        self.assertEqual(set(), refs - set(ids), "合同或提示词引用了不存在的 decision_id")
+
+        board_ids = set(re.findall(r"(?m)^#### ((?:PRE|P\d+)-\d+)\b", self.board))
+        affected_by_decision = {}
+        current_decision = None
+        for line in self.decisions.splitlines():
+            heading = re.match(r"^## (OTA-DEC-\d{3})\b", line)
+            if heading:
+                current_decision = heading.group(1)
+                continue
+            if not line.startswith("- 受影响任务："):
+                continue
+            self.assertIsNotNone(current_decision, "受影响任务字段必须位于 decision_id 标题下")
+            affected = set(re.findall(r"`((?:PRE|P\d+)-\d+)`", line))
+            self.assertTrue(affected, "决策受影响任务字段不能为空")
+            self.assertEqual(set(), affected - board_ids, "决策引用了看板中不存在的任务")
+            self.assertNotIn(current_decision, affected_by_decision, "每项决定只能有一个受影响任务字段")
+            affected_by_decision[current_decision] = affected
+        self.assertEqual(set(ids), set(affected_by_decision), "每项决定必须恰有一个受影响任务字段")
+
+        routed_task_ids = {row["task_id"] for row, _target, _text in self.prompt_records()}
+        prompt_blocking = {decision_id: set() for decision_id in ids}
+        for row, _target, text in self.prompt_records():
+            task_id = row["task_id"]
+            section = text.split("## 阻断性决策", 1)[1]
+            for decision_id in set(re.findall(r"OTA-DEC-\d{3}", section)):
+                prompt_blocking[decision_id].add(task_id)
+        expected_prompt_blocking = self.expected_active_prompt_blocking(
+            ids,
+            status_by_decision,
+            affected_by_decision,
+            routed_task_ids,
+        )
+        self.assertEqual(expected_prompt_blocking, prompt_blocking, "未决决定必须与提示词阻断章节双向一致")
+
+    def test_freeze_authorization_and_contract_maturity_are_locked(self):
+        authorization = (
+            "批准 OTA-DEC-001 至 OTA-DEC-012，授权冻结规范并进入首批实现；"
+            "生产部署仍须等待 P5 验收。"
+        )
+        self.assertIn("### 记录 9", self.decisions)
+        self.assertEqual(1, self.decisions.count(authorization))
+        self.assertIn("本轮新增条款成熟度：`FROZEN`", self.contract)
+        self.assertNotIn("DRAFT_PENDING_REVIEW", self.contract)
+        self.assertNotIn("阻断决定：", self.contract)
+
+    def test_decision_status_transition_releases_prompt_blocking(self):
+        decision_id = "OTA-DEC-999"
+        declared = {decision_id: {"P3-1"}}
+        routed = {"P3-1"}
+        for status, expected in (
+            ("OPEN", {"P3-1"}),
+            ("PROPOSED", {"P3-1"}),
+            ("DECIDED", set()),
+            ("SUPERSEDED", set()),
+        ):
+            with self.subTest(status=status):
+                actual = self.expected_active_prompt_blocking(
+                    [decision_id],
+                    {decision_id: status},
+                    declared,
+                    routed,
+                )
+                self.assertEqual({decision_id: expected}, actual)
+
+    def test_proposed_decision_recommendation_cannot_be_forced_in_prompt(self):
+        active = {"OTA-DEC-009"}
+        outside_blocking = """## 前置依赖
+- `OTA-DEC-009` 推荐方案 A，因此 P4-2 必须先完成。
+
+## 阻断性决策
+
+- `OTA-DEC-009`：P4 实现顺序与 fixture 边界。
+"""
+        forced_in_blocking = """## 阻断性决策
+
+- `OTA-DEC-009`：P4-2 必须先于 P4-1 完成。
+"""
+        forced_without_id = """## 前置依赖
+
+- 推荐方案 A，因此 P4-2 必须先于 P4-1 完成。
+"""
+        forced_wrapped_without_id = """## 前置依赖
+
+- 推荐方案 A，因此 P4-2
+  必须先于 P4-1 完成。
+"""
+        forced_nested_without_id = """## 前置依赖
+
+- 推荐方案 A，因此
+  - P4-2 必须先于 P4-1 完成。
+"""
+        neutral = """## 阻断性决策
+
+- `OTA-DEC-009`：P4 实现顺序与 fixture 边界。
+"""
+        self.assertTrue(self.proposed_decision_requirement_violations(outside_blocking, active))
+        self.assertTrue(self.proposed_decision_requirement_violations(forced_in_blocking, active))
+        self.assertTrue(self.proposed_decision_requirement_violations(forced_without_id, active))
+        self.assertTrue(self.proposed_decision_requirement_violations(forced_wrapped_without_id, active))
+        self.assertTrue(self.proposed_decision_requirement_violations(forced_nested_without_id, active))
+        self.assertEqual([], self.proposed_decision_requirement_violations(neutral, active))
+
+    def test_frozen_decisions_leave_no_prompt_blockers(self):
+        decision_statuses = dict(
+            re.findall(
+                r"(?ms)^## (OTA-DEC-\d{3})\b.*?^- 状态：`([A-Z_]+)`。$",
+                self.decisions,
+            )
+        )
+        active = {
+            decision_id
+            for decision_id, status in decision_statuses.items()
+            if status in self.ACTIVE_DECISION_STATUSES
+        }
+        self.assertEqual(set(), active)
+        for row, target, text in self.prompt_records():
+            with self.subTest(task=row["task_id"]):
+                violations = self.proposed_decision_requirement_violations(text, active)
+                self.assertEqual([], violations, f"{target.name} 把未决决定写到了执行要求中")
+                blocking_section = text.split("## 阻断性决策", 1)[1]
+                self.assertNotRegex(blocking_section, r"OTA-DEC-\d{3}")
+
+    def test_task_status_fields_only_appear_in_board_matrix(self):
+        files = [self.CONTRACT, self.DECISIONS]
+        files.extend(target for _row, target, _text in self.prompt_records())
+        for path in files:
+            text = path.read_text(encoding="utf-8")
+            for field in self.TASK_STATUS_FIELDS:
+                self.assertNotRegex(text, rf"\b{field}\b", f"任务级状态字段只能在 readiness 矩阵: {path}")
+
+    def test_prompt_task_status_values_only_reference_plan_readiness(self):
+        for row, target, text in self.prompt_records():
+            with self.subTest(task=row["task_id"]):
+                violations = self.prompt_task_status_value_violations(text)
+                self.assertEqual(
+                    [],
+                    violations,
+                    f"{target.name} 复制了任务状态值或非法别名；状态唯一来源必须是 PLAN-OTA-EXEC.md readiness 行",
+                )
+
+        allowed_reference = (
+            "按 `PLAN-OTA-EXEC.md` readiness 矩阵的 `P3-1` 行执行；"
+            "该行的 content_readiness=READY。"
+        )
+        self.assertEqual([], self.prompt_task_status_value_violations(allowed_reference))
+        self.assertEqual(
+            [(1, "READY", "content_readiness=READY")],
+            self.prompt_task_status_value_violations("content_readiness=READY"),
+        )
+        self.assertEqual(
+            [(1, "READY_FOR_REVIEW", "状态=READY_FOR_REVIEW")],
+            self.prompt_task_status_value_violations("状态=READY_FOR_REVIEW"),
+        )
+
+    def test_digest_domains_are_explicit_and_non_interchangeable(self):
+        identity = self.contract.split("### OTA-XC-IMAGE-IDENTITY", 1)[1].split("### ", 1)[0]
+        raw_base = self.markdown_table_row(identity, ".etu base_sha8")
+        etsl = self.markdown_table_row(identity, "ETSL.sha8")
+        candidate = self.markdown_table_row(identity, "candidateImageSha8")
+
+        self.assertIn("app.bin", raw_base[1])
+        self.assertIn("image_len", raw_base[1])
+        self.assertIn("raw 镜像 SHA", raw_base[2])
+        self.assertNotIn("fw_header.image_sha256", raw_base[1])
+        self.assertNotIn("双零", raw_base[1])
+
+        for label, row in (("ETSL.sha8", etsl), ("candidateImageSha8", candidate)):
+            with self.subTest(domain=label):
+                self.assertIn("fw_header.image_sha256", row[1])
+                self.assertIn("双零法", row[1])
+                self.assertNotIn("raw", row[1].lower())
+
+        self.assertIn("ETSL.sha8", identity)
+        self.assertIn("candidateImageSha8", identity)
+        self.assertIn("32B raw", identity)
+        self.assertIn("header-integrity", identity)
+        self.assertIn("不得作为 patch 基版完整身份", etsl[3])
+        self.assertIn("不得替代 32B raw SHA", candidate[3])
+
+        vector = self.contract_vector_row(self.contract, "XC-DIGEST-DOMAINS")
+        for token in (
+            "raw SHA",
+            "fw_header 双零 SHA",
+            "各自 SHA8",
+            "raw SHA8 与 header SHA8 不同",
+            "`.etu base_sha8` 使用 raw 前 8B",
+            "ETSL/candidateImageSha8 使用 fw_header 双零摘要前 8B",
+            "任何域交叉替代均失败",
+        ):
+            self.assertIn(token, vector)
+
+    def test_admin_tombstone_and_cron_race_have_stable_boundary_results(self):
+        admin_idempotency = self.contract.split("### OTA-XC-ADMIN-IDEMPOTENCY", 1)[1].split("### ", 1)[0]
+        for token in (
+            "firmware_admin_idempotency_tombstones",
+            "永久的",
+            "`expired_at`",
+            "`tombstoned_at`",
+            "PRIMARY KEY/UNIQUE 为 `(actor_canonical,idempotency_key)`",
+            "INDEX(expired_at)",
+            "tombstone 永久保留",
+            "不保存 response body、URL、token、signature 或 secret",
+            "fingerprint 相同返回 `IDEMPOTENCY_RESULT_EXPIRED`",
+            "fingerprint 不同返回 `IDEMPOTENCY_CONFLICT`",
+            "不得重新进入 pending 或业务副作用",
+            "`currentEpochSeconds == retainedUntil` 与更晚时刻均已过期",
+            "当 `currentEpochSeconds >= retainedUntil` 时",
+            "必须先以原 fingerprint/action/release 写入或核对 tombstone",
+            "确认成功后才可删除完整结果行",
+            "不得先删后补",
+            "tombstone 永不删除",
+            "先提交者留下 tombstone",
+            "后提交者重读该 tombstone",
+            "不得因 Cron 先后改变结果或产生新 mutation/token/audit",
+        ):
+            self.assertIn(token, admin_idempotency)
+
+        boundary = self.contract_vector_row(self.contract, "XC-ADMIN-IDEMPOTENT-BOUNDARY")
+        for token in (
+            "created=1800000000",
+            "retainedUntil=1800086400",
+            "1800086400",
+            "先写/确认 tombstone",
+            "IDEMPOTENCY_RESULT_EXPIRED",
+            "均无新副作用",
+        ):
+            self.assertIn(token, boundary)
+
+        expired_conflict = self.contract_vector_row(self.contract, "XC-ADMIN-IDEMPOTENT-EXPIRED-CONFLICT")
+        for token in (
+            "结果行存在或已由 Cron 清理",
+            "同 fingerprint 为 `IDEMPOTENCY_RESULT_EXPIRED`",
+            "不同 fingerprint 为 `IDEMPOTENCY_CONFLICT`",
+            "不论清理先后",
+        ):
+            self.assertIn(token, expired_conflict)
+
+        race = self.contract_vector_row(self.contract, "XC-ADMIN-IDEMPOTENT-TOMBSTONE-RACE")
+        for token in (
+            "请求事务先提交",
+            "Cron 先提交",
+            "两者并发",
+            "三种调度都只留下一个相同 tombstone",
+            "无第二次 mutation/token/audit",
+            "响应按 fingerprint 稳定",
+        ):
+            self.assertIn(token, race)
+
+    def test_interface_matrix_has_required_interface_level_fields(self):
+        required = (
+            "Producer",
+            "Consumer",
+            "传输介质",
+            "条款 ID",
+            "schema 或结构引用",
+            "生命周期所有者",
+            "错误语义",
+            "幂等规则",
+            "兼容规则",
+            "interface_completeness",
+            "clause_maturity",
+            "blocking_decisions",
+            "affected_tasks",
+        )
+        section = self.contract.split("## 2. 接口矩阵", 1)[1].split("## 3.", 1)[0]
+        table = [line for line in section.splitlines() if line.startswith("|")]
+        self.assertGreaterEqual(len(table), 3)
+        header = table[0]
+        for field in required:
+            self.assertIn(field, header)
+        columns = [cell.strip() for cell in header.strip("|").split("|")]
+        rows = []
+        for line in table[2:]:
+            cells = [cell.strip() for cell in line.strip("|").split("|")]
+            self.assertEqual(len(columns), len(cells), f"接口矩阵列数错误: {line}")
+            rows.append(dict(zip(columns, cells)))
+        self.assertTrue(rows)
+        decision_statuses = dict(
+            re.findall(
+                r"(?ms)^## (OTA-DEC-\d{3})\b.*?^- 状态：`([A-Z_]+)`。$",
+                self.decisions,
+            )
+        )
+        known_decisions = set(decision_statuses)
+        blocking_decisions = {
+            decision_id
+            for decision_id, status in decision_statuses.items()
+            if status in {"OPEN", "PROPOSED"}
+        }
+        self.assertEqual({"DECIDED"}, set(decision_statuses.values()))
+        self.assertEqual(set(), blocking_decisions)
+        clause_matches = list(re.finditer(r"(?m)^### (OTA-XC-[A-Z0-9-]+)$", self.contract))
+        clause_sections = {}
+        for index, match in enumerate(clause_matches):
+            end = clause_matches[index + 1].start() if index + 1 < len(clause_matches) else len(self.contract)
+            clause_sections[match.group(1)] = self.contract[match.end() : end]
+
+        prompt_contract_refs = {}
+        for prompt_row, _target, text in self.prompt_records():
+            contract_section = text.split("## 权威合同", 1)[1].split("## ", 1)[0]
+            prompt_contract_refs[prompt_row["task_id"]] = set(
+                re.findall(r"OTA-XC-[A-Z0-9-]+", contract_section)
+            )
+        board_ids = set(re.findall(r"(?m)^#### ((?:PRE|P\d+)-\d+)\b", self.board))
+        for row in rows:
+            completeness = row["interface_completeness"].strip("`")
+            maturity = row["clause_maturity"].strip("`")
+            decisions = set(re.findall(r"OTA-DEC-\d{3}", row["blocking_decisions"]))
+            affected_tasks = set(re.findall(r"(?:PRE|P\d+)-\d+", row["affected_tasks"]))
+            clauses = set(re.findall(r"OTA-XC-[A-Z0-9-]+", row["条款 ID"]))
+            self.assertIn(completeness, {"COMPLETE", "INCOMPLETE", "BLOCKED_BY_DECISION"})
+            self.assertEqual("COMPLETE", completeness)
+            self.assertEqual("FROZEN", maturity)
+            self.assertEqual(set(), decisions, "冻结接口矩阵不得保留决定阻断")
+            self.assertEqual(set(), decisions - known_decisions, "接口矩阵引用了不存在的决定")
+            self.assertEqual(set(), decisions - blocking_decisions, "接口矩阵只能把 OPEN/PROPOSED 决定列为阻断")
+            self.assertEqual(set(), affected_tasks - board_ids, "接口矩阵引用了不存在的任务")
+            self.assertEqual(set(), clauses - set(clause_sections), "接口矩阵引用了不存在的稳定条款")
+
+            clause_blockers = set()
+            for clause in clauses:
+                clause_blockers.update(re.findall(r"OTA-DEC-\d{3}", clause_sections[clause]))
+            clause_blockers &= blocking_decisions
+            self.assertEqual(
+                set(),
+                clause_blockers - decisions,
+                f"接口矩阵未传播条款正文中的开放决定: {sorted(clauses)}",
+            )
+
+            consumer_clauses = clauses & self.PROPAGATED_CONSUMER_CLAUSES
+            required_consumers = {
+                task_id
+                for task_id, references in prompt_contract_refs.items()
+                if references & consumer_clauses
+            }
+            self.assertEqual(
+                set(),
+                required_consumers - affected_tasks,
+                f"接口矩阵未传播逐卡提示词中的接口消费者: {sorted(consumer_clauses)}",
+            )
+            if decisions:
+                self.assertEqual(
+                    "BLOCKED_BY_DECISION",
+                    completeness,
+                    "存在 blocking_decisions 时必须按优先级传播为 BLOCKED_BY_DECISION",
+                )
+            else:
+                self.assertNotEqual(
+                    "BLOCKED_BY_DECISION",
+                    completeness,
+                    "BLOCKED_BY_DECISION 必须列出实际决定",
+                )
+            if completeness == "COMPLETE":
+                self.assertFalse(decisions, "COMPLETE 接口不得保留阻断决定")
+
+    def test_admin_http_contract_covers_release_actions_recovery_and_audit(self):
+        section = self.contract.split("### OTA-XC-HTTP-ADMIN", 1)[1].split("### ", 1)[0]
+        required_tokens = (
+            "/api/admin/firmware/releases/{releaseId}/disable",
+            "/api/admin/firmware/releases/{releaseId}/recovery-download",
+            '"action": "disable_release"',
+            '"action": "issue_recovery_download"',
+            "purpose=admin-recovery",
+            "RELEASE_NOT_READY",
+            "RELEASE_DISABLED",
+            "RELEASE_ARCHIVED",
+            "RELEASE_IN_USE",
+            "RECOVERY_ASSET_UNAVAILABLE",
+        )
+        for token in required_tokens:
+            self.assertIn(token, section, f"Admin HTTP 合同缺少 {token}")
+
+        audit = self.contract.split("### OTA-XC-D1-AUDIT", 1)[1].split("### ", 1)[0]
+        audit_tokens = (
+            "`disable_release`",
+            "`issue_recovery_download`",
+            "`target_type=firmware_release`",
+            "`target_type=firmware_asset`",
+            "`target_id=releaseId`",
+            "`target_id=assetId`",
+            "`purpose=admin-recovery`",
+            "不得包含完整 URL、token、signature",
+            "不能承担 release action 的幂等键",
+        )
+        for token in audit_tokens:
+            self.assertIn(token, audit, f"Admin audit 合同缺少 {token}")
+
+    def test_admin_idempotency_and_download_token_migrations_are_decision_governed(self):
+        admin_idempotency = self.contract.split("### OTA-XC-ADMIN-IDEMPOTENCY", 1)[1].split("### ", 1)[0]
+        for token in (
+            "OTA-DEC-011",
+            "X-Request-Id",
+            "request fingerprint",
+            "保存期限",
+            "recovery URL 过期",
+        ):
+            self.assertIn(token, admin_idempotency)
+
+        idempotency_decision = self.decisions.split("## OTA-DEC-011", 1)[1].split("## OTA-DEC-012", 1)[0]
+        for token in (
+            "Idempotency-Key",
+            "Access actor + key",
+            "method",
+            "canonical JSON body",
+            "保存 24 小时",
+            "同 key/不同 fingerprint",
+            "recovery URL 过期后",
+            "新 key",
+        ):
+            self.assertIn(token, idempotency_decision)
+
+        download = self.contract.split("### OTA-XC-HTTP-DOWNLOAD", 1)[1].split("### ", 1)[0]
+        for token in (
+            "assetId",
+            "releaseId",
+            "expiresAt",
+            "keyVersion",
+            "signature",
+            "Unix epoch 秒",
+            "OTA-DEC-012",
+            "v1 token",
+        ):
+            self.assertIn(token, download)
+
+        decision = self.decisions.split("## OTA-DEC-012", 1)[1]
+        for token in (
+            "tokenVersion=2",
+            "kind",
+            "purpose",
+            "HMAC-SHA256 Base64URL 无 padding",
+            "部署前已签的 full/patch URL",
+            "永不允许 recovery",
+        ):
+            self.assertIn(token, decision)
+
+    def test_shared_specs_are_required_by_manifest_and_watched_by_ci(self):
+        profiles = json.loads(self.MANIFEST_PROFILES.read_text(encoding="utf-8"))
+        governance = profiles["profiles"]["Governance"]
+        workflow = self.WORKFLOW.read_text(encoding="utf-8")
+        for rel in ("docs/ota-cross-system-contracts.md", "docs/ota-spec-decisions.md"):
+            self.assertIn(rel, governance["top_files"])
+            self.assertIn(rel, governance["required_paths"])
+            self.assertEqual(2, workflow.count(f'- "{rel}"'), f"push/PR 必须都监听 {rel}")
+            self.assertIn(rel, set(VALIDATOR._profile_paths(ROOT, "Governance")))
 
 
 class SpecProbeCiWiringTests(unittest.TestCase):

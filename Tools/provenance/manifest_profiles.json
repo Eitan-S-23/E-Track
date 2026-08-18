@@ -93,13 +93,17 @@
         ".github/copilot-instructions.md",
         "AGENTS.md",
         "PLAN-OTA-EXEC.md",
-        "docs/acceptance-execution-contract.md"
+        "docs/acceptance-execution-contract.md",
+        "docs/ota-cross-system-contracts.md",
+        "docs/ota-spec-decisions.md"
       ],
       "exclude_prefixes": [],
       "required_paths": [
         "AGENTS.md",
         "PLAN-OTA-EXEC.md",
         "docs/acceptance-execution-contract.md",
+        "docs/ota-cross-system-contracts.md",
+        "docs/ota-spec-decisions.md",
         "docs/ota-prompts/prompt-template-acceptance.md",
         "docs/ota-prompts/prompt-template-implementation.md"
       ]
