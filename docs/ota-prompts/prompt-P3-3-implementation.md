@@ -25,7 +25,7 @@ task_id: P3-3
 
 - `P3-1` 提供 MCU transport，`P3-2` 提供可信 INFO。
 - Cloudflare latest/download 必须最终符合 `P4-2` 实现的共享合同。
-- model、摘要、BLE 调参、App 兼容、HTTP 恢复和 token v2 的用户裁定已传播到共享合同；只有这些候选条款完成独立复核且实现依赖满足后，才能形成正式端到端行为。
+- model、摘要、BLE 调参、App 兼容、HTTP 恢复和 token v2 的用户裁定已传播到并冻结在共享合同；实现依赖满足后，才能形成正式端到端行为。
 
 ## 权威合同
 
@@ -114,7 +114,7 @@ OTA domain service 至少区分 idle、queryingDevice、checkingLatest、downloa
 
 ## 停止条件
 
-- 任一受影响共享条款尚未独立复核，或实现依赖尚未完成且必须选择跨系统行为时，停止对应部分。
+- 任一受影响共享条款发生未重新冻结的变更，或实现依赖尚未完成且必须选择跨系统行为时，停止对应部分。
 - Worker 实际 JSON 与共享合同不一致时记录实现缺口，不在 Flutter 建第二套兼容 schema 掩盖。
 - 平台 BLE 库不能提供可靠通知/MTU/重连语义时先建立最小可复现证据，不无界换库。
 - 需要修改冻结 binary contract 才能继续时停止。

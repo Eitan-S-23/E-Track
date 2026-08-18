@@ -62,7 +62,7 @@ task_id: P3-2
 
 - GET_INFO 只读且幂等，可在无活跃 OTA session 时有界重试。
 - fw_header CRC/SHA、BCB 仲裁或镜像读失败时 fail closed；不得退回 `0.0.0`、全零 SHA 或编译期默认版本。
-- `OTA-XC-DEVICE-MODEL` 或 `OTA-XC-IMAGE-IDENTITY` 尚未独立复核时，只允许编译测试 provider 接口，不得产生正式对外值。
+- `OTA-XC-DEVICE-MODEL` 或 `OTA-XC-IMAGE-IDENTITY` 发生未重新冻结的变更时，只允许编译测试 provider 接口，不得产生正式对外值。
 - 查询取消只丢弃本次快照，不改变设备持久化状态。
 
 ## 允许修改范围
@@ -99,7 +99,7 @@ task_id: P3-2
 
 ## 停止条件
 
-- `OTA-XC-DEVICE-MODEL` 或 `OTA-XC-IMAGE-IDENTITY` 尚未完成独立复核时停止正式 wire 值实施，不得用临时映射或双摘要兼容绕过。
+- `OTA-XC-DEVICE-MODEL` 或 `OTA-XC-IMAGE-IDENTITY` 发生未重新冻结的变更时停止正式 wire 值实施，不得用临时映射或双摘要兼容绕过。
 - 发现冻结 INFO 语义与 patch base 合同无法同时满足时记录冲突，不修改冻结文件。
 - 需要信任未校验镜像或改变 BCB 才能返回字段时停止。
 

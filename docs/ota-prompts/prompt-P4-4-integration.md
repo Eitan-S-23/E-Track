@@ -25,7 +25,7 @@ task_id: P4-4
 
 - P4-1 workflow 已按共享 secret 名称和硬失败规则接线。
 - P4-2 Worker/R2 endpoint 已部署到目标环境。
-- rehearsal 与 production 的隔离、证据、独立 reviewer、人工 gate 和 production 审批已传播到 `OTA-XC-RELEASE-GATE` 与 `OTA-XC-SECRETS`，但仍须独立复核。
+- rehearsal 与 production 的隔离、证据、独立 reviewer、人工 gate 和 production 审批已传播到并冻结在 `OTA-XC-RELEASE-GATE` 与 `OTA-XC-SECRETS`。
 - 用户/owner 可操作 GitHub environment、repository secrets/variables、Cloudflare token/bucket/Worker secrets。
 
 ## 权威合同
@@ -83,7 +83,7 @@ task_id: P4-4
 - 负例：逐项缺失/错误 token/bucket/URL，日志无值泄露。
 - 权限最小化验证：R2 token 只具有所需 bucket/operation，deploy token 只接受目标 Worker。
 - environment 审批前 job 等待，拒绝/批准行为可见。
-- P4-1 rehearsal/正式 run 按共享候选合同区分 staging/rehearsal 与 production，并验证 gate 不可绕过。
+- P4-1 rehearsal/正式 run 按共享冻结合同区分 staging/rehearsal 与 production，并验证 gate 不可绕过。
 
 ## 完成判据
 
@@ -94,7 +94,7 @@ task_id: P4-4
 
 ## 停止条件
 
-- `OTA-XC-RELEASE-GATE` 或 `OTA-XC-SECRETS` 尚未独立复核时，不执行 production 解锁或生产验证。
+- `OTA-XC-RELEASE-GATE` 或 `OTA-XC-SECRETS` 发生未重新冻结的变更时，不执行 production 解锁或生产验证。
 - 用户/owner 未授权平台配置、token 创建或 environment 修改时停止。
 - 唯一可行方案要求输出 secret 明文或授予不必要全账户权限时停止。
 - P4-1/P4-2 实现尚未满足幂等/不可变合同，不进行生产验证。

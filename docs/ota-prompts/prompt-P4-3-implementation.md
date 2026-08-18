@@ -25,7 +25,7 @@ task_id: P4-3
 
 - P4-2 多资产和 ready release 语义已实现。
 - 角色/Access/CAS/audit 基础沿用现有 admin。
-- 资产保留、Admin release-action 幂等和 token v2 的用户裁定已传播到共享合同；只有候选条款独立复核后才能实施自动清理或安全能力。
+- 资产保留、Admin release-action 幂等和 token v2 的用户裁定已传播到并冻结在共享合同；按冻结条款实施自动清理或安全能力。
 
 ## 权威合同
 
@@ -88,7 +88,7 @@ task_id: P4-3
 - 禁止绕过 expectedRevision、ready gate、role 或 reason。
 - 禁止撤回时删除/覆盖 R2 资产或更改 release version/hash。
 - 禁止让 stop_latest 自动放开 download，或 stop_downloads 只影响新 URL 而不校验旧 URL。
-- 禁止在 `OTA-XC-D1-RETENTION` 与 `OTA-XC-R2-IMMUTABILITY` 尚未独立复核时新增自动删除策略。
+- 禁止在 `OTA-XC-D1-RETENTION` 与 `OTA-XC-R2-IMMUTABILITY` 发生未重新冻结的变更时新增自动删除策略。
 
 ## 必须新增或调整的测试
 
@@ -109,7 +109,7 @@ task_id: P4-3
 ## 停止条件
 
 - P4-2 ready/channel model 未完成时停止，不在旧单资产 schema 上叠长期兼容逻辑。
-- 保留/删除共享候选条款尚未独立复核时停止任何自动清理、保留数量或物理删除实现。
+- 保留/删除共享条款发生未重新冻结的变更时停止任何自动清理、保留数量或物理删除实现。
 - 发现当前 Access 角色无法满足 stable owner 审批时报告治理缺口，不降低权限。
 - 需要设备降级才能实现“撤回”时说明产品误解并停止。
 
