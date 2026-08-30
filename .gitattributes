@@ -13,6 +13,11 @@
 # 对索引中已含 CRLF 的文件不要加 -text（它们本来就按原样检出）。
 # 不要改成全局 `* -text`：实测会让 2501 个 CRLF 工作树文件的 manifest 绑定失效。
 
+# 验收证据包（合同、证据矩阵、三类 manifest、artifacts）整目录免转换：其中既有
+# 混合 EOL 的 JSON/TXT，也有 pending.bin / rtt-payload.bin 这类被 git 误判为文本、
+# 入库时被剥掉 CR 的二进制证据。矩阵按字节绑定这些产物，必须逐字节稳定。
+/docs/acceptance-contracts/** -text
+
 /.gitattributes -text
 /.github/copilot-instructions.md -text
 /.github/scripts/create_trace_patch.py -text
