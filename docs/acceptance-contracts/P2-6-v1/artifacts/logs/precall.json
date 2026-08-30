@@ -1,0 +1,28 @@
+{
+  "phase": "precall",
+  "status": "PASS",
+  "signature_addresses": [
+    537214492
+  ],
+  "descriptor": {
+    "max_up_buffers": 3,
+    "max_down_buffers": 3,
+    "pBuffer": 537213468,
+    "SizeOfBuffer": 1024,
+    "WrOff": 286,
+    "RdOff": 0,
+    "Flags": 1
+  },
+  "pending_count": 286,
+  "pending_sha256": "A266CBF3756F12F49D8D5B63037298E62E7AD928AD960B4D1FE33AC15BB81FB8",
+  "record_count": 0,
+  "measurement": {
+    "valid": 0,
+    "kind": 0,
+    "seq": 0
+  },
+  "sram_sha256": "350127221D34458226D730A30EEE7C02B7FB205016237BDBEABF381E9D2D0744",
+  "control_block_sha256": "B96F062604BA14D8DE1FB7C406FD23D7B38A8F65C8B778CAD19AD29C327D79F2",
+  "up_buffer_sha256": "9C53C007E0A2DF40370D324363AF3CA128B0701CA33838A19B4F985FA68C49C7",
+  "measurement_sha256": "B707241545A346265AAB1FFB32FF64B55BF8F8DC1B56A46EF33CE3D15DB11D33"
+}

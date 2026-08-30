@@ -1,0 +1,31 @@
+{
+  "phase": "capture",
+  "status": "PASS",
+  "reader": "JLinkRTTLogger",
+  "payload_ready": true,
+  "payload_complete": true,
+  "rtt_channel_binding_verified": true,
+  "logger_stopped_by": "AGENTS.md residual-logger cleanup pattern (Stop-Process); the logger has no natural exit",
+  "logger_pid": 13172,
+  "logger_command": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkRTTLogger.exe",
+    "-Device",
+    "CORTEX-M4",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-RTTAddress",
+    "0x20053E1C",
+    "-RTTChannel",
+    "0",
+    "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\rtt.raw.log"
+  ],
+  "payload_bytes": 731,
+  "payload_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+  "expected_pending_bytes": 731,
+  "logger_wait_seconds": 2.277,
+  "raw_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+  "logger_stopped": true,
+  "residual_rtt_logger_processes": 0
+}

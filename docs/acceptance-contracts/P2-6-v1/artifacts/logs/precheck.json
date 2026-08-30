@@ -1,0 +1,67 @@
+{
+  "phase": "precheck",
+  "status": "ELIGIBLE",
+  "signature_addresses": [
+    537214492
+  ],
+  "descriptor": {
+    "max_up_buffers": 3,
+    "max_down_buffers": 3,
+    "pBuffer": 537213468,
+    "SizeOfBuffer": 1024,
+    "WrOff": 731,
+    "RdOff": 0,
+    "Flags": 1
+  },
+  "pending_count": 731,
+  "pending_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+  "pending_path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\pending.bin",
+  "record_count": 1,
+  "matching_record_count": 1,
+  "record": {
+    "raw": "P2_6 kind=patch result=-1 workspace_peak=0 arena_peak_observed=0 failed_request_size=0 stack_entry=3232 stack_peak=3232 stack_total=8192 guard_entry=1 guard_exit=1 sbrk_delta=0 sbrk_peak=537220800 tlsf_malloc_delta=0 tlsf_realloc_delta=0 tlsf_free_delta=0 lv_free_entry=78864 lv_free_exit=78864 lv_big_entry=66252 lv_big_exit=66252 lv_frag_entry=16 lv_frag_exit=16 lv_max_entry=64619 lv_max_exit=64619 seq=2185635327 last_size=18 last_ret=0x14",
+    "kind": "PATCH",
+    "result": -1,
+    "workspace_peak": 0,
+    "arena_peak_observed": 0,
+    "failed_request_size": 0,
+    "stack_entry": 3232,
+    "stack_peak": 3232,
+    "stack_total": 8192,
+    "guard_entry": 1,
+    "guard_exit": 1,
+    "sbrk_delta": 0,
+    "sbrk_peak": 537220800,
+    "tlsf_malloc_delta": 0,
+    "tlsf_realloc_delta": 0,
+    "tlsf_free_delta": 0,
+    "lv_free_entry": 78864,
+    "lv_free_exit": 78864,
+    "lv_big_entry": 66252,
+    "lv_big_exit": 66252,
+    "lv_frag_entry": 16,
+    "lv_frag_exit": 16,
+    "lv_max_entry": 64619,
+    "lv_max_exit": 64619,
+    "seq": 2185635327,
+    "last_size": 18,
+    "last_ret": 20
+  },
+  "record_bytes": 445,
+  "record_sha256": "BFAA7E1209168984B75A03B77638E163705486BD0A74D1FB5673F00C8DA5F1A5",
+  "measurement": {
+    "valid": 1,
+    "kind": 2,
+    "seq": 2185635327
+  },
+  "measurement_crosscheck": {
+    "valid_is_one": true,
+    "kind_is_patch": true,
+    "seq_matches_record": true
+  },
+  "controlled_patch_result_is_argument_rejection": true,
+  "sram_sha256": "8BACC2F442A1E4EBD5DCB46378B62162315CA45D13609D67E4EE32AC3B9470AF",
+  "control_block_sha256": "46D14E04EC949EF57BC0AA07D8F63E55F0CF45857C229BA01F624CAE69DD5C69",
+  "up_buffer_sha256": "09AF51DCB6279F1712B823689F8AAAE89DB0623CC4D8EC86A28F061C351FF66B",
+  "measurement_sha256": "80F03AEEC6BD13D028E95BDDFBDA171467B5C3544E7E032F70D06F909BD3F857"
+}

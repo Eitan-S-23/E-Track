@@ -1,0 +1,520 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "P2-6-v1",
+  "version": 1,
+  "task_id": "P2-6",
+  "parent_contract_sha256": null,
+  "status": "FROZEN",
+  "approved_by": "E-Track OTA 主会话（用户授权 R20 收口 agent 成形）",
+  "approved_at": "2026-08-30",
+  "implementation_ref": "docs/ota-exec-notes/P2-6-BR-20260829-RTT-BIND-R19-implementation-evidence.md",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "scope": "本合同只覆盖 P2-6 的 RTT 通道绑定轮次 P2-6-BR-20260829-RTT-BIND（正式验收根 .cache/p2-6-rtt-binding-20260829-18，audit-id P2-6-BR-20260829-RTT-BIND-R19-03）。P2-6 卡内 C1/C2、C4-C7、C14 判据以及升级态 RAM 峰值实测回填不在本合同范围内，仍为 NOT_OBSERVED。",
+  "authorized_deviations": [
+    {
+      "id": "DEV-1",
+      "type": "hardware_debug_domain_write",
+      "description": "每个 halt 会话在 monitor halt 之后写一次 monitor WriteU32 0xE0042008 0x00001000（debug apb1_frz bit12 DEBUG_WDT_PAUSE）。",
+      "justification": "R18 已坐实：>10 s 连续 halt 分块复读必然被看门狗复位，该写入是闸门读取的物理前置条件。非 flash、断电即失、不改被测镜像字节与 SHA-256；每脚本恰一行，server log 回显 count==1 被 fail-closed 校验。",
+      "bound_criteria": [
+        "PROC-WDT-PAUSE",
+        "HW-HALT-GATE"
+      ]
+    },
+    {
+      "id": "DEV-2",
+      "type": "host_process_termination",
+      "description": "capture 阶段用 Stop-Process 停止 JLinkRTTLogger 并验证零残留。",
+      "justification": "JLinkRTTLogger 无自然退出，AGENTS.md 明确规定残留清理模式；这是本流程唯一由 host 终止的进程，GDB 与 server 仍严格自然退出；capture.json 显式记录 logger_stopped_by / logger_stopped / 残留计数。",
+      "bound_criteria": [
+        "PROC-NATURAL-EXIT",
+        "HW-CAPTURE-PAYLOAD"
+      ]
+    },
+    {
+      "id": "DEV-3",
+      "type": "process",
+      "description": "本合同在独立验收判定（2026-08-30 PASS）之后由 R20 收口会话冻结，而非在验收前冻结。",
+      "justification": "沿用 R17 以来的既有流程（由验收侧在候选稳定后冻结，见 R19 证据文档 §9）。如实登记而不掩饰：本合同的判据、门槛与观测值全部来自已封存只读根 -18 的原始记录，R20 收口会话不改判定、不重跑硬件、不改产品代码；后续 P2-6 轮次应改为验收前冻结。",
+      "bound_criteria": [
+        "HW-RTT-BINDING",
+        "HW-CAPTURE-PAYLOAD",
+        "HW-POSTCHECK-RDOFF",
+        "HW-HALT-GATE",
+        "HW-IMAGE-AUTHORITY",
+        "HW-NO-FLASH-WRITE",
+        "PROC-WDT-PAUSE",
+        "PROC-NATURAL-EXIT",
+        "PROC-EVIDENCE-DOC-ACCURACY"
+      ]
+    }
+  ],
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "F173B6780A911FE94B7BB05651B62F41027229835CD17411896714E47BF442EB",
+      "manifest_json_sha256": "047E8C0E32CC99AA586F61DBB88686EB19F6301524BCA29E996D5D2B1AFFCDC7"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "8837FE99A8787711FB5FDDEA3EF9C5849028BD54079F2D52E52C8F9F36F70C34",
+      "manifest_json_sha256": "D03EB877F7E27CE98F4C41B564210E94500398E95DF0D7B5DC38175B926503A8"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "11F3E7717AFF5B2515250E65C8AC2B7A26554A3C09A5A374C8B7BF4337B1D3B5",
+      "manifest_json_sha256": "71323695E65DF9FD5F523B7E6747CD2BF52DC9BD7D959D0E4BC705871E556150"
+    }
+  ],
+  "external_inputs": [],
+  "commands": [
+    {
+      "id": "CMD-ACCEPT-RUN",
+      "description": "独立验收会话执行的唯一硬件启动命令（R19 §7.2 冻结形式，bash）。",
+      "command": "cd /d/github/my/E-Track && \"C:/Users/SU/AppData/Local/Programs/Python/Python313/python.exe\" .cache/p2-6-rtt-binding-20260829-18/scripts/run_recovery_binding.py --audit-id P2-6-BR-20260829-RTT-BIND-R19-03 --evidence-root \"D:/github/my/E-Track/.cache/p2-6-rtt-binding-20260829-18\"",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-GDB-SHA",
+      "description": "只读复算证据根 -18 中 8 个生成 GDB 脚本的字节数与 SHA-256。",
+      "command": "cd /d/github/my/E-Track && python -c \"import hashlib,pathlib\\nfor p in sorted(pathlib.Path('.cache/p2-6-rtt-binding-20260829-18/scripts').glob('*.gdb')):\\n    print(f'{p.name} {p.stat().st_size} {hashlib.sha256(p.read_bytes()).hexdigest().upper()}')\"",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-BOARD-HEADER",
+      "description": "板卡 App 头部快照（version_code/CRC32）",
+      "path": "artifacts/snapshots/board-header.bin"
+    },
+    {
+      "id": "ART-BOARD-IMAGE-A",
+      "description": "gate-pre 第一遍全镜像复读",
+      "path": "artifacts/snapshots/board-image-a.bin"
+    },
+    {
+      "id": "ART-BOARD-IMAGE-B",
+      "description": "gate-pre 第二遍全镜像复读",
+      "path": "artifacts/snapshots/board-image-b.bin"
+    },
+    {
+      "id": "ART-BOARD-IMAGE-C",
+      "description": "gate-pre 第三遍全镜像复读",
+      "path": "artifacts/snapshots/board-image-c.bin"
+    },
+    {
+      "id": "ART-CAPTURE-JSON",
+      "description": "会话间 JLinkRTTLogger 采集记录（字节数、SHA、logger 生命周期）",
+      "path": "artifacts/logs/capture.json"
+    },
+    {
+      "id": "ART-CB-POST",
+      "description": "采集后 RTT 控制块快照",
+      "path": "artifacts/snapshots/rtt-cb-post.bin"
+    },
+    {
+      "id": "ART-CB-PRE",
+      "description": "采集前 RTT 控制块快照",
+      "path": "artifacts/snapshots/rtt-cb-pre.bin"
+    },
+    {
+      "id": "ART-GATEPRE-JSON",
+      "description": "gate-pre 三遍复读的逐遍审计记录",
+      "path": "artifacts/logs/gate-pre.json"
+    },
+    {
+      "id": "ART-GDB-LOG",
+      "description": "binding 会话 1 的 GDB 原始日志",
+      "path": "artifacts/logs/gdb.log"
+    },
+    {
+      "id": "ART-GDB-POST-LOG",
+      "description": "binding 会话 2 的 GDB 原始日志",
+      "path": "artifacts/logs/gdb-post.log"
+    },
+    {
+      "id": "ART-GDB-SHA",
+      "description": "根 -18 生成 GDB 脚本的字节数与 SHA-256 复算输出",
+      "path": "artifacts/logs/generated-gdb-sha256.txt"
+    },
+    {
+      "id": "ART-LOGGER-CONSOLE",
+      "description": "JLinkRTTLogger 控制台原始输出",
+      "path": "artifacts/logs/rtt-logger-console.log"
+    },
+    {
+      "id": "ART-PENDING",
+      "description": "precheck 由 GDB 快照推导的待读字节",
+      "path": "artifacts/snapshots/pending.bin"
+    },
+    {
+      "id": "ART-POSTCHECK-JSON",
+      "description": "RTT 控制块前后 diff 与 RdOff 推进记录",
+      "path": "artifacts/logs/postcheck.json"
+    },
+    {
+      "id": "ART-PRECALL-JSON",
+      "description": "受控调用前置状态审计记录",
+      "path": "artifacts/logs/precall.json"
+    },
+    {
+      "id": "ART-PRECHECK-JSON",
+      "description": "采集前 Up0 待读字节的资格与基准记录",
+      "path": "artifacts/logs/precheck.json"
+    },
+    {
+      "id": "ART-R19-DOC",
+      "description": "R20 更正后的 R19 实现证据文档副本",
+      "path": "artifacts/docs/P2-6-BR-20260829-RTT-BIND-R19-implementation-evidence.md"
+    },
+    {
+      "id": "ART-RECOVERY-JSON",
+      "description": "恢复/闸门阶段完整结果记录",
+      "path": "artifacts/logs/recovery-result.json"
+    },
+    {
+      "id": "ART-RESULT",
+      "description": "两会话 binding 编排的最终结果记录（分类/marker/会话退出码）",
+      "path": "artifacts/logs/result.json"
+    },
+    {
+      "id": "ART-ROOT-MANIFEST",
+      "description": "证据根 -18 的封存 manifest（绑定根内全部 965 个文件）",
+      "path": "artifacts/root-manifest.json"
+    },
+    {
+      "id": "ART-RTT-PAYLOAD",
+      "description": "logger 读出的 Up0 环载荷字节",
+      "path": "artifacts/snapshots/rtt-payload.bin"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "HW-RTT-BINDING",
+      "description": "真机两会话 binding 必须把 RTT Up0 通道绑定坐实，判定为 RTT_CHANNEL_BINDING_VERIFIED 且 14 个 GDB 标记全部命中。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-GDB-LOG",
+        "ART-GDB-POST-LOG",
+        "ART-PRECALL-JSON"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "HW-CAPTURE-PAYLOAD",
+      "description": "会话间 JLinkRTTLogger 读出的载荷必须与 precheck 推导的待读字节逐字节一致。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "structured_result",
+        "binary_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-CAPTURE-JSON",
+        "ART-PRECHECK-JSON",
+        "ART-RTT-PAYLOAD",
+        "ART-PENDING"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "payload_bytes=731",
+          "expected_pending_bytes=731",
+          "payload_sha256=206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+          "raw_sha256=206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+          "payload_complete=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-POSTCHECK-RDOFF",
+      "description": "采集只允许推进 Up0 的 4 字节 RdOff 字；控制块其余字节、环内容与 measurement 结构必须逐字节不变。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "structured_result",
+        "binary_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-POSTCHECK-JSON",
+        "ART-CB-PRE",
+        "ART-CB-POST"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "RdOff:0->731",
+          "WrOff:731->731",
+          "control_block_outside_rd_off_changes=0",
+          "up_buffer_sha256_unchanged=true",
+          "measurement_seq_unchanged=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-HALT-GATE",
+      "description": "gate-pre 三遍分块复读期间核心必须全程 halted：每遍 147 chunk / 294 个 DHCSR 标记全为 S_HALT=1，零错误行。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "structured_result",
+        "raw_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-GATEPRE-JSON",
+        "ART-RECOVERY-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "a:dhcsr=294,all_halted=true,errors=0,chunks=147",
+          "b:dhcsr=294,all_halted=true,errors=0,chunks=147",
+          "c:dhcsr=294,all_halted=true,errors=0,chunks=147"
+        ]
+      }
+    },
+    {
+      "id": "HW-IMAGE-AUTHORITY",
+      "description": "被测 App 镜像身份必须三遍复读一致并与冻结权威 SHA-256 相符，头部 CRC32 有效。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "structured_result",
+        "binary_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-RECOVERY-JSON",
+        "ART-BOARD-HEADER",
+        "ART-BOARD-IMAGE-A",
+        "ART-BOARD-IMAGE-B",
+        "ART-BOARD-IMAGE-C"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "read_count=3",
+          "bytes=600744",
+          "sha256=A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+          "reads_identical=true",
+          "classification=BOARD_IMAGE_AUTHORITATIVE",
+          "header_crc32=B8499369,valid=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-NO-FLASH-WRITE",
+      "description": "本轮走 no-flash 分支：全程零 loadbin / 零 verifybin，板卡镜像零差异字节。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-RECOVERY-JSON",
+        "ART-RESULT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "loadbin_count=0",
+          "verifybin_count=0",
+          "difference_bytes=0",
+          "flash_allowed=false",
+          "recovery_classification=APP_IMAGE_ALREADY_AUTHORITATIVE"
+        ]
+      }
+    },
+    {
+      "id": "PROC-WDT-PAUSE",
+      "description": "每个 halt 会话恰好施加一次调试域看门狗暂停写，并由 server log 回显 fail-closed 校验。",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-GATEPRE-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "wdt_pause_applied=true",
+          "session1_echo=1",
+          "session2_echo=1",
+          "gate_pre_a_echo=1",
+          "gate_pre_b_echo=1",
+          "gate_pre_c_echo=1"
+        ]
+      }
+    },
+    {
+      "id": "PROC-NATURAL-EXIT",
+      "description": "GDB 与 GDB server 全部自然退出、退出码为 0，端口清零；唯一由 host 停止的进程是 RTT logger 且零残留。",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "structured_result",
+        "raw_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-ACCEPT-RUN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE-JSON",
+        "ART-LOGGER-CONSOLE"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "gdb_exit_code=0",
+          "gdb_post_exit_code=0",
+          "server_natural_exit=true",
+          "server_post_natural_exit=true",
+          "reset_run_final_ports_listening=0",
+          "logger_stopped_by_host=true",
+          "residual_rtt_logger_processes=0"
+        ]
+      }
+    },
+    {
+      "id": "PROC-EVIDENCE-DOC-ACCURACY",
+      "description": "R19 实现证据文档 §7.1 记录的生成脚本字节数与 SHA-256 必须与证据根 -18 的实读复算逐项一致。",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_output",
+        "document"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-GDB-SHA"
+      ],
+      "artifact_ids": [
+        "ART-GDB-SHA",
+        "ART-R19-DOC",
+        "ART-ROOT-MANIFEST"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": []
+}
