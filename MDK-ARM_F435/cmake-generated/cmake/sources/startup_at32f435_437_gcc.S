@@ -156,6 +156,26 @@ __Vectors_End:
 Reset_Handler:
     ldr r0, =_estack
     mov sp, r0
+    ldr r1, =__StackLimit
+    ldr r2, =__StackTop
+    ldr r3, =0xA5A5A5A5
+.Lfill_ota_stack:
+    cmp r1, r2
+    bcs .Lfill_ota_guard
+    str r3, [r1]
+    adds r1, r1, #4
+    b .Lfill_ota_stack
+.Lfill_ota_guard:
+    ldr r1, =__StackGuardStart
+    ldr r2, =__StackGuardEnd
+    ldr r3, =0x5A5A5A5A
+.Lfill_ota_guard_loop:
+    cmp r1, r2
+    bcs .Lafter_ota_guards
+    str r3, [r1]
+    adds r1, r1, #4
+    b .Lfill_ota_guard_loop
+.Lafter_ota_guards:
     bl extend_sram_512k
     bl SystemInit
     ldr r0, =_sidata

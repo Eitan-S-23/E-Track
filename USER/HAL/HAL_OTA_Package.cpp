@@ -17,7 +17,15 @@
 #if !defined(_WIN32)
 #include "wdg.h"
 #endif
+#if defined(P2_6_TEST_ENABLE)
+#include "SEGGER_RTT.h"
+#include "StackInfo/StackInfo.h"
+#include "lvgl/src/misc/lv_tlsf.h"
+#include "lvgl/src/misc/lv_mem.h"
+#endif
 
+#include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 enum ota_overlay_owner_t
@@ -46,6 +54,211 @@ uint8_t g_ota_overlay_workspace[OTA_PACKAGE_WORKSPACE_SIZE];
 
 static volatile uint8_t g_ota_overlay_owner = OTA_OVERLAY_FREE;
 static ota_package_port_context_t g_ota_package_port;
+
+#if defined(P2_6_TEST_ENABLE)
+extern "C" uint32_t P2_6_sbrk_call_count(void);
+extern "C" uintptr_t P2_6_sbrk_peak(void);
+
+static volatile uint32_t P2_6_lv_tlsf_malloc_calls;
+static volatile uint32_t P2_6_lv_tlsf_realloc_calls;
+static volatile uint32_t P2_6_lv_tlsf_free_calls;
+static volatile uint32_t P2_6_lv_tlsf_sequence;
+static volatile size_t P2_6_last_tlsf_size;
+static volatile uintptr_t P2_6_last_tlsf_return;
+
+extern "C" void *__real_lv_tlsf_malloc(lv_tlsf_t tlsf, size_t size);
+extern "C" void *__real_lv_tlsf_realloc(lv_tlsf_t tlsf, void *ptr,
+                                          size_t size);
+extern "C" size_t __real_lv_tlsf_free(lv_tlsf_t tlsf, const void *ptr);
+
+extern "C" void *__wrap_lv_tlsf_malloc(lv_tlsf_t tlsf, size_t size)
+{
+    void *result;
+
+    ++P2_6_lv_tlsf_malloc_calls;
+    P2_6_last_tlsf_size = size;
+    result = __real_lv_tlsf_malloc(tlsf, size);
+    P2_6_last_tlsf_return = (uintptr_t)result;
+    P2_6_lv_tlsf_sequence = P2_6_lv_tlsf_sequence * 5u + 1u;
+    return result;
+}
+
+extern "C" void *__wrap_lv_tlsf_realloc(lv_tlsf_t tlsf, void *ptr,
+                                          size_t size)
+{
+    void *result;
+
+    ++P2_6_lv_tlsf_realloc_calls;
+    P2_6_last_tlsf_size = size;
+    result = __real_lv_tlsf_realloc(tlsf, ptr, size);
+    P2_6_last_tlsf_return = (uintptr_t)result;
+    P2_6_lv_tlsf_sequence = P2_6_lv_tlsf_sequence * 5u + 2u;
+    return result;
+}
+
+extern "C" size_t __wrap_lv_tlsf_free(lv_tlsf_t tlsf, const void *ptr)
+{
+    size_t result = __real_lv_tlsf_free(tlsf, ptr);
+
+    ++P2_6_lv_tlsf_free_calls;
+    P2_6_last_tlsf_return = (uintptr_t)result;
+    P2_6_lv_tlsf_sequence = P2_6_lv_tlsf_sequence * 5u + 3u;
+    return result;
+}
+
+typedef struct ota_p2_6_measurement_t
+{
+    uint32_t valid;
+    uint32_t kind;
+    uint32_t entry_stack_peak;
+    uint32_t exit_stack_peak;
+    uint32_t stack_total;
+    uint32_t entry_guard_intact;
+    uint32_t exit_guard_intact;
+    uint32_t entry_sbrk_calls;
+    uint32_t exit_sbrk_calls;
+    uintptr_t entry_sbrk_peak;
+    uintptr_t exit_sbrk_peak;
+    uint32_t entry_tlsf_malloc;
+    uint32_t exit_tlsf_malloc;
+    uint32_t entry_tlsf_realloc;
+    uint32_t exit_tlsf_realloc;
+    uint32_t entry_tlsf_free;
+    uint32_t exit_tlsf_free;
+    uint32_t tlsf_sequence;
+    size_t last_tlsf_size;
+    uintptr_t last_tlsf_return;
+    lv_mem_monitor_t entry_mem;
+    lv_mem_monitor_t exit_mem;
+} ota_p2_6_measurement_t;
+
+static ota_p2_6_measurement_t g_ota_p2_6_measurement;
+
+extern "C" __attribute__((noinline, used))
+uint32_t P2_6_StartupStackScanProbe(void)
+{
+    volatile uint32_t scratch[16];
+
+    for (uint32_t index = 0u; index < 16u; ++index)
+    {
+        scratch[index] = 0xC13A0000u + index;
+    }
+    uint32_t usage = StackInfo_GetMaxUsageSize();
+    __asm volatile("" : : "r"(scratch[0]) : "memory");
+    return usage;
+}
+
+static void p2_6_measure_mem(lv_mem_monitor_t *monitor)
+{
+    memset(monitor, 0, sizeof(*monitor));
+    lv_mem_monitor(monitor);
+}
+
+static void p2_6_measure_begin(uint32_t kind)
+{
+    memset(&g_ota_p2_6_measurement, 0,
+           sizeof(g_ota_p2_6_measurement));
+    g_ota_p2_6_measurement.kind = kind;
+    g_ota_p2_6_measurement.stack_total = StackInfo_GetTotalSize();
+    g_ota_p2_6_measurement.entry_stack_peak =
+        StackInfo_GetMaxUsageSize();
+    g_ota_p2_6_measurement.entry_guard_intact =
+        StackInfo_IsGuardIntact();
+    g_ota_p2_6_measurement.entry_sbrk_calls =
+        P2_6_sbrk_call_count();
+    g_ota_p2_6_measurement.entry_sbrk_peak = P2_6_sbrk_peak();
+    g_ota_p2_6_measurement.entry_tlsf_malloc =
+        P2_6_lv_tlsf_malloc_calls;
+    g_ota_p2_6_measurement.entry_tlsf_realloc =
+        P2_6_lv_tlsf_realloc_calls;
+    g_ota_p2_6_measurement.entry_tlsf_free = P2_6_lv_tlsf_free_calls;
+    p2_6_measure_mem(&g_ota_p2_6_measurement.entry_mem);
+}
+
+static void p2_6_measure_end(void)
+{
+    g_ota_p2_6_measurement.exit_stack_peak =
+        StackInfo_GetMaxUsageSize();
+    g_ota_p2_6_measurement.exit_guard_intact =
+        StackInfo_IsGuardIntact();
+    g_ota_p2_6_measurement.exit_sbrk_calls =
+        P2_6_sbrk_call_count();
+    g_ota_p2_6_measurement.exit_sbrk_peak = P2_6_sbrk_peak();
+    g_ota_p2_6_measurement.exit_tlsf_malloc =
+        P2_6_lv_tlsf_malloc_calls;
+    g_ota_p2_6_measurement.exit_tlsf_realloc =
+        P2_6_lv_tlsf_realloc_calls;
+    g_ota_p2_6_measurement.exit_tlsf_free = P2_6_lv_tlsf_free_calls;
+    g_ota_p2_6_measurement.tlsf_sequence = P2_6_lv_tlsf_sequence;
+    g_ota_p2_6_measurement.last_tlsf_size = P2_6_last_tlsf_size;
+    g_ota_p2_6_measurement.last_tlsf_return = P2_6_last_tlsf_return;
+    p2_6_measure_mem(&g_ota_p2_6_measurement.exit_mem);
+    g_ota_p2_6_measurement.valid = 1u;
+}
+
+static uint32_t p2_6_delta(uint32_t before, uint32_t after)
+{
+    return after - before;
+}
+
+static const char *p2_6_kind_name(uint32_t kind)
+{
+    return kind == 1u ? "full" : "patch";
+}
+
+static void p2_6_report_common(long result, const char *name,
+                               uint32_t workspace_peak,
+                               uint32_t arena_peak_observed,
+                               uint32_t failed_request_size)
+{
+    const ota_p2_6_measurement_t *m = &g_ota_p2_6_measurement;
+
+    if (!m->valid)
+    {
+        return;
+    }
+    SEGGER_RTT_printf(
+        0,
+        "P2_6 kind=%s result=%ld workspace_peak=%lu "
+        "arena_peak_observed=%lu failed_request_size=%lu "
+        "stack_entry=%lu stack_peak=%lu stack_total=%lu "
+        "guard_entry=%lu guard_exit=%lu "
+        "sbrk_delta=%lu sbrk_peak=%lu "
+        "tlsf_malloc_delta=%lu tlsf_realloc_delta=%lu tlsf_free_delta=%lu "
+        "lv_free_entry=%lu lv_free_exit=%lu lv_big_entry=%lu "
+        "lv_big_exit=%lu lv_frag_entry=%u lv_frag_exit=%u "
+        "lv_max_entry=%lu lv_max_exit=%lu seq=%lu last_size=%lu "
+        "last_ret=0x%lX\r\n",
+        name, result, (unsigned long)workspace_peak,
+        (unsigned long)arena_peak_observed,
+        (unsigned long)failed_request_size,
+        (unsigned long)m->entry_stack_peak,
+        (unsigned long)m->exit_stack_peak,
+        (unsigned long)m->stack_total,
+        (unsigned long)m->entry_guard_intact,
+        (unsigned long)m->exit_guard_intact,
+        (unsigned long)p2_6_delta(m->entry_sbrk_calls,
+                                  m->exit_sbrk_calls),
+        (unsigned long)m->exit_sbrk_peak,
+        (unsigned long)p2_6_delta(m->entry_tlsf_malloc,
+                                  m->exit_tlsf_malloc),
+        (unsigned long)p2_6_delta(m->entry_tlsf_realloc,
+                                  m->exit_tlsf_realloc),
+        (unsigned long)p2_6_delta(m->entry_tlsf_free,
+                                  m->exit_tlsf_free),
+        (unsigned long)m->entry_mem.free_size,
+        (unsigned long)m->exit_mem.free_size,
+        (unsigned long)m->entry_mem.free_biggest_size,
+        (unsigned long)m->exit_mem.free_biggest_size,
+        (unsigned)m->entry_mem.frag_pct,
+        (unsigned)m->exit_mem.frag_pct,
+        (unsigned long)m->entry_mem.max_used,
+        (unsigned long)m->exit_mem.max_used,
+        (unsigned long)m->tlsf_sequence,
+        (unsigned long)m->last_tlsf_size,
+        (unsigned long)m->last_tlsf_return);
+}
+#endif
 
 static void service_app_watchdog(void)
 {
@@ -390,9 +603,15 @@ ota_package_result_t HAL::OTA_PackageApplyStaging(
 {
     ota_package_io_t io;
     ota_package_device_t device;
+#if defined(P2_6_TEST_ENABLE)
+    p2_6_measure_begin(1u);
+#endif
 
     if (Qspi_IsOtaDisabled() || qspi_restore_xip() != 0)
     {
+#if defined(P2_6_TEST_ENABLE)
+        p2_6_measure_end();
+#endif
         return OTA_PACKAGE_ERR_READ;
     }
     memset(&g_ota_package_port, 0, sizeof(g_ota_package_port));
@@ -407,7 +626,12 @@ ota_package_result_t HAL::OTA_PackageApplyStaging(
     device.hardware_rev = 1u;
     device.layout_id = 1u;
     device.boot_version = 1u;
-    return ota_package_apply_full(&io, &device, package_len, out_info);
+    ota_package_result_t result =
+        ota_package_apply_full(&io, &device, package_len, out_info);
+#if defined(P2_6_TEST_ENABLE)
+    p2_6_measure_end();
+#endif
+    return result;
 }
 
 ota_patch_result_t HAL::OTA_PatchApplyStaging(
@@ -419,13 +643,22 @@ ota_patch_result_t HAL::OTA_PatchApplyStaging(
 {
     ota_patch_io_t io;
     ota_patch_device_t device;
+#if defined(P2_6_TEST_ENABLE)
+    p2_6_measure_begin(2u);
+#endif
 
     if (base_image_sha8 == 0)
     {
+#if defined(P2_6_TEST_ENABLE)
+        p2_6_measure_end();
+#endif
         return OTA_PATCH_ERR_ARGUMENT;
     }
     if (Qspi_IsOtaDisabled() || qspi_restore_xip() != 0)
     {
+#if defined(P2_6_TEST_ENABLE)
+        p2_6_measure_end();
+#endif
         return OTA_PATCH_ERR_READ;
     }
     memset(&g_ota_package_port, 0, sizeof(g_ota_package_port));
@@ -444,8 +677,47 @@ ota_patch_result_t HAL::OTA_PatchApplyStaging(
     device.base_image_len = base_image_len;
     memcpy(device.base_image_sha8, base_image_sha8,
            sizeof(device.base_image_sha8));
-    return ota_patch_apply(&io, &device, package_len, out_info);
+    ota_patch_result_t result =
+        ota_patch_apply(&io, &device, package_len, out_info);
+#if defined(P2_6_TEST_ENABLE)
+    p2_6_measure_end();
+#endif
+    return result;
 }
+
+#if defined(P2_6_TEST_ENABLE)
+void HAL::OTA_P2_6_ReportPackageApply(
+    ota_package_result_t result, const ota_package_info_t *info)
+{
+    ota_package_info_t empty;
+
+    memset(&empty, 0, sizeof(empty));
+    if (info == 0)
+    {
+        info = &empty;
+    }
+    p2_6_report_common((long)result, p2_6_kind_name(1u),
+                       info->workspace_peak,
+                       info->arena_peak_observed,
+                       info->failed_request_size);
+}
+
+void HAL::OTA_P2_6_ReportPatchApply(
+    ota_patch_result_t result, const ota_patch_info_t *info)
+{
+    ota_patch_info_t empty;
+
+    memset(&empty, 0, sizeof(empty));
+    if (info == 0)
+    {
+        info = &empty;
+    }
+    p2_6_report_common((long)result, p2_6_kind_name(2u),
+                       info->workspace_peak,
+                       info->arena_peak_observed,
+                       info->failed_request_size);
+}
+#endif
 
 #if defined(P2_2_TEST_ENABLE)
 static uint32_t evidence_control_crc(uint32_t offset, uint32_t len)

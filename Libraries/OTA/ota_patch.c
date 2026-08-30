@@ -88,6 +88,8 @@ typedef struct ota_arena_t
     size_t capacity;
     size_t used;
     size_t peak;
+    size_t peak_probe;
+    size_t failed_request;
 } ota_arena_t;
 
 /* 工作集与 ota_package.c 的 ota_workspace_state_t 逐字段同构（见 research §7.2:
@@ -187,8 +189,13 @@ static void *arena_alloc(ISzAllocPtr allocator, size_t size)
         return 0;
     }
     aligned_size = align_up(size, ARENA_ALIGNMENT);
+    if (arena->used + aligned_size > arena->peak_probe)
+    {
+        arena->peak_probe = arena->used + aligned_size;
+    }
     if (aligned_size > arena->capacity - arena->used)
     {
+        arena->failed_request = size;
         return 0;
     }
     result = arena->base + arena->used;
@@ -199,6 +206,10 @@ static void *arena_alloc(ISzAllocPtr allocator, size_t size)
     }
     return result;
 }
+
+#if defined(OTA_P2_6_HOST_ARENA_CAPACITY_OVERRIDE)
+extern size_t ota_p2_6_host_arena_capacity(size_t prefix);
+#endif
 
 static void arena_free(ISzAllocPtr allocator, void *address)
 {
@@ -1120,7 +1131,7 @@ ota_patch_result_t ota_patch_apply(
     uint32_t workspace_len = 0u;
     uintptr_t aligned_address;
     size_t prefix;
-    ota_patch_state_t *state;
+    ota_patch_state_t *state = 0;
     CLzmaProps properties;
 
     if (io == 0 || device == 0 || package_len < OTA_PATCH_HEADER_SIZE ||
@@ -1189,6 +1200,9 @@ ota_patch_result_t ota_patch_apply(
     state->arena.allocator.Free = arena_free;
     state->arena.base = workspace + prefix;
     state->arena.capacity = workspace_len - prefix;
+#if defined(OTA_P2_6_HOST_ARENA_CAPACITY_OVERRIDE)
+    state->arena.capacity = ota_p2_6_host_arena_capacity(prefix);
+#endif
     if (ota_keys_get_aes128(outer.key_id, state->key) != 0)
     {
         result = OTA_PATCH_ERR_KEY;
@@ -1289,6 +1303,8 @@ ota_patch_result_t ota_patch_apply(
     info.image_crc32 = inner.ph_ncrc;
     info.decoded_len = (uint32_t)state->decoded_total;
     info.workspace_peak = (uint32_t)(prefix + state->arena.peak);
+    info.arena_peak_observed = (uint32_t)(prefix + state->arena.peak_probe);
+    info.failed_request_size = (uint32_t)state->arena.failed_request;
     result = validate_candidate_image(io, device, &outer, &inner, &info);
     if (result == OTA_PATCH_OK && out_info != 0)
     {
@@ -1296,6 +1312,31 @@ ota_patch_result_t ota_patch_apply(
     }
 
 cleanup:
+    if (state != 0)
+    {
+        info.arena_peak_observed =
+            (uint32_t)(prefix + state->arena.peak_probe);
+        info.failed_request_size = (uint32_t)state->arena.failed_request;
+        if (result == OTA_PATCH_OK)
+        {
+            info.workspace_peak = (uint32_t)(prefix + state->arena.peak);
+        }
+        if (out_info != 0)
+        {
+            if (result == OTA_PATCH_OK)
+            {
+                *out_info = info;
+            }
+            else
+            {
+                memset(out_info, 0, sizeof(*out_info));
+                out_info->arena_peak_observed =
+                    (uint32_t)(prefix + state->arena.peak_probe);
+                out_info->failed_request_size =
+                    (uint32_t)state->arena.failed_request;
+            }
+        }
+    }
     /* 出口统一清零 key / counter / LZMA 状态 / I-O 数据后 release。 */
     secure_zero(workspace, workspace_len);
     io->workspace_release(io->ctx, workspace, workspace_len);

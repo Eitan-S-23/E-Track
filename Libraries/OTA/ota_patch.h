@@ -110,6 +110,8 @@ typedef struct ota_patch_info_t
     uint32_t image_crc32;
     uint32_t decoded_len;
     uint32_t workspace_peak;
+    uint32_t arena_peak_observed;
+    uint32_t failed_request_size;
     uint8_t image_sha256[32];
 } ota_patch_info_t;
 

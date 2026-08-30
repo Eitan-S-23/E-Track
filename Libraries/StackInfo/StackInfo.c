@@ -22,6 +22,10 @@
  */
 #include "StackInfo.h"
 
+#if !defined(__GNUC__) && !defined(__CC_ARM)
+#error "StackInfo requires GNU Arm GCC or ARM Compiler 5"
+#endif
+
 #define CSTACK_BLOCK_NAME                    STACK
 
 #define SECTION_START(_name_)                _name_##$$Base
@@ -35,15 +39,16 @@ extern const int CSTACK_BLOCK_END(CSTACK_BLOCK_NAME);
 
 uint32_t StackInfo_GetTotalSize(void)
 {
-    uint32_t stackBaseAddr = (uint32_t)&CSTACK_BLOCK_START(CSTACK_BLOCK_NAME);
-    uint32_t stackSize = (uint32_t)&CSTACK_BLOCK_END(CSTACK_BLOCK_NAME) - stackBaseAddr;
+    uintptr_t stackBaseAddr = (uintptr_t)&CSTACK_BLOCK_START(CSTACK_BLOCK_NAME);
+    uintptr_t stackLimitAddr = (uintptr_t)&CSTACK_BLOCK_END(CSTACK_BLOCK_NAME);
+    uint32_t stackSize = (uint32_t)(stackLimitAddr - stackBaseAddr);
     return stackSize;
 }
 
 uint32_t StackInfo_GetMaxUsageSize(void)
 {
     static uint32_t stackMaxUsage = 0;
-    uint32_t stackBaseAddr = (uint32_t)&CSTACK_BLOCK_START(CSTACK_BLOCK_NAME);
+    uintptr_t stackBaseAddr = (uintptr_t)&CSTACK_BLOCK_START(CSTACK_BLOCK_NAME);
     uint32_t stackSize = StackInfo_GetTotalSize();
 
     volatile uint32_t* stackBase = (uint32_t*)stackBaseAddr;
@@ -76,4 +81,31 @@ uint32_t StackInfo_GetMinFreeSize(void)
 float StackInfo_GetMaxUtilization(void)
 {
     return (float)StackInfo_GetMaxUsageSize() / StackInfo_GetTotalSize();
+}
+
+uint32_t StackInfo_IsGuardIntact(void)
+{
+#if defined(__GNUC__) && !defined(__CC_ARM)
+    extern const uint32_t __StackGuardStart;
+    extern const uint32_t __StackGuardEnd;
+    uintptr_t start = (uintptr_t)&__StackGuardStart;
+    uintptr_t end = (uintptr_t)&__StackGuardEnd;
+    volatile const uint32_t *guard = (volatile const uint32_t *)start;
+
+    if (end < start || end - start != 32u)
+    {
+        return 0u;
+    }
+    while (start < end)
+    {
+        if (*guard++ != STACK_INFO_GUARD)
+        {
+            return 0u;
+        }
+        start += sizeof(uint32_t);
+    }
+    return 1u;
+#else
+    return 0u;
+#endif
 }

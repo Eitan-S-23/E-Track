@@ -57,6 +57,9 @@ option(P2_2_TEST_ENABLE
 option(P2_3_TEST_ENABLE
        "Enable the evidence-only P2-3 patch harness"
        OFF)
+option(P2_6_TEST_ENABLE
+       "Enable the P2-6 OTA RAM measurement instrumentation"
+       OFF)
 if(P2_1_TEST_ENABLE AND P2_2_TEST_ENABLE)
     message(FATAL_ERROR "P2-1 and P2-2 evidence harnesses are mutually exclusive")
 endif()
@@ -74,6 +77,18 @@ if(P2_1_TEST_ENABLE AND P2_3_TEST_ENABLE)
 endif()
 if(P2_2_TEST_ENABLE AND P2_3_TEST_ENABLE)
     message(FATAL_ERROR "P2-2 and P2-3 evidence harnesses are mutually exclusive")
+endif()
+if(P1_6_TEST_ENABLE AND P2_6_TEST_ENABLE)
+    message(FATAL_ERROR "P1-6 and P2-6 evidence harnesses are mutually exclusive")
+endif()
+if(P2_1_TEST_ENABLE AND P2_6_TEST_ENABLE)
+    message(FATAL_ERROR "P2-1 and P2-6 evidence harnesses are mutually exclusive")
+endif()
+if(P2_2_TEST_ENABLE AND P2_6_TEST_ENABLE)
+    message(FATAL_ERROR "P2-2 and P2-6 evidence harnesses are mutually exclusive")
+endif()
+if(P2_3_TEST_ENABLE AND P2_6_TEST_ENABLE)
+    message(FATAL_ERROR "P2-3 and P2-6 evidence harnesses are mutually exclusive")
 endif()
 set(OTA_TEST_LINKER_DEFINES)
 if(P1_6_TEST_ENABLE)
@@ -720,6 +735,15 @@ if(P2_3_TEST_ENABLE)
     target_compile_definitions(X_Track_App_GCC PRIVATE "P2_3_TEST_ENABLE")
 endif()
 
+# Both production and test App builds must emit their own .su data for the
+# frozen P2-6 static stack-closure route.  Test-only instrumentation remains
+# guarded below; this option changes evidence sidecars, not product semantics.
+target_compile_options(X_Track_App_GCC PRIVATE -fstack-usage)
+
+if(P2_6_TEST_ENABLE)
+    target_compile_definitions(X_Track_App_GCC PRIVATE "P2_6_TEST_ENABLE=1")
+endif()
+
 # 根据当前工具链推导 GCC C++ multilib 头文件目录。
 execute_process(
     COMMAND "${CMAKE_CXX_COMPILER}" -print-sysroot
@@ -860,6 +884,15 @@ target_link_options(X_Track_App_GCC PRIVATE
     -specs=nosys.specs
     -u _printf_float
 )
+
+if(P2_6_TEST_ENABLE)
+    target_link_options(X_Track_App_GCC PRIVATE
+        "-Wl,--wrap=lv_tlsf_malloc"
+        "-Wl,--wrap=lv_tlsf_realloc"
+        "-Wl,--wrap=lv_tlsf_free"
+        "-Wl,--undefined=P2_6_StartupStackScanProbe"
+    )
+endif()
 
 target_link_options(X_Track_Boot PRIVATE
     -mfloat-abi=hard

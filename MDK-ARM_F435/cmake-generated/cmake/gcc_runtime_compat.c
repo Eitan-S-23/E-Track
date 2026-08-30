@@ -23,14 +23,37 @@ __asm__(
 
 extern char end;
 extern char _estack;
-extern char _Min_Stack_Size;
+extern char __StackGuardStart;
+
+#if defined(P2_6_TEST_ENABLE)
+static volatile uint32_t sbrk_call_count;
+static volatile uintptr_t sbrk_peak;
+
+uint32_t P2_6_sbrk_call_count(void)
+{
+    return sbrk_call_count;
+}
+
+uintptr_t P2_6_sbrk_peak(void)
+{
+    return sbrk_peak;
+}
+#endif
 
 void *_sbrk(ptrdiff_t increment)
 {
     static uintptr_t current = (uintptr_t)&end;
     const uintptr_t base = (uintptr_t)&end;
-    const uintptr_t limit = (uintptr_t)&_estack - (uintptr_t)&_Min_Stack_Size;
+    const uintptr_t limit = (uintptr_t)&__StackGuardStart;
     uintptr_t next;
+
+#if defined(P2_6_TEST_ENABLE)
+    ++sbrk_call_count;
+    if (current > sbrk_peak)
+    {
+        sbrk_peak = current;
+    }
+#endif
 
     if (increment >= 0)
     {
@@ -54,5 +77,11 @@ void *_sbrk(ptrdiff_t increment)
 
     void *previous = (void *)current;
     current = next;
+#if defined(P2_6_TEST_ENABLE)
+    if (current > sbrk_peak)
+    {
+        sbrk_peak = current;
+    }
+#endif
     return previous;
 }

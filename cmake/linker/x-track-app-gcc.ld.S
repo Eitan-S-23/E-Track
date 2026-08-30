@@ -6,6 +6,8 @@ _estack = ORIGIN(RAM) + LENGTH(RAM);
 _sstack = ORIGIN(RAM);
 _Min_Heap_Size = 0x200;
 _Min_Stack_Size = 0x1000;
+OTA_STACK_RESERVE = 0x2000;
+OTA_STACK_GUARD_SIZE = 0x20;
 
 MEMORY
 {
@@ -298,9 +300,53 @@ SECTIONS
     . = ALIGN(8);
     PROVIDE(end = .);
     . = . + _Min_Heap_Size;
-    . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } > RAM
+
+  /* The guard is outside the measured stack and forms the heap hard limit. */
+  .ota_stack_guard (_estack - OTA_STACK_RESERVE - OTA_STACK_GUARD_SIZE) (NOLOAD) :
+  {
+    KEEP(*(.ota_stack_guard))
+    . = 32;
+  } > RAM
+
+  /* Keep the measured stack as an explicit, exactly-sized output section. */
+  .ota_stack (_estack - OTA_STACK_RESERVE) (NOLOAD) :
+  {
+    KEEP(*(.ota_stack))
+    . = 8192;
+  } > RAM
+
+  /* Derive all public stack symbols from the actual output sections. */
+  __StackLimit = ADDR(.ota_stack);
+  __StackTop = ADDR(.ota_stack) + SIZEOF(.ota_stack);
+  __StackGuardStart = ADDR(.ota_stack_guard);
+  __StackGuardEnd = ADDR(.ota_stack_guard) + SIZEOF(.ota_stack_guard);
+
+  /* armlink-compatible aliases used by Libraries/StackInfo. */
+  STACK$$Base = __StackLimit;
+  STACK$$Limit = __StackTop;
+
+  ASSERT(SIZEOF(.ota_stack) == OTA_STACK_RESERVE,
+         "A1: OTA stack section size must equal OTA_STACK_RESERVE")
+  ASSERT(SIZEOF(.ota_stack_guard) == OTA_STACK_GUARD_SIZE,
+         "A2: OTA stack guard section size must equal OTA_STACK_GUARD_SIZE")
+  ASSERT(ADDR(.ota_stack) + SIZEOF(.ota_stack) == _estack,
+         "A3: OTA stack section must end exactly at _estack")
+  ASSERT(ADDR(.ota_stack_guard) + SIZEOF(.ota_stack_guard) ==
+             ADDR(.ota_stack),
+         "A4: OTA stack guard must be immediately below the stack area")
+  ASSERT(ADDR(._user_heap_stack) + SIZEOF(._user_heap_stack) <=
+             ADDR(.ota_stack_guard),
+         "A5: Data/heap region overlaps the OTA stack guard area")
+  ASSERT(__StackLimit == ADDR(.ota_stack),
+         "A6: __StackLimit must be derived from ADDR(.ota_stack)")
+  ASSERT(__StackGuardStart == ADDR(.ota_stack_guard),
+         "A7: __StackGuardStart must be derived from ADDR(.ota_stack_guard)")
+  ASSERT(__StackGuardEnd == __StackLimit,
+         "A8: __StackGuardEnd must equal __StackLimit")
+  ASSERT(__StackTop == _estack,
+         "A9: __StackTop must equal _estack")
 
   /DISCARD/ : { *(.note.GNU-stack) }
 }
