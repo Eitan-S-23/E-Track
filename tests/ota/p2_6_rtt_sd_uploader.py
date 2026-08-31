@@ -57,6 +57,18 @@ FROZEN_ASSETS = {
     FROZEN_FULL_SHA256: "FULL",
 }
 
+# BCB 上传前置允许集合（P2-6-BR-20260830-SD-R6-01 §3 授权）：
+# PATCH OTA 之后板卡按契约处于 STAGED（boot 消费链入口），把 CONFIRMED 当作
+# 唯一合法上传前置是 harness 对被测状态机的错误假设（R5 判 HARNESS_FAIL 的根因）。
+# UPLOAD_BCB_STATE_IDLE=0 取自 Libraries/EEPROM/eeprom_bcb.h 的 BCB_STATE_IDLE；
+# driver 未导出该常量且不在本轮修改白名单内，故在此定义并注明来源。
+UPLOAD_BCB_STATE_IDLE = 0
+UPLOAD_ALLOWED_BCB_STATES = (
+    driver.BCB_STATE_CONFIRMED,
+    driver.BCB_STATE_STAGED,
+    UPLOAD_BCB_STATE_IDLE,
+)
+
 MI_BEGIN_RE = re.compile(
     r"^P2_6_MI_READ_BEGIN chunk=(?P<chunk>\d+) block=(?P<block>\d+) "
     r"address=0x(?P<address>[0-9A-Fa-f]+) size=(?P<size>\d+)$"
@@ -259,6 +271,57 @@ def parse_mi_readback(
     return b"".join(data_parts), adopted
 
 
+def upload_runtime_state_lines(
+    symbols: dict[str, int],
+    expected_header: bytes,
+    layout: dict[str, int],
+    label: str,
+    quit_code: int,
+) -> list[str]:
+    """Uploader 侧运行时前置检查：BCB 判定放宽为 UPLOAD_ALLOWED_BCB_STATES 集合。
+
+    与 p2_6_rtt_ota_driver.runtime_state_lines 的其余检查逐行一致（fw 头、
+    RTT 签名、SD/VTOR/CFSR/overlay owner）；该 driver 文件不在修改白名单内，
+    只能在此镜像并与其保持同步。唯一差异：BCB 单值比较改为集合判定，
+    集合外状态（APPLYING/TEST_BOOT/ROLLBACK 等）仍 fail-closed 走原 quit_code。
+    """
+    update_entry = symbols[driver.HAL_UPDATE_SYMBOL]
+    header_address = layout["OTA_APP_ORIGIN"] + layout["OTA_FW_HEADER_OFFSET"]
+    owner = symbols[driver.OVERLAY_OWNER_SYMBOL]
+    lines = driver.firmware_header_check_lines(
+        header_address, expected_header, f"{label}_fw", quit_code
+    )
+    allowed = ",".join(str(state) for state in UPLOAD_ALLOWED_BCB_STATES)
+    not_allowed = " && ".join(
+        f"$bcb_{label} != {state}" for state in UPLOAD_ALLOWED_BCB_STATES
+    )
+    lines.extend(
+        [
+            f"set $rtt_{label} = (unsigned char*)0x{symbols[driver.RTT_SYMBOL]:08x}",
+            f"if $rtt_{label}[0] != 0x53 || $rtt_{label}[1] != 0x45 || $rtt_{label}[2] != 0x47 || $rtt_{label}[3] != 0x47 || $rtt_{label}[4] != 0x45 || $rtt_{label}[5] != 0x52 || $rtt_{label}[6] != 0x20 || $rtt_{label}[7] != 0x52 || $rtt_{label}[8] != 0x54 || $rtt_{label}[9] != 0x54",
+            f'  printf "P2_6_STATE ERROR label={label} rtt_signature\\n"',
+            f"  quit {quit_code}",
+            "end",
+            f"set $sd_{label} = *(unsigned char*)0x{symbols[driver.SD_READY_SYMBOL]:08x}",
+            f"set $vtor_{label} = *(unsigned int*)0x{driver.SCB_VTOR_ADDRESS:08x}",
+            f"set $cfsr_{label} = *(unsigned int*)0x{driver.SCB_CFSR_ADDRESS:08x}",
+            f"set $owner_{label} = *(unsigned char*)0x{owner:08x}",
+            f"if $sd_{label} != 1 || $vtor_{label} != 0x{driver.EXPECTED_VTOR:08x} || $cfsr_{label} != 0 || $owner_{label} != {driver.OTA_OVERLAY_FREE}",
+            f'  printf "P2_6_STATE ERROR label={label} sd=%u vtor=0x%08x cfsr=0x%08x owner=%u\\n", $sd_{label}, $vtor_{label}, $cfsr_{label}, $owner_{label}',
+            f"  quit {quit_code}",
+            "end",
+            f"set $bcb_{label} = ((unsigned char (*)(void))0x{symbols[driver.GET_BCB_SYMBOL] | 1:08x})()",
+            *driver.assert_stopped_at_lines(update_entry, f"{label}_bcb_call", quit_code),
+            f"if {not_allowed}",
+            f'  printf "P2_6_STATE ERROR label={label} bcb=%u allowed={allowed}\\n", $bcb_{label}',
+            f"  quit {quit_code}",
+            "end",
+            f'printf "P2_6_STATE PASS label={label} sd=%u vtor=0x%08x cfsr=0x%08x bcb=%u owner=%u\\n", $sd_{label}, $vtor_{label}, $cfsr_{label}, $bcb_{label}, $owner_{label}',
+        ]
+    )
+    return lines
+
+
 def upload_gdb_command_file(
     path: Path,
     elf: Path,
@@ -298,12 +361,11 @@ def upload_gdb_command_file(
         *driver.deterministic_stop_lines(
             update_entry, "upload_hal_update", 0x50326101, 40, attach=True
         ),
-        *driver.runtime_state_lines(
+        *upload_runtime_state_lines(
             symbols,
             expected_header,
             layout,
             "before_upload",
-            driver.BCB_STATE_CONFIRMED,
             41,
         ),
         *mi_write_memory_lines(path_addr, path_blob.read_bytes()),
@@ -423,12 +485,11 @@ def upload_gdb_command_file(
             '  printf "P2_6_SD_UPLOAD ERROR close_read res=%u\\n", $close_read',
             "  quit 62",
             "end",
-            *driver.runtime_state_lines(
+            *upload_runtime_state_lines(
                 symbols,
                 expected_header,
                 layout,
                 "after_upload",
-                driver.BCB_STATE_CONFIRMED,
                 63,
             ),
             f'printf "P2_6_SD_UPLOAD PASS bytes={total_size} chunks={len(chunks)}\\n"',
