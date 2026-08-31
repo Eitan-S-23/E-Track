@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import re
 import tempfile
 import unittest
 
@@ -191,6 +192,128 @@ class P26RttSdUploaderTest(unittest.TestCase):
         self.assertNotIn("vtable for Page::FirmwareUpdate", names)
         self.assertIn(UPLOADER.driver.OVERLAY_OWNER_SYMBOL, names)
         self.assertIn(UPLOADER.LV_FS_WRITE_SYMBOL, names)
+
+    def test_bcb_precondition_allows_staged_confirmed_idle(self) -> None:
+        """钉死 R6 裁定 §3（P2-6-BR-20260830-SD-R6-01）：不得把 STAGED 判为失败。
+
+        R5 FULL 上传 1/1 的 HARNESS_FAIL 根因是 uploader 把 BCB == CONFIRMED
+        当作上传硬前置；PATCH OTA 之后板卡按契约处于 STAGED。本负例断言：
+        IDLE/STAGED/CONFIRMED 均不触发 quit，而 APPLYING/TEST_BOOT/ROLLBACK
+        仍按原 quit_code fail-closed。
+        """
+        header = bytes(range(96))
+        symbols = selected_symbols()
+        layout = layout_values()
+        allowed = (
+            UPLOADER.UPLOAD_BCB_STATE_IDLE,
+            UPLOADER.driver.BCB_STATE_STAGED,
+            UPLOADER.driver.BCB_STATE_CONFIRMED,
+        )
+        # 2=APPLYING 3=TEST_BOOT 5=ROLLBACK（Libraries/EEPROM/eeprom_bcb.h）
+        forbidden = (2, 3, 5)
+        for label, quit_code in (("before_upload", 41), ("after_upload", 63)):
+            lines = UPLOADER.upload_runtime_state_lines(
+                symbols, header, layout, label, quit_code
+            )
+            text = "\n".join(lines)
+            conditions = [
+                line for line in lines if line.startswith(f"if $bcb_{label} != ")
+            ]
+            self.assertEqual(
+                len(conditions), 1, f"expected one BCB condition for {label}"
+            )
+            condition = conditions[0]
+            for state in allowed:
+                self.assertFalse(
+                    self._condition_triggers_quit(condition, label, state),
+                    f"BCB state {state} must not fail {label}",
+                )
+            for state in forbidden:
+                self.assertTrue(
+                    self._condition_triggers_quit(condition, label, state),
+                    f"BCB state {state} must stay fail-closed at {label}",
+                )
+            self.assertIn(f"quit {quit_code}", text)
+            allowed_text = ",".join(
+                str(state) for state in UPLOADER.UPLOAD_ALLOWED_BCB_STATES
+            )
+            self.assertIn(
+                f'printf "P2_6_STATE ERROR label={label} bcb=%u '
+                f'allowed={allowed_text}',
+                text,
+            )
+
+    @staticmethod
+    def _condition_triggers_quit(condition: str, label: str, state: int) -> bool:
+        expression = (
+            condition[len("if "):]
+            .replace(f"$bcb_{label}", str(state))
+            .replace("&&", "and")
+        )
+        return bool(eval(expression, {"__builtins__": {}}, {}))
+
+    def test_upload_allowed_bcb_states_match_eeprom_bcb_header(self) -> None:
+        """上传前置允许集合必须与生产 BCB 状态枚举逐一对账，防止魔数漂移。"""
+        header_path = (
+            UPLOADER.driver.ROOT / "Libraries" / "EEPROM" / "eeprom_bcb.h"
+        )
+        text = header_path.read_text(encoding="utf-8", errors="replace")
+        values = {
+            name: int(value)
+            for name, value in re.findall(
+                r"(BCB_STATE_[A-Z_]+)\s*=\s*(\d+)", text
+            )
+        }
+        self.assertEqual(
+            values["BCB_STATE_IDLE"], UPLOADER.UPLOAD_BCB_STATE_IDLE
+        )
+        self.assertEqual(
+            values["BCB_STATE_STAGED"], UPLOADER.driver.BCB_STATE_STAGED
+        )
+        self.assertEqual(
+            values["BCB_STATE_CONFIRMED"], UPLOADER.driver.BCB_STATE_CONFIRMED
+        )
+        self.assertEqual(
+            set(UPLOADER.UPLOAD_ALLOWED_BCB_STATES), {0, 1, 4}
+        )
+
+    def test_gdb_script_uses_bcb_state_set_not_single_value(self) -> None:
+        """生成的 GDB 脚本两处 BCB 检查都必须是集合判定，不得回退为单值比较。"""
+        UPLOADER.driver.DEFAULT_TMP_DIR.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=UPLOADER.driver.DEFAULT_TMP_DIR) as temp:
+            base = Path(temp)
+            chunk = base / "source-000.bin"
+            path_blob = base / "mcu-path.bin"
+            script = base / "upload.gdb"
+            chunk.write_bytes(b"test-data")
+            path_blob.write_bytes(b"/P2-6-RUN/test.etu\0")
+            UPLOADER.upload_gdb_command_file(
+                script,
+                UPLOADER.driver.ROOT / "firmware.elf",
+                selected_symbols(),
+                bytes(range(96)),
+                layout_values(),
+                [chunk],
+                path_blob,
+                chunk.stat().st_size,
+            )
+            text = script.read_text(encoding="ascii")
+        lines = text.splitlines()
+        for label in ("before_upload", "after_upload"):
+            conditions = [
+                line for line in lines if line.startswith(f"if $bcb_{label} != ")
+            ]
+            self.assertEqual(len(conditions), 1, f"label={label}")
+            for state in UPLOADER.UPLOAD_ALLOWED_BCB_STATES:
+                self.assertIn(
+                    f"$bcb_{label} != {state}", conditions[0], f"label={label}"
+                )
+            for line in lines:
+                self.assertNotRegex(
+                    line, rf"^if \$bcb_{label} != \d+$", f"label={label}"
+                )
+        self.assertIn("quit 41", text)
+        self.assertIn("quit 63", text)
 
 
 if __name__ == "__main__":
