@@ -1,0 +1,35 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08043216 in main ()
+Writing 0x00001000 @ address 0xE0042008
+P2_6_TRANSPORT attached_stopped pc=0x08043216
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_TRANSPORT breakpoint label=upload_hal_update pc=0x08040884
+P2_6_TRANSPORT stop_verified label=upload_hal_update pc=0x08040884
+P2_6_IDENTITY PASS label=before_upload_fw header_bytes=96
+P2_6_TRANSPORT context_verified label=before_upload_bcb_call pc=0x08040884
+P2_6_STATE PASS label=before_upload sd=1 vtor=0x08010000 cfsr=0x00000000 bcb=4 owner=0
+^done
+P2_6_TRANSPORT context_verified label=probe_open_return pc=0x08040884
+P2_6_SD_UPLOAD target_absent probe_res=12
+P2_6_TRANSPORT context_verified label=create_open_return pc=0x08040884
+^done
+P2_6_TRANSPORT context_verified label=write_chunk_0_return pc=0x08040884
+P2_6_SD_UPLOAD write chunk=0 res=0 bytes=305
+P2_6_TRANSPORT context_verified label=tell_write_return pc=0x08040884
+P2_6_TRANSPORT context_verified label=close_write_return pc=0x08040884
+P2_6_TRANSPORT context_verified label=reopen_return pc=0x08040884
+P2_6_TRANSPORT context_verified label=seek_end_return pc=0x08040884
+P2_6_TRANSPORT context_verified label=tell_read_return pc=0x08040884
+P2_6_TRANSPORT context_verified label=seek_start_return pc=0x08040884
+P2_6_TRANSPORT context_verified label=read_chunk_0_return pc=0x08040884
+P2_6_SD_UPLOAD read chunk=0 res=0 bytes=305
+P2_6_MI_READ_BEGIN chunk=0 block=0 address=0x20058000 size=305
+^done,memory=[{begin="0x20058000",offset="0x00000000",end="0x20058131",contents="45545531400007000100000001000000c91aa7f7c218ad0db39cc8e7f7c26c4cf1000000ecb5de6b415100004051000001000101ab38a4e75d905d305c571e793e70abb6b4a11ab66685a8b56abf15cc75ccbaeed5735782e0e0456877a00569d6d66c8f4fccb543e9b67da0f31415effe629311104d4ddfa190dffca72a21834c07347cf42cfa1cf2ec43b7bf3175f30aa4cbab980a15755ccb17310673e188df5a3ebbbd1e2566d3c246b4680f4284a6c816e3b9b630869697d70a38f4cc4af9b126ccbb08a385d5947cb4efcbbe19dcd41b553bce7c54103a8492083241695d39f3ac16177d42bd4476fff9a37aea97bceb21be7a3228c7ee4e878cfa18da473b96616cc5711280cf70d871c40a175fdfeccf21d94408c616afc024c4da5800439870c2828c3d8a0e618cb83957018d"}]
+P2_6_MI_READ_END chunk=0 block=0
+P2_6_TRANSPORT context_verified label=close_read_return pc=0x08040884
+P2_6_IDENTITY PASS label=after_upload_fw header_bytes=96
+P2_6_TRANSPORT context_verified label=after_upload_bcb_call pc=0x08040884
+P2_6_STATE PASS label=after_upload sd=1 vtor=0x08010000 cfsr=0x00000000 bcb=4 owner=0
+P2_6_SD_UPLOAD PASS bytes=305 chunks=1
+[Inferior 1 (Remote target) detached]

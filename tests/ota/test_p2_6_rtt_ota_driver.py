@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import shutil
 import socket
+import struct
 import subprocess
 import tempfile
 import threading
@@ -103,6 +104,7 @@ class P26RttOtaDriverTest(unittest.TestCase):
             "ports_closed": True,
             "session_error": None,
             "rtt_measurement_required": True,
+            "rtt_pending_derived": True,
             "rtt_payload_ready": True,
             "rtt_drain_success": True,
             "rtt_drain_complete": True,
@@ -110,110 +112,173 @@ class P26RttOtaDriverTest(unittest.TestCase):
             "rtt_payload_complete": True,
             "rtt_record_count": 1,
             "rtt_matching_record_count": 1,
+            "rtt_postcheck_passed": True,
         }
         self.assertEqual(DRIVER.classify_transport_session(outcome), "PASS")
         self.assertFalse(outcome.get("rtt_channel_binding_verified", False))
 
-    def _run_fake_session(
+    def _fake_transport_outcome(self, *, measurement_policy: bool, gdb_exit_code: int = 0) -> dict[str, object]:
+        return {
+            "server_started": True,
+            "server_pid": 501,
+            "server_ready": True,
+            "server_ready_seconds": 0.1,
+            "server_exit_code": 0,
+            "server_process_exited": True,
+            "server_natural_exit": True,
+            "server_terminate_sent": False,
+            "server_kill_sent": False,
+            "server_exit_wait_seconds": 0.1,
+            "server_cleanup_action": "natural_exit",
+            "server_cleanup_error": None,
+            "gdb_started": gdb_exit_code == 0,
+            "gdb_exit_code": gdb_exit_code,
+            "capture_error": None,
+            "rtt_connected": True,
+            "rtt_socket_connected": True,
+            "rtt_socket_eof": False,
+            "rtt_socket_error": False,
+            "rtt_banner_bytes": 107,
+            "rtt_capture_mode": "two_phase_logger",
+            "rtt_measurement_required": bool(measurement_policy),
+            "rtt_expected_kind": "PATCH" if measurement_policy else None,
+            "rtt_pending_derived": False,
+            "rtt_payload_ready": False,
+            "rtt_drain_started": False,
+            "rtt_drain_success": False,
+            "rtt_drain_complete": False,
+            "rtt_drain_deadline_expired": False,
+            "rtt_payload_complete": False,
+            "rtt_payload_timeout": False,
+            "rtt_payload_parse_error": None,
+            "rtt_record_count": 0,
+            "rtt_matching_record_count": None,
+            "rtt_postcheck_passed": False,
+            "rtt_channel_binding_verified": False,
+            "capture_stopped": True,
+            "ports_closed": True,
+            "session_error": None,
+            "transport_classification": None,
+        }
+
+    def _make_control_block(
         self,
-        payload: bytes = b"",
         *,
-        measurement_policy: bool,
+        wr_off: int,
+        rd_off: int,
+        signature: bytes = DRIVER.RTT_SIGNATURE,
+        up_size: int = 1024,
+        p_buffer: int = 0x20053A1C,
+        flags: int = 1,
+        max_up: int = 3,
+        max_down: int = 3,
+    ) -> bytes:
+        cb = bytearray(DRIVER.RTT_CB_SIZE)
+        cb[0:len(signature)] = signature
+        struct.pack_into("<i", cb, DRIVER.RTT_CB_MAX_UP_OFFSET, max_up)
+        struct.pack_into("<i", cb, DRIVER.RTT_CB_MAX_DOWN_OFFSET, max_down)
+        struct.pack_into("<I", cb, DRIVER.RTT_CB_UP0_PBUFFER_OFFSET, p_buffer)
+        struct.pack_into("<I", cb, DRIVER.RTT_CB_UP0_SIZE_OFFSET, up_size)
+        struct.pack_into("<I", cb, DRIVER.RTT_CB_UP0_WROFF_OFFSET, wr_off)
+        struct.pack_into("<I", cb, DRIVER.RTT_CB_UP0_RDOFF_OFFSET, rd_off)
+        struct.pack_into("<I", cb, DRIVER.RTT_CB_UP0_FLAGS_OFFSET, flags)
+        return bytes(cb)
+
+    def _make_ring(self, pending: bytes) -> bytes:
+        ring = bytearray(b"\xEE" * 1024)
+        ring[0:len(pending)] = pending
+        return bytes(ring)
+
+    def _run_fake_two_phase(
+        self,
+        pending: bytes = b"",
+        *,
         expected_kind: str = "PATCH",
         gdb_exit_code: int = 0,
+        capture_status: str = "PASS",
         capture_error: str | None = None,
-        socket_eof: bool = False,
-        socket_error: bool = False,
-        delayed: bool = False,
-    ) -> tuple[dict[str, object], float]:
-        class FakeServer:
-            pid = 501
+        capture_payload: bytes | None = None,
+        capture_timeout: bool = False,
+        post_wr_off: int | None = None,
+        post_rd_off: int | None = None,
+        post_extra_byte: bool = False,
+        post_session_fail: bool = False,
+    ) -> dict[str, object]:
+        """Drive run_two_phase_ota_session with the process/socket layer mocked.
 
-            def __init__(self) -> None:
-                self.exited = False
-
-            def poll(self) -> int | None:
-                return 0 if self.exited else None
-
-            def wait(self, timeout: float | None = None) -> int:
-                self.exited = True
-                return 0
-
-            def terminate(self) -> None:
-                raise AssertionError("unexpected terminate")
-
-            def kill(self) -> None:
-                raise AssertionError("unexpected kill")
-
-        class FakeCapture:
-            def __init__(
-                capture_self,
-                host: str,
-                port: int,
-                output: Path,
-                stop: threading.Event,
-                measurement_policy: bool = False,
-                expected_kind: str | None = None,
-            ) -> None:
-                capture_self.output = output
-                capture_self.measurement_policy = measurement_policy
-                capture_self.expected_kind = expected_kind
-                capture_self.connected = threading.Event()
-                capture_self.socket_connected = False
-                capture_self.socket_eof = socket_eof
-                capture_self.socket_error = socket_error
-                capture_self.payload_ready = False
-                capture_self.drain_started = False
-                capture_self.drain_success = False
-                capture_self.drain_complete = False
-                capture_self.drain_deadline_expired = False
-                capture_self.payload_timeout = False
-                capture_self.error = capture_error
-                capture_self.ident = None
-
-            def start(capture_self) -> None:
-                capture_self.ident = 1
-                capture_self.socket_connected = capture_error is None
-                if capture_self.socket_connected:
-                    capture_self.connected.set()
-                if not delayed:
-                    capture_self.output.write_bytes(payload)
-
-            def wait_for_bounded_drain(
-                capture_self, timeout: float, quiet_timeout: float = 0.1
-            ) -> None:
-                capture_self.drain_started = True
-                if delayed:
-                    time.sleep(0.03)
-                    capture_self.output.write_bytes(payload)
-                capture_self.payload_ready = bool(payload.endswith(b"\n") and b"P2_6 kind=" in payload)
-                capture_self.drain_success = capture_self.payload_ready
-                capture_self.drain_deadline_expired = False
-                capture_self.payload_timeout = not capture_self.drain_success
-                capture_self.drain_complete = capture_self.drain_success
-
-            def join(capture_self, timeout: float | None = None) -> None:
-                return None
-
-            def is_alive(capture_self) -> bool:
-                return False
+        The phase-1 snapshots, the pending derivation, and the postcheck all
+        run for real on constructed control-block/ring bytes; only the GDB
+        sessions, the logger process, and the port checks are faked.
+        """
+        wr_off = len(pending)
+        pre_cb = self._make_control_block(wr_off=wr_off, rd_off=0)
+        post_cb = bytearray(
+            self._make_control_block(
+                wr_off=wr_off if post_wr_off is None else post_wr_off,
+                rd_off=wr_off if post_rd_off is None else post_rd_off,
+            )
+        )
+        if post_extra_byte:
+            post_cb[0x30] = (post_cb[0x30] + 1) & 0xFF
+        post_cb = bytes(post_cb)
 
         with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
             temp_dir = Path(temp)
+            cb_pre = temp_dir / "cb-pre.bin"
+            ring_pre = temp_dir / "ring-pre.bin"
+            cb_post = temp_dir / "cb-post.bin"
+            pending_path = temp_dir / "pending.bin"
+            raw_log = temp_dir / "payload.raw.log"
+            console_log = temp_dir / "console.log"
+            post_rtt_log = temp_dir / "post-rtt.log"
+            cb_pre.write_bytes(pre_cb)
+            ring_pre.write_bytes(self._make_ring(pending))
+
+            def fake_gdb_session(**kwargs: object) -> dict[str, object]:
+                measurement = bool(kwargs.get("measurement_policy"))
+                outcome = self._fake_transport_outcome(
+                    measurement_policy=measurement,
+                    gdb_exit_code=gdb_exit_code if measurement else 0,
+                )
+                # GDB did start in every fake case; a nonzero exit code is a
+                # GDB_FAIL, not a GDB_NOT_STARTED.
+                outcome["gdb_started"] = True
+                if not measurement:
+                    cb_post.write_bytes(post_cb)
+                    if post_session_fail:
+                        outcome["session_error"] = "post session failed"
+                        outcome["gdb_exit_code"] = 3
+                return outcome
+
+            def fake_capture(*args: object, **kwargs: object) -> dict[str, object]:
+                result: dict[str, object] = {
+                    "phase": "capture",
+                    "status": capture_status,
+                    "reader": "JLinkRTTLogger",
+                    "payload_ready": capture_status == "PASS",
+                    "payload_complete": capture_status == "PASS",
+                    "payload_timeout": capture_timeout,
+                    "logger_stopped": True,
+                    "residual_rtt_logger_processes": 0,
+                    "logger_stopped_by": "test",
+                }
+                if capture_status == "PASS":
+                    payload = pending if capture_payload is None else capture_payload
+                    raw_log.write_bytes(payload)
+                    result["payload_bytes"] = len(payload)
+                else:
+                    result["error"] = capture_error or "capture failed"
+                return result
+
             with (
-                mock.patch.object(DRIVER, "start_server", return_value=(FakeServer(), io.StringIO())),
-                mock.patch.object(DRIVER, "wait_for_server_ready"),
-                mock.patch.object(DRIVER, "RttCapture", FakeCapture),
-                mock.patch.object(DRIVER, "port_is_listening", return_value=False),
-                mock.patch.object(DRIVER, "wait_for_ports_closed", return_value=True),
                 mock.patch.object(
-                    DRIVER.subprocess,
-                    "run",
-                    return_value=SimpleNamespace(returncode=gdb_exit_code),
+                    DRIVER, "run_gdb_session", side_effect=fake_gdb_session
+                ),
+                mock.patch.object(
+                    DRIVER, "run_rtt_logger_capture", side_effect=fake_capture
                 ),
             ):
-                started = time.monotonic()
-                outcome = DRIVER.run_gdb_session(
+                outcome = DRIVER.run_two_phase_ota_session(
                     jlink_dir=Path("C:/JLink"),
                     gdb=Path("C:/gdb.exe"),
                     gdb_script=temp_dir / "session.gdb",
@@ -223,396 +288,176 @@ class P26RttOtaDriverTest(unittest.TestCase):
                     tmp_dir=temp_dir,
                     timeout=1,
                     server_ready_timeout=0.01,
-                    server_exit_timeout=0.01,
-                    measurement_policy=measurement_policy,
                     expected_kind=expected_kind,
-                    drain_timeout=0.05,
-                    quiet_timeout=0.02,
+                    rtt_address=0x20053E1C,
+                    cb_snapshot=cb_pre,
+                    ring_snapshot=ring_pre,
+                    pending_path=pending_path,
+                    raw_log=raw_log,
+                    console_log=console_log,
+                    post_gdb_script=temp_dir / "post.gdb",
+                    post_gdb_log=temp_dir / "post-gdb.log",
+                    post_server_log=temp_dir / "post-server.log",
+                    post_rtt_log=post_rtt_log,
+                    post_cb_snapshot=cb_post,
                 )
-                elapsed = time.monotonic() - started
-        return outcome, elapsed
+        return outcome
 
-    def test_default_shared_policy_does_not_require_measurement(self) -> None:
-        outcome, _ = self._run_fake_session(measurement_policy=False)
+    def test_two_phase_full_chain_passes_and_verifies_binding(self) -> None:
+        outcome = self._run_fake_two_phase(self._measurement("PATCH") + b"\r\n")
         self.assertEqual(outcome["transport_classification"], "PASS")
-        self.assertFalse(outcome["rtt_measurement_required"])
-        self.assertEqual(outcome["rtt_record_count"], 0)
-
-    def test_ota_policy_rejects_banner_only_and_missing_payload(self) -> None:
-        for payload in (b"", b"SEGGER RTT\r\n"):
-            with self.subTest(payload=payload):
-                outcome, _ = self._run_fake_session(payload, measurement_policy=True)
-                self.assertEqual(outcome["transport_classification"], "RTT_PAYLOAD_FAIL")
-                self.assertFalse(outcome["rtt_payload_ready"])
-
-    def test_ota_policy_waits_for_delayed_payload(self) -> None:
-        outcome, elapsed = self._run_fake_session(
-            b"SEGGER RTT\r\nnoise\n" + self._measurement("patch"),
-            measurement_policy=True,
-            delayed=True,
-        )
-        self.assertGreaterEqual(elapsed, 0.025)
-        self.assertEqual(outcome["transport_classification"], "PASS")
+        self.assertTrue(outcome["rtt_pending_derived"])
         self.assertTrue(outcome["rtt_payload_ready"])
         self.assertTrue(outcome["rtt_drain_complete"])
         self.assertTrue(outcome["rtt_payload_complete"])
+        self.assertTrue(outcome["rtt_postcheck_passed"])
+        self.assertTrue(outcome["rtt_channel_binding_verified"])
         self.assertEqual(outcome["rtt_record_count"], 1)
-        self.assertFalse(outcome["rtt_channel_binding_verified"])
+        self.assertEqual(outcome["rtt_matching_record_count"], 1)
+        phases = outcome["rtt_two_phase"]
+        self.assertEqual(phases["derive"]["status"], "ELIGIBLE")
+        self.assertEqual(phases["capture"]["status"], "PASS")
+        self.assertEqual(phases["postcheck"]["status"], "PASS")
 
-    def test_ota_policy_rejects_duplicate_and_wrong_kind(self) -> None:
-        duplicate, _ = self._run_fake_session(
-            self._measurement("PATCH") * 2,
-            measurement_policy=True,
+    def test_two_phase_rejects_empty_and_banner_only_inventory(self) -> None:
+        # A banner-only telnet file carries no records; the equivalent empty
+        # Up0 inventory must fail closed at the derive stage.
+        outcome = self._run_fake_two_phase(b"")
+        self.assertFalse(outcome["rtt_pending_derived"])
+        self.assertEqual(outcome["transport_classification"], "RTT_PAYLOAD_FAIL")
+        self.assertIn("empty", str(outcome["session_error"]).lower())
+
+    def test_two_phase_rejects_duplicate_and_wrong_kind(self) -> None:
+        duplicate = self._run_fake_two_phase(
+            self._measurement("PATCH") + b"\r\n" + self._measurement("PATCH") + b"\r\n"
         )
-        wrong_kind, _ = self._run_fake_session(
-            self._measurement("FULL"),
-            measurement_policy=True,
-            expected_kind="PATCH",
+        wrong_kind = self._run_fake_two_phase(
+            self._measurement("FULL") + b"\r\n", expected_kind="PATCH"
         )
-        self.assertEqual(duplicate["rtt_record_count"], 2)
         self.assertEqual(duplicate["transport_classification"], "RTT_PAYLOAD_FAIL")
-        self.assertEqual(wrong_kind["rtt_matching_record_count"], 0)
         self.assertEqual(wrong_kind["transport_classification"], "RTT_PAYLOAD_FAIL")
+        self.assertEqual(duplicate["rtt_record_count"], 2)
+        self.assertEqual(wrong_kind["rtt_matching_record_count"], 0)
 
-    def test_ota_policy_rejects_eof_error_and_truncated_payload(self) -> None:
-        eof, _ = self._run_fake_session(
-            b"SEGGER RTT\r\n", measurement_policy=True, socket_eof=True
+    def test_two_phase_rejects_truncated_record(self) -> None:
+        truncated = self._run_fake_two_phase(
+            self._measurement("PATCH").rstrip(b"\r\n")
         )
-        error, _ = self._run_fake_session(
-            self._measurement("PATCH"),
-            measurement_policy=True,
-            capture_error="socket failed",
-            socket_error=True,
-        )
-        truncated, _ = self._run_fake_session(
-            self._measurement("PATCH").rstrip(b"\r\n"),
-            measurement_policy=True,
-        )
-        self.assertEqual(eof["transport_classification"], "RTT_PAYLOAD_FAIL")
-        self.assertEqual(error["transport_classification"], "RTT_NOT_READY")
+        self.assertFalse(truncated["rtt_pending_derived"])
         self.assertEqual(truncated["transport_classification"], "RTT_PAYLOAD_FAIL")
 
-    def test_ota_policy_rejects_complete_payload_after_eof_or_drain_timeout(self) -> None:
-        eof, _ = self._run_fake_session(
-            self._measurement("PATCH"),
-            measurement_policy=True,
-            socket_eof=True,
+    def test_two_phase_rejects_capture_timeout_extra_bytes_and_mismatch(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        timeout_case = self._run_fake_two_phase(
+            payload,
+            capture_status="FAIL",
+            capture_error="RTT payload timeout: logger delivered 0 of 60 bytes",
+            capture_timeout=True,
         )
-        socket_error, _ = self._run_fake_session(
-            self._measurement("PATCH"),
-            measurement_policy=True,
-            socket_error=True,
-        )
-        self.assertEqual(eof["rtt_record_count"], 1)
-        self.assertTrue(eof["rtt_socket_eof"])
-        self.assertEqual(eof["transport_classification"], "RTT_PAYLOAD_FAIL")
-        self.assertEqual(socket_error["rtt_record_count"], 1)
-        self.assertTrue(socket_error["rtt_socket_error"])
         self.assertEqual(
-            socket_error["transport_classification"], "RTT_PAYLOAD_FAIL"
+            timeout_case["transport_classification"], "RTT_PAYLOAD_FAIL"
         )
-
-    def test_real_rtt_capture_payload_then_timeout_fails_closed(self) -> None:
-        payload = self._measurement("PATCH")
-
-        class TimeoutSocket:
-            def __init__(self) -> None:
-                self.first = True
-
-            def settimeout(self, timeout: float) -> None:
-                return None
-
-            def recv(self, size: int) -> bytes:
-                if self.first:
-                    self.first = False
-                    return payload
-                raise socket.timeout()
-
-            def close(self) -> None:
-                return None
-
-        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
-            output = Path(temp) / "timeout-capture.log"
-            stop = threading.Event()
-            capture = DRIVER.RttCapture(
-                "127.0.0.1",
-                DRIVER.RTT_PORT,
-                output,
-                stop,
-                connect_timeout=1.0,
-                measurement_policy=True,
-                expected_kind="PATCH",
-            )
-            with mock.patch.object(
-                DRIVER.socket, "create_connection", return_value=TimeoutSocket()
-            ):
-                capture.start()
-                self.assertTrue(capture.connected.wait(1.0))
-                deadline = time.monotonic() + 1.0
-                while not capture.payload_ready and time.monotonic() < deadline:
-                    time.sleep(0.005)
-                capture.wait_for_bounded_drain(0.05)
-                stop.set()
-                capture.join(1.0)
-            records = DRIVER.parse_measurements(output.read_bytes())
-
-        self.assertTrue(capture.payload_ready)
-        self.assertEqual(len(records), 1)
-        self.assertTrue(capture.drain_started)
-        self.assertFalse(capture.drain_success)
-        self.assertFalse(capture.drain_complete)
-        self.assertTrue(capture.drain_deadline_expired)
-        self.assertTrue(capture.payload_timeout)
+        self.assertTrue(timeout_case["rtt_payload_timeout"])
+        extra_case = self._run_fake_two_phase(
+            payload,
+            capture_status="FAIL",
+            capture_error="RTT payload contains extra bytes",
+        )
+        self.assertEqual(extra_case["transport_classification"], "RTT_PAYLOAD_FAIL")
+        mismatch_case = self._run_fake_two_phase(
+            payload,
+            capture_status="FAIL",
+            capture_error="RTT payload differs from pre-read Up0 inventory",
+        )
         self.assertEqual(
-            DRIVER.classify_transport_session(
-                {
-                    "server_started": True,
-                    "server_ready": True,
-                    "rtt_connected": True,
-                    "gdb_started": True,
-                    "gdb_exit_code": 0,
-                    "server_process_exited": True,
-                    "server_natural_exit": True,
-                    "server_terminate_sent": False,
-                    "server_kill_sent": False,
-                    "capture_stopped": True,
-                    "ports_closed": True,
-                    "session_error": None,
-                    "capture_error": None,
-                    "rtt_measurement_required": True,
-                    "rtt_payload_ready": True,
-                    "rtt_drain_success": False,
-                    "rtt_drain_complete": False,
-                    "rtt_drain_deadline_expired": True,
-                    "rtt_payload_complete": False,
-                    "rtt_payload_timeout": True,
-                    "rtt_socket_eof": False,
-                    "rtt_socket_error": False,
-                    "rtt_record_count": 1,
-                    "rtt_matching_record_count": 1,
-                }
-            ),
-            "RTT_PAYLOAD_FAIL",
+            mismatch_case["transport_classification"], "RTT_PAYLOAD_FAIL"
         )
 
-    def _run_real_capture_sequence(
-        self,
-        responses: list[bytes | BaseException | object],
-        *,
-        drain: float = 0.1,
-        quiet: float = 0.02,
-        wait_payload_before_drain: bool = False,
-    ) -> tuple[DRIVER.RttCapture, bytes]:
-        class SequenceSocket:
-            def __init__(self, values: list[bytes | BaseException]) -> None:
-                self.values = iter(values)
-
-            def settimeout(self, timeout: float) -> None:
-                return None
-
-            def recv(self, size: int) -> bytes:
-                try:
-                    value = next(self.values)
-                except StopIteration:
-                    raise socket.timeout()
-                if callable(value):
-                    value = value()
-                if isinstance(value, BaseException):
-                    raise value
-                return value
-
-            def close(self) -> None:
-                return None
-
-        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
-            output = Path(temp) / "sequence-capture.log"
-            stop = threading.Event()
-            capture = DRIVER.RttCapture(
-                "127.0.0.1",
-                DRIVER.RTT_PORT,
-                output,
-                stop,
-                connect_timeout=1.0,
-                measurement_policy=True,
-                expected_kind="PATCH",
-            )
-            with mock.patch.object(
-                DRIVER.socket,
-                "create_connection",
-                return_value=SequenceSocket(responses),
-            ):
-                capture.start()
-                self.assertTrue(capture.connected.wait(1.0))
-                if wait_payload_before_drain:
-                    deadline = time.monotonic() + 1.0
-                    while not capture.payload_ready and time.monotonic() < deadline:
-                        time.sleep(0.002)
-                    self.assertTrue(capture.payload_ready)
-                capture.wait_for_bounded_drain(drain, quiet)
-                stop.set()
-                capture.join(1.0)
-            data = output.read_bytes()
-        return capture, data
-
-    def test_pre_drain_payload_enters_quiet_window_and_passes(self) -> None:
-        capture, data = self._run_real_capture_sequence(
-            [self._measurement("PATCH")],
-            wait_payload_before_drain=True,
+    def test_two_phase_rejects_wroff_change_rdoff_stall_and_extra_cb_bytes(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        wr_off_case = self._run_fake_two_phase(payload, post_wr_off=len(payload) + 1)
+        self.assertEqual(wr_off_case["transport_classification"], "RTT_POSTCHECK_FAIL")
+        stall_case = self._run_fake_two_phase(payload, post_rd_off=0)
+        self.assertEqual(
+            stall_case["transport_classification"], "RTT_POSTCHECK_FAIL"
         )
-        self.assertEqual(len(DRIVER.parse_measurements(data)), 1)
-        self.assertTrue(capture.payload_ready)
-        self.assertTrue(capture.drain_success)
-        self.assertTrue(capture.drain_complete)
-        self.assertFalse(capture.drain_deadline_expired)
+        extra_byte_case = self._run_fake_two_phase(payload, post_extra_byte=True)
+        self.assertEqual(
+            extra_byte_case["transport_classification"], "RTT_POSTCHECK_FAIL"
+        )
+        for case in (wr_off_case, stall_case, extra_byte_case):
+            self.assertFalse(case["rtt_channel_binding_verified"])
+            self.assertTrue(case["rtt_pending_derived"])
 
-    def test_delayed_payload_arrives_within_outer_and_quiet_windows(self) -> None:
-        capture, data = self._run_real_capture_sequence(
-            [lambda: (time.sleep(0.01), self._measurement("patch"))[1]]
-        )
-        self.assertEqual(len(DRIVER.parse_measurements(data)), 1)
-        self.assertTrue(capture.payload_ready)
-        self.assertTrue(capture.drain_success)
-        self.assertTrue(capture.drain_complete)
-
-    def test_second_record_during_quiet_window_fails_closed(self) -> None:
-        capture, data = self._run_real_capture_sequence(
-            [
-                self._measurement("PATCH"),
-                lambda: (time.sleep(0.01), self._measurement("PATCH"))[1],
-            ],
-            drain=0.06,
-            quiet=0.02,
-            wait_payload_before_drain=True,
-        )
-        self.assertEqual(len(DRIVER.parse_measurements(data)), 2)
-        self.assertFalse(capture.drain_success)
-        self.assertFalse(capture.drain_complete)
-        self.assertTrue(capture.drain_deadline_expired)
-        self.assertTrue(capture.payload_timeout)
-
-    def test_complete_payload_then_eof_or_socket_error_fails_closed(self) -> None:
-        eof, _ = self._run_real_capture_sequence(
-            [self._measurement("PATCH"), b""]
-        )
-        error, _ = self._run_real_capture_sequence(
-            [self._measurement("PATCH"), OSError("socket failed")]
-        )
-        self.assertTrue(eof.socket_eof)
-        self.assertFalse(eof.drain_success)
-        self.assertFalse(eof.drain_complete)
-        self.assertTrue(error.socket_error)
-        self.assertFalse(error.drain_success)
-        self.assertFalse(error.drain_complete)
-
-    def test_payload_arriving_too_late_for_quiet_window_times_out(self) -> None:
-        capture, data = self._run_real_capture_sequence(
-            [lambda: (time.sleep(0.015), self._measurement("PATCH"))[1]],
-            drain=0.02,
-            quiet=0.05,
-        )
-        self.assertEqual(len(DRIVER.parse_measurements(data)), 1)
-        self.assertTrue(capture.payload_ready)
-        self.assertFalse(capture.drain_success)
-        self.assertFalse(capture.drain_complete)
-        self.assertTrue(capture.drain_deadline_expired)
-        self.assertTrue(capture.payload_timeout)
-
-    def test_shared_policy_ignores_invalid_measurement_content(self) -> None:
-        payloads = (
-            self._measurement("PATCH").rstrip(b"\r\n"),
-            self._measurement("OTHER"),
-        )
-        for payload in payloads:
-            with self.subTest(payload=payload[-32:]):
-                outcome, _ = self._run_fake_session(
-                    payload,
-                    measurement_policy=False,
-                )
-                self.assertEqual(outcome["transport_classification"], "PASS")
-                self.assertIsNone(outcome["session_error"])
-                self.assertIsNone(outcome["rtt_payload_parse_error"])
-                self.assertEqual(outcome["rtt_record_count"], 0)
+    def test_two_phase_post_session_failure_fails_closed(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        outcome = self._run_fake_two_phase(payload, post_session_fail=True)
+        self.assertEqual(outcome["transport_classification"], "RTT_POSTCHECK_FAIL")
+        self.assertFalse(outcome["rtt_postcheck_passed"])
+        self.assertFalse(outcome["rtt_channel_binding_verified"])
 
     def test_gdb_nonzero_fails_even_with_valid_payload(self) -> None:
-        outcome, _ = self._run_fake_session(
-            self._measurement("PATCH"),
-            measurement_policy=True,
+        outcome = self._run_fake_two_phase(
+            self._measurement("PATCH") + b"\r\n",
             gdb_exit_code=7,
         )
-        self.assertEqual(outcome["rtt_record_count"], 1)
+        self.assertEqual(outcome["gdb_exit_code"], 7)
+        self.assertFalse(outcome["rtt_pending_derived"])
         self.assertEqual(outcome["transport_classification"], "GDB_FAIL")
 
-    def test_rtt_capture_eof_and_socket_error_do_not_fake_payload_ready(self) -> None:
-        class FakeSocket:
-            def __init__(self, responses: list[bytes | Exception]) -> None:
-                self.responses = iter(responses)
-
-            def settimeout(self, timeout: float) -> None:
-                return None
-
-            def recv(self, size: int) -> bytes:
-                response = next(self.responses)
-                if isinstance(response, Exception):
-                    raise response
-                return response
-
-            def close(self) -> None:
-                return None
-
+    def test_two_phase_never_reports_binding_without_full_chain(self) -> None:
+        # Any single broken stage must keep rtt_channel_binding_verified false.
         cases = (
-            (FakeSocket([b"SEGGER RTT\r\n", b""]), True, False),
-            (FakeSocket([OSError("recv failed")]), False, True),
+            self._run_fake_two_phase(b""),
+            self._run_fake_two_phase(self._measurement("PATCH") + b"\r\n", capture_status="FAIL"),
+            self._run_fake_two_phase(self._measurement("PATCH") + b"\r\n", post_rd_off=0),
         )
-        for fake_socket, expect_eof, expect_error in cases:
-            with self.subTest(eof=expect_eof, error=expect_error):
-                with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
-                    output = Path(temp) / "capture.log"
-                    capture = DRIVER.RttCapture(
-                        "127.0.0.1", DRIVER.RTT_PORT, output, threading.Event()
-                    )
-                    with mock.patch.object(
-                        DRIVER.socket, "create_connection", return_value=fake_socket
-                    ):
-                        capture.run()
-                self.assertTrue(capture.socket_connected)
-                self.assertEqual(capture.socket_eof, expect_eof)
-                self.assertEqual(capture.socket_error, expect_error)
-                self.assertFalse(capture.payload_ready)
-                self.assertFalse(capture.connected.is_set() and capture.error is not None and not capture.socket_connected)
+        for outcome in cases:
+            self.assertFalse(outcome["rtt_channel_binding_verified"])
+            self.assertNotEqual(outcome["transport_classification"], "PASS")
 
-    def test_shared_rtt_capture_does_not_run_strict_parser(self) -> None:
-        class FakeSocket:
-            def __init__(self) -> None:
-                self.responses = iter([b"P2_6 kind=OTHER\r\n", b""])
+    def test_classify_rejects_drain_timeout_with_valid_record_count(self) -> None:
+        # A complete record count alone must not pass when the capture timed
+        # out: the payload was never fully delivered to the host.
+        outcome = {
+            "server_started": True,
+            "server_ready": True,
+            "rtt_connected": True,
+            "gdb_started": True,
+            "gdb_exit_code": 0,
+            "server_process_exited": True,
+            "server_natural_exit": True,
+            "server_terminate_sent": False,
+            "server_kill_sent": False,
+            "capture_stopped": True,
+            "ports_closed": True,
+            "session_error": None,
+            "capture_error": None,
+            "rtt_measurement_required": True,
+            "rtt_pending_derived": True,
+            "rtt_payload_ready": True,
+            "rtt_drain_success": False,
+            "rtt_drain_complete": False,
+            "rtt_drain_deadline_expired": True,
+            "rtt_payload_complete": False,
+            "rtt_payload_timeout": True,
+            "rtt_record_count": 1,
+            "rtt_matching_record_count": 1,
+            "rtt_postcheck_passed": False,
+        }
+        self.assertEqual(
+            DRIVER.classify_transport_session(outcome), "RTT_PAYLOAD_FAIL"
+        )
 
-            def settimeout(self, timeout: float) -> None:
-                return None
-
-            def recv(self, size: int) -> bytes:
-                return next(self.responses)
-
-            def close(self) -> None:
-                return None
-
-        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
-            output = Path(temp) / "shared-capture.log"
-            capture = DRIVER.RttCapture(
-                "127.0.0.1",
-                DRIVER.RTT_PORT,
-                output,
-                threading.Event(),
-                measurement_policy=False,
-            )
-            with mock.patch.object(
-                DRIVER.socket, "create_connection", return_value=FakeSocket()
-            ):
-                capture.run()
-            captured = output.read_bytes()
-        self.assertTrue(capture.socket_connected)
-        self.assertTrue(capture.socket_eof)
-        self.assertIsNone(capture.error)
-        self.assertFalse(capture.payload_ready)
-        self.assertEqual(captured, b"P2_6 kind=OTHER\r\n")
+    def test_non_measurement_session_never_parses_payload(self) -> None:
+        # Shared (preflight/uploader/qualifier) sessions must not require or
+        # parse any measurement payload; their classification is transport-only.
+        outcome = self._fake_transport_outcome(measurement_policy=False)
+        outcome["transport_classification"] = DRIVER.classify_transport_session(outcome)
+        self.assertEqual(outcome["transport_classification"], "PASS")
+        self.assertFalse(outcome["rtt_measurement_required"])
+        self.assertEqual(outcome["rtt_record_count"], 0)
+        self.assertFalse(outcome["rtt_channel_binding_verified"])
 
     def test_parse_and_classify_clean_record(self) -> None:
         raw = (
@@ -698,6 +543,8 @@ class P26RttOtaDriverTest(unittest.TestCase):
         DRIVER.DEFAULT_TMP_DIR.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
             output = Path(temp) / "driver.gdb"
+            cb_snapshot = Path(temp) / "cb-pre.bin"
+            ring_snapshot = Path(temp) / "up0-pre.bin"
             DRIVER.gdb_command_file(
                 output,
                 DRIVER.ROOT / "firmware.elf",
@@ -706,6 +553,8 @@ class P26RttOtaDriverTest(unittest.TestCase):
                 layout_values(),
                 "/P2-6-RUN-20260820-01/P2-6A-PATCH-SD-R2.etu",
                 "PATCH",
+                cb_snapshot,
+                ring_snapshot,
             )
             text = output.read_text(encoding="ascii")
         self.assertIn("Pages/FirmwareUpdate", text)
@@ -725,6 +574,68 @@ class P26RttOtaDriverTest(unittest.TestCase):
             text.index("stop_verified label=initial_hal_update"),
             text.index("set $sd_before_ota"),
         )
+
+    def test_generated_script_snapshots_rtt_while_halted_with_wdt_pause(self) -> None:
+        DRIVER.DEFAULT_TMP_DIR.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
+            output = Path(temp) / "driver.gdb"
+            cb_snapshot = Path(temp) / "cb-pre.bin"
+            ring_snapshot = Path(temp) / "up0-pre.bin"
+            DRIVER.gdb_command_file(
+                output,
+                DRIVER.ROOT / "firmware.elf",
+                selected_symbols(),
+                bytes(range(96)),
+                layout_values(),
+                "/P2-6-RUN-20260820-01/P2-6A-PATCH-SD-R2.etu",
+                "PATCH",
+                cb_snapshot,
+                ring_snapshot,
+            )
+            text = output.read_text(encoding="ascii")
+        # Exactly one watchdog-pause line, immediately after monitor halt.
+        self.assertEqual(text.count(DRIVER.WDT_PAUSE_COMMAND), 1)
+        self.assertLess(text.index("monitor halt"), text.index(DRIVER.WDT_PAUSE_COMMAND))
+        # Snapshot dump lines run while halted, before detach, at the frozen
+        # RTT control-block address.
+        rtt_addr = selected_symbols()[DRIVER.RTT_SYMBOL]
+        self.assertIn(f"set $rtt_cb = (unsigned char*)0x{rtt_addr:08x}", text)
+        self.assertIn(
+            f"dump binary memory {cb_snapshot.as_posix()} $rtt_cb ($rtt_cb + 0xA8)",
+            text,
+        )
+        self.assertIn(
+            f"dump binary memory {ring_snapshot.as_posix()} $up0_pbuf ($up0_pbuf + $up0_size)",
+            text,
+        )
+        self.assertIn("SNAPSHOT_WRITTEN", text)
+        self.assertLess(text.index("SNAPSHOT_WRITTEN"), text.index("detach"))
+        self.assertLess(text.index("P2_6_RTT_DRIVER PASS"), text.index("SNAPSHOT_WRITTEN"))
+
+    def test_post_snapshot_script_is_halt_wdt_dump_only(self) -> None:
+        DRIVER.DEFAULT_TMP_DIR.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
+            output = Path(temp) / "post.gdb"
+            cb_snapshot = Path(temp) / "cb-post.bin"
+            rtt_addr = selected_symbols()[DRIVER.RTT_SYMBOL]
+            DRIVER.post_snapshot_command_file(
+                output, DRIVER.ROOT / "firmware.elf", rtt_addr, cb_snapshot
+            )
+            text = output.read_text(encoding="ascii")
+        self.assertEqual(text.count("monitor halt"), 1)
+        self.assertEqual(text.count(DRIVER.WDT_PAUSE_COMMAND), 1)
+        self.assertLess(text.index("monitor halt"), text.index(DRIVER.WDT_PAUSE_COMMAND))
+        self.assertIn(
+            f"dump binary memory {cb_snapshot.as_posix()} $rtt_cb ($rtt_cb + 0xA8)",
+            text,
+        )
+        # Read-only session: no continue, no calls, no reset/go, no flash.
+        self.assertNotIn("continue", text)
+        self.assertNotIn("call ", text)
+        self.assertNotIn("reset", text)
+        self.assertNotIn("loadbin", text)
+        self.assertNotIn("loadfile", text)
+        self.assertIn("detach", text)
 
     def test_page_offsets_match_frozen_elf_disassembly(self) -> None:
         objdump = shutil.which("arm-none-eabi-objdump")
@@ -866,24 +777,15 @@ class P26RttOtaDriverTest(unittest.TestCase):
             def kill(self) -> None:
                 events.append("kill")
 
-        class FakeCapture:
-            def __init__(self, *args: object, **kwargs: object) -> None:
-                self.connected = threading.Event()
-                self.socket_connected = False
-                self.error = None
-                self.ident = None
+        class FakeBannerSocket:
+            def settimeout(self, timeout: float) -> None:
+                return None
 
-            def start(self) -> None:
-                events.append("rtt_start")
-                self.ident = 1
-                self.socket_connected = True
-                self.connected.set()
+            def recv(self, size: int) -> bytes:
+                return b"SEGGER J-Link V8.18 - Real time terminal output\r\n"
 
-            def join(self, timeout: float | None = None) -> None:
-                events.append("rtt_join")
-
-            def is_alive(self) -> bool:
-                return False
+            def close(self) -> None:
+                return None
 
         with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
             temp_dir = Path(temp)
@@ -901,7 +803,13 @@ class P26RttOtaDriverTest(unittest.TestCase):
                     "wait_for_server_ready",
                     side_effect=lambda *args, **kwargs: events.append("ready"),
                 ),
-                mock.patch.object(DRIVER, "RttCapture", FakeCapture),
+                mock.patch.object(
+                    DRIVER.socket,
+                    "create_connection",
+                    side_effect=lambda *args, **kwargs: (
+                        events.append("rtt_probe") or FakeBannerSocket()
+                    ),
+                ),
                 mock.patch.object(DRIVER, "port_is_listening", return_value=False),
                 mock.patch.object(DRIVER, "wait_for_ports_closed", return_value=True),
                 mock.patch.object(
@@ -924,14 +832,60 @@ class P26RttOtaDriverTest(unittest.TestCase):
                     server_ready_timeout=0.01,
                     server_exit_timeout=0.01,
                 )
-        self.assertEqual(
-            events,
-            ["start_server", "ready", "rtt_start", "gdb", "rtt_join", "server_wait"],
-        )
+        self.assertEqual(events, ["start_server", "ready", "rtt_probe", "gdb", "server_wait"])
         self.assertTrue(outcome["server_ready"])
         self.assertTrue(outcome["server_natural_exit"])
         self.assertFalse(outcome["server_terminate_sent"])
+        self.assertTrue(outcome["rtt_connected"])
+        self.assertTrue(outcome["rtt_banner_bytes"] > 0)
         self.assertEqual(outcome["transport_classification"], "PASS")
+
+    def test_session_rejects_non_segger_banner(self) -> None:
+        class JunkSocket:
+            def settimeout(self, timeout: float) -> None:
+                return None
+
+            def recv(self, size: int) -> bytes:
+                return b"garbage"
+
+            def close(self) -> None:
+                return None
+
+        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
+            temp_dir = Path(temp)
+            with (
+                mock.patch.object(
+                    DRIVER,
+                    "start_server",
+                    return_value=(SimpleNamespace(pid=407, poll=lambda: None, wait=lambda t=None: 0), io.StringIO()),
+                ),
+                mock.patch.object(DRIVER, "wait_for_server_ready"),
+                mock.patch.object(
+                    DRIVER.socket, "create_connection", return_value=JunkSocket()
+                ),
+                mock.patch.object(DRIVER, "port_is_listening", return_value=False),
+                mock.patch.object(DRIVER, "wait_for_ports_closed", return_value=True),
+                mock.patch.object(DRIVER.subprocess, "run") as gdb_run,
+            ):
+                outcome = DRIVER.run_gdb_session(
+                    jlink_dir=Path("C:/JLink"),
+                    gdb=Path("C:/gdb.exe"),
+                    gdb_script=temp_dir / "session.gdb",
+                    gdb_log=temp_dir / "session-gdb.log",
+                    server_log=temp_dir / "session-server.log",
+                    rtt_log=temp_dir / "session-rtt.log",
+                    tmp_dir=temp_dir,
+                    timeout=1,
+                    server_ready_timeout=0.01,
+                    server_exit_timeout=0.01,
+                )
+        gdb_run.assert_not_called()
+        self.assertFalse(outcome["gdb_started"])
+        self.assertTrue(outcome["rtt_socket_error"])
+        self.assertIsNotNone(outcome["session_error"])
+        # The probe failure happened before the GDB launch, so the session
+        # fails closed with GDB never started.
+        self.assertEqual(outcome["transport_classification"], "GDB_NOT_STARTED")
 
     def test_readiness_failure_never_starts_rtt_or_gdb(self) -> None:
         events: list[str] = []
@@ -955,22 +909,6 @@ class P26RttOtaDriverTest(unittest.TestCase):
             def kill(self) -> None:
                 events.append("kill")
 
-        class ForbiddenCapture:
-            def __init__(self, *args: object, **kwargs: object) -> None:
-                self.connected = threading.Event()
-                self.socket_connected = False
-                self.error = None
-                self.ident = None
-
-            def start(self) -> None:
-                raise AssertionError("RTT capture started before readiness")
-
-            def join(self, timeout: float | None = None) -> None:
-                raise AssertionError("RTT capture joined despite never starting")
-
-            def is_alive(self) -> bool:
-                return False
-
         with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
             temp_dir = Path(temp)
             with (
@@ -984,7 +922,7 @@ class P26RttOtaDriverTest(unittest.TestCase):
                     "wait_for_server_ready",
                     side_effect=DRIVER.DriverError("readiness timeout"),
                 ),
-                mock.patch.object(DRIVER, "RttCapture", ForbiddenCapture),
+                mock.patch.object(DRIVER.socket, "create_connection") as connect,
                 mock.patch.object(DRIVER, "port_is_listening", return_value=False),
                 mock.patch.object(DRIVER, "wait_for_ports_closed", return_value=True),
                 mock.patch.object(DRIVER.subprocess, "run") as gdb_run,
@@ -1002,6 +940,7 @@ class P26RttOtaDriverTest(unittest.TestCase):
                     server_exit_timeout=0.01,
                 )
         gdb_run.assert_not_called()
+        connect.assert_not_called()
         self.assertFalse(outcome["server_ready"])
         self.assertFalse(outcome["gdb_started"])
         self.assertFalse(outcome["rtt_connected"])
@@ -1028,23 +967,15 @@ class P26RttOtaDriverTest(unittest.TestCase):
             def kill(self) -> None:
                 raise AssertionError("kill used")
 
-        class FakeCapture:
-            def __init__(self, *args: object, **kwargs: object) -> None:
-                self.connected = threading.Event()
-                self.socket_connected = False
-                self.error = None
-                self.ident = None
-
-            def start(self) -> None:
-                self.ident = 1
-                self.socket_connected = True
-                self.connected.set()
-
-            def join(self, timeout: float | None = None) -> None:
+        class FakeBannerSocket:
+            def settimeout(self, timeout: float) -> None:
                 return None
 
-            def is_alive(self) -> bool:
-                return False
+            def recv(self, size: int) -> bytes:
+                return b"SEGGER J-Link V8.18 - Real time terminal output\r\n"
+
+            def close(self) -> None:
+                return None
 
         with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
             temp_dir = Path(temp)
@@ -1057,7 +988,9 @@ class P26RttOtaDriverTest(unittest.TestCase):
                     ),
                 ),
                 mock.patch.object(DRIVER, "wait_for_server_ready"),
-                mock.patch.object(DRIVER, "RttCapture", FakeCapture),
+                mock.patch.object(
+                    DRIVER.socket, "create_connection", return_value=FakeBannerSocket()
+                ),
                 mock.patch.object(DRIVER, "port_is_listening", return_value=False),
                 mock.patch.object(DRIVER, "wait_for_ports_closed", return_value=True),
                 mock.patch.object(
@@ -1085,6 +1018,235 @@ class P26RttOtaDriverTest(unittest.TestCase):
         self.assertEqual([item["server_pid"] for item in outcomes], [405, 406])
         self.assertTrue(all(item["server_natural_exit"] for item in outcomes))
         self.assertTrue(all(item["transport_classification"] == "PASS" for item in outcomes))
+
+    def _write_snapshot_pair(
+        self, temp: Path, pre_cb: bytes, ring: bytes
+    ) -> tuple[Path, Path]:
+        cb_path = temp / "derive-cb.bin"
+        ring_path = temp / "derive-ring.bin"
+        cb_path.write_bytes(pre_cb)
+        ring_path.write_bytes(ring)
+        return cb_path, ring_path
+
+    def test_derive_rtt_pending_structural_failures(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        cases: list[tuple[str, bytes, bytes]] = [
+            (
+                "bad_signature",
+                self._make_control_block(wr_off=len(payload), rd_off=0, signature=b"XEGGER RTT"),
+                self._make_ring(payload),
+            ),
+            (
+                "bad_up_size",
+                self._make_control_block(wr_off=len(payload), rd_off=0, up_size=512),
+                self._make_ring(payload),
+            ),
+            (
+                "bad_pbuffer",
+                self._make_control_block(wr_off=len(payload), rd_off=0, p_buffer=0x08010000),
+                self._make_ring(payload),
+            ),
+            (
+                "bad_flags",
+                self._make_control_block(wr_off=len(payload), rd_off=0, flags=0),
+                self._make_ring(payload),
+            ),
+            (
+                "bad_buffer_counts",
+                self._make_control_block(wr_off=len(payload), rd_off=0, max_up=1),
+                self._make_ring(payload),
+            ),
+            (
+                "bad_ring_size",
+                self._make_control_block(wr_off=len(payload), rd_off=0),
+                b"\xEE" * 512,
+            ),
+            (
+                "wroff_out_of_range",
+                self._make_control_block(wr_off=2000, rd_off=0),
+                self._make_ring(payload),
+            ),
+            (
+                "rdoff_out_of_range",
+                self._make_control_block(wr_off=len(payload), rd_off=2000),
+                self._make_ring(payload),
+            ),
+        ]
+        for name, cb, ring in cases:
+            with self.subTest(case=name):
+                with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
+                    cb_path, ring_path = self._write_snapshot_pair(Path(temp), cb, ring)
+                    result = DRIVER.derive_rtt_pending(
+                        cb_path, ring_path, "PATCH", Path(temp) / "pending.bin"
+                    )
+                self.assertEqual(result["status"], "FAIL")
+                self.assertIn("error", result)
+
+    def test_derive_rtt_pending_wraparound_inventory(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        ring = bytearray(b"\xEE" * 1024)
+        # Inventory wrapped across the ring end: bytes 1000..1023 plus 0..9.
+        tail = payload[:24]
+        head = payload[24:]
+        ring[1000:1024] = tail
+        ring[0:len(head)] = head
+        cb = self._make_control_block(wr_off=len(head), rd_off=1000)
+        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
+            cb_path, ring_path = self._write_snapshot_pair(Path(temp), cb, bytes(ring))
+            pending_path = Path(temp) / "pending.bin"
+            result = DRIVER.derive_rtt_pending(cb_path, ring_path, "PATCH", pending_path)
+            written = pending_path.read_bytes() if pending_path.exists() else None
+        self.assertEqual(result["status"], "ELIGIBLE")
+        self.assertEqual(result["pending_count"], len(payload))
+        self.assertEqual(written, payload)
+
+    def test_verify_rtt_postcheck_pass_and_failures(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        wr = len(payload)
+        pre = self._make_control_block(wr_off=wr, rd_off=0)
+        good_post = self._make_control_block(wr_off=wr, rd_off=wr)
+        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
+            temp_dir = Path(temp)
+            pre_path = temp_dir / "pre.bin"
+            post_path = temp_dir / "post.bin"
+            pre_path.write_bytes(pre)
+            post_path.write_bytes(good_post)
+            passed = DRIVER.verify_rtt_postcheck(pre_path, post_path, wr)
+            self.assertEqual(passed["status"], "PASS")
+            self.assertEqual(passed["consumed_count"], wr)
+            self.assertEqual(passed["control_block_outside_rd_off_changes"], 0)
+
+            # WrOff changed during host consumption.
+            post_path.write_bytes(self._make_control_block(wr_off=wr + 1, rd_off=wr))
+            wr_case = DRIVER.verify_rtt_postcheck(pre_path, post_path, wr)
+            self.assertEqual(wr_case["status"], "FAIL")
+            self.assertIn("WrOff changed", wr_case["error"])
+
+            # RdOff stalled (did not consume the inventory).
+            post_path.write_bytes(self._make_control_block(wr_off=wr, rd_off=0))
+            stall = DRIVER.verify_rtt_postcheck(pre_path, post_path, wr)
+            self.assertEqual(stall["status"], "FAIL")
+            self.assertIn("RdOff did not consume", stall["error"])
+
+            # RdOff consumed a different amount than the pending inventory.
+            post_path.write_bytes(self._make_control_block(wr_off=wr, rd_off=wr - 1))
+            short = DRIVER.verify_rtt_postcheck(pre_path, post_path, wr)
+            self.assertEqual(short["status"], "FAIL")
+
+            # A byte outside the four-byte RdOff word changed.
+            mutated = bytearray(self._make_control_block(wr_off=wr, rd_off=wr))
+            mutated[0x30] = (mutated[0x30] + 1) & 0xFF
+            post_path.write_bytes(bytes(mutated))
+            extra = DRIVER.verify_rtt_postcheck(pre_path, post_path, wr)
+            self.assertEqual(extra["status"], "FAIL")
+            self.assertIn("outside the four-byte", extra["error"])
+
+            # RdOff within the word may change freely (that is the logger's
+            # only legal write).
+            mutated = bytearray(self._make_control_block(wr_off=wr, rd_off=wr))
+            struct.pack_into("<I", mutated, DRIVER.RTT_CB_UP0_RDOFF_OFFSET, wr)
+            post_path.write_bytes(bytes(mutated))
+            again = DRIVER.verify_rtt_postcheck(pre_path, post_path, wr)
+            self.assertEqual(again["status"], "PASS")
+
+    def _run_fake_logger(
+        self,
+        pending: bytes,
+        *,
+        delivered: bytes | None,
+        exit_early: bool = False,
+        residual_lines: int = 0,
+    ) -> dict[str, object]:
+        loggers: list[object] = []
+
+        class FakeLogger:
+            pid = 901
+
+            def __init__(self) -> None:
+                # None means still running; the Stop-Process mock below makes
+                # every logger exit once the cleanup command is issued.
+                self.returncode = 5 if exit_early else None
+                loggers.append(self)
+
+            def poll(self) -> int | None:
+                return self.returncode
+
+        class FakeTasklist:
+            stdout = "\r\n".join(
+                ['"JLinkRTTLogger.exe","1234"' for _ in range(residual_lines)]
+            )
+
+        with tempfile.TemporaryDirectory(dir=DRIVER.DEFAULT_TMP_DIR) as temp:
+            temp_dir = Path(temp)
+            pending_path = temp_dir / "pending.bin"
+            pending_path.write_bytes(pending)
+            raw_log = temp_dir / "raw.log"
+            console_log = temp_dir / "console.log"
+
+            def fake_popen(*args: object, **kwargs: object) -> FakeLogger:
+                # The real logger writes its output file after launch; write
+                # the scripted bytes here so the pre-existing-file cleanup in
+                # run_rtt_logger_capture does not delete them first.
+                if delivered is not None:
+                    raw_log.write_bytes(delivered)
+                return FakeLogger()
+
+            def fake_run(*args: object, **kwargs: object) -> FakeTasklist:
+                # The Stop-Process cleanup makes the running loggers exit.
+                for logger in loggers:
+                    if logger.returncode is None:
+                        logger.returncode = 0
+                return FakeTasklist()
+
+            with (
+                mock.patch.object(DRIVER.subprocess, "Popen", side_effect=fake_popen),
+                mock.patch.object(DRIVER.subprocess, "run", side_effect=fake_run),
+            ):
+                return DRIVER.run_rtt_logger_capture(
+                    pending_path,
+                    raw_log,
+                    console_log,
+                    0x20053E1C,
+                    temp_dir,
+                    payload_timeout=0.4,
+                    settle_seconds=0.05,
+                )
+
+    def test_logger_capture_passes_on_byte_identical_payload(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        result = self._run_fake_logger(payload, delivered=payload)
+        self.assertEqual(result["status"], "PASS")
+        self.assertTrue(result["payload_complete"])
+        self.assertEqual(result["payload_bytes"], len(payload))
+        self.assertEqual(result["residual_rtt_logger_processes"], 0)
+        self.assertTrue(result["logger_stopped"])
+
+    def test_logger_capture_fails_closed_on_timeout_and_extra_bytes(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        timeout_case = self._run_fake_logger(payload, delivered=b"")
+        self.assertEqual(timeout_case["status"], "FAIL")
+        self.assertTrue(timeout_case["payload_timeout"])
+        extra_case = self._run_fake_logger(
+            payload, delivered=payload + b"extra\r\n"
+        )
+        self.assertEqual(extra_case["status"], "FAIL")
+        self.assertIn("extra bytes", str(extra_case["error"]))
+        mismatch_case = self._run_fake_logger(
+            payload, delivered=b"X" * len(payload)
+        )
+        self.assertEqual(mismatch_case["status"], "FAIL")
+        self.assertIn("differs", str(mismatch_case["error"]))
+
+    def test_logger_capture_fails_closed_on_early_exit_and_residuals(self) -> None:
+        payload = self._measurement("PATCH") + b"\r\n"
+        early = self._run_fake_logger(payload, delivered=payload, exit_early=True)
+        self.assertEqual(early["status"], "FAIL")
+        self.assertIn("exited early", str(early["error"]))
+        residual = self._run_fake_logger(
+            payload, delivered=payload, residual_lines=1
+        )
+        self.assertEqual(residual["status"], "FAIL")
+        self.assertIn("residual", str(residual["error"]))
 
 
 if __name__ == "__main__":

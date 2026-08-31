@@ -1,0 +1,12 @@
+{
+    "Result":  "PASS",
+    "Profile":  "Governance",
+    "RepoRoot":  "D:\\github\\my\\E-Track",
+    "Head":  "d27200d6e0e203ae4b4c83f248393c7d112bb53b",
+    "FileCount":  24,
+    "ManifestSHA256":  "3D9EC6EBF4D7DFA02F4915DF292C7A3CA482900DFEA6786A9F106F7F6DDBF2D9",
+    "ManifestPath":  "D:\\github\\my\\E-Track\\docs\\acceptance-contracts\\P2-6-v2\\manifest-governance\\source-manifest.txt",
+    "ManifestJsonSHA256":  "A48C2A5CF51D404C930CD63A844CAC26696CD74BCF03BDC316C882EA71E15940",
+    "ManifestJsonPath":  "D:\\github\\my\\E-Track\\docs\\acceptance-contracts\\P2-6-v2\\manifest-governance\\source-manifest.json",
+    "CopyRoot":  null
+}

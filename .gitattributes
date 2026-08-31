@@ -219,6 +219,7 @@
 /docs/acceptance-contracts/template.contract.json -text
 /docs/acceptance-contracts/template.evidence-matrix.json -text
 /docs/acceptance-execution-contract.md -text
+/docs/ota-prompts/prompt-P2-6-SD-R5-independent-review.md -text
 /tests/bcb/test_bcb_arbiter.c -text
 /tests/boot/fw_header_validator_host.c -text
 /tests/boot/test_boot_protocols.c -text
@@ -235,6 +236,7 @@
 /tests/ota/p2_6_rtt_sd_uploader.py -text
 /tests/ota/p2_6_rtt_transport_qualifier.py -text
 /tests/ota/p2_6_stack_preflight.py -text
+/tests/ota/p2_6_v2_evidence_recompute.py -text
 /tests/ota/test_ac5_ram_budget.py -text
 /tests/ota/test_f435_build_bootstrap.py -text
 /tests/ota/test_ota_gcc_reproducibility.py -text

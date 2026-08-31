@@ -1,0 +1,18 @@
+P2_6_V2_RECOMPUTE_SELFTEST cases=16
+  [OK] positive-control exit=0 (expect 0)
+  [OK] negative-pending-byte-flip exit=1 (expect non-zero)
+  [OK] negative-cb-post-outside-rdoff exit=1 (expect non-zero)
+  [OK] negative-cb-post-rdoff-zeroed exit=1 (expect non-zero)
+  [OK] negative-c2-over-limit exit=1 (expect non-zero)
+  [OK] negative-c4-guard-broken exit=1 (expect non-zero)
+  [OK] negative-c5-sbrk-nonzero exit=1 (expect non-zero)
+  [OK] negative-c6-tlsf-nonzero exit=1 (expect non-zero)
+  [OK] negative-c14-pool-drift exit=1 (expect non-zero)
+  [OK] negative-result-nonzero exit=1 (expect non-zero)
+  [OK] negative-session-gdb-nonzero exit=1 (expect non-zero)
+  [OK] negative-preflight-write-calls exit=1 (expect non-zero)
+  [OK] negative-package-identity exit=1 (expect non-zero)
+  [OK] negative-artifact-removed exit=1 (expect non-zero)
+  [OK] negative-custody-doc-tampered exit=1 (expect non-zero)
+  [OK] negative-custody-gdb-script-removed exit=1 (expect non-zero)
+P2_6_V2_RECOMPUTE_SELFTEST=PASS failures=[]

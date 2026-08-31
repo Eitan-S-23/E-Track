@@ -1,0 +1,87 @@
+SEGGER J-Link GDB Server V8.18 Command Line Version
+
+JLinkARM.dll V8.18 (DLL compiled Mar  5 2025 14:42:43)
+
+Command line: -select USB -device AT32F435RGT7 -if SWD -speed 1000 -port 24361 -swoport 24362 -telnetport 24364 -rtttelnetport 24363 -nogui -singlerun
+-----GDB Server start settings-----
+GDBInit file:                  none
+GDB Server Listening port:     24361
+SWO raw output listening port: 24362
+Terminal I/O port:             24364
+Accept remote connection:      localhost only
+Generate logfile:              off
+Verify download:               off
+Init regs on start:            off
+Silent mode:                   off
+Single run mode:               on
+Target connection timeout:     0 ms
+------J-Link related settings------
+J-Link Host interface:         USB
+J-Link script:                 none
+J-Link settings file:          none
+------Target related settings------
+Target device:                 AT32F435RGT7
+Target device parameters:      none
+Target interface:              SWD
+Target interface speed:        1000kHz
+Target endian:                 little
+
+Connecting to J-Link...
+J-Link is connected.
+Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+Hardware: V7.00
+Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+Checking target voltage...
+Target voltage: 3.30 V
+Listening on TCP/IP port 24361
+Connecting to target...
+Halting core...
+Connected to target
+Waiting for GDB connection...Connected to 127.0.0.1
+GDB client (conn. 796) requested target.xml from GDB Server
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0x20010000
+Read register 'r1' (4 bytes) from hardware: 0x00650400
+Read register 'r2' (4 bytes) from hardware: 0xC0000000
+Read register 'r3' (4 bytes) from hardware: 0x0B000000
+Read register 'r4' (4 bytes) from hardware: 0xB2830200
+Read register 'r5' (4 bytes) from hardware: 0x00E000E0
+Read register 'r6' (4 bytes) from hardware: 0xB2830200
+Read register 'r7' (4 bytes) from hardware: 0x6C030020
+Read register 'r8' (4 bytes) from hardware: 0x20000000
+Read register 'r9' (4 bytes) from hardware: 0x40000000
+Read register 'r10' (4 bytes) from hardware: 0x20000000
+Read register 'r11' (4 bytes) from hardware: 0x40000000
+Read register 'r12' (4 bytes) from hardware: 0x000000FA
+Read register 'sp' (4 bytes) from hardware: 0x007E0520
+Read register 'lr' (4 bytes) from hardware: 0x450A0108
+Read register 'pc' (4 bytes) from hardware: 0x1C7A0108
+Read register 'xpsr' (4 bytes) from hardware: 0x00000081
+Read 2 bytes @ address 0x0804BD50 (Data = 0xB508)
+Read 2 bytes @ address 0x0804FF2C (Data = 0x4770)
+Read 4 bytes @ address 0x08017A1C (Data = 0xBD70D9F5)
+Read 2 bytes @ address 0x08017A1C (Data = 0xD9F5)
+Received monitor command: halt
+Halting target CPU...
+...Target halted (PC = 0x08017A1C)
+Received monitor command: WriteU32 0xE0042008 0x00001000
+Writing 0x00001000 @ address 0xE0042008
+Reading register 'msp' = 0x20057E00
+Reading register 'psp' = 0x00000000
+Reading 64 bytes @ address 0x080179C0
+Read 4 bytes @ address 0x08017A22 (Data = 0x42402000)
+Read 4 bytes @ address 0x08017A24 (Data = 0x000F4240)
+Reading 64 bytes @ address 0x08017A00
+Read 1 bytes @ address 0x20053E1C (Data = 0x53)
+Read 1 bytes @ address 0x20053E1D (Data = 0x45)
+Read 1 bytes @ address 0x20053E1E (Data = 0x47)
+Read 1 bytes @ address 0x20053E1F (Data = 0x47)
+Read 1 bytes @ address 0x20053E20 (Data = 0x45)
+Read 1 bytes @ address 0x20053E21 (Data = 0x52)
+Read 1 bytes @ address 0x20053E22 (Data = 0x20)
+Read 1 bytes @ address 0x20053E23 (Data = 0x52)
+Read 1 bytes @ address 0x20053E24 (Data = 0x54)
+Read 1 bytes @ address 0x20053E25 (Data = 0x54)
+Reading 168 bytes @ address 0x20053E1C
+GDB closed TCP/IP connection (Socket 796)
+Restoring target state and closing J-Link connection...
+Shutting down...

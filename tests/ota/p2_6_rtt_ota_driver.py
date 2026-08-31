@@ -58,6 +58,40 @@ SWO_PORT = 24362
 RTT_PORT = 24363
 MONITOR_PORT = 24364
 SERVER_READY_MARKER = "Waiting for GDB connection..."
+
+# The GDB server's RTT telnet channel was proven banner-only on this
+# J-Link/board combination (R19 probe F1, 2026-08-29: zero payload bytes over
+# the telnet port whether the core was halted or running), so measurement
+# payloads are captured with the project's canonical reader JLinkRTTLogger in
+# its own probe connection, two-phase: the first GDB session snapshots the RTT
+# control block and the Up0 ring while halted, the host derives the pending
+# inventory, the logger reads exactly that inventory and advances RdOff, and a
+# short second GDB session verifies only the four-byte RdOff word changed.
+RTT_LOGGER = Path(r"C:\Users\SU\SEGGER\JLink_V818\JLinkRTTLogger.exe")
+RTT_CB_SIZE = 0xA8
+RTT_CB_MAX_UP_OFFSET = 0x10
+RTT_CB_MAX_DOWN_OFFSET = 0x14
+RTT_CB_UP0_PBUFFER_OFFSET = 0x1C
+RTT_CB_UP0_SIZE_OFFSET = 0x20
+RTT_CB_UP0_WROFF_OFFSET = 0x24
+RTT_CB_UP0_RDOFF_OFFSET = 0x28
+RTT_CB_UP0_FLAGS_OFFSET = 0x2C
+RTT_EXPECTED_MAX_UP_BUFFERS = 3
+RTT_EXPECTED_MAX_DOWN_BUFFERS = 3
+RTT_EXPECTED_UP0_SIZE = 1024
+RTT_EXPECTED_UP0_FLAGS = 1
+RTT_SIGNATURE = b"SEGGER RTT"
+
+# Watchdog pause for halted GDB sessions (R18 root cause: the independent
+# watchdog keeps counting while the core is halted and resets the chip after
+# 10 s). Space-separated form only: the comma form is rejected by the server
+# (R19 probe, 2026-08-29). Debug-domain register, not flash, lost on power
+# cycle, does not change the image bytes or its SHA-256.
+WDT_PAUSE_COMMAND = "monitor WriteU32 0xE0042008 0x00001000"
+
+LOGGER_PAYLOAD_TIMEOUT = 10.0
+LOGGER_SETTLE_SECONDS = 1.0
+LOGGER_STOP_WAIT_SECONDS = 15.0
 SERVER_NATURAL_EXIT_TIMEOUT = 10.0
 SERVER_TERMINATE_TIMEOUT = 5.0
 SERVER_KILL_TIMEOUT = 5.0
@@ -337,6 +371,7 @@ def deterministic_stop_lines(
             [
                 f"target remote 127.0.0.1:{GDB_PORT}",
                 "monitor halt",
+                WDT_PAUSE_COMMAND,
                 "set $p2_6_attach_pc = (unsigned int)$pc",
                 'printf "P2_6_TRANSPORT attached_stopped pc=0x%08x\\n", $p2_6_attach_pc',
             ]
@@ -447,142 +482,47 @@ def runtime_state_lines(
     return lines
 
 
-class RttCapture(threading.Thread):
-    def __init__(
-        self,
-        host: str,
-        port: int,
-        output: Path,
-        stop: threading.Event,
-        connect_timeout: float = 60.0,
-        measurement_policy: bool = False,
-        expected_kind: str | None = None,
-    ):
-        super().__init__(daemon=True)
-        self.host = host
-        self.port = port
-        self.output = output
-        self.stop_event = stop
-        self.connect_timeout = connect_timeout
-        self.measurement_policy = measurement_policy
-        self.expected_kind = expected_kind.upper() if expected_kind else None
-        self.error: str | None = None
-        self.connected = threading.Event()
-        self.socket_connected = False
-        self.socket_eof = False
-        self.socket_error = False
-        self.payload_ready = False
-        self.drain_started = False
-        self.drain_success = False
-        self.drain_complete = False
-        self.drain_deadline_expired = False
-        self.payload_timeout = False
-        self._buffer = bytearray()
-        self._state = threading.Condition()
-        self._byte_generation = 0
+def probe_rtt_telnet(
+    host: str,
+    port: int,
+    output: Path,
+    connect_timeout: float = 60.0,
+    banner_timeout: float = 1.5,
+) -> tuple[bool, bytes, str | None]:
+    """Connect once to the GDB server RTT telnet port and record the banner.
 
-    def wait_for_bounded_drain(self, timeout: float, quiet_timeout: float = 0.1) -> None:
-        outer_deadline = time.monotonic() + timeout
-        with self._state:
-            self.drain_started = True
-            self.drain_success = False
-            self.drain_complete = False
-            self.drain_deadline_expired = False
-            self.payload_timeout = False
-            quiet_deadline: float | None = None
-            quiet_generation = self._byte_generation
-            while True:
-                if self.socket_eof or self.socket_error or self.error:
-                    self.drain_complete = False
-                    return
-                now = time.monotonic()
-                if now >= outer_deadline:
-                    self.drain_deadline_expired = True
-                    self.payload_timeout = True
-                    self.drain_complete = False
-                    return
-                if self.payload_ready:
-                    if quiet_deadline is None or quiet_generation != self._byte_generation:
-                        quiet_generation = self._byte_generation
-                        quiet_deadline = now + quiet_timeout
-                    elif now >= quiet_deadline:
-                        self.drain_success = True
-                        self.drain_complete = True
-                        return
-                else:
-                    quiet_deadline = None
-                wait_until = outer_deadline
-                if quiet_deadline is not None:
-                    wait_until = min(wait_until, quiet_deadline)
-                self._state.wait(timeout=max(0.0, wait_until - now))
-
-    def run(self) -> None:
-        deadline = time.monotonic() + self.connect_timeout
+    The telnet channel is banner-only on this J-Link/board combination (R19
+    probe F1), so it is used purely as a transport reachability probe: the
+    first received chunk (the SEGGER banner) is stored in the RTT log for
+    continuity with earlier rounds, and the measurement payload itself is
+    captured by the two-phase JLinkRTTLogger flow. A successful TCP connect
+    never means payload-ready.
+    """
+    deadline = time.monotonic() + connect_timeout
+    last_error: str | None = None
+    while time.monotonic() < deadline:
         sock: socket.socket | None = None
         try:
-            while time.monotonic() < deadline and not self.stop_event.is_set():
-                try:
-                    sock = socket.create_connection((self.host, self.port), timeout=1.0)
-                    self.socket_connected = True
-                    self.connected.set()
-                    break
-                except OSError:
-                    time.sleep(0.2)
-            if sock is None:
-                raise DriverError(f"RTT Telnet did not open on {self.host}:{self.port}")
-            sock.settimeout(0.5)
-            with self.output.open("wb") as stream:
-                while not self.stop_event.is_set():
-                    try:
-                        chunk = sock.recv(4096)
-                    except socket.timeout:
-                        continue
-                    except OSError:
-                        if self.stop_event.is_set():
-                            break
-                        with self._state:
-                            self.socket_error = True
-                            self._state.notify_all()
-                        raise
+            sock = socket.create_connection((host, port), timeout=1.0)
+            sock.settimeout(banner_timeout)
+            banner = bytearray()
+            try:
+                while len(banner) < 4096:
+                    chunk = sock.recv(4096)
                     if not chunk:
-                        with self._state:
-                            self.socket_eof = True
-                            self._state.notify_all()
                         break
-                    with self._state:
-                        self._buffer.extend(chunk)
-                        self._byte_generation += 1
-                        if self.measurement_policy:
-                            try:
-                                last_newline = self._buffer.rfind(b"\n")
-                                if last_newline >= 0:
-                                    complete = bytes(self._buffer[:last_newline + 1])
-                                    records = parse_measurements(complete)
-                                    matching = [
-                                        record
-                                        for record in records
-                                        if record["kind"] == self.expected_kind
-                                    ]
-                                    self.payload_ready = (
-                                        len(records) == 1 and len(matching) == 1
-                                    )
-                                    self._state.notify_all()
-                            except DriverError as exc:
-                                self.error = str(exc)
-                                self._state.notify_all()
-                                break
-                    stream.write(chunk)
-                    stream.flush()
-        except Exception as exc:  # pragma: no cover - exercised on hardware
-            if not self.stop_event.is_set():
-                if self.error is None:
-                    self.error = str(exc)
-                self.socket_error = True
+                    banner.extend(chunk)
+            except OSError:
+                pass
+            output.write_bytes(bytes(banner))
+            return True, bytes(banner), None
+        except OSError as exc:
+            last_error = str(exc)
+            time.sleep(0.2)
         finally:
-            with self._state:
-                self._state.notify_all()
             if sock is not None:
                 sock.close()
+    return False, b"", last_error
 
 
 def server_command(jlink_dir: Path) -> list[str]:
@@ -723,20 +663,23 @@ def classify_transport_session(outcome: dict[str, object]) -> str:
         or not outcome["ports_closed"]
     ):
         return "CLEANUP_FAIL"
-    if outcome.get("rtt_measurement_required") and (
-        not outcome["rtt_payload_ready"]
-        or not outcome.get("rtt_drain_success")
-        or not outcome["rtt_drain_complete"]
-        or outcome.get("rtt_drain_deadline_expired")
-        or not outcome["rtt_payload_complete"]
-        or outcome.get("rtt_socket_eof")
-        or outcome.get("rtt_socket_error")
-        or outcome.get("rtt_payload_timeout")
-        or outcome.get("capture_error")
-        or outcome["rtt_record_count"] != 1
-        or outcome.get("rtt_matching_record_count") != 1
-    ):
-        return "RTT_PAYLOAD_FAIL"
+    if outcome.get("rtt_measurement_required"):
+        if (
+            not outcome.get("rtt_pending_derived")
+            or not outcome["rtt_payload_ready"]
+            or not outcome.get("rtt_drain_success")
+            or not outcome["rtt_drain_complete"]
+            or outcome.get("rtt_drain_deadline_expired")
+            or outcome.get("rtt_socket_eof")
+            or outcome.get("rtt_socket_error")
+            or outcome.get("rtt_payload_timeout")
+            or outcome.get("capture_error")
+            or outcome["rtt_record_count"] != 1
+            or outcome.get("rtt_matching_record_count") != 1
+        ):
+            return "RTT_PAYLOAD_FAIL"
+        if not outcome.get("rtt_postcheck_passed"):
+            return "RTT_POSTCHECK_FAIL"
     if outcome["session_error"]:
         return "HARNESS_FAIL"
     return "PASS"
@@ -756,9 +699,17 @@ def run_gdb_session(
     server_exit_timeout: float = SERVER_NATURAL_EXIT_TIMEOUT,
     measurement_policy: bool = False,
     expected_kind: str | None = None,
-    drain_timeout: float = 2.0,
-    quiet_timeout: float = 0.1,
 ) -> dict[str, object]:
+    """Run one GDB server session end to end.
+
+    The RTT telnet port is only probed for reachability (the SEGGER banner is
+    recorded in the RTT log); it is banner-only on this J-Link, so measurement
+    payloads are captured by the two-phase JLinkRTTLogger flow in
+    run_two_phase_ota_session, which fills in the rtt_* payload fields and the
+    final transport classification afterwards. With measurement_policy set,
+    transport_classification stays None here on purpose: the outcome is
+    incomplete until the second phase closes.
+    """
     ports = (GDB_PORT, SWO_PORT, RTT_PORT, MONITOR_PORT)
     outcome: dict[str, object] = {
         "server_started": False,
@@ -780,6 +731,11 @@ def run_gdb_session(
         "rtt_socket_connected": False,
         "rtt_socket_eof": False,
         "rtt_socket_error": False,
+        "rtt_banner_bytes": None,
+        "rtt_capture_mode": "two_phase_logger",
+        "rtt_measurement_required": bool(measurement_policy),
+        "rtt_expected_kind": expected_kind.upper() if expected_kind else None,
+        "rtt_pending_derived": False,
         "rtt_payload_ready": False,
         "rtt_drain_started": False,
         "rtt_drain_success": False,
@@ -787,23 +743,16 @@ def run_gdb_session(
         "rtt_drain_deadline_expired": False,
         "rtt_payload_complete": False,
         "rtt_payload_timeout": False,
+        "rtt_payload_parse_error": None,
         "rtt_record_count": 0,
+        "rtt_matching_record_count": None,
+        "rtt_postcheck_passed": False,
         "rtt_channel_binding_verified": False,
-        "rtt_measurement_required": bool(measurement_policy),
         "capture_stopped": True,
         "ports_closed": False,
         "session_error": None,
         "transport_classification": None,
     }
-    stop = threading.Event()
-    capture = RttCapture(
-        "127.0.0.1",
-        RTT_PORT,
-        rtt_log,
-        stop,
-        measurement_policy=measurement_policy,
-        expected_kind=expected_kind,
-    )
     server: subprocess.Popen[bytes] | None = None
     server_stream: object | None = None
     child_env = os.environ.copy()
@@ -824,11 +773,21 @@ def run_gdb_session(
         outcome["server_ready_seconds"] = round(
             time.monotonic() - ready_started, 3
         )
-        capture.start()
-        if not capture.connected.wait(timeout=5.0) or not capture.socket_connected:
-            raise DriverError("RTT Telnet connection was not established")
+        connected, banner, probe_error = probe_rtt_telnet(
+            "127.0.0.1", RTT_PORT, rtt_log, connect_timeout=5.0
+        )
+        if not connected:
+            raise DriverError(
+                f"RTT Telnet connection was not established: {probe_error}"
+            )
         outcome["rtt_connected"] = True
-        outcome["rtt_socket_connected"] = bool(capture.socket_connected)
+        outcome["rtt_socket_connected"] = True
+        outcome["rtt_banner_bytes"] = len(banner)
+        if not banner.startswith(b"SEGGER"):
+            outcome["rtt_socket_error"] = True
+            raise DriverError(
+                f"RTT Telnet banner is not a SEGGER banner: {banner[:32]!r}"
+            )
         outcome["gdb_started"] = True
         gdb_env = child_env.copy()
         gdb_env["HOME"] = str(tmp_dir)
@@ -847,13 +806,6 @@ def run_gdb_session(
     except Exception as exc:  # pragma: no cover - exercised on hardware
         outcome["session_error"] = f"{type(exc).__name__}: {exc}"
     finally:
-        if measurement_policy and capture.ident is not None and not capture.drain_complete:
-            capture.wait_for_bounded_drain(drain_timeout, quiet_timeout)
-        stop.set()
-        if capture.ident is not None:
-            capture.join(timeout=5.0)
-            outcome["capture_stopped"] = not capture.is_alive()
-        outcome["capture_error"] = capture.error
         if server is not None:
             cleanup = finish_server_process(server, server_exit_timeout)
             outcome["server_exit_code"] = cleanup["exit_code"]
@@ -867,78 +819,9 @@ def run_gdb_session(
         if server_stream is not None:
             server_stream.close()
         outcome["ports_closed"] = wait_for_ports_closed(ports)
-    raw = rtt_log.read_bytes() if rtt_log.exists() else b""
-    if measurement_policy:
-        try:
-            parsed_records = parse_measurements(raw)
-            parse_error = None
-        except DriverError as exc:
-            parsed_records = []
-            parse_error = str(exc)
-    else:
-        parsed_records = []
-        parse_error = None
-    outcome["rtt_socket_connected"] = bool(
-        outcome["rtt_socket_connected"] or getattr(capture, "socket_connected", False)
-    )
-    normalized_expected_kind = expected_kind.upper() if expected_kind else None
-    matching = (
-        [record for record in parsed_records if record["kind"] == normalized_expected_kind]
-        if measurement_policy and normalized_expected_kind
-        else []
-    )
-    outcome["rtt_payload_ready"] = bool(
-        measurement_policy
-        and getattr(capture, "payload_ready", False)
-        and len(parsed_records) == 1
-        and len(matching) == 1
-        and not parse_error
-        and not outcome["capture_error"]
-        and not getattr(capture, "socket_error", False)
-    )
-    outcome["rtt_socket_eof"] = bool(getattr(capture, "socket_eof", False))
-    outcome["rtt_socket_error"] = bool(getattr(capture, "socket_error", False))
-    outcome["rtt_payload_timeout"] = bool(getattr(capture, "payload_timeout", False))
-    outcome["rtt_drain_started"] = bool(getattr(capture, "drain_started", False))
-    outcome["rtt_drain_success"] = bool(getattr(capture, "drain_success", False))
-    outcome["rtt_drain_complete"] = bool(
-        measurement_policy and getattr(capture, "drain_complete", False)
-    )
-    outcome["rtt_drain_deadline_expired"] = bool(
-        getattr(capture, "drain_deadline_expired", False)
-    )
-    outcome["rtt_record_count"] = len(parsed_records)
-    outcome["rtt_payload_complete"] = bool(
-        len(parsed_records) == 1
-        and len(matching) == 1
-        and parse_error is None
-        and outcome["rtt_drain_complete"]
-        and outcome["rtt_drain_success"]
-        and not outcome["rtt_drain_deadline_expired"]
-        and not outcome["capture_error"]
-        and not outcome["rtt_socket_error"]
-        and not outcome["rtt_socket_eof"]
-        and not outcome["rtt_payload_timeout"]
-    )
-    outcome["rtt_channel_binding_verified"] = False
-    if measurement_policy and parse_error:
-        prior = outcome["session_error"]
-        outcome["session_error"] = (
-            f"{prior}; RTT payload parse failed: {parse_error}"
-            if prior
-            else f"RTT payload parse failed: {parse_error}"
-        )
-    outcome["rtt_payload_parse_error"] = parse_error
-    if measurement_policy and normalized_expected_kind:
-        outcome["rtt_expected_kind"] = normalized_expected_kind
-        outcome["rtt_matching_record_count"] = len(matching)
     cleanup_errors: list[str] = []
-    if not outcome["capture_stopped"]:
-        cleanup_errors.append("RTT capture thread did not stop")
     if not outcome["ports_closed"]:
         cleanup_errors.append("J-Link listener ports remain open")
-    if outcome["capture_error"]:
-        cleanup_errors.append(f"RTT capture error: {outcome['capture_error']}")
     if outcome["server_cleanup_error"]:
         cleanup_errors.append(
             f"J-Link server cleanup error: {outcome['server_cleanup_error']}"
@@ -949,8 +832,303 @@ def run_gdb_session(
         suffix = "; ".join(cleanup_errors)
         prior = outcome["session_error"]
         outcome["session_error"] = f"{prior}; {suffix}" if prior else suffix
-    outcome["transport_classification"] = classify_transport_session(outcome)
+    if not measurement_policy:
+        outcome["transport_classification"] = classify_transport_session(outcome)
     return outcome
+
+
+def rtt_descriptor(control_block: bytes) -> dict[str, int]:
+    """Parse the Up0 descriptor fields out of a 0xA8-byte RTT control block."""
+    if len(control_block) < RTT_CB_SIZE:
+        raise DriverError("RTT control block snapshot is truncated")
+    if control_block[:10] != RTT_SIGNATURE:
+        raise DriverError("RTT control block signature mismatch")
+    return {
+        "max_up_buffers": struct.unpack_from("<i", control_block, RTT_CB_MAX_UP_OFFSET)[0],
+        "max_down_buffers": struct.unpack_from("<i", control_block, RTT_CB_MAX_DOWN_OFFSET)[0],
+        "pBuffer": struct.unpack_from("<I", control_block, RTT_CB_UP0_PBUFFER_OFFSET)[0],
+        "SizeOfBuffer": struct.unpack_from("<I", control_block, RTT_CB_UP0_SIZE_OFFSET)[0],
+        "WrOff": struct.unpack_from("<I", control_block, RTT_CB_UP0_WROFF_OFFSET)[0],
+        "RdOff": struct.unpack_from("<I", control_block, RTT_CB_UP0_RDOFF_OFFSET)[0],
+        "Flags": struct.unpack_from("<I", control_block, RTT_CB_UP0_FLAGS_OFFSET)[0],
+    }
+
+
+def ring_slice(ring: bytes, rd: int, count: int) -> bytes:
+    if count and not 0 <= rd < len(ring):
+        raise DriverError(f"RdOff is out of range: {rd}")
+    if not 0 <= count <= len(ring) - 1:
+        raise DriverError(f"pending byte count is out of range: {count}")
+    first = min(count, len(ring) - rd)
+    return ring[rd:rd + first] + ring[:count - first]
+
+
+def derive_rtt_pending(
+    control_block_path: Path,
+    ring_path: Path,
+    expected_kind: str,
+    pending_path: Path,
+) -> dict[str, object]:
+    """Derive the pending Up0 inventory from the session-1 halted snapshot.
+
+    Fails closed on any structural inconsistency before a single byte is sent
+    to the logger: the descriptor must describe the frozen firmware RTT
+    configuration and the pending bytes must parse as exactly one record of
+    the expected kind.
+    """
+    result: dict[str, object] = {"status": "FAIL"}
+    try:
+        control_block = control_block_path.read_bytes()
+        ring = ring_path.read_bytes()
+        desc = rtt_descriptor(control_block)
+        if desc["max_up_buffers"] != RTT_EXPECTED_MAX_UP_BUFFERS or desc["max_down_buffers"] != RTT_EXPECTED_MAX_DOWN_BUFFERS:
+            raise DriverError(
+                f"RTT buffer counts mismatch: up={desc['max_up_buffers']} down={desc['max_down_buffers']}"
+            )
+        if not 0x20000000 <= desc["pBuffer"] < 0x20080000:
+            raise DriverError(f"Up0 pBuffer is outside SRAM: 0x{desc['pBuffer']:08X}")
+        if desc["SizeOfBuffer"] != RTT_EXPECTED_UP0_SIZE:
+            raise DriverError(f"Up0 size mismatch: {desc['SizeOfBuffer']}")
+        if len(ring) != RTT_EXPECTED_UP0_SIZE:
+            raise DriverError(f"Up0 ring snapshot size mismatch: {len(ring)}")
+        if desc["Flags"] != RTT_EXPECTED_UP0_FLAGS:
+            raise DriverError(f"Up0 flags mismatch: {desc['Flags']}")
+        if not 0 <= desc["WrOff"] < RTT_EXPECTED_UP0_SIZE or not 0 <= desc["RdOff"] < RTT_EXPECTED_UP0_SIZE:
+            raise DriverError("Up0 offsets are out of range")
+        pending_count = (desc["WrOff"] - desc["RdOff"]) % RTT_EXPECTED_UP0_SIZE
+        pending = ring_slice(ring, desc["RdOff"], pending_count)
+        records = parse_measurements(pending)
+        normalized = expected_kind.upper()
+        matching = [record for record in records if record["kind"] == normalized]
+        if pending_count == 0:
+            result.update(
+                {
+                    "status": "EMPTY",
+                    "descriptor": desc,
+                    "pending_count": 0,
+                    "reason": "UP0_INVENTORY_EMPTY",
+                }
+            )
+            return result
+        if len(records) != 1 or len(matching) != 1:
+            result.update(
+                {"record_count": len(records), "matching_record_count": len(matching)}
+            )
+            raise DriverError(
+                f"expected exactly one {normalized} record in pending inventory, "
+                f"records={len(records)} matching={len(matching)}"
+            )
+        pending_path.write_bytes(pending)
+        result.update(
+            {
+                "status": "ELIGIBLE",
+                "descriptor": desc,
+                "pending_count": pending_count,
+                "pending_sha256": hashlib.sha256(pending).hexdigest().upper(),
+                "pending_path": str(pending_path),
+                "record_count": len(records),
+                "matching_record_count": len(matching),
+            }
+        )
+        return result
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        return result
+
+
+def run_rtt_logger_capture(
+    pending_path: Path,
+    raw_log: Path,
+    console_log: Path,
+    rtt_address: int,
+    tmp_dir: Path,
+    payload_timeout: float = LOGGER_PAYLOAD_TIMEOUT,
+    settle_seconds: float = LOGGER_SETTLE_SECONDS,
+) -> dict[str, object]:
+    """Between-sessions RTT payload capture via JLinkRTTLogger.
+
+    The logger is the project's canonical RTT reader in its own probe
+    connection: it reads the Up0 inventory [RdOff, WrOff) that must be
+    byte-identical to the session-1 GDB-snapshotted pending inventory and
+    advances RdOff. The logger has no natural exit; it is stopped with the
+    AGENTS.md residual-logger cleanup pattern and the stop is disclosed in
+    the capture result.
+    """
+    result: dict[str, object] = {
+        "phase": "capture",
+        "status": "FAIL",
+        "reader": "JLinkRTTLogger",
+        "payload_ready": False,
+        "payload_complete": False,
+        "payload_timeout": False,
+        "logger_stopped_by": (
+            "AGENTS.md residual-logger cleanup pattern (Stop-Process); "
+            "the logger has no natural exit"
+        ),
+    }
+    if not RTT_LOGGER.is_file():
+        result["error"] = f"missing JLinkRTTLogger: {RTT_LOGGER}"
+        return result
+    pending = pending_path.read_bytes()
+    if raw_log.exists():
+        raw_log.unlink()
+    logger: subprocess.Popen[bytes] | None = None
+    logger_env = os.environ.copy()
+    logger_env["TEMP"] = str(tmp_dir)
+    logger_env["TMP"] = str(tmp_dir)
+    logger_env["TMPDIR"] = str(tmp_dir)
+    try:
+        command = [
+            str(RTT_LOGGER),
+            "-Device", "CORTEX-M4",
+            "-If", "SWD",
+            "-Speed", "1000",
+            "-RTTAddress", f"0x{rtt_address:08X}",
+            "-RTTChannel", "0",
+            str(raw_log),
+        ]
+        started = time.monotonic()
+        with console_log.open("wb") as console:
+            logger = subprocess.Popen(
+                command,
+                cwd=ROOT,
+                stdin=subprocess.DEVNULL,
+                stdout=console,
+                stderr=subprocess.STDOUT,
+                env=logger_env,
+            )
+        result["logger_pid"] = logger.pid
+        result["logger_command"] = command
+        deadline = started + payload_timeout
+        delivered = 0
+        while time.monotonic() < deadline:
+            if logger.poll() is not None:
+                raise DriverError(f"RTT logger exited early: rc={logger.returncode}")
+            delivered = raw_log.stat().st_size if raw_log.exists() else 0
+            if delivered >= len(pending):
+                break
+            time.sleep(0.1)
+        else:
+            raise DriverError(
+                f"RTT payload timeout: logger delivered {delivered} of {len(pending)} bytes"
+            )
+        result["payload_ready"] = True
+        # Quiet settle: once the inventory size is reached no further byte may
+        # arrive; extra bytes mean the firmware produced output the session-1
+        # snapshot never saw, which would break the byte-binding proof.
+        settle_deadline = time.monotonic() + settle_seconds
+        while time.monotonic() < settle_deadline:
+            if raw_log.exists() and raw_log.stat().st_size > len(pending):
+                raise DriverError("RTT payload contains extra bytes")
+            time.sleep(0.1)
+        payload = raw_log.read_bytes()
+        if len(payload) > len(pending):
+            raise DriverError("RTT payload contains extra bytes")
+        if payload != pending:
+            raise DriverError("RTT payload differs from pre-read Up0 inventory")
+        result.update(
+            {
+                "status": "PASS",
+                "payload_complete": True,
+                "payload_bytes": len(payload),
+                "payload_sha256": hashlib.sha256(payload).hexdigest().upper(),
+                "expected_pending_bytes": len(pending),
+                "logger_wait_seconds": round(time.monotonic() - started, 3),
+            }
+        )
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        result["payload_timeout"] = "timeout" in str(exc).lower()
+        result["raw_bytes"] = raw_log.stat().st_size if raw_log.exists() else 0
+    # Stop the logger before sealing the capture result so the recorded
+    # lifecycle is part of the evidence itself.
+    if logger is not None and logger.poll() is None:
+        subprocess.run(
+            [
+                "powershell.exe", "-NoProfile", "-Command",
+                "Stop-Process -Name JLinkRTTLogger -Force -ErrorAction SilentlyContinue",
+            ],
+            capture_output=True,
+            check=False,
+        )
+        for _ in range(int(LOGGER_STOP_WAIT_SECONDS / 0.25)):
+            if logger.poll() is not None:
+                break
+            time.sleep(0.25)
+    result["logger_stopped"] = logger is None or logger.poll() is not None
+    check = subprocess.run(
+        ["tasklist", "/FO", "CSV", "/NH"], capture_output=True, text=True, check=False
+    )
+    result["residual_rtt_logger_processes"] = sum(
+        1 for line in check.stdout.splitlines() if "JLinkRTTLogger" in line
+    )
+    if result.get("residual_rtt_logger_processes"):
+        result["status"] = "FAIL"
+        result["error"] = "residual JLinkRTTLogger processes remain"
+    return result
+
+
+def verify_rtt_postcheck(
+    pre_control_block_path: Path,
+    post_control_block_path: Path,
+    pending_count: int,
+) -> dict[str, object]:
+    """Verify the logger's only legal side effect on the RTT control block.
+
+    WrOff must be unchanged, RdOff must have advanced exactly over the
+    consumed inventory, and every control-block byte outside the four-byte
+    Up0 RdOff word must be identical between the two snapshots.
+    """
+    result: dict[str, object] = {"phase": "postcheck", "status": "FAIL"}
+    try:
+        pre_cb = pre_control_block_path.read_bytes()
+        post_cb = post_control_block_path.read_bytes()
+        d0 = rtt_descriptor(pre_cb)
+        d1 = rtt_descriptor(post_cb)
+        if (
+            d1["pBuffer"] != d0["pBuffer"]
+            or d1["SizeOfBuffer"] != d0["SizeOfBuffer"]
+            or d1["Flags"] != d0["Flags"]
+        ):
+            raise DriverError("post-read Up0 descriptor identity mismatch")
+        if d1["WrOff"] != d0["WrOff"]:
+            raise DriverError(
+                f"WrOff changed during host consumption: {d0['WrOff']} -> {d1['WrOff']}"
+            )
+        if d1["RdOff"] != d0["WrOff"]:
+            raise DriverError(
+                f"RdOff did not consume inventory: before={d0['RdOff']} "
+                f"after={d1['RdOff']} wr={d0['WrOff']}"
+            )
+        consumed = (d1["RdOff"] - d0["RdOff"]) % d0["SizeOfBuffer"]
+        if consumed != pending_count:
+            raise DriverError(f"RdOff delta {consumed} != pending count {pending_count}")
+        rd_off_word = RTT_CB_UP0_RDOFF_OFFSET
+        outside_rd_off = [
+            {"offset": offset, "before": pre_cb[offset], "after": post_cb[offset]}
+            for offset in range(len(pre_cb))
+            if pre_cb[offset] != post_cb[offset]
+            and not (rd_off_word <= offset < rd_off_word + 4)
+        ]
+        if outside_rd_off:
+            raise DriverError(
+                "RTT control block changed outside the four-byte Up0 RdOff word: "
+                f"{outside_rd_off[:8]}"
+            )
+        result.update(
+            {
+                "status": "PASS",
+                "descriptor_before": d0,
+                "descriptor_after": d1,
+                "pending_count": pending_count,
+                "consumed_count": consumed,
+                "control_block_outside_rd_off_changes": 0,
+            }
+        )
+        return result
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        return result
 
 
 def gdb_command_file(
@@ -961,6 +1139,8 @@ def gdb_command_file(
     layout: dict[str, int],
     package_path: str,
     expected_kind: str,
+    rtt_cb_snapshot: Path,
+    rtt_ring_snapshot: Path,
 ) -> None:
     escaped_path = package_path.replace("\\", "\\\\").replace('"', '\\"')
     parent_path = package_path.rsplit("/", 1)[0] or "/"
@@ -1076,10 +1256,209 @@ def gdb_command_file(
         "  quit 38",
         "end",
         f'printf "P2_6_RTT_DRIVER PASS kind={expected_kind} page_state=%u mode=%u\\n", $page_state, $mode',
+        "",
+        "# Two-phase RTT capture, phase 1: snapshot the Up0 inventory while halted.",
+        f"set $rtt_cb = (unsigned char*)0x{symbols[RTT_SYMBOL]:08x}",
+        f"if $rtt_cb[0] != 0x53 || $rtt_cb[1] != 0x45 || $rtt_cb[2] != 0x47 || $rtt_cb[3] != 0x47 || $rtt_cb[4] != 0x45 || $rtt_cb[5] != 0x52 || $rtt_cb[6] != 0x20 || $rtt_cb[7] != 0x52 || $rtt_cb[8] != 0x54 || $rtt_cb[9] != 0x54",
+        '  printf "P2_6_RTT_DRIVER ERROR rtt_signature_at_snapshot\\n"',
+        "  quit 39",
+        "end",
+        "set $up0_pbuf = *(unsigned int*)($rtt_cb + 0x1C)",
+        "set $up0_size = *(unsigned int*)($rtt_cb + 0x20)",
+        "set $up0_wroff = *(unsigned int*)($rtt_cb + 0x24)",
+        "set $up0_rdoff = *(unsigned int*)($rtt_cb + 0x28)",
+        'printf "P2_6_RTT_CB pBuffer=0x%08x size=%u wroff=%u rdoff=%u\\n", $up0_pbuf, $up0_size, $up0_wroff, $up0_rdoff',
+        "if $up0_size != 1024",
+        '  printf "P2_6_RTT_DRIVER ERROR up0_size=%u\\n", $up0_size',
+        "  quit 40",
+        "end",
+        f"dump binary memory {gdb_path(rtt_cb_snapshot)} $rtt_cb ($rtt_cb + 0xA8)",
+        f"dump binary memory {gdb_path(rtt_ring_snapshot)} $up0_pbuf ($up0_pbuf + $up0_size)",
+        'printf "P2_6_RTT_DRIVER SNAPSHOT_WRITTEN cb_bytes=168 ring_bytes=%u\\n", $up0_size',
         "detach",
         "quit",
     ]
     path.write_text("\n".join(lines) + "\n", encoding="ascii")
+
+
+def post_snapshot_command_file(
+    path: Path,
+    elf: Path,
+    rtt_address: int,
+    control_block_path: Path,
+) -> None:
+    """Phase-3 GDB script: halt, pause the watchdog, dump the post-read RTT
+    control block, detach. Nothing else may run in this session."""
+    lines = [
+        *gdb_prologue_lines(elf),
+        f"target remote 127.0.0.1:{GDB_PORT}",
+        "monitor halt",
+        WDT_PAUSE_COMMAND,
+        f"set $rtt_cb = (unsigned char*)0x{rtt_address:08x}",
+        f"if $rtt_cb[0] != 0x53 || $rtt_cb[1] != 0x45 || $rtt_cb[2] != 0x47 || $rtt_cb[3] != 0x47 || $rtt_cb[4] != 0x45 || $rtt_cb[5] != 0x52 || $rtt_cb[6] != 0x20 || $rtt_cb[7] != 0x52 || $rtt_cb[8] != 0x54 || $rtt_cb[9] != 0x54",
+        '  printf "P2_6_RTT_POST ERROR rtt_signature\\n"',
+        "  quit 41",
+        "end",
+        'printf "P2_6_RTT_POST attached_stopped pc=0x%08x\\n", (unsigned int)$pc',
+        f"dump binary memory {gdb_path(control_block_path)} $rtt_cb ($rtt_cb + 0xA8)",
+        'printf "P2_6_RTT_POST SNAPSHOT_WRITTEN cb_bytes=168\\n"',
+        "detach",
+        "quit",
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="ascii")
+
+
+def _append_session_error(outcome: dict[str, object], message: str) -> None:
+    prior = outcome["session_error"]
+    outcome["session_error"] = f"{prior}; {message}" if prior else message
+
+
+def run_two_phase_ota_session(
+    *,
+    jlink_dir: Path,
+    gdb: Path,
+    gdb_script: Path,
+    gdb_log: Path,
+    server_log: Path,
+    rtt_log: Path,
+    tmp_dir: Path,
+    timeout: int,
+    server_ready_timeout: float,
+    expected_kind: str,
+    rtt_address: int,
+    cb_snapshot: Path,
+    ring_snapshot: Path,
+    pending_path: Path,
+    raw_log: Path,
+    console_log: Path,
+    post_gdb_script: Path,
+    post_gdb_log: Path,
+    post_server_log: Path,
+    post_rtt_log: Path,
+    post_cb_snapshot: Path,
+    server_exit_timeout: float = SERVER_NATURAL_EXIT_TIMEOUT,
+    logger_payload_timeout: float = LOGGER_PAYLOAD_TIMEOUT,
+    logger_settle_seconds: float = LOGGER_SETTLE_SECONDS,
+) -> dict[str, object]:
+    """Two-phase OTA measurement session (R19-proven capture structure).
+
+    Phase 1 runs the OTA driver GDB script, which snapshots the RTT control
+    block and the Up0 ring while the core is halted. Phase 2 captures the
+    pending inventory with JLinkRTTLogger in its own probe connection and
+    requires byte identity with the snapshot. Phase 3 is a short second GDB
+    session proving the logger's only side effect on the control block is the
+    four-byte Up0 RdOff word. The returned outcome keeps the
+    run_gdb_session field layout; the rtt_* payload fields are filled here.
+    """
+    session = run_gdb_session(
+        jlink_dir=jlink_dir,
+        gdb=gdb,
+        gdb_script=gdb_script,
+        gdb_log=gdb_log,
+        server_log=server_log,
+        rtt_log=rtt_log,
+        tmp_dir=tmp_dir,
+        timeout=timeout,
+        server_ready_timeout=server_ready_timeout,
+        server_exit_timeout=server_exit_timeout,
+        measurement_policy=True,
+        expected_kind=expected_kind,
+    )
+    phases: dict[str, object] = {}
+    transport_ok = (
+        session["session_error"] is None and session["gdb_exit_code"] == 0
+    )
+    derived: dict[str, object] = {"status": "NOT_RUN"}
+    capture: dict[str, object] = {"status": "NOT_RUN", "payload_timeout": False}
+    postcheck: dict[str, object] = {"status": "NOT_RUN"}
+    if transport_ok:
+        derived = derive_rtt_pending(
+            cb_snapshot, ring_snapshot, expected_kind, pending_path
+        )
+        phases["derive"] = derived
+        if derived.get("status") == "ELIGIBLE":
+            capture = run_rtt_logger_capture(
+                pending_path,
+                raw_log,
+                console_log,
+                rtt_address,
+                tmp_dir,
+                payload_timeout=logger_payload_timeout,
+                settle_seconds=logger_settle_seconds,
+            )
+            phases["capture"] = capture
+            if capture.get("status") == "PASS":
+                post_session = run_gdb_session(
+                    jlink_dir=jlink_dir,
+                    gdb=gdb,
+                    gdb_script=post_gdb_script,
+                    gdb_log=post_gdb_log,
+                    server_log=post_server_log,
+                    rtt_log=post_rtt_log,
+                    tmp_dir=tmp_dir,
+                    timeout=timeout,
+                    server_ready_timeout=server_ready_timeout,
+                    server_exit_timeout=server_exit_timeout,
+                    measurement_policy=False,
+                )
+                phases["post_session"] = post_session
+                if (
+                    post_session["session_error"] is None
+                    and post_session["gdb_exit_code"] == 0
+                ):
+                    postcheck = verify_rtt_postcheck(
+                        cb_snapshot, post_cb_snapshot, int(derived["pending_count"])
+                    )
+                    phases["postcheck"] = postcheck
+                    if postcheck.get("status") != "PASS":
+                        _append_session_error(
+                            session,
+                            f"RTT postcheck failed: {postcheck.get('error')}",
+                        )
+                else:
+                    _append_session_error(
+                        session,
+                        "post snapshot session failed: "
+                        f"{post_session['session_error']}; gdb={post_session['gdb_exit_code']}",
+                    )
+            else:
+                _append_session_error(
+                    session, f"RTT logger capture failed: {capture.get('error')}"
+                )
+        elif derived.get("status") == "EMPTY":
+            _append_session_error(session, "RTT pending inventory is empty")
+        else:
+            _append_session_error(
+                session, f"RTT pending derivation failed: {derived.get('error')}"
+            )
+    session["rtt_two_phase"] = phases
+    session["rtt_pending_derived"] = derived.get("status") == "ELIGIBLE"
+    session["rtt_drain_started"] = capture.get("status") not in ("NOT_RUN",)
+    session["rtt_drain_success"] = capture.get("status") == "PASS"
+    session["rtt_drain_complete"] = capture.get("status") == "PASS"
+    session["rtt_drain_deadline_expired"] = bool(capture.get("payload_timeout"))
+    session["rtt_payload_timeout"] = bool(capture.get("payload_timeout"))
+    session["rtt_postcheck_passed"] = postcheck.get("status") == "PASS"
+    session["rtt_record_count"] = int(derived.get("record_count", 0) or 0)
+    session["rtt_matching_record_count"] = int(
+        derived.get("matching_record_count", 0) or 0
+    )
+    session["rtt_payload_ready"] = bool(
+        session["rtt_pending_derived"] and session["rtt_drain_success"]
+    )
+    session["rtt_payload_complete"] = bool(
+        session["rtt_pending_derived"]
+        and session["rtt_drain_success"]
+        and session["rtt_drain_complete"]
+        and session["rtt_postcheck_passed"]
+        and session["rtt_record_count"] == 1
+        and session["rtt_matching_record_count"] == 1
+        and not session["rtt_payload_timeout"]
+        and session["session_error"] is None
+    )
+    session["rtt_channel_binding_verified"] = bool(session["rtt_payload_complete"])
+    session["transport_classification"] = classify_transport_session(session)
+    return session
 
 
 def hardware_run(args: argparse.Namespace) -> int:
@@ -1130,8 +1509,35 @@ def hardware_run(args: argparse.Namespace) -> int:
     gdb_log = log_dir / f"{prefix}-gdb.log"
     server_log = log_dir / f"{prefix}-jlink-server.log"
     json_path = log_dir / f"{prefix}-result.json"
+    rtt_payload_log = log_dir / f"{prefix}-rtt-payload.raw.log"
+    rtt_logger_console_log = log_dir / f"{prefix}-rtt-logger-console.log"
+    post_gdb_log = log_dir / f"{prefix}-post-gdb.log"
+    post_server_log = log_dir / f"{prefix}-post-jlink-server.log"
+    post_rtt_log = log_dir / f"{prefix}-post-rtt.raw.log"
+    rtt_cb_snapshot = log_dir / f"{prefix}-rtt-cb-pre.bin"
+    rtt_ring_snapshot = log_dir / f"{prefix}-rtt-up0-pre.bin"
+    post_cb_snapshot = log_dir / f"{prefix}-rtt-cb-post.bin"
+    rtt_pending_path = log_dir / f"{prefix}-rtt-pending.bin"
     gdb_script = tmp_dir / f"{prefix}.gdb"
-    for output in (rtt_log, gdb_log, server_log, json_path, gdb_script):
+    post_gdb_script = tmp_dir / f"{prefix}-post.gdb"
+    outputs = (
+        rtt_log,
+        gdb_log,
+        server_log,
+        json_path,
+        rtt_payload_log,
+        rtt_logger_console_log,
+        post_gdb_log,
+        post_server_log,
+        post_rtt_log,
+        rtt_cb_snapshot,
+        rtt_ring_snapshot,
+        post_cb_snapshot,
+        rtt_pending_path,
+        gdb_script,
+        post_gdb_script,
+    )
+    for output in outputs:
         require_inside_root(output, "output")
         if output.exists():
             raise DriverError(f"refusing to overwrite existing output: {output}")
@@ -1145,6 +1551,11 @@ def hardware_run(args: argparse.Namespace) -> int:
         layout,
         args.package_path,
         args.kind,
+        rtt_cb_snapshot,
+        rtt_ring_snapshot,
+    )
+    post_snapshot_command_file(
+        post_gdb_script, elf, selected_symbols[RTT_SYMBOL], post_cb_snapshot
     )
 
     base_result: dict[str, object] = {
@@ -1174,8 +1585,18 @@ def hardware_run(args: argparse.Namespace) -> int:
             "gdb": str(gdb_log),
             "server": str(server_log),
             "gdb_script": str(gdb_script),
+            "rtt_payload": str(rtt_payload_log),
+            "rtt_logger_console": str(rtt_logger_console_log),
+            "rtt_cb_pre": str(rtt_cb_snapshot),
+            "rtt_up0_pre": str(rtt_ring_snapshot),
+            "rtt_cb_post": str(post_cb_snapshot),
+            "rtt_pending": str(rtt_pending_path),
+            "post_gdb": str(post_gdb_log),
+            "post_server": str(post_server_log),
+            "post_rtt": str(post_rtt_log),
+            "post_gdb_script": str(post_gdb_script),
         },
-        "sha256": {"gdb_script": sha256_file(gdb_script)},
+        "sha256": {"gdb_script": sha256_file(gdb_script), "post_gdb_script": sha256_file(post_gdb_script)},
         "outside_repo_writes": [],
     }
     if args.prepare_only:
@@ -1186,7 +1607,7 @@ def hardware_run(args: argparse.Namespace) -> int:
         print(json.dumps(base_result, indent=2, ensure_ascii=True))
         return 0
 
-    session = run_gdb_session(
+    session = run_two_phase_ota_session(
         jlink_dir=Path(args.jlink_dir),
         gdb=gdb,
         gdb_script=gdb_script,
@@ -1196,10 +1617,20 @@ def hardware_run(args: argparse.Namespace) -> int:
         tmp_dir=tmp_dir,
         timeout=args.timeout + 90,
         server_ready_timeout=args.server_ready_timeout,
-        measurement_policy=True,
         expected_kind=args.kind,
+        rtt_address=selected_symbols[RTT_SYMBOL],
+        cb_snapshot=rtt_cb_snapshot,
+        ring_snapshot=rtt_ring_snapshot,
+        pending_path=rtt_pending_path,
+        raw_log=rtt_payload_log,
+        console_log=rtt_logger_console_log,
+        post_gdb_script=post_gdb_script,
+        post_gdb_log=post_gdb_log,
+        post_server_log=post_server_log,
+        post_rtt_log=post_rtt_log,
+        post_cb_snapshot=post_cb_snapshot,
     )
-    raw = rtt_log.read_bytes() if rtt_log.exists() else b""
+    raw = rtt_payload_log.read_bytes() if rtt_payload_log.exists() else b""
     try:
         measurements = parse_measurements(raw)
     except DriverError:
@@ -1221,6 +1652,20 @@ def hardware_run(args: argparse.Namespace) -> int:
         "gdb": sha256_file(gdb_log) if gdb_log.exists() else None,
         "server": sha256_file(server_log) if server_log.exists() else None,
         "gdb_script": sha256_file(gdb_script),
+        "post_gdb_script": sha256_file(post_gdb_script),
+        "rtt_payload": sha256_file(rtt_payload_log) if rtt_payload_log.exists() else None,
+        "rtt_logger_console": (
+            sha256_file(rtt_logger_console_log)
+            if rtt_logger_console_log.exists()
+            else None
+        ),
+        "rtt_cb_pre": sha256_file(rtt_cb_snapshot) if rtt_cb_snapshot.exists() else None,
+        "rtt_up0_pre": sha256_file(rtt_ring_snapshot) if rtt_ring_snapshot.exists() else None,
+        "rtt_cb_post": sha256_file(post_cb_snapshot) if post_cb_snapshot.exists() else None,
+        "rtt_pending": sha256_file(rtt_pending_path) if rtt_pending_path.exists() else None,
+        "post_gdb": sha256_file(post_gdb_log) if post_gdb_log.exists() else None,
+        "post_server": sha256_file(post_server_log) if post_server_log.exists() else None,
+        "post_rtt": sha256_file(post_rtt_log) if post_rtt_log.exists() else None,
     }
     json_path.write_text(
         json.dumps(result, indent=2, ensure_ascii=True) + "\n", encoding="ascii"
@@ -1235,12 +1680,18 @@ def hardware_run(args: argparse.Namespace) -> int:
     if len(measurements) != 1 or len(matching) != 1:
         raise DriverError(
             f"expected exactly one {args.kind} P2_6 record, "
-            f"found total={len(measurements)} matching={len(matching)}; see {rtt_log}"
+            f"found total={len(measurements)} matching={len(matching)}; see {rtt_payload_log}"
         )
-    if not session["rtt_payload_complete"] or not session["rtt_drain_complete"]:
+    if (
+        not session["rtt_payload_complete"]
+        or not session["rtt_channel_binding_verified"]
+    ):
         raise DriverError(
-            "RTT measurement payload was not complete after bounded drain; "
-            f"ready={session['rtt_payload_ready']} drain={session['rtt_drain_complete']}"
+            "RTT measurement payload was not completely captured and bound "
+            "(pending derive + logger byte identity + postcheck); "
+            f"ready={session['rtt_payload_ready']} "
+            f"drain={session['rtt_drain_complete']} "
+            f"postcheck={session['rtt_postcheck_passed']}"
         )
     checks = classifications[0]
     required = (

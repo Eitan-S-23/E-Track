@@ -1,0 +1,12 @@
+{
+    "Result":  "PASS",
+    "Profile":  "Validation",
+    "RepoRoot":  "D:\\github\\my\\E-Track",
+    "Head":  "d27200d6e0e203ae4b4c83f248393c7d112bb53b",
+    "FileCount":  129,
+    "ManifestSHA256":  "AAB3CA121BF78C247E8CA5FA8B9BDC0C87EC0773354E3D00033EF46AA9D906D0",
+    "ManifestPath":  "D:\\github\\my\\E-Track\\docs\\acceptance-contracts\\P2-6-v2\\manifest-validation\\source-manifest.txt",
+    "ManifestJsonSHA256":  "0C3834B827E3F0666ACF9E64522B51F00631934B65F75EAF96ADF7114863C258",
+    "ManifestJsonPath":  "D:\\github\\my\\E-Track\\docs\\acceptance-contracts\\P2-6-v2\\manifest-validation\\source-manifest.json",
+    "CopyRoot":  null
+}
