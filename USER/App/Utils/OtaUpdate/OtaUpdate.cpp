@@ -465,6 +465,9 @@ bool Session::Apply()
         memset(&info, 0, sizeof(info));
         result = HAL::OTA_PackageApplyStaging(
             packageInfo.package_len, device.current_vcode, &info);
+#if defined(P2_6_TEST_ENABLE)
+        HAL::OTA_P2_6_ReportPackageApply(result, &info);
+#endif
         if (result != OTA_PACKAGE_OK ||
             info.target_vcode != packageInfo.target_vcode)
         {
@@ -488,6 +491,9 @@ bool Session::Apply()
         result = HAL::OTA_PatchApplyStaging(
             packageInfo.package_len, device.current_vcode,
             currentImageLen, device.base_image_sha8, &info);
+#if defined(P2_6_TEST_ENABLE)
+        HAL::OTA_P2_6_ReportPatchApply(result, &info);
+#endif
         if (result != OTA_PATCH_OK ||
             info.target_vcode != packageInfo.target_vcode)
         {

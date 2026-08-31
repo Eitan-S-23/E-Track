@@ -12,6 +12,8 @@ __pycache__/
 # Logs and local runtime state
 *.log
 *.log.*
+# 验收证据包内的日志是冻结产物，不受通用 *.log 规则约束
+!docs/acceptance-contracts/**/*.log
 /log.txt
 /SystemSave.json
 /.SystemSaveBackup.json

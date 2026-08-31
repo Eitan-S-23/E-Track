@@ -1,0 +1,712 @@
+{
+  "schema": "p2-6-app-recovery-result-v4",
+  "audit_id": "P2-6-BR-20260829-RTT-BIND-R19-03",
+  "classification": "APP_IMAGE_ALREADY_AUTHORITATIVE",
+  "reason": "CHUNKED_TRIPLE_PASS_ALREADY_AUTHORITATIVE",
+  "pass": true,
+  "hardware_started": true,
+  "attempt_count": 1,
+  "connection_count": 4,
+  "loadbin_count": 0,
+  "verifybin_count": 0,
+  "reset_count": 1,
+  "source": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-app-image-drift-audit-20260827-01\\restore\\X-Track-App-GCC-p2-6a-test-v2.8.1.authoritative-restore.bin",
+    "bytes": 600744,
+    "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+    "mtime_ns": 1787841784955009100,
+    "mtime_iso": "2026-08-27T22:43:04.955009+08:00"
+  },
+  "gate_pre": {
+    "schema": "p2-6-gate-phase-audit-v1",
+    "phase": "gate-pre",
+    "pass_runs": [
+      {
+        "phase": "gate-pre",
+        "label": "a",
+        "gdb_script": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\readback-gate-pre-a.gdb",
+          "bytes": 84573,
+          "sha256": "BE33110E49E3EA890F8B5E927F9965213C6B3DCA3A239184256C69F96FCE331D",
+          "mtime_ns": 1788063207146349500,
+          "mtime_iso": "2026-08-30T12:13:27.146349+08:00"
+        },
+        "gdb_exit_code": 0,
+        "gdb_log": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-gdb.log",
+          "bytes": 35492,
+          "sha256": "DEA7A95E96806BECDA286A6CD470D75D05D92F6413CD83F3F208799A98F36F31",
+          "mtime_ns": 1788069238107349100,
+          "mtime_iso": "2026-08-30T13:53:58.107349+08:00"
+        },
+        "gdb_log_audit": {
+          "label": "a",
+          "phase": "gate-pre",
+          "dhcsr_marker_count": 294,
+          "dhcsr_pre": 147,
+          "dhcsr_post": 147,
+          "all_halted": true,
+          "resume_issued": true,
+          "error_line_count": 0,
+          "pass": true
+        },
+        "server_pid": 2880,
+        "server_exit_code": 0,
+        "server_natural_exit": true,
+        "server_exit_wait_seconds": 0.175,
+        "server_ready_seconds": 0.306,
+        "server_log": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-server.log",
+          "bytes": 207445,
+          "sha256": "151930087990BDF2E0B919DE053AA2CC349F6346DA9E07501CE2A624D1051EB2",
+          "mtime_ns": 1788069238284956200,
+          "mtime_iso": "2026-08-30T13:53:58.284956+08:00"
+        },
+        "server_log_audit": {
+          "label": "a",
+          "phase": "gate-pre",
+          "gdb_connections": 1,
+          "halt_echo": 1,
+          "wdt_pause_echo": 1,
+          "go_echo": 1,
+          "gdb_closed": 1,
+          "pass": true
+        },
+        "server_command_file": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-server-command.json",
+          "bytes": 492,
+          "sha256": "857BF348930DD7598521B00EACB03675D8D0AB9319FFD17082CC45FBFCEA9866",
+          "mtime_ns": 1788069243986859100,
+          "mtime_iso": "2026-08-30T13:54:03.986859+08:00"
+        },
+        "chunk_file_audit": {
+          "label": "a",
+          "chunk_files": 147,
+          "bytes": 600744,
+          "pass": true
+        },
+        "post_server_cleanup": {
+          "natural_exit": true,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "polls": 1,
+          "wait_seconds": 0.038,
+          "final_ports": {
+            "listening": [],
+            "all_closed": true,
+            "query": "netstat -ano -p tcp"
+          },
+          "final_processes": {
+            "matching": [],
+            "clear": true
+          }
+        },
+        "probe": {
+          "pid": 19072,
+          "exit_code": 0,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "elapsed_seconds": 0.361,
+          "command": [
+            "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+            "-Device",
+            "AT32F435RGT7",
+            "-If",
+            "SWD",
+            "-Speed",
+            "1000",
+            "-AutoConnect",
+            "1",
+            "-ExitOnError",
+            "1",
+            "-CommandFile",
+            "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-probe.jlink"
+          ],
+          "command_file": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-probe.jlink",
+            "bytes": 14,
+            "sha256": "E90A2B976DC54B9845DF89B3741A2837CE02A35ED14C0F887E33E80CA5072D92",
+            "mtime_ns": 1788069238430849300,
+            "mtime_iso": "2026-08-30T13:53:58.430849+08:00"
+          },
+          "log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-probe.log",
+            "bytes": 1767,
+            "sha256": "1866A368BDBE6752B74E52B627142E057D5FCD6B953150F9D0A06D6D47A77914",
+            "mtime_ns": 1788069238772236300,
+            "mtime_iso": "2026-08-30T13:53:58.772236+08:00"
+          }
+        },
+        "probe_audit": {
+          "final": "running",
+          "states": [
+            "running"
+          ],
+          "pass": true
+        },
+        "final_cleanup": {
+          "natural_exit": true,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "polls": 19,
+          "wait_seconds": 5.191,
+          "final_ports": {
+            "listening": [],
+            "all_closed": true,
+            "query": "netstat -ano -p tcp"
+          },
+          "final_processes": {
+            "matching": [],
+            "clear": true
+          }
+        },
+        "terminate_sent": false,
+        "kill_sent": false,
+        "started_at": "2026-08-30T13:53:32.556635+08:00",
+        "finished_at": "2026-08-30T13:54:03.992816+08:00"
+      },
+      {
+        "phase": "gate-pre",
+        "label": "b",
+        "gdb_script": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\readback-gate-pre-b.gdb",
+          "bytes": 84573,
+          "sha256": "4786363036AA637FF4042A7A8229471C172EFE47EBEB7BD393717239B4DE6C3F",
+          "mtime_ns": 1788063207160021600,
+          "mtime_iso": "2026-08-30T12:13:27.160022+08:00"
+        },
+        "gdb_exit_code": 0,
+        "gdb_log": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-gdb.log",
+          "bytes": 35487,
+          "sha256": "8EA527B41E346097E32D24538FEBA0F21A7E92A70CC1EA12B52C9960C9298DE5",
+          "mtime_ns": 1788069268564237500,
+          "mtime_iso": "2026-08-30T13:54:28.564238+08:00"
+        },
+        "gdb_log_audit": {
+          "label": "b",
+          "phase": "gate-pre",
+          "dhcsr_marker_count": 294,
+          "dhcsr_pre": 147,
+          "dhcsr_post": 147,
+          "all_halted": true,
+          "resume_issued": true,
+          "error_line_count": 0,
+          "pass": true
+        },
+        "server_pid": 21996,
+        "server_exit_code": 0,
+        "server_natural_exit": true,
+        "server_exit_wait_seconds": 0.294,
+        "server_ready_seconds": 0.203,
+        "server_log": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-server.log",
+          "bytes": 207496,
+          "sha256": "638B969732A8236FE28C9CD8B7686AFA05223A007FA3CC81BFE1B56B183BC0F5",
+          "mtime_ns": 1788069268755904200,
+          "mtime_iso": "2026-08-30T13:54:28.755904+08:00"
+        },
+        "server_log_audit": {
+          "label": "b",
+          "phase": "gate-pre",
+          "gdb_connections": 1,
+          "halt_echo": 1,
+          "wdt_pause_echo": 1,
+          "go_echo": 1,
+          "gdb_closed": 1,
+          "pass": true
+        },
+        "server_command_file": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-server-command.json",
+          "bytes": 492,
+          "sha256": "857BF348930DD7598521B00EACB03675D8D0AB9319FFD17082CC45FBFCEA9866",
+          "mtime_ns": 1788069274424716900,
+          "mtime_iso": "2026-08-30T13:54:34.424717+08:00"
+        },
+        "chunk_file_audit": {
+          "label": "b",
+          "chunk_files": 147,
+          "bytes": 600744,
+          "pass": true
+        },
+        "post_server_cleanup": {
+          "natural_exit": true,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "polls": 1,
+          "wait_seconds": 0.038,
+          "final_ports": {
+            "listening": [],
+            "all_closed": true,
+            "query": "netstat -ano -p tcp"
+          },
+          "final_processes": {
+            "matching": [],
+            "clear": true
+          }
+        },
+        "probe": {
+          "pid": 2104,
+          "exit_code": 0,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "elapsed_seconds": 0.259,
+          "command": [
+            "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+            "-Device",
+            "AT32F435RGT7",
+            "-If",
+            "SWD",
+            "-Speed",
+            "1000",
+            "-AutoConnect",
+            "1",
+            "-ExitOnError",
+            "1",
+            "-CommandFile",
+            "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-probe.jlink"
+          ],
+          "command_file": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-probe.jlink",
+            "bytes": 14,
+            "sha256": "E90A2B976DC54B9845DF89B3741A2837CE02A35ED14C0F887E33E80CA5072D92",
+            "mtime_ns": 1788069269016842400,
+            "mtime_iso": "2026-08-30T13:54:29.016842+08:00"
+          },
+          "log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-probe.log",
+            "bytes": 1767,
+            "sha256": "196867C3E169A30F30DD9F18B756B976F5DA68AB9F48071804DFEFB485D99231",
+            "mtime_ns": 1788069269268527000,
+            "mtime_iso": "2026-08-30T13:54:29.268527+08:00"
+          }
+        },
+        "probe_audit": {
+          "final": "running",
+          "states": [
+            "running"
+          ],
+          "pass": true
+        },
+        "final_cleanup": {
+          "natural_exit": true,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "polls": 19,
+          "wait_seconds": 5.145,
+          "final_ports": {
+            "listening": [],
+            "all_closed": true,
+            "query": "netstat -ano -p tcp"
+          },
+          "final_processes": {
+            "matching": [],
+            "clear": true
+          }
+        },
+        "terminate_sent": false,
+        "kill_sent": false,
+        "started_at": "2026-08-30T13:54:04.036387+08:00",
+        "finished_at": "2026-08-30T13:54:34.430791+08:00"
+      },
+      {
+        "phase": "gate-pre",
+        "label": "c",
+        "gdb_script": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\readback-gate-pre-c.gdb",
+          "bytes": 84573,
+          "sha256": "82921E9548861E3D61E89E638761B1D1EAADD73625EF86D3FAE8F986345BE55C",
+          "mtime_ns": 1788063207174669400,
+          "mtime_iso": "2026-08-30T12:13:27.174670+08:00"
+        },
+        "gdb_exit_code": 0,
+        "gdb_log": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-gdb.log",
+          "bytes": 35487,
+          "sha256": "D3C986370E07034598DF8F30AF67537F586F11E18A3B941FE53478B182090B61",
+          "mtime_ns": 1788069298930950900,
+          "mtime_iso": "2026-08-30T13:54:58.930951+08:00"
+        },
+        "gdb_log_audit": {
+          "label": "c",
+          "phase": "gate-pre",
+          "dhcsr_marker_count": 294,
+          "dhcsr_pre": 147,
+          "dhcsr_post": 147,
+          "all_halted": true,
+          "resume_issued": true,
+          "error_line_count": 0,
+          "pass": true
+        },
+        "server_pid": 10940,
+        "server_exit_code": 0,
+        "server_natural_exit": true,
+        "server_exit_wait_seconds": 0.146,
+        "server_ready_seconds": 0.202,
+        "server_log": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-server.log",
+          "bytes": 207496,
+          "sha256": "FA857A66C3241895DBDC06D924BBD5E62F7DA377F6DF09B282DA8C78453992F9",
+          "mtime_ns": 1788069299074449600,
+          "mtime_iso": "2026-08-30T13:54:59.074450+08:00"
+        },
+        "server_log_audit": {
+          "label": "c",
+          "phase": "gate-pre",
+          "gdb_connections": 1,
+          "halt_echo": 1,
+          "wdt_pause_echo": 1,
+          "go_echo": 1,
+          "gdb_closed": 1,
+          "pass": true
+        },
+        "server_command_file": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-server-command.json",
+          "bytes": 492,
+          "sha256": "857BF348930DD7598521B00EACB03675D8D0AB9319FFD17082CC45FBFCEA9866",
+          "mtime_ns": 1788069304696445900,
+          "mtime_iso": "2026-08-30T13:55:04.696446+08:00"
+        },
+        "chunk_file_audit": {
+          "label": "c",
+          "chunk_files": 147,
+          "bytes": 600744,
+          "pass": true
+        },
+        "post_server_cleanup": {
+          "natural_exit": true,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "polls": 1,
+          "wait_seconds": 0.039,
+          "final_ports": {
+            "listening": [],
+            "all_closed": true,
+            "query": "netstat -ano -p tcp"
+          },
+          "final_processes": {
+            "matching": [],
+            "clear": true
+          }
+        },
+        "probe": {
+          "pid": 12320,
+          "exit_code": 0,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "elapsed_seconds": 0.275,
+          "command": [
+            "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+            "-Device",
+            "AT32F435RGT7",
+            "-If",
+            "SWD",
+            "-Speed",
+            "1000",
+            "-AutoConnect",
+            "1",
+            "-ExitOnError",
+            "1",
+            "-CommandFile",
+            "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-probe.jlink"
+          ],
+          "command_file": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-probe.jlink",
+            "bytes": 14,
+            "sha256": "E90A2B976DC54B9845DF89B3741A2837CE02A35ED14C0F887E33E80CA5072D92",
+            "mtime_ns": 1788069299238034100,
+            "mtime_iso": "2026-08-30T13:54:59.238034+08:00"
+          },
+          "log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-probe.log",
+            "bytes": 1767,
+            "sha256": "01800B69F40DEDF72EFB08A49E3BAF16CD158A9D4C2FFAD02D0E0FB78E0E5B21",
+            "mtime_ns": 1788069299502571800,
+            "mtime_iso": "2026-08-30T13:54:59.502572+08:00"
+          }
+        },
+        "probe_audit": {
+          "final": "running",
+          "states": [
+            "running"
+          ],
+          "pass": true
+        },
+        "final_cleanup": {
+          "natural_exit": true,
+          "terminate_sent": false,
+          "kill_sent": false,
+          "polls": 19,
+          "wait_seconds": 5.178,
+          "final_ports": {
+            "listening": [],
+            "all_closed": true,
+            "query": "netstat -ano -p tcp"
+          },
+          "final_processes": {
+            "matching": [],
+            "clear": true
+          }
+        },
+        "terminate_sent": false,
+        "kill_sent": false,
+        "started_at": "2026-08-30T13:54:34.475356+08:00",
+        "finished_at": "2026-08-30T13:55:04.701989+08:00"
+      }
+    ],
+    "chunk_audit": {
+      "pass": true,
+      "chunk_size": 4096,
+      "dump_size": 600744,
+      "chunk_count": 147,
+      "passes": [
+        "a",
+        "b",
+        "c"
+      ],
+      "coverage_start": "0x08010000",
+      "coverage_end": "0x080A2AA8",
+      "pass_image_sha256": {
+        "a": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "b": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "c": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+      },
+      "reconstructed_sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+    },
+    "phase_file_audit": {
+      "chunk_files": 441,
+      "pass_images": 3,
+      "bytes_per_image": 600744,
+      "pass": true
+    },
+    "pass_images": [
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-a.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "mtime_ns": 1788069305036591600,
+        "mtime_iso": "2026-08-30T13:55:05.036592+08:00"
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-b.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "mtime_ns": 1788069305040498900,
+        "mtime_iso": "2026-08-30T13:55:05.040499+08:00"
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-c.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "mtime_ns": 1788069305042450700,
+        "mtime_iso": "2026-08-30T13:55:05.042451+08:00"
+      }
+    ]
+  },
+  "gate_post": null,
+  "pre_consensus": {
+    "read_count": 3,
+    "bytes": 600744,
+    "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+    "read_sha256": [
+      "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+    ],
+    "sentinel_address": "0x08037D80",
+    "sentinel_hex": "082549F2",
+    "header_identity": {
+      "pass": true,
+      "exact_match": true,
+      "crc_valid": true,
+      "fields_valid": true,
+      "stored_crc32": "B8499369",
+      "calculated_crc32": "B8499369",
+      "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+      "embedded_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+      "actual_double_zero_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+      "embedded_sha_matches_actual": true
+    },
+    "loadbin_count": 0,
+    "classification": "BOARD_IMAGE_AUTHORITATIVE",
+    "flash_allowed": false,
+    "difference_bytes": 0,
+    "difference_ranges": [],
+    "reverse_bit_bytes": 0,
+    "clear_only_bit_bytes": 0,
+    "pass": true
+  },
+  "flash": null,
+  "post_consensus": null,
+  "authoritative_readbacks": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-a.bin",
+      "bytes": 600744,
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "mtime_ns": 1788069305036591600,
+      "mtime_iso": "2026-08-30T13:55:05.036592+08:00"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-b.bin",
+      "bytes": 600744,
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "mtime_ns": 1788069305040498900,
+      "mtime_iso": "2026-08-30T13:55:05.040499+08:00"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-c.bin",
+      "bytes": 600744,
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "mtime_ns": 1788069305042450700,
+      "mtime_iso": "2026-08-30T13:55:05.042451+08:00"
+    }
+  ],
+  "sentinel_diagnostic": {
+    "address": "0x08037D80",
+    "hex": "082549F2",
+    "decision_input": false
+  },
+  "reset_run": {
+    "pid": 6728,
+    "exit_code": 0,
+    "natural_exit": true,
+    "related_process_cleanup": {
+      "natural_exit": true,
+      "terminate_sent": false,
+      "kill_sent": false,
+      "polls": 18,
+      "wait_seconds": 5.205,
+      "final_ports": {
+        "listening": [],
+        "all_closed": true,
+        "query": "netstat -ano -p tcp"
+      },
+      "final_processes": {
+        "matching": [],
+        "clear": true
+      }
+    },
+    "terminate_sent": false,
+    "kill_sent": false,
+    "started_at": "2026-08-30T13:55:05.275044+08:00",
+    "finished_at": "2026-08-30T13:55:15.839200+08:00",
+    "elapsed_seconds": 10.564,
+    "command": [
+      "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+      "-Device",
+      "AT32F435RGT7",
+      "-If",
+      "SWD",
+      "-Speed",
+      "1000",
+      "-AutoConnect",
+      "1",
+      "-ExitOnError",
+      "1",
+      "-CommandFile",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-reset.jlink"
+    ],
+    "command_file": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-reset.jlink",
+      "bytes": 136,
+      "sha256": "3532E13BC35644B47754315AA62259ED73C1E01A49486B41DBF72A03EB931DD3",
+      "mtime_ns": 1788069305274814500,
+      "mtime_iso": "2026-08-30T13:55:05.274815+08:00"
+    },
+    "log": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-reset.log",
+      "bytes": 4341,
+      "sha256": "79970C04752B8D1A9A28D475F5A71E8BBA57B17F866954057AA3F82B00470FF5",
+      "mtime_ns": 1788069310625570900,
+      "mtime_iso": "2026-08-30T13:55:10.625571+08:00"
+    }
+  },
+  "reset": {
+    "pc": "0x0802B828",
+    "vtor": "0x08010000",
+    "cfsr": "0x00000000",
+    "sd_ready": 1,
+    "owner": 0,
+    "pass": true
+  },
+  "core_state": {
+    "final": "running",
+    "states": [
+      "running",
+      "running"
+    ],
+    "pass": true
+  },
+  "jlinkdll_before": {
+    "exists": true,
+    "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+    "bytes": 1233,
+    "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+    "mtime_ns": 1788065917554093200,
+    "mtime_iso": "2026-08-30T12:58:37.554093+08:00"
+  },
+  "jlinkdll_after": {
+    "exists": true,
+    "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+    "bytes": 1233,
+    "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+    "mtime_ns": 1788065917554093200,
+    "mtime_iso": "2026-08-30T12:58:37.554093+08:00"
+  },
+  "jlinkdll_audit": {
+    "pass": true,
+    "unchanged": true,
+    "expected_path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+    "before_normalized": {
+      "path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+      "bytes": 1233,
+      "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+      "mtime_ns": 1788065917554093200
+    },
+    "after_normalized": {
+      "path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+      "bytes": 1233,
+      "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+      "mtime_ns": 1788065917554093200
+    },
+    "errors": []
+  },
+  "initial_ports": {
+    "listening": [],
+    "all_closed": true,
+    "query": "netstat -ano -p tcp"
+  },
+  "initial_processes": {
+    "matching": [],
+    "clear": true
+  },
+  "final_ports": {
+    "listening": [],
+    "all_closed": true,
+    "query": "netstat -ano -p tcp"
+  },
+  "final_processes": {
+    "matching": [],
+    "clear": true
+  },
+  "natural_process_cleanup": {
+    "natural_exit": true,
+    "terminate_sent": false,
+    "kill_sent": false,
+    "polls": 1,
+    "wait_seconds": 0.036,
+    "final_ports": {
+      "listening": [],
+      "all_closed": true,
+      "query": "netstat -ano -p tcp"
+    },
+    "final_processes": {
+      "matching": [],
+      "clear": true
+    }
+  },
+  "terminate_sent": false,
+  "kill_sent": false,
+  "forbidden_actions_observed": [],
+  "finished_at": "2026-08-30T13:55:15.898670+08:00"
+}

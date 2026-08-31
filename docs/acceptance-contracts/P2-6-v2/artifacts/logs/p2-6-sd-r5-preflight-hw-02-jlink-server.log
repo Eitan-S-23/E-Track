@@ -1,0 +1,234 @@
+SEGGER J-Link GDB Server V8.18 Command Line Version
+
+JLinkARM.dll V8.18 (DLL compiled Mar  5 2025 14:42:43)
+
+Command line: -select USB -device AT32F435RGT7 -if SWD -speed 1000 -port 24361 -swoport 24362 -telnetport 24364 -rtttelnetport 24363 -nogui -singlerun
+-----GDB Server start settings-----
+GDBInit file:                  none
+GDB Server Listening port:     24361
+SWO raw output listening port: 24362
+Terminal I/O port:             24364
+Accept remote connection:      localhost only
+Generate logfile:              off
+Verify download:               off
+Init regs on start:            off
+Silent mode:                   off
+Single run mode:               on
+Target connection timeout:     0 ms
+------J-Link related settings------
+J-Link Host interface:         USB
+J-Link script:                 none
+J-Link settings file:          none
+------Target related settings------
+Target device:                 AT32F435RGT7
+Target device parameters:      none
+Target interface:              SWD
+Target interface speed:        1000kHz
+Target endian:                 little
+
+Connecting to J-Link...
+J-Link is connected.
+Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+Hardware: V7.00
+Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+Checking target voltage...
+Target voltage: 3.30 V
+Listening on TCP/IP port 24361
+Connecting to target...
+Halting core...
+Connected to target
+Waiting for GDB connection...Connected to 127.0.0.1
+GDB client (conn. 796) requested target.xml from GDB Server
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0x04000000
+Read register 'r1' (4 bytes) from hardware: 0x00000000
+Read register 'r2' (4 bytes) from hardware: 0xF0000000
+Read register 'r3' (4 bytes) from hardware: 0x03000000
+Read register 'r4' (4 bytes) from hardware: 0x00000000
+Read register 'r5' (4 bytes) from hardware: 0x04000000
+Read register 'r6' (4 bytes) from hardware: 0x00000000
+Read register 'r7' (4 bytes) from hardware: 0x00000000
+Read register 'r8' (4 bytes) from hardware: 0x307D0520
+Read register 'r9' (4 bytes) from hardware: 0x06000000
+Read register 'r10' (4 bytes) from hardware: 0x7C0C0320
+Read register 'r11' (4 bytes) from hardware: 0xDBF70508
+Read register 'r12' (4 bytes) from hardware: 0xD2000000
+Read register 'sp' (4 bytes) from hardware: 0xF87B0520
+Read register 'lr' (4 bytes) from hardware: 0x7C0C0320
+Read register 'pc' (4 bytes) from hardware: 0xCC640208
+Read register 'xpsr' (4 bytes) from hardware: 0x00000021
+Read 2 bytes @ address 0x0804BD50 (Data = 0xB508)
+Read 2 bytes @ address 0x0804FF2C (Data = 0x4770)
+Read 4 bytes @ address 0x080264CC (Data = 0xEBA04013)
+Read 2 bytes @ address 0x080264CC (Data = 0x4013)
+Received monitor command: halt
+Halting target CPU...
+...Target halted (PC = 0x080264CC)
+Received monitor command: WriteU32 0xE0042008 0x00001000
+Writing 0x00001000 @ address 0xE0042008
+Reading register 'msp' = 0x20057BF8
+Reading register 'psp' = 0x00000000
+Reading 64 bytes @ address 0x08026100
+Read 2 bytes @ address 0x08040884 (Data = 0xB508)
+Setting breakpoint @ address 0x08040884, Kind = 2, Type = THUMB, BPHandle = 0x0001
+Starting target CPU...
+...Breakpoint (set by 'GDB') reached @ address 0x08040884
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0xD03E0520
+Read register 'r1' (4 bytes) from hardware: 0x00000000
+Read register 'r2' (4 bytes) from hardware: 0xAAAA0000
+Read register 'r3' (4 bytes) from hardware: 0x01000000
+Read register 'r4' (4 bytes) from hardware: 0xD71C0200
+Read register 'r5' (4 bytes) from hardware: 0xCC3E0520
+Read register 'r6' (4 bytes) from hardware: 0xCE3E0520
+Read register 'r7' (4 bytes) from hardware: 0xCD3E0520
+Read register 'r8' (4 bytes) from hardware: 0xD03E0520
+Read register 'r9' (4 bytes) from hardware: 0x04000000
+Read register 'r10' (4 bytes) from hardware: 0x01000000
+Read register 'r11' (4 bytes) from hardware: 0x01000000
+Read register 'r12' (4 bytes) from hardware: 0x000000FA
+Read register 'sp' (4 bytes) from hardware: 0xD87F0520
+Read register 'lr' (4 bytes) from hardware: 0xAF310408
+Read register 'pc' (4 bytes) from hardware: 0x84080408
+Read register 'xpsr' (4 bytes) from hardware: 0x00000021
+Removing breakpoint @ address 0x08040884, Size = 2
+Read 4 bytes @ address 0x08040884 (Data = 0xF7D7B508)
+Read 2 bytes @ address 0x08040884 (Data = 0xB508)
+Read 2 bytes @ address 0x08040882 (Data = 0x0804)
+Read 2 bytes @ address 0x08040884 (Data = 0xB508)
+Reading register 'msp' = 0x20057FD8
+Reading register 'psp' = 0x00000000
+Read 4 bytes @ address 0x08010400 (Data = 0x57465445)
+Read 4 bytes @ address 0x08010404 (Data = 0x00000001)
+Read 4 bytes @ address 0x08010408 (Data = 0x00005140)
+Read 4 bytes @ address 0x0801040C (Data = 0x2E382E32)
+Read 4 bytes @ address 0x08010410 (Data = 0x00000030)
+Read 4 bytes @ address 0x08010414 (Data = 0x00000000)
+Read 4 bytes @ address 0x08010418 (Data = 0x00000000)
+Read 4 bytes @ address 0x0801041C (Data = 0x6A791480)
+Read 4 bytes @ address 0x08010420 (Data = 0x00000001)
+Read 4 bytes @ address 0x08010424 (Data = 0x00092AA8)
+Read 4 bytes @ address 0x08010428 (Data = 0x995B2295)
+Read 4 bytes @ address 0x0801042C (Data = 0x32CEC876)
+Read 4 bytes @ address 0x08010430 (Data = 0xB238F5E5)
+Read 4 bytes @ address 0x08010434 (Data = 0x9EAA9E8E)
+Read 4 bytes @ address 0x08010438 (Data = 0xD351FB0C)
+Read 4 bytes @ address 0x0801043C (Data = 0xBF69C718)
+Read 4 bytes @ address 0x08010440 (Data = 0x286CE5CF)
+Read 4 bytes @ address 0x08010444 (Data = 0xFA7218E6)
+Read 4 bytes @ address 0x08010448 (Data = 0xFFFF0101)
+Read 4 bytes @ address 0x0801044C (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x08010450 (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x08010454 (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x08010458 (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x0801045C (Data = 0xC9C387A0)
+Read 1 bytes @ address 0x20053E1C (Data = 0x53)
+Read 1 bytes @ address 0x20053E1D (Data = 0x45)
+Read 1 bytes @ address 0x20053E1E (Data = 0x47)
+Read 1 bytes @ address 0x20053E1F (Data = 0x47)
+Read 1 bytes @ address 0x20053E20 (Data = 0x45)
+Read 1 bytes @ address 0x20053E21 (Data = 0x52)
+Read 1 bytes @ address 0x20053E22 (Data = 0x20)
+Read 1 bytes @ address 0x20053E23 (Data = 0x52)
+Read 1 bytes @ address 0x20053E24 (Data = 0x54)
+Read 1 bytes @ address 0x20053E25 (Data = 0x54)
+Read 1 bytes @ address 0x20053214 (Data = 0x01)
+Read 4 bytes @ address 0xE000ED08 (Data = 0x08010000)
+Read 4 bytes @ address 0xE000ED28 (Data = 0x00000000)
+Read 1 bytes @ address 0x20053FA0 (Data = 0x00)
+Reading register 'd0' = 0x3F4134A6
+Reading register 'd1' = 0xFFFFFB1C
+Reading register 'd2' = 0x00000000
+Reading register 'd3' = 0x00000000
+Reading register 'd4' = 0x00000000
+Reading register 'd5' = 0x310F0EA1
+Reading register 'd6' = 0x3F5233DB
+Reading register 'd7' = 0xD66277C4
+Reading register 'd8' = 0x00000000
+Reading register 'd9' = 0x00000000
+Reading register 'd10' = 0x00000000
+Reading register 'd11' = 0x00000000
+Reading register 'd12' = 0x00000000
+Reading register 'd13' = 0x00000000
+Reading register 'd14' = 0x00000000
+Reading register 'd15' = 0x00000000
+Reading register 'fpscr' = 0x80000010
+Reading register 'primask' = 0x00000000
+Reading register 'basepri' = 0x00000000
+Reading register 'faultmask' = 0x00000000
+Reading register 'control' = 0x00000004
+Reading register 'apsr' = 0x20000000
+Reading register 'epsr' = 0x01000000
+Reading register 'ipsr' = 0x00000000
+Reading register 'iapsr' = 0x20000000
+Reading register 'eapsr' = 0x21000000
+Reading register 'iepsr' = 0x01000000
+Writing register 'lr' = 0x0801B6D5
+Writing register 'sp' = 0x20057FD0
+Read 2 bytes @ address 0x0801B6D4 (Data = 0x4817)
+Writing register 'pc' = 0x08040CCD
+Setting breakpoint @ address 0x0801B6D4, Kind = 2, Type = THUMB, BPHandle = 0x0002
+Setting breakpoint @ address 0x0804BD50, Kind = 2, Type = THUMB, BPHandle = 0x0003
+Starting target CPU...
+...Breakpoint (set by 'GDB') reached @ address 0x0801B6D4
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0x04000000
+Read register 'r1' (4 bytes) from hardware: 0x887F0520
+Read register 'r2' (4 bytes) from hardware: 0x00000000
+Read register 'r3' (4 bytes) from hardware: 0x00000100
+Read register 'r4' (4 bytes) from hardware: 0xD71C0200
+Read register 'r5' (4 bytes) from hardware: 0xCC3E0520
+Read register 'r6' (4 bytes) from hardware: 0xCE3E0520
+Read register 'r7' (4 bytes) from hardware: 0xCD3E0520
+Read register 'r8' (4 bytes) from hardware: 0xD03E0520
+Read register 'r9' (4 bytes) from hardware: 0x04000000
+Read register 'r10' (4 bytes) from hardware: 0x01000000
+Read register 'r11' (4 bytes) from hardware: 0x01000000
+Read register 'r12' (4 bytes) from hardware: 0x000000FA
+Read register 'sp' (4 bytes) from hardware: 0xD07F0520
+Read register 'lr' (4 bytes) from hardware: 0xFD200108
+Read register 'pc' (4 bytes) from hardware: 0xD4B60108
+Read register 'xpsr' (4 bytes) from hardware: 0x00000081
+Writing register 'r0' = 0x20053ED0
+Writing register 'r1' = 0x00000000
+Writing register 'r2' = 0x0000AAAA
+Writing register 'r3' = 0x00000001
+Writing register 'sp' = 0x20057FD8
+Writing register 'lr' = 0x080431AF
+Writing register 'pc' = 0x08040884
+Writing register 'xpsr' = 0x21000000
+Writing register 'd0' = 0x3F4134A6
+Writing register 'd1' = 0xFFFFFB1C
+Writing register 'd2' = 0x00000000
+Writing register 'd3' = 0x00000000
+Writing register 'd4' = 0x00000000
+Writing register 'd5' = 0x310F0EA1
+Writing register 'd6' = 0x3F5233DB
+Writing register 'd7' = 0xD66277C4
+Writing register 'd8' = 0x00000000
+Writing register 'd9' = 0x00000000
+Writing register 'd10' = 0x00000000
+Writing register 'd11' = 0x00000000
+Writing register 'd12' = 0x00000000
+Writing register 'd13' = 0x00000000
+Writing register 'd14' = 0x00000000
+Writing register 'd15' = 0x00000000
+Writing register 'fpscr' = 0x80000010
+Writing register 'msp' = 0x20057FD8
+Writing register 'psp' = 0x00000000
+Writing register 'primask' = 0x00000000
+Writing register 'basepri' = 0x00000000
+Writing register 'faultmask' = 0x00000000
+Writing register 'control' = 0x00000004
+Writing register 'apsr' = 0x20000000
+Writing register 'epsr' = 0x01000000
+Writing register 'ipsr' = 0x00000000
+Writing register 'iapsr' = 0x20000000
+Writing register 'eapsr' = 0x21000000
+Writing register 'iepsr' = 0x01000000
+Removing breakpoint @ address 0x0801B6D4, Size = 2
+Removing breakpoint @ address 0x0804BD50, Size = 2
+Read 4 bytes @ address 0x08040884 (Data = 0xF7D7B508)
+Read 2 bytes @ address 0x08040884 (Data = 0xB508)
+Read 2 bytes @ address 0x08040882 (Data = 0x0804)
+Read 2 bytes @ address 0x08040884 (Data = 0xB508)
+GDB closed TCP/IP connection (Socket 796)
+Restoring target state and closing J-Link connection...
+Shutting down...

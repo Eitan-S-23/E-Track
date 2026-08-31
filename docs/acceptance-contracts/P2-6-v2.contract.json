@@ -1,0 +1,840 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "P2-6-v2",
+  "version": 2,
+  "task_id": "P2-6",
+  "parent_contract_sha256": "BFE0F5931BEED31FE658002DBF22A814650E9A74D6C495D21D6EC710F00C9F48",
+  "status": "FROZEN",
+  "approved_by": "E-Track OTA 独立验收会话（非 R5 实现方；依据 docs/ota-exec-notes/P2-6-SD-R6-dispatch-ruling-2026-08-30.md §5 冻结）",
+  "approved_at": "2026-08-31",
+  "implementation_ref": "docs/ota-exec-notes/P2-6-SD-R5-hw-execution-evidence-2026-08-30.md",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "scope": "本合同覆盖 P2-6 卡在 R5 真机轮次（证据根 .cache/p2-6-sd-r5-20260830-01-implementation，2026-08-30）中已闭合的 PATCH 侧升级态内存门禁 C2/C4/C5/C6 与辅助项 C14，以及支撑这些门禁的板卡状态、升级包身份、RTT 采集完整性、会话收尾与保管链判据。明确不在本合同范围内、在 P2-6 卡上仍为 NOT_OBSERVED 的项：（1）FULL 侧全部判据——R5 轮 FULL 上传被定性为 HARNESS_FAIL，见 R6 裁定书 §3；（2）C3 的 §4.9-E 收尾路径判据；（3）boot 消费链与 SD 升级闭环判据——R5 轮已观察到固件 apply 报 result=0 且 BCB=STAGED、复位后 boot 消费 candidate 后回滚至 v2.8.0 的 PRODUCT_FAIL 候选现象，该现象不由本合同判定，留待 P2-6-v3。另需如实登记板卡状态事实：R5 实现会话在授权范围外对 candidate slot 执行了 qspi_erase(0x0)，破坏了 candidate ETSL 头部（+0x1000 以下 payload 完好），板卡当前不存在有效 candidate slot，见 R6 裁定书 §2.3 与 §7。该越权写入不构成本合同的授权偏差，仅作为状态记录，且不影响本合同判据——全部 14 项判据都只读已封存的 R5 原始产物，不依赖板卡当前状态。",
+  "authorized_deviations": [
+    {
+      "id": "DEV-1",
+      "type": "hardware_debug_domain_write",
+      "description": "每个 halt 会话在 monitor halt 之后写一次 monitor WriteU32 0xE0042008 0x00001000（debug apb1_frz bit12 DEBUG_WDT_PAUSE）。",
+      "justification": "长时间 halt 分块读取必然触发看门狗复位，该写入是读取升级态测量记录的物理前置条件。非 flash、断电即失、不改被测镜像字节与 SHA-256；每个 GDB 脚本恰一行（已逐脚本核对位于第 7 行），server log 回显恰 2 行，均被 fail-closed 复算。",
+      "bound_criteria": [
+        "HW-BOARD-STATE-PREFLIGHT",
+        "HW-POSTCHECK-RDOFF",
+        "PROC-SESSION-CLOSURE"
+      ]
+    },
+    {
+      "id": "DEV-2",
+      "type": "host_process_termination",
+      "description": "采集阶段对主机侧 JLinkRTTLogger 执行一次 Stop-Process。",
+      "justification": "JLinkRTTLogger 无自然退出路径，AGENTS.md 的残留 logger 清理模式要求显式停止；该操作只作用于主机进程，不触碰目标。result.json 记录 logger_stopped=true、logger_pid=1208、residual_rtt_logger_processes=0，且 server/GDB 侧 terminate/kill 均为 false。",
+      "bound_criteria": [
+        "HW-CAPTURE-BYTE-IDENTITY",
+        "PROC-SESSION-CLOSURE"
+      ]
+    },
+    {
+      "id": "DEV-3",
+      "type": "process",
+      "description": "本合同在 R5 真机轮次执行完毕之后冻结，而非执行之前。",
+      "justification": "R5 轮是 P2-6 自 R4-01 以来首次完整取得 PATCH 侧测量记录的轮次，此前不存在可冻结的成功轮次。全部判据的 expected 值均取自该轮已封存的原始产物，复算过程由独立 harness 以 fail-closed 方式重新计算（见 PROC-HARNESS-FAIL-CLOSED），不依赖实现方的自述数值。该时序事实在此显式登记，供后续轮次评估证据强度。",
+      "bound_criteria": [
+        "HW-BOARD-STATE-PREFLIGHT",
+        "HW-PACKAGE-IDENTITY",
+        "HW-INPUTS-IDENTITY",
+        "HW-CAPTURE-BYTE-IDENTITY",
+        "HW-RECORD-UNIQUENESS",
+        "HW-POSTCHECK-RDOFF",
+        "PROC-SESSION-CLOSURE",
+        "PATCH-C2-WORKSPACE-PEAK",
+        "PATCH-C4-GUARD-INTACT",
+        "PATCH-C5-SBRK-DELTA-ZERO",
+        "PATCH-C6-TLSF-DELTA-ZERO",
+        "PATCH-C14-LV-POOL-NET",
+        "PROC-CUSTODY-COMPLETE",
+        "PROC-HARNESS-FAIL-CLOSED"
+      ]
+    },
+    {
+      "id": "DEV-4",
+      "type": "process",
+      "description": "R5 轮的派单方在用户授权下转为该轮实现方，角色发生变更。",
+      "justification": "变更经用户明示授权。验收独立性由本合同的执行方保证：合同冻结、证据复算与校验器执行均由非 R5 实现方完成，且全部判据只读原始产物、可被任意第三方用同一命令逐字节复现。",
+      "bound_criteria": [
+        "HW-BOARD-STATE-PREFLIGHT",
+        "HW-PACKAGE-IDENTITY",
+        "HW-INPUTS-IDENTITY",
+        "HW-CAPTURE-BYTE-IDENTITY",
+        "HW-RECORD-UNIQUENESS",
+        "HW-POSTCHECK-RDOFF",
+        "PROC-SESSION-CLOSURE",
+        "PATCH-C2-WORKSPACE-PEAK",
+        "PATCH-C4-GUARD-INTACT",
+        "PATCH-C5-SBRK-DELTA-ZERO",
+        "PATCH-C6-TLSF-DELTA-ZERO",
+        "PATCH-C14-LV-POOL-NET",
+        "PROC-CUSTODY-COMPLETE",
+        "PROC-HARNESS-FAIL-CLOSED"
+      ]
+    }
+  ],
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "F173B6780A911FE94B7BB05651B62F41027229835CD17411896714E47BF442EB",
+      "manifest_json_sha256": "69DD74C421AC9CE1C5E550BC817B785CF98E1CF6C1A1E9CD7041CA975742F884"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "AAB3CA121BF78C247E8CA5FA8B9BDC0C87EC0773354E3D00033EF46AA9D906D0",
+      "manifest_json_sha256": "0C3834B827E3F0666ACF9E64522B51F00631934B65F75EAF96ADF7114863C258"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "3D9EC6EBF4D7DFA02F4915DF292C7A3CA482900DFEA6786A9F106F7F6DDBF2D9",
+      "manifest_json_sha256": "A48C2A5CF51D404C930CD63A844CAC26696CD74BCF03BDC316C882EA71E15940"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-R5-HW-ROUND",
+      "category": "hardware_state",
+      "description": "R5 真机轮次（2026-08-30）在被测板卡上的实际会话状态，包括被测镜像与头部身份。",
+      "fingerprint": "device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5; device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+      "evidence_path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+      "evidence_sha256": "1A5C4F55ADA98A0C1790E2976FDF6C1C92B297F622AD642C6162CFB271620072"
+    },
+    {
+      "id": "EXT-R5-PREFLIGHT",
+      "category": "hardware_state",
+      "description": "真机轮次开始前的板卡状态基线（只读前置检查会话）。",
+      "fingerprint": "preflight_result_sha256=9676E29CFC4039E023EA4E7DF1E620C82F15E08B4A1DF17CFA0FD4F39D1AF79F",
+      "evidence_path": "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json",
+      "evidence_sha256": "9676E29CFC4039E023EA4E7DF1E620C82F15E08B4A1DF17CFA0FD4F39D1AF79F"
+    },
+    {
+      "id": "EXT-PATCH-PACKAGE",
+      "category": "fixture",
+      "description": "被测 PATCH 升级包 P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu（305 B），以 MCU 侧回读字节封存。",
+      "fingerprint": "bytes=305; sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+      "evidence_path": "artifacts/snapshots/p2-6-sd-r5-patch-upload-hw-01-readback.bin",
+      "evidence_sha256": "2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B"
+    },
+    {
+      "id": "EXT-JLINK-TOOLCHAIN",
+      "category": "toolchain",
+      "description": "真机会话使用的 SEGGER J-Link 工具链与探针固件版本、目标器件与接口速率。",
+      "fingerprint": "SEGGER J-Link GDB Server V8.18; JLinkARM.dll V8.18 (2025-03-05); probe firmware J-Link ARM-OB STM32 (2012-08-22); Target device AT32F435RGT7; SWD 1000 kHz",
+      "evidence_path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-jlink-server.log",
+      "evidence_sha256": "F07D748E4EF07185EBF2AA1EF23169AE8D77BD06BD117B1C512A91353A461904"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-V2-RECOMPUTE",
+      "description": "独立复算：由非实现方 harness 从证据包原始产物重新计算全部 13 项可复算判据。",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v2_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v2 --report docs/acceptance-contracts/P2-6-v2/artifacts/recompute/p2-6-v2-recompute-report.json",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V2-RECOMPUTE-SELFTEST",
+      "description": "复算 harness 自检：1 个正控 + 15 个负控，验证 harness 为 fail-closed。",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v2_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v2 --self-test",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-R5-EVIDENCE-DOC",
+      "description": "R5 实现会话的真机执行证据文档",
+      "path": "artifacts/docs/P2-6-SD-R5-hw-execution-evidence-2026-08-30.md"
+    },
+    {
+      "id": "ART-R6-RULING-DOC",
+      "description": "R6 独立裁定书（定界本合同范围与 v3 遗留项）",
+      "path": "artifacts/docs/P2-6-SD-R6-dispatch-ruling-2026-08-30.md"
+    },
+    {
+      "id": "ART-OTA-GDB-LOG",
+      "description": "PATCH OTA 会话 GDB 全量输出",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-gdb.log"
+    },
+    {
+      "id": "ART-OTA-SERVER-LOG",
+      "description": "PATCH OTA 会话 J-Link GDB Server 全量输出（含工具链指纹与 WDT 暂停写回显）",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-jlink-server.log"
+    },
+    {
+      "id": "ART-OTA-POST-GDB-LOG",
+      "description": "采集后 RTT 控制块复检会话 GDB 输出",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-gdb.log"
+    },
+    {
+      "id": "ART-OTA-POST-SERVER-LOG",
+      "description": "采集后复检会话 J-Link GDB Server 输出",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-jlink-server.log"
+    },
+    {
+      "id": "ART-OTA-POST-RTT-RAW",
+      "description": "采集后复检阶段 RTT 原始日志",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-rtt.raw.log"
+    },
+    {
+      "id": "ART-OTA-RESULT",
+      "description": "PATCH OTA 会话结构化结果（含 measurement record、会话收尾与输入身份字段）",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json"
+    },
+    {
+      "id": "ART-OTA-LOGGER-CONSOLE",
+      "description": "JLinkRTTLogger 控制台输出",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt-logger-console.log"
+    },
+    {
+      "id": "ART-OTA-RTT-RAW",
+      "description": "PATCH OTA 阶段 RTT 原始日志",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt.raw.log"
+    },
+    {
+      "id": "ART-UPLOAD-GDB-LOG",
+      "description": "升级包上传会话 GDB 输出",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-gdb.log"
+    },
+    {
+      "id": "ART-UPLOAD-RESULT",
+      "description": "升级包上传会话结构化结果（含 MCU 侧落盘路径与回读身份）",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-result.json"
+    },
+    {
+      "id": "ART-PREFLIGHT-GDB-LOG",
+      "description": "板卡状态前置检查会话 GDB 输出",
+      "path": "artifacts/logs/p2-6-sd-r5-preflight-hw-02-gdb.log"
+    },
+    {
+      "id": "ART-PREFLIGHT-SERVER-LOG",
+      "description": "板卡状态前置检查会话 J-Link GDB Server 输出",
+      "path": "artifacts/logs/p2-6-sd-r5-preflight-hw-02-jlink-server.log"
+    },
+    {
+      "id": "ART-PREFLIGHT-RESULT",
+      "description": "板卡状态前置检查结构化结果（含 write/flash 调用计数）",
+      "path": "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json"
+    },
+    {
+      "id": "ART-OTA-POST-GDB-SCRIPT",
+      "description": "采集后复检会话冻结 GDB 脚本",
+      "path": "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01-post.gdb"
+    },
+    {
+      "id": "ART-OTA-GDB-SCRIPT",
+      "description": "PATCH OTA 会话冻结 GDB 脚本（唯一目标侧写入为 WDT 暂停位）",
+      "path": "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01.gdb"
+    },
+    {
+      "id": "ART-CB-POST",
+      "description": "采集后 RTT 控制块 168 字节快照",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-post.bin"
+    },
+    {
+      "id": "ART-CB-PRE",
+      "description": "采集前 RTT 控制块 168 字节快照",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-pre.bin"
+    },
+    {
+      "id": "ART-RTT-PAYLOAD",
+      "description": "RTT 采集 payload 原始字节（升级态测量记录的唯一来源）",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log"
+    },
+    {
+      "id": "ART-RTT-PENDING",
+      "description": "采集前由 Up0 环形缓冲直读的 pending 字节（与 payload 做逐字节比对）",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-pending.bin"
+    },
+    {
+      "id": "ART-UP0-PRE",
+      "description": "采集前 Up0 缓冲区 1024 字节快照",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-up0-pre.bin"
+    },
+    {
+      "id": "ART-UPLOAD-READBACK",
+      "description": "上传后从 MCU 侧回读的升级包字节（305 B）",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-upload-hw-01-readback.bin"
+    },
+    {
+      "id": "ART-RECOMPUTE-REPORT",
+      "description": "独立复算 harness 生成的结构化复算报告",
+      "path": "artifacts/recompute/p2-6-v2-recompute-report.json"
+    },
+    {
+      "id": "ART-RECOMPUTE-LOG",
+      "description": "独立复算命令的完整标准输出",
+      "path": "commands/cmd-v2-recompute.stdout.log"
+    },
+    {
+      "id": "ART-RECOMPUTE-SELFTEST-LOG",
+      "description": "独立复算 harness 自检（1 正控 + 15 负控）的完整标准输出",
+      "path": "commands/cmd-v2-recompute-selftest.stdout.log"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "HW-BOARD-STATE-PREFLIGHT",
+      "description": "真机轮次开始前的板卡状态前置检查必须全部命中，且该会话对目标只读：write/flash 调用计数为 0，GDB 正常退出、server 自然退出。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "structured_result",
+        "raw_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [
+        "EXT-R5-PREFLIGHT"
+      ],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-PREFLIGHT-RESULT",
+        "ART-PREFLIGHT-GDB-LOG",
+        "ART-PREFLIGHT-SERVER-LOG",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "preflight_pass_markers=1",
+          "state_pass_markers=1",
+          "write_calls=0",
+          "flash_calls=0",
+          "gdb_exit_code=0",
+          "server_natural_exit=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-PACKAGE-IDENTITY",
+      "description": "被测 PATCH 升级包在主机侧输入、MCU 侧回读、OTA 会话实际引用三处必须身份一致：字节数、SHA-256、MCU 落盘路径全部相同。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "structured_result",
+        "binary_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [
+        "EXT-PATCH-PACKAGE"
+      ],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-UPLOAD-RESULT",
+        "ART-UPLOAD-READBACK",
+        "ART-UPLOAD-GDB-LOG",
+        "ART-OTA-RESULT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "input_bytes=305",
+          "readback_bytes=305",
+          "input_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+          "readback_recomputed_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+          "readback_matches=true",
+          "upload_mcu_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu",
+          "ota_package_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu"
+        ]
+      }
+    },
+    {
+      "id": "HW-INPUTS-IDENTITY",
+      "description": "preflight / upload / ota 三个会话必须绑定同一套被测输入：ELF、MAP、设备镜像、设备头部四项 SHA-256 在三会话间逐项相同，杜绝跨镜像拼接证据。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [
+        "EXT-R5-HW-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-PREFLIGHT-RESULT",
+        "ART-UPLOAD-RESULT",
+        "ART-OTA-RESULT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "preflight.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+          "preflight.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+          "preflight.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+          "preflight.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+          "upload.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+          "upload.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+          "upload.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+          "upload.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+          "ota.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+          "ota.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+          "ota.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+          "ota.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB"
+        ]
+      }
+    },
+    {
+      "id": "HW-CAPTURE-BYTE-IDENTITY",
+      "description": "logger 采集到的 payload 必须与采集前直接从 Up0 环形缓冲读出的 pending 字节逐字节相同，证明测量记录未经 logger 侧改写、截断或补齐。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "binary_snapshot",
+        "raw_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-RTT-PAYLOAD",
+        "ART-RTT-PENDING",
+        "ART-OTA-LOGGER-CONSOLE",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "payload_bytes=737",
+          "pending_bytes=737",
+          "payload_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+          "pending_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+          "byte_identical=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-RECORD-UNIQUENESS",
+      "description": "采集 payload 中 P2-6 升级态测量记录必须唯一且 kind=patch 唯一，result 为 0；杜绝多条记录择优取用。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "binary_snapshot",
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-RTT-PAYLOAD",
+        "ART-OTA-RESULT",
+        "ART-OTA-RTT-RAW",
+        "ART-OTA-POST-RTT-RAW",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "p2_6_record_count=1",
+          "kind_patch_record_count=1",
+          "result=0"
+        ]
+      }
+    },
+    {
+      "id": "HW-POSTCHECK-RDOFF",
+      "description": "采集前后 RTT 控制块 168 字节快照的差异必须只落在 Up0 的 RdOff 字内，且 pBuffer 与 SizeOfBuffer 未变；证明主机侧只推进了读指针，未改写通道结构。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "binary_snapshot",
+        "raw_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-CB-PRE",
+        "ART-CB-POST",
+        "ART-UP0-PRE",
+        "ART-OTA-POST-GDB-LOG",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "WrOff:737->737",
+          "RdOff:0->737",
+          "changed_byte_offsets=[40, 41]",
+          "changed_outside_rd_off_word=0",
+          "up0_pBuffer_unchanged=true",
+          "up0_size_unchanged=true"
+        ]
+      }
+    },
+    {
+      "id": "PROC-SESSION-CLOSURE",
+      "description": "真机会话必须干净收尾：GDB 与 server 均以 0 退出，server 为自然退出而非被杀，端口释放，无 session 级错误。",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "structured_result",
+        "raw_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [
+        "EXT-JLINK-TOOLCHAIN"
+      ],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-OTA-RESULT",
+        "ART-OTA-GDB-LOG",
+        "ART-OTA-SERVER-LOG",
+        "ART-OTA-POST-SERVER-LOG",
+        "ART-OTA-GDB-SCRIPT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "gdb_exit_code=0",
+          "server_exit_code=0",
+          "server_natural_exit=true",
+          "server_kill_sent=false",
+          "ports_closed=true",
+          "session_error=null"
+        ]
+      }
+    },
+    {
+      "id": "PATCH-C2-WORKSPACE-PEAK",
+      "description": "P2-6 C2：PATCH 升级路径的 overlay workspace 峰值占用必须不超过 workspace 物理容量 0xA000。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "binary_snapshot",
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-RTT-PAYLOAD",
+        "ART-OTA-RESULT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "numeric",
+        "basis": "frozen_requirement",
+        "operator": "le",
+        "limit": 40960,
+        "unit": "byte",
+        "rationale": "上限 40960 B = OTA_OVERLAY_WORKSPACE_LENGTH(0xA000)，是 overlay workspace 的物理容量上限，链接脚本中存在等值 ASSERT，并由 docs/ota-prompts/prompt-P2-6-implementation.md 冻结为 C1/C2 硬门槛。超限即越写相邻区段。该值取自架构常量，不是历史实测值加余量反向拟合。"
+      }
+    },
+    {
+      "id": "PATCH-C4-GUARD-INTACT",
+      "description": "P2-6 C4：升级路径进入与退出时的栈哨兵必须均完好（guard_entry=guard_exit=1），证明升级期间未发生栈越界。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "binary_snapshot",
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-RTT-PAYLOAD",
+        "ART-OTA-RESULT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "guard_entry=1",
+          "guard_exit=1"
+        ]
+      }
+    },
+    {
+      "id": "PATCH-C5-SBRK-DELTA-ZERO",
+      "description": "P2-6 C5：升级路径不得引起 newlib sbrk 堆增长，增量必须严格为 0。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "binary_snapshot",
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-RTT-PAYLOAD",
+        "ART-OTA-RESULT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "numeric",
+        "basis": "frozen_requirement",
+        "operator": "eq",
+        "limit": 0,
+        "unit": "call",
+        "rationale": "docs/ota-prompts/prompt-P2-6-implementation.md 冻结 C5 为零堆增长：升级路径禁止触碰 newlib sbrk 堆。任何非零增量都意味着在 LVGL/TLSF 之外新分配了堆内存。0 是协议性绝对值，不含任何余量，也不来自历史测量。"
+      }
+    },
+    {
+      "id": "PATCH-C6-TLSF-DELTA-ZERO",
+      "description": "P2-6 C6：升级路径的 TLSF 分配器 malloc/realloc/free 净增量必须全部为 0，证明未在 LVGL 池上留下净分配。",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "binary_snapshot",
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-RTT-PAYLOAD",
+        "ART-OTA-RESULT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "tlsf_malloc_delta=0",
+          "tlsf_realloc_delta=0",
+          "tlsf_free_delta=0"
+        ]
+      }
+    },
+    {
+      "id": "PATCH-C14-LV-POOL-NET",
+      "description": "P2-6 C14（辅助项）：LVGL 池的 free/big/frag/max 四项进出值必须逐项相等。该项是 C6 的旁证，不得替代 C6 单独作为零分配结论的依据。",
+      "required": false,
+      "kind": "functional",
+      "evidence_types": [
+        "binary_snapshot",
+        "structured_result"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-RTT-PAYLOAD",
+        "ART-OTA-RESULT",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "lv_free 64832->64832",
+          "lv_big 61192->61192",
+          "lv_frag 6->6",
+          "lv_max 64551->64551"
+        ]
+      }
+    },
+    {
+      "id": "PROC-CUSTODY-COMPLETE",
+      "description": "R5 轮 23 份原始产物必须全部在证据包内存在且摘要与冻结值逐一相符，无缺失、无篡改。",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_output",
+        "document"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-R5-EVIDENCE-DOC",
+        "ART-R6-RULING-DOC",
+        "ART-OTA-GDB-LOG",
+        "ART-OTA-SERVER-LOG",
+        "ART-OTA-POST-GDB-LOG",
+        "ART-OTA-POST-SERVER-LOG",
+        "ART-OTA-POST-RTT-RAW",
+        "ART-OTA-RESULT",
+        "ART-OTA-LOGGER-CONSOLE",
+        "ART-OTA-RTT-RAW",
+        "ART-UPLOAD-GDB-LOG",
+        "ART-UPLOAD-RESULT",
+        "ART-PREFLIGHT-GDB-LOG",
+        "ART-PREFLIGHT-SERVER-LOG",
+        "ART-PREFLIGHT-RESULT",
+        "ART-OTA-POST-GDB-SCRIPT",
+        "ART-OTA-GDB-SCRIPT",
+        "ART-CB-POST",
+        "ART-CB-PRE",
+        "ART-RTT-PAYLOAD",
+        "ART-RTT-PENDING",
+        "ART-UP0-PRE",
+        "ART-UPLOAD-READBACK",
+        "ART-RECOMPUTE-REPORT",
+        "ART-RECOMPUTE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "custody_files=23",
+          "present=23",
+          "digest_match=23",
+          "missing=[]",
+          "mismatch=[]"
+        ]
+      }
+    },
+    {
+      "id": "PROC-HARNESS-FAIL-CLOSED",
+      "description": "复算 harness 必须 fail-closed：自检覆盖 1 个正控与 15 个负控（涵盖字节篡改、控制块越界改写、各判据越限、产物缺失与保管链篡改），全部按预期判定且无失败用例。观测值取自 ART-RECOMPUTE-SELFTEST-LOG 的自检汇总行与逐用例行。",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_output"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V2-RECOMPUTE-SELFTEST"
+      ],
+      "artifact_ids": [
+        "ART-RECOMPUTE-SELFTEST-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "selftest_cases=16",
+          "positive_control=1",
+          "negative_cases=15",
+          "failures=0",
+          "selftest=PASS"
+        ]
+      }
+    }
+  ],
+  "performance_gates": []
+}

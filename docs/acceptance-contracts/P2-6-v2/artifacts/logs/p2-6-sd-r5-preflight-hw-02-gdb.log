@@ -1,0 +1,13 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x080264cc in lv_draw_sw_letter ()
+Writing 0x00001000 @ address 0xE0042008
+P2_6_TRANSPORT attached_stopped pc=0x080264cc
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_TRANSPORT breakpoint label=preflight_hal_update pc=0x08040884
+P2_6_TRANSPORT stop_verified label=preflight_hal_update pc=0x08040884
+P2_6_IDENTITY PASS label=preflight_fw header_bytes=96
+P2_6_TRANSPORT context_verified label=preflight_bcb_call pc=0x08040884
+P2_6_STATE PASS label=preflight sd=1 vtor=0x08010000 cfsr=0x00000000 bcb=4 owner=0
+P2_6_SD_PREFLIGHT PASS write_calls=0 flash_calls=0
+[Inferior 1 (Remote target) detached]

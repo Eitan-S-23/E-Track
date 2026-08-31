@@ -33,6 +33,13 @@ bool OTA_PackageEvidenceRun();
 bool OTA_PatchEvidenceRun();
 #endif
 
+#if defined(P2_6_TEST_ENABLE)
+void OTA_P2_6_ReportPackageApply(ota_package_result_t result,
+                                 const ota_package_info_t *info);
+void OTA_P2_6_ReportPatchApply(ota_patch_result_t result,
+                               const ota_patch_info_t *info);
+#endif
+
 }
 
 #if defined(P2_2_TEST_ENABLE)

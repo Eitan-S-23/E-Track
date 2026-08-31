@@ -25,7 +25,8 @@
 
 #include <stdint.h>
 
-#define STACK_INFO_BLANK    ((uint32_t)0x00000000)
+#define STACK_INFO_BLANK    ((uint32_t)0xA5A5A5A5)
+#define STACK_INFO_GUARD    ((uint32_t)0x5A5A5A5A)
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +36,7 @@ uint32_t StackInfo_GetTotalSize(void);
 uint32_t StackInfo_GetMaxUsageSize(void);
 uint32_t StackInfo_GetMinFreeSize(void);
 float StackInfo_GetMaxUtilization(void);
+uint32_t StackInfo_IsGuardIntact(void);
 
 #ifdef __cplusplus
 }

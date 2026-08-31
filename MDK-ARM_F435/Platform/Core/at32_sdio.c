@@ -1016,7 +1016,6 @@ sd_error_status_type sdio_command_data_send(sdio_command_struct_type *sdio_cmd_i
         {
           if(0 == timeout)
           {
-            sd_init();
             return SD_DATA_TIMEOUT;
           }
 
@@ -1047,7 +1046,6 @@ sd_error_status_type sdio_command_data_send(sdio_command_struct_type *sdio_cmd_i
         {
           if(timeout == 0)
           {
-            sd_init();
             return SD_DATA_TIMEOUT;
           }
 
@@ -1132,7 +1130,6 @@ sd_error_status_type sdio_command_data_send(sdio_command_struct_type *sdio_cmd_i
 
     if(timeout == 0)
     {
-      sd_init();
       return SD_DATA_TIMEOUT;
     }
 
@@ -1142,6 +1139,19 @@ sd_error_status_type sdio_command_data_send(sdio_command_struct_type *sdio_cmd_i
     }
   }
 
+  return status;
+}
+
+/* Recovery belongs to an outer transfer boundary.  Keeping it out of the
+   primitive prevents initialization-internal commands (notably sd_switch)
+   from re-entering sd_init through a timeout path. */
+static sd_error_status_type sdio_transfer_recover_timeout(
+  sd_error_status_type status)
+{
+  if(status == SD_DATA_TIMEOUT)
+  {
+    (void)sd_init();
+  }
   return status;
 }
 
@@ -1386,7 +1396,8 @@ sd_error_status_type sd_block_read(uint8_t *buf, long long addr, uint16_t blk_si
 
   stop_flag = 0;
 
-  return sdio_command_data_send(&sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf);
+  return sdio_transfer_recover_timeout(sdio_command_data_send(
+    &sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf));
 }
 
 /**
@@ -1481,7 +1492,8 @@ sd_error_status_type sd_mult_blocks_read(uint8_t *buf, long long addr, uint16_t 
      完成后同步发送 CMD12。 */
   stop_flag = 0;
 
-  status = sdio_command_data_send(&sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf);
+  status = sdio_transfer_recover_timeout(sdio_command_data_send(
+    &sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf));
 
   if(status != SD_OK)
   {
@@ -1604,7 +1616,8 @@ sd_error_status_type sd_block_write(const uint8_t *buf, long long addr, uint16_t
   stop_flag = 0;
 
   /* single block, stop command is unnecessary */
-  status = sdio_command_data_send(&sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf);
+  status = sdio_transfer_recover_timeout(sdio_command_data_send(
+    &sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf));
 
   if(status != SD_OK)
   {
@@ -1770,7 +1783,8 @@ sd_error_status_type sd_mult_blocks_write(const uint8_t *buf, long long addr, ui
 
   stop_flag = 1;
   /* cmd12 is needed */
-  status = sdio_command_data_send(&sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf);
+  status = sdio_transfer_recover_timeout(sdio_command_data_send(
+    &sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf));
 
   if(status != SD_OK)
   {
@@ -1833,7 +1847,8 @@ sd_error_status_type mmc_stream_read(uint8_t *buf, long long addr, uint32_t len)
 
   stop_flag = 1;
   /* cmd12 is needed */
-  return sdio_command_data_send(&sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf);
+  return sdio_transfer_recover_timeout(sdio_command_data_send(
+    &sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf));
 }
 
 /**
@@ -1888,7 +1903,8 @@ sd_error_status_type mmc_stream_write(uint8_t *buf, long long addr, uint32_t len
 
   stop_flag = 1;
   /* cmd12 is needed */
-  status = sdio_command_data_send(&sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf);
+  status = sdio_transfer_recover_timeout(sdio_command_data_send(
+    &sdio_command_init_struct, &sdio_data_init_struct, (uint32_t *)buf));
 
   if(status != SD_OK)
   {

@@ -1,0 +1,48 @@
+{
+  "phase": "postcheck",
+  "status": "PASS",
+  "descriptor_before": {
+    "max_up_buffers": 3,
+    "max_down_buffers": 3,
+    "pBuffer": 537213468,
+    "SizeOfBuffer": 1024,
+    "WrOff": 731,
+    "RdOff": 0,
+    "Flags": 1
+  },
+  "descriptor_after": {
+    "max_up_buffers": 3,
+    "max_down_buffers": 3,
+    "pBuffer": 537213468,
+    "SizeOfBuffer": 1024,
+    "WrOff": 731,
+    "RdOff": 731,
+    "Flags": 1
+  },
+  "pending_count": 731,
+  "consumed_count": 731,
+  "payload_bytes": 731,
+  "payload_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+  "rd_off_address": 537214532,
+  "rd_off_change": [
+    {
+      "address": 537214532,
+      "before_word": 0,
+      "after_word": 731
+    }
+  ],
+  "control_block_outside_rd_off_changes": 0,
+  "sram_mutation_scope": "the core legitimately resumed between the two GDB sessions (the server restores the pre-connection running state on exit), so SRAM outside the RTT structures may change; the control block (except the four-byte RdOff word), the Up0 ring, and the measurement structure are byte-stable",
+  "sram_pre_sha256": "8BACC2F442A1E4EBD5DCB46378B62162315CA45D13609D67E4EE32AC3B9470AF",
+  "sram_post_sha256": "329743DD7865FC157FF2474E1DFD9F0D734A9AD080E219E40BD85942F21B0A09",
+  "control_block_pre_sha256": "46D14E04EC949EF57BC0AA07D8F63E55F0CF45857C229BA01F624CAE69DD5C69",
+  "control_block_post_sha256": "0E4AA86C54E1BAF06732AA46E3CB529014C6BEEAE9017E6DB0C706F0A516858D",
+  "up_buffer_pre_sha256": "09AF51DCB6279F1712B823689F8AAAE89DB0623CC4D8EC86A28F061C351FF66B",
+  "up_buffer_post_sha256": "09AF51DCB6279F1712B823689F8AAAE89DB0623CC4D8EC86A28F061C351FF66B",
+  "measurement": {
+    "valid": 1,
+    "kind": 2,
+    "seq": 2185635327
+  },
+  "rtt_channel_binding_verified": true
+}

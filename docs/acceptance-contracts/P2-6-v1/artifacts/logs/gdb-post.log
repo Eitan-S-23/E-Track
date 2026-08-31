@@ -1,0 +1,17 @@
+The memory-read-packet-size on future remote targets is set to "256 fixed".
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08052e8e in memcpy ()
+Writing 0x00001000 @ address 0xE0042008
+Working directory D:\github\my\E-Track.
+P2_6_BIND GDB_CWD_EXPECTED D:/github/my/E-Track
+P2_6_BIND POST_SESSION_ATTACHED
+P2_6_BIND STATE_UNCHANGED
+P2_6_BIND POST wr=731 rd=731
+P2_6_BIND DUMP_EXPECTED .cache/p2-6-rtt-binding-20260829-18/snapshots/sram-post.bin
+P2_6_BIND DUMP_EXPECTED .cache/p2-6-rtt-binding-20260829-18/snapshots/rtt-cb-post.bin
+P2_6_BIND DUMP_EXPECTED .cache/p2-6-rtt-binding-20260829-18/snapshots/up0-post.bin
+P2_6_BIND DUMP_EXPECTED .cache/p2-6-rtt-binding-20260829-18/snapshots/measurement-post.bin
+P2_6_BIND POST_SNAPSHOTS_DONE
+P2_6_BIND CAPTURE_PASS
+P2_6_BIND PASS channel_binding=1

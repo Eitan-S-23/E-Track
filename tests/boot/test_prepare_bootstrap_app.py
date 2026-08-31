@@ -91,6 +91,8 @@ def run_powershell(
         [executable, "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script],
         cwd=ROOT,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
     )
     if result.returncode != expect:
@@ -177,9 +179,142 @@ def main() -> int:
 
         result = run("verify", "--input", str(app), "--input-kind", "app")
         assert "kind=app" in result.stdout
+        result = run(
+            "verify",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--expected-bytes",
+            str(len(image)),
+            "--expected-sha256",
+            hashlib.sha256(image).hexdigest(),
+            "--flash-address",
+            hex(APP_ORIGIN),
+            "--expected-bytes-at",
+            image[:4].hex(),
+        )
+        assert "P1_5_APP_VERIFY=PASS" in result.stdout
+        result = run(
+            "verify",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--expected-bytes",
+            str(len(image) + 1),
+            expect=1,
+        )
+        assert "image length" in result.stderr
+        result = run(
+            "verify",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--expected-sha256",
+            "00" * 32,
+            expect=1,
+        )
+        assert "SHA-256" in result.stderr
+        result = run(
+            "verify",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--expected-bytes-at",
+            image[:4].hex(),
+            expect=1,
+        )
+        assert "--flash-address is required" in result.stderr
+        result = run(
+            "verify",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--flash-address",
+            hex(APP_ORIGIN),
+            "--expected-bytes-at",
+            "00000000",
+            expect=1,
+        )
+        assert "do not match expected" in result.stderr
+        result = run(
+            "verify",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--flash-address",
+            hex(APP_ORIGIN + len(image) - 1),
+            "--expected-bytes-at",
+            "0000",
+            expect=1,
+        )
+        assert "outside the App image" in result.stderr
         result = run("verify", "--input", str(recovery), "--input-kind", "recovery")
         assert "kind=recovery" in result.stdout
-        checks += 2
+        checks += 8
+
+        staged = work / "staged-restore.bin"
+        result = run(
+            "stage-restore",
+            "--input",
+            str(app),
+            "--input-kind",
+            "app",
+            "--output",
+            str(staged),
+            "--expected-bytes",
+            str(len(image)),
+            "--expected-sha256",
+            hashlib.sha256(image).hexdigest(),
+            "--flash-address",
+            hex(APP_ORIGIN),
+            "--expected-bytes-at",
+            image[:4].hex(),
+        )
+        assert "P1_5_APP_RESTORE_STAGE=PASS" in result.stdout
+        assert staged.read_bytes() == image
+        result = run(
+            "stage-restore",
+            "--input",
+            str(app),
+            "--output",
+            str(staged),
+            "--expected-bytes",
+            str(len(image)),
+            "--expected-sha256",
+            hashlib.sha256(image).hexdigest(),
+            "--flash-address",
+            hex(APP_ORIGIN),
+            "--expected-bytes-at",
+            image[:4].hex(),
+            expect=1,
+        )
+        assert "already exists" in result.stderr
+        rejected_stage = work / "rejected-stage.bin"
+        result = run(
+            "stage-restore",
+            "--input",
+            str(app),
+            "--output",
+            str(rejected_stage),
+            "--expected-bytes",
+            str(len(image)),
+            "--expected-sha256",
+            "00" * 32,
+            "--flash-address",
+            hex(APP_ORIGIN),
+            "--expected-bytes-at",
+            image[:4].hex(),
+            expect=1,
+        )
+        assert "SHA-256" in result.stderr
+        assert not rejected_stage.exists()
+        checks += 6
 
         auto_prepared = work / "auto-prepared.bin"
         run(
@@ -292,7 +427,7 @@ def main() -> int:
         assert "invalid choice" in result.stderr
         checks += 1
 
-        powershell = shutil.which("powershell.exe") or shutil.which("pwsh")
+        powershell = shutil.which("pwsh") or shutil.which("powershell.exe")
         powershell_checks = 0
         if powershell is not None:
             common = ps_quote(JLINK_COMMON)

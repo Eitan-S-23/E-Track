@@ -1,0 +1,350 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P2-6-v1",
+  "contract_sha256": "BFE0F5931BEED31FE658002DBF22A814650E9A74D6C495D21D6EC710F00C9F48",
+  "round_id": "20260830-R20-CLOSURE",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "HW-RTT-BINDING",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": true,
+      "evidence": [
+        "artifacts/logs/result.json",
+        "artifacts/logs/gdb.log",
+        "artifacts/logs/gdb-post.log",
+        "artifacts/logs/precall.json"
+      ],
+      "notes": "classification=RTT_CHANNEL_BINDING_VERIFIED / reason=UP0_RING_BYTES_AND_RD_OFF_PROVEN；audit_id=P2-6-BR-20260829-RTT-BIND-R19-03；14 marker 全 1；gdb_exit_code=0，gdb_post_exit_code=0。"
+    },
+    {
+      "id": "HW-CAPTURE-PAYLOAD",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "payload_bytes=731",
+        "expected_pending_bytes=731",
+        "payload_sha256=206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+        "raw_sha256=206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+        "payload_complete=true"
+      ],
+      "evidence": [
+        "artifacts/logs/capture.json",
+        "artifacts/logs/precheck.json",
+        "artifacts/snapshots/rtt-payload.bin",
+        "artifacts/snapshots/pending.bin"
+      ],
+      "notes": "读取器为 JLinkRTTLogger 独立 probe 连接（GDB server 的 RTT telnet 在本 J-Link 上只给 banner）。"
+    },
+    {
+      "id": "HW-POSTCHECK-RDOFF",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "RdOff:0->731",
+        "WrOff:731->731",
+        "control_block_outside_rd_off_changes=0",
+        "up_buffer_sha256_unchanged=true",
+        "measurement_seq_unchanged=true"
+      ],
+      "evidence": [
+        "artifacts/logs/postcheck.json",
+        "artifacts/snapshots/rtt-cb-pre.bin",
+        "artifacts/snapshots/rtt-cb-post.bin"
+      ],
+      "notes": "全 SRAM 稳定断言在两段式结构下结构性不成立（server 退出会恢复核心运行），已按 R19 §3.3 重定域到 RTT 控制块级 diff。"
+    },
+    {
+      "id": "HW-HALT-GATE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "a:dhcsr=294,all_halted=true,errors=0,chunks=147",
+        "b:dhcsr=294,all_halted=true,errors=0,chunks=147",
+        "c:dhcsr=294,all_halted=true,errors=0,chunks=147"
+      ],
+      "evidence": [
+        "artifacts/logs/gate-pre.json",
+        "artifacts/logs/recovery-result.json"
+      ],
+      "notes": "S_HALT=1 闸门语义未被 R19 修改；WDT 暂停只让该闸门的物理前置条件成立。"
+    },
+    {
+      "id": "HW-IMAGE-AUTHORITY",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "read_count=3",
+        "bytes=600744",
+        "sha256=A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "reads_identical=true",
+        "classification=BOARD_IMAGE_AUTHORITATIVE",
+        "header_crc32=B8499369,valid=true"
+      ],
+      "evidence": [
+        "artifacts/logs/recovery-result.json",
+        "artifacts/snapshots/board-header.bin",
+        "artifacts/snapshots/board-image-a.bin",
+        "artifacts/snapshots/board-image-b.bin",
+        "artifacts/snapshots/board-image-c.bin"
+      ],
+      "notes": "600744 B / A2D3083B...D58E00 与 R19 §9 记录的被测镜像身份一致。"
+    },
+    {
+      "id": "HW-NO-FLASH-WRITE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "loadbin_count=0",
+        "verifybin_count=0",
+        "difference_bytes=0",
+        "flash_allowed=false",
+        "recovery_classification=APP_IMAGE_ALREADY_AUTHORITATIVE"
+      ],
+      "evidence": [
+        "artifacts/logs/recovery-result.json",
+        "artifacts/logs/result.json"
+      ],
+      "notes": "板卡已是权威镜像，恢复分支未触发；flash 分支由 R19 冒烟 B（根 -23）同构验穿，不属本合同判据。"
+    },
+    {
+      "id": "PROC-WDT-PAUSE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "wdt_pause_applied=true",
+        "session1_echo=1",
+        "session2_echo=1",
+        "gate_pre_a_echo=1",
+        "gate_pre_b_echo=1",
+        "gate_pre_c_echo=1"
+      ],
+      "evidence": [
+        "artifacts/logs/result.json",
+        "artifacts/logs/gate-pre.json"
+      ],
+      "notes": "该写入为已授权偏离 DEV-1（见合同 authorized_deviations），非 flash、断电即失、不改镜像字节。"
+    },
+    {
+      "id": "PROC-NATURAL-EXIT",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "gdb_exit_code=0",
+        "gdb_post_exit_code=0",
+        "server_natural_exit=true",
+        "server_post_natural_exit=true",
+        "reset_run_final_ports_listening=0",
+        "logger_stopped_by_host=true",
+        "residual_rtt_logger_processes=0"
+      ],
+      "evidence": [
+        "artifacts/logs/result.json",
+        "artifacts/logs/capture.json",
+        "artifacts/logs/rtt-logger-console.log"
+      ],
+      "notes": "logger 的 host 侧停止为已授权偏离 DEV-2（AGENTS.md 残留清理模式）。"
+    },
+    {
+      "id": "PROC-EVIDENCE-DOC-ACCURACY",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": true,
+      "evidence": [
+        "artifacts/logs/generated-gdb-sha256.txt",
+        "artifacts/docs/P2-6-BR-20260829-RTT-BIND-R19-implementation-evidence.md",
+        "artifacts/root-manifest.json"
+      ],
+      "notes": "R20 收口更正三处：binding.gdb SHA 尾部 121AD8→2121D8（实读 ...702121D8）；补齐 6 个 readback-gate-*.gdb 的字节数与 SHA-256（pre 84573 B、post 84870 B）；如实标注根 -20 已被后续迭代覆盖/未留存。更正后 8 行与本判据命令输出逐项一致。"
+    }
+  ],
+  "evidence_hashes": {
+    "artifacts/snapshots/board-header.bin": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+    "artifacts/snapshots/board-image-a.bin": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+    "artifacts/snapshots/board-image-b.bin": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+    "artifacts/snapshots/board-image-c.bin": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+    "artifacts/logs/capture.json": "603A9D041AE75AEE850778F1DA1C35493EFD209C4560671573550E585803F3C5",
+    "artifacts/snapshots/rtt-cb-post.bin": "0E4AA86C54E1BAF06732AA46E3CB529014C6BEEAE9017E6DB0C706F0A516858D",
+    "artifacts/snapshots/rtt-cb-pre.bin": "46D14E04EC949EF57BC0AA07D8F63E55F0CF45857C229BA01F624CAE69DD5C69",
+    "artifacts/logs/gate-pre.json": "CC787E826E03E606BA996306E1BAFDC605C770CF7F0E7FA739E4ECA8BE18DE64",
+    "artifacts/logs/gdb.log": "80128C87519704FDA7AA42D4427DCD3F21627D2230426429FC97D15789C1195F",
+    "artifacts/logs/gdb-post.log": "2E1217695A1E483F9F4AEBD14A0EE803A9C497659E0686544674722F2B6E0E04",
+    "artifacts/logs/generated-gdb-sha256.txt": "62344FD3D44B5CC8B97FD237A8D36D3D7141B07E661BB504467566C41DAE48D0",
+    "artifacts/logs/rtt-logger-console.log": "D4F8E537872F56B4FD97BFB4A46FE53F9785BA2251A32BC7CDC1ECE9AC29608B",
+    "artifacts/snapshots/pending.bin": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+    "artifacts/logs/postcheck.json": "9739B002366917F3047093E6E6A3FEF5DEB06337D7EE52664B657117D9DD6CE0",
+    "artifacts/logs/precall.json": "67A3D45DDBB41D16125F2DE45C017A4C76E04D4BCA9767722FF75D732F9CAE8D",
+    "artifacts/logs/precheck.json": "9870AFCEE6B9EE8B7C68412EE4EBF83371F3CC3B48FA3EE7C0F6D785B80FE08E",
+    "artifacts/docs/P2-6-BR-20260829-RTT-BIND-R19-implementation-evidence.md": "599DD8C03F60E6B5E000989428AF22CEC382B392A35A3C4FE8DA8BCD31343BA5",
+    "artifacts/logs/recovery-result.json": "45671EF40C7D276524ACC7316DBBA724F345613933EDCFBCBA8FBE232D50B16C",
+    "artifacts/logs/result.json": "93C1DD069EB8173B48D3160D6E684847F70C76BB3B02EABFCA50C2C4F3DAE922",
+    "artifacts/root-manifest.json": "4576CDBB1C85B97ABBC19312330E8FD0237025359BF69735B6BA7300B3457BA2",
+    "artifacts/snapshots/rtt-payload.bin": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49"
+  },
+  "commands": [
+    {
+      "id": "CMD-ACCEPT-RUN",
+      "command": "cd /d/github/my/E-Track && \"C:/Users/SU/AppData/Local/Programs/Python/Python313/python.exe\" .cache/p2-6-rtt-binding-20260829-18/scripts/run_recovery_binding.py --audit-id P2-6-BR-20260829-RTT-BIND-R19-03 --evidence-root \"D:/github/my/E-Track/.cache/p2-6-rtt-binding-20260829-18\"",
+      "exit_code": 0,
+      "output_evidence": "artifacts/logs/result.json",
+      "notes": "由独立验收会话于 2026-08-30 执行（13:53-13:57）。退出码可由产物自证：run_recovery_binding.py 在根 manifest 存在时返回 run_binding.py 的返回码，run_binding.py:1860 为 `return 0 if classification == \"RTT_CHANNEL_BINDING_VERIFIED\" else 1`，而 result.json 记录的 classification 正是该值。"
+    },
+    {
+      "id": "CMD-GDB-SHA",
+      "command": "cd /d/github/my/E-Track && python -c \"import hashlib,pathlib\\nfor p in sorted(pathlib.Path('.cache/p2-6-rtt-binding-20260829-18/scripts').glob('*.gdb')):\\n    print(f'{p.name} {p.stat().st_size} {hashlib.sha256(p.read_bytes()).hexdigest().upper()}')\"",
+      "exit_code": 0,
+      "output_evidence": "artifacts/logs/generated-gdb-sha256.txt",
+      "notes": "R20 收口会话执行的只读复算；输出即 ART-GDB-SHA 本体。"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-BOARD-HEADER",
+      "path": "artifacts/snapshots/board-header.bin",
+      "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+      "size": 96
+    },
+    {
+      "id": "ART-BOARD-IMAGE-A",
+      "path": "artifacts/snapshots/board-image-a.bin",
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "size": 600744
+    },
+    {
+      "id": "ART-BOARD-IMAGE-B",
+      "path": "artifacts/snapshots/board-image-b.bin",
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "size": 600744
+    },
+    {
+      "id": "ART-BOARD-IMAGE-C",
+      "path": "artifacts/snapshots/board-image-c.bin",
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "size": 600744
+    },
+    {
+      "id": "ART-CAPTURE-JSON",
+      "path": "artifacts/logs/capture.json",
+      "sha256": "603A9D041AE75AEE850778F1DA1C35493EFD209C4560671573550E585803F3C5",
+      "size": 982
+    },
+    {
+      "id": "ART-CB-POST",
+      "path": "artifacts/snapshots/rtt-cb-post.bin",
+      "sha256": "0E4AA86C54E1BAF06732AA46E3CB529014C6BEEAE9017E6DB0C706F0A516858D",
+      "size": 168
+    },
+    {
+      "id": "ART-CB-PRE",
+      "path": "artifacts/snapshots/rtt-cb-pre.bin",
+      "sha256": "46D14E04EC949EF57BC0AA07D8F63E55F0CF45857C229BA01F624CAE69DD5C69",
+      "size": 168
+    },
+    {
+      "id": "ART-GATEPRE-JSON",
+      "path": "artifacts/logs/gate-pre.json",
+      "sha256": "CC787E826E03E606BA996306E1BAFDC605C770CF7F0E7FA739E4ECA8BE18DE64",
+      "size": 16661
+    },
+    {
+      "id": "ART-GDB-LOG",
+      "path": "artifacts/logs/gdb.log",
+      "sha256": "80128C87519704FDA7AA42D4427DCD3F21627D2230426429FC97D15789C1195F",
+      "size": 43227
+    },
+    {
+      "id": "ART-GDB-POST-LOG",
+      "path": "artifacts/logs/gdb-post.log",
+      "sha256": "2E1217695A1E483F9F4AEBD14A0EE803A9C497659E0686544674722F2B6E0E04",
+      "size": 906
+    },
+    {
+      "id": "ART-GDB-SHA",
+      "path": "artifacts/logs/generated-gdb-sha256.txt",
+      "sha256": "62344FD3D44B5CC8B97FD237A8D36D3D7141B07E661BB504467566C41DAE48D0",
+      "size": 752
+    },
+    {
+      "id": "ART-LOGGER-CONSOLE",
+      "path": "artifacts/logs/rtt-logger-console.log",
+      "sha256": "D4F8E537872F56B4FD97BFB4A46FE53F9785BA2251A32BC7CDC1ECE9AC29608B",
+      "size": 1107
+    },
+    {
+      "id": "ART-PENDING",
+      "path": "artifacts/snapshots/pending.bin",
+      "sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+      "size": 731
+    },
+    {
+      "id": "ART-POSTCHECK-JSON",
+      "path": "artifacts/logs/postcheck.json",
+      "sha256": "9739B002366917F3047093E6E6A3FEF5DEB06337D7EE52664B657117D9DD6CE0",
+      "size": 1806
+    },
+    {
+      "id": "ART-PRECALL-JSON",
+      "path": "artifacts/logs/precall.json",
+      "sha256": "67A3D45DDBB41D16125F2DE45C017A4C76E04D4BCA9767722FF75D732F9CAE8D",
+      "size": 857
+    },
+    {
+      "id": "ART-PRECHECK-JSON",
+      "path": "artifacts/logs/precheck.json",
+      "sha256": "9870AFCEE6B9EE8B7C68412EE4EBF83371F3CC3B48FA3EE7C0F6D785B80FE08E",
+      "size": 2456
+    },
+    {
+      "id": "ART-R19-DOC",
+      "path": "artifacts/docs/P2-6-BR-20260829-RTT-BIND-R19-implementation-evidence.md",
+      "sha256": "599DD8C03F60E6B5E000989428AF22CEC382B392A35A3C4FE8DA8BCD31343BA5",
+      "size": 23843
+    },
+    {
+      "id": "ART-RECOVERY-JSON",
+      "path": "artifacts/logs/recovery-result.json",
+      "sha256": "45671EF40C7D276524ACC7316DBBA724F345613933EDCFBCBA8FBE232D50B16C",
+      "size": 25076
+    },
+    {
+      "id": "ART-RESULT",
+      "path": "artifacts/logs/result.json",
+      "sha256": "93C1DD069EB8173B48D3160D6E684847F70C76BB3B02EABFCA50C2C4F3DAE922",
+      "size": 115097
+    },
+    {
+      "id": "ART-ROOT-MANIFEST",
+      "path": "artifacts/root-manifest.json",
+      "sha256": "4576CDBB1C85B97ABBC19312330E8FD0237025359BF69735B6BA7300B3457BA2",
+      "size": 173176
+    },
+    {
+      "id": "ART-RTT-PAYLOAD",
+      "path": "artifacts/snapshots/rtt-payload.bin",
+      "sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+      "size": 731
+    }
+  ]
+}

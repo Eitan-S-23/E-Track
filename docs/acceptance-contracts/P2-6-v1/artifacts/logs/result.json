@@ -1,0 +1,2945 @@
+{
+  "schema": "p2-6-rtt-binding-app-recovery-result-v4",
+  "audit_id": "P2-6-BR-20260829-RTT-BIND-R19-03",
+  "classification": "RTT_CHANNEL_BINDING_VERIFIED",
+  "reason": "UP0_RING_BYTES_AND_RD_OFF_PROVEN",
+  "hardware_started": true,
+  "session_count": 2,
+  "hardware_connection_phase_count": 6,
+  "recovery": {
+    "schema": "p2-6-app-recovery-result-v4",
+    "audit_id": "P2-6-BR-20260829-RTT-BIND-R19-03",
+    "classification": "APP_IMAGE_ALREADY_AUTHORITATIVE",
+    "reason": "CHUNKED_TRIPLE_PASS_ALREADY_AUTHORITATIVE",
+    "pass": true,
+    "hardware_started": true,
+    "attempt_count": 1,
+    "connection_count": 4,
+    "loadbin_count": 0,
+    "verifybin_count": 0,
+    "reset_count": 1,
+    "source": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-app-image-drift-audit-20260827-01\\restore\\X-Track-App-GCC-p2-6a-test-v2.8.1.authoritative-restore.bin",
+      "bytes": 600744,
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "mtime_ns": 1787841784955009100,
+      "mtime_iso": "2026-08-27T22:43:04.955009+08:00"
+    },
+    "gate_pre": {
+      "schema": "p2-6-gate-phase-audit-v1",
+      "phase": "gate-pre",
+      "pass_runs": [
+        {
+          "phase": "gate-pre",
+          "label": "a",
+          "gdb_script": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\readback-gate-pre-a.gdb",
+            "bytes": 84573,
+            "sha256": "BE33110E49E3EA890F8B5E927F9965213C6B3DCA3A239184256C69F96FCE331D",
+            "mtime_ns": 1788063207146349500,
+            "mtime_iso": "2026-08-30T12:13:27.146349+08:00"
+          },
+          "gdb_exit_code": 0,
+          "gdb_log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-gdb.log",
+            "bytes": 35492,
+            "sha256": "DEA7A95E96806BECDA286A6CD470D75D05D92F6413CD83F3F208799A98F36F31",
+            "mtime_ns": 1788069238107349100,
+            "mtime_iso": "2026-08-30T13:53:58.107349+08:00"
+          },
+          "gdb_log_audit": {
+            "label": "a",
+            "phase": "gate-pre",
+            "dhcsr_marker_count": 294,
+            "dhcsr_pre": 147,
+            "dhcsr_post": 147,
+            "all_halted": true,
+            "resume_issued": true,
+            "error_line_count": 0,
+            "pass": true
+          },
+          "server_pid": 2880,
+          "server_exit_code": 0,
+          "server_natural_exit": true,
+          "server_exit_wait_seconds": 0.175,
+          "server_ready_seconds": 0.306,
+          "server_log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-server.log",
+            "bytes": 207445,
+            "sha256": "151930087990BDF2E0B919DE053AA2CC349F6346DA9E07501CE2A624D1051EB2",
+            "mtime_ns": 1788069238284956200,
+            "mtime_iso": "2026-08-30T13:53:58.284956+08:00"
+          },
+          "server_log_audit": {
+            "label": "a",
+            "phase": "gate-pre",
+            "gdb_connections": 1,
+            "halt_echo": 1,
+            "wdt_pause_echo": 1,
+            "go_echo": 1,
+            "gdb_closed": 1,
+            "pass": true
+          },
+          "server_command_file": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-server-command.json",
+            "bytes": 492,
+            "sha256": "857BF348930DD7598521B00EACB03675D8D0AB9319FFD17082CC45FBFCEA9866",
+            "mtime_ns": 1788069243986859100,
+            "mtime_iso": "2026-08-30T13:54:03.986859+08:00"
+          },
+          "chunk_file_audit": {
+            "label": "a",
+            "chunk_files": 147,
+            "bytes": 600744,
+            "pass": true
+          },
+          "post_server_cleanup": {
+            "natural_exit": true,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "polls": 1,
+            "wait_seconds": 0.038,
+            "final_ports": {
+              "listening": [],
+              "all_closed": true,
+              "query": "netstat -ano -p tcp"
+            },
+            "final_processes": {
+              "matching": [],
+              "clear": true
+            }
+          },
+          "probe": {
+            "pid": 19072,
+            "exit_code": 0,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "elapsed_seconds": 0.361,
+            "command": [
+              "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+              "-Device",
+              "AT32F435RGT7",
+              "-If",
+              "SWD",
+              "-Speed",
+              "1000",
+              "-AutoConnect",
+              "1",
+              "-ExitOnError",
+              "1",
+              "-CommandFile",
+              "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-probe.jlink"
+            ],
+            "command_file": {
+              "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-probe.jlink",
+              "bytes": 14,
+              "sha256": "E90A2B976DC54B9845DF89B3741A2837CE02A35ED14C0F887E33E80CA5072D92",
+              "mtime_ns": 1788069238430849300,
+              "mtime_iso": "2026-08-30T13:53:58.430849+08:00"
+            },
+            "log": {
+              "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-a-probe.log",
+              "bytes": 1767,
+              "sha256": "1866A368BDBE6752B74E52B627142E057D5FCD6B953150F9D0A06D6D47A77914",
+              "mtime_ns": 1788069238772236300,
+              "mtime_iso": "2026-08-30T13:53:58.772236+08:00"
+            }
+          },
+          "probe_audit": {
+            "final": "running",
+            "states": [
+              "running"
+            ],
+            "pass": true
+          },
+          "final_cleanup": {
+            "natural_exit": true,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "polls": 19,
+            "wait_seconds": 5.191,
+            "final_ports": {
+              "listening": [],
+              "all_closed": true,
+              "query": "netstat -ano -p tcp"
+            },
+            "final_processes": {
+              "matching": [],
+              "clear": true
+            }
+          },
+          "terminate_sent": false,
+          "kill_sent": false,
+          "started_at": "2026-08-30T13:53:32.556635+08:00",
+          "finished_at": "2026-08-30T13:54:03.992816+08:00"
+        },
+        {
+          "phase": "gate-pre",
+          "label": "b",
+          "gdb_script": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\readback-gate-pre-b.gdb",
+            "bytes": 84573,
+            "sha256": "4786363036AA637FF4042A7A8229471C172EFE47EBEB7BD393717239B4DE6C3F",
+            "mtime_ns": 1788063207160021600,
+            "mtime_iso": "2026-08-30T12:13:27.160022+08:00"
+          },
+          "gdb_exit_code": 0,
+          "gdb_log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-gdb.log",
+            "bytes": 35487,
+            "sha256": "8EA527B41E346097E32D24538FEBA0F21A7E92A70CC1EA12B52C9960C9298DE5",
+            "mtime_ns": 1788069268564237500,
+            "mtime_iso": "2026-08-30T13:54:28.564238+08:00"
+          },
+          "gdb_log_audit": {
+            "label": "b",
+            "phase": "gate-pre",
+            "dhcsr_marker_count": 294,
+            "dhcsr_pre": 147,
+            "dhcsr_post": 147,
+            "all_halted": true,
+            "resume_issued": true,
+            "error_line_count": 0,
+            "pass": true
+          },
+          "server_pid": 21996,
+          "server_exit_code": 0,
+          "server_natural_exit": true,
+          "server_exit_wait_seconds": 0.294,
+          "server_ready_seconds": 0.203,
+          "server_log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-server.log",
+            "bytes": 207496,
+            "sha256": "638B969732A8236FE28C9CD8B7686AFA05223A007FA3CC81BFE1B56B183BC0F5",
+            "mtime_ns": 1788069268755904200,
+            "mtime_iso": "2026-08-30T13:54:28.755904+08:00"
+          },
+          "server_log_audit": {
+            "label": "b",
+            "phase": "gate-pre",
+            "gdb_connections": 1,
+            "halt_echo": 1,
+            "wdt_pause_echo": 1,
+            "go_echo": 1,
+            "gdb_closed": 1,
+            "pass": true
+          },
+          "server_command_file": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-server-command.json",
+            "bytes": 492,
+            "sha256": "857BF348930DD7598521B00EACB03675D8D0AB9319FFD17082CC45FBFCEA9866",
+            "mtime_ns": 1788069274424716900,
+            "mtime_iso": "2026-08-30T13:54:34.424717+08:00"
+          },
+          "chunk_file_audit": {
+            "label": "b",
+            "chunk_files": 147,
+            "bytes": 600744,
+            "pass": true
+          },
+          "post_server_cleanup": {
+            "natural_exit": true,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "polls": 1,
+            "wait_seconds": 0.038,
+            "final_ports": {
+              "listening": [],
+              "all_closed": true,
+              "query": "netstat -ano -p tcp"
+            },
+            "final_processes": {
+              "matching": [],
+              "clear": true
+            }
+          },
+          "probe": {
+            "pid": 2104,
+            "exit_code": 0,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "elapsed_seconds": 0.259,
+            "command": [
+              "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+              "-Device",
+              "AT32F435RGT7",
+              "-If",
+              "SWD",
+              "-Speed",
+              "1000",
+              "-AutoConnect",
+              "1",
+              "-ExitOnError",
+              "1",
+              "-CommandFile",
+              "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-probe.jlink"
+            ],
+            "command_file": {
+              "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-probe.jlink",
+              "bytes": 14,
+              "sha256": "E90A2B976DC54B9845DF89B3741A2837CE02A35ED14C0F887E33E80CA5072D92",
+              "mtime_ns": 1788069269016842400,
+              "mtime_iso": "2026-08-30T13:54:29.016842+08:00"
+            },
+            "log": {
+              "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-b-probe.log",
+              "bytes": 1767,
+              "sha256": "196867C3E169A30F30DD9F18B756B976F5DA68AB9F48071804DFEFB485D99231",
+              "mtime_ns": 1788069269268527000,
+              "mtime_iso": "2026-08-30T13:54:29.268527+08:00"
+            }
+          },
+          "probe_audit": {
+            "final": "running",
+            "states": [
+              "running"
+            ],
+            "pass": true
+          },
+          "final_cleanup": {
+            "natural_exit": true,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "polls": 19,
+            "wait_seconds": 5.145,
+            "final_ports": {
+              "listening": [],
+              "all_closed": true,
+              "query": "netstat -ano -p tcp"
+            },
+            "final_processes": {
+              "matching": [],
+              "clear": true
+            }
+          },
+          "terminate_sent": false,
+          "kill_sent": false,
+          "started_at": "2026-08-30T13:54:04.036387+08:00",
+          "finished_at": "2026-08-30T13:54:34.430791+08:00"
+        },
+        {
+          "phase": "gate-pre",
+          "label": "c",
+          "gdb_script": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\readback-gate-pre-c.gdb",
+            "bytes": 84573,
+            "sha256": "82921E9548861E3D61E89E638761B1D1EAADD73625EF86D3FAE8F986345BE55C",
+            "mtime_ns": 1788063207174669400,
+            "mtime_iso": "2026-08-30T12:13:27.174670+08:00"
+          },
+          "gdb_exit_code": 0,
+          "gdb_log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-gdb.log",
+            "bytes": 35487,
+            "sha256": "D3C986370E07034598DF8F30AF67537F586F11E18A3B941FE53478B182090B61",
+            "mtime_ns": 1788069298930950900,
+            "mtime_iso": "2026-08-30T13:54:58.930951+08:00"
+          },
+          "gdb_log_audit": {
+            "label": "c",
+            "phase": "gate-pre",
+            "dhcsr_marker_count": 294,
+            "dhcsr_pre": 147,
+            "dhcsr_post": 147,
+            "all_halted": true,
+            "resume_issued": true,
+            "error_line_count": 0,
+            "pass": true
+          },
+          "server_pid": 10940,
+          "server_exit_code": 0,
+          "server_natural_exit": true,
+          "server_exit_wait_seconds": 0.146,
+          "server_ready_seconds": 0.202,
+          "server_log": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-server.log",
+            "bytes": 207496,
+            "sha256": "FA857A66C3241895DBDC06D924BBD5E62F7DA377F6DF09B282DA8C78453992F9",
+            "mtime_ns": 1788069299074449600,
+            "mtime_iso": "2026-08-30T13:54:59.074450+08:00"
+          },
+          "server_log_audit": {
+            "label": "c",
+            "phase": "gate-pre",
+            "gdb_connections": 1,
+            "halt_echo": 1,
+            "wdt_pause_echo": 1,
+            "go_echo": 1,
+            "gdb_closed": 1,
+            "pass": true
+          },
+          "server_command_file": {
+            "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-server-command.json",
+            "bytes": 492,
+            "sha256": "857BF348930DD7598521B00EACB03675D8D0AB9319FFD17082CC45FBFCEA9866",
+            "mtime_ns": 1788069304696445900,
+            "mtime_iso": "2026-08-30T13:55:04.696446+08:00"
+          },
+          "chunk_file_audit": {
+            "label": "c",
+            "chunk_files": 147,
+            "bytes": 600744,
+            "pass": true
+          },
+          "post_server_cleanup": {
+            "natural_exit": true,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "polls": 1,
+            "wait_seconds": 0.039,
+            "final_ports": {
+              "listening": [],
+              "all_closed": true,
+              "query": "netstat -ano -p tcp"
+            },
+            "final_processes": {
+              "matching": [],
+              "clear": true
+            }
+          },
+          "probe": {
+            "pid": 12320,
+            "exit_code": 0,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "elapsed_seconds": 0.275,
+            "command": [
+              "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+              "-Device",
+              "AT32F435RGT7",
+              "-If",
+              "SWD",
+              "-Speed",
+              "1000",
+              "-AutoConnect",
+              "1",
+              "-ExitOnError",
+              "1",
+              "-CommandFile",
+              "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-probe.jlink"
+            ],
+            "command_file": {
+              "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-probe.jlink",
+              "bytes": 14,
+              "sha256": "E90A2B976DC54B9845DF89B3741A2837CE02A35ED14C0F887E33E80CA5072D92",
+              "mtime_ns": 1788069299238034100,
+              "mtime_iso": "2026-08-30T13:54:59.238034+08:00"
+            },
+            "log": {
+              "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\readback-gate-pre-c-probe.log",
+              "bytes": 1767,
+              "sha256": "01800B69F40DEDF72EFB08A49E3BAF16CD158A9D4C2FFAD02D0E0FB78E0E5B21",
+              "mtime_ns": 1788069299502571800,
+              "mtime_iso": "2026-08-30T13:54:59.502572+08:00"
+            }
+          },
+          "probe_audit": {
+            "final": "running",
+            "states": [
+              "running"
+            ],
+            "pass": true
+          },
+          "final_cleanup": {
+            "natural_exit": true,
+            "terminate_sent": false,
+            "kill_sent": false,
+            "polls": 19,
+            "wait_seconds": 5.178,
+            "final_ports": {
+              "listening": [],
+              "all_closed": true,
+              "query": "netstat -ano -p tcp"
+            },
+            "final_processes": {
+              "matching": [],
+              "clear": true
+            }
+          },
+          "terminate_sent": false,
+          "kill_sent": false,
+          "started_at": "2026-08-30T13:54:34.475356+08:00",
+          "finished_at": "2026-08-30T13:55:04.701989+08:00"
+        }
+      ],
+      "chunk_audit": {
+        "pass": true,
+        "chunk_size": 4096,
+        "dump_size": 600744,
+        "chunk_count": 147,
+        "passes": [
+          "a",
+          "b",
+          "c"
+        ],
+        "coverage_start": "0x08010000",
+        "coverage_end": "0x080A2AA8",
+        "pass_image_sha256": {
+          "a": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+          "b": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+          "c": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+        },
+        "reconstructed_sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+      },
+      "phase_file_audit": {
+        "chunk_files": 441,
+        "pass_images": 3,
+        "bytes_per_image": 600744,
+        "pass": true
+      },
+      "pass_images": [
+        {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-a.bin",
+          "bytes": 600744,
+          "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+          "mtime_ns": 1788069305036591600,
+          "mtime_iso": "2026-08-30T13:55:05.036592+08:00"
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-b.bin",
+          "bytes": 600744,
+          "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+          "mtime_ns": 1788069305040498900,
+          "mtime_iso": "2026-08-30T13:55:05.040499+08:00"
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-c.bin",
+          "bytes": 600744,
+          "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+          "mtime_ns": 1788069305042450700,
+          "mtime_iso": "2026-08-30T13:55:05.042451+08:00"
+        }
+      ]
+    },
+    "gate_post": null,
+    "pre_consensus": {
+      "read_count": 3,
+      "bytes": 600744,
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "read_sha256": [
+        "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+      ],
+      "sentinel_address": "0x08037D80",
+      "sentinel_hex": "082549F2",
+      "header_identity": {
+        "pass": true,
+        "exact_match": true,
+        "crc_valid": true,
+        "fields_valid": true,
+        "stored_crc32": "B8499369",
+        "calculated_crc32": "B8499369",
+        "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+        "embedded_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+        "actual_double_zero_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+        "embedded_sha_matches_actual": true
+      },
+      "loadbin_count": 0,
+      "classification": "BOARD_IMAGE_AUTHORITATIVE",
+      "flash_allowed": false,
+      "difference_bytes": 0,
+      "difference_ranges": [],
+      "reverse_bit_bytes": 0,
+      "clear_only_bit_bytes": 0,
+      "pass": true
+    },
+    "flash": null,
+    "post_consensus": null,
+    "authoritative_readbacks": [
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-a.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "mtime_ns": 1788069305036591600,
+        "mtime_iso": "2026-08-30T13:55:05.036592+08:00"
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-b.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "mtime_ns": 1788069305040498900,
+        "mtime_iso": "2026-08-30T13:55:05.040499+08:00"
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\gate-pre\\board-image-c.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "mtime_ns": 1788069305042450700,
+        "mtime_iso": "2026-08-30T13:55:05.042451+08:00"
+      }
+    ],
+    "sentinel_diagnostic": {
+      "address": "0x08037D80",
+      "hex": "082549F2",
+      "decision_input": false
+    },
+    "reset_run": {
+      "pid": 6728,
+      "exit_code": 0,
+      "natural_exit": true,
+      "related_process_cleanup": {
+        "natural_exit": true,
+        "terminate_sent": false,
+        "kill_sent": false,
+        "polls": 18,
+        "wait_seconds": 5.205,
+        "final_ports": {
+          "listening": [],
+          "all_closed": true,
+          "query": "netstat -ano -p tcp"
+        },
+        "final_processes": {
+          "matching": [],
+          "clear": true
+        }
+      },
+      "terminate_sent": false,
+      "kill_sent": false,
+      "started_at": "2026-08-30T13:55:05.275044+08:00",
+      "finished_at": "2026-08-30T13:55:15.839200+08:00",
+      "elapsed_seconds": 10.564,
+      "command": [
+        "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+        "-Device",
+        "AT32F435RGT7",
+        "-If",
+        "SWD",
+        "-Speed",
+        "1000",
+        "-AutoConnect",
+        "1",
+        "-ExitOnError",
+        "1",
+        "-CommandFile",
+        "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-reset.jlink"
+      ],
+      "command_file": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-reset.jlink",
+        "bytes": 136,
+        "sha256": "3532E13BC35644B47754315AA62259ED73C1E01A49486B41DBF72A03EB931DD3",
+        "mtime_ns": 1788069305274814500,
+        "mtime_iso": "2026-08-30T13:55:05.274815+08:00"
+      },
+      "log": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-reset.log",
+        "bytes": 4341,
+        "sha256": "79970C04752B8D1A9A28D475F5A71E8BBA57B17F866954057AA3F82B00470FF5",
+        "mtime_ns": 1788069310625570900,
+        "mtime_iso": "2026-08-30T13:55:10.625571+08:00"
+      }
+    },
+    "reset": {
+      "pc": "0x0802B828",
+      "vtor": "0x08010000",
+      "cfsr": "0x00000000",
+      "sd_ready": 1,
+      "owner": 0,
+      "pass": true
+    },
+    "core_state": {
+      "final": "running",
+      "states": [
+        "running",
+        "running"
+      ],
+      "pass": true
+    },
+    "jlinkdll_before": {
+      "exists": true,
+      "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+      "bytes": 1233,
+      "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+      "mtime_ns": 1788065917554093200,
+      "mtime_iso": "2026-08-30T12:58:37.554093+08:00"
+    },
+    "jlinkdll_after": {
+      "exists": true,
+      "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+      "bytes": 1233,
+      "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+      "mtime_ns": 1788065917554093200,
+      "mtime_iso": "2026-08-30T12:58:37.554093+08:00"
+    },
+    "jlinkdll_audit": {
+      "pass": true,
+      "unchanged": true,
+      "expected_path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+      "before_normalized": {
+        "path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+        "bytes": 1233,
+        "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+        "mtime_ns": 1788065917554093200
+      },
+      "after_normalized": {
+        "path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+        "bytes": 1233,
+        "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+        "mtime_ns": 1788065917554093200
+      },
+      "errors": []
+    },
+    "initial_ports": {
+      "listening": [],
+      "all_closed": true,
+      "query": "netstat -ano -p tcp"
+    },
+    "initial_processes": {
+      "matching": [],
+      "clear": true
+    },
+    "final_ports": {
+      "listening": [],
+      "all_closed": true,
+      "query": "netstat -ano -p tcp"
+    },
+    "final_processes": {
+      "matching": [],
+      "clear": true
+    },
+    "natural_process_cleanup": {
+      "natural_exit": true,
+      "terminate_sent": false,
+      "kill_sent": false,
+      "polls": 1,
+      "wait_seconds": 0.036,
+      "final_ports": {
+        "listening": [],
+        "all_closed": true,
+        "query": "netstat -ano -p tcp"
+      },
+      "final_processes": {
+        "matching": [],
+        "clear": true
+      }
+    },
+    "terminate_sent": false,
+    "kill_sent": false,
+    "forbidden_actions_observed": [],
+    "finished_at": "2026-08-30T13:55:15.898670+08:00"
+  },
+  "capture_execution": {
+    "status": "EXECUTED",
+    "returncode": 0,
+    "command": [
+      "C:/Users/SU/AppData/Local/Programs/Python/Python313/python.exe",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\binding_host.py",
+      "--phase",
+      "capture",
+      "--pending",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\pending.bin",
+      "--raw-log",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\rtt.raw.log",
+      "--payload",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\rtt-payload.bin",
+      "--console",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\rtt-logger-console.log",
+      "--timeout",
+      "25",
+      "--settle",
+      "1.5",
+      "--out",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\capture.json"
+    ],
+    "stdout_tail": "",
+    "stderr_tail": ""
+  },
+  "wdt_pause_applied": true,
+  "wdt_pause_echo_session1": 1,
+  "wdt_pause_echo_session2": 1,
+  "wdt_pause_deviation": {
+    "command": "monitor WriteU32 0xE0042008 0x00001000",
+    "address": "0xE0042008",
+    "value": "0x00001000",
+    "target_mutation_class": "debug-domain register write; not flash; volatile; disclosed deviation required for >10 s halted readback (R18 root cause)"
+  },
+  "server_pid": 10568,
+  "gdb_pid": 15340,
+  "gdb_exit_code": 0,
+  "server_ready": true,
+  "server_ready_seconds": 0.203,
+  "server_ready_marker": "Waiting for GDB connection...",
+  "server_ready_marker_count": 1,
+  "server_natural_exit": true,
+  "server_exit_code": 0,
+  "server_terminate_sent": false,
+  "server_kill_sent": false,
+  "server_exit_wait_seconds": 0.138,
+  "gdb_post_pid": 20464,
+  "gdb_post_exit_code": 0,
+  "server_post_ready_seconds": 1.217,
+  "server_post_ready_marker_count": 1,
+  "server_post_natural_exit": true,
+  "gdb_post_cwd": {
+    "expected": "D:/github/my/E-Track",
+    "actual": "D:/github/my/E-Track",
+    "marker_present": true,
+    "pass": true
+  },
+  "post_run_error": null,
+  "natural_process_cleanup": {
+    "natural_exit": true,
+    "terminate_sent": false,
+    "kill_sent": false,
+    "polls": 1,
+    "wait_seconds": 0.04,
+    "final_ports": {
+      "listening": [],
+      "all_closed": true,
+      "query": "netstat -ano -p tcp"
+    },
+    "final_processes": {
+      "matching": [],
+      "clear": true
+    }
+  },
+  "run_error": null,
+  "gdb_markers": {
+    "attached_stopped": 1,
+    "identity_pass": 1,
+    "image_identity_pass": 1,
+    "state_pass": 1,
+    "precall_pass": 1,
+    "patch_call_pass": 1,
+    "report_call_pass": 1,
+    "measurement_pass": 1,
+    "inventory_eligible": 1,
+    "post_session_attached": 1,
+    "post_snapshots_done": 1,
+    "capture_pass": 1,
+    "binding_pass": 1,
+    "state_unchanged": 1
+  },
+  "gdb_cwd": {
+    "expected": "D:/github/my/E-Track",
+    "actual": "D:/github/my/E-Track",
+    "marker_present": true,
+    "pass": true
+  },
+  "board_header": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\board-header.bin",
+    "exists": true,
+    "bytes": 96,
+    "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+    "complete": true,
+    "fields": {
+      "magic_ascii": "ETFW",
+      "header_version": 1,
+      "version_code": 20801,
+      "version_name": "2.8.1",
+      "build_timestamp": 1786320000,
+      "hardware_rev": 1,
+      "image_len": 600744,
+      "image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+      "layout_id": 1,
+      "min_boot_version": 1,
+      "header_crc32": "B8499369",
+      "header_crc32_calculated": "B8499369",
+      "header_crc_valid": true
+    }
+  },
+  "board_chunk_audit": {
+    "present": true,
+    "pass": true,
+    "chunk_size": 4096,
+    "dump_size": 600744,
+    "chunk_count": 147,
+    "passes": [
+      "a",
+      "b",
+      "c"
+    ],
+    "coverage_start": "0x08010000",
+    "coverage_end": "0x080A2AA8",
+    "pass_image_sha256": {
+      "a": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "b": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "c": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+    },
+    "reconstructed_sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+  },
+  "pass_authority": {
+    "pass": true,
+    "passes": [
+      "a",
+      "b",
+      "c"
+    ],
+    "sha256": {
+      "a": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "b": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "c": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+    },
+    "authoritative_sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+    "bytes": 600744
+  },
+  "spot_checks": [
+    {
+      "name": "r4",
+      "image_offset": 330056,
+      "flash_address": 134613320,
+      "bytes": 12,
+      "read_a_hex": "E80E3008090D00FC230F7008",
+      "read_b_hex": "E80E3008090D00FC230F7008",
+      "full_dump_hex": "E80E3008090D00FC230F7008",
+      "three_way_match": true
+    },
+    {
+      "name": "r3",
+      "image_offset": 332648,
+      "flash_address": 134615912,
+      "bytes": 8,
+      "read_a_hex": "008F4AF200000EFF",
+      "read_b_hex": "008F4AF200000EFF",
+      "full_dump_hex": "008F4AF200000EFF",
+      "three_way_match": true
+    }
+  ],
+  "identity": {
+    "phase": "identity",
+    "status": "PASS",
+    "unique_match": true,
+    "match_count": 1,
+    "spot_checks": [
+      {
+        "name": "r4",
+        "image_offset": 330056,
+        "flash_address": 134613320,
+        "bytes": 12,
+        "read_a_hex": "E80E3008090D00FC230F7008",
+        "read_b_hex": "E80E3008090D00FC230F7008",
+        "full_dump_hex": "E80E3008090D00FC230F7008",
+        "three_way_match": true
+      },
+      {
+        "name": "r3",
+        "image_offset": 332648,
+        "flash_address": 134615912,
+        "bytes": 8,
+        "read_a_hex": "008F4AF200000EFF",
+        "read_b_hex": "008F4AF200000EFF",
+        "full_dump_hex": "008F4AF200000EFF",
+        "three_way_match": true
+      }
+    ],
+    "board": {
+      "header_bytes": 96,
+      "header_sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+      "header": {
+        "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+        "magic_ascii": "ETFW",
+        "header_version": 1,
+        "version_code": 20801,
+        "version_name": "2.8.1",
+        "image_len": 600744,
+        "image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+        "header_crc32": "B8499369",
+        "header_crc32_calculated": "B8499369",
+        "header_crc_valid": true
+      },
+      "image_dump_bytes": 600744,
+      "image_bytes": 600744,
+      "image_sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "double_zero_image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+      "trailing_dump_bytes": 0,
+      "trailing_dump_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    "candidates": [
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-hardware-20260819\\X-Track-App-GCC-test-v2.8.1.finalized.bin",
+        "bytes": 600656,
+        "sha256": "12C0BECB6233CD10756B464865E0C9FA4909B21876DCF661EDBC41493EFA8223",
+        "header": {
+          "sha256": "CCE90576D6617F1605BCAC1EB6E6945E47BC7DE142D18B0BBACC7B2031C182DE",
+          "magic_ascii": "ETFW",
+          "header_version": 1,
+          "version_code": 20801,
+          "version_name": "2.8.1",
+          "image_len": 600656,
+          "image_sha256": "1C7331861E24D174ACA81B6A1F539B0BE109218D9B5663D88F527328B7FA08F6",
+          "header_crc32": "1C83ABEC",
+          "header_crc32_calculated": "1C83ABEC",
+          "header_crc_valid": true
+        },
+        "double_zero_image_sha256": "1C7331861E24D174ACA81B6A1F539B0BE109218D9B5663D88F527328B7FA08F6",
+        "header_bytes_match": false,
+        "image_bytes_match": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-gdb\\X-Track-App-GCC-test-stack-resume-v2.8.1.finalized.bin",
+        "bytes": 600696,
+        "sha256": "831C13E7D62B76FA56E282C643CAF3A57530846A0AC4B4A2509C47C1108F88B6",
+        "header": {
+          "sha256": "C22DB2C8A33DCF51A592A502AA489A2E5575EE093C46984F581B8432C540A885",
+          "magic_ascii": "ETFW",
+          "header_version": 1,
+          "version_code": 20801,
+          "version_name": "2.8.1",
+          "image_len": 600696,
+          "image_sha256": "847F2EC0483122AFD30103FB13A2D5BEAB7A911E97289371A930E923B1CAFECB",
+          "header_crc32": "F77D19AF",
+          "header_crc32_calculated": "F77D19AF",
+          "header_crc_valid": true
+        },
+        "double_zero_image_sha256": "847F2EC0483122AFD30103FB13A2D5BEAB7A911E97289371A930E923B1CAFECB",
+        "header_bytes_match": false,
+        "image_bytes_match": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-sd-ota\\assets\\X-Track-App-GCC-p2-6a-test-v2.8.1.finalized.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "header": {
+          "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+          "magic_ascii": "ETFW",
+          "header_version": 1,
+          "version_code": 20801,
+          "version_name": "2.8.1",
+          "image_len": 600744,
+          "image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+          "header_crc32": "B8499369",
+          "header_crc32_calculated": "B8499369",
+          "header_crc_valid": true
+        },
+        "double_zero_image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+        "header_bytes_match": true,
+        "image_bytes_match": true
+      }
+    ],
+    "candidate_count": 3,
+    "matches": [
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-sd-ota\\assets\\X-Track-App-GCC-p2-6a-test-v2.8.1.finalized.bin",
+        "bytes": 600744,
+        "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "header": {
+          "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+          "magic_ascii": "ETFW",
+          "header_version": 1,
+          "version_code": 20801,
+          "version_name": "2.8.1",
+          "image_len": 600744,
+          "image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+          "header_crc32": "B8499369",
+          "header_crc32_calculated": "B8499369",
+          "header_crc_valid": true
+        },
+        "double_zero_image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+        "header_bytes_match": true,
+        "image_bytes_match": true
+      }
+    ],
+    "matched_candidate": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-sd-ota\\assets\\X-Track-App-GCC-p2-6a-test-v2.8.1.finalized.bin",
+      "bytes": 600744,
+      "sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "header": {
+        "sha256": "B528761F65753BE578FF2F16317F8812F069CA9311102C7DD542B51F051A4339",
+        "magic_ascii": "ETFW",
+        "header_version": 1,
+        "version_code": 20801,
+        "version_name": "2.8.1",
+        "image_len": 600744,
+        "image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+        "header_crc32": "B8499369",
+        "header_crc32_calculated": "B8499369",
+        "header_crc_valid": true
+      },
+      "double_zero_image_sha256": "9DB3C649B80E82C68EFAD544D7AB28894A3246456B2885C232561FE4CB65E067",
+      "header_bytes_match": true,
+      "image_bytes_match": true
+    },
+    "chunk_audit": {
+      "pass": true,
+      "chunk_size": 4096,
+      "dump_size": 600744,
+      "chunk_count": 147,
+      "passes": [
+        "a",
+        "b",
+        "c"
+      ],
+      "coverage_start": "0x08010000",
+      "coverage_end": "0x080A2AA8",
+      "chunks": [
+        {
+          "index": 0,
+          "offset": 0,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "652D0BAEE0FCF2FD13078FB570137266B3EDCA9D3A902B811A673E55D8355D57",
+            "b": "652D0BAEE0FCF2FD13078FB570137266B3EDCA9D3A902B811A673E55D8355D57",
+            "c": "652D0BAEE0FCF2FD13078FB570137266B3EDCA9D3A902B811A673E55D8355D57"
+          }
+        },
+        {
+          "index": 1,
+          "offset": 4096,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "2821E2C1C845F113979A41242B3E36F88A102620505F50624E8D0024F6A5A4BC",
+            "b": "2821E2C1C845F113979A41242B3E36F88A102620505F50624E8D0024F6A5A4BC",
+            "c": "2821E2C1C845F113979A41242B3E36F88A102620505F50624E8D0024F6A5A4BC"
+          }
+        },
+        {
+          "index": 2,
+          "offset": 8192,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "85752D0799253A6706991D3B00CA1C92E7A88A1296C7546E457B88DD88BF55C2",
+            "b": "85752D0799253A6706991D3B00CA1C92E7A88A1296C7546E457B88DD88BF55C2",
+            "c": "85752D0799253A6706991D3B00CA1C92E7A88A1296C7546E457B88DD88BF55C2"
+          }
+        },
+        {
+          "index": 3,
+          "offset": 12288,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "A42F2226D62DBC349F5D39492CDEC80F06A93936E519250FCC8D4EC552BEC0FF",
+            "b": "A42F2226D62DBC349F5D39492CDEC80F06A93936E519250FCC8D4EC552BEC0FF",
+            "c": "A42F2226D62DBC349F5D39492CDEC80F06A93936E519250FCC8D4EC552BEC0FF"
+          }
+        },
+        {
+          "index": 4,
+          "offset": 16384,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "21F7D0E979FF343FB25896620982D6426384ECE9941E2EC5CA1CFA445C25CBCD",
+            "b": "21F7D0E979FF343FB25896620982D6426384ECE9941E2EC5CA1CFA445C25CBCD",
+            "c": "21F7D0E979FF343FB25896620982D6426384ECE9941E2EC5CA1CFA445C25CBCD"
+          }
+        },
+        {
+          "index": 5,
+          "offset": 20480,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "873EF695593A0B98B26205C8EE580DA8FBD5E866234022F8A421172D0CD652CA",
+            "b": "873EF695593A0B98B26205C8EE580DA8FBD5E866234022F8A421172D0CD652CA",
+            "c": "873EF695593A0B98B26205C8EE580DA8FBD5E866234022F8A421172D0CD652CA"
+          }
+        },
+        {
+          "index": 6,
+          "offset": 24576,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "834F6FA22EE8FED6BA3D05025A4BBF7DBE5673405FF7D47A658A8165ED68C400",
+            "b": "834F6FA22EE8FED6BA3D05025A4BBF7DBE5673405FF7D47A658A8165ED68C400",
+            "c": "834F6FA22EE8FED6BA3D05025A4BBF7DBE5673405FF7D47A658A8165ED68C400"
+          }
+        },
+        {
+          "index": 7,
+          "offset": 28672,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "CD765B78FD07EEAB6271CF0B8CDA9C8094483D538CE8FDF94960EFF9D6A9586B",
+            "b": "CD765B78FD07EEAB6271CF0B8CDA9C8094483D538CE8FDF94960EFF9D6A9586B",
+            "c": "CD765B78FD07EEAB6271CF0B8CDA9C8094483D538CE8FDF94960EFF9D6A9586B"
+          }
+        },
+        {
+          "index": 8,
+          "offset": 32768,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "8C18EF6E82759BC4EB4C38505FE83D0663A55123CD26EF3B5FF6D76D158FBAD6",
+            "b": "8C18EF6E82759BC4EB4C38505FE83D0663A55123CD26EF3B5FF6D76D158FBAD6",
+            "c": "8C18EF6E82759BC4EB4C38505FE83D0663A55123CD26EF3B5FF6D76D158FBAD6"
+          }
+        },
+        {
+          "index": 9,
+          "offset": 36864,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "49AD50C77C59594068FA5E5D5AF3BD15B5499F353638C3694C09E467BE062A91",
+            "b": "49AD50C77C59594068FA5E5D5AF3BD15B5499F353638C3694C09E467BE062A91",
+            "c": "49AD50C77C59594068FA5E5D5AF3BD15B5499F353638C3694C09E467BE062A91"
+          }
+        },
+        {
+          "index": 10,
+          "offset": 40960,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "5D5595CD9DBA039ADCF325A87756D495CC4AD8950E09322DAF9975DE6E01BC12",
+            "b": "5D5595CD9DBA039ADCF325A87756D495CC4AD8950E09322DAF9975DE6E01BC12",
+            "c": "5D5595CD9DBA039ADCF325A87756D495CC4AD8950E09322DAF9975DE6E01BC12"
+          }
+        },
+        {
+          "index": 11,
+          "offset": 45056,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "532DF4D10CE8E2403842583753B94D4F8E98E4B5D350957E236AB35C97866D1E",
+            "b": "532DF4D10CE8E2403842583753B94D4F8E98E4B5D350957E236AB35C97866D1E",
+            "c": "532DF4D10CE8E2403842583753B94D4F8E98E4B5D350957E236AB35C97866D1E"
+          }
+        },
+        {
+          "index": 12,
+          "offset": 49152,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "DBFA6D5E5A9BB43D812E0A1929562313DB5731C0642FA3C9D6B5ACFDD11F3142",
+            "b": "DBFA6D5E5A9BB43D812E0A1929562313DB5731C0642FA3C9D6B5ACFDD11F3142",
+            "c": "DBFA6D5E5A9BB43D812E0A1929562313DB5731C0642FA3C9D6B5ACFDD11F3142"
+          }
+        },
+        {
+          "index": 13,
+          "offset": 53248,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "1CE4BEFE1AE55DED519190EAFF09171A12DA07456AE42B62D70E1DB6F9CE519B",
+            "b": "1CE4BEFE1AE55DED519190EAFF09171A12DA07456AE42B62D70E1DB6F9CE519B",
+            "c": "1CE4BEFE1AE55DED519190EAFF09171A12DA07456AE42B62D70E1DB6F9CE519B"
+          }
+        },
+        {
+          "index": 14,
+          "offset": 57344,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "AF6EE0DD2B47460FCB00165F5C8EE5FD539C1E2D3EF7A962CDB21C1BD8B5D9D4",
+            "b": "AF6EE0DD2B47460FCB00165F5C8EE5FD539C1E2D3EF7A962CDB21C1BD8B5D9D4",
+            "c": "AF6EE0DD2B47460FCB00165F5C8EE5FD539C1E2D3EF7A962CDB21C1BD8B5D9D4"
+          }
+        },
+        {
+          "index": 15,
+          "offset": 61440,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "09F5425B4631B0012AFD7DCDAD52C5226689E2DD1672CDFD2C14AB9CA402602F",
+            "b": "09F5425B4631B0012AFD7DCDAD52C5226689E2DD1672CDFD2C14AB9CA402602F",
+            "c": "09F5425B4631B0012AFD7DCDAD52C5226689E2DD1672CDFD2C14AB9CA402602F"
+          }
+        },
+        {
+          "index": 16,
+          "offset": 65536,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "C44D758144BF97583151C9F98DC066206C5132E4683C5EA033072693024C3F0F",
+            "b": "C44D758144BF97583151C9F98DC066206C5132E4683C5EA033072693024C3F0F",
+            "c": "C44D758144BF97583151C9F98DC066206C5132E4683C5EA033072693024C3F0F"
+          }
+        },
+        {
+          "index": 17,
+          "offset": 69632,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "6A104FB09C8DB10B973770746E2A609D29FF1AE904A08DB7ADF9ED6965D8DD04",
+            "b": "6A104FB09C8DB10B973770746E2A609D29FF1AE904A08DB7ADF9ED6965D8DD04",
+            "c": "6A104FB09C8DB10B973770746E2A609D29FF1AE904A08DB7ADF9ED6965D8DD04"
+          }
+        },
+        {
+          "index": 18,
+          "offset": 73728,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "512BB250CFE06256016CC11C4101DD71A53E755537AAC3619EF98A728F793380",
+            "b": "512BB250CFE06256016CC11C4101DD71A53E755537AAC3619EF98A728F793380",
+            "c": "512BB250CFE06256016CC11C4101DD71A53E755537AAC3619EF98A728F793380"
+          }
+        },
+        {
+          "index": 19,
+          "offset": 77824,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "40E5A01E8B01EB5F4E218F85F8A8CD50FC085F80EACF24D88856136290FDFC85",
+            "b": "40E5A01E8B01EB5F4E218F85F8A8CD50FC085F80EACF24D88856136290FDFC85",
+            "c": "40E5A01E8B01EB5F4E218F85F8A8CD50FC085F80EACF24D88856136290FDFC85"
+          }
+        },
+        {
+          "index": 20,
+          "offset": 81920,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "7D98F9E6EA7C97A4B83263B38FAEB49E634E3E46D12018A96E57736704C04287",
+            "b": "7D98F9E6EA7C97A4B83263B38FAEB49E634E3E46D12018A96E57736704C04287",
+            "c": "7D98F9E6EA7C97A4B83263B38FAEB49E634E3E46D12018A96E57736704C04287"
+          }
+        },
+        {
+          "index": 21,
+          "offset": 86016,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "BAA288B94567CCD01E2CCCC3A652E4B100DB759497AE3E54C72E3B5BFC3CBD8C",
+            "b": "BAA288B94567CCD01E2CCCC3A652E4B100DB759497AE3E54C72E3B5BFC3CBD8C",
+            "c": "BAA288B94567CCD01E2CCCC3A652E4B100DB759497AE3E54C72E3B5BFC3CBD8C"
+          }
+        },
+        {
+          "index": 22,
+          "offset": 90112,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "B93F155A1DDA4B741E618C8E5AB745DF87BC6123DEF9D90E2F78EF93C480AC5A",
+            "b": "B93F155A1DDA4B741E618C8E5AB745DF87BC6123DEF9D90E2F78EF93C480AC5A",
+            "c": "B93F155A1DDA4B741E618C8E5AB745DF87BC6123DEF9D90E2F78EF93C480AC5A"
+          }
+        },
+        {
+          "index": 23,
+          "offset": 94208,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "67F3CB7ADA4A7621D96CFE8F6FE7E3212B4D48958F555A60C185AA58D68E10CF",
+            "b": "67F3CB7ADA4A7621D96CFE8F6FE7E3212B4D48958F555A60C185AA58D68E10CF",
+            "c": "67F3CB7ADA4A7621D96CFE8F6FE7E3212B4D48958F555A60C185AA58D68E10CF"
+          }
+        },
+        {
+          "index": 24,
+          "offset": 98304,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "5A65F173C14DBE76D0BBBDC848367E3F6F6E933B48C708DA80E0730A2EF19CE1",
+            "b": "5A65F173C14DBE76D0BBBDC848367E3F6F6E933B48C708DA80E0730A2EF19CE1",
+            "c": "5A65F173C14DBE76D0BBBDC848367E3F6F6E933B48C708DA80E0730A2EF19CE1"
+          }
+        },
+        {
+          "index": 25,
+          "offset": 102400,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "87293D5CA3503BAA191C01F9EEED6253FCF6C6DA2BB644AFD68CD9352ADCDAF4",
+            "b": "87293D5CA3503BAA191C01F9EEED6253FCF6C6DA2BB644AFD68CD9352ADCDAF4",
+            "c": "87293D5CA3503BAA191C01F9EEED6253FCF6C6DA2BB644AFD68CD9352ADCDAF4"
+          }
+        },
+        {
+          "index": 26,
+          "offset": 106496,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "E39BB85056D1941A5FFACA205A3580FF2B8A6ECFE14163082A202D62E75AB6B6",
+            "b": "E39BB85056D1941A5FFACA205A3580FF2B8A6ECFE14163082A202D62E75AB6B6",
+            "c": "E39BB85056D1941A5FFACA205A3580FF2B8A6ECFE14163082A202D62E75AB6B6"
+          }
+        },
+        {
+          "index": 27,
+          "offset": 110592,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "A7D2C1F891BF75854D4054E12057DC28F3051D710503897D7D3906BDD3412FFC",
+            "b": "A7D2C1F891BF75854D4054E12057DC28F3051D710503897D7D3906BDD3412FFC",
+            "c": "A7D2C1F891BF75854D4054E12057DC28F3051D710503897D7D3906BDD3412FFC"
+          }
+        },
+        {
+          "index": 28,
+          "offset": 114688,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "284C0568981ECCFC8C38AC0824A8F67F72151B60AFC26512EA1970D82384364F",
+            "b": "284C0568981ECCFC8C38AC0824A8F67F72151B60AFC26512EA1970D82384364F",
+            "c": "284C0568981ECCFC8C38AC0824A8F67F72151B60AFC26512EA1970D82384364F"
+          }
+        },
+        {
+          "index": 29,
+          "offset": 118784,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "AA9238E97B4A3BE9746FB9CA507FBC1C33242797173A24EE2D137038921547E6",
+            "b": "AA9238E97B4A3BE9746FB9CA507FBC1C33242797173A24EE2D137038921547E6",
+            "c": "AA9238E97B4A3BE9746FB9CA507FBC1C33242797173A24EE2D137038921547E6"
+          }
+        },
+        {
+          "index": 30,
+          "offset": 122880,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F05DFA2348A6232E1035FED3877575BDDE6C801EAE16BF32D8CE33DCBE7CF6E2",
+            "b": "F05DFA2348A6232E1035FED3877575BDDE6C801EAE16BF32D8CE33DCBE7CF6E2",
+            "c": "F05DFA2348A6232E1035FED3877575BDDE6C801EAE16BF32D8CE33DCBE7CF6E2"
+          }
+        },
+        {
+          "index": 31,
+          "offset": 126976,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "0AAC47AB79F4D56AF4DA8BF76E3CF56C0D4DBAB4C1B25926DE732CB67BF0EB0A",
+            "b": "0AAC47AB79F4D56AF4DA8BF76E3CF56C0D4DBAB4C1B25926DE732CB67BF0EB0A",
+            "c": "0AAC47AB79F4D56AF4DA8BF76E3CF56C0D4DBAB4C1B25926DE732CB67BF0EB0A"
+          }
+        },
+        {
+          "index": 32,
+          "offset": 131072,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "4FEE505FA4A86FC528574FA01A6538ED343BC7850C393E026CC2F8B11EF65039",
+            "b": "4FEE505FA4A86FC528574FA01A6538ED343BC7850C393E026CC2F8B11EF65039",
+            "c": "4FEE505FA4A86FC528574FA01A6538ED343BC7850C393E026CC2F8B11EF65039"
+          }
+        },
+        {
+          "index": 33,
+          "offset": 135168,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "033F365F72195204F862DB05E3317F240684EB3E97948ABBAB8EC1F079CD7E66",
+            "b": "033F365F72195204F862DB05E3317F240684EB3E97948ABBAB8EC1F079CD7E66",
+            "c": "033F365F72195204F862DB05E3317F240684EB3E97948ABBAB8EC1F079CD7E66"
+          }
+        },
+        {
+          "index": 34,
+          "offset": 139264,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "EFB0F5ECDBED360D7C5E3280B1405BB7CFFBD04B2990209ABD4244427BEB1A7E",
+            "b": "EFB0F5ECDBED360D7C5E3280B1405BB7CFFBD04B2990209ABD4244427BEB1A7E",
+            "c": "EFB0F5ECDBED360D7C5E3280B1405BB7CFFBD04B2990209ABD4244427BEB1A7E"
+          }
+        },
+        {
+          "index": 35,
+          "offset": 143360,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "981505839A70CAE6DC88FD3F97015C899239BA15C72CE16F2D69F680EC161228",
+            "b": "981505839A70CAE6DC88FD3F97015C899239BA15C72CE16F2D69F680EC161228",
+            "c": "981505839A70CAE6DC88FD3F97015C899239BA15C72CE16F2D69F680EC161228"
+          }
+        },
+        {
+          "index": 36,
+          "offset": 147456,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "62EB0CFAEF07479C19DD3FA1758A09ABC758AFFAC61DD90FD19883FBE628163D",
+            "b": "62EB0CFAEF07479C19DD3FA1758A09ABC758AFFAC61DD90FD19883FBE628163D",
+            "c": "62EB0CFAEF07479C19DD3FA1758A09ABC758AFFAC61DD90FD19883FBE628163D"
+          }
+        },
+        {
+          "index": 37,
+          "offset": 151552,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "061CCAB2B978EE6F19DF7FEAE86FE20EA418FCAABE3B4F2BCD9CD32C6BF9ECF5",
+            "b": "061CCAB2B978EE6F19DF7FEAE86FE20EA418FCAABE3B4F2BCD9CD32C6BF9ECF5",
+            "c": "061CCAB2B978EE6F19DF7FEAE86FE20EA418FCAABE3B4F2BCD9CD32C6BF9ECF5"
+          }
+        },
+        {
+          "index": 38,
+          "offset": 155648,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "23AA820416D7BA383485328DC621E5BDF54AE7ACD48B63C4ED5BE0F67FC71B39",
+            "b": "23AA820416D7BA383485328DC621E5BDF54AE7ACD48B63C4ED5BE0F67FC71B39",
+            "c": "23AA820416D7BA383485328DC621E5BDF54AE7ACD48B63C4ED5BE0F67FC71B39"
+          }
+        },
+        {
+          "index": 39,
+          "offset": 159744,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "2096E700CA3EE298D8A4AE35CA5BAAC0ABC6F2A5538CF5DA22EFC2907B282D93",
+            "b": "2096E700CA3EE298D8A4AE35CA5BAAC0ABC6F2A5538CF5DA22EFC2907B282D93",
+            "c": "2096E700CA3EE298D8A4AE35CA5BAAC0ABC6F2A5538CF5DA22EFC2907B282D93"
+          }
+        },
+        {
+          "index": 40,
+          "offset": 163840,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "08C6DE6F0E473AB821056A9DAD58711AA64C75D19E5ADB3557A37FCBBEE3010A",
+            "b": "08C6DE6F0E473AB821056A9DAD58711AA64C75D19E5ADB3557A37FCBBEE3010A",
+            "c": "08C6DE6F0E473AB821056A9DAD58711AA64C75D19E5ADB3557A37FCBBEE3010A"
+          }
+        },
+        {
+          "index": 41,
+          "offset": 167936,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "7E53493679F884725FACD35823450240E720AF71D5D505F833C12B50D94A1E6E",
+            "b": "7E53493679F884725FACD35823450240E720AF71D5D505F833C12B50D94A1E6E",
+            "c": "7E53493679F884725FACD35823450240E720AF71D5D505F833C12B50D94A1E6E"
+          }
+        },
+        {
+          "index": 42,
+          "offset": 172032,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "CB00D57F5A7FB4A483167291AA6BA0CBCBA68DF516C8F20639B991685B11A2AC",
+            "b": "CB00D57F5A7FB4A483167291AA6BA0CBCBA68DF516C8F20639B991685B11A2AC",
+            "c": "CB00D57F5A7FB4A483167291AA6BA0CBCBA68DF516C8F20639B991685B11A2AC"
+          }
+        },
+        {
+          "index": 43,
+          "offset": 176128,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F5BE2F8A5814B9AA25E1D84310B7FBFAAF51061B2A4BC3355D29BFB76D1BBE34",
+            "b": "F5BE2F8A5814B9AA25E1D84310B7FBFAAF51061B2A4BC3355D29BFB76D1BBE34",
+            "c": "F5BE2F8A5814B9AA25E1D84310B7FBFAAF51061B2A4BC3355D29BFB76D1BBE34"
+          }
+        },
+        {
+          "index": 44,
+          "offset": 180224,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "5F617BBFAD57E3997828AFCF7FAA3B58858FDDB9920A3C600987165C243032D6",
+            "b": "5F617BBFAD57E3997828AFCF7FAA3B58858FDDB9920A3C600987165C243032D6",
+            "c": "5F617BBFAD57E3997828AFCF7FAA3B58858FDDB9920A3C600987165C243032D6"
+          }
+        },
+        {
+          "index": 45,
+          "offset": 184320,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "2399A2A327E30A7D5EC3BFF5FFEED098DD0ECAD2759C67CDB6722E8D98008A1B",
+            "b": "2399A2A327E30A7D5EC3BFF5FFEED098DD0ECAD2759C67CDB6722E8D98008A1B",
+            "c": "2399A2A327E30A7D5EC3BFF5FFEED098DD0ECAD2759C67CDB6722E8D98008A1B"
+          }
+        },
+        {
+          "index": 46,
+          "offset": 188416,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "9A5DD875DBA28FB556807F4D7E3AB16984045B43BF39B41E2FDB561F259D3699",
+            "b": "9A5DD875DBA28FB556807F4D7E3AB16984045B43BF39B41E2FDB561F259D3699",
+            "c": "9A5DD875DBA28FB556807F4D7E3AB16984045B43BF39B41E2FDB561F259D3699"
+          }
+        },
+        {
+          "index": 47,
+          "offset": 192512,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "29A00BBFD9F1152B5861FB10831FE45A684A96604E28EEB792CAA7E00BF7B672",
+            "b": "29A00BBFD9F1152B5861FB10831FE45A684A96604E28EEB792CAA7E00BF7B672",
+            "c": "29A00BBFD9F1152B5861FB10831FE45A684A96604E28EEB792CAA7E00BF7B672"
+          }
+        },
+        {
+          "index": 48,
+          "offset": 196608,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F36AA3F7022B76BF2840A467DF6E46CAFC7865AFFF50AD88F0B0B31B2A1C36BA",
+            "b": "F36AA3F7022B76BF2840A467DF6E46CAFC7865AFFF50AD88F0B0B31B2A1C36BA",
+            "c": "F36AA3F7022B76BF2840A467DF6E46CAFC7865AFFF50AD88F0B0B31B2A1C36BA"
+          }
+        },
+        {
+          "index": 49,
+          "offset": 200704,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "15B532B6CAAEA0CD43B1FAD877F1DDF3F900E7C1BA3B2DC1391BBB7B4F69C933",
+            "b": "15B532B6CAAEA0CD43B1FAD877F1DDF3F900E7C1BA3B2DC1391BBB7B4F69C933",
+            "c": "15B532B6CAAEA0CD43B1FAD877F1DDF3F900E7C1BA3B2DC1391BBB7B4F69C933"
+          }
+        },
+        {
+          "index": 50,
+          "offset": 204800,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "07D1FAC816EFB6F5F868D755986DFEFBC9FEF09FBECE31E8EA03B5D6B0A01327",
+            "b": "07D1FAC816EFB6F5F868D755986DFEFBC9FEF09FBECE31E8EA03B5D6B0A01327",
+            "c": "07D1FAC816EFB6F5F868D755986DFEFBC9FEF09FBECE31E8EA03B5D6B0A01327"
+          }
+        },
+        {
+          "index": 51,
+          "offset": 208896,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "D8AB5A5202F80FD4AC9D2CC9C35FA354C23FC86D508BB1BC96BD0BD1E308EDDC",
+            "b": "D8AB5A5202F80FD4AC9D2CC9C35FA354C23FC86D508BB1BC96BD0BD1E308EDDC",
+            "c": "D8AB5A5202F80FD4AC9D2CC9C35FA354C23FC86D508BB1BC96BD0BD1E308EDDC"
+          }
+        },
+        {
+          "index": 52,
+          "offset": 212992,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "EB1B06665C08E43843ABB6EB9201DE300A47DF8642E7E7FC19439CE4F2D6EDC4",
+            "b": "EB1B06665C08E43843ABB6EB9201DE300A47DF8642E7E7FC19439CE4F2D6EDC4",
+            "c": "EB1B06665C08E43843ABB6EB9201DE300A47DF8642E7E7FC19439CE4F2D6EDC4"
+          }
+        },
+        {
+          "index": 53,
+          "offset": 217088,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "BC847170F9D4F2E997DA1418E46F733C7FD8D8C6C441F36C733CC1F28230F062",
+            "b": "BC847170F9D4F2E997DA1418E46F733C7FD8D8C6C441F36C733CC1F28230F062",
+            "c": "BC847170F9D4F2E997DA1418E46F733C7FD8D8C6C441F36C733CC1F28230F062"
+          }
+        },
+        {
+          "index": 54,
+          "offset": 221184,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F8812FDC79196BDF06A9E06869BE66660BF7C5C577951BB8EDA9BD662617FCCC",
+            "b": "F8812FDC79196BDF06A9E06869BE66660BF7C5C577951BB8EDA9BD662617FCCC",
+            "c": "F8812FDC79196BDF06A9E06869BE66660BF7C5C577951BB8EDA9BD662617FCCC"
+          }
+        },
+        {
+          "index": 55,
+          "offset": 225280,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "AD5783F4A02D547BC93834F3EB3484996061AE99505B99B1F9F4799520CE9554",
+            "b": "AD5783F4A02D547BC93834F3EB3484996061AE99505B99B1F9F4799520CE9554",
+            "c": "AD5783F4A02D547BC93834F3EB3484996061AE99505B99B1F9F4799520CE9554"
+          }
+        },
+        {
+          "index": 56,
+          "offset": 229376,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "81F174045CC81FA3186698F2049EC60D02703E67C157F5307C39E630EA6A444B",
+            "b": "81F174045CC81FA3186698F2049EC60D02703E67C157F5307C39E630EA6A444B",
+            "c": "81F174045CC81FA3186698F2049EC60D02703E67C157F5307C39E630EA6A444B"
+          }
+        },
+        {
+          "index": 57,
+          "offset": 233472,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "512A3A909D2EFFE92B011B0DDE02843E760C2A7909D4A8C03B281B7D01FBF992",
+            "b": "512A3A909D2EFFE92B011B0DDE02843E760C2A7909D4A8C03B281B7D01FBF992",
+            "c": "512A3A909D2EFFE92B011B0DDE02843E760C2A7909D4A8C03B281B7D01FBF992"
+          }
+        },
+        {
+          "index": 58,
+          "offset": 237568,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "53827E3A0AEF9E6669F948144B90EA51AAB6809A7C8E75CAFE2228C744F88D08",
+            "b": "53827E3A0AEF9E6669F948144B90EA51AAB6809A7C8E75CAFE2228C744F88D08",
+            "c": "53827E3A0AEF9E6669F948144B90EA51AAB6809A7C8E75CAFE2228C744F88D08"
+          }
+        },
+        {
+          "index": 59,
+          "offset": 241664,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "CB4E61E21EE34CC4D0BB33B342F1AA3CE0E8238D4398917ECCB17B543CA99415",
+            "b": "CB4E61E21EE34CC4D0BB33B342F1AA3CE0E8238D4398917ECCB17B543CA99415",
+            "c": "CB4E61E21EE34CC4D0BB33B342F1AA3CE0E8238D4398917ECCB17B543CA99415"
+          }
+        },
+        {
+          "index": 60,
+          "offset": 245760,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "3D7B826A4B489D8E6D853681E7BB9A6141E628137EADBBE6C509D145D86F6DB3",
+            "b": "3D7B826A4B489D8E6D853681E7BB9A6141E628137EADBBE6C509D145D86F6DB3",
+            "c": "3D7B826A4B489D8E6D853681E7BB9A6141E628137EADBBE6C509D145D86F6DB3"
+          }
+        },
+        {
+          "index": 61,
+          "offset": 249856,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "D0AAE6AE0A7486DCF5391E285635AE0C7CAD6EA97474F225DFCE4DEEACB6E48A",
+            "b": "D0AAE6AE0A7486DCF5391E285635AE0C7CAD6EA97474F225DFCE4DEEACB6E48A",
+            "c": "D0AAE6AE0A7486DCF5391E285635AE0C7CAD6EA97474F225DFCE4DEEACB6E48A"
+          }
+        },
+        {
+          "index": 62,
+          "offset": 253952,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "09CBAD477E62BC5021D50E660DE3F0D89255B224B56C38F712D9E747107D789C",
+            "b": "09CBAD477E62BC5021D50E660DE3F0D89255B224B56C38F712D9E747107D789C",
+            "c": "09CBAD477E62BC5021D50E660DE3F0D89255B224B56C38F712D9E747107D789C"
+          }
+        },
+        {
+          "index": 63,
+          "offset": 258048,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "3625972CFBFEA49B954F9043F6AFF2BCC644A19920FF2203696EEA1AD03D721F",
+            "b": "3625972CFBFEA49B954F9043F6AFF2BCC644A19920FF2203696EEA1AD03D721F",
+            "c": "3625972CFBFEA49B954F9043F6AFF2BCC644A19920FF2203696EEA1AD03D721F"
+          }
+        },
+        {
+          "index": 64,
+          "offset": 262144,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "B15A81A375BCF95A635B0220DADCA179C3BEFC84E2017A0B96B9B9B6F584D250",
+            "b": "B15A81A375BCF95A635B0220DADCA179C3BEFC84E2017A0B96B9B9B6F584D250",
+            "c": "B15A81A375BCF95A635B0220DADCA179C3BEFC84E2017A0B96B9B9B6F584D250"
+          }
+        },
+        {
+          "index": 65,
+          "offset": 266240,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "134026776D06CC597A642EDB728C1E625720B222093D259CF69A63702EFB4FB3",
+            "b": "134026776D06CC597A642EDB728C1E625720B222093D259CF69A63702EFB4FB3",
+            "c": "134026776D06CC597A642EDB728C1E625720B222093D259CF69A63702EFB4FB3"
+          }
+        },
+        {
+          "index": 66,
+          "offset": 270336,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "26A6AC191860B1A56CB11DC021F02985B440D00D8986FC12298497C6B13205FA",
+            "b": "26A6AC191860B1A56CB11DC021F02985B440D00D8986FC12298497C6B13205FA",
+            "c": "26A6AC191860B1A56CB11DC021F02985B440D00D8986FC12298497C6B13205FA"
+          }
+        },
+        {
+          "index": 67,
+          "offset": 274432,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "FB0E29339089958F7D81EFCE7B87B3281C71B961B60D2FC90D8849D9BF4D241E",
+            "b": "FB0E29339089958F7D81EFCE7B87B3281C71B961B60D2FC90D8849D9BF4D241E",
+            "c": "FB0E29339089958F7D81EFCE7B87B3281C71B961B60D2FC90D8849D9BF4D241E"
+          }
+        },
+        {
+          "index": 68,
+          "offset": 278528,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "FA16BFB9474C2DC09B027F6113A2FD80720D37F7E583AACEB20B470C292038D7",
+            "b": "FA16BFB9474C2DC09B027F6113A2FD80720D37F7E583AACEB20B470C292038D7",
+            "c": "FA16BFB9474C2DC09B027F6113A2FD80720D37F7E583AACEB20B470C292038D7"
+          }
+        },
+        {
+          "index": 69,
+          "offset": 282624,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "14FA962F1E05605CDCFAA2136A77F9F69BA40B0BF4481FA2EBED974EB163D1F0",
+            "b": "14FA962F1E05605CDCFAA2136A77F9F69BA40B0BF4481FA2EBED974EB163D1F0",
+            "c": "14FA962F1E05605CDCFAA2136A77F9F69BA40B0BF4481FA2EBED974EB163D1F0"
+          }
+        },
+        {
+          "index": 70,
+          "offset": 286720,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "CF5AFD31C4D196691B9C617F5DFF3BA7A0C49C579E53496F2F8CC5EB56335B0B",
+            "b": "CF5AFD31C4D196691B9C617F5DFF3BA7A0C49C579E53496F2F8CC5EB56335B0B",
+            "c": "CF5AFD31C4D196691B9C617F5DFF3BA7A0C49C579E53496F2F8CC5EB56335B0B"
+          }
+        },
+        {
+          "index": 71,
+          "offset": 290816,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "ED1AE3509DEE12F6C4D1B052E3F3C77332FD3264CFB2B5202A7DDAA7B125D87E",
+            "b": "ED1AE3509DEE12F6C4D1B052E3F3C77332FD3264CFB2B5202A7DDAA7B125D87E",
+            "c": "ED1AE3509DEE12F6C4D1B052E3F3C77332FD3264CFB2B5202A7DDAA7B125D87E"
+          }
+        },
+        {
+          "index": 72,
+          "offset": 294912,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "95C535B34858E85990463584AC125337AD76E85A91FA8A15AF6E19AC387E8DB9",
+            "b": "95C535B34858E85990463584AC125337AD76E85A91FA8A15AF6E19AC387E8DB9",
+            "c": "95C535B34858E85990463584AC125337AD76E85A91FA8A15AF6E19AC387E8DB9"
+          }
+        },
+        {
+          "index": 73,
+          "offset": 299008,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "B8B67AB015E77948873D7CEF9732AA0D83645309ACCC60327CD810ECEE7468A5",
+            "b": "B8B67AB015E77948873D7CEF9732AA0D83645309ACCC60327CD810ECEE7468A5",
+            "c": "B8B67AB015E77948873D7CEF9732AA0D83645309ACCC60327CD810ECEE7468A5"
+          }
+        },
+        {
+          "index": 74,
+          "offset": 303104,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "3A16D599C1C15F0631CA713FCDC51AE6275F8031DDBB9C8952D7C0EF9F841EB6",
+            "b": "3A16D599C1C15F0631CA713FCDC51AE6275F8031DDBB9C8952D7C0EF9F841EB6",
+            "c": "3A16D599C1C15F0631CA713FCDC51AE6275F8031DDBB9C8952D7C0EF9F841EB6"
+          }
+        },
+        {
+          "index": 75,
+          "offset": 307200,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "DE64A3A5FC20533D28BD92ABC261307172AC3815B770E07A972B33C779693DDC",
+            "b": "DE64A3A5FC20533D28BD92ABC261307172AC3815B770E07A972B33C779693DDC",
+            "c": "DE64A3A5FC20533D28BD92ABC261307172AC3815B770E07A972B33C779693DDC"
+          }
+        },
+        {
+          "index": 76,
+          "offset": 311296,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "0788475F1E03627B5184B9527CBF5A9FBF488F9BF9D837B69B6448F0636D1483",
+            "b": "0788475F1E03627B5184B9527CBF5A9FBF488F9BF9D837B69B6448F0636D1483",
+            "c": "0788475F1E03627B5184B9527CBF5A9FBF488F9BF9D837B69B6448F0636D1483"
+          }
+        },
+        {
+          "index": 77,
+          "offset": 315392,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "3672666055C2C227A26193A893A61A18974D8FAF15FCEB5F6AE4EFCBED082EDF",
+            "b": "3672666055C2C227A26193A893A61A18974D8FAF15FCEB5F6AE4EFCBED082EDF",
+            "c": "3672666055C2C227A26193A893A61A18974D8FAF15FCEB5F6AE4EFCBED082EDF"
+          }
+        },
+        {
+          "index": 78,
+          "offset": 319488,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "4A319C067F6215161278566B520CB6D4CF46E456B0425DA07B154CB8ADA20783",
+            "b": "4A319C067F6215161278566B520CB6D4CF46E456B0425DA07B154CB8ADA20783",
+            "c": "4A319C067F6215161278566B520CB6D4CF46E456B0425DA07B154CB8ADA20783"
+          }
+        },
+        {
+          "index": 79,
+          "offset": 323584,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "D7F412E99BBEF58FCE15340AFBC01FCF4EBCD93CDFE68E9DA6275FBBF8FAC770",
+            "b": "D7F412E99BBEF58FCE15340AFBC01FCF4EBCD93CDFE68E9DA6275FBBF8FAC770",
+            "c": "D7F412E99BBEF58FCE15340AFBC01FCF4EBCD93CDFE68E9DA6275FBBF8FAC770"
+          }
+        },
+        {
+          "index": 80,
+          "offset": 327680,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "9688EBCF6360AEB618A8DB34C1A1100E46E29A125B2FE3B7246EF0D8C95E4AE3",
+            "b": "9688EBCF6360AEB618A8DB34C1A1100E46E29A125B2FE3B7246EF0D8C95E4AE3",
+            "c": "9688EBCF6360AEB618A8DB34C1A1100E46E29A125B2FE3B7246EF0D8C95E4AE3"
+          }
+        },
+        {
+          "index": 81,
+          "offset": 331776,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "624E7B7A6A86FC21FFC2D1A575EBAB5BCD31818638E2DAFBDFC551853031CB61",
+            "b": "624E7B7A6A86FC21FFC2D1A575EBAB5BCD31818638E2DAFBDFC551853031CB61",
+            "c": "624E7B7A6A86FC21FFC2D1A575EBAB5BCD31818638E2DAFBDFC551853031CB61"
+          }
+        },
+        {
+          "index": 82,
+          "offset": 335872,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "D2F8FEE77F4786CB41114C1C88C62C142B100CB04EEF207A3953A32F3664BE2F",
+            "b": "D2F8FEE77F4786CB41114C1C88C62C142B100CB04EEF207A3953A32F3664BE2F",
+            "c": "D2F8FEE77F4786CB41114C1C88C62C142B100CB04EEF207A3953A32F3664BE2F"
+          }
+        },
+        {
+          "index": 83,
+          "offset": 339968,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "0091D15086F9CC89AD765A378B6B37C7F5F77A395C27E709A50EED8BE393A69D",
+            "b": "0091D15086F9CC89AD765A378B6B37C7F5F77A395C27E709A50EED8BE393A69D",
+            "c": "0091D15086F9CC89AD765A378B6B37C7F5F77A395C27E709A50EED8BE393A69D"
+          }
+        },
+        {
+          "index": 84,
+          "offset": 344064,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "0B86B2C0637FD3F9A0E5F4495D42C6B49BDB4FA1F17FBCDBCC2D47EE6FAEEBAE",
+            "b": "0B86B2C0637FD3F9A0E5F4495D42C6B49BDB4FA1F17FBCDBCC2D47EE6FAEEBAE",
+            "c": "0B86B2C0637FD3F9A0E5F4495D42C6B49BDB4FA1F17FBCDBCC2D47EE6FAEEBAE"
+          }
+        },
+        {
+          "index": 85,
+          "offset": 348160,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "1365FB9DE23827954BC256D3614FA4ED2394F6A3354C71E3B25C6798A70F5F87",
+            "b": "1365FB9DE23827954BC256D3614FA4ED2394F6A3354C71E3B25C6798A70F5F87",
+            "c": "1365FB9DE23827954BC256D3614FA4ED2394F6A3354C71E3B25C6798A70F5F87"
+          }
+        },
+        {
+          "index": 86,
+          "offset": 352256,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "052E5DECB98364A25673DCE32C11139ECE93E4B340717CB4CD59B7466C1561CD",
+            "b": "052E5DECB98364A25673DCE32C11139ECE93E4B340717CB4CD59B7466C1561CD",
+            "c": "052E5DECB98364A25673DCE32C11139ECE93E4B340717CB4CD59B7466C1561CD"
+          }
+        },
+        {
+          "index": 87,
+          "offset": 356352,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "1499F913DAB428FA9CC94B5F5E0096B41493712091728C6F176D5389A971D3AC",
+            "b": "1499F913DAB428FA9CC94B5F5E0096B41493712091728C6F176D5389A971D3AC",
+            "c": "1499F913DAB428FA9CC94B5F5E0096B41493712091728C6F176D5389A971D3AC"
+          }
+        },
+        {
+          "index": 88,
+          "offset": 360448,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "1A257C99BE17A6E1E036BD55A745ADF0E50066F5C7FB79AE6B1F8D9ED054DA49",
+            "b": "1A257C99BE17A6E1E036BD55A745ADF0E50066F5C7FB79AE6B1F8D9ED054DA49",
+            "c": "1A257C99BE17A6E1E036BD55A745ADF0E50066F5C7FB79AE6B1F8D9ED054DA49"
+          }
+        },
+        {
+          "index": 89,
+          "offset": 364544,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "94C73EF4452F6CD5CDCB9D0F6DEF932D8E8378E4B98A4067298EA64825F87398",
+            "b": "94C73EF4452F6CD5CDCB9D0F6DEF932D8E8378E4B98A4067298EA64825F87398",
+            "c": "94C73EF4452F6CD5CDCB9D0F6DEF932D8E8378E4B98A4067298EA64825F87398"
+          }
+        },
+        {
+          "index": 90,
+          "offset": 368640,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "68D749352584F776AB8211E81BD2004C56B436B4DBD47D903FE6FB043FFD4D34",
+            "b": "68D749352584F776AB8211E81BD2004C56B436B4DBD47D903FE6FB043FFD4D34",
+            "c": "68D749352584F776AB8211E81BD2004C56B436B4DBD47D903FE6FB043FFD4D34"
+          }
+        },
+        {
+          "index": 91,
+          "offset": 372736,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "E5B2E4FF70E11D313027CEB69286C29875FBD9F21CE39AE47460C27E578C7A8E",
+            "b": "E5B2E4FF70E11D313027CEB69286C29875FBD9F21CE39AE47460C27E578C7A8E",
+            "c": "E5B2E4FF70E11D313027CEB69286C29875FBD9F21CE39AE47460C27E578C7A8E"
+          }
+        },
+        {
+          "index": 92,
+          "offset": 376832,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "BE2DC1071542188DC136514B9C660EED1820C94C908835ED63CAC7D71D6FB453",
+            "b": "BE2DC1071542188DC136514B9C660EED1820C94C908835ED63CAC7D71D6FB453",
+            "c": "BE2DC1071542188DC136514B9C660EED1820C94C908835ED63CAC7D71D6FB453"
+          }
+        },
+        {
+          "index": 93,
+          "offset": 380928,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "5BEAF1B1CDD4EC4DEA8718BBB30E02E6069431BEB7955415A25CB7DA5F2EEE6A",
+            "b": "5BEAF1B1CDD4EC4DEA8718BBB30E02E6069431BEB7955415A25CB7DA5F2EEE6A",
+            "c": "5BEAF1B1CDD4EC4DEA8718BBB30E02E6069431BEB7955415A25CB7DA5F2EEE6A"
+          }
+        },
+        {
+          "index": 94,
+          "offset": 385024,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "421BBA582BA4F6245532F46430DD669A1A6A85FEB3CEC5FC8A1BB2C157314685",
+            "b": "421BBA582BA4F6245532F46430DD669A1A6A85FEB3CEC5FC8A1BB2C157314685",
+            "c": "421BBA582BA4F6245532F46430DD669A1A6A85FEB3CEC5FC8A1BB2C157314685"
+          }
+        },
+        {
+          "index": 95,
+          "offset": 389120,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F1F8EBE5E8B47249B1BDC4B808E19C49248D4D2BF0F7CF0FA7BB1B6BE98C84F1",
+            "b": "F1F8EBE5E8B47249B1BDC4B808E19C49248D4D2BF0F7CF0FA7BB1B6BE98C84F1",
+            "c": "F1F8EBE5E8B47249B1BDC4B808E19C49248D4D2BF0F7CF0FA7BB1B6BE98C84F1"
+          }
+        },
+        {
+          "index": 96,
+          "offset": 393216,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "35E69A883932757BF97B57E5F42DBBF9018000708D637749BA37D2F86C71E774",
+            "b": "35E69A883932757BF97B57E5F42DBBF9018000708D637749BA37D2F86C71E774",
+            "c": "35E69A883932757BF97B57E5F42DBBF9018000708D637749BA37D2F86C71E774"
+          }
+        },
+        {
+          "index": 97,
+          "offset": 397312,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F54F457DDB9250C5278AAA3DFD4B5A7358359B6DD6D905AD51FC38D022244F7F",
+            "b": "F54F457DDB9250C5278AAA3DFD4B5A7358359B6DD6D905AD51FC38D022244F7F",
+            "c": "F54F457DDB9250C5278AAA3DFD4B5A7358359B6DD6D905AD51FC38D022244F7F"
+          }
+        },
+        {
+          "index": 98,
+          "offset": 401408,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "53CD70EEA14F275E54D0842E52214A8E41E5F112E6864B11A38BDE48A29A9432",
+            "b": "53CD70EEA14F275E54D0842E52214A8E41E5F112E6864B11A38BDE48A29A9432",
+            "c": "53CD70EEA14F275E54D0842E52214A8E41E5F112E6864B11A38BDE48A29A9432"
+          }
+        },
+        {
+          "index": 99,
+          "offset": 405504,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "CB69BFABCB6CDD0D3AE7ACC7177F032E10AE9039B0F6B8A65C9448F478084CDE",
+            "b": "CB69BFABCB6CDD0D3AE7ACC7177F032E10AE9039B0F6B8A65C9448F478084CDE",
+            "c": "CB69BFABCB6CDD0D3AE7ACC7177F032E10AE9039B0F6B8A65C9448F478084CDE"
+          }
+        },
+        {
+          "index": 100,
+          "offset": 409600,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "338F31083BB778568002882E5E3E1EA0959F948EA8D6A2874E86F3370C0B0B8B",
+            "b": "338F31083BB778568002882E5E3E1EA0959F948EA8D6A2874E86F3370C0B0B8B",
+            "c": "338F31083BB778568002882E5E3E1EA0959F948EA8D6A2874E86F3370C0B0B8B"
+          }
+        },
+        {
+          "index": 101,
+          "offset": 413696,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "A7AC6AE57D41DC4DDFDB443621B9D03657D6B6380B8046EAC8AAFAA1B4F9E5AC",
+            "b": "A7AC6AE57D41DC4DDFDB443621B9D03657D6B6380B8046EAC8AAFAA1B4F9E5AC",
+            "c": "A7AC6AE57D41DC4DDFDB443621B9D03657D6B6380B8046EAC8AAFAA1B4F9E5AC"
+          }
+        },
+        {
+          "index": 102,
+          "offset": 417792,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "B1B83D38C8654206ABE0D8508D85EEA7BA6A13305425603572ED049B3A6FFF52",
+            "b": "B1B83D38C8654206ABE0D8508D85EEA7BA6A13305425603572ED049B3A6FFF52",
+            "c": "B1B83D38C8654206ABE0D8508D85EEA7BA6A13305425603572ED049B3A6FFF52"
+          }
+        },
+        {
+          "index": 103,
+          "offset": 421888,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "D061E89E6D2F261AB21EAF9B7BF9324375DC51A9F40F5F75B5243192280F1E23",
+            "b": "D061E89E6D2F261AB21EAF9B7BF9324375DC51A9F40F5F75B5243192280F1E23",
+            "c": "D061E89E6D2F261AB21EAF9B7BF9324375DC51A9F40F5F75B5243192280F1E23"
+          }
+        },
+        {
+          "index": 104,
+          "offset": 425984,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "CD08685096E1DB9D582A98E84F4437365682F3FCE498D151C61B5277BBB23928",
+            "b": "CD08685096E1DB9D582A98E84F4437365682F3FCE498D151C61B5277BBB23928",
+            "c": "CD08685096E1DB9D582A98E84F4437365682F3FCE498D151C61B5277BBB23928"
+          }
+        },
+        {
+          "index": 105,
+          "offset": 430080,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "B75ECE89596A92C4C58F4FE2219CF5850588E86FE8B11584CDB050B49E495530",
+            "b": "B75ECE89596A92C4C58F4FE2219CF5850588E86FE8B11584CDB050B49E495530",
+            "c": "B75ECE89596A92C4C58F4FE2219CF5850588E86FE8B11584CDB050B49E495530"
+          }
+        },
+        {
+          "index": 106,
+          "offset": 434176,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "0F9B32906BD946E5A57348C012923FF6D865828DD534F8D4112498D1641EB3EC",
+            "b": "0F9B32906BD946E5A57348C012923FF6D865828DD534F8D4112498D1641EB3EC",
+            "c": "0F9B32906BD946E5A57348C012923FF6D865828DD534F8D4112498D1641EB3EC"
+          }
+        },
+        {
+          "index": 107,
+          "offset": 438272,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "7AB5DC993B3A5CF00159523C0A6F12D41F11CD43698D99EF266090260906FAE9",
+            "b": "7AB5DC993B3A5CF00159523C0A6F12D41F11CD43698D99EF266090260906FAE9",
+            "c": "7AB5DC993B3A5CF00159523C0A6F12D41F11CD43698D99EF266090260906FAE9"
+          }
+        },
+        {
+          "index": 108,
+          "offset": 442368,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "E4B68384337708A1CE21AEBB3EA44E4BEA6B406DD74064A9611C53785DB3D127",
+            "b": "E4B68384337708A1CE21AEBB3EA44E4BEA6B406DD74064A9611C53785DB3D127",
+            "c": "E4B68384337708A1CE21AEBB3EA44E4BEA6B406DD74064A9611C53785DB3D127"
+          }
+        },
+        {
+          "index": 109,
+          "offset": 446464,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "FA97C20CE13DAAF646E8420EFBD25D59D0E5D6CB1265CB83F559992350B03EC4",
+            "b": "FA97C20CE13DAAF646E8420EFBD25D59D0E5D6CB1265CB83F559992350B03EC4",
+            "c": "FA97C20CE13DAAF646E8420EFBD25D59D0E5D6CB1265CB83F559992350B03EC4"
+          }
+        },
+        {
+          "index": 110,
+          "offset": 450560,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "02AAAE4456F47E112D024F195B3EECAD08A59AD75F40A1FD06B7C3A6BA3937F1",
+            "b": "02AAAE4456F47E112D024F195B3EECAD08A59AD75F40A1FD06B7C3A6BA3937F1",
+            "c": "02AAAE4456F47E112D024F195B3EECAD08A59AD75F40A1FD06B7C3A6BA3937F1"
+          }
+        },
+        {
+          "index": 111,
+          "offset": 454656,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "5460FEC8D6263D0DEFF2D4369A5AC90A127F3E6FE708003EBBC3E251B54E1243",
+            "b": "5460FEC8D6263D0DEFF2D4369A5AC90A127F3E6FE708003EBBC3E251B54E1243",
+            "c": "5460FEC8D6263D0DEFF2D4369A5AC90A127F3E6FE708003EBBC3E251B54E1243"
+          }
+        },
+        {
+          "index": 112,
+          "offset": 458752,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F1E284B0A401CD23236F6AD377BC968B41C46E7F8A0C2639037EAF3FEBABC4E3",
+            "b": "F1E284B0A401CD23236F6AD377BC968B41C46E7F8A0C2639037EAF3FEBABC4E3",
+            "c": "F1E284B0A401CD23236F6AD377BC968B41C46E7F8A0C2639037EAF3FEBABC4E3"
+          }
+        },
+        {
+          "index": 113,
+          "offset": 462848,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "D1C227527D5E8ADF39EE68D1F4964EC3BA1E6C9336A00434776BB2F48ABDEFC9",
+            "b": "D1C227527D5E8ADF39EE68D1F4964EC3BA1E6C9336A00434776BB2F48ABDEFC9",
+            "c": "D1C227527D5E8ADF39EE68D1F4964EC3BA1E6C9336A00434776BB2F48ABDEFC9"
+          }
+        },
+        {
+          "index": 114,
+          "offset": 466944,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "3C0CA86C64A45BAA0AC791B5E78091803D4C3BF84BAB45DE245CD21B6AE8D8C0",
+            "b": "3C0CA86C64A45BAA0AC791B5E78091803D4C3BF84BAB45DE245CD21B6AE8D8C0",
+            "c": "3C0CA86C64A45BAA0AC791B5E78091803D4C3BF84BAB45DE245CD21B6AE8D8C0"
+          }
+        },
+        {
+          "index": 115,
+          "offset": 471040,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "5EA849D8480CF994376F27349F1855C0DC4DD3B5F2B9D82BF333ACC2C7B6578D",
+            "b": "5EA849D8480CF994376F27349F1855C0DC4DD3B5F2B9D82BF333ACC2C7B6578D",
+            "c": "5EA849D8480CF994376F27349F1855C0DC4DD3B5F2B9D82BF333ACC2C7B6578D"
+          }
+        },
+        {
+          "index": 116,
+          "offset": 475136,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "5C39EBCF1D789A77FEF12ED1CD0764BEAEA6A4A5EAE2B2753D2919425F3A2988",
+            "b": "5C39EBCF1D789A77FEF12ED1CD0764BEAEA6A4A5EAE2B2753D2919425F3A2988",
+            "c": "5C39EBCF1D789A77FEF12ED1CD0764BEAEA6A4A5EAE2B2753D2919425F3A2988"
+          }
+        },
+        {
+          "index": 117,
+          "offset": 479232,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F33CB262A642FA665BC42D87AEDADB749B3B758FAAC1849AC2359B0012F8A3D4",
+            "b": "F33CB262A642FA665BC42D87AEDADB749B3B758FAAC1849AC2359B0012F8A3D4",
+            "c": "F33CB262A642FA665BC42D87AEDADB749B3B758FAAC1849AC2359B0012F8A3D4"
+          }
+        },
+        {
+          "index": 118,
+          "offset": 483328,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "55696C18C8340DFF5EB6B7F540A76496964FB5B792902B5BBE21365A700CB81F",
+            "b": "55696C18C8340DFF5EB6B7F540A76496964FB5B792902B5BBE21365A700CB81F",
+            "c": "55696C18C8340DFF5EB6B7F540A76496964FB5B792902B5BBE21365A700CB81F"
+          }
+        },
+        {
+          "index": 119,
+          "offset": 487424,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F2558DAFBA25C600DF38E38E97456C31CCEAE0792C905866FA53F19354EE2CB7",
+            "b": "F2558DAFBA25C600DF38E38E97456C31CCEAE0792C905866FA53F19354EE2CB7",
+            "c": "F2558DAFBA25C600DF38E38E97456C31CCEAE0792C905866FA53F19354EE2CB7"
+          }
+        },
+        {
+          "index": 120,
+          "offset": 491520,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "C607884BF57E265F171F223AD3A2BC48A879FEAD4B3F57358070E351A7FEB1C7",
+            "b": "C607884BF57E265F171F223AD3A2BC48A879FEAD4B3F57358070E351A7FEB1C7",
+            "c": "C607884BF57E265F171F223AD3A2BC48A879FEAD4B3F57358070E351A7FEB1C7"
+          }
+        },
+        {
+          "index": 121,
+          "offset": 495616,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "07275A600BDB19A146D8B4A8DB04B07A0B4D666425B2169CB36CEF03110AD797",
+            "b": "07275A600BDB19A146D8B4A8DB04B07A0B4D666425B2169CB36CEF03110AD797",
+            "c": "07275A600BDB19A146D8B4A8DB04B07A0B4D666425B2169CB36CEF03110AD797"
+          }
+        },
+        {
+          "index": 122,
+          "offset": 499712,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "231BCA8E35224AEBD6B1A48C6F2177BC21A3D20A62A53E5531D06846C3679175",
+            "b": "231BCA8E35224AEBD6B1A48C6F2177BC21A3D20A62A53E5531D06846C3679175",
+            "c": "231BCA8E35224AEBD6B1A48C6F2177BC21A3D20A62A53E5531D06846C3679175"
+          }
+        },
+        {
+          "index": 123,
+          "offset": 503808,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "AAC760E543A4B39260BA50FB343B8506A0799D3BDA17824D39BE1D005137E092",
+            "b": "AAC760E543A4B39260BA50FB343B8506A0799D3BDA17824D39BE1D005137E092",
+            "c": "AAC760E543A4B39260BA50FB343B8506A0799D3BDA17824D39BE1D005137E092"
+          }
+        },
+        {
+          "index": 124,
+          "offset": 507904,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "8E070FECCF47C971E4819A805912B73BE5C15BF86FE80D253D29FB894DF47F80",
+            "b": "8E070FECCF47C971E4819A805912B73BE5C15BF86FE80D253D29FB894DF47F80",
+            "c": "8E070FECCF47C971E4819A805912B73BE5C15BF86FE80D253D29FB894DF47F80"
+          }
+        },
+        {
+          "index": 125,
+          "offset": 512000,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "E50D308D62C5FB43D8FA6F83F2BDE5FB86D439CB604DE904D2BAEB391994382F",
+            "b": "E50D308D62C5FB43D8FA6F83F2BDE5FB86D439CB604DE904D2BAEB391994382F",
+            "c": "E50D308D62C5FB43D8FA6F83F2BDE5FB86D439CB604DE904D2BAEB391994382F"
+          }
+        },
+        {
+          "index": 126,
+          "offset": 516096,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "1800AE753936F694A222335DCB2F6E165463FE814534D02344AED79B474F0DBD",
+            "b": "1800AE753936F694A222335DCB2F6E165463FE814534D02344AED79B474F0DBD",
+            "c": "1800AE753936F694A222335DCB2F6E165463FE814534D02344AED79B474F0DBD"
+          }
+        },
+        {
+          "index": 127,
+          "offset": 520192,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "12BAA80E2E50A41C04C378A4596CAABC2AAEF10FA95991DE2CDC55ACC0F2A2D6",
+            "b": "12BAA80E2E50A41C04C378A4596CAABC2AAEF10FA95991DE2CDC55ACC0F2A2D6",
+            "c": "12BAA80E2E50A41C04C378A4596CAABC2AAEF10FA95991DE2CDC55ACC0F2A2D6"
+          }
+        },
+        {
+          "index": 128,
+          "offset": 524288,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "8F0EECAD4D78D217144213C4C09B020907163EA367D7EEADC493348AB31BDB44",
+            "b": "8F0EECAD4D78D217144213C4C09B020907163EA367D7EEADC493348AB31BDB44",
+            "c": "8F0EECAD4D78D217144213C4C09B020907163EA367D7EEADC493348AB31BDB44"
+          }
+        },
+        {
+          "index": 129,
+          "offset": 528384,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "130DFAA27110A7CF33ECFC8FAF5A1B80EDE1CE22B91A95DF3A226EE59B4BAD05",
+            "b": "130DFAA27110A7CF33ECFC8FAF5A1B80EDE1CE22B91A95DF3A226EE59B4BAD05",
+            "c": "130DFAA27110A7CF33ECFC8FAF5A1B80EDE1CE22B91A95DF3A226EE59B4BAD05"
+          }
+        },
+        {
+          "index": 130,
+          "offset": 532480,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "4411F47EE25BC3BBDDB37CD5A5080E5045DE607C9F8FC691684EB2A626A2152A",
+            "b": "4411F47EE25BC3BBDDB37CD5A5080E5045DE607C9F8FC691684EB2A626A2152A",
+            "c": "4411F47EE25BC3BBDDB37CD5A5080E5045DE607C9F8FC691684EB2A626A2152A"
+          }
+        },
+        {
+          "index": 131,
+          "offset": 536576,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "DBC64D1803EBB6899C1419CFC96840DC276C6A84C6895CC37290B4591FE11DF2",
+            "b": "DBC64D1803EBB6899C1419CFC96840DC276C6A84C6895CC37290B4591FE11DF2",
+            "c": "DBC64D1803EBB6899C1419CFC96840DC276C6A84C6895CC37290B4591FE11DF2"
+          }
+        },
+        {
+          "index": 132,
+          "offset": 540672,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "A6F7A42A609E71E35337CC8F6719D4AA68073B01074AECACD1D54B2F2C22FDD1",
+            "b": "A6F7A42A609E71E35337CC8F6719D4AA68073B01074AECACD1D54B2F2C22FDD1",
+            "c": "A6F7A42A609E71E35337CC8F6719D4AA68073B01074AECACD1D54B2F2C22FDD1"
+          }
+        },
+        {
+          "index": 133,
+          "offset": 544768,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "443DD250E5AA986662B7B8A0AA165C9779DA9BA24E497D19AA1E0DB1688A91D1",
+            "b": "443DD250E5AA986662B7B8A0AA165C9779DA9BA24E497D19AA1E0DB1688A91D1",
+            "c": "443DD250E5AA986662B7B8A0AA165C9779DA9BA24E497D19AA1E0DB1688A91D1"
+          }
+        },
+        {
+          "index": 134,
+          "offset": 548864,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "724B117C0301809EFDCEC30346B46FA6F8037B02EF851C15AEFCE6144E5F7FAA",
+            "b": "724B117C0301809EFDCEC30346B46FA6F8037B02EF851C15AEFCE6144E5F7FAA",
+            "c": "724B117C0301809EFDCEC30346B46FA6F8037B02EF851C15AEFCE6144E5F7FAA"
+          }
+        },
+        {
+          "index": 135,
+          "offset": 552960,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "E0251B0CE6CA3D47B66F21D9754FB61EECDE50597FA92C80B71FA0EBA8495667",
+            "b": "E0251B0CE6CA3D47B66F21D9754FB61EECDE50597FA92C80B71FA0EBA8495667",
+            "c": "E0251B0CE6CA3D47B66F21D9754FB61EECDE50597FA92C80B71FA0EBA8495667"
+          }
+        },
+        {
+          "index": 136,
+          "offset": 557056,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "48CEEAAB5121A0C4216871D9B1C2638FF0014E3E85250EE72EE23F9598BABAAB",
+            "b": "48CEEAAB5121A0C4216871D9B1C2638FF0014E3E85250EE72EE23F9598BABAAB",
+            "c": "48CEEAAB5121A0C4216871D9B1C2638FF0014E3E85250EE72EE23F9598BABAAB"
+          }
+        },
+        {
+          "index": 137,
+          "offset": 561152,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "433DE857EC987B3114895E5FD4A20FEAC066DBAE54BC9F7781FB244A64D5C6CF",
+            "b": "433DE857EC987B3114895E5FD4A20FEAC066DBAE54BC9F7781FB244A64D5C6CF",
+            "c": "433DE857EC987B3114895E5FD4A20FEAC066DBAE54BC9F7781FB244A64D5C6CF"
+          }
+        },
+        {
+          "index": 138,
+          "offset": 565248,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "BE36DE6C928F4D75094AA8D2E43C7E56897E6931F896142C101DB0D8A33E1E04",
+            "b": "BE36DE6C928F4D75094AA8D2E43C7E56897E6931F896142C101DB0D8A33E1E04",
+            "c": "BE36DE6C928F4D75094AA8D2E43C7E56897E6931F896142C101DB0D8A33E1E04"
+          }
+        },
+        {
+          "index": 139,
+          "offset": 569344,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "97A7477DF3745B03B65FB6DE33BE093B8E31ECFDE5259A553DDA1BDC7E91DEE1",
+            "b": "97A7477DF3745B03B65FB6DE33BE093B8E31ECFDE5259A553DDA1BDC7E91DEE1",
+            "c": "97A7477DF3745B03B65FB6DE33BE093B8E31ECFDE5259A553DDA1BDC7E91DEE1"
+          }
+        },
+        {
+          "index": 140,
+          "offset": 573440,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "52065EC254DA13EE2F3971957E400FA002586D962F9DFC10DCB67D0AF79C8FD3",
+            "b": "52065EC254DA13EE2F3971957E400FA002586D962F9DFC10DCB67D0AF79C8FD3",
+            "c": "52065EC254DA13EE2F3971957E400FA002586D962F9DFC10DCB67D0AF79C8FD3"
+          }
+        },
+        {
+          "index": 141,
+          "offset": 577536,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "C448AEBB3B55A70800D7762307132560E522135A1CFC0E948933A00BEEF7F212",
+            "b": "C448AEBB3B55A70800D7762307132560E522135A1CFC0E948933A00BEEF7F212",
+            "c": "C448AEBB3B55A70800D7762307132560E522135A1CFC0E948933A00BEEF7F212"
+          }
+        },
+        {
+          "index": 142,
+          "offset": 581632,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "922D641C70759F432A8C935F9260E9D5B116667234DB0BD0530F2E6C0FFBC125",
+            "b": "922D641C70759F432A8C935F9260E9D5B116667234DB0BD0530F2E6C0FFBC125",
+            "c": "922D641C70759F432A8C935F9260E9D5B116667234DB0BD0530F2E6C0FFBC125"
+          }
+        },
+        {
+          "index": 143,
+          "offset": 585728,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "F32F16010B70E511F1B296E40955B509C8647C813174437E2374D81260FEEF87",
+            "b": "F32F16010B70E511F1B296E40955B509C8647C813174437E2374D81260FEEF87",
+            "c": "F32F16010B70E511F1B296E40955B509C8647C813174437E2374D81260FEEF87"
+          }
+        },
+        {
+          "index": 144,
+          "offset": 589824,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "FAD483C30F84B330FFD9A42A89BAB89B7CF1C80362A6863D84A71211844355D4",
+            "b": "FAD483C30F84B330FFD9A42A89BAB89B7CF1C80362A6863D84A71211844355D4",
+            "c": "FAD483C30F84B330FFD9A42A89BAB89B7CF1C80362A6863D84A71211844355D4"
+          }
+        },
+        {
+          "index": 145,
+          "offset": 593920,
+          "bytes": 4096,
+          "sample_sha256": {
+            "a": "09FDCED6F75F132198FEDD4D78D8B68556AFE38CD75DFBE1FB6185442A80BEDA",
+            "b": "09FDCED6F75F132198FEDD4D78D8B68556AFE38CD75DFBE1FB6185442A80BEDA",
+            "c": "09FDCED6F75F132198FEDD4D78D8B68556AFE38CD75DFBE1FB6185442A80BEDA"
+          }
+        },
+        {
+          "index": 146,
+          "offset": 598016,
+          "bytes": 2728,
+          "sample_sha256": {
+            "a": "34E836A02E06F189545E13E8B256C8EA66E3622BC937216D4AAEF49A80D6E1FE",
+            "b": "34E836A02E06F189545E13E8B256C8EA66E3622BC937216D4AAEF49A80D6E1FE",
+            "c": "34E836A02E06F189545E13E8B256C8EA66E3622BC937216D4AAEF49A80D6E1FE"
+          }
+        }
+      ],
+      "pass_image_sha256": {
+        "a": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "b": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "c": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+      },
+      "reconstructed_sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "output": {
+        "a": ".cache\\p2-6-rtt-binding-20260829-18\\snapshots\\board-image-a.bin",
+        "b": ".cache\\p2-6-rtt-binding-20260829-18\\snapshots\\board-image-b.bin",
+        "c": ".cache\\p2-6-rtt-binding-20260829-18\\snapshots\\board-image-c.bin"
+      }
+    },
+    "pass_authority": {
+      "pass": true,
+      "passes": [
+        "a",
+        "b",
+        "c"
+      ],
+      "sha256": {
+        "a": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "b": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+        "c": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00"
+      },
+      "authoritative_sha256": "A2D3083B25EE32813EFF6CC1BD0CF77CE235FD03BF79947C08B8A3C815D58E00",
+      "bytes": 600744
+    }
+  },
+  "precall": {
+    "phase": "precall",
+    "status": "PASS",
+    "signature_addresses": [
+      537214492
+    ],
+    "descriptor": {
+      "max_up_buffers": 3,
+      "max_down_buffers": 3,
+      "pBuffer": 537213468,
+      "SizeOfBuffer": 1024,
+      "WrOff": 286,
+      "RdOff": 0,
+      "Flags": 1
+    },
+    "pending_count": 286,
+    "pending_sha256": "A266CBF3756F12F49D8D5B63037298E62E7AD928AD960B4D1FE33AC15BB81FB8",
+    "record_count": 0,
+    "measurement": {
+      "valid": 0,
+      "kind": 0,
+      "seq": 0
+    },
+    "sram_sha256": "350127221D34458226D730A30EEE7C02B7FB205016237BDBEABF381E9D2D0744",
+    "control_block_sha256": "B96F062604BA14D8DE1FB7C406FD23D7B38A8F65C8B778CAD19AD29C327D79F2",
+    "up_buffer_sha256": "9C53C007E0A2DF40370D324363AF3CA128B0701CA33838A19B4F985FA68C49C7",
+    "measurement_sha256": "B707241545A346265AAB1FFB32FF64B55BF8F8DC1B56A46EF33CE3D15DB11D33"
+  },
+  "precheck": {
+    "phase": "precheck",
+    "status": "ELIGIBLE",
+    "signature_addresses": [
+      537214492
+    ],
+    "descriptor": {
+      "max_up_buffers": 3,
+      "max_down_buffers": 3,
+      "pBuffer": 537213468,
+      "SizeOfBuffer": 1024,
+      "WrOff": 731,
+      "RdOff": 0,
+      "Flags": 1
+    },
+    "pending_count": 731,
+    "pending_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+    "pending_path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\pending.bin",
+    "record_count": 1,
+    "matching_record_count": 1,
+    "record": {
+      "raw": "P2_6 kind=patch result=-1 workspace_peak=0 arena_peak_observed=0 failed_request_size=0 stack_entry=3232 stack_peak=3232 stack_total=8192 guard_entry=1 guard_exit=1 sbrk_delta=0 sbrk_peak=537220800 tlsf_malloc_delta=0 tlsf_realloc_delta=0 tlsf_free_delta=0 lv_free_entry=78864 lv_free_exit=78864 lv_big_entry=66252 lv_big_exit=66252 lv_frag_entry=16 lv_frag_exit=16 lv_max_entry=64619 lv_max_exit=64619 seq=2185635327 last_size=18 last_ret=0x14",
+      "kind": "PATCH",
+      "result": -1,
+      "workspace_peak": 0,
+      "arena_peak_observed": 0,
+      "failed_request_size": 0,
+      "stack_entry": 3232,
+      "stack_peak": 3232,
+      "stack_total": 8192,
+      "guard_entry": 1,
+      "guard_exit": 1,
+      "sbrk_delta": 0,
+      "sbrk_peak": 537220800,
+      "tlsf_malloc_delta": 0,
+      "tlsf_realloc_delta": 0,
+      "tlsf_free_delta": 0,
+      "lv_free_entry": 78864,
+      "lv_free_exit": 78864,
+      "lv_big_entry": 66252,
+      "lv_big_exit": 66252,
+      "lv_frag_entry": 16,
+      "lv_frag_exit": 16,
+      "lv_max_entry": 64619,
+      "lv_max_exit": 64619,
+      "seq": 2185635327,
+      "last_size": 18,
+      "last_ret": 20
+    },
+    "record_bytes": 445,
+    "record_sha256": "BFAA7E1209168984B75A03B77638E163705486BD0A74D1FB5673F00C8DA5F1A5",
+    "measurement": {
+      "valid": 1,
+      "kind": 2,
+      "seq": 2185635327
+    },
+    "measurement_crosscheck": {
+      "valid_is_one": true,
+      "kind_is_patch": true,
+      "seq_matches_record": true
+    },
+    "controlled_patch_result_is_argument_rejection": true,
+    "sram_sha256": "8BACC2F442A1E4EBD5DCB46378B62162315CA45D13609D67E4EE32AC3B9470AF",
+    "control_block_sha256": "46D14E04EC949EF57BC0AA07D8F63E55F0CF45857C229BA01F624CAE69DD5C69",
+    "up_buffer_sha256": "09AF51DCB6279F1712B823689F8AAAE89DB0623CC4D8EC86A28F061C351FF66B",
+    "measurement_sha256": "80F03AEEC6BD13D028E95BDDFBDA171467B5C3544E7E032F70D06F909BD3F857"
+  },
+  "capture": {
+    "phase": "capture",
+    "status": "PASS",
+    "reader": "JLinkRTTLogger",
+    "payload_ready": true,
+    "payload_complete": true,
+    "rtt_channel_binding_verified": true,
+    "logger_stopped_by": "AGENTS.md residual-logger cleanup pattern (Stop-Process); the logger has no natural exit",
+    "logger_pid": 13172,
+    "logger_command": [
+      "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkRTTLogger.exe",
+      "-Device",
+      "CORTEX-M4",
+      "-If",
+      "SWD",
+      "-Speed",
+      "1000",
+      "-RTTAddress",
+      "0x20053E1C",
+      "-RTTChannel",
+      "0",
+      "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\rtt.raw.log"
+    ],
+    "payload_bytes": 731,
+    "payload_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+    "expected_pending_bytes": 731,
+    "logger_wait_seconds": 2.277,
+    "raw_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+    "logger_stopped": true,
+    "residual_rtt_logger_processes": 0
+  },
+  "postcheck": {
+    "phase": "postcheck",
+    "status": "PASS",
+    "descriptor_before": {
+      "max_up_buffers": 3,
+      "max_down_buffers": 3,
+      "pBuffer": 537213468,
+      "SizeOfBuffer": 1024,
+      "WrOff": 731,
+      "RdOff": 0,
+      "Flags": 1
+    },
+    "descriptor_after": {
+      "max_up_buffers": 3,
+      "max_down_buffers": 3,
+      "pBuffer": 537213468,
+      "SizeOfBuffer": 1024,
+      "WrOff": 731,
+      "RdOff": 731,
+      "Flags": 1
+    },
+    "pending_count": 731,
+    "consumed_count": 731,
+    "payload_bytes": 731,
+    "payload_sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+    "rd_off_address": 537214532,
+    "rd_off_change": [
+      {
+        "address": 537214532,
+        "before_word": 0,
+        "after_word": 731
+      }
+    ],
+    "control_block_outside_rd_off_changes": 0,
+    "sram_mutation_scope": "the core legitimately resumed between the two GDB sessions (the server restores the pre-connection running state on exit), so SRAM outside the RTT structures may change; the control block (except the four-byte RdOff word), the Up0 ring, and the measurement structure are byte-stable",
+    "sram_pre_sha256": "8BACC2F442A1E4EBD5DCB46378B62162315CA45D13609D67E4EE32AC3B9470AF",
+    "sram_post_sha256": "329743DD7865FC157FF2474E1DFD9F0D734A9AD080E219E40BD85942F21B0A09",
+    "control_block_pre_sha256": "46D14E04EC949EF57BC0AA07D8F63E55F0CF45857C229BA01F624CAE69DD5C69",
+    "control_block_post_sha256": "0E4AA86C54E1BAF06732AA46E3CB529014C6BEEAE9017E6DB0C706F0A516858D",
+    "up_buffer_pre_sha256": "09AF51DCB6279F1712B823689F8AAAE89DB0623CC4D8EC86A28F061C351FF66B",
+    "up_buffer_post_sha256": "09AF51DCB6279F1712B823689F8AAAE89DB0623CC4D8EC86A28F061C351FF66B",
+    "measurement": {
+      "valid": 1,
+      "kind": 2,
+      "seq": 2185635327
+    },
+    "rtt_channel_binding_verified": true
+  },
+  "phase_output_audit": {
+    "identity": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\identity.json",
+      "exists": true,
+      "parse_ok": true,
+      "phase_matches": true
+    },
+    "precall": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\precall.json",
+      "exists": true,
+      "parse_ok": true,
+      "phase_matches": true
+    },
+    "precheck": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\precheck.json",
+      "exists": true,
+      "parse_ok": true,
+      "phase_matches": true
+    },
+    "capture": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\capture.json",
+      "exists": true,
+      "parse_ok": true,
+      "phase_matches": true
+    },
+    "postcheck": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\postcheck.json",
+      "exists": true,
+      "parse_ok": true,
+      "phase_matches": true
+    }
+  },
+  "jlinkdll_before": {
+    "exists": true,
+    "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+    "bytes": 1233,
+    "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+    "mtime_ns": 1788065917554093200,
+    "mtime_iso": "2026-08-30T12:58:37.554093+08:00"
+  },
+  "jlinkdll_after": {
+    "exists": true,
+    "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+    "bytes": 1233,
+    "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+    "mtime_ns": 1788065917554093200,
+    "mtime_iso": "2026-08-30T12:58:37.554093+08:00"
+  },
+  "jlinkdll_audit": {
+    "pass": true,
+    "unchanged": true,
+    "expected_path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+    "before_normalized": {
+      "path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+      "bytes": 1233,
+      "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+      "mtime_ns": 1788065917554093200
+    },
+    "after_normalized": {
+      "path": "c:\\users\\su\\appdata\\roaming\\segger\\jlinkdll.ini",
+      "bytes": 1233,
+      "sha256": "768B3315DFD799B5E3615A2CDF5FCB95B68DB513B75045ACA698F2A774A6D8EE",
+      "mtime_ns": 1788065917554093200
+    },
+    "errors": []
+  },
+  "jlink_settings_before": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\jlink-settings.ini",
+    "bytes": 767,
+    "sha256": "849D80A1B2985411396B1884A8BE4717ECE4B4A77BA10E08E36FE408A80B1C13",
+    "mtime_ns": 1788012592600596400,
+    "mtime_iso": "2026-08-29T22:09:52.600596+08:00"
+  },
+  "jlink_settings_after": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\scripts\\jlink-settings.ini",
+    "bytes": 767,
+    "sha256": "849D80A1B2985411396B1884A8BE4717ECE4B4A77BA10E08E36FE408A80B1C13",
+    "mtime_ns": 1788012592600596400,
+    "mtime_iso": "2026-08-29T22:09:52.600596+08:00"
+  },
+  "jlink_settings_unchanged": true,
+  "final_ports": {
+    "listening": [],
+    "all_closed": true,
+    "query": "netstat -ano -p tcp"
+  },
+  "final_processes": {
+    "matching": [],
+    "clear": true
+  },
+  "rtt_channel_binding_verified": true,
+  "authorized_target_mutation": "chunked triple-pass App identity with zero-or-one loadbin, a second gate phase when restored, one final reset, exact NULL-base PATCH measurement call pair, one watchdog pause debug-domain write per halt session (disclosed deviation, R18 root cause), and Up0 RdOff host consumption if ELIGIBLE",
+  "forbidden_actions_observed": [],
+  "logs": {
+    "server": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\jlink-server.log",
+      "bytes": 903640,
+      "sha256": "2FDA98698312AB65B89B62FA964425806A798565A76DE8465FEBA29A7C6E6B6C",
+      "mtime_ns": 1788069402680210000,
+      "mtime_iso": "2026-08-30T13:56:42.680210+08:00"
+    },
+    "gdb": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\gdb.log",
+      "bytes": 43227,
+      "sha256": "80128C87519704FDA7AA42D4427DCD3F21627D2230426429FC97D15789C1195F",
+      "mtime_ns": 1788069402544245900,
+      "mtime_iso": "2026-08-30T13:56:42.544246+08:00"
+    },
+    "server_post": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\jlink-server-post.log",
+      "bytes": 167789,
+      "sha256": "42A6C28FA7F6F452A96BF2ACAF1F4EAC2B4AF09E8225EC7EE1A47BC7DEF0BB3A",
+      "mtime_ns": 1788069428891089000,
+      "mtime_iso": "2026-08-30T13:57:08.891089+08:00"
+    },
+    "gdb_post": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\gdb-post.log",
+      "bytes": 906,
+      "sha256": "2E1217695A1E483F9F4AEBD14A0EE803A9C497659E0686544674722F2B6E0E04",
+      "mtime_ns": 1788069428784237900,
+      "mtime_iso": "2026-08-30T13:57:08.784238+08:00"
+    },
+    "identity": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\identity.json",
+      "bytes": 63798,
+      "sha256": "E3D5E76413AF9BAF72C51F92619C153CE0BE4F8369FD3B7648ACF2EF655D66F2",
+      "mtime_ns": 1788069359566660100,
+      "mtime_iso": "2026-08-30T13:55:59.566660+08:00"
+    },
+    "precall": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\precall.json",
+      "bytes": 857,
+      "sha256": "67A3D45DDBB41D16125F2DE45C017A4C76E04D4BCA9767722FF75D732F9CAE8D",
+      "mtime_ns": 1788069382068179400,
+      "mtime_iso": "2026-08-30T13:56:22.068179+08:00"
+    },
+    "rtt": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\rtt.raw.log",
+      "bytes": 731,
+      "sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+      "mtime_ns": 1788069404035141300,
+      "mtime_iso": "2026-08-30T13:56:44.035141+08:00"
+    },
+    "rtt_logger_console": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\rtt-logger-console.log",
+      "bytes": 1107,
+      "sha256": "D4F8E537872F56B4FD97BFB4A46FE53F9785BA2251A32BC7CDC1ECE9AC29608B",
+      "mtime_ns": 1788069406612109500,
+      "mtime_iso": "2026-08-30T13:56:46.612109+08:00"
+    },
+    "rtt_payload": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\snapshots\\rtt-payload.bin",
+      "bytes": 731,
+      "sha256": "206286D4D2B8866F29AF6308059E53AEB500CC3F79300C8506E3C3F921DDFC49",
+      "mtime_ns": 1788069405652178300,
+      "mtime_iso": "2026-08-30T13:56:45.652178+08:00"
+    },
+    "controlled_call_static_audit": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\controlled-call-static-audit.json",
+      "bytes": 2371,
+      "sha256": "60E7841B81944E7B32ECE11DCAC11F92C9D4ACD9292E094B5A0BC34F86986833",
+      "mtime_ns": 1788069317468319200,
+      "mtime_iso": "2026-08-30T13:55:17.468319+08:00"
+    },
+    "precheck": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\precheck.json",
+      "bytes": 2456,
+      "sha256": "9870AFCEE6B9EE8B7C68412EE4EBF83371F3CC3B48FA3EE7C0F6D785B80FE08E",
+      "mtime_ns": 1788069402525677700,
+      "mtime_iso": "2026-08-30T13:56:42.525678+08:00"
+    },
+    "capture": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\capture.json",
+      "bytes": 982,
+      "sha256": "603A9D041AE75AEE850778F1DA1C35493EFD209C4560671573550E585803F3C5",
+      "mtime_ns": 1788069407349539600,
+      "mtime_iso": "2026-08-30T13:56:47.349540+08:00"
+    },
+    "postcheck": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\postcheck.json",
+      "bytes": 1806,
+      "sha256": "9739B002366917F3047093E6E6A3FEF5DEB06337D7EE52664B657117D9DD6CE0",
+      "mtime_ns": 1788069428761862700,
+      "mtime_iso": "2026-08-30T13:57:08.761863+08:00"
+    },
+    "gate_pre": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\gate-pre.json",
+      "bytes": 16661,
+      "sha256": "CC787E826E03E606BA996306E1BAFDC605C770CF7F0E7FA739E4ECA8BE18DE64",
+      "mtime_ns": 1788069305266047600,
+      "mtime_iso": "2026-08-30T13:55:05.266048+08:00"
+    },
+    "recovery_reset": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-reset.log",
+      "bytes": 4341,
+      "sha256": "79970C04752B8D1A9A28D475F5A71E8BBA57B17F866954057AA3F82B00470FF5",
+      "mtime_ns": 1788069310625570900,
+      "mtime_iso": "2026-08-30T13:55:10.625571+08:00"
+    },
+    "recovery_result": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p2-6-rtt-binding-20260829-18\\logs\\recovery-result.json",
+      "bytes": 25076,
+      "sha256": "45671EF40C7D276524ACC7316DBBA724F345613933EDCFBCBA8FBE232D50B16C",
+      "mtime_ns": 1788069315899764200,
+      "mtime_iso": "2026-08-30T13:55:15.899764+08:00"
+    }
+  }
+}

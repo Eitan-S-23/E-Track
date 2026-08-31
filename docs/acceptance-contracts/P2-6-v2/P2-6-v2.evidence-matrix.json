@@ -1,0 +1,536 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P2-6-v2",
+  "contract_sha256": "0332FEE70D7486C41EF53EC184376A069467DD67C8E80E5744B28B33F9471F62",
+  "round_id": "P2-6-V2-FREEZE-20260831-01",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "HW-BOARD-STATE-PREFLIGHT",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "preflight_pass_markers=1",
+        "state_pass_markers=1",
+        "write_calls=0",
+        "flash_calls=0",
+        "gdb_exit_code=0",
+        "server_natural_exit=true"
+      ],
+      "evidence": [
+        "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json",
+        "artifacts/logs/p2-6-sd-r5-preflight-hw-02-gdb.log",
+        "artifacts/logs/p2-6-sd-r5-preflight-hw-02-jlink-server.log",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "只读前置检查：write/flash 调用计数均为 0，GDB 退出码 0，server 自然退出。"
+    },
+    {
+      "id": "HW-PACKAGE-IDENTITY",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "input_bytes=305",
+        "readback_bytes=305",
+        "input_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+        "readback_recomputed_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+        "readback_matches=true",
+        "upload_mcu_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu",
+        "ota_package_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu"
+      ],
+      "evidence": [
+        "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-result.json",
+        "artifacts/snapshots/p2-6-sd-r5-patch-upload-hw-01-readback.bin",
+        "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-gdb.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "主机输入、MCU 回读、OTA 会话引用三处升级包身份一致（305 B / 2B0ACCAE…9D2B / 同一 MCU 路径）。"
+    },
+    {
+      "id": "HW-INPUTS-IDENTITY",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "preflight.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "preflight.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "preflight.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "preflight.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "upload.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "upload.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "upload.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "upload.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "ota.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "ota.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "ota.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "ota.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB"
+      ],
+      "evidence": [
+        "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json",
+        "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-result.json",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "preflight/upload/ota 三会话的 ELF、MAP、设备镜像、设备头部四项摘要逐项相同。"
+    },
+    {
+      "id": "HW-CAPTURE-BYTE-IDENTITY",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "payload_bytes=737",
+        "pending_bytes=737",
+        "payload_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+        "pending_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+        "byte_identical=true"
+      ],
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-pending.bin",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt-logger-console.log",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "logger payload 与采集前 Up0 直读 pending 逐字节相同（737 B / 7D9C1528…8215）。"
+    },
+    {
+      "id": "HW-RECORD-UNIQUENESS",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "p2_6_record_count=1",
+        "kind_patch_record_count=1",
+        "result=0"
+      ],
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-rtt.raw.log",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "payload 内 P2-6 测量记录唯一、kind=patch 唯一、result=0，不存在择优取用空间。"
+    },
+    {
+      "id": "HW-POSTCHECK-RDOFF",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "WrOff:737->737",
+        "RdOff:0->737",
+        "changed_byte_offsets=[40, 41]",
+        "changed_outside_rd_off_word=0",
+        "up0_pBuffer_unchanged=true",
+        "up0_size_unchanged=true"
+      ],
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-pre.bin",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-post.bin",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-up0-pre.bin",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-gdb.log",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "控制块 168 B 前后差异仅落在偏移 40/41（Up0 RdOff 字内），pBuffer 与 Size 未变。"
+    },
+    {
+      "id": "PROC-SESSION-CLOSURE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "gdb_exit_code=0",
+        "server_exit_code=0",
+        "server_natural_exit=true",
+        "server_kill_sent=false",
+        "ports_closed=true",
+        "session_error=null"
+      ],
+      "evidence": [
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-gdb.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-jlink-server.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-jlink-server.log",
+        "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01.gdb",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "GDB/server 退出码均 0，server 自然退出、未被杀，端口释放，无 session 级错误。DEV-2 的 Stop-Process 仅作用于主机侧 JLinkRTTLogger。"
+    },
+    {
+      "id": "PATCH-C2-WORKSPACE-PEAK",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": {
+        "value": 21792,
+        "unit": "byte"
+      },
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "workspace 峰值 21792 B，占 0xA000(40960 B) 硬上限的 53.2%，余量 19168 B。"
+    },
+    {
+      "id": "PATCH-C4-GUARD-INTACT",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "guard_entry=1",
+        "guard_exit=1"
+      ],
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "升级进入与退出时栈哨兵均完好。stack_peak=3252 / stack_total=8192，未逼近栈顶。"
+    },
+    {
+      "id": "PATCH-C5-SBRK-DELTA-ZERO",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": {
+        "value": 0,
+        "unit": "call"
+      },
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "sbrk 增量严格为 0，升级路径未触碰 newlib 堆。"
+    },
+    {
+      "id": "PATCH-C6-TLSF-DELTA-ZERO",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "tlsf_malloc_delta=0",
+        "tlsf_realloc_delta=0",
+        "tlsf_free_delta=0"
+      ],
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "TLSF malloc/realloc/free 三项净增量均为 0。"
+    },
+    {
+      "id": "PATCH-C14-LV-POOL-NET",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "lv_free 64832->64832",
+        "lv_big 61192->61192",
+        "lv_frag 6->6",
+        "lv_max 64551->64551"
+      ],
+      "evidence": [
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "辅助项（required=false）：LVGL 池 free/big/frag/max 四项进出值逐项相等，作为 C6 的旁证。"
+    },
+    {
+      "id": "PROC-CUSTODY-COMPLETE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "custody_files=23",
+        "present=23",
+        "digest_match=23",
+        "missing=[]",
+        "mismatch=[]"
+      ],
+      "evidence": [
+        "artifacts/docs/P2-6-SD-R5-hw-execution-evidence-2026-08-30.md",
+        "artifacts/docs/P2-6-SD-R6-dispatch-ruling-2026-08-30.md",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-gdb.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-jlink-server.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-gdb.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-jlink-server.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-rtt.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt-logger-console.log",
+        "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt.raw.log",
+        "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-gdb.log",
+        "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-result.json",
+        "artifacts/logs/p2-6-sd-r5-preflight-hw-02-gdb.log",
+        "artifacts/logs/p2-6-sd-r5-preflight-hw-02-jlink-server.log",
+        "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json",
+        "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01-post.gdb",
+        "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01.gdb",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-post.bin",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-pre.bin",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-pending.bin",
+        "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-up0-pre.bin",
+        "artifacts/snapshots/p2-6-sd-r5-patch-upload-hw-01-readback.bin",
+        "artifacts/recompute/p2-6-v2-recompute-report.json",
+        "commands/cmd-v2-recompute.stdout.log"
+      ],
+      "notes": "23 份 R5 原始产物全部存在且摘要相符，missing/mismatch 均为空。"
+    },
+    {
+      "id": "PROC-HARNESS-FAIL-CLOSED",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "selftest_cases=16",
+        "positive_control=1",
+        "negative_cases=15",
+        "failures=0",
+        "selftest=PASS"
+      ],
+      "evidence": [
+        "commands/cmd-v2-recompute-selftest.stdout.log"
+      ],
+      "notes": "harness 自检 16 例（1 正控 + 15 负控）全部按预期判定，failures 为空，证明 harness 为 fail-closed 而非常量 PASS。"
+    }
+  ],
+  "evidence_hashes": {
+    "artifacts/docs/P2-6-SD-R5-hw-execution-evidence-2026-08-30.md": "525964701BA0E0ECDF14CBAF7A9B693E498C6C44E07B92718CAB773F0416559E",
+    "artifacts/docs/P2-6-SD-R6-dispatch-ruling-2026-08-30.md": "41C10CFE963162FB0A7AAC312752D6FC79B1FEC62D0A8CD1112A0A949044D9FA",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-gdb.log": "A26008EE419CF09AB45C4CE3E1144B3C16492CA37561323BFE33F07643C6C165",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-jlink-server.log": "F07D748E4EF07185EBF2AA1EF23169AE8D77BD06BD117B1C512A91353A461904",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-gdb.log": "92BFF125184B51CDAF13B063D9AF41FD669B8E7ACCDC7C579095F7C2F47FA90C",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-jlink-server.log": "4557F012DF4FE4883F01243A770B24BC4087E83E67197183E63EC5FEC7C38A33",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-rtt.raw.log": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json": "1A5C4F55ADA98A0C1790E2976FDF6C1C92B297F622AD642C6162CFB271620072",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt-logger-console.log": "4BFB7C020EE598C2F79DD61BA1B6838A5060DEA31387A9776A2BD99420DE6A36",
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt.raw.log": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0",
+    "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-gdb.log": "790FF97CFB11C4FA3BDA711CF73D07B1152C499CAEE9E91ECC57A0AD8B6108C6",
+    "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-result.json": "9306B4D438424D9E16BDDE3C2B3E0B69D32D2C27A08F87C31190ED92C6AEEDAB",
+    "artifacts/logs/p2-6-sd-r5-preflight-hw-02-gdb.log": "F8A0E517ED57F9ED89F5C5E9ACBAE506A771760BCC900E2BB930A0DACDB1F821",
+    "artifacts/logs/p2-6-sd-r5-preflight-hw-02-jlink-server.log": "A686027E1F11D4E64E1B39E7F724DA29CAD85C35923513A26830044074E93C5B",
+    "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json": "9676E29CFC4039E023EA4E7DF1E620C82F15E08B4A1DF17CFA0FD4F39D1AF79F",
+    "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01-post.gdb": "5955D86D98B151BF5A824046AB61D7BF5B4D8AFBD4BFB906C121126906E1E4E1",
+    "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01.gdb": "89B07A18A002B14050C2B5DBCBA7BF5890FE092D17BEF0CC70DF626F7F33CECB",
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-post.bin": "8789F9176E36D36189BBA7F3432A488A3ED5C98494B1EFF0078FF47F017FC420",
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-pre.bin": "5806020EE0DFDABDFC1D89E38B236F846014D0ED157CC4386FA7A68F0C9CB9CD",
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log": "7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-pending.bin": "7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-up0-pre.bin": "B154EFDDBD72B3D9F4E4A0A0F02B0BA14020B781F3D1DD34BE67EA532158C4A4",
+    "artifacts/snapshots/p2-6-sd-r5-patch-upload-hw-01-readback.bin": "2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+    "artifacts/recompute/p2-6-v2-recompute-report.json": "81EDE9459F204F3796513CBA751DE6C481EA9689996559AE58733E3DD5FBF5A2",
+    "commands/cmd-v2-recompute.stdout.log": "30217CC9BE7765B071AFB9986D142234303083866E198CB0D071B9F5CC74AA05",
+    "commands/cmd-v2-recompute-selftest.stdout.log": "08F62408E02997D377FDE48829E9CE32D242F2A4BE53847C65D51C368A2347AE"
+  },
+  "commands": [
+    {
+      "id": "CMD-V2-RECOMPUTE",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v2_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v2 --report docs/acceptance-contracts/P2-6-v2/artifacts/recompute/p2-6-v2-recompute-report.json",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v2-recompute.stdout.log",
+      "notes": "由独立验收会话（非 R5 实现方）于 2026-08-31 执行。重复执行两次，stdout 与复算报告均逐字节一致，确定性已实测。"
+    },
+    {
+      "id": "CMD-V2-RECOMPUTE-SELFTEST",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v2_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v2 --self-test",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v2-recompute-selftest.stdout.log",
+      "notes": "自检在临时副本上注入 15 类篡改后要求 harness 判失败；正控要求判通过。输出对运行环境与时间不敏感（quiet_run 隔离），可逐字节复现。"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-R5-EVIDENCE-DOC",
+      "path": "artifacts/docs/P2-6-SD-R5-hw-execution-evidence-2026-08-30.md",
+      "sha256": "525964701BA0E0ECDF14CBAF7A9B693E498C6C44E07B92718CAB773F0416559E",
+      "size": 7964
+    },
+    {
+      "id": "ART-R6-RULING-DOC",
+      "path": "artifacts/docs/P2-6-SD-R6-dispatch-ruling-2026-08-30.md",
+      "sha256": "41C10CFE963162FB0A7AAC312752D6FC79B1FEC62D0A8CD1112A0A949044D9FA",
+      "size": 17802
+    },
+    {
+      "id": "ART-OTA-GDB-LOG",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-gdb.log",
+      "sha256": "A26008EE419CF09AB45C4CE3E1144B3C16492CA37561323BFE33F07643C6C165",
+      "size": 2026
+    },
+    {
+      "id": "ART-OTA-SERVER-LOG",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-jlink-server.log",
+      "sha256": "F07D748E4EF07185EBF2AA1EF23169AE8D77BD06BD117B1C512A91353A461904",
+      "size": 70075
+    },
+    {
+      "id": "ART-OTA-POST-GDB-LOG",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-gdb.log",
+      "sha256": "92BFF125184B51CDAF13B063D9AF41FD669B8E7ACCDC7C579095F7C2F47FA90C",
+      "size": 344
+    },
+    {
+      "id": "ART-OTA-POST-SERVER-LOG",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-jlink-server.log",
+      "sha256": "4557F012DF4FE4883F01243A770B24BC4087E83E67197183E63EC5FEC7C38A33",
+      "size": 3820
+    },
+    {
+      "id": "ART-OTA-POST-RTT-RAW",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-post-rtt.raw.log",
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0",
+      "size": 107
+    },
+    {
+      "id": "ART-OTA-RESULT",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json",
+      "sha256": "1A5C4F55ADA98A0C1790E2976FDF6C1C92B297F622AD642C6162CFB271620072",
+      "size": 12058
+    },
+    {
+      "id": "ART-OTA-LOGGER-CONSOLE",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt-logger-console.log",
+      "sha256": "4BFB7C020EE598C2F79DD61BA1B6838A5060DEA31387A9776A2BD99420DE6A36",
+      "size": 1152
+    },
+    {
+      "id": "ART-OTA-RTT-RAW",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-rtt.raw.log",
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0",
+      "size": 107
+    },
+    {
+      "id": "ART-UPLOAD-GDB-LOG",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-gdb.log",
+      "sha256": "790FF97CFB11C4FA3BDA711CF73D07B1152C499CAEE9E91ECC57A0AD8B6108C6",
+      "size": 2680
+    },
+    {
+      "id": "ART-UPLOAD-RESULT",
+      "path": "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-result.json",
+      "sha256": "9306B4D438424D9E16BDDE3C2B3E0B69D32D2C27A08F87C31190ED92C6AEEDAB",
+      "size": 4733
+    },
+    {
+      "id": "ART-PREFLIGHT-GDB-LOG",
+      "path": "artifacts/logs/p2-6-sd-r5-preflight-hw-02-gdb.log",
+      "sha256": "F8A0E517ED57F9ED89F5C5E9ACBAE506A771760BCC900E2BB930A0DACDB1F821",
+      "size": 756
+    },
+    {
+      "id": "ART-PREFLIGHT-SERVER-LOG",
+      "path": "artifacts/logs/p2-6-sd-r5-preflight-hw-02-jlink-server.log",
+      "sha256": "A686027E1F11D4E64E1B39E7F724DA29CAD85C35923513A26830044074E93C5B",
+      "size": 10799
+    },
+    {
+      "id": "ART-PREFLIGHT-RESULT",
+      "path": "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json",
+      "sha256": "9676E29CFC4039E023EA4E7DF1E620C82F15E08B4A1DF17CFA0FD4F39D1AF79F",
+      "size": 3580
+    },
+    {
+      "id": "ART-OTA-POST-GDB-SCRIPT",
+      "path": "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01-post.gdb",
+      "sha256": "5955D86D98B151BF5A824046AB61D7BF5B4D8AFBD4BFB906C121126906E1E4E1",
+      "size": 859
+    },
+    {
+      "id": "ART-OTA-GDB-SCRIPT",
+      "path": "artifacts/scripts/p2-6-sd-r5-patch-ota-hw-01.gdb",
+      "sha256": "89B07A18A002B14050C2B5DBCBA7BF5890FE092D17BEF0CC70DF626F7F33CECB",
+      "size": 19818
+    },
+    {
+      "id": "ART-CB-POST",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-post.bin",
+      "sha256": "8789F9176E36D36189BBA7F3432A488A3ED5C98494B1EFF0078FF47F017FC420",
+      "size": 168
+    },
+    {
+      "id": "ART-CB-PRE",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-pre.bin",
+      "sha256": "5806020EE0DFDABDFC1D89E38B236F846014D0ED157CC4386FA7A68F0C9CB9CD",
+      "size": 168
+    },
+    {
+      "id": "ART-RTT-PAYLOAD",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log",
+      "sha256": "7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+      "size": 737
+    },
+    {
+      "id": "ART-RTT-PENDING",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-pending.bin",
+      "sha256": "7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+      "size": 737
+    },
+    {
+      "id": "ART-UP0-PRE",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-up0-pre.bin",
+      "sha256": "B154EFDDBD72B3D9F4E4A0A0F02B0BA14020B781F3D1DD34BE67EA532158C4A4",
+      "size": 1024
+    },
+    {
+      "id": "ART-UPLOAD-READBACK",
+      "path": "artifacts/snapshots/p2-6-sd-r5-patch-upload-hw-01-readback.bin",
+      "sha256": "2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+      "size": 305
+    },
+    {
+      "id": "ART-RECOMPUTE-REPORT",
+      "path": "artifacts/recompute/p2-6-v2-recompute-report.json",
+      "sha256": "81EDE9459F204F3796513CBA751DE6C481EA9689996559AE58733E3DD5FBF5A2",
+      "size": 10719
+    },
+    {
+      "id": "ART-RECOMPUTE-LOG",
+      "path": "commands/cmd-v2-recompute.stdout.log",
+      "sha256": "30217CC9BE7765B071AFB9986D142234303083866E198CB0D071B9F5CC74AA05",
+      "size": 3060
+    },
+    {
+      "id": "ART-RECOMPUTE-SELFTEST-LOG",
+      "path": "commands/cmd-v2-recompute-selftest.stdout.log",
+      "sha256": "08F62408E02997D377FDE48829E9CE32D242F2A4BE53847C65D51C368A2347AE",
+      "size": 1032
+    }
+  ]
+}

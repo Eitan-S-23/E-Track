@@ -1,0 +1,319 @@
+{
+  "schema": "p2-6-v2-evidence-recompute-v1",
+  "workspace_peak_limit": 40960,
+  "measurement_record": {
+    "kind": "patch",
+    "result": "0",
+    "workspace_peak": "21792",
+    "arena_peak_observed": "21792",
+    "failed_request_size": "0",
+    "stack_entry": "3252",
+    "stack_peak": "3252",
+    "stack_total": "8192",
+    "guard_entry": "1",
+    "guard_exit": "1",
+    "sbrk_delta": "0",
+    "sbrk_peak": "537221216",
+    "tlsf_malloc_delta": "0",
+    "tlsf_realloc_delta": "0",
+    "tlsf_free_delta": "0",
+    "lv_free_entry": "64832",
+    "lv_free_exit": "64832",
+    "lv_big_entry": "61192",
+    "lv_big_exit": "61192",
+    "lv_frag_entry": "6",
+    "lv_frag_exit": "6",
+    "lv_max_entry": "64551",
+    "lv_max_exit": "64551",
+    "seq": "3129738723",
+    "last_size": "202",
+    "last_ret": "0x1A"
+  },
+  "artifact_digests": {
+    "artifacts/logs/p2-6-sd-r5-preflight-hw-02-result.json": {
+      "bytes": 3580,
+      "sha256": "9676E29CFC4039E023EA4E7DF1E620C82F15E08B4A1DF17CFA0FD4F39D1AF79F"
+    },
+    "artifacts/logs/p2-6-sd-r5-patch-upload-hw-01-result.json": {
+      "bytes": 4733,
+      "sha256": "9306B4D438424D9E16BDDE3C2B3E0B69D32D2C27A08F87C31190ED92C6AEEDAB"
+    },
+    "artifacts/snapshots/p2-6-sd-r5-patch-upload-hw-01-readback.bin": {
+      "bytes": 305,
+      "sha256": "2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B"
+    },
+    "artifacts/logs/p2-6-sd-r5-patch-ota-hw-01-result.json": {
+      "bytes": 12058,
+      "sha256": "1A5C4F55ADA98A0C1790E2976FDF6C1C92B297F622AD642C6162CFB271620072"
+    },
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-payload.raw.log": {
+      "bytes": 737,
+      "sha256": "7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215"
+    },
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-pending.bin": {
+      "bytes": 737,
+      "sha256": "7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215"
+    },
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-pre.bin": {
+      "bytes": 168,
+      "sha256": "5806020EE0DFDABDFC1D89E38B236F846014D0ED157CC4386FA7A68F0C9CB9CD"
+    },
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-cb-post.bin": {
+      "bytes": 168,
+      "sha256": "8789F9176E36D36189BBA7F3432A488A3ED5C98494B1EFF0078FF47F017FC420"
+    },
+    "artifacts/snapshots/p2-6-sd-r5-patch-ota-hw-01-rtt-up0-pre.bin": {
+      "bytes": 1024,
+      "sha256": "B154EFDDBD72B3D9F4E4A0A0F02B0BA14020B781F3D1DD34BE67EA532158C4A4"
+    }
+  },
+  "checks": [
+    {
+      "criterion_id": "HW-BOARD-STATE-PREFLIGHT",
+      "observed": [
+        "preflight_pass_markers=1",
+        "state_pass_markers=1",
+        "write_calls=0",
+        "flash_calls=0",
+        "gdb_exit_code=0",
+        "server_natural_exit=true"
+      ],
+      "expected": [
+        "preflight_pass_markers=1",
+        "state_pass_markers=1",
+        "write_calls=0",
+        "flash_calls=0",
+        "gdb_exit_code=0",
+        "server_natural_exit=true"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "HW-PACKAGE-IDENTITY",
+      "observed": [
+        "input_bytes=305",
+        "readback_bytes=305",
+        "input_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+        "readback_recomputed_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+        "readback_matches=true",
+        "upload_mcu_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu",
+        "ota_package_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu"
+      ],
+      "expected": [
+        "input_bytes=305",
+        "readback_bytes=305",
+        "input_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+        "readback_recomputed_sha256=2B0ACCAEABD88572F1DAE98A7AB66DF511F48D099530537281FDA36AF37C9D2B",
+        "readback_matches=true",
+        "upload_mcu_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu",
+        "ota_package_path=/P2-6A-PATCH-v2.8.0-to-v2.8.1-R5-20260830-01.etu"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "HW-INPUTS-IDENTITY",
+      "observed": [
+        "preflight.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "preflight.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "preflight.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "preflight.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "upload.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "upload.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "upload.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "upload.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "ota.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "ota.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "ota.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "ota.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB"
+      ],
+      "expected": [
+        "preflight.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "preflight.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "preflight.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "preflight.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "upload.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "upload.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "upload.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "upload.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "ota.elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "ota.map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "ota.device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "ota.device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "HW-CAPTURE-BYTE-IDENTITY",
+      "observed": [
+        "payload_bytes=737",
+        "pending_bytes=737",
+        "payload_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+        "pending_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+        "byte_identical=true"
+      ],
+      "expected": [
+        "payload_bytes=737",
+        "pending_bytes=737",
+        "payload_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+        "pending_sha256=7D9C1528D06CCFD0801402C6A8EE92B3E87309F328C7B41FCB1290476ACA8215",
+        "byte_identical=true"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "HW-RECORD-UNIQUENESS",
+      "observed": [
+        "p2_6_record_count=1",
+        "kind_patch_record_count=1",
+        "result=0"
+      ],
+      "expected": [
+        "p2_6_record_count=1",
+        "kind_patch_record_count=1",
+        "result=0"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "HW-POSTCHECK-RDOFF",
+      "observed": [
+        "WrOff:737->737",
+        "RdOff:0->737",
+        "changed_byte_offsets=[40, 41]",
+        "changed_outside_rd_off_word=0",
+        "up0_pBuffer_unchanged=true",
+        "up0_size_unchanged=true"
+      ],
+      "expected": [
+        "WrOff:737->737",
+        "RdOff:0->737",
+        "changed_byte_offsets=[40, 41]",
+        "changed_outside_rd_off_word=0",
+        "up0_pBuffer_unchanged=true",
+        "up0_size_unchanged=true"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "PROC-SESSION-CLOSURE",
+      "observed": [
+        "gdb_exit_code=0",
+        "server_exit_code=0",
+        "server_natural_exit=true",
+        "server_kill_sent=false",
+        "ports_closed=true",
+        "session_error=null"
+      ],
+      "expected": [
+        "gdb_exit_code=0",
+        "server_exit_code=0",
+        "server_natural_exit=true",
+        "server_kill_sent=false",
+        "ports_closed=true",
+        "session_error=null"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "PATCH-C2-WORKSPACE-PEAK",
+      "observed": {
+        "value": 21792,
+        "unit": "byte"
+      },
+      "expected": {
+        "operator": "le",
+        "limit": 40960,
+        "unit": "byte"
+      },
+      "result": "PASS",
+      "note": "limit = OTA_OVERLAY_WORKSPACE_LENGTH(0xA000)"
+    },
+    {
+      "criterion_id": "PATCH-C4-GUARD-INTACT",
+      "observed": [
+        "guard_entry=1",
+        "guard_exit=1"
+      ],
+      "expected": [
+        "guard_entry=1",
+        "guard_exit=1"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "PATCH-C5-SBRK-DELTA-ZERO",
+      "observed": {
+        "value": 0,
+        "unit": "call"
+      },
+      "expected": {
+        "operator": "eq",
+        "limit": 0,
+        "unit": "call"
+      },
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "PATCH-C6-TLSF-DELTA-ZERO",
+      "observed": [
+        "tlsf_malloc_delta=0",
+        "tlsf_realloc_delta=0",
+        "tlsf_free_delta=0"
+      ],
+      "expected": [
+        "tlsf_malloc_delta=0",
+        "tlsf_realloc_delta=0",
+        "tlsf_free_delta=0"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "PATCH-C14-LV-POOL-NET",
+      "observed": [
+        "lv_free 64832->64832",
+        "lv_big 61192->61192",
+        "lv_frag 6->6",
+        "lv_max 64551->64551"
+      ],
+      "expected": [
+        "lv_free 64832->64832",
+        "lv_big 61192->61192",
+        "lv_frag 6->6",
+        "lv_max 64551->64551"
+      ],
+      "result": "PASS",
+      "note": ""
+    },
+    {
+      "criterion_id": "PROC-CUSTODY-COMPLETE",
+      "observed": [
+        "custody_files=23",
+        "present=23",
+        "digest_match=23",
+        "missing=[]",
+        "mismatch=[]"
+      ],
+      "expected": [
+        "custody_files=23",
+        "present=23",
+        "digest_match=23",
+        "missing=[]",
+        "mismatch=[]"
+      ],
+      "result": "PASS",
+      "note": ""
+    }
+  ],
+  "failed_criteria": [],
+  "overall": "PASS"
+}

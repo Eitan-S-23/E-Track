@@ -495,6 +495,18 @@ P0-6 当前工作树的链接基线如下;高水位按执行区末端计算,不�
 
 `snapshotBuf` 为 `256*320*2=163840B`,当前静态占满整个 `RW_IRAM2`;页面卸载不会释放它。以上数字与构建产物/时间戳/哈希的完整摘录见 `docs/ota-exec-notes/P0-6-ram-baseline-overlay.md`。
 
+P2-6 当前候选于 2026-08-19 追加以下**实测回填**，不修改本节任何门槛：
+
+| 工具链 | P2-6 当前主 RAM 观测 | 余量口径 | 证据 |
+|---|---:|---|---|
+| GCC Release production | guard 边界 `0x20055FE0`，即 `352224/360448B` | 顶部 `8224B` 固定分成 `32B` guard + `8192B` 栈；`._user_heap_stack` 末 `0x200552C0`，到 guard 的 heap headroom `3360B` | App map SHA-256 `20794BC973A732CBEFBFF313B28EBA60B9D0190DAD522D504A855697091C4BA` |
+| AC5 auxiliary | `RW_IRAM1 Size=0x55D10=351504B` | armlink `Max=0x57FF8=360440B`，余 `8936B`；仅作辅助对照 | map SHA-256 `0DC825F0402F03B91124A50E60C7FF18E9C6A81392521ABD7D8D2EBAD1C8C935` |
+
+GCC 的 P2-6 前当前产物旧口径为 `._user_heap_stack` 末 `0x200562C0=352960B`；
+新旧数值差 `-736B`，但新布局把 8192B 栈和 32B guard 显式放在 RAM 顶部，故该差值
+不是通用堆余量。完整算式、产物时间戳和 warning/error 统计见
+`docs/ota-exec-notes/P2-6-implementation-evidence-2026-08-15.md`。
+
 ### 10.2 OTA 独占 overlay(A:采纳)
 
 升级解密、解压、差分合成开始前,App 必须取得 `OTA_EXCLUSIVE` 所有权。该所有权把同一物理区 `[0x20058000,0x20080000)` 从 LiveMap 的 `.sram_ext` 切换为 OTA 的 `.ota_overlay`;两者不是两个可同时存在的数组:
@@ -527,5 +539,13 @@ P0-6 当前工作树的链接基线如下;高水位按执行区末端计算,不�
 | **OTA overlay 池上限** | **40960 (40KiB)** | `OTA_POOL_CEILING` |
 
 主 RAM 另保留 `8192B` OTA 调用栈(`OTA_STACK_RESERVE`,含当前 linker 的最小栈而非额外无界增长)。因此 overlay 采纳后,AC5 仍至少有 `46920-8192=38728B`,GCC 至少有 `74216-8192=66024B` 主 RAM 余量;160KiB overlay 尚余 `163840-40960=122880B`。不采用 overlay 时,按同一 `5468B` 对齐/保护量计算,AC5 的 16KiB 字典会超出 `2232B`;8KiB 可余 `5960B`,但不作为 v1 方案。
+
+P2-6 宿主边界回填(2026-08-19)：FULL `prefix=6576B,P_full=33072B`，PATCH
+`prefix=7640B,P_full=21848B`；两者均在正式 `40960B` workspace 下成功，且各自
+`arena.capacity=P_full-prefix` 成功、再减 `1B` 返回既有 workspace 错误，失败路径
+candidate prepare/program 为 `0/0`。该观测只闭合固定池的宿主容量边界与诊断字段
+鉴别力；J-Link DAP 初始化失败导致真机 C1-C7/C14 未观测，C3/C13/C16 仍有证据
+缺口，因此不得把宿主值写成真机产品结论，也不得据此改 `40960B`、`8192B`、
+`16KiB` 字典、`35492B` 或 `5468B`。
 
 P2-6 必须在真机以 StackInfo、固定池水位和失败注入复核上述上限;只有实测超过 `40960B` 才能通过 `PLAN-OTA-EXEC.md` §9 变更登记降为 8KiB字典,并同步 `etu_pack.py`/CI 参数。任何未取得 `OTA_EXCLUSIVE` 的路径不得启动 LZMA/bspatch。
