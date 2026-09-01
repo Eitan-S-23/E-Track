@@ -1,0 +1,1281 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P2-6-v3",
+  "contract_sha256": "DA78DDF5BDCA97E1848522193F4FE9F4E7D8E6AC02B0471DFB8F45D9B8AC19B4",
+  "round_id": "P2-6-V3-FREEZE-20260901-01",
+  "executed_by": "独立验收会话（非实现方）",
+  "executed_at": "2026-09-01T00:00:00+08:00",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "FULL-C1-WORKSPACE-PEAK",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "kind=full",
+        "result=0",
+        "workspace_peak_bytes=33016",
+        "arena_peak_observed_bytes=33016",
+        "failed_request_size=0",
+        "limit_bytes=40960",
+        "headroom_bytes=7944",
+        "record_count=1",
+        "workspace_peak_within_limit=true",
+        "arena_equals_workspace_peak=true"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "FULL-C4-GUARD-INTACT",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "guard_entry=1",
+        "guard_exit=1",
+        "guard_bytes=32",
+        "stack_entry_bytes=3496",
+        "stack_peak_bytes=3496",
+        "stack_total_bytes=8192",
+        "stack_headroom_bytes=4696",
+        "stack_peak_within_limit=true"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "FULL-C5-SBRK-DELTA-ZERO",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "sbrk_delta=0",
+        "sbrk_peak=537221444"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "FULL-C6-TLSF-DELTA-ZERO",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "tlsf_malloc_delta=0",
+        "tlsf_realloc_delta=0",
+        "tlsf_free_delta=0"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "FULL-C14-LV-POOL-NET",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "lv_free.entry=63616",
+        "lv_free.exit=63616",
+        "lv_big.entry=59900",
+        "lv_big.exit=59900",
+        "lv_frag.entry=6",
+        "lv_frag.exit=6",
+        "lv_max.entry=64667",
+        "lv_max.exit=64667",
+        "all_four_fields_net_zero=true"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-R8-CAPTURE-BYTE-IDENTITY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "payload_bytes=735",
+        "pending_bytes=735",
+        "byte_identical=true",
+        "payload_sha256=50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+        "declared_pending_sha256=50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+        "derive_descriptor_WrOff=735",
+        "declared_matches_recomputed=true"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-R8-POSTCHECK-RDOFF",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "control_block_bytes=168",
+        "changed_byte_offsets=[40,41]",
+        "changed_outside_rdoff=[]",
+        "up0_pre.pBuffer=537213468",
+        "up0_pre.SizeOfBuffer=1024",
+        "up0_pre.WrOff=735",
+        "up0_pre.RdOff=0",
+        "up0_post.WrOff=735",
+        "up0_post.RdOff=735"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-post.bin",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-pre.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-R8-INPUTS-IDENTITY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "bundle_test_elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "upload_input_bytes=282367",
+        "upload_readback_bytes=282367",
+        "upload_input_sha256=84D3F38420A9521FEEC1251CCE13A76F83F862935C2846A30D09DE1EC96DD2E7",
+        "upload_readback_sha256=84D3F38420A9521FEEC1251CCE13A76F83F862935C2846A30D09DE1EC96DD2E7",
+        "upload_readback_matches=true",
+        "bundle_elf_matches_device=true"
+      ],
+      "evidence": [
+        "artifacts/elf/X-Track-App-GCC-test.elf",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-upload-hw-01-result.json",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "PROC-R8-SESSION-CLOSURE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "gdb_exit_code=0",
+        "server_exit_code=0",
+        "server_natural_exit=true",
+        "server_terminate_sent=false",
+        "server_kill_sent=false",
+        "ports_closed=true",
+        "session_error=null",
+        "transport_classification=PASS",
+        "rtt_channel_binding_verified=true",
+        "rtt_record_count=1",
+        "rtt_matching_record_count=1",
+        "rtt_postcheck_passed=true",
+        "outside_repo_writes=[\"C:\\\\Users\\\\SU\\\\AppData\\\\Roaming\\\\SEGGER\\\\JLinkDLL.ini\"]"
+      ],
+      "evidence": [
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-gdb.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/r8-result.json",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-BOOT-CANDIDATE-SLOT-COMMITTED",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "slot_header.magic=ETSL",
+        "slot_header.slot_type=1",
+        "slot_header.pad=FFFFFF",
+        "slot_header.payload_len=600744",
+        "slot_header.payload_crc32_hex=0x53E81862",
+        "slot_header.version_code=20801",
+        "slot_header.sha8=9db3c649b80e82c6",
+        "slot_header.commit_marker_hex=0x434F4D54",
+        "bcb_a_cand_len=600744",
+        "bcb_a_cand_crc32_hex=0x53E81862",
+        "bcb_a_cand_vcode=20801",
+        "slot_matches_bcb=true"
+      ],
+      "evidence": [
+        "artifacts/r8/r8-s0-bcb-gdb.log",
+        "artifacts/r8/r8-s3-candhdr-gdb.log",
+        "artifacts/r8/s0-bcb-raw.bin",
+        "artifacts/r8/s3-cand-slot-header.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-BOOT-BCB-TRANSITION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "pre_A.state=4",
+        "pre_A.seq=752",
+        "pre_A.cur_vcode=20800",
+        "pre_B.state=5",
+        "pre_B.seq=751",
+        "post_B.state=3",
+        "post_B.seq=903",
+        "post_B.cur_vcode=20800",
+        "post_A.state=4",
+        "post_A.seq=904",
+        "post_A.cur_vcode=20801",
+        "seq_advance_pre_A_to_post_B=151",
+        "seq_advance_post_B_to_post_A=1",
+        "all_copies_crc32_selfconsistent=true"
+      ],
+      "evidence": [
+        "artifacts/r8/r8-s0-bcb-gdb.log",
+        "artifacts/r8/r8-s4-obs2-gdb.log",
+        "artifacts/r8/s0-bcb-raw.bin",
+        "artifacts/r8/s4-obs2-bcb-raw.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-BOOT-APP-VCODE-ADVANCED",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "app_slot_vcode_before_reset=20800",
+        "app_slot_vcode_after_reset=20801",
+        "image_len=600744",
+        "rtt_ring_has_test_boot_confirm=true",
+        "g_ota_state_snapshot=4",
+        "g_ota_confirm_done=1",
+        "vcode_advanced_by_one=true"
+      ],
+      "evidence": [
+        "artifacts/r8/r8-s4-obs1-gdb.log",
+        "artifacts/r8/r8-s4-obs2-gdb.log",
+        "artifacts/r8/s4-obs1-rtt-ring.bin",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-C7-PACKAGE-DERIVATION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "bytes=282355",
+        "diff_offsets=[36,37,38,39,60,61,62,63,141209]",
+        "payload_diff_offsets=[141209]",
+        "flip_xor=1",
+        "good_payload_crc_ok=true",
+        "bad_payload_crc_ok=true",
+        "bad_header_crc_ok=true",
+        "good_target_vcode=20802",
+        "bad_target_vcode=20802",
+        "board_vcode=20801",
+        "good_sha256=761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20",
+        "bad_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+        "single_payload_byte_flipped=true",
+        "target_above_board=true"
+      ],
+      "evidence": [
+        "artifacts/r9/BAD-2.8.2.etu",
+        "artifacts/r9/GOOD-2.8.2.etu",
+        "artifacts/r9/derive_bad.py",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-C7-UPLOAD-BYTE-IDENTITY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "bad_package_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+        "attempt_02_transport=PASS",
+        "attempt_02_readback_bytes=282355",
+        "attempt_02_input_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+        "attempt_02_readback_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+        "attempt_02_byte_identical=true",
+        "attempt_02_readback_matches=true",
+        "attempt_02_chunk_count=9",
+        "attempt_01_transport=GDB_FAIL",
+        "attempt_01_readback_matches=false",
+        "attempt_01_gdb_exit_code=47"
+      ],
+      "evidence": [
+        "artifacts/r9/BAD-2.8.2.etu",
+        "artifacts/r9/bad-upload-hw-02-readback.bin",
+        "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json",
+        "artifacts/r9/p2-6-sd-r9-bad-upload-hw-02-result.json",
+        "artifacts/r9/run_r9_upload.py",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-C7-MIDAPPLY-OWNER-PACKAGE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "confirm_mode=1",
+        "owner_at_confirm=0",
+        "import_mode=2",
+        "owner_at_apply=2",
+        "bcb_mid1=4",
+        "bcb_mid2=4",
+        "lzma_alloc_entry_seen=true"
+      ],
+      "evidence": [
+        "artifacts/r9/r9-s3-c7-chain-gdb.log",
+        "artifacts/r9/r9-s3-c7-chain.gdb",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-C7-FAILURE-NOT-VERSION-GATE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "page_object_bytes=13824",
+        "page_has_error_string=true",
+        "page_has_bad_package_path=true",
+        "error_string=full:lzma_data",
+        "not_payload_crc_check=true",
+        "version_gate_refusal=false",
+        "host_gate_bad_result=lzma_data",
+        "host_gate_failures=0",
+        "host_gate_status=PASS"
+      ],
+      "evidence": [
+        "artifacts/r9/r9-s1-host-gate.log",
+        "artifacts/r9/r9-s3e-errstring-gdb.log",
+        "artifacts/r9/r9-s3e-page-object.bin",
+        "artifacts/r9/test_r9_gate.c",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-C7-OVERLAY-RELEASE-REBUILD",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "post_fail_mode=3",
+        "post_fail_owner=0",
+        "post_fail_vcode=20801",
+        "recover_pre_owner=0",
+        "recover_pop_ok=1",
+        "reacquire_turns=0",
+        "reacquire_owner=1",
+        "final_owner=1",
+        "final_vcode=20801",
+        "r8_owner_mid=1",
+        "r8_fail_state_owner_released=true"
+      ],
+      "evidence": [
+        "artifacts/r8/r8-s5-c-recover-gdb.log",
+        "artifacts/r9/r9-s3b-post-fail-gdb.log",
+        "artifacts/r9/r9-s4-recover-gdb.log",
+        "artifacts/r9/r9-s5-final-gdb.log",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-C7-MAP-HEALTHY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "min_stat_lines_required=30",
+        "r9_baseline.stat_lines=40",
+        "r9_baseline.max_lineHit=608",
+        "r9_recover.stat_lines=44",
+        "r9_recover.max_lineHit=313",
+        "r8_baseline.stat_lines=38",
+        "r8_baseline.max_lineHit=612",
+        "r8_recover.stat_lines=41",
+        "r8_recover.max_lineHit=311",
+        "all_rounds_above_minimum=true"
+      ],
+      "evidence": [
+        "artifacts/r8/s5-a-livemap-baseline.rtt.log",
+        "artifacts/r8/s5-c-livemap-recover.rtt.log",
+        "artifacts/r9/r9-s2-baseline.rtt.log",
+        "artifacts/r9/r9-s4-recover.rtt.log",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HW-C7-BCB-UNTOUCHED",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "s0_bcb_values=[4,4]",
+        "s2_bcb_values=[4,4]",
+        "s3_bcb_values=[4,4,4]",
+        "s3b_bcb_values=[4,4]",
+        "s3e_bcb_values=[4,4]",
+        "s4_bcb_values=[4,4]",
+        "s5_bcb_values=[4,4]",
+        "host_gate_bad_bcb_untouched=true",
+        "host_gate_good_bcb_identical=true",
+        "distinct_states_across_all_stages=[4]"
+      ],
+      "evidence": [
+        "artifacts/r9/r9-s0-precheck-gdb.log",
+        "artifacts/r9/r9-s1-host-gate.log",
+        "artifacts/r9/r9-s2-baseline-gdb.log",
+        "artifacts/r9/r9-s3-c7-chain-gdb.log",
+        "artifacts/r9/r9-s3b-post-fail-gdb.log",
+        "artifacts/r9/r9-s3e-errstring-gdb.log",
+        "artifacts/r9/r9-s4-recover-gdb.log",
+        "artifacts/r9/r9-s5-final-gdb.log",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "OFF-C3-C13-STACK-CLOSURE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "full_thread_peak_bytes=1904",
+        "patch_thread_peak_bytes=2048",
+        "recomputed_thread_peak_bytes=2048",
+        "interrupt_budget_bytes=768",
+        "bounded_interrupt_budget_bytes=768",
+        "recomputed_total_bytes=2816",
+        "limit_bytes=8192",
+        "margin_bytes=5376",
+        "interrupt_evidence_gaps=[]",
+        "measurement_wrapper_upper_bound_bytes=40",
+        "stack_scan_overhead_bytes=16",
+        "startup_scan_observed_bytes=80",
+        "startup_scan_helper_static_bytes=72",
+        "total_within_limit=true"
+      ],
+      "evidence": [
+        "artifacts/elf/X-Track-App-GCC-production.elf",
+        "artifacts/elf/X-Track-App-GCC-test.elf",
+        "artifacts/offline/stack-closure.json",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-stack-closure.stdout.log",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "OFF-C8-C16-RAM-LAYOUT",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "main_ram_region_bytes=360448",
+        "production.allocated_bytes=357088",
+        "production.free_hole_bytes=3360",
+        "production.top_addr_hex=0x20058000",
+        "test.allocated_bytes=357264",
+        "test.free_hole_bytes=3184",
+        "test.top_addr_hex=0x20058000",
+        "instrumentation_delta_bytes=176",
+        "ota_sections_identical_prod_vs_test=true",
+        "ota_sections_production..ota_stack.addr_hex=0x20056000",
+        "ota_sections_production..ota_stack.size=8192",
+        "ota_sections_production..ota_stack_guard.addr_hex=0x20055FE0",
+        "ota_sections_production..ota_stack_guard.size=32",
+        "ota_sections_production..ota_overlay.addr_hex=0x20058000",
+        "ota_sections_production..ota_overlay.size=40960",
+        "sram_ext_addr_hex=0x20058000",
+        "sram_ext_bytes=163840",
+        "production_fits_region=true"
+      ],
+      "evidence": [
+        "artifacts/elf/X-Track-App-GCC-production.elf",
+        "artifacts/elf/X-Track-App-GCC-test.elf",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-ram-highwater.stdout.log",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "OFF-C10-C11-CAPACITY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "full.prefix=6576",
+        "full.P_full=33072",
+        "full.ok_case_capacity=26496",
+        "full.ok_case_result=ok",
+        "full.ok_case_status=PASS",
+        "full.fail_case_capacity=26495",
+        "full.fail_case_result=workspace",
+        "full.fail_case_failed_request_size=16384",
+        "full.fail_case_status=PASS",
+        "patch.prefix=7640",
+        "patch.P_full=21848",
+        "patch.ok_case_capacity=14208",
+        "patch.ok_case_result=ok",
+        "patch.ok_case_status=PASS",
+        "patch.fail_case_capacity=14207",
+        "patch.fail_case_result=workspace",
+        "patch.fail_case_failed_request_size=4096",
+        "patch.fail_case_status=PASS",
+        "full_boundary_is_one_byte=true",
+        "patch_boundary_is_one_byte=true"
+      ],
+      "evidence": [
+        "artifacts/offline/p2-6-capacity-full.run.log",
+        "artifacts/offline/p2-6-capacity-patch.run.log",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-capacity.stdout.log",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "PROC-CUSTODY-COMPLETE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "frozen_artifact_count=52",
+        "frozen_total_bytes=2979503",
+        "missing=[]",
+        "mismatched=[]",
+        "index_entry_count=52",
+        "index_paths_symmetric_difference=[]",
+        "index_divergent_entries=[]",
+        "upstream_manifest_coverage.r8.manifest_entries=89",
+        "upstream_manifest_coverage.r8.bundle_artifacts=18",
+        "upstream_manifest_coverage.r8.uncovered=[]",
+        "upstream_manifest_coverage.r9.manifest_entries=39",
+        "upstream_manifest_coverage.r9.bundle_artifacts=21",
+        "declared_upstream_gaps=[\"artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json\"]",
+        "observed_upstream_gaps=[\"artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json\"]",
+        "declared_equals_observed_gaps=true"
+      ],
+      "evidence": [
+        "artifacts/artifact-index.json",
+        "artifacts/docs/P2-6-SD-R7-hw-execution-evidence-2026-08-31.md",
+        "artifacts/docs/P2-6-SD-R8-hw-execution-evidence-2026-08-31.md",
+        "artifacts/docs/P2-6-SD-R9-hw-execution-evidence-2026-09-01.md",
+        "artifacts/docs/P2-6-SD-R9-research-2026-09-01.md",
+        "artifacts/elf/X-Track-App-GCC-production.elf",
+        "artifacts/elf/X-Track-App-GCC-test.elf",
+        "artifacts/offline/config-matrix-p2-6.log",
+        "artifacts/offline/link-asserts-run.log",
+        "artifacts/offline/p2-6-capacity-full.run.log",
+        "artifacts/offline/p2-6-capacity-patch.run.log",
+        "artifacts/offline/stack-closure.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-gdb.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-post.bin",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-pre.bin",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+        "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+        "artifacts/r8/p2-6-sd-r8-full-upload-hw-01-result.json",
+        "artifacts/r8/r8-result.json",
+        "artifacts/r8/r8-s0-bcb-gdb.log",
+        "artifacts/r8/r8-s3-candhdr-gdb.log",
+        "artifacts/r8/r8-s4-obs1-gdb.log",
+        "artifacts/r8/r8-s4-obs2-gdb.log",
+        "artifacts/r8/r8-s5-c-recover-gdb.log",
+        "artifacts/r8/s0-bcb-raw.bin",
+        "artifacts/r8/s3-cand-slot-header.bin",
+        "artifacts/r8/s4-obs1-rtt-ring.bin",
+        "artifacts/r8/s4-obs2-bcb-raw.bin",
+        "artifacts/r8/s5-a-livemap-baseline.rtt.log",
+        "artifacts/r8/s5-c-livemap-recover.rtt.log",
+        "artifacts/r9/BAD-2.8.2.etu",
+        "artifacts/r9/GOOD-2.8.2.etu",
+        "artifacts/r9/bad-upload-hw-02-readback.bin",
+        "artifacts/r9/derive_bad.py",
+        "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json",
+        "artifacts/r9/p2-6-sd-r9-bad-upload-hw-02-result.json",
+        "artifacts/r9/r9-result.json",
+        "artifacts/r9/r9-s0-precheck-gdb.log",
+        "artifacts/r9/r9-s1-host-gate.log",
+        "artifacts/r9/r9-s1-usb-fix.gdb",
+        "artifacts/r9/r9-s2-baseline-gdb.log",
+        "artifacts/r9/r9-s2-baseline.rtt.log",
+        "artifacts/r9/r9-s3-c7-chain-gdb.log",
+        "artifacts/r9/r9-s3-c7-chain.gdb",
+        "artifacts/r9/r9-s3b-post-fail-gdb.log",
+        "artifacts/r9/r9-s3e-errstring-gdb.log",
+        "artifacts/r9/r9-s3e-page-object.bin",
+        "artifacts/r9/r9-s4-recover-gdb.log",
+        "artifacts/r9/r9-s4-recover.rtt.log",
+        "artifacts/r9/r9-s5-final-gdb.log",
+        "artifacts/r9/run_r9_upload.py",
+        "artifacts/r9/test_r9_gate.c",
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "OFF-C12-C15-WRAPPER-CHECKLIST",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "suite_status=OK",
+        "tests_ran=6",
+        "tests_ok=6",
+        "l1_instrumentation_symbols_present=true",
+        "l1_rtt_fragments_reachable=true",
+        "l2_production_clean=true",
+        "l3_host_only_absent=true",
+        "wrapper_forwards_to_real_tlsf=true",
+        "macro_media_separated=true"
+      ],
+      "evidence": [
+        "artifacts/elf/X-Track-App-GCC-production.elf",
+        "artifacts/elf/X-Track-App-GCC-test.elf",
+        "commands/cmd-v3-symbols.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "OFF-CONFIG-MUTEX",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "status=PASS",
+        "pass_lines=7",
+        "mutual_exclusion_rejections=4",
+        "mutual_exclusion_macros=[\"P1_6_TEST_ENABLE\",\"P2_1_TEST_ENABLE\",\"P2_2_TEST_ENABLE\",\"P2_3_TEST_ENABLE\"]",
+        "production_configure_ok=true",
+        "p2_6_definition_present=true",
+        "production_definition_absent=true"
+      ],
+      "evidence": [
+        "artifacts/offline/config-matrix-p2-6.log",
+        "commands/cmd-v3-configuration.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "OFF-LINK-ASSERTS",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "status=PASS",
+        "positive_case_rc0=true",
+        "negative_cases=5",
+        "negative_ids=[\"A1\",\"A2\",\"A4\",\"A5\",\"A6\"]"
+      ],
+      "evidence": [
+        "artifacts/offline/link-asserts-run.log",
+        "commands/cmd-v3-link-asserts.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "PROC-HARNESS-FAIL-CLOSED",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "positive_cases=1",
+        "negative_cases=32",
+        "failed_cases=0",
+        "status=PASS"
+      ],
+      "evidence": [
+        "artifacts/recompute/p2-6-v3-recompute-report.json",
+        "commands/cmd-v3-recompute-selftest.stdout.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-V3-STACK-CLOSURE",
+      "command": "cd /d/github/my/E-Track && P2_6_PROD_STACK_BUILD=.cache/p2-6a-cmake-prod-stack P2_6_TEST_STACK_BUILD=.cache/p2-6a-cmake-test-stack python -B tests/ota/test_p2_6_stack_closure.py",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-stack-closure.stdout.log"
+    },
+    {
+      "id": "CMD-V3-SYMBOLS",
+      "command": "cd /d/github/my/E-Track && P2_6_PROD_STACK_BUILD=.cache/p2-6a-cmake-prod-stack P2_6_TEST_STACK_BUILD=.cache/p2-6a-cmake-test-stack python -B tests/ota/test_p2_6_symbols.py",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-symbols.stdout.log"
+    },
+    {
+      "id": "CMD-V3-CAPACITY",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/test_p2_6_capacity.py",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-capacity.stdout.log"
+    },
+    {
+      "id": "CMD-V3-CONFIGURATION",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/test_p2_6_configuration.py",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-configuration.stdout.log"
+    },
+    {
+      "id": "CMD-V3-LINK-ASSERTS",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/test_p2_6_link_asserts.py",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-link-asserts.stdout.log"
+    },
+    {
+      "id": "CMD-V3-RAM-HIGHWATER",
+      "command": "cd /d/github/my/E-Track && python -B .cache/p2-6-v3-build/dump_ram_layout.py",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-ram-highwater.stdout.log"
+    },
+    {
+      "id": "CMD-V3-RECOMPUTE",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v3_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v3 --report docs/acceptance-contracts/P2-6-v3/artifacts/recompute/p2-6-v3-recompute-report.json",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-recompute.stdout.log"
+    },
+    {
+      "id": "CMD-V3-RECOMPUTE-SELFTEST",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v3_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v3 --self-test",
+      "exit_code": 0,
+      "output_evidence": "commands/cmd-v3-recompute-selftest.stdout.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "path": "artifacts/artifact-index.json",
+      "sha256": "E287975E770644F25A8F5B934AC5AF500D1A5B0C1D095D55DC945AFAEFEE3BE3",
+      "size": 14418
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R7-HW-EXECUTION-EVIDENCE-2026-08-31-MD",
+      "path": "artifacts/docs/P2-6-SD-R7-hw-execution-evidence-2026-08-31.md",
+      "sha256": "021AEC5B6C2361CB77489ECF317FE22A783F6F0830BC0DB7F7E0D90D578A3AA8",
+      "size": 11313
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R8-HW-EXECUTION-EVIDENCE-2026-08-31-MD",
+      "path": "artifacts/docs/P2-6-SD-R8-hw-execution-evidence-2026-08-31.md",
+      "sha256": "2A9EC779286BC805DEF24BECB6F71F129AF451F78A41D5FCB3ACA7E30E9C3947",
+      "size": 23866
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R9-HW-EXECUTION-EVIDENCE-2026-09-01-MD",
+      "path": "artifacts/docs/P2-6-SD-R9-hw-execution-evidence-2026-09-01.md",
+      "sha256": "97E5342A3A7424EDD93C721ED2BBE4EF7870D200EA5B684423C51F58F91C33F7",
+      "size": 22416
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R9-RESEARCH-2026-09-01-MD",
+      "path": "artifacts/docs/P2-6-SD-R9-research-2026-09-01.md",
+      "sha256": "563C0A4C4C37ADB2A4671B208A1BD799E2A80FDD2C5A57B5882360C7DB7AEA13",
+      "size": 7695
+    },
+    {
+      "id": "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+      "path": "artifacts/elf/X-Track-App-GCC-production.elf",
+      "sha256": "8890935D508A446D4AB3B1988A636A03A2289F2E57A3311AB97017BA87EC87AC",
+      "size": 864320
+    },
+    {
+      "id": "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-TEST-ELF",
+      "path": "artifacts/elf/X-Track-App-GCC-test.elf",
+      "sha256": "35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+      "size": 866372
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-CONFIG-MATRIX-P2-6-LOG",
+      "path": "artifacts/offline/config-matrix-p2-6.log",
+      "sha256": "89D2E65C79B4616DA3FF38DD3535FEDFAA07BECE21C90A5C33119F5CCDD7B048",
+      "size": 145
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-LINK-ASSERTS-RUN-LOG",
+      "path": "artifacts/offline/link-asserts-run.log",
+      "sha256": "5D2D91B8DE4B0600DB547654F23EA8AFAE6F38B3667A17127C12D436FBE9BF1A",
+      "size": 49
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-FULL-RUN-LOG",
+      "path": "artifacts/offline/p2-6-capacity-full.run.log",
+      "sha256": "D8DB97C1AA11149CF4A280FEC803CA8684610D681F9A65FF2EB75DD8FAA5F5AA",
+      "size": 641
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-PATCH-RUN-LOG",
+      "path": "artifacts/offline/p2-6-capacity-patch.run.log",
+      "sha256": "80ACFEF59013A12B9B2A9F98EB10E1688386CE364FB61C0085EDA40FDEA597F8",
+      "size": 643
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-STACK-CLOSURE-JSON",
+      "path": "artifacts/offline/stack-closure.json",
+      "sha256": "E3FDE0E18D85A6FE46EED025A5927E0A35E2F941FC8C7D6AC2087CB253703C53",
+      "size": 71014
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-GDB-LOG",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-gdb.log",
+      "sha256": "2593DFD0E2294F4F10F17BDD4CB20DEB3D763FBFBC484143DAA1A2D53A90B241",
+      "size": 2031
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json",
+      "sha256": "6D927026505980BC6CC10F4D760AE3151C7879E96C1904E01BF93F9058128920",
+      "size": 12024
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-POST-BIN",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-post.bin",
+      "sha256": "CC8154BAC9C5C90F25981A13238415875FE7676F991EC37CCBD0C9D5EB7A8C66",
+      "size": 168
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-PRE-BIN",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-pre.bin",
+      "sha256": "E49A672EC97B8EE525C43731D60B7F1208B6531BD33277FB8488B2B5BA3D6CE6",
+      "size": 168
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log",
+      "sha256": "50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+      "size": 735
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin",
+      "sha256": "50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+      "size": 735
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-UPLOAD-HW-01-RESULT-JSON",
+      "path": "artifacts/r8/p2-6-sd-r8-full-upload-hw-01-result.json",
+      "sha256": "09CE8AB6ECA39A2FDD75DA5DA6A2D9A08712C241CD90EFF10CE6AD78311799E3",
+      "size": 72370
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-RESULT-JSON",
+      "path": "artifacts/r8/r8-result.json",
+      "sha256": "AA6D1259D790CDCEAD2FD5D7E01CE25B0D779A41B25B2B9DFC5BBD98B83B9BBE",
+      "size": 14473
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S0-BCB-GDB-LOG",
+      "path": "artifacts/r8/r8-s0-bcb-gdb.log",
+      "sha256": "22CC436F5CE591BB0B4B84C31D414CE433F192A0F4C621CEA4E1F73F37BB59D1",
+      "size": 775
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S3-CANDHDR-GDB-LOG",
+      "path": "artifacts/r8/r8-s3-candhdr-gdb.log",
+      "sha256": "D5B3AAF1A7779ED910D39F0D5EA5122E7EDF1A4CF6D45B81FD1A8946E25B791A",
+      "size": 621
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S4-OBS1-GDB-LOG",
+      "path": "artifacts/r8/r8-s4-obs1-gdb.log",
+      "sha256": "6BE6EB2A38AEE8CC15D38C671E8DB3326F87EC8AF27F56BCE4EC4484AEFB4FDB",
+      "size": 659
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S4-OBS2-GDB-LOG",
+      "path": "artifacts/r8/r8-s4-obs2-gdb.log",
+      "sha256": "6331B977932330BC99B5EF481EFAF6897892B9C55EBFDB82A403C77E9FAEE529",
+      "size": 777
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S5-C-RECOVER-GDB-LOG",
+      "path": "artifacts/r8/r8-s5-c-recover-gdb.log",
+      "sha256": "D803E1DC95593685978DFEF3F8294724EFE7CD127577C5E1DC2F1F706FE0C637",
+      "size": 617
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S0-BCB-RAW-BIN",
+      "path": "artifacts/r8/s0-bcb-raw.bin",
+      "sha256": "0E0A1449201BDCA028E91B1083C90464AD041A158E6D3FB820348A56A0E7C1F3",
+      "size": 192
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S3-CAND-SLOT-HEADER-BIN",
+      "path": "artifacts/r8/s3-cand-slot-header.bin",
+      "sha256": "E83A86AE8E939941F2B955850ED84EFF52AC17050585E5507F79A44055F341B4",
+      "size": 4096
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S4-OBS1-RTT-RING-BIN",
+      "path": "artifacts/r8/s4-obs1-rtt-ring.bin",
+      "sha256": "1455FB44CFF14BCF86773BE42F05CE288E2D46B6CC8C3372CD4E3F65F3BC892C",
+      "size": 1024
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S4-OBS2-BCB-RAW-BIN",
+      "path": "artifacts/r8/s4-obs2-bcb-raw.bin",
+      "sha256": "B75390AF6D3AD0F80832C00D5DF1BFF654B06E1425EA865289FF73C42C15FD82",
+      "size": 192
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S5-A-LIVEMAP-BASELINE-RTT-LOG",
+      "path": "artifacts/r8/s5-a-livemap-baseline.rtt.log",
+      "sha256": "765ACBF8DE331E8E3F4A6EF808E6A8132A54D89154F3210ED54DFDA55EA7F8A5",
+      "size": 4593
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S5-C-LIVEMAP-RECOVER-RTT-LOG",
+      "path": "artifacts/r8/s5-c-livemap-recover.rtt.log",
+      "sha256": "6BF717DDE65FEE154B7C758B20002766F2A98FF56C3251B98470257D587E7809",
+      "size": 4571
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-BAD-2-8-2-ETU",
+      "path": "artifacts/r9/BAD-2.8.2.etu",
+      "sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+      "size": 282355
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-GOOD-2-8-2-ETU",
+      "path": "artifacts/r9/GOOD-2.8.2.etu",
+      "sha256": "761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20",
+      "size": 282355
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-BAD-UPLOAD-HW-02-READBACK-BIN",
+      "path": "artifacts/r9/bad-upload-hw-02-readback.bin",
+      "sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+      "size": 282355
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-DERIVE-BAD-PY",
+      "path": "artifacts/r9/derive_bad.py",
+      "sha256": "CB003C13E84CA0114E45F6B095646C771B930BBF6627CE8691FE5BCA288A2D9D",
+      "size": 2339
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-01-RESULT-JSON",
+      "path": "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json",
+      "sha256": "E55E5A7DBA08EA60F6097C0B6254A1FE56C6ED56ABA0D7DBA9855BA0DB5A5C8F",
+      "size": 4380
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-02-RESULT-JSON",
+      "path": "artifacts/r9/p2-6-sd-r9-bad-upload-hw-02-result.json",
+      "sha256": "65050B1109842136B4C3EB653F9E251E4EC5D7D55E2C2717E56B5BC88F328314",
+      "size": 72384
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-RESULT-JSON",
+      "path": "artifacts/r9/r9-result.json",
+      "sha256": "C64EDD4AD1F6B785DD5F2227C34C52482A21F787DBFDB5629945FF1DD89FC419",
+      "size": 9603
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S0-PRECHECK-GDB-LOG",
+      "path": "artifacts/r9/r9-s0-precheck-gdb.log",
+      "sha256": "0BBA1AC47783D0FA202263A042B8962450A8F12E72B4590697D522B8B9DD7741",
+      "size": 875
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S1-HOST-GATE-LOG",
+      "path": "artifacts/r9/r9-s1-host-gate.log",
+      "sha256": "2A88D4684A149755D2F79C62FE4774EC90E982F9FE66F8C41A4EBE6FF50E9D80",
+      "size": 1609
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S1-USB-FIX-GDB",
+      "path": "artifacts/r9/r9-s1-usb-fix.gdb",
+      "sha256": "E2CAF01DACE9927B76A2C1D87E9B6528F60A5D08480F70340608F68415378522",
+      "size": 2622
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S2-BASELINE-GDB-LOG",
+      "path": "artifacts/r9/r9-s2-baseline-gdb.log",
+      "sha256": "B3112938EAAB303E50731D1159902FAA4594B5B47D5BB0E19740E647CC8EFE13",
+      "size": 761
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S2-BASELINE-RTT-LOG",
+      "path": "artifacts/r9/r9-s2-baseline.rtt.log",
+      "sha256": "D969AB860F4F071F3B7D5C53EB5F489429C20F88EB68AAE340A73B77DCADD9A5",
+      "size": 4797
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB-LOG",
+      "path": "artifacts/r9/r9-s3-c7-chain-gdb.log",
+      "sha256": "D14D759FD8EEDC1E68E9751DE3D849B4C801B06D85BC6F9F88A7BC87600FB39C",
+      "size": 1135
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB",
+      "path": "artifacts/r9/r9-s3-c7-chain.gdb",
+      "sha256": "D71AB89D1975BAA368090AE526B9A4255ED680C0C449037B17C586A909282573",
+      "size": 13750
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3B-POST-FAIL-GDB-LOG",
+      "path": "artifacts/r9/r9-s3b-post-fail-gdb.log",
+      "sha256": "38211620A11DB6D81FFFFA59C5B1F5F64E68827F3CDCE5FD3642493D4833F7CD",
+      "size": 670
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3E-ERRSTRING-GDB-LOG",
+      "path": "artifacts/r9/r9-s3e-errstring-gdb.log",
+      "sha256": "10B1DD3E981A12F346499D047B96D5DA7DD2C91CA97F5613A8CE020BEA0AA9DA",
+      "size": 494
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3E-PAGE-OBJECT-BIN",
+      "path": "artifacts/r9/r9-s3e-page-object.bin",
+      "sha256": "C50F2A054EFE0B89BD0AC4F1FD3BBCB4721F9C15F6AD08F3FCF8A649883CEFBA",
+      "size": 13824
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S4-RECOVER-GDB-LOG",
+      "path": "artifacts/r9/r9-s4-recover-gdb.log",
+      "sha256": "1746185A974C73E3149C3F22684C31C29813E85C144A09CBF5C2744409C54415",
+      "size": 784
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S4-RECOVER-RTT-LOG",
+      "path": "artifacts/r9/r9-s4-recover.rtt.log",
+      "sha256": "D8B10A5D352F42D856AC57BEC4A623A78EAFC5FB81D5A70BE01842EFB95218EE",
+      "size": 4913
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S5-FINAL-GDB-LOG",
+      "path": "artifacts/r9/r9-s5-final-gdb.log",
+      "sha256": "51D2215952AE436C44A8B28447AE026B64E578101E2332CA440016538F2B2DCE",
+      "size": 560
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-RUN-R9-UPLOAD-PY",
+      "path": "artifacts/r9/run_r9_upload.py",
+      "sha256": "B60F2291AAFA21CE3D28A0739661D98DE2D96850FD15D0C10B8570FCFD0ADD7E",
+      "size": 1918
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-TEST-R9-GATE-C",
+      "path": "artifacts/r9/test_r9_gate.c",
+      "sha256": "48E3190F6B6BE766E896A6B5D6F312771847526B21C2A477F9123C67910B19BE",
+      "size": 5725
+    },
+    {
+      "id": "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON",
+      "path": "artifacts/recompute/p2-6-v3-recompute-report.json",
+      "sha256": "8B19E94B7F9541024D408A5C6706D24997DCB9E0677DEB7B274F10BAB5F971B4",
+      "size": 22832
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-STACK-CLOSURE-STDOUT-LOG",
+      "path": "commands/cmd-v3-stack-closure.stdout.log",
+      "sha256": "DFAC9B66E2327BEAA46DA1AA3930D71CA95EBEA77A690A117937D7D96F443980",
+      "size": 1057
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-SYMBOLS-STDOUT-LOG",
+      "path": "commands/cmd-v3-symbols.stdout.log",
+      "sha256": "9761B54E8F5CC22CCE6E3EC9F39613E2BD35E6FDE34D6644F40C492A0549CCA9",
+      "size": 982
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-CAPACITY-STDOUT-LOG",
+      "path": "commands/cmd-v3-capacity.stdout.log",
+      "sha256": "87376EBD84552FB09297E3EDCA052C46B2F18338520B2F769E5492BA1600F111",
+      "size": 1311
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-CONFIGURATION-STDOUT-LOG",
+      "path": "commands/cmd-v3-configuration.stdout.log",
+      "sha256": "B48A1E1C54903874F1A2F9D7F4B8EB1F37E82A5056D3B867D856CAF94167E530",
+      "size": 460
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-LINK-ASSERTS-STDOUT-LOG",
+      "path": "commands/cmd-v3-link-asserts.stdout.log",
+      "sha256": "3F7D8720AE8B5A9C3362413FCD147B68F226C6C345C475B0B9660D65D73DC57E",
+      "size": 277
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-RAM-HIGHWATER-STDOUT-LOG",
+      "path": "commands/cmd-v3-ram-highwater.stdout.log",
+      "sha256": "A3297389B077E19164E0BB9DB212AE4EDEE566B82E77DBD5F51ABF0D2CCE3435",
+      "size": 2785
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-RECOMPUTE-STDOUT-LOG",
+      "path": "commands/cmd-v3-recompute.stdout.log",
+      "sha256": "C6BEE6F4FCA4AE1C73B23A8A1E8163F0E7409E6FB43BC7DB3810A75F0073A3EA",
+      "size": 9615
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-RECOMPUTE-SELFTEST-STDOUT-LOG",
+      "path": "commands/cmd-v3-recompute-selftest.stdout.log",
+      "sha256": "C7CB52DEF469D38F6713288A6403947C5F51E959357F121C36EC200FECA3562B",
+      "size": 2783
+    }
+  ],
+  "evidence_hashes": {
+    "artifacts/artifact-index.json": "E287975E770644F25A8F5B934AC5AF500D1A5B0C1D095D55DC945AFAEFEE3BE3",
+    "artifacts/docs/P2-6-SD-R7-hw-execution-evidence-2026-08-31.md": "021AEC5B6C2361CB77489ECF317FE22A783F6F0830BC0DB7F7E0D90D578A3AA8",
+    "artifacts/docs/P2-6-SD-R8-hw-execution-evidence-2026-08-31.md": "2A9EC779286BC805DEF24BECB6F71F129AF451F78A41D5FCB3ACA7E30E9C3947",
+    "artifacts/docs/P2-6-SD-R9-hw-execution-evidence-2026-09-01.md": "97E5342A3A7424EDD93C721ED2BBE4EF7870D200EA5B684423C51F58F91C33F7",
+    "artifacts/docs/P2-6-SD-R9-research-2026-09-01.md": "563C0A4C4C37ADB2A4671B208A1BD799E2A80FDD2C5A57B5882360C7DB7AEA13",
+    "artifacts/elf/X-Track-App-GCC-production.elf": "8890935D508A446D4AB3B1988A636A03A2289F2E57A3311AB97017BA87EC87AC",
+    "artifacts/elf/X-Track-App-GCC-test.elf": "35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+    "artifacts/offline/config-matrix-p2-6.log": "89D2E65C79B4616DA3FF38DD3535FEDFAA07BECE21C90A5C33119F5CCDD7B048",
+    "artifacts/offline/link-asserts-run.log": "5D2D91B8DE4B0600DB547654F23EA8AFAE6F38B3667A17127C12D436FBE9BF1A",
+    "artifacts/offline/p2-6-capacity-full.run.log": "D8DB97C1AA11149CF4A280FEC803CA8684610D681F9A65FF2EB75DD8FAA5F5AA",
+    "artifacts/offline/p2-6-capacity-patch.run.log": "80ACFEF59013A12B9B2A9F98EB10E1688386CE364FB61C0085EDA40FDEA597F8",
+    "artifacts/offline/stack-closure.json": "E3FDE0E18D85A6FE46EED025A5927E0A35E2F941FC8C7D6AC2087CB253703C53",
+    "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-gdb.log": "2593DFD0E2294F4F10F17BDD4CB20DEB3D763FBFBC484143DAA1A2D53A90B241",
+    "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json": "6D927026505980BC6CC10F4D760AE3151C7879E96C1904E01BF93F9058128920",
+    "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-post.bin": "CC8154BAC9C5C90F25981A13238415875FE7676F991EC37CCBD0C9D5EB7A8C66",
+    "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-pre.bin": "E49A672EC97B8EE525C43731D60B7F1208B6531BD33277FB8488B2B5BA3D6CE6",
+    "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log": "50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+    "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin": "50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+    "artifacts/r8/p2-6-sd-r8-full-upload-hw-01-result.json": "09CE8AB6ECA39A2FDD75DA5DA6A2D9A08712C241CD90EFF10CE6AD78311799E3",
+    "artifacts/r8/r8-result.json": "AA6D1259D790CDCEAD2FD5D7E01CE25B0D779A41B25B2B9DFC5BBD98B83B9BBE",
+    "artifacts/r8/r8-s0-bcb-gdb.log": "22CC436F5CE591BB0B4B84C31D414CE433F192A0F4C621CEA4E1F73F37BB59D1",
+    "artifacts/r8/r8-s3-candhdr-gdb.log": "D5B3AAF1A7779ED910D39F0D5EA5122E7EDF1A4CF6D45B81FD1A8946E25B791A",
+    "artifacts/r8/r8-s4-obs1-gdb.log": "6BE6EB2A38AEE8CC15D38C671E8DB3326F87EC8AF27F56BCE4EC4484AEFB4FDB",
+    "artifacts/r8/r8-s4-obs2-gdb.log": "6331B977932330BC99B5EF481EFAF6897892B9C55EBFDB82A403C77E9FAEE529",
+    "artifacts/r8/r8-s5-c-recover-gdb.log": "D803E1DC95593685978DFEF3F8294724EFE7CD127577C5E1DC2F1F706FE0C637",
+    "artifacts/r8/s0-bcb-raw.bin": "0E0A1449201BDCA028E91B1083C90464AD041A158E6D3FB820348A56A0E7C1F3",
+    "artifacts/r8/s3-cand-slot-header.bin": "E83A86AE8E939941F2B955850ED84EFF52AC17050585E5507F79A44055F341B4",
+    "artifacts/r8/s4-obs1-rtt-ring.bin": "1455FB44CFF14BCF86773BE42F05CE288E2D46B6CC8C3372CD4E3F65F3BC892C",
+    "artifacts/r8/s4-obs2-bcb-raw.bin": "B75390AF6D3AD0F80832C00D5DF1BFF654B06E1425EA865289FF73C42C15FD82",
+    "artifacts/r8/s5-a-livemap-baseline.rtt.log": "765ACBF8DE331E8E3F4A6EF808E6A8132A54D89154F3210ED54DFDA55EA7F8A5",
+    "artifacts/r8/s5-c-livemap-recover.rtt.log": "6BF717DDE65FEE154B7C758B20002766F2A98FF56C3251B98470257D587E7809",
+    "artifacts/r9/BAD-2.8.2.etu": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+    "artifacts/r9/GOOD-2.8.2.etu": "761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20",
+    "artifacts/r9/bad-upload-hw-02-readback.bin": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+    "artifacts/r9/derive_bad.py": "CB003C13E84CA0114E45F6B095646C771B930BBF6627CE8691FE5BCA288A2D9D",
+    "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json": "E55E5A7DBA08EA60F6097C0B6254A1FE56C6ED56ABA0D7DBA9855BA0DB5A5C8F",
+    "artifacts/r9/p2-6-sd-r9-bad-upload-hw-02-result.json": "65050B1109842136B4C3EB653F9E251E4EC5D7D55E2C2717E56B5BC88F328314",
+    "artifacts/r9/r9-result.json": "C64EDD4AD1F6B785DD5F2227C34C52482A21F787DBFDB5629945FF1DD89FC419",
+    "artifacts/r9/r9-s0-precheck-gdb.log": "0BBA1AC47783D0FA202263A042B8962450A8F12E72B4590697D522B8B9DD7741",
+    "artifacts/r9/r9-s1-host-gate.log": "2A88D4684A149755D2F79C62FE4774EC90E982F9FE66F8C41A4EBE6FF50E9D80",
+    "artifacts/r9/r9-s1-usb-fix.gdb": "E2CAF01DACE9927B76A2C1D87E9B6528F60A5D08480F70340608F68415378522",
+    "artifacts/r9/r9-s2-baseline-gdb.log": "B3112938EAAB303E50731D1159902FAA4594B5B47D5BB0E19740E647CC8EFE13",
+    "artifacts/r9/r9-s2-baseline.rtt.log": "D969AB860F4F071F3B7D5C53EB5F489429C20F88EB68AAE340A73B77DCADD9A5",
+    "artifacts/r9/r9-s3-c7-chain-gdb.log": "D14D759FD8EEDC1E68E9751DE3D849B4C801B06D85BC6F9F88A7BC87600FB39C",
+    "artifacts/r9/r9-s3-c7-chain.gdb": "D71AB89D1975BAA368090AE526B9A4255ED680C0C449037B17C586A909282573",
+    "artifacts/r9/r9-s3b-post-fail-gdb.log": "38211620A11DB6D81FFFFA59C5B1F5F64E68827F3CDCE5FD3642493D4833F7CD",
+    "artifacts/r9/r9-s3e-errstring-gdb.log": "10B1DD3E981A12F346499D047B96D5DA7DD2C91CA97F5613A8CE020BEA0AA9DA",
+    "artifacts/r9/r9-s3e-page-object.bin": "C50F2A054EFE0B89BD0AC4F1FD3BBCB4721F9C15F6AD08F3FCF8A649883CEFBA",
+    "artifacts/r9/r9-s4-recover-gdb.log": "1746185A974C73E3149C3F22684C31C29813E85C144A09CBF5C2744409C54415",
+    "artifacts/r9/r9-s4-recover.rtt.log": "D8B10A5D352F42D856AC57BEC4A623A78EAFC5FB81D5A70BE01842EFB95218EE",
+    "artifacts/r9/r9-s5-final-gdb.log": "51D2215952AE436C44A8B28447AE026B64E578101E2332CA440016538F2B2DCE",
+    "artifacts/r9/run_r9_upload.py": "B60F2291AAFA21CE3D28A0739661D98DE2D96850FD15D0C10B8570FCFD0ADD7E",
+    "artifacts/r9/test_r9_gate.c": "48E3190F6B6BE766E896A6B5D6F312771847526B21C2A477F9123C67910B19BE",
+    "artifacts/recompute/p2-6-v3-recompute-report.json": "8B19E94B7F9541024D408A5C6706D24997DCB9E0677DEB7B274F10BAB5F971B4",
+    "commands/cmd-v3-capacity.stdout.log": "87376EBD84552FB09297E3EDCA052C46B2F18338520B2F769E5492BA1600F111",
+    "commands/cmd-v3-configuration.stdout.log": "B48A1E1C54903874F1A2F9D7F4B8EB1F37E82A5056D3B867D856CAF94167E530",
+    "commands/cmd-v3-link-asserts.stdout.log": "3F7D8720AE8B5A9C3362413FCD147B68F226C6C345C475B0B9660D65D73DC57E",
+    "commands/cmd-v3-ram-highwater.stdout.log": "A3297389B077E19164E0BB9DB212AE4EDEE566B82E77DBD5F51ABF0D2CCE3435",
+    "commands/cmd-v3-recompute-selftest.stdout.log": "C7CB52DEF469D38F6713288A6403947C5F51E959357F121C36EC200FECA3562B",
+    "commands/cmd-v3-recompute.stdout.log": "C6BEE6F4FCA4AE1C73B23A8A1E8163F0E7409E6FB43BC7DB3810A75F0073A3EA",
+    "commands/cmd-v3-stack-closure.stdout.log": "DFAC9B66E2327BEAA46DA1AA3930D71CA95EBEA77A690A117937D7D96F443980",
+    "commands/cmd-v3-symbols.stdout.log": "9761B54E8F5CC22CCE6E3EC9F39613E2BD35E6FDE34D6644F40C492A0549CCA9"
+  },
+  "notes": "本轮全部判据 EXECUTED；C2 由 P2-6-v2 冻结合同覆盖，C9（AC5 辅助构型）按冻结口径不观测且不阻断。"
+}

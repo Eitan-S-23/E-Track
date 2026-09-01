@@ -1,0 +1,16 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08052b5e in memset ()
+Writing 0x00001000 @ address 0xE0042008
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_R9_S0 stop_verified pc=0x08040884
+P2_6_IDENTITY PASS label=pre_fw header_bytes=96
+P2_6_R9_S0 state vcode=20801(0x00005141) bcb=4 owner=1 sd=1 vtor=0x08010000 cfsr=0x00000000
+P2_6_R9_S0 current_page ptr=0x20032ae0 vptr=0x0805d818 (LiveMap=0x0805d818 FirmwareUpdate=0x0809cb44 Dialplate=0x0805d7ac MainMenu=0x0805d878)
+P2_6_R9_S0 livemap_current popping_to_release owner=1
+P2_6_R9_S0 pop_ok=1
+Hardware assisted breakpoint 2 at 0x8040884
+P2_6_R9_S0 release_wait turns=10 owner=0
+P2_6_R9_S0 final vcode=20801 bcb=4 owner=0 sd=1
+P2_6_R9_S0 PASS upload_preconditions_ok
+[Inferior 1 (Remote target) detached]

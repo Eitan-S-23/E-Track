@@ -1,0 +1,9 @@
+[PASS] P1_6_TEST_ENABLE+P2_6 rejected with frozen mutual exclusion
+[PASS] P2_1_TEST_ENABLE+P2_6 rejected with frozen mutual exclusion
+[PASS] P2_2_TEST_ENABLE+P2_6 rejected with frozen mutual exclusion
+[PASS] P2_3_TEST_ENABLE+P2_6 rejected with frozen mutual exclusion
+[PASS] production configure rc=0
+[PASS] P2-6 configure rc=0 and compile definition present
+[PASS] production compile definition and host override absent
+P2_6_CONFIGURATION=PASS
+EXIT=0

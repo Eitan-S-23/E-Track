@@ -1,0 +1,47 @@
+
+========================================
+OTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=4 systick=0x00010007 icsr=0x00400000 iser=0x46200828 ispr=0x00000040
+Reset: none
+QSPI: JEDEC=0xEF4018 whitelisted, OTA enabled
+OTA: BCB already CONFIRMED vcode=20801
+LiveMap start: tiles=0 imgCache=8 view=240x320
+LiveMap stat: update=39 reload=1 lineHit=608 lineMiss=44 lineReadKB=352 sdMs=40 refrMs=250 refrCnt=20 refrPxK=543
+LiveMap stat: update=47 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=219 refrCnt=31 refrPxK=409
+LiveMap stat: update=45 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=1 refrMs=162 refrCnt=11 refrPxK=392
+LiveMap stat: update=47 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=208 refrCnt=29 refrPxK=396
+LiveMap stat: update=43 reload=0 lineHit=10 lineMiss=2 lineReadKB=16 sdMs=1 refrMs=162 refrCnt=10 refrPxK=390
+LiveMap stat: update=45 reload=0 lineHit=12 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=220 refrCnt=29 refrPxK=398
+LiveMap stat: update=43 rLiveMap stat: update=40 reload=0 lineHit=307 lineMiss=24 lineReadKB=192 sdMs=18 refrMs=158 refrCnt=11 refrPxK=388
+LiveMap stat: update=44 reload=0 lineHit=12 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=207 refrCnt=26 refrPxK=397
+LiveMap stat: update=43 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=2 refrMs=172 refrCnt=14 refrPxK=391
+LiveMap stat: update=45 reload=0 lineHit=12 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=206 refrCnt=27 refrPxK=395
+LiveMap stat: update=43 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=166 refrCnt=12 refrPxK=391
+LiveMap stat: update=45 reload=0 lineHit=10 lineMiss=2 lineReadKB=16 sdMs=2 refrMs=207 refrCnt=27 refrPxK=395
+LiveMap stat: update=41 reload=0 lineHit=310 lineMiss=22 lineReadKB=176 sdMs=16 refrMs=167 refrCnt=13 refrPxK=391
+LiveMap stat: update=44 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=2 refrMs=207 refrCnt=27 refrPxK=397
+LiveMap stat: update=43 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=164 refrCnt=13 refrPxK=391
+LiveMap stat: update=44 reload=0 lineHit=8 lineMiss=6 lineReadKB=48 sdMs=5 refrMs=214 refrCnt=28 refrPxK=398
+LiveMap stat: update=43 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=166 refrCnt=11 refrPxK=391
+LiveMap stat: update=45 reload=0 lineHit=12 lineMiss=4 lineReadKB=32 sdMs=3 refrMs=210 refrCnt=29 refrPxK=395
+LiveMap stat: update=43 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=2 refrMs=164 refrCnt=11 refrPxK=391
+LiveMap stat: update=45 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=210 refrCnt=29 refrPxK=395
+LiveMap stat: update=43 reload=0 lineHit=8 lineMiss=6 lineReadKB=48 sdMs=6 refrMs=170 refrCnt=12 refrPxK=393
+LiveMap stat: update=45 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=208 refrCnt=27 refrPxK=395
+LiveMap stat: update=43 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=2 refrMs=169 refrCnt=13 refrPxK=391
+LiveMap stat: update=45 reload=0 lineHit=16 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=206 refrCnt=27 refrPxK=395
+LiveMap stat: update=43 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=2 refrMs=166 refrCnt=12 refrPxK=391
+LiveMap stat: update=45 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=213 refrCnt=29 refrPxK=396
+LiveMap stat: update=41 reload=0 lineHit=308 lineMiss=24 lineReadKB=192 sdMs=18 refrMs=165 refrCnt=11 refrPxK=393
+LiveMap stat: update=46 reload=0 lineHit=14 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=214 refrCnt=29 refrPxK=396
+LiveMap stat: update=44 reload=0 lineHit=16 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=171 refrCnt=12 refrPxK=391
+LiveMap stat: update=46 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=1 refrMs=208 refrCnt=27 refrPxK=395
+LiveMap stat: update=45 reload=0 lineHit=12 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=168 refrCnt=14 refrPxK=391
+LiveMap stat: update=44 reload=0 lineHit=12 lineMiss=2 lineReadKB=16 sdMs=1 refrMs=205 refrCnt=27 refrPxK=395
+LiveMap stat: update=43 reload=0 lineHit=12 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=174 refrCnt=13 refrPxK=391
+LiveMap stat: update=42 reload=0 lineHit=309 lineMiss=22 lineReadKB=176 sdMs=16 refrMs=192 refrCnt=23 refrPxK=392
+LiveMap stat: update=44 reload=0 lineHit=8 lineMiss=2 lineReadKB=16 sdMs=1 refrMs=168 refrCnt=11 refrPxK=391
+LiveMap stat: update=46 reload=0 lineHit=12 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=213 refrCnt=27 refrPxK=397
+LiveMap stat: update=44 reload=0 lineHit=10 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=169 refrCnt=11 refrPxK=391
+LiveMap stat: update=42 reload=1 lineHit=307 lineMiss=24 lineReadKB=192 sdMs=18 refrMs=203 refrCnt=25 refrPxK=395
+LiveMap stat: update=42 reload=0 lineHit=10 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=173 refrCnt=13 refrPxK=391
+LiveMap stat: update=45 reload=0 lineHit=10 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=213 refrCnt=29 refrPxK=395

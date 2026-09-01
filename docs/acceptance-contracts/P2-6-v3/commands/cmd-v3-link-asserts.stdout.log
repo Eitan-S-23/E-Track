@@ -1,0 +1,8 @@
+[PASS] positive rc=0 symbols A1-A9 layout verified
+[PASS] A1 rc=1 hits=['A1', 'A3', 'A9']
+[PASS] A2 rc=1 hits=['A2', 'A4', 'A8']
+[PASS] A4 rc=1 hits=['A4', 'A8']
+[PASS] A5 rc=1 hits=['A5']
+[PASS] A6 rc=1 hits=['A6']
+P2_6_LINK_ASSERTS=PASS positive+A1+A2+A4+A5+A6
+EXIT=0

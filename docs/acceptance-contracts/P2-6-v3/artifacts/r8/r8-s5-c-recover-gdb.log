@@ -1,0 +1,14 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08043216 in main ()
+Writing 0x00001000 @ address 0xE0042008
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_R8_S5C stop_verified pc=0x08040884
+P2_6_R8_S5C fail_state mode=0 owner=0 (mode=0 BROWSER, owner 应=0: LiveMap 已释放)
+P2_6_R8_S5C pop_ok=1
+Hardware assisted breakpoint 2 at 0x8040884
+P2_6_R8_S5C pop_turned
+P2_6_R8_S5C owner_mid=1
+P2_6_R8_S5C gps_reset_done curLon=104.883930 curLat=26.568540
+P2_6_R8_S5C push_ok=0
+P2_6_R8_S5C ERROR push_failed

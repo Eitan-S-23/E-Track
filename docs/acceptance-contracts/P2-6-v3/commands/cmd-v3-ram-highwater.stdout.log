@@ -1,0 +1,61 @@
+P2_6_V3_RAM elf=production path=.cache/p2-6a-cmake-prod-stack/app-gcc/X-Track-App-GCC.elf bytes=864320 sha256=8890935D508A446D4AB3B1988A636A03A2289F2E57A3311AB97017BA87EC87AC
+.cache/p2-6a-cmake-prod-stack/app-gcc/X-Track-App-GCC.elf  :
+section                size        addr
+.isr_vector             524   134283264
+.fw_header               96   134284288
+.text                577216   134284384
+RAMCODE               11076   134861600
+.ARM.extab             2244   134872676
+.ARM.exidx             6552   134874920
+.init_array              80   134881472
+.fini_array               4   134881552
+.data                   848   536870912
+.bss                 347496   536871760
+.ota_vtor_noinit          8   537219256
+.stack                    0   537219264
+.heap                     0   537219264
+.sram_ext            163840   537231360
+.ota_overlay          40960   537231360
+._user_heap_stack       512   537219264
+.ota_stack_guard         32   537223136
+.ota_stack             8192   537223168
+.ARM.attributes          48           0
+.comment                 69           0
+.debug_frame          11868           0
+.debug_line_str         513           0
+Total               1172178
+
+
+   text	   data	    bss	    dec	    hex	filename
+ 597708	    932	 561040	1159680	 11b200	.cache/p2-6a-cmake-prod-stack/app-gcc/X-Track-App-GCC.elf
+P2_6_V3_RAM elf=test path=.cache/p2-6a-cmake-test-stack/app-gcc/X-Track-App-GCC.elf bytes=866372 sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019
+.cache/p2-6a-cmake-test-stack/app-gcc/X-Track-App-GCC.elf  :
+section                size        addr
+.isr_vector             524   134283264
+.fw_header               96   134284288
+.text                578744   134284384
+RAMCODE               11076   134863128
+.ARM.extab             2256   134874204
+.ARM.exidx             6616   134876460
+.init_array              80   134883076
+.fini_array               4   134883156
+.data                   848   536870912
+.bss                 347672   536871760
+.ota_vtor_noinit          8   537219432
+.stack                    0   537219440
+.heap                     0   537219440
+.sram_ext            163840   537231360
+.ota_overlay          40960   537231360
+._user_heap_stack       512   537219440
+.ota_stack_guard         32   537223136
+.ota_stack             8192   537223168
+.ARM.attributes          48           0
+.comment                 69           0
+.debug_frame          11868           0
+.debug_line_str         513           0
+Total               1173958
+
+
+   text	   data	    bss	    dec	    hex	filename
+ 599312	    932	 561216	1161460	 11b8f4	.cache/p2-6a-cmake-test-stack/app-gcc/X-Track-App-GCC.elf
+EXIT=0

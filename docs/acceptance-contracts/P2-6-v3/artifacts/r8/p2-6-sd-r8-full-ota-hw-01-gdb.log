@@ -1,0 +1,36 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x0809ebf2 in lv_color_mix ()
+Writing 0x00001000 @ address 0xE0042008
+P2_6_TRANSPORT attached_stopped pc=0x0809ebf2
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_TRANSPORT breakpoint label=initial_hal_update pc=0x08040884
+P2_6_TRANSPORT stop_verified label=initial_hal_update pc=0x08040884
+P2_6_IDENTITY PASS label=before_ota_fw header_bytes=96
+P2_6_TRANSPORT context_verified label=before_ota_bcb_call pc=0x08040884
+P2_6_STATE PASS label=before_ota sd=1 vtor=0x08010000 cfsr=0x00000000 bcb=4 owner=0
+P2_6_TRANSPORT context_verified label=push_return pc=0x08040884
+P2_6_RTT_DRIVER push_ok=1
+P2_6_RTT_DRIVER page=0x200356d0
+P2_6_RTT_DRIVER page_ready state=3
+P2_6_TRANSPORT context_verified label=enter_path_return pc=0x08040884
+P2_6_TRANSPORT context_verified label=row_scan_return pc=0x08040884
+P2_6_RTT_DRIVER row_index=10
+P2_6_TRANSPORT context_verified label=select_row_return pc=0x08040884
+P2_6_RTT_DRIVER confirm mode=1 kind=FULL
+P2_6_TRANSPORT context_verified label=start_import_return pc=0x08040884
+P2_6_RTT_DRIVER import_started mode=2
+Hardware assisted breakpoint 2 at 0x8045074
+P2_6_TRANSPORT breakpoint label=finish_import_entry pc=0x08045074
+P2_6_TRANSPORT stop_verified label=finish_import_entry pc=0x08045074
+Hardware assisted breakpoint 3 at 0x8040884
+P2_6_TRANSPORT breakpoint label=result_hal_update pc=0x08040884
+P2_6_TRANSPORT stop_verified label=result_hal_update pc=0x08040884
+P2_6_IDENTITY PASS label=after_ota_fw header_bytes=96
+P2_6_TRANSPORT context_verified label=after_ota_bcb_call pc=0x08040884
+P2_6_STATE PASS label=after_ota sd=1 vtor=0x08010000 cfsr=0x00000000 bcb=1 owner=0
+P2_6_RTT_DRIVER result mode=3
+P2_6_RTT_DRIVER PASS kind=FULL page_state=3 mode=3
+P2_6_RTT_CB pBuffer=0x20053a1c size=1024 wroff=735 rdoff=0
+P2_6_RTT_DRIVER SNAPSHOT_WRITTEN cb_bytes=168 ring_bytes=1024
+[Inferior 1 (Remote target) detached]

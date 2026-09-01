@@ -1,0 +1,1838 @@
+{
+  "production_build": "D:\\github\\my\\E-Track\\.cache\\p2-6a-cmake-prod-stack",
+  "test_build": "D:\\github\\my\\E-Track\\.cache\\p2-6a-cmake-test-stack",
+  "nvic_log": "D:\\github\\my\\E-Track\\.cache\\p2-6-jlink-gdb\\nvic-runtime-production.log",
+  "startup_log": "D:\\github\\my\\E-Track\\.cache\\p2-6-gdb\\startup-stack-scan-summary.log",
+  "full": {
+    "thread_peak": 1904,
+    "reachable_functions": 70,
+    "path": [
+      {
+        "address": "0x08042F68",
+        "function": "main",
+        "frame": 40,
+        "edge": "call"
+      },
+      {
+        "address": "0x0802B9E4",
+        "function": "lv_timer_handler",
+        "frame": 48,
+        "edge": "call"
+      },
+      {
+        "address": "0x08044DF0",
+        "function": "Page::FirmwareUpdate::onWorkTimer(_lv_timer_t*)",
+        "frame": 0,
+        "edge": "tail"
+      },
+      {
+        "address": "0x08044CE4",
+        "function": "Page::FirmwareUpdate::RunWorkStep()",
+        "frame": 48,
+        "edge": "call"
+      },
+      {
+        "address": "0x08045A74",
+        "function": "OtaUpdate::Session::Apply()",
+        "frame": 112,
+        "edge": "call"
+      },
+      {
+        "address": "0x08043518",
+        "function": "HAL::OTA_PackageApplyStaging(unsigned long, unsigned long, ota_package_info_t*)",
+        "frame": 64,
+        "edge": "call"
+      },
+      {
+        "address": "0x08046758",
+        "function": "ota_package_apply_full",
+        "frame": 584,
+        "edge": "call"
+      },
+      {
+        "address": "0x0804930C",
+        "function": "boot_fw_header_validate_ex",
+        "frame": 648,
+        "edge": "call"
+      },
+      {
+        "address": "0x080491D0",
+        "function": "boot_sha256_update",
+        "frame": 32,
+        "edge": "call"
+      },
+      {
+        "address": "0x08049058",
+        "function": "sha256_transform",
+        "frame": 328,
+        "edge": "entry"
+      }
+    ]
+  },
+  "patch": {
+    "thread_peak": 2048,
+    "reachable_functions": 80,
+    "path": [
+      {
+        "address": "0x08042F68",
+        "function": "main",
+        "frame": 40,
+        "edge": "call"
+      },
+      {
+        "address": "0x0802B9E4",
+        "function": "lv_timer_handler",
+        "frame": 48,
+        "edge": "call"
+      },
+      {
+        "address": "0x08044DF0",
+        "function": "Page::FirmwareUpdate::onWorkTimer(_lv_timer_t*)",
+        "frame": 0,
+        "edge": "tail"
+      },
+      {
+        "address": "0x08044CE4",
+        "function": "Page::FirmwareUpdate::RunWorkStep()",
+        "frame": 48,
+        "edge": "call"
+      },
+      {
+        "address": "0x08045A74",
+        "function": "OtaUpdate::Session::Apply()",
+        "frame": 112,
+        "edge": "call"
+      },
+      {
+        "address": "0x08043594",
+        "function": "HAL::OTA_PatchApplyStaging(unsigned long, unsigned long, unsigned long, unsigned char const*, ota_patch_info_t*)",
+        "frame": 80,
+        "edge": "call"
+      },
+      {
+        "address": "0x08047318",
+        "function": "ota_patch_apply",
+        "frame": 712,
+        "edge": "call"
+      },
+      {
+        "address": "0x0804930C",
+        "function": "boot_fw_header_validate_ex",
+        "frame": 648,
+        "edge": "call"
+      },
+      {
+        "address": "0x080491D0",
+        "function": "boot_sha256_update",
+        "frame": 32,
+        "edge": "call"
+      },
+      {
+        "address": "0x08049058",
+        "function": "sha256_transform",
+        "frame": 328,
+        "edge": "entry"
+      }
+    ]
+  },
+  "runtime_registers": {
+    "VTOR": "0x08010000",
+    "AIRCR": "0xFA050300",
+    "CCR": "0x00000200",
+    "FPCCR": "0xC0000018",
+    "SysTick_CTRL": "0x00010007"
+  },
+  "active_interrupts": [
+    {
+      "irq": 11,
+      "priority": 0,
+      "handler": "EDMA_Stream1_IRQHandler"
+    },
+    {
+      "irq": 25,
+      "priority": 0,
+      "handler": "TMR1_OVF_TMR10_IRQHandler"
+    },
+    {
+      "irq": 30,
+      "priority": 0,
+      "handler": "TMR4_GLOBAL_IRQHandler"
+    },
+    {
+      "irq": 37,
+      "priority": 1,
+      "handler": "USART1_IRQHandler"
+    },
+    {
+      "irq": 53,
+      "priority": 1,
+      "handler": "UART5_IRQHandler"
+    },
+    {
+      "irq": 58,
+      "priority": 0,
+      "handler": "DMA1_Channel3_IRQHandler"
+    },
+    {
+      "irq": 67,
+      "priority": 1,
+      "handler": "OTGFS1_IRQHandler"
+    },
+    {
+      "irq": -1,
+      "priority": 0,
+      "handler": "SysTick_Handler"
+    }
+  ],
+  "bounded_interrupt_candidates": {
+    "0": [
+      {
+        "irq": 11,
+        "handler": "EDMA_Stream1_IRQHandler",
+        "reachable_functions": 5,
+        "software": 8,
+        "path": [
+          {
+            "address": "0x0801497C",
+            "function": "EDMA_Stream1_IRQHandler",
+            "frame": 8,
+            "edge": "entry"
+          }
+        ]
+      },
+      {
+        "irq": 25,
+        "handler": "TMR1_OVF_TMR10_IRQHandler",
+        "reachable_functions": 8,
+        "software": 16,
+        "path": [
+          {
+            "address": "0x080182E4",
+            "function": "TMR1_OVF_TMR10_IRQHandler",
+            "frame": 8,
+            "edge": "call"
+          },
+          {
+            "address": "0x08015DF8",
+            "function": "Tone_TimerHandler()",
+            "frame": 0,
+            "edge": "tail"
+          },
+          {
+            "address": "0x08015DBC",
+            "function": "noTone(unsigned char)",
+            "frame": 8,
+            "edge": "entry"
+          }
+        ]
+      },
+      {
+        "irq": 30,
+        "handler": "TMR4_GLOBAL_IRQHandler",
+        "reachable_functions": 52,
+        "software": 128,
+        "path": [
+          {
+            "address": "0x08018384",
+            "function": "TMR4_GLOBAL_IRQHandler",
+            "frame": 8,
+            "edge": "call"
+          },
+          {
+            "address": "0x08040514",
+            "function": "HAL_TimerInterrputUpdate()",
+            "frame": 8,
+            "edge": "call"
+          },
+          {
+            "address": "0x08040E70",
+            "function": "HAL::Encoder_Update()",
+            "frame": 8,
+            "edge": "call"
+          },
+          {
+            "address": "0x08011BEA",
+            "function": "ButtonEvent::EventMonitor(bool)",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x08040D80",
+            "function": "Encoder_AHandler(ButtonEvent*, int)",
+            "frame": 0,
+            "edge": "tail"
+          },
+          {
+            "address": "0x08040CBC",
+            "function": "Buzz_Handler(int)",
+            "frame": 16,
+            "edge": "tail"
+          },
+          {
+            "address": "0x080409E4",
+            "function": "HAL::Buzz_Tone(unsigned long, long)",
+            "frame": 0,
+            "edge": "tail"
+          },
+          {
+            "address": "0x08015E34",
+            "function": "tone(unsigned char, unsigned long, unsigned long)",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x08015D94",
+            "function": "toneSetTimer(tmr_type*)",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x08017FF8",
+            "function": "Timer_SetInterruptBase",
+            "frame": 32,
+            "edge": "call"
+          },
+          {
+            "address": "0x08017F54",
+            "function": "Timer_ClockCmd",
+            "frame": 24,
+            "edge": "entry"
+          }
+        ]
+      },
+      {
+        "irq": 58,
+        "handler": "DMA1_Channel3_IRQHandler",
+        "reachable_functions": 7,
+        "software": 16,
+        "path": [
+          {
+            "address": "0x080185C8",
+            "function": "DMA1_Channel3_IRQHandler",
+            "frame": 8,
+            "edge": "tail"
+          },
+          {
+            "address": "0x0801856C",
+            "function": "Display_SPI_DMA_Send(void const*, unsigned long)",
+            "frame": 16,
+            "edge": "entry"
+          }
+        ]
+      },
+      {
+        "irq": -1,
+        "handler": "SysTick_Handler",
+        "reachable_functions": 1,
+        "software": 0,
+        "path": [
+          {
+            "address": "0x0801793C",
+            "function": "SysTick_Handler",
+            "frame": 0,
+            "edge": "entry"
+          }
+        ]
+      }
+    ],
+    "1": [
+      {
+        "irq": 37,
+        "handler": "USART1_IRQHandler",
+        "reachable_functions": 5,
+        "software": 8,
+        "path": [
+          {
+            "address": "0x080159F0",
+            "function": "USART1_IRQHandler",
+            "frame": 0,
+            "edge": "tail"
+          },
+          {
+            "address": "0x08015828",
+            "function": "HardwareSerial::IRQHandler()",
+            "frame": 8,
+            "edge": "entry"
+          }
+        ]
+      },
+      {
+        "irq": 53,
+        "handler": "UART5_IRQHandler",
+        "reachable_functions": 5,
+        "software": 8,
+        "path": [
+          {
+            "address": "0x08015A08",
+            "function": "UART5_IRQHandler",
+            "frame": 0,
+            "edge": "tail"
+          },
+          {
+            "address": "0x08015828",
+            "function": "HardwareSerial::IRQHandler()",
+            "frame": 8,
+            "edge": "entry"
+          }
+        ]
+      },
+      {
+        "irq": 67,
+        "handler": "OTGFS1_IRQHandler",
+        "reachable_functions": 161,
+        "software": 424,
+        "path": [
+          {
+            "address": "0x080423F0",
+            "function": "OTGFS1_IRQHandler",
+            "frame": 0,
+            "edge": "tail"
+          },
+          {
+            "address": "0x080196D0",
+            "function": "usbd_irq_handler",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x080193B4",
+            "function": "usbd_inept_handler",
+            "frame": 24,
+            "edge": "call"
+          },
+          {
+            "address": "0x08019080",
+            "function": "usbd_core_in_handler",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x08014570",
+            "function": "class_in_handler",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x08014474",
+            "function": "bot_scsi_datain_handler",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x08014344",
+            "function": "bot_scsi_cmd_process",
+            "frame": 4,
+            "edge": "tail"
+          },
+          {
+            "address": "0x0801413C",
+            "function": "bot_scsi_read10",
+            "frame": 40,
+            "edge": "call"
+          },
+          {
+            "address": "0x08014814",
+            "function": "msc_disk_read",
+            "frame": 8,
+            "edge": "call"
+          },
+          {
+            "address": "0x08013D70",
+            "function": "SdioCardEX::readBlocks(unsigned long, unsigned char*, unsigned int)",
+            "frame": 24,
+            "edge": "call"
+          },
+          {
+            "address": "0x08013C40",
+            "function": "SdioCard::readBlocks(unsigned long, unsigned char*, unsigned int)",
+            "frame": 16,
+            "edge": "call"
+          },
+          {
+            "address": "0x08017580",
+            "function": "sd_mult_blocks_read",
+            "frame": 48,
+            "edge": "call"
+          },
+          {
+            "address": "0x080172BC",
+            "function": "sd_init",
+            "frame": 40,
+            "edge": "call"
+          },
+          {
+            "address": "0x08017240",
+            "function": "speed_change",
+            "frame": 72,
+            "edge": "call"
+          },
+          {
+            "address": "0x0801719C",
+            "function": "sd_switch",
+            "frame": 40,
+            "edge": "tail"
+          },
+          {
+            "address": "0x08016F0C",
+            "function": "sdio_command_data_send",
+            "frame": 40,
+            "edge": "call"
+          },
+          {
+            "address": "0x08016E8C",
+            "function": "sd_dma_config",
+            "frame": 48,
+            "edge": "entry"
+          }
+        ]
+      }
+    ]
+  },
+  "interrupt_evidence_gaps": [],
+  "interrupt_layers": [
+    {
+      "priority": 1,
+      "hardware": 108,
+      "software": 424,
+      "layer": 532,
+      "handler": "OTGFS1_IRQHandler",
+      "irq": 67,
+      "path": [
+        {
+          "address": "0x080423F0",
+          "function": "OTGFS1_IRQHandler",
+          "frame": 0,
+          "edge": "tail"
+        },
+        {
+          "address": "0x080196D0",
+          "function": "usbd_irq_handler",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x080193B4",
+          "function": "usbd_inept_handler",
+          "frame": 24,
+          "edge": "call"
+        },
+        {
+          "address": "0x08019080",
+          "function": "usbd_core_in_handler",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x08014570",
+          "function": "class_in_handler",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x08014474",
+          "function": "bot_scsi_datain_handler",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x08014344",
+          "function": "bot_scsi_cmd_process",
+          "frame": 4,
+          "edge": "tail"
+        },
+        {
+          "address": "0x0801413C",
+          "function": "bot_scsi_read10",
+          "frame": 40,
+          "edge": "call"
+        },
+        {
+          "address": "0x08014814",
+          "function": "msc_disk_read",
+          "frame": 8,
+          "edge": "call"
+        },
+        {
+          "address": "0x08013D70",
+          "function": "SdioCardEX::readBlocks(unsigned long, unsigned char*, unsigned int)",
+          "frame": 24,
+          "edge": "call"
+        },
+        {
+          "address": "0x08013C40",
+          "function": "SdioCard::readBlocks(unsigned long, unsigned char*, unsigned int)",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x08017580",
+          "function": "sd_mult_blocks_read",
+          "frame": 48,
+          "edge": "call"
+        },
+        {
+          "address": "0x080172BC",
+          "function": "sd_init",
+          "frame": 40,
+          "edge": "call"
+        },
+        {
+          "address": "0x08017240",
+          "function": "speed_change",
+          "frame": 72,
+          "edge": "call"
+        },
+        {
+          "address": "0x0801719C",
+          "function": "sd_switch",
+          "frame": 40,
+          "edge": "tail"
+        },
+        {
+          "address": "0x08016F0C",
+          "function": "sdio_command_data_send",
+          "frame": 40,
+          "edge": "call"
+        },
+        {
+          "address": "0x08016E8C",
+          "function": "sd_dma_config",
+          "frame": 48,
+          "edge": "entry"
+        }
+      ],
+      "candidates": [
+        {
+          "irq": 37,
+          "handler": "USART1_IRQHandler",
+          "reachable_functions": 5,
+          "software": 8,
+          "path": [
+            {
+              "address": "0x080159F0",
+              "function": "USART1_IRQHandler",
+              "frame": 0,
+              "edge": "tail"
+            },
+            {
+              "address": "0x08015828",
+              "function": "HardwareSerial::IRQHandler()",
+              "frame": 8,
+              "edge": "entry"
+            }
+          ]
+        },
+        {
+          "irq": 53,
+          "handler": "UART5_IRQHandler",
+          "reachable_functions": 5,
+          "software": 8,
+          "path": [
+            {
+              "address": "0x08015A08",
+              "function": "UART5_IRQHandler",
+              "frame": 0,
+              "edge": "tail"
+            },
+            {
+              "address": "0x08015828",
+              "function": "HardwareSerial::IRQHandler()",
+              "frame": 8,
+              "edge": "entry"
+            }
+          ]
+        },
+        {
+          "irq": 67,
+          "handler": "OTGFS1_IRQHandler",
+          "reachable_functions": 161,
+          "software": 424,
+          "path": [
+            {
+              "address": "0x080423F0",
+              "function": "OTGFS1_IRQHandler",
+              "frame": 0,
+              "edge": "tail"
+            },
+            {
+              "address": "0x080196D0",
+              "function": "usbd_irq_handler",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x080193B4",
+              "function": "usbd_inept_handler",
+              "frame": 24,
+              "edge": "call"
+            },
+            {
+              "address": "0x08019080",
+              "function": "usbd_core_in_handler",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x08014570",
+              "function": "class_in_handler",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x08014474",
+              "function": "bot_scsi_datain_handler",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x08014344",
+              "function": "bot_scsi_cmd_process",
+              "frame": 4,
+              "edge": "tail"
+            },
+            {
+              "address": "0x0801413C",
+              "function": "bot_scsi_read10",
+              "frame": 40,
+              "edge": "call"
+            },
+            {
+              "address": "0x08014814",
+              "function": "msc_disk_read",
+              "frame": 8,
+              "edge": "call"
+            },
+            {
+              "address": "0x08013D70",
+              "function": "SdioCardEX::readBlocks(unsigned long, unsigned char*, unsigned int)",
+              "frame": 24,
+              "edge": "call"
+            },
+            {
+              "address": "0x08013C40",
+              "function": "SdioCard::readBlocks(unsigned long, unsigned char*, unsigned int)",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x08017580",
+              "function": "sd_mult_blocks_read",
+              "frame": 48,
+              "edge": "call"
+            },
+            {
+              "address": "0x080172BC",
+              "function": "sd_init",
+              "frame": 40,
+              "edge": "call"
+            },
+            {
+              "address": "0x08017240",
+              "function": "speed_change",
+              "frame": 72,
+              "edge": "call"
+            },
+            {
+              "address": "0x0801719C",
+              "function": "sd_switch",
+              "frame": 40,
+              "edge": "tail"
+            },
+            {
+              "address": "0x08016F0C",
+              "function": "sdio_command_data_send",
+              "frame": 40,
+              "edge": "call"
+            },
+            {
+              "address": "0x08016E8C",
+              "function": "sd_dma_config",
+              "frame": 48,
+              "edge": "entry"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "priority": 0,
+      "hardware": 108,
+      "software": 128,
+      "layer": 236,
+      "handler": "TMR4_GLOBAL_IRQHandler",
+      "irq": 30,
+      "path": [
+        {
+          "address": "0x08018384",
+          "function": "TMR4_GLOBAL_IRQHandler",
+          "frame": 8,
+          "edge": "call"
+        },
+        {
+          "address": "0x08040514",
+          "function": "HAL_TimerInterrputUpdate()",
+          "frame": 8,
+          "edge": "call"
+        },
+        {
+          "address": "0x08040E70",
+          "function": "HAL::Encoder_Update()",
+          "frame": 8,
+          "edge": "call"
+        },
+        {
+          "address": "0x08011BEA",
+          "function": "ButtonEvent::EventMonitor(bool)",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x08040D80",
+          "function": "Encoder_AHandler(ButtonEvent*, int)",
+          "frame": 0,
+          "edge": "tail"
+        },
+        {
+          "address": "0x08040CBC",
+          "function": "Buzz_Handler(int)",
+          "frame": 16,
+          "edge": "tail"
+        },
+        {
+          "address": "0x080409E4",
+          "function": "HAL::Buzz_Tone(unsigned long, long)",
+          "frame": 0,
+          "edge": "tail"
+        },
+        {
+          "address": "0x08015E34",
+          "function": "tone(unsigned char, unsigned long, unsigned long)",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x08015D94",
+          "function": "toneSetTimer(tmr_type*)",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x08017FF8",
+          "function": "Timer_SetInterruptBase",
+          "frame": 32,
+          "edge": "call"
+        },
+        {
+          "address": "0x08017F54",
+          "function": "Timer_ClockCmd",
+          "frame": 24,
+          "edge": "entry"
+        }
+      ],
+      "candidates": [
+        {
+          "irq": 11,
+          "handler": "EDMA_Stream1_IRQHandler",
+          "reachable_functions": 5,
+          "software": 8,
+          "path": [
+            {
+              "address": "0x0801497C",
+              "function": "EDMA_Stream1_IRQHandler",
+              "frame": 8,
+              "edge": "entry"
+            }
+          ]
+        },
+        {
+          "irq": 25,
+          "handler": "TMR1_OVF_TMR10_IRQHandler",
+          "reachable_functions": 8,
+          "software": 16,
+          "path": [
+            {
+              "address": "0x080182E4",
+              "function": "TMR1_OVF_TMR10_IRQHandler",
+              "frame": 8,
+              "edge": "call"
+            },
+            {
+              "address": "0x08015DF8",
+              "function": "Tone_TimerHandler()",
+              "frame": 0,
+              "edge": "tail"
+            },
+            {
+              "address": "0x08015DBC",
+              "function": "noTone(unsigned char)",
+              "frame": 8,
+              "edge": "entry"
+            }
+          ]
+        },
+        {
+          "irq": 30,
+          "handler": "TMR4_GLOBAL_IRQHandler",
+          "reachable_functions": 52,
+          "software": 128,
+          "path": [
+            {
+              "address": "0x08018384",
+              "function": "TMR4_GLOBAL_IRQHandler",
+              "frame": 8,
+              "edge": "call"
+            },
+            {
+              "address": "0x08040514",
+              "function": "HAL_TimerInterrputUpdate()",
+              "frame": 8,
+              "edge": "call"
+            },
+            {
+              "address": "0x08040E70",
+              "function": "HAL::Encoder_Update()",
+              "frame": 8,
+              "edge": "call"
+            },
+            {
+              "address": "0x08011BEA",
+              "function": "ButtonEvent::EventMonitor(bool)",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x08040D80",
+              "function": "Encoder_AHandler(ButtonEvent*, int)",
+              "frame": 0,
+              "edge": "tail"
+            },
+            {
+              "address": "0x08040CBC",
+              "function": "Buzz_Handler(int)",
+              "frame": 16,
+              "edge": "tail"
+            },
+            {
+              "address": "0x080409E4",
+              "function": "HAL::Buzz_Tone(unsigned long, long)",
+              "frame": 0,
+              "edge": "tail"
+            },
+            {
+              "address": "0x08015E34",
+              "function": "tone(unsigned char, unsigned long, unsigned long)",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x08015D94",
+              "function": "toneSetTimer(tmr_type*)",
+              "frame": 16,
+              "edge": "call"
+            },
+            {
+              "address": "0x08017FF8",
+              "function": "Timer_SetInterruptBase",
+              "frame": 32,
+              "edge": "call"
+            },
+            {
+              "address": "0x08017F54",
+              "function": "Timer_ClockCmd",
+              "frame": 24,
+              "edge": "entry"
+            }
+          ]
+        },
+        {
+          "irq": 58,
+          "handler": "DMA1_Channel3_IRQHandler",
+          "reachable_functions": 7,
+          "software": 16,
+          "path": [
+            {
+              "address": "0x080185C8",
+              "function": "DMA1_Channel3_IRQHandler",
+              "frame": 8,
+              "edge": "tail"
+            },
+            {
+              "address": "0x0801856C",
+              "function": "Display_SPI_DMA_Send(void const*, unsigned long)",
+              "frame": 16,
+              "edge": "entry"
+            }
+          ]
+        },
+        {
+          "irq": -1,
+          "handler": "SysTick_Handler",
+          "reachable_functions": 1,
+          "software": 0,
+          "path": [
+            {
+              "address": "0x0801793C",
+              "function": "SysTick_Handler",
+              "frame": 0,
+              "edge": "entry"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "interrupt_budget": 768,
+  "bounded_interrupt_budget": 768,
+  "stack_scan_overhead": {
+    "bytes": 16,
+    "begin": {
+      "bytes": 16,
+      "sample_call": {
+        "instruction_index": 8,
+        "call_order_index": 2,
+        "address": "0x08043450",
+        "instruction": "8043450:\tf7d0 fcec \tbl\t8013e2c <StackInfo_GetMaxUsageSize>",
+        "direct_call_order": [
+          {
+            "instruction_index": 4,
+            "address": "0x08043444",
+            "instruction": "8043444:\tf00f fb86 \tbl\t8052b54 <memset>",
+            "target_address": "0x08052B54",
+            "target": "memset"
+          },
+          {
+            "instruction_index": 6,
+            "address": "0x0804344A",
+            "instruction": "804344a:\tf7d0 fce7 \tbl\t8013e1c <StackInfo_GetTotalSize>",
+            "target_address": "0x08013E1C",
+            "target": "StackInfo_GetTotalSize"
+          },
+          {
+            "instruction_index": 8,
+            "address": "0x08043450",
+            "instruction": "8043450:\tf7d0 fcec \tbl\t8013e2c <StackInfo_GetMaxUsageSize>",
+            "target_address": "0x08013E2C",
+            "target": "StackInfo_GetMaxUsageSize"
+          },
+          {
+            "instruction_index": 10,
+            "address": "0x08043456",
+            "instruction": "8043456:\tf7d0 fd09 \tbl\t8013e6c <StackInfo_IsGuardIntact>",
+            "target_address": "0x08013E6C",
+            "target": "StackInfo_IsGuardIntact"
+          },
+          {
+            "instruction_index": 12,
+            "address": "0x0804345C",
+            "instruction": "804345c:\tf7ff fdec \tbl\t8043038 <P2_6_sbrk_call_count>",
+            "target_address": "0x08043038",
+            "target": "P2_6_sbrk_call_count"
+          },
+          {
+            "instruction_index": 14,
+            "address": "0x08043462",
+            "instruction": "8043462:\tf7ff fdef \tbl\t8043044 <P2_6_sbrk_peak>",
+            "target_address": "0x08043044",
+            "target": "P2_6_sbrk_peak"
+          },
+          {
+            "instruction_index": 21,
+            "address": "0x08043482",
+            "instruction": "8043482:\tf00f fb67 \tbl\t8052b54 <memset>",
+            "target_address": "0x08052B54",
+            "target": "memset"
+          }
+        ]
+      },
+      "path": [
+        {
+          "address": "0x08043438",
+          "function": "p2_6_measure_begin(unsigned long)",
+          "frame": 16,
+          "edge": "call@0x08043450",
+          "frame_source": ".su:d:/github/my/e-track/user/hal/hal_ota_package.cpp",
+          "map_object": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/USER/HAL/HAL_OTA_Package.cpp.obj",
+          "compilation_source": "d:/github/my/e-track/user/hal/hal_ota_package.cpp"
+        },
+        {
+          "address": "0x08013E2C",
+          "function": "StackInfo_GetMaxUsageSize",
+          "frame": 0,
+          "edge": "entry",
+          "frame_source": ".su:d:/github/my/e-track/libraries/stackinfo/stackinfo.c",
+          "map_object": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/StackInfo/StackInfo.c.obj",
+          "compilation_source": "d:/github/my/e-track/libraries/stackinfo/stackinfo.c"
+        }
+      ]
+    },
+    "end": {
+      "bytes": 8,
+      "sample_call": {
+        "instruction_index": 1,
+        "call_order_index": 0,
+        "address": "0x080436FE",
+        "instruction": "80436fe:\tf7d0 fb95 \tbl\t8013e2c <StackInfo_GetMaxUsageSize>",
+        "direct_call_order": [
+          {
+            "instruction_index": 1,
+            "address": "0x080436FE",
+            "instruction": "80436fe:\tf7d0 fb95 \tbl\t8013e2c <StackInfo_GetMaxUsageSize>",
+            "target_address": "0x08013E2C",
+            "target": "StackInfo_GetMaxUsageSize"
+          },
+          {
+            "instruction_index": 3,
+            "address": "0x08043706",
+            "instruction": "8043706:\tf7d0 fbb1 \tbl\t8013e6c <StackInfo_IsGuardIntact>",
+            "target_address": "0x08013E6C",
+            "target": "StackInfo_IsGuardIntact"
+          },
+          {
+            "instruction_index": 5,
+            "address": "0x0804370C",
+            "instruction": "804370c:\tf7ff fc94 \tbl\t8043038 <P2_6_sbrk_call_count>",
+            "target_address": "0x08043038",
+            "target": "P2_6_sbrk_call_count"
+          },
+          {
+            "instruction_index": 7,
+            "address": "0x08043712",
+            "instruction": "8043712:\tf7ff fc97 \tbl\t8043044 <P2_6_sbrk_peak>",
+            "target_address": "0x08043044",
+            "target": "P2_6_sbrk_peak"
+          },
+          {
+            "instruction_index": 17,
+            "address": "0x08043746",
+            "instruction": "8043746:\tf00f fa05 \tbl\t8052b54 <memset>",
+            "target_address": "0x08052B54",
+            "target": "memset"
+          },
+          {
+            "instruction_index": 18,
+            "address": "0x0804374A",
+            "instruction": "804374a:\tf7e7 fe8d \tbl\t802b468 <lv_mem_monitor>",
+            "target_address": "0x0802B468",
+            "target": "lv_mem_monitor"
+          }
+        ]
+      },
+      "path": [
+        {
+          "address": "0x080436FC",
+          "function": "p2_6_measure_end()",
+          "frame": 8,
+          "edge": "call@0x080436FE",
+          "frame_source": ".su:d:/github/my/e-track/user/hal/hal_ota_package.cpp",
+          "map_object": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/USER/HAL/HAL_OTA_Package.cpp.obj",
+          "compilation_source": "d:/github/my/e-track/user/hal/hal_ota_package.cpp"
+        },
+        {
+          "address": "0x08013E2C",
+          "function": "StackInfo_GetMaxUsageSize",
+          "frame": 0,
+          "edge": "entry",
+          "frame_source": ".su:d:/github/my/e-track/libraries/stackinfo/stackinfo.c",
+          "map_object": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/StackInfo/StackInfo.c.obj",
+          "compilation_source": "d:/github/my/e-track/libraries/stackinfo/stackinfo.c"
+        }
+      ]
+    }
+  },
+  "measurement_wrapper_upper_bound": {
+    "bytes": 40,
+    "begin": {
+      "bytes": 32,
+      "path": [
+        {
+          "address": "0x08043438",
+          "function": "p2_6_measure_begin(unsigned long)",
+          "frame": 16,
+          "edge": "tail"
+        },
+        {
+          "address": "0x0802B468",
+          "function": "lv_mem_monitor",
+          "frame": 8,
+          "edge": "call"
+        },
+        {
+          "address": "0x0802C0A8",
+          "function": "lv_tlsf_walk_pool",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x0802BD08",
+          "function": "block_next",
+          "frame": 8,
+          "edge": "entry"
+        }
+      ]
+    },
+    "end": {
+      "bytes": 40,
+      "path": [
+        {
+          "address": "0x080436FC",
+          "function": "p2_6_measure_end()",
+          "frame": 8,
+          "edge": "call"
+        },
+        {
+          "address": "0x0802B468",
+          "function": "lv_mem_monitor",
+          "frame": 8,
+          "edge": "call"
+        },
+        {
+          "address": "0x0802C0A8",
+          "function": "lv_tlsf_walk_pool",
+          "frame": 16,
+          "edge": "call"
+        },
+        {
+          "address": "0x0802BD08",
+          "function": "block_next",
+          "frame": 8,
+          "edge": "entry"
+        }
+      ]
+    }
+  },
+  "startup_helper": {
+    "bytes": 72,
+    "path": [
+      {
+        "address": "0x08043804",
+        "function": "P2_6_StartupStackScanProbe",
+        "frame": 72,
+        "edge": "entry"
+      }
+    ]
+  },
+  "startup_scan": {
+    "observed": 80,
+    "guard": 1,
+    "helper_static": 72,
+    "stack_total": 8192
+  },
+  "combined": {
+    "classification": "PASS",
+    "thread_peak": 2048,
+    "interrupt_budget": 768,
+    "total": 2816,
+    "limit": 8192,
+    "margin": 5376
+  },
+  "classification": {
+    "C3": "PASS",
+    "C13": "PASS",
+    "C16": "PASS"
+  },
+  "object_resolution": {
+    "production": {
+      "lzma": {
+        "functions": [
+          "LzmaDec_Allocate",
+          "LzmaDec_FreeProbs"
+        ],
+        "candidates": {
+          "LzmaDec_Allocate": [
+            "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/bsdiff_lzma_AES128-main/bspatch/lzma/LzmaDec.c.obj"
+          ],
+          "LzmaDec_FreeProbs": [
+            "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/bsdiff_lzma_AES128-main/bspatch/lzma/LzmaDec.c.obj"
+          ]
+        },
+        "selected": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/bsdiff_lzma_AES128-main/bspatch/lzma/LzmaDec.c.obj",
+        "compilation_source": "d:/github/my/e-track/bsdiff_lzma_aes128-main/bspatch/lzma/lzmadec.c"
+      },
+      "usb_msc_class": {
+        "functions": [
+          "class_init_handler",
+          "class_clear_handler"
+        ],
+        "candidates": {
+          "class_init_handler": [
+            "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/USB_MSC/msc_class/msc_class.c.obj"
+          ],
+          "class_clear_handler": [
+            "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/USB_MSC/msc_class/msc_class.c.obj"
+          ]
+        },
+        "selected": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/USB_MSC/msc_class/msc_class.c.obj",
+        "compilation_source": "d:/github/my/e-track/libraries/usb_msc/msc_class/msc_class.c"
+      }
+    },
+    "test": {}
+  },
+  "clone_mappings": {
+    "production": [
+      {
+        "elf_address": "0x0804723A",
+        "elf_function": "stream_read_exact.constprop.0",
+        "elf_key": "stream_read_exact",
+        "elf_clone_families": [
+          "constprop"
+        ],
+        "elf_clone_instances": [
+          ".constprop.0"
+        ],
+        "map_object": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/OTA/ota_patch.c.obj",
+        "compilation_source": "d:/github/my/e-track/libraries/ota/ota_patch.c",
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/libraries/ota/ota_patch.c.su",
+        "su_object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/libraries/ota/ota_patch.c.obj",
+        "su_source": "d:/github/my/e-track/libraries/ota/ota_patch.c",
+        "su_line": 441,
+        "su_function": "stream_read_exact.constprop",
+        "su_clone_families": [
+          "constprop"
+        ],
+        "bytes": 40
+      },
+      {
+        "elf_address": "0x0804B09E",
+        "elf_function": "LzmaDec_AllocateProbs2.isra.0",
+        "elf_key": "LzmaDec_AllocateProbs2",
+        "elf_clone_families": [
+          "isra"
+        ],
+        "elf_clone_instances": [
+          ".isra.0"
+        ],
+        "map_object": "CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/bsdiff_lzma_AES128-main/bspatch/lzma/LzmaDec.c.obj",
+        "compilation_source": "d:/github/my/e-track/bsdiff_lzma_aes128-main/bspatch/lzma/lzmadec.c",
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/bsdiff_lzma_aes128-main/bspatch/lzma/lzmadec.c.su",
+        "su_object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/bsdiff_lzma_aes128-main/bspatch/lzma/lzmadec.c.obj",
+        "su_source": "d:/github/my/e-track/bsdiff_lzma_aes128-main/bspatch/lzma/lzmadec.c",
+        "su_line": 1335,
+        "su_function": "LzmaDec_AllocateProbs2.isra",
+        "su_clone_families": [
+          "isra"
+        ],
+        "bytes": 16
+      }
+    ],
+    "test": []
+  },
+  "invalid_su_identities": {
+    "production": [
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/print.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/print.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/arduinoapi/print.cpp",
+        "source": "d:/github/my/e-track/arduinoapi/print.cpp",
+        "line": 277,
+        "function": ")",
+        "reason": "函数标识括号不平衡: ')'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/wire.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/wire.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/arduinoapi/wire.cpp",
+        "source": "d:/github/my/e-track/arduinoapi/wire.cpp",
+        "line": 242,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal.cpp",
+        "line": 160,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_audio.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_audio.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_audio.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_audio.cpp",
+        "line": 34,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "line": 46,
+        "function": ")",
+        "reason": "函数标识括号不平衡: ')'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "line": 93,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_eeprom.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_eeprom.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_eeprom.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_eeprom.cpp",
+        "line": 187,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_encoder.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_encoder.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_encoder.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_encoder.cpp",
+        "line": 155,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_gps.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_gps.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_gps.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_gps.cpp",
+        "line": 150,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_imu.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_imu.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_imu.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_imu.cpp",
+        "line": 43,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_mag.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_mag.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_mag.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_mag.cpp",
+        "line": 45,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_sd_card.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_sd_card.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_sd_card.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_sd_card.cpp",
+        "line": 299,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/resource/resourcepool.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/resource/resourcepool.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/resource/resourcepool.cpp",
+        "source": "d:/github/my/e-track/user/app/resource/resourcepool.cpp",
+        "line": 85,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/datacenter/datacenter.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/datacenter/datacenter.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/datacenter/datacenter.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {Account* const&}; _Tp = Account*; _Alloc = std::allocator<Account*>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {Account* const&}; _Tp = Account*; _Alloc = std::allocator<Account*>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {const lv_poly_line::single_line_t&}; _Tp = lv_poly_line::single_line_t; _Alloc = std::allocator<lv_poly_line::single_line_t>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {const lv_poly_line::single_line_t&}; _Tp = lv_poly_line::single_line_t; _Alloc = std::allocator<lv_poly_line::single_line_t>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {const lv_point_t&}; _Tp = lv_point_t; _Alloc = std::allocator<lv_point_t>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {const lv_point_t&}; _Tp = lv_point_t; _Alloc = std::allocator<lv_point_t>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_base.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_base.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/pagemanager/pm_base.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {PageBase* const&}; _Tp = PageBase*; _Alloc = std::allocator<PageBase*>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {PageBase* const&}; _Tp = PageBase*; _Alloc = std::allocator<PageBase*>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp",
+        "source": "d:/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp",
+        "line": 91,
+        "function": "0()",
+        "reason": "函数标识没有可提取 callable: '0()'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/resourcemanager/resourcemanager.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/resourcemanager/resourcemanager.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/resourcemanager/resourcemanager.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {const ResourceManager::ResourceNode&}; _Tp = ResourceManager::ResourceNode; _Alloc = std::allocator<ResourceManager::ResourceNode>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {const ResourceManager::ResourceNode&}; _Tp = ResourceManager::ResourceNode; _Alloc = std::allocator<ResourceManager::ResourceNode>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/storageservice/storageservice.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/storageservice/storageservice.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/storageservice/storageservice.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {StorageService::Node_t* const&}; _Tp = StorageService::Node_t*; _Alloc = std::allocator<StorageService::Node_t*>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {StorageService::Node_t* const&}; _Tp = StorageService::Node_t*; _Alloc = std::allocator<StorageService::Node_t*>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dataproc.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dataproc.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/common/dataproc/dataproc.cpp",
+        "source": "d:/github/my/e-track/user/app/common/dataproc/dataproc.cpp",
+        "line": 26,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_storage.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_storage.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/common/dataproc/dp_storage.cpp",
+        "source": "d:/github/my/e-track/user/app/common/dataproc/dp_storage.cpp",
+        "line": 214,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp",
+        "source": "d:/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp",
+        "line": 134,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp",
+        "line": 331,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp",
+        "line": 435,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp",
+        "line": 202,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp",
+        "line": 98,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/cmake/sources/hal_faulthandle_20e7c83ac691.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/cmake/sources/hal_faulthandle_20e7c83ac691.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/cmake-generated/cmake/sources/hal_faulthandle_20e7c83ac691.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/cmake-generated/cmake/sources/hal_faulthandle_20e7c83ac691.cpp",
+        "line": 61,
+        "function": ")",
+        "reason": "函数标识括号不平衡: ')'"
+      }
+    ],
+    "test": [
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/print.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/print.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/arduinoapi/print.cpp",
+        "source": "d:/github/my/e-track/arduinoapi/print.cpp",
+        "line": 277,
+        "function": ")",
+        "reason": "函数标识括号不平衡: ')'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/wire.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/arduinoapi/wire.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/arduinoapi/wire.cpp",
+        "source": "d:/github/my/e-track/arduinoapi/wire.cpp",
+        "line": 242,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal.cpp",
+        "line": 160,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_audio.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_audio.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_audio.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_audio.cpp",
+        "line": 34,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "line": 46,
+        "function": ")",
+        "reason": "函数标识括号不平衡: ')'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_bluetooth.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_bluetooth.cpp",
+        "line": 93,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_eeprom.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_eeprom.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_eeprom.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_eeprom.cpp",
+        "line": 187,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_encoder.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_encoder.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_encoder.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_encoder.cpp",
+        "line": 155,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_gps.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_gps.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_gps.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_gps.cpp",
+        "line": 150,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_imu.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_imu.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_imu.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_imu.cpp",
+        "line": 43,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_mag.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_mag.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_mag.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_mag.cpp",
+        "line": 45,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_ota_package.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_ota_package.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_ota_package.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_ota_package.cpp",
+        "line": 209,
+        "function": "0(long int, const char*, uint32_t, uint32_t, uint32_t)",
+        "reason": "函数标识没有可提取 callable: '0(long int, const char*, uint32_t, uint32_t, uint32_t)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_sd_card.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/hal/hal_sd_card.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/hal/hal_sd_card.cpp",
+        "source": "d:/github/my/e-track/user/hal/hal_sd_card.cpp",
+        "line": 299,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/resource/resourcepool.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/resource/resourcepool.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/resource/resourcepool.cpp",
+        "source": "d:/github/my/e-track/user/app/resource/resourcepool.cpp",
+        "line": 85,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/datacenter/datacenter.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/datacenter/datacenter.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/datacenter/datacenter.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {Account* const&}; _Tp = Account*; _Alloc = std::allocator<Account*>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {Account* const&}; _Tp = Account*; _Alloc = std::allocator<Account*>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {const lv_poly_line::single_line_t&}; _Tp = lv_poly_line::single_line_t; _Alloc = std::allocator<lv_poly_line::single_line_t>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {const lv_poly_line::single_line_t&}; _Tp = lv_poly_line::single_line_t; _Alloc = std::allocator<lv_poly_line::single_line_t>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/lv_poly_line/lv_poly_line.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {const lv_point_t&}; _Tp = lv_point_t; _Alloc = std::allocator<lv_point_t>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {const lv_point_t&}; _Tp = lv_point_t; _Alloc = std::allocator<lv_point_t>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_base.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_base.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/pagemanager/pm_base.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {PageBase* const&}; _Tp = PageBase*; _Alloc = std::allocator<PageBase*>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {PageBase* const&}; _Tp = PageBase*; _Alloc = std::allocator<PageBase*>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp",
+        "source": "d:/github/my/e-track/user/app/utils/pagemanager/pm_router.cpp",
+        "line": 91,
+        "function": "0()",
+        "reason": "函数标识没有可提取 callable: '0()'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/resourcemanager/resourcemanager.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/resourcemanager/resourcemanager.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/resourcemanager/resourcemanager.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {const ResourceManager::ResourceNode&}; _Tp = ResourceManager::ResourceNode; _Alloc = std::allocator<ResourceManager::ResourceNode>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {const ResourceManager::ResourceNode&}; _Tp = ResourceManager::ResourceNode; _Alloc = std::allocator<ResourceManager::ResourceNode>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/storageservice/storageservice.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/utils/storageservice/storageservice.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/utils/storageservice/storageservice.cpp",
+        "source": "d:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/arm-none-eabi/include/c++/13.3.1/bits/vector.tcc",
+        "line": 445,
+        "function": ") [with _Args = {StorageService::Node_t* const&}; _Tp = StorageService::Node_t*; _Alloc = std::allocator<StorageService::Node_t*>]",
+        "reason": "函数标识括号不平衡: ') [with _Args = {StorageService::Node_t* const&}; _Tp = StorageService::Node_t*; _Alloc = std::allocator<StorageService::Node_t*>]'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dataproc.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dataproc.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/common/dataproc/dataproc.cpp",
+        "source": "d:/github/my/e-track/user/app/common/dataproc/dataproc.cpp",
+        "line": 26,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_storage.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_storage.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/common/dataproc/dp_storage.cpp",
+        "source": "d:/github/my/e-track/user/app/common/dataproc/dp_storage.cpp",
+        "line": 214,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp",
+        "source": "d:/github/my/e-track/user/app/common/dataproc/dp_trackfilter.cpp",
+        "line": 134,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/core/hardwareserial.cpp",
+        "line": 331,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/core/spi.cpp",
+        "line": 435,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_display.cpp",
+        "line": 202,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/d_/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/platform/hal/hal_touch.cpp",
+        "line": 98,
+        "function": "cpp)",
+        "reason": "函数标识括号不平衡: 'cpp)'"
+      },
+      {
+        "su_file": "cmakefiles/x_track_app_gcc.dir/cmake/sources/hal_faulthandle_20e7c83ac691.cpp.su",
+        "object": "cmakefiles/x_track_app_gcc.dir/cmake/sources/hal_faulthandle_20e7c83ac691.cpp.obj",
+        "compilation_source": "d:/github/my/e-track/mdk-arm_f435/cmake-generated/cmake/sources/hal_faulthandle_20e7c83ac691.cpp",
+        "source": "d:/github/my/e-track/mdk-arm_f435/cmake-generated/cmake/sources/hal_faulthandle_20e7c83ac691.cpp",
+        "line": 61,
+        "function": ")",
+        "reason": "函数标识括号不平衡: ')'"
+      }
+    ]
+  }
+}

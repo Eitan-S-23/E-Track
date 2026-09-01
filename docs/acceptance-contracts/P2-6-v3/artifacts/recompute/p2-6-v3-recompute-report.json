@@ -1,0 +1,709 @@
+{
+  "schema": "p2-6-v3-evidence-recompute-v1",
+  "bundle": "D:\\github\\my\\E-Track\\docs\\acceptance-contracts\\P2-6-v3",
+  "thresholds": {
+    "workspace_peak_limit_bytes": 40960,
+    "ota_stack_limit_bytes": 8192,
+    "ota_stack_guard_bytes": 32,
+    "overlay_base_addr": "0x20058000"
+  },
+  "measurement_record": {
+    "kind": "full",
+    "result": "0",
+    "workspace_peak": "33016",
+    "arena_peak_observed": "33016",
+    "failed_request_size": "0",
+    "stack_entry": "3496",
+    "stack_peak": "3496",
+    "stack_total": "8192",
+    "guard_entry": "1",
+    "guard_exit": "1",
+    "sbrk_delta": "0",
+    "sbrk_peak": "537221444",
+    "tlsf_malloc_delta": "0",
+    "tlsf_realloc_delta": "0",
+    "tlsf_free_delta": "0",
+    "lv_free_entry": "63616",
+    "lv_free_exit": "63616",
+    "lv_big_entry": "59900",
+    "lv_big_exit": "59900",
+    "lv_frag_entry": "6",
+    "lv_frag_exit": "6",
+    "lv_max_entry": "64667",
+    "lv_max_exit": "64667",
+    "seq": "1372434492",
+    "last_size": "24",
+    "last_ret": "0x1A"
+  },
+  "checks": [
+    {
+      "id": "FULL-C1-WORKSPACE-PEAK",
+      "result": "PASS",
+      "observed": {
+        "kind": "full",
+        "result": 0,
+        "workspace_peak_bytes": 33016,
+        "arena_peak_observed_bytes": 33016,
+        "failed_request_size": 0,
+        "limit_bytes": 40960,
+        "headroom_bytes": 7944,
+        "utilisation_pct": 80.61,
+        "record_count": 1
+      },
+      "expected": {
+        "workspace_peak_bytes": "<= 40960",
+        "arena_peak_observed_bytes": "== workspace_peak",
+        "failed_request_size": 0,
+        "result": 0
+      },
+      "note": "FULL 侧 apply 窗口 overlay 工作区峰值"
+    },
+    {
+      "id": "FULL-C4-GUARD-INTACT",
+      "result": "PASS",
+      "observed": {
+        "guard_entry": 1,
+        "guard_exit": 1,
+        "guard_bytes": 32,
+        "stack_entry_bytes": 3496,
+        "stack_peak_bytes": 3496,
+        "stack_total_bytes": 8192,
+        "stack_headroom_bytes": 4696
+      },
+      "expected": {
+        "guard_entry": 1,
+        "guard_exit": 1,
+        "stack_total_bytes": 8192,
+        "stack_peak_bytes": "<= 8192"
+      },
+      "note": "32B guard 进出均完好；OTA 专用栈实测峰值在门槛内"
+    },
+    {
+      "id": "FULL-C5-SBRK-DELTA-ZERO",
+      "result": "PASS",
+      "observed": {
+        "sbrk_delta": 0,
+        "sbrk_peak": 537221444
+      },
+      "expected": {
+        "sbrk_delta": 0
+      },
+      "note": "apply 窗口内 _sbrk 调用增量为 0（sbrk_peak 为历史堆顶水位，非门禁项）"
+    },
+    {
+      "id": "FULL-C6-TLSF-DELTA-ZERO",
+      "result": "PASS",
+      "observed": {
+        "tlsf_malloc_delta": 0,
+        "tlsf_realloc_delta": 0,
+        "tlsf_free_delta": 0
+      },
+      "expected": {
+        "tlsf_malloc_delta": 0,
+        "tlsf_realloc_delta": 0,
+        "tlsf_free_delta": 0
+      },
+      "note": "apply 窗口内 LVGL tlsf 分配器零调用（free_delta 为交叉核对项）"
+    },
+    {
+      "id": "FULL-C14-LV-POOL-NET",
+      "result": "PASS",
+      "observed": {
+        "lv_free": {
+          "entry": 63616,
+          "exit": 63616
+        },
+        "lv_big": {
+          "entry": 59900,
+          "exit": 59900
+        },
+        "lv_frag": {
+          "entry": 6,
+          "exit": 6
+        },
+        "lv_max": {
+          "entry": 64667,
+          "exit": 64667
+        }
+      },
+      "expected": {
+        "每对 entry": "== exit"
+      },
+      "note": "lv_mem_monitor 四字段净状态不变（佐证项）"
+    },
+    {
+      "id": "HW-R8-CAPTURE-BYTE-IDENTITY",
+      "result": "PASS",
+      "observed": {
+        "payload_bytes": 735,
+        "pending_bytes": 735,
+        "byte_identical": true,
+        "payload_sha256": "50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+        "declared_pending_sha256": "50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+        "derive_descriptor_WrOff": 735
+      },
+      "expected": {
+        "payload == pending": true,
+        "len(payload)": "== derive WrOff"
+      },
+      "note": "两段式采集：logger 逐字节落盘与 derive 阶段 pending 快照完全一致"
+    },
+    {
+      "id": "HW-R8-POSTCHECK-RDOFF",
+      "result": "PASS",
+      "observed": {
+        "control_block_bytes": 168,
+        "changed_byte_offsets": [
+          40,
+          41
+        ],
+        "changed_outside_rdoff": [],
+        "up0_pre": {
+          "pName": 134575547,
+          "pBuffer": 537213468,
+          "SizeOfBuffer": 1024,
+          "WrOff": 735,
+          "RdOff": 0,
+          "Flags": 1
+        },
+        "up0_post": {
+          "pName": 134575547,
+          "pBuffer": 537213468,
+          "SizeOfBuffer": 1024,
+          "WrOff": 735,
+          "RdOff": 735,
+          "Flags": 1
+        }
+      },
+      "expected": {
+        "changed_outside_rdoff": [],
+        "post.RdOff": "== WrOff"
+      },
+      "note": "读走数据只推进 RdOff，控制块其余字节零改动"
+    },
+    {
+      "id": "HW-R8-INPUTS-IDENTITY",
+      "result": "PASS",
+      "observed": {
+        "elf_sha256": "35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "map_sha256": "2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "device_image_sha256": "AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "device_header_sha256": "AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "bundle_test_elf_sha256": "35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "upload_readback_matches": true,
+        "upload_input_sha256": "84D3F38420A9521FEEC1251CCE13A76F83F862935C2846A30D09DE1EC96DD2E7",
+        "upload_readback_sha256": "84D3F38420A9521FEEC1251CCE13A76F83F862935C2846A30D09DE1EC96DD2E7",
+        "upload_input_bytes": 282367,
+        "upload_readback_bytes": 282367
+      },
+      "expected": {
+        "elf_sha256": "35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+        "map_sha256": "2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+        "device_image_sha256": "AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+        "device_header_sha256": "AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+        "upload_readback_matches": true
+      },
+      "note": "板上镜像/ELF/MAP 身份与 v2 冻结锚逐字相同；SD 上传读回一致"
+    },
+    {
+      "id": "PROC-R8-SESSION-CLOSURE",
+      "result": "PASS",
+      "observed": {
+        "gdb_exit_code": 0,
+        "server_exit_code": 0,
+        "server_natural_exit": true,
+        "server_terminate_sent": false,
+        "server_kill_sent": false,
+        "ports_closed": true,
+        "session_error": null,
+        "transport_classification": "PASS",
+        "rtt_channel_binding_verified": true,
+        "rtt_record_count": 1,
+        "rtt_matching_record_count": 1,
+        "rtt_postcheck_passed": true,
+        "outside_repo_writes": [
+          "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini"
+        ]
+      },
+      "expected": {
+        "gdb_exit_code": 0,
+        "server_natural_exit": true,
+        "server_kill_sent": false,
+        "transport_classification": "PASS",
+        "rtt_record_count": 1,
+        "outside_repo_writes": [
+          "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini"
+        ]
+      },
+      "note": "会话自然退出、无 terminate/kill、端口清零、项目外写入仅既授权项"
+    },
+    {
+      "id": "HW-BOOT-CANDIDATE-SLOT-COMMITTED",
+      "result": "PASS",
+      "observed": {
+        "slot_header": {
+          "magic": "ETSL",
+          "slot_type": 1,
+          "pad": "FFFFFF",
+          "payload_len": 600744,
+          "payload_crc32": 1407719522,
+          "version_code": 20801,
+          "sha8": "9db3c649b80e82c6",
+          "commit_marker": 1129270612,
+          "payload_crc32_hex": "0x53E81862",
+          "commit_marker_hex": "0x434F4D54"
+        },
+        "bcb_a_cand_len": 600744,
+        "bcb_a_cand_crc32_hex": "0x53E81862",
+        "bcb_a_cand_vcode": 20801
+      },
+      "expected": {
+        "magic": "ETSL",
+        "slot_type": 1,
+        "commit_marker_hex": "0x434F4D54",
+        "payload_len": 600744,
+        "payload_crc32_hex": "0x53E81862"
+      },
+      "note": "candidate 槽头字节级解析：marker-last 已提交，且与 BCB cand_* 三字段互证"
+    },
+    {
+      "id": "HW-BOOT-BCB-TRANSITION",
+      "result": "PASS",
+      "observed": {
+        "pre_A": {
+          "state": 4,
+          "seq": 752,
+          "cur_vcode": 20800,
+          "cand_vcode": 20801,
+          "cand_crc32_hex": "0x53E81862",
+          "crc32_stored_hex": "0x7E8C74EA",
+          "crc32_recomputed_hex": "0x7E8C74EA"
+        },
+        "pre_B": {
+          "state": 5,
+          "seq": 751,
+          "cur_vcode": 20800,
+          "cand_vcode": 20801,
+          "cand_crc32_hex": "0x53E81862",
+          "crc32_stored_hex": "0x66CC6CC3",
+          "crc32_recomputed_hex": "0x66CC6CC3"
+        },
+        "post_A": {
+          "state": 4,
+          "seq": 904,
+          "cur_vcode": 20801,
+          "cand_vcode": 20801,
+          "cand_crc32_hex": "0x53E81862",
+          "crc32_stored_hex": "0x6A8970D2",
+          "crc32_recomputed_hex": "0x6A8970D2"
+        },
+        "post_B": {
+          "state": 3,
+          "seq": 903,
+          "cur_vcode": 20800,
+          "cand_vcode": 20801,
+          "cand_crc32_hex": "0x53E81862",
+          "crc32_stored_hex": "0x488021EC",
+          "crc32_recomputed_hex": "0x488021EC"
+        },
+        "seq_advance_pre_A_to_post_B": 151,
+        "seq_advance_post_B_to_post_A": 1
+      },
+      "expected": {
+        "pre_A.state": 4,
+        "post_B.state": 3,
+        "post_A.state": 4,
+        "post_A.cur_vcode": 20801,
+        "每块 crc32_recomputed": "== crc32_stored"
+      },
+      "note": "EEPROM 双块 CRC 全部独立复算通过；STAGED→TEST_BOOT(B)→CONFIRMED(A, cur_vcode 前进) 在双块上留痕"
+    },
+    {
+      "id": "HW-BOOT-APP-VCODE-ADVANCED",
+      "result": "PASS",
+      "observed": {
+        "app_slot_vcode_before_reset": 20800,
+        "app_slot_vcode_after_reset": 20801,
+        "image_len": 600744,
+        "rtt_ring_has_test_boot_confirm": true,
+        "g_ota_state_snapshot": 4,
+        "g_ota_confirm_done": 1
+      },
+      "expected": {
+        "app_slot_vcode_before_reset": 20800,
+        "app_slot_vcode_after_reset": 20801,
+        "rtt_ring_has_test_boot_confirm": true
+      },
+      "note": "复位后 App slot fw_header 版本前进，且 App 在 TEST_BOOT 态执行确认"
+    },
+    {
+      "id": "HW-C7-PACKAGE-DERIVATION",
+      "result": "PASS",
+      "observed": {
+        "bytes": 282355,
+        "diff_offsets": [
+          36,
+          37,
+          38,
+          39,
+          60,
+          61,
+          62,
+          63,
+          141209
+        ],
+        "payload_diff_offsets": [
+          141209
+        ],
+        "flip_xor": 1,
+        "good_target_vcode": 20802,
+        "bad_target_vcode": 20802,
+        "board_vcode": 20801,
+        "good_payload_crc_ok": true,
+        "bad_payload_crc_ok": true,
+        "bad_header_crc_ok": true,
+        "good_sha256": "761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20",
+        "bad_sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30"
+      },
+      "expected": {
+        "diff_offsets": [
+          36,
+          37,
+          38,
+          39,
+          60,
+          61,
+          62,
+          63,
+          141209
+        ],
+        "payload_diff_offsets": [
+          141209
+        ],
+        "bad_header_crc_ok": true,
+        "bad_target_vcode": 20802
+      },
+      "note": "BAD 包外层 CRC 合法（能过 Inspect），仅 payload 单比特被翻转，target 20802 > 板卡 20801，可越过 ota_sd.c 版本关进入 Apply"
+    },
+    {
+      "id": "HW-C7-UPLOAD-BYTE-IDENTITY",
+      "result": "PASS",
+      "observed": {
+        "attempt_02_readback_bytes": 282355,
+        "attempt_02_byte_identical": true,
+        "attempt_02_readback_sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+        "attempt_02_input_sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+        "attempt_02_readback_matches": true,
+        "attempt_02_chunk_count": 9,
+        "attempt_02_transport": "PASS",
+        "attempt_01_transport": "GDB_FAIL",
+        "attempt_01_readback_matches": false,
+        "attempt_01_gdb_exit_code": 47,
+        "bad_package_sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30"
+      },
+      "expected": {
+        "attempt_02_byte_identical": true,
+        "attempt_02_transport": "PASS",
+        "attempt_01_transport": "!= PASS"
+      },
+      "note": "第 2 次上传读回与 BAD 包逐字节相同；第 1 次（USB MSC 独占 SDIO）如实登记为 GDB_FAIL"
+    },
+    {
+      "id": "HW-C7-MIDAPPLY-OWNER-PACKAGE",
+      "result": "PASS",
+      "observed": {
+        "confirm_mode": 1,
+        "owner_at_confirm": 0,
+        "import_mode": 2,
+        "owner_at_apply": 2,
+        "bcb_mid1": 4,
+        "bcb_mid2": 4,
+        "lzma_alloc_entry_seen": true
+      },
+      "expected": {
+        "confirm_mode": 1,
+        "import_mode": 2,
+        "owner_at_apply": 2
+      },
+      "note": "升级真正进入 Apply 窗口：overlay owner 由 LiveMap 交给 PACKAGE，且在 LZMA 分配点采到 owner=2 的中途快照"
+    },
+    {
+      "id": "HW-C7-FAILURE-NOT-VERSION-GATE",
+      "result": "PASS",
+      "observed": {
+        "page_object_bytes": 13824,
+        "page_has_error_string": true,
+        "page_has_bad_package_path": true,
+        "error_string": "full:lzma_data",
+        "host_gate_bad_result": "lzma_data",
+        "host_gate_failures": 0,
+        "host_gate_status": "PASS",
+        "not_payload_crc_check": true,
+        "version_gate_refusal": false
+      },
+      "expected": {
+        "error_string": "full:lzma_data",
+        "host_gate_bad_result": "lzma_data",
+        "version_gate_refusal": false
+      },
+      "note": "失败发生在解压阶段（lzma_data），既非 Inspect 版本关拒绝，也非外层 payload_crc —— 即真正的「升级中途失败」形态"
+    },
+    {
+      "id": "HW-C7-OVERLAY-RELEASE-REBUILD",
+      "result": "PASS",
+      "observed": {
+        "post_fail_mode": 3,
+        "post_fail_owner": 0,
+        "post_fail_vcode": 20801,
+        "recover_pre_owner": 0,
+        "recover_pop_ok": 1,
+        "reacquire_turns": 0,
+        "reacquire_owner": 1,
+        "final_owner": 1,
+        "final_vcode": 20801,
+        "r8_fail_state_owner_released": true,
+        "r8_owner_mid": 1
+      },
+      "expected": {
+        "post_fail_owner": 0,
+        "recover_pop_ok": 1,
+        "reacquire_owner": 1,
+        "final_owner": 1
+      },
+      "note": "中途失败后 overlay 归 0；Pop 取消后 LiveMap 重新初始化并再次持有 overlay；R8 侧同形恢复链交叉印证"
+    },
+    {
+      "id": "HW-C7-MAP-HEALTHY",
+      "result": "PASS",
+      "observed": {
+        "r9_baseline": {
+          "stat_lines": 40,
+          "max_lineHit": 608
+        },
+        "r9_recover": {
+          "stat_lines": 44,
+          "max_lineHit": 313
+        },
+        "r8_baseline": {
+          "stat_lines": 38,
+          "max_lineHit": 612
+        },
+        "r8_recover": {
+          "stat_lines": 41,
+          "max_lineHit": 311
+        },
+        "min_stat_lines_required": 30
+      },
+      "expected": {
+        "每组 stat_lines": ">= 30",
+        "每组 max_lineHit": "> 0"
+      },
+      "note": "重建后地图渲染统计行数量与命中率与基线同水平，地图正常显示"
+    },
+    {
+      "id": "HW-C7-BCB-UNTOUCHED",
+      "result": "PASS",
+      "observed": {
+        "s0_bcb_values": [
+          4,
+          4
+        ],
+        "s2_bcb_values": [
+          4,
+          4
+        ],
+        "s3_bcb_values": [
+          4,
+          4,
+          4
+        ],
+        "s3b_bcb_values": [
+          4,
+          4
+        ],
+        "s3e_bcb_values": [
+          4,
+          4
+        ],
+        "s4_bcb_values": [
+          4,
+          4
+        ],
+        "s5_bcb_values": [
+          4,
+          4
+        ],
+        "host_gate_bad_bcb_untouched": true,
+        "host_gate_good_bcb_identical": true
+      },
+      "expected": {
+        "所有会话 bcb 观测": 4
+      },
+      "note": "C7 全过程 BCB 恒为 CONFIRMED(4)，失败未污染引导控制块"
+    },
+    {
+      "id": "OFF-C3-C13-STACK-CLOSURE",
+      "result": "PASS",
+      "observed": {
+        "full_thread_peak_bytes": 1904,
+        "patch_thread_peak_bytes": 2048,
+        "recomputed_thread_peak_bytes": 2048,
+        "interrupt_budget_bytes": 768,
+        "bounded_interrupt_budget_bytes": 768,
+        "recomputed_total_bytes": 2816,
+        "limit_bytes": 8192,
+        "margin_bytes": 5376,
+        "interrupt_evidence_gaps": [],
+        "measurement_wrapper_upper_bound_bytes": 40,
+        "stack_scan_overhead_bytes": 16,
+        "startup_scan_observed_bytes": 80,
+        "startup_scan_helper_static_bytes": 72
+      },
+      "expected": {
+        "recomputed_total_bytes": "<= 8192",
+        "interrupt_evidence_gaps": []
+      },
+      "note": "C3/C13：线程峰值 + 有界中断预算独立相加后仍在 8192 B 内；中断证据无缺口；测量包装与扫描开销已量化"
+    },
+    {
+      "id": "OFF-C8-C16-RAM-LAYOUT",
+      "result": "PASS",
+      "observed": {
+        "main_ram_region_bytes": 360448,
+        "production": {
+          "allocated_bytes": 357088,
+          "top_addr": 537231360,
+          "highwater_bytes": 360448,
+          "free_hole_bytes": 3360,
+          "top_addr_hex": "0x20058000"
+        },
+        "test": {
+          "allocated_bytes": 357264,
+          "top_addr": 537231360,
+          "highwater_bytes": 360448,
+          "free_hole_bytes": 3184,
+          "top_addr_hex": "0x20058000"
+        },
+        "instrumentation_delta_bytes": 176,
+        "ota_sections_production": {
+          ".ota_stack": {
+            "addr_hex": "0x20056000",
+            "size": 8192
+          },
+          ".ota_stack_guard": {
+            "addr_hex": "0x20055FE0",
+            "size": 32
+          },
+          ".ota_overlay": {
+            "addr_hex": "0x20058000",
+            "size": 40960
+          }
+        },
+        "ota_sections_identical_prod_vs_test": true,
+        "sram_ext_addr_hex": "0x20058000",
+        "sram_ext_bytes": 163840
+      },
+      "expected": {
+        ".ota_stack.size": 8192,
+        ".ota_stack_guard.size": 32,
+        ".ota_overlay.size": 40960,
+        ".ota_overlay.addr": "0x20058000",
+        "ota_sections_identical_prod_vs_test": true
+      },
+      "note": "C8：主 RAM [0x20000000,0x20058000) 高水位与空洞独立复算；C16：OTA 三节在插桩/生产构型地址尺寸完全一致，overlay 与 .sram_ext 共址"
+    },
+    {
+      "id": "OFF-C10-C11-CAPACITY",
+      "result": "PASS",
+      "observed": {
+        "full": {
+          "prefix": 6576,
+          "P_full": 33072,
+          "baseline_result": "ok",
+          "baseline_workspace_peak": 33072,
+          "ok_case_capacity": 26496,
+          "ok_case_result": "ok",
+          "ok_case_expected": "ok",
+          "ok_case_status": "PASS",
+          "fail_case_capacity": 26495,
+          "fail_case_result": "workspace",
+          "fail_case_expected": "workspace",
+          "fail_case_failed_request_size": 16384,
+          "fail_case_candidate_prepares": 0,
+          "fail_case_status": "PASS",
+          "recomputed_ok_capacity": 26496,
+          "recomputed_fail_capacity": 26495
+        },
+        "patch": {
+          "prefix": 7640,
+          "P_full": 21848,
+          "baseline_result": "ok",
+          "baseline_workspace_peak": 21848,
+          "ok_case_capacity": 14208,
+          "ok_case_result": "ok",
+          "ok_case_expected": "ok",
+          "ok_case_status": "PASS",
+          "fail_case_capacity": 14207,
+          "fail_case_result": "workspace",
+          "fail_case_expected": "workspace",
+          "fail_case_failed_request_size": 4096,
+          "fail_case_candidate_prepares": 0,
+          "fail_case_status": "PASS",
+          "recomputed_ok_capacity": 14208,
+          "recomputed_fail_capacity": 14207
+        }
+      },
+      "expected": {
+        "cap=P_full-prefix": "ok/PASS",
+        "cap=P_full-prefix-1": "workspace/PASS"
+      },
+      "note": "C10/C11：容量恰好等于 P_full-prefix 时成功、少 1 字节即以 workspace 失败，边界可判别且 fail-closed"
+    },
+    {
+      "id": "PROC-CUSTODY-COMPLETE",
+      "result": "PASS",
+      "observed": {
+        "frozen_artifact_count": 52,
+        "frozen_total_bytes": 2979503,
+        "missing": [],
+        "mismatched": [],
+        "index_entry_count": 52,
+        "index_paths_symmetric_difference": [],
+        "index_divergent_entries": [],
+        "upstream_manifest_coverage": {
+          "r8": {
+            "manifest_entries": 89,
+            "bundle_artifacts": 18,
+            "uncovered": []
+          },
+          "r9": {
+            "manifest_entries": 39,
+            "bundle_artifacts": 21,
+            "uncovered": [
+              "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json"
+            ]
+          }
+        },
+        "declared_upstream_gaps": [
+          "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json"
+        ],
+        "observed_upstream_gaps": [
+          "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json"
+        ]
+      },
+      "expected": {
+        "missing": [],
+        "mismatched": [],
+        "index_divergent_entries": [],
+        "frozen_artifact_count": 52,
+        "observed_upstream_gaps": [
+          "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json"
+        ]
+      },
+      "note": "52 件决定性产物对 harness 内冻结哈希表逐字节复算一致，包内索引与冻结表零分歧；上游 R8/R9 manifest 覆盖度按哈希核对，缺口集合须与已登记项（F1）逐字相符"
+    }
+  ],
+  "criteria_count": 23,
+  "failed_criteria": [],
+  "overall": "PASS"
+}

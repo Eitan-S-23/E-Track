@@ -506,6 +506,8 @@ GCC 的 P2-6 前当前产物旧口径为 `._user_heap_stack` 末 `0x200562C0=352
 新旧数值差 `-736B`，但新布局把 8192B 栈和 32B guard 显式放在 RAM 顶部，故该差值
 不是通用堆余量。完整算式、产物时间戳和 warning/error 统计见
 `docs/ota-exec-notes/P2-6-implementation-evidence-2026-08-15.md`。
+P2-6 于 2026-09-01 追加以下**真机轮次的链接布局实测**，同样不修改本节任何门槛：生产与测试两构型的三个 OTA 段逐字段一致——`.ota_stack_guard` `0x20055FE0`/`32B`、`.ota_stack` `0x20056000`/`8192B`、`.ota_overlay` `0x20058000`/`40960B`；主 RAM 高水位仍为区顶 `0x20058000`，生产已分配 `357088B`、测试 `357264B`，对应堆空洞 `3360B`/`3184B`，两构型差值即插桩增量 `176B`；`.sram_ext` 保持 `163840B`。该实测取自 `P2-6-v3` 证据包判据 `OFF-C8-C16-RAM-LAYOUT`，合同 SHA-256 `DA78DDF5BDCA97E1848522193F4FE9F4E7D8E6AC02B0471DFB8F45D9B8AC19B4`。
+
 
 ### 10.2 OTA 独占 overlay(A:采纳)
 
@@ -547,5 +549,7 @@ candidate prepare/program 为 `0/0`。该观测只闭合固定池的宿主容量
 鉴别力；J-Link DAP 初始化失败导致真机 C1-C7/C14 未观测，C3/C13/C16 仍有证据
 缺口，因此不得把宿主值写成真机产品结论，也不得据此改 `40960B`、`8192B`、
 `16KiB` 字典、`35492B` 或 `5468B`。
+
+P2-6 真机闭环回填(2026-09-01)：上一段末句「J-Link DAP 初始化失败导致真机 C1-C7/C14 未观测，C3/C13/C16 仍有证据缺口」自本日起失效，其余内容继续有效。真机 FULL 升级路径(2026-08-31，固件自身 Apply→Stage→复位→boot 消费)实测 overlay workspace 峰值 `33016B`(占 `40960B` 的 `80.61%`，余 `7944B`，`failed_request_size=0`)、OTA 调用栈峰值 `3496B`(占 `8192B` 的 `42.7%`，余 `4696B`)、`32B` guard 进出完整、`sbrk` 增量 `0`、LVGL `lv_tlsf_{malloc,realloc,free}` 增量均 `0`；真机 PATCH 路径(2026-08-30)workspace 峰值 `21792B`(占 `53.2%`)，其余门禁同样通过。静态栈闭合给出总上界 `2816B/8192B`(线程峰值较大者 `2048B` + 最坏中断预算 `768B`，余 `5376B`)。**因此本节预算表闭环：实测全部 ≤ 设计上限，不触发 §10.3 末段的 16KiB→8KiB 字典降档条件，`40960B`、`8192B`、`16KiB`、`35492B`、`5468B` 均保持原值。** 证据绑定：合同 `docs/acceptance-contracts/P2-6-v3.contract.json` SHA-256 `DA78DDF5BDCA97E1848522193F4FE9F4E7D8E6AC02B0471DFB8F45D9B8AC19B4`(PATCH 侧为 `P2-6-v2` SHA-256 `0332FEE70D7486C41EF53EC184376A069467DD67C8E80E5744B28B33F9471F62`)，`Tools/acceptance/validate_bundle.py` 退出码 `0`。
 
 P2-6 必须在真机以 StackInfo、固定池水位和失败注入复核上述上限;只有实测超过 `40960B` 才能通过 `PLAN-OTA-EXEC.md` §9 变更登记降为 8KiB字典,并同步 `etu_pack.py`/CI 参数。任何未取得 `OTA_EXCLUSIVE` 的路径不得启动 LZMA/bspatch。

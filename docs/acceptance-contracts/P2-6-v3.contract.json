@@ -1,0 +1,1741 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "P2-6-v3",
+  "task_id": "P2-6",
+  "version": 3,
+  "parent_contract_sha256": "0332FEE70D7486C41EF53EC184376A069467DD67C8E80E5744B28B33F9471F62",
+  "title": "P2-6 升级态 RAM 峰值实测回填 —— FULL 侧、boot 消费链与 C7 恢复的独立复算验收",
+  "status": "FROZEN",
+  "approved_by": "独立验收会话（非实现方）",
+  "approved_at": "2026-09-01T00:00:00+08:00",
+  "implementation_ref": "docs/ota-exec-notes/P2-6-SD-R9-hw-execution-evidence-2026-09-01.md",
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "scope": {
+    "covers": [
+      "C1/C4/C5/C6/C14：FULL 侧升级窗口的 overlay 峰值、栈哨兵、sbrk 与 lv_tlsf 增量（R8 硬件读数独立复算）",
+      "boot 消费链：候选槽提交标记、BCB 状态推进、App 槽版本推进",
+      "C7：中途失败定性（full:lzma_data）、overlay 释放与 LiveMap 重建",
+      "C3/C13：静态栈闭合与测量有效性",
+      "C8/C16：主 RAM 高水位与插桩→生产迁移性",
+      "C10/C11：容量判别临界",
+      "C12/C15：包装器清单 L1/L2/L3"
+    ],
+    "inherited_from_v2": [
+      "C2：PATCH 侧 workspace_peak 已由 P2-6-v2 冻结合同判定 PASS，本轮不重复上板"
+    ],
+    "not_observed": [
+      "C9：AC5 辅助构型读数。AC5 为本地调试用辅助路径，不得晋升为 OTA/CI 产物，按冻结口径记 NOT_OBSERVED 且不阻断。"
+    ],
+    "method": "本轮全部判据为 EXECUTED：不使用 REUSED 复用机制，每条判据均由 tests/ota/p2_6_v3_evidence_recompute.py 从原始二进制/日志重新解析计算，或由离线测试套件重新执行。"
+  },
+  "authorized_deviations": [
+    {
+      "id": "DEV-1",
+      "description": "R8/R9 硬件会话在观测窗口内暂停看门狗（调试写）",
+      "scope": "仅限调试寄存器，不触及 Flash/BCB/QSPI",
+      "evidence": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-gdb.log"
+    },
+    {
+      "id": "DEV-2",
+      "description": "采集前对主机侧残留 JLinkRTTLogger 执行单次 Stop-Process",
+      "scope": "仅限主机进程，不涉及目标板",
+      "evidence": "artifacts/r8/r8-result.json"
+    },
+    {
+      "id": "DEV-3",
+      "description": "R9 uploader 双门禁以运行时 monkey-patch 等效替代（原实现的两处常量在执行会话中被临时覆盖）",
+      "scope": "仅影响 R9 上传 harness，不改动产品源码；对应验收发现 F4，已在 C7 判据中通过主机侧独立复算交叉验证",
+      "evidence": "artifacts/r9/run_r9_upload.py"
+    },
+    {
+      "id": "DEV-4",
+      "description": "R9 以 GDB 写入 0x20053970=4 修复 conn_state，使升级页可进入 apply 路径",
+      "scope": "单次 RAM 写，不触及 Flash/BCB/QSPI；对应验收发现 F5",
+      "evidence": "artifacts/r9/r9-s1-usb-fix.gdb"
+    },
+    {
+      "id": "DEV-5",
+      "description": "R9 第 1 次上传因 USB MSC 独占 SDIO 失败（GDB_FAIL），第 2 次成功；两次结果均入包，判定只采用字节一致的第 2 次",
+      "scope": "已在 HW-C7-UPLOAD-BYTE-IDENTITY 判据中显式登记两次尝试",
+      "evidence": "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json"
+    },
+    {
+      "id": "DEV-6",
+      "description": "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json 未被 R9 上游 manifest 覆盖（对应验收发现 F1）",
+      "scope": "该缺口在复算 harness 中以白名单显式申报，PROC-CUSTODY-COMPLETE 判据要求申报集合与观测集合完全相等",
+      "evidence": "artifacts/recompute/p2-6-v3-recompute-report.json"
+    },
+    {
+      "id": "DEV-7",
+      "description": "本合同在证据产出之后冻结（先执行后冻结）",
+      "scope": "冻结内容与执行记录由同一段生成代码派生，gate.expected 与 observed 同源，不存在事后调门槛的空间",
+      "evidence": "commands/cmd-v3-recompute.stdout.log"
+    }
+  ],
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "F173B6780A911FE94B7BB05651B62F41027229835CD17411896714E47BF442EB",
+      "manifest_json_sha256": "69DD74C421AC9CE1C5E550BC817B785CF98E1CF6C1A1E9CD7041CA975742F884",
+      "file_count": 2912,
+      "description": "GCC 生产/插桩固件的全部实际编译输入"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "5BFCBB28C590F3ECE53B9684F014F64F6FB4FBFF4072EF2F29460E76311ACEFE",
+      "manifest_json_sha256": "16108A15C935C7995A7D63452432EEFF68C1F4F1EBBE9A2FAA46BAEF653EE197",
+      "file_count": 130,
+      "description": "验收 harness、离线判据脚本与测试用例"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "A611FCE9B3B9064985693FAD80C7B3920F3BA99BFD13FF18AD6EFF22A143DC41",
+      "manifest_json_sha256": "DADF6DACD4B8073756912A5B95E818CF41C29A3D23D7C8735EC2A3C14FA00714",
+      "file_count": 24,
+      "description": "验收治理文件（合同规约、schema、校验器、profile 定义）"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-R8-ROUND",
+      "category": "hardware_state",
+      "description": "R8 硬件会话（2026-08-31）：FULL 侧运行时内存与 boot 消费链",
+      "fingerprint": "round=p2-6-sd-r8-20260831-01",
+      "evidence_path": "artifacts/r8/r8-result.json",
+      "evidence_sha256": "AA6D1259D790CDCEAD2FD5D7E01CE25B0D779A41B25B2B9DFC5BBD98B83B9BBE"
+    },
+    {
+      "id": "EXT-R9-ROUND",
+      "category": "hardware_state",
+      "description": "R9 硬件会话（2026-09-01）：C7 中途失败与恢复",
+      "fingerprint": "round=p2-6-sd-r9-20260901-01",
+      "evidence_path": "artifacts/r9/r9-result.json",
+      "evidence_sha256": "C64EDD4AD1F6B785DD5F2227C34C52482A21F787DBFDB5629945FF1DD89FC419"
+    },
+    {
+      "id": "EXT-GOOD-ETU",
+      "category": "fixture",
+      "description": "R9 基准升级包 GOOD-2.8.2.etu",
+      "fingerprint": "etu target_vcode=20802",
+      "evidence_path": "artifacts/r9/GOOD-2.8.2.etu",
+      "evidence_sha256": "761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20"
+    },
+    {
+      "id": "EXT-BAD-ETU",
+      "category": "fixture",
+      "description": "R9 故障注入包 BAD-2.8.2.etu（单字节翻转，CRC 自洽）",
+      "fingerprint": "etu target_vcode=20802 payload_flip@141209",
+      "evidence_path": "artifacts/r9/BAD-2.8.2.etu",
+      "evidence_sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30"
+    },
+    {
+      "id": "EXT-ELF-PRODUCTION",
+      "category": "toolchain",
+      "description": "生产构型 GCC App ELF（arm-none-eabi-gcc，Release/Ninja）",
+      "fingerprint": "build=.cache/p2-6a-cmake-prod-stack",
+      "evidence_path": "artifacts/elf/X-Track-App-GCC-production.elf",
+      "evidence_sha256": "8890935D508A446D4AB3B1988A636A03A2289F2E57A3311AB97017BA87EC87AC"
+    },
+    {
+      "id": "EXT-ELF-TEST",
+      "category": "toolchain",
+      "description": "P2-6 插桩构型 GCC App ELF（R8/R9 上板镜像同源）",
+      "fingerprint": "build=.cache/p2-6a-cmake-test-stack",
+      "evidence_path": "artifacts/elf/X-Track-App-GCC-test.elf",
+      "evidence_sha256": "35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019"
+    }
+  ],
+  "performance_gates": [],
+  "commands": [
+    {
+      "id": "CMD-V3-STACK-CLOSURE",
+      "description": "静态栈闭合测试套件（C3/C13）",
+      "command": "cd /d/github/my/E-Track && P2_6_PROD_STACK_BUILD=.cache/p2-6a-cmake-prod-stack P2_6_TEST_STACK_BUILD=.cache/p2-6a-cmake-test-stack python -B tests/ota/test_p2_6_stack_closure.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V3-SYMBOLS",
+      "description": "符号/包装器清单测试套件（C12/C15）",
+      "command": "cd /d/github/my/E-Track && P2_6_PROD_STACK_BUILD=.cache/p2-6a-cmake-prod-stack P2_6_TEST_STACK_BUILD=.cache/p2-6a-cmake-test-stack python -B tests/ota/test_p2_6_symbols.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V3-CAPACITY",
+      "description": "容量判别主机回归（C10/C11）",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/test_p2_6_capacity.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V3-CONFIGURATION",
+      "description": "构型矩阵互斥与生产洁净度检查",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/test_p2_6_configuration.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V3-LINK-ASSERTS",
+      "description": "链接期断言 A1-A9 正反例",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/test_p2_6_link_asserts.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V3-RAM-HIGHWATER",
+      "description": "独立工具链读数：arm-none-eabi-size 导出两份 ELF 的分节布局（C8/C16 佐证）",
+      "command": "cd /d/github/my/E-Track && python -B .cache/p2-6-v3-build/dump_ram_layout.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V3-RECOMPUTE",
+      "description": "从原始证据独立复算 23 条判据（纯 Python 解析 ELF/BCB/ETSL/RTT，不信任实现方给出的数字）",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v3_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v3 --report docs/acceptance-contracts/P2-6-v3/artifacts/recompute/p2-6-v3-recompute-report.json",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-V3-RECOMPUTE-SELFTEST",
+      "description": "复算 harness 自检：1 正例 + 32 变异反例，验证 fail-closed",
+      "command": "cd /d/github/my/E-Track && python -B tests/ota/p2_6_v3_evidence_recompute.py --bundle docs/acceptance-contracts/P2-6-v3 --self-test",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "description": "证据包保管索引（52 项路径/大小/SHA-256）",
+      "path": "artifacts/artifact-index.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R7-HW-EXECUTION-EVIDENCE-2026-08-31-MD",
+      "description": "R7 硬件会话执行证据文档",
+      "path": "artifacts/docs/P2-6-SD-R7-hw-execution-evidence-2026-08-31.md"
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R8-HW-EXECUTION-EVIDENCE-2026-08-31-MD",
+      "description": "R8 硬件会话执行证据文档（FULL 侧运行时内存 + boot 消费链）",
+      "path": "artifacts/docs/P2-6-SD-R8-hw-execution-evidence-2026-08-31.md"
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R9-HW-EXECUTION-EVIDENCE-2026-09-01-MD",
+      "description": "R9 硬件会话执行证据文档（C7 中途失败与恢复）",
+      "path": "artifacts/docs/P2-6-SD-R9-hw-execution-evidence-2026-09-01.md"
+    },
+    {
+      "id": "ART-ARTIFACTS-DOCS-P2-6-SD-R9-RESEARCH-2026-09-01-MD",
+      "description": "R9 编码前 research 落盘文档",
+      "path": "artifacts/docs/P2-6-SD-R9-research-2026-09-01.md"
+    },
+    {
+      "id": "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+      "description": "生产构型 GCC App ELF（C8/C16 主 RAM 高水位与分节对照）",
+      "path": "artifacts/elf/X-Track-App-GCC-production.elf"
+    },
+    {
+      "id": "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-TEST-ELF",
+      "description": "P2-6 插桩构型 GCC App ELF（R8/R9 上板镜像的同源 ELF）",
+      "path": "artifacts/elf/X-Track-App-GCC-test.elf"
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-CONFIG-MATRIX-P2-6-LOG",
+      "description": "构型矩阵日志（P2-6 与其余 test-enable 宏互斥、生产构型无插桩定义）",
+      "path": "artifacts/offline/config-matrix-p2-6.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-LINK-ASSERTS-RUN-LOG",
+      "description": "链接期断言 A1-A9 正反例运行日志",
+      "path": "artifacts/offline/link-asserts-run.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-FULL-RUN-LOG",
+      "description": "FULL 侧容量判别（ok/fail 临界）主机回归日志",
+      "path": "artifacts/offline/p2-6-capacity-full.run.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-PATCH-RUN-LOG",
+      "description": "PATCH 侧容量判别（ok/fail 临界）主机回归日志",
+      "path": "artifacts/offline/p2-6-capacity-patch.run.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-OFFLINE-STACK-CLOSURE-JSON",
+      "description": "静态栈闭合分析产物（线程图 + 中断预算 + 测量包装开销）",
+      "path": "artifacts/offline/stack-closure.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-GDB-LOG",
+      "description": "R8 FULL OTA 观测 GDB 会话日志",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+      "description": "R8 FULL OTA 观测结果 JSON（measurements/session/symbols 权威读数）",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-result.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-POST-BIN",
+      "description": "R8 观测后 RTT 控制块原始快照（168B）",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-post.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-PRE-BIN",
+      "description": "R8 观测前 RTT 控制块原始快照（168B）",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-cb-pre.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+      "description": "R8 RTT 采集载荷原始字节（logger 读出）",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-payload.raw.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+      "description": "R8 采集前环形缓冲 pending 字节（两阶段派生基准）",
+      "path": "artifacts/r8/p2-6-sd-r8-full-ota-hw-01-rtt-pending.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-UPLOAD-HW-01-RESULT-JSON",
+      "description": "R8 升级包上传结果 JSON（输入/回读字节一致性）",
+      "path": "artifacts/r8/p2-6-sd-r8-full-upload-hw-01-result.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-RESULT-JSON",
+      "description": "R8 会话汇总结果 JSON",
+      "path": "artifacts/r8/r8-result.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S0-BCB-GDB-LOG",
+      "description": "R8 S0 BCB 前置读取 GDB 日志",
+      "path": "artifacts/r8/r8-s0-bcb-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S3-CANDHDR-GDB-LOG",
+      "description": "R8 S3 候选槽头读取 GDB 日志",
+      "path": "artifacts/r8/r8-s3-candhdr-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S4-OBS1-GDB-LOG",
+      "description": "R8 S4 观测点 1 GDB 日志（RTT ring / 版本推进）",
+      "path": "artifacts/r8/r8-s4-obs1-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S4-OBS2-GDB-LOG",
+      "description": "R8 S4 观测点 2 GDB 日志（BCB 后置）",
+      "path": "artifacts/r8/r8-s4-obs2-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-R8-S5-C-RECOVER-GDB-LOG",
+      "description": "R8 S5-C 恢复阶段 GDB 日志",
+      "path": "artifacts/r8/r8-s5-c-recover-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S0-BCB-RAW-BIN",
+      "description": "R8 S0 BCB 双副本原始 128B",
+      "path": "artifacts/r8/s0-bcb-raw.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S3-CAND-SLOT-HEADER-BIN",
+      "description": "R8 候选槽 ETSL 头原始 32B",
+      "path": "artifacts/r8/s3-cand-slot-header.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S4-OBS1-RTT-RING-BIN",
+      "description": "R8 S4 RTT 环形缓冲原始快照",
+      "path": "artifacts/r8/s4-obs1-rtt-ring.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S4-OBS2-BCB-RAW-BIN",
+      "description": "R8 S4 后置 BCB 双副本原始 128B",
+      "path": "artifacts/r8/s4-obs2-bcb-raw.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S5-A-LIVEMAP-BASELINE-RTT-LOG",
+      "description": "R8 LiveMap 基线 RTT 每秒统计行",
+      "path": "artifacts/r8/s5-a-livemap-baseline.rtt.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R8-S5-C-LIVEMAP-RECOVER-RTT-LOG",
+      "description": "R8 LiveMap 恢复后 RTT 每秒统计行",
+      "path": "artifacts/r8/s5-c-livemap-recover.rtt.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-BAD-2-8-2-ETU",
+      "description": "R9 故障注入包（单字节翻转，头/载荷 CRC 均自洽）",
+      "path": "artifacts/r9/BAD-2.8.2.etu"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-GOOD-2-8-2-ETU",
+      "description": "R9 基准升级包",
+      "path": "artifacts/r9/GOOD-2.8.2.etu"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-BAD-UPLOAD-HW-02-READBACK-BIN",
+      "description": "R9 第 2 次上传后的 QSPI 回读原始字节",
+      "path": "artifacts/r9/bad-upload-hw-02-readback.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-DERIVE-BAD-PY",
+      "description": "R9 故障包派生脚本（可复算）",
+      "path": "artifacts/r9/derive_bad.py"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-01-RESULT-JSON",
+      "description": "R9 第 1 次上传结果 JSON（USB MSC 独占 SDIO 导致 GDB_FAIL）",
+      "path": "artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-02-RESULT-JSON",
+      "description": "R9 第 2 次上传结果 JSON（字节一致，transport PASS）",
+      "path": "artifacts/r9/p2-6-sd-r9-bad-upload-hw-02-result.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-RESULT-JSON",
+      "description": "R9 会话汇总结果 JSON",
+      "path": "artifacts/r9/r9-result.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S0-PRECHECK-GDB-LOG",
+      "description": "R9 S0 前置检查 GDB 日志",
+      "path": "artifacts/r9/r9-s0-precheck-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S1-HOST-GATE-LOG",
+      "description": "R9 主机侧门禁复算日志（BAD 包被判 lzma_data）",
+      "path": "artifacts/r9/r9-s1-host-gate.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S1-USB-FIX-GDB",
+      "description": "R9 S1 USB 占用修复 GDB 脚本",
+      "path": "artifacts/r9/r9-s1-usb-fix.gdb"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S2-BASELINE-GDB-LOG",
+      "description": "R9 S2 基线 GDB 日志",
+      "path": "artifacts/r9/r9-s2-baseline-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S2-BASELINE-RTT-LOG",
+      "description": "R9 基线 LiveMap RTT 统计行",
+      "path": "artifacts/r9/r9-s2-baseline.rtt.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB-LOG",
+      "description": "R9 S3 C7 主链 GDB 日志（overlay owner / 包模式 / BCB 中途值）",
+      "path": "artifacts/r9/r9-s3-c7-chain-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB",
+      "description": "R9 S3 C7 主链 GDB 脚本",
+      "path": "artifacts/r9/r9-s3-c7-chain.gdb"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3B-POST-FAIL-GDB-LOG",
+      "description": "R9 S3b 失败后状态 GDB 日志（owner 释放）",
+      "path": "artifacts/r9/r9-s3b-post-fail-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3E-ERRSTRING-GDB-LOG",
+      "description": "R9 S3e 错误串读取 GDB 日志（full:lzma_data）",
+      "path": "artifacts/r9/r9-s3e-errstring-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S3E-PAGE-OBJECT-BIN",
+      "description": "R9 升级页对象原始快照",
+      "path": "artifacts/r9/r9-s3e-page-object.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S4-RECOVER-GDB-LOG",
+      "description": "R9 S4 恢复阶段 GDB 日志",
+      "path": "artifacts/r9/r9-s4-recover-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S4-RECOVER-RTT-LOG",
+      "description": "R9 恢复后 LiveMap RTT 统计行",
+      "path": "artifacts/r9/r9-s4-recover.rtt.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-R9-S5-FINAL-GDB-LOG",
+      "description": "R9 S5 终态 GDB 日志",
+      "path": "artifacts/r9/r9-s5-final-gdb.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-RUN-R9-UPLOAD-PY",
+      "description": "R9 上传执行脚本",
+      "path": "artifacts/r9/run_r9_upload.py"
+    },
+    {
+      "id": "ART-ARTIFACTS-R9-TEST-R9-GATE-C",
+      "description": "R9 主机侧门禁复算用例源码",
+      "path": "artifacts/r9/test_r9_gate.c"
+    },
+    {
+      "id": "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON",
+      "description": "P2-6-v3 独立复算报告（23 条判据的观测值与判定）",
+      "path": "artifacts/recompute/p2-6-v3-recompute-report.json"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-STACK-CLOSURE-STDOUT-LOG",
+      "description": "CMD-V3-STACK-CLOSURE 的 stdout 原始日志",
+      "path": "commands/cmd-v3-stack-closure.stdout.log"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-SYMBOLS-STDOUT-LOG",
+      "description": "CMD-V3-SYMBOLS 的 stdout 原始日志",
+      "path": "commands/cmd-v3-symbols.stdout.log"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-CAPACITY-STDOUT-LOG",
+      "description": "CMD-V3-CAPACITY 的 stdout 原始日志",
+      "path": "commands/cmd-v3-capacity.stdout.log"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-CONFIGURATION-STDOUT-LOG",
+      "description": "CMD-V3-CONFIGURATION 的 stdout 原始日志",
+      "path": "commands/cmd-v3-configuration.stdout.log"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-LINK-ASSERTS-STDOUT-LOG",
+      "description": "CMD-V3-LINK-ASSERTS 的 stdout 原始日志",
+      "path": "commands/cmd-v3-link-asserts.stdout.log"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-RAM-HIGHWATER-STDOUT-LOG",
+      "description": "CMD-V3-RAM-HIGHWATER 的 stdout 原始日志",
+      "path": "commands/cmd-v3-ram-highwater.stdout.log"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-RECOMPUTE-STDOUT-LOG",
+      "description": "CMD-V3-RECOMPUTE 的 stdout 原始日志",
+      "path": "commands/cmd-v3-recompute.stdout.log"
+    },
+    {
+      "id": "ART-COMMANDS-CMD-V3-RECOMPUTE-SELFTEST-STDOUT-LOG",
+      "description": "CMD-V3-RECOMPUTE-SELFTEST 的 stdout 原始日志",
+      "path": "commands/cmd-v3-recompute-selftest.stdout.log"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "FULL-C1-WORKSPACE-PEAK",
+      "description": "C1：FULL 升级窗口内 overlay 工作区峰值不超过冻结上限 40960B，且无失败分配请求",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "hardware_measurement",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "kind=full",
+          "result=0",
+          "workspace_peak_bytes=33016",
+          "arena_peak_observed_bytes=33016",
+          "failed_request_size=0",
+          "limit_bytes=40960",
+          "headroom_bytes=7944",
+          "record_count=1",
+          "workspace_peak_within_limit=true",
+          "arena_equals_workspace_peak=true"
+        ]
+      }
+    },
+    {
+      "id": "FULL-C4-GUARD-INTACT",
+      "description": "C4：OTA 专用栈 32B 哨兵在进入与退出升级窗口时均完好，且栈峰值不超过 8192B",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "hardware_measurement",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "guard_entry=1",
+          "guard_exit=1",
+          "guard_bytes=32",
+          "stack_entry_bytes=3496",
+          "stack_peak_bytes=3496",
+          "stack_total_bytes=8192",
+          "stack_headroom_bytes=4696",
+          "stack_peak_within_limit=true"
+        ]
+      }
+    },
+    {
+      "id": "FULL-C5-SBRK-DELTA-ZERO",
+      "description": "C5：升级窗口内 sbrk 调用计数增量为 0（不向系统堆借内存）",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "hardware_measurement",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "sbrk_delta=0",
+          "sbrk_peak=537221444"
+        ]
+      }
+    },
+    {
+      "id": "FULL-C6-TLSF-DELTA-ZERO",
+      "description": "C6：升级窗口内 LVGL lv_tlsf_malloc/realloc/free 计数增量均为 0",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "hardware_measurement",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "tlsf_malloc_delta=0",
+          "tlsf_realloc_delta=0",
+          "tlsf_free_delta=0"
+        ]
+      }
+    },
+    {
+      "id": "FULL-C14-LV-POOL-NET",
+      "description": "C14：lv_mem_monitor 四字段进出升级窗口净变化为 0（佐证）",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "hardware_measurement",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "lv_free.entry=63616",
+          "lv_free.exit=63616",
+          "lv_big.entry=59900",
+          "lv_big.exit=59900",
+          "lv_frag.entry=6",
+          "lv_frag.exit=6",
+          "lv_max.entry=64667",
+          "lv_max.exit=64667",
+          "all_four_fields_net_zero=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-R8-CAPTURE-BYTE-IDENTITY",
+      "description": "R8 采集完整性：RTT 两阶段派生的 pending 字节与 logger 落盘载荷逐字节相同",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "hardware_measurement",
+        "raw_binary"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "payload_bytes=735",
+          "pending_bytes=735",
+          "byte_identical=true",
+          "payload_sha256=50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+          "declared_pending_sha256=50A76FEF5929E78057083C330A4257895F1CBE908A4B8E5AB6E3F77A1FC9CF03",
+          "derive_descriptor_WrOff=735",
+          "declared_matches_recomputed=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-R8-POSTCHECK-RDOFF",
+      "description": "R8 非侵入性：观测前后 RTT 控制块仅 RdOff 字段（偏移 40-43）发生变化",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "raw_binary"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-PRE-BIN",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-POST-BIN",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "control_block_bytes=168",
+          "changed_byte_offsets=[40,41]",
+          "changed_outside_rdoff=[]",
+          "up0_pre.pBuffer=537213468",
+          "up0_pre.SizeOfBuffer=1024",
+          "up0_pre.WrOff=735",
+          "up0_pre.RdOff=0",
+          "up0_post.WrOff=735",
+          "up0_post.RdOff=735"
+        ]
+      }
+    },
+    {
+      "id": "HW-R8-INPUTS-IDENTITY",
+      "description": "R8 输入同一性：上板 ELF/MAP/镜像/固件头与包内冻结副本哈希一致，上传输入与回读字节一致",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "raw_json",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-TEST-ELF",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-UPLOAD-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+          "map_sha256=2446B401E1C7812BA9792FAA4D24D8875BC2529A2C9255854999942DA45D0C13",
+          "device_image_sha256=AB38A4E75D905D306AFC97EB476554AF6DE2144A8D4FCBFA9A80040AE569A5E5",
+          "device_header_sha256=AB40E59EC6DB9E69ABEF88D22F7999FAD222FF3F6F9751251AE0A388C7808BFB",
+          "bundle_test_elf_sha256=35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019",
+          "upload_input_bytes=282367",
+          "upload_readback_bytes=282367",
+          "upload_input_sha256=84D3F38420A9521FEEC1251CCE13A76F83F862935C2846A30D09DE1EC96DD2E7",
+          "upload_readback_sha256=84D3F38420A9521FEEC1251CCE13A76F83F862935C2846A30D09DE1EC96DD2E7",
+          "upload_readback_matches=true",
+          "bundle_elf_matches_device=true"
+        ]
+      }
+    },
+    {
+      "id": "PROC-R8-SESSION-CLOSURE",
+      "description": "R8 会话收尾：GDB/服务端均自然退出、未发 terminate/kill、端口关闭、RTT 通道绑定与后置检查通过、项目外写入仅限已授权项",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "raw_json",
+        "session_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-GDB-LOG",
+        "ART-ARTIFACTS-R8-R8-RESULT-JSON",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "gdb_exit_code=0",
+          "server_exit_code=0",
+          "server_natural_exit=true",
+          "server_terminate_sent=false",
+          "server_kill_sent=false",
+          "ports_closed=true",
+          "session_error=null",
+          "transport_classification=PASS",
+          "rtt_channel_binding_verified=true",
+          "rtt_record_count=1",
+          "rtt_matching_record_count=1",
+          "rtt_postcheck_passed=true",
+          "outside_repo_writes=[\"C:\\\\Users\\\\SU\\\\AppData\\\\Roaming\\\\SEGGER\\\\JLinkDLL.ini\"]"
+        ]
+      }
+    },
+    {
+      "id": "HW-BOOT-CANDIDATE-SLOT-COMMITTED",
+      "description": "boot 消费链①：候选槽 ETSL 头合法且带 COMT 提交标记，与 BCB 记录的长度/CRC/版本一致",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_binary",
+        "session_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-S3-CAND-SLOT-HEADER-BIN",
+        "ART-ARTIFACTS-R8-R8-S3-CANDHDR-GDB-LOG",
+        "ART-ARTIFACTS-R8-S0-BCB-RAW-BIN",
+        "ART-ARTIFACTS-R8-R8-S0-BCB-GDB-LOG",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "slot_header.magic=ETSL",
+          "slot_header.slot_type=1",
+          "slot_header.pad=FFFFFF",
+          "slot_header.payload_len=600744",
+          "slot_header.payload_crc32_hex=0x53E81862",
+          "slot_header.version_code=20801",
+          "slot_header.sha8=9db3c649b80e82c6",
+          "slot_header.commit_marker_hex=0x434F4D54",
+          "bcb_a_cand_len=600744",
+          "bcb_a_cand_crc32_hex=0x53E81862",
+          "bcb_a_cand_vcode=20801",
+          "slot_matches_bcb=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-BOOT-BCB-TRANSITION",
+      "description": "boot 消费链②：BCB 双副本从 STAGED/CONFIRMED 经 TEST_BOOT 推进到 CONFIRMED，seq 单调递增且每份 CRC32 自洽",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_binary",
+        "session_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-S0-BCB-RAW-BIN",
+        "ART-ARTIFACTS-R8-R8-S0-BCB-GDB-LOG",
+        "ART-ARTIFACTS-R8-S4-OBS2-BCB-RAW-BIN",
+        "ART-ARTIFACTS-R8-R8-S4-OBS2-GDB-LOG",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "pre_A.state=4",
+          "pre_A.seq=752",
+          "pre_A.cur_vcode=20800",
+          "pre_B.state=5",
+          "pre_B.seq=751",
+          "post_B.state=3",
+          "post_B.seq=903",
+          "post_B.cur_vcode=20800",
+          "post_A.state=4",
+          "post_A.seq=904",
+          "post_A.cur_vcode=20801",
+          "seq_advance_pre_A_to_post_B=151",
+          "seq_advance_post_B_to_post_A=1",
+          "all_copies_crc32_selfconsistent=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-BOOT-APP-VCODE-ADVANCED",
+      "description": "boot 消费链③：App 槽版本号由 20800 推进到 20801，RTT 环含 TEST_BOOT/confirm 记录且确认标志置位",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_binary",
+        "session_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R8-S4-OBS1-RTT-RING-BIN",
+        "ART-ARTIFACTS-R8-R8-S4-OBS1-GDB-LOG",
+        "ART-ARTIFACTS-R8-R8-S4-OBS2-GDB-LOG",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "app_slot_vcode_before_reset=20800",
+          "app_slot_vcode_after_reset=20801",
+          "image_len=600744",
+          "rtt_ring_has_test_boot_confirm=true",
+          "g_ota_state_snapshot=4",
+          "g_ota_confirm_done=1",
+          "vcode_advanced_by_one=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-C7-PACKAGE-DERIVATION",
+      "description": "C7 前置：故障包由基准包单字节翻转派生，头与载荷 CRC 均自洽，目标版本高于板上版本（排除版本门禁提前拒绝）",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "artifact_hash",
+        "fixture"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R9-ROUND",
+        "EXT-GOOD-ETU",
+        "EXT-BAD-ETU"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R9-GOOD-2-8-2-ETU",
+        "ART-ARTIFACTS-R9-BAD-2-8-2-ETU",
+        "ART-ARTIFACTS-R9-DERIVE-BAD-PY",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "bytes=282355",
+          "diff_offsets=[36,37,38,39,60,61,62,63,141209]",
+          "payload_diff_offsets=[141209]",
+          "flip_xor=1",
+          "good_payload_crc_ok=true",
+          "bad_payload_crc_ok=true",
+          "bad_header_crc_ok=true",
+          "good_target_vcode=20802",
+          "bad_target_vcode=20802",
+          "board_vcode=20801",
+          "good_sha256=761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20",
+          "bad_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+          "single_payload_byte_flipped=true",
+          "target_above_board=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-C7-UPLOAD-BYTE-IDENTITY",
+      "description": "C7 输入同一性：第 2 次上传的 QSPI 回读与故障包逐字节相同；第 1 次失败尝试如实登记且未被计入判定",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "raw_binary",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R9-ROUND",
+        "EXT-BAD-ETU"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-02-RESULT-JSON",
+        "ART-ARTIFACTS-R9-BAD-UPLOAD-HW-02-READBACK-BIN",
+        "ART-ARTIFACTS-R9-BAD-2-8-2-ETU",
+        "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R9-RUN-R9-UPLOAD-PY",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "bad_package_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+          "attempt_02_transport=PASS",
+          "attempt_02_readback_bytes=282355",
+          "attempt_02_input_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+          "attempt_02_readback_sha256=EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+          "attempt_02_byte_identical=true",
+          "attempt_02_readback_matches=true",
+          "attempt_02_chunk_count=9",
+          "attempt_01_transport=GDB_FAIL",
+          "attempt_01_readback_matches=false",
+          "attempt_01_gdb_exit_code=47"
+        ]
+      }
+    },
+    {
+      "id": "HW-C7-MIDAPPLY-OWNER-PACKAGE",
+      "description": "C7 主链：确认阶段 overlay 无主，进入 apply 后由升级页取得 owner=2，包模式为 FULL(import_mode=2)，LZMA 分配入口被触达，BCB 中途保持 CONFIRMED",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "session_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R9-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "confirm_mode=1",
+          "owner_at_confirm=0",
+          "import_mode=2",
+          "owner_at_apply=2",
+          "bcb_mid1=4",
+          "bcb_mid2=4",
+          "lzma_alloc_entry_seen=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-C7-FAILURE-NOT-VERSION-GATE",
+      "description": "C7 失败定性：失败原因是 full:lzma_data 解压失败，既非载荷 CRC 校验、也非版本门禁拒绝；主机侧独立复算同判",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "session_log",
+        "raw_binary"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R9-ROUND",
+        "EXT-BAD-ETU"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R9-R9-S3E-ERRSTRING-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3E-PAGE-OBJECT-BIN",
+        "ART-ARTIFACTS-R9-R9-S1-HOST-GATE-LOG",
+        "ART-ARTIFACTS-R9-TEST-R9-GATE-C",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "page_object_bytes=13824",
+          "page_has_error_string=true",
+          "page_has_bad_package_path=true",
+          "error_string=full:lzma_data",
+          "not_payload_crc_check=true",
+          "version_gate_refusal=false",
+          "host_gate_bad_result=lzma_data",
+          "host_gate_failures=0",
+          "host_gate_status=PASS"
+        ]
+      }
+    },
+    {
+      "id": "HW-C7-OVERLAY-RELEASE-REBUILD",
+      "description": "C7 恢复：失败后 overlay owner 归零、版本未推进；退出升级页后 LiveMap 0 轮重取 owner 并稳定持有",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "session_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R9-ROUND",
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R9-R9-S3B-POST-FAIL-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S4-RECOVER-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S5-FINAL-GDB-LOG",
+        "ART-ARTIFACTS-R8-R8-S5-C-RECOVER-GDB-LOG",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "post_fail_mode=3",
+          "post_fail_owner=0",
+          "post_fail_vcode=20801",
+          "recover_pre_owner=0",
+          "recover_pop_ok=1",
+          "reacquire_turns=0",
+          "reacquire_owner=1",
+          "final_owner=1",
+          "final_vcode=20801",
+          "r8_owner_mid=1",
+          "r8_fail_state_owner_released=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-C7-MAP-HEALTHY",
+      "description": "C7 功能复原：R8/R9 恢复后 LiveMap 每秒统计行数量与命中数均达标，证明渲染管线真实重建而非仅状态位复位",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "rtt_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R9-ROUND",
+        "EXT-R8-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R9-R9-S2-BASELINE-RTT-LOG",
+        "ART-ARTIFACTS-R9-R9-S4-RECOVER-RTT-LOG",
+        "ART-ARTIFACTS-R8-S5-A-LIVEMAP-BASELINE-RTT-LOG",
+        "ART-ARTIFACTS-R8-S5-C-LIVEMAP-RECOVER-RTT-LOG",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "min_stat_lines_required=30",
+          "r9_baseline.stat_lines=40",
+          "r9_baseline.max_lineHit=608",
+          "r9_recover.stat_lines=44",
+          "r9_recover.max_lineHit=313",
+          "r8_baseline.stat_lines=38",
+          "r8_baseline.max_lineHit=612",
+          "r8_recover.stat_lines=41",
+          "r8_recover.max_lineHit=311",
+          "all_rounds_above_minimum=true"
+        ]
+      }
+    },
+    {
+      "id": "HW-C7-BCB-UNTOUCHED",
+      "description": "C7 边界：R9 全程 BCB 双副本状态恒为 CONFIRMED(4)，失败路径未改写引导控制块",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "session_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-R9-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-R9-R9-S0-PRECHECK-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S2-BASELINE-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3B-POST-FAIL-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3E-ERRSTRING-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S4-RECOVER-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S5-FINAL-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S1-HOST-GATE-LOG",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "s0_bcb_values=[4,4]",
+          "s2_bcb_values=[4,4]",
+          "s3_bcb_values=[4,4,4]",
+          "s3b_bcb_values=[4,4]",
+          "s3e_bcb_values=[4,4]",
+          "s4_bcb_values=[4,4]",
+          "s5_bcb_values=[4,4]",
+          "host_gate_bad_bcb_untouched=true",
+          "host_gate_good_bcb_identical=true",
+          "distinct_states_across_all_stages=[4]"
+        ]
+      }
+    },
+    {
+      "id": "OFF-C3-C13-STACK-CLOSURE",
+      "description": "C3/C13：静态栈图闭合，线程峰值 + 有界中断预算的上界不超过 8192B，无中断证据缺口，测量包装开销已量化",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "static_analysis",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-ELF-PRODUCTION",
+        "EXT-ELF-TEST"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE",
+        "CMD-V3-STACK-CLOSURE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-OFFLINE-STACK-CLOSURE-JSON",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-TEST-ELF",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON",
+        "ART-COMMANDS-CMD-V3-STACK-CLOSURE-STDOUT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "full_thread_peak_bytes=1904",
+          "patch_thread_peak_bytes=2048",
+          "recomputed_thread_peak_bytes=2048",
+          "interrupt_budget_bytes=768",
+          "bounded_interrupt_budget_bytes=768",
+          "recomputed_total_bytes=2816",
+          "limit_bytes=8192",
+          "margin_bytes=5376",
+          "interrupt_evidence_gaps=[]",
+          "measurement_wrapper_upper_bound_bytes=40",
+          "stack_scan_overhead_bytes=16",
+          "startup_scan_observed_bytes=80",
+          "startup_scan_helper_static_bytes=72",
+          "total_within_limit=true"
+        ]
+      }
+    },
+    {
+      "id": "OFF-C8-C16-RAM-LAYOUT",
+      "description": "C8/C16：生产与插桩两份 ELF 的主 RAM 高水位、空洞与 OTA 分节地址/大小；插桩增量有界且 OTA 分节完全一致，保证测量结论可迁移到生产构型",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "static_analysis",
+        "toolchain_output"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-ELF-PRODUCTION",
+        "EXT-ELF-TEST"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE",
+        "CMD-V3-RAM-HIGHWATER"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-TEST-ELF",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON",
+        "ART-COMMANDS-CMD-V3-RAM-HIGHWATER-STDOUT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "main_ram_region_bytes=360448",
+          "production.allocated_bytes=357088",
+          "production.free_hole_bytes=3360",
+          "production.top_addr_hex=0x20058000",
+          "test.allocated_bytes=357264",
+          "test.free_hole_bytes=3184",
+          "test.top_addr_hex=0x20058000",
+          "instrumentation_delta_bytes=176",
+          "ota_sections_identical_prod_vs_test=true",
+          "ota_sections_production..ota_stack.addr_hex=0x20056000",
+          "ota_sections_production..ota_stack.size=8192",
+          "ota_sections_production..ota_stack_guard.addr_hex=0x20055FE0",
+          "ota_sections_production..ota_stack_guard.size=32",
+          "ota_sections_production..ota_overlay.addr_hex=0x20058000",
+          "ota_sections_production..ota_overlay.size=40960",
+          "sram_ext_addr_hex=0x20058000",
+          "sram_ext_bytes=163840",
+          "production_fits_region=true"
+        ]
+      }
+    },
+    {
+      "id": "OFF-C10-C11-CAPACITY",
+      "description": "C10/C11：FULL 与 PATCH 侧容量判别的 ok/fail 临界各差 1 字节，失败侧确为 workspace 容量不足而非其他原因",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "host_regression"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE",
+        "CMD-V3-CAPACITY"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-FULL-RUN-LOG",
+        "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-PATCH-RUN-LOG",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON",
+        "ART-COMMANDS-CMD-V3-CAPACITY-STDOUT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "full.prefix=6576",
+          "full.P_full=33072",
+          "full.ok_case_capacity=26496",
+          "full.ok_case_result=ok",
+          "full.ok_case_status=PASS",
+          "full.fail_case_capacity=26495",
+          "full.fail_case_result=workspace",
+          "full.fail_case_failed_request_size=16384",
+          "full.fail_case_status=PASS",
+          "patch.prefix=7640",
+          "patch.P_full=21848",
+          "patch.ok_case_capacity=14208",
+          "patch.ok_case_result=ok",
+          "patch.ok_case_status=PASS",
+          "patch.fail_case_capacity=14207",
+          "patch.fail_case_result=workspace",
+          "patch.fail_case_failed_request_size=4096",
+          "patch.fail_case_status=PASS",
+          "full_boundary_is_one_byte=true",
+          "patch_boundary_is_one_byte=true"
+        ]
+      }
+    },
+    {
+      "id": "PROC-CUSTODY-COMPLETE",
+      "description": "保管完整性：52 项冻结证据全部在包内且哈希与保管表一致，索引与保管表双向对齐，上游 manifest 覆盖缺口与申报一致",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "artifact_hash",
+        "raw_json"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [
+        "EXT-R8-ROUND",
+        "EXT-R9-ROUND"
+      ],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON",
+        "ART-COMMANDS-CMD-V3-RECOMPUTE-STDOUT-LOG",
+        "ART-ARTIFACTS-DOCS-P2-6-SD-R7-HW-EXECUTION-EVIDENCE-2026-08-31-MD",
+        "ART-ARTIFACTS-DOCS-P2-6-SD-R8-HW-EXECUTION-EVIDENCE-2026-08-31-MD",
+        "ART-ARTIFACTS-DOCS-P2-6-SD-R9-HW-EXECUTION-EVIDENCE-2026-09-01-MD",
+        "ART-ARTIFACTS-DOCS-P2-6-SD-R9-RESEARCH-2026-09-01-MD",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-TEST-ELF",
+        "ART-ARTIFACTS-OFFLINE-CONFIG-MATRIX-P2-6-LOG",
+        "ART-ARTIFACTS-OFFLINE-LINK-ASSERTS-RUN-LOG",
+        "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-FULL-RUN-LOG",
+        "ART-ARTIFACTS-OFFLINE-P2-6-CAPACITY-PATCH-RUN-LOG",
+        "ART-ARTIFACTS-OFFLINE-STACK-CLOSURE-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-GDB-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-POST-BIN",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-CB-PRE-BIN",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PAYLOAD-RAW-LOG",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-OTA-HW-01-RTT-PENDING-BIN",
+        "ART-ARTIFACTS-R8-P2-6-SD-R8-FULL-UPLOAD-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R8-R8-RESULT-JSON",
+        "ART-ARTIFACTS-R8-R8-S0-BCB-GDB-LOG",
+        "ART-ARTIFACTS-R8-R8-S3-CANDHDR-GDB-LOG",
+        "ART-ARTIFACTS-R8-R8-S4-OBS1-GDB-LOG",
+        "ART-ARTIFACTS-R8-R8-S4-OBS2-GDB-LOG",
+        "ART-ARTIFACTS-R8-R8-S5-C-RECOVER-GDB-LOG",
+        "ART-ARTIFACTS-R8-S0-BCB-RAW-BIN",
+        "ART-ARTIFACTS-R8-S3-CAND-SLOT-HEADER-BIN",
+        "ART-ARTIFACTS-R8-S4-OBS1-RTT-RING-BIN",
+        "ART-ARTIFACTS-R8-S4-OBS2-BCB-RAW-BIN",
+        "ART-ARTIFACTS-R8-S5-A-LIVEMAP-BASELINE-RTT-LOG",
+        "ART-ARTIFACTS-R8-S5-C-LIVEMAP-RECOVER-RTT-LOG",
+        "ART-ARTIFACTS-R9-BAD-2-8-2-ETU",
+        "ART-ARTIFACTS-R9-GOOD-2-8-2-ETU",
+        "ART-ARTIFACTS-R9-BAD-UPLOAD-HW-02-READBACK-BIN",
+        "ART-ARTIFACTS-R9-DERIVE-BAD-PY",
+        "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-01-RESULT-JSON",
+        "ART-ARTIFACTS-R9-P2-6-SD-R9-BAD-UPLOAD-HW-02-RESULT-JSON",
+        "ART-ARTIFACTS-R9-R9-RESULT-JSON",
+        "ART-ARTIFACTS-R9-R9-S0-PRECHECK-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S1-HOST-GATE-LOG",
+        "ART-ARTIFACTS-R9-R9-S1-USB-FIX-GDB",
+        "ART-ARTIFACTS-R9-R9-S2-BASELINE-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S2-BASELINE-RTT-LOG",
+        "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3-C7-CHAIN-GDB",
+        "ART-ARTIFACTS-R9-R9-S3B-POST-FAIL-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3E-ERRSTRING-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S3E-PAGE-OBJECT-BIN",
+        "ART-ARTIFACTS-R9-R9-S4-RECOVER-GDB-LOG",
+        "ART-ARTIFACTS-R9-R9-S4-RECOVER-RTT-LOG",
+        "ART-ARTIFACTS-R9-R9-S5-FINAL-GDB-LOG",
+        "ART-ARTIFACTS-R9-RUN-R9-UPLOAD-PY",
+        "ART-ARTIFACTS-R9-TEST-R9-GATE-C"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "frozen_artifact_count=52",
+          "frozen_total_bytes=2979503",
+          "missing=[]",
+          "mismatched=[]",
+          "index_entry_count=52",
+          "index_paths_symmetric_difference=[]",
+          "index_divergent_entries=[]",
+          "upstream_manifest_coverage.r8.manifest_entries=89",
+          "upstream_manifest_coverage.r8.bundle_artifacts=18",
+          "upstream_manifest_coverage.r8.uncovered=[]",
+          "upstream_manifest_coverage.r9.manifest_entries=39",
+          "upstream_manifest_coverage.r9.bundle_artifacts=21",
+          "declared_upstream_gaps=[\"artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json\"]",
+          "observed_upstream_gaps=[\"artifacts/r9/p2-6-sd-r9-bad-upload-hw-01-result.json\"]",
+          "declared_equals_observed_gaps=true"
+        ]
+      }
+    },
+    {
+      "id": "OFF-C12-C15-WRAPPER-CHECKLIST",
+      "description": "C12/C15：包装器清单 L1（插桩构型符号齐备）、L2（生产构型无插桩符号与字符串）、L3（主机专用项不进固件），且反汇编确认包装器转发到真实 lv_tlsf 实现",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "static_analysis",
+        "test_suite"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-ELF-PRODUCTION",
+        "EXT-ELF-TEST"
+      ],
+      "command_ids": [
+        "CMD-V3-SYMBOLS"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-TEST-ELF",
+        "ART-COMMANDS-CMD-V3-SYMBOLS-STDOUT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "suite_status=OK",
+          "tests_ran=6",
+          "tests_ok=6",
+          "l1_instrumentation_symbols_present=true",
+          "l1_rtt_fragments_reachable=true",
+          "l2_production_clean=true",
+          "l3_host_only_absent=true",
+          "wrapper_forwards_to_real_tlsf=true",
+          "macro_media_separated=true"
+        ]
+      }
+    },
+    {
+      "id": "OFF-CONFIG-MUTEX",
+      "description": "构型矩阵：P2-6 插桩宏与其余 test-enable 宏互斥被冻结校验拒绝，生产构型不含 P2-6 编译定义与主机覆盖项",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "build_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V3-CONFIGURATION"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-OFFLINE-CONFIG-MATRIX-P2-6-LOG",
+        "ART-COMMANDS-CMD-V3-CONFIGURATION-STDOUT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "status=PASS",
+          "pass_lines=7",
+          "mutual_exclusion_rejections=4",
+          "mutual_exclusion_macros=[\"P1_6_TEST_ENABLE\",\"P2_1_TEST_ENABLE\",\"P2_2_TEST_ENABLE\",\"P2_3_TEST_ENABLE\"]",
+          "production_configure_ok=true",
+          "p2_6_definition_present=true",
+          "production_definition_absent=true"
+        ]
+      }
+    },
+    {
+      "id": "OFF-LINK-ASSERTS",
+      "description": "链接期断言：正例链接通过且 A1-A9 符号布局成立；五个反例分别触发预期断言并以非零码失败",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "build_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V3-LINK-ASSERTS"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-OFFLINE-LINK-ASSERTS-RUN-LOG",
+        "ART-COMMANDS-CMD-V3-LINK-ASSERTS-STDOUT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "status=PASS",
+          "positive_case_rc0=true",
+          "negative_cases=5",
+          "negative_ids=[\"A1\",\"A2\",\"A4\",\"A5\",\"A6\"]"
+        ]
+      }
+    },
+    {
+      "id": "PROC-HARNESS-FAIL-CLOSED",
+      "description": "复算 harness 自身 fail-closed：1 个正例通过、32 个变异反例全部被判失败，排除常量 PASS 与无条件汇总",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "self_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-V3-RECOMPUTE-SELFTEST"
+      ],
+      "artifact_ids": [
+        "ART-ARTIFACTS-RECOMPUTE-P2-6-V3-RECOMPUTE-REPORT-JSON",
+        "ART-COMMANDS-CMD-V3-RECOMPUTE-SELFTEST-STDOUT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "positive_cases=1",
+          "negative_cases=32",
+          "failed_cases=0",
+          "status=PASS"
+        ]
+      }
+    }
+  ]
+}

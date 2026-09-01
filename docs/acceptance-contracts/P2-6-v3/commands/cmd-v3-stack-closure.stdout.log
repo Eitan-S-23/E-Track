@@ -1,0 +1,13 @@
+test_combined_static_upper_bound_fits_contract (__main__.P2SixStackClosureTests.test_combined_static_upper_bound_fits_contract) ... ok
+test_full_and_patch_graphs_are_closed (__main__.P2SixStackClosureTests.test_full_and_patch_graphs_are_closed) ... ok
+test_interrupt_graph_and_preemption_chain_are_closed (__main__.P2SixStackClosureTests.test_interrupt_graph_and_preemption_chain_are_closed) ... ok
+test_measurement_call_overhead_is_quantified (__main__.P2SixStackClosureTests.test_measurement_call_overhead_is_quantified) ... ok
+test_runtime_nvic_group_and_exception_frame_inputs (__main__.P2SixStackClosureTests.test_runtime_nvic_group_and_exception_frame_inputs) ... ok
+test_startup_immediate_scan_matches_helper_scale (__main__.P2SixStackClosureTests.test_startup_immediate_scan_matches_helper_scale) ... ok
+test_su_is_static_and_real_release_uses_oz (__main__.P2SixStackClosureTests.test_su_is_static_and_real_release_uses_oz) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 15.469s
+
+OK
+EXIT=0

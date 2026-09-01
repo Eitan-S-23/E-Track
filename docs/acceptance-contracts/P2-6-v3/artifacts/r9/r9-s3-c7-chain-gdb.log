@@ -1,0 +1,25 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08017a14 in delay_us ()
+Writing 0x00001000 @ address 0xE0042008
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_R9_S3 stop_verified pc=0x08040884
+P2_6_IDENTITY PASS label=pre_fw header_bytes=96
+P2_6_R9_S3 pre vcode=20801 bcb=4 owner=1 sd=1
+P2_6_R9_S3 push_try1=1
+Hardware assisted breakpoint 2 at 0x8040884
+P2_6_R9_S3 livemap_release_wait turns=1 owner=0 (应=0)
+P2_6_R9_S3 page_ready state=4
+P2_6_R9_S3 bcb_mid1=4 (应=4)
+P2_6_R9_S3 enter_path_done
+P2_6_R9_S3 row_index=12
+P2_6_R9_S3 confirm mode=1 (1=CONFIRM: 发起被接受; 0=被拒, 不得冒充中途失败)
+P2_6_R9_S3 owner_at_confirm=0 (应=0)
+P2_6_R9_S3 bcb_mid2=4 (应=4)
+P2_6_R9_S3 import_started mode=2
+Hardware assisted breakpoint 3 at 0x804b568
+Writing 0x00001000 @ address 0xE0042008
+P2_6_R9_S3 lzma_alloc_entry pc=0x0804b568
+P2_6_R9_S3 DECISIVE owner_at_apply=2 (2=PACKAGE: Apply 窗口内 overlay 归包)
+P2_6_R9_S3 lzma_ctx vcode=20801 mode=2
+P2_6_R9_S3 ERROR context_lost_bcb_3 pc=0x0804b568

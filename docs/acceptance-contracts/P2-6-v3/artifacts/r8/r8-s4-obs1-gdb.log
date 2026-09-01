@@ -1,0 +1,12 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x0802a870 in _lv_area_intersect ()
+Writing 0x00001000 @ address 0xE0042008
+P2_6_R8_S4_OBS attached_stopped pc=0x0802a870 vtor=0x08010000
+P2_6_R8_S4_OBS fw_header magic=0x57465445 vcode=20801 (0x5141) image_len=600744
+P2_6_R8_S4_OBS g_ota_state_snapshot=4 g_ota_confirm_done=1
+P2_6_R8_S4_OBS cfsr=0x00000000
+P2_6_R8_S4_OBS rtt_head=53454747455220525454
+P2_6_R8_S4_OBS rtt_cb pBuffer=0x20053a1c size=1024 wroff=284 rdoff=0
+P2_6_R8_S4_OBS rtt_dumped cb=168 ring=1024
+[Inferior 1 (Remote target) detached]

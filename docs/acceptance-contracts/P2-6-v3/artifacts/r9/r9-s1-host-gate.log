@@ -1,0 +1,18 @@
+P2_6_R9_GATE kind=good result=ok package_len=282355 payload_len=282291 target_vcode=20802 image_len=600744 workspace_peak=33072 arena_peak_observed=33072 failed_request_size=0 prepares=1 programs=619 acquires=1 releases=1
+P2_6_R9_GATE check good result is ok                                    PASS
+P2_6_R9_GATE check good target_vcode=20802                              PASS
+P2_6_R9_GATE check good workspace_peak>0                                PASS
+P2_6_R9_GATE check good candidate equals source image                   PASS
+P2_6_R9_GATE check good candidate prepared and programmed               PASS
+P2_6_R9_GATE check good acquire/release paired                          PASS
+  good apply leaves BCB byte-identical                                   PASS
+P2_6_R9_GATE kind=bad result=lzma_data workspace_peak=0 arena_peak_observed=33072 failed_request_size=0 prepares=1 programs=228 acquires=1 releases=1 workspace_zeroed=1
+P2_6_R9_GATE check bad result is failure                                PASS
+P2_6_R9_GATE check bad result is not payload_crc                        PASS
+P2_6_R9_GATE check bad outer crc passed (acquired once)                 PASS
+P2_6_R9_GATE check bad workspace released exactly once                  PASS
+P2_6_R9_GATE check bad workspace secured zeroed                         PASS
+P2_6_R9_GATE check bad arena initialized (peak observed)                PASS
+P2_6_R9_GATE check bad failed after candidate_prepare                   PASS
+P2_6_R9_GATE check bad bcb untouched                                    PASS
+P2_6_R9_GATE summary failures=0 status=PASS

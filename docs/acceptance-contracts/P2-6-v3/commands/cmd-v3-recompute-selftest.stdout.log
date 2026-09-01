@@ -1,0 +1,35 @@
+  [OK  ] positive -                                  阳性对照：未变异证据包
+  [OK  ] negative HW-R8-CAPTURE-BYTE-IDENTITY        采集字节与 pending 快照不一致
+  [OK  ] negative FULL-C1-WORKSPACE-PEAK             workspace_peak 超 40960 门槛
+  [OK  ] negative FULL-C1-WORKSPACE-PEAK             apply 返回码非 0
+  [OK  ] negative FULL-C4-GUARD-INTACT               guard_exit 破损
+  [OK  ] negative FULL-C4-GUARD-INTACT               stack_peak 越 8192 界
+  [OK  ] negative FULL-C5-SBRK-DELTA-ZERO            sbrk_delta 非零
+  [OK  ] negative FULL-C6-TLSF-DELTA-ZERO            tlsf_malloc_delta 非零
+  [OK  ] negative FULL-C14-LV-POOL-NET               LVGL 池净状态漂移
+  [OK  ] negative HW-R8-POSTCHECK-RDOFF              控制块 RdOff 之外被改
+  [OK  ] negative HW-R8-POSTCHECK-RDOFF              控制块 RdOff 未推进
+  [OK  ] negative HW-R8-INPUTS-IDENTITY              ELF 身份锚被篡改
+  [OK  ] negative HW-R8-INPUTS-IDENTITY              SD 上传读回声明为不符
+  [OK  ] negative PROC-R8-SESSION-CLOSURE            会话 gdb 退出码非零
+  [OK  ] negative PROC-R8-SESSION-CLOSURE            会话发生 kill
+  [OK  ] negative PROC-R8-SESSION-CLOSURE            出现未授权项目外写入
+  [OK  ] negative HW-BOOT-CANDIDATE-SLOT-COMMITTED   ETSL 提交标记被抹
+  [OK  ] negative HW-BOOT-BCB-TRANSITION             升级后 BCB 块 CRC 不符
+  [OK  ] negative HW-BOOT-APP-VCODE-ADVANCED         复位后 App 版本未前进
+  [OK  ] negative HW-C7-PACKAGE-DERIVATION           BAD 包 payload 出现额外改动
+  [OK  ] negative HW-C7-UPLOAD-BYTE-IDENTITY         上传读回与 BAD 包不符
+  [OK  ] negative HW-C7-UPLOAD-BYTE-IDENTITY         首次失败上传被冒充成功
+  [OK  ] negative HW-C7-MIDAPPLY-OWNER-PACKAGE       Apply 窗口 overlay 未归包
+  [OK  ] negative HW-C7-FAILURE-NOT-VERSION-GATE     失败形态被改成非 lzma_data
+  [OK  ] negative HW-C7-OVERLAY-RELEASE-REBUILD      恢复后 overlay 未重新持有
+  [OK  ] negative HW-C7-MAP-HEALTHY                  恢复后地图统计行塌陷
+  [OK  ] negative HW-C7-BCB-UNTOUCHED                C7 过程中 BCB 被污染
+  [OK  ] negative OFF-C3-C13-STACK-CLOSURE           栈闭合总量超 8192 门槛
+  [OK  ] negative OFF-C3-C13-STACK-CLOSURE           中断证据出现缺口
+  [OK  ] negative OFF-C8-C16-RAM-LAYOUT              生产/插桩 OTA 布局不一致
+  [OK  ] negative OFF-C10-C11-CAPACITY               容量下界用例被改成成功
+  [OK  ] negative PROC-CUSTODY-COMPLETE              决定性产物被删除
+  [OK  ] negative PROC-CUSTODY-COMPLETE              托管文档被篡改
+P2_6_V3_SELFTEST positive=1 negative=32 failed=0 status=PASS
+EXIT=0
