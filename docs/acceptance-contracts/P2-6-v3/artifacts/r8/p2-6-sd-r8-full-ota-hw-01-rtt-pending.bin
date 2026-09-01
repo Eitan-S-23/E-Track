@@ -1,0 +1,7 @@
+
+========================================
+OTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0 systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000
+Reset: NRST SW
+QSPI: JEDEC=0xEF4018 whitelisted, OTA enabled
+OTA: BCB already CONFIRMED vcode=20800
+P2_6 kind=full result=0 workspace_peak=33016 arena_peak_observed=33016 failed_request_size=0 stack_entry=3496 stack_peak=3496 stack_total=8192 guard_entry=1 guard_exit=1 sbrk_delta=0 sbrk_peak=537221444 tlsf_malloc_delta=0 tlsf_realloc_delta=0 tlsf_free_delta=0 lv_free_entry=63616 lv_free_exit=63616 lv_big_entry=59900 lv_big_exit=59900 lv_frag_entry=6 lv_frag_exit=6 lv_max_entry=64667 lv_max_exit=64667 seq=1372434492 last_size=24 last_ret=0x1A

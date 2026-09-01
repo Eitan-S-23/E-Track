@@ -1,0 +1,16 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08010ba4 in TwoWire::i2c_shift_in() ()
+Writing 0x00001000 @ address 0xE0042008
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_R9_S4 stop_verified pc=0x08040884
+P2_6_IDENTITY PASS label=pre_fw header_bytes=96
+P2_6_R9_S4 pre mode=3 owner=0 bcb=4 sd=1
+P2_6_R9_S4 pop_ok=1
+Hardware assisted breakpoint 2 at 0x8040884
+P2_6_R9_S4 reacquire_wait turns=0 owner=1 (应=1: LiveMap 重新初始化并 acquire)
+P2_6_R9_S4 livemap_state=3
+P2_6_R9_S4 gps_reset_done curLon=104.883930 curLat=26.568540
+P2_6_R9_S4 final vcode=20801 bcb=4 owner=1
+P2_6_R9_S4 PASS recover_ready owner=1 livemap_front
+[Inferior 1 (Remote target) detached]

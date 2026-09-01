@@ -1,0 +1,12 @@
+{
+    "Result":  "PASS",
+    "Profile":  "Production",
+    "RepoRoot":  "D:\\github\\my\\E-Track",
+    "Head":  "577e103efd0da5dd005c6cbf8e3cee08e7a8c0aa",
+    "FileCount":  2912,
+    "ManifestSHA256":  "F173B6780A911FE94B7BB05651B62F41027229835CD17411896714E47BF442EB",
+    "ManifestPath":  "D:\\github\\my\\E-Track\\docs\\acceptance-contracts\\P2-6-v3\\manifest-production\\source-manifest.txt",
+    "ManifestJsonSHA256":  "69DD74C421AC9CE1C5E550BC817B785CF98E1CF6C1A1E9CD7041CA975742F884",
+    "ManifestJsonPath":  "D:\\github\\my\\E-Track\\docs\\acceptance-contracts\\P2-6-v3\\manifest-production\\source-manifest.json",
+    "CopyRoot":  null
+}

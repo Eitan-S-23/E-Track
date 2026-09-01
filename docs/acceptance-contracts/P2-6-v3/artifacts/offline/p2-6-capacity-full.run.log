@@ -1,0 +1,3 @@
+P2_6_BOUNDARY kind=full case=baseline result=ok prefix=6576 P_full=33072 workspace_peak=33072 arena_peak_observed=33072 failed_request_size=0 candidate_prepares=1 candidate_programs=4
+P2_6_BOUNDARY kind=full case=cap=P_full-prefix result=ok expected=ok prefix=6576 capacity=26496 workspace_peak=33072 arena_peak_observed=33072 failed_request_size=0 candidate_prepares=1 candidate_programs=4 status=PASS
+P2_6_BOUNDARY kind=full case=cap=P_full-prefix-1 result=workspace expected=workspace prefix=6576 capacity=26495 workspace_peak=0 arena_peak_observed=33072 failed_request_size=16384 candidate_prepares=0 candidate_programs=0 status=PASS

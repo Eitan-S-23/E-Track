@@ -1,0 +1,19 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08052e96 in memcpy ()
+Writing 0x00001000 @ address 0xE0042008
+P2_6_R8_S0 attached_stopped pc=0x08052e96
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_R8_S0 stop_verified pc=0x08040884
+P2_6_R8_S0 IDENTITY PASS magic=ETFW vcode=20800 image_len=600744
+P2_6_R8_S0 STATE PASS sd=1 vtor=0x08010000 cfsr=0x00000000 owner=0 workspace_ptr=0x43425445
+P2_6_R8_S0 bcb_state=4
+P2_6_R8_S0 buffer_zeroed bytes=192
+P2_6_R8_S0 read_a_rc=1
+P2_6_R8_S0 read_b_rc=1
+P2_6_R8_S0 valid_a=1
+P2_6_R8_S0 valid_b=1
+P2_6_R8_S0 hal_ptr=0x0809cb0c
+P2_6_R8_S0 arbiter=1
+P2_6_R8_S0 dump_done bytes=192
+[Inferior 1 (Remote target) detached]

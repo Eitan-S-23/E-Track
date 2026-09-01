@@ -1,0 +1,11 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x080179fa in delay_us ()
+Writing 0x00001000 @ address 0xE0042008
+Hardware assisted breakpoint 1 at 0x8040884
+P2_6_R9_ERR stop_verified pc=0x08040884
+P2_6_R9_ERR pre mode=3 owner=0 vcode=20801
+P2_6_R9_ERR PAGE_DUMPED bytes=13824
+P2_6_R9_ERR bcb=4 vcode=20801
+P2_6_R9_ERR PASS page_dumped mode=3 bcb=4
+[Inferior 1 (Remote target) detached]

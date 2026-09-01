@@ -1,0 +1,11 @@
+`D:\github\my\E-Track\.cache\p2-6a-cmake-test-stack\app-gcc\X-Track-App-GCC.elf' has changed; re-reading symbols.
+(no debugging symbols found)
+0x08010bc0 in TwoWire::i2c_shift_in() ()
+Writing 0x00001000 @ address 0xE0042008
+P2_6_R8_S3 attached_stopped pc=0x08010bc0
+Excluded range 0x90000000 - 0x90000FFF (4096 bytes) from flash cache
+Excluded range 0x90030000 - 0x90030FFF (4096 bytes) from flash cache
+The memory-read-packet-size on the current remote target is set to "256 fixed".
+P2_6_R8_S3 cand_header_dumped bytes=4096
+P2_6_R8_S3 staging_header_dumped bytes=4096
+[Inferior 1 (Remote target) detached]

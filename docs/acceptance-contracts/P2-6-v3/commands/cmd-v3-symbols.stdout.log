@@ -1,0 +1,12 @@
+test_l1_rtt_format_fragments_are_reachable (__main__.P2SixSymbolTests.test_l1_rtt_format_fragments_are_reachable) ... ok
+test_l1_test_configuration_contains_all_instrumentation_symbols (__main__.P2SixSymbolTests.test_l1_test_configuration_contains_all_instrumentation_symbols) ... ok
+test_l2_production_has_no_test_symbols_or_strings (__main__.P2SixSymbolTests.test_l2_production_has_no_test_symbols_or_strings) ... ok
+test_l3_host_only_items_are_absent_from_both_firmware_configs (__main__.P2SixSymbolTests.test_l3_host_only_items_are_absent_from_both_firmware_configs) ... ok
+test_macro_media_is_separated_from_elf_symbol_media (__main__.P2SixSymbolTests.test_macro_media_is_separated_from_elf_symbol_media) ... ok
+test_wrapper_disassembly_forwards_to_real_tlsf_functions (__main__.P2SixSymbolTests.test_wrapper_disassembly_forwards_to_real_tlsf_functions) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.000s
+
+OK
+EXIT=0

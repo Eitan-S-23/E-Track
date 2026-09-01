@@ -1,0 +1,236 @@
+{
+  "task_id": "P2-6-SD-R9",
+  "kind": "C7-supplementary-hw-evidence",
+  "date": "2026-09-01",
+  "evidence_root": ".cache/p2-6-sd-r9-20260901-01-implementation",
+  "firmware_on_device": {
+    "ver_name": "2.8.1",
+    "vcode": 20801,
+    "elf": ".cache/p2-6a-cmake-test-stack/app-gcc/X-Track-App-GCC.elf",
+    "elf_sha256": "35BB2AB75C683FA9061C2A75F20F32DB20F4D9E731E1C4A90E8D7AD95076D019"
+  },
+  "bad_package": {
+    "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/BAD-2.8.2.etu",
+    "bytes": 282355,
+    "sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30",
+    "target_vcode": 20802,
+    "flipped_offset": 141209,
+    "mcu_path": "/P2-6A-FULL-v2.8.2-BAD-R9-20260901-02.etu",
+    "readback_sha256_match": true
+  },
+  "good_package": {
+    "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/GOOD-2.8.2.etu",
+    "bytes": 282355,
+    "sha256": "761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20",
+    "target_vcode": 20802,
+    "uploaded_to_device": false
+  },
+  "verdict": {
+    "P2-6-C7": {
+      "overlay_release": "t (owner_at_apply=2 实测; 失败后稳态 owner=0 实测)",
+      "livemap_rebuild": "t (Pop 后 owner=1 同步 reacquire 实测; LiveMap 前台 vptr 实测)",
+      "map_normal": "t (恢复 44 统计行 lineHit 2-313 vs 基线 40 行 lineHit 8-608, 同档)",
+      "failure_code": "full:lzma_data (产品 Session::lastError 实测, 非 VERSION)",
+      "bcb_all_confirmed": "t (pre/mid1/mid2/apply后/终态 全 4)",
+      "vcode_kept_20801": "t (全程实测)"
+    }
+  },
+  "files": [
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/BAD-2.8.2.etu",
+      "bytes": 282355,
+      "sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/GOOD-2.8.2.etu",
+      "bytes": 282355,
+      "sha256": "761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/app-src-2.8.1.bin",
+      "bytes": 600744,
+      "sha256": "B59E0B690970E28B2E16079F2639E3E7DB7C8C3E246B34248C0D8A3397999721"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/derive_bad.py",
+      "bytes": 2339,
+      "sha256": "CB003C13E84CA0114E45F6B095646C771B930BBF6627CE8691FE5BCA288A2D9D"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/test_r9_gate.c",
+      "bytes": 5725,
+      "sha256": "48E3190F6B6BE766E896A6B5D6F312771847526B21C2A477F9123C67910B19BE"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-nm-full.txt",
+      "bytes": 130045,
+      "sha256": "2B0B9AF2066EE23B601099C26A5E3332E6CD3C33DB3748AFB45BD4D10180F489"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/v281-fw-header-gdb-block.txt",
+      "bytes": 4280,
+      "sha256": "69E1CEDDB8DAEE31E939281D93BDF3957E8498710DCCAD56CE73B4820A264568"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-host-gate.log",
+      "bytes": 1609,
+      "sha256": "2A88D4684A149755D2F79C62FE4774EC90E982F9FE66F8C41A4EBE6FF50E9D80"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s0-precheck-gdb.log",
+      "bytes": 875,
+      "sha256": "0BBA1AC47783D0FA202263A042B8962450A8F12E72B4590697D522B8B9DD7741"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-01-gdb.log",
+      "bytes": 1245,
+      "sha256": "036CB9AFDF4B474C8D493118BBB5A1ECCBD567762FE9CC0711D06BD5B2EBE9D9"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-02-gdb.log",
+      "bytes": 621895,
+      "sha256": "AF063C467DDE317678DC69C8BBB54805EF8B2342B3B7323BF80A5E5317685469"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-02-result.json",
+      "bytes": 72384,
+      "sha256": "65050B1109842136B4C3EB653F9E251E4EC5D7D55E2C2717E56B5BC88F328314"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-release-gdb.log",
+      "bytes": 447,
+      "sha256": "B245A60ABE663A2330480E712ACBC6C8F460E320F6AEB827FA66974AA7B40CC7"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-verify-gdb.log",
+      "bytes": 371,
+      "sha256": "35B5430C24FFB4932F36ACFD4C4CB2D93399ED914CCC6316D1B921588C9DE227"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-fix-gdb.log",
+      "bytes": 668,
+      "sha256": "0748CE3354CB144D2C688D49F3768628B429AE29B01DDC0600F7C70AF859EDC4"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s2-baseline-gdb.log",
+      "bytes": 761,
+      "sha256": "B3112938EAAB303E50731D1159902FAA4594B5B47D5BB0E19740E647CC8EFE13"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s2-baseline.rtt.log",
+      "bytes": 4797,
+      "sha256": "D969AB860F4F071F3B7D5C53EB5F489429C20F88EB68AAE340A73B77DCADD9A5"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3-c7-chain-gdb.log",
+      "bytes": 1135,
+      "sha256": "D14D759FD8EEDC1E68E9751DE3D849B4C801B06D85BC6F9F88A7BC87600FB39C"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-gdb.log",
+      "bytes": 670,
+      "sha256": "38211620A11DB6D81FFFFA59C5B1F5F64E68827F3CDCE5FD3642493D4833F7CD"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-rtt-cb.bin",
+      "bytes": 168,
+      "sha256": "448459C2F7746812A232E65C3C5578CF01651C26C5F97C705B6F1EF4A6793443"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-rtt-up0.bin",
+      "bytes": 1024,
+      "sha256": "C7978682D57690517B21E38A8BFF947614B46AFDE7090E7648196C1C7AD5C1CD"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3e-errstring-gdb.log",
+      "bytes": 494,
+      "sha256": "10B1DD3E981A12F346499D047B96D5DA7DD2C91CA97F5613A8CE020BEA0AA9DA"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3e-page-object.bin",
+      "bytes": 13824,
+      "sha256": "C50F2A054EFE0B89BD0AC4F1FD3BBCB4721F9C15F6AD08F3FCF8A649883CEFBA"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s4-recover-gdb.log",
+      "bytes": 784,
+      "sha256": "1746185A974C73E3149C3F22684C31C29813E85C144A09CBF5C2744409C54415"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s4-recover.rtt.log",
+      "bytes": 4913,
+      "sha256": "D8B10A5D352F42D856AC57BEC4A623A78EAFC5FB81D5A70BE01842EFB95218EE"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s5-final-gdb.log",
+      "bytes": 560,
+      "sha256": "51D2215952AE436C44A8B28447AE026B64E578101E2332CA440016538F2B2DCE"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s0-precheck.gdb",
+      "bytes": 4141,
+      "sha256": "D0F3911017140565CBE4A57125EE47245C5539FA654F60D2C838D099F2363CAE"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s1-usb-release.gdb",
+      "bytes": 2554,
+      "sha256": "4A2361D85DF4DB5FCE563C584A757BB014238411BA2F8FF749826FCD29D9B4A3"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s1-usb-verify.gdb",
+      "bytes": 1542,
+      "sha256": "AFF71FE286D2FE28A8AB0FCC431DA2BD40E997A5D645DA4B93469A454410AF9D"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s1-usb-fix.gdb",
+      "bytes": 2622,
+      "sha256": "E2CAF01DACE9927B76A2C1D87E9B6528F60A5D08480F70340608F68415378522"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s2-baseline.gdb",
+      "bytes": 4477,
+      "sha256": "4F241396C2F8A967D45B148D582400CF217FEBBED659FAC978118BAA6F51DC46"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s3-c7-chain.gdb",
+      "bytes": 13750,
+      "sha256": "D71AB89D1975BAA368090AE526B9A4255ED680C0C449037B17C586A909282573"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s3b-post-fail.gdb",
+      "bytes": 3487,
+      "sha256": "4B3516E80982BE7502155B34A11CFE6954437ADE3C307FBD672F301404FD3DF8"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s3e-errstring.gdb",
+      "bytes": 1854,
+      "sha256": "A65913B8F3CB32645BCAD895E2EA5231983F920DA91F9EA708F8653F564EA41B"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s4-recover.gdb",
+      "bytes": 4282,
+      "sha256": "5BC3099E07BC91039C5532C944083B63C13BBB5B9DCCE07B84B50E9E5BCEC109"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s5-final.gdb",
+      "bytes": 2234,
+      "sha256": "3453176B0EA30FCDF5EFD2D722FAE5B072CB99C403510E3DD8F8A2F6B14CD358"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/run_r9_session.py",
+      "bytes": 1055,
+      "sha256": "40DA319418395417DB4756DA119896E2BB31C025F933F669A8326CEC062879B9"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/run_r9_logger.py",
+      "bytes": 3141,
+      "sha256": "D62E75F074EE209D8E5F96277025DCDCA3A6363B3636A84F7D76933F46A2D6A9"
+    },
+    {
+      "path": ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/run_r9_upload.py",
+      "bytes": 1918,
+      "sha256": "B60F2291AAFA21CE3D28A0739661D98DE2D96850FD15D0C10B8570FCFD0ADD7E"
+    }
+  ],
+  "missing": []
+}
