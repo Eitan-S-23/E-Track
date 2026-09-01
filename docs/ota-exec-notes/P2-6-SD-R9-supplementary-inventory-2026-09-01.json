@@ -1,0 +1,729 @@
+{
+  "counts": {
+    "class_A_declared_and_frozen": 19,
+    "class_B_declared_only": 20,
+    "class_C_frozen_only": 3,
+    "class_D_neither": 53,
+    "r9_root_files": 95,
+    "upstream_declared": 39
+  },
+  "evidence_root": ".cache/p2-6-sd-r9-20260901-01-implementation",
+  "files": {
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-01-gdb.log": {
+      "bytes": 1245,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "036CB9AFDF4B474C8D493118BBB5A1ECCBD567762FE9CC0711D06BD5B2EBE9D9"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-01-jlink-server.log": {
+      "bytes": 39403,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "F14F3209D35108DC1ADFB299F478607F717356B0AD1392826724523D7274E48A"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-01-result.json": {
+      "bytes": 4380,
+      "class": "C",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [
+        "r9/p2-6-sd-r9-bad-upload-hw-01-result.json"
+      ],
+      "sha256": "E55E5A7DBA08EA60F6097C0B6254A1FE56C6ED56ABA0D7DBA9855BA0DB5A5C8F"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-01-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-02-gdb.log": {
+      "bytes": 621895,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "AF063C467DDE317678DC69C8BBB54805EF8B2342B3B7323BF80A5E5317685469"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-02-jlink-server.log": {
+      "bytes": 199133,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "5296DC9B8C9EB76A436FDDE365483020B00D0BF679223199B1323C0DCD9C15FA"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-02-result.json": {
+      "bytes": 72384,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/p2-6-sd-r9-bad-upload-hw-02-result.json"
+      ],
+      "sha256": "65050B1109842136B4C3EB653F9E251E4EC5D7D55E2C2717E56B5BC88F328314"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/p2-6-sd-r9-bad-upload-hw-02-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s0-precheck-gdb.log": {
+      "bytes": 875,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s0-precheck-gdb.log"
+      ],
+      "sha256": "0BBA1AC47783D0FA202263A042B8962450A8F12E72B4590697D522B8B9DD7741"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s0-precheck-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s0-precheck-server.log": {
+      "bytes": 43900,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "BC4E3EEF5D7ACB9F2C47AA88BC2EE2D0F431D2EC647753E9E70B151F12272220"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-host-gate.log": {
+      "bytes": 1609,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s1-host-gate.log"
+      ],
+      "sha256": "2A88D4684A149755D2F79C62FE4774EC90E982F9FE66F8C41A4EBE6FF50E9D80"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-fix-gdb.log": {
+      "bytes": 668,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "0748CE3354CB144D2C688D49F3768628B429AE29B01DDC0600F7C70AF859EDC4"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-fix-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-fix-server.log": {
+      "bytes": 18518,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D75FE20916BDEF1D16660F48372E1E7A455B1D3B362C0E84F579A5A9485B8094"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-release-gdb.log": {
+      "bytes": 447,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "B245A60ABE663A2330480E712ACBC6C8F460E320F6AEB827FA66974AA7B40CC7"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-release-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-release-server.log": {
+      "bytes": 14559,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "51CE8101490F93F0A9A9F91396A0EC19907ABF9A56D35D2342BA8F9BCF1000C9"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-verify-gdb.log": {
+      "bytes": 371,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "35B5430C24FFB4932F36ACFD4C4CB2D93399ED914CCC6316D1B921588C9DE227"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-verify-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s1-usb-verify-server.log": {
+      "bytes": 8622,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "844361B2DDCB5A685C42C5432FED2120A32DD83C46B13E122CAE3549BF124410"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s2-baseline-gdb.log": {
+      "bytes": 761,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s2-baseline-gdb.log"
+      ],
+      "sha256": "B3112938EAAB303E50731D1159902FAA4594B5B47D5BB0E19740E647CC8EFE13"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s2-baseline-logger-console.log": {
+      "bytes": 4158,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "A39A9E0C735268A2D8164CB3F612ACD3206D70B528C8AE3587D0E440997F4F17"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s2-baseline-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s2-baseline-server.log": {
+      "bytes": 30041,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "053B8C6D88344720A7C8AD89ED5F4C41E2EC8892658A94A2F3C79AB9D7BFED18"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s2-baseline.rtt.log": {
+      "bytes": 4797,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s2-baseline.rtt.log"
+      ],
+      "sha256": "D969AB860F4F071F3B7D5C53EB5F489429C20F88EB68AAE340A73B77DCADD9A5"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3-c7-chain-gdb.log": {
+      "bytes": 1135,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s3-c7-chain-gdb.log"
+      ],
+      "sha256": "D14D759FD8EEDC1E68E9751DE3D849B4C801B06D85BC6F9F88A7BC87600FB39C"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3-c7-chain-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3-c7-chain-server.log": {
+      "bytes": 124211,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "9CA5EBDE274CD5B53D0D3E2D2834D0F23C371881333526947CA33E2DDD127AAA"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-gdb.log": {
+      "bytes": 670,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s3b-post-fail-gdb.log"
+      ],
+      "sha256": "38211620A11DB6D81FFFFA59C5B1F5F64E68827F3CDCE5FD3642493D4833F7CD"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-rtt-cb.bin": {
+      "bytes": 168,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "448459C2F7746812A232E65C3C5578CF01651C26C5F97C705B6F1EF4A6793443"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-rtt-up0.bin": {
+      "bytes": 1024,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "C7978682D57690517B21E38A8BFF947614B46AFDE7090E7648196C1C7AD5C1CD"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3b-post-fail-server.log": {
+      "bytes": 9690,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "1B465337982BBE30924AB3B745E5E59A74EE69B76BA25E7796DD641CE54B5310"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3e-errstring-gdb.log": {
+      "bytes": 494,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s3e-errstring-gdb.log"
+      ],
+      "sha256": "10B1DD3E981A12F346499D047B96D5DA7DD2C91CA97F5613A8CE020BEA0AA9DA"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3e-errstring-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3e-errstring-server.log": {
+      "bytes": 9342,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "A43DBFE5A023F26C11F307E9963F5254FD2CBF135611962CF3C4F65DD3371334"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s3e-page-object.bin": {
+      "bytes": 13824,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s3e-page-object.bin"
+      ],
+      "sha256": "C50F2A054EFE0B89BD0AC4F1FD3BBCB4721F9C15F6AD08F3FCF8A649883CEFBA"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s4-recover-gdb.log": {
+      "bytes": 784,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s4-recover-gdb.log"
+      ],
+      "sha256": "1746185A974C73E3149C3F22684C31C29813E85C144A09CBF5C2744409C54415"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s4-recover-logger-console.log": {
+      "bytes": 4157,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "518A295D5DD680C028E1429FC6C881153DD777CEF1B1015EAE6569AC2E3F6E47"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s4-recover-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s4-recover-server.log": {
+      "bytes": 27275,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "03366DB42ECD6DCAD410A74C9FCE1EC817571A4BD08B41D6C20C1CDA53858947"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s4-recover.rtt.log": {
+      "bytes": 4913,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s4-recover.rtt.log"
+      ],
+      "sha256": "D8B10A5D352F42D856AC57BEC4A623A78EAFC5FB81D5A70BE01842EFB95218EE"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s5-final-gdb.log": {
+      "bytes": 560,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s5-final-gdb.log"
+      ],
+      "sha256": "51D2215952AE436C44A8B28447AE026B64E578101E2332CA440016538F2B2DCE"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s5-final-rtt.raw.log": {
+      "bytes": 107,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D859ED3421BBEBBDD78614A9CCAAAEDF147701E74986EB9C7E1C286C39A47FC0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/logs/r9-s5-final-server.log": {
+      "bytes": 10478,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "5CFB741D16A46A586B564F8B03F8FC9B8A063D0A4563BDDF7EDCE1D54F0B9881"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/result.json": {
+      "bytes": 9603,
+      "class": "C",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [
+        "r9/r9-result.json"
+      ],
+      "sha256": "C64EDD4AD1F6B785DD5F2227C34C52482A21F787DBFDB5629945FF1DD89FC419"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/BAD-2.8.2.etu": {
+      "bytes": 282355,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/BAD-2.8.2.etu",
+        "r9/bad-upload-hw-02-readback.bin"
+      ],
+      "sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/GOOD-2.8.2.etu": {
+      "bytes": 282355,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/GOOD-2.8.2.etu"
+      ],
+      "sha256": "761A71C00631FB12ACC3C30C7A387FDFACF2D5DC298501CE96E9CE63A1A19E20"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/app-src-2.8.1.bin": {
+      "bytes": 600744,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "B59E0B690970E28B2E16079F2639E3E7DB7C8C3E246B34248C0D8A3397999721"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/build_result_json.py": {
+      "bytes": 4673,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "A2AECD7A231EDB5203FAB9D1B1C609240381DD7A8FD437828FDEDB4D8DED7AE2"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/derive_bad.py": {
+      "bytes": 2339,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/derive_bad.py"
+      ],
+      "sha256": "CB003C13E84CA0114E45F6B095646C771B930BBF6627CE8691FE5BCA288A2D9D"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/extract_v281_header.py": {
+      "bytes": 1691,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "D106DE0C9E6A979C8025072A068397F2B16DF772A05464C65368F8B5FC931BDE"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/kanban_claim_r9.py": {
+      "bytes": 2012,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "FCCD03536A6AEC5037E0EB183ECDA31B79108F5DA56A2EFDB8582180C063AC7C"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/kanban_close_r9.py": {
+      "bytes": 6562,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "4AE09BE1A8F5C150C0DCE5880D50D87D8F2F00354FF49A0DCF180FF12BF190C6"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/mcu-path.bin": {
+      "bytes": 42,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "4FDFDA13CA77E9D56D2E031B0B4640D645FECB5D8491AFA221294C439A8EFC46"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-000.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "46F8D9447B9CE3EED3D3105D2638A886F2EDA1BA9D5A2BCCA16293AE7A4AB072"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-001.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "9EAB0A61D84C79B818F2CDFD20035D4361BBC6CC2191EDC93187B6A2BFDC7F5D"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-002.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "CAF9FFA90E1F1D410C5940DF9A22073483DA64C38355056FBA211C242A09402A"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-003.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "51C4D5A33C1D1EFF2B1018EC7F6AA43ED739BBD7947B2FFBBE0BF64B4106A9A7"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-004.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "A3A778E85CD2AE1DE0E74D873696A8D905CC5920F6612D3E83EC88FA6844836C"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-005.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "54A9AF0911AA48C898B42B88C1443C94538E321A4E5C4EDC4C05097ECFD4A5C0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-006.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "672A4BADE611F514FED9CEF13B5F80680B8E85B749458174C8EC0A30FFEF77F9"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-007.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "B81A194B83B5A61A94020A8BA3049722D3A50AAFCDFB096DEB6D0A6C9D79F2C4"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/source-008.bin": {
+      "bytes": 20211,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "A9D094187A1E62D7CF417DD285E2D69B9843376BF4A7683EE01959D057847C57"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-01/upload.gdb": {
+      "bytes": 667130,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "3058DEC4576619B7AF36FDF62774B0076D28F79A9A6A882206A32EC4A41DAD64"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/mcu-path.bin": {
+      "bytes": 42,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "382210209EA3BF599A64AE8C296B13E0461377C39473E7EF26412C818D8B98BA"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/readback.bin": {
+      "bytes": 282355,
+      "class": "C",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [
+        "r9/BAD-2.8.2.etu",
+        "r9/bad-upload-hw-02-readback.bin"
+      ],
+      "sha256": "EA7C5CA22E572BFB2D211E21C9475091D9F68725F862939B71FA874E5FA24C30"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-000.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "46F8D9447B9CE3EED3D3105D2638A886F2EDA1BA9D5A2BCCA16293AE7A4AB072"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-001.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "9EAB0A61D84C79B818F2CDFD20035D4361BBC6CC2191EDC93187B6A2BFDC7F5D"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-002.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "CAF9FFA90E1F1D410C5940DF9A22073483DA64C38355056FBA211C242A09402A"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-003.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "51C4D5A33C1D1EFF2B1018EC7F6AA43ED739BBD7947B2FFBBE0BF64B4106A9A7"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-004.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "A3A778E85CD2AE1DE0E74D873696A8D905CC5920F6612D3E83EC88FA6844836C"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-005.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "54A9AF0911AA48C898B42B88C1443C94538E321A4E5C4EDC4C05097ECFD4A5C0"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-006.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "672A4BADE611F514FED9CEF13B5F80680B8E85B749458174C8EC0A30FFEF77F9"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-007.bin": {
+      "bytes": 32768,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "B81A194B83B5A61A94020A8BA3049722D3A50AAFCDFB096DEB6D0A6C9D79F2C4"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/source-008.bin": {
+      "bytes": 20211,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "A9D094187A1E62D7CF417DD285E2D69B9843376BF4A7683EE01959D057847C57"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/p2-6-sd-r9-bad-upload-hw-02/upload.gdb": {
+      "bytes": 667130,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "2807CA62C06897FDF19A0036A9343AD8CF8CD6EC6D9F432B3A28C78AEDC98D3E"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-nm-full.txt": {
+      "bytes": 130045,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "2B0B9AF2066EE23B601099C26A5E3332E6CD3C33DB3748AFB45BD4D10180F489"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s0-precheck.gdb": {
+      "bytes": 4141,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "D0F3911017140565CBE4A57125EE47245C5539FA654F60D2C838D099F2363CAE"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s1-usb-fix.gdb": {
+      "bytes": 2622,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s1-usb-fix.gdb"
+      ],
+      "sha256": "E2CAF01DACE9927B76A2C1D87E9B6528F60A5D08480F70340608F68415378522"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s1-usb-release.gdb": {
+      "bytes": 2554,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "4A2361D85DF4DB5FCE563C584A757BB014238411BA2F8FF749826FCD29D9B4A3"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s1-usb-verify.gdb": {
+      "bytes": 1542,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "AFF71FE286D2FE28A8AB0FCC431DA2BD40E997A5D645DA4B93469A454410AF9D"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s2-baseline.gdb": {
+      "bytes": 4477,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "4F241396C2F8A967D45B148D582400CF217FEBBED659FAC978118BAA6F51DC46"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s3-c7-chain.gdb": {
+      "bytes": 13750,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/r9-s3-c7-chain.gdb"
+      ],
+      "sha256": "D71AB89D1975BAA368090AE526B9A4255ED680C0C449037B17C586A909282573"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s3b-post-fail.gdb": {
+      "bytes": 3487,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "4B3516E80982BE7502155B34A11CFE6954437ADE3C307FBD672F301404FD3DF8"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s3e-errstring.gdb": {
+      "bytes": 1854,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "A65913B8F3CB32645BCAD895E2EA5231983F920DA91F9EA708F8653F564EA41B"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s4-recover.gdb": {
+      "bytes": 4282,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "5BC3099E07BC91039C5532C944083B63C13BBB5B9DCCE07B84B50E9E5BCEC109"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/r9-s5-final.gdb": {
+      "bytes": 2234,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "3453176B0EA30FCDF5EFD2D722FAE5B072CB99C403510E3DD8F8A2F6B14CD358"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/run_r9_logger.py": {
+      "bytes": 3141,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "D62E75F074EE209D8E5F96277025DCDCA3A6363B3636A84F7D76933F46A2D6A9"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/run_r9_session.py": {
+      "bytes": 1055,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "40DA319418395417DB4756DA119896E2BB31C025F933F669A8326CEC062879B9"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/run_r9_upload.py": {
+      "bytes": 1918,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/run_r9_upload.py"
+      ],
+      "sha256": "B60F2291AAFA21CE3D28A0739661D98DE2D96850FD15D0C10B8570FCFD0ADD7E"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/test_r9_gate.c": {
+      "bytes": 5725,
+      "class": "A",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [
+        "r9/test_r9_gate.c"
+      ],
+      "sha256": "48E3190F6B6BE766E896A6B5D6F312771847526B21C2A477F9123C67910B19BE"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/test_r9_gate.exe": {
+      "bytes": 96647,
+      "class": "D",
+      "declared_upstream": false,
+      "frozen_bundle_paths": [],
+      "sha256": "BC1E0D2B95D8AE8F0AE0AC57E1F5C9DB4F9191D11B9CCA3193053B1802BF9EA6"
+    },
+    ".cache/p2-6-sd-r9-20260901-01-implementation/tmp/v281-fw-header-gdb-block.txt": {
+      "bytes": 4280,
+      "class": "B",
+      "declared_upstream": true,
+      "frozen_bundle_paths": [],
+      "sha256": "69E1CEDDB8DAEE31E939281D93BDF3957E8498710DCCAD56CE73B4820A264568"
+    }
+  },
+  "frozen_bundle_root": "docs/acceptance-contracts/P2-6-v3/artifacts",
+  "generated_at": "2026-09-01",
+  "generated_by": "P2-6 非实现独立验收会话（附加清册，不修改任何冻结字节）",
+  "note": "本清册为收口后补充枚举，哈希取值时点为 2026-09-01，不构成对 R9 执行当时文件状态的追溯性完整性证明。",
+  "schema": "etrack-r9-supplementary-inventory-v1"
+}
