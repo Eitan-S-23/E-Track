@@ -264,3 +264,39 @@ python -B tests/ota/p2_6_v3_evidence_recompute.py --selftest
 # 4) 校验器 fail-closed 反证（会临时改写合同/矩阵并自动还原）
 python -B .cache/p2-6-v3-build/validator_selftest.py
 ```
+
+---
+
+## 9. 冻结之后如何复现校验（务必先读，否则会误判证据包已坏）
+
+`PLAN-OTA-EXEC.md` 属 Governance profile 的 `top_files`，而看板在 P2-6 之后必然
+继续被后续任务卡改写。因此**从移动中的 `main` 直接跑校验器一定会 FAIL**，这不是
+证据包损坏，而是验收规约本来的语义：`--repo-root` 要求的是「本轮精确 Git worktree」，
+不是当前 HEAD。
+
+2026-09-01 P2-6 收口后的首次看板改写（§1 总表 P2 行订正 + P1-7 静态前置审计条目 +
+§10 日志）已实测确认这一点：
+
+```text
+# 看板已改写时
+VALIDATION=FAIL errors=2
+ERROR: input manifest worktree length mismatch: PLAN-OTA-EXEC.md
+ERROR: input manifest worktree SHA-256 mismatch: PLAN-OTA-EXEC.md
+
+# 仅把 PLAN-OTA-EXEC.md 还原为冻结字节后（其余一字未动）
+VALIDATION=PASS contract=P2-6-v3 round=P2-6-V3-FREEZE-20260901-01 overall=PASS
+```
+
+两条报错**全部且仅**指向 `PLAN-OTA-EXEC.md`，62 项冻结产物、三份 manifest 的其余
+条目、合同与矩阵哈希均未漂移——这本身就是校验器逐文件复核而非信任登记值的又一次
+实证。
+
+要复现 v3 的 PASS，请在冻结提交上取一个 worktree 再校验：
+
+```text
+git worktree add <项目内路径> bc13f184dd00ca9690f597e62199b9059a59d226
+python Tools/acceptance/validate_bundle.py   --contract docs/acceptance-contracts/P2-6-v3.contract.json   --matrix docs/acceptance-contracts/P2-6-v3/P2-6-v3.evidence-matrix.json   --repo-root <该 worktree 的绝对路径>
+```
+
+不要为了让当前 HEAD 上的校验器变绿而重新生成 v3 合同或矩阵——那会改掉已冻结的
+合同 SHA-256 `DA78DDF5…19B4`，等于事后篡改已收口的证据包。
