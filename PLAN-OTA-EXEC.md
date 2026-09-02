@@ -630,12 +630,13 @@
 - 证据: —
 
 #### P3-6 BLE 帧层测试 CI 接线
-状态: 待办 ｜ 认领: — ｜ 更新: 2026-09-02(由 P3-1 非实现独立验收发现,用户裁定另开卡; 同日 P3-1 收口合并后完成治理记账: 派工书已编写、依赖阻塞已解除、本卡已可派单)
+状态: 进行中 ｜ 认领: Claude(实现会话) / 2026-09-02 ｜ 更新: 2026-09-02(由 P3-1 非实现独立验收发现,用户裁定另开卡; 同日 P3-1 收口合并后完成治理记账: 派工书已编写、依赖阻塞已解除、本卡已可派单; 同日实现会话认领并完成 CI 接线,待非实现会话独立验收)
 - 依赖: P3-1 收口合并入 main —— 已于 2026-09-02 满足(PR #12 产品与验收资产、PR #13 收口回写,均已合并入 main),tests/ota/test_ota_ble_frame.py 与 test_ota_ble_session.py 已是 main 上的跟踪文件,"先接线必红"的前提消失,本卡在 §8.1 矩阵中已转为可派单。
 - 目标: 把两套 BLE host 测试接入 .github/workflows/firmware-build.yml 的测试执行步骤(现仅显式执行 test_ota_staging.py/test_ota_package.py/test_ota_patch.py; paths 触发器已含 tests/ota/test_ota_*.c 与 *.py, 缺的只是执行那两行); 并在动手前先在本卡内定义 P3-1 新增的 tests/ota/p3_1_verify_*.py 属「验收工具」还是「产品回归」, 据此决定是否一并接入,不得默认全接。
+- 分类裁定(动手前置,本卡内定义): tests/ota/p3_1_verify_*.py 共 7 个,全部裁定为「验收工具」,本卡不接入 CI。其中 5 个结构性绑定 P3-1 单轮状态,接入即长期变红或不可复现: artifacts(硬编码该轮申报的产物 SHA-256,任何后续提交都会使其失效)、command_fidelity(与该轮冻结日志逐字节比对)、mutation(重编注错源码副本,分钟级开销,目的是证明该轮 harness 鉴别力)、production_binary 与 rx_ring_budget(读本地构建目录 build-gcc-release 的 ELF/map/compile_commands.json,而 CI 构建目录为 /tmp/etfw)。另 2 个 contract_alignment 与 text_isolation 经实测可脱离构建产物独立运行(分别 47 项零漂移、3 用例零失败),按性质属「产品回归」,但本卡仍不接入: 其文件名不匹配现有 paths 触发器 tests/ota/test_ota_*.py,直接接入会形成「改门禁自身却不触发门禁」的静默缺口,须连同触发器一并处理,另立卡执行。
 - 验收: CI 运行日志中可见两套测试的实际执行输出(P3_1_BLE_FRAME=PASS checks=39、P3_1_BLE_SESSION=PASS checks=105); 并给出「接线确实生效」的反证——在特性分支上跑一次带注入缺陷的临时提交并确认 workflow 变红(随后还原),或等效的 fail-closed 证明。仅有 workflow 文本 diff 或本地执行证据不算通过。
 - 注意: .github/workflows/firmware-build.yml 是 Tools/provenance/manifest_profiles.json 里 Production profile 的 top_file 与 required_path, 改它会使 P3-1-v2 合同内记录的 Production 指纹失效; 本卡须自带新 task_id 的独立验收合同, 不得回改 P3-1 的合同或证据矩阵。另: 待 P3-1 收口后若把本卡 dependency_state 置 SATISFIED, 它会变为 DISPATCHABLE 并触发 tests/ota/test_acceptance_bundle.py 的「首批派单集合精确受控」断言, 须与派工书编写同批走治理变更。该治理变更已于 2026-09-02 同批完成(派工书 docs/ota-prompts/prompt-P3-6-implementation.md + §8.1 两行更新 + 断言钉死集合扩为五项),登记见 §9。
-- 证据: —
+- 证据: docs/ota-exec-notes/P3-6-governance-change.md(批次1 治理变更)、docs/ota-exec-notes/P3-6-ci-wiring-evidence.md(批次2 接线与 fail-closed 反证)
 
 ---
 
@@ -749,7 +750,7 @@
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
 
-- 2026-09-02 ｜ Claude(P3-6 治理变更批次 / 主会话) ｜ P3-6(新增派工书 + 解除依赖阻塞) / P3-4(解除依赖阻塞) ｜ 承 P3-1 收口合并的既成事实做记账收敛: 新增 docs/ota-prompts/prompt-P3-6-implementation.md(17 个必需章节齐备, 已按治理测试的十二项规则逐条自检通过); §8.1 把 P3-4、P3-6 两行的依赖状态与派单资格按派生规则更新, 可派单集合由三项扩为五项; 同批把 tests/ota/test_acceptance_bundle.py 的钉死集合改为同样五项(仍是等值比较, 未放宽为子集); §9 已登记。本批只做治理记账, 不动产品代码与 CI, 不回改 P3-1 的冻结合同与证据矩阵。
+- 2026-09-02 ｜ Claude(P3-6 治理变更批次 / 主会话) ｜ P3-6(新增派工书 + 解除依赖阻塞) / P3-4(解除依赖阻塞) ｜ 承 P3-1 收口合并的既成事实做记账收敛: 新增 docs/ota-prompts/prompt-P3-6-implementation.md(17 个必需章节齐备, 已按治理测试的十二项规则逐条自检通过); §8.1 把 P3-4、P3-6 两行的依赖状态与派单资格按派生规则更新, 可派单集合由三项扩为五项; 同批把 tests/ota/test_acceptance_bundle.py 的钉死集合改为同样五项(仍是等值比较, 未放宽为子集); §9 已登记。本批只做治理记账, 不动产品代码与 CI, 不回改 P3-1 的冻结合同与证据矩阵。同会话接续批次2: 认领本卡并在 workflow 测试步骤接入两套 BLE host 测试,卡内裁定 p3_1_verify_*.py 七个脚本全部为验收工具不接入,fail-closed 反证与 CI 运行证据见 docs/ota-exec-notes/P3-6-ci-wiring-evidence.md。
 
 - 2026-09-02 ｜ Claude(P3-1 非实现非本轮验收收口会话) ｜ P3-1 Git 收口 ｜ 按 AGENTS.md「OTA 执行规约 §5」与「Git / Worktree 收口规约」完成 P3-1 收口: 分支 ota/p3-1-ble-frame-closeout 三提交(EOL 护栏 / 产品实现 / 验收资产与看板)共 61 文件, 全部逐路径显式 add, 派工书列的 6 个 .claude/ 与 .cache-cmake-time-test.cmake 遗留文件保持未跟踪; PR #12 两条硬门禁 firmware-build(arm-none-eabi-gcc) 与 acceptance-governance 全绿后合并入 main, 合并后已完成收口闭环(fetch --prune 定位持有 refs/heads/main 的主 worktree, ff-only 合并, HEAD == origin/main, status 无 ahead/behind), 合并后在真实主工作树复跑 validate_bundle.py 仍 PASS。收口前发现派工书未预见的行尾地雷: 本机 core.autocrlf=true 下 60 个交付文件中 20 个纯 LF 文件会在 checkout 时被改写为 CRLF, 其中 18 个是 P3-1-v2 合同 Production/Validation manifest 的绑定路径, 不处置则刚冻结的指纹在任何全新克隆上必红; 按 .gitattributes 文件头明文的「只增不改」规约追加 18 条 -text(纯新增, 条目数 236→254), 并对收口 HEAD 建临时 worktree 做真实检出比对: 3083 个绑定路径 absent=0 / mismatch=0, 该检出内校验器与 65 项测试全绿, 锚定成立。刻意未做: 未改 .github/workflows/firmware-build.yml(Production top_file, 改则 P3-1-v2 指纹失效, 缺口由 P3-6 承接), 未动 P3-6 的 dependency_state(置 SATISFIED 会打红 test_acceptance_bundle.py 内钉死的首批派单断言, 须与 P3-6 派工书同批走治理变更), 未改任何产品源与验收资产字节。本次回写看板会使 Governance manifest 漂移, P3-1-v2 校验器在此提交后不再为绿 —— 这是冻结合同收口回写后的正常状态(前一轮 P2-6-v3 现状相同), 可复现性由锚定提交承载; 收口证据与全部哈希见 docs/ota-exec-notes/P3-1-closeout-evidence.md。
 

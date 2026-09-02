@@ -193,6 +193,8 @@ jobs:
           python3 tests/ota/test_ota_staging.py
           python3 tests/ota/test_ota_package.py
           python3 tests/ota/test_ota_patch.py
+          python3 tests/ota/test_ota_ble_frame.py
+          python3 tests/ota/test_ota_ble_session.py
 
       - name: Validate OTA App layout
         shell: bash
