@@ -146,6 +146,10 @@ void HAL::HAL_Init()
     taskManager.Register(Power_EventMonitor, 100);
     taskManager.Register(GPS_Update, 200);
 		taskManager.Register(BT_Update, 200);
+    /* P3-1：BLE OTA 泵。会话活跃期 RX 走 overlay 环（ISR 分流），泵
+     * 周期只需 < 环容量时间（4KB@921600≈44ms）；空闲期也顺带排空
+     * BT 串口 HW 环，降低文本协议响应延迟。 */
+    taskManager.Register(BT_OtaPump, CONFIG_OTA_BLE_PUMP_PERIOD_MS);
     taskManager.Register(SD_Update, 500);
     taskManager.Register(Memory_DumpInfo, 1000);
 	//taskManager.Register(Touch_Update, 100);

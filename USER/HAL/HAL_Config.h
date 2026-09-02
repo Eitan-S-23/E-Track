@@ -96,6 +96,12 @@
 #define CONFIG_BT_RX_PIN           PA10
 //#define CONFIG_BT_EN_PIN           PA15
 
+/* BLE OTA 传输（P3-1；实验基线，P3-4 实测定档，禁止冻结为契约）。
+ * RX 环尺寸在 mcu_config.h（受控 RX buffer，需 overlay 子分配预算联动）。 */
+#define CONFIG_OTA_BLE_PUMP_PERIOD_MS     20u   /* BLE 泵节拍 */
+#define CONFIG_OTA_BLE_LIVENESS_MS        500u  /* 无新段重发 ACK 初值（合同明示非契约） */
+#define CONFIG_OTA_BLE_SESSION_TIMEOUT_MS 30000u /* 会话超时（无有效帧） */
+
 /* IMU */
 #define CONFIG_IMU_INT1_PIN         PB10
 #define CONFIG_IMU_INT2_PIN         PB11

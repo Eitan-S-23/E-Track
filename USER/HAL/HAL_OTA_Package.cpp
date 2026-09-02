@@ -32,7 +32,8 @@ enum ota_overlay_owner_t
 {
     OTA_OVERLAY_FREE = 0,
     OTA_OVERLAY_LIVE_MAP = 1,
-    OTA_OVERLAY_PACKAGE = 2
+    OTA_OVERLAY_PACKAGE = 2,
+    OTA_OVERLAY_BLE = 3
 };
 
 typedef struct ota_package_port_context_t
@@ -470,6 +471,27 @@ bool HAL::OTA_OverlayAcquireLiveMap()
 void HAL::OTA_OverlayReleaseLiveMap()
 {
     overlay_release(OTA_OVERLAY_LIVE_MAP);
+}
+
+/* P3-1 BLE 会话 overlay 通道：会话期间子分配 workspace 前部
+ * （RX 环 + staging receiver），与 PACKAGE/LIVE_MAP 互斥。 */
+bool HAL::OTA_OverlayAcquireBle()
+{
+    return overlay_acquire(OTA_OVERLAY_BLE);
+}
+
+void HAL::OTA_OverlayReleaseBle()
+{
+    overlay_release(OTA_OVERLAY_BLE);
+}
+
+uint8_t* HAL::OTA_OverlayGetWorkspace(uint32_t *out_size)
+{
+    if (out_size != 0)
+    {
+        *out_size = (uint32_t)sizeof(g_ota_overlay_workspace);
+    }
+    return g_ota_overlay_workspace;
 }
 
 bool HAL::OTA_OverlayIsOtaOwned()

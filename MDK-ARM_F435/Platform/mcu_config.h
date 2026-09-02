@@ -42,6 +42,12 @@
 #define SERIAL_SUBPRIORITY_DEFAULT          3
 #define SERIAL_CONFIG_DEFAULT               SERIAL_8N1
 
+/* P3-1 BLE OTA 受控 RX 环（合同 §5.1 要求 >=4KB）。不扩 SERIAL_RX_BUFFER_SIZE
+ *（3 实例全局扩容会击穿主 RAM 堆空洞）；BLE 会话活跃期由 UART ISR 回调把
+ * 字节分流进 overlay workspace 内的该环，尺寸须为 2 的幂且与 overlay
+ * 子分配预算（环 + staging receiver <= 40960B）联动。 */
+#define CONFIG_OTA_BLE_RX_RING_SIZE         4096
+
 #define SERIAL_1_ENABLE                     1
 #if SERIAL_1_ENABLE
 #  define SERIAL_1_USART                    USART1
