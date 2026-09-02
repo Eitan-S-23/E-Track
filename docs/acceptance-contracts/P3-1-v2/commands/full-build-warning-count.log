@@ -1,0 +1,51 @@
+# P3-1 验收 · 独立全量 GCC 构建 warning/error 统计
+# 命令: SOURCE_DATE_EPOCH=1786320000 cmake -S MDK-ARM_F435/cmake-generated -B .cache/p3-1-acceptance/build-verify -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OBJECT_PATH_MAX=1024 && cmake --build .cache/p3-1-acceptance/build-verify --target X_Track_App_GCC X_Track_Boot --parallel
+# 说明: 构建落在 .cache 独立目录, 不触碰生产 build-gcc-release, 因此不改变已复算的产物哈希
+# 原始日志: .cache/p3-1-acceptance/full-build-raw.log (1882 行, 已 gitignore)
+
+build_exit_code = 0
+total_log_lines = 1882
+error_count     = 0
+warning_count   = 637
+
+## P3-1 新源自身
+compile_warnings_in_p3_1_sources = 0
+(ota_ble_ring.c / ota_ble_frame.c / ota_ble_session.c 编译期零 warning)
+
+## P3-1 新源仅有的 3 条 warning 均来自链接期 wchar_t 全仓库共性提示,
+## 且反证三个对象确实参与了本次链接:
+[ld] warning: CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/OTA/ota_ble_ring.c.obj uses 2-byte wchar_t yet the output is to use 4-byte wchar_t; use of wchar_t values across objects may fail
+[ld] warning: CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/OTA/ota_ble_frame.c.obj uses 2-byte wchar_t yet the output is to use 4-byte wchar_t; use of wchar_t values across objects may fail
+[ld] warning: CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/OTA/ota_ble_session.c.obj uses 2-byte wchar_t yet the output is to use 4-byte wchar_t; use of wchar_t values across objects may fail
+
+## warning 归属文件 TOP20 (全部为既有代码, 非 P3-1 引入)
+     36 D:/github/my/E-Track/USER/App/Pages/SystemInfos/SystemInfosModel.cpp
+     34 D:/github/my/E-Track/USER/App/Common/Music/MusicCode.h
+     22 D:/github/my/E-Track/USER/App/Utils/PageManager/PageFactory.h
+     18 D:/github/my/E-Track/USER/App/Utils/lv_img_png/PNGdec/src/inflate.c
+     14 D:/github/my/E-Track/USER/lv_port/lv_port_fs_sdfat.cpp
+      9 D:/github/my/E-Track/Libraries/USB_MSC/msc_class/msc_bot_scsi.c
+      8 D:/github/my/E-Track/Libraries/SdFat/src/SdCard/SdioCard_AT32.cpp
+      7 D:/github/my/E-Track/USER/App/Utils/lv_img_png/lv_img_png.cpp
+      7 D:/github/my/E-Track/USER/App/Utils/TrackFilter/TrackPointFilter.cpp
+      6 D:/github/my/E-Track/MDK-ARM_F435/Platform/Core/rtc.c
+      5 D:/github/my/E-Track/MDK-ARM_F435/Platform/Core/timer.c
+      5 D:/github/my/E-Track/Libraries/SdFat/src/FatLib/FatFile.cpp
+      4 D:/github/my/E-Track/MDK-ARM_F435/cmake-generated/cmake/sources/HAL_FaultHandle_20e7c83ac691.cpp
+      4 D:/github/my/E-Track/Libraries/USB_MSC/msc_class/msc_class.c
+      4 D:/github/my/E-Track/Libraries/SdFat/src/FatLib/FatFileLFN.cpp
+      4 D:/github/my/E-Track/ArduinoAPI/avr/pgmspace.h
+      3 D:/github/my/E-Track/USER/HAL/HAL_Encoder.cpp
+      3 D:/github/my/E-Track/USER/HAL/HAL.cpp
+      3 D:/github/my/E-Track/USER/App/Utils/lv_img_png/PNGdec/src/zutil.c
+      3 D:/github/my/E-Track/USER/App/Common/DataProc/DP_Clock.cpp
+
+## 构建结尾 (size / 内存占用)
+           FLASH:      602864 B       960 KB     61.33%
+             RAM:        352 KB       352 KB    100.00%
+        RW_IRAM2:        160 KB       160 KB    100.00%
+   text	   data	    bss	    dec	    hex	filename
+ 601432	    932	 561688	1164052	 11c314	D:/github/my/E-Track/.cache/p3-1-acceptance/build-verify/app-gcc/X-Track-App-GCC.elf
+build_exit=0
+
+P3_1_FULL_BUILD=PASS errors=0 warnings=637 p3_1_compile_warnings=0

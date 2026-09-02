@@ -1,0 +1,108 @@
+=== P3-1 BLE session tests ===
+  GET_INFO is answered even when OTA is disabled and BCB is open       PASS
+  INFO payload carries model, identity, proto and window fields        PASS
+  GET_INFO does not open a session                                     PASS
+  GET_INFO with a non-zero session byte is ignored                     PASS
+  GET_INFO without an info provider stays silent                       PASS
+  rejection fixture package is generated                               PASS
+  BEGIN with proto_ver 2 is rejected with ERR_PROTO                    PASS
+  BEGIN with total_len 0 is rejected with ERR_LEN                      PASS
+  BEGIN above OTA_ETU_MAX_LENGTH is rejected with ERR_LEN              PASS
+  BEGIN is rejected with ERR_OTA_DISABLED before header checks         PASS
+  a corrupt ETU magic is rejected with ERR_HDR before BCB gating       PASS
+  target equal to the running version is rejected with ERR_VERSION     PASS
+  hardware revision mismatch is rejected with ERR_HW_REV               PASS
+  layout mismatch is rejected with ERR_LAYOUT                          PASS
+  an old boot version is rejected with ERR_BOOT_VER                    PASS
+  BEGIN without a confirmed BCB is rejected with ERR_BUSY              PASS
+  BEGIN without the overlay workspace is rejected with ERR_BUSY        PASS
+  an undersized workspace is rejected and the overlay is released      PASS
+  rejected BEGINs never leak an overlay acquisition                    PASS
+  full transfer fixture package is generated                           PASS
+  BEGIN is acknowledged OK with session id 1                           PASS
+  BEGIN ACK reports zero durable progress and empty bitmap             PASS
+  session is active and ISR feeding is armed                           PASS
+  overlay workspace is acquired exactly once                           PASS
+  all 40 DATA segments are acknowledged                                PASS
+  the block-boundary ACK reports the committed 4 KiB                   PASS
+  the first segment of the next block sets bitmap bit 0                PASS
+  the tail segment ACK reports the whole package as durable            PASS
+  the ISR ring is fully drained                                        PASS
+  END is acknowledged OK and tears the session down                    PASS
+  overlay workspace is released after END                              PASS
+  staged payload is byte-exact                                         PASS
+  ETSL records whole-package length, CRC, target and SHA8              PASS
+  the commit marker is written                                         PASS
+  idempotency fixture package is generated                             PASS
+  two in-flight segments are acknowledged                              PASS
+  a duplicate BEGIN is idempotent and echoes live progress             PASS
+  the duplicate BEGIN neither re-acquires nor rewrites staging         PASS
+  a full block is durably committed                                    PASS
+  a fresh-seq DATA below durable_off is idempotent without rewrites    PASS
+  a replayed DATA seq is acknowledged idempotently                     PASS
+  the active session keeps the overlay acquired                        PASS
+  seq fixture package is generated                                     PASS
+  a DATA seq gap is rejected with ERR_SEQ                              PASS
+  the correct in-order seq is still accepted after a gap NAK           PASS
+  a replayed old seq is acknowledged idempotently                      PASS
+  the next in-order seq advances                                       PASS
+  BEGIN near the seq wrap is accepted                                  PASS
+  seq 0xFFFF is accepted and wraps expected to 0                       PASS
+  a replayed 0xFFFF across the wrap is idempotent                      PASS
+  seq 0 after the wrap is accepted in order                            PASS
+  data validation fixture package is generated                         PASS
+  a non-128-aligned offset is rejected with ERR_OFFSET                 PASS
+  a short mid-package segment is rejected with ERR_FRAME               PASS
+  a DATA beyond total_len is rejected with ERR_OFFSET                  PASS
+  DATA with a wrong session byte is rejected with ERR_SESSION          PASS
+  block 0 is committed so the tail block becomes current               PASS
+  the short tail segment with off+len == total is accepted             PASS
+  format errors leave the session active for the sender to retry       PASS
+  ERR_DATA fixture package is generated                                PASS
+  the first off-0 segment is accepted                                  PASS
+  conflicting content at the same offset fails closed with ABORTED     PASS
+  the ERR_DATA path tears the session down and frees the overlay       PASS
+  a fresh BEGIN after fail-closed restarts at zero progress            PASS
+  the retried transfer completes and stages byte-exact data            PASS
+  END path fixture package is generated                                PASS
+  END while idle is rejected with ERR_STATE                            PASS
+  END before the package is complete is rejected with ERR_STATE        PASS
+  staging survives the incomplete END and a fresh BEGIN continues      PASS
+  END with a mismatching sha restatement is rejected with ERR_SHA      PASS
+  the ERR_SHA path erases the staging header page                      PASS
+  after the header erase the same package cannot resume                PASS
+  the probe session is torn down by ABORT                              PASS
+  a BEGIN declaring a mismatching sha still opens a session            PASS
+  a declared sha that mismatches the staged bytes fails with ERR_SHA   PASS
+  END with a wrong session is rejected and keeps the session           PASS
+  the correct END afterwards completes the transfer                    PASS
+  the finally staged package is byte-exact                             PASS
+  abort/resume fixture package is generated                            PASS
+  one full block is durable before the abort                           PASS
+  ABORT with a wrong session is rejected with ERR_SESSION              PASS
+  ABORT is acknowledged ABORTED and tears the session down             PASS
+  the resumed BEGIN reports the durable offset and a new session id    PASS
+  the resumed transfer completes with END OK                           PASS
+  the resumed staging is byte-exact                                    PASS
+  resume never re-erases the already durable first block               PASS
+  ETSL keeps the whole-package CRC semantics after resume              PASS
+  replacement fixture packages are generated                           PASS
+  package A opens session 1                                            PASS
+  a different package BEGIN replaces the live session                  PASS
+  replacement releases and re-acquires the overlay exactly once        PASS
+  package B completes on the replaced session                          PASS
+  liveness fixture package is generated                                PASS
+  no liveness ACK before the 500 ms threshold                          PASS
+  a liveness ACK is resent at the 500 ms threshold                     PASS
+  a second pump in the same period does not double-send                PASS
+  a corrupt frame draws an ERR_CRC NAK but keeps the session           PASS
+  the session times out to an ABORTED ACK after 30 s of silence        PASS
+  the timeout path frees the overlay                                   PASS
+  text isolation fixture package is generated                          PASS
+  idle-phase text bytes reach the text sink                            PASS
+  BEGIN opens the session                                              PASS
+  active-phase text bytes are dropped and never reach the sink         PASS
+  the ISR ring is empty after the pump                                 PASS
+  text passthrough resumes after teardown                              PASS
+=== summary: 105 checks, 0 failure(s) ===
+P3_1_BLE_SESSION=PASS checks=105 failures=0

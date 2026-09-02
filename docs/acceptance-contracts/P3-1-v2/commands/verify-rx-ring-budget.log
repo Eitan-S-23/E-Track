@@ -1,0 +1,15 @@
+编译器 = D:\singlechip\gcc+gdb+openocd\tools\arm-gnu-toolchain-13.3.rel1-ming\bin\arm-none-eabi-gcc.exe
+取证 TU = Libraries/OTA/ota_ble_session.c（生产 flag 原样复用 80 个）
+探针目标 = .cache/p3-1-acceptance/ring-probe/p3_1_ring_probe.o  exit=0
+
+[实测] CONFIG_OTA_BLE_RX_RING_SIZE = 4096B（按生产 flag 展开）
+[实测] sizeof(ota_staging_receiver_t) = 4164B
+[实测] sizeof(ota_ble_session_t) = 568B
+[实测] map .ota_overlay = 40960B
+
+[判据1] 接收环 >= 4096B: True
+[判据2] 环尺寸为 2 的幂（掩码回绕前提）: True
+[判据3] 环 + receiver = 8260B <= overlay 40960B: True（余量 32700B）
+
+=== 失败判据 0 项 ===
+P3_1_RX_RING_BUDGET=PASS ring=4096 receiver=4164 session_obj=568 overlay=40960 headroom=32700

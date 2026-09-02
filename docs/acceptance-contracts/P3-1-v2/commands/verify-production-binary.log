@@ -1,0 +1,23 @@
+nm = D:\singlechip\gcc+gdb+openocd\tools\arm-gnu-toolchain-13.3.rel1-ming\bin\arm-none-eabi-nm.EXE
+ELF = MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.elf  已定义符号 3381 个
+
+[红线1] 生产调用的 BLE 公共 API 应到 14 个，缺失 0 个
+        生产 ELF 内 ota_ble_* 符号共 16 个
+
+[红线1b] P3-1 新源对象在 map 中出现 3/3 个
+
+[红线1c] 无生产调用点、允许 --gc-sections 回收的 API 1 个
+         ota_ble_ring_count: 已编译但被链接器丢弃（map Discarded 区可见），合规
+
+[红线2] 测试专有符号 9 个，泄漏 0 个
+
+[红线3] ota_ble_frame.c 中 memcpy 出现 0 次（应为 0，须逐字节 LE 组装）
+
+[红线4] P3-1 新源动态分配命中 0 处（应为 0）
+
+[红线5a] .ota_overlay 尺寸 = 0xa000（契约断言 0xa000）
+[红线5b] s_ble_session 主 RAM 占用 = 568B（预算 650B）
+[红线5c] A5 栈封顶断言符号在 map 中: True（链接成功即断言通过）
+
+=== 失败红线 0 项 ===
+P3_1_PRODUCTION_BINARY=PASS required_api=14 ble_syms=16 test_syms_leaked=0 frame_memcpy=0 alloc_hits=0 overlay_size=40960 session_ram=568

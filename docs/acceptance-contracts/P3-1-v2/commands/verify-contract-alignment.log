@@ -1,0 +1,54 @@
+契约: docs/ota-binary-contracts.md
+实现: Libraries/OTA/ota_ble_frame.h
+解析到 #define 45 项；命令表 6 行；状态码表 20 行
+
+[OK  ] §5.2 cmd GET_INFO: 契约=0 实现=0
+[OK  ] §5.2 cmd BEGIN: 契约=1 实现=1
+[OK  ] §5.2 cmd DATA: 契约=2 实现=2
+[OK  ] §5.2 cmd END: 契约=3 实现=3
+[OK  ] §5.2 cmd ABORT: 契约=4 实现=4
+[OK  ] §5.2 cmd INFO: 契约=128 实现=128
+[OK  ] §5.2 BEGIN 应答 ACK: 契约=129 实现=129
+[OK  ] §5.2 DATA 应答 ACK: 契约=130 实现=130
+[OK  ] §5.2 END 应答 ACK: 契约=131 实现=131
+[OK  ] §5.2 ABORT 应答 ACK: 契约=132 实现=132
+[OK  ] §5.2 命令码集合完全一致: 契约=[0, 1, 2, 3, 4, 128, 129, 130, 131, 132] 实现=[0, 1, 2, 3, 4, 128, 129, 130, 131, 132]
+[OK  ] §5.7 status OK: 契约=0 实现=0
+[OK  ] §5.7 status ERR_FRAME: 契约=1 实现=1
+[OK  ] §5.7 status ERR_CRC: 契约=2 实现=2
+[OK  ] §5.7 status ERR_SEQ: 契约=3 实现=3
+[OK  ] §5.7 status ERR_SESSION: 契约=4 实现=4
+[OK  ] §5.7 status ERR_STATE: 契约=5 实现=5
+[OK  ] §5.7 status ERR_OFFSET: 契约=6 实现=6
+[OK  ] §5.7 status ERR_LEN: 契约=7 实现=7
+[OK  ] §5.7 status ERR_HDR: 契约=8 实现=8
+[OK  ] §5.7 status ERR_HW_REV: 契约=9 实现=9
+[OK  ] §5.7 status ERR_LAYOUT: 契约=10 实现=10
+[OK  ] §5.7 status ERR_BOOT_VER: 契约=11 实现=11
+[OK  ] §5.7 status ERR_VERSION: 契约=12 实现=12
+[OK  ] §5.7 status ERR_BASE: 契约=13 实现=13
+[OK  ] §5.7 status ERR_BUSY: 契约=14 实现=14
+[OK  ] §5.7 status ERR_FLASH: 契约=15 实现=15
+[OK  ] §5.7 status ERR_SHA: 契约=16 实现=16
+[OK  ] §5.7 status ERR_OTA_DISABLED: 契约=17 实现=17
+[OK  ] §5.7 status ERR_PROTO: 契约=18 实现=18
+[OK  ] §5.7 status ABORTED: 契约=255 实现=255
+[OK  ] §5.7 状态码集合完全一致: 契约=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 255] 实现=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 255]
+[OK  ] §5.2.1 INFO payload 长度: 契约=50 实现=50
+[OK  ] §5.2.1 proto_ver 恒 1: 契约=1 实现=1
+[OK  ] §5.2.1 max_window_segs 恒 32: 契约=32 实现=32
+[OK  ] §5.3 BEGIN payload 长度: 契约=101 实现=101
+[OK  ] §5.1 sync0: 契约=165 实现=165
+[OK  ] §5.1 sync1: 契约=90 实现=90
+[OK  ] §5.1 帧头 8B: 契约=8 实现=8
+[OK  ] §5.1 crc16 2B: 契约=2 实现=2
+[OK  ] §5.4 DATA 最小 payload = u32 off: 契约=4 实现=4
+[OK  ] §5.5 DATA 最大 payload = 4 + 128: 契约=132 实现=132
+[OK  ] §5.6 ACK_BEGIN 10B: 契约=10 实现=10
+[OK  ] §5.6 ACK 其余 9B: 契约=9 实现=9
+[OK  ] §5.2 END payload 32B: 契约=32 实现=32
+[OK  ] §5.2 GET_INFO payload 0B: 契约=0 实现=0
+[OK  ] §5.2 ABORT payload 0B: 契约=0 实现=0
+
+=== 契约漂移项 = 0 / 核对项 = 47 ===
+P3_1_CONTRACT_ALIGNMENT=PASS drift=0 checks=47

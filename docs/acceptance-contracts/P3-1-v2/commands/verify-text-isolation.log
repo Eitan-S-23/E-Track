@@ -1,0 +1,13 @@
+[行为] 重跑 tests/ota/test_ota_ble_session.py  exit=0
+       [PASS] idle-phase text bytes reach the text sink
+       [PASS] active-phase text bytes are dropped and never reach the sink
+       [PASS] text passthrough resumes after teardown
+
+[接线] CONFIG_BT_USE_TRANSPARENT = 0（生产构型须为 0）
+[接线] X-Trace 周期上行发送点 1 处
+       行 293: 受 !ota_ble_session_active 门控 = True
+[接线] 活跃期文本 sink 置 NULL: True
+       ota_ble_session_active(&s_ble_session) ? NULL : bt_text_sink
+
+=== 失败项 0 ===
+P3_1_TEXT_ISOLATION=PASS cases=3 transparent=0 trace_points=1 sink_guard=True
