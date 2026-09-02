@@ -1421,7 +1421,11 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 type_section = text.split("## 任务类型", 1)[1].split("## ", 1)[0]
                 declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
                 self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
-        self.assertEqual({"P3-1", "P3-2", "P4-2"}, dispatchable, "冻结后首批派单集合必须精确受控")
+        self.assertEqual(
+            {"P3-1", "P3-2", "P3-4", "P3-6", "P4-2"},
+            dispatchable,
+            "冻结后可派单集合必须精确受控：P3-1 收口合并解除 P3-4/P3-6 阻塞属治理变更，须与派工书同批登记 §9",
+        )
 
     def test_prompt_paths_and_task_ids_are_unique_in_both_directions(self):
         rows = self.readiness_rows()
