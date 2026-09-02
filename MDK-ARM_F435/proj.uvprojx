@@ -9406,6 +9406,36 @@
               <FilePath>..\Libraries\OTA\ota_p2_1_test.h</FilePath>
             </File>
             <File>
+              <FileName>ota_ble_ring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_ble_ring.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_ble_ring.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_ble_ring.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_ble_frame.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_ble_frame.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_ble_frame.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_ble_frame.h</FilePath>
+            </File>
+            <File>
+              <FileName>ota_ble_session.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_ble_session.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_ble_session.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_ble_session.h</FilePath>
+            </File>
+            <File>
               <FileName>ota_keys.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\OTA\ota_keys.c</FilePath>

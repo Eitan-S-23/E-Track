@@ -1,0 +1,14 @@
+[OK  ] test-ble-frame.log                 exit=0 复跑 3126B / 冻结 3126B frozen_sha=3AF60ECCF7B0 
+[OK  ] test-ble-session.log               exit=0 复跑 8205B / 冻结 8205B frozen_sha=6F1587D10283 
+[OK  ] test-regression.log                exit=0 复跑 15230B / 冻结 15230B frozen_sha=42F4C7BC8954 （掩码行 [195, 198, 200]）
+[OK  ] verify-contract-alignment.log      exit=0 复跑 2848B / 冻结 2848B frozen_sha=E90DFEF982E9 
+[OK  ] verify-production-binary.log       exit=0 复跑 1161B / 冻结 1161B frozen_sha=06EF3468DFCC 
+[OK  ] verify-portability.log             exit=0 复跑 424B / 冻结 424B frozen_sha=073F9B119259 
+[OK  ] verify-artifacts.log               exit=0 复跑 1796B / 冻结 1796B frozen_sha=B050DDCA6913 
+[OK  ] verify-text-isolation.log          exit=0 复跑 637B / 冻结 637B frozen_sha=972B829CA642 
+[OK  ] verify-mutation.log                exit=0 复跑 1285B / 冻结 1285B frozen_sha=2796E53E8157 
+[OK  ] verify-rx-ring-budget.log          exit=0 复跑 772B / 冻结 772B frozen_sha=5C2AD479CE1F 
+[OK  ] build-sync-check.log               exit=0 复跑 99B / 冻结 99B frozen_sha=2CA9254ACAAF 
+
+=== 命令 11 条；不忠实 0 条；随机量掩码行合计 3 行 ===
+P3_1_COMMAND_FIDELITY=PASS cases=11 mismatched=0 masked_lines=3

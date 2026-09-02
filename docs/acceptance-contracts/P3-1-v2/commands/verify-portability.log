@@ -1,0 +1,12 @@
+扫描目录 = ['Libraries', 'USER', 'MDK-ARM_F435/Platform']
+扫描文件数 = 893
+
+[阳性对照] .old 存档命中 1 处
+  Libraries/USB_MSC/msc_diskio.c.old:25  #include "msc_class\msc_bot_scsi.h"
+
+[正式] 参与编译的手写源命中 0 处
+  （无命中 = CI 可移植性红线通过）
+
+[P3-1 新源] 6 个文件命中 0 处
+
+P3_1_PORTABILITY=PASS scanned=893 control_hits=1 live_hits=0 new_src_hits=0

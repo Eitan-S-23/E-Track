@@ -1,0 +1,25 @@
+CC = D:\install\mingw64\bin\gcc.EXE
+变异副本目录 = .cache/p3-1-acceptance/mutation（.gitignore 内，不入证据包）
+工作区源文件全程只读
+
+[M1-crc-poly] CRC16 多项式偏离契约 0x1021
+  变异点 1 处，锚点命中 [2] -> DETECTED(测试变红)
+  CRC16-CCITT-FALSE check value for 123456789 is 0x29B1                FAIL
+
+[M2-seq-wrap] seq 16bit 回绕比较退化为无符号比较
+  变异点 1 处，锚点命中 [1] -> DETECTED(测试变红)
+  a replayed 0xFFFF across the wrap is idempotent                      FAIL
+
+[M3-session-idempotent] 仅禁用 session 层 off<durable_off 幂等短路
+  变异点 1 处，锚点命中 [1] -> EQUIVALENT(预期不变红)
+
+[M4-end-sha-gate] END 整包 SHA-256 复核门禁被短路
+  变异点 1 处，锚点命中 [1] -> DETECTED(测试变红)
+  a declared sha that mismatches the staged bytes fails with ERR_SHA   FAIL
+
+[M5-both-idempotent] 同时禁用 session 层短路与 staging 层幂等(R8-4 双层)
+  变异点 2 处，锚点命中 [1, 1] -> DETECTED(测试变红)
+  a fresh-seq DATA below durable_off is idempotent without rewrites    FAIL
+
+=== 有效变异检出 4/4；等价变异 1 项按预期不变红 ===
+P3_1_MUTATION=PASS effective_detected=4 effective_total=4 problems=0

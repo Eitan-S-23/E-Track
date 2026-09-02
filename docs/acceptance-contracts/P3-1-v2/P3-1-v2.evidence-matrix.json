@@ -1,0 +1,539 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-1-v2",
+  "contract_sha256": "E38FF2A6AD38806BDCD8AF589DEC3BFC3D0BEBD5C4837C572C482F97D2D99424",
+  "round_id": "P3-1-V2-FREEZE-20260902-01",
+  "executed_by": "独立验收会话（非实现方）",
+  "executed_at": "2026-09-02T00:00:00+08:00",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "FRAME-WIRE-CONTRACT",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "drift=0",
+        "checks=47"
+      ],
+      "evidence": [
+        "commands/verify-contract-alignment.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "FRAME-UNIT-SUITE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "checks=39",
+        "failures=0"
+      ],
+      "evidence": [
+        "commands/test-ble-frame.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "SESSION-UNIT-SUITE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "checks=105",
+        "failures=0"
+      ],
+      "evidence": [
+        "commands/test-ble-session.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "VECTOR-PACKAGE-FULL-TRANSFER",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "all 40 DATA segments are acknowledged=PASS",
+        "staged payload is byte-exact=PASS",
+        "the retried transfer completes and stages byte-exact data=PASS",
+        "the finally staged package is byte-exact=PASS",
+        "the resumed staging is byte-exact=PASS"
+      ],
+      "evidence": [
+        "commands/test-ble-session.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "SEQ-LOSS-REORDER-WRAP",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "a DATA seq gap is rejected with ERR_SEQ=PASS",
+        "the correct in-order seq is still accepted after a gap NAK=PASS",
+        "BEGIN near the seq wrap is accepted=PASS",
+        "seq 0xFFFF is accepted and wraps expected to 0=PASS",
+        "seq 0 after the wrap is accepted in order=PASS",
+        "M2-seq-wrap=DETECTED"
+      ],
+      "evidence": [
+        "commands/test-ble-session.log",
+        "commands/verify-mutation.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "IDEMPOTENT-REPLAY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "a duplicate BEGIN is idempotent and echoes live progress=PASS",
+        "a fresh-seq DATA below durable_off is idempotent without rewrites=PASS",
+        "a replayed DATA seq is acknowledged idempotently=PASS",
+        "a replayed old seq is acknowledged idempotently=PASS",
+        "a replayed 0xFFFF across the wrap is idempotent=PASS",
+        "M5-both-idempotent=DETECTED"
+      ],
+      "evidence": [
+        "commands/test-ble-session.log",
+        "commands/verify-mutation.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "TEXT-PROTOCOL-ISOLATION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "cases=3",
+        "transparent=0",
+        "trace_points=1",
+        "sink_guard=True"
+      ],
+      "evidence": [
+        "commands/verify-text-isolation.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "RX-RING-BUDGET",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "ring_bytes=4096",
+        "ring_ge_4096=true",
+        "ring_is_power_of_two=true"
+      ],
+      "evidence": [
+        "artifacts/map/X-Track-App-GCC-production.map",
+        "commands/verify-rx-ring-budget.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "OVERLAY-SUBALLOCATION-HEADROOM",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "receiver_bytes=4164",
+        "ring_plus_receiver=8260",
+        "overlay_bytes=40960",
+        "headroom_bytes=32700",
+        "fits_overlay=true"
+      ],
+      "evidence": [
+        "artifacts/map/X-Track-App-GCC-production.map",
+        "commands/verify-rx-ring-budget.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "PRODUCTION-BINARY-REDLINES",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "required_api=14",
+        "ble_syms=16",
+        "test_syms_leaked=0",
+        "frame_memcpy=0",
+        "alloc_hits=0",
+        "overlay_size=40960",
+        "session_ram=568"
+      ],
+      "evidence": [
+        "artifacts/elf/X-Track-App-GCC-production.elf",
+        "artifacts/map/X-Track-App-GCC-production.map",
+        "commands/verify-production-binary.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "PORTABILITY-BACKSLASH-INCLUDE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "control_hits=1",
+        "live_hits=0",
+        "new_src_hits=0"
+      ],
+      "evidence": [
+        "commands/verify-portability.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "NO-REGRESSION-EXISTING-OTA",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "P2_1_STAGING=PASS",
+        "P2_2_PACKAGE=PASS",
+        "P2_4_OTA_SD=PASS",
+        "P2_4_OTA_UPDATE=PASS",
+        "P2_4_OTA_SD_ALL=PASS",
+        "exit=0"
+      ],
+      "evidence": [
+        "commands/test-regression.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "BUILD-SYNC",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "ninja: no work to do.",
+        "exit=0"
+      ],
+      "evidence": [
+        "artifacts/elf/X-Track-App-GCC-production.elf",
+        "commands/build-sync-check.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "FULL-BUILD-CLEAN",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "build_exit=0",
+        "errors=0",
+        "p3_1_compile_warnings=0"
+      ],
+      "evidence": [
+        "commands/full-build-raw.log",
+        "commands/full-build-warning-count.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "ARTIFACT-CUSTODY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "match=9",
+        "mismatch=0",
+        "missing=0",
+        "total=9"
+      ],
+      "evidence": [
+        "artifacts/artifact-index.json",
+        "artifacts/elf/X-Track-App-GCC-production.elf",
+        "artifacts/map/X-Track-App-GCC-production.map",
+        "commands/verify-artifacts.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HARNESS-DISCRIMINATION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "effective_detected=4",
+        "effective_total=4",
+        "problems=0"
+      ],
+      "evidence": [
+        "commands/verify-mutation.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "COMMAND-FIDELITY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "cases=11",
+        "mismatched=0",
+        "masked_lines=3"
+      ],
+      "evidence": [
+        "commands/build-sync-check.log",
+        "commands/test-ble-frame.log",
+        "commands/test-ble-session.log",
+        "commands/test-regression.log",
+        "commands/verify-artifacts.log",
+        "commands/verify-command-fidelity.log",
+        "commands/verify-contract-alignment.log",
+        "commands/verify-mutation.log",
+        "commands/verify-portability.log",
+        "commands/verify-production-binary.log",
+        "commands/verify-rx-ring-budget.log",
+        "commands/verify-text-isolation.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-TEST-BLE-FRAME",
+      "command": "python -B tests/ota/test_ota_ble_frame.py",
+      "exit_code": 0,
+      "output_evidence": "commands/test-ble-frame.log"
+    },
+    {
+      "id": "CMD-TEST-BLE-SESSION",
+      "command": "python -B tests/ota/test_ota_ble_session.py",
+      "exit_code": 0,
+      "output_evidence": "commands/test-ble-session.log"
+    },
+    {
+      "id": "CMD-TEST-REGRESSION",
+      "command": "PYTHONIOENCODING=utf-8 bash -c 'for t in test_ota_staging test_ota_package test_ota_sd; do echo \"### $t.py\"; python -B tests/ota/$t.py 2>&1; echo \"exit=$?\"; echo; done'",
+      "exit_code": 0,
+      "output_evidence": "commands/test-regression.log"
+    },
+    {
+      "id": "CMD-VERIFY-CONTRACT-ALIGNMENT",
+      "command": "python -B tests/ota/p3_1_verify_contract_alignment.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-contract-alignment.log"
+    },
+    {
+      "id": "CMD-VERIFY-PRODUCTION-BINARY",
+      "command": "python -B tests/ota/p3_1_verify_production_binary.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-production-binary.log"
+    },
+    {
+      "id": "CMD-VERIFY-RX-RING-BUDGET",
+      "command": "python -B tests/ota/p3_1_verify_rx_ring_budget.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-rx-ring-budget.log"
+    },
+    {
+      "id": "CMD-VERIFY-TEXT-ISOLATION",
+      "command": "python -B tests/ota/p3_1_verify_text_isolation.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-text-isolation.log"
+    },
+    {
+      "id": "CMD-VERIFY-PORTABILITY",
+      "command": "python -B tests/ota/p3_1_verify_portability.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-portability.log"
+    },
+    {
+      "id": "CMD-VERIFY-MUTATION",
+      "command": "python -B tests/ota/p3_1_verify_mutation.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-mutation.log"
+    },
+    {
+      "id": "CMD-VERIFY-ARTIFACTS",
+      "command": "python -B tests/ota/p3_1_verify_artifacts.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-artifacts.log"
+    },
+    {
+      "id": "CMD-VERIFY-COMMAND-FIDELITY",
+      "command": "python -B tests/ota/p3_1_verify_command_fidelity.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-command-fidelity.log"
+    },
+    {
+      "id": "CMD-BUILD-SYNC-CHECK",
+      "command": "bash -c 'echo \"### cmake --build (CI 对齐目标，验证产物与当前源同步)\"; cmake --build MDK-ARM_F435/cmake-generated/build-gcc-release --target X_Track_App_GCC X_Track_Boot --parallel 2>&1 | tail -1; echo \"exit=${PIPESTATUS[0]}\"'",
+      "exit_code": 0,
+      "output_evidence": "commands/build-sync-check.log"
+    },
+    {
+      "id": "CMD-FULL-BUILD",
+      "command": "SOURCE_DATE_EPOCH=1786320000 cmake -S MDK-ARM_F435/cmake-generated -B .cache/p3-1-acceptance/build-verify -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OBJECT_PATH_MAX=1024 && cmake --build .cache/p3-1-acceptance/build-verify --target X_Track_App_GCC X_Track_Boot --parallel",
+      "exit_code": 0,
+      "output_evidence": "commands/full-build-raw.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "path": "artifacts/artifact-index.json",
+      "sha256": "8BBED53C16AFEF65124842DE3D4140446173699172AE59EA9681254953986D2F",
+      "size": 603
+    },
+    {
+      "id": "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+      "path": "artifacts/elf/X-Track-App-GCC-production.elf",
+      "sha256": "4A5F673AE775C7C72A481A44F32350A13635B168DE5A954C5985E4CA74773A87",
+      "size": 867952
+    },
+    {
+      "id": "ART-ARTIFACTS-MAP-X-TRACK-APP-GCC-PRODUCTION-MAP",
+      "path": "artifacts/map/X-Track-App-GCC-production.map",
+      "sha256": "057FCE1C10997E8695BEA43AFA66FBA8B738EC4ADBF8010794F78BC7A50241D9",
+      "size": 2433909
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-FRAME-LOG",
+      "path": "commands/test-ble-frame.log",
+      "sha256": "3AF60ECCF7B007A2FB916AF023E7FCF4AA759A7971091F0EB0A7409F64B5DD68",
+      "size": 3126
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-SESSION-LOG",
+      "path": "commands/test-ble-session.log",
+      "sha256": "6F1587D102830BABF5FFC989752C8E6E2B4389E13E94712E5BEEA892CDA9531B",
+      "size": 8205
+    },
+    {
+      "id": "ART-COMMANDS-TEST-REGRESSION-LOG",
+      "path": "commands/test-regression.log",
+      "sha256": "42F4C7BC89541237374A2F4B1DD9AEF876020C026A7E28B4188AD960C4B1BEE8",
+      "size": 15230
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CONTRACT-ALIGNMENT-LOG",
+      "path": "commands/verify-contract-alignment.log",
+      "sha256": "E90DFEF982E950D5C6F07485701A52412A234398E05A4BAF7B435D1780BDF7FC",
+      "size": 2848
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-PRODUCTION-BINARY-LOG",
+      "path": "commands/verify-production-binary.log",
+      "sha256": "06EF3468DFCCAC5C192E94C3C475AA0AC2BF99F5AA2D0470AC2E0A8E81C8060D",
+      "size": 1161
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-RX-RING-BUDGET-LOG",
+      "path": "commands/verify-rx-ring-budget.log",
+      "sha256": "5C2AD479CE1F74A09DFA503B184C5411AD77BD7D754DD6300E019A56AF68F511",
+      "size": 772
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-TEXT-ISOLATION-LOG",
+      "path": "commands/verify-text-isolation.log",
+      "sha256": "972B829CA642B8C2186AB73D897643729EA00600850880060D7C95DD688684B3",
+      "size": 637
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-PORTABILITY-LOG",
+      "path": "commands/verify-portability.log",
+      "sha256": "073F9B11925986E8F15B2FEBB40644EA625CEE84DB15A276DEFBFF807D35B15E",
+      "size": 424
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-MUTATION-LOG",
+      "path": "commands/verify-mutation.log",
+      "sha256": "2796E53E81573B7722743245AAABDF9FB1B2846D8BE885DA2E7AFBFCDA64D610",
+      "size": 1285
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-ARTIFACTS-LOG",
+      "path": "commands/verify-artifacts.log",
+      "sha256": "B050DDCA6913AD77085EF908C0008F7BCC0903C7256BEEE96058C467A69113B2",
+      "size": 1796
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-COMMAND-FIDELITY-LOG",
+      "path": "commands/verify-command-fidelity.log",
+      "sha256": "D2C74D2C6183ECB87475DB7108A987C076E34C59D5E23F03033480F05D36D647",
+      "size": 1297
+    },
+    {
+      "id": "ART-COMMANDS-BUILD-SYNC-CHECK-LOG",
+      "path": "commands/build-sync-check.log",
+      "sha256": "2CA9254ACAAFB6DFB120CC37D22839B7BF8249A3F3C209363B6AB7A2E1BA264A",
+      "size": 99
+    },
+    {
+      "id": "ART-COMMANDS-FULL-BUILD-RAW-LOG",
+      "path": "commands/full-build-raw.log",
+      "sha256": "BAF2D7E849D3773ED7BD79235896184F9F611333BE8C12E49CC7B6EF3DB9D6C3",
+      "size": 293478
+    },
+    {
+      "id": "ART-COMMANDS-FULL-BUILD-WARNING-COUNT-LOG",
+      "path": "commands/full-build-warning-count.log",
+      "sha256": "62584E5A97D1214D8C42C08DC3A37FFC2D2501E7E14F0510878270AB48A14121",
+      "size": 3449
+    }
+  ],
+  "evidence_hashes": {
+    "artifacts/artifact-index.json": "8BBED53C16AFEF65124842DE3D4140446173699172AE59EA9681254953986D2F",
+    "artifacts/elf/X-Track-App-GCC-production.elf": "4A5F673AE775C7C72A481A44F32350A13635B168DE5A954C5985E4CA74773A87",
+    "artifacts/map/X-Track-App-GCC-production.map": "057FCE1C10997E8695BEA43AFA66FBA8B738EC4ADBF8010794F78BC7A50241D9",
+    "commands/build-sync-check.log": "2CA9254ACAAFB6DFB120CC37D22839B7BF8249A3F3C209363B6AB7A2E1BA264A",
+    "commands/full-build-raw.log": "BAF2D7E849D3773ED7BD79235896184F9F611333BE8C12E49CC7B6EF3DB9D6C3",
+    "commands/full-build-warning-count.log": "62584E5A97D1214D8C42C08DC3A37FFC2D2501E7E14F0510878270AB48A14121",
+    "commands/test-ble-frame.log": "3AF60ECCF7B007A2FB916AF023E7FCF4AA759A7971091F0EB0A7409F64B5DD68",
+    "commands/test-ble-session.log": "6F1587D102830BABF5FFC989752C8E6E2B4389E13E94712E5BEEA892CDA9531B",
+    "commands/test-regression.log": "42F4C7BC89541237374A2F4B1DD9AEF876020C026A7E28B4188AD960C4B1BEE8",
+    "commands/verify-artifacts.log": "B050DDCA6913AD77085EF908C0008F7BCC0903C7256BEEE96058C467A69113B2",
+    "commands/verify-command-fidelity.log": "D2C74D2C6183ECB87475DB7108A987C076E34C59D5E23F03033480F05D36D647",
+    "commands/verify-contract-alignment.log": "E90DFEF982E950D5C6F07485701A52412A234398E05A4BAF7B435D1780BDF7FC",
+    "commands/verify-mutation.log": "2796E53E81573B7722743245AAABDF9FB1B2846D8BE885DA2E7AFBFCDA64D610",
+    "commands/verify-portability.log": "073F9B11925986E8F15B2FEBB40644EA625CEE84DB15A276DEFBFF807D35B15E",
+    "commands/verify-production-binary.log": "06EF3468DFCCAC5C192E94C3C475AA0AC2BF99F5AA2D0470AC2E0A8E81C8060D",
+    "commands/verify-rx-ring-budget.log": "5C2AD479CE1F74A09DFA503B184C5411AD77BD7D754DD6300E019A56AF68F511",
+    "commands/verify-text-isolation.log": "972B829CA642B8C2186AB73D897643729EA00600850880060D7C95DD688684B3",
+    "external/ota-binary-contracts.md": "67285804720D3704645A0CD9975ABC7D312F5250E8FF16B3C31FF3D35BC64F22",
+    "manifest-governance/source-manifest.json": "77849DD258E51AA1DAE78D40A56B43FACC0BEC4E8B3F0116EB571359E690DDC7",
+    "manifest-governance/source-manifest.txt": "079F13886686E267220F53817D5D4506FA26491030D92D80AE2DF610F2343808",
+    "manifest-governance/summary.json": "4FAC4EA4CF9AB9815BBA1B39ACF2C60349FA0A520E1DD7738878F16A8F39237D",
+    "manifest-production/source-manifest.json": "BAC867FC0EEE4955628D2142FAF835106343413F648B437E49AC0FEA042CA9BD",
+    "manifest-production/source-manifest.txt": "9A63A80F44935978B2294EF8BB58F6C9CF434E720025C3D8032403B0CCC3E598",
+    "manifest-production/summary.json": "52E504981EB6D931EC5097D43EF73219C14DF86D3CA96E49FA72D0BD7FB60165",
+    "manifest-validation/source-manifest.json": "52E9E60182BD966AD405D3B6DDB9BCB473B479E03B9832A1241D317496024E72",
+    "manifest-validation/source-manifest.txt": "579A4728663F3DEB0337EE6492734D1BC3F88BE456F6E493D2A98564F71FDFF6",
+    "manifest-validation/summary.json": "E533DA9097019E530F7FC581D26FF010B66748F80C90560538227AD79EC7DC35"
+  },
+  "notes": "本轮全部判据 EXECUTED，无 REUSED；C18（真机 BLE 闭环）按冻结口径不观测且不阻断。11 条命令已由 CMD-VERIFY-COMMAND-FIDELITY 证明可复现包内日志。"
+}

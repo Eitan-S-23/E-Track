@@ -1,0 +1,23 @@
+对 P3-1-build-evidence.md §4 申报的 9 个产物独立复算：
+
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.elf
+            size=867952  sha256=4a5f673ae775c7c72a481a44f32350a13635b168de5a954c5985e4ca74773a87
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.hex
+            size=1694382  sha256=cb6de4c884a96577cfff9dd3ee811652e01d46394e8e5ecd0a9e7191371fcef1
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.bin
+            size=602864  sha256=4c44622a7716197278a85a569ad2247cf1e0bc1816edd5c650b40b354f33e30d
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.map
+            size=2433909  sha256=057fce1c10997e8695bea43afa66fba8b738ec4adbf8010794f78bc7a50241d9
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/boot/X-Track-Boot.elf
+            size=36860  sha256=d21713ca2c1efeac949f8ec0ffddacac439fed6bf26f9c65641bee24464fdabc
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/boot/X-Track-Boot.hex
+            size=41485  sha256=ff3badef69be6d97fd66815b8df90efd962a708b559c8951d4b56380f8001f71
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/boot/X-Track-Boot.bin
+            size=14724  sha256=5842ff3e19ba9e1eaaea10f27e825c7b6efc278b200531014b0dba61264f6594
+[MATCH   ] MDK-ARM_F435/cmake-generated/build-gcc-release/boot/X-Track-Boot.map
+            size=100450  sha256=14e7a8addd37dfe71744c11ab0db60d5c535fbe725fe3e950f82354f34a4fc93
+[MATCH   ] Simulator/Output/Debug/x64/LVGL.Simulator.exe
+            size=5864960  sha256=9952365787183701b753c3317d0b33a2f6c059d39b567dd2c020dd2b8af7300f
+
+=== 一致 9 / 不一致 0 / 缺失 0（共 9）===
+P3_1_ARTIFACTS=PASS match=9 mismatch=0 missing=0 total=9

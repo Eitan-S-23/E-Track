@@ -1,0 +1,42 @@
+=== P3-1 BLE frame and ring tests ===
+  CRC16-CCITT-FALSE check value for 123456789 is 0x29B1                PASS
+  CRC16 of the empty input keeps the init value 0xFFFF                 PASS
+  CRC16 is sensitive to a single-bit payload change                    PASS
+  GET_INFO frame with empty payload round-trips                        PASS
+  ABORT frame with empty payload round-trips                           PASS
+  BEGIN frame with the fixed 101-byte payload round-trips              PASS
+  END frame with the fixed 32-byte payload round-trips                 PASS
+  DATA frame with the minimal 4-byte payload round-trips               PASS
+  DATA frame with the maximal 132-byte payload round-trips             PASS
+  session and seq echo covers the full 16-bit range                    PASS
+  encode rejects a NULL destination                                    PASS
+  encode rejects a payload beyond the 132-byte cap                     PASS
+  encode rejects a NULL payload with a non-zero length                 PASS
+  encode accepts a NULL payload only with length zero                  PASS
+  encode refuses to write a half frame into a short buffer             PASS
+  unknown command is rejected with zeroed echo fields                  PASS
+  DATA length above the 132-byte cap is rejected with header echo      PASS
+  DATA length below the 4-byte minimum is rejected                     PASS
+  a corrupted trailing CRC byte is rejected as ERR_CRC with echo       PASS
+  BEGIN with a wrong fixed length is rejected                          PASS
+  both frames parse in order after interleaved noise                   PASS
+  a truncated frame followed by zeros still resyncs to the next frame  PASS
+  a doubled leading A5 does not break frame start                      PASS
+  text flows around a complete binary frame                            PASS
+  a lone A5 is returned to the text stream                             PASS
+  A5 A5 5A leaks exactly one A5 to text and still parses the frame     PASS
+  a false A5 5A start recovers and text resumes                        PASS
+  a NULL sink drops text bytes without affecting frames                PASS
+  ring rejects a non-power-of-two size                                 PASS
+  push on a disarmed ring returns 0                                    PASS
+  pop on a disarmed ring returns 0                                     PASS
+  count on a disarmed ring is 0                                        PASS
+  push on a NULL ring returns 0                                        PASS
+  pop on a NULL ring returns 0                                         PASS
+  ring accepts size-1 bytes without loss                               PASS
+  a full ring drops the newest byte and counts it                      PASS
+  drained bytes keep FIFO order                                        PASS
+  an empty ring pops nothing and keeps the drop counter                PASS
+  wrap-around push/pop keeps FIFO order                                PASS
+=== summary: 39 checks, 0 failure(s) ===
+P3_1_BLE_FRAME=PASS checks=39 failures=0

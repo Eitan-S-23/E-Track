@@ -1,0 +1,867 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "P3-1-v2",
+  "task_id": "P3-1",
+  "version": 2,
+  "parent_contract_sha256": "2CBC789BE235FDAA3C82B2E02844FF7C66FC58A27849A49B5923E6ED68364480",
+  "title": "P3-1 BLE OTA 传输层（帧协议 + 会话状态机 + 接收环）离线独立验收",
+  "status": "FROZEN",
+  "approved_by": "独立验收会话（非实现方）",
+  "approved_at": "2026-09-02T00:00:00+08:00",
+  "implementation_ref": "docs/ota-exec-notes/P3-1-build-evidence.md",
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "scope": {
+    "covers": [
+      "C1：帧层线格式与冻结契约 §5 的机器比对",
+      "C2/C3：帧层与会话层单元测试套件",
+      "C4/C5/C6：整包传输、丢段/乱序/回绕、重复注错幂等",
+      "C7：升级活跃期文本协议隔离",
+      "C8/C9：接收环尺寸与 overlay 子分配预算（按生产 flag 实测）",
+      "C10：生产 ELF/map 红线",
+      "C11：反斜杠 include 可移植性",
+      "C12：既有 OTA 测试无回归",
+      "C13/C14/C15：产物与源同步、全量构建洁净度、产物保管",
+      "C16/C17：harness 鉴别力与命令忠实性"
+    ],
+    "not_observed": [],
+    "method": "本轮全部判据为 EXECUTED，不使用 REUSED 复用机制；每条判据的 observed 取自本轮实跑并入包的原始 stdout，且这些 stdout 已由 CMD-VERIFY-COMMAND-FIDELITY 证明可由冻结命令复现。v2 相对 v1 只删除判据 HW-BLE-CLOSED-LOOP（理由见 excluded_by_freeze 第 2 条），其余 17 条判据的命令、产物与观测值一字未改，仍为同一验收会话、同一 Head、同一工作区的实跑结果。",
+    "excluded_by_freeze": [
+      ".github/workflows/firmware-build.yml 未接入两套 BLE 测试：该项不在本卡冻结任务源（看板验收字段与派工书完成判据）内，按规约不得事后追加为验收门槛，仅在看板与验收报告登记为验收发现；已按用户裁定新立看板 P3-6 承接。",
+      "真机 BLE 链路整包升级与断连续传闭环：看板 P3-1 卡验收字段为「PC 侧模拟发送器(或 Flutter 调试页)对向量包全传；丢段/乱序/重复注错全部正确恢复」，未要求真机链路；真机传输由 P3-3 卡验收字段「对真机传输 toy 包与真包成功」承接。v1 曾把该项写成判据 HW-BLE-CLOSED-LOOP 并标 gate.basis=frozen_requirement，但其 expected 内的 disconnect_resume=10/10 在看板卡与派工书中均查无来源，属验收会话自拟门槛，且该判据绑定 host 测试日志充当真机证据；v2 删除该判据，改在此处登记，避免自拟门槛与「17/18」误导观感。"
+    ]
+  },
+  "authorized_deviations": [
+    {
+      "id": "DEV-1",
+      "description": "命令忠实性复核对 3 行随机量做正则掩码（mkdtemp 后缀、随机 AES nonce、nonce 派生的头部 CRC32），其余字节必须完全一致",
+      "scope": "仅 commands/test-regression.log 的第 195/198/200 行；掩码行号在复核输出中逐条打印，掩码越界会立即暴露",
+      "evidence": "commands/verify-command-fidelity.log"
+    },
+    {
+      "id": "DEV-2",
+      "description": "全量 GCC 构建因代价过高不纳入忠实性复跑，改为把原始 stdout 直接入包自证",
+      "scope": "仅 CMD-FULL-BUILD；其 warning/error 统计可由 commands/full-build-raw.log 独立重算",
+      "evidence": "commands/full-build-raw.log"
+    },
+    {
+      "id": "DEV-3",
+      "description": "C1 依赖的冻结契约 docs/ota-binary-contracts.md 不在任何 manifest profile 的枚举范围内，无法由 input_groups 绑定",
+      "scope": "以 external_inputs EXT-BINARY-CONTRACT 显式冻结其副本与 SHA-256；profile 范围变更须走 acceptance-governance CI，不在本卡处置",
+      "evidence": "external/ota-binary-contracts.md"
+    }
+  ],
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "9A63A80F44935978B2294EF8BB58F6C9CF434E720025C3D8032403B0CCC3E598",
+      "manifest_json_sha256": "BAC867FC0EEE4955628D2142FAF835106343413F648B437E49AC0FEA042CA9BD",
+      "file_count": 2918,
+      "description": "GCC 生产固件的全部实际编译输入（含新增 Libraries/OTA/ota_ble_*）"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "579A4728663F3DEB0337EE6492734D1BC3F88BE456F6E493D2A98564F71FDFF6",
+      "manifest_json_sha256": "52E9E60182BD966AD405D3B6DDB9BCB473B479E03B9832A1241D317496024E72",
+      "file_count": 142,
+      "description": "验收 harness 与测试工具（含本轮新增 tests/ota/p3_1_verify_*.py）"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "079F13886686E267220F53817D5D4506FA26491030D92D80AE2DF610F2343808",
+      "manifest_json_sha256": "77849DD258E51AA1DAE78D40A56B43FACC0BEC4E8B3F0116EB571359E690DDC7",
+      "file_count": 24,
+      "description": "看板、验收执行规约与跨系统契约等治理输入"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-BINARY-CONTRACT",
+      "category": "fixture",
+      "description": "冻结的 OTA 二进制/线格式契约（C1 的权威来源，只读）",
+      "fingerprint": "docs/ota-binary-contracts.md @ 77e14cfe5c8e3d8b9d72f4d73cc84009aa267557",
+      "evidence_path": "external/ota-binary-contracts.md",
+      "evidence_sha256": "67285804720D3704645A0CD9975ABC7D312F5250E8FF16B3C31FF3D35BC64F22"
+    }
+  ],
+  "performance_gates": [],
+  "commands": [
+    {
+      "id": "CMD-TEST-BLE-FRAME",
+      "description": "帧层单元测试（CRC16 契约向量、长度/命令合法性、切片边界）",
+      "command": "python -B tests/ota/test_ota_ble_frame.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TEST-BLE-SESSION",
+      "description": "会话层单元测试（BEGIN/DATA/END 状态机、seq 回绕、幂等、断连续传、文本隔离）",
+      "command": "python -B tests/ota/test_ota_ble_session.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TEST-REGRESSION",
+      "description": "既有 OTA 测试回归（P2-1 staging / P2-2 打包 / P2-4 SD 升级）",
+      "command": "PYTHONIOENCODING=utf-8 bash -c 'for t in test_ota_staging test_ota_package test_ota_sd; do echo \"### $t.py\"; python -B tests/ota/$t.py 2>&1; echo \"exit=$?\"; echo; done'",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-CONTRACT-ALIGNMENT",
+      "description": "冻结契约 §5 表格与 ota_ble_frame.h 常量的机器比对",
+      "command": "python -B tests/ota/p3_1_verify_contract_alignment.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-PRODUCTION-BINARY",
+      "description": "生产 ELF/map 红线：API 在位、零测试符号、帧层零 memcpy、零动态分配、overlay 与常驻 RAM 尺寸",
+      "command": "python -B tests/ota/p3_1_verify_production_binary.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-RX-RING-BUDGET",
+      "description": "按生产编译 flag 反读接收环/receiver/session 实际尺寸，并与 map 的 .ota_overlay 联立核算",
+      "command": "python -B tests/ota/p3_1_verify_rx_ring_budget.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-TEXT-ISOLATION",
+      "description": "升级活跃期文本协议隔离：运行行为 + 生产构型接线双重取证",
+      "command": "python -B tests/ota/p3_1_verify_text_isolation.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-PORTABILITY",
+      "description": "反斜杠 include 扫描（含阳性对照，防止扫描器静默失效）",
+      "command": "python -B tests/ota/p3_1_verify_portability.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-MUTATION",
+      "description": "对 5 个变异体复跑测试套件，证明 harness 具备鉴别力而非恒 PASS",
+      "command": "python -B tests/ota/p3_1_verify_mutation.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-ARTIFACTS",
+      "description": "对实现方申报的 9 个构建产物独立复算 SHA-256",
+      "command": "python -B tests/ota/p3_1_verify_artifacts.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-COMMAND-FIDELITY",
+      "description": "把本合同冻结的 11 条命令原样复跑，与包内日志逐字节比对",
+      "command": "python -B tests/ota/p3_1_verify_command_fidelity.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-BUILD-SYNC-CHECK",
+      "description": "对生产构建目录增量构建，确认已复算产物与当前工作区源同步",
+      "command": "bash -c 'echo \"### cmake --build (CI 对齐目标，验证产物与当前源同步)\"; cmake --build MDK-ARM_F435/cmake-generated/build-gcc-release --target X_Track_App_GCC X_Track_Boot --parallel 2>&1 | tail -1; echo \"exit=${PIPESTATUS[0]}\"'",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-FULL-BUILD",
+      "description": "在独立 .cache 构建目录做 CI 对齐的全量 GCC 构建，统计 error/warning",
+      "command": "SOURCE_DATE_EPOCH=1786320000 cmake -S MDK-ARM_F435/cmake-generated -B .cache/p3-1-acceptance/build-verify -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OBJECT_PATH_MAX=1024 && cmake --build .cache/p3-1-acceptance/build-verify --target X_Track_App_GCC X_Track_Boot --parallel",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "description": "证据包保管索引：ELF/map 的路径、大小、SHA-256",
+      "path": "artifacts/artifact-index.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+      "description": "生产 App ELF（符号红线取证对象）",
+      "path": "artifacts/elf/X-Track-App-GCC-production.elf"
+    },
+    {
+      "id": "ART-ARTIFACTS-MAP-X-TRACK-APP-GCC-PRODUCTION-MAP",
+      "description": "生产 App 链接 map（.ota_overlay/常驻 RAM/Discarded 区取证对象）",
+      "path": "artifacts/map/X-Track-App-GCC-production.map"
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-FRAME-LOG",
+      "description": "帧层单元测试 stdout",
+      "path": "commands/test-ble-frame.log"
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-SESSION-LOG",
+      "description": "会话层单元测试 stdout",
+      "path": "commands/test-ble-session.log"
+    },
+    {
+      "id": "ART-COMMANDS-TEST-REGRESSION-LOG",
+      "description": "P2-1/P2-2/P2-4 既有 OTA 测试回归 stdout",
+      "path": "commands/test-regression.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CONTRACT-ALIGNMENT-LOG",
+      "description": "契约 §5 ↔ ota_ble_frame.h 机器比对 stdout",
+      "path": "commands/verify-contract-alignment.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-PRODUCTION-BINARY-LOG",
+      "description": "生产 ELF/map 红线静态取证 stdout",
+      "path": "commands/verify-production-binary.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-RX-RING-BUDGET-LOG",
+      "description": "接收环与 overlay 子分配预算取证 stdout",
+      "path": "commands/verify-rx-ring-budget.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-TEXT-ISOLATION-LOG",
+      "description": "文本协议隔离行为+接线双证 stdout",
+      "path": "commands/verify-text-isolation.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-PORTABILITY-LOG",
+      "description": "反斜杠 include 可移植性扫描 stdout",
+      "path": "commands/verify-portability.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-MUTATION-LOG",
+      "description": "harness 鉴别力变异测试 stdout",
+      "path": "commands/verify-mutation.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-ARTIFACTS-LOG",
+      "description": "申报产物 SHA-256 独立复算 stdout",
+      "path": "commands/verify-artifacts.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-COMMAND-FIDELITY-LOG",
+      "description": "冻结命令与冻结日志忠实性复核 stdout",
+      "path": "commands/verify-command-fidelity.log"
+    },
+    {
+      "id": "ART-COMMANDS-BUILD-SYNC-CHECK-LOG",
+      "description": "生产构建目录同步性检查 stdout",
+      "path": "commands/build-sync-check.log"
+    },
+    {
+      "id": "ART-COMMANDS-FULL-BUILD-RAW-LOG",
+      "description": "独立全量 GCC 构建原始 stdout（1882 行）",
+      "path": "commands/full-build-raw.log"
+    },
+    {
+      "id": "ART-COMMANDS-FULL-BUILD-WARNING-COUNT-LOG",
+      "description": "独立全量构建的 warning/error 统计（自 raw 派生）",
+      "path": "commands/full-build-warning-count.log"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "FRAME-WIRE-CONTRACT",
+      "description": "C1：帧层线格式常量与冻结契约 docs/ota-binary-contracts.md §5.2/§5.2.1/§5.3/§5.7 逐项一致，零漂移",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "source_analysis"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-BINARY-CONTRACT"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CONTRACT-ALIGNMENT"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CONTRACT-ALIGNMENT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "drift=0",
+          "checks=47"
+        ]
+      }
+    },
+    {
+      "id": "FRAME-UNIT-SUITE",
+      "description": "C2：帧层单元测试全绿（CRC16-CCITT-FALSE 契约向量、长度/命令合法性、切片边界）",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "unit_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-TEST-BLE-FRAME"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-TEST-BLE-FRAME-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "result=PASS",
+          "checks=39",
+          "failures=0"
+        ]
+      }
+    },
+    {
+      "id": "SESSION-UNIT-SUITE",
+      "description": "C3：会话层单元测试全绿（BEGIN/DATA/END 状态机与全部异常分支）",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "unit_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-TEST-BLE-SESSION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-TEST-BLE-SESSION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "checks=105",
+          "failures=0"
+        ]
+      }
+    },
+    {
+      "id": "VECTOR-PACKAGE-FULL-TRANSFER",
+      "description": "C4：向量包整包传输落盘字节精确，含重试与断连续传两条恢复路径",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "unit_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-TEST-BLE-SESSION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-TEST-BLE-SESSION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "all 40 DATA segments are acknowledged=PASS",
+          "staged payload is byte-exact=PASS",
+          "the retried transfer completes and stages byte-exact data=PASS",
+          "the finally staged package is byte-exact=PASS",
+          "the resumed staging is byte-exact=PASS"
+        ]
+      }
+    },
+    {
+      "id": "SEQ-LOSS-REORDER-WRAP",
+      "description": "C5：丢段/乱序注错被 ERR_SEQ 拒绝并可正确恢复，16bit seq 跨 0xFFFF 回绕行为正确",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "unit_test",
+        "mutation_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-TEST-BLE-SESSION",
+        "CMD-VERIFY-MUTATION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-TEST-BLE-SESSION-LOG",
+        "ART-COMMANDS-VERIFY-MUTATION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "a DATA seq gap is rejected with ERR_SEQ=PASS",
+          "the correct in-order seq is still accepted after a gap NAK=PASS",
+          "BEGIN near the seq wrap is accepted=PASS",
+          "seq 0xFFFF is accepted and wraps expected to 0=PASS",
+          "seq 0 after the wrap is accepted in order=PASS",
+          "M2-seq-wrap=DETECTED"
+        ]
+      }
+    },
+    {
+      "id": "IDEMPOTENT-REPLAY",
+      "description": "C6：重复注错幂等（R8-4 双层：session 层短路 + staging 层幂等写），重放不产生重写也不改变状态",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "unit_test",
+        "mutation_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-TEST-BLE-SESSION",
+        "CMD-VERIFY-MUTATION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-TEST-BLE-SESSION-LOG",
+        "ART-COMMANDS-VERIFY-MUTATION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "a duplicate BEGIN is idempotent and echoes live progress=PASS",
+          "a fresh-seq DATA below durable_off is idempotent without rewrites=PASS",
+          "a replayed DATA seq is acknowledged idempotently=PASS",
+          "a replayed old seq is acknowledged idempotently=PASS",
+          "a replayed 0xFFFF across the wrap is idempotent=PASS",
+          "M5-both-idempotent=DETECTED"
+        ]
+      }
+    },
+    {
+      "id": "TEXT-PROTOCOL-ISOLATION",
+      "description": "C7：升级活跃期文本协议被隔离（透传关闭、X-Trace 上行受门控、文本 sink 置 NULL），拆除后自动恢复",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "unit_test",
+        "source_analysis"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-TEXT-ISOLATION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-TEXT-ISOLATION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "cases=3",
+          "transparent=0",
+          "trace_points=1",
+          "sink_guard=True"
+        ]
+      }
+    },
+    {
+      "id": "RX-RING-BUDGET",
+      "description": "C8：BLE OTA 接收环在生产构型下实际展开为 >=4KB，且为 2 的幂（掩码回绕前提）",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "binary_analysis"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-RX-RING-BUDGET"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-RX-RING-BUDGET-LOG",
+        "ART-ARTIFACTS-MAP-X-TRACK-APP-GCC-PRODUCTION-MAP"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "ring_bytes=4096",
+          "ring_ge_4096=true",
+          "ring_is_power_of_two=true"
+        ]
+      }
+    },
+    {
+      "id": "OVERLAY-SUBALLOCATION-HEADROOM",
+      "description": "C9：接收环 + staging receiver 必须放得进链接期固定的 .ota_overlay，否则 BEGIN 恒 ERR_BUSY",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "binary_analysis"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-RX-RING-BUDGET"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-RX-RING-BUDGET-LOG",
+        "ART-ARTIFACTS-MAP-X-TRACK-APP-GCC-PRODUCTION-MAP"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "receiver_bytes=4164",
+          "ring_plus_receiver=8260",
+          "overlay_bytes=40960",
+          "headroom_bytes=32700",
+          "fits_overlay=true"
+        ]
+      }
+    },
+    {
+      "id": "PRODUCTION-BINARY-REDLINES",
+      "description": "C10：生产 ELF 红线——生产调用 API 全在位、零测试符号泄漏、帧层零 memcpy、零动态分配、overlay 与常驻会话 RAM 尺寸符合预期",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "binary_analysis"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-PRODUCTION-BINARY"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-PRODUCTION-BINARY-LOG",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+        "ART-ARTIFACTS-MAP-X-TRACK-APP-GCC-PRODUCTION-MAP"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "required_api=14",
+          "ble_syms=16",
+          "test_syms_leaked=0",
+          "frame_memcpy=0",
+          "alloc_hits=0",
+          "overlay_size=40960",
+          "session_ram=568"
+        ]
+      }
+    },
+    {
+      "id": "PORTABILITY-BACKSLASH-INCLUDE",
+      "description": "C11：手写源零反斜杠 include（Linux GCC 会硬失败），扫描器带阳性对照证明未静默失效",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "source_analysis"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-PORTABILITY"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-PORTABILITY-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "control_hits=1",
+          "live_hits=0",
+          "new_src_hits=0"
+        ]
+      }
+    },
+    {
+      "id": "NO-REGRESSION-EXISTING-OTA",
+      "description": "C12：P2-1 staging、P2-2 打包、P2-4 SD 升级三套既有 OTA 测试无回归",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "unit_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-TEST-REGRESSION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-TEST-REGRESSION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "P2_1_STAGING=PASS",
+          "P2_2_PACKAGE=PASS",
+          "P2_4_OTA_SD=PASS",
+          "P2_4_OTA_UPDATE=PASS",
+          "P2_4_OTA_SD_ALL=PASS",
+          "exit=0"
+        ]
+      }
+    },
+    {
+      "id": "BUILD-SYNC",
+      "description": "C13：被取证的生产 ELF/map 与当前工作区源同步（增量构建无待办工作）",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "build_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-BUILD-SYNC-CHECK"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-BUILD-SYNC-CHECK-LOG",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "ninja: no work to do.",
+          "exit=0"
+        ]
+      }
+    },
+    {
+      "id": "FULL-BUILD-CLEAN",
+      "description": "C14：独立全量 GCC 构建 0 error，且 P3-1 三个新增源编译期 0 warning",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "build_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-FULL-BUILD"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-FULL-BUILD-RAW-LOG",
+        "ART-COMMANDS-FULL-BUILD-WARNING-COUNT-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "build_exit=0",
+          "errors=0",
+          "p3_1_compile_warnings=0"
+        ]
+      }
+    },
+    {
+      "id": "ARTIFACT-CUSTODY",
+      "description": "C15：实现方申报的 9 个构建产物 SHA-256 独立复算全部一致，无缺失",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "hash_recompute"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-ARTIFACTS"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-ARTIFACTS-LOG",
+        "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+        "ART-ARTIFACTS-ELF-X-TRACK-APP-GCC-PRODUCTION-ELF",
+        "ART-ARTIFACTS-MAP-X-TRACK-APP-GCC-PRODUCTION-MAP"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "match=9",
+          "mismatch=0",
+          "missing=0",
+          "total=9"
+        ]
+      }
+    },
+    {
+      "id": "HARNESS-DISCRIMINATION",
+      "description": "C16：变异测试证明 harness 有鉴别力——4 个有效变异全部检出，1 个等价变异按预期不变红",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "mutation_test"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-MUTATION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-MUTATION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "effective_detected=4",
+          "effective_total=4",
+          "problems=0"
+        ]
+      }
+    },
+    {
+      "id": "COMMAND-FIDELITY",
+      "description": "C17：本合同冻结的 11 条命令原样复跑后与包内日志逐字节一致（仅 3 行已定性随机量掩码）",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "byte_comparison"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-COMMAND-FIDELITY"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-COMMAND-FIDELITY-LOG",
+        "ART-COMMANDS-TEST-BLE-FRAME-LOG",
+        "ART-COMMANDS-TEST-BLE-SESSION-LOG",
+        "ART-COMMANDS-TEST-REGRESSION-LOG",
+        "ART-COMMANDS-VERIFY-CONTRACT-ALIGNMENT-LOG",
+        "ART-COMMANDS-VERIFY-PRODUCTION-BINARY-LOG",
+        "ART-COMMANDS-VERIFY-RX-RING-BUDGET-LOG",
+        "ART-COMMANDS-VERIFY-TEXT-ISOLATION-LOG",
+        "ART-COMMANDS-VERIFY-PORTABILITY-LOG",
+        "ART-COMMANDS-VERIFY-MUTATION-LOG",
+        "ART-COMMANDS-VERIFY-ARTIFACTS-LOG",
+        "ART-COMMANDS-BUILD-SYNC-CHECK-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "cases=11",
+          "mismatched=0",
+          "masked_lines=3"
+        ]
+      }
+    }
+  ]
+}

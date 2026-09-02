@@ -11,6 +11,14 @@ bool OTA_OverlayAcquireLiveMap();
 void OTA_OverlayReleaseLiveMap();
 bool OTA_OverlayIsOtaOwned();
 
+/* P3-1 BLE 会话 overlay 通道（与 LIVE_MAP/PACKAGE 互斥）：
+ * acquire 成功后可用 GetWorkspace 取基址做子分配（RX 环 + staging
+ * receiver），会话结束必须 Release。LiveMap 在屏期间 acquire 失败，
+ * BLE BEGIN 按 ERR_BUSY 拒绝（研究笔记 P3-1 §1.2）。 */
+bool OTA_OverlayAcquireBle();
+void OTA_OverlayReleaseBle();
+uint8_t* OTA_OverlayGetWorkspace(uint32_t *out_size);
+
 ota_package_result_t OTA_PackageApplyStaging(
     uint32_t package_len,
     uint32_t current_vcode,

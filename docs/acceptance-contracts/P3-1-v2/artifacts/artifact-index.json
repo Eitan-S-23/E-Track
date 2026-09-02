@@ -1,0 +1,17 @@
+{
+  "count": 2,
+  "artifacts": [
+    {
+      "source": "MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.elf",
+      "bundle_path": "artifacts/elf/X-Track-App-GCC-production.elf",
+      "bytes": 867952,
+      "sha256": "4A5F673AE775C7C72A481A44F32350A13635B168DE5A954C5985E4CA74773A87"
+    },
+    {
+      "source": "MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.map",
+      "bundle_path": "artifacts/map/X-Track-App-GCC-production.map",
+      "bytes": 2433909,
+      "sha256": "057FCE1C10997E8695BEA43AFA66FBA8B738EC4ADBF8010794F78BC7A50241D9"
+    }
+  ]
+}

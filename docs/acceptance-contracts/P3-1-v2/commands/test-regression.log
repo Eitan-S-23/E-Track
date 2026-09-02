@@ -1,0 +1,211 @@
+### test_ota_staging.py
+=== P2-1 OTA staging tests ===
+  contract ETRJ sample CRC32 is 0xC0178C87                           PASS
+  new session begin succeeds                                         PASS
+  new session reports resumed=0 durable_off=0 bitmap=0               PASS
+  new session erases only the 4 KiB header sector                    PASS
+  ETRJ magic, package SHA, and total_len are serialized by offset    PASS
+  ETRJ CRC covers exactly the immutable 40-byte prefix               PASS
+  fresh persistent block bitmap remains erased                       PASS
+  fresh staging commit marker remains erased                         PASS
+  matching reconnect resumes without erasing the header page         PASS
+  invalid ETRJ CRC rebuilds the session page from zero               PASS
+  a different package SHA is the only normal new-session rebuild     PASS
+  golden toy-full.etu fixture is available and 748 bytes             PASS
+  golden session begin succeeds                                      PASS
+  out-of-order segment is buffered only in the 4 KiB RAM window      PASS
+  same in-RAM segment retransmit is idempotent                       PASS
+  conflicting in-RAM retransmit is rejected                          PASS
+  tail segment completion commits the golden package                 PASS
+  golden payload is byte-exact in staging after erase/write/readback PASS
+  block bit clears only after the verified package tail is durable   PASS
+  one-block golden package used one data erase and one data program  PASS
+  reboot reconstructs completed durable_off from persistent bitmap   PASS
+  DATA before durable_off returns ACK state without rewriting flash  PASS
+  finalize writes validated ETSL fields then marker                  PASS
+  ETSL fields encode staging type, length, CRC, vcode, and SHA8      PASS
+  ETSL commit marker has the contracted little-endian value          PASS
+  commit marker is a later, separate program operation               PASS
+  repeated finalize is idempotent and never rewrites an old marker   PASS
+  fault-injection session begin succeeds                             PASS
+  reset injection stops after data readback and before bitmap clear  PASS
+  interrupted block data is present but persistent bit remains one   PASS
+  first interrupted attempt erased and programmed the data sector    PASS
+  post-reset begin resumes session with durable_off still zero       PASS
+  full block retransmit succeeds after reset                         PASS
+  retransmit erased the partially programmed sector a second time    PASS
+  durable bit clears only on the successful second attempt           PASS
+  readback-failure session begin succeeds                            PASS
+  data readback mismatch fails closed                                PASS
+  readback mismatch leaves durable bit set and drops RAM progress    PASS
+  whole block can be retransmitted after readback failure            PASS
+  finalize interruption occurs after fields readback                 PASS
+  interrupted finalize leaves marker erased and fields intact        PASS
+  retry after finalize interruption writes only the marker           PASS
+  zero-length and oversized sessions are rejected                    PASS
+  valid guard-test session begins                                    PASS
+  unaligned DATA offset is rejected                                  PASS
+  short non-tail DATA segment is rejected                            PASS
+  DATA outside the current 4 KiB window is rejected                  PASS
+  finalize before durable completion is rejected                     PASS
+=== summary: 48 checks, 0 failure(s) ===
+P2_1_STAGING=PASS checks=48 failures=0
+exit=0
+
+### test_ota_package.py
+  golden package length is frozen                                        PASS
+  golden image length is frozen                                          PASS
+  golden outer header remains full-package v1                            PASS
+  toy-full returns success                                               PASS
+  toy-full output matches toy-new byte-for-byte                          PASS
+  toy-full metadata lengths and vcode match                              PASS
+  toy-full fw_header double-zero SHA matches expected                    PASS
+  toy-full writes bounded 1KiB chunks                                    PASS
+  toy-full workspace stays within fixed 40KiB arena                      PASS
+  toy-full workspace is acquired, wiped, and released once               PASS
+  toy-full leaves BCB byte-identical                                     PASS
+  bad magic returns magic                                                PASS
+  bad magic performs no candidate prepare/write                          PASS
+  bad magic leaves BCB byte-identical                                    PASS
+  bad header_len returns header_length                                   PASS
+  bad header_len performs no candidate prepare/write                     PASS
+  bad header_len leaves BCB byte-identical                               PASS
+  bad header CRC returns header_crc                                      PASS
+  bad header CRC performs no candidate prepare/write                     PASS
+  bad header CRC leaves BCB byte-identical                               PASS
+  patch flags in P2-2 returns flags                                      PASS
+  patch flags in P2-2 performs no candidate prepare/write                PASS
+  patch flags in P2-2 leaves BCB byte-identical                          PASS
+  unsupported algorithm returns algorithm                                PASS
+  unsupported algorithm performs no candidate prepare/write              PASS
+  unsupported algorithm leaves BCB byte-identical                        PASS
+  unsupported key returns key                                            PASS
+  unsupported key performs no candidate prepare/write                    PASS
+  unsupported key leaves BCB byte-identical                              PASS
+  hardware mismatch returns hardware                                     PASS
+  hardware mismatch performs no candidate prepare/write                  PASS
+  hardware mismatch leaves BCB byte-identical                            PASS
+  layout mismatch returns layout                                         PASS
+  layout mismatch performs no candidate prepare/write                    PASS
+  layout mismatch leaves BCB byte-identical                              PASS
+  minimum boot mismatch returns min_boot                                 PASS
+  minimum boot mismatch performs no candidate prepare/write              PASS
+  minimum boot mismatch leaves BCB byte-identical                        PASS
+  equal-version package is rejected                                      PASS
+  equal-version rejection performs no candidate operation                PASS
+  equal-version package leaves BCB byte-identical                        PASS
+  full package nonzero base_vcode returns base                           PASS
+  full package nonzero base_vcode performs no candidate prepare/write    PASS
+  full package nonzero base_vcode leaves BCB byte-identical              PASS
+  full package nonzero base_sha8 returns base                            PASS
+  full package nonzero base_sha8 performs no candidate prepare/write     PASS
+  full package nonzero base_sha8 leaves BCB byte-identical               PASS
+  payload length mismatch returns package_length                         PASS
+  payload length mismatch performs no candidate prepare/write            PASS
+  payload length mismatch leaves BCB byte-identical                      PASS
+  stored payload CRC mismatch returns payload_crc                        PASS
+  stored payload CRC mismatch performs no candidate prepare/write        PASS
+  stored payload CRC mismatch leaves BCB byte-identical                  PASS
+  ciphertext corruption returns payload_crc                              PASS
+  ciphertext corruption performs no candidate prepare/write              PASS
+  ciphertext corruption leaves BCB byte-identical                        PASS
+  payload read error returns read                                        PASS
+  payload read error performs no candidate prepare/write                 PASS
+  payload read error leaves BCB byte-identical                           PASS
+  workspace acquire failure returns workspace                            PASS
+  workspace acquire failure performs no candidate prepare/write          PASS
+  workspace acquire failure leaves BCB byte-identical                    PASS
+  short workspace returns workspace                                      PASS
+  short workspace performs no candidate prepare/write                    PASS
+  short workspace leaves BCB byte-identical                              PASS
+  short workspace is wiped and released                                  PASS
+  decrypt properties fixture                                             PASS
+  reencrypt bad properties fixture                                       PASS
+  unsupported lc/lp/pb returns lzma_properties                           PASS
+  unsupported lc/lp/pb performs no candidate prepare/write               PASS
+  unsupported lc/lp/pb leaves BCB byte-identical                         PASS
+  decrypt dictionary fixture                                             PASS
+  reencrypt large dictionary fixture                                     PASS
+  dictionary over 16KiB returns lzma_properties                          PASS
+  dictionary over 16KiB performs no candidate prepare/write              PASS
+  dictionary over 16KiB leaves BCB byte-identical                        PASS
+  decrypt output length fixture                                          PASS
+  reencrypt oversized output fixture                                     PASS
+  output length over app limit returns image_length                      PASS
+  output length over app limit performs no candidate prepare/write       PASS
+  output length over app limit leaves BCB byte-identical                 PASS
+  decrypt damaged LZMA fixture                                           PASS
+  reencrypt damaged LZMA fixture                                         PASS
+  damaged LZMA stream returns lzma_data                                  PASS
+  damaged LZMA stream leaves BCB byte-identical                          PASS
+  candidate prepare failure returns candidate_prepare                    PASS
+  candidate prepare failure leaves BCB byte-identical                    PASS
+  prepare failure writes no payload                                      PASS
+  candidate program failure returns candidate_write                      PASS
+  candidate program failure leaves BCB byte-identical                    PASS
+  candidate readback failure returns candidate_verify                    PASS
+  candidate readback failure leaves BCB byte-identical                   PASS
+  candidate readback corruption returns candidate_verify                 PASS
+  candidate readback corruption leaves BCB byte-identical                PASS
+  outer/fw_header vcode mismatch returns image_metadata                  PASS
+  outer/fw_header vcode mismatch leaves BCB byte-identical               PASS
+  metadata mismatch still wrote only declared image                      PASS
+  null io is rejected                                                    PASS
+  null device is rejected                                                PASS
+  short package is rejected                                              PASS
+  result names expose stable diagnostics                                 PASS
+  development key is explicit in default test build                      PASS
+P2_2_PACKAGE=PASS checks=102
+exit=0
+
+### test_ota_sd.py
+=== P2-4 OTA SD import tests ===
+  case-insensitive .etu filtering accepts only the final extension     PASS
+  golden full and patch vectors are available                          PASS
+  full header reports target 2.8.0 and zero base identity              PASS
+  patch header requires the current 2.7.0 raw-image identity           PASS
+  bad magic is rejected before other header fields                     PASS
+  non-frozen flag combinations are rejected                            PASS
+  target version equal to the running version is rejected              PASS
+  outer-header CRC corruption is rejected                              PASS
+  declared payload length must match the exact file length             PASS
+  patch base SHA mismatch is rejected before staging                   PASS
+  two-pass transfer begins after a fresh header inspection             PASS
+  golden full package reaches marker-last staged state                 PASS
+  first pass SHA-256 matches the frozen whole-package identity         PASS
+  ETSL stores whole-package length, CRC, target, and SHA8              PASS
+  staging payload is byte-exact after the second SD pass               PASS
+  commit marker is a separate program after all ETSL fields            PASS
+  encrypted-payload CRC fails during pass one before flash staging     PASS
+  a file changed between hash and staging passes fails closed          PASS
+  confirmation replacement fixtures are available                      PASS
+  confirmation snapshot hashes the complete inspected package          PASS
+  a valid same-path replacement cannot reuse the prior confirmation    PASS
+  confirmation identity mismatch fails before any staging erase        PASS
+  length-change fixture is available                                   PASS
+  appending bytes between passes fails closed before marker commit     PASS
+  truncating bytes between passes fails closed before marker commit    PASS
+  large resume fixture is generated                                    PASS
+  first session durably commits exactly one 4 KiB block                PASS
+  matching package SHA resumes from the durable block and completes    PASS
+  resume never erases or rewrites the already durable first block      PASS
+=== summary: 29 checks, 0 failure(s) ===
+P2_4_OTA_SD=PASS checks=29 failures=0
+[warn] OTA_AES_KEY 未设，使用 vendor 示例 key（仅开发）
+pack-full OK: D:\github\my\E-Track\.cache\etrack-p2-4-ota-update-_58rfsci\replacement.etu
+  app_len=4096 payload_len=684 etu_total=748
+  target_vcode=20800 flags=0x000b key_id=1
+  aes_nonce=7e36e6765352e2d1736a466c0583440e
+  image_sha256=f68f357c708c2d65e6b1547648e955ea47949d81bd52f2cded684a8f640e21c3
+  header_crc32=382e34df
+CONFIRM_REPLACE result=file_changed opens=8 closes=8
+APPEND_1B result=file_changed error=stage:file_changed opens=15 closes=15
+TRUNCATE_1B result=file_changed error=stage:file_changed opens=15 closes=15
+SECOND_PASS_REPLACE result=file_changed error=stage:file_changed opens=19 closes=19
+UNAVAILABLE result=read error=stage:read opens=14 closes=14
+STAGE_BEFORE_APPLY result=staged_commit error=stage:candidate_not_applied
+BEGIN_NON_CONFIRMED begin=busy error=gate:bcb_not_confirmed opens=5
+P2_4_OTA_UPDATE=PASS scenarios=7
+P2_4_OTA_SD_ALL=PASS core_checks=29 adapter_scenarios=5
+exit=0
+

@@ -157,6 +157,9 @@ void BT_NormalMode();
 void BT_SetName();
 bool BT_IsConnected();
 void BT_printf(char *format, ...);
+/* P3-1 BLE OTA 泵：排空 BT 串口 RX（空闲期）与 BLE 会话 overlay 环
+ * （活跃期），驱动帧 parser/会话状态机与活性/超时逻辑。 */
+void BT_OtaPump();
 
 /* Buzzer */
 void Buzz_init();
