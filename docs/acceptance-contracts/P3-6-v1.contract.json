@@ -1,0 +1,718 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "P3-6-v1",
+  "task_id": "P3-6",
+  "version": 1,
+  "parent_contract_sha256": null,
+  "title": "P3-6「BLE 帧层测试 CI 接线」独立验收合同（v1 冻结）",
+  "status": "FROZEN",
+  "approved_by": "独立验收会话（非实现方）",
+  "approved_at": "2026-09-02T00:00:00+08:00",
+  "implementation_ref": "docs/ota-exec-notes/P3-6-ci-wiring-evidence.md",
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "scope": {
+    "covers": [
+      "C01/C02/C03/C04：workflow 接线的命令序列、纯增量性、fail-closed 语义与分类裁定",
+      "C05/C06/C07/C08：CI 三次运行构成的「绿→注错红→还原绿」反证链与同提交对照运行",
+      "C09/C10：产品源零改动红线与授权改动分层",
+      "C11：被接线两套测试的本地复算一致性",
+      "C12：本卡验收 harness 自身的鉴别力（对照 + 单点变异）",
+      "C13：验收治理门禁全量用例"
+    ],
+    "not_observed": [],
+    "method": "本轮全部判据为 EXECUTED，不使用 REUSED 复用机制。所有 observed 取自本轮实跑并入包的原始 stdout（commands/*.log），CI 侧结论取自冻结的 gh 采集件（ci/**）。本卡不重跑远端 CI，也不在本地复算 Ubuntu 固件构建；CI 是否绿由已发生运行的元数据与完整步骤日志回答。为避免看板自指，本合同与证据包落在 docs/acceptance-contracts/P3-6-v1/**，该路径不被任何 profile 枚举，写入证据包不会使三份 manifest 失效。",
+    "excluded_by_freeze": [
+      "远端 CI 的重跑与固件构建本地复算：本卡冻结任务源（看板 P3-6 卡验收字段与派工书完成判据）要求的是「两套 BLE host 测试接入 firmware-build.yml 且 fail-closed 可反证」，不要求验收方重跑流水线；按规约不得事后追加为验收门槛。",
+      "步骤名与内容漂移：被接线的步骤仍名为 `Test Boot fw_header validator vectors`，实际已执行 6 项基线 + 2 项 BLE 共 8 条测试命令。该命名问题在本卡接线前既已存在（基线 6 条中已含 test_ota_staging/package/patch），不属本卡引入，不写为验收门槛，仅在验收报告登记为不阻断发现并建议后续卡处置。",
+      "注错临时提交 7b58ed6 仍在特性分支历史：该提交刻意写入 CRC 缺陷以取得 fail-closed 反证，下一提交 e3f9b1a 已完整还原（reverted_source SHA-256 与 main 一致）。以何种方式合并（squash 或保留历史）属收口策略，不在本卡验收字段内，仅登记为不阻断建议交由主会话处置。"
+    ]
+  },
+  "authorized_deviations": [
+    {
+      "id": "DEV-1",
+      "description": "实现方证据笔记与治理变更笔记（docs/ota-exec-notes/**）不在任何 manifest profile 的枚举范围内，无法由 input_groups 绑定",
+      "scope": "以 external_inputs EXT-IMPL-EVIDENCE-NOTE / EXT-GOVERNANCE-NOTE 显式冻结其包内副本与 SHA-256；profile 范围变更须走 acceptance-governance CI，不在本卡处置（沿用 P3-1-v2 DEV-3 先例）",
+      "evidence": "external/P3-6-ci-wiring-evidence.md, external/P3-6-governance-change.md"
+    },
+    {
+      "id": "DEV-2",
+      "description": "`gh run view --log` 把 ANSI 颜色码渲染为字面 caret notation（0x5E 0x5B，即 `^[`），而非真实 ESC 字节",
+      "scope": "包内 ci/step-*.txt 按采集所得原样冻结（含 caret notation），p3_6_verify_ci_evidence.py 按同一表示解析标记行；不得为「好看」二次清洗这些字节，否则冻结日志与采集命令输出不再一致",
+      "evidence": "ci/step-33620407886.txt, ci/step-33621049995.txt, ci/step-33621403637.txt"
+    },
+    {
+      "id": "DEV-3",
+      "description": "本卡向 .github/workflows/firmware-build.yml 追加 2 行，该文件是 Production profile 的 top_file，因此已冻结的 P3-1-v2 Production 指纹相对当前 HEAD 必然漂移",
+      "scope": "如实声明、不修复：冻结资产禁止回改，P3-1-v2 的 PASS 绑定其自身 Head，本合同用本轮重新枚举的 Production manifest（file_count=2918）作为唯一生产侧指纹",
+      "evidence": "manifest-production/source-manifest.json"
+    },
+    {
+      "id": "DEV-4",
+      "description": "p3_6_verify_scope.py 的核对项总数依赖工作树跟踪状态（提交数、脏文件数、未跟踪聚合项），会随验收过程本身推进而变化，不是不变量",
+      "scope": "SCOPE-* 判据的 state_chain 只绑定 result=PASS / failures=0 / red_line_diffs=0 / committed_changed 等语义不变量，禁止把 checks 总数写进门槛；该脚本已把未跟踪文件收敛为单个聚合核对项，避免总数随执行时刻抖动",
+      "evidence": "commands/verify-scope.log"
+    },
+    {
+      "id": "DEV-5",
+      "description": "本机 `python3` 是 Windows 应用执行别名，直接调用返回 rc=49，无法作为本地复算入口",
+      "scope": "本地命令统一用 `python -X utf8 -B <script>`（附 PYTHONIOENCODING=utf-8 使中文 stdout 可读）；CI 侧 ubuntu-latest 用真 python3 执行同一脚本，两侧脚本字节相同，LOCAL-RECOMPUTE-PARITY 判据即用于核对两侧 checks/failures 一致",
+      "evidence": "commands/test-ble-frame.log, commands/test-ble-session.log"
+    }
+  ],
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "D7A9EDA136442B873EF1C0DE25CE8C21C85D07E83F25615B4163DDFDBBEA8FD9",
+      "manifest_json_sha256": "1068322ED08311AA474D7AF3BCB6B8F5A5555F589D9ED1E3A2BA965DCDCF55BC",
+      "file_count": 2918,
+      "description": "GCC 生产固件的全部实际编译输入；本卡的生产侧被观测对象是 top_file .github/workflows/firmware-build.yml，以及必须保持原样的 Libraries/OTA/**"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "F5EA1A38FC8FD91BE308401E925F3425C2A5D847C7ED38651A6F493604E82858",
+      "manifest_json_sha256": "D5F4320FFEB5F2E660E87983F7D83304759F6A2898B0D8013B627EC365B5BD8F",
+      "file_count": 146,
+      "description": "验收 harness 与测试工具（含本轮新增 tests/ota/p3_6_verify_*.py 与被接线的两套 BLE 测试）"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "123C9F7D7172B73CEF4B0EE4BC6AD7D4E2E77B86282648892BBE4214A8483D4E",
+      "manifest_json_sha256": "08A217984494EDB39279CBF9915DF6BEE7C99CDCCB64A862358B407025ED6793",
+      "file_count": 25,
+      "description": "看板 PLAN-OTA-EXEC.md、验收执行规约、派工书等治理输入"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-IMPL-EVIDENCE-NOTE",
+      "category": "fixture",
+      "description": "实现方 P3-6 接线证据笔记（记录接线判定、CI 运行号与 fail-closed 反证过程，只读）",
+      "fingerprint": "docs/ota-exec-notes/P3-6-ci-wiring-evidence.md @ a9cf6f7fb0802059b52b67225851260e81728f90",
+      "evidence_path": "external/P3-6-ci-wiring-evidence.md",
+      "evidence_sha256": "55F96CBFE77D268843C9429557AC61C40848027B7B41DD657D785120D9B2251C"
+    },
+    {
+      "id": "EXT-GOVERNANCE-NOTE",
+      "category": "fixture",
+      "description": "P3-6 治理变更笔记（记录立卡、依赖解除与授权改动分层，只读）",
+      "fingerprint": "docs/ota-exec-notes/P3-6-governance-change.md @ a9cf6f7fb0802059b52b67225851260e81728f90",
+      "evidence_path": "external/P3-6-governance-change.md",
+      "evidence_sha256": "48EA6E9FCE8A86CFA28032F52AFE8275A498EE9AE4B0902AC3D28342FC11D33E"
+    },
+    {
+      "id": "EXT-CI-RUN-SET",
+      "category": "environment",
+      "description": "GitHub Actions 远端运行集（ubuntu-latest + arm-none-eabi-gcc + 真 python3），本卡不重跑 CI，只对已发生运行的结论与日志取证",
+      "fingerprint": "github.com/<repo> Actions runs 33620407886@0a97b988e2aa(success) / 33621049995@7b58ed6fd8ee(failure) / 33621403637@e3f9b1ab7589(success) / 33621050015@7b58ed6fd8ee(success, Acceptance Governance)",
+      "evidence_path": "ci/runs-branch.json",
+      "evidence_sha256": "05A576224FAA3DEAA78DD98D50A9F56E93E7AFEFC071FF78340E1418109D264E"
+    }
+  ],
+  "performance_gates": [],
+  "commands": [
+    {
+      "id": "CMD-VERIFY-CI-WIRING",
+      "description": "workflow 接线校验：步骤命令序列、纯增量 diff、fail-closed 语义、触发段未被放宽",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_ci_wiring.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-CI-EVIDENCE",
+      "description": "CI 运行证据校验：基线绿/注错红/还原绿三次运行的结论、步骤级归因与日志标记",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_ci_evidence.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-SCOPE",
+      "description": "范围与红线校验：产品源零改动、改动集在授权分层内、四个 BLE 测试文件已入库",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_scope.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-HARNESS",
+      "description": "harness 鉴别力校验：3 组对照 + 15 处单点变异，逐例绑定预期失败原因",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_harness.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TEST-BLE-FRAME",
+      "description": "本地复算被接线的帧层测试（与 CI 同一脚本，核对 checks/failures 一致）",
+      "command": "python -X utf8 -B tests/ota/test_ota_ble_frame.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TEST-BLE-SESSION",
+      "description": "本地复算被接线的会话层测试（与 CI 同一脚本，核对 checks/failures 一致）",
+      "command": "python -X utf8 -B tests/ota/test_ota_ble_session.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-GOVERNANCE-GATE",
+      "description": "验收治理门禁：tests/ota/test_acceptance_bundle.py 全量用例（含看板结构与合同 schema 校验）",
+      "command": "python -X utf8 -B tests/ota/test_acceptance_bundle.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "description": "证据包保管索引：包内每份复制字节的出处、大小、SHA-256",
+      "path": "artifacts/artifact-index.json"
+    },
+    {
+      "id": "ART-ARTIFACTS-FIRMWARE-BUILD-YML",
+      "description": "被接线的 workflow 快照（HEAD 版本），使证据包脱离仓库仍可复核",
+      "path": "artifacts/firmware-build.yml"
+    },
+    {
+      "id": "ART-CI-RUN-33620407886-JSON",
+      "description": "基线绿运行元数据（head 0a97b98，接线提交本身）",
+      "path": "ci/run-33620407886.json"
+    },
+    {
+      "id": "ART-CI-RUN-33621049995-JSON",
+      "description": "注错红运行元数据（head 7b58ed6，CRC 缺陷提交）",
+      "path": "ci/run-33621049995.json"
+    },
+    {
+      "id": "ART-CI-RUN-33621403637-JSON",
+      "description": "还原绿运行元数据（head e3f9b1a，缺陷已还原）",
+      "path": "ci/run-33621403637.json"
+    },
+    {
+      "id": "ART-CI-RUN-33621050015-JSON",
+      "description": "同一注错提交上的 Acceptance Governance 运行元数据（鉴别力对照，仍绿）",
+      "path": "ci/run-33621050015.json"
+    },
+    {
+      "id": "ART-CI-RUNS-BRANCH-JSON",
+      "description": "分支全量运行清单（12 次运行，唯一 1 次红）",
+      "path": "ci/runs-branch.json"
+    },
+    {
+      "id": "ART-CI-PR-14-JSON",
+      "description": "PR #14 元数据与 5 条提交清单（含注错→还原相邻对）",
+      "path": "ci/pr-14.json"
+    },
+    {
+      "id": "ART-CI-STEP-33620407886-TXT",
+      "description": "基线绿完整步骤日志（含两套 BLE 测试 PASS 标记）",
+      "path": "ci/step-33620407886.txt"
+    },
+    {
+      "id": "ART-CI-STEP-33621049995-TXT",
+      "description": "注错红完整步骤日志（第 10 步失败、会话层未产出）",
+      "path": "ci/step-33621049995.txt"
+    },
+    {
+      "id": "ART-CI-STEP-33621403637-TXT",
+      "description": "还原绿完整步骤日志",
+      "path": "ci/step-33621403637.txt"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CI-WIRING-LOG",
+      "description": "CMD-VERIFY-CI-WIRING 原始 stdout",
+      "path": "commands/verify-ci-wiring.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+      "description": "CMD-VERIFY-CI-EVIDENCE 原始 stdout",
+      "path": "commands/verify-ci-evidence.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-SCOPE-LOG",
+      "description": "CMD-VERIFY-SCOPE 原始 stdout",
+      "path": "commands/verify-scope.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-HARNESS-LOG",
+      "description": "CMD-VERIFY-HARNESS 原始 stdout",
+      "path": "commands/verify-harness.log"
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-FRAME-LOG",
+      "description": "CMD-TEST-BLE-FRAME 原始 stdout",
+      "path": "commands/test-ble-frame.log"
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-SESSION-LOG",
+      "description": "CMD-TEST-BLE-SESSION 原始 stdout",
+      "path": "commands/test-ble-session.log"
+    },
+    {
+      "id": "ART-COMMANDS-GOVERNANCE-GATE-LOG",
+      "description": "CMD-GOVERNANCE-GATE 原始 stdout/stderr",
+      "path": "commands/governance-gate.log"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "WIRING-COMMAND-SEQUENCE",
+      "description": "C01：firmware-build.yml 测试步骤的命令序列与冻结期望逐行全等 —— 1 条 shell 守卫（set -euo pipefail）+ 6 条既有基线测试 + 2 条新接入 BLE 测试，顺序与拼写零偏差，且 workflow 全文不含 p3_1_verify 之类验收专用脚本",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-CI-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-WIRING-LOG",
+        "ART-ARTIFACTS-FIRMWARE-BUILD-YML"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "step_commands=9",
+          "wired=2"
+        ]
+      }
+    },
+    {
+      "id": "WIRING-PURE-ADDITION",
+      "description": "C02：相对 main（base ded14e8cb476）workflow 只有 2 行新增、0 行删除，且触发段（on/paths，57 行）与 base 字节一致 —— 接线未顺手改动触发条件或既有步骤",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "git_diff",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-CI-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-WIRING-LOG",
+        "ART-ARTIFACTS-FIRMWARE-BUILD-YML"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "added=2",
+          "removed=0",
+          "trigger_lines=57"
+        ]
+      }
+    },
+    {
+      "id": "WIRING-FAIL-CLOSED-SEMANTICS",
+      "description": "C03：workflow 全文不含任何会吞掉非零退出码的构造 —— `|| true`、`continue-on-error`、`if: always()`、`set +e`、`|| :`、`exit 0` 六类模式零命中，两条新命令因 set -euo pipefail 而必然把失败上抛为步骤失败",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-CI-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-WIRING-LOG",
+        "ART-ARTIFACTS-FIRMWARE-BUILD-YML"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "checks=32",
+          "failures=0"
+        ]
+      }
+    },
+    {
+      "id": "WIRING-CLASSIFICATION-RULING",
+      "description": "C04：接线判定被落盘为可复核记录 —— 实现方笔记说明「哪两条测试接入、为何不接验收专用脚本、fail-closed 反证如何取得」，与 workflow 实际内容一致",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "implementation_note"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-IMPL-EVIDENCE-NOTE"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-WIRING-LOG",
+        "ART-ARTIFACTS-FIRMWARE-BUILD-YML"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "failures=0"
+        ]
+      }
+    },
+    {
+      "id": "CI-BASELINE-GREEN-MARKERS",
+      "description": "C05：基线运行 33620407886（head 0a97b98）整体 success、第 10 步 success，且完整步骤日志中两套 BLE 测试的 PASS 标记各出现 1 次 —— 帧层 39 项 0 失败、会话层 105 项 0 失败，证明测试确实在 CI 里跑过而非被跳过",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "frozen_ci_log",
+        "ci_run_metadata"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-CI-RUN-SET"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-RUN-33620407886-JSON",
+        "ART-CI-STEP-33620407886-TXT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "run=33620407886",
+          "run_conclusion=success",
+          "step10=success",
+          "frame_marker=1",
+          "session_marker=1"
+        ]
+      }
+    },
+    {
+      "id": "CI-DEFECT-RUN-RED-ATTRIBUTED",
+      "description": "C06：注错运行 33621049995（head 7b58ed6，CRC 单点缺陷）整体 failure，且红色可归因到第 10 步 —— 帧层报 39 项 13 失败，会话层因 pipefail 短路完全未产出输出，证明失败沿步骤边界上抛而非被后续命令掩盖",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "frozen_ci_log",
+        "ci_run_metadata"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-CI-RUN-SET"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-RUN-33621049995-JSON",
+        "ART-CI-STEP-33621049995-TXT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "run=33621049995",
+          "run_conclusion=failure",
+          "red_at_step=10",
+          "session_output=0"
+        ]
+      }
+    },
+    {
+      "id": "CI-DISCRIMINATION-CONTRAST",
+      "description": "C07：同一注错提交 7b58ed6 上的 Acceptance Governance 运行 33621050015 仍为 success —— 排除「该提交让所有流水线一起红」的伪鉴别力，证明红色由被接线的测试步骤特异性产生",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "ci_run_metadata"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-CI-RUN-SET"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-RUN-33621050015-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "governance_run=33621050015",
+          "head=7b58ed6",
+          "conclusion=success"
+        ]
+      }
+    },
+    {
+      "id": "CI-RESTORE-GREEN",
+      "description": "C08：还原运行 33621403637（head e3f9b1a）恢复 success、第 10 步 success，分支 12 次运行中仅 1 次红且正是注错提交，PR #14 的 5 条提交里存在「注错→立即还原」相邻对 —— 反证链闭合且未把缺陷留在分支末端",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "frozen_ci_log",
+        "ci_run_metadata",
+        "provenance_index"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-CI-RUN-SET"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-RUN-33621403637-JSON",
+        "ART-CI-STEP-33621403637-TXT",
+        "ART-CI-RUNS-BRANCH-JSON",
+        "ART-CI-PR-14-JSON",
+        "ART-ARTIFACTS-ARTIFACT-INDEX-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "run=33621403637",
+          "run_conclusion=success",
+          "step10=success",
+          "reds=1",
+          "defect_then_restore=1"
+        ]
+      }
+    },
+    {
+      "id": "SCOPE-PRODUCT-SOURCE-INTACT",
+      "description": "C09：20 条产品红线 pathspec（Libraries/OTA/**、boot/**、USER/** 等）相对 main 零 diff，被临时注错的 Libraries/OTA/ota_ble_frame.c 已完整还原（11729 字节，SHA-256 与 main 一致），四个被接线/依赖的 BLE 测试文件均已在 main 入库",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "git_diff",
+        "hash_comparison"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-SCOPE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-SCOPE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "red_line_diffs=0",
+          "reverted_source_size=11729",
+          "required_on_main_tracked=4"
+        ]
+      }
+    },
+    {
+      "id": "SCOPE-AUTHORIZED-CHANGES-ONLY",
+      "description": "C10：相对 main 的 7 个已提交改动文件全部落在授权分层内（card / governance-batch1 / acceptance），零未授权改动；工作树脏文件与未跟踪文件同样只命中授权分层",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "git_status",
+        "governance_note"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [
+        "EXT-GOVERNANCE-NOTE"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-SCOPE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-SCOPE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "committed_changed=7",
+          "failures=0"
+        ]
+      }
+    },
+    {
+      "id": "LOCAL-RECOMPUTE-PARITY",
+      "description": "C11：本地以同一脚本复算被接线的两套测试，checks/failures 与 CI 绿运行日志中的标记完全一致 —— 帧层 39/0、会话层 105/0，证明 CI 里的数字不是环境特有产物，也证明接线没有偷换成弱化版测试",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "cross_environment_parity"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-TEST-BLE-FRAME",
+        "CMD-TEST-BLE-SESSION"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-TEST-BLE-FRAME-LOG",
+        "ART-COMMANDS-TEST-BLE-SESSION-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "frame_checks=39",
+          "frame_failures=0",
+          "session_checks=105",
+          "session_failures=0"
+        ]
+      }
+    },
+    {
+      "id": "HARNESS-FAIL-CLOSED",
+      "description": "C12：本卡四个验收脚本自身具备鉴别力 —— 3 组对照沙箱必须通过（排除「恒失败」伪鉴别力），15 处单点变异必须逐一被捉住，且每例都核对四件事：退出码非零、打出 =FAIL 标记、失败原因已登记、原因出现在 FAIL: 行上",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "mutation_test"
+      ],
+      "input_groups": [
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-HARNESS"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-HARNESS-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "checks=66",
+          "failures=0"
+        ]
+      }
+    },
+    {
+      "id": "GOVERNANCE-GATE-GREEN",
+      "description": "C13：验收治理门禁 tests/ota/test_acceptance_bundle.py 全量 65 个用例通过 —— 看板回写后仍满足看板结构、合同 schema 与证据包约束，证明本轮验收动作本身没有破坏治理不变量",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "manifest"
+      ],
+      "input_groups": [
+        "governance",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-GOVERNANCE-GATE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-GOVERNANCE-GATE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "tests=65",
+          "result=OK"
+        ]
+      }
+    }
+  ]
+}

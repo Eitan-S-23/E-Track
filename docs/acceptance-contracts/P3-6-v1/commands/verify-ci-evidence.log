@@ -1,0 +1,11 @@
+run=33620407886 head=0a97b98 run_conclusion=success step10=success new_failures=0
+run=33621049995 head=7b58ed6 run_conclusion=failure step10=failure new_failures=0
+run=33621403637 head=e3f9b1a run_conclusion=success step10=success new_failures=0
+run=33620407886 log_lines=682 frame_marker=1 session_marker=1
+run=33621049995 log_lines=583 red_at_step=10 session_output=0
+run=33621403637 log_lines=682 frame_marker=1 session_marker=1
+governance_run=33621050015 head=7b58ed6 conclusion=success
+branch_runs=12 firmware_runs=4 reds=1
+pr=14 commits=5 defect_then_restore=1
+=== 失败项 0 / 核对项 88 ===
+P3_6_CI_EVIDENCE=PASS checks=88 failures=0

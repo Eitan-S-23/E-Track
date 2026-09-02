@@ -1,0 +1,17 @@
+base=ded14e8cb476
+committed_changed=7
+  [committed] .gitattributes -> governance-batch1,acceptance
+  [committed] .github/workflows/firmware-build.yml -> card
+  [committed] PLAN-OTA-EXEC.md -> card
+  [committed] docs/ota-exec-notes/P3-6-ci-wiring-evidence.md -> card
+  [committed] docs/ota-exec-notes/P3-6-governance-change.md -> card
+  [committed] docs/ota-prompts/prompt-P3-6-implementation.md -> governance-batch1
+  [committed] tests/ota/test_acceptance_bundle.py -> governance-batch1
+worktree_dirty=2 untracked=39
+  [dirty] .gitattributes -> governance-batch1,acceptance
+  [dirty] PLAN-OTA-EXEC.md -> card
+red_line_pathspecs=20 diffs=0
+reverted_source=Libraries/OTA/ota_ble_frame.c size=11729 sha256=07b20f99c37910cc
+required_on_main=4 tracked=4
+=== 失败项 0 / 核对项 70 ===
+P3_6_SCOPE=PASS checks=70 failures=0

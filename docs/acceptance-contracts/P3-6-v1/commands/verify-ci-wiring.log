@@ -1,0 +1,6 @@
+workflow=.github/workflows/firmware-build.yml size=21482
+step_commands=9 wired=2
+base=ded14e8cb476 base_ref=main trigger_lines=57
+diff_numstat='2\t0\t.github/workflows/firmware-build.yml' added=2 removed=0
+=== 失败项 0 / 核对项 32 ===
+P3_6_CI_WIRING=PASS checks=32 failures=0

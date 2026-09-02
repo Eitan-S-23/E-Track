@@ -1,0 +1,682 @@
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	﻿2026-09-02T10:49:47.3147367Z ##[group]Run set -euo pipefail
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3147919Z ^[[36;1mset -euo pipefail^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3148269Z ^[[36;1mpython3 tests/boot/test_fw_header_vectors.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3148645Z ^[[36;1mpython3 tests/boot/test_boot_protocols.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3149055Z ^[[36;1mpython3 tests/boot/test_boot_state_machine.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3149411Z ^[[36;1mpython3 tests/ota/test_ota_staging.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3149782Z ^[[36;1mpython3 tests/ota/test_ota_package.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3150133Z ^[[36;1mpython3 tests/ota/test_ota_patch.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3150516Z ^[[36;1mpython3 tests/ota/test_ota_ble_frame.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3150861Z ^[[36;1mpython3 tests/ota/test_ota_ble_session.py^[[0m
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3172732Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3173139Z env:
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3173463Z   DEVICE_MODEL: e-track-at32f435
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3173770Z   TARGET_HARDWARE: AT32F435RGT7
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3174127Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3174581Z   BUILD_DIR: /tmp/etfw
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3174891Z   BUILD_TYPE: Release
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3175159Z   SOURCE_DATE_EPOCH: 1786320000
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.3175429Z ##[endgroup]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5948062Z /tmp/etrack-p1-1-cy6jxzew/valid.bin: ok
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5952935Z /tmp/etrack-p1-1-cy6jxzew/bad-magic.bin: magic
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5959131Z /tmp/etrack-p1-1-cy6jxzew/bad-header-crc.bin: header_crc
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5964098Z /tmp/etrack-p1-1-cy6jxzew/bad-header-version.bin: header_version
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5968839Z /tmp/etrack-p1-1-cy6jxzew/bad-image-length.bin: image_length
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5973297Z /tmp/etrack-p1-1-cy6jxzew/bad-sha.bin: image_sha
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5977814Z /tmp/etrack-p1-1-cy6jxzew/wrong-hardware.bin: hardware_rev
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5982240Z /tmp/etrack-p1-1-cy6jxzew/wrong-layout.bin: layout_id
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5987023Z /tmp/etrack-p1-1-cy6jxzew/boot-too-old.bin: min_boot_version
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5991265Z /tmp/etrack-p1-1-cy6jxzew/bad-msp.bin: vector_msp
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.5995899Z /tmp/etrack-p1-1-cy6jxzew/bad-reset.bin: vector_reset
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.6000046Z /tmp/etrack-p1-1-cy6jxzew/top-of-ram-msp.bin: ok
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.6004733Z /tmp/etrack-p1-1-cy6jxzew/bad-version-name.bin: version_name
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.6008769Z /tmp/etrack-p1-1-cy6jxzew/empty-version-name.bin: version_name
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.6013562Z /tmp/etrack-p1-1-cy6jxzew/dirty-version-padding.bin: version_name
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.6017609Z /tmp/etrack-p1-1-cy6jxzew/bad-padding.bin: padding
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.6021253Z P1_1_FW_HEADER_VECTORS=PASS cases=16
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7829529Z === Boot protocol tests ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7830095Z   Ymodem valid transfer                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7830629Z   Ymodem declared size                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7830979Z   Ymodem file name                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7831347Z   Ymodem payload exact                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7831736Z   Ymodem valid sink lifecycle                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7832226Z   Ymodem final ACK                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7832574Z   Ymodem CRC retry and duplicate                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7832913Z   Ymodem retry emits NAK                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7833475Z   Ymodem duplicate is idempotent                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7833941Z   Ymodem sink end failure                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7834269Z   Ymodem sink failure aborts                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7834603Z   Ymodem sink failure sends CAN                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7834984Z   ETSL candidate valid                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7835286Z   ETSL candidate fields                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.7835852Z   ETSL staging valid                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.8008928Z   ETSL missing commit rejected                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.8009799Z   ETSL oversize rejected                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.8010195Z   ETSL wrong type rejected                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.8010620Z   ETSL dirty padding rejected                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.8011004Z === summary: 19 checks, 0 failure(s) ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:47.8011406Z P1_1_BOOT_PROTOCOLS=PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3744628Z === P1-3 Boot state machine host simulation ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3745239Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3745421Z [blank BCB bootstrap]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3745941Z   blank BCB jumps only after internal fw_header validation   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3746470Z   blank BCB is initialized as CONFIRMED                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3746974Z   bootstrap cur_vcode comes from the validated fw_header     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3747480Z   bootstrap performs no App erase                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3747810Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3747955Z [stable states]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3748363Z   legacy IDLE normalizes to CONFIRMED and jumps              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3748910Z   CONFIRMED validates and jumps without another BCB write    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3749263Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3749464Z [STAGED -> APPLYING -> TEST_BOOT -> CONFIRMED]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3749995Z   first persistent transition is atomic APPLYING/phase1/resume0 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3750614Z   each verified apply block persists resume 1,2,3            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3751174Z   copy completion persists TEST_BOOT try=3 before consumption PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3751747Z   first test jump persists boot_try 3->2                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3752705Z   apply erased exactly three logical 4 KiB blocks            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3753257Z   internal image equals candidate after apply                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3753808Z   backup slot stays byte-for-byte locked during apply        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3754355Z   App confirmation uses the shared TEST_BOOT helper          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3754919Z   App confirmation persists CONFIRMED/candidate vcode        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3755441Z   backup remains locked through App confirmation             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3755770Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3755887Z [apply resume points]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3756295Z   APPLYING resume=0 starts at its next unverified block      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3756829Z   APPLYING resume=0 completes and consumes first try         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3757341Z   APPLYING resume=1 starts at its next unverified block      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3757847Z   APPLYING resume=1 completes and consumes first try         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3758364Z   APPLYING resume=2 starts at its next unverified block      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3758912Z   APPLYING resume=2 completes and consumes first try         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3759234Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3759409Z [persistent commit boundaries]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3759881Z   failed STAGED->APPLYING commit leaves STAGED active        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3760504Z   no App erase occurs before APPLYING is durable             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3761058Z   reset after failed first transition can complete           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3761645Z   readback-verified block without progress commit leaves resume=0 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3762371Z   reset repeats only the uncommitted block, not the whole App PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3763357Z   commit-return failure after a valid write still advances arbitration PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3764008Z   reset honors the durable progress even when prior call returned error PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3764397Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3764533Z [all apply persistence boundaries]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3765008Z   apply commit boundary 1 fails without advancing state      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3765558Z   apply commit boundary 1 resumes to first TEST_BOOT jump    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3766118Z   apply commit boundary 2 fails without advancing state      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3766648Z   apply commit boundary 2 resumes to first TEST_BOOT jump    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3767385Z   apply commit boundary 3 fails without advancing state      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3767937Z   apply commit boundary 3 resumes to first TEST_BOOT jump    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3768474Z   apply commit boundary 4 fails without advancing state      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3769026Z   apply commit boundary 4 resumes to first TEST_BOOT jump    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3769563Z   apply commit boundary 5 fails without advancing state      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3770106Z   apply commit boundary 5 resumes to first TEST_BOOT jump    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3770631Z   apply commit boundary 6 fails without advancing state      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3771138Z   apply commit boundary 6 resumes to first TEST_BOOT jump    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3771472Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3771622Z [all rollback persistence boundaries]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3779122Z   rollback commit boundary 1 fails without skipping progress PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3779829Z   rollback commit boundary 1 resumes to CONFIRMED backup     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3780383Z   rollback commit boundary 2 fails without skipping progress PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3780959Z   rollback commit boundary 2 resumes to CONFIRMED backup     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3781506Z   rollback commit boundary 3 fails without skipping progress PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3782277Z   rollback commit boundary 3 resumes to CONFIRMED backup     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3782855Z   rollback commit boundary 4 fails without skipping progress PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3783419Z   rollback commit boundary 4 resumes to CONFIRMED backup     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3783983Z   rollback commit boundary 5 fails without skipping progress PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3784539Z   rollback commit boundary 5 resumes to CONFIRMED backup     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3784865Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3785000Z [transition commit failures]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3785451Z   blank-BCB bootstrap commit failure keeps both BCB blocks invalid PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3786021Z   blank-BCB bootstrap retries to validated CONFIRMED App     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3786555Z   IDLE->CONFIRMED commit failure leaves IDLE active          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3787077Z   IDLE->CONFIRMED retry succeeds                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3787572Z   TEST_BOOT decrement commit failure prevents the jump       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3788110Z   TEST_BOOT decrement retry persists 2->1 before jump        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3992500Z   App confirmation commit failure leaves TEST_BOOT active    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3993065Z   App confirmation retry commits candidate vcode             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3993283Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3993383Z [write-after-readback failure]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3993666Z   full-block readback mismatch fails closed                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3994011Z   readback failure never persists resume for the bad block   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3994351Z   reset rewrites only the block whose readback failed        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3994574Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3994670Z [erase/program failure re-entry]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3994949Z   erase failure preserves the last verified resume block     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3995306Z   reset retries the failed erase block without touching block zero PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3995669Z   program failure preserves the last verified resume block   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3996249Z   reset erases and rewrites only the failed program block onward PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3996505Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3996587Z [bad candidate]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3996843Z   bad STAGED candidate enters atomic rollback before any apply PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3997204Z   bad candidate restores the validated backup and confirms it PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3997423Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3997511Z [rollback resume points]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3997781Z   ROLLBACK resume=0 starts at its next unverified block      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3998125Z   ROLLBACK resume=0 validates and confirms backup            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3998547Z   ROLLBACK resume=1 starts at its next unverified block      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3998918Z   ROLLBACK resume=1 validates and confirms backup            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3999252Z   ROLLBACK resume=2 starts at its next unverified block      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3999581Z   ROLLBACK resume=2 validates and confirms backup            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3999790Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.3999877Z [rollback source identity]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4000167Z   recovery rollback resumes when persisted prefix matches recovery PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4000563Z   backup-to-recovery switch atomically resets resume before copying PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4000962Z   source switch restarts at block zero and cannot create a mixed App PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4001338Z   a valid backup cannot steal an in-progress recovery prefix PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4001542Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4001640Z [failure-driven state transitions]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4002093Z   invalid CONFIRMED App enters atomic rollback and restores backup PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4002496Z   invalid TEST_BOOT App enters rollback without another test jump PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4002880Z   invalid APPLYING candidate resets progress in atomic rollback PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4003256Z   APPLYING with an invalid copy_phase fails closed through rollback PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4003487Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4003564Z [boot_try exhaustion]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4003813Z   first TEST_BOOT jump persists 3->2                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4004147Z   second TEST_BOOT jump persists 2->1                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4004468Z   third TEST_BOOT jump persists 1->0                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4004827Z   fourth reset starts rollback with atomic phase2/resume0    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4005174Z   exhausted test boots restore and confirm backup            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4005385Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4005473Z [backup/recovery fallback]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4005738Z   invalid backup falls back to the validated recovery slot   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4006073Z   invalid backup and recovery enter physical recovery mode   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4006280Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4006361Z [external Flash unavailable]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4006660Z   STAGED with unavailable QSPI keeps the valid current App bootable PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4007026Z   unavailable QSPI does not erase internal Flash             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4007232Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4007315Z [blank BCB with damaged App]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4007601Z   blank BCB plus invalid App can enter resumable recovery copy PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4007947Z   recovery slot completion establishes CONFIRMED             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4008142Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4008232Z [physical recovery acceptance]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4008507Z   validated physical recovery image creates a jump action    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4008860Z   physical recovery resets BCB to CONFIRMED recovery vcode   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4009066Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4009145Z [invalid state]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4009383Z   unknown BCB state fails closed to physical recovery        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4009589Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.4009690Z P1_3_STATE_MACHINE=PASS checks=96 failures=0
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6537489Z === P2-1 OTA staging tests ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6538207Z   contract ETRJ sample CRC32 is 0xC0178C87                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6539078Z   new session begin succeeds                                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6539601Z   new session reports resumed=0 durable_off=0 bitmap=0               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6540152Z   new session erases only the 4 KiB header sector                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6540704Z   ETRJ magic, package SHA, and total_len are serialized by offset    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6541193Z   ETRJ CRC covers exactly the immutable 40-byte prefix               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6542125Z   fresh persistent block bitmap remains erased                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6542774Z   fresh staging commit marker remains erased                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6543596Z   matching reconnect resumes without erasing the header page         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6544488Z   invalid ETRJ CRC rebuilds the session page from zero               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6545281Z   a different package SHA is the only normal new-session rebuild     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6546209Z   golden toy-full.etu fixture is available and 748 bytes             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6547053Z   golden session begin succeeds                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6547796Z   out-of-order segment is buffered only in the 4 KiB RAM window      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6548517Z   same in-RAM segment retransmit is idempotent                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6548949Z   conflicting in-RAM retransmit is rejected                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6549392Z   tail segment completion commits the golden package                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6549834Z   golden payload is byte-exact in staging after erase/write/readback PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6550270Z   block bit clears only after the verified package tail is durable   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6550715Z   one-block golden package used one data erase and one data program  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6551733Z   reboot reconstructs completed durable_off from persistent bitmap   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6552999Z   DATA before durable_off returns ACK state without rewriting flash  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6553821Z   finalize writes validated ETSL fields then marker                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6554785Z   ETSL fields encode staging type, length, CRC, vcode, and SHA8      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6555714Z   ETSL commit marker has the contracted little-endian value          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6556773Z   commit marker is a later, separate program operation               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6557768Z   repeated finalize is idempotent and never rewrites an old marker   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6558486Z   fault-injection session begin succeeds                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6559151Z   reset injection stops after data readback and before bitmap clear  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6560009Z   interrupted block data is present but persistent bit remains one   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6560880Z   first interrupted attempt erased and programmed the data sector    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6561353Z   post-reset begin resumes session with durable_off still zero       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6561794Z   full block retransmit succeeds after reset                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6562426Z   retransmit erased the partially programmed sector a second time    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6562879Z   durable bit clears only on the successful second attempt           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6563329Z   readback-failure session begin succeeds                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6563816Z   data readback mismatch fails closed                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6564281Z   readback mismatch leaves durable bit set and drops RAM progress    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6564729Z   whole block can be retransmitted after readback failure            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6565182Z   finalize interruption occurs after fields readback                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6565716Z   interrupted finalize leaves marker erased and fields intact        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6566172Z   retry after finalize interruption writes only the marker           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6566622Z   zero-length and oversized sessions are rejected                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6567070Z   valid guard-test session begins                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6567500Z   unaligned DATA offset is rejected                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6567927Z   short non-tail DATA segment is rejected                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6568359Z   DATA outside the current 4 KiB window is rejected                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6568865Z   finalize before durable completion is rejected                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6569238Z === summary: 48 checks, 0 failure(s) ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:48.6569532Z P2_1_STAGING=PASS checks=48 failures=0
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3933472Z   golden package length is frozen                                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3934646Z   golden image length is frozen                                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3935499Z   golden outer header remains full-package v1                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3936215Z   toy-full returns success                                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3937018Z   toy-full output matches toy-new byte-for-byte                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3937812Z   toy-full metadata lengths and vcode match                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3938514Z   toy-full fw_header double-zero SHA matches expected                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3939341Z   toy-full writes bounded 1KiB chunks                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3940069Z   toy-full workspace stays within fixed 40KiB arena                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3940768Z   toy-full workspace is acquired, wiped, and released once               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3941559Z   toy-full leaves BCB byte-identical                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3942443Z   bad magic returns magic                                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3943056Z   bad magic performs no candidate prepare/write                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3943648Z   bad magic leaves BCB byte-identical                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3944275Z   bad header_len returns header_length                                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3944862Z   bad header_len performs no candidate prepare/write                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3945454Z   bad header_len leaves BCB byte-identical                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3946057Z   bad header CRC returns header_crc                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3946674Z   bad header CRC performs no candidate prepare/write                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3947259Z   bad header CRC leaves BCB byte-identical                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3947853Z   patch flags in P2-2 returns flags                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3948454Z   patch flags in P2-2 performs no candidate prepare/write                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3949061Z   patch flags in P2-2 leaves BCB byte-identical                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3949669Z   unsupported algorithm returns algorithm                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3950300Z   unsupported algorithm performs no candidate prepare/write              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3950948Z   unsupported algorithm leaves BCB byte-identical                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3951542Z   unsupported key returns key                                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3952261Z   unsupported key performs no candidate prepare/write                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3952900Z   unsupported key leaves BCB byte-identical                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3953529Z   hardware mismatch returns hardware                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3954438Z   hardware mismatch performs no candidate prepare/write                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3955067Z   hardware mismatch leaves BCB byte-identical                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3955672Z   layout mismatch returns layout                                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3956277Z   layout mismatch performs no candidate prepare/write                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3956887Z   layout mismatch leaves BCB byte-identical                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3957486Z   minimum boot mismatch returns min_boot                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3958295Z   minimum boot mismatch performs no candidate prepare/write              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3958866Z   minimum boot mismatch leaves BCB byte-identical                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3959459Z   equal-version package is rejected                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3960065Z   equal-version rejection performs no candidate operation                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3960635Z   equal-version package leaves BCB byte-identical                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3961035Z   full package nonzero base_vcode returns base                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3961417Z   full package nonzero base_vcode performs no candidate prepare/write    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3961813Z   full package nonzero base_vcode leaves BCB byte-identical              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3962417Z   full package nonzero base_sha8 returns base                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3962853Z   full package nonzero base_sha8 performs no candidate prepare/write     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3963250Z   full package nonzero base_sha8 leaves BCB byte-identical               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3963634Z   payload length mismatch returns package_length                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3964018Z   payload length mismatch performs no candidate prepare/write            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3964413Z   payload length mismatch leaves BCB byte-identical                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3964799Z   stored payload CRC mismatch returns payload_crc                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3965230Z   stored payload CRC mismatch performs no candidate prepare/write        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3965642Z   stored payload CRC mismatch leaves BCB byte-identical                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3966045Z   ciphertext corruption returns payload_crc                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3966440Z   ciphertext corruption performs no candidate prepare/write              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3966836Z   ciphertext corruption leaves BCB byte-identical                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3967211Z   payload read error returns read                                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3967592Z   payload read error performs no candidate prepare/write                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3967978Z   payload read error leaves BCB byte-identical                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3968383Z   workspace acquire failure returns workspace                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3968771Z   workspace acquire failure performs no candidate prepare/write          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3969167Z   workspace acquire failure leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3969544Z   short workspace returns workspace                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3969919Z   short workspace performs no candidate prepare/write                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3970304Z   short workspace leaves BCB byte-identical                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3970693Z   short workspace is wiped and released                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3971059Z   decrypt properties fixture                                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3971428Z   reencrypt bad properties fixture                                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3972079Z   unsupported lc/lp/pb returns lzma_properties                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3972482Z   unsupported lc/lp/pb performs no candidate prepare/write               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3972868Z   unsupported lc/lp/pb leaves BCB byte-identical                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3973243Z   decrypt dictionary fixture                                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3973630Z   reencrypt large dictionary fixture                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3974021Z   dictionary over 16KiB returns lzma_properties                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3974484Z   dictionary over 16KiB performs no candidate prepare/write              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3974868Z   dictionary over 16KiB leaves BCB byte-identical                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3975250Z   decrypt output length fixture                                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3975625Z   reencrypt oversized output fixture                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3976001Z   output length over app limit returns image_length                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3976389Z   output length over app limit performs no candidate prepare/write       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3976785Z   output length over app limit leaves BCB byte-identical                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3977160Z   decrypt damaged LZMA fixture                                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3977522Z   reencrypt damaged LZMA fixture                                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3977897Z   damaged LZMA stream returns lzma_data                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3978276Z   damaged LZMA stream leaves BCB byte-identical                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3978661Z   candidate prepare failure returns candidate_prepare                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3979053Z   candidate prepare failure leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3979443Z   prepare failure writes no payload                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3979819Z   candidate program failure returns candidate_write                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3980206Z   candidate program failure leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3980592Z   candidate readback failure returns candidate_verify                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3980992Z   candidate readback failure leaves BCB byte-identical                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3981386Z   candidate readback corruption returns candidate_verify                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3981778Z   candidate readback corruption leaves BCB byte-identical                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3982355Z   outer/fw_header vcode mismatch returns image_metadata                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3982758Z   outer/fw_header vcode mismatch leaves BCB byte-identical               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3983145Z   metadata mismatch still wrote only declared image                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3983510Z   null io is rejected                                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3984203Z   null device is rejected                                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3984634Z   short package is rejected                                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3985007Z   result names expose stable diagnostics                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3985395Z   development key is explicit in default test build                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.3985723Z P2_2_PACKAGE=PASS checks=102
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:49.4531537Z P2_3_VECTOR_PREFLIGHT=PASS vendor_controls=11 oldpos_only=9 invalid_control=[0,0,0]
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3706485Z P2-3 patch package tests
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3706957Z  golden vectors
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3707353Z   toy-patch returns success                                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3707896Z   toy-patch output matches toy-new byte-for-byte                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3708567Z   toy-patch outer metadata matches expected.json                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3708985Z   toy-patch inner header fields match expected.json                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3709405Z   toy-patch fw_header double-zero SHA matches expected                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3709817Z   toy-patch writes bounded 1KiB chunks                                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3710221Z   toy-patch workspace stays within fixed 40KiB arena                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3710634Z   toy-patch workspace is acquired, wiped, and released once              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3711136Z   toy-patch reads base image in bounded blocks, never whole              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3711528Z   toy-patch leaves BCB byte-identical                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3711879Z   [info] workspace_peak=21848 bytes, ceiling=40960 bytes
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3712415Z   [info] work buffer=1024, stream buffer=1024, input window=4096
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3712741Z  vendor multi-control regression
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3713062Z   vendor multi-control patch returns success                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3713497Z   vendor multi-control output matches expected image byte-for-byte       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3713926Z   vendor multi-control metadata reports full decoded stream              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3714351Z   vendor multi-control path performs six bounded writes                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3714760Z   vendor multi-control path stays inside fixed workspace                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3715161Z   vendor multi-control patch leaves BCB byte-identical                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3715484Z  outer header rejections
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3715753Z   bad magic returns magic                                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3716125Z   bad magic performs no candidate prepare/write                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3716508Z   bad magic leaves BCB byte-identical                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3716894Z   bad header_len returns header_length                                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3717277Z   bad header_len performs no candidate prepare/write                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3717656Z   bad header_len leaves BCB byte-identical                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3718025Z   bad header CRC returns header_crc                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3718409Z   bad header CRC performs no candidate prepare/write                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3718787Z   bad header CRC leaves BCB byte-identical                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3719163Z   full-package flags in P2-3 returns flags                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3719547Z   full-package flags in P2-3 performs no candidate prepare/write         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3719938Z   full-package flags in P2-3 leaves BCB byte-identical                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3720330Z   unsupported algorithm returns algorithm                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3720816Z   unsupported algorithm performs no candidate prepare/write              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3721431Z   unsupported algorithm leaves BCB byte-identical                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3722112Z   unsupported key returns key                                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3722705Z   unsupported key performs no candidate prepare/write                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3723319Z   unsupported key leaves BCB byte-identical                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3723725Z   hardware mismatch returns hardware                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3724117Z   hardware mismatch performs no candidate prepare/write                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3724513Z   hardware mismatch leaves BCB byte-identical                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3724981Z   layout mismatch returns layout                                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3725375Z   layout mismatch performs no candidate prepare/write                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3725770Z   layout mismatch leaves BCB byte-identical                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3726154Z   min_boot_ver above device returns min_boot                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3726547Z   min_boot_ver above device performs no candidate prepare/write          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3726951Z   min_boot_ver above device leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3727407Z   equal target_vcode is rejected as downgrade                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3727797Z   equal target_vcode performs no candidate write                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3728219Z   equal target_vcode leaves BCB byte-identical                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3728621Z   newer device vcode is rejected as downgrade                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3729006Z   newer device vcode leaves BCB byte-identical                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3729390Z   base_vcode not equal to current returns base_vcode                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3729806Z   base_vcode not equal to current performs no candidate prepare/write    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3730198Z   base_vcode not equal to current leaves BCB byte-identical              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3730585Z   zero base_vcode (full-package form) returns base_vcode                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3730992Z   zero base_vcode (full-package form) performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3731408Z   zero base_vcode (full-package form) leaves BCB byte-identical          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3731797Z   base_sha8 mismatch returns base_sha8                                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3732298Z   base_sha8 mismatch performs no candidate prepare/write                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3732709Z   base_sha8 mismatch leaves BCB byte-identical                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3733096Z   all-zero base_sha8 (full-package form) returns base_sha8               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3733507Z   all-zero base_sha8 (full-package form) performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3733920Z   all-zero base_sha8 (full-package form) leaves BCB byte-identical       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3734317Z   device image identity mismatch is rejected                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3734715Z   device image identity mismatch leaves BCB byte-identical               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3735127Z   payload_len disagrees with package_len returns package_length          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3735551Z   payload_len disagrees with package_len performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3735982Z   payload_len disagrees with package_len leaves BCB byte-identical       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3736407Z   payload_len leaves no patch stream returns package_length              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3736805Z   payload_len leaves no patch stream performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3737200Z   payload_len leaves no patch stream leaves BCB byte-identical           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3737597Z   payload CRC mismatch returns payload_crc                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3737990Z   payload CRC mismatch performs no candidate prepare/write               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3738386Z   payload CRC mismatch leaves BCB byte-identical                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3738779Z   outer header read failure returns read                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3739169Z   outer header read failure performs no candidate prepare/write          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3739560Z   outer header read failure leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3739944Z   payload read failure during CRC returns read                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3740416Z   payload read failure during CRC performs no candidate prepare/write    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3740817Z   payload read failure during CRC leaves BCB byte-identical              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3741132Z  inner header rejections
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3741416Z   inner header CRC mismatch returns inner_crc                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3741813Z   inner header CRC mismatch performs no candidate prepare/write          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3742346Z   inner header CRC mismatch leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3742751Z   ph_psize disagrees with payload_len returns inner_psize                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3743235Z   ph_psize disagrees with payload_len performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3743663Z   ph_psize disagrees with payload_len leaves BCB byte-identical          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3744068Z   inner pad must be explicit zero returns inner_pad                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3744472Z   inner pad must be explicit zero performs no candidate prepare/write    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3744881Z   inner pad must be explicit zero leaves BCB byte-identical              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3745280Z   non-frozen LZMA lc returns lzma_properties                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3745831Z   non-frozen LZMA lc performs no candidate prepare/write                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3746425Z   non-frozen LZMA lc leaves BCB byte-identical                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3747024Z   dictionary below 4KiB returns lzma_properties                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3747629Z   dictionary below 4KiB performs no candidate prepare/write              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3748211Z   dictionary below 4KiB leaves BCB byte-identical                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3748609Z   dictionary above 16KiB returns lzma_properties                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3749016Z   dictionary above 16KiB performs no candidate prepare/write             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3749414Z   dictionary above 16KiB leaves BCB byte-identical                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3749966Z   ph_nsize cannot hold fw_header returns image_length                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3750458Z   ph_nsize cannot hold fw_header performs no candidate prepare/write     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3750983Z   ph_nsize cannot hold fw_header leaves BCB byte-identical               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3751519Z   ph_nsize exceeds candidate capacity returns image_length               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3752227Z   ph_nsize exceeds candidate capacity performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3752886Z   ph_nsize exceeds candidate capacity leaves BCB byte-identical          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3753554Z   ph_original_size below nsize+control returns decoded_length            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3754414Z   ph_original_size below nsize+control performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3755425Z   ph_original_size below nsize+control leaves BCB byte-identical         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3756450Z   ph_original_size control bytes unaligned returns decoded_length        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3757511Z   ph_original_size control bytes unaligned performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3758582Z   ph_original_size control bytes unaligned leaves BCB byte-identical     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3759214Z   ph_osize disagrees with base image length returns base_length          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3759813Z   ph_osize disagrees with base image length performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3760438Z   ph_osize disagrees with base image length leaves BCB byte-identical    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3761002Z   zero ph_osize returns base_length                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3761553Z   zero ph_osize performs no candidate prepare/write                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3762286Z   zero ph_osize leaves BCB byte-identical                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3763036Z   ph_ocrc disagrees with base image returns base_crc                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3763581Z   ph_ocrc disagrees with base image performs no candidate prepare/write  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3764105Z   ph_ocrc disagrees with base image leaves BCB byte-identical            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3764616Z   modified base image caught by ph_ocrc returns base_crc                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3765171Z   modified base image caught by ph_ocrc performs no candidate prepare/write PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3765705Z   modified base image caught by ph_ocrc leaves BCB byte-identical        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3766358Z   base read failure before prepare returns read                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3766864Z   base read failure before prepare performs no candidate prepare/write   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3767371Z   base read failure before prepare leaves BCB byte-identical             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3767898Z   ph_original_size longer than actual stream returns decoded_length      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3768456Z   decoded_length rejection precedes base validation                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3768987Z   decoded_length rejection precedes candidate prepare                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3769565Z   ph_original_size longer than actual stream leaves BCB byte-identical   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3770150Z   ph_ncrc disagrees with synthesized candidate returns result_crc        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3770715Z   ph_ncrc disagrees with synthesized candidate leaves BCB byte-identical PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3771167Z  stream and flash failures
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3771588Z   corrupt LZMA stream returns lzma_data                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3772314Z   corrupt LZMA stream performs no candidate prepare/write                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3772892Z   corrupt LZMA stream leaves BCB byte-identical                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3773466Z   candidate prepare failure is reported                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3774056Z   candidate prepare failure writes nothing                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3774643Z   candidate prepare failure leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3775245Z   candidate program failure is reported                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3776036Z   candidate program failure leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3776774Z   candidate readback mismatch is reported                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3777537Z   candidate readback mismatch leaves BCB byte-identical                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3778291Z   candidate read failure is reported                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3779065Z   candidate read failure leaves BCB byte-identical                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3779600Z  final image rejections
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3780016Z   candidate fw_header mismatch returns fw_header                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3780725Z   fw_header rejection occurs after candidate synthesis                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3781429Z   candidate fw_header mismatch leaves BCB byte-identical                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3782196Z   candidate version mismatch returns image_metadata                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3782820Z   image_metadata rejection occurs after candidate synthesis              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3783439Z   candidate version metadata mismatch leaves BCB byte-identical          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3783947Z  workspace and argument handling
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3784427Z   workspace acquire failure is reported                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3785024Z   workspace acquire failure writes no candidate                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3785631Z   workspace acquire failure leaves BCB byte-identical                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3786236Z   short workspace is refused                                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3787044Z   short workspace is wiped and released                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3787645Z   short workspace writes no candidate                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3788198Z   null io is rejected                                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3788742Z   null device is rejected                                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3789329Z   missing base_read callback is rejected                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3789927Z   undersized package_len is rejected                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3790872Z   oversized package_len is rejected                                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3791601Z   argument rejections never touch candidate or BCB                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3792440Z  control sanity
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3792873Z   all-zero non-progress control returns patch_control                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3793554Z   patch_control rejection prepares but never writes candidate            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3794173Z   all-zero non-progress control leaves BCB byte-identical                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3794826Z   truncated patch stream is rejected                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3795396Z   truncated patch stream writes no candidate                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3795993Z   truncated patch stream leaves BCB byte-identical                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3796593Z   short LZMA stream fails during validation pass                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3797199Z   short LZMA stream is rejected before base/candidate                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3797792Z   short LZMA stream leaves BCB byte-identical                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3798148Z 
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.3798264Z 167/167 checks passed
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7459087Z === P3-1 BLE frame and ring tests ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7459731Z   CRC16-CCITT-FALSE check value for 123456789 is 0x29B1                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7460318Z   CRC16 of the empty input keeps the init value 0xFFFF                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7461013Z   CRC16 is sensitive to a single-bit payload change                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7462107Z   GET_INFO frame with empty payload round-trips                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7463037Z   ABORT frame with empty payload round-trips                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7463955Z   BEGIN frame with the fixed 101-byte payload round-trips              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7464729Z   END frame with the fixed 32-byte payload round-trips                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7465284Z   DATA frame with the minimal 4-byte payload round-trips               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7465823Z   DATA frame with the maximal 132-byte payload round-trips             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7466356Z   session and seq echo covers the full 16-bit range                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7466876Z   encode rejects a NULL destination                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7467388Z   encode rejects a payload beyond the 132-byte cap                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7467897Z   encode rejects a NULL payload with a non-zero length                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7468415Z   encode accepts a NULL payload only with length zero                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7468946Z   encode refuses to write a half frame into a short buffer             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7469461Z   unknown command is rejected with zeroed echo fields                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7469993Z   DATA length above the 132-byte cap is rejected with header echo      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7470501Z   DATA length below the 4-byte minimum is rejected                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7471041Z   a corrupted trailing CRC byte is rejected as ERR_CRC with echo       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7472245Z   BEGIN with a wrong fixed length is rejected                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7472839Z   both frames parse in order after interleaved noise                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7473428Z   a truncated frame followed by zeros still resyncs to the next frame  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7474024Z   a doubled leading A5 does not break frame start                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7474631Z   text flows around a complete binary frame                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7475202Z   a lone A5 is returned to the text stream                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7475784Z   A5 A5 5A leaks exactly one A5 to text and still parses the frame     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7476652Z   a false A5 5A start recovers and text resumes                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7477406Z   a NULL sink drops text bytes without affecting frames                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7478081Z   ring rejects a non-power-of-two size                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7478777Z   push on a disarmed ring returns 0                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7479318Z   pop on a disarmed ring returns 0                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7479994Z   count on a disarmed ring is 0                                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7480560Z   push on a NULL ring returns 0                                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7481110Z   pop on a NULL ring returns 0                                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7481667Z   ring accepts size-1 bytes without loss                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7482414Z   a full ring drops the newest byte and counts it                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7483007Z   drained bytes keep FIFO order                                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7483582Z   an empty ring pops nothing and keeps the drop counter                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7484200Z   wrap-around push/pop keeps FIFO order                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7484723Z === summary: 39 checks, 0 failure(s) ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:50.7485122Z P3_1_BLE_FRAME=PASS checks=39 failures=0
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4559285Z === P3-1 BLE session tests ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4559871Z   GET_INFO is answered even when OTA is disabled and BCB is open       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4560355Z   INFO payload carries model, identity, proto and window fields        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4560792Z   GET_INFO does not open a session                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4561162Z   GET_INFO with a non-zero session byte is ignored                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4561565Z   GET_INFO without an info provider stays silent                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4562077Z   rejection fixture package is generated                               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4562458Z   BEGIN with proto_ver 2 is rejected with ERR_PROTO                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4562818Z   BEGIN with total_len 0 is rejected with ERR_LEN                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4563190Z   BEGIN above OTA_ETU_MAX_LENGTH is rejected with ERR_LEN              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4563564Z   BEGIN is rejected with ERR_OTA_DISABLED before header checks         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4563932Z   a corrupt ETU magic is rejected with ERR_HDR before BCB gating       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4564303Z   target equal to the running version is rejected with ERR_VERSION     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4564682Z   hardware revision mismatch is rejected with ERR_HW_REV               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4565045Z   layout mismatch is rejected with ERR_LAYOUT                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4565408Z   an old boot version is rejected with ERR_BOOT_VER                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4565771Z   BEGIN without a confirmed BCB is rejected with ERR_BUSY              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4566145Z   BEGIN without the overlay workspace is rejected with ERR_BUSY        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4566516Z   an undersized workspace is rejected and the overlay is released      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4567084Z   rejected BEGINs never leak an overlay acquisition                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4567453Z   full transfer fixture package is generated                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4567827Z   BEGIN is acknowledged OK with session id 1                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4568195Z   BEGIN ACK reports zero durable progress and empty bitmap             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4568558Z   session is active and ISR feeding is armed                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4568924Z   overlay workspace is acquired exactly once                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4569383Z   all 40 DATA segments are acknowledged                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4569786Z   the block-boundary ACK reports the committed 4 KiB                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4570171Z   the first segment of the next block sets bitmap bit 0                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4570565Z   the tail segment ACK reports the whole package as durable            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4570933Z   the ISR ring is fully drained                                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4571312Z   END is acknowledged OK and tears the session down                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4571704Z   overlay workspace is released after END                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4572223Z   staged payload is byte-exact                                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4572622Z   ETSL records whole-package length, CRC, target and SHA8              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4573014Z   the commit marker is written                                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4573396Z   idempotency fixture package is generated                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4573809Z   two in-flight segments are acknowledged                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4574215Z   a duplicate BEGIN is idempotent and echoes live progress             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4574614Z   the duplicate BEGIN neither re-acquires nor rewrites staging         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4575011Z   a full block is durably committed                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4575416Z   a fresh-seq DATA below durable_off is idempotent without rewrites    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4575799Z   a replayed DATA seq is acknowledged idempotently                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4576174Z   the active session keeps the overlay acquired                        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4576544Z   seq fixture package is generated                                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4576909Z   a DATA seq gap is rejected with ERR_SEQ                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4577282Z   the correct in-order seq is still accepted after a gap NAK           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4577656Z   a replayed old seq is acknowledged idempotently                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4578029Z   the next in-order seq advances                                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4578378Z   BEGIN near the seq wrap is accepted                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4578732Z   seq 0xFFFF is accepted and wraps expected to 0                       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4579092Z   a replayed 0xFFFF across the wrap is idempotent                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4579457Z   seq 0 after the wrap is accepted in order                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4579816Z   data validation fixture package is generated                         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4580190Z   a non-128-aligned offset is rejected with ERR_OFFSET                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4584552Z   a short mid-package segment is rejected with ERR_FRAME               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4585115Z   a DATA beyond total_len is rejected with ERR_OFFSET                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4585575Z   DATA with a wrong session byte is rejected with ERR_SESSION          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4586084Z   block 0 is committed so the tail block becomes current               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4586748Z   the short tail segment with off+len == total is accepted             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4587323Z   format errors leave the session active for the sender to retry       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4587850Z   ERR_DATA fixture package is generated                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4588529Z   the first off-0 segment is accepted                                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4589412Z   conflicting content at the same offset fails closed with ABORTED     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4590312Z   the ERR_DATA path tears the session down and frees the overlay       PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4591343Z   a fresh BEGIN after fail-closed restarts at zero progress            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4592154Z   the retried transfer completes and stages byte-exact data            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4592713Z   END path fixture package is generated                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4593217Z   END while idle is rejected with ERR_STATE                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4593717Z   END before the package is complete is rejected with ERR_STATE        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4594235Z   staging survives the incomplete END and a fresh BEGIN continues      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4594762Z   END with a mismatching sha restatement is rejected with ERR_SHA      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4595268Z   the ERR_SHA path erases the staging header page                      PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4595762Z   after the header erase the same package cannot resume                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4596277Z   the probe session is torn down by ABORT                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4596771Z   a BEGIN declaring a mismatching sha still opens a session            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4597286Z   a declared sha that mismatches the staged bytes fails with ERR_SHA   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4597804Z   END with a wrong session is rejected and keeps the session           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4598334Z   the correct END afterwards completes the transfer                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4598843Z   the finally staged package is byte-exact                             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4599401Z   abort/resume fixture package is generated                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4599956Z   one full block is durable before the abort                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4600510Z   ABORT with a wrong session is rejected with ERR_SESSION              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4601078Z   ABORT is acknowledged ABORTED and tears the session down             PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4601676Z   the resumed BEGIN reports the durable offset and a new session id    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4602467Z   the resumed transfer completes with END OK                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4603048Z   the resumed staging is byte-exact                                    PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4603689Z   resume never re-erases the already durable first block               PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4604516Z   ETSL keeps the whole-package CRC semantics after resume              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4605211Z   replacement fixture packages are generated                           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4605893Z   package A opens session 1                                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4606448Z   a different package BEGIN replaces the live session                  PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4607187Z   replacement releases and re-acquires the overlay exactly once        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4607798Z   package B completes on the replaced session                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4608375Z   liveness fixture package is generated                                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4608933Z   no liveness ACK before the 500 ms threshold                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4609535Z   a liveness ACK is resent at the 500 ms threshold                     PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4610105Z   a second pump in the same period does not double-send                PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4610920Z   a corrupt frame draws an ERR_CRC NAK but keeps the session           PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4611521Z   the session times out to an ABORTED ACK after 30 s of silence        PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4612290Z   the timeout path frees the overlay                                   PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4612888Z   text isolation fixture package is generated                          PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4613598Z   idle-phase text bytes reach the text sink                            PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4614299Z   BEGIN opens the session                                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4615031Z   active-phase text bytes are dropped and never reach the sink         PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4615689Z   the ISR ring is empty after the pump                                 PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4616263Z   text passthrough resumes after teardown                              PASS
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4616768Z === summary: 105 checks, 0 failure(s) ===
+Build firmware (arm-none-eabi-gcc)	Test Boot fw_header validator vectors	2026-09-02T10:49:51.4617149Z P3_1_BLE_SESSION=PASS checks=105 failures=0
