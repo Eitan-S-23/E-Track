@@ -12,7 +12,7 @@ uint16_t ota_ble_crc16(const uint8_t *data, size_t len)
      * 逐位实现：921600 波特全速收包约占 0.3% CPU，换取零查表 flash。 */
     for (i = 0u; i < len; ++i)
     {
-        crc ^= (uint16_t)((uint16_t)data[i] << 8);
+        crc |= (uint16_t)((uint16_t)data[i] << 8);
         for (bit = 0u; bit < 8u; ++bit)
         {
             if ((crc & 0x8000u) != 0u)
