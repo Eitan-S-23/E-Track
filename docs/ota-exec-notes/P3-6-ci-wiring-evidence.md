@@ -159,22 +159,98 @@ length + SHA-256 两条，**无任何未申报的夹带**。判定同批次 1：
 
 P3-6 将携带自己新 `task_id` 的独立验收合同，不回改 P3-1 的合同或证据矩阵。
 
-## 6. 待补：CI 运行证据与 fail-closed 反证
+## 6. CI 运行证据与 fail-closed 反证（已取得）
 
-任务卡验收判据要求 CI 侧证据，必须推送后取得。工作流触发条件为
-`push: branches [main, master]` 或 `pull_request: branches [main, master]`，
-特性分支单纯推送**不会**触发，故须开 PR。计划：
+工作流触发条件为 `push: branches [main, master]` 或
+`pull_request: branches [main, master]`，特性分支单纯推送**不会**触发，故反证必须
+在 PR 上取得。实际执行：分支 `ota/p3-6-ci-wiring` → PR #14 → 绿、红、绿三次运行。
 
-1. 开 PR → 取得基线绿 run，日志内应出现
-   `P3_1_BLE_FRAME=PASS checks=39` 与 `P3_1_BLE_SESSION=PASS checks=105`。
-2. 向 PR 分支追加一个注入缺陷的临时提交（缺陷落在 `Libraries/OTA/ota_ble_frame.c`，
-   该路径命中 `Libraries/**` 触发器）→ 确认 workflow 变红，且失败步骤为
-   `Test Boot fw_header validator vectors`、失败命令为新接的那一行。
-3. 还原缺陷 → 确认恢复为绿。
-4. 三次 run 的 id / commit SHA / 关键日志片段回填本节。
+`paths` 触发器已含 `.github/workflows/firmware-build.yml` 本身（实测读取该文件的
+`on` 段确认），故仅改 workflow 的提交也能触发；注错提交改的是
+`Libraries/OTA/ota_ble_frame.c`，命中 `Libraries/**`。
 
-在本节回填完成前，本卡**不得**置「完成」；且按 OTA 执行规约 §3，验收命令须由
-非实现会话执行，实现会话不自验收。
+### 6.1 三次运行总表
+
+| # | commit | run id | `MCU Firmware Build` | `acceptance-governance` | 用途 |
+| - | ------ | ------ | -------------------- | ----------------------- | ---- |
+| 1 | `0a97b98` | 33620407886 | **success** 1m7s | success 45s | 基线绿：证明两套测试确实在 CI 上执行 |
+| 2 | `7b58ed6` | 33621049995 | **failure** 1m6s | success 44s | 反证：注入缺陷后 workflow 变红 |
+| 3 | `e3f9b1a` | 33621403637 | **success** 55s | success 47s | 还原后恢复绿 |
+
+### 6.2 基线绿（run 33620407886）
+
+`Test Boot fw_header validator vectors` 步骤的 `Run` 分组回显确认 8 条命令均已下发
+（`set -euo pipefail` + 8 条 `python3 tests/...`，末两条为本卡新增）。该步骤 stdout
+内的全部测试标记，逐行原样摘录：
+
+```text
+P1_1_FW_HEADER_VECTORS=PASS cases=16
+=== summary: 19 checks, 0 failure(s) ===
+P1_1_BOOT_PROTOCOLS=PASS
+P1_3_STATE_MACHINE=PASS checks=96 failures=0
+=== summary: 48 checks, 0 failure(s) ===
+P2_1_STAGING=PASS checks=48 failures=0
+P2_2_PACKAGE=PASS checks=102
+P2_3_VECTOR_PREFLIGHT=PASS vendor_controls=11 oldpos_only=9 invalid_control=[0,0,0]
+=== P3-1 BLE frame and ring tests ===
+=== summary: 39 checks, 0 failure(s) ===
+P3_1_BLE_FRAME=PASS checks=39 failures=0
+=== P3-1 BLE session tests ===
+=== summary: 105 checks, 0 failure(s) ===
+P3_1_BLE_SESSION=PASS checks=105 failures=0
+```
+
+卡内验收判据要求的两个标记 `P3_1_BLE_FRAME=PASS checks=39` 与
+`P3_1_BLE_SESSION=PASS checks=105` 均以**实际执行输出**形式出现，非文本 diff 推定。
+该步骤 env 回显 `BUILD_DIR: /tmp/etfw`，与 §1 裁定中「CI 构建目录不是
+`build-gcc-release`」的判断一致。
+
+### 6.3 fail-closed 反证（run 33621049995）
+
+注入的缺陷与 §4 本地预检使用的完全相同：`Libraries/OTA/ota_ble_frame.c` 的
+CRC-16 循环 `crc ^= ` 改为 `crc |= `。选它的理由是可编译、不破坏固件构建，故失败
+必然落在测试步骤而非编译步骤，才能证明是**测试**而不是编译器发现了问题。
+文件长度不变（11729 B），SHA-256 由
+`07b20f99c37910ccec0cdc8223cea58e7823451a9198f952c30ec98e1003e02a` 变为
+`58abd1ec5e1cd49bee03103709232a7a923d43f97d916eb260dea450596cbb67`。
+
+实际观测（`gh run view --json jobs` 与 `--log-failed`）：
+
+- 失败步骤 = **第 10 步 `Test Boot fw_header validator vectors`**，即被本卡接线改动的
+  那一步，不是别的步骤。
+- 失败发生在新接入的第一行：`=== P3-1 BLE frame and ring tests ===` 下
+  `=== summary: 39 checks, 13 failure(s) ===`，随后
+  `subprocess.CalledProcessError: Command '[...test_ota_ble_frame]' returned
+  non-zero exit status 1`，步骤以 `##[error]Process completed with exit code 1` 结束。
+- 该步骤带 `set -euo pipefail`，首个失败即终止，故第二行
+  `test_ota_ble_session.py` 未执行 —— 与注错提交里预先写下的预期一致。
+- 同一步骤内位于新增两行**之前**的 6 条命令全部照常 PASS
+  （`P1_1_*`/`P1_3_*`/`P2_1_*` 标记齐全），排除「环境整体坏掉」这种伪反证。
+- 13 条变红用例名：CRC16-CCITT-FALSE 校验值、ABORT/BEGIN/END/DATA 四类帧
+  round-trip、session/seq 全 16 位回显、交织噪声后顺序解析、截断帧后重同步、
+  重复 A5 起始、文本环绕二进制帧、`A5 A5 5A` 透传、NULL sink 丢文本 —— 与 §4
+  本地预检的 13 条同源同数。
+- **同一提交上 `acceptance-governance` 仍为绿（success 44s）**。这条对比很关键：
+  它说明这个产品缺陷不会被既有的治理门禁抓到，鉴别力只可能来自本卡新增的两行；
+  接线之前该缺陷可以一路绿灯合入。
+
+### 6.4 还原后恢复绿（run 33621403637）
+
+用 `git revert` 还原，还原后复算 `Libraries/OTA/ota_ble_frame.c` 的 SHA-256 为
+`07b20f99c37910ccec0cdc8223cea58e7823451a9198f952c30ec98e1003e02a`，与注错前逐字节
+一致；`git diff --cached main -- Libraries/ USER/ boot/ MDK-ARM_F435/` 为空，即相对
+`main` 产品源码零差异。run 33621403637 重新出现
+`P3_1_BLE_FRAME=PASS checks=39 failures=0` 与
+`P3_1_BLE_SESSION=PASS checks=105 failures=0`。
+
+PR 历史里保留了注错提交 `7b58ed6` 与还原提交 `e3f9b1a`（用户已知悉并同意留痕），
+不做历史改写：反证的可复核性依赖这两个提交及其对应 run 仍可访问。
+
+### 6.5 结卡边界
+
+CI 侧证据已完整，但按 `AGENTS.md` OTA 执行规约 §3，验收命令须由**非实现会话**执行，
+实现会话不自验收；且 P3-6 须自带新 `task_id` 的独立验收合同（不得复用或回改
+P3-1-v2）。因此本卡状态保持「进行中」，由后续独立验收会话裁定。
 
 ## 7. 边界声明
 
