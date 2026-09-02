@@ -253,6 +253,10 @@
 /tests/ota/p3_1_verify_production_binary.py -text
 /tests/ota/p3_1_verify_rx_ring_budget.py -text
 /tests/ota/p3_1_verify_text_isolation.py -text
+/tests/ota/p3_6_verify_ci_evidence.py -text
+/tests/ota/p3_6_verify_ci_wiring.py -text
+/tests/ota/p3_6_verify_harness.py -text
+/tests/ota/p3_6_verify_scope.py -text
 /tests/ota/test_ac5_ram_budget.py -text
 /tests/ota/test_f435_build_bootstrap.py -text
 /tests/ota/test_ota_ble_frame.py -text

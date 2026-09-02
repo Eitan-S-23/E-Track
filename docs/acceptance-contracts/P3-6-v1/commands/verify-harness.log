@@ -1,0 +1,24 @@
+对照组（未注错）：
+  wiring/control: exit=0
+  evidence/control: exit=0
+  scope/control: exit=0
+接线脚本注错组：
+  wiring/drop-session-line: exit=1 marker_fail=True reason_hit=True
+  wiring/swallow-exit-code: exit=1 marker_fail=True reason_hit=True
+  wiring/drop-pipefail: exit=1 marker_fail=True reason_hit=True
+  wiring/continue-on-error: exit=1 marker_fail=True reason_hit=True
+  wiring/trigger-tampered: exit=1 marker_fail=True reason_hit=True
+证据脚本注错组：
+  evidence/red-log-replaced-by-green: exit=1 marker_fail=True reason_hit=True
+  evidence/defect-run-marked-success: exit=1 marker_fail=True reason_hit=True
+  evidence/baseline-session-marker-removed: exit=1 marker_fail=True reason_hit=True
+  evidence/governance-contrast-red: exit=1 marker_fail=True reason_hit=True
+  evidence/red-run-session-executed: exit=1 marker_fail=True reason_hit=True
+范围脚本注错组：
+  scope/unauthorized-committed: exit=1 marker_fail=True reason_hit=True
+  scope/red-line-committed: exit=1 marker_fail=True reason_hit=True
+  scope/product-source-tampered: exit=1 marker_fail=True reason_hit=True
+  scope/preexisting-file-tracked: exit=1 marker_fail=True reason_hit=True
+  scope/ble-test-missing-on-main: exit=1 marker_fail=True reason_hit=True
+=== 失败项 0 / 核对项 66 ===
+P3_6_HARNESS_DISCRIMINATION=PASS checks=66 failures=0

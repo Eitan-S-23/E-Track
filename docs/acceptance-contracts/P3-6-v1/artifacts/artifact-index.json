@@ -1,0 +1,77 @@
+{
+  "count": 12,
+  "artifacts": [
+    {
+      "source": "docs/ota-exec-notes/P3-6-ci-wiring-evidence.md",
+      "bundle_path": "external/P3-6-ci-wiring-evidence.md",
+      "bytes": 14733,
+      "sha256": "55F96CBFE77D268843C9429557AC61C40848027B7B41DD657D785120D9B2251C"
+    },
+    {
+      "source": "docs/ota-exec-notes/P3-6-governance-change.md",
+      "bundle_path": "external/P3-6-governance-change.md",
+      "bytes": 11272,
+      "sha256": "48EA6E9FCE8A86CFA28032F52AFE8275A498EE9AE4B0902AC3D28342FC11D33E"
+    },
+    {
+      "source": ".github/workflows/firmware-build.yml",
+      "bundle_path": "artifacts/firmware-build.yml",
+      "bytes": 21482,
+      "sha256": "166053E2804DF785D1733E9855F00BE074BC5C5188BAFE662C8CFDD39EB1F0A3"
+    },
+    {
+      "source": "gh run view 33620407886 --json ... (基线绿运行元数据)",
+      "bundle_path": "ci/run-33620407886.json",
+      "bytes": 3603,
+      "sha256": "DCFE860AB65B5CDCCF3C926DA538F4043DEB75899B42DB9ADFF9F88C6AAABF99"
+    },
+    {
+      "source": "gh run view 33621049995 --json ... (注错红运行元数据)",
+      "bundle_path": "ci/run-33621049995.json",
+      "bytes": 3603,
+      "sha256": "414CBFA5176FA47A205E4636F241292E6F1DB93521166E8E157A0BA28A3E5B45"
+    },
+    {
+      "source": "gh run view 33621403637 --json ... (还原绿运行元数据)",
+      "bundle_path": "ci/run-33621403637.json",
+      "bytes": 3603,
+      "sha256": "982B9F7714144C8404176D518C68679F19923002439C75FBFFF372DAC9F54FD7"
+    },
+    {
+      "source": "gh run view 33621050015 --json ... (注错提交上的治理运行元数据)",
+      "bundle_path": "ci/run-33621050015.json",
+      "bytes": 1818,
+      "sha256": "F2A4C2301CED15FDBC936963FB39D4DE9D35B2F7CDBE1AD3D8559D3FB33C1291"
+    },
+    {
+      "source": "gh run list --branch ota/p3-6-ci-wiring --json ... (分支全量运行清单)",
+      "bundle_path": "ci/runs-branch.json",
+      "bytes": 3510,
+      "sha256": "05A576224FAA3DEAA78DD98D50A9F56E93E7AFEFC071FF78340E1418109D264E"
+    },
+    {
+      "source": "gh pr view 14 --json ... (PR 元数据与提交清单)",
+      "bundle_path": "ci/pr-14.json",
+      "bytes": 8738,
+      "sha256": "44B1959395AB674E47C2A10564F5BD57E5983433A96527E85A485AE208FEBD11"
+    },
+    {
+      "source": "gh run view 33620407886 --log (基线绿步骤日志)",
+      "bundle_path": "ci/step-33620407886.txt",
+      "bytes": 115860,
+      "sha256": "F72545A535B250043C00F04E40F31ABC291531C2258EF52A91DD30158DF273D8"
+    },
+    {
+      "source": "gh run view 33621049995 --log (注错红步骤日志)",
+      "bundle_path": "ci/step-33621049995.txt",
+      "bytes": 98258,
+      "sha256": "F9EC846A08D38B285D4CABA5DF446A8FF530E64A9FF505F1B37AA2EC42163969"
+    },
+    {
+      "source": "gh run view 33621403637 --log (还原绿步骤日志)",
+      "bundle_path": "ci/step-33621403637.txt",
+      "bytes": 115860,
+      "sha256": "821C3F2AA858178020A0C71376F2C90DCBF1A00018DDDC8F71D3B06AB84AFB40"
+    }
+  ]
+}

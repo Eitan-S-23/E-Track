@@ -1,0 +1,431 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-6-v1",
+  "contract_sha256": "E80966AAA3EC17C4A00F3B8A7378DA31AB13F629135A3E8685F794F9D2276A4C",
+  "round_id": "P3-6-V1-FREEZE-20260902-01",
+  "executed_by": "独立验收会话（非实现方）",
+  "executed_at": "2026-09-02T00:00:00+08:00",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "WIRING-COMMAND-SEQUENCE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "step_commands=9",
+        "wired=2"
+      ],
+      "evidence": [
+        "commands/verify-ci-wiring.log",
+        "artifacts/firmware-build.yml"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRING-PURE-ADDITION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "added=2",
+        "removed=0",
+        "trigger_lines=57"
+      ],
+      "evidence": [
+        "commands/verify-ci-wiring.log",
+        "artifacts/firmware-build.yml"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRING-FAIL-CLOSED-SEMANTICS",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "checks=32",
+        "failures=0"
+      ],
+      "evidence": [
+        "commands/verify-ci-wiring.log",
+        "artifacts/firmware-build.yml"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRING-CLASSIFICATION-RULING",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "failures=0"
+      ],
+      "evidence": [
+        "commands/verify-ci-wiring.log",
+        "external/P3-6-ci-wiring-evidence.md"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-BASELINE-GREEN-MARKERS",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "run=33620407886",
+        "run_conclusion=success",
+        "step10=success",
+        "frame_marker=1",
+        "session_marker=1"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log",
+        "ci/run-33620407886.json",
+        "ci/step-33620407886.txt"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-DEFECT-RUN-RED-ATTRIBUTED",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "run=33621049995",
+        "run_conclusion=failure",
+        "red_at_step=10",
+        "session_output=0"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log",
+        "ci/run-33621049995.json",
+        "ci/step-33621049995.txt"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-DISCRIMINATION-CONTRAST",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "governance_run=33621050015",
+        "head=7b58ed6",
+        "conclusion=success"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log",
+        "ci/run-33621050015.json"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-RESTORE-GREEN",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "run=33621403637",
+        "run_conclusion=success",
+        "step10=success",
+        "reds=1",
+        "defect_then_restore=1"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log",
+        "ci/run-33621403637.json",
+        "ci/step-33621403637.txt",
+        "ci/runs-branch.json",
+        "ci/pr-14.json",
+        "artifacts/artifact-index.json"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "SCOPE-PRODUCT-SOURCE-INTACT",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "red_line_diffs=0",
+        "reverted_source_size=11729",
+        "required_on_main_tracked=4"
+      ],
+      "evidence": [
+        "commands/verify-scope.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "SCOPE-AUTHORIZED-CHANGES-ONLY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "committed_changed=7",
+        "failures=0"
+      ],
+      "evidence": [
+        "commands/verify-scope.log",
+        "external/P3-6-governance-change.md"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "LOCAL-RECOMPUTE-PARITY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "frame_checks=39",
+        "frame_failures=0",
+        "session_checks=105",
+        "session_failures=0"
+      ],
+      "evidence": [
+        "commands/test-ble-frame.log",
+        "commands/test-ble-session.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HARNESS-FAIL-CLOSED",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "checks=66",
+        "failures=0"
+      ],
+      "evidence": [
+        "commands/verify-harness.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "GOVERNANCE-GATE-GREEN",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "tests=65",
+        "result=OK"
+      ],
+      "evidence": [
+        "commands/governance-gate.log",
+        "manifest-governance/source-manifest.json"
+      ],
+      "failure_owner": null,
+      "notes": null
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-VERIFY-CI-WIRING",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_ci_wiring.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-ci-wiring.log"
+    },
+    {
+      "id": "CMD-VERIFY-CI-EVIDENCE",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_ci_evidence.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-ci-evidence.log"
+    },
+    {
+      "id": "CMD-VERIFY-SCOPE",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_scope.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-scope.log"
+    },
+    {
+      "id": "CMD-VERIFY-HARNESS",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_harness.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-harness.log"
+    },
+    {
+      "id": "CMD-TEST-BLE-FRAME",
+      "command": "python -X utf8 -B tests/ota/test_ota_ble_frame.py",
+      "exit_code": 0,
+      "output_evidence": "commands/test-ble-frame.log"
+    },
+    {
+      "id": "CMD-TEST-BLE-SESSION",
+      "command": "python -X utf8 -B tests/ota/test_ota_ble_session.py",
+      "exit_code": 0,
+      "output_evidence": "commands/test-ble-session.log"
+    },
+    {
+      "id": "CMD-GOVERNANCE-GATE",
+      "command": "python -X utf8 -B tests/ota/test_acceptance_bundle.py",
+      "exit_code": 0,
+      "output_evidence": "commands/governance-gate.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "path": "artifacts/artifact-index.json",
+      "sha256": "069AE1F46ECC205135F9B2167F801DA6F1FC1ECA5CF281CCC07D27510FC45292",
+      "size": 2957
+    },
+    {
+      "id": "ART-ARTIFACTS-FIRMWARE-BUILD-YML",
+      "path": "artifacts/firmware-build.yml",
+      "sha256": "166053E2804DF785D1733E9855F00BE074BC5C5188BAFE662C8CFDD39EB1F0A3",
+      "size": 21482
+    },
+    {
+      "id": "ART-CI-RUN-33620407886-JSON",
+      "path": "ci/run-33620407886.json",
+      "sha256": "DCFE860AB65B5CDCCF3C926DA538F4043DEB75899B42DB9ADFF9F88C6AAABF99",
+      "size": 3603
+    },
+    {
+      "id": "ART-CI-RUN-33621049995-JSON",
+      "path": "ci/run-33621049995.json",
+      "sha256": "414CBFA5176FA47A205E4636F241292E6F1DB93521166E8E157A0BA28A3E5B45",
+      "size": 3603
+    },
+    {
+      "id": "ART-CI-RUN-33621403637-JSON",
+      "path": "ci/run-33621403637.json",
+      "sha256": "982B9F7714144C8404176D518C68679F19923002439C75FBFFF372DAC9F54FD7",
+      "size": 3603
+    },
+    {
+      "id": "ART-CI-RUN-33621050015-JSON",
+      "path": "ci/run-33621050015.json",
+      "sha256": "F2A4C2301CED15FDBC936963FB39D4DE9D35B2F7CDBE1AD3D8559D3FB33C1291",
+      "size": 1818
+    },
+    {
+      "id": "ART-CI-RUNS-BRANCH-JSON",
+      "path": "ci/runs-branch.json",
+      "sha256": "05A576224FAA3DEAA78DD98D50A9F56E93E7AFEFC071FF78340E1418109D264E",
+      "size": 3510
+    },
+    {
+      "id": "ART-CI-PR-14-JSON",
+      "path": "ci/pr-14.json",
+      "sha256": "44B1959395AB674E47C2A10564F5BD57E5983433A96527E85A485AE208FEBD11",
+      "size": 8738
+    },
+    {
+      "id": "ART-CI-STEP-33620407886-TXT",
+      "path": "ci/step-33620407886.txt",
+      "sha256": "F72545A535B250043C00F04E40F31ABC291531C2258EF52A91DD30158DF273D8",
+      "size": 115860
+    },
+    {
+      "id": "ART-CI-STEP-33621049995-TXT",
+      "path": "ci/step-33621049995.txt",
+      "sha256": "F9EC846A08D38B285D4CABA5DF446A8FF530E64A9FF505F1B37AA2EC42163969",
+      "size": 98258
+    },
+    {
+      "id": "ART-CI-STEP-33621403637-TXT",
+      "path": "ci/step-33621403637.txt",
+      "sha256": "821C3F2AA858178020A0C71376F2C90DCBF1A00018DDDC8F71D3B06AB84AFB40",
+      "size": 115860
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CI-WIRING-LOG",
+      "path": "commands/verify-ci-wiring.log",
+      "sha256": "58C8A0A460F20C4C9C071C64821927AABE8952283D28E184C92D1E07621B8A93",
+      "size": 282
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+      "path": "commands/verify-ci-evidence.log",
+      "sha256": "BDC46C4269EE5F2A3A3CA43F91B332D32A5EEEC832075C58E1F1BC45A126954F",
+      "size": 645
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-SCOPE-LOG",
+      "path": "commands/verify-scope.log",
+      "sha256": "7A88DF9174FC41BBC83A01C0715C5BE5032F6F9432C4A97FE791F75E5B757D4D",
+      "size": 821
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-HARNESS-LOG",
+      "path": "commands/verify-harness.log",
+      "sha256": "E564EE97338C35A28176F3318904D3C4C8AB024F31D4C2114F73EA9120CD94CE",
+      "size": 1357
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-FRAME-LOG",
+      "path": "commands/test-ble-frame.log",
+      "sha256": "9443B53C1BC1470C031D1E483658FCB74DB96BEA73C270B901D1A9C397FAD276",
+      "size": 3084
+    },
+    {
+      "id": "ART-COMMANDS-TEST-BLE-SESSION-LOG",
+      "path": "commands/test-ble-session.log",
+      "sha256": "79F11439DEEC6EA2D97216CB0F48C0EE417EB4FF644ACADD00116092331BA537",
+      "size": 8097
+    },
+    {
+      "id": "ART-COMMANDS-GOVERNANCE-GATE-LOG",
+      "path": "commands/governance-gate.log",
+      "sha256": "A5EDC2A540FAC97AA9211139B57FBCD950FEF12535B1824B61CAC3003327ECA1",
+      "size": 165
+    }
+  ],
+  "evidence_hashes": {
+    "artifacts/artifact-index.json": "069AE1F46ECC205135F9B2167F801DA6F1FC1ECA5CF281CCC07D27510FC45292",
+    "artifacts/firmware-build.yml": "166053E2804DF785D1733E9855F00BE074BC5C5188BAFE662C8CFDD39EB1F0A3",
+    "ci/pr-14.json": "44B1959395AB674E47C2A10564F5BD57E5983433A96527E85A485AE208FEBD11",
+    "ci/run-33620407886.json": "DCFE860AB65B5CDCCF3C926DA538F4043DEB75899B42DB9ADFF9F88C6AAABF99",
+    "ci/run-33621049995.json": "414CBFA5176FA47A205E4636F241292E6F1DB93521166E8E157A0BA28A3E5B45",
+    "ci/run-33621050015.json": "F2A4C2301CED15FDBC936963FB39D4DE9D35B2F7CDBE1AD3D8559D3FB33C1291",
+    "ci/run-33621403637.json": "982B9F7714144C8404176D518C68679F19923002439C75FBFFF372DAC9F54FD7",
+    "ci/runs-branch.json": "05A576224FAA3DEAA78DD98D50A9F56E93E7AFEFC071FF78340E1418109D264E",
+    "ci/step-33620407886.txt": "F72545A535B250043C00F04E40F31ABC291531C2258EF52A91DD30158DF273D8",
+    "ci/step-33621049995.txt": "F9EC846A08D38B285D4CABA5DF446A8FF530E64A9FF505F1B37AA2EC42163969",
+    "ci/step-33621403637.txt": "821C3F2AA858178020A0C71376F2C90DCBF1A00018DDDC8F71D3B06AB84AFB40",
+    "commands/governance-gate.log": "A5EDC2A540FAC97AA9211139B57FBCD950FEF12535B1824B61CAC3003327ECA1",
+    "commands/test-ble-frame.log": "9443B53C1BC1470C031D1E483658FCB74DB96BEA73C270B901D1A9C397FAD276",
+    "commands/test-ble-session.log": "79F11439DEEC6EA2D97216CB0F48C0EE417EB4FF644ACADD00116092331BA537",
+    "commands/verify-ci-evidence.log": "BDC46C4269EE5F2A3A3CA43F91B332D32A5EEEC832075C58E1F1BC45A126954F",
+    "commands/verify-ci-wiring.log": "58C8A0A460F20C4C9C071C64821927AABE8952283D28E184C92D1E07621B8A93",
+    "commands/verify-harness.log": "E564EE97338C35A28176F3318904D3C4C8AB024F31D4C2114F73EA9120CD94CE",
+    "commands/verify-scope.log": "7A88DF9174FC41BBC83A01C0715C5BE5032F6F9432C4A97FE791F75E5B757D4D",
+    "external/P3-6-ci-wiring-evidence.md": "55F96CBFE77D268843C9429557AC61C40848027B7B41DD657D785120D9B2251C",
+    "external/P3-6-governance-change.md": "48EA6E9FCE8A86CFA28032F52AFE8275A498EE9AE4B0902AC3D28342FC11D33E",
+    "manifest-governance/source-manifest.json": "08A217984494EDB39279CBF9915DF6BEE7C99CDCCB64A862358B407025ED6793",
+    "manifest-governance/source-manifest.txt": "123C9F7D7172B73CEF4B0EE4BC6AD7D4E2E77B86282648892BBE4214A8483D4E",
+    "manifest-governance/summary.json": "0945BF7526B96CE44F496CDD2701D0060B26EC816C91ACE5683415377D994E65",
+    "manifest-production/source-manifest.json": "1068322ED08311AA474D7AF3BCB6B8F5A5555F589D9ED1E3A2BA965DCDCF55BC",
+    "manifest-production/source-manifest.txt": "D7A9EDA136442B873EF1C0DE25CE8C21C85D07E83F25615B4163DDFDBBEA8FD9",
+    "manifest-production/summary.json": "FD5585355325E5079DAC52E8EB25C5E9B061D22C8963D530FC48EB36DD624295",
+    "manifest-validation/source-manifest.json": "D5F4320FFEB5F2E660E87983F7D83304759F6A2898B0D8013B627EC365B5BD8F",
+    "manifest-validation/source-manifest.txt": "F5EA1A38FC8FD91BE308401E925F3425C2A5D847C7ED38651A6F493604E82858",
+    "manifest-validation/summary.json": "6078AF458134057A6F6D9160D0C30ADC6E8D5F4581B3811510556FA871512ED3"
+  },
+  "notes": "本轮 13 条判据全部 EXECUTED，无 REUSED，故 previous_matrix_sha256 / rerun_plan_* 均为 null。每条 observed 由 .cache/p36-accept/write_matrix.py 从包内 commands/*.log 逐元素正则派生后再与冻结门槛断言全等，未从 gate.expected 反抄。CI 侧结论取自冻结采集件 ci/**，本轮不重跑远端流水线。按 DEV-4，SCOPE-* 判据刻意不把 p3_6_verify_scope.py 的核对项总数（本轮 70）写进门槛，因该总数随工作树跟踪状态变化，不是不变量。"
+}
