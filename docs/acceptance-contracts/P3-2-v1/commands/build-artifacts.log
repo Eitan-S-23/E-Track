@@ -1,0 +1,18 @@
+### 全量重建后产物指纹（第二次独立复现）###
+X-Track-App-GCC.elf                                      872076  2026-09-03 08:12:48  0d645338529659ad95aabcbf10e214f3627974b6cadfa66efad01ff94417f547
+X-Track-App-GCC.hex                                     1694726  2026-09-03 08:12:48  98703397c1b5cb21b85b3835c151ed3fdbc84f0af0a670d384c9e7fdb594e9f0
+X-Track-App-GCC.bin                                      602984  2026-09-03 08:12:48  7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f
+X-Track-App-GCC.map                                     2434214  2026-09-03 08:12:48  323297e54d2839eddbf2073b0f28b2aa53b061a36ae4f8be882aef9496ec0ac7
+X-Track-Boot.elf                                          36860  2026-09-03 08:12:44  d21713ca2c1efeac949f8ec0ffddacac439fed6bf26f9c65641bee24464fdabc
+X-Track-Boot.hex                                          41485  2026-09-03 08:12:44  ff3badef69be6d97fd66815b8df90efd962a708b559c8951d4b56380f8001f71
+X-Track-Boot.bin                                          14724  2026-09-03 08:12:44  5842ff3e19ba9e1eaaea10f27e825c7b6efc278b200531014b0dba61264f6594
+X-Track-Boot.map                                         100450  2026-09-03 08:12:44  14e7a8addd37dfe71744c11ab0db60d5c535fbe725fe3e950f82354f34a4fc93
+
+### arm-none-eabi-size 双目标 ###
+   text	   data	    bss	    dec	    hex	filename
+ 601544	    940	 561688	1164172	 11c38c	MDK-ARM_F435/cmake-generated/build-gcc-release/app-gcc/X-Track-App-GCC.elf
+  14720	      4	   9780	  24504	   5fb8	MDK-ARM_F435/cmake-generated/build-gcc-release/boot/X-Track-Boot.elf
+
+### 链接产物中确认 ota_device_info 参与链接 ###
+4
+-rw-r--r-- 1 SU 197121 1760 Sep  3 08:12 MDK-ARM_F435/cmake-generated/build-gcc-release/CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/OTA/ota_device_info.c.obj

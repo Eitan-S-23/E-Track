@@ -1,0 +1,461 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-2-v1",
+  "contract_sha256": "1520787999B606ABA6270B5D1F9F3449939DDD7E98D9A004EAEC581CF0F3C60B",
+  "round_id": "P3-2-V1-FREEZE-20260903-01",
+  "executed_by": "独立验收会话（非实现方）",
+  "executed_at": "2026-09-03T00:00:00+08:00",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "notes": "本轮 12 条判据全部 EXECUTED，无 REUSED，故 previous_matrix_sha256 与 rerun_plan_* 均为 null。observed 由 .cache/p3_2_write_matrix.py 从包内原始 stdout 按正则逐元素派生（段内 ok 行计数、核对行取值按 Python 字面量解析、判定行与汇总行独立提取），派生后再与冻结合同 gate.expected 做列表全等断言，不一致即拒绝生成矩阵；未从 expected 反抄。C12 的 exit_code 取本轮命令记录中的实际退出码（unittest 输出本身不含退出码）。C11 门槛内的 checks=23 是不变量而非计数，理由见合同 DEV-6：该核验器把未跟踪文件聚合为单一检查项，故检查总数不随验收产出增长；随产出变化的 tracked/untracked_new/acceptance 计数只出现在汇总行，不进门槛。真机取证件为实现方经 J-Link 采集的硬件状态（DEV-5），验收独立性来自解码与重算全部独立重写，以及 C05 把 INFO 摘要绑回本仓库源码的全量重建结果。",
+  "criteria": [
+    {
+      "id": "C01",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "realdevice=PASS",
+        "failures=0",
+        "section_A_checks=8",
+        "frame_bytes=60",
+        "cmd=0x80",
+        "magic=a55a",
+        "len_field=50",
+        "crc_recomputed_equals_wire=True"
+      ],
+      "evidence": [
+        "commands/verify-realdevice.log",
+        "artifacts/realdevice/info_frame.bin",
+        "artifacts/realdevice/feed_before.bin"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C02",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "realdevice=PASS",
+        "failures=0",
+        "section_B_checks=7",
+        "model=E-Track+NUL",
+        "proto_ver=1",
+        "max_window_segs=32",
+        "image_sha256_len=32",
+        "cur_vcode_nonzero=True"
+      ],
+      "evidence": [
+        "commands/verify-realdevice.log",
+        "artifacts/realdevice/info_frame.bin"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C03",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "realdevice=PASS",
+        "failures=0",
+        "section_C_checks=8",
+        "section_E_checks=4",
+        "magic=ETFW",
+        "header_ver=1",
+        "header_crc32_recomputed_equals_stored=True",
+        "hw_rev_equal=True",
+        "layout_id_equal=True",
+        "cur_vcode_equal=True",
+        "boot_ver_ge_min_boot_ver=True"
+      ],
+      "evidence": [
+        "commands/verify-realdevice.log",
+        "artifacts/realdevice/app_dump.bin"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C04",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "realdevice=PASS",
+        "harness=PASS",
+        "realdevice_section_D_checks=4",
+        "harness_section_D_checks=8",
+        "double_zero_recomputed_equals_stored=True",
+        "raw_domain_ne_double_zero_domain=True",
+        "info_sha256_equals_raw_32B=True",
+        "info_sha256_uses_double_zero=False",
+        "frozen_vector_domains_differ=True"
+      ],
+      "evidence": [
+        "commands/verify-realdevice.log",
+        "commands/verify-harness.log",
+        "artifacts/realdevice/app_dump.bin"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C05",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "build=PASS",
+        "failures=0",
+        "section_A_checks=6",
+        "finalize_exit=0",
+        "finalize_image_equals_board_dump=True",
+        "header_diff_window=1024..1119",
+        "image_len_equals_dump_bytes=True"
+      ],
+      "evidence": [
+        "commands/verify-build.log",
+        "commands/verify-realdevice.log",
+        "artifacts/realdevice/app_dump.bin"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C06",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "realdevice=PASS",
+        "failures=0",
+        "section_F_checks=10",
+        "identity_snapshot_bytes=60",
+        "session_struct_bytes=568",
+        "info_frame_offset=421",
+        "snapshot_valid=1",
+        "snapshot_sha256_equals_info=True",
+        "fw_header_result=0",
+        "bcb_result_not_error=True"
+      ],
+      "evidence": [
+        "commands/verify-realdevice.log",
+        "artifacts/realdevice/identity.bin",
+        "artifacts/realdevice/sess_full.bin"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C07",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "host_test=PASS",
+        "host_checks=114",
+        "host_failures=0",
+        "mutation_probe=PASS",
+        "mutations=M1|M2|M3",
+        "mutation_exit_codes=1|1|1",
+        "compile_error=False|False|False",
+        "source_restored_byte_identical=True",
+        "rerun_after_restore=PASS"
+      ],
+      "evidence": [
+        "commands/host-test.log",
+        "commands/mutation-probe.log",
+        "artifacts/mutation_probe.py"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C08",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "harness=PASS",
+        "failures=0",
+        "section_A_checks=5",
+        "section_B_checks=7",
+        "section_C_checks=11",
+        "exit_code_bound_to_failure_count=True",
+        "gcc_werror=True",
+        "msvc_wx=True",
+        "links_production_source=True",
+        "fail_open_patterns=0"
+      ],
+      "evidence": [
+        "commands/verify-harness.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C09",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "configure_exit=0",
+        "clean_exit=0",
+        "build_exit=0",
+        "app_bin_sha256=7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f",
+        "boot_bin_sha256=5842ff3e19ba9e1eaaea10f27e825c7b6efc278b200531014b0dba61264f6594",
+        "build_ninja_obj_refs=4",
+        "ota_device_info_obj_bytes=1760"
+      ],
+      "evidence": [
+        "commands/build-gcc-production.log",
+        "commands/build-artifacts.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C10",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "build=PASS",
+        "failures=0",
+        "section_B_checks=8",
+        "identity_symbol_nm_type=T",
+        "identity_symbol_region=0x08xxxxxx",
+        "snapshot_symbol_nm_type=b",
+        "snapshot_symbol_region=0x20xxxxxx",
+        "test_symbol_leaks=0",
+        "nm_symbol_count=3381"
+      ],
+      "evidence": [
+        "commands/verify-build.log",
+        "commands/build-artifacts.log",
+        "artifacts/build/nm-app-gcc-symbols.txt"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C11",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "scope=PASS",
+        "checks=23",
+        "failures=0",
+        "committed_changes=0",
+        "card_files=9",
+        "red_line_hits=0",
+        "fail_open_hits=0",
+        "acceptance_scripts_write_calls=0"
+      ],
+      "evidence": [
+        "commands/verify-scope.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "C12",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "governance_gate=PASS",
+        "tests_run=65",
+        "failures=0",
+        "errors=0",
+        "exit_code=0"
+      ],
+      "evidence": [
+        "commands/governance-gate.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-BUILD-GCC-PRODUCTION",
+      "command": "export SOURCE_DATE_EPOCH=1786320000 && LOG=docs/acceptance-contracts/P3-2-v1/commands/build-gcc-production.log && {\n  echo \"### 环境 ###\"\n  echo \"SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH\"\n  cmake --version | head -n 1\n  echo\n  echo \"### 1. configure ###\"\n  cmake -S MDK-ARM_F435/cmake-generated -B MDK-ARM_F435/cmake-generated/build-gcc-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OBJECT_PATH_MAX=1024 2>&1 | tail -n 12\n  echo \"CONFIGURE_EXIT=${PIPESTATUS[0]}\"\n  echo\n  echo \"### 2. clean（强制全量重建）###\"\n  cmake --build MDK-ARM_F435/cmake-generated/build-gcc-release --target clean 2>&1 | tail -n 3\n  echo \"CLEAN_EXIT=${PIPESTATUS[0]}\"\n  echo\n  echo \"### 3. build X_Track_App_GCC + X_Track_Boot ###\"\n  cmake --build MDK-ARM_F435/cmake-generated/build-gcc-release --target X_Track_App_GCC X_Track_Boot --parallel 2>&1 | grep -viE \"wchar_t|^\\[[0-9]+/[0-9]+\\] (Building|Linking) \" | tail -n 40\n  echo \"BUILD_EXIT=${PIPESTATUS[0]}\"\n} > $LOG 2>&1; echo \"全量重建结束 rc=$?\"; tail -n 22 $LOG",
+      "exit_code": 0,
+      "output_evidence": "commands/build-gcc-production.log"
+    },
+    {
+      "id": "CMD-BUILD-ARTIFACTS",
+      "command": "B=docs/acceptance-contracts/P3-2-v1/commands && D=MDK-ARM_F435/cmake-generated/build-gcc-release && {\n  echo \"### 全量重建后产物指纹（第二次独立复现）###\"\n  for f in $D/app-gcc/X-Track-App-GCC.elf $D/app-gcc/X-Track-App-GCC.hex $D/app-gcc/X-Track-App-GCC.bin $D/app-gcc/X-Track-App-GCC.map $D/boot/X-Track-Boot.elf $D/boot/X-Track-Boot.hex $D/boot/X-Track-Boot.bin $D/boot/X-Track-Boot.map; do\n    printf \"%-52s %10s  %s  %s\\n\" \"$(basename $f)\" \"$(stat -c%s $f)\" \"$(date -r $f '+%Y-%m-%d %H:%M:%S')\" \"$(sha256sum $f | cut -c1-64)\"\n  done\n  echo\n  echo \"### arm-none-eabi-size 双目标 ###\"\n  \"D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/arm-none-eabi-size.exe\" $D/app-gcc/X-Track-App-GCC.elf $D/boot/X-Track-Boot.elf\n  echo\n  echo \"### 链接产物中确认 ota_device_info 参与链接 ###\"\n  grep -c \"ota_device_info.c.obj\" $D/build.ninja\n  ls -la $D/CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/OTA/ota_device_info.c.obj\n} > $B/build-artifacts.log 2>&1; cat $B/build-artifacts.log",
+      "exit_code": 0,
+      "output_evidence": "commands/build-artifacts.log"
+    },
+    {
+      "id": "CMD-VERIFY-REALDEVICE",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_realdevice.py > docs/acceptance-contracts/P3-2-v1/commands/verify-realdevice.log 2>&1",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-realdevice.log"
+    },
+    {
+      "id": "CMD-VERIFY-HARNESS",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_harness.py > docs/acceptance-contracts/P3-2-v1/commands/verify-harness.log 2>&1",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-harness.log"
+    },
+    {
+      "id": "CMD-VERIFY-BUILD",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_build.py > docs/acceptance-contracts/P3-2-v1/commands/verify-build.log 2>&1",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-build.log"
+    },
+    {
+      "id": "CMD-VERIFY-SCOPE",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_scope.py > docs/acceptance-contracts/P3-2-v1/commands/verify-scope.log 2>&1",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-scope.log"
+    },
+    {
+      "id": "CMD-HOST-TEST",
+      "command": "python -X utf8 -B tests/ota/test_ota_device_info.py > docs/acceptance-contracts/P3-2-v1/commands/host-test.log 2>&1",
+      "exit_code": 0,
+      "output_evidence": "commands/host-test.log"
+    },
+    {
+      "id": "CMD-MUTATION-PROBE",
+      "command": "python -X utf8 -B docs/acceptance-contracts/P3-2-v1/artifacts/mutation_probe.py > docs/acceptance-contracts/P3-2-v1/commands/mutation-probe.log 2>&1",
+      "exit_code": 0,
+      "output_evidence": "commands/mutation-probe.log"
+    },
+    {
+      "id": "CMD-GOVERNANCE-GATE",
+      "command": "python -X utf8 -B tests/ota/test_acceptance_bundle.py > docs/acceptance-contracts/P3-2-v1/commands/governance-gate.log 2>&1",
+      "exit_code": 0,
+      "output_evidence": "commands/governance-gate.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+      "path": "commands/verify-realdevice.log",
+      "sha256": "07B9883B0D0A7EAFF32504650E640FF9C6A7DA9D7FF26FC9EBE035455105F55C",
+      "size": 3052
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-HARNESS-LOG",
+      "path": "commands/verify-harness.log",
+      "sha256": "EBF8546DF12319392E3253BC92F672F15EBC8B70DCE56941281CDEE61CBC107B",
+      "size": 2900
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-SCOPE-LOG",
+      "path": "commands/verify-scope.log",
+      "sha256": "3157B78FB4792AF6C7F67F13C985C871A7CD946BEBC53F9309E9F39B2C1A8079",
+      "size": 2568
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-BUILD-LOG",
+      "path": "commands/verify-build.log",
+      "sha256": "C457CD819D5884A4C572706A32C8CF3B23832A281D7839713E96094633559B22",
+      "size": 1508
+    },
+    {
+      "id": "ART-COMMANDS-HOST-TEST-LOG",
+      "path": "commands/host-test.log",
+      "sha256": "8432DD700BB585F3A6685AE26E0461179A52F05B224026C5C9194B87BF1B9AC8",
+      "size": 75
+    },
+    {
+      "id": "ART-COMMANDS-MUTATION-PROBE-LOG",
+      "path": "commands/mutation-probe.log",
+      "sha256": "646C5E75649BCF3B65C4ACBD0BC49C8917480F880F8F7AF1CC0310A94270ECB7",
+      "size": 1352
+    },
+    {
+      "id": "ART-COMMANDS-BUILD-GCC-PRODUCTION-LOG",
+      "path": "commands/build-gcc-production.log",
+      "sha256": "65D3FA9AE17C6308D3E540317DC9E0D33827F6BB7414FFA6C6CCC6B4BCAA0147",
+      "size": 8073
+    },
+    {
+      "id": "ART-COMMANDS-BUILD-ARTIFACTS-LOG",
+      "path": "commands/build-artifacts.log",
+      "sha256": "94753606915E8DB346AB5C2BCAF01973C1683AE4FE39DB646DC16B4BDC984642",
+      "size": 1822
+    },
+    {
+      "id": "ART-COMMANDS-GOVERNANCE-GATE-LOG",
+      "path": "commands/governance-gate.log",
+      "sha256": "565C7297B1A96A9382907D514FEC7DF7CC23B9B9F1CD2C02E699B103CB0C4D82",
+      "size": 170
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-APP-DUMP-BIN",
+      "path": "artifacts/realdevice/app_dump.bin",
+      "sha256": "4512DE0878C146A93B55F65AA86ACAB4EEDCF7F7082EAD97AD73C24884671B4B",
+      "size": 602984
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-INFO-FRAME-BIN",
+      "path": "artifacts/realdevice/info_frame.bin",
+      "sha256": "08131BE3706573E92B8F4EC7B50C92CD5C993D294D014C6E51EC02B23F0B4C0F",
+      "size": 60
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-IDENTITY-BIN",
+      "path": "artifacts/realdevice/identity.bin",
+      "sha256": "FFDE650422B8EEE0B8E7B3EB619C7DDABFB97C48B04462282F32FAE2955DE0C5",
+      "size": 60
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-SESS-FULL-BIN",
+      "path": "artifacts/realdevice/sess_full.bin",
+      "sha256": "47495DA75A3EA00519EE9B811C484DE435F3B213D8760815F18BFB66380DB642",
+      "size": 568
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-FEED-BEFORE-BIN",
+      "path": "artifacts/realdevice/feed_before.bin",
+      "sha256": "08131BE3706573E92B8F4EC7B50C92CD5C993D294D014C6E51EC02B23F0B4C0F",
+      "size": 60
+    },
+    {
+      "id": "ART-ARTIFACTS-BUILD-NM-APP-GCC-SYMBOLS-TXT",
+      "path": "artifacts/build/nm-app-gcc-symbols.txt",
+      "sha256": "92DC855CE064D1C65FEA39464D9B13E4FE8B3DCE954B482243B55AF6AE852AEE",
+      "size": 130730
+    },
+    {
+      "id": "ART-ARTIFACTS-MUTATION-PROBE-PY",
+      "path": "artifacts/mutation_probe.py",
+      "sha256": "6656F29001AAB2A07DA8F94301EF04814D1ABF01A1A135D11BF8046F4634C0DB",
+      "size": 3622
+    }
+  ],
+  "evidence_hashes": {
+    "artifacts/build/nm-app-gcc-symbols.txt": "92DC855CE064D1C65FEA39464D9B13E4FE8B3DCE954B482243B55AF6AE852AEE",
+    "artifacts/mutation_probe.py": "6656F29001AAB2A07DA8F94301EF04814D1ABF01A1A135D11BF8046F4634C0DB",
+    "artifacts/realdevice/app_dump.bin": "4512DE0878C146A93B55F65AA86ACAB4EEDCF7F7082EAD97AD73C24884671B4B",
+    "artifacts/realdevice/feed_before.bin": "08131BE3706573E92B8F4EC7B50C92CD5C993D294D014C6E51EC02B23F0B4C0F",
+    "artifacts/realdevice/identity.bin": "FFDE650422B8EEE0B8E7B3EB619C7DDABFB97C48B04462282F32FAE2955DE0C5",
+    "artifacts/realdevice/info_frame.bin": "08131BE3706573E92B8F4EC7B50C92CD5C993D294D014C6E51EC02B23F0B4C0F",
+    "artifacts/realdevice/sess_full.bin": "47495DA75A3EA00519EE9B811C484DE435F3B213D8760815F18BFB66380DB642",
+    "commands/build-artifacts.log": "94753606915E8DB346AB5C2BCAF01973C1683AE4FE39DB646DC16B4BDC984642",
+    "commands/build-gcc-production.log": "65D3FA9AE17C6308D3E540317DC9E0D33827F6BB7414FFA6C6CCC6B4BCAA0147",
+    "commands/governance-gate.log": "565C7297B1A96A9382907D514FEC7DF7CC23B9B9F1CD2C02E699B103CB0C4D82",
+    "commands/host-test.log": "8432DD700BB585F3A6685AE26E0461179A52F05B224026C5C9194B87BF1B9AC8",
+    "commands/mutation-probe.log": "646C5E75649BCF3B65C4ACBD0BC49C8917480F880F8F7AF1CC0310A94270ECB7",
+    "commands/verify-build.log": "C457CD819D5884A4C572706A32C8CF3B23832A281D7839713E96094633559B22",
+    "commands/verify-harness.log": "EBF8546DF12319392E3253BC92F672F15EBC8B70DCE56941281CDEE61CBC107B",
+    "commands/verify-realdevice.log": "07B9883B0D0A7EAFF32504650E640FF9C6A7DA9D7FF26FC9EBE035455105F55C",
+    "commands/verify-scope.log": "3157B78FB4792AF6C7F67F13C985C871A7CD946BEBC53F9309E9F39B2C1A8079",
+    "external/P3-2-identity-research.md": "1E4CD5FDA40171B8BE3B2C0BFF177F66DB648782AA1375DE0CDBF617ABA6EC4B",
+    "external/P3-2-implementation-evidence.md": "1E1DE683CE6AD3C8459412E6812A67B929C289F47D03A866403379BDD6CFA1C7"
+  }
+}

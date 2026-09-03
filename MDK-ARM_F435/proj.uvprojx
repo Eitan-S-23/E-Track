@@ -9436,6 +9436,16 @@
               <FilePath>..\Libraries\OTA\ota_ble_session.h</FilePath>
             </File>
             <File>
+              <FileName>ota_device_info.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OTA\ota_device_info.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_device_info.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\OTA\ota_device_info.h</FilePath>
+            </File>
+            <File>
               <FileName>ota_keys.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\OTA\ota_keys.c</FilePath>
