@@ -23,6 +23,9 @@ on:
       - "tests/ota/test_ota_*.c"
       - "tests/ota/test_ota_*.py"
       - "tests/ota/test_sdio_command_timeouts.py"
+      - "tests/ota/p3_1_verify_contract_alignment.py"
+      - "tests/ota/p3_1_verify_text_isolation.py"
+      - "tests/ota/p3_1_verify_portability.py"
       - "tests/ota/stubs/**"
       - "tests/ota-vectors/**"
       - "vendor/**"
@@ -43,6 +46,9 @@ on:
       - "tests/ota/test_ota_*.c"
       - "tests/ota/test_ota_*.py"
       - "tests/ota/test_sdio_command_timeouts.py"
+      - "tests/ota/p3_1_verify_contract_alignment.py"
+      - "tests/ota/p3_1_verify_text_isolation.py"
+      - "tests/ota/p3_1_verify_portability.py"
       - "tests/ota/stubs/**"
       - "tests/ota-vectors/**"
       - "vendor/**"
@@ -183,7 +189,7 @@ jobs:
           set -euo pipefail
           cmake --build "${BUILD_DIR}" --target X_Track_App_GCC X_Track_Boot --parallel
 
-      - name: Test Boot fw_header validator vectors
+      - name: Run host tests (boot vectors, OTA host tests, P3-1 product regressions)
         shell: bash
         run: |
           set -euo pipefail
@@ -195,6 +201,10 @@ jobs:
           python3 tests/ota/test_ota_patch.py
           python3 tests/ota/test_ota_ble_frame.py
           python3 tests/ota/test_ota_ble_session.py
+          python3 tests/ota/p3_1_verify_contract_alignment.py
+          python3 tests/ota/p3_1_verify_text_isolation.py
+          python3 tests/ota/p3_1_verify_portability.py
+          python3 tests/ota/test_ota_device_info.py
 
       - name: Validate OTA App layout
         shell: bash
