@@ -1,0 +1,5 @@
+workflow=.github/workflows/firmware-build.yml size=22045
+=== 失败项 2 / 核对项 2 ===
+FAIL: 未找到步骤 `Test Boot fw_header validator vectors`
+FAIL: 步骤缺少 run 脚本块
+P3_6_CI_WIRING=FAIL checks=2 failures=2

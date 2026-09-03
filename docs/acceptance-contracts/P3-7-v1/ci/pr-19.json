@@ -1,0 +1,183 @@
+{
+  "baseRefName": "main",
+  "commits": [
+    {
+      "authoredDate": "2026-09-03T09:01:59Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        },
+        {
+          "email": "noreply@anthropic.com",
+          "id": "MDQ6VXNlcjgxODQ3",
+          "login": "claude",
+          "name": "Claude Opus 5"
+        }
+      ],
+      "committedDate": "2026-09-03T09:01:59Z",
+      "messageBody": "- workflow：既有 host 测试步骤内追加 p3_1_verify_contract_alignment /\n  p3_1_verify_text_isolation / p3_1_verify_portability / test_ota_device_info\n  四条裸执行行，步骤名对齐实际内容；push / pull_request 两份 paths 各增三条\n  精确条目（第四条由既有通配 tests/ota/test_ota_*.py 覆盖，故 paths 零冗余）。\n- 验收侧：新增接线核验器与 CI 证据门禁，两者均 fail-closed。\n- 记录：接线 research、证据笔记、第 1/2 轮独立验收记录。\n\n本提交只做接线与留证，真实 CI 运行证据由后续提交序列在本分支取得。\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>",
+      "messageHeadline": "P3-7 接线：firmware-build.yml 执行四条 host 回归并扩 paths 闭包",
+      "oid": "90facc3a8875108e458d3a993497741b543d937d"
+    },
+    {
+      "authoredDate": "2026-09-03T10:01:33Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:01:33Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证注入(1/4)：ACK_BEGIN 长度契约漂移，预期 cmd9 变红",
+      "oid": "f369a5d6c5f79325ded5c62aa7aa2c29ac88cc25"
+    },
+    {
+      "authoredDate": "2026-09-03T10:15:22Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:15:22Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证还原(1/4)：ACK_BEGIN 恢复 10u，预期转绿",
+      "oid": "7b3e6c636979a46cf4b02b0c175e74232b0d0483"
+    },
+    {
+      "authoredDate": "2026-09-03T10:22:19Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:22:19Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证注入(2/4)：移除活跃期文本 sink 守卫，预期 cmd10 变红",
+      "oid": "58088364752404d72ee49282574fa8da4e607ad8"
+    },
+    {
+      "authoredDate": "2026-09-03T10:25:19Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:25:19Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证还原(2/4)：恢复文本 sink 守卫，预期转绿",
+      "oid": "d99c8405284382ccd3acf0442acffcf22bf21de2"
+    },
+    {
+      "authoredDate": "2026-09-03T10:33:03Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:33:03Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证注入(3/4)：HAL_USB.cpp 首行反斜杠 include，预期 cmd11 变红",
+      "oid": "87a0d994ceac23c5744dd0a45e8ea1d7f19a78dc"
+    },
+    {
+      "authoredDate": "2026-09-03T10:36:01Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:36:01Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证还原(3/4)：HAL_USB.cpp 恢复正斜杠 include，预期转绿",
+      "oid": "46c181b96efa43bef2ac118473c25f9daa8a1e92"
+    },
+    {
+      "authoredDate": "2026-09-03T10:38:58Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:38:58Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证注入(4/4)：设备 model 首字符改 F，预期 cmd12 变红",
+      "oid": "607f8024984db8c30d4243547997c9f6c99ef618"
+    },
+    {
+      "authoredDate": "2026-09-03T10:43:15Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T10:43:15Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证还原(4/4)：设备 model 恢复 E-Track，预期转绿",
+      "oid": "690a5287de190022e2ff4b5a0608d4b37ddae94b"
+    },
+    {
+      "authoredDate": "2026-09-03T11:12:40Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T11:12:40Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证注入(3/4, 重做)：HAL_USB.cpp 加 #if 0 反斜杠 include 阳性样本，预期 cmd11 变红",
+      "oid": "11ca914905f284c79367bbd10afba410fc195b0e"
+    },
+    {
+      "authoredDate": "2026-09-03T11:17:07Z",
+      "authors": [
+        {
+          "email": "example@ggbond",
+          "id": "",
+          "login": "",
+          "name": "eitan"
+        }
+      ],
+      "committedDate": "2026-09-03T11:17:07Z",
+      "messageBody": "",
+      "messageHeadline": "P3-7 反证还原(3/4, 重做)：移除 #if 0 阳性样本，预期转绿",
+      "oid": "94c4d68c15133bbcde3c72db7733404870f5fd19"
+    }
+  ],
+  "headRefName": "ota/p3-7-host-test-wiring",
+  "headRefOid": "94c4d68c15133bbcde3c72db7733404870f5fd19",
+  "mergeable": "MERGEABLE",
+  "number": 19,
+  "state": "OPEN",
+  "title": "P3-7 firmware-build.yml host 测试接线（含 CI 反证证据序列）",
+  "url": "https://github.com/Eitan-S-23/E-Track/pull/19"
+}

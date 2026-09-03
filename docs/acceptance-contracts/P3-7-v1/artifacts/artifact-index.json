@@ -1,0 +1,245 @@
+{
+  "count": 40,
+  "artifacts": [
+    {
+      "source": "docs/ota-exec-notes/P3-7-wiring-evidence.md",
+      "bundle_path": "external/P3-7-wiring-evidence.md",
+      "bytes": 13312,
+      "sha256": "FCCEEE6EFEC3BF82AEA3B0C14289011C5AFEE5B2E08C57992ADAB21AD483AB62"
+    },
+    {
+      "source": ".cache/p3-7-accept/collect_run.py（gh 采集器：按 run 号落 run/step/changed 三件）",
+      "bundle_path": "harness/collect_run.py",
+      "bytes": 2931,
+      "sha256": "C6E676D36D1D9D36CDAA8A8D687251AFC194CC2FB30FFD124DC3B021776F956F"
+    },
+    {
+      "source": ".cache/p3-7-accept/inject_ci.py（CI 反证驱动：按字节存档注错并 SHA-256 回校还原）",
+      "bundle_path": "harness/inject_ci.py",
+      "bytes": 4664,
+      "sha256": "66C37A9BE419C07A6B0195A2282F4DD4B3775AA2E1E024700238EC57E3C3C10B"
+    },
+    {
+      "source": ".cache/p3-7-accept/inject_probe.py（接线核验器鉴别力探针，8 例）",
+      "bundle_path": "harness/inject_probe.py",
+      "bytes": 6164,
+      "sha256": "0C3EB1E1C422FABCC256CCB41D650160919F5A623CA117412EF29556A681CFB6"
+    },
+    {
+      "source": ".cache/p3-7-accept/ci_harness_selftest.py（CI 证据核验器双向鉴别力自检，11 类变异）",
+      "bundle_path": "harness/ci_harness_selftest.py",
+      "bytes": 14316,
+      "sha256": "C29BAEE85D5113CEDC3B4695D73773A5B9C4C5C1217BE7FE440A8F5CAB2D3505"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33736951606 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33736951606.json",
+      "bytes": 1076,
+      "sha256": "DFC785040A91D0786D6126E145D07AF671E3E3B672DD3BAC6A1D002541F73360"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33742087214 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33742087214.json",
+      "bytes": 115,
+      "sha256": "FFE826C2AB80FDEA49D80C5E6A843713F59DF2591FA0A376CB8940B558D09C79"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33743337327 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33743337327.json",
+      "bytes": 115,
+      "sha256": "E5ADE899A62DD256C77C0DA112769DFE4FC3BD1FF88C5C7363D47974C84C6C26"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33743950837 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33743950837.json",
+      "bytes": 112,
+      "sha256": "24E9D9DA837DA7881F5C585A135A16429507DE06C80DEC29176BB72863C0E1E9"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33744219606 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33744219606.json",
+      "bytes": 112,
+      "sha256": "98B8DCBF2A3B714BA1AD68A60B8E936602698771655E77FD8A9B93229A6A9E9B"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33745505165 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33745505165.json",
+      "bytes": 117,
+      "sha256": "206C2E57DE32FDC069B8EB458297F489DC38FA028F7B913B8C27D657D09658E7"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33745844623 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33745844623.json",
+      "bytes": 117,
+      "sha256": "8CC04E43494725F8B1005534DA1EE266980F4D8FE7AE151ECCBBA5DEF80E60C7"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33746544048 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33746544048.json",
+      "bytes": 122,
+      "sha256": "02E1219CA0189D8FBE227EA7B9253D601B5FBEB382DD49F678983C8BF296FFF1"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33746838579 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33746838579.json",
+      "bytes": 119,
+      "sha256": "6085D399803746B3F9EED53B37B934A6B0937B7E93A11CFC5DE5D98A20F6D67F"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33748460404 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33748460404.json",
+      "bytes": 106,
+      "sha256": "4F2C3496B82ADEF0D6E3BC4B51A9A66B6EA934084B7273373BF86A43D00D5404"
+    },
+    {
+      "source": "gh api repos/:owner/:repo/commits/<run 33748868768 的 head 提交>/files 的 filename/sha 清单",
+      "bundle_path": "ci/changed-33748868768.json",
+      "bytes": 106,
+      "sha256": "A211842EF08546530AD221F45F7EB3CCDE6767CB4A55A05E30342FCCAFFAE8F3"
+    },
+    {
+      "source": "gh pr view 19 --json baseRefName,headRefName,commits",
+      "bundle_path": "ci/pr-19.json",
+      "bytes": 6106,
+      "sha256": "8238682833A508E9C18B2F3E90F4FC83758ADAB7850E6E7F1530B742FACC6B3C"
+    },
+    {
+      "source": "gh run view 33736951606 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33736951606.json",
+      "bytes": 5532,
+      "sha256": "8957CF5A385B9838AA19B5BA37203E72C71ED2B81D8F45C1A5B65BB55DCA2882"
+    },
+    {
+      "source": "gh run view 33742087214 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33742087214.json",
+      "bytes": 5532,
+      "sha256": "A88BC961D65DC593AAE143A50AAC68A4A6EC190288AC29E87B64B1C151FEF4BB"
+    },
+    {
+      "source": "gh run view 33743337327 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33743337327.json",
+      "bytes": 5532,
+      "sha256": "CA283970265C6CA580D54D6C10CAE43E3453705EADA6EA8170EBD8E422410182"
+    },
+    {
+      "source": "gh run view 33743950837 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33743950837.json",
+      "bytes": 5532,
+      "sha256": "52EC64CBEE97A0F1FF498A5721DE99DBCF1317B542B9BD142511F261B30AA1EB"
+    },
+    {
+      "source": "gh run view 33744219606 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33744219606.json",
+      "bytes": 5532,
+      "sha256": "E72A3E08CA1C2F4770F014F0CEC76EF8F38EE592815446A921B37CA6DABFDD51"
+    },
+    {
+      "source": "gh run view 33745505165 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33745505165.json",
+      "bytes": 5532,
+      "sha256": "58280D2599A02F194D2C8C8BBDBA8FCF59921ED36693659255F539C97141787E"
+    },
+    {
+      "source": "gh run view 33745844623 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33745844623.json",
+      "bytes": 5532,
+      "sha256": "45469B6A26EB340BB3908F4A3F364EA934AC70AF22120EC1B36C6AE538BD1499"
+    },
+    {
+      "source": "gh run view 33746544048 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33746544048.json",
+      "bytes": 5546,
+      "sha256": "9641B627C3B8C7B68861A68A17212690683C013C34773D077D972B75F0E44058"
+    },
+    {
+      "source": "gh run view 33746838579 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33746838579.json",
+      "bytes": 5545,
+      "sha256": "CE19F0BCE983C857B5396E8023DA82CA038C201863AC3CC8969D449423654324"
+    },
+    {
+      "source": "gh run view 33748460404 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33748460404.json",
+      "bytes": 5532,
+      "sha256": "A9EF7ABCD0E907BF979A205E02CF3993603237E149F393FEDA11AE35EB3BA951"
+    },
+    {
+      "source": "gh run view 33748868768 --json databaseId,workflowName,status,conclusion,headSha,jobs",
+      "bundle_path": "ci/run-33748868768.json",
+      "bytes": 5532,
+      "sha256": "04B3979A265638EB568D4024FBB5A8507DF6DC1FDC48D80D8A77B663B22154BC"
+    },
+    {
+      "source": "gh run view 33736951606 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33736951606.txt",
+      "bytes": 154750,
+      "sha256": "091398598714BBF07C328EF47DDE62497D613FF37FA768728E36BE3D7F5A5A54"
+    },
+    {
+      "source": "gh run view 33742087214 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33742087214.txt",
+      "bytes": 150151,
+      "sha256": "8DACBEEF0249E58EF968DC1440E9D144542E2BA6B692829F52ED1D244CE8DCF7"
+    },
+    {
+      "source": "gh run view 33743337327 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33743337327.txt",
+      "bytes": 154750,
+      "sha256": "0D981396DBBFF9E566F5AE71EEEFFC29E522061225DB62A9CDE153DA2C682DDD"
+    },
+    {
+      "source": "gh run view 33743950837 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33743950837.txt",
+      "bytes": 152536,
+      "sha256": "C9AAFA5C7777E72EA609D4042FF731906B9FCA5D38524370F93BC643D4034E2F"
+    },
+    {
+      "source": "gh run view 33744219606 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33744219606.txt",
+      "bytes": 154750,
+      "sha256": "29B95FD2C99E2926A9C63FB5DB78CC80196ACA25CFDBE1725BB503302780304C"
+    },
+    {
+      "source": "gh run view 33745505165 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33745505165.txt",
+      "bytes": 156781,
+      "sha256": "49E4E938F8F799430664521CB69DFC2A119BBBAFEAF519924AE0AD1C55D92AAA"
+    },
+    {
+      "source": "gh run view 33745844623 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33745844623.txt",
+      "bytes": 154750,
+      "sha256": "68AF983106952BD3EF1D8565447F073BCD09EE9D6F5A49537B327F014925DAAA"
+    },
+    {
+      "source": "gh run view 33746544048 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33746544048.txt",
+      "bytes": 154750,
+      "sha256": "966A2161B261BA28A8406F4A77152176B21B92F789BBAFAD449E6D815583E7DA"
+    },
+    {
+      "source": "gh run view 33746838579 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33746838579.txt",
+      "bytes": 154750,
+      "sha256": "D41B9DEEA0387BCC9D0760FD7198846C347744F1106F592B48F44646AE86983F"
+    },
+    {
+      "source": "gh run view 33748460404 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33748460404.txt",
+      "bytes": 154585,
+      "sha256": "446C364955656945C8FC46D2623C6B4181EC3E082C1B85015EE38BDFE58B5192"
+    },
+    {
+      "source": "gh run view 33748868768 --log 中该步骤的原始三列输出（未做任何裁剪或重排）",
+      "bundle_path": "ci/step-33748868768.txt",
+      "bytes": 154750,
+      "sha256": "5EC79F9B669024E3DAE31A6C816B17C8C3CEC5F3487CA2BEF722BDC34BA67997"
+    },
+    {
+      "source": "gh api .../contents/.github/workflows/firmware-build.yml?ref=<正例运行 head>",
+      "bundle_path": "ci/workflow-at-90facc3a8875.yml",
+      "bytes": 22045,
+      "sha256": "A43A002D298875E0EA4F2ACE374DC6F78B035E65B2E80A0C569C05E160DC8F77"
+    }
+  ]
+}

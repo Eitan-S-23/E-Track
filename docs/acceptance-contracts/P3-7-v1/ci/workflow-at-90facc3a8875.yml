@@ -1,0 +1,518 @@
+name: MCU Firmware Build
+
+# 单片机固件 GCC 构建工作流（monorepo 路径隔离）：
+# - push 到 main/master 且固件相关路径变更 → 仅构建 + 上传 Actions artifact（14 天；不建 Release、不注册 CF）
+# - workflow_dispatch(publish=true) → 构建 + GitHub Release + 注册 CF 正式候选
+# - 仅固件路径触发本工作流；Flutter 侧由 build.yml 的 changes job 隔离，互不触发
+# - 正式发布后在 CF admin 端将候选晋升为 stable 渠道当前版本
+# 现有 mcu-firmware-release.yml 保留为"手动上传已编译 bin"的后备通道。
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "USER/**"
+      - "ArduinoAPI/**"
+      - "Libraries/**"
+      - "MDK-ARM_F435/**"
+      - "boot/**"
+      - "cmake/**"
+      - "tests/boot/**"
+      - "tests/ota/test_ota_*.c"
+      - "tests/ota/test_ota_*.py"
+      - "tests/ota/test_sdio_command_timeouts.py"
+      - "tests/ota/p3_1_verify_contract_alignment.py"
+      - "tests/ota/p3_1_verify_text_isolation.py"
+      - "tests/ota/p3_1_verify_portability.py"
+      - "tests/ota/stubs/**"
+      - "tests/ota-vectors/**"
+      - "vendor/**"
+      - "Simulator/LVGL.Simulator/lv_conf.h"
+      - ".github/workflows/firmware-build.yml"
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - "USER/**"
+      - "ArduinoAPI/**"
+      - "Libraries/**"
+      - "MDK-ARM_F435/**"
+      - "boot/**"
+      - "cmake/**"
+      - "tests/boot/**"
+      - "tests/ota/test_ota_*.c"
+      - "tests/ota/test_ota_*.py"
+      - "tests/ota/test_sdio_command_timeouts.py"
+      - "tests/ota/p3_1_verify_contract_alignment.py"
+      - "tests/ota/p3_1_verify_text_isolation.py"
+      - "tests/ota/p3_1_verify_portability.py"
+      - "tests/ota/stubs/**"
+      - "tests/ota-vectors/**"
+      - "vendor/**"
+      - "Simulator/LVGL.Simulator/lv_conf.h"
+      - ".github/workflows/firmware-build.yml"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "构建成功后创建 GitHub Release 并注册 Cloudflare 正式候选"
+        required: true
+        type: boolean
+        default: false
+      version_name:
+        description: "固件版本名（如 2.8.0）；留空则取 Version.h 的 VERSION_SOFTWARE + 构建号"
+        required: false
+        type: string
+      release_notes:
+        description: "发布说明（app/admin 展示）"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: firmware-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVICE_MODEL: e-track-at32f435
+  TARGET_HARDWARE: AT32F435RGT7
+  CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+  # Short build tree avoids CMAKE_OBJECT_PATH_MAX warnings on Linux runners.
+  BUILD_DIR: /tmp/etfw
+  BUILD_TYPE: Release
+  SOURCE_DATE_EPOCH: "1786320000"
+
+jobs:
+  build:
+    name: Build firmware (arm-none-eabi-gcc)
+    runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.version.outputs.version_name }}
+      version_code: ${{ steps.version.outputs.version_code }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      sha256: ${{ steps.artifacts.outputs.sha256 }}
+      bin_size: ${{ steps.artifacts.outputs.bin_size }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Arm GNU Toolchain 13.3.Rel1
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: "13.3.Rel1"
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Install OTA host test dependencies
+        run: python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0
+
+      - name: Verify reproducible GCC timestamps
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          ARM_GCC: arm-none-eabi-gcc
+        run: |
+          set -euo pipefail
+          python3 tests/ota/test_ota_gcc_reproducibility.py
+
+      - name: Extract firmware version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION_NAME: ${{ github.event.inputs.version_name }}
+        run: |
+          set -euo pipefail
+
+          # 版本名：手动输入优先，否则取 Version.h 的 VERSION_SOFTWARE（去 v 前缀）
+          base_version="$(sed -n 's/^#define VERSION_SOFTWARE\s*"v\?\([^"]*\)"/\1/p' USER/App/Version.h | head -n1)"
+          if [[ -z "${base_version}" ]]; then
+            echo "::error title=Version missing::USER/App/Version.h VERSION_SOFTWARE not found"
+            exit 1
+          fi
+          build_number="$(git rev-list --count HEAD)"
+          if [[ -n "${INPUT_VERSION_NAME:-}" ]]; then
+            version_name="${INPUT_VERSION_NAME#v}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version_name="${base_version}"
+          else
+            # push 自动构建：nightly 版本名带构建号便于区分，version_code 不变（候选不晋升不影响设备）
+            # （PRE-3：push 仅 artifact，不注册 CF；nightly 名仍用于 artifact 区分）
+            version_name="${base_version}-nightly.${build_number}"
+          fi
+
+          # version_code = major*10000 + minor*100 + patch (u32; PRE-1 / PLAN-OTA.md §3.1)
+          # Examples: 2.8.0→20800, 2.8.1→20801; legacy old-formula 2007(v2.7) < 20700(2.7.0).
+          # Encode from the effective release name so version_name and version_code cannot diverge.
+          encode_src="${version_name%%-*}"
+          encode_src="${encode_src#v}"
+          if [[ ! "${encode_src}" =~ ^([0-9]+)\.([0-9]+)(\.([0-9]+))?$ ]]; then
+            echo "::error title=Invalid version::version_name must start with major.minor[.patch]: ${version_name}"
+            exit 1
+          fi
+          major="${BASH_REMATCH[1]}"
+          minor="${BASH_REMATCH[2]}"
+          patch="${BASH_REMATCH[4]:-0}"
+          if (( 10#${minor} > 99 || 10#${patch} > 99 )); then
+            echo "::error title=Invalid version::minor and patch must be 0..99 for version_code encoding"
+            exit 1
+          fi
+          version_code=$(( 10#${major} * 10000 + 10#${minor} * 100 + 10#${patch} ))
+          if (( version_code < 0 || version_code > 4294967295 )); then
+            echo "::error title=Invalid version::version_code overflows u32 for ${version_name}"
+            exit 1
+          fi
+
+          echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${version_code}" >> "$GITHUB_OUTPUT"
+          echo "build_number=${build_number}" >> "$GITHUB_OUTPUT"
+          echo "固件版本: v${version_name} (code ${version_code}, build ${build_number})"
+
+      - name: Configure (CMake + Ninja)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S "${CMAKE_PROJECT_DIR}" -B "${BUILD_DIR}" \
+            -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_OBJECT_PATH_MAX=1024
+
+      - name: Build firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build "${BUILD_DIR}" --target X_Track_App_GCC X_Track_Boot --parallel
+
+      - name: Run host tests (boot vectors, OTA host tests, P3-1 product regressions)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/boot/test_fw_header_vectors.py
+          python3 tests/boot/test_boot_protocols.py
+          python3 tests/boot/test_boot_state_machine.py
+          python3 tests/ota/test_ota_staging.py
+          python3 tests/ota/test_ota_package.py
+          python3 tests/ota/test_ota_patch.py
+          python3 tests/ota/test_ota_ble_frame.py
+          python3 tests/ota/test_ota_ble_session.py
+          python3 tests/ota/p3_1_verify_contract_alignment.py
+          python3 tests/ota/p3_1_verify_text_isolation.py
+          python3 tests/ota/p3_1_verify_portability.py
+          python3 tests/ota/test_ota_device_info.py
+
+      - name: Validate OTA App layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import re
+          from pathlib import Path
+
+          layout_text = Path("Libraries/OTA/ota_layout.h").read_text(encoding="ascii")
+
+          def macro(name):
+              match = re.search(
+                  rf"(?m)^\s*#define\s+{re.escape(name)}\s+(0x[0-9A-Fa-f]+|[0-9]+)\b",
+                  layout_text,
+              )
+              if not match:
+                  raise SystemExit(f"layout macro missing: {name}")
+              return int(match.group(1), 0)
+
+          app_origin = macro("OTA_APP_ORIGIN")
+          app_length = macro("OTA_APP_LENGTH")
+          header_offset = macro("OTA_FW_HEADER_OFFSET")
+          header_size = macro("OTA_FW_HEADER_SIZE")
+          vector_max = macro("OTA_VECTOR_MAX")
+          ram_origin = macro("OTA_RAM_ORIGIN")
+          ram_length = macro("OTA_RAM_LENGTH")
+          overlay_origin = macro("OTA_OVERLAY_ORIGIN")
+          overlay_length = macro("OTA_OVERLAY_LENGTH")
+          workspace_length = macro("OTA_OVERLAY_WORKSPACE_LENGTH")
+          evidence_size = macro("OTA_VTOR_EVIDENCE_SIZE")
+
+          output_dir = Path(os.environ["BUILD_DIR"]) / "app-gcc"
+          map_text = (output_dir / "X-Track-App-GCC.map").read_text(
+              encoding="utf-8", errors="replace"
+          )
+          linker_text = (output_dir / "x-track-app-gcc.ld").read_text(
+              encoding="utf-8", errors="strict"
+          )
+          raw_bin = (output_dir / "X-Track-App-GCC.bin").read_bytes()
+
+          def map_region(name):
+              match = re.search(
+                  rf"(?m)^{re.escape(name)}\s+(0x[0-9A-Fa-f]+)\s+(0x[0-9A-Fa-f]+)\s+",
+                  map_text,
+              )
+              if not match:
+                  raise SystemExit(f"map region missing: {name}")
+              return tuple(int(value, 16) for value in match.groups())
+
+          def map_section(name):
+              match = re.search(
+                  rf"(?m)^{re.escape(name)}\s+(0x[0-9A-Fa-f]+)\s+(0x[0-9A-Fa-f]+)",
+                  map_text,
+              )
+              if not match:
+                  raise SystemExit(f"map section missing: {name}")
+              return tuple(int(value, 16) for value in match.groups())
+
+          if map_region("FLASH") != (app_origin, app_length):
+              raise SystemExit("A1: FLASH region mismatch")
+          if map_region("RAM") != (ram_origin, ram_length):
+              raise SystemExit("A7: RAM region mismatch")
+          if map_region("RW_IRAM2") != (overlay_origin, overlay_length):
+              raise SystemExit("A7: overlay region mismatch")
+
+          vector = map_section(".isr_vector")
+          header = map_section(".fw_header")
+          evidence = map_section(".ota_vtor_noinit")
+          overlay = map_section(".sram_ext")
+          ota_overlay = map_section(".ota_overlay")
+          if vector[0] != app_origin or vector[1] > vector_max:
+              raise SystemExit("A3: vector placement/size mismatch")
+          if header != (app_origin + header_offset, header_size):
+              raise SystemExit("A4: firmware header placement/size mismatch")
+          if evidence[1] < evidence_size:
+              raise SystemExit("A6: VTOR evidence section too small")
+          if not (ram_origin <= evidence[0] and evidence[0] + evidence[1] <= ram_origin + ram_length):
+              raise SystemExit("A6: VTOR evidence section escaped main RAM")
+          if overlay != (overlay_origin, overlay_length):
+              raise SystemExit("A7: overlay section mismatch")
+          if ota_overlay != (overlay_origin, workspace_length):
+              raise SystemExit("A7: OTA workspace overlay mismatch")
+          if "g_ota_vtor_actual" not in map_text or "g_ota_vtor_expected" not in map_text:
+              raise SystemExit("A6: VTOR evidence symbols missing")
+
+          linker_flash = re.search(
+              r"FLASH\s+\(rx\)\s*:\s*ORIGIN\s*=\s*(0x[0-9A-Fa-f]+)\s*,\s*LENGTH\s*=\s*(0x[0-9A-Fa-f]+)",
+              linker_text,
+          )
+          if not linker_flash or tuple(int(value, 16) for value in linker_flash.groups()) != (
+              app_origin,
+              app_length,
+          ):
+              raise SystemExit("A1: preprocessed linker MEMORY mismatch")
+          if "ASSERT(SIZEOF(.isr_vector) <= " not in linker_text:
+              raise SystemExit("A3: vector size ASSERT missing")
+
+          header_bytes = raw_bin[header_offset:header_offset + header_size]
+          if len(header_bytes) != header_size or header_bytes != bytes([0xFF]) * header_size:
+              raise SystemExit("A5: raw firmware header is not the placeholder")
+          if len(raw_bin) > app_length:
+              raise SystemExit("A5: raw App image exceeds contracted Flash length")
+
+          prefix_sha = hashlib.sha256(raw_bin[:header_offset]).hexdigest()
+          print(
+              "OTA_LAYOUT_ASSERTIONS=PASS "
+              f"flash={app_origin:#010x}/{app_length:#x} "
+              f"vector={vector[0]:#010x}/{vector[1]:#x} "
+              f"header={header[0]:#010x}/{header[1]} "
+              f"raw_prefix_sha256={prefix_sha}"
+          )
+          PY
+
+      - name: Validate OTA Boot skeleton
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/boot/validate_boot_artifact.py --build-dir "${BUILD_DIR}"
+          python3 tests/boot/validate_boot_handoff.py --build-dir "${BUILD_DIR}"
+
+      - name: Report firmware artifacts
+        id: artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${BUILD_DIR}/app-gcc"
+
+          arm-none-eabi-size --format=berkeley X-Track-App-GCC.elf
+
+          sha256="$(sha256sum X-Track-App-GCC.bin | awk '{print $1}')"
+          bin_size="$(stat -c%s X-Track-App-GCC.bin)"
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+          echo "bin_size=${bin_size}" >> "$GITHUB_OUTPUT"
+          echo "X-Track-App-GCC.bin: ${bin_size} bytes, sha256=${sha256}"
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ steps.version.outputs.version_name }}
+          path: |
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.bin
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.hex
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.elf
+            ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.map
+          retention-days: 14
+          if-no-files-found: error
+
+      # Keep the App artifact rooted at app-gcc/ so the gated release job's
+      # existing firmware-release-assets/X-Track-App-GCC.bin path stays stable.
+      - name: Upload Boot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: boot-${{ steps.version.outputs.version_name }}
+          path: |
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.bin
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.hex
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.elf
+            ${{ env.BUILD_DIR }}/boot/X-Track-Boot.map
+          retention-days: 14
+          if-no-files-found: error
+
+  register-cloudflare:
+    name: Register firmware to Cloudflare
+    runs-on: ubuntu-latest
+    needs: build
+    # PRE-3 / PLAN-OTA.md §6.1：仅 workflow_dispatch publish=true 走正式注册链；
+    # push/PR 永不进入本 job（nightly 不建 Release、不注册 CF）。
+    if: >-
+      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'
+
+    steps:
+      - name: Block release until OTA boot chain is ready
+        shell: bash
+        env:
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+        run: |
+          set -euo pipefail
+          if [[ "${OTA_BOOT_CHAIN_READY:-}" != "true" ]]; then
+            echo "::error title=OTA boot chain not ready::App starts at the OTA App origin and cannot boot from reset until P1-5 bootstrap and P4-1 release rehearsal pass"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download firmware artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware-${{ needs.build.outputs.version_name }}
+          path: firmware-release-assets
+
+      - name: Finalize firmware header for release
+        shell: bash
+        env:
+          APP_BIN: firmware-release-assets/X-Track-App-GCC.bin
+          VERSION_NAME: ${{ needs.build.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          build_ts="$(git show -s --format=%ct "${GITHUB_SHA}")"
+          python3 Tools/etu_pack.py finalize \
+            --app "${APP_BIN}" \
+            --ver-name "${VERSION_NAME}" \
+            --build-ts "${build_ts}"
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path("Tools").resolve()))
+          from etu_unpack import verify_fw_header
+
+          app = Path(os.environ["APP_BIN"])
+          image = app.read_bytes()
+          verify_fw_header(image, "release")
+          print(
+              "RELEASE_FW_HEADER=FINALIZED "
+              f"size={len(image)} sha256={hashlib.sha256(image).hexdigest()}"
+          )
+          PY
+
+      - name: Check Cloudflare configuration
+        id: cloudflare_config
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" && -n "${CLOUDFLARE_API_TOKEN:-}" && -n "${TRACE_UPDATE_SERVICE_URL:-}" && -n "${TRACE_DEPLOY_TOKEN:-}" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::error title=Cloudflare secrets missing::publish=true 需要配置 CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN / TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_NAME: ${{ needs.build.outputs.version_name }}
+          RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
+        run: |
+          set -euo pipefail
+          # 仅正式发布链进入本 job：版本 tag，非 prerelease
+          release_tag="mcu-${DEVICE_MODEL}-v${VERSION_NAME}"
+          notes="${RELEASE_NOTES:-MCU firmware ${release_tag} (${GITHUB_SHA})}"
+          if gh release view "${release_tag}" >/dev/null 2>&1; then
+            gh release edit "${release_tag}" --target "${GITHUB_SHA}" --notes "${notes}"
+          else
+            gh release create "${release_tag}" --target "${GITHUB_SHA}" --title "${release_tag}" --notes "${notes}"
+          fi
+          gh release upload "${release_tag}" firmware-release-assets/X-Track-App-GCC.bin --clobber
+          echo "RELEASE_TAG=${release_tag}" >> "$GITHUB_ENV"
+
+      - name: Build Cloudflare firmware metadata
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/build-firmware-release-metadata.mjs \
+            --assets-dir firmware-release-assets \
+            --firmware-file firmware-release-assets/X-Track-App-GCC.bin \
+            --release-tag "${RELEASE_TAG}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --commit-sha "${GITHUB_SHA}" \
+            --repository "${GITHUB_REPOSITORY}" \
+            --device-model "${DEVICE_MODEL}" \
+            --version-name "${{ needs.build.outputs.version_name }}" \
+            --version-code "${{ needs.build.outputs.version_code }}" \
+            --release-notes "${{ github.event.inputs.release_notes || format('CI build {0}', github.sha) }}" \
+            --target-hardware "${TARGET_HARDWARE}" \
+            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
+
+      - name: Install Cloudflare upload tooling
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        run: npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+      - name: Upload Cloudflare R2 firmware asset
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET || 'trace-update-staging-releases' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs \
+            --assets-dir firmware-release-assets \
+            --metadata firmware-release-assets/cloudflare-firmware-release-metadata.json \
+            --bucket "${TRACE_R2_BUCKET}" \
+            --wrangler-cwd app/bluetooth_flutter_Trace/cloudflare/update-service/worker \
+            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
+
+      - name: Register Cloudflare firmware candidate
+        if: steps.cloudflare_config.outputs.enabled == 'true'
+        env:
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs \
+            firmware-release-assets/cloudflare-firmware-release-metadata.json

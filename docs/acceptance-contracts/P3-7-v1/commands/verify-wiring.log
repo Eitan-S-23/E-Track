@@ -1,0 +1,181 @@
+=== P3-7 接线静态核验 ===
+workflow size=22045 sha256=A43A002D298875E0 head_size=21482
+== A. 目标步骤与 fail-closed 结构 ==
+  ok   顶层 name 保持 MCU Firmware Build
+  ok   顶层 name 行相对基线 main 逐字节未变
+  ok   jobs.build.name 行相对基线 main 逐字节未变且存在
+  ok   旧步骤名已不存在（名称与实际内容对齐）
+  ok   存在步骤 `Run host tests (boot vectors, OTA host tests, P3-1 product regressions)`
+  ok   该步骤存在非空 run 脚本块 = 13
+  ok   步骤命令序列精确等于 8 条既有 + 4 条接线 = ['set -euo pipefail', 'python3 tests/boot/test_fw_header_vectors.py', 'python3 tests/boot/test_boot_protocols.py', 'python3 tests/boot/test_boot_state_machine.py', 'python3 tests/ota/test_ota_staging.py', 'python3 tests/ota/test_ota_package.py', 'python3 tests/ota/test_ota_patch.py', 'python3 tests/ota/test_ota_ble_frame.py', 'python3 tests/ota/test_ota_ble_session.py', 'python3 tests/ota/p3_1_verify_contract_alignment.py', 'python3 tests/ota/p3_1_verify_text_isolation.py', 'python3 tests/ota/p3_1_verify_portability.py', 'python3 tests/ota/test_ota_device_info.py']
+  ok   步骤首行是 set -euo pipefail
+  ok   接线命令存在：python3 tests/ota/p3_1_verify_contract_alignment.py
+  ok   接线命令落在 set -euo pipefail 之后：python3 tests/ota/p3_1_verify_contract_alignment.py
+  ok   接线命令未被额外子句包裹：python3 tests/ota/p3_1_verify_contract_alignment.py
+  ok   接线命令存在：python3 tests/ota/p3_1_verify_text_isolation.py
+  ok   接线命令落在 set -euo pipefail 之后：python3 tests/ota/p3_1_verify_text_isolation.py
+  ok   接线命令未被额外子句包裹：python3 tests/ota/p3_1_verify_text_isolation.py
+  ok   接线命令存在：python3 tests/ota/p3_1_verify_portability.py
+  ok   接线命令落在 set -euo pipefail 之后：python3 tests/ota/p3_1_verify_portability.py
+  ok   接线命令未被额外子句包裹：python3 tests/ota/p3_1_verify_portability.py
+  ok   接线命令存在：python3 tests/ota/test_ota_device_info.py
+  ok   接线命令落在 set -euo pipefail 之后：python3 tests/ota/test_ota_device_info.py
+  ok   接线命令未被额外子句包裹：python3 tests/ota/test_ota_device_info.py
+  ok   目标步骤无 continue-on-error
+  ok   目标步骤无 if: 条件
+  ok   workflow 非注释行集合非空（空集守卫） = 501
+  ok   全文件无 fail-open 写法 /\|\|\s*true\b/ = []
+  ok   全文件无 fail-open 写法 /\|\|\s*:\s*$/ = []
+  ok   全文件无 fail-open 写法 /continue-on-error:\s*true/ = []
+  ok   全文件无 fail-open 写法 /set\s+\+e/ = []
+  ok   全文件无 fail-open 写法 /if:\s*always\(\)/ = []
+  ok   全文件无 fail-open 写法 /^\s*exit\s+0\s*$/ = []
+== B. 触发器同步、闭包与互镜 ==
+  ok   解析出 push / pull_request 两份触发器 = ['pull_request', 'push']
+  ok   两份 paths 列表均非空（空集守卫） = (18, 18)
+  ok   两份 paths 逐项相等（同序同项） = ['USER/**', 'ArduinoAPI/**', 'Libraries/**', 'MDK-ARM_F435/**', 'boot/**', 'cmake/**', 'tests/boot/**', 'tests/ota/test_ota_*.c', 'tests/ota/test_ota_*.py', 'tests/ota/test_sdio_command_timeouts.py', 'tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_text_isolation.py', 'tests/ota/p3_1_verify_portability.py', 'tests/ota/stubs/**', 'tests/ota-vectors/**', 'vendor/**', 'Simulator/LVGL.Simulator/lv_conf.h', '.github/workflows/firmware-build.yml']
+  ok   push.paths 含精确条目：tests/ota/p3_1_verify_contract_alignment.py
+  ok   pull_request.paths 含精确条目：tests/ota/p3_1_verify_contract_alignment.py
+  ok   push.paths 含精确条目：tests/ota/p3_1_verify_text_isolation.py
+  ok   pull_request.paths 含精确条目：tests/ota/p3_1_verify_text_isolation.py
+  ok   push.paths 含精确条目：tests/ota/p3_1_verify_portability.py
+  ok   pull_request.paths 含精确条目：tests/ota/p3_1_verify_portability.py
+  ok   未为已被通配覆盖的脚本新增冗余精确条目：tests/ota/test_ota_device_info.py
+  ok   覆盖它的既有通配仍在两份 paths 内：tests/ota/test_ota_*.py
+  ok   通配确实覆盖该脚本（覆盖关系实算，非声明）：tests/ota/test_ota_*.py -> tests/ota/test_ota_device_info.py
+  ok   基线 main 两份 paths 解析非空（空集守卫） = (15, 15)
+  ok   push.paths 未删除任何既有条目 = []
+  ok   pull_request.paths 未删除任何既有条目 = []
+  ok   push.paths 新增恰为三条脚本 = ['tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_text_isolation.py', 'tests/ota/p3_1_verify_portability.py']
+  ok   pull_request.paths 新增恰为三条脚本 = ['tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_text_isolation.py', 'tests/ota/p3_1_verify_portability.py']
+  ok   步骤内 python3 执行行计数 = 12
+  ok   执行行集合非空（空集守卫）
+  ok   闭包：执行行被 paths 覆盖 tests/boot/test_fw_header_vectors.py
+  ok   执行行指向的文件真实存在 tests/boot/test_fw_header_vectors.py
+  ok   闭包：执行行被 paths 覆盖 tests/boot/test_boot_protocols.py
+  ok   执行行指向的文件真实存在 tests/boot/test_boot_protocols.py
+  ok   闭包：执行行被 paths 覆盖 tests/boot/test_boot_state_machine.py
+  ok   执行行指向的文件真实存在 tests/boot/test_boot_state_machine.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/test_ota_staging.py
+  ok   执行行指向的文件真实存在 tests/ota/test_ota_staging.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/test_ota_package.py
+  ok   执行行指向的文件真实存在 tests/ota/test_ota_package.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/test_ota_patch.py
+  ok   执行行指向的文件真实存在 tests/ota/test_ota_patch.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/test_ota_ble_frame.py
+  ok   执行行指向的文件真实存在 tests/ota/test_ota_ble_frame.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/test_ota_ble_session.py
+  ok   执行行指向的文件真实存在 tests/ota/test_ota_ble_session.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/p3_1_verify_contract_alignment.py
+  ok   执行行指向的文件真实存在 tests/ota/p3_1_verify_contract_alignment.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/p3_1_verify_text_isolation.py
+  ok   执行行指向的文件真实存在 tests/ota/p3_1_verify_text_isolation.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/p3_1_verify_portability.py
+  ok   执行行指向的文件真实存在 tests/ota/p3_1_verify_portability.py
+  ok   闭包：执行行被 paths 覆盖 tests/ota/test_ota_device_info.py
+  ok   执行行指向的文件真实存在 tests/ota/test_ota_device_info.py
+  ok   新增触发器条目集合非空（空集守卫） = ['tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_text_isolation.py', 'tests/ota/p3_1_verify_portability.py']
+  ok   新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_mutation.py = []
+  ok   不接入脚本未被写进执行行 tests/ota/p3_1_verify_mutation.py
+  ok   新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_production_binary.py = []
+  ok   不接入脚本未被写进执行行 tests/ota/p3_1_verify_production_binary.py
+  ok   新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_rx_ring_budget.py = []
+  ok   不接入脚本未被写进执行行 tests/ota/p3_1_verify_rx_ring_budget.py
+  ok   新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_artifacts.py = []
+  ok   不接入脚本未被写进执行行 tests/ota/p3_1_verify_artifacts.py
+  ok   新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_command_fidelity.py = []
+  ok   不接入脚本未被写进执行行 tests/ota/p3_1_verify_command_fidelity.py
+  ok   互镜判据阳性对照：通配模式确实会命中不接入脚本
+== C. 冻结红线 ==
+  ok   本轮改动集合非空且下限成立（空集守卫） = 79
+  ok   零改动：tests/ota/p3_1_verify_contract_alignment.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_contract_alignment.py
+  ok   零改动：tests/ota/p3_1_verify_text_isolation.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_text_isolation.py
+  ok   零改动：tests/ota/p3_1_verify_portability.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_portability.py
+  ok   零改动：tests/ota/test_ota_device_info.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/test_ota_device_info.py
+  ok   零改动：tests/ota/p3_1_verify_mutation.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_mutation.py
+  ok   零改动：tests/ota/p3_1_verify_production_binary.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_production_binary.py
+  ok   零改动：tests/ota/p3_1_verify_rx_ring_budget.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_rx_ring_budget.py
+  ok   零改动：tests/ota/p3_1_verify_artifacts.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_artifacts.py
+  ok   零改动：tests/ota/p3_1_verify_command_fidelity.py
+  ok   仍是原路径的跟踪文件（未改名/移动）：tests/ota/p3_1_verify_command_fidelity.py
+  ok   零改动：Libraries/USB_MSC/msc_diskio.c.old
+  ok   仍是原路径的跟踪文件（未改名/移动）：Libraries/USB_MSC/msc_diskio.c.old
+  ok   红线未被改动 /^boot// = []
+  ok   红线未被改动 /^Libraries/OTA// = []
+  ok   红线未被改动 /^USER// = []
+  ok   红线未被改动 /^PLAN-OTA\.md$/ = []
+  ok   红线未被改动 /^docs/ota-binary-contracts\.md$/ = []
+  ok   红线未被改动 /^docs/ota-cross-system-contracts\.md$/ = []
+  ok   红线未被改动 /^docs/acceptance-execution-contract\.md$/ = []
+  ok   红线未被改动 /^Tools/etu_pack\.py$/ = []
+  ok   红线未被改动 /^Tools/acceptance// = []
+  ok   红线未被改动 /^Tools/provenance// = []
+  ok   红线未被改动 /^\.github/workflows/acceptance-governance\.yml$/ = []
+  ok   红线未被改动 /^tests/ota-vectors// = []
+  ok   红线未被改动 /^tests/ota/p3_1_verify_/ = []
+  ok   红线未被改动 /^Libraries/USB_MSC// = []
+== D. 改动范围与字节卫生 ==
+  [P3-7] 4 项: ['.claude/p3_7_run_ci_sequence.py', '.github/workflows/firmware-build.yml', 'docs/ota-exec-notes/P3-7-research-wiring.md', 'docs/ota-exec-notes/P3-7-wiring-evidence.md']
+  [验收] 67 项: ['.gitattributes', 'docs/ota-exec-notes/P3-7-acceptance-round1.md', 'docs/ota-exec-notes/P3-7-acceptance-round2.md', 'docs/ota-prompts/prompt-P3-7-implementation.md', 'tests/ota/p3_7_verify_ci_evidence.py', 'tests/ota/p3_7_verify_wiring.py', '.claude/verification-report-p3-7.md', '.claude/write_p3_7_acceptance_board.py', 'docs/acceptance-contracts/P3-7-v1.contract.json', 'docs/acceptance-contracts/P3-7-v1/artifacts/artifact-index.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33736951606.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33742087214.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33743337327.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33743950837.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33744219606.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33745505165.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33745844623.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33746544048.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33746838579.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33748460404.json', 'docs/acceptance-contracts/P3-7-v1/ci/changed-33748868768.json', 'docs/acceptance-contracts/P3-7-v1/ci/pr-19.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33736951606.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33742087214.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33743337327.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33743950837.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33744219606.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33745505165.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33745844623.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33746544048.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33746838579.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33748460404.json', 'docs/acceptance-contracts/P3-7-v1/ci/run-33748868768.json', 'docs/acceptance-contracts/P3-7-v1/ci/step-33736951606.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33742087214.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33743337327.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33743950837.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33744219606.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33745505165.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33745844623.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33746544048.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33746838579.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33748460404.txt', 'docs/acceptance-contracts/P3-7-v1/ci/step-33748868768.txt', 'docs/acceptance-contracts/P3-7-v1/ci/workflow-at-90facc3a8875.yml', 'docs/acceptance-contracts/P3-7-v1/commands/ci-harness-selftest.log', 'docs/acceptance-contracts/P3-7-v1/commands/governance-gate.log', 'docs/acceptance-contracts/P3-7-v1/commands/harness-discrimination.log', 'docs/acceptance-contracts/P3-7-v1/commands/p3-6-harness-status.log', 'docs/acceptance-contracts/P3-7-v1/commands/product-redline-diff.log', 'docs/acceptance-contracts/P3-7-v1/commands/verify-ci-evidence.log', 'docs/acceptance-contracts/P3-7-v1/commands/verify-wiring.log', 'docs/acceptance-contracts/P3-7-v1/external/P3-7-wiring-evidence.md', 'docs/acceptance-contracts/P3-7-v1/harness/ci_harness_selftest.py', 'docs/acceptance-contracts/P3-7-v1/harness/collect_run.py', 'docs/acceptance-contracts/P3-7-v1/harness/inject_ci.py', 'docs/acceptance-contracts/P3-7-v1/harness/inject_probe.py', 'docs/acceptance-contracts/P3-7-v1/manifest-governance/source-manifest.json', 'docs/acceptance-contracts/P3-7-v1/manifest-governance/source-manifest.txt', 'docs/acceptance-contracts/P3-7-v1/manifest-governance/summary.json', 'docs/acceptance-contracts/P3-7-v1/manifest-production/source-manifest.json', 'docs/acceptance-contracts/P3-7-v1/manifest-production/source-manifest.txt', 'docs/acceptance-contracts/P3-7-v1/manifest-production/summary.json', 'docs/acceptance-contracts/P3-7-v1/manifest-validation/source-manifest.json', 'docs/acceptance-contracts/P3-7-v1/manifest-validation/source-manifest.txt', 'docs/acceptance-contracts/P3-7-v1/manifest-validation/summary.json', 'docs/ota-exec-notes/P3-7-acceptance-round3.md']
+  [共有] 1 项: ['PLAN-OTA-EXEC.md']
+  [既有] 7 项: ['.cache-cmake-time-test.cmake', '.claude/cc_recover_s4.js', '.claude/ccprobe_hash.js', '.claude/ccprobe_plan.js', '.claude/write_p3_2_acceptance_board.py', '.claude/write_r5_phase0_board.py', '.claude/write_r5_ruling_board.py']
+  [未归类] 0 项: []
+  ok   无法归类的改动为空 = []
+  ok   P3-7 卡内改动恰为 workflow + 两份笔记 + 预演驱动 = ['.claude/p3_7_run_ci_sequence.py', '.github/workflows/firmware-build.yml', 'docs/ota-exec-notes/P3-7-research-wiring.md', 'docs/ota-exec-notes/P3-7-wiring-evidence.md']
+  ok   共有改动恰为看板 = ['PLAN-OTA-EXEC.md']
+  ok   既有未跟踪残留清单全等 = ['.cache-cmake-time-test.cmake', '.claude/cc_recover_s4.js', '.claude/ccprobe_hash.js', '.claude/ccprobe_plan.js', '.claude/write_p3_2_acceptance_board.py', '.claude/write_r5_phase0_board.py', '.claude/write_r5_ruling_board.py']
+  ok   workflow CRLF 计数未变（未被 EOL 归一） = 245
+  ok   workflow 裸 LF 计数恰增 10（10 条新增行） = 273
+  ok   workflow diff 为 11 增 1 删 = [['11', '1', '.github/workflows/firmware-build.yml']]
+  ok   workflow -w diff 同为 11/1（无仅空白差异对） = [['11', '1', '.github/workflows/firmware-build.yml']]
+  ok   看板裸 LF 计数恰增 1（§9 登记表追加 1 行） = 253
+  ok   看板 CRLF 计数恰增 4（§10 追加 3 行 + 卡内新增验收发现 1 行） = 730
+  ok   看板 diff 为 9 增 4 删 = [['9', '4', 'PLAN-OTA-EXEC.md']]
+  ok   P3-7 卡内未出现任何哈希/commit SHA = []
+  ok   §10 会话日志行集合非空（空集守卫） = 184
+  ok   §10 每条日志行都以 Markdown 列表标记 `- ` 开头 = []
+  ok   证据笔记存在：docs/ota-exec-notes/P3-7-research-wiring.md
+  ok   UTF-8 无 BOM：docs/ota-exec-notes/P3-7-research-wiring.md
+  ok   笔记非空且有实质内容：docs/ota-exec-notes/P3-7-research-wiring.md = 6194
+  ok   证据笔记存在：docs/ota-exec-notes/P3-7-wiring-evidence.md
+  ok   UTF-8 无 BOM：docs/ota-exec-notes/P3-7-wiring-evidence.md
+  ok   笔记非空且有实质内容：docs/ota-exec-notes/P3-7-wiring-evidence.md = 13312
+== E. 被接四脚本实跑与计数对账 ==
+  ok   实跑退出码 0：tests/ota/p3_1_verify_contract_alignment.py = 0
+  ok   实跑输出恰含一条结论标记：tests/ota/p3_1_verify_contract_alignment.py = ['P3_1_CONTRACT_ALIGNMENT=PASS drift=0 checks=47']
+       P3_1_CONTRACT_ALIGNMENT=PASS drift=0 checks=47
+  ok   实跑退出码 0：tests/ota/p3_1_verify_text_isolation.py = 0
+  ok   实跑输出恰含一条结论标记：tests/ota/p3_1_verify_text_isolation.py = ['P3_1_TEXT_ISOLATION=PASS cases=3 transparent=0 trace_points=1 sink_guard=True']
+       P3_1_TEXT_ISOLATION=PASS cases=3 transparent=0 trace_points=1 sink_guard=True
+  ok   实跑退出码 0：tests/ota/p3_1_verify_portability.py = 0
+  ok   实跑输出恰含一条结论标记：tests/ota/p3_1_verify_portability.py = ['P3_1_PORTABILITY=PASS scanned=895 control_hits=1 live_hits=0 new_src_hits=0']
+       P3_1_PORTABILITY=PASS scanned=895 control_hits=1 live_hits=0 new_src_hits=0
+  ok   实跑退出码 0：tests/ota/test_ota_device_info.py = 0
+  ok   实跑输出恰含一条结论标记：tests/ota/test_ota_device_info.py = ['P3_2_OTA_DEVICE_INFO_ALL=PASS']
+       P3_2_OTA_DEVICE_INFO_ALL=PASS
+  ok   结论标记逐字符等于基线：tests/ota/p3_1_verify_contract_alignment.py = 'P3_1_CONTRACT_ALIGNMENT=PASS drift=0 checks=47'
+  ok   结论标记逐字符等于基线：tests/ota/p3_1_verify_text_isolation.py = 'P3_1_TEXT_ISOLATION=PASS cases=3 transparent=0 trace_points=1 sink_guard=True'
+  ok   结论标记逐字符等于基线：tests/ota/test_ota_device_info.py = 'P3_2_OTA_DEVICE_INFO_ALL=PASS'
+  ok   portability 结论为 PASS = 'P3_1_PORTABILITY=PASS scanned=895 control_hits=1 live_hits=0 new_src_hits=0'
+  ok   阳性对照仍命中 1 处（对照非空守卫） = '1'
+  ok   在编手写源零反斜杠 include = '0'
+  ok   P3-1 新源零命中 = '0'
+  ok   cmd12 汇总行逐字符等于 P3-2 基线 = ['P3_2_OTA_DEVICE_INFO checks=114 failures=0', 'P3_2_OTA_DEVICE_INFO_ALL=PASS']
+  ok   重算扫描集合非空（空集守卫） = 895
+  ok   脚本自报 scanned 与独立重算一致 = '895'
+  ok   立卡基线扫描数复现 = 893
+  ok   scanned 增量被逐文件解释（P3-2 落地新增的两个源） = ['Libraries/OTA/ota_device_info.c', 'Libraries/OTA/ota_device_info.h']
+  ok   立卡基线内文件无一消失 = []
+  ok   治理自测退出码 0 = 0
+  ok   治理自测用例数 = '65'
+  ok   治理自测末行为 OK
+=== 失败项 0 / 核对项 163 ===
+P3_7_WIRING=PASS checks=163 failures=0

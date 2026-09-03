@@ -1,0 +1,780 @@
+{
+    "Schema":  "etrack-input-manifest-v2",
+    "Profile":  "Validation",
+    "Ordering":  "UTF-8 normalized slash paths, bytewise Ordinal ascending",
+    "Encoding":  "UTF-8 without BOM, CRLF, one trailing newline",
+    "FileCount":  154,
+    "ManifestSHA256":  "B5331BE603F447FE325EC99DCB54456C20D0B52585FD7ACC7918882CA47EDB60",
+    "Files":  [
+                  {
+                      "Path":  ".github/workflows/acceptance-governance.yml",
+                      "Length":  3628,
+                      "SHA256":  "DDD1B1A16E47FBACDB5ED89953621ABBC730C3D3D8F898B1816F3446467E7825"
+                  },
+                  {
+                      "Path":  "Tools/AGENCYB.TTF",
+                      "Length":  60656,
+                      "SHA256":  "4FDE694CC486B55266F7561C685FBD9153EA0003F0C0C39FC744B132051D40C5"
+                  },
+                  {
+                      "Path":  "Tools/acceptance/validate_bundle.py",
+                      "Length":  70505,
+                      "SHA256":  "96194102FD71CDD945221FCBA7CAC008FD6C853CE8794E41F454633C899886B7"
+                  },
+                  {
+                      "Path":  "Tools/addr2line.exe",
+                      "Length":  978944,
+                      "SHA256":  "E185FEF0D3F66BFA30E46D4CA55F0015D933F12FC83EC7643675400E209AF1F9"
+                  },
+                  {
+                      "Path":  "Tools/etu_pack.py",
+                      "Length":  19085,
+                      "SHA256":  "6539F67897956BE5D3158A7A5A82C6896306EBD8F51A207A7C9C04FF2864FC4F"
+                  },
+                  {
+                      "Path":  "Tools/etu_unpack.py",
+                      "Length":  17826,
+                      "SHA256":  "100CACD8343EEE9755777B1062E672BECB338449A5A34D4B22B9D40C43F8FA3C"
+                  },
+                  {
+                      "Path":  "Tools/font_gen/README.md",
+                      "Length":  3973,
+                      "SHA256":  "84CE5B49F6165DD2F2A3C06974A82543F739F9E3FEBC816680D46ECAB0133121"
+                  },
+                  {
+                      "Path":  "Tools/font_gen/font_config.json",
+                      "Length":  1608,
+                      "SHA256":  "EC3EAD824A3B56133C4EAC79105508FC34B289D9FC458720F21CAD29BFF5D7F8"
+                  },
+                  {
+                      "Path":  "Tools/font_gen/font_max_config.json",
+                      "Length":  285,
+                      "SHA256":  "C8B049B5C5235614E5496F7C565836EFE4AD2E0D66DA52B06F371DB6E3209378"
+                  },
+                  {
+                      "Path":  "Tools/font_gen/gen_font.bat",
+                      "Length":  822,
+                      "SHA256":  "258F6282F25A7B98A1FE6B7C61635FDB11BAC533F99291EA44F9448DC954C237"
+                  },
+                  {
+                      "Path":  "Tools/font_gen/gen_font.py",
+                      "Length":  8214,
+                      "SHA256":  "A34DEBB75A22E98636587CE2C93A0E6F84374D8524B13F23537B7729A38C2B25"
+                  },
+                  {
+                      "Path":  "Tools/jlink/deploy-ota-bootstrap.ps1",
+                      "Length":  9330,
+                      "SHA256":  "3FF84DC5AEB0982AB524C93D91A8304B535F4BBD13B8D120A13E82E798634630"
+                  },
+                  {
+                      "Path":  "Tools/jlink/flash-app-ac5.jlink",
+                      "Length":  124,
+                      "SHA256":  "9D9805EB16927D255295ED80D9418F14F36A98AA88ED8BAE501DEC38E4DD4255"
+                  },
+                  {
+                      "Path":  "Tools/jlink/flash-app-gcc.jlink",
+                      "Length":  160,
+                      "SHA256":  "12371530D0D8550E9199F822B3199A7162A9C37B0A6ACE6493352FE64E98342C"
+                  },
+                  {
+                      "Path":  "Tools/jlink/flash-boot.jlink",
+                      "Length":  155,
+                      "SHA256":  "1AA30C1FC5AF49F00976F8690D84DCE810F03048186C95786B2FF5E8DF804D94"
+                  },
+                  {
+                      "Path":  "Tools/jlink/flash-recovery-container.ps1",
+                      "Length":  4724,
+                      "SHA256":  "BF65E0C2AF3E962C9AFA581353957FB8C58BCA9504C0FEB0C31AFC5D88945579"
+                  },
+                  {
+                      "Path":  "Tools/jlink/jlink-common.ps1",
+                      "Length":  17784,
+                      "SHA256":  "DFDFAF81F7911636C5A56A15B419DB3828ECEA036F7C7EAB861BEC05BD47E3ED"
+                  },
+                  {
+                      "Path":  "Tools/jlink/p1-6-common.ps1",
+                      "Length":  26613,
+                      "SHA256":  "F41418D45716EFF625DB9A0CCDD075F5C901A3EB3B6B7C433D71C48E0845FF71"
+                  },
+                  {
+                      "Path":  "Tools/jlink/p1_6_protocol.py",
+                      "Length":  9077,
+                      "SHA256":  "C3211E46AB79844AA3DEF77C25B73FD32C82C2DF19E83904F7B5818FB6F7034F"
+                  },
+                  {
+                      "Path":  "Tools/jlink/p2_1_protocol.py",
+                      "Length":  17055,
+                      "SHA256":  "A408353AB7DB9A9C25FF03C9747561D5C38B87477D8B0368B14606F450C5088B"
+                  },
+                  {
+                      "Path":  "Tools/jlink/p2_2_protocol.py",
+                      "Length":  22286,
+                      "SHA256":  "8AABD1AFDA3A9B61338D425FC88C9E355D910610F2B55C9ECD9CF6245C474FA2"
+                  },
+                  {
+                      "Path":  "Tools/jlink/prepare-bootstrap-app.py",
+                      "Length":  13057,
+                      "SHA256":  "50D778DE529598477B45D22A2D5E7D80A6C8C8BC0A1101B8ADCDF269356431CD"
+                  },
+                  {
+                      "Path":  "Tools/jlink/test-p1-6-matrix.ps1",
+                      "Length":  36859,
+                      "SHA256":  "B87D5ADBEBADC1EC1A4100903FA0D80381465130348E4FD0A1297FFA36E14B15"
+                  },
+                  {
+                      "Path":  "Tools/jlink/test-p2-1-staging.ps1",
+                      "Length":  12535,
+                      "SHA256":  "5F8C1432494A4DE28F7D2450CDCBEC81BD08F499FC7EE2BFEF0C612C2FE41A31"
+                  },
+                  {
+                      "Path":  "Tools/jlink/test-p2-2-package.ps1",
+                      "Length":  18447,
+                      "SHA256":  "BC76D46EDFE1687EDB26CDAF0E804F339FA5A3FB72CCE07EDD2D7CE829DB24BA"
+                  },
+                  {
+                      "Path":  "Tools/provenance/manifest_profiles.json",
+                      "Length":  3417,
+                      "SHA256":  "DE22FD9D9B8E057F58F06CB6F3F124C73A9E53034871D1EECD8350A24A1D5A65"
+                  },
+                  {
+                      "Path":  "Tools/provenance/source_manifest.ps1",
+                      "Length":  9858,
+                      "SHA256":  "E9C83670A2541422DC2CB8E1DB1A8F74D0ED9BB975731A010670523BA57CF032"
+                  },
+                  {
+                      "Path":  "Tools/provenance/worktree_guard.ps1",
+                      "Length":  7139,
+                      "SHA256":  "9C6A24CD79C21316D6439CCA2FDE3D2D56C9BFBE81923DD28E1697E586569DBB"
+                  },
+                  {
+                      "Path":  "Tools/图标/README.md",
+                      "Length":  2761,
+                      "SHA256":  "60B3F11B928D38B55034A322C5392E2D9F70706E1B3BC65EB10039D3D5B73AF5"
+                  },
+                  {
+                      "Path":  "Tools/图标/convert_iconfont.bat",
+                      "Length":  3391,
+                      "SHA256":  "D11467C4834A01DA0BE608B63F64993FC53BED6A29A6FBC211259359AAB6FF23"
+                  },
+                  {
+                      "Path":  "Tools/图标/font_5t5ay47raff/demo.css",
+                      "Length":  8429,
+                      "SHA256":  "654CB16861F47D9BDBEFBAD2BADB2CBBBEAB2CCBA2A1883EA795D9B53811FC69"
+                  },
+                  {
+                      "Path":  "Tools/图标/font_5t5ay47raff/demo_index.html",
+                      "Length":  22188,
+                      "SHA256":  "E71A5F1325ACF5D10FB9C5A82E598AD713CCB5767C1F477121210313B87CF7F8"
+                  },
+                  {
+                      "Path":  "Tools/图标/font_5t5ay47raff/iconfont.css",
+                      "Length":  1200,
+                      "SHA256":  "8DF50C378833612ECF0A8D573C28085AD20756431AB679E0D8F4B66ECD2951C3"
+                  },
+                  {
+                      "Path":  "Tools/图标/font_5t5ay47raff/iconfont.js",
+                      "Length":  34398,
+                      "SHA256":  "0CFC7730E16461B425EA39E145EF53EA78A33FCEB45FC7B5E6F4D434BBB79CDB"
+                  },
+                  {
+                      "Path":  "Tools/图标/font_5t5ay47raff/iconfont.json",
+                      "Length":  3078,
+                      "SHA256":  "5D1BDCC82DB2D3AC2BF89966AA2D67761D28E7FF8761F37448F937627ABB4BD4"
+                  },
+                  {
+                      "Path":  "Tools/图标/font_5t5ay47raff/iconfont.ttf",
+                      "Length":  8096,
+                      "SHA256":  "A0F693DF31B20671B0AC5936BD81341CAEF3F8B41CBE85117EE89FF705818F0E"
+                  },
+                  {
+                      "Path":  "docs/acceptance-contracts/template.contract.json",
+                      "Length":  2608,
+                      "SHA256":  "63D9E134096E016CCCFAC50090DC7A7470306DF4A6F47C9FC2C63137FB43B754"
+                  },
+                  {
+                      "Path":  "docs/acceptance-contracts/template.evidence-matrix.json",
+                      "Length":  684,
+                      "SHA256":  "214D9AB5A48113EAD9A7BDDF17C22F8E01699249CACB4EF5C4AADD30BB510CD9"
+                  },
+                  {
+                      "Path":  "tests/bcb/test_bcb_arbiter.c",
+                      "Length":  10554,
+                      "SHA256":  "A8178CE42F7497E9415CF5A164D1BD470E70E9D60C2D2136F983DFC780EF5905"
+                  },
+                  {
+                      "Path":  "tests/boot/fw_header_validator_host.c",
+                      "Length":  1878,
+                      "SHA256":  "9DE5E46BB5FE10D569E3916BDFA670B1C13649748F0B03A1936CBC761182AFED"
+                  },
+                  {
+                      "Path":  "tests/boot/test_boot_protocols.c",
+                      "Length":  10228,
+                      "SHA256":  "602ED20EEA189BE845DC0A7786FEB0816FCDC2C9096E2854BFD0487A86E282AA"
+                  },
+                  {
+                      "Path":  "tests/boot/test_boot_protocols.py",
+                      "Length":  1973,
+                      "SHA256":  "04777C2A36F0095E30F0E705187FA789C673B5E639DA82D55359A8566E662ED0"
+                  },
+                  {
+                      "Path":  "tests/boot/test_boot_state_machine.c",
+                      "Length":  39413,
+                      "SHA256":  "7811A97CD9580A084F4FC01588605A949C8E8A52C5EDA3554AE2D73D3F24F66F"
+                  },
+                  {
+                      "Path":  "tests/boot/test_boot_state_machine.py",
+                      "Length":  2072,
+                      "SHA256":  "122E45F8FB4CEAE521D44C418CCC7C06AA7290FFCFDC4BF4167C59AB1F2D5148"
+                  },
+                  {
+                      "Path":  "tests/boot/test_fw_header_vectors.py",
+                      "Length":  6910,
+                      "SHA256":  "1CA800DD831162B2266FF9DAF033E413330E720E35E52EB42C0D446D0928F0C2"
+                  },
+                  {
+                      "Path":  "tests/boot/test_p1_6_protocol.py",
+                      "Length":  2843,
+                      "SHA256":  "258EFFA28ADF251D9DB429A0236FECAEC5C434ADC1BD5B3DFE000305C2B75723"
+                  },
+                  {
+                      "Path":  "tests/boot/test_prepare_bootstrap_app.py",
+                      "Length":  19128,
+                      "SHA256":  "E584BD600430DA8B2E63A7E5DBEEE6A2AC5BED16DF51310B33C823934B9DE0DE"
+                  },
+                  {
+                      "Path":  "tests/boot/validate_boot_artifact.py",
+                      "Length":  7014,
+                      "SHA256":  "3130992047FFDD2990E4DB32202E8025AF43CF2C1643630DEB86E4D337AD240F"
+                  },
+                  {
+                      "Path":  "tests/boot/validate_boot_handoff.py",
+                      "Length":  6090,
+                      "SHA256":  "E5E3E02EFCD8A057E6C01EAAA271CD5F90E8585DF51A74927E15DE83ACB9C339"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/expected.json",
+                      "Length":  4354,
+                      "SHA256":  "DB41F34B634F081D45E69B11AB5A620D220A0678C0444BACCBAF618009C653E9"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/gen_vectors.py",
+                      "Length":  14936,
+                      "SHA256":  "7E28C716E0BFCD15236022BF2C3324CDCCB21D9ED9E913E040F1E20300478C5C"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/p2-3-invalid-control.etu",
+                      "Length":  137,
+                      "SHA256":  "6E481859A9FF5508A2DABB1B349F0A0ACF6F0330A3D7895FEC01F5F190ED3E5D"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/p2-3-vendor-oldpos-new.bin",
+                      "Length":  4096,
+                      "SHA256":  "D37E66EF5FE96B1961A504E3C0610EBEC962C27CC93AC7F4955D05986B575034"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/p2-3-vendor-oldpos.etu",
+                      "Length":  448,
+                      "SHA256":  "BCB6ED305EE73D546F4C533C0CDDA8F3495538B88E4F3C5A947D7EA3277D4A27"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/test_vectors.py",
+                      "Length":  15288,
+                      "SHA256":  "6F3C568163F74D5CC75666861D7DF2F335625DC260F4636C60DBA48A1BFFE158"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/toy-full.etu",
+                      "Length":  748,
+                      "SHA256":  "D8E26E51CF574570D69842B6DCC926C7BECB2F050A2F996702C1075FC1617BFC"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/toy-new.bin",
+                      "Length":  4096,
+                      "SHA256":  "F68F357C708C2D65E6B1547648E955EA47949D81BD52F2CDED684A8F640E21C3"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/toy-old.bin",
+                      "Length":  4096,
+                      "SHA256":  "3081FA0AFC5BB2F3A7D456A249CD8F07D9517D257E581E9562BF3EB102EADB1B"
+                  },
+                  {
+                      "Path":  "tests/ota-vectors/toy-patch.etu",
+                      "Length":  213,
+                      "SHA256":  "BF1AC6C9708110B4C100B62E7D735E493A22C2A6E89CD24594427EF80663EB6E"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_link_assert_probe.S",
+                      "Length":  517,
+                      "SHA256":  "0012FEA98E3BC550D57811044078D7BECB2340476F0CB201F04B0D59F552EBAC"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_rtt_ota_driver.py",
+                      "Length":  70942,
+                      "SHA256":  "1B092AF294850AC353D48116D9205A5C1F9E9EF7476D51425891338735A64C56"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_rtt_sd_preflight.py",
+                      "Length":  8013,
+                      "SHA256":  "59524394DB2C8EC0D25927F92CBBE18F855CAE625EB905F28DE871C0A093D29D"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_rtt_sd_uploader.py",
+                      "Length":  30353,
+                      "SHA256":  "BB4F1864A83F59FFDF581275E43D65917081A12C9964A5EDBB2F70B20B1958C9"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_rtt_transport_qualifier.py",
+                      "Length":  13403,
+                      "SHA256":  "8A95B12C9A066A5B07D346252C6AEA1C9FA3585E7C57F150456704943951D896"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_stack_preflight.py",
+                      "Length":  18654,
+                      "SHA256":  "E975D084C3A06370C138DE9B30248CE2F2979CAE934F2D465DA685DD93A2D935"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_v2_evidence_recompute.py",
+                      "Length":  29032,
+                      "SHA256":  "9AC1D73892587110D750B8D4B4CDC4E24E4C2A59BB0121DB7E59C7CE741AC5F6"
+                  },
+                  {
+                      "Path":  "tests/ota/p2_6_v3_evidence_recompute.py",
+                      "Length":  81687,
+                      "SHA256":  "567DEFB044092A3DFB98A3C749B63C5FA755C386C1FE97DFC795337CE0DC8AA5"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_artifacts.py",
+                      "Length":  3168,
+                      "SHA256":  "0AFA0BE202E0178D60D2E17A7ABC430E7022136F04A3711ED22BD01D76B8FEA8"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_command_fidelity.py",
+                      "Length":  6179,
+                      "SHA256":  "11621438BB053E0BEE8C2956FFE338DF79D67E4AD8D81B788C87BD84177DBB5F"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_contract_alignment.py",
+                      "Length":  8637,
+                      "SHA256":  "7E1BC192265F35A04EA823F52DB5868CED3E13DCA1ED130911C66B7CA9FB1C4F"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_mutation.py",
+                      "Length":  6379,
+                      "SHA256":  "297F52966EFC2B32DB72513C2DEEF43F9CC1F60D96AECAB02665AE11CC81C4A0"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_portability.py",
+                      "Length":  3035,
+                      "SHA256":  "8BC43B9D86C2D6A6BAAA46BE198CEDE6FF9018301FBE95F57AB8ACFEBEB08FA0"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_production_binary.py",
+                      "Length":  9237,
+                      "SHA256":  "39D5C8AD0ADD3FF7C95AA8560C9FCB359C349BC3344476CBAC5CFD9F550723E3"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_rx_ring_budget.py",
+                      "Length":  7557,
+                      "SHA256":  "7A61AE12B0873AE60070BB8918C2F6216219F43CD4DD33FE97B23C27634CAF8B"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_1_verify_text_isolation.py",
+                      "Length":  4295,
+                      "SHA256":  "A9E0BB9ECF92384C45E7CF51AB4FCBB2AC2036770BAA33A33CFF5AA49C192802"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_2_verify_build.py",
+                      "Length":  5581,
+                      "SHA256":  "A3115820661532BC2D4BD51B8D5E743ECDCB8668A5CB0FED17277F2A495154C6"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_2_verify_harness.py",
+                      "Length":  8028,
+                      "SHA256":  "B7D32196EB1D8350566C470298BC1AAC77CEF3C183F341A801F5610D15EF5D27"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_2_verify_realdevice.py",
+                      "Length":  8337,
+                      "SHA256":  "4B3BDC1750185E3B42F04E92234FADB00E7809E758BBA9B246713EA21710C475"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_2_verify_scope.py",
+                      "Length":  7188,
+                      "SHA256":  "7B04FB8AC50BFAD25730403D063585001F838D10A237BD2DD55CCC1E05417DBE"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_6_verify_ci_evidence.py",
+                      "Length":  13338,
+                      "SHA256":  "7DF4E7C7BDBCE9C2C20859565EEEE4880B450FEEEB2D32073B29AD239FA2E255"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_6_verify_ci_wiring.py",
+                      "Length":  10425,
+                      "SHA256":  "CBAA8DDF265FF71AB92EC58BB4E804F8919AFD111B57455D9FFA50EC3E925123"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_6_verify_harness.py",
+                      "Length":  17251,
+                      "SHA256":  "026C6CA3681F6A6FE9FB3F10B121E2CE3C9C1CB1C85F2250617BCFE4E7644A4B"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_6_verify_scope.py",
+                      "Length":  8893,
+                      "SHA256":  "48190E5341DAD44D474CC1E05C78DBF8789DAE94FAFFB7C5EBFCA8F5F605FF18"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_7_verify_ci_evidence.py",
+                      "Length":  23260,
+                      "SHA256":  "DE9CBE14D62C25361EE67466E7201FF6CFE1E84D81B4EBC431B0DEC07B4A2FAD"
+                  },
+                  {
+                      "Path":  "tests/ota/p3_7_verify_wiring.py",
+                      "Length":  29139,
+                      "SHA256":  "98209AF91B7DC2F2BB7888F1D75B0E181786FF92F34A25E5927B9F72DEFB3350"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/README.md",
+                      "Length":  11858,
+                      "SHA256":  "08A473AE58EF260461235F5D195ED9F3072AC907BEB3FC736C1A01E9967BBEBE"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/_probe_env.py",
+                      "Length":  4503,
+                      "SHA256":  "6D3FB8631C3A10B6AF8A6624E7A6E825767047DE307DCD640E6D715C2ABFCBE7"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/guard_layout/cases.json",
+                      "Length":  3586,
+                      "SHA256":  "94187B9AF7E4B18DE023DB57E158CE6E39973BE025D04D1F4A7CA3A66276A013"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/guard_layout/layout.ld.tmpl",
+                      "Length":  3140,
+                      "SHA256":  "81DA03ACEF2556E084FC0CD0C50B08EB56518B1BB0145810C4025EC8285738CA"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/guard_layout/probe_main.c",
+                      "Length":  2040,
+                      "SHA256":  "42AC84E1924AADB1307E0E9F355FBE564F846E0B244708E962E1F893CE7D429F"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/guard_layout/run.py",
+                      "Length":  8064,
+                      "SHA256":  "332BD16D762A7D43AC4E8F33434D21CADAA296D42F7BAE68B6B1BCE06DF6A739"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/host_scan/host_scan_test.c",
+                      "Length":  2608,
+                      "SHA256":  "D431ACE803114815306BD6ED1AA4B970C11F342B7ED515098D5DBEEFDE852565"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/host_scan/run.py",
+                      "Length":  4472,
+                      "SHA256":  "2DAA3FC18B876C7952135A75771C7BAED72886646FF481FB108698791008D725"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/run_all.py",
+                      "Length":  9483,
+                      "SHA256":  "669111D9DD23612DA41AEFC3AFB9E2E7A91B95FCC04D2B30E3517E09018AD1AA"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/selftest/classification_selftest.py",
+                      "Length":  8381,
+                      "SHA256":  "E57C59043C190A0FA6133205D92BEA379F5B827E839E7B959512A486733216D1"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/selftest/fake_env_blocked.py",
+                      "Length":  830,
+                      "SHA256":  "5B0FA9273DA3BB302C56A79264BAEAE3B9235F49C8D391B3C372F9F41CFCCA0E"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/selftest/fake_harness_fail.py",
+                      "Length":  322,
+                      "SHA256":  "68AB76ACE86303D9B9A4E7AF7FE57095E1BB21D59B2A25FA3816B1500B449E1F"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/selftest/fake_pass.py",
+                      "Length":  316,
+                      "SHA256":  "CB1270F6D27753869BD0D42F4ADB862712105DADE6904D4982EAD203F274386A"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/selftest/fake_spoofed_env.py",
+                      "Length":  1169,
+                      "SHA256":  "4311666A9A1D96B3F85894805FBA34137215BC7C75E7FB6F14EBFD1FA097A220"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/multicall.c",
+                      "Length":  520,
+                      "SHA256":  "47AEDC320F61CB1253B6D649309E97792A1FF520A22867193B336ECDA08C3CEA"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/ota_chain.c",
+                      "Length":  4226,
+                      "SHA256":  "B09EA6BE18519AEAC19E301E08E49155E51B97395A979C7CDFDF471160E89AC4"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/ota_chain2.c",
+                      "Length":  4530,
+                      "SHA256":  "4F2435E5C8031661F5A535AFAA6EE7A2338C1E5B7C1F0EF30EF38A0FA75AC939"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/ota_chain3.c",
+                      "Length":  4802,
+                      "SHA256":  "1A3544F15BD8E5EF3E5D7F90402D24B90EB6101C5876A3C2F800171DE9B114C3"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/ota_chain4.c",
+                      "Length":  4422,
+                      "SHA256":  "18C92C0875BE4D83CF743A572F0AE09A3DF52EF32849760438BBB476EADB0E13"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/run.py",
+                      "Length":  10168,
+                      "SHA256":  "8EB8FBF74260C6699F773E0B49A6B969D7B578876CD19BFE430CCAFEAA9738A9"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/scan.py",
+                      "Length":  2895,
+                      "SHA256":  "6DC762BDEBC3FA575EBF299E3424B82CEBAE08B31B127E8DF93E54D478C4FA95"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/scan2.py",
+                      "Length":  3132,
+                      "SHA256":  "E4CDBA520CFDD1A4F69344D0CB3E8DD4E747E569296FF3C540418B1AFAE76DCF"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/scan3.py",
+                      "Length":  3787,
+                      "SHA256":  "810517F3C84FF508530096FF02BDC306CBB5DD5A7601A15DDC47FAC103D54342"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/scan4.py",
+                      "Length":  5769,
+                      "SHA256":  "8553972095515B84466EC8A64ACB98347FD3845DE611EDAAA5719B209665EBAC"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/support.c",
+                      "Length":  826,
+                      "SHA256":  "F0D2E5D0BBD7838D8386F0E1D160682CEC1B9B661223998996E2D696B084574A"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/stack_usage/support2.c",
+                      "Length":  738,
+                      "SHA256":  "691A93E70ECD30CA8C9B9430A4E094E4CA2EF413D32857E88FC94ADC2C774882"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/wrap_probe/lv_mem_stub.c",
+                      "Length":  1642,
+                      "SHA256":  "F4CCFE34CE50B437FFE070CADF3CDE00F4A67411A79FA13FED4B3D8665E3EE12"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/wrap_probe/lv_tlsf_stub.c",
+                      "Length":  1406,
+                      "SHA256":  "9335BFC0E7CD213292B4424911048BC974C6B20459FB8848B722A21616553654"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/wrap_probe/main.c",
+                      "Length":  5030,
+                      "SHA256":  "E51A246D1962D0EEBE860D40633E9465E70B1E9695CDAC590B341985778CABC2"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/wrap_probe/p2_6_wrap.c",
+                      "Length":  2625,
+                      "SHA256":  "A191A13EE87F0060E11FD3F4EE504241C71BD912ABAC922BAE367924AC1B430D"
+                  },
+                  {
+                      "Path":  "tests/ota/spec-probes/p2-6/wrap_probe/run.py",
+                      "Length":  13797,
+                      "SHA256":  "8EFCFD3902ED97D210381A2E9A5EC0AEE1B4907D076C9506536546267D076EBF"
+                  },
+                  {
+                      "Path":  "tests/ota/stubs/lvgl/lvgl.h",
+                      "Length":  1383,
+                      "SHA256":  "D10A0C55C4B2F7B1FAB08AA4CCB41F84EF878D13281FC94FAFA23C21C58EEC2E"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ac5_ram_budget.py",
+                      "Length":  2063,
+                      "SHA256":  "36247846C0483D73D2ABA657E660F486B38ED14F6FE246C36632A75E4D2BD787"
+                  },
+                  {
+                      "Path":  "tests/ota/test_acceptance_bundle.py",
+                      "Length":  98826,
+                      "SHA256":  "68C3C80906387B53CA25C0D5C47BED978801EFE9D25B35E82A1CEEC868AF7ECE"
+                  },
+                  {
+                      "Path":  "tests/ota/test_f435_build_bootstrap.py",
+                      "Length":  8496,
+                      "SHA256":  "5774BE1728DADFAFC00916471DDA3CDFD09952BE36666FA68CFE8AD6B69BA1CF"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_backup.c",
+                      "Length":  32050,
+                      "SHA256":  "ADBAE0951261B502C51BFCDCA12C35BD33CE8CD400741E92A914A15312959DA6"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_backup.py",
+                      "Length":  2852,
+                      "SHA256":  "DB4F96995C201AA702ACD78CC89AA073CDD4D6E790207C4C0F0C3FC975CC19B0"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_ble_frame.c",
+                      "Length":  18654,
+                      "SHA256":  "627C5E80B5D4EF5354AE521CABB0E2BEFCF7D2B19669993F5248F1FF912DAB64"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_ble_frame.py",
+                      "Length":  2051,
+                      "SHA256":  "5097D68BC8972EEA81073267C6E3675F7731B2309F758C30E34FD3DFB87223AE"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_ble_session.c",
+                      "Length":  47525,
+                      "SHA256":  "F7CBB13B85E594F30752023CF6394AEBE9A4DE58248C763ABFF9AA3C06D9BD93"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_ble_session.py",
+                      "Length":  2474,
+                      "SHA256":  "96FC2284D0A269ABAB75503EE2136B2F5AC264C9D365FB16A4A0AB60A7CB7AD5"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_confirm_health.c",
+                      "Length":  13234,
+                      "SHA256":  "1CDDA577F5A407581F911E6E38E339FD52BEDD0D0FA8056EC732EB0D2C4CECE1"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_device_info.c",
+                      "Length":  23494,
+                      "SHA256":  "A3B416B0931BCCB39EE79820173B627F25BE69D1BDBB6ECBB516AB623CEBCC2E"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_device_info.py",
+                      "Length":  2631,
+                      "SHA256":  "A284D821FE04B1C9F3CDD5EE3FD498D5E9EECC9DEC188B488C9637AAD342F42C"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_gcc_reproducibility.py",
+                      "Length":  3056,
+                      "SHA256":  "A72D0F339E2619280E14E23E04EFD9CAF88790430C5570E3B79082F23ABC30D6"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_package.c",
+                      "Length":  20032,
+                      "SHA256":  "236CA19FC60C18EB0EA91A115FF5B399EB7C8ECE9B1467212C752141ECB5CCAF"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_package.py",
+                      "Length":  2511,
+                      "SHA256":  "A0D43A373AB93C8C2052FB74C12C25F53AF5D2B2C3968E9A0332E020536BDEA8"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_patch.c",
+                      "Length":  37148,
+                      "SHA256":  "C717E01CCBBE47B24D906DAC8751E714D6C0563CC2486F8203532982048CE4E1"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_patch.py",
+                      "Length":  5794,
+                      "SHA256":  "D0574BD2F57F72318AE27A51BACCE268E51650F41DA04D55E4C481B275B6BDC4"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_sd.c",
+                      "Length":  23896,
+                      "SHA256":  "ED8CD9235D3C5448E492F73E812D527CB3A7B30CFBD36EC7CB08E8B5E86053C5"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_sd.py",
+                      "Length":  2486,
+                      "SHA256":  "8A50FAE209DF6545C475D3D13C7DD1843F3F6EBC3D0048F0570792CD4F785D5A"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_staging.c",
+                      "Length":  22442,
+                      "SHA256":  "E77F021DF7857BE65CA681F359DA0DA820721C325775495539800F0F2ACC90CC"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_staging.py",
+                      "Length":  2037,
+                      "SHA256":  "59A87DFAD68E9F7C0274683783FBC0AC3F2DF8D1496CB4AC2C749D935BACC2AE"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_update.cpp",
+                      "Length":  13168,
+                      "SHA256":  "7C441708DE4D0A05D28FB8857338501AC38533DB256DE0C6DC64326346109779"
+                  },
+                  {
+                      "Path":  "tests/ota/test_ota_update.py",
+                      "Length":  3586,
+                      "SHA256":  "004F7A67B498794A458F8EB0D512F2917EE5BE1544BE9640E9AC288012CBEDBD"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_5_build_provenance.py",
+                      "Length":  20788,
+                      "SHA256":  "3ECA18CA98300C0A1DC4D1786BCB5EDEAB1A70E9B94925DD3B52B6F3ED71262A"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_capacity.py",
+                      "Length":  3329,
+                      "SHA256":  "EB088F14AC6E24B546581EBFE83B12FAD99A5707EFAD38DD9EFC157A20937461"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_capacity_package.c",
+                      "Length":  3978,
+                      "SHA256":  "97A5312CC62AB043AC69863E2052EBBE5CADC257CE39C26CCF20AEFD011F16E5"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_capacity_patch.c",
+                      "Length":  4097,
+                      "SHA256":  "38F10F8E78C92B4785DB9A2A114B8084B9F04B0E6B6240F09DA2A13CFE316452"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_configuration.py",
+                      "Length":  3840,
+                      "SHA256":  "1FC341047F45C09B415C1A335ED3C42768102124C3DA990B1498D63B56511BE7"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_link_asserts.py",
+                      "Length":  5320,
+                      "SHA256":  "DCA0670A599A4A8A49599C195C57F8521EF40CDCD30DE64994F67EEAA9D08230"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_rtt_ota_driver.py",
+                      "Length":  53997,
+                      "SHA256":  "411E01A7C866C74E440B43F97695602B7D2BF0DC6037A1EE2EEBBCFFE51CD5FB"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_rtt_sd_preflight.py",
+                      "Length":  4173,
+                      "SHA256":  "F447625AF5C580939316555C334FCE291AFA6F372DF9F57BF3EEA9A9AABEE1DC"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_rtt_sd_uploader.py",
+                      "Length":  13552,
+                      "SHA256":  "BED2711DD2B0FFD7A77B7EE5342B83FBFAA1E90C4F62DC03A6374D00B49C349B"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_rtt_transport_qualifier.py",
+                      "Length":  10537,
+                      "SHA256":  "56B205E2C50A5699F4BFABE0180D455314AAB3783A20B419E37DD15C5268AF82"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_stack_closure.py",
+                      "Length":  64426,
+                      "SHA256":  "A499727CDF5B363F27B679EF4C2A3F9A84DA731BA9E671ADDB33B5D19A505392"
+                  },
+                  {
+                      "Path":  "tests/ota/test_p2_6_symbols.py",
+                      "Length":  10625,
+                      "SHA256":  "FC285C74188B20FDFC45F1AA9BF75E13643D71FEFC2789C2C316B40D5B619AD4"
+                  },
+                  {
+                      "Path":  "tests/ota/test_sdio_command_timeouts.py",
+                      "Length":  1881,
+                      "SHA256":  "ECB15F4286506DC3EFD5A0951F66A74F28BA189267496669D0995099FD473FB7"
+                  },
+                  {
+                      "Path":  "tests/ota/test_sdio_recovery_bounded.py",
+                      "Length":  3043,
+                      "SHA256":  "A60544FE29930ECFD5D5792D32F56E13F59E34456181AECFECC54DBC09B077BE"
+                  }
+              ]
+}
