@@ -20,7 +20,7 @@
 
 /* OTA-XC-DEVICE-MODEL 冻结线端值："E-Track" + NUL 恰 8 字节。 */
 static const char k_ota_device_model[8] = {
-    'E', '-', 'T', 'r', 'a', 'c', 'k', '\0'
+    'F', '-', 'T', 'r', 'a', 'c', 'k', '\0'
 };
 
 static ota_device_result_t device_raw_sha256(const boot_image_reader_t *reader,
