@@ -57,23 +57,23 @@ STEP_NAME = "Run host tests (boot vectors, OTA host tests, P3-1 product regressi
 STEP_NUMBER = 10
 
 # 采集后回填。留 None 即视为证据未采集（fail-closed，不是跳过）。
-BASELINE_RUN = None          # 正例：接线提交，绿
-TRIGGER_RUN = None           # 触发器反证 A：只改一条新增精确条目对应的脚本
-TRIGGER_GLOB_RUN = None      # 触发器反证 B：只改 cmd12 脚本（验既有通配覆盖）
+BASELINE_RUN = 33736951606          # 正例：接线提交，绿
+TRIGGER_RUN = 33746544048           # 触发器反证 A：只改一条新增精确条目对应的脚本
+TRIGGER_GLOB_RUN = 33746838579      # 触发器反证 B：只改 cmd12 脚本（验既有通配覆盖）
 DEFECT_RUNS = {              # 四次注错，键为被打红的接线序号（0..3）
-    0: None,
-    1: None,
-    2: None,
-    3: None,
+    0: 33742087214,          # cmd9  ota_ble_frame.h ACK_BEGIN 10u->11u
+    1: 33743950837,          # cmd10 HAL_Bluetooth.cpp 移除活跃期 sink 守卫
+    2: 33748460404,          # cmd11 HAL_USB.cpp 加 #if 0 反斜杠 include 阳性样本
+    3: 33745505165,          # cmd12 ota_device_info.c model 首字符 'E'->'F'
 }
 RESTORE_RUNS = {             # 对应四次还原后的绿
-    0: None,
-    1: None,
-    2: None,
-    3: None,
+    0: 33743337327,
+    1: 33744219606,
+    2: 33748868768,
+    3: 33745844623,
 }
-PR_NUMBER = None
-HEAD_BRANCH = None
+PR_NUMBER = 19
+HEAD_BRANCH = "ota/p3-7-host-test-wiring"
 
 # 步骤内应被下发的完整命令序列（末四条为本卡接线）。
 EXPECTED_ECHO = (

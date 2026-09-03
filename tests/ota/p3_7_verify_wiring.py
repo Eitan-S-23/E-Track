@@ -69,6 +69,11 @@ NOT_WIRED_SCRIPTS = (
 )
 POSITIVE_CONTROL = "Libraries/USB_MSC/msc_diskio.c.old"
 
+# 本卡交付的基线 main（PR #19 的 base）。交付比对一律相对它，而非相对 HEAD：
+# 相对 HEAD 的写法只在「交付尚未提交」的那一瞬成立，提交后即自毁，属轮次作用域
+# 钉子；相对固定基线则是不变量，提交前后都成立。
+DELIVERY_BASE = "2d8ff7e52d4c575a4d109b1477a79a7c1493d81b"
+
 # 立卡笔记 §3 的锚定提交与当时实测的扫描文件数；两者用于把 portability 的
 # `scanned` 增量逐文件解释清楚，而不是笼统写「目录自然增长」。
 CARD_BASELINE_REV = "dd0a9952ca2edde8c236a4b1cc57a3ec8879ca0d"
@@ -119,6 +124,10 @@ TIER_ACCEPTANCE = (
     r"^docs/ota-exec-notes/P3-7-acceptance-.*\.md$",
     r"^\.claude/verification-report-p3-7\.md$",
     r"^\.claude/write_p3_7_acceptance_board\.py$",
+    # 派工书 v2：看板 §0 规则 11 要求派工前由非实现会话冻结，故归验收方。
+    r"^docs/ota-prompts/prompt-P3-7-implementation\.md$",
+    # 为本卡两个验收核验器补 `-text` 护栏，防 autocrlf 打红冻结指纹。
+    r"^\.gitattributes$",
 )
 TIER_SHARED = (r"^PLAN-OTA-EXEC\.md$",)
 
@@ -281,9 +290,9 @@ def glob_match(pattern, path):
 
 def main():
     print("=== P3-7 接线静态核验 ===")
-    head_workflow = git_show_bytes("HEAD", WORKFLOW)
+    head_workflow = git_show_bytes(DELIVERY_BASE, WORKFLOW)
     if head_workflow is None:
-        raise SystemExit(f"FATAL: 无法读取 HEAD:{WORKFLOW}")
+        raise SystemExit(f"FATAL: 无法读取 {DELIVERY_BASE[:7]}:{WORKFLOW}")
     work_path = ROOT / WORKFLOW
     if not work_path.is_file():
         raise SystemExit(f"FATAL: 工作树缺少 {WORKFLOW}")
@@ -300,16 +309,16 @@ def main():
     print("== A. 目标步骤与 fail-closed 结构 ==")
     ck(text.count(f"name: {TOP_NAME}") == 1, "顶层 name 保持 MCU Firmware Build")
     ck(
-        git_show_bytes("HEAD", WORKFLOW).decode("utf-8").count(f"name: {TOP_NAME}") == 1
+        git_show_bytes(DELIVERY_BASE, WORKFLOW).decode("utf-8").count(f"name: {TOP_NAME}") == 1
         and [l for l in lines if l.strip() == f"name: {TOP_NAME}"]
         == [l for l in head_lines if l.strip() == f"name: {TOP_NAME}"],
-        "顶层 name 行相对 HEAD 逐字节未变",
+        "顶层 name 行相对基线 main 逐字节未变",
     )
     ck(
         [l for l in lines if l.strip() == f"name: {JOB_NAME}"]
         == [l for l in head_lines if l.strip() == f"name: {JOB_NAME}"]
         and any(l.strip() == f"name: {JOB_NAME}" for l in lines),
-        "jobs.build.name 行相对 HEAD 逐字节未变且存在",
+        "jobs.build.name 行相对基线 main 逐字节未变且存在",
     )
     ck(OLD_STEP_NAME not in text, "旧步骤名已不存在（名称与实际内容对齐）")
 
@@ -375,7 +384,7 @@ def main():
 
     base_push = base.get("push") or []
     base_pull = base.get("pull_request") or []
-    ck(bool(base_push) and bool(base_pull), "HEAD 两份 paths 解析非空（空集守卫）", (len(base_push), len(base_pull)))
+    ck(bool(base_push) and bool(base_pull), "基线 main 两份 paths 解析非空（空集守卫）", (len(base_push), len(base_pull)))
     ck(
         [p for p in base_push if p not in push] == [],
         "push.paths 未删除任何既有条目",
@@ -433,7 +442,7 @@ def main():
     print("== C. 冻结红线 ==")
     tracked = sorted(
         set(
-            [l for l in git("diff", "--name-only", "HEAD").splitlines() if l]
+            [l for l in git("diff", "--name-only", DELIVERY_BASE).splitlines() if l]
             + [l for l in git("diff", "--cached", "--name-only").splitlines() if l]
         )
     )
@@ -492,19 +501,28 @@ def main():
     cur_crlf, cur_lf = eol_stats(raw)
     ck(cur_crlf == head_crlf, "workflow CRLF 计数未变（未被 EOL 归一）", cur_crlf, head_crlf)
     ck(cur_lf == head_lf + 10, "workflow 裸 LF 计数恰增 10（10 条新增行）", cur_lf, head_lf + 10)
-    numstat = [l.split("\t") for l in git("diff", "--numstat", "HEAD", "--", WORKFLOW).splitlines() if l]
+    numstat = [l.split("\t") for l in git("diff", "--numstat", DELIVERY_BASE, "--", WORKFLOW).splitlines() if l]
     ck(numstat and numstat[0][:2] == ["11", "1"], "workflow diff 为 11 增 1 删", numstat, [["11", "1"]])
-    ws = [l.split("\t") for l in git("diff", "--numstat", "-w", "HEAD", "--", WORKFLOW).splitlines() if l]
+    ws = [l.split("\t") for l in git("diff", "--numstat", "-w", DELIVERY_BASE, "--", WORKFLOW).splitlines() if l]
     ck(ws and ws[0][:2] == ["11", "1"], "workflow -w diff 同为 11/1（无仅空白差异对）", ws)
 
-    head_board = git_show_bytes("HEAD", BOARD)
+    head_board = git_show_bytes(DELIVERY_BASE, BOARD)
     board_raw = (ROOT / BOARD).read_bytes()
     b_crlf, b_lf = eol_stats(board_raw)
     h_crlf, h_lf = eol_stats(head_board)
-    ck(b_lf == h_lf, "看板裸 LF 计数未变", b_lf, h_lf)
-    ck(b_crlf == h_crlf + 2, "看板 CRLF 计数恰增 2（§10 追加 v1/v2 各 1 行）", b_crlf, h_crlf + 2)
-    board_numstat = [l.split("\t") for l in git("diff", "--numstat", "HEAD", "--", BOARD).splitlines() if l]
-    ck(board_numstat and board_numstat[0][:2] == ["4", "2"], "看板 diff 为 4 增 2 删", board_numstat)
+    # 以下三条是**轮次作用域**的溯源钉子（不是不变量）：它们钉的是「本卡在看板上留下
+    # 的改动恰为这些，没有夹带」。构成 = 实现批次（状态行、证据行、§10 两行）+ 验收
+    # 回写批次（状态行、验收行、证据行、新增验收发现行、§1 阶段总表 P3 行、§9 登记 1 行、
+    # §10 一行）。看板混合行尾：§9 登记表为裸 LF，其余为 CRLF。
+    ck(b_lf == h_lf + 1, "看板裸 LF 计数恰增 1（§9 登记表追加 1 行）", b_lf, h_lf + 1)
+    ck(
+        b_crlf == h_crlf + 4,
+        "看板 CRLF 计数恰增 4（§10 追加 3 行 + 卡内新增验收发现 1 行）",
+        b_crlf,
+        h_crlf + 4,
+    )
+    board_numstat = [l.split("\t") for l in git("diff", "--numstat", DELIVERY_BASE, "--", BOARD).splitlines() if l]
+    ck(board_numstat and board_numstat[0][:2] == ["9", "4"], "看板 diff 为 9 增 4 删", board_numstat)
     board_text = board_raw.decode("utf-8")
     # 哈希判据：长度 >= 7 的十六进制串，且同时含十六进制字母与数字。纯十进制串
     # （日期标识 20260903、Actions run 号）不是哈希，不在禁止范围内。

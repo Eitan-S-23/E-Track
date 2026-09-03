@@ -141,7 +141,7 @@ cmd7/cmd8 均编译它)——红点落在与本卡接线无关的既有测试上
 反证的「注入→红在目标行→还原→全序复绿」均由该脚本驱动,每轮结束后
 `git status --short` 确认注入文件零残留(仅剩 workflow/看板两处预期改动)。
 
-## 4. CI 证据状态与待办
+## 4. CI 证据要求(下列三类已于收口批次全部取得,见 §5)
 
 按看板 §0 规则 8,本实现会话不执行 `git commit/push/merge`。以下证据
 需主会话推送后补齐(派工书完成判据要求真实 CI 运行日志,本地执行不算):
@@ -163,15 +163,64 @@ cmd7/cmd8 均编译它)——红点落在与本卡接线无关的既有测试上
 收口 squash。CI run 标识、提交 SHA 与关键日志片段由执行推送的会话回填到
 本文件 §5。
 
-## 5. CI 运行证据(待推送后回填)
+## 5. CI 运行证据(已回填,11 条腿)
 
-- [ ] 正例 run:
-- [ ] 触发器反证 run:
-- [ ] 反证一(cmd9)红 run:
-- [ ] 反证一还原绿 run:
-- [ ] 反证二(cmd10)红 run:
-- [ ] 反证二还原绿 run:
-- [ ] 反证三(cmd11)红 run:
-- [ ] 反证三还原绿 run:
-- [ ] 反证四(cmd12)红 run:
-- [ ] 反证四还原绿 run:
+由主会话在特性分支 `ota/p3-7-host-test-wiring` 执行推送后取得,采集件冻结在
+`docs/acceptance-contracts/P3-7-v1/ci/`(每 run 三件:`run-<id>.json` 元数据、
+`step-<id>.txt` 步骤日志原文、`changed-<id>.json` 该提交改动文件清单)。
+回填位由 10 扩至 11 —— 触发器反证拆成 A/B 两条,理由见
+`docs/ota-exec-notes/P3-7-acceptance-round2.md` §5。
+
+| # | 腿 | run | 事件 | 结论 | 提交 | 改动文件 |
+|---|---|---:|---|---|---|---|
+| 1 | 正例 | 33736951606 | pull_request | success | `90facc3` | 接线批次 9 个文件(含 workflow,零产品红线目录) |
+| 2 | 触发器反证 A(新增精确条目) | 33746544048 | push | success | `9bac771` | 仅 `tests/ota/p3_1_verify_portability.py` |
+| 3 | 触发器反证 B(既有通配) | 33746838579 | push | success | `bb2dcf5` | 仅 `tests/ota/test_ota_device_info.py` |
+| 4 | 注错 cmd9 红 | 33742087214 | pull_request | failure | `f369a5d` | 仅 `Libraries/OTA/ota_ble_frame.h` |
+| 5 | 还原 cmd9 绿 | 33743337327 | pull_request | success | `7b3e6c6` | 仅 `Libraries/OTA/ota_ble_frame.h` |
+| 6 | 注错 cmd10 红 | 33743950837 | pull_request | failure | `5808836` | 仅 `USER/HAL/HAL_Bluetooth.cpp` |
+| 7 | 还原 cmd10 绿 | 33744219606 | pull_request | success | `d99c840` | 仅 `USER/HAL/HAL_Bluetooth.cpp` |
+| 8 | 注错 cmd11 红 | 33748460404 | pull_request | failure | `11ca914` | 仅 `USER/HAL/HAL_USB.cpp` |
+| 9 | 还原 cmd11 绿 | 33748868768 | pull_request | success | `94c4d68` | 仅 `USER/HAL/HAL_USB.cpp` |
+| 10 | 注错 cmd12 红 | 33745505165 | pull_request | failure | `607f802` | 仅 `Libraries/OTA/ota_device_info.c` |
+| 11 | 还原 cmd12 绿 | 33745844623 | pull_request | success | `690a528` | 仅 `Libraries/OTA/ota_device_info.c` |
+
+### 5.1 正例 run 的四条结论标记原文
+
+来自 `step-33736951606.txt`(步骤 `Run host tests (boot vectors, OTA host tests,
+P3-1 product regressions)`):
+
+- cmd9  `P3_1_CONTRACT_ALIGNMENT=PASS drift=0 checks=47`
+- cmd10 `P3_1_TEXT_ISOLATION=PASS cases=3 transparent=0 trace_points=1 sink_guard=True`
+- cmd11 `P3_1_PORTABILITY=PASS scanned=895 control_hits=1 live_hits=0 new_src_hits=0`
+- cmd12 `P3_2_OTA_DEVICE_INFO checks=114 failures=0` + `P3_2_OTA_DEVICE_INFO_ALL=PASS`
+
+`scanned=895` 相对立卡笔记 §3 锚定提交处的 893 增 2,增量由本卡新增的两个核验器
+文件解释(`tests/ota/p3_7_verify_wiring.py`、`p3_7_verify_ci_evidence.py`),不是
+「目录自然增长」的笼统说法。
+
+### 5.2 四次注错的红形态
+
+- cmd9 红:`[DRIFT] §5.6 ACK_BEGIN 10B: 契约=10 实现=11`,且 cmd10-12 的标记全部缺席
+  (证明步骤在该行短路,红因可归属)。
+- cmd10 红:`sink_guard=False`。
+- cmd11 红:`live_hits=1`,命中注入的 `#if 0` 包裹样本。
+- cmd12 红:`checks=114 failures=1` + `FAIL: T1 model exact 8B`,且 `_ALL=PASS` 缺席。
+  **该腿的红形态与前三条不同**:失败时不打印 `=FAIL` 汇总行,照抄前三条写法会得到
+  恒真的空转判据,故门禁对它单独构造谓词。
+
+### 5.3 一次作废的注错(留档)
+
+反证三的第一次尝试(提交 `87a0d99`,run 33744927605)把 `USER/HAL/HAL_USB.cpp` 首行
+`#include` 改成反斜杠。本地按 CI 同序跑 12 条,红点确实恰落在 cmd11;但该写法同时让
+`arm-none-eabi-gcc` 编译失败,CI 在**第 9 步 Build firmware** 就红了,第 10 步整步
+`skipped`——目标行从未执行,反证空转。该 run 已作废并从证据目录删除,重做为
+`11ca914`/`94c4d68`。
+
+改用 `#if 0` 包裹的阳性样本:预处理器直接丢弃该块,编译不受影响;可移植性扫描器是
+文本匹配,照样命中。推送前先在本机跑了一次与 CI 同配置的 GCC 构建证明编译不受影响
+(`FLASH 602984 B / 960 KB = 61.34%`,`text 601544 data 940 bss 561688`)。
+
+**通用规则(须带入后续所有卡)**:注错选点的安全性必须同时按两级判定 ——
+命令级(前置命令不得先红)与**步骤级**(不得打红更早的 CI 步骤)。本地按命令同序
+跑一遍看不见固件编译,凡改动会进入编译的产品源都必须另证编译不受影响。
