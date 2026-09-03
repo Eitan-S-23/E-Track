@@ -1,0 +1,22 @@
+== A. finalize 镜像独立复算 ==
+  ok   生产 App bin 与板上 dump 长度一致 = 602984
+  ok   etu_pack.py finalize 退出码 0 = 0
+  ok   复算 finalize 镜像长度一致 = 602984
+  ok   复算 finalize 镜像 == 板上 dump（逐字节，三方闭合） = '4512de0878c146a93b55f65aa86acab4eedcf7f7082ead97ad73c24884671b4b'
+  ok   finalize 仅改写 0x400..0x45F（fw_header 96B），镜像正文未被触碰 = (1024, 1119)
+  ok   finalize 确实回填了 fw_header（存在差异字节） = 78
+== B. 生产符号落位 ==
+  ok   符号 ota_device_identity_get 存在且落在预期段（nm 类型 T） = ('08048868', 'T')
+  ok   符号 _ZL14s_ble_identity 存在且落在预期段（nm 类型 b） = ('20053008', 'b')
+  ok   符号 _ZL21ble_env_info_providerP14ota_ble_info_t 存在且落在预期段（nm 类型 t） = ('080408d8', 't')
+  ok   符号 _ZL18ble_env_get_deviceP15ota_sd_device_t 存在且落在预期段（nm 类型 t） = ('0804095c', 't')
+  ok   身份链实现落在内部 Flash（0x08xxxxxx） = '08048868'
+  ok   快照状态落在 SRAM（0x20xxxxxx） = '20053008'
+  ok   生产 ELF 无测试符号泄漏（白名单外） = []
+  ok   nm 符号表完整（非截断证据） = 3381
+
+P3_2_BUILD checks=14 failures=0
+app_bin_bytes=602984 finalize_sha256=4512de0878c146a93b55f65aa86acab4eedcf7f7082ead97ad73c24884671b4b
+board_dump_sha256=4512de0878c146a93b55f65aa86acab4eedcf7f7082ead97ad73c24884671b4b
+fw_header_diff_bytes=78 symbols=3381
+P3_2_BUILD=PASS

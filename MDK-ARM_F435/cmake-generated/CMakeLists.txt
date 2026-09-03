@@ -532,6 +532,7 @@ list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_package.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_patch.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_sd.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_device_info.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_slot_header.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_staging.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_ble_ring.c"

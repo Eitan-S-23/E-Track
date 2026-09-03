@@ -1,0 +1,46 @@
+== A. C harness 退出码绑定真实失败计数 ==
+  ok   main 退出码 = (failures==0 ? 0 : 1) = True
+  ok   汇总行同时输出 checks 与 failures（可外部核对） = True
+  ok   断言失败路径递增 failures = 2
+  ok   C 源内不存在无条件 ALL=PASS 常量输出 = True
+  ok   main 实际调用的用例组数量 = 7
+== B. Python 运行器不吞失败 ==
+  ok   存在编译与运行两处 subprocess.run = 3
+  ok   全部 subprocess.run 带 check=True（非零退出即抛出） = 3
+  ok   ALL=PASS 打印发生在被测程序成功返回之后 = (2461, 2528)
+  ok   GCC 路径开启 -Werror = True
+  ok   MSVC 路径开启 /WX = True
+  ok   编译开启 -Wall = True
+  ok   编译开启 -Wextra = True
+== C. 链接真实产品源、无 fail-open 逃生 ==
+  ok   直接链接产品源 Libraries/OTA/ota_device_info.c = True
+  ok   链接真实依赖 boot/src/boot_fw_header.c = True
+  ok   链接真实依赖 boot/src/boot_sha256.c = True
+  ok   链接真实依赖 Libraries/EEPROM/eeprom_bcb.c = True
+  ok   被测产品源存在于产品目录（非测试内副本） = True
+  ok   无 fail-open 模式 /\|\|\s*true/ = []
+  ok   无 fail-open 模式 /\|\|\s*:/ = []
+  ok   无 fail-open 模式 /continue-on-error/ = []
+  ok   无 fail-open 模式 /set\s+\+e/ = []
+  ok   无 fail-open 模式 /except\s+Exception\s*:\s*\n\s*pass/ = []
+  ok   无 fail-open 模式 /check\s*=\s*False/ = []
+== D. golden 期望数组与冻结向量逐字节核对 ==
+  ok   RAW_SHA_OLD == expected.json 对应值 = '3081fa0afc5bb2f3a7d456a249cd8f07d9517d257e581e9562bf3eb102eadb1b'
+  ok   HDR_SHA_OLD == expected.json 对应值 = 'e025e0683ea00f5cd00161b7fede2251ffb40b9cacba6bbafb6b39e2702aa944'
+  ok   RAW_SHA_NEW == expected.json 对应值 = 'f68f357c708c2d65e6b1547648e955ea47949d81bd52f2cded684a8f640e21c3'
+  ok   HDR_SHA_NEW == expected.json 对应值 = '5b508eea3c3604ef42b5895d44b1df540a21e910bd00b184ff31ab80f0c824df'
+  ok   BASE_SHA8_OLD == expected.json 对应值 = '3081fa0afc5bb2f3'
+  ok   .etu base_sha8 == 基线镜像 raw SHA 前 8B（身份域同源，非双零域） = '3081fa0afc5bb2f3'
+  ok   冻结向量本身即证明 raw 域与双零域互异 = True
+  ok   冻结 model 期望值为 E-Track + NUL 恰 8B（OTA-XC-DEVICE-MODEL） = True
+== E. 注错反证（读取本包冻结日志）==
+  ok   反证脚本整体判定 PASS = True
+  ok   三处红线注错各执行一次 = ['M1', 'M2', 'M3']
+  ok   三处注错各记录退出码与编译错误标志 = 3
+  ok   三处注错全部把 harness 打红（退出码非 0） = ['1', '1', '1']
+  ok   变红原因是断言失败而非编译错误 = ['False', 'False', 'False']
+  ok   注错后产品源逐字节复原（哈希一致） = 'c1188336e449b79e'
+  ok   还原后复跑重新全绿（证明红是注错所致） = True
+
+P3_2_HARNESS checks=38 failures=0
+P3_2_HARNESS=PASS

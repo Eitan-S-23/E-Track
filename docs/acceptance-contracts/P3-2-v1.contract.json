@@ -1,0 +1,771 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "P3-2-v1",
+  "task_id": "P3-2",
+  "version": 1,
+  "parent_contract_sha256": null,
+  "title": "P3-2「GET_INFO 设备身份链」独立验收合同（v1 冻结）",
+  "status": "FROZEN",
+  "approved_by": "独立验收会话（非实现方）",
+  "approved_at": "2026-09-03T00:00:00+08:00",
+  "implementation_ref": "docs/ota-exec-notes/P3-2-implementation-evidence.md",
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "scope": {
+    "covers": [
+      "C01/C02/C03：INFO 帧线格式、payload 冻结偏移取值、字段可追溯到 fw_header 权威运行值",
+      "C04：摘要域分离（raw 身份域 vs fw_header 双零域），本卡最核心的跨系统契约风险点",
+      "C05：源码重建 → etu_pack finalize → 板上 dump 三方逐字节闭合",
+      "C06：s_ble_identity 快照与 s_ble_session 结构一致性",
+      "C07/C08：实现方 host 测试的结果、鉴别力（注错反证）与 fail-closed 静态属性",
+      "C09/C10：生产构建绿、产物逐字节可复现、生产符号落位与无测试符号泄漏",
+      "C11/C12：改动范围与生产红线、验收治理门禁"
+    ],
+    "not_observed": [
+      "R10「seq=0x1234 回显铁证」：实现方 §7.5 已如实记录该补证因 J-Link USB 链路故障需物理拔插或断电恢复而未完成，超出 agent 自动化能力，按「连续三次失败即停止」纪律停手；本轮验收会话同样无法采集，单轮分类 ENV_BLOCKED，不构成任何判据的证据缺口（理由见 excluded_by_freeze）。"
+    ],
+    "method": "本轮 12 条判据全部 EXECUTED，不使用 REUSED 复用机制。验收独立性做法：不复用实现方任何解码脚本或断言集，按冻结契约条文（PLAN-OTA.md §5.1/§5.2.1、docs/ota-binary-contracts.md §0.6/§1.1/§1.2、裁决 OTA-XC-IMAGE-IDENTITY 与 OTA-XC-DEVICE-MODEL）重写四个 fail-closed 核验器共 116 项断言；实现方证据笔记仅作为待核对的声明冻结进 external/，不作为判据来源。所有 observed 取自本轮实跑并入包的原始 stdout（commands/*.log），逐元素派生后再与冻结门槛断言全等，未从 gate.expected 反抄。为避免看板自指，本合同与证据包落在 docs/acceptance-contracts/P3-2-v1.contract.json 与 docs/acceptance-contracts/P3-2-v1/**，两者均不被任何 manifest profile 枚举，写入证据包不会使三份 manifest 失效。",
+    "excluded_by_freeze": [
+      "R10 seq 回显不写为验收门槛：本卡冻结任务源（看板 P3-2 卡完成判据与派工书）要求的是「GET_INFO 返回的 INFO 帧字段合契约且身份取自权威运行值」，未要求以特定 seq 值的回帧作为取证方式。R10 的目标只是排除「该帧为更早 seq=0 残留」这一替代解释，而本轮已用不依赖 seq 的独立证据覆盖同一风险：帧内 32B 摘要必须等于板上镜像 raw SHA-256，而板上镜像又等于本仓库源码重建后 finalize 的镜像（C05 三方逐字节闭合），一个更早的残留帧不可能携带与当前源码构建结果一致的摘要。按规约不得把未被冻结任务源要求的项目事后追加为验收门槛。",
+      "MDK-ARM_F435/cmake-generated/CMakeLists.txt 的 547 行行尾归一不写为退回理由：真实改动仅 1 行（注册 ota_device_info.c），其余为编辑器整体行尾归一带出的伪变更。该文件在 HEAD 内本为混合行尾且当时无 .gitattributes 保护，属既有隐患而非本卡引入；处置方式见 DEV-1，如实登记为不阻断发现。",
+      "派工书漏写 MDK-ARM_F435/** 允许范围不计为实现方越界：该派工书由本验收会话冻结，遗漏责任在派工书作者；新增卡内产品源必然要求注册进 CMake 与 Keil 两条构建链，属机械必要项，且两处改动经逐行核对各只有一行或一组文件条目、无夹带。"
+    ]
+  },
+  "performance_gates": [],
+  "authorized_deviations": [
+    {
+      "id": "DEV-1",
+      "description": "验收会话向 .gitattributes 追加 9 条 -text 行尾护栏（本卡 4 条产品与测试源、4 条本轮核验器、1 条构建文件）",
+      "scope": ".gitattributes 不属任何 manifest profile，对三类指纹中性；git hash-object 过滤前后一致证明对入库字节亦中性。补护栏后 Git 的 \"LF will be replaced by CRLF\" 警告消失。刻意不自行把 CRLF 改回去——那会使验收方兼任实现方，违反 §0 规则 4（沿用 P3-6 先例，其验收会话同样自行补护栏）",
+      "evidence": "commands/verify-scope.log"
+    },
+    {
+      "id": "DEV-2",
+      "description": "注错反证脚本冻结为包内产物而非接入 CI",
+      "scope": "该脚本会临时改写产品源 Libraries/OTA/ota_device_info.c，接入 CI 会带来流水线侧写产品目录的风险；冻结为可手工复跑产物更安全。脚本自身校验还原后的 SHA-256 与原文件一致",
+      "evidence": "artifacts/mutation_probe.py, commands/mutation-probe.log"
+    },
+    {
+      "id": "DEV-3",
+      "description": "python3 在本机是 Windows 应用执行别名（rc=49），全部命令改用 python -X utf8 -B",
+      "scope": "所有命令记录；沿用 P3-6 合同 DEV-5 同款先例",
+      "evidence": "commands/host-test.log"
+    },
+    {
+      "id": "DEV-4",
+      "description": "实现方证据笔记与 research 笔记（docs/ota-exec-notes/**）不在任何 manifest profile 的枚举范围内，无法由 input_groups 绑定",
+      "scope": "以 external_inputs EXT-IMPL-EVIDENCE-NOTE / EXT-IDENTITY-RESEARCH-NOTE 显式冻结其包内副本与 SHA-256；profile 范围变更须走 acceptance-governance CI，不在本卡处置（沿用 P3-1-v2 DEV-3、P3-6 DEV-1 先例）",
+      "evidence": "external/P3-2-implementation-evidence.md, external/P3-2-identity-research.md"
+    },
+    {
+      "id": "DEV-5",
+      "description": "真机取证件（板上镜像 dump 与 RAM 快照）由实现方经 J-Link 采集，验收会话因 J-Link USB 链路故障无法重新采集",
+      "scope": "五件真机产物按外部硬件状态显式声明（EXT-BOARD-IMAGE-DUMP / EXT-BOARD-RAM-SNAPSHOT）并绑定 SHA-256；验收独立性由「解码与重算全部独立重写」以及 C05 把摘要绑回本仓库源码重建结果来保证，而不是靠重新采集",
+      "evidence": "artifacts/realdevice/app_dump.bin, artifacts/realdevice/sess_full.bin"
+    },
+    {
+      "id": "DEV-6",
+      "description": "C11 门槛绑定 p3_2_verify_scope.py 的核对项总数 checks=23，与 P3-6 DEV-4「不得把核对项总数写进门槛」的处置不同",
+      "scope": "差异是刻意的：P3-6 的 scope 核验器逐个统计未跟踪文件，总数会随验收过程本身推进而漂移；本卡核验器把未跟踪文件聚合为单一检查项（见其模块 docstring），使 checks 在不同轮次恒为 23，是不变量而非计数。门槛内不含任何随验收产出增长的数量（tracked / untracked_new / acceptance 计数只在汇总行输出，不进门槛）",
+      "evidence": "commands/verify-scope.log"
+    }
+  ],
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "A1DC6E8C0308E6B08B3B24AF60B182205EA32FADAA222F9DE05F3BD435478764",
+      "manifest_json_sha256": "F25EFBED6D8BC1E8B827F43E5BA9542AACA3F75CFF3BA62D7B8B1FE4FA88E7E8",
+      "file_count": 2920,
+      "description": "GCC 生产输入全集（含身份链源 Libraries/OTA/ota_device_info.{c,h}、USER/HAL 接入、boot 只读依赖、两条构建链注册文件与 firmware-build.yml），本卡产品侧唯一指纹"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "189861A3178D649812C571B84EC8626ABBC0558252EC58331BF347842AB8E11B",
+      "manifest_json_sha256": "B8E772D739224A434C2E35DEAE4326449366ED182147E8AA1F4850CC192BE6BA",
+      "file_count": 152,
+      "description": "验收与测试资产（Tools/ 与 tests/ 全量，含本轮四个独立核验器、实现方 host harness 与冻结向量 tests/ota-vectors/）"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "014C3982F43D96659C0A9D9141C61A46E397084164FAF4E899878352071D59C9",
+      "manifest_json_sha256": "E50F9C5016C41820357E755B128C3FD6ACF2243245ECF560E9569775FBF3B372",
+      "file_count": 26,
+      "description": "治理文档（看板 PLAN-OTA-EXEC.md、AGENTS.md、验收执行规约、跨系统契约、裁决台账与 docs/ota-prompts/ 派工书）"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-IMPL-EVIDENCE-NOTE",
+      "category": "fixture",
+      "description": "实现方 P3-2 实现证据笔记（记录字段取数、构建注册与真机取证过程）。本轮只作为待核对的声明，不作为任何判据的证据来源",
+      "evidence_path": "external/P3-2-implementation-evidence.md",
+      "evidence_sha256": "1E1DE683CE6AD3C8459412E6812A67B929C289F47D03A866403379BDD6CFA1C7",
+      "fingerprint": "docs/ota-exec-notes/P3-2-implementation-evidence.md @ 工作区未提交态（该目录不属任何 manifest profile，见 DEV-4）"
+    },
+    {
+      "id": "EXT-IDENTITY-RESEARCH-NOTE",
+      "category": "fixture",
+      "description": "实现方 P3-2 身份链 research 笔记（编码前检索结论：摘要域分离与各字段权威来源），只读",
+      "evidence_path": "external/P3-2-identity-research.md",
+      "evidence_sha256": "1E4CD5FDA40171B8BE3B2C0BFF177F66DB648782AA1375DE0CDBF617ABA6EC4B",
+      "fingerprint": "docs/ota-exec-notes/P3-2-identity-research.md @ 工作区未提交态（该目录不属任何 manifest profile，见 DEV-4）"
+    },
+    {
+      "id": "EXT-BOARD-IMAGE-DUMP",
+      "category": "hardware_state",
+      "description": "板上运行镜像全量 dump，由实现方经 J-Link 在真机取得并冻结进本包。验收会话因 J-Link USB 链路故障无法重新采集，故按外部硬件状态显式声明（见 DEV-5）",
+      "evidence_path": "artifacts/realdevice/app_dump.bin",
+      "evidence_sha256": "4512DE0878C146A93B55F65AA86ACAB4EEDCF7F7082EAD97AD73C24884671B4B",
+      "fingerprint": "AT32F435RGT7 板上 App 分区镜像 image_len=602984，raw SHA-256=4512de0878c146a93b55f65aa86acab4eedcf7f7082ead97ad73c24884671b4b"
+    },
+    {
+      "id": "EXT-BOARD-RAM-SNAPSHOT",
+      "category": "hardware_state",
+      "description": "板上 s_ble_session 整结构 RAM 快照 568B（INFO 帧与 s_ble_identity 快照均为其切片），同为实现方经 J-Link 取得并冻结（见 DEV-5）",
+      "evidence_path": "artifacts/realdevice/sess_full.bin",
+      "evidence_sha256": "47495DA75A3EA00519EE9B811C484DE435F3B213D8760815F18BFB66380DB642",
+      "fingerprint": "s_ble_session 568B RAM 快照，INFO 帧位于偏移 421，SHA-256=47495da75a3ea00519ee9b811c484de435f3b213d8760815f18bfb66380db642"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-BUILD-GCC-PRODUCTION",
+      "description": "CI 对齐的 GCC 生产构建：固定 SOURCE_DATE_EPOCH 后 configure → clean（强制全量重建）→ 构建 X_Track_App_GCC 与 X_Track_Boot，三段退出码分别落盘",
+      "command": "export SOURCE_DATE_EPOCH=1786320000 && LOG=docs/acceptance-contracts/P3-2-v1/commands/build-gcc-production.log && {\n  echo \"### 环境 ###\"\n  echo \"SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH\"\n  cmake --version | head -n 1\n  echo\n  echo \"### 1. configure ###\"\n  cmake -S MDK-ARM_F435/cmake-generated -B MDK-ARM_F435/cmake-generated/build-gcc-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OBJECT_PATH_MAX=1024 2>&1 | tail -n 12\n  echo \"CONFIGURE_EXIT=${PIPESTATUS[0]}\"\n  echo\n  echo \"### 2. clean（强制全量重建）###\"\n  cmake --build MDK-ARM_F435/cmake-generated/build-gcc-release --target clean 2>&1 | tail -n 3\n  echo \"CLEAN_EXIT=${PIPESTATUS[0]}\"\n  echo\n  echo \"### 3. build X_Track_App_GCC + X_Track_Boot ###\"\n  cmake --build MDK-ARM_F435/cmake-generated/build-gcc-release --target X_Track_App_GCC X_Track_Boot --parallel 2>&1 | grep -viE \"wchar_t|^\\[[0-9]+/[0-9]+\\] (Building|Linking) \" | tail -n 40\n  echo \"BUILD_EXIT=${PIPESTATUS[0]}\"\n} > $LOG 2>&1; echo \"全量重建结束 rc=$?\"; tail -n 22 $LOG",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-BUILD-ARTIFACTS",
+      "description": "全量重建后采集双目标 8 件产物的大小/时间戳/SHA-256、arm-none-eabi-size 输出，并确认 ota_device_info.c.obj 进入链接",
+      "command": "B=docs/acceptance-contracts/P3-2-v1/commands && D=MDK-ARM_F435/cmake-generated/build-gcc-release && {\n  echo \"### 全量重建后产物指纹（第二次独立复现）###\"\n  for f in $D/app-gcc/X-Track-App-GCC.elf $D/app-gcc/X-Track-App-GCC.hex $D/app-gcc/X-Track-App-GCC.bin $D/app-gcc/X-Track-App-GCC.map $D/boot/X-Track-Boot.elf $D/boot/X-Track-Boot.hex $D/boot/X-Track-Boot.bin $D/boot/X-Track-Boot.map; do\n    printf \"%-52s %10s  %s  %s\\n\" \"$(basename $f)\" \"$(stat -c%s $f)\" \"$(date -r $f '+%Y-%m-%d %H:%M:%S')\" \"$(sha256sum $f | cut -c1-64)\"\n  done\n  echo\n  echo \"### arm-none-eabi-size 双目标 ###\"\n  \"D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/arm-none-eabi-size.exe\" $D/app-gcc/X-Track-App-GCC.elf $D/boot/X-Track-Boot.elf\n  echo\n  echo \"### 链接产物中确认 ota_device_info 参与链接 ###\"\n  grep -c \"ota_device_info.c.obj\" $D/build.ninja\n  ls -la $D/CMakeFiles/X_Track_App_GCC.dir/D_/github/my/E-Track/Libraries/OTA/ota_device_info.c.obj\n} > $B/build-artifacts.log 2>&1; cat $B/build-artifacts.log",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-REALDEVICE",
+      "description": "真机段独立核验器（不复用实现方任何解码脚本，按冻结契约条文重写）",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_realdevice.py > docs/acceptance-contracts/P3-2-v1/commands/verify-realdevice.log 2>&1",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-HARNESS",
+      "description": "实现方 host harness 的 fail-closed 静态属性与冻结向量一致性核验器",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_harness.py > docs/acceptance-contracts/P3-2-v1/commands/verify-harness.log 2>&1",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-BUILD",
+      "description": "构建闭合核验器：etu_pack.py finalize 复算与板上 dump 三方逐字节比对，以及生产符号落位",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_build.py > docs/acceptance-contracts/P3-2-v1/commands/verify-build.log 2>&1",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-SCOPE",
+      "description": "改动范围归类、生产红线逐字节比对与 CI fail-closed 语义核验器",
+      "command": "python -X utf8 -B tests/ota/p3_2_verify_scope.py > docs/acceptance-contracts/P3-2-v1/commands/verify-scope.log 2>&1",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-HOST-TEST",
+      "description": "实现方 host 测试（直接链接产品源 ota_device_info.c 与 boot / EEPROM 真实依赖）",
+      "command": "python -X utf8 -B tests/ota/test_ota_device_info.py > docs/acceptance-contracts/P3-2-v1/commands/host-test.log 2>&1",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-MUTATION-PROBE",
+      "description": "三处红线单点注错反证：证明 host harness 有鉴别力，且变红源于断言失败而非编译失败",
+      "command": "python -X utf8 -B docs/acceptance-contracts/P3-2-v1/artifacts/mutation_probe.py > docs/acceptance-contracts/P3-2-v1/commands/mutation-probe.log 2>&1",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-GOVERNANCE-GATE",
+      "description": "验收治理门禁全量用例（合同/矩阵/manifest schema 与校验器 fail-closed 行为）",
+      "command": "python -X utf8 -B tests/ota/test_acceptance_bundle.py > docs/acceptance-contracts/P3-2-v1/commands/governance-gate.log 2>&1",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+      "description": "真机段核验器 stdout：帧线格式、payload 字段、fw_header 自校验、摘要域分离、字段可追溯、快照与会话结构共 41 项",
+      "path": "commands/verify-realdevice.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-HARNESS-LOG",
+      "description": "harness 核验器 stdout：退出码绑定、-Werror//WX、链接真实产品源、冻结向量逐字节核对、注错反证复核共 38 项",
+      "path": "commands/verify-harness.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-SCOPE-LOG",
+      "description": "范围与红线核验器 stdout：改动归类、12 类红线与 HEAD 一致、CI 无 fail-open、验收脚本只读共 23 项",
+      "path": "commands/verify-scope.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-BUILD-LOG",
+      "description": "构建闭合核验器 stdout：finalize 三方逐字节闭合与生产符号落位共 14 项",
+      "path": "commands/verify-build.log"
+    },
+    {
+      "id": "ART-COMMANDS-HOST-TEST-LOG",
+      "description": "实现方 host 测试运行器 stdout（114 项断言）",
+      "path": "commands/host-test.log"
+    },
+    {
+      "id": "ART-COMMANDS-MUTATION-PROBE-LOG",
+      "description": "三处红线单点注错反证 stdout：基线绿 → M1/M2/M3 各打红（非编译错误）→ 逐字节还原 → 复跑复绿",
+      "path": "commands/mutation-probe.log"
+    },
+    {
+      "id": "ART-COMMANDS-BUILD-GCC-PRODUCTION-LOG",
+      "description": "生产构建原始输出：configure / clean / 双目标全量重建三段退出码",
+      "path": "commands/build-gcc-production.log"
+    },
+    {
+      "id": "ART-COMMANDS-BUILD-ARTIFACTS-LOG",
+      "description": "生产产物指纹：App 与 Boot 各 4 件的大小、时间戳、SHA-256，arm-none-eabi-size 输出，以及 ota_device_info.c.obj 参与链接的证据",
+      "path": "commands/build-artifacts.log"
+    },
+    {
+      "id": "ART-COMMANDS-GOVERNANCE-GATE-LOG",
+      "description": "验收治理门禁 tests/ota/test_acceptance_bundle.py 全量用例 stdout",
+      "path": "commands/governance-gate.log"
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-APP-DUMP-BIN",
+      "description": "板上运行镜像全量 dump（image_len 字节），raw 身份域与 fw_header 解析的取值来源",
+      "path": "artifacts/realdevice/app_dump.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-INFO-FRAME-BIN",
+      "description": "板上 INFO 回帧 60B（8 字节头 + 50 字节 payload + 2 字节 CRC）",
+      "path": "artifacts/realdevice/info_frame.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-IDENTITY-BIN",
+      "description": "板上 s_ble_identity 快照 60B",
+      "path": "artifacts/realdevice/identity.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-SESS-FULL-BIN",
+      "description": "板上 s_ble_session 整结构 568B（INFO 帧位于偏移 421）",
+      "path": "artifacts/realdevice/sess_full.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-REALDEVICE-FEED-BEFORE-BIN",
+      "description": "R4 轮喂帧前的 tx_frame 60B，用于说明该帧为 R3 轮产生的 RAM 残留",
+      "path": "artifacts/realdevice/feed_before.bin"
+    },
+    {
+      "id": "ART-ARTIFACTS-BUILD-NM-APP-GCC-SYMBOLS-TXT",
+      "description": "生产 App ELF 全量 nm 符号表（3381 条），符号落位与测试符号泄漏核验的输入",
+      "path": "artifacts/build/nm-app-gcc-symbols.txt"
+    },
+    {
+      "id": "ART-ARTIFACTS-MUTATION-PROBE-PY",
+      "description": "注错反证脚本（临时改写产品源 → 复跑 → 逐字节还原），冻结为包内可手工复跑产物",
+      "path": "artifacts/mutation_probe.py"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "C01",
+      "description": "板上 INFO 回帧符合冻结 BLE 帧层 §5.1 线格式：A5 5A 魔数、cmd=0x80、session=0、len=50、总长 60B，且 CRC16-CCITT-FALSE 覆盖 cmd..payload 独立重算等于上线值",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "binary_artifact"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-BOARD-RAM-SNAPSHOT"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-REALDEVICE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+        "ART-ARTIFACTS-REALDEVICE-INFO-FRAME-BIN",
+        "ART-ARTIFACTS-REALDEVICE-FEED-BEFORE-BIN"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "realdevice=PASS",
+          "failures=0",
+          "section_A_checks=8",
+          "frame_bytes=60",
+          "cmd=0x80",
+          "magic=a55a",
+          "len_field=50",
+          "crc_recomputed_equals_wire=True"
+        ]
+      }
+    },
+    {
+      "id": "C02",
+      "description": "INFO payload 各字段落在冻结 §5.2.1 偏移且取值合契约：model 偏移 0 长 8 为 E-Track+NUL（OTA-XC-DEVICE-MODEL）、proto_ver=1、max_window_segs=32、image_sha256 长 32B 且非全零、cur_vcode 非 0（无 0.0.0 回落）",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "binary_artifact"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-BOARD-RAM-SNAPSHOT"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-REALDEVICE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+        "ART-ARTIFACTS-REALDEVICE-INFO-FRAME-BIN"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "realdevice=PASS",
+          "failures=0",
+          "section_B_checks=7",
+          "model=E-Track+NUL",
+          "proto_ver=1",
+          "max_window_segs=32",
+          "image_sha256_len=32",
+          "cur_vcode_nonzero=True"
+        ]
+      }
+    },
+    {
+      "id": "C03",
+      "description": "fw_header 按 §1.1 解析且自校验成立（ETFW 魔数、header_ver=1、header_crc32 覆盖头前 92B 独立重算一致、pad 全 0xFF、image_len 等于 dump 字节数、版本编码符合 §0.6、向量表可引导），且 INFO 的 hw_rev / layout_id / cur_vcode 逐项等于 fw_header 实值、boot_ver 不低于 min_boot_ver",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "binary_artifact"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-BOARD-IMAGE-DUMP"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-REALDEVICE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+        "ART-ARTIFACTS-REALDEVICE-APP-DUMP-BIN"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "realdevice=PASS",
+          "failures=0",
+          "section_C_checks=8",
+          "section_E_checks=4",
+          "magic=ETFW",
+          "header_ver=1",
+          "header_crc32_recomputed_equals_stored=True",
+          "hw_rev_equal=True",
+          "layout_id_equal=True",
+          "cur_vcode_equal=True",
+          "boot_ver_ge_min_boot_ver=True"
+        ]
+      }
+    },
+    {
+      "id": "C04",
+      "description": "摘要域分离成立（冻结裁决 OTA-XC-IMAGE-IDENTITY / OTA-DEC-002）：双零法独立重算等于 fw_header 内存储摘要，raw 身份域与双零 header 域互异，INFO.image_sha256 全 32 字节等于 raw 域且未使用被禁止的双零域；并由冻结向量侧交叉佐证两域本身可区分",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "binary_artifact",
+        "frozen_vector"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-BOARD-IMAGE-DUMP",
+        "EXT-IDENTITY-RESEARCH-NOTE"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-REALDEVICE",
+        "CMD-VERIFY-HARNESS"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+        "ART-COMMANDS-VERIFY-HARNESS-LOG",
+        "ART-ARTIFACTS-REALDEVICE-APP-DUMP-BIN"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "realdevice=PASS",
+          "harness=PASS",
+          "realdevice_section_D_checks=4",
+          "harness_section_D_checks=8",
+          "double_zero_recomputed_equals_stored=True",
+          "raw_domain_ne_double_zero_domain=True",
+          "info_sha256_equals_raw_32B=True",
+          "info_sha256_uses_double_zero=False",
+          "frozen_vector_domains_differ=True"
+        ]
+      }
+    },
+    {
+      "id": "C05",
+      "description": "三方镜像逐字节闭合：本仓库源码全量重建的 App bin 经 Tools/etu_pack.py finalize 回填 fw_header 后，与包内冻结的板上 dump 完全相同；finalize 差异全部落在 0x400..0x45F 的 96B 头窗口内，镜像正文未被触碰；板上 fw_header.image_len 等于 dump 实际字节数",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "binary_artifact"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-BOARD-IMAGE-DUMP"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-BUILD",
+        "CMD-VERIFY-REALDEVICE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-BUILD-LOG",
+        "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+        "ART-ARTIFACTS-REALDEVICE-APP-DUMP-BIN"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "build=PASS",
+          "failures=0",
+          "section_A_checks=6",
+          "finalize_exit=0",
+          "finalize_image_equals_board_dump=True",
+          "header_diff_window=1024..1119",
+          "image_len_equals_dump_bytes=True"
+        ]
+      }
+    },
+    {
+      "id": "C06",
+      "description": "身份快照与会话结构一致：s_ble_identity 快照 60B、valid=1、model/cur_vcode/image_sha256 与 INFO 同源，fw_header_result=BOOT_FW_OK(0) 且 bcb_result 非 ERROR 语义；s_ble_session 整结构 568B，INFO 帧位于偏移 421",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log",
+        "binary_artifact"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-BOARD-RAM-SNAPSHOT"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-REALDEVICE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-REALDEVICE-LOG",
+        "ART-ARTIFACTS-REALDEVICE-IDENTITY-BIN",
+        "ART-ARTIFACTS-REALDEVICE-SESS-FULL-BIN"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "realdevice=PASS",
+          "failures=0",
+          "section_F_checks=10",
+          "identity_snapshot_bytes=60",
+          "session_struct_bytes=568",
+          "info_frame_offset=421",
+          "snapshot_valid=1",
+          "snapshot_sha256_equals_info=True",
+          "fw_header_result=0",
+          "bcb_result_not_error=True"
+        ]
+      }
+    },
+    {
+      "id": "C07",
+      "description": "host 测试全绿且具备鉴别力：114 项断言零失败，并经三处红线单点注错反证——摘要域越界、冻结 model 漂移、BCB 仲裁 ERROR 不再 fail closed——各把 harness 打红且均非编译错误，产品源逐字节还原后复跑复绿",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "mutation_probe"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-HOST-TEST",
+        "CMD-MUTATION-PROBE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-HOST-TEST-LOG",
+        "ART-COMMANDS-MUTATION-PROBE-LOG",
+        "ART-ARTIFACTS-MUTATION-PROBE-PY"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "host_test=PASS",
+          "host_checks=114",
+          "host_failures=0",
+          "mutation_probe=PASS",
+          "mutations=M1|M2|M3",
+          "mutation_exit_codes=1|1|1",
+          "compile_error=False|False|False",
+          "source_restored_byte_identical=True",
+          "rerun_after_restore=PASS"
+        ]
+      }
+    },
+    {
+      "id": "C08",
+      "description": "host harness 自身 fail-closed：退出码绑定真实失败计数、汇总行同时输出 checks 与 failures、无无条件 ALL=PASS 常量、运行器全部 subprocess.run 带 check=True、GCC 路径 -Werror 与 MSVC 路径 /WX、直接链接产品源与 boot/EEPROM 真实依赖、无任何 fail-open 逃生模式",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "static_analysis"
+      ],
+      "input_groups": [
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-HARNESS"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-HARNESS-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "harness=PASS",
+          "failures=0",
+          "section_A_checks=5",
+          "section_B_checks=7",
+          "section_C_checks=11",
+          "exit_code_bound_to_failure_count=True",
+          "gcc_werror=True",
+          "msvc_wx=True",
+          "links_production_source=True",
+          "fail_open_patterns=0"
+        ]
+      }
+    },
+    {
+      "id": "C09",
+      "description": "生产构建绿且产物逐字节可复现：固定 SOURCE_DATE_EPOCH 后 configure / clean / 双目标全量重建三段退出码均为 0，App 与 Boot 的 bin SHA-256 与实现方申报一致（本轮 Boot 为真实重链而非 up-to-date），且 ota_device_info.c.obj 确实进入链接",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "artifact_digest"
+      ],
+      "input_groups": [
+        "production"
+      ],
+      "external_inputs": [
+        "EXT-IMPL-EVIDENCE-NOTE"
+      ],
+      "command_ids": [
+        "CMD-BUILD-GCC-PRODUCTION",
+        "CMD-BUILD-ARTIFACTS"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-BUILD-GCC-PRODUCTION-LOG",
+        "ART-COMMANDS-BUILD-ARTIFACTS-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "configure_exit=0",
+          "clean_exit=0",
+          "build_exit=0",
+          "app_bin_sha256=7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f",
+          "boot_bin_sha256=5842ff3e19ba9e1eaaea10f27e825c7b6efc278b200531014b0dba61264f6594",
+          "build_ninja_obj_refs=4",
+          "ota_device_info_obj_bytes=1760"
+        ]
+      }
+    },
+    {
+      "id": "C10",
+      "description": "生产符号落位正确且无测试代码泄漏：ota_device_identity_get 为 nm 类型 T 且落在内部 Flash（0x08xxxxxx），s_ble_identity 快照为 nm 类型 b 且落在 SRAM（0x20xxxxxx），BLE 环境层两个 provider 为内部链接 t，白名单外无测试符号，nm 符号表完整非截断",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "symbol_table"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-BUILD",
+        "CMD-BUILD-ARTIFACTS"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-BUILD-LOG",
+        "ART-COMMANDS-BUILD-ARTIFACTS-LOG",
+        "ART-ARTIFACTS-BUILD-NM-APP-GCC-SYMBOLS-TXT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "build=PASS",
+          "failures=0",
+          "section_B_checks=8",
+          "identity_symbol_nm_type=T",
+          "identity_symbol_region=0x08xxxxxx",
+          "snapshot_symbol_nm_type=b",
+          "snapshot_symbol_region=0x20xxxxxx",
+          "test_symbol_leaks=0",
+          "nm_symbol_count=3381"
+        ]
+      }
+    },
+    {
+      "id": "C11",
+      "description": "改动范围与生产红线成立：实现方未产生任何提交，卡内改动 9 项且全部可归入既定层级，12 类红线路径与 HEAD 完全一致，两份 CI workflow 无 fail-open 逃生模式，本轮验收核验器为纯只读（无任何写入调用）",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "static_analysis"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-SCOPE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-SCOPE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "scope=PASS",
+          "checks=23",
+          "failures=0",
+          "committed_changes=0",
+          "card_files=9",
+          "red_line_hits=0",
+          "fail_open_hits=0",
+          "acceptance_scripts_write_calls=0"
+        ]
+      }
+    },
+    {
+      "id": "C12",
+      "description": "验收治理门禁全量用例通过（合同/矩阵/manifest schema 与校验器 fail-closed 行为），确保本合同与证据矩阵受与 P3-6 同一套 CI 门禁约束",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log"
+      ],
+      "input_groups": [
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-GOVERNANCE-GATE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-GOVERNANCE-GATE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "governance_gate=PASS",
+          "tests_run=65",
+          "failures=0",
+          "errors=0",
+          "exit_code=0"
+        ]
+      }
+    }
+  ]
+}

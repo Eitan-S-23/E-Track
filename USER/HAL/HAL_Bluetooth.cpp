@@ -4,6 +4,7 @@
 #include "HAL/HAL_OTA_Package.h"
 #include "HAL/HAL_OTA_Staging.h"
 #include "OTA/ota_ble_session.h"
+#include "OTA/ota_device_info.h"
 #include "OTA/ota_layout.h"
 #include "boot_fw_header.h"
 #include "EEPROM/eeprom_bcb.h"
@@ -26,12 +27,11 @@ static uint32_t lastRxTick = 0;
 static ota_ble_session_t s_ble_session;
 static ota_staging_io_t s_ble_staging_io;
 
-/* 设备身份缓存：首次使用时校验当前镜像 fw_header 并计算整镜像
- * SHA-256（约百毫秒量级），运行期身份不变故缓存复用；
- * get_device 与 INFO provider 同源（单份身份链，P3-2 增强时替换此处）。 */
-static bool s_ble_device_ready = false;
-static ota_sd_device_t s_ble_device;
-static uint8_t s_ble_image_sha256[32];
+/* P3-2 设备身份链（OTA-XC-INFO-MAPPING）：快照与校验归 ota_device_info，
+ * 此处只注入内部 Flash 镜像读与 App 侧 BCB hal。get_device 与 INFO
+ * provider 同源——单份快照供 BLE BEGIN 的 .etu 头校验与 GET_INFO 回包；
+ * 运行期镜像不变故快照缓存复用，重启清零重建（派工书快照失效语义）。 */
+static ota_device_identity_t s_ble_identity;
 
 static int ble_current_image_read(void *ctx, uint32_t offset,
                                   uint8_t *dst, size_t len)
@@ -46,56 +46,7 @@ static int ble_current_image_read(void *ctx, uint32_t offset,
     return 0;
 }
 
-static bool ble_device_init(void)
-{
-    boot_image_reader_t reader;
-    boot_fw_expectations_t expectations;
-    boot_fw_header_t header;
-    boot_sha256_ctx_t sha;
-    uint32_t offset = 0u;
-    uint8_t block[256];
-
-    if (s_ble_device_ready)
-    {
-        return true;
-    }
-
-    memset(&s_ble_device, 0, sizeof(s_ble_device));
-    s_ble_device.hardware_rev = 1u;
-    s_ble_device.layout_id = 1u;
-    s_ble_device.boot_version = 1u;
-
-    reader.read = ble_current_image_read;
-    reader.ctx = NULL;
-    boot_fw_default_expectations(&expectations);
-    if (boot_fw_header_validate(&reader, &expectations, &header) != BOOT_FW_OK)
-    {
-        return false;
-    }
-    s_ble_device.current_vcode = header.version_code;
-
-    boot_sha256_init(&sha);
-    while (offset < header.image_len)
-    {
-        uint32_t take = header.image_len - offset;
-        if (take > sizeof(block))
-        {
-            take = sizeof(block);
-        }
-        if (ble_current_image_read(NULL, offset, block, take) != 0)
-        {
-            return false;
-        }
-        boot_sha256_update(&sha, block, take);
-        offset += take;
-    }
-    boot_sha256_final(&sha, s_ble_image_sha256);
-    memcpy(s_ble_device.base_image_sha8, s_ble_image_sha256,
-           sizeof(s_ble_device.base_image_sha8));
-
-    s_ble_device_ready = true;
-    return true;
-}
+static boot_image_reader_t s_ble_image_reader = { ble_current_image_read, NULL };
 
 /* ---- ota_ble_env_t 注入实现 ---- */
 
@@ -142,27 +93,45 @@ static uint8_t *ble_env_overlay_workspace(uint32_t *out_size)
 
 static int ble_env_get_device(ota_sd_device_t *out_device)
 {
-    if (out_device == NULL || !ble_device_init())
+    ota_device_info_t info;
+
+    if (out_device == NULL ||
+        ota_device_identity_get(&s_ble_identity, &info,
+                                &s_ble_image_reader,
+                                HAL::OTA_GetBcbHal()) != OTA_DEVICE_OK)
     {
         return 0;
     }
-    *out_device = s_ble_device;
+    memset(out_device, 0, sizeof(*out_device));
+    out_device->current_vcode = info.cur_vcode;
+    out_device->hardware_rev = info.hw_rev;
+    out_device->layout_id = info.layout_id;
+    out_device->boot_version = info.boot_ver;
+    /* .etu base_sha8 比较域 = 设备 raw SHA-256 前 8B
+     * （OTA-XC-IMAGE-IDENTITY 摘要域矩阵） */
+    memcpy(out_device->base_image_sha8, info.image_sha256,
+           sizeof(out_device->base_image_sha8));
     return 1;
 }
 
 static int ble_env_info_provider(ota_ble_info_t *out_info)
 {
-    if (out_info == NULL || !ble_device_init())
+    ota_device_info_t info;
+
+    if (out_info == NULL ||
+        ota_device_identity_get(&s_ble_identity, &info,
+                                &s_ble_image_reader,
+                                HAL::OTA_GetBcbHal()) != OTA_DEVICE_OK)
     {
         return 0;
     }
     memset(out_info, 0, sizeof(*out_info));
-    memcpy(out_info->model, "X-Track", sizeof("X-Track"));
-    out_info->hw_rev = s_ble_device.hardware_rev;
-    out_info->layout_id = s_ble_device.layout_id;
-    out_info->boot_ver = s_ble_device.boot_version;
-    out_info->cur_vcode = s_ble_device.current_vcode;
-    memcpy(out_info->image_sha256, s_ble_image_sha256,
+    memcpy(out_info->model, info.model, sizeof(out_info->model));
+    out_info->hw_rev = info.hw_rev;
+    out_info->layout_id = info.layout_id;
+    out_info->boot_ver = info.boot_ver;
+    out_info->cur_vcode = info.cur_vcode;
+    memcpy(out_info->image_sha256, info.image_sha256,
            sizeof(out_info->image_sha256));
     return 1;
 }

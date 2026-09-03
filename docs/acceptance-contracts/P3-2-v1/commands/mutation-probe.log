@@ -1,0 +1,32 @@
+原文件 SHA-256 = c1188336e449b79e410cba05dff77cb3ebfd4fbf8138c5d6a7bc65299304aaf7
+
+=== 基线（未注错）===
+退出码=0 | P3_2_OTA_DEVICE_INFO checks=114 failures=0 | P3_2_OTA_DEVICE_INFO_ALL=PASS
+
+=== M1 摘要域越界：raw 域结果被 fw_header 双零域覆盖（派工书红线：禁止混用两域） ===
+退出码=1 编译错误=False
+  P3_2_OTA_DEVICE_INFO checks=114 failures=6
+  FAIL: T1 image_sha256 == independent raw sha
+  FAIL: T7 device raw != fixture header double-zero domain
+  FAIL: T7 two 8B domains differ
+  FAIL: T7 device raw first 8B == expected raw first 8B
+  FAIL: T4 NONE sha from fw_header
+
+=== M2 冻结 model 漂移："E-Track" 改 "X-Track"（OTA-XC-DEVICE-MODEL） ===
+退出码=1 编译错误=False
+  P3_2_OTA_DEVICE_INFO checks=114 failures=1
+  FAIL: T1 model exact 8B
+
+=== M3 fail-closed 失效：BCB 仲裁 ERROR 不再拒绝（派工书：IO 失败必须 fail closed） ===
+退出码=1 编译错误=False
+  P3_2_OTA_DEVICE_INFO checks=114 failures=2
+  FAIL: T5 bcb io fail closed
+  FAIL: T5 out untouched
+
+还原后 SHA-256 = c1188336e449b79e410cba05dff77cb3ebfd4fbf8138c5d6a7bc65299304aaf7
+还原一致：源文件逐字节复原
+
+=== 复跑（还原后）===
+退出码=0 | P3_2_OTA_DEVICE_INFO checks=114 failures=0 | P3_2_OTA_DEVICE_INFO_ALL=PASS
+
+P3_2_MUTATION_PROBE=PASS

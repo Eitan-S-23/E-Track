@@ -1,0 +1,53 @@
+== A. INFO 帧线格式（§5.1）==
+  ok   帧总长 = 8 头 + payload + 2 CRC = 60
+  ok   magic A5 5A = 'a55a'
+  ok   cmd = 0x80 INFO = '0x80'
+  ok   session = 0（GET_INFO 无会话） = 0
+  ok   len 字段 = 50 = 50
+  ok   len 字段与实际帧长自洽 = 60
+  ok   CRC16-CCITT-FALSE 覆盖 cmd..payload、小端上线 = '0x1b4f'
+  ok   seq 小端解码自洽 = 0
+== B. INFO payload 字段（§5.2.1 冻结偏移）==
+  ok   model 偏移 0 长 8 ASCIIZ = E-Track = b'E-Track\x00'
+  ok   model 末字节为 NUL（ASCIIZ 边界不溢出） = 0
+  ok   proto_ver 偏移 48 恒 1 = 1
+  ok   max_window_segs 偏移 49 恒 32 = 32
+  ok   cur_vcode 非 0（无 0.0.0 回落） = 30200
+  ok   image_sha256 非全零（无占位摘要） = '4512de0878c146a9'
+  ok   image_sha256 长 32B = 32
+== C. fw_header 解析与自校验（§1.1/§1.2）==
+  ok   magic ETFW @ 偏移 0 = b'ETFW'
+  ok   header_ver = 1 = 1
+  ok   header_crc32 覆盖头前 92B、独立重算一致 = '0x8f431170'
+  ok   pad 偏移 74 长 18 全 0xFF = 'ffffffff'
+  ok   image_len == 板上 dump 实际字节数 = 602984
+  ok   version_code 与 version_name 按 §0.6 编码一致 = 30200
+  ok   向量表 MSP 落在 SRAM 区（镜像可引导） = '0x20058000'
+  ok   向量表 reset 为 Thumb 地址（bit0=1） = '0x801b659'
+== D. 摘要域分离（OTA-XC-IMAGE-IDENTITY / OTA-DEC-002）==
+  ok   双零法独立重算 == fw_header 内存储摘要（header 域成立） = 'd97534841302c16d'
+  ok   raw 身份域与双零 header 域互异（两域确实可区分） = '4512de0878c146a9'
+  ok   INFO.image_sha256 == 板上镜像 raw SHA-256（全 32B 逐字节） = '4512de0878c146a93b55f65aa86acab4eedcf7f7082ead97ad73c24884671b4b'
+  ok   INFO.image_sha256 未使用被禁止的双零域 = '4512de0878c146a9'
+== E. INFO 字段可追溯到 fw_header 权威运行值 ==
+  ok   INFO.hw_rev == fw_header.hw_rev = 1
+  ok   INFO.layout_id == fw_header.layout_id = 1
+  ok   INFO.cur_vcode == fw_header.version_code = 30200
+  ok   INFO.boot_ver >= fw_header.min_boot_ver = 1
+== F. 快照状态与会话结构一致性 ==
+  ok   s_ble_identity 快照 60B = 60
+  ok   快照 valid = 1（已完成一次校验） = 1
+  ok   快照 model 与冻结常量一致 = b'E-Track\x00'
+  ok   快照 cur_vcode == INFO.cur_vcode = 30200
+  ok   快照 image_sha256 == INFO.image_sha256（同源取数） = '4512de0878c146a9'
+  ok   快照 fw_header_result = BOOT_FW_OK(0) = 0
+  ok   快照 bcb_result 非 ERROR 语义（仲裁放行） = 1
+  ok   s_ble_session 整结构 568B = 568
+  ok   INFO 帧位于会话结构偏移 421（tx_frame 字段） = True
+  ok   R4 轮喂帧前后 tx_frame 一致（该轮固件已死，帧为 R3 轮产生的 RAM 残留） = 'a55a'
+
+P3_2_REALDEVICE checks=41 failures=0
+image_len=602984 version_name=3.2.0 version_code=30200
+raw_identity_sha256=4512de0878c146a93b55f65aa86acab4eedcf7f7082ead97ad73c24884671b4b
+header_double_zero_sha256=d97534841302c16d4e026820a6b854c8ee68cc256b0042024d1280001f7401dd
+P3_2_REALDEVICE=PASS
