@@ -177,7 +177,7 @@ static void bt_rx_service(void)
         /* 会话活跃（ISR 标志尚未置位的过渡窗口）时文本字节丢弃 */
         ota_ble_session_feed_idle(
             &s_ble_session,
-            ota_ble_session_active(&s_ble_session) ? NULL : bt_text_sink,
+            bt_text_sink,
             NULL, (uint8_t)c);
     }
 }
