@@ -1,4 +1,7 @@
 #include "HAL/HAL.h"
+#if 0 /* P3-7 fail-closed probe: backslash include sample, not compiled */
+#include "HAL\HAL.h"
+#endif
 #include "USB_MSC/UsbMsc.h"
 #include "USB_MSC/msc_diskio.h"
 
