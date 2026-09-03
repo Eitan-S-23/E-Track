@@ -1,0 +1,38 @@
+[
+  {
+    "filename": ".claude/p3_7_run_ci_sequence.py",
+    "sha": "a184587198c5a28450303cdb54d785e44e88805c"
+  },
+  {
+    "filename": ".github/workflows/firmware-build.yml",
+    "sha": "ab1d62b5de85c08c40195a08ceee1bab87928be9"
+  },
+  {
+    "filename": "PLAN-OTA-EXEC.md",
+    "sha": "47bc81c367feb64f48f7af0b721d307577797f94"
+  },
+  {
+    "filename": "docs/ota-exec-notes/P3-7-acceptance-round1.md",
+    "sha": "40889ffadc8dd5dd1006abbec153df4eb0d3964a"
+  },
+  {
+    "filename": "docs/ota-exec-notes/P3-7-acceptance-round2.md",
+    "sha": "22c460fdce4215ba5a7c6d5ee0927f96601b8e3e"
+  },
+  {
+    "filename": "docs/ota-exec-notes/P3-7-research-wiring.md",
+    "sha": "42b3e0a7354e0575090713bfe3725b51d49074c9"
+  },
+  {
+    "filename": "docs/ota-exec-notes/P3-7-wiring-evidence.md",
+    "sha": "0e9b78436e88533ec81ba0ab395785c14bf0ea20"
+  },
+  {
+    "filename": "tests/ota/p3_7_verify_ci_evidence.py",
+    "sha": "f28f71ab165fa57af64723d80d8b0fa469205d33"
+  },
+  {
+    "filename": "tests/ota/p3_7_verify_wiring.py",
+    "sha": "c416a2480d754679756e8cad71619bb5215300fe"
+  }
+]

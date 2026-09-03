@@ -1,0 +1,172 @@
+{
+  "conclusion": "success",
+  "createdAt": "2026-09-03T11:17:23Z",
+  "databaseId": 33748868768,
+  "displayTitle": "P3-7 firmware-build.yml host 测试接线（含 CI 反证证据序列）",
+  "event": "pull_request",
+  "headBranch": "ota/p3-7-host-test-wiring",
+  "headSha": "94c4d68c15133bbcde3c72db7733404870f5fd19",
+  "jobs": [
+    {
+      "completedAt": "2026-09-03T11:18:30Z",
+      "conclusion": "success",
+      "databaseId": 100627566671,
+      "name": "Build firmware (arm-none-eabi-gcc)",
+      "startedAt": "2026-09-03T11:17:26Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-09-03T11:17:28Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-09-03T11:17:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:17:35Z",
+          "conclusion": "success",
+          "name": "Checkout repository",
+          "number": 2,
+          "startedAt": "2026-09-03T11:17:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:17:39Z",
+          "conclusion": "success",
+          "name": "Install Arm GNU Toolchain 13.3.Rel1",
+          "number": 3,
+          "startedAt": "2026-09-03T11:17:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:17:50Z",
+          "conclusion": "success",
+          "name": "Install Ninja",
+          "number": 4,
+          "startedAt": "2026-09-03T11:17:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:17:54Z",
+          "conclusion": "success",
+          "name": "Install OTA host test dependencies",
+          "number": 5,
+          "startedAt": "2026-09-03T11:17:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:17:54Z",
+          "conclusion": "success",
+          "name": "Verify reproducible GCC timestamps",
+          "number": 6,
+          "startedAt": "2026-09-03T11:17:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:17:54Z",
+          "conclusion": "success",
+          "name": "Extract firmware version",
+          "number": 7,
+          "startedAt": "2026-09-03T11:17:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:17:55Z",
+          "conclusion": "success",
+          "name": "Configure (CMake + Ninja)",
+          "number": 8,
+          "startedAt": "2026-09-03T11:17:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:19Z",
+          "conclusion": "success",
+          "name": "Build firmware",
+          "number": 9,
+          "startedAt": "2026-09-03T11:17:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:25Z",
+          "conclusion": "success",
+          "name": "Run host tests (boot vectors, OTA host tests, P3-1 product regressions)",
+          "number": 10,
+          "startedAt": "2026-09-03T11:18:19Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:26Z",
+          "conclusion": "success",
+          "name": "Validate OTA App layout",
+          "number": 11,
+          "startedAt": "2026-09-03T11:18:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:26Z",
+          "conclusion": "success",
+          "name": "Validate OTA Boot skeleton",
+          "number": 12,
+          "startedAt": "2026-09-03T11:18:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:26Z",
+          "conclusion": "success",
+          "name": "Report firmware artifacts",
+          "number": 13,
+          "startedAt": "2026-09-03T11:18:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:27Z",
+          "conclusion": "success",
+          "name": "Upload firmware artifact",
+          "number": 14,
+          "startedAt": "2026-09-03T11:18:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:28Z",
+          "conclusion": "success",
+          "name": "Upload Boot artifact",
+          "number": 15,
+          "startedAt": "2026-09-03T11:18:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:28Z",
+          "conclusion": "success",
+          "name": "Post Checkout repository",
+          "number": 30,
+          "startedAt": "2026-09-03T11:18:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-03T11:18:28Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 31,
+          "startedAt": "2026-09-03T11:18:28Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/33748868768/job/100627566671"
+    },
+    {
+      "completedAt": "2026-09-03T11:18:30Z",
+      "conclusion": "skipped",
+      "databaseId": 100627877842,
+      "name": "Register firmware to Cloudflare",
+      "startedAt": "2026-09-03T11:18:31Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/33748868768/job/100627877842"
+    }
+  ],
+  "name": "MCU Firmware Build",
+  "status": "completed",
+  "updatedAt": "2026-09-03T11:18:31Z",
+  "workflowName": "MCU Firmware Build"
+}

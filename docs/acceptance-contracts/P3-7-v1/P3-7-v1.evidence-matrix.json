@@ -1,0 +1,664 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-7-v1",
+  "contract_sha256": "D26377D20F046D781931B3E276AEBC4B215EB2EAFC29929D12976491B826370C",
+  "round_id": "P3-7-V1-FREEZE-20260903-R3",
+  "executed_by": "独立验收会话（非实现方）",
+  "executed_at": "2026-09-03T00:00:00+08:00",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "WIRING-STEP-COMMAND-SEQUENCE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "run_block_lines=13",
+        "step_python3_lines=12",
+        "wired=4"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log",
+        "ci/workflow-at-90facc3a8875.yml"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRING-PURE-ADDITION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "added=11",
+        "removed=1",
+        "workflow_bare_lf=273"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log",
+        "ci/workflow-at-90facc3a8875.yml"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRING-FAIL-CLOSED-SEMANTICS",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "fail_open_patterns=6",
+        "fail_open_hits=0",
+        "non_comment_lines=501"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log",
+        "ci/workflow-at-90facc3a8875.yml"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRING-TRIGGER-MIRROR-CLOSURE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "paths_len=18",
+        "paths_baseline_len=15",
+        "paths_added=3",
+        "paths_removed=0",
+        "covered_exec_lines=12",
+        "uncovered_nonwired=5"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log",
+        "ci/workflow-at-90facc3a8875.yml"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRING-FROZEN-RED-LINES",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "red_line_pathspecs=14",
+        "red_line_diffs=0",
+        "protected_paths_intact=10",
+        "redline_diff_lines=0"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log",
+        "commands/product-redline-diff.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "SCOPE-CHANGE-CLASSIFICATION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "unclassified=0",
+        "card_files=4",
+        "shared_changes=1"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log",
+        "artifacts/artifact-index.json"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "WIRED-SCRIPTS-LOCAL-REPLAY",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "scripts=4",
+        "exit_codes=0",
+        "scanned=895",
+        "scanned_baseline=893",
+        "control_hits=1",
+        "live_hits=0"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "BOARD-WRITEBACK-HYGIENE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "board_added=9",
+        "board_removed=4",
+        "board_bare_lf=253",
+        "board_crlf=730",
+        "card_hash_tokens=0",
+        "board_log_lines=184"
+      ],
+      "evidence": [
+        "commands/verify-wiring.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "GOVERNANCE-GATE-GREEN",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "tests=65",
+        "result=OK"
+      ],
+      "evidence": [
+        "commands/governance-gate.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-BASELINE-GREEN-MARKERS",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "run=33736951606",
+        "event=pull_request",
+        "run_conclusion=success",
+        "step10=success",
+        "wired_markers=4",
+        "workflow_matches_tree=True"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log",
+        "ci/workflow-at-90facc3a8875.yml",
+        "ci/run-33736951606.json",
+        "ci/step-33736951606.txt"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-TRIGGER-CLOSURE-REMOTE",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "exact_entry_run=33746544048",
+        "wildcard_run=33746838579",
+        "event=push",
+        "both_conclusions=success",
+        "changed_files_per_commit=1"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log",
+        "ci/run-33746544048.json",
+        "ci/step-33746544048.txt",
+        "ci/changed-33746544048.json",
+        "ci/run-33746838579.json",
+        "ci/step-33746838579.txt",
+        "ci/changed-33746838579.json"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-FAIL-CLOSED-CHAIN",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "defect_pairs=4",
+        "defect_run_conclusion=failure",
+        "defect_step10=failure",
+        "red_at_wired=1;2;3;4",
+        "restore_run_conclusion=success",
+        "restore_wired_markers=4"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "CI-EVIDENCE-ATTRIBUTION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "result=PASS",
+        "checks=308",
+        "failures=0",
+        "runs=11",
+        "run_ids_unique=True",
+        "single_file_commits=10",
+        "baseline_delivery_files=9",
+        "git_invocations=0",
+        "pr_commits=11"
+      ],
+      "evidence": [
+        "commands/verify-ci-evidence.log",
+        "ci/pr-19.json"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "HARNESS-BIDIRECTIONAL-DISCRIMINATION",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "probe_cases=8",
+        "probe_result=PASS",
+        "probe_restore_byte_identical=True",
+        "selftest_can_turn_green=True",
+        "selftest_mutations=11",
+        "selftest_result=PASS"
+      ],
+      "evidence": [
+        "commands/harness-discrimination.log",
+        "commands/ci-harness-selftest.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    },
+    {
+      "id": "P3-6-HARNESS-RED-ATTRIBUTED",
+      "result": "PASS",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "observed": [
+        "p3_6_result=FAIL",
+        "failures=2",
+        "red_cause=step_renamed",
+        "reds_unrelated_to_rename=0"
+      ],
+      "evidence": [
+        "commands/p3-6-harness-status.log"
+      ],
+      "failure_owner": null,
+      "notes": null
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-VERIFY-WIRING",
+      "command": "python -X utf8 -B tests/ota/p3_7_verify_wiring.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-wiring.log"
+    },
+    {
+      "id": "CMD-VERIFY-CI-EVIDENCE",
+      "command": "python -X utf8 -B tests/ota/p3_7_verify_ci_evidence.py",
+      "exit_code": 0,
+      "output_evidence": "commands/verify-ci-evidence.log"
+    },
+    {
+      "id": "CMD-GOVERNANCE-GATE",
+      "command": "python -X utf8 -B -m unittest tests.ota.test_acceptance_bundle",
+      "exit_code": 0,
+      "output_evidence": "commands/governance-gate.log"
+    },
+    {
+      "id": "CMD-HARNESS-DISCRIMINATION",
+      "command": "python -X utf8 -B .cache/p3-7-accept/inject_probe.py",
+      "exit_code": 0,
+      "output_evidence": "commands/harness-discrimination.log"
+    },
+    {
+      "id": "CMD-CI-HARNESS-SELFTEST",
+      "command": "python -X utf8 -B .cache/p3-7-accept/ci_harness_selftest.py",
+      "exit_code": 0,
+      "output_evidence": "commands/ci-harness-selftest.log"
+    },
+    {
+      "id": "CMD-PRODUCT-REDLINE-DIFF",
+      "command": "B=2d8ff7e52d4c575a4d109b1477a79a7c1493d81b; for d in Libraries/ USER/ boot/ MDK-ARM_F435/; do echo \"== git diff --stat $B -- $d\"; git diff --stat $B -- \"$d\"; done; echo \"== git diff --numstat 四目录合并后的行数(应为 0): $(git diff --numstat $B -- Libraries/ USER/ boot/ MDK-ARM_F435/ | wc -l)\"",
+      "exit_code": 0,
+      "output_evidence": "commands/product-redline-diff.log"
+    },
+    {
+      "id": "CMD-P3-6-HARNESS-STATUS",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_ci_wiring.py",
+      "exit_code": 1,
+      "output_evidence": "commands/p3-6-harness-status.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "path": "artifacts/artifact-index.json",
+      "sha256": "6E4369B258D9876681E9FD3979C35F327A2A42C8CE493FD14C02BC12681B00B5",
+      "size": 11112
+    },
+    {
+      "id": "ART-CI-WORKFLOW-SNAPSHOT",
+      "path": "ci/workflow-at-90facc3a8875.yml",
+      "sha256": "A43A002D298875E0EA4F2ACE374DC6F78B035E65B2E80A0C569C05E160DC8F77",
+      "size": 22045
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-WIRING-LOG",
+      "path": "commands/verify-wiring.log",
+      "sha256": "C05FDDD6D57B3A08352D577415B445D40FF454DFCEA4AE2C6B3637CB63417FC1",
+      "size": 19584
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+      "path": "commands/verify-ci-evidence.log",
+      "sha256": "F484F24314CF1C24534C6D9EE18EB9E6E2BFF845467BFDB7800A7F9C21F93F66",
+      "size": 1642
+    },
+    {
+      "id": "ART-COMMANDS-GOVERNANCE-GATE-LOG",
+      "path": "commands/governance-gate.log",
+      "sha256": "5287582C61F4E38ED16E3C240B3D20689EB6F003C5EB71BC8234427BDA853512",
+      "size": 170
+    },
+    {
+      "id": "ART-COMMANDS-HARNESS-DISCRIMINATION-LOG",
+      "path": "commands/harness-discrimination.log",
+      "sha256": "DCC4B9085AC370F1C1A6E06E4374E7FB75335B3372DB1B96CF07FD4B5EA8AA43",
+      "size": 10303
+    },
+    {
+      "id": "ART-COMMANDS-CI-HARNESS-SELFTEST-LOG",
+      "path": "commands/ci-harness-selftest.log",
+      "sha256": "1FF54CBC8DE0DCD4EDE50105513BCBC602372EDD5B6372004DA8A46C49851FE9",
+      "size": 5535
+    },
+    {
+      "id": "ART-COMMANDS-PRODUCT-REDLINE-DIFF-LOG",
+      "path": "commands/product-redline-diff.log",
+      "sha256": "1065569AAB6E18E975842E184F5B49E3BDC3163BBA299B14D8393E362A1E4EDC",
+      "size": 352
+    },
+    {
+      "id": "ART-COMMANDS-P3-6-HARNESS-STATUS-LOG",
+      "path": "commands/p3-6-harness-status.log",
+      "sha256": "0FC5D926BA0CDBE446B791ED4BF3788F883B6C7324A7C4C6E5AEE4EFB76DCDAA",
+      "size": 231
+    },
+    {
+      "id": "ART-CI-RUN-33736951606-JSON",
+      "path": "ci/run-33736951606.json",
+      "sha256": "8957CF5A385B9838AA19B5BA37203E72C71ED2B81D8F45C1A5B65BB55DCA2882",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33736951606-LOG",
+      "path": "ci/step-33736951606.txt",
+      "sha256": "091398598714BBF07C328EF47DDE62497D613FF37FA768728E36BE3D7F5A5A54",
+      "size": 154750
+    },
+    {
+      "id": "ART-CI-CHANGED-33736951606-JSON",
+      "path": "ci/changed-33736951606.json",
+      "sha256": "DFC785040A91D0786D6126E145D07AF671E3E3B672DD3BAC6A1D002541F73360",
+      "size": 1076
+    },
+    {
+      "id": "ART-CI-RUN-33746544048-JSON",
+      "path": "ci/run-33746544048.json",
+      "sha256": "9641B627C3B8C7B68861A68A17212690683C013C34773D077D972B75F0E44058",
+      "size": 5546
+    },
+    {
+      "id": "ART-CI-STEP-33746544048-LOG",
+      "path": "ci/step-33746544048.txt",
+      "sha256": "966A2161B261BA28A8406F4A77152176B21B92F789BBAFAD449E6D815583E7DA",
+      "size": 154750
+    },
+    {
+      "id": "ART-CI-CHANGED-33746544048-JSON",
+      "path": "ci/changed-33746544048.json",
+      "sha256": "02E1219CA0189D8FBE227EA7B9253D601B5FBEB382DD49F678983C8BF296FFF1",
+      "size": 122
+    },
+    {
+      "id": "ART-CI-RUN-33746838579-JSON",
+      "path": "ci/run-33746838579.json",
+      "sha256": "CE19F0BCE983C857B5396E8023DA82CA038C201863AC3CC8969D449423654324",
+      "size": 5545
+    },
+    {
+      "id": "ART-CI-STEP-33746838579-LOG",
+      "path": "ci/step-33746838579.txt",
+      "sha256": "D41B9DEEA0387BCC9D0760FD7198846C347744F1106F592B48F44646AE86983F",
+      "size": 154750
+    },
+    {
+      "id": "ART-CI-CHANGED-33746838579-JSON",
+      "path": "ci/changed-33746838579.json",
+      "sha256": "6085D399803746B3F9EED53B37B934A6B0937B7E93A11CFC5DE5D98A20F6D67F",
+      "size": 119
+    },
+    {
+      "id": "ART-CI-RUN-33742087214-JSON",
+      "path": "ci/run-33742087214.json",
+      "sha256": "A88BC961D65DC593AAE143A50AAC68A4A6EC190288AC29E87B64B1C151FEF4BB",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33742087214-LOG",
+      "path": "ci/step-33742087214.txt",
+      "sha256": "8DACBEEF0249E58EF968DC1440E9D144542E2BA6B692829F52ED1D244CE8DCF7",
+      "size": 150151
+    },
+    {
+      "id": "ART-CI-CHANGED-33742087214-JSON",
+      "path": "ci/changed-33742087214.json",
+      "sha256": "FFE826C2AB80FDEA49D80C5E6A843713F59DF2591FA0A376CB8940B558D09C79",
+      "size": 115
+    },
+    {
+      "id": "ART-CI-RUN-33743337327-JSON",
+      "path": "ci/run-33743337327.json",
+      "sha256": "CA283970265C6CA580D54D6C10CAE43E3453705EADA6EA8170EBD8E422410182",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33743337327-LOG",
+      "path": "ci/step-33743337327.txt",
+      "sha256": "0D981396DBBFF9E566F5AE71EEEFFC29E522061225DB62A9CDE153DA2C682DDD",
+      "size": 154750
+    },
+    {
+      "id": "ART-CI-CHANGED-33743337327-JSON",
+      "path": "ci/changed-33743337327.json",
+      "sha256": "E5ADE899A62DD256C77C0DA112769DFE4FC3BD1FF88C5C7363D47974C84C6C26",
+      "size": 115
+    },
+    {
+      "id": "ART-CI-RUN-33743950837-JSON",
+      "path": "ci/run-33743950837.json",
+      "sha256": "52EC64CBEE97A0F1FF498A5721DE99DBCF1317B542B9BD142511F261B30AA1EB",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33743950837-LOG",
+      "path": "ci/step-33743950837.txt",
+      "sha256": "C9AAFA5C7777E72EA609D4042FF731906B9FCA5D38524370F93BC643D4034E2F",
+      "size": 152536
+    },
+    {
+      "id": "ART-CI-CHANGED-33743950837-JSON",
+      "path": "ci/changed-33743950837.json",
+      "sha256": "24E9D9DA837DA7881F5C585A135A16429507DE06C80DEC29176BB72863C0E1E9",
+      "size": 112
+    },
+    {
+      "id": "ART-CI-RUN-33744219606-JSON",
+      "path": "ci/run-33744219606.json",
+      "sha256": "E72A3E08CA1C2F4770F014F0CEC76EF8F38EE592815446A921B37CA6DABFDD51",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33744219606-LOG",
+      "path": "ci/step-33744219606.txt",
+      "sha256": "29B95FD2C99E2926A9C63FB5DB78CC80196ACA25CFDBE1725BB503302780304C",
+      "size": 154750
+    },
+    {
+      "id": "ART-CI-CHANGED-33744219606-JSON",
+      "path": "ci/changed-33744219606.json",
+      "sha256": "98B8DCBF2A3B714BA1AD68A60B8E936602698771655E77FD8A9B93229A6A9E9B",
+      "size": 112
+    },
+    {
+      "id": "ART-CI-RUN-33748460404-JSON",
+      "path": "ci/run-33748460404.json",
+      "sha256": "A9EF7ABCD0E907BF979A205E02CF3993603237E149F393FEDA11AE35EB3BA951",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33748460404-LOG",
+      "path": "ci/step-33748460404.txt",
+      "sha256": "446C364955656945C8FC46D2623C6B4181EC3E082C1B85015EE38BDFE58B5192",
+      "size": 154585
+    },
+    {
+      "id": "ART-CI-CHANGED-33748460404-JSON",
+      "path": "ci/changed-33748460404.json",
+      "sha256": "4F2C3496B82ADEF0D6E3BC4B51A9A66B6EA934084B7273373BF86A43D00D5404",
+      "size": 106
+    },
+    {
+      "id": "ART-CI-RUN-33748868768-JSON",
+      "path": "ci/run-33748868768.json",
+      "sha256": "04B3979A265638EB568D4024FBB5A8507DF6DC1FDC48D80D8A77B663B22154BC",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33748868768-LOG",
+      "path": "ci/step-33748868768.txt",
+      "sha256": "5EC79F9B669024E3DAE31A6C816B17C8C3CEC5F3487CA2BEF722BDC34BA67997",
+      "size": 154750
+    },
+    {
+      "id": "ART-CI-CHANGED-33748868768-JSON",
+      "path": "ci/changed-33748868768.json",
+      "sha256": "A211842EF08546530AD221F45F7EB3CCDE6767CB4A55A05E30342FCCAFFAE8F3",
+      "size": 106
+    },
+    {
+      "id": "ART-CI-RUN-33745505165-JSON",
+      "path": "ci/run-33745505165.json",
+      "sha256": "58280D2599A02F194D2C8C8BBDBA8FCF59921ED36693659255F539C97141787E",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33745505165-LOG",
+      "path": "ci/step-33745505165.txt",
+      "sha256": "49E4E938F8F799430664521CB69DFC2A119BBBAFEAF519924AE0AD1C55D92AAA",
+      "size": 156781
+    },
+    {
+      "id": "ART-CI-CHANGED-33745505165-JSON",
+      "path": "ci/changed-33745505165.json",
+      "sha256": "206C2E57DE32FDC069B8EB458297F489DC38FA028F7B913B8C27D657D09658E7",
+      "size": 117
+    },
+    {
+      "id": "ART-CI-RUN-33745844623-JSON",
+      "path": "ci/run-33745844623.json",
+      "sha256": "45469B6A26EB340BB3908F4A3F364EA934AC70AF22120EC1B36C6AE538BD1499",
+      "size": 5532
+    },
+    {
+      "id": "ART-CI-STEP-33745844623-LOG",
+      "path": "ci/step-33745844623.txt",
+      "sha256": "68AF983106952BD3EF1D8565447F073BCD09EE9D6F5A49537B327F014925DAAA",
+      "size": 154750
+    },
+    {
+      "id": "ART-CI-CHANGED-33745844623-JSON",
+      "path": "ci/changed-33745844623.json",
+      "sha256": "8CC04E43494725F8B1005534DA1EE266980F4D8FE7AE151ECCBBA5DEF80E60C7",
+      "size": 117
+    }
+  ],
+  "evidence_hashes": {
+    "artifacts/artifact-index.json": "6E4369B258D9876681E9FD3979C35F327A2A42C8CE493FD14C02BC12681B00B5",
+    "ci/changed-33736951606.json": "DFC785040A91D0786D6126E145D07AF671E3E3B672DD3BAC6A1D002541F73360",
+    "ci/changed-33742087214.json": "FFE826C2AB80FDEA49D80C5E6A843713F59DF2591FA0A376CB8940B558D09C79",
+    "ci/changed-33743337327.json": "E5ADE899A62DD256C77C0DA112769DFE4FC3BD1FF88C5C7363D47974C84C6C26",
+    "ci/changed-33743950837.json": "24E9D9DA837DA7881F5C585A135A16429507DE06C80DEC29176BB72863C0E1E9",
+    "ci/changed-33744219606.json": "98B8DCBF2A3B714BA1AD68A60B8E936602698771655E77FD8A9B93229A6A9E9B",
+    "ci/changed-33745505165.json": "206C2E57DE32FDC069B8EB458297F489DC38FA028F7B913B8C27D657D09658E7",
+    "ci/changed-33745844623.json": "8CC04E43494725F8B1005534DA1EE266980F4D8FE7AE151ECCBBA5DEF80E60C7",
+    "ci/changed-33746544048.json": "02E1219CA0189D8FBE227EA7B9253D601B5FBEB382DD49F678983C8BF296FFF1",
+    "ci/changed-33746838579.json": "6085D399803746B3F9EED53B37B934A6B0937B7E93A11CFC5DE5D98A20F6D67F",
+    "ci/changed-33748460404.json": "4F2C3496B82ADEF0D6E3BC4B51A9A66B6EA934084B7273373BF86A43D00D5404",
+    "ci/changed-33748868768.json": "A211842EF08546530AD221F45F7EB3CCDE6767CB4A55A05E30342FCCAFFAE8F3",
+    "ci/pr-19.json": "8238682833A508E9C18B2F3E90F4FC83758ADAB7850E6E7F1530B742FACC6B3C",
+    "ci/run-33736951606.json": "8957CF5A385B9838AA19B5BA37203E72C71ED2B81D8F45C1A5B65BB55DCA2882",
+    "ci/run-33742087214.json": "A88BC961D65DC593AAE143A50AAC68A4A6EC190288AC29E87B64B1C151FEF4BB",
+    "ci/run-33743337327.json": "CA283970265C6CA580D54D6C10CAE43E3453705EADA6EA8170EBD8E422410182",
+    "ci/run-33743950837.json": "52EC64CBEE97A0F1FF498A5721DE99DBCF1317B542B9BD142511F261B30AA1EB",
+    "ci/run-33744219606.json": "E72A3E08CA1C2F4770F014F0CEC76EF8F38EE592815446A921B37CA6DABFDD51",
+    "ci/run-33745505165.json": "58280D2599A02F194D2C8C8BBDBA8FCF59921ED36693659255F539C97141787E",
+    "ci/run-33745844623.json": "45469B6A26EB340BB3908F4A3F364EA934AC70AF22120EC1B36C6AE538BD1499",
+    "ci/run-33746544048.json": "9641B627C3B8C7B68861A68A17212690683C013C34773D077D972B75F0E44058",
+    "ci/run-33746838579.json": "CE19F0BCE983C857B5396E8023DA82CA038C201863AC3CC8969D449423654324",
+    "ci/run-33748460404.json": "A9EF7ABCD0E907BF979A205E02CF3993603237E149F393FEDA11AE35EB3BA951",
+    "ci/run-33748868768.json": "04B3979A265638EB568D4024FBB5A8507DF6DC1FDC48D80D8A77B663B22154BC",
+    "ci/step-33736951606.txt": "091398598714BBF07C328EF47DDE62497D613FF37FA768728E36BE3D7F5A5A54",
+    "ci/step-33742087214.txt": "8DACBEEF0249E58EF968DC1440E9D144542E2BA6B692829F52ED1D244CE8DCF7",
+    "ci/step-33743337327.txt": "0D981396DBBFF9E566F5AE71EEEFFC29E522061225DB62A9CDE153DA2C682DDD",
+    "ci/step-33743950837.txt": "C9AAFA5C7777E72EA609D4042FF731906B9FCA5D38524370F93BC643D4034E2F",
+    "ci/step-33744219606.txt": "29B95FD2C99E2926A9C63FB5DB78CC80196ACA25CFDBE1725BB503302780304C",
+    "ci/step-33745505165.txt": "49E4E938F8F799430664521CB69DFC2A119BBBAFEAF519924AE0AD1C55D92AAA",
+    "ci/step-33745844623.txt": "68AF983106952BD3EF1D8565447F073BCD09EE9D6F5A49537B327F014925DAAA",
+    "ci/step-33746544048.txt": "966A2161B261BA28A8406F4A77152176B21B92F789BBAFAD449E6D815583E7DA",
+    "ci/step-33746838579.txt": "D41B9DEEA0387BCC9D0760FD7198846C347744F1106F592B48F44646AE86983F",
+    "ci/step-33748460404.txt": "446C364955656945C8FC46D2623C6B4181EC3E082C1B85015EE38BDFE58B5192",
+    "ci/step-33748868768.txt": "5EC79F9B669024E3DAE31A6C816B17C8C3CEC5F3487CA2BEF722BDC34BA67997",
+    "ci/workflow-at-90facc3a8875.yml": "A43A002D298875E0EA4F2ACE374DC6F78B035E65B2E80A0C569C05E160DC8F77",
+    "commands/ci-harness-selftest.log": "1FF54CBC8DE0DCD4EDE50105513BCBC602372EDD5B6372004DA8A46C49851FE9",
+    "commands/governance-gate.log": "5287582C61F4E38ED16E3C240B3D20689EB6F003C5EB71BC8234427BDA853512",
+    "commands/harness-discrimination.log": "DCC4B9085AC370F1C1A6E06E4374E7FB75335B3372DB1B96CF07FD4B5EA8AA43",
+    "commands/p3-6-harness-status.log": "0FC5D926BA0CDBE446B791ED4BF3788F883B6C7324A7C4C6E5AEE4EFB76DCDAA",
+    "commands/product-redline-diff.log": "1065569AAB6E18E975842E184F5B49E3BDC3163BBA299B14D8393E362A1E4EDC",
+    "commands/verify-ci-evidence.log": "F484F24314CF1C24534C6D9EE18EB9E6E2BFF845467BFDB7800A7F9C21F93F66",
+    "commands/verify-wiring.log": "C05FDDD6D57B3A08352D577415B445D40FF454DFCEA4AE2C6B3637CB63417FC1",
+    "external/P3-7-wiring-evidence.md": "FCCEEE6EFEC3BF82AEA3B0C14289011C5AFEE5B2E08C57992ADAB21AD483AB62",
+    "harness/ci_harness_selftest.py": "C29BAEE85D5113CEDC3B4695D73773A5B9C4C5C1217BE7FE440A8F5CAB2D3505",
+    "harness/collect_run.py": "C6E676D36D1D9D36CDAA8A8D687251AFC194CC2FB30FFD124DC3B021776F956F",
+    "harness/inject_ci.py": "66C37A9BE419C07A6B0195A2282F4DD4B3775AA2E1E024700238EC57E3C3C10B",
+    "harness/inject_probe.py": "0C3EB1E1C422FABCC256CCB41D650160919F5A623CA117412EF29556A681CFB6",
+    "manifest-governance/source-manifest.json": "3B52567DF4ABDB8276CEE282F8CF34BF3B205BFEED03B9DF501E35B75CE623E6",
+    "manifest-governance/source-manifest.txt": "B35E78737A0E15E1839F48A04CC786727207CDF39211D5CAFF96DBE0908A5D96",
+    "manifest-governance/summary.json": "3E5F6252BC39E2DEF9C403B2186EBC153D3D6B5B469636BAFFD0940EE92063CC",
+    "manifest-production/source-manifest.json": "A4A3B8F3CE68BA6A3C839120C98FB3EE60EB589E6CA1EB1EB5981C49F8FE055E",
+    "manifest-production/source-manifest.txt": "ACAE2C71909AF7F19ADE3978E0D068525AFE513BDEDA48B8CF5D9E08711A6363",
+    "manifest-production/summary.json": "10E9BDD833C5D1BBDBC0E82031740F2BA1C746E40F0E8816EFB0AC5727C5033A",
+    "manifest-validation/source-manifest.json": "B832206A10F791CAA5A93AF95489296F4937FDB6D9F8BE383753DF2A4F0F3E94",
+    "manifest-validation/source-manifest.txt": "B5331BE603F447FE325EC99DCB54456C20D0B52585FD7ACC7918882CA47EDB60",
+    "manifest-validation/summary.json": "397E292A42649A0416BFF14B83557843ED949A075B0E200941F4CF35AE0D3E2B"
+  },
+  "notes": "本轮 15 条判据全部 EXECUTED，无 REUSED，故 previous_matrix_sha256 / rerun_plan_* 均为 null（P3-7-v1 是本 task_id 的首份合同，parent_contract_sha256 亦为 null）。每条 observed 由 .cache/p3-7-accept/write_matrix.py 从包内 commands/*.log 与 ci/** 逐元素正则派生，派生处对「命中次数必须为 1」「集合必须同值」下断言，然后再与冻结门槛全等比较，未从 gate.expected 反抄。CI 侧结论全部取自冻结采集件 ci/**，本轮不重跑远端流水线。按 DEV-4，WIRING-*/SCOPE-* 判据刻意不把 p3_7_verify_wiring.py 的核对项总数写进门槛（该总数随工作树跟踪状态抖动，本轮实测 163 项、改动集合 79 项，均非不变量）；而 CI-EVIDENCE-ATTRIBUTION 绑定 checks=308，因为它只由冻结证据集决定。全部命令串行执行：两个核验器会调起 tests.ota.test_acceptance_bundle，后者在仓库根建临时目录，并发会互相看见对方的临时目录而报假红。执行顺序为「看板回写 → 三份 manifest → 合同 → 刷新命令日志 → 本矩阵」，因此 verify-wiring.log 的改动分类涵盖了合同本体但未涵盖本矩阵文件自身——证据包无法包含一份「看见了自己终态」的日志，这是紧凑证据包的固有残留，已在合同 scope.method 中登记；矩阵路径与合同同属该判据已实际行使过的验收层分类模式。"
+}

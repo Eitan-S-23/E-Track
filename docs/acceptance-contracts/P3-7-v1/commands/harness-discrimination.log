@@ -1,0 +1,108 @@
+原始字节存档 len=22045 sha256=A43A002D298875E0EA4F2ACE374DC6F78B035E65B2E80A0C569C05E160DC8F77
+
+[基线] rc=0 P3_7_WIRING=PASS checks=163 failures=0
+
+[I1 执行行加 || true（削弱 fail-closed）] rc=1 P3_7_WIRING=FAIL checks=163 failures=5
+   新红: 步骤命令序列精确等于 8 条既有 + 4 条接线: got=['set -euo pipefail', 'python3 tests/boot/test_fw_header_vectors.py', 'python3 tests/boot/test_boot_protocols.py', 'pyth
+   新红: 接线命令存在：python3 tests/ota/p3_1_verify_portability.py
+   新红: 接线命令落在 set -euo pipefail 之后：python3 tests/ota/p3_1_verify_portability.py
+   新红: 接线命令未被额外子句包裹：python3 tests/ota/p3_1_verify_portability.py
+   新红: 全文件无 fail-open 写法 /\|\|\s*true\b/: got=[206] want=[]
+   预期关键词命中: {'fail-open': True, '未被额外子句包裹': True, '命令序列': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+[I2 只删 push.paths 的一个新增条目（两份列表失同步）] rc=1 P3_7_WIRING=FAIL checks=163 failures=7
+   新红: 两份 paths 逐项相等（同序同项）: got=['USER/**', 'ArduinoAPI/**', 'Libraries/**', 'MDK-ARM_F435/**', 'boot/**', 'cmake/**', 'tests/boot/**', 'tests/ota/test_ota_*
+   新红: push.paths 含精确条目：tests/ota/p3_1_verify_text_isolation.py
+   新红: push.paths 新增恰为三条脚本: got=['tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_portability.py'] want=['tests/ota/p3_1_verify_contract
+   新红: 闭包：执行行被 paths 覆盖 tests/ota/p3_1_verify_text_isolation.py
+   新红: workflow 裸 LF 计数恰增 10（10 条新增行）: got=272 want=273
+   新红: workflow diff 为 11 增 1 删: got=[['10', '1', '.github/workflows/firmware-build.yml']] want=[['11', '1']]
+   新红: workflow -w diff 同为 11/1（无仅空白差异对）: got=[['10', '1', '.github/workflows/firmware-build.yml']] want=None
+   预期关键词命中: {'逐项相等': True, 'push.paths 含精确条目': True, '新增恰为三条': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+[I3 删掉一条执行行（接线不全）] rc=1 P3_7_WIRING=FAIL checks=161 failures=8
+   新红: 步骤命令序列精确等于 8 条既有 + 4 条接线: got=['set -euo pipefail', 'python3 tests/boot/test_fw_header_vectors.py', 'python3 tests/boot/test_boot_protocols.py', 'pyth
+   新红: 接线命令存在：python3 tests/ota/p3_1_verify_text_isolation.py
+   新红: 接线命令落在 set -euo pipefail 之后：python3 tests/ota/p3_1_verify_text_isolation.py
+   新红: 接线命令未被额外子句包裹：python3 tests/ota/p3_1_verify_text_isolation.py
+   新红: 步骤内 python3 执行行计数: got=11 want=12
+   新红: workflow 裸 LF 计数恰增 10（10 条新增行）: got=272 want=273
+   新红: workflow diff 为 11 增 1 删: got=[['10', '1', '.github/workflows/firmware-build.yml']] want=[['11', '1']]
+   新红: workflow -w diff 同为 11/1（无仅空白差异对）: got=[['10', '1', '.github/workflows/firmware-build.yml']] want=None
+   预期关键词命中: {'命令序列': True, '执行行计数': True, '接线命令存在': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+[I4 新增条目改成通配（触发范围溢出到不接入脚本）] rc=1 P3_7_WIRING=FAIL checks=163 failures=13
+   新红: 两份 paths 逐项相等（同序同项）: got=['USER/**', 'ArduinoAPI/**', 'Libraries/**', 'MDK-ARM_F435/**', 'boot/**', 'cmake/**', 'tests/boot/**', 'tests/ota/test_ota_*
+   新红: push.paths 含精确条目：tests/ota/p3_1_verify_contract_alignment.py
+   新红: push.paths 含精确条目：tests/ota/p3_1_verify_text_isolation.py
+   新红: push.paths 含精确条目：tests/ota/p3_1_verify_portability.py
+   新红: push.paths 新增恰为三条脚本: got=['tests/ota/p3_1_verify_*.py'] want=['tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_text_isolation.py'
+   新红: 新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_mutation.py: got=['tests/ota/p3_1_verify_*.py'] want=[]
+   新红: 新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_production_binary.py: got=['tests/ota/p3_1_verify_*.py'] want=[]
+   新红: 新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_rx_ring_budget.py: got=['tests/ota/p3_1_verify_*.py'] want=[]
+   新红: 新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_artifacts.py: got=['tests/ota/p3_1_verify_*.py'] want=[]
+   新红: 新增条目未覆盖不接入脚本 tests/ota/p3_1_verify_command_fidelity.py: got=['tests/ota/p3_1_verify_*.py'] want=[]
+   新红: workflow 裸 LF 计数恰增 10（10 条新增行）: got=271 want=273
+   新红: workflow diff 为 11 增 1 删: got=[['9', '1', '.github/workflows/firmware-build.yml']] want=[['11', '1']]
+   新红: workflow -w diff 同为 11/1（无仅空白差异对）: got=[['9', '1', '.github/workflows/firmware-build.yml']] want=None
+   预期关键词命中: {'逐项相等': True, '新增恰为三条': True, '未覆盖不接入脚本': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+[I5 改 jobs.build.name（红线：分支必需检查按它识别）] rc=1 P3_7_WIRING=FAIL checks=163 failures=3
+   新红: jobs.build.name 行相对基线 main 逐字节未变且存在
+   新红: workflow diff 为 11 增 1 删: got=[['12', '2', '.github/workflows/firmware-build.yml']] want=[['11', '1']]
+   新红: workflow -w diff 同为 11/1（无仅空白差异对）: got=[['12', '2', '.github/workflows/firmware-build.yml']] want=None
+   预期关键词命中: {'jobs.build.name': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+[I6 删掉第 4 条执行行（v2 接线不全）] rc=1 P3_7_WIRING=FAIL checks=161 failures=8
+   新红: 步骤命令序列精确等于 8 条既有 + 4 条接线: got=['set -euo pipefail', 'python3 tests/boot/test_fw_header_vectors.py', 'python3 tests/boot/test_boot_protocols.py', 'pyth
+   新红: 接线命令存在：python3 tests/ota/test_ota_device_info.py
+   新红: 接线命令落在 set -euo pipefail 之后：python3 tests/ota/test_ota_device_info.py
+   新红: 接线命令未被额外子句包裹：python3 tests/ota/test_ota_device_info.py
+   新红: 步骤内 python3 执行行计数: got=11 want=12
+   新红: workflow 裸 LF 计数恰增 10（10 条新增行）: got=272 want=273
+   新红: workflow diff 为 11 增 1 删: got=[['10', '1', '.github/workflows/firmware-build.yml']] want=[['11', '1']]
+   新红: workflow -w diff 同为 11/1（无仅空白差异对）: got=[['10', '1', '.github/workflows/firmware-build.yml']] want=None
+   预期关键词命中: {'命令序列': True, '执行行计数': True, '接线命令存在': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+[I7 只删 push.paths 的既有通配（cmd12 覆盖失效）] rc=1 P3_7_WIRING=FAIL checks=163 failures=12
+   新红: 两份 paths 逐项相等（同序同项）: got=['USER/**', 'ArduinoAPI/**', 'Libraries/**', 'MDK-ARM_F435/**', 'boot/**', 'cmake/**', 'tests/boot/**', 'tests/ota/test_ota_*
+   新红: 覆盖它的既有通配仍在两份 paths 内：tests/ota/test_ota_*.py
+   新红: push.paths 未删除任何既有条目: got=['tests/ota/test_ota_*.py'] want=[]
+   新红: 闭包：执行行被 paths 覆盖 tests/ota/test_ota_staging.py
+   新红: 闭包：执行行被 paths 覆盖 tests/ota/test_ota_package.py
+   新红: 闭包：执行行被 paths 覆盖 tests/ota/test_ota_patch.py
+   新红: 闭包：执行行被 paths 覆盖 tests/ota/test_ota_ble_frame.py
+   新红: 闭包：执行行被 paths 覆盖 tests/ota/test_ota_ble_session.py
+   新红: 闭包：执行行被 paths 覆盖 tests/ota/test_ota_device_info.py
+   新红: workflow 裸 LF 计数恰增 10（10 条新增行）: got=272 want=273
+   新红: workflow diff 为 11 增 1 删: got=[['11', '2', '.github/workflows/firmware-build.yml']] want=[['11', '1']]
+   新红: workflow -w diff 同为 11/1（无仅空白差异对）: got=[['11', '2', '.github/workflows/firmware-build.yml']] want=None
+   预期关键词命中: {'逐项相等': True, '既有通配仍在两份 paths 内': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+[I8 为已被通配覆盖的脚本加冗余精确条目（paths 非零改动）] rc=1 P3_7_WIRING=FAIL checks=163 failures=6
+   新红: 两份 paths 逐项相等（同序同项）: got=['USER/**', 'ArduinoAPI/**', 'Libraries/**', 'MDK-ARM_F435/**', 'boot/**', 'cmake/**', 'tests/boot/**', 'tests/ota/test_ota_*
+   新红: 未为已被通配覆盖的脚本新增冗余精确条目：tests/ota/test_ota_device_info.py
+   新红: push.paths 新增恰为三条脚本: got=['tests/ota/test_ota_device_info.py', 'tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_text_isolation.py
+   新红: workflow 裸 LF 计数恰增 10（10 条新增行）: got=274 want=273
+   新红: workflow diff 为 11 增 1 删: got=[['12', '1', '.github/workflows/firmware-build.yml']] want=[['11', '1']]
+   新红: workflow -w diff 同为 11/1（无仅空白差异对）: got=[['12', '1', '.github/workflows/firmware-build.yml']] want=None
+   预期关键词命中: {'逐项相等': True, '冗余精确条目': True, '新增恰为三条': True}
+   还原: rc=0 字节一致=True 红项集合复原=True
+
+=== 反证汇总 ===
+OK I1 执行行加 || true（削弱 fail-closed） rc=1 新红=5 关键词全命中=True
+OK I2 只删 push.paths 的一个新增条目（两份列表失同步） rc=1 新红=7 关键词全命中=True
+OK I3 删掉一条执行行（接线不全） rc=1 新红=8 关键词全命中=True
+OK I4 新增条目改成通配（触发范围溢出到不接入脚本） rc=1 新红=13 关键词全命中=True
+OK I5 改 jobs.build.name（红线：分支必需检查按它识别） rc=1 新红=3 关键词全命中=True
+OK I6 删掉第 4 条执行行（v2 接线不全） rc=1 新红=8 关键词全命中=True
+OK I7 只删 push.paths 的既有通配（cmd12 覆盖失效） rc=1 新红=12 关键词全命中=True
+OK I8 为已被通配覆盖的脚本加冗余精确条目（paths 非零改动） rc=1 新红=6 关键词全命中=True
+P3_7_HARNESS_DISCRIMINATION=PASS cases=8

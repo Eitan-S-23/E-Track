@@ -1,0 +1,1005 @@
+{
+  "schema": "etrack-acceptance-contract-v2",
+  "contract_id": "P3-7-v1",
+  "task_id": "P3-7",
+  "version": 1,
+  "parent_contract_sha256": null,
+  "title": "P3-7 firmware-build.yml 宿主测试步骤收敛（四条脚本接线 + 触发器互镜 + 步骤名对齐）",
+  "status": "FROZEN",
+  "approved_by": "独立验收会话（非实现方）",
+  "approved_at": "2026-09-03T00:00:00+08:00",
+  "implementation_ref": "docs/ota-exec-notes/P3-7-wiring-evidence.md",
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "scope": {
+    "covers": [
+      "目标步骤改名与 13 行 run 脚本块的命令序列逐行全等（1 守卫 + 8 既有 + 4 接线）",
+      "workflow 相对交付基线 2d8ff7e 的纯增量性（11 增 1 删）与两处禁改字段的逐字节不变",
+      "全文 6 类 fail-open 写法零命中与目标步骤无 continue-on-error / if:",
+      "push 与 pull_request 两份 paths 的同序全等、只增不删、对 12 条执行行的闭包覆盖，以及对 5 条不接入脚本的刻意不覆盖（含阳性对照）",
+      "14 条冻结红线 pathspec 与 10 个被前序合同按路径钉死的文件零改动、未改名移动",
+      "本轮全部改动的可归类性、卡内桶与共有桶的精确构成",
+      "四条被接线脚本的本地实跑退出码、结论标记逐字符一致性与 scanned 计数的独立重算",
+      "看板回写的行尾卫生、无哈希约束与 §10 格式约束",
+      "11 次真实 CI 运行：正例绿 1、远端 push 触发器反证 2、fail-closed 注错红 4 与还原绿 4",
+      "两个验收核验器的双向鉴别力（8 例注错探针 + 11 类变异自检）",
+      "P3-6 冻结 harness 转红的红因唯一归属"
+    ],
+    "not_observed": [
+      "CI 证据门禁只比红/绿两次提交的改动文件路径集合，不比对同一文件在两处的 blob 哈希；「还原确实把内容改回注错前」由 inject_ci.py 的按字节存档 + SHA-256 回校承担，未在门禁内复算",
+      "两条触发器反证提交所在的临时 master 分支已按计划删除，提交不被任何 ref 指向；门禁复算不依赖 git 故不受影响，受影响的仅是人工按 SHA 追溯 diff",
+      "本轮 CI 证据由验收会话自身推送产生，取证方与被验方同源；可核部分为四个红线目录 diff 为空与逐提交单文件约束，不可核部分是会话自述本身",
+      "未做真机 J-Link 烧录、RTT 采集或 AC5 构建——本卡标的是 CI 接线，不涉及设备行为",
+      "未观测 GitHub 侧对 paths 通配的完整语义（只证明了本卡实际用到的两类覆盖来源各触发一次）"
+    ],
+    "method": "冻结点为特性分支 ota/p3-7-host-test-wiring 的 HEAD 94c4d68；三份分类 manifest 在看板回写完成之后重新枚举（看板是 Governance 的 top_file，顺序颠倒会让指纹当场过期）。证据包路径 docs/acceptance-contracts/P3-7-v1/ 不被任何 profile 的 root_patterns 或 top_files 枚举，因此写入证据包本身不会打红任何已冻结指纹；.claude/ 与 docs/ota-exec-notes/ 同理。全部命令串行执行——两个核验器会调起 tests.ota.test_acceptance_bundle，后者在仓库根建临时目录，并发会互相看见对方的临时目录而报假红。注错选点全部通过命令级与 CI 步骤级两级安全判定；第三条反证的首次尝试因让 arm-none-eabi-gcc 编译失败而打红更早的 Build firmware 步骤、使目标步骤 skipped，该运行已作废并从证据目录删除，重做改用 #if 0 包裹的阳性样本并先在本机跑同配置 GCC 构建证明编译不受影响。残留说明：verify-wiring.log 采集于本合同写入之后、证据矩阵写入之前，故其改动分类未涵盖矩阵文件自身；矩阵路径与本合同同属已被该判据实际行使过的验收层分类模式，且全部跟踪文件在采集时已是终态。",
+    "excluded_by_freeze": [
+      "P3-1-v2 与 P3-6-v1 的合同、证据矩阵、manifest 与历史观测值：一律不回改。本卡向 Production 的 top_file 追加 10 行，其 Production 指纹相对本轮 HEAD 必然漂移，如实声明而不修复",
+      "PLAN-OTA.md、docs/ota-binary-contracts.md 等冻结契约：只读",
+      "Libraries/USB_MSC/msc_diskio.c.old 与 tests/ota/p3_1_verify_*.py 的路径：禁止改名或移动",
+      "workflow 顶层 name 与 jobs.build.name：禁止修改"
+    ]
+  },
+  "authorized_deviations": [
+    {
+      "id": "DEV-1",
+      "description": "实现方证据笔记 docs/ota-exec-notes/** 不在任何 manifest profile 的枚举范围内，无法由 input_groups 绑定",
+      "scope": "以 external_inputs EXT-IMPL-EVIDENCE-NOTE 显式冻结其包内副本与 SHA-256；profile 范围变更须走 acceptance-governance CI，不在本卡处置（沿用 P3-1-v2 DEV-3、P3-6-v1 DEV-1 先例）",
+      "evidence": "external/P3-7-wiring-evidence.md"
+    },
+    {
+      "id": "DEV-2",
+      "description": "`gh run view --log` 把 ANSI 颜色码渲染为字面 caret notation（0x5E 0x5B，即 `^[`），而非真实 ESC 字节；其输出为 TAB 分隔三列（job / step / TIMESTAMP 内容）",
+      "scope": "包内 ci/step-*.txt 按采集所得原样冻结，p3_7_verify_ci_evidence.py 按同一表示解析标记行；不得为「好看」二次清洗这些字节，否则冻结日志与采集命令输出不再一致，门禁也会丢掉它赖以定位步骤边界的信息",
+      "evidence": "ci/step-33736951606.txt, harness/collect_run.py"
+    },
+    {
+      "id": "DEV-3",
+      "description": "本卡向 .github/workflows/firmware-build.yml 追加 10 行（净 11 增 1 删），该文件是 Production profile 的 top_file，因此已冻结的 P3-1-v2 / P3-6-v1 Production 指纹相对当前 HEAD 必然漂移",
+      "scope": "如实声明、不修复：冻结资产禁止回改，前序 PASS 绑定其自身 Head；本合同用本轮重新枚举的 Production manifest（file_count=2920）作为唯一生产侧指纹",
+      "evidence": "manifest-production/source-manifest.json"
+    },
+    {
+      "id": "DEV-4",
+      "description": "p3_7_verify_wiring.py 的核对项总数依赖工作树跟踪状态（改动文件数、未跟踪聚合项），会随验收过程本身推进而变化，不是不变量",
+      "scope": "WIRING-* 与 SCOPE-* 判据的 state_chain 只绑定语义不变量（result=PASS、added/removed、paths 长度、执行行数、红线计数等），禁止把 checks 总数写进门槛。反之 p3_7_verify_ci_evidence.py 的 308 项只由冻结证据集决定，是不变量，故 CI-EVIDENCE-ATTRIBUTION 绑定 checks=308",
+      "evidence": "commands/verify-wiring.log, commands/verify-ci-evidence.log"
+    },
+    {
+      "id": "DEV-5",
+      "description": "本机 `python3` 是 Windows 应用执行别名，直接调用返回 rc=49，无法作为本地复算入口",
+      "scope": "本地命令统一用 `python -X utf8 -B <script>`；CI 侧 ubuntu-latest 用真 python3 执行同一脚本字节，WIRED-SCRIPTS-LOCAL-REPLAY 与 CI-BASELINE-GREEN-MARKERS 的结论标记逐字符比对即用于核对两侧一致",
+      "evidence": "commands/verify-wiring.log"
+    },
+    {
+      "id": "DEV-6",
+      "description": "两条触发器反证的提交位于按计划删除的临时 master 分支上，本地按 SHA 仍可读但不被任何 ref 指向，将来会被 GC 回收；远端亦无该分支",
+      "scope": "p3_7_verify_ci_evidence.py 不含任何 git 调用，复算只依赖冻结的 run/step/changed 三件，故门禁复算不受影响。不采取「为留住提交而向远端推额外 ref」的补救——那是对外可见动作，超出本轮授权范围，改为如实登记",
+      "evidence": "ci/run-33746544048.json, ci/run-33746838579.json"
+    },
+    {
+      "id": "DEV-7",
+      "description": "两个鉴别力 harness 与两个取证脚本位于 .cache/p3-7-accept/，被 .gitignore 忽略，不在任何 profile 的枚举范围内",
+      "scope": "以 external_inputs 冻结包内副本与 SHA-256（harness/ 四份），使 CMD-HARNESS-DISCRIMINATION 与 CMD-CI-HARNESS-SELFTEST 可被第三方复跑；按仓库写入边界规约，临时产物只落仓库内被忽略目录，不入 main",
+      "evidence": "harness/inject_probe.py, harness/ci_harness_selftest.py, harness/collect_run.py, harness/inject_ci.py"
+    },
+    {
+      "id": "DEV-8",
+      "description": "本轮 11 条 CI 腿由验收会话自身推送产生（第 2 轮判 EVIDENCE_GAP 的唯一硬原因是零次真实 CI 运行，用户放行后由本会话补取），取证方与被验方同源",
+      "scope": "不假装该问题不存在。可核部分：分支端态相对交付基线在 Libraries/、USER/、boot/、MDK-ARM_F435/ 四目录 diff 为空（CMD-PRODUCT-REDLINE-DIFF 可复算），每次注错/还原提交恰含一个文件（changed-*.json 可复算）。不可核部分是会话自述本身，只能靠上述两项兜底",
+      "evidence": "commands/product-redline-diff.log, artifacts/artifact-index.json"
+    }
+  ],
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source",
+      "manifest_path": "manifest-production/source-manifest.json",
+      "manifest_sha256": "ACAE2C71909AF7F19ADE3978E0D068525AFE513BDEDA48B8CF5D9E08711A6363",
+      "manifest_json_sha256": "A4A3B8F3CE68BA6A3C839120C98FB3EE60EB589E6CA1EB1EB5981C49F8FE055E",
+      "file_count": 2920,
+      "description": "GCC 生产固件的全部实际编译输入。本卡的被观测对象是 top_file .github/workflows/firmware-build.yml；同时用于证明 Libraries/OTA/**、USER/**、boot/**、MDK-ARM_F435/** 相对交付基线零改动"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs",
+      "manifest_path": "manifest-validation/source-manifest.json",
+      "manifest_sha256": "B5331BE603F447FE325EC99DCB54456C20D0B52585FD7ACC7918882CA47EDB60",
+      "manifest_json_sha256": "B832206A10F791CAA5A93AF95489296F4937FDB6D9F8BE383753DF2A4F0F3E94",
+      "file_count": 154,
+      "description": "验收 harness 与被接入的宿主测试脚本：两个 P3-7 核验器、四条被接线脚本、五条刻意不接入的 P3-1 验收工具脚本、P3-6 的冻结 harness、校验器与 manifest 工具链"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs",
+      "manifest_path": "manifest-governance/source-manifest.json",
+      "manifest_sha256": "B35E78737A0E15E1839F48A04CC786727207CDF39211D5CAFF96DBE0908A5D96",
+      "manifest_json_sha256": "3B52567DF4ABDB8276CEE282F8CF34BF3B205BFEED03B9DF501E35B75CE623E6",
+      "file_count": 26,
+      "description": "治理侧输入：看板 PLAN-OTA-EXEC.md（本卡状态与 §9/§10 回写）、派工书 docs/ota-prompts/prompt-P3-7-implementation.md（spec_version=2）、AGENTS.md 与验收执行契约"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-IMPL-EVIDENCE-NOTE",
+      "category": "fixture",
+      "description": "实现方 P3-7 接线证据笔记（§5 表内逐条列出 11 条 CI 腿的 run 标识、事件、结论、提交与改动文件；docs/ota-exec-notes/** 不在任何 profile 枚举范围内，只能以包内副本冻结）",
+      "fingerprint": "docs/ota-exec-notes/P3-7-wiring-evidence.md @ 工作树（未提交，随收口提交入 main）",
+      "evidence_path": "external/P3-7-wiring-evidence.md",
+      "evidence_sha256": "FCCEEE6EFEC3BF82AEA3B0C14289011C5AFEE5B2E08C57992ADAB21AD483AB62"
+    },
+    {
+      "id": "EXT-HARNESS-PROBE",
+      "category": "fixture",
+      "description": "接线核验器鉴别力探针（8 例注错：按字节存档 workflow、注入可定界缺陷、要求核验器转红且新红恰落在对应判据、再按 SHA-256 回校还原）",
+      "fingerprint": ".cache/p3-7-accept/inject_probe.py @ 未跟踪（.gitignore 忽略 .cache/），仅以包内副本冻结",
+      "evidence_path": "harness/inject_probe.py",
+      "evidence_sha256": "0C3EB1E1C422FABCC256CCB41D650160919F5A623CA117412EF29556A681CFB6"
+    },
+    {
+      "id": "EXT-HARNESS-CI-SELFTEST",
+      "category": "fixture",
+      "description": "CI 证据核验器双向鉴别力自检（复制核验器、只按常量名整行改写 CI_DIR 与 run 常量、判据逻辑一字不动；格式良好的合成证据须绿，11 类伪造/无效证据须各红在对应关键词）",
+      "fingerprint": ".cache/p3-7-accept/ci_harness_selftest.py @ 未跟踪（.gitignore 忽略 .cache/），仅以包内副本冻结",
+      "evidence_path": "harness/ci_harness_selftest.py",
+      "evidence_sha256": "C29BAEE85D5113CEDC3B4695D73773A5B9C4C5C1217BE7FE440A8F5CAB2D3505"
+    },
+    {
+      "id": "EXT-HARNESS-COLLECTOR",
+      "category": "fixture",
+      "description": "gh 采集器：按 run 号落 run-<id>.json / step-<id>.txt / changed-<id>.json 三件，步骤日志按 TAB 三列原样落盘，不做裁剪或重排",
+      "fingerprint": ".cache/p3-7-accept/collect_run.py @ 未跟踪（.gitignore 忽略 .cache/），仅以包内副本冻结",
+      "evidence_path": "harness/collect_run.py",
+      "evidence_sha256": "C6E676D36D1D9D36CDAA8A8D687251AFC194CC2FB30FFD124DC3B021776F956F"
+    },
+    {
+      "id": "EXT-HARNESS-CI-INJECTOR",
+      "category": "fixture",
+      "description": "CI 版 fail-closed 反证驱动：按字节存档目标产品源、注入可定界缺陷、还原时以 SHA-256 回校，保证「还原确实把内容改回注错前」",
+      "fingerprint": ".cache/p3-7-accept/inject_ci.py @ 未跟踪（.gitignore 忽略 .cache/），仅以包内副本冻结",
+      "evidence_path": "harness/inject_ci.py",
+      "evidence_sha256": "66C37A9BE419C07A6B0195A2282F4DD4B3775AA2E1E024700238EC57E3C3C10B"
+    },
+    {
+      "id": "EXT-CI-RUN-SET",
+      "category": "environment",
+      "description": "远端 PR 元数据（基分支 main、头分支 ota/p3-7-host-test-wiring、提交数 11），用于把 11 条腿绑定到同一条特性分支上，属不可由本仓库字节复算的环境事实",
+      "fingerprint": "gh pr view 19 --json baseRefName,headRefName,commits @ github.com 远端",
+      "evidence_path": "ci/pr-19.json",
+      "evidence_sha256": "8238682833A508E9C18B2F3E90F4FC83758ADAB7850E6E7F1530B742FACC6B3C"
+    }
+  ],
+  "performance_gates": [],
+  "commands": [
+    {
+      "id": "CMD-VERIFY-WIRING",
+      "description": "接线静态核验 + 被接四脚本实跑对账：步骤命令序列、纯增量 diff、fail-closed 语义、触发器互镜与闭包、冻结红线、改动分类、看板字节卫生",
+      "command": "python -X utf8 -B tests/ota/p3_7_verify_wiring.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-VERIFY-CI-EVIDENCE",
+      "description": "CI 证据核验：11 次真实运行的元数据、步骤日志标记、改动文件归属；脚本不含任何 git 调用，第三方拿到证据包即可复算",
+      "command": "python -X utf8 -B tests/ota/p3_7_verify_ci_evidence.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-GOVERNANCE-GATE",
+      "description": "验收框架治理自测（合同/矩阵 schema、派工书章节、看板就绪矩阵等）",
+      "command": "python -X utf8 -B -m unittest tests.ota.test_acceptance_bundle",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-HARNESS-DISCRIMINATION",
+      "description": "接线核验器鉴别力探针：8 例注错须各自转红且新红落在对应判据，还原后逐字节复原",
+      "command": "python -X utf8 -B .cache/p3-7-accept/inject_probe.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-CI-HARNESS-SELFTEST",
+      "description": "CI 证据核验器双向鉴别力自检：格式良好的合成证据转绿，11 类伪造/无效证据各红在对应关键词",
+      "command": "python -X utf8 -B .cache/p3-7-accept/ci_harness_selftest.py",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-PRODUCT-REDLINE-DIFF",
+      "description": "产品红线目录相对交付基线的独立人读交叉核对（四目录 --stat 全空 + 合并 --numstat 行数为 0）",
+      "command": "B=2d8ff7e52d4c575a4d109b1477a79a7c1493d81b; for d in Libraries/ USER/ boot/ MDK-ARM_F435/; do echo \"== git diff --stat $B -- $d\"; git diff --stat $B -- \"$d\"; done; echo \"== git diff --numstat 四目录合并后的行数(应为 0): $(git diff --numstat $B -- Libraries/ USER/ boot/ MDK-ARM_F435/ | wc -l)\"",
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P3-6-HARNESS-STATUS",
+      "description": "P3-6 冻结 harness 现状取证（预期红，用于把红因唯一归属到本卡授权的步骤改名）",
+      "command": "python -X utf8 -B tests/ota/p3_6_verify_ci_wiring.py",
+      "expected_exit_codes": [
+        1
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-ARTIFACTS-ARTIFACT-INDEX-JSON",
+      "description": "证据包保管索引：包内每份复制字节的出处、大小、SHA-256（40 条）",
+      "path": "artifacts/artifact-index.json"
+    },
+    {
+      "id": "ART-CI-WORKFLOW-SNAPSHOT",
+      "description": "正例绿运行 head 处的 workflow 原文，用于证明「被观测的 workflow 就是 CI 实际执行的那一份」",
+      "path": "ci/workflow-at-90facc3a8875.yml"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-WIRING-LOG",
+      "description": "接线静态核验原始 stdout（163 项核对逐条可读）",
+      "path": "commands/verify-wiring.log"
+    },
+    {
+      "id": "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+      "description": "CI 证据核验原始 stdout（308 项核对逐条可读）",
+      "path": "commands/verify-ci-evidence.log"
+    },
+    {
+      "id": "ART-COMMANDS-GOVERNANCE-GATE-LOG",
+      "description": "治理自测原始 stderr/stdout（65 用例）",
+      "path": "commands/governance-gate.log"
+    },
+    {
+      "id": "ART-COMMANDS-HARNESS-DISCRIMINATION-LOG",
+      "description": "接线核验器鉴别力探针原始 stdout（8 例）",
+      "path": "commands/harness-discrimination.log"
+    },
+    {
+      "id": "ART-COMMANDS-CI-HARNESS-SELFTEST-LOG",
+      "description": "CI 证据核验器双向鉴别力自检原始 stdout（11 类变异）",
+      "path": "commands/ci-harness-selftest.log"
+    },
+    {
+      "id": "ART-COMMANDS-PRODUCT-REDLINE-DIFF-LOG",
+      "description": "产品红线四目录 diff 原始 stdout",
+      "path": "commands/product-redline-diff.log"
+    },
+    {
+      "id": "ART-COMMANDS-P3-6-HARNESS-STATUS-LOG",
+      "description": "P3-6 冻结 harness 现状原始 stdout（预期红）",
+      "path": "commands/p3-6-harness-status.log"
+    },
+    {
+      "id": "ART-CI-RUN-33736951606-JSON",
+      "description": "run 33736951606 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33736951606.json"
+    },
+    {
+      "id": "ART-CI-STEP-33736951606-LOG",
+      "description": "run 33736951606 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33736951606.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33736951606-JSON",
+      "description": "run 33736951606 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33736951606.json"
+    },
+    {
+      "id": "ART-CI-RUN-33746544048-JSON",
+      "description": "run 33746544048 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33746544048.json"
+    },
+    {
+      "id": "ART-CI-STEP-33746544048-LOG",
+      "description": "run 33746544048 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33746544048.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33746544048-JSON",
+      "description": "run 33746544048 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33746544048.json"
+    },
+    {
+      "id": "ART-CI-RUN-33746838579-JSON",
+      "description": "run 33746838579 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33746838579.json"
+    },
+    {
+      "id": "ART-CI-STEP-33746838579-LOG",
+      "description": "run 33746838579 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33746838579.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33746838579-JSON",
+      "description": "run 33746838579 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33746838579.json"
+    },
+    {
+      "id": "ART-CI-RUN-33742087214-JSON",
+      "description": "run 33742087214 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33742087214.json"
+    },
+    {
+      "id": "ART-CI-STEP-33742087214-LOG",
+      "description": "run 33742087214 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33742087214.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33742087214-JSON",
+      "description": "run 33742087214 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33742087214.json"
+    },
+    {
+      "id": "ART-CI-RUN-33743337327-JSON",
+      "description": "run 33743337327 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33743337327.json"
+    },
+    {
+      "id": "ART-CI-STEP-33743337327-LOG",
+      "description": "run 33743337327 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33743337327.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33743337327-JSON",
+      "description": "run 33743337327 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33743337327.json"
+    },
+    {
+      "id": "ART-CI-RUN-33743950837-JSON",
+      "description": "run 33743950837 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33743950837.json"
+    },
+    {
+      "id": "ART-CI-STEP-33743950837-LOG",
+      "description": "run 33743950837 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33743950837.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33743950837-JSON",
+      "description": "run 33743950837 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33743950837.json"
+    },
+    {
+      "id": "ART-CI-RUN-33744219606-JSON",
+      "description": "run 33744219606 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33744219606.json"
+    },
+    {
+      "id": "ART-CI-STEP-33744219606-LOG",
+      "description": "run 33744219606 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33744219606.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33744219606-JSON",
+      "description": "run 33744219606 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33744219606.json"
+    },
+    {
+      "id": "ART-CI-RUN-33748460404-JSON",
+      "description": "run 33748460404 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33748460404.json"
+    },
+    {
+      "id": "ART-CI-STEP-33748460404-LOG",
+      "description": "run 33748460404 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33748460404.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33748460404-JSON",
+      "description": "run 33748460404 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33748460404.json"
+    },
+    {
+      "id": "ART-CI-RUN-33748868768-JSON",
+      "description": "run 33748868768 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33748868768.json"
+    },
+    {
+      "id": "ART-CI-STEP-33748868768-LOG",
+      "description": "run 33748868768 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33748868768.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33748868768-JSON",
+      "description": "run 33748868768 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33748868768.json"
+    },
+    {
+      "id": "ART-CI-RUN-33745505165-JSON",
+      "description": "run 33745505165 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33745505165.json"
+    },
+    {
+      "id": "ART-CI-STEP-33745505165-LOG",
+      "description": "run 33745505165 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33745505165.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33745505165-JSON",
+      "description": "run 33745505165 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33745505165.json"
+    },
+    {
+      "id": "ART-CI-RUN-33745844623-JSON",
+      "description": "run 33745844623 的元数据（事件、结论、head 提交、各 job/step 结论）",
+      "path": "ci/run-33745844623.json"
+    },
+    {
+      "id": "ART-CI-STEP-33745844623-LOG",
+      "description": "run 33745844623 目标步骤的原始三列日志（TAB 分隔，ANSI 保留为 caret notation）",
+      "path": "ci/step-33745844623.txt"
+    },
+    {
+      "id": "ART-CI-CHANGED-33745844623-JSON",
+      "description": "run 33745844623 的 head 提交改动文件清单（用于把红/绿归属到唯一一个文件）",
+      "path": "ci/changed-33745844623.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "WIRING-STEP-COMMAND-SEQUENCE",
+      "description": "C01：目标步骤按派工书改名为 `Run host tests (boot vectors, OTA host tests, P3-1 product regressions)` 且旧名不再存在；run 脚本块 13 行 = 1 条 set -euo pipefail 守卫 + 12 条 python3 执行行（8 条既有 + 4 条本卡接线），顺序与拼写逐行全等；四条接线命令均落在守卫之后且未被任何额外子句包裹",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG",
+        "ART-CI-WORKFLOW-SNAPSHOT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "run_block_lines=13",
+          "step_python3_lines=12",
+          "wired=4"
+        ]
+      }
+    },
+    {
+      "id": "WIRING-PURE-ADDITION",
+      "description": "C02：workflow 相对交付基线（分支起点 main）恰为 11 增 1 删，裸 LF 计数恰增 10；顶层 `name: MCU Firmware Build` 与 `jobs.build.name` 两行逐字节未变",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG",
+        "ART-CI-WORKFLOW-SNAPSHOT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "added=11",
+          "removed=1",
+          "workflow_bare_lf=273"
+        ]
+      }
+    },
+    {
+      "id": "WIRING-FAIL-CLOSED-SEMANTICS",
+      "description": "C03：workflow 全文（501 行非注释行，带空集守卫）对 6 类 fail-open 写法零命中（`|| true`、行尾 `|| :`、`continue-on-error: true`、`set +e`、`if: always()`、裸 `exit 0`）；目标步骤既无 continue-on-error 也无 if: 条件",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG",
+        "ART-CI-WORKFLOW-SNAPSHOT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "fail_open_patterns=6",
+          "fail_open_hits=0",
+          "non_comment_lines=501"
+        ]
+      }
+    },
+    {
+      "id": "WIRING-TRIGGER-MIRROR-CLOSURE",
+      "description": "C04：push.paths 与 pull_request.paths 各 18 条且逐项同序全等（两份均带空集守卫）；相对基线 main 的 15 条只增不删，新增恰为三条 p3_1_verify 精确条目；12 条执行行全部被 paths 覆盖且目标文件真实存在；第 4 条接线靠既有通配 tests/ota/test_ota_*.py 覆盖、未加冗余精确条目；5 条刻意不接入的 P3-1 验收工具脚本既未被新增条目覆盖也未被写进执行行，并以「通配模式确实会命中它们」作阳性对照，排除判据恒真",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG",
+        "ART-CI-WORKFLOW-SNAPSHOT"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "paths_len=18",
+          "paths_baseline_len=15",
+          "paths_added=3",
+          "paths_removed=0",
+          "covered_exec_lines=12",
+          "uncovered_nonwired=5"
+        ]
+      }
+    },
+    {
+      "id": "WIRING-FROZEN-RED-LINES",
+      "description": "C05：14 条冻结红线 pathspec 相对交付基线零改动（boot/、Libraries/OTA/、USER/、PLAN-OTA.md、二进制契约、跨系统契约、验收执行契约、Tools/etu_pack.py、Tools/acceptance/、Tools/provenance/、acceptance-governance.yml、tests/ota-vectors/、tests/ota/p3_1_verify_、Libraries/USB_MSC/）；被 P3-1-v2 与 P3-6-v1 按路径钉死的 9 条脚本与 Libraries/USB_MSC/msc_diskio.c.old 共 10 个路径既零改动也未改名或移动；并以四目录 git diff 独立人读交叉核对",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "diff"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING",
+        "CMD-PRODUCT-REDLINE-DIFF"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG",
+        "ART-COMMANDS-PRODUCT-REDLINE-DIFF-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "red_line_pathspecs=14",
+          "red_line_diffs=0",
+          "protected_paths_intact=10",
+          "redline_diff_lines=0"
+        ]
+      }
+    },
+    {
+      "id": "SCOPE-CHANGE-CLASSIFICATION",
+      "description": "C06：本轮全部改动（跟踪+未忽略未跟踪，带非空下限守卫）逐条可归类，无法归类项为空；卡内桶恰为 4 个文件（workflow、两份实现笔记、CI 序列脚本）；与实现方共有的改动恰为看板一个文件；既有未跟踪文件集合与冻结清单全等",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "command_log",
+        "manifest"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG",
+        "ART-ARTIFACTS-ARTIFACT-INDEX-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "unclassified=0",
+          "card_files=4",
+          "shared_changes=1"
+        ]
+      }
+    },
+    {
+      "id": "WIRED-SCRIPTS-LOCAL-REPLAY",
+      "description": "C07：四条被接线脚本在本地各自 rc=0、输出恰含一条结论标记且标记逐字符等于其基线；portability 的 scanned=895 由核验器独立重算复现（带空集守卫），相对立卡基线 893 的增量被逐文件解释为 P3-2 落地的两个新源，且基线内文件无一消失；阳性对照仍命中 1 处、在编手写源反斜杠 include 为 0、P3-1 新源命中为 0",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "command_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "scripts=4",
+          "exit_codes=0",
+          "scanned=895",
+          "scanned_baseline=893",
+          "control_hits=1",
+          "live_hits=0"
+        ]
+      }
+    },
+    {
+      "id": "BOARD-WRITEBACK-HYGIENE",
+      "description": "C08：看板回写恰为 9 增 4 删，裸 LF 恰增 1（§9 登记表 1 行）、CRLF 恰增 4（§10 追加 3 行 + 卡内验收发现 1 行），混合行尾逐处保留；P3-7 卡片段内不出现任何哈希或 commit SHA（看板是 Governance 的 top_file，写哈希会构造不收敛自指环）；§10 会话日志 184 行非空且每行以 Markdown 列表标记 `- ` 开头",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log",
+        "manifest"
+      ],
+      "input_groups": [
+        "governance",
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-VERIFY-WIRING"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-WIRING-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "board_added=9",
+          "board_removed=4",
+          "board_bare_lf=253",
+          "board_crlf=730",
+          "card_hash_tokens=0",
+          "board_log_lines=184"
+        ]
+      }
+    },
+    {
+      "id": "GOVERNANCE-GATE-GREEN",
+      "description": "C09：验收框架治理自测 65 条用例全绿（含派工书章节结构、看板就绪矩阵派生、合同/矩阵 schema 自洽）——本轮它抓到的两处红都是验收方自身的错，修后复绿",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log"
+      ],
+      "input_groups": [
+        "validation",
+        "governance"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-GOVERNANCE-GATE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-GOVERNANCE-GATE-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "tests=65",
+          "result=OK"
+        ]
+      }
+    },
+    {
+      "id": "CI-BASELINE-GREEN-MARKERS",
+      "description": "C10：正例真实运行为绿，且四条接线脚本的结论标记全部出现在目标步骤日志内；该运行 head 处的 workflow 原文与被验收的 workflow 逐字节一致，排除「本地文件与 CI 实际执行的不是同一份」",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "ci_run_metadata",
+        "ci_step_log",
+        "workflow_snapshot"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-IMPL-EVIDENCE-NOTE",
+        "EXT-CI-RUN-SET"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-WORKFLOW-SNAPSHOT",
+        "ART-CI-RUN-33736951606-JSON",
+        "ART-CI-STEP-33736951606-LOG",
+        "ART-CI-CHANGED-33736951606-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "run=33736951606",
+          "event=pull_request",
+          "run_conclusion=success",
+          "step10=success",
+          "wired_markers=4",
+          "workflow_matches_tree=True"
+        ]
+      }
+    },
+    {
+      "id": "CI-TRIGGER-CLOSURE-REMOTE",
+      "description": "C11：触发器闭包由远端两次真实 push 事件各验证一次——反证 A 只改被新增精确条目覆盖的 tests/ota/p3_1_verify_portability.py，反证 B 只改被既有通配 tests/ota/test_ota_*.py 覆盖的 tests/ota/test_ota_device_info.py；两次均确实触发该 workflow 且为绿，两类覆盖来源各自被 GitHub 侧证明一次。本仓库自实现的匹配器判自己通过不构成对 GitHub 匹配行为的证明，故此判据不可由本地命令替代",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "ci_run_metadata",
+        "ci_step_log",
+        "commit_file_list"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-IMPL-EVIDENCE-NOTE",
+        "EXT-HARNESS-COLLECTOR"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-RUN-33746544048-JSON",
+        "ART-CI-STEP-33746544048-LOG",
+        "ART-CI-CHANGED-33746544048-JSON",
+        "ART-CI-RUN-33746838579-JSON",
+        "ART-CI-STEP-33746838579-LOG",
+        "ART-CI-CHANGED-33746838579-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "exact_entry_run=33746544048",
+          "wildcard_run=33746838579",
+          "event=push",
+          "both_conclusions=success",
+          "changed_files_per_commit=1"
+        ]
+      }
+    },
+    {
+      "id": "CI-FAIL-CLOSED-CHAIN",
+      "description": "C12：四条接线各有一次 CI 版 fail-closed 反证 —— 注错运行整体 failure、目标步骤 failure 且红点恰落在对应那一条执行行（第 1/2/3/4 条各一次），还原运行整体 success 且四条结论标记齐现。注错选点通过两级安全判定：命令级（本地按 CI 同序跑满 12 条，红点恰落目标行、其前全绿）与步骤级（缺陷不得打红更早的 CI 步骤，否则目标步骤 skipped、反证空转）",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "ci_run_metadata",
+        "ci_step_log"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-IMPL-EVIDENCE-NOTE",
+        "EXT-HARNESS-CI-INJECTOR"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-RUN-33742087214-JSON",
+        "ART-CI-STEP-33742087214-LOG",
+        "ART-CI-RUN-33743337327-JSON",
+        "ART-CI-STEP-33743337327-LOG",
+        "ART-CI-RUN-33743950837-JSON",
+        "ART-CI-STEP-33743950837-LOG",
+        "ART-CI-RUN-33744219606-JSON",
+        "ART-CI-STEP-33744219606-LOG",
+        "ART-CI-RUN-33748460404-JSON",
+        "ART-CI-STEP-33748460404-LOG",
+        "ART-CI-RUN-33748868768-JSON",
+        "ART-CI-STEP-33748868768-LOG",
+        "ART-CI-RUN-33745505165-JSON",
+        "ART-CI-STEP-33745505165-LOG",
+        "ART-CI-RUN-33745844623-JSON",
+        "ART-CI-STEP-33745844623-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "defect_pairs=4",
+          "defect_run_conclusion=failure",
+          "defect_step10=failure",
+          "red_at_wired=1;2;3;4",
+          "restore_run_conclusion=success",
+          "restore_wired_markers=4"
+        ]
+      }
+    },
+    {
+      "id": "CI-EVIDENCE-ATTRIBUTION",
+      "description": "C13：10 次触发器/注错/还原运行的 head 提交各自恰改动一个文件，红或绿只能归属到那一个文件；正例是 PR 事件运行，其 head 提交携带本卡 9 个文件的交付本体，因而不适用单文件约束（它证明的是「全量交付下 job 为绿」）。11 个 run 标识互不复用；PR #19 基分支 main、头分支 ota/p3-7-host-test-wiring、提交数 11；核验器 308 项核对零失败，且脚本不含任何 git 调用——判据只读冻结证据文件，第三方拿到证据包即可复算，不依赖本机仓库状态或远端可达性",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "ci_run_metadata",
+        "commit_file_list",
+        "command_log"
+      ],
+      "input_groups": [
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-CI-RUN-SET",
+        "EXT-HARNESS-COLLECTOR",
+        "EXT-IMPL-EVIDENCE-NOTE"
+      ],
+      "command_ids": [
+        "CMD-VERIFY-CI-EVIDENCE"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-VERIFY-CI-EVIDENCE-LOG",
+        "ART-CI-CHANGED-33736951606-JSON",
+        "ART-CI-CHANGED-33746544048-JSON",
+        "ART-CI-CHANGED-33746838579-JSON",
+        "ART-CI-CHANGED-33742087214-JSON",
+        "ART-CI-CHANGED-33743337327-JSON",
+        "ART-CI-CHANGED-33743950837-JSON",
+        "ART-CI-CHANGED-33744219606-JSON",
+        "ART-CI-CHANGED-33748460404-JSON",
+        "ART-CI-CHANGED-33748868768-JSON",
+        "ART-CI-CHANGED-33745505165-JSON",
+        "ART-CI-CHANGED-33745844623-JSON"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "result=PASS",
+          "checks=308",
+          "failures=0",
+          "runs=11",
+          "run_ids_unique=True",
+          "single_file_commits=10",
+          "baseline_delivery_files=9",
+          "git_invocations=0",
+          "pr_commits=11"
+        ]
+      }
+    },
+    {
+      "id": "HARNESS-BIDIRECTIONAL-DISCRIMINATION",
+      "description": "C14：两个核验器均被证明双向有鉴别力，而不只是 fail-closed。接线核验器：8 例注错（fail-open 注入、删触发器条目、删执行行、把新增条目改成通配、改 jobs.build.name、删第 4 条执行行、删既有通配、为已被通配覆盖的脚本加冗余精确条目）各 rc=1、新红恰落在对应判据、还原后 SHA-256 逐字节一致且红项集合复原至基线。CI 证据核验器：格式良好的合成证据可转绿，11 类伪造/无效证据各红在对应关键词上——这一条专治「全红但零鉴别力」，本轮该自检正因常量失配退化成该状态而被修复",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log"
+      ],
+      "input_groups": [
+        "validation"
+      ],
+      "external_inputs": [
+        "EXT-HARNESS-PROBE",
+        "EXT-HARNESS-CI-SELFTEST"
+      ],
+      "command_ids": [
+        "CMD-HARNESS-DISCRIMINATION",
+        "CMD-CI-HARNESS-SELFTEST"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-HARNESS-DISCRIMINATION-LOG",
+        "ART-COMMANDS-CI-HARNESS-SELFTEST-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "probe_cases=8",
+          "probe_result=PASS",
+          "probe_restore_byte_identical=True",
+          "selftest_can_turn_green=True",
+          "selftest_mutations=11",
+          "selftest_result=PASS"
+        ]
+      }
+    },
+    {
+      "id": "P3-6-HARNESS-RED-ATTRIBUTED",
+      "description": "C15：P3-6 的冻结 harness tests/ota/p3_6_verify_ci_wiring.py 现为红，且红因唯一并完全归属于本卡按派工书授权的步骤改名（2 项失败，均指向旧步骤名）；不存在与接线内容本身有关的第三项红。判定为不阻断本卡：P3-6 证据包在其冻结提交上仍可校验，这是「每轮证据包只在其冻结提交上可校验」的设计后果而非回归；不回改 P3-6 的冻结字节",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "command_log"
+      ],
+      "input_groups": [
+        "validation"
+      ],
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-P3-6-HARNESS-STATUS"
+      ],
+      "artifact_ids": [
+        "ART-COMMANDS-P3-6-HARNESS-STATUS-LOG"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "frozen_requirement",
+        "expected": [
+          "p3_6_result=FAIL",
+          "failures=2",
+          "red_cause=step_renamed",
+          "reds_unrelated_to_rename=0"
+        ]
+      }
+    }
+  ]
+}

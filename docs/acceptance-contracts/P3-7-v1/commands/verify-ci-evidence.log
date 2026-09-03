@@ -1,0 +1,26 @@
+正例 run=33736951606 head=90facc3 run=success step10=success
+正例 run=33736951606 log_lines=767 wired_markers=4
+workflow 同一性 run=33736951606 head=90facc3 sha256=A43A002D298875E0…
+触发器反证A(新增精确条目) run=33746544048 head=9bac771 run=success step10=success
+触发器反证A(新增精确条目) run=33746544048 log_lines=767 wired_markers=4
+触发器反证B(既有通配) run=33746838579 head=bb2dcf5 run=success step10=success
+触发器反证B(既有通配) run=33746838579 log_lines=767 wired_markers=4
+反证1红 run=33742087214 head=f369a5d run=failure step10=failure
+反证1红 run=33742087214 log_lines=741 red_at_wired=1
+反证1绿 run=33743337327 head=7b3e6c6 run=success step10=success
+反证1绿 run=33743337327 log_lines=767 wired_markers=4
+反证2红 run=33743950837 head=5808836 run=failure step10=failure
+反证2红 run=33743950837 log_lines=754 red_at_wired=2
+反证2绿 run=33744219606 head=d99c840 run=success step10=success
+反证2绿 run=33744219606 log_lines=767 wired_markers=4
+反证3红 run=33748460404 head=11ca914 run=failure step10=failure
+反证3红 run=33748460404 log_lines=766 red_at_wired=3
+反证3绿 run=33748868768 head=94c4d68 run=success step10=success
+反证3绿 run=33748868768 log_lines=767 wired_markers=4
+反证4红 run=33745505165 head=607f802 run=failure step10=failure
+反证4红 run=33745505165 log_lines=777 red_at_wired=4
+反证4绿 run=33745844623 head=690a528 run=success step10=success
+反证4绿 run=33745844623 log_lines=767 wired_markers=4
+pr=19 commits=11
+=== 失败项 0 / 核对项 308 ===
+P3_7_CI_EVIDENCE=PASS checks=308 failures=0

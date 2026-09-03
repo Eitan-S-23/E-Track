@@ -229,6 +229,7 @@
 /docs/acceptance-contracts/template.contract.json -text
 /docs/acceptance-contracts/template.evidence-matrix.json -text
 /docs/acceptance-execution-contract.md -text
+/docs/ota-exec-notes/P3-7-wiring-evidence.md -text
 /docs/ota-prompts/prompt-P2-6-SD-R5-independent-review.md -text
 /docs/ota-prompts/prompt-P3-6-implementation.md -text
 /docs/ota-prompts/prompt-P3-7-implementation.md -text
@@ -265,6 +266,8 @@
 /tests/ota/p3_6_verify_ci_wiring.py -text
 /tests/ota/p3_6_verify_harness.py -text
 /tests/ota/p3_6_verify_scope.py -text
+/tests/ota/p3_7_verify_ci_evidence.py -text
+/tests/ota/p3_7_verify_wiring.py -text
 /tests/ota/test_ac5_ram_budget.py -text
 /tests/ota/test_f435_build_bootstrap.py -text
 /tests/ota/test_ota_ble_frame.py -text

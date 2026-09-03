@@ -1,0 +1,140 @@
+{
+    "Schema":  "etrack-input-manifest-v2",
+    "Profile":  "Governance",
+    "Ordering":  "UTF-8 normalized slash paths, bytewise Ordinal ascending",
+    "Encoding":  "UTF-8 without BOM, CRLF, one trailing newline",
+    "FileCount":  26,
+    "ManifestSHA256":  "B35E78737A0E15E1839F48A04CC786727207CDF39211D5CAFF96DBE0908A5D96",
+    "Files":  [
+                  {
+                      "Path":  ".github/copilot-instructions.md",
+                      "Length":  823,
+                      "SHA256":  "8596BA2AFAFFDC206E5500E7A8030E72310206A2008665DB04198AD6D348C21D"
+                  },
+                  {
+                      "Path":  "AGENTS.md",
+                      "Length":  51756,
+                      "SHA256":  "B0F548E3B0F9ECFD73CB315AA30F2C731AE4FE04DF13DDAD413CA19FA5EB4EAE"
+                  },
+                  {
+                      "Path":  "PLAN-OTA-EXEC.md",
+                      "Length":  428443,
+                      "SHA256":  "887039FABD44FCFF4AB81039B454227A4079CAC7E4FCD727602D3986FD585A04"
+                  },
+                  {
+                      "Path":  "docs/acceptance-execution-contract.md",
+                      "Length":  12083,
+                      "SHA256":  "598C2A2BEC4E9CEC1E00591A5A537972024449CB896192D5066A6822452D5F52"
+                  },
+                  {
+                      "Path":  "docs/ota-cross-system-contracts.md",
+                      "Length":  103411,
+                      "SHA256":  "25E590DA55A09DAD239465A37F152914F3E43342230DA19D1E33613FF9BDE2E3"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P1-7-implementation.md",
+                      "Length":  14892,
+                      "SHA256":  "A9FA7F408CC3B71DB24B4073DE363155627B2521C6689857EAB6F382628E3C5B"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P2-6-SD-R5-independent-review.md",
+                      "Length":  4382,
+                      "SHA256":  "88BCE89836D7CDE8C75FC77CE991391F494E33CA57B68DD71008CBB18A7E8E68"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P2-6-implementation.md",
+                      "Length":  116534,
+                      "SHA256":  "2394F76F7FEBE4B3A6F9B8C332C5CC9263FFF53F782F6CF672FDCF1EB60F218F"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P3-1-implementation.md",
+                      "Length":  7430,
+                      "SHA256":  "37E61DC99D7FB16440B2D1CD2A45878893F090FF582A8FE385FBEE3714B9272C"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P3-2-implementation.md",
+                      "Length":  6165,
+                      "SHA256":  "B400EA2FC0F47592C0EB00FFE33A6CDB8E20C69772AE980974F61486DE4413D6"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P3-3-implementation.md",
+                      "Length":  8020,
+                      "SHA256":  "D08FEF8E1725B4D508681A67E0B9F39EB1AD40725474A8A734AA646884F2A987"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P3-4-experiment.md",
+                      "Length":  5685,
+                      "SHA256":  "5727794B1C2D2EDF919EE163A7F5967BBB6136FCDB167F452CC14B5A9C71162A"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P3-5-integration.md",
+                      "Length":  5685,
+                      "SHA256":  "F2260598E8BD4B13BC70C3097389848919E23A0491C039B0DAD971A73D15064B"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P3-6-implementation.md",
+                      "Length":  9083,
+                      "SHA256":  "0AEE80D90EEE9E267BAEE7F6D74DDF4BF0BDA0FEE7F155B675AEB3B49C827209"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P3-7-implementation.md",
+                      "Length":  13621,
+                      "SHA256":  "8C9CCA62EDC985625F787F7F92C8E0E1881A2C38252A154D64F0D8E72F38BE2A"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P4-1-implementation.md",
+                      "Length":  7444,
+                      "SHA256":  "606E9976D3BA6992127CCF1C3749C09A1C96219C8584EF02D1CB5D5F3D3A572A"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P4-2-implementation.md",
+                      "Length":  9018,
+                      "SHA256":  "CAA197CAED1E010F567F94D88AB4124A1668399240382F83C3FB437A2EBDFA7D"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P4-3-implementation.md",
+                      "Length":  7081,
+                      "SHA256":  "ED421E0AB149A5EA8C5F29D677327EF4CAFA86D45F571D6366BF99BBE37FCFC9"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P4-4-integration.md",
+                      "Length":  5461,
+                      "SHA256":  "D28C858AA14E7DC636B1668D6DEF2A1DC0CDFF6B988AE844DFF2192A9DAB52A1"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P5-1-acceptance.md",
+                      "Length":  7553,
+                      "SHA256":  "1B3F2139E8B5D985C21558BBA704102788D9DDEB0E87DC734E3C748799F0C234"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P5-2-acceptance.md",
+                      "Length":  7888,
+                      "SHA256":  "22E3239A0592244818AB0B729BAF335CBF21932BF800DD1EF8F45894B59A0CC1"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-P5-3-acceptance.md",
+                      "Length":  6997,
+                      "SHA256":  "A027168C11750DD201BB2F1C1892D8AD104B88A7998FAA7034A24A8F4E9B80B4"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-p2-3-bspatch.md",
+                      "Length":  9568,
+                      "SHA256":  "0332F1DB60B61564C1B785A73252839DAFD97E4E4DD29BDA4222F693243D2E5D"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-template-acceptance.md",
+                      "Length":  11184,
+                      "SHA256":  "44EAFDBEDAA52B4ABE5273F56B6157B150CCEDC2B936512F570DFFA00EBCFA59"
+                  },
+                  {
+                      "Path":  "docs/ota-prompts/prompt-template-implementation.md",
+                      "Length":  11409,
+                      "SHA256":  "37CE492DCCCC682796B318823550F6EB5912D7A18AAB20EBB7D861C97B4E042F"
+                  },
+                  {
+                      "Path":  "docs/ota-spec-decisions.md",
+                      "Length":  35614,
+                      "SHA256":  "71F64524334C696686170EC726C4DB93B9042D5283345DB5A3A07092AAB4E88B"
+                  }
+              ]
+}

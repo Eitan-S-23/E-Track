@@ -1,0 +1,70 @@
+[完整良好证据] rc=0 P3_7_CI_EVIDENCE=PASS checks=308 failures=0
+   => 可变绿: True
+
+[M1 正例缺 cmd12 的结论标记] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=2
+   红: 正例 run 40000000001 第 4 条接线结论标记缺失或重复：/^P3_2_OTA_DEVICE_INFO checks=114 failures=0$/ 命中 0 次
+   红: 正例 run 40000000001 第 4 条接线结论标记缺失或重复：/^P3_2_OTA_DEVICE_INFO_ALL=PASS$/ 命中 0 次
+   关键词 '接线结论标记缺失' 命中: True
+
+[M2 无效注错选点：红运行缺前置标记（缺陷打红了既有测试，新增行从未执行）] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=3
+   红: 反证1红 run 40000000010 缺少前置标记 P2_3_VECTOR_PREFLIGHT=PASS，无法排除红在既有测试或环境整体失败
+   红: 反证1红 run 40000000010 缺少前置标记 P3_1_BLE_FRAME=PASS checks=39 failures=0，无法排除红在既有测试或环境整体失败
+   红: 反证1红 run 40000000010 缺少前置标记 P3_1_BLE_SESSION=PASS checks=105 failures=0，无法排除红在既有测试或环境整体失败
+   关键词 '缺少前置标记' 命中: True
+
+[M3 红运行里后续接线仍有输出（步骤未在首个失败处终止）] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=2
+   红: 反证2红 run 40000000020 第 3 条接线仍有输出，说明步骤未在首个失败处终止（fail-closed 语义不成立）
+   红: 反证2红 run 40000000020 第 4 条接线仍有输出，说明步骤未在首个失败处终止（fail-closed 语义不成立）
+   关键词 '仍有输出' 命中: True
+
+[M4 绿运行的 workflow 与当前树不一致（绿的不是最终门禁）] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=1
+   红: 正例 run 40000000001 处的 workflow 与当前树不一致：冻结 1EBDA5CC070038D2 vs 当前 A43A002D298875E0，绿运行不能代表最终门禁
+   关键词 'workflow 与当前树不一致' 命中: True
+
+[M5 触发器反证A 提交改了不止一个文件] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=1
+   红: 触发器反证A(新增精确条目) run 40000000002 改动文件不是恰好一个 ['tests/ota/p3_1_verify_contract_alignment.py', 'tests/ota/p3_1_verify_text_isolation.py', 'tests/ota/p3_1_v
+   关键词 '不是恰好一个' 命中: True
+
+[M6 红运行元数据谎报为 success] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=3
+   红: 反证3红 run 40000000030 结论不是 failure：success
+   红: 反证3红 run 40000000030 步骤结论不是 failure：success
+   红: 反证3红 run 40000000030 构建 job 结论不是 failure
+   关键词 '结论不是 failure' 命中: True
+
+[M7 cmd12 红运行里 _ALL=PASS 仍在（缺陷未被该行捕获）] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=1
+   红: 反证4红 run 40000000040 第 4 条接线仍报通过标记 /^P3_2_OTA_DEVICE_INFO_ALL=PASS$/，缺陷未被捕获
+   关键词 '仍报通过标记' 命中: True
+
+[M8 还原绿运行的提交改的不是注错目标（红绿因果无法归属）] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=1
+   红: 反证3绿 run 40000000031 提交改动文件不是恰为注错目标 USER/HAL/HAL_USB.cpp：['docs/ota-exec-notes/P3-7-wiring-evidence.md']
+   关键词 '不是恰为注错目标' 命中: True
+
+[M9 触发器反证B 复用正例的 run（同一 run 充当多条腿）] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=2
+   红: CI 运行标识存在复用（同一 run 不得充当多条腿）：{'正例': '40000000001', '触发器反证A(新增精确条目)': '40000000002', '触发器反证B(既有通配)': '40000000001', '反证1红': '40000000010', '反证2红': '4000
+   红: 触发器反证B(既有通配) run 40000000001 改动文件不是恰好一个 ['tests/ota/test_ota_device_info.py'] 中的脚本：['.github/workflows/firmware-build.yml', 'docs/ota-exec-notes/P3-7-
+   关键词 '存在复用' 命中: True
+
+[M10 正例提交触碰了产品红线目录] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=1
+   红: 正例 run 40000000001 提交触碰了产品红线目录：['Libraries/OTA/ota_ble_frame.h']
+   关键词 '触碰了产品红线目录' 命中: True
+
+[M11 触发器反证B 改的是新增精确条目脚本（未证明既有通配覆盖）] rc=1 P3_7_CI_EVIDENCE=FAIL checks=308 failures=1
+   红: 触发器反证B(既有通配) run 40000000003 改动文件不是恰好一个 ['tests/ota/test_ota_device_info.py'] 中的脚本：['tests/ota/p3_1_verify_portability.py']
+   关键词 '不是恰好一个' 命中: True
+
+真实证据目录逐字节未变: 605AD89F297B60868CD859D3
+
+=== 双向鉴别力汇总 ===
+OK 完整良好证据可变绿
+OK M1 正例缺 cmd12 的结论标记
+OK M2 无效注错选点：红运行缺前置标记（缺陷打红了既有测试，新增行从未执行）
+OK M3 红运行里后续接线仍有输出（步骤未在首个失败处终止）
+OK M4 绿运行的 workflow 与当前树不一致（绿的不是最终门禁）
+OK M5 触发器反证A 提交改了不止一个文件
+OK M6 红运行元数据谎报为 success
+OK M7 cmd12 红运行里 _ALL=PASS 仍在（缺陷未被该行捕获）
+OK M8 还原绿运行的提交改的不是注错目标（红绿因果无法归属）
+OK M9 触发器反证B 复用正例的 run（同一 run 充当多条腿）
+OK M10 正例提交触碰了产品红线目录
+OK M11 触发器反证B 改的是新增精确条目脚本（未证明既有通配覆盖）
+P3_7_CI_HARNESS_SELFTEST=PASS mutations=11
