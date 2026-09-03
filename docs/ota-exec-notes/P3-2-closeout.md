@@ -161,6 +161,49 @@ git status --short --branch         → ## main...origin/main  （无 ahead/behi
 `.claude/write_p3_2_acceptance_board.py`、`.claude/write_r5_phase0_board.py`、
 `.claude/write_r5_ruling_board.py`）全部保留未动。
 
+### 6.1 PR #17 的同步闭环，并补正 §6 的一句话
+
+收口回写自身也走了一次 PR：#17，合并提交 `576a863b5ca0619d95e52c4153f26585e85aed91`，
+时间 `2026-09-03T05:18:45Z`，以 merge 方式（与 P3-6 收口回写的 PR #15 同型）。
+合并前检查：`Validate acceptance and build governance` pass 45s
+（运行号 33718213199）、`Detect changed paths` pass 8s（运行号 33718213200）、
+APK/EXE/Release/Pages 四项 skipping，`mergeable=MERGEABLE state=CLEAN`，无 pending。
+
+`MCU Firmware Build` 这次**根本没被触发**，不是被跳过：`firmware-build.yml` 的
+`paths:` 过滤只列 `USER/** ArduinoAPI/** Libraries/** MDK-ARM_F435/** boot/**
+cmake/** tests/boot/** tests/ota/test_ota_*.{c,py} tests/ota/stubs/**
+tests/ota-vectors/** vendor/** Simulator/LVGL.Simulator/lv_conf.h` 与自身，
+`PLAN-OTA-EXEC.md` 和 `docs/ota-exec-notes/**` 都不在内，属设计中的 monorepo 路径
+隔离。本卡源码的固件构建绿记在 §3（PR #16 运行号 33717103433），不因本次未触发
+而缺失。
+
+**补正 §6 的措辞**：§6 说「本仓库没有任何 worktree 检出 `refs/heads/main`，故无法按
+规约字面在 main worktree 里执行 `git merge --ff-only`」。这句话在当时那一刻成立，
+但**不该被后续 agent 当成先例照抄**——字面路径其实做得到：主 worktree 的 tracked
+工作区干净时（只剩既有未跟踪文件），先把它切到 `main`，再执行规约原文的命令即可。
+本次就是这么做的：
+
+```text
+git fetch --prune origin          → 0e4780e..576a863  main -> origin/main
+git worktree list --porcelain     → 三个 worktree 分别在 ota/p3-2-closeout、
+                                     p2-4-20260731、p2-5-20260801（仍无 main）
+git rev-list --left-right --count main...origin/main   → 0  2   （无分叉）
+git checkout main                 → Switched to branch 'main'（7 个未跟踪文件未被覆盖）
+git merge --ff-only origin/main   → Updating 0e4780e..576a863  Fast-forward
+git rev-parse HEAD                → 576a863b5ca0619d95e52c4153f26585e85aed91
+git rev-parse origin/main         → 576a863b5ca0619d95e52c4153f26585e85aed91
+git status --short --branch       → ## main...origin/main  （无 ahead/behind）
+git merge-base --is-ancestor cb2ebdd main → 真（冻结点仍可达）
+```
+
+**优先级**：以后遇到「无 worktree 检出 main」，先试「切主 worktree 到 main +
+`git merge --ff-only`」；只有当主 worktree 的 tracked 改动无法安全离开当前分支时，
+才退到 §6 那种同样受快进检查约束的引用更新形式，并说明退让理由。
+
+**递归终止**：本节是文档追加，不改看板字节、不属任何 manifest profile，故不再产生
+新的看板回写义务。本节之后的纯文档跟进提交不需要再写同类附录，否则「记录同步 →
+产生新合并 → 又要记录同步」会无限递归。P3-2 收口至此闭环。
+
 ## 7. 收口回写导致的指纹漂移（声明）
 
 本次收口回写（P3-2 卡状态「待收口」→「已收口」、新增「- 收口:」行、§10 追加一条）
