@@ -44,7 +44,7 @@ extern "C" {
 #define OTA_BLE_LEN_END 32u
 #define OTA_BLE_LEN_ABORT 0u
 #define OTA_BLE_LEN_DATA_MIN 4u
-#define OTA_BLE_LEN_ACK_BEGIN 10u
+#define OTA_BLE_LEN_ACK_BEGIN 11u
 #define OTA_BLE_LEN_ACK_OTHER 9u
 #define OTA_BLE_LEN_INFO 50u
 /* INFO 固定字段（合同 §5.2.1） */
