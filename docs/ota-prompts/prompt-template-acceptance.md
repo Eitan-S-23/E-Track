@@ -8,7 +8,7 @@
 > - **Part A 撰写检查表** —— 给撰写者看，**禁止复制进派发的 prompt**。
 > - **Part B prompt 骨架** —— 复制到 `docs/ota-prompts/prompt-<卡ID>-acceptance.md`
 >   后逐项填空。派单提示词是规范性文件，必须落在 `docs/ota-prompts/`（纳入 Governance
->   manifest 与 Acceptance Governance workflow），**不得放在 `.claude/`**。
+>   profile 与 Acceptance Governance workflow），**不得放在 `.claude/`**。
 
 ---
 
@@ -52,7 +52,7 @@ harness 干扰）。
 
 你是 **<卡ID> 的独立验收会话**。强制生效：
 
-1. `AGENTS.md`「独立验收执行规约」+ `docs/acceptance-execution-contract.md` v2。
+1. `AGENTS.md`「独立验收执行规约」+ `docs/acceptance-execution-contract.md` v3。
 2. **不得覆盖实现认领人**。你只在证据栏追加「验收人 + 轮次 + 单轮结果」。
 3. 单轮结果固定五种，**必须分层**，不得混同：
    `PASS` / `PRODUCT_FAIL` / `HARNESS_FAIL` / `EVIDENCE_GAP` / `ENV_BLOCKED`。
@@ -72,10 +72,14 @@ harness 干扰）。
 - 验收开始后**不得原地改合同**。新增或改变门禁必须升版本重新审批：
   同一 `task_id`、版本严格加一、用 `parent_contract_sha256` 绑定上一份。
 
-三类 manifest 生成命令见 `docs/acceptance-execution-contract.md` §5，profile 范围
-唯一定义在 `Tools/provenance/manifest_profiles.json`，不得手写范围。
+合同顶层必须写死 `freeze_commit`（被验实现所在提交）、`freeze_tree` 与
+`profile_config_blob`。profile 范围取自冻结 tree 内的
+`Tools/provenance/manifest_profiles.json`，不得用当前 checkout 的配置解释历史 tree，
+也不再生成 manifest 文件。实现与 harness 必须先提交再验收；profile 内脏文件或未跟踪
+文件会被执行门禁拒绝。
 
-最终校验（失败不得宣告通过）：
+执行前先用 `FROZEN` 合同和 `NOT_RUN` 矩阵运行下列命令；最终报告前再运行一次。任一次
+失败都不得执行或宣告通过：
 
   python Tools/acceptance/validate_bundle.py \
     --contract docs/acceptance-contracts/<卡ID>-v<n>.contract.json \
@@ -88,7 +92,8 @@ harness 干扰）。
    跑一次 dry-run 确认可用，然后**冻结**。
 2. 冻结后 harness 若必须修改：**只对被改文件做增量审计**
    （语法/AST、常量结论、动态加载、强杀路径、路径边界），
-   **不得**因一次编辑就重建绑定全部历史审计产物的证明链。
+   **不得**因一次编辑就重建绑定全部历史审计产物的证明链。修改后停止执行，把文件交给
+   主会话先提交，再按新冻结点生成 rerun plan；禁止直接在脏 harness 上继续采证。
 3. 完整 provenance 复核**只做两次**：封包前一次、最终报告前一次。
 4. `docs/acceptance-execution-contract.md` 的「结论作废」条款**只在发现 required
    outcome 被硬编码时触发**，不适用于每次 harness 编辑。不要扩大解释。
@@ -104,13 +109,13 @@ harness 干扰）。
 - 计划轮次：**<n> 轮**（默认 3）。达到上限仍未收敛 → 停止并上报，不得自行加轮。
 - **开新轮次的唯一判据是机器生成的 rerun plan，不是人工回答**。开轮前先用
   `validate_bundle.py --write-rerun-plan` 生成计划（失效规则见
-  `docs/acceptance-execution-contract.md:168`）。若 `rerun_criteria` 为空，
+  `docs/acceptance-execution-contract.md` §6）。若 `rerun_criteria` 为空，
   且不存在任何 required 命令、产物或证据缺口，**不得开启新轮次**。
 - 因 `HARNESS_FAIL`、`EVIDENCE_GAP`、`ENV_BLOCKED` 修复后**重新采集同一条产品观测值
   是允许的**（这类轮次的 rerun plan 非空或存在 required 缺口）。不得用「产品值没变」
   为由拒绝重采，也不得反过来用「换个说法就是新观测」为由绕过上一条。
 - 矩阵一旦冻结在某个结果集上，除以下情况不得重开：
-  ① 发现 required outcome 被硬编码；② 产品源（Production manifest 稳定指纹）变化；
+  ① 发现 required outcome 被硬编码；② 产品源（Production profile 路径集）变化；
   ③ 自动 rerun plan 判定该判据必须重跑；④ 用户裁定重开。
 
 ## 4. 门禁来源审查（防门禁自指，先做再测）
@@ -178,11 +183,12 @@ harness 干扰）。
 
 - 最终矩阵：每项判据填 `result` / `execution` / `observed` / `evidence`，
   `observed` 必须是可与 gate 机械比较的布尔值、带单位数值或完整状态链。
-- 紧凑证据包（`docs/acceptance-execution-contract.md` §8）：冻结合同、最终矩阵、
-  三类 manifest、rerun plan（若复用）、命令输出、决定性原始日志、最终产物、
+- 紧凑证据包（`docs/acceptance-execution-contract.md` §8）：冻结合同（含三个冻结对象）、
+  最终矩阵、rerun plan（若复用）、命令输出、决定性原始日志、最终产物、
   外部输入证据。**默认不保留完整构建目录与源码副本。**
 - 验收报告：逐判据结论 + 单轮结果分类 + **未观测项如实列出及原因**。
 - 若出现 `HARNESS_FAIL`：明确写「这是验证工具问题，不是产品不通过」。
 - 回写卡状态 + 看板 §10 追加一行。
-- **不 commit**。
+- **不 commit**。主会话先把上述包单独提交为 `bundle_commit`，再用后续提交登记
+  `FREEZE-INDEX.md`；禁止让包提交记录自身 SHA。
 ```

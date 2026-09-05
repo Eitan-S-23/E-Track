@@ -1,19 +1,54 @@
 # 验收执行合同
 
-版本：v2（2026-08-15，fail-closed 收紧版）
+版本：v3（2026-09-05，git 对象冻结版）
 
-本合同适用于 OTA、固件、模拟器、硬件闭环和其他需要独立验收的任务。v2 将验收标准、
+本合同适用于 OTA、固件、模拟器、硬件闭环和其他需要独立验收的任务。v3 把验收标准、
 输入依赖、执行命令、产物和观测值全部结构化，校验器必须读取实物复核，不能只检查 JSON
 字段是否存在。
+
+v3 的实质变化是：**跨轮输入身份不再用自研 manifest 记录工作树字节，而是冻结被验实现的
+Git 提交、tree 和该 tree 内的 profile 配置 blob。** 两轮失效判定只比较 Git 对象，因此
+检出行尾、`core.autocrlf`、mtime、绝对路径和 profile 外的提交不会制造跨轮噪声。最终验收
+另有执行 worktree 门禁：冻结提交必须是当前 HEAD 的祖先，冻结后不得再有 profile 内提交、
+脏文件或未跟踪文件。这样既不把操作系统检出差异当输入变化，也不允许拿旧提交给脏工作树
+的产物背书。
+
+v2 的稳定 manifest 本来就不包含 mtime、绝对 `RepoRoot` 或 HEAD；它的真实缺陷是最终校验
+重新读取工作树字节、枚举 profile 内未跟踪文件，以及 Governance 包含每轮必改的看板。
+自研生成器 `Tools/provenance/source_manifest.ps1` 与 `etrack-input-manifest-v2` 已删除，v2 合同
+不再被当前校验器接受。
 
 ## 1. 权威来源与冻结
 
 1. 每轮验收必须引用 `docs/acceptance-contracts/` 下的版本化 JSON 合同。
 2. `.claude/` prompt、聊天消息和历史报告只能解释合同，不能成为唯一标准。
-3. 冻结前先生成三类 manifest。将 JSON 文件哈希回填 `manifest_json_sha256`，将 JSON
-   内部稳定文件集合指纹 `ManifestSHA256` 回填 `manifest_sha256`，两者禁止混用。
-4. 合同置为 `FROZEN` 时必须记录审批人、审批时间、任务号和实现基线。
-5. 验收开始后不得原地改变合同。新增或改变门禁必须提升合同版本并重新审批。
+3. 冻结前必须先把实现提交进 `main` 或待合并分支，再把该提交的三个对象回填合同：
+
+   ```powershell
+   git rev-parse HEAD        # -> freeze_commit
+   git rev-parse HEAD^{tree} # -> freeze_tree
+   git rev-parse HEAD:Tools/provenance/manifest_profiles.json # -> profile_config_blob
+   ```
+
+   被验对象是这个提交，不是任意工作区状态。未跟踪实现或 harness 必须先提交，不能作为
+   tree 外的隐式输入。
+4. 合同置为 `FROZEN` 时必须记录审批人、审批时间、任务号和实现基线。先用 `NOT_RUN`
+   矩阵运行一次校验器作为执行前检查；只有冻结提交可达、HEAD 未改变任何 profile 输入、
+   profile 内无脏文件或未跟踪文件时才能开始执行合同命令。最终报告前再运行同一检查。
+5. 验收开始后不得原地改变合同。新增或改变门禁必须提升合同版本并重新审批；harness 必须
+   修改时也要先提交，并据此产生新冻结点和 rerun plan。
+6. 最终合同、矩阵和紧凑证据先单独落成 `bundle_commit`。该提交可以晚于
+   `freeze_commit`，但两者之间不得改变任何 profile 输入。
+7. 再由后续收口提交向 `docs/acceptance-contracts/FREEZE-INDEX.md` 追加一行，登记
+   `bundle_commit`、`freeze_commit` 与 `freeze_tree`。索引提交晚于证据包提交，避免让
+   证据包记录自身 SHA；已登记行只增不改。
+8. 合并 PR 只能使用保留原提交 ID 的 merge commit（或受控 fast-forward），**禁止
+   squash 与 rebase-merge**。两者都会让 `freeze_commit` 从 `main` 不可达（P3-6 的
+   `7833303` 即是先例），冻结包随之失去可复校的提交锚点。治理 CI 用完整历史核对索引中的
+   `freeze_commit -> bundle_commit -> HEAD` 祖先链。
+9. 轮次核验器是一次性资产，只对本轮负责；冻结包则是不可变审计资产，必须能在登记的
+   `bundle_commit` 上自校验，但其结论只适用于合同的 `freeze_tree`。能否复用于后续 tree
+   由 rerun plan 判定，禁止为了让历史核验器在 `main` 顶端变绿而回改冻结字节。
 
 模板：
 
@@ -24,10 +59,13 @@
 
 ```powershell
 python Tools/acceptance/validate_bundle.py `
-  --contract docs/acceptance-contracts/P2-6-v1.contract.json `
-  --matrix .acceptance-p2-6/<round>/evidence-matrix.json `
+  --contract docs/acceptance-contracts/<TASK-vN>.contract.json `
+  --matrix .acceptance-<task>/<round>/evidence-matrix.json `
   --repo-root .
 ```
+
+同一命令在矩阵仍为 `NOT_RUN` 时是执行前检查，只核对合同结构、冻结对象和执行 worktree；
+写入最终结果后再次运行，才会继续核对证据与产物实物。两次都必须通过。
 
 ## 2. 任务状态与验收结果
 
@@ -43,9 +81,14 @@ python Tools/acceptance/validate_bundle.py `
 
 验收者只追加验收人、轮次和结果，不得覆盖任务实现认领人。
 
-## 3. 合同 v2 必填结构
+## 3. 合同 v3 必填结构
 
-合同必须包含且只能包含以下三个 Git manifest 输入组：
+合同顶层必须记录 `freeze_commit`、`freeze_tree` 与 `profile_config_blob`，三者都是 40 位
+十六进制 Git 对象 id。校验器会核对 `freeze_commit^{tree} == freeze_tree`，并要求
+`freeze_tree:Tools/provenance/manifest_profiles.json == profile_config_blob`；对象缺失、类型
+不符、配置无效或任一关系不匹配都必须失败。
+
+合同必须包含且只能包含以下三个输入组：
 
 | id | profile | category |
 |---|---|---|
@@ -53,15 +96,12 @@ python Tools/acceptance/validate_bundle.py `
 | `validation` | `Validation` | `validation_inputs` |
 | `governance` | `Governance` | `governance_inputs` |
 
-三类 manifest 缺任意一项都不能冻结合同。fixture、工具链、硬件和环境状态使用
+三个输入组缺任意一项都不能冻结合同。fixture、工具链、硬件和环境状态使用
 `external_inputs` 单独记录 fingerprint、证据路径及证据 SHA-256。
 
-每个输入组必须同时记录：
-
-- `manifest_path`：证据包内 `source-manifest.json` 路径。
-- `manifest_json_sha256`：JSON 文件本身的完整性哈希，只用于确认文件没有被替换。
-- `manifest_sha256`：由相对路径、字节长度和文件内容 SHA-256 构成的稳定文件集合指纹，
-  只使用它判断输入组是否变化。
+每个输入组**只能**包含 `id`、`profile`、`category` 三个字段。输入组按 profile 引用 git
+对象，不再生成、不再绑定任何工作树字节 manifest；出现 `manifest_path`、`manifest_sha256`
+等残留字段时校验器必须拒绝该合同。
 
 合同谱系必须 fail-closed。`version=1` 的 `parent_contract_sha256` 必须为 `null`；改变冻结
 合同内容时，后继合同必须保持同一 `task_id`、版本严格加一，并用
@@ -109,67 +149,79 @@ harness 失败还必须绑定实际参与判定的产物；不得仅凭一段手
 `PRODUCT_FAIL` 或 `HARNESS_FAIL`。`NOT_OBSERVED`、证据缺口以及确实未产生下游产物的
 环境阻塞可以不伪造产物，但必须保留原因和已有原始证据。
 
-## 5. 分类 manifest
+## 5. 输入组范围与枚举口径
+
+三个 profile 的范围由冻结 tree 内的 `Tools/provenance/manifest_profiles.json`
+（`etrack-manifest-profiles-v1`）唯一定义。合同用 `profile_config_blob` 绑定它；校验器必须
+从每份合同自己的 `freeze_tree` 读取，禁止用当前 checkout 的配置重新解释历史 tree，也
+禁止在合同或脚本里另写一份路径清单。
+
+- Production 覆盖真实 GCC CMake 入口、链接配置、CI/打包脚本和生产源码，必须包含
+  GCC CMake 实际引用的 `MDK-ARM_F435/RTE/Device/-AT32F435RGT7/**` 与
+  `RTE/_X-Track/**`；AC5 专用 `RTE/_X-Track-App-AC5/**` 和旧 CGU7 输入不得混入，
+  否则 AC5 侧改动会打红 GCC 判据。
+- Validation 覆盖测试、runner、探针、校验工具以及两个合同模板的精确路径。
+- Governance 覆盖 agent 规则、跨系统契约和本执行合同。
+
+不得把整个活动合同目录纳入 profile，避免合同自引用和无关任务相互失效；当前版本化合同
+由矩阵的 `contract_sha256` 单独绑定。
+
+以下两个文件必须留在**所有** profile 之外，原因是它们每轮收口都会被回写：
+
+- `PLAN-OTA-EXEC.md`：看板。留在 Governance 会让两轮之间任何一行会话日志改动打红整个
+  Governance 组，使全部治理判据失去复用资格。
+- `docs/acceptance-contracts/FREEZE-INDEX.md`：冻结点索引。它记录提交 id，进入 profile
+  会构成自指环。
+
+校验器枚举 profile 路径集时只读 git 对象：
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File Tools/provenance/source_manifest.ps1 `
-  -RepoRoot . -OutputDirectory .acceptance-<task>/<round>/manifest-production -Profile Production
-
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File Tools/provenance/source_manifest.ps1 `
-  -RepoRoot . -OutputDirectory .acceptance-<task>/<round>/manifest-validation -Profile Validation
-
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File Tools/provenance/source_manifest.ps1 `
-  -RepoRoot . -OutputDirectory .acceptance-<task>/<round>/manifest-governance -Profile Governance
+git -c core.quotepath=false ls-tree -r -z --name-only <freeze_tree> -- <pathspec...>
 ```
 
-Production 必须覆盖真实 GCC CMake 入口、链接配置、CI/打包脚本和生产源码。Validation
-覆盖测试、runner、探针、校验工具以及两个合同模板的精确路径。不得把整个活动合同目录
-纳入 profile，避免合同自引用和无关任务相互失效。Governance 覆盖 agent 规则、看板规则
-和本执行合同。
-当前版本化合同由矩阵 `contract_sha256` 单独绑定，避免 Governance manifest 自引用。
-三类范围的唯一机器可读定义是 `Tools/provenance/manifest_profiles.json`，PowerShell
-生成器和 Python 校验器必须共同读取它。Production 必须包含 GCC CMake 实际引用的
-`MDK-ARM_F435/RTE/Device/-AT32F435RGT7/**` 与 `RTE/_X-Track/**`。AC5 专用
-`RTE/_X-Track-App-AC5/**` 和旧 CGU7 输入不得混入 GCC Production 失效范围。
+所有路径命令统一使用 `-z` 原样输出，并显式设置 `core.quotepath=false`；本仓库存在非 ASCII
+路径（`Tools/图标/**`），不得解析 Git 的引号转义文本输出。路径集按 UTF-8 字节序排序，
+避免不同 locale 下顺序漂移。
 
-生成器与校验器枚举 Git 路径时必须使用 `git ls-files -z` 的原始字节输出，以 NUL 分隔并
-严格按 UTF-8 解码。禁止使用 Git 的引号转义文本输出，否则中文等非 ASCII 路径会被漏记。
-记录排序按规范化路径的 UTF-8 字节序执行。
+跨轮失效判定只读 Git 对象。校验器对每个 profile 要求路径集非空且包含冻结配置中的全部
+`required_paths`；profile 定义本身改变时该组必须失效。mtime、检出行尾、绝对路径、证据
+目录位置和 profile 外提交不参与这个判定。
 
-正式 profile 使用 `etrack-input-manifest-v2`。校验器必须检查 schema、profile、字段集合、
-`FileCount`、路径格式、排序、重复项、逐项长度/SHA-256、各 profile 关键入口，并按规范
-重建 `source-manifest.txt`，复算内部 `ManifestSHA256` 后再与合同比较。空 manifest、伪造
-内部哈希、漏掉真实 GCC/RTE 输入或缺少配套文本清单都必须失败。除此之外，最终校验必须
-显式传入 `--repo-root`；校验器从该 Git worktree 重新执行 profile 枚举并读取真实文件，
-要求路径集合、字节长度和内容 SHA-256 与 manifest 完全一致。仅构造一份内部自洽 JSON
-或少量“关键路径”不能通过。
-
-稳定文件集合指纹不得包含 mtime、绝对 `RepoRoot`、全局 Git `HEAD`、生成时间或证据包
-保存位置。`RepoRoot` 和 `Head` 只能出现在不参与复验的 `summary.json`。因此仅触碰文件
-时间、换 worktree、无关提交或移动证据目录不会触发产品复验；相对路径、字节长度或实际
-文件内容改变时仍会失效。换行符变化属于实际字节变化，仍应按输入变化处理。
+执行门禁与跨轮失效判定是两件事。最终校验还会要求 `freeze_commit` 是执行 worktree HEAD
+的祖先，比较 `freeze_tree` 与 `HEAD^{tree}` 的 profile 差异，并用 Git 的逻辑 diff 检查
+tracked 改动、用 `ls-files -o --exclude-standard` 检查未跟踪输入。正常 `autocrlf` 检出仍是
+Git clean，不会假红；真实脏源码、未提交 harness、profile 内未跟踪文件或冻结后提交的输入
+变化必须失败。推荐始终在 `freeze_commit` 的专用干净 worktree 中执行验收。
 
 ## 6. 自动最小复验
 
-需要复用上一轮证据时，先生成计划。上一轮必须有可读取的精确 Git worktree；不得把当前
-worktree 默认当作历史基线：
+需要复用上一轮证据时，先生成计划。两轮的 `freeze_tree` 在同一个仓库内比较，因此不再
+需要上一轮的 worktree，只需要一个能解析两个 tree 的 Git 仓库：
 
 ```powershell
 python Tools/acceptance/validate_bundle.py `
-  --contract docs/acceptance-contracts/P2-6-v2.contract.json `
-  --matrix .acceptance-p2-6/<current>/evidence-matrix.json `
-  --repo-root <current-worktree> `
-  --previous-contract docs/acceptance-contracts/P2-6-v1.contract.json `
-  --previous-matrix .acceptance-p2-6/<previous>/evidence-matrix.json `
-  --previous-repo-root <previous-worktree> `
+  --contract docs/acceptance-contracts/<TASK-v2>.contract.json `
+  --matrix .acceptance-<task>/<current>/evidence-matrix.json `
+  --repo-root . `
+  --previous-contract docs/acceptance-contracts/<TASK-v1>.contract.json `
+  --previous-matrix .acceptance-<task>/<previous>/evidence-matrix.json `
   --write-rerun-plan rerun-plan.json
 ```
 
-校验器会先核对合同谱系，再比较三类 manifest 的稳定 `manifest_sha256`、external input
-fingerprint、判据定义、命令定义、产物定义和上一轮判据结果，输出 `rerun_criteria`、
-`reusable_criteria`、`required_commands` 和 `required_artifacts`。JSON 完整性哈希、
-manifest 包内路径、绝对工作区路径或全局 `HEAD` 变化本身不得使产品判据失效。上一轮不是
-`EXECUTED PASS`、稳定依赖输入变化、判据变化或执行定义变化时，该判据必须重跑。
+校验器会先核对合同谱系，再对每个 profile 执行
+
+```powershell
+git -c core.quotepath=false diff-tree -r -z --name-only --no-renames --no-commit-id `
+  <previous_freeze_tree> <current_freeze_tree> -- <pathspec...>
+```
+
+每轮 pathspec 来自该轮冻结的 profile 配置；若同一 profile 的定义改变，该组直接失效。
+校验器还会比较 external input fingerprint、判据定义、命令定义、产物定义和上一轮判据结果，输出
+`changed_input_groups`、`rerun_criteria`、`reusable_criteria`、`required_commands` 和
+`required_artifacts`。两个 `freeze_tree` 相同即 tracked 输入字节相同：此时 commit id 变化
+本身不触发跨轮复验，但最终执行门禁仍要求合同中的 `freeze_commit` 可达。两个 tree 不同而
+又没有可读取的仓库时，校验器必须拒绝判定（fail-closed），不得默认“未失效”。上一轮不是
+`EXECUTED PASS`、profile 内容或定义变化、判据变化或执行定义变化时，该判据必须重跑。
 
 不同 `task_id`、修改合同但不升版本、跳过版本或 `parent_contract_sha256` 不匹配时，禁止
 生成复用计划，不能退化为“人工确认可复用”。
@@ -194,11 +246,15 @@ manifest 包内路径、绝对工作区路径或全局 `HEAD` 变化本身不得
 
 ## 8. 紧凑证据包
 
-最终证据包必须包含冻结合同、最终矩阵、三类 manifest、rerun plan（发生复用时）、命令
-输出、决定性原始日志、最终产物和外部输入证据。所有路径必须位于矩阵所在证据包内，且
-由 SHA-256 绑定。
+最终证据包必须包含冻结合同（含 `freeze_commit` / `freeze_tree` /
+`profile_config_blob`）、最终矩阵、rerun plan（发生复用时）、命令输出、决定性原始日志、
+最终产物和外部输入证据。所有路径必须位于矩阵
+所在证据包内，且由 SHA-256 绑定。输入组不再产出 manifest 文件。证据包提交后，在下一次
+收口提交中把 `bundle_commit` 与合同的输入冻结点登记到
+`docs/acceptance-contracts/FREEZE-INDEX.md`；复校 checkout `bundle_commit`，不能 checkout
+`freeze_commit` 后假定最终证据已经存在。
 
-生成 manifest、日志或计划前必须使用 worktree 输出守卫。目标文件或其任一父目录若为
+生成日志或计划前必须使用 worktree 输出守卫。目标文件或其任一父目录若为
 symlink、junction 或其他 reparse point，必须在写入前拒绝，不能跟随链接覆盖 worktree
 外或其他位置的文件。`--write-rerun-plan` 必须在创建父目录前检查一次完整父链，并在实际
 写入前再次检查新建后的完整父链。

@@ -2,34 +2,6 @@
   "schema": "etrack-manifest-profiles-v1",
   "exclude_path_regex": "(^|/)(build[^/]*|Output|Objects|Listings|\\.vs|__pycache__)(/|$)",
   "profiles": {
-    "Legacy": {
-      "root_patterns": [
-        "ArduinoAPI/",
-        "Libraries/",
-        "USER/",
-        "boot/",
-        "bsdiff_lzma_AES128-main/",
-        "cmake/",
-        "MDK-ARM_F435/Platform/",
-        "MDK-ARM_F435/cmake-generated/cmake/",
-        "Simulator/LVGL.Simulator/",
-        "Tools/",
-        "tests/",
-        "segger_rtt/",
-        "vendor/"
-      ],
-      "top_files": [
-        "AGENTS.md",
-        "CMakeLists.txt",
-        "build_f435_and_simulator.bat",
-        "MDK-ARM_F435/build_f435.ps1",
-        "MDK-ARM_F435/proj.uvprojx"
-      ],
-      "exclude_prefixes": [
-        "Tools/provenance/"
-      ],
-      "required_paths": []
-    },
     "Production": {
       "root_patterns": [
         ".github/scripts/",
@@ -80,7 +52,6 @@
         "docs/acceptance-contracts/template.evidence-matrix.json",
         "Tools/acceptance/validate_bundle.py",
         "Tools/provenance/manifest_profiles.json",
-        "Tools/provenance/source_manifest.ps1",
         "Tools/provenance/worktree_guard.ps1",
         "tests/ota/test_acceptance_bundle.py"
       ]
@@ -92,7 +63,6 @@
       "top_files": [
         ".github/copilot-instructions.md",
         "AGENTS.md",
-        "PLAN-OTA-EXEC.md",
         "docs/acceptance-execution-contract.md",
         "docs/ota-cross-system-contracts.md",
         "docs/ota-spec-decisions.md"
@@ -100,7 +70,6 @@
       "exclude_prefixes": [],
       "required_paths": [
         "AGENTS.md",
-        "PLAN-OTA-EXEC.md",
         "docs/acceptance-execution-contract.md",
         "docs/ota-cross-system-contracts.md",
         "docs/ota-spec-decisions.md",

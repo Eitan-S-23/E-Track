@@ -820,33 +820,66 @@ Before reporting success:
    prompt 不能作为唯一标准。执行中改变条件必须升版本重新审批。
 2. 任务状态与单轮验收结果分离。单轮结果只允许 `PASS`、`PRODUCT_FAIL`、
    `HARNESS_FAIL`、`EVIDENCE_GAP`、`ENV_BLOCKED`；验收者不得覆盖实现认领人。
-3. 合同必须包含 `Production`、`Validation`、`Governance` 三类 manifest，并让每项
-   判据显式引用输入组、命令和产物。发生证据复用时，使用校验器比较前后轮合同/矩阵并
-   生成 `rerun-plan.json`；不得人工填写“全部未失效”。复验只比较内部稳定
-   `ManifestSHA256`，JSON 文件哈希仅校验证据完整性；mtime、绝对 worktree、无关 `HEAD`
-   或 manifest 保存位置变化不得触发产品复验。profile 范围只由
-   `Tools/provenance/manifest_profiles.json` 定义；Production 必须覆盖实际 GCC 输入，
-   包括 `MDK-ARM_F435/RTE/Device/-AT32F435RGT7/**` 和 `RTE/_X-Track/**`，但不得把
-   AC5 专用 `_X-Track-App-AC5` 或旧 CGU7 目录混入 GCC 失效范围。
+3. 合同（v3）必须在顶层写死 `freeze_commit`（被验实现所在的提交）、
+   `freeze_tree`（该提交的 tree SHA）与 `profile_config_blob`（该 tree 内
+   `Tools/provenance/manifest_profiles.json` 的 blob SHA），并声明 `Production`、`Validation`、
+   `Governance` 三个输入组，让每项判据显式引用输入组、命令和产物。输入组只按
+   profile 引用 git 对象，**不再生成、不再绑定任何工作树字节 manifest**。发生证据
+   复用时，使用校验器比较前后轮合同/矩阵并生成 `rerun-plan.json`；不得人工填写
+   “全部未失效”。跨轮失效判定使用各自冻结的 profile 配置比较两个 `freeze_tree`；
+   profile 定义变化或定义内路径的 Git 对象变化才使该组失效，mtime、检出行尾、绝对
+   worktree 与 profile 外提交不得触发产品复验。最终验收另做执行 worktree 门禁：
+   `freeze_commit` 必须是 HEAD 的祖先，冻结后 profile 内不得有提交变化、脏文件或未跟踪
+   文件。profile 范围只由冻结 tree 内的 `Tools/provenance/manifest_profiles.json` 定义；
+   Production 必须覆盖实际 GCC 输入，包括 `MDK-ARM_F435/RTE/Device/-AT32F435RGT7/**`
+   和 `RTE/_X-Track/**`，但不得把 AC5 专用 `_X-Track-App-AC5` 或旧 CGU7 目录混入
+   GCC 失效范围。`PLAN-OTA-EXEC.md` 不属于任何 profile：看板每次收口必然回写，
+   留在 Governance 会让两轮之间任何一行日志改动打红 Governance 组、使全部判据失去
+   复用资格。
 4. PASS/FAIL 都必须绑定原始证据和实际观测值。实际执行的 PASS/FAIL 必须存在合同要求的
    命令记录；PASS 以及产品/harness FAIL 还必须绑定真实产物。校验器会读取文件复核路径、
    大小和 SHA-256。harness 必须 fail-closed，禁止常量 PASS、无条件汇总字段或用“没有
    错误日志”推定通过。
 5. 性能门禁必须来自产品 SLA、协议契约或明确安全比例；禁止把历史测量值加极小
    余量后反向冻结为门槛。
-6. 收口提交紧凑证据包：合同、矩阵、分类 manifest、命令/退出码、产物哈希、
-   决定性原始日志和视觉证据哈希。默认不保留完整构建目录或重复源码副本。
+6. 收口必须分开落提交：先提交紧凑证据包（合同、矩阵、命令/退出码、产物哈希、决定性
+   原始日志和视觉证据哈希）得到 `bundle_commit`，再由后续提交把 `bundle_commit`、
+   `freeze_commit`、`freeze_tree` 登记到 `docs/acceptance-contracts/FREEZE-INDEX.md`。
+   禁止让证据包提交记录自身 SHA。默认不保留完整构建目录或重复源码副本。
 7. 使用 `python Tools/acceptance/validate_bundle.py --contract <path>
-   --matrix <path> --repo-root <本轮精确Git-worktree>` 校验最终合同与证据矩阵。校验器会
-   从该 worktree 重新枚举并读取每个 profile 的真实文件，manifest 仅自洽不算通过。若
-   矩阵含 `REUSED`，还必须传入 `--previous-contract`、`--previous-matrix` 和
-   `--previous-repo-root <上一轮精确worktree>`；当前矩阵必须绑定上一矩阵文件 SHA-256
+   --matrix <path> --repo-root <本轮干净执行或 bundle worktree>` 校验最终合同与证据矩阵。
+   校验器从 `freeze_tree` 读取并核对 `profile_config_blob`，要求各 profile 非空且包含全部
+   `required_paths`；同时检查冻结提交可达、HEAD 未改变冻结 profile、profile 内工作树 clean。
+   正常 `autocrlf` 检出由 Git 视为 clean，不会假红。`FROZEN` 合同配 `NOT_RUN` 矩阵时先跑
+   同一命令作为执行前检查，最终报告前再跑一次。若矩阵含 `REUSED`，
+   还必须传入 `--previous-contract` 与 `--previous-matrix`（两轮 freeze tree 在同一
+   仓库内比较，不再需要上一轮 worktree）；当前矩阵必须绑定上一矩阵文件 SHA-256
    及包内 rerun plan 路径/SHA-256。上一判据只有在其自身为 `EXECUTED PASS` 时可复用，
    禁止相同矩阵、相同轮次或链式 `REUSED` 自证。相同冻结合同可跨轮次复用；合同内容改变
    时必须保持同一 `task_id`、版本加一并用 `parent_contract_sha256` 绑定上一合同。校验
    失败不得宣告通过。
-8. 验收 schema、校验器、manifest 或 AC5 构建规约变化必须通过
+8. 验收 schema、校验器、profile 定义或 AC5 构建规约变化必须通过
    `.github/workflows/acceptance-governance.yml`；不得以本地测试通过代替 CI 接线。
+9. **实现先提交，再验收。** `freeze_commit` 必须是已存在且可从本轮执行 HEAD 到达的提交；
+   实现、harness 与会影响命令的 profile 内文件必须全部提交。profile 内未跟踪文件会被
+   执行门禁拒绝，不能成为 tree 外的隐式输入。
+   PR 只能用保留原提交 ID 的 merge commit（或受控 fast-forward），**禁止 squash 与
+   rebase-merge**：二者都会让 `freeze_commit` 从 `main` 不可达（P3-6 的 `7833303`
+   即是先例），只有 tree 能幸存。
+10. **轮次核验器是一次性资产，冻结包是不可变审计资产。** `tests/ota/p*_verify_*.py` 类
+    脚本只对所属轮次负责；在后续提交上跑红是脱轮，不是产品缺陷。冻结包必须能在索引的
+    `bundle_commit` 上自校验，但它的 PASS 只适用于合同的 `freeze_tree`；能否复用于后续
+    tree 只能由 rerun plan 判定。禁止为让历史核验器在 `main` 顶端变绿而回改冻结字节。
+11. **7 份 v2 冻结包（P2-6-v1/v2/v3、P3-1-v2、P3-2-v1、P3-6-v1、P3-7-v1）在
+    `main` 顶端复校必红**：v2 manifest 绑的是工作树字节，收口回写看板即打红。
+    唯一可校语义是 checkout 到 `docs/acceptance-contracts/FREEZE-INDEX.md` 登记的
+    `bundle_commit`、用该提交自带的校验器复校。v2 行的 `bundle_commit` 与旧冻结提交
+    相同；v3 行必须先落证据包提交，再由后续收口提交追加索引。
+12. 新写核验器只断言长期事实或只读冻结证据（样板 `tests/ota/p3_7_verify_ci_evidence.py`，
+    零 git 调用）。`git diff` 计数、工作区状态、步骤名、命令条数这类轮次快照不写成
+    脚本判据，直接把当轮命令输出冻结进证据包。轮次专用脚本放
+    `docs/acceptance-contracts/<id>/tools/`，不放 `tests/`，避免进入 Validation
+    profile 后被后续卡的合法改动打红。
 
 ## OTA 执行规约（强制,适用一切 OTA 相关任务）
 
