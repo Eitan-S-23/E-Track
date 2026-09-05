@@ -673,9 +673,18 @@ def validate_contract(contract, allow_draft=False):
         if not _list_of_strings(dependencies):
             errors.append(f"{prefix}.input_groups must be a non-empty string list")
             dependencies = []
+        elif len(dependencies) != len(set(dependencies)):
+            errors.append(f"{prefix}.input_groups must not contain duplicates")
         unknown_inputs = sorted(set(dependencies) - set(REQUIRED_INPUT_GROUPS))
         if unknown_inputs:
             errors.append(f"{prefix}.input_groups has unknown ids: " + ", ".join(unknown_inputs))
+        if "dependency_rationale" in criterion:
+            if not _nonempty(criterion["dependency_rationale"]):
+                errors.append(f"{prefix}.dependency_rationale must be a non-empty string when set")
+        elif len(set(dependencies)) > 1:
+            errors.append(
+                f"{prefix}.dependency_rationale is required when multiple input_groups are used"
+            )
 
         external_dependencies = criterion.get("external_inputs", [])
         if not _list_of_strings(external_dependencies, allow_empty=True):

@@ -103,6 +103,26 @@ python Tools/acceptance/validate_bundle.py `
 对象，不再生成、不再绑定任何工作树字节 manifest；出现 `manifest_path`、`manifest_sha256`
 等残留字段时校验器必须拒绝该合同。
 
+每项判据的 `input_groups` 必须只列出其直接依赖的最小集合，且不得重复。产品输入对应
+`production`；若产物或观测由本仓库 runner/探针生成或解释，必须包含 `validation`；
+确实检查规约/派单内容时再包含 `governance`。不得把三个 profile 作为模板默认值，也不得
+为减少重跑而删掉真实依赖。只有没有仓库内 runner/探针参与结论的直接产品观测，才可只列
+`production`；模板中的单组示例不是所有产品判据的通用依赖清单。
+
+跨组理由必须写入判据的 `dependency_rationale`，不能只放在 `description` 或聊天中。
+该字段说明每个组如何影响结论；“完整性”或“保险”不构成依赖理由。结构由校验器检查，
+依赖是否完整、理由是否真实仍由合同审批审查，不能靠一段非空文本自动证明。
+
+| 判据字段/情形 | 合法情况 | 非法情况与校验错误 |
+|---|---|---|
+| `input_groups` | 非空、无重复、仅引用三个已定义组 | 空/类型错/未知 ID，或 `input_groups must not contain duplicates` |
+| 单输入组 | 可省略 `dependency_rationale` | 一旦提供就必须是非空字符串，`null`、空白、非字符串均报 `dependency_rationale must be a non-empty string when set` |
+| 多输入组 | 必须提供非空字符串 `dependency_rationale` | 缺字段时报 `dependency_rationale is required when multiple input_groups are used` |
+
+例如宿主测量判据应声明 `input_groups: ["production", "validation"]`，并解释
+`dependency_rationale: "production 提供被测实现，validation 提供计算观测值的 runner"`。
+反例是把该判据删成只有 `production` 来避免 runner 修改后重测，或无理由绑定全部三个组。
+
 合同谱系必须 fail-closed。`version=1` 的 `parent_contract_sha256` 必须为 `null`；改变冻结
 合同内容时，后继合同必须保持同一 `task_id`、版本严格加一，并用
 `parent_contract_sha256` 绑定上一份合同文件。完全相同的冻结合同可跨多个验收轮次继续使用，
@@ -221,7 +241,13 @@ git -c core.quotepath=false diff-tree -r -z --name-only --no-renames --no-commit
 `required_artifacts`。两个 `freeze_tree` 相同即 tracked 输入字节相同：此时 commit id 变化
 本身不触发跨轮复验，但最终执行门禁仍要求合同中的 `freeze_commit` 可达。两个 tree 不同而
 又没有可读取的仓库时，校验器必须拒绝判定（fail-closed），不得默认“未失效”。上一轮不是
-`EXECUTED PASS`、profile 内容或定义变化、判据变化或执行定义变化时，该判据必须重跑。
+`EXECUTED PASS`、所引用的 profile 内容或定义变化、判据变化或所引用的执行定义变化时，
+该判据必须重跑。另一项判据失败、未引用的 profile/外部输入/命令/产物变化，不应扩大范围。
+
+失效粒度仍是 profile，而不是单个源文件。声明 `validation` 的判据会因 Validation 内任意
+受管文件变化而保守失效；多组理由不会改变这个算法，更不能据此人工覆盖计划。共享命令、
+产物或原始观测的判据并非独立，冻结合同前必须让依赖范围覆盖这些共享输入。回归测试须
+同时证明“无关组变化只重跑其消费者”和“真实 runner 依赖变化仍重跑相应产品判据”。
 
 不同 `task_id`、修改合同但不升版本、跳过版本或 `parent_contract_sha256` 不匹配时，禁止
 生成复用计划，不能退化为“人工确认可复用”。
@@ -243,6 +269,38 @@ git -c core.quotepath=false diff-tree -r -z --name-only --no-renames --no-commit
 - harness 至少包含一个证明判据具有鉴别力的负例或故障注入。
 - 性能门禁只能来自 `product_sla`、`safety_ratio` 或 `protocol_contract`。
 - 历史测量值只能作为基线或告警阈值，不能加极小余量后变成阻断门槛。
+
+## 7.1 阶段化执行与最小重跑
+
+验收执行必须按“前置检查 → 产品观测 → 证据封包”三阶段推进。冻结合同的
+`commands[].description` 应说明阶段、前置条件和共享输入；硬件/高成本命令还须写清
+超时、观测配额、允许的恢复动作及重试条件。派单只解释这些约束，不能另增授权。
+这些执行约束需审批和执行者核对；当前校验器不会代替调度器执行命令或自动计数硬件配额。
+
+1. **前置检查（preflight）**只验证工具、连接、固件身份、目标状态、RTT/日志通道和
+   输出目录等可执行条件。硬件 preflight 默认只读；若目标必须暂停 WDT 或写入调试域寄存器，
+   合同必须明确地址、值、非持久性、恢复方式和授权。烧录、擦除、写 SD 属于另行授权的
+   部署/产品命令，不得伪装成免费预检。若需部署目标镜像，先核对工具、连接和操作边界，
+   按合同部署后再核对固件身份，不能要求一个尚未部署的镜像先通过身份检查。
+   preflight 必须有明确超时和 fail-closed 结果；失败分类为 `HARNESS_FAIL` 或 `ENV_BLOCKED`，
+   不消耗产品观测配额。只有相关前置条件满足，才能启动对应的部署或观测命令。
+2. **产品观测（product）**只在相应 preflight 通过后执行。未约定重试时默认只执行一次；
+   首次失败先保留证据和分类，不得换路径、换目录盲重试。在已有授权和剩余配额内，已提交的
+   产品/harness 修复或有证据的外部状态变化，可以按重新计算的 rerun plan 最小范围复测。
+   没有实际修复/状态变化时不得碰运气重试；配额耗尽或需要新操作时先申请授权，必要时升级
+   合同。产品失败只能归类为 `PRODUCT_FAIL`，不能用 harness 修复掩盖。
+3. **证据封包（evidence）**只整理已产生的原始输出、产物和哈希。封包或解析失败归类
+   为 `HARNESS_FAIL` / `EVIDENCE_GAP`，只修复受影响的证据链；不得因为封包失败而重跑
+   已通过且输入未变的产品观测。原始日志缺失、污染或测量工具不可信时，必须重新采集受影响
+   的观测；失败分类本身不能把无效证据变成可复用 PASS。
+
+下一轮必须先运行校验器生成 `rerun-plan.json`，只重跑 `required_commands` 所列的观测/采集
+命令，并重新生成 `required_artifacts`。必要的只读预检、证据整理和完整性校验仍可执行，但
+不得借这些阶段的名字绕过观测配额。未列入 `rerun_criteria` 的 `EXECUTED PASS` 判据应使用 `REUSED`；
+禁止以“方便”或“保险”为由重跑整套宿主测试、构建或硬件流程。只有生产输入、外部输入、
+判据定义、命令定义、产物定义实际变化，或先前观测不是可复用 PASS 时，才扩大重跑范围。
+**rerun plan 只计算失效范围，不授予操作权限或追加配额。** 验收报告必须记录本轮阶段、
+失败分类、修复/状态变化证据、已消耗及剩余配额和 rerun plan，便于审计是否发生无授权重试。
 
 ## 8. 紧凑证据包
 

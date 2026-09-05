@@ -189,3 +189,82 @@ python -X utf8 -B tests/ota/test_p2_5_build_provenance.py
 # 冻结包复校（以 P3-7-v1 为例，命令模板见 FREEZE-INDEX.md）
 git worktree add --detach .cache/freeze-check/wt-p3-7 <bundle_commit>
 ```
+
+## 8. 后续规范补强
+
+v3 的对象冻结解决了工作树字节和看板回写造成的跨轮假失败，但不能单独决定每轮执行
+多少命令或硬件动作。后续合同必须为每项判据声明最小直接 profile 依赖，并按
+“preflight → product → evidence”分阶段执行：工具/连接/RTT/WDT 准备失败不消耗产品配额，
+harness 或证据修复只按 rerun plan 执行受影响命令，禁止无条件重跑整套宿主、构建和硬件流程。
+调试域暂停 WDT 等必要准备动作可以存在，但必须在合同中写明地址、值、非持久性、恢复方式
+和授权；“默认只读”不能被误解为禁止所有受控调试准备。
+
+### 8.1 续作边界与复核结论（2026-09-05）
+
+本轮承接未提交的规范补强，不改产品源码、历史冻结包或性能门槛，不认领 OTA 产品卡。
+当前续作授权覆盖实现和本地验证；提交、推送与 PR 收口另行确认。
+
+- 上次只落下多输入组的 `dependency_rationale` 校验，fixture 与配套回归未同步，不能沿用
+  修改前的 83 项测试结果。本轮补齐合法、缺失、类型错误、重复依赖的正反用例。
+- 现有 rerun plan 已按判据引用的 profile、外部输入、命令和产物选择重跑集合。本轮用真实
+  Git fixture 验证其最小范围，不新增另一套路径依赖系统；同一 profile 内仍保守失效。
+- 不得为减少重跑而漏报真实依赖：结果依赖 runner/探针时仍须声明 Validation，多个输入组
+  用结构化理由说明用途，而不是把所有判据一律改为只依赖 Production。
+- rerun plan 是失效计算，不是硬件操作或追加配额的授权。预检、观测、封包需要区分；必要
+  的只读检查与证据校验不能被“只执行 required_commands”误禁，真实修复也不能被首次失败
+  停止规则永久阻断。模板与看板同步引用这套执行口径。
+
+### 8.2 本轮本地验证
+
+测试串行执行，临时目录留在项目内，使用 `-B` 禁止 Python 字节码输出；Git 配置和模板、
+TEMP/TMP/TMPDIR 指向 `.cache/acceptance-policy-20260905-01/`。Windows PowerShell
+子进程的输出使用本机编码解码，避免旧测试的 UTF-8/GBK reader 线程异常。
+
+| 命令 | 结果 |
+|---|---|
+| `python -X utf8 -B -m unittest tests.ota.test_acceptance_bundle` | 94/94，121.196s，OK；`OTA_REQUIRE_SYMLINK_TEST=1`，无跳过 |
+| `python -X utf8=0 -B tests/ota/test_p2_5_build_provenance.py` | 11/11，11.161s，OK |
+| `python -X utf8 -B -m unittest tests.ota.test_ac5_ram_budget tests.ota.test_f435_build_bootstrap` | 17/17，0.054s，OK |
+| Python AST、合同模板 JSON、`git diff --check` | 通过 |
+
+三次最终测试共 122 项通过，0 失败、0 错误、0 跳过，测试输出无警告。Git 另有四个文本文件
+的 LF/CRLF 转换提示，未修改行尾白名单。首次基线的缺理由失败与新环境 fixture 分类错误
+均保留在本地日志，后者已修正为 environment-owned FAIL，未放宽校验器。
+
+日志目录：`.cache/acceptance-policy-20260905-01/`，最终日志 SHA-256：
+
+| 文件 | SHA-256 |
+|---|---|
+| `governance.log` | `10A3E90911CBCE0FF8F62D2A6675B1D4626AB6BD105C9FD6D852047169AA85A2` |
+| `provenance.log` | `CA1351A14D9CD6BCFEC6C4A2FD0699FA7D764550BB8D0DA979DEFA7E13177453` |
+| `build-governance.log` | `264742471341356A9270FC8CB2664880B7971B476661AECE9EF8CD626BCCE1A7` |
+
+本地回归不替代独立验收或治理 CI。本轮没有重编固件、执行真机操作或重跑未变的 Spec 探针；
+尚未提交、推送或触发本批修改的远端 CI，不能宣告 PR 收口。
+
+### 8.3 写入审计例外
+
+八个原有未跟踪文件的 SHA-256 未变，旧 `.manifest-test-mzl4deqo` 未清理；测试创建的临时
+fixture 已退出清理，保留的日志与配置在上述项目内缓存目录。但审计发现 PowerShell 自动
+更新了两处项目外启动优化缓存，TEMP 与模块分析缓存设置未覆盖这类 .NET 启动数据。
+以下为初次审计时的记录，不是不可变产物：
+
+- `C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`：
+  1196 字节，20:18 更新，来自 provenance 测试启动的 Windows PowerShell。
+- `C:/Users/SU/AppData/Local/Microsoft/PowerShell/StartupProfileData-NonInteractive`：
+  83692 字节，20:21 更新，来自终端 PowerShell 启动。
+
+已向用户报告并停止后续 PowerShell 启动，改用 cmd 完成项目内记录；未删除、还原或移动
+上述外部缓存。建议保留，若需清理必须取得针对准确路径的单独授权。
+
+改用 cmd 后的只读复查又看到 Windows PowerShell 缓存于 21:12 更新为 1004 字节，PowerShell
+缓存于 20:57 更新为 77236 字节；后续写入来源未确认，不能归因于本轮某条命令或声称缓存
+已保持不变。本会话未再主动启动 PowerShell，也未对这两处路径执行清理或恢复。
+
+### 8.4 后续提交授权
+
+用户随后在当前会话明确授权提交、推送与 PR 合并；该授权不包含项目外缓存的清理或恢复。
+本批只提交九个治理目标文件，八个原有未跟踪文件继续保留。主会话检查 Git 元数据与全局
+hooks 后执行收口，保留 pre-commit 检查，使用显式提交信息。GitHub CLI 配置、缓存与临时
+输出重定向到项目内，凭据仅在进程内读取，不写入仓库或日志。远端 CI 与 PR 结果将在合并前
+补入本节；必须使用保留原提交 ID 的 merge，并在合并后同步持有 main 的主 worktree。

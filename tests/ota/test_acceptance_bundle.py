@@ -104,6 +104,10 @@ def valid_contract():
                 "kind": "functional",
                 "evidence_types": ["raw_log"],
                 "input_groups": ["production", "validation", "governance"],
+                "dependency_rationale": (
+                    "Production supplies the firmware, Validation the runner, "
+                    "and Governance the process assertions in this combined fixture."
+                ),
                 "external_inputs": [],
                 "command_ids": ["CMD-FUNC-1"],
                 "artifact_ids": ["ART-FIRMWARE"],
@@ -1469,6 +1473,283 @@ class GovernancePromptScopeTests(unittest.TestCase):
                     self.DISPATCH_PROMPT_RE.match(name),
                     f"{name} 不应被判为派单提示词(会误伤非 OTA 文件)",
                 )
+
+
+class CriterionDependencyTests(unittest.TestCase):
+    def test_single_group_does_not_require_rationale(self):
+        for group in ("production", "validation", "governance"):
+            with self.subTest(group=group):
+                contract = valid_contract()
+                contract["criteria"][0]["input_groups"] = [group]
+                contract["criteria"][0].pop("dependency_rationale")
+                self.assertEqual([], VALIDATOR.validate_contract(contract))
+
+    def test_multiple_groups_require_a_structured_rationale(self):
+        for groups in (["production", "validation"], list(VALIDATOR.REQUIRED_INPUT_GROUPS)):
+            with self.subTest(groups=groups):
+                contract = valid_contract()
+                criterion = contract["criteria"][0]
+                criterion["input_groups"] = groups
+                self.assertEqual([], VALIDATOR.validate_contract(contract))
+                criterion.pop("dependency_rationale")
+                criterion["description"] = "A prose explanation cannot replace the structured field."
+                self.assertEqual(
+                    ["contract.criteria[0].dependency_rationale is required when multiple input_groups are used"],
+                    VALIDATOR.validate_contract(contract),
+                )
+
+    def test_present_rationale_must_be_nonempty_text(self):
+        for groups in (["production"], ["production", "validation"]):
+            for value in (None, "", " \t\n", False, 1, [], {}):
+                with self.subTest(groups=groups, value=value):
+                    contract = valid_contract()
+                    contract["criteria"][0]["input_groups"] = groups
+                    contract["criteria"][0]["dependency_rationale"] = value
+                    self.assertEqual(
+                        ["contract.criteria[0].dependency_rationale must be a non-empty string when set"],
+                        VALIDATOR.validate_contract(contract),
+                    )
+
+    def test_duplicate_groups_are_rejected_even_with_a_rationale(self):
+        for groups in (["production", "production"], ["production", "validation", "production"]):
+            with self.subTest(groups=groups):
+                contract = valid_contract()
+                contract["criteria"][0]["input_groups"] = groups
+                self.assertEqual(
+                    ["contract.criteria[0].input_groups must not contain duplicates"],
+                    VALIDATOR.validate_contract(contract),
+                )
+
+    def test_malformed_dependencies_fail_closed(self):
+        for groups in (None, "production", [], [""], [{}], ["Production"], ["unknown"]):
+            with self.subTest(groups=groups):
+                contract = valid_contract()
+                contract["criteria"][0]["input_groups"] = groups
+                errors = VALIDATOR.validate_contract(contract)
+                self.assertTrue(any(".input_groups" in error for error in errors), errors)
+
+
+class SelectiveRerunTests(unittest.TestCase):
+    def setUp(self):
+        template = valid_contract()
+        observations = valid_matrix(template)
+        self.contract = copy.deepcopy(template)
+        self.matrix = copy.deepcopy(observations)
+        for field in ("criteria", "commands", "artifacts"):
+            self.contract[field] = []
+            self.matrix[field] = []
+        for group in VALIDATOR.REQUIRED_INPUT_GROUPS:
+            criterion = copy.deepcopy(template["criteria"][0])
+            criterion.update(
+                id=group,
+                input_groups=[group],
+                command_ids=[f"CMD-{group}"],
+                artifact_ids=[f"ART-{group}"],
+            )
+            criterion.pop("dependency_rationale")
+            command = dict(template["commands"][0], id=f"CMD-{group}", command=f"observe-{group}")
+            artifact = dict(template["artifacts"][0], id=f"ART-{group}", path=f"artifacts/{group}.bin")
+            self.contract["criteria"].append(criterion)
+            self.contract["commands"].append(command)
+            self.contract["artifacts"].append(artifact)
+            self.matrix["criteria"].append(dict(observations["criteria"][0], id=group))
+            self.matrix["commands"].append(
+                dict(observations["commands"][0], id=command["id"], command=command["command"])
+            )
+            self.matrix["artifacts"].append(
+                dict(observations["artifacts"][0], id=artifact["id"], path=artifact["path"])
+            )
+        self.matrix["contract_sha256"] = contract_hash(self.contract)
+        self.assertEqual([], VALIDATOR.validate_contract(self.contract))
+        self.assertEqual(
+            [], VALIDATOR.validate_matrix(self.matrix, self.contract, contract_hash(self.contract))
+        )
+
+    def assert_scope(self, plan, groups):
+        self.assertEqual(sorted(groups), sorted(item["id"] for item in plan["rerun_criteria"]))
+        self.assertEqual(sorted(f"CMD-{group}" for group in groups), plan["required_commands"])
+        self.assertEqual(sorted(f"ART-{group}" for group in groups), plan["required_artifacts"])
+        self.assertEqual(
+            sorted(set(VALIDATOR.REQUIRED_INPUT_GROUPS) - set(groups)), plan["reusable_criteria"]
+        )
+
+    def test_git_changes_select_only_the_criteria_that_depend_on_the_profile(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            for group, path in (
+                ("production", "USER/behavior.c"),
+                ("validation", "Tools/measure.py"),
+                ("governance", "AGENTS.md"),
+            ):
+                with self.subTest(group=group):
+                    previous = copy.deepcopy(self.contract)
+                    (
+                        previous["freeze_commit"],
+                        previous["freeze_tree"],
+                        previous["profile_config_blob"],
+                    ) = fixture_freeze(repo)
+                    current = successor_contract(previous)
+                    (
+                        current["freeze_commit"],
+                        current["freeze_tree"],
+                        current["profile_config_blob"],
+                    ) = commit_fixture_files(repo, {path: b"changed input\n"})
+                    plan = VALIDATOR.compute_rerun_plan(current, previous, self.matrix, repo_root=repo)
+                    self.assertEqual([group], plan["changed_input_groups"])
+                    self.assert_scope(plan, [group])
+                    self.assertIn(f"input_group_changed:{group}", plan["rerun_criteria"][0]["reasons"])
+
+                    reused = copy.deepcopy(self.matrix)
+                    for item in reused["criteria"]:
+                        item.update(execution="REUSED", reused_from_round=self.matrix["round_id"])
+                    errors = VALIDATOR.validate_reuse(reused, current, self.matrix, plan)
+                    self.assertEqual(1, len(errors), errors)
+                    self.assertIn("reuses invalidated evidence", errors[0])
+                    for item in reused["criteria"]:
+                        if item["id"] == group:
+                            item.update(execution="EXECUTED", reused_from_round=None)
+                    self.assertEqual([], VALIDATOR.validate_reuse(reused, current, self.matrix, plan))
+
+                    if group == "validation":
+                        # A real runner dependency must still invalidate the product observation.
+                        previous["criteria"][0]["input_groups"].append("validation")
+                        previous["criteria"][0]["dependency_rationale"] = "The runner measures this product gate."
+                        current["criteria"] = copy.deepcopy(previous["criteria"])
+                        current["parent_contract_sha256"] = contract_hash(previous)
+                        self.assertEqual([], VALIDATOR.validate_contract(current))
+                        plan = VALIDATOR.compute_rerun_plan(current, previous, self.matrix, repo_root=repo)
+                        self.assert_scope(plan, ["production", "validation"])
+
+    def test_failures_do_not_invalidate_unrelated_passes(self):
+        for group, result, owner, overall in (
+            ("production", "FAIL", "product", "PRODUCT_FAIL"),
+            ("validation", "FAIL", "harness", "HARNESS_FAIL"),
+            ("production", "NOT_OBSERVED", None, "EVIDENCE_GAP"),
+            ("production", "FAIL", "environment", "ENV_BLOCKED"),
+        ):
+            with self.subTest(overall=overall):
+                previous_matrix = copy.deepcopy(self.matrix)
+                previous_matrix["overall_result"] = overall
+                for item in previous_matrix["criteria"]:
+                    if item["id"] == group:
+                        item.update(
+                            result=result,
+                            failure_owner=owner,
+                            observed=False if owner == "product" else None,
+                        )
+                self.assertEqual(
+                    [], VALIDATOR.validate_matrix(previous_matrix, self.contract, contract_hash(self.contract))
+                )
+                plan = VALIDATOR.compute_rerun_plan(self.contract, self.contract, previous_matrix)
+                self.assert_scope(plan, [group])
+                self.assertIn("previous_result_not_pass", plan["rerun_criteria"][0]["reasons"])
+
+    def test_definition_changes_only_rerun_their_consumers(self):
+        for field, changed_key, value, reason in (
+            ("commands", "command", "observe-product-v2", "command_definition_changed:CMD-production"),
+            ("artifacts", "path", "artifacts/new-product.bin", "artifact_definition_changed:ART-production"),
+            ("criteria", "description", "An updated requirement.", "criterion_definition_changed"),
+        ):
+            with self.subTest(field=field):
+                current = successor_contract(self.contract)
+                current[field][0][changed_key] = value
+                plan = VALIDATOR.compute_rerun_plan(current, self.contract, self.matrix)
+                self.assert_scope(plan, ["production"])
+                self.assertIn(reason, plan["rerun_criteria"][0]["reasons"])
+
+    def test_external_state_changes_only_rerun_their_consumers(self):
+        previous = copy.deepcopy(self.contract)
+        previous["external_inputs"] = [
+            {
+                "id": "board",
+                "category": "hardware_state",
+                "description": "Target readiness.",
+                "fingerprint": "before",
+                "evidence_path": "raw/board.log",
+                "evidence_sha256": "A" * 64,
+            }
+        ]
+        previous["criteria"][0]["external_inputs"] = ["board"]
+        current = successor_contract(previous)
+        current["external_inputs"][0]["fingerprint"] = "after"
+        current["external_inputs"][0]["evidence_sha256"] = "B" * 64
+        self.assertEqual([], VALIDATOR.validate_contract(current))
+        plan = VALIDATOR.compute_rerun_plan(current, previous, self.matrix)
+        self.assert_scope(plan, ["production"])
+        self.assertEqual(["board"], plan["changed_external_inputs"])
+        self.assertIn("external_input_changed:board", plan["rerun_criteria"][0]["reasons"])
+
+
+class AcceptanceExecutionPolicyTests(unittest.TestCase):
+    """守护最小依赖和阶段化验收规则，避免新合同退回全量重跑。"""
+
+    CONTRACT_DOC = ROOT / "docs" / "acceptance-execution-contract.md"
+    AGENTS_DOC = ROOT / "AGENTS.md"
+
+    def test_template_criterion_does_not_overdeclare_profiles(self):
+        template = json.loads(CONTRACT_TEMPLATE.read_text(encoding="utf-8"))
+        profiles = {group["id"] for group in template["input_groups"]}
+        self.assertEqual(profiles, {"production", "validation", "governance"})
+        for criterion in template["criteria"]:
+            dependencies = criterion["input_groups"]
+            self.assertEqual(
+                len(dependencies),
+                len(set(dependencies)),
+                f"模板判据 {criterion['id']} 的 input_groups 不得重复",
+            )
+            self.assertLess(
+                len(dependencies),
+                len(profiles),
+                f"模板判据 {criterion['id']} 不得默认绑定全部 profile；只列直接依赖",
+            )
+
+    def test_staged_execution_policy_is_documented(self):
+        contract = self.CONTRACT_DOC.read_text(encoding="utf-8")
+        agents = self.AGENTS_DOC.read_text(encoding="utf-8")
+        for marker in (
+            "## 7.1 阶段化执行与最小重跑",
+            "前置检查（preflight）",
+            "产品观测（product）",
+            "证据封包（evidence）",
+            "只重跑 `required_commands`",
+            "禁止以“方便”或“保险”为由重跑整套宿主测试、构建或硬件流程",
+            "每项判据的 `input_groups` 必须只列出其直接依赖的最小集合",
+            "暂停 WDT 或写入调试域寄存器",
+            "dependency_rationale",
+            "不授予操作权限或追加配额",
+            "已有授权和剩余配额",
+            "必要的只读预检、证据整理和完整性校验仍可执行",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, contract)
+        self.assertIn("验收必须阶段化且按最小范围重跑", agents)
+
+    def test_dispatch_templates_keep_dependency_and_retry_boundaries(self):
+        prompt = (ROOT / "docs/ota-prompts/prompt-template-acceptance.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "dependency_rationale",
+            "必须包含 `validation`",
+            "不授予操作权限或追加配额",
+            "已有授权及剩余配额",
+            "只重跑 `required_commands`",
+            "已用/剩余观测配额",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prompt)
+        implementation = (ROOT / "docs/ota-prompts/prompt-template-implementation.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("仅改治理规范、模板或宿主工具时", implementation)
+        self.assertIn("远端治理 CI 要求不变", implementation)
+
+    def test_board_routes_to_git_freeze_inputs_not_worktree_manifests(self):
+        board = (ROOT / BOARD_PATH).read_text(encoding="utf-8")
+        rules = board.split("## 0.", 1)[1].split("## 1.", 1)[0]
+        self.assertIn("freeze_tree", rules)
+        self.assertIn("不授予操作权限或追加配额", rules)
+        self.assertNotIn("重算 manifest", rules)
 
 
 class PostP26SpecGovernanceTests(unittest.TestCase):
