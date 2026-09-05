@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import ast
-import hashlib
 import importlib.util
 import io
 import json
@@ -15,7 +14,8 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 GUARD = ROOT / "Tools" / "provenance" / "worktree_guard.ps1"
-MANIFEST = ROOT / "Tools" / "provenance" / "source_manifest.ps1"
+BOARD = "PLAN-OTA-EXEC.md"
+FREEZE_INDEX = "docs/acceptance-contracts/FREEZE-INDEX.md"
 PROFILE_CONFIG = ROOT / "Tools" / "provenance" / "manifest_profiles.json"
 VALIDATOR_PATH = ROOT / "Tools" / "acceptance" / "validate_bundle.py"
 REPRO = ROOT / "cmake" / "reproducible_build.cmake"
@@ -26,6 +26,32 @@ POWERSHELL = shutil.which("powershell.exe") or shutil.which("pwsh")
 VALIDATOR_SPEC = importlib.util.spec_from_file_location("provenance_validator", VALIDATOR_PATH)
 VALIDATOR = importlib.util.module_from_spec(VALIDATOR_SPEC)
 VALIDATOR_SPEC.loader.exec_module(VALIDATOR)
+
+
+def git_fixture(repo_root, *arguments):
+    """只读 git 调用：统一关掉引号转义，保证非 ASCII 路径不被转义。"""
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), "-c", "core.quotepath=false", *arguments],
+        check=True,
+        cwd=ROOT,
+        capture_output=True,
+    )
+    return result.stdout.decode("utf-8").strip()
+
+
+def init_fixture_repo(repo_root):
+    subprocess.run(["git", "init", "-q", str(repo_root)], check=True, cwd=ROOT)
+    hooks = repo_root / ".no-hooks"
+    hooks.mkdir()
+    git_fixture(repo_root, "config", "core.autocrlf", "false")
+    git_fixture(repo_root, "config", "core.hooksPath", str(hooks))
+    git_fixture(repo_root, "config", "user.name", "fixture")
+    git_fixture(repo_root, "config", "user.email", "fixture@example.invalid")
+
+
+def commit_fixture_repo(repo_root, message):
+    git_fixture(repo_root, "add", "-A", ".")
+    git_fixture(repo_root, "commit", "-q", "-m", message)
 
 
 def repo_local_temp_env(directory):
@@ -112,22 +138,28 @@ class P25BuildProvenanceTests(unittest.TestCase):
                 self.assertEqual(1, module.run_suite(suite=suite, stream=stream))
                 self.assertIn("FAIL-CLOSED:", stream.getvalue())
 
-    def test_manifest_protocol_is_explicit(self):
-        text = MANIFEST.read_text(encoding="ascii")
-        self.assertIn("[System.StringComparer]::Ordinal", text)
-        self.assertIn("Join-Path (Join-Path (Join-Path $PSHOME 'Modules')", text)
-        self.assertIn("Import-Module $utilityModule", text)
-        self.assertIn("UTF-8 without BOM, CRLF, one trailing newline", text)
-        self.assertIn("manifest_profiles.json", text)
+    def test_profile_enumeration_protocol_is_explicit(self):
+        """v3 起输入组的唯一来源是 git 对象，校验器的调用口径必须显式可查。"""
+        text = VALIDATOR_PATH.read_text(encoding="utf-8")
+        # 仓库含非 ASCII 路径（Tools/图标/**）：关引号转义 + NUL 分隔缺一不可。
+        self.assertIn('"-c", "core.quotepath=false"', text)
+        self.assertIn('["ls-tree", "-r", "-z", "--name-only", tree,', text)
+        self.assertIn('"diff-tree",', text)
+        self.assertIn('"--no-renames",', text)
+        self.assertIn('"--no-commit-id",', text)
+        # 工作树枚举只保留给治理测试做对照，不参与失效判定。
+        self.assertIn('["ls-files", "-co", "--exclude-standard", "-z", "--",', text)
+        # 路径集按 UTF-8 字节排序，避免不同 locale 下顺序漂移。
+        self.assertIn('sorted(selected, key=lambda path: path.encode("utf-8"))', text)
         self.assertIn("etrack-manifest-profiles-v1", text)
-        self.assertIn("Assert-WorktreeFileOutput", text)
-        self.assertIn("'ls-files', '-co', '--exclude-standard', '-z'", text)
-        self.assertIn("[Text.UTF8Encoding]::new($false, $true)", text)
+        self.assertIn("manifest_profiles.json", text)
+        self.assertIn("profile_config_blob", text)
+        self.assertIn("validate_execution_worktree", text)
+        self.assertIn('"merge-base", "--is-ancestor"', text)
+        # 自研 manifest 生成器已删除，校验器不得再引用它。
+        self.assertNotIn("source_manifest.ps1", text)
 
     def test_manifest_profiles_separate_product_and_validation_inputs(self):
-        text = MANIFEST.read_text(encoding="ascii")
-        self.assertIn("ValidateSet('Legacy', 'Production', 'Validation', 'Governance')", text)
-        self.assertIn("'etrack-input-manifest-v2'", text)
         config = json.loads(PROFILE_CONFIG.read_text(encoding="ascii"))
         self.assertEqual("etrack-manifest-profiles-v1", config["schema"])
         production = config["profiles"]["Production"]
@@ -169,7 +201,12 @@ class P25BuildProvenanceTests(unittest.TestCase):
             "docs/acceptance-contracts/template.evidence-matrix.json",
             validation["required_paths"],
         )
-        self.assertIn("PLAN-OTA-EXEC.md", governance["top_files"])
+        # 看板是每轮收口都要回写的文件，留在 Governance 会让任何一行日志改动
+        # 打红全部治理判据，因此必须在 profile 之外。
+        self.assertNotIn(BOARD, governance["top_files"])
+        self.assertNotIn(BOARD, governance["required_paths"])
+        self.assertNotIn(FREEZE_INDEX, governance["top_files"])
+        self.assertNotIn(FREEZE_INDEX, governance["required_paths"])
         self.assertNotIn("docs/acceptance-contracts/", governance["root_patterns"])
 
     def test_worktree_guard_rejects_sibling_output(self):
@@ -257,101 +294,78 @@ class P25BuildProvenanceTests(unittest.TestCase):
             self.assertNotEqual(0, result.returncode)
             self.assertEqual("unchanged\n", target.read_text(encoding="ascii"))
 
-    def test_manifest_profiles_execute_and_report_their_category(self):
-        if POWERSHELL is None:
-            self.skipTest("PowerShell is unavailable")
-        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".manifest-test-") as temp_dir:
-            for profile in ("Production", "Validation", "Governance"):
-                output = Path(temp_dir) / profile.lower()
-                result = subprocess.run(
-                    [
-                        POWERSHELL,
-                        "-NoProfile",
-                        "-ExecutionPolicy",
-                        "Bypass",
-                        "-File",
-                        str(MANIFEST),
-                        "-RepoRoot",
-                        str(ROOT),
-                        "-OutputDirectory",
-                        str(output),
-                        "-Profile",
-                        profile,
-                    ],
-                    cwd=ROOT,
-                    env=repo_local_temp_env(temp_dir),
-                    capture_output=True,
-                    text=True,
-                )
-                self.assertEqual(0, result.returncode, result.stderr)
-                manifest = json.loads((output / "source-manifest.json").read_text(encoding="utf-8-sig"))
-                summary = json.loads((output / "summary.json").read_text(encoding="utf-8-sig"))
-                self.assertEqual("etrack-input-manifest-v2", manifest["Schema"])
-                self.assertEqual(profile, manifest["Profile"])
-                self.assertNotIn("RepoRoot", manifest)
-                self.assertNotIn("Head", manifest)
-                self.assertEqual(str(ROOT.resolve()), str(Path(summary["RepoRoot"]).resolve()))
-                self.assertRegex(summary["Head"], r"^[0-9a-fA-F]{40,64}$")
-                manifest_bytes = (output / "source-manifest.json").read_bytes()
-                self.assertEqual(
-                    hashlib.sha256(manifest_bytes).hexdigest().upper(),
-                    summary["ManifestJsonSHA256"],
-                )
-                paths = {entry["Path"] for entry in manifest["Files"]}
-                if profile == "Production":
-                    self.assertIn(".github/workflows/firmware-build.yml", paths)
-                    self.assertIn("Tools/etu_pack.py", paths)
-                    self.assertIn("MDK-ARM_F435/cmake-generated/CMakeLists.txt", paths)
-                    self.assertTrue(
-                        any(path.startswith("MDK-ARM_F435/RTE/") for path in paths)
-                    )
-                    self.assertIn("MDK-ARM_F435/RTE/_X-Track/RTE_Components.h", paths)
-                    self.assertFalse(
-                        any(
-                            path.startswith("MDK-ARM_F435/RTE/_X-Track-App-AC5/")
-                            for path in paths
-                        )
-                    )
-                    self.assertFalse(
-                        any(
-                            path.startswith("MDK-ARM_F435/RTE/Device/-AT32F435CGU7/")
-                            for path in paths
-                        )
-                    )
-                    self.assertNotIn("tests/ota/test_ota_patch.py", paths)
-                elif profile == "Validation":
-                    self.assertIn("tests/ota/test_ota_patch.py", paths)
-                    self.assertIn("Tools/provenance/source_manifest.ps1", paths)
-                    self.assertIn("Tools/provenance/manifest_profiles.json", paths)
-                    self.assertIn("Tools/\u56fe\u6807/README.md", paths)
-                    self.assertIn(".github/workflows/acceptance-governance.yml", paths)
-                    self.assertIn("docs/acceptance-contracts/template.contract.json", paths)
-                    self.assertIn(
-                        "docs/acceptance-contracts/template.evidence-matrix.json",
-                        paths,
-                    )
-                    self.assertNotIn("USER/main.cpp", paths)
-                    self.assertEqual(
-                        VALIDATOR._collect_profile_records(ROOT, profile),
-                        manifest["Files"],
-                    )
-                else:
-                    self.assertIn("PLAN-OTA-EXEC.md", paths)
-                    self.assertNotIn("docs/acceptance-contracts/template.contract.json", paths)
+    def test_profile_enumeration_separates_product_validation_and_governance(self):
+        head_tree = git_fixture(ROOT, "rev-parse", "--verify", "HEAD^{tree}")
+        enumerated = {}
+        for profile in ("Production", "Validation", "Governance"):
+            tree_paths = VALIDATOR._profile_tree_paths(ROOT, head_tree, profile)
+            self.assertTrue(tree_paths, profile)
+            # 这里只断言 git tree 枚举，不比工作树：工作树枚举会看见未跟踪文件，
+            # 属于环境状态。tree 与干净工作树逐路径一致由
+            # tests/ota/test_acceptance_bundle.py 的 fixture 仓库用例保证。
+            self.assertTrue(
+                VALIDATOR.PROFILE_REQUIRED_PATHS[profile].issubset(set(tree_paths)), profile
+            )
+            enumerated[profile] = set(tree_paths)
 
-    def test_manifest_identity_ignores_root_head_and_mtime(self):
-        if POWERSHELL is None:
-            self.skipTest("PowerShell is unavailable")
+        production = enumerated["Production"]
+        self.assertIn(".github/workflows/firmware-build.yml", production)
+        self.assertIn("Tools/etu_pack.py", production)
+        self.assertIn("MDK-ARM_F435/cmake-generated/CMakeLists.txt", production)
+        self.assertIn("MDK-ARM_F435/RTE/_X-Track/RTE_Components.h", production)
+        self.assertTrue(any(path.startswith("MDK-ARM_F435/RTE/") for path in production))
+        # AC5 专用 RTE 与旧 CGU7 目录不是 GCC 输入，混入会让 AC5 改动打红 GCC 判据。
+        self.assertFalse(
+            any(path.startswith("MDK-ARM_F435/RTE/_X-Track-App-AC5/") for path in production)
+        )
+        self.assertFalse(
+            any(
+                path.startswith("MDK-ARM_F435/RTE/Device/-AT32F435CGU7/")
+                for path in production
+            )
+        )
+        self.assertNotIn("tests/ota/test_ota_patch.py", production)
+
+        validation = enumerated["Validation"]
+        self.assertIn("tests/ota/test_ota_patch.py", validation)
+        self.assertIn("Tools/provenance/worktree_guard.ps1", validation)
+        self.assertIn("Tools/provenance/manifest_profiles.json", validation)
+        # 非 ASCII 路径必须完整出现，证明 core.quotepath=false 与 -z 生效。
+        self.assertIn("Tools/\u56fe\u6807/README.md", validation)
+        self.assertIn(".github/workflows/acceptance-governance.yml", validation)
+        self.assertIn("docs/acceptance-contracts/template.contract.json", validation)
+        self.assertIn("docs/acceptance-contracts/template.evidence-matrix.json", validation)
+        self.assertNotIn("USER/main.cpp", validation)
+
+        governance = enumerated["Governance"]
+        self.assertIn("AGENTS.md", governance)
+        self.assertIn("docs/acceptance-execution-contract.md", governance)
+        # 看板与冻结点索引都必须留在 profile 之外：它们每轮收口都会被回写。
+        self.assertNotIn(BOARD, governance)
+        self.assertNotIn(FREEZE_INDEX, governance)
+        self.assertNotIn("docs/acceptance-contracts/template.contract.json", governance)
+
+        # Tools/etu_pack.py 是唯一被两个 profile 共享的路径：它既是 OTA 打包器
+        # （Production top_files），又落在 Validation 的 Tools/ 根模式下。除它以外
+        # 生产源与验收工具必须完全分开，否则改测试会打红产品判据、反之亦然。
+        self.assertEqual({"Tools/etu_pack.py"}, production & validation)
+        self.assertEqual(set(), production & governance)
+        self.assertEqual(set(), validation & governance)
+
+    def test_profile_enumeration_ignores_root_head_and_mtime(self):
+        """两个内容相同、根路径/HEAD/mtime 都不同的仓库必须枚举出相同的 Production 路径集。
+
+        这是 v3 失效判定的地基：判据只能被 profile 路径集的 git 内容变化打红，
+        绝对路径、提交 id、文件时间戳都不得参与。
+        """
         with tempfile.TemporaryDirectory(dir=ROOT, prefix=".manifest-stability-test-") as temp_dir:
             base = Path(temp_dir)
-            outputs = []
-            summaries = []
+            enumerated = []
+            trees = []
+            heads = []
             mtimes = []
             for index in (1, 2):
                 repo = base / f"repo-{index}"
-                process_temp = repo / ".tmp"
-                process_temp.mkdir(parents=True)
-                process_env = repo_local_temp_env(process_temp)
                 files = {
                     ".github/workflows/firmware-build.yml": "name: fixture\n",
                     "CMakeLists.txt": "cmake_minimum_required(VERSION 3.20)\n",
@@ -367,96 +381,48 @@ class P25BuildProvenanceTests(unittest.TestCase):
                     path = repo / relative
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text(content, encoding="ascii", newline="\n")
-                subprocess.run(
-                    ["git", "init", "-q", str(repo)],
-                    check=True,
-                    cwd=ROOT,
-                    env=process_env,
-                )
-                subprocess.run(
-                    ["git", "-C", str(repo), "config", "user.name", "fixture"],
-                    check=True,
-                    env=process_env,
-                )
-                subprocess.run(
-                    ["git", "-C", str(repo), "config", "user.email", "fixture@example.invalid"],
-                    check=True,
-                    env=process_env,
-                )
-                subprocess.run(
-                    ["git", "-C", str(repo), "config", "core.autocrlf", "false"],
-                    check=True,
-                    env=process_env,
-                )
-                hooks = repo / ".no-hooks"
-                hooks.mkdir()
-                subprocess.run(
-                    ["git", "-C", str(repo), "config", "core.hooksPath", str(hooks)],
-                    check=True,
-                    env=process_env,
-                )
-                subprocess.run(
-                    ["git", "-C", str(repo), "add", "."],
-                    check=True,
-                    env=process_env,
-                )
-                subprocess.run(
-                    ["git", "-C", str(repo), "commit", "-q", "-m", "fixture"],
-                    check=True,
-                    env=process_env,
-                )
+                init_fixture_repo(repo)
+                commit_fixture_repo(repo, "fixture")
                 if index == 2:
-                    note = repo / "unrelated-governance-note.txt"
-                    note.write_text("unrelated\n", encoding="ascii", newline="\n")
-                    subprocess.run(
-                        ["git", "-C", str(repo), "add", note.name],
-                        check=True,
-                        env=process_env,
+                    # 完全无关的新文件：改变 HEAD 与整棵 tree，但不在任何 profile 里。
+                    (repo / "unrelated-governance-note.txt").write_text(
+                        "unrelated\n", encoding="ascii", newline="\n"
                     )
-                    subprocess.run(
-                        ["git", "-C", str(repo), "commit", "-q", "-m", "unrelated"],
-                        check=True,
-                        env=process_env,
-                    )
+                    commit_fixture_repo(repo, "unrelated")
                 sample = repo / "USER" / "sample.c"
                 stat = sample.stat()
                 os.utime(sample, (stat.st_atime, stat.st_mtime + (index * 60)))
                 mtimes.append(sample.stat().st_mtime_ns)
-                output = repo / "manifest-output"
-                result = subprocess.run(
-                    [
-                        POWERSHELL,
-                        "-NoProfile",
-                        "-ExecutionPolicy",
-                        "Bypass",
-                        "-File",
-                        str(MANIFEST),
-                        "-RepoRoot",
-                        str(repo),
-                        "-OutputDirectory",
-                        str(output),
-                        "-Profile",
-                        "Production",
-                    ],
-                    cwd=repo,
-                    env=process_env,
-                    capture_output=True,
-                    text=True,
+                heads.append(git_fixture(repo, "rev-parse", "--verify", "HEAD^{commit}"))
+                trees.append(git_fixture(repo, "rev-parse", "--verify", "HEAD^{tree}"))
+                enumerated.append(
+                    VALIDATOR._profile_tree_paths(repo, trees[-1], "Production")
                 )
-                self.assertEqual(0, result.returncode, result.stderr)
-                outputs.append(
-                    (
-                        (output / "source-manifest.txt").read_bytes(),
-                        (output / "source-manifest.json").read_bytes(),
-                    )
-                )
-                summaries.append(json.loads((output / "summary.json").read_text(encoding="utf-8")))
 
-            self.assertEqual(outputs[0], outputs[1])
+            self.assertEqual(enumerated[0], enumerated[1])
+            self.assertIn("USER/sample.c", enumerated[0])
+            self.assertNotIn("unrelated-governance-note.txt", enumerated[1])
             self.assertNotEqual(mtimes[0], mtimes[1])
-            self.assertNotEqual(summaries[0]["RepoRoot"], summaries[1]["RepoRoot"])
-            self.assertNotEqual(summaries[0]["Head"], summaries[1]["Head"])
-            self.assertEqual(summaries[0]["ManifestSHA256"], summaries[1]["ManifestSHA256"])
+            self.assertNotEqual(heads[0], heads[1])
+            self.assertNotEqual(trees[0], trees[1])
+
+            repo = base / "repo-2"
+            first_tree = git_fixture(repo, "rev-parse", "--verify", "HEAD~1^{tree}")
+            # 负例的另一半:profile 之外的提交不得让 Production 失效。
+            self.assertEqual(
+                [],
+                VALIDATOR._profile_tree_changes(repo, first_tree, trees[1], "Production"),
+            )
+            # 正例:真实 Production 输入改一个字节就必须失效。
+            (repo / "USER" / "sample.c").write_text(
+                "int sample(void) { return 2; }\n", encoding="ascii", newline="\n"
+            )
+            commit_fixture_repo(repo, "touch a production input")
+            changed_tree = git_fixture(repo, "rev-parse", "--verify", "HEAD^{tree}")
+            self.assertEqual(
+                ["USER/sample.c"],
+                VALIDATOR._profile_tree_changes(repo, trees[1], changed_tree, "Production"),
+            )
 
 if __name__ == "__main__":
     unittest.main()

@@ -8,7 +8,6 @@ import io
 import json
 import os
 import re
-import shutil
 import subprocess
 import tempfile
 import unittest
@@ -20,9 +19,14 @@ ROOT = Path(__file__).resolve().parents[2]
 VALIDATOR_PATH = ROOT / "Tools" / "acceptance" / "validate_bundle.py"
 CONTRACT_TEMPLATE = ROOT / "docs" / "acceptance-contracts" / "template.contract.json"
 MATRIX_TEMPLATE = ROOT / "docs" / "acceptance-contracts" / "template.evidence-matrix.json"
-MANIFEST_SCRIPT = ROOT / "Tools" / "provenance" / "source_manifest.ps1"
-POWERSHELL = shutil.which("powershell.exe") or shutil.which("pwsh")
+FREEZE_INDEX = ROOT / "docs" / "acceptance-contracts" / "FREEZE-INDEX.md"
+PROFILE_CONFIG_PATH = ROOT / "Tools" / "provenance" / "manifest_profiles.json"
+BOARD_PATH = "PLAN-OTA-EXEC.md"
 SYMLINK_TEST_REQUIRED_ENV = "OTA_REQUIRE_SYMLINK_TEST"
+# 合同单元测试用的占位冻结点：格式合法（40-hex），但不指向任何真实对象；
+# 凡要走 git 对象核对的用例都必须改用 fixture 仓库的真实提交（见 write_bundle）。
+PLACEHOLDER_OID = "0" * 40
+ABSENT_OID = "1" * 40
 
 SPEC = importlib.util.spec_from_file_location("acceptance_validator", VALIDATOR_PATH)
 VALIDATOR = importlib.util.module_from_spec(SPEC)
@@ -38,7 +42,7 @@ def symlink_security_test_required():
 
 def valid_contract():
     return {
-        "schema": "etrack-acceptance-contract-v2",
+        "schema": "etrack-acceptance-contract-v3",
         "contract_id": "P2-6-v1",
         "version": 1,
         "task_id": "P2-6",
@@ -47,6 +51,9 @@ def valid_contract():
         "approved_by": "user",
         "approved_at": "2026-08-14T12:00:00+08:00",
         "implementation_ref": "0123456789abcdef",
+        "freeze_commit": PLACEHOLDER_OID,
+        "freeze_tree": PLACEHOLDER_OID,
+        "profile_config_blob": PLACEHOLDER_OID,
         "result_taxonomy": [
             "PASS",
             "PRODUCT_FAIL",
@@ -60,25 +67,16 @@ def valid_contract():
                 "id": "production",
                 "profile": "Production",
                 "category": "production_source",
-                "manifest_path": "manifest-production/source-manifest.json",
-                "manifest_sha256": "A" * 64,
-                "manifest_json_sha256": "1" * 64,
             },
             {
                 "id": "validation",
                 "profile": "Validation",
                 "category": "validation_inputs",
-                "manifest_path": "manifest-validation/source-manifest.json",
-                "manifest_sha256": "B" * 64,
-                "manifest_json_sha256": "2" * 64,
             },
             {
                 "id": "governance",
                 "profile": "Governance",
                 "category": "governance_inputs",
-                "manifest_path": "manifest-governance/source-manifest.json",
-                "manifest_sha256": "C" * 64,
-                "manifest_json_sha256": "3" * 64,
             },
         ],
         "external_inputs": [],
@@ -184,6 +182,56 @@ def valid_matrix(contract, result="PASS", owner=None, overall="PASS"):
     return matrix
 
 
+def git_fixture(repo_root, *arguments):
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo_root),
+            "-c",
+            "core.quotepath=false",
+            "-c",
+            "user.name=fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "-c",
+            f"core.hooksPath={repo_root / '.no-hooks'}",
+            *arguments,
+        ],
+        check=True,
+        cwd=ROOT,
+        capture_output=True,
+    )
+    return result.stdout.decode("utf-8").strip()
+
+
+def commit_fixture_files(repo_root, files, message="fixture"):
+    """\u5199\u5165\u5e76\u63d0\u4ea4\u4e00\u7ec4\u6587\u4ef6\uff0c\u8fd4\u56de\u65b0\u63d0\u4ea4\u7684\u4e09\u4e2a\u51bb\u7ed3\u5bf9\u8c61 id\u3002"""
+    for relative, payload in files.items():
+        target = repo_root.joinpath(*relative.split("/"))
+        if payload is None:
+            target.unlink()
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(payload)
+    git_fixture(repo_root, "add", "-A", ".")
+    git_fixture(repo_root, "commit", "-q", "--allow-empty", "-m", message)
+    return fixture_freeze(repo_root)
+
+
+def fixture_freeze(repo_root, revision="HEAD"):
+    """\u8fd4\u56de (commit, tree, profile config blob) \u4e09\u4e2a\u51bb\u7ed3\u5bf9\u8c61\u3002"""
+    commit = git_fixture(repo_root, "rev-parse", "--verify", f"{revision}^{{commit}}")
+    tree = git_fixture(repo_root, "rev-parse", "--verify", f"{revision}^{{tree}}")
+    config_blob = git_fixture(
+        repo_root,
+        "rev-parse",
+        "--verify",
+        f"{revision}:{VALIDATOR.PROFILE_CONFIG_REPO_PATH}",
+    )
+    return commit, tree, config_blob
+
+
 def create_fixture_repo(path, extra_files=None):
     path.mkdir(parents=True, exist_ok=True)
     files = {
@@ -196,69 +244,17 @@ def create_fixture_repo(path, extra_files=None):
     )
     files["MDK-ARM_F435/RTE/_X-Track/RTE_Components.h"] = b"#define RTE_FIXTURE 1\n"
     files["Tools/\u56fe\u6807/README.md"] = b"unicode path fixture\n"
+    files[VALIDATOR.PROFILE_CONFIG_REPO_PATH] = PROFILE_CONFIG_PATH.read_bytes()
     files.update(extra_files or {})
-    for relative, payload in files.items():
-        target = path.joinpath(*relative.split("/"))
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(payload)
     subprocess.run(["git", "init", "-q", str(path)], check=True, cwd=ROOT)
     subprocess.run(
         ["git", "-C", str(path), "config", "core.autocrlf", "false"],
         check=True,
         cwd=ROOT,
     )
-    hooks = path / ".no-hooks"
-    hooks.mkdir()
-    subprocess.run(["git", "-C", str(path), "add", "."], check=True, cwd=ROOT)
-    subprocess.run(
-        [
-            "git",
-            "-C",
-            str(path),
-            "-c",
-            "user.name=fixture",
-            "-c",
-            "user.email=fixture@example.invalid",
-            "-c",
-            f"core.hooksPath={hooks}",
-            "commit",
-            "-q",
-            "-m",
-            "fixture",
-        ],
-        check=True,
-        cwd=ROOT,
-    )
+    (path / ".no-hooks").mkdir()
+    commit_fixture_files(path, files)
     return path
-
-
-def records_for_profile(profile, repo_root):
-    return VALIDATOR._collect_profile_records(repo_root, profile)
-
-
-def write_input_manifest(bundle, group, records=None):
-    if records is None:
-        raise ValueError("manifest records must be provided by a real fixture worktree")
-    records = copy.deepcopy(records)
-    manifest_path = bundle / group["manifest_path"]
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    text_bytes = VALIDATOR._manifest_text_bytes(records)
-    text_path = manifest_path.with_name("source-manifest.txt")
-    text_path.write_bytes(text_bytes)
-    stable_hash = hashlib.sha256(text_bytes).hexdigest().upper()
-    manifest = {
-        "Schema": VALIDATOR.INPUT_MANIFEST_SCHEMA,
-        "Profile": group["profile"],
-        "Ordering": VALIDATOR.INPUT_MANIFEST_ORDERING,
-        "Encoding": VALIDATOR.INPUT_MANIFEST_ENCODING,
-        "FileCount": len(records),
-        "ManifestSHA256": stable_hash,
-        "Files": records,
-    }
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    group["manifest_sha256"] = stable_hash
-    group["manifest_json_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest().upper()
-    return manifest_path, text_path, manifest
 
 
 def rewrite_contract_and_matrix(contract_path, matrix_path, contract, matrix):
@@ -268,15 +264,14 @@ def rewrite_contract_and_matrix(contract_path, matrix_path, contract, matrix):
     matrix_path.write_text(json.dumps(matrix, indent=2) + "\n", encoding="utf-8")
 
 
-def write_bundle(bundle, repo_root, contract=None, matrix=None, records_by_profile=None):
+def write_bundle(bundle, repo_root, contract=None, matrix=None, revision="HEAD"):
     contract = copy.deepcopy(contract or valid_contract())
     matrix = copy.deepcopy(matrix or valid_matrix(contract))
-    records_by_profile = records_by_profile or {}
-    for group in contract["input_groups"]:
-        records = records_by_profile.get(group["profile"])
-        if records is None:
-            records = records_for_profile(group["profile"], repo_root)
-        write_input_manifest(bundle, group, records)
+    (
+        contract["freeze_commit"],
+        contract["freeze_tree"],
+        contract["profile_config_blob"],
+    ) = fixture_freeze(repo_root, revision)
 
     raw = bundle / "raw" / "func-1.log"
     raw.parent.mkdir(parents=True, exist_ok=True)
@@ -348,54 +343,160 @@ class AcceptanceBundleTests(unittest.TestCase):
             )
             self.assertEqual(0, result, stderr)
 
-    def test_powershell_manifest_matches_python_worktree_rebuild(self):
-        if POWERSHELL is None:
-            self.skipTest("PowerShell is unavailable")
+    def test_frozen_not_run_matrix_performs_execution_preflight(self):
         with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
-            temp = Path(temp_dir)
-            env = os.environ.copy()
-            for name in ("TEMP", "TMP", "TMPDIR"):
-                env[name] = str(temp)
-            for profile in ("Production", "Validation", "Governance"):
-                output = self.repo_root / f".manifest-output-{profile.lower()}"
-                result = subprocess.run(
-                    [
-                        POWERSHELL,
-                        "-NoProfile",
-                        "-ExecutionPolicy",
-                        "Bypass",
-                        "-File",
-                        str(MANIFEST_SCRIPT),
-                        "-RepoRoot",
-                        str(self.repo_root),
-                        "-OutputDirectory",
-                        str(output),
-                        "-Profile",
-                        profile,
-                    ],
-                    cwd=ROOT,
-                    env=env,
-                    capture_output=True,
-                    text=True,
-                )
-                self.assertEqual(0, result.returncode, result.stderr)
-                manifest = json.loads(
-                    (output / "source-manifest.json").read_text(encoding="utf-8-sig")
-                )
-                self.assertEqual(
-                    records_for_profile(profile, self.repo_root), manifest["Files"]
-                )
-                if profile == "Validation":
-                    self.assertIn(
-                        "Tools/\u56fe\u6807/README.md",
-                        {record["Path"] for record in manifest["Files"]},
-                    )
+            root = Path(temp_dir)
+            repo = create_fixture_repo(root / "repo")
+            contract = valid_contract()
+            matrix = valid_matrix(contract, result="NOT_OBSERVED", overall="NOT_RUN")
+            contract_path, matrix_path, _, _ = write_bundle(
+                root / "bundle", repo, contract, matrix
+            )
+            untracked = repo / "USER" / "implicit-input.c"
+            untracked.parent.mkdir(parents=True, exist_ok=True)
+            untracked.write_bytes(b"int implicit_input;\n")
+            result, _, stderr = run_main(
+                [
+                    "--contract",
+                    str(contract_path),
+                    "--matrix",
+                    str(matrix_path),
+                    "--repo-root",
+                    str(repo),
+                ]
+            )
+            self.assertEqual(1, result)
+            self.assertIn("dirty or untracked Production", stderr)
 
-    def test_contract_requires_all_three_manifest_profiles(self):
+    def test_tree_enumeration_matches_worktree_enumeration_on_fixture(self):
+        # \u9a8c\u6536\u8f93\u5165\u7684\u552f\u4e00\u5b9a\u4e49\u662f git tree\uff1b\u5de5\u4f5c\u6811\u679a\u4e3e\u53ea\u7528\u4e8e\u6cbb\u7406\u6d4b\u8bd5\u5bf9\u7167\uff0c
+        # \u4e24\u8005\u5728\u5e72\u51c0\u68c0\u51fa\u4e0a\u5fc5\u987b\u9010\u8def\u5f84\u76f8\u7b49\uff0c\u4e14\u975e ASCII \u8def\u5f84\u4e0d\u5f97\u56e0\u5f15\u53f7\u8f6c\u4e49\u4e22\u5931\u3002
+        _, tree, _ = fixture_freeze(self.repo_root)
+        for profile in sorted(VALIDATOR.PROFILE_NAMES):
+            tree_paths = VALIDATOR._profile_tree_paths(self.repo_root, tree, profile)
+            self.assertTrue(tree_paths, profile)
+            self.assertEqual(VALIDATOR._profile_paths(self.repo_root, profile), tree_paths)
+            self.assertTrue(
+                VALIDATOR.PROFILE_REQUIRED_PATHS[profile].issubset(tree_paths), profile
+            )
+        self.assertIn(
+            "Tools/\u56fe\u6807/README.md",
+            VALIDATOR._profile_tree_paths(self.repo_root, tree, "Validation"),
+        )
+
+    def test_worktree_enumeration_does_not_report_deleted_index_entries(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            _, tree, _ = fixture_freeze(repo)
+            deleted = repo / "Tools" / "acceptance" / "validate_bundle.py"
+            deleted.unlink()
+            self.assertNotIn(
+                "Tools/acceptance/validate_bundle.py",
+                VALIDATOR._profile_paths(repo, "Validation"),
+            )
+            self.assertIn(
+                "Tools/acceptance/validate_bundle.py",
+                VALIDATOR._profile_tree_paths(repo, tree, "Validation"),
+            )
+
+    def test_real_repository_head_tree_contains_required_profile_paths(self):
+        # \u771f\u4ed3\u5e93\u7684 HEAD tree \u5fc5\u987b\u8ba9\u4e09\u4e2a profile \u90fd\u975e\u7a7a\u4e14\u8986\u76d6 required_paths\uff1b
+        # \u8fd9\u662f v3 \u5408\u540c\u5728\u4efb\u4f55\u68c0\u51fa\u4e0a\u90fd\u80fd\u7528 git \u5bf9\u8c61\u6838\u5bf9\u7684\u524d\u63d0\u3002
+        for profile in sorted(VALIDATOR.PROFILE_NAMES):
+            paths = set(VALIDATOR._profile_tree_paths(ROOT, "HEAD^{tree}", profile))
+            self.assertTrue(paths, profile)
+            self.assertEqual(
+                set(),
+                VALIDATOR.PROFILE_REQUIRED_PATHS[profile] - paths,
+                f"{profile} required_paths \u5fc5\u987b\u5b58\u5728\u4e8e HEAD tree",
+            )
+
+    def test_board_and_freeze_index_are_outside_every_profile(self):
+        # \u770b\u677f\u6bcf\u6b21\u6536\u53e3\u5fc5\u7136\u56de\u5199\uff0c\u51bb\u7ed3\u70b9\u7d22\u5f15\u6bcf\u6b21\u6536\u53e3\u5fc5\u7136\u8ffd\u52a0\uff1a\u4e8c\u8005\u82e5\u843d\u5728\u4efb\u4f55 profile \u5185\uff0c
+        # \u6536\u53e3\u52a8\u4f5c\u672c\u8eab\u5c31\u4f1a\u6253\u7ea2\u521a\u51bb\u7ed3\u7684\u5305\uff08\u81ea\u6307\u73af\uff09\u3002
+        for profile in sorted(VALIDATOR.PROFILE_NAMES):
+            definition = VALIDATOR._profile_definition(profile)
+            self.assertEqual(
+                [],
+                VALIDATOR._filter_profile_paths(
+                    [BOARD_PATH, VALIDATOR.FREEZE_INDEX_PATH], definition
+                ),
+                profile,
+            )
+            self.assertNotIn(BOARD_PATH, definition["required_paths"])
+
+    def test_freeze_index_rows_bind_reachable_bundle_and_input_commits(self):
+        rows = []
+        for line in FREEZE_INDEX.read_text(encoding="utf-8").splitlines():
+            if not re.match(r"^\|\s*P\d", line):
+                continue
+            cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
+            self.assertEqual(6, len(cells), line)
+            rows.append(cells)
+        self.assertEqual(7, len(rows))
+
+        seen = set()
+        for contract_id, schema, bundle_commit, freeze_commit, freeze_tree, result in rows:
+            self.assertNotIn(contract_id, seen)
+            seen.add(contract_id)
+            self.assertRegex(bundle_commit, r"^[0-9a-f]{40}$")
+            self.assertRegex(freeze_commit, r"^[0-9a-f]{40}$")
+            self.assertRegex(freeze_tree, r"^[0-9a-f]{40}$")
+            self.assertEqual("PASS", result)
+            self.assertEqual("commit", git_fixture(ROOT, "cat-file", "-t", bundle_commit))
+            self.assertEqual("commit", git_fixture(ROOT, "cat-file", "-t", freeze_commit))
+            self.assertEqual(freeze_tree, git_fixture(ROOT, "rev-parse", f"{freeze_commit}^{{tree}}"))
+            git_fixture(ROOT, "merge-base", "--is-ancestor", freeze_commit, bundle_commit)
+            git_fixture(ROOT, "merge-base", "--is-ancestor", bundle_commit, "HEAD")
+
+            contract_text = git_fixture(
+                ROOT,
+                "show",
+                f"{bundle_commit}:docs/acceptance-contracts/{contract_id}.contract.json",
+            )
+            contract = json.loads(contract_text)
+            self.assertEqual(f"etrack-acceptance-contract-{schema}", contract["schema"])
+            if schema == "v2":
+                self.assertEqual(bundle_commit, freeze_commit)
+            elif schema == "v3":
+                self.assertEqual(freeze_commit, contract["freeze_commit"])
+                self.assertEqual(freeze_tree, contract["freeze_tree"])
+                self.assertRegex(contract["profile_config_blob"], r"^[0-9a-fA-F]{40}$")
+            else:
+                self.fail(f"unsupported schema in freeze index: {schema}")
+
+    def test_contract_requires_all_three_input_groups(self):
         contract = valid_contract()
         contract["input_groups"] = contract["input_groups"][:1]
         errors = VALIDATOR.validate_contract(contract)
         self.assertTrue(any("missing required groups" in error for error in errors))
+
+    def test_legacy_v2_contract_is_rejected_with_freeze_index_pointer(self):
+        contract = valid_contract()
+        contract["schema"] = "etrack-acceptance-contract-v2"
+        errors = VALIDATOR.validate_contract(contract)
+        self.assertEqual(1, len(errors), errors)
+        self.assertIn("etrack-acceptance-contract-v3", errors[0])
+        self.assertIn(VALIDATOR.FREEZE_INDEX_PATH, errors[0])
+        self.assertTrue((ROOT / VALIDATOR.FREEZE_INDEX_PATH).is_file())
+
+    def test_contract_freeze_point_must_be_git_object_ids(self):
+        for field in ("freeze_commit", "freeze_tree", "profile_config_blob"):
+            for bad in (None, "", "abc", "0" * 39, "g" * 40, "0" * 64):
+                contract = valid_contract()
+                contract[field] = bad
+                errors = VALIDATOR.validate_contract(contract)
+                self.assertEqual(
+                    [f"contract.{field} must be a 40-hex Git object id"], errors, (field, bad)
+                )
+
+    def test_input_groups_reject_manifest_fields(self):
+        contract = valid_contract()
+        contract["input_groups"][0]["manifest_path"] = "manifest-production/source-manifest.json"
+        contract["input_groups"][0]["manifest_sha256"] = "A" * 64
+        errors = VALIDATOR.validate_contract(contract)
+        self.assertEqual(1, len(errors), errors)
+        self.assertIn("unsupported fields: manifest_path, manifest_sha256", errors[0])
 
     def test_contract_id_and_parent_must_match_version(self):
         contract = valid_contract()
@@ -527,25 +628,201 @@ class AcceptanceBundleTests(unittest.TestCase):
             self.assertEqual(1, result)
             self.assertIn("artifact file is missing", stderr)
 
-    def test_input_manifests_verify_json_and_stable_hashes(self):
+    def test_freeze_objects_pass_for_the_committed_fixture(self):
         with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
-            bundle = Path(temp_dir)
-            _, _, contract, _ = write_bundle(bundle, self.repo_root)
+            _, _, contract, _ = write_bundle(Path(temp_dir), self.repo_root)
+            commit, tree, config_blob = fixture_freeze(self.repo_root)
             self.assertEqual(
-                [],
-                VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root),
+                (commit, tree, config_blob),
+                (
+                    contract["freeze_commit"],
+                    contract["freeze_tree"],
+                    contract["profile_config_blob"],
+                ),
             )
-            contract["input_groups"][0]["manifest_json_sha256"] = "0" * 64
-            errors = VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root)
-            self.assertTrue(any("JSON SHA-256 mismatch" in error for error in errors))
+            self.assertEqual([], VALIDATOR.validate_freeze_objects(contract, self.repo_root))
+            # 大小写不影响对象解析，校验器统一按小写比较。
+            contract["freeze_commit"] = commit.upper()
+            contract["freeze_tree"] = tree.upper()
+            self.assertEqual([], VALIDATOR.validate_freeze_objects(contract, self.repo_root))
 
-    def test_empty_manifest_is_rejected_end_to_end(self):
+    def test_freeze_objects_use_the_profile_config_from_the_frozen_tree(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            contract = valid_contract()
+            (
+                contract["freeze_commit"],
+                contract["freeze_tree"],
+                contract["profile_config_blob"],
+            ) = fixture_freeze(repo)
+            with mock.patch.object(VALIDATOR, "MANIFEST_PROFILE_CONFIG", {"profiles": {}}):
+                self.assertEqual([], VALIDATOR.validate_freeze_objects(contract, repo))
+
+            contract["profile_config_blob"] = git_fixture(repo, "rev-parse", "HEAD:AGENTS.md")
+            errors = VALIDATOR.validate_freeze_objects(contract, repo)
+            self.assertEqual(1, len(errors), errors)
+            self.assertIn("profile_config_blob does not match", errors[0])
+
+    def test_execution_worktree_rejects_dirty_and_untracked_profile_inputs(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            contract = valid_contract()
+            (
+                contract["freeze_commit"],
+                contract["freeze_tree"],
+                contract["profile_config_blob"],
+            ) = fixture_freeze(repo)
+            self.assertEqual([], VALIDATOR.validate_execution_worktree(contract, repo))
+
+            tracked = repo / "build_f435_and_simulator.bat"
+            tracked.write_bytes(b"dirty tracked input\n")
+            errors = VALIDATOR.validate_execution_worktree(contract, repo)
+            self.assertTrue(any("dirty or untracked Production" in error for error in errors), errors)
+
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            contract = valid_contract()
+            (
+                contract["freeze_commit"],
+                contract["freeze_tree"],
+                contract["profile_config_blob"],
+            ) = fixture_freeze(repo)
+            untracked = repo / "USER" / "untracked-input.c"
+            untracked.parent.mkdir(parents=True, exist_ok=True)
+            untracked.write_bytes(b"int untracked_input;\n")
+            errors = VALIDATOR.validate_execution_worktree(contract, repo)
+            self.assertTrue(any("dirty or untracked Production" in error for error in errors), errors)
+
+    def test_execution_worktree_allows_bundle_only_commits_but_rejects_profile_drift(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            contract = valid_contract()
+            (
+                contract["freeze_commit"],
+                contract["freeze_tree"],
+                contract["profile_config_blob"],
+            ) = fixture_freeze(repo)
+            commit_fixture_files(
+                repo,
+                {"docs/acceptance-contracts/P9-9-v1.contract.json": b"{}\n"},
+                "commit bundle bytes outside profiles",
+            )
+            self.assertEqual([], VALIDATOR.validate_execution_worktree(contract, repo))
+
+            commit_fixture_files(
+                repo,
+                {"USER/App/App.cpp": b"// changed after acceptance freeze\n"},
+                "change a frozen production input",
+            )
+            errors = VALIDATOR.validate_execution_worktree(contract, repo)
+            self.assertTrue(any("execution HEAD changes frozen Production" in error for error in errors), errors)
+
+    def test_execution_worktree_rejects_a_present_but_unreachable_freeze_commit(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            _, tree, config_blob = fixture_freeze(repo)
+            unreachable = git_fixture(repo, "commit-tree", tree, "-m", "unreachable fixture")
+            contract = valid_contract()
+            contract["freeze_commit"] = unreachable
+            contract["freeze_tree"] = tree
+            contract["profile_config_blob"] = config_blob
+            self.assertEqual([], VALIDATOR.validate_freeze_objects(contract, repo))
+            errors = VALIDATOR.validate_execution_worktree(contract, repo)
+            self.assertEqual(1, len(errors), errors)
+            self.assertIn("not an ancestor", errors[0])
+
+    def test_freeze_objects_reject_missing_or_mistyped_objects(self):
+        contract = valid_contract()
+        commit, tree, config_blob = fixture_freeze(self.repo_root)
+        contract["profile_config_blob"] = config_blob
+        blob = git_fixture(self.repo_root, "rev-parse", "HEAD:AGENTS.md")
+
+        contract["freeze_commit"], contract["freeze_tree"] = ABSENT_OID, tree
+        errors = VALIDATOR.validate_freeze_objects(contract, self.repo_root)
+        self.assertEqual(1, len(errors), errors)
+        self.assertIn(f"freeze_commit object is not present in this repository: {ABSENT_OID}", errors[0])
+        self.assertIn(VALIDATOR.FREEZE_INDEX_PATH, errors[0])
+
+        contract["freeze_commit"], contract["freeze_tree"] = commit, ABSENT_OID
+        errors = VALIDATOR.validate_freeze_objects(contract, self.repo_root)
+        self.assertEqual([f"freeze_tree object is not present in this repository: {ABSENT_OID}"], errors)
+
+        contract["freeze_commit"], contract["freeze_tree"] = tree, tree
+        errors = VALIDATOR.validate_freeze_objects(contract, self.repo_root)
+        self.assertEqual([f"freeze_commit is a tree, not a commit: {tree}"], errors)
+
+        contract["freeze_commit"], contract["freeze_tree"] = commit, blob
+        errors = VALIDATOR.validate_freeze_objects(contract, self.repo_root)
+        self.assertEqual([f"freeze_tree is a blob, not a tree: {blob}"], errors)
+
+    def test_freeze_tree_must_match_freeze_commit_tree(self):
+        contract = valid_contract()
+        commit, tree, config_blob = fixture_freeze(self.repo_root)
+        contract["profile_config_blob"] = config_blob
+        subtree = git_fixture(self.repo_root, "rev-parse", "HEAD:Tools")
+        contract["freeze_commit"], contract["freeze_tree"] = commit, subtree
+        errors = VALIDATOR.validate_freeze_objects(contract, self.repo_root)
+        self.assertEqual(
+            [f"freeze_tree does not match freeze_commit^{{tree}}: contract={subtree} commit={tree}"],
+            errors,
+        )
+
+    def test_freeze_tree_must_keep_every_profile_non_empty_with_required_paths(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            contract = valid_contract()
+
+            # 删掉一个 Validation 必需路径：其余路径仍在，报“缺必需路径”。
+            (
+                contract["freeze_commit"],
+                contract["freeze_tree"],
+                contract["profile_config_blob"],
+            ) = commit_fixture_files(repo, {"Tools/acceptance/validate_bundle.py": None}, "drop validator")
+            errors = VALIDATOR.validate_freeze_objects(contract, repo)
+            self.assertEqual(
+                ["freeze_tree is missing required Validation paths: Tools/acceptance/validate_bundle.py"],
+                errors,
+            )
+
+            # 删掉全部 Governance 路径：报“profile 为空”，而不是列一长串缺失路径。
+            governance = VALIDATOR._profile_tree_paths(repo, contract["freeze_tree"], "Governance")
+            (
+                contract["freeze_commit"],
+                contract["freeze_tree"],
+                contract["profile_config_blob"],
+            ) = commit_fixture_files(repo, {path: None for path in governance}, "drop governance")
+            errors = VALIDATOR.validate_freeze_objects(contract, repo)
+            self.assertIn("freeze_tree contains no Governance paths", errors)
+            self.assertFalse(any("missing required Governance" in error for error in errors), errors)
+
+            # 历史提交不受后续删除影响：回到初始提交仍然干净。
+            (
+                contract["freeze_commit"],
+                contract["freeze_tree"],
+                contract["profile_config_blob"],
+            ) = fixture_freeze(repo, "HEAD~2")
+            self.assertEqual([], VALIDATOR.validate_freeze_objects(contract, repo))
+
+    def test_freeze_objects_require_a_git_worktree_root(self):
+        contract = valid_contract()
+        (
+            contract["freeze_commit"],
+            contract["freeze_tree"],
+            contract["profile_config_blob"],
+        ) = fixture_freeze(self.repo_root)
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
+            errors = VALIDATOR.validate_freeze_objects(contract, temp_dir)
+        self.assertEqual(1, len(errors), errors)
+        self.assertIn("repository root is invalid", errors[0])
+        # 结构错误（非 40-hex）由 validate_contract 报告，这里不重复报。
+        contract["freeze_commit"] = "not-an-oid"
+        self.assertEqual([], VALIDATOR.validate_freeze_objects(contract, self.repo_root))
+
+    def test_absent_freeze_commit_is_rejected_end_to_end(self):
         with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
             bundle = Path(temp_dir)
-            contract_path, matrix_path, contract, matrix = write_bundle(
-                bundle, self.repo_root
-            )
-            write_input_manifest(bundle, contract["input_groups"][0], records=[])
+            contract_path, matrix_path, contract, matrix = write_bundle(bundle, self.repo_root)
+            contract["freeze_commit"] = ABSENT_OID
             rewrite_contract_and_matrix(contract_path, matrix_path, contract, matrix)
             result, _, stderr = run_main(
                 [
@@ -558,72 +835,8 @@ class AcceptanceBundleTests(unittest.TestCase):
                 ]
             )
             self.assertEqual(1, result)
-            self.assertIn("Files must be a non-empty list", stderr)
-
-    def test_manifest_rejects_forged_internal_hash_and_missing_text(self):
-        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
-            bundle = Path(temp_dir)
-            _, _, contract, _ = write_bundle(bundle, self.repo_root)
-            group = contract["input_groups"][0]
-            manifest_path = bundle / group["manifest_path"]
-            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            manifest["ManifestSHA256"] = "0" * 64
-            manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-            group["manifest_json_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest().upper()
-            manifest_path.with_name("source-manifest.txt").unlink()
-            errors = VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root)
-            self.assertTrue(any("stable SHA-256 mismatch" in error for error in errors))
-            self.assertTrue(any("text file is missing" in error for error in errors))
-
-    def test_manifest_rejects_out_of_order_duplicate_and_missing_required_paths(self):
-        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
-            bundle = Path(temp_dir)
-            _, _, contract, _ = write_bundle(bundle, self.repo_root)
-            group = contract["input_groups"][1]
-            records = records_for_profile("Validation", self.repo_root)
-            records[0], records[1] = records[1], records[0]
-            write_input_manifest(bundle, group, records)
-            errors = VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root)
-            self.assertTrue(any("not in ordinal order" in error for error in errors))
-
-            records = records_for_profile("Validation", self.repo_root)
-            records[1] = copy.deepcopy(records[0])
-            write_input_manifest(bundle, group, records)
-            errors = VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root)
-            self.assertTrue(any("duplicate paths" in error for error in errors))
-
-            records = records_for_profile("Validation", self.repo_root)[1:]
-            write_input_manifest(bundle, group, records)
-            errors = VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root)
-            self.assertTrue(any("missing required Validation paths" in error for error in errors))
-
-    def test_manifest_rejects_self_consistent_forged_worktree_records(self):
-        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
-            bundle = Path(temp_dir)
-            _, _, contract, _ = write_bundle(bundle, self.repo_root)
-            group = contract["input_groups"][0]
-            records = records_for_profile("Production", self.repo_root)
-            records[0]["Length"] += 7
-            records[0]["SHA256"] = "A" * 64
-            write_input_manifest(bundle, group, records)
-            errors = VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root)
-            self.assertTrue(any("worktree length mismatch" in error for error in errors))
-            self.assertTrue(any("worktree SHA-256 mismatch" in error for error in errors))
-
-    def test_production_manifest_cannot_omit_real_rte_inputs(self):
-        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
-            bundle = Path(temp_dir)
-            _, _, contract, _ = write_bundle(bundle, self.repo_root)
-            group = contract["input_groups"][0]
-            records = [
-                record
-                for record in records_for_profile("Production", self.repo_root)
-                if not record["Path"].startswith("MDK-ARM_F435/RTE/")
-            ]
-            write_input_manifest(bundle, group, records)
-            errors = VALIDATOR.validate_input_manifests(contract, bundle, self.repo_root)
-            self.assertTrue(any("missing worktree files for Production" in error for error in errors))
-            self.assertTrue(any("MDK-ARM_F435/RTE/" in error for error in errors))
+            self.assertIn("freeze_commit object is not present in this repository", stderr)
+            self.assertNotIn("worktree", stderr)
 
     def test_historical_performance_gate_is_rejected(self):
         contract = valid_contract()
@@ -654,26 +867,123 @@ class AcceptanceBundleTests(unittest.TestCase):
         matrix["overall_result"] = "HARNESS_FAIL"
         self.assertEqual([], VALIDATOR.validate_matrix(matrix, contract, contract_hash(contract)))
 
-    def test_rerun_ignores_manifest_packaging_metadata(self):
+    def test_rerun_ignores_the_commit_id_when_the_freeze_tree_is_unchanged(self):
+        # squash / rebase / cherry-pick 会换掉 commit id，但 tree 相同即输入字节相同，
+        # 不得据此要求重跑；tree 相同的比较也不需要仓库。
         previous_contract = valid_contract()
+        (
+            previous_contract["freeze_commit"],
+            previous_contract["freeze_tree"],
+            previous_contract["profile_config_blob"],
+        ) = fixture_freeze(self.repo_root)
         previous_matrix = valid_matrix(previous_contract)
         current = successor_contract(previous_contract)
-        current["input_groups"][0]["manifest_path"] = "other-root/source-manifest.json"
-        current["input_groups"][0]["manifest_json_sha256"] = "F" * 64
+        current["freeze_commit"] = ABSENT_OID
         plan = VALIDATOR.compute_rerun_plan(current, previous_contract, previous_matrix)
+        self.assertEqual([], plan["changed_input_groups"])
         self.assertEqual([], plan["rerun_criteria"])
         self.assertEqual(["FUNC-1"], plan["reusable_criteria"])
 
-    def test_rerun_invalidates_only_when_stable_input_hash_changes(self):
+    def test_rerun_invalidates_only_the_profiles_whose_tree_paths_changed(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            previous_contract = valid_contract()
+            (
+                previous_contract["freeze_commit"],
+                previous_contract["freeze_tree"],
+                previous_contract["profile_config_blob"],
+            ) = fixture_freeze(repo)
+            previous_matrix = valid_matrix(previous_contract)
+
+            current = successor_contract(previous_contract)
+            (
+                current["freeze_commit"],
+                current["freeze_tree"],
+                current["profile_config_blob"],
+            ) = commit_fixture_files(
+                repo,
+                {"tests/ota/test_acceptance_bundle.py": b"# fixture edit\n"},
+                "touch a validation input",
+            )
+            plan = VALIDATOR.compute_rerun_plan(
+                current, previous_contract, previous_matrix, repo_root=repo
+            )
+            self.assertEqual(["validation"], plan["changed_input_groups"])
+            self.assertEqual(["FUNC-1"], [item["id"] for item in plan["rerun_criteria"]])
+            self.assertIn("input_group_changed:validation", plan["rerun_criteria"][0]["reasons"])
+            self.assertEqual(["CMD-FUNC-1"], plan["required_commands"])
+            self.assertEqual(["ART-FIRMWARE"], plan["required_artifacts"])
+
+            # 收口回写看板与冻结点索引都在 profile 之外，不得让任何判据失效。
+            outside = successor_contract(current)
+            (
+                outside["freeze_commit"],
+                outside["freeze_tree"],
+                outside["profile_config_blob"],
+            ) = commit_fixture_files(
+                repo,
+                {
+                    BOARD_PATH: b"board writeback\n",
+                    VALIDATOR.FREEZE_INDEX_PATH: b"| P9-9-v1 | v3 | ... |\n",
+                },
+                "write the board back",
+            )
+            plan = VALIDATOR.compute_rerun_plan(
+                outside, current, valid_matrix(current), repo_root=repo
+            )
+            self.assertEqual([], plan["changed_input_groups"])
+            self.assertEqual(["FUNC-1"], plan["reusable_criteria"])
+
+    def test_rerun_uses_each_tree_profile_config_and_invalidates_definition_changes(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            previous = valid_contract()
+            (
+                previous["freeze_commit"],
+                previous["freeze_tree"],
+                previous["profile_config_blob"],
+            ) = fixture_freeze(repo)
+            previous_matrix = valid_matrix(previous)
+
+            config = json.loads(PROFILE_CONFIG_PATH.read_text(encoding="utf-8"))
+            config["profiles"]["Production"]["root_patterns"].remove("USER/")
+            current = successor_contract(previous)
+            (
+                current["freeze_commit"],
+                current["freeze_tree"],
+                current["profile_config_blob"],
+            ) = commit_fixture_files(
+                repo,
+                {
+                    VALIDATOR.PROFILE_CONFIG_REPO_PATH: (
+                        json.dumps(config, indent=2, ensure_ascii=False) + "\n"
+                    ).encode("utf-8")
+                },
+                "change the Production profile definition",
+            )
+            plan = VALIDATOR.compute_rerun_plan(
+                current, previous, previous_matrix, repo_root=repo
+            )
+            self.assertEqual(["production", "validation"], plan["changed_input_groups"])
+            self.assertEqual(["FUNC-1"], [item["id"] for item in plan["rerun_criteria"]])
+
+    def test_rerun_requires_a_repository_root_when_the_freeze_tree_differs(self):
         previous_contract = valid_contract()
+        (
+            previous_contract["freeze_commit"],
+            previous_contract["freeze_tree"],
+            previous_contract["profile_config_blob"],
+        ) = fixture_freeze(self.repo_root)
         previous_matrix = valid_matrix(previous_contract)
         current = successor_contract(previous_contract)
-        current["input_groups"][1]["manifest_sha256"] = "F" * 64
-        plan = VALIDATOR.compute_rerun_plan(current, previous_contract, previous_matrix)
-        self.assertEqual(["FUNC-1"], [item["id"] for item in plan["rerun_criteria"]])
-        self.assertIn("input_group_changed:validation", plan["rerun_criteria"][0]["reasons"])
-        self.assertEqual(["CMD-FUNC-1"], plan["required_commands"])
-        self.assertEqual(["ART-FIRMWARE"], plan["required_artifacts"])
+        current["freeze_tree"] = ABSENT_OID
+        with self.assertRaisesRegex(ValueError, "repository root is required"):
+            VALIDATOR.compute_rerun_plan(current, previous_contract, previous_matrix)
+        current["freeze_tree"] = "not-an-oid"
+        with self.assertRaisesRegex(ValueError, "40-hex freeze_tree"):
+            VALIDATOR.compute_rerun_plan(
+                current, previous_contract, previous_matrix, repo_root=self.repo_root
+            )
 
     def test_rerun_rejects_cross_task_same_version_and_wrong_parent(self):
         previous_contract = valid_contract()
@@ -686,7 +996,7 @@ class AcceptanceBundleTests(unittest.TestCase):
             VALIDATOR.compute_rerun_plan(cross_task, previous_contract, previous_matrix)
 
         same_version = copy.deepcopy(previous_contract)
-        same_version["input_groups"][0]["manifest_sha256"] = "F" * 64
+        same_version["freeze_commit"] = ABSENT_OID
         with self.assertRaisesRegex(ValueError, "next contract version"):
             VALIDATOR.compute_rerun_plan(same_version, previous_contract, previous_matrix)
 
@@ -696,22 +1006,40 @@ class AcceptanceBundleTests(unittest.TestCase):
             VALIDATOR.compute_rerun_plan(wrong_parent, previous_contract, previous_matrix)
 
     def test_reuse_is_rejected_when_dependency_changed(self):
-        previous_contract = valid_contract()
-        previous_matrix = valid_matrix(previous_contract)
-        current_contract = successor_contract(previous_contract)
-        current_contract["input_groups"][0]["manifest_sha256"] = "F" * 64
-        current_matrix = copy.deepcopy(previous_matrix)
-        current_matrix["contract_id"] = current_contract["contract_id"]
-        current_matrix["criteria"][0]["execution"] = "REUSED"
-        current_matrix["criteria"][0]["reused_from_round"] = previous_matrix["round_id"]
-        plan = VALIDATOR.compute_rerun_plan(current_contract, previous_contract, previous_matrix)
-        errors = VALIDATOR.validate_reuse(
-            current_matrix,
-            current_contract,
-            previous_matrix,
-            plan,
-        )
-        self.assertTrue(any("reuses invalidated evidence" in error for error in errors))
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-repo-fixture-") as temp_dir:
+            repo = create_fixture_repo(Path(temp_dir) / "repo")
+            previous_contract = valid_contract()
+            (
+                previous_contract["freeze_commit"],
+                previous_contract["freeze_tree"],
+                previous_contract["profile_config_blob"],
+            ) = fixture_freeze(repo)
+            previous_matrix = valid_matrix(previous_contract)
+            current_contract = successor_contract(previous_contract)
+            (
+                current_contract["freeze_commit"],
+                current_contract["freeze_tree"],
+                current_contract["profile_config_blob"],
+            ) = commit_fixture_files(
+                repo,
+                {"USER/App/App.cpp": b"// fixture edit\n"},
+                "touch a production input",
+            )
+            current_matrix = copy.deepcopy(previous_matrix)
+            current_matrix["contract_id"] = current_contract["contract_id"]
+            current_matrix["criteria"][0]["execution"] = "REUSED"
+            current_matrix["criteria"][0]["reused_from_round"] = previous_matrix["round_id"]
+            plan = VALIDATOR.compute_rerun_plan(
+                current_contract, previous_contract, previous_matrix, repo_root=repo
+            )
+            self.assertEqual(["production"], plan["changed_input_groups"])
+            errors = VALIDATOR.validate_reuse(
+                current_matrix,
+                current_contract,
+                previous_matrix,
+                plan,
+            )
+            self.assertTrue(any("reuses invalidated evidence" in error for error in errors))
 
     def test_reused_result_cannot_be_reused_again(self):
         previous_contract = valid_contract()
@@ -762,8 +1090,6 @@ class AcceptanceBundleTests(unittest.TestCase):
                 str(previous_contract_path),
                 "--previous-matrix",
                 str(previous_matrix_path),
-                "--previous-repo-root",
-                str(self.repo_root),
             ]
             result, stdout, stderr = run_main(
                 base_args + ["--write-rerun-plan", "rerun-plan.json"]
@@ -850,8 +1176,6 @@ class AcceptanceBundleTests(unittest.TestCase):
                     str(previous_contract_path),
                     "--previous-matrix",
                     str(previous_matrix_path),
-                    "--previous-repo-root",
-                    str(self.repo_root),
                     "--write-rerun-plan",
                     "linked-output/rerun-plan.json",
                 ]
@@ -879,6 +1203,17 @@ class AcceptanceBundleTests(unittest.TestCase):
             1,
             governance_step.count(f'{SYMLINK_TEST_REQUIRED_ENV}: "1"'),
             "Governance CI 必须把 symlink 安全用例设为不可跳过",
+        )
+
+    def test_governance_ci_fetches_history_for_freeze_reachability(self):
+        workflow = (ROOT / ".github" / "workflows" / "acceptance-governance.yml").read_text(
+            encoding="utf-8"
+        )
+        checkout = workflow.split("- name: Checkout", 1)[1].split("- name:", 1)[0]
+        self.assertIn(
+            "fetch-depth: 0",
+            checkout,
+            "冻结提交与证据包提交的祖先关系需要完整 Git 历史",
         )
 
     def test_rerun_plan_output_walks_parent_chain_without_symlink_privilege(self):
@@ -919,13 +1254,29 @@ class AcceptanceBundleTests(unittest.TestCase):
                     str(contract_path),
                     "--previous-matrix",
                     str(matrix_path),
-                    "--previous-repo-root",
-                    str(self.repo_root),
                 ]
             )
             self.assertEqual(1, result)
             self.assertIn("current and previous matrix files must be different", stderr)
             self.assertIn("round_id must be different", stderr)
+
+    def test_previous_contract_and_matrix_must_be_supplied_together(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as temp_dir:
+            contract_path, matrix_path, _, _ = write_bundle(Path(temp_dir), self.repo_root)
+            result, _, stderr = run_main(
+                [
+                    "--contract",
+                    str(contract_path),
+                    "--matrix",
+                    str(matrix_path),
+                    "--repo-root",
+                    str(self.repo_root),
+                    "--previous-contract",
+                    str(contract_path),
+                ]
+            )
+            self.assertEqual(1, result)
+            self.assertIn("previous contract and matrix must be supplied together", stderr)
 
 
 class GovernancePromptScopeTests(unittest.TestCase):

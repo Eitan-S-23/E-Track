@@ -1,5 +1,5 @@
 {
-  "schema": "etrack-acceptance-contract-v2",
+  "schema": "etrack-acceptance-contract-v3",
   "contract_id": "TASK-v1",
   "version": 1,
   "task_id": "TASK",
@@ -8,6 +8,9 @@
   "approved_by": "",
   "approved_at": "",
   "implementation_ref": "",
+  "freeze_commit": "0000000000000000000000000000000000000000",
+  "freeze_tree": "0000000000000000000000000000000000000000",
+  "profile_config_blob": "0000000000000000000000000000000000000000",
   "result_taxonomy": [
     "PASS",
     "PRODUCT_FAIL",
@@ -20,26 +23,17 @@
     {
       "id": "production",
       "profile": "Production",
-      "category": "production_source",
-      "manifest_path": "manifest-production/source-manifest.json",
-      "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "manifest_json_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      "category": "production_source"
     },
     {
       "id": "validation",
       "profile": "Validation",
-      "category": "validation_inputs",
-      "manifest_path": "manifest-validation/source-manifest.json",
-      "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "manifest_json_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      "category": "validation_inputs"
     },
     {
       "id": "governance",
       "profile": "Governance",
-      "category": "governance_inputs",
-      "manifest_path": "manifest-governance/source-manifest.json",
-      "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "manifest_json_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      "category": "governance_inputs"
     }
   ],
   "external_inputs": [],

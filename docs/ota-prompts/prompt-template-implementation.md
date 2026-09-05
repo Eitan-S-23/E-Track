@@ -8,7 +8,7 @@
 > - **Part A 撰写检查表** —— 给撰写者看，**禁止复制进派发的 prompt**。
 > - **Part B prompt 骨架** —— 复制到 `docs/ota-prompts/prompt-<卡ID>-implementation.md`
 >   后逐项填空。派单提示词是规范性文件，必须落在 `docs/ota-prompts/`（纳入 Governance
->   manifest 与 Acceptance Governance workflow），**不得放在 `.claude/`**。
+>   profile 与 Acceptance Governance workflow），**不得放在 `.claude/`**。
 
 ---
 
@@ -76,7 +76,9 @@ BCB ROLLBACK 自锁事故。**真机失效模式天然不可穷举**，所以 Pa
    `docs/ota-exec-notes/<卡ID>-implementation-evidence-<YYYY-MM-DD>.md`。
    **你不自验收** —— 验收由另一个非实现会话执行。
 4. **research 落盘**：编码前的检索/分析结论写进上面那个证据文档，不许只留在对话里。
-5. **不提交**：禁止 `git commit` / `push` / `merge`，由主会话收口。
+5. **不提交**：禁止 `git commit` / `push` / `merge`，由主会话收口。独立验收开始前，
+   主会话必须先把实现与 harness 全部提交，生成合同的 `freeze_commit` / `freeze_tree` /
+   `profile_config_blob`；验收不得直接消费本会话留下的脏工作树。
 6. **收尾**：结束前回写 <卡ID> 卡状态，并在看板 §10 会话日志追加一行。
 7. **绝对禁止** `git checkout -- <file>` / `git restore`：本 worktree 的未提交内容
    是唯一副本，覆盖即永久丢失。

@@ -116,7 +116,8 @@ i/crlf  w/crlf  attr/-text   docs/acceptance-contracts/P3-2-v1/manifest-producti
 
 ## 5. 一处「预期不可复跑」须留档
 
-`tests/ota/p3_2_verify_scope.py` 在收口后必然转红（23 项中 2 项失败），
+`tests/ota/p3_2_verify_scope.py` 在收口后必然转红（转红项数随工作区杂散文件浮动，
+实测既出现过 2 项也出现过 1 项，故不钉计数；下方是当轮冻结的原始输出），
 不是回归：
 
 ```text

@@ -9,12 +9,11 @@ import sys
 from pathlib import Path
 
 
-CONTRACT_SCHEMA = "etrack-acceptance-contract-v2"
+CONTRACT_SCHEMA = "etrack-acceptance-contract-v3"
+LEGACY_CONTRACT_SCHEMA = "etrack-acceptance-contract-v2"
 MATRIX_SCHEMA = "etrack-evidence-matrix-v2"
 RERUN_SCHEMA = "etrack-rerun-plan-v1"
-INPUT_MANIFEST_SCHEMA = "etrack-input-manifest-v2"
-INPUT_MANIFEST_ORDERING = "UTF-8 normalized slash paths, bytewise Ordinal ascending"
-INPUT_MANIFEST_ENCODING = "UTF-8 without BOM, CRLF, one trailing newline"
+FREEZE_INDEX_PATH = "docs/acceptance-contracts/FREEZE-INDEX.md"
 OVERALL_RESULTS = {
     "PASS",
     "PRODUCT_FAIL",
@@ -51,28 +50,22 @@ REQUIRED_INPUT_GROUPS = {
 MANIFEST_PROFILE_CONFIG_PATH = (
     Path(__file__).resolve().parents[1] / "provenance" / "manifest_profiles.json"
 )
+PROFILE_CONFIG_REPO_PATH = "Tools/provenance/manifest_profiles.json"
+PROFILE_NAMES = {"Production", "Validation", "Governance"}
 EXTERNAL_INPUT_CATEGORIES = {"fixture", "hardware_state", "toolchain", "environment"}
 CRITERION_KINDS = {"functional", "safety", "performance", "visual", "process"}
 SHA256_RE = re.compile(r"^[0-9A-Fa-f]{64}$")
+GIT_OID_RE = re.compile(r"^[0-9A-Fa-f]{40}$")
 
 
-def _load_manifest_profile_config():
-    try:
-        config = json.loads(MANIFEST_PROFILE_CONFIG_PATH.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"cannot load manifest profile config: {exc}") from exc
+def _validate_manifest_profile_config(config):
     if not isinstance(config, dict) or config.get("schema") != "etrack-manifest-profiles-v1":
-        raise RuntimeError("manifest profile config schema is invalid")
+        raise ValueError("manifest profile config schema is invalid")
     if set(config) != {"schema", "exclude_path_regex", "profiles"}:
-        raise RuntimeError("manifest profile config fields are invalid")
+        raise ValueError("manifest profile config fields are invalid")
     profiles = config.get("profiles")
-    if not isinstance(profiles, dict) or set(profiles) != {
-        "Legacy",
-        "Production",
-        "Validation",
-        "Governance",
-    }:
-        raise RuntimeError("manifest profile config must define all four profiles exactly once")
+    if not isinstance(profiles, dict) or set(profiles) != PROFILE_NAMES:
+        raise ValueError("manifest profile config must define the three profiles exactly once")
     for profile, definition in profiles.items():
         if not isinstance(definition, dict) or set(definition) != {
             "root_patterns",
@@ -80,18 +73,26 @@ def _load_manifest_profile_config():
             "exclude_prefixes",
             "required_paths",
         }:
-            raise RuntimeError(f"manifest profile fields are invalid: {profile}")
+            raise ValueError(f"manifest profile fields are invalid: {profile}")
         for field in ("root_patterns", "top_files", "exclude_prefixes", "required_paths"):
             values = definition.get(field)
             if not isinstance(values, list) or not all(
                 isinstance(value, str) and value for value in values
             ):
-                raise RuntimeError(f"manifest profile {profile}.{field} is invalid")
+                raise ValueError(f"manifest profile {profile}.{field} is invalid")
     try:
         re.compile(config.get("exclude_path_regex"))
     except (TypeError, re.error) as exc:
-        raise RuntimeError(f"manifest exclude regex is invalid: {exc}") from exc
+        raise ValueError(f"manifest exclude regex is invalid: {exc}") from exc
     return config
+
+
+def _load_manifest_profile_config():
+    try:
+        config = json.loads(MANIFEST_PROFILE_CONFIG_PATH.read_text(encoding="utf-8"))
+        return _validate_manifest_profile_config(config)
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        raise RuntimeError(f"cannot load manifest profile config: {exc}") from exc
 
 
 MANIFEST_PROFILE_CONFIG = _load_manifest_profile_config()
@@ -109,6 +110,10 @@ def _nonempty(value):
 
 def _is_sha256(value):
     return isinstance(value, str) and SHA256_RE.fullmatch(value) is not None
+
+
+def _is_git_oid(value):
+    return isinstance(value, str) and GIT_OID_RE.fullmatch(value) is not None
 
 
 def _list_of_strings(value, allow_empty=False):
@@ -134,15 +139,6 @@ def _is_bundle_relative(value):
     return not path.is_absolute() and ".." not in path.parts
 
 
-def _is_repo_relative(value):
-    if not _nonempty(value) or "\\" in value or value.startswith("/"):
-        return False
-    if re.match(r"^[A-Za-z]:", value):
-        return False
-    parts = value.split("/")
-    return all(part not in {"", ".", ".."} for part in parts)
-
-
 def _canonical(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
@@ -166,7 +162,6 @@ def _input_group_signature(group):
         "id": group.get("id"),
         "profile": group.get("profile"),
         "category": group.get("category"),
-        "manifest_sha256": group.get("manifest_sha256"),
     }
 
 
@@ -180,14 +175,6 @@ def _external_input_signature(item):
         "fingerprint": item.get("fingerprint"),
         "evidence_sha256": item.get("evidence_sha256"),
     }
-
-
-def _manifest_text_bytes(records):
-    lines = [
-        f"{record['SHA256'].upper()}  {record['Length']}  {record['Path']}"
-        for record in records
-    ]
-    return (("\r\n".join(lines)) + "\r\n").encode("utf-8")
 
 
 def _is_link_or_reparse(path):
@@ -229,31 +216,30 @@ def _resolve_git_worktree(repo_root):
     return git_root
 
 
-def _profile_paths(repo_root, profile):
-    definition = PROFILE_DEFINITIONS.get(profile)
+def _profile_definition(profile, config=None):
+    definitions = (config or MANIFEST_PROFILE_CONFIG)["profiles"]
+    definition = definitions.get(profile)
     if definition is None:
         raise ValueError(f"manifest profile is not defined: {profile}")
-    pathspecs = definition["root_patterns"] + definition["top_files"]
+    return definition
+
+
+def _profile_pathspecs(definition):
+    return definition["root_patterns"] + definition["top_files"]
+
+
+def _git_nul_paths(repo_root, git_args, profile, action):
+    # -z 提供原始 NUL 分隔路径；显式关闭 quotePath，避免以后改成文本输出时静默转义。
     result = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(repo_root),
-            "ls-files",
-            "-co",
-            "--exclude-standard",
-            "-z",
-            "--",
-            *pathspecs,
-        ],
+        ["git", "-C", str(repo_root), "-c", "core.quotepath=false", *git_args],
         capture_output=True,
         check=False,
     )
     if result.returncode != 0:
         message = result.stderr.decode("utf-8", errors="replace").strip()
-        raise ValueError(f"git ls-files failed for {profile}: {message or result.returncode}")
+        raise ValueError(f"git {action} failed for {profile}: {message or result.returncode}")
     try:
-        candidates = [
+        return [
             item.decode("utf-8").replace("\\", "/")
             for item in result.stdout.split(b"\0")
             if item
@@ -261,6 +247,9 @@ def _profile_paths(repo_root, profile):
     except UnicodeError as exc:
         raise ValueError(f"git returned a non-UTF-8 path for {profile}: {exc}") from exc
 
+
+def _filter_profile_paths(candidates, definition, exclude_re=None):
+    exclude_re = exclude_re or PROFILE_EXCLUDE_RE
     selected = set()
     top_files = set(definition["top_files"])
     for path in candidates:
@@ -273,39 +262,189 @@ def _profile_paths(repo_root, profile):
             continue
         for prefix in definition["root_patterns"]:
             if path.startswith(prefix):
-                if not PROFILE_EXCLUDE_RE.search(path):
+                if not exclude_re.search(path):
                     selected.add(path)
                 break
     return sorted(selected, key=lambda path: path.encode("utf-8"))
 
 
-def _collect_profile_records(repo_root, profile):
-    root = _resolve_git_worktree(repo_root)
-    records = []
-    for relative_path in _profile_paths(root, profile):
-        if not _is_repo_relative(relative_path):
-            raise ValueError(f"profile selected an invalid repository path: {relative_path}")
-        source = root.joinpath(*relative_path.split("/"))
-        if _is_link_or_reparse(source):
-            raise ValueError(f"manifest source is a link or reparse point: {relative_path}")
-        if not source.is_file():
-            continue
-        try:
-            resolved = source.resolve(strict=True)
-            resolved.relative_to(root)
-            data = source.read_bytes()
-        except ValueError as exc:
-            raise ValueError(f"manifest source escapes the worktree: {relative_path}") from exc
-        except OSError as exc:
-            raise ValueError(f"cannot read manifest source {relative_path}: {exc}") from exc
-        records.append(
-            {
-                "Path": relative_path,
-                "Length": len(data),
-                "SHA256": hashlib.sha256(data).hexdigest().upper(),
-            }
+def _profile_paths(repo_root, profile):
+    """枚举工作树现存文件（含未跟踪、排除忽略）；仅供治理与执行前检查。"""
+    definition = _profile_definition(profile)
+    candidates = _git_nul_paths(
+        repo_root,
+        ["ls-files", "-co", "--exclude-standard", "-z", "--", *_profile_pathspecs(definition)],
+        profile,
+        "ls-files",
+    )
+    selected = _filter_profile_paths(candidates, definition)
+    root = Path(repo_root)
+    return [path for path in selected if root.joinpath(*path.split("/")).is_file()]
+
+
+def _profile_tree_paths(repo_root, tree, profile, config=None):
+    """枚举 git tree 对象中落在 profile 内的路径；这是验收输入的唯一定义。"""
+    config = config or MANIFEST_PROFILE_CONFIG
+    definition = _profile_definition(profile, config)
+    exclude_re = re.compile(config["exclude_path_regex"])
+    candidates = _git_nul_paths(
+        repo_root,
+        ["ls-tree", "-r", "-z", "--name-only", tree, "--", *_profile_pathspecs(definition)],
+        profile,
+        "ls-tree",
+    )
+    return _filter_profile_paths(candidates, definition, exclude_re)
+
+
+def _profile_tree_changes(repo_root, previous_tree, current_tree, profile, config=None):
+    """两个 tree 之间 profile 路径集的差异；mtime、行尾、工作树状态都不参与。"""
+    config = config or MANIFEST_PROFILE_CONFIG
+    definition = _profile_definition(profile, config)
+    exclude_re = re.compile(config["exclude_path_regex"])
+    candidates = _git_nul_paths(
+        repo_root,
+        [
+            "diff-tree",
+            "-r",
+            "-z",
+            "--name-only",
+            "--no-renames",
+            "--no-commit-id",
+            previous_tree,
+            current_tree,
+            "--",
+            *_profile_pathspecs(definition),
+        ],
+        profile,
+        "diff-tree",
+    )
+    return _filter_profile_paths(candidates, definition, exclude_re)
+
+
+def _git_object_type(repo_root, oid):
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), "cat-file", "-t", oid],
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.decode("utf-8", errors="replace").strip()
+
+
+def _git_commit_tree(repo_root, commit):
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), "rev-parse", "--verify", "--quiet", f"{commit}^{{tree}}"],
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.decode("utf-8", errors="replace").strip().lower()
+
+
+def _git_resolve_oid(repo_root, expression):
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), "rev-parse", "--verify", "--quiet", expression],
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    oid = result.stdout.decode("utf-8", errors="replace").strip().lower()
+    return oid if _is_git_oid(oid) else None
+
+
+def _git_object_bytes(repo_root, oid, object_type):
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), "cat-file", object_type, oid],
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        message = result.stderr.decode("utf-8", errors="replace").strip()
+        raise ValueError(
+            f"cannot read Git {object_type} object {oid}: {message or result.returncode}"
         )
-    return records
+    return result.stdout
+
+
+def _profile_config_from_tree(repo_root, tree):
+    config_blob = _git_resolve_oid(repo_root, f"{tree}:{PROFILE_CONFIG_REPO_PATH}")
+    if config_blob is None:
+        raise ValueError(f"freeze_tree is missing {PROFILE_CONFIG_REPO_PATH}")
+    if _git_object_type(repo_root, config_blob) != "blob":
+        raise ValueError(f"{PROFILE_CONFIG_REPO_PATH} is not a blob in freeze_tree")
+    try:
+        data = _git_object_bytes(repo_root, config_blob, "blob")
+        config = json.loads(data.decode("utf-8"))
+        _validate_manifest_profile_config(config)
+    except (UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        raise ValueError(f"invalid frozen profile config: {exc}") from exc
+    return config_blob, config
+
+
+def _contract_profile_config(repo_root, contract):
+    freeze_tree = contract.get("freeze_tree")
+    expected_blob = contract.get("profile_config_blob")
+    if not _is_git_oid(freeze_tree) or not _is_git_oid(expected_blob):
+        raise ValueError("contract must carry 40-hex freeze_tree and profile_config_blob")
+    actual_blob, config = _profile_config_from_tree(repo_root, freeze_tree.lower())
+    if actual_blob != expected_blob.lower():
+        raise ValueError(
+            "profile_config_blob does not match the config in freeze_tree: "
+            f"contract={expected_blob.lower()} tree={actual_blob}"
+        )
+    return config
+
+
+def _git_is_ancestor(repo_root, ancestor, descendant):
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), "merge-base", "--is-ancestor", ancestor, descendant],
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode == 0:
+        return True
+    if result.returncode == 1:
+        return False
+    message = result.stderr.decode("utf-8", errors="replace").strip()
+    raise ValueError(f"git merge-base failed: {message or result.returncode}")
+
+
+def _profile_worktree_changes(repo_root, profile, config):
+    definition = _profile_definition(profile, config)
+    pathspecs = _profile_pathspecs(definition)
+    tracked = _git_nul_paths(
+        repo_root,
+        [
+            "diff",
+            "--no-ext-diff",
+            "--no-renames",
+            "--ignore-submodules=none",
+            "--name-only",
+            "-z",
+            "HEAD",
+            "--",
+            *pathspecs,
+        ],
+        profile,
+        "diff",
+    )
+    untracked = _git_nul_paths(
+        repo_root,
+        ["ls-files", "-o", "--exclude-standard", "-z", "--", *pathspecs],
+        profile,
+        "ls-files",
+    )
+    exclude_re = re.compile(config["exclude_path_regex"])
+    return _filter_profile_paths(tracked + untracked, definition, exclude_re)
+
+
+def _summarize_paths(paths, limit=8):
+    shown = paths[:limit]
+    suffix = f" (+{len(paths) - limit} more)" if len(paths) > limit else ""
+    return ", ".join(shown) + suffix
 
 
 def _gate_satisfied(gate, observed):
@@ -340,7 +479,13 @@ def validate_contract(contract, allow_draft=False):
     if not isinstance(contract, dict):
         return ["contract root must be an object"]
     if contract.get("schema") != CONTRACT_SCHEMA:
-        errors.append(f"contract schema must be {CONTRACT_SCHEMA}")
+        if contract.get("schema") == LEGACY_CONTRACT_SCHEMA:
+            errors.append(
+                f"contract schema must be {CONTRACT_SCHEMA}; a {LEGACY_CONTRACT_SCHEMA} bundle "
+                f"is only checkable at its frozen commit with that commit's validator, see {FREEZE_INDEX_PATH}"
+            )
+        else:
+            errors.append(f"contract schema must be {CONTRACT_SCHEMA}")
     for field in ("contract_id", "task_id", "invalidation_policy"):
         if not _nonempty(contract.get(field)):
             errors.append(f"contract.{field} must be a non-empty string")
@@ -369,6 +514,10 @@ def validate_contract(contract, allow_draft=False):
         for field in ("approved_by", "approved_at", "implementation_ref"):
             if not _nonempty(contract.get(field)):
                 errors.append(f"frozen contract.{field} must be set")
+    # 被验对象 = 实现提交、其 tree 与该 tree 内的 profile 配置。
+    for field in ("freeze_commit", "freeze_tree", "profile_config_blob"):
+        if not _is_git_oid(contract.get(field)):
+            errors.append(f"contract.{field} must be a 40-hex Git object id")
 
     taxonomy = contract.get("result_taxonomy")
     if not isinstance(taxonomy, list) or set(taxonomy) != RESULT_TAXONOMY:
@@ -402,12 +551,12 @@ def validate_contract(contract, allow_draft=False):
                 errors.append(f"{prefix}.profile must be {expected_profile}")
             if group.get("category") != expected_category:
                 errors.append(f"{prefix}.category must be {expected_category}")
-        if not _is_bundle_relative(group.get("manifest_path")):
-            errors.append(f"{prefix}.manifest_path must stay inside the bundle")
-        if not _is_sha256(group.get("manifest_sha256")):
-            errors.append(f"{prefix}.manifest_sha256 must be a stable file-set SHA-256")
-        if not _is_sha256(group.get("manifest_json_sha256")):
-            errors.append(f"{prefix}.manifest_json_sha256 must be a JSON file SHA-256")
+        extra_fields = sorted(set(group) - {"id", "profile", "category"})
+        if extra_fields:
+            errors.append(
+                f"{prefix} has unsupported fields: " + ", ".join(extra_fields)
+                + " (input groups reference git objects by profile only)"
+            )
     if input_ids != set(REQUIRED_INPUT_GROUPS):
         missing = sorted(set(REQUIRED_INPUT_GROUPS) - input_ids)
         extra = sorted(input_ids - set(REQUIRED_INPUT_GROUPS))
@@ -901,171 +1050,143 @@ def validate_evidence_files(matrix, bundle_directory):
     return errors
 
 
-def validate_input_manifests(contract, bundle_directory, repo_root):
+def validate_freeze_objects(contract, repo_root):
+    """核对冻结提交、tree、profile 配置 blob 及三个 profile 的最低结构。
+
+    profile 配置必须取自 freeze_tree，不能用运行校验器时所在 checkout 的配置
+    重新解释历史输入。
+    """
     errors = []
+    freeze_commit = contract.get("freeze_commit")
+    freeze_tree = contract.get("freeze_tree")
+    profile_config_blob = contract.get("profile_config_blob")
+    if not all(_is_git_oid(value) for value in (freeze_commit, freeze_tree, profile_config_blob)):
+        return errors
+    try:
+        root = _resolve_git_worktree(repo_root)
+    except ValueError as exc:
+        return [f"repository root is invalid: {exc}"]
+    freeze_commit = freeze_commit.lower()
+    freeze_tree = freeze_tree.lower()
+    profile_config_blob = profile_config_blob.lower()
+    commit_type = _git_object_type(root, freeze_commit)
+    if commit_type is None:
+        errors.append(
+            f"freeze_commit object is not present in this repository: {freeze_commit} "
+            f"(fetch the implementation commit or check {FREEZE_INDEX_PATH})"
+        )
+    elif commit_type != "commit":
+        errors.append(f"freeze_commit is a {commit_type}, not a commit: {freeze_commit}")
+    tree_type = _git_object_type(root, freeze_tree)
+    if tree_type is None:
+        errors.append(f"freeze_tree object is not present in this repository: {freeze_tree}")
+    elif tree_type != "tree":
+        errors.append(f"freeze_tree is a {tree_type}, not a tree: {freeze_tree}")
+    config_type = _git_object_type(root, profile_config_blob)
+    if config_type is None:
+        errors.append(
+            f"profile_config_blob object is not present in this repository: {profile_config_blob}"
+        )
+    elif config_type != "blob":
+        errors.append(
+            f"profile_config_blob is a {config_type}, not a blob: {profile_config_blob}"
+        )
+    if errors:
+        return errors
+    commit_tree = _git_commit_tree(root, freeze_commit)
+    if commit_tree != freeze_tree:
+        errors.append(
+            f"freeze_tree does not match freeze_commit^{{tree}}: contract={freeze_tree} commit={commit_tree}"
+        )
+        return errors
+    try:
+        actual_config_blob, profile_config = _profile_config_from_tree(root, freeze_tree)
+    except ValueError as exc:
+        return [str(exc)]
+    if actual_config_blob != profile_config_blob:
+        return [
+            "profile_config_blob does not match the config in freeze_tree: "
+            f"contract={profile_config_blob} tree={actual_config_blob}"
+        ]
     input_groups = contract.get("input_groups")
     if not isinstance(input_groups, list):
         return ["contract.input_groups must be a list"]
-    try:
-        worktree_root = _resolve_git_worktree(repo_root)
-    except ValueError as exc:
-        return [f"repository root is invalid: {exc}"]
-    bundle_root = Path(bundle_directory).resolve()
-    for index, group in enumerate(input_groups):
+    for group in input_groups:
         if not isinstance(group, dict):
             continue
-        relative_path = group.get("manifest_path")
-        expected_json_hash = group.get("manifest_json_sha256")
-        expected_manifest_hash = group.get("manifest_sha256")
-        if (
-            not _is_bundle_relative(relative_path)
-            or not _is_sha256(expected_json_hash)
-            or not _is_sha256(expected_manifest_hash)
-        ):
+        profile = group.get("profile")
+        if profile not in profile_config["profiles"]:
             continue
         try:
-            manifest_path = _resolve_bundle_file(bundle_root, relative_path)
-        except ValueError:
-            errors.append(f"input manifest path escapes the bundle: {relative_path}")
+            paths = _profile_tree_paths(root, freeze_tree, profile, profile_config)
+        except ValueError as exc:
+            errors.append(f"cannot enumerate {profile} paths in freeze_tree: {exc}")
             continue
-        if not manifest_path.is_file():
-            errors.append(f"input manifest file is missing: {relative_path}")
+        if not paths:
+            errors.append(f"freeze_tree contains no {profile} paths")
             continue
-        data = manifest_path.read_bytes()
-        actual_hash = hashlib.sha256(data).hexdigest().upper()
-        if actual_hash != expected_json_hash.upper():
-            errors.append(f"input manifest JSON SHA-256 mismatch: {relative_path}")
-        try:
-            manifest = json.loads(data.decode("utf-8"))
-        except (UnicodeError, json.JSONDecodeError):
-            errors.append(f"input manifest is not valid UTF-8 JSON: {relative_path}")
-            continue
-        if not isinstance(manifest, dict):
-            errors.append(f"input manifest root must be an object: {relative_path}")
-            continue
-        expected_keys = {
-            "Schema",
-            "Profile",
-            "Ordering",
-            "Encoding",
-            "FileCount",
-            "ManifestSHA256",
-            "Files",
-        }
-        if set(manifest) != expected_keys:
-            errors.append(f"input manifest fields are invalid: {relative_path}")
-        if manifest.get("Schema") != INPUT_MANIFEST_SCHEMA:
-            errors.append(f"input manifest schema mismatch: {relative_path}")
-        if manifest.get("Profile") != group.get("profile"):
-            errors.append(f"input manifest profile mismatch: {relative_path}")
-        if manifest.get("Ordering") != INPUT_MANIFEST_ORDERING:
-            errors.append(f"input manifest ordering mismatch: {relative_path}")
-        if manifest.get("Encoding") != INPUT_MANIFEST_ENCODING:
-            errors.append(f"input manifest encoding mismatch: {relative_path}")
-
-        files = manifest.get("Files")
-        records_valid = isinstance(files, list) and bool(files)
-        if not records_valid:
-            errors.append(f"input manifest Files must be a non-empty list: {relative_path}")
-            files = []
-        file_count = manifest.get("FileCount")
-        if (
-            not isinstance(file_count, int)
-            or isinstance(file_count, bool)
-            or file_count < 1
-            or file_count != len(files)
-        ):
-            errors.append(f"input manifest FileCount mismatch: {relative_path}")
-
-        paths = []
-        for record_index, record in enumerate(files):
-            record_prefix = f"{relative_path}:Files[{record_index}]"
-            if not isinstance(record, dict) or set(record) != {"Path", "Length", "SHA256"}:
-                errors.append(f"input manifest file record is invalid: {record_prefix}")
-                records_valid = False
-                continue
-            path = record.get("Path")
-            length = record.get("Length")
-            digest = record.get("SHA256")
-            if not _is_repo_relative(path):
-                errors.append(f"input manifest path is invalid: {record_prefix}")
-                records_valid = False
-            else:
-                paths.append(path)
-            if not isinstance(length, int) or isinstance(length, bool) or length < 0:
-                errors.append(f"input manifest length is invalid: {record_prefix}")
-                records_valid = False
-            if not _is_sha256(digest):
-                errors.append(f"input manifest SHA-256 is invalid: {record_prefix}")
-                records_valid = False
-
-        if paths != sorted(paths):
-            errors.append(f"input manifest paths are not in ordinal order: {relative_path}")
-            records_valid = False
-        if len(paths) != len(set(paths)):
-            errors.append(f"input manifest contains duplicate paths: {relative_path}")
-            records_valid = False
-        required_paths = PROFILE_REQUIRED_PATHS.get(group.get("profile"), set())
+        required_paths = set(profile_config["profiles"][profile]["required_paths"])
         missing_paths = sorted(required_paths - set(paths))
         if missing_paths:
             errors.append(
-                f"input manifest is missing required {group.get('profile')} paths: "
-                + ", ".join(missing_paths)
+                f"freeze_tree is missing required {profile} paths: " + ", ".join(missing_paths)
             )
-            records_valid = False
+    return errors
 
+
+def validate_execution_worktree(contract, repo_root):
+    """证明本轮执行 worktree 仍等价于 freeze_tree 的 profile 输入。"""
+    errors = []
+    freeze_commit = contract.get("freeze_commit")
+    freeze_tree = contract.get("freeze_tree")
+    if not _is_git_oid(freeze_commit) or not _is_git_oid(freeze_tree):
+        return errors
+    try:
+        root = _resolve_git_worktree(repo_root)
+        profile_config = _contract_profile_config(root, contract)
+    except ValueError as exc:
+        return [f"cannot validate the execution worktree: {exc}"]
+    freeze_commit = freeze_commit.lower()
+    freeze_tree = freeze_tree.lower()
+    if _git_object_type(root, freeze_commit) != "commit" or _git_object_type(root, freeze_tree) != "tree":
+        return errors
+    head_commit = _git_resolve_oid(root, "HEAD^{commit}")
+    head_tree = _git_resolve_oid(root, "HEAD^{tree}")
+    if head_commit is None or head_tree is None:
+        return ["cannot resolve the execution worktree HEAD commit and tree"]
+    try:
+        if not _git_is_ancestor(root, freeze_commit, head_commit):
+            errors.append(
+                "freeze_commit is not an ancestor of the execution worktree HEAD: "
+                f"freeze={freeze_commit} head={head_commit}"
+            )
+            return errors
+    except ValueError as exc:
+        return [str(exc)]
+
+    for group in contract.get("input_groups", []):
+        if not isinstance(group, dict):
+            continue
+        profile = group.get("profile")
+        if profile not in profile_config["profiles"]:
+            continue
         try:
-            expected_records = _collect_profile_records(worktree_root, group.get("profile"))
+            committed = _profile_tree_changes(
+                root, freeze_tree, head_tree, profile, profile_config
+            )
+            worktree = _profile_worktree_changes(root, profile, profile_config)
         except ValueError as exc:
-            errors.append(f"cannot rebuild {group.get('profile')} manifest: {exc}")
-            expected_records = None
-        if expected_records is not None:
-            expected_by_path = {record["Path"]: record for record in expected_records}
-            actual_by_path = {
-                record.get("Path"): record
-                for record in files
-                if isinstance(record, dict) and _is_repo_relative(record.get("Path"))
-            }
-            missing_actual = sorted(set(expected_by_path) - set(actual_by_path))
-            extra_actual = sorted(set(actual_by_path) - set(expected_by_path))
-            if missing_actual:
-                errors.append(
-                    f"input manifest is missing worktree files for {group.get('profile')}: "
-                    + ", ".join(missing_actual)
-                )
-            if extra_actual:
-                errors.append(
-                    f"input manifest contains files outside the {group.get('profile')} profile: "
-                    + ", ".join(extra_actual)
-                )
-            for path in sorted(set(expected_by_path) & set(actual_by_path)):
-                expected_record = expected_by_path[path]
-                actual_record = actual_by_path[path]
-                if actual_record.get("Length") != expected_record["Length"]:
-                    errors.append(f"input manifest worktree length mismatch: {path}")
-                actual_digest = actual_record.get("SHA256")
-                if (
-                    not isinstance(actual_digest, str)
-                    or actual_digest.upper() != expected_record["SHA256"]
-                ):
-                    errors.append(f"input manifest worktree SHA-256 mismatch: {path}")
-
-        internal_hash = manifest.get("ManifestSHA256")
-        if not _is_sha256(internal_hash):
-            errors.append(f"input manifest ManifestSHA256 is invalid: {relative_path}")
-        elif internal_hash.upper() != expected_manifest_hash.upper():
-            errors.append(f"input manifest stable SHA-256 mismatch: {relative_path}")
-
-        if records_valid:
-            text_bytes = _manifest_text_bytes(files)
-            computed_hash = hashlib.sha256(text_bytes).hexdigest().upper()
-            if not _is_sha256(internal_hash) or internal_hash.upper() != computed_hash:
-                errors.append(f"input manifest internal SHA-256 mismatch: {relative_path}")
-            text_path = manifest_path.with_name("source-manifest.txt")
-            if not text_path.is_file():
-                errors.append(f"input manifest text file is missing: {text_path.name}")
-            elif text_path.read_bytes() != text_bytes:
-                errors.append(f"input manifest text content mismatch: {relative_path}")
+            errors.append(f"cannot inspect execution inputs for {profile}: {exc}")
+            continue
+        if committed:
+            errors.append(
+                f"execution HEAD changes frozen {profile} inputs: {_summarize_paths(committed)}"
+            )
+        if worktree:
+            errors.append(
+                f"execution worktree has dirty or untracked {profile} inputs: "
+                + _summarize_paths(worktree)
+            )
     return errors
 
 
@@ -1176,6 +1297,64 @@ def validate_matrix_lineage(
     return errors
 
 
+def _changed_input_groups(current_contract, previous_contract, repo_root):
+    """判定两轮合同之间哪些输入组失效。
+
+    组签名或该 profile 的冻结定义不同即失效；否则按共同冻结定义比较两个 tree。
+    tree 不同又没有仓库可查时拒绝判定（fail-closed），绝不默认“未失效”。
+    """
+    current_groups = _records_by_id(current_contract.get("input_groups"))
+    previous_groups = _records_by_id(previous_contract.get("input_groups"))
+    changed = {
+        group_id
+        for group_id in set(current_groups) | set(previous_groups)
+        if _canonical(_input_group_signature(current_groups.get(group_id)))
+        != _canonical(_input_group_signature(previous_groups.get(group_id)))
+    }
+    current_tree = current_contract.get("freeze_tree")
+    previous_tree = previous_contract.get("freeze_tree")
+    current_config_blob = current_contract.get("profile_config_blob")
+    previous_config_blob = previous_contract.get("profile_config_blob")
+    if not _is_git_oid(current_tree) or not _is_git_oid(previous_tree):
+        raise ValueError("both contracts must carry a 40-hex freeze_tree")
+    if not _is_git_oid(current_config_blob) or not _is_git_oid(previous_config_blob):
+        raise ValueError("both contracts must carry a 40-hex profile_config_blob")
+    current_tree = current_tree.lower()
+    previous_tree = previous_tree.lower()
+    if current_tree == previous_tree:
+        if current_config_blob.lower() != previous_config_blob.lower():
+            raise ValueError("the same freeze_tree cannot carry different profile_config_blob values")
+        return sorted(changed)
+    if repo_root is None:
+        raise ValueError(
+            "freeze_tree differs between the contracts; a repository root is required "
+            "to diff the profile path sets"
+        )
+    root = _resolve_git_worktree(repo_root)
+    current_config = _contract_profile_config(root, current_contract)
+    previous_config = _contract_profile_config(root, previous_contract)
+    for group_id, group in current_groups.items():
+        if group_id in changed:
+            continue
+        profile = group.get("profile")
+        if (
+            profile not in current_config["profiles"]
+            or profile not in previous_config["profiles"]
+        ):
+            changed.add(group_id)
+            continue
+        definition_changed = (
+            current_config["exclude_path_regex"] != previous_config["exclude_path_regex"]
+            or _canonical(current_config["profiles"][profile])
+            != _canonical(previous_config["profiles"][profile])
+        )
+        if definition_changed or _profile_tree_changes(
+            root, previous_tree, current_tree, profile, current_config
+        ):
+            changed.add(group_id)
+    return sorted(changed)
+
+
 def compute_rerun_plan(
     current_contract,
     previous_contract,
@@ -1184,6 +1363,7 @@ def compute_rerun_plan(
     previous_contract_sha256=None,
     previous_matrix_sha256=None,
     current_round_id=None,
+    repo_root=None,
 ):
     current_hash = current_contract_sha256 or _json_sha256(current_contract)
     previous_hash = previous_contract_sha256 or _json_sha256(previous_contract)
@@ -1195,14 +1375,7 @@ def compute_rerun_plan(
     )
     if lineage_errors:
         raise ValueError("invalid contract lineage: " + "; ".join(lineage_errors))
-    current_groups = _records_by_id(current_contract.get("input_groups"))
-    previous_groups = _records_by_id(previous_contract.get("input_groups"))
-    changed_groups = sorted(
-        group_id
-        for group_id in set(current_groups) | set(previous_groups)
-        if _canonical(_input_group_signature(current_groups.get(group_id)))
-        != _canonical(_input_group_signature(previous_groups.get(group_id)))
-    )
+    changed_groups = _changed_input_groups(current_contract, previous_contract, repo_root)
     current_external = _records_by_id(current_contract.get("external_inputs"))
     previous_external = _records_by_id(previous_contract.get("external_inputs"))
     changed_external = sorted(
@@ -1420,9 +1593,15 @@ def _load_bundle(contract_path, matrix_path):
     return contract, matrix, contract_hash, matrix_hash
 
 
-def _physical_errors(contract, matrix, bundle_directory, repo_root):
-    errors = []
-    errors.extend(validate_input_manifests(contract, bundle_directory, repo_root))
+def _freeze_errors(contract, repo_root, require_execution):
+    errors = validate_freeze_objects(contract, repo_root)
+    if require_execution and not errors:
+        errors.extend(validate_execution_worktree(contract, repo_root))
+    return errors
+
+
+def _physical_errors(contract, matrix, bundle_directory, repo_root, require_execution=False):
+    errors = _freeze_errors(contract, repo_root, require_execution)
     errors.extend(validate_external_inputs(contract, bundle_directory))
     errors.extend(validate_evidence_files(matrix, bundle_directory))
     errors.extend(validate_artifact_files(matrix, bundle_directory))
@@ -1433,11 +1612,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Validate an E-Track acceptance bundle.")
     parser.add_argument("--contract", required=True)
     parser.add_argument("--matrix", required=True)
-    parser.add_argument("--repo-root", required=True)
+    parser.add_argument(
+        "--repo-root",
+        required=True,
+        help=(
+            "The clean execution or bundle worktree. Its HEAD must descend from freeze_commit "
+            "without changing frozen profile inputs."
+        ),
+    )
     parser.add_argument("--allow-draft", action="store_true")
     parser.add_argument("--previous-contract")
     parser.add_argument("--previous-matrix")
-    parser.add_argument("--previous-repo-root")
     parser.add_argument(
         "--write-rerun-plan",
         help="Write a computed plan inside the current matrix bundle.",
@@ -1456,23 +1641,28 @@ def main(argv=None):
     errors.extend(validate_matrix(matrix, contract, contract_hash, allow_draft=args.allow_draft))
     needs_physical = matrix.get("overall_result") in FINAL_RESULTS or args.write_rerun_plan
     if needs_physical:
-        errors.extend(_physical_errors(contract, matrix, matrix_path.parent, args.repo_root))
+        errors.extend(
+            _physical_errors(
+                contract,
+                matrix,
+                matrix_path.parent,
+                args.repo_root,
+                require_execution=True,
+            )
+        )
+    elif contract.get("status") == "FROZEN":
+        # A FROZEN contract plus NOT_RUN matrix is the mandatory execution preflight.
+        errors.extend(_freeze_errors(contract, args.repo_root, require_execution=True))
 
     previous_contract = None
     previous_matrix = None
     previous_hash = None
     previous_matrix_hash = None
     rerun_plan = None
-    previous_pair = any(
-        (args.previous_contract, args.previous_matrix, args.previous_repo_root)
-    )
-    if previous_pair and not all(
-        (args.previous_contract, args.previous_matrix, args.previous_repo_root)
-    ):
-        errors.append(
-            "previous contract, matrix, and repository root must be supplied together"
-        )
-    elif args.previous_contract and args.previous_matrix and args.previous_repo_root:
+    previous_pair = any((args.previous_contract, args.previous_matrix))
+    if previous_pair and not all((args.previous_contract, args.previous_matrix)):
+        errors.append("previous contract and matrix must be supplied together")
+    elif args.previous_contract and args.previous_matrix:
         try:
             (
                 previous_contract,
@@ -1489,12 +1679,13 @@ def main(argv=None):
             previous_errors.extend(
                 validate_matrix(previous_matrix, previous_contract, previous_hash)
             )
+            # 上一轮的 git 对象与本轮同在一个仓库里，不再需要上一轮的 worktree。
             previous_errors.extend(
                 _physical_errors(
                     previous_contract,
                     previous_matrix,
                     Path(args.previous_matrix).parent,
-                    args.previous_repo_root,
+                    args.repo_root,
                 )
             )
             errors.extend(f"previous: {error}" for error in previous_errors)
@@ -1515,15 +1706,20 @@ def main(argv=None):
                 )
                 errors.extend(lineage_errors)
                 if not lineage_errors:
-                    rerun_plan = compute_rerun_plan(
-                        contract,
-                        previous_contract,
-                        previous_matrix,
-                        current_contract_sha256=contract_hash,
-                        previous_contract_sha256=previous_hash,
-                        previous_matrix_sha256=previous_matrix_hash,
-                        current_round_id=matrix.get("round_id"),
-                    )
+                    try:
+                        rerun_plan = compute_rerun_plan(
+                            contract,
+                            previous_contract,
+                            previous_matrix,
+                            current_contract_sha256=contract_hash,
+                            previous_contract_sha256=previous_hash,
+                            previous_matrix_sha256=previous_matrix_hash,
+                            current_round_id=matrix.get("round_id"),
+                            repo_root=args.repo_root,
+                        )
+                    except ValueError as exc:
+                        errors.append(f"cannot compute the rerun plan: {exc}")
+                if rerun_plan is not None:
                     errors.extend(validate_reuse(matrix, contract, previous_matrix, rerun_plan))
                     errors.extend(
                         validate_rerun_plan_file(
