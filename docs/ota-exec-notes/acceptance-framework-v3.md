@@ -266,5 +266,24 @@ fixture 已退出清理，保留的日志与配置在上述项目内缓存目录
 用户随后在当前会话明确授权提交、推送与 PR 合并；该授权不包含项目外缓存的清理或恢复。
 本批只提交九个治理目标文件，八个原有未跟踪文件继续保留。主会话检查 Git 元数据与全局
 hooks 后执行收口，保留 pre-commit 检查，使用显式提交信息。GitHub CLI 配置、缓存与临时
-输出重定向到项目内，凭据仅在进程内读取，不写入仓库或日志。远端 CI 与 PR 结果将在合并前
-补入本节；必须使用保留原提交 ID 的 merge，并在合并后同步持有 main 的主 worktree。
+输出重定向到项目内，凭据仅在进程内读取，不写入仓库或日志。必须使用保留原提交 ID 的
+merge，并在合并后同步持有 main 的主 worktree。
+
+### 8.5 PR 与远端验证记录
+
+§8.2 的“未提交/未运行 CI”是本地续作结束时的快照，后续状态以本节和 PR 记录为准。
+
+- PR：[22](https://github.com/Eitan-S-23/E-Track/pull/22)。
+- 实现提交：`9bd98396342760fe2f820fb88a6ef0d7c13c90f2`。
+- Acceptance Governance：[run 33974767898](https://github.com/Eitan-S-23/E-Track/actions/runs/33974767898)，
+  对应上述提交，全部步骤成功。
+- 远端回归：94 + 3 + 14 + 11 项通过；Spec 探针 8/8，分类器自检 20 项通过。
+- 警告：1 条 Node.js 20 弃用提示，`actions/checkout@v4` 由 runner 改用 Node.js 24 执行；
+  不是测试失败，本批不改变现有 workflow 版本。
+- 原始日志保留在项目内 `.cache/acceptance-policy-closeout-20260905-01/ci.log`，SHA-256 为
+  `C822EE85A1C51610E9F03203459C3F45034B2BAA7594D5E1581A2D79567617E9`。
+
+本记录在合并前随 PR 的文档提交入库，不记录自身提交 SHA，也不预先声称已合并。文档提交
+后仍须等待 PR 最新 head 的检查通过，再执行非 squash merge；最终合并状态见 PR，主会话
+在同步后的主 worktree 核对 `HEAD == origin/main` 和实现提交可达性，不为填写自身 SHA
+反复开收口提交。八个原有未跟踪文件与项目外启动缓存均不纳入该 PR。
