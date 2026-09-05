@@ -40,7 +40,7 @@
   "commands": [
     {
       "id": "CMD-FUNC-1",
-      "description": "Run the command that directly observes FUNC-1.",
+      "description": "product: directly observe FUNC-1 after preflight. Before freezing, specify prerequisites, timeout, observation quota and recovery/retry conditions.",
       "command": "replace-with-the-exact-command",
       "expected_exit_codes": [
         0
@@ -58,16 +58,14 @@
   "criteria": [
     {
       "id": "FUNC-1",
-      "description": "Replace with a frozen, observable requirement.",
+      "description": "Replace with a direct product observation. If a repository runner generates or interprets evidence, add validation and dependency_rationale.",
       "required": true,
       "kind": "functional",
       "evidence_types": [
         "raw_log"
       ],
       "input_groups": [
-        "production",
-        "validation",
-        "governance"
+        "production"
       ],
       "external_inputs": [],
       "command_ids": [

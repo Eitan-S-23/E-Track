@@ -880,6 +880,16 @@ Before reporting success:
     脚本判据，直接把当轮命令输出冻结进证据包。轮次专用脚本放
     `docs/acceptance-contracts/<id>/tools/`，不放 `tests/`，避免进入 Validation
     profile 后被后续卡的合法改动打红。
+13. **验收必须阶段化且按最小范围重跑。** preflight 默认只读；必要的暂停 WDT/调试域写入
+    须在合同写明地址、值、非持久性、恢复方式和授权。部署前核对工具、连接与操作边界，
+    按合同部署后再核对固件身份；烧录/写 SD 不能伪装成免费预检。观测失败先留证据并分类，
+    不得盲重试；已有授权和剩余配额内的产品/harness 修复或外部状态变化可最小范围复测。
+    校验器生成的 `rerun-plan.json` **只计算失效范围，不授予操作权限或追加配额**。只重跑
+    `required_commands` 所列观测/采集命令，必要的只读预检与封包校验仍可执行；未失效的
+    `EXECUTED PASS` 使用 `REUSED`，禁止无条件重跑整套宿主测试、构建或硬件流程。每项判据
+    只列直接依赖的最小 profile 集合，多组必须填 `dependency_rationale`；不得为减小范围漏掉
+    真实 runner/探针依赖。阶段、失败分类、修复证据、已用/剩余配额及重跑范围写入报告，
+    详细规则见 `docs/acceptance-execution-contract.md` §3、§7.1。
 
 ## OTA 执行规约（强制,适用一切 OTA 相关任务）
 
