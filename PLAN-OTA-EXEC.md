@@ -619,7 +619,8 @@
 - 收口: 2026-09-03 用户确认后由主会话收口(主会话非本卡实现者), PR #16 已并入 main。刻意不用 squash 而用 merge: 三个提交的顺序本身承载可校验性 —— 第 2 个提交是 P3-2-v1 证据包的可校验冻结点, 其 Governance manifest 绑定该提交里的看板字节, 而 R10 补证是冻结之后才观测到的加强项, 故必须「先落冻结点、再落晚于冻结的内容」; squash 会压掉冻结点使证据包在 main 的任何提交上都无法复校(与 P3-6 为排除注错临时提交而 squash 的裁定相反, 理由不同)。合并前 PR 全检查绿: 固件构建通过(干净 checkout 下的 Ubuntu + arm-none-eabi-gcc, 覆盖本卡新增 Libraries/OTA/ota_device_info.c), Acceptance Governance 通过(覆盖本批对钉死断言的修改), APK/EXE/Release/Pages 与 Cloudflare 注册按路径过滤 skipping。入库后三项实测: ①在冻结点提交上复跑 validate_bundle.py 仍 PASS; ②看板做 R10 更新后在 main 顶端复跑转红且 errors=2 全部且仅为 PLAN-OTA-EXEC.md 的长度与 SHA-256, 即漂移范围精确等于本次回写, 反证三个 profile 其余全部文件在一次真实分支切换检出后仍逐字节匹配冻结值; ③F-1 的 -text 护栏在真实检出后生效, MDK-ARM_F435/cmake-generated/CMakeLists.txt 首次为 i/lf w/lf 字节稳定, Git 的「LF will be replaced by CRLF」警告消失。须留档的预期不可复跑: tests/ota/p3_2_verify_scope.py 收口后必然转红, 转红项均为收口前快照断言(统计 merge-base..HEAD 变更文件数、统计未提交工作区差异), 其绿色状态任何提交都无法复现; 转红项数随工作区杂散文件浮动(实测既出现过 2 项也出现过 1 项), 故不钉计数, 唯一有效证据是已按字节冻结在证据包命令日志内的当轮输出; 治理门禁test_acceptance_bundle.py 回写后仍全绿。本地 main 已快进并与 origin/main 一致(本仓库无 worktree 检出 main, 故用同样受快进检查约束的 fetch 引用更新, 未用 reset或强制覆盖), 主 worktree 已切到 main。收口证据见 docs/ota-exec-notes/P3-2-closeout.md
 
 #### P3-3 Flutter 传输与升级 UI
-状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **APK 构建走 GitHub Actions(app 子项目禁本地构建)**
+状态: 待办 ｜ 认领: — ｜ 更新: 2026-09-07(派单依赖核对，未认领实施) ｜ **APK 构建走 GitHub Actions(app 子项目禁本地构建)**
+- 依赖: P3-1、P3-2 均已完成并合入 main；派单资格见 §8.1，实施沿用 `docs/ota-prompts/prompt-P3-3-implementation.md`。
 - 目标: BLE 帧层(MTU-3 分片、credit 窗口、断点续传);实现 `startOtaUpgrade()`(现固定 false,ota_service.dart:234);删除硬编码机型/0.0.0(ota_upgrade_page.dart:595-596),改 GET_INFO 数据流;进度/续传 UI;minAppVersionCode 兼容提示。
 - 验收: Actions 构建绿+APK 可装;对真机传输 toy 包与真包成功。
 - 证据: —
@@ -717,7 +718,7 @@
 <!-- post-p2-6-readiness:start -->
 ## 8.1 P2-6 后 OTA Spec readiness 矩阵
 
-本矩阵是 P2-6 后任务状态的唯一来源。`prompt_path` 与 `spec_block_reason` 严格二选一。用户已批准 `OTA-DEC-001` 至 `OTA-DEC-012`，共享合同成熟度为 `FROZEN`：P3/P4 任务的内容状态为 `READY`，P5 验收任务为 `DEFERRED_ACCEPTANCE`。派单资格由内容状态、规范成熟度和实际依赖共同派生；当前可派单集合为 `P3-1`、`P3-2`、`P3-4`、`P3-6`、`P3-7`、`P4-2`，均为 `DISPATCHABLE`（P3-1 于 2026-09-02 收口合并后，其唯一后置依赖 `P3-4` 阻塞解除；`P3-6` 派工书同批编写完成，阻塞一并解除；`P3-7` 于 2026-09-03 立卡，无前置阻塞且派工书同批冻结，登记见 §9）。生产部署仍须等待 P5 验收，不因规范冻结而解锁。
+本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。用户已批准 `OTA-DEC-001` 至 `OTA-DEC-012`，共享合同成熟度为 `FROZEN`：P3/P4 任务的内容状态为 `READY`，P5 验收任务为 `DEFERRED_ACCEPTANCE`。派单资格由内容状态、规范成熟度和实际依赖共同派生；当前可派单集合为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P4-2`，均为 `DISPATCHABLE`（P3-4/P3-6 解锁与 P3-7 立卡已登记；2026-09-07 核对 P3-1、P3-2 均已完成并合入 main，同步解除 P3-3 的过期依赖阻塞，见 §9）。生产部署仍须等待 P5 验收，不因规范冻结而解锁。
 
 依赖方向统一解释为“前置任务 -> 后置任务”。用户裁定固定新增 `P4-2 -> P4-1`、`P4-2 -> P3-5`；P4-1 与 P3-5 之间无自动依赖，P4-2 不依赖 P4-1。
 
@@ -725,7 +726,7 @@
 |---:|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | P3-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-1-implementation.md |  | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 2 | P3-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-2-implementation.md |  | `OTA-XC-INFO-MAPPING`, `OTA-XC-DEVICE-MODEL`, `OTA-XC-IMAGE-IDENTITY` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 3 | P3-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-3-implementation.md |  | `OTA-XC-FLUTTER-DEVICE-DTO`, `OTA-XC-HTTP-LATEST`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-1、P3-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-1, P3-2 |
+| 3 | P3-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-3-implementation.md |  | `OTA-XC-FLUTTER-DEVICE-DTO`, `OTA-XC-HTTP-LATEST`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | SATISFIED | P3-1、P3-2 均已完成并合入 main | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 4 | P3-4 | EXPERIMENT | docs/ota-prompts/prompt-P3-4-experiment.md |  | `OTA-XC-BLE-TUNING`, `OTA-XC-TEST-VECTORS` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 5 | P3-5 | INTEGRATION | docs/ota-prompts/prompt-P3-5-integration.md |  | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT`, `OTA-XC-D1-STATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-1、P3-2、P3-3、P3-4、P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-1, P3-2, P3-3, P3-4, P4-2 |
 | 6 | P3-6 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-6-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main，两套 BLE 测试文件已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
@@ -774,6 +775,7 @@
 | 2026-09-02 | P3-6 / 主会话(治理变更批次) | P3-1 收口合并后 P3-4 与 P3-6 的依赖阻塞已实际解除,但 §8.1 矩阵仍记为阻塞;且 P3-6 无派工书,单改矩阵会违反 prompt_path 与 spec_block_reason 二选一,并打红 tests/ota/test_acceptance_bundle.py 中「冻结后首批派单集合必须精确受控」的钉死断言 | 同批完成三件事:编写 docs/ota-prompts/prompt-P3-6-implementation.md;按派生规则更新 P3-4、P3-6 两行的依赖状态与派单资格;把该断言的钉死集合由三项扩为五项(新增 P3-4、P3-6) | 用户已选定「记账 + CI 接线」范围并授权本批治理变更;断言保持等值比较的精确受控语义,不放宽为子集,派单集合每次扩张仍须在本表登记;本批不改任何冻结合同、二进制契约与产品代码 | 已执行 |
 | 2026-09-03 | P3-7 / 主会话(立卡批次) | P3-6 收口后遗留两项治理欠账: 三条可独立运行的产品回归未接入 CI, 且其文件名不被现有 paths 触发器覆盖; 另 P3-6 分类裁定按 7 个脚本计数, 实际为 8 个, 漏计 portability。新增看板任务号会被 post_p26_task_ids 强制要求 §8.1 同序同项, 而据实推导的派单资格为可派单, 必然打红"冻结后可派单集合必须精确受控"的钉死断言 | 同批完成五件事: 新增 P3-7 卡(状态待办); 编写 docs/ota-prompts/prompt-P3-7-implementation.md; §8.1 新增第 7 行并把原 7-13 行顺延为 8-14; 该断言钉死集合由五项扩为六项(新增 P3-7); 分类补正与逐脚本实跑取证落 docs/ota-exec-notes/P3-7-card-creation.md | 用户裁定「先立卡」并授权本批治理变更; 两项欠账改的是同一 Production top_file 的同一步骤, 拆两张卡会让第二张的基线在第一张合并后漂移, 为一行重命名付两轮验收成本不成比例, 故合成一卡; 断言保持等值比较的精确受控语义, 不放宽为子集; 本批不改任何冻结合同、二进制契约与产品代码 | 已执行 |
 | 2026-09-03 | P3-7 / 非实现独立验收会话(第 2 轮) | 第 2 轮验收发现 F-5: 本卡在 CI 步骤末位新接的第 4 条执行行 tests/ota/test_ota_device_info.py 不在立卡时的卡内范围与派工书 v1 完成判据内, 属实现方自行扩范围; 但该脚本是 P3-2 的产品回归, 接入本身正确且已实测有效, 退回会丢掉一条真实门禁 | 初议另立新卡承接该增量 | 用户裁定: **不另立新卡**(会让项目计划变臃肿), 改以同一 task_id 的派工书升版承接 —— docs/ota-prompts/prompt-P3-7-implementation.md 出 spec_version=2 并以 parent_spec_sha256 绑定 v1 字节, 四项实质增量为: 接线 3 条扩为 4 条; paths 闭包判定改为实算覆盖(该脚本靠既有 test_ota_*.py 通配覆盖, 不加冗余精确条目); fail-closed 反证 3 次扩为 4 次并新增「注错选点两级安全」硬前置(命令级+CI 步骤级); 触发器反证 1 条扩为 2 条(新增精确条目一条、既有通配一条)。看板本卡验收字段同步为 v2 标准。不改任何冻结合同、二进制契约与产品代码 | 已执行/已升版
+| 2026-09-07 | P3-3 / Codex 派单治理 | P3-1/P3-2 已完成并合入 main，但 P3-3 readiness 与测试仍钉死旧依赖阻塞 | 同步修正派单摘要、P3-3 行和精确集合断言；不更改 P4-2 -> P3-5，不回改冻结资产 | 用户本轮授权更新派单状态和提供实现提示词；P3-3 保持待办、未认领，不删减既有验收门槛。真机验收归属表述差异在正式冻结前集中确认，详见 docs/ota-exec-notes/P3-3-dispatch-readiness-2026-09-07.md | 已更新/待实施 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
 
@@ -994,3 +996,5 @@
 - 2026-09-06 ｜ Codex(批量审查与正式验收准入续作) ｜ 无产品卡状态变更 ｜ 补齐集中审查、一次反馈、批量整改与稳定基线准入，取消默认整卡重来和普通新缺陷停整卡；保留安全暂停、局部自测、独立验收与真实失败报告。校验器拒绝已有计划中的无依据额外 EXECUTED PASS，允许必要共享命令一次执行，计划生成不再输出最终通过标记。本批稳定后串行各跑一次 31+94 项回归，全通过；未重跑无关构建/硬件，未提交推送/触发 CI。3 项 PowerShell 检查仍待授权环境/CI，项目外缓存更新观察和限制继续记入同一治理记录，未清理外部文件。
 - 2026-09-07 ｜ Codex(规范优化授权提交推送) ｜ 无产品卡状态变更 ｜ 用户明确授权提交推送本批治理改动，拟发布至 codex/acceptance-batch-governance-20260907；只纳入相关 15 个文件，保留原有 8 个未跟踪文件。沿用稳定批次 125 项本地回归结果，不因补记授权状态重跑构建/硬件；CI/正式验收与 main 合并状态仍单独确认，本次授权不包含自动合并或部署。
 - 2026-09-07 ｜ Codex(规范优化 PR #23 授权合并前复核) ｜ 无产品卡状态变更 ｜ 用户进一步授权合并 main，供后续实现/验收使用。460bb42 的治理 CI run 34049428961 通过：153 项回归、8 项 Spec 探针和 20 项分类自检全绿，3 项本地暂缓的 PowerShell 检查在 CI 执行；APK/EXE/部署按范围跳过，有 1 条既有 Node.js 20 弃用警告。独立复核发现历史轮次可洗白计划外执行，已补历史执行范围校验及三轮负例，修前错误成功、修后拒绝；截图改为可见窗口，未宣称实测截图。补充只读复核未发现剩余合并阻断。本条随整改批次在合并前入库；最新 PR head 治理 CI 通过后才允许保留历史 merge，随后同步并核对 main，不用旧 CI 代替新结果。细节见同一治理记录，未重开产品/硬件验收。
+- 2026-09-07 ｜ Codex(P3-3 派单就绪修正) ｜ P3-3(只更新派单资格，仍待办/未认领) ｜ 核对 P3-1/P3-2 已完成并合入 main，同步修正 readiness 和可派单集合精确断言，§9 已登记；旧状态负例被拒，修正后 18 项 Spec 治理测试通过。未改产品、实施 Spec 或冻结包，未重验已完成卡；本批未提交推送、未运行 CI/独立验收。真机验收归属差异与验证记录见 docs/ota-exec-notes/P3-3-dispatch-readiness-2026-09-07.md。
+- 2026-09-07 ｜ Codex(P3-3 派单修正授权提交) ｜ P3-3(仍待办/未认领) ｜ 用户进一步授权提交推送；只收录看板、治理测试和交接记录三份文件，普通推送 main，不夹带历史临时工具。已静态核查原 8 个未跟踪文件，另有 0 字节 .P3-5，共 9 个均保留原样且不纳入验收输入。沿用同批 18 项本地自测，提交对应治理 CI 结果单独核对，不重跑产品/硬件验收；用途分类、授权与限制见同一交接记录。
