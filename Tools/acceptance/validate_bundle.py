@@ -1900,6 +1900,7 @@ def _validate_reuse_history(source, sources, repo_root, checked, active):
                     current_round_id=matrix["round_id"], repo_root=repo_root, reuse_sources=sources,
                 )
                 errors.extend(validate_reuse(matrix, contract, parent["matrix"], plan, sources))
+                errors.extend(validate_planned_execution(matrix, contract, plan))
                 errors.extend(validate_rerun_plan_file(
                     matrix, source["bundle_directory"], plan, parent["matrix_sha256"]))
             except ValueError as exc:

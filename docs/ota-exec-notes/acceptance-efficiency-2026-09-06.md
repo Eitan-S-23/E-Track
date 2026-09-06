@@ -144,6 +144,52 @@ observation anchor; intermediate reuse never becomes a new experiment. Changed
 criteria, tools or external inputs invalidate the relevant consumers. Unknown
 dependencies require conservative scope or a decision, never silent exclusion.
 
+## PR integration, 2026-09-07
+
+The user subsequently authorized merging this work into main so later
+implementation and acceptance sessions use the updated rules. PR #23 targets
+main from codex/acceptance-batch-governance-20260907. The implementation commit
+is 460bb4262d30c021966601ab1d388640decb07b5; no squash or rebase merge is allowed.
+
+Governance CI for that commit passed:
+https://github.com/Eitan-S-23/E-Track/actions/runs/34049428961
+
+- 153 regression tests passed: 94 acceptance, 31 efficiency, 3 AC5 RAM,
+  14 build-bootstrap and 11 provenance tests, with no skipped test reported.
+- The three PowerShell-dependent provenance checks deferred on Windows ran in
+  CI. This resolves their CI verification gap, not the local startup-cache rule.
+- All 8 spec probes and 20 classification self-tests passed.
+- The APK/EXE workflow ran its path detector only; Android, Windows, Pages and
+  release jobs were skipped because their product inputs did not change.
+- One existing warning remains: actions/checkout@v4 targets deprecated Node.js
+  20 and was run on Node.js 24. No product build or deployment was triggered.
+
+The raw job log is .cache/acceptance-efficiency/governance-pr23-460bb42.log;
+SHA-256: 97e0e8325df7529685490c6cd2d1d68b1b653b62188c22765b476ac4ca9f2124.
+Independent read-only review found one blocking scope-laundering path: a mixed
+REUSED/EXECUTED intermediate round that never passed final validation could
+become a later reuse source. A three-round regression reproduced the invalid
+success before the fix; historical-round validation now also calls
+validate_planned_execution. The capture launcher also uses a visible window for
+screen capture instead of depending on a hidden process exposing MainWindowHandle.
+No simulator/hardware capture was run for this governance change. A focused
+follow-up read-only review checked the fix, the new regression and the remaining
+template/document differences, and reported no remaining merge blocker. It did
+not claim runtime capture verification or independently hash the CI log.
+
+The targeted three-round regression failed before the fix (invalid success,
+exit 0 instead of the required rejection) and passed after it in 16.835 seconds.
+Logs are history-scope-red.log and history-scope-green.log in the same local
+cache directory. The updated efficiency suite contains 32 tests. The latest
+PR-head governance CI must pass before merge; the old 460bb42 run alone is not
+approval for the corrected code. Final CI/merge identity is available on PR #23.
+Then fetch and fast-forward the main worktree, verify HEAD equals origin/main,
+and preserve all eight pre-existing untracked files and the other worktrees.
+
+This record is committed before merging to avoid leaving closure evidence on an
+already-merged feature branch. It is governance verification, not a new product
+acceptance campaign or permission to rewrite historical frozen bundles.
+
 ## Filesystem audit exception
 
 All chosen source edits, logs and test fixture outputs are inside E-Track.

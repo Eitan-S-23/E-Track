@@ -281,6 +281,43 @@ class AcceptanceEfficiencyTests(unittest.TestCase):
         code, _, errors = base.run_main(self.cli_args(fixed, failed, original))
         self.assertEqual(0, code, errors)
 
+    def test_mixed_history_cannot_launder_unplanned_execution(self):
+        contract = base.valid_contract()
+        command = copy.deepcopy(contract["commands"][0])
+        command.update({"id": "CMD-FUNC-2", "command": "run-func-2"})
+        contract["commands"].append(command)
+        criterion = copy.deepcopy(contract["criteria"][0])
+        criterion.update({"id": "FUNC-2", "command_ids": ["CMD-FUNC-2"]})
+        contract["criteria"].append(criterion)
+        matrix = base.valid_matrix(contract)
+        result = copy.deepcopy(matrix["criteria"][0])
+        result["id"] = "FUNC-2"
+        matrix["criteria"].append(result)
+        record = copy.deepcopy(matrix["commands"][0])
+        record.update({"id": "CMD-FUNC-2", "command": "run-func-2"})
+        matrix["commands"].append(record)
+        original = base.write_bundle(self.root / "r1", self.repo, contract, matrix)
+        intermediate, _ = self.reuse_round(original, original, "r2")
+        args = self.cli_args(intermediate, original, original)
+        code, output, errors = base.run_main(args + ["--write-rerun-plan", "rerun-plan.json"])
+        self.assertEqual(0, code, errors)
+        self.assertIn("FINAL_VALIDATION=NOT_RUN", output)
+        code, _, errors = base.run_main(args)
+        self.assertEqual(1, code)
+        self.assertIn("unplanned EXECUTED PASS", errors)
+        current, plan = self.reuse_round(intermediate, original, "r3")
+        origin = plan["reuse_origins"]["FUNC-2"]
+        current[3]["criteria"][1].update({
+            "execution": "REUSED", "reused_from_round": origin["round_id"],
+            "origin_contract_sha256": origin["contract_sha256"],
+            "origin_matrix_sha256": origin["matrix_sha256"],
+        })
+        base.rewrite_contract_and_matrix(*current)
+        code, _, errors = base.run_main(self.cli_args(current, intermediate, original))
+        self.assertEqual(1, code, errors)
+        self.assertIn("reuse history r2", errors)
+        self.assertIn("unplanned EXECUTED PASS", errors)
+
     def test_missing_original_fails_without_silent_reexecution(self):
         first = base.write_bundle(self.root / "r1", self.repo)
         second, _ = self.reuse_round(first, first, "r2")

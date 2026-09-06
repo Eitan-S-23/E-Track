@@ -41,7 +41,8 @@ public class Win {
 Get-Process -Name LVGL.Simulator -ErrorAction SilentlyContinue |
   Where-Object { $_.Path -eq $exe } | Stop-Process -Force
 Start-Sleep -Milliseconds 300
-$p = Start-Process -FilePath $exe -WorkingDirectory (Split-Path -Parent $exe) -WindowStyle Hidden -PassThru
+# Screen capture requires a visible main window, not a hidden background helper.
+$p = Start-Process -FilePath $exe -WorkingDirectory (Split-Path -Parent $exe) -WindowStyle Normal -PassThru
 Start-Sleep -Seconds 7
 $p.Refresh()
 $h = $p.MainWindowHandle
