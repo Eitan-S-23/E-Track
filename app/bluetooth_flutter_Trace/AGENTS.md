@@ -6,14 +6,14 @@ This project must not be built locally.
 
 - Do not run local build or packaging commands such as `flutter build`, `gradle build`, `./gradlew assemble*`, `xcodebuild`, `dart compile`, or platform package/signing commands.
 - Use GitHub Actions for all compile/build verification and release artifacts.
-- After changing Flutter app code, if local compile/build verification is unavailable or prohibited, the change must be committed and pushed so GitHub Actions performs the build verification.
+- After changing Flutter app code, GitHub Actions verification is required. Only the root session may commit/push, after explicit user authorization; this build gate is not permission to publish changes. Implementation or acceptance sub-agents hand changes back to the root session.
 - Local non-build checks are allowed when useful, such as formatting, static analysis, tests that do not invoke a build, and file/content inspection.
 - If a task requires a real build result, trigger or inspect the relevant GitHub Actions workflow instead of attempting a local build.
 
 ### GitHub Actions Verification Gate
 
 - Do not report Flutter app code changes as complete until a GitHub Actions build has been pushed or manually triggered and the run conclusion has been inspected.
-- If the current local worktree is dirty, behind `origin/main`, or otherwise unsafe to push, create a clean temporary clone or worktree from the latest `origin/main`, apply only the intended changes, commit, push with the `Eitan-S-23` credential, and trigger or inspect the relevant workflow there.
+- If the worktree is unsafe to push, preserve existing changes and report the blocker. After authorization, use a reviewed clean worktree within the approved filesystem boundary; never silently relocate, commit or push unrelated work.
 - A final response for Flutter app code changes must include the commit SHA, workflow run URL, and whether Android APK and Windows EXE jobs succeeded. Local `git diff --check`, formatting, or analysis results are not enough by themselves.
 - Android APK and Windows EXE build verification is required only when Flutter app build inputs or `pubspec.yaml` / `pubspec.lock` version/dependency inputs change. Cloudflare admin Pages UI, docs, AGENTS.md, and other non-app changes must use their own checks/deploys and should not trigger APK/EXE rebuilds.
 - If the user explicitly says not to push, do not push; state that GitHub Actions verification was intentionally not performed and provide the exact git commands the user can run.
@@ -39,7 +39,7 @@ The update pipeline prepares Cloudflare release candidates automatically, but it
 
 ## Cloudflare Admin Pages Deployment
 
-- Before deploying or troubleshooting the update admin UI at `cloudflare/update-service/admin`, read `.codex/skills/deploy-update-admin-pages/SKILL.md` and follow it.
+- Before deploying or troubleshooting the update admin UI, read `cloudflare/update-service/admin/README.md` and `cloudflare/update-service/docs/STAGING-SETUP.md`. The former `.codex/skills/deploy-update-admin-pages/SKILL.md` reference is not tracked and is not a prerequisite.
 - Normal admin UI/code redeploys must use `.\cloudflare\update-service\scripts\deploy-admin-staging.ps1 -Yes -SkipSecrets` unless the user explicitly asks to update Access secrets and provides current values.
 - Keep the admin Pages `wrangler.jsonc` bindings synchronized with `AdminEnv` in `functions/api/admin/[[path]].ts`; notably, `/api/admin/storage` requires the `RELEASES_BUCKET` R2 binding.
 - Do not treat GitHub Actions deployment attempts as proof that the Admin Pages fix is live. The repository `CLOUDFLARE_API_TOKEN` may lack Pages or D1 permissions; an Actions failure with Cloudflare `Authentication error [code: 10000]` means the token is insufficient, not that the UI code is invalid.

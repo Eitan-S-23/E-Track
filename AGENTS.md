@@ -5,6 +5,26 @@ project. Keil ARM Compiler 5 remains an auxiliary path for local hardware
 debugging, toolchain comparison, and compatibility checks. Agents must not
 promote AC5 artifacts to OTA or CI release artifacts.
 
+## Task Entry and Acceptance Scope
+
+- Read `docs/acceptance-execution-contract.md` before independent acceptance or
+  changing governance. It owns dependency scopes, evidence reuse and rerun rules.
+- Use approved component profiles and direct original EXECUTED PASS anchors;
+  missing dependencies/evidence are not permission to skip checks or rerun all.
+- Governance-only changes use host regressions, not historical firmware/hardware
+  campaigns. Never rewrite frozen bundles to make current HEAD appear green.
+- Self-tests are not independent acceptance. Commit/push/deploy require explicit
+  user authorization; a CI requirement does not grant that authorization.
+- Review the bounded change set and consolidate findings before costly formal
+  acceptance. Fix and self-test in batches; a targeted test after each fix is
+  not a new acceptance round. See the execution contract, section 7.3.
+- For agent commands on Windows, prefer `cmd.exe` until PowerShell startup writes
+  are contained or explicitly authorized. `-NoProfile` and TEMP overrides do not
+  prevent `StartupProfileData-NonInteractive` writes under LOCALAPPDATA in
+  `Microsoft/PowerShell` and `Microsoft/Windows/PowerShell`. This also applies to
+  read-only PowerShell checks and test subprocesses. Do not clean those caches
+  without path-specific permission; see the 2026-09-06 governance audit note.
+
 ## Default Build Entry Point (firmware and/or simulator)
 
 **Default action:** when asked to compile the MCU firmware and simulator, run
@@ -351,9 +371,9 @@ Conventions:
 
 ### LiveMap 性能与 SDIO 改动防坑清单（2026-07 帧率优化战役沉淀）
 
-完整根因链、性能账本与实验方法见仓库根
-`导航帧率优化全程复盘与踩坑手册.md`（改动 SDIO 驱动 / LiveMap 渲染 /
-行缓存 / 做性能测量之前必读）。**改地图/滚动/渲染参数、做性能调优或排查
+渲染链路见仓库根 `LiveMap渲染流程技术文档.md`。旧引用
+`导航帧率优化全程复盘与踩坑手册.md` 当前未入库，不能作为必读前置或据此猜测规则。
+**改地图/滚动/渲染参数、做性能调优或排查
 地图故障时，先读仓库根 `LiveMap参数调整与优化操作手册.md`——查表式手册，
 参数位置/调法/验证命令/故障速查全部可直接照抄，无需理解实现。**
 以下为红线级规则：
@@ -464,6 +484,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .claude\cap.ps1
 ```
 
 - Screenshot output: `.claude\sim_new.png`
+- `.claude\cap.ps1 -CheckOnly` resolves the current worktree executable/output
+  and prints its SHA-256 without starting the simulator or creating a screenshot.
+  The PowerShell host still needs the startup-cache preflight above. Capture only
+  stops instances with this worktree's executable path, never other projects.
 - If MSBuild fails with `LNK1104` on `LVGL.Simulator.exe`, a simulator process
   is still running and locking the exe. Stop it first:
 
@@ -570,9 +594,9 @@ project also compiles against this same file.
   screen after flashing while the simulator still ran normally. Restore and
   keep the ARDUINO/LVGL built-in pool at `128U * 1024U` unless device memory is
   re-profiled and the firmware is tested on hardware.
-- After any `lv_conf.h` change, rebuild AC5 firmware with `build_f435.ps1
-  -Target X-Track-App-AC5 -AutoStale` so all source files depending on the
-  header are recompiled. A relink or single-source compile is not sufficient.
+- After any `lv_conf.h` change, rebuild both production GCC targets through
+  CMake. Run AC5 `-AutoStale` only when AC5 evidence was explicitly requested.
+  A relink or single-source compile is not sufficient for either toolchain.
 
 ### Navigation / GPX Import / File Browser Lessons Learned
 
@@ -734,6 +758,11 @@ When adding a new generated font file such as `font_iconfont_16.c`, also:
 - Add the source file to `Simulator\LVGL.Simulator\LVGL.Simulator.vcxproj`.
 - Add the source file to `Simulator\LVGL.Simulator\LVGL.Simulator.vcxproj.filters`.
 - Add the source file to `MDK-ARM_F435\proj.uvprojx`.
+- Register it in `MDK-ARM_F435\cmake-generated\CMakeLists.txt` as well. GCC uses
+  explicit source lists; the default build does not regenerate them from Keil.
+  The generator is not tracked here, so maintain source-registration entries
+  directly and preserve the OTA App/Boot customization. Check all three build
+  registrations before compiling, rather than discovering omissions one by one.
 - If `MDK-ARM_F435\Objects-App-AC5\proj_X-Track-App-AC5.dep` and
   `X-Track-App-AC5.lnp` do not yet
   include the new file, compile it using `build_f435.ps1 -Target
@@ -823,7 +852,8 @@ Before reporting success:
 3. 合同（v3）必须在顶层写死 `freeze_commit`（被验实现所在的提交）、
    `freeze_tree`（该提交的 tree SHA）与 `profile_config_blob`（该 tree 内
    `Tools/provenance/manifest_profiles.json` 的 blob SHA），并声明 `Production`、`Validation`、
-   `Governance` 三个输入组，让每项判据显式引用输入组、命令和产物。输入组只按
+   `Governance` 三个基础输入组；可额外引用冻结配置中已审批的组件 profile。每项判据
+   显式引用真实依赖、命令和产物；组件合同的命令还声明 input_groups 与 runner_paths。输入组只按
    profile 引用 git 对象，**不再生成、不再绑定任何工作树字节 manifest**。发生证据
    复用时，使用校验器比较前后轮合同/矩阵并生成 `rerun-plan.json`；不得人工填写
    “全部未失效”。跨轮失效判定使用各自冻结的 profile 配置比较两个 `freeze_tree`；
@@ -854,8 +884,10 @@ Before reporting success:
    同一命令作为执行前检查，最终报告前再跑一次。若矩阵含 `REUSED`，
    还必须传入 `--previous-contract` 与 `--previous-matrix`（两轮 freeze tree 在同一
    仓库内比较，不再需要上一轮 worktree）；当前矩阵必须绑定上一矩阵文件 SHA-256
-   及包内 rerun plan 路径/SHA-256。上一判据只有在其自身为 `EXECUTED PASS` 时可复用，
-   禁止相同矩阵、相同轮次或链式 `REUSED` 自证。相同冻结合同可跨轮次复用；合同内容改变
+   及包内 rerun plan 路径/SHA-256。复用必须直接绑定原始 `EXECUTED PASS` 的合同与矩阵
+   SHA-256；多轮使用 `--reuse-source <contract> <matrix>` 提供原始包和所需中间轮次。
+   校验器检查前驱/计划与失败记录，不把中间 REUSED 当新实测，也不因曾复用就重采。
+   禁止自引、同轮次、缺失证明或挑选旧 PASS 掩盖后续 FAIL。相同冻结合同可跨轮次复用；合同内容改变
    时必须保持同一 `task_id`、版本加一并用 `parent_contract_sha256` 绑定上一合同。校验
    失败不得宣告通过。
 8. 验收 schema、校验器、profile 定义或 AC5 构建规约变化必须通过
@@ -886,10 +918,15 @@ Before reporting success:
     不得盲重试；已有授权和剩余配额内的产品/harness 修复或外部状态变化可最小范围复测。
     校验器生成的 `rerun-plan.json` **只计算失效范围，不授予操作权限或追加配额**。只重跑
     `required_commands` 所列观测/采集命令，必要的只读预检与封包校验仍可执行；未失效的
-    `EXECUTED PASS` 使用 `REUSED`，禁止无条件重跑整套宿主测试、构建或硬件流程。每项判据
+    `EXECUTED PASS` 使用 `REUSED`（计划内共享命令可消费同一次真实输出），禁止无条件重跑
+    整套宿主测试、构建或硬件流程。每项判据
     只列直接依赖的最小 profile 集合，多组必须填 `dependency_rationale`；不得为减小范围漏掉
     真实 runner/探针依赖。阶段、失败分类、修复证据、已用/剩余配额及重跑范围写入报告，
     详细规则见 `docs/acceptance-execution-contract.md` §3、§7.1。
+14. **集中审查、批量整改、稳定后正式验收。** 按执行合同 §7.3 一次汇总当前可安全检查的
+    问题和未覆盖项，不能首错即打回、每修一个点就重开正式验收。已知阻断问题未修完时不
+    启动依赖它的高成本流程；范围内普通缺陷可批量修复，安全/越权问题仅暂停受影响动作。
+    红线违反按证据与依赖确定失效范围，不默认整卡重来。局部自测仍须做，真实失败仍须报。
 
 ## OTA 执行规约（强制,适用一切 OTA 相关任务）
 
@@ -915,8 +952,8 @@ firmware CI 或 CF 固件后台的任务,任何 agent 必须遵守:
 
 ## GCC / Linux CI 源码可移植防坑（PRE-4 实测,2026-07-24）
 
-OTA 与固件 CI 走 **Ubuntu + arm-none-eabi-gcc + Ninja**,本机日常开发走 **Keil AC5 /
-Windows**。两边都能编过,才算 clean-checkout 绿。PRE-4 打回后的首轮
+OTA 与固件 CI 走 **Ubuntu + arm-none-eabi-gcc + Ninja**，本机默认也是 GCC，
+AC5 仅为按需辅助验证。本机通过不能替代 Linux CI。PRE-4 打回后的首轮
 `MCU Firmware Build` 失败根因不是缺 vendor、也不是生成脚本没跑,而是源码
 include 路径分隔符不可移植。
 
@@ -945,9 +982,9 @@ include 路径分隔符不可移植。
   `MDK-ARM_F435/Platform/middlewares/usb_drivers/**`、`USER/HAL/HAL_USB.cpp`
   等**手写源**,不是 `cmake-generated`。
 - **禁止误判**:
-  - 不要因为 CI 红就去手改 `MDK-ARM_F435/cmake-generated/CMakeLists.txt`
-    (该目录由 `keil_uvprojx2cmake.py` 生成,手改会被下次生成覆盖;可移植性
-    问题应改生成脚本或手写源,见 `.claude/prompt-keil2cmake-portable.md`)。
+  - include 可移植性问题应修手写源，不能通过伪造 include 目录绕过。
+    `keil_uvprojx2cmake.py` 当前未入库；现有 CMake 是受版本控制的构建输入，允许必要的
+    源清单/构建修复。重新引入生成器时必须先证明保留 OTA 定制，不能盲目覆盖生成目录。
   - 本机 Windows `build-gcc` 绿 **不能**证明 Linux CI 绿;反斜杠 include 是
     典型的"本机过、CI 挂"。
 - **提交前自检**(改过 include / 新增跨目录头文件时):

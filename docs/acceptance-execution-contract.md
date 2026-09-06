@@ -1,6 +1,6 @@
 # 验收执行合同
 
-版本：v3（2026-09-05，git 对象冻结版）
+版本：v3（2026-09-06，git 对象冻结；组件依赖、原始证据复用与批量审查）
 
 本合同适用于 OTA、固件、模拟器、硬件闭环和其他需要独立验收的任务。v3 把验收标准、
 输入依赖、执行命令、产物和观测值全部结构化，校验器必须读取实物复核，不能只检查 JSON
@@ -88,7 +88,8 @@ python Tools/acceptance/validate_bundle.py `
 `freeze_tree:Tools/provenance/manifest_profiles.json == profile_config_blob`；对象缺失、类型
 不符、配置无效或任一关系不匹配都必须失败。
 
-合同必须包含且只能包含以下三个输入组：
+合同必须包含以下三个基础输入组。旧合同仍按这三个组保守判定；新合同可额外引用
+冻结 profile 配置中已审批的组件组，不能在执行时临时缩小范围：
 
 | id | profile | category |
 |---|---|---|
@@ -96,7 +97,7 @@ python Tools/acceptance/validate_bundle.py `
 | `validation` | `Validation` | `validation_inputs` |
 | `governance` | `Governance` | `governance_inputs` |
 
-三个输入组缺任意一项都不能冻结合同。fixture、工具链、硬件和环境状态使用
+三个基础输入组缺任意一项都不能冻结合同。fixture、工具链、硬件和环境状态使用
 `external_inputs` 单独记录 fingerprint、证据路径及证据 SHA-256。
 
 每个输入组**只能**包含 `id`、`profile`、`category` 三个字段。输入组按 profile 引用 git
@@ -104,10 +105,12 @@ python Tools/acceptance/validate_bundle.py `
 等残留字段时校验器必须拒绝该合同。
 
 每项判据的 `input_groups` 必须只列出其直接依赖的最小集合，且不得重复。产品输入对应
-`production`；若产物或观测由本仓库 runner/探针生成或解释，必须包含 `validation`；
+`production` 或 production_source 组件组；仓库内验收 runner/探针参与采集或解释观测时，
+必须包含 `validation` 或 validation_inputs 组件组。已由 production_source 覆盖的生产
+构建入口无需再绑定 Validation，但它调用的验收探针仍须声明真实依赖。
 确实检查规约/派单内容时再包含 `governance`。不得把三个 profile 作为模板默认值，也不得
 为减少重跑而删掉真实依赖。只有没有仓库内 runner/探针参与结论的直接产品观测，才可只列
-`production`；模板中的单组示例不是所有产品判据的通用依赖清单。
+产品输入组；模板中的单组示例不是所有产品判据的通用依赖清单。
 
 跨组理由必须写入判据的 `dependency_rationale`，不能只放在 `description` 或聊天中。
 该字段说明每个组如何影响结论；“完整性”或“保险”不构成依赖理由。结构由校验器检查，
@@ -115,7 +118,7 @@ python Tools/acceptance/validate_bundle.py `
 
 | 判据字段/情形 | 合法情况 | 非法情况与校验错误 |
 |---|---|---|
-| `input_groups` | 非空、无重复、仅引用三个已定义组 | 空/类型错/未知 ID，或 `input_groups must not contain duplicates` |
+| `input_groups` | 非空、无重复、仅引用合同内已定义的基础或组件组 | 空/类型错/未知 ID，或 `input_groups must not contain duplicates` |
 | 单输入组 | 可省略 `dependency_rationale` | 一旦提供就必须是非空字符串，`null`、空白、非字符串均报 `dependency_rationale must be a non-empty string when set` |
 | 多输入组 | 必须提供非空字符串 `dependency_rationale` | 缺字段时报 `dependency_rationale is required when multiple input_groups are used` |
 
@@ -141,13 +144,27 @@ python Tools/acceptance/validate_bundle.py `
 
 禁止保留未被任何判据引用的命令或产物定义，也禁止使用任意字符串表达失效范围。
 
+组件合同还要求所有 `commands` 声明 `input_groups` 和 `runner_paths`。前者列出命令真实
+依赖的组，后者列出仓库内入口脚本与直接/间接助手的 POSIX 相对路径；直接工具观测无仓库
+runner 时显式填空数组。判据必须包含其全部命令的依赖，不得把产品观测改标 `process`
+以逃避产品输入。校验器检查依赖并集、runner 的冻结路径覆盖和命令文本中的脚本入口；
+传递依赖与判据分类的真实性仍须非实现会话审查，路径声明本身不是可信证明。
+runner 可由命令声明的任一受管组覆盖，包括生产构建入口；不能因 category 名称重复绑定
+同一份已受管输入。组件合同的解释器命令不得省略 runner_paths，脚本/模块入口必须在其中；
+解释器只支持显式脚本/模块入口与受限启动选项，不支持 -c/-Command/-EncodedCommand、
+attached -c、node eval、bash -lc 等内联执行；未知选项 fail-closed。应使用已入库入口或
+保守的基础组三组合同，不得以无关 runner 名称为内联代码背书。
+
 ## 4. 证据矩阵 v2
 
 每项判据必须记录：
 
 - `result`：`PASS`、`FAIL` 或 `NOT_OBSERVED`。
 - `execution`：本轮执行使用 `EXECUTED`，合法复用使用 `REUSED`。
-- `reused_from_round`：只有 `REUSED` 时填写上一轮 ID。
+- `reused_from_round`：只有 `REUSED` 时填写原始实测轮次 ID，旧单跳记录为上一轮 ID。
+- `origin_contract_sha256`、`origin_matrix_sha256`：新建复用记录必须绑定原始实测合同与
+  矩阵文件哈希。组件合同强制这两个字段；旧三组单跳记录兼容保留，但无原始绑定不能升级
+  为多轮复用。非 REUSED 记录两字段须省略或为 null。
 - `observed`：布尔值、带单位数值或实际状态链，必须能由校验器与 gate 比较。
 - `evidence`：位于证据包内的原始证据文件。
 
@@ -171,7 +188,7 @@ harness 失败还必须绑定实际参与判定的产物；不得仅凭一段手
 
 ## 5. 输入组范围与枚举口径
 
-三个 profile 的范围由冻结 tree 内的 `Tools/provenance/manifest_profiles.json`
+基础和组件 profile 的范围由冻结 tree 内的 `Tools/provenance/manifest_profiles.json`
 （`etrack-manifest-profiles-v1`）唯一定义。合同用 `profile_config_blob` 绑定它；校验器必须
 从每份合同自己的 `freeze_tree` 读取，禁止用当前 checkout 的配置重新解释历史 tree，也
 禁止在合同或脚本里另写一份路径清单。
@@ -213,6 +230,34 @@ tracked 改动、用 `ls-files -o --exclude-standard` 检查未跟踪输入。�
 Git clean，不会假红；真实脏源码、未提交 harness、profile 内未跟踪文件或冻结后提交的输入
 变化必须失败。推荐始终在 `freeze_commit` 的专用干净 worktree 中执行验收。
 
+### 5.1 组件范围与防漏验
+
+冻结配置提供 `Firmware`、`Flutter`、`Cloudflare`（生产输入），以及 `Capture`
+（J-Link/截图采集工具）、`Evidence`（离线证据工具）。基础 Production 仍覆盖全部产品，
+作为依赖未拆清时的保守后备；固件判据应避免无条件依赖 Flutter 页面。
+
+在三个基础组之外可声明组件组，例如：
+
+```json
+{"id":"capture","profile":"Capture","category":"validation_inputs"}
+```
+
+组件 profile 必须在冻结配置中定义 category、目录边界、精确文件和非空 required_paths。
+未知 profile、空范围、必需文件缺失、category 不符、runner 未覆盖均拒绝冻结。新增 runner
+先将入口、导入模块、命令文件、fixture、解释器配置纳入受审依赖，再冻结合同。现有 Capture
+并不自动覆盖其他目录的任务 harness；不得移动脚本或删除真实依赖来缩小复验范围。
+依赖不清时使用保守组或停止请求裁定，不允许未跟踪/忽略目录中的验证代码作为隐式输入。
+
+构建、原始采集、离线解析、封包应拆成独立判据和命令，消费的上游产物仍须绑定路径和
+SHA-256。只换解析器必须重新解释原始字节，不能照抄旧 observed；采集缺失、污染或采集
+实现变化才重采。共享 runner/产物必须声明共享依赖。旧合同不会自动变窄，须升版本审批。
+
+新合同冻结前，审批者必须一次核对“变更组件 → 共享依赖 → 消费判据/命令”的影响范围。
+若一个局部改动会使多数判据失效，先确认是否错误地绑定了整个 Production/Validation；
+可以用现有受审组件表达时应拆清，确有共享依赖或范围尚不明确时保留保守组并说明理由。
+不得追求更小重跑清单而漏掉公共头文件、链接/构建配置、传递调用或测量方法。此核对写入
+现有 dependency_rationale/审查记录，不另建逐文件审计体系，也不回改历史冻结合同。
+
 ## 6. 自动最小复验
 
 需要复用上一轮证据时，先生成计划。两轮的 `freeze_tree` 在同一个仓库内比较，因此不再
@@ -240,11 +285,13 @@ git -c core.quotepath=false diff-tree -r -z --name-only --no-renames --no-commit
 `changed_input_groups`、`rerun_criteria`、`reusable_criteria`、`required_commands` 和
 `required_artifacts`。两个 `freeze_tree` 相同即 tracked 输入字节相同：此时 commit id 变化
 本身不触发跨轮复验，但最终执行门禁仍要求合同中的 `freeze_commit` 可达。两个 tree 不同而
-又没有可读取的仓库时，校验器必须拒绝判定（fail-closed），不得默认“未失效”。上一轮不是
-`EXECUTED PASS`、所引用的 profile 内容或定义变化、判据变化或所引用的执行定义变化时，
-该判据必须重跑。另一项判据失败、未引用的 profile/外部输入/命令/产物变化，不应扩大范围。
+又没有可读取的仓库时，校验器必须拒绝判定（fail-closed），不得默认“未失效”。上一轮判据
+须为可验证的 `EXECUTED PASS`，或能按 §6.1 追溯原始实测并通过历史核对的 `REUSED PASS`。
+上一轮非 PASS、所引用的 profile 内容或定义变化、判据变化或所引用的执行定义变化时，
+该判据必须重跑；缺来源包或中间计划则先补证据，不自动授权重采。另一项判据失败、
+未引用的 profile/外部输入/命令/产物变化，不应扩大范围。
 
-失效粒度仍是 profile，而不是单个源文件。声明 `validation` 的判据会因 Validation 内任意
+失效粒度是选用的 profile，而不是文件白名单。声明基础 `validation` 的判据仍会因 Validation 内任意
 受管文件变化而保守失效；多组理由不会改变这个算法，更不能据此人工覆盖计划。共享命令、
 产物或原始观测的判据并非独立，冻结合同前必须让依赖范围覆盖这些共享输入。回归测试须
 同时证明“无关组变化只重跑其消费者”和“真实 runner 依赖变化仍重跑相应产品判据”。
@@ -255,11 +302,34 @@ git -c core.quotepath=false diff-tree -r -z --name-only --no-renames --no-commit
 计划生成后，将上一矩阵文件 SHA-256、`rerun-plan.json` 路径及其文件 SHA-256 写入当前
 矩阵，再去掉 `--write-rerun-plan` 重跑同一条命令完成最终校验。最终校验会重新计算计划并
 要求 JSON 内容逐项一致，缺文件、错误哈希或人工改写计划都会失败。
+`--write-rerun-plan` 只输出计划与 `FINAL_VALIDATION=NOT_RUN`，不是最终验收通过。
 
 矩阵使用 `REUSED` 时，校验器还会核对观测值、证据哈希、命令记录和产物哈希与上一轮
-一致。当前和上一矩阵文件哈希及 `round_id` 必须不同；被复用的上一判据必须由上一轮
-实际 `EXECUTED`，不能继续复用一个 `REUSED` 结果。当前证据包仍须包含复用后的决定性
-证据和产物，避免形成不可独立解释的链式引用或循环自证。
+一致。当前和上一矩阵文件哈希及 `round_id` 必须不同。多轮复用只允许直接锚定原始
+`EXECUTED PASS`，不把中间 `REUSED` 当作一次新实测，也不因曾复用就强制重新采集。
+当前证据包仍须包含复用后的决定性证据和产物。
+
+### 6.1 原始执行锚点与历史核对
+
+生成计划及最终校验时，传入原始执行和所需中间轮次，每份一对参数：
+
+```powershell
+python Tools/acceptance/validate_bundle.py --contract <current-contract> --matrix <current-matrix> `
+  --repo-root . --previous-contract <previous-contract> --previous-matrix <previous-matrix> `
+  --reuse-source <original-contract> <original-matrix> `
+  --reuse-source <intermediate-contract> <intermediate-matrix> --write-rerun-plan rerun-plan.json
+```
+
+计划的 `reuse_origins` 给出原始轮次与合同/矩阵 SHA-256，按它填写当前矩阵的 origin 字段。
+`previous_matrix_sha256` 仍绑定实际上一轮，禁止跳过失败轮次、挑历史最好结果冒充上一轮。
+校验器只读核验原始包实物、输入身份、命令/产物定义、观测值与哈希，以及中间轮次自身的
+前驱、计划和复用合法性；每个矩阵 SHA 在一次校验中只检查一次。缺来源包、缺计划、篡改、
+自引、循环、同轮次或超过 128 层均 fail-closed。128 是解析安全上限，不是执行配额。
+
+上一轮真实 FAIL 或 NOT_OBSERVED 不能由更早 PASS 恢复，无效中间轮不能洗白失败。真实
+输入、门禁或观测方法变化仍须复测。历史证明仅作机器只读核验，不重建旧固件、不重跑旧
+测试，也不要求 agent 逐轮重写报告；缺证据优先补证据，不能为省整理而重新采集。
+最终包应携带所需来源合同、矩阵、计划和决定性证据，保证独立复校。
 
 ## 7. Harness 与性能门禁
 
@@ -297,10 +367,67 @@ git -c core.quotepath=false diff-tree -r -z --name-only --no-renames --no-commit
 下一轮必须先运行校验器生成 `rerun-plan.json`，只重跑 `required_commands` 所列的观测/采集
 命令，并重新生成 `required_artifacts`。必要的只读预检、证据整理和完整性校验仍可执行，但
 不得借这些阶段的名字绕过观测配额。未列入 `rerun_criteria` 的 `EXECUTED PASS` 判据应使用 `REUSED`；
+若它的全部命令已因其他失效判据进入 `required_commands`，可消费同一次执行的真实输出，
+不得为它再跑一次共享命令或夹带其他未计划命令。判据与命令不得复制新 ID 来绕过这一限制。
 禁止以“方便”或“保险”为由重跑整套宿主测试、构建或硬件流程。只有生产输入、外部输入、
 判据定义、命令定义、产物定义实际变化，或先前观测不是可复用 PASS 时，才扩大重跑范围。
 **rerun plan 只计算失效范围，不授予操作权限或追加配额。** 验收报告必须记录本轮阶段、
 失败分类、修复/状态变化证据、已消耗及剩余配额和 rerun plan，便于审计是否发生无授权重试。
+
+首次正式轮次之后，生成计划和最终校验都须传入实际上一轮的 `--previous-contract` 与
+`--previous-matrix`，即使本轮没有 REUSED；无复用时矩阵的三个 rerun 绑定字段仍按 §4 为 null。
+最终校验会拒绝本可复用却新增计划外命令的 `EXECUTED PASS`。新的 FAIL/NOT_OBSERVED 必须
+如实记录，不能因为旧 PASS 或减少轮次而删除；接收失败记录不表示追认计划外操作。
+不得靠省略前轮参数、换任务/轮次 ID 或只运行计划生成模式规避检查。校验器不能自行发现
+未提供的执行历史，也不调度命令或计数物理操作，执行者与独立验收者仍须核对完整账目。
+
+### 7.2 执行效率与验收责任
+
+- 实现者负责真实实现和自测，非实现会话负责独立验收；自测通过不等于正式 PASS。
+- 派单前一次性审查依赖、门禁来源、负例、前置条件和配额。稳定硬件能力按工具链/设备/
+  固件身份指纹复用；烧录、复位或换连接后仍需轻量核对当前身份、RTT 签名和 WDT 状态。
+- 门槛只能来自已批准 SLA、协议或安全比例，不得用 917 ms 一类历史值加微小余量反向定门槛。
+  更改门槛须审批并升级合同，不能为“省时间”放宽后追认 PASS。
+- 保留一份失败原始输出、分类、根因/修复与重跑计划即可，不要求每轮另建完整审计套件。
+  同一观测默认只跑一次；重试必须有修复或状态变化且在剩余配额内。换目录、换 agent、
+  换轮次不得重置总配额。连续同因失败或配额耗尽时只暂停受影响动作，不拉起无关全量回归。
+- 治理/文档/封包器修改优先用宿主正反例和静态检查验证，不因此重开已完成的产品卡。
+  但 CI 接线、必要负例、真实日志/产物哈希及缺失判据不能省略。
+
+必须回归：封包变动不重采、采集器/产品变动必须重采、遗漏依赖被拒、多轮原始 PASS 可复用、
+原始证据篡改/中间计划缺失/失败洗白/循环均被拒；计划外成功执行被拒、计划内共享命令
+不重复运行、新失败可记录、计划生成不冒充最终验收。测试入口为
+`python -X utf8 -B tests/ota/test_acceptance_efficiency.py`，串行执行并将临时目录限定在项目内。
+
+### 7.3 批量审查与正式验收准入
+
+默认节奏是“集中审查 → 问题汇总 → 批量修复与局部自测 → 稳定基线正式验收 → 最小复验”。
+这里的集中审查只覆盖本卡已知范围和当前可验证项，不要求穷举所有未来缺陷，也不增加一个
+反复审批的前置验收工程。每修一个点就跑针对性单测是正常开发，不算重开正式验收轮次。
+
+1. **集中预审**：派单者/非实现审查者一次核对契约与 SLA、受影响调用链和源登记、共享
+   依赖、历史同类故障、harness 正反例、环境/输出边界及操作配额。检查全部当前可安全
+   检查的相关项，不得发现第一个普通问题就结束审查并要求返工；无法检查的项注明原因。
+   安全风险、越权或证据污染只暂停受影响动作，其他独立安全的检查继续，不能继续危险实测。
+2. **一份清单**：在既有 research/证据文档汇总 `发现ID | 依据/判据 | 影响范围 | 处置 |
+   自测证据`，区分本卡阻断、非阻断建议和范围外事项。已违反 required 判据、证据可信度或
+   安全授权的缺陷不得降级成建议；风格偏好和无关存量债务不得成为重开本卡的理由。
+3. **批量整改**：实现者对同根因的范围内调用点、配置与测试一起检查和修复，再交付一个
+   自测完整的批次。不得每改一个文件/问题就要求重新派验收、冻结合同、提交或烧录。小范围
+   单测、静态检查、增量编译可随修随跑；正式观测和硬件动作无论叫调试还是自测，都受原
+   授权与累计配额约束。新增范围或安全风险先裁定，普通范围内缺陷不自动暂停整卡。
+4. **正式验收准入**：本批已知阻断问题须有修复和针对性自测，受影响宿主回归通过，已能
+   执行的环境前置检查完成，必要依赖/负例/操作计划已确认，才提交稳定批次进入正式验收。
+   不得用昂贵正式验收代替这些开发检查。尚需首次真实产品观测才能判定的项应明确列入
+   正式计划，不得为了准入要求它们提前“通过”，也不得伪造预检或宣称自测等于独立 PASS。
+5. **集中反馈与复验**：独立验收在同一基线上完成安全可执行的相关检查，再一次反馈全部
+   已发现问题与未覆盖项；有前置阻断的下游高成本命令暂不执行。整改后检查整个整改批次，
+   只重验受影响项，不重新审计所有无关文件或重建历史证据。后续新发现注明新观测、回归
+   或前次遗漏，并检查范围内同类问题；不能压下真实缺陷来维持“一轮通过”。
+
+红线违反先作废被影响的结论，保留原始失败记录，再按依赖重算范围。只有公共基线、共享
+工具或证据整体不可信且有明确影响依据时，才能扩大到整组/整卡；不得把“整卡作废重来”
+作为任何问题的默认处罚。改变合同、授权或安全红线仍须先审批，不能借批量整改自行放宽。
 
 ## 8. 紧凑证据包
 

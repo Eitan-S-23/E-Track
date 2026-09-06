@@ -4,6 +4,7 @@ import hashlib
 import json
 import operator
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -52,6 +53,7 @@ MANIFEST_PROFILE_CONFIG_PATH = (
 )
 PROFILE_CONFIG_REPO_PATH = "Tools/provenance/manifest_profiles.json"
 PROFILE_NAMES = {"Production", "Validation", "Governance"}
+INPUT_CATEGORIES = {value[1] for value in REQUIRED_INPUT_GROUPS.values()}
 EXTERNAL_INPUT_CATEGORIES = {"fixture", "hardware_state", "toolchain", "environment"}
 CRITERION_KINDS = {"functional", "safety", "performance", "visual", "process"}
 SHA256_RE = re.compile(r"^[0-9A-Fa-f]{64}$")
@@ -64,22 +66,39 @@ def _validate_manifest_profile_config(config):
     if set(config) != {"schema", "exclude_path_regex", "profiles"}:
         raise ValueError("manifest profile config fields are invalid")
     profiles = config.get("profiles")
-    if not isinstance(profiles, dict) or set(profiles) != PROFILE_NAMES:
-        raise ValueError("manifest profile config must define the three profiles exactly once")
+    if not isinstance(profiles, dict) or not PROFILE_NAMES.issubset(profiles):
+        raise ValueError("manifest profile config must define the three base profiles")
     for profile, definition in profiles.items():
-        if not isinstance(definition, dict) or set(definition) != {
+        fields = {
             "root_patterns",
             "top_files",
             "exclude_prefixes",
             "required_paths",
-        }:
+        }
+        if profile not in PROFILE_NAMES:
+            fields.add("category")
+        if not isinstance(definition, dict) or set(definition) != fields:
             raise ValueError(f"manifest profile fields are invalid: {profile}")
+        if profile not in PROFILE_NAMES and (
+            not isinstance(profile, str)
+            or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", profile)
+            or not isinstance(definition["category"], str)
+            or definition["category"] not in INPUT_CATEGORIES
+            or not definition["required_paths"]
+        ):
+            raise ValueError(f"component profile must have a category and required paths: {profile}")
         for field in ("root_patterns", "top_files", "exclude_prefixes", "required_paths"):
             values = definition.get(field)
             if not isinstance(values, list) or not all(
                 isinstance(value, str) and value for value in values
             ):
                 raise ValueError(f"manifest profile {profile}.{field} is invalid")
+            for value in values:
+                if (value.startswith(("/", "\\")) or ":" in value or "\\" in value
+                        or ".." in value.split("/") or any(ch in value for ch in "*?[]")):
+                    raise ValueError(f"profile paths must be literal repository-relative paths: {value}")
+            if field == "root_patterns" and any(not value.endswith("/") for value in values):
+                raise ValueError(f"profile root patterns must end with /: {profile}")
     try:
         re.compile(config.get("exclude_path_regex"))
     except (TypeError, re.error) as exc:
@@ -544,7 +563,11 @@ def validate_contract(contract, allow_draft=False):
         input_ids.add(group_id)
         expected = REQUIRED_INPUT_GROUPS.get(group_id)
         if expected is None:
-            errors.append(f"{prefix}.id must be production, validation, or governance")
+            if (not re.fullmatch(r"[a-z][a-z0-9_-]*", group_id)
+                    or not _nonempty(group.get("profile"))
+                    or group.get("profile") in PROFILE_NAMES
+                    or group.get("category") not in INPUT_CATEGORIES):
+                errors.append(f"{prefix} must reference a categorized component profile")
         else:
             expected_profile, expected_category = expected
             if group.get("profile") != expected_profile:
@@ -557,13 +580,10 @@ def validate_contract(contract, allow_draft=False):
                 f"{prefix} has unsupported fields: " + ", ".join(extra_fields)
                 + " (input groups reference git objects by profile only)"
             )
-    if input_ids != set(REQUIRED_INPUT_GROUPS):
+    if not set(REQUIRED_INPUT_GROUPS).issubset(input_ids):
         missing = sorted(set(REQUIRED_INPUT_GROUPS) - input_ids)
-        extra = sorted(input_ids - set(REQUIRED_INPUT_GROUPS))
         if missing:
             errors.append("contract.input_groups is missing required groups: " + ", ".join(missing))
-        if extra:
-            errors.append("contract.input_groups has unsupported groups: " + ", ".join(extra))
 
     external_inputs = contract.get("external_inputs", [])
     if not isinstance(external_inputs, list):
@@ -675,7 +695,7 @@ def validate_contract(contract, allow_draft=False):
             dependencies = []
         elif len(dependencies) != len(set(dependencies)):
             errors.append(f"{prefix}.input_groups must not contain duplicates")
-        unknown_inputs = sorted(set(dependencies) - set(REQUIRED_INPUT_GROUPS))
+        unknown_inputs = sorted(set(dependencies) - input_ids)
         if unknown_inputs:
             errors.append(f"{prefix}.input_groups has unknown ids: " + ", ".join(unknown_inputs))
         if "dependency_rationale" in criterion:
@@ -764,6 +784,33 @@ def validate_contract(contract, allow_draft=False):
                 errors.append(f"{prefix}.limit must be numeric")
             if gate.get("basis") not in PERFORMANCE_GATE_BASES:
                 errors.append(f"{prefix}.basis must not be a historical measurement")
+    if input_ids - set(REQUIRED_INPUT_GROUPS):
+        if errors:
+            return errors
+        groups = _records_by_id(input_groups)
+        by_command = _records_by_id(commands)
+        for command in by_command.values():
+            dependencies = command.get("input_groups")
+            if not _list_of_strings(dependencies) or set(dependencies) - input_ids:
+                errors.append(f"command {command['id']} must declare its input_groups for scoped acceptance")
+            runners = command.get("runner_paths")
+            if not _list_of_strings(runners, allow_empty=True) or any(
+                not _is_bundle_relative(path) or "\\" in path or ":" in path for path in runners or []
+            ):
+                errors.append(f"command {command['id']} must declare repository-relative runner_paths")
+        for criterion in criteria:
+            if not isinstance(criterion, dict):
+                continue
+            dependencies = set(criterion.get("input_groups", []))
+            for command_id in criterion.get("command_ids", []):
+                values = by_command.get(command_id, {}).get("input_groups", [])
+                required = set(values) if _list_of_strings(values) else set()
+                if required - dependencies:
+                    errors.append(f"criterion {criterion.get('id')} omits command dependencies: {command_id}")
+            if criterion.get("kind") != "process" and not any(
+                groups.get(group, {}).get("category") == "production_source" for group in dependencies
+            ):
+                errors.append(f"criterion {criterion.get('id')} must include product inputs")
     return errors
 
 
@@ -835,6 +882,10 @@ def validate_matrix(matrix, contract, contract_sha256, allow_draft=False):
                 errors.append(f"{prefix}.reused_from_round must be set for REUSED evidence")
         elif reused_from is not None:
             errors.append(f"{prefix}.reused_from_round must be null for EXECUTED evidence")
+        origin_fields = ("origin_contract_sha256", "origin_matrix_sha256")
+        if any(item.get(field) is not None for field in origin_fields):
+            if execution != "REUSED" or not all(_is_sha256(item.get(field)) for field in origin_fields):
+                errors.append(f"{prefix} origin hashes require REUSED and both original file hashes")
 
         evidence = item.get("evidence")
         if not isinstance(evidence, list) or not all(_nonempty(entry) for entry in evidence):
@@ -1125,7 +1176,11 @@ def validate_freeze_objects(contract, repo_root):
             continue
         profile = group.get("profile")
         if profile not in profile_config["profiles"]:
+            errors.append(f"frozen profile is not defined: {profile}")
             continue
+        definition = profile_config["profiles"][profile]
+        if profile not in PROFILE_NAMES and group.get("category") != definition["category"]:
+            errors.append(f"component profile category mismatch: {profile}")
         try:
             paths = _profile_tree_paths(root, freeze_tree, profile, profile_config)
         except ValueError as exc:
@@ -1140,7 +1195,92 @@ def validate_freeze_objects(contract, repo_root):
             errors.append(
                 f"freeze_tree is missing required {profile} paths: " + ", ".join(missing_paths)
             )
+    groups = _records_by_id(input_groups)
+    if set(groups) - set(REQUIRED_INPUT_GROUPS):
+        for command in contract.get("commands", []):
+            covered = set()
+            for group_id in command.get("input_groups", []):
+                group = groups.get(group_id, {})
+                profile = group.get("profile")
+                if profile in profile_config["profiles"]:
+                    covered.update(_profile_tree_paths(root, freeze_tree, profile, profile_config))
+            runners = command.get("runner_paths", [])
+            if not _list_of_strings(runners, allow_empty=True):
+                continue
+            missing = set(runners) - covered
+            if missing:
+                errors.append(f"command {command['id']} has unbound runner paths: {_summarize_paths(sorted(missing))}")
+            # Catch omitted entry scripts as well as declared paths. Helpers still
+            # require an independent dependency review before freezing the profile.
+            try:
+                tokens = shlex.split(command.get("command", "").replace("\\", "/"))
+            except ValueError:
+                errors.append(f"command {command['id']} has unparseable quoting")
+                continue
+            interpreters = [index for index, token in enumerate(tokens) if re.fullmatch(
+                r"(?:python[0-9.]*|py|powershell|pwsh|node|bash|sh|cmd)(?:\.exe)?", Path(token).name,
+                re.IGNORECASE,
+            )]
+            interpreter = bool(interpreters)
+            if interpreter and not runners:
+                errors.append(f"command {command['id']} must bind interpreter runner_paths")
+            if any(not _supported_interpreter_entry(tokens, index) for index in interpreters):
+                errors.append(f"command {command['id']} needs an explicit script/module entry, not inline or unsupported interpreter options")
+            script_paths = [token.rstrip(";|") for token in tokens if re.search(
+                r"\.(?:py|ps1|bat|cmd|sh|mjs|cjs|js|gdb|jlink)(?:[;|])?$", token, re.IGNORECASE)]
+            for index, token in enumerate(tokens):
+                if token == "-m" and index + 1 < len(tokens):
+                    module = tokens[index + 1]
+                elif token.startswith("-m") and len(token) > 2:
+                    module = token[2:]
+                else:
+                    continue
+                if re.fullmatch(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*", module):
+                    for candidate in (module.replace(".", "/") + ".py", module.replace(".", "/") + "/__main__.py"):
+                        if _git_resolve_oid(root, f"{freeze_tree}:{candidate}") is not None:
+                            script_paths.append(candidate)
+            for path in script_paths:
+                path = path.replace("\\", "/").removeprefix("./")
+                if path not in runners:
+                    errors.append(f"command {command['id']} omits entry script from runner_paths: {path}")
     return errors
+
+
+def _supported_interpreter_entry(tokens, index):
+    name = Path(tokens[index]).name.lower().removesuffix(".exe")
+    if name == "cmd":
+        index += 1
+        while index < len(tokens) and tokens[index].lower() in {"/d", "/s"}:
+            index += 1
+        return (index + 1 < len(tokens) and tokens[index].lower() == "/c"
+                and tokens[index + 1].lower().endswith((".bat", ".cmd"))
+                and not any(ch.isspace() for ch in tokens[index + 1]))
+    python = name == "py" or name.startswith("python")
+    powershell = name in {"powershell", "pwsh"}
+    flags = ({"-B", "-E", "-I", "-O", "-OO", "-s", "-S", "-u", "-q"} if python else
+             {"-noprofile", "-noninteractive", "-nologo"} if powershell else
+             {"--no-warnings", "--trace-warnings"} if name == "node" else
+             {"-e", "-u", "-eu", "-ue", "-x", "-eux", "--noprofile", "--norc"})
+    index += 1
+    while index < len(tokens):
+        token = tokens[index]
+        option = token.lower() if powershell else token
+        if option in flags or python and name == "py" and re.fullmatch(r"-3(?:\.\d+)?", token):
+            index += 1
+            continue
+        if python and token in {"-X", "-W"} or powershell and option in {"-executionpolicy", "-windowstyle"}:
+            index += 2
+            continue
+        if python and token.startswith(("-X", "-W")) and len(token) > 2:
+            index += 1
+            continue
+        if python and token.startswith("-m"):
+            return len(token) > 2 or index + 1 < len(tokens)
+        if powershell:
+            return option == "-file" and index + 1 < len(tokens) and tokens[index + 1].lower().endswith(".ps1")
+        suffixes = (".py",) if python else (".js", ".mjs", ".cjs") if name == "node" else (".sh",)
+        return not token.startswith("-") and token.lower().endswith(suffixes)
+    return False
 
 
 def validate_execution_worktree(contract, repo_root):
@@ -1373,6 +1513,7 @@ def compute_rerun_plan(
     previous_matrix_sha256=None,
     current_round_id=None,
     repo_root=None,
+    reuse_sources=None,
 ):
     current_hash = current_contract_sha256 or _json_sha256(current_contract)
     previous_hash = previous_contract_sha256 or _json_sha256(previous_contract)
@@ -1403,17 +1544,22 @@ def compute_rerun_plan(
 
     rerun = []
     reusable = []
+    reuse_origins = {}
     for criterion_id, criterion in current_criteria.items():
         reasons = []
         previous_criterion = previous_criteria.get(criterion_id)
         previous_result = previous_results.get(criterion_id)
+        origin = _reuse_origin(
+            criterion_id, previous_contract, previous_matrix, previous_hash,
+            previous_matrix_sha256 or _json_sha256(previous_matrix), reuse_sources or {}, repo_root,
+        ) if previous_result and previous_result.get("result") == "PASS" else None
         if previous_criterion is None:
             reasons.append("new_criterion")
         elif _canonical(criterion) != _canonical(previous_criterion):
             reasons.append("criterion_definition_changed")
         if previous_result is None or previous_result.get("result") != "PASS":
             reasons.append("previous_result_not_pass")
-        elif previous_result.get("execution") != "EXECUTED":
+        elif origin is None:
             reasons.append("previous_result_not_executed")
         for group_id in criterion.get("input_groups", []):
             if group_id in changed_groups:
@@ -1432,6 +1578,11 @@ def compute_rerun_plan(
             rerun.append({"id": criterion_id, "reasons": reasons})
         else:
             reusable.append(criterion_id)
+            reuse_origins[criterion_id] = {
+                "contract_sha256": origin["contract_sha256"],
+                "matrix_sha256": origin["matrix_sha256"],
+                "round_id": origin["matrix"]["round_id"],
+            }
 
     rerun_ids = {item["id"] for item in rerun}
     required_commands = sorted(
@@ -1464,6 +1615,7 @@ def compute_rerun_plan(
         "changed_external_inputs": changed_external,
         "rerun_criteria": rerun,
         "reusable_criteria": sorted(reusable),
+        "reuse_origins": reuse_origins,
         "required_commands": required_commands,
         "required_artifacts": required_artifacts,
     }
@@ -1490,7 +1642,64 @@ def _artifact_signature(matrix, artifact_id):
     return (record.get("sha256", "").upper(), record.get("size"))
 
 
-def validate_reuse(current_matrix, current_contract, previous_matrix, rerun_plan):
+def _same_observation(left_matrix, left, right_matrix, right, specification):
+    return (
+        left.get("observed") == right.get("observed")
+        and _evidence_digests(left_matrix, left) == _evidence_digests(right_matrix, right)
+        and all(_command_signature(left_matrix, key) == _command_signature(right_matrix, key)
+                for key in specification.get("command_ids", []))
+        and all(_artifact_signature(left_matrix, key) == _artifact_signature(right_matrix, key)
+                for key in specification.get("artifact_ids", []))
+    )
+
+
+def _reuse_origin(criterion_id, contract, matrix, contract_hash, matrix_hash, sources, repo_root):
+    result = _records_by_id(matrix.get("criteria")).get(criterion_id, {})
+    if result.get("execution") == "EXECUTED":
+        return {"contract": contract, "matrix": matrix,
+                "contract_sha256": contract_hash.upper(), "matrix_sha256": matrix_hash.upper()}
+    origin_hash = result.get("origin_matrix_sha256")
+    if not origin_hash:
+        return None  # Old one-hop records never become unverifiable chains.
+    source = sources.get(origin_hash.upper())
+    if source is None:
+        raise ValueError(f"missing original EXECUTED bundle for {criterion_id}; supply --reuse-source, do not recapture to repair missing metadata")
+    original = _records_by_id(source["matrix"].get("criteria")).get(criterion_id, {})
+    spec = _records_by_id(contract.get("criteria")).get(criterion_id, {})
+    original_spec = _records_by_id(source["contract"].get("criteria")).get(criterion_id)
+    if (source["contract_sha256"] != str(result.get("origin_contract_sha256", "")).upper()
+            or source["matrix_sha256"] == matrix_hash.upper()
+            or source["matrix"].get("round_id") == matrix.get("round_id")
+            or source["matrix"].get("round_id") != result.get("reused_from_round")
+            or original.get("execution") != "EXECUTED" or original.get("result") != "PASS"
+            or source["contract"].get("task_id") != contract.get("task_id")
+            or source["contract"].get("version", 0) > contract.get("version", 0)
+            or _canonical(original_spec) != _canonical(spec)):
+        raise ValueError(f"invalid original EXECUTED PASS binding for {criterion_id}")
+    if (source["contract"]["version"] == contract["version"]
+            and source["contract_sha256"] != contract_hash.upper()):
+        raise ValueError("same-version origin contract differs from the previous contract")
+    if source["contract"]["freeze_commit"] != contract["freeze_commit"]:
+        if repo_root is None or not _git_is_ancestor(
+                _resolve_git_worktree(repo_root), source["contract"]["freeze_commit"], contract["freeze_commit"]):
+            raise ValueError("origin freeze_commit must be an ancestor of the previous freeze_commit")
+    if set(spec.get("input_groups", [])) & set(_changed_input_groups(contract, source["contract"], repo_root)):
+        raise ValueError(f"original inputs have changed for {criterion_id}")
+    for field, ids in (("commands", "command_ids"), ("artifacts", "artifact_ids")):
+        before, after = _records_by_id(source["contract"].get(field)), _records_by_id(contract.get(field))
+        if any(_canonical(before.get(key)) != _canonical(after.get(key)) for key in spec.get(ids, [])):
+            raise ValueError(f"original {field} have changed for {criterion_id}")
+    before = _records_by_id(source["contract"].get("external_inputs"))
+    after = _records_by_id(contract.get("external_inputs"))
+    if any(_external_input_signature(before.get(key)) != _external_input_signature(after.get(key))
+           for key in spec.get("external_inputs", [])):
+        raise ValueError(f"original external inputs have changed for {criterion_id}")
+    if not _same_observation(matrix, result, source["matrix"], original, spec):
+        raise ValueError(f"previous reused observation differs from original for {criterion_id}")
+    return source
+
+
+def validate_reuse(current_matrix, current_contract, previous_matrix, rerun_plan, reuse_sources=None):
     errors = []
     previous_criteria = _records_by_id(previous_matrix.get("criteria"))
     contract_criteria = _records_by_id(current_contract.get("criteria"))
@@ -1514,24 +1723,67 @@ def validate_reuse(current_matrix, current_contract, previous_matrix, rerun_plan
         if previous is None or previous.get("result") != "PASS":
             errors.append(f"matrix.criteria[{index}] has no previous PASS to reuse")
             continue
+        origin = rerun_plan.get("reuse_origins", {}).get(criterion_id)
+        comparison_matrix = previous_matrix
+        comparison_round = previous_round
+        has_origin = any(criterion.get(field) is not None for field in
+                         ("origin_contract_sha256", "origin_matrix_sha256"))
+        if origin and (has_origin or previous.get("execution") == "REUSED"
+                       or set(_records_by_id(current_contract.get("input_groups"))) - set(REQUIRED_INPUT_GROUPS)):
+            if (criterion.get("origin_contract_sha256") != origin["contract_sha256"]
+                    or criterion.get("origin_matrix_sha256") != origin["matrix_sha256"]):
+                errors.append(f"matrix.criteria[{index}] must bind the original contract and matrix hashes")
+                continue
+        if previous.get("execution") == "REUSED" and origin:
+            source = (reuse_sources or {}).get(origin["matrix_sha256"])
+            if source is None:
+                errors.append(f"matrix.criteria[{index}] is missing the original EXECUTED bundle")
+                continue
+            comparison_matrix = source["matrix"]
+            comparison_round = comparison_matrix.get("round_id")
+            previous = _records_by_id(comparison_matrix.get("criteria")).get(criterion_id, {})
         if previous.get("execution") != "EXECUTED":
             errors.append(f"matrix.criteria[{index}] cannot reuse a previously REUSED result")
             continue
-        if criterion.get("reused_from_round") != previous_round:
+        if criterion.get("reused_from_round") != comparison_round:
             errors.append(f"matrix.criteria[{index}].reused_from_round does not match the baseline")
         if criterion.get("result") != previous.get("result"):
             errors.append(f"matrix.criteria[{index}] result differs from reused evidence")
         if criterion.get("observed") != previous.get("observed"):
             errors.append(f"matrix.criteria[{index}] observed value differs from reused evidence")
-        if _evidence_digests(current_matrix, criterion) != _evidence_digests(previous_matrix, previous):
+        if _evidence_digests(current_matrix, criterion) != _evidence_digests(comparison_matrix, previous):
             errors.append(f"matrix.criteria[{index}] evidence hashes differ from the baseline")
         specification = contract_criteria.get(criterion_id, {})
         for command_id in specification.get("command_ids", []):
-            if _command_signature(current_matrix, command_id) != _command_signature(previous_matrix, command_id):
+            if _command_signature(current_matrix, command_id) != _command_signature(comparison_matrix, command_id):
                 errors.append(f"matrix.criteria[{index}] command {command_id} differs from the baseline")
         for artifact_id in specification.get("artifact_ids", []):
-            if _artifact_signature(current_matrix, artifact_id) != _artifact_signature(previous_matrix, artifact_id):
+            if _artifact_signature(current_matrix, artifact_id) != _artifact_signature(comparison_matrix, artifact_id):
                 errors.append(f"matrix.criteria[{index}] artifact {artifact_id} differs from the baseline")
+    return errors
+
+
+def validate_planned_execution(matrix, contract, rerun_plan):
+    """Reject extra successful executions without suppressing new failure evidence."""
+    errors = []
+    reusable = set(rerun_plan.get("reusable_criteria", []))
+    required_commands = set(rerun_plan.get("required_commands", []))
+    specifications = _records_by_id(contract.get("criteria"))
+    for item in matrix.get("criteria", []):
+        if item.get("execution") != "EXECUTED" or item.get("result") != "PASS":
+            continue
+        criterion_id = item.get("id")
+        if criterion_id not in reusable:
+            continue
+        command_ids = set(specifications.get(criterion_id, {}).get("command_ids", []))
+        unplanned = sorted(command_ids - required_commands)
+        # Shared commands already required by another criterion do not add a run.
+        if unplanned or not command_ids:
+            errors.append(
+                f"criterion {criterion_id} has unplanned EXECUTED PASS; "
+                "use REUSED or an approved invalidation, not an extra acceptance run"
+                + (": " + ", ".join(unplanned) if unplanned else "")
+            )
     return errors
 
 
@@ -1617,6 +1869,48 @@ def _physical_errors(contract, matrix, bundle_directory, repo_root, require_exec
     return errors
 
 
+def _validate_reuse_history(source, sources, repo_root, checked, active):
+    key = source["matrix_sha256"]
+    if key in checked:
+        return []
+    if key in active or len(active) >= 128:
+        return ["reuse history is cyclic or exceeds 128 rounds"]
+    matrix, contract = source["matrix"], source["contract"]
+    if not any(item.get("execution") == "REUSED" for item in matrix["criteria"]):
+        checked.add(key)
+        return []
+    active.add(key)
+    parent = sources.get(str(matrix.get("previous_matrix_sha256", "")).upper())
+    errors = []
+    if parent is None:
+        errors.append("missing previous round in reuse history; supply its contract/matrix with --reuse-source")
+    else:
+        errors.extend(_validate_reuse_history(parent, sources, repo_root, checked, active))
+        errors.extend(validate_contract_lineage(
+            contract, parent["contract"], source["contract_sha256"], parent["contract_sha256"]))
+        errors.extend(validate_matrix_lineage(
+            matrix, parent["matrix"], source["matrix_sha256"], parent["matrix_sha256"]))
+        if not errors:
+            try:
+                plan = compute_rerun_plan(
+                    contract, parent["contract"], parent["matrix"],
+                    current_contract_sha256=source["contract_sha256"],
+                    previous_contract_sha256=parent["contract_sha256"],
+                    previous_matrix_sha256=parent["matrix_sha256"],
+                    current_round_id=matrix["round_id"], repo_root=repo_root, reuse_sources=sources,
+                )
+                errors.extend(validate_reuse(matrix, contract, parent["matrix"], plan, sources))
+                errors.extend(validate_planned_execution(matrix, contract, plan))
+                errors.extend(validate_rerun_plan_file(
+                    matrix, source["bundle_directory"], plan, parent["matrix_sha256"]))
+            except ValueError as exc:
+                errors.append(str(exc))
+    active.remove(key)
+    if not errors:
+        checked.add(key)
+    return [f"reuse history {matrix['round_id']}: {error}" for error in errors]
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Validate an E-Track acceptance bundle.")
     parser.add_argument("--contract", required=True)
@@ -1632,6 +1926,9 @@ def main(argv=None):
     parser.add_argument("--allow-draft", action="store_true")
     parser.add_argument("--previous-contract")
     parser.add_argument("--previous-matrix")
+    parser.add_argument("--reuse-source", nargs=2, action="append", default=[],
+                        metavar=("CONTRACT", "MATRIX"),
+                        help="Original or intermediate evidence bundle; repeat for the complete reuse history.")
     parser.add_argument(
         "--write-rerun-plan",
         help="Write a computed plan inside the current matrix bundle.",
@@ -1647,7 +1944,13 @@ def main(argv=None):
         return 2
 
     errors = validate_contract(contract, allow_draft=args.allow_draft)
-    errors.extend(validate_matrix(matrix, contract, contract_hash, allow_draft=args.allow_draft))
+    if not errors:
+        errors.extend(validate_matrix(matrix, contract, contract_hash, allow_draft=args.allow_draft))
+    if errors:
+        for error in errors:
+            print(f"ERROR: {error}", file=sys.stderr)
+        print(f"VALIDATION=FAIL errors={len(errors)}", file=sys.stderr)
+        return 1
     needs_physical = matrix.get("overall_result") in FINAL_RESULTS or args.write_rerun_plan
     if needs_physical:
         errors.extend(
@@ -1668,7 +1971,30 @@ def main(argv=None):
     previous_hash = None
     previous_matrix_hash = None
     rerun_plan = None
+    reuse_sources = {}
+    for source_contract_path, source_matrix_path in args.reuse_source:
+        try:
+            sc, sm, sh, mh = _load_bundle(source_contract_path, source_matrix_path)
+            source_errors = validate_contract(sc)
+            if not source_errors:
+                source_errors.extend(validate_matrix(sm, sc, sh))
+            if not source_errors:
+                source_errors.extend(_physical_errors(sc, sm, Path(source_matrix_path).parent, args.repo_root))
+            if mh == matrix_hash or isinstance(sm, dict) and sm.get("round_id") == matrix.get("round_id"):
+                source_errors.append("a reuse source cannot be the current matrix or round")
+            if mh in reuse_sources:
+                source_errors.append("duplicate reuse source matrix")
+            if source_errors:
+                errors.extend(f"origin: {error}" for error in source_errors)
+            else:
+                reuse_sources[mh] = {"contract": sc, "matrix": sm,
+                                     "contract_sha256": sh, "matrix_sha256": mh,
+                                     "bundle_directory": Path(source_matrix_path).parent}
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            errors.append(f"original bundle cannot be loaded: {exc}")
     previous_pair = any((args.previous_contract, args.previous_matrix))
+    if args.reuse_source and not previous_pair:
+        errors.append("reuse sources require a previous contract and matrix")
     if previous_pair and not all((args.previous_contract, args.previous_matrix)):
         errors.append("previous contract and matrix must be supplied together")
     elif args.previous_contract and args.previous_matrix:
@@ -1685,19 +2011,36 @@ def main(argv=None):
             errors.append(f"previous bundle cannot be loaded: {exc}")
         if previous_contract is not None:
             previous_errors = validate_contract(previous_contract)
-            previous_errors.extend(
+            if not previous_errors:
+                previous_errors.extend(
                 validate_matrix(previous_matrix, previous_contract, previous_hash)
-            )
+                )
             # 上一轮的 git 对象与本轮同在一个仓库里，不再需要上一轮的 worktree。
-            previous_errors.extend(
+            if not previous_errors:
+                previous_errors.extend(
                 _physical_errors(
                     previous_contract,
                     previous_matrix,
                     Path(args.previous_matrix).parent,
                     args.repo_root,
                 )
-            )
+                )
             errors.extend(f"previous: {error}" for error in previous_errors)
+            if not previous_errors:
+                previous_errors.extend(validate_matrix_lineage(
+                    matrix, previous_matrix, matrix_hash, previous_matrix_hash))
+                errors.extend(previous_errors)
+            if not previous_errors:
+                reuse_sources[previous_matrix_hash] = {
+                    "contract": previous_contract, "matrix": previous_matrix,
+                    "contract_sha256": previous_hash, "matrix_sha256": previous_matrix_hash,
+                    "bundle_directory": Path(args.previous_matrix).parent,
+                }
+                checked = set()
+                for source in reuse_sources.values():
+                    previous_errors.extend(_validate_reuse_history(
+                        source, reuse_sources, args.repo_root, checked, set()))
+                errors.extend(previous_errors)
             if not previous_errors:
                 lineage_errors = validate_contract_lineage(
                     contract,
@@ -1725,11 +2068,14 @@ def main(argv=None):
                             previous_matrix_sha256=previous_matrix_hash,
                             current_round_id=matrix.get("round_id"),
                             repo_root=args.repo_root,
+                            reuse_sources=reuse_sources,
                         )
                     except ValueError as exc:
                         errors.append(f"cannot compute the rerun plan: {exc}")
                 if rerun_plan is not None:
-                    errors.extend(validate_reuse(matrix, contract, previous_matrix, rerun_plan))
+                    errors.extend(validate_reuse(matrix, contract, previous_matrix, rerun_plan, reuse_sources))
+                    if not args.write_rerun_plan:
+                        errors.extend(validate_planned_execution(matrix, contract, rerun_plan))
                     errors.extend(
                         validate_rerun_plan_file(
                             matrix,
@@ -1772,6 +2118,8 @@ def main(argv=None):
             f"RERUN_PLAN={output} rerun={len(rerun_plan['rerun_criteria'])} "
             f"reusable={len(rerun_plan['reusable_criteria'])}"
         )
+        print("FINAL_VALIDATION=NOT_RUN mode=plan-only")
+        return 0
 
     print(
         f"VALIDATION=PASS contract={contract.get('contract_id')} "
