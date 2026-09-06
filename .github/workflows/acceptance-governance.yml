@@ -15,6 +15,10 @@ on:
       - "docs/ota-prompts/**"
       - "tests/ota/spec-probes/**"
       - "tests/ota/test_acceptance_bundle.py"
+      - "tests/ota/test_acceptance_efficiency.py"
+      - ".claude/cap.ps1"
+      - "app/bluetooth_flutter_Trace/AGENTS.md"
+      - "app/bluetooth_flutter_Trace/CLAUDE.md"
       - "tests/ota/test_ac5_ram_budget.py"
       - "tests/ota/test_f435_build_bootstrap.py"
       - "tests/ota/test_p2_5_build_provenance.py"
@@ -39,6 +43,10 @@ on:
       - "docs/ota-prompts/**"
       - "tests/ota/spec-probes/**"
       - "tests/ota/test_acceptance_bundle.py"
+      - "tests/ota/test_acceptance_efficiency.py"
+      - ".claude/cap.ps1"
+      - "app/bluetooth_flutter_Trace/AGENTS.md"
+      - "app/bluetooth_flutter_Trace/CLAUDE.md"
       - "tests/ota/test_ac5_ram_budget.py"
       - "tests/ota/test_f435_build_bootstrap.py"
       - "tests/ota/test_p2_5_build_provenance.py"
@@ -76,6 +84,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/ota/test_acceptance_bundle.py
+          python3 tests/ota/test_acceptance_efficiency.py
           python3 tests/ota/test_ac5_ram_budget.py
           python3 tests/ota/test_f435_build_bootstrap.py
           python3 tests/ota/test_p2_5_build_provenance.py

@@ -4,6 +4,7 @@
   "profiles": {
     "Production": {
       "root_patterns": [
+        "app/bluetooth_flutter_Trace/",
         ".github/scripts/",
         "ArduinoAPI/",
         "Libraries/",
@@ -20,6 +21,9 @@
         "vendor/"
       ],
       "top_files": [
+        ".github/workflows/build.yml",
+        ".github/workflows/cloudflare-update-service.yml",
+        ".github/workflows/deploy-cloudflare-admin.yml",
         ".github/workflows/firmware-build.yml",
         "CMakeLists.txt",
         "build_f435_and_simulator.bat",
@@ -28,7 +32,14 @@
         "MDK-ARM_F435/proj.uvprojx",
         "Tools/etu_pack.py"
       ],
-      "exclude_prefixes": [],
+      "exclude_prefixes": [
+        "app/bluetooth_flutter_Trace/AGENTS.md",
+        "app/bluetooth_flutter_Trace/CLAUDE.md",
+        "app/bluetooth_flutter_Trace/test/",
+        "app/bluetooth_flutter_Trace/integration_test/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts"
+      ],
       "required_paths": [
         ".github/workflows/firmware-build.yml",
         "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
@@ -38,9 +49,14 @@
     "Validation": {
       "root_patterns": [
         "Tools/",
-        "tests/"
+        "tests/",
+        "app/bluetooth_flutter_Trace/test/",
+        "app/bluetooth_flutter_Trace/integration_test/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/"
       ],
       "top_files": [
+        ".claude/cap.ps1",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts",
         ".github/workflows/acceptance-governance.yml",
         "docs/acceptance-contracts/template.contract.json",
         "docs/acceptance-contracts/template.evidence-matrix.json"
@@ -63,6 +79,9 @@
       "top_files": [
         ".github/copilot-instructions.md",
         "AGENTS.md",
+        "CLAUDE.md",
+        "app/bluetooth_flutter_Trace/AGENTS.md",
+        "app/bluetooth_flutter_Trace/CLAUDE.md",
         "docs/acceptance-execution-contract.md",
         "docs/ota-cross-system-contracts.md",
         "docs/ota-spec-decisions.md"
@@ -76,6 +95,77 @@
         "docs/ota-prompts/prompt-template-acceptance.md",
         "docs/ota-prompts/prompt-template-implementation.md"
       ]
+    },
+    "Firmware": {
+      "category": "production_source",
+      "root_patterns": [
+        "ArduinoAPI/", "Libraries/", "USER/", "boot/", "cmake/",
+        "bsdiff_lzma_AES128-main/", "MDK-ARM_F435/Platform/",
+        "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/", "MDK-ARM_F435/RTE/_X-Track/",
+        "MDK-ARM_F435/cmake-generated/cmake/", "Simulator/LVGL.Simulator/",
+        "segger_rtt/", "vendor/"
+      ],
+      "top_files": [
+        ".github/workflows/firmware-build.yml", "CMakeLists.txt",
+        "build_f435_and_simulator.bat", "MDK-ARM_F435/build_f435.ps1",
+        "MDK-ARM_F435/cmake-generated/CMakeLists.txt", "MDK-ARM_F435/proj.uvprojx",
+        "Simulator/LVGL.Simulator.sln", "Tools/etu_pack.py"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": ["MDK-ARM_F435/cmake-generated/CMakeLists.txt", "Tools/etu_pack.py"]
+    },
+    "Flutter": {
+      "category": "production_source",
+      "root_patterns": [
+        "app/bluetooth_flutter_Trace/lib/", "app/bluetooth_flutter_Trace/android/",
+        "app/bluetooth_flutter_Trace/windows/", "app/bluetooth_flutter_Trace/assets/",
+        "app/bluetooth_flutter_Trace/third_party/", "app/bluetooth_flutter_Trace/ios/",
+        "app/bluetooth_flutter_Trace/linux/", "app/bluetooth_flutter_Trace/macos/"
+      ],
+      "top_files": [
+        "app/bluetooth_flutter_Trace/pubspec.yaml", "app/bluetooth_flutter_Trace/pubspec.lock",
+        "app/bluetooth_flutter_Trace/analysis_options.yaml", ".github/workflows/build.yml",
+        ".github/scripts/create_trace_patch.py", ".github/scripts/create_vcdiff_patch.py"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": ["app/bluetooth_flutter_Trace/pubspec.yaml", ".github/workflows/build.yml"]
+    },
+    "Cloudflare": {
+      "category": "production_source",
+      "root_patterns": [
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/admin/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/public/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/migrations/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/"
+      ],
+      "top_files": [
+        ".github/workflows/cloudflare-update-service.yml", ".github/workflows/deploy-cloudflare-admin.yml"
+      ],
+      "exclude_prefixes": [
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/",
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts"
+      ],
+      "required_paths": ["app/bluetooth_flutter_Trace/cloudflare/update-service/worker/package.json"]
+    },
+    "Capture": {
+      "category": "validation_inputs",
+      "root_patterns": ["Tools/jlink/"],
+      "top_files": ["Tools/provenance/worktree_guard.ps1", ".claude/cap.ps1"],
+      "exclude_prefixes": [],
+      "required_paths": ["Tools/jlink/jlink-common.ps1", "Tools/provenance/worktree_guard.ps1"]
+    },
+    "Evidence": {
+      "category": "validation_inputs",
+      "root_patterns": ["Tools/acceptance/"],
+      "top_files": [
+        "Tools/provenance/manifest_profiles.json", ".github/workflows/acceptance-governance.yml",
+        "tests/ota/test_acceptance_bundle.py", "tests/ota/test_acceptance_efficiency.py",
+        "docs/acceptance-contracts/template.contract.json",
+        "docs/acceptance-contracts/template.evidence-matrix.json"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": ["Tools/acceptance/validate_bundle.py"]
     }
   }
 }

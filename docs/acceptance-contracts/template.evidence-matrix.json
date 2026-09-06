@@ -14,6 +14,8 @@
       "failure_owner": null,
       "execution": "EXECUTED",
       "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
       "observed": null,
       "evidence": [],
       "notes": "Replace with the observation or the reason it was not observed."

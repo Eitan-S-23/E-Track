@@ -42,6 +42,8 @@
       "id": "CMD-FUNC-1",
       "description": "product: directly observe FUNC-1 after preflight. Before freezing, specify prerequisites, timeout, observation quota and recovery/retry conditions.",
       "command": "replace-with-the-exact-command",
+      "input_groups": ["production"],
+      "runner_paths": [],
       "expected_exit_codes": [
         0
       ],
