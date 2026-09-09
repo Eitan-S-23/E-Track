@@ -1,0 +1,89 @@
+name: Flutter Development Checks
+
+on:
+  push:
+    branches:
+      - "dev/flutter/**"
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: "all: app test suite; ota: targeted OTA development tests"
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - ota
+      build_apk:
+        description: "Build a debug APK after checks; forces all tests on both hosts"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  development:
+    name: Flutter self-tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            shell: bash
+          - os: windows-2022
+            shell: cmd
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+      FLUTTER_DEV_TEST_SCOPE: ${{ (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'all' || inputs.test_scope || 'all' }}
+      FLUTTER_DEV_BUILD_APK: ${{ matrix.os == 'ubuntu-latest' && (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'true' || 'false' }}
+    steps:
+      - name: Checkout validation commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verify development runner
+        timeout-minutes: 5
+        shell: ${{ matrix.shell }}
+        working-directory: ${{ github.workspace }}
+        run: python -B tests/ota/test_flutter_dev_checks.py
+
+      - name: Verify debug APK helper
+        timeout-minutes: 5
+        shell: ${{ matrix.shell }}
+        working-directory: ${{ github.workspace }}
+        run: python -B tests/ota/test_flutter_dev_apk.py
+
+      - name: Analyze, test and optionally build a debug APK
+        shell: ${{ matrix.shell }}
+        working-directory: ${{ github.workspace }}
+        run: python -B Tools/flutter/dev_checks.py --repo-root .
+
+      - name: Upload development logs (not acceptance evidence)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-dev-${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/flutter-dev-checks/runs/*/result.json
+            .cache/flutter-dev-checks/runs/*/logs/*.log
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload debug APK (not a release)
+        if: success() && env.FLUTTER_DEV_BUILD_APK == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-dev-debug-apk-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/flutter-dev-checks/runs/*/artifacts/trace-dev-debug.apk
+            .cache/flutter-dev-checks/runs/*/artifacts/trace-dev-debug.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

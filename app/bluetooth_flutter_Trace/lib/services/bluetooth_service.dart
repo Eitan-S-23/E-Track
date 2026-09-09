@@ -38,6 +38,19 @@ abstract class BluetoothAdapter {
       String deviceAddress, String serviceId, String characteristicId);
   Future<void> unSubscribeFromCharacteristic(
       String deviceAddress, String serviceId, String characteristicId);
+
+  /// 该 adapter 是否提供真实特征通知流（RC3-09）：WinBle 提供
+  /// [characteristicValueStreamOf]；FlutterBluePlus 的订阅在 service
+  /// 层按特征展开（`ch.onValueReceived`），不走 adapter。测试替身可
+  /// 置 true 在任意平台驱动 Windows 通知路径。
+  bool get supportsCharacteristicValueStream;
+
+  /// 真实特征通知事件流（RC3-09）：保留每片及顺序、**不去重**——
+  /// FFF1 为 notify-only 分片流，同值通知可能是有效重发，重复片由
+  /// 协议层幂等处理（ACK bitmap 对 delta=0 幂等重发）。不支持时抛
+  /// [UnsupportedError]（先查 [supportsCharacteristicValueStream]）。
+  Stream<List<int>> characteristicValueStreamOf(
+      String deviceAddress, String serviceId, String characteristicId);
 }
 
 // FlutterBluePlus适配器（用于移动端）
@@ -156,6 +169,17 @@ class FlutterBluePlusAdapter implements BluetoothAdapter {
       String deviceAddress, String serviceId, String characteristicId) async {
     throw UnsupportedError(
         'FlutterBluePlus characteristic unsubscription not implemented in adapter');
+  }
+
+  @override
+  bool get supportsCharacteristicValueStream => false;
+
+  @override
+  Stream<List<int>> characteristicValueStreamOf(
+      String deviceAddress, String serviceId, String characteristicId) {
+    throw UnsupportedError(
+        'FlutterBluePlus notify events are consumed per-characteristic in '
+        'BluetoothService, not via adapter');
   }
 }
 
@@ -413,6 +437,23 @@ class WinBleAdapter implements BluetoothAdapter {
       rethrow;
     }
   }
+
+  @override
+  bool get supportsCharacteristicValueStream => true;
+
+  @override
+  Stream<List<int>> characteristicValueStreamOf(
+      String deviceAddress, String serviceId, String characteristicId) {
+    // WinBle.characteristicValueStreamOf 已按 address/serviceId/
+    // characteristicId 过滤真实通知事件（win_ble 1.1.1 API）。value
+    // 是平台通道字节（Uint8List），拷贝为普通 List<int> 防止跨流
+    // 共享底层缓冲被后续通知覆写。
+    return WinBle.characteristicValueStreamOf(
+      address: deviceAddress,
+      serviceId: serviceId,
+      characteristicId: characteristicId,
+    ).map<List<int>>((value) => List<int>.from(value as List));
+  }
 }
 
 /// 跨平台蓝牙服务
@@ -443,6 +484,12 @@ class BluetoothService extends GetxController {
 
   // 蓝牙适配器实例
   late BluetoothAdapter _adapter;
+
+  /// 测试注入 adapter（RC3-09）：不经 [initBluetooth] 平台分支，直接
+  /// 驱动 adapter 接口的通知订阅路径。真实路径仍由 [initBluetooth]
+  /// 按平台选择，此注入不改变生产行为。
+  @visibleForTesting
+  set adapterForTest(BluetoothAdapter adapter) => _adapter = adapter;
 
   @override
   void onInit() {
@@ -1140,44 +1187,83 @@ class BluetoothService extends GetxController {
     }
   }
 
-  /// 订阅通知（Windows 走 WinBle，移动端走FlutterBlue特征）
+  /// OTA 专用写入（RC2-08）：UUID 用 [_strictBleUuidEquals] 严格匹配。
+  ///
+  /// 遥控透传 [writeByAddress] 的宽松匹配与调试字符串提取不适用于
+  /// OTA 传输（OTA-XC-FLUTTER-TRANSPORT 红线：非 FFF2 特征不得被
+  /// 模糊匹配命中）。serviceId/characteristicId 必须来自
+  /// [findExactOtaCharacteristicsByAddress] 的发现结果。
+  Future<void> writeOtaCharacteristicByAddress(
+    String deviceAddress,
+    String serviceId,
+    String characteristicId,
+    List<int> data, {
+    bool writeWithResponse = false,
+  }) async {
+    try {
+      if (Platform.isWindows) {
+        await _adapter.writeCharacteristic(
+          deviceAddress,
+          serviceId,
+          characteristicId,
+          data,
+          writeWithResponse: writeWithResponse,
+        );
+      } else {
+        final device = _findDeviceByAddress(deviceAddress);
+        if (device == null) {
+          throw UnsupportedError('未找到设备，无法写入: $deviceAddress');
+        }
+        final services = await device.discoverServices();
+        for (final svc in services) {
+          final sid = svc.uuid.toString();
+          if (!_strictBleUuidEquals(sid, serviceId)) continue;
+          for (final ch in svc.characteristics) {
+            final cid = ch.uuid.toString();
+            if (!_strictBleUuidEquals(cid, characteristicId)) continue;
+            await ch.write(Uint8List.fromList(data),
+                withoutResponse: !writeWithResponse);
+            return;
+          }
+        }
+        throw UnsupportedError('未找到目标OTA特征: $characteristicId');
+      }
+    } catch (e) {
+      debugPrint('OTA写入失败($deviceAddress/$serviceId/$characteristicId): $e');
+      rethrow;
+    }
+  }
+
+  /// 订阅通知（Windows 走 WinBle 通知事件流，移动端走FlutterBlue特征）
   Stream<List<int>>? subscribeNotifyByAddress(
       String deviceAddress, String serviceId, String characteristicId) {
     try {
-      if (Platform.isWindows) {
-        // Windows: 发起订阅，并通过轮询读取构建一个值流
+      if (_adapter.supportsCharacteristicValueStream) {
+        // Windows（RC3-09）：消费真实特征通知事件，不再 250ms 轮询读
+        // + last 去重（会丢连续分片/同值通知）。可读特征额外做一次
+        // 初始读给出当前值；notify-only 特征读失败属预期，忽略。
         return Stream<List<int>>.multi((controller) async {
-          List<int>? last;
-          Timer? timer;
+          StreamSubscription<List<int>>? sub;
           try {
             await _adapter.subscribeToCharacteristic(
                 deviceAddress, serviceId, characteristicId);
           } catch (_) {}
-
-          Future<void> poll() async {
-            try {
-              final data = await readByAddress(
-                  deviceAddress, serviceId, characteristicId);
-              if (data.isNotEmpty) {
-                if (last == null || !listEquals(last, data)) {
-                  last = List<int>.from(data);
-                  controller.add(data);
-                }
-              }
-            } catch (e) {
-              controller.addError(e);
+          try {
+            // 初始读直连 adapter（notify-only 特征读失败属预期，忽略；
+            // 可读特征给出当前值）。
+            final current = await _adapter.readCharacteristic(
+                deviceAddress, serviceId, characteristicId);
+            if (current.isNotEmpty) {
+              controller.add(current);
             }
-          }
-
-          // 先立即读一次
-          await poll();
-          // 每250ms轮询一次
-          timer = Timer.periodic(const Duration(milliseconds: 250), (_) async {
-            await poll();
-          });
-
+          } catch (_) {}
+          sub = _adapter
+              .characteristicValueStreamOf(
+                  deviceAddress, serviceId, characteristicId)
+              .listen(controller.add,
+                  onError: controller.addError, onDone: controller.close);
           controller.onCancel = () async {
-            timer?.cancel();
+            await sub?.cancel();
             try {
               await _adapter.unSubscribeFromCharacteristic(
                   deviceAddress, serviceId, characteristicId);
@@ -1363,6 +1449,232 @@ class BluetoothService extends GetxController {
     return const <dynamic>[];
   }
 
+  /// 精确发现 OTA 特征（OTA 专用，无降级）。
+  ///
+  /// 在 FFF0 服务内要求同时存在精确 FFF2（可写）与 FFF1（可通知）
+  /// 两个特征；缺任一即返回 null。禁止任取第一个可写/通知特征——
+  /// 那是遥控透传 `findTransparentUuidsByAddress` 的降级策略，
+  /// OTA 传输红线（OTA-XC-FLUTTER-TRANSPORT）不允许复用。
+  ///
+  /// UUID 比较用 [_strictBleUuidEquals]：短格式或 Bluetooth Base UUID
+  /// 精确等价，其他 128-bit UUID 不得冒充标准服务/特征（PR06）。
+  /// 返回 { 'serviceId', 'writeCharId'(FFF2), 'notifyCharId'(FFF1),
+  /// 'writeMode'('with'/'without'——FFF2 实际支持的写模式) }。
+  Future<Map<String, String>?> findExactOtaCharacteristicsByAddress(
+    String deviceAddress, {
+    String serviceUuid = 'fff0',
+    String writeCharUuid = 'fff2',
+    String notifyCharUuid = 'fff1',
+  }) async {
+    try {
+      final services = await discoverServicesByAddress(deviceAddress);
+      String? normalizeId(dynamic obj) => _extractUuidFromAny(obj);
+
+      for (final svc in services) {
+        final sid = normalizeId(svc);
+        if (sid == null) continue;
+        if (!_strictBleUuidEquals(sid, serviceUuid)) continue;
+
+        final characteristics = Platform.isWindows
+            ? await _adapter.discoverCharacteristics(deviceAddress, sid)
+            : _safeMobileCharacteristicsList(svc);
+
+        String? writeId;
+        String? writeMode;
+        String? notifyId;
+        for (final ch in characteristics) {
+          final cid = normalizeId(ch);
+          if (cid == null) continue;
+          if (writeId == null &&
+              _strictBleUuidEquals(cid, writeCharUuid)) {
+            // 绑定实际支持的写模式：仅 withoutResponse 时禁止强制
+            // withResponse 写（PR06）。
+            final mode = _otaWriteMode(ch);
+            if (mode != null) {
+              writeId = cid;
+              writeMode = mode;
+            }
+          }
+          if (notifyId == null &&
+              _strictBleUuidEquals(cid, notifyCharUuid) &&
+              _hasCharacteristicNotify(ch)) {
+            notifyId = cid;
+          }
+        }
+        if (writeId == null || notifyId == null) {
+          // 精确匹配失败：不做任何降级，直接视为无 OTA 特征。
+          return null;
+        }
+        return {
+          'serviceId': sid,
+          'writeCharId': writeId,
+          'notifyCharId': notifyId,
+          'writeMode': writeMode!,
+        };
+      }
+      return null;
+    } catch (e) {
+      debugPrint('精确发现OTA特征失败($deviceAddress): $e');
+      return null;
+    }
+  }
+
+  /// OTA 专用通知订阅：等待订阅真正就绪后才返回流（PR10）。
+  ///
+  /// 与遥控透传 [subscribeNotifyByAddress] 的区别：
+  /// - 返回 Future——订阅完成、监听建立后才 resolve，调用方
+  ///   （OtaService 绑定 transport）可安全地在 resolve 后立即发送
+  ///   GET_INFO；
+  /// - UUID 用 [_strictBleUuidEquals] 精确匹配；
+  /// - Windows 端 `subscribeToCharacteristic` 失败返回 null（不静默吞掉）。
+  ///
+  /// Windows 通知路径（RC3-09）：FFF1 为 notify-only 分片流，不可读——
+  /// 订阅后消费真实特征通知事件（[BluetoothAdapter
+  /// .characteristicValueStreamOf]），保留每片及顺序、不去重（同值
+  /// 通知是有效重发，由协议层 ACK 幂等处理）。原 250ms 轮询读 + last
+  /// 去重会丢连续分片/同值通知，已删除。
+  /// 特征不存在/订阅失败/平台异常均返回 null，不抛出。
+  Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(
+    String deviceAddress,
+    String serviceId,
+    String characteristicId,
+  ) async {
+    try {
+      if (_adapter.supportsCharacteristicValueStream) {
+        try {
+          await _adapter.subscribeToCharacteristic(
+              deviceAddress, serviceId, characteristicId);
+        } catch (e) {
+          debugPrint('OTA订阅特征失败($deviceAddress/$characteristicId): $e');
+          return null;
+        }
+        // WinBle 无 CCCD 就绪回调：订阅调用返回即视为就绪。通知流在
+        // 订阅前建立也可（broadcast 流，早到事件由订阅方过滤丢弃），
+        // 这里订阅成功后再监听，保证取消订阅后流不再吐值。
+        final notifyStream = _adapter.characteristicValueStreamOf(
+            deviceAddress, serviceId, characteristicId);
+        late StreamSubscription<List<int>> sub;
+        final controller = StreamController<List<int>>();
+        sub = notifyStream.listen(
+          controller.add,
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+        controller.onCancel = () async {
+          await sub.cancel();
+          try {
+            await _adapter.unSubscribeFromCharacteristic(
+                deviceAddress, serviceId, characteristicId);
+          } catch (_) {}
+        };
+        return controller.stream;
+      } else {
+        final device = _findDeviceByAddress(deviceAddress);
+        if (device == null) return null;
+        final services = await device.discoverServices();
+        for (final svc in services) {
+          final sid = svc.uuid.toString();
+          if (!_strictBleUuidEquals(sid, serviceId)) continue;
+          for (final ch in svc.characteristics) {
+            final cid = ch.uuid.toString();
+            if (!_strictBleUuidEquals(cid, characteristicId)) continue;
+            // 先完成 CCCD 订阅再返回流：resolve 后即可安全发命令。
+            await ch.setNotifyValue(true);
+            late StreamSubscription<List<int>> sub;
+            final controller = StreamController<List<int>>();
+            sub = ch.onValueReceived.listen(
+              controller.add,
+              onError: controller.addError,
+              onDone: controller.close,
+            );
+            controller.onCancel = () async {
+              try {
+                await ch.setNotifyValue(false);
+              } catch (_) {}
+              await sub.cancel();
+            };
+            return controller.stream;
+          }
+        }
+        return null;
+      }
+    } catch (e) {
+      debugPrint('OTA订阅通知失败($deviceAddress/$characteristicId): $e');
+      return null;
+    }
+  }
+
+  /// 请求协商更大的 ATT MTU（移动端专用；Windows WinBle 协议栈自管理）。
+  ///
+  /// 返回协商后的单次写入净荷上限（MTU-3）；失败或平台不支持时返回
+  /// 保守值 20（ATT 默认 MTU 23 - 3）。OTA 分片以该值为准。
+  Future<int> requestOtaMtu(String deviceAddress, {int requested = 247}) async {
+    try {
+      if (Platform.isWindows) {
+        // WinBle 由协议栈管理分片；返回保守默认写入大小。
+        return 20;
+      }
+      final device = _findDeviceByAddress(deviceAddress);
+      if (device == null) return 20;
+      final negotiated = await device.requestMtu(requested);
+      if (negotiated >= 23) {
+        return negotiated - 3;
+      }
+      return 20;
+    } catch (e) {
+      debugPrint('协商MTU失败($deviceAddress): $e');
+      return 20;
+    }
+  }
+
+  /// OTA 重连专用：按地址主动断开（RC2-07）。
+  ///
+  /// 设备重启前旧 GATT 连接可能悬挂（协议栈仍报告已连接），在旧连接
+  /// 上会读到重启前的 INFO/通知。升级完成后等重启时必须先主动断开。
+  /// 尽力语义：失败不抛出（断不开由上层轮询兜底）。
+  Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {
+    try {
+      if (Platform.isWindows) {
+        await _adapter.disconnect(deviceAddress);
+        _deviceConnectionSubscriptions[deviceAddress]?.cancel();
+        _deviceConnectionSubscriptions.remove(deviceAddress);
+      } else {
+        final device = _findDeviceByAddress(deviceAddress) ??
+            BluetoothDevice.fromId(deviceAddress);
+        await device.disconnect();
+      }
+      connectedDevices.removeWhere((d) =>
+          d.remoteId.str.toLowerCase() == deviceAddress.toLowerCase());
+    } catch (e) {
+      debugPrint('OTA主动断开失败($deviceAddress): $e');
+    }
+  }
+
+  /// OTA 重连专用：按地址发起连接（RC2-07）。
+  ///
+  /// Windows 走 WinBle 地址连接；移动端优先复用已连接/扫描缓存的
+  /// 设备对象，否则按 remoteId 直接构造（设备重启后不在任何缓存里）。
+  /// 返回是否成功；失败由调用方继续轮询。
+  Future<bool> connectOtaDeviceByAddress(String deviceAddress) async {
+    try {
+      if (Platform.isWindows) {
+        await _adapter.connect(deviceAddress);
+        return true;
+      }
+      final device = _findDeviceByAddress(deviceAddress) ??
+          BluetoothDevice.fromId(deviceAddress);
+      // flutter_blue_plus 对已连接设备 connect 是幂等成功，不会抛错。
+      await device.connect(timeout: const Duration(seconds: 10));
+      if (!connectedDevices.contains(device)) {
+        connectedDevices.add(device);
+      }
+      return true;
+    } catch (e) {
+      debugPrint('OTA重连失败($deviceAddress): $e');
+      return false;
+    }
+  }
+
   // 判断特征是否可写（跨平台）
   bool _isCharacteristicWritable(dynamic ch) {
     try {
@@ -1445,11 +1757,59 @@ class BluetoothService extends GetxController {
         }
         return false;
       }
+      // win_ble 1.1.1 的 Properties 是 bool? 字段式对象（无 getField()/operator[]，
+      // toString() 是默认实例串）：先按字段名显式访问成员，bool? 为 true 才算具备。
+      for (final k in keySet) {
+        if (_propField(props, k)) return true;
+      }
       final s = props.toString().toLowerCase();
       for (final k in keySet) {
         if (s.contains(k)) return true;
       }
       return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// 按 win_ble Properties 的字段名读取 bool 能力位。
+  /// 字段是 `bool?`：仅显式为 true 视为具备，null/false 一律视为不具备；
+  /// 成员不存在（NoSuchMethodError）安全返回 false，不冒泡。
+  bool _propField(dynamic props, String lowerKey) {
+    try {
+      final dynamic v;
+      switch (lowerKey) {
+        case 'broadcast':
+          v = props.broadcast;
+          break;
+        case 'read':
+          v = props.read;
+          break;
+        case 'writewithoutresponse':
+          v = props.writeWithoutResponse;
+          break;
+        case 'write':
+          v = props.write;
+          break;
+        case 'notify':
+          v = props.notify;
+          break;
+        case 'indicate':
+          v = props.indicate;
+          break;
+        case 'authenticatedsignedwrites':
+          v = props.authenticatedSignedWrites;
+          break;
+        case 'reliablewrite':
+          v = props.reliableWrite;
+          break;
+        case 'writableauxiliaries':
+          v = props.writableAuxiliaries;
+          break;
+        default:
+          return false;
+      }
+      return v == true;
     } catch (_) {
       return false;
     }
@@ -1572,6 +1932,63 @@ class BluetoothService extends GetxController {
     return to16(na) == to16(nb);
   }
 
+  /// 严格 UUID 等价（OTA 红线，PR06）：仅接受短格式（4 位 hex）或
+  /// Bluetooth Base UUID `0000xxxx-0000-1000-8000-00805f9b34fb` 的精确
+  /// 等价；其他 128-bit UUID 一律不等价，不得冒充标准服务/特征。
+  /// 遥控透传的宽松匹配 [_uuidLikeEquals] 不受影响。
+  bool _strictBleUuidEquals(String a, String b) {
+    String norm(String x) =>
+        x.toLowerCase().replaceAll('-', '').replaceAll('0x', '').trim();
+    final na = norm(a);
+    final nb = norm(b);
+    if (na == nb) return true;
+    const baseSuffix = '00001000800000805f9b34fb'; // Base UUID 去前 4 位后缀
+    String? to16(String x) {
+      if (x.length == 4) return x;
+      if (x.length == 32 &&
+          x.startsWith('0000') &&
+          x.endsWith(baseSuffix)) {
+        return x.substring(4, 8);
+      }
+      return null; // 非标准 128-bit：禁止截断冒充
+    }
+    final a16 = to16(na);
+    final b16 = to16(nb);
+    return a16 != null && a16 == b16;
+  }
+
+  /// OTA 写模式检测：优先 withResponse，其次 withoutResponse，不可写为 null。
+  /// 绑定实际支持的写模式，禁止对仅 withoutResponse 的特征强制
+  /// withResponse 写（PR06）。
+  String? _otaWriteMode(dynamic ch) {
+    try {
+      bool withResp;
+      bool withoutResp;
+      if (Platform.isWindows) {
+        withResp = _getProperty(ch, 'writeWithResponse') == true ||
+            _getProperty(ch, 'write') == true ||
+            _propContains(_getProperty(ch, 'properties'), ['write']);
+        withoutResp = _getProperty(ch, 'writeWithoutResponse') == true ||
+            _propContains(
+                _getProperty(ch, 'properties'), ['writeWithoutResponse']);
+        // WinBle 的 canWrite/isWritable 语义未区分模式：保守按有响应写。
+        if (!withResp && !withoutResp) {
+          final ambiguous = _getProperty(ch, 'canWrite') == true ||
+              _getProperty(ch, 'isWritable') == true;
+          if (ambiguous) withResp = true;
+        }
+      } else {
+        withResp = ch.properties.write == true;
+        withoutResp = ch.properties.writeWithoutResponse == true;
+      }
+      if (withResp) return 'with';
+      if (withoutResp) return 'without';
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// 从可能包含调试描述的字符串中提取 UUID（支持 16位 或 128位）
   String _extractUuidFromVerboseString(String input) {
     final s = input.trim();
@@ -1619,6 +2036,13 @@ class BluetoothService extends GetxController {
           return object.serviceUuids;
         case 'connectable':
           return object.connectable;
+        case 'uuid':
+          // win_ble BleCharacteristic.uuid：字符串字段，直接成员访问。
+          return object.uuid;
+        case 'properties':
+          // win_ble BleCharacteristic.properties：字段式对象而非 Map，
+          // 必须整对象返回给 _propContains/_propField 做字段式判定。
+          return object.properties;
         default:
           // 尝试动态访问
           try {

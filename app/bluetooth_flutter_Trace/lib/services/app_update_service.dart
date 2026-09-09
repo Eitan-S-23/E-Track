@@ -295,6 +295,16 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     return _LocalAppInfo.fromMap(result);
   }
 
+  /// 当前 App 的 build number（OTA latest query 的 appVersionCode 来源）。
+  ///
+  /// 复用本类唯一的 platform `getAppInfo` 通道，不另建第二套平台读取。
+  /// Windows runner 未实现该通道时会抛异常——调用方（OTA）必须
+  /// fail closed：不发 latest 请求。
+  Future<int> getLocalAppVersionCode() async {
+    final localInfo = await _getLocalAppInfo();
+    return localInfo.versionCode;
+  }
+
   Future<bool> _openInstaller(
     String apkPath, {
     int? expectedVersionCode,
