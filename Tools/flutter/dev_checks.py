@@ -286,11 +286,47 @@ def checkout_identity(root):
             errors="replace", check=True, timeout=15,
         ).stdout.strip()
 
+    def diff_quiet(*args):
+        return subprocess.run(
+            ["git", "--no-optional-locks", "-C", str(root), "diff", "--quiet",
+             "--ignore-cr-at-eol", *args],
+            cwd=root, capture_output=True, timeout=15,
+        ).returncode == 0
+
     toplevel = Path(os.path.abspath(git("rev-parse", "--show-toplevel")))
     if toplevel != root:
         raise ValueError(f"Expected Git root {root}, got {toplevel}")
     status = git("status", "--porcelain=v1", "--untracked-files=normal")
-    return {"head": git("rev-parse", "HEAD"), "clean": not status, "status": status}
+    # Flutter 工具链会以 LF 重写检出为 CRLF 的文件（pub get 再生插件注册
+    # 文件、analyze 规范化配置），这类行尾差异不代表被测输入变化。语义
+    # 脏列表按内容差异（忽略 CR-at-EOL）判定；原样 status 保留作审计。
+    dirty = []
+    if status:
+        entries = subprocess.run(
+            ["git", "--no-optional-locks", "-C", str(root), "status",
+             "--porcelain=v1", "-z", "--untracked-files=normal"],
+            cwd=root, capture_output=True, text=True, encoding="utf-8",
+            errors="replace", check=True, timeout=15,
+        ).stdout
+        for entry in entries.split("\0"):
+            if not entry:
+                continue
+            # X=index 状态，Y=worktree 状态；两端都无内容差异才视为行尾差异。
+            eol_only = (diff_quiet("--cached", "--", entry[3:])
+                        and diff_quiet("--", entry[3:]))
+            dirty.append({"path": entry[3:], "eol_only": eol_only})
+    return {
+        "head": git("rev-parse", "HEAD"),
+        "clean": not status,
+        "status": status,
+        "dirty_semantic": [item["path"] for item in dirty if not item["eol_only"]],
+        "dirty_eol_only": [item["path"] for item in dirty if item["eol_only"]],
+    }
+
+
+def semantic_state(identity):
+    """checkout 的语义指纹：head + 语义脏文件列表（行尾差异不计入）。"""
+    return (identity["head"], tuple(identity["dirty_semantic"]))
 
 
 def command_plan(root, run_dir, scope, *, build_apk=False, env=None):
@@ -393,7 +429,7 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
         if name == "apk_prepare" and not blocked:
             if any(item["status"] != "PASS" for item in report["commands"][:5]):
                 blocked = "APK generation requires both analysis and full tests to pass"
-            elif not source["clean"] or identify(root) != source:
+            elif semantic_state(identify(root)) != semantic_state(source):
                 blocked = "APK generation requires the unchanged, committed checkout tested above"
             elif source["head"] != os.environ.get("GITHUB_SHA"):
                 blocked = "APK generation requires the tested commit to match GITHUB_SHA"
@@ -417,7 +453,8 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
     report["lock_sha256_after"] = file_hash(lockfile)
     report["lockfile_unchanged"] = report["lock_sha256_after"] == lock_before
     report["source_after"] = identify(root)
-    report["source_unchanged"] = report["source_after"] == source
+    report["source_unchanged"] = (
+        semantic_state(report["source_after"]) == semantic_state(source))
     passed = report["lockfile_unchanged"] and all(
         command["status"] == "PASS" for command in report["commands"]
     )

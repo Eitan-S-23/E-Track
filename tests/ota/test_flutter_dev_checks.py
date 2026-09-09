@@ -99,7 +99,10 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                 mock.patch.dict(os.environ, {"GITHUB_SHA": "1" * 40}):
             code, path = RUNNER.run_checks(
                 self.project, scope, build_apk=build_apk, execute=execute,
-                identify=lambda root: {"head": "1" * 40, "clean": True, "status": "", "fixture": True},
+                identify=lambda root: {
+                    "head": "1" * 40, "clean": True, "status": "",
+                    "dirty_semantic": [], "dirty_eol_only": [], "fixture": True,
+                },
             )
         return code, json.loads(path.read_text(encoding="utf-8")), calls, path
 
