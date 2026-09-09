@@ -51,7 +51,7 @@ void main() {
   );
 
   /// 资产文件名（ASSET-NAMING：full 必须以 -full.etu 结尾）。
-  final pkgName = 'e-track-at32f435-v2.9.0-full.etu';
+  const pkgName = 'e-track-at32f435-v2.9.0-full.etu';
 
   Uint8List assetBytes(int size) =>
       Uint8List.fromList(List<int>.generate(size, (i) => (i * 7 + 3) & 0xFF));
@@ -266,7 +266,7 @@ void main() {
     expect(pkg, isNotNull);
     expect(await pkg!.length(), bytes.length);
     expect(pkg.path.endsWith(pkgName), isTrue);
-    expect(await File('${pkg.path}.part').existsSync(), isFalse);
+    expect(File('${pkg.path}.part').existsSync(), isFalse);
   });
 
   test('取消清理已校验完成包：keepPackage=false 删文件，true 保留', () async {
@@ -459,19 +459,14 @@ void main() {
 }
 
 /// fake BLE：GET_INFO mini 应答；发现/订阅/MTU 返回固定合法值。
+/// 仅经构造器注入使用，不经 Get.put 触发（onInit 不会被生命周期调用，
+/// 平台通道在测试宿主不可用）。
 class _FakeBle extends BluetoothService {
   _FakeBle(this.infoPayload);
 
   final List<int> infoPayload;
 
   final _notifyController = StreamController<List<int>>.broadcast();
-
-  @override
-  void onInit() {
-    super.onInit();
-    // 空实现：阻止真实 initBluetooth（平台通道在测试宿主不可用）。
-    // 仅经构造器注入使用，不经 Get.put 触发。
-  }
 
   @override
   Future<Map<String, String>?> findExactOtaCharacteristicsByAddress(

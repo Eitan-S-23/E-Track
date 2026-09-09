@@ -80,7 +80,7 @@ class _Decoder {
     final second = cursor.readByte();
     final third = cursor.readByte();
     if (first != _magic1 || second != _magic2 || third != _magic3) {
-      throw InvalidMagicException('Invalid VCDIFF magic bytes');
+      throw const InvalidMagicException('Invalid VCDIFF magic bytes');
     }
 
     final version = cursor.readByte();
@@ -91,17 +91,17 @@ class _Decoder {
     }
 
     final indicator = cursor.readByte();
-    final validBits = _vcdDecompress | _vcdCodeTable | _vcdAppHeader;
+    const validBits = _vcdDecompress | _vcdCodeTable | _vcdAppHeader;
     if ((indicator & ~validBits) != 0) {
       throw InvalidFormatException(
         'Invalid VCDIFF header indicator: $indicator',
       );
     }
     if ((indicator & _vcdDecompress) != 0) {
-      throw InvalidFormatException('Secondary compression is not supported');
+      throw const InvalidFormatException('Secondary compression is not supported');
     }
     if ((indicator & _vcdCodeTable) != 0) {
-      throw InvalidFormatException('Custom code tables are not supported');
+      throw const InvalidFormatException('Custom code tables are not supported');
     }
     if ((indicator & _vcdAppHeader) != 0) {
       cursor.skip(cursor.readVarint());
@@ -110,7 +110,7 @@ class _Decoder {
 
   Uint8List _decodeWindow(_Cursor cursor, Uint8List previousTarget) {
     final winIndicator = cursor.readByte();
-    final validBits = _vcdSource | _vcdTarget | _vcdAdler32;
+    const validBits = _vcdSource | _vcdTarget | _vcdAdler32;
     if ((winIndicator & ~validBits) != 0) {
       throw InvalidFormatException(
         'Invalid VCDIFF window indicator: $winIndicator',
@@ -118,7 +118,7 @@ class _Decoder {
     }
     if ((winIndicator & _vcdSource) != 0 &&
         (winIndicator & _vcdTarget) != 0) {
-      throw InvalidFormatException(
+      throw const InvalidFormatException(
         'VCD_SOURCE and VCD_TARGET cannot both be set',
       );
     }
@@ -157,7 +157,7 @@ class _Decoder {
     final targetWindowLength = deltaCursor.readVarint();
     final deltaIndicator = deltaCursor.readByte();
     if (deltaIndicator != 0) {
-      throw InvalidFormatException(
+      throw const InvalidFormatException(
         'Compressed delta sections are not supported',
       );
     }
@@ -175,7 +175,7 @@ class _Decoder {
     final instructionSection = deltaCursor.readView(instructionLength);
     final addressSection = deltaCursor.readView(addressLength);
     if (!deltaCursor.isDone) {
-      throw InvalidFormatException('VCDIFF delta section length mismatch');
+      throw const InvalidFormatException('VCDIFF delta section length mismatch');
     }
     cursor.offset = deltaEnd;
 
@@ -224,7 +224,7 @@ class _Decoder {
           size = instructionCursor.readVarint();
         }
         if (size < 0) {
-          throw InvalidFormatException('Negative instruction size');
+          throw const InvalidFormatException('Negative instruction size');
         }
 
         switch (instruction.type) {
@@ -262,7 +262,7 @@ class _Decoder {
         }
 
         if (output.length > targetWindowLength) {
-          throw InvalidFormatException(
+          throw const InvalidFormatException(
             'Decoded target window exceeds declared length',
           );
         }
@@ -270,10 +270,10 @@ class _Decoder {
     }
 
     if (!dataCursor.isDone) {
-      throw CorruptedDataException('Unused bytes remain in data section');
+      throw const CorruptedDataException('Unused bytes remain in data section');
     }
     if (!addressCache.isDone) {
-      throw CorruptedDataException('Unused bytes remain in address section');
+      throw const CorruptedDataException('Unused bytes remain in address section');
     }
     if (output.length != targetWindowLength) {
       throw InvalidFormatException(
@@ -350,7 +350,7 @@ class _Cursor {
 
   int readUint32() {
     if (offset + 4 > limit) {
-      throw CorruptedDataException('Unexpected EOF while reading uint32');
+      throw const CorruptedDataException('Unexpected EOF while reading uint32');
     }
     final value = (bytes[offset] << 24) |
         (bytes[offset + 1] << 16) |
@@ -367,7 +367,7 @@ class _Cursor {
       value = (value << 7) | (byte & 0x7f);
       if ((byte & 0x80) == 0) return value;
     }
-    throw InvalidFormatException('Variable-length integer is too long');
+    throw const InvalidFormatException('Variable-length integer is too long');
   }
 
   Uint8List readView(int length) {

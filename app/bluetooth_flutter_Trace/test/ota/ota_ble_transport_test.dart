@@ -254,10 +254,6 @@ void main() {
       );
       expect(ack.isOk, isTrue);
       expect(mcu.maxInFlight, lessThanOrEqualTo(4));
-      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset，
-      // 区分重发发生在头部/中部/尾部。根因定位后移除。
-      print('[diag] credit dataOffsets(${mcu.dataOffsets.length}): '
-          '${mcu.dataOffsets}');
       // 窗口收紧不丢段：32 段全部送达。
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
@@ -285,26 +281,6 @@ void main() {
         etuHeader: etuHeaderOf(package),
       );
       expect(ack.isOk, isTrue);
-      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset，
-      // 区分重发发生在头部/中部/尾部。根因定位后移除。
-      print('[diag] byte-chunk dataOffsets(${mcu.dataOffsets.length}): '
-          '${mcu.dataOffsets}');
-      // [diag] 投递/emit 分叉：deliveredChunks 是 map 包装层实际投递到
-      // transport 订阅者的通知分片数；ackFramesSent 是 sendFrame 层
-      // emit 的 DATA ACK 帧数；ackStatuses 是 _emitDataAck 进入计数。
-      // 三者与重组结果（bitmap 停更点）交叉定位丢失环节。根因定位后
-      // 移除。
-      print('[diag] byte-chunk deliveredChunks=${mcu.deliveredChunks} '
-          'ackFramesSent=${mcu.sentFrames.where((f) => f.cmd == OtaBleCodec.rspAckData).length} '
-          'ackStatuses=${mcu.dataAckStatuses.length}');
-      // [diag] 决定性对账（RC3-02 根因定位）：MCU 侧全部 emit 帧的
-      // cmd/session/seq/帧长序列 + 控制帧调用计数。验证「952 字节 = 哪些
-      // 帧构成」及 BEGIN/END 是否发生 roundTrip 超时重试（byte 模式投递
-      // 停摆的旁证）。根因定位后移除。
-      print('[diag] byte-chunk calls: begin=${mcu.beginCalls} '
-          'end=${mcu.endCalls} abort=${mcu.abortCalls}');
-      print('[diag] byte-chunk frames(${mcu.sentFrames.length}): '
-          '${mcu.sentFrames.map((f) => 'c${f.cmd.toRadixString(16)}/s${f.session}/q${f.seq}/${8 + f.payload.length + 2}B').join(',')}');
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
@@ -1078,10 +1054,6 @@ void main() {
       );
       expect(ack.isOk, isTrue);
       expect(ack.durableOff, 4096);
-      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset，
-      // 定位慢 ACK 场景下重发发生的窗口位置。根因定位后移除。
-      print('[diag] slow-ack dataOffsets(${mcu.dataOffsets.length}): '
-          '${mcu.dataOffsets}');
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
@@ -1534,7 +1506,7 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   _ChunkMode chunkMode = _ChunkMode.ble20;
   /// 每个写分片的固定延迟（RC3-07：慢写 + 小 MTU 压满 30s 总预算）。
   Duration writeChunkDelay = Duration.zero;
-  /// [diag] 通知投递计数（RC3-02）：map 包装层逐事件累加，区分
+  /// 通知投递计数（RC3-02 排查遗留）：map 包装层逐事件累加，区分
   /// 「sendFrame 已 emit」与「事件真正投递到 transport 订阅者」。
   int deliveredChunks = 0;
 

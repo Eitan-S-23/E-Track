@@ -422,7 +422,7 @@ class DeviceDetailPage extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 80,
                 height: 80,
                 child: CircularProgressIndicator(

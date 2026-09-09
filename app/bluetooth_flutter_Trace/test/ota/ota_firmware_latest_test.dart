@@ -458,7 +458,7 @@ void main() {
 
   group('parseLatestResponse', () {
     test('UTF-8 字节 → DTO', () {
-      final json = '{"schemaVersion":2,"requestId":"r","appId":"trace",'
+      const json = '{"schemaVersion":2,"requestId":"r","appId":"trace",'
           '"deviceModel":"e-track-at32f435","channel":"stable",'
           '"updateAvailable":false,"errorCode":"NO_UPDATE"}';
       final info = parseLatestResponse(json.codeUnits);

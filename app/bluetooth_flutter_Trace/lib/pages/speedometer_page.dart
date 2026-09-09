@@ -1535,7 +1535,7 @@ class _MetricAreaChartPainter extends CustomPainter {
     _drawText(
       canvas,
       data.chartUnit,
-      Offset(0, 2),
+      const Offset(0, 2),
       color: Colors.white.withValues(alpha: 0.56),
       size: 13,
       bold: true,
@@ -5337,7 +5337,7 @@ class _RouteImportFabState extends State<_RouteImportFab>
   Widget build(BuildContext context) {
     const actionSpacing = 12.0;
     const actionStep = 68.0;
-    final actionCount = 2;
+    const actionCount = 2;
     final stackHeight = 64.0 + actionSpacing + actionStep * actionCount;
 
     return Column(
@@ -6283,7 +6283,7 @@ class _RouteListCardState extends State<_RouteListCard> {
                                   spacing: 8,
                                   runSpacing: 4,
                                   children: [
-                                    _RouteBadge(
+                                    const _RouteBadge(
                                       label: '公路',
                                       color: _RideColors.orange,
                                     ),
@@ -6760,7 +6760,7 @@ class _RideRouteDetailPage extends StatelessWidget {
                     const SizedBox(height: 14),
                     Row(
                       children: [
-                        _RouteBadge(label: '公路', color: _RideColors.orange),
+                        const _RouteBadge(label: '公路', color: _RideColors.orange),
                         const SizedBox(width: 8),
                         _RouteBadge(
                             label: '难度 $difficulty', color: difficultyColor),

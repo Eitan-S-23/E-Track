@@ -13,18 +13,18 @@ class BackgroundOptimizationService extends GetxController {
   MonitorController get _monitorController => Get.find<MonitorController>();
 
   // 后台优化配置
-  var _isBackgroundMode = false.obs;
-  var _backgroundScanInterval = 5000.obs; // 后台扫描间隔（毫秒）
-  var _foregroundScanInterval = 1000.obs; // 前台扫描间隔（毫秒）
+  final _isBackgroundMode = false.obs;
+  final _backgroundScanInterval = 5000.obs; // 后台扫描间隔（毫秒）
+  final _foregroundScanInterval = 1000.obs; // 前台扫描间隔（毫秒）
 
   Timer? _backgroundTimer;
   Timer? _networkOptimizationTimer;
   Timer? _optimizedScanStopTimer;
 
   // 网络使用统计
-  var _networkUsageOptimized = false.obs;
-  var _lastScanTime = DateTime.now().obs;
-  var _scanCount = 0.obs;
+  final _networkUsageOptimized = false.obs;
+  final _lastScanTime = DateTime.now().obs;
+  final _scanCount = 0.obs;
 
   bool get isBackgroundMode => _isBackgroundMode.value;
   int get backgroundScanInterval => _backgroundScanInterval.value;

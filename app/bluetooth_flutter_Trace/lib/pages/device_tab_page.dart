@@ -374,7 +374,7 @@ class _DeviceStageState extends State<_DeviceStage>
     double throwVelocity = 0,
     double throwDistance = 0,
   }) {
-    final step = math.pi / 2;
+    const step = math.pi / 2;
     final dragDelta = _normalizeAngle(_rotation - _dragStartRotation);
     final moved = dragDelta.abs() > 0.01 ||
         throwVelocity.abs() > 0.08 ||
@@ -839,7 +839,7 @@ class _DeviceStagePainter extends CustomPainter {
 
     final direction = orbitGlowDirection.sign;
     final headAngle = -math.pi / 2 + geometry.rotation;
-    final tailSpan = math.pi * 1.28;
+    const tailSpan = math.pi * 1.28;
 
     _paintMotionRingTrail(
       canvas,
@@ -1033,7 +1033,7 @@ class _DeviceCore extends StatelessWidget {
             // 盘面同心装饰环
             CustomPaint(
               size: Size.square(size),
-              painter: _DeviceCoreDialPainter(),
+              painter: const _DeviceCoreDialPainter(),
             ),
             Container(
               margin: EdgeInsets.all(size * 0.075),

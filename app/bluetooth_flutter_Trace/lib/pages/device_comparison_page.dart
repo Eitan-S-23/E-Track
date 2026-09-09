@@ -16,7 +16,7 @@ class _DeviceComparisonPageState extends State<DeviceComparisonPage>
   late TabController _tabController;
   final monitorController = Get.find<MonitorController>();
 
-  List<String> _selectedDeviceIds = [];
+  final List<String> _selectedDeviceIds = [];
   final Map<String, Color> _deviceColors = {};
   final List<Color> _availableColors = [
     const Color(0xFF4A90E2),

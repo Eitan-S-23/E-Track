@@ -1707,7 +1707,9 @@ class BluetoothService extends GetxController {
     try {
       if (Platform.isWindows) {
         if (_getProperty(ch, 'read') == true ||
-            _getProperty(ch, 'canRead') == true) return true;
+            _getProperty(ch, 'canRead') == true) {
+          return true;
+        }
         final props = _getProperty(ch, 'properties');
         if (_propContains(props, ['read'])) return true;
         return false;
@@ -1725,7 +1727,9 @@ class BluetoothService extends GetxController {
       if (Platform.isWindows) {
         if (_getProperty(ch, 'notify') == true ||
             _getProperty(ch, 'canNotify') == true ||
-            _getProperty(ch, 'indicate') == true) return true;
+            _getProperty(ch, 'indicate') == true) {
+          return true;
+        }
         final props = _getProperty(ch, 'properties');
         if (_propContains(props, ['notify', 'indicate'])) return true;
         return false;

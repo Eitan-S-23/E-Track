@@ -450,7 +450,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
       LineChartData(
         minY: 0.0,
         maxY: yAxisMax,
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -557,7 +557,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
       LineChartData(
         minY: 0.0,
         maxY: yAxisMax,
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(

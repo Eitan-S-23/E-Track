@@ -132,6 +132,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
     _handlingAutoDisconnect = false;
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -199,7 +200,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              Container(
+              SizedBox(
                 height: 220,
                 child: GridView.builder(
                   shrinkWrap: true,
@@ -935,7 +936,9 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                         customButtons.add(newButton);
                       }
                     });
-                    Navigator.pop(context);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   });
                 } catch (e) {
                   Get.snackbar('错误', '数据格式不正确');
@@ -1118,7 +1121,7 @@ extension on _RemoteControlPageState {
     } else {
       // continuous hex string
       if (cleaned.length % 2 != 0) {
-        throw FormatException('十六进制长度必须为偶数');
+        throw const FormatException('十六进制长度必须为偶数');
       }
       final out = <int>[];
       for (int i = 0; i < cleaned.length; i += 2) {
@@ -1151,7 +1154,7 @@ extension on _RemoteControlPageState {
           '发送成功',
           _sendAsHex
               ? _bytesToHex(bytes)
-              : (text.length > 50 ? text.substring(0, 50) + '…' : text),
+              : (text.length > 50 ? '${text.substring(0, 50)}…' : text),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4A90E2),
           colorText: Colors.white,

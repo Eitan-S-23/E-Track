@@ -181,7 +181,11 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
       final context = checkingDialogContext;
       if (context != null) {
-        _closeDialogRouteForContext(context);
+        // mounted 守卫从 _closeDialogRouteForContext 提升：context 存在但
+        // 已卸载时不做任何事（等价其内部早退），不落到 Get.back 兜底。
+        if (context.mounted) {
+          _closeDialogRouteForContext(context);
+        }
       } else if (Get.isDialogOpen == true) {
         Get.back<void>();
       }
@@ -612,12 +616,12 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
           source: _ManifestSource.cloudflare,
         ),
       if (ShareLinks.emergencyUpdateManifestUrl.isNotEmpty)
-        _ManifestRequest(
+        const _ManifestRequest(
           url: ShareLinks.emergencyUpdateManifestUrl,
           source: _ManifestSource.emergency,
         ),
       if (ShareLinks.cloudflareUpdateManifestUrl.isEmpty)
-        _ManifestRequest(
+        const _ManifestRequest(
           url: ShareLinks.legacyGithubLatestManifestUrl,
           source: _ManifestSource.legacyGithubLatest,
         ),
@@ -635,7 +639,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         );
         final raw = response.data;
         if (raw == null || raw.trim().isEmpty) {
-          throw _UpdateException('EMPTY_MANIFEST', '更新清单为空');
+          throw const _UpdateException('EMPTY_MANIFEST', '更新清单为空');
         }
         final json = jsonDecode(raw) as Map<String, dynamic>;
         final updateInfo = _RemoteUpdateInfo.fromJson(
@@ -671,7 +675,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     if (lastError != null) {
       Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
     }
-    throw _UpdateException('NO_MANIFEST_SOURCE', '没有可用的更新清单地址');
+    throw const _UpdateException('NO_MANIFEST_SOURCE', '没有可用的更新清单地址');
   }
 
   String _cloudflareManifestUrl(_LocalAppInfo localInfo) {
@@ -754,7 +758,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
           ],
         ),
         actions: [
-          TraceDialogAction(
+          const TraceDialogAction(
             label: '稍后',
             onPressed: TraceDialog.close,
           ),
@@ -796,7 +800,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
             ? '最新版本 ${updateInfo.versionName} 已发布，但当前版本 ${localInfo.versionName} 没有匹配当前安装包的增量更新包。可以改用全量 APK，大小约 ${_formatBytes(updateInfo.apkSize)}，建议在 Wi-Fi 下下载。'
             : '最新版本 ${updateInfo.versionName} 已发布，但当前版本 ${localInfo.versionName} 没有匹配当前安装包的增量更新包，且更新清单未提供可用的全量 APK 下载地址。',
         actions: [
-          TraceDialogAction(
+          const TraceDialogAction(
             label: '稍后',
             color: TraceColors.amber,
             onPressed: TraceDialog.close,
@@ -831,7 +835,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         color: TraceColors.cyanSoft,
         message: '$reason\n\n将下载完整 APK，大小约 ${_formatBytes(updateInfo.apkSize)}。下载完成后会校验 SHA-256，再打开系统安装器。建议在 Wi-Fi 下继续。',
         actions: [
-          TraceDialogAction(
+          const TraceDialogAction(
             label: '稍后',
             color: TraceColors.cyanSoft,
             onPressed: TraceDialog.close,
@@ -1078,7 +1082,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     required ProgressCallback onReceiveProgress,
   }) async {
     if (urls.isEmpty) {
-      throw _UpdateException('DOWNLOAD_URL_MISSING', '更新清单缺少下载地址');
+      throw const _UpdateException('DOWNLOAD_URL_MISSING', '更新清单缺少下载地址');
     }
 
     Object? lastError;
@@ -1127,7 +1131,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     if (lastError != null) {
       Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
     }
-    throw _UpdateException('DOWNLOAD_URL_MISSING', '更新清单缺少下载地址');
+    throw const _UpdateException('DOWNLOAD_URL_MISSING', '更新清单缺少下载地址');
   }
 
   void _showIncrementalUpdateFailedDialog(
@@ -1143,7 +1147,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         color: TraceColors.amber,
         message: '错误：${_formatUpdateFailure(error)}\n\n${updateInfo.hasFullDownload ? '你可以重试增量更新，或改用全量 APK。全量包大小约 ${_formatBytes(updateInfo.apkSize)}，建议在 Wi-Fi 下下载。' : '你可以稍后重试增量更新。当前更新清单未提供全量 APK 下载地址。'}',
         actions: [
-          TraceDialogAction(
+          const TraceDialogAction(
             label: '稍后',
             color: TraceColors.amber,
             onPressed: TraceDialog.close,
@@ -1186,7 +1190,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         color: TraceColors.amber,
         message: '错误：${_formatUpdateFailure(error)}',
         actions: [
-          TraceDialogAction(
+          const TraceDialogAction(
             label: '稍后',
             color: TraceColors.amber,
             onPressed: TraceDialog.close,
@@ -1214,8 +1218,8 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         icon: Icons.check_circle_outline,
         color: TraceColors.mint,
         message: message,
-        actions: [
-          TraceDialogAction(
+        actions: const [
+          const TraceDialogAction(
             label: '知道了',
             isPrimary: true,
             color: TraceColors.mint,
@@ -1233,7 +1237,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         color: TraceColors.amber,
         message: message,
         actions: [
-          TraceDialogAction(
+          const TraceDialogAction(
             label: '稍后',
             color: TraceColors.amber,
             onPressed: TraceDialog.close,
@@ -1425,7 +1429,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   Future<void> _verifyPayloadSignature(_RemoteUpdateInfo updateInfo) async {
     final signature = updateInfo.payloadSignature;
     if (updateInfo.source == _ManifestSource.emergency && signature == null) {
-      throw _UpdateException('SIGNATURE_MISSING', '紧急更新清单缺少 payloadSignature');
+      throw const _UpdateException('SIGNATURE_MISSING', '紧急更新清单缺少 payloadSignature');
     }
     if (signature == null) return;
 
@@ -1436,7 +1440,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       );
     }
     if (ShareLinks.updatePayloadPublicKeyBase64.isEmpty) {
-      throw _UpdateException('SIGNATURE_KEY_MISSING', '客户端未内置更新清单验签公钥');
+      throw const _UpdateException('SIGNATURE_KEY_MISSING', '客户端未内置更新清单验签公钥');
     }
 
     final publicKeyBytes = base64Decode(ShareLinks.updatePayloadPublicKeyBase64);
@@ -1454,7 +1458,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       ),
     );
     if (!isValid) {
-      throw _UpdateException('SIGNATURE_INVALID', '更新清单签名校验失败');
+      throw const _UpdateException('SIGNATURE_INVALID', '更新清单签名校验失败');
     }
   }
 
@@ -1826,7 +1830,7 @@ class _RemoteUpdateInfo {
     final minClientVersionCode =
         _jsonIntWithDefault(json['minClientVersionCode'], 0);
     if (minClientVersionCode > localVersionCode) {
-      throw _UpdateException('CLIENT_TOO_OLD', '当前版本过旧，需要先安装兼容版本');
+      throw const _UpdateException('CLIENT_TOO_OLD', '当前版本过旧，需要先安装兼容版本');
     }
 
     final releaseTag = (json['releaseTag'] ?? '').toString();

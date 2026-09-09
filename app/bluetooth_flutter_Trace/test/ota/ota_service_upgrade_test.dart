@@ -871,12 +871,6 @@ class _UpgradeFakeBle extends BluetoothService {
   Uint8List? beginShaBytes;
   Uint8List? endShaBytes;
 
-  @override
-  void onInit() {
-    super.onInit();
-    // 空实现：阻止真实 initBluetooth（平台通道在测试宿主不可用）。
-  }
-
   // ---- BLE 公开方法覆写（OTA 专用链路）----
 
   @override
@@ -1050,7 +1044,7 @@ class _UpgradeFakeBle extends BluetoothService {
     }
     // 不同 sha：整页重建，清旧包 journal（真值 erase staging，
     // RC3-03⑤——缺此分支时新包会从旧包 durable 续传，喂错字节）。
-    if (!_stagedBytes.isEmpty && !shaMatch) {
+    if (_stagedBytes.isNotEmpty && !shaMatch) {
       _eraseStaged();
     }
     _beginSha = sha;

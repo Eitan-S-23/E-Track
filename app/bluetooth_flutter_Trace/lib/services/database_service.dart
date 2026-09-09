@@ -463,7 +463,7 @@ class DatabaseService {
       {required int skip, required int limit}) async {
     final db = await database;
 
-    final String sql = '''
+    const String sql = '''
       SELECT * FROM device_data 
       WHERE deviceId = ? 
       ORDER BY timestamp ASC 
@@ -483,7 +483,7 @@ class DatabaseService {
       String deviceId, int limit) async {
     final db = await database;
 
-    final String sql = '''
+    const String sql = '''
       SELECT * FROM device_data 
       WHERE deviceId = ? 
       ORDER BY timestamp DESC 

@@ -49,7 +49,7 @@ class ScanSettingsPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         '${scanSettings.scanIntervalSeconds}秒 (${scanSettings.scanInterval.value}毫秒)',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF4A90E2),

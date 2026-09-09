@@ -116,7 +116,7 @@ class DiscoverTabPage extends StatelessWidget {
 
   Widget _buildMoreRows() {
     final rows = [
-      _MoreRowData(
+      const _MoreRowData(
         title: '公告',
         subtitle: '查看后台通知与最新版本发布说明',
         icon: Icons.campaign_outlined,
@@ -168,13 +168,13 @@ class DiscoverTabPage extends StatelessWidget {
 
   static void _showAnnouncementsDialog() {
     Get.dialog<void>(
-      TraceDialog(
+      const TraceDialog(
         title: '公告',
         icon: Icons.campaign_outlined,
         color: TraceColors.cyan,
         content: const _AnnouncementsDialogContent(),
-        actions: [
-          TraceDialogAction(
+        actions: const [
+          const TraceDialogAction(
             label: '确定',
             isPrimary: true,
             onPressed: TraceDialog.close,
@@ -205,8 +205,8 @@ class DiscoverTabPage extends StatelessWidget {
             ],
           ],
         ),
-        actions: [
-          TraceDialogAction(
+        actions: const [
+          const TraceDialogAction(
             label: '确定',
             isPrimary: true,
             onPressed: TraceDialog.close,
@@ -586,7 +586,7 @@ class _HeroCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           data.kicker,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: TraceColors.cyan,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -598,14 +598,14 @@ class _HeroCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       data.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: TraceColors.text,
                         fontSize: 28,
                         height: 1.08,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.4,
-                        shadows: [
-                          Shadow(color: Color(0x5524F6DE), blurRadius: 14),
+                        shadows: const [
+                          const Shadow(color: Color(0x5524F6DE), blurRadius: 14),
                         ],
                       ),
                     ),

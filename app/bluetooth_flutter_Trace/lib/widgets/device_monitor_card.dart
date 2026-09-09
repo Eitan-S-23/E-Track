@@ -314,7 +314,7 @@ class DeviceMonitorCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.battery_std,
             color: const Color(0xFF2196F3),
             size: 20,
@@ -444,7 +444,7 @@ class DeviceMonitorCard extends StatelessWidget {
   }
 
   Widget _buildActionButton() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: onTap,

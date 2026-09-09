@@ -777,8 +777,9 @@ class _DeviceChartPageState extends State<DeviceChartPage>
 
   // Dynamic unit conversion for current
   Map<String, dynamic> _convertCurrentToBestUnit(List<DeviceData> data) {
-    if (data.isEmpty)
+    if (data.isEmpty) {
       return {'values': <double>[], 'unit': 'nA', 'multiplier': 1.0};
+    }
 
     // Convert all values to nA first
     final valuesInNA =
@@ -826,8 +827,9 @@ class _DeviceChartPageState extends State<DeviceChartPage>
 
   // Dynamic unit conversion for voltage
   Map<String, dynamic> _convertVoltageToBestUnit(List<DeviceData> data) {
-    if (data.isEmpty)
+    if (data.isEmpty) {
       return {'values': <double>[], 'unit': 'mV', 'multiplier': 1.0};
+    }
 
     final voltages = data.map((d) => d.voltage).toList();
     final maxVoltage = voltages.reduce((a, b) => a > b ? a : b);
@@ -845,8 +847,9 @@ class _DeviceChartPageState extends State<DeviceChartPage>
 
   // Dynamic unit conversion for power
   Map<String, dynamic> _convertPowerToBestUnit(List<DeviceData> data) {
-    if (data.isEmpty)
+    if (data.isEmpty) {
       return {'values': <double>[], 'unit': 'mW', 'multiplier': 1.0};
+    }
 
     final powers = data.map((d) => d.power).toList();
     final maxPower = powers.reduce((a, b) => a > b ? a : b);
@@ -1010,6 +1013,7 @@ class _DeviceChartPageState extends State<DeviceChartPage>
   void _showDeviceSettings(BuildContext context, SelectedDevice device) async {
     final alertService = Get.find<AlertService>();
     final settings = await alertService.getDeviceSettings(device.deviceId);
+    if (!context.mounted) return;
 
     showDialog(
       context: context,
@@ -1440,8 +1444,9 @@ class _DeviceSettingsDialogState extends State<DeviceSettingsDialog> {
 
       final alertService = Get.find<AlertService>();
       await alertService.saveDeviceSettings(newSettings);
-
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
 
       Get.snackbar(
         '成功',

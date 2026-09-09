@@ -864,9 +864,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.verified,
                 color: Color(0xFF2E7D32),
                 size: 24,
@@ -973,7 +973,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               ),
             )
           else
-            ...history.map((record) => _buildHistoryItem(record)).toList(),
+            ...history.map(_buildHistoryItem),
         ],
       ),
     );

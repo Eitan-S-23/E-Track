@@ -10,7 +10,7 @@ import '../services/alert_service.dart';
 import 'ble_controller.dart';
 
 // 定义数据记录的最大条数
-const int MAX_DATA_RECORDS = 2592000;
+const int maxDataRecords = 2592000;
 
 class MonitorController extends GetxController {
   static MonitorController get to => Get.find();
@@ -92,14 +92,14 @@ class MonitorController extends GetxController {
 
         final List<DeviceData> historyData;
 
-        if (totalCount <= MAX_DATA_RECORDS) {
+        if (totalCount <= maxDataRecords) {
           // 如果数据量小于等于最大记录数，获取全部数据（不指定limit）
           historyData = await _dbService.getDeviceData(device.deviceId);
           debugPrint('加载了 ${historyData.length} 条历史数据');
         } else {
-          // 如果数据量大于最大记录数，获取最新的MAX_DATA_RECORDS条数据
+          // 如果数据量大于最大记录数，获取最新的maxDataRecords条数据
           historyData = await _dbService.getLatestDeviceData(
-              device.deviceId, MAX_DATA_RECORDS);
+              device.deviceId, maxDataRecords);
           debugPrint('加载了最新的 ${historyData.length} 条历史数据（总计 $totalCount 条）');
         }
 

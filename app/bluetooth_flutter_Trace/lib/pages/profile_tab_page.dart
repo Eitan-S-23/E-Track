@@ -135,13 +135,13 @@ class ProfileTabPage extends StatelessWidget {
 
   void _showSettingsDialog() {
     _showTraceDialog(
-      TraceDialog(
+      const TraceDialog(
         title: '应用设置',
         icon: Icons.settings,
         color: TraceColors.mint,
         message: '设置功能开发中。当前版本先保留入口，后续会接入个性化配置。',
-        actions: [
-          TraceDialogAction(
+        actions: const [
+          const TraceDialogAction(
             label: '知道了',
             isPrimary: true,
             color: TraceColors.mint,
@@ -177,8 +177,8 @@ class ProfileTabPage extends StatelessWidget {
             _buildUserInfoRow('数据', '设备与骑行记录保存在本机'),
           ],
         ),
-        actions: [
-          TraceDialogAction(
+        actions: const [
+          const TraceDialogAction(
             label: '确定',
             isPrimary: true,
             color: TraceColors.cyan,
@@ -207,8 +207,8 @@ class ProfileTabPage extends StatelessWidget {
               _buildStatItem('数据记录', '${dbInfo['dataCount']} 条'),
             ],
           ),
-          actions: [
-            TraceDialogAction(
+          actions: const [
+            const TraceDialogAction(
               label: '确定',
               isPrimary: true,
               onPressed: TraceDialog.close,
@@ -266,7 +266,7 @@ class ProfileTabPage extends StatelessWidget {
 
   void _showHelpDialog() {
     _showTraceDialog(
-      TraceDialog(
+      const TraceDialog(
         title: '帮助与反馈',
         icon: Icons.chat_bubble_outline,
         color: TraceColors.amber,
@@ -290,8 +290,8 @@ class ProfileTabPage extends StatelessWidget {
             Text('3. 发送控制指令'),
           ],
         ),
-        actions: [
-          TraceDialogAction(
+        actions: const [
+          const TraceDialogAction(
             label: '确定',
             isPrimary: true,
             color: TraceColors.amber,
@@ -324,8 +324,8 @@ class ProfileTabPage extends StatelessWidget {
             const Text('• OTA 固件升级'),
           ],
         ),
-        actions: [
-          TraceDialogAction(
+        actions: const [
+          const TraceDialogAction(
             label: '确定',
             isPrimary: true,
             color: TraceColors.rose,
@@ -449,9 +449,9 @@ class _ProfileAvatar extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              CustomPaint(
+              const CustomPaint(
                 size: const Size.square(118),
-                painter: _ProfileAvatarDialPainter(),
+                painter: const _ProfileAvatarDialPainter(),
               ),
               Semantics(
                 button: true,
@@ -575,8 +575,8 @@ class _ProfilePanel extends StatelessWidget {
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned.fill(
-              child: CustomPaint(painter: _ProfilePanelPainter()),
+            const Positioned.fill(
+              child: const CustomPaint(painter: _ProfilePanelPainter()),
             ),
             ClipPath(
               clipper: _ProfilePanelClipper(),
