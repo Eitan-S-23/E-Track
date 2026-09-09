@@ -1444,7 +1444,8 @@ class _DeviceSettingsDialogState extends State<DeviceSettingsDialog> {
 
       final alertService = Get.find<AlertService>();
       await alertService.saveDeviceSettings(newSettings);
-      if (context.mounted) {
+      // State 方法内 context 即 State.context，守卫须用 State.mounted
+      if (mounted) {
         Navigator.pop(context);
       }
 

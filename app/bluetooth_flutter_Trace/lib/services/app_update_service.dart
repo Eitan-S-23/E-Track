@@ -1219,7 +1219,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         color: TraceColors.mint,
         message: message,
         actions: const [
-          const TraceDialogAction(
+          TraceDialogAction(
             label: '知道了',
             isPrimary: true,
             color: TraceColors.mint,

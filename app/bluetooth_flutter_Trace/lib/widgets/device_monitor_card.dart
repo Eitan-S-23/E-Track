@@ -316,7 +316,7 @@ class DeviceMonitorCard extends StatelessWidget {
         children: [
           const Icon(
             Icons.battery_std,
-            color: const Color(0xFF2196F3),
+            color: Color(0xFF2196F3),
             size: 20,
           ),
           const SizedBox(width: 8),

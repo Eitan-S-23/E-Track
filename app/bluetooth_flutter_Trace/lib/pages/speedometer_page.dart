@@ -5338,7 +5338,7 @@ class _RouteImportFabState extends State<_RouteImportFab>
     const actionSpacing = 12.0;
     const actionStep = 68.0;
     const actionCount = 2;
-    final stackHeight = 64.0 + actionSpacing + actionStep * actionCount;
+    const stackHeight = 64.0 + actionSpacing + actionStep * actionCount;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

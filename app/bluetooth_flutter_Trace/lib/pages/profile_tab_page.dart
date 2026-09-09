@@ -140,8 +140,8 @@ class ProfileTabPage extends StatelessWidget {
         icon: Icons.settings,
         color: TraceColors.mint,
         message: '设置功能开发中。当前版本先保留入口，后续会接入个性化配置。',
-        actions: const [
-          const TraceDialogAction(
+        actions: [
+          TraceDialogAction(
             label: '知道了',
             isPrimary: true,
             color: TraceColors.mint,
@@ -178,7 +178,7 @@ class ProfileTabPage extends StatelessWidget {
           ],
         ),
         actions: const [
-          const TraceDialogAction(
+          TraceDialogAction(
             label: '确定',
             isPrimary: true,
             color: TraceColors.cyan,
@@ -208,7 +208,7 @@ class ProfileTabPage extends StatelessWidget {
             ],
           ),
           actions: const [
-            const TraceDialogAction(
+            TraceDialogAction(
               label: '确定',
               isPrimary: true,
               onPressed: TraceDialog.close,
@@ -270,7 +270,7 @@ class ProfileTabPage extends StatelessWidget {
         title: '帮助与反馈',
         icon: Icons.chat_bubble_outline,
         color: TraceColors.amber,
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -290,8 +290,8 @@ class ProfileTabPage extends StatelessWidget {
             Text('3. 发送控制指令'),
           ],
         ),
-        actions: const [
-          const TraceDialogAction(
+        actions: [
+          TraceDialogAction(
             label: '确定',
             isPrimary: true,
             color: TraceColors.amber,
@@ -325,7 +325,7 @@ class ProfileTabPage extends StatelessWidget {
           ],
         ),
         actions: const [
-          const TraceDialogAction(
+          TraceDialogAction(
             label: '确定',
             isPrimary: true,
             color: TraceColors.rose,
@@ -450,8 +450,8 @@ class _ProfileAvatar extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               const CustomPaint(
-                size: const Size.square(118),
-                painter: const _ProfileAvatarDialPainter(),
+                size: Size.square(118),
+                painter: _ProfileAvatarDialPainter(),
               ),
               Semantics(
                 button: true,
@@ -576,7 +576,7 @@ class _ProfilePanel extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             const Positioned.fill(
-              child: const CustomPaint(painter: _ProfilePanelPainter()),
+              child: CustomPaint(painter: _ProfilePanelPainter()),
             ),
             ClipPath(
               clipper: _ProfilePanelClipper(),

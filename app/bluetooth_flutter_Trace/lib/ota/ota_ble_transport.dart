@@ -1042,7 +1042,8 @@ class _TransferAckView {
     }
     if (f.cmd != OtaBleCodec.rspAckData) {
       // 异步 ACK_ABORT（MCU 主动 teardown）：无请求关联，到达即终止。
-      _error = _AckError(ack.status, f.cmd, f.seq);
+      // 首错保留（??=）：迟到的 ERR ACK 不得覆盖已锁存的 terminal ABORTED。
+      _error ??= _AckError(ack.status, f.cmd, f.seq);
       _signal();
       return;
     }
@@ -1053,7 +1054,8 @@ class _TransferAckView {
       return;
     }
     if (ack.status != OtaBleCodec.statusOk) {
-      _error = _AckError(ack.status, f.cmd, f.seq);
+      // 首错保留（??=）：不覆盖更早锁存的错误（如异步 ABORTED）。
+      _error ??= _AckError(ack.status, f.cmd, f.seq);
       _signal();
       return;
     }
@@ -1086,7 +1088,8 @@ class _TransferAckView {
       // 若误当已确认，客户端会跳过该段不补发，最终 END 校验失败。
       // fail closed 记 ERR_STATE，由传输循环 ABORT teardown + BEGIN
       // 重对齐（新会话重置 expected_seq，SHA 从 journal 前缀重建）。
-      _error = _AckError(OtaBleCodec.statusErrState, f.cmd, f.seq);
+      // 首错保留（??=）：不覆盖更早锁存的错误（如异步 ABORTED）。
+      _error ??= _AckError(OtaBleCodec.statusErrState, f.cmd, f.seq);
       _signal();
       return;
     }

@@ -332,7 +332,7 @@ class HomePage extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.check_circle,
-                        color: const Color(0xFF4A90E2),
+                        color: Color(0xFF4A90E2),
                         size: 20,
                       ),
                       const SizedBox(width: 8),

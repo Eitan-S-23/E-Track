@@ -42,7 +42,7 @@ class CyclingDashboardPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: const Row(
-            children: const [
+            children: [
               Text(
                 'GPS',
                 style: TextStyle(
@@ -93,9 +93,9 @@ class CyclingDashboardPage extends StatelessWidget {
           alignment: CrossAxisAlignment.start,
         ),
         const Expanded(
-          child: const Column(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Text(
                 '0.00',
                 style: TextStyle(
@@ -127,9 +127,9 @@ class CyclingDashboardPage extends StatelessWidget {
 
   Widget _buildStatsGrid(BuildContext context) {
     return const Column(
-      children: const [
-        const Row(
-          children: const [
+      children: [
+        Row(
+          children: [
             Expanded(child: _StatTile(value: '0.00', label: '里程(km)')),
             SizedBox(width: 16),
             Expanded(child: _StatTile(value: '00:00', label: '运动时间')),
@@ -137,9 +137,9 @@ class CyclingDashboardPage extends StatelessWidget {
             Expanded(child: _StatTile(value: '0.00', label: '运动均速(km/h)')),
           ],
         ),
-        const SizedBox(height: 24),
-        const Row(
-          children: const [
+        SizedBox(height: 24),
+        Row(
+          children: [
             Expanded(child: _StatTile(value: '0.00', label: '极速(km/h)')),
             SizedBox(width: 16),
             Expanded(child: _StatTile(value: '0.0', label: '海拔(m)')),

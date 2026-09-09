@@ -871,8 +871,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                 color: Color(0xFF2E7D32),
                 size: 24,
               ),
-              const SizedBox(width: 12),
-              const Text(
+              SizedBox(width: 12),
+              Text(
                 '固件升级完成',
                 style: TextStyle(
                   fontSize: 18,

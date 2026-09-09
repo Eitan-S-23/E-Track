@@ -172,9 +172,9 @@ class DiscoverTabPage extends StatelessWidget {
         title: '公告',
         icon: Icons.campaign_outlined,
         color: TraceColors.cyan,
-        content: const _AnnouncementsDialogContent(),
-        actions: const [
-          const TraceDialogAction(
+        content: _AnnouncementsDialogContent(),
+        actions: [
+          TraceDialogAction(
             label: '确定',
             isPrimary: true,
             onPressed: TraceDialog.close,
@@ -206,7 +206,7 @@ class DiscoverTabPage extends StatelessWidget {
           ],
         ),
         actions: const [
-          const TraceDialogAction(
+          TraceDialogAction(
             label: '确定',
             isPrimary: true,
             onPressed: TraceDialog.close,
@@ -604,8 +604,8 @@ class _HeroCard extends StatelessWidget {
                         height: 1.08,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.4,
-                        shadows: const [
-                          const Shadow(color: Color(0x5524F6DE), blurRadius: 14),
+                        shadows: [
+                          Shadow(color: Color(0x5524F6DE), blurRadius: 14),
                         ],
                       ),
                     ),

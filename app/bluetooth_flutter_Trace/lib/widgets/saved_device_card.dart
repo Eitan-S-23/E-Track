@@ -178,7 +178,7 @@ class SavedDeviceCard extends StatelessWidget {
             children: [
               const Icon(
                 Icons.analytics,
-                color: const Color(0xFF4A90E2),
+                color: Color(0xFF4A90E2),
                 size: 16,
               ),
               const SizedBox(width: 6),
@@ -288,7 +288,7 @@ class SavedDeviceCard extends StatelessWidget {
         children: [
           const Icon(
             Icons.battery_std,
-            color: const Color(0xFF2196F3),
+            color: Color(0xFF2196F3),
             size: 18,
           ),
           const SizedBox(width: 8),

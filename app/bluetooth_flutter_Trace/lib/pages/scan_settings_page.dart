@@ -52,7 +52,7 @@ class ScanSettingsPage extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF4A90E2),
+                          color: Color(0xFF4A90E2),
                         ),
                       ),
                       const SizedBox(height: 8),
