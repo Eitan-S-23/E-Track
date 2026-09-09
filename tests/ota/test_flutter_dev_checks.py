@@ -80,7 +80,8 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             output.write(content)
         return path
 
-    def fixture_run(self, outcomes=None, after=None, scope="all", build_apk=False):
+    def fixture_run(self, outcomes=None, after=None, scope="all", build_apk=False,
+                    identify=None):
         calls = []
 
         def execute(root, argv, cwd, env, log, timeout):
@@ -95,14 +96,17 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                 after(name)
             return result
 
+        if identify is None:
+            def identify(root):
+                return {
+                    "head": "1" * 40, "clean": True, "status": "",
+                    "dirty_semantic": [], "dirty_eol_only": [], "fixture": True,
+                }
         with mock.patch("sys.stdout", new_callable=io.StringIO), \
                 mock.patch.dict(os.environ, {"GITHUB_SHA": "1" * 40}):
             code, path = RUNNER.run_checks(
                 self.project, scope, build_apk=build_apk, execute=execute,
-                identify=lambda root: {
-                    "head": "1" * 40, "clean": True, "status": "",
-                    "dirty_semantic": [], "dirty_eol_only": [], "fixture": True,
-                },
+                identify=identify,
             )
         return code, json.loads(path.read_text(encoding="utf-8")), calls, path
 
@@ -536,6 +540,72 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertEqual("FAIL", report["apk_result"])
         self.assertNotIn("apk_verify", calls)
         self.assertNotIn("apk_collect", calls)
+
+    def _capture_git_checkout(self):
+        checkouts = []
+        real_run = subprocess.run
+
+        def fake_run(argv, *args, **kwargs):
+            if "checkout" in argv:
+                checkouts.append(list(argv))
+                return SimpleNamespace(returncode=0, stdout="", stderr="")
+            return real_run(argv, *args, **kwargs)
+
+        return checkouts, mock.patch.object(RUNNER.subprocess, "run",
+                                            side_effect=fake_run)
+
+    def test_apk_restores_toolchain_regenerated_files_before_build(self):
+        self.apk_inputs()
+        # 依次：起点干净 → 门禁处仅工具链再生白名单脏 → 恢复后干净 → 报告收尾。
+        states = iter([
+            {"head": "1" * 40, "clean": True, "status": "",
+             "dirty_semantic": [], "dirty_eol_only": []},
+            {"head": "1" * 40, "clean": False,
+             "status": "M app/bluetooth_flutter_Trace/analysis_options.yaml",
+             "dirty_semantic": [
+                 "app/bluetooth_flutter_Trace/analysis_options.yaml",
+                 "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+             ],
+             "dirty_eol_only": []},
+            {"head": "1" * 40, "clean": True, "status": "",
+             "dirty_semantic": [], "dirty_eol_only": []},
+            {"head": "1" * 40, "clean": True, "status": "",
+             "dirty_semantic": [], "dirty_eol_only": []},
+        ])
+        checkouts, patched = self._capture_git_checkout()
+        with mock.patch.object(sys, "platform", "linux"), patched:
+            code, report, calls, _ = self.fixture_run(
+                build_apk=True, identify=lambda root: next(states))
+        self.assertEqual(0, code)
+        self.assertEqual("PASS", report["apk_result"])
+        self.assertTrue(report["source_unchanged"])
+        self.assertEqual(1, len(checkouts))
+        self.assertEqual(
+            ["app/bluetooth_flutter_Trace/analysis_options.yaml",
+             "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake"],
+            checkouts[0][checkouts[0].index("checkout") + 2:])
+        self.assertIn("apk_build", calls)
+
+    def test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist(self):
+        self.apk_inputs()
+        dirty = {"head": "1" * 40, "clean": False, "status": "M lib/main.dart",
+                 "dirty_semantic": ["app/bluetooth_flutter_Trace/lib/main.dart"],
+                 "dirty_eol_only": []}
+        states = iter([
+            {"head": "1" * 40, "clean": True, "status": "",
+             "dirty_semantic": [], "dirty_eol_only": []},
+            dict(dirty), dict(dirty),
+        ])
+        checkouts, patched = self._capture_git_checkout()
+        with mock.patch.object(sys, "platform", "linux"), patched:
+            code, report, calls, _ = self.fixture_run(
+                build_apk=True, identify=lambda root: next(states))
+        self.assertEqual(1, code)
+        self.assertEqual("NOT_RUN", report["apk_result"])
+        self.assertIn("unchanged, committed checkout",
+                      report["commands"][5]["reason"])
+        self.assertEqual([], checkouts)
+        self.assertFalse(any(name.startswith("apk_") for name in calls))
 
     def test_standing_authorization_is_not_a_mainline_or_release_grant(self):
         guide = (ROOT / "docs/flutter-development-validation.md").read_text(encoding="utf-8")

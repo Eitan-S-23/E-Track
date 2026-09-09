@@ -329,6 +329,19 @@ def semantic_state(identity):
     return (identity["head"], tuple(identity["dirty_semantic"]))
 
 
+# Flutter 工具链在 pub get 时自动改写的文件：新版工具会升级
+# analysis_options.yaml（追加 exclude build/平台目录）并按当前 SDK
+# 模板再生 Windows 插件注册三件套。它们不是被测源码：依赖输入由
+# lockfile_unchanged 哈希单独守门，插件注册内容是 lockfile 的确定性
+# 产物。APK 构建前恢复提交字节，保证构建输入与被测提交完全一致。
+TOOLCHAIN_REGENERATED = frozenset((
+    "app/bluetooth_flutter_Trace/analysis_options.yaml",
+    "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+    "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
+    "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+))
+
+
 def command_plan(root, run_dir, scope, *, build_apk=False, env=None):
     if scope not in SCOPES:
         raise ValueError(f"Unknown test scope: {scope}")
@@ -429,10 +442,28 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
         if name == "apk_prepare" and not blocked:
             if any(item["status"] != "PASS" for item in report["commands"][:5]):
                 blocked = "APK generation requires both analysis and full tests to pass"
-            elif semantic_state(identify(root)) != semantic_state(source):
-                blocked = "APK generation requires the unchanged, committed checkout tested above"
             elif source["head"] != os.environ.get("GITHUB_SHA"):
                 blocked = "APK generation requires the tested commit to match GITHUB_SHA"
+            else:
+                # 工具链改写恢复（三重条件：起点干净 + 差异仅限工具链
+                # 再生白名单 + head 未变）：只恢复本轮内 flutter 自动改写
+                # 的生成文件，不触碰起点已有的任何用户改动。
+                current = identify(root)
+                if (source["clean"] and current["head"] == source["head"]
+                        and current["dirty_semantic"]
+                        and all(path in TOOLCHAIN_REGENERATED
+                                for path in current["dirty_semantic"])):
+                    subprocess.run(
+                        ["git", "--no-optional-locks", "-C", str(root),
+                         "checkout", "--", *current["dirty_semantic"]],
+                        cwd=root, capture_output=True, text=True,
+                        encoding="utf-8", errors="replace", check=True,
+                        timeout=15,
+                    )
+                    current = identify(root)
+                if semantic_state(current) != semantic_state(source):
+                    blocked = ("APK generation requires the unchanged, "
+                               "committed checkout tested above")
         if blocked:
             command["reason"] = blocked
         else:
