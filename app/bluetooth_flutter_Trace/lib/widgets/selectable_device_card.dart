@@ -15,7 +15,7 @@ class SelectableDeviceCard extends StatelessWidget {
   final VoidCallback onConnect;
 
   const SelectableDeviceCard({
-    Key? key,
+    super.key,
     required this.device,
     required this.bleController,
     required this.monitorController,
@@ -24,7 +24,7 @@ class SelectableDeviceCard extends StatelessWidget {
     required this.onTap,
     required this.onSelect,
     required this.onConnect,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class SelectableDeviceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),

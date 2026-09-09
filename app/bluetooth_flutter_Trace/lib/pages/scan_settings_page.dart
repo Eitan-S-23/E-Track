@@ -4,7 +4,7 @@ import '../services/scan_settings_service.dart';
 import '../controllers/monitor_controller.dart';
 
 class ScanSettingsPage extends StatelessWidget {
-  const ScanSettingsPage({Key? key}) : super(key: key);
+  const ScanSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +28,10 @@ class ScanSettingsPage extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4A90E2).withOpacity(0.1),
+                    color: const Color(0xFF4A90E2).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF4A90E2).withOpacity(0.3),
+                      color: const Color(0xFF4A90E2).withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -120,7 +120,7 @@ class ScanSettingsPage extends StatelessWidget {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -146,7 +146,7 @@ class ScanSettingsPage extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: isSelected
-                                        ? Colors.white.withOpacity(0.8)
+                                        ? Colors.white.withValues(alpha: 0.8)
                                         : Colors.grey[600],
                                   ),
                                 ),
@@ -240,10 +240,10 @@ class ScanSettingsPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.orange.withOpacity(0.3),
+                      color: Colors.orange.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),

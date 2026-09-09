@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -13,7 +12,7 @@ import 'power_stats_page.dart';
 class DeviceChartPage extends StatefulWidget {
   final String deviceId;
 
-  const DeviceChartPage({Key? key, required this.deviceId}) : super(key: key);
+  const DeviceChartPage({super.key, required this.deviceId});
 
   @override
   State<DeviceChartPage> createState() => _DeviceChartPageState();
@@ -230,7 +229,7 @@ class _DeviceChartPageState extends State<DeviceChartPage>
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -520,7 +519,7 @@ class _DeviceChartPageState extends State<DeviceChartPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1060,10 +1059,10 @@ class DeviceSettingsDialog extends StatefulWidget {
   final DeviceSettings settings;
 
   const DeviceSettingsDialog({
-    Key? key,
+    super.key,
     required this.device,
     required this.settings,
-  }) : super(key: key);
+  });
 
   @override
   State<DeviceSettingsDialog> createState() => _DeviceSettingsDialogState();
@@ -1167,18 +1166,25 @@ class _DeviceSettingsDialogState extends State<DeviceSettingsDialog> {
                 ),
               ),
               const SizedBox(height: 8),
-              ...AlertType.values
-                  .map((type) => RadioListTile<AlertType>(
-                        title: Text(_getAlertTypeName(type)),
-                        value: type,
-                        groupValue: _alertType,
-                        onChanged: (value) {
-                          setState(() {
-                            _alertType = value!;
-                          });
-                        },
-                      ))
-                  .toList(),
+              // RadioGroup 管理 groupValue/onChanged（Flutter 3.31 起
+              // RadioListTile 逐个传 groupValue/onChanged 已弃用）。
+              RadioGroup<AlertType>(
+                groupValue: _alertType,
+                onChanged: (value) {
+                  setState(() {
+                    _alertType = value!;
+                  });
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: AlertType.values
+                      .map((type) => RadioListTile<AlertType>(
+                            title: Text(_getAlertTypeName(type)),
+                            value: type,
+                          ))
+                      .toList(),
+                ),
+              ),
 
               // 自定义铃声选择（仅当选择声音或震动+声音时显示）
               if (_alertType == AlertType.sound ||
@@ -1320,7 +1326,7 @@ class _DeviceSettingsDialogState extends State<DeviceSettingsDialog> {
         const SizedBox(width: 8),
         IntrinsicWidth(
           child: DropdownButtonFormField<String>(
-            value: selectedUnit,
+            initialValue: selectedUnit,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(

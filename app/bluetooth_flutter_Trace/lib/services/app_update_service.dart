@@ -695,7 +695,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     return Get.dialog<T>(
       dialog,
       barrierDismissible: barrierDismissible,
-      barrierColor: Colors.black.withOpacity(0.62),
+      barrierColor: Colors.black.withValues(alpha: 0.62),
     );
   }
 
@@ -1267,7 +1267,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
               LinearProgressIndicator(
                 value: updateProgress.value,
                 color: TraceColors.cyan,
-                backgroundColor: TraceColors.cyan.withOpacity(0.14),
+                backgroundColor: TraceColors.cyan.withValues(alpha: 0.14),
               ),
               const SizedBox(height: 8),
               Text('${(updateProgress.value * 100).toStringAsFixed(0)}%'),

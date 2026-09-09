@@ -83,7 +83,7 @@ class DeviceOtaInfo {
       if (b < 0x20 || b > 0x7E) {
         throw OtaDeviceIdentityException(
           code: 'UNKNOWN_DEVICE_MODEL',
-          message: 'wire model 含非 ASCII 可打印字节 @${i}',
+          message: 'wire model 含非 ASCII 可打印字节 @$i',
           wireModelHex: modelHexLower(wire),
         );
       }

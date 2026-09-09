@@ -20,7 +20,7 @@ import '../services/ota_service.dart';
 class OtaUpgradePage extends StatefulWidget {
   final BluetoothDevice? connectedDevice;
 
-  const OtaUpgradePage({Key? key, this.connectedDevice}) : super(key: key);
+  const OtaUpgradePage({super.key, this.connectedDevice});
 
   @override
   State<OtaUpgradePage> createState() => _OtaUpgradePageState();
@@ -281,8 +281,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         boxShadow: [
           BoxShadow(
             color: identityConfirmed
-                ? const Color(0xFF4CAF50).withOpacity(0.3)
-                : Colors.grey.withOpacity(0.3),
+                ? const Color(0xFF4CAF50).withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -332,7 +332,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -391,7 +391,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -482,8 +482,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: retryable
-              ? Colors.orange.withOpacity(0.3)
-              : Colors.red.withOpacity(0.3),
+              ? Colors.orange.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -547,10 +547,10 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF4A90E2).withOpacity(0.2)),
+        border: Border.all(color: const Color(0xFF4A90E2).withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -564,7 +564,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A90E2).withOpacity(0.1),
+                  color: const Color(0xFF4A90E2).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -609,7 +609,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                     if (!ok) {
                       if (!otaService.isUpgrading) {
                         Get.snackbar('错误', '固件包清理失败，请重试',
-                            backgroundColor: Colors.red.withOpacity(0.1),
+                            backgroundColor: Colors.red.withValues(alpha: 0.1),
                             colorText: Colors.red.shade700,
                             snackPosition: SnackPosition.TOP,
                             icon: const Icon(Icons.error_outline,
@@ -688,10 +688,10 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF4A90E2).withOpacity(0.05),
+            color: const Color(0xFF4A90E2).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: const Color(0xFF4A90E2).withOpacity(0.1),
+              color: const Color(0xFF4A90E2).withValues(alpha: 0.1),
             ),
           ),
           child: Text(
@@ -737,7 +737,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -751,7 +751,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A90E2).withOpacity(0.1),
+                  color: const Color(0xFF4A90E2).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -859,7 +859,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       decoration: BoxDecoration(
         color: Colors.green.shade50,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.withOpacity(0.3)),
+        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -946,7 +946,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1041,7 +1041,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       await otaService.checkFirmwareUpdate();
     } catch (e) {
       Get.snackbar('错误', '检查更新失败: $e',
-          backgroundColor: Colors.red.withOpacity(0.1),
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
           colorText: Colors.red.shade700,
           snackPosition: SnackPosition.TOP,
           icon: const Icon(Icons.error_outline, color: Colors.red));
@@ -1059,7 +1059,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     if (!success) return;
 
     Get.snackbar('成功', '固件已下载并校验，可开始 BLE 传输',
-        backgroundColor: Colors.green.withOpacity(0.1),
+        backgroundColor: Colors.green.withValues(alpha: 0.1),
         colorText: Colors.green.shade700,
         snackPosition: SnackPosition.TOP,
         icon: const Icon(Icons.check_circle, color: Colors.green));

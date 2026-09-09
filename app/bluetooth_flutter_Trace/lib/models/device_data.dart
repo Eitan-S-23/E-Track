@@ -284,12 +284,6 @@ class SelectedDevice {
   // 月度耗电量统计数组（最近12个月）
   final List<double?> _monthlyConsumptionArray = List.filled(12, null);
 
-  // 当前统计的日期索引（用于每日数组）
-  int _currentDayIndex = 0;
-
-  // 当前统计的月份索引（用于月度数组）
-  int _currentMonthIndex = 0;
-
   // 本次会话耗电量（软件重启后清零）
   double _sessionConsumption = 0.0;
 
@@ -719,7 +713,7 @@ class MonthlyPowerConsumption {
 
   /// 获取月份的唯一键（用于比较）
   String get monthKey =>
-      '${year}-${(monthIndex + 1).toString().padLeft(2, '0')}';
+      '$year-${(monthIndex + 1).toString().padLeft(2, '0')}';
 
   /// 转换为Map用于数据库存储
   Map<String, dynamic> toMap() {

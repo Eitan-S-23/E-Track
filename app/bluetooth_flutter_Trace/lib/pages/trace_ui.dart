@@ -123,7 +123,7 @@ class TraceAtmospherePainter extends CustomPainter {
     canvas.drawRect(Offset.zero & size, washPaint);
 
     final gridPaint = Paint()
-      ..color = TraceColors.cyan.withOpacity(0.022)
+      ..color = TraceColors.cyan.withValues(alpha: 0.022)
       ..strokeWidth = 1;
 
     const step = 36.0;
@@ -138,8 +138,8 @@ class TraceAtmospherePainter extends CustomPainter {
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          TraceColors.cyan.withOpacity(0.16),
-          TraceColors.ocean.withOpacity(0.05),
+          TraceColors.cyan.withValues(alpha: 0.16),
+          TraceColors.ocean.withValues(alpha: 0.05),
           Colors.transparent,
         ],
       ).createShader(
@@ -156,7 +156,7 @@ class TraceAtmospherePainter extends CustomPainter {
 
     final cornerGlowPaint = Paint()
       ..shader = RadialGradient(
-        colors: [TraceColors.cyanSoft.withOpacity(0.08), Colors.transparent],
+        colors: [TraceColors.cyanSoft.withValues(alpha: 0.08), Colors.transparent],
       ).createShader(
         Rect.fromCircle(
           center: Offset(size.width * 0.94, size.height * 0.12),
@@ -180,7 +180,7 @@ class TraceAtmospherePainter extends CustomPainter {
       starPaint.color = (random.nextBool()
               ? TraceColors.cyanSoft
               : Colors.white)
-          .withOpacity(opacity);
+          .withValues(alpha: opacity);
       canvas.drawCircle(Offset(dx, dy), radius, starPaint);
     }
 
@@ -188,7 +188,7 @@ class TraceAtmospherePainter extends CustomPainter {
     final arcPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
-      ..color = TraceColors.cyan.withOpacity(0.07);
+      ..color = TraceColors.cyan.withValues(alpha: 0.07);
     canvas.drawCircle(
       Offset(size.width * -0.18, size.height * 0.34),
       size.width * 0.52,
@@ -204,7 +204,7 @@ class TraceAtmospherePainter extends CustomPainter {
       ..shader = LinearGradient(
         colors: [
           Colors.transparent,
-          TraceColors.cyan.withOpacity(0.18),
+          TraceColors.cyan.withValues(alpha: 0.18),
           Colors.transparent,
         ],
       ).createShader(
@@ -228,8 +228,8 @@ class TraceAtmospherePainter extends CustomPainter {
         endAngle: sweepAngle + math.pi * 0.22,
         colors: [
           Colors.transparent,
-          TraceColors.cyan.withOpacity(0.02),
-          TraceColors.cyanSoft.withOpacity(0.18),
+          TraceColors.cyan.withValues(alpha: 0.02),
+          TraceColors.cyanSoft.withValues(alpha: 0.18),
           Colors.transparent,
         ],
         stops: const [0, 0.45, 0.75, 1],
@@ -248,7 +248,7 @@ class TraceAtmospherePainter extends CustomPainter {
       ..shader = LinearGradient(
         colors: [
           Colors.transparent,
-          TraceColors.cyanSoft.withOpacity(0.13),
+          TraceColors.cyanSoft.withValues(alpha: 0.13),
           Colors.transparent,
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, 1));
@@ -264,7 +264,7 @@ class TraceAtmospherePainter extends CustomPainter {
     final particlePaint = Paint()..strokeCap = StrokeCap.round;
     final linePaint = Paint()
       ..strokeWidth = 0.7
-      ..color = TraceColors.cyan.withOpacity(0.08);
+      ..color = TraceColors.cyan.withValues(alpha: 0.08);
     final particles = <Offset>[];
     for (var i = 0; i < 18; i++) {
       final seed = i * 37.0;
@@ -285,7 +285,7 @@ class TraceAtmospherePainter extends CustomPainter {
     }
     for (var i = 0; i < particles.length; i++) {
       final pulse = 0.55 + math.sin(phase * math.pi * 2 + i) * 0.25;
-      particlePaint.color = TraceColors.cyanSoft.withOpacity(0.18 + pulse * 0.16);
+      particlePaint.color = TraceColors.cyanSoft.withValues(alpha: 0.18 + pulse * 0.16);
       canvas.drawCircle(particles[i], 1.1 + pulse * 1.4, particlePaint);
     }
   }
@@ -318,7 +318,7 @@ class TraceSectionHeader extends StatelessWidget {
             color: color,
             borderRadius: BorderRadius.circular(2),
             boxShadow: [
-              BoxShadow(color: color.withOpacity(0.7), blurRadius: 8),
+              BoxShadow(color: color.withValues(alpha: 0.7), blurRadius: 8),
             ],
           ),
         ),
@@ -395,14 +395,14 @@ class TraceGlowNode extends StatelessWidget {
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            color.withOpacity(0.2),
-                            const Color(0xFF092934).withOpacity(0.97),
-                            const Color(0xFF030E15).withOpacity(0.99),
+                            color.withValues(alpha: 0.2),
+                            const Color(0xFF092934).withValues(alpha: 0.97),
+                            const Color(0xFF030E15).withValues(alpha: 0.99),
                           ],
                           stops: const [0, 0.58, 1],
                         ),
                         border: Border.all(
-                          color: color.withOpacity(0.74),
+                          color: color.withValues(alpha: 0.74),
                           width: 1.3,
                         ),
                       ),
@@ -410,7 +410,7 @@ class TraceGlowNode extends StatelessWidget {
                         margin: EdgeInsets.all(size * 0.08),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: color.withOpacity(0.26)),
+                          border: Border.all(color: color.withValues(alpha: 0.26)),
                         ),
                         child: Icon(
                           icon,
@@ -418,7 +418,7 @@ class TraceGlowNode extends StatelessWidget {
                           size: size * 0.38,
                           shadows: [
                             Shadow(
-                              color: color.withOpacity(0.92),
+                              color: color.withValues(alpha: 0.92),
                               blurRadius: 16,
                             ),
                           ],
@@ -459,7 +459,7 @@ class TraceGlowNode extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: TraceColors.muted.withOpacity(0.9),
+                  color: TraceColors.muted.withValues(alpha: 0.9),
                   fontSize: 10.5,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.2,
@@ -485,8 +485,8 @@ class _TraceNodeRingsPainter extends CustomPainter {
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          color.withOpacity(0.18),
-          color.withOpacity(0.06),
+          color.withValues(alpha: 0.18),
+          color.withValues(alpha: 0.06),
           Colors.transparent,
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius * 0.72));
@@ -495,24 +495,24 @@ class _TraceNodeRingsPainter extends CustomPainter {
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
-      ..color = color.withOpacity(0.24);
+      ..color = color.withValues(alpha: 0.24);
 
     canvas.drawCircle(center, radius * 0.47, ringPaint);
     canvas.drawCircle(
       center,
       radius * 0.67,
-      ringPaint..color = color.withOpacity(0.18),
+      ringPaint..color = color.withValues(alpha: 0.18),
     );
     canvas.drawCircle(
       center,
       radius * 0.9,
-      ringPaint..color = color.withOpacity(0.12),
+      ringPaint..color = color.withValues(alpha: 0.12),
     );
 
     final tickPaint = Paint()
       ..strokeWidth = 0.8
       ..strokeCap = StrokeCap.round
-      ..color = color.withOpacity(0.32);
+      ..color = color.withValues(alpha: 0.32);
 
     for (var i = 0; i < 36; i++) {
       final angle = -math.pi / 2 + i * math.pi * 2 / 36;
@@ -524,7 +524,7 @@ class _TraceNodeRingsPainter extends CustomPainter {
       canvas.drawLine(start, end, tickPaint);
     }
 
-    final dotPaint = Paint()..color = color.withOpacity(0.75);
+    final dotPaint = Paint()..color = color.withValues(alpha: 0.75);
     for (final angle in const [0.0, math.pi / 2, math.pi, math.pi * 1.5]) {
       final position = center + Offset(math.cos(angle), math.sin(angle)) * radius * 0.88;
       canvas.drawCircle(position, 2, dotPaint);
@@ -589,17 +589,17 @@ class TraceDialog extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: BoxDecoration(
-            color: const Color(0xFF061821).withOpacity(0.96),
+            color: const Color(0xFF061821).withValues(alpha: 0.96),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: color.withOpacity(0.24)),
+            border: Border.all(color: color.withValues(alpha: 0.24)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.58),
+                color: Colors.black.withValues(alpha: 0.58),
                 blurRadius: 34,
                 offset: const Offset(0, 20),
               ),
               BoxShadow(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 blurRadius: 34,
                 spreadRadius: -12,
               ),
@@ -617,8 +617,8 @@ class TraceDialog extends StatelessWidget {
                     height: 46,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: color.withOpacity(0.14),
-                      border: Border.all(color: color.withOpacity(0.34)),
+                      color: color.withValues(alpha: 0.14),
+                      border: Border.all(color: color.withValues(alpha: 0.34)),
                     ),
                     child: Icon(icon ?? Icons.info_outline, color: color, size: 24),
                   ),
@@ -685,17 +685,17 @@ class _TraceDialogButton extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
           decoration: BoxDecoration(
-            color: action.isPrimary ? action.color.withOpacity(0.88) : Colors.transparent,
+            color: action.isPrimary ? action.color.withValues(alpha: 0.88) : Colors.transparent,
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: action.isPrimary
-                  ? action.color.withOpacity(0.7)
-                  : action.color.withOpacity(0.24),
+                  ? action.color.withValues(alpha: 0.7)
+                  : action.color.withValues(alpha: 0.24),
             ),
             boxShadow: action.isPrimary
                 ? [
                     BoxShadow(
-                      color: action.color.withOpacity(0.24),
+                      color: action.color.withValues(alpha: 0.24),
                       blurRadius: 22,
                       spreadRadius: -8,
                     ),

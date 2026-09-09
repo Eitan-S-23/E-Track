@@ -5,7 +5,7 @@ import '../controllers/monitor_controller.dart';
 import '../models/device_data.dart';
 
 class DeviceComparisonPage extends StatefulWidget {
-  const DeviceComparisonPage({Key? key}) : super(key: key);
+  const DeviceComparisonPage({super.key});
 
   @override
   State<DeviceComparisonPage> createState() => _DeviceComparisonPageState();
@@ -126,7 +126,7 @@ class _DeviceComparisonPageState extends State<DeviceComparisonPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -193,9 +193,9 @@ class _DeviceComparisonPageState extends State<DeviceComparisonPage>
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: color.withOpacity(0.3)),
+                    border: Border.all(color: color.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -244,7 +244,7 @@ class _DeviceComparisonPageState extends State<DeviceComparisonPage>
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
@@ -303,7 +303,7 @@ class _DeviceComparisonPageState extends State<DeviceComparisonPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

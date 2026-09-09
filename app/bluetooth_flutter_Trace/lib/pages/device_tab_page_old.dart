@@ -7,7 +7,7 @@ import 'remote_control_page.dart';
 import '../widgets/responsive_widgets.dart';
 
 class DeviceTabPage extends StatelessWidget {
-  const DeviceTabPage({Key? key}) : super(key: key);
+  const DeviceTabPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class DeviceTabPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF667eea).withOpacity(0.4),
+                    color: const Color(0xFF667eea).withValues(alpha: 0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -117,7 +117,7 @@ class DeviceTabPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -244,7 +244,7 @@ class DeviceTabPage extends StatelessWidget {
                   colors: [Colors.grey.shade400, Colors.grey.shade600],
                   onTap: () {
                     Get.snackbar('提示', '功能开发中，敬请期待',
-                        backgroundColor: Colors.orange.withOpacity(0.1),
+                        backgroundColor: Colors.orange.withValues(alpha: 0.1),
                         colorText: Colors.orange.shade700,
                         snackPosition: SnackPosition.TOP,
                         icon: const Icon(Icons.construction,
@@ -275,7 +275,6 @@ class DeviceTabPage extends StatelessWidget {
         // 根据设备类型调整卡片布局
         double cardPadding;
         double iconSize;
-        double iconContainerSize;
         double titleFontSize;
         double subtitleFontSize;
         double spacing;
@@ -284,7 +283,6 @@ class DeviceTabPage extends StatelessWidget {
           // 桌面端：更紧凑的布局
           cardPadding = 16;
           iconSize = 28;
-          iconContainerSize = 48;
           titleFontSize = 14;
           subtitleFontSize = 11;
           spacing = 12;
@@ -292,7 +290,6 @@ class DeviceTabPage extends StatelessWidget {
           // 平板端：中等大小
           cardPadding = 18;
           iconSize = 30;
-          iconContainerSize = 52;
           titleFontSize = 15;
           subtitleFontSize = 12;
           spacing = 14;
@@ -300,7 +297,6 @@ class DeviceTabPage extends StatelessWidget {
           // 手机端：更大字体和图标，确保可读性
           cardPadding = 20;
           iconSize = 32;
-          iconContainerSize = 56;
           titleFontSize = 16;
           subtitleFontSize = 12;
           spacing = 16;

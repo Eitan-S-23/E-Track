@@ -51,7 +51,7 @@ class DeviceTabPage extends StatelessWidget {
                   Text(
                     '连接、监控、控制您的蓝牙设备',
                     style: TextStyle(
-                      color: TraceColors.cyanSoft.withOpacity(0.86),
+                      color: TraceColors.cyanSoft.withValues(alpha: 0.86),
                       fontSize: compact ? 16 : 18,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 2.2,
@@ -130,12 +130,12 @@ class _DeviceTitle extends StatelessWidget {
           end: reverse ? Alignment.centerLeft : Alignment.centerRight,
           colors: [
             Colors.transparent,
-            TraceColors.cyan.withOpacity(0.9),
+            TraceColors.cyan.withValues(alpha: 0.9),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: TraceColors.cyan.withOpacity(0.55),
+            color: TraceColors.cyan.withValues(alpha: 0.55),
             blurRadius: 10,
           ),
         ],
@@ -673,8 +673,8 @@ class _DeviceStagePainter extends CustomPainter {
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          TraceColors.cyan.withOpacity(0.2),
-          TraceColors.ocean.withOpacity(0.08),
+          TraceColors.cyan.withValues(alpha: 0.2),
+          TraceColors.ocean.withValues(alpha: 0.08),
           Colors.transparent,
         ],
       ).createShader(
@@ -686,28 +686,28 @@ class _DeviceStagePainter extends CustomPainter {
     final orbitPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.1
-      ..color = TraceColors.cyan.withOpacity(0.16);
+      ..color = TraceColors.cyan.withValues(alpha: 0.16);
     canvas.drawCircle(center, geometry.orbitRadius, orbitPaint);
     canvas.drawCircle(
       center,
       geometry.orbitRadius * 1.14,
-      orbitPaint..color = TraceColors.cyan.withOpacity(0.09),
+      orbitPaint..color = TraceColors.cyan.withValues(alpha: 0.09),
     );
     canvas.drawCircle(
       center,
       geometry.orbitRadius * 0.78,
-      orbitPaint..color = TraceColors.cyan.withOpacity(0.1),
+      orbitPaint..color = TraceColors.cyan.withValues(alpha: 0.1),
     );
     canvas.drawCircle(
       center,
       geometry.orbitRadius * 0.64,
-      orbitPaint..color = TraceColors.cyan.withOpacity(0.08),
+      orbitPaint..color = TraceColors.cyan.withValues(alpha: 0.08),
     );
     _paintMotionGlow(canvas, center);
 
     final tickPaint = Paint()
       ..strokeCap = StrokeCap.round
-      ..color = TraceColors.cyan.withOpacity(0.36);
+      ..color = TraceColors.cyan.withValues(alpha: 0.36);
     for (var i = 0; i < 112; i++) {
       final angle = -math.pi / 2 + i * math.pi * 2 / 112;
       final major = i % 14 == 0;
@@ -731,13 +731,13 @@ class _DeviceStagePainter extends CustomPainter {
       final armBodyPaint = Paint()
         ..strokeCap = StrokeCap.round
         ..strokeWidth = geometry.width * 0.032
-        ..color = TraceColors.ocean.withOpacity(0.54);
+        ..color = TraceColors.ocean.withValues(alpha: 0.54);
       canvas.drawLine(start, end, armBodyPaint);
 
       final armEdgePaint = Paint()
         ..strokeCap = StrokeCap.round
         ..strokeWidth = 1.4
-        ..color = TraceColors.cyan.withOpacity(0.34);
+        ..color = TraceColors.cyan.withValues(alpha: 0.34);
       canvas.drawLine(
         start + perpendicular * geometry.width * 0.014,
         end + perpendicular * geometry.width * 0.014,
@@ -746,15 +746,15 @@ class _DeviceStagePainter extends CustomPainter {
       canvas.drawLine(
         start - perpendicular * geometry.width * 0.014,
         end - perpendicular * geometry.width * 0.014,
-        armEdgePaint..color = TraceColors.cyan.withOpacity(0.22),
+        armEdgePaint..color = TraceColors.cyan.withValues(alpha: 0.22),
       );
 
       final linkPaint = Paint()
         ..strokeWidth = 1.5
         ..shader = LinearGradient(
           colors: [
-            TraceColors.cyan.withOpacity(0.68),
-            TraceColors.cyan.withOpacity(0.16),
+            TraceColors.cyan.withValues(alpha: 0.68),
+            TraceColors.cyan.withValues(alpha: 0.16),
           ],
         ).createShader(Rect.fromPoints(start, end));
       canvas.drawLine(start, end, linkPaint);
@@ -767,7 +767,7 @@ class _DeviceStagePainter extends CustomPainter {
           Paint()
             ..strokeCap = StrokeCap.round
             ..strokeWidth = 2
-            ..color = TraceColors.cyanSoft.withOpacity(0.42),
+            ..color = TraceColors.cyanSoft.withValues(alpha: 0.42),
         );
         canvas.drawCircle(
           joint,
@@ -775,7 +775,7 @@ class _DeviceStagePainter extends CustomPainter {
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.2
-            ..color = TraceColors.cyan.withOpacity(0.6),
+            ..color = TraceColors.cyan.withValues(alpha: 0.6),
         );
       }
 
@@ -783,11 +783,11 @@ class _DeviceStagePainter extends CustomPainter {
       canvas.drawCircle(
         midpoint,
         2.2,
-        Paint()..color = TraceColors.cyanSoft.withOpacity(0.55),
+        Paint()..color = TraceColors.cyanSoft.withValues(alpha: 0.55),
       );
     }
 
-    final cardinalPaint = Paint()..color = TraceColors.cyanSoft.withOpacity(0.9);
+    final cardinalPaint = Paint()..color = TraceColors.cyanSoft.withValues(alpha: 0.9);
     for (final angle in const [
       -math.pi / 2,
       0.0,
@@ -806,7 +806,7 @@ class _DeviceStagePainter extends CustomPainter {
       final radius = geometry.orbitRadius * (0.5 + random.nextDouble() * 0.75);
       final position = center + Offset(math.cos(angle), math.sin(angle)) * radius;
       dotPaint.color = TraceColors.cyanSoft
-          .withOpacity(0.08 + random.nextDouble() * 0.3);
+          .withValues(alpha: 0.08 + random.nextDouble() * 0.3);
       canvas.drawCircle(position, 0.7 + random.nextDouble() * 1.3, dotPaint);
     }
 
@@ -814,7 +814,7 @@ class _DeviceStagePainter extends CustomPainter {
     final floorPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          TraceColors.cyan.withOpacity(0.1),
+          TraceColors.cyan.withValues(alpha: 0.1),
           Colors.transparent,
         ],
       ).createShader(
@@ -882,8 +882,8 @@ class _DeviceStagePainter extends CustomPainter {
     final headPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          TraceColors.cyanSoft.withOpacity(0.5 * orbitGlowIntensity),
-          TraceColors.cyan.withOpacity(0.22 * orbitGlowIntensity),
+          TraceColors.cyanSoft.withValues(alpha: 0.5 * orbitGlowIntensity),
+          TraceColors.cyan.withValues(alpha: 0.22 * orbitGlowIntensity),
           Colors.transparent,
         ],
       ).createShader(
@@ -914,7 +914,7 @@ class _DeviceStagePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = glowStrokeWidth
       ..color = TraceColors.cyanSoft
-          .withOpacity(0.12 * orbitGlowIntensity * opacityScale)
+          .withValues(alpha: 0.12 * orbitGlowIntensity * opacityScale)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
     canvas.drawArc(rect, trailStart, trailSweep, false, glowPaint);
 
@@ -923,7 +923,7 @@ class _DeviceStagePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = rimStrokeWidth
       ..color = TraceColors.text
-          .withOpacity(0.36 * orbitGlowIntensity * opacityScale);
+          .withValues(alpha: 0.36 * orbitGlowIntensity * opacityScale);
     canvas.drawArc(rect, hotStart, hotSweep, false, rimPaint);
 
     final leadingPaint = Paint()
@@ -931,7 +931,7 @@ class _DeviceStagePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = rimStrokeWidth + 0.9
       ..color = TraceColors.cyanSoft
-          .withOpacity(0.5 * orbitGlowIntensity * opacityScale);
+          .withValues(alpha: 0.5 * orbitGlowIntensity * opacityScale);
     canvas.drawArc(
       rect,
       headAngle - direction * math.pi * 0.08,
@@ -970,12 +970,12 @@ class _DeviceStagePainter extends CustomPainter {
 
       tickGlowPaint
         ..strokeWidth = major ? 2.9 : 2.2
-        ..color = TraceColors.cyanSoft.withOpacity(0.16 * opacity);
+        ..color = TraceColors.cyanSoft.withValues(alpha: 0.16 * opacity);
       canvas.drawLine(start, end, tickGlowPaint);
 
       tickHotPaint
         ..strokeWidth = major ? 1.5 : 1.0
-        ..color = TraceColors.text.withOpacity(0.44 * opacity);
+        ..color = TraceColors.text.withValues(alpha: 0.44 * opacity);
       canvas.drawLine(start, end, tickHotPaint);
     }
   }
@@ -1004,12 +1004,12 @@ class _DeviceCore extends StatelessWidget {
         border: Border.all(color: TraceColors.cyan, width: 3),
         boxShadow: [
           BoxShadow(
-            color: TraceColors.cyan.withOpacity(0.55),
+            color: TraceColors.cyan.withValues(alpha: 0.55),
             blurRadius: 34,
             spreadRadius: 1,
           ),
           BoxShadow(
-            color: TraceColors.cyan.withOpacity(0.22),
+            color: TraceColors.cyan.withValues(alpha: 0.22),
             blurRadius: 80,
             spreadRadius: 14,
           ),
@@ -1040,7 +1040,7 @@ class _DeviceCore extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: TraceColors.cyan.withOpacity(0.3),
+                  color: TraceColors.cyan.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -1050,7 +1050,7 @@ class _DeviceCore extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: TraceColors.cyan.withOpacity(0.14),
+                  color: TraceColors.cyan.withValues(alpha: 0.14),
                   width: 1,
                 ),
               ),
@@ -1078,12 +1078,12 @@ class _DeviceCore extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: const Color(0xFF041A22),
                     border: Border.all(
-                      color: TraceColors.cyan.withOpacity(0.65),
+                      color: TraceColors.cyan.withValues(alpha: 0.65),
                       width: 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: TraceColors.cyan.withOpacity(0.4),
+                        color: TraceColors.cyan.withValues(alpha: 0.4),
                         blurRadius: 14,
                         spreadRadius: -2,
                       ),
@@ -1113,7 +1113,7 @@ class _DeviceCoreDialPainter extends CustomPainter {
     final radius = size.shortestSide / 2;
     final tickPaint = Paint()
       ..strokeCap = StrokeCap.round
-      ..color = TraceColors.cyanSoft.withOpacity(0.22);
+      ..color = TraceColors.cyanSoft.withValues(alpha: 0.22);
 
     for (var i = 0; i < 96; i++) {
       final angle = -math.pi / 2 + i * math.pi * 2 / 96;
@@ -1135,8 +1135,8 @@ class _DeviceCoreDialPainter extends CustomPainter {
       ..shader = SweepGradient(
         colors: [
           Colors.transparent,
-          TraceColors.cyan.withOpacity(0.18),
-          TraceColors.cyanSoft.withOpacity(0.45),
+          TraceColors.cyan.withValues(alpha: 0.18),
+          TraceColors.cyanSoft.withValues(alpha: 0.45),
           Colors.transparent,
         ],
         stops: const [0, 0.18, 0.32, 0.55],

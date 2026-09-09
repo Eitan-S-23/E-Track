@@ -181,7 +181,7 @@ class DiscoverTabPage extends StatelessWidget {
           ),
         ],
       ),
-      barrierColor: Colors.black.withOpacity(0.62),
+      barrierColor: Colors.black.withValues(alpha: 0.62),
     );
   }
 
@@ -213,7 +213,7 @@ class DiscoverTabPage extends StatelessWidget {
           ),
         ],
       ),
-      barrierColor: Colors.black.withOpacity(0.62),
+      barrierColor: Colors.black.withValues(alpha: 0.62),
     );
   }
 }
@@ -286,7 +286,7 @@ class _AnnouncementsDialogContentState
                     decoration: BoxDecoration(
                       color: i == _index
                           ? TraceColors.cyan
-                          : TraceColors.muted.withOpacity(0.35),
+                          : TraceColors.muted.withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -311,9 +311,9 @@ class _AnnouncementPage extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 2),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF071B25).withOpacity(0.78),
+        color: const Color(0xFF071B25).withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: TraceColors.cyan.withOpacity(0.2)),
+        border: Border.all(color: TraceColors.cyan.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,9 +323,9 @@ class _AnnouncementPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
-                  color: TraceColors.cyan.withOpacity(0.1),
+                  color: TraceColors.cyan.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: TraceColors.cyan.withOpacity(0.3)),
+                  border: Border.all(color: TraceColors.cyan.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   data.type.label,
@@ -341,7 +341,7 @@ class _AnnouncementPage extends StatelessWidget {
                 Text(
                   data.releaseTag!,
                   style: TextStyle(
-                    color: TraceColors.muted.withOpacity(0.85),
+                    color: TraceColors.muted.withValues(alpha: 0.85),
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
@@ -544,15 +544,15 @@ class _HeroCard extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: TraceColors.cyan.withOpacity(0.3)),
+        border: Border.all(color: TraceColors.cyan.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withValues(alpha: 0.4),
             blurRadius: 26,
             offset: const Offset(0, 14),
           ),
           BoxShadow(
-            color: TraceColors.cyan.withOpacity(0.16),
+            color: TraceColors.cyan.withValues(alpha: 0.16),
             blurRadius: 30,
             spreadRadius: -10,
           ),
@@ -577,7 +577,7 @@ class _HeroCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(2),
                             boxShadow: [
                               BoxShadow(
-                                color: TraceColors.cyan.withOpacity(0.7),
+                                color: TraceColors.cyan.withValues(alpha: 0.7),
                                 blurRadius: 6,
                               ),
                             ],
@@ -615,13 +615,13 @@ class _HeroCard extends StatelessWidget {
                         Icon(
                           data.icon,
                           size: 14,
-                          color: TraceColors.muted.withOpacity(0.9),
+                          color: TraceColors.muted.withValues(alpha: 0.9),
                         ),
                         const SizedBox(width: 6),
                         Text(
                           data.subtitle,
                           style: TextStyle(
-                            color: TraceColors.muted.withOpacity(0.95),
+                            color: TraceColors.muted.withValues(alpha: 0.95),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1,
@@ -653,7 +653,7 @@ class _HeroCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: i == activeIndex
                         ? TraceColors.cyan
-                        : TraceColors.muted.withOpacity(0.35),
+                        : TraceColors.muted.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -684,7 +684,7 @@ class _HeroPhoneArt extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                TraceColors.cyan.withOpacity(0.24),
+                TraceColors.cyan.withValues(alpha: 0.24),
                 Colors.transparent,
               ],
             ),
@@ -696,7 +696,7 @@ class _HeroPhoneArt extends StatelessWidget {
           child: Icon(
             Icons.bluetooth,
             size: 30,
-            color: TraceColors.cyan.withOpacity(0.4),
+            color: TraceColors.cyan.withValues(alpha: 0.4),
           ),
         ),
         Transform.rotate(
@@ -711,15 +711,15 @@ class _HeroPhoneArt extends StatelessWidget {
                 colors: [Color(0xFF0D303C), Color(0xFF04151D)],
               ),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: TraceColors.cyan.withOpacity(0.55)),
+              border: Border.all(color: TraceColors.cyan.withValues(alpha: 0.55)),
               boxShadow: [
                 BoxShadow(
-                  color: TraceColors.cyan.withOpacity(0.3),
+                  color: TraceColors.cyan.withValues(alpha: 0.3),
                   blurRadius: 22,
                   spreadRadius: -4,
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   blurRadius: 16,
                   offset: const Offset(4, 10),
                 ),
@@ -733,13 +733,13 @@ class _HeroPhoneArt extends StatelessWidget {
                   height: 26,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: TraceColors.cyan.withOpacity(0.14),
+                    color: TraceColors.cyan.withValues(alpha: 0.14),
                     border: Border.all(
-                      color: TraceColors.cyan.withOpacity(0.7),
+                      color: TraceColors.cyan.withValues(alpha: 0.7),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: TraceColors.cyan.withOpacity(0.5),
+                        color: TraceColors.cyan.withValues(alpha: 0.5),
                         blurRadius: 12,
                       ),
                     ],
@@ -762,7 +762,7 @@ class _HeroPhoneArt extends StatelessWidget {
                           width: 3,
                           height: barHeight,
                           decoration: BoxDecoration(
-                            color: TraceColors.cyan.withOpacity(0.8),
+                            color: TraceColors.cyan.withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -774,7 +774,7 @@ class _HeroPhoneArt extends StatelessWidget {
                   width: 22,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: TraceColors.muted.withOpacity(0.5),
+                    color: TraceColors.muted.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -790,10 +790,10 @@ class _HeroPhoneArt extends StatelessWidget {
             height: 5,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: TraceColors.cyanSoft.withOpacity(0.8),
+              color: TraceColors.cyanSoft.withValues(alpha: 0.8),
               boxShadow: [
                 BoxShadow(
-                  color: TraceColors.cyan.withOpacity(0.8),
+                  color: TraceColors.cyan.withValues(alpha: 0.8),
                   blurRadius: 8,
                 ),
               ],
@@ -836,17 +836,17 @@ class _GuideCard extends StatelessWidget {
           width: 150,
           padding: const EdgeInsets.fromLTRB(14, 16, 14, 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF071B25).withOpacity(0.82),
+            color: const Color(0xFF071B25).withValues(alpha: 0.82),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: TraceColors.cyan.withOpacity(0.22)),
+            border: Border.all(color: TraceColors.cyan.withValues(alpha: 0.22)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.32),
+                color: Colors.black.withValues(alpha: 0.32),
                 blurRadius: 20,
                 offset: const Offset(0, 12),
               ),
               BoxShadow(
-                color: TraceColors.cyan.withOpacity(0.1),
+                color: TraceColors.cyan.withValues(alpha: 0.1),
                 blurRadius: 24,
                 spreadRadius: -8,
               ),
@@ -862,11 +862,11 @@ class _GuideCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: const Color(0xFF04202B),
                   border: Border.all(
-                    color: TraceColors.cyan.withOpacity(0.55),
+                    color: TraceColors.cyan.withValues(alpha: 0.55),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: TraceColors.cyan.withOpacity(0.3),
+                      color: TraceColors.cyan.withValues(alpha: 0.3),
                       blurRadius: 14,
                       spreadRadius: -2,
                     ),
@@ -904,7 +904,7 @@ class _GuideCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: TraceColors.muted.withOpacity(0.95),
+                          color: TraceColors.muted.withValues(alpha: 0.95),
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
                         ),
@@ -952,9 +952,9 @@ class _MoreRow extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF071B25).withOpacity(0.72),
+            color: const Color(0xFF071B25).withValues(alpha: 0.72),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: TraceColors.cyan.withOpacity(0.16)),
+            border: Border.all(color: TraceColors.cyan.withValues(alpha: 0.16)),
           ),
           child: Row(
             children: [
@@ -965,7 +965,7 @@ class _MoreRow extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: const Color(0xFF04202B),
                   border: Border.all(
-                    color: TraceColors.cyan.withOpacity(0.45),
+                    color: TraceColors.cyan.withValues(alpha: 0.45),
                   ),
                 ),
                 child: Icon(data.icon, color: TraceColors.cyan, size: 20),
@@ -989,7 +989,7 @@ class _MoreRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: TraceColors.muted.withOpacity(0.85),
+                        color: TraceColors.muted.withValues(alpha: 0.85),
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1000,7 +1000,7 @@ class _MoreRow extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right,
-                color: TraceColors.cyan.withOpacity(0.8),
+                color: TraceColors.cyan.withValues(alpha: 0.8),
                 size: 20,
               ),
             ],

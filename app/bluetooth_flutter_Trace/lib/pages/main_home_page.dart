@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_page.dart'; // 假设原主功能页面为 home_page.dart，可根据实际替换
 
 class MainHomePage extends StatefulWidget {
-  const MainHomePage({Key? key}) : super(key: key);
+  const MainHomePage({super.key});
 
   @override
   State<MainHomePage> createState() => _MainHomePageState();

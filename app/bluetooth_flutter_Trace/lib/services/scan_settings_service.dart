@@ -55,7 +55,7 @@ class ScanSettingsService extends GetxController {
     await _saveSettings();
     onChanged?.call();
 
-    Get.snackbar('成功', '扫描间隔已设置为 ${seconds}秒');
+    Get.snackbar('成功', '扫描间隔已设置为 $seconds秒');
   }
 
   /// 设置扫描间隔（毫秒）
@@ -75,7 +75,7 @@ class ScanSettingsService extends GetxController {
     await _saveSettings();
     onChanged?.call();
 
-    Get.snackbar('成功', '扫描间隔已设置为 ${milliseconds}毫秒');
+    Get.snackbar('成功', '扫描间隔已设置为 $milliseconds毫秒');
   }
 
   /// 获取预设间隔选项

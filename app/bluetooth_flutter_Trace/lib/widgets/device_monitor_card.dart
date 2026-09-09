@@ -10,12 +10,12 @@ class DeviceMonitorCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const DeviceMonitorCard({
-    Key? key,
+    super.key,
     required this.device,
     this.latestData,
     this.powerConsumption = 0.0,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class DeviceMonitorCard extends StatelessWidget {
               : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),

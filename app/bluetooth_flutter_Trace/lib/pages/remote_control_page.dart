@@ -42,7 +42,7 @@ IconData _customButtonIconForCode(int? codePoint) {
 }
 
 class RemoteControlPage extends StatefulWidget {
-  const RemoteControlPage({Key? key}) : super(key: key);
+  const RemoteControlPage({super.key});
 
   @override
   State<RemoteControlPage> createState() => _RemoteControlPageState();
@@ -315,7 +315,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                         Switch(
                           value: _sendAsHex,
                           onChanged: (v) => setState(() => _sendAsHex = v),
-                          activeColor: const Color(0xFF4A90E2),
+                          activeThumbColor: const Color(0xFF4A90E2),
                         ),
                         const Text('16进制发送'),
                         const Spacer(),
@@ -344,7 +344,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                               _stopLoopTimer();
                             }
                           },
-                          activeColor: const Color(0xFF4A90E2),
+                          activeThumbColor: const Color(0xFF4A90E2),
                         ),
                         const Text('循环发送'),
                         const SizedBox(width: 12),
@@ -422,7 +422,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -537,8 +537,8 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                button.color.withOpacity(0.1),
-                button.color.withOpacity(0.05),
+                button.color.withValues(alpha: 0.1),
+                button.color.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -549,7 +549,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: button.color.withOpacity(0.2),
+                  color: button.color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -564,7 +564,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: button.color.withOpacity(0.8),
+                  color: button.color.withValues(alpha: 0.8),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -597,7 +597,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
@@ -790,7 +790,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                     Switch(
                       value: isHexSelected,
                       onChanged: (v) => setState(() => isHexSelected = v),
-                      activeColor: const Color(0xFF4A90E2),
+                      activeThumbColor: const Color(0xFF4A90E2),
                     ),
                     const Text('Hex'),
                   ],
@@ -817,7 +817,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: selectedIcon == icon
-                                    ? Colors.blue.withOpacity(0.2)
+                                    ? Colors.blue.withValues(alpha: 0.2)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -917,7 +917,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
                     id: id,
                     name: name,
                     iconCode: selectedIcon.codePoint,
-                    colorValue: selectedColor.value,
+                    colorValue: selectedColor.toARGB32(),
                     isHex: isHexSelected,
                     payload: isHexSelected
                         ? _bytesToHex(hexData)
