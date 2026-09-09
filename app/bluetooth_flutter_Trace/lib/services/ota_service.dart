@@ -174,6 +174,11 @@ class OtaService extends GetxController {
   /// cancelUpgrade 等待它确认旧 owner 完全退出（含 finally）后才解锁，
   /// 防止新入口在旧 owner 尚未退出时进入造成并发发布/transport 撕裂。
   Future<void>? _ownerDone;
+  /// owner 登记代数（RC3-04⑤）：_runExclusive 每次登记时自增。仅凭
+  /// 「_ownerDone == null」无法区分「从未有 owner」与「后来 owner 已
+  /// 跑完退出」——cancelUpgrade 以「取消窗口内 epoch 未前进」识别
+  /// 没有任何后来者进出，避免覆盖后来者的包与终态。
+  int _ownerEpoch = 0;
   /// 设备身份快照所属的 BLE 地址（RC3-08）：换设备连接时旧快照立即
   /// 失效，不得用 A 设备的身份给 B 设备发请求/传输。
   String? _deviceInfoAddress;
@@ -232,6 +237,11 @@ class OtaService extends GetxController {
     }
     return _runExclusive((generation) async {
       final previousInfo = _deviceInfo; // RC3-08⑤/12⑤：身份漂移比对基准
+      // RC3-12⑤：地址快照独立于身份快照——身份字段比对只能发现「换到
+      // 了不同型号/版本的设备」，换到同型号同版本的另一台设备时身份
+      // 巧合相同，但地址已变：旧地址建立的清单/包/终态与设备绑定关系
+      // 随地址作废，不得沿用。
+      final previousAddress = _deviceInfoAddress;
       _deviceInfo = null; // 先失效旧快照，成功才重建
       _deviceInfoAddress = null;
       try {
@@ -277,6 +287,13 @@ class OtaService extends GetxController {
           _clearFirmwareInfo();
           _terminalState.value = null;
           _upgradeStatus.value = '设备身份已变更，旧的固件清单与下载包已作废，请重新检查更新';
+        } else if (previousAddress != null &&
+            previousAddress != deviceAddress) {
+          // RC3-12⑤：地址漂移（身份字段巧合相同时也成立）——旧地址的
+          // 清单/资产/终态一并作废，提示重新检查更新。
+          _clearFirmwareInfo();
+          _terminalState.value = null;
+          _upgradeStatus.value = '设备地址已变更，旧的固件清单与下载包已作废，请重新检查更新';
         } else {
           // 显式重新建立有效查询链：终止态解锁（PR11）。
           _terminalState.value = null;
@@ -601,12 +618,18 @@ class OtaService extends GetxController {
       // 等已知非兼容码重发同请求必然复现，留在普通失败分支会允许
       // 用户无限次撞同一堵墙而不闭锁。
       final httpError = e.httpError;
+      // RC3-10：autoRetryable 判定对齐 _terminalFromDioError——errorCode
+      // 声称可自动重试（RATE_LIMITED/BACKEND_UNAVAILABLE）仅当 HTTP
+      // 状态为 429/503 时成立；其他状态（如 5xx 携带 RATE_LIMITED 码）
+      // 不得据此免除稳定闭锁判定，否则服务端错配的响应会被无限重试。
+      final autoRetryable = httpError != null &&
+          httpError.isAutoRetryable &&
+          (httpError.httpStatus == 429 || httpError.httpStatus == 503);
       final stableReject =
           (httpError != null &&
               (httpError.isTerminal ||
                   httpError.isUnknown ||
-                  (!httpError.isAutoRetryable &&
-                      !httpError.isRetryableLater))) ||
+                  (!autoRetryable && !httpError.isRetryableLater))) ||
               (httpError == null &&
                   e.httpStatus != null &&
                   e.httpStatus! >= 400 &&
@@ -622,6 +645,13 @@ class OtaService extends GetxController {
         }
         _terminalState.value = OtaTerminalState(
           code: code,
+          // RC3-10：终态携带兼容性上下文字段——CLIENT_TOO_OLD 的
+          // 「需 ≥ minAppVersionCode」、HARDWARE_INCOMPATIBLE 等的
+          // required/actual 展示依赖这些字段，缺失时 userMessage 退化为
+          // 无版本号文案（对齐 _terminalFromDioError 的字段传递）。
+          minAppVersionCode: httpError?.minAppVersionCode,
+          requiredValue: httpError?.requiredValue,
+          actualValue: httpError?.actualValue,
           message: httpError != null
               ? '${httpError.message ?? '固件下载被服务端拒绝'}'
                   '（requestId: ${httpError.requestId ?? '无'}）'
@@ -745,7 +775,17 @@ class OtaService extends GetxController {
           return false;
         }
         final transport = await _bindTransport(deviceAddress, otaChars);
-        if (generation != _cancelGeneration) return false;
+        if (generation != _cancelGeneration) {
+          // RC3-04⑤：迟到完成的 bind 产物无人接管——transport 与其订阅
+          // 不释放会悬挂占用通知通道（PR10 一个连接代次仅一个订阅，
+          // 残留订阅会顶掉下一次绑定的流）。释放后静默退出，对齐
+          // readDeviceInfo 的同型分支。
+          await transport?.dispose();
+          if (transport != null && identical(_transport, transport)) {
+            _transport = null;
+          }
+          return false;
+        }
         if (transport == null) {
           _upgradeStatus.value = 'OTA 通知订阅失败';
           _phase.value = OtaPhase.failed;
@@ -903,17 +943,28 @@ class OtaService extends GetxController {
   ///   的去留：false 时一并删除。
   Future<void> cancelUpgrade({bool keepPackage = false}) async {
     _cancelGeneration++;
-    // RC3-04⑤：代次自增后**同步**快照当前 owner，之后的等待只认这份
-    // 快照。若等 await 时才读 _ownerDone，旧 owner 退出与新 owner 登记
-    // 之间没有间隙屏障——取消会等到新 owner 退出、再删新操作刚建立的
-    // 包并覆盖其终态，取消变成对后来者的破坏。快照 owner 退出后登记的
-    // 新 owner 属于新操作，不由本取消等待或处置。
+    // RC3-04⑤：代次自增后**同步**快照当前 owner 与 owner 代数，之后的
+    // 等待只认这份快照。若等 await 时才读 _ownerDone，旧 owner 退出与新
+    // owner 登记之间没有间隙屏障——取消会等到新 owner 退出、再删新操作
+    // 刚建立的包并覆盖其终态，取消变成对后来者的破坏。快照 owner 退出后
+    // 登记的新 owner 属于新操作，不由本取消等待或处置。
+    // ownerEpoch（RC3-04⑤）：_runExclusive 每次登记自增。仅靠
+    // 「_ownerDone == null」无法识别「进入又结束的后来 owner」——等待
+    // 期间新 owner 跑完全程后 _ownerDone 回到 null，删包与终态发布会
+    // 作用于新 owner 已结束的状态、覆盖其终态。结尾以「epoch 未前进」
+    // 识别整个取消窗口内没有任何后来者进出。
     final ownerAtCancel = _ownerDone;
+    final epochAtCancel = _ownerEpoch;
     // RC3-04：在途 latest 请求立即中断（不等待其自然超时）。
     _activeLatestToken?.cancel();
     // 先直接取消持有令牌（覆盖 OtaFirmwareDownload 内部注册前的
     // 极早期取消窗口），再走其自身的取消/清理路径。
     _activeDownloadToken?.cancel();
+    // RC3-04⑤：下载资源快照同样在首个 await 前同步读取——ABORT 等待
+    // 期间新 owner 进入并建立自己的 _asset/_download 时，本取消不得
+    // 删新 owner 的 partial 文件（快照的是取消时刻的在途下载）。
+    final assetId = _asset?.assetId;
+    final download = _download;
     // RC3-05：先停 BLE 传输（发送循环停止、尽力 ABORT），再停下载——
     // 下载清理会等待在途请求退出，传输先停可避免等待期间仍在发送
     // 数据段。
@@ -921,8 +972,6 @@ class OtaService extends GetxController {
     if (transport != null && !transport.isCancelled) {
       await transport.abortBestEffort();
     }
-    final assetId = _asset?.assetId;
-    final download = _download;
     if (assetId != null && download != null) {
       try {
         await download.cancel(assetId, keepPartial: false);
@@ -940,9 +989,16 @@ class OtaService extends GetxController {
     // 删除已验证包（RC3-12）：纳入 owner 串行——防止删除与并发新操作
     // （如取消后立刻开始的传输，就地读包）竞争同一文件；新操作已抢入
     // 时 _runExclusive 拒绝并让位，不删新操作正用的包（RC3-04）。
+    // epoch 屏障（RC3-04⑤）：仅当取消窗口内没有后来 owner 进出时才
+    // 删包——后来的新操作可能刚建立自己的包，删它属于越权处置。
     String? cleanupFailure;
-    if (!keepPackage && _firmwareFile != null && _ownerDone == null) {
+    var cleanupRan = false; // 自己的删包 owner 也会登记（epoch +1）
+    if (!keepPackage &&
+        _firmwareFile != null &&
+        _ownerEpoch == epochAtCancel &&
+        _ownerDone == null) {
       await _runExclusive<void>((_) async {
+        cleanupRan = true;
         final file = _firmwareFile;
         if (file == null) return;
         try {
@@ -959,10 +1015,12 @@ class OtaService extends GetxController {
       });
     }
     // 发布前防新 owner 竞态：等待期间若有新入口抢入（_ownerDone 重新
-    // 登记），取消状态让位给新操作的进度展示；否则发布取消终态。
+    // 登记，或后来者已跑完整个流程退出——epoch 前进而 _ownerDone 回到
+    // null），取消状态让位给新操作的进度/终态展示；否则发布取消终态。
     // phase 与 status 在同一同步段赋值（RC3-12）：Obx 重建时文件状态
     // 与 phase/Rx 一致，不会出现 cancelled 已显示、包随后才删的中间态。
-    if (_ownerDone == null) {
+    final expectedEpoch = epochAtCancel + (cleanupRan ? 1 : 0);
+    if (_ownerEpoch == expectedEpoch && _ownerDone == null) {
       _upgradeStatus.value = cleanupFailure != null
           ? '操作已取消（$cleanupFailure，固件包已保留）'
           : '操作已取消';
@@ -1009,8 +1067,21 @@ class OtaService extends GetxController {
         await transport.abortBestEffort();
         return;
       }
-    } catch (_) {
-      // 复核失败不阻断恢复：连接异常由传输自身预算/重试处理。
+    } catch (e) {
+      // RC3-08⑤：复核失败 fail closed——读取不到当前身份就无法确认
+      // 后台期间设备未被更换（系统断开旧连接后可能重连到别的设备），
+      // 继续发送会把旧包字节写进未知设备。置终止态并尽力 ABORT 停止
+      // 发送循环；MCU durable 层保留已落盘字节，重试经 BEGIN 幂等 +
+      // durable 续传恢复，不依赖本会话续发。
+      _terminalState.value = OtaTerminalState(
+        code: 'DEVICE_RECHECK_FAILED',
+        message: '后台恢复时无法复核设备身份（$e），已终止升级',
+        retryableLater: true,
+      );
+      _upgradeStatus.value = '设备身份复核失败（后台恢复），升级已终止，可重试续传';
+      _notify('错误', _terminalState.value!.userMessage);
+      await transport.abortBestEffort();
+      return;
     }
     transport.resumeFromBackground();
   }
@@ -1087,6 +1158,7 @@ class OtaService extends GetxController {
     final done = Completer<void>();
     final previous = _ownerDone;
     final generation = _cancelGeneration;
+    _ownerEpoch++; // 登记即前进（RC3-04⑤）：取消窗口用它识别后来者
     _ownerDone = done.future;
     try {
       await previous;

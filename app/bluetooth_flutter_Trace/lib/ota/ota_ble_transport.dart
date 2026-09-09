@@ -4,6 +4,13 @@ import 'dart:typed_data';
 import 'ota_ble_codec.dart';
 import 'ota_device_info.dart';
 
+/// [diag] RC3-02 单字节分片用例根因定位临时打点（根因定位后整段移除）。
+/// MCU 侧已证明 952 字节全部投递、46 个 DATA ACK 全部 emit；本打点输出
+/// transport 侧发窗/重发/ACK 消费的真实交错轨迹，用于定位「14 段新 seq
+/// 重发 + ABORT+BEGIN#2」的触发链。
+// ignore: avoid_print
+void _otaDiag(String msg) => print(msg);
+
 /// OTA BLE 传输测试注入点：生产实现绑定 flutter_blue_plus 的真实特征，
 /// 测试用 fake 模拟 MCU 行为（ACK、丢帧、乱序、断连）。
 abstract class OtaBleChannel {
@@ -197,6 +204,9 @@ class OtaBleTransport {
           etuHeader: etuHeader,
           timeout: _capByBudget(ackTimeout),
         );
+        _otaDiag('[diag] B-begin st=${beginAck.status} s=${beginAck.session} '
+            'dur=${beginAck.durableOff} '
+            'bmp=0x${beginAck.blockBitmap.toRadixString(16)}');
         final beginTerminal = _abortStatusOf(beginAck.status);
         if (beginTerminal != null) {
           return OtaAckResult.terminal(
@@ -238,6 +248,8 @@ class OtaBleTransport {
             _checkUsable();
             final midErr = view.takeError();
             if (midErr != null) {
+              _otaDiag('[diag] C-miderr st=0x${midErr.status.toRadixString(16)} '
+                  'left=$resumeLeft');
               final decision = _classifyAckError(midErr, resumeLeft);
               if (decision.resume) {
                 resumeLeft--;
@@ -261,6 +273,9 @@ class OtaBleTransport {
               if ((view.blockBitmap >> seg) & 1 == 1) continue; // 已收段幂等跳过
               if (view.isSegmentInFlight(seg)) continue; // 在途未确认
               final seq = _nextSeq();
+              _otaDiag('[diag] T-send seg=$seg seq=$seq '
+                  'bmp=0x${view.blockBitmap.toRadixString(16)} '
+                  'infl=${view.inFlightCount} dur=${view.durableOff}');
               view.trackSend(seq, seg);
               await _sendSegment(package, blockStart, seg, seq);
               sentBytes += _segmentLength(package, blockStart, seg);
@@ -270,12 +285,17 @@ class OtaBleTransport {
             _checkNoProgress();
             final changed =
                 await view.waitForChange(_capByBudget(ackTimeout));
+            _otaDiag('[diag] T-wfc changed=$changed '
+                'bmp=0x${view.blockBitmap.toRadixString(16)} '
+                'infl=${view.inFlightCount} dur=${view.durableOff}');
             if (changed) continue; // 有 ACK/错误到达，回到循环头重估
             // 无任何 ACK：重发在途且未被位图确认的段（复用原 seq——MCU
             // 对落后 seq 幂等 ACK，对超前 seq 报 ERR_SEQ，§5.1）。
             var overLimit = false;
             final pending =
                 Map<int, int>.of(view.inFlight); // seq → seg 快照
+            _otaDiag('[diag] T-resend n=${pending.length} '
+                'seqs=${pending.keys.toList()} segs=${pending.values.toList()}');
             for (final entry in pending.entries) {
               _checkNoProgress();
               await _waitIfPaused(); // 后台暂停挂起（RC3-08）
@@ -289,6 +309,7 @@ class OtaBleTransport {
             }
             if (overLimit) {
               if (resumeLeft > 0) {
+                _otaDiag('[diag] C-resume overLimit left=${resumeLeft - 1}');
                 // ACK 持续丢失（RC3-08③）：MCU 可能仍 ACTIVE 卡在旧
                 // expected_seq（快速掉线重连场景，DATA 幂等 ACK 不写
                 // staging）。ABORT teardown 后 BEGIN 重置 expected_seq
@@ -317,6 +338,8 @@ class OtaBleTransport {
           // 一次，处置链与段循环头一致（resume / terminal / 抛出）。
           final blockEndErr = view.takeError();
           if (blockEndErr != null) {
+            _otaDiag('[diag] C-blockenderr '
+                'st=0x${blockEndErr.status.toRadixString(16)} left=$resumeLeft');
             final decision = _classifyAckError(blockEndErr, resumeLeft);
             if (decision.resume) {
               resumeLeft--;
@@ -332,6 +355,7 @@ class OtaBleTransport {
         if (needsResume) {
           // MCU 仍 ACTIVE 时同包 BEGIN 不重置 expected_seq：先 ABORT
           // teardown（durable 保留），再由循环头 BEGIN 续传（RC2-05）。
+          _otaDiag('[diag] R-abort(blockLoop) session=$_session');
           await _abortRoundTrip();
           _session = 0;
           continue;
@@ -367,6 +391,7 @@ class OtaBleTransport {
             }
             if (endAck.status == OtaBleCodec.statusErrState &&
                 resumeLeft > 0) {
+              _otaDiag('[diag] C-resume endErrState left=${resumeLeft - 1}');
               resumeLeft--; // MCU 缺段 teardown → 重新 BEGIN resume 补齐
               needsResume = true;
               break;
@@ -391,6 +416,8 @@ class OtaBleTransport {
                   'END ACK OK 但 block_bitmap 越出尾块有效位（MCU 状态不可信）',
                   code: 'ACK_MALFORMED');
             }
+            _otaDiag('[diag] E-end st=${endAck.status} dur=${endAck.durableOff} '
+                'bmp=0x${endAck.blockBitmap.toRadixString(16)}');
             return OtaAckResult.fromAck(endAck);
           } on TimeoutException {
             _checkNoProgress(); // 预算耗尽优先终止，不再空转重试（RC3-07）
@@ -403,6 +430,7 @@ class OtaBleTransport {
           }
         }
         if (needsResume) {
+          _otaDiag('[diag] R-abort(endLoop) session=$_session');
           await _abortRoundTrip();
           _session = 0;
           continue;
@@ -537,6 +565,9 @@ class OtaBleTransport {
     final view = _ackView;
     if (view != null && _viewAccepts(f)) {
       view.onAck(f);
+    } else {
+      _otaDiag('[diag] D-drop q=${f.seq} c=0x${f.cmd.toRadixString(16)} '
+          's=${f.session} noView=${view == null}');
     }
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.offer(f);
@@ -937,8 +968,9 @@ class OtaBleTransport {
       if (frameEnd > bytes.length) break; // 半帧，继续收
       try {
         _dispatchFrame(OtaBleCodec.decodeFrame(bytes.sublist(offset, frameEnd)));
-      } on FormatException {
+      } on FormatException catch (e) {
         // 坏帧：跳过（不终止整个流；上层按超时/重试处理）。
+        _otaDiag('[diag] N-badframe @${offset} len=${bytes.length} ${e.message}');
       }
       offset = frameEnd;
     }
@@ -1024,16 +1056,20 @@ class _TransferAckView {
   }
 
   void onAck(OtaBleFrame f) {
+    _otaDiag('[diag] V-enter q=${f.seq} c=0x${f.cmd.toRadixString(16)} '
+        's=${f.session} pl=${f.payload.length}');
     final OtaAckPayload ack;
     try {
       ack = OtaAckPayload.parse(f.cmd, f.payload);
     } on FormatException {
+      _otaDiag('[diag] V-parsefail q=${f.seq}');
       _malformed = true;
       _signal();
       return;
     }
     if (f.cmd != OtaBleCodec.rspAckData) {
       // 异步 ACK_ABORT（MCU 主动 teardown）：无请求关联，到达即终止。
+      _otaDiag('[diag] V-asyncabort q=${f.seq} st=${ack.status}');
       if (_error == null) {
         _error = _AckError(ack.status, f.cmd, f.seq);
       }
@@ -1043,10 +1079,13 @@ class _TransferAckView {
     // 未知/迟到/重复 ACK（seq 不在途）：忽略整帧，不覆盖权威进度。
     final seg = inFlight.remove(f.seq);
     if (seg == null) {
+      _otaDiag('[diag] V-ignore q=${f.seq} (seq not in-flight '
+          'infl=${inFlight.length})');
       _signal();
       return;
     }
     if (ack.status != OtaBleCodec.statusOk) {
+      _otaDiag('[diag] V-errlock q=${f.seq} st=${ack.status}');
       if (_error == null) {
         _error = _AckError(ack.status, f.cmd, f.seq);
       }
@@ -1055,6 +1094,8 @@ class _TransferAckView {
     }
     if (!_durableValid(ack.durableOff) || ack.durableOff < durableOff) {
       // 超范围/未对齐/倒退：不可信 ACK，fail closed 记为畸形。
+      _otaDiag('[diag] V-baddur q=${f.seq} ackDur=${ack.durableOff} '
+          'curDur=${durableOff}');
       _malformed = true;
       _signal();
       return;
@@ -1065,11 +1106,15 @@ class _TransferAckView {
       // 更新过 durable——相邻两次被接受的 ACK 之间 durable 前移至多
       // 一个块。8192B 包首块在途时 ACK 报 durable=8192/bitmap=0 的
       // 伪造跳跃（可清 inFlight 跳过第二块发 END）在此 fail closed。
+      _otaDiag('[diag] V-jump q=${f.seq} ackDur=${ack.durableOff} '
+          'curDur=${durableOff}');
       _malformed = true;
       _signal();
       return;
     }
     if (!_bitmapValid(ack.blockBitmap, ack.durableOff)) {
+      _otaDiag('[diag] V-badbmp q=${f.seq} bmp=0x'
+          '${ack.blockBitmap.toRadixString(16)} dur=${ack.durableOff}');
       _malformed = true;
       _signal();
       return;
@@ -1082,6 +1127,8 @@ class _TransferAckView {
       // 若误当已确认，客户端会跳过该段不补发，最终 END 校验失败。
       // fail closed 记 ERR_STATE，由传输循环 ABORT teardown + BEGIN
       // 重对齐（新会话重置 expected_seq，SHA 从 journal 前缀重建）。
+      _otaDiag('[diag] V-wrconf q=${f.seq} seg=$seg '
+          'bmp=0x${ack.blockBitmap.toRadixString(16)} dur=${ack.durableOff}');
       if (_error == null) {
         _error = _AckError(OtaBleCodec.statusErrState, f.cmd, f.seq);
       }
@@ -1090,6 +1137,9 @@ class _TransferAckView {
     }
     durableOff = ack.durableOff;
     blockBitmap = ack.blockBitmap;
+    _otaDiag('[diag] V-ok q=${f.seq} seg=$seg dur=${ack.durableOff} '
+        'bmp=0x${ack.blockBitmap.toRadixString(16)} adv=$advanced '
+        'infl=${inFlight.length}');
     if (advanced) {
       // durable 跨块前移（MCU 整块 commit 后推进）：旧块所有在途段
       // （含丢 ACK 的）一并回收，防跨块残留耗尽窗口；旧块计数同步清
