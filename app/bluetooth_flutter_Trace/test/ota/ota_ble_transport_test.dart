@@ -285,10 +285,18 @@ void main() {
         etuHeader: etuHeaderOf(package),
       );
       expect(ack.isOk, isTrue);
-      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset。
-      // 根因定位后移除。
+      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset，
+      // 区分重发发生在头部/中部/尾部。根因定位后移除。
       print('[diag] byte-chunk dataOffsets(${mcu.dataOffsets.length}): '
           '${mcu.dataOffsets}');
+      // [diag] 投递/emit 分叉：deliveredChunks 是 map 包装层实际投递到
+      // transport 订阅者的通知分片数；ackFramesSent 是 sendFrame 层
+      // emit 的 DATA ACK 帧数；ackStatuses 是 _emitDataAck 进入计数。
+      // 三者与重组结果（bitmap 停更点）交叉定位丢失环节。根因定位后
+      // 移除。
+      print('[diag] byte-chunk deliveredChunks=${mcu.deliveredChunks} '
+          'ackFramesSent=${mcu.sentFrames.where((f) => f.cmd == OtaBleCodec.rspAckData).length} '
+          'ackStatuses=${mcu.dataAckStatuses.length}');
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
@@ -529,13 +537,17 @@ void main() {
         expect(e.code, 'TIMEOUT');
       }
       // TIMEOUT 是当轮等待的失败，不是 MCU 数据丢失（RC3-02⑤）：全丢
-      // ACK 期间 fake 已把 4096B 真正提交 journal。协议允许的后续是
-      // 再 transfer 续传——MCU 仍 ACTIVE，新 BEGIN 幂等回 [4096, 0]
-      // （不重置 expected_seq，真值 :377-386），无段可发直接 END，
-      // 内容 SHA 跨轮连续即 OK。
+      // ACK 期间 fake 已把 4096B 真正提交 journal。协议允许的后续是新
+      // 连接再 transfer 续传——同一 transport 的 seq 连续计数会超前
+      // MCU expected_seq（同包 BEGIN 幂等不重置，真值 :377-386），无段
+      // 可发时 END 被超前的 seq 拒 ERR_SEQ，且 retries=0 无 resume 余量
+      // 重对齐；新连接的 transport seq 从头开始，BEGIN（无 seq 检查）
+      // 幂等回 [4096, 0]，END 落后 seq 幂等回当前进度 OK（真值
+      // :636-642），内容 SHA 跨轮连续即 OK。
       expect(mcu.stagedDurable, 4096);
       mcu.respondDataAck = true;
-      final ack2 = await transport.transfer(
+      final transport2 = OtaBleTransport(channel: mcu);
+      final ack2 = await transport2.transfer(
         package: package,
         packageSha256: shaOf(package),
         etuHeader: etuHeaderOf(package),
@@ -957,13 +969,21 @@ void main() {
       // 等待中）时即调 abortBestEffort——ABORT 与在途分片写交错，靠
       // 写串行化（_writeSerial）排在当前帧之后从帧边界发出。等
       // transfer 先退出再 ABORT 测不到这条交错路径。
-      await transport.abortBestEffort();
+      //
+      // await 顺序（Dart uncaught 语义）：cancel()→fail→completeError 的
+      // 错误级联在 abortBestEffort 首个 await 让出后的微任务中把 transfer
+      // future 变成 error 完成；此刻它若无 listener，zone 会立即上报
+      // uncaught async error，从 abortBestEffort 的 await 点压垮测试。
+      // 必须先同步发起 abort（cancel 立即生效），紧接着 await future
+      // 注册 listener，ABORT 写完成的收尾放错误断言之后。
+      final abortFuture = transport.abortBestEffort();
       try {
         await future;
         fail('应抛 CANCELLED');
       } on OtaTransportException catch (e) {
         expect(e.code, 'CANCELLED');
       }
+      await abortFuture;
       // 取消路径的尽力 ABORT：完整帧写出，MCU 重组缓冲无半帧残留
       // （若 ABORT 被吞成半帧 payload，abortFrames 将为空且 pending 非零）。
       expect(mcu.abortFrames, hasLength(1));
@@ -1490,13 +1510,20 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   _ChunkMode chunkMode = _ChunkMode.ble20;
   /// 每个写分片的固定延迟（RC3-07：慢写 + 小 MTU 压满 30s 总预算）。
   Duration writeChunkDelay = Duration.zero;
+  /// [diag] 通知投递计数（RC3-02）：map 包装层逐事件累加，区分
+  /// 「sendFrame 已 emit」与「事件真正投递到 transport 订阅者」。
+  int deliveredChunks = 0;
 
   /// 重组缓冲中尚未组成完整帧的字节数（RC3-05② 断言：取消/中止
   /// 边界处 MCU 不得停留在半帧状态）。
   int get pendingByteCount => _pending.length;
 
   @override
-  Stream<List<int>> get notifications => _notifyController.stream;
+  Stream<List<int>> get notifications =>
+      _notifyController.stream.map((chunk) {
+        deliveredChunks++;
+        return chunk;
+      });
 
   @override
   Future<int> maxWriteChunkSize() async => connected ? mtu - 3 : 0;
