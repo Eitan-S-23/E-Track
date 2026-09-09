@@ -413,7 +413,9 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertFalse(marker.exists())
 
     def test_workflow_is_development_only_and_covers_both_hosts(self):
-        text = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text()
+        # workflow 含中文注释，必须显式 UTF-8 读取（Windows 默认 GBK 解码失败）。
+        text = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(
+            encoding="utf-8")
         self.assertIn('branches:\n      - "dev/flutter/**"\n', text)
         self.assertNotIn("\n    paths:", text)
         self.assertIn("permissions:\n  contents: read\n", text)
@@ -421,6 +423,10 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertIn("fail-fast: false", text)
         self.assertIn("os: ubuntu-latest\n            shell: bash", text)
         self.assertIn("os: windows-2022\n            shell: cmd", text)
+        # steps.shell 不接受任何 context（GitHub 解析器拒绝 matrix）；
+        # matrix shell 必须经 job 级 defaults.run.shell 注入。
+        self.assertIn("defaults:\n      run:\n        shell: ${{ matrix.shell }}", text)
+        self.assertNotIn("steps:", text[:text.index("defaults:")])
         self.assertIn("timeout-minutes: 90", text)
         self.assertIn("options:\n          - all\n          - ota", text)
         self.assertIn("python -B Tools/flutter/dev_checks.py --repo-root .", text)

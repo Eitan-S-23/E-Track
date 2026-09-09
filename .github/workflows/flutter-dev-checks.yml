@@ -36,6 +36,11 @@ jobs:
             shell: cmd
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
+    # steps.shell 不允许任何 context（GitHub 解析器直接拒绝 matrix），
+    # job 级 defaults.run.shell 允许 matrix——shell 一律由这里注入。
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
     env:
       PYTHONDONTWRITEBYTECODE: "1"
       PYTHONUTF8: "1"
@@ -49,18 +54,15 @@ jobs:
 
       - name: Verify development runner
         timeout-minutes: 5
-        shell: ${{ matrix.shell }}
         working-directory: ${{ github.workspace }}
         run: python -B tests/ota/test_flutter_dev_checks.py
 
       - name: Verify debug APK helper
         timeout-minutes: 5
-        shell: ${{ matrix.shell }}
         working-directory: ${{ github.workspace }}
         run: python -B tests/ota/test_flutter_dev_apk.py
 
       - name: Analyze, test and optionally build a debug APK
-        shell: ${{ matrix.shell }}
         working-directory: ${{ github.workspace }}
         run: python -B Tools/flutter/dev_checks.py --repo-root .
 
