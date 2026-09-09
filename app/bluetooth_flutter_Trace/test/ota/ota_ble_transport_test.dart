@@ -297,6 +297,14 @@ void main() {
       print('[diag] byte-chunk deliveredChunks=${mcu.deliveredChunks} '
           'ackFramesSent=${mcu.sentFrames.where((f) => f.cmd == OtaBleCodec.rspAckData).length} '
           'ackStatuses=${mcu.dataAckStatuses.length}');
+      // [diag] 决定性对账（RC3-02 根因定位）：MCU 侧全部 emit 帧的
+      // cmd/session/seq/帧长序列 + 控制帧调用计数。验证「952 字节 = 哪些
+      // 帧构成」及 BEGIN/END 是否发生 roundTrip 超时重试（byte 模式投递
+      // 停摆的旁证）。根因定位后移除。
+      print('[diag] byte-chunk calls: begin=${mcu.beginCalls} '
+          'end=${mcu.endCalls} abort=${mcu.abortCalls}');
+      print('[diag] byte-chunk frames(${mcu.sentFrames.length}): '
+          '${mcu.sentFrames.map((f) => 'c${f.cmd.toRadixString(16)}/s${f.session}/q${f.seq}/${8 + f.payload.length + 2}B').join(',')}');
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
@@ -546,6 +554,10 @@ void main() {
       // :636-642），内容 SHA 跨轮连续即 OK。
       expect(mcu.stagedDurable, 4096);
       mcu.respondDataAck = true;
+      // 新连接语义：旧 transport 已因 TIMEOUT 结束但持有通知订阅，先
+      // dispose 释放（fake 已改 broadcast，不 dispose 会让两个 transport
+      // 同时消费同一 ACK 流，产生串台）。
+      await transport.dispose();
       final transport2 = OtaBleTransport(channel: mcu);
       final ack2 = await transport2.transfer(
         package: package,
@@ -1390,7 +1402,13 @@ void _writeU32(Uint8List p, int at, int v) {
 abstract class _FakeMcuHost implements OtaBleChannel {
   final writtenFrames = <Uint8List>[];
   final sentFrames = <OtaBleFrame>[];
-  final _notifyController = StreamController<List<int>>();
+  // broadcast（RC3-02 续传用例）：续传语义 = 新连接再 transfer，同一
+  // fake 需要支撑第二个 transport listen 同一通知流。单订阅流的
+  // stream.map() 包装二次 listen 抛 "Stream has already been listened
+  // to"；broadcast 每帧投递给当前全部订阅者，dispose 后的事件丢弃
+  // （本 fake 的所有 sendFrame 都由存活 transport 的 writeChunk 触发，
+  // 无「先 add 后 listen」依赖）。
+  final _notifyController = StreamController<List<int>>.broadcast();
   bool connected = true;
   int mtu = 247;
   final _pending = <int>[];
