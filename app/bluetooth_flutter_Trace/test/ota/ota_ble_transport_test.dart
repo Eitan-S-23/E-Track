@@ -40,8 +40,6 @@ int crc32Of(List<int> bytes) {
 }
 
 void main() {
-  const blockSize = OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize;
-
   /// 构造合法 ETU 头（64B，RC3-03）：字段布局对齐 MCU 真值
   /// ota_sd.c（偏移 enum + ota_sd_inspect_header）——magic "ETU1"、
   /// header_len=64、flags=0x000B（full）、algorithm=1、key=1、
@@ -985,7 +983,7 @@ void main() {
       expect(mcu.beginCalls, 3);
       expect(mcu.abortCalls, 1);
       // 幂等 BEGIN ACK 回 RAM 保留进度（ACTIVE 未 teardown，真值语义）。
-      expect(mcu.beginAckStates[1], [0, 0b11111]);
+      expect(mcu.beginAckStates[1], [0, 0x1F]);
       // ABORT teardown 清 RAM 后 resume 从整块开始（真值 memset receiver）；
       // END OK 依赖内容级流式摘要（fake 真值 oracle）：重发段全喂 +
       // 空前缀 == 整包 SHA（RC3-03）。

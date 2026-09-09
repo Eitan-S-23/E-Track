@@ -398,6 +398,18 @@ class OtaFirmwareDownload {
             onProgress?.call(localPartSize + received, asset.sizeBytes);
           }
           await sink.flush();
+        } catch (e) {
+          // RC3-11：Dio 5.9.0 的包装流 onCancel 不回传底层 source，
+          // Stream.timeout / Dio receiveTimer 都只退出本端等待——读流
+          // 异常（含停滞超时）时底层连接仍挂着。主动 cancel token 让
+          // Dio 层中止底层请求（真实 adapter abort 连接），再原样上抛
+          // 交上层按网络中断分类。token 幂等，与用户取消并发无副作用。
+          if (e is TimeoutException ||
+              (e is DioException &&
+                  e.type == DioExceptionType.receiveTimeout)) {
+            token.cancel();
+          }
+          rethrow;
         } finally {
           await sink.close();
           digestSink?.close();

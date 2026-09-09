@@ -5,7 +5,7 @@ import 'package:ble_monitor/config/share_links.dart';
 /// latest query 构造（OTA-XC-CLOUD-QUERY-MAPPING）：typed 全参数与校验。
 void main() {
   // RC3-01：String 乘法不是 const 可表达式，必须用 final。
-  final validSha = '0123456789abcdef' * 4;
+  const validSha = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
   group('ShareLinks.firmwareLatestQuery（正向）', () {
     test('全参数生成 10 个 query 项', () {

@@ -150,7 +150,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     if (_resolveAttempted) return;
     _resolveAttempted = true;
     try {
-      final devices = await FlutterBluePlus.connectedDevices;
+      final devices = FlutterBluePlus.connectedDevices;
       for (final device in devices) {
         if (device.isConnected) {
           if (mounted) {
@@ -314,7 +314,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           ),
           const SizedBox(height: 8),
           Text(
-            identityConfirmed && deviceInfo != null
+            identityConfirmed
                 ? '${deviceInfo.deviceModel} • 固件 vcode ${deviceInfo.currentVersionCode}'
                 : (widget.connectedDevice ?? _resolvedDevice)?.platformName ??
                     '连接码表后自动读取设备身份',

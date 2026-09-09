@@ -824,16 +824,17 @@ void main() {
 
     test('首块正文停滞：包装流空闲超时兜底，不无限挂起（RC3-11⑤）',
         () async {
-      // 响应头已到、首块后正文永不到——Dio 5.9.0 的接收空闲计时器
-      // 只在收到首个 data 事件后启动，裸 await for 会无限挂起且 Dio
-      // 超时不触发（修复前行为）。对包装流套 Stream.timeout 后必须
-      // 在 receiveIdleTimeout 内注入 TimeoutException 终止等待。测试
-      // 把 Dio receiveTimeout 压到 200ms、用例限 10s：修复缺失时表
-      // 现为用例超时挂起，而非安静通过。
+      // 响应头已到、首块正文永不到（stallAfterChunks: 0 → 首块前停滞，
+      // fake 不投递任何 data 事件）——Dio 5.9.0 的接收空闲计时器只在
+      // 收到首个 data 事件后启动，此时不触发；裸 await for 会无限挂起。
+      // 对包装流套 Stream.timeout 后必须在 receiveIdleTimeout 内注入
+      // TimeoutException 终止等待。修复缺失时表现为用例超时挂起而非
+      // 安静通过。首块前停滞使包装流空闲超时成为唯一超时来源，测试
+      // 不会因 Dio 内部 receiveTimer 先到而失去鉴别力。
       final bytes = assetBytes(4096);
       final dio = dioWithServer(bytes,
           behavior: const _MockBehavior(
-              bodyChunkSize: 1024, stallAfterChunks: 1));
+              bodyChunkSize: 1024, stallAfterChunks: 0));
       dio.options.receiveTimeout = const Duration(milliseconds: 200);
       try {
         await downloader(dio).download(
@@ -850,8 +851,8 @@ void main() {
           File('${tempDir.path}${Platform.pathSeparator}pkg.etu.part');
       expect(part.existsSync(), isTrue,
           reason: '停滞按网络中断处置，partial 保留供续传');
-      expect(await part.length(), 1024,
-          reason: '停滞前已收到的 1 片（1024B）须已落盘');
+      expect(await part.length(), 0,
+          reason: '首块前停滞，无字节落盘（openWrite 已创建文件）');
     }, timeout: const Timeout(Duration(seconds: 10)));
 
     test('Content-Digest 重复 sha-256 项：RESUME_PROTOCOL（RFC 9530 唯一项）',
@@ -962,25 +963,40 @@ class _MockAdapter implements HttpClientAdapter {
   int deliveredBytes = 0;
 
   /// 按 [chunkSize] 分片投递 body；片在 yield 前计入 [deliveredBytes]。
-  Stream<Uint8List> _bodyStream(Uint8List body) {
+  ///
+  /// - [cancelFuture] 是 Dio adapter 契约的一部分：真实
+  ///   IOHttpClientAdapter 在其触发时 abort 底层请求；mock 同样必须
+  ///   响应（置位后生成器停止投递），否则 cancel 语义在 fake 上失真
+  ///   （修复前无视 cancelFuture，drain 达界 cancel 后仍全量产出，
+  ///   deliveredBytes 观测不能反映有界性）。
+  /// - [stallAfterChunks] 在 yield **前**判定：0 表示首块前停滞
+  ///   （响应头已到、首个正文事件永不到——Dio receiveTimer 不启动，
+  ///   产品的包装流空闲超时是唯一超时来源）；N>0 表示投递 N 片后停滞。
+  Stream<Uint8List> _bodyStream(Uint8List body, Future<void>? cancelFuture) {
     final chunkSize = behavior.bodyChunkSize;
     if (chunkSize == null) {
       return Stream<Uint8List>.fromIterable([body]);
     }
     return () async* {
+      var cancelled = false;
+      if (cancelFuture != null) {
+        // ignore: unawaited_futures
+        cancelFuture.then((_) => cancelled = true);
+      }
       var emitted = 0;
       for (var i = 0; i < body.length; i += chunkSize) {
-        final chunk =
-            Uint8List.sublistView(body, i, math.min(i + chunkSize, body.length));
-        deliveredBytes += chunk.length;
-        yield chunk;
-        emitted++;
+        if (cancelled) return;
         final stallAt = behavior.stallAfterChunks;
         if (stallAt != null && emitted >= stallAt) {
           // 永不完成的等待：模拟服务器停止投递正文（连接保持但不
           // 出数据）。
           await Completer<void>().future;
         }
+        final chunk =
+            Uint8List.sublistView(body, i, math.min(i + chunkSize, body.length));
+        deliveredBytes += chunk.length;
+        yield chunk;
+        emitted++;
       }
     }();
   }
@@ -1022,7 +1038,7 @@ class _MockAdapter implements HttpClientAdapter {
       return ResponseBody.fromString('', 416);
     }
     final body = bytes.sublist(start);
-    final stream = _bodyStream(body);
+    final stream = _bodyStream(body, cancelFuture);
     final contentLength =
         behavior.contentLengthOverride ?? body.length;
     return ResponseBody(stream, status, headers: {

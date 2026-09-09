@@ -211,6 +211,12 @@ class OtaBleTransport {
         _session = beginAck.session;
         view.reset(beginAck.durableOff, beginAck.blockBitmap, total);
         var durableOff = beginAck.durableOff;
+        if (beginAck.durableOff > lastDurable) {
+          // resume 后 BEGIN 带回更大 durable（丢 ACK 期间 MCU 已提交）：
+          // 真实 staging 进展同样重置无进展预算窗口，否则刚获得恢复进展
+          // 的传输仍按旧截止时间被判超时（RC3-07）。
+          _noProgressClock?.reset();
+        }
         _notifyDurable(onDurableProgress, durableOff, total);
         needsResume = false;
         // ---- 块循环：块起点按字节换算（durableOff ~/ blockSize）----
@@ -809,10 +815,24 @@ class OtaBleTransport {
   /// 前序 DATA 的失败跳过（错误仍由各帧自身的 future 抛给调用方）。
   Future<void> _writeSerial = Future<void>.value();
 
+  /// 写通道废弃标志（RC3-05）：分片写超时意味着部分分片已落地 MCU，
+  /// 帧解析器悬空在半帧 payload 中——后续任何帧（含取消路径的 ABORT）
+  /// 的同步字都会被吞进悬空帧的 payload/CRC 位置，无法恢复同步。
+  /// MCU 真值（ota_ble_frame.c PAYLOAD 态按 len 吞全部字节，含 A5 5A）。
+  /// 此时唯一正确行为是停止一切出站帧，靠 MCU 30s 会话超时
+  /// （CONFIG_OTA_BLE_SESSION_TIMEOUT_MS）teardown；该状态不可恢复，
+  /// 重连后由新 transport 实例重建写通道。
+  bool _writeChannelPoisoned = false;
+
   Future<void> _writeFrameChecked(
     Uint8List frame, {
     required bool allowCancelled,
   }) {
+    if (_writeChannelPoisoned) {
+      throw const OtaTransportException(
+          '写通道已废弃：分片写超时后帧边界不可信，须重连重建',
+          code: 'WRITE_TIMEOUT');
+    }
     final task = _writeSerial
         .then((_) => _writeFrameLocked(frame, allowCancelled: allowCancelled));
     _writeSerial = task.catchError((_) {});
@@ -872,6 +892,11 @@ class OtaBleTransport {
         try {
           await pendingWrite.timeout(writeTimeout * 2);
         } catch (_) {} // 迟到错误不覆盖本帧超时语义
+        // 废弃写通道（RC3-05）：settle 结束时无论物理写是否落地，MCU
+        // 都悬空在半帧中；后续帧（含尽力 ABORT）会被吞进悬空帧的
+        // payload，无法恢复同步。停止一切出站帧，MCU 30s 会话超时
+        // teardown 兜底。abortBestEffort 对此路径的失败按尽力语义吞掉。
+        _writeChannelPoisoned = true;
         throw OtaTransportException(
             'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
             code: 'WRITE_TIMEOUT');
@@ -1100,12 +1125,18 @@ class _TransferAckView {
     segSendCounts.removeWhere((seg, _) => (blockBitmap >> seg) & 1 == 1);
   }
 
-  /// 首个非 OK ACK（畸形 ACK 以 status<0 表示）。
+  /// 首个非 OK ACK（畸形 ACK 以 status<0 表示）。消费语义（RC3-06）：
+  /// 读取即清除锁存。段循环头已处置（resume/terminal/抛出）的错误在
+  /// 块尾不得再次处置——否则同一错误双扣 resumeLeft，retries=1 时一次
+  /// 可恢复错误即被拒，默认 5 次预算也被两次一组消耗而非五次独立恢复。
   _AckError? takeError() {
     if (_malformed) {
+      _malformed = false;
       return const _AckError(-1, 0, 0);
     }
-    return _error;
+    final err = _error;
+    _error = null;
+    return err;
   }
 
   OtaAckResult result() => OtaAckResult(
@@ -1152,7 +1183,6 @@ class _AckError {
 /// 块循环对 ACK 错误的处置决定。
 class _AckErrorDecision {
   const _AckErrorDecision({this.resume = false, this.terminal});
-  const _AckErrorDecision.resume() : this(resume: true);
 
   final bool resume;
   final int? terminal;

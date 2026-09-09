@@ -7,7 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:path_provider/path_provider.dart';
 
 import '../config/share_links.dart';
@@ -945,7 +945,7 @@ class OtaService extends GetxController {
     if (!keepPackage && _firmwareFile != null && _ownerDone == null) {
       await _runExclusive<void>((_) async {
         final file = _firmwareFile;
-        if (file == null) return null;
+        if (file == null) return;
         try {
           if (await file.exists()) {
             await file.delete();
@@ -957,7 +957,6 @@ class OtaService extends GetxController {
           // 仍在，传输入口保持可用（下次清理重试）。
           cleanupFailure = '固件包清理失败: $e';
         }
-        return null;
       });
     }
     // 发布前防新 owner 竞态：等待期间若有新入口抢入（_ownerDone 重新

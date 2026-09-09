@@ -959,7 +959,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
     if (failure == null) return;
     if (failure is PlatformException &&
-        (failure as PlatformException).code == _unknownAppSourcesCode) {
+        failure.code == _unknownAppSourcesCode) {
       Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
       return;
     }
@@ -1062,7 +1062,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
     if (failure == null) return;
     if (failure is PlatformException &&
-        (failure as PlatformException).code == _unknownAppSourcesCode) {
+        failure.code == _unknownAppSourcesCode) {
       Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
       return;
     }
@@ -2018,19 +2018,6 @@ enum _ManifestSource {
   cloudflare,
   emergency,
   legacyGithubLatest,
-}
-
-extension _ManifestSourceLabel on _ManifestSource {
-  String get label {
-    switch (this) {
-      case _ManifestSource.cloudflare:
-        return '更新服务';
-      case _ManifestSource.emergency:
-        return '备用更新服务';
-      case _ManifestSource.legacyGithubLatest:
-        return '备用更新服务';
-    }
-  }
 }
 
 class _ManifestRequest {

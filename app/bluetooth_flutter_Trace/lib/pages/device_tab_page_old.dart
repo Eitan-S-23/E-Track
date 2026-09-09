@@ -253,11 +253,14 @@ class DeviceTabPage extends StatelessWidget {
                 ).animate(delay: 1200.ms).fadeIn(duration: 600.ms).scale(
                     begin: const Offset(0.8, 0.8), end: const Offset(1, 1)),
               ],
+                );
+              },
             ),
           ],
         ),
       );
     });
+  );
   }
 
   Widget _buildFeatureCard({
