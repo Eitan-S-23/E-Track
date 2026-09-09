@@ -983,15 +983,11 @@ class _MockAdapter implements HttpClientAdapter {
         // ignore: unawaited_futures
         cancelFuture.then((_) {
           cancelled = true;
-          // ignore: avoid_print
-          print('[diag] cancelFuture 置位: delivered=$deliveredBytes');
         });
       }
       var emitted = 0;
       for (var i = 0; i < body.length; i += chunkSize) {
         if (cancelled) {
-          // ignore: avoid_print
-          print('[diag] cancelled 命中: 片 ${(i / chunkSize).round() + 1}');
           return;
         }
         final stallAt = behavior.stallAfterChunks;
@@ -1003,12 +999,14 @@ class _MockAdapter implements HttpClientAdapter {
         final chunk =
             Uint8List.sublistView(body, i, math.min(i + chunkSize, body.length));
         deliveredBytes += chunk.length;
-        // ignore: avoid_print
-        print('[diag] 片投递: ${(i / chunkSize).round() + 1}/'
-            '${(body.length / chunkSize).ceil()}, '
-            'delivered=$deliveredBytes');
         yield chunk;
         emitted++;
+        // 真实 IO 的 chunk 之间存在时隙；本地内存流必须显式补上。
+        // async* 的 yield 在消费端未 pause 时同步继续（Dart 语义：仅
+        // paused 时挂起），连片 yield 不产生微任务边界——Dio pipe 全速
+        // 拉源头时 cancelFuture.then 的回调永远排不上，cancel 语义在
+        // fake 上失真（16 片一口气连发后才见置位，有界 drain 断言必红）。
+        await Future<void>.delayed(Duration.zero);
       }
     }();
   }

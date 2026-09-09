@@ -254,6 +254,10 @@ void main() {
       );
       expect(ack.isOk, isTrue);
       expect(mcu.maxInFlight, lessThanOrEqualTo(4));
+      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset，
+      // 区分重发发生在头部/中部/尾部。根因定位后移除。
+      print('[diag] credit dataOffsets(${mcu.dataOffsets.length}): '
+          '${mcu.dataOffsets}');
       // 窗口收紧不丢段：32 段全部送达。
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
@@ -281,6 +285,10 @@ void main() {
         etuHeader: etuHeaderOf(package),
       );
       expect(ack.isOk, isTrue);
+      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset。
+      // 根因定位后移除。
+      print('[diag] byte-chunk dataOffsets(${mcu.dataOffsets.length}): '
+          '${mcu.dataOffsets}');
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
@@ -472,14 +480,43 @@ void main() {
       }
     });
 
-    test('无 ACK：有界重发超限抛 TIMEOUT，journal 保留可续传（RC3-02⑤）',
-        () async {
+    test('全丢 ACK：DATA 照常提交，内部 ABORT+BEGIN 用 journal 恢复后 '
+        'END 合法成功（RC3-02⑤）', () async {
       final package = packageBytes(4096);
       final mcu = _McuSim()..respondDataAck = false;
       final transport = OtaBleTransport(
         channel: mcu,
         ackTimeout: const Duration(milliseconds: 60),
         retries: 2,
+      );
+      // respondDataAck=false 只丢应答，不阻止 DATA 提交：4096B 收满后
+      // 重发超限触发内部 ABORT teardown + BEGIN 重对齐；新 BEGIN 幂等
+      // 回 [4096, 0]（journal 全前缀重建 SHA），无段可发直接 END 成功。
+      // §6.14.3：不得为迁就 TIMEOUT 期望而声称该输入必然失败——合法
+      // 持久化恢复就是这个输入的正确结果。
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      expect(ack.durableOff, 4096);
+      // 重发确实发生（首发 32 段 + 2 轮窗口重发）。
+      expect(
+        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
+        greaterThanOrEqualTo(64),
+      );
+      expect(mcu.stagedDurable, 4096);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('无 ACK 且无 resume 余量（retries=0）：重发超限抛 TIMEOUT，'
+        'journal 保留可续传（RC3-02⑤）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()..respondDataAck = false;
+      final transport = OtaBleTransport(
+        channel: mcu,
+        ackTimeout: const Duration(milliseconds: 60),
+        retries: 0, // resumeLeft=0：重发超限不得再走 ABORT+BEGIN 恢复
       );
       try {
         await transport.transfer(
@@ -491,16 +528,11 @@ void main() {
       } on OtaTransportException catch (e) {
         expect(e.code, 'TIMEOUT');
       }
-      // 重发确实发生（首发 32 段 + 2 轮窗口重发）。
-      expect(
-        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
-        greaterThanOrEqualTo(64),
-      );
       // TIMEOUT 是当轮等待的失败，不是 MCU 数据丢失（RC3-02⑤）：全丢
       // ACK 期间 fake 已把 4096B 真正提交 journal。协议允许的后续是
-      // 再 transfer 续传——新 BEGIN 幂等回 [4096, 0]，无段可发直接
-      // END，内容 SHA 跨轮连续即 OK。用例不得为迁就 TIMEOUT 期望而
-      // 声称该输入必然失败。
+      // 再 transfer 续传——MCU 仍 ACTIVE，新 BEGIN 幂等回 [4096, 0]
+      // （不重置 expected_seq，真值 :377-386），无段可发直接 END，
+      // 内容 SHA 跨轮连续即 OK。
       expect(mcu.stagedDurable, 4096);
       mcu.respondDataAck = true;
       final ack2 = await transport.transfer(
@@ -1008,6 +1040,10 @@ void main() {
       );
       expect(ack.isOk, isTrue);
       expect(ack.durableOff, 4096);
+      // [diag] 时序根因排查（RC3-02）：接收顺序中的全部 DATA offset，
+      // 定位慢 ACK 场景下重发发生的窗口位置。根因定位后移除。
+      print('[diag] slow-ack dataOffsets(${mcu.dataOffsets.length}): '
+          '${mcu.dataOffsets}');
       expect(mcu.dataOffsets.length, 32);
     }, timeout: const Timeout(Duration(seconds: 60)));
 

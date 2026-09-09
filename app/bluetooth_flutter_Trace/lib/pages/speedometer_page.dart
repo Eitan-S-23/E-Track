@@ -765,7 +765,6 @@ class _MetricDetailData {
   final List<_MetricDetailRow> detailRows;
   final String footerLabel;
   final String footerValue;
-  final IconData? footerIcon;
   final Duration duration;
 
   static _MetricDetailData unavailable({
@@ -1431,10 +1430,6 @@ class _MetricDetailFooter extends StatelessWidget {
             ),
           ),
         ),
-        if (data.footerIcon != null) ...[
-          const SizedBox(width: 10),
-          Icon(data.footerIcon, color: Colors.white.withValues(alpha: 0.62), size: 20),
-        ],
       ],
     );
   }

@@ -259,8 +259,9 @@ class DeviceTabPage extends StatelessWidget {
           ],
         ),
       );
-    },
-  );
+        },
+      ),
+    );
   }
 
   Widget _buildFeatureCard({

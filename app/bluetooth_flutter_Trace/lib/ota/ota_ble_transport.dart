@@ -1153,9 +1153,17 @@ class _TransferAckView {
   Future<bool> waitForChange(Duration timeout) {
     final c = Completer<void>();
     _change = c;
-    return c.future
-        .then((_) => true)
-        .timeout(timeout, onTimeout: () => false);
+    return c.future.then((_) => true).timeout(timeout, onTimeout: () {
+      // 超时必须注销并收尾孤儿 completer：then 链已被 timeout 绕过，
+      // 留守的 c 会吃掉后续 [_signal]（transport 注册新等待者后等不到
+      // 已发生的 ACK，假性二次超时重发）；更严重的是 cancel/fail 对
+      // 孤儿 completeError 时错误无人消费，以 uncaught async error 从
+      // 无关的 await 点冒出（MTU=23 取消用例：abortBestEffort 的写
+      // await 点收走 CANCELLED，压垮测试的错误处理边界）。
+      if (_change == c) _change = null;
+      if (!c.isCompleted) c.complete();
+      return false;
+    });
   }
 
   void fail(Object e) {

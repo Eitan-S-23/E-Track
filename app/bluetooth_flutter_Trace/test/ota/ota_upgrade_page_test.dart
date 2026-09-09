@@ -70,6 +70,12 @@ void main() {
     _FakeOtaService? fake,
     BluetoothDevice? connectedDevice,
   }) async {
+    // 升级页按手机竖屏设计：默认 800x600 测试视口下「取消升级」「忽略」
+    // 等操作按钮位于视口外（hit test 落空、对话框不弹出）。统一放大
+    // 逻辑视口，保持 800 宽度不变以贴近现有断言的布局。
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
     Get.put<OtaService>(fake ?? _FakeOtaService());
     // GetMaterialApp（非 MaterialApp）：Get.dialog 依赖 Get.key 挂载，
     // 取消对话框交互用例（RC3-05①）需要可用的根导航。
