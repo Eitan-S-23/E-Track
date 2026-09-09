@@ -981,11 +981,19 @@ class _MockAdapter implements HttpClientAdapter {
       var cancelled = false;
       if (cancelFuture != null) {
         // ignore: unawaited_futures
-        cancelFuture.then((_) => cancelled = true);
+        cancelFuture.then((_) {
+          cancelled = true;
+          // ignore: avoid_print
+          print('[diag] cancelFuture 置位: delivered=$deliveredBytes');
+        });
       }
       var emitted = 0;
       for (var i = 0; i < body.length; i += chunkSize) {
-        if (cancelled) return;
+        if (cancelled) {
+          // ignore: avoid_print
+          print('[diag] cancelled 命中: 片 ${(i / chunkSize).round() + 1}');
+          return;
+        }
         final stallAt = behavior.stallAfterChunks;
         if (stallAt != null && emitted >= stallAt) {
           // 永不完成的等待：模拟服务器停止投递正文（连接保持但不
@@ -995,6 +1003,10 @@ class _MockAdapter implements HttpClientAdapter {
         final chunk =
             Uint8List.sublistView(body, i, math.min(i + chunkSize, body.length));
         deliveredBytes += chunk.length;
+        // ignore: avoid_print
+        print('[diag] 片投递: ${(i / chunkSize).round() + 1}/'
+            '${(body.length / chunkSize).ceil()}, '
+            'delivered=$deliveredBytes');
         yield chunk;
         emitted++;
       }

@@ -743,9 +743,7 @@ class _MetricDetailData {
     required this.distributionTitle,
     required this.footerLabel,
     required this.footerValue,
-    this.zones = const [],
     this.detailRows = const [],
-    this.footerIcon,
     this.duration = Duration.zero,
   });
 
@@ -763,7 +761,7 @@ class _MetricDetailData {
   final List<double> chartTicks;
   final List<double> chartValues;
   final String distributionTitle;
-  final List<_MetricZoneRow> zones;
+  final List<_MetricZoneRow> zones = const [];
   final List<_MetricDetailRow> detailRows;
   final String footerLabel;
   final String footerValue;
@@ -5605,15 +5603,10 @@ class _RouteFabButton extends StatelessWidget {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : AnimatedRotation(
-                    turns: turn,
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: size * 0.44,
-                    ),
+                : Icon(
+                    icon,
+                    color: Colors.white,
+                    size: size * 0.44,
                   ),
           ),
         ),

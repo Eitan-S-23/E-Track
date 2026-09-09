@@ -873,6 +873,7 @@ class _UpgradeFakeBle extends BluetoothService {
 
   @override
   void onInit() {
+    super.onInit();
     // 空实现：阻止真实 initBluetooth（平台通道在测试宿主不可用）。
   }
 

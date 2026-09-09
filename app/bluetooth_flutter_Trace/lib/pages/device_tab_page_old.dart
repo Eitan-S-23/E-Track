@@ -259,7 +259,7 @@ class DeviceTabPage extends StatelessWidget {
           ],
         ),
       );
-    });
+    },
   );
   }
 

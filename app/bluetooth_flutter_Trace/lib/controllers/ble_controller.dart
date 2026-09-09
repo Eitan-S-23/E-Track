@@ -75,9 +75,9 @@ class BleController extends GetxController {
       // 获取当前状态
       adapterState.value = _bluetoothService.adapterState.value;
       isScanning.value = _bluetoothService.isScanning.value;
-      discoveredDevices.value = _bluetoothService.discoveredDevices.value;
-      connectedDevices.value = _bluetoothService.connectedDevices.value;
-      scanResults.value = _bluetoothService.scanResults.value;
+      discoveredDevices.assignAll(_bluetoothService.discoveredDevices);
+      connectedDevices.assignAll(_bluetoothService.connectedDevices);
+      scanResults.assignAll(_bluetoothService.scanResults);
 
       debugPrint('蓝牙控制器初始化成功，平台: ${_bluetoothService.getPlatformInfo()}');
     } catch (e) {

@@ -560,7 +560,7 @@ class SelectedDevice {
   /// 获取有数据的天数
   int get daysWithData {
     return _dailyConsumptionArray
-        .where((value) => value != null && value! > 0)
+        .where((value) => value != null && value > 0)
         .length;
   }
 

@@ -45,16 +45,21 @@ class OtaBleTransport {
         retries = retries,
         noProgressTimeout = noProgressTimeout,
         writeTimeout = writeTimeout {
-    // 通知流是单订阅 async* 源：必须一次订阅、由等待者队列分帧。
-    // 不能用 asBroadcastStream——零监听会取消源订阅，二次 listen 即失败。
-    _frameSub = _framesFromChannel(channel).listen(
-      _dispatchFrame,
+    // 通知流订阅必须在构造内同步建立：async* 生成器的初始运行被延迟到
+    // 微任务，此前「写入回调里同步回投的 ACK」在 broadcast 通知源上
+    // 因无监听者被整帧丢弃（真实 BLE 通知流即 broadcast 语义）。显式
+    // 订阅在构造返回前生效，零竞态；同时避免 async* 取消协议在
+    // 「生成器尚未启动即 dispose」时 cancel 永不完成的挂死。
+    _frameSub = channel.notifications.listen(
+      _onNotifyChunk,
       onError: _dispatchError,
     );
   }
 
   final OtaBleChannel _channel;
-  late final StreamSubscription<OtaBleFrame> _frameSub;
+  late final StreamSubscription<List<int>> _frameSub;
+  /// 通知字节流的跨 chunk 重组缓冲（半帧回存，PR03）。
+  final BytesBuilder _frameBuffer = BytesBuilder();
 
   /// 单次 ACK 等待超时。冻结推导规则为 clamp(3*P99_ACK, 500ms, 2000ms)
   /// （OTA-XC-RETRY-POLICY；P99 由 P3-4 实测产出前默认取上限 2000ms，
@@ -908,39 +913,38 @@ class OtaBleTransport {
     }
   }
 
-  static Stream<OtaBleFrame> _framesFromChannel(OtaBleChannel channel) async* {
-    final buffer = BytesBuilder();
-    await for (final notifyChunk in channel.notifications) {
-      buffer.add(notifyChunk);
-      final bytes = Uint8List.fromList(buffer.takeBytes());
-      // 通知可能一次带多帧或半帧；循环解析完整帧。
-      var offset = 0;
-      while (offset + OtaBleCodec.frameHeaderSize + OtaBleCodec.frameCrcSize <=
-          bytes.length) {
-        if (bytes[offset] != OtaBleCodec.frameSync0 ||
-            bytes[offset + 1] != OtaBleCodec.frameSync1) {
-          // 丢失同步：丢弃直到下一个同步字（容错，不 crash）。
-          offset += 1;
-          continue;
-        }
-        final len = bytes[offset + 6] | (bytes[offset + 7] << 8);
-        final frameEnd = offset +
-            OtaBleCodec.frameHeaderSize +
-            len +
-            OtaBleCodec.frameCrcSize;
-        if (frameEnd > bytes.length) break; // 半帧，继续收
-        try {
-          yield OtaBleCodec.decodeFrame(
-              bytes.sublist(offset, frameEnd));
-        } on FormatException {
-          // 坏帧：跳过（不终止整个流；上层按超时/重试处理）。
-        }
-        offset = frameEnd;
+  /// 通知分片处理：跨 chunk 帧重组（一次通知可能带多帧或半帧），
+  /// 完整帧同步分发。替代原 async* 生成器——订阅在构造内同步建立
+  /// （见构造函数注释），ACK 不因订阅竞态丢失。
+  void _onNotifyChunk(List<int> notifyChunk) {
+    _frameBuffer.add(notifyChunk);
+    final bytes = Uint8List.fromList(_frameBuffer.takeBytes());
+    // 通知可能一次带多帧或半帧；循环解析完整帧。
+    var offset = 0;
+    while (offset + OtaBleCodec.frameHeaderSize + OtaBleCodec.frameCrcSize <=
+        bytes.length) {
+      if (bytes[offset] != OtaBleCodec.frameSync0 ||
+          bytes[offset + 1] != OtaBleCodec.frameSync1) {
+        // 丢失同步：丢弃直到下一个同步字（容错，不 crash）。
+        offset += 1;
+        continue;
       }
-      // 半帧必须无条件回存（PR03）：offset < bytes.length 即有未消费尾部。
-      if (offset < bytes.length) {
-        buffer.add(bytes.sublist(offset));
+      final len = bytes[offset + 6] | (bytes[offset + 7] << 8);
+      final frameEnd = offset +
+          OtaBleCodec.frameHeaderSize +
+          len +
+          OtaBleCodec.frameCrcSize;
+      if (frameEnd > bytes.length) break; // 半帧，继续收
+      try {
+        _dispatchFrame(OtaBleCodec.decodeFrame(bytes.sublist(offset, frameEnd)));
+      } on FormatException {
+        // 坏帧：跳过（不终止整个流；上层按超时/重试处理）。
       }
+      offset = frameEnd;
+    }
+    // 半帧必须无条件回存（PR03）：offset < bytes.length 即有未消费尾部。
+    if (offset < bytes.length) {
+      _frameBuffer.add(bytes.sublist(offset));
     }
   }
 
