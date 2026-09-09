@@ -957,7 +957,13 @@ void main() {
         // 全部 BEGIN 重试轮次。
         expect(e.code, 'NO_DURABLE_PROGRESS');
       }
-      expect(mcu.beginCalls, 2);
+      // 断言意图是「预算优先于跑满重试（默认 5 次）」，不是精确 2 次：
+      // 200ms+100ms 恰好压在 300ms 预算边界上，BEGIN#2 的超时唤醒与
+      // 预算时钟读数之间存在调度间隙（CI 负载下毫秒级），间隙大于
+      // 写帧耗耗时第 3 次 BEGIN 会在耗尽前一刻被放行、随后立即
+      // NO_DURABLE_PROGRESS 终止（Ubuntu/Windows 实测 2 或 3 皆合法）。
+      expect(mcu.beginCalls, lessThanOrEqualTo(3));
+      expect(mcu.beginCalls, lessThan(5));
     }, timeout: const Timeout(Duration(seconds: 60)));
 
     test('MTU=23 下取消：在途 DATA 写完后 ABORT 从帧边界发出，无半帧残留'

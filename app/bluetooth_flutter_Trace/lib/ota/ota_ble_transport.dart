@@ -269,6 +269,13 @@ class OtaBleTransport {
             for (var seg = 0; seg < segsInBlock; seg++) {
               _checkNoProgress();
               await _waitIfPaused(); // 后台暂停挂起（RC3-08）
+              // 块完成即停（RC3-02⑥）：段间 await 让出期间，块提交 ACK
+              // （advanced）可把 durable 推到块尾并清空 inFlight、bitmap
+              // 被 MCU 提交后的 0 覆盖——循环恢复后若不检查会按
+              // 「无置位/无在途」对已完成块从头重发（新 seq），重发段的
+              // 幂等 ACK（bitmap 不含段）再触发写入确认判定 ERR_STATE，
+              // 引发无谓的 ABORT+BEGIN resume。
+              if (view.durableOff >= blockEnd) break;
               if (view.inFlightCount >= effectiveWindow) break;
               if ((view.blockBitmap >> seg) & 1 == 1) continue; // 已收段幂等跳过
               if (view.isSegmentInFlight(seg)) continue; // 在途未确认
@@ -299,6 +306,11 @@ class OtaBleTransport {
             for (final entry in pending.entries) {
               _checkNoProgress();
               await _waitIfPaused(); // 后台暂停挂起（RC3-08）
+              // 块完成即停（RC3-02⑥）：重发段间让出期间块提交 ACK 可能
+              // 已把 durable 推到块尾——此时重发只会得到幂等 ACK 并触发
+              // 写入确认判定 ERR_STATE（RC3-08 判定对「未写 staging 的
+              // 幂等 ACK」fail closed 是对的，但本场景的重发本身不该发生）。
+              if (view.durableOff >= blockEnd) break;
               final seg = entry.value;
               if ((view.blockBitmap >> seg) & 1 == 1) continue;
               view.trackSend(entry.key, seg); // 累计发送计数 +1
