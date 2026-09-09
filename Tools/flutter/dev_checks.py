@@ -329,17 +329,37 @@ def semantic_state(identity):
     return (identity["head"], tuple(identity["dirty_semantic"]))
 
 
-# Flutter 工具链在 pub get 时自动改写的文件：新版工具会升级
-# analysis_options.yaml（追加 exclude build/平台目录）并按当前 SDK
-# 模板再生 Windows 插件注册三件套。它们不是被测源码：依赖输入由
-# lockfile_unchanged 哈希单独守门，插件注册内容是 lockfile 的确定性
-# 产物。APK 构建前恢复提交字节，保证构建输入与被测提交完全一致。
+# Flutter 工具链自动改写的文件：pub get 会升级 analysis_options.yaml
+# （追加 exclude build/平台目录）并按当前 stable SDK 模板再生 Windows
+# 插件注册三件套；flutter build 会 "Upgrading gradle.properties"。
+# 它们不是被测源码：依赖输入由 lockfile_unchanged 哈希单独守门，插件
+# 注册内容是 lockfile 的确定性产物。APK 构建前后恢复提交字节，保证
+# 构建输入与被测提交完全一致。
 TOOLCHAIN_REGENERATED = frozenset((
     "app/bluetooth_flutter_Trace/analysis_options.yaml",
     "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
     "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
     "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+    "app/bluetooth_flutter_Trace/android/gradle.properties",
 ))
+
+
+def restore_toolchain_regen(root, dirty_semantic):
+    """语义脏仅限工具链再生白名单时，恢复这些文件的提交字节。
+
+    调用方须先确认起点 clean 且 head 未变（不触碰用户起点改动），
+    恢复后需重新 identify。返回是否执行了恢复。
+    """
+    if not dirty_semantic or not all(
+            path in TOOLCHAIN_REGENERATED for path in dirty_semantic):
+        return False
+    subprocess.run(
+        ["git", "--no-optional-locks", "-C", str(root),
+         "checkout", "--", *dirty_semantic],
+        cwd=root, capture_output=True, text=True, encoding="utf-8",
+        errors="replace", check=True, timeout=15,
+    )
+    return True
 
 
 def command_plan(root, run_dir, scope, *, build_apk=False, env=None):
@@ -445,21 +465,12 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
             elif source["head"] != os.environ.get("GITHUB_SHA"):
                 blocked = "APK generation requires the tested commit to match GITHUB_SHA"
             else:
-                # 工具链改写恢复（三重条件：起点干净 + 差异仅限工具链
-                # 再生白名单 + head 未变）：只恢复本轮内 flutter 自动改写
-                # 的生成文件，不触碰起点已有的任何用户改动。
+                # 工具链改写恢复（三重条件：起点干净 + head 未变 + 语义脏
+                # 仅限再生白名单）：只恢复本轮内 flutter 自动改写的文件，
+                # 不触碰起点已有的任何用户改动。
                 current = identify(root)
                 if (source["clean"] and current["head"] == source["head"]
-                        and current["dirty_semantic"]
-                        and all(path in TOOLCHAIN_REGENERATED
-                                for path in current["dirty_semantic"])):
-                    subprocess.run(
-                        ["git", "--no-optional-locks", "-C", str(root),
-                         "checkout", "--", *current["dirty_semantic"]],
-                        cwd=root, capture_output=True, text=True,
-                        encoding="utf-8", errors="replace", check=True,
-                        timeout=15,
-                    )
+                        and restore_toolchain_regen(root, current["dirty_semantic"])):
                     current = identify(root)
                 if semantic_state(current) != semantic_state(source):
                     blocked = ("APK generation requires the unchanged, "
@@ -484,6 +495,14 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
     report["lock_sha256_after"] = file_hash(lockfile)
     report["lockfile_unchanged"] = report["lock_sha256_after"] == lock_before
     report["source_after"] = identify(root)
+    # APK 构建期间 flutter 工具会再次再生白名单文件（"Upgrading
+    # gradle.properties" 等）：APK 已用提交字节构建完成，恢复后重取；
+    # 恢复前的原始状态保留为 source_after_pre_restore 供审计。
+    if (source["clean"] and report["source_after"]["head"] == source["head"]
+            and restore_toolchain_regen(root,
+                                        report["source_after"]["dirty_semantic"])):
+        report["source_after_pre_restore"] = report["source_after"]
+        report["source_after"] = identify(root)
     report["source_unchanged"] = (
         semantic_state(report["source_after"]) == semantic_state(source))
     passed = report["lockfile_unchanged"] and all(

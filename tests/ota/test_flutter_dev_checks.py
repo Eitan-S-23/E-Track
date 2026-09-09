@@ -586,6 +586,34 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             checkouts[0][checkouts[0].index("checkout") + 2:])
         self.assertIn("apk_build", calls)
 
+    def test_apk_restores_toolchain_regen_files_after_build(self):
+        self.apk_inputs()
+        # 依次：起点干净 → 门禁干净 → 构建后仅白名单脏 → 恢复后干净。
+        regen = {"head": "1" * 40, "clean": False,
+                 "status": "M app/bluetooth_flutter_Trace/android/gradle.properties",
+                 "dirty_semantic": [
+                     "app/bluetooth_flutter_Trace/android/gradle.properties"],
+                 "dirty_eol_only": []}
+        clean = {"head": "1" * 40, "clean": True, "status": "",
+                 "dirty_semantic": [], "dirty_eol_only": []}
+        states = iter([clean, clean, dict(regen), dict(clean)])
+        checkouts, patched = self._capture_git_checkout()
+        with mock.patch.object(sys, "platform", "linux"), patched:
+            code, report, calls, _ = self.fixture_run(
+                build_apk=True, identify=lambda root: next(states))
+        self.assertEqual(0, code)
+        self.assertEqual("PASS", report["apk_result"])
+        self.assertTrue(report["source_unchanged"])
+        self.assertEqual(1, len(checkouts))
+        self.assertEqual(
+            ["app/bluetooth_flutter_Trace/android/gradle.properties"],
+            checkouts[0][checkouts[0].index("checkout") + 2:])
+        # 恢复前的构建期改写保留为审计快照
+        self.assertEqual(
+            ["app/bluetooth_flutter_Trace/android/gradle.properties"],
+            report["source_after_pre_restore"]["dirty_semantic"])
+        self.assertIn("apk_collect", calls)
+
     def test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist(self):
         self.apk_inputs()
         dirty = {"head": "1" * 40, "clean": False, "status": "M lib/main.dart",
