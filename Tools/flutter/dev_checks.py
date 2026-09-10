@@ -428,41 +428,61 @@ def bind_toolchain_regen(root, identity, stage):
     再次写入迁移开关）。这里在恢复之前把每个白名单文件的提交侧内容、实际
     生效内容与统一 diff 记录下来，让"生效输入到底是什么"可被复核，而不是
     用文件名白名单把任意改写一笔带过（RC3-02）。
+
+    收集失败一律炸开，不产生字段为 null 的"已绑定"记录：`git show`/
+    `git diff` 非零退出、白名单路径在检出中不是普通文件，都意味着生效字节
+    无法证明。此时记录 null 会让豁免判据把"没有证据"读成"证据齐全"，这正是
+    RC3-02 的 fail open 形态。
     """
     bound = []
     for path in identity["dirty_semantic"]:
         if path not in TOOLCHAIN_REGENERATED:
             continue
+        file = root / path
+        if not file.is_file():
+            raise ValueError(
+                f"Toolchain-regenerated input is not a regular file: {path}")
         committed = subprocess.run(
             ["git", "--no-optional-locks", "-C", str(root), "show",
              f"HEAD:{path}"],
             cwd=root, capture_output=True, timeout=15,
         )
-        effective = (root / path).read_bytes() if (root / path).is_file() else b""
+        if committed.returncode != 0:
+            raise ValueError(
+                f"git show failed for toolchain-regenerated input: {path}")
+        effective = file.read_bytes()
         diff = subprocess.run(
             ["git", "--no-optional-locks", "-C", str(root), "diff",
              "--no-color", "HEAD", "--", path],
             cwd=root, capture_output=True, text=True, encoding="utf-8",
             errors="replace", timeout=15,
         )
+        if diff.returncode != 0:
+            raise ValueError(
+                f"git diff failed for toolchain-regenerated input: {path}")
         bound.append({
             "stage": stage,
             "path": path,
-            "committed_sha256": (hashlib.sha256(committed.stdout).hexdigest()
-                                 if committed.returncode == 0 else None),
+            "committed_sha256": hashlib.sha256(committed.stdout).hexdigest(),
             "effective_sha256": hashlib.sha256(effective).hexdigest(),
             "effective_bytes": len(effective),
-            "diff": diff.stdout if diff.returncode == 0 else None,
+            # 本阶段识别出的工作树指纹（worktree_fingerprints 的 blob 记录）：
+            # 豁免判据据此证明这条证据描述的正是被判定状态里的那份输入，
+            # 而不是同一路径的另一份字节或其他阶段的残留记录。
+            "effective_blob": identity["dirty_semantic_sha"][path],
+            "diff": diff.stdout,
         })
     return bound
 
 
-def deltas_are_bound_toolchain_regen(source, current, bound):
+def deltas_are_bound_toolchain_regen(source, current, bound, stage):
     """语义漂移是否全部落在已绑定证据的工具链再生文件上。
 
-    条件有三：起点未脏、head 未变、每个新增/变化的语义脏路径都在白名单内
-    且已被 bind_toolchain_regen 记录。任何一条不满足即不成立——白名单本身
-    不构成"输入没变"的结论。
+    条件有四：起点未脏、head 未变、每个新增/变化的语义脏路径都在白名单内，
+    且该路径存在一条属于 [stage]、字段完整、并与 [current] 观测一致的绑定
+    证据（committed_sha256 与 diff 非空，effective_blob 等于该状态下的工作树
+    指纹）。任何一条不满足即不成立——白名单本身不构成"输入没变"的结论，
+    字段残缺或来自其他阶段的收集残骸同样不构成证据（RC3-02）。
     """
     if not source["clean"] or current["head"] != source["head"]:
         return False
@@ -470,9 +490,18 @@ def deltas_are_bound_toolchain_regen(source, current, bound):
                - set(semantic_state(source)[1])}
     if not drifted:
         return False
-    recorded = {item["path"] for item in bound}
-    return all(path in TOOLCHAIN_REGENERATED and path in recorded
-               for path in drifted)
+    prints = current["dirty_semantic_sha"]
+    evidence = {item.get("path"): item for item in bound
+                if item.get("stage") == stage}
+    for path in drifted:
+        item = evidence.get(path)
+        if path not in TOOLCHAIN_REGENERATED or item is None:
+            return False
+        if not item.get("committed_sha256") or not item.get("diff"):
+            return False
+        if item.get("effective_blob") != prints.get(path):
+            return False
+    return True
 
 
 def restore_toolchain_regen(root, dirty_semantic):
@@ -649,7 +678,8 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
         semantic_state(report["source_after"]) == semantic_state(source))
     report["source_deltas_bound_toolchain_regen"] = (
         deltas_are_bound_toolchain_regen(
-            source, report["source_after"], report["toolchain_regen"]))
+            source, report["source_after"], report["toolchain_regen"],
+            "after_run"))
     if (source["clean"] and report["source_after"]["head"] == source["head"]
             and restore_toolchain_regen(root,
                                         report["source_after"]["dirty_semantic"])):

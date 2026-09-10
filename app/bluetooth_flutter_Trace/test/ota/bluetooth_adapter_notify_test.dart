@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart' show BluetoothAdapterState;
+import 'package:flutter_blue_plus/flutter_blue_plus.dart'
+    show BluetoothAdapterState, BluetoothDevice;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:win_ble/win_ble.dart' as win_ble;
 
@@ -26,6 +27,13 @@ class _FakeNotifyAdapter implements BluetoothAdapter {
   List<String> lastStreamArgs = const [];
   Object? subscribeError;
 
+  /// 平台订阅的完成闸门（RC3-08⑦）：非 null 且未完成时，
+  /// [subscribeToCharacteristic] 在返回前挂起，[subscribeEntered] 在
+  /// 首次调用进入时完成。用于构造「先发起的订阅后完成」——完成顺序与
+  /// 发起顺序相反的真实交错。
+  Completer<void>? subscribeGate;
+  final Completer<void> subscribeEntered = Completer<void>();
+
   /// 平台侧 CCCD 当前是否开启（RC3-08⑦）。
   ///
   /// 真实协议栈里 CCCD 是按特征共享的单一开关：关掉后该特征上的通知
@@ -47,6 +55,14 @@ class _FakeNotifyAdapter implements BluetoothAdapter {
   /// OTA 写入调用记录：[地址, 服务, 特征, 数据, writeWithResponse]。
   final writes = <List<dynamic>>[];
 
+  /// 平台断开调用次数与闸门（RC3-08⑦）：非 null 且未完成时，
+  /// [disconnect] 在返回前挂起，[disconnectEntered] 在调用进入时完成。
+  /// 用于把旧 disconnectOtaDeviceByAddress 停在平台返回之前，构造
+  /// 「等待期间链路已被新连接/操作重建」的迟到完成交错。
+  int disconnectCalls = 0;
+  Completer<void>? disconnectGate;
+  final Completer<void> disconnectEntered = Completer<void>();
+
   @override
   bool get supportsCharacteristicValueStream => true;
 
@@ -64,6 +80,11 @@ class _FakeNotifyAdapter implements BluetoothAdapter {
     lastSubscribeArgs = [deviceAddress, serviceId, characteristicId];
     final error = subscribeError;
     if (error != null) throw error;
+    final gate = subscribeGate;
+    if (gate != null && !gate.isCompleted) {
+      if (!subscribeEntered.isCompleted) subscribeEntered.complete();
+      await gate.future;
+    }
     notifyEnabled = true;
   }
 
@@ -98,7 +119,14 @@ class _FakeNotifyAdapter implements BluetoothAdapter {
   Future<void> connect(String deviceAddress) async {}
 
   @override
-  Future<void> disconnect(String deviceAddress) async {}
+  Future<void> disconnect(String deviceAddress) async {
+    disconnectCalls++;
+    final gate = disconnectGate;
+    if (gate != null && !gate.isCompleted) {
+      if (!disconnectEntered.isCompleted) disconnectEntered.complete();
+      await gate.future;
+    }
+  }
 
   @override
   Future<List<dynamic>> getConnectedDevices() async => [];
@@ -487,6 +515,45 @@ void main() {
       expect(fake.notifyEnabled, isFalse);
     });
 
+    test('发起顺序决定所有权：先发起、后完成的旧订阅不得接管新 owner（RC3-08⑦）',
+        () async {
+      // 与上例相反的交错：旧订阅**先发起**（平台订阅在途挂起），新订阅
+      // 后发起并先就绪，随后旧订阅的平台调用才返回。若所有权在平台订阅
+      // 返回后才分配，旧探测会拿到最新令牌，把已经活着的新 owner 顶掉；
+      // 它被放弃时再关掉共享 CCCD，新 transport 就会收不到任何通知。
+      fake.subscribeGate = Completer<void>();
+      final staleFuture =
+          service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
+      // 平台订阅确实进入了（而非被跳过）：否则本用例会退化成
+      // 「两边都返回 null」的假绿。
+      await fake.subscribeEntered.future.timeout(const Duration(seconds: 5));
+
+      final freshFuture =
+          service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
+
+      // 旧订阅先发起、后完成。
+      fake.subscribeGate!.complete();
+      final stale = await staleFuture;
+      final fresh = await freshFuture;
+
+      expect(fake.subscribeCalls, 2, reason: '两次都真正调用了平台订阅');
+      expect(stale, isNull,
+          reason: '平台订阅已返回但令牌已易主：旧探测必须放弃，不得建立监听');
+      expect(fresh, isNotNull, reason: '后发起者是当前 owner，订阅照常成立');
+
+      final freshReceived = <List<int>>[];
+      final freshSub = fresh!.listen(freshReceived.add);
+      emit(fake, [0x22]);
+      await _flush();
+      expect(freshReceived, [
+        [0x22]
+      ], reason: 'CCCD 仍由新 owner 持有，通知必须可达');
+
+      await freshSub.cancel();
+      expect(fake.unsubscribeCalls, 1);
+      expect(fake.notifyEnabled, isFalse);
+    });
+
     test('所有权转移后再重订：owner 归属跟随最新一次订阅', () async {
       final first = await service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
       final firstSub = first!.listen((_) {});
@@ -509,5 +576,38 @@ void main() {
       expect(fake.unsubscribeCalls, 2);
       expect(fake.notifyEnabled, isFalse);
     });
+  });
+
+  // Windows 专属：disconnectOtaDeviceByAddress 的 Windows 分支经
+  // [BluetoothAdapter.disconnect]（可注入替身）走平台，才能把断开停在
+  // 平台返回之前；非 Windows 分支直接调 flutter_blue_plus 设备对象，
+  // 无法在单测里构造该交错。
+  group('晚到的断开完成不得拆掉新链路资源（RC3-08⑦）',
+      skip: !Platform.isWindows ? 'Windows 平台断开分支，由 Windows CI 执行' : false, () {
+    test('断开在途期间代次已前进：迟到完成不清新链路设备、不重复前进代次',
+        () async {
+      // 旧断开发起，平台 disconnect 在途挂起。
+      fake.disconnectGate = Completer<void>();
+      final staleDisconnect = service.disconnectOtaDeviceByAddress(_addr);
+      await fake.disconnectEntered.future.timeout(const Duration(seconds: 5));
+
+      // 等待期间同地址链路已被重建：代次前进，新连接的设备已登记。
+      // 第二次断开走同一公开入口（未被闸门拦住）代表这次链路迁移。
+      await service.disconnectOtaDeviceByAddress(_addr);
+      final freshDevice = BluetoothDevice.fromId(_addr);
+      service.connectedDevices.add(freshDevice);
+      final generationAfterRebuild = service.otaLinkGeneration(_addr);
+      expect(generationAfterRebuild, 1, reason: '链路迁移已推进一代');
+
+      // 迟到的旧断开完成。
+      fake.disconnectGate!.complete();
+      await staleDisconnect;
+
+      expect(fake.disconnectCalls, 2, reason: '两次断开都真正调用了平台');
+      expect(service.otaLinkGeneration(_addr), generationAfterRebuild,
+          reason: '代次已被并发操作推进时不得重复前进');
+      expect(service.connectedDevices.contains(freshDevice), isTrue,
+          reason: '迟到完成不得清掉新链路刚登记的同地址设备');
+    }, timeout: const Timeout(Duration(seconds: 30)));
   });
 }

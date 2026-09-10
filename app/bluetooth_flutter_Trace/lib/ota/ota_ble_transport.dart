@@ -18,6 +18,16 @@ abstract class OtaBleChannel {
 
   /// 连接是否可用（fake 用于模拟断连）。
   bool get isConnected;
+
+  /// 本通道所依附的**物理链路身份**（RC3-05⑤）。
+  ///
+  /// 同一条真实连接上的所有 wrapper 必须返回同一个对象；真实重连
+  /// （新物理连接）必须返回新对象。传输层用它界定写通道废弃标记的
+  /// 作用域：包装对象可以按需重建，物理链路上的悬挂半帧不会因此消失，
+  /// 只有真实重连才让 MCU 帧解析器回到同步态。
+  ///
+  /// 返回 null 表示无法区分，此时退化按通道对象自身隔离。
+  Object? get linkIdentity;
 }
 
 /// OTA BLE 传输 owner（冻结依据 docs/ota-binary-contracts.md §5、§4.5，
@@ -851,20 +861,28 @@ class OtaBleTransport {
   /// 此时唯一正确行为是停止一切出站帧，靠 MCU 30s 会话超时
   /// （CONFIG_OTA_BLE_SESSION_TIMEOUT_MS）teardown。
   ///
-  /// 作用域是**物理写通道对象**而非 transport 实例：`Future.timeout` 不取消
-  /// 底层 writeChunk，迟到分片仍会落地；有界 settle 只保证「本帧不与自己的
-  /// 迟到分片交错」，不等于物理写已被取消。若只标记实例，上层在同一连接上
-  /// 重建 transport 即可继续写，新帧与旧连接的迟到半帧交错，MCU 同样无法
-  /// 恢复同步。真实重连由 OtaService 每次 bind 新建 `_ChannelAdapter`，
-  /// 「新物理连接」天然拿到未污染的新对象；「同一通道换实例」则被正确拦截。
-  /// Expando 随通道对象一起回收，不产生全局泄漏。
-  static final Expando<bool> _poisonedChannels =
-      Expando<bool>('otaWriteChannelPoisoned');
+  /// 作用域是**物理链路**而非包装对象或 transport 实例：`Future.timeout`
+  /// 不取消底层 writeChunk，迟到分片仍会落地；有界 settle 只保证「本帧不与
+  /// 自己的迟到分片交错」，不等于物理写已被取消。若只标记实例，上层在同一
+  /// 连接上重建 transport 即可继续写；若只标记包装对象，同一条连接每次 bind
+  /// 新建 `_ChannelAdapter` 也会让标记失效。两种情况下新帧都与旧连接的迟到
+  /// 半帧交错，MCU 同样无法恢复同步。标记落在 [_linkScope]，同一真实连接上的
+  /// 所有 wrapper 共享；真实重连（OtaService 侧递增链路代数）拿到全新身份，
+  /// 才允许重新出帧。Expando 随身份对象一起回收，不产生全局泄漏。
+  static final Expando<bool> _poisonedLinks =
+      Expando<bool>('otaWriteLinkPoisoned');
 
-  bool get _writeChannelPoisoned => _poisonedChannels[_channel] ?? false;
+  /// 废弃标记的作用域对象（RC3-05⑤）。优先取通道自报的物理链路身份：
+  /// 同一真实连接上的 wrapper 可能被反复重建（每次 bind 新建
+  /// `_ChannelAdapter`），但物理链路上的悬挂半帧不会因换 wrapper 消失，
+  /// 只有真实重连才让 MCU 帧解析器回到同步态。通道未提供身份时退回通道
+  /// 对象自身，保持旧语义不放大。
+  Object get _linkScope => _channel.linkIdentity ?? _channel;
+
+  bool get _writeChannelPoisoned => _poisonedLinks[_linkScope] ?? false;
 
   void _poisonWriteChannel() {
-    _poisonedChannels[_channel] = true;
+    _poisonedLinks[_linkScope] = true;
   }
 
   Future<void> _writeFrameChecked(

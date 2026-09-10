@@ -851,6 +851,12 @@ void main() {
       } on TimeoutException {
         // 停滞界生效：按网络中断类失败处置。
       }
+      // 真实终止证据（RC3-11⑥）：源头流必须被消费方取消并释放——只断言
+      // 「adapter 收到了取消请求」不够，那个标志位唤不醒停滞的 await。
+      // 无界等待时本断言以超时失败（而不是随用例一起挂住）。
+      final adapter = dio.httpClientAdapter as _MockAdapter;
+      await adapter.stalledSourceClosed.future
+          .timeout(const Duration(seconds: 5));
       // 网络中断语义：partial 保留供下次续传，不删除。
       final part =
           File('${tempDir.path}${Platform.pathSeparator}pkg.etu.part');
@@ -927,6 +933,10 @@ void main() {
       final adapter = dio.httpClientAdapter as _MockAdapter;
       expect(adapter.abortedRequests, 1,
           reason: '停滞必须中止上游，不能只退出本端等待');
+      // 真实终止证据（RC3-11⑥）：取消请求到达 adapter 之后，源头流的订阅
+      // 必须真的被取消并释放（原 fake 的停滞 await 唤不醒，观测不到终止）。
+      await adapter.stalledSourceClosed.future
+          .timeout(const Duration(seconds: 5));
     }, timeout: const Timeout(Duration(seconds: 10)));
 
     test('无在途下载时 cancel：既有 partial/sidecar 照常删除（RC3-05⑥）',
@@ -996,13 +1006,16 @@ void main() {
       expect(File('${part.path}.json').existsSync(), isFalse);
     }, timeout: const Timeout(Duration(seconds: 20)));
 
-    test('在途未退出：cancel 有界等待超时后不删，清理回退给下载路径'
-        '（RC3-05⑤）', () async {
+    test('在途未退出：cancel 超时不抢删，写盘方退出后补删（RC3-02/05）',
+        () async {
       // 构造"已登记在途但尚未退出"的窗口：dirProvider 挂起 → download 卡在
-      // 解析目录（_inFlight 已登记）。cancel 的 5s 有界等待必然超时——此时
-      // 无法证明写盘方已退出，删除既可能失败也不代表清理完成，必须不删，
-      // 交给 download 自身退出路径与 24h 兜底。
-      // 反向鉴别：把 RC3-05⑥ 的"无在途即删"过度修成"一律删"，此用例红。
+      // 解析目录（令牌与在途 future 都在 download() 的同一同步段登记）。
+      // cancel 的有界等待必然超时——此时无法证明写盘方已退出，删除既可能
+      // 失败也不代表清理完成，必须不删；但也不能就此变成 no-op：登记延后
+      // 清理，等在途真正退出后再把删除做完（24h 兜底只应是最后一道防线）。
+      // 鉴别力：① 取消落在令牌登记前（本用例的原始形态）→ 在途照常下完
+      // 整包并返回成功，下面的 CANCELLED 断言红；② 超时后直接抢删 → 在途
+      // 仍在写盘，前置的"不得删除"断言红；③ 超时后放弃清理 → 补删断言红。
       final bytes = assetBytes(2048);
       final part = writePartial(bytes, 1024);
       final gate = Completer<void>();
@@ -1018,6 +1031,11 @@ void main() {
         releaseId: 'rel-1',
         downloadUrl: 'http://localhost:9/pkg.etu',
       );
+      // 在途 future 的退出错误由本用例接管（不得漏成未捕获）。
+      final exitError = Completer<Object>();
+      unawaited(pending.then((_) {}, onError: (Object e) {
+        exitError.complete(e);
+      }));
       final started = DateTime.now();
       await owner.cancel('asset-1');
       expect(DateTime.now().difference(started).inSeconds,
@@ -1026,10 +1044,60 @@ void main() {
       expect(part.existsSync(), isTrue,
           reason: '写盘方未证明退出前不得删除 partial');
       expect(File('${part.path}.json').existsSync(), isTrue);
-      // 放行在途路径：它继续按续传完成，证明 cancel 未破坏其状态。
+      expect(exitError.isCompleted, isFalse, reason: '在途仍卡在目录解析');
+      // 放行在途路径：令牌已取消，它必须在落盘/发请求前退出，不得继续
+      // 把整包下完（取消的合同语义是停止请求，不是"稍后照样成功"）。
       gate.complete();
-      final file = await pending;
-      expect(await file.length(), bytes.length);
+      final cleanup = owner.pendingCancelCleanup;
+      expect(cleanup, isNotNull,
+          reason: '超时后必须登记延后清理，不能退化成静默 no-op');
+      await cleanup!;
+      final error = await exitError.future;
+      expect(error, isA<OtaDownloadException>());
+      expect((error as OtaDownloadException).code, 'CANCELLED');
+      expect(part.existsSync(), isFalse, reason: '写盘方退出后必须补删 partial');
+      expect(File('${part.path}.json').existsSync(), isFalse);
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('清理的删除边界复核归属：新 attempt 接管的同名文件不被旧清理删掉'
+        '（RC3-04/05）', () async {
+      // 旧 attempt 取消时在途未退出（目录解析挂起）→ 登记延后清理；清理
+      // 真正执行前归属已转移：上层开始新一轮下载同一资产，写出同名的
+      // `.part`/sidecar。两次 attempt 的 assetId 与文件名本来就相同，
+      // 只在进入清理时判定一次的实现在这里会删掉新 attempt 的字节。
+      // 鉴别力：去掉删除边界复核，freshPart 被旧清理删除，断言红。
+      final bytes = assetBytes(2048);
+      final gate = Completer<void>();
+      var ownsOld = true;
+      final old = OtaFirmwareDownload(
+        dio: dioWithServer(bytes),
+        dirProvider: () async {
+          await gate.future;
+          return tempDir;
+        },
+        stillOwns: () => ownsOld,
+      );
+      final pending = old.download(
+        asset: assetOf(bytes),
+        releaseId: 'rel-1',
+        downloadUrl: 'http://localhost:9/pkg.etu',
+      );
+      unawaited(pending.catchError((Object e) {
+        return File('${tempDir.path}${Platform.pathSeparator}unused');
+      }));
+      await old.cancel('asset-1');
+      final cleanup = old.pendingCancelCleanup;
+      expect(cleanup, isNotNull,
+          reason: '在途未退出时必须登记延后清理，不能静默 no-op');
+      // 新 attempt 接管：同名 .part 与 sidecar 都是它写的。
+      final freshPart = writePartial(bytes, 1024);
+      ownsOld = false;
+      gate.complete();
+      await cleanup!;
+      expect(freshPart.existsSync(), isTrue,
+          reason: '归属已转移，旧 attempt 不得按路径删除新 attempt 的字节');
+      expect(File('${freshPart.path}.json').existsSync(), isTrue,
+          reason: 'sidecar 同属新 attempt，同样不得删');
     }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('Content-Digest 重复 sha-256 项：RESUME_PROTOCOL（RFC 9530 唯一项）',
@@ -1147,6 +1215,11 @@ class _MockAdapter implements HttpClientAdapter {
   /// 未取消（否则协议违规会被误报成用户取消），而底层响应确实已中止。
   int abortedRequests = 0;
 
+  /// 停滞源被真正终止的证据（RC3-11⑥）：源头流的订阅被取消
+  /// （[StreamController.onCancel]）时完成。取消**请求**到达 adapter
+  /// （[abortedRequests]）不等于源头终止——两者必须分别观测。
+  final Completer<void> stalledSourceClosed = Completer<void>();
+
   /// 按 [chunkSize] 分片投递 body；片在 yield 前计入 [deliveredBytes]。
   ///
   /// - [cancelFuture] 是 Dio adapter 契约的一部分：真实
@@ -1162,6 +1235,10 @@ class _MockAdapter implements HttpClientAdapter {
     if (chunkSize == null) {
       return Stream<Uint8List>.fromIterable([body]);
     }
+    final stallAt = behavior.stallAfterChunks;
+    if (stallAt != null) {
+      return _stalledBodyStream(body, chunkSize, stallAt);
+    }
     return () async* {
       var cancelled = false;
       if (cancelFuture != null) {
@@ -1174,12 +1251,6 @@ class _MockAdapter implements HttpClientAdapter {
       for (var i = 0; i < body.length; i += chunkSize) {
         if (cancelled) {
           return;
-        }
-        final stallAt = behavior.stallAfterChunks;
-        if (stallAt != null && emitted >= stallAt) {
-          // 永不完成的等待：模拟服务器停止投递正文（连接保持但不
-          // 出数据）。
-          await Completer<void>().future;
         }
         final chunk =
             Uint8List.sublistView(body, i, math.min(i + chunkSize, body.length));
@@ -1194,6 +1265,50 @@ class _MockAdapter implements HttpClientAdapter {
         await Future<void>.delayed(Duration.zero);
       }
     }();
+  }
+
+  /// 真正可关闭的停滞源（RC3-11⑥）：投递 [emitChunks] 片后停止出数据
+  /// （连接保持但不再出内容），同时**保留取消响应**——消费方取消订阅即
+  /// 触发 [StreamController.onCancel]，停表并完成 [stalledSourceClosed]。
+  ///
+  /// 原实现是 async* 生成器里 `await Completer<void>().future` 的永久
+  /// 挂起：取消只置一个标志位，唤不醒那个 await，生成器停在挂起点永不
+  /// 退出也不会释放，于是「取消请求已到达 adapter」被当成了「源头已终止」。
+  /// 真实 IOHttpClientAdapter 在取消时 abort 连接（源头随之终止），本
+  /// fake 必须同构，否则这条断言没有观测对象。
+  Stream<Uint8List> _stalledBodyStream(
+    Uint8List body,
+    int chunkSize,
+    int emitChunks,
+  ) {
+    var emitted = 0;
+    var index = 0;
+    Timer? timer;
+    late final StreamController<Uint8List> controller;
+    void release() {
+      timer?.cancel();
+      timer = null;
+      if (!stalledSourceClosed.isCompleted) {
+        stalledSourceClosed.complete();
+      }
+    }
+
+    controller = StreamController<Uint8List>(
+      onListen: () {
+        timer = Timer.periodic(const Duration(milliseconds: 1), (_) {
+          // 停滞：到期后不再投递，但连接/控制器保持存活（服务器挂起）。
+          if (emitted >= emitChunks || index >= body.length) return;
+          final chunk = Uint8List.sublistView(
+              body, index, math.min(index + chunkSize, body.length));
+          index += chunkSize;
+          emitted++;
+          deliveredBytes += chunk.length;
+          controller.add(chunk);
+        });
+      },
+      onCancel: release,
+    );
+    return controller.stream;
   }
 
   @override

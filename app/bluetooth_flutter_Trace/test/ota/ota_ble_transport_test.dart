@@ -1580,13 +1580,15 @@ void main() {
       await transport.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
-    test('迟到写不污染后来的会话：同一通道换 transport 仍拒写，新通道'
-        '恢复正常（RC3-05⑤）', () async {
+    test('迟到写不污染后来的会话：同一条物理链路换包装对象仍拒写，真实重连'
+        '才恢复（RC3-05⑤）', () async {
       final package = packageBytes(4096);
       final mcu = _McuSim()
         ..mtu = 23
         ..failAtDataChunk = 3;
-      final first = OtaBleTransport(channel: mcu);
+      // 真实路径上 OtaService 每次 bind 都新建 _ChannelAdapter 包住同一条
+      // 物理连接：废弃标记必须锚定链路身份，而不是包装对象身份。
+      final first = OtaBleTransport(channel: _ReboundWrapper(mcu));
       try {
         await first.transfer(
           package: package,
@@ -1600,27 +1602,27 @@ void main() {
       await first.dispose();
       expect(mcu.pendingByteCount, 40);
 
-      // 「新 transport」不等于「新物理连接」：同一通道对象上重建实例，
-      // MCU 侧那半帧仍悬空，任何新帧都会被吞进 payload。有界等待只保证
-      // 本帧不与自己的迟到分片交错，并没有取消底层写，因此废弃标记的
-      // 作用域必须是物理写通道对象——实例级标记会在这里放行。
-      final rebound = OtaBleTransport(channel: mcu);
+      // 「新 transport + 新包装对象」不等于「新物理连接」：MCU 侧那半帧
+      // 仍悬空，任何新帧都会被吞进 payload。有界等待只保证本帧不与自己的
+      // 迟到分片交错，并没有取消底层写，因此废弃标记的作用域必须是物理
+      // 链路——按通道对象作用域会在这里放行，把 10B 写进悬空 DATA 帧。
+      final rebound = OtaBleTransport(channel: _ReboundWrapper(mcu));
       try {
         await rebound.getDeviceInfo(
             timeout: const Duration(milliseconds: 300));
-        fail('同一通道重建实例应仍被拒绝');
+        fail('同一物理链路上的新包装对象应仍被拒绝');
       } on OtaTransportException catch (e) {
         expect(e.code, 'WRITE_TIMEOUT');
       }
-      // GET_INFO 一个字节都没写出去（10B 帧放行则 pending 变 50）。
+      // 放行与否由字节数鉴别（两种情况下都只会超时，错误码无区分力）。
       expect(mcu.pendingByteCount, 40);
       await rebound.dispose();
 
-      // 真实重连 = 新的物理通道对象（OtaService 每次 bind 新建
-      // _ChannelAdapter）：不受旧通道废弃标记影响，恢复预算保持有界，
-      // 不会因一次半帧把设备永久锁死。
-      final reconnected = _McuSim();
-      final fresh = OtaBleTransport(channel: reconnected);
+      // 真实重连 = 新物理连接：MCU 帧解析器回到同步态、链路身份前进，
+      // 不再命中旧链路的废弃标记，恢复预算保持有界，不会因一次半帧把
+      // 设备永久锁死。
+      mcu.reconnect();
+      final fresh = OtaBleTransport(channel: _ReboundWrapper(mcu));
       final info = await fresh.getDeviceInfo();
       expect(info.deviceModel, 'e-track-at32f435');
       expect(info.hardwareRevision, 3);
@@ -1834,6 +1836,34 @@ class _GatedWriteChannel implements OtaBleChannel {
 
   @override
   bool get isConnected => connected;
+
+  /// 物理链路身份（RC3-05⑤）：本 fake 每次创建即代表一条新链路。
+  @override
+  Object? linkIdentity = Object();
+}
+
+/// 同一物理链路的新包装对象（RC3-05⑤）：除自身对象身份外全部转发给
+/// [inner]，`linkIdentity` 也如实透传，模拟真实路径上「同一条连接、
+/// 每次 bind 新建 `_ChannelAdapter`」——包装对象换了，物理连接没换。
+class _ReboundWrapper implements OtaBleChannel {
+  _ReboundWrapper(this.inner);
+
+  final OtaBleChannel inner;
+
+  @override
+  Object? get linkIdentity => inner.linkIdentity;
+
+  @override
+  Future<void> writeChunk(List<int> chunk) => inner.writeChunk(chunk);
+
+  @override
+  Stream<List<int>> get notifications => inner.notifications;
+
+  @override
+  Future<int> maxWriteChunkSize() => inner.maxWriteChunkSize();
+
+  @override
+  bool get isConnected => inner.isConnected;
 }
 
 /// 在「GET_INFO 等待者已注册、物理写仍挂起」的窗口内执行 [disturb]，
@@ -1926,6 +1956,19 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   bool connected = true;
   int mtu = 247;
   final _pending = <int>[];
+
+  /// 物理链路身份（RC3-05⑤）：默认每条 fake 即一条独立物理链路。
+  /// 用例可把同一对象包进多个包装通道，模拟真实路径上「同一条连接、
+  /// 每次 bind 新建 `_ChannelAdapter`」；[reconnect] 前进它表示真实重连。
+  @override
+  Object? linkIdentity = Object();
+
+  /// 模拟真实重连（RC3-05⑤）：新物理连接下 MCU 侧帧解析器回到同步态
+  /// （悬空半帧随旧连接作废），物理链路身份同时前进。
+  void reconnect() {
+    _pending.clear();
+    linkIdentity = Object();
+  }
 
   void onBeginFrame(OtaBleFrame f);
   void onDataFrame(OtaBleFrame f);

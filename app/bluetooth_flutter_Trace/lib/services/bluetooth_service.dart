@@ -501,6 +501,31 @@ class BluetoothService extends GetxController {
   int otaLinkGeneration(String deviceAddress) =>
       _otaLinkGenerations[deviceAddress.toLowerCase()] ?? 0;
 
+  /// 物理链路代次到身份对象的缓存（RC3-05⑤）。
+  final Map<String, _OtaLinkIdentity> _otaLinkIdentities =
+      <String, _OtaLinkIdentity>{};
+
+  /// 取 [deviceAddress] 当前物理链路的**身份对象**（RC3-05⑤）。
+  ///
+  /// 同一 (地址, 代次) 恒定返回同一个对象，代次前进后返回新对象。写通道
+  /// 废弃标记按对象身份作用域（`Expando`），需要的是一个「同一条真实连接
+  /// 处处相等、真实重连后必然不等」的句柄；代次整数只适合比较，直接当
+  /// Expando 键会退化成一张永不回收的全局表。
+  ///
+  /// 身份从 [otaLinkGeneration] 派生而非直接读内部计数，保证测试替身覆写
+  /// 代次读取时，身份与代次始终同源。
+  Object otaLinkIdentity(String deviceAddress) {
+    final key = deviceAddress.toLowerCase();
+    final generation = otaLinkGeneration(key);
+    final cached = _otaLinkIdentities[key];
+    if (cached != null && cached.generation == generation) {
+      return cached.identity;
+    }
+    final identity = Object();
+    _otaLinkIdentities[key] = _OtaLinkIdentity(generation, identity);
+    return identity;
+  }
+
   /// 记录一次链路状态迁移（RC3-08⑦）。
   void _bumpOtaLinkGeneration(String deviceAddress) {
     final key = deviceAddress.toLowerCase();
@@ -529,14 +554,53 @@ class BluetoothService extends GetxController {
   /// 后来者刚打开的 CCCD 关掉——后来者的 transport 还活着、读写都成功，
   /// 但再也收不到任何通知，表现为全部命令 WRITE/ACK 超时。
   ///
-  /// 令牌随每次成功订阅自增；取消时只有仍是记录在册的 owner 才执行
-  /// 平台关通知，Dart 侧监听一律取消（本流必须停止吐值）。
+  /// 令牌**按发起顺序**分配（在任何 await 之前登记），取消时只有仍是
+  /// 记录在册的 owner 才执行平台关通知，Dart 侧监听一律取消（本流必须
+  /// 停止吐值）。按发起顺序而非完成顺序分配是必须的：先发起、后完成的
+  /// 旧探测若在返回时才取号，会拿到最新令牌并把活着的新 owner 顶掉，
+  /// 于是它被放弃时的取消动作就合法地关掉了新 owner 的 CCCD。
   final Map<String, int> _otaNotifyOwners = <String, int>{};
   int _otaNotifyTokenSeq = 0;
 
   String _otaNotifyKey(String address, String serviceId, String charId) =>
       '${address.toLowerCase()}|${serviceId.toLowerCase()}'
       '|${charId.toLowerCase()}';
+
+  /// 每个 (地址, 服务, 特征) 上的平台 CCCD 开关串行链（RC3-08⑦）。
+  ///
+  /// 复核 owner 令牌与真正调用平台之间隔着 await，只在检查处判断挡不住
+  /// 「旧订阅的取消动作在新订阅成功之后才落地」——排队期间 owner 已经换人，
+  /// 迟到动作照样会关掉新 owner 依赖的共享 CCCD。把订阅与取消都按**排队顺序**
+  /// 串行执行、并在**执行时刻**复核令牌，才有可判定的先后。
+  /// 条目数按会话内出现过的特征键数有界；不回收条目，因为回收会与已排队的
+  /// 动作分裂成两条并行链，反而破坏顺序。
+  final Map<String, Future<void>> _otaNotifyOpSerial = <String, Future<void>>{};
+
+  /// 排队执行一次共享 CCCD 平台操作（RC3-08⑦）。
+  ///
+  /// 轮到执行时若令牌已易主则整体跳过：旧订阅既不该重开、也不该关闭已经
+  /// 由新 owner 接管的平台开关。前序动作的异常不阻断链条。
+  Future<void> _runNotifyOwnerOp(
+    String ownerKey,
+    int ownerToken,
+    Future<void> Function() op,
+  ) {
+    final previous = _otaNotifyOpSerial[ownerKey] ?? Future<void>.value();
+    final next = previous.catchError((Object _) {}).then((_) async {
+      if (_otaNotifyOwners[ownerKey] != ownerToken) return;
+      await op();
+    });
+    _otaNotifyOpSerial[ownerKey] =
+        next.then<void>((_) {}, onError: (Object _) {});
+    return next;
+  }
+
+  /// 释放令牌（RC3-08⑦）：只清自己仍持有的那一个，不得顶掉新 owner。
+  void _releaseNotifyOwner(String ownerKey, int ownerToken) {
+    if (_otaNotifyOwners[ownerKey] == ownerToken) {
+      _otaNotifyOwners.remove(ownerKey);
+    }
+  }
 
   // 蓝牙适配器实例
   late BluetoothAdapter _adapter;
@@ -1602,27 +1666,38 @@ class BluetoothService extends GetxController {
   /// 通知是有效重发，由协议层 ACK 幂等处理）。原 250ms 轮询读 + last
   /// 去重会丢连续分片/同值通知，已删除。
   /// 特征不存在/订阅失败/平台异常均返回 null，不抛出。
+  ///
+  /// 所有权按**发起顺序**分配（RC3-08⑦）：令牌在任何 await 之前登记。
+  /// 若在平台订阅返回后才分配，先发起、后完成的旧探测会拿到最新令牌，把
+  /// 已经在上层活着的新 owner 顶掉；旧探测随后被放弃时，它的取消动作就会
+  /// 关掉新 owner 依赖的共享 CCCD——新 transport 读写都成功却收不到任何
+  /// 通知，表现为全部 ACK 超时。等平台订阅返回后若已易主，本地直接放弃：
+  /// 既不建立监听，也不动平台开关（那是新 owner 的）。
   Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(
     String deviceAddress,
     String serviceId,
     String characteristicId,
   ) async {
+    final ownerKey =
+        _otaNotifyKey(deviceAddress, serviceId, characteristicId);
+    final ownerToken = ++_otaNotifyTokenSeq;
+    _otaNotifyOwners[ownerKey] = ownerToken;
     try {
       if (_adapter.supportsCharacteristicValueStream) {
         try {
-          await _adapter.subscribeToCharacteristic(
-              deviceAddress, serviceId, characteristicId);
+          await _runNotifyOwnerOp(ownerKey, ownerToken, () async {
+            await _adapter.subscribeToCharacteristic(
+                deviceAddress, serviceId, characteristicId);
+          });
         } catch (e) {
           debugPrint('OTA订阅特征失败($deviceAddress/$characteristicId): $e');
+          _releaseNotifyOwner(ownerKey, ownerToken);
           return null;
         }
+        if (_otaNotifyOwners[ownerKey] != ownerToken) return null;
         // WinBle 无 CCCD 就绪回调：订阅调用返回即视为就绪。通知流在
         // 订阅前建立也可（broadcast 流，早到事件由订阅方过滤丢弃），
         // 这里订阅成功后再监听，保证取消订阅后流不再吐值。
-        final ownerKey =
-            _otaNotifyKey(deviceAddress, serviceId, characteristicId);
-        final ownerToken = ++_otaNotifyTokenSeq;
-        _otaNotifyOwners[ownerKey] = ownerToken;
         final notifyStream = _adapter.characteristicValueStreamOf(
             deviceAddress, serviceId, characteristicId);
         late StreamSubscription<List<int>> sub;
@@ -1636,17 +1711,21 @@ class BluetoothService extends GetxController {
           await sub.cancel();
           // RC3-08⑦：只有仍是 owner 才关平台通知，否则会关掉更新
           // owner 刚打开的共享 CCCD。
-          if (_otaNotifyOwners[ownerKey] != ownerToken) return;
-          _otaNotifyOwners.remove(ownerKey);
-          try {
-            await _adapter.unSubscribeFromCharacteristic(
-                deviceAddress, serviceId, characteristicId);
-          } catch (_) {}
+          await _runNotifyOwnerOp(ownerKey, ownerToken, () async {
+            _releaseNotifyOwner(ownerKey, ownerToken);
+            try {
+              await _adapter.unSubscribeFromCharacteristic(
+                  deviceAddress, serviceId, characteristicId);
+            } catch (_) {}
+          });
         };
         return controller.stream;
       } else {
         final device = _findDeviceByAddress(deviceAddress);
-        if (device == null) return null;
+        if (device == null) {
+          _releaseNotifyOwner(ownerKey, ownerToken);
+          return null;
+        }
         final services = await device.discoverServices();
         for (final svc in services) {
           final sid = svc.uuid.toString();
@@ -1655,11 +1734,16 @@ class BluetoothService extends GetxController {
             final cid = ch.uuid.toString();
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
             // 先完成 CCCD 订阅再返回流：resolve 后即可安全发命令。
-            await ch.setNotifyValue(true);
-            final ownerKey =
-                _otaNotifyKey(deviceAddress, serviceId, characteristicId);
-            final ownerToken = ++_otaNotifyTokenSeq;
-            _otaNotifyOwners[ownerKey] = ownerToken;
+            try {
+              await _runNotifyOwnerOp(
+                  ownerKey, ownerToken, () => ch.setNotifyValue(true));
+            } catch (e) {
+              debugPrint(
+                  'OTA订阅通知失败($deviceAddress/$characteristicId): $e');
+              _releaseNotifyOwner(ownerKey, ownerToken);
+              return null;
+            }
+            if (_otaNotifyOwners[ownerKey] != ownerToken) return null;
             late StreamSubscription<List<int>> sub;
             final controller = StreamController<List<int>>();
             sub = ch.onValueReceived.listen(
@@ -1671,19 +1755,22 @@ class BluetoothService extends GetxController {
               await sub.cancel();
               // RC3-08⑦：与 Windows 分支同一约束——CCCD 按特征共享，
               // 非 owner 不得关闭。
-              if (_otaNotifyOwners[ownerKey] != ownerToken) return;
-              _otaNotifyOwners.remove(ownerKey);
-              try {
-                await ch.setNotifyValue(false);
-              } catch (_) {}
+              await _runNotifyOwnerOp(ownerKey, ownerToken, () async {
+                _releaseNotifyOwner(ownerKey, ownerToken);
+                try {
+                  await ch.setNotifyValue(false);
+                } catch (_) {}
+              });
             };
             return controller.stream;
           }
         }
+        _releaseNotifyOwner(ownerKey, ownerToken);
         return null;
       }
     } catch (e) {
       debugPrint('OTA订阅通知失败($deviceAddress/$characteristicId): $e');
+      _releaseNotifyOwner(ownerKey, ownerToken);
       return null;
     }
   }
@@ -1716,27 +1803,45 @@ class BluetoothService extends GetxController {
   /// 设备重启前旧 GATT 连接可能悬挂（协议栈仍报告已连接），在旧连接
   /// 上会读到重启前的 INFO/通知。升级完成后等重启时必须先主动断开。
   /// 尽力语义：失败不抛出（断不开由上层轮询兜底）。
+  ///
+  /// 收尾动作绑定**发起时刻**的链路状态（RC3-08⑦）：断开是异步尽力操作，
+  /// 等待平台返回期间可能有更新的连接重建了同地址链路（重启等待流程就是
+  /// 「断开→重连」紧邻发生）。若收尾不设防，迟到完成会把新链路刚注册的
+  /// 观测订阅取消、把新连接刚登记的设备与连接订阅一并清掉——代次虽已前进，
+  /// 但新链路的观测被自己的收尾动作拆掉，后续断开再无观测入口。
   Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {
+    final key = deviceAddress.toLowerCase();
+    final startGeneration = otaLinkGeneration(key);
+    final startWatcher = _otaLinkWatchers[key];
     try {
       if (Platform.isWindows) {
         await _adapter.disconnect(deviceAddress);
-        _deviceConnectionSubscriptions[deviceAddress]?.cancel();
-        _deviceConnectionSubscriptions.remove(deviceAddress);
+        if (otaLinkGeneration(key) == startGeneration) {
+          _deviceConnectionSubscriptions[deviceAddress]?.cancel();
+          _deviceConnectionSubscriptions.remove(deviceAddress);
+        }
       } else {
         final device = _findDeviceByAddress(deviceAddress) ??
             BluetoothDevice.fromId(deviceAddress);
         await device.disconnect();
       }
-      connectedDevices.removeWhere((d) =>
-          d.remoteId.str.toLowerCase() == deviceAddress.toLowerCase());
+      if (otaLinkGeneration(key) == startGeneration) {
+        connectedDevices.removeWhere((d) => d.remoteId.str.toLowerCase() == key);
+      }
     } catch (e) {
       debugPrint('OTA主动断开失败($deviceAddress): $e');
     } finally {
       // RC3-08⑦：断开尝试后链路状态不再是绑定时那一条，成功与否都
       // 前进代次——断开失败同样意味着链路状态不可信（尽力语义下上层
       // 会重连），不得让失败路径把代次留在旧值上冒充"链路未变"。
-      _otaLinkWatchers.remove(deviceAddress.toLowerCase())?.cancel();
-      _bumpOtaLinkGeneration(deviceAddress);
+      // 代次已被并发操作推进时不重复推进：链路失效的语义已经达成，
+      // 再加一次只会让后续绑定的代次快照更难对上。
+      if (otaLinkGeneration(key) == startGeneration) {
+        _bumpOtaLinkGeneration(deviceAddress);
+      }
+      if (identical(_otaLinkWatchers[key], startWatcher)) {
+        _otaLinkWatchers.remove(key)?.cancel();
+      }
     }
   }
 
@@ -2301,4 +2406,13 @@ class BluetoothService extends GetxController {
       return false; // 出错时默认为不可连接
     }
   }
+}
+
+/// 物理链路身份缓存项（RC3-05⑤）：记录身份对象由哪一代链路生成，
+/// 代次不变即复用同一对象。
+class _OtaLinkIdentity {
+  _OtaLinkIdentity(this.generation, this.identity);
+
+  final int generation;
+  final Object identity;
 }

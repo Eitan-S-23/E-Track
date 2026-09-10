@@ -164,6 +164,11 @@ class OtaService extends GetxController {
   /// [cancelUpgrade] 在任何时序下都能立即停止在途请求（RC2-04）。
   CancelToken? _activeDownloadToken;
 
+  /// 下载尝试序号（RC3-04/05）：每次 `_downloadOnce` 自增，作为
+  /// OtaFirmwareDownload 删除边界的归属判定依据。删除动作在 await 之间
+  /// 执行，序号一变即说明该 attempt 已不是文件所有者，迟到的清理必须让位。
+  int _downloadAttemptSeq = 0;
+
   /// 在途 latest 请求令牌（RC3-04）：cancelUpgrade 立即中断在途
   /// metadata 请求，不等待其自然超时。
   CancelToken? _activeLatestToken;
@@ -585,9 +590,15 @@ class OtaService extends GetxController {
     // 分发到 adapter）在此静默退出，不发出任何请求。
     if (generation != _cancelGeneration) return false;
     try {
+      // 归属判定（RC3-04/05）：每次下载尝试取一个单调序号，删除边界上
+      // 复核序号未变才允许删——取消后立刻重新下载同一资产时，旧取消的
+      // 迟到枚举不会删掉新 attempt 正在写的同名 `.part`/sidecar（按
+      // assetId 匹配挡不住，两次尝试的 assetId 本来就相同）。
+      final attemptSeq = ++_downloadAttemptSeq;
       _download = OtaFirmwareDownload(
         dio: _downloadDio,
         dirProvider: _firmwareDirProvider,
+        stillOwns: () => _downloadAttemptSeq == attemptSeq,
       );
       // 发起前创建并登记令牌：cancelUpgrade 可取消任何时序下的在途请求。
       final token = CancelToken();
@@ -627,7 +638,9 @@ class OtaService extends GetxController {
       return true;
     } on OtaDownloadException catch (e) {
       if (e.code == 'CANCELLED') {
-        _phase.value = OtaPhase.cancelled;
+        // cancelled 终态由 cancelUpgrade 在包清理完成后统一发布
+        // （RC3-12）：本处抢先发布会让「cancelled 即包已处置」的 UI
+        // 契约提前成立，出现 cancelled 已显示、partial 随后才删的中间态。
         return false;
       }
       // 终止型/未知 HTTP 错误闭锁（RC3-10）：服务端明确终止码
@@ -704,7 +717,7 @@ class OtaService extends GetxController {
       return null;
     } catch (error) {
       if (error is DioException && CancelToken.isCancel(error)) {
-        _phase.value = OtaPhase.cancelled;
+        // 同 CANCELLED 分支（RC3-12）：不在此处发布 cancelled 终态。
         return false;
       }
       final message = _friendlyDioMessage(error);
@@ -937,9 +950,20 @@ class OtaService extends GetxController {
           // 连接仍在时尽力 ABORT（清理 MCU 侧会话）。
           await activeTransport?.abortBestEffort();
           _phase.value = OtaPhase.failed;
-        } else {
-          _phase.value = OtaPhase.cancelled;
+        } else if (generation == _cancelGeneration) {
+          // 非取消来源的 CANCELLED：发送循环是被 abortBestEffort 停掉的
+          // （例如后台复核失败 fail closed），发起中止的路径已发布自己的
+          // 终止态与文案，这里只收尾为失败，不得改写成 cancelled。
+          _phase.value = OtaPhase.failed;
         }
+        // 剩余情形即用户取消（generation != _cancelGeneration，RC3-12）：
+        // 静默退出，此处不得发布任何「已取消」可观测状态。终态与包清理由
+        // cancelUpgrade 在本 owner 完全退出后一次性发布（文案与 phase 同段
+        // 赋值）。抢先置 cancelled 会让 UI 立刻按「已取消且包已处置」渲染
+        // 并放开重新进入传输；抢先发布取消文案同样有害——进度卡的 Obx
+        // 直接读 upgradeStatus，此时取消路径的清理（partial/已验证包）还没
+        // 跑完，「取消文案 ⇒ 包已处置」的契约会提前成立。与下载路径的
+        // CANCELLED 分支、目标身份复核的 cancelled 分支保持同一策略。
         return false;
       } on OtaDeviceIdentityException catch (e) {
         _terminalState.value = OtaTerminalState(
@@ -1025,6 +1049,20 @@ class OtaService extends GetxController {
     // 快照（RC3-04⑤）。
     if (ownerAtCancel != null) {
       await ownerAtCancel;
+    }
+    // 慢退出兜底清理（RC3-05⑤）：取消时在途下载在 5s 上限内没退出，
+    // 下载层当时不做删除（可能仍有写盘方），改为登记延后清理。此处 owner
+    // 已退出（下载只在本 owner 锁内发起，owner 退出即在途已结算），await
+    // 它把删除真正做完；否则用户看到「已取消」而 partial 要留到 24h 兜底
+    // 才清。归属判定仍在删除边界内复核，新 attempt 接管同一资产时不删。
+    final deferredCleanup = download?.pendingCancelCleanup;
+    if (deferredCleanup != null) {
+      try {
+        await deferredCleanup;
+      } catch (e) {
+        // 与即时清理同一处置：失败不吞，经通知暴露。
+        _notify('提示', '操作已取消，但本地临时文件清理失败: $e');
+      }
     }
     // 删除已验证包（RC3-12）：纳入 owner 串行——防止删除与并发新操作
     // （如取消后立刻开始的传输，就地读包）竞争同一文件；新操作已抢入
@@ -1141,27 +1179,43 @@ class OtaService extends GetxController {
       );
       return;
     }
+    // 非空副本供下面的闭包使用（闭包内不做可空判定）。
+    final boundAddress = address;
+    final boundLinkGen = boundLink;
 
-    // 1. 物理链路代次（同步读取，不引入新的迟到窗口）。
-    final currentLink = _ble.otaLinkGeneration(address);
-    if (currentLink != boundLink) {
+    /// await 之后的统一复核（RC3-08⑦）。
+    ///
+    /// 链路代次会因平台上报的断开在**任意两个 await 之间**前进：只在入口
+    /// 同步读一次，挡不住「后台期间断开又重连」正好落在 await 期间——
+    /// 旧会话会继续在绑定于旧链路的 transport 上发送字节，正是本节要防的
+    /// 情形。返回 true 表示本会话不得继续，且两种原因必须区别处置：
+    /// - 已被取消 / 被新 owner 接管：静默退出。取消方已发布自己的终态，
+    ///   旧会话再写一次就是用旧结论覆盖新 owner 的状态；
+    /// - 链路已变更：必须由本会话发布终止态，没有别人替它发布。
+    Future<bool> aborted() async {
+      if (stale()) return true;
+      final currentLink = _ble.otaLinkGeneration(boundAddress);
+      if (currentLink == boundLinkGen) return false;
       await failClosed(
         'DEVICE_LINK_CHANGED',
-        '后台期间蓝牙连接已断开重连（链路代次 $boundLink→$currentLink），'
+        '后台恢复期间蓝牙链路已变更（链路代次 $boundLinkGen→$currentLink），'
             '无法确认仍是同一条连接，已终止升级',
         retryableLater: true,
       );
-      return;
+      return true;
     }
+
+    // 1. 物理链路代次。
+    if (await aborted()) return;
 
     // 2. 重新发现 OTA 特征（有界）。
     Map<String, String>? rediscovered;
     try {
       rediscovered = await _ble
-          .findExactOtaCharacteristicsByAddress(address)
+          .findExactOtaCharacteristicsByAddress(boundAddress)
           .timeout(const Duration(seconds: 5));
     } catch (e) {
-      if (stale()) return;
+      if (await aborted()) return;
       await failClosed(
         'DEVICE_RECHECK_FAILED',
         '后台恢复时重新发现 OTA 服务失败（$e），已终止升级',
@@ -1169,7 +1223,7 @@ class OtaService extends GetxController {
       );
       return;
     }
-    if (stale()) return;
+    if (await aborted()) return;
     if (rediscovered == null || !_charsMatch(rediscovered, boundChars)) {
       await failClosed(
         'DEVICE_LINK_CHANGED',
@@ -1183,7 +1237,7 @@ class OtaService extends GetxController {
     try {
       final current = await transport.getDeviceInfo(
           timeout: const Duration(seconds: 3));
-      if (stale()) return;
+      if (await aborted()) return;
       if (!deviceIdentityMatches(current, sessionInfo)) {
         await failClosed(
           'DEVICE_IDENTITY_CHANGED',
@@ -1197,7 +1251,7 @@ class OtaService extends GetxController {
       // 继续发送会把旧包字节写进未知设备。置终止态并尽力 ABORT 停止
       // 发送循环；MCU durable 层保留已落盘字节，重试经 BEGIN 幂等 +
       // durable 续传恢复，不依赖本会话续发。
-      if (stale()) return;
+      if (await aborted()) return;
       await failClosed(
         'DEVICE_RECHECK_FAILED',
         '后台恢复时无法复核设备身份（$e），已终止升级',
@@ -1206,7 +1260,7 @@ class OtaService extends GetxController {
       return;
     }
     // 复核期间被取消/被新 owner 接管时不得恢复旧发送循环。
-    if (stale()) return;
+    if (await aborted()) return;
     transport.resumeFromBackground();
   }
 
@@ -1441,7 +1495,7 @@ class OtaService extends GetxController {
             await _ble.findExactOtaCharacteristicsByAddress(deviceAddress);
         if (aborted()) return null;
         if (otaChars != null) {
-          probe = await _bindProbeTransport(deviceAddress, otaChars);
+          probe = await _bindProbeTransport(deviceAddress, otaChars, aborted);
           if (aborted()) return null;
           if (probe != null) {
             _phase.value = OtaPhase.reconnectVerify;
@@ -1473,13 +1527,20 @@ class OtaService extends GetxController {
   /// 新 owner 可能已登记自己的 transport，迟到完成的 probe 若走全局
   /// 绑定路径会 dispose 新 owner 的连接。绑定失败时已建立的部分资源
   /// 在本函数内释放。
+  ///
+  /// [aborted] 在每个 await 之后复核（RC3-08⑦）：探测可能在 MTU 协商或
+  /// 平台订阅期间被取代。订阅晚于新 owner 发起时，令牌机制已保证它拿不到
+  /// 所有权（不会关掉新 owner 的共享 CCCD）；这里再保证不把已被取代的
+  /// 探测结果交付出去——建立完成的 transport 当场释放，本地监听一并取消。
   Future<OtaBleTransport?> _bindProbeTransport(
     String deviceAddress,
     Map<String, String> otaChars,
+    bool Function() aborted,
   ) async {
     OtaBleTransport? transport;
     try {
       final mtuChunk = await _ble.requestOtaMtu(deviceAddress);
+      if (aborted()) return null;
       final serviceId = otaChars['serviceId']!;
       final writeId = otaChars['writeCharId']!;
       final notifyId = otaChars['notifyCharId']!;
@@ -1504,6 +1565,13 @@ class OtaService extends GetxController {
         writeWithResponse: writeWithResponse,
       );
       transport = OtaBleTransport(channel: channel);
+      if (aborted()) {
+        // 已被取代：当场释放（dispose 取消本地通知监听），平台 CCCD 的开
+        // 关归新 owner，令牌复核保证这里的释放不会误关别人的通知流。
+        await transport.dispose();
+        transport = null;
+        return null;
+      }
       return transport;
     } catch (e) {
       debugPrint('绑定 probe transport 失败: $e');
@@ -1921,7 +1989,13 @@ class _ChannelAdapter implements OtaBleChannel {
     required this.chunkSize,
     required this.notifyStream,
     required this.writeWithResponse,
-  }) : _ble = ble;
+  })  : _ble = ble,
+        // 绑定时快照物理链路身份（RC3-05⑤），供传输层界定写通道废弃标记。
+        // 快照而非每次现取：现取会让已被放弃的旧 adapter 在重连后"继承"
+        // 新链路的干净状态，重新开始写已经不可信的通道。同一条真实连接上
+        // 重建 wrapper（每次 bind 新建 adapter）拿到的是同一身份，标记不会被
+        // 洗掉；只有真实重连（服务侧链路代次前进）才拿到新身份。
+        linkIdentity = ble.otaLinkIdentity(deviceAddress);
 
   final BluetoothService _ble;
   final String deviceAddress;
@@ -1932,6 +2006,10 @@ class _ChannelAdapter implements OtaBleChannel {
   /// FFF2 实际支持的写模式（PR06 绑定）。
   final bool writeWithResponse;
   bool _connected = true;
+
+  /// 绑定时所依附的物理链路身份（RC3-05⑤）。
+  @override
+  final Object? linkIdentity;
 
   @override
   Future<void> writeChunk(List<int> chunk) async {

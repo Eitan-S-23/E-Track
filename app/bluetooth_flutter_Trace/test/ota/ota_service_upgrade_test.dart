@@ -184,6 +184,9 @@ void main() {
     List<String>? notifyLog,
     HttpClientAdapter? latestAdapter,
     HttpClientAdapter? downloadAdapter,
+    // 目录提供器替身（RC3-04/05）：取消清理的目录解析是删除前的一处
+    // 真实 IO await，用例用它把清理停在该窗口内编排「后来者接管」。
+    Future<Directory> Function()? firmwareDirProvider,
   }) {
     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条
     // 通知即抛 UnsupportedError。默认改为可增长列表。
@@ -198,7 +201,7 @@ void main() {
       bluetoothService: ble,
       dio: latest,
       downloadDio: download,
-      firmwareDirProvider: () async => firmwareDir,
+      firmwareDirProvider: firmwareDirProvider ?? () async => firmwareDir,
       latestUriBuilder: (info, appVersionCode, channel) =>
           Uri.parse('http://localhost:9/api/firmware/latest'),
       // onNotify 替身（RC3-02）：通知进 log 供断言，不走 Get.snackbar。
@@ -622,20 +625,30 @@ void main() {
       postRebootPayload: postRebootPayload,
     );
     final latestAdapter = _LatestOkAdapter(latestBody(assetBytes()));
-    // 与上一个用例的区别：闭锁被真实 readDeviceInfo 解锁后重新检查，
-    // 入口锁不再拦截，第三次下载真正发出——此时"上一轮遗留的刷新
-    // 标志"才有机会生效。第三条响应是 200 但字节与清单 sha 不符：
-    // SHA_MISMATCH 既不是稳定拒绝码，也不在 {RANGE_AT_END/URL_EXPIRED/
-    // ASSET_CONFLICT/LOCAL_CORRUPT} 刷新码集合内，因此本轮自身不会置
-    // 刷新标志——是否发生第四次 latest，唯一取决于第一轮稳定拒绝时
-    // 是否复位了标志。
+    // 预置响应顺序是鉴别力的全部关键：只要稳定拒绝那一刻标志不是真的
+    // 处于 true，本条用例就退化成空转（只要 ② 缺位，外层刷新路径在刷新
+    // 前就会把 ① 置的标清掉，稳定拒绝时标志本来就是 false）。
+    //   ① 401 TOKEN_EXPIRED → URL_EXPIRED（可重试码）：置刷新标志，并经
+    //      外层自动刷新重下一次；
+    //   ② 同一次 downloadFirmware 内的第二次尝试再次 URL_EXPIRED：外层
+    //      刷新只做一次，此处重新置位后调用结束，标志真实残留为 true；
+    //   ③ 400 INVALID_PARAMETER：稳定拒绝分支——本次要鉴别的那一行必须
+    //      在这里把残留的 true 复位；
+    //   ④ 200 但字节与清单 sha 不符：SHA_MISMATCH 既不是稳定拒绝码，也
+    //      不在 {RANGE_AT_END/URL_EXPIRED/ASSET_CONFLICT/LOCAL_CORRUPT}
+    //      刷新码集合内，本轮自身既不置位也不闭锁——是否发生第四次
+    //      latest 完全取决于 ③ 是否复位了标志。
     // 鉴别力：删掉 _downloadOnce 稳定拒绝分支里的 `_needsFreshManifest
-    // = false`，残留标志会让本轮自动刷新成立 → latest 4 次、下载 4 次
-    // （预置耗尽），两条计数断言同时变红。
+    // = false`，残留标志会让 ④ 之后的外层自动刷新条件成立 → latest 4 次
+    // （计数断言直接打红），并额外发出一次下载尝试（预置已耗尽，fake 抛
+    // StateError，由 _downloadOnce 兜底为普通失败）。
     final downloadAdapter = _DownloadStagedAdapter([
       _DownloadStagedReply.json(401,
           '{"errorCode":"TOKEN_EXPIRED","message":"授权过期",'
           '"requestId":"req-e"}'),
+      _DownloadStagedReply.json(401,
+          '{"errorCode":"TOKEN_EXPIRED","message":"授权过期",'
+          '"requestId":"req-e2"}'),
       _DownloadStagedReply.json(400,
           '{"errorCode":"INVALID_PARAMETER","message":"参数非法",'
           '"requestId":"req-9"}'),
@@ -656,9 +669,20 @@ void main() {
 
     expect(await service.readDeviceInfo('AA:BB'), isNotNull);
     expect(await service.checkFirmwareUpdate(), isNotNull);
+
+    // 第一轮：① 置刷新标志 → 外层自动刷新重下 → ② 重新置位。调用结束时
+    // 标志真实残留为 true（刷新路径只在刷新前清掉 ① 置的那一份），
+    // URL_EXPIRED 不闭锁资产。
     expect(await service.downloadFirmware(), isFalse);
-    expect(latestAdapter.calls, 2);
+    expect(latestAdapter.calls, 2, reason: '① 之后应恰好自动刷新一次');
     expect(downloadAdapter.requests, 2);
+    expect(service.terminalState, isNull, reason: '可重试失败不闭锁');
+
+    // 第二轮：进入稳定拒绝分支时标志为 true（该状态在测试侧不可直接读取，
+    // 由下面第三轮的 latest 计数反证；若这里标志本来就是 false，本条鉴别
+    // 就失效，故 ② 不可省）。稳定拒绝闭锁资产并复位标志。
+    expect(await service.downloadFirmware(), isFalse);
+    expect(downloadAdapter.requests, 3);
     expect(service.terminalState?.code, 'INVALID_PARAMETER');
 
     // 真实 readDeviceInfo 成功（同一身份、同一地址）→ 终止态解除；
@@ -668,12 +692,12 @@ void main() {
     expect(await service.checkFirmwareUpdate(), isNotNull);
     expect(latestAdapter.calls, 3);
 
-    // 第三次下载：SHA 校验失败（普通失败，不闭锁）。刷新标志已在第一轮
+    // 第三轮：SHA 校验失败（普通失败，不闭锁）。刷新标志已在第二轮
     // 稳定拒绝时复位 → 本轮不得自动重新 latest、不得重下。
     notifyLog.clear();
     expect(await service.downloadFirmware(), isFalse);
     expect(latestAdapter.calls, 3, reason: '残留刷新标志不得触发第四次 latest');
-    expect(downloadAdapter.requests, 3, reason: '不得因残留标志再重下一次');
+    expect(downloadAdapter.requests, 4, reason: '不得因残留标志再重下一次');
     expect(downloadAdapter.remaining, 0);
     expect(service.phase, OtaPhase.failed);
     expect(service.terminalState, isNull, reason: 'SHA 不符是普通失败，不闭锁');
@@ -912,7 +936,7 @@ void main() {
       expect(ble.beginCalls, beginCalls);
     });
 
-    test('取消删包与终态发布次序：最终取消文案发布时包已删除（RC3-12 发布时刻 IO 屏障）',
+    test('取消清理持闸期间不得发布取消文案或 phase：清理与终态发布原子（RC3-12）',
         () async {
       final tempDir = tempFirmwareDir();
       final notifyLog = <String>[];
@@ -924,34 +948,60 @@ void main() {
       final pkgFile = service.downloadedFirmwareFile;
       expect(pkgFile, isNotNull);
 
+      // 传输在途：首个 DATA ACK 挂在闸门内。
       ble.dataGate = Completer<void>();
       final startFuture = service.startOtaUpgrade('AA:BB');
       await ble.dataGated.future;
 
-      // 发布时刻观测（RC3-12）：status Rx 的监听器在赋值同步段内触发
-      // （GetX GetStream.add 同步派发），回调里核对包文件是否已删除。
-      // 「操作已取消」与旧 owner 的过渡文案「BLE 传输失败: …」值不同，
-      // 必然通知；断言的不是取消返回后的最终事实，而是发布那一刻的
-      // IO 事实——若删除发生在发布之后（次序倒置），此处立即红。
-      var sawFinalStatus = false;
-      var fileExistsAtPublish = true;
+      // 发布时刻观测（RC3-12）：取消文案每发布一次即记录当时的 IO 事实。
+      // 进度卡的 Obx 直接读 upgradeStatus、phase 决定传输入口能否重新
+      // 进入，二者都必须与「包已处置」一致——只看取消返回后的最终值
+      // 会漏掉「文案/phase 先发布、清理后跑」的中间态。
+      var cancelTextPublishes = 0;
+      final fileExistsAtPublish = <bool>[];
       final sub = service.upgradeStatusRx.listen((status) {
         if (status != '操作已取消') return;
-        sawFinalStatus = true;
-        fileExistsAtPublish = pkgFile!.existsSync();
+        cancelTextPublishes++;
+        fileExistsAtPublish.add(pkgFile!.existsSync());
       });
 
-      await service.cancelUpgrade(keepPackage: false);
+      // 清理前的 IO 屏障：ABORT 物理写在途，cancelUpgrade 停在
+      // await transport.abortBestEffort()——包删除与终态发布都还没开始。
+      ble.abortWriteGate = Completer<void>();
+      final cancelFuture = service.cancelUpgrade(keepPackage: false);
+      await ble.abortWriteEntered.future;
+
+      // 释放 DATA ACK 闸门，让旧 owner 的真实退出路径跑完（传输以
+      // CANCELLED 中止、service 捕获后必须静默退出）。旧 owner 的退出
+      // 不得在清理完成前留下任何「已取消」可观测状态：文案与 cancelled
+      // phase 都由 cancelUpgrade 在清理后一次性发布，否则 UI 会按
+      // 「已取消且包已处置」渲染并重新放开已作废的传输入口。
+      ble.releaseDataGate();
+      expect(await startFuture, isFalse, reason: '旧 owner 已在 ABORT 在途期间退出');
+      expect(cancelTextPublishes, 0,
+          reason: '清理未完成不得发布取消文案（取消文案 ⇒ 包已处置）');
+      expect(service.phase, isNot(OtaPhase.cancelled),
+          reason: '清理未完成不得置 cancelled（否则传输入口重新可用）');
+      expect(service.terminalState, isNull, reason: '取消清理期间不得产生终止态');
+      expect(pkgFile!.existsSync(), isTrue,
+          reason: '闸门未释放时包清理尚未开始，不得提前处置资产');
+
+      // 释放 ABORT 写：取消路径完成清理后一次性发布文案 + phase。
+      ble.abortWriteGate!.complete();
+      await cancelFuture;
+      await Future<void>.delayed(Duration.zero);
       await sub.cancel();
 
-      expect(sawFinalStatus, isTrue, reason: '必须观测到最终取消文案的发布');
-      expect(fileExistsAtPublish, isFalse,
+      expect(cancelTextPublishes, 1,
+          reason: '取消文案只发布一次，且发生在包清理之后');
+      expect(fileExistsAtPublish, [false],
           reason: '「操作已取消」发布时包文件必须已删除（发布时刻 IO 屏障）');
       expect(await startFuture, isFalse);
       expect(service.phase, OtaPhase.cancelled);
+      expect(service.upgradeStatus, '操作已取消');
       expect(service.downloadedFirmwareFile, isNull);
       expect(await pkgFile!.exists(), isFalse);
-    });
+    }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('取消窗口内同资产重下：旧取消不得拔掉后来者的下载（RC3-04⑦）',
         () async {
@@ -1024,6 +1074,73 @@ void main() {
       ble.releaseDataGate();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    test('取消清理停在内层 IO 时后来者接管同资产：删除边界归属复核（RC3-04/05）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = _UpgradeFakeBle(
+        preRebootPayload: preRebootPayload,
+        postRebootPayload: postRebootPayload,
+      );
+      final downloadAdapter = _DownloadGatedAdapter(assetBytes());
+      // 目录闸门（RC3-04/05）：只挂起取消清理的那一次目录解析。此时取消
+      // 已越过 owner 代次检查、进入老 downloader 的删除流程；目录之后的
+      // 枚举与 sidecar 读同样在 await 中，后来者正是在这个窗口里接管
+      // 同一资产——按 assetId/文件名匹配挡不住，只有删除边界上的归属
+      // 复核能拦下旧清理。
+      final dirGate = Completer<void>();
+      final dirGateEntered = Completer<void>();
+      var dirGateArmed = false;
+      Future<Directory> gatedDirProvider() async {
+        if (dirGateArmed) {
+          dirGateArmed = false;
+          if (!dirGateEntered.isCompleted) dirGateEntered.complete();
+          await dirGate.future;
+        }
+        return tempDir;
+      }
+
+      final service = makeService(
+        ble: ble,
+        firmwareDir: tempDir,
+        notifyLog: notifyLog,
+        downloadAdapter: downloadAdapter,
+        firmwareDirProvider: gatedDirProvider,
+      );
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+
+      // 首轮完整下载（未设闸门）：取消时无在途下载方，partial 清理直达
+      // 目录解析这一 IO 点。
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      expect(await service.downloadFirmware(), isTrue);
+      expect(service.downloadedFirmwareFile, isNotNull);
+
+      dirGateArmed = true;
+      final cancelFuture = service.cancelUpgrade(keepPackage: true);
+      await dirGateEntered.future;
+
+      // 后来者接管同一资产：新 attempt 序号前进，写出与旧 attempt 同名
+      // 的 `.part` 与 sidecar（assetId、文件名本来就相同）。
+      final holdGate = Completer<void>();
+      downloadAdapter.gate = holdGate;
+      final redownload = service.downloadFirmware();
+      await downloadAdapter.entered.future;
+
+      // 放行旧清理：枚举读到的是新 attempt 的 sidecar（assetId 匹配），
+      // 归属已在删除边界转移，旧清理必须整体放弃。
+      dirGate.complete();
+      await cancelFuture;
+
+      expect(notifyLog.any((l) => l.contains('本地临时文件清理失败')), isFalse,
+          reason: '旧清理不得删除后来者正在写的 partial（Windows 鉴别点）');
+      holdGate.complete();
+      expect(await redownload, isTrue,
+          reason: '旧清理不得按路径删掉后来者的 partial/sidecar（POSIX 鉴别点）');
+      expect(service.downloadedFirmwareFile, isNotNull);
+      expect(service.phase, OtaPhase.readyToInstall);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
     test('后台恢复一级复核：链路代次变化 → DEVICE_LINK_CHANGED 可重试终止（RC3-08⑦）',
         () async {
       final tempDir = tempFirmwareDir();
@@ -1059,6 +1176,46 @@ void main() {
       expect(service.phase, OtaPhase.cancelled);
       expect(ble.abortCalls, 1, reason: 'fail closed 必须尽力 ABORT 停止发送循环');
     });
+
+    test('后台恢复一级复核补位：复核 await 期间链路代次前进 → DEVICE_LINK_CHANGED（RC3-08⑦）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+      expect(ble.discoverCalls, 2);
+      expect(ble.getInfoCalls, 2);
+
+      service.pauseForBackground();
+      // 入口那次一级复核读到的代次还没变，链路代次在**重新发现 await
+      // 期间**才前进（系统断开重连正好落在两个 await 之间）。只在入口
+      // 同步读一次挡不住这种交错：旧会话会继续在绑定于旧链路的
+      // transport 上发送字节，正是本节要防的情形。
+      ble.rediscoverGate = Completer<void>();
+      final resumeFuture = service.resumeFromBackground();
+      await ble.rediscoverEntered.future;
+      ble.linkGeneration = 1;
+      ble.rediscoverGate!.complete();
+      await resumeFuture;
+
+      // 二级复核已进入并返回了一致的结果，仍必须以新代次作废。
+      expect(ble.discoverCalls, 3);
+      expect(ble.getInfoCalls, 2, reason: '链路已变时不得继续三级复核');
+      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
+      expect(service.terminalState?.retryableLater, isTrue);
+      expect(notifyLog.any((l) => l.startsWith('错误: ') && l.contains('已终止')),
+          isTrue, reason: 'fail closed 必须经通知暴露终止事实');
+      expect(await startFuture, isFalse);
+      expect(service.phase, OtaPhase.cancelled);
+      expect(ble.abortCalls, 1, reason: 'fail closed 必须尽力 ABORT 停止发送循环');
+    }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('后台恢复二级复核：特征重发现不一致 → DEVICE_LINK_CHANGED（RC3-08⑦）',
         () async {

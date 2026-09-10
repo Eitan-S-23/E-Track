@@ -28,17 +28,38 @@ import 'ota_firmware_latest.dart';
 /// - 完成前同时验证长度与 metadata `sha256`，然后原子 rename；
 /// - 24 小时 partial 清理（含孤儿 sidecar）。
 class OtaFirmwareDownload {
-  OtaFirmwareDownload({Dio? dio, this.dirProvider}) : _dio = dio ?? Dio();
+  OtaFirmwareDownload({Dio? dio, this.dirProvider, this.stillOwns}) : _dio = dio ?? Dio();
 
   final Dio _dio;
   /// 返回存放 `.part`/sidecar/最终文件的目录（通常是应用文档目录）。
   final Future<Directory> Function()? dirProvider;
+
+  /// 「本 attempt 仍拥有该资产文件」的判定（RC3-04/05），由上层提供。
+  ///
+  /// 取消清理要遍历目录、读取 sidecar、逐个删除，全程有 await；取消后
+  /// 用户可能立刻重新下载同一资产（新 attempt 写出同名 `.part`/sidecar），
+  /// 迟到的枚举会把新 attempt 刚写的字节删掉——按 assetId 匹配挡不住，
+  /// 两次 attempt 的 assetId 本来就相同。判定必须在**删除边界**上复核，
+  /// 而不是在进入清理时判定一次。
+  ///
+  /// 为 null 表示调用方不参与归属（单 attempt 场景），清理照常执行。
+  final bool Function()? stillOwns;
+
   final _cancelTokens = <String, CancelToken>{};
 
   /// 在途 download future（按 assetId），[cancel] 有界等待用（RC3-05）。
   final _inFlight = <String, Future<File>>{};
   /// 用户取消时是否保留已下载字节（由 [cancel] 设置，RC2-04）。
   bool _cancelKeepsPartial = false;
+
+  /// 取消时有界等待在途退出的上限（RC3-05）。
+  static const Duration cancelSettleTimeout = Duration(seconds: 5);
+
+  /// 在途未在上限内退出时登记的延后清理（RC3-05⑤）。
+  ///
+  /// 上层（OtaService.cancelUpgrade）在 owner 退出后 await 它把删除做完；
+  /// 归属判定仍按 [stillOwns] 在删除边界复核，新 attempt 接管时不清。
+  Future<void>? _deferredCleanup;
 
   /// 下载（或续传）指定资产，返回最终文件路径。
   ///
@@ -54,15 +75,30 @@ class OtaFirmwareDownload {
   }) {
     // RC3-05：登记在途 future，[cancel] 有界等待其退出（sink 已关闭、
     // 不再写盘）后再删除 partial，避免删除与追加写并发。
+    //
+    // RC3-02：令牌必须与在途登记在**同一同步段**建立。原实现在
+    // _downloadImpl 走完 _resolveDir/cleanExpiredPartials 之后才登记令牌，
+    // 这段窗口里的 cancel() 既看不到令牌（无可取消），又因在途 future
+    // 尚未结算而在有界等待后放弃删除；impl 随后照常发起请求，用户的取消
+    // 被静默吞掉、整包继续下完。前置登记后，任何能看到在途 future 的
+    // 取消都必然能看到令牌。
+    final token = cancelToken ?? CancelToken();
+    _cancelTokens[asset.assetId] = token;
     final future = _downloadImpl(
       asset: asset,
       releaseId: releaseId,
       downloadUrl: downloadUrl,
       onProgress: onProgress,
-      cancelToken: cancelToken,
+      token: token,
     );
     _inFlight[asset.assetId] = future;
-    return future.whenComplete(() => _inFlight.remove(asset.assetId));
+    return future.whenComplete(() {
+      // 身份复核后再摘除：同一 assetId 的新 attempt 可能已登记自己的
+      // future/令牌，无条件 remove 会把新 attempt 的登记一起抹掉。
+      if (identical(_inFlight[asset.assetId], future)) {
+        _inFlight.remove(asset.assetId);
+      }
+    });
   }
 
   Future<File> _downloadImpl({
@@ -70,19 +106,14 @@ class OtaFirmwareDownload {
     required String releaseId,
     required String downloadUrl,
     void Function(int received, int total)? onProgress,
-    CancelToken? cancelToken,
+    required CancelToken token,
   }) async {
-    final dir = await _resolveDir();
-    final baseName = _safeFileName(asset.fileName);
-    final partFile = File(_joinPath(dir.path, '$baseName.part'));
-    final finalFile = File(_joinPath(dir.path, baseName));
-    final sidecar = File(_joinPath(dir.path, '$baseName.part.json'));
-
-    await cleanExpiredPartials(dir);
-
-    final token = cancelToken ?? CancelToken();
-    _cancelTokens[asset.assetId] = token;
     try {
+      final dir = await _resolveDir();
+      final baseName = _safeFileName(asset.fileName);
+      final partFile = File(_joinPath(dir.path, '$baseName.part'));
+      final finalFile = File(_joinPath(dir.path, baseName));
+      final sidecar = File(_joinPath(dir.path, '$baseName.part.json'));
       // 续传身份不合法（含 206 头校验失败、If-Range 失配）作废重下，
       // 但最多一次，防止与服务器状态反复拉锯。
       var restartUsed = false;
@@ -93,15 +124,44 @@ class OtaFirmwareDownload {
       // 失效状态继续写盘）。
       var cleanupNote = '';
       Future<void> invalidatePartial() async {
+        // 归属已转移（RC3-04/05）：上层已开始新一轮下载同一资产，同名
+        // `.part`/sidecar 属于新 attempt，按路径删除会毁掉它刚写的字节。
+        // 与 [_deleteAssetPartials] 同一判定，只是删除点不同。
+        if (!_ownsAsset()) {
+          cleanupNote = '；partial 归属已转移，已跳过清理';
+          return;
+        }
         try {
           await _deletePartial(partFile, sidecar);
         } catch (e) {
           cleanupNote = '；partial 清理失败: $e';
         }
       }
+
+      /// 取消检查的统一点（RC3-02）：已取消则按 keepPartial 语义处置
+      /// 字节并抛 CANCELLED。登记令牌与发起请求之间、以及每轮续传的
+      /// 读盘动作之间都有 await，取消可能落在其中任意一处；少了这些
+      /// 检查点，取消会被静默吞掉或推迟到整包下完之后才生效。
+      ///
+      /// 归属转移（RC3-04/05）与取消同处：本 attempt 已不是该资产文件的
+      /// owner 时，继续写盘/删文件都会破坏新 attempt 的状态，一律退出。
+      Future<void> abortIfCancelled() async {
+        if (!token.isCancelled && _ownsAsset()) return;
+        if (!_cancelKeepsPartial) {
+          await invalidatePartial();
+        }
+        throw OtaDownloadException(
+            token.isCancelled ? '下载已取消$cleanupNote' : '下载归属已转移$cleanupNote',
+            code: 'CANCELLED');
+      }
+
+      await abortIfCancelled();
+      await cleanExpiredPartials(dir);
+      await abortIfCancelled();
       while (true) {
         var sidecarData = await _readSidecar(sidecar);
         var localPartSize = await _fileLength(partFile);
+        await abortIfCancelled();
 
         if (sidecarData != null &&
             !_sidecarMatches(sidecarData, asset, releaseId)) {
@@ -115,22 +175,22 @@ class OtaFirmwareDownload {
           // 合同：不发 Range，先整文件校验，通过后原子转完成。
           if (await verifyFileMatchesAsset(partFile, asset)) {
             // RC3-05：整文件校验耗时期间用户可能已取消——rename 前核对
-            // 令牌，已取消按取消路径处置，不得把取消后的文件转成完成包。
-            if (token.isCancelled) {
-              await invalidatePartial();
-              throw OtaDownloadException('下载已取消$cleanupNote',
-                  code: 'CANCELLED');
-            }
+            // 令牌与归属，已取消/已易主一律按取消路径处置，不得把字节
+            // 转成本 attempt 的完成包。
+            await abortIfCancelled();
             await partFile.rename(finalFile.path);
             // RC3-05⑤：rename 是耗时 await，完成后需复核取消——取消若
             // 在复核前一刻到达，已落成的 finalFile 不得伪装成功返回。
             // keepPartial 语义下保留 finalFile（字节已验证正确，下次
             // 直接复用）。
-            if (token.isCancelled) {
+            if (token.isCancelled || !_ownsAsset()) {
               if (!_cancelKeepsPartial) {
-                await _deletePartial(finalFile, sidecar);
+                await _deleteIfOwned(finalFile, sidecar);
               }
-              throw OtaDownloadException('下载已取消$cleanupNote',
+              throw OtaDownloadException(
+                  token.isCancelled
+                      ? '下载已取消$cleanupNote'
+                      : '下载归属已转移$cleanupNote',
                   code: 'CANCELLED');
             }
             await _quietDelete(sidecar);
@@ -152,6 +212,9 @@ class OtaFirmwareDownload {
         }
 
         // ---- 发请求（续传时带 Range/If-Range）----
+        // 分发前的最后一道取消检查（RC3-02）：此处之后就是真实网络请求，
+        // 取消若正好落在上面的读盘 await 之间，必须在这里拦住，不得发出。
+        await abortIfCancelled();
         final headers = <String, dynamic>{};
         var resumed = false;
         if (localPartSize > 0 && sidecarData != null) {
@@ -452,29 +515,31 @@ class OtaFirmwareDownload {
         }
         // RC3-05：verify 耗时期间用户可能已取消——字节已校验正确，
         // partial 按 keepPartial 语义处置，不得转成完成包。
-        if (token.isCancelled) {
-          if (!_cancelKeepsPartial) {
-            await invalidatePartial();
-          }
-          throw OtaDownloadException('下载已取消$cleanupNote',
-              code: 'CANCELLED');
-        }
+        await abortIfCancelled();
         await partFile.rename(finalFile.path);
-        // RC3-05⑤：rename 后复核取消——verify 通过到 rename 返回之间
-        // 取消到达时，已完成包不得伪装成功；keepPartial 语义下保留
+        // RC3-05⑤：rename 后复核取消/归属——verify 通过到 rename 返回之间
+        // 取消或易主时，已完成包不得伪装成功；keepPartial 语义下保留
         // finalFile（字节已验证正确，下次直接复用）。
-        if (token.isCancelled) {
+        if (token.isCancelled || !_ownsAsset()) {
           if (!_cancelKeepsPartial) {
-            await _deletePartial(finalFile, sidecar);
+            await _deleteIfOwned(finalFile, sidecar);
           }
-          throw OtaDownloadException('下载已取消$cleanupNote',
+          throw OtaDownloadException(
+              token.isCancelled
+                  ? '下载已取消$cleanupNote'
+                  : '下载归属已转移$cleanupNote',
               code: 'CANCELLED');
         }
         await _quietDelete(sidecar);
         return finalFile;
       }
     } finally {
-      _cancelTokens.remove(asset.assetId);
+      // RC3-02：令牌在 download() 里与在途 future 同一同步段登记，摘除
+      // 只有这一处——本体所有退出路径（含 _resolveDir 抛错）都经过 finally。
+      // 按身份复核，避免抹掉同 assetId 新 attempt 已登记的令牌。
+      if (identical(_cancelTokens[asset.assetId], token)) {
+        _cancelTokens.remove(asset.assetId);
+      }
     }
   }
 
@@ -504,14 +569,18 @@ class OtaFirmwareDownload {
   /// RC3-05⑥：无在途 download 时不存在并发写盘方，既有 partial/sidecar
   /// 必须照常删除。把"没有在途"与"等待超时"混为一谈会让取消一个已结束
   /// 的下载变成静默 no-op：用户看到取消成功，字节却留到 24h 兜底才清。
+  ///
+  /// RC3-05⑤：等待超时不再直接放弃——登记 [pendingCancelCleanup]，等
+  /// 在途真正退出后按同一归属判定删除，由上层在 owner 退出后 await 收口。
   Future<void> cancel(String assetId, {bool keepPartial = false}) async {
     _cancelKeepsPartial = keepPartial;
-    _cancelTokens[assetId]?.cancel();
+    final token = _cancelTokens[assetId];
+    token?.cancel();
     final inFlight = _inFlight[assetId];
     var settled = inFlight == null;
     if (inFlight != null) {
       try {
-        await inFlight.timeout(const Duration(seconds: 5));
+        await inFlight.timeout(cancelSettleTimeout);
         settled = true;
       } on TimeoutException {
         settled = false;
@@ -521,8 +590,41 @@ class OtaFirmwareDownload {
         settled = true;
       }
     }
-    _cancelTokens.remove(assetId);
-    if (keepPartial || !settled) return;
+    // 摘除按身份复核（RC3-02）：等待期间同一 assetId 的新 attempt 可能
+    // 已登记自己的令牌，无条件 remove 会剥掉它后续被取消的能力。
+    if (token != null && identical(_cancelTokens[assetId], token)) {
+      _cancelTokens.remove(assetId);
+    }
+    if (keepPartial) return;
+    if (settled) {
+      await _deleteAssetPartials(assetId);
+      return;
+    }
+    _deferredCleanup = _settleThenDelete(assetId, inFlight!);
+  }
+
+  /// 取消时在途未在上限内退出而登记的延后清理（RC3-05⑤）；无则为 null。
+  Future<void>? get pendingCancelCleanup => _deferredCleanup;
+
+  /// 等指定在途 download 完全退出后再删除该资产的 partial（RC3-05⑤）。
+  Future<void> _settleThenDelete(String assetId, Future<File> inFlight) async {
+    try {
+      await inFlight;
+    } catch (_) {
+      // 以异常退出同样代表已退出（sink 已关闭）；异常由 download()
+      // 调用方收悉，此处只负责退出后清理。
+    }
+    await _deleteAssetPartials(assetId);
+  }
+
+  /// 按 assetId 删除该资产的 `.part` 与 sidecar。
+  ///
+  /// 归属判定 [stillOwns] 在每个**删除边界**上复核（RC3-04/05）：本函数
+  /// 全程有 await，取消后用户可能立刻重新下载同一资产，新 attempt 会写出
+  /// 同名 `.part`/sidecar——按 assetId 匹配挡不住（两次 attempt 的 assetId
+  /// 本来就相同），迟到的枚举会把新 attempt 刚写的字节删掉。
+  Future<void> _deleteAssetPartials(String assetId) async {
+    if (!_ownsAsset()) return;
     final dir = await _resolveDir();
     await for (final entity in dir.list()) {
       if (entity is! File) continue;
@@ -530,10 +632,24 @@ class OtaFirmwareDownload {
       if (!name.endsWith('.part')) continue;
       final sidecar = File('${entity.path}.json');
       final data = await _readSidecar(sidecar);
-      if (data != null && data.assetId == assetId) {
-        await _deletePartial(entity, sidecar);
-      }
+      if (data == null || data.assetId != assetId) continue;
+      // 删除边界上的最后复核：枚举与本行之间隔着读 sidecar 的 await。
+      if (!_ownsAsset()) return;
+      await _deletePartial(entity, sidecar);
     }
+  }
+
+  /// 本 downloader 是否仍拥有该资产文件（无判定函数时视为拥有）。
+  bool _ownsAsset() => stillOwns?.call() ?? true;
+
+  /// 归属仍在时才按路径删除（RC3-04/05）。
+  ///
+  /// 删除点分布在多个 await 之后，归属可能在这些窗口内转移给新 attempt：
+  /// 两次 attempt 的 assetId 与文件名本来就相同，按路径删除会毁掉新
+  /// attempt 刚写下的字节。判定必须在**删除边界**上做。
+  Future<void> _deleteIfOwned(File file, File sidecar) async {
+    if (!_ownsAsset()) return;
+    await _deletePartial(file, sidecar);
   }
 
   /// 清理超过 24 小时的 `.part` 与 sidecar（按 sidecar 更新时间判定，

@@ -108,11 +108,15 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         if bind is None:
             # 流程用例不碰真实仓库：绑定证据由 identify 提供的白名单脏路径
             # 直接折算，真实 Git 行为另有 checkout_identity 用例覆盖。
+            # effective_blob 必须等于本阶段指纹（生效字节的绑定），
+            # effective_sha256 只表示"采集到了字节"，两者在真实实现里
+            # 分别是 git blob 与 sha256。
             def bind(root, identity, stage):
                 return [{"stage": stage, "path": path,
                          "committed_sha256": "c" * 64,
-                         "effective_sha256": identity["dirty_semantic_sha"][path],
-                         "effective_bytes": 1, "diff": "fixture"}
+                         "effective_sha256": "f" * 64,
+                         "effective_bytes": 1, "diff": "fixture",
+                         "effective_blob": identity["dirty_semantic_sha"][path]}
                         for path in identity["dirty_semantic"]
                         if path in RUNNER.TOOLCHAIN_REGENERATED]
         with mock.patch("sys.stdout", new_callable=io.StringIO), \
@@ -611,7 +615,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
              ("before_apk",
               "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
               "b" * 40)],
-            [(item["stage"], item["path"], item["effective_sha256"])
+            [(item["stage"], item["path"], item["effective_blob"])
              for item in report["toolchain_regen"]])
 
     def test_apk_restores_toolchain_regen_files_after_build(self):
@@ -643,7 +647,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertEqual([], report["source_after_restored"]["dirty_semantic"])
         self.assertEqual(
             [("after_run", gradle, "d" * 40)],
-            [(item["stage"], item["path"], item["effective_sha256"])
+            [(item["stage"], item["path"], item["effective_blob"])
              for item in report["toolchain_regen"]])
         self.assertIn("apk_collect", calls)
 
@@ -861,10 +865,80 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             bound[0]["committed_sha256"])
         self.assertNotEqual(bound[0]["committed_sha256"],
                             bound[0]["effective_sha256"])
+        # 生效字节同时按工作树指纹绑定：豁免判据不能用另一份字节顶替。
+        self.assertEqual(identity["dirty_semantic_sha"][yaml],
+                         bound[0]["effective_blob"])
         self.assertIn("+exclude:", bound[0]["diff"])
         self.assertTrue(clean["clean"])
-        self.assertTrue(
-            RUNNER.deltas_are_bound_toolchain_regen(clean, identity, bound))
+        self.assertTrue(RUNNER.deltas_are_bound_toolchain_regen(
+            clean, identity, bound, "before_apk"))
+
+    def test_bind_toolchain_regen_fails_closed_on_collection_failure(self):
+        """收集失败必须显式炸开，不得留下字段为 null 的"已绑定"记录。
+
+        RC3-02：旧实现把非零退出的 `git show`/`git diff` 记成 null，豁免判据
+        只看路径是否出现过，于是"没有证据"被读成"证据齐全"。白名单路径在
+        检出中不是普通文件（删除/变成目录）同样无法证明生效字节，一并拒绝。
+        """
+        repo, run = self.git_repo()
+        yaml = "app/bluetooth_flutter_Trace/analysis_options.yaml"
+        RUNNER.make_directory(repo, Path(yaml).parent)
+        (repo / yaml).write_bytes(b"include: package:flutter_lints\n")
+        # 占位文件：让 windows/flutter 目录本身有已跟踪内容，否则未跟踪目录
+        # 会被折成一条 `dir/` 记录，取不到单文件路径。
+        ghost = ("app/bluetooth_flutter_Trace/windows/flutter/"
+                 "generated_plugins.cmake")
+        placeholder = "app/bluetooth_flutter_Trace/windows/flutter/keep.txt"
+        RUNNER.make_directory(repo, Path(placeholder).parent)
+        (repo / placeholder).write_bytes(b"placeholder\n")
+        run("add", "--", yaml, placeholder)
+        run("commit", "--quiet", "-m", "config")
+        # HEAD 里没有这个路径：`git show HEAD:<path>` 非零退出。
+        (repo / ghost).write_bytes(b"# never committed\n")
+        identity = RUNNER.checkout_identity(repo)
+        self.assertEqual([ghost], identity["dirty_semantic"])
+        with self.assertRaises(ValueError):
+            RUNNER.bind_toolchain_regen(repo, identity, "before_apk")
+
+        # 已提交路径被删除：读不到生效字节，同样不是"已绑定"。
+        (repo / ghost).unlink()
+        (repo / yaml).unlink()
+        deleted = RUNNER.checkout_identity(repo)
+        self.assertEqual([yaml], deleted["dirty_semantic"])
+        with self.assertRaises(ValueError):
+            RUNNER.bind_toolchain_regen(repo, deleted, "before_apk")
+
+    def test_bound_regen_exemption_requires_complete_current_evidence(self):
+        """豁免判据必须核对证据本身，而不是只核对路径出现过。
+
+        RC3-02：独立探针能用"只有 path 字段"和"null 证据 + 无关阶段/指纹"
+        的记录让旧判据返回 True。以下逐项拒绝：字段残缺、跨阶段残留、
+        与当前观测不符的生效字节；齐全且匹配的那一条才放行。
+        """
+        path = "app/bluetooth_flutter_Trace/android/gradle.properties"
+        current = {"head": "1" * 40, "clean": False, "status": "M " + path,
+                   "dirty_semantic": [path],
+                   "dirty_semantic_sha": {path: "a" * 40},
+                   "dirty_eol_only": [], "dirty_untracked": []}
+        source = dict(current, clean=True, dirty_semantic=[],
+                      dirty_semantic_sha={})
+        complete = {"stage": "after_run", "path": path,
+                    "committed_sha256": "c" * 64, "effective_sha256": "f" * 64,
+                    "effective_bytes": 1, "diff": "fixture",
+                    "effective_blob": "a" * 40}
+        self.assertTrue(RUNNER.deltas_are_bound_toolchain_regen(
+            source, current, [complete], "after_run"))
+        for broken in (
+            dict(complete, committed_sha256=None),
+            dict(complete, diff=None),
+            dict(complete, effective_blob="b" * 40),
+            dict(complete, stage="before_apk"),
+            {"stage": "after_run", "path": path},
+        ):
+            self.assertFalse(
+                RUNNER.deltas_are_bound_toolchain_regen(
+                    source, current, [broken], "after_run"),
+                msg=f"残缺/不匹配的证据不得豁免: {broken}")
 
     def test_bound_regen_exemption_rejects_paths_outside_the_whitelist(self):
         repo, _ = self.git_repo()
@@ -874,19 +948,27 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                       dirty_semantic_sha={}, dirty_eol_only=[],
                       dirty_untracked=[])
         self.assertEqual([], RUNNER.bind_toolchain_regen(repo, current, "x"))
-        self.assertFalse(
-            RUNNER.deltas_are_bound_toolchain_regen(source, current, []))
+        self.assertFalse(RUNNER.deltas_are_bound_toolchain_regen(
+            source, current, [], "after_run"))
         # 未采集证据时，即便路径在白名单内也不得豁免
         forged = dict(
             current,
             dirty_semantic=["app/bluetooth_flutter_Trace/android/gradle.properties"],
             dirty_semantic_sha={
                 "app/bluetooth_flutter_Trace/android/gradle.properties": "a" * 40})
-        self.assertFalse(
-            RUNNER.deltas_are_bound_toolchain_regen(source, forged, []))
-        self.assertTrue(RUNNER.deltas_are_bound_toolchain_regen(
+        self.assertFalse(RUNNER.deltas_are_bound_toolchain_regen(
+            source, forged, [], "after_run"))
+        # 只有路径、没有采集字段的"记录"同样不是证据（RC3-02 fail open）
+        self.assertFalse(RUNNER.deltas_are_bound_toolchain_regen(
             source, forged,
-            [{"path": "app/bluetooth_flutter_Trace/android/gradle.properties"}]))
+            [{"path": "app/bluetooth_flutter_Trace/android/gradle.properties"}],
+            "after_run"))
+        self.assertFalse(RUNNER.deltas_are_bound_toolchain_regen(
+            source, forged,
+            [{"path": "app/bluetooth_flutter_Trace/android/gradle.properties",
+              "committed_sha256": None, "diff": None,
+              "effective_blob": "b" * 40, "stage": "before_apk"}],
+            "after_run"))
 
     def test_standing_authorization_is_not_a_mainline_or_release_grant(self):
         guide = (ROOT / "docs/flutter-development-validation.md").read_text(encoding="utf-8")
