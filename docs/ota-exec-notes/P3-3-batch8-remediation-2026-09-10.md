@@ -100,3 +100,45 @@ fail-closed（后台复核失败 → abortBestEffort）沿用的收尾语义历�
 → `Ran 50 tests ... OK`。Dart 侧仍为 NOT_RUN（本机无 SDK），以第二轮双宿主
 CI 为准。
 
+## 7. 第二轮双宿主回归（run 34483261169，SHA bbe27dd）——开发自测通过
+
+运行：<https://github.com/Eitan-S-23/E-Track/actions/runs/34483261169>
+attempt 1，headSha `bbe27ddc28e28ffd5d4240c4dc952a8d15d733c7`，整体
+`completed / success`；两宿主 `Analyze, test and optionally build a debug APK`
+步骤均 success（退出码 0）。
+
+| 项 | ubuntu-latest | windows-2022 |
+|---|---|---|
+| 静态分析 | `No issues found!`（15.0s，退出码 0） | `No issues found!`（17.1s，退出码 0） |
+| 测试 | `+275 ~7: All tests passed!`（273 通过用例 + 7 条 Windows 专属 skip） | `+282: All tests passed!`（Windows 专属用例在此执行） |
+| scope | `all`（分支前缀 `dev/flutter/apk/` 强制） | `all` |
+| pubspec.lock sha256 | `95ba37036efedb9df8de68ee83ba643b5ad9753ec3adbcd3a03bf3ff6e2325ea`（run 前后不变） | `ed54e10209a46f0ed9673245d6d400427db886d08f4bcae04c0e5d26ddb5e0fd`（run 前后不变） |
+| 调试 APK | 已构建：`trace-dev-debug.apk` | `NOT_REQUESTED`（Windows 不构建 APK） |
+
+SDK 身份（`sdk_version.log`）：Flutter `3.47.3` stable，frameworkRevision
+`e8113bf45620cbeb8aff64947ee4c93e16adb4cf`，engineRevision
+`06a2e2a110089dff50fe635cffd2a61e1b24fbcd`，dartSdkVersion `3.13.3`。
+
+调试 APK（开发用，非发布）：`131464330` 字节，SHA-256
+`22f311282a6f72706afeb05ca19cea09754a2b28999a525fa8be2736e3cca453`，
+`release_signing: false`；`apksigner verify --verbose` 结果
+`Verified using v2 scheme (APK Signature Scheme v2): true`、`Number of signers: 1`。
+构建期告警均为非阻断的版本升级提示（Gradle 8.14.0 / AGP 8.11.1 / Kotlin
+2.2.20 即将停止支持、7 个插件要求 compileSdk 36、sdkmanager 弃用提示），
+无构建错误。
+
+**本轮 runner 新判据在 CI 实跑**（RC3-02 fail-closed 与豁免证据完整性）：
+两宿主 `toolchain_regen` 记录均带 `committed_sha256` / `effective_sha256` /
+`effective_blob` / `diff`，`source_deltas_bound_toolchain_regen = true`
+（Linux 记在 `before_apk` 阶段，Windows 记在 `after_run`）；Windows 的
+`windows/flutter/generated_plugin_registrant.h` 只有行尾差异，落在
+`dirty_eol_only` 而未计入语义脏。
+
+首轮红证据保留在 `.cache-ci/batch8-run-34480053998/`（`failed.log` 与两宿主
+`analyze`/`tests` 原始日志、`result.json`），未清理、未改写。
+
+**结论口径**：以上是**开发自测**结果（`evidence_kind:
+development-self-test`、`formal_acceptance: NOT_RUN`），不是独立验收；任务卡
+状态与 §10 会话日志由主会话回写。
+
+
