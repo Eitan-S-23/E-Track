@@ -1209,21 +1209,38 @@ void main() {
       await gate.entered.future;
 
       // 后来者接管（真实 service owner 路径）：新 attempt 序号前进，重下
-      // 同一资产并在首块之后停住——此刻同名 `.part` 与 sidecar 都是它写
-      // 的。（旧残留的 sidecar 无强 ETag，它按合同作废重下，走的正是
-      // 删除 + 重建同一路径的流程。）
+      // 同一资产。（旧残留的 sidecar 无强 ETag，后来者按合同作废重下，
+      // 走的正是「删除旧残留 + 重建同一路径」的流程——`entered` 时刻它
+      // 自己的字节是否已落盘取决于写盘与读流的事件顺序，因此下面先做
+      // 有界观察，不等落盘就让断言跑起来会把编排时机问题误判成产品缺陷。）
       final holdGate = Completer<void>();
       downloadAdapter.gate = holdGate;
       final redownload = service.downloadFirmware();
       await downloadAdapter.entered.future;
-      // 前置锚点：后来者已进入写盘阶段，同名 `.part`/sidecar 此刻必须是它
-      // 刚写下的字节——后续「旧清理不得按路径删除」的鉴别力以此为前提，
-      // 否则断言的对象根本不存在。目录快照留在失败原因里便于定位。
+      // 有界观察同名 `.part` 落盘（上限 2s，只在目录内容变化时记录时间线）。
+      // 前置锚点：后来者的文件必须在放行旧清理之前存在——后续「旧清理不得
+      // 按路径删除」的鉴别力以此为前提，否则断言的对象根本不存在。时间线、
+      // 闸调用序、抓取序一并写进失败原因，用于区分「编排时机」与「旧清理
+      // 越权删除」两种解释。
+      final timeline = <String>[];
+      var lastSeen = _dirSnapshot(tempDir);
+      final deadline = DateTime.now().add(const Duration(seconds: 2));
+      while (!part.existsSync() && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+        final now = _dirSnapshot(tempDir);
+        if (now != lastSeen) {
+          lastSeen = now;
+          timeline.add(now);
+        }
+      }
       final afterTakeover = _dirSnapshot(tempDir);
       final takeoverBytes = part.existsSync() ? part.lengthSync() : -1;
       expect(part.existsSync(), isTrue,
           reason: '前置：后来者进入写盘阶段后同名 .part 必须已创建；'
-              '接管后目录=$afterTakeover');
+              '接管后目录=$afterTakeover；目录时间线=$timeline；'
+              '闸调用=${gate.calls}；抓取=${downloadAdapter.fetches}；'
+              'phase=${service.phase}；status=${service.upgradeStatus}；'
+              '通知=$notifyLog');
 
       // 同族 tmp：旧清理的第三个删除目标，同样不得被按路径删除。
       final sidecarTmp = File('${sidecar.path}.tmp');
@@ -1239,13 +1256,16 @@ void main() {
       expect(part.existsSync(), isTrue,
           reason: '旧清理不得按路径删除后来者的 .part；'
               '接管后目录=$afterTakeover（.part ${takeoverBytes}B），'
-              '放行后目录=${_dirSnapshot(tempDir)}');
+              '放行后目录=${_dirSnapshot(tempDir)}；'
+              '闸调用=${gate.calls}；抓取=${downloadAdapter.fetches}');
       expect(sidecar.existsSync(), isTrue,
           reason: '旧清理不得按路径删除后来者的 sidecar；'
-              '放行后目录=${_dirSnapshot(tempDir)}');
+              '放行后目录=${_dirSnapshot(tempDir)}；'
+              '闸调用=${gate.calls}');
       expect(sidecarTmp.existsSync(), isTrue,
           reason: '旧清理不得按路径删除同族 tmp；'
-              '放行后目录=${_dirSnapshot(tempDir)}');
+              '放行后目录=${_dirSnapshot(tempDir)}；'
+              '闸调用=${gate.calls}');
 
       // 后来者继续完成下载（POSIX 鉴别点：旧清理若删掉在写文件，重下会在
       // 最终 rename 处失败或落到错误字节）。
@@ -1608,10 +1628,15 @@ class _TakeoverGate extends OtaFilePathGate {
   /// 用例放行旧清理继续走进删除体。
   final resume = Completer<void>();
 
+  /// 闸调用序（诊断用）：`<桶尾>#armed` 或 `<桶尾>#pass`。
+  final List<String> calls = <String>[];
+
   void arm() => _armed = true;
 
   @override
   Future<T> run<T>(String bucket, Future<T> Function() body) {
+    calls.add('${bucket.split(Platform.pathSeparator).last}'
+        '#${_armed ? 'armed' : 'pass'}');
     if (!_armed) return super.run(bucket, body);
     _armed = false;
     return () async {
@@ -1636,12 +1661,17 @@ class _DownloadGatedAdapter implements HttpClientAdapter {
   /// 首块已交付且正文流正被闸住。
   final Completer<void> entered = Completer<void>();
 
+  /// 抓取序（诊断用）：每次 fetch 一行，记录是否带 Range 与当时有无闸门。
+  final List<String> fetches = <String>[];
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    fetches.add('range=${options.headers.containsKey('Range')}'
+        '|gate=${gate != null}');
     final half = bytes.length ~/ 2;
     Stream<Uint8List> body() async* {
       yield Uint8List.sublistView(bytes, 0, half);
