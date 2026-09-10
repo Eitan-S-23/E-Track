@@ -1685,7 +1685,12 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 1000));
       expect(mcu.pendingByteCount, 122);
       expect(mcu.writeTimeline, ['start#1', 'done#1']);
-      await _expectBusinessWriteRefused(transport, '取消交错后');
+      // 本实例已取消，begin 的 CANCELLED 会先于写门禁拦截业务帧，故按真实
+      // 路径（每次 bind 新建包装通道）用同设备的第二个 transport 复核废弃
+      // 标记：设备作用域未因取消或换包装而失效（RC3-05⑤）。
+      final rebounded = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      await _expectBusinessWriteRefused(rebounded, '取消交错后');
+      await rebounded.dispose();
       await transport.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
