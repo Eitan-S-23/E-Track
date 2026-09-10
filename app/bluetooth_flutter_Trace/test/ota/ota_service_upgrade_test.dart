@@ -552,7 +552,7 @@ void main() {
     expect(ble.beginCalls, beginCallsAfterInvalidate);
   });
 
-  test('下载 INVALID_PARAMETER 稳定闭锁：残留刷新标志不得洗白终止态'
+  test('下载 INVALID_PARAMETER 稳定闭锁：终止态在入口拦截后续下载'
       '（RC3-10⑤）', () async {
     final tempDir = tempFirmwareDir();
     final notifyLog = <String>[];
@@ -564,16 +564,17 @@ void main() {
     // 下载侧状态机（按请求顺序消费）：
     // ① 401/TOKEN_EXPIRED → URL_EXPIRED 可重试（置刷新标志，无终止态
     //    时自动刷新合法）；
-    // ② 400/INVALID_PARAMETER → 已知非重试码，稳定拒绝闭锁；
-    // ③ 401/TOKEN_EXPIRED → 再次置刷新标志（残留），验证非 retryableLater
-    //    终止态存在时刷新被守卫拦下、闭锁不被洗白。
-    final downloadAdapter = _DownloadStagedErrorAdapter([
-      _DownloadErrorReply(401,
-          '{"errorCode":"TOKEN_EXPIRED","message":"授权过期","requestId":"req-e"}'),
-      _DownloadErrorReply(400,
-          '{"errorCode":"INVALID_PARAMETER","message":"参数非法","requestId":"req-9"}'),
-      _DownloadErrorReply(401,
-          '{"errorCode":"TOKEN_EXPIRED","message":"授权过期","requestId":"req-f"}'),
+    // ② 400/INVALID_PARAMETER → 已知非重试码，稳定拒绝闭锁。
+    // 只预置这两条：闭锁后的第二次 downloadFirmware 被入口锁拦下，
+    // 不会发出第三个请求——再预置一条只会永远留在队列里，让"跨调用
+    // 覆盖"看起来成立而实际空转（原用例即如此）。
+    final downloadAdapter = _DownloadStagedAdapter([
+      _DownloadStagedReply.json(401,
+          '{"errorCode":"TOKEN_EXPIRED","message":"授权过期",'
+          '"requestId":"req-e"}'),
+      _DownloadStagedReply.json(400,
+          '{"errorCode":"INVALID_PARAMETER","message":"参数非法",'
+          '"requestId":"req-9"}'),
     ]);
     final service = makeService(
       ble: ble,
@@ -593,20 +594,609 @@ void main() {
     // 闭锁终止态、清资产并复位刷新标志，requestId 贯通供排查。
     expect(await service.downloadFirmware(), isFalse);
     expect(latestAdapter.calls, 2);
+    expect(downloadAdapter.requests, 2, reason: '两条预置响应都被真实消费');
+    expect(downloadAdapter.remaining, 0);
     expect(service.terminalState?.code, 'INVALID_PARAMETER');
     expect(service.terminalState?.retryableLater, isFalse);
     expect(service.terminalState?.requestId, 'req-9');
     expect(service.phase, OtaPhase.failed);
     expect(service.downloadedFirmwareFile, isNull);
 
-    // 第二轮：401 再置刷新标志（残留）。非 retryableLater 终止态存在时
-    // 自动刷新必须被守卫拦下——刷新会经 _checkLatestLocked 成功清掉
-    // 终止态，把服务端明确拒绝的稳定闭锁洗白成"可继续下载"。修复前
-    // 此路径放行第三次 latest 并清终止态。
+    // 第二轮：非 retryableLater 终止态存在 → 入口 _terminalLocked 直接
+    // 拒绝，连 HTTP 都不发（既不查 latest 也不重下）。这条断言的判据是
+    // 入口锁，不是内层刷新守卫——刷新标志的复位另由下一个用例鉴别。
     expect(await service.downloadFirmware(), isFalse);
-    expect(latestAdapter.calls, 2); // 无新增 latest：残留标志未绕过闭锁
+    expect(latestAdapter.calls, 2);
+    expect(downloadAdapter.requests, 2);
+    expect(service.upgradeStatus, contains('已进入终止状态'));
     expect(service.terminalState?.code, 'INVALID_PARAMETER');
     expect(service.phase, OtaPhase.failed);
+  });
+
+  test('稳定终止复位刷新标志：解锁重查后的普通失败不得触发本轮自动刷新'
+      '（RC3-10⑤）', () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    final ble = _UpgradeFakeBle(
+      preRebootPayload: preRebootPayload,
+      postRebootPayload: postRebootPayload,
+    );
+    final latestAdapter = _LatestOkAdapter(latestBody(assetBytes()));
+    // 与上一个用例的区别：闭锁被真实 readDeviceInfo 解锁后重新检查，
+    // 入口锁不再拦截，第三次下载真正发出——此时"上一轮遗留的刷新
+    // 标志"才有机会生效。第三条响应是 200 但字节与清单 sha 不符：
+    // SHA_MISMATCH 既不是稳定拒绝码，也不在 {RANGE_AT_END/URL_EXPIRED/
+    // ASSET_CONFLICT/LOCAL_CORRUPT} 刷新码集合内，因此本轮自身不会置
+    // 刷新标志——是否发生第四次 latest，唯一取决于第一轮稳定拒绝时
+    // 是否复位了标志。
+    // 鉴别力：删掉 _downloadOnce 稳定拒绝分支里的 `_needsFreshManifest
+    // = false`，残留标志会让本轮自动刷新成立 → latest 4 次、下载 4 次
+    // （预置耗尽），两条计数断言同时变红。
+    final downloadAdapter = _DownloadStagedAdapter([
+      _DownloadStagedReply.json(401,
+          '{"errorCode":"TOKEN_EXPIRED","message":"授权过期",'
+          '"requestId":"req-e"}'),
+      _DownloadStagedReply.json(400,
+          '{"errorCode":"INVALID_PARAMETER","message":"参数非法",'
+          '"requestId":"req-9"}'),
+      _DownloadStagedReply.raw(
+        200,
+        Uint8List.fromList(List<int>.generate(
+            assetBytes().length, (i) => (i * 11 + 5) & 0xFF)),
+      ),
+    ]);
+    final service = makeService(
+      ble: ble,
+      firmwareDir: tempDir,
+      notifyLog: notifyLog,
+      latestAdapter: latestAdapter,
+      downloadAdapter: downloadAdapter,
+    );
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+
+    expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+    expect(await service.checkFirmwareUpdate(), isNotNull);
+    expect(await service.downloadFirmware(), isFalse);
+    expect(latestAdapter.calls, 2);
+    expect(downloadAdapter.requests, 2);
+    expect(service.terminalState?.code, 'INVALID_PARAMETER');
+
+    // 真实 readDeviceInfo 成功（同一身份、同一地址）→ 终止态解除；
+    // 稳定拒绝已清资产，必须重新检查更新才能再下载。
+    expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+    expect(service.terminalState, isNull);
+    expect(await service.checkFirmwareUpdate(), isNotNull);
+    expect(latestAdapter.calls, 3);
+
+    // 第三次下载：SHA 校验失败（普通失败，不闭锁）。刷新标志已在第一轮
+    // 稳定拒绝时复位 → 本轮不得自动重新 latest、不得重下。
+    notifyLog.clear();
+    expect(await service.downloadFirmware(), isFalse);
+    expect(latestAdapter.calls, 3, reason: '残留刷新标志不得触发第四次 latest');
+    expect(downloadAdapter.requests, 3, reason: '不得因残留标志再重下一次');
+    expect(downloadAdapter.remaining, 0);
+    expect(service.phase, OtaPhase.failed);
+    expect(service.terminalState, isNull, reason: 'SHA 不符是普通失败，不闭锁');
+    expect(service.downloadedFirmwareFile, isNull);
+    expect(
+      notifyLog.any((line) => line.contains('SHA-256 校验失败')),
+      isTrue,
+      reason: '失败原因如实上报，不得静默',
+    );
+  });
+
+  // ---- RC3-03：fake MCU 段判据模型测试 ----
+  // 这些用例直接对 fake 打帧，不经 transport：产品 transport 永远不会
+  // 发出错位段、非尾部短段或同 offset 异内容段，靠它驱动无法进入 fake
+  // 的这些分支。fake 判据本身错了，上层一切"MCU 会拒绝"的断言都是自证。
+  group('fake MCU 段判据（RC3-03，直接打帧）', () {
+    /// 任意长度合法资产：前 64B 为与 total 自洽的 ETU 头
+    /// （inspect 要求 64+payload_len == total_len），否则 BEGIN 直接
+    /// ERR_LEN，后续 DATA 判据一条都进不去。
+    Uint8List assetOfLength(int total) {
+      final bytes = Uint8List.fromList(
+          List<int>.generate(total, (i) => (i * 7 + 3) & 0xFF));
+      bytes.setRange(0, 64, buildEtuHeader(total - 64));
+      return bytes;
+    }
+
+    /// 裸 DATA payload 组装：绕开 [OtaBleCodec.encodeDataPayload] 的
+    /// 客户端侧参数断言（它会先抛错位/超长），本组测的是 MCU 侧判据。
+    Uint8List rawDataPayload(int offset, List<int> content) {
+      final p = Uint8List(4 + content.length);
+      p[0] = offset & 0xFF;
+      p[1] = (offset >> 8) & 0xFF;
+      p[2] = (offset >> 16) & 0xFF;
+      p[3] = (offset >> 24) & 0xFF;
+      p.setRange(4, p.length, content);
+      return p;
+    }
+
+    /// 建好一个 ACTIVE 会话的 fake：BEGIN(seq=10) → session=1、
+    /// expected_seq=11、durable=0。返回值即 fake 本体。
+    Future<_UpgradeFakeBle> activeFake(Uint8List asset) async {
+      final ble = _UpgradeFakeBle(
+        preRebootPayload: preRebootPayload,
+        postRebootPayload: postRebootPayload,
+      );
+      await ble.writeOtaCharacteristicByAddress(
+        'AA:BB',
+        'fff0',
+        'fff2',
+        OtaBleCodec.encodeCommand(
+          cmd: OtaBleCodec.cmdBegin,
+          session: 0,
+          seq: 10,
+          payload: OtaBleCodec.encodeBeginPayload(
+            totalLen: asset.length,
+            packageSha256: sha256.convert(asset).bytes,
+            etuHeader: Uint8List.fromList(asset.sublist(0, 64)),
+          ),
+        ),
+      );
+      expect(ble.beginAckStatuses, [OtaBleCodec.statusOk],
+          reason: '模型前置：BEGIN 必须建立 ACTIVE 会话');
+      return ble;
+    }
+
+    /// 对已 ACTIVE 的 fake 写一帧 DATA（session 恒 1：首个会话）。
+    Future<void> writeData(
+      _UpgradeFakeBle ble,
+      int seq,
+      int offset,
+      List<int> content,
+    ) async {
+      await ble.writeOtaCharacteristicByAddress(
+        'AA:BB',
+        'fff0',
+        'fff2',
+        OtaBleCodec.encodeCommand(
+          cmd: OtaBleCodec.cmdData,
+          session: 1,
+          seq: seq,
+          payload: rawDataPayload(offset, content),
+        ),
+      );
+    }
+
+    /// 顺序灌满 [0, count*128)，seq 从 11 起递增。返回下一个可用 seq。
+    Future<int> fillSegments(
+        _UpgradeFakeBle ble, Uint8List asset, int count) async {
+      for (var i = 0; i < count; i++) {
+        await writeData(
+            ble, 11 + i, i * 128, asset.sublist(i * 128, (i + 1) * 128));
+      }
+      return 11 + count;
+    }
+
+    test('offset 未按 128B 对齐 → ERR_OFFSET（真值 :526-532）', () async {
+      final asset = assetOfLength(1024);
+      final ble = await activeFake(asset);
+      await writeData(ble, 11, 64, asset.sublist(64, 192));
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusErrOffset,
+          reason: '旧 fake 把三条判据并成一条 ERR_LEN，错分类');
+    });
+
+    test('非尾部短段 → ERR_FRAME（真值 :533-541）', () async {
+      // 段净荷恒 128B，唯一例外是包尾段。off=0、len=64 既非 128 也不
+      // 触及包尾（0+64 != 1024），真值判 ERR_FRAME。
+      // ERR_FRAME 在 transport 的 _resumeStatuses 里 → 有界重 BEGIN
+      // 续传；旧 fake 的 ERR_LEN 不在其中 → 直接终止。分类错误会把
+      // 可恢复错误伪装成终止错误。
+      final asset = assetOfLength(1024);
+      final ble = await activeFake(asset);
+      await writeData(ble, 11, 0, asset.sublist(0, 64));
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusErrFrame);
+    });
+
+    test('尾部短段（off+len == total_len）放行（真值 :533-541 反向）',
+        () async {
+      // 与上一例只差 offset：证明 ERR_FRAME 不是"见短段就拒"。
+      // total_len 取 1028（非 128 整数倍）才存在真正的尾部短段。
+      final asset = assetOfLength(1028);
+      final ble = await activeFake(asset);
+      final seq = await fillSegments(ble, asset, 8);
+      // 尾部段：off=1024，len=4，off+len == 1028 == total_len。
+      await writeData(ble, seq, 1024, asset.sublist(1024, 1028));
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusOk);
+      expect(ble.stagedDurable, 1028, reason: '9 段收齐 → 块提交到包尾');
+    });
+
+    test('整段跨越包尾（off+len > total_len）→ ERR_OFFSET（真值 :542-548）',
+        () async {
+      // len==128 过得了会话层长度门，但 1024+128 > 1028，命中范围判据的
+      // 第二个析取项。与下一例（off >= total_len，第一个析取项）区分。
+      final asset = assetOfLength(1028);
+      final ble = await activeFake(asset);
+      await writeData(ble, 11, 1024, List<int>.filled(128, 0xAB));
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusErrOffset);
+    });
+
+    test('off >= total_len → ERR_OFFSET（真值 :542-548）', () async {
+      final asset = assetOfLength(1024);
+      final ble = await activeFake(asset);
+      await writeData(ble, 11, 1024, List<int>.filled(128, 0xAB));
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusErrOffset);
+    });
+
+    test('同 offset 同内容重发 → DUPLICATE 幂等 OK'
+        '（真值 ota_staging_receive :508-516）', () async {
+      final asset = assetOfLength(1024);
+      final ble = await activeFake(asset);
+      await writeData(ble, 11, 0, asset.sublist(0, 128));
+      // seq 12 = 当前 expected_seq：走 staging 重复段分支，而不是
+      // 会话层"seq 落后即幂等回 OK"的分支。
+      await writeData(ble, 12, 0, asset.sublist(0, 128));
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusOk);
+      expect(ble.stagedDurable, 0, reason: '块未收齐，durable 不前移');
+    });
+
+    test('同 offset 不同内容 → ABORTED 且会话 teardown'
+        '（真值 ota_staging.c:510-513 → ota_ble_session.c:585-591）',
+        () async {
+      // 旧 fake 只看 offset 是否已收过，内容不同也回 OK：把"同一段收到
+      // 两份互相矛盾的数据"这类真实损坏静默吞掉，只能拖到 END 整包 SHA
+      // 才暴露，MCU 侧的 fail-closed teardown 语义完全不被建模。
+      final asset = assetOfLength(1024);
+      final ble = await activeFake(asset);
+      await writeData(ble, 11, 0, asset.sublist(0, 128));
+      final corrupted = Uint8List.fromList(asset.sublist(0, 128));
+      corrupted[7] ^= 0xFF;
+      await writeData(ble, 12, 0, corrupted);
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusAborted);
+      // teardown 已发生：后续同会话 DATA 落 ERR_STATE。
+      await writeData(ble, 13, 128, asset.sublist(128, 256));
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusErrState);
+      // teardown 只清 RAM 层，journal durable 保留（此处本就是 0）。
+      expect(ble.stagedDurable, 0);
+    });
+
+    test('已提交 offset 的重复 DATA 幂等 OK（真值 :550-558）', () async {
+      final asset = assetOfLength(1024);
+      final ble = await activeFake(asset);
+      final seq = await fillSegments(ble, asset, 8);
+      expect(ble.stagedDurable, 1024, reason: '8 段收齐 → 块提交');
+      // durable 之后重发首段：走会话层幂等分支，不进 staging，因此即便
+      // 内容被改也不触发 ERR_DATA（真值同款：已提交区间不再比对 RAM
+      // 块缓冲——该区间的正确性由 END 的整包 SHA 兜底）。
+      final corrupted = Uint8List.fromList(asset.sublist(0, 128));
+      corrupted[3] ^= 0xFF;
+      await writeData(ble, seq, 0, corrupted);
+      expect(ble.dataAckStatuses.last, OtaBleCodec.statusOk);
+    });
+  });
+
+  // ---- 取消/后台恢复的 owner 与资源生命周期（RC3-04⑦/08⑦/12⑦）----
+  // 复审缺口：此前用例只在 cancel/resume 返回后断言终态字段，取消窗口
+  // 内「后来者下载」「迟到复核结论」「发布与删除的次序」「失败读取后的
+  // 资产归属基准」都无法观测。本组用闸门把 service 停在真实交错点再编排
+  // 后续操作，并在发布时刻挂监听器核对 IO 事实，而非事后补断言。
+  group('取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦）', () {
+    test('身份 A 持有资产 → 读取失败 → 成功读取 B：A 资产整体作废（RC3-12⑦）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+      expect(service.downloadedFirmwareFile, isNotNull);
+
+      // 中间一次读取失败（服务发现失败）：快照清空，但资产签署者基准
+      // 不得被失败读取洗掉——旧实现把漂移基准绑在上次快照上，失败读取
+      // 置空快照后，下次成功读到的 B 与 null 比对不算漂移，A 签发的
+      // 清单/资产/已验证包被沿用给 B。
+      ble.discoverReplies.add(null);
+      expect(await service.readDeviceInfo('AA:BB'), isNull);
+      expect(service.upgradeStatus, '设备未暴露 OTA 服务（FFF0/FFF2/FFF1）');
+      expect(service.downloadedFirmwareFile, isNotNull,
+          reason: '失败读取不得顺手作废已校验资产（读取与下载是两条线）');
+
+      // 随后成功读取到不同硬件身份 B：以资产签署者（A）为基准判漂移，
+      // A 的清单/资产/包字段整体作废。
+      ble.discoverReplies.clear();
+      ble.infoOverride = postRebootOtherHardwarePayload;
+      final infoB = await service.readDeviceInfo('AA:BB');
+      expect(infoB, isNotNull);
+      expect(infoB!.currentVersionCode, 20900, reason: '读到的是 B 的身份');
+      expect(service.downloadedFirmwareFile, isNull,
+          reason: '身份 A 的已下载包不得沿用到身份 B（RC3-12⑦）');
+      expect(service.upgradeStatus, contains('设备身份已变更'));
+
+      // 旧入口立即失效：给出明确指引，不重建 BLE 会话。
+      notifyLog.clear();
+      final beginCalls = ble.beginCalls;
+      expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+      expect(notifyLog, contains('错误: 固件文件不存在，请先下载固件'));
+      expect(ble.beginCalls, beginCalls);
+    });
+
+    test('取消删包与终态发布次序：最终取消文案发布时包已删除（RC3-12 发布时刻 IO 屏障）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+      final pkgFile = service.downloadedFirmwareFile;
+      expect(pkgFile, isNotNull);
+
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+
+      // 发布时刻观测（RC3-12）：status Rx 的监听器在赋值同步段内触发
+      // （GetX GetStream.add 同步派发），回调里核对包文件是否已删除。
+      // 「操作已取消」与旧 owner 的过渡文案「BLE 传输失败: …」值不同，
+      // 必然通知；断言的不是取消返回后的最终事实，而是发布那一刻的
+      // IO 事实——若删除发生在发布之后（次序倒置），此处立即红。
+      var sawFinalStatus = false;
+      var fileExistsAtPublish = true;
+      final sub = service.upgradeStatusRx.listen((status) {
+        if (status != '操作已取消') return;
+        sawFinalStatus = true;
+        fileExistsAtPublish = pkgFile!.existsSync();
+      });
+
+      await service.cancelUpgrade(keepPackage: false);
+      await sub.cancel();
+
+      expect(sawFinalStatus, isTrue, reason: '必须观测到最终取消文案的发布');
+      expect(fileExistsAtPublish, isFalse,
+          reason: '「操作已取消」发布时包文件必须已删除（发布时刻 IO 屏障）');
+      expect(await startFuture, isFalse);
+      expect(service.phase, OtaPhase.cancelled);
+      expect(service.downloadedFirmwareFile, isNull);
+      expect(await pkgFile!.exists(), isFalse);
+    });
+
+    test('取消窗口内同资产重下：旧取消不得拔掉后来者的下载（RC3-04⑦）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = _UpgradeFakeBle(
+        preRebootPayload: preRebootPayload,
+        postRebootPayload: postRebootPayload,
+      );
+      final downloadAdapter = _DownloadGatedAdapter(assetBytes());
+      final service = makeService(
+        ble: ble,
+        firmwareDir: tempDir,
+        notifyLog: notifyLog,
+        downloadAdapter: downloadAdapter,
+      );
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+
+      // 首轮：闸门未设，read → check → download 直接完成。
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      expect(await service.downloadFirmware(), isTrue);
+      expect(service.downloadedFirmwareFile, isNotNull);
+
+      // 传输在途（首个 DATA ACK 挂起）。
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+
+      // 取消发起，ABORT 物理写被闸住：cancelUpgrade 停在
+      // await transport.abortBestEffort()。transport.cancel() 已同步失败
+      // 全部等待者——旧 owner 不等 ABORT 写完成即可退出，这就是
+      // 「取消等待期间新 owner 可登记」的真实窗口。
+      ble.abortWriteGate = Completer<void>();
+      final cancelFuture = service.cancelUpgrade(keepPackage: true);
+      await ble.abortWriteEntered.future;
+      expect(await startFuture, isFalse,
+          reason: '旧 owner 必须在 ABORT 在途期间即可退出');
+
+      // owner 2：清掉旧包，让后续重下是真实的新文件写入
+      // （cleanupFirmware 保留清单，重下无需重新 check）。
+      expect(await service.cleanupFirmware(), isTrue);
+      expect(service.downloadedFirmwareFile, isNull);
+
+      // owner 3：同一资产重新下载，首块后闸住——此刻 `.part` 与 sidecar
+      // 均已落盘（sidecar 先于流循环写入），正是旧取消目录扫描的匹配
+      // 目标（同 assetId、同 partial 文件名）。
+      final holdGate = Completer<void>();
+      downloadAdapter.gate = holdGate;
+      final redownload = service.downloadFirmware();
+      await downloadAdapter.entered.future;
+
+      // 释放 ABORT 写：cancelUpgrade 走到 epoch 屏障。
+      ble.abortWriteGate!.complete();
+      await cancelFuture;
+
+      // 屏障生效：取消窗口内后来者进出过（owner 2/3），旧取消不得再对
+      // 同 assetId 执行 cancel(keepPartial:false)——那会取消新下载令牌并
+      // 删除它正在写的 partial。两主机各自的失败形态：Windows 删除打开
+      // 中的文件抛错 → 「本地临时文件清理失败」通知；POSIX unlink 成功
+      // → 重下在最终 rename 处失败。断言组合在两主机都有鉴别力。
+      expect(notifyLog.any((l) => l.contains('本地临时文件清理失败')), isFalse,
+          reason: '旧取消不得触碰后来者的 partial（Windows 鉴别点）');
+      holdGate.complete();
+      expect(await redownload, isTrue,
+          reason: '旧取消不得拔掉后来者的下载（POSIX 鉴别点）');
+      expect(service.phase, OtaPhase.readyToInstall);
+      expect(service.downloadedFirmwareFile, isNotNull);
+
+      ble.releaseDataGate();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('后台恢复一级复核：链路代次变化 → DEVICE_LINK_CHANGED 可重试终止（RC3-08⑦）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+      // 基线：readDeviceInfo 绑定 + startOtaUpgrade 绑定复核各一次。
+      expect(ble.discoverCalls, 2);
+      expect(ble.getInfoCalls, 2);
+
+      // 后台 → 绑定后链路代次前进（模拟系统断开重连）。
+      notifyLog.clear();
+      service.pauseForBackground();
+      ble.linkGeneration = 1;
+      await service.resumeFromBackground();
+
+      // 一级复核即终止：不得触发重新发现、不得发 INFO。
+      expect(ble.discoverCalls, 2,
+          reason: '链路代次不符时不得继续二三级复核');
+      expect(ble.getInfoCalls, 2);
+      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
+      expect(service.terminalState?.retryableLater, isTrue);
+      expect(notifyLog.any((l) => l.startsWith('错误: ') && l.contains('已终止')),
+          isTrue, reason: 'fail closed 必须经通知暴露终止事实');
+      expect(await startFuture, isFalse);
+      expect(service.phase, OtaPhase.cancelled);
+      expect(ble.abortCalls, 1, reason: 'fail closed 必须尽力 ABORT 停止发送循环');
+    });
+
+    test('后台恢复二级复核：特征重发现不一致 → DEVICE_LINK_CHANGED（RC3-08⑦）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+
+      service.pauseForBackground();
+      // 链路代次未变，但重新发现返回了不同的写模式（GATT 重建后语义
+      // 变化）——旧句柄/写模式沿用会把帧写进非 OTA 通道。
+      ble.discoverReplies.add({
+        'serviceId': 'fff0',
+        'writeCharId': 'fff2',
+        'notifyCharId': 'fff1',
+        'writeMode': 'without',
+      });
+      await service.resumeFromBackground();
+
+      expect(ble.discoverCalls, 3, reason: '二级复核确实执行了重新发现');
+      expect(ble.getInfoCalls, 2, reason: '特征不一致时不得发 INFO');
+      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
+      expect(service.terminalState?.retryableLater, isTrue);
+      expect(await startFuture, isFalse);
+      expect(ble.abortCalls, 1);
+    });
+
+    test('后台恢复三级复核：INFO 身份漂移 → DEVICE_IDENTITY_CHANGED（RC3-08⑦）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+
+      service.pauseForBackground();
+      // 链路代次与特征都一致，但 INFO 报出了另一台设备的硬件身份：
+      // 继续发送会把旧包字节写进新设备，必须 fail closed 且不可重试。
+      ble.infoOverride = postRebootOtherHardwarePayload;
+      await service.resumeFromBackground();
+
+      expect(ble.discoverCalls, 3, reason: '二级复核通过后才轮到 INFO');
+      expect(ble.getInfoCalls, 3, reason: '三级复核确实发了 INFO');
+      expect(service.terminalState?.code, 'DEVICE_IDENTITY_CHANGED');
+      expect(service.terminalState?.retryableLater, isFalse,
+          reason: '身份漂移是稳定拒绝，不得标成可重试');
+      expect(await startFuture, isFalse);
+      expect(service.phase, OtaPhase.cancelled);
+      expect(ble.abortCalls, 1);
+    });
+
+    test('后台复检迟到发布：取消后的复核结论不得覆盖取消终态（RC3-04⑦）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+
+      service.pauseForBackground();
+      // 把 resume 停在二级复核（重新发现）中途，然后用户取消——
+      // 若无迟到发布屏障，闸门释放后 mismatch 结论会以旧会话的
+      // 终止态覆盖取消终态。
+      ble.discoverReplies.add({
+        'serviceId': 'fff0',
+        'writeCharId': 'fff2',
+        'notifyCharId': 'fff1',
+        'writeMode': 'without',
+      });
+      ble.rediscoverGate = Completer<void>();
+      final resumeFuture = service.resumeFromBackground();
+      await ble.rediscoverEntered.future;
+
+      notifyLog.clear();
+      await service.cancelUpgrade(keepPackage: true);
+      expect(service.phase, OtaPhase.cancelled);
+      expect(service.upgradeStatus, '操作已取消');
+      expect(await startFuture, isFalse);
+
+      // 释放复核闸门：迟到的复核结论必须静默丢弃。
+      ble.rediscoverGate!.complete();
+      await resumeFuture;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(service.terminalState, isNull,
+          reason: '迟到复核结论不得覆盖取消终态');
+      expect(notifyLog.any((l) => l.contains('已终止')), isFalse,
+          reason: '迟到复核结论不得再发终止通知');
+      expect(service.phase, OtaPhase.cancelled);
+      expect(service.upgradeStatus, '操作已取消');
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('后台恢复三级复核通过：恢复发送并完成传输（RC3-08⑦ 正例）', () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      ble.dataGate = Completer<void>();
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataGated.future;
+
+      service.pauseForBackground();
+      await service.resumeFromBackground();
+
+      // 三级复核全部真实执行（重新发现 + INFO），且不置终止态。
+      expect(ble.discoverCalls, 3);
+      expect(ble.getInfoCalls, 3);
+      expect(service.terminalState, isNull, reason: '复核通过不得置终止态');
+
+      // 恢复后释放挂起 ACK：传输走完全程（含 END 与重启后身份复核）。
+      ble.releaseDataGate();
+      expect(await startFuture, isTrue);
+      expect(service.phase, OtaPhase.completed);
+      expect(ble.endCalls, 1);
+      expect(ble.abortCalls, 0, reason: '复核通过不得发 ABORT');
+    }, timeout: const Timeout(Duration(seconds: 30)));
   });
 }
 
@@ -662,21 +1252,36 @@ class _DownloadOkAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-/// 下载错误响应（状态码 + JSON 错误体，RC3-10⑤）。
-class _DownloadErrorReply {
-  _DownloadErrorReply(this.status, this.body);
+/// 下载侧预置响应（RC3-10⑤）：JSON 错误体，或 200 原始包体
+/// （content-length 与字节数一致，供 SHA 校验分支使用）。
+class _DownloadStagedReply {
+  _DownloadStagedReply.json(this.status, this.body) : bytes = null;
+
+  _DownloadStagedReply.raw(this.status, Uint8List data)
+      : body = null,
+        bytes = data;
 
   final int status;
-  final String body;
+  final String? body;
+  final Uint8List? bytes;
 }
 
-/// 下载侧错误状态机：按请求顺序逐个消费预置响应（每请求一份，
-/// 耗尽即抛，用例应在此之前完成全部断言）。
-class _DownloadStagedErrorAdapter implements HttpClientAdapter {
-  _DownloadStagedErrorAdapter(this.replies);
+/// 下载侧状态机：按请求顺序逐个消费预置响应（每请求一份，耗尽即抛）。
+///
+/// [requests]/[remaining] 供用例断言"目标响应真正被消费"与"没有多发
+/// 请求"：只断言终态而不数请求，会让预置却从未被消费的响应伪装成覆盖
+/// （RC3-10⑤ 原用例即因此空转）。
+class _DownloadStagedAdapter implements HttpClientAdapter {
+  _DownloadStagedAdapter(this.replies);
 
-  final List<_DownloadErrorReply> replies;
+  final List<_DownloadStagedReply> replies;
   var _index = 0;
+
+  /// 已消费的下载请求数。
+  int get requests => _index;
+
+  /// 未被消费的预置响应数。
+  int get remaining => replies.length - _index;
 
   @override
   Future<ResponseBody> fetch(
@@ -688,8 +1293,58 @@ class _DownloadStagedErrorAdapter implements HttpClientAdapter {
       throw StateError('download 请求数超出预置: ${_index + 1}');
     }
     final reply = replies[_index++];
-    return ResponseBody.fromString(reply.body, reply.status, headers: {
+    final bytes = reply.bytes;
+    if (bytes != null) {
+      return ResponseBody(
+        Stream<Uint8List>.fromIterable([bytes]),
+        reply.status,
+        headers: {
+          'content-length': ['${bytes.length}'],
+        },
+      );
+    }
+    return ResponseBody.fromString(reply.body!, reply.status, headers: {
       'content-type': ['application/json'],
+    });
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// 下载侧可闸适配器（RC3-04⑦）：正文首块交付后挂起，[entered] 完成
+/// 即证明下载已真实进入写盘阶段（`.part` 与 sidecar 已落盘），测试据此
+/// 在「取消窗口内新 owner 的同资产下载在途」时刻做后续编排。
+class _DownloadGatedAdapter implements HttpClientAdapter {
+  _DownloadGatedAdapter(this.bytes);
+
+  final Uint8List bytes;
+
+  /// 非 null 且未完成时，首块之后挂起正文流。
+  Completer<void>? gate;
+
+  /// 首块已交付且正文流正被闸住。
+  final Completer<void> entered = Completer<void>();
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final half = bytes.length ~/ 2;
+    Stream<Uint8List> body() async* {
+      yield Uint8List.sublistView(bytes, 0, half);
+      final g = gate;
+      if (g != null && !g.isCompleted) {
+        if (!entered.isCompleted) entered.complete();
+        await g.future;
+      }
+      yield Uint8List.sublistView(bytes, half);
+    }
+
+    return ResponseBody(body(), 200, headers: {
+      'content-length': ['${bytes.length}'],
     });
   }
 
@@ -831,13 +1486,28 @@ class _UpgradeFakeBle extends BluetoothService {
     }
     final payloadLen = le32(32);
     if (flags == 0x000B) {
-      // full：base_vcode=0 且 base_sha8 全零 且 payload_len!=0。
-      if (le32(44) != 0 ||
-          le32(52) != 0 ||
-          le32(56) != 0 ||
-          payloadLen == 0) {
+      // full（真值 ota_sd.c:316-328）：base_vcode=0 且 base_sha8 全零，
+      // 否则 ERR_BASE；payload_len==0 属长度域，真值返回
+      // OTA_SD_ERR_PACKAGE_LENGTH → ERR_LEN，不是 ERR_BASE。
+      if (le32(44) != 0 || le32(52) != 0 || le32(56) != 0) {
         return OtaBleCodec.statusErrBase;
       }
+      if (payloadLen == 0) return OtaBleCodec.statusErrLen;
+    } else {
+      // patch（真值 ota_sd.c:329-341）：base_vcode 必须等于设备当前
+      // 版本，base_sha8 必须等于设备 image_sha256 前 8B（真值链
+      // HAL_Bluetooth.cpp:94 → ota_sd_device_t.base_image_sha8）；
+      // payload_len 必须严格大于 patch 内层头 40B。旧 fake 完全没有
+      // patch 分支，任何 base 域都会被放行。
+      if (le32(44) != device.currentVersionCode) {
+        return OtaBleCodec.statusErrBase;
+      }
+      for (var i = 0; i < 8; i++) {
+        if (etu[52 + i] != device.imageSha256[i]) {
+          return OtaBleCodec.statusErrBase;
+        }
+      }
+      if (payloadLen <= 40) return OtaBleCodec.statusErrLen;
     }
     // package_len 恒 64+payload_len 且 payload_len <= 0x180000-64。
     if (payloadLen > 0x180000 - 64 || 64 + payloadLen != totalLen) {
@@ -863,11 +1533,57 @@ class _UpgradeFakeBle extends BluetoothService {
   /// DATA 帧正处于多片写在途」的真实交错窗口。
   Duration? writeChunkDelay;
 
+  // ---- 测试注入：后台恢复复核与取消窗口（RC3-04⑦/08⑦）----
+  /// 链路代次注入（RC3-08⑦ 一级复核）：resumeFromBackground 经
+  /// BluetoothService.otaLinkGeneration 读取当前代次，fake 覆写为可变
+  /// 字段，测试在传输在途后改值模拟「后台期间断开重连」。
+  int linkGeneration = 0;
+
+  /// findExact 调用观测计数：断言二级复核是否真的执行了重新发现
+  /// （一级复核失败时不得触发），与 getInfoCalls 配对使用。
+  int discoverCalls = 0;
+
+  /// 重新发现应答队列（RC3-08⑦ 二级复核）：非空时
+  /// [findExactOtaCharacteristicsByAddress] 按调用顺序弹出（元素 null
+  /// 表示该次发现失败返回 null），弹尽后回落默认特征表——绑定与复核
+  /// 两次调用可分别注入不同结果。
+  final List<Map<String, String>?> discoverReplies = [];
+
+  /// 重新发现闸门（RC3-04⑦ 迟到发布）：非 null 且未完成时，
+  /// findExact 在返回前挂起，[rediscoverEntered] 完成；用于把
+  /// resumeFromBackground 的复核停在中途，构造「复核未决时用户取消」
+  /// 的真实交错。
+  Completer<void>? rediscoverGate;
+  final Completer<void> rediscoverEntered = Completer<void>();
+
+  /// GET_INFO 应答身份覆写（RC3-08⑦ 三级复核 / RC3-12⑦）：非 null 时
+  /// GET_INFO 恒回该 payload（如另一台硬件的身份），模拟后台期间设备
+  /// 被更换或重读到不同身份。
+  List<int>? infoOverride;
+
+  /// GET_INFO 观测计数（不分重启前后）：断言三级复核确实发了 INFO，
+  /// 而不是在更早层级就返回了。
+  int getInfoCalls = 0;
+
+  /// ABORT 物理写闸门（RC3-04⑦）：非 null 且未完成时，ABORT 帧的
+  /// writeOtaCharacteristic 在送达 fake 前挂起，[abortWriteEntered]
+  /// 完成。MTU 247 下 ABORT 帧（10B）单片送达，chunk 头 3 字节即
+  /// sync0/sync1/cmdAbort，判定可靠。用于把 cancelUpgrade 停在
+  /// `await transport.abortBestEffort()` 处，构造「ABORT 在途期间新
+  /// owner 进出」的取消窗口。
+  Completer<void>? abortWriteGate;
+  final Completer<void> abortWriteEntered = Completer<void>();
+
   // ---- 观测 ----
   int beginCalls = 0;
   int endCalls = 0;
   int abortCalls = 0;
   final dataOffsets = <int>[];
+  /// 每帧 DATA 的判定结果（判定时刻记录，不受 ACK 闸门延迟影响）：
+  /// RC3-03 段判据模型测试的观测点。
+  final dataAckStatuses = <int>[];
+  /// BEGIN ACK 的 status 序列（观测点，同上）。
+  final beginAckStatuses = <int>[];
   Uint8List? beginShaBytes;
   Uint8List? endShaBytes;
 
@@ -880,12 +1596,27 @@ class _UpgradeFakeBle extends BluetoothService {
   Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {}
 
   @override
+  int otaLinkGeneration(String deviceAddress) => linkGeneration;
+
+  @override
   Future<Map<String, String>?> findExactOtaCharacteristicsByAddress(
     String deviceAddress, {
     String serviceUuid = 'fff0',
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
   }) async {
+    discoverCalls++;
+    // 复核闸门（RC3-04⑦）：绑定调用（startOtaUpgrade/readDeviceInfo）
+    // 不设闸，测试只在传输在途后设闸，挂起的是 resume 的重新发现。
+    final gate = rediscoverGate;
+    if (gate != null && !gate.isCompleted) {
+      if (!rediscoverEntered.isCompleted) rediscoverEntered.complete();
+      await gate.future;
+    }
+    if (discoverReplies.isNotEmpty) {
+      final reply = discoverReplies.removeAt(0);
+      return reply == null ? null : Map<String, String>.of(reply);
+    }
     return {
       'serviceId': 'fff0',
       'writeCharId': 'fff2',
@@ -921,6 +1652,19 @@ class _UpgradeFakeBle extends BluetoothService {
       // 慢速写：延迟期间数据未入 _feed——调用方（transport 的逐片
       // await 写序列）在写完成前不会发下一片，构造真实分片在途。
       await Future<void>.delayed(delay);
+    }
+    // ABORT 物理写闸门（RC3-04⑦）：cancelUpgrade 停在
+    // `await transport.abortBestEffort()` 时，ABORT 帧正处于本写调用
+    // 在途未送达——闸住此处的就是那个窗口。
+    if (data.length >= 3 &&
+        data[0] == OtaBleCodec.frameSync0 &&
+        data[1] == OtaBleCodec.frameSync1 &&
+        data[2] == OtaBleCodec.cmdAbort) {
+      final gate = abortWriteGate;
+      if (gate != null && !gate.isCompleted) {
+        if (!abortWriteEntered.isCompleted) abortWriteEntered.complete();
+        await gate.future;
+      }
     }
     _feed(data);
   }
@@ -971,6 +1715,9 @@ class _UpgradeFakeBle extends BluetoothService {
   }
 
   void _send(int cmd, int session, int seq, List<int> payload) {
+    if (cmd == OtaBleCodec.rspAckBegin && payload.isNotEmpty) {
+      beginAckStatuses.add(payload[0]);
+    }
     _notifyController.add(OtaBleCodec.encodeCommand(
       cmd: cmd,
       session: session,
@@ -985,8 +1732,12 @@ class _UpgradeFakeBle extends BluetoothService {
     // INFO 帧：session=0、seq 回显请求 seq（§5.6）。
     // 重启状态机：END OK 前恒旧身份；之后前 rebootDelayProbes 次
     // 探测仍旧身份（MCU 重启中），再报新身份。
+    getInfoCalls++;
     final List<int> payload;
-    if (!_rebooted) {
+    final override = infoOverride;
+    if (override != null) {
+      payload = override;
+    } else if (!_rebooted) {
       payload = preRebootPayload;
     } else {
       _probeCount++;
@@ -1093,13 +1844,23 @@ class _UpgradeFakeBle extends BluetoothService {
     }
     _expectedSeq = (f.seq + 1) & 0xFFFF;
 
-    // 段校验链（真值 :526-548）：对齐、长度、范围内。
+    // 段校验链（真值 ota_ble_session.c:526-548）：三条独立判据，错误码
+    // 互不相同——对齐不符 → ERR_OFFSET；非尾部短段/空段 → ERR_FRAME；
+    // 越包尾 → ERR_OFFSET。旧 fake 把三者并成一条 ERR_LEN，既错分类，
+    // 又把 transport 的可恢复分支（ERR_FRAME/ERR_SEQ 在
+    // _resumeStatuses 里）伪装成不可恢复的终止错误。
     final content = Uint8List.fromList(f.payload.sublist(4));
-    if (off % OtaBleCodec.dataSegmentSize != 0 ||
-        content.isEmpty ||
-        content.length > OtaBleCodec.dataSegmentSize ||
-        off + content.length > _totalLen) {
-      _emitDataAck(OtaBleCodec.statusErrLen, f);
+    if (off % OtaBleCodec.dataSegmentSize != 0) {
+      _emitDataAck(OtaBleCodec.statusErrOffset, f);
+      return;
+    }
+    if (content.length != OtaBleCodec.dataSegmentSize &&
+        off + content.length != _totalLen) {
+      _emitDataAck(OtaBleCodec.statusErrFrame, f);
+      return;
+    }
+    if (off >= _totalLen || off + content.length > _totalLen) {
+      _emitDataAck(OtaBleCodec.statusErrOffset, f);
       return;
     }
     if (off < _stagedDurable) {
@@ -1107,6 +1868,16 @@ class _UpgradeFakeBle extends BluetoothService {
       // 摘要（真值 :550-558，RC3-03⑤——缺此分支时重发段会经
       // _segContent 误判 DUPLICATE 或重复喂 SHA，污染内容 oracle）。
       _emitDataAck(OtaBleCodec.statusOk, f);
+      return;
+    }
+    // staging 层长度判据（真值 ota_staging_receive :485-493）：
+    // expected_len = min(total-off, 128)，不符即 ERR_RANGE → ERR_OFFSET。
+    // 会话层只挡"非尾部短段"，尾部段还要在这里钉死精确长度。
+    final expectedLen = (_totalLen - off) < OtaBleCodec.dataSegmentSize
+        ? (_totalLen - off)
+        : OtaBleCodec.dataSegmentSize;
+    if (content.length != expectedLen) {
+      _emitDataAck(OtaBleCodec.statusErrOffset, f);
       return;
     }
     // 越当前 4KB 窗（RC3-03⑤，真值 ota_staging_receive :499-503）：
@@ -1119,8 +1890,18 @@ class _UpgradeFakeBle extends BluetoothService {
       _emitDataAck(OtaBleCodec.statusErrOffset, f);
       return;
     }
-    if (_segContent.containsKey(off)) {
-      // DUPLICATE：同段幂等 OK（真值 :576-580）。
+    final staged = _segContent[off];
+    if (staged != null) {
+      // 位图已置位的同段重发（真值 ota_staging_receive :508-516）：
+      // 内容相同 → DUPLICATE 幂等 OK；内容不同 → ERR_DATA，会话层
+      // 映射 ABORTED 并 teardown（ota_ble_session.c:585-591）。旧 fake
+      // 无条件回 OK，等于把"同 offset 两份不同数据"这类真实损坏
+      // 静默吞掉。
+      if (!_bytesEqual(staged, content)) {
+        _emitDataAck(OtaBleCodec.statusAborted, f);
+        _teardown();
+        return;
+      }
       _emitDataAck(OtaBleCodec.statusOk, f);
       return;
     }
@@ -1227,6 +2008,7 @@ class _UpgradeFakeBle extends BluetoothService {
   /// DATA ACK 发射（应答时刻组装 payload 快照，RC3-03；受 dataGate
   /// 挂起控制：帧处理照常，仅 ACK 发送挂起）。
   void _emitDataAck(int status, OtaBleFrame f) {
+    dataAckStatuses.add(status);
     final payload = packAck(
         status, _stagedDurable, _state == _active ? _stagedBitmap : 0);
     final session = _sessionId;

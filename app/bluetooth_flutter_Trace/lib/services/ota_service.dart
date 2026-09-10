@@ -168,6 +168,16 @@ class OtaService extends GetxController {
   /// metadata 请求，不等待其自然超时。
   CancelToken? _activeLatestToken;
   OtaBleTransport? _transport;
+  /// 当前 [_transport] 绑定时的物理链路快照（RC3-08⑦）。
+  ///
+  /// transport 对象活着不等于底层链路还是绑定时那一条：后台期间系统
+  /// 可能断开旧连接后重连（甚至连到同地址的另一台设备）。恢复发送前
+  /// 必须用这三项与现场重新比对——链路代次（BluetoothService 观测的
+  /// 真实连接迁移）、可重新发现的 OTA 特征、以及 INFO 身份，缺一不可：
+  /// 只读 INFO 无法区分「同一条链路」与「新链路上的同型号设备」。
+  String? _boundAddress;
+  Map<String, String>? _boundChars;
+  int? _boundLinkGeneration;
   /// 取消代次：cancelUpgrade 递增；在途操作发现代次变化即静默退出。
   int _cancelGeneration = 0;
   /// 当前 owner 的完成信号（RC3-04）：非 null 表示有升级族操作在途。
@@ -182,6 +192,17 @@ class OtaService extends GetxController {
   /// 设备身份快照所属的 BLE 地址（RC3-08）：换设备连接时旧快照立即
   /// 失效，不得用 A 设备的身份给 B 设备发请求/传输。
   String? _deviceInfoAddress;
+  /// 签署当前保留资产的身份与地址（RC3-12⑦）。
+  ///
+  /// 资产（_latestInfo/_asset/_releaseId/_firmwareFile/_verified）由某次
+  /// 设备身份查询签发，其有效性绑定该身份，而不是绑定「上一次快照」。
+  /// 读取失败会把 _deviceInfo/_deviceInfoAddress 一并清空，因此仅用
+  /// previous 快照比对会漏掉「身份 A 有资产 → 读取失败 → 读到 B」：B 与
+  /// null 不算漂移，A 的清单与包被沿用给 B，随后的 BEGIN 复核是 B 比 B
+  /// 也一样通过。资产自带签署者后，任何无法证明归属当前身份/地址的资产
+  /// 都直接作废（fail-closed）。
+  DeviceOtaInfo? _assetOwnerInfo;
+  String? _assetOwnerAddress;
   /// 最近一次成功 latest 查询使用的显式 channel（RC3-10⑤）：URL 过期
   /// 自动刷新必须绑定同一查询身份，不得退回默认通道。
   String? _lastCheckedChannel;
@@ -201,6 +222,10 @@ class OtaService extends GetxController {
   /// 当前领域阶段（UI 唯一驱动源）。
   OtaPhase get phase => _phase.value;
   Rx<OtaPhase> get phaseRx => _phase;
+  /// 状态文案的 Rx 暴露（RC3-12）：终态发布次序的发布时刻观测点——
+  /// 监听器在赋值同步段内触发，可在回调里核对 IO 事实（如包文件是否
+  /// 已删除），而非仅在取消流程返回后补断言。
+  Rx<String> get upgradeStatusRx => _upgradeStatus;
 
   @override
   void onInit() {
@@ -236,12 +261,6 @@ class OtaService extends GetxController {
       return _deviceInfo;
     }
     return _runExclusive((generation) async {
-      final previousInfo = _deviceInfo; // RC3-08⑤/12⑤：身份漂移比对基准
-      // RC3-12⑤：地址快照独立于身份快照——身份字段比对只能发现「换到
-      // 了不同型号/版本的设备」，换到同型号同版本的另一台设备时身份
-      // 巧合相同，但地址已变：旧地址建立的清单/包/终态与设备绑定关系
-      // 随地址作废，不得沿用。
-      final previousAddress = _deviceInfoAddress;
       _deviceInfo = null; // 先失效旧快照，成功才重建
       _deviceInfoAddress = null;
       try {
@@ -278,22 +297,23 @@ class OtaService extends GetxController {
         _deviceInfo = info;
         // 快照绑定来源地址（RC3-08）：换设备连接时旧快照失效。
         _deviceInfoAddress = deviceAddress;
-        // RC3-08⑤/12⑤：身份漂移时旧查询链结果一并作废——设备可能已
-        // 被更换或刷过别的版本，旧 latest/资产/已验证包属于另一身份，
-        // 不得沿用到新身份（否则新身份可不经 latest 检查直接用旧包
-        // 升级到错误目标）。
-        if (previousInfo != null &&
-            !deviceIdentityMatches(previousInfo, info)) {
+        // RC3-08⑤/12⑤/12⑦：资产失效以「签署这批资产的身份/地址」为
+        // 基准，不是「上一次快照」。旧写法捕获 previousInfo/
+        // previousAddress 后立即把两者置空，一旦中间夹了一次读取失败，
+        // 下次成功读到的 B 与 null 比对不算漂移，A 签发的 latest/资产/
+        // 已验证包就被沿用给 B，之后 BEGIN 的 recheck 是 B 比 B 同样
+        // 放行。改为比对资产签署者后，A→(失败)→B 也能判定失效；身份
+        // 字段巧合相同但地址已变（同型号另一台设备）同样失效。
+        if (_hasFirmwareAssets && !_assetsBelongTo(info, deviceAddress)) {
+          final owner = _assetOwnerInfo;
+          // 签署者缺失（无法证明归属）与身份字段不符同级处理。
+          final identityDrift =
+              owner == null || !deviceIdentityMatches(owner, info);
           _clearFirmwareInfo();
           _terminalState.value = null;
-          _upgradeStatus.value = '设备身份已变更，旧的固件清单与下载包已作废，请重新检查更新';
-        } else if (previousAddress != null &&
-            previousAddress != deviceAddress) {
-          // RC3-12⑤：地址漂移（身份字段巧合相同时也成立）——旧地址的
-          // 清单/资产/终态一并作废，提示重新检查更新。
-          _clearFirmwareInfo();
-          _terminalState.value = null;
-          _upgradeStatus.value = '设备地址已变更，旧的固件清单与下载包已作废，请重新检查更新';
+          _upgradeStatus.value = identityDrift
+              ? '设备身份已变更，旧的固件清单与下载包已作废，请重新检查更新'
+              : '设备地址已变更，旧的固件清单与下载包已作废，请重新检查更新';
         } else {
           // 显式重新建立有效查询链：终止态解锁（PR11）。
           _terminalState.value = null;
@@ -422,6 +442,10 @@ class OtaService extends GetxController {
       _latestInfo = latest;
       _asset = latest.asset;
       _releaseId = latest.releaseId;
+      // 登记签署者（RC3-12⑦）：本批资产由本次查询所用的身份/地址签发，
+      // 后续任何身份读取都以此为失效基准。
+      _assetOwnerInfo = info;
+      _assetOwnerAddress = _deviceInfoAddress;
       // 记忆本次查询身份（RC3-10⑤）：URL 过期刷新绑定同一 channel。
       _lastCheckedChannel = channel;
       _upgradeStatus.value = '发现新固件: ${latest.versionName}';
@@ -618,13 +642,11 @@ class OtaService extends GetxController {
       // 等已知非兼容码重发同请求必然复现，留在普通失败分支会允许
       // 用户无限次撞同一堵墙而不闭锁。
       final httpError = e.httpError;
-      // RC3-10：autoRetryable 判定对齐 _terminalFromDioError——errorCode
-      // 声称可自动重试（RATE_LIMITED/BACKEND_UNAVAILABLE）仅当 HTTP
-      // 状态为 429/503 时成立；其他状态（如 5xx 携带 RATE_LIMITED 码）
-      // 不得据此免除稳定闭锁判定，否则服务端错配的响应会被无限重试。
-      final autoRetryable = httpError != null &&
-          httpError.isAutoRetryable &&
-          (httpError.httpStatus == 429 || httpError.httpStatus == 503);
+      // RC3-10/11：autoRetryable/retryableLater 的 HTTP 状态约束已收敛到
+      // OtaHttpError（errorCode 必须与 OTA-XC-HTTP-ERROR 表的状态匹配才
+      // 成立），此处不再重复维护第二份状态表，避免两处判定漂移；错配响应
+      // （如 403 携带 CHANNEL_STOPPED）因此落入下面的稳定拒绝分支。
+      final autoRetryable = httpError != null && httpError.isAutoRetryable;
       final stableReject =
           (httpError != null &&
               (httpError.isTerminal ||
@@ -724,6 +746,14 @@ class OtaService extends GetxController {
     if (_deviceInfoAddress != deviceAddress) {
       _upgradeStatus.value = '设备身份快照与目标设备不符，请重新连接设备';
       _notify('错误', '设备身份与连接不符，请重新连接设备后再升级');
+      return false;
+    }
+    // 资产必须由当前身份签发（RC3-12⑦）：BEGIN 前的 recheck 只比对
+    // 「当前 INFO 与会话快照」，两者可以同为 B 而清单/包属于 A，比对
+    // 恒等通过。这里直接查资产签署者，无法证明归属即拒绝入口。
+    if (!_assetsBelongTo(info, deviceAddress)) {
+      _upgradeStatus.value = '固件清单与下载包不属于当前设备身份，请重新检查更新';
+      _notify('错误', '固件包与当前设备身份不符，请重新检查更新');
       return false;
     }
     if (_isUpgrading.value) {
@@ -972,7 +1002,17 @@ class OtaService extends GetxController {
     if (transport != null && !transport.isCancelled) {
       await transport.abortBestEffort();
     }
-    if (assetId != null && download != null) {
+    // epoch 屏障（RC3-04⑦）：ABORT 等待期间可能有新 owner 登记并重新
+    // 下载**同一资产**。OtaFirmwareDownload 的取消资源全部按 assetId
+    // 索引——`_cancelTokens[assetId]` 会被新下载覆盖、`_inFlight[assetId]`
+    // 指向新 future、partial 文件名由 asset.fileName 决定同样是同一个。
+    // 此时再对快照 assetId 调 cancel(keepPartial:false)，等于取消新
+    // owner 的令牌、等它退出、再删它正在写的 partial：旧取消把后来者
+    // 的下载连根拔掉。旧在途下载在本函数首个 await 之前已由
+    // `_activeDownloadToken.cancel()` 中止，其自身退出路径会按取消语义
+    // 处置字节，跳过这次清理不留在途写入方。
+    final ownerTookOver = _ownerEpoch != epochAtCancel;
+    if (assetId != null && download != null && !ownerTookOver) {
       try {
         await download.cancel(assetId, keepPartial: false);
       } catch (e) {
@@ -1039,13 +1079,26 @@ class OtaService extends GetxController {
 
   /// App 回前台（RC3-08）：恢复传输发送循环与无进展预算计时。
   ///
-  /// RC3-08⑤：恢复发送**前**先经现有 transport 复核设备身份——后台
-  /// 期间设备可能被更换（系统断开旧连接、重连到别的设备），对变更后
-  /// 的设备继续发 DATA 会把旧包字节写进新设备。复核用会话开始快照
-  /// 逐字段比对（deviceIdentityMatches），不匹配则置终止态并尽力
-  /// ABORT、不恢复发送；复核失败（连接/读取异常）不阻断恢复——连接
-  /// 问题由传输自身的预算/重试处理。复核期间传输保持暂停（先探测
-  /// 后 resume，见函数尾）。
+  /// RC3-08⑤：恢复发送**前**先复核设备——后台期间设备可能被更换
+  /// （系统断开旧连接、重连到别的设备），对变更后的设备继续发 DATA
+  /// 会把旧包字节写进新设备。任一复核不通过或复核本身失败都 fail
+  /// closed：置终止态并尽力 ABORT、不恢复发送。复核期间传输保持暂停
+  /// （先探测后 resume，见函数尾）。
+  ///
+  /// RC3-08⑦ 三级复核，缺一不可：
+  /// 1. **物理链路代次**：BluetoothService 观测到的 connect/disconnect
+  ///    迁移。代次变了说明绑定时那条链路已不在，即使地址、身份字段
+  ///    全同也可能是新链路（同型号另一台设备同样匹配身份字段）；
+  /// 2. **重新发现**：链路重建后 GATT 句柄/特征可能整体变化，旧
+  ///    serviceId/charId 写下去不再指向 OTA 通道。重新发现结果必须与
+  ///    绑定时完全一致；
+  /// 3. **INFO 身份**：仍按会话开始快照逐字段比对。
+  ///
+  /// RC3-04⑦ 迟到发布屏障：三级复核都要 await，期间用户可能取消并
+  /// 开始新一轮（新 owner、新 transport）。每个 await 之后都要确认
+  /// 「取消代次未变且全局 transport 仍是本次快照」，否则静默退出——
+  /// 迟到的复核结论属于已结束的旧会话，发布它会用旧终止态覆盖新
+  /// owner 的进度/终态。
   Future<void> resumeFromBackground() async {
     final transport = _transport;
     if (transport == null) return;
@@ -1054,17 +1107,88 @@ class OtaService extends GetxController {
       transport.resumeFromBackground();
       return;
     }
+    final generation = _cancelGeneration;
+    // 快照绑定现场：resume 期间 _bindTransport 可能被新 owner 调用并
+    // 覆盖这三项，因此比对基准必须在首个 await 前取。
+    final address = _boundAddress;
+    final boundChars = _boundChars;
+    final boundLink = _boundLinkGeneration;
+    bool stale() =>
+        generation != _cancelGeneration || !identical(_transport, transport);
+
+    Future<void> failClosed(String code, String message,
+        {bool retryableLater = false}) async {
+      if (stale()) return;
+      _terminalState.value = OtaTerminalState(
+        code: code,
+        message: message,
+        retryableLater: retryableLater,
+      );
+      _upgradeStatus.value = retryableLater
+          ? '设备复核失败（后台恢复），升级已终止，可重试续传'
+          : '设备复核失败（后台恢复），升级已终止';
+      _notify('错误', _terminalState.value!.userMessage);
+      await transport.abortBestEffort();
+    }
+
+    if (address == null || boundChars == null || boundLink == null) {
+      // 无绑定现场即无法证明链路未变（fail closed）：正常路径下
+      // _bindTransport 必然写入三项，缺失说明 transport 来源不可核。
+      await failClosed(
+        'DEVICE_RECHECK_FAILED',
+        '后台恢复时缺少连接绑定信息，无法确认链路未变更，已终止升级',
+        retryableLater: true,
+      );
+      return;
+    }
+
+    // 1. 物理链路代次（同步读取，不引入新的迟到窗口）。
+    final currentLink = _ble.otaLinkGeneration(address);
+    if (currentLink != boundLink) {
+      await failClosed(
+        'DEVICE_LINK_CHANGED',
+        '后台期间蓝牙连接已断开重连（链路代次 $boundLink→$currentLink），'
+            '无法确认仍是同一条连接，已终止升级',
+        retryableLater: true,
+      );
+      return;
+    }
+
+    // 2. 重新发现 OTA 特征（有界）。
+    Map<String, String>? rediscovered;
+    try {
+      rediscovered = await _ble
+          .findExactOtaCharacteristicsByAddress(address)
+          .timeout(const Duration(seconds: 5));
+    } catch (e) {
+      if (stale()) return;
+      await failClosed(
+        'DEVICE_RECHECK_FAILED',
+        '后台恢复时重新发现 OTA 服务失败（$e），已终止升级',
+        retryableLater: true,
+      );
+      return;
+    }
+    if (stale()) return;
+    if (rediscovered == null || !_charsMatch(rediscovered, boundChars)) {
+      await failClosed(
+        'DEVICE_LINK_CHANGED',
+        '后台恢复时 OTA 服务/特征与绑定时不一致，已终止升级',
+        retryableLater: true,
+      );
+      return;
+    }
+
+    // 3. INFO 身份。
     try {
       final current = await transport.getDeviceInfo(
           timeout: const Duration(seconds: 3));
+      if (stale()) return;
       if (!deviceIdentityMatches(current, sessionInfo)) {
-        _terminalState.value = OtaTerminalState(
-          code: 'DEVICE_IDENTITY_CHANGED',
-          message: '后台恢复时设备身份与会话开始时不一致，已终止升级',
+        await failClosed(
+          'DEVICE_IDENTITY_CHANGED',
+          '后台恢复时设备身份与会话开始时不一致，已终止升级',
         );
-        _upgradeStatus.value = '设备身份复核失败（后台恢复），升级已终止';
-        _notify('错误', _terminalState.value!.userMessage);
-        await transport.abortBestEffort();
         return;
       }
     } catch (e) {
@@ -1073,17 +1197,29 @@ class OtaService extends GetxController {
       // 继续发送会把旧包字节写进未知设备。置终止态并尽力 ABORT 停止
       // 发送循环；MCU durable 层保留已落盘字节，重试经 BEGIN 幂等 +
       // durable 续传恢复，不依赖本会话续发。
-      _terminalState.value = OtaTerminalState(
-        code: 'DEVICE_RECHECK_FAILED',
-        message: '后台恢复时无法复核设备身份（$e），已终止升级',
+      if (stale()) return;
+      await failClosed(
+        'DEVICE_RECHECK_FAILED',
+        '后台恢复时无法复核设备身份（$e），已终止升级',
         retryableLater: true,
       );
-      _upgradeStatus.value = '设备身份复核失败（后台恢复），升级已终止，可重试续传';
-      _notify('错误', _terminalState.value!.userMessage);
-      await transport.abortBestEffort();
       return;
     }
+    // 复核期间被取消/被新 owner 接管时不得恢复旧发送循环。
+    if (stale()) return;
     transport.resumeFromBackground();
+  }
+
+  /// 重新发现结果是否与绑定时完全一致（RC3-08⑦）。
+  ///
+  /// 逐键全等（含 writeMode）：写模式变化意味着写入语义变了，同样
+  /// 不能沿用旧通道继续发。
+  bool _charsMatch(Map<String, String> a, Map<String, String> b) {
+    if (a.length != b.length) return false;
+    for (final entry in a.entries) {
+      if (b[entry.key] != entry.value) return false;
+    }
+    return true;
   }
 
   /// 清理已下载固件包（RC3-12①）。
@@ -1225,7 +1361,15 @@ class OtaService extends GetxController {
     // 迁移），60s 总预算必须覆盖断开与全部轮询，不得从断开完成后才
     // 开始计费（否则断开耗时会无声挤占重启等待窗口）。
     final deadline = DateTime.now().add(const Duration(seconds: 60));
-    await _ble.disconnectOtaDeviceByAddress(deviceAddress);
+    // RC3-08⑦：主动断开自身必须有界。disconnectOtaDeviceByAddress 是
+    // 尽力平台调用（WinBle disconnect / flutter_blue_plus disconnect），
+    // 协议栈异常或设备已在重启途中时可能永不 resolve——无界 await 会把
+    // 「至多 60s 必返回」的重启等待变成永久挂起：deadline 已建立却永远
+    // 走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：断开
+    // 只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。
+    await _ble
+        .disconnectOtaDeviceByAddress(deviceAddress)
+        .timeout(const Duration(seconds: 5), onTimeout: () {});
     while (DateTime.now().isBefore(deadline)) {
       if (generation != _cancelGeneration) {
         return const _RebootOutcome(_RebootKind.cancelled);
@@ -1406,6 +1550,11 @@ class OtaService extends GetxController {
       );
       final transport = OtaBleTransport(channel: channel);
       _transport = transport;
+      // RC3-08⑦：记录本次绑定所依附的物理链路（地址 + 链路代次 +
+      // 实际发现到的特征）。后台恢复据此判断链路是否已被换掉。
+      _boundAddress = deviceAddress;
+      _boundChars = Map<String, String>.unmodifiable(otaChars);
+      _boundLinkGeneration = _ble.otaLinkGeneration(deviceAddress);
       return transport;
     } catch (e) {
       debugPrint('绑定 OTA transport 失败: $e');
@@ -1457,7 +1606,8 @@ class OtaService extends GetxController {
 
   /// latest 请求的自动重试判定（RC3-10）——先分类，后重试：
   /// - 可解析错误体 → 按 OtaHttpError 稳定 errorCode 分类，仅
-  ///   isAutoRetryable **且 HTTP 状态为 429/503**（契约语义）时重试；
+  ///   isAutoRetryable 时重试（该判定内部已要求 HTTP 状态符合
+  ///   OTA-XC-HTTP-ERROR 表：RATE_LIMITED=429、BACKEND_UNAVAILABLE=503）；
   ///   终止/未知/坏 schema 均不重试（fail closed，交
   ///   _terminalFromDioError 处置）；
   /// - 无体/不可解析体 → 仅裸 429/503 状态码重试；
@@ -1481,9 +1631,8 @@ class OtaService extends GetxController {
             response.statusCode ?? 0,
             requestIdHeader: _firstHeader(response.headers, 'x-request-id'),
           );
-          final status = response.statusCode;
-          return httpError.isAutoRetryable &&
-              (status == 429 || status == 503);
+          // 状态约束在 OtaHttpError 内（RC3-10/11），此处不重复维护状态表。
+          return httpError.isAutoRetryable;
         } on OtaLatestParseException {
           // 坏 schema：不重试未知。
           return false;
@@ -1526,6 +1675,30 @@ class OtaService extends GetxController {
     _releaseId = null;
     _firmwareFile = null;
     _verified = null;
+    // 签署者随资产一起清除（RC3-12⑦）：残留 owner 会让下一批资产在
+    // 尚未登记签署者时看起来"已归属"。
+    _assetOwnerInfo = null;
+    _assetOwnerAddress = null;
+  }
+
+  /// 是否仍持有任何固件资产（RC3-12⑦）。
+  bool get _hasFirmwareAssets =>
+      _latestInfo != null ||
+      _asset != null ||
+      _releaseId != null ||
+      _firmwareFile != null ||
+      _verified != null;
+
+  /// 保留的资产是否确属 [info]/[address] 这一身份（RC3-12⑦）。
+  ///
+  /// 没有资产时为真（无可失效对象）。有资产但签署者缺失时为假——无法
+  /// 证明归属即视为不属于（fail-closed），不做"大概是同一台"的推定。
+  bool _assetsBelongTo(DeviceOtaInfo info, String address) {
+    if (!_hasFirmwareAssets) return true;
+    final owner = _assetOwnerInfo;
+    return owner != null &&
+        deviceIdentityMatches(owner, info) &&
+        _assetOwnerAddress == address;
   }
 
   /// 终止型/闭锁型 HTTP 错误分类（PR11）：所有非 2xx 状态的错误体都
@@ -1560,7 +1733,10 @@ class OtaService extends GetxController {
         status,
         requestIdHeader: _firstHeader(response.headers, 'x-request-id'),
       );
-      if (httpError.isAutoRetryable && (status == 429 || status == 503)) {
+      // 状态约束在 OtaHttpError.isAutoRetryable / isRetryableLater 内部
+      // （RATE_LIMITED=429、BACKEND_UNAVAILABLE=503、CHANNEL_STOPPED=200/503），
+      // 此处不重复判定；状态错配的响应直接落到下面的稳定终态分支（RC3-10/11）。
+      if (httpError.isAutoRetryable) {
         if (!retryExhausted) return null; // 重试层还会继续
         // 自动重试耗尽：可稍后重试终态（不闭锁入口，但调用方会清资产）。
         return OtaTerminalState(

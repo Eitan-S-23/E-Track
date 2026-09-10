@@ -454,6 +454,67 @@ void main() {
         throwsA(isA<OtaLatestParseException>()),
       );
     });
+
+    // RC3-10/11：重试类判定必须同时匹配 errorCode 与 OTA-XC-HTTP-ERROR 表
+    // 的 HTTP 状态。只看 errorCode 会让服务端（或错配中间层）用一个
+    // "稍后重试"码把 401/403/500 这类稳定拒绝包装成软失败——入口不闭锁，
+    // 用户可以无限次重撞同一堵墙。状态不符按 fail closed 交给稳定拒绝。
+    test('CHANNEL_STOPPED 挂在 403：不算稍后重试，诊断字段仍保留'
+        '（RC3-10/11）', () {
+      final err = OtaHttpError.fromBody({
+        'errorCode': 'CHANNEL_STOPPED',
+        'message': '渠道停服',
+        'requestId': 'r-403',
+      }, 403);
+      expect(err.isRetryableLater, isFalse);
+      expect(err.isAutoRetryable, isFalse);
+      expect(err.isUnknown, isFalse);
+      // 诊断/兼容字段不因状态约束被丢弃（终态展示与排查依赖它们）。
+      expect(err.message, '渠道停服');
+      expect(err.requestId, 'r-403');
+      expect(err.httpStatus, 403);
+    });
+
+    test('BACKEND_UNAVAILABLE 挂在 500 / RATE_LIMITED 挂在 503：均不可重试'
+        '（RC3-10/11）', () {
+      final backend500 = OtaHttpError.fromBody({
+        'errorCode': 'BACKEND_UNAVAILABLE',
+        'requestId': 'r-500',
+      }, 500);
+      expect(backend500.isAutoRetryable, isFalse);
+      expect(backend500.isRetryableLater, isFalse);
+      expect(backend500.requestId, 'r-500');
+      // 状态串味：RATE_LIMITED 的契约状态是 429，503 上不成立。
+      final rate503 = OtaHttpError.fromBody({
+        'errorCode': 'RATE_LIMITED',
+        'retryAfter': 5,
+      }, 503);
+      expect(rate503.isAutoRetryable, isFalse);
+      expect(rate503.retryAfterSeconds, 5);
+    });
+
+    test('CHANNEL_STOPPED 的 latest 侧 HTTP 200 形态仍是稍后重试'
+        '（RC3-10/11）', () {
+      // disable_latest=1 走 HTTP 200 业务结果（OTA-XC-LATEST），状态约束
+      // 不能把这条合法形态一并收紧。
+      final err = OtaHttpError.fromBody({
+        'errorCode': 'CHANNEL_STOPPED',
+        'message': '维护中',
+      }, 200);
+      expect(err.isRetryableLater, isTrue);
+      expect(err.isAutoRetryable, isFalse);
+    });
+
+    test('终止码不受状态约束影响：426 之外的状态仍然终止（RC3-10/11）', () {
+      // 终止方向是保守侧：状态错配时仍须终止，不得反向降级为可重试。
+      final err = OtaHttpError.fromBody({
+        'errorCode': 'CLIENT_TOO_OLD',
+        'minAppVersionCode': 60,
+      }, 500);
+      expect(err.isTerminal, isTrue);
+      expect(err.isRetryableLater, isFalse);
+      expect(err.minAppVersionCode, 60);
+    });
   });
 
   group('parseLatestResponse', () {

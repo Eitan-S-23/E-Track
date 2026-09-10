@@ -278,6 +278,68 @@ def run_command(root, argv, cwd, env, log_path, timeout):
     return result
 
 
+def _porcelain_entries(payload):
+    """Split `status --porcelain=v1 -z` into (xy, path) pairs.
+
+    Rename/copy records emit the destination path first and the original path
+    as a separate NUL field; consuming it as another record would slice three
+    characters off a real path and silently misclassify it.
+    """
+    fields = [field for field in payload.split("\0") if field]
+    entries = []
+    index = 0
+    while index < len(fields):
+        field = fields[index]
+        index += 1
+        if len(field) < 4 or field[2] != " ":
+            raise ValueError(f"Unparsable porcelain record: {field!r}")
+        xy, path = field[:2], field[3:]
+        if "R" in xy or "C" in xy:
+            if index >= len(fields):
+                raise ValueError(f"Rename record without origin path: {field!r}")
+            index += 1  # 原路径字段属于同一条记录
+        entries.append((xy, path))
+    return entries
+
+
+def worktree_fingerprints(root, paths):
+    """Raw worktree bytes per path (`--no-filters`: no EOL normalisation).
+
+    Line-ending-only drift is already excluded when classifying an entry, so
+    the fingerprint must stay literal: normalising here would let a real
+    content change hide behind a filter.
+
+    `--untracked-files=normal` collapses an untracked directory into one
+    `dir/` record, which has no single byte string; it is fingerprinted as
+    `<dir>`, so content churn strictly inside a directory that already existed
+    at the start is not visible here. The APK gate closes that gap by
+    requiring a clean starting checkout, and a newly appearing directory still
+    changes the semantic path set.
+    """
+    ordinary = [path for path in paths if "\n" not in path]
+    if len(ordinary) != len(paths):
+        raise ValueError("Newline in a tracked path is not supported")
+    files = [path for path in ordinary if (root / path).is_file()]
+    prints = {}
+    if files:
+        digests = subprocess.run(
+            ["git", "--no-optional-locks", "-C", str(root), "hash-object",
+             "--no-filters", "--stdin-paths"],
+            cwd=root, input="\n".join(files) + "\n", capture_output=True,
+            text=True, encoding="utf-8", errors="replace", check=True,
+            timeout=60,
+        ).stdout.split()
+        if len(digests) != len(files):
+            raise ValueError("git hash-object returned a mismatched digest count")
+        prints = dict(zip(files, digests))
+    for path in paths:
+        if path in prints:
+            continue
+        # 目录记录（未跟踪目录整体折叠）与删除都没有 worktree 字节。
+        prints[path] = "<dir>" if (root / path).is_dir() else "<absent>"
+    return prints
+
+
 def checkout_identity(root):
     def git(*args):
         return subprocess.run(
@@ -308,33 +370,48 @@ def checkout_identity(root):
             cwd=root, capture_output=True, text=True, encoding="utf-8",
             errors="replace", check=True, timeout=15,
         ).stdout
-        for entry in entries.split("\0"):
-            if not entry:
-                continue
-            # X=index 状态，Y=worktree 状态；两端都无内容差异才视为行尾差异。
-            eol_only = (diff_quiet("--cached", "--", entry[3:])
-                        and diff_quiet("--", entry[3:]))
-            dirty.append({"path": entry[3:], "eol_only": eol_only})
+        for xy, path in _porcelain_entries(entries):
+            # `git diff` 不看未跟踪文件：对 ?? 记录两侧都"无差异"，按行尾
+            # 差异放行等于让任意未跟踪输入与干净检出等价（RC3-02 fail
+            # open）。未跟踪、重命名/复制、删除一律记为语义变化，只有
+            # 「两端都无内容差异」的跟踪态修改才算纯行尾差异。
+            eol_only = (xy not in ("??", "!!")
+                        and "R" not in xy and "C" not in xy and "D" not in xy
+                        and diff_quiet("--cached", "--", path)
+                        and diff_quiet("--", path))
+            dirty.append({"path": path, "xy": xy, "eol_only": eol_only})
+    semantic = [item["path"] for item in dirty if not item["eol_only"]]
     return {
         "head": git("rev-parse", "HEAD"),
         "clean": not status,
         "status": status,
-        "dirty_semantic": [item["path"] for item in dirty if not item["eol_only"]],
+        "dirty_semantic": semantic,
+        # 语义脏文件的实际内容指纹：只比路径列表会漏掉「同一个已脏文件
+        # 内容又变了」，而这正是被测输入是否漂移的关键（RC3-02）。
+        "dirty_semantic_sha": worktree_fingerprints(root, semantic),
         "dirty_eol_only": [item["path"] for item in dirty if item["eol_only"]],
+        "dirty_untracked": [item["path"] for item in dirty if item["xy"] == "??"],
     }
 
 
 def semantic_state(identity):
-    """checkout 的语义指纹：head + 语义脏文件列表（行尾差异不计入）。"""
-    return (identity["head"], tuple(identity["dirty_semantic"]))
+    """checkout 的语义指纹：head + 每个语义脏文件的 (路径, 内容指纹)。
+
+    指纹缺失时直接 KeyError：宁可炸开，也不能退化成只比路径列表。
+    """
+    prints = identity["dirty_semantic_sha"]
+    return (identity["head"],
+            tuple((path, prints[path])
+                  for path in sorted(identity["dirty_semantic"])))
 
 
 # Flutter 工具链自动改写的文件：pub get 会升级 analysis_options.yaml
 # （追加 exclude build/平台目录）并按当前 stable SDK 模板再生 Windows
 # 插件注册三件套；flutter build 会 "Upgrading gradle.properties"。
 # 它们不是被测源码：依赖输入由 lockfile_unchanged 哈希单独守门，插件
-# 注册内容是 lockfile 的确定性产物。APK 构建前后恢复提交字节，保证
-# 构建输入与被测提交完全一致。
+# 注册内容是 lockfile 的确定性产物。构建前后恢复提交字节只是让检出回到
+# 原状，**不能**据此声称构建消费的就是提交配置——实际生效字节必须由
+# bind_toolchain_regen 逐个绑定成证据（RC3-02）。
 TOOLCHAIN_REGENERATED = frozenset((
     "app/bluetooth_flutter_Trace/analysis_options.yaml",
     "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
@@ -344,11 +421,66 @@ TOOLCHAIN_REGENERATED = frozenset((
 ))
 
 
+def bind_toolchain_regen(root, identity, stage):
+    """Bind the effective bytes of every regenerated build input.
+
+    恢复提交字节不证明构建消费了提交配置（flutter 在 assembleDebug 前会
+    再次写入迁移开关）。这里在恢复之前把每个白名单文件的提交侧内容、实际
+    生效内容与统一 diff 记录下来，让"生效输入到底是什么"可被复核，而不是
+    用文件名白名单把任意改写一笔带过（RC3-02）。
+    """
+    bound = []
+    for path in identity["dirty_semantic"]:
+        if path not in TOOLCHAIN_REGENERATED:
+            continue
+        committed = subprocess.run(
+            ["git", "--no-optional-locks", "-C", str(root), "show",
+             f"HEAD:{path}"],
+            cwd=root, capture_output=True, timeout=15,
+        )
+        effective = (root / path).read_bytes() if (root / path).is_file() else b""
+        diff = subprocess.run(
+            ["git", "--no-optional-locks", "-C", str(root), "diff",
+             "--no-color", "HEAD", "--", path],
+            cwd=root, capture_output=True, text=True, encoding="utf-8",
+            errors="replace", timeout=15,
+        )
+        bound.append({
+            "stage": stage,
+            "path": path,
+            "committed_sha256": (hashlib.sha256(committed.stdout).hexdigest()
+                                 if committed.returncode == 0 else None),
+            "effective_sha256": hashlib.sha256(effective).hexdigest(),
+            "effective_bytes": len(effective),
+            "diff": diff.stdout if diff.returncode == 0 else None,
+        })
+    return bound
+
+
+def deltas_are_bound_toolchain_regen(source, current, bound):
+    """语义漂移是否全部落在已绑定证据的工具链再生文件上。
+
+    条件有三：起点未脏、head 未变、每个新增/变化的语义脏路径都在白名单内
+    且已被 bind_toolchain_regen 记录。任何一条不满足即不成立——白名单本身
+    不构成"输入没变"的结论。
+    """
+    if not source["clean"] or current["head"] != source["head"]:
+        return False
+    drifted = {path for path, _ in set(semantic_state(current)[1])
+               - set(semantic_state(source)[1])}
+    if not drifted:
+        return False
+    recorded = {item["path"] for item in bound}
+    return all(path in TOOLCHAIN_REGENERATED and path in recorded
+               for path in drifted)
+
+
 def restore_toolchain_regen(root, dirty_semantic):
     """语义脏仅限工具链再生白名单时，恢复这些文件的提交字节。
 
-    调用方须先确认起点 clean 且 head 未变（不触碰用户起点改动），
-    恢复后需重新 identify。返回是否执行了恢复。
+    调用方须先确认起点 clean 且 head 未变（不触碰用户起点改动），并已用
+    bind_toolchain_regen 绑定生效字节；恢复后需重新 identify。恢复只是把
+    检出复位，不产生任何"输入未变"的结论。返回是否执行了恢复。
     """
     if not dirty_semantic or not all(
             path in TOOLCHAIN_REGENERATED for path in dirty_semantic):
@@ -398,7 +530,8 @@ def save_report(root, path, report):
         output.write(json.dumps(report, indent=2, ensure_ascii=True) + "\n")
 
 
-def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=checkout_identity):
+def run_checks(root, scope, *, build_apk=False, execute=run_command,
+               identify=checkout_identity, bind=bind_toolchain_regen):
     root = checked_path(root, Path("."))
     if scope not in SCOPES:
         raise ValueError(f"Unknown test scope: {scope}")
@@ -446,6 +579,9 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
         ),
         "github_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
         "lock_sha256_before": lock_before,
+        # 工具链再生文件的实际生效字节证据（恢复前采集），见
+        # bind_toolchain_regen。
+        "toolchain_regen": [],
         "commands": [
             {"name": name, "argv": argv, "cwd": str(cwd),
              "timeout_seconds": timeout, "status": "NOT_RUN", "exit_code": None,
@@ -467,14 +603,22 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
             else:
                 # 工具链改写恢复（三重条件：起点干净 + head 未变 + 语义脏
                 # 仅限再生白名单）：只恢复本轮内 flutter 自动改写的文件，
-                # 不触碰起点已有的任何用户改动。
+                # 不触碰起点已有的任何用户改动。恢复前先把每个白名单文件的
+                # 生效字节绑定成证据——白名单只表示"允许由工具链再生"，
+                # 恢复本身不能证明构建消费的就是提交配置（RC3-02）。
                 current = identify(root)
-                if (source["clean"] and current["head"] == source["head"]
-                        and restore_toolchain_regen(root, current["dirty_semantic"])):
-                    current = identify(root)
-                if semantic_state(current) != semantic_state(source):
-                    blocked = ("APK generation requires the unchanged, "
-                               "committed checkout tested above")
+                report["toolchain_regen"] += bind(root, current, "before_apk")
+                if not source["clean"]:
+                    blocked = ("APK generation requires a clean starting "
+                               "checkout")
+                else:
+                    if (current["head"] == source["head"]
+                            and restore_toolchain_regen(
+                                root, current["dirty_semantic"])):
+                        current = identify(root)
+                    if semantic_state(current) != semantic_state(source):
+                        blocked = ("APK generation requires the unchanged, "
+                                   "committed checkout tested above")
         if blocked:
             command["reason"] = blocked
         else:
@@ -495,20 +639,26 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command, identify=ch
     report["lock_sha256_after"] = file_hash(lockfile)
     report["lockfile_unchanged"] = report["lock_sha256_after"] == lock_before
     report["source_after"] = identify(root)
-    # APK 构建期间 flutter 工具会再次再生白名单文件（"Upgrading
-    # gradle.properties" 等）：APK 已用提交字节构建完成，恢复后重取；
-    # 恢复前的原始状态保留为 source_after_pre_restore 供审计。
+    report["toolchain_regen"] += bind(root, report["source_after"], "after_run")
+    # source_after 保留恢复前的真实观测：构建期 flutter 会再次改写白名单文件
+    # （"Upgrading gradle.properties" 等），恢复只是把检出复位，不能据此声称
+    # 构建消费的就是提交字节。source_unchanged 因此按恢复前状态判定；APK 放行
+    # 另用 source_deltas_bound_toolchain_regen（漂移全部落在已绑定证据的再生
+    # 文件上）作为显式豁免，而不是把白名单当成"输入没变"（RC3-02）。
+    report["source_unchanged"] = (
+        semantic_state(report["source_after"]) == semantic_state(source))
+    report["source_deltas_bound_toolchain_regen"] = (
+        deltas_are_bound_toolchain_regen(
+            source, report["source_after"], report["toolchain_regen"]))
     if (source["clean"] and report["source_after"]["head"] == source["head"]
             and restore_toolchain_regen(root,
                                         report["source_after"]["dirty_semantic"])):
-        report["source_after_pre_restore"] = report["source_after"]
-        report["source_after"] = identify(root)
-    report["source_unchanged"] = (
-        semantic_state(report["source_after"]) == semantic_state(source))
+        report["source_after_restored"] = identify(root)
     passed = report["lockfile_unchanged"] and all(
         command["status"] == "PASS" for command in report["commands"]
     )
-    if build_apk and not report["source_unchanged"]:
+    if build_apk and not (report["source_unchanged"]
+                          or report["source_deltas_bound_toolchain_regen"]):
         passed = False
         report["error"] = "Source checkout changed during APK generation"
     report["development_result"] = "PASS" if passed else "FAIL"

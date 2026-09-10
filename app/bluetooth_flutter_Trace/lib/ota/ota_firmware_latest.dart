@@ -333,14 +333,38 @@ class OtaHttpError {
   final int? actualValue;
 
   /// 收到该错误后 Flutter 必须进入终止状态（不得转 NO_UPDATE、不得下载/BLE）。
+  ///
+  /// 终止判定**不加** HTTP 状态约束：终止本身是保守侧，服务端把终止码挂在
+  /// 非契约状态上时仍应终止，而不是降级成可重试。
   bool get isTerminal => _terminalCodes.contains(errorCode);
 
   /// 允许用户稍后重试（保留设备状态）。
-  bool get isRetryableLater => _retryLaterCodes.contains(errorCode);
+  ///
+  /// RC3-10/11：必须同时匹配 errorCode 与 OTA-XC-HTTP-ERROR 表规定的 HTTP
+  /// 状态。只看 errorCode 会让"稍后重试"绕开状态约束——服务端（或错配的
+  /// 中间层）把 `CHANNEL_STOPPED`/`BACKEND_UNAVAILABLE` 挂在 401/403/500
+  /// 等状态上时，明确的稳定拒绝会被判成软失败，用户可以无限次撞同一堵墙
+  /// 且入口不闭锁。状态不符按 fail closed 交给稳定拒绝分支处理。
+  bool get isRetryableLater =>
+      _retryLaterCodes.contains(errorCode) && _matchesRetryStatusContract;
 
-  /// OTA-XC-RETRY-POLICY 允许自动重试的网络类错误。
+  /// OTA-XC-RETRY-POLICY 允许自动重试的网络类错误（同样受状态约束）。
   bool get isAutoRetryable =>
-      errorCode == 'RATE_LIMITED' || errorCode == 'BACKEND_UNAVAILABLE';
+      (errorCode == 'RATE_LIMITED' || errorCode == 'BACKEND_UNAVAILABLE') &&
+      _matchesRetryStatusContract;
+
+  /// 本响应的 HTTP 状态是否符合该 errorCode 的契约状态集合。
+  bool get _matchesRetryStatusContract =>
+      _retryStatusContract[errorCode]?.contains(httpStatus) ?? false;
+
+  /// 重试类 errorCode 的契约 HTTP 状态（OTA-XC-HTTP-ERROR 表）。
+  /// `CHANNEL_STOPPED` 另有 latest 侧 `disable_latest=1` 的 HTTP 200 业务
+  /// 结果形态（OTA-XC-LATEST），两者都保留"稍后重试"语义。
+  static const Map<String, Set<int>> _retryStatusContract = {
+    'CHANNEL_STOPPED': {200, 503},
+    'BACKEND_UNAVAILABLE': {503},
+    'RATE_LIMITED': {429},
+  };
 
   /// 已知 errorCode 闭集合（OTA-XC-HTTP-ERROR 表）。
   static const Set<String> knownErrorCodes = {

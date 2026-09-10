@@ -828,14 +828,28 @@ class OtaBleTransport {
   /// 前序 DATA 的失败跳过（错误仍由各帧自身的 future 抛给调用方）。
   Future<void> _writeSerial = Future<void>.value();
 
-  /// 写通道废弃标志（RC3-05）：分片写超时意味着部分分片已落地 MCU，
+  /// 写通道废弃标记（RC3-05⑤）：分片写中断意味着部分分片已落地 MCU，
   /// 帧解析器悬空在半帧 payload 中——后续任何帧（含取消路径的 ABORT）
   /// 的同步字都会被吞进悬空帧的 payload/CRC 位置，无法恢复同步。
   /// MCU 真值（ota_ble_frame.c PAYLOAD 态按 len 吞全部字节，含 A5 5A）。
   /// 此时唯一正确行为是停止一切出站帧，靠 MCU 30s 会话超时
-  /// （CONFIG_OTA_BLE_SESSION_TIMEOUT_MS）teardown；该状态不可恢复，
-  /// 重连后由新 transport 实例重建写通道。
-  bool _writeChannelPoisoned = false;
+  /// （CONFIG_OTA_BLE_SESSION_TIMEOUT_MS）teardown。
+  ///
+  /// 作用域是**物理写通道对象**而非 transport 实例：`Future.timeout` 不取消
+  /// 底层 writeChunk，迟到分片仍会落地；有界 settle 只保证「本帧不与自己的
+  /// 迟到分片交错」，不等于物理写已被取消。若只标记实例，上层在同一连接上
+  /// 重建 transport 即可继续写，新帧与旧连接的迟到半帧交错，MCU 同样无法
+  /// 恢复同步。真实重连由 OtaService 每次 bind 新建 `_ChannelAdapter`，
+  /// 「新物理连接」天然拿到未污染的新对象；「同一通道换实例」则被正确拦截。
+  /// Expando 随通道对象一起回收，不产生全局泄漏。
+  static final Expando<bool> _poisonedChannels =
+      Expando<bool>('otaWriteChannelPoisoned');
+
+  bool get _writeChannelPoisoned => _poisonedChannels[_channel] ?? false;
+
+  void _poisonWriteChannel() {
+    _poisonedChannels[_channel] = true;
+  }
 
   Future<void> _writeFrameChecked(
     Uint8List frame, {
@@ -843,7 +857,7 @@ class OtaBleTransport {
   }) {
     if (_writeChannelPoisoned) {
       throw const OtaTransportException(
-          '写通道已废弃：分片写超时后帧边界不可信，须重连重建',
+          '写通道已废弃：分片写中断后帧边界不可信，须重连重建',
           code: 'WRITE_TIMEOUT');
     }
     final task = _writeSerial
@@ -867,6 +881,16 @@ class OtaBleTransport {
     Uint8List frame, {
     required bool allowCancelled,
   }) async {
+    // 排队期间通道可能已被前序帧废弃（RC3-05⑤）：[_writeFrameChecked] 只在
+    // 入队时刻检查，而取消路径的 ABORT 常常在前序 DATA 写超时**之前**就已
+    // 排队（abortBestEffort 不等待传输循环退出）。轮到它启动时若不复核，
+    // ABORT 的同步字正好写进悬空半帧的 payload 位置，MCU 既收不到 ABORT
+    // 也无法恢复同步。
+    if (_writeChannelPoisoned) {
+      throw const OtaTransportException(
+          '写通道已废弃：分片写中断后帧边界不可信，须重连重建',
+          code: 'WRITE_TIMEOUT');
+    }
     if (!allowCancelled) {
       _checkUsable();
       _checkNoProgress();
@@ -881,39 +905,50 @@ class OtaBleTransport {
       throw const OtaTransportException(
           'MTU 未协商或过小，无法分片写入', code: 'MTU_UNAVAILABLE');
     }
-    for (var offset = 0; offset < frame.length; offset += chunkSize) {
-      // 逐片重算预算（RC3-07）：帧外一次计算会让 142B DATA 帧在
-      // MTU=23 下的 8 个分片各按 10s 上限（均未单片超时）累计 72s，
-      // 绕过 30s 总预算。每个分片以当次剩余预算封顶，片间预算耗尽
-      // 即终止（单片写卡死仍受 writeTimeout 上限保护）。
-      if (!allowCancelled) {
-        _checkNoProgress();
-      }
-      final perChunkTimeout =
-          allowCancelled ? writeTimeout : _capByBudget(writeTimeout);
-      final end = (offset + chunkSize).clamp(0, frame.length);
-      // 迟到物理写隔离（RC3-05⑤）：Future.timeout 不取消底层 writeChunk——
-      // 直接上抛会让串行队列（_writeSerial）立即放行下一帧（含取消路径的
-      // ABORT），迟到分片在 ABORT 之后落地，MCU 收到交错的半帧流。超时后
-      // 先有界等待底层写 settle（上限 2×writeTimeout），吞掉迟到错误再抛
-      // 本帧 WRITE_TIMEOUT；迟到上限内仍未返回的物理写意味着写通道已卡死，
-      // 排在其后的帧同样会被截断，不会与本帧分片交错。
-      final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
-      try {
-        await pendingWrite.timeout(perChunkTimeout);
-      } on TimeoutException {
+    var dispatchedAny = false;
+    var frameComplete = false;
+    try {
+      for (var offset = 0; offset < frame.length; offset += chunkSize) {
+        // 逐片重算预算（RC3-07）：帧外一次计算会让 142B DATA 帧在
+        // MTU=23 下的 8 个分片各按 10s 上限（均未单片超时）累计 72s，
+        // 绕过 30s 总预算。每个分片以当次剩余预算封顶，片间预算耗尽
+        // 即终止（单片写卡死仍受 writeTimeout 上限保护）。
+        if (!allowCancelled) {
+          _checkNoProgress();
+        }
+        final perChunkTimeout =
+            allowCancelled ? writeTimeout : _capByBudget(writeTimeout);
+        final end = (offset + chunkSize).clamp(0, frame.length);
+        // 迟到物理写隔离（RC3-05⑤）：Future.timeout 不取消底层 writeChunk——
+        // 直接上抛会让串行队列（_writeSerial）立即放行下一帧（含取消路径的
+        // ABORT），迟到分片在 ABORT 之后落地，MCU 收到交错的半帧流。超时后
+        // 先有界等待底层写 settle（上限 2×writeTimeout），吞掉迟到错误再抛
+        // 本帧 WRITE_TIMEOUT；迟到上限内仍未返回的物理写意味着写通道已卡死，
+        // 排在其后的帧同样会被截断，不会与本帧分片交错。
+        final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
+        dispatchedAny = true;
         try {
-          await pendingWrite.timeout(writeTimeout * 2);
-        } catch (_) {} // 迟到错误不覆盖本帧超时语义
-        // 废弃写通道（RC3-05）：settle 结束时无论物理写是否落地，MCU
-        // 都悬空在半帧中；后续帧（含尽力 ABORT）会被吞进悬空帧的
-        // payload，无法恢复同步。停止一切出站帧，MCU 30s 会话超时
-        // teardown 兜底。abortBestEffort 对此路径的失败按尽力语义吞掉。
-        _writeChannelPoisoned = true;
-        throw OtaTransportException(
-            'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
-            code: 'WRITE_TIMEOUT');
+          await pendingWrite.timeout(perChunkTimeout);
+        } on TimeoutException {
+          try {
+            await pendingWrite.timeout(writeTimeout * 2);
+          } catch (_) {} // 迟到错误不覆盖本帧超时语义
+          throw OtaTransportException(
+              'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
+              code: 'WRITE_TIMEOUT');
+        }
       }
+      frameComplete = true;
+    } catch (_) {
+      // 半帧即废弃写通道（RC3-05⑤）：只要有分片已交付底层而整帧未写完，
+      // MCU 帧解析器就悬空在 payload 态。写超时不是唯一入口——片间预算
+      // 耗尽（_checkNoProgress 抛 NO_DURABLE_PROGRESS）与底层写错误同样
+      // 留下半帧，三者处置必须一致，否则后续尽力 ABORT 会被悬空帧吞掉。
+      // 一片未发（连接不可用、MTU 非法、首片前预算耗尽）不污染通道。
+      if (dispatchedAny && !frameComplete) {
+        _poisonWriteChannel();
+      }
+      rethrow;
     }
     // 帧完整落地后才暴露取消（RC3-05②）：保证字节流帧边界完整。
     if (!allowCancelled) {
@@ -1207,6 +1242,24 @@ class _AckErrorDecision {
 
 /// 帧等待者基类：匹配的帧到达即完成 future。
 abstract class _FrameWaiterBase {
+  _FrameWaiterBase() {
+    // 命令帧的等待者必须先注册再发送（GET_INFO/BEGIN/END/ABORT 都是
+    // 「_waiters.add(waiter) → await _writeFrame(frame) → await waiter.future」）。
+    // 物理写本身是 await 点：分片写让出期间发生 cancel()/dispose()/通知流
+    // onError 时，[fail] 会对一个**尚无监听者**的 future completeError，Dart
+    // 立即把它上报为 uncaught async error，从当时正在执行的无关 await 点
+    // （典型是 abortBestEffort 的写等待）冒出，测试直接判失败、生产里则
+    // 越过调用方的 try/catch 变成 zone 级错误（RC3-02/04）。
+    //
+    // 构造即挂一个「只观察不处置」的监听者：错误从此刻起始终被观察，处置
+    // 仍由调用方 await 同一个 future 完成——Future 支持多监听者，每个监听者
+    // 各自收到同一结果，互不吞掉（与 Stream 的单订阅语义不同）。
+    unawaited(_completer.future.then(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    ));
+  }
+
   final Completer<OtaBleFrame> _completer = Completer<OtaBleFrame>();
 
   Future<OtaBleFrame> get future => _completer.future;

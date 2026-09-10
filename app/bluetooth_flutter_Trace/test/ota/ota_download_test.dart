@@ -816,10 +816,15 @@ void main() {
       expect(adapter.deliveredBytes, lessThan(256 * 1024));
       // RC3-11⑤：达界 break 只取消 Dio 的包装流——锁定的 Dio 5.9.0
       // handleResponseStream 不把包装流 onCancel 传回底层 source，
-      // 底层响应仍可能被继续读取。达界必须主动 cancel token 让 Dio
-      // 层中止底层请求（修复前仅 break，token 完好，此断言红）。
-      expect(token.isCancelled, isTrue,
-          reason: 'drain 达界后必须主动取消 token 中止底层请求');
+      // 底层响应仍可能被继续读取。达界必须让 Dio 层真正中止底层请求，
+      // 观测点是 adapter 侧的 cancelFuture（真实 adapter 在此 abort 连接）。
+      await Future<void>.delayed(Duration.zero);
+      expect(adapter.abortedRequests, 1,
+          reason: 'drain 达界后必须真正中止底层请求，而不只是本端停读');
+      // 中止本次响应 ≠ 用户取消整个下载：会话 token 必须保持干净，
+      // 否则紧随的重下会立刻 CANCELLED，把服务器协议违规误报成用户取消。
+      expect(token.isCancelled, isFalse,
+          reason: '协议违规不得连带取消会话 token');
     });
 
     test('首块正文停滞：包装流空闲超时兜底，不无限挂起（RC3-11⑤）',
@@ -854,6 +859,178 @@ void main() {
       expect(await part.length(), 0,
           reason: '首块前停滞，无字节落盘（openWrite 已创建文件）');
     }, timeout: const Timeout(Duration(seconds: 10)));
+
+    test('首个 206 头违规：旧响应被真正中止，且从零重下仍成功'
+        '（RC3-11⑤ attempt token）', () async {
+      // 256KB 资产 + 本地 128KB partial → 首轮 206 缺 Accept-Ranges（头
+      // 违规，不进入写盘）→ 有界 drain 达界必须中止**这一次**响应；随后
+      // 作废 partial 从零重下必须照常成功。
+      // 鉴别力（两个方向都能打红）：
+      // - 旧实现首次违规传 null token（为了不污染重下），旧连接不关，
+      //   abortedRequests=0；
+      // - 若改用会话 token 去关旧响应，重下立刻 CANCELLED，download 抛异常。
+      final bytes = assetBytes(256 * 1024);
+      writePartial(bytes, 128 * 1024);
+      final seenHeaders = <Map<String, dynamic>>[];
+      final dio = dioWithServer(
+        bytes,
+        behavior: const _MockBehavior(
+            omitAcceptRanges: true, bodyChunkSize: 16 * 1024),
+        requestLog: [(options) => seenHeaders.add(options.headers)],
+      );
+      final file = await downloader(dio).download(
+        asset: assetOf(bytes),
+        releaseId: 'rel-1',
+        downloadUrl: 'http://localhost:9/pkg.etu',
+      );
+      expect(await file.length(), bytes.length);
+      expect(sha256.bind(file.openRead()).first,
+          completion(sha256.convert(bytes)));
+      expect(seenHeaders.length, 2);
+      expect(seenHeaders.first['Range'], 'bytes=131072-');
+      expect(seenHeaders.last['Range'], isNull, reason: '第二轮从零重下');
+      await Future<void>.delayed(Duration.zero);
+      final adapter = dio.httpClientAdapter as _MockAdapter;
+      expect(adapter.abortedRequests, 1,
+          reason: '首个违规响应必须被中止，且只中止它一个');
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('错误体零事件停滞：空闲超时兜底并中止上游，不无限挂起（RC3-11⑥）',
+        () async {
+      // 401 响应头已到、错误体一个 data 事件都不来。Dio 的接收空闲计时器
+      // 只在首个 data 事件后启动，此处永不启动；裸 await for 会让 401/409/
+      // 410 的看码分流永久挂起，且挂在 await 上连取消都到不了。修复缺失
+      // 时表现为用例超时挂起，而不是安静通过。
+      final bytes = assetBytes(1024);
+      final dio = dioWithServer(bytes,
+          behavior: const _MockBehavior(
+              status: 401,
+              errorBody: '{"errorCode":"TOKEN_EXPIRED"}',
+              bodyChunkSize: 1024,
+              stallAfterChunks: 0));
+      dio.options.receiveTimeout = const Duration(milliseconds: 200);
+      try {
+        await downloader(dio).download(
+          asset: assetOf(bytes),
+          releaseId: 'rel-1',
+          downloadUrl: 'http://localhost:9/pkg.etu',
+        );
+        fail('停滞的 401 错误体应按坏体 fail closed');
+      } on OtaDownloadException catch (e) {
+        // 读不到 errorCode（停滞按坏体）→ 不得猜成 URL_EXPIRED 触发刷新，
+        // 按裸状态码闭锁。
+        expect(e.code, 'HTTP_STATUS');
+        expect(e.httpStatus, 401);
+        expect(e.httpError, isNull, reason: '停滞体不得伪造 OtaHttpError');
+      }
+      await Future<void>.delayed(Duration.zero);
+      final adapter = dio.httpClientAdapter as _MockAdapter;
+      expect(adapter.abortedRequests, 1,
+          reason: '停滞必须中止上游，不能只退出本端等待');
+    }, timeout: const Timeout(Duration(seconds: 10)));
+
+    test('无在途下载时 cancel：既有 partial/sidecar 照常删除（RC3-05⑥）',
+        () async {
+      // 下载早已结束（或从未开始）时取消不能退化成静默 no-op：用户看到
+      // "已取消"，字节却要留到 24h 兜底才清。无在途 = 无并发写盘方，
+      // 删除是安全且必须的。
+      final bytes = assetBytes(2048);
+      final part = writePartial(bytes, 1024);
+      final sidecar = File('${part.path}.json');
+      await downloader(dioWithServer(bytes)).cancel('asset-1');
+      expect(part.existsSync(), isFalse,
+          reason: '无在途写盘方，取消必须真的删除 partial');
+      expect(sidecar.existsSync(), isFalse);
+    });
+
+    test('无在途下载时 cancel(keepPartial)：字节保留供续传（RC3-05⑥）',
+        () async {
+      final bytes = assetBytes(2048);
+      final part = writePartial(bytes, 1024);
+      await downloader(dioWithServer(bytes))
+          .cancel('asset-1', keepPartial: true);
+      expect(part.existsSync(), isTrue,
+          reason: 'keepPartial 语义不因无在途而改变');
+      expect(File('${part.path}.json').existsSync(), isTrue);
+    });
+
+    test('body 传输中取消：等在途写盘方退出后再删 partial（RC3-05）',
+        () async {
+      // 首块已进写盘路径、后续停滞 → 取消到达时写盘方正卡在读流上。
+      // cancel 必须先等它退出（sink 已关闭）再删，删除与追加写不得并发；
+      // 鉴别力：去掉有界等待直接删，则 cancel 返回时在途尚未退出，
+      // pendingError 仍为 null 而红。
+      // receiveTimeout 收紧到 2s：无论"取消唤醒读流"还是"空闲超时兜底"
+      // 先生效，在途都必然在 cancel 的 5s 有界等待内退出，用例不依赖
+      // Dio 内部把包装流取消回传底层 source 的实现细节。
+      final bytes = assetBytes(4096);
+      final dio = dioWithServer(bytes,
+          behavior: const _MockBehavior(
+              bodyChunkSize: 1024, stallAfterChunks: 1));
+      dio.options.receiveTimeout = const Duration(seconds: 2);
+      final owner = downloader(dio);
+      final firstChunk = Completer<void>();
+      final pending = owner.download(
+        asset: assetOf(bytes),
+        releaseId: 'rel-1',
+        downloadUrl: 'http://localhost:9/pkg.etu',
+        onProgress: (received, total) {
+          if (!firstChunk.isCompleted) firstChunk.complete();
+        },
+      );
+      // 在途 future 以取消异常退出，错误由本用例接管（不得漏成未捕获）。
+      Object? pendingError;
+      unawaited(pending.catchError((Object e) {
+        pendingError = e;
+        return File('${tempDir.path}${Platform.pathSeparator}unused');
+      }));
+      await firstChunk.future;
+      final part =
+          File('${tempDir.path}${Platform.pathSeparator}pkg.etu.part');
+      expect(part.existsSync(), isTrue);
+      await owner.cancel('asset-1');
+      await Future<void>.delayed(Duration.zero);
+      expect(pendingError, isNotNull, reason: '取消必须让在途路径退出');
+      expect(part.existsSync(), isFalse,
+          reason: '在途退出后必须删除 partial');
+      expect(File('${part.path}.json').existsSync(), isFalse);
+    }, timeout: const Timeout(Duration(seconds: 20)));
+
+    test('在途未退出：cancel 有界等待超时后不删，清理回退给下载路径'
+        '（RC3-05⑤）', () async {
+      // 构造"已登记在途但尚未退出"的窗口：dirProvider 挂起 → download 卡在
+      // 解析目录（_inFlight 已登记）。cancel 的 5s 有界等待必然超时——此时
+      // 无法证明写盘方已退出，删除既可能失败也不代表清理完成，必须不删，
+      // 交给 download 自身退出路径与 24h 兜底。
+      // 反向鉴别：把 RC3-05⑥ 的"无在途即删"过度修成"一律删"，此用例红。
+      final bytes = assetBytes(2048);
+      final part = writePartial(bytes, 1024);
+      final gate = Completer<void>();
+      final owner = OtaFirmwareDownload(
+        dio: dioWithServer(bytes),
+        dirProvider: () async {
+          await gate.future;
+          return tempDir;
+        },
+      );
+      final pending = owner.download(
+        asset: assetOf(bytes),
+        releaseId: 'rel-1',
+        downloadUrl: 'http://localhost:9/pkg.etu',
+      );
+      final started = DateTime.now();
+      await owner.cancel('asset-1');
+      expect(DateTime.now().difference(started).inSeconds,
+          greaterThanOrEqualTo(4),
+          reason: '有界等待必须真的等到上限，不是立即放弃');
+      expect(part.existsSync(), isTrue,
+          reason: '写盘方未证明退出前不得删除 partial');
+      expect(File('${part.path}.json').existsSync(), isTrue);
+      // 放行在途路径：它继续按续传完成，证明 cancel 未破坏其状态。
+      gate.complete();
+      final file = await pending;
+      expect(await file.length(), bytes.length);
+    }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('Content-Digest 重复 sha-256 项：RESUME_PROTOCOL（RFC 9530 唯一项）',
         () async {
@@ -962,6 +1139,14 @@ class _MockAdapter implements HttpClientAdapter {
   /// 有界 drain 判定的直接观测：无界 drain 会拉满整个 body。
   int deliveredBytes = 0;
 
+  /// Dio 把取消传到 adapter（cancelFuture 触发）的次数。
+  ///
+  /// RC3-11⑤：真实 IOHttpClientAdapter 在 cancelFuture 触发时 abort 底层
+  /// 连接——「上游是否真被关闭」只能在 adapter 侧观测。断言调用方 token
+  /// 的标志位不等价：每次尝试改持独立 attempt token 后，会话 token 保持
+  /// 未取消（否则协议违规会被误报成用户取消），而底层响应确实已中止。
+  int abortedRequests = 0;
+
   /// 按 [chunkSize] 分片投递 body；片在 yield 前计入 [deliveredBytes]。
   ///
   /// - [cancelFuture] 是 Dio adapter 契约的一部分：真实
@@ -1020,7 +1205,25 @@ class _MockAdapter implements HttpClientAdapter {
     for (final log in requestLog) {
       log(options);
     }
+    if (cancelFuture != null) {
+      // 真实 adapter 在此 abort 底层连接；mock 记账供断言观测。
+      // ignore: unawaited_futures
+      cancelFuture.then((_) {
+        abortedRequests++;
+      });
+    }
     if (behavior.status != null) {
+      if (behavior.stallAfterChunks != null) {
+        // 只发头不发体的错误响应：错误体读取路径的零事件停滞。
+        // Dio 的接收空闲计时器要等首个 data 事件才启动，此处永不启动，
+        // 裸 await for 会无限挂起（产品侧需自带空闲超时兜底）。
+        return ResponseBody(
+          _bodyStream(
+              Uint8List.fromList(utf8.encode(behavior.errorBody ?? '')),
+              cancelFuture),
+          behavior.status!,
+        );
+      }
       return ResponseBody.fromString(
           behavior.errorBody ?? '', behavior.status!);
     }

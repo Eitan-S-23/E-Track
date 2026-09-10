@@ -22,6 +22,19 @@ const fakeDeviceLayoutId = 5;
 const fakeDeviceBootVersion = 2;
 const fakeCurrentVcode = 20801;
 
+/// fake 设备 INFO 应答里的 image_sha256（32B 原始域）。
+/// 顶层单一来源：INFO 应答与 inspect 门禁必须读同一份，否则 patch 的
+/// base_sha8 比对会退化成"自证"。
+final List<int> fakeDeviceImageSha256 =
+    List<int>.unmodifiable(List<int>.generate(32, (i) => i * 3));
+
+/// patch 包 base_sha8 的比对域 = 设备 image_sha256 的前 8 字节。
+/// 真值链：HAL_Bluetooth.cpp:94 把 info.image_sha256 前 8B 复制进
+/// ota_sd_device_t.base_image_sha8，ota_sd.c:331-336 再与 ETU 头
+/// [52:60] 逐字节 memcmp。
+final List<int> fakeDeviceBaseSha8 =
+    List<int>.unmodifiable(fakeDeviceImageSha256.sublist(0, 8));
+
 /// 标准 CRC-32/ISO-HDLC（RC3-03）：与 MCU boot_crc32 同构——init
 /// 0xFFFFFFFF、多项式 0xEDB88320 反射、final ^0xFFFFFFFF。fake 的
 /// ETU 头 CRC 门禁用。
@@ -42,12 +55,19 @@ int crc32Of(List<int> bytes) {
 void main() {
   /// 构造合法 ETU 头（64B，RC3-03）：字段布局对齐 MCU 真值
   /// ota_sd.c（偏移 enum + ota_sd_inspect_header）——magic "ETU1"、
-  /// header_len=64、flags=0x000B（full）、algorithm=1、key=1、
-  /// payload_len、payload_crc32 占位（fake 不校验内容 CRC）、
-  /// target_vcode（默认高于 fake 当前版本）、base_vcode=0、
+  /// header_len=64、flags（默认 0x000B full，可传 0x0007 patch）、
+  /// algorithm=1、key=1、payload_len、payload_crc32 占位（fake 不校验
+  /// 内容 CRC）、target_vcode（默认高于 fake 当前版本）、base_vcode、
   /// hardware_rev/layout_id/min_boot 与 fake 设备身份匹配、
-  /// base_sha8 全零（full 要求）、header_crc32 覆盖前 60B。
-  Uint8List buildEtuHeader(int payloadLen, {int targetVcode = 20900}) {
+  /// base_sha8（默认按 flags 取全零/设备摘要前 8B）、
+  /// header_crc32 覆盖前 60B。
+  Uint8List buildEtuHeader(
+    int payloadLen, {
+    int targetVcode = 20900,
+    int flags = 0x000B,
+    int? baseVcode,
+    List<int>? baseSha8,
+  }) {
     final h = Uint8List(64);
     h.setRange(0, 4, [0x45, 0x54, 0x55, 0x31]); // "ETU1"
     void put16(int off, int v) {
@@ -62,18 +82,23 @@ void main() {
       h[off + 3] = (v >> 24) & 0xFF;
     }
 
+    final isPatch = flags == 0x0007;
     put16(4, 64); // header_len
-    put16(6, 0x000B); // flags：full
+    put16(6, flags);
     put32(8, 1); // algorithm v1
     put32(12, 1); // key v1
     put32(32, payloadLen);
     put32(36, 0x11223344); // payload_crc32 占位
     put32(40, targetVcode);
-    put32(44, 0); // base_vcode：full 恒 0
+    // base_vcode：full 恒 0；patch 必须等于设备当前版本。
+    put32(44, baseVcode ?? (isPatch ? fakeCurrentVcode : 0));
     put16(48, fakeDeviceHardwareRev);
     h[50] = fakeDeviceLayoutId;
     h[51] = fakeDeviceBootVersion; // min_boot <= 设备 boot_version
-    // [52:60] base_sha8 保持全零（full 要求）。
+    // base_sha8：full 必须全零；patch 必须等于设备 image_sha256 前 8B。
+    final sha8 =
+        baseSha8 ?? (isPatch ? fakeDeviceBaseSha8 : List<int>.filled(8, 0));
+    h.setRange(52, 60, sha8);
     put32(60, crc32Of(h.sublist(0, 60)));
     return h;
   }
@@ -419,6 +444,148 @@ void main() {
       }
     });
 
+    // RC3-03：patch 包（flags=0x0007）此前完全没有门禁分支——fake 只查
+    // full 的 base 域，patch 头无论 base_vcode/base_sha8 填什么都放行。
+    // 真值 ota_sd.c:329-341 对 patch 的 base 绑定与 full 一样是硬门禁：
+    // base_vcode 必须等于设备当前版本、base_sha8 必须等于设备
+    // image_sha256 前 8B，否则 ERR_BASE；payload_len<=40（patch 内层头）
+    // 属长度域 ERR_LEN。下面三例逐条区分这三条真值规则。
+    test('BEGIN 门禁：patch 的 base_vcode 不匹配设备当前版本 → ERR_BASE'
+        '（RC3-03）', () async {
+      final package = packageBytes(4096);
+      // 设备当前版本 20801；patch 声称基线 20700（旧基线包错投）。
+      final header = buildEtuHeader(
+        package.length - 64,
+        flags: 0x0007,
+        baseVcode: 20700,
+      );
+      final mcu = _McuSim();
+      final transport = OtaBleTransport(channel: mcu);
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: header,
+        );
+        fail('应抛 ACK_STATUS');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'ACK_STATUS');
+        expect(e.status, OtaBleCodec.statusErrBase);
+      }
+    });
+
+    test('BEGIN 门禁：patch 的 base_sha8 与设备镜像摘要不符 → ERR_BASE'
+        '（RC3-03）', () async {
+      final package = packageBytes(4096);
+      // 版本号对得上但基线镜像不是本机这一份（同版本不同构建）：
+      // 真值仍必拒，否则打到错误基线上会做出坏镜像。
+      final wrongSha8 = List<int>.of(fakeDeviceBaseSha8);
+      wrongSha8[7] ^= 0x01;
+      final header = buildEtuHeader(
+        package.length - 64,
+        flags: 0x0007,
+        baseSha8: wrongSha8,
+      );
+      final mcu = _McuSim();
+      final transport = OtaBleTransport(channel: mcu);
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: header,
+        );
+        fail('应抛 ACK_STATUS');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'ACK_STATUS');
+        expect(e.status, OtaBleCodec.statusErrBase);
+      }
+    });
+
+    test('BEGIN 门禁：patch payload_len 不大于内层头 40B → ERR_LEN'
+        '（RC3-03）', () async {
+      // package_len = 64+40 = 104：base 域全部合法，只有 payload_len
+      // 恰好等于内层头长度。真值用 `<=` 判定，边界值 40 必须落 ERR_LEN
+      // 而不是通过——这一例同时钉死边界方向。
+      final package = packageBytes(104);
+      final header = buildEtuHeader(40, flags: 0x0007);
+      final mcu = _McuSim();
+      final transport = OtaBleTransport(channel: mcu);
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: header,
+        );
+        fail('应抛 ACK_STATUS');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'ACK_STATUS');
+        expect(e.status, OtaBleCodec.statusErrLen);
+      }
+    });
+
+    test('BEGIN 门禁：patch base 域与长度全部合法 → 放行（RC3-03 反向）',
+        () async {
+      // 与上三例只差在被测字段本身：证明新增的 patch 分支不是"见
+      // patch 就拒"的常量拒绝，而是逐字段判定。
+      final package = packageBytes(4096);
+      final header = buildEtuHeader(package.length - 64, flags: 0x0007);
+      package.setRange(0, 64, header); // 包体首 64B 与 BEGIN 头一致
+      final mcu = _McuSim();
+      final transport = OtaBleTransport(channel: mcu);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: header,
+      );
+      expect(ack.status, OtaBleCodec.statusOk);
+    });
+
+    test('BEGIN 门禁：full 的 payload_len=0 落 ERR_LEN 而非 ERR_BASE'
+        '（RC3-03）', () async {
+      // 真值把空 full 归到 OTA_SD_ERR_PACKAGE_LENGTH（→ERR_LEN），
+      // 旧 fake 把它并进 base 分支返回 ERR_BASE：错误码归类错误会让
+      // 上层"基线不匹配 vs 包本身为空"两类终态诊断互相冒充。
+      final package = packageBytes(64); // package_len=64，payload_len=0
+      final header = buildEtuHeader(0);
+      final mcu = _McuSim();
+      final transport = OtaBleTransport(channel: mcu);
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: header,
+        );
+        fail('应抛 ACK_STATUS');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'ACK_STATUS');
+        expect(e.status, OtaBleCodec.statusErrLen);
+      }
+    });
+
+    test('BEGIN 门禁：full 携带非零 base_sha8 仍是 ERR_BASE（RC3-03 反向）',
+        () async {
+      // 与上一例配对：证明 full 分支被拆成 base/长度两条后，base 侧
+      // 判据没有被顺手删掉。
+      final package = packageBytes(4096);
+      final header = buildEtuHeader(
+        package.length - 64,
+        baseSha8: List<int>.filled(8, 0x5A),
+      );
+      final mcu = _McuSim();
+      final transport = OtaBleTransport(channel: mcu);
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: header,
+        );
+        fail('应抛 ACK_STATUS');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'ACK_STATUS');
+        expect(e.status, OtaBleCodec.statusErrBase);
+      }
+    });
+
     test('fake 门禁：越当前 4KB 窗的段 → ERR_OFFSET（RC3-03⑤）', () async {
       final package = packageBytes(8192);
       final mcu = _McuSim();
@@ -639,7 +806,7 @@ void main() {
     test('DATA 回 ERR_SEQ（expected_seq 失配）：ABORT+BEGIN 重对齐后续传成功',
         () async {
       final package = packageBytes(4096);
-      final mcu = _McuSim()..errSeqAtDataCount = 3; // 第 3 段 DATA
+      final mcu = _McuSim()..errSeqAtDataCounts = {3}; // 第 3 段 DATA
       final transport = OtaBleTransport(
         channel: mcu,
         ackTimeout: const Duration(milliseconds: 200),
@@ -664,6 +831,68 @@ void main() {
         mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
         64,
       );
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    // RC3-06：一次 seq 断档 = 恰好一次预算处置。ERR_SEQ 注入后 MCU 的
+    // expected_seq 停住，同一发窗里剩余 ~29 帧全部真实回 ERR_SEQ；若实现
+    // 按「每份错误 ACK 扣一次预算」计费，retries=1 会在第二份就耗尽并抛
+    // ACK_STATUS。传输成功即证明 30 份错误 ACK 只折算成一次恢复处置
+    // （_TransferAckView 首错锁存 + takeError 取走清零）。
+    test('同一发窗内连环 ERR_SEQ 只消耗一次恢复预算（retries=1 仍成功，'
+        'RC3-06）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()..errSeqAtDataCounts = {3};
+      final transport = OtaBleTransport(
+        channel: mcu,
+        retries: 1, // 预算只有一次：多扣一次即失败
+        ackTimeout: const Duration(milliseconds: 200),
+      );
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue, reason: '一次断档在 retries=1 下必须仍能续传');
+      // 连环 ERR_SEQ 只触发一轮 ABORT+BEGIN：预算恰好用掉 1。
+      expect(mcu.abortCalls, 1);
+      expect(mcu.beginCalls, 2);
+      final errSeqAcks = mcu.dataAckStatuses
+          .where((s) => s == OtaBleCodec.statusErrSeq)
+          .length;
+      expect(errSeqAcks, greaterThan(1),
+          reason: '前置：本用例必须真的产生多份 ERR_SEQ ACK，否则不具鉴别力');
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    // RC3-06：恢复预算有限。第二次断档落在 resume 轮（首发 32 帧后第 3
+    // 帧 = 全局第 35 帧），此时 resumeLeft 已为 0：必须以 ACK_STATUS 终止，
+    // 不得无限 ABORT+BEGIN 打转。
+    test('恢复预算耗尽后不再重新 BEGIN：第二次 ERR_SEQ 抛 ACK_STATUS'
+        '（RC3-06）', () async {
+      final package = packageBytes(4096);
+      // 3 = 首轮第 3 帧；35 = resume 轮（第 33 帧起）的第 3 帧。
+      final mcu = _McuSim()..errSeqAtDataCounts = {3, 35};
+      final transport = OtaBleTransport(
+        channel: mcu,
+        retries: 1,
+        ackTimeout: const Duration(milliseconds: 200),
+      );
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('恢复预算耗尽后必须终止，不得继续 resume');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'ACK_STATUS');
+        expect(e.status, OtaBleCodec.statusErrSeq);
+        expect(e.message, contains('可恢复错误重试次数超限'));
+      }
+      // 只发生过一轮恢复：第二次断档直接终止，没有第三次 BEGIN。
+      expect(mcu.abortCalls, 1);
+      expect(mcu.beginCalls, 2);
+      expect(mcu.errSeqAtDataCounts, isEmpty,
+          reason: '前置：两次注入都必须真的命中，否则用例没走到目标分支');
     }, timeout: const Timeout(Duration(seconds: 60)));
 
     test('BEGIN ACK 丢失：重试复用同一 seq，MCU 幂等回进度（expected_seq '
@@ -1274,6 +1503,130 @@ void main() {
       expect(mcu.pendingByteCount, 140);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    test('半帧后排队的写在启动时复核通道：取消提前入队的 ABORT 不得'
+        '写进悬空帧（RC3-05⑤）', () async {
+      final package = packageBytes(4096);
+      // 分片写 200ms、单片写超时 60ms：首个 DATA 帧的片 1 必然超时；
+      // 有界 settle（2×60ms）在 180ms 到期时底层写仍未返回 → 抛
+      // WRITE_TIMEOUT 并废弃写通道，片 1 的 20B 在 200ms 迟到落地，
+      // MCU 侧滞留 20B 悬空帧（142B 帧只到 20B）。
+      final mcu = _McuSim()
+        ..mtu = 23
+        ..writeChunkDelay = const Duration(milliseconds: 200);
+      final transport = OtaBleTransport(
+        channel: mcu,
+        writeTimeout: const Duration(milliseconds: 60),
+      );
+      final future = transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      // 取消发生在「片 1 在途、DATA 尚未超时」的窗口：abortBestEffort
+      // 不等待传输循环退出，ABORT 在此刻入队排在 DATA 写之后——入队
+      // 时刻通道尚未废弃，因此只在 _writeFrameChecked 里检查是不够的。
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      final abortFuture = transport.abortBestEffort();
+      try {
+        await future;
+        fail('应中止');
+      } on OtaTransportException catch (e) {
+        expect(e.code, anyOf('WRITE_TIMEOUT', 'CANCELLED'));
+      }
+      await abortFuture;
+      // 等片 1 迟到落地后再断言，确保观测的是最终字节流。
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      // 修复前：DATA 写失败放行串行队列（~180ms）时 _pending 仍空，
+      // ABORT 被 fake 当作完整帧解析（abortFrames=1），随后片 1 迟到，
+      // 字节流变成「ABORT + 半个 DATA」。真机上 MCU 处于 PAYLOAD 态，
+      // 会把 ABORT 的 A5 5A 吞进 payload：既收不到 ABORT，也无法恢复
+      // 同步（ota_ble_frame.c 按 len 吞全部字节）。
+      expect(mcu.abortFrames, isEmpty);
+      expect(
+        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdAbort),
+        isEmpty,
+      );
+      // 悬空半帧只有 DATA 片 1 的 20B，无任何后续帧字节混入。
+      expect(mcu.pendingByteCount, 20);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('分片写底层报错同样留下半帧：写通道废弃，尽力 ABORT 被拒'
+        '（RC3-05⑤）', () async {
+      final package = packageBytes(4096);
+      // 首个 DATA 帧（142B / MTU=23 → 8 片）的片 3 底层写报错：片 1-2
+      // 的 40B 已落地 MCU，帧解析器悬空在 payload 态。按 DATA 分片计数
+      // 注错，不受 BEGIN 片数影响。
+      final mcu = _McuSim()
+        ..mtu = 23
+        ..failAtDataChunk = 3;
+      final transport = OtaBleTransport(channel: mcu);
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } catch (_) {
+        // 底层写错误的具体类型不是本用例判据。
+      }
+      expect(mcu.pendingByteCount, 40);
+      // 写超时不是半帧的唯一入口：底层写错误必须同样废弃写通道，否则
+      // 尽力 ABORT 的 10B 会被追加进悬空帧（pending 变 50），MCU 既
+      // 收不到 ABORT 也无法恢复同步。
+      await transport.abortBestEffort();
+      expect(mcu.pendingByteCount, 40);
+      expect(mcu.abortFrames, isEmpty);
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('迟到写不污染后来的会话：同一通道换 transport 仍拒写，新通道'
+        '恢复正常（RC3-05⑤）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()
+        ..mtu = 23
+        ..failAtDataChunk = 3;
+      final first = OtaBleTransport(channel: mcu);
+      try {
+        await first.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } catch (_) {
+        // 同上：本用例判据是后续会话的写行为。
+      }
+      await first.dispose();
+      expect(mcu.pendingByteCount, 40);
+
+      // 「新 transport」不等于「新物理连接」：同一通道对象上重建实例，
+      // MCU 侧那半帧仍悬空，任何新帧都会被吞进 payload。有界等待只保证
+      // 本帧不与自己的迟到分片交错，并没有取消底层写，因此废弃标记的
+      // 作用域必须是物理写通道对象——实例级标记会在这里放行。
+      final rebound = OtaBleTransport(channel: mcu);
+      try {
+        await rebound.getDeviceInfo(
+            timeout: const Duration(milliseconds: 300));
+        fail('同一通道重建实例应仍被拒绝');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'WRITE_TIMEOUT');
+      }
+      // GET_INFO 一个字节都没写出去（10B 帧放行则 pending 变 50）。
+      expect(mcu.pendingByteCount, 40);
+      await rebound.dispose();
+
+      // 真实重连 = 新的物理通道对象（OtaService 每次 bind 新建
+      // _ChannelAdapter）：不受旧通道废弃标记影响，恢复预算保持有界，
+      // 不会因一次半帧把设备永久锁死。
+      final reconnected = _McuSim();
+      final fresh = OtaBleTransport(channel: reconnected);
+      final info = await fresh.getDeviceInfo();
+      expect(info.deviceModel, 'e-track-at32f435');
+      expect(info.hardwareRevision, 3);
+      await fresh.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
     test('后台暂停/恢复：发窗在帧边界挂起，恢复后传输完成（RC3-08）',
         () async {
       final package = packageBytes(4096);
@@ -1342,7 +1695,157 @@ void main() {
         expect(e.code, 'CANCELLED');
       }
     }, timeout: const Timeout(Duration(seconds: 60)));
+
+    // RC3-02/04⑦：命令帧等待者的异步错误窗口。GET_INFO/BEGIN/END/ABORT
+    // 是同一形状——`_waiters.add(waiter)` → `await _writeFrame(frame)` →
+    // `await waiter.future`。物理写是 await 点：分片写让出期间发生
+    // cancel()/dispose()/通知流 onError 时，waiter.fail() 会对一个**尚无
+    // 监听者**的 future completeError，Dart 立即把它当 uncaught async
+    // error 上报到该 future 的**创建 zone**——生产里越过调用方
+    // try/catch 变成 zone 级错误，测试里直接判失败。
+    //
+    // 判据必须同时成立：zone 捕获列表为空（错误没有逃逸）**且**调用方
+    // 仍拿到确定的错误（不是靠吞错变绿）。只断言前者会被「waiter 永不
+    // fail、调用方挂死到超时」蒙过；只断言后者则修复前后都绿。
+    test('延迟写期间取消：命令等待者错误不逃逸为 uncaught async error'
+        '（RC3-02/04⑦）', () async {
+      final outcome = await _runCommandWriteWindowDisturbance(
+          (transport, channel) => transport.cancel());
+      expect(
+        outcome.callerError,
+        isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED'),
+      );
+      expect(outcome.zoneErrors, isEmpty);
+    });
+
+    test('延迟写期间释放：命令等待者错误不逃逸为 uncaught async error'
+        '（RC3-02/04⑦）', () async {
+      // dispose() 自身要 await _frameSub.cancel()，此处不阻塞扰动时序；
+      // 助手收尾会再次 dispose（fail/cancel 均幂等）。
+      final outcome = await _runCommandWriteWindowDisturbance(
+          (transport, channel) => unawaited(transport.dispose()));
+      expect(
+        outcome.callerError,
+        isA<OtaTransportException>().having((e) => e.code, 'code', 'DISPOSED'),
+      );
+      expect(outcome.zoneErrors, isEmpty);
+    });
+
+    test('延迟写期间通知流报错：命令等待者错误不逃逸为 uncaught async '
+        'error（RC3-02/04⑦）', () async {
+      final outcome = await _runCommandWriteWindowDisturbance((transport,
+              channel) =>
+          channel.emitNotifyError(const _InjectedNotifyError()));
+      // _dispatchError 原样下发（不包装），调用方观测到注入对象本身。
+      expect(outcome.callerError, isA<_InjectedNotifyError>());
+      expect(outcome.zoneErrors, isEmpty);
+    });
   });
+}
+
+/// 通知流链路错误注入对象（RC3-02/04⑦）：自定义类型便于与产品异常
+/// （OtaTransportException/StateError）区分，确认错误原样透传。
+class _InjectedNotifyError implements Exception {
+  const _InjectedNotifyError();
+
+  @override
+  String toString() => '_InjectedNotifyError(injected link failure)';
+}
+
+/// 命令帧延迟写窗口扰动的观测结果（RC3-02/04⑦）。
+class _WriteWindowOutcome {
+  _WriteWindowOutcome(this.callerError, this.zoneErrors);
+
+  /// 调用方（await getDeviceInfo 的一方）最终观测到的错误；null 表示成功。
+  final Object? callerError;
+
+  /// 被守护 zone 捕获的未处理异步错误（逃逸判据，期望为空）。
+  final List<Object> zoneErrors;
+}
+
+/// 物理写闸门通道：writeChunk 一直挂起到 [releaseAll]，用来稳定复现
+/// 「等待者已注册、调用方仍卡在 await 物理写」这一窗口（RC3-02/04⑦）。
+/// 真实 BLE 的分片写就是这样一个可让出、可长时间未完成的 await 点。
+class _GatedWriteChannel implements OtaBleChannel {
+  final _notify = StreamController<List<int>>.broadcast();
+  final _gates = <Completer<void>>[];
+
+  bool connected = true;
+  int mtu = 247;
+
+  /// 仍挂起的写分片数。
+  int get pendingWrites => _gates.where((g) => !g.isCompleted).length;
+
+  /// 放行全部挂起的写分片，让调用方继续走到 await waiter.future。
+  void releaseAll() {
+    for (final gate in _gates) {
+      if (!gate.isCompleted) gate.complete();
+    }
+  }
+
+  /// 注入通知流链路错误（对应真实 GATT 通知订阅 onError）。
+  void emitNotifyError(Object error) => _notify.addError(error);
+
+  @override
+  Future<void> writeChunk(List<int> chunk) {
+    final gate = Completer<void>();
+    _gates.add(gate);
+    return gate.future;
+  }
+
+  @override
+  Stream<List<int>> get notifications => _notify.stream;
+
+  @override
+  Future<int> maxWriteChunkSize() async => connected ? mtu - 3 : 0;
+
+  @override
+  bool get isConnected => connected;
+}
+
+/// 在「GET_INFO 等待者已注册、物理写仍挂起」的窗口内执行 [disturb]，
+/// 返回调用方观测到的错误与守护 zone 捕获的未处理异步错误。
+///
+/// transport 与请求都在守护 zone 内创建：等待者 completer 的归属 zone
+/// 即该 zone，其未处理错误才会落进 zoneErrors 被计数。搬运结果的
+/// [settled] 故意建在 zone 外，且只 complete **值**（把错误当值传出），
+/// 因此助手自身不会引入新的未处理错误源。
+Future<_WriteWindowOutcome> _runCommandWriteWindowDisturbance(
+  void Function(OtaBleTransport transport, _GatedWriteChannel channel) disturb,
+) async {
+  final channel = _GatedWriteChannel();
+  final zoneErrors = <Object>[];
+  final settled = Completer<Object?>();
+  OtaBleTransport? created;
+  runZonedGuarded(() {
+    final transport = OtaBleTransport(channel: channel);
+    created = transport;
+    transport.getDeviceInfo(timeout: const Duration(seconds: 2)).then(
+          (_) => settled.complete(null),
+          onError: (Object e) => settled.complete(e),
+        );
+  }, (Object error, StackTrace stack) => zoneErrors.add(error));
+  final transport = created!;
+
+  // 等 GET_INFO 走到 writeChunk 并挂在闸门上：此刻等待者已入 _waiters，
+  // 调用方尚未 await waiter.future——正是要复现的窗口。
+  final deadline = DateTime.now().add(const Duration(seconds: 5));
+  while (channel.pendingWrites == 0) {
+    if (DateTime.now().isAfter(deadline)) {
+      fail('物理写未进入挂起状态，窗口未复现');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
+  disturb(transport, channel);
+  // 错误级联（completeError → 无监听者 → zone 上报）发生在随后的微任务，
+  // 先让它跑完再放行物理写，否则窗口被写完成掩盖。
+  await Future<void>.delayed(const Duration(milliseconds: 20));
+  channel.releaseAll();
+  final callerError = await settled.future.timeout(const Duration(seconds: 5));
+  // 再给一拍，收集迟到的未处理错误。
+  await Future<void>.delayed(const Duration(milliseconds: 50));
+  await transport.dispose();
+  return _WriteWindowOutcome(callerError, zoneErrors);
 }
 
 /// 通知分片粒度。
@@ -1396,25 +1899,32 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   void onEndFrame(OtaBleFrame f);
   void onAbortFrame(OtaBleFrame f);
 
+  /// 本 chunk 所属帧的 cmd（判不出返回 null）。transport 按帧切片
+  /// （每 chunk 只属于单帧），写入侧无垃圾注入，未完帧剩余 _pending
+  /// 恒从 sync 开始：与 chunk 拼接后首个 sync 帧头的 cmd 即所属帧。
+  int? _chunkFrameCmd(List<int> chunk) {
+    final head = _pending.isEmpty ? chunk : [..._pending, ...chunk];
+    for (var i = 0; i + 2 < head.length; i++) {
+      if (head[i] == OtaBleCodec.frameSync0 &&
+          head[i + 1] == OtaBleCodec.frameSync1) {
+        return head[i + 2];
+      }
+    }
+    return null;
+  }
+
   @override
   Future<void> writeChunk(List<int> chunk) async {
-    // RC3-07⑤：慢写只作用于 DATA 帧分片——控制帧（GET_INFO/BEGIN/
-    // END/ABORT）不延迟。transport 按帧切片（每 chunk 属于单帧），
-    // 写入侧无垃圾注入，未完帧剩余 _pending 恒从 sync 开始：与
-    // chunk 拼接后首个 sync 帧头的 cmd 即本 chunk 所属帧。若 BEGIN
-    // 也延迟，小 MTU 下 BEGIN 自身 6 片先吃掉预算，用例测不到
-    // 「DATA 分片累计超预算」。
-    if (writeChunkDelay != Duration.zero) {
-      final head = _pending.isEmpty ? chunk : [..._pending, ...chunk];
-      var isDataChunk = false;
-      for (var i = 0; i + 2 < head.length; i++) {
-        if (head[i] == OtaBleCodec.frameSync0 &&
-            head[i + 1] == OtaBleCodec.frameSync1) {
-          isDataChunk = head[i + 2] == OtaBleCodec.cmdData;
-          break;
-        }
+    // RC3-07⑤：慢写与写错误注入只作用于 DATA 帧分片——控制帧
+    // （GET_INFO/BEGIN/END/ABORT）不延迟、不注错。若 BEGIN 也延迟，
+    // 小 MTU 下 BEGIN 自身 6 片先吃掉预算，用例测不到「DATA 分片
+    // 累计超预算」；按 DATA 分片计数注错则不受 BEGIN 片数影响。
+    if (_chunkFrameCmd(chunk) == OtaBleCodec.cmdData) {
+      dataChunkWrites++;
+      if (failAtDataChunk == dataChunkWrites) {
+        throw StateError('injected GATT write failure');
       }
-      if (isDataChunk) {
+      if (writeChunkDelay != Duration.zero) {
         await Future<void>.delayed(writeChunkDelay);
       }
     }
@@ -1451,7 +1961,7 @@ abstract class _FakeMcuHost implements OtaBleChannel {
               layoutId: 5,
               bootVersion: 2,
               currentVersionCode: 20801,
-              imageSha256: List<int>.generate(32, (i) => i * 3),
+              imageSha256: fakeDeviceImageSha256,
             ),
           );
           break;
@@ -1506,6 +2016,12 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   _ChunkMode chunkMode = _ChunkMode.ble20;
   /// 每个写分片的固定延迟（RC3-07：慢写 + 小 MTU 压满 30s 总预算）。
   Duration writeChunkDelay = Duration.zero;
+  /// DATA 帧分片写入次数（含被注入失败的那次），供注错定位。
+  int dataChunkWrites = 0;
+  /// 第 N 个 DATA 分片的底层写报错（1 基，RC3-05⑤）：模拟 GATT 写
+  /// 失败在整帧中途中断。半帧成因不止写超时，底层错误同样让 MCU 帧
+  /// 解析器悬空在 payload 态，处置必须一致。
+  int? failAtDataChunk;
   /// 通知投递计数（RC3-02 排查遗留）：map 包装层逐事件累加，区分
   /// 「sendFrame 已 emit」与「事件真正投递到 transport 订阅者」。
   int deliveredChunks = 0;
@@ -1609,8 +2125,10 @@ class _McuSim extends _FakeMcuHost {
   /// 该 offset 段 ACK 位图照常置位但 staging 不落（模拟 flash 静默
   /// 丢失；块收齐时谎报提交，END 校验 durable != total 暴露 → ERR_STATE）。
   int? loseSegmentOff;
-  /// 第 N 个 DATA 回 ERR_SEQ（模拟 MCU expected_seq 与发送端失配）。
-  int? errSeqAtDataCount;
+  /// 这些序号的 DATA 回 ERR_SEQ（模拟 MCU expected_seq 与发送端失配）。
+  /// 每个序号 one-shot（命中即移除），集合允许跨 resume 轮注入多次，用于
+  /// 测恢复预算的有限性（RC3-06）。
+  Set<int>? errSeqAtDataCounts;
   /// 第一次 BEGIN 处理照常但不回 ACK（模拟上行丢帧）。
   bool dropBeginAckOnce = false;
   /// 这些 offset 的 DATA ACK 丢弃（staging 照常，测位图回收窗口）。
@@ -1708,13 +2226,25 @@ class _McuSim extends _FakeMcuHost {
     if (le32(40) <= currentVcode) return OtaBleCodec.statusErrVersion;
     final payloadLen = le32(32);
     if (flags == 0x000B) {
-      // full：base_vcode=0 且 base_sha8 全零 且 payload_len!=0。
-      if (le32(44) != 0 ||
-          le32(52) != 0 ||
-          le32(56) != 0 ||
-          payloadLen == 0) {
+      // full（真值 :316-328）：base_vcode=0 且 base_sha8 全零，否则
+      // ERR_BASE；payload_len==0 属长度域，真值返回
+      // OTA_SD_ERR_PACKAGE_LENGTH → ERR_LEN，不是 ERR_BASE。
+      if (le32(44) != 0 || le32(52) != 0 || le32(56) != 0) {
         return OtaBleCodec.statusErrBase;
       }
+      if (payloadLen == 0) return OtaBleCodec.statusErrLen;
+    } else {
+      // patch（真值 :329-341）：base_vcode 必须等于设备当前版本，
+      // base_sha8 必须等于设备 image_sha256 前 8B；两者任一不符
+      // ERR_BASE。payload_len 必须严格大于 patch 内层头 40B
+      // （ETU_PATCH_INNER_HEADER_SIZE），否则 ERR_LEN。
+      if (le32(44) != currentVcode) return OtaBleCodec.statusErrBase;
+      for (var i = 0; i < 8; i++) {
+        if (etu[52 + i] != fakeDeviceBaseSha8[i]) {
+          return OtaBleCodec.statusErrBase;
+        }
+      }
+      if (payloadLen <= 40) return OtaBleCodec.statusErrLen;
     }
     // package_len 恒 64+payload_len 且 payload_len <= 0x180000-64。
     if (payloadLen > 0x180000 - 64 || 64 + payloadLen != totalLen) {
@@ -1840,7 +2370,8 @@ class _McuSim extends _FakeMcuHost {
         (f.payload[3] << 24);
     dataOffsets.add(off);
     // ERR_SEQ 注入：模拟 MCU expected_seq 与发送端失配（如 MCU 侧重启）。
-    final injectErrSeq = errSeqAtDataCount == dataFrames.length;
+    final injectErrSeq =
+        errSeqAtDataCounts?.contains(dataFrames.length) ?? false;
     if (_state != _active) {
       // teardown 后：session=0 的 ERR_STATE NAK（真值 :491-496）。
       _emitDataAck(OtaBleCodec.statusErrState, f);
@@ -1854,7 +2385,7 @@ class _McuSim extends _FakeMcuHost {
         ? 1 // 强制断档：不推进 expected_seq
         : OtaBleCodec.seqCompare(f.seq, _expectedSeq);
     if (delta > 0) {
-      if (injectErrSeq) errSeqAtDataCount = null;
+      if (injectErrSeq) errSeqAtDataCounts!.remove(dataFrames.length);
       _emitDataAck(OtaBleCodec.statusErrSeq, f);
       return;
     }
@@ -1863,7 +2394,7 @@ class _McuSim extends _FakeMcuHost {
       _emitDataAck(OtaBleCodec.statusOk, f);
       return;
     }
-    if (injectErrSeq) errSeqAtDataCount = null;
+    if (injectErrSeq) errSeqAtDataCounts!.remove(dataFrames.length);
     _expectedSeq = (f.seq + 1) & 0xFFFF;
 
     // ---- 段校验链（真值 :526-548）----

@@ -169,6 +169,17 @@ class OtaFirmwareDownload {
             resumed = true;
           }
         }
+        // RC3-11⑤：每次尝试持有独立的 attempt token。会话 token 表示
+        // 「用户取消整个下载」，而中止**本次响应**是另一回事：Dio 5.9.0
+        // 的 handleResponseStream 不把包装流的 onCancel 传回底层 source，
+        // 只 break 排空并不关闭上游连接，必须 cancel token 才真正中止。
+        // 若用会话 token 去关旧响应，紧接着的重下请求会立即 CANCELLED，
+        // 把服务器协议违规误报成用户取消；分离后旧响应可确定性关闭，
+        // 新尝试拿到干净 token。会话取消向下级联，用户取消照常生效。
+        final attemptToken = CancelToken();
+        unawaited(token.whenCancel.then((_) {
+          if (!attemptToken.isCancelled) attemptToken.cancel();
+        }));
         Response<ResponseBody> response;
         try {
           response = await _dio.get<ResponseBody>(
@@ -185,7 +196,7 @@ class OtaFirmwareDownload {
                       status == 410 ||
                       status == 416),
             ),
-            cancelToken: token,
+            cancelToken: attemptToken,
           );
         } on DioException catch (e) {
           if (CancelToken.isCancel(e)) {
@@ -207,7 +218,7 @@ class OtaFirmwareDownload {
             final data = e.response!.data;
             final errorBody = await _readErrorBody(
                 data is ResponseBody ? data : null,
-                cancelToken: token);
+                cancelToken: attemptToken);
             throw OtaDownloadException(
                 '下载返回 HTTP $status（errorCode: ${_errorCodeOf(errorBody)}）',
                 code: 'HTTP_STATUS',
@@ -221,7 +232,7 @@ class OtaFirmwareDownload {
         final status = response.statusCode ?? 0;
         if (status == 416) {
           // XC-RANGE-AT-END：删除 partial 并要求上层重新 latest。
-          await _drainBody(response.data, cancelToken: token);
+          await _drainBody(response.data, cancelToken: attemptToken);
           await invalidatePartial();
           throw OtaDownloadException(
               '区间已在文件末尾（416），需重新获取清单$cleanupNote',
@@ -234,7 +245,7 @@ class OtaFirmwareDownload {
           // （RC3-10③：错误体解析为 OtaHttpError 供上层闭锁并携带
           // requestId，不静默降级为可重试失败）。
           final errorBody =
-              await _readErrorBody(response.data, cancelToken: token);
+              await _readErrorBody(response.data, cancelToken: attemptToken);
           final errorCode = _errorCodeOf(errorBody);
           if (errorCode == 'TOKEN_INVALID' || errorCode == 'TOKEN_EXPIRED') {
             throw OtaDownloadException(
@@ -254,7 +265,7 @@ class OtaFirmwareDownload {
           // RC3-10③：看码分流——body 明确 ASSET_DISABLED 才走下架路径，
           // 其他/未知 errorCode fail closed 归 HTTP_STATUS 附 OtaHttpError。
           final errorBody =
-              await _readErrorBody(response.data, cancelToken: token);
+              await _readErrorBody(response.data, cancelToken: attemptToken);
           if (_errorCodeOf(errorBody) == 'ASSET_DISABLED') {
             await invalidatePartial();
             throw OtaDownloadException(
@@ -276,7 +287,7 @@ class OtaFirmwareDownload {
           // RC3-10③：看码分流——body 明确 ASSET_ARCHIVED 才走冲突刷新
           // 路径；其他/未知 errorCode fail closed 归 HTTP_STATUS。
           final errorBody =
-              await _readErrorBody(response.data, cancelToken: token);
+              await _readErrorBody(response.data, cancelToken: attemptToken);
           if (_errorCodeOf(errorBody) == 'ASSET_ARCHIVED') {
             throw OtaDownloadException(
                 '资产状态冲突（HTTP 409 ASSET_ARCHIVED），需重新获取清单',
@@ -291,7 +302,7 @@ class OtaFirmwareDownload {
                       _firstHeader(response.headers, 'x-request-id')));
         }
         if (status != 200 && status != 206) {
-          await _drainBody(response.data, cancelToken: token);
+          await _drainBody(response.data, cancelToken: attemptToken);
           throw OtaDownloadException('下载返回非法状态码: $status',
               code: 'HTTP_STATUS', httpStatus: status);
         }
@@ -325,13 +336,13 @@ class OtaFirmwareDownload {
           if (violation != null) {
             // 头校验失败即不进入写盘：先 drain 释放连接（RC3-11），
             // 再作废本地续传状态。
-            // RC3-11⑤：仅反复失败（即将 throw）的 drain 才主动取消
-            // token——首次违规后要走 continue 从零重下，同一 token 的
-            // 新请求会因已取消而立即 CANCELLED，把协议违规误归因为
-            // 用户取消；首次违规由有界 drain（64KB）限流量，重试请求
-            // 取代旧连接。
-            await _drainBody(response.data,
-                cancelToken: restartUsed ? token : null);
+            // RC3-11⑤：drain 用 attempt token——排空只是本端读完，Dio
+            // 5.9.0 的包装流不会因 break 关闭底层 source，必须 cancel
+            // 才真正中止旧响应。attempt token 只作用于本次响应，首次
+            // 违规后 continue 重下会新建 token，不会把协议违规误报成
+            // 用户取消（旧实现为规避这一点，首次违规干脆不取消，旧连接
+            // 因此挂到 GC/超时）。
+            await _drainBody(response.data, cancelToken: attemptToken);
             await invalidatePartial();
             if (restartUsed) {
               throw OtaDownloadException(
@@ -344,7 +355,7 @@ class OtaFirmwareDownload {
         } else if (!resumed && status == 206) {
           // 未请求区间却返回 206：服务器协议违规，无法核对区间归属，
           // 作废本地状态 fail closed（不进入写盘）。
-          await _drainBody(response.data, cancelToken: token);
+          await _drainBody(response.data, cancelToken: attemptToken);
           await invalidatePartial();
           throw OtaDownloadException('未请求区间却返回 206$cleanupNote',
               code: 'RESUME_PROTOCOL');
@@ -353,7 +364,7 @@ class OtaFirmwareDownload {
           // 长度+SHA 校验兜底，不在此假绿）。
           if (contentLengthHeader != null &&
               contentLengthHeader != asset.sizeBytes) {
-            await _drainBody(response.data, cancelToken: token);
+            await _drainBody(response.data, cancelToken: attemptToken);
             throw OtaDownloadException(
                 '200 响应 Content-Length 与清单不符: '
                 '$contentLengthHeader != ${asset.sizeBytes}',
@@ -370,7 +381,7 @@ class OtaFirmwareDownload {
 
         // ---- 流式写盘 + Content-Digest 交叉核对 ----
         final contentDigest =
-            await _parseContentDigest(response, cancelToken: token);
+            await _parseContentDigest(response, cancelToken: attemptToken);
         final digestAccumulator = <Digest>[];
         final digestSink = contentDigest == null
             ? null
@@ -401,13 +412,14 @@ class OtaFirmwareDownload {
         } catch (e) {
           // RC3-11：Dio 5.9.0 的包装流 onCancel 不回传底层 source，
           // Stream.timeout / Dio receiveTimer 都只退出本端等待——读流
-          // 异常（含停滞超时）时底层连接仍挂着。主动 cancel token 让
-          // Dio 层中止底层请求（真实 adapter abort 连接），再原样上抛
-          // 交上层按网络中断分类。token 幂等，与用户取消并发无副作用。
+          // 异常（含停滞超时）时底层连接仍挂着。主动 cancel attempt
+          // token 让 Dio 层中止底层请求（真实 adapter abort 连接），再
+          // 原样上抛交上层按网络中断分类。attempt token 只覆盖本次响应，
+          // 不污染后续尝试；与用户取消并发时 token 幂等，无副作用。
           if (e is TimeoutException ||
               (e is DioException &&
                   e.type == DioExceptionType.receiveTimeout)) {
-            token.cancel();
+            attemptToken.cancel();
           }
           rethrow;
         } finally {
@@ -488,11 +500,15 @@ class OtaFirmwareDownload {
   /// 删除既可能失败也不证明清理完成，留给 download() 自身的取消路径
   /// （token 已 cancel，其退出时会按 keepPartial 删除）与
   /// cleanExpiredPartials 的 24h 兜底（RC3-05⑤）。
+  ///
+  /// RC3-05⑥：无在途 download 时不存在并发写盘方，既有 partial/sidecar
+  /// 必须照常删除。把"没有在途"与"等待超时"混为一谈会让取消一个已结束
+  /// 的下载变成静默 no-op：用户看到取消成功，字节却留到 24h 兜底才清。
   Future<void> cancel(String assetId, {bool keepPartial = false}) async {
     _cancelKeepsPartial = keepPartial;
     _cancelTokens[assetId]?.cancel();
     final inFlight = _inFlight[assetId];
-    var settled = false;
+    var settled = inFlight == null;
     if (inFlight != null) {
       try {
         await inFlight.timeout(const Duration(seconds: 5));
@@ -650,6 +666,32 @@ class OtaFirmwareDownload {
         code: 'NO_DIR');
   }
 
+  /// 响应体事件间隔上限（零事件停滞保护）。
+  ///
+  /// RC3-11⑥：Dio 5.9.0 的接收空闲计时器只在收到首个 data 事件后启动
+  /// （`handleResponseStream` 里 `watchReceiveTimeout` 挂在 data 回调），
+  /// 响应头已到而正文一个事件都不来时不会触发。主体写盘路径已套
+  /// `Stream.timeout` 补偿，drain / 错误体读取同样需要——否则一个只发头
+  /// 不发体的服务端能让 401/409/410/416 分流和头校验失败路径永久挂起，
+  /// 且这些路径都在 `await` 上，连取消都到不了。
+  Duration get _bodyIdleTimeout =>
+      _dio.options.receiveTimeout ?? const Duration(seconds: 60);
+
+  /// 给响应体流加空闲超时：停滞即取消上游（包装流的取消到不了 Dio
+  /// 底层 source，必须 cancel token）并向本端注入 [TimeoutException]，
+  /// 由调用方按“坏体”fail closed 处置，不做半截正文解析。
+  Stream<List<int>> _guardBodyIdle(
+      Stream<List<int>> stream, CancelToken? cancelToken) {
+    return stream.timeout(_bodyIdleTimeout, onTimeout: (sink) {
+      if (cancelToken != null && !cancelToken.isCancelled) {
+        cancelToken.cancel();
+      }
+      sink.addError(
+          TimeoutException('响应体停滞超时', _bodyIdleTimeout), StackTrace.current);
+      sink.close();
+    });
+  }
+
   /// 消费并丢弃响应体流（释放连接；正文不参与判定的路径用）。
   ///
   /// RC3-11：有界消费——读满 [maxBytes] 即 break 取消订阅，禁止对
@@ -658,14 +700,14 @@ class OtaFirmwareDownload {
   /// RC3-11⑤：break 只取消 Dio 的包装流——锁定的 Dio 5.9.0
   /// handleResponseStream 不把包装流的 onCancel 传回底层 source，
   /// 原始响应仍可能被继续读取。达界后主动 cancel [cancelToken]，
-  /// 让 Dio 层中止底层请求（token 与本次 download 绑定，无复用）。
+  /// 让 Dio 层中止底层请求（token 与本次尝试绑定，无跨尝试复用）。
   Future<void> _drainBody(ResponseBody? body,
       {int maxBytes = 64 * 1024, CancelToken? cancelToken}) async {
     final stream = body?.stream;
     if (stream == null) return;
     try {
       var received = 0;
-      await for (final chunk in stream) {
+      await for (final chunk in _guardBodyIdle(stream, cancelToken)) {
         received += chunk.length;
         if (received >= maxBytes) {
           cancelToken?.cancel();
@@ -673,7 +715,7 @@ class OtaFirmwareDownload {
         }
       }
     } catch (_) {
-      // 排空失败不掩盖主错误。
+      // 排空失败（含停滞超时）不掩盖主错误；上游已在 onTimeout 中止。
     }
   }
 
@@ -686,6 +728,7 @@ class OtaFirmwareDownload {
   ///
   /// RC3-11⑤：overflow break 后同样主动 cancel [cancelToken]（包装流
   /// 的取消到不了 Dio 底层 source，理由同 [_drainBody]）。
+  /// RC3-11⑥：零事件停滞由 [_guardBodyIdle] 兜底，超时按坏体返回 null。
   Future<Map<String, dynamic>?> _readErrorBody(ResponseBody? body,
       {int maxBytes = 64 * 1024, CancelToken? cancelToken}) async {
     final stream = body?.stream;
@@ -693,7 +736,7 @@ class OtaFirmwareDownload {
     try {
       final bytes = <int>[];
       var overflow = false;
-      await for (final chunk in stream) {
+      await for (final chunk in _guardBodyIdle(stream, cancelToken)) {
         if (bytes.length + chunk.length > maxBytes) {
           overflow = true;
           cancelToken?.cancel();

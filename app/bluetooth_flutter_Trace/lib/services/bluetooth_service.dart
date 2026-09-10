@@ -481,6 +481,63 @@ class BluetoothService extends GetxController {
   Timer? _scanTimeoutTimer;
   final Map<String, StreamSubscription> _deviceConnectionSubscriptions = {};
 
+  /// OTA 物理连接代次（RC3-08⑦）：按地址计数，每次链路状态迁移 +1。
+  ///
+  /// 逻辑对象（transport/订阅流）活着不代表底层链路还是绑定时那一条：
+  /// App 在后台期间系统可能断开旧连接并重连（甚至连到同地址的另一台
+  /// 设备），此时 transport 仍可读写，只是写到了新链路上。代次是唯一
+  /// 能把「同一个 Dart 对象」与「同一条物理连接」区分开的观测量。
+  ///
+  /// 计数点：主动 connect 成功、主动 disconnect、平台上报的断开事件。
+  /// connect 幂等成功也计数——宁可多判一次失效（fail-closed），也不
+  /// 把「可能已换链路」当作没变。
+  final Map<String, int> _otaLinkGenerations = <String, int>{};
+
+  /// OTA 链路观测订阅（RC3-08⑦）：与 [_deviceConnectionSubscriptions]
+  /// 分开保存，避免与遥控连接路径互相顶掉对方的监听。
+  final Map<String, StreamSubscription> _otaLinkWatchers = {};
+
+  /// 读取 [deviceAddress] 当前的 OTA 物理连接代次（RC3-08⑦）。
+  int otaLinkGeneration(String deviceAddress) =>
+      _otaLinkGenerations[deviceAddress.toLowerCase()] ?? 0;
+
+  /// 记录一次链路状态迁移（RC3-08⑦）。
+  void _bumpOtaLinkGeneration(String deviceAddress) {
+    final key = deviceAddress.toLowerCase();
+    _otaLinkGenerations[key] = (_otaLinkGenerations[key] ?? 0) + 1;
+  }
+
+  /// 监听平台上报的断开事件（RC3-08⑦）：断开即代次前进。
+  ///
+  /// 只在 OTA 连接入口注册；重复注册前先取消旧订阅，防止一个地址上
+  /// 挂多个监听把一次断开计成多次。
+  void _watchOtaLink(String deviceAddress, Stream<bool> connectedStream) {
+    final key = deviceAddress.toLowerCase();
+    _otaLinkWatchers.remove(key)?.cancel();
+    _otaLinkWatchers[key] = connectedStream.listen((isConnected) {
+      if (!isConnected) {
+        _bumpOtaLinkGeneration(deviceAddress);
+      }
+    });
+  }
+
+  /// OTA 通知通道所有者令牌（RC3-08⑦）。
+  ///
+  /// CCCD 是 **按特征共享** 的平台资源：同一 (地址, 服务, 特征) 上只有
+  /// 一个开关。被放弃的探测绑定（MTU 协商失败、订阅后发现身份不符等）
+  /// 在 dispose 里取消自己的通知流时，如果无条件调平台关通知，就会把
+  /// 后来者刚打开的 CCCD 关掉——后来者的 transport 还活着、读写都成功，
+  /// 但再也收不到任何通知，表现为全部命令 WRITE/ACK 超时。
+  ///
+  /// 令牌随每次成功订阅自增；取消时只有仍是记录在册的 owner 才执行
+  /// 平台关通知，Dart 侧监听一律取消（本流必须停止吐值）。
+  final Map<String, int> _otaNotifyOwners = <String, int>{};
+  int _otaNotifyTokenSeq = 0;
+
+  String _otaNotifyKey(String address, String serviceId, String charId) =>
+      '${address.toLowerCase()}|${serviceId.toLowerCase()}'
+      '|${charId.toLowerCase()}';
+
   // 蓝牙适配器实例
   late BluetoothAdapter _adapter;
 
@@ -508,6 +565,11 @@ class BluetoothService extends GetxController {
       subscription.cancel();
     }
     _deviceConnectionSubscriptions.clear();
+    // OTA 链路观测订阅同样释放（RC3-08⑦）。
+    for (var subscription in _otaLinkWatchers.values) {
+      subscription.cancel();
+    }
+    _otaLinkWatchers.clear();
 
     super.onClose();
   }
@@ -984,6 +1046,8 @@ class BluetoothService extends GetxController {
             Get.snackbar('成功', '设备连接成功', snackPosition: SnackPosition.BOTTOM);
           } else {
             connectedDevices.remove(device);
+            // RC3-08⑦：遥控路径观测到的断开同样是物理链路迁移。
+            _bumpOtaLinkGeneration(device.remoteId.str);
           }
         });
       } else {
@@ -1004,6 +1068,8 @@ class BluetoothService extends GetxController {
             }
           } else if (state == BluetoothConnectionState.disconnected) {
             connectedDevices.remove(device);
+            // RC3-08⑦：同上，断开即物理链路迁移。
+            _bumpOtaLinkGeneration(device.remoteId.str);
           }
         });
 
@@ -1031,6 +1097,9 @@ class BluetoothService extends GetxController {
       connectedDevices.remove(device);
     } catch (e) {
       // 断开设备连接失败
+    } finally {
+      // RC3-08⑦：主动断开（含失败）后链路状态不可信，代次前进。
+      _bumpOtaLinkGeneration(device.remoteId.str);
     }
   }
 
@@ -1550,6 +1619,10 @@ class BluetoothService extends GetxController {
         // WinBle 无 CCCD 就绪回调：订阅调用返回即视为就绪。通知流在
         // 订阅前建立也可（broadcast 流，早到事件由订阅方过滤丢弃），
         // 这里订阅成功后再监听，保证取消订阅后流不再吐值。
+        final ownerKey =
+            _otaNotifyKey(deviceAddress, serviceId, characteristicId);
+        final ownerToken = ++_otaNotifyTokenSeq;
+        _otaNotifyOwners[ownerKey] = ownerToken;
         final notifyStream = _adapter.characteristicValueStreamOf(
             deviceAddress, serviceId, characteristicId);
         late StreamSubscription<List<int>> sub;
@@ -1561,6 +1634,10 @@ class BluetoothService extends GetxController {
         );
         controller.onCancel = () async {
           await sub.cancel();
+          // RC3-08⑦：只有仍是 owner 才关平台通知，否则会关掉更新
+          // owner 刚打开的共享 CCCD。
+          if (_otaNotifyOwners[ownerKey] != ownerToken) return;
+          _otaNotifyOwners.remove(ownerKey);
           try {
             await _adapter.unSubscribeFromCharacteristic(
                 deviceAddress, serviceId, characteristicId);
@@ -1579,6 +1656,10 @@ class BluetoothService extends GetxController {
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
             // 先完成 CCCD 订阅再返回流：resolve 后即可安全发命令。
             await ch.setNotifyValue(true);
+            final ownerKey =
+                _otaNotifyKey(deviceAddress, serviceId, characteristicId);
+            final ownerToken = ++_otaNotifyTokenSeq;
+            _otaNotifyOwners[ownerKey] = ownerToken;
             late StreamSubscription<List<int>> sub;
             final controller = StreamController<List<int>>();
             sub = ch.onValueReceived.listen(
@@ -1587,10 +1668,14 @@ class BluetoothService extends GetxController {
               onDone: controller.close,
             );
             controller.onCancel = () async {
+              await sub.cancel();
+              // RC3-08⑦：与 Windows 分支同一约束——CCCD 按特征共享，
+              // 非 owner 不得关闭。
+              if (_otaNotifyOwners[ownerKey] != ownerToken) return;
+              _otaNotifyOwners.remove(ownerKey);
               try {
                 await ch.setNotifyValue(false);
               } catch (_) {}
-              await sub.cancel();
             };
             return controller.stream;
           }
@@ -1646,6 +1731,12 @@ class BluetoothService extends GetxController {
           d.remoteId.str.toLowerCase() == deviceAddress.toLowerCase());
     } catch (e) {
       debugPrint('OTA主动断开失败($deviceAddress): $e');
+    } finally {
+      // RC3-08⑦：断开尝试后链路状态不再是绑定时那一条，成功与否都
+      // 前进代次——断开失败同样意味着链路状态不可信（尽力语义下上层
+      // 会重连），不得让失败路径把代次留在旧值上冒充"链路未变"。
+      _otaLinkWatchers.remove(deviceAddress.toLowerCase())?.cancel();
+      _bumpOtaLinkGeneration(deviceAddress);
     }
   }
 
@@ -1658,6 +1749,11 @@ class BluetoothService extends GetxController {
     try {
       if (Platform.isWindows) {
         await _adapter.connect(deviceAddress);
+        // RC3-08⑦：新链路建立即前进代次，并监听平台断开事件——系统在
+        // App 后台期间断开重连时，代次是上层判定"绑定的那条链路还在
+        // 不在"的唯一依据。
+        _bumpOtaLinkGeneration(deviceAddress);
+        _watchOtaLink(deviceAddress, WinBle.connectionStreamOf(deviceAddress));
         return true;
       }
       final device = _findDeviceByAddress(deviceAddress) ??
@@ -1667,6 +1763,12 @@ class BluetoothService extends GetxController {
       if (!connectedDevices.contains(device)) {
         connectedDevices.add(device);
       }
+      _bumpOtaLinkGeneration(deviceAddress);
+      _watchOtaLink(
+        deviceAddress,
+        device.connectionState
+            .map((state) => state == BluetoothConnectionState.connected),
+      );
       return true;
     } catch (e) {
       debugPrint('OTA重连失败($deviceAddress): $e');

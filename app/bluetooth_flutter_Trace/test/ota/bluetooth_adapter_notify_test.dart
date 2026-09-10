@@ -25,6 +25,14 @@ class _FakeNotifyAdapter implements BluetoothAdapter {
   List<String> lastSubscribeArgs = const [];
   List<String> lastStreamArgs = const [];
   Object? subscribeError;
+
+  /// 平台侧 CCCD 当前是否开启（RC3-08⑦）。
+  ///
+  /// 真实协议栈里 CCCD 是按特征共享的单一开关：关掉后该特征上的通知
+  /// 对**所有**订阅者一起停止。替身据此建模，测试用 [notifyEnabled]
+  /// 门控发事件，才能检出「迟到 dispose 关掉新 owner 通知」这类缺陷，
+  /// 而不只是数调用次数。
+  bool notifyEnabled = false;
   /// false 模拟 notify-only 特征（readCharacteristic 抛错）。
   bool readSupported = true;
   List<int> initialReadValue = const [];
@@ -56,12 +64,14 @@ class _FakeNotifyAdapter implements BluetoothAdapter {
     lastSubscribeArgs = [deviceAddress, serviceId, characteristicId];
     final error = subscribeError;
     if (error != null) throw error;
+    notifyEnabled = true;
   }
 
   @override
   Future<void> unSubscribeFromCharacteristic(
       String deviceAddress, String serviceId, String characteristicId) async {
     unsubscribeCalls++;
+    notifyEnabled = false;
   }
 
   @override
@@ -435,6 +445,69 @@ void main() {
         [7]
       ]);
       await sub.cancel();
+    });
+  });
+
+  group('共享 CCCD 所有权（RC3-08⑦）', () {
+    /// 平台侧发通知：CCCD 关闭时协议栈根本不会上报。
+    void emit(_FakeNotifyAdapter fake, List<int> data) {
+      if (!fake.notifyEnabled) return;
+      fake.notifyController.add(data);
+    }
+
+    test('迟到的旧订阅取消：不得关闭新 owner 的共享 CCCD', () async {
+      // 旧绑定：探测/放弃路径（MTU 协商失败、身份不符等）订阅已成功，
+      // 但该 transport 随后被丢弃，dispose 迟到。
+      final stale = await service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
+      final staleReceived = <List<int>>[];
+      final staleSub = stale!.listen(staleReceived.add);
+
+      // 新 owner 在旧 dispose 之前完成订阅：CCCD 现由它持有。
+      final fresh = await service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
+      expect(fake.subscribeCalls, 2);
+      final freshReceived = <List<int>>[];
+      final freshSub = fresh!.listen(freshReceived.add);
+
+      // 迟到的旧 dispose。
+      await staleSub.cancel();
+      expect(fake.unsubscribeCalls, 0,
+          reason: 'CCCD 按特征共享：非 owner 的迟到取消不得调平台退订');
+      expect(fake.notifyEnabled, isTrue);
+
+      emit(fake, [0x11]);
+      await _flush();
+      expect(staleReceived, isEmpty, reason: '旧流自身必须停止吐值');
+      expect(freshReceived, [
+        [0x11]
+      ], reason: '新 owner 的通知不得被旧绑定的 dispose 关掉');
+
+      // owner 自己取消时才真正退订。
+      await freshSub.cancel();
+      expect(fake.unsubscribeCalls, 1);
+      expect(fake.notifyEnabled, isFalse);
+    });
+
+    test('所有权转移后再重订：owner 归属跟随最新一次订阅', () async {
+      final first = await service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
+      final firstSub = first!.listen((_) {});
+      final second = await service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
+      final secondSub = second!.listen((_) {});
+
+      // 第二次订阅接管后，第一次取消不退订。
+      await firstSub.cancel();
+      expect(fake.unsubscribeCalls, 0);
+      // 第二次（当前 owner）取消才退订。
+      await secondSub.cancel();
+      expect(fake.unsubscribeCalls, 1);
+
+      // 退订后重新订阅仍是一次全新的 owner，取消照常退订：
+      // 所有权记录不得在释放后留下残留把后续取消一并吞掉。
+      final third = await service.subscribeOtaNotifyByAddress(_addr, _svc, _ch);
+      expect(fake.subscribeCalls, 3);
+      final thirdSub = third!.listen((_) {});
+      await thirdSub.cancel();
+      expect(fake.unsubscribeCalls, 2);
+      expect(fake.notifyEnabled, isFalse);
     });
   });
 }

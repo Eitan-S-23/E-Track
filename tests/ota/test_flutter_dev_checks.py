@@ -2,6 +2,7 @@
 """Host regression for the Flutter development entry; never runs Flutter."""
 
 import ctypes
+import hashlib
 import importlib.util
 import io
 import json
@@ -81,7 +82,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         return path
 
     def fixture_run(self, outcomes=None, after=None, scope="all", build_apk=False,
-                    identify=None):
+                    identify=None, bind=None):
         calls = []
 
         def execute(root, argv, cwd, env, log, timeout):
@@ -100,13 +101,25 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             def identify(root):
                 return {
                     "head": "1" * 40, "clean": True, "status": "",
-                    "dirty_semantic": [], "dirty_eol_only": [], "fixture": True,
+                    "dirty_semantic": [], "dirty_semantic_sha": {},
+                    "dirty_eol_only": [], "dirty_untracked": [],
+                    "fixture": True,
                 }
+        if bind is None:
+            # 流程用例不碰真实仓库：绑定证据由 identify 提供的白名单脏路径
+            # 直接折算，真实 Git 行为另有 checkout_identity 用例覆盖。
+            def bind(root, identity, stage):
+                return [{"stage": stage, "path": path,
+                         "committed_sha256": "c" * 64,
+                         "effective_sha256": identity["dirty_semantic_sha"][path],
+                         "effective_bytes": 1, "diff": "fixture"}
+                        for path in identity["dirty_semantic"]
+                        if path in RUNNER.TOOLCHAIN_REGENERATED]
         with mock.patch("sys.stdout", new_callable=io.StringIO), \
                 mock.patch.dict(os.environ, {"GITHUB_SHA": "1" * 40}):
             code, path = RUNNER.run_checks(
                 self.project, scope, build_apk=build_apk, execute=execute,
-                identify=identify,
+                identify=identify, bind=bind,
             )
         return code, json.loads(path.read_text(encoding="utf-8")), calls, path
 
@@ -554,23 +567,29 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         return checkouts, mock.patch.object(RUNNER.subprocess, "run",
                                             side_effect=fake_run)
 
+    CLEAN = {"head": "1" * 40, "clean": True, "status": "",
+             "dirty_semantic": [], "dirty_semantic_sha": {},
+             "dirty_eol_only": [], "dirty_untracked": []}
+
     def test_apk_restores_toolchain_regenerated_files_before_build(self):
         self.apk_inputs()
         # 依次：起点干净 → 门禁处仅工具链再生白名单脏 → 恢复后干净 → 报告收尾。
         states = iter([
-            {"head": "1" * 40, "clean": True, "status": "",
-             "dirty_semantic": [], "dirty_eol_only": []},
+            dict(self.CLEAN),
             {"head": "1" * 40, "clean": False,
              "status": "M app/bluetooth_flutter_Trace/analysis_options.yaml",
              "dirty_semantic": [
                  "app/bluetooth_flutter_Trace/analysis_options.yaml",
                  "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
              ],
-             "dirty_eol_only": []},
-            {"head": "1" * 40, "clean": True, "status": "",
-             "dirty_semantic": [], "dirty_eol_only": []},
-            {"head": "1" * 40, "clean": True, "status": "",
-             "dirty_semantic": [], "dirty_eol_only": []},
+             "dirty_semantic_sha": {
+                 "app/bluetooth_flutter_Trace/analysis_options.yaml": "a" * 40,
+                 "app/bluetooth_flutter_Trace/windows/flutter/"
+                 "generated_plugins.cmake": "b" * 40,
+             },
+             "dirty_eol_only": [], "dirty_untracked": []},
+            dict(self.CLEAN),
+            dict(self.CLEAN),
         ])
         checkouts, patched = self._capture_git_checkout()
         with mock.patch.object(sys, "platform", "linux"), patched:
@@ -585,45 +604,100 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake"],
             checkouts[0][checkouts[0].index("checkout") + 2:])
         self.assertIn("apk_build", calls)
+        # 恢复不是"输入没变"的证明：生效字节必须被逐个绑定成证据。
+        self.assertEqual(
+            [("before_apk", "app/bluetooth_flutter_Trace/analysis_options.yaml",
+              "a" * 40),
+             ("before_apk",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+              "b" * 40)],
+            [(item["stage"], item["path"], item["effective_sha256"])
+             for item in report["toolchain_regen"]])
 
     def test_apk_restores_toolchain_regen_files_after_build(self):
         self.apk_inputs()
         # 依次：起点干净 → 门禁干净 → 构建后仅白名单脏 → 恢复后干净。
+        gradle = "app/bluetooth_flutter_Trace/android/gradle.properties"
         regen = {"head": "1" * 40, "clean": False,
-                 "status": "M app/bluetooth_flutter_Trace/android/gradle.properties",
-                 "dirty_semantic": [
-                     "app/bluetooth_flutter_Trace/android/gradle.properties"],
-                 "dirty_eol_only": []}
-        clean = {"head": "1" * 40, "clean": True, "status": "",
-                 "dirty_semantic": [], "dirty_eol_only": []}
-        states = iter([clean, clean, dict(regen), dict(clean)])
+                 "status": "M " + gradle,
+                 "dirty_semantic": [gradle],
+                 "dirty_semantic_sha": {gradle: "d" * 40},
+                 "dirty_eol_only": [], "dirty_untracked": []}
+        states = iter([dict(self.CLEAN), dict(self.CLEAN), dict(regen),
+                       dict(self.CLEAN)])
         checkouts, patched = self._capture_git_checkout()
         with mock.patch.object(sys, "platform", "linux"), patched:
             code, report, calls, _ = self.fixture_run(
                 build_apk=True, identify=lambda root: next(states))
         self.assertEqual(0, code)
         self.assertEqual("PASS", report["apk_result"])
-        self.assertTrue(report["source_unchanged"])
         self.assertEqual(1, len(checkouts))
         self.assertEqual(
-            ["app/bluetooth_flutter_Trace/android/gradle.properties"],
-            checkouts[0][checkouts[0].index("checkout") + 2:])
-        # 恢复前的构建期改写保留为审计快照
+            [gradle], checkouts[0][checkouts[0].index("checkout") + 2:])
+        # 收尾观测保留恢复前的真相：构建确实改写了生效输入，因此
+        # source_unchanged=False；放行靠的是"漂移全部落在已绑定证据的
+        # 再生文件上"这一显式豁免，而不是把恢复说成没变过。
+        self.assertFalse(report["source_unchanged"])
+        self.assertTrue(report["source_deltas_bound_toolchain_regen"])
+        self.assertEqual([gradle], report["source_after"]["dirty_semantic"])
+        self.assertEqual([], report["source_after_restored"]["dirty_semantic"])
         self.assertEqual(
-            ["app/bluetooth_flutter_Trace/android/gradle.properties"],
-            report["source_after_pre_restore"]["dirty_semantic"])
+            [("after_run", gradle, "d" * 40)],
+            [(item["stage"], item["path"], item["effective_sha256"])
+             for item in report["toolchain_regen"]])
         self.assertIn("apk_collect", calls)
+
+    def test_apk_fails_when_build_drift_escapes_bound_toolchain_regen(self):
+        """构建期改写落在白名单之外时，不得被"恢复即未变"洗白。"""
+        self.apk_inputs()
+        drifted = {"head": "1" * 40, "clean": False,
+                   "status": "M app/bluetooth_flutter_Trace/lib/main.dart",
+                   "dirty_semantic": ["app/bluetooth_flutter_Trace/lib/main.dart"],
+                   "dirty_semantic_sha": {
+                       "app/bluetooth_flutter_Trace/lib/main.dart": "e" * 40},
+                   "dirty_eol_only": [], "dirty_untracked": []}
+        states = iter([dict(self.CLEAN), dict(self.CLEAN), dict(drifted)])
+        checkouts, patched = self._capture_git_checkout()
+        with mock.patch.object(sys, "platform", "linux"), patched:
+            code, report, calls, _ = self.fixture_run(
+                build_apk=True, identify=lambda root: next(states))
+        self.assertEqual(1, code)
+        self.assertEqual("FAIL", report["development_result"])
+        self.assertFalse(report["source_unchanged"])
+        self.assertFalse(report["source_deltas_bound_toolchain_regen"])
+        self.assertEqual("Source checkout changed during APK generation",
+                         report["error"])
+        self.assertEqual([], checkouts)
+        self.assertEqual([], report["toolchain_regen"])
+        self.assertIn("apk_build", calls)
+
+    def test_apk_blocks_when_starting_checkout_is_not_clean(self):
+        """起点不干净就没有"未改动的提交检出"可言，APK 必须挡住。"""
+        self.apk_inputs()
+        dirty = {"head": "1" * 40, "clean": False,
+                 "status": "?? leftover.txt",
+                 "dirty_semantic": ["leftover.txt"],
+                 "dirty_semantic_sha": {"leftover.txt": "f" * 40},
+                 "dirty_eol_only": [], "dirty_untracked": ["leftover.txt"]}
+        states = iter([dict(dirty), dict(dirty), dict(dirty)])
+        checkouts, patched = self._capture_git_checkout()
+        with mock.patch.object(sys, "platform", "linux"), patched:
+            code, report, calls, _ = self.fixture_run(
+                build_apk=True, identify=lambda root: next(states))
+        self.assertEqual(1, code)
+        self.assertEqual("NOT_RUN", report["apk_result"])
+        self.assertIn("clean starting checkout", report["commands"][5]["reason"])
+        self.assertEqual([], checkouts)
+        self.assertFalse(any(name.startswith("apk_") for name in calls))
 
     def test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist(self):
         self.apk_inputs()
         dirty = {"head": "1" * 40, "clean": False, "status": "M lib/main.dart",
                  "dirty_semantic": ["app/bluetooth_flutter_Trace/lib/main.dart"],
-                 "dirty_eol_only": []}
-        states = iter([
-            {"head": "1" * 40, "clean": True, "status": "",
-             "dirty_semantic": [], "dirty_eol_only": []},
-            dict(dirty), dict(dirty),
-        ])
+                 "dirty_semantic_sha": {
+                     "app/bluetooth_flutter_Trace/lib/main.dart": "e" * 40},
+                 "dirty_eol_only": [], "dirty_untracked": []}
+        states = iter([dict(self.CLEAN), dict(dirty), dict(dirty)])
         checkouts, patched = self._capture_git_checkout()
         with mock.patch.object(sys, "platform", "linux"), patched:
             code, report, calls, _ = self.fixture_run(
@@ -634,6 +708,185 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                       report["commands"][5]["reason"])
         self.assertEqual([], checkouts)
         self.assertFalse(any(name.startswith("apk_") for name in calls))
+
+    def test_source_unchanged_sees_content_change_on_an_already_dirty_path(self):
+        """只比脏路径列表会漏掉"同一个已脏文件内容又变了"。
+
+        起点已脏，收尾时路径集合完全相同、只有内容指纹变化：旧实现的
+        (head, 路径元组) 相等即判 source_unchanged=True；新实现必须判 False。
+        """
+        self.apk_inputs()
+        leftover = "docs/notes.md"
+
+        def state(sha):
+            return {"head": "1" * 40, "clean": False, "status": " M " + leftover,
+                    "dirty_semantic": [leftover],
+                    "dirty_semantic_sha": {leftover: sha},
+                    "dirty_eol_only": [], "dirty_untracked": []}
+
+        states = iter([state("a" * 40), state("b" * 40)])
+        checkouts, patched = self._capture_git_checkout()
+        with patched:
+            code, report, _, _ = self.fixture_run(
+                identify=lambda root: next(states))
+        self.assertEqual(0, code)  # 非 APK 轮不因起点脏而判失败
+        self.assertFalse(report["source_unchanged"])
+        # 起点脏 + 非白名单：不得触发任何恢复
+        self.assertEqual([], checkouts)
+        self.assertNotEqual(RUNNER.semantic_state(state("a" * 40)),
+                            RUNNER.semantic_state(state("b" * 40)))
+        self.assertEqual(RUNNER.semantic_state(state("a" * 40)),
+                         RUNNER.semantic_state(state("a" * 40)))
+
+    def git_repo(self):
+        """项目边界内的一次性真实 Git 仓库（.cache 已被父仓库忽略）。
+
+        输入门禁的判据来自 Git 自身输出（未跟踪 vs 修改 vs 行尾 vs 重命名），
+        mock 的 identity 字典证明不了解析是否正确，必须对真实 Git 断言。
+        """
+        repo = RUNNER.make_directory(self.project, Path("gitfixture"))
+
+        def run(*argv):
+            return subprocess.run(
+                ["git", "-C", str(repo), *argv], capture_output=True,
+                text=True, encoding="utf-8", errors="replace", check=True,
+                timeout=30,
+            ).stdout
+        run("init", "--quiet")
+        # 行尾策略写死：宿主 autocrlf 会让行尾用例时红时绿。
+        run("config", "core.autocrlf", "false")
+        run("config", "user.name", "dev-checks-fixture")
+        run("config", "user.email", "fixture@example.invalid")
+        run("config", "commit.gpgsign", "false")
+        (repo / "kept.txt").write_bytes(b"alpha\nbeta\n")
+        (repo / "moved.txt").write_bytes(b"payload\n")
+        run("add", "kept.txt", "moved.txt")
+        run("commit", "--quiet", "-m", "fixture")
+        return repo, run
+
+    def test_identity_treats_untracked_files_as_semantic_not_eol(self):
+        """RC3-02 反例：`git diff` 看不见未跟踪文件。
+
+        对 `??` 记录，`diff --quiet` 两侧都返回"无差异"，旧实现据此判定
+        eol_only=True，于是任意未跟踪输入都与干净检出语义等价。
+        """
+        repo, _ = self.git_repo()
+        clean = RUNNER.checkout_identity(repo)
+        self.assertTrue(clean["clean"])
+        (repo / "stray.txt").write_bytes(b"unreviewed input\n")
+        identity = RUNNER.checkout_identity(repo)
+        self.assertFalse(identity["clean"])
+        self.assertEqual(["stray.txt"], identity["dirty_semantic"])
+        self.assertEqual(["stray.txt"], identity["dirty_untracked"])
+        self.assertEqual([], identity["dirty_eol_only"])
+        self.assertNotEqual(RUNNER.semantic_state(clean),
+                            RUNNER.semantic_state(identity))
+
+    def test_identity_treats_untracked_directory_as_semantic(self):
+        """`--untracked-files=normal` 把未跟踪目录折叠成一条 `dir/` 记录。"""
+        repo, _ = self.git_repo()
+        RUNNER.make_directory(repo, Path("stray"))
+        (repo / "stray" / "inner.txt").write_bytes(b"unreviewed\n")
+        identity = RUNNER.checkout_identity(repo)
+        self.assertEqual(["stray/"], identity["dirty_semantic"])
+        self.assertEqual([], identity["dirty_eol_only"])
+        self.assertEqual("<dir>", identity["dirty_semantic_sha"]["stray/"])
+
+    def test_identity_keeps_crlf_only_rewrite_out_of_semantic(self):
+        """真正的纯行尾差异仍必须放行，否则工具链改写会假红。"""
+        repo, _ = self.git_repo()
+        (repo / "kept.txt").write_bytes(b"alpha\r\nbeta\r\n")
+        identity = RUNNER.checkout_identity(repo)
+        self.assertFalse(identity["clean"])
+        self.assertEqual([], identity["dirty_semantic"])
+        self.assertEqual(["kept.txt"], identity["dirty_eol_only"])
+        self.assertEqual({}, identity["dirty_semantic_sha"])
+
+    def test_identity_fingerprints_distinguish_successive_content_changes(self):
+        """同一条脏路径的两次不同内容必须产生不同语义指纹。"""
+        repo, run = self.git_repo()
+        (repo / "kept.txt").write_bytes(b"alpha\nchanged\n")
+        first = RUNNER.checkout_identity(repo)
+        (repo / "kept.txt").write_bytes(b"alpha\nchanged again\n")
+        second = RUNNER.checkout_identity(repo)
+        self.assertEqual(["kept.txt"], first["dirty_semantic"])
+        self.assertEqual(first["dirty_semantic"], second["dirty_semantic"])
+        self.assertEqual(
+            run("hash-object", "--no-filters", "kept.txt").strip(),
+            second["dirty_semantic_sha"]["kept.txt"])
+        self.assertNotEqual(first["dirty_semantic_sha"]["kept.txt"],
+                            second["dirty_semantic_sha"]["kept.txt"])
+        self.assertNotEqual(RUNNER.semantic_state(first),
+                            RUNNER.semantic_state(second))
+
+    def test_identity_parses_rename_records_without_mangling_paths(self):
+        """`-z` 的重命名记录多带一个原路径字段，误当成新记录会切掉三个字符。"""
+        repo, run = self.git_repo()
+        run("mv", "moved.txt", "renamed.txt")
+        identity = RUNNER.checkout_identity(repo)
+        self.assertEqual(["renamed.txt"], identity["dirty_semantic"])
+        self.assertEqual([], identity["dirty_eol_only"])
+        self.assertEqual(
+            run("hash-object", "--no-filters", "renamed.txt").strip(),
+            identity["dirty_semantic_sha"]["renamed.txt"])
+
+    def test_identity_treats_deletion_as_semantic(self):
+        repo, _ = self.git_repo()
+        (repo / "kept.txt").unlink()
+        identity = RUNNER.checkout_identity(repo)
+        self.assertEqual(["kept.txt"], identity["dirty_semantic"])
+        self.assertEqual([], identity["dirty_eol_only"])
+        self.assertEqual("<absent>", identity["dirty_semantic_sha"]["kept.txt"])
+
+    def test_bind_toolchain_regen_records_effective_and_committed_bytes(self):
+        """恢复前必须绑定生效字节，否则白名单等于"改了也算没改"。"""
+        repo, run = self.git_repo()
+        yaml = "app/bluetooth_flutter_Trace/analysis_options.yaml"
+        RUNNER.make_directory(repo, Path(yaml).parent)
+        (repo / yaml).write_bytes(b"include: package:flutter_lints\n")
+        run("add", "--", yaml)
+        run("commit", "--quiet", "-m", "config")
+        clean = RUNNER.checkout_identity(repo)
+        (repo / yaml).write_bytes(b"include: package:flutter_lints\nexclude:\n")
+        identity = RUNNER.checkout_identity(repo)
+        bound = RUNNER.bind_toolchain_regen(repo, identity, "before_apk")
+        self.assertEqual(1, len(bound))
+        self.assertEqual(yaml, bound[0]["path"])
+        self.assertEqual("before_apk", bound[0]["stage"])
+        self.assertEqual(
+            hashlib.sha256(b"include: package:flutter_lints\nexclude:\n").hexdigest(),
+            bound[0]["effective_sha256"])
+        self.assertEqual(
+            hashlib.sha256(b"include: package:flutter_lints\n").hexdigest(),
+            bound[0]["committed_sha256"])
+        self.assertNotEqual(bound[0]["committed_sha256"],
+                            bound[0]["effective_sha256"])
+        self.assertIn("+exclude:", bound[0]["diff"])
+        self.assertTrue(clean["clean"])
+        self.assertTrue(
+            RUNNER.deltas_are_bound_toolchain_regen(clean, identity, bound))
+
+    def test_bound_regen_exemption_rejects_paths_outside_the_whitelist(self):
+        repo, _ = self.git_repo()
+        (repo / "kept.txt").write_bytes(b"alpha\nchanged\n")
+        current = RUNNER.checkout_identity(repo)
+        source = dict(current, clean=True, dirty_semantic=[],
+                      dirty_semantic_sha={}, dirty_eol_only=[],
+                      dirty_untracked=[])
+        self.assertEqual([], RUNNER.bind_toolchain_regen(repo, current, "x"))
+        self.assertFalse(
+            RUNNER.deltas_are_bound_toolchain_regen(source, current, []))
+        # 未采集证据时，即便路径在白名单内也不得豁免
+        forged = dict(
+            current,
+            dirty_semantic=["app/bluetooth_flutter_Trace/android/gradle.properties"],
+            dirty_semantic_sha={
+                "app/bluetooth_flutter_Trace/android/gradle.properties": "a" * 40})
+        self.assertFalse(
+            RUNNER.deltas_are_bound_toolchain_regen(source, forged, []))
+        self.assertTrue(RUNNER.deltas_are_bound_toolchain_regen(
+            source, forged,
+            [{"path": "app/bluetooth_flutter_Trace/android/gradle.properties"}]))
 
     def test_standing_authorization_is_not_a_mainline_or_release_grant(self):
         guide = (ROOT / "docs/flutter-development-validation.md").read_text(encoding="utf-8")
