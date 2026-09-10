@@ -957,13 +957,13 @@ class OtaService extends GetxController {
             return false; // 静默：状态由 cancelUpgrade 发布
         }
       } on OtaTransportException catch (e) {
-        _upgradeStatus.value = 'BLE 传输失败: ${e.message}';
         if (e.code == 'DISCONNECTED') {
           // 断连使旧身份快照失效（PR09）：恢复须重新 GET_INFO。
           _deviceInfo = null;
           _deviceInfoAddress = null;
         }
         if (e.code != 'CANCELLED') {
+          _upgradeStatus.value = 'BLE 传输失败: ${e.message}';
           // 连接仍在时尽力 ABORT（清理 MCU 侧会话）。
           await activeTransport?.abortBestEffort();
           _phase.value = OtaPhase.failed;
@@ -975,16 +975,22 @@ class OtaService extends GetxController {
           // 发起传输入口（retryableLater 终止态正是「可重试续传」）。
           // 与下面的用户取消分支不同，这一支不存在「清理未完成」的窗口——
           // 本路径不删任何资产。
+          //
+          // 文案不得在此无条件发布（RC3-12）：`e.message` 对 CANCELLED 恒为
+          // 传输层的「OTA 传输已取消」，抢先写会把 failClosed 刚发布的
+          // 「设备复核失败（后台恢复），升级已终止，可重试续传」覆盖成
+          // 通用链路失败文案，丢掉终止原因与可重试语义。
           _phase.value = OtaPhase.cancelled;
         }
         // 剩余情形即用户取消（generation != _cancelGeneration，RC3-12）：
-        // 静默退出，此处不得发布任何「已取消」可观测状态。终态与包清理由
-        // cancelUpgrade 在本 owner 完全退出后一次性发布（文案与 phase 同段
-        // 赋值）。抢先置 cancelled 会让 UI 立刻按「已取消且包已处置」渲染
-        // 并放开重新进入传输；抢先发布取消文案同样有害——进度卡的 Obx
-        // 直接读 upgradeStatus，此时取消路径的清理（partial/已验证包）还没
-        // 跑完，「取消文案 ⇒ 包已处置」的契约会提前成立。与下载路径的
-        // CANCELLED 分支、目标身份复核的 cancelled 分支保持同一策略。
+        // 静默退出，此处不得发布任何「已取消」可观测状态——既不写文案也不
+        // 置 phase。终态与包清理由 cancelUpgrade 在本 owner 完全退出后一次性
+        // 发布（文案与 phase 同段赋值）。抢先置 cancelled 会让 UI 立刻按
+        // 「已取消且包已处置」渲染并放开重新进入传输；抢先发布取消文案同样
+        // 有害——进度卡的 Obx 直接读 upgradeStatus，此时取消路径的清理
+        // （partial/已验证包）还没跑完，「取消文案 ⇒ 包已处置」的契约会提前
+        // 成立。因此上面两个分支各自只发布自己成立的那部分状态，本分支不发布。
+        // 与下载路径的 CANCELLED 分支、目标身份复核的 cancelled 分支保持同一策略。
         return false;
       } on OtaDeviceIdentityException catch (e) {
         _terminalState.value = OtaTerminalState(

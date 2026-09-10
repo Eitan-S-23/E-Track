@@ -959,17 +959,20 @@ void main() {
       final startFuture = service.startOtaUpgrade('AA:BB');
       await ble.dataGated.future;
 
-      // 发布时刻观测（RC3-12）：取消文案每发布一次即记录当时的 IO 事实。
-      // 进度卡的 Obx 直接读 upgradeStatus、phase 决定传输入口能否重新
-      // 进入，二者都必须与「包已处置」一致——只看取消返回后的最终值
-      // 会漏掉「文案/phase 先发布、清理后跑」的中间态。
-      var cancelTextPublishes = 0;
+      // 发布时刻观测（RC3-12）：**每一次** upgradeStatus / phase 发布都记录
+      // 当时的 IO 事实。进度卡的 Obx 直接读 upgradeStatus、phase 决定传输
+      // 入口能否重新进入，二者都必须与「包已处置」一致——只看取消返回后的
+      // 最终值、或只盯最终取消文案，都会漏掉「抢先发布、清理后跑」的中间态：
+      // 旧实现正是在本窗口内由旧 owner 的 catch 抢先发布
+      // 「BLE 传输失败: OTA 传输已取消」，UI 随即按「失败且包已处置」渲染。
+      final statusPublishes = <String>[];
       final fileExistsAtPublish = <bool>[];
-      final sub = service.upgradeStatusRx.listen((status) {
-        if (status != '操作已取消') return;
-        cancelTextPublishes++;
+      final phasePublishes = <OtaPhase>[];
+      final statusSub = service.upgradeStatusRx.listen((status) {
+        statusPublishes.add(status);
         fileExistsAtPublish.add(pkgFile!.existsSync());
       });
+      final phaseSub = service.phaseRx.listen(phasePublishes.add);
 
       // 清理前的 IO 屏障：ABORT 物理写在途，cancelUpgrade 停在
       // await transport.abortBestEffort()——包删除与终态发布都还没开始。
@@ -984,8 +987,21 @@ void main() {
       // 「已取消且包已处置」渲染并重新放开已作废的传输入口。
       ble.releaseDataGate();
       expect(await startFuture, isFalse, reason: '旧 owner 已在 ABORT 在途期间退出');
-      expect(cancelTextPublishes, 0,
-          reason: '清理未完成不得发布取消文案（取消文案 ⇒ 包已处置）');
+      // 窗口内**全部**发布都必须与「清理未完成」一致：既不得出现取消/失败
+      // 文案，也不得出现 cancelled/failed phase。旧实现在此处由旧 owner 的
+      // catch 抢先发布「BLE 传输失败: OTA 传输已取消」——该断言是它与修复
+      // 后行为的鉴别点，不是对最终标签的同义反复。
+      expect(
+          statusPublishes.where((s) => s.contains('取消') || s.contains('失败')),
+          isEmpty,
+          reason: '清理未完成不得发布任何取消/失败文案（旧实现在此抢先发布）');
+      expect(
+          phasePublishes.where(
+              (p) => p == OtaPhase.cancelled || p == OtaPhase.failed),
+          isEmpty,
+          reason: '清理未完成不得置 cancelled/failed（否则传输入口重新可用）');
+      expect(statusPublishes, isNot(contains('操作已取消')),
+          reason: '取消文案必须晚于包清理，不得在本窗口发布');
       expect(service.phase, isNot(OtaPhase.cancelled),
           reason: '清理未完成不得置 cancelled（否则传输入口重新可用）');
       expect(service.terminalState, isNull, reason: '取消清理期间不得产生终止态');
@@ -996,11 +1012,14 @@ void main() {
       ble.abortWriteGate!.complete();
       await cancelFuture;
       await Future<void>.delayed(Duration.zero);
-      await sub.cancel();
+      await statusSub.cancel();
+      await phaseSub.cancel();
 
-      expect(cancelTextPublishes, 1,
+      expect(statusPublishes.where((s) => s == '操作已取消').length, 1,
           reason: '取消文案只发布一次，且发生在包清理之后');
-      expect(fileExistsAtPublish, [false],
+      expect(statusPublishes.last, '操作已取消',
+          reason: '最后发布的文案必须是取消文案（旧 owner 的抢先文案不得留在末尾）');
+      expect(fileExistsAtPublish.last, isFalse,
           reason: '「操作已取消」发布时包文件必须已删除（发布时刻 IO 屏障）');
       expect(await startFuture, isFalse);
       expect(service.phase, OtaPhase.cancelled);
@@ -1308,6 +1327,13 @@ void main() {
           isTrue, reason: 'fail closed 必须经通知暴露终止事实');
       expect(await startFuture, isFalse);
       expect(service.phase, OtaPhase.cancelled);
+      // RC3-12：终止文案由 failClosed 发布，旧 owner 的退出路径不得再写一次
+      // 通用链路失败文案覆盖它——旧实现无条件写
+      // 「BLE 传输失败: ${e.message}」（CANCELLED 时即「OTA 传输已取消」），
+      // 把「可重试续传」这条可操作信息冲掉。startFuture 已完成，证明旧
+      // owner 的 catch 已经跑过，此处不是竞态窗口。
+      expect(service.upgradeStatus, '设备复核失败（后台恢复），升级已终止，可重试续传',
+          reason: 'fail closed 的可重试终止文案不得被旧 owner 的通用失败文案覆盖');
       expect(ble.abortCalls, 1, reason: 'fail closed 必须尽力 ABORT 停止发送循环');
     });
 
