@@ -1664,8 +1664,51 @@ void main() {
         packageSha256: shaOf(package),
         etuHeader: etuHeaderOf(package),
       );
-      expect(ack.isOk, isTrue);
+      expect(ack.status, OtaBleCodec.statusOk);
       await reconnected.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('设备复位后重新同步：本端仍 fail-closed，探针一次即成且不产生坏帧'
+        '（RC3-05⑤）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()
+        ..mtu = 125
+        ..failAtDataChunk = 2;
+      final first = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      try {
+        await first.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } catch (_) {
+        // 判据是复位后的写行为。
+      }
+      await first.dispose();
+      expect(mcu.pendingByteCount, 122);
+
+      // 断电/复位是唯一会清掉 MCU 侧解析器状态的事件（reboot ≠ 重连）。
+      mcu.powerCycle();
+      expect(mcu.pendingByteCount, 0);
+
+      // 但本端拿不到「设备已复位」的直接证据，仍须 fail-closed：标记不因
+      // 设备侧状态变化自动解除，只能由一次真实 GET_INFO → INFO 往返解除。
+      final afterReset = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      await _expectBusinessWriteRefused(afterReset, '设备已复位但本端尚未取得同步证据');
+      final info = await afterReset.getDeviceInfo();
+      expect(info.deviceModel, 'e-track-at32f435');
+      expect(mcu.badCrcFrames, 0,
+          reason: '解析器已随复位清空，无需靠坏帧冲刷，探针首次即应被完整解析');
+      expect(mcu.linkReconnects, 0, reason: '复位不是 BLE 重连，用例本身不得混淆二者');
+      final ack = await afterReset.begin(
+        totalLen: package.length,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.status, OtaBleCodec.statusOk,
+          reason: '废弃标记不是永久砖化：取得同步证据后业务帧恢复');
+      await afterReset.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
     test('后台暂停/恢复：发窗在帧边界挂起，恢复后传输完成（RC3-08）',
