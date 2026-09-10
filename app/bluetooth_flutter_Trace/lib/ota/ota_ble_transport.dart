@@ -918,7 +918,10 @@ class OtaBleTransport {
   ///
   /// 作用域是**设备**而非包装对象或 transport 实例：`Future.timeout`
   /// 不取消底层 writeChunk，迟到分片仍会落地；有界 settle 只保证「本帧不与
-  /// 自己的迟到分片交错」，不等于物理写已被取消。若只标记实例，上层在
+  /// 自己的迟到分片交错」，不等于物理写已被取消。传输路径上 settle 宽限
+  /// 还被剩余 durable 预算封顶（RC3-07），预算耗尽时宽限为 0——此时不再
+  /// 为迟到分片保留串行队列，交错风险转由本标记 + 探针重试承担。
+  /// 若只标记实例，上层在
   /// 同一设备上重建 transport 即可继续写；若只标记包装对象，每次 bind
   /// 新建 `_ChannelAdapter` 也会让标记失效。两种情况下新帧都与旧连接的
   /// 迟到半帧交错，MCU 同样无法恢复同步。标记落在 [_deviceScope]，同一台
@@ -984,7 +987,9 @@ class OtaBleTransport {
   ///   不再检查取消——MCU 永远收到完整帧，取消后的 ABORT 不会被吞成
   ///   半帧 payload；取消最多延迟一帧，帧完成后立即向调用方抛出。
   /// - 每个分片写入受 [writeTimeout] 限制，并受无 durable 进展总预算
-  ///   约束（RC3-07：写通道卡死不得无限阻塞传输循环）。
+  ///   约束（RC3-07：写通道卡死不得无限阻塞传输循环）；超时后的 settle
+  ///   宽限同样由剩余预算封顶，故传输路径上「本帧抛出 WRITE_TIMEOUT」的
+  ///   时刻不晚于预算截止（默认 30s），不会出现预算 + 20s 的第三段等待。
   /// - 取消旁路（RC3-05②）：预算检查/封顶只约束正常传输路径——预算
   ///   耗尽的职责是终止卡死的传输，而取消路径的 ABORT 是收拾残局的
   ///   尽力帧，若被预算拦截（checkNoProgress 抛出 / 剩余归零封顶成
@@ -1043,17 +1048,31 @@ class OtaBleTransport {
         // 迟到物理写隔离（RC3-05⑤）：Future.timeout 不取消底层 writeChunk——
         // 直接上抛会让串行队列（_writeSerial）立即放行下一帧（含取消路径的
         // ABORT），迟到分片在 ABORT 之后落地，MCU 收到交错的半帧流。超时后
-        // 先有界等待底层写 settle（上限 2×writeTimeout），吞掉迟到错误再抛
-        // 本帧 WRITE_TIMEOUT；迟到上限内仍未返回的物理写意味着写通道已卡死，
-        // 排在其后的帧同样会被截断，不会与本帧分片交错。
+        // 先等待底层写 settle（宽限 2×writeTimeout），吞掉迟到错误再抛本帧
+        // WRITE_TIMEOUT。
+        // 该宽限**不是第三段预算**，仍由无 durable 进展的剩余预算封顶
+        // （RC3-07）：不封顶时终止发布时刻可达「预算 + 20s」（默认 30s +
+        // 20s = 50s），超出 30s 合同窗口；封顶后传输路径的终止发布上界
+        // 恒为 noProgressTimeout。
+        // 预算已耗尽时宽限为 0、立即上抛：此刻继续占住串行队列只会把终止
+        // 推迟到合同窗口之外。安全性由废弃标记承担——它已拒绝全部业务帧
+        // 与 ABORT（见 [_writeFrameChecked]），唯一可能交错的帧是 GET_INFO
+        // 探针；探针字节被吞进悬空帧后由 MCU 坏帧自复位（ota_ble_frame.c
+        // 失败分支 reset）与有界探针重试（[maxResyncProbes]）接管。
+        // 取消路径在 transfer 退出后预算已解除（[_noProgressClock] 置空），
+        // 宽限仍取 2×writeTimeout——该路径的终止上界是
+        // writeTimeout + 2×writeTimeout，以单次写超时为唯一依据。
         final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
         dispatchedAny = true;
         try {
           await pendingWrite.timeout(perChunkTimeout);
         } on TimeoutException {
-          try {
-            await pendingWrite.timeout(writeTimeout * 2);
-          } catch (_) {} // 迟到错误不覆盖本帧超时语义
+          final settleGrace = _capByBudget(writeTimeout * 2);
+          if (settleGrace > Duration.zero) {
+            try {
+              await pendingWrite.timeout(settleGrace);
+            } catch (_) {} // 迟到错误不覆盖本帧超时语义
+          }
           throw OtaTransportException(
               'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
               code: 'WRITE_TIMEOUT');

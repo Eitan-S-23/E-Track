@@ -1515,10 +1515,178 @@ void main() {
         mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
         0,
       );
-      // 截断证据：142B DATA 帧已送达 7 片 × 20B = 140B、尾片 2B 未发，
-      // 超时后有界 settle 等到片 7 迟到落地再抛出，_pending 恰滞留
-      // 140B 半帧（无后续帧字节混入）。
+      // 截断证据：片 7 于 480ms 发起、560ms 落地，而预算 520ms 到期时
+      // settle 宽限已被剩余预算封顶为 0——抛出时刻片 7 可能尚未落地。
+      // 两种取值都仍是同一 DATA 帧的前缀（120B 或 140B）。
+      expect(mcu.pendingByteCount, anyOf(120, 140));
+      // 等片 7 迟到落地后：_pending 恰为 140B 半帧前缀，无尾片 2B、无后续
+      // 帧字节混入（迟到物理写未被取消，只是不再阻塞终止发布）。
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(mcu.pendingByteCount, 140);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('接近预算耗尽的写挂起：终止发布不得超出 durable 预算（RC3-07⑤）',
+        () async {
+      final package = packageBytes(4096);
+      // MTU=23（20B/片）：DATA 帧 8 片，前 3 片各 300ms 慢写吃掉 900ms 预算，
+      // 片 4 起写通道卡死（永不返回）。预算 1500ms、单次写超时 5s：片 4 的
+      // cap = 剩余 ~600ms < 写挂起，超时在预算截止处触发（片 4 起点的预算
+      // 检查仍在预算内，不会先抛 NO_DURABLE_PROGRESS）。
+      // 修复前：超时处理器再等 2×writeTimeout = 10s（片 4 永不返回 → 等满），
+      // 终止发布落在 ~11.5s；本批把 settle 宽限交给剩余预算封顶 → 宽限 = 0，
+      // 抛出即预算截止。判据因此是「墙钟时间」而非错误码（两者相同）。
+      final mcu = _McuSim()
+        ..mtu = 23
+        ..writeChunkDelay = const Duration(milliseconds: 300)
+        ..hangAtDataChunk = 4
+        ..respondDataAck = false;
+      final transport = OtaBleTransport(
+        channel: mcu,
+        noProgressTimeout: const Duration(milliseconds: 1500),
+        writeTimeout: const Duration(seconds: 5),
+        retries: 999, // 压制重发超限，让预算先触发
+      );
+      final sw = Stopwatch()..start();
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } on OtaTransportException catch (e) {
+        expect(e.code, 'WRITE_TIMEOUT');
+      } finally {
+        sw.stop();
+      }
+      expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(1000),
+          reason: '预算本身必须真的走完（片 1-3 各 300ms）');
+      expect(sw.elapsedMilliseconds, lessThan(3000),
+          reason: '终止发布不得超出 1500ms 预算：旧实现要再等 2×writeTimeout=10s');
+      // 半帧已废弃：后续业务帧被拒（写通道不可信）。
+      await _expectBusinessWriteRefused(transport, '预算耗尽写挂起后');
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('写超时后迟到成功：仍抛 WRITE_TIMEOUT，终止发布等到迟到写落地'
+        '（RC3-07⑤）', () async {
+      final package = packageBytes(4096);
+      // MTU=125（122B/片）：DATA 帧 142B = 片 1（122B）+ 片 2（20B）。
+      // 片 1 写 200ms 才落地，而写超时 100ms：超时触发时物理写仍在途，
+      // 预算未耗尽（默认 30s）→ settle 宽限 200ms 内迟到成功落地
+      // （窗口 [100ms, 300ms] 两侧各留 100ms 余量）。
+      final mcu = _McuSim()
+        ..mtu = 125
+        ..slowDataChunkAt = 1
+        ..slowDataChunkDelay = const Duration(milliseconds: 200);
+      final transport = OtaBleTransport(
+        channel: mcu,
+        writeTimeout: const Duration(milliseconds: 100),
+      );
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } on OtaTransportException catch (e) {
+        // 迟到成功不得把已截断的帧「救回」：处置仍是 WRITE_TIMEOUT。
+        expect(e.code, 'WRITE_TIMEOUT');
+        // settle 等到了迟到落地：抛出时刻这 122B 已在 MCU 侧。若实现直接
+        // 上抛（不等 settle），串行队列会在物理写完成前放行下一帧。
+        expect(mcu.pendingByteCount, 122,
+            reason: '终止发布必须等迟到物理写 settle，否则队列提前放行下一帧');
+      }
+      // 片 2 从未发起（帧已废弃）；悬空半帧无后续字节混入。
+      expect(mcu.writeTimeline, ['start#1', 'done#1']);
+      expect(
+        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData),
+        isEmpty,
+      );
+      await _expectBusinessWriteRefused(transport, '迟到成功写超时后');
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('写超时后迟到错误：迟到错误不覆盖本帧 WRITE_TIMEOUT 语义（RC3-07⑤）',
+        () async {
+      final package = packageBytes(4096);
+      // 与迟到成功用例同参数：写超时 100ms，片 1 在 200ms 以底层异常收场，
+      // 落在 settle 宽限窗口 [100ms, 300ms] 内。
+      final mcu = _McuSim()
+        ..mtu = 125
+        ..slowDataChunkAt = 1
+        ..slowDataChunkDelay = const Duration(milliseconds: 200)
+        ..slowDataChunkFails = true;
+      final transport = OtaBleTransport(
+        channel: mcu,
+        writeTimeout: const Duration(milliseconds: 100),
+      );
+      try {
+        await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } on OtaTransportException catch (e) {
+        // 迟到错误必须被 settle 吞掉：调用方看到的是本帧的写超时，
+        // 而不是一条与帧边界无关的底层异常。
+        expect(e.code, 'WRITE_TIMEOUT');
+      } on StateError {
+        fail('迟到底层错误不得穿透到调用方');
+      }
+      expect(mcu.writeTimeline, ['start#1', 'error#1']);
+      expect(mcu.pendingByteCount, 0, reason: '迟到错误无字节落地');
+      await _expectBusinessWriteRefused(transport, '迟到错误写超时后');
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('预算耗尽前取消交错：settle 宽限被预算截断，提前放行的 ABORT 不得'
+        '与迟到半帧交错（RC3-07⑤）', () async {
+      final package = packageBytes(4096);
+      // 预算 600ms、写超时 500ms、MTU=125：DATA 片 1（122B）写 1.5s 才落地。
+      // 片 1 在 500ms 超时；修复前的 settle 宽限 2×500ms=1000ms 会把终止
+      // 发布推迟到 1500ms（迟到写落地处，超出 600ms 预算），封顶后只剩
+      // 剩余预算 100ms，终止发布落在预算截止（600ms）。
+      final mcu = _McuSim()
+        ..mtu = 125
+        ..slowDataChunkAt = 1
+        ..slowDataChunkDelay = const Duration(milliseconds: 1500);
+      final transport = OtaBleTransport(
+        channel: mcu,
+        noProgressTimeout: const Duration(milliseconds: 600),
+        writeTimeout: const Duration(milliseconds: 500),
+      );
+      final sw = Stopwatch()..start();
+      final future = transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      // 取消发生在「片 1 在途、DATA 尚未超时」：ABORT 入队排在 DATA 写之后。
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      final abortFuture = transport.abortBestEffort();
+      try {
+        await future;
+        fail('应中止');
+      } on OtaTransportException catch (e) {
+        expect(e.code, anyOf('WRITE_TIMEOUT', 'CANCELLED'));
+      }
+      await abortFuture;
+      sw.stop();
+      expect(sw.elapsedMilliseconds, lessThan(1000),
+          reason: 'settle 宽限被剩余预算截断：不得等到 1.5s 的迟到物理写');
+      // 宽限归零 → 串行队列立即放行 ABORT；启动时的废弃复核必须拦住它，
+      // 否则一个字节就混进悬空半帧（真值：MCU 按 len 吞全部字节）。
+      expect(mcu.abortFrames, isEmpty);
+      expect(mcu.pendingByteCount, 0);
+      // 迟到片 1 落地后仍是干净的半帧前缀，无 ABORT 字节混入。
+      await Future<void>.delayed(const Duration(milliseconds: 1000));
+      expect(mcu.pendingByteCount, 122);
+      expect(mcu.writeTimeline, ['start#1', 'done#1']);
+      await _expectBusinessWriteRefused(transport, '取消交错后');
+      await transport.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
     test('半帧后排队的写在启动时复核通道：取消提前入队的 ABORT 不得'
@@ -2097,12 +2265,24 @@ abstract class _FakeMcuHost implements OtaBleChannel {
     // 累计超预算」；按 DATA 分片计数注错则不受 BEGIN 片数影响。
     if (_chunkFrameCmd(chunk) == OtaBleCodec.cmdData) {
       dataChunkWrites++;
+      writeTimeline.add('start#$dataChunkWrites');
       if (failAtDataChunk == dataChunkWrites) {
         throw StateError('injected GATT write failure');
       }
-      if (writeChunkDelay != Duration.zero) {
+      if (hangAtDataChunk == dataChunkWrites) {
+        // 写通道卡死：永不返回（无定时器，仅悬挂的 future）。
+        await Completer<void>().future;
+      }
+      if (slowDataChunkAt == dataChunkWrites) {
+        await Future<void>.delayed(slowDataChunkDelay);
+        if (slowDataChunkFails) {
+          writeTimeline.add('error#$dataChunkWrites');
+          throw StateError('injected late GATT write failure');
+        }
+      } else if (writeChunkDelay != Duration.zero) {
         await Future<void>.delayed(writeChunkDelay);
       }
+      writeTimeline.add('done#$dataChunkWrites');
     }
     _pending.addAll(chunk);
     // 分片写入重组：一次 chunk 可能含多帧或半帧。
@@ -2209,6 +2389,20 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   /// 失败在整帧中途中断。半帧成因不止写超时，底层错误同样让 MCU 帧
   /// 解析器悬空在 payload 态，处置必须一致。
   int? failAtDataChunk;
+  /// 第 N 个 DATA 分片的底层写**永不返回**（写通道卡死，RC3-07⑤）：
+  /// 只能被上层的写超时/预算终止，用来区分「从零时刻起的单次超时」与
+  /// 「接近预算耗尽时的写挂起」。
+  int? hangAtDataChunk;
+  /// 第 N 个 DATA 分片的底层写在 [slowDataChunkDelay] 后才有结果
+  /// （RC3-07⑤ 迟到落地）：[slowDataChunkFails] 为 false 时迟到成功
+  /// 落地、为 true 时以异常收场。延迟刻意大于 writeTimeout，用于分辨
+  /// 「settle 等到迟到结果」与「立即上抛」。
+  int? slowDataChunkAt;
+  Duration slowDataChunkDelay = Duration.zero;
+  bool slowDataChunkFails = false;
+  /// 分片写观测时间线（RC3-07⑤）：`start#n` / `done#n` / `error#n`，
+  /// 用于断言终止发布与迟到物理写的先后次序。
+  final writeTimeline = <String>[];
   /// 通知投递计数（RC3-02 排查遗留）：map 包装层逐事件累加，区分
   /// 「sendFrame 已 emit」与「事件真正投递到 transport 订阅者」。
   int deliveredChunks = 0;
