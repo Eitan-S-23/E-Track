@@ -79,6 +79,14 @@ class OtaBleTransport {
   _TransferAckView? _ackView;
 
   int _seq = 0;
+  /// 会话外查询（GET_INFO，session=0）的 seq 独立空间（RC3-08⑦）。
+  /// 合同 §5.1 定义 seq 为「会话内」帧序号，MCU 会话层对 BEGIN/DATA/END
+  /// 严格连续校验（ota_ble_session.c session_seq_check）；GET_INFO 不参与
+  /// 会话状态（§5.2，session=0，seq 仅作应答回显关联）。传输在途的后台
+  /// 恢复复核会发 GET_INFO——若它从会话计数器取号，后续 DATA 将整体跳号
+  /// 被 ERR_SEQ 拒绝，触发内部 ABORT+BEGIN 重对齐并从 durable 整段重发；
+  /// 只读复核不得破坏被复核的传输。
+  int _querySeq = 0;
   int _session = 0;
   bool _busy = false;
   bool _cancelled = false;
@@ -96,7 +104,8 @@ class OtaBleTransport {
     var attempts = 0;
     while (true) {
       _checkUsable();
-      final seq = _nextSeq();
+      // 会话外查询取号（RC3-08⑦）：不消耗会话 seq 空间，见 _querySeq。
+      final seq = _nextQuerySeq();
       final frame = OtaBleCodec.encodeCommand(
         cmd: OtaBleCodec.cmdGetInfo,
         session: 0,
@@ -801,6 +810,13 @@ class OtaBleTransport {
   int _nextSeq() {
     final s = _seq;
     _seq = (_seq + 1) & 0xFFFF;
+    return s;
+  }
+
+  /// 会话外查询帧的 seq 分配（独立空间，见 [_querySeq]）。
+  int _nextQuerySeq() {
+    final s = _querySeq;
+    _querySeq = (_querySeq + 1) & 0xFFFF;
     return s;
   }
 

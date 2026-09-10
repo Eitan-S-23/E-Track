@@ -1196,6 +1196,12 @@ void main() {
       expect(service.phase, OtaPhase.completed);
       expect(ble.endCalls, 1);
       expect(ble.abortCalls, 0, reason: '复核通过不得发 ABORT');
+      // 复核的 GET_INFO 不得消耗会话 seq（RC3-08⑦）：会话外查询混入
+      // 会话计数器会让恢复后的 DATA 整体跳号被 ERR_SEQ 拒绝，触发内部
+      // ABORT+BEGIN 重对齐并整段重发（beginCalls>1 / 段重复）。
+      expect(ble.beginCalls, 1, reason: '复核通过不得触发内部恢复重对齐');
+      expect(ble.dataOffsets.length, 8, reason: '1024B 包恰好 8 段，不得重发');
+      expect(ble.dataOffsets.toSet().length, 8, reason: '段偏移不得重复');
     }, timeout: const Timeout(Duration(seconds: 30)));
   });
 }

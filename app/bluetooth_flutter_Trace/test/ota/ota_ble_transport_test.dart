@@ -1664,6 +1664,39 @@ void main() {
       expect(ack.durableOff, 4096);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    test('传输在途 GET_INFO 复核不占会话 seq：DATA 连续不被 ERR_SEQ 打断（RC3-08⑦）',
+        () async {
+      final package = packageBytes(4096);
+      // ACK 延迟让传输保持在途；期间插入一次 GET_INFO（service 三级
+      // 复核的真实形态）。修复前 GET_INFO 从会话计数器取号，后续 DATA
+      // 整体跳号被 MCU 会话层 ERR_SEQ 拒收（真值 session_seq_check 对
+      // 会话帧严格连续）→ 内部 ABORT+BEGIN 重对齐 + 从 durable 整段重发。
+      final mcu = _McuSim()..ackDelay = const Duration(milliseconds: 50);
+      final transport = OtaBleTransport(
+        channel: mcu,
+        noProgressTimeout: const Duration(seconds: 30),
+      );
+      final future = transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      // 等首批 DATA 在途（ACK 延迟窗口内）再复核。
+      while (mcu.dataOffsets.isEmpty) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      final info = await transport.getDeviceInfo(
+          timeout: const Duration(seconds: 2));
+      expect(info.deviceModel, 'e-track-at32f435');
+      final ack = await future;
+      expect(ack.isOk, isTrue);
+      expect(ack.durableOff, 4096);
+      expect(mcu.beginCalls, 1, reason: '复核不得触发 ERR_SEQ 内部恢复重对齐');
+      expect(mcu.abortCalls, 0, reason: '复核是只读探测，不得发 ABORT');
+      expect(mcu.dataOffsets.length, 32, reason: '4096B 恰 32 段，不得重发');
+      expect(mcu.dataOffsets.toSet().length, 32);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
     test('暂停挂起中取消：闸门解除不死锁，CANCELLED 立即返回（RC3-08）',
         () async {
       final package = packageBytes(4096);
