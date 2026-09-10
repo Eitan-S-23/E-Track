@@ -1247,7 +1247,6 @@ class _MockAdapter implements HttpClientAdapter {
           cancelled = true;
         });
       }
-      var emitted = 0;
       for (var i = 0; i < body.length; i += chunkSize) {
         if (cancelled) {
           return;
@@ -1256,7 +1255,6 @@ class _MockAdapter implements HttpClientAdapter {
             Uint8List.sublistView(body, i, math.min(i + chunkSize, body.length));
         deliveredBytes += chunk.length;
         yield chunk;
-        emitted++;
         // 真实 IO 的 chunk 之间存在时隙；本地内存流必须显式补上。
         // async* 的 yield 在消费端未 pause 时同步继续（Dart 语义：仅
         // paused 时挂起），连片 yield 不产生微任务边界——Dio pipe 全速

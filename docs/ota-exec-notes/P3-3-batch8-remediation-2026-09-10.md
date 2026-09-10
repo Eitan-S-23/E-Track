@@ -71,3 +71,32 @@
 - 上节文档口径对齐（治理层，需主会话串行窗口）。
 - RC3-11 的「真实 IOAdapter 终止」仍由 fake 同构证明，不是真实 Dio 适配器的
   运行时证据；产品侧未改，属证据强度说明而非新缺陷。
+
+## 6. 首轮双宿主回归（run 34480053998，SHA 94bf3bd）与整改
+
+结论：**红**。两宿主均在 `Analyze, test and optionally build a debug APK` 步骤
+失败（analyze exit=1、tests exit=1；Linux APK 因此 NOT_RUN）。根因四项，全部
+是本批自身引入，逐条整改：
+
+| # | 现象（原始日志） | 根因 | 处置 |
+|---|---|---|---|
+| 1 | Ubuntu/Windows `tests`：`Expected: OtaPhase:<OtaPhase.cancelled>` / `Actual: OtaPhase:<OtaPhase.failed>`，3 条后台恢复复核用例 | 本批把 `startOtaUpgrade` 传输 catch 的**非用户取消**分支由 `cancelled` 改成 `failed`，属超出审查范围的语义改动 | 回退该分支为 `cancelled`（`ota_service.dart:953-961`），仅保留 RC3-12 要求的「用户取消分支静默」 |
+| 2 | Windows `tests`：`晚到的断开完成不得拆掉新链路资源（RC3-08⑦）` TimeoutException after 30s | 本批新增用例复用同一个未完成的 `disconnectGate` 发起第二次断开，第二次调用停在闸门上原地自锁（用例缺陷，非产品缺陷） | 第二次断开前置空 `fake.disconnectGate`，并用局部 `staleGate` 收尾旧断开 |
+| 3 | 两宿主 `analyze`：`test/ota/ota_download_test.dart:1250 unused_local_variable 'emitted'` | 本批改写 `_bodyStream` 后遗留只写不读的计数变量 | 删除声明与自增（观测口径本就是 `deliveredBytes`） |
+| 4 | 两宿主 `analyze`：`test/ota/ota_service_upgrade_test.dart:1003 unnecessary_non_null_assertion` | 同一用例上文已有 `!` 完成非空提升 | 去掉多余的 `!` |
+
+关于第 1 项的口径说明：`OtaPhase.cancelled` 的枚举注释写作「用户取消」，但
+fail-closed（后台复核失败 → abortBestEffort）沿用的收尾语义历来是 `cancelled`，
+且被既有绿用例固化；该路径**不删任何资产**，UI 正是据此保留「开始 BLE 传输」
+入口配合 `retryableLater` 终止态的「可重试续传」文案。本批不单方面改变该语义，
+仅把审查指出的**用户取消**窗口（文案/phase 抢在清理之前发布）修掉。枚举注释
+与 fail-closed 语义的措辞差异记在此处备查，不在本批范围内改。
+
+第 2 项的用例缺陷本身就说明该用例在第一轮没有真正校验过迟到收尾：超时会让
+整条用例跳过全部断言。整改后其断言链（两次平台调用、代次不重复前进、新设备
+不被清除）才可执行。
+
+自测（本地可执行部分）：`python -m unittest tests.ota.test_flutter_dev_checks`
+→ `Ran 50 tests ... OK`。Dart 侧仍为 NOT_RUN（本机无 SDK），以第二轮双宿主
+CI 为准。
+

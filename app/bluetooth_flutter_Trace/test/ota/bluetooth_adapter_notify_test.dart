@@ -587,12 +587,17 @@ void main() {
     test('断开在途期间代次已前进：迟到完成不清新链路设备、不重复前进代次',
         () async {
       // 旧断开发起，平台 disconnect 在途挂起。
-      fake.disconnectGate = Completer<void>();
+      final staleGate = Completer<void>();
+      fake.disconnectGate = staleGate;
       final staleDisconnect = service.disconnectOtaDeviceByAddress(_addr);
       await fake.disconnectEntered.future.timeout(const Duration(seconds: 5));
 
       // 等待期间同地址链路已被重建：代次前进，新连接的设备已登记。
-      // 第二次断开走同一公开入口（未被闸门拦住）代表这次链路迁移。
+      // 第二次断开走同一公开入口代表这次链路迁移。它不能被旧断开用的
+      // 闸门挡住——闸门是「平台调用在途挂起」的模拟，若复用同一个未完成
+      // 的 Completer，这次调用同样停在 gate 上原地自锁（平台调用根本
+      // 不返回，本用例会退化成超时而非校验迟到收尾语义）。
+      fake.disconnectGate = null;
       await service.disconnectOtaDeviceByAddress(_addr);
       final freshDevice = BluetoothDevice.fromId(_addr);
       service.connectedDevices.add(freshDevice);
@@ -600,7 +605,7 @@ void main() {
       expect(generationAfterRebuild, 1, reason: '链路迁移已推进一代');
 
       // 迟到的旧断开完成。
-      fake.disconnectGate!.complete();
+      staleGate.complete();
       await staleDisconnect;
 
       expect(fake.disconnectCalls, 2, reason: '两次断开都真正调用了平台');

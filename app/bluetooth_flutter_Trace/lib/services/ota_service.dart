@@ -952,9 +952,13 @@ class OtaService extends GetxController {
           _phase.value = OtaPhase.failed;
         } else if (generation == _cancelGeneration) {
           // 非取消来源的 CANCELLED：发送循环是被 abortBestEffort 停掉的
-          // （例如后台复核失败 fail closed），发起中止的路径已发布自己的
-          // 终止态与文案，这里只收尾为失败，不得改写成 cancelled。
-          _phase.value = OtaPhase.failed;
+          // （例如后台复核失败 fail closed）。终止原因由发起中止的路径
+          // （failClosed）发布到 _terminalState/_upgradeStatus，此处保持
+          // 既有收尾语义为 cancelled：已验证包仍在本地、UI 据此保留重新
+          // 发起传输入口（retryableLater 终止态正是「可重试续传」）。
+          // 与下面的用户取消分支不同，这一支不存在「清理未完成」的窗口——
+          // 本路径不删任何资产。
+          _phase.value = OtaPhase.cancelled;
         }
         // 剩余情形即用户取消（generation != _cancelGeneration，RC3-12）：
         // 静默退出，此处不得发布任何「已取消」可观测状态。终态与包清理由
