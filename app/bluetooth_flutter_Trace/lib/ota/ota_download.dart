@@ -7,6 +7,73 @@ import 'package:dio/dio.dart';
 
 import 'ota_firmware_latest.dart';
 
+/// 资产文件族的**跨 attempt 串行闸**（RC3-04/05）。
+///
+/// 归属判定（[OtaFirmwareDownload.stillOwns]）只能回答「此刻还属不属于
+/// 我」。删除点分布在若干 await（`exists()`/`delete()`/`rename()`）之后，
+/// 新 attempt 会在这些 await 期间写出**同名**文件——两次 attempt 的
+/// assetId、文件名、`.part` 路径本来就相同（续传语义要求复用同一
+/// `.part`），因此判定通过不等于可以按路径删。
+///
+/// 只在删除前再补一次归属判断并不够：判定本身与破坏性 IO 之间仍隔着
+/// 异步边界，新 attempt 能挤进这条缝隙。可靠做法是把同一资产文件族上
+/// **所有会创建/改名/删除文件的操作**放进同一把闸串行执行，并在闸内
+/// 复核归属——闸内的判定不会被后来者的创建动作穿插。
+///
+/// 桶键按「资产基地名」分（`<dir>/<base>`）：`.part`、sidecar、
+/// sidecar.tmp、最终文件同属一桶。不同 attempt 会各自 new 一个
+/// [OtaFirmwareDownload]，所以闸必须跨实例共享（[shared]）。
+///
+/// 闸的边界（RC3-04/05）：它保证**删除**与**创建/改名/打开写句柄**互斥，
+/// 因此旧 owner 的清理不可能落在新 owner 的文件创建之后，闸内归属判定
+/// 与破坏性 IO 之间也不存在可插入的 await。读取（sidecar 内容、`.part`
+/// 长度）不在闸内：读与旧清理交错时本 attempt 会按长度/SHA 校验失败
+/// fail closed（重取清单或重下），不会写出静默错误的字节。
+class OtaFilePathGate {
+  /// 生产路径的进程内共享闸。
+  static final OtaFilePathGate shared = OtaFilePathGate();
+
+  final _chains = <String, Future<void>>{};
+
+  /// 串行执行同一桶键上的 [body]，返回其结果（异常原样交给本次调用方）。
+  ///
+  /// 前序任务无论正常结束还是抛错都会放行后续任务；本函数不吞异常。
+  ///
+  /// 调用方**不得**在 [body] 内再次以同一桶键调用本函数：同一异步链上的
+  /// 第二次调用会排在自己持有的那条链之后，形成自锁。
+  Future<T> run<T>(String bucket, Future<T> Function() body) {
+    final prev = _chains[bucket] ?? Future<void>.value();
+    final gate = Completer<void>();
+    _chains[bucket] = gate.future;
+    return prev.then((_) async {
+      try {
+        return await body();
+      } finally {
+        gate.complete();
+        if (identical(_chains[bucket], gate.future)) {
+          _chains.remove(bucket);
+        }
+      }
+    });
+  }
+}
+
+/// 由资产文件族内任一成员路径求串行闸桶键（`<dir>/<base>`）。
+///
+/// 成员形态：`<base>`（最终文件）、`<base>.part`、`<base>.part.json`、
+/// `<base>.part.json.tmp`。后缀**由长到短**匹配：base 本身以 `.part`
+/// 结尾（例如 `fw.part`）时先命中长的 sidecar 后缀才不会截错。最终文件
+/// 无后缀可依，调用方一律用同族的 sidecar/part 路径求键，不要传最终文件
+/// 路径（那样会落到另一条链上）。
+String _gateBucketOf(String path) {
+  for (final suffix in const ['.part.json.tmp', '.part.json', '.part']) {
+    if (path.endsWith(suffix)) {
+      return path.substring(0, path.length - suffix.length);
+    }
+  }
+  return path;
+}
+
 /// 固件包下载 owner（冻结依据 docs/ota-cross-system-contracts.md
 /// OTA-XC-HTTP-DOWNLOAD、OTA-XC-HTTP-RESUME、OTA-XC-CANCEL-RECOVERY）。
 ///
@@ -28,9 +95,15 @@ import 'ota_firmware_latest.dart';
 /// - 完成前同时验证长度与 metadata `sha256`，然后原子 rename；
 /// - 24 小时 partial 清理（含孤儿 sidecar）。
 class OtaFirmwareDownload {
-  OtaFirmwareDownload({Dio? dio, this.dirProvider, this.stillOwns}) : _dio = dio ?? Dio();
+  OtaFirmwareDownload(
+      {Dio? dio, this.dirProvider, this.stillOwns, OtaFilePathGate? fileGate})
+      : _dio = dio ?? Dio(),
+        _fileGate = fileGate ?? OtaFilePathGate.shared;
 
   final Dio _dio;
+
+  /// 同资产文件族的串行闸（RC3-04/05）：写入/rename/删除必须共用一把闸。
+  final OtaFilePathGate _fileGate;
   /// 返回存放 `.part`/sidecar/最终文件的目录（通常是应用文档目录）。
   final Future<Directory> Function()? dirProvider;
 
@@ -114,6 +187,8 @@ class OtaFirmwareDownload {
       final partFile = File(_joinPath(dir.path, '$baseName.part'));
       final finalFile = File(_joinPath(dir.path, baseName));
       final sidecar = File(_joinPath(dir.path, '$baseName.part.json'));
+      // 本资产文件族的串行闸桶键（RC3-04/05）：写入、rename 与删除共用。
+      final bucket = _gateBucketOf(sidecar.path);
       // 续传身份不合法（含 206 头校验失败、If-Range 失配）作废重下，
       // 但最多一次，防止与服务器状态反复拉锯。
       var restartUsed = false;
@@ -167,6 +242,10 @@ class OtaFirmwareDownload {
             !_sidecarMatches(sidecarData, asset, releaseId)) {
           // 身份漂移：作废旧 partial，从零开始。
           await _deletePartial(partFile, sidecar);
+          // 作废可能因归属转移被闸内复核跳过（RC3-04/05）：旧字节仍在
+          // 原地，而下面 resumed=false 会走 FileMode.write 截断——那会把
+          // 新 attempt 刚写的同名文件清掉。删除点之后必须重新判定。
+          await abortIfCancelled();
           sidecarData = null;
           localPartSize = 0;
         }
@@ -178,7 +257,9 @@ class OtaFirmwareDownload {
             // 令牌与归属，已取消/已易主一律按取消路径处置，不得把字节
             // 转成本 attempt 的完成包。
             await abortIfCancelled();
-            await partFile.rename(finalFile.path);
+            // rename 过串行闸（RC3-04/05）：本 attempt 的落成动作与后来者
+            // 的创建/清理互斥，避免把新 attempt 正在写的同名文件改名带走。
+            await _fileGate.run(bucket, () => partFile.rename(finalFile.path));
             // RC3-05⑤：rename 是耗时 await，完成后需复核取消——取消若
             // 在复核前一刻到达，已落成的 finalFile 不得伪装成功返回。
             // keepPartial 语义下保留 finalFile（字节已验证正确，下次
@@ -224,6 +305,8 @@ class OtaFirmwareDownload {
           final etag = sidecarData.strongEtag;
           if (etag == null || !_isStrongEtag(etag)) {
             await _deletePartial(partFile, sidecar);
+            // 同上：删除被归属复核跳过后，下面的写盘会截断新 owner 的字节。
+            await abortIfCancelled();
             sidecarData = null;
             localPartSize = 0;
           } else {
@@ -453,9 +536,23 @@ class OtaFirmwareDownload {
                     (digests) => digestAccumulator.addAll(digests)),
               );
         var received = 0;
-        final sink = partFile.openWrite(
-          mode: resumed ? FileMode.append : FileMode.write,
-        );
+        // 打开写句柄也属于「创建/截断同名文件」这一族操作（RC3-04/05）：
+        // 与后来者的创建/清理共用同一把串行闸，并在闸内复核归属。响应头
+        // 到达与写盘之间隔着整轮网络往返，旧 attempt 若在这段窗口里复活，
+        // FileMode.write 会把新 owner 刚写的字节截断——闸内判定能挡住。
+        final opened = await _fileGate.run<IOSink?>(bucket, () async {
+          if (!_ownsAsset()) return null;
+          return partFile.openWrite(
+            mode: resumed ? FileMode.append : FileMode.write,
+          );
+        });
+        if (opened == null) {
+          // 归属已转移：先排空响应体归还连接，再走统一退出。该分支下
+          // abortIfCancelled 必然抛出 CANCELLED（归属判定为假）。
+          await _drainBody(response.data, cancelToken: attemptToken);
+          await abortIfCancelled();
+        }
+        final sink = opened!;
         // RC3-11⑤：Dio 5.9.0 的接收空闲计时器只在收到首个 data 事件后
         // 启动——响应头已到而首块正文永不到（或块间长停）时，await for
         // 无限挂起且 Dio 超时不触发。对包装流套 Stream.timeout 补偿：
@@ -516,7 +613,8 @@ class OtaFirmwareDownload {
         // RC3-05：verify 耗时期间用户可能已取消——字节已校验正确，
         // partial 按 keepPartial 语义处置，不得转成完成包。
         await abortIfCancelled();
-        await partFile.rename(finalFile.path);
+        // 同上：落成 rename 与后来者的创建/清理互斥（RC3-04/05）。
+        await _fileGate.run(bucket, () => partFile.rename(finalFile.path));
         // RC3-05⑤：rename 后复核取消/归属——verify 通过到 rename 返回之间
         // 取消或易主时，已完成包不得伪装成功；keepPartial 语义下保留
         // finalFile（字节已验证正确，下次直接复用）。
@@ -898,13 +996,17 @@ class OtaFirmwareDownload {
     return file.length();
   }
 
+  /// 截断 `.part`（200 回退重下）。同样是「改写同族文件」的操作，过串行闸
+  /// （RC3-04/05），避免与旧 attempt 迟到的清理交错。
   Future<void> _truncateFile(File file) async {
-    final raf = await file.open(mode: FileMode.write);
-    try {
-      await raf.truncate(0);
-    } finally {
-      await raf.close();
-    }
+    await _fileGate.run(_gateBucketOf(file.path), () async {
+      final raf = await file.open(mode: FileMode.write);
+      try {
+        await raf.truncate(0);
+      } finally {
+        await raf.close();
+      }
+    });
   }
 
   Future<OtaSidecarData?> _readSidecar(File sidecar) async {
@@ -950,6 +1052,9 @@ class OtaFirmwareDownload {
     required String releaseId,
     String? etag,
   }) async {
+    // 原子写：先临时文件再 rename。整段过闸（RC3-04/05）——sidecar 是
+    // 续传身份的唯一来源，不能让旧 attempt 迟到的清理插在写与 rename
+    // 之间，也不能让本次写覆盖掉新 owner 刚写下的身份。
     final payload = jsonEncode({
       'assetId': asset.assetId,
       'releaseId': releaseId,
@@ -958,10 +1063,11 @@ class OtaFirmwareDownload {
       'strongEtag': etag,
       'updatedAtMs': DateTime.now().millisecondsSinceEpoch,
     });
-    // 原子写：先临时文件再 rename。
-    final tmp = File('${sidecar.path}.tmp');
-    await tmp.writeAsString(payload, flush: true);
-    await tmp.rename(sidecar.path);
+    await _fileGate.run(_gateBucketOf(sidecar.path), () async {
+      final tmp = File('${sidecar.path}.tmp');
+      await tmp.writeAsString(payload, flush: true);
+      await tmp.rename(sidecar.path);
+    });
   }
 
   bool _sidecarMatches(
@@ -975,15 +1081,23 @@ class OtaFirmwareDownload {
         data.sizeBytes == asset.sizeBytes;
   }
 
-  /// 失败清理路径的删除（RC3-05⑤）：删除失败必须抛出——「失败后清理」
+  /// 删除 part/sidecar/tmp（RC3-05⑤：删除失败必须抛出——「失败后清理」
   /// 不兑现却被吞掉时，调用方会误以为状态已复位（partial 残留、下次
   /// 续传基于脏状态），失败上报不兑现。主错误已在抛出途中的路径用
-  /// [invalidatePartial] 把本异常串入 cleanupNote。
+  /// [invalidatePartial] 把本异常串入 cleanupNote）。
+  ///
+  /// 三个删除点在**同一把串行闸内**执行，并在闸内复核归属（RC3-04/05）：
+  /// 闸把本段与后来者对同一资产文件族的写入/rename 互斥，闸内判定因此
+  /// 不会被后来者的创建动作穿插。仅在外层再补一次 epoch 判定是不够的
+  /// ——判定与本段之间的 await 就是后来者挤进来的缝隙。归属已转移时
+  /// 静默跳过（新 owner 的文件不属于本次清理）。
   Future<void> _deletePartial(File partFile, File sidecar) async {
-    await _deleteStrict(partFile);
-    await _deleteStrict(sidecar);
-    final tmp = File('${sidecar.path}.tmp');
-    await _deleteStrict(tmp);
+    await _fileGate.run(_gateBucketOf(sidecar.path), () async {
+      if (!_ownsAsset()) return;
+      await _deleteStrict(partFile);
+      await _deleteStrict(sidecar);
+      await _deleteStrict(File('${sidecar.path}.tmp'));
+    });
   }
 
   Future<void> _deleteStrict(File file) async {
@@ -1001,14 +1115,19 @@ class OtaFirmwareDownload {
   /// 残留不改变成功语义，cleanExpiredPartials 24h 兜底会再清）。失败
   /// 路径一律用 [_deletePartial]/[_deleteStrict]，禁止吞掉删除失败
   /// （RC3-05⑤）。
+  ///
+  /// 同样过串行闸（RC3-04/05）：成功路径的善后删除与失败路径的清理
+  /// 走的是同一个路径名，必须与后来者的写入互斥。
   Future<void> _quietDelete(File file) async {
-    if (await file.exists()) {
-      try {
-        await file.delete();
-      } catch (_) {
-        // 成功路径善后：残留交给 24h 兜底清理。
+    await _fileGate.run(_gateBucketOf(file.path), () async {
+      if (await file.exists()) {
+        try {
+          await file.delete();
+        } catch (_) {
+          // 成功路径善后：残留交给 24h 兜底清理。
+        }
       }
-    }
+    });
   }
 
   String? _firstHeader(Headers headers, String name) {

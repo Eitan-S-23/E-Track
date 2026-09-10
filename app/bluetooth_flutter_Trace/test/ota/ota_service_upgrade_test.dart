@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -9,6 +10,7 @@ import 'package:get/get.dart';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
+import 'package:ble_monitor/ota/ota_download.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
@@ -187,6 +189,9 @@ void main() {
     // 目录提供器替身（RC3-04/05）：取消清理的目录解析是删除前的一处
     // 真实 IO await，用例用它把清理停在该窗口内编排「后来者接管」。
     Future<Directory> Function()? firmwareDirProvider,
+    // 同资产文件族串行闸替身（RC3-04/05）：用例把清理停在「已取到删除
+    // 闸、删除体尚未执行」的窗口内，编排后来者在删除 await 中接管。
+    OtaFilePathGate? downloadFileGate,
   }) {
     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条
     // 通知即抛 UnsupportedError。默认改为可增长列表。
@@ -206,6 +211,7 @@ void main() {
           Uri.parse('http://localhost:9/api/firmware/latest'),
       // onNotify 替身（RC3-02）：通知进 log 供断言，不走 Get.snackbar。
       onNotify: (title, message) => log.add('$title: $message'),
+      downloadFileGate: downloadFileGate,
     );
     Get.put<OtaService>(service);
     return service;
@@ -1141,6 +1147,102 @@ void main() {
       expect(service.phase, OtaPhase.readyToInstall);
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    test('清理已取删除闸、删除体未执行时后来者接管：part/sidecar/tmp 均不得按路径删除'
+        '（RC3-04/05）', () async {
+      // 与上一条的鉴别力差别：上一条把接管编排在**目录解析**这个外层
+      // await 上，拦下它的是 `_deleteAssetPartials` 的外层归属判定。
+      // 本条的接管落在 `_deletePartial` **已排到串行闸、删除体尚未执行**
+      // 的窗口内——外层判定此刻已经通过。只在闸外再做一次 epoch 判断
+      // （或只补一次删除前判断）在这里都会红：判定与 delete() 之间的
+      // await 正是后来者挤进来的缝隙，旧清理会按路径删掉后来者的
+      // `.part`/sidecar/tmp。
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = _UpgradeFakeBle(
+        preRebootPayload: preRebootPayload,
+        postRebootPayload: postRebootPayload,
+      );
+      final downloadAdapter = _DownloadGatedAdapter(assetBytes());
+      final gate = _TakeoverGate();
+      final service = makeService(
+        ble: ble,
+        firmwareDir: tempDir,
+        notifyLog: notifyLog,
+        downloadAdapter: downloadAdapter,
+        downloadFileGate: gate,
+      );
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+
+      // 前置：read → check → download 完成——取消时 `_download` 快照存在，
+      // 才会走到 downloader 的资产清理（无在途下载方，清理直达删除闸）。
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      expect(await service.downloadFirmware(), isTrue);
+
+      // 清掉首轮完成包（保留清单，重下无需重新 check）：后来者的 rename
+      // 是真实的新文件落成，不依赖平台对「rename 覆盖既有文件」的差异。
+      expect(await service.cleanupFirmware(), isTrue);
+      expect(service.downloadedFirmwareFile, isNull);
+
+      // 盘上留一份该资产的中断残留，作为旧清理的匹配目标：接管前它属于
+      // 旧 owner，接管后同名同路径由后来者接管。
+      final bytes = assetBytes();
+      final partName = '$pkgName.part';
+      final part = File('${tempDir.path}${Platform.pathSeparator}$partName');
+      part.writeAsBytesSync(Uint8List.sublistView(bytes, 0, 256), flush: true);
+      final sidecar = File('${part.path}.json');
+      sidecar.writeAsStringSync(
+        jsonEncode({
+          'assetId': 'asset-1',
+          'releaseId': 'rel-1',
+          'sha256': sha256.convert(bytes).toString(),
+          'sizeBytes': bytes.length,
+          'strongEtag': null,
+          'updatedAtMs': DateTime.now().millisecondsSinceEpoch,
+        }),
+        flush: true,
+      );
+
+      // 取消：清理到达删除闸时被替身挂起（闸已取到、删除体未执行）。
+      gate.arm();
+      final cancelFuture = service.cancelUpgrade(keepPackage: true);
+      await gate.entered.future;
+
+      // 后来者接管（真实 service owner 路径）：新 attempt 序号前进，重下
+      // 同一资产并在首块之后停住——此刻同名 `.part` 与 sidecar 都是它写
+      // 的。（旧残留的 sidecar 无强 ETag，它按合同作废重下，走的正是
+      // 删除 + 重建同一路径的流程。）
+      final holdGate = Completer<void>();
+      downloadAdapter.gate = holdGate;
+      final redownload = service.downloadFirmware();
+      await downloadAdapter.entered.future;
+
+      // 同族 tmp：旧清理的第三个删除目标，同样不得被按路径删除。
+      final sidecarTmp = File('${sidecar.path}.tmp');
+      sidecarTmp.writeAsStringSync('{"assetId":"asset-1"}', flush: true);
+
+      // 放行旧清理：闸内归属复核必须看到归属已转移，整体放弃删除。
+      gate.resume.complete();
+      await cancelFuture;
+
+      expect(notifyLog.any((l) => l.contains('本地临时文件清理失败')), isFalse,
+          reason: '旧清理不得触碰后来者的同族文件（Windows 鉴别点：'
+              '删除在写文件抛错会走清理失败通知）');
+      expect(part.existsSync(), isTrue,
+          reason: '旧清理不得按路径删除后来者的 .part');
+      expect(sidecar.existsSync(), isTrue,
+          reason: '旧清理不得按路径删除后来者的 sidecar');
+      expect(sidecarTmp.existsSync(), isTrue,
+          reason: '旧清理不得按路径删除同族 tmp');
+
+      // 后来者继续完成下载（POSIX 鉴别点：旧清理若删掉在写文件，重下会在
+      // 最终 rename 处失败或落到错误字节）。
+      holdGate.complete();
+      expect(await redownload, isTrue, reason: '旧清理不得拔掉后来者的下载');
+      expect(service.phase, OtaPhase.readyToInstall);
+      expect(service.downloadedFirmwareFile, isNotNull);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
     test('后台恢复一级复核：链路代次变化 → DEVICE_LINK_CHANGED 可重试终止（RC3-08⑦）',
         () async {
       final tempDir = tempFirmwareDir();
@@ -1473,6 +1575,39 @@ class _DownloadStagedAdapter implements HttpClientAdapter {
 
   @override
   void close({bool force = false}) {}
+}
+
+/// 删除闸替身（RC3-04/05）：在「已排到串行闸、删除体尚未执行」之间插入
+/// 一次编排窗口。
+///
+/// [arm] 后下一次 [run] 不会立即执行删除体，而是先完成 [entered] 并等
+/// [resume]；用例在该窗口内让后来者接管同一资产（真实 service owner 路径
+/// 重下，写出同名 `.part`/sidecar）。此时旧清理的外层归属判定都已通过，
+/// 只有闸内复核能拦下按路径删除。
+///
+/// 注意替身在调用 `super.run` **之前** 挂起，因此窗口内闸链尚为空：
+/// 后来者自己的写入/rename 仍能正常取闸，不会与本次编排互锁。
+class _TakeoverGate extends OtaFilePathGate {
+  bool _armed = false;
+
+  /// 旧清理已到达删除闸（删除体未执行）。
+  final entered = Completer<void>();
+
+  /// 用例放行旧清理继续走进删除体。
+  final resume = Completer<void>();
+
+  void arm() => _armed = true;
+
+  @override
+  Future<T> run<T>(String bucket, Future<T> Function() body) {
+    if (!_armed) return super.run(bucket, body);
+    _armed = false;
+    return () async {
+      if (!entered.isCompleted) entered.complete();
+      await resume.future;
+      return super.run(bucket, body);
+    }();
+  }
 }
 
 /// 下载侧可闸适配器（RC3-04⑦）：正文首块交付后挂起，[entered] 完成

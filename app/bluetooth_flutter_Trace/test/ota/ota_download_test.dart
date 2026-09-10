@@ -1089,8 +1089,12 @@ void main() {
       final cleanup = old.pendingCancelCleanup;
       expect(cleanup, isNotNull,
           reason: '在途未退出时必须登记延后清理，不能静默 no-op');
-      // 新 attempt 接管：同名 .part 与 sidecar 都是它写的。
+      // 新 attempt 接管：同名 .part 与 sidecar 都是它写的（同族 tmp 同样
+      // 属于它——删除边界复核必须覆盖 part/sidecar/tmp 三个删除目标，
+      // 不能只看最终返回值）。
       final freshPart = writePartial(bytes, 1024);
+      final freshTmp = File('${freshPart.path}.json.tmp');
+      freshTmp.writeAsStringSync('{}');
       ownsOld = false;
       gate.complete();
       await cleanup!;
@@ -1098,6 +1102,8 @@ void main() {
           reason: '归属已转移，旧 attempt 不得按路径删除新 attempt 的字节');
       expect(File('${freshPart.path}.json').existsSync(), isTrue,
           reason: 'sidecar 同属新 attempt，同样不得删');
+      expect(freshTmp.existsSync(), isTrue,
+          reason: '同族 tmp 同属新 attempt，同样不得删');
     }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('Content-Digest 重复 sha-256 项：RESUME_PROTOCOL（RFC 9530 唯一项）',

@@ -59,12 +59,15 @@ enum OtaPhase {
 class OtaService extends GetxController {
   static OtaService get to => Get.find();
 
-  /// [downloadDio]/[firmwareDirProvider]/[latestUriBuilder]/[onNotify]
+  /// [downloadDio]/[firmwareDirProvider]/[latestUriBuilder]/[onNotify]/
+  /// [downloadFileGate]
   /// 为测试注入点：生产缺省用独立下载 Dio、应用文档目录下的
   /// firmware/、ShareLinks latest 构造与 Get.snackbar 通知（行为不变）。
   /// [onNotify] 隔离 UI 副作用（RC3-02）：测试注入记录器后不再依赖
   /// runZonedGuarded 吞 GetQueue 无 overlay 上下文的异步 TypeError——
   /// 空 handler 会把产品代码的真实未处理异常一并吞掉，测试失去鉴别力。
+  /// [downloadFileGate] 让用例在同资产文件族的串行闸内安排后来者接管
+  /// （RC3-04/05），生产缺省用进程内共享闸 [OtaFilePathGate.shared]。
   OtaService({
     BluetoothService? bluetoothService,
     Dio? dio,
@@ -73,8 +76,10 @@ class OtaService extends GetxController {
     Uri Function(DeviceOtaInfo info, int appVersionCode, String? channel)?
         latestUriBuilder,
     void Function(String title, String message)? onNotify,
+    OtaFilePathGate? downloadFileGate,
   })  : _bluetoothService = bluetoothService,
         _notifyImpl = onNotify,
+        _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
         _dio = dio ??
             Dio(
               BaseOptions(
@@ -106,6 +111,10 @@ class OtaService extends GetxController {
   final void Function(String title, String message)? _notifyImpl;
   final Dio _dio;
   final Dio _downloadDio;
+
+  /// 同资产文件族的跨 attempt 串行闸（RC3-04/05）：下载器的写入/rename/
+  /// 清理共用它，避免上一 attempt 迟到的清理删掉新 attempt 的同名文件。
+  final OtaFilePathGate _downloadFileGate;
   final Future<Directory> Function() _firmwareDirProvider;
   final Uri Function(DeviceOtaInfo info, int appVersionCode, String? channel)
       _latestUriBuilder;
@@ -591,14 +600,22 @@ class OtaService extends GetxController {
     if (generation != _cancelGeneration) return false;
     try {
       // 归属判定（RC3-04/05）：每次下载尝试取一个单调序号，删除边界上
-      // 复核序号未变才允许删——取消后立刻重新下载同一资产时，旧取消的
-      // 迟到枚举不会删掉新 attempt 正在写的同名 `.part`/sidecar（按
-      // assetId 匹配挡不住，两次尝试的 assetId 本来就相同）。
+      // 复核序号未变才允许删。**但序号只回答「还属不属于我」**——两次
+      // attempt 必然共用同一 assetId、文件名与 `.part` 路径（续传语义），
+      // 所以序号判定通过不等于可以按路径删；真正的互斥来自所有 attempt
+      // 共用的 [OtaFilePathGate]：创建/rename/删除同族文件都在闸内串行，
+      // 归属复核也放在闸内，判定与破坏性 IO 之间不再有可插入的 await。
+      //
+      // 每次 `_downloadOnce` 都 new 一个新的 [OtaFirmwareDownload]，因此
+      // 下载器实例内的 `_cancelTokens`/`_inFlight` **不跨 attempt 共享**，
+      // 也谈不上被新 attempt 覆盖。跨 attempt 真正共享的只有：文件路径、
+      // 文件名、assetId，以及这里的串行闸。
       final attemptSeq = ++_downloadAttemptSeq;
       _download = OtaFirmwareDownload(
         dio: _downloadDio,
         dirProvider: _firmwareDirProvider,
         stillOwns: () => _downloadAttemptSeq == attemptSeq,
+        fileGate: _downloadFileGate,
       );
       // 发起前创建并登记令牌：cancelUpgrade 可取消任何时序下的在途请求。
       final token = CancelToken();
@@ -1031,14 +1048,17 @@ class OtaService extends GetxController {
       await transport.abortBestEffort();
     }
     // epoch 屏障（RC3-04⑦）：ABORT 等待期间可能有新 owner 登记并重新
-    // 下载**同一资产**。OtaFirmwareDownload 的取消资源全部按 assetId
-    // 索引——`_cancelTokens[assetId]` 会被新下载覆盖、`_inFlight[assetId]`
-    // 指向新 future、partial 文件名由 asset.fileName 决定同样是同一个。
-    // 此时再对快照 assetId 调 cancel(keepPartial:false)，等于取消新
-    // owner 的令牌、等它退出、再删它正在写的 partial：旧取消把后来者
-    // 的下载连根拔掉。旧在途下载在本函数首个 await 之前已由
-    // `_activeDownloadToken.cancel()` 中止，其自身退出路径会按取消语义
-    // 处置字节，跳过这次清理不留在途写入方。
+    // 下载**同一资产**。两次 attempt 的 assetId、文件名与 `.part` 路径
+    // 必然相同（续传语义要求复用同一 `.part`），对快照 download 调
+    // cancel(keepPartial:false) 最终会落到同一个文件路径上——旧取消会
+    // 把后来者正在写的 partial 连根拔掉。
+    //
+    // 注意取消资源**不是**「按 assetId 共享的同一张表」：每次
+    // `_downloadOnce` 都 new 一个新的 [OtaFirmwareDownload]，实例内的
+    // `_cancelTokens`/`_inFlight` 各归各，不存在被新 attempt 覆盖一说；
+    // 跨 attempt 真正共享的是文件路径、文件名、assetId（以及串行闸）。
+    // 旧在途下载在本函数首个 await 之前已由 `_activeDownloadToken.cancel()`
+    // 中止，其自身退出路径会按取消语义处置字节，跳过这次清理不留在途写入方。
     final ownerTookOver = _ownerEpoch != epochAtCancel;
     if (assetId != null && download != null && !ownerTookOver) {
       try {
