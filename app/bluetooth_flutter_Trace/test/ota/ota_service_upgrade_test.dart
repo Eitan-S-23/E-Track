@@ -1187,7 +1187,7 @@ void main() {
       // 盘上留一份该资产的中断残留，作为旧清理的匹配目标：接管前它属于
       // 旧 owner，接管后同名同路径由后来者接管。
       final bytes = assetBytes();
-      final partName = '$pkgName.part';
+      const partName = '$pkgName.part';
       final part = File('${tempDir.path}${Platform.pathSeparator}$partName');
       part.writeAsBytesSync(Uint8List.sublistView(bytes, 0, 256), flush: true);
       final sidecar = File('${part.path}.json');
@@ -1216,6 +1216,14 @@ void main() {
       downloadAdapter.gate = holdGate;
       final redownload = service.downloadFirmware();
       await downloadAdapter.entered.future;
+      // 前置锚点：后来者已进入写盘阶段，同名 `.part`/sidecar 此刻必须是它
+      // 刚写下的字节——后续「旧清理不得按路径删除」的鉴别力以此为前提，
+      // 否则断言的对象根本不存在。目录快照留在失败原因里便于定位。
+      final afterTakeover = _dirSnapshot(tempDir);
+      final takeoverBytes = part.existsSync() ? part.lengthSync() : -1;
+      expect(part.existsSync(), isTrue,
+          reason: '前置：后来者进入写盘阶段后同名 .part 必须已创建；'
+              '接管后目录=$afterTakeover');
 
       // 同族 tmp：旧清理的第三个删除目标，同样不得被按路径删除。
       final sidecarTmp = File('${sidecar.path}.tmp');
@@ -1229,11 +1237,15 @@ void main() {
           reason: '旧清理不得触碰后来者的同族文件（Windows 鉴别点：'
               '删除在写文件抛错会走清理失败通知）');
       expect(part.existsSync(), isTrue,
-          reason: '旧清理不得按路径删除后来者的 .part');
+          reason: '旧清理不得按路径删除后来者的 .part；'
+              '接管后目录=$afterTakeover（.part ${takeoverBytes}B），'
+              '放行后目录=${_dirSnapshot(tempDir)}');
       expect(sidecar.existsSync(), isTrue,
-          reason: '旧清理不得按路径删除后来者的 sidecar');
+          reason: '旧清理不得按路径删除后来者的 sidecar；'
+              '放行后目录=${_dirSnapshot(tempDir)}');
       expect(sidecarTmp.existsSync(), isTrue,
-          reason: '旧清理不得按路径删除同族 tmp');
+          reason: '旧清理不得按路径删除同族 tmp；'
+              '放行后目录=${_dirSnapshot(tempDir)}');
 
       // 后来者继续完成下载（POSIX 鉴别点：旧清理若删掉在写文件，重下会在
       // 最终 rename 处失败或落到错误字节）。
@@ -1654,6 +1666,17 @@ class _DownloadGatedAdapter implements HttpClientAdapter {
 class _FakeAppUpdateService extends AppUpdateService {
   @override
   Future<int> getLocalAppVersionCode() async => 42;
+}
+
+/// 目录内容快照（只取文件名），用于把「盘上到底有什么」写进断言失败原因。
+String _dirSnapshot(Directory dir) {
+  if (!dir.existsSync()) return '(目录不存在)';
+  final names = dir
+      .listSync()
+      .map((e) => e.uri.pathSegments.last)
+      .toList()
+    ..sort();
+  return names.isEmpty ? '(空)' : names.join(',');
 }
 
 bool _bytesEqual(List<int> a, List<int> b) {
