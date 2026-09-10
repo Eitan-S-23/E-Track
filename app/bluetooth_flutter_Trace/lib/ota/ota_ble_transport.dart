@@ -19,15 +19,19 @@ abstract class OtaBleChannel {
   /// 连接是否可用（fake 用于模拟断连）。
   bool get isConnected;
 
-  /// 本通道所依附的**物理链路身份**（RC3-05⑤）。
+  /// 本通道所面向的**设备作用域句柄**（RC3-05⑤）。
   ///
-  /// 同一条真实连接上的所有 wrapper 必须返回同一个对象；真实重连
-  /// （新物理连接）必须返回新对象。传输层用它界定写通道废弃标记的
-  /// 作用域：包装对象可以按需重建，物理链路上的悬挂半帧不会因此消失，
-  /// 只有真实重连才让 MCU 帧解析器回到同步态。
+  /// 同一台设备（同地址）在进程内必须恒定返回同一个对象，**BLE 重连
+  /// 不得返回新对象**。传输层用它界定写通道废弃标记的作用域：悬空半帧
+  /// 留在 MCU 的 UART 帧解析器里（`ota_ble_session_t::demux.parser`），
+  /// 而 BLE 连接事件不复位它——`ota_ble_session.c` 的 `session_teardown`
+  /// 不动 `session->demux`，`ota_ble_demux_init` 只在开机
+  /// `ota_ble_session_init` 调用一次；解析器只在「本帧被吃完（CRC 通过
+  /// 或失败）」时自复位（`ota_ble_frame.c` PAYLOAD/CRC 态）。因此重连
+  /// 后的新连接面对的是同一个悬空解析器，标记不能随链路代次失效。
   ///
   /// 返回 null 表示无法区分，此时退化按通道对象自身隔离。
-  Object? get linkIdentity;
+  Object? get deviceScope;
 }
 
 /// OTA BLE 传输 owner（冻结依据 docs/ota-binary-contracts.md §5、§4.5，
@@ -109,9 +113,16 @@ class OtaBleTransport {
   /// 发送 GET_INFO 并解析身份。连接不可用或超时抛 [OtaTransportException]。
   /// INFO payload 链路损坏（MALFORMED_INFO）有界重发；身份不符是确定性
   /// 错误，直接抛 [OtaDeviceIdentityException]。
+  ///
+  /// 写通道处于废弃态（RC3-05⑤）时，本调用是唯一放行的出站流量，并按
+  /// 重新同步探针处理：GET_INFO 帧本身可能整帧落进悬空帧的 payload 被吞掉，
+  /// 因此按 [maxResyncProbes] / [resyncProbeTimeout] 有界重试，直到收到
+  /// INFO 应答——那是「MCU 解析器已重新同步」的正向证明。重试耗尽仍无应答
+  /// 即抛错，标记保持废弃，绝不假装恢复。
   Future<DeviceOtaInfo> getDeviceInfo(
       {Duration timeout = const Duration(seconds: 10)}) async {
     var attempts = 0;
+    var probes = 0;
     while (true) {
       _checkUsable();
       // 会话外查询取号（RC3-08⑦）：不消耗会话 seq 空间，见 _querySeq。
@@ -122,13 +133,28 @@ class OtaBleTransport {
         seq: seq,
       );
       // INFO 应答：session=0、seq 回显请求 seq（§5.6）。
-      final payload = await _roundTrip(
-        frame,
-        OtaBleCodec.rspInfo,
-        session: 0,
-        seq: seq,
-        timeout: timeout,
-      );
+      // late：下面的 catch 只会 rethrow 或 continue，赋值失败路径不会落到读取。
+      late final Uint8List payload;
+      try {
+        payload = await _roundTrip(
+          frame,
+          OtaBleCodec.rspInfo,
+          session: 0,
+          seq: seq,
+          timeout: _writeChannelPoisoned ? resyncProbeTimeout : timeout,
+          resyncProbeSeq: seq,
+        );
+      } on OtaTransportException catch (e) {
+        // 只有废弃态才把超时解释为「探针被悬空帧吞掉」：此时本探针是
+        // 把悬空帧吃满、逼解析器自复位的唯一手段，重试才算进展。正常
+        // 链路超时照旧上抛，不改变既有语义。
+        if (!_writeChannelPoisoned ||
+            e.code != 'TIMEOUT' ||
+            ++probes >= maxResyncProbes) {
+          rethrow;
+        }
+        continue;
+      }
       try {
         return DeviceOtaInfo.fromInfoPayload(payload);
       } on OtaDeviceIdentityException catch (e) {
@@ -558,6 +584,17 @@ class OtaBleTransport {
   // ---- 内部：帧分发 ----
 
   void _dispatchFrame(OtaBleFrame f) {
+    // 重新同步证据（RC3-05⑤）：INFO 只可能由「被 MCU 完整解析的 GET_INFO」
+    // 触发，因此收到本实例在废弃状态下发出的那个 seq 的 INFO，就证明 MCU
+    // 帧解析器已脱离悬空态。必须 seq 匹配——废弃前发出的 GET_INFO 其迟到
+    // 应答同样以 session=0/rspInfo 到达，不能用它充当恢复证据。
+    if (f.cmd == OtaBleCodec.rspInfo &&
+        f.session == 0 &&
+        _writeChannelPoisoned &&
+        f.seq == _resyncProbeSeq) {
+      _clearWriteChannelPoison();
+      _resyncProbeSeq = null;
+    }
     // 传输期 ACK 视图只消费 DATA ACK（每段独立应答，一问一答等待者
     // 无法覆盖）；BEGIN/END/ABORT ACK 由等待者按 cmd+session+seq 精确
     // 关联，视图不重复消费（RC2-06）。
@@ -755,17 +792,21 @@ class OtaBleTransport {
   }
 
   /// 单帧写 + 等待响应（先注册等待者再发送；按 cmd+session+seq 关联）。
+  /// [resyncProbeSeq] 非 null 时本帧同时充当写通道废弃的重新同步探针
+  /// （RC3-05⑤）：废弃期间唯一放行的帧，应答到达即由 [_dispatchFrame]
+  /// 解除标记。
   Future<Uint8List> _roundTrip(
     Uint8List frame,
     int expectedRsp, {
     required int session,
     required int seq,
     required Duration timeout,
+    int? resyncProbeSeq,
   }) async {
     final waiter = _ResponseWaiter(expectedRsp, session, seq);
     _waiters.add(waiter);
     try {
-      await _writeFrame(frame);
+      await _writeFrame(frame, resyncProbeSeq: resyncProbeSeq);
       final resp = await waiter.future.timeout(
         timeout,
         onTimeout: () => throw OtaTransportException(
@@ -832,8 +873,11 @@ class OtaBleTransport {
 
   /// 常规帧写入（数据/命令路径）：受取消/释放与预算检查约束，
   /// 实际分片与超时语义见 [_writeFrameLocked]。
-  Future<void> _writeFrame(Uint8List frame) async {
-    await _writeFrameChecked(frame, allowCancelled: false);
+  /// [resyncProbeSeq] 仅由 [getDeviceInfo] 的探针透传：非 null 表示本帧
+  /// 是废弃期间唯一放行的重新同步探针（RC3-05⑤）。
+  Future<void> _writeFrame(Uint8List frame, {int? resyncProbeSeq}) async {
+    await _writeFrameChecked(frame,
+        allowCancelled: false, resyncProbeSeq: resyncProbeSeq);
   }
 
   /// 取消旁路写通路（RC2-03）：仅用于取消后的尽力 ABORT——
@@ -857,45 +901,80 @@ class OtaBleTransport {
   /// 写通道废弃标记（RC3-05⑤）：分片写中断意味着部分分片已落地 MCU，
   /// 帧解析器悬空在半帧 payload 中——后续任何帧（含取消路径的 ABORT）
   /// 的同步字都会被吞进悬空帧的 payload/CRC 位置，无法恢复同步。
-  /// MCU 真值（ota_ble_frame.c PAYLOAD 态按 len 吞全部字节，含 A5 5A）。
-  /// 此时唯一正确行为是停止一切出站帧，靠 MCU 30s 会话超时
-  /// （CONFIG_OTA_BLE_SESSION_TIMEOUT_MS）teardown。
+  /// MCU 真值（ota_ble_frame.c:260-272 PAYLOAD 态按 len 吞全部字节，
+  /// 含 A5 5A）。
   ///
-  /// 作用域是**物理链路**而非包装对象或 transport 实例：`Future.timeout`
+  /// 解除条件必须是**接收方支持的、可观测的**重新同步证据，不能是
+  /// 「换了连接」这种应用侧事件：解析器状态属于 MCU 而非 BLE 链路，
+  /// 连接事件不复位它（见 [OtaBleChannel.deviceScope] 的引证）。可达的
+  /// 重新同步只有两条：①（应用可控）继续投递字节，让悬空帧按自身 len
+  /// 被吃完、CRC 失败、解析器自复位（ota_ble_frame.c:274-313 失败分支
+  /// 同样 reset）——上界为 OTA_BLE_MAX_PAYLOAD(132) + 2 字节；②（应用
+  /// 不可控）MCU 断电/复位。因此废弃期间**只放行** [getDeviceInfo] 的
+  /// GET_INFO 探针帧（只读、幂等、被吞无副作用），并只在收到与之关联的
+  /// INFO 应答时解除——INFO 只可能由「被完整解析的 GET_INFO」触发，是
+  /// 接收方已回到同步态的正向证明（见 [_resyncProbeSeq]）。无证据即
+  /// 保持 fail-closed，绝不因重连、超时或换 wrapper 假装恢复。
+  ///
+  /// 作用域是**设备**而非包装对象或 transport 实例：`Future.timeout`
   /// 不取消底层 writeChunk，迟到分片仍会落地；有界 settle 只保证「本帧不与
-  /// 自己的迟到分片交错」，不等于物理写已被取消。若只标记实例，上层在同一
-  /// 连接上重建 transport 即可继续写；若只标记包装对象，同一条连接每次 bind
-  /// 新建 `_ChannelAdapter` 也会让标记失效。两种情况下新帧都与旧连接的迟到
-  /// 半帧交错，MCU 同样无法恢复同步。标记落在 [_linkScope]，同一真实连接上的
-  /// 所有 wrapper 共享；真实重连（OtaService 侧递增链路代数）拿到全新身份，
-  /// 才允许重新出帧。Expando 随身份对象一起回收，不产生全局泄漏。
-  static final Expando<bool> _poisonedLinks =
-      Expando<bool>('otaWriteLinkPoisoned');
+  /// 自己的迟到分片交错」，不等于物理写已被取消。若只标记实例，上层在
+  /// 同一设备上重建 transport 即可继续写；若只标记包装对象，每次 bind
+  /// 新建 `_ChannelAdapter` 也会让标记失效。两种情况下新帧都与旧连接的
+  /// 迟到半帧交错，MCU 同样无法恢复同步。标记落在 [_deviceScope]，同一台
+  /// 设备上的所有 wrapper 与重连后的新连接共享。Expando 随身份对象一起
+  /// 回收，不产生全局泄漏。
+  static final Expando<bool> _poisonedDevices =
+      Expando<bool>('otaWriteDevicePoisoned');
 
-  /// 废弃标记的作用域对象（RC3-05⑤）。优先取通道自报的物理链路身份：
-  /// 同一真实连接上的 wrapper 可能被反复重建（每次 bind 新建
-  /// `_ChannelAdapter`），但物理链路上的悬挂半帧不会因换 wrapper 消失，
-  /// 只有真实重连才让 MCU 帧解析器回到同步态。通道未提供身份时退回通道
-  /// 对象自身，保持旧语义不放大。
-  Object get _linkScope => _channel.linkIdentity ?? _channel;
+  /// 废弃标记的作用域对象（RC3-05⑤）。取通道自报的设备作用域：同一台
+  /// 设备上的 wrapper 可能被反复重建（每次 bind 新建 `_ChannelAdapter`）、
+  /// 也可能经历真实重连，但 MCU 侧的悬空半帧在设备复位前一直存在。
+  /// 通道未提供作用域时退回通道对象自身，保持旧语义不放大。
+  Object get _deviceScope => _channel.deviceScope ?? _channel;
 
-  bool get _writeChannelPoisoned => _poisonedLinks[_linkScope] ?? false;
+  bool get _writeChannelPoisoned => _poisonedDevices[_deviceScope] ?? false;
 
   void _poisonWriteChannel() {
-    _poisonedLinks[_linkScope] = true;
+    _poisonedDevices[_deviceScope] = true;
+  }
+
+  /// 同步探针的 seq（RC3-05⑤）：仅当本实例在**废弃状态下**发出了
+  /// GET_INFO 探针时登记，收到同一 seq 的 INFO 应答才解除标记。避免用
+  /// 陈旧 INFO（废弃前那次 GET_INFO 的迟到应答）误判为已重新同步。
+  int? _resyncProbeSeq;
+
+  /// 废弃期间单次探针等待上限：比常规 ACK 超时略宽（悬空帧可能还要
+  /// 先吃满若干字节才轮到探针被解析），但仍远小于用户可见的超时。
+  static const Duration resyncProbeTimeout = Duration(milliseconds: 800);
+
+  /// 废弃期间探针重试上限。上界依据：悬空帧最多还需
+  /// OTA_BLE_MAX_PAYLOAD(132) + 2 = 134 字节才结束，一个 GET_INFO 帧
+  /// 为 8 + 0 + 2 = 10 字节，最坏 14 次即可把探针送进已被解析的位置；
+  /// 取 20 留余量（含首帧被整帧吞掉的情况）。超过即保持废弃并抛错。
+  static const int maxResyncProbes = 20;
+
+  /// 收到探针应答后的解除（RC3-05⑤）。只在本地确有在途探针时生效。
+  void _clearWriteChannelPoison() {
+    _poisonedDevices[_deviceScope] = false;
   }
 
   Future<void> _writeFrameChecked(
     Uint8List frame, {
     required bool allowCancelled,
+    int? resyncProbeSeq,
   }) {
-    if (_writeChannelPoisoned) {
+    if (_writeChannelPoisoned && resyncProbeSeq == null) {
       throw const OtaTransportException(
-          '写通道已废弃：分片写中断后帧边界不可信，须重连重建',
+          '写通道已废弃：分片写中断后帧边界不可信，'
+          '须由 GET_INFO 探针证明 MCU 已重新同步',
           code: 'WRITE_TIMEOUT');
     }
-    final task = _writeSerial
-        .then((_) => _writeFrameLocked(frame, allowCancelled: allowCancelled));
+    final task = _writeSerial.then((_) => _writeFrameLocked(
+          frame,
+          allowCancelled: allowCancelled,
+          resyncProbeSeq: resyncProbeSeq,
+        ));
     _writeSerial = task.catchError((_) {});
     return task;
   }
@@ -914,6 +993,7 @@ class OtaBleTransport {
   Future<void> _writeFrameLocked(
     Uint8List frame, {
     required bool allowCancelled,
+    int? resyncProbeSeq,
   }) async {
     // 排队期间通道可能已被前序帧废弃（RC3-05⑤）：[_writeFrameChecked] 只在
     // 入队时刻检查，而取消路径的 ABORT 常常在前序 DATA 写超时**之前**就已
@@ -921,9 +1001,16 @@ class OtaBleTransport {
     // ABORT 的同步字正好写进悬空半帧的 payload 位置，MCU 既收不到 ABORT
     // 也无法恢复同步。
     if (_writeChannelPoisoned) {
-      throw const OtaTransportException(
-          '写通道已废弃：分片写中断后帧边界不可信，须重连重建',
-          code: 'WRITE_TIMEOUT');
+      if (resyncProbeSeq == null) {
+        throw const OtaTransportException(
+            '写通道已废弃：分片写中断后帧边界不可信，'
+            '须由 GET_INFO 探针证明 MCU 已重新同步',
+            code: 'WRITE_TIMEOUT');
+      }
+      // 探针是本帧唯一放行的通道占用者：登记 seq，供 INFO 应答核对后
+      // 解除标记。入队时才登记（此刻确实处于废弃态），排队期间被别的
+      // 帧解除/重新废弃都不会把陈旧 seq 留在原地。
+      _resyncProbeSeq = resyncProbeSeq;
     }
     if (!allowCancelled) {
       _checkUsable();

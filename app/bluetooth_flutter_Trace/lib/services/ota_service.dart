@@ -2014,12 +2014,12 @@ class _ChannelAdapter implements OtaBleChannel {
     required this.notifyStream,
     required this.writeWithResponse,
   })  : _ble = ble,
-        // 绑定时快照物理链路身份（RC3-05⑤），供传输层界定写通道废弃标记。
-        // 快照而非每次现取：现取会让已被放弃的旧 adapter 在重连后"继承"
-        // 新链路的干净状态，重新开始写已经不可信的通道。同一条真实连接上
-        // 重建 wrapper（每次 bind 新建 adapter）拿到的是同一身份，标记不会被
-        // 洗掉；只有真实重连（服务侧链路代次前进）才拿到新身份。
-        linkIdentity = ble.otaLinkIdentity(deviceAddress);
+        // 绑定时取设备作用域句柄（RC3-05⑤），供传输层界定写通道废弃标记。
+        // 取一次而非每次现取：现取会让已被放弃的旧 adapter 在重连后"继承"
+        // 新链路的干净状态，重新开始写已经不可信的通道。设备作用域按地址
+        // 恒定（重连不更换），所以重建 wrapper 与真实重连都拿到同一句柄；
+        // 解除只能靠传输层用 GET_INFO → INFO 往返证明 MCU 解析器已重新同步。
+        deviceScope = ble.otaDeviceScope(deviceAddress);
 
   final BluetoothService _ble;
   final String deviceAddress;
@@ -2031,9 +2031,10 @@ class _ChannelAdapter implements OtaBleChannel {
   final bool writeWithResponse;
   bool _connected = true;
 
-  /// 绑定时所依附的物理链路身份（RC3-05⑤）。
+  /// 本通道所属设备的作用域句柄（RC3-05⑤）：MCU 侧帧解析器状态不随
+  /// BLE 连接事件改变，因此重连后仍是同一作用域。
   @override
-  final Object? linkIdentity;
+  final Object? deviceScope;
 
   @override
   Future<void> writeChunk(List<int> chunk) async {

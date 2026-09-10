@@ -501,28 +501,31 @@ class BluetoothService extends GetxController {
   int otaLinkGeneration(String deviceAddress) =>
       _otaLinkGenerations[deviceAddress.toLowerCase()] ?? 0;
 
-  /// 物理链路代次到身份对象的缓存（RC3-05⑤）。
-  final Map<String, _OtaLinkIdentity> _otaLinkIdentities =
-      <String, _OtaLinkIdentity>{};
+  /// 设备作用域句柄缓存（RC3-05⑤）。
+  final Map<String, _OtaDeviceScope> _otaDeviceScopes =
+      <String, _OtaDeviceScope>{};
 
-  /// 取 [deviceAddress] 当前物理链路的**身份对象**（RC3-05⑤）。
+  /// 取 [deviceAddress] 对应设备的**作用域句柄**（RC3-05⑤）。
   ///
-  /// 同一 (地址, 代次) 恒定返回同一个对象，代次前进后返回新对象。写通道
-  /// 废弃标记按对象身份作用域（`Expando`），需要的是一个「同一条真实连接
-  /// 处处相等、真实重连后必然不等」的句柄；代次整数只适合比较，直接当
-  /// Expando 键会退化成一张永不回收的全局表。
+  /// 同一地址恒定返回同一个对象，**真实重连也不更换**。写通道废弃标记
+  /// 按对象身份作用域（`Expando`），它要回答的问题是「MCU 侧的悬空半帧
+  /// 还在不在」——而该状态属于 MCU 的 UART 帧解析器，不随 BLE 连接事件
+  /// 改变：`Libraries/OTA/ota_ble_session.c` 的 `session_teardown` 不复位
+  /// `session->demux`，`ota_ble_demux_init` 只在开机 `ota_ble_session_init`
+  /// 调用一次；解析器只在帧被吃完（CRC 通过或失败）时自复位
+  /// （`ota_ble_frame.c` PAYLOAD/CRC 态）。若按链路代次作用域，一次截断
+  /// 写会因重连而静默解除，继续往悬空解析器里写。
   ///
-  /// 身份从 [otaLinkGeneration] 派生而非直接读内部计数，保证测试替身覆写
-  /// 代次读取时，身份与代次始终同源。
-  Object otaLinkIdentity(String deviceAddress) {
+  /// 解除由传输层用 GET_INFO → INFO 往返证明（见
+  /// `OtaBleTransport.getDeviceInfo`），本方法只负责给出稳定的作用域句柄。
+  Object otaDeviceScope(String deviceAddress) {
     final key = deviceAddress.toLowerCase();
-    final generation = otaLinkGeneration(key);
-    final cached = _otaLinkIdentities[key];
-    if (cached != null && cached.generation == generation) {
+    final cached = _otaDeviceScopes[key];
+    if (cached != null) {
       return cached.identity;
     }
     final identity = Object();
-    _otaLinkIdentities[key] = _OtaLinkIdentity(generation, identity);
+    _otaDeviceScopes[key] = _OtaDeviceScope(identity);
     return identity;
   }
 
@@ -2408,11 +2411,11 @@ class BluetoothService extends GetxController {
   }
 }
 
-/// 物理链路身份缓存项（RC3-05⑤）：记录身份对象由哪一代链路生成，
-/// 代次不变即复用同一对象。
-class _OtaLinkIdentity {
-  _OtaLinkIdentity(this.generation, this.identity);
+/// 设备作用域句柄缓存（RC3-05⑤）：按地址恒定返回同一对象，不随链路代次
+/// 变化——写通道废弃标记的作用域是「MCU 侧帧解析器状态所属的设备」，
+/// 见 [BluetoothService.otaDeviceScope]。
+class _OtaDeviceScope {
+  _OtaDeviceScope(this.identity);
 
-  final int generation;
   final Object identity;
 }

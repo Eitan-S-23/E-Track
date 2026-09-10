@@ -52,6 +52,24 @@ int crc32Of(List<int> bytes) {
   return crc ^ 0xFFFFFFFF;
 }
 
+/// 断言业务帧（非 GET_INFO 探针）在写通道废弃态被拒绝（RC3-05⑤）。
+/// [where] 只用于失败原因定位。判据是错误码 + 拒绝发生在写之前
+/// （调用方由 `pendingByteCount` 另行核对字节数未变）。
+Future<void> _expectBusinessWriteRefused(
+    OtaBleTransport transport, String where) async {
+  try {
+    await transport.begin(
+      totalLen: 4096,
+      packageSha256: List<int>.filled(32, 7),
+      etuHeader: List<int>.filled(64, 9),
+      timeout: const Duration(milliseconds: 300),
+    );
+    fail('$where：废弃态下业务帧必须被拒绝');
+  } on OtaTransportException catch (e) {
+    expect(e.code, 'WRITE_TIMEOUT', reason: '$where：拒绝码应为写通道废弃');
+  }
+}
+
 void main() {
   /// 构造合法 ETU 头（64B，RC3-03）：字段布局对齐 MCU 真值
   /// ota_sd.c（偏移 enum + ota_sd_inspect_header）——magic "ETU1"、
@@ -1580,14 +1598,17 @@ void main() {
       await transport.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
-    test('迟到写不污染后来的会话：同一条物理链路换包装对象仍拒写，真实重连'
-        '才恢复（RC3-05⑤）', () async {
+    test('迟到写不污染后来的会话：同设备换包装对象与真实重连都仍拒写，'
+        'GET_INFO 探针证明重新同步后才放行（RC3-05⑤）', () async {
       final package = packageBytes(4096);
+      // MTU 125 → 单分片 122B：DATA 帧（142B）第 1 片落地、第 2 片注入失败，
+      // MCU 侧悬空 122B，距该帧 len 还差 20B——两次 GET_INFO 探针即可把它
+      // 吃满（见下方重新同步断言）。
       final mcu = _McuSim()
-        ..mtu = 23
-        ..failAtDataChunk = 3;
-      // 真实路径上 OtaService 每次 bind 都新建 _ChannelAdapter 包住同一条
-      // 物理连接：废弃标记必须锚定链路身份，而不是包装对象身份。
+        ..mtu = 125
+        ..failAtDataChunk = 2;
+      // 真实路径上 OtaService 每次 bind 都新建 _ChannelAdapter 包住同一台
+      // 设备：废弃标记必须锚定设备作用域，而不是包装对象身份。
       final first = OtaBleTransport(channel: _ReboundWrapper(mcu));
       try {
         await first.transfer(
@@ -1600,33 +1621,51 @@ void main() {
         // 同上：本用例判据是后续会话的写行为。
       }
       await first.dispose();
-      expect(mcu.pendingByteCount, 40);
+      expect(mcu.pendingByteCount, 122);
 
-      // 「新 transport + 新包装对象」不等于「新物理连接」：MCU 侧那半帧
-      // 仍悬空，任何新帧都会被吞进 payload。有界等待只保证本帧不与自己的
-      // 迟到分片交错，并没有取消底层写，因此废弃标记的作用域必须是物理
-      // 链路——按通道对象作用域会在这里放行，把 10B 写进悬空 DATA 帧。
+      // 「新 transport + 新包装对象」不等于「设备已复位」：MCU 侧那半帧
+      // 仍悬空，业务帧会被吞进 payload。有界等待只保证本帧不与自己的
+      // 迟到分片交错，并没有取消底层写，因此废弃标记的作用域必须是设备
+      // ——按通道对象作用域会在这里放行，把新帧写进悬空 DATA 帧。
       final rebound = OtaBleTransport(channel: _ReboundWrapper(mcu));
-      try {
-        await rebound.getDeviceInfo(
-            timeout: const Duration(milliseconds: 300));
-        fail('同一物理链路上的新包装对象应仍被拒绝');
-      } on OtaTransportException catch (e) {
-        expect(e.code, 'WRITE_TIMEOUT');
-      }
+      await _expectBusinessWriteRefused(rebound, '同一设备上的新包装对象');
       // 放行与否由字节数鉴别（两种情况下都只会超时，错误码无区分力）。
-      expect(mcu.pendingByteCount, 40);
+      expect(mcu.pendingByteCount, 122, reason: '被拒的帧不得落下任何字节');
       await rebound.dispose();
 
-      // 真实重连 = 新物理连接：MCU 帧解析器回到同步态、链路身份前进，
-      // 不再命中旧链路的废弃标记，恢复预算保持有界，不会因一次半帧把
-      // 设备永久锁死。
+      // 真实重连 ≠ 重新同步：BLE 链路重建不会复位 MCU 的 UART 解析器
+      // （真值：session_teardown 不动 session->demux，ota_ble_demux_init
+      // 只在开机 ota_ble_session_init 调用一次）。旧实现按链路代次作用域，
+      // 重连即静默解除标记，把新帧继续写进悬空解析器——本用例在此处
+      // 鉴别该错误解除条件。
       mcu.reconnect();
-      final fresh = OtaBleTransport(channel: _ReboundWrapper(mcu));
-      final info = await fresh.getDeviceInfo();
+      final reconnected = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      await _expectBusinessWriteRefused(reconnected, '真实重连后');
+      expect(mcu.pendingByteCount, 122,
+          reason: '重连本身不是重新同步证据；重连次数=${mcu.linkReconnects}');
+
+      // 唯一可达且可证明的重新同步路径：继续投递字节把悬空帧吃满
+      // （解析器按 len 吞完 → CRC 失败 → 自复位），再以 INFO 应答为证。
+      // GET_INFO 是废弃期间唯一放行的帧，它在被吞期间会整帧消失，因此
+      // 按上界有界重试；收到 INFO 才解除标记。
+      expect(mcu.badCrcFrames, 0);
+      final info = await reconnected.getDeviceInfo();
       expect(info.deviceModel, 'e-track-at32f435');
       expect(info.hardwareRevision, 3);
-      await fresh.dispose();
+      expect(mcu.badCrcFrames, greaterThanOrEqualTo(1),
+          reason: '悬空帧必须被后续字节吃满并以 CRC 失败收场');
+      expect(mcu.pendingByteCount, 0,
+          reason: '重新同步后不得残留半帧或被吞的探针字节');
+
+      // 证据成立后业务帧恢复（不是「重连就放行」的同义反复：解除发生在
+      // INFO 应答之后，前两次业务帧尝试在同一连接/不同连接上都被拒）。
+      final ack = await reconnected.begin(
+        totalLen: package.length,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      await reconnected.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
     test('后台暂停/恢复：发窗在帧边界挂起，恢复后传输完成（RC3-08）',
@@ -1837,21 +1876,21 @@ class _GatedWriteChannel implements OtaBleChannel {
   @override
   bool get isConnected => connected;
 
-  /// 物理链路身份（RC3-05⑤）：本 fake 每次创建即代表一条新链路。
+  /// 设备作用域句柄（RC3-05⑤）：本 fake 每次创建即代表一台设备。
   @override
-  Object? linkIdentity = Object();
+  Object? deviceScope = Object();
 }
 
-/// 同一物理链路的新包装对象（RC3-05⑤）：除自身对象身份外全部转发给
-/// [inner]，`linkIdentity` 也如实透传，模拟真实路径上「同一条连接、
-/// 每次 bind 新建 `_ChannelAdapter`」——包装对象换了，物理连接没换。
+/// 同一设备的新包装对象（RC3-05⑤）：除自身对象身份外全部转发给
+/// [inner]，`deviceScope` 也如实透传，模拟真实路径上「同一台设备、
+/// 每次 bind 新建 `_ChannelAdapter`」——包装对象换了，设备没换。
 class _ReboundWrapper implements OtaBleChannel {
   _ReboundWrapper(this.inner);
 
   final OtaBleChannel inner;
 
   @override
-  Object? get linkIdentity => inner.linkIdentity;
+  Object? get deviceScope => inner.deviceScope;
 
   @override
   Future<void> writeChunk(List<int> chunk) => inner.writeChunk(chunk);
@@ -1957,18 +1996,36 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   int mtu = 247;
   final _pending = <int>[];
 
-  /// 物理链路身份（RC3-05⑤）：默认每条 fake 即一条独立物理链路。
-  /// 用例可把同一对象包进多个包装通道，模拟真实路径上「同一条连接、
-  /// 每次 bind 新建 `_ChannelAdapter`」；[reconnect] 前进它表示真实重连。
+  /// 本设备的作用域句柄（RC3-05⑤）：默认每台 fake 即一台独立设备。
+  /// 用例可把同一对象包进多个包装通道，模拟真实路径上「同一台设备、
+  /// 每次 bind 新建 `_ChannelAdapter`」；[reconnect] 只模拟 BLE 重连，
+  /// **不更换**该句柄——MCU 侧解析器状态属于设备，重连不复位它。
   @override
-  Object? linkIdentity = Object();
+  Object? deviceScope = Object();
 
-  /// 模拟真实重连（RC3-05⑤）：新物理连接下 MCU 侧帧解析器回到同步态
-  /// （悬空半帧随旧连接作废），物理链路身份同时前进。
+  /// 模拟真实重连（RC3-05⑤）：BLE 链路重建，**MCU 侧帧解析器状态不变**。
+  ///
+  /// 真值：悬空半帧保存在 `ota_ble_session_t::demux.parser`，连接事件
+  /// 不复位它——`ota_ble_session.c` 的 `session_teardown` 不动
+  /// `session->demux`，`ota_ble_demux_init` 只在开机
+  /// `ota_ble_session_init` 调用；解析器只在帧被吃完时自复位
+  /// （`ota_ble_frame.c` PAYLOAD/CRC 态）。旧实现在这里 `_pending.clear()`，
+  /// 等于凭空造出一个「重连即回到同步态」的干净解析器，把未经证明的
+  /// 结论固化成用例前提。本方法只推进连接状态，`_pending`/`deviceScope`
+  /// 原样保留。
   void reconnect() {
-    _pending.clear();
-    linkIdentity = Object();
+    _linkReconnects++;
   }
+
+  /// 模拟本设备被复位/断电：唯一能清除 MCU 侧解析器状态的事件
+  /// （开机 `ota_ble_session_init` → `ota_ble_demux_init`）。
+  void powerCycle() {
+    _pending.clear();
+  }
+
+  /// [reconnect] 调用次数（诊断用：区分「重连过」与「换了设备」）。
+  int get linkReconnects => _linkReconnects;
+  int _linkReconnects = 0;
 
   void onBeginFrame(OtaBleFrame f);
   void onDataFrame(OtaBleFrame f);
@@ -2022,8 +2079,19 @@ abstract class _FakeMcuHost implements OtaBleChannel {
       if (_pending.length < frameEnd) return;
       final frame = Uint8List.fromList(_pending.sublist(0, frameEnd));
       _pending.removeRange(0, frameEnd);
+      // 坏帧语义（ota_ble_frame.c:274-313）：CRC 失败 → 整帧丢弃 +
+      // 解析器复位，剩余字节继续按同步字重新扫描，**不**向上抛错——
+      // 真实 GATT 写不会因为 MCU 拒帧而失败。截断写留下的悬空帧正是
+      // 这样被后续字节喂满后以 ERR_CRC 收场，这一点必须如实模拟，
+      // 否则「探针被吞掉再重新同步」的路径在替身上根本走不到。
+      final OtaBleFrame f;
+      try {
+        f = OtaBleCodec.decodeFrame(frame);
+      } on FormatException {
+        badCrcFrames++;
+        continue;
+      }
       writtenFrames.add(frame);
-      final f = OtaBleCodec.decodeFrame(frame);
       switch (f.cmd) {
         case OtaBleCodec.cmdGetInfo:
           // INFO 帧：session=0、seq 回显请求 seq（§5.6）。
@@ -2105,6 +2173,11 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   /// 重组缓冲中尚未组成完整帧的字节数（RC3-05② 断言：取消/中止
   /// 边界处 MCU 不得停留在半帧状态）。
   int get pendingByteCount => _pending.length;
+
+  /// 被 MCU 以 CRC 失败丢弃的整帧数（RC3-05⑤ 重新同步路径的观测点）。
+  /// 简化：真值下 MCU 还会回一个 ERR_CRC 的 NAK（`session_handle_frame_error`），
+  /// 本替身不发——NAK 与本用例的判据无关，且悬空态下应用本来就在等探针应答。
+  int badCrcFrames = 0;
 
   @override
   Stream<List<int>> get notifications =>
