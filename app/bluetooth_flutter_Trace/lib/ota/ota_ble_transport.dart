@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'ota_ble_codec.dart';
 import 'ota_device_info.dart';
+import 'ota_mono.dart';
 
 /// OTA BLE 传输测试注入点：生产实现绑定 flutter_blue_plus 的真实特征，
 /// 测试用 fake 模拟 MCU 行为（ACK、丢帧、乱序、断连）。
@@ -294,6 +295,7 @@ class OtaBleTransport {
     // 全部等待点；预算跨 BEGIN/resume 保留（重新 BEGIN 本身不算进展），
     // 只在 durable 前进时 reset；finally 清空解除对后续命令的约束。
     _noProgressClock = Stopwatch()..start();
+    otaMonoLog('MONO_BUDGET_START');
     try {
       final total = package.length;
       var resumeLeft = retries; // ERR_SEQ/ERR_SESSION/ERR_STATE → ABORT+BEGIN
@@ -337,6 +339,7 @@ class OtaBleTransport {
           // 真实 staging 进展同样重置无进展预算窗口，否则刚获得恢复进展
           // 的传输仍按旧截止时间被判超时（RC3-07）。
           _noProgressClock?.reset();
+          otaMonoLog('MONO_BUDGET_RESET', durable: beginAck.durableOff);
         }
         _notifyDurable(onDurableProgress, durableOff, total);
         needsResume = false;
@@ -434,6 +437,7 @@ class OtaBleTransport {
             durableOff = view.durableOff;
             _notifyDurable(onDurableProgress, durableOff, total);
             _noProgressClock?.reset(); // durable 前进即重置预算窗口
+            otaMonoLog('MONO_BUDGET_RESET', durable: durableOff);
           }
           if (durableOff > lastDurable) {
             lastDurable = durableOff;
@@ -634,6 +638,7 @@ class OtaBleTransport {
     if (_disposed || _cancelled) return;
     _paused = true;
     _noProgressClock?.stop();
+    otaMonoLog('MONO_PAUSE');
     _resumeGate ??= Completer<void>();
   }
 
@@ -642,6 +647,7 @@ class OtaBleTransport {
     if (!_paused) return;
     _paused = false;
     _noProgressClock?.start();
+    otaMonoLog('MONO_RESUME');
     _releasePauseGate();
   }
 
@@ -929,6 +935,7 @@ class OtaBleTransport {
   void _checkNoProgress() {
     final left = _noProgressLeft;
     if (left != null && left == Duration.zero) {
+      otaMonoLog('MONO_FAIL_AT', code: 'NO_DURABLE_PROGRESS');
       throw const OtaTransportException(
           '无 durable 进展超时，中止传输', code: 'NO_DURABLE_PROGRESS');
     }
@@ -1259,6 +1266,7 @@ class OtaBleTransport {
               await pendingWrite.timeout(settleGrace);
             } catch (_) {} // 迟到错误不覆盖本帧超时语义
           }
+          otaMonoLog('MONO_FAIL_AT', code: 'WRITE_TIMEOUT');
           throw OtaTransportException(
               'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
               code: 'WRITE_TIMEOUT');

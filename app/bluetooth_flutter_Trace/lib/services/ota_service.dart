@@ -15,6 +15,7 @@ import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
 import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
+import '../ota/ota_mono.dart';
 import 'app_update_service.dart';
 import 'bluetooth_service.dart';
 
@@ -997,6 +998,7 @@ class OtaService extends GetxController {
           return false;
         }
         if (e.code != 'CANCELLED') {
+          otaMonoLog('MONO_TERMINAL', code: e.code);
           _upgradeStatus.value = 'BLE 传输失败: ${e.message}';
           // 连接仍在时尽力 ABORT（清理 MCU 侧会话）。
           await activeTransport?.abortBestEffort();
@@ -1034,6 +1036,7 @@ class OtaService extends GetxController {
           // 身份异常覆盖成 DEVICE_IDENTITY_* + failed。
           return false;
         }
+        otaMonoLog('MONO_TERMINAL', code: e.code);
         _terminalState.value = OtaTerminalState(
           code: e.code,
           message: e.toString(),
@@ -1052,6 +1055,7 @@ class OtaService extends GetxController {
           // 退出走这一支，不得覆盖 failClosed 已发布的终止态。
           return false;
         }
+        otaMonoLog('MONO_TERMINAL');
         _upgradeStatus.value = '升级失败: $e';
         await activeTransport?.abortBestEffort();
         _phase.value = OtaPhase.failed;
@@ -1255,6 +1259,7 @@ class OtaService extends GetxController {
       // 不前进代次，在途写随后以非 CANCELLED 错误退出时必须认出这是已决
       // 终止的收尾，而不是新的升级失败。
       _failClosedDecided = true;
+      otaMonoLog('MONO_TERMINAL', code: code);
       _terminalState.value = OtaTerminalState(
         code: code,
         message: message,
