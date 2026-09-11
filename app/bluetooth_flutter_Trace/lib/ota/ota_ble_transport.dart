@@ -93,14 +93,14 @@ class OtaBleTransport {
   _TransferAckView? _ackView;
 
   int _seq = 0;
-  /// 会话外查询（GET_INFO，session=0）的 seq 独立空间（RC3-08⑦）。
-  /// 合同 §5.1 定义 seq 为「会话内」帧序号，MCU 会话层对 BEGIN/DATA/END
-  /// 严格连续校验（ota_ble_session.c session_seq_check）；GET_INFO 不参与
-  /// 会话状态（§5.2，session=0，seq 仅作应答回显关联）。传输在途的后台
-  /// 恢复复核会发 GET_INFO——若它从会话计数器取号，后续 DATA 将整体跳号
-  /// 被 ERR_SEQ 拒绝，触发内部 ABORT+BEGIN 重对齐并从 durable 整段重发；
-  /// 只读复核不得破坏被复核的传输。
-  int _querySeq = 0;
+  // 会话外查询（GET_INFO，session=0）使用独立 seq 空间（RC3-08⑦）。
+  // 合同 §5.1 定义 seq 为「会话内」帧序号，MCU 会话层对 BEGIN/DATA/END
+  // 严格连续校验（ota_ble_session.c session_seq_check）；GET_INFO 不参与
+  // 会话状态（§5.2，session=0，seq 仅作应答回显关联）。传输在途的后台
+  // 恢复复核会发 GET_INFO——若它从会话计数器取号，后续 DATA 将整体跳号
+  // 被 ERR_SEQ 拒绝，触发内部 ABORT+BEGIN 重对齐并从 durable 整段重发；
+  // 只读复核不得破坏被复核的传输。该空间按**设备**分配而不是按实例
+  // （RC3-05⑤），见 [_nextQuerySeq] 与 [_DeviceWriteLedger.nextQuerySeq]。
   int _session = 0;
   bool _busy = false;
   bool _cancelled = false;
@@ -117,15 +117,37 @@ class OtaBleTransport {
   /// 写通道处于废弃态（RC3-05⑤）时，本调用是唯一放行的出站流量，并按
   /// 重新同步探针处理：GET_INFO 帧本身可能整帧落进悬空帧的 payload 被吞掉，
   /// 因此按 [maxResyncProbes] / [resyncProbeTimeout] 有界重试，直到收到
-  /// INFO 应答——那是「MCU 解析器已重新同步」的正向证明。重试耗尽仍无应答
-  /// 即抛错，标记保持废弃，绝不假装恢复。
+  /// 一个**属于当前废弃世代、且发出时设备上没有在途旧物理写**的探针的
+  /// INFO 应答——那才是「MCU 解析器已重新同步」的正向证明。探针预算
+  /// （[maxResyncProbes] × [resyncProbeTimeout]，含等待在途旧写结算的开销）
+  /// 用尽仍无证据即抛错，标记保持废弃，绝不假装恢复。
   Future<DeviceOtaInfo> getDeviceInfo(
       {Duration timeout = const Duration(seconds: 10)}) async {
     var attempts = 0;
     var probes = 0;
+    // 废弃探针序列的端到端预算（RC3-05⑤）：次数上限 × 单次上限。它与
+    // 调用方的 [timeout] 是两件事——后者描述「一次往返」的合理等待，直接
+    // 拿它当整段探针序列的上界，会在最坏情形（悬空帧需约 14 次探针才被
+    // 吃满，≈11s）提前放弃一个正在收敛的恢复过程。取两者较大值：既有硬
+    // 上界，又不因调用方给了个短超时而缩掉既有的恢复能力。等待在途旧物理
+    // 写的开销也计入同一预算，不再是「探针之外的无界第三段等待」。
+    final probeBudget = resyncProbeTimeout * maxResyncProbes;
+    final budget = timeout > probeBudget ? timeout : probeBudget;
+    final clock = Stopwatch()..start();
+    Duration remaining() {
+      final left = budget - clock.elapsed;
+      return left.isNegative ? Duration.zero : left;
+    }
+
     while (true) {
       _checkUsable();
-      // 会话外查询取号（RC3-08⑦）：不消耗会话 seq 空间，见 _querySeq。
+      final poisoned = _writeChannelPoisoned;
+      if (poisoned && remaining() == Duration.zero) {
+        throw const OtaTransportException(
+            '写通道废弃：探针总时限内未取得重新同步证据（cmd=0x1）',
+            code: 'TIMEOUT');
+      }
+      // 会话外查询取号（RC3-08⑦）：不消耗会话 seq 空间，见 _nextQuerySeq。
       final seq = _nextQuerySeq();
       final frame = OtaBleCodec.encodeCommand(
         cmd: OtaBleCodec.cmdGetInfo,
@@ -141,18 +163,39 @@ class OtaBleTransport {
           OtaBleCodec.rspInfo,
           session: 0,
           seq: seq,
-          timeout: _writeChannelPoisoned ? resyncProbeTimeout : timeout,
+          timeout: poisoned
+              ? (resyncProbeTimeout < remaining()
+                  ? resyncProbeTimeout
+                  : remaining())
+              : timeout,
           resyncProbeSeq: seq,
         );
       } on OtaTransportException catch (e) {
         // 只有废弃态才把超时解释为「探针被悬空帧吞掉」：此时本探针是
         // 把悬空帧吃满、逼解析器自复位的唯一手段，重试才算进展。正常
         // 链路超时照旧上抛，不改变既有语义。
-        if (!_writeChannelPoisoned ||
+        if (!poisoned ||
             e.code != 'TIMEOUT' ||
             ++probes >= maxResyncProbes) {
           rethrow;
         }
+        // 重试前先等设备上的旧物理写结算（RC3-05⑤）：只要它们还在途，
+        // 下一个探针即使被解析也不能作为解除证据（见
+        // [_resyncProbeAuthoritative]），先等它们落地再取证才有意义。
+        await _awaitDeviceWritesIdle(remaining());
+        continue;
+      }
+      if (poisoned && _writeChannelPoisoned) {
+        // 应答到了、废弃却没解除：本探针发出时仍有在途旧物理写（或其间
+        // 发生了重新废弃），其 INFO 不构成重新同步证据。不能把 payload
+        // 当成功返回——上层据此认为链路可信，而迟到的旧分片随后仍会污染
+        // 新会话。等旧写结算后用**新的**探针重新取证。
+        if (++probes >= maxResyncProbes) {
+          throw const OtaTransportException(
+              '写通道废弃：探针预算耗尽仍未在无在途旧写时取得重新同步证据',
+              code: 'TIMEOUT');
+        }
+        await _awaitDeviceWritesIdle(remaining());
         continue;
       }
       try {
@@ -498,6 +541,10 @@ class OtaBleTransport {
     // 取消必须解除暂停等待（RC3-08）：挂起在 _waitIfPaused 的传输循环
     // 否则永远无法到达 _checkUsable 抛出取消，owner await 死锁。
     _releasePauseGate();
+    // 本实例退出后其探针登记一并作废（RC3-05⑤）：写入者已不再持有这条
+    // 恢复事务，迟到的应答不得经死人登记解除设备上的废弃标记。
+    _resyncProbeSeq = null;
+    _resyncProbeAuthoritative = false;
     const err = OtaTransportException('OTA 传输已取消', code: 'CANCELLED');
     _ackView?.fail(err);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
@@ -530,6 +577,9 @@ class OtaBleTransport {
   Future<void> dispose() async {
     _disposed = true;
     _releasePauseGate();
+    // 与 [cancel] 同理（RC3-05⑤）：释放后本实例不再持有重新同步事务。
+    _resyncProbeSeq = null;
+    _resyncProbeAuthoritative = false;
     const err = OtaTransportException('transport 已释放', code: 'DISPOSED');
     _ackView?.fail(err);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
@@ -588,12 +638,10 @@ class OtaBleTransport {
     // 触发，因此收到本实例在废弃状态下发出的那个 seq 的 INFO，就证明 MCU
     // 帧解析器已脱离悬空态。必须 seq 匹配——废弃前发出的 GET_INFO 其迟到
     // 应答同样以 session=0/rspInfo 到达，不能用它充当恢复证据。
-    if (f.cmd == OtaBleCodec.rspInfo &&
-        f.session == 0 &&
-        _writeChannelPoisoned &&
-        f.seq == _resyncProbeSeq) {
+    // 三个条件缺一不可（见 [_isResyncEvidence]）：seq 匹配只是其一，
+    // 还要求应答属于本世代废弃、且该探针发出时设备上没有在途旧物理写。
+    if (_isResyncEvidence(f)) {
       _clearWriteChannelPoison();
-      _resyncProbeSeq = null;
     }
     // 传输期 ACK 视图只消费 DATA ACK（每段独立应答，一问一答等待者
     // 无法覆盖）；BEGIN/END/ABORT ACK 由等待者按 cmd+session+seq 精确
@@ -864,11 +912,42 @@ class OtaBleTransport {
     return s;
   }
 
-  /// 会话外查询帧的 seq 分配（独立空间，见 [_querySeq]）。
-  int _nextQuerySeq() {
-    final s = _querySeq;
-    _querySeq = (_querySeq + 1) & 0xFFFF;
-    return s;
+  /// 会话外查询帧的 seq 分配（独立空间，见 `_seq`/`_session` 上方字段注释）。
+  ///
+  /// 号码按**设备**分配而非按实例（RC3-05⑤）：同设备上「换个 transport
+  /// 再查」是常规路径（每次 bind 新建包装通道），实例各自从 0 起分配会
+  /// 让两个实际不同的探针拿到同一个 seq——A 实例探针的应答（甚至废弃前
+  /// 那次 GET_INFO 的迟到应答）会被 B 实例当成自己探针的证据，据此解除
+  /// 隔离。设备作用域计数器保证同一设备上在途探针的 seq 互不相同。
+  int _nextQuerySeq() => _deviceWriteLedger.nextQuerySeq();
+
+  /// 登记一次「已交付底层、尚未结算」的物理写（RC3-05⑤）。
+  ///
+  /// `Future.timeout` 不取消底层 writeChunk：帧被判超时后串行队列放行
+  /// 下一帧，而这一片仍可能在之后落地。账本记录这种在途写的条数，探针
+  /// 只有在「发出时零在途」才算权威证据（[_resyncProbeAuthoritative]），
+  /// 调用方也可等待其结算后再取证（[_awaitDeviceWritesIdle]）。
+  void _trackOutstandingWrite(Future<void> write) {
+    final ledger = _deviceWriteLedger;
+    ledger.beginWrite();
+    // whenComplete 派生链继承原错误，不消费会在「宽限归零、原 future 不再
+    // 被 await」时变成未处理的异步错误。
+    write.whenComplete(ledger.endWrite).catchError((_) {});
+  }
+
+  /// 等待设备上的在途物理写全部结算；[limit] 内未结算即抛 TIMEOUT。
+  /// 拿不到「旧写已结束」的证据时不假装已恢复，废弃标记保持。
+  Future<void> _awaitDeviceWritesIdle(Duration limit) async {
+    final ledger = _deviceWriteLedger;
+    if (ledger.outstanding == 0) return;
+    try {
+      await ledger.idle.timeout(limit);
+    } on TimeoutException {
+      throw OtaTransportException(
+          '写通道废弃：${limit.inMilliseconds}ms 内旧物理写仍未结算，'
+          '无法取得重新同步证据',
+          code: 'TIMEOUT');
+    }
   }
 
   /// 常规帧写入（数据/命令路径）：受取消/释放与预算检查约束，
@@ -936,16 +1015,43 @@ class OtaBleTransport {
   /// 通道未提供作用域时退回通道对象自身，保持旧语义不放大。
   Object get _deviceScope => _channel.deviceScope ?? _channel;
 
+  /// 设备作用域的写在途账本与查询序号空间（RC3-05⑤）。
+  static final Expando<_DeviceWriteLedger> _deviceLedgers =
+      Expando<_DeviceWriteLedger>('otaDeviceWriteLedger');
+
+  _DeviceWriteLedger get _deviceWriteLedger =>
+      _deviceLedgers[_deviceScope] ??= _DeviceWriteLedger();
+
   bool get _writeChannelPoisoned => _poisonedDevices[_deviceScope] ?? false;
 
   void _poisonWriteChannel() {
+    final ledger = _deviceWriteLedger;
+    // 世代前进（RC3-05⑤）：新一段废弃使此前登记过的全部探针证据失效，
+    // 包括同设备上其它实例登记的探针——它们是在解析器状态还不同的
+    // 时刻发出的，其应答不能再为当前这段废弃作证。
+    ledger.epoch++;
     _poisonedDevices[_deviceScope] = true;
+    _resyncProbeSeq = null;
+    _resyncProbeAuthoritative = false;
   }
 
   /// 同步探针的 seq（RC3-05⑤）：仅当本实例在**废弃状态下**发出了
   /// GET_INFO 探针时登记，收到同一 seq 的 INFO 应答才解除标记。避免用
   /// 陈旧 INFO（废弃前那次 GET_INFO 的迟到应答）误判为已重新同步。
   int? _resyncProbeSeq;
+
+  /// 登记探针所属的废弃世代，核对时要求与设备账本的当前世代一致。
+  int _resyncProbeEpoch = 0;
+
+  /// 本探针在写出第一个分片时，设备上是否**没有**在途的旧物理写。
+  ///
+  /// 这是「INFO 应答能否作为重新同步证据」的第二个必要条件（RC3-05⑤）：
+  /// `Future.timeout` 不取消底层 writeChunk，被判定超时的旧帧其分片仍可能
+  /// 在探针之后才落地。若探针发出时仍有这种写在途，即使探针被 MCU 完整
+  /// 解析并回了 INFO，解析器也只是「此刻」同步——迟到的旧分片随后照样在
+  /// 它上面制造新的悬空半帧，用它解除隔离等于把未结算的旧写放进了新会话。
+  /// 因此这种探针只用于「投递字节逼解析器复位」，不作解除证据。
+  bool _resyncProbeAuthoritative = false;
 
   /// 废弃期间单次探针等待上限：比常规 ACK 超时略宽（悬空帧可能还要
   /// 先吃满若干字节才轮到探针被解析），但仍远小于用户可见的超时。
@@ -960,6 +1066,17 @@ class OtaBleTransport {
   /// 收到探针应答后的解除（RC3-05⑤）。只在本地确有在途探针时生效。
   void _clearWriteChannelPoison() {
     _poisonedDevices[_deviceScope] = false;
+    _resyncProbeSeq = null;
+    _resyncProbeAuthoritative = false;
+  }
+
+  /// 该 INFO 是否构成「MCU 解析器已回到同步态」的当前世代证据。
+  bool _isResyncEvidence(OtaBleFrame f) {
+    if (f.cmd != OtaBleCodec.rspInfo || f.session != 0) return false;
+    if (!_writeChannelPoisoned) return false;
+    if (_resyncProbeSeq == null || f.seq != _resyncProbeSeq) return false;
+    if (!_resyncProbeAuthoritative) return false;
+    return _resyncProbeEpoch == _deviceWriteLedger.epoch;
   }
 
   Future<void> _writeFrameChecked(
@@ -1012,10 +1129,13 @@ class OtaBleTransport {
             '须由 GET_INFO 探针证明 MCU 已重新同步',
             code: 'WRITE_TIMEOUT');
       }
-      // 探针是本帧唯一放行的通道占用者：登记 seq，供 INFO 应答核对后
-      // 解除标记。入队时才登记（此刻确实处于废弃态），排队期间被别的
-      // 帧解除/重新废弃都不会把陈旧 seq 留在原地。
+      // 探针是本帧唯一放行的通道占用者：登记 seq、世代与「发出时无在途旧
+      // 写」，供 INFO 应答核对后解除标记（RC3-05⑤）。入队时才登记（此刻
+      // 确实处于废弃态），排队期间被别的帧解除/重新废弃都不会把陈旧登记
+      // 留在原地——重新废弃会前进世代并使本登记在核对时被拒。
       _resyncProbeSeq = resyncProbeSeq;
+      _resyncProbeEpoch = _deviceWriteLedger.epoch;
+      _resyncProbeAuthoritative = _deviceWriteLedger.outstanding == 0;
     }
     if (!allowCancelled) {
       _checkUsable();
@@ -1055,14 +1175,17 @@ class OtaBleTransport {
         // 20s = 50s），超出 30s 合同窗口；封顶后传输路径的终止发布上界
         // 恒为 noProgressTimeout。
         // 预算已耗尽时宽限为 0、立即上抛：此刻继续占住串行队列只会把终止
-        // 推迟到合同窗口之外。安全性由废弃标记承担——它已拒绝全部业务帧
-        // 与 ABORT（见 [_writeFrameChecked]），唯一可能交错的帧是 GET_INFO
-        // 探针；探针字节被吞进悬空帧后由 MCU 坏帧自复位（ota_ble_frame.c
-        // 失败分支 reset）与有界探针重试（[maxResyncProbes]）接管。
+        // 推迟到合同窗口之外。安全性由废弃标记 + 在途写账本共同承担——
+        // 废弃标记已拒绝全部业务帧与 ABORT（见 [_writeFrameChecked]），
+        // 因此**不会有新的应用帧**与这一片交错；但这一片本身仍是在途的
+        // 物理写，它若在某个探针应答之后落地，照样能在已同步的解析器上
+        // 制造新的悬空半帧。故本片一并记入设备账本：在它结算之前，任何
+        // 探针应答都不被当作重新同步证据（[_resyncProbeAuthoritative]）。
         // 取消路径在 transfer 退出后预算已解除（[_noProgressClock] 置空），
         // 宽限仍取 2×writeTimeout——该路径的终止上界是
         // writeTimeout + 2×writeTimeout，以单次写超时为唯一依据。
         final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
+        _trackOutstandingWrite(pendingWrite);
         dispatchedAny = true;
         try {
           await pendingWrite.timeout(perChunkTimeout);
@@ -1485,6 +1608,59 @@ class OtaAckResult {
   final bool terminal;
 
   bool get isOk => status == OtaBleCodec.statusOk && !terminal;
+}
+
+/// 设备作用域的写在途账本与查询序号空间（RC3-05⑤）。
+///
+/// 为什么这些状态必须按设备而不是按 transport 实例：
+/// - 写通道废弃标记本身落在设备作用域（`_poisonedDevices`），恢复证据
+///   必须同域，否则「换个 wrapper 再查」就会把另一个实例的应答当成
+///   本实例的证据；
+/// - 会话外查询 seq 若按实例分配，各实例都从 0 起，两个实际不同的探针会
+///   拿到同一个号码，谁先收到谁的应答无法区分；
+/// - `Future.timeout` 不取消底层 `writeChunk`：一帧写超时后它的分片仍可能
+///   在未来落地。只要设备上还有这种「已交付、未结算」的写在途，任何探针
+///   应答都不构成「解析器已重新同步」的证明——迟到分片会在应答之后落到
+///   同一个解析器上，重新制造悬空半帧。
+///
+/// 账本随设备身份对象一起回收（Expando），不产生全局泄漏。
+class _DeviceWriteLedger {
+  /// 会话外查询（GET_INFO，session=0）的 seq 空间。合同 §5.1 的 seq 只
+  /// 约束会话内帧；GET_INFO 不参与会话状态（§5.2），seq 仅作应答回显关联。
+  int _querySeq = 0;
+
+  /// 取下一个会话外查询 seq（0..0xFFFF 回绕）。
+  int nextQuerySeq() {
+    final s = _querySeq;
+    _querySeq = (_querySeq + 1) & 0xFFFF;
+    return s;
+  }
+
+  /// 废弃世代：每次进入废弃态 +1。旧世代登记的探针应答不得解除新世代的
+  /// 废弃（跨实例也成立——世代在设备上共享）。
+  int epoch = 0;
+
+  /// 已交付底层、尚未结算（成功/失败/迟到）的物理写条数。
+  int outstanding = 0;
+
+  Completer<void> _idle = Completer<void>()..complete();
+
+  /// 设备上已无在途物理写时完成（当前已无在途则立即完成）。
+  Future<void> get idle => _idle.future;
+
+  void beginWrite() {
+    if (outstanding == 0) {
+      _idle = Completer<void>();
+    }
+    outstanding++;
+  }
+
+  void endWrite() {
+    outstanding--;
+    if (outstanding == 0 && !_idle.isCompleted) {
+      _idle.complete();
+    }
+  }
 }
 
 /// 传输层稳定领域异常。

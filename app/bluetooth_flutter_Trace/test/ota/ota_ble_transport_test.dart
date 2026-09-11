@@ -1884,6 +1884,114 @@ void main() {
       await afterReset.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    test('在途旧物理写未结算时，INFO 应答不得解除隔离（RC3-05⑤ 迟到写）',
+        () async {
+      final package = packageBytes(4096);
+      // MTU=23 → DATA 帧 8 片；片 1 的底层写在 1.8s 后才落地，单片写超时
+      // 200ms。600ms 时本帧以 WRITE_TIMEOUT 收场并废弃写通道，而**片 1 仍
+      // 在途**——`Future.timeout` 不取消底层 writeChunk。此刻 MCU 侧 0 字节、
+      // 解析器同步，探针能被完整解析并回 INFO：旧实现正是在这里解除隔离，
+      // 随后 1.8s 迟到的片 1（含同步字的帧首）落进「已恢复」的通道，重新
+      // 制造悬空半帧。
+      final mcu = _McuSim()
+        ..mtu = 23
+        ..slowDataChunkAt = 1
+        ..slowDataChunkDelay = const Duration(milliseconds: 1800);
+      final transport = OtaBleTransport(
+        channel: _ReboundWrapper(mcu),
+        writeTimeout: const Duration(milliseconds: 200),
+        noProgressTimeout: const Duration(seconds: 4),
+      );
+      await expectLater(
+        transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        ),
+        throwsA(isA<OtaTransportException>()),
+      );
+      expect(mcu.pendingByteCount, 0,
+          reason: '片 1 尚未落地：MCU 解析器此刻是同步的');
+      await transport.dispose();
+
+      // 同设备上新 transport 取重新同步证据。
+      final rebound = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      final probe = rebound.getDeviceInfo();
+      final probeOutcome =
+          probe.then<Object?>((_) => null, onError: (Object e) => e);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(
+        mcu.sentFrames.where((f) => f.cmd == OtaBleCodec.rspInfo).length,
+        1,
+        reason: '探针被 MCU 完整解析并回了 INFO——旧实现正是在此处解除隔离',
+      );
+      // 判据一：旧物理写未结算期间，业务帧必须继续被拒。
+      await _expectBusinessWriteRefused(rebound, '在途旧物理写未结算时');
+      expect(mcu.pendingByteCount, 0,
+          reason: '被拒的帧不得落下任何字节；探针帧已被完整解析');
+
+      // 判据二：迟到片 1 落地后仍是「帧首字节」，解析器重新悬空——那条
+      // 早期 INFO 没有被当成恢复证据，隔离依然成立。
+      await Future<void>.delayed(const Duration(milliseconds: 1800));
+      expect(mcu.pendingByteCount, 20,
+          reason: '迟到的帧首分片落地，解析器悬空在新的半帧上');
+      await _expectBusinessWriteRefused(rebound, '迟到帧首分片落地后');
+
+      // 终止探针（本用例只验证围栏，不验证完全恢复——后者由上一用例的
+      // 探针冲刷路径覆盖）。
+      rebound.cancel();
+      expect(await probeOutcome, isA<OtaTransportException>());
+      await rebound.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('隔离前发出的旧 INFO 重放不得解除隔离：查询 seq 按设备分配'
+        '（RC3-05⑤ 跨实例串号）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()
+        ..mtu = 125
+        ..failAtDataChunk = 2;
+      // ① 干净链路上先取一次真实 INFO：该帧属于「隔离之前」的世代。
+      final clean = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      final info = await clean.getDeviceInfo();
+      expect(info.hardwareRevision, 3);
+      final staleIndex = mcu.sentFrames.length - 1;
+      expect(mcu.sentFrames[staleIndex].cmd, OtaBleCodec.rspInfo);
+      await clean.dispose();
+
+      // ② 制造隔离：片 1 落地、片 2 底层报错，MCU 侧悬空 122B；此后探针
+      //    会被吞进 payload，不存在任何新的 INFO 应答。
+      final first = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      await expectLater(
+        first.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        ),
+        throwsA(isA<OtaTransportException>()),
+      );
+      expect(mcu.pendingByteCount, 122);
+      await first.dispose();
+
+      // ③ 新 transport 发探针（同设备作用域）。
+      final rebound = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      final probe = rebound.getDeviceInfo();
+      final probeOutcome =
+          probe.then<Object?>((_) => null, onError: (Object e) => e);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      // ④ 重放隔离前那条 INFO。旧实现下「每个实例的查询 seq 都从 0 起」，
+      //    该帧的 seq 恰与新实例探针的 seq 相同，会被当成重新同步证据并
+      //    解除隔离——而它证明不了任何关于当前解析器状态的事。
+      mcu.replaySentFrame(staleIndex);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await _expectBusinessWriteRefused(rebound, '重放隔离前的旧 INFO 后');
+      expect(mcu.pendingByteCount, 132,
+          reason: '悬空 122B 加上被吞掉的探针帧 10B，被拒的帧不得落下字节');
+
+      rebound.cancel();
+      expect(await probeOutcome, isA<OtaTransportException>());
+      await rebound.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
     test('后台暂停/恢复：发窗在帧边界挂起，恢复后传输完成（RC3-08）',
         () async {
       final package = packageBytes(4096);
@@ -2367,6 +2475,13 @@ abstract class _FakeMcuHost implements OtaBleChannel {
       _notifyController.add(List<int>.filled(garbagePrefixBytes, 0xA5 + 1));
       garbagePrefixBytes = 0;
     }
+    _emitToNotify(frame);
+    sentFrameBytes.add(frame);
+    sentFrames.add(OtaBleCodec.decodeFrame(frame));
+  }
+
+  /// 按 [chunkMode] 把一条完整帧投递到通知流（分片粒度与真实链路一致）。
+  void _emitToNotify(Uint8List frame) {
     switch (chunkMode) {
       case _ChunkMode.ble20:
         for (var off = 0; off < frame.length; off += 20) {
@@ -2380,8 +2495,17 @@ abstract class _FakeMcuHost implements OtaBleChannel {
         }
         break;
     }
-    sentFrames.add(OtaBleCodec.decodeFrame(frame));
   }
+
+  /// 重放一条此前发出的应答（RC3-05⑤ 反例注入）：把该帧原始字节再次投递
+  /// 到通知流，模拟迟到/重复的应答帧。真实链路上通知重放（缓冲重放、重传）
+  /// 是可能的，而「重放的旧 INFO 能否解除写通道隔离」正是对应用例的判据。
+  void replaySentFrame(int index) {
+    _emitToNotify(Uint8List.fromList(sentFrameBytes[index]));
+  }
+
+  /// 已发出应答帧的原始字节（[replaySentFrame] 的数据源）。
+  final sentFrameBytes = <Uint8List>[];
 
   /// 测试注入：一次性垃圾前缀字节（非同步字）。
   int garbagePrefixBytes = 0;

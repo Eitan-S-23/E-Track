@@ -962,12 +962,26 @@ class OtaService extends GetxController {
           _deviceInfo = null;
           _deviceInfoAddress = null;
         }
+        if (generation != _cancelGeneration) {
+          // 用户取消窗口内的在途错误（RC3-12②）：不能只按 `e.code` 分流。
+          // 取消时刻正在途的物理写可能以 WRITE_TIMEOUT 结束，也可能被
+          // abortBestEffort / 原生层以任意异常抛出；这些都不是「升级失败」
+          // 的新事实，而是取消造成的退出路径。此刻 cancelUpgrade 的清理
+          // （partial / 已验证包）尚未跑完，若在这里发布失败文案并置
+          // `_phase = failed`，「失败且已收尾」的可观测状态会先于清理成立——
+          // UI 据此放开重试入口，随后取消路径又把 phase 覆盖成 cancelled，
+          // 用户看到文案与相位来回跳，且可能对着还没删完的包重发。
+          // 终止语义与包处置由 cancelUpgrade 在本 owner（含 finally）完全退出后
+          // 一次性发布，这里静默让出，也不重复 ABORT——取消路径已对取消时刻的
+          // transport 做过尽力 ABORT。
+          return false;
+        }
         if (e.code != 'CANCELLED') {
           _upgradeStatus.value = 'BLE 传输失败: ${e.message}';
           // 连接仍在时尽力 ABORT（清理 MCU 侧会话）。
           await activeTransport?.abortBestEffort();
           _phase.value = OtaPhase.failed;
-        } else if (generation == _cancelGeneration) {
+        } else {
           // 非取消来源的 CANCELLED：发送循环是被 abortBestEffort 停掉的
           // （例如后台复核失败 fail closed）。终止原因由发起中止的路径
           // （failClosed）发布到 _terminalState/_upgradeStatus，此处保持
@@ -982,17 +996,19 @@ class OtaService extends GetxController {
           // 通用链路失败文案，丢掉终止原因与可重试语义。
           _phase.value = OtaPhase.cancelled;
         }
-        // 剩余情形即用户取消（generation != _cancelGeneration，RC3-12）：
-        // 静默退出，此处不得发布任何「已取消」可观测状态——既不写文案也不
-        // 置 phase。终态与包清理由 cancelUpgrade 在本 owner 完全退出后一次性
-        // 发布（文案与 phase 同段赋值）。抢先置 cancelled 会让 UI 立刻按
-        // 「已取消且包已处置」渲染并放开重新进入传输；抢先发布取消文案同样
-        // 有害——进度卡的 Obx 直接读 upgradeStatus，此时取消路径的清理
-        // （partial/已验证包）还没跑完，「取消文案 ⇒ 包已处置」的契约会提前
-        // 成立。因此上面两个分支各自只发布自己成立的那部分状态，本分支不发布。
-        // 与下载路径的 CANCELLED 分支、目标身份复核的 cancelled 分支保持同一策略。
+        // 本 catch 的两支都只在 `generation == _cancelGeneration`（本 owner
+        // 仍是当前 owner）时发布：用户取消窗口已在上面统一让出。
         return false;
       } on OtaDeviceIdentityException catch (e) {
+        if (generation != _cancelGeneration) {
+          // 与上面同一条取消窗口让出规则（RC3-12②），也与重启复核的
+          // `_RebootKind.identityChanged` 分支保持一致——那条路径在发布前
+          // 已做 `generation != _cancelGeneration` 前置判定，本 catch 若不
+          // 判定就是同一语义的两个出口行为不一致。且 `_terminalState` 不被
+          // cancelUpgrade 重置：取消后由迟到身份异常写入的 DEVICE_IDENTITY_*
+          // 会一直挂在 phase=cancelled 旁边，UI 展示自相矛盾的终止原因。
+          return false;
+        }
         _terminalState.value = OtaTerminalState(
           code: e.code,
           message: e.toString(),
@@ -1001,6 +1017,11 @@ class OtaService extends GetxController {
         _phase.value = OtaPhase.failed;
         return false;
       } catch (e) {
+        if (generation != _cancelGeneration) {
+          // 原生/未知异常同样不得抢在取消清理前发布失败态（RC3-12②）：
+          // 取消引发的在途写异常会走这一支，发布职责归属 cancelUpgrade。
+          return false;
+        }
         _upgradeStatus.value = '升级失败: $e';
         await activeTransport?.abortBestEffort();
         _phase.value = OtaPhase.failed;

@@ -1028,6 +1028,81 @@ void main() {
       expect(await pkgFile.exists(), isFalse);
     }, timeout: const Timeout(Duration(seconds: 30)));
 
+    test('取消窗口内旧物理写以原生异常退出：不得抢先发布失败文案与 failed（RC3-12②）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+      final pkgFile = service.downloadedFirmwareFile;
+      expect(pkgFile, isNotNull);
+
+      // 发布时刻观测（同上一用例）：每一次 upgradeStatus / phase 发布都
+      // 记录当时的包存在性。判据不是「最终标签等于什么」，而是
+      // 「失败/取消文案与 phase 只在包已处置之后出现」。
+      final statusPublishes = <String>[];
+      final fileExistsAtPublish = <bool>[];
+      final phasePublishes = <OtaPhase>[];
+      final statusSub = service.upgradeStatusRx.listen((status) {
+        statusPublishes.add(status);
+        fileExistsAtPublish.add(pkgFile!.existsSync());
+      });
+      final phaseSub = service.phaseRx.listen(phasePublishes.add);
+
+      // 慢速写在途 + DATA 分片原生异常（RC3-12②）：与上一用例（旧 owner 以
+      // CANCELLED 退出）互补。同一取消窗口内，在途物理写也可能以
+      // WRITE_TIMEOUT 或原生异常退出——二者都不带 CANCELLED 码，旧实现只按
+      // `e.code != 'CANCELLED'` 分流，于是这一支会抢先发布
+      // 「升级失败: ...」并置 `failed`，早于取消路径的包清理。修复后由代次
+      // 围栏统一让出：终止语义归 cancelUpgrade。
+      ble.writeChunkDelay = const Duration(milliseconds: 200);
+      ble.dataWriteError = StateError('native GATT write failed');
+
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      // DATA 首片已进入 native 写调用（在途未结算）。
+      await ble.dataWriteEntered.future;
+      // 取消代次在 cancelUpgrade 首个同步语句即自增；此后 native 写才抛错，
+      // 正是「用户取消后，在途写以原生异常退出」的时序（不是取消前的失败）。
+      final cancelFuture = service.cancelUpgrade(keepPackage: false);
+      expect(await startFuture, isFalse, reason: '旧 owner 以原生写异常退出');
+      await cancelFuture;
+      await Future<void>.delayed(Duration.zero);
+      await statusSub.cancel();
+      await phaseSub.cancel();
+
+      // 鉴别点一：取消窗口内不得出现 failed phase（旧实现在此置 failed）。
+      expect(phasePublishes.where((p) => p == OtaPhase.failed), isEmpty,
+          reason: '取消引发的在途写异常不是升级失败，不得置 failed');
+      // 鉴别点二：不得发布失败文案（旧实现在此发布「升级失败: ...」）。
+      expect(statusPublishes.where((s) => s.contains('失败')), isEmpty,
+          reason: '取消窗口内的在途写异常不得发布失败文案');
+      // 鉴别点三（时序）：任何失败/取消文案发布时，包必须已被处置。
+      final premature = <String>[];
+      for (var i = 0; i < statusPublishes.length; i++) {
+        final s = statusPublishes[i];
+        if ((s.contains('失败') || s.contains('取消')) &&
+            fileExistsAtPublish[i]) {
+          premature.add(s);
+        }
+      }
+      expect(premature, isEmpty,
+          reason: '「失败/已取消」文案不得在包清理完成前发布');
+      expect(service.terminalState, isNull,
+          reason: '取消引发的在途写异常不得留下终止态');
+      expect(statusPublishes.last, '操作已取消',
+          reason: '末尾文案必须是取消路径在清理后发布的取消文案');
+      expect(fileExistsAtPublish.last, isFalse,
+          reason: '「操作已取消」发布时包文件必须已删除');
+      expect(phasePublishes.last, OtaPhase.cancelled);
+      expect(service.phase, OtaPhase.cancelled);
+      expect(service.upgradeStatus, '操作已取消');
+      expect(service.downloadedFirmwareFile, isNull);
+      expect(await pkgFile.exists(), isFalse);
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
     test('取消窗口内同资产重下：旧取消不得拔掉后来者的下载（RC3-04⑦）',
         () async {
       final tempDir = tempFirmwareDir();
@@ -1293,6 +1368,196 @@ void main() {
       expect(service.phase, OtaPhase.readyToInstall);
       expect(service.downloadedFirmwareFile, isNotNull);
     }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('旧清理持删除闸期间，后来者同族写入必须排队：临界区内互斥（RC3-02/04/05）',
+        () async {
+      // 与上一条的鉴别力差别：上一条的 `_TakeoverGate` 在调用 `super.run`
+      // **之前**挂起——挂起期间闸链为空，后来者的写入/删除/rename 畅通
+      // 无阻，因此那条用例只能证明「闸内归属复核」生效，不能证明「删除
+      // 过程中的互斥」。本条把暂停点移进闸的临界区（已取得闸、删除体未
+      // 执行），并断言后来者对**同一资产文件族**的操作在放行前不得进入
+      // 自己的临界区、盘上不得出现同族变更、其 future 不得完成。
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = _UpgradeFakeBle(
+        preRebootPayload: preRebootPayload,
+        postRebootPayload: postRebootPayload,
+      );
+      final downloadAdapter = _DownloadGatedAdapter(assetBytes());
+      final gate = _HoldGate();
+      final service = makeService(
+        ble: ble,
+        firmwareDir: tempDir,
+        notifyLog: notifyLog,
+        downloadAdapter: downloadAdapter,
+        downloadFileGate: gate,
+      );
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      expect(await service.downloadFirmware(), isTrue);
+      expect(await service.cleanupFirmware(), isTrue);
+      expect(service.downloadedFirmwareFile, isNull);
+
+      // 同族残留（`.part` + sidecar）：旧清理的删除目标，也是后来者的同族
+      // 路径。sidecar 必须存在——`_deleteAssetPartials` 按 assetId 过滤，
+      // 没有 sidecar 的 `.part` 根本进不到删除体，编排就不成立。
+      final bytes = assetBytes();
+      const partName = '$pkgName.part';
+      final part = File('${tempDir.path}${Platform.pathSeparator}$partName');
+      part.writeAsBytesSync(Uint8List.sublistView(bytes, 0, 256), flush: true);
+      final sidecar = File('${part.path}.json');
+      sidecar.writeAsStringSync(
+        jsonEncode({
+          'assetId': 'asset-1',
+          'releaseId': 'rel-1',
+          'sha256': sha256.convert(bytes).toString(),
+          'sizeBytes': bytes.length,
+          'strongEtag': null,
+          'updatedAtMs': DateTime.now().millisecondsSinceEpoch,
+        }),
+        flush: true,
+      );
+
+      // 旧清理：取消路径进入 downloader 的删除闸（`ota_download.dart:1094-1101`
+      // `_deletePartial`），替身停在临界区内、删除体未执行。
+      gate.arm();
+      final cancelFuture = service.cancelUpgrade(keepPackage: true);
+      await gate.insideCritical.future;
+      expect(gate.bodiesRun, 1, reason: '旧清理是该桶第一个进入临界区的操作');
+
+      // 后来者：同一资产重新下载（真实 service owner 路径）。其首个同族
+      // 操作（作废旧残留 / 建 `.part` / 写 sidecar）必须经过同一把闸。
+      var successorDone = false;
+      Object? successorError;
+      final successor = service.downloadFirmware().then((ok) {
+        successorDone = true;
+        return ok;
+      }).catchError((Object e) {
+        successorError = e;
+        return false;
+      });
+
+      // 有界观察（1s）：持闸期间后来者不得进入同族临界区。
+      final beforeWindow = _dirSnapshot(tempDir);
+      final windowEnd = DateTime.now().add(const Duration(seconds: 1));
+      while (DateTime.now().isBefore(windowEnd) && !successorDone) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(gate.bodiesRun, 1,
+          reason: '持闸期间后来者的同族写入不得进入临界区；'
+              '闸调用=${gate.calls}；目录=${_dirSnapshot(tempDir)}；'
+              'phase=${service.phase}；status=${service.upgradeStatus}');
+      expect(_dirSnapshot(tempDir), beforeWindow,
+          reason: '持闸期间盘上不得出现同族变更；闸调用=${gate.calls}');
+      expect(successorDone, isFalse,
+          reason: '后来者的同族写入必须排队到旧清理退出临界区之后');
+      expect(part.lengthSync(), 256,
+          reason: '持闸期间后来者不得改写/删除同族 .part');
+
+      // 放行：旧清理退出临界区，后来者随后进入同一桶的临界区并完成下载。
+      gate.release.complete();
+      await cancelFuture;
+      expect(await successor.timeout(const Duration(seconds: 10)), isTrue,
+          reason: '排队必须有界：旧清理释放后后来者必须能继续完成下载；'
+              '后继错误=$successorError；闸调用=${gate.calls}');
+      expect(gate.bodiesRun, greaterThan(1),
+          reason: '后来者确实走同一把闸（否则上面的负向断言恒真）；'
+              '闸调用=${gate.calls}');
+      expect(gate.calls.length, greaterThan(1));
+      expect(gate.calls[1].split('#').first, gate.calls[0].split('#').first,
+          reason: '旧清理与后来者的临界区必须落在同一桶键（同资产文件族）；'
+              '闸调用=${gate.calls}');
+      expect(service.downloadedFirmwareFile, isNotNull);
+      expect(await service.downloadedFirmwareFile!.length(), bytes.length);
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('鉴别力对照：闸被旁路时「持闸期间同族写入必须排队」不再成立（RC3-02/04/05）',
+        () async {
+      // 上一条的对照：同一编排、同一观察点，只把闸换成不排队的旁路实现
+      // （模拟「把守卫挪出临界区 / 绕过串行闸」的伪修复）。上一条的负向
+      // 断言在本条下必须反过来成立——这是那条断言具备鉴别力的证据，而
+      // 不是编排本身造成的恒真。
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = _UpgradeFakeBle(
+        preRebootPayload: preRebootPayload,
+        postRebootPayload: postRebootPayload,
+      );
+      final downloadAdapter = _DownloadGatedAdapter(assetBytes());
+      final gate = _BypassGate();
+      final service = makeService(
+        ble: ble,
+        firmwareDir: tempDir,
+        notifyLog: notifyLog,
+        downloadAdapter: downloadAdapter,
+        downloadFileGate: gate,
+      );
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      expect(await service.downloadFirmware(), isTrue);
+      expect(await service.cleanupFirmware(), isTrue);
+
+      final bytes = assetBytes();
+      const partName = '$pkgName.part';
+      final part = File('${tempDir.path}${Platform.pathSeparator}$partName');
+      part.writeAsBytesSync(Uint8List.sublistView(bytes, 0, 256), flush: true);
+      final sidecar = File('${part.path}.json');
+      sidecar.writeAsStringSync(
+        jsonEncode({
+          'assetId': 'asset-1',
+          'releaseId': 'rel-1',
+          'sha256': sha256.convert(bytes).toString(),
+          'sizeBytes': bytes.length,
+          'strongEtag': null,
+          'updatedAtMs': DateTime.now().millisecondsSinceEpoch,
+        }),
+        flush: true,
+      );
+
+      gate.arm();
+      final cancelFuture = service.cancelUpgrade(keepPackage: true);
+      await gate.insideCritical.future;
+
+      var successorDone = false;
+      Object? successorError;
+      final successor = service.downloadFirmware().then((ok) {
+        successorDone = true;
+        return ok;
+      }).catchError((Object e) {
+        successorError = e;
+        return false;
+      });
+
+      // 与主用例同一观察：闸被旁路时旧清理仍停在临界区内（release 未放行），
+      // 后来者却已进入自己的临界区并完成下载。主用例对同一观察断言「不得
+      // 进入临界区 / 不得完成」——那条断言在本条下反转成立，即证明它不是
+      // 编排恒真，而是真的在测互斥。观察窗放宽到 5s 是为了避免把「后来者
+      // 本身较慢」误判成「被排队」。
+      final windowEnd = DateTime.now().add(const Duration(seconds: 5));
+      while (DateTime.now().isBefore(windowEnd) && !successorDone) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(gate.bodiesRun, greaterThan(1),
+          reason: '对照：闸被旁路时后来者的同族写入不再排队；'
+              '闸调用=${gate.calls}');
+      expect(successorDone, isTrue,
+          reason: '对照：闸被旁路时后来者无需等待旧清理放行即可完成；'
+              '闸调用=${gate.calls}；后继错误=$successorError；'
+              'phase=${service.phase}；status=${service.upgradeStatus}');
+      expect(service.downloadedFirmwareFile, isNotNull,
+          reason: '对照：旧清理仍在临界区内时后来者已落成完成包；'
+              '闸调用=${gate.calls}');
+
+      // 收尾不得死锁：放行后旧清理与后来者都能结束。
+      gate.release.complete();
+      await cancelFuture;
+      expect(await successor.timeout(const Duration(seconds: 10)), isTrue);
+      expect(successorDone, isTrue);
+    }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('后台恢复一级复核：链路代次变化 → DEVICE_LINK_CHANGED 可重试终止（RC3-08⑦）',
         () async {
@@ -1673,6 +1938,89 @@ class _TakeoverGate extends OtaFilePathGate {
   }
 }
 
+/// 临界区持闸替身（RC3-02/04/05 互斥鉴别）：在**已取得串行闸、删除体尚未
+/// 执行**之间插入一次编排窗口（与 [_TakeoverGate] 的关键差别：后者在调用
+/// `super.run` 之前挂起，挂起期间闸链为空，后来者的同族写入畅通无阻）。
+///
+/// [arm] 后，下一次进入该桶临界区的调用体先完成 [insideCritical] 并等
+/// [release]；期间本桶的其它调用会被 [OtaFilePathGate] 的 FIFO 挡在自己
+/// 的临界区外。用例据此断言「持闸期间后来者的同族写入不得进入临界区、
+/// 盘上不得出现同族变更」——这正是旧用例无法证明的删除过程互斥。
+///
+/// 编排窗口内的 body 仍是真实的删除体（`_deletePartial`：闸内复核归属 +
+/// 三删），因此窗口覆盖的是破坏性 IO 的临界区。
+class _HoldGate extends OtaFilePathGate {
+  bool _armed = false;
+
+  /// 进入该桶临界区的次数（[arm] 起算）：1 = 仅旧清理，>1 = 后来者已插入。
+  int bodiesRun = 0;
+
+  /// 旧清理已进入临界区（删除体未执行）。
+  final insideCritical = Completer<void>();
+
+  /// 用例放行旧清理执行删除体。
+  final release = Completer<void>();
+
+  /// 临界区调用序（诊断用）：`<桶尾>#hold` 或 `<桶尾>#run`。
+  final List<String> calls = <String>[];
+
+  void arm() {
+    _armed = true;
+    bodiesRun = 0;
+    calls.clear();
+  }
+
+  @override
+  Future<T> run<T>(String bucket, Future<T> Function() body) {
+    // 暂停点必须在 body 之内：调用方（`super.run`）已把本调用排到该桶的
+    // 队首并持有链尾，此刻后来者以同一桶键调用会被 FIFO 挡在临界区外。
+    return super.run(bucket, () {
+      bodiesRun++;
+      final held = _armed;
+      calls.add('${bucket.split(Platform.pathSeparator).last}'
+          '#${held ? 'hold' : 'run'}');
+      if (!held) return body();
+      _armed = false;
+      if (!insideCritical.isCompleted) insideCritical.complete();
+      return release.future.then((_) => body());
+    });
+  }
+}
+
+/// 闸旁路对照替身（RC3-02/04/05 鉴别力对照）：[run] 不排队直接执行 body，
+/// 模拟「把守卫挪出临界区 / 绕过串行闸」的伪修复。
+///
+/// 对照用例与 [_HoldGate] 用例共用同一编排与同一观察点，只换闸的实现：
+/// 主用例的负向断言（持闸期间后来者不得进入同族临界区）在本替身下必须
+/// 反过来成立，否则说明那条断言是编排恒真、而非真的在测互斥。
+class _BypassGate extends OtaFilePathGate {
+  bool _armed = false;
+  int bodiesRun = 0;
+  final insideCritical = Completer<void>();
+  final release = Completer<void>();
+  final List<String> calls = <String>[];
+
+  void arm() {
+    _armed = true;
+    bodiesRun = 0;
+    calls.clear();
+  }
+
+  @override
+  Future<T> run<T>(String bucket, Future<T> Function() body) {
+    // 与 [_HoldGate] 同一暂停点，但**不排队**：模拟「把守卫挪出临界区 /
+    // 绕过串行闸」的伪修复，用于证明主用例的负向断言不是编排恒真。
+    bodiesRun++;
+    final held = _armed;
+    calls.add('${bucket.split(Platform.pathSeparator).last}'
+        '#${held ? 'hold' : 'bypass'}');
+    if (!held) return body();
+    _armed = false;
+    if (!insideCritical.isCompleted) insideCritical.complete();
+    return release.future.then((_) => body());
+  }
+}
+
 /// 下载侧可闸适配器（RC3-04⑦）：正文首块交付后挂起，[entered] 完成
 /// 即证明下载已真实进入写盘阶段（`.part` 与 sidecar 已落盘），测试据此
 /// 在「取消窗口内新 owner 的同资产下载在途」时刻做后续编排。
@@ -1910,6 +2258,26 @@ class _UpgradeFakeBle extends BluetoothService {
   /// DATA 帧正处于多片写在途」的真实交错窗口。
   Duration? writeChunkDelay;
 
+  /// 在途 DATA 分片写观测（RC3-12②）：DATA 帧分片进入 native 写调用时
+  /// 完成（早于 [writeChunkDelay]），测试据此在「物理写确实在途」时发起
+  /// 取消，构造「用户取消 → 旧物理写随后以异常退出」的真实时序。
+  final Completer<void> dataWriteEntered = Completer<void>();
+
+  /// 原生写异常注入（RC3-12②）：非 null 时，DATA 帧分片的 native 写在
+  /// [writeChunkDelay] 结束后抛出该错误，**不做任何包装**——与
+  /// `_ChannelAdapter.writeChunk` 的 rethrow 语义一致（生产实现把平台
+  /// 异常原样上抛，仅顺带标记断连）。用于构造取消窗口内「在途写以原生
+  /// 异常退出」；WRITE_TIMEOUT 走同一 catch 分支，仅 code 不同。
+  Object? dataWriteError;
+
+  /// 分片是否属于 DATA 帧（chunk 头 3 字节即 sync0/sync1/cmd，MTU≥23
+  /// 时首片必含帧头）。
+  static bool _isDataChunk(List<int> data) =>
+      data.length >= 3 &&
+      data[0] == OtaBleCodec.frameSync0 &&
+      data[1] == OtaBleCodec.frameSync1 &&
+      data[2] == OtaBleCodec.cmdData;
+
   // ---- 测试注入：后台恢复复核与取消窗口（RC3-04⑦/08⑦）----
   /// 链路代次注入（RC3-08⑦ 一级复核）：resumeFromBackground 经
   /// BluetoothService.otaLinkGeneration 读取当前代次，fake 覆写为可变
@@ -2024,11 +2392,21 @@ class _UpgradeFakeBle extends BluetoothService {
     List<int> data, {
     bool writeWithResponse = false,
   }) async {
+    final isDataChunk = _isDataChunk(data);
+    if (isDataChunk && !dataWriteEntered.isCompleted) {
+      dataWriteEntered.complete();
+    }
     final delay = writeChunkDelay;
     if (delay != null) {
       // 慢速写：延迟期间数据未入 _feed——调用方（transport 的逐片
       // await 写序列）在写完成前不会发下一片，构造真实分片在途。
       await Future<void>.delayed(delay);
+    }
+    final writeError = dataWriteError;
+    if (writeError != null && isDataChunk) {
+      // 原生写异常（RC3-12②）：不包装、不喂帧，直接上抛——
+      // `_ChannelAdapter.writeChunk` 生产语义即 rethrow。
+      throw writeError;
     }
     // ABORT 物理写闸门（RC3-04⑦）：cancelUpgrade 停在
     // `await transport.abortBestEffort()` 时，ABORT 帧正处于本写调用
