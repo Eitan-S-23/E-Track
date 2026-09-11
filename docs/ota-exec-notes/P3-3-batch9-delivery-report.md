@@ -420,3 +420,29 @@ release 包，也不是独立验收证据；Windows 侧无 APK 任务，EXE 仍 
 - 未在共享工作树上使用 `git checkout/restore`；未做本地 Flutter/Gradle 构建；
   未用 PowerShell 执行构建类命令；全部写入均在项目根
   `D:\github\my\E-Track` 内（`.cache/p3-3-r2-ci-*`、本报告）。
+
+## 13. r2 复核第三项（观测计划）的处置状态：改为待批表，仍未执行
+
+r2 复核第三项 `RC3-07/02: The Observation Plan Remains An Unapproved Draft`（P2）
+**不是代码缺陷**，本轮按复核给出的六条要求把原草案重写为可执行、可批准的
+operations sheet：`P3-3-batch9-device-observation-sheet.md`（**待批**）。
+
+重写期间的只读源码核查得到三条**改变计划形态**的事实，均已写入该表：
+
+1. 原草案用 `DateTime.now().microsecondsSinceEpoch` 作判据时钟，与冻结契约
+   `OTA-XC-BLE-TUNING`（`docs/ota-cross-system-contracts.md:1037`「计时使用单调
+   高精度时钟」）冲突；改为进程内唯一 `Stopwatch` 单调计数器，判据只用其差值。
+2. 无进展锚点改为产品自身的预算时钟（`ota_ble_transport.dart:296/339/436/541`），
+   并明写「重复的相同 BEGIN／durable 不重置」，同时补上原草案漏掉的后台停表
+   （`:636/:644`）干扰口径。
+3. T2 所依赖的 MCU 侧 RTT 通道**在当前生产固件上不存在**：
+   `Libraries/OTA/ota_ble_frame.c`、`ota_ble_ring.c`、`ota_ble_session.c`
+   （共 1370 行）零输出调用；OTA 区域仅有的 RTT 打印全部在
+   `P2_1/P2_2/P2_3/P2_6_TEST_ENABLE` 自检宏内（生产构型不编译）。
+   按草案自身规则记 `ENV_BLOCKED`，不得用「RTT 没有错误行」推定通过。
+
+该表另列三个需用户裁定的决策点（T1b 可控外设选型、T2 是否另立 MCU 插桩卡、
+20×800ms 作为计划内部前提的确认）与总配额 3 轮。
+
+**本轮未执行任何设备操作**：无烧录、无安装、无 BLE 连接、无 logcat 采集、
+无 RTT；§12.8 的 NOT_RUN 清单因此保持不变。
