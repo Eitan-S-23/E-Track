@@ -1100,7 +1100,7 @@ void main() {
       expect(service.phase, OtaPhase.cancelled);
       expect(service.upgradeStatus, '操作已取消');
       expect(service.downloadedFirmwareFile, isNull);
-      expect(await pkgFile.exists(), isFalse);
+      expect(await pkgFile!.exists(), isFalse);
     }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('取消窗口内同资产重下：旧取消不得拔掉后来者的下载（RC3-04⑦）',
