@@ -265,3 +265,158 @@ blob `06dcbd36…`），用于排除 `build` 与平台目录；`result.json` 的
 - 未在共享工作树上使用 `git checkout/restore`；未做本地 Flutter/Gradle 构建；
   未用 PowerShell 执行构建类命令；未做 Python 字节手术（本批编辑一律走
   Edit/apply_patch 等价工具）。
+
+## 12. 追加轮：r2 复核 RC3-07 / RC3-08/12 关闭（2026-09-11 晚场）
+
+本节接续 §1 的「实现最终 SHA」`526267e`，记录第二轮独立复核
+（`.cache/p3-3-review-batch9-r2-20260911/review.md`）中两项**代码发现**的关闭
+过程与证据。该复核第三项「真机观测计划仍未获批」（P2）**不在本节关闭范围**，
+见 §13。
+
+### 12.1 提交链（526267e → 7ca1929，5 个提交）
+
+```text
+f6e3462  docs  第九批交付报告——范围/提交链/双宿主回归/RC3 全量处置表
+40e503d  fix   集中整改——隔离解除围栏/取消期发布让出/持锁互斥用例
+b29954c  fix   CI 红修复——可空接收者/迟到片字节下界/异常类型判据
+e512515  fix   RC3-07/08/12 整改——恢复探测端到端截止与 failClosed 迟到错误围栏
+7ca1929  fix   RC3-07 黑洞用例——fake 分片归属按自身同步字判定
+```
+
+`git diff --stat 526267e..7ca1929`：6 个文件，**+1494 / −113**
+（`ota_ble_transport.dart` 365、`ota_service.dart` 88、
+`ota_ble_transport_test.dart` 327、`ota_service_upgrade_test.dart` 427、
+本报告 267、`P3-3-batch9-rc3-07-settle-bound.md` 133）。逐文件增删行数与真实
+编辑量一致，无整文件行尾翻转型伪变更。
+
+远端映射（`git ls-remote --heads origin dev/flutter/apk/p3-3-batch6`）：
+
+```text
+7ca19297d051ad22856a9aec5339399ff9e49bb6  refs/heads/dev/flutter/apk/p3-3-batch6
+```
+
+本地 HEAD、远端分支、本轮 CI 的 `source_before.head` 三者一致。**未**推送
+main/master/tag，**未**强制推送，**未**合并，**未**触发生产构建/发布工作流。
+
+### 12.2 RC3-07：恢复探测的端到端截止（`e512515`）
+
+§8 计划面要求的「终止发布不得晚于恢复预算截止」，此前只覆盖探针循环入口与
+应答等待；写分片等待（`writeTimeout` 10 s）与写后结算宽限（2 × `writeTimeout`）
+落在探针之外，可把终止推迟到预算 16 s 之外（最坏 10 s + 20 s 量级的无界第三段）。
+
+- 探针入口建立单一单调时钟与预算（`_recoveryClock` / `_recoveryBudget`，
+  剩余量 `_recoveryLeft`），写分片、写后结算、应答等待三处统一经 `_capByBudget`
+  取 `min(本段上限, _hardDeadlineLeft)`，其中
+  `_hardDeadlineLeft = min(_noProgressLeft, _recoveryLeft)`。
+- 到期后**同步**清探针登记（zero-guard），停止后续探测；隔离状态**不**因到期
+  解除——解除仍须由本实例探针收到 `session=0` 且 `seq` 匹配的 INFO 证据。
+- 迟到的物理写仍被安全跟踪：在途写未结算时 `_awaitDeviceWritesIdle(0)` 抛
+  `TIMEOUT`，`getDeviceInfo` 以 `OtaTransportException(code: 'TIMEOUT')` 退出，
+  不把在途字节当作已证据化。**未降低任何门槛**（30 s / 10 s / 2×`writeTimeout`
+  / 20 探针 × 800 ms 全部不变）。
+
+### 12.3 RC3-08/12：failClosed 已决终止的迟到错误围栏（`e512515`）
+
+`ota_service.dart` 新增 `_failClosedDecided`（`startOtaUpgrade` 复位、`failClosed()`
+发布终止态前置位），三处 catch 在链路代次校验后经 `_consumeFailClosedDecision()`
+消费：已决时不再以通用失败文案覆盖 `terminalState` / `retryableLater` /
+`upgradeStatus`，也不把相位打回 `failed`。
+
+### 12.4 真实失败链（保留，不掩饰）
+
+| run | 提交 | 结论 | 真实原因（原始日志） |
+| --- | --- | --- | --- |
+| 34571974895 | `40e503d` | 双宿主 failure | Linux `analyze` exit 1；测试文件编译失败（可空 `File.exists`）；`tests` `+251 ~7` 含 2 条 transport 断言失败（20 与 30 字节、期望传输异常实为注入的 `StateError`）。Windows `analyze` exit 1、`tests` `+258` 同 3 项失败 |
+| 34573026537 | `b29954c` | 双宿主 success | 上述 3 项修复生效 |
+| **34587263364** | **`e512515`** | 双宿主 failure | 两宿主 `analyze` 均 `No issues found!`；`tests` **仅一条**失败：`恢复探针写卡死…（RC3-07 黑洞）`，`Expected: <122> / Actual: <0>`（Linux `00:58 +223 -1`，终局 `01:32 +288 ~7 -1`；Windows `00:38 +106 -1`，终局 `01:33 +295 -1`）。Linux 检查未过 → APK 链 8 条命令全部 `NOT_RUN`，未产出 APK |
+| **34588728713** | **`7ca1929`** | **双宿主 success** | 见 §12.5 |
+
+红灯根因在**测试替身**，不在产品源码，且**未**改断言、**未**弱化注入：
+
+- `_McuSim._chunkFrameCmd` 已按「chunk 首字节是否为同步字」区分首片/续片，但对
+  **首片**仍先拼上悬空的 `_pending`（122 B 的 DATA 半帧）前缀，于是 GET_INFO
+  探针首片被归类为 `cmdData`，`hangControlCmd: cmdGetInfo` 的卡死注入连续两次
+  落空。
+- 落空的两次探针各写 10 B 进 `_pending`，恰好把 142 B 的 DATA 帧补满并被消费，
+  `_pending` 归零，第三次探针才真正卡死——末态因此是 `pendingByteCount == 0`，
+  与真实链路语义（探针写卡死在传输层、字节根本到不了 MCU、悬空 122 B 恒在）
+  不符。
+- 修复（`7ca1929`）：chunk 自身以同步字开头即**新帧首片**，直接读自身帧头；
+  只有续片（不以同步字开头）才拼接 `_pending` 恢复所属帧。修复不改变 DATA
+  分片注入与续片归类行为（既有注入用例仍全绿）。
+
+### 12.5 最终 SHA 双宿主回归（run 34588728713）
+
+| 项 | Linux | Windows |
+| --- | --- | --- |
+| run URL | `https://github.com/Eitan-S-23/E-Track/actions/runs/34588728713` | 同（job 级） |
+| 事件 / attempt | push / 1 | push / 1 |
+| 结论 | success | success |
+| `development_result` | PASS | PASS |
+| `scope` | `all` | `all` |
+| `apk_requested` / `apk_result` | true / **PASS** | false / `NOT_REQUESTED` |
+| `source_before.head` | `7ca19297d0…`（clean=true） | `7ca19297d0…`（clean=true） |
+| `lock_sha256_before/after` | `95ba3703…` / 同（未变） | `ed54e102…` / 同（未变） |
+| 命令条数/退出码 | 13 条全 `PASS`、exit 0 | 5 条全 `PASS`、exit 0 |
+| `analyze` | `No issues found!`（15.2 s） | `No issues found!`（11.8 s） |
+| `tests` | `+289 ~7: All tests passed!` | `+296: All tests passed!` |
+
+三个新用例在两宿主逐条可见（Linux 展开计数）：
+
+```text
+00:21 +152  ota_service_upgrade_test.dart: failClosed 已决终止不被迟到在途写原生错误覆盖…
+00:43 +223  ota_ble_transport_test.dart:   恢复探针写卡死…（RC3-07 黑洞）
+00:59 +224  ota_ble_transport_test.dart:   探针写完成但 INFO 迟到于恢复预算…（RC3-07 迟应答）
+```
+
+Ubuntu job 墙钟 10:20:30 → 10:32:46（736 s）；Windows job 10:20:30 → 10:23:50
+（200 s，无 APK 任务）。原始日志本轮已下载进
+`.cache/p3-3-r2-ci-34588728713/{flutter-dev-ubuntu-latest,flutter-dev-windows-2022}-*`
+（各含 `result.json` + `logs/*.log`），红轮原始日志保留在
+`.cache/p3-3-r2-ci-34587263364/`。两侧均在项目根内，无项目外写入。
+
+### 12.6 debug APK（run 34588728713，Linux）
+
+| 项 | 值 |
+| --- | --- |
+| 产物名 | `flutter-dev-debug-apk-7ca19297d051ad22856a9aec5339399ff9e49bb6-34588728713-1` |
+| 文件 / 大小 | `trace-dev-debug.apk` / 131 485 342 字节 |
+| SHA-256 | `5c38ad11b5d4373906b36e0f4c0ddd9a031fda8755aefa17b6470289d82e4f05` |
+| `release_signing` / `formal_acceptance` | false / `NOT_RUN` |
+| 签名校验 | `apksigner verify --verbose` exit 0；v1 false、**v2 true**、v3/v3.1/v4 false、SourceStamp false、`Number of signers: 1` |
+
+来源为 `logs/apk_collect.log` 的产物 JSON（`artifact_kind:
+development-debug-apk`、`commit: 7ca19297d0…`）。仍是**开发自测产物**，不是
+release 包，也不是独立验收证据；Windows 侧无 APK 任务，EXE 仍 `NOT_RUN`。
+
+### 12.7 处置表增量（覆盖 §6 中 RC3-07/08/12 三行）
+
+| 原 ID | 本轮实际修改 | 本次证据 | 源码处置状态 | 运行验证状态 | 剩余缺口 |
+| --- | --- | --- | --- | --- | --- |
+| RC3-07 | 探针预算升级为**端到端**：写分片、写后结算、应答等待全部经 `_capByBudget` 封顶；到期同步退休且不解除隔离；新增黑洞/迟应答两条鉴别用例 | `run-34587263364` 真实红灯（黑洞用例暴露替身缺陷）→ `7ca1929` 修复 → `run-34588728713` 双宿主绿 | **已修复（端到端）** | 注入时长用例 **EXECUTED PASS（双宿主）**；真机 bound **NOT_RUN** | 真机 GATT 写黑洞下的终止发布时刻与 native 层是否真的取消物理写（§13 相关项 1/7） |
+| RC3-08 | `_failClosedDecided` 围栏：三处 catch 在代次校验后消费已决结论，迟到非 CANCELLED 错误不再覆盖 reason/retryability/closing 状态 | 新增用例 `ota_service_upgrade_test.dart:1605` 双宿主通过；Linux `+152` | **已修复** | **EXECUTED PASS（双宿主）** | 真实重连下 watcher 保留的物理观测 **NOT_RUN** |
+| RC3-12 | 与 RC3-08 同一围栏：已决终止的文案/相位不被迟到错误回跳 | 同上（同一用例同时断言 `terminalState.code`、`retryableLater`、`phase`、`upgradeStatus`、通知日志） | **已修复** | **EXECUTED PASS（双宿主）** | 无新增缺口；取消窗口文案的真机观测并入 §13 |
+
+§6 其余各行（RC3-01～06、09～11）本轮**未触碰**，其处置状态与剩余缺口保持
+原样；本轮未新增或回退任何此前接受的修复。
+
+### 12.8 NOT_RUN 清单（本轮不变）
+
+`flutter analyze`、`flutter test`（`all` 档位）、`flutter pub get --enforce-lockfile`、
+`flutter build apk --debug`、`apksigner verify` 已在 CI 实跑；以下仍 **NOT_RUN**：
+
+- 真机 BLE GATT 写黑洞观测（终止发布时刻、native 写是否真被取消、迟到片交错）；
+- release APK / Windows EXE；真机安装、卸载旧版、清数据；
+- MCU 侧真机 RTT 复现；物理 BLE 与平台生命周期测量。
+
+本报告仍**不**主张任何独立验收结论，`formal_acceptance` 全程 `NOT_RUN`。
+
+### 12.9 本轮工作树与输出审计
+
+- 起始与结束的 `git status --short` 完全一致：**8 个既有 tracked 修改**与
+  **21 项未跟踪条目**原样保留，全部未暂存、未提交、未改动。
+- 本轮提交只显式暂存本任务文件（源码 2 + 用例 2 + 笔记 1 + 报告 1 及中间批次），
+  无夹带、无治理改动、无覆盖原认领人内容。
+- 未在共享工作树上使用 `git checkout/restore`；未做本地 Flutter/Gradle 构建；
+  未用 PowerShell 执行构建类命令；全部写入均在项目根
+  `D:\github\my\E-Track` 内（`.cache/p3-3-r2-ci-*`、本报告）。
