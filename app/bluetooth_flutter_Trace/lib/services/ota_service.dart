@@ -194,6 +194,15 @@ class OtaService extends GetxController {
   int? _boundLinkGeneration;
   /// 取消代次：cancelUpgrade 递增；在途操作发现代次变化即静默退出。
   int _cancelGeneration = 0;
+  /// 后台复核 failClosed 已决定终止（RC3-08/12②）：failClosed 发布终止态
+  /// 时**不**前进取消代次——它终止的是「当前正在进行」的传输，不构成用户
+  /// 取消语义（取消路径的代次递增 + 资产清理由 cancelUpgrade 承担）。因此
+  /// 仅靠 `generation == _cancelGeneration` 无法区分「本 owner 正常在途」与
+  /// 「本 owner 已被 failClosed 决定终止」。在途物理写随后以 WRITE_TIMEOUT/
+  /// 原生异常退出时，三个 catch 分支必须消费本标记并静默让出，否则会用
+  /// 通用失败文案 + failed phase 覆盖 failClosed 已发布的终止原因/可重试
+  /// 语义/收尾相位（cancelled）。
+  bool _failClosedDecided = false;
   /// 当前 owner 的完成信号（RC3-04）：非 null 表示有升级族操作在途。
   /// cancelUpgrade 等待它确认旧 owner 完全退出（含 finally）后才解锁，
   /// 防止新入口在旧 owner 尚未退出时进入造成并发发布/transport 撕裂。
@@ -796,6 +805,9 @@ class OtaService extends GetxController {
       return false;
     }
     return await _runExclusive((generation) async {
+      // 每轮升级重置 failClosed 决策（RC3-08/12②）：上个 owner 未被消费的
+      // 残留决策不得沿用到新一轮传输的 catch。
+      _failClosedDecided = false;
       _terminalState.value = null;
       _durableProgress.value = 0.0;
       _phase.value = OtaPhase.transferring;
@@ -976,6 +988,14 @@ class OtaService extends GetxController {
           // transport 做过尽力 ABORT。
           return false;
         }
+        if (_consumeFailClosedDecision()) {
+          // 后台复核 failClosed 已决定终止（RC3-08/12②）：终止态发布时不
+          // 前进代次，在途写在它之后以 WRITE_TIMEOUT/原生异常退出同样落在
+          // 本分支。终止原因/可重试语义/收尾相位（cancelled）归属
+          // failClosed 已发布的 [_terminalState]/[_upgradeStatus]，这里静默
+          // 让出，也不重复 ABORT——failClosed 已尽力 ABORT 过。
+          return false;
+        }
         if (e.code != 'CANCELLED') {
           _upgradeStatus.value = 'BLE 传输失败: ${e.message}';
           // 连接仍在时尽力 ABORT（清理 MCU 侧会话）。
@@ -1009,6 +1029,11 @@ class OtaService extends GetxController {
           // 会一直挂在 phase=cancelled 旁边，UI 展示自相矛盾的终止原因。
           return false;
         }
+        if (_consumeFailClosedDecision()) {
+          // 同 typed catch（RC3-08/12②）：failClosed 已决终止不得被迟到的
+          // 身份异常覆盖成 DEVICE_IDENTITY_* + failed。
+          return false;
+        }
         _terminalState.value = OtaTerminalState(
           code: e.code,
           message: e.toString(),
@@ -1022,12 +1047,30 @@ class OtaService extends GetxController {
           // 取消引发的在途写异常会走这一支，发布职责归属 cancelUpgrade。
           return false;
         }
+        if (_consumeFailClosedDecision()) {
+          // 同 typed catch（RC3-08/12②）：failClosed 之后在途写以原生异常
+          // 退出走这一支，不得覆盖 failClosed 已发布的终止态。
+          return false;
+        }
         _upgradeStatus.value = '升级失败: $e';
         await activeTransport?.abortBestEffort();
         _phase.value = OtaPhase.failed;
         return false;
       }
     }) ?? false;
+  }
+
+  /// 消费一次 failClosed 已决终止（RC3-08/12②）。代次未变但在途写在
+  /// failClosed 之后以非 CANCELLED 错误退出时，三个 catch 分支都必须
+  /// 认出这是「已决终止的收尾」而非新的升级失败：终止原因/可重试语义
+  /// 已由 failClosed 发布到 [_terminalState]/[_upgradeStatus]，收尾相位
+  /// 统一为 cancelled（与 CANCELLED 分支一致——已验证包仍在本地、UI 据此
+  /// 保留重试续传入口）。返回 true 表示调用方应静默让出。
+  bool _consumeFailClosedDecision() {
+    if (!_failClosedDecided) return false;
+    _failClosedDecided = false;
+    _phase.value = OtaPhase.cancelled;
+    return true;
   }
 
   /// 取消升级（分层归责，PR08；RC3-04/05① 收紧）：
@@ -1208,6 +1251,10 @@ class OtaService extends GetxController {
     Future<void> failClosed(String code, String message,
         {bool retryableLater = false}) async {
       if (stale()) return;
+      // 记录「终止已决」供本 owner 的 catch 消费（RC3-08/12②）：failClosed
+      // 不前进代次，在途写随后以非 CANCELLED 错误退出时必须认出这是已决
+      // 终止的收尾，而不是新的升级失败。
+      _failClosedDecided = true;
       _terminalState.value = OtaTerminalState(
         code: code,
         message: message,

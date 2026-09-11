@@ -134,76 +134,108 @@ class OtaBleTransport {
     final probeBudget = resyncProbeTimeout * maxResyncProbes;
     final budget = timeout > probeBudget ? timeout : probeBudget;
     final clock = Stopwatch()..start();
-    Duration remaining() {
-      final left = budget - clock.elapsed;
-      return left.isNegative ? Duration.zero : left;
-    }
+    // RC3-07：探针预算作为本实例的恢复期公共截止挂到 [_capByBudget]，
+    // 写分片/settle/应答等待因此全部被它封顶（见 _roundTrip 的应答等待
+    // 封顶），不再出现「写 10s + 宽限 20s」超出探针预算的第三段等待。
+    // finally 在退出时清除时钟；若退出时隔离仍未解除，本实例的探针登记
+    // 一并作废——迟到的 INFO 应答不得在恢复事务已经终止之后仍解除设备
+    // 隔离（否则预算超限的恢复会以「隔离开关被晚到帧偷偷打开」收场）。
+    _recoveryClock = clock;
+    _recoveryBudget = budget;
+    try {
+      Duration remaining() {
+        final left = budget - clock.elapsed;
+        return left.isNegative ? Duration.zero : left;
+      }
 
-    while (true) {
-      _checkUsable();
-      final poisoned = _writeChannelPoisoned;
-      if (poisoned && remaining() == Duration.zero) {
-        throw const OtaTransportException(
-            '写通道废弃：探针总时限内未取得重新同步证据（cmd=0x1）',
-            code: 'TIMEOUT');
-      }
-      // 会话外查询取号（RC3-08⑦）：不消耗会话 seq 空间，见 _nextQuerySeq。
-      final seq = _nextQuerySeq();
-      final frame = OtaBleCodec.encodeCommand(
-        cmd: OtaBleCodec.cmdGetInfo,
-        session: 0,
-        seq: seq,
-      );
-      // INFO 应答：session=0、seq 回显请求 seq（§5.6）。
-      // late：下面的 catch 只会 rethrow 或 continue，赋值失败路径不会落到读取。
-      late final Uint8List payload;
-      try {
-        payload = await _roundTrip(
-          frame,
-          OtaBleCodec.rspInfo,
-          session: 0,
-          seq: seq,
-          timeout: poisoned
-              ? (resyncProbeTimeout < remaining()
-                  ? resyncProbeTimeout
-                  : remaining())
-              : timeout,
-          resyncProbeSeq: seq,
-        );
-      } on OtaTransportException catch (e) {
-        // 只有废弃态才把超时解释为「探针被悬空帧吞掉」：此时本探针是
-        // 把悬空帧吃满、逼解析器自复位的唯一手段，重试才算进展。正常
-        // 链路超时照旧上抛，不改变既有语义。
-        if (!poisoned ||
-            e.code != 'TIMEOUT' ||
-            ++probes >= maxResyncProbes) {
-          rethrow;
-        }
-        // 重试前先等设备上的旧物理写结算（RC3-05⑤）：只要它们还在途，
-        // 下一个探针即使被解析也不能作为解除证据（见
-        // [_resyncProbeAuthoritative]），先等它们落地再取证才有意义。
-        await _awaitDeviceWritesIdle(remaining());
-        continue;
-      }
-      if (poisoned && _writeChannelPoisoned) {
-        // 应答到了、废弃却没解除：本探针发出时仍有在途旧物理写（或其间
-        // 发生了重新废弃），其 INFO 不构成重新同步证据。不能把 payload
-        // 当成功返回——上层据此认为链路可信，而迟到的旧分片随后仍会污染
-        // 新会话。等旧写结算后用**新的**探针重新取证。
-        if (++probes >= maxResyncProbes) {
+      while (true) {
+        _checkUsable();
+        final poisoned = _writeChannelPoisoned;
+        if (poisoned && remaining() == Duration.zero) {
           throw const OtaTransportException(
-              '写通道废弃：探针预算耗尽仍未在无在途旧写时取得重新同步证据',
+              '写通道废弃：探针总时限内未取得重新同步证据（cmd=0x1）',
               code: 'TIMEOUT');
         }
-        await _awaitDeviceWritesIdle(remaining());
-        continue;
-      }
-      try {
-        return DeviceOtaInfo.fromInfoPayload(payload);
-      } on OtaDeviceIdentityException catch (e) {
-        if (e.code != 'MALFORMED_INFO' || ++attempts > retries) {
-          rethrow;
+        // 会话外查询取号（RC3-08⑦）：不消耗会话 seq 空间，见 _nextQuerySeq。
+        final seq = _nextQuerySeq();
+        final frame = OtaBleCodec.encodeCommand(
+          cmd: OtaBleCodec.cmdGetInfo,
+          session: 0,
+          seq: seq,
+        );
+        // INFO 应答：session=0、seq 回显请求 seq（§5.6）。
+        // late：下面的 catch 只会 rethrow 或 continue，赋值失败路径不会落到读取。
+        late final Uint8List payload;
+        try {
+          payload = await _roundTrip(
+            frame,
+            OtaBleCodec.rspInfo,
+            session: 0,
+            seq: seq,
+            timeout: poisoned
+                ? (resyncProbeTimeout < remaining()
+                    ? resyncProbeTimeout
+                    : remaining())
+                : timeout,
+            resyncProbeSeq: seq,
+          );
+        } on OtaTransportException catch (e) {
+          // 只有废弃态才把超时解释为「探针被悬空帧吞掉」：此时本探针是
+          // 把悬空帧吃满、逼解析器自复位的唯一手段，重试才算进展。正常
+          // 链路超时照旧上抛，不改变既有语义。
+          // RC3-07：恢复期内写分片已被探针预算封顶，WRITE_TIMEOUT 只会在
+          // 预算接近耗尽或悬空帧吞探针时出现——与 TIMEOUT 同属「探针未
+          // 取得证据」的预算事件，继续重试（投递字节逼解析器复位）或
+          // 终止由剩余预算/次数决定，不当成新的升级失败上抛。
+          if (!poisoned ||
+              (e.code != 'TIMEOUT' && e.code != 'WRITE_TIMEOUT') ||
+              ++probes >= maxResyncProbes) {
+            rethrow;
+          }
+          // 重试前先等设备上的旧物理写结算（RC3-05⑤）：只要它们还在途，
+          // 下一个探针即使被解析也不能作为解除证据（见
+          // [_resyncProbeAuthoritative]），先等它们落地再取证才有意义。
+          // remaining() 此刻可能已为 0：预算耗尽时 idle 等待立即抛 TIMEOUT，
+          // 恢复事务在此退休，不再发起后续探针。
+          if (remaining() == Duration.zero) {
+            // 预算已耗尽，恢复事务在此退休（RC3-07）：同步作废探针登记，
+            // 避免下面 idle 等待的微任务边界内晚到的 INFO 应答抢先解除
+            // 设备隔离（应答已不可能在预算内到来，不得再被它当作证据）。
+            _resyncProbeSeq = null;
+            _resyncProbeAuthoritative = false;
+          }
+          await _awaitDeviceWritesIdle(remaining());
+          continue;
         }
+        if (poisoned && _writeChannelPoisoned) {
+          // 应答到了、废弃却没解除：本探针发出时仍有在途旧物理写（或其间
+          // 发生了重新废弃），其 INFO 不构成重新同步证据。不能把 payload
+          // 当成功返回——上层据此认为链路可信，而迟到的旧分片随后仍会污染
+          // 新会话。等旧写结算后用**新的**探针重新取证。
+          if (++probes >= maxResyncProbes) {
+            throw const OtaTransportException(
+                '写通道废弃：探针预算耗尽仍未在无在途旧写时取得重新同步证据',
+                code: 'TIMEOUT');
+          }
+          await _awaitDeviceWritesIdle(remaining());
+          continue;
+        }
+        try {
+          return DeviceOtaInfo.fromInfoPayload(payload);
+        } on OtaDeviceIdentityException catch (e) {
+          if (e.code != 'MALFORMED_INFO' || ++attempts > retries) {
+            rethrow;
+          }
+        }
+      }
+    } finally {
+      _recoveryClock = null;
+      if (_writeChannelPoisoned && _resyncProbeSeq != null) {
+        // 恢复事务退休（RC3-07）：本实例不再持有这条恢复事务。budget 用尽
+        // 抛错、MALFORMED_INFO 重试耗尽、调用方取消/释放等所有退出路径上，
+        // 只要设备隔离尚未解除，迟到该探针的 INFO 应答都不再有权开隔离门。
+        _resyncProbeSeq = null;
+        _resyncProbeAuthoritative = false;
       }
     }
   }
@@ -856,7 +888,10 @@ class OtaBleTransport {
     try {
       await _writeFrame(frame, resyncProbeSeq: resyncProbeSeq);
       final resp = await waiter.future.timeout(
-        timeout,
+        // RC3-07：用写完后的当前剩余硬截止封顶应答等待——写分片/结算已
+        // 消耗的部分计入同一恢复预算，应答不得另起一段超出截止的等待
+        // （否则「探针写完近截止、INFO 迟到」仍会以预算外时长返回成功）。
+        _capByBudget(timeout),
         onTimeout: () => throw OtaTransportException(
             '等待响应超时 (cmd=0x${expectedRsp.toRadixString(16)})',
             code: 'TIMEOUT'),
@@ -899,9 +934,37 @@ class OtaBleTransport {
     }
   }
 
-  /// 用剩余预算封顶单次等待超时。
+  /// 恢复探针端到端预算时钟（RC3-07）：仅 [getDeviceInfo] 期间非空。单调
+  /// 绝对截止，覆盖排队/写分片/结算宽限/旧写等待/应答等待全部等待点——
+  /// 恢复期内写分片与 settle 宽限经 [_capByBudget] 用同一剩余预算封顶，
+  /// 不再出现「写 10s + 宽限 20s」超出探针预算（16s）的第三段等待。
+  Stopwatch? _recoveryClock;
+
+  /// 恢复探针预算（[getDeviceInfo] 内取 max(timeout, probeBudget)）。
+  Duration _recoveryBudget = Duration.zero;
+
+  /// 剩余恢复预算；null 表示不在恢复期（不限）。
+  Duration? get _recoveryLeft {
+    final clock = _recoveryClock;
+    if (clock == null) return null;
+    final left = _recoveryBudget - clock.elapsed;
+    return left.isNegative ? Duration.zero : left;
+  }
+
+  /// 硬截止剩余 = min(传输无进展预算, 恢复探针预算)。两个预算互斥（传输期
+  /// 无恢复、恢复期无传输），但 min 语义让「transfer 暂停期重查」的
+  /// getDeviceInfo（resumeFromBackground 路径）也拿到两者中更紧的公共上界。
+  Duration? get _hardDeadlineLeft {
+    final t = _noProgressLeft;
+    final r = _recoveryLeft;
+    if (t == null) return r;
+    if (r == null) return t;
+    return t < r ? t : r;
+  }
+
+  /// 用剩余硬截止封顶单次等待超时。
   Duration _capByBudget(Duration timeout) {
-    final left = _noProgressLeft;
+    final left = _hardDeadlineLeft;
     if (left == null) return timeout;
     return left < timeout ? left : timeout;
   }

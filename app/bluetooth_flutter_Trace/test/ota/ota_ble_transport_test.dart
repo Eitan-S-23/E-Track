@@ -1998,6 +1998,120 @@ void main() {
       await rebound.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    test('恢复探针写卡死：端到端预算封顶写/结算等待，到期退休且不解除隔离'
+        '（RC3-07 黑洞）', () async {
+      final package = packageBytes(4096);
+      // 悬空半帧 122B（同「迟到写」用例）：隔离成立。此后 GET_INFO 探针
+      // 写被永久卡死（hangControlCmd=cmdGetInfo）。旧实现里探针预算只管
+      // 循环入口/应答等待，写分片与结算宽限是「探针之外的无界第三段等待」
+      // （写 10s + 结算 20s，终止迟到预算之外）；RC3-07 修复后写分片
+      // （_capByBudget(writeTimeout)）与结算宽限（_capByBudget(2×timeout)）
+      // 都被探针预算（16s）封顶，终止发布不得晚于预算截止。
+      final mcu = _McuSim()
+        ..mtu = 125
+        ..failAtDataChunk = 2
+        ..hangControlCmd = OtaBleCodec.cmdGetInfo;
+      final first = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      try {
+        await first.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } catch (_) {
+        // 判据是后续恢复探针的行为，注入的底层写错误类型不作为判据。
+      }
+      await first.dispose();
+      expect(mcu.pendingByteCount, 122);
+
+      final stopwatch = Stopwatch()..start();
+      final rebound = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      await expectLater(
+        rebound.getDeviceInfo(),
+        throwsA(
+          isA<OtaTransportException>()
+              .having((e) => e.code, 'code', 'TIMEOUT'),
+        ),
+      );
+      stopwatch.stop();
+      expect(
+        stopwatch.elapsed,
+        greaterThanOrEqualTo(const Duration(seconds: 15)),
+        reason: '写卡死必须消耗完整探针预算（16s）才退休，不得提前放弃；'
+            '实测 ${stopwatch.elapsed.inMilliseconds}ms',
+      );
+      expect(
+        stopwatch.elapsed,
+        lessThan(const Duration(seconds: 19)),
+        reason: '终止发布不得拖到「写 10s + 结算 20s」之外的第三段等待；'
+            '实测 ${stopwatch.elapsed.inMilliseconds}ms',
+      );
+      // 到期退休：仍无重新同步证据，隔离保持——业务帧继续被拒。
+      await _expectBusinessWriteRefused(rebound, '探针写卡死、恢复到期退休后');
+      // 卡死的探针写仍在设备账本在途：idle 等待超时正是「继续跟踪迟到
+      // 物理写、不假装恢复」的体现。被拒的帧不得落下任何字节。
+      expect(mcu.pendingByteCount, 122,
+          reason: '探针写从未落地，被拒的帧不得落下字节');
+      await rebound.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('探针写完成但 INFO 迟到于恢复预算：到期退休后迟到 INFO 不解除隔离'
+        '（RC3-07 迟应答）', () async {
+      final package = packageBytes(4096);
+      // 隔离成立（悬空 122B）。探针写能完成，但 INFO 应答被延迟
+      // （infoResponseDelay=5s）——每个探针的应答等待（≤800ms）都在
+      // INFO 到达前超时，恢复进程按预算重试、最终到期退休。旧实现在
+      // 「预算耗尽后的某次探针写完成 + INFO 迟到」时可能把迟到 INFO 当
+      // 解除证据放行；RC3-07 的响应等待封顶 + 退休作废探针登记确保迟到
+      // INFO 无权解除隔离。
+      final mcu = _McuSim()
+        ..mtu = 125
+        ..failAtDataChunk = 2
+        ..infoResponseDelay = const Duration(seconds: 5);
+      final first = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      try {
+        await first.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        );
+        fail('应中止');
+      } catch (_) {
+        // 同上：判据是后续恢复探针的行为。
+      }
+      await first.dispose();
+      expect(mcu.pendingByteCount, 122);
+
+      final stopwatch = Stopwatch()..start();
+      final rebound = OtaBleTransport(channel: _ReboundWrapper(mcu));
+      await expectLater(
+        rebound.getDeviceInfo(),
+        throwsA(
+          isA<OtaTransportException>()
+              .having((e) => e.code, 'code', 'TIMEOUT'),
+        ),
+      );
+      stopwatch.stop();
+      expect(
+        stopwatch.elapsed,
+        greaterThanOrEqualTo(const Duration(seconds: 15)),
+        reason: '迟应答同样必须消耗完整探针预算才退休；'
+            '实测 ${stopwatch.elapsed.inMilliseconds}ms',
+      );
+      expect(
+        stopwatch.elapsed,
+        lessThan(const Duration(seconds: 19)),
+        reason: '迟到应答不得把恢复拖延到预算之外；'
+            '实测 ${stopwatch.elapsed.inMilliseconds}ms',
+      );
+      // 恢复事务已退休。等迟到 INFO 投递窗口过完（最后一次探针写 +5s
+      // 之后），迟到的应答仍不得解除隔离——业务帧继续被拒。
+      await Future<void>.delayed(const Duration(seconds: 6));
+      await _expectBusinessWriteRefused(rebound, '迟到 INFO 投递后恢复已退休');
+      await rebound.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
     test('后台暂停/恢复：发窗在帧边界挂起，恢复后传输完成（RC3-08）',
         () async {
       final package = packageBytes(4096);
@@ -2402,6 +2516,18 @@ abstract class _FakeMcuHost implements OtaBleChannel {
         await Future<void>.delayed(writeChunkDelay);
       }
       writeTimeline.add('done#$dataChunkWrites');
+    } else {
+      // 控制帧（GET_INFO/BEGIN/END/ABORT）分片：慢写/卡死注入只按帧 cmd
+      // 生效（[hangControlCmd]），默认不延迟不注错（RC3-07⑤：BEGIN 若
+      // 延迟，小 MTU 下其自身分片会先吃掉预算，测不到「探针写卡死/慢写
+      // 超预算」的目标路径）。
+      controlChunkWrites++;
+      if (hangControlCmd != null && _chunkFrameCmd(chunk) == hangControlCmd) {
+        // 探针写通道卡死：永不返回（无定时器，仅悬挂的 future）。
+        await Completer<void>().future;
+      } else if (controlWriteDelay != Duration.zero) {
+        await Future<void>.delayed(controlWriteDelay);
+      }
     }
     _pending.addAll(chunk);
     // 分片写入重组：一次 chunk 可能含多帧或半帧。
@@ -2437,19 +2563,17 @@ abstract class _FakeMcuHost implements OtaBleChannel {
       switch (f.cmd) {
         case OtaBleCodec.cmdGetInfo:
           // INFO 帧：session=0、seq 回显请求 seq（§5.6）。
-          sendFrame(
-            OtaBleCodec.rspInfo,
-            0,
-            f.seq,
-            buildInfoPayload(
-              model: DeviceOtaInfo.wireModelETrack,
-              hardwareRevision: 3,
-              layoutId: 5,
-              bootVersion: 2,
-              currentVersionCode: 20801,
-              imageSha256: fakeDeviceImageSha256,
-            ),
-          );
+          if (infoResponseDelay != Duration.zero) {
+            // 迟到 INFO 注入（RC3-07）：独立定时器延迟投递，不阻塞本写
+            // 分片返回——「探针写已完成、应答晚到」是分离事件。应答等待
+            // 超时后恢复事务退休，迟到的 INFO 不得再解除设备隔离。
+            unawaited(
+              Future<void>.delayed(infoResponseDelay)
+                  .then((_) => _sendInfoFrame(f)),
+            );
+          } else {
+            _sendInfoFrame(f);
+          }
           break;
         case OtaBleCodec.cmdBegin:
           onBeginFrame(f);
@@ -2467,6 +2591,23 @@ abstract class _FakeMcuHost implements OtaBleChannel {
           break;
       }
     }
+  }
+
+  /// 回发 GET_INFO 的 INFO 应答（seq 回显请求 seq，§5.6）。
+  void _sendInfoFrame(OtaBleFrame f) {
+    sendFrame(
+      OtaBleCodec.rspInfo,
+      0,
+      f.seq,
+      buildInfoPayload(
+        model: DeviceOtaInfo.wireModelETrack,
+        hardwareRevision: 3,
+        layoutId: 5,
+        bootVersion: 2,
+        currentVersionCode: 20801,
+        imageSha256: fakeDeviceImageSha256,
+      ),
+    );
   }
 
   /// 上行应答帧：seq 回显请求 seq，按所选粒度分片回发。
@@ -2535,6 +2676,24 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   int? slowDataChunkAt;
   Duration slowDataChunkDelay = Duration.zero;
   bool slowDataChunkFails = false;
+  /// 非 DATA 控制帧分片写入次数（RC3-07 黑洞/慢写注入定位用）。控制帧
+  /// （GET_INFO/BEGIN/END/ABORT）与 DATA 帧分开计数，避免 BEGIN 分片
+  /// 数干扰 DATA 分片注入定位。
+  int controlChunkWrites = 0;
+  /// 卡死「所属帧 cmd == [hangControlCmd]」的控制帧写入（RC3-07 黑洞）：
+  /// 底层写永不返回（仅悬挂的 future），只能被写超时/探针预算终止。按帧
+  /// cmd 注入而非计数——同一 fake 上前序传输的 BEGIN/END/ABORT 控制写
+  /// 不计入定位，`cmdGetInfo` 即唯一命中探针写。
+  int? hangControlCmd;
+  /// 每个非 DATA 控制帧分片写入的固定延迟（RC3-07 慢写）：GET_INFO 探针
+  /// 等控制帧写被拖慢，用于分辨「探针写完成、应答在恢复事务退休后才到」
+  /// 的应答等待封顶路径。
+  Duration controlWriteDelay = Duration.zero;
+  /// INFO 应答投递延迟（RC3-07 迟到应答）：GET_INFO 帧被解析后用独立
+  /// 定时器延迟 [infoResponseDelay] 再 sendFrame(rspInfo)，**不阻塞本写
+  /// 分片返回**——「写已完成、应答晚到」是分离事件，模拟探针写成功而
+  /// INFO 在恢复事务退休之后才到的真实路径。
+  Duration infoResponseDelay = Duration.zero;
   /// 分片写观测时间线（RC3-07⑤）：`start#n` / `done#n` / `error#n`，
   /// 用于断言终止发布与迟到物理写的先后次序。
   final writeTimeline = <String>[];

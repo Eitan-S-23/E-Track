@@ -1602,6 +1602,55 @@ void main() {
       expect(ble.abortCalls, 1, reason: 'fail closed 必须尽力 ABORT 停止发送循环');
     });
 
+    test('failClosed 已决终止不被迟到在途写原生错误覆盖：DEVICE_LINK_CHANGED'
+        '保持、phase/文案不回跳（RC3-08/12②）', () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      // 慢速写在途（200ms）：DATA 首片进入 native 写调用尚未结算。与既有
+      // RC3-08⑦ 用例不同，本用例不设 dataGate——在途写会真正以原生异常
+      // 退出，覆盖「failClosed 决定终止之后」的迟到错误路径（既有用例的
+      // dataGate 把写全闸住，错误根本到不了 catch）。
+      ble.writeChunkDelay = const Duration(milliseconds: 200);
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.dataWriteEntered.future;
+
+      // 后台 → 链路代次前进。failClosed 在 resumeFromBackground 调用的
+      // 同步前缀里发布终止态（不前进代次，见 _failClosedDecided 注释），
+      // 在途写随后以非 CANCELLED 错误退出正是要防的覆盖路径。
+      service.pauseForBackground();
+      ble.linkGeneration = 1;
+      final resumeFuture = service.resumeFromBackground();
+      // 此刻在途 DATA 写仍在 200ms 延迟中未结算：注错让它在 failClosed
+      // 决定终止**之后**以原生异常（StateError，非 CANCELLED）退出。
+      ble.dataWriteError = StateError('native GATT write failed');
+      await resumeFuture;
+      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED',
+          reason: 'failClosed 必须发布终止态，终止不依赖在途写的退出方式');
+
+      // 旧 owner 的在途写以原生异常退出（走非 CANCELLED catch 分支）。
+      expect(await startFuture, isFalse);
+      // RC3-08/12② 鉴别点：终止原因/可重试语义/收尾相位/文案全部保持
+      // failClosed 已发布的结论，不得被通用失败覆盖——旧实现按
+      // `e.code != 'CANCELLED'` 分流会在这里发布「升级失败: ...」+ failed，
+      // 把「可重试续传」这条可操作信息冲掉。
+      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED',
+          reason: '迟到在途写原生错误不得覆盖 failClosed 已决定的终止原因');
+      expect(service.terminalState?.retryableLater, isTrue,
+          reason: '可重试续传语义不得被迟到错误冲掉');
+      expect(service.phase, OtaPhase.cancelled,
+          reason: '迟到在途写原生错误不得把收尾相位打回 failed');
+      expect(service.upgradeStatus, '设备复核失败（后台恢复），升级已终止，可重试续传',
+          reason: 'failClosed 的可重试终止文案不得被通用失败文案覆盖');
+      expect(notifyLog.any((l) => l.startsWith('错误: ') && l.contains('已终止')),
+          isTrue, reason: 'fail closed 必须经通知暴露终止事实');
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
     test('后台恢复一级复核补位：复核 await 期间链路代次前进 → DEVICE_LINK_CHANGED（RC3-08⑦）',
         () async {
       final tempDir = tempFirmwareDir();
