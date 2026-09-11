@@ -43,6 +43,10 @@ class DevelopmentApkTests(unittest.TestCase):
         self.write(Path("host-sdk/licenses/android-sdk-license"), b"fixture-license\n")
         self.write(Path("host-java/bin/java"), b"fixture\n")
         base = CHECKS.contained_environment(self.root, self.run)
+        # 宿主/CI 环境可能已显式启用包名后缀（workflow 的 job env 会透传）；它
+        # 不得渗进 fixture 判定，否则同一提交在不同环境得到不同期望值。该路径
+        # 由 test_environment_... 与 test_collect_rejects_... 显式覆盖。
+        base.pop(APK.APPLICATION_ID_ENV, None)
         base.update({"ANDROID_HOME": str(self.root / "host-sdk"),
                      "JAVA_HOME_17_X64": str(self.root / "host-java")})
         self.env = APK.environment(self.root, self.run, base)
