@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import stat
 import sys
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 import uuid
@@ -32,7 +33,8 @@ class DevelopmentApkTests(unittest.TestCase):
     def setUp(self):
         self.root = CHECKS.make_directory(ROOT, self.output / self._testMethodName)
         self.run = CHECKS.make_directory(self.root, Path("run"))
-        self.write(CHECKS.APP / "android/app/build.gradle.kts", b"compileSdk = 35\n")
+        self.write(CHECKS.APP / "android/app/build.gradle.kts",
+                   b'compileSdk = 35\napplicationId = "com.example.fixture" // fixture\n')
         self.properties = self.write(
             CHECKS.APP / "android/gradle/wrapper/gradle-wrapper.properties",
             b"distributionUrl=https\\://services.gradle.org/distributions/gradle-8.12-all.zip\n",
@@ -79,6 +81,7 @@ class DevelopmentApkTests(unittest.TestCase):
         env = APK.environment(self.root, self.run, {
             **self.env, "ANDROID_RELEASE_KEYSTORE_PASSWORD": "fixture-only",
             "SIDELOAD_KEY_PASSWORD": "fixture-only",
+            "TRACE_DEV_APP_ID_SUFFIX": ".obs",
             "JAVA_OPTS": "-Duser.home=/unapproved",
             "_JAVA_OPTIONS": "-Djava.io.tmpdir=/unapproved",
             "JDK_JAVA_OPTIONS": "-Duser.home=/unapproved",
@@ -92,6 +95,50 @@ class DevelopmentApkTests(unittest.TestCase):
         self.assertNotIn("SIDELOAD_KEY_PASSWORD", env)
         for key in ("JAVA_OPTS", "_JAVA_OPTIONS", "JDK_JAVA_OPTIONS", "SDKMANAGER_OPTS"):
             self.assertNotIn(key, env)
+        # 包名后缀不是凭据：它必须原样到达 Gradle，否则显式启用会静默失效。
+        self.assertEqual(".obs", env["TRACE_DEV_APP_ID_SUFFIX"])
+
+    def test_debug_application_id_suffix_is_explicit_and_validated(self):
+        self.assertEqual("", APK.application_id_suffix({}))
+        self.assertEqual("", APK.application_id_suffix({APK.APPLICATION_ID_ENV: "   "}))
+        self.assertEqual(".obs", APK.application_id_suffix({APK.APPLICATION_ID_ENV: " .obs "}))
+        for invalid in ("obs", ".", ".1obs", ".ob-s", "com.example.obs"):
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(
+                    ValueError, "TRACE_DEV_APP_ID_SUFFIX"):
+                APK.application_id_suffix({APK.APPLICATION_ID_ENV: invalid})
+        # 真实构建配置：未启用时生产包名不变，启用时只追加后缀。
+        self.assertEqual("com.wen.gaia.gaia", APK.expected_application_id(ROOT, ""))
+        self.assertEqual("com.wen.gaia.gaia.obs", APK.expected_application_id(ROOT, ".obs"))
+        self.assertEqual("com.example.fixture.obs",
+                         APK.expected_application_id(self.root, ".obs"))
+
+    def test_apk_identity_is_read_from_the_artifact_not_the_build_intent(self):
+        self.write(Path("run/apk-toolchain.json"), b'{"build_tools": "35.0.0"}\n')
+        apk = self.root / APK.APK_RELATIVE
+        calls = []
+
+        def run(argv, **kwargs):
+            calls.append(argv)
+            return SimpleNamespace(
+                returncode=0,
+                stdout="package: name='com.example.fixture.obs' versionCode='86'\n",
+            )
+
+        self.assertEqual("com.example.fixture.obs",
+                         APK.read_application_id(self.root, self.run, apk, run=run))
+        self.assertEqual(Path(calls[0][0]), self.run / "android-sdk/build-tools/35.0.0/aapt2")
+        self.assertEqual(["dump", "badging"], calls[0][1:3])
+        def blank(*args, **kwargs):
+            return SimpleNamespace(returncode=0, stdout="")
+
+        with self.assertRaisesRegex(ValueError, "no package identity"):
+            APK.read_application_id(self.root, self.run, apk, run=blank)
+
+        def failed(*args, **kwargs):
+            return SimpleNamespace(returncode=1, stdout="")
+
+        with self.assertRaisesRegex(ValueError, "could not read the debug APK identity"):
+            APK.read_application_id(self.root, self.run, apk, run=failed)
 
     def test_prepare_verifies_download_and_preserves_tracked_wrapper_properties(self):
         original = self.properties.read_bytes()
@@ -149,7 +196,8 @@ class DevelopmentApkTests(unittest.TestCase):
 
     def test_wrapper_install_checks_sdk_and_preserves_other_local_properties(self):
         for relative in ("cmdline-tools/latest/bin/sdkmanager", "platform-tools/adb",
-                         "platforms/android-35/android.jar", "build-tools/35.0.0/apksigner"):
+                         "platforms/android-35/android.jar", "build-tools/35.0.0/apksigner",
+                         "build-tools/35.0.0/aapt2"):
             self.write(Path("run/android-sdk") / relative, b"fixture\n")
         for relative in ("gradlew", "gradlew.bat", "gradle/wrapper/gradle-wrapper.jar"):
             self.write(Path("run/wrapper-bootstrap") / relative, b"new-wrapper\n")
@@ -176,21 +224,34 @@ class DevelopmentApkTests(unittest.TestCase):
     def test_artifact_collection_binds_bytes_commit_and_debug_classification(self):
         data = self.archive_bytes([("AndroidManifest.xml", b"fixture, not a real APK manifest")])
         self.write(APK.APK_RELATIVE, data)
-        with mock.patch("sys.stdout", new_callable=io.StringIO):
-            APK.collect(self.root, self.run, "1" * 40)
+        with mock.patch.object(APK, "read_application_id",
+                               return_value="com.example.fixture"), \
+                mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, self.env)
         metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
         self.assertEqual(hashlib.sha256(data).hexdigest(), metadata["sha256"])
         self.assertEqual("1" * 40, metadata["commit"])
+        self.assertEqual("com.example.fixture", metadata["application_id"])
         self.assertFalse(metadata["release_signing"])
         self.assertEqual("NOT_RUN", metadata["formal_acceptance"])
         self.assertEqual(data, (self.run / "artifacts/trace-dev-debug.apk").read_bytes())
 
+    def test_collect_rejects_an_apk_whose_real_application_id_differs(self):
+        data = self.archive_bytes([("AndroidManifest.xml", b"fixture, not a real APK manifest")])
+        self.write(APK.APK_RELATIVE, data)
+        env = {**self.env, APK.APPLICATION_ID_ENV: ".obs"}
+        with mock.patch.object(APK, "read_application_id",
+                               return_value="com.example.fixture"), \
+                self.assertRaisesRegex(ValueError, "expected com.example.fixture.obs"):
+            APK.collect(self.root, self.run, "1" * 40, env)
+        self.assertFalse((self.run / "artifacts").exists())
+
     def test_missing_apk_or_commit_cannot_be_reported_as_generated(self):
         with self.assertRaisesRegex(ValueError, "missing or empty"):
-            APK.collect(self.root, self.run, "1" * 40)
+            APK.collect(self.root, self.run, "1" * 40, self.env)
         self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture")]))
         with self.assertRaisesRegex(ValueError, "exact tested commit"):
-            APK.collect(self.root, self.run, "")
+            APK.collect(self.root, self.run, "", self.env)
         self.assertFalse((self.run / "artifacts").exists())
 
     def test_plan_is_debug_only_and_bounded(self):

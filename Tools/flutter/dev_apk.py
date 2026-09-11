@@ -20,6 +20,8 @@ from Tools.flutter.dev_checks import APP, checked_path, make_directory
 
 
 APK_RELATIVE = APP / "build/app/outputs/flutter-apk/app-debug.apk"
+APPLICATION_ID_ENV = "TRACE_DEV_APP_ID_SUFFIX"
+APPLICATION_ID_SUFFIX_PATTERN = re.compile(r"^\.[A-Za-z][A-Za-z0-9_]*$")
 
 
 def android_versions(root):
@@ -37,6 +39,49 @@ def android_versions(root):
     if len(compile_sdk) != 1:
         raise ValueError("APK bootstrap requires one explicit compileSdk in the app config")
     return match.group(1), compile_sdk[0]
+
+
+def application_id_suffix(env):
+    """显式启用的调试包名后缀；未设置即空串（生产 application id 不变）。"""
+    suffix = (env.get(APPLICATION_ID_ENV) or "").strip()
+    if suffix and not APPLICATION_ID_SUFFIX_PATTERN.fullmatch(suffix):
+        raise ValueError(
+            f"{APPLICATION_ID_ENV} must be a dot-prefixed package segment such as '.dev'"
+        )
+    return suffix
+
+
+def expected_application_id(root, suffix):
+    source = (root / APP / "android/app/build.gradle.kts").read_text(encoding="utf-8")
+    found = re.findall(r'^\s*applicationId\s*=\s*"([^"]+)"\s*(?://.*)?$', source, re.MULTILINE)
+    if len(found) != 1:
+        raise ValueError("APK identity requires one explicit applicationId in the app config")
+    return found[0] + suffix
+
+
+def read_application_id(root, run_dir, apk, run=subprocess.run):
+    """从产物自身读取最终 application id，而不是采信构建意图。
+
+    调试后缀只由 Gradle 应用，工作流/helper 都无法断言它真的生效；产物身份
+    必须由 APK 里的 manifest 记录证明（aapt2），否则会得到"看似可共存、实际
+    仍是生产包名"的假阳性产物。
+    """
+    toolchain = json.loads(
+        checked_path(root, run_dir / "apk-toolchain.json").read_text(encoding="utf-8")
+    )
+    aapt2 = checked_path(
+        root, run_dir / f"android-sdk/build-tools/{toolchain['build_tools']}/aapt2"
+    )
+    result = run(
+        [str(aapt2), "dump", "badging", str(apk)], cwd=root, capture_output=True,
+        text=True, encoding="utf-8", errors="replace", timeout=60,
+    )
+    if result.returncode != 0:
+        raise ValueError("aapt2 could not read the debug APK identity")
+    match = re.search(r"^package: name='([^']+)'", result.stdout, re.MULTILINE)
+    if not match:
+        raise ValueError("aapt2 output has no package identity")
+    return match.group(1)
 
 
 def environment(root, run_dir, env):
@@ -153,6 +198,7 @@ def assert_ignored(root, path):
 
 def prepare(root, run_dir, env, fetch=download):
     version, compile_sdk = android_versions(root)
+    application_id = expected_application_id(root, application_id_suffix(env))
     source = Path(env.get("ETRACK_ANDROID_SDK_SOURCE", ""))
     java = Path(env.get("JAVA_HOME", "")) / "bin/java"
     if not env.get("JAVA_HOME") or not java.is_file():
@@ -191,6 +237,7 @@ def prepare(root, run_dir, env, fetch=download):
         "gradle_version": version, "gradle_sha256": expected.lower(),
         "compile_sdk": compile_sdk, "build_tools": "35.0.0",
         "java_home": str(java.parent.parent), "android_tools_source": str(source),
+        "application_id": application_id,
     }, indent=2) + "\n")
 
 
@@ -198,7 +245,7 @@ def install_wrapper(root, run_dir):
     _, compile_sdk = android_versions(root)
     sdk = run_dir / "android-sdk"
     for relative in ("cmdline-tools/latest/bin/sdkmanager", "platform-tools/adb", f"platforms/android-{compile_sdk}/android.jar",
-                     "build-tools/35.0.0/apksigner"):
+                     "build-tools/35.0.0/apksigner", "build-tools/35.0.0/aapt2"):
         if not checked_path(root, sdk / relative).is_file():
             raise ValueError(f"Android package was not installed: {relative}")
     for relative in ("gradlew", "gradlew.bat", "gradle/wrapper/gradle-wrapper.jar"):
@@ -216,7 +263,7 @@ def install_wrapper(root, run_dir):
         output.write("\n".join([*kept, f"flutter.sdk={run_dir / 'sdk'}", f"sdk.dir={sdk}"]) + "\n")
 
 
-def collect(root, run_dir, commit):
+def collect(root, run_dir, commit, env):
     source = checked_path(root, root / APK_RELATIVE)
     if not source.is_file() or not source.stat().st_size:
         raise ValueError("Debug APK is missing or empty")
@@ -225,12 +272,18 @@ def collect(root, run_dir, commit):
             raise ValueError("Debug APK has no Android manifest")
     if not re.fullmatch(r"[0-9a-fA-F]{40}", commit or ""):
         raise ValueError("An exact tested commit is required for the APK record")
+    expected = expected_application_id(root, application_id_suffix(env))
+    observed = read_application_id(root, run_dir, source)
+    if observed != expected:
+        raise ValueError(
+            f"Debug APK declares application id {observed}, expected {expected}"
+        )
     target = checked_path(root, run_dir / "artifacts/trace-dev-debug.apk")
     copy_new(root, source, target)
     metadata = {
         "artifact_kind": "development-debug-apk", "formal_acceptance": "NOT_RUN",
         "commit": commit, "sha256": sha256(target), "bytes": target.stat().st_size,
-        "file": target.name, "release_signing": False,
+        "file": target.name, "release_signing": False, "application_id": observed,
     }
     write_new(root, target.with_suffix(".json"), json.dumps(metadata, indent=2) + "\n")
     print(json.dumps(metadata))
@@ -257,7 +310,7 @@ def main(argv=None):
         elif args.phase == "install-wrapper":
             install_wrapper(root, run_dir)
         else:
-            collect(root, run_dir, os.environ.get("GITHUB_SHA"))
+            collect(root, run_dir, os.environ.get("GITHUB_SHA"), os.environ)
         return 0
     except (OSError, ValueError, zipfile.BadZipFile) as exc:
         print(f"Development APK failed: {exc}", file=sys.stderr)

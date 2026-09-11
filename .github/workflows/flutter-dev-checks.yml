@@ -19,6 +19,11 @@ on:
         required: true
         type: boolean
         default: false
+      app_id_suffix:
+        description: "Explicit opt-in debug application id suffix such as '.dev'; empty keeps the production application id"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -46,6 +51,8 @@ jobs:
       PYTHONUTF8: "1"
       FLUTTER_DEV_TEST_SCOPE: ${{ (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'all' || inputs.test_scope || 'all' }}
       FLUTTER_DEV_BUILD_APK: ${{ matrix.os == 'ubuntu-latest' && (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'true' || 'false' }}
+      # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
+      TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
     steps:
       - name: Checkout validation commit
         uses: actions/checkout@v4

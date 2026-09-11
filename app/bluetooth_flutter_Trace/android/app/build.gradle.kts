@@ -55,6 +55,20 @@ if (releaseSigningRequested && !hasReleaseSigningConfig) {
     )
 }
 
+// 开发调试包名后缀：只有显式设置 TRACE_DEV_APP_ID_SUFFIX 时才生效，默认空值
+// 保持生产 application id 不变。仅作用于 debug 构建类型，用于让调试产物与已
+// 安装的生产版共存（application id 不同才可能同时安装）。非法取值直接失败，
+// 避免产出身份不明的"看似可用"产物。
+val debugApplicationIdSuffix = System.getenv("TRACE_DEV_APP_ID_SUFFIX")?.trim().orEmpty()
+if (debugApplicationIdSuffix.isNotEmpty() &&
+    !Regex("^\\.[A-Za-z][A-Za-z0-9_]*$").matches(debugApplicationIdSuffix)
+) {
+    error(
+        "TRACE_DEV_APP_ID_SUFFIX must be a dot-prefixed package segment such as '.dev'; " +
+            "refusing to build an ambiguous development application id."
+    )
+}
+
 android {
     namespace = "com.wen.gaia.gaia" // 替换为你的项目包名
     compileSdk = 35
@@ -102,6 +116,15 @@ android {
                         "Configure android/key.properties or fixed GitHub Actions secrets for reliable updates."
                 )
                 signingConfigs.getByName("debug")
+            }
+        }
+
+        getByName("debug") {
+            if (debugApplicationIdSuffix.isNotEmpty()) {
+                applicationIdSuffix = debugApplicationIdSuffix
+                logger.lifecycle(
+                    "Development debug application id suffix enabled: $debugApplicationIdSuffix"
+                )
             }
         }
     }
