@@ -2479,7 +2479,17 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   /// 本 chunk 所属帧的 cmd（判不出返回 null）。transport 按帧切片
   /// （每 chunk 只属于单帧），写入侧无垃圾注入，未完帧剩余 _pending
   /// 恒从 sync 开始：与 chunk 拼接后首个 sync 帧头的 cmd 即所属帧。
+  /// chunk 自身以同步字开头即**新帧首片**，直接读自身帧头，不被悬空的
+  /// `_pending` 前缀带偏——否则 DATA 半帧在途时，GET_INFO 探针首片会被
+  /// 误判成 DATA 续片，卡死/慢写注入落空（RC3-07 黑洞：真实链路里探针写
+  /// 卡死在传输层，字节根本到不了 MCU，注入必须在首片就命中）。只有续片
+  /// （不以同步字开头）才拼接 `_pending` 恢复所属帧。
   int? _chunkFrameCmd(List<int> chunk) {
+    if (chunk.length >= 3 &&
+        chunk[0] == OtaBleCodec.frameSync0 &&
+        chunk[1] == OtaBleCodec.frameSync1) {
+      return chunk[2];
+    }
     final head = _pending.isEmpty ? chunk : [..._pending, ...chunk];
     for (var i = 0; i + 2 < head.length; i++) {
       if (head[i] == OtaBleCodec.frameSync0 &&
