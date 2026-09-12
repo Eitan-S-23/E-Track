@@ -1751,6 +1751,100 @@ class AcceptanceExecutionPolicyTests(unittest.TestCase):
         self.assertIn("不授予操作权限或追加配额", rules)
         self.assertNotIn("重算 manifest", rules)
 
+    P33_HARDWARE_EVIDENCE = (
+        "APK 实际安装",
+        "toy 包实机闭环",
+        "真包实机闭环",
+    )
+
+    @classmethod
+    def p33_hardware_scope_violations(cls, text):
+        rows = [
+            [cell.strip() for cell in line.strip().strip("|").split("|")]
+            for line in text.splitlines()
+            if line.strip().startswith("|")
+        ]
+        errors = []
+        for label in cls.P33_HARDWARE_EVIDENCE:
+            matches = [row for row in rows if row[0] == label]
+            if len(matches) != 1:
+                errors.append(f"{label}: expected one evidence row")
+            elif len(matches[0]) < 3 or matches[0][1] != "P3-3 完成前":
+                errors.append(f"{label}: hardware evidence was deferred")
+        for obsolete in (
+            "artifact 可安装性由后续集成会话验证",
+            "真机安装和传输留待 P3-5",
+        ):
+            if obsolete in text:
+                errors.append(f"obsolete completion promise: {obsolete}")
+        return errors
+
+    def test_p33_hardware_scope_is_not_deferred(self):
+        prompt = (ROOT / "docs/ota-prompts/prompt-P3-3-implementation.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual([], self.p33_hardware_scope_violations(prompt))
+        board = (ROOT / BOARD_PATH).read_text(encoding="utf-8")
+        card = board.split("#### P3-3 ", 1)[1].split("#### P3-4 ", 1)[0]
+        self.assertIn("OTA-DEC-013", card)
+        self.assertIn("P3-3 完成前", card)
+
+    def test_p33_scope_guard_rejects_missing_duplicate_or_deferred_evidence(self):
+        rows = [
+            f"| {label} | P3-3 完成前 | real observation |"
+            for label in self.P33_HARDWARE_EVIDENCE
+        ]
+        valid = "\n".join(rows)
+        self.assertEqual([], self.p33_hardware_scope_violations(valid))
+        bad_cases = {
+            "deferred": valid.replace("P3-3 完成前", "P3-5 完成前", 1),
+            "missing": "\n".join(rows[:-1]),
+            "duplicate": valid + "\n" + rows[0],
+            "old_promise": valid + "\n真机安装和传输留待 P3-5。",
+        }
+        for label, text in bad_cases.items():
+            with self.subTest(case=label):
+                self.assertTrue(self.p33_hardware_scope_violations(text))
+
+    def test_p33_scope_requires_bootable_assets_and_final_identity(self):
+        prompt = (ROOT / "docs/ota-prompts/prompt-P3-3-implementation.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "各至少一轮",
+            "durable_off == total_len",
+            "ACK_END",
+            "GET_INFO",
+            "raw SHA-256",
+            "可启动",
+            "4KB",
+            "full/patch",
+            "不得用 PC sender",
+            "不依赖 P3-5 的启动或完成",
+            "受控 HTTP",
+            "不宣称真实 P4-2",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prompt)
+
+    def test_p35_retains_real_backend_and_ten_disconnects(self):
+        prompt = (ROOT / "docs/ota-prompts/prompt-P3-5-integration.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in ("OTA-DEC-013", "P4-2", "R2", "D1", "10/10", "GET_INFO"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prompt)
+        self.assertIn("P3-3 的最小实机门禁不替代本卡", prompt)
+        self.assertIn("不得把 P3-3 的普通成功传输计入本卡 10 次断连", prompt)
+
+    def test_p33_scope_ruling_records_delegated_authority_not_execution_grant(self):
+        decisions = (ROOT / "docs/ota-spec-decisions.md").read_text(encoding="utf-8")
+        ruling = decisions.split("## OTA-DEC-013 ", 1)[1].split("## 用户裁定原文", 1)[0]
+        for marker in ("方案 A", "记录 10", "不授予操作权限或追加配额", "`DECIDED`"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, ruling)
+        self.assertIn("请你决策并解决该问题，我提前授予你权限", decisions)
+
 
 class PostP26SpecGovernanceTests(unittest.TestCase):
     """机械守护 P2-6 后共享合同、唯一提示词和 readiness 路由。"""
@@ -2154,7 +2248,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         statuses = re.findall(r"(?m)^- 状态：`([A-Z_]+)`。$", self.decisions)
         self.assertEqual(len(ids), len(statuses), "每项决定必须恰有一个状态")
         self.assertTrue(set(statuses) <= {"OPEN", "PROPOSED", "DECIDED", "SUPERSEDED"})
-        self.assertEqual({"DECIDED"}, set(statuses), "用户冻结授权后十二项决定必须全部为 DECIDED")
+        self.assertEqual({"DECIDED"}, set(statuses), "已获批准的决定必须全部为 DECIDED")
         status_by_decision = dict(zip(ids, statuses))
 
         reference_text = self.contract + "\n" + self.board

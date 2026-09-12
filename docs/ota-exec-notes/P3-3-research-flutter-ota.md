@@ -1532,3 +1532,200 @@ research 追加后历史字节前缀不变；看板 728 个 CRLF 对应行数量
 手术（非 Edit 工具）避免混合行尾被规范化。既有脏文件、未跟踪文件
 与历史证据全部保留；未运行历史 .claude 脚本，未清理无关产物，无
 项目外写入，未输出密钥。
+
+### 6.16 P3-3/P3-5 验收归属授权裁定（治理，2026-09-10）
+
+用户已明确授权本会话决策并解决 R2。`OTA-DEC-013` 选择方案 A，保留
+P3-3 卡面的实机门槛：完成前取得实际 APK 安装，以及 toy/真包各至少一轮
+手机到真实 MCU 的升级、重启重连和 GET_INFO 目标版本/raw SHA 一致证据。
+受验 toy 必须是经审定的可启动受控固件包，不能把 4KB golden vector、
+fake 测试、GATT 写成功或 END ACK 单独当作升级完成。
+
+P3-3 可先执行本卡真机验收，不依赖 P3-5 的启动或完成；P3-5 保留真实
+P4-2 后端候选链、P3-4 生产参数和 10/10 独立断连续传，不能拿普通传输
+成功充数。两份 Spec、看板、决策登记及开发验证指南同步。此前各节“归属
+待冻结前确认”的记载保留为历史，自本裁定起以新条款为准。
+
+本节不是 RC3 整改交付或新正式验收轮次，不修改 §6.15 的开发 CI 报告及
+剩余问题，不重编 RC3-01 至 RC3-12，不把开发 PASS 升格成独立 PASS。
+R2 的决策缺口已解决，具体资产/合同冻结、产品整改及未观测实机证据仍须
+分别落实；P3-3 保持进行中，正式验收仍未执行。本次未执行 Actions、安装、
+部署、烧录或其他真机操作，未回改冻结协议或历史证据包。
+
+决策来源、治理回归及写入审计见
+`docs/ota-exec-notes/P3-3-acceptance-scope-ruling-2026-09-10.md`。
+
+### 6.17 RC3 第七批整合整改交付与开发自测闭环（P3-3-IMPL-20260907，2026-09-10）
+
+- 身份：P3-3 实现 agent 开发自测批次（非独立验收，实现者不自验收）。
+- 分支：dev/flutter/apk/p3-3-batch6（续用第六批独占验证分支，Eitan-S-23 推送）。
+- 授权：执行合同 §7.3.2 + docs/flutter-development-validation.md 持续预授权（2026-09-09 用户批准）。
+- 输入：第六批独立复审草案 .cache/p3-3-review-20260910/review-draft.md（复核基线 HEAD 7e3ab72，非冻结合同；第五批缺完整提交锚点，跨批差异以本批提交区间 7e3ab72..3e10311 为准）。
+- 工作流：flutter-dev-checks.yml 双宿主（ubuntu-latest + windows-2022）；分支名匹配 dev/flutter/apk/** 自动请求 debug APK + scope=all 全量测试。
+- 终态：run 34452184680（commit 3e10311）completed success——ubuntu 13 命令全 PASS（含 apk_build 524s、apksigner verify、apk_collect），windows 5 命令全 PASS；正式验收 NOT_RUN。
+
+#### 6.17.1 交付总览
+
+本批按复审草案第六项整合整改范围交付，两个提交（7e3ab72..3e10311，合计 12 个文件 +2766/−260，新增用例 56=产品测试 45+runner 回归 11）：
+
+- f9dba08「fix(flutter-ota): P3-3 第七批整合整改——输入门禁/传输边界/生命周期」（12 文件 +2710/−259）：runner 输入门禁语义化、传输边界（命令等待者错误窗口/半帧投毒/会话隔离/发窗间预算）、owner 与资源生命周期、HTTP 分类关闭清理、fake 真值校准用例。
+- 3e10311「fix(flutter-ota): 会话外 GET_INFO 独立 seq 空间，修复在途复核打断传输」（3 文件 +56/−1）：首跑 CI 反馈链修复，见 §6.17.3。
+
+前五批已修子项不归零、RC3-01..12 编号保留；已纠正的历史误判（latestGate 可被 cancelFuture 打断、_runExclusive identical 释放、MCU 提交后清位图故 END OK 带 bitmap=0、零体停滞确不先发体、丢 DATA-ACK 允许日志内恢复且 retries=0 超时已单测、Dio 5.9.0 自带接收计时器、块完成守卫改变旧跨窗反例控制流）不在本批重开。
+
+#### 6.17.2 RC3 逐项处置（本批）
+
+| 原 ID | 合同依据 | 本批修改（提交） | 回归用例 | 运行证据 | 源码状态 | 开发验证状态 | 剩余缺口 |
+|---|---|---|---|---|---|---|---|
+| RC3-02（runner 输入门禁） | 执行合同 §7/§7.3；开发指南 committed-input/fail-closed 规则 | f9dba08：dev_checks 语义身份——porcelain 解析 rename/copy 双 NUL 记录；git hash-object --no-filters 内容指纹；未跟踪/重命名/删除=语义差异（git diff 看不见未跟踪）；semantic_state=head+(path,指纹)对；bind_toolchain_regen 绑定再生前后实际生效字节；APK 门禁要求起点 clean | 11 项 runner 回归：toolchain_regen 逃逸白名单拒收、起点不干净拒 APK、脏路径上再见内容变化、未跟踪文件与目录=语义、CRLF-only 重写非语义、指纹区分连续内容变化、rename 记录解析、删除=语义、绑定记录生效与提交字节、白名单外路径拒绝 | 本地宿主回归 48 项 OK；run 34452184680 ubuntu 绑定 4 项、windows 绑定 3 项真实工具链 migration 再生（committed/effective SHA-256+diff 留档 result.json），收尾恢复后 ubuntu clean、windows 仅 EOL-only 非语义差异 | 已提交（f9dba08） | PASS（双宿主） | 无（复审草案要求的未跟踪/实质修改/真 EOL 三分与迁移绑定已闭合） |
+| RC3-02/04（命令等待者异步错误窗口） | 复审草案「Command Waiters Can Fail Before Their Error Listener Exists」；二进制合同 §5/§7 | f9dba08：GET_INFO/BEGIN/END/ABORT 命令等待者在 await 物理写之前挂错误监听 | transport 3 项：延迟写期间 取消/释放/通知流报错——错误不逃逸为 uncaught async error、不丢首错 | run 34452184680 双宿主 PASS（round 1 亦过，非失败点） | 已提交（f9dba08） | PASS | 无新增；物理写取消的真机证据属独立验收 |
+| RC3-05/07（半帧/超时/迟到物理写） | HTTP-RESUME 271；FLUTTER-TRANSPORT 1057；安全帧边界 | f9dba08：排队写启动时复核通道安全（半帧后提前入队的 ABORT 不再绕过投毒）；任意失败投毒+写通道废弃+尽力 ABORT 被拒；通道对象域投毒（迟到写不污染后来的会话：同通道换 transport 仍拒写、新通道放行）；发窗间预算（连环 ERR_SEQ 只扣一次恢复预算、耗尽后不再 BEGIN） | transport 5 项：半帧后排队的写启动时复核通道、分片写底层报错留半帧、迟到写不污染后来的会话、同一发窗连环 ERR_SEQ 单次扣减、恢复预算耗尽不再重新 BEGIN | run 34452184680 双宿主 PASS | 已提交（f9dba08） | PASS | 物理写超时上限与通道隔离的物理 BLE 证据属真机验收 |
+| RC3-04/08/12（owner 与真实资源生命周期） | Single owner；CANCEL-RECOVERY；DEVICE-DTO 118；BLE-LIFECYCLE；FLUTTER-TRANSPORT 1058 | f9dba08：cancelUpgrade 取消代次+epoch 屏障（旧取消不得拔掉后来者的同资产下载，download.cancel 过 epoch 校验后才删包）；后台复检迟到发布不覆盖取消终态；resumeFromBackground 三级 fail-closed 复核（链路代次→有界重发现 5s→INFO 身份 3s，每级 await 后 stale() 重查，失败即终止态+尽力 ABORT）；A 持有资产读取失败后成功读取 B 时 A 资产整体作废；取消删包与终态发布次序（状态监听+IO 屏障，终态发布时包已删除）；bluetooth_service 迟到的旧订阅取消不关闭新 owner 的共享 CCCD（owner 归属跟随最新一次订阅） | service 10 项（INVALID_PARAMETER 稳定闭锁、稳定终止复位刷新标志、A→B 作废、取消删包与终态发布次序、取消窗口内同资产重下、后台恢复一/二/三级复核、迟到发布、在途恢复正例）+ adapter 2 项（迟到旧订阅取消、所有权转移后重订） | run 34452184680 双宿主 PASS（在途恢复正例即 round 1 失败点，修复后通过） | 已提交（f9dba08） | PASS | 真实连接代次/迟到 CCCD 生命周期需真机；OTA-DEC-013 已把真机判据留 P3-3 独立验收 |
+| RC3-03/06（fake 与 ACK/恢复校准） | 二进制合同 §2.4/§4.4/§4.5/§5；ota_sd_inspect_header 与 MCU 会话真值 | 产品逻辑沿第五/六批实现；本批补齐校准用例（f9dba08） | transport 6 项 BEGIN 门禁（patch base_vcode 不符→ERR_BASE、patch base_sha8 不符→ERR_BASE、payload_len≤内层头 40B→ERR_LEN、合法 patch 放行、full payload_len=0→ERR_LEN 而非 ERR_BASE、full 带非零 base_sha8→ERR_BASE）+ service 8 项 MCU oracle 真值（128B 对齐、非尾部短段 ERR_FRAME、尾部短段放行、跨包尾 ERR_OFFSET、off≥total_len、同 offset 同内容 DUPLICATE 幂等、不同内容 ABORTED+teardown、已提交 offset 重复幂等）；预算语义用例列于 RC3-05/07 行 | run 34452184680 双宿主 PASS | 测试已提交（f9dba08）；产品逻辑为五六批既有 | PASS | 拒绝分支鉴别力的独立变异测试未做（复审草案原文保留） |
+| RC3-05/10/11（HTTP 分类、关闭与清理） | HTTP-ERROR；UNKNOWN-FIELDS；HTTP-DOWNLOAD/RESUME 响应处置与有限等待 | f9dba08：首个 206 头违规即真正中止旧响应（从零重下仍成功）；错误体零事件空闲超时兜底并中止上游；无在途下载 cancel/cancel(keepPartial)（既有 partial/sidecar 照常删/字节保留）；body 传输中取消等在途写盘方退出后再删 partial；在途未退出有界等待超时后不删（清理回退给下载路径）；latest 侧 isRetryableLater 状态契约（终止码不受状态约束影响） | download 6 项（首个 206 头违规旧响应中止、零事件停滞兜底、无在途 cancel、无在途 cancel(keepPartial)、body 传输中取消、在途未退出超时不删）+ latest 4 项（CHANNEL_STOPPED 挂 403 不算稍后重试、BACKEND_UNAVAILABLE 挂 500/RATE_LIMITED 挂 503 均不可重试、CHANNEL_STOPPED 的 200 形态仍稍后重试、426 之外状态仍终止） | run 34452184680 双宿主 PASS | 已提交（f9dba08） | PASS | 无新增 |
+
+#### 6.17.3 本批自测抓获并修复的产品缺陷：会话外 GET_INFO 消耗会话 seq（RC3-08 关联）
+
+- 现象：首跑 run 34449930671（commit f9dba08）双宿主同一用例确定性失败——「后台恢复三级复核通过：恢复发送并完成传输（RC3-08⑦ 正例）」期望 abortCalls=0 实际 1；进度打点到 2048/1024（1024B 包发了 16 段=整包重发一遍）。
+- 根因：getDeviceInfo 的 GET_INFO 与会话帧共用传输级 _seq 计数器。service 后台恢复复核在传输在途时发 GET_INFO，多消耗一个 seq→恢复后的 DATA 发窗整体跳号→MCU 会话层 session_seq_check（Libraries/OTA/ota_ble_session.c:272-282）对 delta>0 判 ERR_SEQ→内部 ABORT+BEGIN 重对齐→从 durable 整段重发。
+- 固件真值与合同依据：二进制合同 §5.1 定义 seq 为「会话内帧序号，初值 0，每发一帧 +1」；§5.2 GET_INFO 以 session=0 发送；MCU session_handle_get_info（ota_ble_session.c:296-311）不触碰 expected_seq，seq 仅作应答回显关联——会话外查询本就不应从会话计数器取号。
+- 真机影响（修复前）：传输在途每次后台→前台往返损失一个发送窗口并消耗一次恢复预算；恢复预算有限（第二次 ERR_SEQ 即 ACK_STATUS 失败），两次在途后台往返=升级失败。该缺陷自第五/六批引入复核设计起存在，此前无「在途恢复正例」测试故从未暴露——由本批新增用例抓获。
+- 修复（3e10311）：新增 _querySeq 独立计数器与 _nextQuerySeq()（镜像 _nextSeq() 的 16bit 回绕），getDeviceInfo 改用会话外取号；_nextSeq() 全部调用点逐一核对（DATA 在发窗内、END/ABORT/BEGIN 各在重试循环外取号一次；BEGIN 后 MCU expected=BEGIN.seq+1，不受影响；全测试仅一处绝对 seq 断言=新传输首帧 seq==0，仍成立）。
+- 鉴别性回归：①service 在途恢复正例强化——beginCalls=1（复核通过不得触发内部恢复重对齐）、dataOffsets 恰 8 段且不重复（1024B 包）；②新增 transport 级回归「传输在途 GET_INFO 复核不占会话 seq」——ACK 延迟 50ms 使 4096B 包保持传输在途，插入 getDeviceInfo 复核，断言 isOk、durableOff=4096、beginCalls=1、abortCalls=0、32 段不重发。
+- 修复后证据：run 34452184680 双宿主两用例均 PASS（Windows tests.log +98 transport 级、+242 service 级）。
+
+#### 6.17.4 CI 反馈链（本批 2 run）
+
+| run | commit | 失败点（日志取证） | 修复 |
+|---|---|---|---|
+| 34449930671 | f9dba08 | 双宿主 tests -1：「后台恢复三级复核通过…（RC3-08⑦ 正例）」abortCalls 期望 0 实际 1；进度 2048/1024 整包重发；APK 链 fail-closed NOT_RUN。原始日志留痕 .cache-ci/batch7-artifacts/{ubuntu,windows}/run-*/logs/ | 3e10311 独立 _querySeq 空间 |
+| 34452184680 | 3e10311 | —（completed success：ubuntu 13 命令+windows 5 命令全 PASS，APK 复产） | — |
+
+原始证据：round-1 .cache-ci/batch7-artifacts/（保留不动）；round-2 .cache-ci/batch7-artifacts-r2/（ubuntu run-30b2e995603b4e4fafdce9941ccf7285/、windows run-8945c1f5a24a4bc3a4d56442b7268b25/、apk run-30b2e995603b4e4fafdce9941ccf7285/artifacts/trace-dev-debug.json）。
+
+#### 6.17.5 SDK 身份、APK 元数据与未执行项
+
+- SDK（双宿主一致）：Flutter 3.47.3 stable，framework e8113bf45620cbeb8aff64947ee4c93e16adb4cf（2026-09-04），engine 06a2e2a110089dff50fe635cffd2a61e1b24fbcd，Dart 3.13.3，DevTools 2.60.0；pub get --enforce-lockfile，lockfile 前后 SHA-256 一致（95ba37036efedb9df8de68ee83ba643b5ad9753ec3adbcd3a03bf3ff6e2325ea）。
+- 测试规模：ubuntu All tests passed!（+271 ~6 skip——Windows 专属用例在 Linux 跳过，不计 Windows 证据）；windows All tests passed!（+277）。
+- APK（ubuntu）：flutter build apk --debug --no-pub --target-platform=android-arm,android-arm64——apk_build PASS（524s）、apksigner verify PASS、apk_collect PASS；trace-dev-debug.apk 131,454,050 B，sha256 e38c6887ddacb0f92ae9b21225033f766c6d461ca363e043d97f77b48029030a，release_signing=false，formal_acceptance=NOT_RUN（工件 flutter-dev-debug-apk-3e10311e98b79b7fb975b2425b4946739cfc6630-34452184680-1）。
+- Windows 收尾状态：仅 generated_plugin_registrant.h EOL-only 差异，门禁三分类判非语义（dirty_eol_only 不拦），development_result=PASS。
+- 未执行项（如实）：release 模式 APK/EXE 构建、APK 真机安装、toy/真包真机升级闭环、正式验收合同/矩阵全部 NOT_RUN。开发自测全绿≠正式验收，P3-3 保持进行中；真机判据按 OTA-DEC-013 留待独立验收主持执行。
+
+#### 6.17.6 写入审计
+
+本节由 Python 字节追加（纯 LF，非 Edit 工具），历史字节前缀不变；本批看板回写同样 Python 字节手术，新增行 LF 与插入点邻近行一致。看板与研究文档的回写**留在工作树未提交**：当前工作树另有裁定会话（OTA-DEC-013）刻意未提交的治理文档改动，实现 agent 不得将其卷入本批 WIP 提交；治理文档提交由主会话串行协调。既有脏文件、未跟踪文件与历史证据全部保留；未运行历史 .claude 脚本，未清理无关产物，无项目外写入，未输出密钥。
+
+### 6.18 P3-3 独立验收准入与集中复核（2026-09-12）
+
+验收者：Codex，非本卡产品实现会话。用户请求按项目规范验收 P3-3。
+**准入结论：EVIDENCE_GAP，正式验收 NOT_RUN；P3-3 保持进行中，原实现认领不变。**
+本节是执行合同 §7.3 的集中反馈，不是新建 v3 正式失败轮次，不生成虚假的 PASS/FAIL
+矩阵，也不把实现者开发自测改标为独立 EXECUTED PASS。
+
+#### 6.18.1 对象、范围与执行边界
+
+- 活动根：`D:\github\my\E-Track`；分支：`dev/flutter/apk/p3-3-t1a`。
+- 实际审查 HEAD：`c89c58f44dec1745980f0f2a54e612af48f6d32c`；tree：
+  `3b7bd3aa96a8988e12f4c888adfc16304a4c3adb`；profile blob：
+  `15512870de154a59e870145b98403117da96cc83`。这些是观察对象身份，**不是已审批冻结点**。
+- 读取根/app AGENTS、执行合同、共享 OTA-XC 合同、P3-3 Spec、OTA-DEC-013、
+  第九批及 r2 交付、T1a 插桩/扫描记录、B1-M 操作单与真实日志。仓库不存在 `.trellis/`，
+  使用实际项目规约，不另建 Trellis 任务。
+- 增量源码重点是 `7ca1929..c89c58f` 的 12 个 app/测试/runner/workflow 文件；
+  同时定向回读 `OtaService -> transport -> BluetoothService`、重启身份复核、下载取消
+  与既有测试调用链。没有把全部历史静态复审重新宣称执行一遍。
+- 开始时已有 10 个 tracked 修改及多项未跟踪文件。特别是
+  `docs/flutter-development-validation.md`、两个任务 Spec、`docs/ota-spec-decisions.md`
+  与 `tests/ota/test_acceptance_bundle.py` 尚未提交；app 下还有未跟踪 `.cache-ci/`。
+  这些现状保留，不暂存、不恢复、不清理。不能以已提交的 Dart 文件替整个执行工作树背书。
+- 本轮只有本地宿主回归、只读 Actions/原始证据核验及报告回写；没有项目 commit、push、
+  dispatch、部署、APK 安装、广播、连接、J-Link、RTT 或其他真机动作。
+
+#### 6.18.2 一次性发现清单
+
+下表中的“阻断”指相应准入/观测不能据此通过，不把尚未执行的正式判据虚报成产品 FAIL。
+已有 RC3 编号保留；OBS 编号只标识本次新插桩发现。
+
+| ID / 优先级 | 发现与依据 | 影响、处置及针对性自测 |
+| --- | --- | --- |
+| ADMIT-01 / P1 | `docs/acceptance-contracts/` 没有 P3-3 版本化合同/矩阵，`docs/ota-prompts/` 没有 P3-3 acceptance prompt；治理与 Validation 输入仍脏。执行合同 §1/§3/§7.3 要求先提交实现/runner、审批冻结并通过 NOT_RUN 前检。 | 正式执行准入阻断。先完成稳定批次和已授权的开发自测，再由获授权会话提交相关输入并冻结真实命令、资产、依赖、环境和配额；本次不冒填 approved_by，不用旧 tree 套新 Spec，不创建伪前检。 |
+| ADMIT-02 / P1 | 当前 HEAD 的 GitHub API 只返回两个 `flutter-dev-checks.yml` run，最新 run 34692044446 为 debug APK；Windows job 没有 EXE 构建。第九批报告 §4 的“pubspec/平台输入未改所以不需 EXE”不符合 app AGENTS：`lib/` 同样是 app build input，`build.yml` 的路径判定也明确包含 `lib/`。 | release-mode APK / Flutter Windows EXE 构建门仍缺；LVGL Simulator 不是这里的 Windows EXE。需另行获准执行适当的 Actions 构建并核对产物，不以 debug 签名或 Windows 单测替代，也不自动触发具有发布权限的生产工作流。 |
+| ADMIT-03 / P1 | OTA-DEC-013 与 P3-3 Spec 要求同一受验 APK 的实际安装、独立可启动 toy/真包各一轮手机 OTA，终点为重启新连接 GET_INFO 的目标版本及完整 raw SHA。未找到满足这三项的冻结实物链；旧扫描记录甚至没有目标身份。 | 本卡完成阻断，不迁移到 P3-5。已有旧 APK 安装/签名冲突与扫描尝试均保留，但不等于当前受验 APK 安装证据。分别冻结安全资产、HTTP 外部输入、板/Boot 身份与操作计划后，才在授权内实测。 |
+| OBS-SEC-01 / P2 | `Tools/flutter/dev_apk.py:101` 对原始 query 做黑名单正则，不解码参数名。独立调用真实 `observation_config()`：`token=fixture-only` 被拒，`%74oken=fixture-only`、`sign%61ture=fixture-only`、`access_token=fixture-only` 却被接受。后续 defines/collect 会将 URL 放进 APK 和日志/元数据。 | 新增输入守卫缺陷，影响“无凭据公开端点”的安全承诺。先按规范化 query/明确允许集合校验，再允许构建；补编码键名、重复键、大小写及常见 token 别名的拒绝用例。本次只用虚构值，没有发送 HTTP、使用真实凭据或发现实际泄露。 |
+| OBS-01 / P2 | `bluetooth_service.dart:2172` 调用吞异常的 `startScan()` 后无条件 `return true`；其 `:720` catch 只提示 UI，`:1051` 的扫描流错误也不通知 observer。平台拒扫且 UI 提示成功时，观察器仍打开窗口并最终报 `target_not_seen`。 | 不能把“未真正开始/中途失效”当成完整扫描的否定证据。需要真实启动结果及流错误传播；补 adapter=on 但 start 拒绝、扫描中报错、正常空扫描三类集成层用例。现有 observer 测试只注入 bool/Future，未覆盖这个适配器边界；这些新 Dart 反例本轮未执行。 |
+| OBS-02 / P2 | `ota_device_observation.dart:353` 命中时先设 `_settled` 并取消唯一 timer，然后 `unawaited(_bind(...))`；`:371` 的 stopScan 和 `:372` 的 connect 不在 catch 内，start/stop/connect/readIdentity 也没有 observer 级总截止。stop/cancel 失败或依赖 Future 永不完成时，承诺的唯一 `done` 行仍可能永久缺失。 | 观测 runner 的 fail-closed/有界结局缺口。区分“绑定中”和“已终止”，为完整链路定义总截止及异常/清理结局；逐个注入抛错和悬空 Future，断言唯一终止、无迟到二次发布与资源收尾。本次为源码确认，不能称这些 Dart 负例已经运行。 |
+| RC3-07/02（插桩增量）/ P2 | `ota_service.dart:1001` 与 `:1058` 的 MONO_TERMINAL 先于异步 ABORT，phase=failed 在 ABORT 后才发布；`ota_ble_transport.dart:545` 已解除无进展预算，ABORT 写还可能等待。操作单 §1.2/§2.1 却把这个时间作为终止发布，并要求 NO_DURABLE_PROGRESS 且严格 `<30s`；实际 `ota_ble_transport.dart:927`/`:935` 在预算耗尽才触发该错误。 | 当前打点不能证明最终收尾/相位发布的上界，严格小于触发阈值也不是冻结合同“30 秒无进展必须中止”的忠实表达。先区分中止决定、停止业务写与终态发布并在真实边界打点，审查后固定操作单；用延迟 ABORT 与边界时钟反例验证。不得改产品门槛来让数据变绿；不据此臆判真机一定超时。 |
+| OPS-01 / P2（仅受影响的硬件执行/证据） | B1-M 操作单 §6.4 仍是已用 0/剩余 3，但交付报告及 r9/r20/r21 原始记录均证明各有一次真实写。报告 §7 还披露 `adb logcat -c` 和设备端 `/sdcard/ui.xml` 覆盖；操作单 §4 明禁清日志，未在该报告找到覆盖这项差异的另行批准锚点。报告又将失败轮从“合计 <=20min（含广播、连接、收尾）”中排除，整段跨度约 58min。 | 台账与边界审计必须补齐；B1-M 三次写额度不能按旧表继续使用。核对真实授权、全部尝试/时间/副作用及受影响证据，不能把报告自述当额外授权。本轮不裁定未提供的聊天授权不存在，不抹掉有效原始样本，也不因这项差异作废整个 P3-3 或擅自重采。 |
+| OBS-03 / P3（非阻断记录纠正） | `ota_device_observation.dart:367` 的 `addr=$advertisement.address` 仅插值对象，`.address` 是普通文本；target 行不是声明的地址格式。成功用例只检查 matched_by，未检查该字段。 | 应使用实际 address 字段并断言完整 target 行；connect/identity 行仍有正确地址，不因此把它们全部作废。该项不单独重开硬件或整卡验收。 |
+
+#### 6.18.3 独立执行与远端实物核验
+
+本轮输出根：`.cache/p3-3-acceptance-20260912-01/`。命令、cwd、真实退出码、超时和
+原始日志 SHA-256 分别保留在同名 JSON/log 中；它们是本次预审记录，不是 v3 冻结矩阵。
+
+| 检查 | 本轮实际结果 | 原始记录 |
+| --- | --- | --- |
+| `python -X utf8 -B tests/ota/test_flutter_dev_apk.py -v` | 25/25 通过，exit 0，不构建 APK | `host-apk.log` / `host-apk.json` |
+| `python -X utf8 -B tests/ota/test_flutter_dev_checks.py -v` | 50/50 通过，exit 0，含进程超时/清理、边界正反例与 Git fixture | `host-checks.log` / `host-checks.json` |
+| `python -X utf8 -B tests/ota/test_acceptance_bundle.py AcceptanceExecutionPolicyTests PostP26SpecGovernanceTests -v` | 27/27 通过，exit 0，含三类实机证据归属与错误延期的拒绝用例 | `host-governance.log` / `host-governance.json` |
+| 对真实 `observation_config()` 的四组无网络负例 | 1 项正确拒绝、3 项错误放行，探针 exit 1；失败原样保留 | `url-probes.log` / `url-probes.json` 记录原始输出与精确 argv，探针入口见同目录 `review_io.py`；已存在日志禁止原地覆盖 |
+| Actions 当前 HEAD 查询与 job 检查 | 两个 run 都是开发工作流；独立核对 dispatch run 双宿主均 success | `ci-for-head.log`、`ci-view-34692044446.log` |
+| 原始开发归档下载/全字节摘要核对 | 两个日志 ZIP 的实物 SHA-256 与 GitHub API 的 artifact digest 一致，20 个文件先检查路径再解包 | `ci-artifacts-34692044446.log`、`archive-*-inventory.json`、`ci-logs-34692044446/` |
+| `git diff --check` | 当前已执行通过；6 条既有 autocrlf 提示不是内容错误 | 最后报告回写后再做格式检查，不据此替代产品测试 |
+
+权威 run：`https://github.com/Eitan-S-23/E-Track/actions/runs/34692044446`，attempt 1，
+headSha 与本轮 HEAD 完全一致。原始 `result.json` 均声明 `scope=all`、
+`evidence_kind=development-self-test`、`formal_acceptance=NOT_RUN`。
+
+| 项 | Ubuntu | Windows |
+| --- | --- | --- |
+| analyze | `No issues found!`，exit 0 | `No issues found!`，exit 0 |
+| 全量 app tests | `+304 ~7: All tests passed!` | `+311: All tests passed!` |
+| 命令退出码 | 13 条全部 0 | 5 条全部 0 |
+| APK | debug 构建/签名校验/收集成功 | NOT_REQUESTED |
+| release APK / Flutter EXE | NOT_RUN | NOT_RUN |
+
+两宿主 SDK 均为 Flutter **3.47.4** stable，framework
+`9584c6713b324636289d067944a46fd6b49df14b`，engine
+`06a2e2a110089dff50fe635cffd2a61e1b24fbcd`，Dart **3.13.3**；不是第九批报告中的
+Flutter 3.47.3。各自 lockfile 前后摘要未变，toolchain regeneration 仍由现有开发记录
+绑定；不能把这种开发豁免直接当成正式执行 worktree 门禁通过。
+
+Linux `apk_build.log` 实数 **12 条 warning、0 条 error**：Gradle/AGP/Kotlin 支持期、
+SDK manager 弃用、插件要求 SDK 36 与 SDK XML 版本告警均如实保留，不以“构建绿”隐藏。
+`apk_collect.log` 记录 `com.wen.gaia.gaia.obs`，131,509,606 B，debug APK SHA-256
+`89a0491b97ae3170c1c3615ffc6a0ee8189fa252b1445589c19e748f6bda3f6d`，
+`release_signing=false`。**本轮只下载并复算日志归档，未下载这个 APK 实物、未安装；
+该 APK 摘要是经核对的 CI 原始记录，不冒充本机 APK 重算值。**
+
+B1-M 方面，本轮只读核对三份 `peripheral.jsonl` 和对应 native logcat：r9/r20/r21 均
+`writes_seen=1, exit_code=0`；PC held_us 分别为 34087、3045805、20028353；手机
+native 回调分别为成功、成功、GATT_UNLIKELY(14)。因此不是“从未做过机制观测”，
+三次写账目须保留。但它们使用旧 release 客户端 `writeByAddress` 而非本卡 OTA 专用
+路径；报告明确未证明物理写取消，也没有 toy/真包升级。手机片段是 logcat 的墙钟时间，
+不将其自动提升为本卡单调时钟性能验收证据，更不跨设备相减。
+
+旧 T1a 的 `device-e268804/flutter-scan.log` 确有 config 行、`No Overlay widget found`
+及 `target_not_seen ... scanned=0`；只证明旧轮失败形态。`t1a-r2/install.log` 记录旧
+`.dev` APK 签名不兼容，不能算覆盖安装成功。这些历史输出不改成当前 HEAD 的实测结果。
+
+#### 6.18.4 批量整改、正式入口与写入审计
+
+1. 先集中修复 OBS-SEC-01、OBS-01/02 及计时/台账问题，补相应负例；保留既有
+   RC3 已修子项及此次真实开发绿证，不要求重做无关历史 MCU/固件验收。
+2. 实现者按现有 `dev/flutter/**` 预授权取得整改批次实际双宿主反馈；开发自测不以
+   正式冻结为前置。需要 release APK/EXE、设备安装或其他额外动作时另按准确边界获准。
+3. 稳定后提交真实实现与 runner 输入，冻结 P3-3 合同/NOT_RUN 矩阵，明确 toy/真包、
+   外部 HTTP、设备身份和有界操作；只通过正式前检后执行所需独立观测。若消费 B1-M
+   runner，先使其入口/助手/配置纳入已审批依赖，不能以未跟踪脚本作为隐式输入。
+4. 当前没有可供 P3-3 正式复用的原始 EXECUTED PASS 合同/矩阵，故不编造 rerun plan、
+   不把开发报告标成 REUSED。以后按执行合同计算最小复验，不默认整套重来。
+
+本轮仅通过 apply_patch 在本 research 与看板增加记录；历史段落、原实现认领及其他
+既有修改保留。输出先核对规范化绝对路径和完整父链，拒绝 reparse/link；全部命令显式
+使用活动根为 cwd，gh 缓存、HOME/AppData/TEMP、测试 fixture 与日志均限定在项目内。
+gh 既有配置仅只读用于结果查询，不修改凭据；没有启动 PowerShell 或任何设备工具。
+宿主 fixture 分别是 `.cache/flutter-dev-apk-tests/run-07de7f605f654029bcf26b443db41c72/`
+与 `.cache/flutter-dev-checks-tests/run-2d88e5d42d9b497096c95faff9f60e54/`，没有清理
+前序产物。最终审核记录保留于输出根的 `closing-audit.json`，检查 HEAD、其他初始脏文件
+哈希、历史文档字节与本次输出路径；不将写入安全快照冒称 v3 source manifest。

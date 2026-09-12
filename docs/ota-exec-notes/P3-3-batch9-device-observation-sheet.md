@@ -13,7 +13,7 @@
 | 项 | 状态 |
 | --- | --- |
 | T1b / A 路径探索（项目内 harness + 隔离依赖 + 只读能力检查） | **已完成**（结论见 §7 与能力报告） |
-| T1b / B1 最小机制验证（广播 + 连接 + 三策略注错） | **未授权**（方案见 §7，待批） |
+| T1b / B1-M 最小机制验证（广播 + 连接 + 三策略注错） | **已授权**（判据见 §7，三种策略各一次） |
 | T1a / A1 开发观测（真机 + 目标板 + J-Link h/g） | **已授权 1 次**（前提见 §2.2） |
 | T1a / B1、B2 注错观测 | **未授权** |
 | T2 MCU 侧 RTT 观测 | **本轮 ENV_BLOCKED**（非永久豁免） |
@@ -229,35 +229,102 @@ adb -s <serial> shell dumpsys bluetooth_manager | findstr /i "state"
 | 判据 | 授权轮数 | 已用 | 剩余 | 备注 |
 | --- | --- | --- | --- | --- |
 | A1（T1a） | 1 | 0 | 1 | 历史失败/尝试记录一并保留 |
-| B1（T1b） | 0（未授权） | 0 | — | 待最小操作方案获批 |
+| **B1-M（T1b 机制）** | **3（每策略 1 次写）** | **0** | **3** | 仅判机制、不判协议；**不占用也不重置** A1 额度 |
+| B1（T1b 完整协议仿真） | 0（未授权） | 0 | — | 只在 B1-M 第 3 策略成立后才申请 |
 | B2（T1b） | 0（未授权） | 0 | — | 同上 |
 
-## 7. T1b / B1 最小操作方案（**待批，未执行**）
+## 7. T1b / B1-M 最小机制验证（**已获授权**；判据先固定，再执行）
 
-能力依据已落盘：`docs/ota-exec-notes/P3-3-t1b-pathA-capability-report.md`。
+授权口径（用户 2026-09-11）：批准广播、连接与三种策略的最小验证，范围**仅限**已核对的
+PC 蓝牙适配器与本项目专用测试手机；新增额度为三种策略**各一次**实际写观测，单独记为
+**B1-M**，不冒充完整 T1b/B1 产品观测，**不占用、不重置** §6.4 的 T1a 额度；**不包括**
+完整 OTA 协议仿真、MCU 操作或 J-Link 操作。
 
-- **源码结论**：`bless==0.2.6`（本机唯一可安装版本）公开 API **无**写响应控制点——
-  回调返回后无条件 `request.respond()`（`bless/backends/winrt/server.py:347-353`；
-  0.3.0 `:409-415` 同构），回调返回值被丢弃（`backends/server.py:271`）。
-  「停止 FFF1 的 OTA ACK 通知 ≠ 停止 ATT 写响应」经源码确认成立。
-- **控制点位置**：WinRT 层存在（`GattWriteRequest.respond` /
-  `respond_with_protocol_error` / `option`；`GattLocalCharacteristic.add_/remove_write_requested`），
-  经 `BlessServer.get_characteristic(uuid).obj` 可达。
-- **只读能力**：本机适配器 `is_peripheral_role_supported=true`（同时 central/LE/offload 为 true）。
-  该自述能力**不**证明 Windows GATT server 实际可被 Android 发现。
-- **最小机制验证（只判机制、不判协议）**：
-  1. 外设侧用 bless 起服务，声明一个 **write-with-response** 特征，由自定义处理器接管
-     （撤销 bless 处理器，或子类覆写后再注册——两条路均需实测确认）；
-  2. 中央侧（Android 测试机）对该特征发一次有响应写；
-  3. 三种策略分别观测：立即 `respond()` / 推迟 N 秒 `respond()` /
-     **不 `respond()` 且不 `complete()` deferral**；
-  4. 判据：仅第 3 种策略下中央侧写回调**不返回**（并在观测窗内复核连接是否仍在）。
-- **本次申请授权**：上述第 1–4 步的**广播、连接与注错观测**（B1）。**不**申请完整
-  FFF0/FFF1/FFF2 协议仿真——它只在第 3 种策略成立后才申请。
-- **止损**：若 Windows 栈在无响应时自动应答或断开 → A 路径不可行，报**具体 API 限制**
-  再比较 B/C，不写「永远无法实测」。
-- **未决项**：见能力报告 §7（delegate 同一性、系统超时/断连语义、扣住响应期能否继续
-  notify、客户端写模式、bless 每回调新建事件循环的影响）。
+### 7.1 判据参数（执行前固定，**不得事后调整**）
+
+依据产品自身计时配置（`lib/ota/ota_ble_transport.dart`）：`ackTimeout=2000ms`（`:77`）、
+`noProgressTimeout=30s`（`:81`）、`writeTimeout=10s`（`:83`）；中央端库
+`flutter_blue_plus 1.35.5` 的写自身超时 **T_c = 15s**
+（`lib/src/bluetooth_characteristic.dart:158` `int timeout = 15`；成功路径必须等到
+`onCharacteristicWritten`）。
+
+| 参数 | 固定值 | 依据 |
+| --- | --- | --- |
+| 延迟应答延迟 **N** | **3s** | 落在产品 `ackTimeout=2s` 之外、`writeTimeout=10s` 之内，三段可区分 |
+| 不应答观察窗 **H** | **20s** | 必须覆盖产品写超时 `10s`；且 H ≥ T_c=15s，才能同时观察客户端自身超时 |
+| 客户端自身超时 **T_c** | **15s** | 中央端库默认值，本次**不修改** |
+| 单策略时限 | **≤ 5 分钟** | 含广播、连接、写入、注错、收尾 |
+| 三策略合计 | **≤ 20 分钟** | 同上 |
+
+- H 按本次**实际配置**核实（产品 10s / 客户端 15s），故取 20s；执行中不得为让结果好看
+  而放大或缩小。
+- 「不返回」必须是**有界观察**：只要求 H 内没有 native 写完成回调，不要求永远没有回调。
+
+### 7.2 判定规则（中央侧 native 事件为准）
+
+| 策略 | 期望 | 判据 |
+| --- | --- | --- |
+| 立即应答 | 正常完成 | 收到 native 写完成事件（logcat TAG `[FBP-Android]` 的 `onCharacteristicWrite`）且成功 |
+| 延迟应答 N=3s | 体现对应延迟后完成 | 完成时刻相对发起时刻 ≈ N，且成功 |
+| 不应答 | H 内无完成回调、连接仍有效 | H 内**无** native 写完成事件；同期连接态仍为已连接 |
+
+- **禁止替代物**：不得用「写请求已提交」「UI 卡住」「Dart Future 未完成」代替 native 完成事件。
+- Windows 后续超时或断连**不自动意味着** A 不可行——要看此前是否已提供足够长的受控无响应窗口。
+- 仅看到超时**也不能**判 A 成立——必须排除客户端、事件循环或采集器自身卡住
+  （PC 侧心跳与中央侧 logcat 双端时间线互证）。
+- 本实验**不能**自动证明「物理写已取消」；只能区分「未观察到写完成」「未收到 ATT 响应」两类。
+- 不同设备的单调时间**不可直接相减**；只与各自设备内的事件序列比较。
+
+### 7.3 工具现状（本轮实测；含一处**方法变更**）
+
+- **bless 在本机不可用（两个版本都不行）**：
+  - `bless==0.3.0` 装不上（钉死已不在 PyPI 的 `winrt-Windows.Devices.Bluetooth==2.0.0b1`）；
+  - `bless==0.2.6` 装得上但**导不进来**：`backends/winrt/{server,service,characteristic}.py`
+    **无条件** `import bleak_winrt.*`（三处，无 `sys.version_info` 分支），且 `service.py`
+    依赖的 `bleak.backends.winrt.service` 已被 `bleak>=1.0` 移除（实测 `bleak==3.0.2` 无此模块）；
+    补齐需源码编译只有 sdist 的 `bleak-winrt==1.2.0`，并把两代 WinRT 投影
+    （pywinrt 1.x 与 winrt-runtime 3.2.1）混进同一进程——不作此变通。
+  - 因此**废止**原「bless 包装 + 撤销其处理器」路线（能力报告原 A1），改用已安装的
+    `winrt-*==3.2.1` **直连**建 GATT server：这正是 bless 所包装的同一 API 面，
+    且**不引入**自研协议栈（仅单特征机制验证）。方法变更的证据见能力报告 §2.5。
+- harness：`docs/ota-exec-notes/tools/p3-3-b1m/b1m_peripheral.py`（约 300 行，单文件）。
+  `docs/ota-exec-notes/**` **不属**任何验收 profile，不进入 Production/Validation/Governance。
+- 本机 API 冒烟（**不广播、不连接、不写**，`--setup-only`）已通过：
+  `GattServiceProvider.create_async` `error=0`、`create_characteristic_async` `error=0`、
+  写处理器注册成功 → 本机可在**非打包** Python 进程内创建 GATT 服务提供者。
+- **必须由中央侧定性的未决项**：本机 `GattLocalCharacteristic.characteristic_properties`
+  回读**系统性丢失 WRITE 位**——请求 `READ|WRITE(10)` 回读 2、`WRITE(8)` 回读 0、
+  `READ|WRITE|NOTIFY(26)` 回读 18；已排除赋值形式（枚举 / int）、写处理器注册前后、
+  `static_value` 与权限级别（权限级别能正确回读），**广播启动后仍为 0**。可能是本机属性
+  getter 的投影问题，也可能真的意味着特征对中央不可写——**只有中央侧发现结果能定性**。
+  若中央发现结果不含 `write` → A 路径在**发现阶段**即受阻，按 §7.6 止损。
+- **本机环回不可行**：Windows 对本地适配器自过滤，同机 `bleak` 扫描（12s / 8s 两次，
+  共 8–9 个外部设备）未发现本机广播，故 PC **不能**充当中央端；中央侧判据必须由手机提供。
+- `stop_advertising()` 后回读 `advertisement_status` 在 1s 内仍为 2 且无状态变更事件；
+  停止后的等待已放宽到 3s，**不以该读数**声称「已停止」——只有「调用过 stop 且进程退出」
+  是确定事实。
+- 准备记录（逐条命令与原始日志路径）：`docs/ota-exec-notes/P3-3-b1m-prep-2026-09-11.md`。
+
+### 7.4 执行前必须记录（缺一不执行）
+
+1. PC 适配器身份（`.cache/p3-3-t1b/capcheck.py` 的 `device_id` / `bluetooth_address`）。
+2. 中央端设备身份（手机序列号）与客户端版本（APK 提交 + SHA-256）。
+3. 特征 UUID 与**实际写模式**：harness 只声明 `WRITE(8)`；实测到达的 `request.option`
+   必须为 `WRITE_WITH_RESPONSE`（harness 逐条记录），否则该次作废并说明。
+4. 输出目录：`.cache/p3-3-t1b/runs/b1m-<strategy>-<run-id>/`（项目内，先建后写）。
+
+### 7.5 收尾（受控，不得擅自动系统状态）
+
+- 到实验截止：释放全部挂起请求（受控 `respond()` + `complete()`）→ 取消延迟任务 →
+  停广播 → 只结束**本次记录的**进程。
+- 不擅自重置系统蓝牙、不清配对、不清应用数据；不全局按名杀进程；不启动未容纳的 PowerShell。
+- 沿用项目内输出预检；所有产物落 §7.4 的项目内目录。
+
+### 7.6 止损
+
+- 正常对照（立即应答）失败 → **先停止定位**，不继续注错、不盲目重试。
+- 若 Windows 栈在无响应时自动应答或断开 → A 路径不可行，报**具体 API 限制**后比较 B/C，
+  不写「永远无法实测」。
 
 ## 8. 交付物（开发观测）
 

@@ -214,8 +214,13 @@ requires committed implementation/runner inputs, approved frozen profiles and
 criteria, the execution-worktree gate and NOT_RUN matrix precheck. Formal
 reruns still use `validate_bundle.py` and its `required_commands`; these reports
 are not replacement manifests or original independent EXECUTED PASS anchors.
-This entry does not resolve or lower P3-3's toy/real-package hardware criteria or
-their pending P3-5 scope ruling.
+This entry does not satisfy or lower P3-3's hardware criteria. OTA-DEC-013
+(2026-09-10) assigns actual APK installation and both toy/real-package device
+upgrade round trips to P3-3 before completion. P3-5 retains real-backend candidate
+integration and ten independent disconnect recoveries. The task Specs define
+the required bootable assets and final GET_INFO identity observations; a debug
+APK or fake test is not that evidence. No hardware authority follows from this
+development entry.
 
 ## Runner Regression
 

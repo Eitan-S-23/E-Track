@@ -73,6 +73,42 @@ WinRT 后端的写请求处理器对两个版本都是「回调返回后无条�
   `deferral.complete()` 双双跳过，但这是**未定义路径**（依赖异常穿过 pythonnet 事件
   回调），不作为方案。
 
+### 2.5 补充实测（2026-09-11 当日复核）：bless 在本机**根本导不进来**
+
+§2 的源码结论成立，但同一轮实测发现更强的阻断：**bless 在本机两个版本都无法投入使用**。
+
+| 版本 | 状态 | 证据 |
+| --- | --- | --- |
+| `0.3.0` | **装不上** | 元数据钉死 `winrt-Windows.Devices.Bluetooth==2.0.0b1`（已不在 PyPI） |
+| `0.2.6` | 装得上，**导不进来** | `import bless` 失败，见下 |
+
+`import bless` 的实际失败链（`.cache/p3-3-t1b/venv`，Python 3.13.12）：
+
+```text
+bless/__init__.py:41              from bless.backends.winrt.server import BlessServerWinRT
+bless/backends/winrt/server.py:14 from bless.backends.winrt.service import BlessGATTServiceWinRT
+bless/backends/winrt/service.py:4 from bleak_winrt.windows... import ...
+ModuleNotFoundError: No module named 'bleak_winrt'
+```
+
+两个独立断点：
+
+1. `bleak_winrt` 命名空间未安装。bless 0.2.6 的三个 winrt 后端模块
+   （`server.py:27/29/31`、`service.py:4`、`characteristic.py:8`）**无条件**导入该命名空间，
+   **没有** `sys.version_info` 分支（只有 0.3.0 有）。该包在 PyPI 上仅存
+   `bleak-winrt==1.2.0`，且对本机解释器**只有 sdist、无 wheel**，安装需本地编译。
+2. 即使装上 `bleak_winrt`，`service.py:9` 还依赖 `bleak.backends.winrt.service`，
+   而 **`bleak>=1.0` 已移除该模块**——实测 `bleak==3.0.2` 的 `backends/winrt/` 只剩
+   `__init__.py / client.py / scanner.py / util.py`；bless 0.2.6 的依赖声明只是未钉版本的
+   `Requires-Dist: bleak`，解析到 3.0.2 后必然断裂。
+
+**处置**：不作「本地编译 legacy 绑定 + 降级 bleak + 同一进程混两代 WinRT 投影」的变通；
+按 §6 的 A2 判据改用已安装的 `winrt-*==3.2.1` **直连**建 GATT server——即 bless 所包装的
+**同一 API 面**，仅做单特征机制验证，不实现协议栈。此属**方法变更**，已记入操作单 §7.3。
+符号名以 `.cache/p3-3-t1b/direct_api_probe.py` 实测确认，不凭记忆书写；直连 harness 的
+API 冒烟（建服务 + 建特征 + 注册处理器，**不广播**）已通过（`error=0`，日志见
+`.cache/p3-3-t1b/runs/b1m-smoke/`）。
+
 ## 3. 第二问：WinRT 层是否存在控制点 —— **有**
 
 只读 API 面检查（`winrt-Windows.Devices.Bluetooth.GenericAttributeProfile==3.2.1`
@@ -129,8 +165,8 @@ WinRT 后端的写请求处理器对两个版本都是「回调返回后无条�
 | 级别 | 内容 | 判定 |
 | --- | --- | --- |
 | A0 | 用 bless 公开 API 扣住写响应 | **不可行**（§2，源码级确定） |
-| A1 | bless 负责广播/服务声明/通知 + 自定义 `add_write_requested` 处理器接管应答 | **机制具备、语义未验证**（§3 控制点存在，§4 未决） |
-| A2 | 完全自写 WinRT GATT server，不用 bless | 不推荐：自研面扩大，且未解决 §4 的同一未决问题 |
+| A1 | bless 负责广播/服务声明/通知 + 自定义 `add_write_requested` 处理器接管应答 | **本机不可行**：bless 导不进来（§2.5，实测） |
+| A2 | 不用 bless，直接用 `winrt-*` 建 GATT server | **本轮采用**（收窄为单特征机制验证；符号经实测确认，冒烟通过） |
 
 ## 7. 未决项清单（只能由实测判定）
 
@@ -164,7 +200,11 @@ INFO/BEGIN/ACK/断供全流程），而是先做**单特征最小机制验证**�
 
 ## 9. 本报告**未**做的事（NOT_RUN）
 
-- 未广播、未创建 `GattServiceProvider`、未连接任何设备、未注错。
+- 未**广播**、未连接任何设备、未对目标设备注错（`start_advertising` 从未调用）。
+- **已做但需如实记账**：在 `.cache/p3-3-t1b/runs/b1m-smoke/` 的 API 冒烟中创建了
+  `GattServiceProvider` 与一个本地特征并注册了写处理器（`--setup-only`）。该动作会在
+  本机系统内登记一个本地 GATT 服务，属设备状态动作，**不是**只读预检；它不广播、
+  不连接、不写，进程退出后不再持有，但不按「免费」记账。
 - 未安装/未修改任何 MCU 固件，未使用 J-Link。
-- 未对目标 AT32F435 板或测试手机做任何操作。
+- 未对目标 AT32F435 板做任何操作；未对测试手机做任何操作。
 - 未改动冻结契约、历史验收包、`main` 分支或他人工作树内容。
