@@ -25,8 +25,9 @@ import 'ota_device_info.dart';
 ///
 /// 本文件只读扫描结果与时钟、只写日志，不改变任何控制流；所有输出行以
 /// `OTA_OBS ` 开头，字段顺序固定，便于 logcat 侧逐行解析。**结局是全的**：
-/// 命中并读身份成功 / 连接失败 / 身份为空 / 身份抛异常 / 窗口到期仍未命中
-/// —— 五种结局各有且仅有一行 `done`，不允许出现"没有任何终止行"。
+/// 命中并读身份成功 / 连接失败 / 身份为空 / 身份抛异常 / 窗口到期仍未命中 /
+/// 扫描压根没启动（含启动路径自己抛异常）—— 六种结局各有且仅有一行 `done`，
+/// 不允许出现"没有任何终止行"。
 ///
 /// 环境变量名（构建侧同名注入，改一个必须同步改另一个）：
 /// - `TRACE_DEV_DEVICE_OBSERVATION`
@@ -173,7 +174,13 @@ class ObservedAdvertisement {
   static String _orDash(String value) => value.isEmpty ? '-' : value;
 }
 
-typedef OtaObservationStart = Future<void> Function();
+/// 启动扫描。返回值 = **扫描是否真的启动**：适配器未就绪、平台拒绝等情况下
+/// 必须返回 false，观测侧据此给出确定的 `scan_not_started` 终止行，而不是让
+/// "扫了 120s 什么都没扫到"与"扫描根本没启动"在日志里长得一模一样。
+///
+/// 抛异常同样是"没启动"：观测侧会把异常收进同一结局并留下原文，不会让它变成
+/// 一条没有终止行的野异常。
+typedef OtaObservationStart = Future<bool> Function();
 typedef OtaObservationStop = Future<void> Function();
 typedef OtaObservationConnect = Future<bool> Function(
     ObservedAdvertisement advertisement);
@@ -279,8 +286,39 @@ class OtaDeviceObserver {
     if (!config.active || _started) return;
     _started = true;
     _emit(config.statusLine);
+    unawaited(_beginScan());
+  }
+
+  /// 真正开始扫描后才开观测窗口。
+  ///
+  /// 启动是异步的（适配器状态可能还没填充），如果在 [start] 里就开计时，
+  /// 等待期会被算进观测窗口，窗口到期时可能一次扫描都还没跑起来。
+  Future<void> _beginScan() async {
+    bool started;
+    try {
+      started = await startScan();
+    } catch (error) {
+      // 启动路径的实现在失败时会弹 UI 提示，而弹提示那一步自身也会抛
+      // （2026-09-12 真机实测：`No Overlay widget found.`）。异常若逃出去，
+      // 这里就再也不会写下终止行——"启动炸了"会退化成"没有任何终止行"，
+      // 正是本文件要消灭的形态。因此把它归入同一个结局并留下原因。
+      if (_settled) return;
+      _settled = true;
+      _emit('OTA_OBS start result=error detail=$error');
+      _emit('OTA_OBS done result=scan_not_started');
+      unawaited(stopScan());
+      return;
+    }
+    if (_settled) return;
+    if (!started) {
+      // 扫描没启动就不必再等窗口：等下去只会把"没扫"伪装成"扫了没看到"。
+      _settled = true;
+      _emit('OTA_OBS done result=scan_not_started');
+      unawaited(stopScan());
+      return;
+    }
+    _emit('OTA_OBS window=open windowMs=${window.inMilliseconds}');
     _windowTimer = Timer(window, _onWindowExpired);
-    unawaited(startScan());
   }
 
   /// 窗口到期仍未命中目标：给出确定且唯一的终止行，并停止扫描。

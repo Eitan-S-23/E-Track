@@ -80,7 +80,10 @@ void main() {
   test('startFromBuild 在默认构建下不装配观测器也不启动扫描', () async {
     var started = 0;
     final observer = OtaDeviceObserver.startFromBuild(
-      startScan: () async => started++,
+      startScan: () async {
+        started++;
+        return true;
+      },
       stopScan: () async {},
       connect: (_) async => true,
       readIdentity: (_) async => null,
@@ -136,7 +139,7 @@ void main() {
     final lines = <String>[];
     final observer = OtaDeviceObserver(
       config: config(enabled: false),
-      startScan: () async {},
+      startScan: () async => true,
       stopScan: () async {},
       connect: (_) async => true,
       readIdentity: (_) async => null,
@@ -154,7 +157,7 @@ void main() {
     final lines = <String>[];
     final observer = OtaDeviceObserver(
       config: config(),
-      startScan: () async {},
+      startScan: () async => true,
       stopScan: () async {},
       connect: (_) async => true,
       readIdentity: (_) async => null,
@@ -191,7 +194,7 @@ void main() {
     String? boundAddress;
     final observer = OtaDeviceObserver(
       config: config(),
-      startScan: () async {},
+      startScan: () async => true,
       stopScan: () async => stopped = true,
       connect: (_) async {
         stopBeforeConnect = stopped;
@@ -238,7 +241,7 @@ void main() {
       final lines = <String>[];
       final observer = OtaDeviceObserver(
         config: config(),
-        startScan: () async {},
+        startScan: () async => true,
         stopScan: () async {},
         connect: (_) async => connected,
         readIdentity: (_) async {
@@ -267,7 +270,7 @@ void main() {
     var connects = 0;
     final observer = OtaDeviceObserver(
       config: config(),
-      startScan: () async {},
+      startScan: () async => true,
       stopScan: () async {},
       connect: (_) async {
         connects++;
@@ -286,12 +289,12 @@ void main() {
     expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
   });
 
-  test('窗口到期仍未命中：输出确定的 target_not_seen 终止行并停扫描', () async {
+  test('扫描未启动：立刻给出 scan_not_started，不等窗口也不伪装成"扫了没看到"', () async {
     final lines = <String>[];
     var stopped = 0;
     final observer = OtaDeviceObserver(
       config: config(),
-      startScan: () async {},
+      startScan: () async => false,
       stopScan: () async => stopped++,
       connect: (_) async => true,
       readIdentity: (_) async => identity(),
@@ -299,6 +302,70 @@ void main() {
       emit: lines.add,
     );
     observer.start();
+    await pumpUntil(lines, 'OTA_OBS done');
+
+    // 真机踩过：适配器状态未就绪时扫描压根没下发，日志只剩 scanned=0，
+    // 与"扫了 120s 但目标不在场"长得一模一样。必须有一条确定的区分行。
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS done')),
+        'OTA_OBS done result=scan_not_started');
+    expect(lines.any((line) => line.startsWith('OTA_OBS window')), isFalse,
+        reason: '扫描没启动就不该开窗口');
+    expect(stopped, 1, reason: '没启动也要回收扫描状态');
+
+    // 窗口时长过去后不得补出第二条终止行。
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
+  });
+
+  test('启动路径自己抛异常：照样收进 scan_not_started，不留野异常', () async {
+    final lines = <String>[];
+    var stopped = 0;
+    // 显式标注返回类型：`() async => throw …` 推出的是 `Future<Never>`，
+    // 这里要的是"签名就是 Future<bool>、但调用时失败"的那条路径。
+    Future<bool> throwingStart() async {
+      throw StateError('No Overlay widget found.');
+    }
+
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: throwingStart,
+      stopScan: () async => stopped++,
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      window: const Duration(milliseconds: 60),
+      emit: lines.add,
+    );
+    observer.start();
+    await pumpUntil(lines, 'OTA_OBS done');
+
+    // 真机 2026-09-12：启动失败路径内部弹 UI 提示又因缺 Overlay 再抛一次。
+    // 异常逃出去就没有终止行，"启动炸了"与"尚未读取"无法区分。
+    expect(lines.last, 'OTA_OBS done result=scan_not_started');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS start')),
+        contains('No Overlay widget found.'));
+    expect(lines.any((line) => line.startsWith('OTA_OBS window')), isFalse);
+    expect(stopped, 1);
+  });
+
+  test('窗口到期仍未命中：输出确定的 target_not_seen 终止行并停扫描', () async {
+    final lines = <String>[];
+    var stopped = 0;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async => stopped++,
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      window: const Duration(milliseconds: 60),
+      emit: lines.add,
+    );
+    observer.start();
+    // 窗口在扫描**真正启动后**才开：启动是异步的，先等 `window=open` 落盘再喂
+    // 扫描结果，断言才不依赖微任务调度顺序，也不会把 30s 适配器等就绪的时间
+    // 误算进 60ms 观测窗口。
+    await pumpUntil(lines, 'OTA_OBS window=open');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS window')),
+        'OTA_OBS window=open windowMs=60');
     observer.onAdvertisements(<ObservedAdvertisement>[
       advertisement(address: '11:22:33:44:55:66', name: 'AIMA'),
     ]);
@@ -323,7 +390,7 @@ void main() {
     final lines = <String>[];
     final observer = OtaDeviceObserver(
       config: config(),
-      startScan: () async {},
+      startScan: () async => true,
       stopScan: () async {},
       connect: (_) async => true,
       readIdentity: (_) async => identity(),
@@ -336,6 +403,9 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 160));
     expect(lines.where((line) => line.startsWith('OTA_OBS done')),
         <String>['OTA_OBS done result=ok']);
+    // 命中发生在窗口打开之前（`start()` 异步启动扫描），结算后 `_beginScan()`
+    // 不得再补开窗口——否则终止结局会有第二行候选。
+    expect(lines.any((line) => line.startsWith('OTA_OBS window')), isFalse);
   });
 
   test('身份为空时原样转述服务侧原因，不把三类失败压成一个词', () async {
@@ -343,7 +413,7 @@ void main() {
     const reason = '设备未暴露 OTA 服务（FFF0/FFF2/FFF1）';
     final observer = OtaDeviceObserver(
       config: config(),
-      startScan: () async {},
+      startScan: () async => true,
       stopScan: () async {},
       connect: (_) async => true,
       readIdentity: (_) async => null,
@@ -361,7 +431,7 @@ void main() {
     final lines = <String>[];
     final observer = OtaDeviceObserver(
       config: config(),
-      startScan: () async {},
+      startScan: () async => true,
       stopScan: () async {},
       connect: (_) async => true,
       readIdentity: (_) async => null,

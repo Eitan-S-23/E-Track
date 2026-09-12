@@ -117,7 +117,8 @@ class MyApp extends StatelessWidget {
               // 任何日志，默认行为与改动前一致。启用但配置缺失/非法时只输出
               // 一行 OTA_OBS config=INVALID，不启动观测。
               OtaDeviceObserver.startFromBuild(
-                startScan: () => Get.find<BleController>().startScan(),
+                startScan: () => Get.find<bt_service.BluetoothService>()
+                    .startObservationScan(),
                 stopScan: () => Get.find<BleController>().stopScan(),
                 connect: (advertisement) =>
                     Get.find<bt_service.BluetoothService>()

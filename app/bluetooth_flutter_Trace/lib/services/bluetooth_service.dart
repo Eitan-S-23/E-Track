@@ -2150,6 +2150,35 @@ class BluetoothService extends GetxController {
     );
   }
 
+  /// 观测专用扫描入口：等适配器就绪后再启动，并**返回是否已下发扫描**。
+  ///
+  /// UI 入口 `BleController.startScan()` 在适配器状态尚未填充时按"蓝牙未开"
+  /// 直接返回并尝试弹提示；观测是在首帧回调里发起的，那一刻
+  /// [adapterState] 仍在异步初始化，于是扫描根本没启动，日志只留下
+  /// `scanned=0`——与"扫了 120s 但目标不在场"长得一模一样。2026-09-12 真机
+  /// 实测即为此：`.obs` 包全程零扫描批次，而同机另一进程正常收到 169 台。
+  ///
+  /// 这里按有界重试等状态到位（最多 30s，1s 未就绪重试一次），复用同一条
+  /// 扫描实现，不另写扫描逻辑。
+  ///
+  /// 返回值的边界：[startScan] 内部吞掉平台异常，因此这里只能保证"适配器
+  /// 已经是 on 且已下发扫描"，不能保证平台一定兑现。不额外探测平台状态
+  /// 制造更弱的证据——若平台拒绝，观测侧仍会以 `target_not_seen scanned=0`
+  /// 收尾，与"设备不在场"的差别由本方法返回 false 的那条路径显式区分。
+  Future<bool> startObservationScan() async {
+    const attempts = 30;
+    for (var attempt = 0; attempt < attempts; attempt++) {
+      if (adapterState.value == BluetoothAdapterState.on) {
+        await startScan();
+        return true;
+      }
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    debugPrint('观测扫描未启动: 适配器状态在 ${attempts}s 内未就绪 '
+        '(adapterState=${adapterState.value})');
+    return false;
+  }
+
   /// 观测专用连接入口：按已扫描到的地址连接，并**返回真实结果**。
   ///
   /// UI 入口 [connectDevice] 只弹提示不返回成败，观测侧需要确定的
