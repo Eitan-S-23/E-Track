@@ -31,6 +31,22 @@ void main() {
     }
   });
 
+  /// 有界等待文件真正落盘。
+  ///
+  /// `File.openWrite()` 的文件创建是**异步**的：它同步返回 IOSink，真正的
+  /// create/open 在后台完成。因此"首块进度回调已触发"并不等于"文件此刻已
+  /// 存在"——进度回调发生在 `sink.add()` 之后，而该写可能还排在待打开队列
+  /// 里。在途用例若紧接着断言 `existsSync()`，就是拿调度时序做赌博，负载高
+  /// 的 runner（Windows 实测）上会输。
+  ///
+  /// 这里只消除时序不确定性，不改变判别力：文件始终没被创建时轮询到上限
+  /// 后断言仍为假，用例照常失败。
+  Future<void> waitForFile(File file) async {
+    for (var i = 0; i < 200 && !file.existsSync(); i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+  }
+
   Uint8List assetBytes(int size) =>
       Uint8List.fromList(List<int>.generate(size, (i) => (i * 7 + 3) & 0xFF));
 
@@ -997,13 +1013,25 @@ void main() {
       await firstChunk.future;
       final part =
           File('${tempDir.path}${Platform.pathSeparator}pkg.etu.part');
-      expect(part.existsSync(), isTrue);
-      await owner.cancel('asset-1');
-      await Future<void>.delayed(Duration.zero);
-      expect(pendingError, isNotNull, reason: '取消必须让在途路径退出');
-      expect(part.existsSync(), isFalse,
-          reason: '在途退出后必须删除 partial');
-      expect(File('${part.path}.json').existsSync(), isFalse);
+      // 首块已进写盘路径：等文件真正落盘再断言（见 waitForFile 注释）。
+      // 断言失败时不能让在途下载留在原地——它的写句柄会让 tearDown 的目录
+      // 删除报 errno 32，把一条失败放大成两条并掩盖真正的失败原因。
+      var cancelled = false;
+      try {
+        await waitForFile(part);
+        expect(part.existsSync(), isTrue);
+        await owner.cancel('asset-1');
+        cancelled = true;
+        await Future<void>.delayed(Duration.zero);
+        expect(pendingError, isNotNull, reason: '取消必须让在途路径退出');
+        expect(part.existsSync(), isFalse,
+            reason: '在途退出后必须删除 partial');
+        expect(File('${part.path}.json').existsSync(), isFalse);
+      } finally {
+        if (!cancelled) {
+          await owner.cancel('asset-1', keepPartial: true);
+        }
+      }
     }, timeout: const Timeout(Duration(seconds: 20)));
 
     test('在途未退出：cancel 超时不抢删，写盘方退出后补删（RC3-02/05）',
