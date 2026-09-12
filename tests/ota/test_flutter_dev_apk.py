@@ -43,10 +43,14 @@ class DevelopmentApkTests(unittest.TestCase):
         self.write(Path("host-sdk/licenses/android-sdk-license"), b"fixture-license\n")
         self.write(Path("host-java/bin/java"), b"fixture\n")
         base = CHECKS.contained_environment(self.root, self.run)
-        # 宿主/CI 环境可能已显式启用包名后缀（workflow 的 job env 会透传）；它
-        # 不得渗进 fixture 判定，否则同一提交在不同环境得到不同期望值。该路径
-        # 由 test_environment_... 与 test_collect_rejects_... 显式覆盖。
-        base.pop(APK.APPLICATION_ID_ENV, None)
+        # 宿主/CI 环境可能已显式启用包名后缀或设备观测（workflow 的 job env 会
+        # 透传）；它们不得渗进 fixture 判定，否则同一提交在不同环境得到不同
+        # 期望值。两条路径分别由 test_environment_... /
+        # test_debug_application_id_suffix_... 与 test_device_observation_...
+        # 显式覆盖。
+        for name in (APK.APPLICATION_ID_ENV, APK.DEVICE_OBSERVATION_ENV,
+                     APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV):
+            base.pop(name, None)
         base.update({"ANDROID_HOME": str(self.root / "host-sdk"),
                      "JAVA_HOME_17_X64": str(self.root / "host-java")})
         self.env = APK.environment(self.root, self.run, base)
@@ -268,6 +272,147 @@ class DevelopmentApkTests(unittest.TestCase):
         sdk = next(argv for name, argv, _, _ in plan if name == "apk_sdk")
         self.assertIn(f"--sdk_root={self.run / 'android-sdk'}", sdk)
         self.assertIn("platforms;android-35", sdk)
+
+    def observation_env(self):
+        """显式启用的设备观测构建环境（不含任何凭据）。"""
+        return {
+            **self.env,
+            APK.DEVICE_OBSERVATION_ENV: "true",
+            APK.OBSERVATION_TARGET_ENV: "XTrace",
+            APK.OBSERVATION_FIRMWARE_URL_ENV:
+                "https://example.pages.dev/api/public/firmware/latest",
+        }
+
+    def test_device_observation_is_opt_in_and_absent_by_default(self):
+        # 未设置 / 空 / 显式 false 一律等于"不观测"，且不注入任何 dart-define。
+        for env in ({}, {APK.DEVICE_OBSERVATION_ENV: "   "},
+                    {APK.DEVICE_OBSERVATION_ENV: "false"}):
+            with self.subTest(env=env):
+                self.assertIsNone(APK.observation_config(env))
+        self.assertEqual([], APK.observation_defines(None))
+        plan = APK.plan(self.root, self.run, self.env)
+        build = next(argv for name, argv, _, _ in plan if name == "apk_build")
+        self.assertFalse([arg for arg in build if arg.startswith("--dart-define")])
+
+    def test_device_observation_injection_reaches_the_build_command(self):
+        env = self.observation_env()
+        config = APK.observation_config(env)
+        self.assertEqual("XTrace", config["target"])
+        self.assertEqual(env[APK.OBSERVATION_FIRMWARE_URL_ENV],
+                         config["firmware_latest_url"])
+        self.assertTrue(config["sentinel"].startswith(APK.OBSERVATION_SENTINEL_PREFIX))
+        # 指纹只由 (target, url) 决定：键序与开关写法（含大小写/空白）不改变它，
+        # 运行期日志里的 sentinel 才能与 CI 记录一一对上。
+        self.assertEqual(config["sentinel"], APK.observation_config({
+            APK.OBSERVATION_FIRMWARE_URL_ENV: env[APK.OBSERVATION_FIRMWARE_URL_ENV],
+            APK.DEVICE_OBSERVATION_ENV: "  TRUE  ",
+            APK.OBSERVATION_TARGET_ENV: "XTrace",
+        })["sentinel"])
+        plan = APK.plan(self.root, self.run, env)
+        build = next(argv for name, argv, _, _ in plan if name == "apk_build")
+        for expected in (
+            f"--dart-define={APK.DEVICE_OBSERVATION_ENV}=true",
+            f"--dart-define={APK.OBSERVATION_TARGET_ENV}=XTrace",
+            f"--dart-define={APK.OBSERVATION_SENTINEL_ENV}={config['sentinel']}",
+            "--dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL="
+            + env[APK.OBSERVATION_FIRMWARE_URL_ENV],
+        ):
+            self.assertIn(expected, build)
+        self.assertIn("--debug", build)
+
+    def test_device_observation_rejects_incomplete_or_credentialed_config(self):
+        base = {
+            APK.DEVICE_OBSERVATION_ENV: "true",
+            APK.OBSERVATION_TARGET_ENV: "XTrace",
+            APK.OBSERVATION_FIRMWARE_URL_ENV: "https://example.pages.dev/latest",
+        }
+        cases = [
+            # 启用后缺 target / 缺地址：不许"半配置"进入构建。
+            ({**base, APK.OBSERVATION_TARGET_ENV: ""}, "TRACE_DEV_OBSERVATION_TARGET"),
+            ({**base, APK.OBSERVATION_TARGET_ENV: "有中文"}, "TRACE_DEV_OBSERVATION_TARGET"),
+            ({**base, APK.OBSERVATION_FIRMWARE_URL_ENV: ""},
+             "TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL"),
+            # 只允许不含凭据的公开 HTTPS 地址。
+            ({**base, APK.OBSERVATION_FIRMWARE_URL_ENV: "http://example.pages.dev/latest"},
+             "credential-free public https"),
+            ({**base, APK.OBSERVATION_FIRMWARE_URL_ENV: "https://u:p@example.pages.dev/latest"},
+             "credential-free public https"),
+            ({**base, APK.OBSERVATION_FIRMWARE_URL_ENV:
+                "https://example.pages.dev/latest?token=fixture"},
+             "must not carry credentials"),
+            ({**base, APK.OBSERVATION_FIRMWARE_URL_ENV:
+                "https://example.pages.dev/latest#fixture"},
+             "must not carry credentials"),
+            # 开关取值只认 true：含糊的取值不许被当成"已启用"。
+            ({APK.DEVICE_OBSERVATION_ENV: "yes"}, "must be exactly"),
+        ]
+        for env, message in cases:
+            with self.subTest(env=env), self.assertRaisesRegex(ValueError, message):
+                APK.observation_config(env)
+        # 非法配置在构建计划阶段就失败，不会先下载 Gradle 再报错。
+        with self.assertRaisesRegex(ValueError, "TRACE_DEV_OBSERVATION_TARGET"):
+            APK.plan(self.root, self.run, {**base, APK.OBSERVATION_TARGET_ENV: ""})
+
+    def test_collect_refuses_an_apk_without_the_injected_observation_constants(self):
+        env = self.observation_env()
+        config = APK.observation_config(env)
+        constants = {
+            "sentinel": config["sentinel"],
+            "url": config["firmware_latest_url"],
+            "target": config["target"],
+        }
+        for missing in constants:
+            with self.subTest(missing=missing):
+                blob = "".join(
+                    value for name, value in constants.items() if name != missing
+                ).encode("utf-8")
+                self.write(APK.APK_RELATIVE, self.archive_bytes([
+                    ("AndroidManifest.xml", b"fixture, not a real APK manifest"),
+                    (APK.KERNEL_BLOB, blob),
+                ]))
+                with mock.patch.object(APK, "read_application_id",
+                                       return_value="com.example.fixture"), \
+                        self.assertRaisesRegex(ValueError, "not observation-ready"):
+                    APK.collect(self.root, self.run, "1" * 40, env)
+                self.assertFalse((self.run / "artifacts").exists())
+        # 没有 kernel blob 同样拒绝：不能"读不到就不检查"。
+        self.write(APK.APK_RELATIVE, self.archive_bytes([
+            ("AndroidManifest.xml", b"fixture, not a real APK manifest"),
+        ]))
+        with mock.patch.object(APK, "read_application_id",
+                               return_value="com.example.fixture"), \
+                self.assertRaisesRegex(ValueError, "no Dart kernel blob"):
+            APK.collect(self.root, self.run, "1" * 40, env)
+        self.assertFalse((self.run / "artifacts").exists())
+
+    def test_collect_records_the_verified_observation_configuration(self):
+        env = self.observation_env()
+        config = APK.observation_config(env)
+        blob = ("".join(config.values())).encode("utf-8")
+        self.write(APK.APK_RELATIVE, self.archive_bytes([
+            ("AndroidManifest.xml", b"fixture, not a real APK manifest"),
+            (APK.KERNEL_BLOB, blob),
+        ]))
+        with mock.patch.object(APK, "read_application_id",
+                               return_value="com.example.fixture"), \
+                mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, env)
+        metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        observed = metadata["device_observation"]
+        self.assertTrue(observed["enabled"])
+        self.assertEqual("XTrace", observed["target"])
+        self.assertEqual(config["sentinel"], observed["sentinel"])
+        self.assertEqual(config["firmware_latest_url"], observed["firmware_latest_url"])
+
+    def test_collect_without_observation_keeps_the_previous_metadata(self):
+        data = self.archive_bytes([("AndroidManifest.xml", b"fixture")])
+        self.write(APK.APK_RELATIVE, data)
+        with mock.patch.object(APK, "read_application_id",
+                               return_value="com.example.fixture"), \
+                mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, self.env)
+        metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        self.assertNotIn("device_observation", metadata)
 
     def test_cli_never_builds_or_downloads_locally(self):
         with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "false"}), \

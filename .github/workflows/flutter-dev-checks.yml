@@ -24,6 +24,21 @@ on:
         required: false
         type: string
         default: ""
+      device_observation:
+        description: "Explicit opt-in device-observation debug APK; requires observation_target and observation_firmware_latest_url"
+        required: false
+        type: boolean
+        default: false
+      observation_target:
+        description: "BLE advertised name or MAC the observation APK binds automatically, such as 'XTrace'; required when device_observation is on"
+        required: false
+        type: string
+        default: ""
+      observation_firmware_latest_url:
+        description: "Credential-free public https firmware-latest endpoint compiled into the observation APK; required when device_observation is on"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -53,6 +68,10 @@ jobs:
       FLUTTER_DEV_BUILD_APK: ${{ matrix.os == 'ubuntu-latest' && (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'true' || 'false' }}
       # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
       TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
+      # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
+      TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}
+      TRACE_DEV_OBSERVATION_TARGET: ${{ inputs.observation_target || '' }}
+      TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: ${{ inputs.observation_firmware_latest_url || '' }}
     steps:
       - name: Checkout validation commit
         uses: actions/checkout@v4

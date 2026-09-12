@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'controllers/ble_controller.dart';
 import 'controllers/monitor_controller.dart';
+import 'ota/ota_device_observation.dart';
 import 'pages/main_app_page.dart';
 import 'pages/home_page.dart';
 import 'pages/monitor_page.dart';
@@ -111,6 +112,19 @@ class MyApp extends StatelessWidget {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Get.find<NotificationService>().initialize();
               Get.find<AppUpdateService>().checkDailyOnStartup();
+              // P3-3 T1a 设备观测（dev 分支 + dev APK 专用）。未显式注入
+              // TRACE_DEV_DEVICE_OBSERVATION 时返回 null：不启动扫描、不产生
+              // 任何日志，默认行为与改动前一致。启用但配置缺失/非法时只输出
+              // 一行 OTA_OBS config=INVALID，不启动观测。
+              OtaDeviceObserver.startFromBuild(
+                startScan: () => Get.find<BleController>().startScan(),
+                stopScan: () => Get.find<BleController>().stopScan(),
+                connect: (advertisement) =>
+                    Get.find<bt_service.BluetoothService>()
+                        .connectObservedDevice(advertisement),
+                readIdentity: (address) =>
+                    Get.find<OtaService>().readDeviceInfo(address),
+              );
             });
           }),
           getPages: [

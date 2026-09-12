@@ -11,6 +11,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import urllib.parse
 import urllib.request
 import zipfile
 
@@ -22,6 +23,20 @@ from Tools.flutter.dev_checks import APP, checked_path, make_directory
 APK_RELATIVE = APP / "build/app/outputs/flutter-apk/app-debug.apk"
 APPLICATION_ID_ENV = "TRACE_DEV_APP_ID_SUFFIX"
 APPLICATION_ID_SUFFIX_PATTERN = re.compile(r"^\.[A-Za-z][A-Za-z0-9_]*$")
+
+# 设备观测构建开关（P3-3 T1a）。三项都显式启用；默认全部为空 = 不观测。
+DEVICE_OBSERVATION_ENV = "TRACE_DEV_DEVICE_OBSERVATION"
+OBSERVATION_TARGET_ENV = "TRACE_DEV_OBSERVATION_TARGET"
+OBSERVATION_FIRMWARE_URL_ENV = "TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL"
+OBSERVATION_SENTINEL_ENV = "TRACE_DEV_OBSERVATION_SENTINEL"
+OBSERVATION_SENTINEL_PREFIX = "OTAOBS"
+OBSERVATION_TARGET_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:_.\-]{1,31}$")
+# 只允许不含凭据的公开地址：查询串里出现这些键名即视为凭据。
+CREDENTIAL_QUERY_PATTERN = re.compile(
+    r"(?i)(^|[?&])(token|secret|signature|sig|apikey|api_key|access_key|auth)="
+)
+# 调试构建的 Dart 常量落在 kernel blob 里；定义是否真的进了产物以此为准。
+KERNEL_BLOB = "assets/flutter_assets/kernel_blob.bin"
 
 
 def android_versions(root):
@@ -57,6 +72,68 @@ def expected_application_id(root, suffix):
     if len(found) != 1:
         raise ValueError("APK identity requires one explicit applicationId in the app config")
     return found[0] + suffix
+
+
+def observation_config(env):
+    """显式启用的设备观测构建配置；未启用返回 None（默认行为不变）。
+
+    启用后 target 与固件查询地址都必填：缺失或非法**在这里就失败**，不进入
+    构建也不产出产物记录——"声称设备观测就绪、实际没注入"的假阳性 APK 不能
+    产生。地址只接受不含凭据的公开 HTTPS URL。
+    """
+    enabled = (env.get(DEVICE_OBSERVATION_ENV) or "").strip().lower()
+    if enabled in ("", "0", "false"):
+        return None
+    if enabled not in ("1", "true"):
+        raise ValueError(f"{DEVICE_OBSERVATION_ENV} must be exactly 'true' when set")
+    target = (env.get(OBSERVATION_TARGET_ENV) or "").strip()
+    if not OBSERVATION_TARGET_PATTERN.fullmatch(target):
+        raise ValueError(
+            f"{OBSERVATION_TARGET_ENV} must be a BLE name or address such as 'XTrace'"
+        )
+    url = (env.get(OBSERVATION_FIRMWARE_URL_ENV) or "").strip()
+    parsed = urllib.parse.urlsplit(url)
+    if (parsed.scheme != "https" or not parsed.hostname
+            or parsed.username or parsed.password):
+        raise ValueError(
+            f"{OBSERVATION_FIRMWARE_URL_ENV} must be a credential-free public https URL"
+        )
+    if parsed.fragment or CREDENTIAL_QUERY_PATTERN.search(parsed.query):
+        raise ValueError(
+            f"{OBSERVATION_FIRMWARE_URL_ENV} must not carry credentials or fragments"
+        )
+    return {
+        "target": target,
+        "firmware_latest_url": url,
+        # 配置指纹：绑定本次注入的确切取值，运行期把它打进日志与 CI 记录比对。
+        "sentinel": OBSERVATION_SENTINEL_PREFIX + hashlib.sha256(
+            f"{target}\n{url}".encode("utf-8")
+        ).hexdigest()[:24],
+    }
+
+
+def observation_defines(config):
+    """观测配置对应的 `--dart-define` 列表；未启用时为空（不注入任何定义）。"""
+    if config is None:
+        return []
+    return [
+        f"--dart-define={DEVICE_OBSERVATION_ENV}=true",
+        f"--dart-define={OBSERVATION_TARGET_ENV}={config['target']}",
+        f"--dart-define={OBSERVATION_SENTINEL_ENV}={config['sentinel']}",
+        f"--dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL={config['firmware_latest_url']}",
+    ]
+
+
+def read_kernel_blob(root, apk):
+    """读取调试 APK 的 Dart kernel blob（编译期常量的判据所在）。"""
+    source = checked_path(root, apk)
+    try:
+        with zipfile.ZipFile(source) as archive:
+            return archive.read(KERNEL_BLOB)
+    except KeyError:
+        raise ValueError(
+            "Debug APK has no Dart kernel blob; cannot verify injected constants"
+        )
 
 
 def read_application_id(root, run_dir, apk, run=subprocess.run):
@@ -108,6 +185,8 @@ def environment(root, run_dir, env):
 
 def plan(root, run_dir, env):
     version, compile_sdk = android_versions(root)
+    # 观测配置在这里先校验一次：非法取值在下载/构建之前失败，不浪费一轮构建。
+    defines = observation_defines(observation_config(env))
     helper = [sys.executable, "-B", str(root / "Tools/flutter/dev_apk.py")]
     common = ["--repo-root", str(root), "--run-dir", str(run_dir)]
     source = Path(env.get("ETRACK_ANDROID_SDK_SOURCE") or run_dir / "missing-android-tools")
@@ -125,7 +204,8 @@ def plan(root, run_dir, env):
                          "--gradle-version", version, "--distribution-type", "all"], root, 300),
         ("apk_install_wrapper", helper + ["install-wrapper", *common], root, 30),
         ("apk_build", [str(run_dir / "sdk/bin/flutter"), "build", "apk", "--debug",
-                       "--no-pub", "--target-platform=android-arm,android-arm64"], root / APP, 1200),
+                       "--no-pub", "--target-platform=android-arm,android-arm64",
+                       *defines], root / APP, 1200),
         ("apk_verify", [str(sdk / "build-tools/35.0.0/apksigner"), "verify", "--verbose",
                         str(root / APK_RELATIVE)], root, 60),
         ("apk_collect", helper + ["collect", *common], root, 30),
@@ -278,6 +358,21 @@ def collect(root, run_dir, commit, env):
         raise ValueError(
             f"Debug APK declares application id {observed}, expected {expected}"
         )
+    # 观测产物必须自证注入生效：`--dart-define` 是构建意图，只有产物内的
+    # 常量字面量能证明它真的进了这台 APK。缺一即拒绝记录产物。
+    observation = observation_config(env)
+    if observation is not None:
+        blob = read_kernel_blob(root, source)
+        for label, value in (
+            ("sentinel", observation["sentinel"]),
+            ("firmware-latest URL", observation["firmware_latest_url"]),
+            ("target", observation["target"]),
+        ):
+            if value.encode("utf-8") not in blob:
+                raise ValueError(
+                    f"Debug APK does not contain the injected device-observation "
+                    f"{label}; refusing to record an APK that is not observation-ready"
+                )
     target = checked_path(root, run_dir / "artifacts/trace-dev-debug.apk")
     copy_new(root, source, target)
     metadata = {
@@ -285,6 +380,13 @@ def collect(root, run_dir, commit, env):
         "commit": commit, "sha256": sha256(target), "bytes": target.stat().st_size,
         "file": target.name, "release_signing": False, "application_id": observed,
     }
+    if observation is not None:
+        metadata["device_observation"] = {
+            "enabled": True,
+            "target": observation["target"],
+            "sentinel": observation["sentinel"],
+            "firmware_latest_url": observation["firmware_latest_url"],
+        }
     write_new(root, target.with_suffix(".json"), json.dumps(metadata, indent=2) + "\n")
     print(json.dumps(metadata))
 

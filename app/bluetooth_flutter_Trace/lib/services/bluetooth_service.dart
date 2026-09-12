@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 // Windows蓝牙支持 - 条件性导入
 import 'package:win_ble/win_ble.dart';
 
+import '../ota/ota_device_observation.dart';
+
 // 抽象蓝牙适配器接口
 abstract class BluetoothAdapter {
   Future<void> init();
@@ -739,6 +741,8 @@ class BluetoothService extends GetxController {
 
       // 监听扫描结果
       _scanSubscription = _adapter.scanResults.listen((results) {
+        // P3-3 T1a 设备观测：显式启用时逐台落 logcat（未启用时是空操作）。
+        _observeScanResults(results);
         if (Platform.isWindows) {
           debugPrint('Windows平台处理扫描结果，设备数量: ${results.length}');
 
@@ -2131,6 +2135,57 @@ class BluetoothService extends GetxController {
             r.device.remoteId.str.toLowerCase() == deviceAddress.toLowerCase())
         ?.device;
     return foundScanned;
+  }
+
+  // ---- P3-3 T1a 设备观测适配（仅显式启用的 dev APK 生效） ----
+
+  /// 把扫描批次喂给观测器。观测器未装配（默认构建）时立即返回，
+  /// 不产生任何计算与日志。
+  void _observeScanResults(List<dynamic> results) {
+    final observer = OtaDeviceObserver.instance;
+    if (observer == null) return;
+    if (results is! List<ScanResult>) return;
+    observer.onAdvertisements(
+      results.map(_observedAdvertisement).toList(growable: false),
+    );
+  }
+
+  /// 观测专用连接入口：按已扫描到的地址连接，并**返回真实结果**。
+  ///
+  /// UI 入口 [connectDevice] 只弹提示不返回成败，观测侧需要确定的
+  /// `ok/fail` 证据，故在其上做一层结果判定（复用同一条连接实现，
+  /// 不另写连接逻辑）。
+  Future<bool> connectObservedDevice(ObservedAdvertisement advertisement) async {
+    try {
+      final device = _findDeviceByAddress(advertisement.address.toLowerCase());
+      if (device == null) return false;
+      if (device.isConnected) return true;
+      await connectDevice(device);
+      return device.isConnected;
+    } catch (e) {
+      // 观测行已记录连接失败；这里只保证不把异常抛给扫描监听。
+      debugPrint('观测连接失败(${advertisement.address}): $e');
+      return false;
+    }
+  }
+
+  /// 单条扫描结果的观测快照；厂商数据拼成小写 hex 串。
+  ObservedAdvertisement _observedAdvertisement(ScanResult result) {
+    final data = result.advertisementData;
+    final advName = data.advName;
+    final platformName = result.device.platformName;
+    return ObservedAdvertisement(
+      address: result.device.remoteId.str,
+      name: advName.isNotEmpty ? advName : platformName,
+      rssi: result.rssi,
+      connectable: data.connectable,
+      serviceUuids:
+          data.serviceUuids.map((uuid) => uuid.toString()).toList(growable: false),
+      manufacturerDataHex: data.manufacturerData.values
+          .expand((bytes) => bytes)
+          .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+          .join(),
+    );
   }
 
   /// 辅助：宽松判断两个UUID是否等价（支持16位/128位、大小写、带不带连字符）
