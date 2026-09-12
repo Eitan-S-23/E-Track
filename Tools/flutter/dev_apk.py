@@ -31,9 +31,27 @@ OBSERVATION_FIRMWARE_URL_ENV = "TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL"
 OBSERVATION_SENTINEL_ENV = "TRACE_DEV_OBSERVATION_SENTINEL"
 OBSERVATION_SENTINEL_PREFIX = "OTAOBS"
 OBSERVATION_TARGET_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:_.\-]{1,31}$")
-# 只允许不含凭据的公开地址：查询串里出现这些键名即视为凭据。
-CREDENTIAL_QUERY_PATTERN = re.compile(
-    r"(?i)(^|[?&])(token|secret|signature|sig|apikey|api_key|access_key|auth)="
+# 只允许不含凭据的公开地址。查询串先按 RFC 3986 百分号解码再匹配键名，
+# 否则编码键名（如 %74oken）、大小写变体或 token 别名可以绕过黑名单
+# （独立复核 §6.18 OBS-SEC-01 真实负例证实过该绕过）。
+CREDENTIAL_QUERY_KEYS = frozenset({
+    "token", "secret", "signature", "sig", "apikey", "api_key",
+    "access_key", "auth", "access_token", "password", "passwd", "key",
+})
+# 观测 URL 允许携带的查询键白名单：固件 latest 查询的公开参数
+# （OTA-XC-CLOUD-QUERY-MAPPING）。白名单外的键一律拒绝——观测 URL 应当
+# 是"配置一个公开端点"，不承载任何未知参数。
+OBSERVATION_ALLOWED_QUERY_KEYS = frozenset({
+    "appid", "devicemodel", "channel", "currentversioncode",
+    "currentimagesha", "hardwarerevision", "layoutid", "bootversion",
+    "protocolversion", "appversioncode",
+})
+CREDENTIAL_QUERY_VALUES = ("%00",)
+# 取值中不得出现的敏感词片段（词边界或空格/连字符分隔均算）：不以真实秘密
+# 做测试值，也不允许把凭据藏进白名单键的取值里。
+CREDENTIAL_SENTINEL_PATTERN = re.compile(
+    r"(?i)(token|secret|signature|password|passwd|credential|authorization"
+    r"|bearer|api[_-]?key|access[_-]?key|access[_-]?token|sig)(?:\b|[\s_-])"
 )
 # 调试构建的 Dart 常量落在 kernel blob 里；定义是否真的进了产物以此为准。
 KERNEL_BLOB = "assets/flutter_assets/kernel_blob.bin"
@@ -74,6 +92,40 @@ def expected_application_id(root, suffix):
     return found[0] + suffix
 
 
+def normalized_query_pairs(query):
+    """按 RFC 3986 解码查询串并返回 (键, 值) 列表，保留重复参数。
+
+    解码发生在任何匹配之前：`%74oken` 必须在成为 `token` 之后才参与键名
+    判定，否则编码键名可以携带凭据绕过黑名单（OBS-SEC-01）。
+    """
+    pairs = []
+    for raw_key, raw_value in urllib.parse.parse_qsl(
+        query, keep_blank_values=True, strict_parsing=False,
+    ):
+        # parse_qsl 已做一次百分号解码；再做一层防双重编码伪装
+        # （`%2574oken` 解码一次是 `%74oken`，仍非白名单键，会被拒绝）。
+        key = urllib.parse.unquote(raw_key).strip().lower()
+        value = urllib.parse.unquote(raw_value)
+        pairs.append((key, value))
+    return pairs
+
+
+def credential_query_error(query):
+    """规范化后的凭据检查；无凭据返回 None，有则返回拒绝原因。"""
+    if not query:
+        return None
+    for key, value in normalized_query_pairs(query):
+        if key in CREDENTIAL_QUERY_KEYS:
+            return f"credential query parameter '{key}'"
+        if key not in OBSERVATION_ALLOWED_QUERY_KEYS:
+            return f"unexpected query parameter '{key}'"
+        if any(bad in value for bad in CREDENTIAL_QUERY_VALUES):
+            return f"control characters in query parameter '{key}'"
+        if CREDENTIAL_SENTINEL_PATTERN.search(value):
+            return f"credential-like value in query parameter '{key}'"
+    return None
+
+
 def observation_config(env):
     """显式启用的设备观测构建配置；未启用返回 None（默认行为不变）。
 
@@ -98,9 +150,12 @@ def observation_config(env):
         raise ValueError(
             f"{OBSERVATION_FIRMWARE_URL_ENV} must be a credential-free public https URL"
         )
-    if parsed.fragment or CREDENTIAL_QUERY_PATTERN.search(parsed.query):
+    # 先凭据校验、后任何记录/注入：不可信 URL 不进入 defines/collect。
+    credential_error = credential_query_error(parsed.query)
+    if parsed.fragment or credential_error:
         raise ValueError(
             f"{OBSERVATION_FIRMWARE_URL_ENV} must not carry credentials or fragments"
+            + (f": {credential_error}" if credential_error else "")
         )
     return {
         "target": target,

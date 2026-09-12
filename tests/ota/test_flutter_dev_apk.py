@@ -353,6 +353,75 @@ class DevelopmentApkTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "TRACE_DEV_OBSERVATION_TARGET"):
             APK.plan(self.root, self.run, {**base, APK.OBSERVATION_TARGET_ENV: ""})
 
+    def test_device_observation_rejects_encoded_and_disguised_credential_keys(self):
+        """OBS-SEC-01 回归：编码键名、大小写、token 别名与未知参数都不得绕过。
+
+        独立复核 §6.18 证实旧实现对原始 query 做黑名单正则，`%74oken`、
+        `sign%61ture`、`access_token` 被放行并进入 defines/collect。凭据
+        判定必须在百分号解码与大小写规范化之后进行。
+        """
+        base = {
+            APK.DEVICE_OBSERVATION_ENV: "true",
+            APK.OBSERVATION_TARGET_ENV: "XTrace",
+        }
+        rejects = [
+            # §6.18 真实负例：百分号编码的凭据键名。
+            "https://example.pages.dev/latest?%74oken=fixture-only",
+            "https://example.pages.dev/latest?sign%61ture=fixture-only",
+            "https://example.pages.dev/latest?access_token=fixture-only",
+            # 大小写与连字符/下划线别名。
+            "https://example.pages.dev/latest?TOKEN=fixture-only",
+            "https://example.pages.dev/latest?Api-Key=fixture-only",
+            # 双重编码（解码一次仍是 %74oken，非白名单键）。
+            "https://example.pages.dev/latest?%2574oken=fixture-only",
+            # 白名单外的未知键：观测 URL 是"配置公开端点"，不承载未知参数。
+            "https://example.pages.dev/latest?unknown_param=1",
+            # 凭据藏进白名单键的取值里（解码后为 bearer-x）。
+            "https://example.pages.dev/latest?appid=be%61rer-x",
+            "https://example.pages.dev/latest?appid=signature",
+            "https://example.pages.dev/latest?appid=%74oken",
+            # 短别名与空值凭据键。
+            "https://example.pages.dev/latest?sig=abc",
+            "https://example.pages.dev/latest?token=",
+            "https://example.pages.dev/latest?password=fixture",
+            "https://example.pages.dev/latest?auth=fixture",
+        ]
+        for url in rejects:
+            with self.subTest(url=url), \
+                    self.assertRaisesRegex(ValueError, "must not carry credentials"):
+                APK.observation_config({**base, APK.OBSERVATION_FIRMWARE_URL_ENV: url})
+        # 正常无凭据端点（含白名单公开参数、大小写、重复参数）仍然可用。
+        accepts = [
+            "https://example.pages.dev/latest",
+            "https://example.pages.dev/latest?appId=x&channel=stable",
+            "https://example.pages.dev/latest?appId=x&channel=stable&channel=beta",
+            "https://example.pages.dev/latest?deviceModel=M1&currentVersionCode=5",
+            "https://example.pages.dev/latest?currentimagesha=" + "a" * 64,
+            "https://example.pages.dev/latest?appId=",
+        ]
+        for url in accepts:
+            with self.subTest(url=url):
+                config = APK.observation_config(
+                    {**base, APK.OBSERVATION_FIRMWARE_URL_ENV: url})
+                self.assertEqual(url, config["firmware_latest_url"])
+        # 拒绝原因带具体键名，方便 CI 日志定位；编码键名报解码后的名字。
+        with self.assertRaisesRegex(
+            ValueError, r"credential query parameter 'token'",
+        ):
+            APK.observation_config({
+                **base,
+                APK.OBSERVATION_FIRMWARE_URL_ENV:
+                    "https://example.pages.dev/latest?%74oken=fixture-only",
+            })
+        with self.assertRaisesRegex(
+            ValueError, r"unexpected query parameter 'unknown_param'",
+        ):
+            APK.observation_config({
+                **base,
+                APK.OBSERVATION_FIRMWARE_URL_ENV:
+                    "https://example.pages.dev/latest?unknown_param=1",
+            })
+
     def test_collect_refuses_an_apk_without_the_injected_observation_constants(self):
         env = self.observation_env()
         config = APK.observation_config(env)
