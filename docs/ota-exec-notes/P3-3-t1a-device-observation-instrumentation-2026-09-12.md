@@ -146,12 +146,111 @@ Dart 侧 9 个用例**本机 NOT_RUN**：本机无 Flutter/Dart SDK（`flutter` 
 - 未合并、未发布、未部署、未触发生产工作流。
 - 正式验收 `NOT_RUN`；T2 的暂时 `ENV_BLOCKED` 不变；A1 单轮观测配额仍为 1 次未消耗。
 
-## 7. 下一步（待执行，按本报告同一分支）
+## 7. 首轮 dev CI 结论与整改（实测，2026-09-12）
 
-1. 提交并推送本分支 WIP，派发 `.github/workflows/flutter-dev-checks.yml`
-   （`build_apk=true`、`app_id_suffix=.dev`、`device_observation=true`、
-   `observation_target=XTrace`、`observation_firmware_latest_url=<公开地址>`）。
-2. 取双宿主结论 + debug APK 的 `apk_collect.log` 与 `trace-dev-debug.json`
-   （其中 `device_observation` 应回填 target/sentinel/地址）。
-3. 装机后由**只读 logcat** 得到全量扫描清单与（命中时）完整身份行；
+推送提交 `1c2dc6d` 后触发 run `34686430345`（push）与 `34686437572`
+（dispatch，`build_apk=true` / `app_id_suffix=.dev` / `device_observation=true` /
+`observation_target=XTrace`），**双宿主同时打红**：
+
+| 宿主 | `analyze` | `tests` | `apk_*` |
+| --- | --- | --- | --- |
+| ubuntu-latest | FAIL(1) | FAIL(1) | 全部 `NOT_RUN`（未产出 APK） |
+| windows-2022 | FAIL(1) | FAIL(1) | 不适用（APK 仅在 Linux 构建） |
+
+三项根因，**一项是真实缺陷，两项是 lint**：
+
+1. **真实缺陷（测试抓到，实现改）**：`match()` 只在 target 含冒号时才走归一化
+   地址比较，于是 `AABBCCDDEEFF` 这种无分隔符写法落到名字分支返回 `none`。改为
+   「含分隔符，或去分隔符后恰好 12 位 hex」即做归一化比较；比较仍是**全等**
+   而非子串，故 `aabb` 短名字的误命中防护不变。
+2. `prefer_const_declarations`：`startFromBuild()` 内 `final config` 指向
+   `static const`，改 `const`。
+3. `non_constant_identifier_names`：测试局部变量 `target_line` → `targetLine`。
+
+整改提交 `f68b680`。本机离线回归保持全绿（25 OK / 50 OK）。
+
+### 7.1 次轮 dev CI：双宿主全绿，debug APK 产出
+
+整改后同一提交 `f68b680` 触发 run `34686910798`（push）与 `34686919457`
+（dispatch，同上五个输入），**全部通过**：
+
+| 宿主 | `analyze` | `tests` | `apk_result` |
+| --- | --- | --- | --- |
+| ubuntu-latest | PASS（No issues found） | PASS（`+298 ~7` All tests passed） | **PASS** |
+| windows-2022 | PASS（No issues found） | PASS | `NOT_REQUESTED`（APK 仅 Linux） |
+
+`apk_collect.log` 实录（原样，未改写）：
+
+```json
+{"artifact_kind": "development-debug-apk", "formal_acceptance": "NOT_RUN",
+ "commit": "f68b6808f41af24b25406030ac64b4adb54c8927",
+ "sha256": "594521196c1c69616c83af484471c8d00b4aa5ab823b3f54b7639e0230726472",
+ "bytes": 131502370, "file": "trace-dev-debug.apk", "release_signing": false,
+ "application_id": "com.wen.gaia.gaia.dev",
+ "device_observation": {"enabled": true, "target": "XTrace",
+   "sentinel": "OTAOBS25728d5efc16a857bf0f7b05",
+   "firmware_latest_url": "https://trace-update-public-staging.pages.dev/api/public/firmware/latest"}}
+```
+
+- `apk_verify`：`Verified using v2 scheme (APK Signature Scheme v2): true`，
+  `Number of signers: 1`，`release_signing: false` —— debug 签名，不是发布签名。
+- 运行产物 id：`flutter-dev-debug-apk-f68b6808f41af24b25406030ac64b4adb54c8927-34686919457-1`
+  （75,241,871 B 压缩包；本轮**未整包下载**，APK 哈希取自 `apk_collect.log`）。
+- **`application_id = com.wen.gaia.gaia.dev`**：与生产包名不同，即"乙"方案实测生效
+  ——设备观测 APK 与手机现存生产版**不构成同包升级关系**，因此不触发既有授权里
+  的"签名冲突即停止"分支；它可并存安装，不需要卸载或清数据。
+
+### 7.2 §5 的唯一未验证假设已被闸门实证
+
+`apk_collect` 的闸门要求 sentinel / 固件地址 / target 三个**字面量**出现在产物
+`assets/flutter_assets/kernel_blob.bin` 中，否则拒绝归档。本次归档通过，即：
+
+> **`--dart-define` 注入的是键**之外**，其取值确实以字面量形式落进了 debug 构建的 kernel blob。**
+
+§5 记录的"未实证项"因此**转为已实证**，不需要改为弱判据。运行期首行
+`OTA_OBS config=enabled target=XTrace sentinel=OTAOBS25728d5efc16a857bf0f7b05`
+应与上表一致——不一致即说明手机上装的不是这次构建的产物。
+
+### 7.3 本轮**已实证**的链条
+
+失败运行仍产出了 Linux 端 `result.json`，其中 `apk_build` 的**计划 argv** 为：
+
+```
+flutter build apk --debug --no-pub --target-platform=android-arm,android-arm64 \
+  --dart-define=TRACE_DEV_DEVICE_OBSERVATION=true \
+  --dart-define=TRACE_DEV_OBSERVATION_TARGET=XTrace \
+  --dart-define=TRACE_DEV_OBSERVATION_SENTINEL=OTAOBS25728d5efc16a857bf0f7b05 \
+  --dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=https://trace-update-public-staging.pages.dev/api/public/firmware/latest
+```
+
+即 **`workflow_dispatch` 输入 → job `env` → `observation_config()` 校验 →
+`--dart-define` 生成 → 构建命令** 这条链已由真实运行记录证实；Windows 端
+`result.json` 不含任何观测字面量，也反证了注入只发生在被显式请求的档位。
+
+## 8. 未完成 / 需独立验收的部分
+
+**已完成的开发侧工作到此为止**：插桩、闸门、回归、双宿主 CI、debug APK 全部落地
+并有原始证据。以下不在本次范围内：
+
+1. **未装机、未连接任何真实设备**：未安装 APK 到手机、未连接目标板、未发起任何
+   BLE 通信、未 J-Link 停机/烧录/断电、未插拔 SD、未清除应用数据。**A1 单轮观测
+   配额 1 次仍未消耗**。
+2. **正式验收保持 `NOT_RUN`**；T2 的暂时 `ENV_BLOCKED` 不变。debug APK 不是发布
+   产物，开发自测不是独立验收。
+3. 未合并、未发布、未部署、未触发任何生产工作流。
+4. 共享看板（`PLAN-OTA-EXEC.md`）与其余共享文档带前序会话的未提交改动，按既有
+   串行化约定由主会话统一回写，本分支未触碰。
+
+**交给独立验收的最小判据**（每项都有上面的原始证据可复核）：
+
+- 默认（未注入）构建**零观测行为**：`apk_build` 命令行无 `--dart-define`
+  （`test_device_observation_is_opt_in_and_absent_by_default` + §7.3 的 Windows 反证）。
+- 显式启用时**注入确实到达构建命令**，且**产物内自证**通过（§7.1/§7.2）。
+- 观测行契约固定且终止行唯一（9 个 Dart 用例，CI `test/ota` 全量在跑）。
+- 设备观测 APK 与生产版**不同包名**，不构成签名冲突（§7.1 的 `application_id`）。
+
+## 9. 后续（待执行，需另行授权）
+
+1. 装机后由**只读 logcat** 得到全量扫描清单与（命中时）完整身份行；
    该步仍受既有授权约束（签名冲突即停止，不卸载、不清数据）。
+2. 用真实身份发起固件候选查询并核验 `.etu`（步骤 2）。
