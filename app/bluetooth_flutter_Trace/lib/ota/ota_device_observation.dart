@@ -91,18 +91,20 @@ class OtaDeviceObservationConfig {
 
   /// 目标匹配规则（按强度依次尝试，命中即返回）。
   ///
-  /// 地址规则只对**含冒号的 target**生效：否则像 `abc` 这种短名字会被
-  /// 归一化地址的 hex 子串误命中。
+  /// 地址规则只对**地址形态的 target**生效（含分隔符，或去掉分隔符后恰好
+  /// 12 位 hex）；且比较是**全等**而非子串。两者合起来保证像 `aabb` 这种
+  /// 短名字不会被归一化地址的 hex 片段误命中，同时 `AABBCCDDEEFF` 这种
+  /// 无分隔符写法仍能命中。
   OtaObservationMatch match(ObservedAdvertisement advertisement) {
     final wanted = target.trim().toLowerCase();
     if (wanted.isEmpty) return OtaObservationMatch.none;
     if (advertisement.address.toLowerCase() == wanted) {
       return OtaObservationMatch.address;
     }
-    if (wanted.contains(':')) {
-      final wantedHex = wanted.replaceAll(RegExp('[^0-9a-f]'), '');
-      if (wantedHex.isNotEmpty &&
-          advertisement.normalizedAddress == wantedHex) {
+    final wantedHex = wanted.replaceAll(RegExp('[^0-9a-f]'), '');
+    if (wantedHex.isNotEmpty &&
+        (wanted.contains(':') || wantedHex.length == 12)) {
+      if (advertisement.normalizedAddress == wantedHex) {
         return OtaObservationMatch.address;
       }
     }
@@ -206,7 +208,7 @@ class OtaDeviceObserver {
     required OtaObservationIdentityRead readIdentity,
     void Function(String line)? emit,
   }) {
-    final config = OtaDeviceObservationConfig.fromBuild;
+    const config = OtaDeviceObservationConfig.fromBuild;
     if (!config.enabled) return null;
     final reporter = emit ?? debugPrint;
     if (!config.active) {

@@ -116,6 +116,8 @@ void main() {
     // 归一化地址（去分隔符、大小写不敏感）。
     expect(config(target: 'AABBCCDDEEFF').match(advertisement()),
         OtaObservationMatch.address);
+    expect(config(target: 'aa-bb-cc-dd-ee-ff').match(advertisement()),
+        OtaObservationMatch.address);
     // 名字精确匹配（大小写不敏感）。
     expect(config(target: 'xtrace').match(advertisement()),
         OtaObservationMatch.nameExact);
@@ -209,9 +211,9 @@ void main() {
     expect(stopBeforeConnect, isTrue, reason: '必须停扫描再连接');
     // 绑定用平台原样地址（小写），不是归一化 hex：服务侧按 remoteId 查设备。
     expect(boundAddress, 'aa:bb:cc:dd:ee:ff');
-    final target_line =
+    final targetLine =
         lines.singleWhere((line) => line.startsWith('OTA_OBS target'));
-    expect(target_line, contains('matched_by=namePrefix'));
+    expect(targetLine, contains('matched_by=namePrefix'));
     expect(lines.singleWhere((line) => line.startsWith('OTA_OBS connect')),
         'OTA_OBS connect addr=aa:bb:cc:dd:ee:ff result=ok');
     final identityLine =
