@@ -719,6 +719,9 @@ class BluetoothService extends GetxController {
       await _startScan(timeout);
     } catch (e) {
       debugPrint('开始扫描失败: $e');
+      // UI 入口的既有约定：平台异常不外抛（页面层无承接），只提示。
+      // 扫描失败路径已在 _startScan 内把 isScanning 复位为 false——
+      // 观测入口 startObservationScan 用该复位信号区分"启动被拒"（OBS-01）。
       Get.snackbar('错误', '开始扫描失败: $e', snackPosition: SnackPosition.BOTTOM);
     }
   }
@@ -1050,6 +1053,10 @@ class BluetoothService extends GetxController {
         }
       }, onError: (Object error, StackTrace stackTrace) {
         debugPrint('扫描结果监听失败: $error');
+        // P3-3 T1a 设备观测（OBS-01）：扫描流报错必须通知观测器，否则
+        // "流中途炸了"会伪装成"扫了 120s 什么都没有"。默认构建（观测器
+        // 未装配）时是空操作。
+        OtaDeviceObserver.instance?.onScanStreamError(error);
         isScanning.value = false;
         _scanTimeoutTimer?.cancel();
       }, cancelOnError: false);
@@ -2150,7 +2157,7 @@ class BluetoothService extends GetxController {
     );
   }
 
-  /// 观测专用扫描入口：等适配器就绪后再启动，并**返回是否已下发扫描**。
+  /// 观测专用扫描入口：等适配器就绪后再启动，并**返回是否真的启动了扫描**。
   ///
   /// UI 入口 `BleController.startScan()` 在适配器状态尚未填充时按"蓝牙未开"
   /// 直接返回并尝试弹提示；观测是在首帧回调里发起的，那一刻
@@ -2161,16 +2168,19 @@ class BluetoothService extends GetxController {
   /// 这里按有界重试等状态到位（最多 30s，1s 未就绪重试一次），复用同一条
   /// 扫描实现，不另写扫描逻辑。
   ///
-  /// 返回值的边界：[startScan] 内部吞掉平台异常，因此这里只能保证"适配器
-  /// 已经是 on 且已下发扫描"，不能保证平台一定兑现。不额外探测平台状态
-  /// 制造更弱的证据——若平台拒绝，观测侧仍会以 `target_not_seen scanned=0`
-  /// 收尾，与"设备不在场"的差别由本方法返回 false 的那条路径显式区分。
+  /// 返回值 = **扫描是否真的在跑**：适配器未就绪返回 false（观测侧据此给
+  /// `scan_not_started`）；适配器已 on 且平台启动被拒绝时，[_startScan]
+  /// 的失败路径已把 [isScanning] 复位为 false，这里同样返回 false——
+  /// 平台拒绝不再被吞成"扫描已启动"（OBS-01）。不额外探测平台状态制造
+  /// 更弱的证据：启动成功的最终观测证据仍是 `OTA_OBS scan` 批次行本身。
   Future<bool> startObservationScan() async {
     const attempts = 30;
     for (var attempt = 0; attempt < attempts; attempt++) {
       if (adapterState.value == BluetoothAdapterState.on) {
         await startScan();
-        return true;
+        // startScan 内部吞掉平台异常（UI 入口约定），但失败路径复位了
+        // isScanning；观测侧用这个复位信号区分"真的在扫"与"启动被拒"。
+        return isScanning.value;
       }
       await Future<void>.delayed(const Duration(seconds: 1));
     }

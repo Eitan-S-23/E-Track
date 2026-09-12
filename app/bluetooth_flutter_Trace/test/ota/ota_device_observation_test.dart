@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ble_monitor/ota/ota_device_info.dart';
@@ -61,6 +63,16 @@ void main() {
     for (var i = 0; i < 64 && !lines.any((line) => line.contains(marker)); i++) {
       await Future<void>.delayed(Duration.zero);
     }
+  }
+
+  /// 带真实时间流逝的轮询（毫秒级）：超时类用例的 Timer 需要真实时钟
+  /// 前进，零延迟微任务循环催不动它。
+  Future<bool> pumpRealUntil(bool Function() ready,
+      {int rounds = 200}) async {
+    for (var i = 0; i < rounds && !ready(); i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 2));
+    }
+    return ready();
   }
 
   test('默认（未注入）配置不观测，且不算非法配置', () {
@@ -442,5 +454,296 @@ void main() {
     await pumpUntil(lines, 'OTA_OBS done');
     expect(lines.singleWhere((line) => line.startsWith('OTA_OBS identity')),
         'OTA_OBS identity addr=aa:bb:cc:dd:ee:ff result=fail status=-');
+  });
+
+  // ---- OBS-01/02/03：三结局区分、唯一终止、有界结局与迟到回调 ----
+
+  test('OBS-03：target 行的地址是字段值，不是对象插值', () async {
+    final lines = <String>[];
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async {},
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      emit: lines.add,
+    );
+    observer.onAdvertisements(<ObservedAdvertisement>[
+      advertisement(address: 'AA:BB:CC:DD:EE:FF', name: 'XTrace'),
+    ]);
+    await pumpUntil(lines, 'OTA_OBS done');
+
+    final targetLine =
+        lines.singleWhere((line) => line.startsWith('OTA_OBS target'));
+    // 旧缺陷：`$advertisement.address` 落盘成
+    // `Instance of 'ObservedAdvertisement'.address`，地址与 connect/identity
+    // 行对不上。修复后必须是真实地址。
+    expect(targetLine,
+        'OTA_OBS target addr=AA:BB:CC:DD:EE:FF name=XTrace rssi=-60 '
+        'matched_by=name');
+    // connect/identity 行的地址与 target 行的地址指向同一台设备。
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS connect')),
+        contains('addr=aa:bb:cc:dd:ee:ff'));
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS identity')),
+        contains('addr=aa:bb:cc:dd:ee:ff'));
+  });
+
+  test('启动永不完成：startTimeout 到时给出 scan_start_timeout，不无限等',
+      () async {
+    final lines = <String>[];
+    var stopped = 0;
+    // 永不完成的 startScan（模拟适配器状态永不到位/平台调用挂死）。
+    Future<bool> neverStarts() => Completer<bool>().future;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: neverStarts,
+      stopScan: () async => stopped++,
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      startTimeout: const Duration(milliseconds: 50),
+      window: const Duration(milliseconds: 60),
+      emit: lines.add,
+    );
+    observer.start();
+    expect(
+        await pumpRealUntil(
+            () => lines.any((line) => line.startsWith('OTA_OBS done'))),
+        isTrue,
+        reason: '启动挂死必须在 startTimeout 处收尾，不得无限等待');
+
+    expect(lines.last, 'OTA_OBS done result=scan_start_timeout waitedMs=50');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS start')),
+        contains('result=timeout'));
+    expect(lines.any((line) => line.startsWith('OTA_OBS window')), isFalse);
+    expect(stopped, 1);
+    // 终态只有一个。
+    expect(observer.result, lines.last);
+  });
+
+  test('连接挂死：connectTimeout 到时给出 connect_timeout，不是无限等待',
+      () async {
+    final lines = <String>[];
+    Future<bool> neverConnects(ObservedAdvertisement _) =>
+        Completer<bool>().future;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async {},
+      connect: neverConnects,
+      readIdentity: (_) async => identity(),
+      connectTimeout: const Duration(milliseconds: 50),
+      emit: lines.add,
+    );
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    expect(
+        await pumpRealUntil(
+            () => lines.any((line) => line.startsWith('OTA_OBS done'))),
+        isTrue,
+        reason: '连接挂死必须在 connectTimeout 处收尾，不得无限等待');
+
+    expect(lines.last, 'OTA_OBS done result=connect_timeout');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS connect')),
+        contains('result=timeout'));
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
+  });
+
+  test('读身份挂死：identityTimeout 到时给出 identity_timeout', () async {
+    final lines = <String>[];
+    Future<DeviceOtaInfo?> neverReads(String _) =>
+        Completer<DeviceOtaInfo?>().future;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async {},
+      connect: (_) async => true,
+      readIdentity: neverReads,
+      identityTimeout: const Duration(milliseconds: 50),
+      emit: lines.add,
+    );
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    expect(
+        await pumpRealUntil(
+            () => lines.any((line) => line.startsWith('OTA_OBS done'))),
+        isTrue,
+        reason: '读身份挂死必须在 identityTimeout 处收尾，不得无限等待');
+
+    expect(lines.last, 'OTA_OBS done result=identity_timeout');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS identity')),
+        contains('result=timeout'));
+  });
+
+  test('扫描流报错：第三结局 scan_stream_error，且终态唯一', () async {
+    final lines = <String>[];
+    var stopped = 0;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async => stopped++,
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      window: const Duration(milliseconds: 60),
+      emit: lines.add,
+    );
+    observer.start();
+    await pumpUntil(lines, 'OTA_OBS window=open');
+    observer.onAdvertisements(<ObservedAdvertisement>[
+      advertisement(address: '11:22:33:44:55:66', name: 'AIMA'),
+    ]);
+    // 流中途报错（adapter/平台通道异常）。
+    observer.onScanStreamError(const StateError('stream blew up'));
+    await pumpUntil(lines, 'OTA_OBS done');
+
+    expect(lines.last, 'OTA_OBS done result=scan_stream_error scanned=1');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS stream')),
+        contains('result=error'));
+    expect(stopped, 1);
+
+    // 终态之后迟到的窗口到期不得补出第二条 done。
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
+  });
+
+  test('终态之后迟到完成不得覆盖终态：connect 挂死被 timeout 收尾后完成',
+      () async {
+    final lines = <String>[];
+    final connectCompleter = Completer<bool>();
+    Future<bool> gatedConnect(ObservedAdvertisement _) =>
+        connectCompleter.future;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async {},
+      connect: gatedConnect,
+      readIdentity: (_) async => identity(),
+      connectTimeout: const Duration(milliseconds: 50),
+      emit: lines.add,
+    );
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    expect(
+        await pumpRealUntil(
+            () => lines.any((line) => line.startsWith('OTA_OBS done'))),
+        isTrue,
+        reason: 'connect 挂死必须由 connectTimeout 收尾');
+    expect(lines.last, 'OTA_OBS done result=connect_timeout');
+
+    // 迟到的 connect 完成（true = 平台最终说连上了）。
+    connectCompleter.complete(true);
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    // 终态不得被覆盖：仍是 connect_timeout，且 done 行唯一。
+    expect(observer.result, 'OTA_OBS done result=connect_timeout');
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
+    // 迟到完成后不得再读身份（终态已发布，链路已废弃）。
+    expect(lines.any((line) => line.contains('result=ok')), isFalse);
+  });
+
+  test('启动超时后迟到完成：不得再开窗口或补终态', () async {
+    final lines = <String>[];
+    final startCompleter = Completer<bool>();
+    Future<bool> gatedStart() => startCompleter.future;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: gatedStart,
+      stopScan: () async {},
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      startTimeout: const Duration(milliseconds: 50),
+      window: const Duration(milliseconds: 60),
+      emit: lines.add,
+    );
+    observer.start();
+    expect(
+        await pumpRealUntil(
+            () => lines.any((line) => line.startsWith('OTA_OBS done'))),
+        isTrue,
+        reason: '启动挂死必须在 startTimeout 处收尾，不得无限等待');
+    expect(lines.last, 'OTA_OBS done result=scan_start_timeout');
+
+    // 启动调用迟到的"成功"返回。
+    startCompleter.complete(true);
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
+    expect(lines.any((line) => line.startsWith('OTA_OBS window')), isFalse,
+        reason: '终态已发布，迟到完成不得再开观测窗口');
+  });
+
+  test('终局清理钩子：绑定过的结局带地址清理，未绑定结局收 null', () async {
+    // 绑定后失败：清理收到绑定地址。
+    var cleanedAddress = '';
+    final bound = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async {},
+      connect: (_) async => false,
+      readIdentity: (_) async => identity(),
+      cleanup: (address) async => cleanedAddress = address ?? '(null)',
+      emit: (_) {},
+    );
+    bound.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    expect(cleanedAddress, 'aa:bb:cc:dd:ee:ff');
+
+    // 未进入绑定（窗口到期）：清理收到 null。
+    var unboundCleaned = '';
+    final unbound = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async {},
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      window: const Duration(milliseconds: 50),
+      cleanup: (address) async => unboundCleaned = address ?? '(null)',
+      emit: (_) {},
+    );
+    unbound.start();
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    expect(unboundCleaned, '(null)');
+  });
+
+  test('清理钩子自身抛异常：不覆盖终态、不留野异常', () async {
+    final lines = <String>[];
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => true,
+      stopScan: () async {},
+      connect: (_) async => false,
+      readIdentity: (_) async => identity(),
+      cleanup: (address) async => throw StateError('cleanup blew up'),
+      emit: lines.add,
+    );
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    await pumpUntil(lines, 'OTA_OBS done');
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(observer.result, 'OTA_OBS done result=connect_failed');
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS cleanup')),
+        contains('result=error'));
+  });
+
+  test('stopScan 抛异常：不吞掉终态行，单独留一行错误', () async {
+    final lines = <String>[];
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async => false,
+      stopScan: () async => throw StateError('stop refused'),
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      emit: lines.add,
+    );
+    observer.start();
+    await pumpUntil(lines, 'OTA_OBS done');
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+
+    // done 行先落盘，stop 错误行由 unawaited 的清理在其后补上——因此
+    // 不能断言 lines.last，按前缀取唯一 done 行。
+    expect(
+        lines.singleWhere((line) => line.startsWith('OTA_OBS done')),
+        'OTA_OBS done result=scan_not_started');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS stop')),
+        contains('result=error'));
   });
 }

@@ -25,9 +25,10 @@ import 'ota_device_info.dart';
 ///
 /// 本文件只读扫描结果与时钟、只写日志，不改变任何控制流；所有输出行以
 /// `OTA_OBS ` 开头，字段顺序固定，便于 logcat 侧逐行解析。**结局是全的**：
-/// 命中并读身份成功 / 连接失败 / 身份为空 / 身份抛异常 / 窗口到期仍未命中 /
-/// 扫描压根没启动（含启动路径自己抛异常）—— 六种结局各有且仅有一行 `done`，
-/// 不允许出现"没有任何终止行"。
+/// 命中并读身份成功 / 连接失败 / 连接抛异常 / 连接超时 / 身份为空 /
+/// 身份抛异常 / 身份超时 / 窗口到期仍未命中 / 扫描压根没启动（含启动路径
+/// 自己抛异常或超时）/ 扫描流中途报错 / 绑定链路意外异常兜底 —— 每个结局
+/// 各有且仅有一行 `done`，不允许出现"没有任何终止行"。
 ///
 /// 环境变量名（构建侧同名注入，改一个必须同步改另一个）：
 /// - `TRACE_DEV_DEVICE_OBSERVATION`
@@ -187,6 +188,13 @@ typedef OtaObservationConnect = Future<bool> Function(
 typedef OtaObservationIdentityRead = Future<DeviceOtaInfo?> Function(
     String address);
 
+/// 终局清理钩子（OBS-02）：终止行落盘后调用，用于拆除观测占用的物理
+/// 资源（如断开观测连接）。参数是本次绑定过的目标地址（小写），从未
+/// 进入绑定阶段时为 null（此时通常只需停扫描，停扫描已由观测器自理）。
+/// **清理自身失败不得覆盖已发布的终态**——它只是尽力而为的收尾，异常
+/// 在这里就地吞掉并记录一行 `cleanup_error`。
+typedef OtaObservationCleanup = Future<void> Function(String? address);
+
 /// 观测器：把扫描批次转成 `OTA_OBS` 行，命中目标后绑定并读取身份。
 ///
 /// 依赖全部由构造参数注入（连接/读身份不进本文件），因此本类可脱离 GetX、
@@ -198,8 +206,12 @@ class OtaDeviceObserver {
     required this.stopScan,
     required this.connect,
     required this.readIdentity,
+    this.cleanup,
     this.identityStatus,
     this.window = defaultWindow,
+    this.startTimeout = defaultStartTimeout,
+    this.connectTimeout = defaultConnectTimeout,
+    this.identityTimeout = defaultIdentityTimeout,
     void Function(String line)? emit,
   }) : _emit = emit ?? debugPrint;
 
@@ -207,6 +219,26 @@ class OtaDeviceObserver {
   /// 终止行——"没有任何终止行"必须被消灭：logcat 侧不允许用"没有错误行"
   /// 反推"尚未读取"。
   static const Duration defaultWindow = Duration(seconds: 120);
+
+  /// 扫描启动自身的等待上限：启动路径挂死（适配器状态永不到位、平台
+  /// `startScan()` 永不返回）时观测不能跟着无限等——到时给出确定的
+  /// `scan_start_timeout` 终止行。
+  ///
+  /// 注意与 [OtaObservationStart] 返回 false 的区别：那是"启动被拒绝"
+  /// （适配器未就绪、平台明确报错），立即收尾；这里处理的是"启动调用
+  /// **永远不完成**"，两者在日志上必须可区分。
+  static const Duration defaultStartTimeout = Duration(seconds: 60);
+
+  /// 命中目标后连接的等待上限：`connect` 调用挂死时同样不能无限等，
+  /// 到时输出 `connect_timeout`。
+  static const Duration defaultConnectTimeout = Duration(seconds: 30);
+
+  /// 读取身份（GET_INFO 往返）的等待上限：到时输出 `identity_timeout`。
+  ///
+  /// 注意：`Future.timeout` 只是**放弃等待**，不取消底层操作。该边界只
+  /// 保证观测侧必有一条终止行，不声称连接已被物理拆除——清理仍交给
+  /// 装配处注入的 [OtaObservationCleanup]。
+  static const Duration defaultIdentityTimeout = Duration(seconds: 30);
 
   /// 进程内唯一实例。**仅在显式启用且配置完整时被赋值**；扫描监听据此
   /// 判断是否需要观测，未启用时是 null。
@@ -222,6 +254,7 @@ class OtaDeviceObserver {
     required OtaObservationStop stopScan,
     required OtaObservationConnect connect,
     required OtaObservationIdentityRead readIdentity,
+    OtaObservationCleanup? cleanup,
     String Function()? identityStatus,
     void Function(String line)? emit,
   }) {
@@ -238,6 +271,7 @@ class OtaDeviceObserver {
       stopScan: stopScan,
       connect: connect,
       readIdentity: readIdentity,
+      cleanup: cleanup,
       identityStatus: identityStatus,
       emit: reporter,
     );
@@ -251,6 +285,7 @@ class OtaDeviceObserver {
   final OtaObservationStop stopScan;
   final OtaObservationConnect connect;
   final OtaObservationIdentityRead readIdentity;
+  final OtaObservationCleanup? cleanup;
 
   /// 读取服务侧最近一次身份失败的原因文案（`OtaService.upgradeStatus`）。
   /// 服务侧已把「设备未暴露 OTA 服务（FFF0/FFF2/FFF1）」/「OTA 通知订阅失败」/
@@ -261,6 +296,11 @@ class OtaDeviceObserver {
   /// 观测窗口：到期未命中即给出终止行。
   final Duration window;
 
+  /// 各阶段等待上限（OBS-02）。见同名 default 常量的文档。
+  final Duration startTimeout;
+  final Duration connectTimeout;
+  final Duration identityTimeout;
+
   final void Function(String line) _emit;
 
   /// 已观测过的地址（归一化）：同一台设备只输出一次广播明细，避免日志被
@@ -270,11 +310,63 @@ class OtaDeviceObserver {
   bool _started = false;
 
   /// 终止结局的唯一闸门：一旦置位，既不再发起绑定，也不会再输出第二行
-  /// `done`。窗口到期与命中绑定共用它，二者在同一 isolate 上同步判定，
-  /// 不存在竞态。
+  /// `done`。窗口到期、命中绑定、流错误与启动失败共用它，判定与置位都在
+  /// 同一 isolate 上同步完成，不存在竞态。**`_settle` 之后迟到的回调
+  /// （窗口、启动完成、connect/readIdentity 的迟到完成）一律只做清理，
+  /// 不得再输出终止行或覆盖终态。**
   bool _settled = false;
 
+  /// 已发布的终态结果（供测试与装配处断言"结局唯一且可读"）。
+  String? get result => _result;
+  String? _result;
+
   Timer? _windowTimer;
+
+  /// 占据终止闸门（OBS-02）：从此窗口、启动完成、迟到批次都不得再产出
+  /// 任何结局。绑定路径先占闸门、再走异步链路，`done` 行由
+  /// [_publishDone] 在链路终点发布。
+  void _claim() {
+    if (_settled) return;
+    _settled = true;
+    _windowTimer?.cancel();
+    _windowTimer = null;
+  }
+
+  /// 绑定阶段已进入的目标地址（小写）；null = 从未绑定。
+  String? _boundAddress;
+
+  /// 发布唯一终止行：所有结局必须经此出口，保证 `done` 行恰好一行。
+  /// 调用方必须已经 [claim]（或在同一步内先 claim）。
+  void _publishDone(String line) {
+    assert(_settled, 'done 行发布前必须先占据终止闸门');
+    if (_result != null) return;
+    _result = line;
+    _emit(line);
+    final hook = cleanup;
+    if (hook != null) {
+      // 清理是尽力而为：失败不得覆盖已发布的终态，也不得把异常抛回
+      // 调用方（那会变成没有终止行的野异常——正是本闸门要消灭的形态）。
+      unawaited(hook(_boundAddress).catchError((Object error) {
+        _emit('OTA_OBS cleanup result=error detail=$error');
+      }));
+    }
+  }
+
+  /// 占闸门 + 发布终态 + 尽力停扫描的一步式出口（启动失败/流错误/窗口
+  /// 到期等"扫描侧"结局专用）。
+  void _finishScanDone(String line) {
+    _claim();
+    if (_result != null) return;
+    _publishDone(line);
+    _stopScanQuietly();
+  }
+
+  /// 停止扫描的统一出口：扫描未启动时也调用（回收半开状态），失败不抛。
+  void _stopScanQuietly() {
+    unawaited(stopScan().catchError((Object error) {
+      _emit('OTA_OBS stop result=error detail=$error');
+    }));
+  }
 
   /// 已见过的去重地址数（供测试断言）。
   int get observedDevices => _seenAddresses.length;
@@ -296,25 +388,29 @@ class OtaDeviceObserver {
   Future<void> _beginScan() async {
     bool started;
     try {
-      started = await startScan();
+      started = await startScan().timeout(
+        startTimeout,
+        onTimeout: () => throw TimeoutException('startScan', startTimeout),
+      );
     } catch (error) {
       // 启动路径的实现在失败时会弹 UI 提示，而弹提示那一步自身也会抛
       // （2026-09-12 真机实测：`No Overlay widget found.`）。异常若逃出去，
       // 这里就再也不会写下终止行——"启动炸了"会退化成"没有任何终止行"，
       // 正是本文件要消灭的形态。因此把它归入同一个结局并留下原因。
-      if (_settled) return;
-      _settled = true;
-      _emit('OTA_OBS start result=error detail=$error');
-      _emit('OTA_OBS done result=scan_not_started');
-      unawaited(stopScan());
+      // 启动超时（TimeoutException）同样走这里，但结果行可区分。
+      final timedOut = error is TimeoutException;
+      _emit('OTA_OBS start result=${timedOut ? 'timeout' : 'error'} '
+          'detail=$error');
+      _finishScanDone(timedOut
+          ? 'OTA_OBS done result=scan_start_timeout waitedMs='
+              '${startTimeout.inMilliseconds}'
+          : 'OTA_OBS done result=scan_not_started');
       return;
     }
     if (_settled) return;
     if (!started) {
       // 扫描没启动就不必再等窗口：等下去只会把"没扫"伪装成"扫了没看到"。
-      _settled = true;
-      _emit('OTA_OBS done result=scan_not_started');
-      unawaited(stopScan());
+      _finishScanDone('OTA_OBS done result=scan_not_started');
       return;
     }
     _emit('OTA_OBS window=open windowMs=${window.inMilliseconds}');
@@ -325,10 +421,22 @@ class OtaDeviceObserver {
   void _onWindowExpired() {
     _windowTimer = null;
     if (_settled) return;
-    _settled = true;
-    _emit('OTA_OBS done result=target_not_seen waitedMs=${window.inMilliseconds} '
-        'scanned=${_seenAddresses.length} target=${config.target}');
-    unawaited(stopScan());
+    _finishScanDone('OTA_OBS done result=target_not_seen waitedMs='
+        '${window.inMilliseconds} scanned=${_seenAddresses.length} '
+        'target=${config.target}');
+  }
+
+  /// 扫描流中途报错（OBS-01）：观测的第三个可区分结局。
+  ///
+  /// 装配处（`BluetoothService` 的 `onError` 回调）在扫描流出错时调用。
+  /// 与 `scan_not_started`（压根没启动）、`target_not_seen`（扫了但目标
+  /// 不在场）不同，本结局表示"扫过且流活着，随后流报错"——三者在日志上
+  /// 必须一眼可辨，否则真机故障会被错误归类。
+  void onScanStreamError(Object error) {
+    if (!config.active || _settled) return;
+    _emit('OTA_OBS stream result=error detail=$error');
+    _finishScanDone('OTA_OBS done result=scan_stream_error '
+        'scanned=${_seenAddresses.length}');
   }
 
   /// 消费一批扫描结果。未启用/已产生终止结局时是安全的空操作。
@@ -350,43 +458,79 @@ class OtaDeviceObserver {
     for (final advertisement in batch) {
       final matched = config.match(advertisement);
       if (matched == OtaObservationMatch.none) continue;
-      _settled = true;
-      _windowTimer?.cancel();
-      _windowTimer = null;
+      _claim();
       unawaited(_bind(advertisement, matched));
       return;
     }
   }
 
+  /// 绑定链路（OBS-02）：连接与读身份各有等待上限；任何一步抛异常都收进
+  /// 确定的终止行；链路终点由 [_publishDone] 发布唯一的 `done`。
+  ///
+  /// 分段收口：连接段的异常（含超时）在此结束；读身份段的异常（含超时）
+  /// 在连接成功后单独收口。任何路径都不允许漏出"没有 done 行"的观测。
   Future<void> _bind(
     ObservedAdvertisement advertisement,
     OtaObservationMatch matched,
   ) async {
     // 绑定用地址必须是平台侧原样地址（`_findDeviceByAddress` 按小写比较）。
     final address = advertisement.address.toLowerCase();
-    _emit('OTA_OBS target addr=$advertisement.address '
+    // 绑定已进入：终局清理钩子据此断开观测连接（此前为 null，清理只停
+    // 扫描——停扫描由观测器自理）。
+    _boundAddress = address;
+    // OBS-03：target 行的地址必须是 advertisement.address 的**字段值**。
+    // 旧代码写 `$advertisement.address` 会被解析成 `$advertisement` 后跟
+    // 字面文本 `.address`，落盘成 `Instance of 'ObservedAdvertisement'.address`，
+    // 使 target 行的地址无法与 connect/identity 行对上。
+    _emit('OTA_OBS target addr=${advertisement.address} '
         'name=${advertisement.name.isEmpty ? '-' : advertisement.name} '
         'rssi=${advertisement.rssi} matched_by=${matched.label}');
-    // 先停扫描：中央设备同时扫描与连接会互相挤占射频。
-    await stopScan();
-    final connected = await connect(advertisement);
-    _emit('OTA_OBS connect addr=$address result=${connected ? 'ok' : 'fail'}');
-    if (!connected) {
-      _emit('OTA_OBS done result=connect_failed');
+    try {
+      // 先停扫描：中央设备同时扫描与连接会互相挤占射频。停扫失败不阻断
+      // 绑定（失败细节由 _stopScanQuietly 单独落一行错误）。
+      await stopScan().catchError((Object error) {
+        _emit('OTA_OBS stop result=error detail=$error');
+      });
+      final connected = await connect(advertisement).timeout(
+        connectTimeout,
+        onTimeout: () => throw TimeoutException('connect', connectTimeout),
+      );
+      _emit('OTA_OBS connect addr=$address '
+          'result=${connected ? 'ok' : 'fail'}');
+      if (!connected) {
+        _publishDone('OTA_OBS done result=connect_failed');
+        return;
+      }
+    } on TimeoutException {
+      // connect 的超时：与"连接被明确拒绝"（result=fail）分开。
+      _emit('OTA_OBS connect addr=$address result=timeout');
+      _publishDone('OTA_OBS done result=connect_timeout');
+      return;
+    } catch (error) {
+      // 连接段的预期外异常：不得变成没有终止行的野异常。
+      _emit('OTA_OBS bind result=error detail=$error');
+      _publishDone('OTA_OBS done result=bind_error');
       return;
     }
     DeviceOtaInfo? info;
     try {
-      info = await readIdentity(address);
+      info = await readIdentity(address).timeout(
+        identityTimeout,
+        onTimeout: () => throw TimeoutException('identity', identityTimeout),
+      );
+    } on TimeoutException catch (error) {
+      _emit('OTA_OBS identity addr=$address result=timeout detail=$error');
+      _publishDone('OTA_OBS done result=identity_timeout');
+      return;
     } catch (error) {
       _emit('OTA_OBS identity addr=$address result=error detail=$error');
-      _emit('OTA_OBS done result=identity_error');
+      _publishDone('OTA_OBS done result=identity_error');
       return;
     }
     if (info == null) {
       _emit('OTA_OBS identity addr=$address result=fail '
           'status=${_reportedStatus()}');
-      _emit('OTA_OBS done result=identity_failed');
+      _publishDone('OTA_OBS done result=identity_failed');
       return;
     }
     _emit('OTA_OBS identity addr=$address result=ok wire=${info.wireModel} '
@@ -394,7 +538,7 @@ class OtaDeviceObserver {
         'hw=${info.hardwareRevision} layout=${info.layoutId} '
         'boot=${info.bootVersion} proto=${info.protocolVersion} '
         'window=${info.maxWindowSegments} sha=${info.currentImageSha256Hex}');
-    _emit('OTA_OBS done result=ok');
+    _publishDone('OTA_OBS done result=ok');
   }
 
   /// 失败原因文案；读取不到时用 `-`，不留空字段。

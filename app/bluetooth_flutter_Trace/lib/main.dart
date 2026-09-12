@@ -126,6 +126,13 @@ class MyApp extends StatelessWidget {
                 readIdentity: (address) =>
                     Get.find<OtaService>().readDeviceInfo(address),
                 identityStatus: () => Get.find<OtaService>().upgradeStatus,
+                // 终局清理（OBS-02）：观测连接占用的物理链路在 done 行之后
+                // 拆除；从未绑定时（null）只需观测器已自理的停扫描。
+                cleanup: (address) async {
+                  if (address == null) return;
+                  await Get.find<bt_service.BluetoothService>()
+                      .disconnectOtaDeviceByAddress(address);
+                },
               );
             });
           }),
