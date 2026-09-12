@@ -124,6 +124,7 @@ class MyApp extends StatelessWidget {
                         .connectObservedDevice(advertisement),
                 readIdentity: (address) =>
                     Get.find<OtaService>().readDeviceInfo(address),
+                identityStatus: () => Get.find<OtaService>().upgradeStatus,
               );
             });
           }),

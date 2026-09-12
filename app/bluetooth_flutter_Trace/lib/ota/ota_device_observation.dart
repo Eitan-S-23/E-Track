@@ -14,8 +14,8 @@ import 'ota_device_info.dart';
 ///
 /// 三道闸门（任一不满足都不产生观测行为）：
 /// 1. 编译期必须显式注入 `TRACE_DEV_DEVICE_OBSERVATION=true`。默认 false，
-///    未注入时 [OtaDeviceObserver.instance] 保持 null，扫描监听根本不调用
-///    本文件，默认行为与改动前一致。
+///    未注入时 [OtaDeviceObserver.instance] 保持 null，扫描监听里的接线
+///    立即返回、不产生任何日志行，默认行为与改动前一致。
 /// 2. 启用后必须同时注入 target 与 sentinel，否则
 ///    [OtaDeviceObservationConfig.problem] 非空，观测不启动（fail-closed），
 ///    只输出一行 `OTA_OBS config=INVALID`，不产出"看起来在观测"的假象。
@@ -24,7 +24,9 @@ import 'ota_device_info.dart';
 ///    ——"声称已注入、实际没注入"的假阳性 APK 无法离开 CI。
 ///
 /// 本文件只读扫描结果与时钟、只写日志，不改变任何控制流；所有输出行以
-/// `OTA_OBS ` 开头，字段顺序固定，便于 logcat 侧逐行解析。
+/// `OTA_OBS ` 开头，字段顺序固定，便于 logcat 侧逐行解析。**结局是全的**：
+/// 命中并读身份成功 / 连接失败 / 身份为空 / 身份抛异常 / 窗口到期仍未命中
+/// —— 五种结局各有且仅有一行 `done`，不允许出现"没有任何终止行"。
 ///
 /// 环境变量名（构建侧同名注入，改一个必须同步改另一个）：
 /// - `TRACE_DEV_DEVICE_OBSERVATION`
@@ -189,8 +191,15 @@ class OtaDeviceObserver {
     required this.stopScan,
     required this.connect,
     required this.readIdentity,
+    this.identityStatus,
+    this.window = defaultWindow,
     void Function(String line)? emit,
   }) : _emit = emit ?? debugPrint;
+
+  /// 观测窗口的缺省时长。窗口到期仍未命中目标，即输出 `target_not_seen`
+  /// 终止行——"没有任何终止行"必须被消灭：logcat 侧不允许用"没有错误行"
+  /// 反推"尚未读取"。
+  static const Duration defaultWindow = Duration(seconds: 120);
 
   /// 进程内唯一实例。**仅在显式启用且配置完整时被赋值**；扫描监听据此
   /// 判断是否需要观测，未启用时是 null。
@@ -206,6 +215,7 @@ class OtaDeviceObserver {
     required OtaObservationStop stopScan,
     required OtaObservationConnect connect,
     required OtaObservationIdentityRead readIdentity,
+    String Function()? identityStatus,
     void Function(String line)? emit,
   }) {
     const config = OtaDeviceObservationConfig.fromBuild;
@@ -221,6 +231,7 @@ class OtaDeviceObserver {
       stopScan: stopScan,
       connect: connect,
       readIdentity: readIdentity,
+      identityStatus: identityStatus,
       emit: reporter,
     );
     instance = observer;
@@ -233,6 +244,16 @@ class OtaDeviceObserver {
   final OtaObservationStop stopScan;
   final OtaObservationConnect connect;
   final OtaObservationIdentityRead readIdentity;
+
+  /// 读取服务侧最近一次身份失败的原因文案（`OtaService.upgradeStatus`）。
+  /// 服务侧已把「设备未暴露 OTA 服务（FFF0/FFF2/FFF1）」/「OTA 通知订阅失败」/
+  /// 「GET_INFO 失败: …」/「设备身份识别失败: …」分开写；这里原样转述，
+  /// 不在观测侧另造一套分类，避免两处口径漂移。
+  final String Function()? identityStatus;
+
+  /// 观测窗口：到期未命中即给出终止行。
+  final Duration window;
+
   final void Function(String line) _emit;
 
   /// 已观测过的地址（归一化）：同一台设备只输出一次广播明细，避免日志被
@@ -240,7 +261,13 @@ class OtaDeviceObserver {
   final Set<String> _seenAddresses = <String>{};
 
   bool _started = false;
-  bool _binding = false;
+
+  /// 终止结局的唯一闸门：一旦置位，既不再发起绑定，也不会再输出第二行
+  /// `done`。窗口到期与命中绑定共用它，二者在同一 isolate 上同步判定，
+  /// 不存在竞态。
+  bool _settled = false;
+
+  Timer? _windowTimer;
 
   /// 已见过的去重地址数（供测试断言）。
   int get observedDevices => _seenAddresses.length;
@@ -252,10 +279,21 @@ class OtaDeviceObserver {
     if (!config.active || _started) return;
     _started = true;
     _emit(config.statusLine);
+    _windowTimer = Timer(window, _onWindowExpired);
     unawaited(startScan());
   }
 
-  /// 消费一批扫描结果。未启用/已绑定完成时是安全的空操作。
+  /// 窗口到期仍未命中目标：给出确定且唯一的终止行，并停止扫描。
+  void _onWindowExpired() {
+    _windowTimer = null;
+    if (_settled) return;
+    _settled = true;
+    _emit('OTA_OBS done result=target_not_seen waitedMs=${window.inMilliseconds} '
+        'scanned=${_seenAddresses.length} target=${config.target}');
+    unawaited(stopScan());
+  }
+
+  /// 消费一批扫描结果。未启用/已产生终止结局时是安全的空操作。
   void onAdvertisements(List<ObservedAdvertisement> batch) {
     if (!config.active) return;
     final fresh = <ObservedAdvertisement>[];
@@ -270,11 +308,13 @@ class OtaDeviceObserver {
     for (final advertisement in fresh) {
       _emit(advertisement.line);
     }
-    if (_binding) return;
+    if (_settled) return;
     for (final advertisement in batch) {
       final matched = config.match(advertisement);
       if (matched == OtaObservationMatch.none) continue;
-      _binding = true;
+      _settled = true;
+      _windowTimer?.cancel();
+      _windowTimer = null;
       unawaited(_bind(advertisement, matched));
       return;
     }
@@ -306,7 +346,8 @@ class OtaDeviceObserver {
       return;
     }
     if (info == null) {
-      _emit('OTA_OBS identity addr=$address result=fail');
+      _emit('OTA_OBS identity addr=$address result=fail '
+          'status=${_reportedStatus()}');
       _emit('OTA_OBS done result=identity_failed');
       return;
     }
@@ -316,5 +357,12 @@ class OtaDeviceObserver {
         'boot=${info.bootVersion} proto=${info.protocolVersion} '
         'window=${info.maxWindowSegments} sha=${info.currentImageSha256Hex}');
     _emit('OTA_OBS done result=ok');
+  }
+
+  /// 失败原因文案；读取不到时用 `-`，不留空字段。
+  String _reportedStatus() {
+    final status = identityStatus?.call();
+    if (status == null || status.trim().isEmpty) return '-';
+    return status.trim();
   }
 }

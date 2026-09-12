@@ -285,4 +285,92 @@ void main() {
     expect(connects, 1);
     expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
   });
+
+  test('窗口到期仍未命中：输出确定的 target_not_seen 终止行并停扫描', () async {
+    final lines = <String>[];
+    var stopped = 0;
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async {},
+      stopScan: () async => stopped++,
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      window: const Duration(milliseconds: 60),
+      emit: lines.add,
+    );
+    observer.start();
+    observer.onAdvertisements(<ObservedAdvertisement>[
+      advertisement(address: '11:22:33:44:55:66', name: 'AIMA'),
+    ]);
+    expect(lines.any((line) => line.startsWith('OTA_OBS done')), isFalse,
+        reason: '窗口内不得提前下终止结论');
+
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+
+    // "没有终止行"被消灭：目标板没出现时也必须有一条确定结局。
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS done')),
+        'OTA_OBS done result=target_not_seen waitedMs=60 scanned=1 '
+        'target=XTrace');
+    expect(stopped, 1);
+
+    // 窗口结算后再出现目标：不得再起第二条链路（终止结局唯一）。
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    await Future<void>.delayed(Duration.zero);
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')).length, 1);
+  });
+
+  test('窗口内命中即取消窗口：不会补出 target_not_seen', () async {
+    final lines = <String>[];
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async {},
+      stopScan: () async {},
+      connect: (_) async => true,
+      readIdentity: (_) async => identity(),
+      window: const Duration(milliseconds: 60),
+      emit: lines.add,
+    );
+    observer.start();
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    await pumpUntil(lines, 'OTA_OBS done');
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    expect(lines.where((line) => line.startsWith('OTA_OBS done')),
+        <String>['OTA_OBS done result=ok']);
+  });
+
+  test('身份为空时原样转述服务侧原因，不把三类失败压成一个词', () async {
+    final lines = <String>[];
+    const reason = '设备未暴露 OTA 服务（FFF0/FFF2/FFF1）';
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async {},
+      stopScan: () async {},
+      connect: (_) async => true,
+      readIdentity: (_) async => null,
+      identityStatus: () => reason,
+      emit: lines.add,
+    );
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    await pumpUntil(lines, 'OTA_OBS done');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS identity')),
+        'OTA_OBS identity addr=aa:bb:cc:dd:ee:ff result=fail status=$reason');
+    expect(lines.last, 'OTA_OBS done result=identity_failed');
+  });
+
+  test('失败原因读不到时用 - 占位，不留空字段', () async {
+    final lines = <String>[];
+    final observer = OtaDeviceObserver(
+      config: config(),
+      startScan: () async {},
+      stopScan: () async {},
+      connect: (_) async => true,
+      readIdentity: (_) async => null,
+      identityStatus: () => '   ',
+      emit: lines.add,
+    );
+    observer.onAdvertisements(<ObservedAdvertisement>[advertisement()]);
+    await pumpUntil(lines, 'OTA_OBS done');
+    expect(lines.singleWhere((line) => line.startsWith('OTA_OBS identity')),
+        'OTA_OBS identity addr=aa:bb:cc:dd:ee:ff result=fail status=-');
+  });
 }
