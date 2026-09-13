@@ -37,6 +37,7 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 | P3-2-v1 | v2 | `cb2ebdde6ff210906e06c293c891c13eae5c626f` | `cb2ebdde6ff210906e06c293c891c13eae5c626f` | `771431d10cb6099c2d34f8d3ff8ffd02f2b22b85` | PASS |
 | P3-6-v1 | v2 | `fa320bead2cce90b38bf211ca757f846822ded25` | `fa320bead2cce90b38bf211ca757f846822ded25` | `2787fa0e529ee32009c614f761e81ae28e2a9728` | PASS |
 | P3-7-v1 | v2 | `fcb77158425f2ade3733f9a5237013aaf7bb51f4` | `fcb77158425f2ade3733f9a5237013aaf7bb51f4` | `26b0a97f42f1c51bfef669b6d27b765cf274fcf3` | PASS |
+| P3-3-v3 | v3 | `421bd290b0f5e30b385a17c2ab82a2b3d8844dc2` | `a178ecc1dca3929e1bca702fb11344f3c5bd2872` | `2ce26b29c395aebdd75b49376755d16c3706feea` | PASS（2026-09-13 FROZEN+NOT_RUN 执行前检查；O 序列执行后另行最终验收） |
 
 备注：
 
