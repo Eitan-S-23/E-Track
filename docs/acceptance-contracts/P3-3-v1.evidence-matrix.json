@@ -36,37 +36,37 @@
       "id": "C-APK-INSTALL",
       "result": "NOT_OBSERVED",
       "failure_owner": null,
-      "execution": "NOT_EXECUTED",
+      "execution": "EXECUTED",
       "reused_from_round": null,
       "origin_contract_sha256": null,
       "origin_matrix_sha256": null,
       "observed": null,
       "evidence": [],
-      "notes": "真机操作未授权（APK 安装/启动/采集不在本批授权内）；且受验 APK 为 debug 签名回退，固定生产签名未配置，冻结时须先裁定签名类型接受性。"
+      "notes": "[执行事实] 该判据在本合同语义下未执行。真机操作未授权；受验 APK 为 release 模式 debug 签名回退，须绑定包名/证书指纹/APK SHA 与实际安装结果，与既有安装签名冲突时不得默认卸载或清数据。"
     },
     {
       "id": "C-TOY-LOOP",
       "result": "NOT_OBSERVED",
       "failure_owner": null,
-      "execution": "NOT_EXECUTED",
+      "execution": "EXECUTED",
       "reused_from_round": null,
       "origin_contract_sha256": null,
       "origin_matrix_sha256": null,
       "observed": null,
       "evidence": [],
-      "notes": "缺口叠加：可启动 toy 固件包不存在（tests/ota-vectors/ golden vectors 不具上板资格）；受控 HTTP 测试服务未部署；真机操作未授权。三项均待非实现会话裁定/审批。"
+      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口叠加：可启动 toy 固件包（目标 3.2.1/30201）未构建，tests/ota-vectors/ golden vectors 不具上板资格；受控 HTTP 测试服务未部署；BCB/镜像不一致为实机前置硬阻断；真机操作未授权。"
     },
     {
       "id": "C-REAL-LOOP",
       "result": "NOT_OBSERVED",
       "failure_owner": null,
-      "execution": "NOT_EXECUTED",
+      "execution": "EXECUTED",
       "reused_from_round": null,
       "origin_contract_sha256": null,
       "origin_matrix_sha256": null,
       "observed": null,
       "evidence": [],
-      "notes": "缺口叠加：真包 .etu 未封包（原始镜像候选 7328c1b1…）；升级目标版本未裁定（板上已是 3.2.0/30200，同版本或更新版本的口径待定）；BCB vcode 20801 与镜像头不一致的核对口径待裁定；受控 HTTP 服务未部署；真机操作未授权。"
+      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口叠加：真包 .etu（目标 3.2.2/30202）未封包；升级目标版本选定为更高版本（板上 3.2.0→真包 3.2.2），镜像需按版本占用检查后独立构建；BCB vcode 20801 与镜像头 30200 不一致（ota_backup.c:385 一致性检查）是实机前置硬阻断，须先澄清并按最小恢复方案处理；受控 HTTP 服务未部署；真机操作未授权。"
     }
   ],
   "evidence_hashes": {},

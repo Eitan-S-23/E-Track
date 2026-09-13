@@ -11,7 +11,7 @@
   "freeze_commit": "0000000000000000000000000000000000000000",
   "freeze_tree": "0000000000000000000000000000000000000000",
   "profile_config_blob": "0000000000000000000000000000000000000000",
-  "draft_note": "DRAFT 草案（实现会话 2026-09-12 整改批交付）。freeze_* 为占位零值：冻结时必须由非实现会话绑定审批时刻实际实现提交（稳定基线 >= ab6ce3b5bab8bcb357e8a687b7bb099ab1a0ce0d）的真实 git OID，并填 approved_by/approved_at。真机命令为绑定骨架，正式冻结前须由验收会话按执行合同 §3 阶段化补齐设备序列号、超时、观测配额与恢复条件。",
+  "draft_note": "DRAFT 草案（实现会话 2026-09-12 整改批交付，2026-09-13 按用户 8 条意见修订）。freeze_* 为占位零值：冻结时必须由非实现会话绑定一个精确的 freeze_commit（不允许写 >= 某提交的区间表述）及其 freeze_tree/profile_config_blob 真实 git OID，并填 approved_by/approved_at。执行顺序（用户裁定）：交接材料及 schema 修正 → BCB/镜像身份问题澄清 → 两类安全资产及服务/APK 方案确定 → 必要准备和自测 → 非实现会话审查精确合同 → 用户审批 → 冻结及 NOT_RUN 前检 → 分阶段实机执行。外部输入 fingerprint/evidence 为 PENDING 占位，冻结前必须回填为真实值。真机命令为绑定骨架，正式冻结前须按合并操作单逐项绑定设备、命令、超时、次数与恢复条件。",
   "result_taxonomy": [
     "PASS",
     "PRODUCT_FAIL",
@@ -39,32 +39,48 @@
     {
       "id": "flutter",
       "profile": "Flutter",
-      "category": "component_source",
-      "dependency_rationale": "手机 App 源码（lib/android/windows/pubspec/build.yml）是 APK/EXE 构建与 BLE 观测/升级链路的直接输入；OTA-DEC-013 三类实机证据均以该 App 为载体。"
+      "category": "production_source"
     }
   ],
   "external_inputs": [
     {
       "id": "EXT-HTTP-TEST-SERVICE",
-      "description": "受控 HTTP 测试服务（版本化、符合冻结共享合同的 latest/下载端点），仅当真实 P4-2 后台未就绪时作为显式外部输入。APK 必须经受控配置发真实 HTTP 请求，不旁路 latest/兼容/token/摘要检查，不把包直接注入 service 状态。须绑定服务 URL、版本与 fixture 身份；不宣称真实 P4-2 register/R2/D1 链已通过。",
-      "status": "PENDING_DEPLOYMENT"
+      "category": "environment",
+      "description": "受控 HTTP 测试服务（版本化、符合冻结共享合同的 latest/下载端点），仅当真实 P4-2 后台未就绪时作为显式外部输入。APK 必须经受控配置发真实 HTTP 请求，不旁路 latest/兼容/token/摘要检查，不把包直接注入 service 状态。不宣称真实 P4-2 register/R2/D1 链已通过。具体方案（部署位置/域名、手机访问方式、代码及 fixture 版本、latest/download/token 行为、资产身份、日志位置、有效期与清理方式）待提交审批后部署；冻结前必须回填本输入的 fingerprint/evidence_path/evidence_sha256。",
+      "fingerprint": "PENDING: 方案审批与部署后回填（服务 URL/版本/fixture 身份）",
+      "evidence_path": "evidence/external/http-test-service.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "id": "EXT-TOY-BOOTABLE",
-      "description": "经审定的可启动受控固件包（toy）：保留真实 Boot/BCB/OTA 路径且具有合法 fw_header/向量。tests/ota-vectors/ 的 golden vectors 不具上板资格，不得刷入。准入与身份（SHA-256/size/目标 versionCode）由非实现会话在冻结时裁定。",
-      "status": "PENDING_ASSET_APPROVAL"
+      "category": "fixture",
+      "description": "经审定的可启动受控固件包（toy 3.2.1，目标 versionCode 30201）：保留真实 Boot/BCB/OTA 路径且具有合法 fw_header。按 GCC 构建+finalize+etu_pack 流程独立准备，不修改 Boot/BCB/OTA 校验逻辑，不写设备，不手改二进制头。tests/ota-vectors/ 的 golden vectors 不具上板资格，不得刷入。pre-finalize BIN 摘要、最终镜像 raw SHA-256、fw_header 双零摘要与 ETU 包摘要分开记录；冻结前回填 fingerprint/evidence。",
+      "fingerprint": "PENDING: 资产构建后回填（toy 3.2.1 目标镜像 raw SHA-256 与 ETU 包 SHA-256/size）",
+      "evidence_path": "evidence/external/toy-bootable-asset.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "id": "EXT-REAL-ETU",
-      "description": "真实固件 OTA 包（.etu，含目标 versionCode 与 raw SHA-256）：候选原始镜像 X-Track-App-GCC.bin（602984B，7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f）尚未经 Tools/etu_pack.py 封包；目标版本（板上已是 3.2.0/30200）待非实现会话裁定。",
-      "status": "PENDING_PACKAGING_AND_TARGET_DECISION"
+      "category": "fixture",
+      "description": "真实固件 OTA 包（toy 3.2.2，目标 versionCode 30202）：候选原始镜像 X-Track-App-GCC.bin（602984B，7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f）为 3.2.0 基线，真包资产需以更高目标版本独立构建/封包，与 toy 资产分别绑定目标版本和最终镜像身份，不得同包改名重复计算。摘要记录口径同 EXT-TOY-BOOTABLE；冻结前回填 fingerprint/evidence。",
+      "fingerprint": "PENDING: 资产构建后回填（真包 3.2.2 目标镜像 raw SHA-256 与 ETU 包 SHA-256/size）",
+      "evidence_path": "evidence/external/real-etu-asset.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "EXT-BOARD-STATE",
+      "category": "hardware_state",
+      "description": "目标板实机前置状态：BCB vcode 20801 与运行镜像 3.2.0(30200) 不一致（ota_backup.c:385 一致性检查会拒绝 STAGED 提交）是实机执行的硬阻断。冻结前必须先核对原始证据与 BCB 仲裁结果、确认当前镜像身份，并提交最小恢复方案（不删除一致性检查、不直接改 BCB 数字、不擅自烧录对齐）；解决证据回填本输入后实机判据方可执行。",
+      "fingerprint": "PENDING: BCB/镜像不一致澄清与最小恢复方案落地后回填",
+      "evidence_path": "evidence/external/board-bcb-state.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   ],
   "commands": [
     {
       "id": "CMD-DEV-CHECKS",
-      "description": "开发自测：flutter-dev-checks.yml 双宿主（ubuntu+windows）strict analyze + 全部单测/widget 测试（test_scope=all）。已在本轮稳定提交 ab6ce3b 验证通过（run 34730007317）；冻结时须在 freeze_commit 上重新绑定 run 证据或按 rerun plan 复用。",
-      "command": "gh workflow run flutter-dev-checks.yml --ref <freeze_branch> -f test_scope=all -f build_apk=false",
+      "description": "开发自测：flutter-dev-checks.yml 双宿主（ubuntu+windows）strict analyze + 全部单测/widget 测试（test_scope=all）。gh workflow run 退出码 0 只证明派发成功；本判据通过条件是核对实际 run 的 job conclusion（两个 job 均 success）、analyze 无 issue、全部测试通过（无 continue-on-error/降级），并归档原始日志与 run URL。",
+      "command": "gh workflow run flutter-dev-checks.yml --ref <freeze_branch> -f test_scope=all -f build_apk=false && gh run watch <run_id>",
       "input_groups": ["flutter", "validation"],
       "runner_paths": [".github/workflows/flutter-dev-checks.yml", "Tools/flutter/dev_checks.py"],
       "expected_exit_codes": [0],
@@ -72,8 +88,8 @@
     },
     {
       "id": "CMD-RELEASE-BUILD",
-      "description": "release 构建：build.yml build-only（publish_release=false）产出 release 模式 Android APK 与 Windows 完整运行包。本轮已在 ab6ce3b 验证（run 34730618341；APK 46682620B / 2a5d5db991bf764afde0fd1b77eaee22b730a3c80cf81e0c51c66188ce4ac71b，release 模式 debug 签名回退）；冻结时须绑定 freeze_commit 上的 run。",
-      "command": "gh workflow run build.yml --ref <freeze_branch> -f publish_release=false -f replace_existing_release=false",
+      "description": "release 构建：build.yml build-only（publish_release=false）产出 release 模式 Android APK 与 Windows 完整运行包。gh workflow run 退出码 0 只证明派发成功；本判据通过条件是核对实际 run 的 job conclusion（Android/Windows 均 success、Pages/Release job skipped）、Flutter 测试计数、APK/EXE/zip 的 size 与 SHA-256 实物核验（下载产物计算，非仅日志转述），并归档原始日志。Windows 证据为完整运行包 zip，不是裸 exe。",
+      "command": "gh workflow run build.yml --ref <freeze_branch> -f publish_release=false -f replace_existing_release=false && gh run watch <run_id>",
       "input_groups": ["flutter", "validation"],
       "runner_paths": [".github/workflows/build.yml"],
       "expected_exit_codes": [0],
@@ -109,37 +125,53 @@
   ],
   "artifacts": [
     {
+      "id": "ART-DEV-LOGS",
+      "description": "开发自测归档：run URL、job conclusion、analyze 输出、测试计数与原始日志（绑定具体 run，不以派发退出码代替）。",
+      "path": "evidence/dev-checks/"
+    },
+    {
       "id": "ART-APK-RELEASE",
-      "description": "受验 release APK（冻结时绑定确切路径/size/SHA-256 与签名类型；本轮候选 2a5d5db991bf764afde0fd1b77eaee22b730a3c80cf81e0c51c66188ce4ac71b 为 release 模式 debug 签名回退，固定生产签名未配置）。",
+      "description": "受验 release APK（冻结时绑定确切路径/size/SHA-256、包名与证书指纹；release 模式 debug 签名回退不自动否决功能验收，但不视为固定生产签名验证；与既有安装签名冲突时不得默认卸载或清数据，处理方式按合并操作单审批）。",
       "path": "artifacts/ble-monitor-android.apk"
     },
     {
+      "id": "ART-WINDOWS-RUNTIME",
+      "description": "Windows 完整运行包 zip（独立产物绑定；Windows 证据以完整运行包为准，不是裸 exe）。",
+      "path": "artifacts/ble-monitor-windows.zip"
+    },
+    {
       "id": "ART-TOY-ETU",
-      "description": "可启动受控 toy OTA 包（冻结时绑定封包产物身份；当前不存在，golden vectors 不具上板资格）。",
-      "path": "artifacts/toy-bootable.etu"
+      "description": "可启动受控 toy OTA 包（目标 3.2.1/30201；冻结时绑定 pre-finalize BIN 摘要、目标镜像 raw SHA-256、fw_header 双零摘要与 ETU 包 SHA-256/size，分开记录；当前不存在，golden vectors 不具上板资格）。",
+      "path": "artifacts/toy-3.2.1.etu"
+    },
+    {
+      "id": "ART-TOY-TARGET-IMAGE",
+      "description": "toy 闭环冻结目标镜像（3.2.1/30201，GET_INFO 终点的 versionCode 与 raw SHA-256 基准）。",
+      "path": "artifacts/toy-3.2.1-target-image.bin"
     },
     {
       "id": "ART-REAL-ETU",
-      "description": "真实固件 OTA 包（冻结时绑定 etu_pack.py 封包产物身份与目标 versionCode/raw SHA-256）。",
-      "path": "artifacts/x-track-app.etu"
+      "description": "真实固件 OTA 包（目标 3.2.2/30202；与 toy 资产分别绑定目标版本和最终镜像身份，不得同包改名重复计算；摘要口径同 ART-TOY-ETU）。",
+      "path": "artifacts/real-3.2.2.etu"
     },
     {
-      "id": "ART-TARGET-IMAGE",
-      "description": "冻结目标固件镜像（真包闭环的 versionCode/raw SHA-256 基准；目标版本待裁定）。",
-      "path": "artifacts/target-image.bin"
+      "id": "ART-REAL-TARGET-IMAGE",
+      "description": "真包闭环冻结目标镜像（3.2.2/30202，GET_INFO 终点的 versionCode 与 raw SHA-256 基准）。",
+      "path": "artifacts/real-3.2.2-target-image.bin"
     }
   ],
   "criteria": [
     {
       "id": "C-DEV-CHECKS",
-      "description": "freeze_commit 上 flutter-dev-checks 双宿主 strict analyze + 全部测试通过（无 continue-on-error/降级）。",
+      "description": "freeze_commit 上 flutter-dev-checks 双宿主 strict analyze + 全部测试通过（无 continue-on-error/降级）。通过条件核对实际 run 的 job conclusion 与原始日志，不以 gh workflow run 派发退出码代替。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "run_url"],
       "input_groups": ["flutter", "validation"],
+      "dependency_rationale": "flutter 组提供 App 源码与 runner 入口（dev_checks.py 在 Validation profile 内），两组共同构成自测命令的真实输入。",
       "external_inputs": [],
       "command_ids": ["CMD-DEV-CHECKS"],
-      "artifact_ids": [],
+      "artifact_ids": ["ART-DEV-LOGS"],
       "gate": {
         "type": "boolean",
         "basis": "frozen_requirement",
@@ -148,14 +180,15 @@
     },
     {
       "id": "C-RELEASE-BUILD",
-      "description": "freeze_commit 上 build.yml build-only 成功产出 release 模式 Android APK 与 Windows 完整运行包（非裸 exe）；签名类型如实绑定。",
+      "description": "freeze_commit 上 build.yml build-only 成功产出 release 模式 Android APK 与 Windows 完整运行包（非裸 exe）；签名类型如实绑定（release 模式 debug 签名回退不自动否决功能验收，不视为固定生产签名验证）。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "run_url", "artifact_hash"],
       "input_groups": ["flutter", "validation"],
+      "dependency_rationale": "flutter 组提供 App 源码与 build.yml；Validation 组提供构建 runner 脚本与宿主回归。产物身份以实物下载核验为准。",
       "external_inputs": [],
       "command_ids": ["CMD-RELEASE-BUILD"],
-      "artifact_ids": ["ART-APK-RELEASE"],
+      "artifact_ids": ["ART-APK-RELEASE", "ART-WINDOWS-RUNTIME"],
       "gate": {
         "type": "boolean",
         "basis": "frozen_requirement",
@@ -164,7 +197,7 @@
     },
     {
       "id": "C-APK-INSTALL",
-      "description": "受验 release APK 在实际 Android 手机（vivo V2312A，序列号 10ADA4197U001CK）实际安装并启动；记录包名/版本/设备/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK。",
+      "description": "受验 release APK 在实际 Android 手机（vivo V2312A，序列号 10ADA4197U001CK）实际安装并启动；记录包名/版本/证书指纹/设备/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK。与既有安装签名冲突时按合并操作单批准的方式处理，不得默认卸载或清数据。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "device_observation"],
@@ -180,14 +213,15 @@
     },
     {
       "id": "C-TOY-LOOP",
-      "description": "可启动受控 toy 包经手机 App→BLE→MCU 完整升级闭环；共同终点=重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结目标镜像一致。golden vectors 不得上板。",
+      "description": "可启动受控 toy 包（3.2.1/30201）经手机 App→BLE→MCU 完整升级闭环；共同终点=重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结 toy 目标镜像一致。golden vectors 不得上板。前置：EXT-BOARD-STATE（BCB/镜像不一致）已按最小恢复方案解决并留证。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
       "input_groups": ["production", "flutter"],
-      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-TOY-BOOTABLE"],
+      "dependency_rationale": "production 组提供 MCU 侧 OTA/boot 源码与目标镜像输入，flutter 组提供手机 App 升级链路；两者共同构成 BLE 闭环的两端。",
+      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-TOY-BOOTABLE", "EXT-BOARD-STATE"],
       "command_ids": ["CMD-TOY-LOOP"],
-      "artifact_ids": ["ART-TOY-ETU", "ART-TARGET-IMAGE"],
+      "artifact_ids": ["ART-TOY-ETU", "ART-TOY-TARGET-IMAGE"],
       "gate": {
         "type": "state_chain",
         "basis": "protocol_contract",
@@ -203,14 +237,15 @@
     },
     {
       "id": "C-REAL-LOOP",
-      "description": "真实固件 OTA 包同 C-TOY-LOOP 的闭环终点；不得由 toy 代替。板上 BCB vcode 20801 与镜像 3.2.0 的不一致核对口径由冻结时裁定。",
+      "description": "真实固件 OTA 包（3.2.2/30202）同 C-TOY-LOOP 的闭环终点，不得由 toy 代替；与 toy 闭环分别绑定各自目标镜像身份。前置：EXT-BOARD-STATE 已解决。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
       "input_groups": ["production", "flutter"],
-      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-REAL-ETU"],
+      "dependency_rationale": "同 C-TOY-LOOP：MCU 侧与手机 App 侧源码共同构成闭环两端；真包资产独立于 toy 资产构建与绑定。",
+      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-REAL-ETU", "EXT-BOARD-STATE"],
       "command_ids": ["CMD-REAL-LOOP"],
-      "artifact_ids": ["ART-REAL-ETU", "ART-TARGET-IMAGE"],
+      "artifact_ids": ["ART-REAL-ETU", "ART-REAL-TARGET-IMAGE"],
       "gate": {
         "type": "state_chain",
         "basis": "protocol_contract",
