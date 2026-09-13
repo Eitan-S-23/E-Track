@@ -7594,23 +7594,6 @@ class _DeviceRow extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(width: 10),
-            OutlinedButton(
-              onPressed: onTap,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: _RideColors.orange,
-                side: const BorderSide(color: _RideColors.orange),
-                minimumSize: const Size(64, 38),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: const Text(
-                '详情',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
-              ),
-            ),
           ],
         ),
       ),
