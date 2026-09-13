@@ -15,7 +15,6 @@ import '../config/share_links.dart';
 import '../controllers/ble_controller.dart';
 import '../controllers/ride_controller.dart';
 import '../models/ride_models.dart';
-import 'device_detail_page.dart';
 import 'ota_upgrade_page.dart';
 
 class SpeedometerPage extends StatefulWidget {
@@ -7268,7 +7267,6 @@ class _DevicesPageState extends State<_DevicesPage>
               padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
               child: _AvailableDevicesPanel(
                 bleController: _ble,
-                onRefresh: _refreshDevices,
                 onMissingDevice: _openMissingDeviceHelp,
               ),
             ),
@@ -7369,12 +7367,10 @@ class _ScanPanel extends StatelessWidget {
 class _AvailableDevicesPanel extends StatelessWidget {
   const _AvailableDevicesPanel({
     required this.bleController,
-    required this.onRefresh,
     required this.onMissingDevice,
   });
 
   final BleController bleController;
-  final VoidCallback onRefresh;
   final VoidCallback onMissingDevice;
 
   @override
@@ -7383,24 +7379,16 @@ class _AvailableDevicesPanel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
       child: Column(
         children: [
-          Row(
-            children: [
-              const Text(
-                '可用设备',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                ),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '可用设备',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
               ),
-              const Spacer(),
-              IconButton(
-                onPressed: onRefresh,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: Icon(Icons.refresh, color: Colors.white.withValues(alpha: 0.78)),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 14),
           Obx(() {
@@ -7434,15 +7422,7 @@ class _AvailableDevicesPanel extends StatelessWidget {
             return Column(
               children: [
                 for (final device in devices) ...[
-                  _DeviceRow(
-                    title: _displayName(bleController, device),
-                    type: bleController.connectedDevices
-                            .any((d) => d.remoteId == device.remoteId)
-                        ? '已连接'
-                        : device.remoteId.str,
-                    bars: _rssiBars(bleController.getDeviceRssi(device)),
-                    onTap: () => Get.to(() => DeviceDetailPage(device: device)),
-                  ),
+                  _buildDeviceRow(device),
                   const SizedBox(height: 10),
                 ],
               ],
@@ -7477,6 +7457,23 @@ class _AvailableDevicesPanel extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildDeviceRow(BluetoothDevice device) {
+    final connected = bleController.connectedDevices
+        .any((d) => d.remoteId == device.remoteId);
+    return _DeviceRow(
+      title: _displayName(bleController, device),
+      type: connected ? '已连接' : device.remoteId.str,
+      bars: _rssiBars(bleController.getDeviceRssi(device)),
+      iconCategory: bleController.getDeviceCategory(device),
+      onTap: () => Get.to(
+        () => _SpeedometerDeviceDetailPage(device: device),
+      ),
+      onConnect: connected || !bleController.isConnectable(device)
+          ? null
+          : () => unawaited(bleController.connectDevice(device)),
+    );
+  }
 }
 
 /// 无广播名的设备回退显示 MAC 地址，避免出现空标题行。
@@ -7499,13 +7496,19 @@ class _DeviceRow extends StatelessWidget {
     required this.title,
     required this.type,
     required this.bars,
+    required this.iconCategory,
     required this.onTap,
+    this.onConnect,
   });
 
   final String title;
   final String type;
   final int bars;
+  final String iconCategory;
   final VoidCallback onTap;
+
+  /// 直连回调；为 null（已连接或不可连接）时隐藏连接按钮。
+  final VoidCallback? onConnect;
 
   @override
   Widget build(BuildContext context) {
@@ -7522,22 +7525,30 @@ class _DeviceRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _DeviceThumbnail(kind: type, compact: true),
+            _CategoryDeviceThumbnail(category: iconCategory, compact: true),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _SignalBars(value: bars),
+                    ],
                   ),
                   const SizedBox(height: 6),
                   Align(
@@ -7563,21 +7574,41 @@ class _DeviceRow extends StatelessWidget {
                 ],
               ),
             ),
-            _SignalBars(value: bars),
-            const SizedBox(width: 16),
+            if (onConnect != null) ...[
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: onConnect,
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: _RideColors.orange,
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: _RideColors.orange),
+                  minimumSize: const Size(64, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  '连接',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
+                ),
+              ),
+            ],
+            const SizedBox(width: 10),
             OutlinedButton(
               onPressed: onTap,
               style: OutlinedButton.styleFrom(
                 foregroundColor: _RideColors.orange,
                 side: const BorderSide(color: _RideColors.orange),
-                minimumSize: const Size(76, 38),
+                minimumSize: const Size(64, 38),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
               child: const Text(
                 '详情',
-                style: TextStyle(fontWeight: FontWeight.w900),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
               ),
             ),
           ],
@@ -7587,20 +7618,339 @@ class _DeviceRow extends StatelessWidget {
   }
 }
 
-class _DeviceThumbnail extends StatelessWidget {
-  const _DeviceThumbnail({
-    required this.kind,
+/// 按广播类别渲染设备缩略图；码表/心率带沿用既有造型，其余类别用深色图标块。
+class _CategoryDeviceThumbnail extends StatelessWidget {
+  const _CategoryDeviceThumbnail({
+    required this.category,
     this.compact = false,
   });
 
-  final String kind;
+  final String category;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    if (kind == '雷达') return _RadarDeviceThumbnail(compact: compact);
-    if (kind == '心率带') return _HeartRateDeviceThumbnail(compact: compact);
-    return _ComputerDeviceThumbnail(compact: compact);
+    if (category == 'computer') {
+      return _ComputerDeviceThumbnail(compact: compact);
+    }
+    if (category == 'heart_rate') {
+      return _HeartRateDeviceThumbnail(compact: compact);
+    }
+    final (icon, color) = _categoryIcon(category);
+    return SizedBox(
+      width: compact ? 56 : 92,
+      height: compact ? 64 : 108,
+      child: Center(
+        child: Container(
+          width: compact ? 46 : 74,
+          height: compact ? 56 : 92,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(compact ? 12 : 18),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2E3338), Color(0xFF101318)],
+            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.34),
+                blurRadius: compact ? 10 : 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: color, size: compact ? 24 : 38),
+        ),
+      ),
+    );
+  }
+
+  (IconData, Color) _categoryIcon(String category) {
+    switch (category) {
+      case 'watch':
+        return const (Icons.watch, Color(0xFF7EC8FF));
+      case 'power_meter':
+        return const (Icons.bolt, _RideColors.orange);
+      case 'cadence':
+        return const (Icons.pedal_bike, Color(0xFF9BE6A0));
+      case 'earphones':
+        return const (Icons.headphones, Color(0xFFC6A9FF));
+      case 'speaker':
+        return const (Icons.speaker, Color(0xFFC6A9FF));
+      case 'phone':
+        return const (Icons.phone_android, Color(0xFF7EC8FF));
+      case 'tv':
+        return const (Icons.tv, Color(0xFF7EC8FF));
+      case 'keyboard':
+        return const (Icons.keyboard, Color(0xFFA9B4C2));
+      case 'mouse':
+        return const (Icons.mouse, Color(0xFFA9B4C2));
+      case 'beacon':
+        return const (Icons.location_on, Color(0xFFFFD166));
+      default:
+        return const (Icons.bluetooth, Color(0xFF3BE23E));
+    }
+  }
+}
+
+/// 码表线设备详情页：与码表页同风格（深色玻璃拟态），承载连接控制与
+/// 固件升级入口；功率计线继续使用独立的 DeviceDetailPage。
+class _SpeedometerDeviceDetailPage extends StatelessWidget {
+  const _SpeedometerDeviceDetailPage({required this.device});
+
+  final BluetoothDevice device;
+
+  Future<void> _copyDeviceId(String deviceId) async {
+    await Clipboard.setData(ClipboardData(text: deviceId));
+    _showUiMessage('已复制', '设备ID已复制到剪贴板');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ble = Get.put(BleController(), permanent: true);
+    final name = ble.getDeviceName(device);
+    final category = ble.getDeviceCategory(device);
+    final connectable = ble.isConnectable(device);
+
+    return Scaffold(
+      backgroundColor: _RideColors.background,
+      appBar: AppBar(
+        backgroundColor: _RideColors.background,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.copy,
+              color: Colors.white.withValues(alpha: 0.82),
+              size: 20,
+            ),
+            onPressed: () => _copyDeviceId(device.remoteId.str),
+          ),
+        ],
+      ),
+      body: Obx(() {
+        final connected = ble.connectedDevices
+            .any((d) => d.remoteId == device.remoteId);
+        final rssi = ble.getDeviceRssi(device);
+        final serviceCount = ble.getServiceUuids(device).length;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _GlassPanel(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    _CategoryDeviceThumbnail(category: category),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 19,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: connected
+                                      ? const Color(0xFF3BE23E)
+                                      : Colors.white.withValues(alpha: 0.38),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  connected
+                                      ? '已连接'
+                                      : (connectable ? '未连接' : '仅广播，不支持连接'),
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.72),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _GlassPanel(
+                child: Column(
+                  children: [
+                    _DetailInfoRow(
+                      label: '设备ID',
+                      value: device.remoteId.str,
+                    ),
+                    _DetailInfoRow(
+                      label: '可连接',
+                      value: connectable ? '是' : '否',
+                    ),
+                    _DetailInfoRow(
+                      label: '信号强度',
+                      value: rssi == 0
+                          ? '暂无数据'
+                          : '$rssi dBm（${ble.getRssiDescription(rssi)}）',
+                    ),
+                    _DetailInfoRow(
+                      label: '服务 UUID',
+                      value: serviceCount == 0 ? '无' : '$serviceCount 项',
+                      last: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _GlassPanel(
+                padding: const EdgeInsets.all(16),
+                child: connectable
+                    ? SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (connected) {
+                              unawaited(ble.disconnectDevice(device));
+                            } else {
+                              unawaited(ble.connectDevice(device));
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: connected
+                                ? Colors.white.withValues(alpha: 0.12)
+                                : _RideColors.orange,
+                            foregroundColor: Colors.white,
+                            side: connected
+                                ? BorderSide(
+                                    color: Colors.white.withValues(alpha: 0.2))
+                                : null,
+                            minimumSize: const Size.fromHeight(46),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(23),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            connected ? '断开连接' : '连接设备',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.white.withValues(alpha: 0.6),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '此设备不支持连接，仅广播数据',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.66),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+              if (connected) ...[
+                const SizedBox(height: 12),
+                _GlassPanel(
+                  padding: const EdgeInsets.all(16),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(15),
+                    onTap: () => Get.to(
+                      () => OtaUpgradePage(connectedDevice: device),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _RideColors.orange.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(13),
+                            border: Border.all(
+                              color: _RideColors.orange.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.system_update_alt,
+                            color: _RideColors.orange,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '检查单片机固件更新',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '下载最新码表固件',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: Colors.white.withValues(alpha: 0.6),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      }),
+    );
   }
 }
 
@@ -7670,53 +8020,6 @@ class _ComputerDeviceThumbnail extends StatelessWidget {
                     ),
                   ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RadarDeviceThumbnail extends StatelessWidget {
-  const _RadarDeviceThumbnail({required this.compact});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: compact ? 56 : 92,
-      height: compact ? 64 : 108,
-      child: Center(
-        child: Container(
-          width: compact ? 42 : 68,
-          height: compact ? 58 : 92,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF2E3338), Color(0xFF101318)],
-            ),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.34),
-                blurRadius: compact ? 10 : 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Container(
-              width: compact ? 18 : 30,
-              height: compact ? 18 : 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-              ),
             ),
           ),
         ),
@@ -9766,7 +10069,7 @@ void _openFirstConnectedDeviceDetail() {
     _showUiMessage('设备详情', '尚未连接设备，请先在设备页扫描并连接');
     return;
   }
-  Get.to(() => DeviceDetailPage(device: connected.first));
+  Get.to(() => _SpeedometerDeviceDetailPage(device: connected.first));
 }
 
 Future<void> _showDeviceSyncActions(BuildContext context) {
