@@ -43,9 +43,9 @@ class _SpeedometerPageState extends State<SpeedometerPage> {
           return Column(
             children: [
               // 固定顶部栏：永远可见、永远可点（不随内容滚动）
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
-                child: const _TopChrome(),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(18, 12, 18, 0),
+                child: _TopChrome(),
               ),
               // 选中页占满中间剩余空间，由各页自行决定固定子头与单一滚动区
               Expanded(
