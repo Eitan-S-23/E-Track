@@ -1,0 +1,66 @@
+{
+  "_comment": "P3-3 受控 v2 测试服务配置（冻结源码 v1 配套）。fixture 身份绑定 2026-09-13 离线制包四元组（docs/ota-exec-notes/P3-3-offline-assets-2026-09-13.md），服务启动时逐字节核验，失配拒绝启动。本服务不证明 P4-2 通过（未实现 register/D1/admin 发布链）。",
+  "listenHost": "127.0.0.1",
+  "listenPort": 8443,
+  "publicBaseUrl": "https://p3-3-v2-service.invalid:8443",
+  "token": {
+    "keyVersion": 1,
+    "keyHex": "7033337632746573746b65792d6e6f742d70726f64756374696f6e2d30313233"
+  },
+  "channels": {
+    "stable": null,
+    "beta": null
+  },
+  "releases": {
+    "toy-30201": {
+      "releaseId": "release-30201",
+      "versionName": "3.2.1",
+      "versionCode": 30201,
+      "releaseTag": "v3.2.1",
+      "releaseNotes": "P3-3 受控测试 toy 固件包（3.2.1/30201），离线制包身份见 P3-3-offline-assets-2026-09-13.md",
+      "targetImageSha256": "43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30201",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.1-full.etu",
+        "sha256": "fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2",
+        "sizeBytes": 284092,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": "../../../../.cache/p3-3-assets/e-track-at32f435-v3.2.1-full.etu"
+      }
+    },
+    "real-30202": {
+      "releaseId": "release-30202",
+      "versionName": "3.2.2",
+      "versionCode": 30202,
+      "releaseTag": "v3.2.2",
+      "releaseNotes": "P3-3 受控测试真固件包（3.2.2/30202），离线制包身份见 P3-3-offline-assets-2026-09-13.md",
+      "targetImageSha256": "c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30202",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.2-full.etu",
+        "sha256": "0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5",
+        "sizeBytes": 284112,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": "../../../../.cache/p3-3-assets/e-track-at32f435-v3.2.2-full.etu"
+      }
+    }
+  }
+}

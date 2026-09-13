@@ -42,7 +42,7 @@
       "origin_matrix_sha256": null,
       "observed": null,
       "evidence": [],
-      "notes": "[执行事实] 该判据在本合同语义下未执行。真机操作未授权；受验 APK 未构建（须含 firmware_latest_url 注入）；安装前须 apksigner verify --print-certs 实测证书指纹（不同 CI run 的 debug 签名不能假定相同）并与既有安装 1.0.60(86) 比对，冲突时停在安装前报裁定，不得默认卸载或清数据。"
+      "notes": "[执行事实] 该判据在本合同语义下未执行。真机操作未授权；受验 APK 未构建（须含 firmware_latest_url 注入，唯一一次 build-only 配额）；安装前须双侧完整证书指纹比对（既有安装 dumpsys 取 codePath → adb pull → apksigner verify --print-certs；受验 APK 同命令实测；不同 CI run 的 debug 签名不能假定相同），冲突时停在安装前报裁定，不得默认卸载或清数据（任何情况下不得以卸载或清数据解决签名冲突）；安装策略在唯一一次受验构建前冻结。"
     },
     {
       "id": "C-TOY-LOOP",
@@ -54,7 +54,7 @@
       "origin_matrix_sha256": null,
       "observed": null,
       "evidence": [],
-      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口：受控 HTTP 服务前置未解除（staging v1 与冻结合同 v2 不兼容，须 P4-2 固件 worker v2 或用户裁定等价物，见 P3-3-cloud-write-sheet-2026-09-13.md）；BCB 恢复（R0-R5，P3-3-bcb-recovery-plan-2026-09-13-v2.md）待批执行（A1-A4 独立授权）；真机操作未授权。toy 3.2.1/30201 资产已离线制包（四元组见 EXT-TOY-BOOTABLE，P3-3-offline-assets-2026-09-13.md），上板资格待非实现会话审定；golden vectors 不具上板资格。"
+      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口（2026-09-13 第三轮裁定口径）：BCB 恢复（v3 S1-S6，P3-3-bcb-recovery-plan-2026-09-13-v3.md，REC1-REC7 独立授权编号）待批执行——须 §5 完成判据四条全部满足；受控 v2 测试服务已实现冻结（三件套哈希见 EXT-HTTP-TEST-SERVICE，13 项宿主自测 PASS）但 D1-D5 部署申请待批；真机操作未授权。toy 3.2.1/30201 资产已离线制包并绑入服务冻结配置（四元组见 EXT-TOY-BOOTABLE，P3-3-offline-assets-2026-09-13.md），上板资格待非实现会话审定；golden vectors 不具上板资格。云端 staging 路线已暂停（写入单 B0-B4 冻结），不再是前置。"
     },
     {
       "id": "C-REAL-LOOP",
@@ -66,7 +66,7 @@
       "origin_matrix_sha256": null,
       "observed": null,
       "evidence": [],
-      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口：前置 C-TOY-LOOP 未执行（真包 fixture 仅在 toy 闭环成功后按写入单 §5.2 时序登记/激活）；受控 HTTP 服务前置未解除（同 C-TOY-LOOP，P4-2）；BCB 恢复待批执行；真机操作未授权。真包 3.2.2/30202 资产已离线制包（四元组见 EXT-REAL-ETU），上板资格待非实现会话审定。"
+      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口：前置 C-TOY-LOOP 未执行（真包仅在 toy 闭环成功后经受控服务 D4 切换激活：停服务 → --active-release real-30202 重启）；受控 v2 服务部署待批（同 C-TOY-LOOP）；BCB 恢复 v3 待批执行；真机操作未授权。真包 3.2.2/30202 资产已离线制包并绑入服务冻结配置（四元组见 EXT-REAL-ETU），上板资格待非实现会话审定。"
     }
   ],
   "evidence_hashes": {},

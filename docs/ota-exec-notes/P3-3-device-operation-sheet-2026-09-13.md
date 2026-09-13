@@ -1,16 +1,20 @@
-# P3-3 实机合并操作单（第二版，待集中审批）—— 2026-09-13
+# P3-3 实机合并操作单（第三版，待集中审批）—— 2026-09-13
 
-> 依据：用户 2026-09-13 分项批复第 7 条——O1-O5 现版不予整单批准，修改后
-> 集中提交。本版修订：补身份/签名预检；BCB 恢复列为独立准备操作（阶段 0，
-> 排在一切升级闭环之前）；正式升级的前置链写死（恢复完成 → 服务与资产准入
-> → 用户审批合同 → FROZEN+NOT_RUN 前检通过）；删除"预期 BCB 拒绝"观测点；
-> toy 闭环终点核对（30201 + 完整 raw SHA）通过后才进真包 30202；BCB 授权
-> 口径改精确表述；失败后不假定 STAGED、不自动恢复/重试/进入下一阶段；
-> J-Link 连接/采集单列为独立授权项。
+> 依据：用户 2026-09-13 分项批复第 7 条（O1-O5 现版不予整单批准，修改后
+> 集中提交）与第三轮裁定第 4 条。本版（第三版）修订：补身份/签名预检；
+> BCB 恢复列为独立准备操作（阶段 0，排在一切升级闭环之前）；正式升级的
+> 前置链改写死为「**恢复流程全部完成 + 受控 v2 服务及资产准入 + 同一受验
+> APK 身份确定 + 用户审批冻结合同 + FROZEN/NOT_RUN 前检通过**」；云端
+> staging 路线暂停，服务侧改走受控 v2 测试服务（D1-D5 部署申请）；O1 双侧
+> 证书比对改用**可比的完整证书指纹**（既有安装 dumpsys 取 APK 路径 →
+> adb pull → apksigner verify --print-certs，双侧同格式比对）；安装策略
+> 在唯一一次受验构建前确定；删除"预期 BCB 拒绝"观测点；toy 闭环终点核对
+> （30201 + 完整 raw SHA）通过后才激活真包并进 O4；失败后不假定 STAGED、
+> 不自动恢复/重试/进入下一阶段；J-Link 仍不含在 O 序列。
 >
 > **性质**：申报文档。全部操作均未授权、未执行。取代
-> `P3-3-admission-remediation-2026-09-12.md` §11 框架（该节保留为历史，
-> 以本单为准）。
+> `P3-3-admission-remediation-2026-09-12.md` §11 框架与同日前两版操作单
+> （保留为历史，以本版为准）。
 
 ## 1. 设备与资产身份（执行前逐项绑定实物哈希）
 
@@ -18,48 +22,85 @@
 | --- | --- | --- |
 | 测试手机 | vivo V2312A，序列号 `10ADA4197U001CK`，Android 13（SDK 33）；既有安装 `com.wen.gaia.gaia` 1.0.60(86) release（APK SHA `428a5d3a…`，2026-06-30 首装，历史动作不追认） | 沿用 B1-M r1 identity.md |
 | 目标板 | AT32F435RGT7；板上 App 3.2.0(30200)（finalize 头双零摘要链已核）；Boot=磁盘 `X-Track-Boot.bin` 原版 | 板识别文档（2026-09-12） |
-| 板上 BCB 起点 | **恢复执行前**：CONFIRMED cur_vcode=20801（阻断态）；**恢复执行后（O 序列合法起点）**：CONFIRMED cur_vcode=30200（R4 终态核验值） | 恢复方案 v2 §3.3 |
-| 受验 APK | 经 build.yml dispatch 输入 `firmware_latest_url=<受控服务URL>` 构建（endpoint 方式 iii）；绑定包名/versionCode/APK SHA-256/**证书指纹实测值**（apksigner verify --print-certs） | 待构建（追加 1 次 build-only 配额，待服务就绪后用） |
-| toy 包 | `e-track-at32f435-v3.2.1-full.etu`（284092B，SHA `fc4ae5a9…`）→ 云端 fixture 按 R2 对象键上传登记；终点基准=镜像 raw SHA `43ee943a…` + vcode 30201 | 已离线制包；云端写入单待批 |
+| 板上 BCB 起点 | **恢复执行前**：CONFIRMED cur_vcode=20801（阻断态）；**恢复执行后（O 序列合法起点）**：CONFIRMED cur_vcode=30200（§5 完成判据四条全满足） | 恢复方案 v3 §5 |
+| 受验 APK | 经 build.yml dispatch 输入 `firmware_latest_url=<受控 v2 服务URL>` 构建（endpoint 方式 iii）；绑定包名/versionCode/APK SHA-256/**证书指纹实测值**（apksigner verify --print-certs） | 待构建（追加 1 次 build-only 配额=上一封已批同一额度的确认，服务就绪后使用） |
+| toy 包 | `e-track-at32f435-v3.2.1-full.etu`（284092B，SHA `fc4ae5a9…`）；终点基准=镜像 raw SHA `43ee943a…` + vcode 30201 | 已离线制包；作为受控服务 fixture（config 四元组冻结） |
 | 真包 | `e-track-at32f435-v3.2.2-full.etu`（284112B，SHA `0a2eb26a…`）；终点基准=镜像 raw SHA `c9582213…` + vcode 30202 | 同上 |
-| 受控 HTTP 服务 | P4-2 固件 worker v2 部署实例（前置，见 §0）；endpoint 经 dispatch 输入注入 APK | 未就绪（P4-2 未认领） |
+| 受控 v2 测试服务 | 项目内受控服务（`docs/ota-exec-notes/tools/p3-3-v2-service/` 三件套：`service.py` `98695057…` / `service_config.json` `bb33724…` / `selftest.py` `60a414a…`；13 项宿主自测 PASS）；endpoint 经 dispatch 输入注入 APK | 已实现冻结；D1-D5 部署申请待批（服务文档 §6） |
 
-## 2. 执行前置链（全部满足才可开始 O 序列）
+## 2. 执行前置链（全部满足才可开始 O 序列；2026-09-13 第三轮裁定原文口径）
 
 ```
-P0 BCB 恢复获批并执行（A1-A4，独立授权）→ R4 终态核验通过
-P1 受控 HTTP 服务就绪（P4-2 worker v2 部署或用户裁定等价物）+ 云端写入单获批
-P2 资产上板资格经非实现会话审定（合同冻结时 EXT-* 回填）
-P3 受验 APK 构建（dispatch 注入 endpoint；apksigner 指纹留档）
-P4 用户审批冻结合同（FROZEN）+ validate_bundle NOT_RUN 前检通过
-P5 云端 toy fixture 按写入单 §5.2 时序登记并激活 stable channel 指针 → 30201
-→ O1 → O2 → O3（toy 闭环）→ 【PASS 后】云端 stable 指针 30201→30202 → O4 → O5
+P0 BCB 恢复流程全部完成（恢复方案 v3 S1-S6 / REC1-REC7 执行完毕，
+   §5 完成判据四条全满足：生产 Boot 已恢复+核验、App 身份未变(30200)、
+   BCB 与 App 一致(cur_vcode=30200)、生产 App RTT 新鲜自报）
+P1 受控 v2 服务及资产准入（服务三件套冻结版本 + fixture 四元组经非实现
+   会话审定；D1-D5 部署申请获批；回环域名/端口/证书执行前人工验证完成）
+P2 同一受验 APK 身份确定（dispatch 注入受控服务 URL 的唯一一次 build-only
+   构建；APK SHA-256 + apksigner 证书指纹实测留档；安装策略已按 §4 O1
+   在构建前确定）
+P3 用户审批冻结合同（FROZEN）+ validate_bundle NOT_RUN 前检通过
+→ O1 → O2 → O3（toy 闭环）
+→ 【O3 PASS 后】受控服务 D4 切换（停服务 → --active-release real-30202
+   重启；不再是云端 stable publish）→ O4 → O5
 ```
+
+- 云端 staging 写入路线（原 P1/P5 的 R2 上传、D1 登记、stable publish）
+  已按第三轮裁定**暂停**（云端写入单 B0-B4 冻结），不再是本单前置。
 
 ## 3. 阶段 0：BCB 恢复（独立准备操作，不属本操作单判据）
 
-- 完整方案：`P3-3-bcb-recovery-plan-2026-09-13-v2.md` §3.2 R0-R5
-  （P5 变体：P1_6_TEST_ENABLE 版 Boot → CLEAR_BCB → 状态机 commit_confirmed
-  重建 → 换回生产 Boot；复位合计 3 次；BCB 原始字节快照留档；App 镜像全程
-  不动）。
-- 授权申报：该文档 §4（A1 烧 P1_6 Boot ×1、A2 J-Link 会话 ×3、A3 复位 ×1、
-  A4 烧回生产 Boot ×1）——**单独审批，与 O 序列额度不互借**。
-- 完成判据：R4 终态核验（BCB.cur_vcode == 30200 == App fw_header.version_code）
-  留证回填合同 EXT-BOARD-STATE。
+- 完整方案：`P3-3-bcb-recovery-plan-2026-09-13-v3.md` §3 S1-S6
+  （P1_6_TEST_ENABLE 版 Boot 烧录 → SNAPSHOT 基线 → CLEAR_BCB → 显式
+  复位触发状态机 commit_confirmed 重建 → SNAPSHOT 终态核验 → 烧回生产
+  Boot；**复位合计 6 次**；BCB 原始 128B 字节快照留档[若 S2 未裁剪]；
+  App 镜像全程不动）。配套构建与命令离线验证见
+  `P3-3-recovery-boot-build-2026-09-13.md`（13/13 PASS）。
+- 授权申报：该文档 §7（**REC1-REC7** 独立编号：烧 P1_6 Boot / SNAPSHOT
+  基线 / CLEAR_BCB / 显式复位+RTT / SNAPSHOT 验证 / 烧回生产 Boot /
+  RTT 终证）——**单独审批，与 O 序列额度不互借，与历史 A1/B1-M 配额
+  不混淆**。
+- 完成判据：该文档 §5 四条（生产 Boot 恢复+核验、App 身份未变、BCB 与
+  App 一致 cur_vcode=30200、生产 App RTT 新鲜自报）全满足，留证回填
+  合同 EXT-BOARD-STATE。
 
 ## 4. 操作序列 O1-O5（每项含命令/超时/次数/失败处理/证据路径）
 
 ### O1 受验 APK 身份/签名预检 + 安装 + 启动
 
+**双侧证书比对方法（2026-09-13 第三轮裁定修订：必须用可比的完整证书
+指纹，dumpsys 的签名摘要行不作比对依据）**：
+
+1. **既有安装侧**（只读，可在受验 APK 构建前先行执行）：
+   `adb -s 10ADA4197U001CK shell dumpsys package com.wen.gaia.gaia`
+   → 从 `codePath`/`baseCodePath` 取既有安装 APK 的设备侧真实路径 →
+   `adb pull <设备侧APK路径> evidence/o1-existing.apk` →
+   `apksigner verify --print-certs evidence/o1-existing.apk`
+   （得到既有安装的**完整证书指纹**，SHA-256 digest 留档）。
+2. **受验侧**：`apksigner verify --print-certs <受验APK>`（构建产物
+   实测；**不同 CI run 的 debug 签名不能假定相同**，以本次实测为准，
+   不以历史 run 推定）。
+3. **比对**：两侧 apksigner 输出的 signer certificate SHA-256 digest
+   逐一全等 → 继续；**不一致 → 停在安装前**，保留既有安装与数据，
+   报用户裁定（不默认卸载/清数据——签名冲突在任何情况下不得通过
+   卸载或清数据解决）。
+
+**安装策略前置确定（唯一一次受验构建之前）**：受验 APK 构建消耗的是
+唯一一次 build-only 配额（与上一封批复为同一额度），因此既有安装侧
+证书指纹必须**在构建前**先行实测（上述步骤 1 只读、不依赖受验 APK），
+并把完整安装策略写入冻结合同：指纹一致预期路径、不一致时停在安装前
+（ENV_BLOCKED，配额消耗如实登记，不卸载不清数据）、不因冲突改用
+非受验 APK 替代安装。策略在构建前冻结，装机时不再临场改。
+
 | 项 | 内容 |
 | --- | --- |
-| 预检命令 | `apksigner verify --print-certs <apk>`（提取受验 APK 实际证书指纹）；`adb -s 10ADA4197U001CK shell dumpsys package com.wen.gaia.gaia`（提取既有安装签名）——**不同 CI run 的 debug 签名不能假定相同，指纹以本次实测为准，不以历史 run 推定** |
-| 比对 | 两者一致 → 继续；**不一致 → 停在安装前**，保留既有安装与数据，报用户裁定（不默认卸载/清数据） |
+| 预检命令 | 双侧 apksigner 完整证书指纹（方法见上）；`adb shell dumpsys package` 只读采集包名/versionCode |
+| 比对 | 两侧 SHA-256 digest 全等 → 继续；不一致 → 停在安装前（见上） |
 | 安装 | `adb -s 10ADA4197U001CK install -r <apk>`（`-r` 保留数据覆盖安装；签名不一致时此命令不会执行） |
 | 启动 | 手动/monkey 启动 App；`adb logcat -v time > evidence/o1-install.log`（受控采集，**不清缓冲**：不执行 `logcat -c`） |
 | 超时 / 次数 | 5 min / 各命令 1 次（预检只读不限，但每会话采集一次为准） |
-| 留证 | 安装结果、包名/versionCode 实测、证书指纹双侧实测值、APK SHA-256（与云端参与传输的 fixture 同源核对）、启动 logcat；路径 `evidence/o1-*.log` |
-| 失败处理 | 安装失败（非签名冲突，如存储不足）→ ENV_BLOCKED 留证停；签名冲突 → 上述停报 |
+| 留证 | 安装结果、包名/versionCode 实测、双侧 apksigner 完整证书指纹输出、既有安装 APK pull 回件 SHA-256、受验 APK SHA-256（与服务 fixture 同源核对）、启动 logcat；路径 `evidence/o1-*.log`、`evidence/o1-existing.apk` |
+| 失败处理 | 安装失败（非签名冲突，如存储不足）→ ENV_BLOCKED 留证停；签名冲突 → 上述停报（不卸载/清数据） |
 
 ### O2 App 对受控服务真实 latest/下载请求观测
 
@@ -68,7 +109,7 @@ P5 云端 toy fixture 按写入单 §5.2 时序登记并激活 stable channel �
 | 操作 | App 内进入固件升级入口，触发 latest 检查与下载（观测插桩 `OTA_OBS` 日志经 logcat 采集） |
 | 核对 | App 日志证明请求打到受控服务 endpoint（非 legacy GitHub 路径）；latest 响应解析 v2 成功；token 下载链走真实 `/api/public/firmware/download`（非静态直链）；整包 SHA 校验通过（`fc4ae5a9…`） |
 | 超时 / 次数 | 10 min / 1 次 |
-| 留证 | `evidence/o2-latest-download.log`（logcat 全程）+ 服务端请求日志（由云端写入单执行方提供当次请求记录） |
+| 留证 | `evidence/o2-latest-download.log`（logcat 全程）+ 服务端请求日志 `<repo>/.cache/p3-3-v2-service/service.log`（受控服务 D3 持续采集，每请求一行含 requestId，与 App logcat 的 requestId 交叉核对——不再依赖云端写入单执行方） |
 | 失败处理 | 网络不可达/服务 5xx → ENV_BLOCKED，不动设备；解析失败 → HARNESS_FAIL（服务配置）或 PRODUCT_FAIL（App 解析）按日志分类留证停——**不自动重试** |
 
 ### O3 toy 3.2.1 闭环（App→BLE→MCU 传输→STAGED→重启→GET_INFO 终点核对）
@@ -83,7 +124,9 @@ P5 云端 toy fixture 按写入单 §5.2 时序登记并激活 stable channel �
 | 留证 | `evidence/o3-toy-loop.log`（logcat 全程，含 OTA_OBS 状态链 6 态）、GET_INFO 终点两条实测值 |
 | 失败处理 | 传输/提交失败：**不得一概假定设备处于 STAGED**——以重启后（或断连前最后一次）GET_INFO/设备状态实测分类；不自动恢复、不自动重试、不自动进入 O4；按 MONO 插桩留证分类 PRODUCT_FAIL/HARNESS_FAIL 后停报 |
 
-**O3 → O4 门禁**：O3 PASS（终点双值核对通过）+ 云端 stable 指针按写入单 §5.2 切换 30201→30202 完成后，方可进 O4。任一不满足即停。
+**O3 → O4 门禁**：O3 PASS（终点双值核对通过）后，受控服务按 D4 切换
+（停服务 → `--active-release real-30202` 重启，启动日志留证），toy 成功
+**且仅在其成功后**才激活真包并进 O4。任一不满足即停。
 
 ### O4 真包 3.2.2 闭环（同 O3，目标 30202）
 
@@ -116,8 +159,10 @@ P5 云端 toy fixture 按写入单 §5.2 时序登记并激活 stable channel �
 - 断电注错实验：两个正常成功闭环不默认需要；确需时单独说明原因列项。
 - 任何烧录（App/Boot/BCB 直写）：O 序列零烧录；BCB 恢复的烧录在阶段 0 独立授权。
 - 额外 B1-M 实验（PC 蓝牙适配器路径）：同上。
-- 卸载/清手机数据：O1 签名冲突时明确禁止。
-- **额度互借：A1、B1-M 与升级闭环额度不得互借**（用户原文）。
+- 卸载/清手机数据：O1 签名冲突时明确禁止（第三轮裁定重申：任何情况下
+  不得以卸载或清数据解决签名冲突）。
+- **额度互借：REC1-REC7（BCB 恢复）、B1-M 与升级闭环额度不得互借**
+  （用户原文；恢复项独立 REC 编号，不与历史 A1 混淆）。
 - 自动恢复/自动重试/自动进入下一阶段：全部失败分支均"留证停报"。
 
 ## 7. 授权配额申报（O 序列；阶段 0 见恢复方案 §4，云端见写入单 §5）
@@ -132,8 +177,10 @@ P5 云端 toy fixture 按写入单 §5.2 时序登记并激活 stable channel �
 
 - 设备重启发生在 OTA 闭环内部（升级提交后固件自复位），属获批操作范围内
   的固件状态转换，不另计"复位操作"。
-- 云端 stable 指针切换（O3 后 30201→30202）按写入单 §5.2 已含的 publish
-  操作执行，不新增云端写入次数。
+- 受控服务 toy→真包切换（O3 后 D4：停服务换 `--active-release` 重启）
+  按服务文档 §6 已含的部署申请执行，不新增云端写入（云端路线整体暂停，
+  无 stable publish 动作）。
+- J-Link 不含在 O 序列（§5 独立授权项，维持第三轮裁定口径）。
 
 ## 8. 边界声明
 

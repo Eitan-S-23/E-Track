@@ -9,6 +9,19 @@
 > 下载路径保留 token/兼容/摘要检查）。
 >
 > **性质**：纯申报文档。零云端写入、零真机操作、零代码改动、零部署。
+>
+> **⏸ 暂停状态（2026-09-13 第三轮裁定第 2 条，整体生效）**：
+> - **B0-B4 云端写入方案暂停**（B0 写入前快照后的全部写操作序列：
+>   B1 元数据构建产物、B2 R2 上传、B3 D1 candidate 登记、B4 stable
+>   publish）。本单任何云端写入在解除暂停前不执行。
+> - **不申请或传递 Access 会话**：步骤 4 所需的 Access owner 会话不由
+>   agent 申请、不由用户代持传递给 agent；解除暂停前不发起。
+> - **不修改共享 stable 渠道**：`firmware_channels` stable 指针（含
+>   publish/disable 一切路径）不触碰。
+> - **替代路线已落地**：P3-3 验收链改走受控 v2 测试服务
+>   （`P3-3-v2-service-plan-and-selftest-2026-09-13.md`，冻结源码 v1 +
+>   13 项宿主自测 PASS + 部署申请待批）。本单降级为 P4-2 前置未解除
+>   期间的**冻结申报**，不再阻塞 P3-3。
 
 ## 1. 结论先行：staging 共享合同不兼容实锤，方案 A/B 均不可行
 
@@ -228,12 +241,12 @@ GET /api/public/firmware/download?<latest 响应给出的 token 参数>
   SQL 改指针的动作。
 - VERSION_REGRESSION 顺序性：30201→30202 递增，无回退。
 
-### 5.3 清理范围（验收轮结束后，另行授权执行）
+### 5.3 清理范围（暂停状态下零待执行项；若本单曾解冻执行，验收轮结束后按本节方案清理，另行授权执行）
 
 | 对象 | 清理动作 | 边界 |
 | --- | --- | --- |
 | D1 fixture 记录（30201/30202 两行） | `POST /api/admin/firmware/releases/<id>/disable`（owner 角色，admin [[path]].ts:297-306）置 disabled；触发器保证 disabled 不可被 channel 指向 | **不删除行**（现网 admin API 无 firmware delete；行保留即审计证据）；audit_logs 的 publish/disable 记录保留 |
-| firmware_channels stable 指针 | 指向后续首个正式固件发布时自然前移；**恢复写前原状（current_release_id=NULL）现网 admin API 无对应操作**——若用户要求恢复 NULL，需另行批准直接 D1 SQL 并留快照对照 | 不自行执行 SQL |
+| firmware_channels stable 指针还原 | **可执行方案（不以"将来自然前移"代替）**：现网 admin API 无 firmware channel 回退操作，唯一可执行路径是直接 D1 SQL——`wrangler d1 execute trace-update-staging --remote --command "UPDATE firmware_channels SET current_release_id = NULL, revision = revision + 1 WHERE current_release_id IN (<本单写入的 releaseId 清单>)"`（列名/WHERE 以步骤 0 写入前快照的实际行结构为准先核对；预期影响行数 ≤2；执行后 `SELECT * FROM firmware_channels` 复核与写入前快照逐列一致并落盘留证）。该 SQL 逐次报批执行，报批时附：精确命令、WHERE 限定、预期影响行数、写入前快照对照 | 仅还原本单 publish 触碰的指针；后续正式固件发布使指针前移只是客观时序后果，不构成清理方案的一部分 |
 | R2 对象（两键） | `wrangler r2 object delete trace-update-staging-releases/<键>` | 仅删本单写入的两键；不触碰 bucket 内其他对象 |
 | 写入前快照与执行证据 | **全部保留**（审计证据不删，用户第 3 条） | — |
 | 本地资产实物 | `.cache/p3-3-assets/` 保留（受控资产唯一持有处，离线资产文档 §6） | — |
@@ -274,17 +287,30 @@ channel 指针」——与源码完全一致，链路为：
   （含资产上传）；c) P4-2 实现时调整 register 校验（属 P4-2 卡范围）。
   裁定前本单步骤 1-4 全部冻结。
 
-## 8. 执行前置清单（全部满足才可开工）
+**裁定回填（2026-09-13 第三轮裁定第 2 条）**：
+
+- **不选 a**：不得填写指向不存在 Release URL 的 githubUrl 冒充溯源
+  （v1 链路的数据完整性问题不做 fixture 占位妥协）。
+- **不授权 b**：不为打通 v1 链路创建 Release/tag
+  （`mcu-e-track-at32f435-v3.2.1` / `3.2.2` 两个 tag 均不创建）。
+- **c 留给 P4-2**：register 校验的调整（含 githubUrl 字段语义、
+  OTA-XC-RELEASE-METADATA v2 多资产登记）属 P4-2 任务卡范围，届时随
+  worker v2 一并设计与审批。
+- 实际效果：本单步骤 1-4 在 P4-2 落地前**永久冻结**（不止暂停）；P3-3
+  的溯源需求由受控 v2 服务方案（本地 fixture 四元组 + SHA-256 身份链）
+  承担，不依赖 GitHub Release URL。
+
+## 8. 执行前置清单（全部满足才可开工；当前整体暂停，本表仅为解冻条件存档）
 
 | # | 前置 | 状态 |
 | --- | --- | --- |
 | 1 | P4-2 固件 worker v2 实现并部署到目标实例（latest v2/register v2/token v2/D1 多资产），部署版本按 §2 核对回填 | 未开始（P4-2 DISPATCHABLE 未认领） |
-| 2 | 用户裁定 githubUrl 矛盾（§7 三选项之一） | 未裁定 |
-| 3 | 本写入单获用户批准（含 §5.3 清理范围与时序 §5.2） | 本文档即申报 |
+| 2 | 用户裁定 githubUrl 矛盾（§7 三选项之一） | **已裁定（2026-09-13）**：不选 a、不授权 b、c 留给 P4-2（见 §7 裁定回填） |
+| 3 | 本写入单获用户批准（含 §5.3 清理范围与时序 §5.2）+ **解除 B0-B4 暂停**（2026-09-13 第三轮裁定暂停中） | 暂停，待 P4-2 与用户解冻 |
 | 4 | Cloudflare 账号/部署版本核对回填（§2） | 待执行前核对 |
 | 5 | D1/R2 写入前快照（§5.1 步骤 0）完成且无占用冲突 | 待执行 |
-| 6 | Access owner 会话（步骤 4 stable publish 需要）由用户在执行时提供 | 不持有 |
-| 7 | BCB 恢复（R0-R5）完成且 R4 终态核验通过——云端激活早于实机闭环无妨，但 C-TOY-LOOP 前置含它 | 方案已落盘待批 |
+| 6 | Access owner 会话（步骤 4 stable publish 需要）由用户在执行时提供 | 不持有；暂停状态下不申请、不传递 |
+| 7 | BCB 恢复完成且终态核验通过——**P3-3 验收链已改走受控 v2 服务，本项不再是本单解冻条件，仅是云端激活后 C-TOY-LOOP 实机闭环的前置** | v3 方案已落盘待批（`P3-3-bcb-recovery-plan-2026-09-13-v3.md`） |
 
 ## 9. 边界声明
 
@@ -296,6 +322,7 @@ channel 指针」——与源码完全一致，链路为：
   firmware.ts、admin [[path]].ts、三个 .mjs 脚本未变，否则本单升版。
 - **批准本单 ≠ 解除 P4-2 前置**（§1）：在 worker v2 落地前，任何 D1/R2
   写入都只是为 App 走不通的 v1 链路准备数据。
-- 与合同的关系：EXT-SERVICE（受控 HTTP 服务）external input 的
-  fingerprint/evidence 在实际部署+写入完成后回填；C-APK-INSTALL 之后的
-  O2 观测依赖 endpoint 注入（已选 iii）+ 本单服务侧就绪 + P4-2。
+- 与合同的关系：EXT-SERVICE external input 已改绑受控 v2 测试服务
+  （`EXT-HTTP-TEST-SERVICE`，见服务文档 §7 与合同修订），**不再依赖本单**；
+  C-APK-INSTALL 之后的 O2 观测依赖 endpoint 注入（已选 iii）+ 受控 v2
+  服务部署（D1-D5 申请待批）。本单解冻前，云端链路对 P3-3 无阻塞项。
