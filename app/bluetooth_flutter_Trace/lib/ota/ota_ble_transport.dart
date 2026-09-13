@@ -572,8 +572,14 @@ class OtaBleTransport {
 
   /// 请求取消：停止发送循环、完成所有在途等待者（CANCELLED）。
   /// 取消后的实例永久失效（防竞态复用），由上层重建 transport。
+  ///
+  /// RC3-07/02 四阶段：`_cancelled = true` 置位即**停止业务写**的物理
+  /// 边界——此后 [_checkUsable] 拒绝一切新的 DATA/END 帧（ABORT 走
+  /// [_writeFrameAfterCancel] 旁路）。与 `MONO_FAIL_AT`（中止决定）
+  /// 的差值就是「决定→业务写停」的收尾时长。
   void cancel() {
     _cancelled = true;
+    otaMonoLog('MONO_WRITE_STOP');
     // 取消必须解除暂停等待（RC3-08）：挂起在 _waitIfPaused 的传输循环
     // 否则永远无法到达 _checkUsable 抛出取消，owner await 死锁。
     _releasePauseGate();
@@ -932,6 +938,12 @@ class OtaBleTransport {
   }
 
   /// 预算耗尽即抛 NO_DURABLE_PROGRESS（优先于继续重试/写下一分片）。
+  ///
+  /// RC3-07/02 四阶段：这里是**中止决定**点（预算耗尽的事实判定）。
+  /// 「停止业务写」的物理边界在异常离开 transfer 后、service 侧
+  /// abortBestEffort→cancel() 置 `_cancelled` 时才成立——发送循环的
+  /// 下一次 [_checkUsable] 在那之后才拒绝新帧。判据不得把
+  /// `monoUs(MONO_FAIL_AT)` 当作「业务写已停」的时刻。
   void _checkNoProgress() {
     final left = _noProgressLeft;
     if (left != null && left == Duration.zero) {

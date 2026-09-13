@@ -44,15 +44,25 @@
 
 | 事件 | 位置 | 含义 |
 | --- | --- | --- |
-| 时钟建立 | `:296` | transfer 入口；无任何 durable 进展时锚点即此 |
-| 重置 | `:339`、`:436` | **仅** durable 真实前进（严格大于上一次） |
-| 停表／续走 | `:636`、`:644` | `pauseForBackground()` / `resumeFromBackground()` |
-| 解除 | `:541` | transfer 退出 |
-| 到期抛错 | `:929-934` | `NO_DURABLE_PROGRESS` |
+| 时钟建立 | `:297` | transfer 入口；无任何 durable 进展时锚点即此 |
+| 重置 | `:341`、`:439` | **仅** durable 真实前进（严格大于上一次） |
+| 停表／续走 | `:646`、`:655` | `pauseForBackground()` / `resumeFromBackground()` |
+| 解除 | `:545` | transfer 退出 |
+| 到期抛错 | `:948-953` | `NO_DURABLE_PROGRESS`（`_checkNoProgress`） |
 
-- 重复的相同 BEGIN／相同 durable **不重置**（`:335`、`:433` 均为严格大于比较）。
-- 判据窗口 = `monoUs(MONO_BUDGET_RESET 或 MONO_BUDGET_START)` →
-  `monoUs(MONO_TERMINAL)`；上限仍是 **30s**，不加余量。
+- 重复的相同 BEGIN／相同 durable **不重置**（`:341`、`:439` 均为严格大于比较）。
+- **判据窗口 = `monoUs(MONO_BUDGET_RESET 或 MONO_BUDGET_START)` →
+  `monoUs(MONO_FAIL_AT)`；上限 30s，不加余量**（冻结合同
+  `ota-cross-system-contracts.md:1033/1088` 的「30 秒无 durable 进展必须中止」
+  约束的是**中止决定**，预算时钟恰好封顶到决定点）。
+- `MONO_FAIL_AT` **不是**「业务写已停」的时刻（RC3-07/02）：发送循环的下一次
+  `_checkUsable` 要等 service 侧 `abortBestEffort→cancel()` 置 `_cancelled`
+  （`MONO_WRITE_STOP`）才拒绝新帧；判据不得用 FAIL_AT 代替 WRITE_STOP。
+- **决定→终态发布的收尾时长单列观测、不设门槛**：`monoUs(MONO_TERMINAL) −
+  monoUs(MONO_TERMINAL_DECIDED)` 含 ABORT 收尾（取消旁路写仅受
+  `writeTimeout=10s` 单分片上限约束，不受 30s 预算约束），把它并入 <30s 判据
+  是无来源的表述错误——旧表「`MONO_TERMINAL − 锚点 < 30s`」即错在此处，
+  已作废。30s 合同窗口用 FAIL_AT 判；收尾时长如实记录，供后续按实际证据定门槛。
 - 窗口内若出现 `MONO_PAUSE`：场景前提不成立，该轮记 `HARNESS_FAIL`，
   **不得**用时钟差硬判，也不得据此改判据口径。
 
@@ -62,12 +72,19 @@
 
 | event | 位置 |
 | --- | --- |
-| `MONO_BUDGET_START` | `ota_ble_transport.dart:296` 之后 |
-| `MONO_BUDGET_RESET` | `:339`、`:436` 之后 |
-| `MONO_PAUSE` / `MONO_RESUME` | `:636` / `:644` 之后 |
-| `MONO_FAIL_AT` | `:929-934`、`_writeFrameLocked` 超时分支抛错前 |
-| `MONO_TERMINAL` | `ota_service.dart` 终止发布处（`failClosed` 与失败分支） |
+| `MONO_BUDGET_START` | `ota_ble_transport.dart:298` |
+| `MONO_BUDGET_RESET` | `:342`、`:440` |
+| `MONO_PAUSE` / `MONO_RESUME` | `:647` / `:656` |
+| `MONO_FAIL_AT` | `:950`（NO_DURABLE_PROGRESS）、`:1281`（WRITE_TIMEOUT） |
+| `MONO_TERMINAL_DECIDED` | `ota_service.dart` 各终止 catch 决定处（`:1004`、`:1053`、`:1075`、`:1303`） |
+| `MONO_WRITE_STOP` | `ota_ble_transport.dart:582`（`cancel()` 置 `_cancelled`＝停止业务写物理边界） |
+| `MONO_ABORT_BEGIN` / `MONO_ABORT_DONE` | `ota_service.dart` `abortBestEffort()` 前/后（`:1009/1013`、`:1079/1083`、`:1151/1155`、`:1316/1320`） |
+| `MONO_TERMINAL` | `ota_service.dart` 真正终态发布处（`:1016`、`:1054`、`:1086`、`:1240`、`:1322`）——**均在 ABORT 收尾完成之后** |
 
+- 四阶段序列（RC3-07/02）：`MONO_FAIL_AT`/用户取消（中止决定）→
+  `MONO_TERMINAL_DECIDED`（service 侧决定）→ `MONO_WRITE_STOP`（业务写停）→
+  `MONO_ABORT_BEGIN/DONE`（ABORT 收尾）→ `MONO_TERMINAL`（终态发布）。
+  身份异常路径无在途业务写，DECIDED 与 TERMINAL 同点落盘（`:1053-1054`）。
 - 插桩提交按执行合同 §7.3.2 走（dev 分支 WIP + dev CI）；**不等**正式合同冻结。
 - 记录并交付：插桩 commit、dev CI run URL 与结论、APK 的 SHA-256。
 
@@ -78,8 +95,12 @@
 - 拓扑：专用测试手机（dev debug APK）+ 指定 AT32F435 板（既有生产固件）+ J-Link。
 - 步骤：装/保持不变覆盖安装 dev APK → 连接 → 前台开始一次真实 OTA → DATA 流期间
   J-Link `h` 停机 → 观察应用侧终止 → `g` 恢复 → 断连 → 停止本次创建的进程。
-- 判据 A1：`monoUs(MONO_TERMINAL) − monoUs(锚点)` **< 30s**，错误码
-  `NO_DURABLE_PROGRESS`。
+- 判据 A1：`monoUs(MONO_FAIL_AT) − monoUs(锚点)` **≤ 30s**，错误码
+  `NO_DURABLE_PROGRESS`。FAIL_AT 是**中止决定**时刻；30s 合同窗口（
+  `ota-cross-system-contracts.md:1033/1088`）约束到决定点为止。决定之后的
+  ABORT 收尾（`MONO_TERMINAL_DECIDED → MONO_ABORT_DONE → MONO_TERMINAL`）
+  另行记录时间线，**不并入本判据也不另设门槛**（取消旁路写不受 30s 预算
+  约束，把它塞进 <30s 没有合同依据——旧表述已作废）。
 - **不预设现象**：若实际终止原因为写超时、断连、复位、应用转后台等，如实记录实际
   `code` 与时间线，并判定场景前提是否成立；**不得**硬填 A1 通过。
 - **不越界**：T1a 结果**不得**替代 ATT 写黑洞（T1b/B1）或物理写取消（B2）的证据。
@@ -174,21 +195,21 @@ adb -s <serial> shell dumpsys bluetooth_manager | findstr /i "state"
 
 | # | 循环 | 位置 |
 | --- | --- | --- |
-| 1 | BEGIN 无应答重试 | `:838`（`++attempts > retries`，`:839` 抛 `TIMEOUT`） |
-| 2 | 块级 resume（ABORT+BEGIN）预算 | `:299` `resumeLeft = retries`；消费点 `:359`、`:424`、`:450`、`:498`；`:735` `resumeLeft <= 0` 判据 |
-| 3 | 单段 DATA 重传上限 | `:413` `view.sendCountOf(seg) > retries` → `overLimit` |
-| 4 | END 帧重试 | `:525` `++endAttempts > retries` |
-| 5 | INFO 载荷损坏重发 | `:226` `++attempts > retries` |
+| 1 | BEGIN 无应答重试 | `:850`（`++attempts > retries`，抛 `TIMEOUT`） |
+| 2 | 块级 resume（ABORT+BEGIN）预算 | `:301` `resumeLeft = retries`；消费点 `:362`、`:427`、`:454`、`:502`；`:747` `resumeLeft <= 0` 判据 |
+| 3 | 单段 DATA 重传上限 | `:416` `view.sendCountOf(seg) > retries` → `overLimit` |
+| 4 | END 帧重试 | `:529` `++endAttempts > retries` |
+| 5 | INFO 载荷损坏重发 | `:227` `++attempts > retries` |
 
 ### 5.2 与同步探针的计数边界
 
-- 探针计数器 `probes` 只属于 `getDeviceInfo` 的**废弃态重同步循环**（`:192`、`:215`，
-  界 `maxResyncProbes=20`，`ota_ble_transport.dart:1127`）；探针用 `_nextQuerySeq` 取号，
-  **不消耗会话 seq 空间**（`:159-160`）；单次探针上限 `resyncProbeTimeout=800ms`（`:1121`）。
+- 探针计数器 `probes` 只属于 `getDeviceInfo` 的**废弃态重同步循环**（`:193`、`:216`，
+  界 `maxResyncProbes=20`，`ota_ble_transport.dart:1146`）；探针用 `_nextQuerySeq` 取号，
+  **不消耗会话 seq 空间**（`:96-104`）；单次探针上限 `resyncProbeTimeout=800ms`（`:1140`）。
 - 业务重发用会话 seq 与 `retries` 计数。**两类计数器互不抵扣**：探针失败不计入
   `retries`，业务重传也不计入 20 次探针。
-- 探针预算 `probeBudget = 800ms × 20 = 16s`（`:134`），预算取
-  `max(调用方 timeout, probeBudget)`（`:135`）；等待在途旧写结算计入同一预算。
+- 探针预算 `probeBudget = 800ms × 20 = 16s`（`:135`），预算取
+  `max(调用方 timeout, probeBudget)`（`:136`）；等待在途旧写结算计入同一预算。
 
 ### 5.3 时限口径（不得越界解释）
 
@@ -242,8 +263,8 @@ PC 蓝牙适配器与本项目专用测试手机；新增额度为三种策略**
 
 ### 7.1 判据参数（执行前固定，**不得事后调整**）
 
-依据产品自身计时配置（`lib/ota/ota_ble_transport.dart`）：`ackTimeout=2000ms`（`:77`）、
-`noProgressTimeout=30s`（`:81`）、`writeTimeout=10s`（`:83`）；中央端库
+依据产品自身计时配置（`lib/ota/ota_ble_transport.dart`）：`ackTimeout=2000ms`（`:78`）、
+`noProgressTimeout=30s`（`:82`）、`writeTimeout=10s`（`:84`）；中央端库
 `flutter_blue_plus 1.35.5` 的写自身超时 **T_c = 15s**
 （`lib/src/bluetooth_characteristic.dart:158` `int timeout = 15`；成功路径必须等到
 `onCharacteristicWritten`）。

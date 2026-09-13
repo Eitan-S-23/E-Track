@@ -998,10 +998,22 @@ class OtaService extends GetxController {
           return false;
         }
         if (e.code != 'CANCELLED') {
-          otaMonoLog('MONO_TERMINAL', code: e.code);
+          // RC3-07/02 四阶段：此处是「中止决定」，终态发布要等 ABORT
+          // 收尾完成后才打 MONO_TERMINAL——旧打点把决定提前宣告成终态，
+          // 延迟 ABORT 期间的真机日志会被误读为「已终止」。
+          otaMonoLog('MONO_TERMINAL_DECIDED', code: e.code);
           _upgradeStatus.value = 'BLE 传输失败: ${e.message}';
           // 连接仍在时尽力 ABORT（清理 MCU 侧会话）。
-          await activeTransport?.abortBestEffort();
+          final abortTransport = activeTransport;
+          if (abortTransport != null) {
+            otaMonoLog('MONO_ABORT_BEGIN', code: e.code);
+            try {
+              await abortTransport.abortBestEffort();
+            } finally {
+              otaMonoLog('MONO_ABORT_DONE', code: e.code);
+            }
+          }
+          otaMonoLog('MONO_TERMINAL', code: e.code);
           _phase.value = OtaPhase.failed;
         } else {
           // 非取消来源的 CANCELLED：发送循环是被 abortBestEffort 停掉的
@@ -1036,6 +1048,9 @@ class OtaService extends GetxController {
           // 身份异常覆盖成 DEVICE_IDENTITY_* + failed。
           return false;
         }
+        // RC3-07/02：身份异常路径无在途业务写（GET_INFO 期间不发
+        // DATA/END），没有 ABORT 收尾段——决定即终态，两事件同点落盘。
+        otaMonoLog('MONO_TERMINAL_DECIDED', code: e.code);
         otaMonoLog('MONO_TERMINAL', code: e.code);
         _terminalState.value = OtaTerminalState(
           code: e.code,
@@ -1055,9 +1070,20 @@ class OtaService extends GetxController {
           // 退出走这一支，不得覆盖 failClosed 已发布的终止态。
           return false;
         }
-        otaMonoLog('MONO_TERMINAL');
+        // RC3-07/02 四阶段：同 typed catch——决定、ABORT 收尾、终态发布
+        // 分开打点，未知异常的收尾时长同样可观测。
+        otaMonoLog('MONO_TERMINAL_DECIDED', code: 'UNKNOWN');
         _upgradeStatus.value = '升级失败: $e';
-        await activeTransport?.abortBestEffort();
+        final abortTransport = activeTransport;
+        if (abortTransport != null) {
+          otaMonoLog('MONO_ABORT_BEGIN', code: 'UNKNOWN');
+          try {
+            await abortTransport.abortBestEffort();
+          } finally {
+            otaMonoLog('MONO_ABORT_DONE', code: 'UNKNOWN');
+          }
+        }
+        otaMonoLog('MONO_TERMINAL', code: 'UNKNOWN');
         _phase.value = OtaPhase.failed;
         return false;
       }
@@ -1119,7 +1145,15 @@ class OtaService extends GetxController {
     // 数据段。
     final transport = _transport;
     if (transport != null && !transport.isCancelled) {
-      await transport.abortBestEffort();
+      // RC3-07/02 四阶段：用户取消路径同样区分决定/收尾——取消的
+      // 「决定」是用户动作（无对应日志事件），这里只标记停止业务写
+      // 与 ABORT 收尾两段；终态发布（cancelled）在函数尾部。
+      otaMonoLog('MONO_ABORT_BEGIN', code: 'USER_CANCEL');
+      try {
+        await transport.abortBestEffort();
+      } finally {
+        otaMonoLog('MONO_ABORT_DONE', code: 'USER_CANCEL');
+      }
     }
     // epoch 屏障（RC3-04⑦）：ABORT 等待期间可能有新 owner 登记并重新
     // 下载**同一资产**。两次 attempt 的 assetId、文件名与 `.part` 路径
@@ -1201,6 +1235,9 @@ class OtaService extends GetxController {
           ? '操作已取消（$cleanupFailure，固件包已保留）'
           : '操作已取消';
       _phase.value = OtaPhase.cancelled;
+      // RC3-07/02 四阶段：取消路径的真正终态发布——在 ABORT 收尾、
+      // 下载清理与删包全部完成后才打。
+      otaMonoLog('MONO_TERMINAL', code: 'USER_CANCEL');
     }
   }
 
@@ -1259,7 +1296,11 @@ class OtaService extends GetxController {
       // 不前进代次，在途写随后以非 CANCELLED 错误退出时必须认出这是已决
       // 终止的收尾，而不是新的升级失败。
       _failClosedDecided = true;
-      otaMonoLog('MONO_TERMINAL', code: code);
+      // RC3-07/02 四阶段：failClosed 的「中止决定」。这里发布终止态是
+      // 决策本身（状态字段），物理收尾（ABORT）在其后；真正的
+      // MONO_TERMINAL 在 ABORT 完成后打——旧打点与状态发布同时落，
+      // 把「已决」混同「已收尾」。
+      otaMonoLog('MONO_TERMINAL_DECIDED', code: code);
       _terminalState.value = OtaTerminalState(
         code: code,
         message: message,
@@ -1269,7 +1310,16 @@ class OtaService extends GetxController {
           ? '设备复核失败（后台恢复），升级已终止，可重试续传'
           : '设备复核失败（后台恢复），升级已终止';
       _notify('错误', _terminalState.value!.userMessage);
-      await transport.abortBestEffort();
+      // RC3-07/02 四阶段：failClosed 的 ABORT 收尾与终态发布分开打点。
+      // abortBestEffort 尽力而为（断连静默失败），收尾时长由
+      // MONO_ABORT_BEGIN→MONO_ABORT_DONE 之差可观测。
+      otaMonoLog('MONO_ABORT_BEGIN', code: code);
+      try {
+        await transport.abortBestEffort();
+      } finally {
+        otaMonoLog('MONO_ABORT_DONE', code: code);
+      }
+      otaMonoLog('MONO_TERMINAL', code: code);
     }
 
     if (address == null || boundChars == null || boundLink == null) {

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
@@ -1101,6 +1102,98 @@ void main() {
       expect(service.upgradeStatus, '操作已取消');
       expect(service.downloadedFirmwareFile, isNull);
       expect(await pkgFile!.exists(), isFalse);
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('延迟 ABORT 反例：ABORT 在途期间不得提前宣告终止（RC3-07/02）',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final notifyLog = <String>[];
+      final ble = await prepareDownloaded(
+        tempDir: tempDir,
+        notifyLog: notifyLog,
+      );
+      final service = Get.find<OtaService>();
+
+      // OTA_MONO 行经 debugPrint 落盘（lib/ota/ota_mono.dart）。覆写
+      // debugPrint 捕获进程级输出，finally 恢复——不覆写则插桩行不可
+      // 断言（测试环境 debugPrint 默认丢弃输出）。按事件名记 monoUs，
+      // 同名多次（如 BUDGET_RESET）以列表保序。
+      final monoLog = <String, List<int>>{};
+      final originalPrint = debugPrint;
+      debugPrint = (String? message, {int? wrapWidth}) {
+        final line = message ?? '';
+        if (line.startsWith('OTA_MONO ')) {
+          final match =
+              RegExp(r'^OTA_MONO (\S+) monoUs=(\d+)').firstMatch(line);
+          if (match != null) {
+            monoLog.putIfAbsent(match.group(1)!, () => <int>[])
+                .add(int.parse(match.group(2)!));
+          }
+        }
+      };
+      addTearDown(() {
+        debugPrint = originalPrint;
+      });
+
+      // 构造**非取消**的传输失败：首个 DATA ACK 即 ERR_OFFSET（不在
+      // _resumeStatuses 也不在 abortStatuses → ACK_STATUS 异常 →
+      // service typed catch 走 `e.code != 'CANCELLED'` 分支）。这是
+      // 四阶段打点所在的路径，与 CANCELLED（无 ABORT 段）以及
+      // failClosed（独立打点链）都不同。覆写从传输开始前生效，不经
+      // dataGate（闸门在应答时刻组装 payload 快照，事后再覆写无效）。
+      ble.dataAckStatusOverride = OtaBleCodec.statusErrOffset;
+      // ABORT 物理写闸门：service 侧 catch 决定终止后将停在
+      // `await abortTransport.abortBestEffort()`——ABORT 帧在途未送达。
+      ble.abortWriteGate = Completer<void>();
+
+      final startFuture = service.startOtaUpgrade('AA:BB');
+      await ble.abortWriteEntered.future;
+
+      // ---- ABORT 在途窗口内的断言（反例鉴别点）----
+      // 旧打点把 MONO_TERMINAL 打在与 _upgradeStatus 赋值同点、ABORT
+      // 之前：此时它已落盘，真机日志会被误读为「传输已终止」——而 MCU
+      // 侧会话清理（ABORT）尚未送达。修复后本窗口只有决定（DECIDED）。
+      expect(monoLog['MONO_TERMINAL_DECIDED'], isNotNull,
+          reason: '中止决定（typed catch 进入）必须已打点');
+      expect(monoLog['MONO_TERMINAL_DECIDED']!.single, greaterThan(0));
+      expect(monoLog['MONO_ABORT_BEGIN'], isNotNull,
+          reason: 'ABORT 收尾开始必须打点');
+      expect(monoLog['MONO_TERMINAL'], isNull,
+          reason: 'ABORT 在途期间不得提前宣告终止（旧打点在此落盘）');
+      // 失败文案已可见（决定即发布状态字段），但 phase 终态同样要等
+      // ABORT 完成——窗口内不得出现 failed。
+      expect(service.upgradeStatus, contains('BLE 传输失败'));
+      expect(service.phase, isNot(OtaPhase.failed));
+
+      // ---- 释放 ABORT 写：收尾完成，终态才发布 ----
+      ble.abortWriteGate!.complete();
+      expect(await startFuture, isFalse);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(monoLog['MONO_ABORT_DONE'], isNotNull);
+      expect(monoLog['MONO_TERMINAL'], isNotNull,
+          reason: 'ABORT 收尾完成后必须发布终止');
+      // 单调顺序（同类进程级 monoUs）：DECIDED ≤ WRITE_STOP ≤
+      // ABORT_DONE ≤ TERMINAL。WRITE_STOP 在 abortBestEffort→cancel()
+      // 置 _cancelled 时打——它必须晚于决定（决定先于收尾）且早于
+      // TERMINAL（业务写停先于终态发布）。旧打点无 DECIDED/WRITE_STOP，
+      // 顺序断言同时防「打点提前」与「事件缺失」两种退化。
+      final decided = monoLog['MONO_TERMINAL_DECIDED']!.single;
+      final writeStop = monoLog['MONO_WRITE_STOP']!.single;
+      final abortDone = monoLog['MONO_ABORT_DONE']!.single;
+      final terminal = monoLog['MONO_TERMINAL']!.single;
+      expect(writeStop, greaterThanOrEqualTo(decided),
+          reason: '停止业务写必须不早于中止决定');
+      expect(abortDone, greaterThanOrEqualTo(writeStop),
+          reason: 'ABORT 收尾完成必须不早于业务写停');
+      expect(terminal, greaterThanOrEqualTo(abortDone),
+          reason: '终止发布必须在 ABORT 收尾完成之后');
+      // ABORT 确实送达 MCU（闸门只挂物理写，不吞帧），失败终态成立。
+      expect(ble.abortCalls, 1);
+      expect(service.phase, OtaPhase.failed);
+      expect(service.upgradeStatus, contains('BLE 传输失败'));
+      // 终止发布只发生一次（窗口内零次 + 收尾后一次）。
+      expect(monoLog['MONO_TERMINAL']!.length, 1);
     }, timeout: const Timeout(Duration(seconds: 30)));
 
     test('取消窗口内同资产重下：旧取消不得拔掉后来者的下载（RC3-04⑦）',
@@ -2368,6 +2461,14 @@ class _UpgradeFakeBle extends BluetoothService {
   Completer<void>? abortWriteGate;
   final Completer<void> abortWriteEntered = Completer<void>();
 
+  /// DATA ACK 状态覆写（RC3-07/02）：非 null 时 `_emitDataAck` 把状态
+  /// 换成该值再发（payload 仍按 fake 真实 staging 快照组装）。用于
+  /// 构造**非取消**的传输失败（如 ERR_OFFSET）：transport 分类为
+  /// 不可恢复 → service 侧 typed catch 走 `e.code != 'CANCELLED'`
+  /// 分支——四阶段打点（DECIDED→ABORT_BEGIN→ABORT_DONE→TERMINAL）
+  /// 的反例鉴别就在这条路径上，CANCELLED 路径测不到。
+  int? dataAckStatusOverride;
+
   // ---- 观测 ----
   int beginCalls = 0;
   int endCalls = 0;
@@ -2813,6 +2914,10 @@ class _UpgradeFakeBle extends BluetoothService {
   /// 挂起控制：帧处理照常，仅 ACK 发送挂起）。
   void _emitDataAck(int status, OtaBleFrame f) {
     dataAckStatuses.add(status);
+    final overrideStatus = dataAckStatusOverride;
+    if (overrideStatus != null) {
+      status = overrideStatus;
+    }
     final payload = packAck(
         status, _stagedDurable, _state == _active ? _stagedBitmap : 0);
     final session = _sessionId;
