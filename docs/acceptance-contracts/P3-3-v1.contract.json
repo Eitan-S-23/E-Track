@@ -1,0 +1,229 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-3-v1",
+  "version": 1,
+  "task_id": "P3-3",
+  "parent_contract_sha256": null,
+  "status": "DRAFT",
+  "approved_by": "",
+  "approved_at": "",
+  "implementation_ref": "docs/ota-exec-notes/P3-3-admission-remediation-2026-09-12.md",
+  "freeze_commit": "0000000000000000000000000000000000000000",
+  "freeze_tree": "0000000000000000000000000000000000000000",
+  "profile_config_blob": "0000000000000000000000000000000000000000",
+  "draft_note": "DRAFT 草案（实现会话 2026-09-12 整改批交付）。freeze_* 为占位零值：冻结时必须由非实现会话绑定审批时刻实际实现提交（稳定基线 >= ab6ce3b5bab8bcb357e8a687b7bb099ab1a0ce0d）的真实 git OID，并填 approved_by/approved_at。真机命令为绑定骨架，正式冻结前须由验收会话按执行合同 §3 阶段化补齐设备序列号、超时、观测配额与恢复条件。",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "component_source",
+      "dependency_rationale": "手机 App 源码（lib/android/windows/pubspec/build.yml）是 APK/EXE 构建与 BLE 观测/升级链路的直接输入；OTA-DEC-013 三类实机证据均以该 App 为载体。"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-HTTP-TEST-SERVICE",
+      "description": "受控 HTTP 测试服务（版本化、符合冻结共享合同的 latest/下载端点），仅当真实 P4-2 后台未就绪时作为显式外部输入。APK 必须经受控配置发真实 HTTP 请求，不旁路 latest/兼容/token/摘要检查，不把包直接注入 service 状态。须绑定服务 URL、版本与 fixture 身份；不宣称真实 P4-2 register/R2/D1 链已通过。",
+      "status": "PENDING_DEPLOYMENT"
+    },
+    {
+      "id": "EXT-TOY-BOOTABLE",
+      "description": "经审定的可启动受控固件包（toy）：保留真实 Boot/BCB/OTA 路径且具有合法 fw_header/向量。tests/ota-vectors/ 的 golden vectors 不具上板资格，不得刷入。准入与身份（SHA-256/size/目标 versionCode）由非实现会话在冻结时裁定。",
+      "status": "PENDING_ASSET_APPROVAL"
+    },
+    {
+      "id": "EXT-REAL-ETU",
+      "description": "真实固件 OTA 包（.etu，含目标 versionCode 与 raw SHA-256）：候选原始镜像 X-Track-App-GCC.bin（602984B，7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f）尚未经 Tools/etu_pack.py 封包；目标版本（板上已是 3.2.0/30200）待非实现会话裁定。",
+      "status": "PENDING_PACKAGING_AND_TARGET_DECISION"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-DEV-CHECKS",
+      "description": "开发自测：flutter-dev-checks.yml 双宿主（ubuntu+windows）strict analyze + 全部单测/widget 测试（test_scope=all）。已在本轮稳定提交 ab6ce3b 验证通过（run 34730007317）；冻结时须在 freeze_commit 上重新绑定 run 证据或按 rerun plan 复用。",
+      "command": "gh workflow run flutter-dev-checks.yml --ref <freeze_branch> -f test_scope=all -f build_apk=false",
+      "input_groups": ["flutter", "validation"],
+      "runner_paths": [".github/workflows/flutter-dev-checks.yml", "Tools/flutter/dev_checks.py"],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-RELEASE-BUILD",
+      "description": "release 构建：build.yml build-only（publish_release=false）产出 release 模式 Android APK 与 Windows 完整运行包。本轮已在 ab6ce3b 验证（run 34730618341；APK 46682620B / 2a5d5db991bf764afde0fd1b77eaee22b730a3c80cf81e0c51c66188ce4ac71b，release 模式 debug 签名回退）；冻结时须绑定 freeze_commit 上的 run。",
+      "command": "gh workflow run build.yml --ref <freeze_branch> -f publish_release=false -f replace_existing_release=false",
+      "input_groups": ["flutter", "validation"],
+      "runner_paths": [".github/workflows/build.yml"],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-APK-INSTALL",
+      "description": "真机阶段 1：受验 release APK 在测试手机实际安装并启动（adb install + 启动 + logcat 采集）。须记录包名/版本/设备序列号 10ADA4197U001CK/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK。真机操作授权与配额冻结前必须已获批。",
+      "command": "<由验收会话绑定：adb -s <serial> install -r <apk> 及启动/采集命令>",
+      "input_groups": ["flutter"],
+      "runner_paths": [],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TOY-LOOP",
+      "description": "真机阶段 2：可启动受控 toy 包经手机 App→BLE→MCU 完整升级闭环。真实 OtaService 完成 INFO/latest/下载/长度与整包 SHA 校验/BEGIN/DATA/END；MCU durable_off==total_len 且 ACK_END 成功；重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结目标镜像一致。",
+      "command": "<由验收会话绑定：App 操作序列 + BLE/RTT/logcat 采集命令>",
+      "input_groups": ["production", "flutter"],
+      "runner_paths": [],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-REAL-LOOP",
+      "description": "真机阶段 3：真实固件 OTA 包同 CMD-TOY-LOOP 的闭环终点，不得由 toy 代替。GATT 写成功、UI 100%、END ACK、仍运行旧固件均不足以通过。",
+      "command": "<由验收会话绑定：App 操作序列 + BLE/RTT/logcat 采集命令>",
+      "input_groups": ["production", "flutter"],
+      "runner_paths": [],
+      "expected_exit_codes": [0],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-APK-RELEASE",
+      "description": "受验 release APK（冻结时绑定确切路径/size/SHA-256 与签名类型；本轮候选 2a5d5db991bf764afde0fd1b77eaee22b730a3c80cf81e0c51c66188ce4ac71b 为 release 模式 debug 签名回退，固定生产签名未配置）。",
+      "path": "artifacts/ble-monitor-android.apk"
+    },
+    {
+      "id": "ART-TOY-ETU",
+      "description": "可启动受控 toy OTA 包（冻结时绑定封包产物身份；当前不存在，golden vectors 不具上板资格）。",
+      "path": "artifacts/toy-bootable.etu"
+    },
+    {
+      "id": "ART-REAL-ETU",
+      "description": "真实固件 OTA 包（冻结时绑定 etu_pack.py 封包产物身份与目标 versionCode/raw SHA-256）。",
+      "path": "artifacts/x-track-app.etu"
+    },
+    {
+      "id": "ART-TARGET-IMAGE",
+      "description": "冻结目标固件镜像（真包闭环的 versionCode/raw SHA-256 基准；目标版本待裁定）。",
+      "path": "artifacts/target-image.bin"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "description": "freeze_commit 上 flutter-dev-checks 双宿主 strict analyze + 全部测试通过（无 continue-on-error/降级）。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "run_url"],
+      "input_groups": ["flutter", "validation"],
+      "external_inputs": [],
+      "command_ids": ["CMD-DEV-CHECKS"],
+      "artifact_ids": [],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "description": "freeze_commit 上 build.yml build-only 成功产出 release 模式 Android APK 与 Windows 完整运行包（非裸 exe）；签名类型如实绑定。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "run_url", "artifact_hash"],
+      "input_groups": ["flutter", "validation"],
+      "external_inputs": [],
+      "command_ids": ["CMD-RELEASE-BUILD"],
+      "artifact_ids": ["ART-APK-RELEASE"],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "description": "受验 release APK 在实际 Android 手机（vivo V2312A，序列号 10ADA4197U001CK）实际安装并启动；记录包名/版本/设备/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "device_observation"],
+      "input_groups": ["flutter"],
+      "external_inputs": [],
+      "command_ids": ["CMD-APK-INSTALL"],
+      "artifact_ids": ["ART-APK-RELEASE"],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "description": "可启动受控 toy 包经手机 App→BLE→MCU 完整升级闭环；共同终点=重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结目标镜像一致。golden vectors 不得上板。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
+      "input_groups": ["production", "flutter"],
+      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-TOY-BOOTABLE"],
+      "command_ids": ["CMD-TOY-LOOP"],
+      "artifact_ids": ["ART-TOY-ETU", "ART-TARGET-IMAGE"],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "ota_session_info_ok",
+          "ota_package_verified",
+          "ota_transfer_durable_complete",
+          "ota_ack_end_ok",
+          "device_reboot",
+          "get_info_target_version_and_raw_sha_match"
+        ]
+      }
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "description": "真实固件 OTA 包同 C-TOY-LOOP 的闭环终点；不得由 toy 代替。板上 BCB vcode 20801 与镜像 3.2.0 的不一致核对口径由冻结时裁定。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
+      "input_groups": ["production", "flutter"],
+      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-REAL-ETU"],
+      "command_ids": ["CMD-REAL-LOOP"],
+      "artifact_ids": ["ART-REAL-ETU", "ART-TARGET-IMAGE"],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "ota_session_info_ok",
+          "ota_package_verified",
+          "ota_transfer_durable_complete",
+          "ota_ack_end_ok",
+          "device_reboot",
+          "get_info_target_version_and_raw_sha_match"
+        ]
+      }
+    }
+  ],
+  "performance_gates": []
+}

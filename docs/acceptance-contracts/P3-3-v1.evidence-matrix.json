@@ -1,0 +1,75 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v1",
+  "contract_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "round_id": "20260912-DRAFT",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "合同尚为 DRAFT、未冻结，本判据在本合同语义下未执行。参考事实（非本矩阵证据）：开发自测 run 34730007317 在稳定提交 ab6ce3b 双宿主全绿，属实现侧开发自测，不构成独立验收。冻结时须在 freeze_commit 上重新绑定 run 或由 rerun plan 判定复用。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "合同尚为 DRAFT、未冻结。参考事实（非本矩阵证据）：build.yml run 34730618341 在 ab6ce3b build-only 全绿（APK 46682620B / 2a5d5db9…，release 模式 debug 签名回退），属实现侧构建验证。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "NOT_EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "真机操作未授权（APK 安装/启动/采集不在本批授权内）；且受验 APK 为 debug 签名回退，固定生产签名未配置，冻结时须先裁定签名类型接受性。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "NOT_EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "缺口叠加：可启动 toy 固件包不存在（tests/ota-vectors/ golden vectors 不具上板资格）；受控 HTTP 测试服务未部署；真机操作未授权。三项均待非实现会话裁定/审批。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "NOT_EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "缺口叠加：真包 .etu 未封包（原始镜像候选 7328c1b1…）；升级目标版本未裁定（板上已是 3.2.0/30200，同版本或更新版本的口径待定）；BCB vcode 20801 与镜像头不一致的核对口径待裁定；受控 HTTP 服务未部署；真机操作未授权。"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}
