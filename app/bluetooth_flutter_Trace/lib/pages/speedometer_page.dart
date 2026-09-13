@@ -6,13 +6,16 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/share_links.dart';
+import '../controllers/ble_controller.dart';
 import '../controllers/ride_controller.dart';
 import '../models/ride_models.dart';
+import 'device_detail_page.dart';
 import 'ota_upgrade_page.dart';
 
 class SpeedometerPage extends StatefulWidget {
@@ -42,10 +45,7 @@ class _SpeedometerPageState extends State<SpeedometerPage> {
               // 固定顶部栏：永远可见、永远可点（不随内容滚动）
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
-                child: _TopChrome(
-                  selectedIndex: selectedIndex,
-                  isConnected: selectedIndex != 3,
-                ),
+                child: const _TopChrome(),
               ),
               // 选中页占满中间剩余空间，由各页自行决定固定子头与单一滚动区
               Expanded(
@@ -88,7 +88,7 @@ class _SelectedPage extends StatelessWidget {
       case 2:
         return _RoutesPage(controller: controller);
       case 3:
-        return _DevicesPage(controller: controller);
+        return const _DevicesPage();
       case 0:
       default:
         return _DashboardPage(controller: controller);
@@ -97,16 +97,11 @@ class _SelectedPage extends StatelessWidget {
 }
 
 class _TopChrome extends StatelessWidget {
-  const _TopChrome({
-    required this.selectedIndex,
-    required this.isConnected,
-  });
-
-  final int selectedIndex;
-  final bool isConnected;
+  const _TopChrome();
 
   @override
   Widget build(BuildContext context) {
+    final bleController = Get.put(BleController(), permanent: true);
     return SizedBox(
       height: 54,
       child: Row(
@@ -117,52 +112,61 @@ class _TopChrome extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
-                onTap: _openConnectedDeviceDetail,
+                onTap: _openFirstConnectedDeviceDetail,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(0, 4, 10, 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.78),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.more_vert,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  child: Obx(
+                    () {
+                      final connected = bleController.connectedDevices;
+                      final isConnected = connected.isNotEmpty;
+                      final deviceName = isConnected
+                          ? bleController.getDeviceName(connected.first)
+                          : '未连接设备';
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            isConnected ? '已连接' : '未连接',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.90),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                          Container(
+                            width: 24,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.78),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.more_vert,
+                              color: Colors.white,
+                              size: 15,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'iGPSPORT BSC300',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.70),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isConnected ? '已连接' : '未连接',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.90),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                deviceName,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.70),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -7186,9 +7190,7 @@ class _MapStatDivider extends StatelessWidget {
 }
 
 class _DevicesPage extends StatefulWidget {
-  const _DevicesPage({required this.controller});
-
-  final RideController controller;
+  const _DevicesPage();
 
   @override
   State<_DevicesPage> createState() => _DevicesPageState();
@@ -7197,16 +7199,23 @@ class _DevicesPage extends StatefulWidget {
 class _DevicesPageState extends State<_DevicesPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _radar;
-  bool _scanning = true;
+  late final BleController _ble;
 
   @override
   void initState() {
     super.initState();
-    // 雷达扫描旋转动画（纯本地视觉状态，不接真实 BleController）。
+    _ble = Get.put(BleController(), permanent: true);
+    // 雷达扫描旋转动画（视觉装饰；扫描状态由 BleController.isScanning 驱动）。
     _radar = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1600),
     )..repeat();
+    // 进入设备页自动开扫；权限或蓝牙未就绪时由 BleController 自行提示并保持停止态。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_ble.isScanning.value) {
+        unawaited(_ble.startScan());
+      }
+    });
   }
 
   @override
@@ -7216,28 +7225,16 @@ class _DevicesPageState extends State<_DevicesPage>
   }
 
   void _toggleScan() {
-    setState(() {
-      _scanning = !_scanning;
-      if (_scanning) {
-        _radar.repeat();
-      } else {
-        _radar.stop();
-      }
-    });
-    _showUiMessage(
-      _scanning ? '开始扫描' : '停止扫描',
-      _scanning ? '正在扫描附近设备...' : '已停止扫描',
-    );
+    if (_ble.isScanning.value) {
+      unawaited(_ble.stopScan());
+    } else {
+      unawaited(_ble.startScan());
+    }
   }
 
   void _refreshDevices() {
-    if (!_scanning) {
-      setState(() {
-        _scanning = true;
-        _radar.repeat();
-      });
-    }
-    _showUiMessage('刷新设备', '正在重新扫描可用设备...');
+    // 扫描列表跨页累计，刷新即重新触发一轮真实扫描。
+    unawaited(_ble.startScan());
   }
 
   void _openMissingDeviceHelp() {
@@ -7251,30 +7248,33 @@ class _DevicesPageState extends State<_DevicesPage>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // 固定子头：扫描雷达 + 停止扫描（本地视觉状态，不接真实 BleController）
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
-          child: _ScanPanel(
-            scanning: _scanning,
-            rotation: _radar,
-            onToggle: _toggleScan,
-          ),
-        ),
-        const SizedBox(height: 12),
-        // 单一滚动区：可用设备列表
-        Expanded(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
-            child: _AvailableDevicesPanel(
-              onRefresh: _refreshDevices,
-              onMissingDevice: _openMissingDeviceHelp,
+    return Obx(
+      () => Column(
+        children: [
+          // 固定子头：扫描雷达 + 停止扫描（跟随 BleController.isScanning 真实状态）
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
+            child: _ScanPanel(
+              scanning: _ble.isScanning.value,
+              rotation: _radar,
+              onToggle: _toggleScan,
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          // 单一滚动区：真实扫描发现的设备列表
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
+              child: _AvailableDevicesPanel(
+                bleController: _ble,
+                onRefresh: _refreshDevices,
+                onMissingDevice: _openMissingDeviceHelp,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -7368,10 +7368,12 @@ class _ScanPanel extends StatelessWidget {
 
 class _AvailableDevicesPanel extends StatelessWidget {
   const _AvailableDevicesPanel({
+    required this.bleController,
     required this.onRefresh,
     required this.onMissingDevice,
   });
 
+  final BleController bleController;
   final VoidCallback onRefresh;
   final VoidCallback onMissingDevice;
 
@@ -7401,41 +7403,51 @@ class _AvailableDevicesPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          _DeviceRow(
-            title: 'iGPSPORT BSC300_1234',
-            type: '码表',
-            bars: 4,
-            onTap: () => _openRidePage(
-              () => const _RideDeviceDetailPage(
-                name: 'iGPSPORT BSC300_1234',
-                type: '码表',
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _DeviceRow(
-            title: 'iGPSPORT SR30_5678',
-            type: '雷达',
-            bars: 4,
-            onTap: () => _openRidePage(
-              () => const _RideDeviceDetailPage(
-                name: 'iGPSPORT SR30_5678',
-                type: '雷达',
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _DeviceRow(
-            title: 'iGPSPORT HR40_9012',
-            type: '心率带',
-            bars: 3,
-            onTap: () => _openRidePage(
-              () => const _RideDeviceDetailPage(
-                name: 'iGPSPORT HR40_9012',
-                type: '心率带',
-              ),
-            ),
-          ),
+          Obx(() {
+            final devices = bleController.discoveredDevices;
+            if (devices.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 26),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.bluetooth_searching,
+                      size: 46,
+                      color: Colors.white.withValues(alpha: 0.52),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      bleController.isScanning.value
+                          ? '正在搜索设备...'
+                          : '暂未发现设备，点按上方按钮开始扫描',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.66),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+            return Column(
+              children: [
+                for (final device in devices) ...[
+                  _DeviceRow(
+                    title: _displayName(bleController, device),
+                    type: bleController.connectedDevices
+                            .any((d) => d.remoteId == device.remoteId)
+                        ? '已连接'
+                        : device.remoteId.str,
+                    bars: _rssiBars(bleController.getDeviceRssi(device)),
+                    onTap: () => Get.to(() => DeviceDetailPage(device: device)),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            );
+          }),
           const SizedBox(height: 18),
           InkWell(
             borderRadius: BorderRadius.circular(12),
@@ -7467,18 +7479,33 @@ class _AvailableDevicesPanel extends StatelessWidget {
   }
 }
 
+/// 无广播名的设备回退显示 MAC 地址，避免出现空标题行。
+String _displayName(BleController controller, BluetoothDevice device) {
+  final name = controller.getDeviceName(device).trim();
+  return name.isEmpty ? device.remoteId.str : name;
+}
+
+/// 广播 RSSI 映射为 1-4 格信号强度；0 表示尚无信号数据。
+int _rssiBars(int rssi) {
+  if (rssi == 0) return 1;
+  if (rssi >= -55) return 4;
+  if (rssi >= -70) return 3;
+  if (rssi >= -85) return 2;
+  return 1;
+}
+
 class _DeviceRow extends StatelessWidget {
   const _DeviceRow({
     required this.title,
     required this.type,
     required this.bars,
-    this.onTap,
+    required this.onTap,
   });
 
   final String title;
   final String type;
   final int bars;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -7539,8 +7566,7 @@ class _DeviceRow extends StatelessWidget {
             _SignalBars(value: bars),
             const SizedBox(width: 16),
             OutlinedButton(
-              onPressed:
-                  onTap ?? () => _showUiMessage('连接设备', '$title 正在连接...'),
+              onPressed: onTap,
               style: OutlinedButton.styleFrom(
                 foregroundColor: _RideColors.orange,
                 side: const BorderSide(color: _RideColors.orange),
@@ -7550,7 +7576,7 @@ class _DeviceRow extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                '连接',
+                '详情',
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
             ),
@@ -7766,417 +7792,6 @@ class _DeviceScreenLine extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.76),
         borderRadius: BorderRadius.circular(999),
-      ),
-    );
-  }
-}
-
-class _ConnectedDevicePanel extends StatelessWidget {
-  const _ConnectedDevicePanel({
-    this.deviceName = 'iGPSPORT BSC300_1234',
-    this.deviceType = '码表',
-  });
-
-  final String deviceName;
-  final String deviceType;
-
-  @override
-  Widget build(BuildContext context) {
-    return _GlassPanel(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _DeviceThumbnail(kind: deviceType),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      deviceName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF3BE23E),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '已连接',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.76),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '固件版本：v1.23.0',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.66),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '电量：100%',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.66),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          const _DeviceFirmwareUpdateRow(),
-          const SizedBox(height: 6),
-          const _DeviceSettingRow(
-            icon: Icons.settings,
-            color: Color(0xFF268DFF),
-            title: '设备设置',
-          ),
-          const _DeviceSettingRow(
-            icon: Icons.grid_view,
-            color: Color(0xFF4AD14A),
-            title: '页面配置',
-          ),
-          const _DeviceSettingRow(
-            icon: Icons.link,
-            color: Color(0xFFA533FF),
-            title: '传感器管理',
-          ),
-          const _DeviceSwitchRow(
-            icon: Icons.pause,
-            color: _RideColors.orange,
-            title: '自动暂停',
-            subtitle: '停止运动时自动暂停记录',
-          ),
-          const _DeviceSwitchRow(
-            icon: Icons.trip_origin,
-            color: Color(0xFFFFC400),
-            title: '自动计圈',
-            subtitle: '按距离自动生成计圈',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DeviceInfoPanel extends StatelessWidget {
-  const _DeviceInfoPanel({required this.name});
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return _GlassPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '设备信息',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 4),
-          _DetailInfoRow(label: '设备名称', value: name),
-          const _DetailInfoRow(label: '序列号', value: 'SN1234567890'),
-          const _DetailInfoRow(label: '固件版本', value: 'v1.23.0'),
-          const _DetailInfoRow(label: '硬件版本', value: 'v1.0'),
-          const _DetailInfoRow(
-              label: 'MAC 地址', value: 'D0:55:3C:12:34:56', last: true),
-        ],
-      ),
-    );
-  }
-}
-
-class _RideDeviceDetailPage extends StatelessWidget {
-  const _RideDeviceDetailPage({required this.name, required this.type});
-
-  final String name;
-  final String type;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _RideColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _DetailTopBar(
-              title: '设备',
-              actions: [
-                IconButton(
-                  onPressed: () => _showUiMessage('更多', '更多操作入口已激活'),
-                  icon:
-                      Icon(Icons.more_horiz, color: Colors.white.withValues(alpha: 0.9)),
-                ),
-              ],
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-                child: Column(
-                  children: [
-                    _ConnectedDevicePanel(deviceName: name, deviceType: type),
-                    const SizedBox(height: 12),
-                    _DeviceInfoPanel(name: name),
-                    const SizedBox(height: 14),
-                    OutlinedButton(
-                      onPressed: () => _showUiMessage('解除绑定', '已打开设备解绑确认'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: _RideColors.orange,
-                        minimumSize: const Size(double.infinity, 52),
-                        side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: const Text(
-                        '解除绑定',
-                        style:
-                            TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DeviceFirmwareUpdateRow extends StatelessWidget {
-  const _DeviceFirmwareUpdateRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => Get.to(() => const OtaUpgradePage()),
-        child: Ink(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                const Color(0xFF1C8CFF).withValues(alpha: 0.34),
-                const Color(0xFF55E8E6).withValues(alpha: 0.18),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.13)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: const Color(0xFF55E8E6).withValues(alpha: 0.5),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.system_update_alt,
-                  color: Color(0xFF55E8E6),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '检查单片机固件更新',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '下载最新码表固件',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.62),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.white.withValues(alpha: 0.78),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DeviceSettingRow extends StatelessWidget {
-  const _DeviceSettingRow({
-    required this.icon,
-    required this.color,
-    required this.title,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceRowBase(
-      icon: icon,
-      color: color,
-      title: title,
-      trailing: Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.76)),
-    );
-  }
-}
-
-class _DeviceSwitchRow extends StatelessWidget {
-  const _DeviceSwitchRow({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceRowBase(
-      icon: icon,
-      color: color,
-      title: title,
-      subtitle: subtitle,
-      trailing: Switch(
-        value: true,
-        onChanged: (_) {},
-        activeThumbColor: Colors.white,
-        activeTrackColor: _RideColors.orange,
-      ),
-    );
-  }
-}
-
-class _DeviceRowBase extends StatelessWidget {
-  const _DeviceRowBase({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.trailing,
-    this.subtitle,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String? subtitle;
-  final Widget trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 70),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.11),
-                shape: BoxShape.circle,
-                border: Border.all(color: color, width: 2),
-              ),
-              child: Icon(icon, color: color, size: 21),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle!,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.56),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            trailing,
-          ],
-        ),
       ),
     );
   }
@@ -10144,13 +9759,14 @@ $title
 ''';
 }
 
-void _openConnectedDeviceDetail() {
-  _openRidePage(
-    () => const _RideDeviceDetailPage(
-      name: 'iGPSPORT BSC300_1234',
-      type: '码表',
-    ),
-  );
+void _openFirstConnectedDeviceDetail() {
+  final bleController = Get.put(BleController(), permanent: true);
+  final connected = bleController.connectedDevices;
+  if (connected.isEmpty) {
+    _showUiMessage('设备详情', '尚未连接设备，请先在设备页扫描并连接');
+    return;
+  }
+  Get.to(() => DeviceDetailPage(device: connected.first));
 }
 
 Future<void> _showDeviceSyncActions(BuildContext context) {
@@ -10194,7 +9810,7 @@ Future<void> _showDeviceMoreActions(BuildContext context) {
         label: '设备详情',
         onTap: () {
           Navigator.of(sheetContext).pop();
-          _openConnectedDeviceDetail();
+          _openFirstConnectedDeviceDetail();
         },
       ),
       _RouteMoreAction(
