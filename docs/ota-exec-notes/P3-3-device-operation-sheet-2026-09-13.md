@@ -48,7 +48,9 @@ P2 同一受验 APK 身份确定（dispatch 注入隧道 https URL + release 侧
 P0 BCB 恢复流程全部完成（恢复方案 v5 S1a-S6 / REC0-REC7 执行完毕，
    §5 完成判据四条全满足：生产 Boot 已按全区恢复+核验、App 身份未变
    (30200)、BCB 与 App 一致(cur_vcode=30200)、生产 App RTT 新鲜自报）
-P3 用户审批冻结合同（FROZEN）+ validate_bundle NOT_RUN 前检通过
+P3 合同冻结（FROZEN）+ validate_bundle NOT_RUN 前检通过——独立准入
+   复核通过后由非实现会话办理（授权第一节授权范围：集中执行授权本身
+   即用户对冻结路径的审批，实现 agent 不自任验收者、不代填审批人）
 → O1 → O2 → O3（toy 闭环）
 → 【O3 PASS 后】受控服务 D4 切换（只停服务 → --active-release real-30202
    重启；**隧道进程与公网地址不变**）→ O4 → O5 → D5 完整清理
