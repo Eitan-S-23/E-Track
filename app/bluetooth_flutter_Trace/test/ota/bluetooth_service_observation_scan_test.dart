@@ -266,7 +266,9 @@ void main() {
     // → connect_failed），证明匹配与绑定接线也是真实的。
     final aima = ScanResult(
       device: BluetoothDevice(remoteId: const DeviceIdentifier('11:22:33:44:55:66')),
-      advertisementData: const AdvertisementData(
+      // AdvertisementData 构造器在 flutter_blue_plus 1.35.5 非 const，
+      // 与生产代码 bluetooth_service.dart 的既有构造方式一致。
+      advertisementData: AdvertisementData(
         advName: 'AIMA',
         txPowerLevel: null,
         appearance: 0,
@@ -280,7 +282,7 @@ void main() {
     );
     final xtrace = ScanResult(
       device: BluetoothDevice(remoteId: const DeviceIdentifier('AA:BB:CC:DD:EE:FF')),
-      advertisementData: const AdvertisementData(
+      advertisementData: AdvertisementData(
         advName: 'XTrace',
         txPowerLevel: null,
         appearance: 0,
