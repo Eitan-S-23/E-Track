@@ -118,7 +118,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: "8.12"
+          gradle-version: "8.14"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -134,7 +134,7 @@ jobs:
         shell: bash
         run: |
           printf 'flutter.sdk=%s\n' "$FLUTTER_ROOT" > local.properties
-          gradle wrapper --gradle-version 8.12 --distribution-type all
+          gradle wrapper --gradle-version 8.14 --distribution-type all
 
       - name: Configure Android release signing
         id: android_release_signing
