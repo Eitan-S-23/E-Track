@@ -156,8 +156,12 @@ function Invoke-P33RttEvidence {
     Test-P1RttSignature -Address $rttAddress -RunDirectory $RunDirectory `
         -Label ($Label + '-rtt-signature') | Out-Null
     $rttOut = Join-Path $RunDirectory ($Label + '-rtt.log')
+    # Out-Null keeps the function's return value a single result object:
+    # Invoke-P1RttCapture emits a status line into the pipeline, which
+    # would otherwise make callers receive an Object[] and break strict
+    # property access ($rtt.LogPath) in S4/S6.
     Invoke-P1RttCapture -Address $rttAddress -OutputPath $rttOut `
-        -TimeoutSeconds $RttTimeoutSeconds
+        -TimeoutSeconds $RttTimeoutSeconds | Out-Null
     $text = Get-P33RttText -Path $rttOut
     if ($text -notmatch [regex]::Escape($RttTargetLine)) {
         if ($FailIsFr4) {
@@ -353,9 +357,11 @@ switch ($Phase) {
             throw ('S2 baseline cur_vcode mismatch: {0}' -f $run.Result.cur_vcode)
         }
         # Mandatory BCB raw preservation (authorization: no trimming).
+        # Each arbiter block is BCB_SIZE=64 bytes (eeprom_bcb.h:26,
+        # snapshot_bcb raw_a[BCB_SIZE]), so a hex string is 128 chars.
         $rawA = [string]$run.Result.bcb_a_raw
         $rawB = [string]$run.Result.bcb_b_raw
-        if ($rawA.Length -ne 256 -or $rawB.Length -ne 256) {
+        if ($rawA.Length -ne 128 -or $rawB.Length -ne 128) {
             throw ('S2 BCB raw length mismatch: A={0} B={1}' -f
                 $rawA.Length, $rawB.Length)
         }
@@ -394,7 +400,8 @@ switch ($Phase) {
         }
         $rawA = [string]$run.Result.bcb_a_raw
         $rawB = [string]$run.Result.bcb_b_raw
-        if ($rawA -notmatch '^[fF]{256}$' -or $rawB -notmatch '^[fF]{256}$') {
+        # 64 bytes per block (BCB_SIZE, eeprom_bcb.h:26) = 128 hex chars.
+        if ($rawA -notmatch '^[fF]{128}$' -or $rawB -notmatch '^[fF]{128}$') {
             throw 'S3 BCB raw blocks are not all 0xFF after CLEAR_BCB'
         }
         Write-P33PhaseResult -PhaseName 'S3' -Record ([ordered]@{
