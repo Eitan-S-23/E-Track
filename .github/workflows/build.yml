@@ -32,6 +32,11 @@ on:
         required: false
         type: string
         default: ""
+      release_application_id_suffix:
+        description: "Optional dot-prefixed release application id suffix such as '.p33acceptance' for an acceptance APK that coexists with the production install; empty keeps the production application id"
+        required: false
+        type: string
+        default: ""
 
 env:
   PUB_HOSTED_URL: https://pub.dev
@@ -220,10 +225,20 @@ jobs:
           TRACE_PUBLIC_UPDATE_SERVICE_URL: ${{ vars.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_UPDATE_SERVICE_URL }}
           TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
           DISPATCH_FIRMWARE_LATEST_URL: ${{ inputs.firmware_latest_url || '' }}
+          TRACE_RELEASE_APP_ID_SUFFIX: ${{ inputs.release_application_id_suffix || '' }}
         run: |
           set +e
           build_args=(apk --release --target-platform=android-arm,android-arm64)
           echo "Android release APK targets ARM ABIs only to keep the sideload package smaller."
+          if [[ -n "${TRACE_RELEASE_APP_ID_SUFFIX:-}" ]]; then
+            # 验收并存包名后缀：仅接受点前缀的合法包名段（gradle 侧同正则
+            # 二次校验，双层 fail-closed）。默认空值保持生产包名不变。
+            if ! [[ "${TRACE_RELEASE_APP_ID_SUFFIX}" =~ ^\.[A-Za-z][A-Za-z0-9_]*$ ]]; then
+              echo "::error title=Release application id suffix::Dispatch input must be a dot-prefixed package segment such as '.p33acceptance'."
+              exit 1
+            fi
+            echo "Release application id suffix enabled: ${TRACE_RELEASE_APP_ID_SUFFIX}"
+          fi
           if [[ -n "${DISPATCH_FIRMWARE_LATEST_URL:-}" ]]; then
             # 显式 dispatch 输入只覆盖固件 latest endpoint；仅接受不含凭据的
             # 公开 HTTPS URL（校验逻辑与 dev-checks 观测路径同一套口径）。

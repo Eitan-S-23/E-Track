@@ -1,8 +1,18 @@
-# P3-3 受控 v2 测试服务：方案、实现与宿主自测 —— 2026-09-13（第四轮修订，源码 v2）
+# P3-3 受控 v2 测试服务：方案、实现与宿主自测 —— 2026-09-13（第五轮修订，源码 v2）
 
 > 依据用户 2026-09-13 第三轮裁定第 1 条确立受控 v2 测试服务路线（原边界
 > 声明继续有效：不证明 P4-2 通过、不实现正式发布链、不放宽 App 校验、
 > 不直接注入 OtaService 状态）。
+>
+> **第五轮修订（P3-3-EXEC-AUTH-20260913 第二节，2026-09-13）**：
+> - 真机 HTTPS 路线直接确定为 **Quick Tunnel**（§5 重写）：本轮测试专用、
+>   不用 Cloudflare 账号、不读旧 token；v2 版把「随机 URL 与 APK 注入
+>   冲突」列为排除理由的论证被用户裁定不成立——正确解法是执行顺序
+>   （先隧道取地址→宿主端到端检查→注入唯一一次受验 APK 构建→绑定合同），
+>   而非要求 URL 先于一切固定。
+> - §6 D 序列去掉 adb reverse（本路线不需要），新增隧道生命周期管理
+>   （8 小时窗口、地址变化即暂停、toy→真包切换只重启本机后端不动隧道）。
+> - 状态语言按授权书第五节更新：已获条件授权的项标「已授权，待前检/执行」。
 >
 > **第四轮修订（2026-09-13 裁定第 2/3 条）**：
 > - 修复三项实测缺陷：requestId 未贯通（日志/响应体/响应头三方统一）、
@@ -16,7 +26,8 @@
 >   基准改为仓库根；`Tools/provenance/manifest_profiles.json` 的
 >   Validation profile required_paths 已补齐四件套与恢复 runner。
 > - §5/§6 按「HTTPS 硬前置」重写：宿主 HTTPS 已实证，真机域名/证书路线
->   A/B 待批输入清单化；D5 重定义为完整清理与无残留验证。
+>   A/B 待批输入清单化；D5 重定义为完整清理与无残留验证。（第五轮已
+>   被上节取代——路线 A/B 降为 Quick Tunnel 不可用时的备选。）
 
 ## 1. 设计（源码 v2，受管路径）
 
@@ -179,90 +190,126 @@ python service.py --config service_config.json --active-release toy-30201
 App 侧公共可信证书；真机 O 序列使用的域名/证书链/有效期按 §5 路线另行
 绑定。本脚本不放宽 App 校验、不安装任何系统 CA。
 
-## 5. 真机 HTTPS 方案（硬前置；宿主已实证，路线待批）
+## 5. 真机 HTTPS 路线（已确定：Quick Tunnel；授权 P3-3-EXEC-AUTH-20260913 第二节）
 
 **HTTPS 是当前受验 App 的硬前置**：App 端
 `ota_firmware_latest.dart` 硬性要求 downloadUrl https；Android 13
 （targetSdk≥28）禁止明文 latest；App 无 `badCertificateCallback`/
 `SecurityContext`（**不得放宽**）；`dart:io` HttpClient 在 Android 只信任
-系统 CA。**adb reverse 只转发端口，不提供 TLS，也不解决证书信任**——
-手机侧必须看到公共可信证书链。
+系统 CA。
 
-宿主侧已实证（§4.2）：服务的 TLS 实现（`--tls-cert`/`--tls-key`/
-`--public-base-url`、minimum TLSv1_2）与证书链配置可工作。**剩余待办全部
-在域名与公共可信证书侧**，按以下两条路线申报，由用户裁定：
+宿主侧已实证（§4.2）：服务的 TLS 实现与证书链配置可工作。真机路线按
+授权第二节直接确定如下，**不再要求用户提供域名、DNS API token 或证书
+策略**。
 
-### 路线 A（主推）：自有域名 + Let's Encrypt DNS-01 + 局域网直连
+### 5.1 主路线：Cloudflare Quick Tunnel（已授权，待前检/执行）
 
-- 原理：用户自有域名一条 A/AAAA 记录指向 PC 局域网 IP（或测试期内
-  网段），Let's Encrypt 通过 DNS-01（TXT 记录）签发公共可信证书（无需
-  公网入站端口）；服务绑 `--host 0.0.0.0`（需另行授权），手机经局域网
-  直连 `https://<域名>:<PORT>`；`--public-base-url` 与证书域名一致。
-- 需用户提供/批准的输入：
-  1. 域名（及其 DNS 提供商）；
-  2. DNS-01 执行方式：手动 TXT（每次续期人工操作）或 ACME 客户端 +
-     DNS API token（token 注入与存放位置须预检批准）；
-  3. 证书有效期策略（Let's Encrypt 90 天，测试窗口内单次签发即可）；
-  4. 局域网直连授权（服务绑非回环地址 + 手机访问 PC IP）。
-- 优点：无第三方账号依赖、证书为标准公共 CA、URL 固定（可注入 APK
-  构建参数）。
+- **形态**：一个测试专用 Quick Tunnel——`cloudflared tunnel --url
+  http://127.0.0.1:<PORT>`，生成随机 `*.trycloudflare.com` HTTPS 地址；
+  Cloudflare 边缘终止 TLS（边缘证书公共可信，App 侧 `dart:io` 系统信任
+  库可直接校验，**不改变 App 的证书或 HTTPS 校验**）；隧道到本机服务走
+  127.0.0.1 HTTP（本服务不绑局域网地址、无 `--tls-cert`）。
+- **执行顺序（消除「随机 URL 与 APK 注入冲突」的正确解法）**：
+  1. 启动隧道，取得实际 HTTPS 地址；
+  2. 宿主端到端检查（§5.2）全过；
+  3. 该地址注入唯一一次受验 APK 构建（dispatch
+     `firmware_latest_url=https://<trycloudflare 地址>/api/public/firmware/latest`）；
+  4. 地址绑定进合同（执行时回填，见 §7）。
+- **账号边界**：Quick Tunnel 不使用用户的 Cloudflare 账号、不读取任何
+  token（含旧环境 token），不触发云端写入单 §9 CF 账号规约的申报前置
+  （该规约仅适用于 Named Tunnel/账号类操作，见云端写入单 §9 注记）。
+- **暴露范围（授权原文口径）**：只暴露本服务的 latest/download 端点及
+  两份已绑定测试 ETU（toy-30201 / real-30202 的 fixture 配置内资产）；
+  不得暴露其他本机服务、文件、日志或管理接口（本服务实现无管理端口，
+  127.0.0.1 绑定保证隧道只能到达本服务）。
+- **窗口**：开放窗口最长 **8 小时**；本轮结束或到期即关闭（§6 D5）。
+- **toy→真包切换**：只重启本机后端（`--active-release` 切换），**维持
+  同一隧道进程和公网地址**；地址改变或隧道退出时暂停相关阶段，不偷偷
+  换地址、不自动消耗额外 APK 构建。
+- **本路线不需要 adb reverse**：不创建、不删除任何 adb reverse 映射
+  （授权明示「不要沿用旧方案去创建或删除无关映射」）。
+- **cloudflared 二进制获取**：下载到 admission worktree
+  `.cache/p3-3-cloudflared/`（路径预检：写入位置在活动 worktree 内；
+  不全局安装、不修改全局 PATH；下载源为官方发布渠道，落盘后登记 SHA-256）。
 
-### 路线 B（备选）：Cloudflare Named Tunnel
+### 5.2 宿主端到端检查（注入 APK 前的门槛，全部通过才可消耗构建配额）
 
-- 原理：cloudflared 建立反向隧道，公网 `https://<子域>` 经 CF 边缘终止
-  TLS（CF 证书公共可信）转发到本机服务；手机走公网回路，无需局域网
-  直连授权。
-- **须按第四轮裁定第 4 条流程申报后才可启动**：先说明具体目标账号、
-  资源、域名和对外暴露范围；获批后**先发起浏览器鉴权请求刷新本地登录**，
-  鉴权后核对实际 account ID 与目标资源归属，排除旧环境 token 覆盖新
-  OAuth 登录；不得沿用未经核验的缓存身份，不得全局删除其他账号凭据，
-  不输出 token/cookie。PowerShell/cloudflared 的启动缓存、日志和认证
-  文件仍须做写入预检；浏览器鉴权不豁免项目外写入边界。
-- 优点：无需 DNS-01 与局域网授权；缺点：引入 CF 账号依赖与写入面。
+用真实 CLI 参数启动服务（127.0.0.1 HTTP 形态）+ 隧道，从公网地址执行：
 
-### 已排除路线（论证）
+1. `GET https://<隧道地址>/api/public/firmware/latest?…（真机十参数）` →
+   200、schemaVersion=2、downloadUrl 为同一隧道地址的 https 前缀；
+2. 按 downloadUrl 整包下载 toy ETU → 200、字节数与 SHA-256 与冻结
+   四元组一致（`fc4ae5a9…` / 284,092 B）；
+3. 证书链为 Cloudflare 边缘证书（公共可信——宿主默认信任库直接校验
+   通过，无需加载任何测试 CA）；
+4. 负例：路径外资源（如 `/`、`/api/ci/…`）不暴露本机其他内容（按服务
+   实现返回 404/405，隧道不放大暴露面）。
+
+结果（含隧道地址、时间戳、命令与响应摘要）落盘
+`.cache/p3-3-v2-service/quicktunnel-hostcheck.log` 并回填本节，作为
+O 序列与合同 EXT 条目的前置证据。
+
+### 5.3 替代路线（仅 Quick Tunnel 确实不可用时集中申报，本轮不启用）
+
+| 路线 | 说明 | 申报前置 |
+| --- | --- | --- |
+| 路线 A：自有域名 + Let's Encrypt DNS-01 + 局域网直连 | 用户域名 A/AAAA → PC 局域网 IP，DNS-01 签发公共可信证书，服务绑非回环地址 | 按 v2 版原 §5 路线 A 清单：域名、DNS-01 执行方式（手动 TXT 或 ACME+DNS token）、证书策略、局域网直连授权四项输入 |
+| 路线 B：Cloudflare Named Tunnel | `cloudflared tunnel` 具名隧道 + DNS zone 绑定 | 按授权第二节末段与云端写入单 §9：先浏览器鉴权 → 核对 account ID 与资源归属 → 排除旧 token 覆盖；不得通过聊天索取或输出 token/cookie |
+
+### 5.4 已排除路线（论证，维持）
 
 | 路线 | 排除原因 |
 | --- | --- |
-| Quick Tunnel（`cloudflared tunnel --url`） | URL 随机（`*.trycloudflare.com` 每次变化），与 APK 构建时注入的 `firmware_latest_url` 固定值冲突；不可绑定 |
 | mkcert / 自签 / 用户 CA | 非公共可信；Android 系统信任库外（用户 CA 对 `dart:io` HttpClient 无效）→ 等效放宽校验，禁止 |
-| 回环域名服务（localhost.direct / localcert.me 等） | 现状（域名、签发流程、有效期）无法在本环境在线验证（网页抓取被网络策略拦截）；依赖第三方可用性与续期；如用户已验证可用可作为路线 A 的替代申报 |
-| adb reverse + HTTP | 仅端口转发，无 TLS、不解决证书信任；App 明文禁止（仅宿主自测形态） |
+| 回环域名服务（localhost.direct / localcert.me 等） | 现状无法在本环境在线验证；依赖第三方可用性与续期；Quick Tunnel 已获批，无需引入 |
+| adb reverse + HTTP | 仅端口转发，无 TLS、不解决证书信任；App 明文禁止；授权明示本路线不需要 adb reverse |
 
-**真机执行绑定要求（O2 前置检查）**：域名、端口、证书链、notBefore/
-notAfter、证书文件路径、完整启动命令行（D1 形态）全部落盘留证；证书
-剩余有效期须覆盖整个 O 序列窗口。
+**真机执行绑定要求（O2 前置检查）**：隧道地址（完整 URL）、本地端口、
+服务启动命令行（§6 D1 形态）、cloudflared 进程 PID、宿主端到端检查
+记录（§5.2）全部落盘留证；8 小时窗口起止时间登记，窗口须覆盖剩余
+O 序列全程。
 
-## 6. 部署申请（待批，未执行；D1-D5 按第四轮裁定第 3 条重定义）
+## 6. 部署序列（已授权，待前检/执行；D1-D5，Quick Tunnel 路线）
 
-执行 O2 时的服务启动与清理序列（域名/证书按 §5 批准路线取值）：
+执行 O 序列时的服务与隧道启停序列（无 adb reverse——授权明示本路线不需要，
+不创建、不删除任何映射）：
 
 | # | 操作 | 命令要点 | 留证 |
 | --- | --- | --- | --- |
-| D1 | 启动（toy 激活，TLS） | `python service.py --config service_config.json --active-release toy-30201 --host <按路线> --port <PORT> --public-base-url https://<域名>:<PORT> --tls-cert <cert.pem> --tls-key <key.pem> --log-file <repo>/.cache/p3-3-v2-service/service.log` | 启动日志（版本=2/fixture 身份/激活指针/TLS 绑定） |
-| D2 | 端口转发（仅路线 A 局域网方案不需要；adb reverse 方案适用时） | **先 `adb -s 10ADA4197U001CK reverse --list` 检查现有映射；目标端口已有映射时不得直接覆盖**——停止并申报冲突，由用户裁定 | 检查回显 + 映射命令回显 |
-| D3 | O2 观测期间 | 服务日志持续采集（每请求一行：脱敏路径/状态/字节数/req=） | 与 App logcat 的 requestId 交叉 |
-| D4 | toy→真包切换（O3 PASS 后） | 停服务 → `--active-release real-30202` 重启（同 D1 参数） | 两段启动日志 + 停启时间戳 |
-| D5 | **完整清理（含验证）** | ① `adb reverse --remove tcp:<PORT>`（本次建立的映射）→ ② 终止本次服务进程（记录 PID/退出码）→ ③ 日志归档到项目内 `.cache/`（含 service.log、启动命令行、证书身份）→ ④ **无残留验证**：`adb reverse --list` 不含本次映射、`Get-Process` 无本次服务进程（按 PID 核对，不按名字误杀）、`.cache` 内日志文件齐且有 SHA | 四步各自回显 |
+| D1 | 启动（服务 + 隧道，两个独立进程） | ① `python service.py --config service_config.json --active-release toy-30201 --host 127.0.0.1 --port <PORT> --public-base-url https://<隧道地址> --log-file <repo>/.cache/p3-3-v2-service/service.log`（**HTTP 形态，无 --tls-cert/--tls-key**——TLS 由隧道边缘终止）；② `<repo>/.cache/p3-3-cloudflared/cloudflared.exe tunnel --url http://127.0.0.1:<PORT>`（Quick Tunnel，不读账号 token；日志重定向到项目内 `.cache/p3-3-cloudflared/tunnel.log`）；③ 从隧道日志捕获实际 `https://<随机>.trycloudflare.com` 地址，回填 `--public-base-url` 后重启一次服务（或以地址启动顺序：先隧道后服务，避免二次重启） | 启动日志（版本=2/fixture 身份/激活指针）+ 隧道日志含地址行 + 两进程 PID + 窗口起始时间戳 |
+| D2 | 宿主端到端检查（§5.2；注入 APK 的门槛） | latest 真机十参数 → 200；downloadUrl 同隧道地址 https；整包下载 SHA 与冻结四元组一致；负例路径不放大暴露 | `quicktunnel-hostcheck.log`（地址/时间戳/命令/响应摘要） |
+| D3 | O2 观测期间 | 服务日志持续采集（每请求一行：脱敏路径/状态/字节数/req=）；隧道进程保持运行 | 与 App logcat 的 requestId 交叉 |
+| D4 | toy→真包切换（O3 PASS 后） | **只停服务** → `--active-release real-30202` 重启（同 D1 参数，含同一 `--public-base-url`）；**隧道进程不动**（授权原文：维持同一隧道进程和公网地址）。地址改变或隧道退出 → 暂停相关阶段并申报，不换地址、不追加 APK 构建 | 两段服务启动/停止日志 + 时间戳（隧道 PID 不变即留证） |
+| D5 | **完整清理（含验证）** | ① 按记录的 PID 终止隧道进程（cloudflared，不按名字误杀）→ ② 按记录的 PID 终止本次服务进程（记录退出码）→ ③ 日志与证据归档到项目内 `.cache/p3-3-v2-service/`（service.log、tunnel.log、启动命令行、地址、窗口起止）→ ④ **无残留验证**：`Get-Process` 按两 PID 核对均不存在、`Get-NetTCPConnection -LocalPort <PORT>` 无监听、`.cache` 内日志文件齐且有 SHA | 四步各自回显 |
 
-- 授权口径：D1-D5 合并为一次部署会话申报；暴露范围按 §5 批准路线
-  （路线 A = 局域网直连；路线 B = CF 隧道公网回路）。
-- **D5 的清理是判据不是善后**：残留（映射/进程/日志缺失）记
-  HARNESS_FAIL。
-- 服务进程为长运行进程，执行方须在会话结束前确认无残留（同 J-Link
+- 授权口径：D1-D5 属于 P3-3-EXEC-AUTH-20260913 第二节的隧道与服务管理
+  授权范围（创建并运行本轮短期公网隧道，只暴露本服务 latest/download 端点
+  及两份已绑定测试 ETU；开放窗口最长 8 小时，本轮结束或到期即关闭）。
+- **8 小时窗口**：D1 启动时登记起始时间戳；窗口到期或 O 序列/清理完成即
+  执行 D5 关闭。窗口内未完成的相关阶段暂停并申报，不自动续窗口。
+- **D5 的清理是判据不是善后**：残留（隧道进程/服务进程/监听端口/日志缺失）
+  记 HARNESS_FAIL。
+- 服务与隧道均为长运行进程，执行方须在会话结束前确认无残留（同 J-Link
   logger 清残留纪律，按 PID 精确核对）。
+- cloudflared 的启动缓存/日志默认路径若在用户目录（`~/.cloudflared/`），
+  须以项目内参数（`--no-autoupdate`、日志重定向、`--origincert` 不涉及——
+  Quick Tunnel 不用证书）收敛到 worktree `.cache/` 内；执行前按全局
+  「非项目目录写入边界」做路径预检。
 
 ## 7. 与合同/操作单的衔接
 
-- 合同 external input `EXT-HTTP-TEST-SERVICE` 升 v2：描述改受管路径
-  `Tools/ota/p3-3-service/` + 本文 §1 四件套 SHA-256（v2 值）；runner
-  依赖经 Validation profile 冻结（`Tools/provenance/manifest_profiles.json`
+- 合同 external input `EXT-HTTP-TEST-SERVICE`：描述改受管路径
+  `Tools/ota/p3-3-service/` + 本文 §1 四件套 SHA-256（v2 值）+ **Quick
+  Tunnel 路线（§5.1）**；隧道地址按合同「执行时回填」规则绑定（§6 D1/D2
+  留证 + `quicktunnel-hostcheck.log`），不预先写死随机 URL。runner 依赖经
+  Validation profile 冻结（`Tools/provenance/manifest_profiles.json`
   required_paths 含四件套 + `Tools/jlink/p1-6-common.ps1` +
   `Tools/jlink/test-p1-6-recovery-cmd.ps1`），**description 内哈希仅为
   辅助说明，不替代 profile 冻结依赖**；外部 fixture（`.cache/p3-3-assets/`
   两份 ETU + 恢复 Boot 产物）身份仍按 EXT 条目单独绑定。见合同修订。
 - 操作单 O2「服务端请求日志」来源：本文 §6 D3 的 service.log。
-- 受验 APK 构建命令中的 `firmware_latest_url` 值 = §5 批准路线的
-  `https://<域名>:<PORT>/api/public/firmware/latest`。
-- 云端写入单 B0-B4 暂停标注维持；若 §5 路线 B 获批，其账号/写入面申报
-  并入云端写入单 CF 规约（见云端写入单修订）。
+- 受验 APK 构建命令中的 `firmware_latest_url` 值 = §5.1 隧道地址的
+  `https://<随机>.trycloudflare.com/api/public/firmware/latest`（§5.2 宿主
+  检查通过后才注入，唯一一次 build-only 配额）。
+- 云端写入单 B0-B4 暂停标注维持（Quick Tunnel 不触发其 §9 CF 账号规约：
+  不使用账号、不读 token，见云端写入单 §9 注记）。

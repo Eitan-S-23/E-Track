@@ -1,0 +1,75 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v3",
+  "contract_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "round_id": "20260913-DRAFT-V3",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "合同尚为 DRAFT（v3）、未冻结，本判据在本合同语义下未执行。参考事实（非本矩阵证据）：开发自测 run 34730007317 在稳定提交 ab6ce3b 双宿主全绿、run 34738585857 在 endpoint 注入改造（63db787）后双宿主全绿，均属实现侧开发自测，不构成独立验收。注意：v3 新增的 release 侧并存包名机制（build.gradle.kts TRACE_RELEASE_APP_ID_SUFFIX + build.yml dispatch 输入贯通，2026-09-13）晚于上述两次全绿 run——冻结时必须在 freeze_commit 上重新派发 dev-checks（test_scope=all）并核对双宿主 job conclusion，不得复用旧 run（顶层 gradle 校验块语法与 release 配置路径均随该改动变化）。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "合同尚为 DRAFT（v3）、未冻结。参考事实（非本矩阵证据）：build.yml run 34730618341 在 ab6ce3b build-only 全绿（APK 46682620B / 2a5d5db9…，release 模式 debug 签名回退，无固件 endpoint 与并存后缀注入），属实现侧构建验证，不满足受验 APK 条件。受验 APK 须以 dispatch 输入 firmware_latest_url=https://<Quick Tunnel 地址>/api/public/firmware/latest + release_application_id_suffix=.p33acceptance 重新构建（P3-3-EXEC-AUTH-20260913 第四节）：消耗的是保留的现有同一笔 build-only 1 次额度（不追加、不为试错消耗）；publish_release=false、replace_existing_release=false。注入时序（第二节）：先启动隧道取得实际 https 地址 → 宿主端到端检查（服务文档第五轮修订 §5.2 四项）通过 → 注入唯一一次构建 → 地址绑定进合同（执行时回填，不预先写死随机 URL）。构建判据含 APK 包名实测（必须为 com.wen.gaia.gaia.p33acceptance，注入失效即失败）；不同 CI run 的 debug 签名不能假定相同，证书指纹以本次产物 apksigner 实测为准。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "[执行事实] 该判据在本合同语义下未执行。已获条件授权（P3-3-EXEC-AUTH-20260913 第四节），状态：已授权，待前检/执行（前置=恢复完成、服务与资产准入、合同冻结、NOT_RUN 前检通过）。安装策略已按授权确定：受验 APK 并存包名 com.wen.gaia.gaia.p33acceptance 全新安装；既有安装 com.wen.gaia.gaia 全程不动——不卸载、不清数据（任何情况下不得以卸载或清数据解决签名冲突；并存包名下不存在覆盖冲突）。安装前预检：受验 APK 包名实测必须为 com.wen.gaia.gaia.p33acceptance（构建注入失效 → 停在安装前报 ENV_BLOCKED，不消耗安装动作、不改装非受验 APK）；双侧完整证书指纹实测留档（既有安装 dumpsys 取 codePath → adb pull → apksigner verify --print-certs；受验 APK 同命令实测；不同 CI run 的 debug 签名不能假定相同）——并存包名下指纹差异不构成安装阻断，比对用于证明并存策略必要性与受验侧签名身份绑定。正常 BLE 权限授予（Android 13 BLUETOOTH_CONNECT/SCAN/ADVERTISE）含在授权内。指定设备 10ADA4197U001CK，时长 5 分钟一次。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "[执行事实] 该判据在本合同语义下未执行。已获条件授权（P3-3-EXEC-AUTH-20260913 第三、四节），状态：已授权，待前检/执行。前置缺口（按第五节执行顺序，安全准备/HTTPS 检查/APK 构建可先行，不必先操作设备）：① BCB 恢复 v5（P3-3-bcb-recovery-plan-2026-09-13-v5.md，REC0-REC7，执行入口 Tools/jlink/p3-3-recovery-execute.ps1 分 Phase fail-closed；恰好 10 命令会话/6 主动复位/2 RTT logger（各 ≤120s）/≤2 签名核对会话；S1a 同连接 备份→烧录→RAM 失效+读回；BCB 双块 128B 强制留档不裁剪；FR4 备用会话替代 S5）待独立复核通过后执行——须 §5 完成判据四条全部满足；② 受控 v2 测试服务 + Quick Tunnel 部署（服务文档第五轮修订 §5.1/§6 D1-D5：不用 CF 账号不读 token、8h 窗口、只暴露 latest/download 端点与两份绑定 ETU、无 adb reverse、D4 切换只重启服务隧道不动、D5 清理为判据）待 D2 宿主端到端检查通过；③ 受验 APK（唯一一笔 build-only 额度）待注入隧道地址构建；④ 合同冻结 + NOT_RUN 前检通过。toy 3.2.1/30201 资产已离线制包并绑入服务冻结配置（四元组见 EXT-TOY-BOOTABLE，P3-3-offline-assets-2026-09-13.md），上板资格待非实现会话审定；golden vectors 不具上板资格。云端 staging 路线维持冻结，不再是前置。时长 30 分钟一次；失败留证，不盲重试、不互借历史 A1/B1-M 额度。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "[执行事实] 该判据在本合同语义下未执行。已获条件授权，状态：已授权，待前检/执行。前置：C-TOY-LOOP 已 PASS（真包仅在 toy 闭环成功后经受控服务 D4 切换激活——只停服务 → --active-release real-30202 重启，隧道进程与公网地址维持不变，启动日志留证；云端 stable publish 路线维持冻结不使用）；EXT-BOARD-STATE 维持恢复后一致态。其余前置与失败处理口径同 C-TOY-LOOP（Quick Tunnel D1-D5 就绪、恢复 v5 完成、合同冻结+NOT_RUN 前检）。真包 3.2.2/30202 资产已离线制包并绑入服务冻结配置（四元组见 EXT-REAL-ETU），上板资格待非实现会话审定。时长 30 分钟一次；终点 versionCode 30202 与完整 raw SHA-256 c9582213… 独立比对，不得由 toy 结果代替。"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

@@ -23,10 +23,11 @@
 >   `Tools/ota/p3-3-service/` 四件套，SERVICE_VERSION=2，16 项宿主自测 +
 >   tls_hostcheck 宿主 HTTPS 全链 PASS，部署申请待批）。本单降级为 P4-2
 >   前置未解除期间的**冻结申报**，不再阻塞 P3-3。
-> - **当前本机路线不使用 Cloudflare**（2026-09-13 第四轮裁定第 4 条）：
->   不需要刷新或读取其 token，也不需要用户在聊天中提供凭据。若受控服务
->   HTTPS 路线 B（Cloudflare Named Tunnel，服务文档 v2 §5）最终获批，
->   其账号操作按本单 §9 CF 规约执行。
+> - **当前本机路线不使用 Cloudflare 账号**：真机 HTTPS 已按
+>   P3-3-EXEC-AUTH-20260913 第二节确定为 Quick Tunnel（服务文档 §5.1，
+>   2026-09-13 第五轮修订）——不用账号、不刷新或读取其 token，也不需要
+>   用户在聊天中提供凭据。若替代路线 B（Cloudflare Named Tunnel，服务
+>   文档 §5.3）经集中申报获批启用，其账号操作按本单 §9 CF 规约执行。
 
 ## 1. 结论先行：staging 共享合同不兼容实锤，方案 A/B 均不可行
 
@@ -317,15 +318,16 @@ channel 指针」——与源码完全一致，链路为：
 | 6 | Access owner 会话（步骤 4 stable publish 需要）由用户在执行时提供 | 不持有；暂停状态下不申请、不传递 |
 | 7 | BCB 恢复完成且终态核验通过——**P3-3 验收链已改走受控 v2 服务，本项不再是本单解冻条件，仅是云端激活后 C-TOY-LOOP 实机闭环的前置** | v4 方案已落盘待批（`P3-3-bcb-recovery-plan-2026-09-13-v4.md`，REC0-REC7） |
 
-## 9. Cloudflare 账号操作规约（2026-09-13 第四轮裁定第 4 条回填）
+## 9. Cloudflare 账号操作规约（2026-09-13 第四轮裁定第 4 条回填；第五轮注记见末条）
 
-适用于本单（B0-B4）与受控服务 HTTPS 路线 B（Cloudflare Named Tunnel，
-服务文档 v2 §5）的一切 Cloudflare 账号操作；两者均未获批、未执行。
+适用于本单（B0-B4）与受控服务 HTTPS 替代路线 B（Cloudflare Named Tunnel，
+服务文档 §5.3）的一切 Cloudflare 账号操作；B0-B4 冻结未执行，路线 B 未启用。
 
-1. **当前路线不使用 Cloudflare**：受控服务 HTTPS 待批路线 A（自有域名 +
-   Let's Encrypt DNS-01）不涉及 CF 账号；路线 B 未获批前不发起任何
-   `wrangler`/`cloudflared` 账号类命令，不刷新或读取其 token，也不要求
-   用户在聊天中提供任何凭据。
+1. **当前主路线不使用 Cloudflare 账号**：P3-3 真机 HTTPS 已按
+   P3-3-EXEC-AUTH-20260913 第二节确定为 **Quick Tunnel**（服务文档 §5.1）——
+   `cloudflared tunnel --url` 不使用用户账号、不读取任何 token（含旧环境
+   token），**不触发本规约的申报前置**；本条规约仅适用于 Named Tunnel/
+   账号类操作。
 2. **路线 B 获批后的申报前置**：先说明具体目标账号、资源（tunnel/
    DNS zone/hostname）、域名和对外暴露范围（公网 URL、转发目标
    `localhost:<PORT>`、是否限源），由用户批准资源操作后，**先发起浏览器
@@ -344,6 +346,11 @@ channel 指针」——与源码完全一致，链路为：
    配置、浏览器鉴权落盘位置）均在项目根之外——任一写入前按全局
    「非项目目录写入边界」逐路径申报并获批；**浏览器鉴权不豁免项目外
    写入边界**。
+6. **Quick Tunnel 的项目外写入收敛**（第五轮注记，2026-09-13）：Quick
+   Tunnel 虽不走账号，cloudflared 二进制本身仍是外部工具——下载到
+   admission worktree `.cache/p3-3-cloudflared/`（不全局安装、不改
+   PATH），启动参数收敛自动更新与日志输出到项目内路径，执行前按
+   「非项目目录写入边界」做路径预检（服务文档 §6 D1/D5 已含此要求）。
 
 ## 10. 边界声明
 

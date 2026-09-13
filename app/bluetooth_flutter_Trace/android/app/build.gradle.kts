@@ -69,6 +69,21 @@ if (debugApplicationIdSuffix.isNotEmpty() &&
     )
 }
 
+// 验收并存包名后缀：只有显式设置 TRACE_RELEASE_APP_ID_SUFFIX 时才生效，
+// 默认空值保持生产 application id 不变。仅作用于 release 构建类型，用于
+// 受验产物与既有生产安装并存（application id 不同才可能同时安装；签名
+// 指纹与既有安装无法保持一致时的授权替代路径）。非法取值直接失败，避免
+// 产出身份不明的"看似可用"产物。
+val releaseApplicationIdSuffix = System.getenv("TRACE_RELEASE_APP_ID_SUFFIX")?.trim().orEmpty()
+if (releaseApplicationIdSuffix.isNotEmpty() &&
+    !Regex("^\\.[A-Za-z][A-Za-z0-9_]*$").matches(releaseApplicationIdSuffix)
+) {
+    error(
+        "TRACE_RELEASE_APP_ID_SUFFIX must be a dot-prefixed package segment such as '.p33acceptance'; " +
+            "refusing to build an ambiguous release application id."
+    )
+}
+
 android {
     namespace = "com.wen.gaia.gaia" // 替换为你的项目包名
     compileSdk = 35
@@ -108,6 +123,12 @@ android {
 
     buildTypes {
         getByName("release") {
+            if (releaseApplicationIdSuffix.isNotEmpty()) {
+                applicationIdSuffix = releaseApplicationIdSuffix
+                logger.lifecycle(
+                    "Acceptance release application id suffix enabled: $releaseApplicationIdSuffix"
+                )
+            }
             signingConfig = if (hasReleaseSigningConfig) {
                 signingConfigs.getByName("release")
             } else {

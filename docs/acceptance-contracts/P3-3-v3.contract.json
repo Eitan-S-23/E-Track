@@ -1,0 +1,264 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-3-v3",
+  "version": 3,
+  "task_id": "P3-3",
+  "parent_contract_sha256": "5940da0606816fcc90cedd7dd062e664196863d76b9807553856da7c8ba8846a",
+  "status": "DRAFT",
+  "approved_by": "",
+  "approved_at": "",
+  "implementation_ref": "docs/ota-exec-notes/P3-3-admission-remediation-2026-09-12.md",
+  "freeze_commit": "0000000000000000000000000000000000000000",
+  "freeze_tree": "0000000000000000000000000000000000000000",
+  "profile_config_blob": "0000000000000000000000000000000000000000",
+  "draft_note": "DRAFT 草案（实现会话 2026-09-12 整改批交付；2026-09-13 按用户分项批复第二轮修订、第三轮裁定修订服务路线与实机口径、第四轮裁定升 v2；同日按集中执行授权 P3-3-EXEC-AUTH-20260913 升 v3）。freeze_* 为占位零值：冻结时必须由非实现会话绑定一个精确的 freeze_commit（不允许写 >= 某提交的区间表述）及其 freeze_tree/profile_config_blob 真实 git OID，并填 approved_by/approved_at。执行顺序（集中授权第五节）：安全准备、HTTPS 检查和 APK 构建可独立推进，不必先操作设备；准备充分后再安排恢复和升级；交付一次完整结果（实际执行项、独立验收结论、证据、剩余额度及清理状态）。外部输入 fingerprint 已按实现侧事实回填资产/服务身份（资产四元组、受控 v2 服务四件套哈希），evidence_sha256 仍为占位，冻结时由非实现会话核对回填。真机命令为绑定骨架，正式冻结前须按合并操作单（第五版）逐项绑定设备、命令、超时、次数与恢复条件。第五轮修订（v2→v3，parent 5940da06…）要点（P3-3-EXEC-AUTH-20260913）：HTTPS 路线直接确定为 Cloudflare Quick Tunnel（服务文档第五轮修订 §5.1——测试专用隧道不用 CF 账号不读 token；执行顺序=先启动隧道取实际 https 地址→宿主端到端检查（§5.2 四项）→注入唯一一次受验 APK 构建→绑定进合同（地址执行时回填）；本路线不需要 adb reverse；8 小时窗口；toy→真包切换只重启本机后端维持同一隧道进程和公网地址；路线 A/B 降为不可用时替代申报）；受验 APK 安装策略确定为专用并存 applicationId com.wen.gaia.gaia.p33acceptance（release 侧 TRACE_RELEASE_APP_ID_SUFFIX 机制：默认空=生产包名不变、非法值双层 fail-closed、生产默认包名不得改变；既有安装 com.wen.gaia.gaia 不卸载不清数据）；BCB 恢复前置升 v5（S1a 同连接 备份→烧录→RAM 失效 失效读回 全程 halt，S1b 复位前 magic 已实测失效；FR4 备用会话替代 REC5——复位恒 6、命令会话恒 10；备份不裁剪；执行入口 Tools/jlink/p3-3-recovery-execute.ps1 分 Phase fail-closed）；O1-O5 与 REC0-REC7 已获条件授权（待独立复核通过+P1-P3 前检；时长 5/10/30/30/5 分钟；含正常 BLE 权限授予与正常 OTA 的 BCB/App Flash/固件重启；不含 J-Link 直刷 App 或注错；不互借历史额度）。第四轮修订（v1→v2）要点（历史保留）：受控 v2 服务四件套迁入受管目录 Tools/ota/p3-3-service/ 并修复三项实测缺陷，宿主自测 16 项 + tls_hostcheck PASS，SERVICE_VERSION=2；HTTPS 定为受验 App 硬前置；D5 重定义为完整清理+无残留验证；BCB 前置按批准恢复方案执行完毕且完成判据四条全部满足。第三轮修订要点（历史保留）：服务路线改受控 v2 测试服务；O 序列前置链写死；O1 双侧证书比对改完整证书指纹，签名冲突任何情况下不得卸载/清数据；真包激活改受控服务 D4 切换。此前修订记录：endpoint 注入选定 build.yml dispatch 输入 firmware_latest_url（63db787）；toy/真包资产离线制包（P3-3-offline-assets-2026-09-13.md）。",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-HTTP-TEST-SERVICE",
+      "category": "environment",
+      "description": "受控 v2 测试服务 + Cloudflare Quick Tunnel 公网入口（项目内版本化实现；2026-09-13 第三轮裁定路线 + 第四轮修复 + 第五轮集中授权确定 Quick Tunnel）。冻结身份：Tools/ota/p3-3-service/ 四件套（service.py SHA-256 f71012de119811863d2274fd674a702c69a512f18ea73e3188be2233130ba009 / service_config.json 2facafa60fb4c65944c55168d46a2fbf2b2de7ea05d46e47beffa850cc7ce39c / selftest.py b96d4e2f05c84c3401c1dff14ee9c0f6e5dc7ee0a076e272180d2f4d4aa202b4 / tls_hostcheck.py f9202b6b47f50526e75710fd2b8048e87b24bb94ab07f82b88716a761821da6c，SERVICE_VERSION=2；runner 冻结依赖经 Validation profile required_paths 落地，本 description 内哈希仅为辅助说明，不替代 profile 冻结依赖）。方案与 16 项宿主自测 + tls_hostcheck 宿主 HTTPS 全链记录见 P3-3-v2-service-plan-and-selftest-2026-09-13.md（第五轮修订）。语义覆盖：latest v2 十参数闭集合+处理顺序+兼容门禁链（含协议门禁 409 PROTOCOL_UNSUPPORTED）+426 App 门禁、requestId 日志/响应体/响应头三方一致+普通日志签名脱敏、token v2 八参数 HMAC 300s 排他过期+kind 与资产类型不符 401 TOKEN_INVALID、下载 200 头集含 RFC 9530 Content-Digest、Range/416/If-Range、可见性 410/409/404、toy→真包激活时序（--active-release 启动参数切换，D4 只重启服务、隧道进程与公网地址不变）。fixture 两份四元组绑定 .cache/p3-3-assets/ 实物（fc4ae5a9…/0a2eb26a…），相对路径以仓库根为基准，启动时逐字节核验失配拒绝。明确不证明 P4-2 通过（不实现 register/D1/admin 发布链）。服务不放宽 App 校验、不注入 OtaService 状态；APK 走真实 Dio HTTP 请求；Python 侧 App 解析器镜像不构成真实 Dart consumer 验证（真实消费行为留 O2 观测）。HTTPS 入口（P3-3-EXEC-AUTH-20260913 第二节，已授权待前检/执行）：Quick Tunnel——服务绑 127.0.0.1 HTTP（无 --tls-cert，隧道到本机不走 TLS；不开放局域网监听），cloudflared tunnel --url http://127.0.0.1:<PORT> 生成随机 *.trycloudflare.com 地址，Cloudflare 边缘终止 TLS（边缘证书公共可信，App 侧 dart:io 系统信任库直接校验，不改变 App 的证书或 HTTPS 校验）；不用 CF 账号、不读任何 token（含旧环境 token），不触发云端写入单 §9 CF 账号规约；cloudflared 二进制下载到 admission worktree .cache/p3-3-cloudflared/（不全局安装不改 PATH，SHA 登记）。暴露范围：只暴露本服务 latest/download 端点及两份已绑定测试 ETU，不暴露其他本机服务/文件/日志/管理接口。窗口最长 8 小时（D1 起计），本轮结束或到期即关闭（D5）；地址改变或隧道退出即暂停相关阶段，不偷偷换地址、不自动消耗额外 APK 构建。执行顺序（消除随机 URL 冲突）：先隧道取地址→宿主端到端检查（服务文档 §5.2 四项：latest 十参数 200/downloadUrl 同隧道 https/整包下载 SHA 与冻结四元组一致/负例路径不放大暴露）→注入唯一一次受验 APK 构建→地址绑定进本合同（执行时回填，不预先写死随机 URL）。本路线不需要 adb reverse，不创建、不删除任何映射。endpoint 注入方式 build.yml dispatch 输入 firmware_latest_url：受验 APK 构建时注入 https://<隧道地址>/api/public/firmware/latest。下载路径必须走 token 验签端点 /api/public/firmware/download，不用任何静态直链。部署序列（已授权待前检/执行）：服务文档第五轮修订 §6 D1（服务+隧道双进程启动）→D2（宿主端到端检查）→D3（观测期日志）→D4（toy→真包切换，隧道不动）→D5（完整清理：按 PID 终止隧道+按 PID 终止服务+日志归档+无残留验证；残留记 HARNESS_FAIL）。冻结前必须回填本输入的 fingerprint/evidence_path/evidence_sha256（D1/D2 部署与宿主检查证据：隧道地址、本地端口、服务启动命令行、两进程 PID、窗口起止、quicktunnel-hostcheck.log）。",
+      "fingerprint": "PENDING: Quick Tunnel D1-D5 部署与宿主端到端检查（§5.2 四项）通过后回填（隧道完整 URL、本地端口、服务启动命令行、两进程 PID、8h 窗口起止时间戳、quicktunnel-hostcheck.log 哈希）。四件套源码身份已冻结（见 description）；endpoint 注入路径已定：build.yml dispatch 输入 firmware_latest_url=隧道地址（执行时回填）",
+      "evidence_path": "evidence/external/http-test-service.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "EXT-TOY-BOOTABLE",
+      "category": "fixture",
+      "description": "可启动受控固件包（toy 3.2.1，目标 versionCode 30201）：保留真实 Boot/BCB/OTA 路径且具有合法 fw_header。已按用户批准的离线准备路径制包完成（同一合格生产镜像 7328c1b1… 经 finalize 3.2.1 + pack-full 30201，零真机/零云端/零代码改动；记录见 P3-3-offline-assets-2026-09-13.md，实物在 admission worktree .cache/p3-3-assets/ 为唯一持有处）。资产身份四元组：pre-finalize BIN SHA 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f（602984B）/ 最终镜像 raw SHA 43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55 / fw_header 双零摘要 a7ae03872dbeb62f1167f16701d57eee0666bab547d94ef08a5f2c603dd755d9 / ETU 包 SHA fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2（284092B，规范名 e-track-at32f435-v3.2.1-full.etu）。tests/ota-vectors/ golden vectors 不具上板资格。离线准备完成不等于独立准入：上板资格由非实现会话按本合同审定；若 freeze_commit 源码树与 c89c58f 在 Production profile 范围不一致，按资产方案 §2.3 重建重出四元组。",
+      "fingerprint": "已按实现侧事实回填：目标 versionCode 30201；最终镜像 raw SHA-256=43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55；ETU=e-track-at32f435-v3.2.1-full.etu SHA-256=fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2 size=284092B。冻结时由非实现会话核对实物与四元组后落 evidence",
+      "evidence_path": "evidence/external/toy-bootable-asset.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "EXT-REAL-ETU",
+      "category": "fixture",
+      "description": "真实固件 OTA 包（真包 3.2.2，目标 versionCode 30202）：与 toy 同一合格生产镜像（7328c1b1…）经 finalize 3.2.2 + pack-full 30202 独立封包，两镜像仅 fw_header 版本身份字段（0x408..0x45F）差异、功能本体逐字节相同（用户裁定：同一合格生产镜像生成两个版本受控资产，不同包分别绑定身份、不混用）。已离线制包完成（记录见 P3-3-offline-assets-2026-09-13.md）。资产身份四元组：pre-finalize BIN SHA 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f（602984B）/ 最终镜像 raw SHA c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39 / fw_header 双零摘要 85d19304bcc8f40be99e544705f4100c7b9d2702882773f32a46226c1be9d327 / ETU 包 SHA 0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5（284112B，规范名 e-track-at32f435-v3.2.2-full.etu）。30201 与 30202 占用检查已通过；上板资格同 EXT-TOY-BOOTABLE 由非实现会话审定。",
+      "fingerprint": "已按实现侧事实回填：目标 versionCode 30202；最终镜像 raw SHA-256=c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39；ETU=e-track-at32f435-v3.2.2-full.etu SHA-256=0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5 size=284112B。冻结时由非实现会话核对实物与四元组后落 evidence",
+      "evidence_path": "evidence/external/real-etu-asset.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "EXT-BOARD-STATE",
+      "category": "hardware_state",
+      "description": "目标板实机前置状态：BCB vcode 20801 与运行镜像 3.2.0(30200) 不一致（ota_backup.c:385 一致性检查会拒绝 STAGED 提交）是实机执行的硬阻断。原始证据身份与仲裁依据已核实（板上 App fw_header 30200=直烧镜像、BCB 20801=P1-3 TEST_BOOT 合法确认残留，见 P3-3-bcb-recovery-plan-2026-09-13-v2.md §1，事实部分 v3/v4/v5 继续沿用）。可执行恢复方案已升 v5：P3-3-bcb-recovery-plan-2026-09-13-v5.md（P1_6_TEST_ENABLE 版 Boot 的 CLEAR_BCB + 状态机 commit_confirmed 重建；S1a 同一 J-Link 连接内完成 REC0 Boot 全区备份 0x08000000-0x08004FFF 20,480B（含生产 Boot 前缀锚点断言与尾部 5,756B 板上原值 SHA 登记，不假定 0xFF）+ REC1 烧录测试 Boot + RAM magic 失效与失效读回（全程 halt，-ExitOnError 1 保证 savebin 失败则 loadfile 不执行；测试 Boot 第一次启动执行任何命令之前 RAM magic 已实测失效且已验证）→ S1b 复位①；每命令会话两阶段（Phase 0 板上 magic 失效+读回断言 fail-closed + Phase 1 启动）；BCB 双块原始 128B 字节快照强制留档（不裁剪，无任何审批路径可裁剪）；S5 终态 SNAPSHOT arg1=0 含内部 App 快照（snapshot_app 纯只读，物理写入仍仅 RAM 控制块；QSPI 槽不快照）；FR4 备用会话替代 REC5/S5（互斥恰好其一，复位恒 6、命令会话恒 10）；REC6 失败收尾与成功路径共用同一额度（恢复动作只执行一次）；S6 Boot 全区恢复 loadbin+verifybin+全区读回 SHA 全等；RTT 采集纪律 v5 §8 数值化（120s 硬超时、每编号至多 1 个 logger、复位会话内 Sleep 8000 先让自报行落入 buffer、J-Link 会话与 logger 互斥）。授权额度总账（v5 §7，P3-3-EXEC-AUTH-20260913 第三节口径，已授权待独立复核后执行）：命令会话恰好 10、RTT logger 2（每个 ≤120s）、主动复位 6、身份/RTT 签名核对会话 ≤2（不写块不复位）；Flash 边界限定 0x08000000-0x08004FFF、RAM 控制块 0x20057E00-0x20057FFF；EEPROM 0x00-0x7F 经既有 CLEAR_BCB 清空并由既有 Boot 状态机重建 CONFIRMED；不授权 App 烧录、QSPI 槽写入、断电注错或其他测试 opcode；计划外 nRESET 单步 ≥2 次或全程累计 >2 次即停止；恢复授权与 O 序列、历史 A1/B1-M 配额不互借。执行入口 Tools/jlink/p3-3-recovery-execute.ps1（分 Phase S1A/S1B/S2/S3/S4/S5/S6，每 Phase 主机侧 fail-closed 断言+result.json 留证，Assert-P33PriorPhase 前置链检查，无一键 ALL 模式；语法 PARSE_OK、干跑前置拒绝 4 项 PASS、资产身份核对全对）。配套构建与命令离线验证：P3-3-recovery-boot-build-2026-09-13.md 13/13 PASS + Tools/jlink/test-p1-6-recovery-cmd.ps1 24/24 PASS（受管 runner，入 Validation profile required_paths）。恢复属独立真机准备操作，不并入本合同判据；本输入的解决证据 = 恢复操作执行后 v5 §5 完成判据四条的留证（S2/S5 快照文件 + RTT 自报行 + S6 全区恢复核验（verifybin + 读回 SHA 全等）+ 生产 App 终证行：终态 BCB.cur_vcode==30200==App fw_header.version_code 且生产 Boot 已按全区恢复核验）。四条判据全部满足前 C-TOY-LOOP/C-REAL-LOOP 不得执行。",
+      "fingerprint": "PENDING: BCB 恢复（v5 S1a-S6 / REC0-REC7，独立复核通过后执行一次）且 §5 完成判据四条全部满足后回填（快照文件与 RTT 日志哈希、S1a 全区备份/锚点/尾部 SHA、S6 全区恢复读回 SHA 比对、终态 BCB/App 版本一致性观测值、各 Phase result.json）",
+      "evidence_path": "evidence/external/board-bcb-state.md",
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-DEV-CHECKS",
+      "description": "开发自测：flutter-dev-checks.yml 双宿主（ubuntu+windows）strict analyze + 全部单测/widget 测试（test_scope=all）。gh workflow run 退出码 0 只证明派发成功；本判据通过条件是核对实际 run 的 job conclusion（两个 job 均 success）、analyze 无 issue、全部测试通过（无 continue-on-error/降级），并归档原始日志与 run URL。",
+      "command": "gh workflow run flutter-dev-checks.yml --ref <freeze_branch> -f test_scope=all -f build_apk=false && gh run watch <run_id>",
+      "input_groups": ["flutter", "validation"],
+      "runner_paths": [".github/workflows/flutter-dev-checks.yml", "Tools/flutter/dev_checks.py"],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-RELEASE-BUILD",
+      "description": "release 构建：build.yml build-only（publish_release=false、replace_existing_release=false，Pages/Release 不得执行）+ dispatch 输入 firmware_latest_url=https://<Quick Tunnel 地址>/api/public/firmware/latest（EXT-HTTP-TEST-SERVICE 宿主端到端检查通过后注入；随机地址执行时回填）+ dispatch 输入 release_application_id_suffix=.p33acceptance（并存包名注入：TRACE_RELEASE_APP_ID_SUFFIX 机制，工作流 bash 校验与 gradle 校验双层 fail-closed 正则 ^\\.[A-Za-z][A-Za-z0-9_]*$，默认空=生产包名不变，生产默认包名不得改变）产出注入了受控服务 endpoint、包名 com.wen.gaia.gaia.p33acceptance 的 release 模式 Android APK 与 Windows 完整运行包。本命令消耗的是 P3-3-EXEC-AUTH-20260913 第四节保留的现有同一笔 build-only 1 次额度（不追加），HTTPS 地址、安装策略与开发自测齐备后使用，不为试错消耗。gh workflow run 退出码 0 只证明派发成功；本判据通过条件是核对实际 run 的 job conclusion（Android/Windows 均 success、Pages/Release job skipped）、Flutter 测试计数、APK/EXE/zip 的 size 与 SHA-256 实物核验（下载产物计算，非仅日志转述）、APK 包名实测为 com.wen.gaia.gaia.p33acceptance（aapt dump badging 或安装后 dumpsys），并归档原始日志。Windows 证据为完整运行包 zip，不是裸 exe。不同 CI run 的 debug 签名不能假定相同：证书指纹以 APK 实物 apksigner verify --print-certs 输出为准，逐次实测记录。",
+      "command": "gh workflow run build.yml --ref <freeze_branch> -f publish_release=false -f replace_existing_release=false -f firmware_latest_url=https://<quicktunnel>.trycloudflare.com/api/public/firmware/latest -f release_application_id_suffix=.p33acceptance && gh run watch <run_id>",
+      "input_groups": ["flutter", "validation"],
+      "runner_paths": [".github/workflows/build.yml"],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-APK-INSTALL",
+      "description": "真机阶段 1（含身份/签名预检 + 并存安装）。安装策略（P3-3-EXEC-AUTH-20260913 第四节，已按授权确定）：受验 APK 使用专用并存 applicationId com.wen.gaia.gaia.p33acceptance；既有安装 com.wen.gaia.gaia 全程不动——不卸载、不清数据（任何情况下不得以卸载或清数据解决签名冲突；并存包名下不存在覆盖冲突）。双侧证书指纹实测留档（2026-09-13 第三轮裁定方法）：既有安装侧 dumpsys package com.wen.gaia.gaia 取 codePath 下 APK 设备路径 → adb pull 回本地 → apksigner verify --print-certs（完整证书指纹）；受验侧 apksigner verify --print-certs <受验APK>（不同 CI run 的 debug 签名不能假定相同，逐次实测）；因包名并存，指纹差异不构成安装阻断——比对用于证明并存策略必要性与受验侧签名身份绑定。安装前核对：受验 APK 包名实测为 com.wen.gaia.gaia.p33acceptance（构建注入失效 → 停在安装前报 ENV_BLOCKED，不消耗安装动作、不改装非受验 APK）。adb install -r 并存安装（全新安装，既有安装不受影响）、正常 BLE 权限授予（Android 13 BLUETOOTH_CONNECT/BLUETOOTH_SCAN 按系统弹窗或 pm grant 正常授予——授权第四节明示包含）、启动、logcat 采集（受控、不清缓冲）。须记录受验包名/versionCode/双侧证书指纹实测值/pull 回件 SHA-256/设备序列号 10ADA4197U001CK/系统/安装结果/APK SHA-256/既有安装未被触碰的 dumpsys 只读确认；参与传输的必须是同一 APK（与受控服务 fixture 同源）。",
+      "command": "<由验收会话绑定：dumpsys 取 codePath + adb pull + 双侧 apksigner verify --print-certs；adb -s <serial> install -r <apk>（并存包名）及权限授予/启动/采集命令>",
+      "input_groups": ["flutter"],
+      "runner_paths": [],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TOY-LOOP",
+      "description": "真机阶段 2（toy 3.2.1/30201 闭环）。前置：EXT-BOARD-STATE 已按批准恢复方案 v5（S1a-S6 / REC0-REC7）执行完毕且 §5 完成判据四条全部满足；受控 v2 测试服务 + Quick Tunnel 按 D1-D5 部署（D2 宿主端到端检查通过）且 toy-30201 激活。真实 OtaService 完成 INFO/latest/下载/长度与整包 SHA 校验/BEGIN/DATA/END；MCU durable_off==total_len 且 ACK_END 成功；重启后新连接 GET_INFO 的目标 versionCode 30201 与完整 raw SHA-256（43ee943a…）与冻结目标镜像一致。BCB 授权口径（P3-3-EXEC-AUTH-20260913 第四节）：禁止未经授权的直接 BCB 改写或绕过检查（不含通过 J-Link 直接刷 App 或注错）；正常 OTA 所需的候选/备份槽、App Flash、BCB 更新和固件重启（固件执行的 STAGED→APPLYING→TEST_BOOT→CONFIRMED 状态转换）包含在获批操作范围内。失败处理：传输/提交失败后不得一概假定设备处于 STAGED——以 GET_INFO/BCB 快照实测分类；不自动恢复、不自动重试、不自动进入下一阶段，留证后停报；失败留证，不互借历史 A1/B1-M 额度。J-Link 连接/采集（若需）为独立授权项，不得作为只读预检免费夹带。本阶段不含任何'预期 BCB 拒绝'观测点（恢复完成后 385 前置应满足；若仍出现拒绝即为真实 PRODUCT_FAIL，非预期行为）。",
+      "command": "<由验收会话绑定：App 操作序列 + BLE/logcat 采集命令；J-Link 采集（若需）按独立授权项绑定>",
+      "input_groups": ["production", "flutter"],
+      "runner_paths": [],
+      "expected_exit_codes": [0],
+      "output_required": true
+    },
+    {
+      "id": "CMD-REAL-LOOP",
+      "description": "真机阶段 3（真包 3.2.2/30202 闭环）。前置：C-TOY-LOOP 已 PASS（真包仅在 toy 闭环成功后经受控服务 D4 切换激活：只停服务 → --active-release real-30202 重启，启动日志留证，隧道进程与公网地址维持不变——Quick Tunnel 路线下 O3 重启后新连接 GET_INFO 版本和完整 raw SHA 匹配后才激活真包进 O4；云端 stable publish 路线已冻结不使用）；EXT-BOARD-STATE 维持恢复后一致态。闭环终点与失败/BCB/J-Link 口径同 CMD-TOY-LOOP，目标 versionCode 30202 与完整 raw SHA-256（c9582213…）独立比对，不得由 toy 结果代替。",
+      "command": "<由验收会话绑定：App 操作序列 + BLE/logcat 采集命令；J-Link 采集（若需）按独立授权项绑定>",
+      "input_groups": ["production", "flutter"],
+      "runner_paths": [],
+      "expected_exit_codes": [0],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-DEV-LOGS",
+      "description": "开发自测归档：run URL、job conclusion、analyze 输出、测试计数与原始日志（绑定具体 run，不以派发退出码代替）。",
+      "path": "evidence/dev-checks/"
+    },
+    {
+      "id": "ART-APK-RELEASE",
+      "description": "受验 release APK（经 build.yml dispatch 输入 firmware_latest_url 注入 Quick Tunnel https endpoint + release_application_id_suffix=.p33acceptance 构建；包名 com.wen.gaia.gaia.p33acceptance（生产默认包名不变），冻结时绑定确切路径/size/SHA-256、包名实测值（aapt/dumpsys）与证书指纹实测值（apksigner verify --print-certs，不同 CI run 的 debug 签名不能假定相同）；release 模式 debug 签名回退不自动否决功能验收，但不视为固定生产签名验证；既有安装 com.wen.gaia.gaia 全程不动——不卸载、不清数据，并存安装无覆盖冲突）。",
+      "path": "artifacts/ble-monitor-android.apk"
+    },
+    {
+      "id": "ART-WINDOWS-RUNTIME",
+      "description": "Windows 完整运行包 zip（独立产物绑定；Windows 证据以完整运行包为准，不是裸 exe）。",
+      "path": "artifacts/ble-monitor-windows.zip"
+    },
+    {
+      "id": "ART-TOY-ETU",
+      "description": "可启动受控 toy OTA 包（目标 3.2.1/30201，规范名 e-track-at32f435-v3.2.1-full.etu）：已离线制包（实物为 admission worktree .cache/p3-3-assets/ 唯一持有处，ETU 因 AES nonce 随机不可从文档复现、丢失重打包须重新登记）。四元组：pre-finalize 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f / 镜像 raw 43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55 / 双零摘要 a7ae03872dbeb62f1167f16701d57eee0666bab547d94ef08a5f2c603dd755d9 / ETU SHA fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2（284092B）。golden vectors 不具上板资格。",
+      "path": "artifacts/e-track-at32f435-v3.2.1-full.etu"
+    },
+    {
+      "id": "ART-TOY-TARGET-IMAGE",
+      "description": "toy 闭环冻结目标镜像（3.2.1/30201，GET_INFO 终点的 versionCode 与 raw SHA-256 基准 43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55）。",
+      "path": "artifacts/toy-3.2.1-target-image.bin"
+    },
+    {
+      "id": "ART-REAL-ETU",
+      "description": "真实固件 OTA 包（目标 3.2.2/30202，规范名 e-track-at32f435-v3.2.2-full.etu）：已离线制包（同一生产镜像独立封包，与 toy 仅 fw_header 版本身份字段差异，分别绑定身份、不混用）。四元组：pre-finalize 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f / 镜像 raw c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39 / 双零摘要 85d19304bcc8f40be99e544705f4100c7b9d2702882773f32a46226c1be9d327 / ETU SHA 0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5（284112B）。",
+      "path": "artifacts/e-track-at32f435-v3.2.2-full.etu"
+    },
+    {
+      "id": "ART-REAL-TARGET-IMAGE",
+      "description": "真包闭环冻结目标镜像（3.2.2/30202，GET_INFO 终点的 versionCode 与 raw SHA-256 基准 c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39）。",
+      "path": "artifacts/real-3.2.2-target-image.bin"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "description": "freeze_commit 上 flutter-dev-checks 双宿主 strict analyze + 全部测试通过（无 continue-on-error/降级）。通过条件核对实际 run 的 job conclusion 与原始日志，不以 gh workflow run 派发退出码代替。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "run_url"],
+      "input_groups": ["flutter", "validation"],
+      "dependency_rationale": "flutter 组提供 App 源码与 runner 入口（dev_checks.py 在 Validation profile 内），两组共同构成自测命令的真实输入。",
+      "external_inputs": [],
+      "command_ids": ["CMD-DEV-CHECKS"],
+      "artifact_ids": ["ART-DEV-LOGS"],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "description": "freeze_commit 上 build.yml build-only 成功产出 release 模式 Android APK 与 Windows 完整运行包（非裸 exe）；签名类型如实绑定（release 模式 debug 签名回退不自动否决功能验收，不视为固定生产签名验证）。firmware_latest_url 为 Quick Tunnel https URL（EXT-HTTP-TEST-SERVICE 宿主端到端检查通过后注入；App 校验不放宽）；release_application_id_suffix=.p33acceptance（并存包名注入，APK 包名实测为 com.wen.gaia.gaia.p33acceptance；生产默认包名不变）。本构建消耗 P3-3-EXEC-AUTH-20260913 第四节保留的现有同一笔 build-only 1 次额度。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "run_url", "artifact_hash"],
+      "input_groups": ["flutter", "validation"],
+      "dependency_rationale": "flutter 组提供 App 源码与 build.yml；Validation 组提供构建 runner 脚本与宿主回归。产物身份以实物下载核验为准。",
+      "external_inputs": [],
+      "command_ids": ["CMD-RELEASE-BUILD"],
+      "artifact_ids": ["ART-APK-RELEASE", "ART-WINDOWS-RUNTIME"],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "description": "受验 release APK（包名 com.wen.gaia.gaia.p33acceptance，并存安装）在实际 Android 手机（vivo V2312A，序列号 10ADA4197U001CK）实际安装并启动；既有安装 com.wen.gaia.gaia 全程不动——不卸载、不清数据。安装前必须完成身份/签名预检：双侧完整证书指纹实测（既有安装 dumpsys 取 codePath → adb pull → apksigner verify --print-certs；受验 APK 同命令实测；不同 CI run 的 debug 签名不能假定相同）留档——并存包名下指纹差异不构成安装阻断，比对用于证明并存策略必要性与受验侧签名身份绑定；受验 APK 包名实测必须为 com.wen.gaia.gaia.p33acceptance（构建注入失效 → 停在安装前 ENV_BLOCKED，不改装非受验 APK）；安装后正常 BLE 权限授予（授权第四节明示包含）。记录受验包名/版本/双侧证书指纹实测值/pull 回件 SHA-256/设备/系统/安装结果/APK SHA-256/既有安装未被触碰的只读确认；参与传输的必须是同一 APK（与受控服务 fixture 同源）。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "device_observation"],
+      "input_groups": ["flutter"],
+      "external_inputs": [],
+      "command_ids": ["CMD-APK-INSTALL"],
+      "artifact_ids": ["ART-APK-RELEASE"],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "description": "可启动受控 toy 包（3.2.1/30201）经手机 App→BLE→MCU 完整升级闭环；共同终点=重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结 toy 目标镜像一致。golden vectors 不得上板。前置（P3-3-EXEC-AUTH-20260913 口径）：EXT-BOARD-STATE 已按批准恢复方案 v5（S1a-S6 / REC0-REC7）执行完毕且 §5 完成判据四条全部满足；受控 v2 测试服务 + Quick Tunnel 已部署（D1-D5，D2 宿主端到端检查通过，endpoint 为隧道 https URL）且 toy-30201 激活。BCB 授权口径：禁止未经授权的直接 BCB 改写或绕过检查（不含 J-Link 直刷 App 或注错）；正常 OTA 所需的候选/备份槽、App Flash、BCB 更新和固件重启（固件执行的状态转换）包含在获批操作范围内。失败后不得一概假定设备处于 STAGED，不自动恢复/重试/进入下一阶段；J-Link 连接/采集（若需）为独立授权项。本判据不含'预期 BCB 拒绝'观测点——恢复后 385 前置应满足，仍拒绝即为真实 PRODUCT_FAIL。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
+      "input_groups": ["production", "flutter"],
+      "dependency_rationale": "production 组提供 MCU 侧 OTA/boot 源码与目标镜像输入，flutter 组提供手机 App 升级链路；两者共同构成 BLE 闭环的两端。",
+      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-TOY-BOOTABLE", "EXT-BOARD-STATE"],
+      "command_ids": ["CMD-TOY-LOOP"],
+      "artifact_ids": ["ART-TOY-ETU", "ART-TOY-TARGET-IMAGE"],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "ota_session_info_ok",
+          "ota_package_verified",
+          "ota_transfer_durable_complete",
+          "ota_ack_end_ok",
+          "device_reboot",
+          "get_info_target_version_and_raw_sha_match"
+        ]
+      }
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "description": "真实固件 OTA 包（3.2.2/30202）同 C-TOY-LOOP 的闭环终点，不得由 toy 代替；与 toy 闭环分别绑定各自目标镜像身份。前置：C-TOY-LOOP 已 PASS（真包仅在 toy 闭环成功后经受控服务 D4 切换激活：只停服务 → --active-release real-30202 重启，隧道进程与公网地址维持不变；云端 stable publish 路线已冻结不使用）；EXT-BOARD-STATE 维持恢复后一致态；受控 v2 服务与隧道就绪。失败/BCB/J-Link 口径同 C-TOY-LOOP。",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
+      "input_groups": ["production", "flutter"],
+      "dependency_rationale": "同 C-TOY-LOOP：MCU 侧与手机 App 侧源码共同构成闭环两端；真包资产独立于 toy 资产构建与绑定。",
+      "external_inputs": ["EXT-HTTP-TEST-SERVICE", "EXT-REAL-ETU", "EXT-BOARD-STATE"],
+      "command_ids": ["CMD-REAL-LOOP"],
+      "artifact_ids": ["ART-REAL-ETU", "ART-REAL-TARGET-IMAGE"],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "ota_session_info_ok",
+          "ota_package_verified",
+          "ota_transfer_durable_complete",
+          "ota_ack_end_ok",
+          "device_reboot",
+          "get_info_target_version_and_raw_sha_match"
+        ]
+      }
+    }
+  ],
+  "performance_gates": []
+}
