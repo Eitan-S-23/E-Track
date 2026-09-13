@@ -38,6 +38,7 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 | P3-6-v1 | v2 | `fa320bead2cce90b38bf211ca757f846822ded25` | `fa320bead2cce90b38bf211ca757f846822ded25` | `2787fa0e529ee32009c614f761e81ae28e2a9728` | PASS |
 | P3-7-v1 | v2 | `fcb77158425f2ade3733f9a5237013aaf7bb51f4` | `fcb77158425f2ade3733f9a5237013aaf7bb51f4` | `26b0a97f42f1c51bfef669b6d27b765cf274fcf3` | PASS |
 | P3-3-v3 | v3 | `421bd290b0f5e30b385a17c2ab82a2b3d8844dc2` | `a178ecc1dca3929e1bca702fb11344f3c5bd2872` | `2ce26b29c395aebdd75b49376755d16c3706feea` | PASS（2026-09-13 FROZEN+NOT_RUN 执行前检查；O 序列执行后另行最终验收） |
+| P3-3-v4 | v3 | `a548d4325d6651264b0867e865e3ee40695aa372` | `bed3aa06f99c3d99291b081069a72ffd426a4e3d` | `6b971c71abcf7ebaa271aee9f6eac6f4ceb66b80` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理经用户授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |
 
 备注：
 
@@ -46,3 +47,8 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 - P3-6-v1 的实现提交 `7833303` 经 PR #14 squash 后只剩 `fa320be`，两者 tree 相同
   （`2787fa0e…`）。这是 v3 起禁止 squash 合并的直接原因：squash 会让
   `freeze_commit` 不可达，只有 tree 能幸存。
+- P3-3-v3 行按「只增不改」保留原样，但该轮判定已被 v4 取代：用户 2026-09-13
+  决策「现在立刻修，验收重来」（受验 App 码表设备页为演示稿），v3 冻结包作废
+  （freeze_commit `a178ecc` 后 profile 内出现新提交，执行门禁必红）。v4 合同经
+  `parent_contract_sha256` 绑定 v3 合同；v3 包字节不动，仍可在其 `bundle_commit`
+  上复校。
