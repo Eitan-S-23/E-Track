@@ -11,7 +11,7 @@
   "freeze_commit": "0000000000000000000000000000000000000000",
   "freeze_tree": "0000000000000000000000000000000000000000",
   "profile_config_blob": "0000000000000000000000000000000000000000",
-  "draft_note": "DRAFT 草案（实现会话 2026-09-12 整改批交付，2026-09-13 按用户 8 条意见修订）。freeze_* 为占位零值：冻结时必须由非实现会话绑定一个精确的 freeze_commit（不允许写 >= 某提交的区间表述）及其 freeze_tree/profile_config_blob 真实 git OID，并填 approved_by/approved_at。执行顺序（用户裁定）：交接材料及 schema 修正 → BCB/镜像身份问题澄清 → 两类安全资产及服务/APK 方案确定 → 必要准备和自测 → 非实现会话审查精确合同 → 用户审批 → 冻结及 NOT_RUN 前检 → 分阶段实机执行。外部输入 fingerprint/evidence 为 PENDING 占位，冻结前必须回填为真实值。真机命令为绑定骨架，正式冻结前须按合并操作单逐项绑定设备、命令、超时、次数与恢复条件。",
+  "draft_note": "DRAFT 草案（实现会话 2026-09-12 整改批交付，2026-09-13 按用户分项批复第二轮修订）。freeze_* 为占位零值：冻结时必须由非实现会话绑定一个精确的 freeze_commit（不允许写 >= 某提交的区间表述）及其 freeze_tree/profile_config_blob 真实 git OID，并填 approved_by/approved_at。执行顺序（用户裁定）：交接材料及 schema 修正 → BCB/镜像身份问题澄清与恢复方案 → 两类安全资产及服务/APK 方案确定 → 必要准备和自测 → 非实现会话审查精确合同 → 用户审批 → 冻结及 NOT_RUN 前检 → 分阶段实机执行。外部输入 fingerprint 已按实现侧事实回填资产/服务身份（资产四元组、endpoint 注入方式），evidence_sha256 仍为占位，冻结时由非实现会话核对回填。真机命令为绑定骨架，正式冻结前须按合并操作单逐项绑定设备、命令、超时、次数与恢复条件。2026-09-13 修订要点：endpoint 注入选定 build.yml dispatch 输入 firmware_latest_url（63db787，dev-checks run 34738585857 双宿主全绿）；受控 HTTP 服务前置改为 P4-2 固件 worker v2（staging v1 与冻结合同 v2 不兼容，方案 A/B 均不可行，见 P3-3-cloud-write-sheet-2026-09-13.md）；BCB 前置改为按批准恢复方案（P3-3-bcb-recovery-plan-2026-09-13-v2.md R0-R5）执行后 R4 终态核验通过；toy/真包资产已离线制包（P3-3-offline-assets-2026-09-13.md）。",
   "result_taxonomy": [
     "PASS",
     "PRODUCT_FAIL",
@@ -46,32 +46,32 @@
     {
       "id": "EXT-HTTP-TEST-SERVICE",
       "category": "environment",
-      "description": "受控 HTTP 测试服务（版本化、符合冻结共享合同的 latest/下载端点），仅当真实 P4-2 后台未就绪时作为显式外部输入。APK 必须经受控配置发真实 HTTP 请求，不旁路 latest/兼容/token/摘要检查，不把包直接注入 service 状态。不宣称真实 P4-2 register/R2/D1 链已通过。具体方案（部署位置/域名、手机访问方式、代码及 fixture 版本、latest/download/token 行为、资产身份、日志位置、有效期与清理方式）待提交审批后部署；冻结前必须回填本输入的 fingerprint/evidence_path/evidence_sha256。",
-      "fingerprint": "PENDING: 方案审批与部署后回填（服务 URL/版本/fixture 身份）",
+      "description": "受控 HTTP 测试服务（版本化、符合冻结共享合同 OTA-XC-HTTP-LATEST v2 的 latest/下载端点）。前置（2026-09-13 实锤）：现网 staging 固件端点为 schema v1（worker firmware.ts:101），App 端冻结合同 v2 解析器 fail-closed 在 schemaVersion!=2 直接终止（'未知 schema major: 1'）——复用 staging（方案 A）或以同一份源码部署新实例（方案 B）均不可行；服务就绪前置 = P4-2 固件 worker v2 实现并部署（latest v2/register v2/token v2/D1 多资产），或用户裁定的等价物。D1/R2/channel 写入按已申报的完整写入单（P3-3-cloud-write-sheet-2026-09-13.md）另行批准执行。APK endpoint 注入方式已选定 build.yml dispatch 输入 firmware_latest_url（63db787）：受验 APK 构建时以该输入注入受控服务 URL，不污染全局仓库配置。APK 必须经该配置发真实 HTTP latest/下载请求，不旁路 latest/兼容/token/摘要检查（下载路径必须是 token 验签端点，不得用 R2/Pages 静态直链），不把包直接注入 service 状态。不宣称真实 P4-2 register/R2/D1 链已通过。冻结前必须回填本输入的 fingerprint/evidence_path/evidence_sha256（部署版本、D1/R2 写入证据、channel 指针状态）。",
+      "fingerprint": "PENDING: P4-2 worker v2 部署 + 云端写入单执行后回填（服务 URL/部署版本/fixture 记录与 R2 对象键/签名）。endpoint 注入路径已定：build.yml dispatch 输入 firmware_latest_url",
       "evidence_path": "evidence/external/http-test-service.md",
       "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "id": "EXT-TOY-BOOTABLE",
       "category": "fixture",
-      "description": "经审定的可启动受控固件包（toy 3.2.1，目标 versionCode 30201）：保留真实 Boot/BCB/OTA 路径且具有合法 fw_header。按 GCC 构建+finalize+etu_pack 流程独立准备，不修改 Boot/BCB/OTA 校验逻辑，不写设备，不手改二进制头。tests/ota-vectors/ 的 golden vectors 不具上板资格，不得刷入。pre-finalize BIN 摘要、最终镜像 raw SHA-256、fw_header 双零摘要与 ETU 包摘要分开记录；冻结前回填 fingerprint/evidence。",
-      "fingerprint": "PENDING: 资产构建后回填（toy 3.2.1 目标镜像 raw SHA-256 与 ETU 包 SHA-256/size）",
+      "description": "可启动受控固件包（toy 3.2.1，目标 versionCode 30201）：保留真实 Boot/BCB/OTA 路径且具有合法 fw_header。已按用户批准的离线准备路径制包完成（同一合格生产镜像 7328c1b1… 经 finalize 3.2.1 + pack-full 30201，零真机/零云端/零代码改动；记录见 P3-3-offline-assets-2026-09-13.md，实物在 admission worktree .cache/p3-3-assets/ 为唯一持有处）。资产身份四元组：pre-finalize BIN SHA 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f（602984B）/ 最终镜像 raw SHA 43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55 / fw_header 双零摘要 a7ae03872dbeb62f1167f16701d57eee0666bab547d94ef08a5f2c603dd755d9 / ETU 包 SHA fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2（284092B，规范名 e-track-at32f435-v3.2.1-full.etu）。tests/ota-vectors/ golden vectors 不具上板资格。离线准备完成不等于独立准入：上板资格由非实现会话按本合同审定；若 freeze_commit 源码树与 c89c58f 在 Production profile 范围不一致，按资产方案 §2.3 重建重出四元组。",
+      "fingerprint": "已按实现侧事实回填：目标 versionCode 30201；最终镜像 raw SHA-256=43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55；ETU=e-track-at32f435-v3.2.1-full.etu SHA-256=fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2 size=284092B。冻结时由非实现会话核对实物与四元组后落 evidence",
       "evidence_path": "evidence/external/toy-bootable-asset.md",
       "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "id": "EXT-REAL-ETU",
       "category": "fixture",
-      "description": "真实固件 OTA 包（toy 3.2.2，目标 versionCode 30202）：候选原始镜像 X-Track-App-GCC.bin（602984B，7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f）为 3.2.0 基线，真包资产需以更高目标版本独立构建/封包，与 toy 资产分别绑定目标版本和最终镜像身份，不得同包改名重复计算。摘要记录口径同 EXT-TOY-BOOTABLE；冻结前回填 fingerprint/evidence。",
-      "fingerprint": "PENDING: 资产构建后回填（真包 3.2.2 目标镜像 raw SHA-256 与 ETU 包 SHA-256/size）",
+      "description": "真实固件 OTA 包（真包 3.2.2，目标 versionCode 30202）：与 toy 同一合格生产镜像（7328c1b1…）经 finalize 3.2.2 + pack-full 30202 独立封包，两镜像仅 fw_header 版本身份字段（0x408..0x45F）差异、功能本体逐字节相同（用户裁定：同一合格生产镜像生成两个版本受控资产，不同包分别绑定身份、不混用）。已离线制包完成（记录见 P3-3-offline-assets-2026-09-13.md）。资产身份四元组：pre-finalize BIN SHA 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f（602984B）/ 最终镜像 raw SHA c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39 / fw_header 双零摘要 85d19304bcc8f40be99e544705f4100c7b9d2702882773f32a46226c1be9d327 / ETU 包 SHA 0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5（284112B，规范名 e-track-at32f435-v3.2.2-full.etu）。30201 与 30202 占用检查已通过；上板资格同 EXT-TOY-BOOTABLE 由非实现会话审定。",
+      "fingerprint": "已按实现侧事实回填：目标 versionCode 30202；最终镜像 raw SHA-256=c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39；ETU=e-track-at32f435-v3.2.2-full.etu SHA-256=0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5 size=284112B。冻结时由非实现会话核对实物与四元组后落 evidence",
       "evidence_path": "evidence/external/real-etu-asset.md",
       "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "id": "EXT-BOARD-STATE",
       "category": "hardware_state",
-      "description": "目标板实机前置状态：BCB vcode 20801 与运行镜像 3.2.0(30200) 不一致（ota_backup.c:385 一致性检查会拒绝 STAGED 提交）是实机执行的硬阻断。冻结前必须先核对原始证据与 BCB 仲裁结果、确认当前镜像身份，并提交最小恢复方案（不删除一致性检查、不直接改 BCB 数字、不擅自烧录对齐）；解决证据回填本输入后实机判据方可执行。",
-      "fingerprint": "PENDING: BCB/镜像不一致澄清与最小恢复方案落地后回填",
+      "description": "目标板实机前置状态：BCB vcode 20801 与运行镜像 3.2.0(30200) 不一致（ota_backup.c:385 一致性检查会拒绝 STAGED 提交）是实机执行的硬阻断。原始证据身份与仲裁依据已核实（板上 App fw_header 30200=直烧镜像、BCB 20801=P1-3 TEST_BOOT 合法确认残留，见 P3-3-bcb-recovery-plan-2026-09-13-v2.md §1）。可执行最小恢复方案已落盘：P5 变体（P1_6_TEST_ENABLE 版 Boot 的 CLEAR_BCB + 状态机 commit_confirmed 重建，R0-R5，复位 3 次，BCB 原始字节快照留档、App 镜像全程不动、R5 换回生产 Boot）。恢复属独立真机准备操作（A1-A4 逐项授权，恢复方案 §4），不并入本合同判据；本输入的解决证据 = 恢复操作获批执行后 R1-R4 的快照/RTT 留证（快照文件 + 确认行 + 终态 BCB.cur_vcode==30200==App fw_header.version_code）。R4 核验通过前 C-TOY-LOOP/C-REAL-LOOP 不得执行。",
+      "fingerprint": "PENDING: BCB 恢复（R0-R5）获批执行且 R4 终态核验通过后回填（快照文件与 RTT 日志哈希、终态 BCB/App 版本一致性观测值）",
       "evidence_path": "evidence/external/board-bcb-state.md",
       "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
@@ -88,8 +88,8 @@
     },
     {
       "id": "CMD-RELEASE-BUILD",
-      "description": "release 构建：build.yml build-only（publish_release=false）产出 release 模式 Android APK 与 Windows 完整运行包。gh workflow run 退出码 0 只证明派发成功；本判据通过条件是核对实际 run 的 job conclusion（Android/Windows 均 success、Pages/Release job skipped）、Flutter 测试计数、APK/EXE/zip 的 size 与 SHA-256 实物核验（下载产物计算，非仅日志转述），并归档原始日志。Windows 证据为完整运行包 zip，不是裸 exe。",
-      "command": "gh workflow run build.yml --ref <freeze_branch> -f publish_release=false -f replace_existing_release=false && gh run watch <run_id>",
+      "description": "release 构建：build.yml build-only（publish_release=false）+ dispatch 输入 firmware_latest_url=<受控服务URL>（endpoint 注入方式 iii，63db787 已实现）产出注入了受控服务 endpoint 的 release 模式 Android APK 与 Windows 完整运行包。gh workflow run 退出码 0 只证明派发成功；本判据通过条件是核对实际 run 的 job conclusion（Android/Windows 均 success、Pages/Release job skipped）、Flutter 测试计数、APK/EXE/zip 的 size 与 SHA-256 实物核验（下载产物计算，非仅日志转述），并归档原始日志。Windows 证据为完整运行包 zip，不是裸 exe。不同 CI run 的 debug 签名不能假定相同：证书指纹以 APK 实物 apksigner verify --print-certs 输出为准，逐次实测记录。",
+      "command": "gh workflow run build.yml --ref <freeze_branch> -f publish_release=false -f replace_existing_release=false -f firmware_latest_url=<受控服务URL> && gh run watch <run_id>",
       "input_groups": ["flutter", "validation"],
       "runner_paths": [".github/workflows/build.yml"],
       "expected_exit_codes": [0],
@@ -97,8 +97,8 @@
     },
     {
       "id": "CMD-APK-INSTALL",
-      "description": "真机阶段 1：受验 release APK 在测试手机实际安装并启动（adb install + 启动 + logcat 采集）。须记录包名/版本/设备序列号 10ADA4197U001CK/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK。真机操作授权与配额冻结前必须已获批。",
-      "command": "<由验收会话绑定：adb -s <serial> install -r <apk> 及启动/采集命令>",
+      "description": "真机阶段 1（含身份/签名预检）：先用 apksigner verify --print-certs 提取受验 APK 实际证书指纹（不同 CI run 的 debug 签名不能假定相同），并与手机既有安装 com.wen.gaia.gaia 1.0.60(86) 的证书比对；签名冲突 → 停在安装前报用户裁定，不得默认卸载/清数据。比对通过后 adb install -r 安装、启动、logcat 采集（受控、不清缓冲）。须记录包名/版本/证书指纹实测值/设备序列号 10ADA4197U001CK/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK（与云端 fixture 同源）。真机操作授权与配额冻结前必须已获批。",
+      "command": "<由验收会话绑定：apksigner verify --print-certs <apk>；既有安装证书提取比对；adb -s <serial> install -r <apk> 及启动/采集命令>",
       "input_groups": ["flutter"],
       "runner_paths": [],
       "expected_exit_codes": [0],
@@ -106,8 +106,8 @@
     },
     {
       "id": "CMD-TOY-LOOP",
-      "description": "真机阶段 2：可启动受控 toy 包经手机 App→BLE→MCU 完整升级闭环。真实 OtaService 完成 INFO/latest/下载/长度与整包 SHA 校验/BEGIN/DATA/END；MCU durable_off==total_len 且 ACK_END 成功；重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结目标镜像一致。",
-      "command": "<由验收会话绑定：App 操作序列 + BLE/RTT/logcat 采集命令>",
+      "description": "真机阶段 2（toy 3.2.1/30201 闭环）。前置：EXT-BOARD-STATE 已按批准恢复方案（R0-R5）执行且 R4 终态核验通过。真实 OtaService 完成 INFO/latest/下载/长度与整包 SHA 校验/BEGIN/DATA/END；MCU durable_off==total_len 且 ACK_END 成功；重启后新连接 GET_INFO 的目标 versionCode 30201 与完整 raw SHA-256（43ee943a…）与冻结目标镜像一致。BCB 授权口径：禁止未经授权的直接 BCB 改写或绕过检查；正常 OTA 流程中由固件执行的 BCB 状态转换（STAGED→APPLYING→TEST_BOOT→CONFIRMED）包含在获批操作范围内。失败处理：传输/提交失败后不得一概假定设备处于 STAGED——以 GET_INFO/BCB 快照实测分类；不自动恢复、不自动重试、不自动进入下一阶段，留证后停报。J-Link 连接/采集（若需）为独立授权项，不得作为只读预检免费夹带。本阶段不含任何'预期 BCB 拒绝'观测点（恢复完成后 385 前置应满足；若仍出现拒绝即为真实 PRODUCT_FAIL，非预期行为）。",
+      "command": "<由验收会话绑定：App 操作序列 + BLE/logcat 采集命令；J-Link 采集（若需）按独立授权项绑定>",
       "input_groups": ["production", "flutter"],
       "runner_paths": [],
       "expected_exit_codes": [0],
@@ -115,8 +115,8 @@
     },
     {
       "id": "CMD-REAL-LOOP",
-      "description": "真机阶段 3：真实固件 OTA 包同 CMD-TOY-LOOP 的闭环终点，不得由 toy 代替。GATT 写成功、UI 100%、END ACK、仍运行旧固件均不足以通过。",
-      "command": "<由验收会话绑定：App 操作序列 + BLE/RTT/logcat 采集命令>",
+      "description": "真机阶段 3（真包 3.2.2/30202 闭环）。前置：C-TOY-LOOP 已 PASS（真包 fixture 仅在 toy 闭环成功后按写入单 §5.2 时序登记/激活 stable channel 指针）；EXT-BOARD-STATE 维持恢复后一致态。闭环终点与失败/BCB/J-Link 口径同 CMD-TOY-LOOP，目标 versionCode 30202 与完整 raw SHA-256（c9582213…）独立比对，不得由 toy 结果代替。",
+      "command": "<由验收会话绑定：App 操作序列 + BLE/logcat 采集命令；J-Link 采集（若需）按独立授权项绑定>",
       "input_groups": ["production", "flutter"],
       "runner_paths": [],
       "expected_exit_codes": [0],
@@ -131,7 +131,7 @@
     },
     {
       "id": "ART-APK-RELEASE",
-      "description": "受验 release APK（冻结时绑定确切路径/size/SHA-256、包名与证书指纹；release 模式 debug 签名回退不自动否决功能验收，但不视为固定生产签名验证；与既有安装签名冲突时不得默认卸载或清数据，处理方式按合并操作单审批）。",
+      "description": "受验 release APK（经 build.yml dispatch 输入 firmware_latest_url 注入受控服务 endpoint 构建；冻结时绑定确切路径/size/SHA-256、包名与证书指纹实测值（apksigner verify --print-certs，不同 CI run 的 debug 签名不能假定相同）；release 模式 debug 签名回退不自动否决功能验收，但不视为固定生产签名验证；与既有安装签名冲突时不得默认卸载或清数据，处理方式按合并操作单审批）。",
       "path": "artifacts/ble-monitor-android.apk"
     },
     {
@@ -141,22 +141,22 @@
     },
     {
       "id": "ART-TOY-ETU",
-      "description": "可启动受控 toy OTA 包（目标 3.2.1/30201；冻结时绑定 pre-finalize BIN 摘要、目标镜像 raw SHA-256、fw_header 双零摘要与 ETU 包 SHA-256/size，分开记录；当前不存在，golden vectors 不具上板资格）。",
-      "path": "artifacts/toy-3.2.1.etu"
+      "description": "可启动受控 toy OTA 包（目标 3.2.1/30201，规范名 e-track-at32f435-v3.2.1-full.etu）：已离线制包（实物为 admission worktree .cache/p3-3-assets/ 唯一持有处，ETU 因 AES nonce 随机不可从文档复现、丢失重打包须重新登记）。四元组：pre-finalize 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f / 镜像 raw 43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55 / 双零摘要 a7ae03872dbeb62f1167f16701d57eee0666bab547d94ef08a5f2c603dd755d9 / ETU SHA fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2（284092B）。golden vectors 不具上板资格。",
+      "path": "artifacts/e-track-at32f435-v3.2.1-full.etu"
     },
     {
       "id": "ART-TOY-TARGET-IMAGE",
-      "description": "toy 闭环冻结目标镜像（3.2.1/30201，GET_INFO 终点的 versionCode 与 raw SHA-256 基准）。",
+      "description": "toy 闭环冻结目标镜像（3.2.1/30201，GET_INFO 终点的 versionCode 与 raw SHA-256 基准 43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55）。",
       "path": "artifacts/toy-3.2.1-target-image.bin"
     },
     {
       "id": "ART-REAL-ETU",
-      "description": "真实固件 OTA 包（目标 3.2.2/30202；与 toy 资产分别绑定目标版本和最终镜像身份，不得同包改名重复计算；摘要口径同 ART-TOY-ETU）。",
-      "path": "artifacts/real-3.2.2.etu"
+      "description": "真实固件 OTA 包（目标 3.2.2/30202，规范名 e-track-at32f435-v3.2.2-full.etu）：已离线制包（同一生产镜像独立封包，与 toy 仅 fw_header 版本身份字段差异，分别绑定身份、不混用）。四元组：pre-finalize 7328c1b15feff7214378065ca3e7d556ac803b59ebed7029a892d64f15e2153f / 镜像 raw c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39 / 双零摘要 85d19304bcc8f40be99e544705f4100c7b9d2702882773f32a46226c1be9d327 / ETU SHA 0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5（284112B）。",
+      "path": "artifacts/e-track-at32f435-v3.2.2-full.etu"
     },
     {
       "id": "ART-REAL-TARGET-IMAGE",
-      "description": "真包闭环冻结目标镜像（3.2.2/30202，GET_INFO 终点的 versionCode 与 raw SHA-256 基准）。",
+      "description": "真包闭环冻结目标镜像（3.2.2/30202，GET_INFO 终点的 versionCode 与 raw SHA-256 基准 c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39）。",
       "path": "artifacts/real-3.2.2-target-image.bin"
     }
   ],
@@ -197,7 +197,7 @@
     },
     {
       "id": "C-APK-INSTALL",
-      "description": "受验 release APK 在实际 Android 手机（vivo V2312A，序列号 10ADA4197U001CK）实际安装并启动；记录包名/版本/证书指纹/设备/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK。与既有安装签名冲突时按合并操作单批准的方式处理，不得默认卸载或清数据。",
+      "description": "受验 release APK 在实际 Android 手机（vivo V2312A，序列号 10ADA4197U001CK）实际安装并启动；安装前必须完成身份/签名预检——apksigner verify --print-certs 提取受验 APK 实际证书指纹（不同 CI run 的 debug 签名不能假定相同），与既有安装 com.wen.gaia.gaia 1.0.60(86) 的证书比对，冲突时停在安装前报用户裁定、不得默认卸载或清数据。记录包名/版本/证书指纹实测值/设备/系统/安装结果/APK SHA-256；参与传输的必须是同一 APK。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "device_observation"],
@@ -213,7 +213,7 @@
     },
     {
       "id": "C-TOY-LOOP",
-      "description": "可启动受控 toy 包（3.2.1/30201）经手机 App→BLE→MCU 完整升级闭环；共同终点=重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结 toy 目标镜像一致。golden vectors 不得上板。前置：EXT-BOARD-STATE（BCB/镜像不一致）已按最小恢复方案解决并留证。",
+      "description": "可启动受控 toy 包（3.2.1/30201）经手机 App→BLE→MCU 完整升级闭环；共同终点=重启后新连接 GET_INFO 的目标 versionCode 与完整 raw SHA-256 与冻结 toy 目标镜像一致。golden vectors 不得上板。前置：EXT-BOARD-STATE 已按批准恢复方案（R0-R5）执行且 R4 终态核验通过；受控 HTTP 服务（P4-2 前置）就绪且 toy fixture 已按写入单时序激活 stable channel。BCB 授权口径：禁止未经授权的直接 BCB 改写或绕过检查；正常 OTA 中由固件执行的 BCB 状态转换（STAGED→APPLYING→TEST_BOOT→CONFIRMED）包含在获批操作范围内。失败后不得一概假定设备处于 STAGED，不自动恢复/重试/进入下一阶段；J-Link 连接/采集（若需）为独立授权项。本判据不含'预期 BCB 拒绝'观测点——恢复后 385 前置应满足，仍拒绝即为真实 PRODUCT_FAIL。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
@@ -237,7 +237,7 @@
     },
     {
       "id": "C-REAL-LOOP",
-      "description": "真实固件 OTA 包（3.2.2/30202）同 C-TOY-LOOP 的闭环终点，不得由 toy 代替；与 toy 闭环分别绑定各自目标镜像身份。前置：EXT-BOARD-STATE 已解决。",
+      "description": "真实固件 OTA 包（3.2.2/30202）同 C-TOY-LOOP 的闭环终点，不得由 toy 代替；与 toy 闭环分别绑定各自目标镜像身份。前置：C-TOY-LOOP 已 PASS（真包 fixture 仅在 toy 闭环成功后按云端写入单 §5.2 时序登记并激活 stable channel 指针 30201→30202）；EXT-BOARD-STATE 维持恢复后一致态；受控 HTTP 服务就绪。失败/BCB/J-Link 口径同 C-TOY-LOOP。",
       "required": true,
       "kind": "functional",
       "evidence_types": ["raw_log", "device_observation", "protocol_trace"],
