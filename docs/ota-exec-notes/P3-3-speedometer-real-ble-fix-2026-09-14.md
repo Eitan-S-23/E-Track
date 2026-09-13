@@ -268,3 +268,61 @@ monkey 启动，pidof 29948，dumpsys versionCode=86/versionName=1.0.60。
 
 待用户复测 5 项整改（图标分类/行内连接/无刷新按钮/深色详情页/
 列表行无详情按钮——详情入口为点击整行）。
+
+
+## 12. r3 隧道死亡登记与真机 latest 请求固化（2026-09-14 03:1x）
+
+### r3 隧道+服务死亡（03:12 左右）
+
+r3 Quick Tunnel（started-monitors-shower-cherry）与受控服务 python 进程
+于本地 03:09-03:12 间双双死亡（tasklist 零匹配；tunnel.log 无正常 shutdown
+行，进程无声消失）。tunnel.log 死亡时间轴（共 7 条 ERR）：
+
+- 2026-09-13T19:09:41Z（本地 03:09:41）首个 datagram 错误：UDP 超时
+  （no recent network activity，IPv6 2606:4700:a8::8）——距最后一次成功
+  请求（03:08:27 参数缺失 400）约 1 分钟。
+- 19:10:00Z-19:10:47Z QUIC 拨号连续超时（IPv4/IPv6 交替）。
+- 19:11:30Z wsasendto: A socket operation was attempted to an
+  unreachable network（UDP 网络不可达）。
+- 19:11:33Z 最后一次重注册成功（sjc07）后进程消失。
+
+根因链：手机蜂窝/热点链路瞬断（UDP 不可达）→ cloudflared QUIC 断链疯狂
+重连 → 进程死亡 → Quick Tunnel 域名随进程永久失效。与 r1/r2 同模式：
+本环境蜂窝链路撑不起 Quick Tunnel（r1 约 2.6h、r2 约 3min、r3 约 1.4h）。
+
+### 影响登记
+
+- r3 endpoint（https://started-monitors-shower-cherry.trycloudflare.com/
+  api/public/firmware/latest）永久失效，无法通过重启进程恢复（Quick
+  Tunnel 域名与进程生命周期绑定）。
+- 第四轮受验 APK（d241f7ca…）注入的 endpoint 随之作废：App 检查更新
+  将连接失败。O1-O5 在服务路线修复前暂停。
+- v4 合同 EXT-HTTP-TEST-SERVICE fingerprint 与 C-RELEASE-BUILD 的
+  endpoint 事实随之失效；路线变更须升合同版本（v5）并重新冻结。
+
+### 真机 latest 请求证据固化（装机轮真实观测，服务日志原始行）
+
+装机与用户实测期间，真机 App 共发起两条 latest 请求，均 200（1130 字节，
+完整响应含 toy-30201 更新元数据）：
+
+1. 2026-09-14 02:16:26,915（装机后 monkey 启动时段）
+   `GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30200&currentImageSha=000…000&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1130 bytes) req=b38b8866aa074cf58ee06b6a0462ac8d`
+   ——currentImageSha 全 0（App 未连接板卡时的自发起检查）。
+2. 2026-09-14 02:45:51,039（用户实测 5 项整改时段）
+   `GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30200&currentImageSha=4512de0878c146a93b55f65aa86acab4eedcf7f7082ead97ad73c24884671b4b&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1130 bytes) req=dae7de1be3b1430b82015a6235de17f1`
+   ——currentImageSha 非零：App 已真实 BLE 连接板卡并经 GET_INFO 读到
+   当前镜像 SHA 后发起检查更新。该条证明真机链路（App→公网隧道→受控
+   服务→返回更新元数据）完整工作，距 toy 闭环仅差下载/传输/重启步骤。
+   两条请求不替代 O1 正式观测轮（无伴随采集窗口），作为链路真实工作的
+   独立佐证留档。
+
+### 待用户决策
+
+服务路线二选一（两案均需合同 v5 升版+新 APK 构建授权，成本相同）：
+
+- A. Tailscale（*.ts.net 机器名 + Let's Encrypt 证书，默认信任库信任）：
+  地址永久固定，进程死亡重连后域名不变——结构性根治蜂窝抖动杀隧道的
+  问题。代价：电脑与手机各装 Tailscale 客户端并登录同一账号（免费）。
+- B. 重赌 Quick Tunnel（第四条隧道）：零新安装，但按 r1-r3 规律隧道寿命
+  约 2 小时，需将「隧道→APK 构建→装机→O1-O5 全程」压入窗口，蜂窝
+  再抖动一次即再烧一轮额度。
