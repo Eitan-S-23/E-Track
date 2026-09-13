@@ -19,9 +19,14 @@
 > - **不修改共享 stable 渠道**：`firmware_channels` stable 指针（含
 >   publish/disable 一切路径）不触碰。
 > - **替代路线已落地**：P3-3 验收链改走受控 v2 测试服务
->   （`P3-3-v2-service-plan-and-selftest-2026-09-13.md`，冻结源码 v1 +
->   13 项宿主自测 PASS + 部署申请待批）。本单降级为 P4-2 前置未解除
->   期间的**冻结申报**，不再阻塞 P3-3。
+>   （`P3-3-v2-service-plan-and-selftest-2026-09-13.md`（v2），受管路径
+>   `Tools/ota/p3-3-service/` 四件套，SERVICE_VERSION=2，16 项宿主自测 +
+>   tls_hostcheck 宿主 HTTPS 全链 PASS，部署申请待批）。本单降级为 P4-2
+>   前置未解除期间的**冻结申报**，不再阻塞 P3-3。
+> - **当前本机路线不使用 Cloudflare**（2026-09-13 第四轮裁定第 4 条）：
+>   不需要刷新或读取其 token，也不需要用户在聊天中提供凭据。若受控服务
+>   HTTPS 路线 B（Cloudflare Named Tunnel，服务文档 v2 §5）最终获批，
+>   其账号操作按本单 §9 CF 规约执行。
 
 ## 1. 结论先行：staging 共享合同不兼容实锤，方案 A/B 均不可行
 
@@ -310,9 +315,37 @@ channel 指针」——与源码完全一致，链路为：
 | 4 | Cloudflare 账号/部署版本核对回填（§2） | 待执行前核对 |
 | 5 | D1/R2 写入前快照（§5.1 步骤 0）完成且无占用冲突 | 待执行 |
 | 6 | Access owner 会话（步骤 4 stable publish 需要）由用户在执行时提供 | 不持有；暂停状态下不申请、不传递 |
-| 7 | BCB 恢复完成且终态核验通过——**P3-3 验收链已改走受控 v2 服务，本项不再是本单解冻条件，仅是云端激活后 C-TOY-LOOP 实机闭环的前置** | v3 方案已落盘待批（`P3-3-bcb-recovery-plan-2026-09-13-v3.md`） |
+| 7 | BCB 恢复完成且终态核验通过——**P3-3 验收链已改走受控 v2 服务，本项不再是本单解冻条件，仅是云端激活后 C-TOY-LOOP 实机闭环的前置** | v4 方案已落盘待批（`P3-3-bcb-recovery-plan-2026-09-13-v4.md`，REC0-REC7） |
 
-## 9. 边界声明
+## 9. Cloudflare 账号操作规约（2026-09-13 第四轮裁定第 4 条回填）
+
+适用于本单（B0-B4）与受控服务 HTTPS 路线 B（Cloudflare Named Tunnel，
+服务文档 v2 §5）的一切 Cloudflare 账号操作；两者均未获批、未执行。
+
+1. **当前路线不使用 Cloudflare**：受控服务 HTTPS 待批路线 A（自有域名 +
+   Let's Encrypt DNS-01）不涉及 CF 账号；路线 B 未获批前不发起任何
+   `wrangler`/`cloudflared` 账号类命令，不刷新或读取其 token，也不要求
+   用户在聊天中提供任何凭据。
+2. **路线 B 获批后的申报前置**：先说明具体目标账号、资源（tunnel/
+   DNS zone/hostname）、域名和对外暴露范围（公网 URL、转发目标
+   `localhost:<PORT>`、是否限源），由用户批准资源操作后，**先发起浏览器
+   鉴权请求刷新本地登录**（`cloudflared tunnel login` /
+   `wrangler login`），不得直接使用本地已有凭据开工。
+3. **鉴权后身份核对**：核对实际 account ID 与目标资源归属
+   （`wrangler whoami` / tunnel 列表 / zone 列表），排除旧环境 token
+   覆盖新 OAuth 登录的情况（本地已有 cert/OAuth 配置时先核验其归属
+   账号与目标资源是否一致，不一致则重新鉴权）。
+4. **缓存身份与凭据边界**：不得沿用未经核验的缓存身份；不得全局删除
+   其他账号凭据（`~/.cloudflared/cert.pem`、wrangler OAuth 配置等只按需
+   核验指向，不批量清理、不删除无关条目）；不输出任何 token/cookie
+   （包括日志、报告与聊天交付）。
+5. **项目外写入预检**：PowerShell、Wrangler、cloudflared 的启动缓存、
+   日志和认证文件（`~/.cloudflared/`、`%USERPROFILE%` 下 wrangler
+   配置、浏览器鉴权落盘位置）均在项目根之外——任一写入前按全局
+   「非项目目录写入边界」逐路径申报并获批；**浏览器鉴权不豁免项目外
+   写入边界**。
+
+## 10. 边界声明
 
 - 本文档零云端写入、零部署、零真机操作、零代码改动；staging 仅有的两次
   公开 GET 探测（latest 返 86、firmware 缺参 400）在资产方案文档 §7 已

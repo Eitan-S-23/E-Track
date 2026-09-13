@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""P3-3 受控 v2 测试服务宿主自测（冻结源码 v1 配套，#24 交付）。
+"""P3-3 受控 v2 测试服务宿主自测（冻结源码 v2 配套，#24 交付 + #27-#29 回归）。
 
 覆盖矩阵（对齐 `docs/ota-cross-system-contracts.md` 冻结契约与本卡 App 端
 `ota_firmware_latest.dart` / `ota_download.dart` 的 fail-closed 解析器）：
@@ -32,9 +32,24 @@
    （fileName 正则/sizeBytes 域/full 的 baseVersionCode=0 且
    baseImageSha256 键存在值 null/downloadUrl 绝对 https）、false 精简体
    不含 asset、426/409 错误体字段。
+   注：镜像是宿主自测辅助，**不构成真实 Dart consumer 验证**（用户第四轮
+   裁定口径；真实 App 消费行为由 O 序列真机观测覆盖）。
 9. 线级回环：ThreadingHTTPServer + urllib 真实 HTTP 请求（latest→下载→
    断点续传→416→401 篡改签名）。
 10. fail-closed 启动语义整体：ServiceConfigError 拒绝构造（等价拒绝启动）。
+
+v2 回归新增（用户 2026-09-13 第四轮裁定，原 13 项保留不改写）：
+
+11. 协议门禁补齐：protocolVersion 不低于 release.minProtocolVersion 但
+    不在服务受支持集合（当前仅 1）→ 409 PROTOCOL_UNSUPPORTED；协议 1
+    正常通过；低于最低版本仍拒绝（双臂对照）。
+12. token kind 与资产类型不符（签名有效，为 full 资产签 kind=patch）→
+    401 TOKEN_INVALID（错误体含 tokenKind/assetKind）；对照：签名有效、
+    kind=full 但 assetId 不存在 → 仍为 404 RELEASE_NOT_FOUND。
+13. 线级 requestId 三方一致：成功 latest / 错误 401 / 下载 200 三场景，
+    响应头 X-Request-Id == 响应体 requestId == 请求日志 req=；同时断言
+    请求日志中签名 URL 参数已脱敏（signature=<redacted>，无明文签名），
+    外加 redact_path_for_log 的单元形态（多参数/无签名/空值）。
 
 运行：python selftest.py（仅标准库；从本文件所在目录或任意 cwd 均可）。
 """
@@ -49,6 +64,7 @@ import os
 import re
 import sys
 import threading
+import time
 import traceback
 import urllib.error
 import urllib.request
@@ -334,7 +350,7 @@ def test_config_fail_closed():
             sizeBytes=TOY_ETU_SIZE + 1), '篡改 fixture size')
     _expect_config_error(
         lambda c: c['releases']['toy-30201']['asset'].update(
-            path='../../../../.cache/p3-3-assets/not-exist.etu'),
+            path='.cache/p3-3-assets/not-exist.etu'),
         'fixture 文件不存在')
 
     def _archived(cfg):
@@ -755,6 +771,180 @@ def test_wire_loop():
         httpd.server_close()
 
 
+class _ListLogHandler(logging.Handler):
+    """内存日志捕获：线级 requestId 一致性断言用。"""
+
+    def __init__(self):
+        super().__init__(level=logging.INFO)
+        self.messages = []
+
+    def emit(self, record):
+        self.messages.append(record.getMessage())
+
+
+_REQ_ID_RE = re.compile(r'req=([0-9a-f]{32})')
+
+
+def test_protocol_unsupported_above_min():
+    """协议门禁补齐：不低于最低版本但不受支持（2/3/255）→ 409，不静默按协议 1 应答。"""
+    state = make_state(active='toy-30201')
+    # 高于 min=1 但不在受支持集合 → 409（第四轮裁定实测缺陷：此前返回 200）
+    for proto in (2, 3, 255):
+        status, body = call_latest(state, latest_pairs(30200, proto=proto))
+        assert status == 409, (proto, status, body)
+        assert body['errorCode'] == 'PROTOCOL_UNSUPPORTED', (proto, body)
+        assert body['minProtocolVersion'] == 1
+        assert body['protocolVersion'] == proto
+        assert body['releaseId'] == 'release-30201'
+        assert 'asset' not in body and 'downloadUrl' not in body
+    # 低于最低版本（0 < 1）仍拒绝（原语义保持）
+    status, body = call_latest(state, latest_pairs(30200, proto=0))
+    assert status == 409 and body['errorCode'] == 'PROTOCOL_UNSUPPORTED'
+    assert body['minProtocolVersion'] == 1 and body['protocolVersion'] == 0
+    # 受支持边界：协议 1 正常通过（防门禁误伤）
+    status, body = call_latest(state, latest_pairs(30200, proto=1))
+    assert status == 200 and body['updateAvailable'] is True
+    # 最低版本抬高后，协议 1 走下限分支拒绝（双臂对照）
+    cfg = copy.deepcopy(load_real_config())
+    cfg['releases']['toy-30201']['minProtocolVersion'] = 2
+    state2 = svc.V2ServiceState(cfg, HERE, active_release='toy-30201',
+                                now_fn=lambda: 1800000000)
+    status, body = call_latest(state2, latest_pairs(30200, proto=1))
+    assert status == 409 and body['errorCode'] == 'PROTOCOL_UNSUPPORTED'
+    assert body['minProtocolVersion'] == 2 and body['protocolVersion'] == 1
+
+
+def test_download_token_kind_mismatch():
+    """签名有效但 kind 与 full 资产类型不符 → 401 TOKEN_INVALID（非 404）。"""
+    state = make_state(active='toy-30201')
+    rel = state.releases['toy-30201']
+    expires = int(state.now_fn()) + svc.TOKEN_TTL_SECONDS
+    # 用真实 key 为「目标资产 + 错误 kind」重新签名：签名本身有效，
+    # 穿过验签层后到达资产一致性比对（第四轮裁定实测缺陷：此前 404）。
+    signature = svc.sign_token_v2(
+        state.token_key, rel.asset.asset_id, rel.release_id, 'patch',
+        'public-ota', expires, state.key_version)
+    pairs = [('tokenVersion', '2'), ('assetId', rel.asset.asset_id),
+             ('releaseId', rel.release_id), ('kind', 'patch'),
+             ('purpose', 'public-ota'), ('expiresAt', str(expires)),
+             ('keyVersion', str(state.key_version)),
+             ('signature', signature)]
+    status, _h, body = call_download(state, pairs)
+    parsed = json.loads(body)
+    assert status == 401, (status, parsed)
+    assert parsed['errorCode'] == 'TOKEN_INVALID', parsed
+    assert parsed.get('tokenKind') == 'patch'
+    assert parsed.get('assetKind') == 'full'
+    # purpose 允许集合之外的 kind（recovery）在验签层即拒绝，同样 401
+    signature_rec = svc.sign_token_v2(
+        state.token_key, rel.asset.asset_id, rel.release_id, 'recovery',
+        'public-ota', expires, state.key_version)
+    pairs_rec = [('tokenVersion', '2'), ('assetId', rel.asset.asset_id),
+                 ('releaseId', rel.release_id), ('kind', 'recovery'),
+                 ('purpose', 'public-ota'), ('expiresAt', str(expires)),
+                 ('keyVersion', str(state.key_version)),
+                 ('signature', signature_rec)]
+    status, _h, body = call_download(state, pairs_rec)
+    assert status == 401 and \
+        json.loads(body)['errorCode'] == 'TOKEN_INVALID', (status, body)
+    # 对照：签名有效、kind=full 正确但 assetId 不存在 → 仍 404 RELEASE_NOT_FOUND
+    signature_other = svc.sign_token_v2(
+        state.token_key, 'asset-full-99999', rel.release_id, 'full',
+        'public-ota', expires, state.key_version)
+    pairs_other = [('tokenVersion', '2'), ('assetId', 'asset-full-99999'),
+                   ('releaseId', rel.release_id), ('kind', 'full'),
+                   ('purpose', 'public-ota'), ('expiresAt', str(expires)),
+                   ('keyVersion', str(state.key_version)),
+                   ('signature', signature_other)]
+    status, _h, body = call_download(state, pairs_other)
+    assert status == 404 and \
+        json.loads(body)['errorCode'] == 'RELEASE_NOT_FOUND', (status, body)
+
+
+def test_wire_request_id_and_redaction():
+    """线级 requestId 三方一致（成功/错误/下载）+ 日志签名 URL 脱敏。"""
+    state = make_state(active='toy-30201')
+    log = logging.getLogger('p33-selftest-wire-ids')
+    capture = _ListLogHandler()
+    log.handlers = [capture]
+    log.setLevel(logging.INFO)
+    log.propagate = False
+    handler_cls = type('SelftestHandlerIds', (svc.P33RequestHandler,),
+                       {'state': state, 'log': log})
+    httpd = ThreadingHTTPServer(('127.0.0.1', 0), handler_cls)
+    httpd.daemon_threads = True
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    try:
+        base = 'http://127.0.0.1:%d' % httpd.server_address[1]
+        state.public_base_url = base  # 测试专用回环基址（生产为 https 域名）
+
+        def wait_log(n):
+            # do_GET 在写完响应体后才 log.info；客户端拿到响应时日志行
+            # 可能尚未落 handler，按行数轮询等待（上限 5s）。
+            deadline = time.time() + 5.0
+            while time.time() < deadline:
+                if len(capture.messages) >= n:
+                    return capture.messages[n - 1]
+                time.sleep(0.01)
+            raise AssertionError('日志行 #%d 未出现: %r' % (n, capture.messages))
+
+        # 场景 1（成功 latest）：头 == 体 == 日志
+        latest_url = base + svc.LATEST_PATH + '?' + urlencode(
+            dict(latest_pairs(30200)))
+        status, headers, raw = _http_get(latest_url)
+        assert status == 200, (status, raw)
+        body = json.loads(raw)
+        line = wait_log(1)
+        rid_log = _REQ_ID_RE.search(line)
+        assert rid_log, line
+        assert headers['x-request-id'] == body['requestId'] == \
+            rid_log.group(1), (headers.get('x-request-id'),
+                               body['requestId'], line)
+
+        # 场景 2（错误 401）：头 == 体 == 日志，且该行日志已脱敏
+        download_url = body['asset']['downloadUrl']
+        sig_value = dict(url_query_pairs(download_url))['signature']
+        tampered = download_url.replace(
+            'signature=' + sig_value, 'signature=' + ('X' + sig_value[1:]))
+        status, headers, raw = _http_get(tampered)
+        assert status == 401, (status, raw)
+        err_body = json.loads(raw)
+        line = wait_log(2)
+        rid_log = _REQ_ID_RE.search(line)
+        assert rid_log, line
+        assert headers['x-request-id'] == err_body['requestId'] == \
+            rid_log.group(1), (headers.get('x-request-id'),
+                               err_body['requestId'], line)
+        assert 'signature=<redacted>' in line, line
+        assert sig_value not in line, '日志泄漏签名明文'
+
+        # 场景 3（下载 200）：头 x-request-id 与日志一致，日志已脱敏
+        status, headers, raw = _http_get(download_url)
+        assert status == 200
+        line = wait_log(3)
+        rid_log = _REQ_ID_RE.search(line)
+        assert rid_log, line
+        assert headers['x-request-id'] == rid_log.group(1), \
+            (headers.get('x-request-id'), line)
+        assert 'signature=<redacted>' in line and sig_value not in line, line
+        assert raw == state.releases['toy-30201'].asset.data
+
+        # redact_path_for_log 单元形态：多参数/无签名/空值/尾参数
+        assert svc.redact_path_for_log(
+            '/x?tokenVersion=2&signature=AbC_123&kind=full') == \
+            '/x?tokenVersion=2&signature=<redacted>&kind=full'
+        assert svc.redact_path_for_log(
+            '/latest?appId=trace') == '/latest?appId=trace'
+        assert svc.redact_path_for_log(
+            '/d?signature=') == '/d?signature=<redacted>'
+        assert svc.redact_path_for_log(
+            '/d?a=1&signature=tok') == '/d?a=1&signature=<redacted>'
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
 TESTS = [
     ('黄金向量签名（独立复算+生产路径+参数顺序）', test_golden_vector_sign),
     ('黄金向量验签与排他过期边界', test_golden_vector_verify_and_expiry),
@@ -769,6 +959,9 @@ TESTS = [
     ('下载可见性（410/409/404/切换作废）', test_download_visibility),
     ('Range/If-Range/416/摘要复算', test_download_range_semantics),
     ('线级回环（真实 HTTP 全链）', test_wire_loop),
+    ('协议门禁：不低于最低但不受支持 → 409', test_protocol_unsupported_above_min),
+    ('token kind 与资产不符（签名有效）→ 401', test_download_token_kind_mismatch),
+    ('线级 requestId 三方一致与日志脱敏', test_wire_request_id_and_redaction),
 ]
 
 

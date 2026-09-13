@@ -70,7 +70,13 @@
         "Tools/acceptance/validate_bundle.py",
         "Tools/provenance/manifest_profiles.json",
         "Tools/provenance/worktree_guard.ps1",
-        "tests/ota/test_acceptance_bundle.py"
+        "tests/ota/test_acceptance_bundle.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p3-3-service/service_config.json",
+        "Tools/ota/p3-3-service/selftest.py",
+        "Tools/ota/p3-3-service/tls_hostcheck.py",
+        "Tools/jlink/p1-6-common.ps1",
+        "Tools/jlink/test-p1-6-recovery-cmd.ps1"
       ]
     },
     "Governance": {

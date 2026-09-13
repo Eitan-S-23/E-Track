@@ -34,7 +34,7 @@
         "sizeBytes": 284092,
         "baseVersionCode": 0,
         "baseImageSha256": null,
-        "path": "../../../../.cache/p3-3-assets/e-track-at32f435-v3.2.1-full.etu"
+        "path": ".cache/p3-3-assets/e-track-at32f435-v3.2.1-full.etu"
       }
     },
     "real-30202": {
@@ -59,7 +59,7 @@
         "sizeBytes": 284112,
         "baseVersionCode": 0,
         "baseImageSha256": null,
-        "path": "../../../../.cache/p3-3-assets/e-track-at32f435-v3.2.2-full.etu"
+        "path": ".cache/p3-3-assets/e-track-at32f435-v3.2.2-full.etu"
       }
     }
   }
