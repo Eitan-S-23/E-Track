@@ -590,7 +590,7 @@ void main() {
       advertisement(address: '11:22:33:44:55:66', name: 'AIMA'),
     ]);
     // 流中途报错（adapter/平台通道异常）。
-    observer.onScanStreamError(const StateError('stream blew up'));
+    observer.onScanStreamError(StateError('stream blew up'));
     await pumpUntil(lines, 'OTA_OBS done');
 
     expect(lines.last, 'OTA_OBS done result=scan_stream_error scanned=1');

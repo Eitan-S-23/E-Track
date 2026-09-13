@@ -156,7 +156,7 @@ void main() {
   List<String> wireObserver({Duration window = const Duration(seconds: 5)}) {
     final lines = <String>[];
     OtaDeviceObserver.instance = OtaDeviceObserver(
-      config: OtaDeviceObservationConfig(
+      config: const OtaDeviceObservationConfig(
         enabled: true,
         target: _target,
         sentinel: _fingerprint,
@@ -265,7 +265,7 @@ void main() {
     // 观测器批次行。XTrace 即目标，命中后走绑定链路（connect 返回 false
     // → connect_failed），证明匹配与绑定接线也是真实的。
     final aima = ScanResult(
-      device: BluetoothDevice(remoteId: DeviceIdentifier('11:22:33:44:55:66')),
+      device: BluetoothDevice(remoteId: const DeviceIdentifier('11:22:33:44:55:66')),
       advertisementData: const AdvertisementData(
         advName: 'AIMA',
         txPowerLevel: null,
@@ -279,7 +279,7 @@ void main() {
       timeStamp: DateTime.now(),
     );
     final xtrace = ScanResult(
-      device: BluetoothDevice(remoteId: DeviceIdentifier('AA:BB:CC:DD:EE:FF')),
+      device: BluetoothDevice(remoteId: const DeviceIdentifier('AA:BB:CC:DD:EE:FF')),
       advertisementData: const AdvertisementData(
         advName: 'XTrace',
         txPowerLevel: null,
