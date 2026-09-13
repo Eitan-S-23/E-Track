@@ -657,7 +657,10 @@ void main() {
             () => lines.any((line) => line.startsWith('OTA_OBS done'))),
         isTrue,
         reason: '启动挂死必须在 startTimeout 处收尾，不得无限等待');
-    expect(lines.last, 'OTA_OBS done result=scan_start_timeout');
+    // 终止行带 waitedMs 后缀（同 514 行场景的固定格式），本用例关注终态
+    // 唯一与不被迟到完成覆盖，按前缀断言。
+    expect(lines.last,
+        startsWith('OTA_OBS done result=scan_start_timeout'));
 
     // 启动调用迟到的"成功"返回。
     startCompleter.complete(true);
