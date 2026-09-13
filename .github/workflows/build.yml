@@ -27,6 +27,11 @@ on:
         required: true
         type: boolean
         default: false
+      firmware_latest_url:
+        description: "Optional credential-free public https firmware-latest endpoint compiled into the APK; empty keeps vars/secrets-derived behavior"
+        required: false
+        type: string
+        default: ""
 
 env:
   PUB_HOSTED_URL: https://pub.dev
@@ -214,11 +219,29 @@ jobs:
         env:
           TRACE_PUBLIC_UPDATE_SERVICE_URL: ${{ vars.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_UPDATE_SERVICE_URL }}
           TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
+          DISPATCH_FIRMWARE_LATEST_URL: ${{ inputs.firmware_latest_url || '' }}
         run: |
           set +e
           build_args=(apk --release --target-platform=android-arm,android-arm64)
           echo "Android release APK targets ARM ABIs only to keep the sideload package smaller."
-          if [[ -n "${TRACE_PUBLIC_UPDATE_SERVICE_URL:-}" ]]; then
+          if [[ -n "${DISPATCH_FIRMWARE_LATEST_URL:-}" ]]; then
+            # 显式 dispatch 输入只覆盖固件 latest endpoint；仅接受不含凭据的
+            # 公开 HTTPS URL（校验逻辑与 dev-checks 观测路径同一套口径）。
+            parsed_url="${DISPATCH_FIRMWARE_LATEST_URL%/}"
+            case "${parsed_url}" in
+              https://*) ;;
+              *) echo "::error title=Firmware latest endpoint::Dispatch input must be a public https URL."; exit 1 ;;
+            esac
+            case "${parsed_url}" in
+              *token=*|*secret=*|*signature=*|*password=*|*apikey=*|*api_key=*|*access_key=*|*auth=*)
+                echo "::error title=Firmware latest endpoint::Dispatch input must not carry credential query parameters."; exit 1 ;;
+            esac
+            if [[ "${DISPATCH_FIRMWARE_LATEST_URL}" == *"#"* ]]; then
+              echo "::error title=Firmware latest endpoint::Dispatch input must not carry fragments."; exit 1
+            fi
+            build_args+=(--dart-define="TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=${parsed_url}")
+            echo "Firmware latest endpoint injected from dispatch input (firmware endpoint only; update manifest source unchanged)."
+          elif [[ -n "${TRACE_PUBLIC_UPDATE_SERVICE_URL:-}" ]]; then
             update_service_url="${TRACE_PUBLIC_UPDATE_SERVICE_URL%/}"
             build_args+=(--dart-define="TRACE_CLOUDFLARE_UPDATE_MANIFEST_URL=${update_service_url}/api/public/latest")
             build_args+=(--dart-define="TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=${update_service_url}/api/public/firmware/latest")
