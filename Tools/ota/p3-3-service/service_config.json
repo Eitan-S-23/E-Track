@@ -61,6 +61,31 @@
         "baseImageSha256": null,
         "path": ".cache/p3-3-assets-v5/e-track-at32f435-v3.2.2-full.etu"
       }
+    },
+    "real-30203": {
+      "releaseId": "release-30203",
+      "versionName": "3.2.3",
+      "versionCode": 30203,
+      "releaseTag": "v3.2.3",
+      "releaseNotes": "P3-3 受控测试真固件包（3.2.3/30203），v6 制包身份见 docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md（第十一轮三缺陷修复实机验证用，源=1894f9d GCC 构建同源）",
+      "targetImageSha256": "3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30203",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.3-full.etu",
+        "sha256": "a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915",
+        "sizeBytes": 284608,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v6/e-track-at32f435-v3.2.3-full.etu"
+      }
     }
   }
 }
