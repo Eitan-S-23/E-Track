@@ -404,6 +404,8 @@ void main() {
     final ok = await service.startOtaUpgrade('AA:BB');
     expect(ok, isFalse);
     expect(service.phase, OtaPhase.failed);
+    // 轮询真实发生（非直接超时）：窗口内多轮探测都读到旧身份。
+    expect(ble.probeCount, greaterThanOrEqualTo(1));
     final terminal = service.terminalState!;
     expect(terminal.code, 'REBOOT_RECONNECT_FAILED');
     expect(terminal.retryableLater, isTrue,

@@ -531,8 +531,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull,
           reason: '窄屏两按钮并存不得溢出截断');
-      expect(findButton(tester, '检查更新'), findsOneWidget);
-      expect(find.text('重新读取身份解锁'), findsOneWidget);
+      // CLIENT_TOO_OLD 非 retryableLater：检查按钮禁用渲染（findButton 在
+      // 按钮缺失时自身抛错，onPressed 断言隐含按钮存在且布局成功）。
+      expect(findButton(tester, '检查更新').onPressed, isNull);
+      // 解锁入口换行后仍完整渲染且可执行（与正常视口用例同强度断言）。
+      final unlock = find.widgetWithText(OutlinedButton, '重新读取身份解锁');
+      expect(unlock, findsOneWidget);
+      expect(tester.widget<OutlinedButton>(unlock).onPressed, isNotNull);
     });
   });
 
