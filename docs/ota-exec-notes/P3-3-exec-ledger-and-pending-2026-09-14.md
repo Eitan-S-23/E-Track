@@ -1,4 +1,4 @@
-# P3-3 执行台账与待决事项 —— 2026-09-14（03:3x 建档，晚间二次更新）
+# P3-3 执行台账与待决事项 —— 2026-09-14（03:3x 建档，晚间三次更新）
 
 > 性质：集中交付材料（#47 的一部分）。汇总本轮（2026-09-13 起）全部
 > 额度消耗、作废轮、有效资产与待用户决策事项，供审阅与追认。
@@ -6,18 +6,18 @@
 > `P3-3-acceptance-apk-build-2026-09-13.md`、`P3-3-recovery-execution-2026-09-13.md`、
 > `P3-3-recovery-execution-2026-09-14-r2.md`、服务日志与 tunnel.log 原始记录。
 
-## 1. 当前状态快照（2026-09-14 晚 二次更新）
+## 1. 当前状态快照（2026-09-14 晚 三次更新：v5 冻结完成）
 
 | 项 | 状态 |
 | --- | --- |
-| 实现分支 | `dev/flutter/apk/p3-3-admission`，HEAD `1894f9d`（bed3aa0 五项 UI 整改 + O2 缺陷修复「Apply/Stage 提交 BCB STAGED 并复位」，修复版已重建+finalize+烧板+恢复） |
+| 实现分支 | `dev/flutter/apk/p3-3-admission`，HEAD `1894f9d`（bed3aa0 五项 UI 整改 + O2 缺陷修复「Apply/Stage 提交 BCB STAGED 并复位」，修复版已重建+finalize+烧板+恢复）；其后 HEAD 链 `6415226`（O2 修复证据批次）→`475ece5`（v5 DRAFT：合同+四 EXT 证据+NOT_RUN 矩阵）→`b2fc1ce`（v5 FROZEN=bundle_commit）→本提交（FREEZE-INDEX v5 行登记+看板/台账回写） |
 | CI | flutter-dev-checks run 34774089038 双宿主全绿（analyze+tests，bed3aa0 时点）；`1894f9d` 固件侧为本机 GCC 构建（`.cache/bg/app-gcc`），CI 重跑随 v5 轮 |
-| v4 冻结包 | 已定稿并登记（bundle `a548d43`，DRAFT→FROZEN 全链 2026-09-14 03:0x；执行门禁 PASS）——**但 EXT-HTTP/C-RELEASE-BUILD 绑定的 r3 隧道与第四轮 APK 已失效（见 §3），且源镜像绑定旧 `7328c1b1…`（O2 缺陷版本），待升 v5** |
+| v4 冻结包 | 已定稿并登记（bundle `a548d43`，DRAFT→FROZEN 全链 2026-09-14 03:0x；执行门禁 PASS）——**但 EXT-HTTP/C-RELEASE-BUILD 绑定的 r3 隧道与第四轮 APK 已失效（见 §3），且源镜像绑定旧 `7328c1b1…`（O2 缺陷版本），待升 v5**——**已升 v5 完成**（v5 bundle `b2fc1ce`，2026-09-14 晚三提交链定稿登记，validate_bundle 两轮 PASS；v4 包字节不动、仍可在其 bundle_commit `a548d43` 上复校，v5 经 parent_contract_sha256 `4AABC513…` 绑定取代其判定） |
 | r3 Quick Tunnel | **已死**（03:09-03:12，蜂窝链路瞬断杀进程；域名随进程永久失效） |
 | 受控服务 | **v5 实例存活**（20:21:05 起，PID 22316，`--active-release toy-30201`，供 v5 toy fixture `0219899d…`；启动双 fixture 逐字节核验 PASS，本机+公网 latest/下载字节级验证均过，见 P3-3-offline-assets-v5-rebuild-2026-09-14.md §7）。旧 r4 实例（17:01:54-20:21，供旧 toy `fc4ae5a9…`）已按 PID 精确核验后停止，其 O1/O2 请求日志完整保留 `service-r4-20260914.log` |
 | 板卡 | **烧录事故已恢复**（2026-09-14 晚，恢复轮 20260914-r2 全 PASS）：生产 Boot（全区原样）+ 3.2.0-fixed App(30200) + BCB CONFIRMED/30200；App 启动序列完整，黑屏解除。事故与恢复全记录见主执行笔记 §16 |
 | 手机 | **第五轮受验 App 在装**（p33acceptance，`2506e952…`，run 34781909023，r4 endpoint 注入；用户装机并确认升级页元数据与冻结基准全等）；r4 隧道与服务均存活，App 检查更新可用 |
-| O 序列 | **O1 已实测通过**（16:53 真机 latest×3 200，§13.5；仅已装侧证书指纹项延后）；**O2 实测 PRODUCT_FAIL**（17:04 latest/download 200 + BLE 传输完成，终点 REBOOT_RECONNECT_FAILED——固件缺 BCB STAGED 提交+复位，缺陷已修复 `1894f9d` 并恢复上板）；O3-O5 未执行——**v5 重制包已完成**（源=`1894f9d` 修复版构建，四元组与全 PASS 验证见 P3-3-offline-assets-v5-rebuild-2026-09-14.md，受控服务已切 v5），待合同 v5 重冻结后重跑（O1 因 fixture 身份变化按 v5 rerun plan 判定重测范围） |
+| O 序列 | **O1 已实测通过**（16:53 真机 latest×3 200，§13.5；仅已装侧证书指纹项延后）；**O2 实测 PRODUCT_FAIL**（17:04 latest/download 200 + BLE 传输完成，终点 REBOOT_RECONNECT_FAILED——固件缺 BCB STAGED 提交+复位，缺陷已修复 `1894f9d` 并恢复上板）；O3-O5 未执行——**v5 重制包已完成**（源=`1894f9d` 修复版构建，四元组与全 PASS 验证见 P3-3-offline-assets-v5-rebuild-2026-09-14.md，受控服务已切 v5），**合同 v5 已冻结（bundle_commit `b2fc1ce`，执行前检查 PASS），O1-O5 可执行**（O1 因 fixture 身份变化重测+补已装侧证书指纹实测；O2 复测即 `1894f9d` 修复的实机验证，当前 v5 服务实例直接可用；前置 EXT-HTTP/EXT-BOARD-STATE 均就绪） |
 
 ## 2. APK 构建额度账（build.yml dispatch，逐笔授权链）
 
@@ -108,3 +108,11 @@ r4 轮已于 04:2x-04:4x 执行完毕：r4 隧道起（域名
    （BCB=ROLLBACK→恢复等待死等→黑屏）。无持久损伤，经 finalize 重烧 +
    恢复轮 r2 全 PASS 恢复；责任在实现 agent 流程把关（GCC 产物烧板前
    必须 finalize 的教训已登记 AGENTS.md 之外的主执行笔记 §16.2）。
+4. **第三次 cwd 漂移（2026-09-14 ~20:5x，纯只读零写入）**：v5 冻结取证
+   段（取 CI 作业时序）新 turn 后 Bash cwd 再次重置回主仓，3 条只读命令
+   在主仓执行（`gh run view 34844438554` + `ls docs/acceptance-contracts/`；
+   `grep` FREEZE-INDEX + `git log`/`git show --stat a548d43`；`git log
+   --follow` + `git status --short` + `grep`）。均为只读、零写入、无残留
+   （主仓既有脏文件为会话开始前状态，未触碰）；本段后续写入前已发现并
+   切回显式 `cd` worktree。防再犯措施不变：每 turn 写入动作前一律显式
+   绝对路径/先 `cd` 至 worktree。

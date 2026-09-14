@@ -39,6 +39,7 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 | P3-7-v1 | v2 | `fcb77158425f2ade3733f9a5237013aaf7bb51f4` | `fcb77158425f2ade3733f9a5237013aaf7bb51f4` | `26b0a97f42f1c51bfef669b6d27b765cf274fcf3` | PASS |
 | P3-3-v3 | v3 | `421bd290b0f5e30b385a17c2ab82a2b3d8844dc2` | `a178ecc1dca3929e1bca702fb11344f3c5bd2872` | `2ce26b29c395aebdd75b49376755d16c3706feea` | PASS（2026-09-13 FROZEN+NOT_RUN 执行前检查；O 序列执行后另行最终验收） |
 | P3-3-v4 | v3 | `a548d4325d6651264b0867e865e3ee40695aa372` | `bed3aa06f99c3d99291b081069a72ffd426a4e3d` | `6b971c71abcf7ebaa271aee9f6eac6f4ceb66b80` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理经用户授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |
+| P3-3-v5 | v3 | `b2fc1cebfc9c2585026489ac366315e4e89d38d8` | `6415226b8c30abcffa2b9bab52f0db717f8f7cb9` | `4bcf18a82a03f16c813e1b46938962538876ddbd` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理依修复轮整体授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |
 
 备注：
 
@@ -52,3 +53,9 @@ git worktree remove --force .cache/freeze-check/wt-<id>
   （freeze_commit `a178ecc` 后 profile 内出现新提交，执行门禁必红）。v4 合同经
   `parent_contract_sha256` 绑定 v3 合同；v3 包字节不动，仍可在其 `bundle_commit`
   上复校。
+- P3-3-v4 行按「只增不改」保留原样，但该轮判定已被 v5 取代：v4 冻结约 40 分钟后
+  r3 Quick Tunnel 域名随进程死亡（EXT-HTTP 事实基础失效），O2 在旧缺陷 toy
+  （源 7328c1b1…，未含 BCB STAGED 提交修复）上实测 PRODUCT_FAIL
+  （REBOOT_RECONNECT_FAILED），修复轮重建烧板又经烧录事故与恢复轮 20260914-r2；
+  v5 合同经 `parent_contract_sha256` 绑定 v4 合同（4AABC513…D20A2），资产从
+  1894f9d 修复版源重制；v4 包字节不动，仍可在其 `bundle_commit` 上复校。
