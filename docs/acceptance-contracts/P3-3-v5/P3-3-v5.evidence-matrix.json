@@ -1,7 +1,7 @@
 {
   "schema": "etrack-evidence-matrix-v2",
   "contract_id": "P3-3-v5",
-  "contract_sha256": "FAD1105EB11ADC018F6D966BCCF21260AB820E396A66A20DD8D77C0DBC4A4401",
+  "contract_sha256": "487786706F3583BA7066810361E53E59A6F340807FC75C8A89EEF57F58782AB7",
   "round_id": "P3-3-V5-FREEZE-20260914-R1",
   "overall_result": "NOT_RUN",
   "previous_matrix_sha256": null,
