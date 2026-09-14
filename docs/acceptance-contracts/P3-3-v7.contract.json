@@ -1,0 +1,356 @@
+{
+ "schema": "etrack-acceptance-contract-v3",
+ "contract_id": "P3-3-v7",
+ "version": 7,
+ "task_id": "P3-3",
+ "parent_contract_sha256": "B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171",
+ "status": "DRAFT",
+ "approved_by": "用户飞书授权实现会话代办（P3-3-IMPL-20260907）：2026-09-15 v6 独立验收轮结论 EVIDENCE_GAP（G01 五条冻结命令沿用执行轮口径含派发/占位文本、G02 EXT-REAL-ETU/EXT-HTTP 指纹遗留 v5 身份，均为合同文本疏漏非产品缺陷）后，用户经治理质疑答复（验收标准三层结构澄清：标准内容在看板卡面与执行合同、实现会话仅起草第三层绑定）后裁定「你继续起草吧」授权 v7 勘误轮——修正 G01/G02 与 ART-DEV-LOGS 路径并重走冻结提交链；沿用 v4/v5/v6 用户批准的实现会话代办冻结先例，approved_by 如实登记授权链、不伪装独立会话，单轮判定权仍归独立验收会话",
+ "approved_at": "2026-09-15T03:05:00+08:00",
+ "implementation_ref": "docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md（第六轮受验 APK 与三缺陷实机验证执行，§7/§7.1 已回填实测结论与 D 清理）；实现链：7d2856e=第十一轮三缺陷修复、ce30190=同轮 CI 整改（见 P3-3-reboot-window-and-ui-fixes-2026-09-14.md）、0fb167c=第十二轮收口（r6 证据回填+service_config 新增 real-30203+两项新需求研究落盘+看板回写，即本合同 freeze_commit）；v6 fixture 制包与四元组见 r6 文档 §2/§3；两项新需求研究（用户裁定暂缓）见 P3-3-ble-speed-and-background-research-2026-09-15.md；v5 轮全链文档（O 序列/重制包/恢复 r2/码表整改）沿 v5 合同 implementation_ref 不变；v6 独立验收：docs/ota-exec-notes/P3-3-v6-acceptance-2026-09-15.md（EVIDENCE_GAP，G01/G02 详述、已复算实物 §4.1、最小后续范围 §5）",
+ "freeze_commit": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+ "freeze_tree": "b3d1d311645d584c48419b546a061c5648da740f",
+ "profile_config_blob": "3769369d053aad028b67d7e2c17b5827b2b96f55",
+ "draft_note": "DRAFT 由实现会话 2026-09-15 起草（v6→v7，parent B445C209…）。升版动因：v6 独立验收轮（P3-3-V6-FREEZE-20260915-R1）结论 EVIDENCE_GAP——G01：五条冻结命令沿用执行轮口径（gh workflow run 派发+watch+「由验收会话绑定」占位符），与只读取证授权冲突，无法如实登记命令记录；G02：EXT-REAL-ETU.fingerprint 遗留 v5 的 30202 四元组、EXT-HTTP-TEST-SERVICE.fingerprint 遗留 r4/v5 实例身份，与判据/产物的 30203 与 r5/v6 事实冲突；另 ART-DEV-LOGS 为目录式路径不符合校验器文件型要求。v7 为纯合同勘误轮：零实现/固件/服务/设备变化，freeze_commit/freeze_tree/profile_config_blob 与 v6 完全相同（0fb167c/b3d1d311/3769369d）；v6 轮独立复算的实物（r6 APK/两份 ETU/两份目标镜像哈希全等）与 Git 冻结关系全部沿用。修正面：五条命令改写为验收会话可如实执行的只读形式（既有 run 的 gh run view 核验/本地实物哈希与证书比对/手机在装包只读 dumpsys+pull+双侧 apksigner/两闭环改离线证据审查入口）；EXT-REAL-ETU/EXT-HTTP/EXT-BOARD-STATE 指纹改绑 v6 事实（evidence_sha256 由脚本从实际文件计算，不手抄；v5/r4 历史归属保留在 external 证据文档）；ART-DEV-LOGS 改文件型路径；C-TOY 时间线按v6 验收报告 §4.2 修正为 21:40:15.699 起、C-REAL 补 23:43 首次未闭环尝试。v6 验收产物（报告+终态矩阵+证据）随前置提交入库；后继验收轮 validate 须携带 v6 合同/矩阵为前驱（--previous-contract/--previous-matrix），不能省略 v6 EVIDENCE_GAP。",
+ "result_taxonomy": [
+  "PASS",
+  "PRODUCT_FAIL",
+  "HARNESS_FAIL",
+  "EVIDENCE_GAP",
+  "ENV_BLOCKED"
+ ],
+ "invalidation_policy": "docs/acceptance-execution-contract.md",
+ "input_groups": [
+  {
+   "id": "production",
+   "profile": "Production",
+   "category": "production_source"
+  },
+  {
+   "id": "validation",
+   "profile": "Validation",
+   "category": "validation_inputs"
+  },
+  {
+   "id": "governance",
+   "profile": "Governance",
+   "category": "governance_inputs"
+  },
+  {
+   "id": "flutter",
+   "profile": "Flutter",
+   "category": "production_source"
+  }
+ ],
+ "external_inputs": [
+  {
+   "id": "EXT-HTTP-TEST-SERVICE",
+   "category": "environment",
+   "description": "受控 v2 测试服务四件套（Tools/ota/p3-3-service/，SERVICE_VERSION=2，冻结依赖经 Validation profile required_paths 落地）+ Quick Tunnel 公网入口。v6 轮部署实例=r5 隧道（quality-lap-aggregate-comment.trycloudflare.com，cloudflared PID 3868，隧道日志 .cache/p3-3-cloudflared/tunnel-r5-20260914.log）+ v6 服务实例（python PID 17520，2026-09-14 23:42:39 起，127.0.0.1:8443，--active-release real-30203，请求日志 .cache/p3-3-v2-service/service-v6-20260914.log）；启动横幅三 fixture fail-closed 字节级核验；第六轮受验 APK（run 34864052541）构建时注入 r5 隧道 latest 地址。历史实例（r4 隧道+v5 服务）服务 v5 轮，归属与边界见 evidence/external/http-test-service.md §2/§3。服务与隧道已于 2026-09-15 D 清理按 PID 核验终止，v7 验收为纯离线复核，不重新拉起、不依赖活端点。方案与 16 项宿主自测见 docs/ota-exec-notes/P3-3-v2-service-plan-and-selftest-2026-09-13.md（第五轮修订）。",
+   "fingerprint": "v6 轮部署实例（本合同绑定）：r5 Quick Tunnel https://quality-lap-aggregate-comment.trycloudflare.com（cloudflared PID 3868，指向 127.0.0.1:8443）+ v6 服务实例（python PID 17520，2026-09-14 23:42:39 起，--active-release real-30203，请求日志 .cache/p3-3-v2-service/service-v6-20260914.log）；启动横幅（service-v6-restart.stdout）三 fixture 字节级核验：real-30202 284573:0c8ae468…、real-30203 284608:a543f952…、toy-30201 284540:0219899d…；第六轮 APK（run 34864052541）构建时注入本隧道 latest 地址（DISPATCH_FIRMWARE_LATEST_URL 留证）。历史实例（r4 隧道+v5 服务 PID 22316，service-v5-20260914.log）服务 v5 轮，不作本合同指纹。隧道与服务已于 2026-09-15 D 清理按 PID 核验终止，零残留。",
+   "evidence_path": "evidence/external/http-test-service.md",
+   "evidence_sha256": "4C649077F182E541661F866B974768463FFFFE5F3B7D6E0CBE4424A48261ED78"
+  },
+  {
+   "id": "EXT-TOY-BOOTABLE",
+   "category": "fixture",
+   "description": "可启动受控固件包（toy 3.2.1，目标 versionCode 30201）：保留真实 Boot/BCB/OTA 路径且具有合法 fw_header。v5 重制（修复轮整体授权内）：源镜像=1894f9d 修复版 GCC 构建原件 .cache/bg/app-gcc/X-Track-App-GCC.bin（SHA-256 4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec，603,764B，即板上 3.2.0-fixed 本体，与 finalize 镜像 d7cc4194… 仅差 0x400 头区），按资产方案 §2.3 基线规则重建（v4 绑定源 7328c1b1… 为 O2 缺陷版本，O2 实测 PRODUCT_FAIL 后必须换源），finalize 3.2.1 + pack-full 30201，零真机/零云端/零产品代码改动；记录见 P3-3-offline-assets-v5-rebuild-2026-09-14.md，实物在 admission worktree .cache/p3-3-assets-v5/ 为唯一持有处。资产身份四元组：pre-finalize BIN SHA 4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec（603,764B）/ 最终镜像 raw SHA aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298 / fw_header 双零摘要 9d7a3cdca4f8612908a13c538796cddcb9bb0e27c8b3d06ae21769dcbe123371 / ETU 包 SHA 0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5（284,540B，规范名 e-track-at32f435-v3.2.1-full.etu；target_vcode=30201 flags=0x000b key_id=1 nonce 4d3bfb84…；header_crc32 0x138BA318）。与板上 3.2.0-fixed 本体逐字节同源（仅 41 字节 0x408..0x45F 头身份字段差异），排除升级后本体回退风险。tests/ota-vectors/ golden vectors 不具上板资格。离线准备完成不等于独立准入：上板资格由非实现会话按本合同审定；源码树固件变化即按资产方案 §2.3 重建重出四元组（本轮已执行）。",
+   "fingerprint": "已按实现侧事实回填：目标 versionCode 30201；最终镜像 raw SHA-256=aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298；ETU=e-track-at32f435-v3.2.1-full.etu SHA-256=0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5 size=284540B。v5 轮实测（实现会话，供冻结会话核对）：verify_v5.py 判据 A-I 全 PASS（rc=0，报告 .cache/p3-3-assets-v5/verify_v5_report.txt——pre-finalize 与 bg 构建原件逐字节相等、finalize 差异仅 0x400..0x45F、头字段/双零摘要/header_crc32 独立复算、etu_unpack --verify-fw-header OK、candidate 与规范名副本逐字节比对、升级检查模拟 30201>30200）；受控服务启动双 fixture 核验通过；公网签名下载探针与实物逐字节全等。evidence 落 evidence/external/toy-bootable-asset.md",
+   "evidence_path": "evidence/external/toy-bootable-asset.md",
+   "evidence_sha256": "57F72DE73D6EAB2D0A1BFC816157461EE0DD0796AE8278169735B63B316AF6DB"
+  },
+  {
+   "id": "EXT-REAL-ETU",
+   "category": "fixture",
+   "description": "真实固件 OTA 包 3.2.3（versionCode 30203），v6 轮从 1894f9d 修复版 GCC 构建源（pre-finalize 4b16048f…，603,764B，与 toy/30202 真包同源）finalize+pack-full 制包，四元组记录见 docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md §2/§3。v6 轮本包已完成 30202→30203 实机闭环（r6），当前设备即运行本包目标镜像。实物 .cache/p3-3-assets-v6/（admission worktree 内唯一持有处，ETU 因 AES nonce 随机不可从文档复现）；离线验证 verify_v6.py 判据 A-G+I 全 PASS（报告 .cache/p3-3-assets-v6/verify_v6_report.txt）；v6 轮独立验收已复算实物一致（v6 验收报告 §4.1）。v5 真包 30202 为历史轮身份，归属见 evidence/external/real-etu-asset.md §3。",
+   "fingerprint": "目标 3.2.3（versionCode 30203）；pre-finalize BIN 4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec（603,764B，1894f9d 修复版 GCC 构建原件，与 30200/30201/30202 同源）；最终镜像 raw 3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3（603,764B）；fw_header 双零摘要 1a60579440c6feb79fa52f488dfcc0d6ff893eda36533d32ff08e4685094bd28；ETU 规范名 e-track-at32f435-v3.2.3-full.etu，SHA-256 a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915（284,608B）。升级链归属：与 30200/30201/30202 各环仅 fw_header 版本身份字段（0x408..0x45F，41 字节）差异，同源升级链第 4 环。v5 真包 30202（ab0585f7…/0c8ae468…/284,573B）为历史轮身份，不作本合同指纹。",
+   "evidence_path": "evidence/external/real-etu-asset.md",
+   "evidence_sha256": "691AFEE485CEF2BEA1858E8B12356EC16B221C15C4999E1DFD42F82964ED8F15"
+  },
+  {
+   "id": "EXT-BOARD-STATE",
+   "category": "hardware_state",
+   "description": "目标板实机前置状态输入（hardware_state）：C-TOY-LOOP/C-REAL-LOOP 执行前板卡必须处于「生产 Boot 完整 + BCB 与运行 App 一致」的合法态。历史链（如实登记）：原始阻断=BCB vcode 20801 与运行镜像 3.2.0(30200) 不一致（ota_backup.c:385 一致性检查拒绝 STAGED 提交），2026-09-13 经批准恢复方案 v5（P3-3-bcb-recovery-plan-2026-09-13-v5.md，P1_6_TEST_ENABLE 版 Boot 的 CLEAR_BCB + 状态机 commit_confirmed 重建）以恢复轮 20260913-r1 消除（REC0-REC7/S1A-S6 全 PASS，四判据满足；该轮命令会话 11/10 超授权 1 次已经用户 2026-09-14 追认销账）；2026-09-14 O2 实测 PRODUCT_FAIL 期间板卡未被改动（缺陷固件只完成传输+落盘 staging，未写 BCB 未复位；J-Link 三次只读实证留 .cache/p3-3-o2-jlink/）；2026-09-14 晚烧录事故（实现 agent 误烧未 finalize 裸构建镜像触发 boot 设计内 ROLLBACK 死等黑屏，无持久损伤，复盘主执行笔记 §16）经恢复轮 20260914-r2（S1A-S6 全 PASS，脚本 Tools/jlink/p3-3-recovery-execute.ps1 三处参数化适配随 freeze_commit 入库）恢复。当前终态（O 序列重跑合法起点）：生产 Boot 全区原样（S6 restored_sha256=b6b33a82a56a4e974a9a2e2d887ddc598130aae0ab4940c4007ad1feb89b2dd4 与 S1A 备份及 r1 轮同 SHA 闭合）+ 3.2.0-fixed App(30200)（S5 app_sha256=24fc02ea389eec37e1eda0f896bbf8e90fa7a50fa8a8072450ba0e057e728126 与 finalize 镜像头 image_sha256 全等，app_sha256_checked=true；该 App 即 1894f9d 修复版 finalize 产物，与 v5 toy/真包功能本体逐字节同源）+ BCB CONFIRMED cur_vcode=30200（S5 active=1(A)/state=4/seq=0/app_result=VALID）+ 新鲜终证（S6 复位⑥后 RTT 自报 OTA: BCB already CONFIRMED vcode=30200，RTT 地址 0x200540AC 经 map 严格符号行+SEGGER 签名会话双核对）。本输入的解决证据=r2 恢复操作执行后完成判据四条的留证（S2/S5 快照文件+RTT 自报行+S6 全区恢复核验+终态一致性）；四条判据全部满足前 C-TOY-LOOP/C-REAL-LOOP 不得执行（已满足）。授权与边界：恢复属独立真机准备操作，不并入本合同判据；r2 额度 10/10+6/6+2/2+2/2 零超授权（命令会话/主动复位/RTT logger/RTT 签名会话）；写入仅 boot 区 0x08000000-0x08004FFF、EEPROM 0x00-0x7F（CLEAR_BCB，清前双块 128B 留档）、RAM 控制块 0x20057E00-0x20057FFF；App 区 0x08010000 与 QSPI 槽零写入；恢复授权与 O 序列、历史 A1/B1-M 配额不互借。；v6 轮演进（如实登记）：v5 合同登记的 r2 恢复终态（30200 CONFIRMED）经第十轮 O2/O3 toy 闭环→30201、O4 真包闭环→30202、r6 轮 v6 真包闭环→30203（全程生产 Boot 全区原样、BCB 每轮 CONFIRMED 一致态，无阻断态复发）；当前设备态=3.2.3(30203)+3a282768 CONFIRMED（r6 服务日志设备自报+用户实测确认）；C-TOY/C-REAL 判据执行时点的前置状态以此历史链为准。",
+   "fingerprint": "当前设备终态（本合同执行时点）：运行 App 3.2.3（versionCode 30203），镜像 SHA-256 3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3（=v6 真包目标镜像，r6 闭环终点），BCB CONFIRMED/cur_vcode=30203，生产 Boot 全区原样（r2 恢复轮 S6 restored_sha256 与 S1A 备份闭合，其后各轮未写 Boot 区）；证据=r6 服务日志三次设备自报（00:06:05.449/00:06:08.608/00:07:22.431，30203+3a282768 与服务端注册全等）+用户 2026-09-15 实测确认（180s 复核窗口内确认）。历史状态链（20801 不一致→20260913-r1 恢复→O2 缺陷→烧录事故→20260914-r2 恢复 30200→O2/O3 toy 30201→O4 30202→r6 30203）全部留档，见 evidence/external/board-bcb-state.md §2。v7 验收纯只读，不操作设备（不连 J-Link、不烧录、不读写 BCB/App 区）。",
+   "evidence_path": "evidence/external/board-bcb-state.md",
+   "evidence_sha256": "3A71B529C62AED464E505F2A4B82ACDC1CA067A51996D7FDBF42EC44A73588E2"
+  }
+ ],
+ "commands": [
+  {
+   "id": "CMD-DEV-CHECKS",
+   "description": "开发自测只读核验（零 dispatch）：核验既有 run 34861159023（ce30190 push 触发）与 34869549756（freeze_commit 0fb167c push 触发）的 conclusion 与双宿主 job 结论。本判据通过条件：两个 run 双宿主 job conclusion 均 success、analyze 无 issue、全部测试通过（无 continue-on-error/降级）；原始日志可按需用 gh run view <id> --log 归档为 raw_log 证据（ART-DEV-LOGS）。run URL：https://github.com/Eitan-S-23/E-Track/actions/runs/34861159023 与 …/34869549756。v6 轮 G01 教训：命令必须与实际取证动作一致，不得以派发命令冒记只读核验。",
+   "command": "gh run view 34861159023 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh run view 34869549756 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\"",
+   "input_groups": [
+    "flutter",
+    "validation"
+   ],
+   "runner_paths": [
+    ".github/workflows/flutter-dev-checks.yml",
+    "Tools/flutter/dev_checks.py"
+   ],
+   "expected_exit_codes": [
+    0
+   ],
+   "output_required": true
+  },
+  {
+   "id": "CMD-RELEASE-BUILD",
+   "description": "受验 APK 构建核验（只读，零 dispatch/零新构建）：核验既有 run 34864052541（第六轮 APK，用户 2026-09-14 授权第六笔 build 额度；Build Android APK/Build Windows EXE success、Pages/Release skipped；dispatch 提交 ce30190=freeze_commit 直接父提交，git diff ce30190 0fb167c -- app/ 为空=构建输入零差异）。artifact 清单经 gh api 列出；Windows 完整运行包（ART-WINDOWS-RUNTIME）按名 windows-exe 下载至 .cache/p3-3-v7-win/（验收会话专用下载目标）核验。本地实物 .cache/p3-3-apk-r6/ble-monitor-android.apk 46,699,144B SHA-256 fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13；apksigner 输出受验侧证书基准（不同 CI run 的 debug 签名证书不保证相同，逐次实测；apksigner=官方 build-tools r35 组件 .cache/p3-3-apk/tools/android-15/）。",
+   "command": "gh run view 34864052541 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh api repos/Eitan-S-23/E-Track/actions/runs/34864052541/artifacts --jq \".artifacts[]|{name:.name,size:.size_in_bytes,id:.id}\" && gh run download 34864052541 -n windows-exe -D .cache/p3-3-v7-win && python -X utf8 -c \"import hashlib;d=open('.cache/p3-3-apk-r6/ble-monitor-android.apk','rb').read();print(len(d));print(hashlib.sha256(d).hexdigest())\" && .cache/p3-3-apk/tools/android-15/apksigner.bat verify --print-certs .cache/p3-3-apk-r6/ble-monitor-android.apk",
+   "input_groups": [
+    "flutter",
+    "validation"
+   ],
+   "runner_paths": [
+    ".github/workflows/build.yml"
+   ],
+   "expected_exit_codes": [
+    0
+   ],
+   "output_required": true
+  },
+  {
+   "id": "CMD-APK-INSTALL",
+   "description": "在装受验包只读核验（零安装/零卸载/零清数据）：r6 轮已由第六轮 APK（fb6a91e6…）覆盖装机并实测通过，本轮补全 v6 轮未完成的双侧证书比对。取证链：dumpsys 确认在装受验包 versionCode=86/versionName=1.0.60 → pm path 定位 → adb pull 在装 base.apk → size/SHA-256（对受验实物 fb6a91e6…）→ apksigner 在装证书（对受验实物证书=受验 APK 来源身份锚定）→ 生产包 com.wen.gaia.gaia dumpsys 只读确认（versionName/lastUpdateTime 未被触碰）。设备 vivo V2312A 序列号 10ADA4197U001CK；pull 回件落项目内 .cache/。手机未连接则判 ENV_BLOCKED，不得改装任何包。",
+   "command": "adb -s 10ADA4197U001CK shell dumpsys package com.wen.gaia.gaia.p33acceptance | grep -E \"versionCode|versionName\" && P=$(adb -s 10ADA4197U001CK shell pm path com.wen.gaia.gaia.p33acceptance | head -1 | tr -d '\\r' | sed 's/package://') && adb -s 10ADA4197U001CK pull \"$P\" .cache/p3-3-v7-installed-base.apk && python -X utf8 -c \"import hashlib;d=open('.cache/p3-3-v7-installed-base.apk','rb').read();print(len(d));print(hashlib.sha256(d).hexdigest())\" && .cache/p3-3-apk/tools/android-15/apksigner.bat verify --print-certs .cache/p3-3-v7-installed-base.apk && adb -s 10ADA4197U001CK shell dumpsys package com.wen.gaia.gaia | grep -E \"versionName|lastUpdateTime\"",
+   "input_groups": [
+    "flutter"
+   ],
+   "runner_paths": [],
+   "expected_exit_codes": [
+    0
+   ],
+   "output_required": true
+  },
+  {
+   "id": "CMD-TOY-LOOP",
+   "description": "toy 3.2.1/30201 闭环离线证据审查（零设备操作）：判定素材=第十轮 O2/O3 实测留档+代码演进论证。证据链：服务日志 .cache/p3-3-v2-service/service-v5-20260914.log（21:33 发现 30201→21:33:48 download 284,540B→21:40:15.699/21:40:23.420/21:40:28.439 三次 latest 设备自报 30201+aeafc96e 全等；20:21-20:22 为宿主三层验证行）+ RTT 留档 .cache/p3-3-o-verify/o-verify-boot-rtt.log（两处 'OTA: BCB already CONFIRMED vcode=30201'）+ J-Link 读回仲裁与设备侧细节 docs/ota-exec-notes/P3-3-o-sequence-execution-2026-09-14.md + toy 目标镜像实物哈希核对（.cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin，603,764B aeafc96e…）+ 代码演进 git diff 6415226 0fb167c --stat -- app/（仅 7d2856e 三缺陷修复+ce30190 CI 整改，6 文件，不触碰发现/传输/staging/激活路径；60s→180s 复核窗口新行为已由 r6 real 闭环实测 PASS）。六状态判定口径见 C-TOY-LOOP 判据描述（含缺口如实登记）。设备当前=30203，toy 重跑需回退烧录授权（未获授权不执行）。",
+   "command": "grep -nE \"asset-full-30201|currentVersionCode=30201\" .cache/p3-3-v2-service/service-v5-20260914.log | head -8 && grep -n \"BCB already CONFIRMED vcode=30201\" .cache/p3-3-o-verify/o-verify-boot-rtt.log && python -X utf8 -c \"import hashlib;d=open('.cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin','rb').read();print(len(d));print(hashlib.sha256(d).hexdigest())\" && git diff 6415226 0fb167c --stat -- app/",
+   "input_groups": [
+    "production",
+    "flutter"
+   ],
+   "runner_paths": [],
+   "expected_exit_codes": [
+    0
+   ],
+   "output_required": true
+  },
+  {
+   "id": "CMD-REAL-LOOP",
+   "description": "真包 3.2.3/30203 闭环离线证据审查（零设备操作）：v6 执行事实=r6 轮实测（第六轮 APK fb6a91e6… 含三缺陷修复实现，30202→30203）。服务日志 .cache/p3-3-v2-service/service-v6-20260914.log 完整时间线（如实含首次未闭环尝试）：23:43:06/23:43:19 latest（30202，currentImageSha 全零——App 未带设备完整镜像 SHA）→23:43:23 download 284,608B（首次下载，未形成完整传输闭环）→23:59:30/00:00:11 latest（30202+ab0585f7 真实起点）→00:00:15 download 284,608B→BLE 传输→00:06:05.449/00:06:08.608/00:07:22.431 三次 latest 设备自报 30203+3a282768 与服务端注册全等→200 no_update（114B）自洽；用户 2026-09-15 实测确认（180s 复核窗口内确认）。证据回填 docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md §7/§7.1。real 目标镜像实物哈希核对（.cache/p3-3-assets-v6/real-3.2.3-30203-final.bin，603,764B 3a282768…）。构建输入等价：git diff ce30190 0fb167c -- app/ 为空（wc -l 输出 0）。受控服务与隧道已于 2026-09-15 D 清理终止，验收走日志+落盘证据，不依赖活端点。",
+   "command": "grep -nE \"asset-full-30203|currentVersionCode=30203\" .cache/p3-3-v2-service/service-v6-20260914.log | head -8 && python -X utf8 -c \"import hashlib;d=open('.cache/p3-3-assets-v6/real-3.2.3-30203-final.bin','rb').read();print(len(d));print(hashlib.sha256(d).hexdigest())\" && git diff ce30190 0fb167c -- app/ | wc -l",
+   "input_groups": [
+    "production",
+    "flutter"
+   ],
+   "runner_paths": [],
+   "expected_exit_codes": [
+    0
+   ],
+   "output_required": true
+  }
+ ],
+ "artifacts": [
+  {
+   "id": "ART-DEV-LOGS",
+   "description": "开发自测归档（文件型）：两个 run 的 gh run view --json 核验输出与按需 --log 原始日志摘要，落 evidence/dev-checks/dev-checks-runs.json，绑定具体 run，不以派发退出码代替。",
+   "path": "evidence/dev-checks/dev-checks-runs.json"
+  },
+  {
+   "id": "ART-APK-RELEASE",
+   "description": "受验 release APK（经 build.yml dispatch 输入 firmware_latest_url 注入 Quick Tunnel r4 https endpoint + release_application_id_suffix=.p33acceptance 构建；包名 com.wen.gaia.gaia.p33acceptance（生产默认包名不变），冻结时绑定确切路径/size/SHA-256、包名实测值（aapt/dumpsys）与证书指纹实测值（apksigner verify --print-certs，不同 CI run 的 debug 签名不能假定相同）；release 模式 debug 签名回退不自动否决功能验收，但不视为固定生产签名验证；既有安装 com.wen.gaia.gaia 全程不动——不卸载、不清数据，并存安装无覆盖冲突）。；v6 轮受验 APK=第六轮（.cache/p3-3-apk-r6/ble-monitor-android.apk，46,699,144B，SHA-256 fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13，run 34864052541 构建，r6 已装机实测）。",
+   "path": "artifacts/ble-monitor-android.apk"
+  },
+  {
+   "id": "ART-WINDOWS-RUNTIME",
+   "description": "Windows 完整运行包 zip（独立产物绑定；Windows 证据以完整运行包为准，不是裸 exe）。",
+   "path": "artifacts/ble-monitor-windows.zip"
+  },
+  {
+   "id": "ART-TOY-ETU",
+   "description": "可启动受控 toy OTA 包（目标 3.2.1/30201，规范名 e-track-at32f435-v3.2.1-full.etu）：v5 重制（源=1894f9d 修复版 GCC 构建即板上 3.2.0-fixed 本体；实物为 admission worktree .cache/p3-3-assets-v5/ 唯一持有处，ETU 因 AES nonce 随机不可从文档复现、丢失重打包须重新登记）。四元组：pre-finalize 4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec / 镜像 raw aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298 / 双零摘要 9d7a3cdca4f8612908a13c538796cddcb9bb0e27c8b3d06ae21769dcbe123371 / ETU SHA 0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5（284,540B）。golden vectors 不具上板资格。",
+   "path": "artifacts/e-track-at32f435-v3.2.1-full.etu"
+  },
+  {
+   "id": "ART-TOY-TARGET-IMAGE",
+   "description": "toy 闭环冻结目标镜像（3.2.1/30201，GET_INFO 终点的 versionCode 与 raw SHA-256 基准 aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298）。",
+   "path": "artifacts/toy-3.2.1-target-image.bin"
+  },
+  {
+   "id": "ART-REAL-ETU",
+   "description": "真实固件 OTA 包（目标 3.2.3/30203，规范名 e-track-at32f435-v3.2.3-full.etu）：v6 制包（源=1894f9d 修复版 GCC 构建即板上 3.2.0-fixed 本体，与 toy/30202 真包同源；实物为 admission worktree .cache/p3-3-assets-v6/ 唯一持有处，ETU 因 AES nonce 随机不可从文档复现、丢失重打包须重新登记）。四元组：pre-finalize 4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec / 镜像 raw 3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3 / 双零摘要 1a60579440c6feb79fa52f488dfcc0d6ff893eda36533d32ff08e4685094bd28 / ETU SHA a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915（284,608B）。v5 真包（3.2.2/30202，0c8ae468…）实物 .cache/p3-3-assets-v5/ 原样保留作历史轮证据。",
+   "path": "artifacts/e-track-at32f435-v3.2.3-full.etu"
+  },
+  {
+   "id": "ART-REAL-TARGET-IMAGE",
+   "description": "真包闭环冻结目标镜像（3.2.3/30203，GET_INFO 终点的 versionCode 与 raw SHA-256 基准 3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3）。",
+   "path": "artifacts/real-3.2.3-target-image.bin"
+  }
+ ],
+ "criteria": [
+  {
+   "id": "C-DEV-CHECKS",
+   "description": "freeze_commit 上 flutter-dev-checks 双宿主 strict analyze + 全部测试通过（无 continue-on-error/降级）。v7 为只读核验轮：核验既有 run 34861159023（ce30190 push 触发）与 34869549756（freeze_commit 0fb167c push 触发）的 job conclusion（双宿主 success）与原始日志，零 dispatch。run URL：https://github.com/Eitan-S-23/E-Track/actions/runs/34861159023 与 …/34869549756。",
+   "required": true,
+   "kind": "functional",
+   "evidence_types": [
+    "raw_log",
+    "run_url"
+   ],
+   "input_groups": [
+    "flutter",
+    "validation"
+   ],
+   "dependency_rationale": "flutter 组提供 App 源码与 runner 入口（dev_checks.py 在 Validation profile 内），两组共同构成自测命令的真实输入。",
+   "external_inputs": [],
+   "command_ids": [
+    "CMD-DEV-CHECKS"
+   ],
+   "artifact_ids": [
+    "ART-DEV-LOGS"
+   ],
+   "gate": {
+    "type": "boolean",
+    "basis": "frozen_requirement",
+    "expected": true
+   }
+  },
+  {
+   "id": "C-RELEASE-BUILD",
+   "description": "受验 APK 构建核验（只读，零 dispatch/零新构建）：run 34864052541（第六轮 APK，用户 2026-09-14 授权第六笔 build 额度；Build Android APK/Build Windows EXE success、Pages/Release skipped；dispatch 提交 ce30190=freeze_commit 直接父提交，git diff ce30190 0fb167c -- app/ 为空=构建输入零差异）。本地实物 .cache/p3-3-apk-r6/ble-monitor-android.apk 46,699,144B SHA-256 fb6a91e6…；apksigner 实测受验侧证书基准（不同 CI run 的 debug 签名证书不保证相同，逐次实测）。Windows 完整运行包（ART-WINDOWS-RUNTIME）按 artifact 名 windows-exe 从该 run 下载核验。",
+   "required": true,
+   "kind": "functional",
+   "evidence_types": [
+    "raw_log",
+    "run_url",
+    "artifact_hash"
+   ],
+   "input_groups": [
+    "flutter",
+    "validation"
+   ],
+   "dependency_rationale": "flutter 组提供 App 源码与 build.yml；Validation 组提供构建 runner 脚本与宿主回归。产物身份以实物下载核验为准。",
+   "external_inputs": [],
+   "command_ids": [
+    "CMD-RELEASE-BUILD"
+   ],
+   "artifact_ids": [
+    "ART-APK-RELEASE",
+    "ART-WINDOWS-RUNTIME"
+   ],
+   "gate": {
+    "type": "boolean",
+    "basis": "frozen_requirement",
+    "expected": true
+   }
+  },
+  {
+   "id": "C-APK-INSTALL",
+   "description": "在装受验包只读核验（零安装/零卸载/零清数据）：r6 轮已由第六轮 APK（fb6a91e6…）覆盖装机并实测，本轮补全 v6 轮未完成的双侧证书比对。取证链：dumpsys 确认在装 versionCode=86/versionName=1.0.60 → pm path → adb pull base.apk → size/SHA-256（对 fb6a91e6…）→ apksigner 在装证书（对受验实物证书）→ 生产包 com.wen.gaia.gaia dumpsys 只读确认（versionName/lastUpdateTime 未被触碰）。设备 vivo V2312A 序列号 10ADA4197U001CK；手机未连接判 ENV_BLOCKED，不得改装任何包。",
+   "required": true,
+   "kind": "functional",
+   "evidence_types": [
+    "raw_log",
+    "device_observation"
+   ],
+   "input_groups": [
+    "flutter"
+   ],
+   "external_inputs": [],
+   "command_ids": [
+    "CMD-APK-INSTALL"
+   ],
+   "artifact_ids": [
+    "ART-APK-RELEASE"
+   ],
+   "gate": {
+    "type": "boolean",
+    "basis": "frozen_requirement",
+    "expected": true
+   }
+  },
+  {
+   "id": "C-TOY-LOOP",
+   "description": "toy 3.2.1/30201 闭环（卡面验收标准：重启后新连接 GET_INFO 的目标版本和完整 raw SHA-256 一致，不以发送完成或 END ACK 代替）。判定素材=v5 冻结后第十轮 O2/O3 实测留档+代码演进论证：service-v5 日志（21:33 发现 30201→21:33:48 download 284,540B→21:40:15.699/21:40:23.420/21:40:28.439 三次 latest 设备自报 30201+aeafc96e 全等；首见新身份时间为 21:40:15.699——按 v6 验收报告 §4.2 修正，不沿用实现叙述的 21:40:02/11）+ RTT 留档（两处 'OTA: BCB already CONFIRMED vcode=30201'）+ J-Link 读回仲裁（docs/ota-exec-notes/P3-3-o-sequence-execution-2026-09-14.md）+ git diff 6415226 0fb167c -- app/（仅 7d2856e 三缺陷修复+ce30190 CI 整改，不触碰发现/传输/staging/激活路径；60s→180s 复核窗口新行为已由 r6 real 闭环实测）。六状态推导口径：ota_session_info_ok/ota_package_verified/ota_transfer_durable_complete/ota_ack_end_ok 由「服务端发现+下载+终点设备自报新身份+RTT CONFIRMED+1894f9d 修复语义（BCB 提交与复位仅在 ACK_END 成功后发生）」推导；toy 轮 App logcat 已滚动丢失、BLE 层无独立原始日志——缺口如实登记，接受推导与否由独立验收会话判定，不预设 PASS；无法推导时按 v6 验收报告 §5.3 讨论最小补测（需回退烧录授权，本轮不预设）。device_reboot/get_info_target_version_and_raw_sha_match 由三次 latest 自报直接证明。设备当前=30203，toy 重跑需版本回退授权（未获授权不执行）。",
+   "required": true,
+   "kind": "functional",
+   "evidence_types": [
+    "raw_log",
+    "device_observation",
+    "protocol_trace"
+   ],
+   "input_groups": [
+    "production",
+    "flutter"
+   ],
+   "dependency_rationale": "production 组提供 MCU 侧 OTA/boot 源码与目标镜像输入，flutter 组提供手机 App 升级链路；两者共同构成 BLE 闭环的两端。",
+   "external_inputs": [
+    "EXT-HTTP-TEST-SERVICE",
+    "EXT-TOY-BOOTABLE",
+    "EXT-BOARD-STATE"
+   ],
+   "command_ids": [
+    "CMD-TOY-LOOP"
+   ],
+   "artifact_ids": [
+    "ART-TOY-ETU",
+    "ART-TOY-TARGET-IMAGE"
+   ],
+   "gate": {
+    "type": "state_chain",
+    "basis": "protocol_contract",
+    "expected": [
+     "ota_session_info_ok",
+     "ota_package_verified",
+     "ota_transfer_durable_complete",
+     "ota_ack_end_ok",
+     "device_reboot",
+     "get_info_target_version_and_raw_sha_match"
+    ]
+   }
+  },
+  {
+   "id": "C-REAL-LOOP",
+   "description": "真包 3.2.3/30203 闭环（卡面验收标准同 C-TOY-LOOP，不以发送完成或 END ACK 代替）。v6 执行事实=r6 轮实测（第六轮 APK fb6a91e6… 含三缺陷修复实现，30202→30203）。service-v6 日志完整时间线（如实含首次未闭环尝试）：23:43:06/23:43:19 latest（30202，currentImageSha 全零——App 未带设备完整镜像 SHA，不能据该两条声称绑定设备真实身份）→23:43:23 download 284,608B（首次下载，未形成完整传输闭环）→23:59:30/00:00:11 latest（30202+ab0585f7 真实起点）→00:00:15 download 284,608B→BLE 传输→00:06:05.449/00:06:08.608/00:07:22.431 三次 latest 设备自报 30203+3a282768 与服务端注册全等→no_update 自洽；用户 2026-09-15 实测确认（180s 复核窗口内确认目标）。证据回填 docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md §7/§7.1。构建输入等价：git diff ce30190 0fb167c -- app/ 为空。六状态推导口径同 C-TOY-LOOP：BLE durable/ACK_END 无 App 端独立原始日志（服务端 HTTP 层不能直接代替），由传输完成+设备重启进新版本+复核确认推导，缺口如实登记、由独立验收会话裁定推导是否充分；no_update 响应=App 从设备 GET_INFO 读到新身份后回传查询的服务端镜像证据。受控服务与隧道已于 2026-09-15 D 清理终止，验收走日志+落盘证据，不依赖活端点。",
+   "required": true,
+   "kind": "functional",
+   "evidence_types": [
+    "raw_log",
+    "device_observation",
+    "protocol_trace"
+   ],
+   "input_groups": [
+    "production",
+    "flutter"
+   ],
+   "dependency_rationale": "同 C-TOY-LOOP：MCU 侧与手机 App 侧源码共同构成闭环两端；真包资产独立于 toy 资产构建与绑定。",
+   "external_inputs": [
+    "EXT-HTTP-TEST-SERVICE",
+    "EXT-REAL-ETU",
+    "EXT-BOARD-STATE"
+   ],
+   "command_ids": [
+    "CMD-REAL-LOOP"
+   ],
+   "artifact_ids": [
+    "ART-REAL-ETU",
+    "ART-REAL-TARGET-IMAGE"
+   ],
+   "gate": {
+    "type": "state_chain",
+    "basis": "protocol_contract",
+    "expected": [
+     "ota_session_info_ok",
+     "ota_package_verified",
+     "ota_transfer_durable_complete",
+     "ota_ack_end_ok",
+     "device_reboot",
+     "get_info_target_version_and_raw_sha_match"
+    ]
+   }
+  }
+ ],
+ "performance_gates": []
+}
