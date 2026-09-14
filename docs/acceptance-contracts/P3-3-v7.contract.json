@@ -4,7 +4,7 @@
  "version": 7,
  "task_id": "P3-3",
  "parent_contract_sha256": "B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171",
- "status": "DRAFT",
+ "status": "FROZEN",
  "approved_by": "用户飞书授权实现会话代办（P3-3-IMPL-20260907）：2026-09-15 v6 独立验收轮结论 EVIDENCE_GAP（G01 五条冻结命令沿用执行轮口径含派发/占位文本、G02 EXT-REAL-ETU/EXT-HTTP 指纹遗留 v5 身份，均为合同文本疏漏非产品缺陷）后，用户经治理质疑答复（验收标准三层结构澄清：标准内容在看板卡面与执行合同、实现会话仅起草第三层绑定）后裁定「你继续起草吧」授权 v7 勘误轮——修正 G01/G02 与 ART-DEV-LOGS 路径并重走冻结提交链；沿用 v4/v5/v6 用户批准的实现会话代办冻结先例，approved_by 如实登记授权链、不伪装独立会话，单轮判定权仍归独立验收会话",
  "approved_at": "2026-09-15T03:05:00+08:00",
  "implementation_ref": "docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md（第六轮受验 APK 与三缺陷实机验证执行，§7/§7.1 已回填实测结论与 D 清理）；实现链：7d2856e=第十一轮三缺陷修复、ce30190=同轮 CI 整改（见 P3-3-reboot-window-and-ui-fixes-2026-09-14.md）、0fb167c=第十二轮收口（r6 证据回填+service_config 新增 real-30203+两项新需求研究落盘+看板回写，即本合同 freeze_commit）；v6 fixture 制包与四元组见 r6 文档 §2/§3；两项新需求研究（用户裁定暂缓）见 P3-3-ble-speed-and-background-research-2026-09-15.md；v5 轮全链文档（O 序列/重制包/恢复 r2/码表整改）沿 v5 合同 implementation_ref 不变；v6 独立验收：docs/ota-exec-notes/P3-3-v6-acceptance-2026-09-15.md（EVIDENCE_GAP，G01/G02 详述、已复算实物 §4.1、最小后续范围 §5）",
