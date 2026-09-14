@@ -40,6 +40,7 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 | P3-3-v3 | v3 | `421bd290b0f5e30b385a17c2ab82a2b3d8844dc2` | `a178ecc1dca3929e1bca702fb11344f3c5bd2872` | `2ce26b29c395aebdd75b49376755d16c3706feea` | PASS（2026-09-13 FROZEN+NOT_RUN 执行前检查；O 序列执行后另行最终验收） |
 | P3-3-v4 | v3 | `a548d4325d6651264b0867e865e3ee40695aa372` | `bed3aa06f99c3d99291b081069a72ffd426a4e3d` | `6b971c71abcf7ebaa271aee9f6eac6f4ceb66b80` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理经用户授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |
 | P3-3-v5 | v3 | `b2fc1cebfc9c2585026489ac366315e4e89d38d8` | `6415226b8c30abcffa2b9bab52f0db717f8f7cb9` | `4bcf18a82a03f16c813e1b46938962538876ddbd` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理依修复轮整体授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |
+| P3-3-v6 | v3 | `3f7ca7e124c8cc36cbf78fb0eeea9a14b3fe88dc` | `0fb167cf4c44a6e4741e5a42fcd4945cf29f7780` | `b3d1d311645d584c48419b546a061c5648da740f` | PASS（2026-09-15 FROZEN+NOT_RUN 执行前检查；冻结办理经用户授权由实现会话代办，如实记录授权链；合同 SHA-256 B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171，矩阵 37A64A107DFE84A531909865B02C90CA25E3CCCC26634BF575744459E62EF6B9；r6 实机闭环等事实证据由验收会话复核，正式验收另行） |
 
 备注：
 
