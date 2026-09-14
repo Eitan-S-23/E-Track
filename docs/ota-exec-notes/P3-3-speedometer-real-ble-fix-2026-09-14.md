@@ -326,3 +326,220 @@ r3 Quick Tunnel（started-monitors-shower-cherry）与受控服务 python 进程
 - B. 重赌 Quick Tunnel（第四条隧道）：零新安装，但按 r1-r3 规律隧道寿命
   约 2 小时，需将「隧道→APK 构建→装机→O1-O5 全程」压入窗口，蜂窝
   再抖动一次即再烧一轮额度。
+
+
+## 13. r4 轮（B 路线）执行登记（2026-09-14 04:2x-04:4x）
+
+用户决策：选 B（重赌 Quick Tunnel 第四条）。备选 A（Tailscale）与新增
+C（公网免费平台部署）讨论留档于会话记录；B 路线用户侧零操作。
+
+### 13.1 预检与启动
+
+- 预检：无残留 cloudflared/python 进程，端口 8443 空闲；r3 的
+  `tunnel.log`/`service.log` 原样保留（§12 证据引用不破坏），r4 轮全部
+  使用新文件名（`tunnel-r4-20260914.log`/`tunnel-r4.pid`/
+  `service-r4-20260914.log`）。
+- r4 隧道：2026-09-14 04:22:26 起（tunnel log 20:22:26Z），域名
+  `describing-substance-databases-past.trycloudflare.com`，Connector
+  ID 78d40f42-e9bd-49fe-8610-cb561bc4710b，协议 QUIC 边缘 sjc，
+  `--no-autoupdate --url http://127.0.0.1:8443`（与 r1-r3 同形态）。
+- 受控服务：04:22:49 起，`--active-release toy-30201 --host 127.0.0.1
+  --port 8443 --public-base-url https://describing-substance-databases-
+  past.trycloudflare.com`，启动行双 fixture 核验一致（toy-30201
+  fc4ae5a9…/284092、real-30202 0a2eb26a…/284112，与冻结基准全等）。
+  netstat LISTENING PID 16284；D2 探测报服务 PID=18940、隧道 PID=15892
+  （探测口径差异如实登记，以 D2 输出与 tunnel-r4.pid 留档为准）。
+
+### 13.2 D2 宿主端到端检查：14/14 ALL PASS（04:2x）
+
+latest 十参数 200 / versionCode=30201（toy）/ downloadUrl 同域 https
+前缀 / fixture 哈希与大小一致 / 下载端点 200 且 SHA-256 全等
+fc4ae5a9…/ 证书链默认信任库校验通过（subject CN=trycloudflare.com，
+issuer Google Trust Services WE1）/ 根路径与 /api/ci/jobs、
+/api/admin/、/api/public/firmware/latestx 均 404。
+
+### 13.3 第五轮受验 APK 构建（用户逐轮授权）
+
+- 授权：用户 2026-09-14 飞书「授权」（04:4x，r4 轮第 5 笔构建额度）。
+- dispatch：04:48:47 触发 run 34781909023，参数与第四轮相同仅换
+  `firmware_latest_url`（新域名），`publish_release=false`、
+  `replace_existing_release=false`、后缀 `.p33acceptance`。
+- 构建结果与 APK 身份：run 34781909023 conclusion=success（5/5 jobs
+  绿）。APK 46,699,144 B，SHA-256
+  `2506e952da92fb2631b1325add4431cf60360efa9db4cbe641dddd3edf9d95af`
+  （存 `.cache/p3-3-apk-r5/ble-monitor-android.apk`）。飞书单文件上限
+  30MB，改发 GitHub artifact 原始 zip（25,508,237 B，SHA-256
+  `2e095bcc764374e30d4f3adb2015ba4c12d801c19f261422ce8c01df01cde58f`，
+  内层 APK 哈希复核全等）。用户装机并确认升级页元数据与冻结基准全等
+  （3.2.1 / 277.4 KB=284,092 B / 完整包 / fc4ae5a9… / toy 更新说明）。
+  已装侧证书指纹实测（dumpsys→pull→apksigner）因手机 USB 断连延后补。
+
+### 13.4 服务进程死亡与重启（HARNESS 类，已恢复）
+
+- 16:5x 会话轮换时上个 Claude 进程退出，带走 run_in_background 托管的
+  v2 服务（8443 无监听）；Quick Tunnel r4（shell `&` 形式）幸存，域名
+  不变。备份日志为 `service-r4-20260914-part1.bak` 后，用 `(python
+  service.py … &)` 完全脱离 harness 托管重启服务（17:01:54 启动行），
+  curl 验证 200。后续长驻进程一律脱离托管形式启动。
+- **cwd 漂移越界（第二次）**：新 turn 后 Bash cwd 重置回主仓，`gh run
+  download` 落到主仓 `D:\github\my\E-Track\.cache\p3-3-apk-r5\`。
+  已 mv 回本 worktree（哈希复核一致）；主仓空目录壳因句柄占用暂无法
+  删除，待句柄释放后清理并登记台账 §8。防再犯：所有命令显式绝对路径。
+
+### 13.5 O1 真机联网检查：实测通过（服务侧证据闭环）
+
+- 真机请求（服务日志 `service-r4-20260914.log`）：16:53:08 起三次
+  latest（16:53:08/12/19），十参数全对（appId=trace、deviceModel=
+  e-track-at32f435、channel=stable、currentVersionCode=30200、
+  currentImageSha=4512de08…【板卡实时镜像身份，非零即证明 BLE 已连
+  真板】、appVersionCode=86 等），均 200。
+- App 升级页元数据渲染与冻结基准全等（用户截图+文字确认）。
+- O1 判定：实测通过；仅已装侧证书指纹项延后（USB 断连，不改变判定）。
+
+## 14. O2 实测与 PRODUCT_FAIL 缺陷登记（2026-09-14 17:0x-18:0x）
+
+### 14.1 O2 时序（服务侧完整，BLE 传输完成，终点失败）
+
+- 17:04:25 latest 200（req=1dc958f6…，currentImageSha=4512de08…）→
+  17:04:30 download 200（284,092 B，req=a7759816…，token 签名通过）。
+- 用户观察：网络下载与 BLE 传输均完成，App 终点报
+  「等待设备重启复核超时」（REBOOT_RECONNECT_FAILED）。
+- 用户复查：①设备没有重启；②仍是 3.2.0；③断电重启后设备信息无版本
+  项、仍显示「发现新版本：3.2.1」；服务日志 17:13:36 latest 仍带
+  currentImageSha=4512de08…（重启后板上身份未变）。
+- O2 判定：**PRODUCT_FAIL**（服务侧两项 200 为实测通过；升级闭环终点
+  失败为产品缺陷，证据见 14.2/14.3）。O3/O5 被此缺陷阻断。
+
+### 14.2 源码根因链（板上固件 provenance 已钉死=当前源码固件部分）
+
+- `Libraries/OTA/ota_ble_session.c` `session_handle_end`（609-675 行）：
+  sha 复述比对→durable 对齐→整包 SHA-256 校验→`ota_staging_finalize`
+  →ACK END OK→teardown。**无 BCB 写、无系统复位**。
+- `bcb_commit(STAGED)` 全局唯一调用链在 SD 卡路径
+  （`USER/App/Utils/OtaUpdate/OtaUpdate.cpp` CommitStaged）；系统复位
+  全局唯二（`FileBrowser.cpp:236` SD 路径、`HAL_FaultHandle.cpp:20`）。
+- `boot/src/boot_state_machine.c`：578 行 CONFIRMED 分支=
+  validate_internal_app→return_jump，**完全无视 staging 区**；只有
+  STAGED 分支（590 行）才搬包。
+- App 侧 `ota_service.dart`（890-990 行）END ACK OK 后 dispose 传输层，
+  60 秒等待重连+GET_INFO 三态复核——与固件「不重启不激活」的实现不
+  匹配，必然超时。
+- 结论：**BLE OTA 接收端只完成了「传输+落盘 staging」一半；「BCB 置
+  STAGED+复位激活」两环节缺失**，升级包永久躺 staging 区无人消费。
+
+### 14.3 J-Link 只读实证（用户授权「只读 BCB+staging 槽头，不写入」）
+
+三次纯只读会话（AT32F435RGT7/SWD/1000kHz，脚本与产物在
+`.cache/p3-3-o2-jlink/`，log 内含全部命令与读回）：
+
+- **staging 槽头**（`savebin 0x90300000,0x120`，QSPI1 XIP 窗口，App
+  启动后 XIP 常开）：`ETSL` + slot_type=3(STAGING) + total_len=284,092
+  + payload_crc32=0xAD86C649 + target_vcode=30201 + sha8=
+  `fc4ae5a9fd1a9c13` + COMMIT_MARKER=0x434F4D54。**四身份字段与 toy
+  包冻结基准全等，commit marker 已写入**——固件侧 finalize 成功实证。
+- **staging payload 头**（`savebin 0x90301000,0x100`，payload 在
+  OTA_SLOT_HEADER_SIZE=0x1000 之后）：前 256 字节与
+  `e-track-at32f435-v3.2.1-full.etu` 实物**逐字节全等**（含 magic
+  ETU1 与 nonce 9bd604ec…）。
+- **板上 App fw_header**（`savebin 0x08010400,0x60`，OTA_APP_ORIGIN=
+  0x08010000+0x400）：`ETFW` + vcode=30200 + "3.2.0" + image_len=
+  602,984 + 双零摘要 `d97534841302c16d4e026820a6b854c8ee68cc256b0042
+  024d1280001f7401dd`——与恢复轮 SNAPSHOT 实测 app_sha256 全等。
+  **板上运行镜像仍是 3.2.0，未被替换。**
+- **BCB 未做字节级读**：BCB 在 I2C EEPROM（Wire 总线），无内存映射；
+  字节级读需 halt 后篡改 PC/寄存器执行固件代码，超出「不写入任何
+  东西」的授权字面边界，未执行。BCB=CONFIRMED/30200 由反证闭合：若
+  BCB 处于 STAGED/TEST_BOOT，断电重启后 boot 必然搬包或回滚使版本
+  改变；实测断电重启后仍 3.2.0（服务日志 17:13:36 + fw_header 直读），
+  故 BCB 必然仍在 CONFIRMED 态。
+- 证据哈希：staging-slot.bin
+  `a095bbd129e3f0907531f96ff394a009ba1516abb3d0ecfbfabab110f7cfc7af`；
+  staging-payload-head.bin
+  `cbdb2346b0c8a8f8dc2234d52b8272945d72930967f87476213bd677e85ef127`；
+  app-fw-header.bin
+  `ddff9540dbe7268644d1624639b792a8fea2c90dab4ba4db803212829c04b1fd`。
+
+### 14.4 缺陷登记与修复方向
+
+- 分类：PRODUCT_FAIL（固件侧 BLE OTA 升级闭环断裂）。
+- 修复方向：固件 `session_handle_end` 在 ACK END OK 前补
+  `bcb_commit(BCB_STATE_STAGED, cand_addr=OTA_EXT_STAGING)` + 系统
+  复位（对齐 SD 卡路径 CommitStaged 的两环节语义）；App 侧 60 秒复核
+  设计无需改动（修复后固件会真实重启进入 TEST_BOOT/CONFIRMED 流程）。
+- 后续整改走新轮次：固件修复→重建（GCC）→重新制包（源镜像变化后
+  按资产方案 §2.3 基线规则）→v5 合同冻结（parent 绑 v4
+  4AABC513…，task_id 不变）→O 序列重跑（O3 切真包需换
+  --active-release 重启服务，D4 规则只停服务不动隧道）。
+
+## 15. 修复轮实现与本地验证（2026-09-14 18:0x-19:0x，用户授权后）
+
+### 15.1 实现内容（三个源文件 + 测试扩展）
+
+- `Libraries/OTA/ota_ble_session.h`：`ota_ble_env_t` 新增
+  `activate_staged(target_vcode, total_len, kind)` 与 `system_reset`
+  两回调；`ota_ble_session_t` 新增 `pkg_kind`（BEGIN inspect 结果）。
+- `Libraries/OTA/ota_ble_session.c` `session_handle_end`：①ACK OK 前
+  对 `activate_staged` 做 NULL fail-closed（回 ERR_FLASH，不发送伪
+  OK）；②ACK OK→teardown 之后调激活（成功→`system_reset`，失败→
+  自然返回跑旧版）。BEGIN 处理同步存 `pkg_kind`。
+- `USER/HAL/HAL_Bluetooth.cpp`：`ble_env_activate_staged` 实现
+  CONFIRMED 再核→full/patch 按 kind 分派（patch 基线从当前镜像
+  fw_header 读）→Apply→target_vcode 核对→BackupStage→身份三元
+  核对；`COMMIT_AMBIGUOUS` 与 SD 路径同分类（不复位，BCB 由 boot
+  下次启动仲裁）。`ble_env_system_reset` = CMSIS `NVIC_SystemReset()`
+  （固件内先例 HAL_FaultHandle.cpp:20；FileBrowser 的
+  HAL_NVIC_SystemReset 不参与固件构建，非有效先例）。RTT 打点
+  `BLEACT:` 各阶段计时行（供 60s 窗口裁定）。`_WIN32` 分支对齐
+  OtaUpdate 模拟器语义。
+- `tests/ota/test_ota_ble_session.c`：env 打点（activate 参数三元组/
+  reset 计数/NULL 注入）；新增 `make_patch_kind_package` fixture；
+  test_end_paths 扩 F/G/H/I 四段（成功激活+复位 / 失败 ACK 先行不
+  复位 / NULL fail-closed ERR_FLASH / patch kind 透传）。
+
+### 15.2 设计依据
+
+- 契约依据：`docs/ota-binary-contracts.md` §4.5「成功路径随后重启
+  进入 boot」——修复即补齐契约要求行为，契约无需改动；激活序列与
+  SD 卡路径 OtaUpdate::Apply→Stage→复位同构（BLE×差分是 P5-1 四
+  组合门槛，故 kind 两分支完整实现）。
+- ACK 先行时序：App `receiveTimeout=60s`（ota_service.dart:105）与
+  激活 23-36s 估算存在赛跑；ACK END OK 先发（传输确认语义）使
+  发送端立即起算重启复核窗口，激活失败时窗口超时如实反映。teardown
+  先于激活：释放 BLE overlay owner 后 Apply 才能 acquire PACKAGE
+  overlay（owner 互斥）。
+- 同步长跑（非异步状态机）：对齐 SD 路径先例
+  （service_app_watchdog 注释明示 Apply/Backup 同步设计、内部喂狗）。
+
+### 15.3 本地验证
+
+- host 测试：`python tests/ota/test_ota_ble_session.py`
+  **114 checks, 0 failures**（首跑 2 failures 为 I 段会话号笔误，
+  修正后全绿）。CI 清单其余 host 测试串行复跑全 PASS
+  （staging/package/patch/ble_frame/device_info）。
+- GCC 构建：worktree 路径深 34 字符致默认构建目录对象路径超
+  MAX_PATH（benchmark demo 源 dep 文件打不开），改用项目内短目录
+  `.cache/bg`（对齐 CI 短目录先例，CMake 参数不变）。App+Boot
+  构建成功，增量重建 0 warning 0 error；首次全量存在 1 处既有
+  格式警告（HAL_FaultHandle.cpp:284 %08lx，P3-1-v2 验收包
+  full-build-raw.log 同款，非本次引入）。
+- 模拟器构建：MSBuild 绿（`_WIN32` 分支编译通过）。
+- 产物身份（`.cache/bg/`，2026-09-14 18:31）：
+  App bin 603,764 B =
+  `4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec`；
+  App elf `5f7f6c970a12cfb2b21b55b01e332a07d74dc36bb43f96f470b581915eb611f6`；
+  App hex `7dadfeb4a84d5b165a4aff3c8c4322693375eea810ffe7b70ac6d2b93ff9c950`；
+  Boot bin 14,724 B =
+  `5842ff3e19ba9e1eaaea10f27e825c7b6efc278b200531014b0dba61264f6594`；
+  Boot elf `d21713ca2c1efeac949f8ec0ffddacac439fed6bf26f9c65641bee24464fdabc`；
+  Boot hex `ff3badef69be6d97fd66815b8df90efd962a708b559c8951d4b56380f8001f71`。
+  size 输出：text 602324 / data 940 / bss 561696（RAM 100% 为
+  overlay 全量静态分配的既有状态）。
+
+### 15.4 后续（按用户授权的修复轮整体计划）
+
+- 烧板（3.2.0 修复版）→ RTT 采集 BLEACT 实测激活耗时 → 依据实测
+  裁定 App 60s 复核窗口（>50s 才改+重构建 APK 需新额度授权）。
+- 源镜像变化后按资产方案 §2.3 重制包（finalize 3.2.0/3.2.1/3.2.2
+  三版本基线）→ v5 合同冻结（parent 绑 v4 4AABC513…，task_id
+  不变）→ O 序列重跑（O3 切真包换 --active-release 重启服务，
+  D4 规则只停服务不动隧道）。

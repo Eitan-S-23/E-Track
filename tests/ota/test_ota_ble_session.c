@@ -205,6 +205,15 @@ typedef struct test_env_t
     ota_sd_device_t device;
     int info_provider_null;
     uint8_t image_sha[32];
+    /* P3-3 激活钩子打点：activate_result 注入返回值（默认 0 成功）；
+     * activate_hook_null 注入 NULL 测会话层 fail-closed。 */
+    int activate_hook_null;
+    int activate_result;
+    uint32_t activate_calls;
+    uint32_t activate_vcode;
+    uint32_t activate_total_len;
+    uint8_t activate_kind;
+    uint32_t reset_calls;
 } test_env_t;
 
 static test_env_t te;
@@ -285,6 +294,21 @@ static int env_info_provider(ota_ble_info_t *out_info)
     return 1;
 }
 
+static int env_activate_staged(uint32_t target_vcode, uint32_t total_len,
+                               ota_sd_kind_t kind)
+{
+    ++te.activate_calls;
+    te.activate_vcode = target_vcode;
+    te.activate_total_len = total_len;
+    te.activate_kind = (uint8_t)kind;
+    return te.activate_result;
+}
+
+static void env_system_reset(void)
+{
+    ++te.reset_calls;
+}
+
 static ota_ble_session_t session;
 
 static void build_session(void)
@@ -301,6 +325,8 @@ static void build_session(void)
     env.overlay_workspace = env_overlay_workspace;
     env.get_device = env_get_device;
     env.info_provider = te.info_provider_null ? NULL : env_info_provider;
+    env.activate_staged = te.activate_hook_null ? NULL : env_activate_staged;
+    env.system_reset = env_system_reset;
     env.staging_io = &staging_io;
     ota_ble_session_init(&session, &env);
 }
@@ -504,6 +530,53 @@ static uint8_t *make_full_package(uint32_t package_len)
     write_u32le(package + 12u, 1u);
     write_u32le(package + 32u, payload_len);
     write_u32le(package + 40u, 20800u);
+    package[48] = 1u;
+    package[50] = 1u;
+    package[51] = 1u;
+    for (index = OTA_SD_HEADER_SIZE; index < package_len; ++index)
+    {
+        package[index] = (uint8_t)(index * 29u + 7u);
+    }
+    write_u32le(package + 36u,
+                boot_crc32(package + OTA_SD_HEADER_SIZE, payload_len));
+    write_u32le(package + 60u, boot_crc32(package, 60u));
+    return package;
+}
+
+/* 与 make_full_package 同骨架，仅 flags/base 域按差分头规则填
+ * （base_vcode=20700、base_sha8=0x30..0x37，与 begin_case 的设备身份
+ * 耦合）。inspect 只校验头部合法性，patch payload 语义由 ota_patch
+ * 测试覆盖；本 fixture 用于验证 kind 透传到激活钩子。 */
+static uint8_t *make_patch_kind_package(uint32_t package_len)
+{
+    uint8_t *package;
+    uint32_t payload_len;
+    uint32_t index;
+
+    if (package_len <= OTA_SD_HEADER_SIZE + 41u)
+    {
+        return NULL;
+    }
+    package = (uint8_t *)calloc(1u, package_len);
+    if (package == NULL)
+    {
+        return NULL;
+    }
+    payload_len = package_len - OTA_SD_HEADER_SIZE;
+    memcpy(package, "ETU1", 4u);
+    package[4] = (uint8_t)OTA_SD_HEADER_SIZE;
+    package[5] = 0u;
+    package[6] = (uint8_t)(OTA_SD_PATCH_FLAGS & 0xFFu);
+    package[7] = (uint8_t)(OTA_SD_PATCH_FLAGS >> 8);
+    write_u32le(package + 8u, 1u);
+    write_u32le(package + 12u, 1u);
+    write_u32le(package + 32u, payload_len);
+    write_u32le(package + 40u, 20800u);
+    write_u32le(package + 44u, 20700u);
+    for (index = 0u; index < 8u; ++index)
+    {
+        package[52u + index] = (uint8_t)(0x30u + index);
+    }
     package[48] = 1u;
     package[50] = 1u;
     package[51] = 1u;
@@ -1072,7 +1145,9 @@ static void test_err_data_fail_closed(void)
 static void test_end_paths(void)
 {
     uint8_t *pkg;
+    uint8_t *pkg_p;
     uint8_t sha[32];
+    uint8_t sha_p[32];
     uint8_t wrong_sha[32];
     tx_view_t v;
     uint32_t pkg_len = 5000u;
@@ -1175,6 +1250,85 @@ static void test_end_paths(void)
     check("the finally staged package is byte-exact",
           memcmp(flash_fixture.bytes + OTA_STAGING_PAYLOAD_OFFSET, pkg,
                  pkg_len) == 0);
+
+    /* F. 激活成功：ACK OK 先行，激活钩子以 BEGIN inspect 的三元组被调，
+     * 成功后触发复位钩子（合同 §4.5：成功路径随后重启进入 boot）。 */
+    check("the successful END activated the staged package once",
+          te.activate_calls == 1u && te.activate_vcode == 20800u &&
+              te.activate_total_len == pkg_len &&
+              te.activate_kind == (uint8_t)OTA_SD_KIND_FULL);
+    check("the successful END triggered the reset hook after the ACK",
+          te.reset_calls == 1u &&
+              te.overlay_acquire_count == te.overlay_release_count);
+
+    /* G. 激活失败：ACK OK 仍先行（发送端起算重启复核窗口），不复位、
+     * 会话干净收尾（BCB 保持 CONFIRMED 的平台语义由设备侧保证）。 */
+    te.tx_count = 0u;
+    te.activate_result = -1;
+    wire_len = (uint16_t)build_begin_frame(140u, pkg_len, sha, pkg, 1u);
+    feed_idle(wire_len);
+    send_segments(pkg_len, pkg, 0u, 141u);
+    wire_len = (uint16_t)build_end_frame(181u, 6u, sha);
+    feed_isr(wire_len);
+    pump_once();
+    check("a failing activation still ACKs END OK first",
+          last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_END &&
+              tx_status(&v) == OTA_BLE_STATUS_OK);
+    check("a failing activation does not reset and tears down cleanly",
+          te.activate_calls == 2u && te.reset_calls == 1u &&
+              !ota_ble_session_active(&session) &&
+              te.overlay_acquire_count == te.overlay_release_count);
+
+    /* H. 激活钩子缺失：fail-closed 回 ERR_FLASH，不发送伪 OK。 */
+    te.tx_count = 0u;
+    te.activate_hook_null = 1;
+    build_session();
+    wire_len = (uint16_t)build_begin_frame(150u, pkg_len, sha, pkg, 1u);
+    feed_idle(wire_len);
+    send_segments(pkg_len, pkg, 0u, 151u);
+    wire_len = (uint16_t)build_end_frame(191u, 1u, sha);
+    feed_isr(wire_len);
+    pump_once();
+    check("a missing activation hook fails closed with ERR_FLASH",
+          last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_END &&
+              tx_status(&v) == OTA_BLE_STATUS_ERR_FLASH &&
+              !ota_ble_session_active(&session));
+    check("the missing-hook path never reaches activation or reset",
+          te.activate_calls == 2u && te.reset_calls == 1u);
+
+    /* I. 差分 kind 透传：patch 头包的激活钩子收到 OTA_SD_KIND_PATCH。 */
+    te.tx_count = 0u;
+    te.activate_calls = 0u;
+    te.activate_vcode = 0u;
+    te.activate_total_len = 0u;
+    te.activate_kind = 0u;
+    te.reset_calls = 0u;
+    te.activate_result = 0;
+    te.activate_hook_null = 0;
+    build_session();
+    pkg_p = make_patch_kind_package(pkg_len);
+    check("patch-kind fixture package is generated", pkg_p != NULL);
+    if (pkg_p != NULL)
+    {
+        sha256_of(pkg_p, pkg_len, sha_p);
+        wire_len = (uint16_t)build_begin_frame(160u, pkg_len, sha_p, pkg_p,
+                                               1u);
+        feed_idle(wire_len);
+        send_segments(pkg_len, pkg_p, 0u, 161u);
+        wire_len = (uint16_t)build_end_frame(201u, 1u, sha_p);
+        feed_isr(wire_len);
+        pump_once();
+        check("a patch-kind package activates with OTA_SD_KIND_PATCH",
+              last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_END &&
+                  tx_status(&v) == OTA_BLE_STATUS_OK &&
+                  te.activate_calls == 1u &&
+                  te.activate_kind == (uint8_t)OTA_SD_KIND_PATCH &&
+                  te.activate_vcode == 20800u &&
+                  te.activate_total_len == pkg_len);
+        check("the patch-kind activation path also resets",
+              te.reset_calls == 1u);
+        free(pkg_p);
+    }
     free(pkg);
 }
 
