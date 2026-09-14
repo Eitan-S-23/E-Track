@@ -1,5 +1,5 @@
 {
-  "_comment": "P3-3 受控 v2 测试服务配置（冻结源码 v1 配套）。fixture 身份绑定 2026-09-13 离线制包四元组（docs/ota-exec-notes/P3-3-offline-assets-2026-09-13.md），服务启动时逐字节核验，失配拒绝启动。本服务不证明 P4-2 通过（未实现 register/D1/admin 发布链）。",
+  "_comment": "P3-3 受控 v2 测试服务配置（冻结源码 v1 配套）。fixture 身份绑定 2026-09-14 v5 重制包四元组（docs/ota-exec-notes/P3-3-offline-assets-v5-rebuild-2026-09-14.md，源=1894f9d 修复版 GCC 构建即板上 3.2.0-fixed 本体），服务启动时逐字节核验，失配拒绝启动。本服务不证明 P4-2 通过（未实现 register/D1/admin 发布链）。",
   "listenHost": "127.0.0.1",
   "listenPort": 8443,
   "publicBaseUrl": "https://p3-3-v2-service.invalid:8443",
@@ -17,8 +17,8 @@
       "versionName": "3.2.1",
       "versionCode": 30201,
       "releaseTag": "v3.2.1",
-      "releaseNotes": "P3-3 受控测试 toy 固件包（3.2.1/30201），离线制包身份见 P3-3-offline-assets-2026-09-13.md",
-      "targetImageSha256": "43ee943a185f63d70284c7c5a9992d677a9bf8c518dacd2e63df8ec7e5809b55",
+      "releaseNotes": "P3-3 受控测试 toy 固件包（3.2.1/30201），v5 重制身份见 P3-3-offline-assets-v5-rebuild-2026-09-14.md",
+      "targetImageSha256": "aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298",
       "targetHardware": "e-track-at32f435",
       "minAppVersionCode": 0,
       "hardwareRevision": 1,
@@ -30,11 +30,11 @@
         "assetId": "asset-full-30201",
         "kind": "full",
         "fileName": "e-track-at32f435-v3.2.1-full.etu",
-        "sha256": "fc4ae5a9fd1a9c131b548188a7bb66643703cdea7b7007f66c8a71e304d479a2",
-        "sizeBytes": 284092,
+        "sha256": "0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5",
+        "sizeBytes": 284540,
         "baseVersionCode": 0,
         "baseImageSha256": null,
-        "path": ".cache/p3-3-assets/e-track-at32f435-v3.2.1-full.etu"
+        "path": ".cache/p3-3-assets-v5/e-track-at32f435-v3.2.1-full.etu"
       }
     },
     "real-30202": {
@@ -42,8 +42,8 @@
       "versionName": "3.2.2",
       "versionCode": 30202,
       "releaseTag": "v3.2.2",
-      "releaseNotes": "P3-3 受控测试真固件包（3.2.2/30202），离线制包身份见 P3-3-offline-assets-2026-09-13.md",
-      "targetImageSha256": "c958221392fade8b40520df2d7fd4278632d64bcdd8261b0ac7536c6468a7f39",
+      "releaseNotes": "P3-3 受控测试真固件包（3.2.2/30202），v5 重制身份见 P3-3-offline-assets-v5-rebuild-2026-09-14.md",
+      "targetImageSha256": "ab0585f71b9a523863b582e8ed4cc47a279bf6e57c4a1038635593306746ab7e",
       "targetHardware": "e-track-at32f435",
       "minAppVersionCode": 0,
       "hardwareRevision": 1,
@@ -55,11 +55,11 @@
         "assetId": "asset-full-30202",
         "kind": "full",
         "fileName": "e-track-at32f435-v3.2.2-full.etu",
-        "sha256": "0a2eb26a481d8c462b5316a67a151c8241de354d00797fa22f11e77056538ce5",
-        "sizeBytes": 284112,
+        "sha256": "0c8ae468948d8e85af0e8eaf3ec52e046f1b6a3cdba88f9bd8478790f0590f6f",
+        "sizeBytes": 284573,
         "baseVersionCode": 0,
         "baseImageSha256": null,
-        "path": ".cache/p3-3-assets/e-track-at32f435-v3.2.2-full.etu"
+        "path": ".cache/p3-3-assets-v5/e-track-at32f435-v3.2.2-full.etu"
       }
     }
   }

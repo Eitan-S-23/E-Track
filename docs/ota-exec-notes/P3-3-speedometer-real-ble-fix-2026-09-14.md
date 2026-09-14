@@ -543,3 +543,91 @@ issuer Google Trust Services WE1）/ 根路径与 /api/ci/jobs、
   三版本基线）→ v5 合同冻结（parent 绑 v4 4AABC513…，task_id
   不变）→ O 序列重跑（O3 切真包换 --active-release 重启服务，
   D4 规则只停服务不动隧道）。
+
+## 16. 修复轮烧板事故与 finalize 补救（2026-09-14 晚）
+
+### 16.1 事故经过
+
+- 首次烧录用 `.cache/bg/app-gcc/X-Track-App-GCC.hex`（裸构建产物，烧录
+  604,160 B，Erase 14.4s / Program 19.7s / Verify O.K.，退出码 0）。
+- 烧后设备未正常运行：J-Link mem8 读 `0x200540AC`（新 map 的
+  `_SEGGER_RTT`）内容为旧固件布局的 RTT 控制块（四字段连续匹配旧
+  `_acUpBuffer`=0x20053CA4，整体比新 map 前移 8 字节）——该 RAM 为旧
+  固件数据、未被新固件 bss 清零，新 App 的 ResetHandler 未运行。
+- 随后 SWD 持续 `Failed to initialized DAP`（1000/500/300 kHz 与
+  Reset-pin 重试均失败，VTref=3.3V 正常）。O2 轮同一板卡空闲 30-60 分钟
+  后 SWD 仍可连，排除常态空闲睡眠；判定为低功耗/复位态，需断电重启。
+
+### 16.2 根因（本地已钉死）
+
+- **GCC 裸构建 bin/hex 的 0x400 fw_header 槽为全 0xFF**（主仓
+  `build-gcc-release` 同代产物同样验证为全 FF）；fw_header 由
+  `Tools/etu_pack.py finalize` 写入（资产流程 §3 先例）。烧录未
+  finalize 镜像 → boot `validate_internal_app` 验 magic≠ETFW 拒跳
+  （`boot_state_machine.c` CONFIRMED 分支 578-588 行）→ `begin_rollback`
+  从 backup 槽回滚旧 3.2.0（设计内安全行为，无持久损伤；staging 槽
+  toy 3.2.1 与 BCB 不受影响）。
+- 教训登记：**GCC 构建产物烧板前必须 finalize**；AC5 hex 历史上直接
+  烧录可启动（AGENTS.md J-Link 流程先例均为 AC5），勿据此外推 GCC。
+  `validate_internal_app` 只验头自洽（default expectations），不比对
+  BCB 记录身份，故 finalize 后重烧即可恢复，无需动 BCB。
+
+### 16.3 补救产物（已就绪待烧）
+
+- `python Tools/etu_pack.py finalize --app
+  .cache/bg/app-gcc/X-Track-App-GCC.bin --out
+  .cache/p3-3-fix-flash/app-3.2.0-fixed-final.bin --ver-name 3.2.0
+  --build-ts 1789245256 --hw-rev 1 --layout-id 1 --min-boot 1`
+  （build_ts 沿用板上旧 3.2.0 头的 0x6A987148=1789245256，O2 dump
+  `.cache/p3-3-o2-jlink/app-fw-header.bin` 解析）。
+- 身份：603,764 B / vcode 30200 / ver "3.2.0" / image_sha256
+  `24fc02ea389eec37e1eda0f896bbf8e90fa7a50fa8a8072450ba0e057e728126`
+  （双零法本地复算 MATCH）/ final bin SHA-256
+  `d7cc41944fada9ddb4dada923d7efb65e6403cbf8e4fa52959361fccea38e488`。
+- 烧录脚本 `.cache/p3-3-fix-flash/flash-final.jlink`
+  （loadfile bin@0x08010000 → r → g → qc）。首次尝试仍 DAP 失败，
+  已请用户断电重启板卡后立即重烧。
+
+### 16.4 finalize 镜像烧录与逐字节核验（2026-09-14 19:07 后）
+
+- 断电重启后重烧成功；savebin 读回 0x08010000 起全区与
+  `app-3.2.0-fixed-final.bin` **逐字节全等**（603,764B）。
+- 头部 96B dump 核验：vc=30200、image_len=603,764、image_sha256=
+  `24fc02ea…728126`、layout_id/min_boot=01/01、**crc32@0x5C=E5BF739A**
+  （0x58-0x5B 为 padding 0xFF——此前把 crc 误读在 0x58 系布局偏移误判，
+  虚惊一场，已修正认知）。
+- 身份链闭合：`.cache/bg/app-gcc` 构建产物与 final bin 仅差
+  0x400-0x45F 头区（bg 构建该处为保留 0xFF）→ bg 的 map/elf 与板上
+  固件匹配，RTT 符号地址（`_SEGGER_RTT@0x200540AC`）可放心使用。
+
+### 16.5 黑屏根因终判与 WFI/DAP 之谜（2026-09-14 晚）
+
+- **烧好镜像后仍黑屏的根因**：首次误烧已置 BCB=ROLLBACK；
+  ROLLBACK 分支只看外部 backup/recovery QSPI 槽（均无效）→
+  `return_recovery` → `receive_physical_recovery()` 死等 PA15≥3s
+  （YMODEM）→ 黑屏（boot 设计内行为，非 JLink 故障、非二次损坏）。
+  光烧好内部 App 镜像救不回，必须走 CLEAR_BCB 恢复链。
+- **SWD「低功耗挂死」判定修正**：恢复等待循环 ~96% 时间在
+  `__WFI()` 睡眠；老板载 ARM-OB J-Link 在核睡眠时 DAP init 偶发
+  失败（本段实测 2 次，重试均成功）；**已建立连接后的 halt 正常**
+  （调试请求唤醒核）。处置规则（已向用户申报并获批）：纯连接失败
+  （未执行任何命令）重试同一 Phase、单独登记、不占会话额度、
+  单 Phase 至多重试 2 次。
+
+### 16.6 恢复轮 r2 执行（2026-09-14 晚，用户授权）
+
+- 完整留证：`P3-3-recovery-execution-2026-09-14-r2.md`（S1A-S6
+  **全 PASS**；额度 10/10 命令会话、6/6 复位、2/2 logger、2/2 签名
+  会话，零重试、零超授权）。
+- 脚本适配 3 处（S2 基线参数化 30200/5；S1B 增 BootWait 断言模式
+  PC∈boot 区+CFSR=0，共享库不动；`-ProductionAppMap` 指修复版构建 +
+  `-ExpectedAppSha256 24fc02ea…`），默认值保持 r1 语义。
+- 关键实测：S2 基线 ROLLBACK(5)/30200/seq=1；S4 复位后
+  NONE→commit_confirmed(30200)→跳 App，RTT@0x200540AC 命中
+  `OTA: BCB already CONFIRMED vcode=30200`；S5 终态 CONFIRMED(4)/
+  30200/seq=0，app_sha256 与 finalize 镜像**全等**；S6 生产 Boot
+  全区还原 SHA `b6b33a82…` 与 S1A 备份全等 + RTT 终证再命中。
+- 设备终态：**生产 Boot + 3.2.0-fixed App(30200) + BCB
+  CONFIRMED/30200，App 启动序列完整（RTT 四行），黑屏解除**。
+- 同轮用户追认：REC 轮（20260913-r1）命令会话 11/10 超授权 1 次
+  销账（见 r2 留证 §6 与台账更新）。

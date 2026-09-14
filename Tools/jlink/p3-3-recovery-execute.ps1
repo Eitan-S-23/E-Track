@@ -40,7 +40,26 @@ param(
 
     # Expected on-board App raw SHA-256 (hex, 64 chars) from the board
     # identification round. When non-empty the S5 app snapshot must match.
-    [string]$ExpectedAppSha256 = ''
+    [string]$ExpectedAppSha256 = '',
+
+    # Round-2 adaptation (2026-09-14 incident recovery): the on-board BCB
+    # is ROLLBACK(30200) after the unfinalized-image flash, not the round-1
+    # CONFIRMED(20801) blocked state. Baseline expectations are therefore
+    # parameters; the defaults keep the round-1 semantics.
+    [uint32]$BaselineCurVcode = 20801,
+
+    # -1 = record the S2 state without asserting it (round-1 semantics);
+    # any value >= 0 additionally asserts the baseline state byte.
+    [int]$BaselineState = -1,
+
+    # 'App' = round-1 semantics: the test boot jumps into the App partition
+    # and Assert-P1NormalResetEvidence applies. 'BootWait' = round-2
+    # semantics: BCB=ROLLBACK with both external slots invalid keeps the
+    # test boot in the physical recovery wait loop, so the post-reset PC
+    # must be inside the boot region with CFSR=0 (same session shape as
+    # Invoke-P16OrdinaryResetEvidence, boot-region assertion inline).
+    [ValidateSet('App', 'BootWait')]
+    [string]$S1BExpectedPcRegion = 'App'
 )
 
 Set-StrictMode -Version Latest
@@ -60,7 +79,6 @@ $P33TestBootHexLength = 52727
 $P33TestBootBinLength = 18720
 $P33ProductionBootBinLength = 14724
 $P33HexLastAddress = [uint32]0x0800491F
-$P33BaselineCurVcode = [uint32]20801
 $P33FinalCurVcode = [uint32]30200
 $P33ArbiterA = [uint32]1
 $P33ArbiterB = [uint32]2
@@ -328,17 +346,59 @@ switch ($Phase) {
         # REC1 reset 1: first start of the test boot with the control
         # block already invalidated and verified inside S1A.
         Assert-P33PriorPhase -Prior 'S1A' | Out-Null
-        $evidence = Invoke-P16OrdinaryResetEvidence -RunDirectory $RunDirectory `
-            -Label 'S1B-reset1' -WaitMilliseconds 5000
+        if ($S1BExpectedPcRegion -eq 'App') {
+            $evidence = Invoke-P16OrdinaryResetEvidence -RunDirectory $RunDirectory `
+                -Label 'S1B-reset1' -WaitMilliseconds 5000
+        }
+        else {
+            # BootWait mode (round-2): BCB=ROLLBACK and both external
+            # slots are invalid, so the test boot must be parked in the
+            # physical recovery wait loop. Same session shape as
+            # Invoke-P16OrdinaryResetEvidence; the assertion is inline so
+            # the shared library keeps its App-partition semantics.
+            $log = Invoke-P16JLink -Lines @(
+                'r', 'g', 'Sleep 5000', 'h', 'regs',
+                'mem32 0xE000ED08, 1',
+                'mem32 0xE000ED28, 1',
+                'g', 'qc'
+            ) -RunDirectory $RunDirectory -Label 'S1B-reset1' `
+                -TimeoutSeconds 80
+            $logText = Get-Content -LiteralPath $log -Raw
+            $pc = Get-P1LogHex32 -Text $logText `
+                -Pattern '^\s*PC\s*=\s*(?:0x)?([0-9A-Fa-f]{8})\b' -Label 'PC'
+            $vtor = Get-P1LogHex32 -Text $logText `
+                -Pattern '^\s*E000ED08\s*=\s*(?:0x)?([0-9A-Fa-f]{8})\b' -Label 'VTOR'
+            $cfsr = Get-P1LogHex32 -Text $logText `
+                -Pattern '^\s*E000ED28\s*=\s*(?:0x)?([0-9A-Fa-f]{8})\b' -Label 'CFSR'
+            $bootEnd = [uint64]$script:P16BootRegionBase +
+                [uint64]$script:P16BootAffectedLength
+            if ([uint64]$pc -lt [uint64]$script:P16BootRegionBase -or
+                [uint64]$pc -ge $bootEnd) {
+                throw ('S1B boot-wait PC is outside the boot region: 0x{0:X8}' -f $pc)
+            }
+            if ($cfsr -ne 0) {
+                throw ('S1B boot-wait CFSR is nonzero: 0x{0:X8}' -f $cfsr)
+            }
+            # VTOR is recorded but not asserted: the test boot parks in a
+            # delay loop and its VTOR is boot-owned, not part of the
+            # recovery contract.
+            $evidence = [pscustomobject]@{
+                pc = ('0x{0:X8}' -f $pc)
+                vtor = ('0x{0:X8}' -f $vtor)
+                cfsr = ('0x{0:X8}' -f $cfsr)
+                log = $log
+            }
+        }
         Write-P33PhaseResult -PhaseName 'S1B' -Record ([ordered]@{
             result = 'PASS'
+            expected_pc_region = $S1BExpectedPcRegion
             pc = $evidence.pc
             vtor = $evidence.vtor
             cfsr = $evidence.cfsr
             log = $evidence.log
         })
-        Write-Output ('S1B_RESULT=PASS pc={0} vtor={1} cfsr={2}' -f
-            $evidence.pc, $evidence.vtor, $evidence.cfsr)
+        Write-Output ('S1B_RESULT=PASS region={0} pc={1} vtor={2} cfsr={3}' -f
+            $S1BExpectedPcRegion, $evidence.pc, $evidence.vtor, $evidence.cfsr)
     }
 
     'S2' {
@@ -353,8 +413,13 @@ switch ($Phase) {
         if ($active -ne $P33ArbiterA -and $active -ne $P33ArbiterB) {
             throw ('S2 baseline arbiter is not A/B: {0}' -f $active)
         }
-        if ([uint32]$run.Result.cur_vcode -ne $P33BaselineCurVcode) {
-            throw ('S2 baseline cur_vcode mismatch: {0}' -f $run.Result.cur_vcode)
+        if ([uint32]$run.Result.cur_vcode -ne $BaselineCurVcode) {
+            throw ('S2 baseline cur_vcode mismatch: {0} (expected {1})' -f
+                $run.Result.cur_vcode, $BaselineCurVcode)
+        }
+        if ($BaselineState -ge 0 -and [int][uint32]$run.Result.state -ne $BaselineState) {
+            throw ('S2 baseline state mismatch: {0} (expected {1})' -f
+                [uint32]$run.Result.state, $BaselineState)
         }
         # Mandatory BCB raw preservation (authorization: no trimming).
         # Each arbiter block is BCB_SIZE=64 bytes (eeprom_bcb.h:26,
