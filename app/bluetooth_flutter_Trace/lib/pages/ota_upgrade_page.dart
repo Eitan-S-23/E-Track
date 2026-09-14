@@ -315,7 +315,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           const SizedBox(height: 8),
           Text(
             identityConfirmed
-                ? '${deviceInfo.deviceModel} • 固件 vcode ${deviceInfo.currentVersionCode}'
+                ? '${deviceInfo.deviceModel} • 固件 v${deviceInfo.versionName}'
                 : (widget.connectedDevice ?? _resolvedDevice)?.platformName ??
                     '连接码表后自动读取设备身份',
             style: const TextStyle(
@@ -423,8 +423,13 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          // Wrap 而非 Row：terminalLocked 态下「检查更新」与「重新读取
+          // 身份解锁」两个按钮同排，窄屏总宽溢出会被截断——Wrap 在宽度
+          // 不足时把后续按钮换行到第二行居中。
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
             children: [
               ElevatedButton.icon(
                 onPressed: canCheck ? _checkForUpdate : null,
@@ -451,8 +456,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               // 恢复入口——重新 GET_INFO 成功即重建查询链并解锁，
               // 不只给文字提示。
               if (_deviceAddress != null &&
-                  (otaService.deviceInfo == null || terminalLocked)) ...[
-                const SizedBox(width: 12),
+                  (otaService.deviceInfo == null || terminalLocked))
                 OutlinedButton.icon(
                   onPressed: _isChecking ? null : _readDeviceInfo,
                   icon: const Icon(Icons.refresh),
@@ -463,7 +467,6 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                     foregroundColor: const Color(0xFF4A90E2),
                   ),
                 ),
-              ],
             ],
           ),
         ],

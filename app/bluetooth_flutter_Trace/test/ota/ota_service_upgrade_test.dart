@@ -193,6 +193,11 @@ void main() {
     // 同资产文件族串行闸替身（RC3-04/05）：用例把清理停在「已取到删除
     // 闸、删除体尚未执行」的窗口内，编排后来者在删除 await 中接管。
     OtaFilePathGate? downloadFileGate,
+    // 重启复核时序注入（O4 整改）：生产默认 180s/20s/3s，用例注入短值
+    // 实测单轮上限与窗口轮询行为，不真实等待产品窗口。
+    Duration? rebootWindow,
+    Duration? rebootProbeTimeout,
+    Duration? rebootProbeInterval,
   }) {
     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条
     // 通知即抛 UnsupportedError。默认改为可增长列表。
@@ -213,6 +218,9 @@ void main() {
       // onNotify 替身（RC3-02）：通知进 log 供断言，不走 Get.snackbar。
       onNotify: (title, message) => log.add('$title: $message'),
       downloadFileGate: downloadFileGate,
+      rebootWindow: rebootWindow,
+      rebootProbeTimeout: rebootProbeTimeout,
+      rebootProbeInterval: rebootProbeInterval,
     );
     Get.put<OtaService>(service);
     return service;
@@ -228,11 +236,18 @@ void main() {
   }
 
   /// 常规前置：read → check → download 完成（readyToInstall）。
+  ///
+  /// [rebootWindow]/[rebootProbeTimeout]/[rebootProbeInterval] 透传
+  /// [makeService] 的重启复核时序注入（O4 整改）：前置阶段不走复核
+  /// 路径，注入不影响 read/check/download 的建立。
   Future<_UpgradeFakeBle> prepareDownloaded({
     required Directory tempDir,
     required List<String> notifyLog,
     List<int> rebootPayload = const [],
     int rebootDelayProbes = 0,
+    Duration? rebootWindow,
+    Duration? rebootProbeTimeout,
+    Duration? rebootProbeInterval,
   }) async {
     final ble = _UpgradeFakeBle(
       preRebootPayload: preRebootPayload,
@@ -240,7 +255,14 @@ void main() {
           rebootPayload.isEmpty ? postRebootPayload : rebootPayload,
       rebootDelayProbes: rebootDelayProbes,
     );
-    final service = makeService(ble: ble, firmwareDir: tempDir, notifyLog: notifyLog);
+    final service = makeService(
+      ble: ble,
+      firmwareDir: tempDir,
+      notifyLog: notifyLog,
+      rebootWindow: rebootWindow,
+      rebootProbeTimeout: rebootProbeTimeout,
+      rebootProbeInterval: rebootProbeInterval,
+    );
     Get.put<AppUpdateService>(_FakeAppUpdateService());
 
     expect(await service.readDeviceInfo('AA:BB'), isNotNull);
@@ -323,6 +345,73 @@ void main() {
     expect(ble.endCalls, 1);
     expect(ble.probeCount, 1);
   });
+
+  test('单轮探测 connect 挂起：单轮上限放弃该轮，后续轮确认目标（O4 整改）',
+      () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    final ble = await prepareDownloaded(
+      tempDir: tempDir,
+      notifyLog: notifyLog,
+      rebootWindow: const Duration(seconds: 4),
+      rebootProbeTimeout: const Duration(milliseconds: 800),
+      rebootProbeInterval: const Duration(milliseconds: 50),
+    );
+    // 第一轮 connect 永不 resolve（O4 实测 Android BLE 栈挂起模式）。
+    ble.connectHangRounds = 1;
+    final service = Get.find<OtaService>();
+
+    final ok = await service.startOtaUpgrade('AA:BB');
+    expect(ok, isTrue, reason: '单轮挂起必须被上限放弃，不得吞掉整个窗口');
+    expect(service.phase, OtaPhase.completed);
+    expect(ble.connectCalls, greaterThanOrEqualTo(2),
+        reason: '挂起轮被放弃后必须有后续 connect 重试');
+    expect(ble.probeCount, 1, reason: '挂起轮未达 GET_INFO，成功确认在后续轮');
+  }, timeout: const Timeout(Duration(seconds: 30)));
+
+  test('窗口内多轮旧身份后确认目标：interval 注入下轮询推进（O4 整改）',
+      () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    final ble = await prepareDownloaded(
+      tempDir: tempDir,
+      notifyLog: notifyLog,
+      rebootDelayProbes: 3, // 前三轮仍报旧身份（设备恢复慢于单轮）。
+      rebootWindow: const Duration(seconds: 4),
+      rebootProbeInterval: const Duration(milliseconds: 100),
+    );
+    final service = Get.find<OtaService>();
+
+    final ok = await service.startOtaUpgrade('AA:BB');
+    expect(ok, isTrue);
+    expect(service.phase, OtaPhase.completed);
+    expect(ble.probeCount, 4, reason: '三轮旧身份丢弃后第四轮确认目标');
+  }, timeout: const Timeout(Duration(seconds: 30)));
+
+  test('窗口耗尽 timedOut：文案说明升级可能已完成且可稍后重试（O4 整改）',
+      () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    final ble = await prepareDownloaded(
+      tempDir: tempDir,
+      notifyLog: notifyLog,
+      rebootDelayProbes: 1 << 30, // 恒报旧身份：设备在窗口内永不恢复。
+      rebootWindow: const Duration(milliseconds: 600),
+      rebootProbeInterval: const Duration(milliseconds: 100),
+    );
+    final service = Get.find<OtaService>();
+
+    final ok = await service.startOtaUpgrade('AA:BB');
+    expect(ok, isFalse);
+    expect(service.phase, OtaPhase.failed);
+    final terminal = service.terminalState!;
+    expect(terminal.code, 'REBOOT_RECONNECT_FAILED');
+    expect(terminal.retryableLater, isTrue,
+        reason: '复核超时是「未确认」而非「升级失败」，稍后重连可解锁');
+    expect(terminal.message, contains('升级可能已完成'),
+        reason: '假阴性修复：文案必须区分「设备未恢复」与「升级失败」');
+    expect(service.upgradeStatus, contains('升级可能已完成'));
+  }, timeout: const Timeout(Duration(seconds: 30)));
 
   test('传输在途二次 start：同步段忙锁拒绝，不打断在途传输（RC3-04）',
       () async {
@@ -2485,7 +2574,24 @@ class _UpgradeFakeBle extends BluetoothService {
   // ---- BLE 公开方法覆写（OTA 专用链路）----
 
   @override
-  Future<bool> connectOtaDeviceByAddress(String deviceAddress) async => true;
+  Future<bool> connectOtaDeviceByAddress(String deviceAddress) async {
+    _connectCalls++;
+    // 测试注入：剩余次数内的 connect 永不 resolve——模拟 O4 实测的
+    // Android BLE 栈 connect 挂起（第一轮抛错后后续轮日志静默）。单轮
+    // 探测上限必须放弃该轮继续轮询，不得一轮吞掉剩余全部窗口。
+    if (_connectHangRemaining > 0) {
+      _connectHangRemaining--;
+      await Completer<bool>().future;
+    }
+    return true;
+  }
+
+  /// 挂起注入剩余次数（见 [connectOtaDeviceByAddress]）。
+  int _connectHangRemaining = 0;
+  set connectHangRounds(int value) => _connectHangRemaining = value;
+  int _connectCalls = 0;
+  /// connectOtaDeviceByAddress 调用计数（含挂起轮，观测断言用）。
+  int get connectCalls => _connectCalls;
 
   @override
   Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {}

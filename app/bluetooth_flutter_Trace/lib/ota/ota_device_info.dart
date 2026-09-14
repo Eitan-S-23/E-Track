@@ -33,6 +33,20 @@ class DeviceOtaInfo {
   final int protocolVersion;
   final int maxWindowSegments;
 
+  /// 人类可读固件版本名（`3.2.2` 式）。
+  ///
+  /// INFO 帧不携带版本名，按冻结契约 docs/ota-binary-contracts.md
+  /// §0.6（PRE-1，`version_code = major*10000+minor*100+patch`，u32）从
+  /// [currentVersionCode] 反解；制包端 Tools/etu_pack.py
+  /// parse_version_name 是该编码的唯一生成实现（minor/patch 强制
+  /// 0..99），约束闭合。
+  String get versionName {
+    final major = currentVersionCode ~/ 10000;
+    final minor = (currentVersionCode ~/ 100) % 100;
+    final patch = currentVersionCode % 100;
+    return '$major.$minor.$patch';
+  }
+
   /// wire model 8B（含 NUL）精确值 `E-Track\0`（OTA-XC-DEVICE-MODEL）。
   static const List<int> wireModelETrack = [
     0x45, 0x2D, 0x54, 0x72, 0x61, 0x63, 0x6B, 0x00,

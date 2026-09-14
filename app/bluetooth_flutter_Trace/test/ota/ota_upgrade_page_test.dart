@@ -119,8 +119,9 @@ void main() {
       await pumpPage(tester, fake: fake, connectedDevice: device);
       expect(find.text('设备身份已确认'), findsOneWidget);
       expect(
-        find.text('e-track-at32f435 • 固件 vcode 20801'),
+        find.text('e-track-at32f435 • 固件 v2.8.1'),
         findsOneWidget,
+        reason: '身份卡显示契约 §0.6 反解的版本名而非裸 vcode',
       );
       expect(findButton(tester, '检查更新').onPressed, isNotNull);
     });
@@ -505,6 +506,33 @@ void main() {
       // 读取成功清除终止态（与真实 service PR11 解锁对齐）：检查入口恢复。
       expect(findButton(tester, '检查更新').onPressed, isNotNull);
       expect(find.text('基于设备身份查询可用固件'), findsOneWidget);
+    });
+
+    testWidgets('窄屏终止闭锁：检查更新与解锁按钮换行共存不截断（O4 整改）',
+        (tester) async {
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
+      final device = BluetoothDevice(
+        remoteId: const DeviceIdentifier('11:22:33:44:55:66'),
+      );
+      await pumpPage(tester, fake: fake, connectedDevice: device);
+      // 逻辑宽 360（720 物理 / dpr 2）：「检查更新」+「重新读取身份解锁」
+      // 同排总宽溢出——旧 Row 实现抛 RenderFlex overflowed 并截断按钮，
+      // Wrap 实现必须换行共存。必须在 pumpPage 之后设置（pumpPage 内部
+      // 把 view 固定为 800x1800）。
+      tester.view.physicalSize = const Size(720, 1600);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.reset);
+      fake.terminal$.value = OtaTerminalState(
+        code: 'CLIENT_TOO_OLD',
+        message: 'App 版本过低',
+        minAppVersionCode: 60,
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull,
+          reason: '窄屏两按钮并存不得溢出截断');
+      expect(findButton(tester, '检查更新'), findsOneWidget);
+      expect(find.text('重新读取身份解锁'), findsOneWidget);
     });
   });
 

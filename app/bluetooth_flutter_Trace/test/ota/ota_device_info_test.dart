@@ -41,6 +41,35 @@ void main() {
       expect(info.protocolVersion, 1);
       expect(info.maxWindowSegments, 32);
     });
+
+    test('versionName 按契约 §0.6 反解（major*10000+minor*100+patch）', () {
+      // 实测版本对（etu_pack.py parse_version_name 的镜像值）。
+      expect(
+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 30200)).versionName,
+        '3.2.0',
+      );
+      expect(
+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 30201)).versionName,
+        '3.2.1',
+      );
+      expect(
+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 30202)).versionName,
+        '3.2.2',
+      );
+      expect(
+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 20801)).versionName,
+        '2.8.1',
+      );
+      // 边界：minor/patch 各自占满两位编码段。
+      expect(
+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 10099)).versionName,
+        '1.0.99',
+      );
+      expect(
+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 0)).versionName,
+        '0.0.0',
+      );
+    });
   });
 
   group('DeviceOtaInfo 负例（必须 fail closed）', () {

@@ -69,6 +69,10 @@ class OtaService extends GetxController {
   /// 空 handler 会把产品代码的真实未处理异常一并吞掉，测试失去鉴别力。
   /// [downloadFileGate] 让用例在同资产文件族的串行闸内安排后来者接管
   /// （RC3-04/05），生产缺省用进程内共享闸 [OtaFilePathGate.shared]。
+  /// [rebootWindow]/[rebootProbeTimeout]/[rebootProbeInterval] 为重启
+  /// 复核时序注入点（O4 实测整改）：设备复位→BLE 可连接实测 ≥97s，
+  /// 60s 固定窗口造成升级已成功但复核假阴性；生产默认 180s 总窗口 +
+  /// 单轮探测 20s 上限 + 3s 轮询间隔，测试注入短值实测时序行为。
   OtaService({
     BluetoothService? bluetoothService,
     Dio? dio,
@@ -78,6 +82,9 @@ class OtaService extends GetxController {
         latestUriBuilder,
     void Function(String title, String message)? onNotify,
     OtaFilePathGate? downloadFileGate,
+    Duration? rebootWindow,
+    Duration? rebootProbeTimeout,
+    Duration? rebootProbeInterval,
   })  : _bluetoothService = bluetoothService,
         _notifyImpl = onNotify,
         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
@@ -106,12 +113,27 @@ class OtaService extends GetxController {
               ),
             ),
         _firmwareDirProvider = firmwareDirProvider ?? _defaultFirmwareDir,
-        _latestUriBuilder = latestUriBuilder ?? _defaultLatestUriBuilder;
+        _latestUriBuilder = latestUriBuilder ?? _defaultLatestUriBuilder,
+        _rebootWindow = rebootWindow ?? const Duration(seconds: 180),
+        _rebootProbeTimeout = rebootProbeTimeout ?? const Duration(seconds: 20),
+        _rebootProbeInterval =
+            rebootProbeInterval ?? const Duration(seconds: 3);
 
   final BluetoothService? _bluetoothService;
   final void Function(String title, String message)? _notifyImpl;
   final Dio _dio;
   final Dio _downloadDio;
+
+  /// 重启复核总窗口（O4 实测整改）：设备复位→BLE 可连接实测 ≥97s
+  /// （BCB 搬运 ~600KB + 启动 + BLE 起播），旧 60s 固定窗口使升级已
+  /// 成功的会话以 REBOOT_RECONNECT_FAILED 假阴性收场。
+  final Duration _rebootWindow;
+  /// 重启复核单轮探测上限：防单轮 connect 挂起吞掉剩余全部窗口——
+  /// O4 logcat 实测第一轮 connect 抛错后后续轮挂起（日志静默），
+  /// 外层按剩余总预算封顶的 timeout 一轮即耗尽窗口。
+  final Duration _rebootProbeTimeout;
+  /// 重启复核轮询间隔。
+  final Duration _rebootProbeInterval;
 
   /// 同资产文件族的跨 attempt 串行闸（RC3-04/05）：下载器的写入/rename/
   /// 清理共用它，避免上一 attempt 迟到的清理删掉新 attempt 的同名文件。
@@ -952,10 +974,14 @@ class OtaService extends GetxController {
           case _RebootKind.timedOut:
             _terminalState.value = OtaTerminalState(
               code: 'REBOOT_RECONNECT_FAILED',
-              message: '设备重启后 60 秒内未确认目标固件在运行',
+              message: '设备未在 ${_rebootWindow.inSeconds} 秒复核窗口内'
+                  '恢复连接确认目标固件——升级可能已完成（设备重启恢复'
+                  '慢于窗口），请稍后重新连接设备确认版本',
               retryableLater: true,
             );
-            _upgradeStatus.value = '等待设备重启复核超时';
+            _upgradeStatus.value = '等待设备重启复核超时'
+                '（${_rebootWindow.inSeconds} 秒，升级可能已完成，可稍后'
+                '重连确认）';
             _phase.value = OtaPhase.failed;
             return false;
           case _RebootKind.identityChanged:
@@ -1548,8 +1574,9 @@ class OtaService extends GetxController {
   ///
   /// 1. 先按地址**主动断开**旧连接：设备重启前协议栈可能仍报告已
   ///    连接，旧连接上会读到重启前的 INFO/通知（假身份复核）；
-  /// 2. 以 60 秒总截止轮询 connect + 发现精确特征 + 绑定 transport
-  ///    + GET_INFO 三态判定：
+  /// 2. 以总截止窗口（O4 整改后 180s，实测设备复位→BLE 可连接 ≥97s）
+  ///    轮询 connect + 发现精确特征 + 绑定 transport + GET_INFO
+  ///    三态判定：
   ///    - 目标身份（vcode 与 raw image SHA 等于清单目标）→
   ///      targetVerified；
   ///    - 旧身份（等于会话开始快照）：MCU 尚未重启完成，丢弃本轮
@@ -1565,15 +1592,15 @@ class OtaService extends GetxController {
     int generation,
   ) async {
     // RC3-08⑤：截止先于主动断开建立——断开本身可能耗时（等协议栈状态
-    // 迁移），60s 总预算必须覆盖断开与全部轮询，不得从断开完成后才
-    // 开始计费（否则断开耗时会无声挤占重启等待窗口）。
-    final deadline = DateTime.now().add(const Duration(seconds: 60));
+    // 迁移），总预算必须覆盖断开与全部轮询，不得从断开完成后才开始
+    // 计费（否则断开耗时会无声挤占重启等待窗口）。
+    final deadline = DateTime.now().add(_rebootWindow);
     // RC3-08⑦：主动断开自身必须有界。disconnectOtaDeviceByAddress 是
     // 尽力平台调用（WinBle disconnect / flutter_blue_plus disconnect），
     // 协议栈异常或设备已在重启途中时可能永不 resolve——无界 await 会把
-    // 「至多 60s 必返回」的重启等待变成永久挂起：deadline 已建立却永远
-    // 走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：断开
-    // 只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。
+    // 「至多一个窗口必返回」的重启等待变成永久挂起：deadline 已建立却
+    // 永远走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：
+    // 断开只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。
     await _ble
         .disconnectOtaDeviceByAddress(deviceAddress)
         .timeout(const Duration(seconds: 5), onTimeout: () {});
@@ -1581,14 +1608,20 @@ class OtaService extends GetxController {
       if (generation != _cancelGeneration) {
         return const _RebootOutcome(_RebootKind.cancelled);
       }
-      // RC3-08：单轮探测链（connect/discover/bind/INFO）受剩余总预算
-      // 封顶——任一环节挂死不得越过 60s 截止；超时按本轮无判定处理。
+      // RC3-08：单轮探测链（connect/discover/bind/INFO）受剩余总预算与
+      // 单轮上限（O4 整改 20s）双重封顶——正常成功轮（connect ≤10s +
+      // discover/MTU/subscribe/INFO 数秒）不会触顶；任一环节挂死时至多
+      // 吞掉单轮上限，后续轮仍有机会，不再一轮挂起耗尽全部剩余窗口
+      // （O4 logcat 实测：第一轮 connect 抛错后后续轮挂起即吞掉 59s）。
       // 最小 1s 保证 timeout 参数恒为正，总等待至多越线 1s。
       // RC3-08⑤：外层超时同时置 abandoned 标志——probe 在每个 await 后
       // 检查并提前退出（onTimeout 返回 null 只是放弃等待，并不取消
       // probe 内部动作；无标志时迟到的 bind/GET_INFO 会继续占用平台
       // 订阅通道）。
       final remaining = deadline.difference(DateTime.now());
+      final roundCap = remaining < _rebootProbeTimeout
+          ? remaining
+          : _rebootProbeTimeout;
       var probeAbandoned = false;
       bool probeAborted() =>
           probeAbandoned || generation != _cancelGeneration;
@@ -1600,9 +1633,9 @@ class OtaService extends GetxController {
           latest,
           probeAborted,
         ).timeout(
-          remaining < const Duration(seconds: 1)
+          roundCap < const Duration(seconds: 1)
               ? const Duration(seconds: 1)
-              : remaining,
+              : roundCap,
           onTimeout: () {
             probeAbandoned = true;
             return null;
@@ -1612,14 +1645,12 @@ class OtaService extends GetxController {
         // 重启期间连接/读取失败是预期路径，继续轮询。
       }
       if (outcome != null) return outcome;
-      // 3s 轮询间隔同样受剩余预算封顶（RC3-08）：不足 3s 按剩余量
+      // 轮询间隔同样受剩余预算封顶（RC3-08）：不足一个间隔时按剩余量
       // 等待，不越过截止线。
       final rest = deadline.difference(DateTime.now());
       if (rest > Duration.zero) {
         await Future<void>.delayed(
-          rest < const Duration(seconds: 3)
-              ? rest
-              : const Duration(seconds: 3),
+          rest < _rebootProbeInterval ? rest : _rebootProbeInterval,
         );
       }
     }
