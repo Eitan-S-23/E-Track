@@ -1,0 +1,77 @@
+{
+  "created_at_utc": "2026-09-14T17:50:45.449Z",
+  "worktree": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "operation": "byte-for-byte evidence consolidation; no product execution",
+  "files": [
+    {
+      "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/http-test-service.md",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/http-test-service.md",
+      "size": 7776,
+      "sha256": "9ad77bfa37045d1b67f6f7a022ef44c514c737dded9d5160cd43ee1443930dfe",
+      "byte_identical": true
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/toy-bootable-asset.md",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/toy-bootable-asset.md",
+      "size": 5004,
+      "sha256": "57f72de73d6eab2d0a1bfc816157461ee0dd0796ae8278169735b63b316af6db",
+      "byte_identical": true
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/real-etu-asset.md",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/real-etu-asset.md",
+      "size": 3166,
+      "sha256": "b57af3013a36a5cff14345c2d39e7210accf91ee7f4ba3cfa73fb62383832681",
+      "byte_identical": true
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/board-bcb-state.md",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/board-bcb-state.md",
+      "size": 6217,
+      "sha256": "83393681f756e6560e72490fed279cf2f84af4faf2633d419d413b297111266b",
+      "byte_identical": true
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v6/P3-3-v6.evidence-matrix.json",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/entry-matrix.json",
+      "size": 2858,
+      "sha256": "37a64a107dfe84a531909865b02c90ca25e3cccc26634bf575744459e62ef6b9",
+      "byte_identical": true
+    },
+    {
+      "source": ".cache/p3-3-v2-service/service-v5-20260914.log",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/service-v5-20260914.log",
+      "size": 4000,
+      "sha256": "1f6d2f7e056c286432fb099ff71b887cdab6b2425a8715691adaa8043aaa29b5",
+      "byte_identical": true
+    },
+    {
+      "source": ".cache/p3-3-v2-service/service-v6-20260914.log",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/service-v6-20260914.log",
+      "size": 3698,
+      "sha256": "d03ef586995acccf4f8e1f4f4081673c31f08c2cb43d274ea1a7999867cbc5cd",
+      "byte_identical": true
+    },
+    {
+      "source": ".cache/p3-3-o-verify/o-verify-boot-rtt.log",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/o-verify-boot-rtt.log",
+      "size": 573,
+      "sha256": "8d40136f336b16537c1bb34c63990c8e15a7a7d1a8df1779c4667407f0384f56",
+      "byte_identical": true
+    },
+    {
+      "source": "docs/ota-exec-notes/P3-3-o-sequence-execution-2026-09-14.md",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md",
+      "size": 11789,
+      "sha256": "fc0d5b9972fc034ce403cb701a1f7bb32b203c86bbb7f3c5881bf743e399de91",
+      "byte_identical": true
+    },
+    {
+      "source": "docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md",
+      "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md",
+      "size": 11232,
+      "sha256": "2b336ccc2b4889eb6cc7fe244473d84c5ffd3e67bfbba685ea0bc11f4b0d8032",
+      "byte_identical": true
+    }
+  ]
+}

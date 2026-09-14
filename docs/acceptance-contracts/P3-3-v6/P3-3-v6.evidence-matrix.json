@@ -3,7 +3,7 @@
  "contract_id": "P3-3-v6",
  "contract_sha256": "B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171",
  "round_id": "P3-3-V6-FREEZE-20260915-R1",
- "overall_result": "NOT_RUN",
+ "overall_result": "EVIDENCE_GAP",
  "previous_matrix_sha256": null,
  "rerun_plan_path": null,
  "rerun_plan_sha256": null,
@@ -17,8 +17,11 @@
    "origin_contract_sha256": null,
    "origin_matrix_sha256": null,
    "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。v6 执行前检查（NOT_RUN 前置）：执行轮依据为 ce30190 push run 34861159023 与 freeze_commit 0fb167c push run 34869549756（双宿主 success——windows-2022 2026-09-14T16:35:28Z→16:39:11Z、ubuntu-latest 16:35:28Z→16:49:07Z）。正式判定由验收会话核对实际 job conclusion 与原始日志。"
+   "evidence": [
+    "evidence/acceptance-20260915/review-outputs.json",
+    "evidence/acceptance-20260915/entry-matrix.json"
+   ],
+   "notes": "本轮独立结论 EVIDENCE_GAP（G01）。冻结 CMD-DEV-CHECKS 是 gh workflow run 加中文说明，不是既有 run 的只读核验命令，不能把 gh run view 冒记为它的成功执行。已核对冻结对象，未重新 dispatch，也未从 GitHub 拉取本判据 job/analyze/test 日志。ART-DEV-LOGS 的目录式路径还需与校验器要求的文件型产物统一。 按执行合同 §4 使用 NOT_OBSERVED/observed=null 表达未获得完整 gate 观测；EXECUTED 字段不表示执行过占位合同命令。本轮五条冻结命令均未执行，commands 保持空；起始准入说明已原样归档 entry-matrix.json。详见 docs/ota-exec-notes/P3-3-v6-acceptance-2026-09-15.md。"
   },
   {
    "id": "C-RELEASE-BUILD",
@@ -29,8 +32,11 @@
    "origin_contract_sha256": null,
    "origin_matrix_sha256": null,
    "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。第六轮 APK run 34864052541（dispatch 提交 ce30190=freeze_commit 0fb167c 直接父提交，app/ 输入零差异）；APK fb6a91e6…/46,699,144B 实物在 .cache/p3-3-apk-r6/。正式判定由验收会话核对 run 结论与实物哈希。"
+   "evidence": [
+    "evidence/acceptance-20260915/review-outputs.json",
+    "evidence/acceptance-20260915/entry-matrix.json"
+   ],
+   "notes": "本轮独立结论 EVIDENCE_GAP（G01）。冻结 CMD-RELEASE-BUILD 包含新 dispatch、watch 和中文说明，不能按本轮仅复核历史 run 的授权执行或伪填命令。实测 APK 46699144B，SHA-256 fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13；ce30190 为 0fb167c 直接父提交，二者 app/ diff 为空且完整变更清单无构建入口改动。GitHub run 结论、Windows 完整运行包、aapt 与签名未在停止后继续核验。 按执行合同 §4 使用 NOT_OBSERVED/observed=null 表达未获得完整 gate 观测；EXECUTED 字段不表示执行过占位合同命令。本轮五条冻结命令均未执行，commands 保持空；起始准入说明已原样归档 entry-matrix.json。详见 docs/ota-exec-notes/P3-3-v6-acceptance-2026-09-15.md。"
   },
   {
    "id": "C-APK-INSTALL",
@@ -41,8 +47,11 @@
    "origin_contract_sha256": null,
    "origin_matrix_sha256": null,
    "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。r6 轮第六轮 APK 已覆盖装机并实测（用户 2026-09-15 确认三缺陷通过）；双侧证书比对由验收会话只读复核补全。"
+   "evidence": [
+    "evidence/acceptance-20260915/review-outputs.json",
+    "evidence/acceptance-20260915/entry-matrix.json"
+   ],
+   "notes": "本轮独立结论 EVIDENCE_GAP（G01）。CMD-APK-INSTALL 仍为“由验收会话绑定”占位文本，冻结后不能就地改写。按用户的冲突停止指令，本轮未调用手机，未执行 dumpsys/pull/apksigner，不能声称 r6 双侧证书比对已补全；已有第五轮比对不冒充第六轮实测。手机安装、权限、数据均未操作。 按执行合同 §4 使用 NOT_OBSERVED/observed=null 表达未获得完整 gate 观测；EXECUTED 字段不表示执行过占位合同命令。本轮五条冻结命令均未执行，commands 保持空；起始准入说明已原样归档 entry-matrix.json。详见 docs/ota-exec-notes/P3-3-v6-acceptance-2026-09-15.md。"
   },
   {
    "id": "C-TOY-LOOP",
@@ -53,8 +62,15 @@
    "origin_contract_sha256": null,
    "origin_matrix_sha256": null,
    "observed": null,
-   "evidence": [],
-   "notes": "同合同判据（含 v6 判定素材段）。v5 冻结后第十轮 O2/O3 实测证据+代码演进论证；判定（接受论证或 EVIDENCE_GAP 补测）归独立验收会话。"
+   "evidence": [
+    "evidence/acceptance-20260915/review-outputs.json",
+    "evidence/acceptance-20260915/entry-matrix.json",
+    "evidence/acceptance-20260915/service-v5-20260914.log",
+    "evidence/acceptance-20260915/o-verify-boot-rtt.log",
+    "evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md",
+    "evidence/external/toy-bootable-asset.md"
+   ],
+   "notes": "本轮独立结论 EVIDENCE_GAP（G01；完整状态链未获证实）。已复算 toy ETU 284540B/0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5、目标镜像 603764B/aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298。原始日志首次新身份实际为 21:40:15.699，另有 21:40:23.420/28.439；RTT 原文存在 BCB already CONFIRMED vcode=30201。实际 app/ diff 支持传输核心未改、重启复核改为 180s/20s 的范围论证，但旧执行记录明确 toy App logcat 已滚动，不能仅以 HTTP/RTT 终点合成全部六状态。没有因本轮未重跑而直接判产品失败，也没有回退或补刷设备。 按执行合同 §4 使用 NOT_OBSERVED/observed=null 表达未获得完整 gate 观测；EXECUTED 字段不表示执行过占位合同命令。本轮五条冻结命令均未执行，commands 保持空；起始准入说明已原样归档 entry-matrix.json。详见 docs/ota-exec-notes/P3-3-v6-acceptance-2026-09-15.md。"
   },
   {
    "id": "C-REAL-LOOP",
@@ -65,11 +81,32 @@
    "origin_contract_sha256": null,
    "origin_matrix_sha256": null,
    "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。r6 轮 30202→30203 实测闭环（服务日志时间线+设备自报身份全等+用户确认）；正式判定由验收会话复核留档证据。"
+   "evidence": [
+    "evidence/acceptance-20260915/review-outputs.json",
+    "evidence/acceptance-20260915/entry-matrix.json",
+    "evidence/acceptance-20260915/service-v6-20260914.log",
+    "evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md",
+    "evidence/external/real-etu-asset.md",
+    "evidence/external/http-test-service.md"
+   ],
+   "notes": "本轮独立结论 EVIDENCE_GAP（G01、G02；完整状态链未获证实）。已复算 v6 真包 ETU 284608B/a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915、目标镜像 603764B/3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3，三次 00:06:05/08、00:07:22 latest 的 30203 与完整 SHA 确实全等。然而 EXT-REAL-ETU.fingerprint/evidence_sha256 仍绑定 30202/ab0585f7/0c8ae468/284573，与本判据及产物身份冲突。HTTP 日志不是 BLE ACK_END/durable/new-connection 的完整原始轨迹，未将叙述推断填为 observed 状态链。未启动服务、隧道或执行 OTA。 按执行合同 §4 使用 NOT_OBSERVED/observed=null 表达未获得完整 gate 观测；EXECUTED 字段不表示执行过占位合同命令。本轮五条冻结命令均未执行，commands 保持空；起始准入说明已原样归档 entry-matrix.json。详见 docs/ota-exec-notes/P3-3-v6-acceptance-2026-09-15.md。"
   }
  ],
- "evidence_hashes": {},
+ "evidence_hashes": {
+  "evidence/acceptance-20260915/copy-manifest.json": "78DA4ED9C3EABFEF194390A8AA9F34DEB698B00B845DD1814F5D05D5EC1784ED",
+  "evidence/acceptance-20260915/entry-matrix.json": "37A64A107DFE84A531909865B02C90CA25E3CCCC26634BF575744459E62EF6B9",
+  "evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md": "FC0D5B9972FC034CE403CB701A1F7BB32B203C86BBB7F3C5881BF743E399DE91",
+  "evidence/acceptance-20260915/o-verify-boot-rtt.log": "8D40136F336B16537C1BB34C63990C8E15A7A7D1A8DF1779C4667407F0384F56",
+  "evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md": "2B336CCC2B4889EB6CC7FE244473D84C5FFD3E67BFBBA685EA0BC11F4B0D8032",
+  "evidence/acceptance-20260915/review-outputs.json": "06B6F04D26930FCE06FCE5255015CCC14293BA3579914ADDFDD6897F2FF12268",
+  "evidence/acceptance-20260915/service-v5-20260914.log": "1F6D2F7E056C286432FB099FF71B887CDAB6B2425A8715691ADAA8043AAA29B5",
+  "evidence/acceptance-20260915/service-v6-20260914.log": "D03EF586995ACCCF4F8E1F4F4081673C31F08C2CB43D274EA1A7999867CBC5CD",
+  "evidence/acceptance-20260915/write-preflight.json": "4B71D348C2310286EDE3E5BEEAACC0395BD67680BBA529ECD30BBEB4C8BA5E38",
+  "evidence/external/board-bcb-state.md": "83393681F756E6560E72490FED279CF2F84AF4FAF2633D419D413B297111266B",
+  "evidence/external/http-test-service.md": "9AD77BFA37045D1B67F6F7A022EF44C514C737DDED9D5160CD43EE1443930DFE",
+  "evidence/external/real-etu-asset.md": "B57AF3013A36A5CFF14345C2D39E7210ACCF91EE7F4BA3CFA73FB62383832681",
+  "evidence/external/toy-bootable-asset.md": "57F72DE73D6EAB2D0A1BFC816157461EE0DD0796AE8278169735B63B316AF6DB"
+ },
  "commands": [],
  "artifacts": []
 }

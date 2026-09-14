@@ -1,0 +1,75 @@
+{
+ "schema": "etrack-evidence-matrix-v2",
+ "contract_id": "P3-3-v6",
+ "contract_sha256": "B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171",
+ "round_id": "P3-3-V6-FREEZE-20260915-R1",
+ "overall_result": "NOT_RUN",
+ "previous_matrix_sha256": null,
+ "rerun_plan_path": null,
+ "rerun_plan_sha256": null,
+ "criteria": [
+  {
+   "id": "C-DEV-CHECKS",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。v6 执行前检查（NOT_RUN 前置）：执行轮依据为 ce30190 push run 34861159023 与 freeze_commit 0fb167c push run 34869549756（双宿主 success——windows-2022 2026-09-14T16:35:28Z→16:39:11Z、ubuntu-latest 16:35:28Z→16:49:07Z）。正式判定由验收会话核对实际 job conclusion 与原始日志。"
+  },
+  {
+   "id": "C-RELEASE-BUILD",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。第六轮 APK run 34864052541（dispatch 提交 ce30190=freeze_commit 0fb167c 直接父提交，app/ 输入零差异）；APK fb6a91e6…/46,699,144B 实物在 .cache/p3-3-apk-r6/。正式判定由验收会话核对 run 结论与实物哈希。"
+  },
+  {
+   "id": "C-APK-INSTALL",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。r6 轮第六轮 APK 已覆盖装机并实测（用户 2026-09-15 确认三缺陷通过）；双侧证书比对由验收会话只读复核补全。"
+  },
+  {
+   "id": "C-TOY-LOOP",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据（含 v6 判定素材段）。v5 冻结后第十轮 O2/O3 实测证据+代码演进论证；判定（接受论证或 EVIDENCE_GAP 补测）归独立验收会话。"
+  },
+  {
+   "id": "C-REAL-LOOP",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。r6 轮 30202→30203 实测闭环（服务日志时间线+设备自报身份全等+用户确认）；正式判定由验收会话复核留档证据。"
+  }
+ ],
+ "evidence_hashes": {},
+ "commands": [],
+ "artifacts": []
+}
