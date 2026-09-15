@@ -42,6 +42,8 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 | P3-3-v5 | v3 | `b2fc1cebfc9c2585026489ac366315e4e89d38d8` | `6415226b8c30abcffa2b9bab52f0db717f8f7cb9` | `4bcf18a82a03f16c813e1b46938962538876ddbd` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理依修复轮整体授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |
 | P3-3-v6 | v3 | `3f7ca7e124c8cc36cbf78fb0eeea9a14b3fe88dc` | `0fb167cf4c44a6e4741e5a42fcd4945cf29f7780` | `b3d1d311645d584c48419b546a061c5648da740f` | PASS（2026-09-15 FROZEN+NOT_RUN 执行前检查；冻结办理经用户授权由实现会话代办，如实记录授权链；合同 SHA-256 B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171，矩阵 37A64A107DFE84A531909865B02C90CA25E3CCCC26634BF575744459E62EF6B9；r6 实机闭环等事实证据由验收会话复核，正式验收另行） |
 | P3-3-v7 | v3 | `c4a38f802ec81928f1182136ccee9d457068ed1b` | `0fb167cf4c44a6e4741e5a42fcd4945cf29f7780` | `b3d1d311645d584c48419b546a061c5648da740f` | PASS（2026-09-15 FROZEN+NOT_RUN 执行前检查；勘误轮：修正 v6 独立验收 EVIDENCE_GAP 两阻断 G01（五条冻结命令执行轮口径）与 G02（EXT 指纹遗留 v5 身份），freeze 三元组与 v6 相同零实现变化；冻结办理经用户授权（治理质疑答复后「你继续起草吧」，五条命令与指纹改动过目后「冻结吧」）由实现会话代办，如实记录授权链；合同 SHA-256 38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B，矩阵 0AE4ABA9ADF63AB3386F807C100D4796E11DB9CA8B61EF9EBCA776C502D07F1B；parent 绑定 v6 合同 B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171；后继验收轮 validate 须携带 v6 合同/矩阵为前驱） |
+| P3-3-v8 | v3 | `5695abc5d7cd1402bd0815017a3e383c57571662` | `ceaf8d2b7bb8e78968462af51a57ff1250731b61` | `4fd600a48a25654fe82db3cb6fd6f6338392bc48` | VALIDATION=PASS，overall=EVIDENCE_GAP（2026-09-15 原独立验收 R1 历史终态；四项原始 EXECUTED PASS 为 v9 直接复用来源；R2 准备仍为 NOT_RUN，未替代 R1） |
+| P3-3-v9 | v3 | `5695abc5d7cd1402bd0815017a3e383c57571662` | `ceaf8d2b7bb8e78968462af51a57ff1250731b61` | `4fd600a48a25654fe82db3cb6fd6f6338392bc48` | VALIDATION=PASS，overall=PASS（2026-09-15 当前有效独立验收，五项全部 PASS；本次主会话按移交命令完整性复校通过，非新验收轮次） |
 
 备注：
 
@@ -61,3 +63,14 @@ git worktree remove --force .cache/freeze-check/wt-<id>
   （REBOOT_RECONNECT_FAILED），修复轮重建烧板又经烧录事故与恢复轮 20260914-r2；
   v5 合同经 `parent_contract_sha256` 绑定 v4 合同（4AABC513…D20A2），资产从
   1894f9d 修复版源重制；v4 包字节不动，仍可在其 `bundle_commit` 上复校。
+- P3-3-v7 原索引行仍绑定其 FROZEN+NOT_RUN 前检提交，不改写该行。后续独立验收的
+  EVIDENCE_GAP 终态矩阵、原始记录和报告按交付原样归档于 `5695abc5d7cd1402bd0815017a3e383c57571662`；
+  不把 v9 PASS 追溯写入 v7/v8，也不要求旧冻结输入在当前 HEAD 上全部变绿。
+- P3-3-v9 复校必须同时传入同一归档提交内的 `P3-3-v8.contract.json` 和
+  `P3-3-v8/P3-3-v8.evidence-matrix.json`。实际上一终态为 v8 R1，
+  矩阵 SHA-256 `634a57b09ab94cee46f013ccb888884040dc95c23f2a42435b2b3641e35f409f`；
+  不得改用 v8 R2 NOT_RUN 准备矩阵。v9 合同 SHA-256
+  `8b0fd07a8e01070d2eda5745ea73ec0e6759911c45796c3289dadce54a44950f`，
+  终态矩阵 SHA-256 `26ea1e0d9fa54da3837bdfcbe551e9fdf07b621a4b03f10ef326bd4aff8264c2`。
+  验收结论见 `docs/ota-exec-notes/P3-3-v9-acceptance-2026-09-15.md`；
+  Git 收口状态单独记录于 `docs/ota-exec-notes/P3-3-git-closeout-2026-09-15.md`。
