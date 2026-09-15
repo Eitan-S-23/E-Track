@@ -523,6 +523,10 @@ class OtaBleTransport {
                   'END ACK OK 但 block_bitmap 越出尾块有效位（MCU 状态不可信）',
                   code: 'ACK_MALFORMED');
             }
+            // 终点观测（补测轮取证）：END ACK OK 收尾是升级会话的关键
+            // 六状态之一（App 解析到 ACK_END/OK），此前该路径无打点，
+            // 历史轮次采不到证。durable==total 已由上方校验保证。
+            otaMonoLog('MONO_END_ACK_OK', durable: endAck.durableOff);
             return OtaAckResult.fromAck(endAck);
           } on TimeoutException {
             _checkNoProgress(); // 预算耗尽优先终止，不再空转重试（RC3-07）

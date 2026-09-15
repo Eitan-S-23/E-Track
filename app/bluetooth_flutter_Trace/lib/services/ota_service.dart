@@ -964,6 +964,10 @@ class OtaService extends GetxController {
         if (generation != _cancelGeneration) return false;
         switch (outcome.kind) {
           case _RebootKind.targetVerified:
+            // 终点观测（补测轮取证）：复核链在新连接上 GET_INFO 比对
+            // 全等后唯一到达此分支——它是「原升级调用成功完成」的直接
+            // 终态（与 timedOut 后手动查询互斥），此前无打点采不到证。
+            otaMonoLog('MONO_REBOOT_VERIFIED');
             // 刷新本地快照为升级后身份。
             _deviceInfo = outcome.info;
             _deviceInfoAddress = deviceAddress;

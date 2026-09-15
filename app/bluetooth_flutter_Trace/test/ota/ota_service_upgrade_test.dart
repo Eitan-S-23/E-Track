@@ -282,6 +282,24 @@ void main() {
     final service = Get.find<OtaService>();
     expect(ble.beginCalls, 0, reason: '前置阶段不得发起 BEGIN');
 
+    // 成功路径两个终点观测点的捕获（补测轮取证打点）：debugPrint 覆写
+    // 参照「延迟 ABORT 反例」测试的既有模式，按事件名记 monoUs。
+    final monoLog = <String, List<int>>{};
+    final originalPrint = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) {
+      final line = message ?? '';
+      if (line.startsWith('OTA_MONO ')) {
+        final match = RegExp(r'^OTA_MONO (\S+) monoUs=(\d+)').firstMatch(line);
+        if (match != null) {
+          monoLog.putIfAbsent(match.group(1)!, () => <int>[])
+              .add(int.parse(match.group(2)!));
+        }
+      }
+    };
+    addTearDown(() {
+      debugPrint = originalPrint;
+    });
+
     final ok = await service.startOtaUpgrade('AA:BB');
     expect(ok, isTrue);
     expect(service.phase, OtaPhase.completed);
@@ -291,6 +309,17 @@ void main() {
       contains('vcode 20900'),
       reason: '完成文案须携带目标 vcode（目标身份已确认）',
     );
+
+    // 终点观测点（补测轮取证）：END ACK OK 收尾与复核成功各恰好一次，
+    // 且复核成功不早于 END ACK OK（复核在传输收尾之后才开始等待）。
+    expect(monoLog['MONO_END_ACK_OK'], isNotNull,
+        reason: 'END ACK OK 成功收尾必须打点（六状态第 4 项观测）');
+    expect(monoLog['MONO_END_ACK_OK']!.single, greaterThan(0));
+    expect(monoLog['MONO_REBOOT_VERIFIED'], isNotNull,
+        reason: '复核链确认目标身份必须打点（六状态第 5/6 项观测）');
+    expect(monoLog['MONO_REBOOT_VERIFIED']!.single,
+        greaterThanOrEqualTo(monoLog['MONO_END_ACK_OK']!.single),
+        reason: '复核成功不得早于 END ACK OK 收尾');
 
     // MCU 侧收满：8 段全部落 staging、块收齐提交 durable=1024、
     // END 校验通过（sha 复述与 BEGIN 一致、durable==total）。
