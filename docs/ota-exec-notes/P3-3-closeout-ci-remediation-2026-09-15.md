@@ -88,3 +88,20 @@ Git 可按属性规范化行尾，原始字节另由归档保证；不以 stash/
 主树切回 main 前再次检查 tracked clean、未跟踪/忽略文件碰撞、实际路径和完整父链，
 同步后核对 `HEAD == origin/main`，并将最终 CI/合并/同步记录提交入 main。
 上述步骤尚未全部完成前，P3-3 卡仍为进行中，v9 独立验收 PASS 保留原锚点。
+
+## 真实 Actions 与合并结果
+
+修复提交 `3110cd7af5fc6e63cc764dc639d1b4514acec486` 的自然 CI 全部通过：
+治理 run 34970512157、开发双宿主 run 34970506983、APK/EXE run 34970511963、
+自动 MCU run 34970512071。Release、Pages、Cloudflare 注册均跳过。
+Linux 的 `apk_build`、`apk_verify`、`apk_collect` 均实际 exit 0；
+原始 job 日志在 `.cache/p3-3-closeout-20260915-01/remediation-development-ubuntu-log.stdout.log`。
+磁盘预检记录 free=14378385408 B，结束 df 显示 855 MiB 可用；
+当前问题已在真实 CI 验证关闭，未来资源预算不作为任何 OTA 产品判据。
+
+PR #24 于 2026-09-15T13:04:17Z 用 merge commit
+`c6465bd44121f244de25bf15103ccc7dd429f68c` 合入 main。
+主树保全后安全切回 main，HEAD == origin/main == c6465bd；
+冻结祖先链、367 份证据 Git 对象、363 份主树冻结文件字节以及旧索引均核对通过。
+最终看板/CI/合并/同步记录通过后续独立文档提交入 main，再完成最终同步；
+没有重开 v9 验收，旧失败轮次及用户保全资产均保留。

@@ -5,8 +5,10 @@
 P3-3-v9 独立验收五项全部 PASS，结论采用
 `docs/ota-exec-notes/P3-3-v9-acceptance-2026-09-15.md`。
 主会话只办理 Git 收口，不参与重新实现或重新判定验收。
-本记录初次提交时，必要 CI、PR 合并和主工作树同步尚待完成，不能宣称整卡已收口。
-看板保持“进行中”，实现认领 Claude(P3-3-IMPL-20260907) 不变。
+PR #24 已在必要 CI 全绿后用 merge commit 合并，主工作树已安全同步到 main，
+最终证据和操作事实见本文末节。看板置“完成”，实现认领 Claude(P3-3-IMPL-20260907) 不变。
+本记录初次提交时的未完成状态及其后失败/修复过程保留在以下历史章节，
+不使用旧状态覆盖当前 v9 PASS，也不让旧 PASS 冒充后续治理输入的验收。
 
 ## 归档身份
 
@@ -92,3 +94,56 @@ Release、Pages 和 Cloudflare 注册跳过。失败记录保留，不覆盖为�
 `81f93ff7d3aa3f54edc5acf7c752c498eb7a65d6`；不推送、不并入 PR。
 未删除或清理其他文件；原 t1a 分支保留。
 新 CI、PR 合并及 main 同步仍待执行，整卡 Git 收口尚未完成。
+
+## 最终合并与主树同步
+
+上节“仍待执行”为修复提交前的历史状态，现由本节的实际结果接续。
+
+- 证据提交：`5695abc5d7cd1402bd0815017a3e383c57571662`。
+- 独立索引提交：`4df590b37c2e4f9f1f7e1aa82c47898c384164ba`。
+- 治理/开发 CI 修复提交：`3110cd7af5fc6e63cc764dc639d1b4514acec486`。
+- PR：https://github.com/Eitan-S-23/E-Track/pull/24。
+- 合并时间：2026-09-15T13:04:17Z。
+- merge commit：`c6465bd44121f244de25bf15103ccc7dd429f68c`。
+
+合并前 GitHub 确認 approved head=3110cd7、base=0ef3cc1、MERGEABLE/CLEAN，
+所有必要检查 completed SUCCESS；使用 `--merge --match-head-commit`，
+未使用 auto/admin/squash/rebase、force-push 或删除分支选项。
+
+| 必要 CI | 当前实际结果 |
+|---|---|
+| Acceptance Governance / 34970512157 | SUCCESS |
+| Flutter Development Checks / 34970506983 | Linux、Windows SUCCESS；Linux debug APK build/verify/collect 全 PASS |
+| Build APK and EXE / 34970511963 | Android release-mode APK、Windows EXE SUCCESS |
+| MCU Firmware Build / 34970512071 | SUCCESS，仅自然 PR 触发 |
+
+Release、GitHub Pages 和 Cloudflare 注册均 SKIPPED，未执行任何发布或部署。
+旧失败 run 34960469334/34960338796 保留，不改写其结果。
+开发 Linux 磁盘预检 free=14378385408 B，minimum=12884901888 B；
+APK 完成后 `/dev/root` 可用 855 MiB（df 人类可读输出），
+说明当前修复实际跑通，但未来冷工具链仍需关注磁盘容量，12 GiB 不是充分性保证。
+
+安全同步顺序实测：fetch origin 后确认没有 worktree 检出 main；
+root tracked clean，486 个 incoming 变更路径无未跟踪/忽略文件或父链碰撞；
+用无强制的 `git fetch origin refs/heads/main:refs/heads/main` 快进本地 main，
+再在指定主树执行 `git switch --no-overwrite-ignore main`。
+主树 HEAD 和 origin/main 均为 c6465bd44121f244de25bf15103ccc7dd429f68c，
+`git status --short --branch --untracked-files=no` 只显示 `main...origin/main`。
+
+同步后只读审计 PASS：freeze_commit -> bundle_commit -> origin/main 可达，
+367 份证据/报告 Git 对象与 bundle 相同，主树 363 份冻结文件原始 SHA-256 相同，
+FREEZE-INDEX 与索引提交相同；post-bundle 差异仅为已批准的治理/开发 CI 和收口文档。
+未在治理修改后的 HEAD 上重跑旧 v9 执行门禁，也没有新建正式验收轮次。
+
+一次收口辅助审计误用了“Git fixture 隔离配置”启动模式，因丢失正常 autocrlf
+配置而把检出行尾报告为脏；正常 Git status 无 tracked 差异。
+改用真实工作树配置的同一只读审计后 PASS，未修改/还原文件或绕过门禁，
+误报日志 `first-main-identity-audit.*` 原样保留。这不是产品或 v9 验收失败。
+
+本节与看板作为后续文档提交通过 PR 落入 main，不仅留在已合并分支；
+不记录本提交自身 SHA，最终文档合并后再快进主树并核对 HEAD == origin/main。
+admission 工作树、原始日志、唯一资产、本地保全分支和 19 份原字节归档均保留。
+本次主动输出仅在用户授权的两个项目根内，临时和 GH 缓存位于 admission
+`.cache/p3-3-closeout-20260915-01/`；未启动 PowerShell，无已知项目外主动写入。
+未执行本地 Flutter 构建、新的产品验收、手动 build-only/固件工作流、
+Release/tag、部署、安装/卸载/清数据、OTA、J-Link、烧录或复位。
