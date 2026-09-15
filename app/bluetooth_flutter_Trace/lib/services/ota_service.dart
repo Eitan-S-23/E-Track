@@ -1716,7 +1716,7 @@ class OtaService extends GetxController {
       if (await _ble.connectOtaDeviceByAddress(deviceAddress)) {
         if (aborted()) return null;
         // P3-4 观测：probe 轮的特征发现耗时（跨 attempt 累计共用实例）。
-        final charsSw = stats == null ? null : Stopwatch()..start();
+        final charsSw = stats == null ? null : (Stopwatch()..start());
         final otaChars =
             await _ble.findExactOtaCharacteristicsByAddress(deviceAddress);
         stats?.recordCharsDiscovery(

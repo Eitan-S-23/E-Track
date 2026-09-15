@@ -1247,7 +1247,7 @@ class BluetoothService extends GetxController {
   }) async {
     try {
       if (Platform.isWindows) {
-        final sw = stats == null ? null : Stopwatch()..start();
+        final sw = stats == null ? null : (Stopwatch()..start());
         final services = await _adapter.discoverServices(deviceAddress);
         stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services;
@@ -1257,7 +1257,7 @@ class BluetoothService extends GetxController {
         if (device == null) {
           throw UnsupportedError('未找到设备，无法发现服务: $deviceAddress');
         }
-        final sw = stats == null ? null : Stopwatch()..start();
+        final sw = stats == null ? null : (Stopwatch()..start());
         final services = await device.discoverServices();
         stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services; // 返回动态列表，调用方做解析
@@ -1407,7 +1407,7 @@ class BluetoothService extends GetxController {
   }) async {
     try {
       if (Platform.isWindows) {
-        final wSw = stats == null ? null : Stopwatch()..start();
+        final wSw = stats == null ? null : (Stopwatch()..start());
         await _adapter.writeCharacteristic(
           deviceAddress,
           serviceId,
@@ -1424,7 +1424,7 @@ class BluetoothService extends GetxController {
         if (device == null) {
           throw UnsupportedError('未找到设备，无法写入: $deviceAddress');
         }
-        final dSw = stats == null ? null : Stopwatch()..start();
+        final dSw = stats == null ? null : (Stopwatch()..start());
         final services = await device.discoverServices();
         stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
         for (final svc in services) {
@@ -1433,7 +1433,7 @@ class BluetoothService extends GetxController {
           for (final ch in svc.characteristics) {
             final cid = ch.uuid.toString();
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
-            final wSw = stats == null ? null : Stopwatch()..start();
+            final wSw = stats == null ? null : (Stopwatch()..start());
             await ch.write(Uint8List.fromList(data),
                 withoutResponse: !writeWithResponse);
             stats?.recordPlatformWrite(
@@ -1839,7 +1839,7 @@ class BluetoothService extends GetxController {
           _releaseNotifyOwner(ownerKey, ownerToken);
           return null;
         }
-        final dSw = stats == null ? null : Stopwatch()..start();
+        final dSw = stats == null ? null : (Stopwatch()..start());
         final services = await device.discoverServices();
         stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
         for (final svc in services) {

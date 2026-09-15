@@ -113,7 +113,7 @@ void main() {
       stats.recordSegmentSendEnd(offsetBytes: 256, lengthBytes: 128);
       // bitmap=0b101 → 段 0 与段 2（off 256）；段 1 未发送不产生样本。
       stats.recordBitmapConfirm(
-          durableOff: 0, bitmap: 0b101, segmentSize: 128);
+          durableOff: 0, bitmap: 0x05, segmentSize: 128);
       expect(stats.ackLatencySamplesUs, hasLength(2));
       expect(stats.ackSampleIntegrity, 'complete');
     });

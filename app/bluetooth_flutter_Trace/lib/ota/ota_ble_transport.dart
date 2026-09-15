@@ -129,7 +129,7 @@ class OtaBleTransport {
   Future<DeviceOtaInfo> getDeviceInfo(
       {Duration timeout = const Duration(seconds: 10)}) async {
     // P3-4 观测：一次成功 GET_INFO 往返（含实例内有界重试/探针）。
-    final statsWatch = stats == null ? null : Stopwatch()..start();
+    final statsWatch = stats == null ? null : (Stopwatch()..start());
     var attempts = 0;
     var probes = 0;
     // 废弃探针序列的端到端预算（RC3-05⑤）：次数上限 × 单次上限。它与
