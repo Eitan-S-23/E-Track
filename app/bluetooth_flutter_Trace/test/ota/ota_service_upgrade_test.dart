@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
+import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
@@ -2658,7 +2659,11 @@ class _UpgradeFakeBle extends BluetoothService {
   }
 
   @override
-  Future<int> requestOtaMtu(String deviceAddress, {int requested = 247}) async {
+  Future<int> requestOtaMtu(
+    String deviceAddress, {
+    int requested = 247,
+    OtaLinkStats? stats,
+  }) async {
     return otaMtu;
   }
 
@@ -2666,8 +2671,9 @@ class _UpgradeFakeBle extends BluetoothService {
   Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(
     String deviceAddress,
     String serviceId,
-    String characteristicId,
-  ) async {
+    String characteristicId, {
+    OtaLinkStats? stats,
+  }) async {
     return _notifyController.stream;
   }
 
@@ -2678,6 +2684,7 @@ class _UpgradeFakeBle extends BluetoothService {
     String characteristicId,
     List<int> data, {
     bool writeWithResponse = false,
+    OtaLinkStats? stats,
   }) async {
     final isDataChunk = _isDataChunk(data);
     if (isDataChunk && !dataWriteEntered.isCompleted) {

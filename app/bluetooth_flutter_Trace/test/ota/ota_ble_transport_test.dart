@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
+import 'package:ble_monitor/ota/ota_link_stats.dart';
 
 /// OtaBleTransport：fake MCU 严格对照 Libraries/OTA/ota_ble_session.c 真值
 /// （seq 模型 §5.1、BEGIN 幂等/新会话分支、DATA 段校验链、END durable+sha
@@ -2258,6 +2259,111 @@ void main() {
       expect(outcome.callerError, isA<_InjectedNotifyError>());
       expect(outcome.zoneErrors, isEmpty);
     });
+  });
+
+  group('P3-4 链路观测接线（OtaLinkStats）', () {
+    test('clean run 8192：每唯一段恰一 ACK 样本，摘要完整、outcome=ok',
+        () async {
+      final package = packageBytes(8192); // 2 块 64 段
+      final mcu = _McuSim();
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      // 64 唯一段，每段恰一 ACK 样本（冻结语义：首发结束→首个有效确认）。
+      expect(stats.segmentsUnique, 64);
+      expect(stats.ackLatencySamplesUs, hasLength(64));
+      expect(stats.ackSampleIntegrity, 'complete');
+      expect(stats.retransmitFrames, 0);
+      // 每段一 DATA ACK、无重复/错误/畸形。
+      expect(stats.acksOk, 64);
+      expect(stats.acksDuplicate, 0);
+      expect(stats.acksMalformed, 0);
+      // durable 序列：BEGIN ACK 起点 0 + 两次块提交（单调递增）。
+      expect(stats.durableOffsets, [0, 4096, 8192]);
+      // 传输时长（BEGIN 首帧写开始 → END ACK 到达，同一时钟域）> 0。
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['outcome'], 'ok');
+      expect(t['elapsedUs'] as int?, greaterThan(0));
+      expect(t['segmentsUnique'], 64);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('丢部分 DATA ACK：位图确认回收，样本仍每段恰一个', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()..dropAckForOffsets = {0, 128}; // 段 0/1 的 ACK 丢
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+        windowSegments: 4,
+      );
+      expect(ack.isOk, isTrue);
+      // 32 段全部送达且零重发（位图回收，RC2-05）。
+      expect(
+        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
+        32,
+      );
+      // 丢 ACK 段（0/1）的确认来自后续段 ACK 的 bitmap 置位——共享
+      // 同一 ACK 的段各自成样本，终点相同、起点各异。
+      expect(stats.segmentsUnique, 32);
+      expect(stats.ackLatencySamplesUs, hasLength(32));
+      expect(stats.ackSampleIntegrity, 'complete');
+      expect(stats.retransmitFrames, 0);
+      // 送达的 ACK 30 份（段 0/1 的被丢），全部 ok。
+      expect(stats.acksOk, 30);
+      expect(stats.acksDuplicate, 0);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('块尾段 ACK 丢后重发：重传计入计数，样本不新增（冻结语义）',
+        () async {
+      final package = packageBytes(8192);
+      final mcu = _McuSim()..dropAckOnceForOffsets = {31 * 128}; // 块 0 尾段
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      // 首发 64 段 + 块 0 尾段一次重发（首发 ACK 丢失），无其他重发。
+      expect(
+        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
+        65,
+      );
+      // 重传不创建新样本：唯一段仍 64、样本仍 64、起点仍是首发结束。
+      expect(stats.segmentsUnique, 64);
+      expect(stats.retransmitFrames, 1);
+      expect(stats.ackLatencySamplesUs, hasLength(64));
+      expect(stats.ackSampleIntegrity, 'complete');
+      // 重发段（off 3968）的确认来自重发触发的幂等 ACK（durable 前移
+      // 4096，advanced 回收自身段）——样本终点含超时等待与重发全程。
+      expect(stats.durableOffsets, [0, 4096, 8192]);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('重复 DATA ACK：duplicate 计数，样本数不变', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()..duplicateDataAck = true;
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      // 每段两份 ACK：第二份 seq 已不在途 → duplicate 分类，不产生样本。
+      expect(stats.acksOk, 32);
+      expect(stats.acksDuplicate, 32);
+      expect(stats.ackLatencySamplesUs, hasLength(32));
+      expect(stats.ackSampleIntegrity, 'complete');
+    }, timeout: const Timeout(Duration(seconds: 60)));
   });
 }
 

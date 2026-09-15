@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:win_ble/win_ble.dart';
 
 import '../ota/ota_device_observation.dart';
+import '../ota/ota_link_stats.dart';
 
 // 抽象蓝牙适配器接口
 abstract class BluetoothAdapter {
@@ -1236,18 +1237,29 @@ class BluetoothService extends GetxController {
     }
   }
 
-  /// 通过设备地址发现服务（用于遥控透传）
-  Future<List<dynamic>> discoverServicesByAddress(String deviceAddress) async {
+  /// 通过设备地址发现服务（用于遥控透传）。
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录每次
+  /// 服务发现调用耗时（含 OTA 写路径内的重复发现——待测热点归因数据）。
+  Future<List<dynamic>> discoverServicesByAddress(
+    String deviceAddress, {
+    OtaLinkStats? stats,
+  }) async {
     try {
       if (Platform.isWindows) {
-        return await _adapter.discoverServices(deviceAddress);
+        final sw = stats == null ? null : Stopwatch()..start();
+        final services = await _adapter.discoverServices(deviceAddress);
+        stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
+        return services;
       } else {
         // 移动端：直接通过FlutterBluePlus发现服务（要求设备已连接）
         final device = _findDeviceByAddress(deviceAddress);
         if (device == null) {
           throw UnsupportedError('未找到设备，无法发现服务: $deviceAddress');
         }
+        final sw = stats == null ? null : Stopwatch()..start();
         final services = await device.discoverServices();
+        stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services; // 返回动态列表，调用方做解析
       }
     } catch (e) {
@@ -1339,15 +1351,63 @@ class BluetoothService extends GetxController {
   /// OTA 传输（OTA-XC-FLUTTER-TRANSPORT 红线：非 FFF2 特征不得被
   /// 模糊匹配命中）。serviceId/characteristicId 必须来自
   /// [findExactOtaCharacteristicsByAddress] 的发现结果。
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：方法级 GATT
+  /// 写计时（channel 层观测点）；私有实现内再拆分平台写与移动端逐分片
+  /// discoverServices() 的各自耗时。
   Future<void> writeOtaCharacteristicByAddress(
     String deviceAddress,
     String serviceId,
     String characteristicId,
     List<int> data, {
     bool writeWithResponse = false,
+    OtaLinkStats? stats,
+  }) async {
+    if (stats == null) {
+      await _writeOtaCharacteristicByAddress(
+        deviceAddress,
+        serviceId,
+        characteristicId,
+        data,
+        writeWithResponse: writeWithResponse,
+      );
+      return;
+    }
+    final sw = Stopwatch()..start();
+    try {
+      await _writeOtaCharacteristicByAddress(
+        deviceAddress,
+        serviceId,
+        characteristicId,
+        data,
+        writeWithResponse: writeWithResponse,
+        stats: stats,
+      );
+      stats.recordGattWrite(
+        durationUs: sw.elapsedMicroseconds,
+        bytes: data.length,
+      );
+    } catch (e) {
+      stats.recordGattWrite(
+        durationUs: sw.elapsedMicroseconds,
+        bytes: data.length,
+        error: true,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> _writeOtaCharacteristicByAddress(
+    String deviceAddress,
+    String serviceId,
+    String characteristicId,
+    List<int> data, {
+    bool writeWithResponse = false,
+    OtaLinkStats? stats,
   }) async {
     try {
       if (Platform.isWindows) {
+        final wSw = stats == null ? null : Stopwatch()..start();
         await _adapter.writeCharacteristic(
           deviceAddress,
           serviceId,
@@ -1355,20 +1415,31 @@ class BluetoothService extends GetxController {
           data,
           writeWithResponse: writeWithResponse,
         );
+        stats?.recordPlatformWrite(
+          durationUs: wSw!.elapsedMicroseconds,
+          bytes: data.length,
+        );
       } else {
         final device = _findDeviceByAddress(deviceAddress);
         if (device == null) {
           throw UnsupportedError('未找到设备，无法写入: $deviceAddress');
         }
+        final dSw = stats == null ? null : Stopwatch()..start();
         final services = await device.discoverServices();
+        stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
         for (final svc in services) {
           final sid = svc.uuid.toString();
           if (!_strictBleUuidEquals(sid, serviceId)) continue;
           for (final ch in svc.characteristics) {
             final cid = ch.uuid.toString();
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
+            final wSw = stats == null ? null : Stopwatch()..start();
             await ch.write(Uint8List.fromList(data),
                 withoutResponse: !writeWithResponse);
+            stats?.recordPlatformWrite(
+              durationUs: wSw!.elapsedMicroseconds,
+              bytes: data.length,
+            );
             return;
           }
         }
@@ -1687,11 +1758,39 @@ class BluetoothService extends GetxController {
   /// 关掉新 owner 依赖的共享 CCCD——新 transport 读写都成功却收不到任何
   /// 通知，表现为全部 ACK 超时。等平台订阅返回后若已易主，本地直接放弃：
   /// 既不建立监听，也不动平台开关（那是新 owner 的）。
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录订阅
+  /// 整体耗时与成败；移动端分支内的重复 discoverServices() 由私有实现
+  /// 内的 discover 计时覆盖。
   Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(
     String deviceAddress,
     String serviceId,
-    String characteristicId,
-  ) async {
+    String characteristicId, {
+    OtaLinkStats? stats,
+  }) async {
+    if (stats == null) {
+      return _subscribeOtaNotifyByAddress(
+          deviceAddress, serviceId, characteristicId);
+    }
+    final sw = Stopwatch()..start();
+    final stream = await _subscribeOtaNotifyByAddress(
+      deviceAddress,
+      serviceId,
+      characteristicId,
+      stats: stats,
+    );
+    stats.recordSubscribe(
+      durationUs: sw.elapsedMicroseconds,
+      ok: stream != null,
+    );
+    return stream;
+  }
+
+  Future<Stream<List<int>>?> _subscribeOtaNotifyByAddress(
+    String deviceAddress,
+    String serviceId,
+    String characteristicId, {
+    OtaLinkStats? stats,
+  }) async {
     final ownerKey =
         _otaNotifyKey(deviceAddress, serviceId, characteristicId);
     final ownerToken = ++_otaNotifyTokenSeq;
@@ -1740,7 +1839,9 @@ class BluetoothService extends GetxController {
           _releaseNotifyOwner(ownerKey, ownerToken);
           return null;
         }
+        final dSw = stats == null ? null : Stopwatch()..start();
         final services = await device.discoverServices();
+        stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
         for (final svc in services) {
           final sid = svc.uuid.toString();
           if (!_strictBleUuidEquals(sid, serviceId)) continue;
@@ -1793,7 +1894,31 @@ class BluetoothService extends GetxController {
   ///
   /// 返回协商后的单次写入净荷上限（MTU-3）；失败或平台不支持时返回
   /// 保守值 20（ATT 默认 MTU 23 - 3）。OTA 分片以该值为准。
-  Future<int> requestOtaMtu(String deviceAddress, {int requested = 247}) async {
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录请求值、
+  /// 协商结果净荷上限与耗时。
+  Future<int> requestOtaMtu(
+    String deviceAddress, {
+    int requested = 247,
+    OtaLinkStats? stats,
+  }) async {
+    if (stats == null) {
+      return _requestOtaMtu(deviceAddress, requested: requested);
+    }
+    final sw = Stopwatch()..start();
+    final chunk = await _requestOtaMtu(deviceAddress, requested: requested);
+    stats.recordMtu(
+      requested: requested,
+      chunkBytes: chunk,
+      durationUs: sw.elapsedMicroseconds,
+    );
+    return chunk;
+  }
+
+  Future<int> _requestOtaMtu(
+    String deviceAddress, {
+    int requested = 247,
+  }) async {
     try {
       if (Platform.isWindows) {
         // WinBle 由协议栈管理分片；返回保守默认写入大小。

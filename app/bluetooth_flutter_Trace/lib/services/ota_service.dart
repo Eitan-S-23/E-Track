@@ -15,6 +15,7 @@ import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
 import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
+import '../ota/ota_link_stats.dart';
 import '../ota/ota_mono.dart';
 import 'app_update_service.dart';
 import 'bluetooth_service.dart';
@@ -834,6 +835,9 @@ class OtaService extends GetxController {
       _terminalState.value = null;
       _durableProgress.value = 0.0;
       _phase.value = OtaPhase.transferring;
+      // P3-4 链路观测：本轮升级的单一时钟域实例（发现→绑定→复核→传输
+      // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
+      final linkStats = OtaLinkStats(label: 'upgrade', device: deviceAddress);
       OtaBleTransport? activeTransport;
       try {
         // 就地读取并校验包字节（RC2-04）：锁后一次读取，长度+SHA 校验
@@ -860,8 +864,14 @@ class OtaService extends GetxController {
         final etuHeader = package.sublist(0, 64);
         final packageSha256 = packageDigest.bytes;
 
+        // P3-4 观测：OTA 特征发现（findExact 整体）耗时与结果。
+        final charsSw = Stopwatch()..start();
         final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
           deviceAddress,
+        );
+        linkStats.recordCharsDiscovery(
+          durationUs: charsSw.elapsedMicroseconds,
+          found: otaChars != null,
         );
         if (generation != _cancelGeneration) return false;
         if (otaChars == null) {
@@ -869,7 +879,11 @@ class OtaService extends GetxController {
           _phase.value = OtaPhase.failed;
           return false;
         }
-        final transport = await _bindTransport(deviceAddress, otaChars);
+        // P3-4 观测：绑定阶段（MTU 协商 + 通知订阅）整体起止。
+        linkStats.phaseStart('bind');
+        final transport = await _bindTransport(deviceAddress, otaChars,
+            stats: linkStats);
+        linkStats.phaseEnd('bind');
         if (generation != _cancelGeneration) {
           // RC3-04⑤：迟到完成的 bind 产物无人接管——transport 与其订阅
           // 不释放会悬挂占用通知通道（PR10 一个连接代次仅一个订阅，
@@ -921,6 +935,9 @@ class OtaService extends GetxController {
             debugPrint('OTA sent $sent/$total');
           },
         );
+        // P3-4 观测：传输终态已定（transport finally 已记录 outcome），
+        // 输出本轮升级的聚合摘要（幂等；取消/异常路径由各 catch 补发）。
+        linkStats.emitSummary();
         if (generation != _cancelGeneration) return false;
         if (!ack.isOk) {
           final terminal = OtaTerminalState(
@@ -1000,6 +1017,8 @@ class OtaService extends GetxController {
             return false; // 静默：状态由 cancelUpgrade 发布
         }
       } on OtaTransportException catch (e) {
+        // P3-4 观测：异常退出路径补发摘要（幂等，取消窗口同发）。
+        linkStats.emitSummary();
         if (e.code == 'DISCONNECTED') {
           // 断连使旧身份快照失效（PR09）：恢复须重新 GET_INFO。
           _deviceInfo = null;
@@ -1064,6 +1083,9 @@ class OtaService extends GetxController {
         // 仍是当前 owner）时发布：用户取消窗口已在上面统一让出。
         return false;
       } on OtaDeviceIdentityException catch (e) {
+        // P3-4 观测：身份异常多发生在传输前的 GET_INFO 复核，摘要含
+        // 发现/绑定/复核数据（幂等）。
+        linkStats.emitSummary();
         if (generation != _cancelGeneration) {
           // 与上面同一条取消窗口让出规则（RC3-12②），也与重启复核的
           // `_RebootKind.identityChanged` 分支保持一致——那条路径在发布前
@@ -1090,6 +1112,8 @@ class OtaService extends GetxController {
         _phase.value = OtaPhase.failed;
         return false;
       } catch (e) {
+        // P3-4 观测：未知异常路径补发摘要（幂等）。
+        linkStats.emitSummary();
         if (generation != _cancelGeneration) {
           // 原生/未知异常同样不得抢在取消清理前发布失败态（RC3-12②）：
           // 取消引发的在途写异常会走这一支，发布职责归属 cancelUpgrade。
@@ -1595,6 +1619,11 @@ class OtaService extends GetxController {
     FirmwareLatestInfo latest,
     int generation,
   ) async {
+    // P3-4 链路观测：重启探测独立时钟域实例（跨轮询 attempt 累计共用
+    // 一个实例；与升级传输的 upgrade 实例时间戳不相减）。结束路径
+    // （cancelled/targetVerified/timedOut/identityChanged）统一在返回前
+    // 输出聚合摘要（幂等）。
+    final probeStats = OtaLinkStats(label: 'probe', device: deviceAddress);
     // RC3-08⑤：截止先于主动断开建立——断开本身可能耗时（等协议栈状态
     // 迁移），总预算必须覆盖断开与全部轮询，不得从断开完成后才开始
     // 计费（否则断开耗时会无声挤占重启等待窗口）。
@@ -1610,6 +1639,7 @@ class OtaService extends GetxController {
         .timeout(const Duration(seconds: 5), onTimeout: () {});
     while (DateTime.now().isBefore(deadline)) {
       if (generation != _cancelGeneration) {
+        probeStats.emitSummary();
         return const _RebootOutcome(_RebootKind.cancelled);
       }
       // RC3-08：单轮探测链（connect/discover/bind/INFO）受剩余总预算与
@@ -1636,6 +1666,7 @@ class OtaService extends GetxController {
           sessionInfo,
           latest,
           probeAborted,
+          stats: probeStats,
         ).timeout(
           roundCap < const Duration(seconds: 1)
               ? const Duration(seconds: 1)
@@ -1648,7 +1679,10 @@ class OtaService extends GetxController {
       } catch (_) {
         // 重启期间连接/读取失败是预期路径，继续轮询。
       }
-      if (outcome != null) return outcome;
+      if (outcome != null) {
+        probeStats.emitSummary();
+        return outcome;
+      }
       // 轮询间隔同样受剩余预算封顶（RC3-08）：不足一个间隔时按剩余量
       // 等待，不越过截止线。
       final rest = deadline.difference(DateTime.now());
@@ -1658,6 +1692,7 @@ class OtaService extends GetxController {
         );
       }
     }
+    probeStats.emitSummary();
     return const _RebootOutcome(_RebootKind.timedOut);
   }
 
@@ -1673,17 +1708,25 @@ class OtaService extends GetxController {
     String deviceAddress,
     DeviceOtaInfo sessionInfo,
     FirmwareLatestInfo latest,
-    bool Function() aborted,
-  ) async {
+    bool Function() aborted, {
+    OtaLinkStats? stats,
+  }) async {
     OtaBleTransport? probe;
     try {
       if (await _ble.connectOtaDeviceByAddress(deviceAddress)) {
         if (aborted()) return null;
+        // P3-4 观测：probe 轮的特征发现耗时（跨 attempt 累计共用实例）。
+        final charsSw = stats == null ? null : Stopwatch()..start();
         final otaChars =
             await _ble.findExactOtaCharacteristicsByAddress(deviceAddress);
+        stats?.recordCharsDiscovery(
+          durationUs: charsSw!.elapsedMicroseconds,
+          found: otaChars != null,
+        );
         if (aborted()) return null;
         if (otaChars != null) {
-          probe = await _bindProbeTransport(deviceAddress, otaChars, aborted);
+          probe = await _bindProbeTransport(deviceAddress, otaChars, aborted,
+              stats: stats);
           if (aborted()) return null;
           if (probe != null) {
             _phase.value = OtaPhase.reconnectVerify;
@@ -1723,11 +1766,13 @@ class OtaService extends GetxController {
   Future<OtaBleTransport?> _bindProbeTransport(
     String deviceAddress,
     Map<String, String> otaChars,
-    bool Function() aborted,
-  ) async {
+    bool Function() aborted, {
+    OtaLinkStats? stats,
+  }) async {
     OtaBleTransport? transport;
     try {
-      final mtuChunk = await _ble.requestOtaMtu(deviceAddress);
+      final mtuChunk =
+          await _ble.requestOtaMtu(deviceAddress, stats: stats);
       if (aborted()) return null;
       final serviceId = otaChars['serviceId']!;
       final writeId = otaChars['writeCharId']!;
@@ -1739,6 +1784,7 @@ class OtaService extends GetxController {
         deviceAddress,
         serviceId,
         notifyId,
+        stats: stats,
       );
       if (notifyStream == null) {
         return null;
@@ -1751,8 +1797,9 @@ class OtaService extends GetxController {
         chunkSize: mtuChunk,
         notifyStream: notifyStream,
         writeWithResponse: writeWithResponse,
+        stats: stats,
       );
-      transport = OtaBleTransport(channel: channel);
+      transport = OtaBleTransport(channel: channel, stats: stats);
       if (aborted()) {
         // 已被取代：当场释放（dispose 取消本地通知监听），平台 CCCD 的开
         // 关归新 owner，令牌复核保证这里的释放不会误关别人的通知流。
@@ -1770,17 +1817,22 @@ class OtaService extends GetxController {
 
   /// 建立 OTA transport：精确特征绑定 + MTU 协商 + 通知订阅就绪。
   /// 重建前先释放旧 transport（PR10：一个连接代次仅一个订阅）。
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：透传到 MTU
+  /// 协商、通知订阅、写通道与 transport 实例。
   Future<OtaBleTransport?> _bindTransport(
     String deviceAddress,
-    Map<String, String> otaChars,
-  ) async {
+    Map<String, String> otaChars, {
+    OtaLinkStats? stats,
+  }) async {
     try {
       final old = _transport;
       _transport = null;
       if (old != null) {
         await old.dispose();
       }
-      final mtuChunk = await _ble.requestOtaMtu(deviceAddress);
+      final mtuChunk =
+          await _ble.requestOtaMtu(deviceAddress, stats: stats);
       final serviceId = otaChars['serviceId']!;
       final writeId = otaChars['writeCharId']!;
       final notifyId = otaChars['notifyCharId']!;
@@ -1791,6 +1843,7 @@ class OtaService extends GetxController {
         deviceAddress,
         serviceId,
         notifyId,
+        stats: stats,
       );
       if (notifyStream == null) {
         return null;
@@ -1803,8 +1856,9 @@ class OtaService extends GetxController {
         chunkSize: mtuChunk,
         notifyStream: notifyStream,
         writeWithResponse: writeWithResponse,
+        stats: stats,
       );
-      final transport = OtaBleTransport(channel: channel);
+      final transport = OtaBleTransport(channel: channel, stats: stats);
       _transport = transport;
       // RC3-08⑦：记录本次绑定所依附的物理链路（地址 + 链路代次 +
       // 实际发现到的特征）。后台恢复据此判断链路是否已被换掉。
@@ -2177,6 +2231,7 @@ class _ChannelAdapter implements OtaBleChannel {
     required this.chunkSize,
     required this.notifyStream,
     required this.writeWithResponse,
+    this.stats,
   })  : _ble = ble,
         // 绑定时取设备作用域句柄（RC3-05⑤），供传输层界定写通道废弃标记。
         // 取一次而非每次现取：现取会让已被放弃的旧 adapter 在重连后"继承"
@@ -2193,6 +2248,8 @@ class _ChannelAdapter implements OtaBleChannel {
   final Stream<List<int>> notifyStream;
   /// FFF2 实际支持的写模式（PR06 绑定）。
   final bool writeWithResponse;
+  /// P3-4 链路观测（可选；null 时零行为差异）：透传 GATT 写计时。
+  final OtaLinkStats? stats;
   bool _connected = true;
 
   /// 本通道所属设备的作用域句柄（RC3-05⑤）：MCU 侧帧解析器状态不随
@@ -2211,6 +2268,7 @@ class _ChannelAdapter implements OtaBleChannel {
         writeCharId,
         chunk,
         writeWithResponse: writeWithResponse,
+        stats: stats,
       );
     } catch (e) {
       // 写失败同样标记断连（PR09）：不能只依赖通知流 error/done。
