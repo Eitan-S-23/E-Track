@@ -36,6 +36,22 @@ promote AC5 artifacts to OTA or CI release artifacts.
   read-only PowerShell checks and test subprocesses. Do not clean those caches
   without path-specific permission; see the 2026-09-06 governance audit note.
 
+### BLE Performance And Android Background OTA
+
+- Before changing OTA throughput, background execution or progress notifications,
+  read `OTA-XC-BLE-PERFORMANCE`, `OTA-XC-ANDROID-OTA-BACKGROUND` and
+  `OTA-XC-OTA-PROGRESS` in `docs/ota-cross-system-contracts.md`.
+- P3-4 owns measured link optimization and AT tuning; P3-8 owns Android background
+  OTA and notification progress. These are post-P3-3 improvements, not grounds to
+  rewrite the accepted P3-3-v9 bundle or reopen its completed card.
+- Measure discovery, GATT writes, ACK waits and durable staging before attributing
+  slow OTA to UART baud. A faster baud is not evidence of faster or reliable OTA.
+- Background continuation requires acknowledged service/runtime ownership, not
+  merely a notification or removal of the pause guard. Progress must reflect MCU
+  confirmation; final success still requires reboot/reconnect identity verification.
+- A task/spec requirement does not grant device operations or new CI permissions.
+  Keep development checks, independent acceptance and actual hardware evidence separate.
+
 ## Default Build Entry Point (firmware and/or simulator)
 
 **Default action:** when asked to compile the MCU firmware and simulator, run

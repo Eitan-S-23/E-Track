@@ -31,6 +31,39 @@ This project must not be built locally.
 - Android APK and Windows EXE build verification is required only when Flutter app build inputs or `pubspec.yaml` / `pubspec.lock` version/dependency inputs change. Cloudflare admin Pages UI, docs, AGENTS.md, and other non-app changes must use their own checks/deploys and should not trigger APK/EXE rebuilds.
 - If the user explicitly says not to push, do not push; state that GitHub Actions verification was intentionally not performed and provide the exact git commands the user can run.
 
+## Device OTA Performance And Background Execution
+
+- Read `../../docs/ota-cross-system-contracts.md` clauses
+  `OTA-XC-BLE-PERFORMANCE`, `OTA-XC-ANDROID-OTA-BACKGROUND` and
+  `OTA-XC-OTA-PROGRESS` before changing device OTA writes, lifecycle or notifications.
+  Task boundaries are P3-4 and P3-8 in `../../PLAN-OTA-EXEC.md`; P3-3-v9 remains
+  historical accepted evidence, not proof that these new capabilities exist.
+- Do not assume UART baud is the bottleneck. Measure service discovery, negotiated
+  MTU, GATT writes, ACK waits and durable advancement; compare identical assets
+  and parameter groups. Reuse strictly discovered characteristics only within the
+  valid connection generation, invalidating them on disconnect or service change.
+- Android background OTA must have one task owner independent of the page, with
+  an acknowledged connected-device foreground service and a live execution/BLE
+  runtime. The existing App self-update dataSync service is not that guarantee.
+  Do not just delete `pauseForBackground()` or add a notification and claim support.
+- Entering background or locking the screen may continue only after successful
+  handoff. Missing notification/Bluetooth permission, service-start failure or
+  loss of execution ownership requires a visible safe fallback. Force-stop is not
+  promised to keep running; recovery must revalidate package/device identity and
+  use MCU durable state, never cached UI progress as transport truth.
+- Use a separate device-OTA notification identity. Show download/transfer/apply/
+  reconnect/verification phases, with transfer progress based on confirmed durable
+  bytes. END ACK is not upgrade success; require the target version and full raw
+  SHA-256 after reboot/reconnect. Do not invent apply percentages or assume every
+  Android status bar can render a persistent numeric percentage.
+- Notification actions and late callbacks must be bound to the current task and
+  generation. Cancellation is only available in cancellable phases. Release
+  service, wake lock and listeners on terminal paths without affecting App updates.
+- Real background, screen-lock, return-to-page and disconnect/recovery evidence
+  is required alongside Actions checks/builds. Unit tests or APK creation alone
+  do not establish Android background reliability. Hardware actions remain subject
+  to separate authorization; this section does not expand standing CI permissions.
+
 ## GitHub Credentials
 
 - This Windows machine may have multiple GitHub credentials configured.

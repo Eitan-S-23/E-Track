@@ -2204,10 +2204,80 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
                 self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
         self.assertEqual(
-            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P4-2"},
+            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-2"},
             dispatchable,
-            "冻结后可派单集合必须精确受控：P3-1/P3-2 收口合并解除 P3-3 阻塞；P3-4/P3-6 解锁及 P3-7 立卡均已登记，派单变更须同批登记 §9",
+            "可派单集合必须精确受控：历次解锁及 OTA-DEC-014 新增 P3-8 均须同批登记 §9，不能用子集比较放宽",
         )
+
+    def test_ble_performance_policy_preserves_measurement_and_link_boundaries(self):
+        section = self.contract.split("### OTA-XC-BLE-PERFORMANCE", 1)[1].split("### ", 1)[0]
+        for token in (
+            "OTA-DEC-014", "不新增或放宽", "服务发现次数/耗时", "实际协商 MTU",
+            "GATT 写耗时", "ACK 等待", "不同单调时钟域", "变量变化另立输入组",
+            "源码热点不能代替实测根因", "不承诺固定提速倍数", "设备、连接代次",
+            "断连、服务变化、设备切换必须失效", "旧代次迟到", "不能削弱",
+            "Actions 编译/测试通过不证明吞吐",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, section)
+        tuning = self.contract.split("### OTA-XC-BLE-TUNING", 1)[1].split("### ", 1)[0]
+        for token in ("referencePackageBytes=1048576", "effectiveThroughputKiBps >= 9",
+                      "30/30", "4 小时", "10/10", "clamp(3*P99_ACK, 500ms, 2000ms)"):
+            self.assertIn(token, tuning)
+        prompt = (self.PROMPT_ROOT / "prompt-P3-4-experiment.md").read_text(encoding="utf-8")
+        card = self.board.split("#### P3-4 ", 1)[1].split("#### P3-5 ", 1)[0]
+        for text in (prompt, card):
+            self.assertIn("审批后将选定生产 baud/timeout/retry 回填共享契约文档", text)
+
+    def test_android_background_policy_requires_real_handoff_and_fallback(self):
+        section = self.contract.split("### OTA-XC-ANDROID-OTA-BACKGROUND", 1)[1].split("### ", 1)[0]
+        for token in (
+            "acquire(taskKey)", "ACQUIRED / UNAVAILABLE(reason)", "App 前台",
+            "已实际建立", "执行引擎和 BLE 所有者均存活", "不是接管确认",
+            "不能各启动一个发送器", "connectedDevice", "dataSync",
+            "进入后台时安全暂停", "无 durable 进展截止", "强制停止",
+            "durable_off/bitmap", "旧通知按钮", "终态/异常/释放路径",
+            "完整 raw SHA-256", "不得只删除", "不追溯更改",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, section)
+
+    def test_ota_progress_policy_rejects_sent_bytes_and_premature_success(self):
+        section = self.contract.split("### OTA-XC-OTA-PROGRESS", 1)[1].split("## 8.", 1)[0]
+        for token in (
+            "durableBytes / totalBytes", "0 <= durableBytes <= totalBytes", "totalBytes > 0",
+            "非 durable 接收不能冒充", "不用计时器生成百分比", "END ACK",
+            "版本/raw SHA 验证", "独立于 App 自更新", "下拉通知栏", "不承诺所有 OEM",
+            "canCancel", "点击时再次验证", "旧 Intent", "不得阻塞逐帧发送",
+            "释放资源", "均不合格",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, section)
+        example = re.search(r"durable=(\d+)、total=(\d+) 时传输显示 (\d+)%", section)
+        self.assertIsNotNone(example)
+        durable, total, percent = map(int, example.groups())
+        self.assertGreater(total, 0)
+        self.assertGreaterEqual(durable, 0)
+        self.assertLessEqual(durable, total)
+        # Binary contract sections 4.2.2/5.5 commit whole 4 KiB blocks or the package tail.
+        self.assertTrue(durable == total or durable % 4096 == 0)
+        self.assertEqual(durable * 100, total * percent)
+
+    def test_p3_8_requirements_are_routed_without_reopening_p3_3(self):
+        row = next(item for item in self.readiness_rows() if item["task_id"] == "P3-8")
+        self.assertEqual("docs/ota-prompts/prompt-P3-8-implementation.md", row["prompt_path"])
+        self.assertEqual("IMPLEMENTATION", row["type"])
+        self.assertIn("P3-3 已完成", row["blocking_dependencies"])
+        card = self.board.split("#### P3-8 ", 1)[1].split("## 7.", 1)[0]
+        for token in ("不新增 P3-8 -> P3-5", "P3-3-v9", "不沿用 P3-3 临时额度"):
+            self.assertIn(token, card)
+        for relative in ("AGENTS.md", "app/bluetooth_flutter_Trace/AGENTS.md"):
+            text = (ROOT / relative).read_text(encoding="utf-8")
+            for clause in ("OTA-XC-BLE-PERFORMANCE", "OTA-XC-ANDROID-OTA-BACKGROUND", "OTA-XC-OTA-PROGRESS"):
+                self.assertIn(clause, text)
+        decision = self.decisions.split("## OTA-DEC-014", 1)[1].split("## 用户裁定原文", 1)[0]
+        self.assertIn("只批准需求、规范和治理回归", decision)
+        self.assertIn("不新增提交/推送/合并", decision)
 
     def test_prompt_paths_and_task_ids_are_unique_in_both_directions(self):
         rows = self.readiness_rows()

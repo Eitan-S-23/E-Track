@@ -40,7 +40,7 @@
 | P0 | 契约冻结+基建 | 完成 | 6/6 | P0-4/P0-5 独立真机复核通过；P1/P2 方案硬门槛重开 |
 | P1 | bootloader | 进行中 | 5/7 | P0 已 6/6,门槛已开;P1-1/P1-2/P1-3/P1-4/P1-5 独立验收通过;P1-6 进行中;P1-7(启动耗时与 POWER_EN 重复锁存)2026-08-04 新立 |
 | P2 | MCU App 升级链 | 完成 | 6/6 | **P0 全部完成(方案硬门槛)** |
-| P3 | BLE+Flutter | 进行中 | 4/7 | P2-1/2 完成 |
+| P3 | BLE+Flutter | 进行中 | 5/8 | P2-1/2 完成；P3-8 为新增后台 OTA 能力，不重开 P3-3 |
 | P4 | CI/CF | 待办 | 0/4 | P0 完成(可与 P1/P2 并行) |
 | P5 | 联调验收 | 待办 | 0/3 | P1-P4 全部完成 |
 
@@ -649,9 +649,12 @@
 - 准入整改批交付(实现会话): Claude(P3-3 实现 agent, P3-3-IMPL-20260907, 授权 P3-3-IMPL-AUTH-20260912)/2026-09-12；在独占 worktree dev/flutter/apk/p3-3-admission 完成七项准入整改(提交 b3f7a05→d98d978→2c2b5f0→c1e4051→ee0266c→e1edd9e→095421d→1e641f1→ab6ce3b)：OBS-SEC-01 观测 URL 凭据键校验绕过修复、OBS-01/02/03 扫描三结局区分+唯一终止闸门+target 地址插桩、RC3-07/02 中止四阶段计时、OPS-01 B1-M 台账对账(3/3 用尽)、CI const 两轮修复、build.yml Gradle 8.14 对齐；稳定提交 ab6ce3b 开发自测 run 34730007317 双宿主全绿+debug APK，build-only run 34730618341 全绿(release 模式 APK 46682620B/2a5d5db9…、Windows 完整运行包 8bbbbea4…，均 debug 签名回退，Pages/Release skipped)；治理 CI 首跑绿(34728291114)；验收准备材料落盘：P3-3-v1 合同/矩阵草案(DRAFT/NOT_RUN，freeze 字段占位)、设备/Boot 身份、toy/真包资产清单(golden vectors 不具上板资格)与缺口移交清单，详见 docs/ota-exec-notes/P3-3-admission-remediation-2026-09-12.md。真机操作、合并/发布/部署均未执行；正式验收 NOT_RUN，保持进行中，认领不变；build-only 配额 3/3 用尽、治理 CI 剩 2/3。
 
 #### P3-4 AT 提速实测
-状态: 待办 ｜ 认领: — ｜ 更新: —
-- 目标: 115200 基线吞吐实测;AT 提速(至 921600 逐档)稳定性与吞吐记录;超时/重传参数按实测标定(500ms 为初值非契约);流控全靠协议 credit(硬件流控引脚接地,禁启用)。
-- 验收: 吞吐/丢包数据表留证;选定生产波特率写入契约文档。
+状态: 待办 ｜ 认领: — ｜ 更新: 2026-09-15(按 OTA-DEC-014 补充链路诊断与最小热点优化；未开始实施或实测)
+- 依赖: P3-1 已完成；可使用已完成 P3-3 的实际发送器，不新增 P3-8 前置。
+- 目标: 先分解服务发现/GATT 写入/ACK 等待/UART 与 staging 开销，对实测支持的热点做最小优化，再做 115200 基线与至 921600 的 AT 逐档稳定性/吞吐实验；500ms 为初值非契约，流控只用协议 credit，禁启用硬件 RTS/CTS。
+- 范围: 沿用 MCU/发送器配置与统计接口；按 Spec 允许有证据支持的 Flutter 连接内 GATT 复用及必要调用链修改，不扩为无关重构或后台功能实现。源码热点不是已确认根因，不预设加速倍数。
+- 验收: 按 OTA-XC-BLE-PERFORMANCE 提供同一资产/参数组的分阶段和前后对照；按原 OTA-XC-BLE-TUNING 门槛独立复核唯一生产参数组合，审批后将选定生产 baud/timeout/retry 回填共享契约文档，不改写原性能门槛。
+- 派工书: docs/ota-prompts/prompt-P3-4-experiment.md；本次只是规范补充，实机操作与配额须另批，产品与正式验收 NOT_RUN，P3-3-v9 不变。
 - 证据: —
 
 #### P3-5 真机 BLE 闭环
@@ -686,6 +689,17 @@
 - 证据: docs/ota-exec-notes/P3-7-research-wiring.md(检索/接线设计与本地基线) ｜ docs/ota-exec-notes/P3-7-wiring-evidence.md(含 v2 打回补做: 第 4 条执行行 test_ota_device_info.py 置末位、paths 一行未加靠既有通配覆盖保持互镜; CI 反证选点修正——v1 的 SYNC0 与 ota_ble_ring.h 两处会先红在第 8 条被作废, 逐一实测后定 ACK_BEGIN 10u→11u / sink 守卫 / HAL_USB.cpp 反斜杠 include / k_ota_device_model 'E'→'F' 四处; 每次注错先按 CI 同序跑全部 12 条命令, cmd1 至目标前一条全绿、红点恰落在目标行, 还原后全序复绿; 治理测试 65/65; §5 已由收口批次回填至 11 条腿) ｜ docs/ota-exec-notes/P3-7-acceptance-round1.md、-round2.md、-round3.md(三轮独立验收记录, 全部哈希与 run/commit 标识登记于此) ｜ docs/acceptance-contracts/P3-7-v1.contract.json(冻结合同) ｜ docs/acceptance-contracts/P3-7-v1/(证据包: 三类 manifest、命令原始日志、11 次 CI 运行的元数据/步骤日志/改动文件清单、证据矩阵) ｜ .claude/verification-report-p3-7.md(审查评分)
 - 验收发现(均不阻断本卡): F-4 P3-6 的冻结 harness tests/ota/p3_6_verify_ci_wiring.py 现为红(2 项失败), 红因唯一且可归属——本卡按派工书授权把该步骤改名, 而该 harness 把旧步骤名钉死; P3-6 证据包在其冻结提交上仍可校验, 属「每轮证据包只在其冻结提交上可校验」的设计结果而非回归, 不回改 P3-6 冻结字节, 如需在 main 上重新可跑须另行立卡并出 P3-6 新版本合同。F-5 第 4 条接线 test_ota_device_info.py 原不在本卡范围, 经用户裁定不另立新卡, 改以同 task_id 的派工书 v2 承接(见 §9)。局限二则如实登记: 两条触发器反证的提交所在临时分支已按计划删除, 提交本身不被任何 ref 指向(门禁复算只读冻结证据文件、不含 git 调用, 故不受影响, 受影响的仅是人工按 SHA 追溯); CI 证据门禁只比红/绿两次提交的改动文件路径集合, 不比同一文件的 blob 哈希。另: 本轮 CI 证据由验收会话自行推送产生, 取证方与被验方同源, 可核部分为分支端态相对基线在 Libraries/、USER/、boot/、MDK-ARM_F435/ 四个红线目录上 diff 为空且每次注错/还原提交恰含一个文件。
 - 收口: 2026-09-04 用户放话后由主会话收口(主会话非本卡实现者), PR #19 已并入 main。刻意不用 squash 而用 merge: 包内 changed-*.json 逐条声明「该次注错/还原提交恰含一个文件」、run-*.json 把每次运行绑到具体提交, squash 会把 13 个提交压成 1 个使这些声明无法被第三方复核, fail-closed 反证四条腿的可信度随之塌掉(与 P3-6 为排除注错临时提交而 squash 的裁定相反, 理由不同)。代价如实登记: 4 次注错提交因此位于 main 可达历史中, git bisect 可能检出带注入缺陷的树; 缓解为每次注错的下一个提交即还原(缺陷树存活跨度 1 个提交)、main 顶端树干净、合并为 first-parent 线性结构故 git bisect --first-parent 不会进入注错提交。合并前 PR 全检查绿(MCU Firmware Build、Acceptance Governance、Build APK and EXE Release 三者 success; 治理 CI 本次被触发是因收口批次改动 docs/acceptance-contracts/ 与 tests/ota/, 其绿是收口硬前置)。三个 worktree 均不在 refs/heads/main 上, 故在主 worktree 切回 main 后 merge --ff-only, 快进 14 个提交, 核对 HEAD 与 origin/main 一致且无 ahead/behind, 未用 reset 或强制覆盖。入库后在 main 顶端复跑本卡接入的四条脚本全部 rc=0, 证明四次注错已彻底还原。收口证据见 docs/ota-exec-notes/P3-7-closeout.md, 收口后遗留问题清单见 docs/ota-exec-notes/P3-7-residual-issues.md。
+
+#### P3-8 Android 后台 OTA 与通知进度
+状态: 待办 ｜ 认领: — ｜ 更新: 2026-09-15(用户新增需求落盘，未实施/未实测)
+- 依赖: P3-3 已完成并合入 main；不以 P3-4 或 P4-2 部署为软件实施前置，不新增 P3-8 -> P3-5 硬依赖。
+- 目标: 前台发起并实际取得 Android 服务/执行器接管后，正常切应用、下拉通知栏和锁屏继续设备 OTA；页面/通知同源展示真实阶段和 durable 进度，回前台重附着任务，终态释放资源。
+- 范围: Flutter OTA/BLE 生命周期与通知的必要接线、Android 前台服务/权限/桥接及测试；不混用 App 自更新任务，不改 MCU/BLE 字节协议，不仅删除后台暂停保护。
+- 验收: OTA-XC-ANDROID-OTA-BACKGROUND 与 OTA-XC-OTA-PROGRESS 的接管/回退/代次隔离/取消/进度语义有正反例，必要 Actions analyze/test/APK/EXE 通过；独立真机证明后台及锁屏期间 durable 推进、通知/UI 一致、重启后新连接 GET_INFO 目标版本与完整 raw SHA 一致，并有服务/锁/订阅收尾证据。
+- 平台边界: 状态栏图标与下拉通知栏进度，不承诺所有 OEM 顶栏百分比；强制停止/进程被杀不保证持续执行，下次明确恢复按已核验包/设备及 MCU durable 状态处理。
+- 派工书: docs/ota-prompts/prompt-P3-8-implementation.md；具体设备、时长、操作/恢复配额和独立验收合同须另行审批，当前产品与正式验收 NOT_RUN。
+- 历史与权限: P3-3-v9、原认领及历史冻结包不变；本卡不授予新增推送/发布/部署或真机权限，不沿用 P3-3 临时额度。
+- 证据: —；立卡与治理验证记录见 docs/ota-exec-notes/P3-4-P3-8-requirements-2026-09-15.md，不冒充实现证据。
 
 ---
 
@@ -742,7 +756,7 @@
 <!-- post-p2-6-readiness:start -->
 ## 8.1 P2-6 后 OTA Spec readiness 矩阵
 
-本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。用户已批准 `OTA-DEC-001` 至 `OTA-DEC-012`，共享合同成熟度为 `FROZEN`：P3/P4 任务的内容状态为 `READY`，P5 验收任务为 `DEFERRED_ACCEPTANCE`。派单资格由内容状态、规范成熟度和实际依赖共同派生；当前可派单集合为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P4-2`，均为 `DISPATCHABLE`（P3-4/P3-6 解锁与 P3-7 立卡已登记；2026-09-07 核对 P3-1、P3-2 均已完成并合入 main，同步解除 P3-3 的过期依赖阻塞，见 §9）。生产部署仍须等待 P5 验收，不因规范冻结而解锁。
+本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。用户已批准 `OTA-DEC-001` 至 `OTA-DEC-012`，并按记录 10/11 增补任务边界和 Android 后台 OTA 要求，共享合同成熟度为 `FROZEN`：P3/P4 任务的内容状态为 `READY`，P5 验收任务为 `DEFERRED_ACCEPTANCE`。派单资格由内容状态、规范成熟度和实际依赖共同派生；当前可派单集合为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P3-8`、`P4-2`，均为 `DISPATCHABLE`（历次解锁及 2026-09-15 P3-8 立卡已登记 §9；已完成卡的资格不表示重开）。生产部署仍须等待 P5 验收，不因规范冻结而解锁；派单资格也不授予真机操作。
 
 依赖方向统一解释为“前置任务 -> 后置任务”。用户裁定固定新增 `P4-2 -> P4-1`、`P4-2 -> P3-5`；P4-1 与 P3-5 之间无自动依赖，P4-2 不依赖 P4-1。
 
@@ -751,17 +765,18 @@
 | 1 | P3-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-1-implementation.md |  | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 2 | P3-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-2-implementation.md |  | `OTA-XC-INFO-MAPPING`, `OTA-XC-DEVICE-MODEL`, `OTA-XC-IMAGE-IDENTITY` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 3 | P3-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-3-implementation.md |  | `OTA-XC-FLUTTER-DEVICE-DTO`, `OTA-XC-HTTP-LATEST`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | SATISFIED | P3-1、P3-2 均已完成并合入 main | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 4 | P3-4 | EXPERIMENT | docs/ota-prompts/prompt-P3-4-experiment.md |  | `OTA-XC-BLE-TUNING`, `OTA-XC-TEST-VECTORS` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 5 | P3-5 | INTEGRATION | docs/ota-prompts/prompt-P3-5-integration.md |  | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT`, `OTA-XC-D1-STATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-1、P3-2、P3-3、P3-4、P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-1, P3-2, P3-3, P3-4, P4-2 |
+| 4 | P3-4 | EXPERIMENT | docs/ota-prompts/prompt-P3-4-experiment.md |  | `OTA-XC-BLE-PERFORMANCE`, `OTA-XC-BLE-TUNING`, `OTA-XC-TEST-VECTORS` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 5 | P3-5 | INTEGRATION | docs/ota-prompts/prompt-P3-5-integration.md |  | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT`, `OTA-XC-D1-STATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-4、P4-2；P3-1/P3-2/P3-3 已完成 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-4, P4-2 |
 | 6 | P3-6 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-6-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main，两套 BLE 测试文件已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 7 | P3-7 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-7-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1、P3-6 均已完成并合入 main，三条待接脚本已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 8 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
-| 9 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 10 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
-| 11 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1、P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1, P4-2 |
-| 12 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
-| 13 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
-| 14 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
+| 8 | P3-8 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-8-implementation.md |  | `OTA-XC-ANDROID-OTA-BACKGROUND`, `OTA-XC-OTA-PROGRESS`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | SATISFIED | P3-3 已完成并合入 main；设备操作须另批 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
+| 10 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
+| 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1、P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1, P4-2 |
+| 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
+| 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
+| 15 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
 
 <!-- post-p2-6-readiness:end -->
 
@@ -805,6 +820,7 @@
 | 2026-09-10 | P3-3 / Claude 实现 agent（第六批开发自测） | 开发验证入口真实 CI 首跑暴露三处 harness 缺陷：checkout 字节比较把 Flutter 工具链 migration 再生文件误判为源码漂移而拦 APK；构建期再生未恢复致收尾误红；早期 workflow 语法/治理配套/lockfile 漂移阻断首跑 | dev_checks 门禁改语义比较+工具链再生白名单(构建前恢复提交字节、收尾恢复留 source_after_pre_restore 审计快照)；Android 构建链升 Gradle 8.14/AGP 8.11.1/Kotlin 2.2.20 满足 Flutter stable 最低要求；宿主回归 37 项全绿 | 属 §7.3.2 预授权范围内的开发验证工具修复，不改冻结合同/矩阵/判据；每轮修复以 changed inputs 重新触发(22 run 反馈链留痕 .cache-ci/ 与 research §6.15)，终态 run 34376805924 全绿+debug APK 首产；开发自测≠正式验收 | 已执行/开发自测全绿 |
 | 2026-09-10 | P3-3/P3-5 / Codex 用户授权治理裁定 | P3-3 卡面要求实机安装/toy/真包成功，Spec 却延期至依赖本卡的 P3-5，R2 归属未决 | 采用方案 A，P3-3 完成前保留最小实机闭环，成功到重启重连 GET_INFO 目标版本/raw SHA；受验 toy 必须可启动，P3-5 保留真实后端及 10/10 独立断连续传 | 用户明确授权本会话决策并解决，登记 OTA-DEC-013/记录 10；同步两卡 Spec、看板及交接记录并补治理回归，不修改冻结协议/历史合同、产品或开发 runner，不增加操作授权 | 已裁定/待正式合同与实际证据 |
 | 2026-09-10 | P3-3 / Claude 实现 agent（第七批整合整改） | 第六批复审草案指出的 runner 门禁非 fail-closed(未跟踪/实质修改/真 EOL 不分)、命令等待者错误窗口、半帧/迟到写投毒绕过、owner 与资源生命周期、HTTP 关闭清理；首跑 CI 暴露在途 GET_INFO 消耗会话 seq 的产品缺陷(合同 §5.1 seq=会话内帧序号) | dev_checks 语义身份+工具链再生绑定(11 runner 回归)；传输等待者错误监听/排队写启动复核/任意失败投毒/通道对象域/发窗间预算；service 取消代次 epoch 屏障+后台恢复三级 fail-closed 复核+A→B 作废；GET_INFO 独立 _querySeq(3e10311) | 属 §7.3.2 预授权范围内的开发自测整改，不改冻结合同/矩阵/判据；终态 run 34452184680 双宿主全绿+debug APK 复产，失败轮 34449930671 证据留痕 .cache-ci/；开发自测≠正式验收 | 已执行/开发自测全绿 |
+| 2026-09-15 | P3-4/P3-8 / Codex 需求治理 | 用户要求 BLE 提速及 Android 后台 OTA/状态栏进度；现有逐分片发现热点未实测定因，后台是主动安全暂停 | OTA-DEC-014/记录 11：P3-4 增加链路诊断与最小热点优化，新增 P3-8 前台服务实际接管/安全回退/durable 通知；同步 AGENTS、共享合同、Spec、readiness 精确派单集合及治理回归 | 用户明确要求写入项目规范；旧 BLE 性能门槛和 P3-3-v9 冻结包不变；P3-8 只依赖 P3-3，P3-5 仍等待 P3-4/P4-2，不增加硬件或远端授权 | 已落盘；首跑 37 项、复核修订后 22 项宿主治理测试通过，独立复核两项发现关闭；远端 CI/产品实测 NOT_RUN |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
 
@@ -1075,3 +1091,4 @@
 - 2026-09-15 ｜ Codex(P3-3 主会话，Git 收口，非实现/非重新验收) ｜ P3-3(v9 独立验收五项 PASS；Git 收口进行中) ｜ 按用户集中授权归档 v7 历史、完整 v8 来源与 v9 当前证据，精确暂存并核对 367 个文件字节一致，证据提交 5695abc5d7cd1402bd0815017a3e383c57571662；指定 v9 完整性复校 VALIDATION=PASS、overall=PASS，随后独立登记 FREEZE-INDEX 并回写本卡。v7/v8 不追溯改成 PASS，v8 R2 保留 NOT_RUN。必要 CI/PR 合并/主工作树安全同步仍待完成；主树既有 10 个 tracked 改动及未跟踪文件原样保留，不 stash/reset/清理，不改产品、profile 或验收工具，不追加构建/实机操作。详情 docs/ota-exec-notes/P3-3-git-closeout-2026-09-15.md。
 - 2026-09-15 ｜ Codex(P3-3 主会话，追加授权治理/CI 收口修复) ｜ P3-3(进行中，v9 PASS 不变) ｜ 修 PR #24 的索引测试快照断言与开发 APK 磁盘问题，保持历史结果、Git 身份核对和完整 Flutter 测试/ABI；101+52+26+32 项宿主回归及补依赖后三项定向回归通过，独立复核问题关闭。主树 19 份原改动保全为本地提交 81f93ff7d3aa3f54edc5acf7c752c498eb7a65d6 和逐字节归档，不推送；其他遗留资产原位保留。新 Actions、merge commit、main 同步和最终记录入主线仍待完成，不重开产品验收、不改冻结包、不执行本地 Flutter 构建或任何发布/硬件操作。详见 docs/ota-exec-notes/P3-3-closeout-ci-remediation-2026-09-15.md。
 - 2026-09-15 ｜ Codex(P3-3 主会话，最终 Git 收口记录) ｜ P3-3(完成，保留 Claude 实现认领及 v9 五项 PASS) ｜ PR #24 在必要 CI 全绿后以 c6465bd merge commit 合并，主树原改动保全于本地分支 81f93ff 与项目内原字节归档后安全同步 main；HEAD == origin/main、freeze -> bundle -> main、367 份证据对象/363 份冻结文件字节及索引均核对通过。最终 CI/合并/同步事实通过后续文档提交入主线并再次同步，不只留在已合并分支；未 squash/rebase/force-push/stash/reset/清理/删分支或工作树，未发布部署或新增硬件操作。详见 docs/ota-exec-notes/P3-3-git-closeout-2026-09-15.md。
+- 2026-09-15 ｜ Codex(BLE 提速/Android 后台 OTA 需求治理，非产品实现) ｜ P3-4(待办，补充链路诊断)、P3-8(新立待办卡) ｜ 按用户要求登记 OTA-DEC-014 并同步根/App 规范、跨系统条款、两卡 Spec、readiness 和治理回归；实际接管前不放行后台，通知依据 MCU durable 与最终身份，提速先测量不承诺倍数。首跑 37 项、复核修订后相关 22 项宿主测试通过；独立复核纠正持久进度示例与生产参数回填要求后确认关闭，无新增问题。P3-3-v9 与历史冻结包不改，P3-5 既有依赖不变；写入审计通过，375 份既有未跟踪文件原字节保留；产品/Flutter/Actions/真机均本批 NOT_RUN，不提交推送、不追加设备额度。记录 docs/ota-exec-notes/P3-4-P3-8-requirements-2026-09-15.md。

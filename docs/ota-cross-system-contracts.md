@@ -7,6 +7,7 @@
 - 二进制协议唯一来源：`docs/ota-binary-contracts.md`，本文只引用其章节和语义，不复制字节偏移表。
 - 任务状态唯一来源：`PLAN-OTA-EXEC.md` 的 P2-6 后 readiness 矩阵；本文不保存任务级 readiness 或派单资格。
 - 决策过程索引：`docs/ota-spec-decisions.md`。`OTA-DEC-001` 至 `OTA-DEC-012` 均为 `DECIDED`，对应裁定已传播到本文。本文冻结只授权符合 readiness 与依赖条件的任务派单，不授权生产部署；生产部署仍须等待 P5 验收。
+- 2026-09-15 增补：按用户要求及 `OTA-DEC-014` / 决策记录 11，增加 P3-4 链路诊断与 P3-8 Android 后台 OTA/通知要求。增补只约束后续实现和验收，不追溯改写 P3-3-v9 或其他历史冻结包，也不授予新的远端或真机操作权限。
 
 文中“必须”“不得”“仅”表示冻结规范性条款；“例如”“建议实现”“当前入口”属于非规范性说明。各条款的“裁定依据”只保留决定来源和审计链，不再构成决定阻断；实现和派单资格仍以 `PLAN-OTA-EXEC.md` readiness 矩阵为唯一来源。
 
@@ -22,6 +23,7 @@
 4. 正式发布链的输入、输出、资产角色、摘要和退出码。
 5. BLE transport 的生命周期所有者，以及 Flutter/MCU 各自的恢复责任。
 6. App 兼容、未知字段、错误封装、鉴权、摘要、取消和重试边界。
+7. Android 设备 OTA 的执行接管、通知进度，以及客户端/MCU 性能观测边界。
 
 非目标：
 
@@ -36,11 +38,13 @@
 
 | Producer | Consumer | 传输介质 | 条款 ID | schema 或结构引用 | 生命周期所有者 | 错误语义 | 幂等规则 | 兼容规则 | interface_completeness | clause_maturity | blocking_decisions | affected_tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| MCU OTA identity provider | Flutter OTA domain | BLE `INFO` | `OTA-XC-INFO-MAPPING`, `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-DEVICE-MODEL` | `docs/ota-binary-contracts.md` §5.2.1 + `DeviceOtaInfo` | MCU 负责真实值，Flutter 负责解析和不可变快照 | 二进制状态码只引用 §5.7；格式错误不得构造 DTO | `GET_INFO` 只读，可安全重试 | 未知 model/hash/protocol fail closed | `COMPLETE` | `FROZEN` | — | `P3-2`, `P3-3`, `P3-5`, `P5-1` |
+| MCU OTA identity provider | Flutter OTA domain | BLE `INFO` | `OTA-XC-INFO-MAPPING`, `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-DEVICE-MODEL` | `docs/ota-binary-contracts.md` §5.2.1 + `DeviceOtaInfo` | MCU 负责真实值，Flutter 负责解析和不可变快照 | 二进制状态码只引用 §5.7；格式错误不得构造 DTO | `GET_INFO` 只读，可安全重试 | 未知 model/hash/protocol fail closed | `COMPLETE` | `FROZEN` | — | `P3-2`, `P3-3`, `P3-5`, `P3-8`, `P5-1` |
 | Flutter OTA domain | Worker latest API | HTTPS query | `OTA-XC-CLOUD-QUERY-MAPPING`, `OTA-XC-HTTP-LATEST` | `FirmwareLatestQuery` | Flutter 生成，Worker 校验 | `OTA-XC-HTTP-ERROR` | 相同查询无副作用 | `OTA-XC-COMPATIBILITY`, `OTA-XC-UNKNOWN-FIELDS` | `COMPLETE` | `FROZEN` | — | `P3-3`, `P4-2`, `P3-5`, `P5-1` |
 | Worker latest API | Flutter OTA domain | HTTPS JSON | `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION` | `FirmwareLatestResponse` | Worker | `OTA-XC-HTTP-ERROR` | 只读 | schema v2 可加可选字段；download 只签 token v2 | `COMPLETE` | `FROZEN` | — | `P3-3`, `P4-2`, `P3-5`, `P5-1` |
-| Worker/R2 | Flutter downloader | HTTPS binary | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-RESUME` | 选中 asset 的原始文件字节 | Worker 校验授权，R2 保存不可变对象，Flutter 校验长度和摘要 | `OTA-XC-HTTP-ERROR` | 单区间 `bytes=N-`；partial 绑定资产身份 | token v2；v1 仅有界兼容既有 public URL | `COMPLETE` | `FROZEN` | — | `P3-3`, `P3-5`, `P4-2`, `P4-3`, `P5-1`, `P5-2` |
-| Flutter BLE transport | MCU BLE transport | FFF2 下行/FFF1 上行 | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING`, `OTA-XC-FLUTTER-TRANSPORT` | `docs/ota-binary-contracts.md` §5 | Flutter 管发送窗口，MCU 管 session/staging durable 状态 | 状态码唯一来源为二进制合同 §5.7 | 已提交 DATA 重传按 §5.5 幂等 | proto/max window 由 `INFO` 协商 | `COMPLETE` | `FROZEN` | — | `P3-1`, `P3-3`, `P3-4`, `P3-5`, `P5-1`, `P5-2` |
+| Worker/R2 | Flutter downloader | HTTPS binary | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-RESUME` | 选中 asset 的原始文件字节 | Worker 校验授权，R2 保存不可变对象，Flutter 校验长度和摘要 | `OTA-XC-HTTP-ERROR` | 单区间 `bytes=N-`；partial 绑定资产身份 | token v2；v1 仅有界兼容既有 public URL | `COMPLETE` | `FROZEN` | — | `P3-3`, `P3-5`, `P3-8`, `P4-2`, `P4-3`, `P5-1`, `P5-2` |
+| Flutter BLE transport | MCU BLE transport | FFF2 下行/FFF1 上行 | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING`, `OTA-XC-FLUTTER-TRANSPORT` | `docs/ota-binary-contracts.md` §5 | Flutter 管发送窗口，MCU 管 session/staging durable 状态 | 状态码唯一来源为二进制合同 §5.7 | 已提交 DATA 重传按 §5.5 幂等 | proto/max window 由 `INFO` 协商 | `COMPLETE` | `FROZEN` | — | `P3-1`, `P3-3`, `P3-4`, `P3-5`, `P3-8`, `P5-1`, `P5-2` |
+| OTA runtime | Android foreground service / UI / notification | 平台桥接与只读任务快照 | `OTA-XC-ANDROID-OTA-BACKGROUND`, `OTA-XC-OTA-PROGRESS` | 本文任务键、接管确认与阶段进度语义 | 同一 OTA 任务的唯一执行所有者；页面与通知只投影状态 | 接管失败安全回退，旧代次事件拒绝；不伪造 BLE 状态码 | 同任务接管/停止幂等，不影响其他任务 | 仅 Android 后台能力；其他平台保持安全回退 | `COMPLETE` | `FROZEN` | — | `P3-8` |
+| Flutter / MCU timing probes | P3-4 experiment runner | 单调计时与原始日志 | `OTA-XC-BLE-PERFORMANCE`, `OTA-XC-BLE-TUNING` | 分阶段耗时、调用次数、链路与资产身份 | 各时钟域独立测量；实验 runner 汇总 | 缺日志或时钟无效不能宣告提速 | 同一输入组可独立复放，不混组 | 不改变冻结线端协议和生产门槛 | `COMPLETE` | `FROZEN` | — | `P3-4` |
 | GitHub Actions release job | metadata builder | 文件 + JSON | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-RELEASE-METADATA` | `FirmwareReleaseRegistration` | release job | 任一步非零即整链失败 | 相同输入产生相同 canonical metadata | schema v2；未知资产 kind 拒绝 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
 | GitHub Actions R2 uploader | R2 immutable object | Wrangler/R2 object write | `OTA-XC-R2-UPLOAD`, `OTA-XC-R2-IMMUTABILITY` | `R2AssetUploadResult` | uploader 负责 put、HEAD/readback 和机器结果 | 失败输出稳定 JSON 且不得继续注册 | 同 key 同长度/摘要为 `ALREADY_PRESENT` | 媒体类型、长度和 RFC 9530 摘要稳定 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
 | register client | Worker register API | HTTPS JSON | `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-METADATA`, `OTA-XC-SECURITY` | `FirmwareReleaseRegistration` / `FirmwareReleaseRegistrationResult` | Worker | `OTA-XC-HTTP-ERROR` | 完全相同 metadata 重放返回 200 | schema v2；未知字段拒绝 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
@@ -1019,6 +1023,29 @@ gate 通过后保持 true，普通固件业务代码变化不自动关闭。以�
 
 MCU 与 Flutter 都必须有可测试的状态转换日志，但日志不得包含 AES key、deploy token、完整签名 URL 或用户隐私标识。
 
+### OTA-XC-BLE-PERFORMANCE
+
+裁定依据：`OTA-DEC-014`。P3-4 先定位链路开销，再按 `OTA-XC-BLE-TUNING` 调参。
+本条不新增或放宽吞吐、可靠性、时长门槛，也不以静态源码推断代替速度实测。
+
+- 将 latest/下载、BLE BEGIN 到 END ACK、MCU 应用、重启重连/GET_INFO 分开报告。
+  BLE 统计边界和 P99/吞吐计算仍只由 `OTA-XC-BLE-TUNING` 定义。
+- 记录服务发现次数/耗时、实际协商 MTU 和写净荷、写入模式、GATT 写耗时、ACK 等待、
+  重传及 durable 推进；MCU 侧分别记录 UART 接收与 staging 持久化开销。
+  主机/MCU 不同单调时钟域未经校准不得直接相减，重叠耗时不得相加冒充总时长。
+- 优化前后必须绑定同一合法包的 SHA-256/长度、设备、发送器/固件提交、MTU、baud、
+  timeout/retry、前后台状态和采集方法；变量变化另立输入组，不拼接不同组的最好结果。
+- 2026-09-15 基线中的逐 GATT 分片 `discoverServices()` 是待测观察，不是长期架构要求。
+  源码热点不能代替实测根因；优先核对发现/绑定能否在同一有效连接内复用，再考虑 AT
+  改速，不承诺固定提速倍数。
+- 复用的 characteristic 必须绑定设备、连接代次和精确 FFF0/FFF2/FFF1 发现结果。
+  断连、服务变化、设备切换必须失效；旧代次迟到发现/写入不得污染新绑定或继续发送。
+  连接内缓存不能削弱能力检查、取消、帧串行、信用窗口或重连身份校验。
+- 包大小指完整合法 `.etu`，不能追加无意义填充绕过解析或把小 toy 结果冒充参考包成绩。
+  实验前说明 END 后是否触发应用/Flash 写入；未获准的不可启动 fixture 不得交给自动应用链。
+- 只有相同测量口径下的原始数据和完整性/可靠性结果同时支持时，才能宣告优化有效。
+  Actions 编译/测试通过不证明吞吐；不得以放宽 CRC、seq、摘要、durable 或开启 RTS/CTS 换速度。
+
 ### OTA-XC-BLE-TUNING
 
 裁定依据：`OTA-DEC-003`。
@@ -1055,8 +1082,64 @@ Flutter transport 必须：
 3. 先订阅上行通知并验证 `GET_INFO`，再开始 latest/download/BEGIN。
 4. 以 MCU ACK 为 credit 和 durable 真相；UI 已发送字节不得冒充 durable 进度。
 5. 用户取消时发送 ABORT（连接可用时）、停止新写入、清理本地会话；已下载且摘要通过的包是否保留由 UI 明确选择。
-6. App 进入后台、蓝牙断开或进程重启时不得继续盲写；恢复后重新发现特征、查询设备并按合同决定续传或重新下载。
+6. App 进入后台不得无执行保障继续盲写。Android 经 `OTA-XC-ANDROID-OTA-BACKGROUND` 实际接管后可保持原会话运行；未接管或保障丢失时安全暂停。蓝牙断开、服务失效或进程重启后，恢复必须重新发现特征、查询设备并按合同决定续传或重新下载；同一有效后台会话回前台仅重附着 UI，不因页面恢复而重复 BEGIN 或重启发送器。
 7. 未知 ACK 状态、未知 protocolVersion、特征不匹配或摘要不一致均 fail closed。
+
+### OTA-XC-ANDROID-OTA-BACKGROUND
+
+裁定依据：`OTA-DEC-014`。适用于 P3-8 及后续 Android 设备 OTA；不追溯更改
+P3-3-v9 的后台安全暂停语义或其已冻结证据，不承诺 iOS/Windows 具有相同后台能力。
+
+以下是跨层语义签名，具体通道/API 命名由实现选择，不新增 BLE 命令：
+
+- `acquire(taskKey) -> ACQUIRED / UNAVAILABLE(reason)`：任务键绑定设备、包 SHA-256
+  和本次操作代次；必须在 App 前台启动接管。只有系统前台服务已实际建立、所需权限满足、
+  执行引擎和 BLE 所有者均存活且绑定同任务时才能确认 ACQUIRED。
+  `startForegroundService()` 返回、显示普通通知或保持屏幕常亮都不是接管确认。
+- `snapshot(taskKey) -> phase, totalBytes, durableBytes, targetVerified, canCancel`：
+  状态来自唯一 OTA 执行所有者，页面和通知均为只读投影，不能各启动一个发送器。
+- `cancel(taskKey)` / `release(taskKey)`：校验当前代次且幂等；旧通知按钮、旧回调
+  不得取消新任务。只有可取消阶段执行既有取消链，结束释放不能影响 App 自更新。
+
+实现必须按实际阶段和 Android API/target SDK 声明相应前台服务类型与权限，BLE 阶段
+采用 connectedDevice 能力，不以 App 自更新的 dataSync 服务冒充设备连接保障。
+任务必须独立于页面生命周期，明确 Flutter 引擎或原生执行器的存活所有者；如需 CPU
+唤醒锁，只在有效任务期间有界持有，终态/异常/释放路径均清理服务、锁与订阅。
+
+| 场景 | 必须行为 |
+|---|---|
+| 已接管，正常切应用、打开通知栏或锁屏 | 同一 OTA 会话继续，无 UI 引起的重复 BEGIN/断连/暂停；保留真实无 durable 进展截止 |
+| 接管未确认、通知不可见或 Bluetooth 权限不足 | 告知原因，保留可行的前台路径；进入后台时安全暂停，不宣称支持后台运行 |
+| 服务启动被拒、执行所有权丢失或 BLE 失效 | 存活路径安全停止新发送并报告；按原协议取消/重连/身份复核恢复，不盲写或常量成功 |
+| 原有效后台任务回到页面 | 重附着当前快照，不复制执行所有者，不将旧快照发布到新任务 |
+| 系统终止进程或用户强制停止 | 不保证继续运行，不伪造完成；下次明确恢复时核验资产/设备，以 MCU BEGIN 的 durable_off/bitmap 为准 |
+| MCU 已进入应用/重启阶段 | 不提供虚假的可取消保证；只有新连接 GET_INFO 匹配目标版本和完整 raw SHA-256 才能成功 |
+
+通知权限或渠道被关闭时不能保证用户看到进度；应检测可检测状态并提供明确回退，不
+诱导永久豁免系统限制。系统强制终止、断电、Bluetooth 被关闭不属于“保证不断线”的承诺。
+不得只删除 `pauseForBackground()` 就把原安全回退改成后台盲写。
+
+### OTA-XC-OTA-PROGRESS
+
+裁定依据：`OTA-DEC-014`。P3-8 的通知和 UI 消费同一任务快照，不形成第二进度真相。
+
+- 下载显示已接收字节及校验阶段；传输百分比只使用当前包的
+  `durableBytes / totalBytes`，满足 `0 <= durableBytes <= totalBytes` 且 `totalBytes > 0`。
+  手机已发送字节、GATT 写成功或 bitmap 的非 durable 接收不能冒充设备持久进度。
+- 阶段至少区分下载/校验、传输、设备应用、重连/身份复核、成功、失败、取消及安全暂停。
+  没有真实比例的应用/重启阶段使用不定进度，不用计时器生成百分比；传输 100% 和 END ACK
+  只表示该阶段结束，最终成功仍按 `OTA-XC-BLE-LIFECYCLE` 的版本/raw SHA 验证。
+- Android 常驻通知使用独立于 App 自更新的 channel/notification/task 身份；状态栏通常
+  提供图标，下拉通知栏提供阶段、进度和入口，不承诺所有 OEM 顶栏显示数字百分比。
+- 点击通知回到当前升级任务；取消按钮只在 canCancel 为真时可用，点击时再次验证
+  任务键、代次和阶段。旧事件、旧 Intent、旧进度不得覆盖或终止新任务。
+- 进度更新合并/节流，阶段和终态及时刷新；通知刷新不得阻塞逐帧发送或淹没事件队列。
+  完成、失败、取消均退出常驻运行状态并释放资源；终态提示可保留，不混用 APK 安装通知。
+- 通知不得包含完整签名 URL、token、密钥或设备隐私标识；缺失状态或权限不能静默显示成功。
+
+正例：同一包 durable=4096、total=8192 时传输显示 50%；total 全 durable 后进入
+设备应用/复核提示，目标身份核对通过后才显示成功。反例：仅手机写出全部字节就显示
+100% 成功、后台仍停发却持续推进通知、进程重启后直接相信缓存 UI 进度，均不合格。
 
 ## 8. 兼容、重试、取消与安全
 
