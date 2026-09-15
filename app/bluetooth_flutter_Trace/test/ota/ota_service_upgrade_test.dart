@@ -2717,6 +2717,10 @@ class _UpgradeFakeBle extends BluetoothService {
     int requested = 247,
     OtaLinkStats? stats,
   }) async {
+    // P3-4：fake 覆写的是带计时的外壳（真实外壳在此记 recordMtu），
+    // 对齐外壳的 stats 上报语义；fake 无真实耗时，durationUs 记 0。
+    stats?.recordMtu(
+        requested: requested, chunkBytes: otaMtu, durationUs: 0);
     return otaMtu;
   }
 
@@ -2727,6 +2731,9 @@ class _UpgradeFakeBle extends BluetoothService {
     String characteristicId, {
     OtaLinkStats? stats,
   }) async {
+    // P3-4：对齐外壳的 stats 上报语义（外壳在订阅成功后记
+    // recordSubscribe）；fake 恒返回非 null 流，ok 恒 true。
+    stats?.recordSubscribe(durationUs: 0, ok: true);
     return _notifyController.stream;
   }
 
@@ -2739,36 +2746,46 @@ class _UpgradeFakeBle extends BluetoothService {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
   }) async {
-    final isDataChunk = _isDataChunk(data);
-    if (isDataChunk && !dataWriteEntered.isCompleted) {
-      dataWriteEntered.complete();
-    }
-    final delay = writeChunkDelay;
-    if (delay != null) {
-      // 慢速写：延迟期间数据未入 _feed——调用方（transport 的逐片
-      // await 写序列）在写完成前不会发下一片，构造真实分片在途。
-      await Future<void>.delayed(delay);
-    }
-    final writeError = dataWriteError;
-    if (writeError != null && isDataChunk) {
-      // 原生写异常（RC3-12②）：不包装、不喂帧，直接上抛——
-      // `_ChannelAdapter.writeChunk` 生产语义即 rethrow。
-      throw writeError;
-    }
-    // ABORT 物理写闸门（RC3-04⑦）：cancelUpgrade 停在
-    // `await transport.abortBestEffort()` 时，ABORT 帧正处于本写调用
-    // 在途未送达——闸住此处的就是那个窗口。
-    if (data.length >= 3 &&
-        data[0] == OtaBleCodec.frameSync0 &&
-        data[1] == OtaBleCodec.frameSync1 &&
-        data[2] == OtaBleCodec.cmdAbort) {
-      final gate = abortWriteGate;
-      if (gate != null && !gate.isCompleted) {
-        if (!abortWriteEntered.isCompleted) abortWriteEntered.complete();
-        await gate.future;
+    // P3-4：fake 覆写的是带计时的外壳（真实外壳成功记 recordGattWrite、
+    // 异常补 error 版后 rethrow），此处对齐外壳的 stats 上报语义；
+    // fake 无真实耗时，durationUs 记 0。
+    try {
+      final isDataChunk = _isDataChunk(data);
+      if (isDataChunk && !dataWriteEntered.isCompleted) {
+        dataWriteEntered.complete();
       }
+      final delay = writeChunkDelay;
+      if (delay != null) {
+        // 慢速写：延迟期间数据未入 _feed——调用方（transport 的逐片
+        // await 写序列）在写完成前不会发下一片，构造真实分片在途。
+        await Future<void>.delayed(delay);
+      }
+      final writeError = dataWriteError;
+      if (writeError != null && isDataChunk) {
+        // 原生写异常（RC3-12②）：不包装、不喂帧，直接上抛——
+        // `_ChannelAdapter.writeChunk` 生产语义即 rethrow。
+        throw writeError;
+      }
+      // ABORT 物理写闸门（RC3-04⑦）：cancelUpgrade 停在
+      // `await transport.abortBestEffort()` 时，ABORT 帧正处于本写调用
+      // 在途未送达——闸住此处的就是那个窗口。
+      if (data.length >= 3 &&
+          data[0] == OtaBleCodec.frameSync0 &&
+          data[1] == OtaBleCodec.frameSync1 &&
+          data[2] == OtaBleCodec.cmdAbort) {
+        final gate = abortWriteGate;
+        if (gate != null && !gate.isCompleted) {
+          if (!abortWriteEntered.isCompleted) abortWriteEntered.complete();
+          await gate.future;
+        }
+      }
+      _feed(data);
+    } catch (e) {
+      stats?.recordGattWrite(
+          durationUs: 0, bytes: data.length, error: true);
+      rethrow;
     }
-    _feed(data);
+    stats?.recordGattWrite(durationUs: 0, bytes: data.length);
   }
 
   // ---- 帧分片重组与分发（跨 chunk 帧重组，真值 MCU 同款）----
