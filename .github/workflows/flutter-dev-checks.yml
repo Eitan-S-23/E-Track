@@ -77,6 +77,35 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+          # Development checks do not consume firmware binaries or frozen bundles.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.gitattributes
+            /.gitignore
+            /AGENTS.md
+            /PLAN-OTA-EXEC.md
+            /.github/
+            /app/bluetooth_flutter_Trace/
+            /Tools/flutter/
+            /Tools/provenance/manifest_profiles.json
+            /tests/ota/test_flutter_dev_checks.py
+            /tests/ota/test_flutter_dev_apk.py
+            /docs/flutter-development-validation.md
+            /docs/acceptance-execution-contract.md
+
+      - name: Check debug APK disk budget
+        if: matrix.os == 'ubuntu-latest' && env.FLUTTER_DEV_BUILD_APK == 'true'
+        working-directory: ${{ github.workspace }}
+        run: |
+          python -B - <<'PY'
+          import os
+          import shutil
+          usage = shutil.disk_usage(os.environ["GITHUB_WORKSPACE"])
+          minimum = 12 * 1024 ** 3
+          print(f"DISK_PREFLIGHT total={usage.total} used={usage.used} free={usage.free} minimum={minimum}", flush=True)
+          if usage.free < minimum:
+              raise SystemExit("CI_DISK_SPACE_INSUFFICIENT: need 12 GiB before cold SDK/Gradle setup and APK packaging")
+          PY
 
       - name: Verify development runner
         timeout-minutes: 5
@@ -103,6 +132,11 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 14
+
+      - name: Report final workspace disk use
+        if: always() && matrix.os == 'ubuntu-latest'
+        working-directory: ${{ github.workspace }}
+        run: df -h "$GITHUB_WORKSPACE"
 
       - name: Upload debug APK (not a release)
         if: success() && env.FLUTTER_DEV_BUILD_APK == 'true'

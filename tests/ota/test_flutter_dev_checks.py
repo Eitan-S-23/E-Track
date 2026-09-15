@@ -10,10 +10,12 @@ import os
 from pathlib import Path
 import re
 import signal
+import shutil
 import stat
 import subprocess
 import sys
 import time
+import textwrap
 from types import SimpleNamespace
 import unittest
 from unittest import mock
@@ -466,6 +468,57 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                           "continue-on-error", "flutter build", "wrangler", "pwsh",
                           "pull_request_target:", "publish_release", "git push"):
             self.assertNotIn(forbidden, text)
+
+    def test_workflow_sparse_inputs(self):
+        workflow = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
+        self.assertIn("sparse-checkout-cone-mode: false", workflow)
+        block = re.search(r"(?m)^          sparse-checkout: \|\n((?:            .+\n)+)", workflow)
+        self.assertIsNotNone(block)
+        patterns = [line.strip() for line in block[1].splitlines()]
+        kept = (
+            ".gitignore", ".gitattributes", "AGENTS.md", "PLAN-OTA-EXEC.md",
+            ".github/workflows/flutter-dev-checks.yml", ".github/workflows/acceptance-governance.yml",
+            ".github/workflows/build.yml", "app/bluetooth_flutter_Trace/pubspec.yaml",
+            "app/bluetooth_flutter_Trace/test/ota/probe_test.dart",
+            "Tools/flutter/dev_checks.py", "Tools/flutter/dev_apk.py",
+            "Tools/provenance/manifest_profiles.json",
+            "tests/ota/test_flutter_dev_checks.py", "tests/ota/test_flutter_dev_apk.py",
+            "docs/flutter-development-validation.md", "docs/acceptance-execution-contract.md",
+        )
+        omitted = ("docs/acceptance-contracts/P3-3-v9/artifacts/probe.bin", "bsdiff_lzma_AES128-main/dist/probe.bin")
+        repo, run = self.git_repo()
+        for relative in kept + omitted:
+            path = RUNNER.checked_path(repo, relative)
+            RUNNER.make_directory(repo, path.parent)
+            path.write_text("fixture\n", encoding="utf-8")
+        run("add", "--", *kept, *omitted)
+        run("commit", "--quiet", "-m", "sparse-fixture")
+        run("sparse-checkout", "set", "--no-cone", *patterns)
+        for relative in kept:
+            self.assertTrue((repo / relative).is_file(), relative)
+        for relative in omitted:
+            self.assertFalse((repo / relative).exists(), relative)
+            self.assertEqual("blob", run("cat-file", "-t", f"HEAD:{relative}").strip())
+        self.assertTrue(RUNNER.checkout_identity(repo)["clean"])
+
+    def test_workflow_disk_preflight(self):
+        workflow = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
+        step = workflow.split("- name: Check debug APK disk budget", 1)[1].split("      - name:", 1)[0]
+        self.assertIn("matrix.os == 'ubuntu-latest' && env.FLUTTER_DEV_BUILD_APK == 'true'", step)
+        self.assertLess(workflow.index("- name: Check debug APK disk budget"), workflow.index("- name: Verify development runner"))
+        source = re.search(r"python -B - <<'PY'\n(.*?)\n          PY", step, re.DOTALL)
+        self.assertIsNotNone(source)
+        code = compile(textwrap.dedent(source[1]), "workflow-disk-preflight", "exec")
+        minimum = 12 * 1024 ** 3
+        for free in (0, minimum - 1, minimum, minimum + 1):
+            with self.subTest(free=free), mock.patch.dict(os.environ, {"GITHUB_WORKSPACE": str(self.project)}), \
+                    mock.patch.object(shutil, "disk_usage", return_value=SimpleNamespace(total=32 * 1024 ** 3, used=0, free=free)), \
+                    mock.patch("sys.stdout", new_callable=io.StringIO):
+                if free < minimum:
+                    with self.assertRaisesRegex(SystemExit, "CI_DISK_SPACE_INSUFFICIENT"):
+                        exec(code, {})
+                else:
+                    exec(code, {})
 
     def test_runner_workflow_and_docs_have_profile_and_ci_ownership(self):
         profiles = json.loads((ROOT / "Tools/provenance/manifest_profiles.json").read_text())[

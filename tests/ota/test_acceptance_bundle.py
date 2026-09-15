@@ -33,6 +33,36 @@ VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
 
 
+def parse_freeze_index(text):
+    rows = []
+    seen = set()
+    outcomes = r"PASS|FAIL|PRODUCT_FAIL|HARNESS_FAIL|EVIDENCE_GAP|ENV_BLOCKED|NOT_RUN"
+    result_pattern = rf"(?:VALIDATION=(?:PASS|FAIL)[,，]\s*overall=)?(?:{outcomes})(?:$|[（(])"
+    for line in text.splitlines():
+        if not line.strip().startswith("|"):
+            continue
+        cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
+        if cells[0] == "contract_id" or all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
+        if len(cells) != 6:
+            raise ValueError("freeze-index row must have six columns")
+        contract_id, schema, bundle, freeze, tree, result = cells
+        if not re.fullmatch(r"P\d+-\d+-v[1-9]\d*", contract_id) or contract_id in seen:
+            raise ValueError("invalid or duplicate freeze-index contract id")
+        if schema not in {"v2", "v3"}:
+            raise ValueError("unsupported freeze-index schema")
+        if not all(re.fullmatch(r"[0-9a-f]{40}", oid) for oid in (bundle, freeze, tree)):
+            raise ValueError("invalid freeze-index Git object id")
+        # This column records integrity/precheck/history, not only product PASS.
+        if not re.match(result_pattern, result):
+            raise ValueError("unrecognized freeze-index result")
+        seen.add(contract_id)
+        rows.append(cells)
+    if not rows:
+        raise ValueError("freeze index must not be empty")
+    return rows
+
+
 def symlink_security_test_required():
     return (
         os.environ.get(SYMLINK_TEST_REQUIRED_ENV) == "1"
@@ -430,23 +460,9 @@ class AcceptanceBundleTests(unittest.TestCase):
             self.assertNotIn(BOARD_PATH, definition["required_paths"])
 
     def test_freeze_index_rows_bind_reachable_bundle_and_input_commits(self):
-        rows = []
-        for line in FREEZE_INDEX.read_text(encoding="utf-8").splitlines():
-            if not re.match(r"^\|\s*P\d", line):
-                continue
-            cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
-            self.assertEqual(6, len(cells), line)
-            rows.append(cells)
-        self.assertEqual(7, len(rows))
+        rows = parse_freeze_index(FREEZE_INDEX.read_text(encoding="utf-8"))
 
-        seen = set()
         for contract_id, schema, bundle_commit, freeze_commit, freeze_tree, result in rows:
-            self.assertNotIn(contract_id, seen)
-            seen.add(contract_id)
-            self.assertRegex(bundle_commit, r"^[0-9a-f]{40}$")
-            self.assertRegex(freeze_commit, r"^[0-9a-f]{40}$")
-            self.assertRegex(freeze_tree, r"^[0-9a-f]{40}$")
-            self.assertEqual("PASS", result)
             self.assertEqual("commit", git_fixture(ROOT, "cat-file", "-t", bundle_commit))
             self.assertEqual("commit", git_fixture(ROOT, "cat-file", "-t", freeze_commit))
             self.assertEqual(freeze_tree, git_fixture(ROOT, "rev-parse", f"{freeze_commit}^{{tree}}"))
@@ -459,6 +475,7 @@ class AcceptanceBundleTests(unittest.TestCase):
                 f"{bundle_commit}:docs/acceptance-contracts/{contract_id}.contract.json",
             )
             contract = json.loads(contract_text)
+            self.assertEqual(contract_id, contract["contract_id"])
             self.assertEqual(f"etrack-acceptance-contract-{schema}", contract["schema"])
             if schema == "v2":
                 self.assertEqual(bundle_commit, freeze_commit)
@@ -466,8 +483,47 @@ class AcceptanceBundleTests(unittest.TestCase):
                 self.assertEqual(freeze_commit, contract["freeze_commit"])
                 self.assertEqual(freeze_tree, contract["freeze_tree"])
                 self.assertRegex(contract["profile_config_blob"], r"^[0-9a-fA-F]{40}$")
+                self.assertEqual(
+                    contract["profile_config_blob"].lower(),
+                    git_fixture(ROOT, "rev-parse", f"{freeze_commit}:{VALIDATOR.PROFILE_CONFIG_REPO_PATH}"),
+                )
             else:
                 self.fail(f"unsupported schema in freeze index: {schema}")
+
+    def test_freeze_index_allows_growth_and_truthful_historical_results(self):
+        outcomes = (
+            "PASS", "PASS(precheck NOT_RUN)", "EVIDENCE_GAP",
+            "VALIDATION=PASS, overall=EVIDENCE_GAP(history)",
+            "VALIDATION=PASS，overall=PASS（final）",
+        )
+        for count in (1, 8, 19):
+            text = "\n".join(
+                f"| P3-3-v{version} | v3 | {PLACEHOLDER_OID} | {PLACEHOLDER_OID} | "
+                f"{PLACEHOLDER_OID} | {outcomes[(version - 1) % len(outcomes)]} |"
+                for version in range(1, count + 1)
+            )
+            with self.subTest(count=count):
+                rows = parse_freeze_index(text)
+                self.assertEqual(count, len(rows))
+                self.assertEqual(outcomes[0], rows[0][-1])
+                if count > 2:
+                    self.assertEqual("EVIDENCE_GAP", rows[2][-1])
+
+    def test_freeze_index_rejects_malformed_rows(self):
+        row = f"| P3-3-v1 | v3 | {PLACEHOLDER_OID} | {PLACEHOLDER_OID} | {PLACEHOLDER_OID} | PASS |"
+        cases = {
+            "empty": "", "duplicate": row + "\n" + row,
+            "unknown_id": row.replace("P3-3-v1", "BROKEN"),
+            "schema": row.replace("| v3 |", "| v4 |"),
+            "oid": row.replace(PLACEHOLDER_OID, "1234", 1),
+            "columns": row + " extra |",
+            "result": row.replace("PASS", "UNKNOWN"),
+            "empty_result": row.replace("PASS", ""),
+            "result_prefix": row.replace("PASS", "PASSING"),
+        }
+        for label, text in cases.items():
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                parse_freeze_index(text)
 
     def test_contract_requires_all_three_input_groups(self):
         contract = valid_contract()

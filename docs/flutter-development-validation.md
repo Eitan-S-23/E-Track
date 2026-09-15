@@ -110,6 +110,23 @@ gh run view RUN_ID --json headSha,url,conclusion,jobs
 
 ## Commands And Results
 
+The development workflow uses a Git sparse checkout for the complete Flutter
+package, its host checks, runners, workflow definitions, ignore/attribute rules
+and profile/documentation dependencies. Unrelated firmware payloads and historical
+acceptance bundles are not materialized in this disposable development checkout;
+their Git objects and the archived evidence are not edited or deleted. This is
+not the checkout mode for independent acceptance or Acceptance Governance CI.
+When a check gains a repository dependency, update the checkout patterns and the
+real-Git sparse-checkout regression together.
+
+Before a Linux debug APK run, the workflow logs free/used/total bytes and requires
+12 GiB free. This is a cold-run resource budget for SDK/NDK bootstrap, Gradle
+dependencies/intermediates and packaging headroom, not an OTA acceptance gate or
+a guarantee that future toolchains will fit. Insufficient capacity fails early,
+before SDK downloads; final disk usage is logged even after later failures. The
+workflow does not delete preinstalled tools, local developer files or frozen
+evidence, and does not narrow the Flutter test suite or APK target architectures.
+
 The runner first verifies the explicit checkout root, the selected package/test
 directory and the existing lockfile. It then uses a fresh directory under
 `.cache/flutter-dev-checks/runs/` for SDK, HOME/USERPROFILE, AppData, pub cache,

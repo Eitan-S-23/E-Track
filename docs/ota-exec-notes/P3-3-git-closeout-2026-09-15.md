@@ -72,3 +72,23 @@ Release/Cloudflare 发布须 tag 或显式发布 dispatch，本次均不执行�
 无关未跟踪文件已建立保留基线，不纳入本批提交。
 admission 工作树、原始日志和唯一资产保留，不删除工作树。
 未执行发布、部署、tag/Release、安装、卸载、清数据、OTA、J-Link、烧录或复位。
+
+## 收口阻断后的追加授权与修复
+
+PR https://github.com/Eitan-S-23/E-Track/pull/24 初轮实际 CI：
+治理 run 34960469334 被固定索引行数断言打红；开发 run 34960338796 的双宿主
+analyze/test 通过，但 Linux debug APK 在 packageDebug 阶段磁盘耗尽。
+release APK/EXE run 34960469237、自动 MCU run 34960469219 成功，
+Release、Pages 和 Cloudflare 注册跳过。失败记录保留，不覆盖为成功。
+
+用户随后明确授权治理测试、开发 CI 的最小修复，以及主树原改动无损保全。
+本批 post-bundle 治理/CI 变更影响 Validation 和指南所属 Governance，
+不修改产品、冻结 profile、合同、校验器或旧证据；旧 v9 PASS 不冒充新 HEAD 的验收。
+修复、独立复核与实测宿主结果见
+`docs/ota-exec-notes/P3-3-closeout-ci-remediation-2026-09-15.md`。
+
+主树 19 份待保全文件已保存原字节归档，并在本地专用分支
+`archive/p3-3-root-before-main-20260915` 提交
+`81f93ff7d3aa3f54edc5acf7c752c498eb7a65d6`；不推送、不并入 PR。
+未删除或清理其他文件；原 t1a 分支保留。
+新 CI、PR 合并及 main 同步仍待执行，整卡 Git 收口尚未完成。
