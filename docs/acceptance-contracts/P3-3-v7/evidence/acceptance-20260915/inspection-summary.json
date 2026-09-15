@@ -1,0 +1,218 @@
+{
+  "head": "7b5961f74f604bf04307f256b1ac97e85912a833",
+  "dev_checks": [
+    {
+      "run": "34861159023",
+      "host": "windows-2022",
+      "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+      "scope": "all",
+      "analyze": [
+        "No issues found! (ran in 16.9s)"
+      ],
+      "tests": [
+        "01:38 +331: All tests passed!"
+      ],
+      "source_deltas_bound_toolchain_regen": true,
+      "toolchain_regen": [
+        {
+          "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+          "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+          "effective_sha256": "cfe7a312ea0047e4e756a589789adc3f94e3727a4ce503d3506f7c4510a60c87",
+          "effective_blob": "06dcbd36d182f74df878861592ef511bcee2103c",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+          "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+          "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+          "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+          "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+          "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+          "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+        }
+      ],
+      "after_semantic_dirty": [],
+      "after_eol_only": [
+        "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+      ],
+      "analyze_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/analyze.log",
+      "tests_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/tests.log"
+    },
+    {
+      "run": "34861159023",
+      "host": "ubuntu-latest",
+      "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+      "scope": "all",
+      "analyze": [
+        "No issues found! (ran in 15.5s)"
+      ],
+      "tests": [
+        "01:36 +324 ~7: All tests passed!"
+      ],
+      "source_deltas_bound_toolchain_regen": true,
+      "toolchain_regen": [
+        {
+          "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+          "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+          "effective_sha256": "62d5001517860783236e148ad669ce5560998c64f1cabc2de997131225f56129",
+          "effective_blob": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+          "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+          "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+          "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+          "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+          "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+          "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/android/gradle.properties",
+          "committed_sha256": "cc15de2254a2f7a9d830521626418c7d890978ec9127e67af2fba72361a439ae",
+          "effective_sha256": "5dff6e9df6a50c22f8cfd31ac37cdd9a841ac9d089446b44a8402e1d28a70994",
+          "effective_blob": "cd4198da4532c255497fa8c5aaa2430ef6fc9885",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/android/gradle.properties b/app/bluetooth_flutter_Trace/android/gradle.properties\nindex bbd7acc..cd4198d 100644\n--- a/app/bluetooth_flutter_Trace/android/gradle.properties\n+++ b/app/bluetooth_flutter_Trace/android/gradle.properties\n@@ -1,3 +1,7 @@\n org.gradle.jvmargs=-Xmx1536M\n android.useAndroidX=true\n android.enableJetifier=false\n+# This builtInKotlin flag was added automatically by Flutter migrator\n+android.builtInKotlin=false\n+# This newDsl flag was added automatically by Flutter migrator\n+android.newDsl=false\n"
+        }
+      ],
+      "after_semantic_dirty": [],
+      "after_eol_only": [],
+      "analyze_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/analyze.log",
+      "tests_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/tests.log"
+    },
+    {
+      "run": "34869549756",
+      "host": "windows-2022",
+      "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+      "scope": "all",
+      "analyze": [
+        "No issues found! (ran in 16.0s)"
+      ],
+      "tests": [
+        "01:38 +331: All tests passed!"
+      ],
+      "source_deltas_bound_toolchain_regen": true,
+      "toolchain_regen": [
+        {
+          "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+          "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+          "effective_sha256": "cfe7a312ea0047e4e756a589789adc3f94e3727a4ce503d3506f7c4510a60c87",
+          "effective_blob": "06dcbd36d182f74df878861592ef511bcee2103c",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+          "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+          "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+          "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+          "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+          "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+          "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+        }
+      ],
+      "after_semantic_dirty": [],
+      "after_eol_only": [
+        "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+      ],
+      "analyze_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/analyze.log",
+      "tests_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/tests.log"
+    },
+    {
+      "run": "34869549756",
+      "host": "ubuntu-latest",
+      "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+      "scope": "all",
+      "analyze": [
+        "No issues found! (ran in 15.6s)"
+      ],
+      "tests": [
+        "01:37 +324 ~7: All tests passed!"
+      ],
+      "source_deltas_bound_toolchain_regen": true,
+      "toolchain_regen": [
+        {
+          "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+          "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+          "effective_sha256": "62d5001517860783236e148ad669ce5560998c64f1cabc2de997131225f56129",
+          "effective_blob": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+          "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+          "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+          "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+          "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+          "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+          "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/android/gradle.properties",
+          "committed_sha256": "cc15de2254a2f7a9d830521626418c7d890978ec9127e67af2fba72361a439ae",
+          "effective_sha256": "5dff6e9df6a50c22f8cfd31ac37cdd9a841ac9d089446b44a8402e1d28a70994",
+          "effective_blob": "cd4198da4532c255497fa8c5aaa2430ef6fc9885",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/android/gradle.properties b/app/bluetooth_flutter_Trace/android/gradle.properties\nindex bbd7acc..cd4198d 100644\n--- a/app/bluetooth_flutter_Trace/android/gradle.properties\n+++ b/app/bluetooth_flutter_Trace/android/gradle.properties\n@@ -1,3 +1,7 @@\n org.gradle.jvmargs=-Xmx1536M\n android.useAndroidX=true\n android.enableJetifier=false\n+# This builtInKotlin flag was added automatically by Flutter migrator\n+android.builtInKotlin=false\n+# This newDsl flag was added automatically by Flutter migrator\n+android.newDsl=false\n"
+        }
+      ],
+      "after_semantic_dirty": [],
+      "after_eol_only": [],
+      "analyze_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/analyze.log",
+      "tests_path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/tests.log"
+    }
+  ],
+  "release": {
+    "run": 34864052541,
+    "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+    "conclusion": "success",
+    "event": "workflow_dispatch",
+    "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34864052541",
+    "warning_line_count": 24,
+    "warning_lines": [
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:18.2063918Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:18.2388219Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:18.2399750Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:28.2073107Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:29.5057740Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:30.4066350Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:31.3123773Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:32.5058111Z Warning: The plugin share_plus requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:33.8135519Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:46:34.5060102Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:45.0570727Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:45.0683998Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:45.0773364Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:46.3345434Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:46.5343187Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:46.7343376Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:46.9351817Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:47.5541344Z Warning: The plugin share_plus requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:47.7504160Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:48:48.0530824Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:53:28.2323755Z (node:3365) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.",
+      "Build Android APK\tUNKNOWN STEP\t2026-09-14T15:53:29.5063181Z (node:3365) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.",
+      "Build Windows EXE\tUNKNOWN STEP\t2026-09-14T15:51:10.1710252Z (node:6556) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.",
+      "Build Windows EXE\tUNKNOWN STEP\t2026-09-14T15:51:10.7344377Z (node:6556) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities."
+    ]
+  },
+  "source_proof": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/loop-inference-source.json"
+}

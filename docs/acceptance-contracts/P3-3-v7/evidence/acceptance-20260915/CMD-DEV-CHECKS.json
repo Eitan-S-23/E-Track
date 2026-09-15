@@ -1,0 +1,12 @@
+{
+  "id": "CMD-DEV-CHECKS",
+  "command": "gh run view 34861159023 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh run view 34869549756 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\"",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "shell": "D:/install/Git/bin/bash.exe --noprofile --norc -o pipefail",
+  "started_utc": "2026-09-14T19:49:33.130Z",
+  "finished_utc": "2026-09-14T19:49:39.168Z",
+  "exit_code": 0,
+  "stdout": "{\"conclusion\":\"success\",\"jobs\":[{\"conclusion\":\"success\",\"name\":\"Flutter self-tests (windows-2022)\"},{\"conclusion\":\"success\",\"name\":\"Flutter self-tests (ubuntu-latest)\"}]}\n{\"conclusion\":\"success\",\"jobs\":[{\"conclusion\":\"success\",\"name\":\"Flutter self-tests (ubuntu-latest)\"},{\"conclusion\":\"success\",\"name\":\"Flutter self-tests (windows-2022)\"}]}\n",
+  "stderr": "",
+  "error": null
+}

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:\\Program Files\\GitHub CLI\\gh.exe",
+    "api",
+    "user",
+    "--jq",
+    ".login"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T06:28:15.424Z",
+  "ended_at": "2026-09-15T06:28:17.239Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "Eitan-S-23\n",
+  "stderr": "",
+  "error": null
+}

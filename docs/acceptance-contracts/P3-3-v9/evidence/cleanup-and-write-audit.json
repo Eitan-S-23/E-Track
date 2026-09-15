@@ -1,0 +1,44 @@
+{
+  "adb_cleanup": {
+    "command": "adb kill-server",
+    "reason": "Only the server started by this acceptance preflight; no device install/reset/data write",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "processes": {
+    "command": "tasklist /fo csv /nh",
+    "exit_code": 0,
+    "relevant_lines": []
+  },
+  "ports": {
+    "command": "netstat -ano -p tcp",
+    "exit_code": 0,
+    "relevant_lines": []
+  },
+  "node_runtime": {
+    "NODE_COMPILE_CACHE": null,
+    "NODE_OPTIONS": null
+  },
+  "outside_default_file_observation": [
+    {
+      "path": "C:/Users/SU/.android/adbkey",
+      "size": 1704,
+      "modified_at": "2022-02-21T13:44:37.383Z",
+      "created_at": "2022-02-21T13:44:37.381Z"
+    },
+    {
+      "path": "C:/Users/SU/.android/adbkey.pub",
+      "size": 716,
+      "modified_at": "2022-02-21T13:44:37.382Z",
+      "created_at": "2022-02-21T13:44:37.382Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/Local/Temp/adb.log",
+      "size": 55585,
+      "modified_at": "2026-09-15T05:57:19.757Z",
+      "created_at": "2026-09-11T11:47:20.000Z"
+    }
+  ],
+  "timestamp": "2026-09-15T07:32:05.184Z"
+}

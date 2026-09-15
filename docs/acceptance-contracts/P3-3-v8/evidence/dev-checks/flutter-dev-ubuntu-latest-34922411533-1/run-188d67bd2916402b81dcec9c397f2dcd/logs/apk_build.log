@@ -1,0 +1,140 @@
+[1/1] Android SDK
+  ├─ [1/6] android-arm-profile/linux-x64                           295ms
+  ├─ [2/6] android-arm-release/linux-x64                           162ms
+  ├─ [3/6] android-arm64-profile/linux-x64                         165ms
+  ├─ [4/6] android-arm64-release/linux-x64                         114ms
+  ├─ [5/6] android-x64-profile/linux-x64                           115ms
+  └─ [6/6] android-x64-release/linux-x64                           101ms
+Upgrading gradle.properties
+Upgrading gradle.properties
+Running Gradle task 'assembleDebug'...                          
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android/gradle/wrapper/gradle-wrapper.properties. 
+For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
+
+Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android/settings.gradle), by a plugin with the id of com.android.application. 
+If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+
+Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's KGP version is typically defined in the plugins block of the `settings.gradle` file (/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android/settings.gradle), by a plugin with the id of org.jetbrains.kotlin.android. 
+If you don't see a plugins block, your project was likely created with an older template version, in which case it is most likely defined in the top-level build.gradle file (/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android/build.gradle) by the ext.kotlin_version property.
+
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+The 'android' binary can also be found in the cmdline-tools directory, and 'android sdk' is the replacement for 'sdkmanager'.
+To learn more about the Android CLI and how to use it, see the documentation (https://d.android.com/tools/agents/android-cli)
+
+Downloading Android CLI...
+Unpacking embedded installation...
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Terms of Service and License Agreement for the Android Software Development Kit
+
+https://developer.android.com/studio/terms
+
+Google collects usage data for the Android CLI, such as commands, sub-commands, and flags used. This data does not include custom parameters or identifiable information. This information helps improve the tool and is collected in accordance with Google's Privacy Policy.
+
+https://policies.google.com/privacy
+
+Disable Android CLI metrics collection by using the --no-metrics flag.
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+https://dl.google.com/android/repository/android-ndk-r28c-linux.zip...
+
+Unzipping ndk/28.2.13676358... [.....................] 0% (0 B/2.1 GB) ETA: 0s
+Unzipping ndk/28.2.13676358......
+Sep 15, 2026 2:51:48 AM java.util.prefs.FileSystemPreferences setupUserRoot
+INFO: Created user preferences directory.
+Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: The plugin geolocator_android requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: The plugin package_info_plus requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: The plugin path_provider_android requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: The plugin share_plus requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: The plugin sqflite_android requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 34 in /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk/licenses
+License for package Android SDK Platform 34 accepted.
+Preparing "Install Android SDK Platform 34 (revision 3)".
+"Install Android SDK Platform 34 (revision 3)" ready.
+Installing Android SDK Platform 34 in /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk/platforms/android-34
+"Install Android SDK Platform 34 (revision 3)" complete.
+"Install Android SDK Platform 34 (revision 3)" finished.
+[=========                              ] 25%                                   
+[=========                              ] 25% Fetch remote repository...        
+[=======================================] 100% Fetch remote repository...       
+Checking the license for package Android SDK Platform 33 in /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk/licenses
+License for package Android SDK Platform 33 accepted.
+Preparing "Install Android SDK Platform 33 (revision 3)".
+"Install Android SDK Platform 33 (revision 3)" ready.
+Installing Android SDK Platform 33 in /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk/platforms/android-33
+"Install Android SDK Platform 33 (revision 3)" complete.
+"Install Android SDK Platform 33 (revision 3)" finished.
+[=========                              ] 25%                                   
+[=========                              ] 25% Fetch remote repository...        
+[=======================================] 100% Fetch remote repository...       
+Checking the license for package Android SDK Platform 36 in /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk/licenses
+License for package Android SDK Platform 36 accepted.
+Preparing "Install Android SDK Platform 36 (revision 2)".
+"Install Android SDK Platform 36 (revision 2)" ready.
+Installing Android SDK Platform 36 in /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk/platforms/android-36
+"Install Android SDK Platform 36 (revision 2)" complete.
+"Install Android SDK Platform 36 (revision 2)" finished.
+[=========                              ] 25%                                   
+[=========                              ] 25% Fetch remote repository...        
+[=======================================] 100% Fetch remote repository...       
+Your project is configured to compile against Android SDK 35, but the following plugin(s) require to be compiled against a higher Android SDK version:
+- flutter_plugin_android_lifecycle compiles against Android SDK 36
+- geolocator_android compiles against Android SDK 36
+- package_info_plus compiles against Android SDK 36
+- path_provider_android compiles against Android SDK 36
+- share_plus compiles against Android SDK 36
+- shared_preferences_android compiles against Android SDK 36
+- sqflite_android compiles against Android SDK 36
+Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
+Add the following to /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android/app/build.gradle.kts:
+
+    android {
+        compileSdk = 36
+        ...
+    }
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+
+Running Gradle task 'assembleDebug'...                            497.5s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk

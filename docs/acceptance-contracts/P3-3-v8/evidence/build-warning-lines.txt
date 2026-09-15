@@ -1,0 +1,24 @@
+Build Windows EXE	UNKNOWN STEP	2026-09-15T03:17:46.8651392Z (node:3968) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build Windows EXE	UNKNOWN STEP	2026-09-15T03:17:47.5978080Z (node:3968) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:41.5207112Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:41.5328616Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:41.5891216Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:52.2217932Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:55.2228049Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:56.3194197Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:57.5220842Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:58.7202877Z Warning: The plugin share_plus requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:11:59.9213514Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:12:00.5222704Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:11.2623206Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:11.2724409Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:11.2826261Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:12.5343253Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:12.7328058Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:12.9345459Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:13.1329314Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:13.5342171Z Warning: The plugin share_plus requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:13.7343475Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:14:13.9332496Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:18:51.3819638Z (node:3421) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build Android APK	UNKNOWN STEP	2026-09-15T03:18:52.5293260Z (node:3421) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.

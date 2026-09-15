@@ -1,0 +1,54 @@
+{
+  "source": ".cache/p33-verify-r7/logcat-live-toy.log",
+  "source_sha256": "d31d49688d5e2176305da7f6579f8fa3836fe4b95b6fec7eb7656fa7146d6c00",
+  "lines": [
+    {
+      "line": 184822,
+      "text": "09-15 11:35:31.067 I/ProximityAuth(29741): [RecentAppsMediator] Package removed: (user=UserHandle{0}) com.wen.gaia.gaia.p33acceptance"
+    },
+    {
+      "line": 184858,
+      "text": "09-15 11:35:31.958 W/RWIPackageIntentOps(26849): Registries cleared for package: com.wen.gaia.gaia.p33acceptance"
+    },
+    {
+      "line": 184860,
+      "text": "09-15 11:35:32.300 E/WorkSourceUtil(26849): Could not find package: com.wen.gaia.gaia.p33acceptance"
+    },
+    {
+      "line": 184861,
+      "text": "09-15 11:35:32.305 I/Icing   (26849): doRemovePackageData com.wen.gaia.gaia.p33acceptance"
+    },
+    {
+      "line": 184942,
+      "text": "09-15 11:35:33.315 W/SQLiteLog(26849): (28) double-quoted string literal: \"com.wen.gaia.gaia.p33acceptance\""
+    },
+    {
+      "line": 185260,
+      "text": "09-15 11:35:37.393 I/Finsky  (21048): [2] AIM: AppInfoCacheUpdater -> invalidating apps: [com.wen.gaia.gaia.p33acceptance]"
+    },
+    {
+      "line": 185263,
+      "text": "09-15 11:35:37.413 I/Finsky  (21048): [1733] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=0, cacheMissCount=1. Missed  in cache (limit 10) : [com.wen.gaia.gaia.p33acceptance]"
+    },
+    {
+      "line": 185320,
+      "text": "09-15 11:35:37.848 I/Finsky  (21048): [1755] Asset module storage cleared for package com.wen.gaia.gaia.p33acceptance."
+    },
+    {
+      "line": 185322,
+      "text": "09-15 11:35:37.881 W/Finsky  (21048): [2] STU: Failed to get storage stats for package 'com.wen.gaia.gaia.p33acceptance' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)"
+    },
+    {
+      "line": 185361,
+      "text": "09-15 11:35:38.732 I/Finsky  (21048): [2] Received an install/uninstall event for package com.wen.gaia.gaia.p33acceptance"
+    },
+    {
+      "line": 185368,
+      "text": "09-15 11:35:38.805 I/Finsky  (21048): [1730] Not an active Cubes user. Ignoring package install/uninstall event."
+    },
+    {
+      "line": 186073,
+      "text": "09-15 11:35:59.652 I/ActivityTaskManager( 1980): Displayed com.android.packageinstaller/.PackageInstallerActivity: +472ms"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# real 轮（30205，2026-09-15 13:41~13:46）证据归档
+
+# 截图原件带手机相册厂商标记尾（cameralbum!，与 toy 轮原件同构），头为合法 JPEG SOI
+
+logcat-decisive-real.txt: 9783B sha256=fe2cae2ab69427a3cd09708e8562c7118cf0062a1140bd5032c942455e316fec
+rtt-device-real.log: 351B sha256=a4d6a89d006bd77f2eb43a790aebc49a1cb1132c95048ab28df3129394651b4a
+service-v7-real-20260915.log: 2116B sha256=699140a428461b39a28e4c674419734d9395bb86620a48f33777ca763bc84557
+real-success-screenshot.jpg: 510748B sha256=c9a782fc9f97d36949403cfa134f3b3e1c8b11d63a45a1d9e1c36a87f8f0bb8c
+real-success-screenshot-user-forward.jpg: 108966B sha256=fb9da4152cc867a6e81ac275d53c5407fcdd2e0d7a03f378f7aabf15cb252f72
+
+# 原始大文件（留 .cache 原地，未拷贝）
+logcat-live-real.log(全量): 17964197B sha256=6a8d7d5f8c118e4a52df99ef3317a7a7cb771226ec8c6a9fcff78359625a507b

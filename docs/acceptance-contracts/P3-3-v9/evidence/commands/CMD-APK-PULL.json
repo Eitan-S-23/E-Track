@@ -1,0 +1,12 @@
+{
+  "id": "CMD-APK-PULL",
+  "command": "adb -s 10ADA4197U001CK pull /data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==/base.apk docs/acceptance-contracts/P3-3-v8/artifacts/installed-base.apk",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:09:56.530Z",
+  "ended_at": "2026-09-15T07:09:59.175Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "/data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==/base.apk: 1 file pulled, 0 skipped. 18.4 MB/s (46699140 bytes in 2.419s)\r\n",
+  "stderr": ""
+}

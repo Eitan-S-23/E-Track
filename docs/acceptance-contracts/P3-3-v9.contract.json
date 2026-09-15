@@ -1,0 +1,616 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-3-v9",
+  "version": 9,
+  "task_id": "P3-3",
+  "parent_contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+  "status": "FROZEN",
+  "approved_by": "Codex 独立非实现验收会话，依据用户本线程「旧包是我卸载的」及后续「那就继续吧」「继续」完成既有正式验收授权。此次审批仅将唯一未通过项改为离线证据补充复核，不降低门禁、不修改产品，不增加设备、构建、部署、提交或发布授权；不是声称用户另行逐字审批过 v9 文本。",
+  "approved_at": "2026-09-15T08:46:40Z",
+  "implementation_ref": "253f153 两处真实观测打点+测试；ceaf8d2 两份新 fixture 配置和 toy/real 补测归档。docs/ota-exec-notes/P3-3-evidence-recovery-2026-09-15.md §4、两份 *-loop-r7-2026-09-15.md 为原补测事实输入。本轮不是补做升级，原五项门禁不变。；v9 为用户确认后的证据补充裁定，无新实现或产物。",
+  "freeze_commit": "ceaf8d2b7bb8e78968462af51a57ff1250731b61",
+  "freeze_tree": "4fd600a48a25654fe82db3cb6fd6f6338392bc48",
+  "profile_config_blob": "3769369d053aad028b67d7e2c17b5827b2b96f55",
+  "round_scope": "v8 R1 为实际上一终态（4 PASS + C-APK-INSTALL EVIDENCE_GAP）。v8 R2 的六命令新读取路线只完成 NOT_RUN 前检；手机预检无设备，未执行任何判据命令，不伪装为新手机实测。根据执行合同 §7.1 证据封包规则，保留该预检记录，改以 v9 在同一 R2 收尾轮中离线复核既有独立安装实测、实物与用户来源确认。源码、资产、五个门禁不变；唯一实际方法变化为 C-APK-INSTALL，故版本加一，不原改 v8。其他四项直接锚定 v8 R1 原始 EXECUTED PASS。",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    },
+    {
+      "id": "firmware",
+      "profile": "Firmware",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "EXT-HTTP-TEST-SERVICE",
+      "category": "environment",
+      "description": "v7 补测实例：checkout-sheep-full-evening.trycloudflare.com；toy PID23232、real PID24332、cloudflared PID20712；SERVICE_VERSION=2；service_config SHA 5c2fe64f3ab9541e58b622e50f2a96d407271767f58452bb00c6a7aa204e9556。本轮仅审查留档，不复起服务，不证明 P4-2。",
+      "fingerprint": "v7 补测实例：checkout-sheep-full-evening.trycloudflare.com；toy PID23232、real PID24332、cloudflared PID20712；SERVICE_VERSION=2；service_config SHA 5c2fe64f3ab9541e58b622e50f2a96d407271767f58452bb00c6a7aa204e9556。本轮仅审查留档，不复起服务，不证明 P4-2。",
+      "evidence_path": "evidence/external/inputs.json",
+      "evidence_sha256": "5b899aa5d4c45cabfe6037c86628499cc6ab54f8535c34110a8bac74934aa879"
+    },
+    {
+      "id": "EXT-TOY-BOOTABLE",
+      "category": "fixture",
+      "description": "toy 30204；raw 43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13；ETU 81a773363711adff31cd788217ba18445b462e675042682bdd22302123f0228b / 284581B；合法 fw_header、真实 Boot/BCB/OTA 功能本体。",
+      "fingerprint": "toy 30204；raw 43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13；ETU 81a773363711adff31cd788217ba18445b462e675042682bdd22302123f0228b / 284581B；合法 fw_header、真实 Boot/BCB/OTA 功能本体。",
+      "evidence_path": "evidence/external/inputs.json",
+      "evidence_sha256": "5b899aa5d4c45cabfe6037c86628499cc6ab54f8535c34110a8bac74934aa879"
+    },
+    {
+      "id": "EXT-REAL-ETU",
+      "category": "fixture",
+      "description": "real 30205；raw ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4；ETU 32577aa5d0d98cab071440b455151bcc536f33a9a9d930e832f8bb140a607d77 / 284590B；不同于 toy 独立身份，同源 GCC 本体。",
+      "fingerprint": "real 30205；raw ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4；ETU 32577aa5d0d98cab071440b455151bcc536f33a9a9d930e832f8bb140a607d77 / 284590B；不同于 toy 独立身份，同源 GCC 本体。",
+      "evidence_path": "evidence/external/inputs.json",
+      "evidence_sha256": "5b899aa5d4c45cabfe6037c86628499cc6ab54f8535c34110a8bac74934aa879"
+    },
+    {
+      "id": "EXT-BOARD-STATE",
+      "category": "hardware_state",
+      "description": "补测起点 30203，连续自然 OTA 到 30204/30205，原始 RTT TEST_BOOT confirmed 与 App 新连接身份复核留档；历史生产 Boot 恢复事实沿 v7 原件，不在本轮重新宣称实测 Flash/BCB。",
+      "fingerprint": "补测起点 30203，连续自然 OTA 到 30204/30205，原始 RTT TEST_BOOT confirmed 与 App 新连接身份复核留档；历史生产 Boot 恢复事实沿 v7 原件，不在本轮重新宣称实测 Flash/BCB。",
+      "evidence_path": "evidence/external/inputs.json",
+      "evidence_sha256": "5b899aa5d4c45cabfe6037c86628499cc6ab54f8535c34110a8bac74934aa879"
+    },
+    {
+      "id": "EXT-APK",
+      "category": "fixture",
+      "description": "release APK 85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9 / 46699140B；com.wen.gaia.gaia.p33verify / 86 / 1.0.60；证书 6f51a6a64e21b50b0d7cace2fdf0ca4b978fbdff1814d7bbab90fad08832e658；run 34923921739@253f153，r6 隧道 endpoint。",
+      "fingerprint": "release APK 85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9 / 46699140B；com.wen.gaia.gaia.p33verify / 86 / 1.0.60；证书 6f51a6a64e21b50b0d7cace2fdf0ca4b978fbdff1814d7bbab90fad08832e658；run 34923921739@253f153，r6 隧道 endpoint。",
+      "evidence_path": "evidence/external/inputs.json",
+      "evidence_sha256": "5b899aa5d4c45cabfe6037c86628499cc6ab54f8535c34110a8bac74934aa879"
+    },
+    {
+      "id": "EXT-USER-UNINSTALL",
+      "category": "environment",
+      "description": "用户确认旧 .p33acceptance 由其自主卸载，原始 11:35:31 卸载日志不变；不将用户行为归因为产品缺陷或 agent 越权，不授予 agent 卸载权限。",
+      "fingerprint": "本线程用户原话：旧包是我卸载的，接下来应该怎么做？其后授权继续完成正式验收。",
+      "evidence_path": "evidence/adjudication/user-confirmation.md",
+      "evidence_sha256": "B716B23B9FDF7A29DD6A4C240C1B23FAD378D4037FE137E680A7612C816B93BB"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-DEV-CHECKS",
+      "description": "核验已执行的 push run，必须为 253f153、双宿主 success；无新派发。",
+      "command": "gh run view 34922411533 --repo Eitan-S-23/E-Track --json databaseId,headSha,headBranch,event,status,conclusion,url,jobs",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/flutter-dev-checks.yml",
+        "Tools/flutter/dev_checks.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-DEV-LOGS",
+      "description": "本轮只读独立核验；命令输出落包。",
+      "command": "gh run view 34922411533 --repo Eitan-S-23/E-Track --log",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/flutter-dev-checks.yml",
+        "Tools/flutter/dev_checks.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-DEV-DOWNLOAD",
+      "description": "仅下载两宿主原始 analyze/test 日志与 result.json，独立检查全部实际日志；不下载 debug APK 代替受验 release APK。",
+      "command": "gh run download 34922411533 --repo Eitan-S-23/E-Track -n flutter-dev-ubuntu-latest-34922411533-1 -n flutter-dev-windows-2022-34922411533-1 -D .cache/p3-3-v8-acceptance/downloads/dev-checks",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/flutter-dev-checks.yml",
+        "Tools/flutter/dev_checks.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-RELEASE-BUILD",
+      "description": "核验已有 build-only run：Android/Windows success，Pages/Release skipped；禁止新 dispatch。",
+      "command": "gh run view 34923921739 --repo Eitan-S-23/E-Track --json databaseId,headSha,headBranch,event,status,conclusion,url,jobs",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/build.yml"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-RELEASE-LOGS",
+      "description": "核对实际 release 构建及 endpoint/suffix 注入，不以 workflow 总结代替构建日志。",
+      "command": "gh run view 34923921739 --repo Eitan-S-23/E-Track --log",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/build.yml"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-RELEASE-DOWNLOAD",
+      "description": "下载现有产物，APK 与本地 r7 实物 SHA/size 全等；Windows 以完整运行包 ZIP 而非裸 EXE 为准。",
+      "command": "gh run download 34923921739 --repo Eitan-S-23/E-Track -n android-apk -n windows-exe -D .cache/p3-3-v8-acceptance/downloads/release",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/build.yml"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-SOURCE-EQUIVALENCE",
+      "description": "两提交间 App、测试、工作流及其开发 runner 输入必须零差异。ceaf8d2 新增服务 fixture 配置另由 loop 的 Validation 依赖覆盖，不能把整棵 Validation 谎称未变。",
+      "command": "git diff 253f15371f2a0aeef0e7c5feb10af3118494c9e1 ceaf8d2b7bb8e78968462af51a57ff1250731b61 -- app/ .github/workflows/build.yml .github/workflows/flutter-dev-checks.yml .github/scripts/ Tools/flutter/",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-APK-BADGING",
+      "description": "本轮只读独立核验；命令输出落包。",
+      "command": ".cache/p3-3-apk/tools/android-15/aapt.exe dump badging docs/acceptance-contracts/P3-3-v8/artifacts/ble-monitor-android.apk",
+      "input_groups": [
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-APK-CERT",
+      "description": "本轮只读独立核验；命令输出落包。",
+      "command": "java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs docs/acceptance-contracts/P3-3-v8/artifacts/ble-monitor-android.apk",
+      "input_groups": [
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-APK-INSTALL",
+      "description": "证据阶段：原样读取 v8 R1 独立执行的六份安装/签名/生产包命令记录及旧包卸载原始日志，结合用户确认重新裁定。明确不是当前手机读取；已取得的在装证据不因手机离线重采。每份记录的命令、执行时间、退出码、实物哈希必须核对，用户确认只补操作人来源。",
+      "command": "D:/install/Git/usr/bin/cat.exe docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-APK-INSTALL.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-APK-PULL.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-APK-CERT.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-INSTALLED-CERT.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-PRODUCTION-INSTALL.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-PREVIOUS-INSTALL.json docs/acceptance-contracts/P3-3-v9/evidence/old-package-removal-context.json docs/acceptance-contracts/P3-3-v9/evidence/adjudication/user-confirmation.md",
+      "input_groups": [
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-INSTALLED-CERT",
+      "description": "重新验证 v8 R1 已从手机 pull 的原件签名；只操作本地实物，不连接手机、不将旧 pull 件冒充本轮新采集。Java 临时目录与 user.home 限于项目 .cache/p3-3-v9-acceptance/。",
+      "command": "D:/install/jdk17/bin/java.exe -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs docs/acceptance-contracts/P3-3-v9/artifacts/installed-base.apk",
+      "input_groups": [
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TOY-LOOP",
+      "description": "独立离线审查原补测 toy 30203→30204；摘录须逐行匹配已哈希绑定全量 logcat，三个时间通道与实际成功截图、源代码强制门禁交叉。零设备操作，不得重跑已耗尽的升级额度。",
+      "command": "cat docs/acceptance-contracts/P3-3-v8/evidence/toy/logcat-decisive-toy.txt docs/acceptance-contracts/P3-3-v8/evidence/toy/service-v7-toy-20260915.log docs/acceptance-contracts/P3-3-v8/evidence/toy/rtt-device-toy.log",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-REAL-LOOP",
+      "description": "独立离线审查原补测 real 30204→30205；与 toy 为不同 ETU/raw 身份、同一 APK，独立闭环；不以 toy 代 real。不得重启服务/隧道或连接 J-Link。",
+      "command": "cat docs/acceptance-contracts/P3-3-v8/evidence/real/logcat-decisive-real.txt docs/acceptance-contracts/P3-3-v8/evidence/real/service-v7-real-20260915.log docs/acceptance-contracts/P3-3-v8/evidence/real/rtt-device-real.log",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TOY-UNPACK",
+      "description": "离线解析已产生资产，不制包不烧录；校验外层 CRC、密文 payload CRC、fw_header CRC、双零摘要。Python -S 禁用 site 启动，Crypto 从既有 Python313/site-packages 只读导入，全部输出在本 worktree。",
+      "command": "python -X utf8 -B -S Tools/etu_unpack.py docs/acceptance-contracts/P3-3-v8/artifacts/e-track-at32f435-v3.2.4-full.etu --out .cache/p3-3-v8-acceptance/toy-unpacked.bin --verify-fw-header",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/etu_unpack.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-REAL-UNPACK",
+      "description": "与 toy 分别解包验证，不复用其结果；全量产物输出限定本 worktree。",
+      "command": "python -X utf8 -B -S Tools/etu_unpack.py docs/acceptance-contracts/P3-3-v8/artifacts/e-track-at32f435-v3.2.5-full.etu --out .cache/p3-3-v8-acceptance/real-unpacked.bin --verify-fw-header",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/etu_unpack.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TOY-COMPARE",
+      "description": "解包实物必须与冻结 toy raw 镜像逐字节相等；cmp 0 是明确相等判定，不用「无错误日志」推定。",
+      "command": "cmp .cache/p3-3-v8-acceptance/toy-unpacked.bin docs/acceptance-contracts/P3-3-v8/artifacts/toy-3.2.4-target-image.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-REAL-COMPARE",
+      "description": "解包实物必须与冻结 real raw 镜像逐字节相等。",
+      "command": "cmp .cache/p3-3-v8-acceptance/real-unpacked.bin docs/acceptance-contracts/P3-3-v8/artifacts/real-3.2.5-target-image.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-INSTALLED-HASH",
+      "description": "分别重新读取受验 APK 与独立手机 pull 原件，SHA 必须全等于冻结 85ce64df...，不能只核对人工登记值。",
+      "command": "D:/install/Git/usr/bin/sha256sum.exe docs/acceptance-contracts/P3-3-v9/artifacts/ble-monitor-android.apk docs/acceptance-contracts/P3-3-v9/artifacts/installed-base.apk",
+      "input_groups": [
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-DEV-LOGS",
+      "path": "evidence/commands/CMD-DEV-CHECKS.json",
+      "description": "当前独立 gh run view 原始输出及时间/退出码；两宿主完整原始日志另以 evidence_hashes 绑定。"
+    },
+    {
+      "id": "ART-APK-RELEASE",
+      "path": "artifacts/ble-monitor-android.apk",
+      "description": "46699140B；85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9；新 endpoint/.p33verify release APK，须与 run 34923921739 下载实物一致。"
+    },
+    {
+      "id": "ART-WINDOWS-RUNTIME",
+      "path": "artifacts/ble-monitor-windows.zip",
+      "description": "run 34923921739 Windows 完整运行包，检查 EXE/DLL/data/flutter_assets 齐全；不在本轮启动 GUI。"
+    },
+    {
+      "id": "ART-INSTALLED-APK",
+      "path": "artifacts/installed-base.apk",
+      "description": "当前手机只读 pull 回件；字节和证书均对新受验 APK，而非旧轮签名。"
+    },
+    {
+      "id": "ART-GCC-SOURCE",
+      "path": "artifacts/gcc-pre-finalize.bin",
+      "description": "1894f9d GCC 构建原件 603764B/4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec；两镜像 body 必须与它一致。"
+    },
+    {
+      "id": "ART-TOY-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.4-full.etu",
+      "description": "30204；284581B；81a773363711adff31cd788217ba18445b462e675042682bdd22302123f0228b。"
+    },
+    {
+      "id": "ART-TOY-TARGET-IMAGE",
+      "path": "artifacts/toy-3.2.4-target-image.bin",
+      "description": "30204；603764B；43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13。"
+    },
+    {
+      "id": "ART-REAL-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.5-full.etu",
+      "description": "30205；284590B；32577aa5d0d98cab071440b455151bcc536f33a9a9d930e832f8bb140a607d77。"
+    },
+    {
+      "id": "ART-REAL-TARGET-IMAGE",
+      "path": "artifacts/real-3.2.5-target-image.bin",
+      "description": "30205；603764B；ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4。"
+    }
+  ],
+  "criteria": [
+    {
+      "required": true,
+      "kind": "functional",
+      "id": "C-DEV-CHECKS",
+      "description": "实际执行的开发 run 34922411533（253f153）Ubuntu 与 Windows strict analyze 无 issue，所有适用测试通过、平台 skip 有 Windows 实测补足，不能 continue-on-error 或 scope 缩水。ceaf8d2 与此 run 的 App/test/runner 输入零差异，现有原始日志充分才通过。",
+      "evidence_types": [
+        "raw_log",
+        "run_url"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter 覆盖 App；Validation 覆盖测试、dev_checks.py 和开发 workflow。本轮改动使 v7 旧 PASS 失效，独立核对新 run，不冒用 REUSED。",
+      "external_inputs": [],
+      "command_ids": [
+        "CMD-DEV-CHECKS",
+        "CMD-DEV-LOGS",
+        "CMD-DEV-DOWNLOAD",
+        "CMD-SOURCE-EQUIVALENCE"
+      ],
+      "artifact_ids": [
+        "ART-DEV-LOGS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "required": true,
+      "kind": "functional",
+      "id": "C-RELEASE-BUILD",
+      "description": "已有 build-only run 34923921739 的 Android release APK 与 Windows 完整运行包构建通过；Pages/Release skipped，endpoint 和 .p33verify 注入准确；APK 大小/哈希/包名/证书对冻结输入全等，Windows ZIP 非裸 EXE。",
+      "evidence_types": [
+        "raw_log",
+        "run_url",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter 提供 App/Gradle/build.yml 输入；Validation 提供构建必跑测试。本轮只读构建日志及产物，不重新编译。",
+      "external_inputs": [
+        "EXT-APK"
+      ],
+      "command_ids": [
+        "CMD-RELEASE-BUILD",
+        "CMD-RELEASE-LOGS",
+        "CMD-RELEASE-DOWNLOAD",
+        "CMD-SOURCE-EQUIVALENCE",
+        "CMD-APK-BADGING",
+        "CMD-APK-CERT"
+      ],
+      "artifact_ids": [
+        "ART-APK-RELEASE",
+        "ART-WINDOWS-RUNTIME"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "required": true,
+      "kind": "functional",
+      "id": "C-APK-INSTALL",
+      "description": "新受验包 com.wen.gaia.gaia.p33verify 的真实安装、86/1.0.60、与本轮受验实物相同的字节和证书，必须由已有独立手机命令/原件证明；生产包 lastUpdateTime=2026-07-10 19:05:06 不变。旧 .p33acceptance 的不擅动条款约束 agent 行为，不限制用户自主卸载；结合真实卸载日志及用户确认裁定其来源，不谎称旧包仍存在。本轮离线复核，不声称当前在装快照，不依赖此刻 USB 连接，不以人证替代 APK 身份取证。",
+      "evidence_types": [
+        "raw_log",
+        "device_observation",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter"
+      ],
+      "external_inputs": [
+        "EXT-APK",
+        "EXT-USER-UNINSTALL"
+      ],
+      "command_ids": [
+        "CMD-APK-INSTALL",
+        "CMD-INSTALLED-CERT",
+        "CMD-INSTALLED-HASH"
+      ],
+      "artifact_ids": [
+        "ART-APK-RELEASE",
+        "ART-INSTALLED-APK"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "required": true,
+      "kind": "functional",
+      "id": "C-TOY-LOOP",
+      "description": "toy 30203→30204 原补测闭环独立证据审查。六状态保持 v7 门禁：起点及目标身份；App 对实际传输字节长度+整包 SHA 校验通过；MCU durable 达 total；同会话 ACK_END/OK；自然重启；新连接 GET_INFO 版本及完整 raw SHA 与目标全等，且原升级调用 completed。App 校验结果允许从强制 fail-closed 控制流和后续真实打点推证，不强求特定日志文案。END_ACK_OK 打点本身不能单独证明 statusOk：必须与同轮后续 REBOOT_VERIFIED、service 的 !ack.isOk 失败返回门禁共同审查。RTT/截图为交叉证据；摘录必须与绑定全量原始日志逐行相符。不得以无错误、仅发送完成、仅 END ACK 或手动 latest 替代终点。",
+      "evidence_types": [
+        "raw_log",
+        "device_observation",
+        "protocol_trace",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Firmware 提供 MCU/Boot 和 GCC 目标本体；Flutter 提供实际 App、ACK 关联和目标复核语义；Validation 提供受控 service/config 与独立解包器。原始 RTT 使用外部 SEGGER 采集，本轮不调用采集器；服务变更不能从依赖中遗漏。",
+      "external_inputs": [
+        "EXT-HTTP-TEST-SERVICE",
+        "EXT-TOY-BOOTABLE",
+        "EXT-BOARD-STATE",
+        "EXT-APK"
+      ],
+      "command_ids": [
+        "CMD-TOY-LOOP",
+        "CMD-TOY-UNPACK",
+        "CMD-TOY-COMPARE"
+      ],
+      "artifact_ids": [
+        "ART-TOY-ETU",
+        "ART-TOY-TARGET-IMAGE",
+        "ART-GCC-SOURCE"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "ota_session_info_ok",
+          "ota_package_verified",
+          "ota_transfer_durable_complete",
+          "ota_ack_end_ok",
+          "device_reboot",
+          "get_info_target_version_and_raw_sha_match"
+        ]
+      }
+    },
+    {
+      "required": true,
+      "kind": "functional",
+      "id": "C-REAL-LOOP",
+      "description": "real 30204→30205 原补测闭环独立证据审查。六状态保持 v7 门禁：起点及目标身份；App 对实际传输字节长度+整包 SHA 校验通过；MCU durable 达 total；同会话 ACK_END/OK；自然重启；新连接 GET_INFO 版本及完整 raw SHA 与目标全等，且原升级调用 completed。App 校验结果允许从强制 fail-closed 控制流和后续真实打点推证，不强求特定日志文案。END_ACK_OK 打点本身不能单独证明 statusOk：必须与同轮后续 REBOOT_VERIFIED、service 的 !ack.isOk 失败返回门禁共同审查。RTT/截图为交叉证据；摘录必须与绑定全量原始日志逐行相符。不得以无错误、仅发送完成、仅 END ACK 或手动 latest 替代终点。",
+      "evidence_types": [
+        "raw_log",
+        "device_observation",
+        "protocol_trace",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Firmware 提供 MCU/Boot 和 GCC 目标本体；Flutter 提供实际 App、ACK 关联和目标复核语义；Validation 提供受控 service/config 与独立解包器。原始 RTT 使用外部 SEGGER 采集，本轮不调用采集器；服务变更不能从依赖中遗漏。",
+      "external_inputs": [
+        "EXT-HTTP-TEST-SERVICE",
+        "EXT-REAL-ETU",
+        "EXT-BOARD-STATE",
+        "EXT-APK"
+      ],
+      "command_ids": [
+        "CMD-REAL-LOOP",
+        "CMD-REAL-UNPACK",
+        "CMD-REAL-COMPARE"
+      ],
+      "artifact_ids": [
+        "ART-REAL-ETU",
+        "ART-REAL-TARGET-IMAGE",
+        "ART-GCC-SOURCE"
+      ],
+      "gate": {
+        "type": "state_chain",
+        "basis": "protocol_contract",
+        "expected": [
+          "ota_session_info_ok",
+          "ota_package_verified",
+          "ota_transfer_durable_complete",
+          "ota_ack_end_ok",
+          "device_reboot",
+          "get_info_target_version_and_raw_sha_match"
+        ]
+      }
+    }
+  ],
+  "performance_gates": [],
+  "excluded_scope": [
+    "BLE 提速",
+    "后台/锁屏 OTA 和常驻通知",
+    "P4-2 发布后台",
+    "生产发布签名资格"
+  ]
+}

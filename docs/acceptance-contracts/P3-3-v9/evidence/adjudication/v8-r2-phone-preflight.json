@@ -1,0 +1,15 @@
+{
+  "command": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "devices",
+    "-l"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T08:19:54.118Z",
+  "ended_at": "2026-09-15T08:19:56.371Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "List of devices attached\r\n\r\n",
+  "stderr": "* daemon not running; starting now at tcp:5037\r\n* daemon started successfully\r\n",
+  "error": null
+}

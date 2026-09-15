@@ -1,0 +1,77 @@
+{
+  "method": "byte-for-byte copy of existing artifacts and original evidence; no new build or hardware operation",
+  "files": [
+    {
+      "source": ".cache/p3-3-apk-r6/ble-monitor-android.apk",
+      "path": "docs/acceptance-contracts/P3-3-v7/artifacts/ble-monitor-android.apk",
+      "size": 46699144,
+      "sha256": "fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13"
+    },
+    {
+      "source": ".cache/p3-3-v7-win/ble-monitor-windows.zip",
+      "path": "docs/acceptance-contracts/P3-3-v7/artifacts/ble-monitor-windows.zip",
+      "size": 20353729,
+      "sha256": "a354f7354ee379433940fc0e6e851735a8c8306bbc6e1ecd965f84b10e332312"
+    },
+    {
+      "source": ".cache/p3-3-assets-v5/e-track-at32f435-v3.2.1-full.etu",
+      "path": "docs/acceptance-contracts/P3-3-v7/artifacts/e-track-at32f435-v3.2.1-full.etu",
+      "size": 284540,
+      "sha256": "0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5"
+    },
+    {
+      "source": ".cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin",
+      "path": "docs/acceptance-contracts/P3-3-v7/artifacts/toy-3.2.1-target-image.bin",
+      "size": 603764,
+      "sha256": "aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298"
+    },
+    {
+      "source": ".cache/p3-3-assets-v6/e-track-at32f435-v3.2.3-full.etu",
+      "path": "docs/acceptance-contracts/P3-3-v7/artifacts/e-track-at32f435-v3.2.3-full.etu",
+      "size": 284608,
+      "sha256": "a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915"
+    },
+    {
+      "source": ".cache/p3-3-assets-v6/real-3.2.3-30203-final.bin",
+      "path": "docs/acceptance-contracts/P3-3-v7/artifacts/real-3.2.3-target-image.bin",
+      "size": 603764,
+      "sha256": "3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3"
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v7/P3-3-v7.evidence-matrix.json",
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/entry-matrix.json",
+      "size": 3275,
+      "sha256": "0ae4aba9adf63ab3386f807c100d4796e11db9ca8b61ef9ebca776c502d07f1b"
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/service-v5-20260914.log",
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/service-v5-20260914.log",
+      "size": 4000,
+      "sha256": "1f6d2f7e056c286432fb099ff71b887cdab6b2425a8715691adaa8043aaa29b5"
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/service-v6-20260914.log",
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/service-v6-20260914.log",
+      "size": 3698,
+      "sha256": "d03ef586995acccf4f8e1f4f4081673c31f08c2cb43d274ea1a7999867cbc5cd"
+    },
+    {
+      "source": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/o-verify-boot-rtt.log",
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/o-verify-boot-rtt.log",
+      "size": 573,
+      "sha256": "8d40136f336b16537c1bb34c63990c8e15a7a7d1a8df1779c4667407f0384f56"
+    },
+    {
+      "source": "docs/ota-exec-notes/P3-3-o-sequence-execution-2026-09-14.md",
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md",
+      "size": 11789,
+      "sha256": "fc0d5b9972fc034ce403cb701a1f7bb32b203c86bbb7f3c5881bf743e399de91"
+    },
+    {
+      "source": "docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md",
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md",
+      "size": 11232,
+      "sha256": "2b336ccc2b4889eb6cc7fe244473d84c5ffd3e67bfbba685ea0bc11f4b0d8032"
+    }
+  ]
+}

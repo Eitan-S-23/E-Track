@@ -1,0 +1,12 @@
+{
+  "id": "CMD-RELEASE-BUILD",
+  "command": "gh run view 34864052541 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh api repos/Eitan-S-23/E-Track/actions/runs/34864052541/artifacts --jq \".artifacts[]|{name:.name,size:.size_in_bytes,id:.id}\" && gh run download 34864052541 -n windows-exe -D .cache/p3-3-v7-win && sha256sum .cache/p3-3-apk-r6/ble-monitor-android.apk && wc -c < .cache/p3-3-apk-r6/ble-monitor-android.apk && java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs .cache/p3-3-apk-r6/ble-monitor-android.apk",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "shell": "D:/install/Git/bin/bash.exe --noprofile --norc -o pipefail",
+  "started_utc": "2026-09-14T20:00:43.912Z",
+  "finished_utc": "2026-09-14T20:01:19.705Z",
+  "exit_code": 0,
+  "stdout": "{\"conclusion\":\"success\",\"jobs\":[{\"conclusion\":\"success\",\"name\":\"Detect changed paths\"},{\"conclusion\":\"success\",\"name\":\"Build Android APK\"},{\"conclusion\":\"success\",\"name\":\"Build Windows EXE\"},{\"conclusion\":\"skipped\",\"name\":\"Deploy GitHub Pages\"},{\"conclusion\":\"skipped\",\"name\":\"Create GitHub Release\"}]}\n{\"id\":10356790657,\"name\":\"android-apk\",\"size\":25509009}\n{\"id\":10356329746,\"name\":\"windows-exe\",\"size\":20384290}\nfb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13 *.cache/p3-3-apk-r6/ble-monitor-android.apk\n46699144\nSigner #1 certificate DN: C=US, O=Android, CN=Android Debug\r\nSigner #1 certificate SHA-256 digest: f6c0f2247c5054fd5b9e0c2792db8edb8bf694776b9a29cb5b83cace30cdf44d\r\nSigner #1 certificate SHA-1 digest: af9434b67a3ede9747f613fac16a82736781e24e\r\nSigner #1 certificate MD5 digest: a708f0426ec23d7f46dc0e07dd6eef74\r\n",
+  "stderr": "Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\temp -Duser.home=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\home -XX:-UsePerfData -XX:ErrorFile=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\temp\\hs_err_pid%p.log -XX:HeapDumpPath=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\temp\n",
+  "error": null
+}

@@ -1,0 +1,324 @@
+Activity Resolver Table:
+  Schemes:
+      trace:
+        2ad2156 com.wen.gaia.gaia.p33verify/com.wen.gaia.gaia.MainActivity filter 7587ec4
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "trace"
+
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        2ad2156 com.wen.gaia.gaia.p33verify/com.wen.gaia.gaia.MainActivity filter 26395d7
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        b61b873 com.wen.gaia.gaia.p33verify/androidx.profileinstaller.ProfileInstallReceiver filter 6b7052e
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      EXTRA_CHOSEN_COMPONENT:
+        6e5e1ad com.wen.gaia.gaia.p33verify/dev.fluttercommunity.plus.share.SharePlusPendingIntent filter 371fce2
+          Action: "EXTRA_CHOSEN_COMPONENT"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        b61b873 com.wen.gaia.gaia.p33verify/androidx.profileinstaller.ProfileInstallReceiver filter ac0c330
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        b61b873 com.wen.gaia.gaia.p33verify/androidx.profileinstaller.ProfileInstallReceiver filter 6abeba9
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        b61b873 com.wen.gaia.gaia.p33verify/androidx.profileinstaller.ProfileInstallReceiver filter f1568cf
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Domain verification status:
+
+Permissions:
+  Permission [com.wen.gaia.gaia.p33verify.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (4a157ab):
+    sourcePackage=com.wen.gaia.gaia.p33verify
+    uid=10344 gids=[] type=0 prot=signature
+    perm=PermissionInfo{aa838d6 com.wen.gaia.gaia.p33verify.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+
+Registered ContentProviders:
+  com.wen.gaia.gaia.p33verify/androidx.core.content.FileProvider:
+    Provider{6759757 com.wen.gaia.gaia.p33verify/androidx.core.content.FileProvider}
+  com.wen.gaia.gaia.p33verify/androidx.startup.InitializationProvider:
+    Provider{8782244 com.wen.gaia.gaia.p33verify/androidx.startup.InitializationProvider}
+  com.wen.gaia.gaia.p33verify/dev.fluttercommunity.plus.share.ShareFileProvider:
+    Provider{a2f7f2d com.wen.gaia.gaia.p33verify/dev.fluttercommunity.plus.share.ShareFileProvider}
+
+ContentProvider Authorities:
+  [com.wen.gaia.gaia.p33verify.androidx-startup]:
+    Provider{8782244 com.wen.gaia.gaia.p33verify/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{aaa9e08 com.wen.gaia.gaia.p33verify}
+  [com.wen.gaia.gaia.p33verify.fileprovider]:
+    Provider{6759757 com.wen.gaia.gaia.p33verify/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{8fbe9a1 com.wen.gaia.gaia.p33verify}
+  [com.wen.gaia.gaia.p33verify.flutter.share_provider]:
+    Provider{a2f7f2d com.wen.gaia.gaia.p33verify/dev.fluttercommunity.plus.share.ShareFileProvider}
+      applicationInfo=ApplicationInfo{7f7b7c6 com.wen.gaia.gaia.p33verify}
+
+Key Set Manager:
+  [com.wen.gaia.gaia.p33verify]
+      Signing KeySets: 516
+
+Packages:
+  Package [com.wen.gaia.gaia.p33verify] (79bc387):
+    userId=10344
+    pkg=Package{a9a4fb com.wen.gaia.gaia.p33verify}
+    codePath=/data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==
+    resourcePath=/data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==
+    legacyNativeLibraryDir=/data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=86 minSdk=24 targetSdk=36
+    minExtensionVersions=[]
+    versionName=1.0.60
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesIntents=[Intent { act=android.intent.action.GET_CONTENT dat=content://*/... typ=*/* }]
+    dataDir=/data/user/0/com.wen.gaia.gaia.p33verify
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesOptionalLibraries:
+      androidx.window.extensions
+      androidx.window.sidecar
+    timeStamp=2026-09-15 11:35:59
+    lastUpdateTime=2026-09-15 11:36:08
+    packageSource=0
+    signatures=PackageSignatures{4b1e129 version:2, signatures:[cc0358c3], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    declared permissions:
+      com.wen.gaia.gaia.p33verify.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED
+    requested permissions:
+      android.permission.INTERNET
+      android.permission.REQUEST_INSTALL_PACKAGES
+      android.permission.BLUETOOTH
+      android.permission.BLUETOOTH_ADMIN
+      android.permission.ACCESS_COARSE_LOCATION
+      android.permission.ACCESS_FINE_LOCATION
+      android.permission.BLUETOOTH_CONNECT
+      android.permission.BLUETOOTH_SCAN
+      android.permission.POST_NOTIFICATIONS
+      android.permission.USE_FULL_SCREEN_INTENT
+      android.permission.VIBRATE
+      android.permission.WAKE_LOCK
+      android.permission.FOREGROUND_SERVICE
+      android.permission.FOREGROUND_SERVICE_DATA_SYNC
+      android.permission.FOREGROUND_SERVICE_LOCATION
+      android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+      android.permission.MODIFY_AUDIO_SETTINGS
+      com.wen.gaia.gaia.p33verify.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+    install permissions:
+      android.permission.MODIFY_AUDIO_SETTINGS: granted=true
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: granted=true
+      android.permission.BLUETOOTH: granted=true
+      android.permission.INTERNET: granted=true
+      android.permission.BLUETOOTH_ADMIN: granted=true
+      android.permission.USE_FULL_SCREEN_INTENT: granted=true
+      android.permission.VIBRATE: granted=true
+      com.wen.gaia.gaia.p33verify.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.REQUEST_INSTALL_PACKAGES: granted=false
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=627011 installed=true hidden=false vHidden=1 suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      installReason=0
+      firstInstallTime=2026-09-15 11:36:08
+      uninstallReason=0
+      overlay paths:
+        /data/resource-cache/com.android.systemui-neutral-f8RU.frro
+        /data/resource-cache/com.android.systemui-accent-FKZ0.frro
+      gids=[3002, 3003, 3001]
+      runtime permissions:
+        android.permission.POST_NOTIFICATIONS: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_FINE_LOCATION: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|524288]
+        android.permission.BLUETOOTH_CONNECT: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_COARSE_LOCATION: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.BLUETOOTH_SCAN: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+    User 999: ceDataInode=0 installed=false hidden=false vHidden=1 suspended=false distractionFlags=0 stopped=true notLaunched=true enabled=0 instant=false virtual=false
+      installReason=0
+      firstInstallTime=2026-09-15 11:36:08
+      uninstallReason=0
+      gids=[3002, 3003, 3001]
+      runtime permissions:
+        android.permission.POST_NOTIFICATIONS: granted=false
+        android.permission.ACCESS_FINE_LOCATION: granted=false
+        android.permission.BLUETOOTH_CONNECT: granted=false
+        android.permission.ACCESS_COARSE_LOCATION: granted=false
+        android.permission.BLUETOOTH_SCAN: granted=false
+
+Queries:
+  system apps queryable: false
+  queries via forceQueryable:
+  queries via package name:
+  queries via component:
+    [com.vivo.gamecube,com.vivo.gamewatch,com.vivo.assistant,com.android.location.fused,com.vivo.permissionmanager,com.vivo.aiengine,com.vivo.audiofx,com.vivo.vtouch,com.vivo.vivokaraoke,com.android.BBKCrontab,com.vivo.fingerprint,com.vivo.vms,com.vivo.healthservice,com.vivo.smartmultiwindow,com.iqoo.aftersale.engineermode,com.android.providers.settings,com.vivo.fingerprintengineer,com.vivo.multinlp,com.vivo.fuelsummary,com.iqoo.powersaving,com.mobile.cos.iroaming,com.vivo.epm,com.vivo.vibrator4d,com.android.networkstack.inprocess,com.android.networkstack.tethering.inprocess,com.vivo.pem,com.vivo.contentcatcher,com.vivo.vdfs,com.vivo.faceui,com.android.settings,com.vivo.fingerprintui,com.android.server.telecom,com.android.wallpaperbackup,com.vivo.daemonService,com.vivo.doubleinstance,com.vivo.car.networking,com.android.inputdevices,com.vivo.voicewakeup,com.vivo.basemanager,com.vivo.floatingball,com.vivo.fuzzylocationmanager,com.vivo.sps,android,com.vivo.dr,com.vivo.hover,com.android.localtransport,com.bbk.facewake,com.android.dynsystem,com.vivo.minscreen,com.vivo.setupwizard,com.android.keychain,com.vivo.upslide,com.vivo.abe,com.vivo.appfilter,com.vivo.globalanimation,com.vivo.smartunlock,com.vivo.faceunlock,com.vivo.smartshot,com.android.bbklog,com.wapi.wapicertmanage,com.bbk.SuperPowerSave,com.qualcomm.qti.xrvd.service,com.vivo.networkstate]:
+      com.wen.gaia.gaia.p33verify
+    com.sohu.inputmethod.sogou.vivo:
+      com.wen.gaia.gaia.p33verify
+    com.vivo.browser:
+      com.wen.gaia.gaia.p33verify
+    com.vivo.hiboard:
+      com.wen.gaia.gaia.p33verify
+    com.vivo.hybrid:
+      com.wen.gaia.gaia.p33verify
+    com.vivo.upnpserver:
+      com.wen.gaia.gaia.p33verify
+    com.vivo.space:
+      com.wen.gaia.gaia.p33verify
+    com.taobao.litetao:
+      com.wen.gaia.gaia.p33verify
+    com.maimemo.markji.android:
+      com.wen.gaia.gaia.p33verify
+    com.autonavi.minimap:
+      com.wen.gaia.gaia.p33verify
+    com.dicos.prod:
+      com.wen.gaia.gaia.p33verify
+    com.xingin.xhs:
+      com.wen.gaia.gaia.p33verify
+    com.netease.mobimail:
+      com.wen.gaia.gaia.p33verify
+    com.quark.browser:
+      com.wen.gaia.gaia.p33verify
+    com.jingdong.app.mall:
+      com.wen.gaia.gaia.p33verify
+    com.xunmeng.pinduoduo:
+      com.wen.gaia.gaia.p33verify
+    com.tmall.wireless:
+      com.wen.gaia.gaia.p33verify
+    com.canghai.haoka:
+      com.wen.gaia.gaia.p33verify
+    com.cainiao.wireless:
+      com.wen.gaia.gaia.p33verify
+    com.ophone.reader.ui:
+      com.wen.gaia.gaia.p33verify
+    com.baidu.netdisk:
+      com.wen.gaia.gaia.p33verify
+    com.ct.client:
+      com.wen.gaia.gaia.p33verify
+    com.sankuai.meituan:
+      com.wen.gaia.gaia.p33verify
+    com.cmri.universalapp:
+      com.wen.gaia.gaia.p33verify
+    com.qnet.screentest.displaytest:
+      com.wen.gaia.gaia.p33verify
+    com.sand.airmirror:
+      com.wen.gaia.gaia.p33verify
+    com.maimemo.momolist.android:
+      com.wen.gaia.gaia.p33verify
+    com.sohu.inputmethod.sogou:
+      com.wen.gaia.gaia.p33verify
+    com.taobao.taobao:
+      com.wen.gaia.gaia.p33verify
+    mark.via:
+      com.wen.gaia.gaia.p33verify
+    com.cmcc.cmvideo:
+      com.wen.gaia.gaia.p33verify
+    com.youdao.dict:
+      com.wen.gaia.gaia.p33verify
+    com.tencent.mm:
+      com.wen.gaia.gaia.p33verify
+    com.taobao.idlefish:
+      com.wen.gaia.gaia.p33verify
+    com.huaxiaozhu.rider:
+      com.wen.gaia.gaia.p33verify
+    com.greenpoint.android.mc10086.activity:
+      com.wen.gaia.gaia.p33verify
+    com.instagram.android:
+      com.wen.gaia.gaia.p33verify
+    com.facebook.katana:
+      com.wen.gaia.gaia.p33verify
+    com.cloudflare.onedotonedotonedotone:
+      com.wen.gaia.gaia.p33verify
+    com.cloudflare.cloudflareoneagent:
+      com.wen.gaia.gaia.p33verify
+    com.smule.singandroid:
+      com.wen.gaia.gaia.p33verify
+    com.baidu.tieba:
+      com.wen.gaia.gaia.p33verify
+    com.wen.gaia.gaia.p33verify:
+      com.android.contacts
+      com.tencent.mtt
+      com.chinamobile.mcloud
+      bin.mt.plus.canary
+    com.sina.weibo:
+      com.wen.gaia.gaia.p33verify
+    bubei.tingshu:
+      com.wen.gaia.gaia.p33verify
+    com.flightmanager.view:
+      com.wen.gaia.gaia.p33verify
+    com.tongcheng.android:
+      com.wen.gaia.gaia.p33verify
+    com.Qunar:
+      com.wen.gaia.gaia.p33verify
+    com.tmri.app.main:
+      com.wen.gaia.gaia.p33verify
+    com.auto.fairy:
+      com.wen.gaia.gaia.p33verify
+    com.leisu.sports:
+      com.wen.gaia.gaia.p33verify
+    com.larus.nova:
+      com.wen.gaia.gaia.p33verify
+    com.dongqiudi.news:
+      com.wen.gaia.gaia.p33verify
+    com.chaozh.iReaderFree:
+      com.wen.gaia.gaia.p33verify
+    com.ximalaya.ting.android:
+      com.wen.gaia.gaia.p33verify
+    com.nowcoder.app.florida:
+      com.wen.gaia.gaia.p33verify
+    com.chinamobile.mcloud:
+      com.wen.gaia.gaia.p33verify
+    uni.zhoubiangou:
+      com.wen.gaia.gaia.p33verify
+    im.xingzhe:
+      com.wen.gaia.gaia.p33verify
+    com.tencent.wework:
+      com.wen.gaia.gaia.p33verify
+    com.ss.android.ugc.aweme.lite:
+      com.wen.gaia.gaia.p33verify
+    com.aliyun.tongyi:
+      com.wen.gaia.gaia.p33verify
+    io.dcloud.H576E6CC7:
+      com.wen.gaia.gaia.p33verify
+  queryable via interaction:
+    User 0:
+      [com.vivo.gamecube,com.vivo.gamewatch,com.vivo.assistant,com.android.location.fused,com.vivo.permissionmanager,com.vivo.aiengine,com.vivo.audiofx,com.vivo.vtouch,com.vivo.vivokaraoke,com.android.BBKCrontab,com.vivo.fingerprint,com.vivo.vms,com.vivo.healthservice,com.vivo.smartmultiwindow,com.iqoo.aftersale.engineermode,com.android.providers.settings,com.vivo.fingerprintengineer,com.vivo.multinlp,com.vivo.fuelsummary,com.iqoo.powersaving,com.mobile.cos.iroaming,com.vivo.epm,com.vivo.vibrator4d,com.android.networkstack.inprocess,com.android.networkstack.tethering.inprocess,com.vivo.pem,com.vivo.contentcatcher,com.vivo.vdfs,com.vivo.faceui,com.android.settings,com.vivo.fingerprintui,com.android.server.telecom,com.android.wallpaperbackup,com.vivo.daemonService,com.vivo.doubleinstance,com.vivo.car.networking,com.android.inputdevices,com.vivo.voicewakeup,com.vivo.basemanager,com.vivo.floatingball,com.vivo.fuzzylocationmanager,com.vivo.sps,android,com.vivo.dr,com.vivo.hover,com.android.localtransport,com.bbk.facewake,com.android.dynsystem,com.vivo.minscreen,com.vivo.setupwizard,com.android.keychain,com.vivo.upslide,com.vivo.abe,com.vivo.appfilter,com.vivo.globalanimation,com.vivo.smartunlock,com.vivo.faceunlock,com.vivo.smartshot,com.android.bbklog,com.wapi.wapicertmanage,com.bbk.SuperPowerSave,com.qualcomm.qti.xrvd.service,com.vivo.networkstate]:
+        com.wen.gaia.gaia.p33verify
+      com.android.permissioncontroller:
+        com.wen.gaia.gaia.p33verify
+      [com.google.android.gsf,com.google.android.gms]:
+        com.wen.gaia.gaia.p33verify
+      com.sohu.inputmethod.sogou:
+        com.wen.gaia.gaia.p33verify
+    User 999:
+  queryable via uses-library:
+
+Dexopt state:
+  [com.wen.gaia.gaia.p33verify]
+    path: /data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==/base.apk
+      arm64: [status=verify] [reason=install]
+  BgDexopt state:
+    enabled:true
+    mDexOptThread:null
+    mDexOptCancellingThread:null
+    mFinishedPostBootUpdate:true
+    mLastExecutionStatus:0
+    mLastExecutionStartTimeMs:346351837
+    mLastExecutionDurationIncludingSleepMs:299969
+    mLastExecutionStartUptimeMs:344322072
+    mLastExecutionDurationMs:299968
+    now:386171258
+    mLastCancelledPackages:
+    mFailedPackageNamesPrimary:com.google.android.googlequicksearchbox
+    mFailedPackageNamesSecondary:
+
+Compiler stats:
+  [com.wen.gaia.gaia.p33verify]
+     base.apk - 983

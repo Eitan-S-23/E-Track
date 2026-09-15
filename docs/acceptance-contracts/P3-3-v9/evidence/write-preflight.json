@@ -1,0 +1,30 @@
+{
+  "root": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "realroot": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "writeTargets": [
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\evidence",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8.contract.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\ota-exec-notes\\P3-3-v8-acceptance-2026-09-15.md",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\home",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\tmp",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\localappdata",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\appdata",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\xdg-cache",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\xdg-config",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\gh",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\downloads",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\pycache",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\pip-cache",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\android",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\artifacts",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\evidence\\commands",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\evidence\\external",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\evidence\\toy",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\evidence\\real",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\evidence\\dev-checks"
+  ],
+  "runtime": "cmd.exe + Node wrappers; project-local HOME/TEMP/caches; no PowerShell",
+  "timestamp": "2026-09-15T06:28:20.015Z"
+}

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "C:\\Program Files\\GitHub CLI\\gh.exe",
+    "api",
+    "repos/Eitan-S-23/E-Track/actions/runs/34922411533/artifacts"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T06:33:15.612Z",
+  "ended_at": "2026-09-15T06:33:17.180Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "{\"total_count\":3,\"artifacts\":[{\"id\":10378708222,\"node_id\":\"MDg6QXJ0aWZhY3QxMDM3ODcwODIyMg==\",\"name\":\"flutter-dev-debug-apk-253f15371f2a0aeef0e7c5feb10af3118494c9e1-34922411533-1\",\"size_in_bytes\":75244247,\"url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10378708222\",\"archive_download_url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10378708222/zip\",\"expired\":false,\"digest\":\"sha256:4b39707249b6e7aac9ec5e3595ee6ae8117224aaaaf945eda8e989e4573ed0a4\",\"created_at\":\"2026-09-15T02:57:46Z\",\"updated_at\":\"2026-09-15T02:57:46Z\",\"expires_at\":\"2026-09-29T02:57:41Z\",\"workflow_run\":{\"id\":34922411533,\"repository_id\":1310649784,\"head_repository_id\":1310649784,\"head_branch\":\"dev/flutter/apk/p3-3-admission\",\"head_sha\":\"253f15371f2a0aeef0e7c5feb10af3118494c9e1\"}},{\"id\":10378539077,\"node_id\":\"MDg6QXJ0aWZhY3QxMDM3ODUzOTA3Nw==\",\"name\":\"flutter-dev-ubuntu-latest-34922411533-1\",\"size_in_bytes\":33878,\"url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10378539077\",\"archive_download_url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10378539077/zip\",\"expired\":false,\"digest\":\"sha256:8bed3c68376ae6285259b71a7c6936b4906091126aaa38eb84fc2a70b95b7d7a\",\"created_at\":\"2026-09-15T02:57:41Z\",\"updated_at\":\"2026-09-15T02:57:41Z\",\"expires_at\":\"2026-09-29T02:57:40Z\",\"workflow_run\":{\"id\":34922411533,\"repository_id\":1310649784,\"head_repository_id\":1310649784,\"head_branch\":\"dev/flutter/apk/p3-3-admission\",\"head_sha\":\"253f15371f2a0aeef0e7c5feb10af3118494c9e1\"}},{\"id\":10378078598,\"node_id\":\"MDg6QXJ0aWZhY3QxMDM3ODA3ODU5OA==\",\"name\":\"flutter-dev-windows-2022-34922411533-1\",\"size_in_bytes\":25501,\"url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10378078598\",\"archive_download_url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10378078598/zip\",\"expired\":false,\"digest\":\"sha256:28a7e9a23ba69606207737a8b1ac2136152876ca4311108277328ad85a5ff5a3\",\"created_at\":\"2026-09-15T02:49:26Z\",\"updated_at\":\"2026-09-15T02:49:26Z\",\"expires_at\":\"2026-09-29T02:49:25Z\",\"workflow_run\":{\"id\":34922411533,\"repository_id\":1310649784,\"head_repository_id\":1310649784,\"head_branch\":\"dev/flutter/apk/p3-3-admission\",\"head_sha\":\"253f15371f2a0aeef0e7c5feb10af3118494c9e1\"}}]}",
+  "stderr": "",
+  "error": null
+}

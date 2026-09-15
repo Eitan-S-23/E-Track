@@ -1,0 +1,9 @@
+{
+  "id": "CMD-INSTALLED-HASH",
+  "command": "D:/install/Git/usr/bin/sha256sum.exe docs/acceptance-contracts/P3-3-v9/artifacts/ble-monitor-android.apk docs/acceptance-contracts/P3-3-v9/artifacts/installed-base.apk",
+  "shell_wrapper": null,
+  "started_at": "2026-09-15T08:57:51.160Z",
+  "ended_at": "2026-09-15T08:57:52.141Z",
+  "exit_code": 0,
+  "output": "85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9 *docs/acceptance-contracts/P3-3-v9/artifacts/ble-monitor-android.apk\n85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9 *docs/acceptance-contracts/P3-3-v9/artifacts/installed-base.apk\n"
+}

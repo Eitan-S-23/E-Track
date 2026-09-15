@@ -1,75 +1,255 @@
 {
- "schema": "etrack-evidence-matrix-v2",
- "contract_id": "P3-3-v7",
- "contract_sha256": "38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B",
- "round_id": "P3-3-V7-FREEZE-20260915-R1",
- "overall_result": "NOT_RUN",
- "previous_matrix_sha256": null,
- "rerun_plan_path": null,
- "rerun_plan_sha256": null,
- "criteria": [
-  {
-   "id": "C-DEV-CHECKS",
-   "result": "NOT_OBSERVED",
-   "failure_owner": null,
-   "execution": "EXECUTED",
-   "reused_from_round": null,
-   "origin_contract_sha256": null,
-   "origin_matrix_sha256": null,
-   "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：五条命令已改只读核验口径（gh run view 既有 run 34861159023/34869549756，零 dispatch）；原始日志归档进 ART-DEV-LOGS（文件型 dev-checks-runs.json）。v6 轮（P3-3-V6-FREEZE-20260915-R1）EVIDENCE_GAP 之既有复核成果由本轮命令重新如实登记。"
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v7",
+  "contract_sha256": "38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B",
+  "round_id": "P3-3-V7-FREEZE-20260915-R1",
+  "overall_result": "EVIDENCE_GAP",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/acceptance-20260915/CMD-DEV-CHECKS.json",
+        "evidence/dev-checks/dev-checks-runs.json",
+        "evidence/acceptance-20260915/dev-log-artifacts.json",
+        "evidence/acceptance-20260915/inspection-summary.json",
+        "evidence/acceptance-20260915/dev-34861159023.json",
+        "evidence/acceptance-20260915/dev-34869549756.json"
+      ],
+      "notes": "独立执行冻结只读命令，退出码 0。两轮均为指定提交的 push run，四个宿主 job success。四份原始 analyze 日志均 No issues found，Windows 每轮 331 passed；Ubuntu 每轮 324 passed + 7 个 Windows 专属用例按预期 skip，对应 Windows 均执行。scope=all，无 continue-on-error；工具链再生差异已由冻结 runner 绑定有效字节，复核后无语义脏文件。不是以 development_result 字段或 job success 单独推定 PASS。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/acceptance-20260915/CMD-RELEASE-BUILD.json",
+        "evidence/acceptance-20260915/release-run.json",
+        "evidence/acceptance-20260915/release-run.log",
+        "evidence/acceptance-20260915/release-artifacts.json",
+        "evidence/acceptance-20260915/release-aapt.log",
+        "evidence/acceptance-20260915/release-archive-inspection.json",
+        "evidence/acceptance-20260915/copy-manifest.json",
+        "evidence/acceptance-20260915/inspection-summary.json"
+      ],
+      "notes": "独立执行冻结只读命令，退出码 0。run 34864052541 的 Android/Windows release 构建 success，Pages/Release skipped；head=ce30190 为 freeze_commit 0fb167c 直接父提交，App 构建输入无差异。原 Android artifact ZIP SHA 与 GitHub digest 全等，内层 APK 46699144B/SHA fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13；aapt 包名 com.wen.gaia.gaia.p33acceptance，86/1.0.60；apksigner 通过，证书 SHA-256 f6c0f2247c5054fd5b9e0c2792db8edb8bf694776b9a29cb5b83cace30cdf44d。Windows 完整运行 ZIP 20353729B/SHA a354f7354ee379433940fc0e6e851735a8c8306bbc6e1ecd965f84b10e332312，26 entries、CRC 正常，含 EXE/Flutter DLL/插件/data；未启动 Windows GUI。原构建日志有 24 条按已声明规则计数的 warning/deprecation 行，不隐瞒为零告警，不扩为本合同外门禁。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "evidence/acceptance-20260915/phone-preflight.json",
+        "evidence/acceptance-20260915/runtime-preflight.json",
+        "evidence/acceptance-20260915/CMD-RELEASE-BUILD.json"
+      ],
+      "notes": "本轮判据分类 ENV_BLOCKED（手机前置条件不满足）。既有 adb 1.0.41 已定位、路径 CR 处理离线检查正确；ADB 服务只读 host:devices-l 两次均无 10ADA4197U001CK，第二次其他 transport 也为 0。已请求用户接回 USB，但未获得设备接入。未重启 server、未运行冻结 CMD-APK-INSTALL、未执行手机 shell/pull、未使用旧第五轮在装回件冒充 r6。本地 r6 签名已核验，在装侧证书仍未观察；按 schema 用 NOT_OBSERVED 记录未启动的产品命令，不伪造命令退出码。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "FAIL",
+      "failure_owner": "evidence",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "evidence/acceptance-20260915/CMD-TOY-LOOP.json",
+        "evidence/acceptance-20260915/service-v5-20260914.log",
+        "evidence/acceptance-20260915/o-verify-boot-rtt.log",
+        "evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md",
+        "evidence/acceptance-20260915/loop-inference-source.json",
+        "evidence/acceptance-20260915/copy-manifest.json",
+        "evidence/external/toy-bootable-asset.md"
+      ],
+      "notes": "独立执行冻结离线审查命令，退出码 0；单轮判据为 EVIDENCE_GAP，不是 PRODUCT_FAIL。toy 目标镜像 raw SHA aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298/603764B 与冻结值一致；原始 latest 21:40:15.699/23.420/28.439 为 30201+完整 SHA，RTT 两条 CONFIRMED 30201。代码演进范围论证成立，但完整六状态推导不充分：冻结 ota_ble_session.c:79 忽略 send 返回值，:700 发送尝试后 :711/:720 仍可激活/复位；新镜像运行不蕴含手机收到 ACK_END。ota_service.dart:303/:340/:343 支持独立重新读取身份再 latest，故终点查询也不能独自证明来自原升级会话成功复核。原 toy App/BLE 日志缺失未补齐。此为静态非排他反例，不是本轮观测到丢包；observed=null 表示没有可如实填入的完整六状态，不预填 gate.expected。未回退、未重跑。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "FAIL",
+      "failure_owner": "evidence",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "evidence/acceptance-20260915/CMD-REAL-LOOP.json",
+        "evidence/acceptance-20260915/service-v6-20260914.log",
+        "evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md",
+        "evidence/acceptance-20260915/loop-inference-source.json",
+        "evidence/acceptance-20260915/copy-manifest.json",
+        "evidence/external/real-etu-asset.md",
+        "evidence/external/http-test-service.md"
+      ],
+      "notes": "独立执行冻结离线审查命令，退出码 0；单轮判据为 EVIDENCE_GAP，不是 PRODUCT_FAIL。G02 已修：fingerprint、证据、ETU 284608B/a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915 和 raw 镜像 603764B/3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3 一致。00:06:05.449/08.608、00:07:22.431 三条 latest 与 30203+完整 SHA 全等，但与 C-TOY 相同，设备新版本不能排他推出手机 ACK_END 及原升级会话的完整六状态；只改为“代码推导”尚未补足证明。用户实测成功反馈保留，不否定其事实；没有新实机/网络服务操作，observed=null 不伪造状态链。"
+    }
+  ],
+  "evidence_hashes": {
+    "evidence/acceptance-20260915/CMD-DEV-CHECKS.json": "FC42AF0E53B02182B03859C0CBA76A1A1CDF306E106C9A089E11A8B79B44C8B0",
+    "evidence/acceptance-20260915/CMD-REAL-LOOP.json": "A67962A15331D485985CAC61D0FD76CB4941D4B603AECB280CB4A9277BE510B0",
+    "evidence/acceptance-20260915/CMD-RELEASE-BUILD.json": "A86AE8590CF19180845E49533C1F027F324A942251C39AC51DEE4D361C4B760E",
+    "evidence/acceptance-20260915/CMD-TOY-LOOP.json": "DB327014B0A0B474596BB6A2DF190F224598CC5011B6948E4EBE44B0FE9EE736",
+    "evidence/acceptance-20260915/copy-manifest.json": "C9148895CA49F8C996E07BAC786FFFE6D1E5CEA3F5256C83476F92607672F602",
+    "evidence/acceptance-20260915/dev-34861159023.json": "2E452AFD2B0B3730E5762C9A7EC25FD5ECDF8C7A71B5E65CB4F489DA7F174232",
+    "evidence/acceptance-20260915/dev-34861159023.log": "03BA1FC49834BB323182AA73018836DEF5C21BA4281BF4AEB94A116BEF44F184",
+    "evidence/acceptance-20260915/dev-34869549756.json": "7154F9FA83A889E4B30BCBEF81C602F6B297CCE33C3787186890ADB903372215",
+    "evidence/acceptance-20260915/dev-34869549756.log": "C70B4CBFBE3B278EF5A8756E9FE96B144DB7C0C8B190A608D59A3E7255C707C0",
+    "evidence/acceptance-20260915/dev-log-artifacts.json": "71B1266BFF36388F0B174D455F8B531B96FA7DC5A463F0B5DC9BDCEDA5B46155",
+    "evidence/acceptance-20260915/entry-matrix.json": "0AE4ABA9ADF63AB3386F807C100D4796E11DB9CA8B61EF9EBCA776C502D07F1B",
+    "evidence/acceptance-20260915/entry-review.json": "D50262D70DF795765EFB8A5577C1D117F74D454DD2A67E3BCF0BCF49A973F1F0",
+    "evidence/acceptance-20260915/execution-plan-command.json": "098DE1714E619DD8550F82A52C37ECB615B4A923AB96CC9825D8224C5197B557",
+    "evidence/acceptance-20260915/initial-validation.json": "2900CB9AEF45BF9A2FACC37B83CE8F1B1C92576712DC3C5B02F85FCE0E118025",
+    "evidence/acceptance-20260915/inspection-summary.json": "BDCEDE329801D005DBFF27CE8B770804634556D83B0B290CB944A76C2BB7B732",
+    "evidence/acceptance-20260915/loop-inference-source.json": "F4DBE81772E6872DEE6C679068030FCFC80FB2975F56983F7A1D91A6D9F79C1F",
+    "evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md": "FC0D5B9972FC034CE403CB701A1F7BB32B203C86BBB7F3C5881BF743E399DE91",
+    "evidence/acceptance-20260915/o-verify-boot-rtt.log": "8D40136F336B16537C1BB34C63990C8E15A7A7D1A8DF1779C4667407F0384F56",
+    "evidence/acceptance-20260915/phone-preflight.json": "7427B31244AABC25118DDF4574B0D95F535205A165AB50BB510961D5BD57D3D8",
+    "evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md": "2B336CCC2B4889EB6CC7FE244473D84C5FFD3E67BFBBA685EA0BC11F4B0D8032",
+    "evidence/acceptance-20260915/release-aapt.log": "6CE549DCFBA71A4968127E8B92CB831E0A5A549BC4BD4AEA61CB1F5D8E55965D",
+    "evidence/acceptance-20260915/release-archive-inspection.json": "2F500D97FF1881C456D4264C4A7F4047ED5EDD8E3C0599A6449C0DFE58F4E679",
+    "evidence/acceptance-20260915/release-artifacts.json": "DD7ED7517EE5FAA32006D339C1B15987AC4EF372C99CD3BF6599A90D1D454D35",
+    "evidence/acceptance-20260915/release-run.json": "DFF091EEC7475D403ABC39FF4B3CA6DB1D2628BA84EC70430A48C1EEB181B4B8",
+    "evidence/acceptance-20260915/release-run.log": "7C2A8114431BDE374A97D7CCED1315120B84EA44B8E3C9A879F7455A22A3A772",
+    "evidence/acceptance-20260915/runtime-preflight.json": "6401DB61C5763B716F708E4772E1D70CE0608A22674BD9581E746B7866144CD3",
+    "evidence/acceptance-20260915/service-v5-20260914.log": "1F6D2F7E056C286432FB099FF71B887CDAB6B2425A8715691ADAA8043AAA29B5",
+    "evidence/acceptance-20260915/service-v6-20260914.log": "D03EF586995ACCCF4F8E1F4F4081673C31F08C2CB43D274EA1A7999867CBC5CD",
+    "evidence/acceptance-20260915/write-preflight.json": "7C62226852F81390FDB1E6DA59A5612FF655CD12C9D7CA693736744EFB9D6D37",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/analyze.log": "D3287B9741A17447F1F47F9FA28AE7CF8215F7ADB3A18B16FD6503412E534BF2",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_build.log": "D36CF812F5FD29E0CC673A8A5734C66D5B1217F4FEACE5B755E104824F1FB11D",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_collect.log": "7410AD5C1D4D0A921794836A60688E607E6C8C939C04460AD3647AE641FFDDAD",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_install_wrapper.log": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_java.log": "26AA92B5A3F43BBB0AE61C886FCC8719433F5193174F5E9137A99EADE9027278",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_prepare.log": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_sdk.log": "892D151C947D1974A01464265800D25876052BE6E787D707FA6AC206805CDDD5",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_verify.log": "D668EFA5297AC95B72C8C44FADE5CD67AC1EAB11237E33B3E8BEE06F1B3142F3",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_wrapper.log": "6816A2E00D142ADCA7D8A81FE1202C75D5A9C85D430BE56AC5A00DFEAB2DD843",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/dependencies.log": "F8FE9BC10DD99D96CEAD03C12E5E2444D77FAFCDE5ABBB6C547AC0E12811DD76",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/sdk_checkout.log": "B9676FAEAB8CE88480F2AE15D4844272D7FDEC36ED2CBCEBDC85635F811B3150",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/sdk_version.log": "39D38BE1417266502AAB4AE24D75EA8FB7D1B0F2A59FED8A0B31A04A1F8D5995",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/tests.log": "8629BD812F929C84A49572290DDDF608E6CD880740DDE3DE452492CB343576AD",
+    "evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/result.json": "40E8956D00BEB5E1552903A2AA572CC0E96DB826EEDAA06ECF673E02DBFD6B91",
+    "evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/analyze.log": "BB5659C304BB8ADB54DAC66D871C83EE59C86C1A30ED53F41C37D57D481AC5DF",
+    "evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/dependencies.log": "70C29446C69A754BB0143FB3F58CFF60B171DBD5FB1F4470E55CFF183A4CA724",
+    "evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/sdk_checkout.log": "E299C37A019461ABA18D484A09FA518E135BE363CF58A6F38288F49EB0246550",
+    "evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/sdk_version.log": "DFA9D8565F990DBDA57D78D0B0C94666FEBA87A683F3380FBFFF5FCE99FE0E87",
+    "evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/tests.log": "F793698861E64DA0CEBC9A953748B89A809F9475BF11B703FC3B3BC5A6FDB71B",
+    "evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/result.json": "7ED1400567EF8FE45050750B70198BD0F3A47E5123208B0830BFB9617EB48A90",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/analyze.log": "1ACEC092634F61EE38DC51D8FC5FE5943909423A425AF5D175F4D83E3BC7486B",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_build.log": "C1D96949B793373CDA5B205F8DE50C983BCD7D26C7156E2D1F10A6D131A9C9AB",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_collect.log": "E69BC4DC9DDC0881C8886A1948D1BC027F5D19A10735053881FF70334F3276CD",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_install_wrapper.log": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_java.log": "085165AD33E3A94CAB8E57B1BC323775A8F5A4093D955C9719ECB4ECD3BEC65C",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_prepare.log": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_sdk.log": "02C4CC542C2EBE11A5ED655C49FA95A3E9C6E3DCF7241BD0FB9C797B71764A67",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_verify.log": "08F35145935B7F51B7EE904CDD1DDC4423B561465D67C42BEA25F89C2B1291F7",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_wrapper.log": "736CA0C0630BC39168C344982B800D5066CED3F1511BD0F62690004A16DD4AA9",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/dependencies.log": "D252DFEF788EAF5212CB085B5436649AAC174AD982A8481DB5C191D4041CA9E2",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/sdk_checkout.log": "89928EC171D00440D2169707FEC0BF8414F5B700BEC91494B725C23AE9C54C13",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/sdk_version.log": "ABBDDDFA61FF0DA5AB85DE4BB9CF749CF81605CFFC9281C246C5B30CAEB11186",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/tests.log": "DFAFF4FF7A4D43558D97262C9E089D428753018805D5377731140AA714E2360B",
+    "evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/result.json": "EE92DA07B74AB013463020896F27A3AC8761C6B4F7E97598659E78A6ABB36CB8",
+    "evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/analyze.log": "783035BD9B801FCD2B168882FE22BABC7B3FEEF1036324AD86D692040F3BBEBC",
+    "evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/dependencies.log": "D5778A0DD88B9F27AFD4C72E28DEA6C9473F7364CFB12E90CCB4DB75420ACCF0",
+    "evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/sdk_checkout.log": "ED49E33C7DC828174E75FB49CFF237A1D2460D8F6CA72639C1878BFAB9369635",
+    "evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/sdk_version.log": "A957FE728B57353A76DB7F4A3FF615D9608569AAF67820D66CBC390C49A23E64",
+    "evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/tests.log": "0BF790D36D63A32015C3C12157BBE90A5F4CA6CCAA9A8EC06A567F779307B696",
+    "evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/result.json": "828E800D3246F840CD0B53D9B195AE4C699B4E836EF3916904B614AA3D25E9CC",
+    "evidence/dev-checks/dev-checks-runs.json": "A2E8AFECE2A6050C3D7938D3D18CDFFF2121C248D27440AB9138D808D8594C4A",
+    "evidence/external/board-bcb-state.md": "3A71B529C62AED464E505F2A4B82ACDC1CA067A51996D7FDBF42EC44A73588E2",
+    "evidence/external/http-test-service.md": "4C649077F182E541661F866B974768463FFFFE5F3B7D6E0CBE4424A48261ED78",
+    "evidence/external/real-etu-asset.md": "691AFEE485CEF2BEA1858E8B12356EC16B221C15C4999E1DFD42F82964ED8F15",
+    "evidence/external/toy-bootable-asset.md": "57F72DE73D6EAB2D0A1BFC816157461EE0DD0796AE8278169735B63B316AF6DB",
+    "rerun-plan.json": "CC1207FBAD8C46B9094F28362FEA5199494822694D59C710B23F762A4735DF3E"
   },
-  {
-   "id": "C-RELEASE-BUILD",
-   "result": "NOT_OBSERVED",
-   "failure_owner": null,
-   "execution": "EXECUTED",
-   "reused_from_round": null,
-   "origin_contract_sha256": null,
-   "origin_matrix_sha256": null,
-   "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：只读核验 run 34864052541+artifact 清单+Windows 完整运行包按名 windows-exe 下载核验+本地 APK 实物（fb6a91e6…/46,699,144B）+受验侧证书实测（第六轮证书值尚未实测过，由本轮补全）。"
-  },
-  {
-   "id": "C-APK-INSTALL",
-   "result": "NOT_OBSERVED",
-   "failure_owner": null,
-   "execution": "EXECUTED",
-   "reused_from_round": null,
-   "origin_contract_sha256": null,
-   "origin_matrix_sha256": null,
-   "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：补全 v6 轮未完成的在装受验包 dumpsys/pull/双侧 apksigner 比对（受验侧基准=第六轮 APK 实物）+生产包只读确认；零安装零卸载零清数据；手机未连接判 ENV_BLOCKED。"
-  },
-  {
-   "id": "C-TOY-LOOP",
-   "result": "NOT_OBSERVED",
-   "failure_owner": null,
-   "execution": "EXECUTED",
-   "reused_from_round": null,
-   "origin_contract_sha256": null,
-   "origin_matrix_sha256": null,
-   "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：离线证据审查入口（service-v5 日志/o-verify RTT 留档/toy 镜像实物哈希/git diff 代码演进）；六状态推导链含 toy 轮 App logcat 滚动丢失与 BLE 层无独立原始日志的缺口，如实判定，不预设 PASS。"
-  },
-  {
-   "id": "C-REAL-LOOP",
-   "result": "NOT_OBSERVED",
-   "failure_owner": null,
-   "execution": "EXECUTED",
-   "reused_from_round": null,
-   "origin_contract_sha256": null,
-   "origin_matrix_sha256": null,
-   "observed": null,
-   "evidence": [],
-   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：离线证据审查入口（service-v6 日志完整时间线含 23:43 首次未闭环尝试/real 目标镜像实物哈希/git diff app/ 零差异）；BLE durable/ACK_END 无 App 端独立原始日志的缺口如实登记，由验收会话裁定推导是否充分。"
-  }
- ],
- "evidence_hashes": {},
- "commands": [],
- "artifacts": []
+  "commands": [
+    {
+      "id": "CMD-DEV-CHECKS",
+      "command": "gh run view 34861159023 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh run view 34869549756 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\"",
+      "exit_code": 0,
+      "output_evidence": "evidence/acceptance-20260915/CMD-DEV-CHECKS.json"
+    },
+    {
+      "id": "CMD-RELEASE-BUILD",
+      "command": "gh run view 34864052541 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh api repos/Eitan-S-23/E-Track/actions/runs/34864052541/artifacts --jq \".artifacts[]|{name:.name,size:.size_in_bytes,id:.id}\" && gh run download 34864052541 -n windows-exe -D .cache/p3-3-v7-win && sha256sum .cache/p3-3-apk-r6/ble-monitor-android.apk && wc -c < .cache/p3-3-apk-r6/ble-monitor-android.apk && java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs .cache/p3-3-apk-r6/ble-monitor-android.apk",
+      "exit_code": 0,
+      "output_evidence": "evidence/acceptance-20260915/CMD-RELEASE-BUILD.json"
+    },
+    {
+      "id": "CMD-TOY-LOOP",
+      "command": "grep -nE \"asset-full-30201|currentVersionCode=30201\" .cache/p3-3-v2-service/service-v5-20260914.log | head -8 && grep -n \"BCB already CONFIRMED vcode=30201\" .cache/p3-3-o-verify/o-verify-boot-rtt.log && sha256sum .cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin && wc -c < .cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin && git diff 6415226 0fb167c --stat -- app/",
+      "exit_code": 0,
+      "output_evidence": "evidence/acceptance-20260915/CMD-TOY-LOOP.json"
+    },
+    {
+      "id": "CMD-REAL-LOOP",
+      "command": "grep -nE \"asset-full-30203|currentVersionCode=30203\" .cache/p3-3-v2-service/service-v6-20260914.log | head -8 && sha256sum .cache/p3-3-assets-v6/real-3.2.3-30203-final.bin && wc -c < .cache/p3-3-assets-v6/real-3.2.3-30203-final.bin && git diff ce30190 0fb167c -- app/ | wc -l",
+      "exit_code": 0,
+      "output_evidence": "evidence/acceptance-20260915/CMD-REAL-LOOP.json"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-DEV-LOGS",
+      "path": "evidence/dev-checks/dev-checks-runs.json",
+      "size": 22047,
+      "sha256": "A2E8AFECE2A6050C3D7938D3D18CDFFF2121C248D27440AB9138D808D8594C4A"
+    },
+    {
+      "id": "ART-APK-RELEASE",
+      "path": "artifacts/ble-monitor-android.apk",
+      "size": 46699144,
+      "sha256": "FB6A91E69A0AD30DC0B9C79A69C5E638D376898D6E313836191F2B40EBF80A13"
+    },
+    {
+      "id": "ART-WINDOWS-RUNTIME",
+      "path": "artifacts/ble-monitor-windows.zip",
+      "size": 20353729,
+      "sha256": "A354F7354EE379433940FC0E6E851735A8C8306BBC6E1ECD965F84B10E332312"
+    },
+    {
+      "id": "ART-TOY-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.1-full.etu",
+      "size": 284540,
+      "sha256": "0219899DD993F61F2C75EAEC7002BC9C24E0FC629A60E87046E74266D55410C5"
+    },
+    {
+      "id": "ART-TOY-TARGET-IMAGE",
+      "path": "artifacts/toy-3.2.1-target-image.bin",
+      "size": 603764,
+      "sha256": "AEAFC96E77D372AEA1E893A979F2368BA9176C4999A61090CEB2956CD4085298"
+    },
+    {
+      "id": "ART-REAL-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.3-full.etu",
+      "size": 284608,
+      "sha256": "A543F952DCD1B0F57770669E253B29E9A93B7FFB94263BC7BDC3B1BDF4EF1915"
+    },
+    {
+      "id": "ART-REAL-TARGET-IMAGE",
+      "path": "artifacts/real-3.2.3-target-image.bin",
+      "size": 603764,
+      "sha256": "3A2827683CBD2B557DD5D441927D1A490B3B28FE11F8D7A4B4B5C86A594144A3"
+    }
+  ]
 }

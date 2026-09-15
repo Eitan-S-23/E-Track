@@ -1,0 +1,124 @@
+{
+  "schema": "p3-3-v8-external-identities-v1",
+  "task_id": "P3-3",
+  "approval": {
+    "source": "2026-09-15 本线程：用户提交补测完成移交并明确要求「请验收」。本轮由 Codex 独立验收会话办理 v8 输入绑定及只读复核；不是实现自验收。",
+    "scope": "保留原五判据与六状态门禁；更新补测真实身份；零新升级、零 J-Link、零安装、零部署、零 CI 派发。git 提交、push、索引登记及合并另待用户确认。",
+    "effective_at": "2026-09-15T14:32:10+08:00",
+    "not_retroactive": "v8 冻结用于本轮独立离线证据审查及手机只读核验，不声称此前两轮补测在 v8 FROZEN 后执行。补测执行依据为用户批准的 P3-3-evidence-recovery-2026-09-15.md §4 操作单。"
+  },
+  "predecessor": {
+    "contract": "P3-3-v7",
+    "contract_sha256": "38279b9fc9f2ebb7e6c18831ff4d8a0ddd719bed1ebdf4cafb637fe68d721b9b",
+    "matrix_sha256": "646613539c4905a89948e91803251e69066ca1528bca830d1938b303649c2eca",
+    "report_sha256": "1963f9862713bf1bcf50598f4be6f594901258164afc003151454d2bbebfda40",
+    "result": "EVIDENCE_GAP",
+    "preserved": true
+  },
+  "source": {
+    "freeze_commit": "ceaf8d2b7bb8e78968462af51a57ff1250731b61",
+    "freeze_tree": "4fd600a48a25654fe82db3cb6fd6f6338392bc48",
+    "profile_config_blob": "3769369d053aad028b67d7e2c17b5827b2b96f55",
+    "app_build_commit": "253f15371f2a0aeef0e7c5feb10af3118494c9e1",
+    "relation": "ceaf8d2 的父提交为 253f153；后者只增加两处 App 观测打点和对应测试。ceaf8d2 新增服务 fixture 配置及交付证据，App/工作流/开发 runner 与 CI 构建提交相同。"
+  },
+  "ci": {
+    "development_run": 34922411533,
+    "release_run": 34923921739,
+    "repository": "Eitan-S-23/E-Track",
+    "dispatch_authorization": "补测操作单 A1：一次 build-only，publish_release=false，replace_existing_release=false；本轮只读现有 run，不新增 CI。"
+  },
+  "apk": {
+    "path": ".cache/p3-3-apk-r7/ble-monitor-android.apk",
+    "size": 46699140,
+    "sha256": "85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9",
+    "package_name": "com.wen.gaia.gaia.p33verify",
+    "version_code": 86,
+    "version_name": "1.0.60",
+    "certificate_sha256": "6f51a6a64e21b50b0d7cace2fdf0ca4b978fbdff1814d7bbab90fad08832e658",
+    "endpoint": "https://checkout-sheep-full-evening.trycloudflare.com/api/public/firmware/latest",
+    "signing_scope": "release 模式、CI debug 证书，限功能验收，不作为生产签名资格。"
+  },
+  "firmware_source": {
+    "path": ".cache/bg/app-gcc/X-Track-App-GCC.bin",
+    "size": 603764,
+    "sha256": "4b16048f5970c9cef924690a62031e232cd1d2fb8c1b8af85c18993cfdf830ec",
+    "build_commit": "1894f9d",
+    "identity_rule": "GCC 同源功能本体；两新镜像分别 finalize，差异仅 0x400..0x45f 共 96B fw_header 区。golden vectors 未用作上板资产。"
+  },
+  "toy": {
+    "start_version": 30203,
+    "start_raw_sha256": "3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3",
+    "target_version": 30204,
+    "target_version_name": "3.2.4",
+    "target_image_size": 603764,
+    "target_raw_sha256": "43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13",
+    "fw_header_double_zero_sha256": "a30d8802e69efe4ec729ac045bde3f614ee88ac23d49028a19c2a505946dd88b",
+    "etu_file": "e-track-at32f435-v3.2.4-full.etu",
+    "etu_sha256": "81a773363711adff31cd788217ba18445b462e675042682bdd22302123f0228b",
+    "etu_size": 284581,
+    "fixture": "toy-30204",
+    "app_pid": 24733,
+    "execution_window": "2026-09-15 11:37:36.512 +08:00 至 11:43:25.529 +08:00",
+    "full_log_size": 32087068,
+    "full_log_sha256": "d31d49688d5e2176305da7f6579f8fa3836fe4b95b6fec7eb7656fa7146d6c00"
+  },
+  "real": {
+    "start_version": 30204,
+    "start_raw_sha256": "43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13",
+    "target_version": 30205,
+    "target_version_name": "3.2.5",
+    "target_image_size": 603764,
+    "target_raw_sha256": "ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4",
+    "fw_header_double_zero_sha256": "5bb216a64dfab6a4bc317598811372a351ab292e1ddb018b54a9646e8e9340da",
+    "etu_file": "e-track-at32f435-v3.2.5-full.etu",
+    "etu_sha256": "32577aa5d0d98cab071440b455151bcc536f33a9a9d930e832f8bb140a607d77",
+    "etu_size": 284590,
+    "fixture": "real-30205",
+    "app_pid": 24733,
+    "execution_window": "2026-09-15 13:41:13.459 +08:00 至 13:46:32.251 +08:00",
+    "full_log_size": 17964197,
+    "full_log_sha256": "6a8d7d5f8c118e4a52df99ef3317a7a7cb771226ec8c6a9fcff78359625a507b"
+  },
+  "service": {
+    "version": 2,
+    "endpoint": "https://checkout-sheep-full-evening.trycloudflare.com",
+    "listen": "127.0.0.1:8443",
+    "cloudflared_pid": 20712,
+    "toy_pid": 23232,
+    "real_pid": 24332,
+    "source_hashes": {
+      "Tools/ota/p3-3-service/service.py": "f71012de119811863d2274fd674a702c69a512f18ea73e3188be2233130ba009",
+      "Tools/ota/p3-3-service/service_config.json": "5c2fe64f3ab9541e58b622e50f2a96d407271767f58452bb00c6a7aa204e9556",
+      "Tools/ota/p3-3-service/selftest.py": "b96d4e2f05c84c3401c1dff14ee9c0f6e5dc7ee0a076e272180d2f4d4aa202b4",
+      "Tools/ota/p3-3-service/tls_hostcheck.py": "f9202b6b47f50526e75710fd2b8048e87b24bb94ab07f82b88716a761821da6c"
+    },
+    "scope": "Quick Tunnel 公网 TLS 到本机受控服务；原始服务日志留档。本轮不得重启服务/隧道、不使用 Cloudflare 账号，不代表 P4-2 后台通过。"
+  },
+  "board": {
+    "hardware": "e-track-at32f435",
+    "hardware_revision": 1,
+    "layout_id": 1,
+    "boot_version": 1,
+    "protocol_version": 1,
+    "historical_start": "30203，生产 Boot 原样；历史恢复证据保存在 v7 及原始 r2 恢复轮。",
+    "supplemental_sequence": [
+      30203,
+      30204,
+      30205
+    ],
+    "final_evidence": "real RTT 含 BLEACT reset 及 TEST_BOOT confirmed vcode=30205；App 原升级调用完成新连接目标版本及 raw SHA 比对。不是本轮新读 BCB/Flash。",
+    "read_boundary": "本轮不连 J-Link、不读写 BCB/App 区、不复位，不追加升级。"
+  },
+  "corrections": [
+    "原离线资产报告把 fw_header 双零摘要写为 8a823a70... 且 real 写「同左」不符实物。本文件记录头内存储值及独立复算一致值，不篡改旧报告。",
+    "MONO_END_ACK_OK 是实际 END 应答已解析的打点，但不是所有非 OK 状态均在其前返回；必须连同同会话后续 MONO_REBOOT_VERIFIED 及 service 的 ack.isOk 拦截路径采信，不能仅凭名称认定 OK。",
+    "real 原件截图实际为「固件升级完成 / vcode 30205」及「设备身份已确认 / 固件 v3.2.5」，未显示交付表所称的 3.2.4→3.2.5 或 5分11秒。耗时只按原始日志计算。"
+  ],
+  "out_of_scope": [
+    "BLE 提速",
+    "后台/锁屏 OTA 和常驻通知",
+    "P4-2 发布后台",
+    "生产发布签名资格"
+  ]
+}

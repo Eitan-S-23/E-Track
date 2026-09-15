@@ -1,0 +1,3 @@
+unpack(full) OK: .cache/p3-3-v8-acceptance/real-unpacked.bin
+  candidate_len=603764 target_vcode=30205
+  image_sha256=ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4

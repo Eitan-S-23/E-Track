@@ -1,0 +1,12 @@
+{
+  "id": "CMD-SOURCE-EQUIVALENCE",
+  "command": "git diff 253f15371f2a0aeef0e7c5feb10af3118494c9e1 ceaf8d2b7bb8e78968462af51a57ff1250731b61 -- app/ .github/workflows/build.yml .github/workflows/flutter-dev-checks.yml .github/scripts/ Tools/flutter/",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:09:51.228Z",
+  "ended_at": "2026-09-15T07:09:51.652Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": ""
+}

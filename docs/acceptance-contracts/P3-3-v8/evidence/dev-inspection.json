@@ -1,0 +1,309 @@
+[
+  {
+    "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "run": "https://github.com/Eitan-S-23/E-Track/actions/runs/34922411533",
+    "head": "253f15371f2a0aeef0e7c5feb10af3118494c9e1",
+    "scope": "all",
+    "lockfile_unchanged": true,
+    "source_after_restored": {
+      "head": "253f15371f2a0aeef0e7c5feb10af3118494c9e1",
+      "clean": true,
+      "status": "",
+      "dirty_semantic": [],
+      "dirty_semantic_sha": {},
+      "dirty_eol_only": [],
+      "dirty_untracked": []
+    },
+    "source_deltas_bound_toolchain_regen": true,
+    "analyze": "Analyzing bluetooth_flutter_Trace...                            \nNo issues found! (ran in 15.1s)",
+    "test_final": [
+      "01:35 +324 ~7: All tests passed!"
+    ],
+    "commands": [
+      {
+        "name": "sdk_checkout",
+        "argv": [
+          "git",
+          "clone",
+          "--config",
+          "core.longpaths=true",
+          "--depth",
+          "1",
+          "--branch",
+          "stable",
+          "https://github.com/flutter/flutter.git",
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/sdk"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "sdk_version",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/sdk/bin/flutter",
+          "--version",
+          "--machine"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "dependencies",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/sdk/bin/flutter",
+          "pub",
+          "get",
+          "--enforce-lockfile"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "analyze",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/sdk/bin/flutter",
+          "analyze",
+          "--no-pub"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "tests",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/sdk/bin/flutter",
+          "test",
+          "--no-pub",
+          "--reporter",
+          "expanded",
+          "--timeout",
+          "2m",
+          "test"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_prepare",
+        "argv": [
+          "/usr/bin/python",
+          "-B",
+          "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+          "prepare",
+          "--repo-root",
+          "/home/runner/work/E-Track/E-Track",
+          "--run-dir",
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_java",
+        "argv": [
+          "/usr/lib/jvm/temurin-17-jdk-amd64/bin/java",
+          "-version"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_sdk",
+        "argv": [
+          "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager",
+          "--sdk_root=/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk",
+          "cmdline-tools;latest",
+          "platform-tools",
+          "platforms;android-35",
+          "build-tools;35.0.0"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_wrapper",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/gradle-dist/gradle-8.14/bin/gradle",
+          "--no-daemon",
+          "-p",
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/wrapper-bootstrap",
+          "wrapper",
+          "--gradle-version",
+          "8.14",
+          "--distribution-type",
+          "all"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_install_wrapper",
+        "argv": [
+          "/usr/bin/python",
+          "-B",
+          "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+          "install-wrapper",
+          "--repo-root",
+          "/home/runner/work/E-Track/E-Track",
+          "--run-dir",
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_build",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/sdk/bin/flutter",
+          "build",
+          "apk",
+          "--debug",
+          "--no-pub",
+          "--target-platform=android-arm,android-arm64"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_verify",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/android-sdk/build-tools/35.0.0/apksigner",
+          "verify",
+          "--verbose",
+          "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/app/outputs/flutter-apk/app-debug.apk"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "apk_collect",
+        "argv": [
+          "/usr/bin/python",
+          "-B",
+          "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+          "collect",
+          "--repo-root",
+          "/home/runner/work/E-Track/E-Track",
+          "--run-dir",
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      }
+    ],
+    "negative_tests": [
+      "00:26 +200: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer MCU 谎报提交（落盘静默丢失）：END ERR_STATE 暴露 → resume BEGIN durable 倒退 → fail closed ACK_MALFORMED（RC3-03）",
+      "00:31 +215: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 无 durable 进展超时：NO_DURABLE_PROGRESS 中止",
+      "OTA_MONO MONO_FAIL_AT monoUs=4991398 wallUs=1789440467484687 code=NO_DURABLE_PROGRESS",
+      "00:32 +226: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） durable 倒退的 ACK：fail closed 抛 ACK_MALFORMED（RC2-06）",
+      "00:34 +230: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK durable 伪跳跃（> total）：fail closed 抛 ACK_MALFORMED（RC3-06）",
+      "00:34 +231: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK bitmap 越出所属块有效位：fail closed 抛 ACK_MALFORMED（RC3-06）",
+      "00:34 +232: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 END ACK 报 OK 但 durable != total：fail closed 抛 ACK_MALFORMED（RC3-06）",
+      "OTA_MONO MONO_FAIL_AT monoUs=10585123 wallUs=1789440473078417 code=NO_DURABLE_PROGRESS",
+      "00:37 +238: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 DATA ACK durable 跨块伪跳跃：8192B 包首块在途 ACK 报 durable=8192 → fail closed ACK_MALFORMED（RC3-06）",
+      "00:37 +241: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK 帧头 session 与 payload session 不一致：fail closed ACK_MALFORMED（RC3-06）",
+      "00:37 +242: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 END ACK OK 但 bitmap 越出尾块有效位：fail closed ACK_MALFORMED（RC3-06）"
+    ]
+  },
+  {
+    "host": "Windows-2022Server-10.0.20348-SP0",
+    "run": "https://github.com/Eitan-S-23/E-Track/actions/runs/34922411533",
+    "head": "253f15371f2a0aeef0e7c5feb10af3118494c9e1",
+    "scope": "all",
+    "lockfile_unchanged": true,
+    "source_after_restored": {
+      "head": "253f15371f2a0aeef0e7c5feb10af3118494c9e1",
+      "clean": false,
+      "status": "M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
+      "dirty_semantic": [],
+      "dirty_semantic_sha": {},
+      "dirty_eol_only": [
+        "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+      ],
+      "dirty_untracked": []
+    },
+    "source_deltas_bound_toolchain_regen": true,
+    "analyze": "Analyzing bluetooth_flutter_Trace...                            \nNo issues found! (ran in 15.8s)",
+    "test_final": [
+      "01:38 +331: All tests passed!"
+    ],
+    "commands": [
+      {
+        "name": "sdk_checkout",
+        "argv": [
+          "git",
+          "clone",
+          "--config",
+          "core.longpaths=true",
+          "--depth",
+          "1",
+          "--branch",
+          "stable",
+          "https://github.com/flutter/flutter.git",
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-866987b6ef3d4ced89689f02a23351e2\\sdk"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "sdk_version",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-866987b6ef3d4ced89689f02a23351e2\\sdk\\bin\\flutter.bat",
+          "--version",
+          "--machine"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "dependencies",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-866987b6ef3d4ced89689f02a23351e2\\sdk\\bin\\flutter.bat",
+          "pub",
+          "get",
+          "--enforce-lockfile"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "analyze",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-866987b6ef3d4ced89689f02a23351e2\\sdk\\bin\\flutter.bat",
+          "analyze",
+          "--no-pub"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      {
+        "name": "tests",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-866987b6ef3d4ced89689f02a23351e2\\sdk\\bin\\flutter.bat",
+          "test",
+          "--no-pub",
+          "--reporter",
+          "expanded",
+          "--timeout",
+          "2m",
+          "test"
+        ],
+        "exit_code": 0,
+        "status": "PASS"
+      }
+    ],
+    "negative_tests": [
+      "00:03 +54: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer MCU 谎报提交（落盘静默丢失）：END ERR_STATE 暴露 → resume BEGIN durable 倒退 → fail closed ACK_MALFORMED（RC3-03）",
+      "00:07 +69: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 无 durable 进展超时：NO_DURABLE_PROGRESS 中止",
+      "OTA_MONO MONO_FAIL_AT monoUs=5059577 wallUs=1789440474195128 code=NO_DURABLE_PROGRESS",
+      "00:08 +80: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） durable 倒退的 ACK：fail closed 抛 ACK_MALFORMED（RC2-06）",
+      "00:11 +84: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK durable 伪跳跃（> total）：fail closed 抛 ACK_MALFORMED（RC3-06）",
+      "00:11 +85: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK bitmap 越出所属块有效位：fail closed 抛 ACK_MALFORMED（RC3-06）",
+      "00:11 +86: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 END ACK 报 OK 但 durable != total：fail closed 抛 ACK_MALFORMED（RC3-06）",
+      "OTA_MONO MONO_FAIL_AT monoUs=10692620 wallUs=1789440479828015 code=NO_DURABLE_PROGRESS",
+      "00:14 +92: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 DATA ACK durable 跨块伪跳跃：8192B 包首块在途 ACK 报 durable=8192 → fail closed ACK_MALFORMED（RC3-06）",
+      "00:14 +95: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK 帧头 session 与 payload session 不一致：fail closed ACK_MALFORMED（RC3-06）",
+      "00:14 +96: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 END ACK OK 但 bitmap 越出尾块有效位：fail closed ACK_MALFORMED（RC3-06）"
+    ]
+  }
+]

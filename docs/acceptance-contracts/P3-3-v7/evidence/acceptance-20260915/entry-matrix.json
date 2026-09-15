@@ -1,0 +1,75 @@
+{
+ "schema": "etrack-evidence-matrix-v2",
+ "contract_id": "P3-3-v7",
+ "contract_sha256": "38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B",
+ "round_id": "P3-3-V7-FREEZE-20260915-R1",
+ "overall_result": "NOT_RUN",
+ "previous_matrix_sha256": null,
+ "rerun_plan_path": null,
+ "rerun_plan_sha256": null,
+ "criteria": [
+  {
+   "id": "C-DEV-CHECKS",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：五条命令已改只读核验口径（gh run view 既有 run 34861159023/34869549756，零 dispatch）；原始日志归档进 ART-DEV-LOGS（文件型 dev-checks-runs.json）。v6 轮（P3-3-V6-FREEZE-20260915-R1）EVIDENCE_GAP 之既有复核成果由本轮命令重新如实登记。"
+  },
+  {
+   "id": "C-RELEASE-BUILD",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：只读核验 run 34864052541+artifact 清单+Windows 完整运行包按名 windows-exe 下载核验+本地 APK 实物（fb6a91e6…/46,699,144B）+受验侧证书实测（第六轮证书值尚未实测过，由本轮补全）。"
+  },
+  {
+   "id": "C-APK-INSTALL",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：补全 v6 轮未完成的在装受验包 dumpsys/pull/双侧 apksigner 比对（受验侧基准=第六轮 APK 实物）+生产包只读确认；零安装零卸载零清数据；手机未连接判 ENV_BLOCKED。"
+  },
+  {
+   "id": "C-TOY-LOOP",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：离线证据审查入口（service-v5 日志/o-verify RTT 留档/toy 镜像实物哈希/git diff 代码演进）；六状态推导链含 toy 轮 App logcat 滚动丢失与 BLE 层无独立原始日志的缺口，如实判定，不预设 PASS。"
+  },
+  {
+   "id": "C-REAL-LOOP",
+   "result": "NOT_OBSERVED",
+   "failure_owner": null,
+   "execution": "EXECUTED",
+   "reused_from_round": null,
+   "origin_contract_sha256": null,
+   "origin_matrix_sha256": null,
+   "observed": null,
+   "evidence": [],
+   "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：离线证据审查入口（service-v6 日志完整时间线含 23:43 首次未闭环尝试/real 目标镜像实物哈希/git diff app/ 零差异）；BLE durable/ACK_END 无 App 端独立原始日志的缺口如实登记，由验收会话裁定推导是否充分。"
+  }
+ ],
+ "evidence_hashes": {},
+ "commands": [],
+ "artifacts": []
+}

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "C:\\Program Files\\GitHub CLI\\gh.exe",
+    "api",
+    "repos/Eitan-S-23/E-Track/actions/runs/34923921739/artifacts"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T06:29:39.175Z",
+  "ended_at": "2026-09-15T06:29:41.384Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "{\"total_count\":2,\"artifacts\":[{\"id\":10379450770,\"node_id\":\"MDg6QXJ0aWZhY3QxMDM3OTQ1MDc3MA==\",\"name\":\"windows-exe\",\"size_in_bytes\":20384525,\"url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10379450770\",\"archive_download_url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10379450770/zip\",\"expired\":false,\"digest\":\"sha256:0955437ca497529008d1af1395365b5fe0eb47715812375a1bb258d1ae0a56ef\",\"created_at\":\"2026-09-15T03:17:49Z\",\"updated_at\":\"2026-09-15T03:17:49Z\",\"expires_at\":\"2026-12-14T03:09:42Z\",\"workflow_run\":{\"id\":34923921739,\"repository_id\":1310649784,\"head_repository_id\":1310649784,\"head_branch\":\"dev/flutter/apk/p3-3-admission\",\"head_sha\":\"253f15371f2a0aeef0e7c5feb10af3118494c9e1\"}},{\"id\":10379401648,\"node_id\":\"MDg6QXJ0aWZhY3QxMDM3OTQwMTY0OA==\",\"name\":\"android-apk\",\"size_in_bytes\":25508716,\"url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10379401648\",\"archive_download_url\":\"https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/10379401648/zip\",\"expired\":false,\"digest\":\"sha256:09ed00010449cb437091b7ca64887f852b152b86b2390942063a1de1cb1308a4\",\"created_at\":\"2026-09-15T03:18:54Z\",\"updated_at\":\"2026-09-15T03:18:54Z\",\"expires_at\":\"2026-12-14T03:09:42Z\",\"workflow_run\":{\"id\":34923921739,\"repository_id\":1310649784,\"head_repository_id\":1310649784,\"head_branch\":\"dev/flutter/apk/p3-3-admission\",\"head_sha\":\"253f15371f2a0aeef0e7c5feb10af3118494c9e1\"}}]}",
+  "stderr": "",
+  "error": null
+}

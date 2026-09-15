@@ -1,0 +1,70 @@
+{
+  "release_apk": {
+    "size": 46699140,
+    "sha256": "85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9"
+  },
+  "ci_download_apk": {
+    "size": 46699140,
+    "sha256": "85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9"
+  },
+  "installed_apk": {
+    "size": 46699140,
+    "sha256": "85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9"
+  },
+  "windows_zip": {
+    "size": 20353958,
+    "sha256": "b1fa08b1a8caae97494be18c1ff5ad4c7dc6166a7e0254d78d593c1cce8ded97"
+  },
+  "windows_members": [
+    "data/app.so",
+    "data/icudtl.dat",
+    "data/flutter_assets/assets/",
+    "data/flutter_assets/packages/",
+    "data/flutter_assets/AssetManifest.bin",
+    "data/flutter_assets/FontManifest.json",
+    "data/flutter_assets/NativeAssetsManifest.json",
+    "data/flutter_assets/NOTICES.Z",
+    "data/flutter_assets/assets/audio/gear_rotate.wav",
+    "data/flutter_assets/assets/audio/vault_rotate.wav",
+    "data/flutter_assets/fonts/MaterialIcons-Regular.otf",
+    "data/flutter_assets/packages/cupertino_icons/",
+    "data/flutter_assets/packages/win_ble/",
+    "data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf",
+    "data/flutter_assets/packages/win_ble/assets/BLEServer.exe",
+    "data/flutter_assets/shaders/ink_sparkle.frag",
+    "data/flutter_assets/shaders/stretch_effect.frag",
+    "audioplayers_windows_plugin.dll",
+    "ble_monitor.exe",
+    "BLEServer.exe",
+    "flutter_windows.dll",
+    "geolocator_windows_plugin.dll",
+    "local_notifier_plugin.dll",
+    "permission_handler_windows_plugin.dll",
+    "share_plus_plugin.dll",
+    "url_launcher_windows_plugin.dll"
+  ],
+  "apk_members": [
+    {
+      "member": "lib/arm64-v8a/libapp.so",
+      "bytes": 8389512,
+      "sha256": "f39bd98258840ff1243ce35667785df8ef78a84cbef5fdebfa070c524e96c9fc",
+      "endpoint": true,
+      "end_marker": true,
+      "reboot_marker": true
+    },
+    {
+      "member": "lib/armeabi-v7a/libapp.so",
+      "bytes": 9273928,
+      "sha256": "166a7c4c946a60389156ed795b3a9d67ce9baa91ea48f13caf4afc6a86838dc2",
+      "endpoint": true,
+      "end_marker": true,
+      "reboot_marker": true
+    }
+  ],
+  "zip_list_command": [
+    "D:\\install\\Git\\usr\\bin\\unzip.exe",
+    "-Z1",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v8\\artifacts\\ble-monitor-windows.zip"
+  ],
+  "zip_list_exit_code": 0
+}

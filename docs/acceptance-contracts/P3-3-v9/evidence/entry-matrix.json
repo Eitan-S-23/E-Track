@@ -1,0 +1,75 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v8",
+  "contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+  "round_id": "P3-3-V8-ACCEPTANCE-20260915-R1",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "等待本轮独立执行冻结只读复核命令；不预填 PASS。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "等待本轮独立执行冻结只读复核命令；不预填 PASS。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "等待本轮独立执行冻结只读复核命令；不预填 PASS。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "等待本轮独立执行冻结只读复核命令；不预填 PASS。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "等待本轮独立执行冻结只读复核命令；不预填 PASS。"
+    }
+  ],
+  "commands": [],
+  "artifacts": [],
+  "evidence_hashes": {}
+}

@@ -1,0 +1,585 @@
+{
+  "independent_raw_log_review": [
+  {
+    "run": "34861159023",
+    "host": "windows-2022",
+    "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+    "scope": "all",
+    "source_deltas_bound_toolchain_regen": true,
+    "analyze": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/analyze.log",
+      "sha256": "bb5659c304bb8adb54dac66d871c83ee59c86c1a30ed53f41c37d57d481ac5df",
+      "signals": [
+        "No issues found! (ran in 16.9s)"
+      ]
+    },
+    "tests": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/tests.log",
+      "sha256": "f793698861e64da0cebc9a953748b89a809f9475bf11b703fc3b3bc5a6fdb71b",
+      "signals": [
+        "01:38 +331: All tests passed!"
+      ]
+    },
+    "commands": [
+      {
+        "name": "analyze",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+          "analyze",
+          "--no-pub"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "tests",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+          "test",
+          "--no-pub",
+          "--reporter",
+          "expanded",
+          "--timeout",
+          "2m",
+          "test"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      }
+    ]
+  },
+  {
+    "run": "34861159023",
+    "host": "ubuntu-latest",
+    "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+    "scope": "all",
+    "source_deltas_bound_toolchain_regen": true,
+    "analyze": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/analyze.log",
+      "sha256": "d3287b9741a17447f1f47f9fa28ae7cf8215f7adb3a18b16fd6503412e534bf2",
+      "signals": [
+        "No issues found! (ran in 15.5s)"
+      ]
+    },
+    "tests": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/tests.log",
+      "sha256": "8629bd812f929c84a49572290dddf608e6cd880740dde3de452492cb343576ad",
+      "signals": [
+        "01:36 +324 ~7: All tests passed!"
+      ]
+    },
+    "commands": [
+      {
+        "name": "analyze",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+          "analyze",
+          "--no-pub"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "tests",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+          "test",
+          "--no-pub",
+          "--reporter",
+          "expanded",
+          "--timeout",
+          "2m",
+          "test"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      }
+    ]
+  },
+  {
+    "run": "34869549756",
+    "host": "windows-2022",
+    "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+    "scope": "all",
+    "source_deltas_bound_toolchain_regen": true,
+    "analyze": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/analyze.log",
+      "sha256": "783035bd9b801fcd2b168882fe22babc7b3feef1036324ad86d692040f3bbebc",
+      "signals": [
+        "No issues found! (ran in 16.0s)"
+      ]
+    },
+    "tests": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/tests.log",
+      "sha256": "0bf790d36d63a32015c3c12157bbe90a5f4ca6ccaa9a8ec06a567f779307b696",
+      "signals": [
+        "01:38 +331: All tests passed!"
+      ]
+    },
+    "commands": [
+      {
+        "name": "analyze",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat",
+          "analyze",
+          "--no-pub"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "tests",
+        "argv": [
+          "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat",
+          "test",
+          "--no-pub",
+          "--reporter",
+          "expanded",
+          "--timeout",
+          "2m",
+          "test"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      }
+    ]
+  },
+  {
+    "run": "34869549756",
+    "host": "ubuntu-latest",
+    "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+    "scope": "all",
+    "source_deltas_bound_toolchain_regen": true,
+    "analyze": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/analyze.log",
+      "sha256": "1acec092634f61ee38dc51d8fc5fe5943909423a425af5d175f4d83e3bc7486b",
+      "signals": [
+        "No issues found! (ran in 15.6s)"
+      ]
+    },
+    "tests": {
+      "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/tests.log",
+      "sha256": "dfaff4ff7a4d43558d97262c9e089d428753018805d5377731140aa714e2360b",
+      "signals": [
+        "01:37 +324 ~7: All tests passed!"
+      ]
+    },
+    "commands": [
+      {
+        "name": "analyze",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+          "analyze",
+          "--no-pub"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "tests",
+        "argv": [
+          "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+          "test",
+          "--no-pub",
+          "--reporter",
+          "expanded",
+          "--timeout",
+          "2m",
+          "test"
+        ],
+        "exit_code": 0,
+        "timed_out": false
+      }
+    ]
+  }
+],
+  "collection": "read-only existing Actions runs; no dispatch",
+  "runs": [
+    {
+      "id": "34861159023",
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34861159023",
+      "headSha": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+      "headBranch": "dev/flutter/apk/p3-3-admission",
+      "event": "push",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "Flutter self-tests (windows-2022)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "completedAt": "2026-09-14T15:17:18Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-14T15:17:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:17:34Z",
+              "conclusion": "success",
+              "name": "Checkout validation commit",
+              "number": 2,
+              "startedAt": "2026-09-14T15:17:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:17:45Z",
+              "conclusion": "success",
+              "name": "Verify development runner",
+              "number": 3,
+              "startedAt": "2026-09-14T15:17:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:17:46Z",
+              "conclusion": "success",
+              "name": "Verify debug APK helper",
+              "number": 4,
+              "startedAt": "2026-09-14T15:17:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:20:54Z",
+              "conclusion": "success",
+              "name": "Analyze, test and optionally build a debug APK",
+              "number": 5,
+              "startedAt": "2026-09-14T15:17:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:20:55Z",
+              "conclusion": "success",
+              "name": "Upload development logs (not acceptance evidence)",
+              "number": 6,
+              "startedAt": "2026-09-14T15:20:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:20:55Z",
+              "conclusion": "skipped",
+              "name": "Upload debug APK (not a release)",
+              "number": 7,
+              "startedAt": "2026-09-14T15:20:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:20:57Z",
+              "conclusion": "success",
+              "name": "Post Checkout validation commit",
+              "number": 14,
+              "startedAt": "2026-09-14T15:20:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:20:57Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-09-14T15:20:57Z",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "name": "Flutter self-tests (ubuntu-latest)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "completedAt": "2026-09-14T15:17:17Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-14T15:17:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:17:26Z",
+              "conclusion": "success",
+              "name": "Checkout validation commit",
+              "number": 2,
+              "startedAt": "2026-09-14T15:17:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:17:33Z",
+              "conclusion": "success",
+              "name": "Verify development runner",
+              "number": 3,
+              "startedAt": "2026-09-14T15:17:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:17:34Z",
+              "conclusion": "success",
+              "name": "Verify debug APK helper",
+              "number": 4,
+              "startedAt": "2026-09-14T15:17:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:30:09Z",
+              "conclusion": "success",
+              "name": "Analyze, test and optionally build a debug APK",
+              "number": 5,
+              "startedAt": "2026-09-14T15:17:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:30:10Z",
+              "conclusion": "success",
+              "name": "Upload development logs (not acceptance evidence)",
+              "number": 6,
+              "startedAt": "2026-09-14T15:30:09Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:30:17Z",
+              "conclusion": "success",
+              "name": "Upload debug APK (not a release)",
+              "number": 7,
+              "startedAt": "2026-09-14T15:30:10Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:30:17Z",
+              "conclusion": "success",
+              "name": "Post Checkout validation commit",
+              "number": 14,
+              "startedAt": "2026-09-14T15:30:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T15:30:17Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-09-14T15:30:17Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/dev-34861159023.json",
+        "size": 3885,
+        "sha256": "2e452afd2b0b3730e5762c9a7ec25fd5ecdf8c7a71b5e65cb4f489da7f174232",
+        "command": "gh run view 34861159023 --json databaseId,headSha,headBranch,event,status,conclusion,url,createdAt,jobs",
+        "exit_code": 0
+      },
+      "raw_log": {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/dev-34861159023.log",
+        "size": 117854,
+        "sha256": "03ba1fc49834bb323182aa73018836def5c21ba4281bf4aeb94a116bef44f184",
+        "command": "gh run view 34861159023 --log",
+        "exit_code": 0
+      },
+      "signals": [
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T15:17:19.4079201Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T15:17:34.6645453Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T15:17:45.0430353Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T15:17:46.0583771Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T15:20:54.3944171Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T15:17:17.7718513Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T15:17:26.6011773Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T15:17:33.0499018Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T15:17:34.6876132Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T15:30:09.3468312Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T15:30:10.6092993Z   FLUTTER_DEV_TEST_SCOPE: all"
+      ]
+    },
+    {
+      "id": "34869549756",
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34869549756",
+      "headSha": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+      "headBranch": "dev/flutter/apk/p3-3-admission",
+      "event": "push",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "Flutter self-tests (ubuntu-latest)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "completedAt": "2026-09-14T16:35:30Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-14T16:35:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:35:40Z",
+              "conclusion": "success",
+              "name": "Checkout validation commit",
+              "number": 2,
+              "startedAt": "2026-09-14T16:35:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:35:47Z",
+              "conclusion": "success",
+              "name": "Verify development runner",
+              "number": 3,
+              "startedAt": "2026-09-14T16:35:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:35:48Z",
+              "conclusion": "success",
+              "name": "Verify debug APK helper",
+              "number": 4,
+              "startedAt": "2026-09-14T16:35:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:48:57Z",
+              "conclusion": "success",
+              "name": "Analyze, test and optionally build a debug APK",
+              "number": 5,
+              "startedAt": "2026-09-14T16:35:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:48:59Z",
+              "conclusion": "success",
+              "name": "Upload development logs (not acceptance evidence)",
+              "number": 6,
+              "startedAt": "2026-09-14T16:48:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:49:05Z",
+              "conclusion": "success",
+              "name": "Upload debug APK (not a release)",
+              "number": 7,
+              "startedAt": "2026-09-14T16:48:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:49:05Z",
+              "conclusion": "success",
+              "name": "Post Checkout validation commit",
+              "number": 14,
+              "startedAt": "2026-09-14T16:49:05Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:49:05Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-09-14T16:49:05Z",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "name": "Flutter self-tests (windows-2022)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "completedAt": "2026-09-14T16:35:30Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-14T16:35:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:35:45Z",
+              "conclusion": "success",
+              "name": "Checkout validation commit",
+              "number": 2,
+              "startedAt": "2026-09-14T16:35:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:35:55Z",
+              "conclusion": "success",
+              "name": "Verify development runner",
+              "number": 3,
+              "startedAt": "2026-09-14T16:35:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:35:56Z",
+              "conclusion": "success",
+              "name": "Verify debug APK helper",
+              "number": 4,
+              "startedAt": "2026-09-14T16:35:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:39:06Z",
+              "conclusion": "success",
+              "name": "Analyze, test and optionally build a debug APK",
+              "number": 5,
+              "startedAt": "2026-09-14T16:35:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:39:07Z",
+              "conclusion": "success",
+              "name": "Upload development logs (not acceptance evidence)",
+              "number": 6,
+              "startedAt": "2026-09-14T16:39:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:39:07Z",
+              "conclusion": "skipped",
+              "name": "Upload debug APK (not a release)",
+              "number": 7,
+              "startedAt": "2026-09-14T16:39:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:39:09Z",
+              "conclusion": "success",
+              "name": "Post Checkout validation commit",
+              "number": 14,
+              "startedAt": "2026-09-14T16:39:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-14T16:39:09Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-09-14T16:39:09Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/dev-34869549756.json",
+        "size": 3885,
+        "sha256": "7154f9fa83a889e4b30bcbef81c602f6b297cce33c3787186890adb903372215",
+        "command": "gh run view 34869549756 --json databaseId,headSha,headBranch,event,status,conclusion,url,createdAt,jobs",
+        "exit_code": 0
+      },
+      "raw_log": {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/dev-34869549756.log",
+        "size": 117525,
+        "sha256": "c70b4cbfbe3b278ef5a8756e9fe96b144db7c0c8b190a608d59a3e7255c707c0",
+        "command": "gh run view 34869549756 --log",
+        "exit_code": 0
+      },
+      "signals": [
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T16:35:30.9747791Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T16:35:40.1103930Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T16:35:47.1693996Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T16:35:48.4202086Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T16:48:57.8940316Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (ubuntu-latest)\tUNKNOWN STEP\t2026-09-14T16:48:59.4574859Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T16:35:30.8086675Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T16:35:45.9402393Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T16:35:55.9148097Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T16:35:57.0165041Z   FLUTTER_DEV_TEST_SCOPE: all",
+        "Flutter self-tests (windows-2022)\tUNKNOWN STEP\t2026-09-14T16:39:06.9729017Z   FLUTTER_DEV_TEST_SCOPE: all"
+      ]
+    }
+  ]
+}

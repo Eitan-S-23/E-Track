@@ -1,0 +1,6 @@
+{
+  "command": "D:/install/leidian/LDPlayer4/adb.exe kill-server",
+  "exit_code": 0,
+  "output": "",
+  "reason": "仅清理本轮无设备预检启动的 ADB server。未执行安装、卸载或手机数据写入。"
+}

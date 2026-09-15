@@ -1,0 +1,12 @@
+{
+  "id": "CMD-PREVIOUS-INSTALL",
+  "command": "adb -s 10ADA4197U001CK shell dumpsys package com.wen.gaia.gaia.p33acceptance",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:10:02.170Z",
+  "ended_at": "2026-09-15T07:10:02.437Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "Unable to find package: com.wen.gaia.gaia.p33acceptance\r\n",
+  "stderr": ""
+}

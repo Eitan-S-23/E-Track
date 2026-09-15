@@ -1,0 +1,83 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-3-v7",
+  "current_contract_sha256": "38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B",
+  "previous_contract_id": "P3-3-v6",
+  "previous_contract_sha256": "B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P3-3-V7-FREEZE-20260915-R1",
+  "previous_round_id": "P3-3-V6-FREEZE-20260915-R1",
+  "previous_matrix_sha256": "631B14A0AB3C96D231F714C84B4BEC9461645A251B5C07FF943BBEE43E2FEA7C",
+  "changed_input_groups": [],
+  "changed_external_inputs": [
+    "EXT-BOARD-STATE",
+    "EXT-HTTP-TEST-SERVICE",
+    "EXT-REAL-ETU"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "reasons": [
+        "artifact_definition_changed:ART-DEV-LOGS",
+        "command_definition_changed:CMD-DEV-CHECKS",
+        "criterion_definition_changed",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "reasons": [
+        "command_definition_changed:CMD-RELEASE-BUILD",
+        "criterion_definition_changed",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "reasons": [
+        "command_definition_changed:CMD-APK-INSTALL",
+        "criterion_definition_changed",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "reasons": [
+        "command_definition_changed:CMD-TOY-LOOP",
+        "criterion_definition_changed",
+        "external_input_changed:EXT-BOARD-STATE",
+        "external_input_changed:EXT-HTTP-TEST-SERVICE",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "reasons": [
+        "command_definition_changed:CMD-REAL-LOOP",
+        "criterion_definition_changed",
+        "external_input_changed:EXT-BOARD-STATE",
+        "external_input_changed:EXT-HTTP-TEST-SERVICE",
+        "external_input_changed:EXT-REAL-ETU",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-APK-INSTALL",
+    "CMD-DEV-CHECKS",
+    "CMD-REAL-LOOP",
+    "CMD-RELEASE-BUILD",
+    "CMD-TOY-LOOP"
+  ],
+  "required_artifacts": [
+    "ART-APK-RELEASE",
+    "ART-DEV-LOGS",
+    "ART-REAL-ETU",
+    "ART-REAL-TARGET-IMAGE",
+    "ART-TOY-ETU",
+    "ART-TOY-TARGET-IMAGE",
+    "ART-WINDOWS-RUNTIME"
+  ]
+}

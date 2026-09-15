@@ -1,0 +1,9 @@
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/tmp"
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1

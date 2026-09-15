@@ -1,0 +1,61 @@
+{
+  "source_sha256": "d31d49688d5e2176305da7f6579f8fa3836fe4b95b6fec7eb7656fa7146d6c00",
+  "records": [
+    {
+      "line": 190512,
+      "text": "09-15 11:37:18.896 E/.gaia.p33verify(24733): Not starting debugger since process cannot load the jdwp agent."
+    },
+    {
+      "line": 190514,
+      "text": "09-15 11:37:18.942 I/.gaia.p33verify(24733): Open vivo delay for GC JIT ."
+    },
+    {
+      "line": 190516,
+      "text": "09-15 11:37:18.983 V/GraphicsEnvironment(24733): ANGLE Developer option for 'com.wen.gaia.gaia.p33verify' set to: 'default'"
+    },
+    {
+      "line": 190517,
+      "text": "09-15 11:37:18.984 V/GraphicsEnvironment(24733): ANGLE GameManagerService for com.wen.gaia.gaia.p33verify: false"
+    },
+    {
+      "line": 190528,
+      "text": "09-15 11:37:19.043 W/.gaia.p33verify(24733): type=1400 audit(0.0:28601387): avc: denied { read } for name=\"max_map_count\" dev=\"proc\" ino=64092137 scontext=u:r:untrusted_app:s0:c88,c257,c512,c768 tcontext=u:object_r:proc_max_map_count:s0 tclass=file permissive=0 app=com.wen.gaia.gaia.p33verify"
+    },
+    {
+      "line": 190529,
+      "text": "09-15 11:37:19.064 D/vulkan  (24733): searching for layers in '/data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==/lib/arm64'"
+    },
+    {
+      "line": 190530,
+      "text": "09-15 11:37:19.065 D/vulkan  (24733): searching for layers in '/data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==/base.apk!/lib/arm64-v8a'"
+    },
+    {
+      "line": 190594,
+      "text": "09-15 11:37:19.291 I/.gaia.p33verify(24733): Close vivo delay for GC JIT ."
+    },
+    {
+      "line": 190656,
+      "text": "09-15 11:37:20.558 V/ImeFocusController(24733): checkFocus: view=DecorView@a2c37d9[MainActivity] next=DecorView@a2c37d9[MainActivity] immDelegate=delegate{8e14f98 displayId=0} force=true package=com.wen.gaia.gaia.p33verify"
+    },
+    {
+      "line": 190840,
+      "text": "09-15 11:37:24.313 V/ImeFocusController(24733): checkFocus: view=DecorView@a2c37d9[MainActivity] next=DecorView@a2c37d9[MainActivity] immDelegate=delegate{8e14f98 displayId=0} force=true package=com.wen.gaia.gaia.p33verify"
+    },
+    {
+      "line": 190841,
+      "text": "09-15 11:37:24.318 D/ProfileInstaller(24733): Installing profile for com.wen.gaia.gaia.p33verify"
+    },
+    {
+      "line": 191289,
+      "text": "09-15 11:37:25.610 I/.gaia.p33verify(24733): Open vivo delay for GC JIT ."
+    },
+    {
+      "line": 192050,
+      "text": "09-15 11:37:27.295 I/.gaia.p33verify(24733): Close vivo delay for GC JIT ."
+    },
+    {
+      "line": 193207,
+      "text": "09-15 11:37:30.965 I/.gaia.p33verify(24733): Open vivo delay for GC JIT ."
+    }
+  ]
+}

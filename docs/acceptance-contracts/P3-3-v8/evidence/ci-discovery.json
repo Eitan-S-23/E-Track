@@ -1,0 +1,23 @@
+{
+  "command": [
+    "C:\\Program Files\\GitHub CLI\\gh.exe",
+    "run",
+    "list",
+    "--repo",
+    "Eitan-S-23/E-Track",
+    "--commit",
+    "253f15371f2a0aeef0e7c5feb10af3118494c9e1",
+    "--limit",
+    "20",
+    "--json",
+    "databaseId,workflowName,headSha,conclusion,event,url,createdAt"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T06:28:17.266Z",
+  "ended_at": "2026-09-15T06:28:19.982Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "[{\"conclusion\":\"success\",\"createdAt\":\"2026-09-15T03:09:40Z\",\"databaseId\":34923921739,\"event\":\"workflow_dispatch\",\"headSha\":\"253f15371f2a0aeef0e7c5feb10af3118494c9e1\",\"url\":\"https://github.com/Eitan-S-23/E-Track/actions/runs/34923921739\",\"workflowName\":\"Build APK and EXE Release\"},{\"conclusion\":\"success\",\"createdAt\":\"2026-09-15T02:45:43Z\",\"databaseId\":34922411533,\"event\":\"push\",\"headSha\":\"253f15371f2a0aeef0e7c5feb10af3118494c9e1\",\"url\":\"https://github.com/Eitan-S-23/E-Track/actions/runs/34922411533\",\"workflowName\":\".github/workflows/flutter-dev-checks.yml\"}]\n",
+  "stderr": "",
+  "error": null
+}
