@@ -234,7 +234,7 @@ void main() {
       expect(transfer['ackLatency']['p99Us'], isNull);
       expect(transfer['durable']['events'], 0);
       expect(transfer['durable']['finalOff'], isNull);
-      expect((json['acks'] as Map<String, dynamic>)['ok'], 0);
+      expect((transfer['acks'] as Map<String, dynamic>)['ok'], 0);
     });
 
     test('emitSummary 幂等：仅首次输出一行 OTA_LINK_STATS', () {

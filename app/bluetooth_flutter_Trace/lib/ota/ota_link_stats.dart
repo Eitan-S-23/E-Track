@@ -1,3 +1,5 @@
+import 'dart:convert' as convert;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -426,10 +428,13 @@ class OtaLinkStats {
   bool _summaryEmitted = false;
 
   /// 输出一次 `OTA_LINK_STATS {json}` 聚合摘要（幂等，仅首次调用生效）。
+  ///
+  /// 输出必须是 jsonEncode 的规范 JSON（单行），供日志采集侧直接解析；
+  /// 不得退化为 Dart Map.toString（键无引号，分析侧无法解析）。
   void emitSummary() {
     if (_summaryEmitted) return;
     _summaryEmitted = true;
-    debugPrint('OTA_LINK_STATS ${toJson()}');
+    debugPrint('OTA_LINK_STATS ${convert.jsonEncode(toJson())}');
   }
 
   void _emitSample(String kind, int us, {String extra = ''}) {

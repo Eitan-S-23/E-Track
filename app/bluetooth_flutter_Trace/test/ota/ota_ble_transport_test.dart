@@ -2265,7 +2265,11 @@ void main() {
     test('clean run 8192：每唯一段恰一 ACK 样本，摘要完整、outcome=ok',
         () async {
       final package = packageBytes(8192); // 2 块 64 段
-      final mcu = _McuSim();
+      // ACK 延迟 1ms：ackDelay=0 的同步 fake 中，DATA ACK 的流监听微任务
+      // 会先于发送循环 recordSegmentSendEnd 的 continuation 执行——确认
+      // 到达时首发未登记，样本被系统性跳过。真机 ACK 至少一个连接间隔
+      // 后才到，不存在该竞争；本组测试用 1ms 延迟还原真实时序。
+      final mcu = _McuSim()..ackDelay = const Duration(milliseconds: 1);
       final stats = OtaLinkStats(label: 'upgrade');
       final transport = OtaBleTransport(channel: mcu, stats: stats);
       final ack = await transport.transfer(
@@ -2294,7 +2298,9 @@ void main() {
 
     test('丢部分 DATA ACK：位图确认回收，样本仍每段恰一个', () async {
       final package = packageBytes(4096);
-      final mcu = _McuSim()..dropAckForOffsets = {0, 128}; // 段 0/1 的 ACK 丢
+      final mcu = _McuSim()
+        ..dropAckForOffsets = {0, 128} // 段 0/1 的 ACK 丢
+        ..ackDelay = const Duration(milliseconds: 1); // 避开零延迟 ACK 抢跑
       final stats = OtaLinkStats(label: 'upgrade');
       final transport = OtaBleTransport(channel: mcu, stats: stats);
       final ack = await transport.transfer(
@@ -2323,7 +2329,9 @@ void main() {
     test('块尾段 ACK 丢后重发：重传计入计数，样本不新增（冻结语义）',
         () async {
       final package = packageBytes(8192);
-      final mcu = _McuSim()..dropAckOnceForOffsets = {31 * 128}; // 块 0 尾段
+      final mcu = _McuSim()
+        ..dropAckOnceForOffsets = {31 * 128} // 块 0 尾段
+        ..ackDelay = const Duration(milliseconds: 1); // 避开零延迟 ACK 抢跑
       final stats = OtaLinkStats(label: 'upgrade');
       final transport = OtaBleTransport(channel: mcu, stats: stats);
       final ack = await transport.transfer(
@@ -2349,7 +2357,9 @@ void main() {
 
     test('重复 DATA ACK：duplicate 计数，样本数不变', () async {
       final package = packageBytes(4096);
-      final mcu = _McuSim()..duplicateDataAck = true;
+      final mcu = _McuSim()
+        ..duplicateDataAck = true
+        ..ackDelay = const Duration(milliseconds: 1); // 避开零延迟 ACK 抢跑
       final stats = OtaLinkStats(label: 'upgrade');
       final transport = OtaBleTransport(channel: mcu, stats: stats);
       final ack = await transport.transfer(
