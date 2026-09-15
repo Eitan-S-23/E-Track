@@ -1,0 +1,12 @@
+{
+  "id": "CMD-REAL-UNPACK",
+  "command": "python -X utf8 -B -S Tools/etu_unpack.py docs/acceptance-contracts/P3-3-v8/artifacts/e-track-at32f435-v3.2.5-full.etu --out .cache/p3-3-v8-acceptance/real-unpacked.bin --verify-fw-header",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:10:05.555Z",
+  "ended_at": "2026-09-15T07:10:06.469Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "unpack(full) OK: .cache/p3-3-v8-acceptance/real-unpacked.bin\r\n  candidate_len=603764 target_vcode=30205\r\n  image_sha256=ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4\r\n",
+  "stderr": "[warn] OTA_AES_KEY 未设，使用 vendor 示例 key（仅开发）\r\n"
+}

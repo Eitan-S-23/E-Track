@@ -1,0 +1,81 @@
+{
+  "github_artifacts": [
+    {
+      "name": "android-apk",
+      "id": 10356790657,
+      "size": 25509009,
+      "digest": "sha256:0edf01eec20a1bb1af9d30b8259b2a8f915207cbaa20db86e340b9ea8e5baf1a",
+      "workflow_run": {
+        "id": 34864052541,
+        "repository_id": 1310649784,
+        "head_repository_id": 1310649784,
+        "head_branch": "dev/flutter/apk/p3-3-admission",
+        "head_sha": "ce301906736d7b4209a09ad7e42ce080fb7a19a6"
+      }
+    },
+    {
+      "name": "windows-exe",
+      "id": 10356329746,
+      "size": 20384290,
+      "digest": "sha256:077f1d2c4dd86294814e84c49a326e2abb4a1fe7a862402601d3527270f17b09",
+      "workflow_run": {
+        "id": 34864052541,
+        "repository_id": 1310649784,
+        "head_repository_id": 1310649784,
+        "head_branch": "dev/flutter/apk/p3-3-admission",
+        "head_sha": "ce301906736d7b4209a09ad7e42ce080fb7a19a6"
+      }
+    }
+  ],
+  "windows": {
+    "path": ".cache\\p3-3-v7-win\\ble-monitor-windows.zip",
+    "size": 20353729,
+    "sha256": "a354f7354ee379433940fc0e6e851735a8c8306bbc6e1ecd965f84b10e332312",
+    "crc_error": null,
+    "entries": 26,
+    "unsafe_names": [],
+    "total_uncompressed": 40742035,
+    "top_level": [
+      "audioplayers_windows_plugin.dll",
+      "ble_monitor.exe",
+      "BLEServer.exe",
+      "flutter_windows.dll",
+      "geolocator_windows_plugin.dll",
+      "local_notifier_plugin.dll",
+      "permission_handler_windows_plugin.dll",
+      "share_plus_plugin.dll",
+      "url_launcher_windows_plugin.dll"
+    ],
+    "runtime_anchors": [
+      "data/icudtl.dat",
+      "data/flutter_assets/AssetManifest.bin",
+      "data/flutter_assets/FontManifest.json",
+      "data/flutter_assets/packages/win_ble/assets/BLEServer.exe",
+      "audioplayers_windows_plugin.dll",
+      "ble_monitor.exe",
+      "BLEServer.exe",
+      "flutter_windows.dll",
+      "geolocator_windows_plugin.dll",
+      "local_notifier_plugin.dll",
+      "permission_handler_windows_plugin.dll",
+      "share_plus_plugin.dll",
+      "url_launcher_windows_plugin.dll"
+    ]
+  },
+  "android_archive": {
+    "path": ".cache\\p3-3-apk-r6\\android-apk-artifact.zip",
+    "size": 25509009,
+    "sha256": "0edf01eec20a1bb1af9d30b8259b2a8f915207cbaa20db86e340b9ea8e5baf1a",
+    "crc_error": null,
+    "entries": 1,
+    "unsafe_names": [],
+    "total_uncompressed": 46699144,
+    "contents": [
+      {
+        "name": "ble-monitor-android.apk",
+        "size": 46699144,
+        "sha256": "fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13"
+      }
+    ]
+  }
+}

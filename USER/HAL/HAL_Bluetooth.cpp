@@ -136,6 +136,147 @@ static int ble_env_info_provider(ota_ble_info_t *out_info)
     return 1;
 }
 
+/* P3-3 修复：END 激活链（对齐 SD 卡路径 OtaUpdate::Apply/Stage 既有
+ * 语义，共用 ota_package/ota_backup/BCB 底层，不复制协议状态）：
+ * CONFIRMED 再核 → staging→candidate 搬运+ETU 解包校验（full/patch 按
+ * BEGIN inspect 的 kind 分派）→ backup 自拷+BCB STAGED 原子提交 →
+ * 身份三元核对。任何环节失败不提交，活动 BCB 保持 CONFIRMED，设备
+ * 继续运行旧版。同步长跑（Apply/Backup 内部喂狗，同 SD 路径先例）。 */
+static int ble_env_activate_staged(uint32_t target_vcode, uint32_t total_len,
+                                   ota_sd_kind_t kind)
+{
+#if defined(_WIN32)
+    /* 模拟器不驱动真实 QSPI/EEPROM（同 OtaUpdate::Apply/Stage 的
+     * _WIN32 语义）：返回成功供会话流程走通。 */
+    (void)target_vcode;
+    (void)total_len;
+    (void)kind;
+    return 0;
+#else
+    ota_sd_device_t device;
+    ota_backup_info_t stage_info;
+    ota_backup_result_t stage_result;
+    uint32_t cand_vcode;
+    uint32_t cand_len;
+    uint8_t cand_sha8[8];
+    uint32_t t_apply0;
+    uint32_t t_apply1;
+
+    /* 身份快照与 GET_INFO/BEGIN 同源（运行期镜像不变，缓存复用）。 */
+    if (!ble_env_get_device(&device))
+    {
+        return -1;
+    }
+    /* P2-5 阻断 3 对齐：candidate prepare/write 前再次确认 CONFIRMED。 */
+    if (HAL::OTA_GetBcbState() != BCB_STATE_CONFIRMED)
+    {
+        return -2;
+    }
+
+    t_apply0 = millis();
+    if (kind == OTA_SD_KIND_PATCH)
+    {
+        /* 差分基线 = 当前运行镜像 fw_header（SD 路径 Begin 同源读法）。 */
+        boot_fw_header_t fw;
+        boot_fw_expectations_t expect;
+        ota_patch_info_t info;
+        ota_patch_result_t result;
+
+        boot_fw_default_expectations(&expect);
+        if (boot_fw_header_validate(&s_ble_image_reader, &expect,
+                                    &fw) != BOOT_FW_OK)
+        {
+            return -3;
+        }
+        memset(&info, 0, sizeof(info));
+        result = HAL::OTA_PatchApplyStaging(total_len, device.current_vcode,
+                                            fw.image_len,
+                                            device.base_image_sha8, &info);
+        if (result != OTA_PATCH_OK)
+        {
+            SEGGER_RTT_printf(0, "BLEACT: patch apply %s\r\n",
+                              ota_patch_result_name(result));
+            return -4;
+        }
+        cand_vcode = info.target_vcode;
+        cand_len = info.image_len;
+        memcpy(cand_sha8, info.image_sha256, sizeof(cand_sha8));
+    }
+    else
+    {
+        ota_package_info_t info;
+        ota_package_result_t result;
+
+        memset(&info, 0, sizeof(info));
+        result = HAL::OTA_PackageApplyStaging(total_len,
+                                              device.current_vcode, &info);
+        if (result != OTA_PACKAGE_OK)
+        {
+            SEGGER_RTT_printf(0, "BLEACT: full apply %s\r\n",
+                              ota_package_result_name(result));
+            return -4;
+        }
+        cand_vcode = info.target_vcode;
+        cand_len = info.image_len;
+        memcpy(cand_sha8, info.image_sha256, sizeof(cand_sha8));
+    }
+    /* Apply 输出版本必须等于 BEGIN inspect 的 target_vcode（SD 路径
+     * Apply 同款核对）。 */
+    if (cand_vcode != target_vcode)
+    {
+        return -5;
+    }
+    t_apply1 = millis();
+
+    memset(&stage_info, 0, sizeof(stage_info));
+    stage_result = HAL::OTA_BackupStage(&stage_info);
+    if (stage_result == OTA_BACKUP_ERR_COMMIT_AMBIGUOUS)
+    {
+        /* 与 SD 路径同分类（commit_unknown）：提交后状态未知，不复位、
+         * 不覆盖槽区；BCB 由 boot 下次启动仲裁（STAGED 则走 TEST_BOOT
+         * 带看门狗与回滚保护，CONFIRMED 则维持旧版）。App 重试时 BEGIN
+         * 的 bcb_confirmed 门槛自然拒绝，不会重传覆盖。 */
+        SEGGER_RTT_printf(0, "BLEACT: stage commit_unknown\r\n");
+        return -6;
+    }
+    if (stage_result != OTA_BACKUP_OK)
+    {
+        SEGGER_RTT_printf(0, "BLEACT: stage %s\r\n",
+                          ota_backup_result_name(stage_result));
+        return -6;
+    }
+    /* 核对 STAGED 提交的正是本次 Apply 的 candidate（身份三元，与 SD
+     * 路径 Stage() 相同；sha8 = image_sha256 raw 前 8B）。 */
+    if (stage_info.candidate_vcode != cand_vcode ||
+        stage_info.candidate_len != cand_len ||
+        memcmp(stage_info.candidate_sha8, cand_sha8,
+               sizeof(cand_sha8)) != 0)
+    {
+        return -7;
+    }
+    /* 激活耗时打点：实测数据决定 App 侧 60s 重启复核窗口是否需要放宽。 */
+    SEGGER_RTT_printf(0, "BLEACT: ok apply=%lums stage=%lums vcode=%lu\r\n",
+                      (unsigned long)(t_apply1 - t_apply0),
+                      (unsigned long)(millis() - t_apply1),
+                      (unsigned long)target_vcode);
+    return 0;
+#endif
+}
+
+/* 激活成功后的系统复位（合同 §4.5：成功路径随后重启进入 boot STAGED
+ * 流程；复位函数沿用固件内既有先例 HAL_FaultHandle.cpp 的 CMSIS
+ * NVIC_SystemReset）。 */
+static void ble_env_system_reset(void)
+{
+#if defined(_WIN32)
+    /* 模拟器不复位进程，仅留痕。 */
+    CONFIG_DEBUG_SERIAL.println("BLEACT: reset (sim)");
+#else
+    SEGGER_RTT_printf(0, "BLEACT: reset\r\n");
+    NVIC_SystemReset();
+#endif
+}
+
 /* UART ISR 回调（HardwareSerial 每字节入 HW 环后调用）：
  * 会话活跃期把 HW 环即时搬空进 overlay RX 环（HW 环 tail 仅 ISR 动），
  * 使 512B HW 环在任何波特率下都不积压；空闲期立刻返回，字节留给
@@ -211,6 +352,8 @@ void HAL::BT_Init()
     env.overlay_workspace = ble_env_overlay_workspace;
     env.get_device = ble_env_get_device;
     env.info_provider = ble_env_info_provider;
+    env.activate_staged = ble_env_activate_staged;
+    env.system_reset = ble_env_system_reset;
     HAL::OTA_StagingGetIo(&s_ble_staging_io);
     env.staging_io = &s_ble_staging_io;
     ota_ble_session_init(&s_ble_session, &env);

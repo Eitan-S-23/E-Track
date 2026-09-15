@@ -1,0 +1,51 @@
+{
+  "created_directories": [
+    ".cache/p3-3-independent-v7-20260915/home",
+    ".cache/p3-3-independent-v7-20260915/temp",
+    ".cache/p3-3-independent-v7-20260915/cache/local",
+    ".cache/p3-3-independent-v7-20260915/cache/roaming",
+    ".cache/p3-3-independent-v7-20260915/cache/xdg",
+    ".cache/p3-3-independent-v7-20260915/gh-config",
+    ".cache/p3-3-independent-v7-20260915/android",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915",
+    "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks",
+    "docs/acceptance-contracts/P3-3-v7/artifacts"
+  ],
+  "gh_identity": {
+    "exit_code": 0,
+    "login": "Eitan-S-23",
+    "stderr": ""
+  },
+  "tools": [
+    {
+      "executable": "D:/install/Git/bin/bash.exe",
+      "args": [
+        "--noprofile",
+        "--norc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)\nCopyright (C) 2022 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\nThis is free software; you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n",
+      "stderr": ""
+    },
+    {
+      "executable": "D:/install/leidian/LDPlayer4/adb.exe",
+      "args": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "Android Debug Bridge version 1.0.41\r\nVersion 34.0.4-10411341\r\nInstalled as D:\\install\\leidian\\LDPlayer4\\adb.exe\r\nRunning on Windows 10.0.19045\r\n",
+      "stderr": ""
+    },
+    {
+      "executable": "D:/install/jdk17/bin/java.exe",
+      "args": [
+        "-version"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\temp -Duser.home=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\home -XX:-UsePerfData -XX:ErrorFile=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\temp\\hs_err_pid%p.log -XX:HeapDumpPath=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-independent-v7-20260915\\temp\nopenjdk version \"17.0.19\" 2026-04-21\r\nOpenJDK Runtime Environment Temurin-17.0.19+10 (build 17.0.19+10)\r\nOpenJDK 64-Bit Server VM Temurin-17.0.19+10 (build 17.0.19+10, mixed mode, sharing)\r\n"
+    }
+  ],
+  "apksigner_jar_sha256": "00ef9948f843fe395d2440ae3ef41405b8040a6d5d46493bd1902ac0ee6deae7"
+}

@@ -10,6 +10,8 @@ task_id: P3-5
 
 唯一任务状态见 `PLAN-OTA-EXEC.md` readiness 矩阵的 `P3-5` 行。本文件不得另行维护该状态。本卡需要用户操作手机。
 
+验收分层按 2026-09-10 用户授权裁定 `OTA-DEC-013`：P3-3 完成前已须取得其 APK 实际安装和 toy/真包实机证据；本卡保留真实生产候选链与十次断连续传，不是替 P3-3 补做被延期的完成判据。
+
 ## 目标
 
 使用 Actions APK 和生产候选 MCU/Worker 链完成手机查询设备、latest 选包、下载、BLE 传输、MCU 升级、重启重连、GET_INFO 确认的真实闭环，并执行断连 10 次续传验收。
@@ -27,6 +29,14 @@ task_id: P3-5
 - `P4-2` 必须先提供真实 register/latest/download 链、R2 全字节 readback、D1 ready release，以及由 `OTA-XC-SCHEMA-FIXTURE` 约束的 versioned fixture。
 - 依赖方向固定为 `P4-2 -> P3-5`。本卡与 `P4-1` 之间不建立自动依赖；不得手改 D1 或使用任意静态 JSON 冒充真实闭环。
 - 用户可操作手机安装 APK、授权蓝牙并按步骤制造断连。
+
+## 与 P3-3 的验收边界
+
+P3-3 的最小实机门禁不替代本卡。本卡仍须使用真实 P4-2 register/latest/download、R2 readback 和 D1 ready release，以及 P3-4 确认的生产参数，验证当前冻结的手机 APK/MCU/Worker 候选组合。P3-3 为隔离上游而使用的受控 HTTP 服务或 fixture 不能作为本卡真实后端证据；P3-3 未完成时不得提前把本卡标为完成。
+
+本卡继续保留 toy 冒烟、真包完整升级、升级后 no update、最终 GET_INFO 目标身份一致和 10/10 断连恢复要求。涉及启动的 toy 资产同样必须满足 P3-3 Spec 中的可启动资产准入，不能直接把 4KB golden vector 当作可刷写固件。
+
+不得把 P3-3 的普通成功传输计入本卡 10 次断连；十次必须是本卡冻结条件下实际发生、覆盖不同 durable 阶段的独立恢复事件。P3-3 原始证据可以用于入场核对，不能直接改标为 P3-5 的 EXECUTED/REUSED PASS；外部产物引用和适用证据复用须由执行合同核对，不得口头互认。若候选输入变化，按真实依赖重新确定验证范围，不重写历史冻结包。
 
 ## 权威合同
 

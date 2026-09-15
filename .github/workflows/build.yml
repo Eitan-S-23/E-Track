@@ -27,6 +27,16 @@ on:
         required: true
         type: boolean
         default: false
+      firmware_latest_url:
+        description: "Optional credential-free public https firmware-latest endpoint compiled into the APK; empty keeps vars/secrets-derived behavior"
+        required: false
+        type: string
+        default: ""
+      release_application_id_suffix:
+        description: "Optional dot-prefixed release application id suffix such as '.p33acceptance' for an acceptance APK that coexists with the production install; empty keeps the production application id"
+        required: false
+        type: string
+        default: ""
 
 env:
   PUB_HOSTED_URL: https://pub.dev
@@ -83,7 +93,7 @@ jobs:
               if grep -q '^app/bluetooth_flutter_Trace/docs/' <<< "${changed_paths}"; then
                 docs_changed=true
               fi
-              if grep -Eq '^app/bluetooth_flutter_Trace/(pubspec[.]yaml|pubspec[.]lock|analysis_options[.]yaml|lib/|android/|windows/|assets/|third_party/)' <<< "${changed_paths}"; then
+              if grep -Eq '^app/bluetooth_flutter_Trace/(pubspec[.]yaml|pubspec[.]lock|analysis_options[.]yaml|lib/|android/|windows/|assets/|third_party/|test/)' <<< "${changed_paths}"; then
                 app_build_required=true
               fi
             fi
@@ -118,7 +128,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: "8.12"
+          gradle-version: "8.14"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -134,7 +144,7 @@ jobs:
         shell: bash
         run: |
           printf 'flutter.sdk=%s\n' "$FLUTTER_ROOT" > local.properties
-          gradle wrapper --gradle-version 8.12 --distribution-type all
+          gradle wrapper --gradle-version 8.14 --distribution-type all
 
       - name: Configure Android release signing
         id: android_release_signing
@@ -198,8 +208,10 @@ jobs:
           echo "fixed_signing_configured=true" >> "$GITHUB_OUTPUT"
 
       - name: Analyze project
-        continue-on-error: true
         run: flutter analyze
+
+      - name: Run Flutter tests
+        run: flutter test
 
       - name: Clear cached Flutter Android artifacts
         shell: bash
@@ -212,11 +224,39 @@ jobs:
         env:
           TRACE_PUBLIC_UPDATE_SERVICE_URL: ${{ vars.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_PUBLIC_UPDATE_SERVICE_URL || secrets.TRACE_UPDATE_SERVICE_URL }}
           TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
+          DISPATCH_FIRMWARE_LATEST_URL: ${{ inputs.firmware_latest_url || '' }}
+          TRACE_RELEASE_APP_ID_SUFFIX: ${{ inputs.release_application_id_suffix || '' }}
         run: |
           set +e
           build_args=(apk --release --target-platform=android-arm,android-arm64)
           echo "Android release APK targets ARM ABIs only to keep the sideload package smaller."
-          if [[ -n "${TRACE_PUBLIC_UPDATE_SERVICE_URL:-}" ]]; then
+          if [[ -n "${TRACE_RELEASE_APP_ID_SUFFIX:-}" ]]; then
+            # 验收并存包名后缀：仅接受点前缀的合法包名段（gradle 侧同正则
+            # 二次校验，双层 fail-closed）。默认空值保持生产包名不变。
+            if ! [[ "${TRACE_RELEASE_APP_ID_SUFFIX}" =~ ^\.[A-Za-z][A-Za-z0-9_]*$ ]]; then
+              echo "::error title=Release application id suffix::Dispatch input must be a dot-prefixed package segment such as '.p33acceptance'."
+              exit 1
+            fi
+            echo "Release application id suffix enabled: ${TRACE_RELEASE_APP_ID_SUFFIX}"
+          fi
+          if [[ -n "${DISPATCH_FIRMWARE_LATEST_URL:-}" ]]; then
+            # 显式 dispatch 输入只覆盖固件 latest endpoint；仅接受不含凭据的
+            # 公开 HTTPS URL（校验逻辑与 dev-checks 观测路径同一套口径）。
+            parsed_url="${DISPATCH_FIRMWARE_LATEST_URL%/}"
+            case "${parsed_url}" in
+              https://*) ;;
+              *) echo "::error title=Firmware latest endpoint::Dispatch input must be a public https URL."; exit 1 ;;
+            esac
+            case "${parsed_url}" in
+              *token=*|*secret=*|*signature=*|*password=*|*apikey=*|*api_key=*|*access_key=*|*auth=*)
+                echo "::error title=Firmware latest endpoint::Dispatch input must not carry credential query parameters."; exit 1 ;;
+            esac
+            if [[ "${DISPATCH_FIRMWARE_LATEST_URL}" == *"#"* ]]; then
+              echo "::error title=Firmware latest endpoint::Dispatch input must not carry fragments."; exit 1
+            fi
+            build_args+=(--dart-define="TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=${parsed_url}")
+            echo "Firmware latest endpoint injected from dispatch input (firmware endpoint only; update manifest source unchanged)."
+          elif [[ -n "${TRACE_PUBLIC_UPDATE_SERVICE_URL:-}" ]]; then
             update_service_url="${TRACE_PUBLIC_UPDATE_SERVICE_URL%/}"
             build_args+=(--dart-define="TRACE_CLOUDFLARE_UPDATE_MANIFEST_URL=${update_service_url}/api/public/latest")
             build_args+=(--dart-define="TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=${update_service_url}/api/public/firmware/latest")
@@ -287,8 +327,10 @@ jobs:
         run: flutter pub get
 
       - name: Analyze project
-        continue-on-error: true
         run: flutter analyze
+
+      - name: Run Flutter tests
+        run: flutter test
 
       - name: Build Windows release
         run: flutter build windows --release

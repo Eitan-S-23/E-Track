@@ -1,0 +1,12 @@
+{
+  "id": "CMD-RELEASE-DOWNLOAD",
+  "command": "gh run download 34923921739 --repo Eitan-S-23/E-Track -n android-apk -n windows-exe -D .cache/p3-3-v8-acceptance/downloads/release",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:06:42.284Z",
+  "ended_at": "2026-09-15T07:09:51.146Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": ""
+}

@@ -1,0 +1,8 @@
+BLEACT: ok apply=15912ms stage=13572ms vcode=30205
+BLEACT: reset
+
+========================================
+OTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0 systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000
+Reset: NRST SW
+QSPI: JEDEC=0xEF4018 whitelisted, OTA enabled
+OTA: TEST_BOOT confirmed vcode=30205

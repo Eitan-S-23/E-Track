@@ -190,12 +190,89 @@ function Get-P16WordWriteLines {
     return $lines.ToArray()
 }
 
+function Get-P16InvalidateLines {
+    param(
+        [Parameter(Mandatory = $true)][string]$ReadbackPath
+    )
+    # RAM commit-ordering fix (2026-09-13 ruling): a staged file with
+    # magic=0 does NOT prove the on-device RAM magic is 0. The device may
+    # retain a valid old COMMAND/ARM/DONE magic from a previous run, and
+    # writing a new body under that old magic makes the block parse as a
+    # valid command before the final magic write. This script invalidates
+    # the on-device magic first and reads it back in a dedicated J-Link
+    # session; Write-P16BlockInPlace verifies the readback (fail-closed)
+    # before any body word is written. The only remaining interruption
+    # window (before the invalidate w4 lands) leaves the block in the
+    # complete, well-known old state - never a magic/body mix.
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add('h')
+    $lines.Add(('w4 0x{0:X8}, 0x00000000' -f $script:P16ControlAddress))
+    $lines.Add(('savebin "{0}", 0x{1:X8}, 0x{2:X}' -f
+                $ReadbackPath, $script:P16ControlAddress,
+                $script:P16ControlSize))
+    $lines.Add('qc')
+    return $lines.ToArray()
+}
+
+function Test-P16InvalidatedControl {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+    # Fail-closed check that the control block is in a known-invalid state
+    # (magic zero, no sub-block valid) after the invalidate session.
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    if ($bytes.Length -ne $script:P16ControlSize) {
+        throw "P1-6 invalidate readback size mismatch: $Path"
+    }
+    if ([BitConverter]::ToUInt32($bytes, 0) -ne 0) {
+        throw "P1-6 invalidate readback magic is not zero: $Path"
+    }
+    $decoded = Get-P16DecodedControl -Path $Path
+    if ([bool]$decoded.command_valid -or [bool]$decoded.arm_valid -or
+        [bool]$decoded.done) {
+        throw "P1-6 invalidate readback still parses as valid control: $Path"
+    }
+    return $decoded
+}
+
+function Invoke-P16ControlInvalidate {
+    param(
+        [Parameter(Mandatory = $true)][string]$RunDirectory,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+    # Invalidate the on-device control block (magic -> 0) and verify the
+    # readback before any further writes. Used both before writing a new
+    # block (Write-P16BlockInPlace) and after flashing a test boot image
+    # to bring the control block into a known state before first reset
+    # (the previous production run leaves stale RAM behind; a reset does
+    # not clear RAM and the test boot inspects the command immediately).
+    [System.IO.Directory]::CreateDirectory($RunDirectory) | Out-Null
+    $readback = Join-Path $RunDirectory ($Label + '.invalidate-readback.bin')
+    $lines = Get-P16InvalidateLines -ReadbackPath $readback
+    Invoke-P16JLink -Lines $lines -RunDirectory $RunDirectory `
+        -Label ($Label + '-invalidate') -TimeoutSeconds 120 | Out-Null
+    Assert-P1File $readback
+    $decoded = Test-P16InvalidatedControl -Path $readback
+    return [pscustomobject]@{
+        Path = $readback
+        Decoded = $decoded
+    }
+}
+
 function Write-P16BlockInPlace {
     param(
         [Parameter(Mandatory = $true)]$Encoded,
         [Parameter(Mandatory = $true)][string]$RunDirectory,
         [Parameter(Mandatory = $true)][string]$Label
     )
+    # Phase 1 (fail-closed gate): invalidate the on-device magic and
+    # verify via readback that the block is known-invalid BEFORE any body
+    # word is written. Without this gate a stale on-device COMMAND/ARM
+    # magic plus the fresh body parses as a valid command mid-write.
+    Invoke-P16ControlInvalidate -RunDirectory $RunDirectory `
+        -Label ($Label + '-pre') | Out-Null
+    # Phase 2: write body words (staged keeps magic zero), commit magic
+    # last, read back and verify against the committed encoding.
     $readback = Join-Path $RunDirectory ($Label + '.write-readback.bin')
     $lines = Get-P16WordWriteLines -StagedBlock $Encoded.Staged `
         -Magic $Encoded.Magic -ReadbackPath $readback
@@ -279,6 +356,14 @@ function Invoke-P16StartEncodedControl {
         [uint32]$Arg1 = 0
     )
     $wait = [Math]::Min($PollMilliseconds, $MaxWaitSeconds * 1000)
+    # Fail-closed ordering gate (2026-09-13 ruling round 4): zero the
+    # on-device magic and verify the block is known-invalid BEFORE any
+    # body word is written. A stale COMMAND/ARM/DONE magic retained in
+    # RAM plus the fresh body parses as a valid command mid-write
+    # (offline defect reproduction T12); a staged file alone proves
+    # nothing about the on-device magic.
+    Invoke-P16ControlInvalidate -RunDirectory $RunDirectory `
+        -Label ($Label + '-pre') | Out-Null
     $readback = Join-Path $RunDirectory ($Label + '.write-readback.bin')
     $capture = Join-Path $RunDirectory ($Label + '.start.bin')
     $coreLines = @(Get-P16WordWriteLines -StagedBlock $Encoded.Staged `
@@ -627,6 +712,128 @@ function Save-P16MemoryRange {
         -TimeoutSeconds 90 | Out-Null
     Assert-P1File $output
     return $output
+}
+
+# Boot region recovery scope (2026-09-13 ruling round 4).
+# Production boot bin is 14724 bytes (last non-0xFF byte at 0x3983, i.e.
+# valid data spans 0x08000000..0x08003983), NOT the 16384 bytes previously
+# documented; the recovery test boot bin is 18720 bytes with HEX records up
+# to 0x0800491F. AT32F435 flash sectors are 4 KB (at32f435_437_flash.c,
+# "every bit is used to protect the 4KB bytes"), so flashing the test boot
+# erases sectors 0..4 and the affected region is 0x08000000..0x08004FFF
+# (0x5000 bytes). Restoring only the shorter production bin cannot prove
+# the tail region is reverted, and the tail content beyond the production
+# bin is UNKNOWN (never assume 0xFF). Recovery therefore backs up the full
+# affected region before REC1, and restores it byte-for-byte from that
+# backup. This does not extend the erase scope: sectors 0..4 are exactly
+# the sectors the test boot flash already erased. The executed-round gate
+# must still confirm the actual erased-sector boundary from the flashing
+# log before treating this constant as authoritative.
+$script:P16BootRegionBase = 0x08000000
+$script:P16BootAffectedLength = 0x5000
+
+function Invoke-P16BootRegionBackup {
+    param(
+        [Parameter(Mandatory = $true)][string]$RunDirectory,
+        [Parameter(Mandatory = $true)][string]$Label,
+        [uint32]$Length = $script:P16BootAffectedLength
+    )
+    # REC1 precondition: capture the full affected Boot region (savebin)
+    # and register its identity. Callers MUST anchor the backup against
+    # the on-disk production boot bin (Assert-P16BootBackupMatchesProduction)
+    # and register the full-region SHA-256 before proceeding.
+    $output = Save-P16MemoryRange -Address $script:P16BootRegionBase `
+        -Length $Length -RunDirectory $RunDirectory -Label $Label
+    $actual = (Get-Item -LiteralPath $output).Length
+    if ($actual -ne [int64]$Length) {
+        throw "P1-6 Boot region backup size mismatch: $actual != $Length ($output)"
+    }
+    return $output
+}
+
+function Assert-P16BootBackupMatchesProduction {
+    param(
+        [Parameter(Mandatory = $true)][string]$BackupBin,
+        [Parameter(Mandatory = $true)][string]$ProductionBootBin
+    )
+    # Backup validity anchor: the first <production bin size> bytes of the
+    # backup must equal the on-disk production boot bin byte-for-byte.
+    # The remaining tail bytes are board-specific unknown content whose
+    # only fidelity requirement is to be restored identically.
+    Assert-P1File $BackupBin
+    Assert-P1File $ProductionBootBin
+    $prod = [System.IO.File]::ReadAllBytes($ProductionBootBin)
+    $backup = [System.IO.File]::ReadAllBytes($BackupBin)
+    if ($backup.Length -lt $prod.Length) {
+        throw "P1-6 Boot backup shorter than production bin: $BackupBin"
+    }
+    $prodSha = (Get-FileHash -LiteralPath $ProductionBootBin -Algorithm SHA256).Hash
+    $stream = [System.IO.MemoryStream]::new()
+    $stream.Write($backup, 0, $prod.Length)
+    $stream.Position = 0
+    $prefixSha = (Get-FileHash -InputStream $stream -Algorithm SHA256).Hash
+    if ($prefixSha -ne $prodSha) {
+        throw "P1-6 Boot backup prefix does not match production bin: $BackupBin"
+    }
+    return $prod.Length
+}
+
+function Get-P16BootRestoreLines {
+    param(
+        [Parameter(Mandatory = $true)][string]$BackupBin,
+        [Parameter(Mandatory = $true)][string]$ReadbackPath,
+        [uint32]$Length = $script:P16BootAffectedLength
+    )
+    # J-Link script for full-region restore: halt, rewrite the affected
+    # sectors from the REC1 backup, verify the written image, read the
+    # whole region back for hash comparison, quit.
+    return @(
+        'h',
+        ('loadbin "{0}", 0x{1:X8}' -f $BackupBin, $script:P16BootRegionBase),
+        ('verifybin "{0}", 0x{1:X8}' -f $BackupBin, $script:P16BootRegionBase),
+        ('savebin "{0}", 0x{1:X8}, 0x{2:X}' -f
+         $ReadbackPath, $script:P16BootRegionBase, $Length),
+        'qc'
+    )
+}
+
+function Invoke-P16BootRegionRestore {
+    param(
+        [Parameter(Mandatory = $true)][string]$BackupBin,
+        [Parameter(Mandatory = $true)][string]$RunDirectory,
+        [Parameter(Mandatory = $true)][string]$Label,
+        [uint32]$Length = $script:P16BootAffectedLength
+    )
+    # REC6: restore the full affected region from the REC1 backup.
+    # loadbin rewrites sectors 0..4 from the backup (erasing exactly the
+    # sectors the test boot flash already erased - no scope extension),
+    # verifybin checks the written image, and a fresh savebin readback of
+    # the whole region must hash identically to the backup.
+    Assert-P1File $BackupBin
+    if ((Get-Item -LiteralPath $BackupBin).Length -ne [int64]$Length) {
+        throw "P1-6 Boot restore input size mismatch: $BackupBin"
+    }
+    $resolved = (Resolve-Path $BackupBin).Path
+    $readback = Join-Path $RunDirectory ($Label + '.restore-readback.bin')
+    $log = Invoke-P16JLink -Lines (Get-P16BootRestoreLines `
+            -BackupBin $resolved -ReadbackPath $readback -Length $Length) `
+        -RunDirectory $RunDirectory -Label ($Label + '-restore') `
+        -TimeoutSeconds 300
+    $text = Get-Content -LiteralPath $log -Raw
+    if ([regex]::Matches($text, 'Verify successful\.').Count -ne 1) {
+        throw "P1-6 Boot region restore verification failed: $log"
+    }
+    Assert-P1File $readback
+    $expected = (Get-FileHash -LiteralPath $BackupBin -Algorithm SHA256).Hash
+    $actual = (Get-FileHash -LiteralPath $readback -Algorithm SHA256).Hash
+    if ($expected -ne $actual) {
+        throw "P1-6 Boot region restore readback hash mismatch: $readback"
+    }
+    return [pscustomobject]@{
+        Readback = $readback
+        Log = $log
+        Sha256 = $actual.ToLowerInvariant()
+    }
 }
 
 function Invoke-P16FlashApp {

@@ -1,0 +1,190 @@
+{
+  "contract_sha256": "38279b9fc9f2ebb7e6c18831ff4d8a0ddd719bed1ebdf4cafb637fe68d721b9b",
+  "freeze_commit": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+  "freeze_tree": "b3d1d311645d584c48419b546a061c5648da740f",
+  "profile_config_blob": "3769369d053aad028b67d7e2c17b5827b2b96f55",
+  "previous_matrix_sha256": "631b14a0ab3c96d231f714c84b4bec9461645a251b5c07ff943bbee43e2fea7c",
+  "previous_report_sha256": "e782be4d62bca6c568be723b2a4c8559839ae9ebe09b4de65e3c3650a59e0104",
+  "entry_matrix": {
+    "schema": "etrack-evidence-matrix-v2",
+    "contract_id": "P3-3-v7",
+    "contract_sha256": "38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B",
+    "round_id": "P3-3-V7-FREEZE-20260915-R1",
+    "overall_result": "NOT_RUN",
+    "previous_matrix_sha256": null,
+    "rerun_plan_path": null,
+    "rerun_plan_sha256": null,
+    "criteria": [
+      {
+        "id": "C-DEV-CHECKS",
+        "result": "NOT_OBSERVED",
+        "failure_owner": null,
+        "execution": "EXECUTED",
+        "reused_from_round": null,
+        "origin_contract_sha256": null,
+        "origin_matrix_sha256": null,
+        "observed": null,
+        "evidence": [],
+        "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：五条命令已改只读核验口径（gh run view 既有 run 34861159023/34869549756，零 dispatch）；原始日志归档进 ART-DEV-LOGS（文件型 dev-checks-runs.json）。v6 轮（P3-3-V6-FREEZE-20260915-R1）EVIDENCE_GAP 之既有复核成果由本轮命令重新如实登记。"
+      },
+      {
+        "id": "C-RELEASE-BUILD",
+        "result": "NOT_OBSERVED",
+        "failure_owner": null,
+        "execution": "EXECUTED",
+        "reused_from_round": null,
+        "origin_contract_sha256": null,
+        "origin_matrix_sha256": null,
+        "observed": null,
+        "evidence": [],
+        "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：只读核验 run 34864052541+artifact 清单+Windows 完整运行包按名 windows-exe 下载核验+本地 APK 实物（fb6a91e6…/46,699,144B）+受验侧证书实测（第六轮证书值尚未实测过，由本轮补全）。"
+      },
+      {
+        "id": "C-APK-INSTALL",
+        "result": "NOT_OBSERVED",
+        "failure_owner": null,
+        "execution": "EXECUTED",
+        "reused_from_round": null,
+        "origin_contract_sha256": null,
+        "origin_matrix_sha256": null,
+        "observed": null,
+        "evidence": [],
+        "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：补全 v6 轮未完成的在装受验包 dumpsys/pull/双侧 apksigner 比对（受验侧基准=第六轮 APK 实物）+生产包只读确认；零安装零卸载零清数据；手机未连接判 ENV_BLOCKED。"
+      },
+      {
+        "id": "C-TOY-LOOP",
+        "result": "NOT_OBSERVED",
+        "failure_owner": null,
+        "execution": "EXECUTED",
+        "reused_from_round": null,
+        "origin_contract_sha256": null,
+        "origin_matrix_sha256": null,
+        "observed": null,
+        "evidence": [],
+        "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：离线证据审查入口（service-v5 日志/o-verify RTT 留档/toy 镜像实物哈希/git diff 代码演进）；六状态推导链含 toy 轮 App logcat 滚动丢失与 BLE 层无独立原始日志的缺口，如实判定，不预设 PASS。"
+      },
+      {
+        "id": "C-REAL-LOOP",
+        "result": "NOT_OBSERVED",
+        "failure_owner": null,
+        "execution": "EXECUTED",
+        "reused_from_round": null,
+        "origin_contract_sha256": null,
+        "origin_matrix_sha256": null,
+        "observed": null,
+        "evidence": [],
+        "notes": "同合同判据。v7 执行前检查（NOT_RUN 前置）：离线证据审查入口（service-v6 日志完整时间线含 23:43 首次未闭环尝试/real 目标镜像实物哈希/git diff app/ 零差异）；BLE durable/ACK_END 无 App 端独立原始日志的缺口如实登记，由验收会话裁定推导是否充分。"
+      }
+    ],
+    "evidence_hashes": {},
+    "commands": [],
+    "artifacts": []
+  },
+  "original_result": "NOT_RUN",
+  "frozen_commands": [
+    {
+      "id": "CMD-DEV-CHECKS",
+      "description": "开发自测只读核验（零 dispatch）：核验既有 run 34861159023（ce30190 push 触发）与 34869549756（freeze_commit 0fb167c push 触发）的 conclusion 与双宿主 job 结论。本判据通过条件：两个 run 双宿主 job conclusion 均 success、analyze 无 issue、全部测试通过（无 continue-on-error/降级）；原始日志可按需用 gh run view <id> --log 归档为 raw_log 证据（ART-DEV-LOGS）。run URL：https://github.com/Eitan-S-23/E-Track/actions/runs/34861159023 与 …/34869549756。v6 轮 G01 教训：命令必须与实际取证动作一致，不得以派发命令冒记只读核验。",
+      "command": "gh run view 34861159023 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh run view 34869549756 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\"",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/flutter-dev-checks.yml",
+        "Tools/flutter/dev_checks.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-RELEASE-BUILD",
+      "description": "受验 APK 构建核验（只读，零 dispatch/零新构建）：核验既有 run 34864052541（第六轮 APK，用户 2026-09-14 授权第六笔 build 额度；Build Android APK/Build Windows EXE success、Pages/Release skipped；dispatch 提交 ce30190=freeze_commit 直接父提交，git diff ce30190 0fb167c -- app/ 为空=构建输入零差异）。artifact 清单经 gh api 列出；Windows 完整运行包（ART-WINDOWS-RUNTIME）按名 windows-exe 下载至 .cache/p3-3-v7-win/（验收会话专用下载目标）核验。本地实物 .cache/p3-3-apk-r6/ble-monitor-android.apk 46,699,144B SHA-256 fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13；证书验证输出受验侧基准（java -jar 调用 .cache/p3-3-apk/tools/android-15/lib/apksigner.jar，官方 build-tools r35 组件，PATH java 17；不同 CI run 的 debug 签名证书不保证相同，逐次实测）。哈希与字节数用 sha256sum/wc -c（Git Bash 自带）实测，不用内联解释器。",
+      "command": "gh run view 34864052541 --json conclusion,createdAt,jobs --jq \"{conclusion:.conclusion,jobs:[.jobs[]|{name:.name,conclusion:.conclusion}]}\" && gh api repos/Eitan-S-23/E-Track/actions/runs/34864052541/artifacts --jq \".artifacts[]|{name:.name,size:.size_in_bytes,id:.id}\" && gh run download 34864052541 -n windows-exe -D .cache/p3-3-v7-win && sha256sum .cache/p3-3-apk-r6/ble-monitor-android.apk && wc -c < .cache/p3-3-apk-r6/ble-monitor-android.apk && java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs .cache/p3-3-apk-r6/ble-monitor-android.apk",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".github/workflows/build.yml"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-APK-INSTALL",
+      "description": "在装受验包只读核验（零安装/零卸载/零清数据）：r6 轮已由第六轮 APK（fb6a91e6…）覆盖装机并实测通过，本轮补全 v6 轮未完成的双侧证书比对。取证链：dumpsys 确认在装受验包 versionCode=86/versionName=1.0.60 → pm path 定位 → adb pull 在装 base.apk → size/SHA-256（对受验实物 fb6a91e6…）→ 在装证书验证（java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar；对受验实物证书=受验 APK 来源身份锚定）→ 生产包 com.wen.gaia.gaia dumpsys 只读确认（versionName/lastUpdateTime 未被触碰）。设备 vivo V2312A 序列号 10ADA4197U001CK；pull 回件落项目内 .cache/。手机未连接则判 ENV_BLOCKED，不得改装任何包。",
+      "command": "adb -s 10ADA4197U001CK shell dumpsys package com.wen.gaia.gaia.p33acceptance | grep -E \"versionCode|versionName\" && P=$(adb -s 10ADA4197U001CK shell pm path com.wen.gaia.gaia.p33acceptance | head -1 | tr -d '\\r' | sed 's/package://') && adb -s 10ADA4197U001CK pull \"$P\" .cache/p3-3-v7-installed-base.apk && sha256sum .cache/p3-3-v7-installed-base.apk && wc -c < .cache/p3-3-v7-installed-base.apk && java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs .cache/p3-3-v7-installed-base.apk && adb -s 10ADA4197U001CK shell dumpsys package com.wen.gaia.gaia | grep -E \"versionName|lastUpdateTime\"",
+      "input_groups": [
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-TOY-LOOP",
+      "description": "toy 3.2.1/30201 闭环离线证据审查（零设备操作）：判定素材=第十轮 O2/O3 实测留档+代码演进论证。证据链：服务日志 .cache/p3-3-v2-service/service-v5-20260914.log（21:33 发现 30201→21:33:48 download 284,540B→21:40:15.699/21:40:23.420/21:40:28.439 三次 latest 设备自报 30201+aeafc96e 全等；20:21-20:22 为宿主三层验证行）+ RTT 留档 .cache/p3-3-o-verify/o-verify-boot-rtt.log（两处 'OTA: BCB already CONFIRMED vcode=30201'）+ J-Link 读回仲裁与设备侧细节 docs/ota-exec-notes/P3-3-o-sequence-execution-2026-09-14.md + toy 目标镜像实物哈希核对（.cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin，603,764B aeafc96e…）+ 代码演进 git diff 6415226 0fb167c --stat -- app/（仅 7d2856e 三缺陷修复+ce30190 CI 整改，6 文件，不触碰发现/传输/staging/激活路径；60s→180s 复核窗口新行为已由 r6 real 闭环实测 PASS）。六状态判定口径见 C-TOY-LOOP 判据描述（含缺口如实登记）。设备当前=30203，toy 重跑需回退烧录授权（未获授权不执行）。",
+      "command": "grep -nE \"asset-full-30201|currentVersionCode=30201\" .cache/p3-3-v2-service/service-v5-20260914.log | head -8 && grep -n \"BCB already CONFIRMED vcode=30201\" .cache/p3-3-o-verify/o-verify-boot-rtt.log && sha256sum .cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin && wc -c < .cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin && git diff 6415226 0fb167c --stat -- app/",
+      "input_groups": [
+        "production",
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-REAL-LOOP",
+      "description": "真包 3.2.3/30203 闭环离线证据审查（零设备操作）：v6 执行事实=r6 轮实测（第六轮 APK fb6a91e6… 含三缺陷修复实现，30202→30203）。服务日志 .cache/p3-3-v2-service/service-v6-20260914.log 完整时间线（如实含首次未闭环尝试）：23:43:06/23:43:19 latest（30202，currentImageSha 全零——App 未带设备完整镜像 SHA）→23:43:23 download 284,608B（首次下载，未形成完整传输闭环）→23:59:30/00:00:11 latest（30202+ab0585f7 真实起点）→00:00:15 download 284,608B→BLE 传输→00:06:05.449/00:06:08.608/00:07:22.431 三次 latest 设备自报 30203+3a282768 与服务端注册全等→200 no_update（114B）自洽；用户 2026-09-15 实测确认（180s 复核窗口内确认）。证据回填 docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md §7/§7.1。real 目标镜像实物哈希核对（.cache/p3-3-assets-v6/real-3.2.3-30203-final.bin，603,764B 3a282768…）。构建输入等价：git diff ce30190 0fb167c -- app/ 为空（wc -l 输出 0）。受控服务与隧道已于 2026-09-15 D 清理终止，验收走日志+落盘证据，不依赖活端点。",
+      "command": "grep -nE \"asset-full-30203|currentVersionCode=30203\" .cache/p3-3-v2-service/service-v6-20260914.log | head -8 && sha256sum .cache/p3-3-assets-v6/real-3.2.3-30203-final.bin && wc -c < .cache/p3-3-assets-v6/real-3.2.3-30203-final.bin && git diff ce30190 0fb167c -- app/ | wc -l",
+      "input_groups": [
+        "production",
+        "flutter"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifact_definitions": [
+    {
+      "id": "ART-DEV-LOGS",
+      "path": "evidence/dev-checks/dev-checks-runs.json"
+    },
+    {
+      "id": "ART-APK-RELEASE",
+      "path": "artifacts/ble-monitor-android.apk"
+    },
+    {
+      "id": "ART-WINDOWS-RUNTIME",
+      "path": "artifacts/ble-monitor-windows.zip"
+    },
+    {
+      "id": "ART-TOY-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.1-full.etu"
+    },
+    {
+      "id": "ART-TOY-TARGET-IMAGE",
+      "path": "artifacts/toy-3.2.1-target-image.bin"
+    },
+    {
+      "id": "ART-REAL-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.3-full.etu"
+    },
+    {
+      "id": "ART-REAL-TARGET-IMAGE",
+      "path": "artifacts/real-3.2.3-target-image.bin"
+    }
+  ]
+}

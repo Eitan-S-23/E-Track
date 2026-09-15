@@ -1,0 +1,19 @@
+{
+  "command": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-s",
+    "10ADA4197U001CK",
+    "shell",
+    "pm",
+    "path",
+    "com.wen.gaia.gaia.p33verify"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T06:29:47.178Z",
+  "ended_at": "2026-09-15T06:29:47.370Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "package:/data/app/~~Ug3DHYzZyZigbuX5e5_tFA==/com.wen.gaia.gaia.p33verify-LhKy1dRnFWIGPE2OFi-v8w==/base.apk\r\n",
+  "stderr": "",
+  "error": null
+}

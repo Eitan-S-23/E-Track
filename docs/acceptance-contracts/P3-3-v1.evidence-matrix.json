@@ -1,0 +1,75 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v1",
+  "contract_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "round_id": "20260912-DRAFT",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "合同尚为 DRAFT、未冻结，本判据在本合同语义下未执行。参考事实（非本矩阵证据）：开发自测 run 34730007317 在稳定提交 ab6ce3b 双宿主全绿，属实现侧开发自测，不构成独立验收。冻结时须在 freeze_commit 上重新绑定 run 或由 rerun plan 判定复用。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "合同尚为 DRAFT、未冻结。参考事实（非本矩阵证据）：build.yml run 34730618341 在 ab6ce3b build-only 全绿（APK 46682620B / 2a5d5db9…，release 模式 debug 签名回退，无固件 endpoint），属实现侧构建验证；该 APK 不含受控服务 endpoint，不满足受验 APK 条件。受验 APK 须以 dispatch 输入 firmware_latest_url=<受控服务URL> 重新构建（endpoint 改造 63db787 已落地，dev-checks run 34738585857 双宿主全绿）；待 endpoint/服务方案/签名策略齐备后按用户裁定使用追加的 1 次 build-only 配额。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "[执行事实] 该判据在本合同语义下未执行。真机操作未授权；受验 APK 未构建（须含 firmware_latest_url 注入，唯一一次 build-only 配额）；安装前须双侧完整证书指纹比对（既有安装 dumpsys 取 codePath → adb pull → apksigner verify --print-certs；受验 APK 同命令实测；不同 CI run 的 debug 签名不能假定相同），冲突时停在安装前报裁定，不得默认卸载或清数据（任何情况下不得以卸载或清数据解决签名冲突）；安装策略在唯一一次受验构建前冻结。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口（2026-09-13 第三轮裁定口径）：BCB 恢复（v3 S1-S6，P3-3-bcb-recovery-plan-2026-09-13-v3.md，REC1-REC7 独立授权编号）待批执行——须 §5 完成判据四条全部满足；受控 v2 测试服务已实现冻结（三件套哈希见 EXT-HTTP-TEST-SERVICE，13 项宿主自测 PASS）但 D1-D5 部署申请待批；真机操作未授权。toy 3.2.1/30201 资产已离线制包并绑入服务冻结配置（四元组见 EXT-TOY-BOOTABLE，P3-3-offline-assets-2026-09-13.md），上板资格待非实现会话审定；golden vectors 不具上板资格。云端 staging 路线已暂停（写入单 B0-B4 冻结），不再是前置。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "[执行事实] 该判据在本合同语义下未执行（同上口径）。缺口：前置 C-TOY-LOOP 未执行（真包仅在 toy 闭环成功后经受控服务 D4 切换激活：停服务 → --active-release real-30202 重启）；受控 v2 服务部署待批（同 C-TOY-LOOP）；BCB 恢复 v3 待批执行；真机操作未授权。真包 3.2.2/30202 资产已离线制包并绑入服务冻结配置（四元组见 EXT-REAL-ETU），上板资格待非实现会话审定。"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

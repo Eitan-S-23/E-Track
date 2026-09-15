@@ -1,0 +1,243 @@
+Activity Resolver Table:
+  Schemes:
+      trace:
+        c91bdd6 com.wen.gaia.gaia/.MainActivity filter 541af44
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "trace"
+
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        c91bdd6 com.wen.gaia.gaia/.MainActivity filter b693857
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        f5f02f3 com.wen.gaia.gaia/androidx.profileinstaller.ProfileInstallReceiver filter c02b1ae
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      EXTRA_CHOSEN_COMPONENT:
+        2f6882d com.wen.gaia.gaia/dev.fluttercommunity.plus.share.SharePlusPendingIntent filter 43e162
+          Action: "EXTRA_CHOSEN_COMPONENT"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        f5f02f3 com.wen.gaia.gaia/androidx.profileinstaller.ProfileInstallReceiver filter 94c7bb0
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        f5f02f3 com.wen.gaia.gaia/androidx.profileinstaller.ProfileInstallReceiver filter d607a29
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        f5f02f3 com.wen.gaia.gaia/androidx.profileinstaller.ProfileInstallReceiver filter 9dcdb4f
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Domain verification status:
+
+Permissions:
+  Permission [com.wen.gaia.gaia.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (4319167):
+    sourcePackage=com.wen.gaia.gaia
+    uid=10510 gids=[] type=0 prot=signature
+    perm=PermissionInfo{c394b98 com.wen.gaia.gaia.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+
+Registered ContentProviders:
+  com.wen.gaia.gaia/androidx.startup.InitializationProvider:
+    Provider{8fdaff1 com.wen.gaia.gaia/androidx.startup.InitializationProvider}
+  com.wen.gaia.gaia/dev.fluttercommunity.plus.share.ShareFileProvider:
+    Provider{50587d6 com.wen.gaia.gaia/dev.fluttercommunity.plus.share.ShareFileProvider}
+  com.wen.gaia.gaia/androidx.core.content.FileProvider:
+    Provider{8423a57 com.wen.gaia.gaia/androidx.core.content.FileProvider}
+
+ContentProvider Authorities:
+  [com.wen.gaia.gaia.androidx-startup]:
+    Provider{8fdaff1 com.wen.gaia.gaia/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{127b14 com.wen.gaia.gaia}
+  [com.wen.gaia.gaia.flutter.share_provider]:
+    Provider{50587d6 com.wen.gaia.gaia/dev.fluttercommunity.plus.share.ShareFileProvider}
+      applicationInfo=ApplicationInfo{ed6afbd com.wen.gaia.gaia}
+  [com.wen.gaia.gaia.fileprovider]:
+    Provider{8423a57 com.wen.gaia.gaia/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{42299b2 com.wen.gaia.gaia}
+
+Key Set Manager:
+  [com.wen.gaia.gaia]
+      Signing KeySets: 483
+
+Packages:
+  Package [com.wen.gaia.gaia] (b485988):
+    userId=10510
+    pkg=Package{391f5b0 com.wen.gaia.gaia}
+    codePath=/data/app/~~G0pu6F8JK6KbhbFvUTmMHQ==/com.wen.gaia.gaia-kqMRob5GEdtMRcEB0taWSA==
+    resourcePath=/data/app/~~G0pu6F8JK6KbhbFvUTmMHQ==/com.wen.gaia.gaia-kqMRob5GEdtMRcEB0taWSA==
+    legacyNativeLibraryDir=/data/app/~~G0pu6F8JK6KbhbFvUTmMHQ==/com.wen.gaia.gaia-kqMRob5GEdtMRcEB0taWSA==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=86 minSdk=24 targetSdk=36
+    minExtensionVersions=[]
+    versionName=1.0.60
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesIntents=[Intent { act=android.intent.action.GET_CONTENT dat=content://*/... typ=*/* }]
+    dataDir=/data/user/0/com.wen.gaia.gaia
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesOptionalLibraries:
+      androidx.window.extensions
+      androidx.window.sidecar
+    timeStamp=2026-07-10 19:04:59
+    lastUpdateTime=2026-07-10 19:05:06
+    installerPackageName=com.android.packageinstaller
+    packageSource=3
+    signatures=PackageSignatures{4216c29 version:2, signatures:[5bcd2e74], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    declared permissions:
+      com.wen.gaia.gaia.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED
+    requested permissions:
+      android.permission.INTERNET
+      android.permission.REQUEST_INSTALL_PACKAGES
+      android.permission.BLUETOOTH
+      android.permission.BLUETOOTH_ADMIN
+      android.permission.ACCESS_COARSE_LOCATION
+      android.permission.ACCESS_FINE_LOCATION
+      android.permission.BLUETOOTH_CONNECT
+      android.permission.BLUETOOTH_SCAN
+      android.permission.POST_NOTIFICATIONS
+      android.permission.USE_FULL_SCREEN_INTENT
+      android.permission.VIBRATE
+      android.permission.WAKE_LOCK
+      android.permission.FOREGROUND_SERVICE
+      android.permission.FOREGROUND_SERVICE_DATA_SYNC
+      android.permission.FOREGROUND_SERVICE_LOCATION
+      android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+      android.permission.MODIFY_AUDIO_SETTINGS
+      com.wen.gaia.gaia.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+    install permissions:
+      android.permission.MODIFY_AUDIO_SETTINGS: granted=true
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: granted=true
+      android.permission.BLUETOOTH: granted=true
+      android.permission.INTERNET: granted=true
+      android.permission.BLUETOOTH_ADMIN: granted=true
+      android.permission.USE_FULL_SCREEN_INTENT: granted=true
+      com.wen.gaia.gaia.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.VIBRATE: granted=true
+      android.permission.REQUEST_INSTALL_PACKAGES: granted=false
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=3374278 installed=true hidden=false vHidden=1 suspended=false distractionFlags=0 stopped=true notLaunched=false enabled=0 instant=false virtual=false
+      installReason=4
+      firstInstallTime=2026-06-30 02:21:47
+      uninstallReason=0
+      overlay paths:
+        /data/resource-cache/com.android.systemui-neutral-f8RU.frro
+        /data/resource-cache/com.android.systemui-accent-FKZ0.frro
+      gids=[3002, 3003, 3001]
+      runtime permissions:
+        android.permission.POST_NOTIFICATIONS: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_FINE_LOCATION: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.BLUETOOTH_CONNECT: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_COARSE_LOCATION: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.BLUETOOTH_SCAN: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+    User 999: ceDataInode=0 installed=false hidden=false vHidden=1 suspended=false distractionFlags=0 stopped=true notLaunched=true enabled=0 instant=false virtual=false
+      installReason=0
+      firstInstallTime=1970-01-01 08:00:00
+      uninstallReason=0
+      gids=[3002, 3003, 3001]
+      runtime permissions:
+        android.permission.POST_NOTIFICATIONS: granted=false
+        android.permission.ACCESS_FINE_LOCATION: granted=false
+        android.permission.BLUETOOTH_CONNECT: granted=false
+        android.permission.ACCESS_COARSE_LOCATION: granted=false
+        android.permission.BLUETOOTH_SCAN: granted=false
+
+Queries:
+  system apps queryable: false
+  queries via forceQueryable:
+  queries via package name:
+  queries via component:
+    com.sohu.inputmethod.sogou.vivo:
+      com.wen.gaia.gaia
+    com.taobao.litetao:
+      com.wen.gaia.gaia
+    com.xingin.xhs:
+      com.wen.gaia.gaia
+    com.quark.browser:
+      com.wen.gaia.gaia
+    com.jingdong.app.mall:
+      com.wen.gaia.gaia
+    com.xunmeng.pinduoduo:
+      com.wen.gaia.gaia
+    com.tmall.wireless:
+      com.wen.gaia.gaia
+    com.sand.airmirror:
+      com.wen.gaia.gaia
+    com.taobao.taobao:
+      com.wen.gaia.gaia
+    com.tencent.mm:
+      com.wen.gaia.gaia
+    com.instagram.android:
+      com.wen.gaia.gaia
+    com.facebook.katana:
+      com.wen.gaia.gaia
+    com.cloudflare.onedotonedotonedotone:
+      com.wen.gaia.gaia
+    com.cloudflare.cloudflareoneagent:
+      com.wen.gaia.gaia
+    com.smule.singandroid:
+      com.wen.gaia.gaia
+    com.sina.weibo:
+      com.wen.gaia.gaia
+    com.Qunar:
+      com.wen.gaia.gaia
+    com.tmri.app.main:
+      com.wen.gaia.gaia
+    com.dongqiudi.news:
+      com.wen.gaia.gaia
+    com.chaozh.iReaderFree:
+      com.wen.gaia.gaia
+    im.xingzhe:
+      com.wen.gaia.gaia
+    com.tencent.wework:
+      com.wen.gaia.gaia
+    com.aliyun.tongyi:
+      com.wen.gaia.gaia
+    com.wen.gaia.gaia:
+      com.android.contacts
+      com.tencent.mtt
+      com.chinamobile.mcloud
+      bin.mt.plus.canary
+  queryable via interaction:
+    User 0:
+      [com.vivo.gamecube,com.vivo.gamewatch,com.vivo.assistant,com.android.location.fused,com.vivo.permissionmanager,com.vivo.aiengine,com.vivo.audiofx,com.vivo.vtouch,com.vivo.vivokaraoke,com.android.BBKCrontab,com.vivo.fingerprint,com.vivo.vms,com.vivo.healthservice,com.vivo.smartmultiwindow,com.iqoo.aftersale.engineermode,com.android.providers.settings,com.vivo.fingerprintengineer,com.vivo.multinlp,com.vivo.fuelsummary,com.iqoo.powersaving,com.mobile.cos.iroaming,com.vivo.epm,com.vivo.vibrator4d,com.android.networkstack.inprocess,com.android.networkstack.tethering.inprocess,com.vivo.pem,com.vivo.contentcatcher,com.vivo.vdfs,com.vivo.faceui,com.android.settings,com.vivo.fingerprintui,com.android.server.telecom,com.android.wallpaperbackup,com.vivo.daemonService,com.vivo.doubleinstance,com.vivo.car.networking,com.android.inputdevices,com.vivo.voicewakeup,com.vivo.basemanager,com.vivo.floatingball,com.vivo.fuzzylocationmanager,com.vivo.sps,android,com.vivo.dr,com.vivo.hover,com.android.localtransport,com.bbk.facewake,com.android.dynsystem,com.vivo.minscreen,com.vivo.setupwizard,com.android.keychain,com.vivo.upslide,com.vivo.abe,com.vivo.appfilter,com.vivo.globalanimation,com.vivo.smartunlock,com.vivo.faceunlock,com.vivo.smartshot,com.android.bbklog,com.wapi.wapicertmanage,com.bbk.SuperPowerSave,com.qualcomm.qti.xrvd.service,com.vivo.networkstate]:
+        com.wen.gaia.gaia
+      com.sohu.inputmethod.sogou:
+        com.wen.gaia.gaia
+    User 999:
+  queryable via uses-library:
+
+Dexopt state:
+  [com.wen.gaia.gaia]
+    path: /data/app/~~G0pu6F8JK6KbhbFvUTmMHQ==/com.wen.gaia.gaia-kqMRob5GEdtMRcEB0taWSA==/base.apk
+      arm64: [status=speed-profile] [reason=bg-dexopt]
+  BgDexopt state:
+    enabled:true
+    mDexOptThread:null
+    mDexOptCancellingThread:null
+    mFinishedPostBootUpdate:true
+    mLastExecutionStatus:0
+    mLastExecutionStartTimeMs:346351837
+    mLastExecutionDurationIncludingSleepMs:299969
+    mLastExecutionStartUptimeMs:344322072
+    mLastExecutionDurationMs:299968
+    now:386176904
+    mLastCancelledPackages:
+    mFailedPackageNamesPrimary:com.google.android.googlequicksearchbox
+    mFailedPackageNamesSecondary:
+
+Compiler stats:
+  [com.wen.gaia.gaia]
+     base.apk - 1438

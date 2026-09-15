@@ -1,0 +1,39 @@
+{
+  "classification": "ENV_BLOCKED",
+  "target_serial": "10ADA4197U001CK",
+  "first": {
+    "adb_server_version": [
+      "OKAY",
+      "0029"
+    ],
+    "devices_status": "OKAY",
+    "target": [],
+    "started_or_restarted_server": false
+  },
+  "last": {
+    "timestamp_utc": "2026-09-14T20:08:27.878061+00:00",
+    "status": "OKAY",
+    "target": [],
+    "other_transport_count": 0,
+    "server_started_or_restarted": false
+  },
+  "frozen_command_executed": false,
+  "phone_shell_or_pull_commands": 0,
+  "adb_server_started_or_restarted": false,
+  "user_connection_requested": true,
+  "command_path_preflight": {
+    "adb_exists": true,
+    "tr_argument": "\\r",
+    "tr_argument_codes": [
+      92,
+      114
+    ],
+    "test_input": "/data/app/rProbe/com.wen.gaia.gaia.p33acceptance-rX/base.apk\r\n",
+    "expected_output": "/data/app/rProbe/com.wen.gaia.gaia.p33acceptance-rX/base.apk\n",
+    "actual_output": "/data/app/rProbe/com.wen.gaia.gaia.p33acceptance-rX/base.apk\n",
+    "exit_code": 0,
+    "stderr": "",
+    "correct_cr_removal": true,
+    "gh_config_dir": "C:\\Users\\SU\\AppData\\Roaming/GitHub CLI"
+  }
+}

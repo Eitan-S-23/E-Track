@@ -1,0 +1,151 @@
+name: Flutter Development Checks
+
+on:
+  push:
+    branches:
+      - "dev/flutter/**"
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: "all: app test suite; ota: targeted OTA development tests"
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - ota
+      build_apk:
+        description: "Build a debug APK after checks; forces all tests on both hosts"
+        required: true
+        type: boolean
+        default: false
+      app_id_suffix:
+        description: "Explicit opt-in debug application id suffix such as '.dev'; empty keeps the production application id"
+        required: false
+        type: string
+        default: ""
+      device_observation:
+        description: "Explicit opt-in device-observation debug APK; requires observation_target and observation_firmware_latest_url"
+        required: false
+        type: boolean
+        default: false
+      observation_target:
+        description: "BLE advertised name or MAC the observation APK binds automatically, such as 'XTrace'; required when device_observation is on"
+        required: false
+        type: string
+        default: ""
+      observation_firmware_latest_url:
+        description: "Credential-free public https firmware-latest endpoint compiled into the observation APK; required when device_observation is on"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  development:
+    name: Flutter self-tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            shell: bash
+          - os: windows-2022
+            shell: cmd
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    # steps.shell 不允许任何 context（GitHub 解析器直接拒绝 matrix），
+    # job 级 defaults.run.shell 允许 matrix——shell 一律由这里注入。
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+      FLUTTER_DEV_TEST_SCOPE: ${{ (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'all' || inputs.test_scope || 'all' }}
+      FLUTTER_DEV_BUILD_APK: ${{ matrix.os == 'ubuntu-latest' && (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'true' || 'false' }}
+      # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
+      TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
+      # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
+      TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}
+      TRACE_DEV_OBSERVATION_TARGET: ${{ inputs.observation_target || '' }}
+      TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: ${{ inputs.observation_firmware_latest_url || '' }}
+    steps:
+      - name: Checkout validation commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          # Development checks do not consume firmware binaries or frozen bundles.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.gitattributes
+            /.gitignore
+            /AGENTS.md
+            /PLAN-OTA-EXEC.md
+            /.github/
+            /app/bluetooth_flutter_Trace/
+            /Tools/flutter/
+            /Tools/provenance/manifest_profiles.json
+            /tests/ota/test_flutter_dev_checks.py
+            /tests/ota/test_flutter_dev_apk.py
+            /docs/flutter-development-validation.md
+            /docs/acceptance-execution-contract.md
+
+      - name: Check debug APK disk budget
+        if: matrix.os == 'ubuntu-latest' && env.FLUTTER_DEV_BUILD_APK == 'true'
+        working-directory: ${{ github.workspace }}
+        run: |
+          python -B - <<'PY'
+          import os
+          import shutil
+          usage = shutil.disk_usage(os.environ["GITHUB_WORKSPACE"])
+          minimum = 12 * 1024 ** 3
+          print(f"DISK_PREFLIGHT total={usage.total} used={usage.used} free={usage.free} minimum={minimum}", flush=True)
+          if usage.free < minimum:
+              raise SystemExit("CI_DISK_SPACE_INSUFFICIENT: need 12 GiB before cold SDK/Gradle setup and APK packaging")
+          PY
+
+      - name: Verify development runner
+        timeout-minutes: 5
+        working-directory: ${{ github.workspace }}
+        run: python -B tests/ota/test_flutter_dev_checks.py
+
+      - name: Verify debug APK helper
+        timeout-minutes: 5
+        working-directory: ${{ github.workspace }}
+        run: python -B tests/ota/test_flutter_dev_apk.py
+
+      - name: Analyze, test and optionally build a debug APK
+        working-directory: ${{ github.workspace }}
+        run: python -B Tools/flutter/dev_checks.py --repo-root .
+
+      - name: Upload development logs (not acceptance evidence)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-dev-${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/flutter-dev-checks/runs/*/result.json
+            .cache/flutter-dev-checks/runs/*/logs/*.log
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Report final workspace disk use
+        if: always() && matrix.os == 'ubuntu-latest'
+        working-directory: ${{ github.workspace }}
+        run: df -h "$GITHUB_WORKSPACE"
+
+      - name: Upload debug APK (not a release)
+        if: success() && env.FLUTTER_DEV_BUILD_APK == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-dev-debug-apk-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/flutter-dev-checks/runs/*/artifacts/trace-dev-debug.apk
+            .cache/flutter-dev-checks/runs/*/artifacts/trace-dev-debug.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

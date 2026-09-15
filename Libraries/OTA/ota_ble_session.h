@@ -67,6 +67,20 @@ typedef struct ota_ble_env_t
     /* INFO 内容提供者；NULL = GET_INFO 不应答 */
     int (*info_provider)(ota_ble_info_t *out_info);
     const ota_staging_io_t *staging_io; /* QSPI staging IO（绝对地址语义） */
+    /* P3-3 修复：END 激活钩子（staging finalize 成功后调用）。
+     * 平台实现串「staging→candidate 搬运+ETU 解包校验 +
+     * backup 自拷 + BCB STAGED 提交」（对齐 SD 卡路径
+     * OtaUpdate::Apply/Stage 的既有语义；kind 决定全量/差分 Apply
+     * 分支）。返回 0 成功；非 0 = 任一环节失败（活动 BCB 保持
+     * CONFIRMED，设备继续运行旧版）。target_vcode/total_len/kind
+     * 均来自 BEGIN 时 ota_sd_inspect_header 的校验结果，供平台核对
+     * Apply 输出版本与长度一致性。会话层 fail-closed：NULL 视为
+     * 配置残缺，END 回 ERR_FLASH。 */
+    int (*activate_staged)(uint32_t target_vcode, uint32_t total_len,
+                           ota_sd_kind_t kind);
+    /* 激活成功且 ACK END OK 已发出后调用（生产 = 系统复位进入 boot
+     * STAGED 流程；host 测试注入打点后正常返回）。 */
+    void (*system_reset)(void);
 } ota_ble_env_t;
 
 typedef enum ota_ble_session_state_t
@@ -91,6 +105,7 @@ typedef struct ota_ble_session_t
      * 的 verified_package_crc32 同源；END 时收尾传 ota_staging_finalize） */
     boot_crc32_ctx_t pkg_crc;
     uint32_t target_vcode;
+    uint8_t pkg_kind; /* ota_sd_kind_t（BEGIN inspect 结果，END 激活分派） */
 
     ota_staging_progress_t progress;
     boot_sha256_ctx_t sha; /* 块提交时增量；resume 时从 staging 回填前缀 */

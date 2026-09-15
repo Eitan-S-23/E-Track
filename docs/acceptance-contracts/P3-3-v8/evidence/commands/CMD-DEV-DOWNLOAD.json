@@ -1,0 +1,12 @@
+{
+  "id": "CMD-DEV-DOWNLOAD",
+  "command": "gh run download 34922411533 --repo Eitan-S-23/E-Track -n flutter-dev-ubuntu-latest-34922411533-1 -n flutter-dev-windows-2022-34922411533-1 -D .cache/p3-3-v8-acceptance/downloads/dev-checks",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:06:24.313Z",
+  "ended_at": "2026-09-15T07:06:31.253Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": ""
+}

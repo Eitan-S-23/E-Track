@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/notification_service.dart';
 import '../services/alert_service.dart';
-import '../models/device_settings.dart';
 import '../models/device_data.dart';
 
 class TestNotificationPage extends StatelessWidget {

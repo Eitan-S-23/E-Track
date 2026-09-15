@@ -10,12 +10,12 @@ class DeviceMonitorCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const DeviceMonitorCard({
-    Key? key,
+    super.key,
     required this.device,
     this.latestData,
     this.powerConsumption = 0.0,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class DeviceMonitorCard extends StatelessWidget {
               : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -314,9 +314,9 @@ class DeviceMonitorCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.battery_std,
-            color: const Color(0xFF2196F3),
+            color: Color(0xFF2196F3),
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -444,7 +444,7 @@ class DeviceMonitorCard extends StatelessWidget {
   }
 
   Widget _buildActionButton() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: onTap,

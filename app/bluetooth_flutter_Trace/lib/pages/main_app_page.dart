@@ -5,7 +5,7 @@ import 'profile_tab_page.dart';
 import 'trace_ui.dart';
 
 class MainAppPage extends StatefulWidget {
-  const MainAppPage({Key? key}) : super(key: key);
+  const MainAppPage({super.key});
 
   @override
   State<MainAppPage> createState() => _MainAppPageState();
@@ -149,20 +149,20 @@ class _TraceBottomNavigation extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF03121A).withOpacity(0.66),
-            const Color(0xFF02090F).withOpacity(0.58),
+            const Color(0xFF03121A).withValues(alpha: 0.66),
+            const Color(0xFF02090F).withValues(alpha: 0.58),
           ],
         ),
         borderRadius: BorderRadius.circular(44),
-        border: Border.all(color: TraceColors.cyan.withOpacity(0.28)),
+        border: Border.all(color: TraceColors.cyan.withValues(alpha: 0.28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.56),
+            color: Colors.black.withValues(alpha: 0.56),
             blurRadius: 34,
             offset: const Offset(0, 18),
           ),
           BoxShadow(
-            color: TraceColors.cyan.withOpacity(0.22),
+            color: TraceColors.cyan.withValues(alpha: 0.22),
             blurRadius: 34,
             spreadRadius: -10,
           ),
@@ -190,13 +190,13 @@ class _TraceBottomNavigation extends StatelessWidget {
                         height: 68,
                         decoration: BoxDecoration(
                           color: selected
-                              ? TraceColors.cyan.withOpacity(0.12)
+                              ? TraceColors.cyan.withValues(alpha: 0.12)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: selected
                               ? [
                                   BoxShadow(
-                                    color: TraceColors.cyan.withOpacity(0.24),
+                                    color: TraceColors.cyan.withValues(alpha: 0.24),
                                     blurRadius: 24,
                                     spreadRadius: -8,
                                   ),
@@ -214,7 +214,7 @@ class _TraceBottomNavigation extends StatelessWidget {
                                   ? [
                                       Shadow(
                                         color:
-                                            TraceColors.cyan.withOpacity(0.85),
+                                            TraceColors.cyan.withValues(alpha: 0.85),
                                         blurRadius: 14,
                                       ),
                                     ]
@@ -238,7 +238,7 @@ class _TraceBottomNavigation extends StatelessWidget {
                                     ? [
                                         Shadow(
                                           color: TraceColors.cyan
-                                              .withOpacity(0.75),
+                                              .withValues(alpha: 0.75),
                                           blurRadius: 12,
                                         ),
                                       ]
@@ -257,7 +257,7 @@ class _TraceBottomNavigation extends StatelessWidget {
                                     ? [
                                         BoxShadow(
                                           color: TraceColors.cyan
-                                              .withOpacity(0.9),
+                                              .withValues(alpha: 0.9),
                                           blurRadius: 8,
                                         ),
                                       ]
@@ -275,7 +275,7 @@ class _TraceBottomNavigation extends StatelessWidget {
                     width: 1,
                     height: 32,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
-                    color: TraceColors.cyan.withOpacity(0.14),
+                    color: TraceColors.cyan.withValues(alpha: 0.14),
                   ),
               ],
             ),

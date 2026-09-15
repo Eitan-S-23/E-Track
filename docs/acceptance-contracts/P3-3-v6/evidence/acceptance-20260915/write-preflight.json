@@ -1,0 +1,25 @@
+{
+  "timestamp_utc": "2026-09-14T17:49:13.289267+00:00",
+  "worktree": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "write_preflight": "PASS",
+  "outputs": [
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\external\\http-test-service.md",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\external\\toy-bootable-asset.md",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\external\\real-etu-asset.md",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\external\\board-bcb-state.md",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\entry-matrix.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\service-v5-20260914.log",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\service-v6-20260914.log",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\o-verify-boot-rtt.log",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\o-sequence-execution-2026-09-14.md",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\r6-verification-execution-2026-09-14.md",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\write-preflight.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\review-outputs.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\copy-manifest.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\evidence\\acceptance-20260915\\final-validation.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\acceptance-contracts\\P3-3-v6\\P3-3-v6.evidence-matrix.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\docs\\ota-exec-notes\\P3-3-v6-acceptance-2026-09-15.md"
+  ],
+  "outside_writes": false,
+  "existing_files_preserved_except_authorized_matrix": true
+}

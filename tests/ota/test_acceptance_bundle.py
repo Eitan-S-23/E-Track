@@ -33,6 +33,36 @@ VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
 
 
+def parse_freeze_index(text):
+    rows = []
+    seen = set()
+    outcomes = r"PASS|FAIL|PRODUCT_FAIL|HARNESS_FAIL|EVIDENCE_GAP|ENV_BLOCKED|NOT_RUN"
+    result_pattern = rf"(?:VALIDATION=(?:PASS|FAIL)[,，]\s*overall=)?(?:{outcomes})(?:$|[（(])"
+    for line in text.splitlines():
+        if not line.strip().startswith("|"):
+            continue
+        cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
+        if cells[0] == "contract_id" or all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
+        if len(cells) != 6:
+            raise ValueError("freeze-index row must have six columns")
+        contract_id, schema, bundle, freeze, tree, result = cells
+        if not re.fullmatch(r"P\d+-\d+-v[1-9]\d*", contract_id) or contract_id in seen:
+            raise ValueError("invalid or duplicate freeze-index contract id")
+        if schema not in {"v2", "v3"}:
+            raise ValueError("unsupported freeze-index schema")
+        if not all(re.fullmatch(r"[0-9a-f]{40}", oid) for oid in (bundle, freeze, tree)):
+            raise ValueError("invalid freeze-index Git object id")
+        # This column records integrity/precheck/history, not only product PASS.
+        if not re.match(result_pattern, result):
+            raise ValueError("unrecognized freeze-index result")
+        seen.add(contract_id)
+        rows.append(cells)
+    if not rows:
+        raise ValueError("freeze index must not be empty")
+    return rows
+
+
 def symlink_security_test_required():
     return (
         os.environ.get(SYMLINK_TEST_REQUIRED_ENV) == "1"
@@ -430,23 +460,9 @@ class AcceptanceBundleTests(unittest.TestCase):
             self.assertNotIn(BOARD_PATH, definition["required_paths"])
 
     def test_freeze_index_rows_bind_reachable_bundle_and_input_commits(self):
-        rows = []
-        for line in FREEZE_INDEX.read_text(encoding="utf-8").splitlines():
-            if not re.match(r"^\|\s*P\d", line):
-                continue
-            cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
-            self.assertEqual(6, len(cells), line)
-            rows.append(cells)
-        self.assertEqual(7, len(rows))
+        rows = parse_freeze_index(FREEZE_INDEX.read_text(encoding="utf-8"))
 
-        seen = set()
         for contract_id, schema, bundle_commit, freeze_commit, freeze_tree, result in rows:
-            self.assertNotIn(contract_id, seen)
-            seen.add(contract_id)
-            self.assertRegex(bundle_commit, r"^[0-9a-f]{40}$")
-            self.assertRegex(freeze_commit, r"^[0-9a-f]{40}$")
-            self.assertRegex(freeze_tree, r"^[0-9a-f]{40}$")
-            self.assertEqual("PASS", result)
             self.assertEqual("commit", git_fixture(ROOT, "cat-file", "-t", bundle_commit))
             self.assertEqual("commit", git_fixture(ROOT, "cat-file", "-t", freeze_commit))
             self.assertEqual(freeze_tree, git_fixture(ROOT, "rev-parse", f"{freeze_commit}^{{tree}}"))
@@ -459,6 +475,7 @@ class AcceptanceBundleTests(unittest.TestCase):
                 f"{bundle_commit}:docs/acceptance-contracts/{contract_id}.contract.json",
             )
             contract = json.loads(contract_text)
+            self.assertEqual(contract_id, contract["contract_id"])
             self.assertEqual(f"etrack-acceptance-contract-{schema}", contract["schema"])
             if schema == "v2":
                 self.assertEqual(bundle_commit, freeze_commit)
@@ -466,8 +483,47 @@ class AcceptanceBundleTests(unittest.TestCase):
                 self.assertEqual(freeze_commit, contract["freeze_commit"])
                 self.assertEqual(freeze_tree, contract["freeze_tree"])
                 self.assertRegex(contract["profile_config_blob"], r"^[0-9a-fA-F]{40}$")
+                self.assertEqual(
+                    contract["profile_config_blob"].lower(),
+                    git_fixture(ROOT, "rev-parse", f"{freeze_commit}:{VALIDATOR.PROFILE_CONFIG_REPO_PATH}"),
+                )
             else:
                 self.fail(f"unsupported schema in freeze index: {schema}")
+
+    def test_freeze_index_allows_growth_and_truthful_historical_results(self):
+        outcomes = (
+            "PASS", "PASS(precheck NOT_RUN)", "EVIDENCE_GAP",
+            "VALIDATION=PASS, overall=EVIDENCE_GAP(history)",
+            "VALIDATION=PASS，overall=PASS（final）",
+        )
+        for count in (1, 8, 19):
+            text = "\n".join(
+                f"| P3-3-v{version} | v3 | {PLACEHOLDER_OID} | {PLACEHOLDER_OID} | "
+                f"{PLACEHOLDER_OID} | {outcomes[(version - 1) % len(outcomes)]} |"
+                for version in range(1, count + 1)
+            )
+            with self.subTest(count=count):
+                rows = parse_freeze_index(text)
+                self.assertEqual(count, len(rows))
+                self.assertEqual(outcomes[0], rows[0][-1])
+                if count > 2:
+                    self.assertEqual("EVIDENCE_GAP", rows[2][-1])
+
+    def test_freeze_index_rejects_malformed_rows(self):
+        row = f"| P3-3-v1 | v3 | {PLACEHOLDER_OID} | {PLACEHOLDER_OID} | {PLACEHOLDER_OID} | PASS |"
+        cases = {
+            "empty": "", "duplicate": row + "\n" + row,
+            "unknown_id": row.replace("P3-3-v1", "BROKEN"),
+            "schema": row.replace("| v3 |", "| v4 |"),
+            "oid": row.replace(PLACEHOLDER_OID, "1234", 1),
+            "columns": row + " extra |",
+            "result": row.replace("PASS", "UNKNOWN"),
+            "empty_result": row.replace("PASS", ""),
+            "result_prefix": row.replace("PASS", "PASSING"),
+        }
+        for label, text in cases.items():
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                parse_freeze_index(text)
 
     def test_contract_requires_all_three_input_groups(self):
         contract = valid_contract()
@@ -1751,6 +1807,100 @@ class AcceptanceExecutionPolicyTests(unittest.TestCase):
         self.assertIn("不授予操作权限或追加配额", rules)
         self.assertNotIn("重算 manifest", rules)
 
+    P33_HARDWARE_EVIDENCE = (
+        "APK 实际安装",
+        "toy 包实机闭环",
+        "真包实机闭环",
+    )
+
+    @classmethod
+    def p33_hardware_scope_violations(cls, text):
+        rows = [
+            [cell.strip() for cell in line.strip().strip("|").split("|")]
+            for line in text.splitlines()
+            if line.strip().startswith("|")
+        ]
+        errors = []
+        for label in cls.P33_HARDWARE_EVIDENCE:
+            matches = [row for row in rows if row[0] == label]
+            if len(matches) != 1:
+                errors.append(f"{label}: expected one evidence row")
+            elif len(matches[0]) < 3 or matches[0][1] != "P3-3 完成前":
+                errors.append(f"{label}: hardware evidence was deferred")
+        for obsolete in (
+            "artifact 可安装性由后续集成会话验证",
+            "真机安装和传输留待 P3-5",
+        ):
+            if obsolete in text:
+                errors.append(f"obsolete completion promise: {obsolete}")
+        return errors
+
+    def test_p33_hardware_scope_is_not_deferred(self):
+        prompt = (ROOT / "docs/ota-prompts/prompt-P3-3-implementation.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual([], self.p33_hardware_scope_violations(prompt))
+        board = (ROOT / BOARD_PATH).read_text(encoding="utf-8")
+        card = board.split("#### P3-3 ", 1)[1].split("#### P3-4 ", 1)[0]
+        self.assertIn("OTA-DEC-013", card)
+        self.assertIn("P3-3 完成前", card)
+
+    def test_p33_scope_guard_rejects_missing_duplicate_or_deferred_evidence(self):
+        rows = [
+            f"| {label} | P3-3 完成前 | real observation |"
+            for label in self.P33_HARDWARE_EVIDENCE
+        ]
+        valid = "\n".join(rows)
+        self.assertEqual([], self.p33_hardware_scope_violations(valid))
+        bad_cases = {
+            "deferred": valid.replace("P3-3 完成前", "P3-5 完成前", 1),
+            "missing": "\n".join(rows[:-1]),
+            "duplicate": valid + "\n" + rows[0],
+            "old_promise": valid + "\n真机安装和传输留待 P3-5。",
+        }
+        for label, text in bad_cases.items():
+            with self.subTest(case=label):
+                self.assertTrue(self.p33_hardware_scope_violations(text))
+
+    def test_p33_scope_requires_bootable_assets_and_final_identity(self):
+        prompt = (ROOT / "docs/ota-prompts/prompt-P3-3-implementation.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "各至少一轮",
+            "durable_off == total_len",
+            "ACK_END",
+            "GET_INFO",
+            "raw SHA-256",
+            "可启动",
+            "4KB",
+            "full/patch",
+            "不得用 PC sender",
+            "不依赖 P3-5 的启动或完成",
+            "受控 HTTP",
+            "不宣称真实 P4-2",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prompt)
+
+    def test_p35_retains_real_backend_and_ten_disconnects(self):
+        prompt = (ROOT / "docs/ota-prompts/prompt-P3-5-integration.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in ("OTA-DEC-013", "P4-2", "R2", "D1", "10/10", "GET_INFO"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prompt)
+        self.assertIn("P3-3 的最小实机门禁不替代本卡", prompt)
+        self.assertIn("不得把 P3-3 的普通成功传输计入本卡 10 次断连", prompt)
+
+    def test_p33_scope_ruling_records_delegated_authority_not_execution_grant(self):
+        decisions = (ROOT / "docs/ota-spec-decisions.md").read_text(encoding="utf-8")
+        ruling = decisions.split("## OTA-DEC-013 ", 1)[1].split("## 用户裁定原文", 1)[0]
+        for marker in ("方案 A", "记录 10", "不授予操作权限或追加配额", "`DECIDED`"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, ruling)
+        self.assertIn("请你决策并解决该问题，我提前授予你权限", decisions)
+
 
 class PostP26SpecGovernanceTests(unittest.TestCase):
     """机械守护 P2-6 后共享合同、唯一提示词和 readiness 路由。"""
@@ -2154,7 +2304,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         statuses = re.findall(r"(?m)^- 状态：`([A-Z_]+)`。$", self.decisions)
         self.assertEqual(len(ids), len(statuses), "每项决定必须恰有一个状态")
         self.assertTrue(set(statuses) <= {"OPEN", "PROPOSED", "DECIDED", "SUPERSEDED"})
-        self.assertEqual({"DECIDED"}, set(statuses), "用户冻结授权后十二项决定必须全部为 DECIDED")
+        self.assertEqual({"DECIDED"}, set(statuses), "已获批准的决定必须全部为 DECIDED")
         status_by_decision = dict(zip(ids, statuses))
 
         reference_text = self.contract + "\n" + self.board

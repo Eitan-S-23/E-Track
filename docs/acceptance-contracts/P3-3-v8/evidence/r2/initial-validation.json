@@ -1,0 +1,28 @@
+{
+  "command": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-X",
+    "utf8",
+    "-B",
+    "-S",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P3-3-v8.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P3-3-v8/P3-3-v8-r2.evidence-matrix.json",
+    "--repo-root",
+    ".",
+    "--previous-contract",
+    "docs/acceptance-contracts/P3-3-v8.contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P3-3-v8/P3-3-v8.evidence-matrix.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T08:14:41.287Z",
+  "ended_at": "2026-09-15T08:14:58.819Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "VALIDATION=PASS contract=P3-3-v8 round=P3-3-V8-ACCEPTANCE-20260915-R2 overall=NOT_RUN\r\n",
+  "stderr": "",
+  "error": null
+}

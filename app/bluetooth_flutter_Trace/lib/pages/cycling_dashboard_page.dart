@@ -41,8 +41,8 @@ class CyclingDashboardPage extends StatelessWidget {
             color: Colors.grey.shade100,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Text(
                 'GPS',
                 style: TextStyle(
@@ -92,10 +92,10 @@ class CyclingDashboardPage extends StatelessWidget {
           footer: _buildFooterAction('心率'),
           alignment: CrossAxisAlignment.start,
         ),
-        Expanded(
+        const Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Text(
                 '0.00',
                 style: TextStyle(
@@ -126,10 +126,10 @@ class CyclingDashboardPage extends StatelessWidget {
   }
 
   Widget _buildStatsGrid(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
         Row(
-          children: const [
+          children: [
             Expanded(child: _StatTile(value: '0.00', label: '里程(km)')),
             SizedBox(width: 16),
             Expanded(child: _StatTile(value: '00:00', label: '运动时间')),
@@ -137,9 +137,9 @@ class CyclingDashboardPage extends StatelessWidget {
             Expanded(child: _StatTile(value: '0.00', label: '运动均速(km/h)')),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
         Row(
-          children: const [
+          children: [
             Expanded(child: _StatTile(value: '0.00', label: '极速(km/h)')),
             SizedBox(width: 16),
             Expanded(child: _StatTile(value: '0.0', label: '海拔(m)')),

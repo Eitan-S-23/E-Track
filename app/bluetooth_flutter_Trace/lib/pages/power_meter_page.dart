@@ -12,7 +12,7 @@ import 'device_detail_page.dart';
 import '../widgets/selectable_device_card.dart';
 
 class PowerMeterPage extends StatelessWidget {
-  const PowerMeterPage({Key? key}) : super(key: key);
+  const PowerMeterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class PowerMeterPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),

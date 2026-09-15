@@ -75,9 +75,9 @@ class BleController extends GetxController {
       // 获取当前状态
       adapterState.value = _bluetoothService.adapterState.value;
       isScanning.value = _bluetoothService.isScanning.value;
-      discoveredDevices.value = _bluetoothService.discoveredDevices.value;
-      connectedDevices.value = _bluetoothService.connectedDevices.value;
-      scanResults.value = _bluetoothService.scanResults.value;
+      discoveredDevices.assignAll(_bluetoothService.discoveredDevices);
+      connectedDevices.assignAll(_bluetoothService.connectedDevices);
+      scanResults.assignAll(_bluetoothService.scanResults);
 
       debugPrint('蓝牙控制器初始化成功，平台: ${_bluetoothService.getPlatformInfo()}');
     } catch (e) {
@@ -172,6 +172,50 @@ class BleController extends GetxController {
             .map((uuid) => uuid.toString())
             .toList() ??
         [];
+  }
+
+  /// 按广播内容粗分设备类别，用于设备列表与详情页的图标匹配。
+  /// 名称关键词（广播名优先、平台名兜底）优先于标准 GATT 服务 UUID 兜底。
+  String getDeviceCategory(BluetoothDevice device) {
+    final result = getScanResult(device);
+    final names =
+        '${result?.advertisementData.advName ?? ''} ${device.platformName}'
+            .toLowerCase();
+
+    bool has(List<String> keys) => keys.any(names.contains);
+
+    if (has(['watch', '手表', '手环', 'band'])) return 'watch';
+    if (has(['heart', '心率', 'hrm'])) return 'heart_rate';
+    if (has(['headphone', 'earphone', 'airpods', 'buds', 'beats', '耳机'])) {
+      return 'earphones';
+    }
+    if (has(['power', '功率'])) return 'power_meter';
+    if (has(['cadence', '踏频', 'csc'])) return 'cadence';
+    if (has(['speaker', '音箱'])) return 'speaker';
+    if (has(['phone', '手机'])) return 'phone';
+    if (has(['tv', '电视'])) return 'tv';
+    if (has(['keyboard', '键盘'])) return 'keyboard';
+    if (has(['mouse', '鼠标'])) return 'mouse';
+    if (has(['beacon', '信标'])) return 'beacon';
+    if (has(['igpsport', 'xoss', '码表', 'computer'])) {
+      return 'computer';
+    }
+
+    // 标准 GATT 服务 UUID 兜底（16 位服务号在 128 位规范形式中的固定前缀）。
+    final uuids = result?.advertisementData.serviceUuids
+            .map((uuid) => uuid.toString().toLowerCase()) ??
+        const Iterable<String>.empty();
+    if (uuids.any((u) => u.contains('0000180d-0000-1000'))) {
+      return 'heart_rate';
+    }
+    if (uuids.any((u) => u.contains('00001818-0000-1000'))) {
+      return 'power_meter';
+    }
+    if (uuids.any((u) => u.contains('00001816-0000-1000')) ||
+        uuids.any((u) => u.contains('00001814-0000-1000'))) {
+      return 'cadence';
+    }
+    return 'unknown';
   }
 
   /// 检查设备是否可连接

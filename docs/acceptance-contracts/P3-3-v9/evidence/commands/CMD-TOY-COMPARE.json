@@ -1,0 +1,12 @@
+{
+  "id": "CMD-TOY-COMPARE",
+  "command": "cmp .cache/p3-3-v8-acceptance/toy-unpacked.bin docs/acceptance-contracts/P3-3-v8/artifacts/toy-3.2.4-target-image.bin",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:10:06.671Z",
+  "ended_at": "2026-09-15T07:10:07.757Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": ""
+}

@@ -1,0 +1,1578 @@
+[
+  {
+    "run": "34861159023",
+    "host": "windows-2022",
+    "command": "gh run download 34861159023 -n flutter-dev-windows-2022-34861159023-1 -D docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "",
+    "files": [
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/analyze.log",
+        "size": 97,
+        "sha256": "bb5659c304bb8adb54dac66d871c83ee59c86c1a30ed53f41c37d57d481ac5df",
+        "signals": [
+          "No issues found! (ran in 16.9s)"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/dependencies.log",
+        "size": 4663,
+        "sha256": "70c29446c69a754bb0143fb3f58cff60b171dbd5fb1f4470e55cff183a4ca724",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/sdk_checkout.log",
+        "size": 2675,
+        "sha256": "e299c37a019461aba18d484a09fa518e135be363cf58a6f38288f49eb0246550",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/sdk_version.log",
+        "size": 920,
+        "sha256": "dfa9d8565f990dbda57d78d0b0c94666feba87a683f3380fbfff5fce99fe0e87",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/logs/tests.log",
+        "size": 90525,
+        "sha256": "f793698861e64da0cebc9a953748b89a809f9475bf11b703fc3b3bc5a6fdb71b",
+        "signals": [
+          "01:38 +331: All tests passed!"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-windows-2022/run-3c9cf79be1f54ad6b87a636b418cecdd/result.json",
+        "size": 10632,
+        "sha256": "7ed1400567ef8fe45050750b70198bd0f3a47e5123208b0830bfb9617eb48a90",
+        "result": {
+          "schema": "etrack-flutter-dev-checks-v1",
+          "evidence_kind": "development-self-test",
+          "formal_acceptance": "NOT_RUN",
+          "development_result": "PASS",
+          "scope": "all",
+          "apk_requested": false,
+          "apk_result": "NOT_REQUESTED",
+          "source_before": {
+            "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+            "clean": true,
+            "status": "",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "host": "Windows-2022Server-10.0.20348-SP0",
+          "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+          "sdk_channel": "stable",
+          "github_run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34861159023",
+          "github_run_attempt": "1",
+          "lock_sha256_before": "ed54e10209a46f0ed9673245d6d400427db886d08f4bcae04c0e5d26ddb5e0fd",
+          "toolchain_regen": [
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+              "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+              "effective_sha256": "cfe7a312ea0047e4e756a589789adc3f94e3727a4ce503d3506f7c4510a60c87",
+              "effective_bytes": 1571,
+              "effective_blob": "06dcbd36d182f74df878861592ef511bcee2103c",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+            },
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+              "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+              "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+              "effective_bytes": 1196,
+              "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+            },
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+              "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+              "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+              "effective_bytes": 869,
+              "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+            }
+          ],
+          "commands": [
+            {
+              "name": "sdk_checkout",
+              "argv": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track",
+              "timeout_seconds": 180,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\sdk_checkout.log",
+              "timed_out": false,
+              "launch": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk"
+              ],
+              "pid": 7300,
+              "elapsed_seconds": 5.219
+            },
+            {
+              "name": "sdk_version",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+                "--version",
+                "--machine"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\sdk_version.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"--version\" \"--machine\"\"",
+              "pid": 2112,
+              "elapsed_seconds": 37.266
+            },
+            {
+              "name": "dependencies",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+                "pub",
+                "get",
+                "--enforce-lockfile"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\dependencies.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"pub\" \"get\" \"--enforce-lockfile\"\"",
+              "pid": 2764,
+              "elapsed_seconds": 12.906
+            },
+            {
+              "name": "analyze",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+                "analyze",
+                "--no-pub"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\analyze.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"analyze\" \"--no-pub\"\"",
+              "pid": 4652,
+              "elapsed_seconds": 18.438
+            },
+            {
+              "name": "tests",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+                "test",
+                "--no-pub",
+                "--reporter",
+                "expanded",
+                "--timeout",
+                "2m",
+                "test"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 600,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\tests.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"test\" \"--no-pub\" \"--reporter\" \"expanded\" \"--timeout\" \"2m\" \"test\"\"",
+              "pid": 3696,
+              "elapsed_seconds": 110.844
+            }
+          ],
+          "lock_sha256_after": "ed54e10209a46f0ed9673245d6d400427db886d08f4bcae04c0e5d26ddb5e0fd",
+          "lockfile_unchanged": true,
+          "source_after": {
+            "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+            "clean": false,
+            "status": "M app/bluetooth_flutter_Trace/analysis_options.yaml\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+            "dirty_semantic": [
+              "app/bluetooth_flutter_Trace/analysis_options.yaml",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake"
+            ],
+            "dirty_semantic_sha": {
+              "app/bluetooth_flutter_Trace/analysis_options.yaml": "06dcbd36d182f74df878861592ef511bcee2103c",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc": "78cbc3a6706333e1c35500de87904494c0692f79",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake": "1b07b9cb7555eb75f34d2663449f786927cb5cf6"
+            },
+            "dirty_eol_only": [
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+            ],
+            "dirty_untracked": []
+          },
+          "source_unchanged": false,
+          "source_deltas_bound_toolchain_regen": true,
+          "source_after_restored": {
+            "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+            "clean": false,
+            "status": "M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+            ],
+            "dirty_untracked": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "run": "34861159023",
+    "host": "ubuntu-latest",
+    "command": "gh run download 34861159023 -n flutter-dev-ubuntu-latest-34861159023-1 -D docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "",
+    "files": [
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/analyze.log",
+        "size": 97,
+        "sha256": "d3287b9741a17447f1f47f9fa28ae7cf8215f7adb3a18b16fd6503412e534bf2",
+        "signals": [
+          "No issues found! (ran in 15.5s)"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_build.log",
+        "size": 13433,
+        "sha256": "d36cf812f5fd29e0cc673a8a5734c66d5b1217f4feace5b755e104824f1fb11d",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_collect.log",
+        "size": 323,
+        "sha256": "7410ad5c1d4d0a921794836a60688e607e6c8c939c04460ad3647ae641ffddad",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_install_wrapper.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_java.log",
+        "size": 468,
+        "sha256": "26aa92b5a3f43bbb0ae61c886fcc8719433f5193174f5e9137a99eade9027278",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_prepare.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_sdk.log",
+        "size": 18664,
+        "sha256": "892d151c947d1974a01464265800d25876052be6e787d707fa6ac206805cddd5",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_verify.log",
+        "size": 618,
+        "sha256": "d668efa5297ac95b72c8c44fade5cd67ac1eab11237e33b3e8bee06f1b3142f3",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/apk_wrapper.log",
+        "size": 892,
+        "sha256": "6816a2e00d142adca7d8a81fe1202c75d5a9c85d430be56ac5a00dfeab2dd843",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/dependencies.log",
+        "size": 4663,
+        "sha256": "f8fe9bc10dd99d96cead03c12e5e2444d77fafcde5abbb6c547ac0e12811dd76",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/sdk_checkout.log",
+        "size": 551,
+        "sha256": "b9676faeab8ce88480f2ae15d4844272d7fdec36ed2cbcebdc85635f811b3150",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/sdk_version.log",
+        "size": 4244,
+        "sha256": "39d38be1417266502aab4ae24d75ea8fb7d1b0f2a59fed8a0b31a04a1f8d5995",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/logs/tests.log",
+        "size": 93551,
+        "sha256": "8629bd812f929c84a49572290dddf608e6cd880740dde3de452492cb343576ad",
+        "signals": [
+          "01:36 +324 ~7: All tests passed!"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34861159023-ubuntu-latest/run-3b2608dcfb4e476e83678a0637e98a4e/result.json",
+        "size": 18235,
+        "sha256": "40e8956d00beb5e1552903a2aa572cc0e96db826eedaa06ecf673e02dbfd6b91",
+        "result": {
+          "schema": "etrack-flutter-dev-checks-v1",
+          "evidence_kind": "development-self-test",
+          "formal_acceptance": "NOT_RUN",
+          "development_result": "PASS",
+          "scope": "all",
+          "apk_requested": true,
+          "apk_result": "PASS",
+          "source_before": {
+            "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+            "clean": true,
+            "status": "",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+          "python": "3.12.3 (main, Jul 15 2026, 23:46:41) [GCC 13.3.0]",
+          "sdk_channel": "stable",
+          "github_run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34861159023",
+          "github_run_attempt": "1",
+          "lock_sha256_before": "95ba37036efedb9df8de68ee83ba643b5ad9753ec3adbcd3a03bf3ff6e2325ea",
+          "toolchain_regen": [
+            {
+              "stage": "before_apk",
+              "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+              "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+              "effective_sha256": "62d5001517860783236e148ad669ce5560998c64f1cabc2de997131225f56129",
+              "effective_bytes": 1536,
+              "effective_blob": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+            },
+            {
+              "stage": "before_apk",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+              "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+              "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+              "effective_bytes": 1196,
+              "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+            },
+            {
+              "stage": "before_apk",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+              "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+              "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+              "effective_bytes": 869,
+              "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+            },
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/android/gradle.properties",
+              "committed_sha256": "cc15de2254a2f7a9d830521626418c7d890978ec9127e67af2fba72361a439ae",
+              "effective_sha256": "5dff6e9df6a50c22f8cfd31ac37cdd9a841ac9d089446b44a8402e1d28a70994",
+              "effective_bytes": 265,
+              "effective_blob": "cd4198da4532c255497fa8c5aaa2430ef6fc9885",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/android/gradle.properties b/app/bluetooth_flutter_Trace/android/gradle.properties\nindex bbd7acc..cd4198d 100644\n--- a/app/bluetooth_flutter_Trace/android/gradle.properties\n+++ b/app/bluetooth_flutter_Trace/android/gradle.properties\n@@ -1,3 +1,7 @@\n org.gradle.jvmargs=-Xmx1536M\n android.useAndroidX=true\n android.enableJetifier=false\n+# This builtInKotlin flag was added automatically by Flutter migrator\n+android.builtInKotlin=false\n+# This newDsl flag was added automatically by Flutter migrator\n+android.newDsl=false\n"
+            }
+          ],
+          "commands": [
+            {
+              "name": "sdk_checkout",
+              "argv": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 180,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/sdk_checkout.log",
+              "timed_out": false,
+              "launch": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk"
+              ],
+              "pid": 2304,
+              "elapsed_seconds": 3.022
+            },
+            {
+              "name": "sdk_version",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "--version",
+                "--machine"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/sdk_version.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "--version",
+                "--machine"
+              ],
+              "pid": 2313,
+              "elapsed_seconds": 33.792
+            },
+            {
+              "name": "dependencies",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "pub",
+                "get",
+                "--enforce-lockfile"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/dependencies.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "pub",
+                "get",
+                "--enforce-lockfile"
+              ],
+              "pid": 2444,
+              "elapsed_seconds": 12.403
+            },
+            {
+              "name": "analyze",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "analyze",
+                "--no-pub"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/analyze.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "analyze",
+                "--no-pub"
+              ],
+              "pid": 2609,
+              "elapsed_seconds": 16.063
+            },
+            {
+              "name": "tests",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "test",
+                "--no-pub",
+                "--reporter",
+                "expanded",
+                "--timeout",
+                "2m",
+                "test"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 600,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/tests.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "test",
+                "--no-pub",
+                "--reporter",
+                "expanded",
+                "--timeout",
+                "2m",
+                "test"
+              ],
+              "pid": 2670,
+              "elapsed_seconds": 106.813
+            },
+            {
+              "name": "apk_prepare",
+              "argv": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "prepare",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 900,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_prepare.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "prepare",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e"
+              ],
+              "pid": 2970,
+              "elapsed_seconds": 2.72
+            },
+            {
+              "name": "apk_java",
+              "argv": [
+                "/usr/lib/jvm/temurin-17-jdk-amd64/bin/java",
+                "-version"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 30,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_java.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/lib/jvm/temurin-17-jdk-amd64/bin/java",
+                "-version"
+              ],
+              "pid": 2972,
+              "elapsed_seconds": 0.165
+            },
+            {
+              "name": "apk_sdk",
+              "argv": [
+                "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager",
+                "--sdk_root=/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/android-sdk",
+                "cmdline-tools;latest",
+                "platform-tools",
+                "platforms;android-35",
+                "build-tools;35.0.0"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 600,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_sdk.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager",
+                "--sdk_root=/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/android-sdk",
+                "cmdline-tools;latest",
+                "platform-tools",
+                "platforms;android-35",
+                "build-tools;35.0.0"
+              ],
+              "pid": 2990,
+              "elapsed_seconds": 15.653
+            },
+            {
+              "name": "apk_wrapper",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/gradle-dist/gradle-8.14/bin/gradle",
+                "--no-daemon",
+                "-p",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/wrapper-bootstrap",
+                "wrapper",
+                "--gradle-version",
+                "8.14",
+                "--distribution-type",
+                "all"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_wrapper.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/gradle-dist/gradle-8.14/bin/gradle",
+                "--no-daemon",
+                "-p",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/wrapper-bootstrap",
+                "wrapper",
+                "--gradle-version",
+                "8.14",
+                "--distribution-type",
+                "all"
+              ],
+              "pid": 3077,
+              "elapsed_seconds": 7.762
+            },
+            {
+              "name": "apk_install_wrapper",
+              "argv": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "install-wrapper",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 30,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_install_wrapper.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "install-wrapper",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e"
+              ],
+              "pid": 3171,
+              "elapsed_seconds": 0.114
+            },
+            {
+              "name": "apk_build",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "build",
+                "apk",
+                "--debug",
+                "--no-pub",
+                "--target-platform=android-arm,android-arm64"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 1200,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_build.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/sdk/bin/flutter",
+                "build",
+                "apk",
+                "--debug",
+                "--no-pub",
+                "--target-platform=android-arm,android-arm64"
+              ],
+              "pid": 3176,
+              "elapsed_seconds": 549.562
+            },
+            {
+              "name": "apk_verify",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/android-sdk/build-tools/35.0.0/apksigner",
+                "verify",
+                "--verbose",
+                "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/app/outputs/flutter-apk/app-debug.apk"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 60,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_verify.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/android-sdk/build-tools/35.0.0/apksigner",
+                "verify",
+                "--verbose",
+                "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/app/outputs/flutter-apk/app-debug.apk"
+              ],
+              "pid": 4024,
+              "elapsed_seconds": 0.527
+            },
+            {
+              "name": "apk_collect",
+              "argv": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "collect",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 30,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_collect.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "collect",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e"
+              ],
+              "pid": 4052,
+              "elapsed_seconds": 0.818
+            }
+          ],
+          "lock_sha256_after": "95ba37036efedb9df8de68ee83ba643b5ad9753ec3adbcd3a03bf3ff6e2325ea",
+          "lockfile_unchanged": true,
+          "source_after": {
+            "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+            "clean": false,
+            "status": "M app/bluetooth_flutter_Trace/android/gradle.properties",
+            "dirty_semantic": [
+              "app/bluetooth_flutter_Trace/android/gradle.properties"
+            ],
+            "dirty_semantic_sha": {
+              "app/bluetooth_flutter_Trace/android/gradle.properties": "cd4198da4532c255497fa8c5aaa2430ef6fc9885"
+            },
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "source_unchanged": false,
+          "source_deltas_bound_toolchain_regen": true,
+          "source_after_restored": {
+            "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+            "clean": true,
+            "status": "",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "apk_metadata": "artifacts/trace-dev-debug.json"
+        }
+      }
+    ]
+  },
+  {
+    "run": "34869549756",
+    "host": "windows-2022",
+    "command": "gh run download 34869549756 -n flutter-dev-windows-2022-34869549756-1 -D docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "",
+    "files": [
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/analyze.log",
+        "size": 97,
+        "sha256": "783035bd9b801fcd2b168882fe22babc7b3feef1036324ad86d692040f3bbebc",
+        "signals": [
+          "No issues found! (ran in 16.0s)"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/dependencies.log",
+        "size": 4663,
+        "sha256": "d5778a0dd88b9f27afd4c72e28dea6c9473f7364cfb12e90ccb4db75420accf0",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/sdk_checkout.log",
+        "size": 2742,
+        "sha256": "ed49e33c7dc828174e75fb49cff237a1d2460d8f6ca72639c1878bfab9369635",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/sdk_version.log",
+        "size": 920,
+        "sha256": "a957fe728b57353a76db7f4a3ff615d9608569aaf67820d66cbc390c49a23e64",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/logs/tests.log",
+        "size": 90526,
+        "sha256": "0bf790d36d63a32015c3c12157bbe90a5f4ca6ccaa9a8ec06a567f779307b696",
+        "signals": [
+          "01:38 +331: All tests passed!"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-windows-2022/run-693aae26c21a4e2c9f98110f2e092c3d/result.json",
+        "size": 10632,
+        "sha256": "828e800d3246f840cd0b53d9b195ae4c699b4e836ef3916904b614aa3d25e9cc",
+        "result": {
+          "schema": "etrack-flutter-dev-checks-v1",
+          "evidence_kind": "development-self-test",
+          "formal_acceptance": "NOT_RUN",
+          "development_result": "PASS",
+          "scope": "all",
+          "apk_requested": false,
+          "apk_result": "NOT_REQUESTED",
+          "source_before": {
+            "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+            "clean": true,
+            "status": "",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "host": "Windows-2022Server-10.0.20348-SP0",
+          "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+          "sdk_channel": "stable",
+          "github_run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34869549756",
+          "github_run_attempt": "1",
+          "lock_sha256_before": "ed54e10209a46f0ed9673245d6d400427db886d08f4bcae04c0e5d26ddb5e0fd",
+          "toolchain_regen": [
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+              "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+              "effective_sha256": "cfe7a312ea0047e4e756a589789adc3f94e3727a4ce503d3506f7c4510a60c87",
+              "effective_bytes": 1571,
+              "effective_blob": "06dcbd36d182f74df878861592ef511bcee2103c",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+            },
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+              "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+              "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+              "effective_bytes": 1196,
+              "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+            },
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+              "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+              "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+              "effective_bytes": 869,
+              "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+            }
+          ],
+          "commands": [
+            {
+              "name": "sdk_checkout",
+              "argv": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track",
+              "timeout_seconds": 180,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\sdk_checkout.log",
+              "timed_out": false,
+              "launch": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk"
+              ],
+              "pid": 2264,
+              "elapsed_seconds": 5.609
+            },
+            {
+              "name": "sdk_version",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat",
+                "--version",
+                "--machine"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\sdk_version.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat\" \"--version\" \"--machine\"\"",
+              "pid": 1072,
+              "elapsed_seconds": 38.469
+            },
+            {
+              "name": "dependencies",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat",
+                "pub",
+                "get",
+                "--enforce-lockfile"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\dependencies.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat\" \"pub\" \"get\" \"--enforce-lockfile\"\"",
+              "pid": 4288,
+              "elapsed_seconds": 16.062
+            },
+            {
+              "name": "analyze",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat",
+                "analyze",
+                "--no-pub"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\analyze.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat\" \"analyze\" \"--no-pub\"\"",
+              "pid": 6276,
+              "elapsed_seconds": 17.672
+            },
+            {
+              "name": "tests",
+              "argv": [
+                "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat",
+                "test",
+                "--no-pub",
+                "--reporter",
+                "expanded",
+                "--timeout",
+                "2m",
+                "test"
+              ],
+              "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+              "timeout_seconds": 600,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs\\tests.log",
+              "timed_out": false,
+              "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-693aae26c21a4e2c9f98110f2e092c3d\\sdk\\bin\\flutter.bat\" \"test\" \"--no-pub\" \"--reporter\" \"expanded\" \"--timeout\" \"2m\" \"test\"\"",
+              "pid": 6504,
+              "elapsed_seconds": 110.735
+            }
+          ],
+          "lock_sha256_after": "ed54e10209a46f0ed9673245d6d400427db886d08f4bcae04c0e5d26ddb5e0fd",
+          "lockfile_unchanged": true,
+          "source_after": {
+            "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+            "clean": false,
+            "status": "M app/bluetooth_flutter_Trace/analysis_options.yaml\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+            "dirty_semantic": [
+              "app/bluetooth_flutter_Trace/analysis_options.yaml",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake"
+            ],
+            "dirty_semantic_sha": {
+              "app/bluetooth_flutter_Trace/analysis_options.yaml": "06dcbd36d182f74df878861592ef511bcee2103c",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc": "78cbc3a6706333e1c35500de87904494c0692f79",
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake": "1b07b9cb7555eb75f34d2663449f786927cb5cf6"
+            },
+            "dirty_eol_only": [
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+            ],
+            "dirty_untracked": []
+          },
+          "source_unchanged": false,
+          "source_deltas_bound_toolchain_regen": true,
+          "source_after_restored": {
+            "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+            "clean": false,
+            "status": "M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [
+              "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+            ],
+            "dirty_untracked": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "run": "34869549756",
+    "host": "ubuntu-latest",
+    "command": "gh run download 34869549756 -n flutter-dev-ubuntu-latest-34869549756-1 -D docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "",
+    "files": [
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/analyze.log",
+        "size": 97,
+        "sha256": "1acec092634f61ee38dc51d8fc5fe5943909423a425af5d175f4d83e3bc7486b",
+        "signals": [
+          "No issues found! (ran in 15.6s)"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_build.log",
+        "size": 13433,
+        "sha256": "c1d96949b793373cda5b205f8de50c983bcd7d26c7156e2d1f10a6d131a9c9ab",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_collect.log",
+        "size": 323,
+        "sha256": "e69bc4dc9ddc0881c8886a1948d1bc027f5d19a10735053881ff70334f3276cd",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_install_wrapper.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_java.log",
+        "size": 468,
+        "sha256": "085165ad33e3a94cab8e57b1bc323775a8f5a4093d955c9719ecb4ecd3bec65c",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_prepare.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_sdk.log",
+        "size": 18664,
+        "sha256": "02c4cc542c2ebe11a5ed655c49fa95a3e9c6e3dcf7241bd0fb9c797b71764a67",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_verify.log",
+        "size": 618,
+        "sha256": "08f35145935b7f51b7ee904cdd1ddc4423b561465d67c42bea25f89c2b1291f7",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/apk_wrapper.log",
+        "size": 892,
+        "sha256": "736ca0c0630bc39168c344982b800d5066ced3f1511bd0f62690004a16dd4aa9",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/dependencies.log",
+        "size": 4663,
+        "sha256": "d252dfef788eaf5212cb085b5436649aac174ad982a8481db5c191d4041ca9e2",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/sdk_checkout.log",
+        "size": 586,
+        "sha256": "89928ec171d00440d2169707fec0bf8414f5b700bec91494b725c23ae9c54c13",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/sdk_version.log",
+        "size": 4560,
+        "sha256": "abbdddfa61ff0da5ab85de4bb9cf749cf81605cffc9281c246c5b30caeb11186",
+        "signals": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/logs/tests.log",
+        "size": 93556,
+        "sha256": "dfaff4ff7a4d43558d97262c9e089d428753018805d5377731140aa714e2360b",
+        "signals": [
+          "01:37 +324 ~7: All tests passed!"
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v7/evidence/dev-checks/34869549756-ubuntu-latest/run-0c7e0d0aa9c34fc085cc75e50cad796b/result.json",
+        "size": 18234,
+        "sha256": "ee92da07b74ab013463020896f27a3ac8761c6b4f7e97598659e78a6abb36cb8",
+        "result": {
+          "schema": "etrack-flutter-dev-checks-v1",
+          "evidence_kind": "development-self-test",
+          "formal_acceptance": "NOT_RUN",
+          "development_result": "PASS",
+          "scope": "all",
+          "apk_requested": true,
+          "apk_result": "PASS",
+          "source_before": {
+            "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+            "clean": true,
+            "status": "",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+          "python": "3.12.3 (main, Jul 15 2026, 23:46:41) [GCC 13.3.0]",
+          "sdk_channel": "stable",
+          "github_run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34869549756",
+          "github_run_attempt": "1",
+          "lock_sha256_before": "95ba37036efedb9df8de68ee83ba643b5ad9753ec3adbcd3a03bf3ff6e2325ea",
+          "toolchain_regen": [
+            {
+              "stage": "before_apk",
+              "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+              "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+              "effective_sha256": "62d5001517860783236e148ad669ce5560998c64f1cabc2de997131225f56129",
+              "effective_bytes": 1536,
+              "effective_blob": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+            },
+            {
+              "stage": "before_apk",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+              "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+              "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+              "effective_bytes": 1196,
+              "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+            },
+            {
+              "stage": "before_apk",
+              "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+              "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+              "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+              "effective_bytes": 869,
+              "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+            },
+            {
+              "stage": "after_run",
+              "path": "app/bluetooth_flutter_Trace/android/gradle.properties",
+              "committed_sha256": "cc15de2254a2f7a9d830521626418c7d890978ec9127e67af2fba72361a439ae",
+              "effective_sha256": "5dff6e9df6a50c22f8cfd31ac37cdd9a841ac9d089446b44a8402e1d28a70994",
+              "effective_bytes": 265,
+              "effective_blob": "cd4198da4532c255497fa8c5aaa2430ef6fc9885",
+              "diff": "diff --git a/app/bluetooth_flutter_Trace/android/gradle.properties b/app/bluetooth_flutter_Trace/android/gradle.properties\nindex bbd7acc..cd4198d 100644\n--- a/app/bluetooth_flutter_Trace/android/gradle.properties\n+++ b/app/bluetooth_flutter_Trace/android/gradle.properties\n@@ -1,3 +1,7 @@\n org.gradle.jvmargs=-Xmx1536M\n android.useAndroidX=true\n android.enableJetifier=false\n+# This builtInKotlin flag was added automatically by Flutter migrator\n+android.builtInKotlin=false\n+# This newDsl flag was added automatically by Flutter migrator\n+android.newDsl=false\n"
+            }
+          ],
+          "commands": [
+            {
+              "name": "sdk_checkout",
+              "argv": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 180,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/sdk_checkout.log",
+              "timed_out": false,
+              "launch": [
+                "git",
+                "clone",
+                "--config",
+                "core.longpaths=true",
+                "--depth",
+                "1",
+                "--branch",
+                "stable",
+                "https://github.com/flutter/flutter.git",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk"
+              ],
+              "pid": 2292,
+              "elapsed_seconds": 3.276
+            },
+            {
+              "name": "sdk_version",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "--version",
+                "--machine"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/sdk_version.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "--version",
+                "--machine"
+              ],
+              "pid": 2301,
+              "elapsed_seconds": 38.332
+            },
+            {
+              "name": "dependencies",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "pub",
+                "get",
+                "--enforce-lockfile"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/dependencies.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "pub",
+                "get",
+                "--enforce-lockfile"
+              ],
+              "pid": 2436,
+              "elapsed_seconds": 14.367
+            },
+            {
+              "name": "analyze",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "analyze",
+                "--no-pub"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/analyze.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "analyze",
+                "--no-pub"
+              ],
+              "pid": 2594,
+              "elapsed_seconds": 16.31
+            },
+            {
+              "name": "tests",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "test",
+                "--no-pub",
+                "--reporter",
+                "expanded",
+                "--timeout",
+                "2m",
+                "test"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 600,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/tests.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "test",
+                "--no-pub",
+                "--reporter",
+                "expanded",
+                "--timeout",
+                "2m",
+                "test"
+              ],
+              "pid": 2660,
+              "elapsed_seconds": 108.794
+            },
+            {
+              "name": "apk_prepare",
+              "argv": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "prepare",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 900,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_prepare.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "prepare",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b"
+              ],
+              "pid": 2957,
+              "elapsed_seconds": 2.471
+            },
+            {
+              "name": "apk_java",
+              "argv": [
+                "/usr/lib/jvm/temurin-17-jdk-amd64/bin/java",
+                "-version"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 30,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_java.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/lib/jvm/temurin-17-jdk-amd64/bin/java",
+                "-version"
+              ],
+              "pid": 2959,
+              "elapsed_seconds": 0.215
+            },
+            {
+              "name": "apk_sdk",
+              "argv": [
+                "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager",
+                "--sdk_root=/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/android-sdk",
+                "cmdline-tools;latest",
+                "platform-tools",
+                "platforms;android-35",
+                "build-tools;35.0.0"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 600,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_sdk.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager",
+                "--sdk_root=/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/android-sdk",
+                "cmdline-tools;latest",
+                "platform-tools",
+                "platforms;android-35",
+                "build-tools;35.0.0"
+              ],
+              "pid": 2977,
+              "elapsed_seconds": 13.64
+            },
+            {
+              "name": "apk_wrapper",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/gradle-dist/gradle-8.14/bin/gradle",
+                "--no-daemon",
+                "-p",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/wrapper-bootstrap",
+                "wrapper",
+                "--gradle-version",
+                "8.14",
+                "--distribution-type",
+                "all"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 300,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_wrapper.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/gradle-dist/gradle-8.14/bin/gradle",
+                "--no-daemon",
+                "-p",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/wrapper-bootstrap",
+                "wrapper",
+                "--gradle-version",
+                "8.14",
+                "--distribution-type",
+                "all"
+              ],
+              "pid": 3066,
+              "elapsed_seconds": 8.568
+            },
+            {
+              "name": "apk_install_wrapper",
+              "argv": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "install-wrapper",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 30,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_install_wrapper.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "install-wrapper",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b"
+              ],
+              "pid": 3221,
+              "elapsed_seconds": 0.114
+            },
+            {
+              "name": "apk_build",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "build",
+                "apk",
+                "--debug",
+                "--no-pub",
+                "--target-platform=android-arm,android-arm64"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+              "timeout_seconds": 1200,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_build.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/sdk/bin/flutter",
+                "build",
+                "apk",
+                "--debug",
+                "--no-pub",
+                "--target-platform=android-arm,android-arm64"
+              ],
+              "pid": 3227,
+              "elapsed_seconds": 578.724
+            },
+            {
+              "name": "apk_verify",
+              "argv": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/android-sdk/build-tools/35.0.0/apksigner",
+                "verify",
+                "--verbose",
+                "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/app/outputs/flutter-apk/app-debug.apk"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 60,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_verify.log",
+              "timed_out": false,
+              "launch": [
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b/android-sdk/build-tools/35.0.0/apksigner",
+                "verify",
+                "--verbose",
+                "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/app/outputs/flutter-apk/app-debug.apk"
+              ],
+              "pid": 4097,
+              "elapsed_seconds": 0.521
+            },
+            {
+              "name": "apk_collect",
+              "argv": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "collect",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b"
+              ],
+              "cwd": "/home/runner/work/E-Track/E-Track",
+              "timeout_seconds": 30,
+              "status": "PASS",
+              "exit_code": 0,
+              "log": "logs/apk_collect.log",
+              "timed_out": false,
+              "launch": [
+                "/usr/bin/python",
+                "-B",
+                "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+                "collect",
+                "--repo-root",
+                "/home/runner/work/E-Track/E-Track",
+                "--run-dir",
+                "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-0c7e0d0aa9c34fc085cc75e50cad796b"
+              ],
+              "pid": 4124,
+              "elapsed_seconds": 0.817
+            }
+          ],
+          "lock_sha256_after": "95ba37036efedb9df8de68ee83ba643b5ad9753ec3adbcd3a03bf3ff6e2325ea",
+          "lockfile_unchanged": true,
+          "source_after": {
+            "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+            "clean": false,
+            "status": "M app/bluetooth_flutter_Trace/android/gradle.properties",
+            "dirty_semantic": [
+              "app/bluetooth_flutter_Trace/android/gradle.properties"
+            ],
+            "dirty_semantic_sha": {
+              "app/bluetooth_flutter_Trace/android/gradle.properties": "cd4198da4532c255497fa8c5aaa2430ef6fc9885"
+            },
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "source_unchanged": false,
+          "source_deltas_bound_toolchain_regen": true,
+          "source_after_restored": {
+            "head": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+            "clean": true,
+            "status": "",
+            "dirty_semantic": [],
+            "dirty_semantic_sha": {},
+            "dirty_eol_only": [],
+            "dirty_untracked": []
+          },
+          "apk_metadata": "artifacts/trace-dev-debug.json"
+        }
+      }
+    ]
+  }
+]

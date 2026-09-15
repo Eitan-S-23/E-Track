@@ -1,0 +1,12 @@
+{
+  "id": "CMD-APK-CERT",
+  "command": "java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs docs/acceptance-contracts/P3-3-v8/artifacts/ble-monitor-android.apk",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:09:52.236Z",
+  "ended_at": "2026-09-15T07:09:56.031Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "Signer #1 certificate DN: C=US, O=Android, CN=Android Debug\r\nSigner #1 certificate SHA-256 digest: 6f51a6a64e21b50b0d7cace2fdf0ca4b978fbdff1814d7bbab90fad08832e658\r\nSigner #1 certificate SHA-1 digest: c02bf17a2e612e63bc497046edad922d2281fd2e\r\nSigner #1 certificate MD5 digest: 01845e4703c9a0dd9b1d85172e9fce28\r\n",
+  "stderr": "Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\tmp -Duser.home=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\home -XX:-UsePerfData -XX:ErrorFile=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\hs_err_pid%p.log -XX:HeapDumpPath=D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-v8-acceptance\\heap.hprof\n"
+}

@@ -1,0 +1,148 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-3-v8",
+  "current_contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+  "previous_contract_id": "P3-3-v7",
+  "previous_contract_sha256": "38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P3-3-V8-ACCEPTANCE-20260915-R1",
+  "previous_round_id": "P3-3-V7-FREEZE-20260915-R1",
+  "previous_matrix_sha256": "646613539C4905A89948E91803251E69066CA1528BCA830D1938B303649C2ECA",
+  "changed_input_groups": [
+    "firmware",
+    "flutter",
+    "production",
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "EXT-APK",
+    "EXT-BOARD-STATE",
+    "EXT-HTTP-TEST-SERVICE",
+    "EXT-REAL-ETU",
+    "EXT-TOY-BOOTABLE"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "reasons": [
+        "artifact_definition_changed:ART-DEV-LOGS",
+        "command_definition_changed:CMD-DEV-CHECKS",
+        "command_definition_changed:CMD-DEV-DOWNLOAD",
+        "command_definition_changed:CMD-DEV-LOGS",
+        "command_definition_changed:CMD-SOURCE-EQUIVALENCE",
+        "criterion_definition_changed",
+        "input_group_changed:flutter",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "reasons": [
+        "artifact_definition_changed:ART-APK-RELEASE",
+        "artifact_definition_changed:ART-WINDOWS-RUNTIME",
+        "command_definition_changed:CMD-APK-BADGING",
+        "command_definition_changed:CMD-APK-CERT",
+        "command_definition_changed:CMD-RELEASE-BUILD",
+        "command_definition_changed:CMD-RELEASE-DOWNLOAD",
+        "command_definition_changed:CMD-RELEASE-LOGS",
+        "command_definition_changed:CMD-SOURCE-EQUIVALENCE",
+        "criterion_definition_changed",
+        "external_input_changed:EXT-APK",
+        "input_group_changed:flutter",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "reasons": [
+        "artifact_definition_changed:ART-APK-RELEASE",
+        "artifact_definition_changed:ART-INSTALLED-APK",
+        "command_definition_changed:CMD-APK-CERT",
+        "command_definition_changed:CMD-APK-INSTALL",
+        "command_definition_changed:CMD-APK-PULL",
+        "command_definition_changed:CMD-INSTALLED-CERT",
+        "command_definition_changed:CMD-PREVIOUS-INSTALL",
+        "command_definition_changed:CMD-PRODUCTION-INSTALL",
+        "criterion_definition_changed",
+        "external_input_changed:EXT-APK",
+        "input_group_changed:flutter",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "reasons": [
+        "artifact_definition_changed:ART-GCC-SOURCE",
+        "artifact_definition_changed:ART-TOY-ETU",
+        "artifact_definition_changed:ART-TOY-TARGET-IMAGE",
+        "command_definition_changed:CMD-TOY-COMPARE",
+        "command_definition_changed:CMD-TOY-LOOP",
+        "command_definition_changed:CMD-TOY-UNPACK",
+        "criterion_definition_changed",
+        "external_input_changed:EXT-APK",
+        "external_input_changed:EXT-BOARD-STATE",
+        "external_input_changed:EXT-HTTP-TEST-SERVICE",
+        "external_input_changed:EXT-TOY-BOOTABLE",
+        "input_group_changed:firmware",
+        "input_group_changed:flutter",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "reasons": [
+        "artifact_definition_changed:ART-GCC-SOURCE",
+        "artifact_definition_changed:ART-REAL-ETU",
+        "artifact_definition_changed:ART-REAL-TARGET-IMAGE",
+        "command_definition_changed:CMD-REAL-COMPARE",
+        "command_definition_changed:CMD-REAL-LOOP",
+        "command_definition_changed:CMD-REAL-UNPACK",
+        "criterion_definition_changed",
+        "external_input_changed:EXT-APK",
+        "external_input_changed:EXT-BOARD-STATE",
+        "external_input_changed:EXT-HTTP-TEST-SERVICE",
+        "external_input_changed:EXT-REAL-ETU",
+        "input_group_changed:firmware",
+        "input_group_changed:flutter",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-APK-BADGING",
+    "CMD-APK-CERT",
+    "CMD-APK-INSTALL",
+    "CMD-APK-PULL",
+    "CMD-DEV-CHECKS",
+    "CMD-DEV-DOWNLOAD",
+    "CMD-DEV-LOGS",
+    "CMD-INSTALLED-CERT",
+    "CMD-PREVIOUS-INSTALL",
+    "CMD-PRODUCTION-INSTALL",
+    "CMD-REAL-COMPARE",
+    "CMD-REAL-LOOP",
+    "CMD-REAL-UNPACK",
+    "CMD-RELEASE-BUILD",
+    "CMD-RELEASE-DOWNLOAD",
+    "CMD-RELEASE-LOGS",
+    "CMD-SOURCE-EQUIVALENCE",
+    "CMD-TOY-COMPARE",
+    "CMD-TOY-LOOP",
+    "CMD-TOY-UNPACK"
+  ],
+  "required_artifacts": [
+    "ART-APK-RELEASE",
+    "ART-DEV-LOGS",
+    "ART-GCC-SOURCE",
+    "ART-INSTALLED-APK",
+    "ART-REAL-ETU",
+    "ART-REAL-TARGET-IMAGE",
+    "ART-TOY-ETU",
+    "ART-TOY-TARGET-IMAGE",
+    "ART-WINDOWS-RUNTIME"
+  ]
+}

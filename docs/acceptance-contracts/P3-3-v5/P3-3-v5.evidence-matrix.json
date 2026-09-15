@@ -1,0 +1,75 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v5",
+  "contract_sha256": "487786706F3583BA7066810361E53E59A6F340807FC75C8A89EEF57F58782AB7",
+  "round_id": "P3-3-V5-FREEZE-20260914-R1",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v5 执行前检查（NOT_RUN 前置）：执行轮依据为 freeze_commit 6415226 上 push 自动触发 run 34844438554（flutter-dev-checks.yml 对 dev/flutter/apk/** 分支 push 等价 test_scope=all；双宿主 success——windows-2022 2026-09-14T12:37:34Z→12:41:16Z、ubuntu-latest 12:37:34Z→12:49:44Z；run URL https://github.com/Eitan-S-23/E-Track/actions/runs/34844438554）。缺陷修复提交 1894f9d push 触发 run 34834215116 亦双宿主 success（2026-09-14T10:38:51Z 创建），供证据链参照。正式判定仍由验收会话执行并绑定原始日志。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v5 执行前检查（NOT_RUN 前置）：run 34781909023（2026-09-14T04:48:47Z 派发；dispatch 提交 55b2d07=v4 FREEZE-INDEX 登记提交，为 freeze_commit 6415226 的祖先；git diff 55b2d07..6415226 -- app/ 为空即 Flutter 输入组零差异、构建输入等价成立；Build Android APK/Build Windows EXE success、Pages/Release skipped），APK 实测 .cache/p3-3-apk-r5/ble-monitor-android.apk 46,699,144B SHA-256 2506e952da92fb2631b1325add4431cf60360efa9db4cbe641dddd3edf9d95af，包名 com.wen.gaia.gaia.p33acceptance versionCode=86/versionName=1.0.60，证书 SHA-256 f5e838ef0e2ae7a8b6c1c1240966e041b9aaaa92c092b7ce82c1dc02a45c9a80（仅 v2 scheme，1 signer；不同 CI run 的 debug 签名不能假定相同，O1 双侧比对以本值为受验侧基准）。额度：用户 2026-09-14 对第五轮受验 APK 的单独授权（build-only 第 5 笔）。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v5 执行前检查（NOT_RUN 前置）：受验 APK（run 34781909023，.p33acceptance 并存包）已由用户装机并确认升级页元数据与冻结基准全等（2026-09-14 04:5x-05:0x，当时服务供旧 toy fixture），dumpsys versionCode=86/versionName=1.0.60 实测在案；16:53 真机 latest×3 200 实证 endpoint 生效。已装侧（既有安装）证书指纹实测因 USB 断连延后，正式判定（双侧证书指纹实测留档等）仍由验收会话在 O1 重测时按合同补全。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v5 轮全部重跑：v4 轮 O1 实测通过但其比对基准为旧 fixture 身份（toy fc4ae5a9…），v5 fixture 身份（0219899d…/aeafc96e…）变化后须重测；O2 实测 PRODUCT_FAIL（REBOOT_RECONNECT_FAILED，旧缺陷 fixture）已由 1894f9d 修复（host 测试扩展 F/G/H/I 激活用例 114 checks 全绿），本判据即修复的实机复测。前置 EXT-HTTP-TEST-SERVICE（r4 隧道存活+v5 服务实例 PID 22316 toy-30201 激活，两层宿主检查：r4 D2 14/14+v5 三层验证）与 EXT-BOARD-STATE（r2 恢复终态，四判据满足）已就绪。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v5 轮全部重跑；前置 C-TOY-LOOP 已 PASS（真包经受控服务 D4 切换激活：只停服务 → --active-release real-30202 重启，隧道进程与公网地址维持不变，沿用 r4 隧道）。"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

@@ -1,0 +1,141 @@
+{
+  "_comment": "P3-3 受控 v2 测试服务配置（冻结源码 v1 配套）。fixture 身份绑定 2026-09-14 v5 重制包四元组（docs/ota-exec-notes/P3-3-offline-assets-v5-rebuild-2026-09-14.md，源=1894f9d 修复版 GCC 构建即板上 3.2.0-fixed 本体），服务启动时逐字节核验，失配拒绝启动。本服务不证明 P4-2 通过（未实现 register/D1/admin 发布链）。",
+  "listenHost": "127.0.0.1",
+  "listenPort": 8443,
+  "publicBaseUrl": "https://p3-3-v2-service.invalid:8443",
+  "token": {
+    "keyVersion": 1,
+    "keyHex": "7033337632746573746b65792d6e6f742d70726f64756374696f6e2d30313233"
+  },
+  "channels": {
+    "stable": null,
+    "beta": null
+  },
+  "releases": {
+    "toy-30201": {
+      "releaseId": "release-30201",
+      "versionName": "3.2.1",
+      "versionCode": 30201,
+      "releaseTag": "v3.2.1",
+      "releaseNotes": "P3-3 受控测试 toy 固件包（3.2.1/30201），v5 重制身份见 P3-3-offline-assets-v5-rebuild-2026-09-14.md",
+      "targetImageSha256": "aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30201",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.1-full.etu",
+        "sha256": "0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5",
+        "sizeBytes": 284540,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v5/e-track-at32f435-v3.2.1-full.etu"
+      }
+    },
+    "real-30202": {
+      "releaseId": "release-30202",
+      "versionName": "3.2.2",
+      "versionCode": 30202,
+      "releaseTag": "v3.2.2",
+      "releaseNotes": "P3-3 受控测试真固件包（3.2.2/30202），v5 重制身份见 P3-3-offline-assets-v5-rebuild-2026-09-14.md",
+      "targetImageSha256": "ab0585f71b9a523863b582e8ed4cc47a279bf6e57c4a1038635593306746ab7e",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30202",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.2-full.etu",
+        "sha256": "0c8ae468948d8e85af0e8eaf3ec52e046f1b6a3cdba88f9bd8478790f0590f6f",
+        "sizeBytes": 284573,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v5/e-track-at32f435-v3.2.2-full.etu"
+      }
+    },
+    "real-30203": {
+      "releaseId": "release-30203",
+      "versionName": "3.2.3",
+      "versionCode": 30203,
+      "releaseTag": "v3.2.3",
+      "releaseNotes": "P3-3 受控测试真固件包（3.2.3/30203），v6 制包身份见 docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md（第十一轮三缺陷修复实机验证用，源=1894f9d GCC 构建同源）",
+      "targetImageSha256": "3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30203",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.3-full.etu",
+        "sha256": "a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915",
+        "sizeBytes": 284608,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v6/e-track-at32f435-v3.2.3-full.etu"
+      }
+    },
+    "toy-30204": {
+      "releaseId": "release-30204",
+      "versionName": "3.2.4",
+      "versionCode": 30204,
+      "releaseTag": "v3.2.4",
+      "releaseNotes": "P3-3 补测轮 toy 固件包（3.2.4/30204），v7 制包身份见 .cache/p3-3-assets-v7/verify_v7_report.txt（用户批准补测，源=1894f9d GCC 构建同源）",
+      "targetImageSha256": "43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30204",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.4-full.etu",
+        "sha256": "81a773363711adff31cd788217ba18445b462e675042682bdd22302123f0228b",
+        "sizeBytes": 284581,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v7/e-track-at32f435-v3.2.4-full.etu"
+      }
+    },
+    "real-30205": {
+      "releaseId": "release-30205",
+      "versionName": "3.2.5",
+      "versionCode": 30205,
+      "releaseTag": "v3.2.5",
+      "releaseNotes": "P3-3 补测轮真固件包（3.2.5/30205），v7 制包身份见 .cache/p3-3-assets-v7/verify_v7_report.txt（用户批准补测，源=1894f9d GCC 构建同源）",
+      "targetImageSha256": "ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30205",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.5-full.etu",
+        "sha256": "32577aa5d0d98cab071440b455151bcc536f33a9a9d930e832f8bb140a607d77",
+        "sizeBytes": 284590,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v7/e-track-at32f435-v3.2.5-full.etu"
+      }
+    }
+  }
+}

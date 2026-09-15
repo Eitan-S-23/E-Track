@@ -1,0 +1,65 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-3-v9",
+  "current_contract_sha256": "8B0FD07A8E01070D2EDA5745EA73EC0E6759911C45796C3289DADCE54A44950F",
+  "previous_contract_id": "P3-3-v8",
+  "previous_contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P3-3-V9-ACCEPTANCE-20260915-R2",
+  "previous_round_id": "P3-3-V8-ACCEPTANCE-20260915-R1",
+  "previous_matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+  "changed_input_groups": [],
+  "changed_external_inputs": [
+    "EXT-USER-UNINSTALL"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "C-APK-INSTALL",
+      "reasons": [
+        "command_definition_changed:CMD-APK-INSTALL",
+        "command_definition_changed:CMD-INSTALLED-CERT",
+        "command_definition_changed:CMD-INSTALLED-HASH",
+        "criterion_definition_changed",
+        "external_input_changed:EXT-USER-UNINSTALL",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [
+    "C-DEV-CHECKS",
+    "C-REAL-LOOP",
+    "C-RELEASE-BUILD",
+    "C-TOY-LOOP"
+  ],
+  "reuse_origins": {
+    "C-DEV-CHECKS": {
+      "contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "round_id": "P3-3-V8-ACCEPTANCE-20260915-R1"
+    },
+    "C-RELEASE-BUILD": {
+      "contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "round_id": "P3-3-V8-ACCEPTANCE-20260915-R1"
+    },
+    "C-TOY-LOOP": {
+      "contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "round_id": "P3-3-V8-ACCEPTANCE-20260915-R1"
+    },
+    "C-REAL-LOOP": {
+      "contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "round_id": "P3-3-V8-ACCEPTANCE-20260915-R1"
+    }
+  },
+  "required_commands": [
+    "CMD-APK-INSTALL",
+    "CMD-INSTALLED-CERT",
+    "CMD-INSTALLED-HASH"
+  ],
+  "required_artifacts": [
+    "ART-APK-RELEASE",
+    "ART-INSTALLED-APK"
+  ]
+}

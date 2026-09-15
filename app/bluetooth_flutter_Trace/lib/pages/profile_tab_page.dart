@@ -29,7 +29,7 @@ Future<String> _loadAppVersionLabel() async {
 }
 
 class ProfileTabPage extends StatelessWidget {
-  const ProfileTabPage({Key? key}) : super(key: key);
+  const ProfileTabPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +135,7 @@ class ProfileTabPage extends StatelessWidget {
 
   void _showSettingsDialog() {
     _showTraceDialog(
-      TraceDialog(
+      const TraceDialog(
         title: '应用设置',
         icon: Icons.settings,
         color: TraceColors.mint,
@@ -177,7 +177,7 @@ class ProfileTabPage extends StatelessWidget {
             _buildUserInfoRow('数据', '设备与骑行记录保存在本机'),
           ],
         ),
-        actions: [
+        actions: const [
           TraceDialogAction(
             label: '确定',
             isPrimary: true,
@@ -207,7 +207,7 @@ class ProfileTabPage extends StatelessWidget {
               _buildStatItem('数据记录', '${dbInfo['dataCount']} 条'),
             ],
           ),
-          actions: [
+          actions: const [
             TraceDialogAction(
               label: '确定',
               isPrimary: true,
@@ -246,7 +246,7 @@ class ProfileTabPage extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: TraceColors.text.withOpacity(0.74),
+              color: TraceColors.text.withValues(alpha: 0.74),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -266,11 +266,11 @@ class ProfileTabPage extends StatelessWidget {
 
   void _showHelpDialog() {
     _showTraceDialog(
-      TraceDialog(
+      const TraceDialog(
         title: '帮助与反馈',
         icon: Icons.chat_bubble_outline,
         color: TraceColors.amber,
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -324,7 +324,7 @@ class ProfileTabPage extends StatelessWidget {
             const Text('• OTA 固件升级'),
           ],
         ),
-        actions: [
+        actions: const [
           TraceDialogAction(
             label: '确定',
             isPrimary: true,
@@ -339,7 +339,7 @@ class ProfileTabPage extends StatelessWidget {
   void _showTraceDialog(TraceDialog dialog) {
     Get.dialog<void>(
       dialog,
-      barrierColor: Colors.black.withOpacity(0.62),
+      barrierColor: Colors.black.withValues(alpha: 0.62),
     );
   }
 }
@@ -389,7 +389,7 @@ class _ProfileTitle extends StatelessWidget {
                 const SizedBox(width: 6),
                 _profileTitleDot(TraceColors.cyan),
                 const SizedBox(width: 18),
-                _profileTitleDot(TraceColors.cyan.withOpacity(0.7)),
+                _profileTitleDot(TraceColors.cyan.withValues(alpha: 0.7)),
               ],
             ),
           ),
@@ -404,13 +404,13 @@ class _ProfileTitle extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            TraceColors.cyan.withOpacity(0.9),
+            TraceColors.cyan.withValues(alpha: 0.9),
             Colors.transparent,
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: TraceColors.cyan.withOpacity(0.55),
+            color: TraceColors.cyan.withValues(alpha: 0.55),
             blurRadius: 9,
           ),
         ],
@@ -426,7 +426,7 @@ class _ProfileTitle extends StatelessWidget {
         shape: BoxShape.circle,
         color: color,
         boxShadow: [
-          BoxShadow(color: color.withOpacity(0.8), blurRadius: 8),
+          BoxShadow(color: color.withValues(alpha: 0.8), blurRadius: 8),
         ],
       ),
     );
@@ -449,8 +449,8 @@ class _ProfileAvatar extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              CustomPaint(
-                size: const Size.square(118),
+              const CustomPaint(
+                size: Size.square(118),
                 painter: _ProfileAvatarDialPainter(),
               ),
               Semantics(
@@ -462,8 +462,8 @@ class _ProfileAvatar extends StatelessWidget {
                   child: InkWell(
                     onTap: onTap,
                     customBorder: const CircleBorder(),
-                    splashColor: TraceColors.cyan.withOpacity(0.18),
-                    highlightColor: TraceColors.cyan.withOpacity(0.08),
+                    splashColor: TraceColors.cyan.withValues(alpha: 0.18),
+                    highlightColor: TraceColors.cyan.withValues(alpha: 0.08),
                     child: Ink(
                       width: 82,
                       height: 82,
@@ -471,17 +471,17 @@ class _ProfileAvatar extends StatelessWidget {
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            TraceColors.cyan.withOpacity(0.2),
-                            const Color(0xFF06202A).withOpacity(0.96),
+                            TraceColors.cyan.withValues(alpha: 0.2),
+                            const Color(0xFF06202A).withValues(alpha: 0.96),
                           ],
                         ),
                         border: Border.all(
-                          color: TraceColors.cyan.withOpacity(0.9),
+                          color: TraceColors.cyan.withValues(alpha: 0.9),
                           width: 1.8,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: TraceColors.cyan.withOpacity(0.45),
+                            color: TraceColors.cyan.withValues(alpha: 0.45),
                             blurRadius: 28,
                             spreadRadius: -2,
                           ),
@@ -530,16 +530,16 @@ class _ProfileAvatarDialPainter extends CustomPainter {
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
-      ..color = TraceColors.cyan.withOpacity(0.15);
+      ..color = TraceColors.cyan.withValues(alpha: 0.15);
     canvas.drawCircle(center, radius * 0.96, ringPaint);
-    canvas.drawCircle(center, radius * 0.82, ringPaint..color = TraceColors.cyan.withOpacity(0.2));
-    canvas.drawCircle(center, radius * 0.66, ringPaint..color = TraceColors.cyan.withOpacity(0.12));
+    canvas.drawCircle(center, radius * 0.82, ringPaint..color = TraceColors.cyan.withValues(alpha: 0.2));
+    canvas.drawCircle(center, radius * 0.66, ringPaint..color = TraceColors.cyan.withValues(alpha: 0.12));
 
     final arcPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round
-      ..color = TraceColors.cyan.withOpacity(0.7);
+      ..color = TraceColors.cyan.withValues(alpha: 0.7);
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius * 0.9),
       -math.pi * 0.92,
@@ -575,7 +575,7 @@ class _ProfilePanel extends StatelessWidget {
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned.fill(
+            const Positioned.fill(
               child: CustomPaint(painter: _ProfilePanelPainter()),
             ),
             ClipPath(
@@ -584,10 +584,10 @@ class _ProfilePanel extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(22, 30, 22, 38),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF071B25).withOpacity(0.76),
+                  color: const Color(0xFF071B25).withValues(alpha: 0.76),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.42),
+                      color: Colors.black.withValues(alpha: 0.42),
                       blurRadius: 32,
                       offset: const Offset(0, 16),
                     ),
@@ -605,7 +605,7 @@ class _ProfilePanel extends StatelessWidget {
                             color: TraceColors.amber,
                             boxShadow: [
                               BoxShadow(
-                                color: TraceColors.amber.withOpacity(0.7),
+                                color: TraceColors.amber.withValues(alpha: 0.7),
                                 blurRadius: 8,
                               ),
                             ],
@@ -659,13 +659,13 @@ class _ProfilePanel extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      TraceColors.cyan.withOpacity(0.95),
+                      TraceColors.cyan.withValues(alpha: 0.95),
                       Colors.transparent,
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: TraceColors.cyan.withOpacity(0.65),
+                      color: TraceColors.cyan.withValues(alpha: 0.65),
                       blurRadius: 10,
                     ),
                   ],
@@ -713,9 +713,9 @@ class _ProfilePanelPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          TraceColors.cyan.withOpacity(0.18),
+          TraceColors.cyan.withValues(alpha: 0.18),
           Colors.transparent,
-          TraceColors.cyan.withOpacity(0.1),
+          TraceColors.cyan.withValues(alpha: 0.1),
         ],
       ).createShader(Offset.zero & size);
     canvas.drawPath(path, fillPaint);
@@ -723,20 +723,20 @@ class _ProfilePanelPainter extends CustomPainter {
     final borderPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
-      ..color = TraceColors.cyan.withOpacity(0.62);
+      ..color = TraceColors.cyan.withValues(alpha: 0.62);
     canvas.drawPath(path, borderPaint);
 
     final glowPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
-      ..color = TraceColors.cyan.withOpacity(0.28);
+      ..color = TraceColors.cyan.withValues(alpha: 0.28);
     canvas.drawPath(path, glowPaint);
 
     final sidePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
-      ..color = TraceColors.cyan.withOpacity(0.22);
+      ..color = TraceColors.cyan.withValues(alpha: 0.22);
     canvas.drawLine(Offset(14, size.height * 0.2), Offset(14, size.height * 0.78), sidePaint);
     canvas.drawLine(
       Offset(size.width - 14, size.height * 0.2),
@@ -765,7 +765,7 @@ class _ProfileFooter extends StatelessWidget {
               child: Text(
                 'BLE Monitor 智能设备管理助手',
                 style: TextStyle(
-                  color: TraceColors.muted.withOpacity(0.85),
+                  color: TraceColors.muted.withValues(alpha: 0.85),
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1,
@@ -787,7 +787,7 @@ class _ProfileFooter extends StatelessWidget {
                   height: 4,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: TraceColors.cyan.withOpacity(opacity),
+                    color: TraceColors.cyan.withValues(alpha: opacity),
                   ),
                 ),
               ),
@@ -806,7 +806,7 @@ class _ProfileFooter extends StatelessWidget {
           end: reverse ? Alignment.centerLeft : Alignment.centerRight,
           colors: [
             Colors.transparent,
-            TraceColors.cyan.withOpacity(0.45),
+            TraceColors.cyan.withValues(alpha: 0.45),
           ],
         ),
       ),

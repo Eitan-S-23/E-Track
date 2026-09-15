@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../models/device_data.dart';
 import '../models/device_settings.dart';
@@ -464,7 +463,7 @@ class DatabaseService {
       {required int skip, required int limit}) async {
     final db = await database;
 
-    final String sql = '''
+    const String sql = '''
       SELECT * FROM device_data 
       WHERE deviceId = ? 
       ORDER BY timestamp ASC 
@@ -484,7 +483,7 @@ class DatabaseService {
       String deviceId, int limit) async {
     final db = await database;
 
-    final String sql = '''
+    const String sql = '''
       SELECT * FROM device_data 
       WHERE deviceId = ? 
       ORDER BY timestamp DESC 

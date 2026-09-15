@@ -1,0 +1,33 @@
+{
+  "write_preflight": "PASS",
+  "worktree": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "checked_outputs": [
+    "docs/acceptance-contracts/P3-3-v7/artifacts/ble-monitor-android.apk",
+    "docs/acceptance-contracts/P3-3-v7/artifacts/ble-monitor-windows.zip",
+    "docs/acceptance-contracts/P3-3-v7/artifacts/e-track-at32f435-v3.2.1-full.etu",
+    "docs/acceptance-contracts/P3-3-v7/artifacts/toy-3.2.1-target-image.bin",
+    "docs/acceptance-contracts/P3-3-v7/artifacts/e-track-at32f435-v3.2.3-full.etu",
+    "docs/acceptance-contracts/P3-3-v7/artifacts/real-3.2.3-target-image.bin",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/entry-matrix.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/service-v5-20260914.log",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/service-v6-20260914.log",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/o-verify-boot-rtt.log",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/copy-manifest.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/CMD-DEV-CHECKS.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/CMD-RELEASE-BUILD.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/CMD-TOY-LOOP.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/CMD-REAL-LOOP.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/phone-preflight.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/initial-validation.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/execution-plan-command.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/write-preflight.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/runtime-preflight.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/release-archive-inspection.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/entry-review.json",
+    "docs/acceptance-contracts/P3-3-v7/evidence/acceptance-20260915/final-validation.json",
+    "docs/acceptance-contracts/P3-3-v7/P3-3-v7.evidence-matrix.json",
+    "docs/ota-exec-notes/P3-3-v7-acceptance-2026-09-15.md"
+  ]
+}

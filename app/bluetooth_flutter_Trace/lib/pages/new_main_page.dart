@@ -4,7 +4,7 @@ import 'shop_tab_page.dart';
 import 'profile_tab_page.dart';
 
 class NewMainPage extends StatefulWidget {
-  const NewMainPage({Key? key}) : super(key: key);
+  const NewMainPage({super.key});
 
   @override
   State<NewMainPage> createState() => _NewMainPageState();
@@ -31,7 +31,7 @@ class _NewMainPageState extends State<NewMainPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -57,7 +57,7 @@ class _NewMainPageState extends State<NewMainPage> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: _currentIndex == 0
-                      ? const Color(0xFF4A90E2).withOpacity(0.1)
+                      ? const Color(0xFF4A90E2).withValues(alpha: 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -73,7 +73,7 @@ class _NewMainPageState extends State<NewMainPage> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: _currentIndex == 1
-                      ? const Color(0xFF4A90E2).withOpacity(0.1)
+                      ? const Color(0xFF4A90E2).withValues(alpha: 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -89,7 +89,7 @@ class _NewMainPageState extends State<NewMainPage> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: _currentIndex == 2
-                      ? const Color(0xFF4A90E2).withOpacity(0.1)
+                      ? const Color(0xFF4A90E2).withValues(alpha: 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),

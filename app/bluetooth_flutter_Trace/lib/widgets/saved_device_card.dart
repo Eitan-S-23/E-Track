@@ -11,14 +11,14 @@ class SavedDeviceCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const SavedDeviceCard({
-    Key? key,
+    super.key,
     required this.device,
     required this.latestData,
     required this.powerConsumption,
     required this.onTap,
     required this.onToggleMonitoring,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class SavedDeviceCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -84,7 +84,7 @@ class SavedDeviceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: device.isMonitoring.value
                 ? const Color(0xFF4A90E2)
-                    .withOpacity(0.1) // 注意：这里修正了withValues的错误用法
+                    .withValues(alpha: 0.1) // 注意：这里修正了withValues的错误用法
                 : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(12),
           ),
@@ -137,7 +137,7 @@ class SavedDeviceCard extends StatelessWidget {
             Switch(
               value: device.isMonitoring.value,
               onChanged: (_) => onToggleMonitoring(),
-              activeColor: const Color(0xFF4CAF50),
+              activeThumbColor: const Color(0xFF4CAF50),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             const SizedBox(height: 4), // 按钮和文本之间的间距
@@ -176,9 +176,9 @@ class SavedDeviceCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.analytics,
-                color: const Color(0xFF4A90E2),
+                color: Color(0xFF4A90E2),
                 size: 16,
               ),
               const SizedBox(width: 6),
@@ -286,9 +286,9 @@ class SavedDeviceCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.battery_std,
-            color: const Color(0xFF2196F3),
+            color: Color(0xFF2196F3),
             size: 18,
           ),
           const SizedBox(width: 8),

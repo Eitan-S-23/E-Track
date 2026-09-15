@@ -13,7 +13,7 @@ class ResponsiveContainer extends StatelessWidget {
   final Decoration? decoration;
 
   const ResponsiveContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.width,
     this.height,
@@ -21,7 +21,7 @@ class ResponsiveContainer extends StatelessWidget {
     this.margin,
     this.color,
     this.decoration,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +52,14 @@ class ResponsiveText extends StatelessWidget {
 
   const ResponsiveText(
     this.text, {
-    Key? key,
+    super.key,
     required this.fontSize,
     this.fontWeight,
     this.color,
     this.textAlign,
     this.maxLines,
     this.overflow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -87,10 +87,10 @@ class ResponsiveIcon extends StatelessWidget {
 
   const ResponsiveIcon(
     this.icon, {
-    Key? key,
+    super.key,
     required this.size,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,12 +112,12 @@ class ResponsiveElevatedButton extends StatelessWidget {
   final EdgeInsets? padding;
 
   const ResponsiveElevatedButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.child,
     this.size,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -153,14 +153,14 @@ class ResponsiveCard extends StatelessWidget {
   final double? elevation;
 
   const ResponsiveCard({
-    Key? key,
+    super.key,
     required this.child,
     this.height,
     this.margin,
     this.padding,
     this.color,
     this.elevation,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -189,14 +189,14 @@ class ResponsiveListTile extends StatelessWidget {
   final double height;
 
   const ResponsiveListTile({
-    Key? key,
+    super.key,
     this.leading,
     this.title,
     this.subtitle,
     this.trailing,
     this.onTap,
     this.height = 56.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -224,10 +224,10 @@ class ResponsiveSpacing extends StatelessWidget {
   final bool isVertical;
 
   const ResponsiveSpacing({
-    Key? key,
+    super.key,
     required this.spacing,
     this.isVertical = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +256,7 @@ class ResponsiveGridView extends StatelessWidget {
   final ScrollPhysics? physics;
 
   const ResponsiveGridView({
-    Key? key,
+    super.key,
     required this.children,
     required this.crossAxisCount,
     this.childAspectRatio = 1.0,
@@ -265,7 +265,7 @@ class ResponsiveGridView extends StatelessWidget {
     this.crossAxisSpacing = 0.0,
     this.shrinkWrap = false,
     this.physics,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +296,7 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget? bottom;
 
   const ResponsiveAppBar({
-    Key? key,
+    super.key,
     this.title,
     this.actions,
     this.leading,
@@ -305,7 +305,7 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.foregroundColor,
     this.elevation,
     this.bottom,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -342,11 +342,11 @@ class ResponsiveDialog extends StatelessWidget {
   final EdgeInsets? insetPadding;
 
   const ResponsiveDialog({
-    Key? key,
+    super.key,
     required this.child,
     this.size,
     this.insetPadding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -379,9 +379,9 @@ class ResponsiveBuilder extends StatelessWidget {
       builder;
 
   const ResponsiveBuilder({
-    Key? key,
+    super.key,
     required this.builder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -6,11 +6,13 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/share_links.dart';
+import '../controllers/ble_controller.dart';
 import '../controllers/ride_controller.dart';
 import '../models/ride_models.dart';
 import 'ota_upgrade_page.dart';
@@ -40,12 +42,9 @@ class _SpeedometerPageState extends State<SpeedometerPage> {
           return Column(
             children: [
               // 固定顶部栏：永远可见、永远可点（不随内容滚动）
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
-                child: _TopChrome(
-                  selectedIndex: selectedIndex,
-                  isConnected: selectedIndex != 3,
-                ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(18, 12, 18, 0),
+                child: _TopChrome(),
               ),
               // 选中页占满中间剩余空间，由各页自行决定固定子头与单一滚动区
               Expanded(
@@ -88,7 +87,7 @@ class _SelectedPage extends StatelessWidget {
       case 2:
         return _RoutesPage(controller: controller);
       case 3:
-        return _DevicesPage(controller: controller);
+        return const _DevicesPage();
       case 0:
       default:
         return _DashboardPage(controller: controller);
@@ -97,16 +96,11 @@ class _SelectedPage extends StatelessWidget {
 }
 
 class _TopChrome extends StatelessWidget {
-  const _TopChrome({
-    required this.selectedIndex,
-    required this.isConnected,
-  });
-
-  final int selectedIndex;
-  final bool isConnected;
+  const _TopChrome();
 
   @override
   Widget build(BuildContext context) {
+    final bleController = Get.put(BleController(), permanent: true);
     return SizedBox(
       height: 54,
       child: Row(
@@ -117,52 +111,61 @@ class _TopChrome extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
-                onTap: _openConnectedDeviceDetail,
+                onTap: _openFirstConnectedDeviceDetail,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(0, 4, 10, 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.78),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.more_vert,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  child: Obx(
+                    () {
+                      final connected = bleController.connectedDevices;
+                      final isConnected = connected.isNotEmpty;
+                      final deviceName = isConnected
+                          ? bleController.getDeviceName(connected.first)
+                          : '未连接设备';
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            isConnected ? '已连接' : '未连接',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.90),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                          Container(
+                            width: 24,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.78),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.more_vert,
+                              color: Colors.white,
+                              size: 15,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'iGPSPORT BSC300',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.70),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isConnected ? '已连接' : '未连接',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.90),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                deviceName,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.70),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -347,7 +350,7 @@ class _ActivityHeroCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.96),
+                              color: Colors.white.withValues(alpha: 0.96),
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
                             ),
@@ -360,7 +363,7 @@ class _ActivityHeroCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.62),
+                          color: Colors.white.withValues(alpha: 0.62),
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -382,7 +385,7 @@ class _ActivityHeroCard extends StatelessWidget {
                             TextSpan(
                               text: ' km',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.92),
+                                color: Colors.white.withValues(alpha: 0.92),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -630,10 +633,10 @@ class _MetricTile extends StatelessWidget {
                         width: 18,
                         height: 18,
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.13),
+                          color: color.withValues(alpha: 0.13),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: color.withOpacity(0.90),
+                            color: color.withValues(alpha: 0.90),
                             width: 1.2,
                           ),
                         ),
@@ -680,7 +683,7 @@ class _MetricTile extends StatelessWidget {
                         TextSpan(
                           text: ' $unit',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.72),
+                            color: Colors.white.withValues(alpha: 0.72),
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
                           ),
@@ -700,7 +703,7 @@ class _MetricTile extends StatelessWidget {
                         maxLines: 1,
                         softWrap: false,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.58),
+                          color: Colors.white.withValues(alpha: 0.58),
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                         ),
@@ -743,9 +746,7 @@ class _MetricDetailData {
     required this.distributionTitle,
     required this.footerLabel,
     required this.footerValue,
-    this.zones = const [],
     this.detailRows = const [],
-    this.footerIcon,
     this.duration = Duration.zero,
   });
 
@@ -763,11 +764,10 @@ class _MetricDetailData {
   final List<double> chartTicks;
   final List<double> chartValues;
   final String distributionTitle;
-  final List<_MetricZoneRow> zones;
+  final List<_MetricZoneRow> zones = const [];
   final List<_MetricDetailRow> detailRows;
   final String footerLabel;
   final String footerValue;
-  final IconData? footerIcon;
   final Duration duration;
 
   static _MetricDetailData unavailable({
@@ -834,192 +834,6 @@ class _MetricDetailData {
     );
   }
 
-  static _MetricDetailData power() {
-    return const _MetricDetailData(
-      icon: Icons.bolt,
-      title: '功率',
-      color: Color(0xFF64D72A),
-      primaryLabel: '平均功率',
-      primaryValue: '186',
-      primaryUnit: 'w',
-      secondaryLabel: '最大功率',
-      secondaryValue: '562',
-      secondaryUnit: 'w',
-      chartUnit: 'w',
-      chartMax: 600,
-      chartTicks: <double>[0, 200, 400, 600],
-      chartValues: <double>[
-        260, 300, 325, 345, 335, 360, 320, 380, 355, 390, 365, 430, 372, 470,
-        520, 455, 562, 510, 445, 405, 435, 395, 410, 180, 430, 390, 415, 385,
-        435, 405, 418, 392, 450, 405, 470, 330, 455, 390, 410, 480, 360,
-      ],
-      distributionTitle: '功率分布',
-      zones: [
-        _MetricZoneRow(
-          color: Color(0xFFFF3158),
-          zone: 'Z5',
-          range: '> 350 w',
-          value: '12:15',
-          ratio: '11%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFFFF7A1A),
-          zone: 'Z4',
-          range: '250 - 350 w',
-          value: '28:47',
-          ratio: '26%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFFFFD21A),
-          zone: 'Z3',
-          range: '180 - 250 w',
-          value: '40:21',
-          ratio: '36%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFF4AD14A),
-          zone: 'Z2',
-          range: '120 - 180 w',
-          value: '32:16',
-          ratio: '18%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFF268DFF),
-          zone: 'Z1',
-          range: '< 120 w',
-          value: '12:09',
-          ratio: '9%',
-        ),
-      ],
-      footerLabel: '归一化功率 (NP)',
-      footerValue: '210 w',
-    );
-  }
-
-  static _MetricDetailData heartRate() {
-    return const _MetricDetailData(
-      icon: Icons.favorite,
-      title: '心率',
-      color: Color(0xFFFF3B5F),
-      primaryLabel: '平均心率',
-      primaryValue: '156',
-      primaryUnit: 'bpm',
-      secondaryLabel: '最大心率',
-      secondaryValue: '188',
-      secondaryUnit: 'bpm',
-      chartUnit: 'bpm',
-      chartMax: 200,
-      chartTicks: <double>[0, 50, 100, 150, 200],
-      chartValues: <double>[
-        88, 96, 92, 98, 94, 100, 110, 116, 125, 104, 126, 148, 160, 154, 166,
-        158, 172, 164, 148, 134, 108, 146, 168, 176, 170, 182, 174, 168, 172,
-        166, 148, 138, 142, 132, 150, 164, 158, 172, 152, 166, 156,
-      ],
-      distributionTitle: '心率分布',
-      zones: [
-        _MetricZoneRow(
-          color: Color(0xFFFF3158),
-          zone: 'Z5',
-          range: '> 178 bpm',
-          value: '08:36',
-          ratio: '6%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFFFF7A1A),
-          zone: 'Z4',
-          range: '160 - 178 bpm',
-          value: '26:18',
-          ratio: '17%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFFFFD21A),
-          zone: 'Z3',
-          range: '140 - 160 bpm',
-          value: '55:21',
-          ratio: '36%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFF4AD14A),
-          zone: 'Z2',
-          range: '120 - 140 bpm',
-          value: '48:23',
-          ratio: '31%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFF268DFF),
-          zone: 'Z1',
-          range: '< 120 bpm',
-          value: '11:10',
-          ratio: '10%',
-        ),
-      ],
-      footerLabel: '心率储备',
-      footerValue: '63%',
-    );
-  }
-
-  static _MetricDetailData cadence() {
-    return const _MetricDetailData(
-      icon: Icons.track_changes,
-      title: '踏频',
-      color: Color(0xFFFFC400),
-      primaryLabel: '平均踏频',
-      primaryValue: '87',
-      primaryUnit: 'rpm',
-      secondaryLabel: '最高踏频',
-      secondaryValue: '118',
-      secondaryUnit: 'rpm',
-      chartUnit: 'rpm',
-      chartMax: 150,
-      chartTicks: <double>[0, 50, 100, 150],
-      chartValues: <double>[
-        78, 84, 88, 92, 96, 90, 104, 82, 88, 94, 86, 91, 97, 102, 90, 86, 93,
-        98, 104, 100, 95, 108, 97, 102, 94, 99, 92, 101, 88, 96, 103, 94, 98,
-        90, 100, 96, 104, 92, 101, 95, 106,
-      ],
-      distributionTitle: '踏频分布',
-      zones: [
-        _MetricZoneRow(
-          color: Color(0xFFFF3158),
-          zone: 'Z5',
-          range: '> 110 rpm',
-          value: '10:12',
-          ratio: '9%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFFFF7A1A),
-          zone: 'Z4',
-          range: '90 - 110 rpm',
-          value: '28:33',
-          ratio: '25%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFFFFD21A),
-          zone: 'Z3',
-          range: '70 - 90 rpm',
-          value: '45:18',
-          ratio: '39%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFF4AD14A),
-          zone: 'Z2',
-          range: '50 - 70 rpm',
-          value: '32:45',
-          ratio: '19%',
-        ),
-        _MetricZoneRow(
-          color: Color(0xFF268DFF),
-          zone: 'Z1',
-          range: '< 50 rpm',
-          value: '08:40',
-          ratio: '8%',
-        ),
-      ],
-      footerLabel: '最常用踏频',
-      footerValue: '84 rpm',
-    );
-  }
-
   static _MetricDetailData climb(
     _RideSample sample,
     List<double> liveValues,
@@ -1053,37 +867,6 @@ class _MetricDetailData {
       footerLabel: '数据来源',
       footerValue: hasSeries ? '当前骑行记录' : '等待 GPS 数据',
       duration: duration,
-    );
-  }
-
-  static _MetricDetailData temperature() {
-    return const _MetricDetailData(
-      icon: Icons.thermostat,
-      title: '温度',
-      color: Color(0xFF23D8E9),
-      primaryLabel: '平均温度',
-      primaryValue: '22.4',
-      primaryUnit: '°C',
-      secondaryLabel: '最高温度',
-      secondaryValue: '28.6',
-      secondaryUnit: '°C',
-      chartUnit: '°C',
-      chartMax: 40,
-      chartTicks: <double>[0, 10, 20, 30, 40],
-      chartValues: <double>[
-        24, 22, 24, 23, 22, 21, 20, 16, 15, 14, 15, 13, 14, 12, 13, 11, 15,
-        18, 21, 22, 24, 26, 18, 17, 19, 18, 17, 15, 16, 18, 20, 23, 18,
-      ],
-      distributionTitle: '',
-      detailRows: [
-        _MetricDetailRow(label: '最低温度', value: '18.2 °C'),
-        _MetricDetailRow(label: '温差', value: '10.4 °C'),
-        _MetricDetailRow(label: '高温时长 (>25°C)', value: '1:12:38    32%'),
-        _MetricDetailRow(label: '低温时长 (<15°C)', value: '00:00:00    0%'),
-      ],
-      footerLabel: '温度趋势',
-      footerValue: '缓慢升高',
-      footerIcon: Icons.north_east,
     );
   }
 }
@@ -1124,7 +907,7 @@ void _showMetricDetailDialog(BuildContext context, _MetricDetailData data) {
     context: context,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: Colors.black.withOpacity(0.62),
+    barrierColor: Colors.black.withValues(alpha: 0.62),
     transitionDuration: const Duration(milliseconds: 220),
     pageBuilder: (context, animation, secondaryAnimation) {
       return _MetricDetailDialog(data: data);
@@ -1189,18 +972,18 @@ class _MetricDetailPanel extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF202A36).withOpacity(0.98),
-            const Color(0xFF121922).withOpacity(0.99),
+            const Color(0xFF202A36).withValues(alpha: 0.98),
+            const Color(0xFF121922).withValues(alpha: 0.99),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.46),
+            color: Colors.black.withValues(alpha: 0.46),
             blurRadius: 34,
             offset: const Offset(0, 20),
           ),
@@ -1257,7 +1040,7 @@ class _MetricDetailHeader extends StatelessWidget {
               constraints: const BoxConstraints.tightFor(width: 40, height: 40),
               icon: Icon(
                 Icons.close,
-                color: Colors.white.withOpacity(0.62),
+                color: Colors.white.withValues(alpha: 0.62),
                 size: 30,
               ),
             ),
@@ -1269,7 +1052,7 @@ class _MetricDetailHeader extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: data.color.withOpacity(0.13),
+                  color: data.color.withValues(alpha: 0.13),
                   shape: BoxShape.circle,
                   border: Border.all(color: data.color, width: 2),
                 ),
@@ -1342,7 +1125,7 @@ class _MetricDetailStat extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.55),
+            color: Colors.white.withValues(alpha: 0.55),
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
@@ -1368,7 +1151,7 @@ class _MetricDetailStat extends StatelessWidget {
                 TextSpan(
                   text: ' $unit',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.70),
+                    color: Colors.white.withValues(alpha: 0.70),
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1396,9 +1179,9 @@ class _MetricDistributionBox extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.015),
+        color: Colors.white.withValues(alpha: 0.015),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1491,7 +1274,7 @@ class _MetricZoneLine extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.58),
+              color: Colors.white.withValues(alpha: 0.58),
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -1510,7 +1293,7 @@ class _MetricZoneLine extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.82),
+                color: Colors.white.withValues(alpha: 0.82),
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
@@ -1530,7 +1313,7 @@ class _MetricZoneLine extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.64),
+                color: Colors.white.withValues(alpha: 0.64),
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
@@ -1553,9 +1336,9 @@ class _MetricDetailRowsBox extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.015),
+        color: Colors.white.withValues(alpha: 0.015),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: [
@@ -1576,7 +1359,7 @@ class _MetricDetailRowsBox extends StatelessWidget {
                           maxLines: 1,
                           softWrap: false,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.55),
+                            color: Colors.white.withValues(alpha: 0.55),
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                           ),
@@ -1598,7 +1381,7 @@ class _MetricDetailRowsBox extends StatelessWidget {
                           maxLines: 1,
                           softWrap: false,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.82),
+                            color: Colors.white.withValues(alpha: 0.82),
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                           ),
@@ -1630,7 +1413,7 @@ class _MetricDetailFooter extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.70),
+              color: Colors.white.withValues(alpha: 0.70),
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
@@ -1644,16 +1427,12 @@ class _MetricDetailFooter extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.88),
+              color: Colors.white.withValues(alpha: 0.88),
               fontSize: 17,
               fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        if (data.footerIcon != null) ...[
-          const SizedBox(width: 10),
-          Icon(data.footerIcon, color: Colors.white.withOpacity(0.62), size: 20),
-        ],
       ],
     );
   }
@@ -1753,14 +1532,14 @@ class _MetricAreaChartPainter extends CustomPainter {
     if (data.chartValues.length < 2 || data.chartMax <= 0) return;
     final chartRect = _metricAreaChartRect(size);
     final gridPaint = Paint()
-      ..color = Colors.white.withOpacity(0.075)
+      ..color = Colors.white.withValues(alpha: 0.075)
       ..strokeWidth = 1;
 
     _drawText(
       canvas,
       data.chartUnit,
-      Offset(0, 2),
-      color: Colors.white.withOpacity(0.56),
+      const Offset(0, 2),
+      color: Colors.white.withValues(alpha: 0.56),
       size: 13,
       bold: true,
     );
@@ -1773,7 +1552,7 @@ class _MetricAreaChartPainter extends CustomPainter {
         canvas,
         tick.toStringAsFixed(0),
         Offset(6, y - 8),
-        color: Colors.white.withOpacity(0.48),
+        color: Colors.white.withValues(alpha: 0.48),
         size: 13,
       );
     }
@@ -1801,9 +1580,9 @@ class _MetricAreaChartPainter extends CustomPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            data.color.withOpacity(0.45),
-            data.color.withOpacity(0.06),
-            data.color.withOpacity(0.0),
+            data.color.withValues(alpha: 0.45),
+            data.color.withValues(alpha: 0.06),
+            data.color.withValues(alpha: 0.0),
           ],
         ).createShader(chartRect),
     );
@@ -1824,7 +1603,7 @@ class _MetricAreaChartPainter extends CustomPainter {
         canvas,
         labels[i],
         Offset(x, size.height - 14),
-        color: Colors.white.withOpacity(0.52),
+        color: Colors.white.withValues(alpha: 0.52),
         size: 13,
         center: true,
         maxWidth: size.width,
@@ -1846,7 +1625,7 @@ class _MetricAreaChartPainter extends CustomPainter {
       Offset(x, chartRect.top),
       Offset(x, chartRect.bottom),
       Paint()
-        ..color = Colors.white.withOpacity(0.16)
+        ..color = Colors.white.withValues(alpha: 0.16)
         ..strokeWidth = 1,
     );
     canvas.drawCircle(
@@ -1860,7 +1639,7 @@ class _MetricAreaChartPainter extends CustomPainter {
       point,
       3,
       Paint()
-        ..color = Colors.white.withOpacity(0.92)
+        ..color = Colors.white.withValues(alpha: 0.92)
         ..style = PaintingStyle.fill,
     );
 
@@ -1888,7 +1667,7 @@ class _MetricAreaChartPainter extends CustomPainter {
   }) {
     final titlePainter = _textPainter(
       title,
-      color: Colors.white.withOpacity(0.66),
+      color: Colors.white.withValues(alpha: 0.66),
       size: 11,
       weight: FontWeight.w700,
     );
@@ -1908,12 +1687,12 @@ class _MetricAreaChartPainter extends CustomPainter {
     );
     canvas.drawRRect(
       rect,
-      Paint()..color = const Color(0xFF303744).withOpacity(0.96),
+      Paint()..color = const Color(0xFF303744).withValues(alpha: 0.96),
     );
     canvas.drawRRect(
       rect,
       Paint()
-        ..color = accent.withOpacity(0.32)
+        ..color = accent.withValues(alpha: 0.32)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );
@@ -2245,7 +2024,7 @@ class _ZoneDistributionPanel extends StatelessWidget {
                         Text(
                           centerSubtext,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.50),
+                            color: Colors.white.withValues(alpha: 0.50),
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -2276,7 +2055,7 @@ class _ZoneDistributionPanel extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.72),
+                                    color: Colors.white.withValues(alpha: 0.72),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -2285,7 +2064,7 @@ class _ZoneDistributionPanel extends StatelessWidget {
                               Text(
                                 values[i],
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.82),
+                                  color: Colors.white.withValues(alpha: 0.82),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -2653,7 +2432,7 @@ class _StatisticsPageState extends State<_StatisticsPage> {
         labelIndices: yearLabelIndices,
         color: _RideColors.orange,
         tooltipTitles: yearTooltipTitles,
-        tooltipTitle: '${_selectedYear}年',
+        tooltipTitle: '$_selectedYear年',
         tooltipValue: '0.0 km',
         maxValue: _barMaxValue(yearMileage, fallback: 50.0),
       ),
@@ -2666,7 +2445,7 @@ class _StatisticsPageState extends State<_StatisticsPage> {
         labelIndices: yearLabelIndices,
         color: const Color(0xFF268DFF),
         tooltipTitles: yearTooltipTitles,
-        tooltipTitle: '${_selectedYear}年',
+        tooltipTitle: '$_selectedYear年',
         tooltipValue: '0 分钟',
         maxValue: _barMaxValue(yearDuration, fallback: 3.0),
       ),
@@ -2693,7 +2472,7 @@ class _PeriodSegment extends StatelessWidget {
       height: 47,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
       ),
       child: _AnimatedSegmentTabs(
@@ -2702,9 +2481,9 @@ class _PeriodSegment extends StatelessWidget {
         controller: controller,
         height: 39,
         borderRadius: BorderRadius.circular(14),
-        indicatorColor: Colors.white.withOpacity(0.08),
+        indicatorColor: Colors.white.withValues(alpha: 0.08),
         activeColor: Colors.white,
-        inactiveColor: Colors.white.withOpacity(0.62),
+        inactiveColor: Colors.white.withValues(alpha: 0.62),
         fontSize: 16,
         fontWeight: FontWeight.w800,
         onSelect: onSelect,
@@ -2845,7 +2624,7 @@ class _MonthSelector extends StatelessWidget {
           onPressed: canShift ? onPrevious : null,
           icon: Icon(
             Icons.chevron_left,
-            color: Colors.white.withOpacity(canShift ? 0.86 : 0.24),
+            color: Colors.white.withValues(alpha: canShift ? 0.86 : 0.24),
             size: 30,
           ),
         ),
@@ -2877,7 +2656,7 @@ class _MonthSelector extends StatelessWidget {
           onPressed: canShift ? onNext : null,
           icon: Icon(
             Icons.chevron_right,
-            color: Colors.white.withOpacity(canShift ? 0.86 : 0.24),
+            color: Colors.white.withValues(alpha: canShift ? 0.86 : 0.24),
             size: 30,
           ),
         ),
@@ -2904,7 +2683,7 @@ Future<T?> _showStatsDialog<T>(
     context: context,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: Colors.black.withOpacity(0.58),
+    barrierColor: Colors.black.withValues(alpha: 0.58),
     transitionDuration: const Duration(milliseconds: 220),
     pageBuilder: (context, animation, secondaryAnimation) {
       return Material(
@@ -2993,7 +2772,7 @@ Future<DateTime?> _showStatsWeekPicker(
                 '${_formatChineseDate(pendingWeekStart.add(const Duration(days: 6)))}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.72),
+                  color: Colors.white.withValues(alpha: 0.72),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3203,7 +2982,7 @@ Future<_StatsDateRange?> _showStatsAllPicker(
                     '${_formatChineseDate(pendingEnd)}',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.62),
+                      color: Colors.white.withValues(alpha: 0.62),
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -3518,11 +3297,11 @@ class _StatsWheelViewport extends StatelessWidget {
               height: _statsPickerItemExtent,
               margin: EdgeInsets.symmetric(horizontal: horizontalMargin),
               decoration: BoxDecoration(
-                color: _statsWheelBlue.withOpacity(0.10),
+                color: _statsWheelBlue.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.symmetric(
                   horizontal: BorderSide(
-                    color: _statsWheelBlue.withOpacity(0.76),
+                    color: _statsWheelBlue.withValues(alpha: 0.76),
                     width: 1.2,
                   ),
                 ),
@@ -3543,7 +3322,7 @@ class _StatsWheelViewport extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     const Color(0xFF1F2731),
-                    const Color(0xFF1F2731).withOpacity(0),
+                    const Color(0xFF1F2731).withValues(alpha: 0),
                   ],
                 ),
               ),
@@ -3563,7 +3342,7 @@ class _StatsWheelViewport extends StatelessWidget {
                   end: Alignment.topCenter,
                   colors: [
                     const Color(0xFF171F29),
-                    const Color(0xFF171F29).withOpacity(0),
+                    const Color(0xFF171F29).withValues(alpha: 0),
                   ],
                 ),
               ),
@@ -3596,7 +3375,7 @@ class _StatsWheelItem extends StatelessWidget {
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOutCubic,
           style: TextStyle(
-            color: Colors.white.withOpacity(selected ? 0.98 : 0.46),
+            color: Colors.white.withValues(alpha: selected ? 0.98 : 0.46),
             fontSize: selected ? 25 : 18,
             fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
           ),
@@ -3638,7 +3417,7 @@ class _StatsSingleDayCalendar extends StatelessWidget {
                   child: Text(
                     weekday,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.76),
+                      color: Colors.white.withValues(alpha: 0.76),
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
@@ -3709,7 +3488,7 @@ class _StatsRangeDayCell extends StatelessWidget {
                   bottom: 7,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: _RideColors.orange.withOpacity(0.16),
+                      color: _RideColors.orange.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.horizontal(
                         left: Radius.circular(isStart ? 14 : 0),
                         right: Radius.circular(isEnd ? 14 : 0),
@@ -3729,10 +3508,10 @@ class _StatsRangeDayCell extends StatelessWidget {
                   day.day.toString(),
                   style: TextStyle(
                     color: selected
-                        ? Colors.black.withOpacity(0.86)
+                        ? Colors.black.withValues(alpha: 0.86)
                         : inRange
-                            ? Colors.white.withOpacity(0.92)
-                            : Colors.white.withOpacity(inMonth ? 0.76 : 0.42),
+                            ? Colors.white.withValues(alpha: 0.92)
+                            : Colors.white.withValues(alpha: inMonth ? 0.76 : 0.42),
                     fontSize: 14,
                     fontWeight: selected || inRange
                         ? FontWeight.w900
@@ -3765,18 +3544,18 @@ class _StatsPickerFrame extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF252D38).withOpacity(0.98),
-            const Color(0xFF151C26).withOpacity(0.99),
+            const Color(0xFF252D38).withValues(alpha: 0.98),
+            const Color(0xFF151C26).withValues(alpha: 0.99),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.48),
+            color: Colors.black.withValues(alpha: 0.48),
             blurRadius: 36,
             offset: const Offset(0, 22),
           ),
@@ -3824,7 +3603,7 @@ class _StatsPickerFrame extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(height: 1, color: Colors.white.withOpacity(0.07)),
+            Divider(height: 1, color: Colors.white.withValues(alpha: 0.07)),
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
               child: child,
@@ -3886,7 +3665,7 @@ class _StatsMonthHeader extends StatelessWidget {
                   const SizedBox(width: 4),
                   Icon(
                     Icons.expand_more,
-                    color: Colors.white.withOpacity(0.62),
+                    color: Colors.white.withValues(alpha: 0.62),
                     size: 20,
                   ),
                 ],
@@ -3928,7 +3707,7 @@ class _StatsWeekCalendar extends StatelessWidget {
                   child: Text(
                     weekday,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.76),
+                      color: Colors.white.withValues(alpha: 0.76),
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
@@ -3981,10 +3760,10 @@ class _StatsWeekCalendarRow extends StatelessWidget {
               bottom: 4,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: _RideColors.orange.withOpacity(0.20),
+                  color: _RideColors.orange.withValues(alpha: 0.20),
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: _RideColors.orange.withOpacity(0.72),
+                    color: _RideColors.orange.withValues(alpha: 0.72),
                   ),
                 ),
               ),
@@ -4042,48 +3821,10 @@ class _StatsDayCircle extends StatelessWidget {
         day.day.toString(),
         style: TextStyle(
           color: selected
-              ? Colors.black.withOpacity(0.86)
-              : Colors.white.withOpacity(inMonth ? 0.76 : 0.42),
+              ? Colors.black.withValues(alpha: 0.86)
+              : Colors.white.withValues(alpha: inMonth ? 0.76 : 0.42),
           fontSize: 14,
           fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatsPickerListItem extends StatelessWidget {
-  const _StatsPickerListItem({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        height: 52,
-        width: double.infinity,
-        alignment: Alignment.center,
-        margin: const EdgeInsets.symmetric(vertical: 3),
-        decoration: BoxDecoration(
-          color: selected ? Colors.white.withOpacity(0.08) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(selected ? 0.96 : 0.34),
-            fontSize: selected ? 25 : 18,
-            fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-          ),
         ),
       ),
     );
@@ -4111,7 +3852,7 @@ class _StatsRangeDateRow extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.58),
+            color: Colors.white.withValues(alpha: 0.58),
             fontSize: 15,
             fontWeight: FontWeight.w800,
           ),
@@ -4125,13 +3866,13 @@ class _StatsRangeDateRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: selected
-                  ? _RideColors.orange.withOpacity(0.14)
-                  : Colors.white.withOpacity(0.06),
+                  ? _RideColors.orange.withValues(alpha: 0.14)
+                  : Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(15),
               border: Border.all(
                 color: selected
-                    ? _RideColors.orange.withOpacity(0.78)
-                    : Colors.white.withOpacity(0.07),
+                    ? _RideColors.orange.withValues(alpha: 0.78)
+                    : Colors.white.withValues(alpha: 0.07),
               ),
             ),
             child: Row(
@@ -4156,7 +3897,7 @@ class _StatsRangeDateRow extends StatelessWidget {
                   selected ? Icons.edit_calendar : Icons.calendar_month,
                   color: selected
                       ? _RideColors.orange
-                      : Colors.white.withOpacity(0.36),
+                      : Colors.white.withValues(alpha: 0.36),
                   size: 21,
                 ),
               ],
@@ -4447,7 +4188,7 @@ class _OverviewMetric extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
-          right: BorderSide(color: Colors.white.withOpacity(0.08)),
+          right: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
         ),
       ),
       child: Column(
@@ -4458,7 +4199,7 @@ class _OverviewMetric extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.56),
+              color: Colors.white.withValues(alpha: 0.56),
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
@@ -4485,7 +4226,7 @@ class _OverviewMetric extends StatelessWidget {
                     TextSpan(
                       text: ' $unit',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.58),
+                        color: Colors.white.withValues(alpha: 0.58),
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
@@ -4610,7 +4351,7 @@ class _BarTrendPanelState extends State<_BarTrendPanel> {
               Text(
                 widget.unit,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.54),
+                  color: Colors.white.withValues(alpha: 0.54),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -4704,7 +4445,7 @@ class _AnnualDistributionPanel extends StatelessWidget {
               Text(
                 '单位：km',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.54),
+                  color: Colors.white.withValues(alpha: 0.54),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -4761,7 +4502,7 @@ class _AnnualDistributionPanel extends StatelessWidget {
                     Text(
                       '总里程 (km)',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.54),
+                        color: Colors.white.withValues(alpha: 0.54),
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
@@ -4830,7 +4571,7 @@ class _DistributionRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.82),
+            color: Colors.white.withValues(alpha: 0.82),
             fontSize: 14,
             fontWeight: FontWeight.w800,
           ),
@@ -4839,7 +4580,7 @@ class _DistributionRow extends StatelessWidget {
         Text(
           ratio,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.82),
+            color: Colors.white.withValues(alpha: 0.82),
             fontSize: 14,
             fontWeight: FontWeight.w800,
           ),
@@ -4971,9 +4712,9 @@ class _InteractiveDonutChartState extends State<_InteractiveDonutChart> {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF303744).withOpacity(0.96),
+                          color: const Color(0xFF303744).withValues(alpha: 0.96),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white.withOpacity(0.08)),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                         ),
                         child: Text(
                           tooltip ?? '',
@@ -5315,7 +5056,7 @@ class _RoutesPageState extends State<_RoutesPage> {
                     child: Text(
                       routeCountLabel,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.72),
+                        color: Colors.white.withValues(alpha: 0.72),
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
@@ -5463,7 +5204,7 @@ class _RouteListEntry {
       'climb': climb,
       'duration': duration,
       'difficulty': difficulty,
-      'difficultyColor': difficultyColor.value,
+      'difficultyColor': difficultyColor.toARGB32(),
       'variant': variant,
       'imported': imported,
       'track': track.map((point) => point.toJson()).toList(),
@@ -5528,7 +5269,7 @@ extension _RouteListEntrySelection on _RouteListEntry {
       climb: climb,
       duration: duration,
       difficulty: difficulty,
-      difficultyColorValue: difficultyColor.value,
+      difficultyColorValue: difficultyColor.toARGB32(),
       variant: variant,
       track: track
           .map(
@@ -5599,8 +5340,8 @@ class _RouteImportFabState extends State<_RouteImportFab>
   Widget build(BuildContext context) {
     const actionSpacing = 12.0;
     const actionStep = 68.0;
-    final actionCount = 2;
-    final stackHeight = 64.0 + actionSpacing + actionStep * actionCount;
+    const actionCount = 2;
+    const stackHeight = 64.0 + actionSpacing + actionStep * actionCount;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -5711,12 +5452,12 @@ class _RouteFabAction extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF101720).withOpacity(0.92),
+                  color: const Color(0xFF101720).withValues(alpha: 0.92),
                   borderRadius: BorderRadius.circular(17),
-                  border: Border.all(color: Colors.white.withOpacity(0.10)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.24),
+                      color: Colors.black.withValues(alpha: 0.24),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -5768,7 +5509,7 @@ class _RouteFabToggleButton extends StatelessWidget {
       color: color,
       shape: const CircleBorder(),
       elevation: 10,
-      shadowColor: Colors.black.withOpacity(0.52),
+      shadowColor: Colors.black.withValues(alpha: 0.52),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
@@ -5829,7 +5570,6 @@ class _RouteFabButton extends StatelessWidget {
     required this.size,
     required this.onTap,
     this.busy = false,
-    this.turn = 0,
   });
 
   final IconData icon;
@@ -5837,7 +5577,6 @@ class _RouteFabButton extends StatelessWidget {
   final double size;
   final VoidCallback? onTap;
   final bool busy;
-  final double turn;
 
   @override
   Widget build(BuildContext context) {
@@ -5845,7 +5584,7 @@ class _RouteFabButton extends StatelessWidget {
       color: color,
       shape: const CircleBorder(),
       elevation: 10,
-      shadowColor: Colors.black.withOpacity(0.52),
+      shadowColor: Colors.black.withValues(alpha: 0.52),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
@@ -5862,15 +5601,10 @@ class _RouteFabButton extends StatelessWidget {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : AnimatedRotation(
-                    turns: turn,
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: size * 0.44,
-                    ),
+                : Icon(
+                    icon,
+                    color: Colors.white,
+                    size: size * 0.44,
                   ),
           ),
         ),
@@ -6246,12 +5980,12 @@ class _RouteEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white.withOpacity(0.36), size: 42),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.36), size: 42),
           const SizedBox(height: 12),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.58),
+              color: Colors.white.withValues(alpha: 0.58),
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
@@ -6312,12 +6046,12 @@ class _RouteModeTabs extends StatelessWidget {
         controller: controller,
         height: 48,
         borderRadius: BorderRadius.circular(10),
-        indicatorColor: _RideColors.orange.withOpacity(0.13),
+        indicatorColor: _RideColors.orange.withValues(alpha: 0.13),
         indicatorBorder: Border.all(
-          color: _RideColors.orange.withOpacity(0.85),
+          color: _RideColors.orange.withValues(alpha: 0.85),
         ),
         activeColor: _RideColors.orange,
-        inactiveColor: Colors.white.withOpacity(0.70),
+        inactiveColor: Colors.white.withValues(alpha: 0.70),
         fontSize: 14,
         fontWeight: FontWeight.w900,
         onSelect: onSelect,
@@ -6344,12 +6078,12 @@ class _RouteSearchBar extends StatelessWidget {
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.07),
+              color: Colors.white.withValues(alpha: 0.07),
               borderRadius: BorderRadius.circular(15),
             ),
             child: Row(
               children: [
-                Icon(Icons.search, color: Colors.white.withOpacity(0.64), size: 23),
+                Icon(Icons.search, color: Colors.white.withValues(alpha: 0.64), size: 23),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -6357,7 +6091,7 @@ class _RouteSearchBar extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.48),
+                      color: Colors.white.withValues(alpha: 0.48),
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
@@ -6375,7 +6109,7 @@ class _RouteSearchBar extends StatelessWidget {
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 18),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(15),
             ),
             child: Row(
@@ -6391,7 +6125,7 @@ class _RouteSearchBar extends StatelessWidget {
                 const SizedBox(width: 6),
                 Icon(
                   Icons.keyboard_arrow_down,
-                  color: Colors.white.withOpacity(0.78),
+                  color: Colors.white.withValues(alpha: 0.78),
                 ),
               ],
             ),
@@ -6542,7 +6276,7 @@ class _RouteListCardState extends State<_RouteListCard> {
                                 Text(
                                   date,
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.60),
+                                    color: Colors.white.withValues(alpha: 0.60),
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -6552,7 +6286,7 @@ class _RouteListCardState extends State<_RouteListCard> {
                                   spacing: 8,
                                   runSpacing: 4,
                                   children: [
-                                    _RouteBadge(
+                                    const _RouteBadge(
                                       label: '公路',
                                       color: _RideColors.orange,
                                     ),
@@ -6582,7 +6316,7 @@ class _RouteListCardState extends State<_RouteListCard> {
                           ),
                         ),
                         Divider(
-                          color: Colors.white.withOpacity(0.08),
+                          color: Colors.white.withValues(alpha: 0.08),
                           height: 16,
                         ),
                         SizedBox(
@@ -6660,7 +6394,7 @@ class _RouteActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? _RideColors.orange : Colors.white.withOpacity(0.72);
+    final color = active ? _RideColors.orange : Colors.white.withValues(alpha: 0.72);
     return Tooltip(
       message: tooltip,
       child: InkWell(
@@ -6690,7 +6424,7 @@ class _RouteBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.09),
+        color: color.withValues(alpha: 0.09),
         borderRadius: BorderRadius.circular(5),
         border: Border.all(color: color),
       ),
@@ -6732,7 +6466,7 @@ class _RouteMetric extends StatelessWidget {
             TextSpan(
               text: ' $unit',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.62),
+                color: Colors.white.withValues(alpha: 0.62),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -6783,7 +6517,7 @@ class _RouteDetailFavoriteButtonState extends State<_RouteDetailFavoriteButton> 
       onPressed: _toggle,
       icon: Icon(
         _favorited ? Icons.star : Icons.star_border,
-        color: _favorited ? _RideColors.orange : Colors.white.withOpacity(0.9),
+        color: _favorited ? _RideColors.orange : Colors.white.withValues(alpha: 0.9),
       ),
     );
   }
@@ -6841,14 +6575,14 @@ class _DetailInfoRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: last
             ? null
-            : Border(bottom: BorderSide(color: Colors.white.withOpacity(0.07))),
+            : Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.07))),
       ),
       child: Row(
         children: [
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -6913,7 +6647,7 @@ class _RideRouteDetailPage extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () => _showUiMessage('更多', '更多操作入口已激活'),
-                  icon: Icon(Icons.more_horiz, color: Colors.white.withOpacity(0.9)),
+                  icon: Icon(Icons.more_horiz, color: Colors.white.withValues(alpha: 0.9)),
                 ),
               ],
             ),
@@ -6992,7 +6726,7 @@ class _RideRouteDetailPage extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 9, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF3BE23E).withOpacity(0.12),
+                            color: const Color(0xFF3BE23E).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(color: const Color(0xFF3BE23E)),
                           ),
@@ -7011,7 +6745,7 @@ class _RideRouteDetailPage extends StatelessWidget {
                     Text(
                       date,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -7029,7 +6763,7 @@ class _RideRouteDetailPage extends StatelessWidget {
                     const SizedBox(height: 14),
                     Row(
                       children: [
-                        _RouteBadge(label: '公路', color: _RideColors.orange),
+                        const _RouteBadge(label: '公路', color: _RideColors.orange),
                         const SizedBox(width: 8),
                         _RouteBadge(
                             label: '难度 $difficulty', color: difficultyColor),
@@ -7054,7 +6788,7 @@ class _RideRouteDetailPage extends StatelessWidget {
                                 ? '这是一条经典的环山路线，适合有一定经验的骑友。路线包含平路、爬坡与下坡，沿途风景优美，建议早晨出发，注意补给和防晒。'
                                 : '已解析导入路书中的 ${track.length} 个路线点，地图与海拔图会按 GPX 轨迹绘制。请在发送到设备前确认路线方向与路点完整性。',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.68),
+                              color: Colors.white.withValues(alpha: 0.68),
                               fontSize: 14,
                               height: 1.5,
                               fontWeight: FontWeight.w600,
@@ -7134,7 +6868,7 @@ class _RideRouteDetailPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF101720),
                 border: Border(
-                  top: BorderSide(color: Colors.white.withOpacity(0.08)),
+                  top: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
                 ),
               ),
               child: SafeArea(
@@ -7147,7 +6881,7 @@ class _RideRouteDetailPage extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           minimumSize: const Size(0, 50),
-                          side: BorderSide(color: Colors.white.withOpacity(0.25)),
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.25)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -7225,7 +6959,7 @@ class _RideFullscreenMapPage extends StatelessWidget {
                   onPressed: () => _shareRouteSummary(context, title: title),
                   icon: Icon(
                     Icons.share_outlined,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -7291,9 +7025,9 @@ class _MapHeaderOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFF101720).withOpacity(0.74),
+        color: const Color(0xFF101720).withValues(alpha: 0.74),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -7303,7 +7037,7 @@ class _MapHeaderOverlay extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: _RideColors.orange.withOpacity(0.16),
+                color: _RideColors.orange.withValues(alpha: 0.16),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -7334,7 +7068,7 @@ class _MapHeaderOverlay extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.62),
+                      color: Colors.white.withValues(alpha: 0.62),
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -7364,9 +7098,9 @@ class _MapStatsOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFF101720).withOpacity(0.78),
+        color: const Color(0xFF101720).withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -7404,7 +7138,7 @@ class _MapStatItem extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.50),
+              color: Colors.white.withValues(alpha: 0.50),
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),
@@ -7427,7 +7161,7 @@ class _MapStatItem extends StatelessWidget {
                   TextSpan(
                     text: ' $unit',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.62),
+                      color: Colors.white.withValues(alpha: 0.62),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                     ),
@@ -7449,15 +7183,13 @@ class _MapStatDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 34,
-      color: Colors.white.withOpacity(0.10),
+      color: Colors.white.withValues(alpha: 0.10),
     );
   }
 }
 
 class _DevicesPage extends StatefulWidget {
-  const _DevicesPage({required this.controller});
-
-  final RideController controller;
+  const _DevicesPage();
 
   @override
   State<_DevicesPage> createState() => _DevicesPageState();
@@ -7466,16 +7198,23 @@ class _DevicesPage extends StatefulWidget {
 class _DevicesPageState extends State<_DevicesPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _radar;
-  bool _scanning = true;
+  late final BleController _ble;
 
   @override
   void initState() {
     super.initState();
-    // 雷达扫描旋转动画（纯本地视觉状态，不接真实 BleController）。
+    _ble = Get.put(BleController(), permanent: true);
+    // 雷达扫描旋转动画（视觉装饰；扫描状态由 BleController.isScanning 驱动）。
     _radar = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1600),
     )..repeat();
+    // 进入设备页自动开扫；权限或蓝牙未就绪时由 BleController 自行提示并保持停止态。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_ble.isScanning.value) {
+        unawaited(_ble.startScan());
+      }
+    });
   }
 
   @override
@@ -7485,28 +7224,16 @@ class _DevicesPageState extends State<_DevicesPage>
   }
 
   void _toggleScan() {
-    setState(() {
-      _scanning = !_scanning;
-      if (_scanning) {
-        _radar.repeat();
-      } else {
-        _radar.stop();
-      }
-    });
-    _showUiMessage(
-      _scanning ? '开始扫描' : '停止扫描',
-      _scanning ? '正在扫描附近设备...' : '已停止扫描',
-    );
+    if (_ble.isScanning.value) {
+      unawaited(_ble.stopScan());
+    } else {
+      unawaited(_ble.startScan());
+    }
   }
 
   void _refreshDevices() {
-    if (!_scanning) {
-      setState(() {
-        _scanning = true;
-        _radar.repeat();
-      });
-    }
-    _showUiMessage('刷新设备', '正在重新扫描可用设备...');
+    // 扫描列表跨页累计，刷新即重新触发一轮真实扫描。
+    unawaited(_ble.startScan());
   }
 
   void _openMissingDeviceHelp() {
@@ -7520,30 +7247,32 @@ class _DevicesPageState extends State<_DevicesPage>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // 固定子头：扫描雷达 + 停止扫描（本地视觉状态，不接真实 BleController）
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
-          child: _ScanPanel(
-            scanning: _scanning,
-            rotation: _radar,
-            onToggle: _toggleScan,
-          ),
-        ),
-        const SizedBox(height: 12),
-        // 单一滚动区：可用设备列表
-        Expanded(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
-            child: _AvailableDevicesPanel(
-              onRefresh: _refreshDevices,
-              onMissingDevice: _openMissingDeviceHelp,
+    return Obx(
+      () => Column(
+        children: [
+          // 固定子头：扫描雷达 + 停止扫描（跟随 BleController.isScanning 真实状态）
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
+            child: _ScanPanel(
+              scanning: _ble.isScanning.value,
+              rotation: _radar,
+              onToggle: _toggleScan,
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          // 单一滚动区：真实扫描发现的设备列表
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
+              child: _AvailableDevicesPanel(
+                bleController: _ble,
+                onMissingDevice: _openMissingDeviceHelp,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -7577,7 +7306,7 @@ class _ScanPanel extends StatelessWidget {
           Text(
             scanning ? '请确保设备已开机并靠近手机' : '点按下方按钮重新开始扫描',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.66),
+              color: Colors.white.withValues(alpha: 0.66),
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
@@ -7602,7 +7331,7 @@ class _ScanPanel extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF3BE23E).withOpacity(0.18),
+                    color: const Color(0xFF3BE23E).withValues(alpha: 0.18),
                   ),
                   child: const Icon(
                     Icons.bluetooth,
@@ -7618,7 +7347,7 @@ class _ScanPanel extends StatelessWidget {
             onPressed: onToggle,
             style: OutlinedButton.styleFrom(
               foregroundColor: _RideColors.orange,
-              side: BorderSide(color: Colors.white.withOpacity(0.14)),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
               minimumSize: const Size(200, 44),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(22),
@@ -7637,11 +7366,11 @@ class _ScanPanel extends StatelessWidget {
 
 class _AvailableDevicesPanel extends StatelessWidget {
   const _AvailableDevicesPanel({
-    required this.onRefresh,
+    required this.bleController,
     required this.onMissingDevice,
   });
 
-  final VoidCallback onRefresh;
+  final BleController bleController;
   final VoidCallback onMissingDevice;
 
   @override
@@ -7650,61 +7379,55 @@ class _AvailableDevicesPanel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
       child: Column(
         children: [
-          Row(
-            children: [
-              const Text(
-                '可用设备',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                ),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '可用设备',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
               ),
-              const Spacer(),
-              IconButton(
-                onPressed: onRefresh,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: Icon(Icons.refresh, color: Colors.white.withOpacity(0.78)),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 14),
-          _DeviceRow(
-            title: 'iGPSPORT BSC300_1234',
-            type: '码表',
-            bars: 4,
-            onTap: () => _openRidePage(
-              () => const _RideDeviceDetailPage(
-                name: 'iGPSPORT BSC300_1234',
-                type: '码表',
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _DeviceRow(
-            title: 'iGPSPORT SR30_5678',
-            type: '雷达',
-            bars: 4,
-            onTap: () => _openRidePage(
-              () => const _RideDeviceDetailPage(
-                name: 'iGPSPORT SR30_5678',
-                type: '雷达',
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _DeviceRow(
-            title: 'iGPSPORT HR40_9012',
-            type: '心率带',
-            bars: 3,
-            onTap: () => _openRidePage(
-              () => const _RideDeviceDetailPage(
-                name: 'iGPSPORT HR40_9012',
-                type: '心率带',
-              ),
-            ),
-          ),
+          Obx(() {
+            final devices = bleController.discoveredDevices;
+            if (devices.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 26),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.bluetooth_searching,
+                      size: 46,
+                      color: Colors.white.withValues(alpha: 0.52),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      bleController.isScanning.value
+                          ? '正在搜索设备...'
+                          : '暂未发现设备，点按上方按钮开始扫描',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.66),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+            return Column(
+              children: [
+                for (final device in devices) ...[
+                  _buildDeviceRow(device),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            );
+          }),
           const SizedBox(height: 18),
           InkWell(
             borderRadius: BorderRadius.circular(12),
@@ -7716,7 +7439,7 @@ class _AvailableDevicesPanel extends StatelessWidget {
                   Text(
                     '未找到我的设备',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.68),
+                      color: Colors.white.withValues(alpha: 0.68),
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
@@ -7724,7 +7447,7 @@ class _AvailableDevicesPanel extends StatelessWidget {
                   const Spacer(),
                   Icon(
                     Icons.chevron_right,
-                    color: Colors.white.withOpacity(0.82),
+                    color: Colors.white.withValues(alpha: 0.82),
                   ),
                 ],
               ),
@@ -7734,6 +7457,38 @@ class _AvailableDevicesPanel extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildDeviceRow(BluetoothDevice device) {
+    final connected = bleController.connectedDevices
+        .any((d) => d.remoteId == device.remoteId);
+    return _DeviceRow(
+      title: _displayName(bleController, device),
+      type: connected ? '已连接' : device.remoteId.str,
+      bars: _rssiBars(bleController.getDeviceRssi(device)),
+      iconCategory: bleController.getDeviceCategory(device),
+      onTap: () => Get.to(
+        () => _SpeedometerDeviceDetailPage(device: device),
+      ),
+      onConnect: connected || !bleController.isConnectable(device)
+          ? null
+          : () => unawaited(bleController.connectDevice(device)),
+    );
+  }
+}
+
+/// 无广播名的设备回退显示 MAC 地址，避免出现空标题行。
+String _displayName(BleController controller, BluetoothDevice device) {
+  final name = controller.getDeviceName(device).trim();
+  return name.isEmpty ? device.remoteId.str : name;
+}
+
+/// 广播 RSSI 映射为 1-4 格信号强度；0 表示尚无信号数据。
+int _rssiBars(int rssi) {
+  if (rssi == 0) return 1;
+  if (rssi >= -55) return 4;
+  if (rssi >= -70) return 3;
+  if (rssi >= -85) return 2;
+  return 1;
 }
 
 class _DeviceRow extends StatelessWidget {
@@ -7741,13 +7496,19 @@ class _DeviceRow extends StatelessWidget {
     required this.title,
     required this.type,
     required this.bars,
-    this.onTap,
+    required this.iconCategory,
+    required this.onTap,
+    this.onConnect,
   });
 
   final String title;
   final String type;
   final int bars;
-  final VoidCallback? onTap;
+  final String iconCategory;
+  final VoidCallback onTap;
+
+  /// 直连回调；为 null（已连接或不可连接）时隐藏连接按钮。
+  final VoidCallback? onConnect;
 
   @override
   Widget build(BuildContext context) {
@@ -7758,28 +7519,36 @@ class _DeviceRow extends StatelessWidget {
         height: 82,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.035),
+          color: Colors.white.withValues(alpha: 0.035),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.07)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
         ),
         child: Row(
           children: [
-            _DeviceThumbnail(kind: type, compact: true),
+            _CategoryDeviceThumbnail(category: iconCategory, compact: true),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _SignalBars(value: bars),
+                    ],
                   ),
                   const SizedBox(height: 6),
                   Align(
@@ -7790,12 +7559,12 @@ class _DeviceRow extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
                         border:
-                            Border.all(color: Colors.white.withOpacity(0.18)),
+                            Border.all(color: Colors.white.withValues(alpha: 0.18)),
                       ),
                       child: Text(
                         type,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.78),
+                          color: Colors.white.withValues(alpha: 0.78),
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -7805,24 +7574,26 @@ class _DeviceRow extends StatelessWidget {
                 ],
               ),
             ),
-            _SignalBars(value: bars),
-            const SizedBox(width: 16),
-            OutlinedButton(
-              onPressed:
-                  onTap ?? () => _showUiMessage('连接设备', '$title 正在连接...'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: _RideColors.orange,
-                side: const BorderSide(color: _RideColors.orange),
-                minimumSize: const Size(76, 38),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+            if (onConnect != null) ...[
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: onConnect,
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: _RideColors.orange,
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: _RideColors.orange),
+                  minimumSize: const Size(64, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  '连接',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
                 ),
               ),
-              child: const Text(
-                '连接',
-                style: TextStyle(fontWeight: FontWeight.w900),
-              ),
-            ),
+            ],
           ],
         ),
       ),
@@ -7830,20 +7601,339 @@ class _DeviceRow extends StatelessWidget {
   }
 }
 
-class _DeviceThumbnail extends StatelessWidget {
-  const _DeviceThumbnail({
-    required this.kind,
+/// 按广播类别渲染设备缩略图；码表/心率带沿用既有造型，其余类别用深色图标块。
+class _CategoryDeviceThumbnail extends StatelessWidget {
+  const _CategoryDeviceThumbnail({
+    required this.category,
     this.compact = false,
   });
 
-  final String kind;
+  final String category;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    if (kind == '雷达') return _RadarDeviceThumbnail(compact: compact);
-    if (kind == '心率带') return _HeartRateDeviceThumbnail(compact: compact);
-    return _ComputerDeviceThumbnail(compact: compact);
+    if (category == 'computer') {
+      return _ComputerDeviceThumbnail(compact: compact);
+    }
+    if (category == 'heart_rate') {
+      return _HeartRateDeviceThumbnail(compact: compact);
+    }
+    final (icon, color) = _categoryIcon(category);
+    return SizedBox(
+      width: compact ? 56 : 92,
+      height: compact ? 64 : 108,
+      child: Center(
+        child: Container(
+          width: compact ? 46 : 74,
+          height: compact ? 56 : 92,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(compact ? 12 : 18),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2E3338), Color(0xFF101318)],
+            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.34),
+                blurRadius: compact ? 10 : 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: color, size: compact ? 24 : 38),
+        ),
+      ),
+    );
+  }
+
+  (IconData, Color) _categoryIcon(String category) {
+    switch (category) {
+      case 'watch':
+        return const (Icons.watch, Color(0xFF7EC8FF));
+      case 'power_meter':
+        return const (Icons.bolt, _RideColors.orange);
+      case 'cadence':
+        return const (Icons.pedal_bike, Color(0xFF9BE6A0));
+      case 'earphones':
+        return const (Icons.headphones, Color(0xFFC6A9FF));
+      case 'speaker':
+        return const (Icons.speaker, Color(0xFFC6A9FF));
+      case 'phone':
+        return const (Icons.phone_android, Color(0xFF7EC8FF));
+      case 'tv':
+        return const (Icons.tv, Color(0xFF7EC8FF));
+      case 'keyboard':
+        return const (Icons.keyboard, Color(0xFFA9B4C2));
+      case 'mouse':
+        return const (Icons.mouse, Color(0xFFA9B4C2));
+      case 'beacon':
+        return const (Icons.location_on, Color(0xFFFFD166));
+      default:
+        return const (Icons.bluetooth, Color(0xFF3BE23E));
+    }
+  }
+}
+
+/// 码表线设备详情页：与码表页同风格（深色玻璃拟态），承载连接控制与
+/// 固件升级入口；功率计线继续使用独立的 DeviceDetailPage。
+class _SpeedometerDeviceDetailPage extends StatelessWidget {
+  const _SpeedometerDeviceDetailPage({required this.device});
+
+  final BluetoothDevice device;
+
+  Future<void> _copyDeviceId(String deviceId) async {
+    await Clipboard.setData(ClipboardData(text: deviceId));
+    _showUiMessage('已复制', '设备ID已复制到剪贴板');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ble = Get.put(BleController(), permanent: true);
+    final name = ble.getDeviceName(device);
+    final category = ble.getDeviceCategory(device);
+    final connectable = ble.isConnectable(device);
+
+    return Scaffold(
+      backgroundColor: _RideColors.background,
+      appBar: AppBar(
+        backgroundColor: _RideColors.background,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.copy,
+              color: Colors.white.withValues(alpha: 0.82),
+              size: 20,
+            ),
+            onPressed: () => _copyDeviceId(device.remoteId.str),
+          ),
+        ],
+      ),
+      body: Obx(() {
+        final connected = ble.connectedDevices
+            .any((d) => d.remoteId == device.remoteId);
+        final rssi = ble.getDeviceRssi(device);
+        final serviceCount = ble.getServiceUuids(device).length;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _GlassPanel(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    _CategoryDeviceThumbnail(category: category),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 19,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: connected
+                                      ? const Color(0xFF3BE23E)
+                                      : Colors.white.withValues(alpha: 0.38),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  connected
+                                      ? '已连接'
+                                      : (connectable ? '未连接' : '仅广播，不支持连接'),
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.72),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _GlassPanel(
+                child: Column(
+                  children: [
+                    _DetailInfoRow(
+                      label: '设备ID',
+                      value: device.remoteId.str,
+                    ),
+                    _DetailInfoRow(
+                      label: '可连接',
+                      value: connectable ? '是' : '否',
+                    ),
+                    _DetailInfoRow(
+                      label: '信号强度',
+                      value: rssi == 0
+                          ? '暂无数据'
+                          : '$rssi dBm（${ble.getRssiDescription(rssi)}）',
+                    ),
+                    _DetailInfoRow(
+                      label: '服务 UUID',
+                      value: serviceCount == 0 ? '无' : '$serviceCount 项',
+                      last: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _GlassPanel(
+                padding: const EdgeInsets.all(16),
+                child: connectable
+                    ? SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (connected) {
+                              unawaited(ble.disconnectDevice(device));
+                            } else {
+                              unawaited(ble.connectDevice(device));
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: connected
+                                ? Colors.white.withValues(alpha: 0.12)
+                                : _RideColors.orange,
+                            foregroundColor: Colors.white,
+                            side: connected
+                                ? BorderSide(
+                                    color: Colors.white.withValues(alpha: 0.2))
+                                : null,
+                            minimumSize: const Size.fromHeight(46),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(23),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            connected ? '断开连接' : '连接设备',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.white.withValues(alpha: 0.6),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '此设备不支持连接，仅广播数据',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.66),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+              if (connected) ...[
+                const SizedBox(height: 12),
+                _GlassPanel(
+                  padding: const EdgeInsets.all(16),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(15),
+                    onTap: () => Get.to(
+                      () => OtaUpgradePage(connectedDevice: device),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _RideColors.orange.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(13),
+                            border: Border.all(
+                              color: _RideColors.orange.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.system_update_alt,
+                            color: _RideColors.orange,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '检查单片机固件更新',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '下载最新码表固件',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: Colors.white.withValues(alpha: 0.6),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      }),
+    );
   }
 }
 
@@ -7872,10 +7962,10 @@ class _ComputerDeviceThumbnail extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [Color(0xFF30343A), Color(0xFF101318)],
             ),
-            border: Border.all(color: Colors.white.withOpacity(0.16)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.34),
+                color: Colors.black.withValues(alpha: 0.34),
                 blurRadius: compact ? 10 : 18,
                 offset: const Offset(0, 8),
               ),
@@ -7885,7 +7975,7 @@ class _ComputerDeviceThumbnail extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(compact ? 6 : 10),
               color: const Color(0xFF1B2026),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -7893,7 +7983,7 @@ class _ComputerDeviceThumbnail extends StatelessWidget {
                 Text(
                   'iGPS',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.86),
+                    color: Colors.white.withValues(alpha: 0.86),
                     fontSize: compact ? 5 : 9,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.2,
@@ -7913,53 +8003,6 @@ class _ComputerDeviceThumbnail extends StatelessWidget {
                     ),
                   ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RadarDeviceThumbnail extends StatelessWidget {
-  const _RadarDeviceThumbnail({required this.compact});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: compact ? 56 : 92,
-      height: compact ? 64 : 108,
-      child: Center(
-        child: Container(
-          width: compact ? 42 : 68,
-          height: compact ? 58 : 92,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF2E3338), Color(0xFF101318)],
-            ),
-            border: Border.all(color: Colors.white.withOpacity(0.14)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.34),
-                blurRadius: compact ? 10 : 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Container(
-              width: compact ? 18 : 30,
-              height: compact ? 18 : 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
-                border: Border.all(color: Colors.white.withOpacity(0.18)),
-              ),
             ),
           ),
         ),
@@ -8002,13 +8045,13 @@ class _HeartRateDeviceThumbnail extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [Color(0xFF282D32), Color(0xFF0F1216)],
                 ),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               ),
               child: Center(
                 child: Text(
                   'iGPS',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.78),
+                    color: Colors.white.withValues(alpha: 0.78),
                     fontSize: compact ? 5 : 8,
                     fontWeight: FontWeight.w900,
                   ),
@@ -8033,419 +8076,8 @@ class _DeviceScreenLine extends StatelessWidget {
       width: width,
       height: 2,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.76),
+        color: Colors.white.withValues(alpha: 0.76),
         borderRadius: BorderRadius.circular(999),
-      ),
-    );
-  }
-}
-
-class _ConnectedDevicePanel extends StatelessWidget {
-  const _ConnectedDevicePanel({
-    this.deviceName = 'iGPSPORT BSC300_1234',
-    this.deviceType = '码表',
-  });
-
-  final String deviceName;
-  final String deviceType;
-
-  @override
-  Widget build(BuildContext context) {
-    return _GlassPanel(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _DeviceThumbnail(kind: deviceType),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      deviceName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF3BE23E),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '已连接',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.76),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '固件版本：v1.23.0',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.66),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '电量：100%',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.66),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          const _DeviceFirmwareUpdateRow(),
-          const SizedBox(height: 6),
-          const _DeviceSettingRow(
-            icon: Icons.settings,
-            color: Color(0xFF268DFF),
-            title: '设备设置',
-          ),
-          const _DeviceSettingRow(
-            icon: Icons.grid_view,
-            color: Color(0xFF4AD14A),
-            title: '页面配置',
-          ),
-          const _DeviceSettingRow(
-            icon: Icons.link,
-            color: Color(0xFFA533FF),
-            title: '传感器管理',
-          ),
-          const _DeviceSwitchRow(
-            icon: Icons.pause,
-            color: _RideColors.orange,
-            title: '自动暂停',
-            subtitle: '停止运动时自动暂停记录',
-          ),
-          const _DeviceSwitchRow(
-            icon: Icons.trip_origin,
-            color: Color(0xFFFFC400),
-            title: '自动计圈',
-            subtitle: '按距离自动生成计圈',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DeviceInfoPanel extends StatelessWidget {
-  const _DeviceInfoPanel({required this.name});
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return _GlassPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '设备信息',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 4),
-          _DetailInfoRow(label: '设备名称', value: name),
-          const _DetailInfoRow(label: '序列号', value: 'SN1234567890'),
-          const _DetailInfoRow(label: '固件版本', value: 'v1.23.0'),
-          const _DetailInfoRow(label: '硬件版本', value: 'v1.0'),
-          const _DetailInfoRow(
-              label: 'MAC 地址', value: 'D0:55:3C:12:34:56', last: true),
-        ],
-      ),
-    );
-  }
-}
-
-class _RideDeviceDetailPage extends StatelessWidget {
-  const _RideDeviceDetailPage({required this.name, required this.type});
-
-  final String name;
-  final String type;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _RideColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _DetailTopBar(
-              title: '设备',
-              actions: [
-                IconButton(
-                  onPressed: () => _showUiMessage('更多', '更多操作入口已激活'),
-                  icon:
-                      Icon(Icons.more_horiz, color: Colors.white.withOpacity(0.9)),
-                ),
-              ],
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-                child: Column(
-                  children: [
-                    _ConnectedDevicePanel(deviceName: name, deviceType: type),
-                    const SizedBox(height: 12),
-                    _DeviceInfoPanel(name: name),
-                    const SizedBox(height: 14),
-                    OutlinedButton(
-                      onPressed: () => _showUiMessage('解除绑定', '已打开设备解绑确认'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: _RideColors.orange,
-                        minimumSize: const Size(double.infinity, 52),
-                        side: BorderSide(color: Colors.white.withOpacity(0.12)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: const Text(
-                        '解除绑定',
-                        style:
-                            TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DeviceFirmwareUpdateRow extends StatelessWidget {
-  const _DeviceFirmwareUpdateRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => Get.to(() => const OtaUpgradePage()),
-        child: Ink(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                const Color(0xFF1C8CFF).withOpacity(0.34),
-                const Color(0xFF55E8E6).withOpacity(0.18),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withOpacity(0.13)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: const Color(0xFF55E8E6).withOpacity(0.5),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.system_update_alt,
-                  color: Color(0xFF55E8E6),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '检查单片机固件更新',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '下载最新码表固件',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.62),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.white.withOpacity(0.78),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DeviceSettingRow extends StatelessWidget {
-  const _DeviceSettingRow({
-    required this.icon,
-    required this.color,
-    required this.title,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceRowBase(
-      icon: icon,
-      color: color,
-      title: title,
-      trailing: Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.76)),
-    );
-  }
-}
-
-class _DeviceSwitchRow extends StatelessWidget {
-  const _DeviceSwitchRow({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceRowBase(
-      icon: icon,
-      color: color,
-      title: title,
-      subtitle: subtitle,
-      trailing: Switch(
-        value: true,
-        onChanged: (_) {},
-        activeColor: Colors.white,
-        activeTrackColor: _RideColors.orange,
-      ),
-    );
-  }
-}
-
-class _DeviceRowBase extends StatelessWidget {
-  const _DeviceRowBase({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.trailing,
-    this.subtitle,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String? subtitle;
-  final Widget trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 70),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Colors.white.withOpacity(0.08)),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.11),
-                shape: BoxShape.circle,
-                border: Border.all(color: color, width: 2),
-              ),
-              child: Icon(icon, color: color, size: 21),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle!,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.56),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            trailing,
-          ],
-        ),
       ),
     );
   }
@@ -8472,7 +8104,7 @@ class _SignalBars extends StatelessWidget {
               decoration: BoxDecoration(
                 color: i < value
                     ? const Color(0xFF55E8E6)
-                    : Colors.white.withOpacity(0.18),
+                    : Colors.white.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
@@ -8497,7 +8129,7 @@ class _RecordingBar extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
-            side: BorderSide(color: Colors.white.withOpacity(0.10)),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
           ),
           title: const Text(
             '结束骑行',
@@ -8509,7 +8141,7 @@ class _RecordingBar extends StatelessWidget {
           content: Text(
             '确定结束并保存本次骑行吗？',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.72),
+              color: Colors.white.withValues(alpha: 0.72),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -8519,7 +8151,7 @@ class _RecordingBar extends StatelessWidget {
               child: Text(
                 '继续骑行',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.72),
+                  color: Colors.white.withValues(alpha: 0.72),
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -8558,7 +8190,7 @@ class _RecordingBar extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF12181F),
           border: Border(
-            top: BorderSide(color: Colors.white.withOpacity(0.06)),
+            top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
           ),
         ),
         child: Row(
@@ -8577,7 +8209,7 @@ class _RecordingBar extends StatelessWidget {
             Text(
               paused ? '已暂停' : '记录中',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.86),
+                color: Colors.white.withValues(alpha: 0.86),
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
@@ -8625,13 +8257,13 @@ class _RideTabBar extends StatelessWidget {
       final isPaused = controller.isPaused.value;
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF101720).withOpacity(0.98),
+          color: const Color(0xFF101720).withValues(alpha: 0.98),
           border: Border(
-            top: BorderSide(color: Colors.white.withOpacity(0.08)),
+            top: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.40),
+              color: Colors.black.withValues(alpha: 0.40),
               blurRadius: 30,
               offset: const Offset(0, -12),
             ),
@@ -8716,7 +8348,7 @@ class _BottomRecordAction extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _RideColors.orange.withOpacity(0.36),
+                    color: _RideColors.orange.withValues(alpha: 0.36),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -8757,7 +8389,7 @@ class _BottomAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? _RideColors.orange : Colors.white.withOpacity(0.62);
+    final color = selected ? _RideColors.orange : Colors.white.withValues(alpha: 0.62);
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -8770,7 +8402,7 @@ class _BottomAction extends StatelessWidget {
               height: selected ? 42 : 36,
               decoration: BoxDecoration(
                 color: selected
-                    ? _RideColors.orange.withOpacity(0.12)
+                    ? _RideColors.orange.withValues(alpha: 0.12)
                     : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -8811,9 +8443,9 @@ class _OuterFrame extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: const Color(0xFF151B24).withOpacity(0.82),
+        color: const Color(0xFF151B24).withValues(alpha: 0.82),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: child,
     );
@@ -8836,18 +8468,18 @@ class _GlassPanel extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF222A35).withOpacity(0.82),
-            const Color(0xFF141A23).withOpacity(0.96),
+            const Color(0xFF222A35).withValues(alpha: 0.82),
+            const Color(0xFF141A23).withValues(alpha: 0.96),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.30),
+            color: Colors.black.withValues(alpha: 0.30),
             blurRadius: 22,
             offset: const Offset(0, 12),
           ),
@@ -8876,10 +8508,10 @@ class _RoundIconButton extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.10),
+          color: Colors.white.withValues(alpha: 0.10),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.white.withOpacity(0.82), size: 23),
+        child: Icon(icon, color: Colors.white.withValues(alpha: 0.82), size: 23),
       ),
     );
   }
@@ -8907,7 +8539,7 @@ class _HeroStat extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.48),
+            color: Colors.white.withValues(alpha: 0.48),
             fontSize: 11,
             fontWeight: FontWeight.w700,
           ),
@@ -8932,7 +8564,7 @@ class _HeroStat extends StatelessWidget {
                   style: TextStyle(
                     color: unit == '高'
                         ? const Color(0xFFE34CFF)
-                        : Colors.white.withOpacity(0.62),
+                        : Colors.white.withValues(alpha: 0.62),
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                   ),
@@ -8963,7 +8595,7 @@ class _LegendText extends StatelessWidget {
         Text(
           '$label ',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.54),
+            color: Colors.white.withValues(alpha: 0.54),
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
@@ -9077,8 +8709,8 @@ class _RouteMapPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          const Color(0xFF1F2833).withOpacity(0.92),
-          const Color(0xFF10161F).withOpacity(0.98),
+          const Color(0xFF1F2833).withValues(alpha: 0.92),
+          const Color(0xFF10161F).withValues(alpha: 0.98),
         ],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, bgPaint);
@@ -9153,7 +8785,7 @@ class _RouteMapPainter extends CustomPainter {
 
   void _drawPolyline(Canvas canvas, List<Offset> pts) {
     final shadow = Paint()
-      ..color = Colors.black.withOpacity(0.34)
+      ..color = Colors.black.withValues(alpha: 0.34)
       ..strokeWidth = 11
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -9183,17 +8815,17 @@ class _RouteMapPainter extends CustomPainter {
     canvas.drawCircle(pts.first, 4, Paint()..color = Colors.white);
     canvas.drawCircle(pts.last, 8, Paint()..color = Colors.white);
     canvas.drawCircle(
-        pts.last, 4, Paint()..color = Colors.black.withOpacity(0.78));
+        pts.last, 4, Paint()..color = Colors.black.withValues(alpha: 0.78));
   }
 
   void _drawMapLines(Canvas canvas, Size size) {
     final roadPaint = Paint()
-      ..color = Colors.white.withOpacity(0.045)
+      ..color = Colors.white.withValues(alpha: 0.045)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     final thinRoadPaint = Paint()
-      ..color = Colors.white.withOpacity(0.028)
+      ..color = Colors.white.withValues(alpha: 0.028)
       ..strokeWidth = 1.2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -9232,7 +8864,7 @@ class _RouteMapPainter extends CustomPainter {
   void _drawRoute(Canvas canvas, Size size) {
     final route = _routePoints(size);
     final shadow = Paint()
-      ..color = Colors.black.withOpacity(0.34)
+      ..color = Colors.black.withValues(alpha: 0.34)
       ..strokeWidth = 11
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -9268,7 +8900,7 @@ class _RouteMapPainter extends CustomPainter {
     canvas.drawCircle(route.first, 4, Paint()..color = Colors.white);
     final finish = route[math.max(0, route.length - 3)];
     canvas.drawCircle(finish, 8, Paint()..color = Colors.white);
-    canvas.drawCircle(finish, 4, Paint()..color = Colors.black.withOpacity(0.78));
+    canvas.drawCircle(finish, 4, Paint()..color = Colors.black.withValues(alpha: 0.78));
   }
 
   List<Offset> _routePoints(Size size) {
@@ -9343,7 +8975,7 @@ class _SparklinePainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [color.withOpacity(0.42), color.withOpacity(0.0)],
+          colors: [color.withValues(alpha: 0.42), color.withValues(alpha: 0.0)],
         ).createShader(Offset.zero & size),
     );
     canvas.drawPath(
@@ -9490,7 +9122,7 @@ class _ElevationLineChartPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [color.withOpacity(0.34), color.withOpacity(0.02)],
+          colors: [color.withValues(alpha: 0.34), color.withValues(alpha: 0.02)],
         ).createShader(rect),
     );
     canvas.drawPath(
@@ -9520,7 +9152,7 @@ class _ElevationLineChartPainter extends CustomPainter {
 
   void _drawGrid(Canvas canvas, Rect rect) {
     final grid = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = Colors.white.withValues(alpha: 0.08)
       ..strokeWidth = 1;
     for (var i = 0; i <= 2; i++) {
       final y = rect.bottom - rect.height * i / 2;
@@ -9539,14 +9171,14 @@ class _ElevationLineChartPainter extends CustomPainter {
       canvas,
       '${_formatChartValue(maxValue, 'm')}m',
       Offset(0, rect.top - 2),
-      color: Colors.white.withOpacity(0.44),
+      color: Colors.white.withValues(alpha: 0.44),
       size: 10,
     );
     _drawLabel(
       canvas,
       '${_formatChartValue(minValue, 'm')}m',
       Offset(0, rect.bottom - 10),
-      color: Colors.white.withOpacity(0.44),
+      color: Colors.white.withValues(alpha: 0.44),
       size: 10,
     );
 
@@ -9557,7 +9189,7 @@ class _ElevationLineChartPainter extends CustomPainter {
         canvas,
         progressLabels[i],
         Offset(x, size.height - 13),
-        color: Colors.white.withOpacity(0.42),
+        color: Colors.white.withValues(alpha: 0.42),
         size: 10,
         center: true,
       );
@@ -9583,14 +9215,14 @@ class _ElevationLineChartPainter extends CustomPainter {
       Offset(point.dx, rect.top),
       Offset(point.dx, rect.bottom),
       Paint()
-        ..color = Colors.white.withOpacity(0.16)
+        ..color = Colors.white.withValues(alpha: 0.16)
         ..strokeWidth = 1,
     );
     canvas.drawCircle(point, 5.5, Paint()..color = color);
     canvas.drawCircle(
       point,
       2.6,
-      Paint()..color = Colors.white.withOpacity(0.92),
+      Paint()..color = Colors.white.withValues(alpha: 0.92),
     );
 
     _drawTooltip(
@@ -9611,7 +9243,7 @@ class _ElevationLineChartPainter extends CustomPainter {
   }) {
     final titlePainter = _textPainter(
       title,
-      color: Colors.white.withOpacity(0.66),
+      color: Colors.white.withValues(alpha: 0.66),
       size: 10,
       weight: FontWeight.w700,
     );
@@ -9631,12 +9263,12 @@ class _ElevationLineChartPainter extends CustomPainter {
     );
     canvas.drawRRect(
       rect,
-      Paint()..color = const Color(0xFF303744).withOpacity(0.96),
+      Paint()..color = const Color(0xFF303744).withValues(alpha: 0.96),
     );
     canvas.drawRRect(
       rect,
       Paint()
-        ..color = color.withOpacity(0.32)
+        ..color = color.withValues(alpha: 0.32)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );
@@ -9784,7 +9416,7 @@ class _DualLineChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = _chartRect(size);
     final grid = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = Colors.white.withValues(alpha: 0.08)
       ..strokeWidth = 1;
     // 单位与刻度成列：左列(km/h + 60/40/20)统一左对齐，右列(m + 1500/1000/500)统一右对齐。
     const levels = 4;
@@ -9823,7 +9455,7 @@ class _DualLineChartPainter extends CustomPainter {
       text: TextSpan(
         text: text,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.40),
+          color: Colors.white.withValues(alpha: 0.40),
           fontSize: 9,
           fontWeight: FontWeight.w700,
         ),
@@ -9863,7 +9495,7 @@ class _DualLineChartPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [color.withOpacity(0.34), color.withOpacity(0.02)],
+          colors: [color.withValues(alpha: 0.34), color.withValues(alpha: 0.02)],
         ).createShader(chartRect),
     );
     canvas.drawPath(
@@ -9883,7 +9515,7 @@ class _DualLineChartPainter extends CustomPainter {
       text: TextSpan(
         text: text,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.62),
+          color: Colors.white.withValues(alpha: 0.62),
           fontSize: 11,
           fontWeight: FontWeight.w800,
         ),
@@ -9904,7 +9536,7 @@ class _DualLineChartPainter extends CustomPainter {
       text: TextSpan(
         text: text,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.46),
+          color: Colors.white.withValues(alpha: 0.46),
           fontSize: 10,
           fontWeight: FontWeight.w700,
         ),
@@ -9923,7 +9555,7 @@ class _DualLineChartPainter extends CustomPainter {
       Offset(x, rect.top),
       Offset(x, rect.bottom),
       Paint()
-        ..color = Colors.white.withOpacity(0.16)
+        ..color = Colors.white.withValues(alpha: 0.16)
         ..strokeWidth = 1,
     );
 
@@ -10001,7 +9633,7 @@ class _DualLineChartPainter extends CustomPainter {
     canvas.drawCircle(
       selection.point,
       2.4,
-      Paint()..color = Colors.white.withOpacity(0.92),
+      Paint()..color = Colors.white.withValues(alpha: 0.92),
     );
   }
 
@@ -10014,7 +9646,7 @@ class _DualLineChartPainter extends CustomPainter {
   ) {
     final titlePainter = _textPainter(
       title,
-      color: Colors.white.withOpacity(0.66),
+      color: Colors.white.withValues(alpha: 0.66),
       size: 10,
       weight: FontWeight.w700,
     );
@@ -10050,7 +9682,7 @@ class _DualLineChartPainter extends CustomPainter {
     );
     canvas.drawRRect(
       rect,
-      Paint()..color = const Color(0xFF303744).withOpacity(0.96),
+      Paint()..color = const Color(0xFF303744).withValues(alpha: 0.96),
     );
     titlePainter.paint(canvas, Offset(centerX - titlePainter.width / 2, top + 7));
     for (var i = 0; i < rows.length; i++) {
@@ -10098,7 +9730,7 @@ class _BarChartPainter extends CustomPainter {
     if (values.isEmpty || maxValue <= 0) return;
     final chartRect = Rect.fromLTWH(34, 26, size.width - 54, size.height - 52);
     final grid = Paint()
-      ..color = Colors.white.withOpacity(0.07)
+      ..color = Colors.white.withValues(alpha: 0.07)
       ..strokeWidth = 1;
     for (var i = 0; i <= 4; i++) {
       final y = chartRect.bottom - chartRect.height * i / 4;
@@ -10107,7 +9739,7 @@ class _BarChartPainter extends CustomPainter {
         canvas,
         (maxValue * i / 4).round().toString(),
         Offset(0, y - 7),
-        color: Colors.white.withOpacity(0.46),
+        color: Colors.white.withValues(alpha: 0.46),
         size: 11,
       );
     }
@@ -10127,7 +9759,7 @@ class _BarChartPainter extends CustomPainter {
           ..shader = LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [color, color.withOpacity(0.70)],
+            colors: [color, color.withValues(alpha: 0.70)],
           ).createShader(rect.outerRect),
       );
     }
@@ -10147,7 +9779,7 @@ class _BarChartPainter extends CustomPainter {
         canvas,
         labels[i],
         Offset(x, size.height - 20),
-        color: Colors.white.withOpacity(0.48),
+        color: Colors.white.withValues(alpha: 0.48),
         size: 12,
         center: true,
       );
@@ -10179,7 +9811,7 @@ class _BarChartPainter extends CustomPainter {
     );
     canvas.drawRRect(
       rect,
-      Paint()..color = const Color(0xFF303744).withOpacity(0.96),
+      Paint()..color = const Color(0xFF303744).withValues(alpha: 0.96),
     );
     final pointer = Path()
       ..moveTo(adjustedAnchor.dx - 8, adjustedAnchor.dy - 8)
@@ -10188,10 +9820,10 @@ class _BarChartPainter extends CustomPainter {
       ..close();
     canvas.drawPath(
       pointer,
-      Paint()..color = const Color(0xFF303744).withOpacity(0.96),
+      Paint()..color = const Color(0xFF303744).withValues(alpha: 0.96),
     );
     _drawText(canvas, tooltipTitle, Offset(adjustedAnchor.dx, adjustedAnchor.dy - 61),
-        color: Colors.white.withOpacity(0.82), size: 12, center: true);
+        color: Colors.white.withValues(alpha: 0.82), size: 12, center: true);
     _drawText(canvas, tooltipValue, Offset(adjustedAnchor.dx, adjustedAnchor.dy - 40),
         color: Colors.white, size: 14, center: true, bold: true);
   }
@@ -10266,7 +9898,7 @@ class _DonutPainter extends CustomPainter {
         false,
         Paint()
           ..color = hasSelection && !isSelected
-              ? colors[i].withOpacity(0.42)
+              ? colors[i].withValues(alpha: 0.42)
               : colors[i]
           ..style = PaintingStyle.stroke
           ..strokeWidth = isSelected ? strokeWidth + 3 : strokeWidth
@@ -10300,7 +9932,7 @@ class _RadarPainter extends CustomPainter {
     final radius = math.min(size.width, size.height) * 0.46;
     if (radius <= 0) return;
     final ring = Paint()
-      ..color = Colors.white.withOpacity(0.10)
+      ..color = Colors.white.withValues(alpha: 0.10)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
     for (var i = 1; i <= 4; i++) {
@@ -10326,8 +9958,8 @@ class _RadarPainter extends CustomPainter {
       Paint()
         ..shader = RadialGradient(
           colors: [
-            const Color(0xFF42E343).withOpacity(0.08),
-            const Color(0xFF42E343).withOpacity(0.52),
+            const Color(0xFF42E343).withValues(alpha: 0.08),
+            const Color(0xFF42E343).withValues(alpha: 0.52),
           ],
         ).createShader(Rect.fromCircle(center: center, radius: radius)),
     );
@@ -10345,28 +9977,6 @@ void _showUiMessage(String title, String message) {
     snackPosition: SnackPosition.BOTTOM,
     duration: const Duration(seconds: 2),
   );
-}
-
-Future<void> _shareText(
-  BuildContext context, {
-  required String title,
-  required String text,
-}) async {
-  try {
-    final result = await SharePlus.instance.share(
-      ShareParams(
-        title: title,
-        subject: title,
-        text: text,
-        sharePositionOrigin: _sharePositionOrigin(context),
-      ),
-    );
-    if (result.status == ShareResultStatus.unavailable) {
-      await _copyShareText(text);
-    }
-  } catch (_) {
-    await _copyShareText(text);
-  }
 }
 
 Future<void> _copyShareText(String text) async {
@@ -10435,13 +10045,14 @@ $title
 ''';
 }
 
-void _openConnectedDeviceDetail() {
-  _openRidePage(
-    () => const _RideDeviceDetailPage(
-      name: 'iGPSPORT BSC300_1234',
-      type: '码表',
-    ),
-  );
+void _openFirstConnectedDeviceDetail() {
+  final bleController = Get.put(BleController(), permanent: true);
+  final connected = bleController.connectedDevices;
+  if (connected.isEmpty) {
+    _showUiMessage('设备详情', '尚未连接设备，请先在设备页扫描并连接');
+    return;
+  }
+  Get.to(() => _SpeedometerDeviceDetailPage(device: connected.first));
 }
 
 Future<void> _showDeviceSyncActions(BuildContext context) {
@@ -10485,7 +10096,7 @@ Future<void> _showDeviceMoreActions(BuildContext context) {
         label: '设备详情',
         onTap: () {
           Navigator.of(sheetContext).pop();
-          _openConnectedDeviceDetail();
+          _openFirstConnectedDeviceDetail();
         },
       ),
       _RouteMoreAction(
@@ -10504,7 +10115,7 @@ Future<void> _showDeviceMoreActions(BuildContext context) {
           _showUiMessage('传感器管理', '已打开已配对传感器列表');
         },
       ),
-      Divider(color: Colors.white.withOpacity(0.08), height: 8),
+      Divider(color: Colors.white.withValues(alpha: 0.08), height: 8),
       _RouteMoreAction(
         icon: Icons.link_off,
         label: '解除绑定',
@@ -10591,10 +10202,10 @@ Future<void> _showDeviceActionSheet(
           decoration: BoxDecoration(
             color: const Color(0xFF171D27),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.42),
+                color: Colors.black.withValues(alpha: 0.42),
                 blurRadius: 28,
                 offset: const Offset(0, 12),
               ),
@@ -10640,10 +10251,10 @@ Future<void> _showRouteMoreActions(
           decoration: BoxDecoration(
             color: const Color(0xFF171D27),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.42),
+                color: Colors.black.withValues(alpha: 0.42),
                 blurRadius: 28,
                 offset: const Offset(0, 12),
               ),
@@ -10681,7 +10292,7 @@ Future<void> _showRouteMoreActions(
                 },
               ),
               if (onDelete != null) ...[
-                Divider(color: Colors.white.withOpacity(0.08), height: 8),
+                Divider(color: Colors.white.withValues(alpha: 0.08), height: 8),
                 _RouteMoreAction(
                   icon: Icons.delete_outline,
                   label: '删除路线',
@@ -10713,7 +10324,7 @@ Future<bool> _showRouteDeleteConfirmDialog(
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: Colors.white.withOpacity(0.08)),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
         ),
         title: const Text(
           '删除路线？',
@@ -10725,7 +10336,7 @@ Future<bool> _showRouteDeleteConfirmDialog(
         content: Text(
           '确认删除「$title」？删除后无法恢复。',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.72),
+            color: Colors.white.withValues(alpha: 0.72),
             height: 1.4,
             fontWeight: FontWeight.w700,
           ),
@@ -10735,7 +10346,7 @@ Future<bool> _showRouteDeleteConfirmDialog(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(
               '取消',
-              style: TextStyle(color: Colors.white.withOpacity(0.72)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.72)),
             ),
           ),
           FilledButton(

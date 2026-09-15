@@ -1,0 +1,426 @@
+SOURCE COMMIT ceaf8d2b7bb8e78968462af51a57ff1250731b61
+
+FILE app/bluetooth_flutter_Trace/lib/ota/ota_ble_transport.dart
+275:    required List<int> packageSha256,
+276:    required List<int> etuHeader,
+277:    int? windowSegments,
+278:    void Function(int durableOff, int total)? onDurableProgress,
+279:    void Function(int sentBytes, int total)? onSent,
+280:  }) async {
+281:    if (_busy) {
+282:      throw const OtaTransportException('transport 忙：会话进行中', code: 'BUSY');
+283:    }
+284:    _checkUsable();
+285:    _busy = true;
+286:    final effectiveWindow = (windowSegments ?? OtaBleCodec.segmentsPerBlock)
+287:        .clamp(1, OtaBleCodec.segmentsPerBlock);
+288:    final view = _TransferAckView(
+289:      blockSize:
+290:          OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize,
+291:      segmentSize: OtaBleCodec.dataSegmentSize,
+292:    );
+293:    _ackView = view;
+294:    // 无 durable 进展总预算（RC3-07）：单调时钟实例字段，覆盖 transfer
+295:    // 全部等待点；预算跨 BEGIN/resume 保留（重新 BEGIN 本身不算进展），
+296:    // 只在 durable 前进时 reset；finally 清空解除对后续命令的约束。
+297:    _noProgressClock = Stopwatch()..start();
+298:    otaMonoLog('MONO_BUDGET_START');
+299:    try {
+300:      final total = package.length;
+301:      var resumeLeft = retries; // ERR_SEQ/ERR_SESSION/ERR_STATE → ABORT+BEGIN
+302:      var sentBytes = 0;
+303:      var lastDurable = 0; // 跨 BEGIN 保留：resume 不得倒退（RC3-06）
+304:      var needsResume = false;
+305:      while (true) {
+306:        _checkUsable();
+307:        _checkNoProgress();
+308:        // ---- BEGIN（同 package_sha256 幂等：MCU 返回当前进度）----
+309:        // 注意 MCU 真值（ota_ble_session.c:377）：同包重复 BEGIN 不重置
+310:        // expected_seq。因此 resume 必须先 ABORT teardown（staging durable
+
+FILE app/bluetooth_flutter_Trace/lib/ota/ota_ble_transport.dart
+471:        // ---- END：复述 package_sha256（seq 复用重试，先注册等待者再发送）----
+472:        final endSeq = _nextSeq(); // 循环外分配一次：重试复用（MCU 对
+473:        // 落后 seq 幂等 ACK，新 seq 会因超前被 ERR_SEQ 拒绝，§5.1）。
+474:        var endAttempts = 0;
+475:        needsResume = false;
+476:        while (true) {
+477:          _checkUsable();
+478:          await _waitIfPaused(); // 后台暂停挂起（RC3-08）
+479:          // MCU teardown 后的 NAK 以 session=0 回显 seq：等待者按 cmd+seq
+480:          // 关联，session 仅在错误态放宽（见 _ResponseWaiter.matches）。
+481:          final waiter = _ResponseWaiter(OtaBleCodec.rspAckEnd, _session, endSeq);
+482:          _waiters.add(waiter);
+483:          try {
+484:            final frame = OtaBleCodec.encodeCommand(
+485:              cmd: OtaBleCodec.cmdEnd,
+486:              session: _session,
+487:              seq: endSeq,
+488:              payload: OtaBleCodec.encodeEndPayload(packageSha256),
+489:            );
+490:            await _writeFrame(frame);
+491:            final endFrame = await waiter.future
+492:                .timeout(_capByBudget(ackTimeout),
+493:                    onTimeout: () => throw TimeoutException('END ACK 超时'));
+494:            final endAck = _parseAck(endFrame);
+495:            final endTerminal = _abortStatusOf(endAck.status);
+496:            if (endTerminal != null) {
+497:              return OtaAckResult.terminal(
+498:                  endTerminal, OtaAckResult.fromAck(endAck));
+499:            }
+500:            if (endAck.status == OtaBleCodec.statusErrState &&
+501:                resumeLeft > 0) {
+502:              resumeLeft--; // MCU 缺段 teardown → 重新 BEGIN resume 补齐
+503:              needsResume = true;
+504:              break;
+505:            }
+506:            if (endAck.status == OtaBleCodec.statusOk &&
+507:                endAck.durableOff != total) {
+508:              // END OK 核对（RC3-06）：MCU finalize 成功语义是
+509:              // durable==total 且 ETRJ 匹配；OK 但 durable 不符即
+510:              // 状态不可信，fail closed，不得当成功上报。
+511:              throw const OtaTransportException(
+512:                  'END ACK OK 但 durable_off != total（MCU 状态不可信）',
+513:                  code: 'ACK_MALFORMED');
+514:            }
+515:            if (endAck.status == OtaBleCodec.statusOk &&
+516:                endAck.durableOff == total &&
+517:                !view.endBitmapValid(endAck.blockBitmap, total)) {
+518:              // END ACK 权威位图校验（RC3-06）：MCU 真值 END OK ACK 发送
+519:              // 时 teardown 尚未执行（ota_ble_session.c:686-689），bitmap
+520:              // 是活跃块位图残留（可能非 0），故不校验 ==0；但置位段仍
+521:              // 不得越出尾块有效位——越界即状态不可信，fail closed。
+522:              throw const OtaTransportException(
+523:                  'END ACK OK 但 block_bitmap 越出尾块有效位（MCU 状态不可信）',
+524:                  code: 'ACK_MALFORMED');
+525:            }
+526:            // 终点观测（补测轮取证）：END ACK OK 收尾是升级会话的关键
+527:            // 六状态之一（App 解析到 ACK_END/OK），此前该路径无打点，
+528:            // 历史轮次采不到证。durable==total 已由上方校验保证。
+529:            otaMonoLog('MONO_END_ACK_OK', durable: endAck.durableOff);
+530:            return OtaAckResult.fromAck(endAck);
+
+FILE app/bluetooth_flutter_Trace/lib/ota/ota_ble_transport.dart
+1600:    // 立即把它上报为 uncaught async error，从当时正在执行的无关 await 点
+1601:    // （典型是 abortBestEffort 的写等待）冒出，测试直接判失败、生产里则
+1602:    // 越过调用方的 try/catch 变成 zone 级错误（RC3-02/04）。
+1603:    //
+1604:    // 构造即挂一个「只观察不处置」的监听者：错误从此刻起始终被观察，处置
+1605:    // 仍由调用方 await 同一个 future 完成——Future 支持多监听者，每个监听者
+1606:    // 各自收到同一结果，互不吞掉（与 Stream 的单订阅语义不同）。
+1607:    unawaited(_completer.future.then(
+1608:      (_) {},
+1609:      onError: (Object _, StackTrace __) {},
+1610:    ));
+1611:  }
+1612:
+1613:  final Completer<OtaBleFrame> _completer = Completer<OtaBleFrame>();
+1614:
+1615:  Future<OtaBleFrame> get future => _completer.future;
+1616:
+1617:  bool matches(OtaBleFrame f);
+1618:
+1619:  void offer(OtaBleFrame f) {
+1620:    if (_completer.isCompleted || !matches(f)) return;
+1621:    _completer.complete(f);
+1622:  }
+1623:
+1624:  void fail(Object e) {
+1625:    if (!_completer.isCompleted) {
+1626:      _completer.completeError(e);
+1627:    }
+1628:  }
+1629:}
+1630:
+1631:/// 一问一答等待者：按 cmd+session+seq 精确关联。
+1632:///
+1633:/// [session] 传 -1 表示不校验帧头 session（BEGIN ACK 帧头是 MCU 新分配
+1634:/// 的会话，session 只能从 payload 解析）。MCU teardown 后的错误 NAK 以
+1635:/// session=0 回显请求 seq：session 不匹配时仅错误态放宽接受。
+1636:class _ResponseWaiter extends _FrameWaiterBase {
+1637:  _ResponseWaiter(this.expectedCmd, this.session, this.seq);
+1638:
+1639:  final int expectedCmd;
+1640:  final int session;
+1641:  final int seq;
+1642:
+1643:  @override
+1644:  bool matches(OtaBleFrame f) {
+1645:    if (f.cmd != expectedCmd || f.seq != seq) return false;
+1646:    if (session < 0 || f.session == session) return true;
+1647:    return f.session == 0 &&
+1648:        f.payload.isNotEmpty &&
+1649:        f.payload[0] != OtaBleCodec.statusOk;
+1650:  }
+1651:}
+1652:
+1653:/// BEGIN ACK 结果。
+1654:class OtaBeginAck {
+1655:  OtaBeginAck({
+1656:    required this.status,
+1657:    required this.session,
+1658:    required this.durableOff,
+1659:    required this.blockBitmap,
+1660:  });
+1661:
+1662:  final int status;
+1663:  final int session;
+1664:  final int durableOff;
+1665:  final int blockBitmap;
+1666:}
+1667:
+1668:/// ACK 统一结果（BEGIN/DATA/END）。
+1669:class OtaAckResult {
+1670:  OtaAckResult({
+1671:    required this.status,
+1672:    required this.durableOff,
+1673:    required this.blockBitmap,
+1674:    this.terminal = false,
+1675:  });
+1676:
+1677:  factory OtaAckResult.fromAck(OtaAckPayload ack) => OtaAckResult(
+1678:        status: ack.status,
+1679:        durableOff: ack.durableOff,
+1680:        blockBitmap: ack.blockBitmap,
+1681:      );
+1682:
+1683:  factory OtaAckResult.terminal(int status, OtaAckResult from) =>
+1684:      OtaAckResult(
+1685:        status: status,
+1686:        durableOff: from.durableOff,
+1687:        blockBitmap: from.blockBitmap,
+1688:        terminal: true,
+1689:      );
+1690:
+1691:  final int status;
+1692:  final int durableOff;
+1693:  final int blockBitmap;
+1694:  /// 不可恢复中止（§5.7 abortStatuses）。
+1695:  final bool terminal;
+1696:
+1697:  bool get isOk => status == OtaBleCodec.statusOk && !terminal;
+1698:}
+1699:
+1700:/// 设备作用域的写在途账本与查询序号空间（RC3-05⑤）。
+1701:///
+1702:/// 为什么这些状态必须按设备而不是按 transport 实例：
+1703:/// - 写通道废弃标记本身落在设备作用域（`_poisonedDevices`），恢复证据
+1704:///   必须同域，否则「换个 wrapper 再查」就会把另一个实例的应答当成
+1705:///   本实例的证据；
+1706:/// - 会话外查询 seq 若按实例分配，各实例都从 0 起，两个实际不同的探针会
+1707:///   拿到同一个号码，谁先收到谁的应答无法区分；
+1708:/// - `Future.timeout` 不取消底层 `writeChunk`：一帧写超时后它的分片仍可能
+1709:///   在未来落地。只要设备上还有这种「已交付、未结算」的写在途，任何探针
+1710:///   应答都不构成「解析器已重新同步」的证明——迟到分片会在应答之后落到
+
+FILE app/bluetooth_flutter_Trace/lib/services/ota_service.dart
+830:    return await _runExclusive((generation) async {
+831:      // 每轮升级重置 failClosed 决策（RC3-08/12②）：上个 owner 未被消费的
+832:      // 残留决策不得沿用到新一轮传输的 catch。
+833:      _failClosedDecided = false;
+834:      _terminalState.value = null;
+835:      _durableProgress.value = 0.0;
+836:      _phase.value = OtaPhase.transferring;
+837:      OtaBleTransport? activeTransport;
+838:      try {
+839:        // 就地读取并校验包字节（RC2-04）：锁后一次读取，长度+SHA 校验
+840:        // 与传输共用同一份字节快照，替代原先 verifyFileMatchesAsset 二次
+841:        // 读文件 + readAsBytesSync 再读一次的多份文件视图（文件在两次
+842:        // 读取之间被改将无法被发现）。
+843:        final package = await file.readAsBytes();
+844:        if (generation != _cancelGeneration) return false;
+845:        final packageDigest = sha256.convert(package);
+846:        if (package.length < 64) {
+847:          _upgradeStatus.value = '固件包长度非法: ${package.length}';
+848:          _phase.value = OtaPhase.failed;
+849:          return false;
+850:        }
+851:        if (package.length != asset.sizeBytes ||
+852:            packageDigest.toString() != asset.sha256) {
+853:          _firmwareFile = null;
+854:          _verified = null;
+855:          _upgradeStatus.value = '固件文件与清单不符（长度或 SHA-256），请重新下载';
+856:          _notify('错误', '固件文件校验失败，请重新下载');
+857:          _phase.value = OtaPhase.failed;
+858:          return false;
+859:        }
+860:        final etuHeader = package.sublist(0, 64);
+861:        final packageSha256 = packageDigest.bytes;
+
+FILE app/bluetooth_flutter_Trace/lib/services/ota_service.dart
+889:        activeTransport = transport;
+890:        // 重连身份复核：当前 INFO 必须与会话开始时快照一致。
+891:        final recheck = await transport.getDeviceInfo();
+892:        if (generation != _cancelGeneration) return false;
+893:        if (!deviceIdentityMatches(recheck, info)) {
+894:          _terminalState.value = OtaTerminalState(
+895:            code: 'DEVICE_IDENTITY_CHANGED',
+896:            message: '设备身份与升级会话开始时不一致，已终止',
+897:          );
+898:          _upgradeStatus.value = '设备身份复核失败';
+899:          _phase.value = OtaPhase.failed;
+900:          return false;
+901:        }
+902:
+903:        // ETU 包字节与身份已在上锁后就地校验（RC2-04）。
+904:
+905:        _upgradeStatus.value = 'BLE 传输中...';
+906:        final ack = await transport.transfer(
+907:          package: package,
+908:          packageSha256: packageSha256,
+909:          etuHeader: etuHeader,
+910:          // INFO.max_window_segs 消费：在途段上限（PR04 附带）。
+911:          windowSegments: recheck.maxWindowSegments,
+912:          onDurableProgress: (durableOff, total) {
+913:            final p = total > 0 ? (durableOff / total).clamp(0.0, 1.0) : 0.0;
+914:            _durableProgress.value = p;
+915:            _upgradeProgress.value = p;
+916:            _upgradeStatus.value =
+917:                '传输中: ${_formatBytes(durableOff)}/${_formatBytes(total)}（MCU 落盘确认）';
+918:          },
+919:          onSent: (sent, total) {
+920:            // GATT 已写字节只作为传输活性参考，不进 durable 进度。
+921:            debugPrint('OTA sent $sent/$total');
+922:          },
+923:        );
+924:        if (generation != _cancelGeneration) return false;
+925:        if (!ack.isOk) {
+926:          final terminal = OtaTerminalState(
+927:            code: 'MCU_ACK_${ack.status.toRadixString(16).toUpperCase()}',
+928:            message: 'MCU 返回失败状态 0x${ack.status.toRadixString(16)}，'
+929:                'durable=${ack.durableOff}',
+930:            retryableLater: !OtaBleCodec.abortStatuses.contains(ack.status),
+931:          );
+932:          _terminalState.value = terminal;
+933:          _upgradeStatus.value = '升级失败: ${terminal.code}';
+934:          _phase.value = OtaPhase.failed;
+935:          return false;
+936:        }
+937:        // ---- END OK 只是包传完（PR07）----
+938:        _durableProgress.value = 1.0;
+939:        _upgradeProgress.value = 1.0;
+940:        _phase.value = OtaPhase.waitingReboot;
+941:        _upgradeStatus.value = '升级包传输完成，等待设备重启...';
+942:        await activeTransport.dispose();
+943:        activeTransport = null;
+944:        _transport = null;
+945:
+946:        // 等待设备重启并复核目标身份（RC3-08②：三态判定，旧身份不误判）。
+947:        final latest = _latestInfo;
+948:        if (latest == null) {
+949:          _terminalState.value = OtaTerminalState(
+950:            code: 'TARGET_IDENTITY_MISMATCH',
+951:            message: '固件清单缺失，无法复核升级结果',
+952:            retryableLater: true,
+953:          );
+954:          _upgradeStatus.value = '目标身份复核失败（清单缺失）';
+955:          _phase.value = OtaPhase.failed;
+956:          return false;
+957:        }
+958:        final outcome = await _waitForTargetIdentity(
+959:          deviceAddress,
+960:          info,
+961:          latest,
+962:          generation,
+963:        );
+964:        if (generation != _cancelGeneration) return false;
+965:        switch (outcome.kind) {
+966:          case _RebootKind.targetVerified:
+967:            // 终点观测（补测轮取证）：复核链在新连接上 GET_INFO 比对
+968:            // 全等后唯一到达此分支——它是「原升级调用成功完成」的直接
+969:            // 终态（与 timedOut 后手动查询互斥），此前无打点采不到证。
+970:            otaMonoLog('MONO_REBOOT_VERIFIED');
+971:            // 刷新本地快照为升级后身份。
+972:            _deviceInfo = outcome.info;
+973:            _deviceInfoAddress = deviceAddress;
+974:            _phase.value = OtaPhase.completed;
+975:            _upgradeStatus.value =
+976:                '固件升级完成: 设备已运行 ${latest.versionName}（vcode ${latest.versionCode}）';
+977:            return true;
+
+FILE app/bluetooth_flutter_Trace/lib/services/ota_service.dart
+1577:  /// 等待设备重启并复核目标身份（RC3-08②：三态判定）。
+1578:  ///
+1579:  /// 1. 先按地址**主动断开**旧连接：设备重启前协议栈可能仍报告已
+1580:  ///    连接，旧连接上会读到重启前的 INFO/通知（假身份复核）；
+1581:  /// 2. 以总截止窗口（O4 整改后 180s，实测设备复位→BLE 可连接 ≥97s）
+1582:  ///    轮询 connect + 发现精确特征 + 绑定 transport + GET_INFO
+1583:  ///    三态判定：
+1584:  ///    - 目标身份（vcode 与 raw image SHA 等于清单目标）→
+1585:  ///      targetVerified；
+1586:  ///    - 旧身份（等于会话开始快照）：MCU 尚未重启完成，丢弃本轮
+1587:  ///      连接继续等——**不得把重启后的第一次可连接误当已重启**；
+1588:  ///    - 硬件身份变化（非同一台设备）→ identityChanged 终止。
+1589:  ///    vcode/sha 非目标也非旧身份的中间态按「未重启完成」继续等待，
+1590:  ///    由总截止兜底为 REBOOT_RECONNECT_FAILED（可稍后重试）。
+1591:  /// 取消代次变化立即静默退出（cancelled）。
+1592:  Future<_RebootOutcome> _waitForTargetIdentity(
+1593:    String deviceAddress,
+1594:    DeviceOtaInfo sessionInfo,
+1595:    FirmwareLatestInfo latest,
+1596:    int generation,
+1597:  ) async {
+1598:    // RC3-08⑤：截止先于主动断开建立——断开本身可能耗时（等协议栈状态
+1599:    // 迁移），总预算必须覆盖断开与全部轮询，不得从断开完成后才开始
+1600:    // 计费（否则断开耗时会无声挤占重启等待窗口）。
+1601:    final deadline = DateTime.now().add(_rebootWindow);
+1602:    // RC3-08⑦：主动断开自身必须有界。disconnectOtaDeviceByAddress 是
+1603:    // 尽力平台调用（WinBle disconnect / flutter_blue_plus disconnect），
+1604:    // 协议栈异常或设备已在重启途中时可能永不 resolve——无界 await 会把
+1605:    // 「至多一个窗口必返回」的重启等待变成永久挂起：deadline 已建立却
+1606:    // 永远走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：
+1607:    // 断开只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。
+1608:    await _ble
+1609:        .disconnectOtaDeviceByAddress(deviceAddress)
+1610:        .timeout(const Duration(seconds: 5), onTimeout: () {});
+1611:    while (DateTime.now().isBefore(deadline)) {
+
+FILE app/bluetooth_flutter_Trace/lib/services/ota_service.dart
+1664:  /// 单轮重启探测（RC3-08 抽出）：connect → discover → bind → GET_INFO
+1665:  /// → 三态判定。返回 null 表示本轮未获判定（连接失败/未重启完成），
+1666:  /// 由调用方继续轮询；transport 的建立与释放在本函数内闭环。
+1667:  ///
+1668:  /// RC3-08⑤：[aborted]（外层剩余预算超时/取消代次变化）在每个 await
+1669:  /// 后检查——迟到完成的步骤立即放弃并走 finally 释放；probe 使用
+1670:  /// 独立绑定（[_bindProbeTransport]），不触碰全局 transport 与 phase
+1671:  /// 之外的状态，迟到完成不再误杀新 owner 登记的连接。
+1672:  Future<_RebootOutcome?> _probeTargetIdentity(
+1673:    String deviceAddress,
+1674:    DeviceOtaInfo sessionInfo,
+1675:    FirmwareLatestInfo latest,
+1676:    bool Function() aborted,
+1677:  ) async {
+1678:    OtaBleTransport? probe;
+1679:    try {
+1680:      if (await _ble.connectOtaDeviceByAddress(deviceAddress)) {
+1681:        if (aborted()) return null;
+1682:        final otaChars =
+1683:            await _ble.findExactOtaCharacteristicsByAddress(deviceAddress);
+1684:        if (aborted()) return null;
+1685:        if (otaChars != null) {
+1686:          probe = await _bindProbeTransport(deviceAddress, otaChars, aborted);
+1687:          if (aborted()) return null;
+1688:          if (probe != null) {
+1689:            _phase.value = OtaPhase.reconnectVerify;
+1690:            final target = await probe.getDeviceInfo();
+1691:            if (aborted()) return null;
+1692:            if (!deviceHardwareMatches(target, sessionInfo)) {
+1693:              return const _RebootOutcome(_RebootKind.identityChanged);
+1694:            }
+1695:            if (target.currentVersionCode == latest.versionCode &&
+1696:                target.currentImageSha256Hex == latest.targetImageSha256) {
+1697:              // 目标身份确认：连接已不需要，身份交给主流程。
+1698:              return _RebootOutcome(_RebootKind.targetVerified, info: target);
+1699:            }
+1700:            // 旧身份/中间态：MCU 尚未重启完成，本轮连接由 finally
+1701:            // 统一释放后继续轮询。
+1702:          }
+1703:        }
+1704:      }
+1705:      return null;
+1706:    } finally {
+1707:      if (probe != null) {
+1708:        await probe.dispose();
+1709:      }
+1710:    }
+1711:  }

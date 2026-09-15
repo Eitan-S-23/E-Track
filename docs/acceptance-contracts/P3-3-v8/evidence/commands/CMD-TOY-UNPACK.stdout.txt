@@ -1,0 +1,3 @@
+unpack(full) OK: .cache/p3-3-v8-acceptance/toy-unpacked.bin
+  candidate_len=603764 target_vcode=30204
+  image_sha256=43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13

@@ -1,0 +1,75 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v4",
+  "contract_sha256": "4AABC5136D5F4B149A17CCF326995B4FD02F57A93AEB1772F95A3B591D1D20A2",
+  "round_id": "P3-3-V4-FREEZE-20260914-R1",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v4 执行前检查（NOT_RUN 前置）：执行轮依据为 freeze_commit bed3aa0 上 push 自动触发 run 34774089038（flutter-dev-checks.yml 对 dev/flutter/apk/** 分支 push 等价 test_scope=all；双宿主 success——windows-2022 2026-09-13T18:15:56Z→18:19:35Z、ubuntu-latest 18:15:57Z→18:29:24Z；run URL https://github.com/Eitan-S-23/E-Track/actions/runs/34774089038）。该轮为整改验证轮，正式判定仍由验收会话执行并绑定原始日志。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v4 执行前检查（NOT_RUN 前置）：run 34774834925（dispatch 提交=freeze_commit bed3aa0，Build Android APK/Build Windows EXE success、Pages/Release skipped），APK 实测 .cache/p3-3-apk-r4/ble-monitor-android.apk 46,699,144B SHA-256 d241f7ca2fe5da80d0aaaaaf197b10c0433fb16f12da23f38dbbe4d8c47a0df0，包名 com.wen.gaia.gaia.p33acceptance versionCode=86，证书 SHA-256 fe0664a64d718f5def70cffbda760a1777daa9e2c869c30db0e8d12c5ea72ff3（v2 Verifies）。额度：用户 2026-09-14 对第四轮受验 APK 的单独授权。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v4 执行前检查（NOT_RUN 前置）：实现侧已按用户实测要求完成预装（卸旧 p33acceptance 装新 run 34774834925 APK、monkey 启动、pidof 29948、dumpsys versionCode=86/versionName=1.0.60；生产包 com.wen.gaia.gaia 未动）。正式判定（双侧证书指纹实测留档等）仍由验收会话按合同执行。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v4 轮全部重跑（v3 轮 O1/O2 作废不留用）；前置 EXT-HTTP-TEST-SERVICE（r3 隧道+服务 D2 14/14）与 EXT-BOARD-STATE（恢复一致态维持）已就绪。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "同合同判据。v4 轮全部重跑；D4 切换沿用 r3 隧道（隧道进程与公网地址维持不变）。"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

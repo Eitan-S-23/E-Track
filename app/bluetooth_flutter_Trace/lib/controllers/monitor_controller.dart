@@ -10,7 +10,7 @@ import '../services/alert_service.dart';
 import 'ble_controller.dart';
 
 // 定义数据记录的最大条数
-const int MAX_DATA_RECORDS = 2592000;
+const int maxDataRecords = 2592000;
 
 class MonitorController extends GetxController {
   static MonitorController get to => Get.find();
@@ -48,7 +48,6 @@ class MonitorController extends GetxController {
 
   // 数据缓存，用于去重和批量保存
   final Map<String, DeviceData> _latestDataCache = {}; // 设备ID -> 最新数据
-  final Map<String, DateTime> _lastSaveTime = {}; // 设备ID -> 最后保存时间
   final List<DeviceData> _pendingSaveData = []; // 待保存的数据列表
 
   @override
@@ -93,14 +92,14 @@ class MonitorController extends GetxController {
 
         final List<DeviceData> historyData;
 
-        if (totalCount <= MAX_DATA_RECORDS) {
+        if (totalCount <= maxDataRecords) {
           // 如果数据量小于等于最大记录数，获取全部数据（不指定limit）
           historyData = await _dbService.getDeviceData(device.deviceId);
           debugPrint('加载了 ${historyData.length} 条历史数据');
         } else {
-          // 如果数据量大于最大记录数，获取最新的MAX_DATA_RECORDS条数据
+          // 如果数据量大于最大记录数，获取最新的maxDataRecords条数据
           historyData = await _dbService.getLatestDeviceData(
-              device.deviceId, MAX_DATA_RECORDS);
+              device.deviceId, maxDataRecords);
           debugPrint('加载了最新的 ${historyData.length} 条历史数据（总计 $totalCount 条）');
         }
 
@@ -960,17 +959,6 @@ class MonitorController extends GetxController {
   void _setDeviceMonthlyArray(
       SelectedDevice device, List<double?> monthlyArray) {
     device.loadMonthlyConsumptionArray(monthlyArray);
-  }
-
-  /// 定期保存耗电量统计数组到数据库
-  void _scheduleConsumptionArraySave(SelectedDevice device) {
-    // 取消之前的定时器
-    _consumptionArraySaveTimer?.cancel();
-
-    // 设置新的定时器，每30秒保存一次（避免频繁写入数据库）
-    _consumptionArraySaveTimer = Timer(const Duration(seconds: 30), () {
-      _saveConsumptionArraysToDatabase([device]);
-    });
   }
 
   /// 保存耗电量统计数组到数据库

@@ -434,6 +434,7 @@ static void session_handle_begin(ota_ble_session_t *session,
     memcpy(session->package_sha256, package_sha, 32u);
     session->total_len = total_len;
     session->target_vcode = info.target_vcode;
+    session->pkg_kind = (uint8_t)info.kind;
 
     st = ota_staging_begin(session->receiver, session->env.staging_io,
                            package_sha, total_len, &session->progress);
@@ -684,9 +685,41 @@ static void session_handle_end(ota_ble_session_t *session,
         return;
     }
 
+    /* P3-3 修复：激活钩子缺失 = 平台配置残缺，fail-closed 回
+     * ERR_FLASH——不发送伪 OK（ACK OK 后发送端会起算重启复核窗口，
+     * 而无激活钩子的固件不会重启）。staging finalize 已持久化，此路径
+     * 与「staging 有包、BCB 仍 CONFIRMED」的既有安全态一致。 */
+    if (session->env.activate_staged == NULL)
+    {
+        session_send_ack(session, OTA_BLE_CMD_ACK_END,
+                         OTA_BLE_STATUS_ERR_FLASH, frame->seq);
+        session_teardown(session);
+        return;
+    }
+
     session_send_ack(session, OTA_BLE_CMD_ACK_END, OTA_BLE_STATUS_OK,
                      frame->seq);
     session_teardown(session);
+
+    /* P3-3 修复：END 成功路径的激活序列（合同 §4.5 退出/恢复——成功
+     * 路径随后重启进入 boot；staging→candidate 搬运与 BCB STAGED 提交
+     * 与 SD 卡路径 Apply→Stage 同构，同步长跑、内部喂狗）。
+     *
+     * 顺序约束：ACK 先行——发送端据此释放传输层并起算重启复核窗口，
+     * 不与激活时长赛跑；teardown 必须先于激活——释放 BLE overlay
+     * owner 后，Apply 才能取得 PACKAGE overlay。 */
+    if (session->env.activate_staged(session->target_vcode,
+                                     session->total_len,
+                                     (ota_sd_kind_t)session->pkg_kind) != 0)
+    {
+        /* 任一激活环节失败：活动 BCB 保持 CONFIRMED，设备继续运行
+         * 旧版；发送端在复核窗口观测到版本未变即如实报失败。 */
+        return;
+    }
+    if (session->env.system_reset != NULL)
+    {
+        session->env.system_reset();
+    }
 }
 
 static void session_handle_abort(ota_ble_session_t *session,

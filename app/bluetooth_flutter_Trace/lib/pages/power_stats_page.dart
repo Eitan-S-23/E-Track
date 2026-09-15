@@ -8,10 +8,10 @@ class PowerStatsPage extends StatefulWidget {
   final String deviceName;
 
   const PowerStatsPage({
-    Key? key,
+    super.key,
     required this.deviceId,
     required this.deviceName,
-  }) : super(key: key);
+  });
 
   @override
   State<PowerStatsPage> createState() => _PowerStatsPageState();
@@ -52,24 +52,14 @@ class _PowerStatsPageState extends State<PowerStatsPage>
           orElse: () => monitorController.savedDevices
               .firstWhere((d) => d.deviceId == widget.deviceId));
 
-      if (device != null) {
-        // 近一年总耗电量直接由月度数组累加得到
-        _totalConsumption = device.totalConsumptionOneYear;
+      // 近一年总耗电量直接由月度数组累加得到
+      _totalConsumption = device.totalConsumptionOneYear;
 
-        // 获取每日统计（使用数组中的数据）
-        _dailyStats = device.getDailyConsumptionStats(days: 30);
+      // 获取每日统计（使用数组中的数据）
+      _dailyStats = device.getDailyConsumptionStats(days: 30);
 
-        // 获取月度统计（使用数组中的数据）
-        _monthlyStats = device.getMonthlyConsumptionStats(months: 12);
-      } else {
-        // 如果找不到设备，使用传统方法
-        _totalConsumption =
-            monitorController.getDeviceTotalConsumption(widget.deviceId);
-        _dailyStats = monitorController
-            .getDeviceDailyConsumptionStats(widget.deviceId, days: 30);
-        _monthlyStats = monitorController
-            .getDeviceMonthlyConsumptionStats(widget.deviceId, months: 12);
-      }
+      // 获取月度统计（使用数组中的数据）
+      _monthlyStats = device.getMonthlyConsumptionStats(months: 12);
 
       setState(() {
         _isLoading = false;
@@ -170,7 +160,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4A90E2).withOpacity(0.3),
+                  color: const Color(0xFF4A90E2).withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -265,7 +255,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -325,7 +315,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -377,10 +367,10 @@ class _PowerStatsPageState extends State<PowerStatsPage>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -391,7 +381,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -460,7 +450,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
       LineChartData(
         minY: 0.0,
         maxY: yAxisMax,
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -528,7 +518,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
             ),
             belowBarData: BarAreaData(
               show: true,
-              color: const Color(0xFF4A90E2).withOpacity(0.1),
+              color: const Color(0xFF4A90E2).withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -567,7 +557,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
       LineChartData(
         minY: 0.0,
         maxY: yAxisMax,
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -625,7 +615,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: const Color(0xFF9C27B0).withOpacity(0.1),
+              color: const Color(0xFF9C27B0).withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -770,7 +760,7 @@ class _PowerStatsPageState extends State<PowerStatsPage>
         orElse: () => monitorController.savedDevices
             .firstWhere((d) => d.deviceId == widget.deviceId));
 
-    return device?.averageDailyConsumption ?? 0.0;
+    return device.averageDailyConsumption;
   }
 
   /// 计算Y轴间隔

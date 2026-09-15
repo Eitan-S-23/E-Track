@@ -7,7 +7,7 @@ import 'remote_control_page.dart';
 import '../widgets/responsive_widgets.dart';
 
 class DeviceTabPage extends StatelessWidget {
-  const DeviceTabPage({Key? key}) : super(key: key);
+  const DeviceTabPage({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,0 +1,777 @@
+Flutter self-tests (windows-2022)	UNKNOWN STEP	﻿2026-09-15T02:45:48.2132947Z Current runner version: '2.337.0'
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2166880Z ##[group]Runner Image Provisioner
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2168201Z Hosted Compute Agent
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2169097Z Version: 20260828.587
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2170125Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2171346Z Build Date: 2026-08-28T16:44:25Z
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2172450Z Worker ID: {66fc911a-6f06-49f4-bc26-1a0aaef052b0}
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2173639Z Azure Region: westus
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2174479Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2176709Z ##[group]Operating System
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2177789Z Microsoft Windows Server 2022
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2178780Z 10.0.20348
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2179613Z Datacenter
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2180360Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2181167Z ##[group]Runner Image
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2182051Z Image: windows-2022
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2182886Z Version: 20260907.297.1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2185178Z Included Software: https://github.com/actions/runner-images/blob/win22/20260907.297/images/windows/Windows2022-Readme.md
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2187905Z Image Release: https://github.com/actions/runner-images/releases/tag/win22%2F20260907.297
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2189608Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2191413Z ##[group]GITHUB_TOKEN Permissions
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2193813Z Contents: read
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2194710Z Metadata: read
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2195585Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2198552Z Secret source: Actions
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2199884Z Cache mode: write
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.2200972Z Prepare workflow directory
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.3012540Z Prepare all required actions
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.3084372Z Getting action download info
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.7237291Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:48.8370544Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.1556398Z Complete job name: Flutter self-tests (windows-2022)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3289724Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3322715Z ##[group]Run actions/checkout@v4
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3324065Z with:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3324857Z   persist-credentials: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3325823Z   repository: Eitan-S-23/E-Track
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3334914Z   token: ***
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3335589Z   ssh-strict: true
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3336044Z   ssh-user: git
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3336472Z   clean: true
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3336941Z   sparse-checkout-cone-mode: true
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3337480Z   fetch-depth: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3337929Z   fetch-tags: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3338394Z   show-progress: true
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3338900Z   lfs: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3339424Z   submodules: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3339894Z   set-safe-directory: true
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3340408Z   allow-unsafe-pr-checkout: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3341294Z env:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3342927Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3343921Z   PYTHONUTF8: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3344751Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3345709Z   FLUTTER_DEV_BUILD_APK: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3346667Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3347693Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3348768Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3349923Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:49.3351122Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4955750Z Syncing repository: Eitan-S-23/E-Track
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4958060Z ##[group]Getting Git version info
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4958817Z Working directory is 'D:\a\E-Track\E-Track'
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4959912Z [command]"C:\Program Files\Git\bin\git.exe" version
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4963891Z git version 2.55.0.windows.5
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4965821Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4971458Z Temporarily overriding HOME='D:\a\_temp\4bdca8b9-1a8e-4d29-8a0d-4bfad910807c' before making global git config changes
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4972780Z Adding repository directory to the temporary git global config as a safe directory
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4973991Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\E-Track\E-Track
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4975684Z Deleting the contents of 'D:\a\E-Track\E-Track'
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4976713Z ##[group]Initializing the repository
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4977492Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\E-Track\E-Track
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4978402Z Initialized empty Git repository in D:/a/E-Track/E-Track/.git/
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4980149Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/Eitan-S-23/E-Track
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4982097Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.4983020Z ##[group]Disabling automatic garbage collection
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.5027935Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.5029712Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.5030386Z ##[group]Setting up auth
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.5031249Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.5034561Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.5618597Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:51.5879393Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:52.1061709Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:52.1426181Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:52.6986923Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:52.7241695Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:52.7242745Z ##[group]Fetching the repository
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:45:52.7258980Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +253f15371f2a0aeef0e7c5feb10af3118494c9e1:refs/remotes/origin/dev/flutter/apk/p3-3-admission
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.0735522Z From https://github.com/Eitan-S-23/E-Track
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.0739039Z  * [new ref]         253f15371f2a0aeef0e7c5feb10af3118494c9e1 -> origin/dev/flutter/apk/p3-3-admission
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.0814177Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.0819597Z ##[group]Determining the checkout info
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.0830697Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.0833129Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.1236323Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.1478263Z ##[group]Checking out the ref
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:03.1496888Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B dev/flutter/apk/p3-3-admission refs/remotes/origin/dev/flutter/apk/p3-3-admission
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.1979768Z Updating files:  47% (1995/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.2400196Z Updating files:  48% (2003/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.2489040Z Updating files:  49% (2044/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.2585289Z Updating files:  50% (2086/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.2679615Z Updating files:  51% (2128/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.2865230Z Updating files:  52% (2169/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3088644Z Updating files:  53% (2211/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3230569Z Updating files:  54% (2253/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3493998Z Updating files:  55% (2295/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3583528Z Updating files:  56% (2336/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3658036Z Updating files:  57% (2378/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3733765Z Updating files:  58% (2420/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3809687Z Updating files:  59% (2461/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3881235Z Updating files:  60% (2503/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.3955026Z Updating files:  61% (2545/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4053415Z Updating files:  62% (2587/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4142534Z Updating files:  63% (2628/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4209429Z Updating files:  64% (2670/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4284138Z Updating files:  65% (2712/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4366678Z Updating files:  66% (2753/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4451366Z Updating files:  67% (2795/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4564221Z Updating files:  68% (2837/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.4652714Z Updating files:  69% (2878/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.5330321Z Updating files:  70% (2920/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.5451739Z Updating files:  71% (2962/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.5535988Z Updating files:  72% (3004/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.5643692Z Updating files:  73% (3045/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.5775888Z Updating files:  74% (3087/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.5879798Z Updating files:  75% (3129/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.5987156Z Updating files:  76% (3170/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.6115117Z Updating files:  77% (3212/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:04.6209673Z Updating files:  78% (3254/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.1703125Z Updating files:  79% (3296/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.3411149Z Updating files:  80% (3337/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.5550477Z Updating files:  80% (3365/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.9057248Z Updating files:  81% (3379/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.9149828Z Updating files:  82% (3421/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.9369525Z Updating files:  83% (3462/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.9541770Z Updating files:  84% (3504/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.9629552Z Updating files:  85% (3546/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.9823875Z Updating files:  86% (3588/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:05.9928032Z Updating files:  87% (3629/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0029870Z Updating files:  88% (3671/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0117300Z Updating files:  89% (3713/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0252448Z Updating files:  90% (3754/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0351932Z Updating files:  91% (3796/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0479828Z Updating files:  92% (3838/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0603775Z Updating files:  93% (3880/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0719478Z Updating files:  94% (3921/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0823134Z Updating files:  95% (3963/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.0917689Z Updating files:  96% (4005/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1062266Z Updating files:  97% (4046/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1188717Z Updating files:  98% (4088/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1352494Z Updating files:  99% (4130/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1353163Z Updating files: 100% (4171/4171)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1356015Z Updating files: 100% (4171/4171), done.
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1523357Z Switched to a new branch 'dev/flutter/apk/p3-3-admission'
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1543860Z branch 'dev/flutter/apk/p3-3-admission' set up to track 'origin/dev/flutter/apk/p3-3-admission'.
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.1823469Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.2267919Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.2479306Z 253f15371f2a0aeef0e7c5feb10af3118494c9e1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.2511776Z ##[group]Removing auth
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.2521795Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.2758496Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.7505122Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.7706899Z http.https://github.com/.extraheader
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.7766578Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:06.8020281Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.2995363Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.3229588Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.7819417Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8230964Z ##[group]Run python -B tests/ota/test_flutter_dev_checks.py
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8231549Z ^[[36;1mpython -B tests/ota/test_flutter_dev_checks.py^[[0m
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8256458Z shell: C:\Windows\system32\cmd.EXE /D /E:ON /V:OFF /S /C "CALL "{0}""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8256830Z env:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8257029Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8257269Z   PYTHONUTF8: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8257468Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8257709Z   FLUTTER_DEV_BUILD_APK: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8257951Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8258186Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8258430Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8258692Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:07.8258967Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:09.6499159Z Host fixtures: D:\a\E-Track\E-Track\.cache\flutter-dev-checks-tests\run-d041d591b91642c893d08fb38d296820
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.0503351Z test_analysis_failure_collects_tests_but_never_builds_apk (__main__.FlutterDevelopmentChecksTests.test_analysis_failure_collects_tests_but_never_builds_apk) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.0834528Z test_analysis_timeout_is_red_but_cleaned_up_tests_can_run (__main__.FlutterDevelopmentChecksTests.test_analysis_timeout_is_red_but_cleaned_up_tests_can_run) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.1166334Z test_analyze_failure_still_collects_tests_and_fails_overall (__main__.FlutterDevelopmentChecksTests.test_analyze_failure_still_collects_tests_and_fails_overall) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.1168887Z test_apk_blocks_when_starting_checkout_is_not_clean (__main__.FlutterDevelopmentChecksTests.test_apk_blocks_when_starting_checkout_is_not_clean)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.1696737Z 起点不干净就没有"未改动的提交检出"可言，APK 必须挡住。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.1698253Z test_apk_fails_when_build_drift_escapes_bound_toolchain_regen (__main__.FlutterDevelopmentChecksTests.test_apk_fails_when_build_drift_escapes_bound_toolchain_regen)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.2227088Z 构建期改写落在白名单之外时，不得被"恢复即未变"洗白。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.2753275Z test_apk_failure_propagates_and_does_not_collect_an_artifact (__main__.FlutterDevelopmentChecksTests.test_apk_failure_propagates_and_does_not_collect_an_artifact) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.2832589Z test_apk_requires_full_scope_and_linux (__main__.FlutterDevelopmentChecksTests.test_apk_requires_full_scope_and_linux) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.3356822Z test_apk_restores_toolchain_regen_files_after_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regen_files_after_build) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.3908087Z test_apk_restores_toolchain_regenerated_files_before_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regenerated_files_before_build) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.4380139Z test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist (__main__.FlutterDevelopmentChecksTests.test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:10.4382793Z test_bind_toolchain_regen_fails_closed_on_collection_failure (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_fails_closed_on_collection_failure)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:11.1655980Z 收集失败必须显式炸开，不得留下字段为 null 的"已绑定"记录。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:11.1657747Z test_bind_toolchain_regen_records_effective_and_committed_bytes (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_records_effective_and_committed_bytes)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:11.9552353Z 恢复前必须绑定生效字节，否则白名单等于"改了也算没改"。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3207595Z test_bound_regen_exemption_rejects_paths_outside_the_whitelist (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_rejects_paths_outside_the_whitelist) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3210311Z test_bound_regen_exemption_requires_complete_current_evidence (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_requires_complete_current_evidence)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3253253Z 豁免判据必须核对证据本身，而不是只核对路径出现过。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3310642Z test_boundary_checks_nonexistent_leaf_and_all_existing_parents (__main__.FlutterDevelopmentChecksTests.test_boundary_checks_nonexistent_leaf_and_all_existing_parents) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3359032Z test_boundary_rejects_parent_escape_and_sibling_prefix (__main__.FlutterDevelopmentChecksTests.test_boundary_rejects_parent_escape_and_sibling_prefix) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3441254Z test_cli_refuses_local_sdk_initialization (__main__.FlutterDevelopmentChecksTests.test_cli_refuses_local_sdk_initialization) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3518929Z test_cli_rejects_mismatched_workspace (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_mismatched_workspace) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3691003Z test_cli_rejects_non_validation_branches (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_non_validation_branches) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.3748568Z test_command_scopes_are_bounded_and_lock_enforced (__main__.FlutterDevelopmentChecksTests.test_command_scopes_are_bounded_and_lock_enforced) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.4196221Z test_dependency_failure_leaves_analysis_and_tests_not_run (__main__.FlutterDevelopmentChecksTests.test_dependency_failure_leaves_analysis_and_tests_not_run) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.4334103Z test_environment_contains_standard_sdk_cache_home_and_temp_outputs (__main__.FlutterDevelopmentChecksTests.test_environment_contains_standard_sdk_cache_home_and_temp_outputs) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.4483147Z test_existing_log_cannot_be_overwritten (__main__.FlutterDevelopmentChecksTests.test_existing_log_cannot_be_overwritten) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.4485547Z test_identity_fingerprints_distinguish_successive_content_changes (__main__.FlutterDevelopmentChecksTests.test_identity_fingerprints_distinguish_successive_content_changes)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.9828448Z 同一条脏路径的两次不同内容必须产生不同语义指纹。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:12.9830101Z test_identity_keeps_crlf_only_rewrite_out_of_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_keeps_crlf_only_rewrite_out_of_semantic)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:13.3084078Z 真正的纯行尾差异仍必须放行，否则工具链改写会假红。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:13.3085915Z test_identity_parses_rename_records_without_mangling_paths (__main__.FlutterDevelopmentChecksTests.test_identity_parses_rename_records_without_mangling_paths)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:13.6631136Z `-z` 的重命名记录多带一个原路径字段，误当成新记录会切掉三个字符。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:13.9462772Z test_identity_treats_deletion_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_deletion_as_semantic) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:13.9465008Z test_identity_treats_untracked_directory_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_directory_as_semantic)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.2314876Z `--untracked-files=normal` 把未跟踪目录折叠成一条 `dir/` 记录。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.2316688Z test_identity_treats_untracked_files_as_semantic_not_eol (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_files_as_semantic_not_eol)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.6030277Z RC3-02 反例：`git diff` 看不见未跟踪文件。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.6082721Z test_invalid_scope_fails_before_any_run_output (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_fails_before_any_run_output) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.6161548Z test_invalid_scope_from_environment_is_not_a_shell_argument (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_from_environment_is_not_a_shell_argument) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.6480776Z test_lockfile_drift_fails_before_analysis (__main__.FlutterDevelopmentChecksTests.test_lockfile_drift_fails_before_analysis) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.6623220Z test_missing_executable_is_error_not_pass (__main__.FlutterDevelopmentChecksTests.test_missing_executable_is_error_not_pass) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.6684367Z test_missing_lock_does_not_silently_resolve_dependencies (__main__.FlutterDevelopmentChecksTests.test_missing_lock_does_not_silently_resolve_dependencies) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.7285870Z test_new_run_preserves_previous_report_and_logs (__main__.FlutterDevelopmentChecksTests.test_new_run_preserves_previous_report_and_logs) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.7606075Z test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root (__main__.FlutterDevelopmentChecksTests.test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:14.8490848Z test_real_process_preserves_stdout_stderr_and_exit_code (__main__.FlutterDevelopmentChecksTests.test_real_process_preserves_stdout_stderr_and_exit_code) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:17.9190194Z test_real_timeout_terminates_parent_and_child_without_hanging (__main__.FlutterDevelopmentChecksTests.test_real_timeout_terminates_parent_and_child_without_hanging) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:17.9284945Z test_release_build_does_not_mask_analysis_failures (__main__.FlutterDevelopmentChecksTests.test_release_build_does_not_mask_analysis_failures) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:17.9331911Z test_runner_workflow_and_docs_have_profile_and_ci_ownership (__main__.FlutterDevelopmentChecksTests.test_runner_workflow_and_docs_have_profile_and_ci_ownership) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:17.9628447Z test_sdk_setup_failure_does_not_pretend_checks_executed (__main__.FlutterDevelopmentChecksTests.test_sdk_setup_failure_does_not_pretend_checks_executed) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:17.9630970Z test_source_unchanged_sees_content_change_on_an_already_dirty_path (__main__.FlutterDevelopmentChecksTests.test_source_unchanged_sees_content_change_on_an_already_dirty_path)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.0010145Z 只比脏路径列表会漏掉"同一个已脏文件内容又变了"。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.0087550Z test_standing_authorization_is_not_a_mainline_or_release_grant (__main__.FlutterDevelopmentChecksTests.test_standing_authorization_is_not_a_mainline_or_release_grant) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.0420007Z test_success_is_development_only_with_all_raw_logs (__main__.FlutterDevelopmentChecksTests.test_success_is_development_only_with_all_raw_logs) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.0741816Z test_test_failure_is_not_masked (__main__.FlutterDevelopmentChecksTests.test_test_failure_is_not_masked) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.1676276Z test_test_failure_prevents_apk_and_success_preserves_phase_order (__main__.FlutterDevelopmentChecksTests.test_test_failure_prevents_apk_and_success_preserves_phase_order) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.1993243Z test_unproven_process_cleanup_stops_downstream_work (__main__.FlutterDevelopmentChecksTests.test_unproven_process_cleanup_stops_downstream_work) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.2809483Z test_windows_batch_quoting_and_exit_propagation (__main__.FlutterDevelopmentChecksTests.test_windows_batch_quoting_and_exit_propagation) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3028908Z test_windows_job_assignment_failure_never_starts_the_command (__main__.FlutterDevelopmentChecksTests.test_windows_job_assignment_failure_never_starts_the_command) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3078971Z test_workflow_is_development_only_and_covers_both_hosts (__main__.FlutterDevelopmentChecksTests.test_workflow_is_development_only_and_covers_both_hosts) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3080214Z 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3080583Z ----------------------------------------------------------------------
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3081237Z Ran 50 tests in 8.659s
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3081574Z 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3081815Z OK
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3420697Z ##[group]Run python -B tests/ota/test_flutter_dev_apk.py
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3421369Z ^[[36;1mpython -B tests/ota/test_flutter_dev_apk.py^[[0m
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3439542Z shell: C:\Windows\system32\cmd.EXE /D /E:ON /V:OFF /S /C "CALL "{0}""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3439917Z env:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3440118Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3440358Z   PYTHONUTF8: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3440559Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3440798Z   FLUTTER_DEV_BUILD_APK: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3441033Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3441268Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3441506Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3441763Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.3442032Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.5641100Z APK helper fixtures: D:\a\E-Track\E-Track\.cache\flutter-dev-apk-tests\run-2998ea054b1b4689904c070f416bd0e2
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.5906283Z test_apk_identity_is_read_from_the_artifact_not_the_build_intent (__main__.DevelopmentApkTests.test_apk_identity_is_read_from_the_artifact_not_the_build_intent) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.6295881Z test_archive_rejects_escape_before_writing_any_member (__main__.DevelopmentApkTests.test_archive_rejects_escape_before_writing_any_member) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.6532477Z test_archive_rejects_symlinks (__main__.DevelopmentApkTests.test_archive_rejects_symlinks) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.6821485Z test_artifact_collection_binds_bytes_commit_and_debug_classification (__main__.DevelopmentApkTests.test_artifact_collection_binds_bytes_commit_and_debug_classification) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.7089833Z test_bad_checksum_never_extracts_distribution (__main__.DevelopmentApkTests.test_bad_checksum_never_extracts_distribution) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.7340099Z test_cli_never_builds_or_downloads_locally (__main__.DevelopmentApkTests.test_cli_never_builds_or_downloads_locally) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.7621392Z test_collect_records_the_verified_observation_configuration (__main__.DevelopmentApkTests.test_collect_records_the_verified_observation_configuration) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.8644316Z test_collect_refuses_an_apk_without_the_injected_observation_constants (__main__.DevelopmentApkTests.test_collect_refuses_an_apk_without_the_injected_observation_constants) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.9081750Z test_collect_rejects_an_apk_whose_real_application_id_differs (__main__.DevelopmentApkTests.test_collect_rejects_an_apk_whose_real_application_id_differs) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.9502023Z test_collect_without_observation_keeps_the_previous_metadata (__main__.DevelopmentApkTests.test_collect_without_observation_keeps_the_previous_metadata) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.9714352Z test_debug_application_id_suffix_is_explicit_and_validated (__main__.DevelopmentApkTests.test_debug_application_id_suffix_is_explicit_and_validated) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:18.9921113Z test_device_observation_injection_reaches_the_build_command (__main__.DevelopmentApkTests.test_device_observation_injection_reaches_the_build_command) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.0129864Z test_device_observation_is_opt_in_and_absent_by_default (__main__.DevelopmentApkTests.test_device_observation_is_opt_in_and_absent_by_default) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.0132275Z test_device_observation_rejects_encoded_and_disguised_credential_keys (__main__.DevelopmentApkTests.test_device_observation_rejects_encoded_and_disguised_credential_keys)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.0346894Z OBS-SEC-01 回归：编码键名、大小写、token 别名与未知参数都不得绕过。 ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.0558738Z test_device_observation_rejects_incomplete_or_credentialed_config (__main__.DevelopmentApkTests.test_device_observation_rejects_incomplete_or_credentialed_config) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.0805604Z test_environment_redirects_android_java_outputs_and_drops_signing_secrets (__main__.DevelopmentApkTests.test_environment_redirects_android_java_outputs_and_drops_signing_secrets) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.1021015Z test_missing_android_package_stops_wrapper_install (__main__.DevelopmentApkTests.test_missing_android_package_stops_wrapper_install) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.1265923Z test_missing_apk_or_commit_cannot_be_reported_as_generated (__main__.DevelopmentApkTests.test_missing_apk_or_commit_cannot_be_reported_as_generated) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.1475566Z test_missing_jdk_is_failure_not_silent_fallback (__main__.DevelopmentApkTests.test_missing_jdk_is_failure_not_silent_fallback) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.1683758Z test_plan_is_debug_only_and_bounded (__main__.DevelopmentApkTests.test_plan_is_debug_only_and_bounded) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.2044670Z test_prepare_verifies_download_and_preserves_tracked_wrapper_properties (__main__.DevelopmentApkTests.test_prepare_verifies_download_and_preserves_tracked_wrapper_properties) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.2275199Z test_release_signing_file_is_rejected_without_download (__main__.DevelopmentApkTests.test_release_signing_file_is_rejected_without_download) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.2506993Z test_stale_apk_is_rejected_without_download (__main__.DevelopmentApkTests.test_stale_apk_is_rejected_without_download) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3187247Z test_tracked_inputs_cannot_be_overwritten_as_generated_outputs (__main__.DevelopmentApkTests.test_tracked_inputs_cannot_be_overwritten_as_generated_outputs) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3728542Z test_versions_are_derived_from_tracked_inputs (__main__.DevelopmentApkTests.test_versions_are_derived_from_tracked_inputs) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3993414Z test_wrapper_install_checks_sdk_and_preserves_other_local_properties (__main__.DevelopmentApkTests.test_wrapper_install_checks_sdk_and_preserves_other_local_properties) ... ok
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3994823Z 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3995236Z ----------------------------------------------------------------------
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3995960Z Ran 26 tests in 0.836s
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3996313Z 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.3996558Z OK
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4328966Z ##[group]Run python -B Tools/flutter/dev_checks.py --repo-root .
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4329521Z ^[[36;1mpython -B Tools/flutter/dev_checks.py --repo-root .^[[0m
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4347582Z shell: C:\Windows\system32\cmd.EXE /D /E:ON /V:OFF /S /C "CALL "{0}""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4347947Z env:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4348141Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4348382Z   PYTHONUTF8: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4348585Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4348823Z   FLUTTER_DEV_BUILD_APK: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4349058Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4349289Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4349526Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4349787Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.4350058Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:19.7968263Z Running sdk_checkout; log: D:\a\E-Track\E-Track\.cache\flutter-dev-checks\runs\run-866987b6ef3d4ced89689f02a23351e2\logs\sdk_checkout.log
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:46:25.4901224Z Running sdk_version; log: D:\a\E-Track\E-Track\.cache\flutter-dev-checks\runs\run-866987b6ef3d4ced89689f02a23351e2\logs\sdk_version.log
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:47:03.0846052Z Running dependencies; log: D:\a\E-Track\E-Track\.cache\flutter-dev-checks\runs\run-866987b6ef3d4ced89689f02a23351e2\logs\dependencies.log
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:47:17.2214152Z Running analyze; log: D:\a\E-Track\E-Track\.cache\flutter-dev-checks\runs\run-866987b6ef3d4ced89689f02a23351e2\logs\analyze.log
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:47:34.7181700Z Running tests; log: D:\a\E-Track\E-Track\.cache\flutter-dev-checks\runs\run-866987b6ef3d4ced89689f02a23351e2\logs\tests.log
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6483914Z sdk_checkout: PASS (exit=0)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6484725Z sdk_version: PASS (exit=0)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6485403Z dependencies: PASS (exit=0)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6486005Z analyze: PASS (exit=0)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6486556Z tests: PASS (exit=0)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6487704Z Development report: D:\a\E-Track\E-Track\.cache\flutter-dev-checks\runs\run-866987b6ef3d4ced89689f02a23351e2\result.json
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6831717Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6834003Z ##[group]Run actions/upload-artifact@v4
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6834636Z with:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6834986Z   name: flutter-dev-windows-2022-34922411533-1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6835604Z   path: .cache/flutter-dev-checks/runs/*/result.json
+Flutter self-tests (windows-2022)	UNKNOWN STEP	.cache/flutter-dev-checks/runs/*/logs/*.log
+Flutter self-tests (windows-2022)	UNKNOWN STEP	
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6836150Z   include-hidden-files: true
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6836451Z   if-no-files-found: error
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6836726Z   retention-days: 14
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6836964Z   compression-level: 6
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6837230Z   overwrite: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6837443Z env:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6837674Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6837988Z   PYTHONUTF8: 1
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6838195Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6838457Z   FLUTTER_DEV_BUILD_APK: false
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6838740Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6838972Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6839226Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6839504Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.6839799Z ##[endgroup]
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.8824406Z (node:2168) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.8825905Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.9082238Z With the provided path, there will be 6 files uploaded
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.9125736Z Artifact name is valid!
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:25.9179898Z Root directory input is valid!
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.3144473Z Beginning upload of artifact content to blob storage
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.3541608Z (node:2168) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.6672611Z Uploaded bytes 25501
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.7384677Z Finished uploading artifact content to blob storage!
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.7385780Z SHA256 digest of uploaded artifact zip is 28a7e9a23ba69606207737a8b1ac2136152876ca4311108277328ad85a5ff5a3
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.7387664Z Finalizing artifact upload
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.9923035Z Artifact flutter-dev-windows-2022-34922411533-1.zip successfully finalized. Artifact ID 10378078598
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.9924967Z Artifact flutter-dev-windows-2022-34922411533-1 has been successfully uploaded! Final size is 25501 bytes. Artifact ID is 10378078598
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:26.9934586Z Artifact download URL: https://github.com/Eitan-S-23/E-Track/actions/runs/34922411533/artifacts/10378078598
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.0305974Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.0307489Z Post job cleanup.
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.2512045Z [command]"C:\Program Files\Git\bin\git.exe" version
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.2839331Z git version 2.55.0.windows.5
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.2983913Z Temporarily overriding HOME='D:\a\_temp\6fc0b1eb-07fc-4e08-ac50-40b3022d5944' before making global git config changes
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.2987063Z Adding repository directory to the temporary git global config as a safe directory
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.2988803Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\E-Track\E-Track
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.3341131Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.3691862Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:27.9801091Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:28.0121777Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:28.5418970Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:28.5655832Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:29.0490195Z Cleaning up orphan processes
+Flutter self-tests (windows-2022)	UNKNOWN STEP	2026-09-15T02:49:29.1088686Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	﻿2026-09-15T02:45:47.0115330Z Current runner version: '2.337.0'
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0151421Z ##[group]Runner Image Provisioner
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0153209Z Hosted Compute Agent
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0154163Z Version: 20260828.587
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0155144Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0156514Z Build Date: 2026-08-28T16:44:25Z
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0157675Z Worker ID: {a25e33bd-b35e-4033-8f91-557cc6a58d37}
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0158987Z Azure Region: eastus2
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0159926Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0162284Z ##[group]Operating System
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0163456Z Ubuntu
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0164292Z 24.04.5
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0165053Z LTS
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0165994Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0166863Z ##[group]Runner Image
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0167921Z Image: ubuntu-24.04
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0168911Z Version: 20260907.300.1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0171486Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260907.300/images/ubuntu/Ubuntu2404-Readme.md
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0174159Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260907.300
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0176018Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0177613Z ##[group]GITHUB_TOKEN Permissions
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0180552Z Contents: read
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0181695Z Metadata: read
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0182732Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0185843Z Secret source: Actions
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0187366Z Cache mode: write
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.0189048Z Prepare workflow directory
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.1022097Z Prepare all required actions
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.1097643Z Getting action download info
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.3987766Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.5207754Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.7405988Z Complete job name: Flutter self-tests (ubuntu-latest)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8071601Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8080468Z ##[group]Run actions/checkout@v4
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8081384Z with:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8081839Z   persist-credentials: false
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8082380Z   repository: Eitan-S-23/E-Track
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8086223Z   token: ***
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8086665Z   ssh-strict: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8087113Z   ssh-user: git
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8087543Z   clean: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8088004Z   sparse-checkout-cone-mode: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8088531Z   fetch-depth: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8088964Z   fetch-tags: false
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8089407Z   show-progress: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8089860Z   lfs: false
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8090399Z   submodules: false
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8091038Z   set-safe-directory: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8091566Z   allow-unsafe-pr-checkout: false
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8092258Z env:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8092686Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8093176Z   PYTHONUTF8: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8093616Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8094133Z   FLUTTER_DEV_BUILD_APK: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8094638Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8095144Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8095668Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8096216Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.8096790Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9283091Z Syncing repository: Eitan-S-23/E-Track
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9286185Z ##[group]Getting Git version info
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9288031Z Working directory is '/home/runner/work/E-Track/E-Track'
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9292003Z [command]/usr/bin/git version
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9497670Z git version 2.55.0
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9526993Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9537133Z Temporarily overriding HOME='/home/runner/work/_temp/42443cf7-37bf-4245-aa33-01812fe04ffc' before making global git config changes
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9540899Z Adding repository directory to the temporary git global config as a safe directory
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9543695Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9575371Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9577633Z ##[group]Initializing the repository
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9579125Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9942154Z hint: Using 'master' as the name for the initial branch. This default branch name
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9963135Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9965050Z hint: to use in all of your new repositories, which will suppress this warning,
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9966866Z hint: call:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9969757Z hint:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9970590Z hint: 	git config --global init.defaultBranch <name>
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9971845Z hint:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9972744Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9974103Z hint: 'development'. The just-created branch can be renamed via this command:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9975237Z hint:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9975891Z hint: 	git branch -m <name>
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9976665Z hint:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9977694Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9979237Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9982116Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9984731Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9985901Z ##[group]Disabling automatic garbage collection
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9986959Z [command]/usr/bin/git config --local gc.auto 0
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:47.9989446Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.0001063Z ##[group]Setting up auth
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.0002964Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1046528Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1151993Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1156379Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1346626Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1362539Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1684895Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1738807Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1742165Z ##[group]Fetching the repository
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:48.1744798Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +253f15371f2a0aeef0e7c5feb10af3118494c9e1:refs/remotes/origin/dev/flutter/apk/p3-3-admission
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3784916Z From https://github.com/Eitan-S-23/E-Track
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3787902Z  * [new ref]         253f15371f2a0aeef0e7c5feb10af3118494c9e1 -> origin/dev/flutter/apk/p3-3-admission
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3811009Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3813426Z ##[group]Determining the checkout info
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3816112Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3817660Z [command]/usr/bin/git sparse-checkout disable
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3903023Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.3973824Z ##[group]Checking out the ref
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:54.4002865Z [command]/usr/bin/git checkout --progress --force -B dev/flutter/apk/p3-3-admission refs/remotes/origin/dev/flutter/apk/p3-3-admission
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.4284742Z Updating files:  80% (3375/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5074899Z Updating files:  81% (3379/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5121479Z Updating files:  82% (3421/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5261866Z Updating files:  83% (3462/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5361632Z Updating files:  84% (3504/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5391451Z Updating files:  85% (3546/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5504007Z Updating files:  86% (3588/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5555483Z Updating files:  87% (3629/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5594655Z Updating files:  88% (3671/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5626014Z Updating files:  89% (3713/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5689917Z Updating files:  90% (3754/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5733406Z Updating files:  91% (3796/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5793280Z Updating files:  92% (3838/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5853239Z Updating files:  93% (3880/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5903412Z Updating files:  94% (3921/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5944947Z Updating files:  95% (3963/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.5983633Z Updating files:  96% (4005/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.6021735Z Updating files:  97% (4046/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.6067839Z Updating files:  98% (4088/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.6139543Z Updating files:  99% (4130/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.6141693Z Updating files: 100% (4171/4171)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.6142655Z Updating files: 100% (4171/4171), done.
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7145607Z Switched to a new branch 'dev/flutter/apk/p3-3-admission'
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7160253Z branch 'dev/flutter/apk/p3-3-admission' set up to track 'origin/dev/flutter/apk/p3-3-admission'.
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7233669Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7625653Z [command]/usr/bin/git log -1 --format=%H
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7671573Z 253f15371f2a0aeef0e7c5feb10af3118494c9e1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7687926Z ##[group]Removing auth
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7692860Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.7744778Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.8008146Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.8536534Z http.https://github.com/.extraheader
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.8573830Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.8619672Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.8904685Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.8954094Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9232139Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9448716Z ##[group]Run python -B tests/ota/test_flutter_dev_checks.py
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9449240Z ^[[36;1mpython -B tests/ota/test_flutter_dev_checks.py^[[0m
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9495430Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9495800Z env:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9496038Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9496312Z   PYTHONUTF8: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9496539Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9496797Z   FLUTTER_DEV_BUILD_APK: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9497054Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9497314Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9497576Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9497851Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:55.9498147Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.2017606Z Host fixtures: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks-tests/run-6a9c3f97d23a40f88ed076198fd77382
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.3454167Z test_analysis_failure_collects_tests_but_never_builds_apk (__main__.FlutterDevelopmentChecksTests.test_analysis_failure_collects_tests_but_never_builds_apk) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.3984277Z test_analysis_timeout_is_red_but_cleaned_up_tests_can_run (__main__.FlutterDevelopmentChecksTests.test_analysis_timeout_is_red_but_cleaned_up_tests_can_run) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.4449275Z test_analyze_failure_still_collects_tests_and_fails_overall (__main__.FlutterDevelopmentChecksTests.test_analyze_failure_still_collects_tests_and_fails_overall) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.4451661Z test_apk_blocks_when_starting_checkout_is_not_clean (__main__.FlutterDevelopmentChecksTests.test_apk_blocks_when_starting_checkout_is_not_clean)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.5159665Z 起点不干净就没有"未改动的提交检出"可言，APK 必须挡住。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.5161430Z test_apk_fails_when_build_drift_escapes_bound_toolchain_regen (__main__.FlutterDevelopmentChecksTests.test_apk_fails_when_build_drift_escapes_bound_toolchain_regen)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.5917529Z 构建期改写落在白名单之外时，不得被"恢复即未变"洗白。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.6672628Z test_apk_failure_propagates_and_does_not_collect_an_artifact (__main__.FlutterDevelopmentChecksTests.test_apk_failure_propagates_and_does_not_collect_an_artifact) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.6851762Z test_apk_requires_full_scope_and_linux (__main__.FlutterDevelopmentChecksTests.test_apk_requires_full_scope_and_linux) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.7998287Z test_apk_restores_toolchain_regen_files_after_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regen_files_after_build) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.8753501Z test_apk_restores_toolchain_regenerated_files_before_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regenerated_files_before_build) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.9433820Z test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist (__main__.FlutterDevelopmentChecksTests.test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:56.9436556Z test_bind_toolchain_regen_fails_closed_on_collection_failure (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_fails_closed_on_collection_failure)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.0033217Z 收集失败必须显式炸开，不得留下字段为 null 的"已绑定"记录。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.0034573Z test_bind_toolchain_regen_records_effective_and_committed_bytes (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_records_effective_and_committed_bytes)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.0604965Z 恢复前必须绑定生效字节，否则白名单等于"改了也算没改"。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.0978996Z test_bound_regen_exemption_rejects_paths_outside_the_whitelist (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_rejects_paths_outside_the_whitelist) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.0981626Z test_bound_regen_exemption_requires_complete_current_evidence (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_requires_complete_current_evidence)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1051368Z 豁免判据必须核对证据本身，而不是只核对路径出现过。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1157061Z test_boundary_checks_nonexistent_leaf_and_all_existing_parents (__main__.FlutterDevelopmentChecksTests.test_boundary_checks_nonexistent_leaf_and_all_existing_parents) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1218418Z test_boundary_rejects_parent_escape_and_sibling_prefix (__main__.FlutterDevelopmentChecksTests.test_boundary_rejects_parent_escape_and_sibling_prefix) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1292929Z test_cli_refuses_local_sdk_initialization (__main__.FlutterDevelopmentChecksTests.test_cli_refuses_local_sdk_initialization) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1359824Z test_cli_rejects_mismatched_workspace (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_mismatched_workspace) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1457256Z test_cli_rejects_non_validation_branches (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_non_validation_branches) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1535218Z test_command_scopes_are_bounded_and_lock_enforced (__main__.FlutterDevelopmentChecksTests.test_command_scopes_are_bounded_and_lock_enforced) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.1980037Z test_dependency_failure_leaves_analysis_and_tests_not_run (__main__.FlutterDevelopmentChecksTests.test_dependency_failure_leaves_analysis_and_tests_not_run) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.2181451Z test_environment_contains_standard_sdk_cache_home_and_temp_outputs (__main__.FlutterDevelopmentChecksTests.test_environment_contains_standard_sdk_cache_home_and_temp_outputs) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.2398168Z test_existing_log_cannot_be_overwritten (__main__.FlutterDevelopmentChecksTests.test_existing_log_cannot_be_overwritten) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.2400222Z test_identity_fingerprints_distinguish_successive_content_changes (__main__.FlutterDevelopmentChecksTests.test_identity_fingerprints_distinguish_successive_content_changes)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.2913536Z 同一条脏路径的两次不同内容必须产生不同语义指纹。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.2914915Z test_identity_keeps_crlf_only_rewrite_out_of_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_keeps_crlf_only_rewrite_out_of_semantic)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.3345699Z 真正的纯行尾差异仍必须放行，否则工具链改写会假红。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.3347213Z test_identity_parses_rename_records_without_mangling_paths (__main__.FlutterDevelopmentChecksTests.test_identity_parses_rename_records_without_mangling_paths)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.3715041Z `-z` 的重命名记录多带一个原路径字段，误当成新记录会切掉三个字符。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.4036378Z test_identity_treats_deletion_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_deletion_as_semantic) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.4038265Z test_identity_treats_untracked_directory_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_directory_as_semantic)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.4369176Z `--untracked-files=normal` 把未跟踪目录折叠成一条 `dir/` 记录。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.4371056Z test_identity_treats_untracked_files_as_semantic_not_eol (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_files_as_semantic_not_eol)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.4783667Z RC3-02 反例：`git diff` 看不见未跟踪文件。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.4848756Z test_invalid_scope_fails_before_any_run_output (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_fails_before_any_run_output) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.4925082Z test_invalid_scope_from_environment_is_not_a_shell_argument (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_from_environment_is_not_a_shell_argument) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.5388796Z test_lockfile_drift_fails_before_analysis (__main__.FlutterDevelopmentChecksTests.test_lockfile_drift_fails_before_analysis) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.5596784Z test_missing_executable_is_error_not_pass (__main__.FlutterDevelopmentChecksTests.test_missing_executable_is_error_not_pass) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.5678170Z test_missing_lock_does_not_silently_resolve_dependencies (__main__.FlutterDevelopmentChecksTests.test_missing_lock_does_not_silently_resolve_dependencies) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.6549450Z test_new_run_preserves_previous_report_and_logs (__main__.FlutterDevelopmentChecksTests.test_new_run_preserves_previous_report_and_logs) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.6654284Z test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root (__main__.FlutterDevelopmentChecksTests.test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:45:57.7177990Z test_real_process_preserves_stdout_stderr_and_exit_code (__main__.FlutterDevelopmentChecksTests.test_real_process_preserves_stdout_stderr_and_exit_code) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.7493892Z test_real_timeout_terminates_parent_and_child_without_hanging (__main__.FlutterDevelopmentChecksTests.test_real_timeout_terminates_parent_and_child_without_hanging) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.7558768Z test_release_build_does_not_mask_analysis_failures (__main__.FlutterDevelopmentChecksTests.test_release_build_does_not_mask_analysis_failures) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.7619320Z test_runner_workflow_and_docs_have_profile_and_ci_ownership (__main__.FlutterDevelopmentChecksTests.test_runner_workflow_and_docs_have_profile_and_ci_ownership) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.8055192Z test_sdk_setup_failure_does_not_pretend_checks_executed (__main__.FlutterDevelopmentChecksTests.test_sdk_setup_failure_does_not_pretend_checks_executed) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.8057717Z test_source_unchanged_sees_content_change_on_an_already_dirty_path (__main__.FlutterDevelopmentChecksTests.test_source_unchanged_sees_content_change_on_an_already_dirty_path)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.8561165Z 只比脏路径列表会漏掉"同一个已脏文件内容又变了"。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.8649799Z test_standing_authorization_is_not_a_mainline_or_release_grant (__main__.FlutterDevelopmentChecksTests.test_standing_authorization_is_not_a_mainline_or_release_grant) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.9115898Z test_success_is_development_only_with_all_raw_logs (__main__.FlutterDevelopmentChecksTests.test_success_is_development_only_with_all_raw_logs) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:00.9576238Z test_test_failure_is_not_masked (__main__.FlutterDevelopmentChecksTests.test_test_failure_is_not_masked) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.0921578Z test_test_failure_prevents_apk_and_success_preserves_phase_order (__main__.FlutterDevelopmentChecksTests.test_test_failure_prevents_apk_and_success_preserves_phase_order) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1377817Z test_unproven_process_cleanup_stops_downstream_work (__main__.FlutterDevelopmentChecksTests.test_unproven_process_cleanup_stops_downstream_work) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1436551Z test_windows_batch_quoting_and_exit_propagation (__main__.FlutterDevelopmentChecksTests.test_windows_batch_quoting_and_exit_propagation) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1493794Z test_windows_job_assignment_failure_never_starts_the_command (__main__.FlutterDevelopmentChecksTests.test_windows_job_assignment_failure_never_starts_the_command) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1551653Z test_workflow_is_development_only_and_covers_both_hosts (__main__.FlutterDevelopmentChecksTests.test_workflow_is_development_only_and_covers_both_hosts) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1552918Z 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1553679Z ----------------------------------------------------------------------
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1554460Z Ran 50 tests in 4.955s
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1554893Z 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1555158Z OK
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1770554Z ##[group]Run python -B tests/ota/test_flutter_dev_apk.py
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1771320Z ^[[36;1mpython -B tests/ota/test_flutter_dev_apk.py^[[0m
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1813825Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1814211Z env:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1814472Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1814751Z   PYTHONUTF8: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1814991Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1815252Z   FLUTTER_DEV_BUILD_APK: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1815502Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1815778Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1816060Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1816338Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.1816636Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.2914658Z APK helper fixtures: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-apk-tests/run-5414b01968ea47e0934de86a26ddc52e
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.3259429Z test_apk_identity_is_read_from_the_artifact_not_the_build_intent (__main__.DevelopmentApkTests.test_apk_identity_is_read_from_the_artifact_not_the_build_intent) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.3679040Z test_archive_rejects_escape_before_writing_any_member (__main__.DevelopmentApkTests.test_archive_rejects_escape_before_writing_any_member) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.4161912Z test_archive_rejects_symlinks (__main__.DevelopmentApkTests.test_archive_rejects_symlinks) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.4772194Z test_artifact_collection_binds_bytes_commit_and_debug_classification (__main__.DevelopmentApkTests.test_artifact_collection_binds_bytes_commit_and_debug_classification) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.5234089Z test_bad_checksum_never_extracts_distribution (__main__.DevelopmentApkTests.test_bad_checksum_never_extracts_distribution) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.5678084Z test_cli_never_builds_or_downloads_locally (__main__.DevelopmentApkTests.test_cli_never_builds_or_downloads_locally) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:01.6068877Z test_collect_records_the_verified_observation_configuration (__main__.DevelopmentApkTests.test_collect_records_the_verified_observation_configuration) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.3540442Z test_collect_refuses_an_apk_without_the_injected_observation_constants (__main__.DevelopmentApkTests.test_collect_refuses_an_apk_without_the_injected_observation_constants) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.3868952Z test_collect_rejects_an_apk_whose_real_application_id_differs (__main__.DevelopmentApkTests.test_collect_rejects_an_apk_whose_real_application_id_differs) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.4242265Z test_collect_without_observation_keeps_the_previous_metadata (__main__.DevelopmentApkTests.test_collect_without_observation_keeps_the_previous_metadata) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.4543073Z test_debug_application_id_suffix_is_explicit_and_validated (__main__.DevelopmentApkTests.test_debug_application_id_suffix_is_explicit_and_validated) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.4861116Z test_device_observation_injection_reaches_the_build_command (__main__.DevelopmentApkTests.test_device_observation_injection_reaches_the_build_command) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.5164539Z test_device_observation_is_opt_in_and_absent_by_default (__main__.DevelopmentApkTests.test_device_observation_is_opt_in_and_absent_by_default) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.5166655Z test_device_observation_rejects_encoded_and_disguised_credential_keys (__main__.DevelopmentApkTests.test_device_observation_rejects_encoded_and_disguised_credential_keys)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.5484321Z OBS-SEC-01 回归：编码键名、大小写、token 别名与未知参数都不得绕过。 ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.5788058Z test_device_observation_rejects_incomplete_or_credentialed_config (__main__.DevelopmentApkTests.test_device_observation_rejects_incomplete_or_credentialed_config) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.6139099Z test_environment_redirects_android_java_outputs_and_drops_signing_secrets (__main__.DevelopmentApkTests.test_environment_redirects_android_java_outputs_and_drops_signing_secrets) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.6438926Z test_missing_android_package_stops_wrapper_install (__main__.DevelopmentApkTests.test_missing_android_package_stops_wrapper_install) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.6775359Z test_missing_apk_or_commit_cannot_be_reported_as_generated (__main__.DevelopmentApkTests.test_missing_apk_or_commit_cannot_be_reported_as_generated) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.7071527Z test_missing_jdk_is_failure_not_silent_fallback (__main__.DevelopmentApkTests.test_missing_jdk_is_failure_not_silent_fallback) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.7384166Z test_plan_is_debug_only_and_bounded (__main__.DevelopmentApkTests.test_plan_is_debug_only_and_bounded) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.7802750Z test_prepare_verifies_download_and_preserves_tracked_wrapper_properties (__main__.DevelopmentApkTests.test_prepare_verifies_download_and_preserves_tracked_wrapper_properties) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.8127872Z test_release_signing_file_is_rejected_without_download (__main__.DevelopmentApkTests.test_release_signing_file_is_rejected_without_download) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.8455841Z test_stale_apk_is_rejected_without_download (__main__.DevelopmentApkTests.test_stale_apk_is_rejected_without_download) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.8805254Z test_tracked_inputs_cannot_be_overwritten_as_generated_outputs (__main__.DevelopmentApkTests.test_tracked_inputs_cannot_be_overwritten_as_generated_outputs) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9109072Z test_versions_are_derived_from_tracked_inputs (__main__.DevelopmentApkTests.test_versions_are_derived_from_tracked_inputs) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9701679Z test_wrapper_install_checks_sdk_and_preserves_other_local_properties (__main__.DevelopmentApkTests.test_wrapper_install_checks_sdk_and_preserves_other_local_properties) ... ok
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9703026Z 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9703532Z ----------------------------------------------------------------------
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9704357Z Ran 26 tests in 1.680s
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9704781Z 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9705056Z OK
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9925870Z ##[group]Run python -B Tools/flutter/dev_checks.py --repo-root .
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9926532Z ^[[36;1mpython -B Tools/flutter/dev_checks.py --repo-root .^[[0m
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9966849Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9967192Z env:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9967411Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9967668Z   PYTHONUTF8: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9967891Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9968134Z   FLUTTER_DEV_BUILD_APK: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9968376Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9968637Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9968898Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9969185Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:02.9969490Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:04.2872824Z Running sdk_checkout; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/sdk_checkout.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:06.9102121Z Running sdk_version; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/sdk_version.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:38.4978637Z Running dependencies; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/dependencies.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:46:49.8996719Z Running analyze; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/analyze.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:47:05.6012003Z Running tests; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/tests.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:48:55.6403664Z Running apk_prepare; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_prepare.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:48:58.3115549Z Running apk_java; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_java.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:48:58.4780066Z Running apk_sdk; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_sdk.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:49:10.0229531Z Running apk_wrapper; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_wrapper.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:49:17.2352884Z Running apk_install_wrapper; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_install_wrapper.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:49:17.3512717Z Running apk_build; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_build.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:38.0294380Z Running apk_verify; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_verify.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:38.5473093Z Running apk_collect; log: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_collect.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0118725Z sdk_checkout: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0119109Z sdk_version: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0129576Z dependencies: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0130062Z analyze: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0130294Z tests: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0130519Z apk_prepare: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0131149Z apk_java: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0131381Z apk_sdk: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0131596Z apk_wrapper: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0131976Z apk_install_wrapper: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0132296Z apk_build: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0132521Z apk_verify: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0132745Z apk_collect: PASS (exit=0)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.0133516Z Development report: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-188d67bd2916402b81dcec9c397f2dcd/result.json
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1843633Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1849467Z ##[group]Run actions/upload-artifact@v4
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1851476Z with:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1853677Z   name: flutter-dev-ubuntu-latest-34922411533-1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1856293Z   path: .cache/flutter-dev-checks/runs/*/result.json
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	.cache/flutter-dev-checks/runs/*/logs/*.log
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1858605Z   include-hidden-files: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1859027Z   if-no-files-found: error
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1861368Z   retention-days: 14
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1863479Z   compression-level: 6
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1865468Z   overwrite: false
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1867352Z env:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1867748Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1871203Z   PYTHONUTF8: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1871604Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1873428Z   FLUTTER_DEV_BUILD_APK: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1875282Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1877365Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1877786Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1881144Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.1883205Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.5294783Z (node:4101) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.5604969Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.5948855Z With the provided path, there will be 14 files uploaded
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.8796228Z Artifact name is valid!
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.8804803Z Root directory input is valid!
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.8848831Z Beginning upload of artifact content to blob storage
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.9197227Z (node:4101) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.9311236Z Uploaded bytes 33878
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.9472180Z Finished uploading artifact content to blob storage!
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.9480370Z SHA256 digest of uploaded artifact zip is 8bed3c68376ae6285259b71a7c6936b4906091126aaa38eb84fc2a70b95b7d7a
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:40.9481377Z Finalizing artifact upload
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1608630Z Artifact flutter-dev-ubuntu-latest-34922411533-1.zip successfully finalized. Artifact ID 10378539077
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1615925Z Artifact flutter-dev-ubuntu-latest-34922411533-1 has been successfully uploaded! Final size is 33878 bytes. Artifact ID is 10378539077
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1641756Z Artifact download URL: https://github.com/Eitan-S-23/E-Track/actions/runs/34922411533/artifacts/10378539077
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1888666Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1890875Z ##[group]Run actions/upload-artifact@v4
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1891294Z with:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1891875Z   name: flutter-dev-debug-apk-253f15371f2a0aeef0e7c5feb10af3118494c9e1-34922411533-1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1893125Z   path: .cache/flutter-dev-checks/runs/*/artifacts/trace-dev-debug.apk
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	.cache/flutter-dev-checks/runs/*/artifacts/trace-dev-debug.json
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1894095Z   include-hidden-files: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1894490Z   if-no-files-found: error
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1894867Z   retention-days: 14
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1895206Z   compression-level: 6
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1895535Z   overwrite: false
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1895832Z env:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1896094Z   PYTHONDONTWRITEBYTECODE: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1896470Z   PYTHONUTF8: 1
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1896796Z   FLUTTER_DEV_TEST_SCOPE: all
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1897185Z   FLUTTER_DEV_BUILD_APK: true
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1897827Z   TRACE_DEV_APP_ID_SUFFIX: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1898205Z   TRACE_DEV_DEVICE_OBSERVATION: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1898596Z   TRACE_DEV_OBSERVATION_TARGET: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1899030Z   TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: 
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.1899471Z ##[endgroup]
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.3658170Z (node:4114) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.3659640Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.3829139Z With the provided path, there will be 2 files uploaded
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.4130993Z Artifact name is valid!
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.4135403Z Root directory input is valid!
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:41.6437646Z Beginning upload of artifact content to blob storage
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:42.0951319Z (node:4114) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:42.2771946Z Uploaded bytes 8388608
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:42.9917011Z Uploaded bytes 16777216
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:43.7244704Z Uploaded bytes 25165824
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:44.5049310Z Uploaded bytes 33554432
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:44.9901612Z Uploaded bytes 41943040
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:45.4024986Z Uploaded bytes 50331648
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:45.8296927Z Uploaded bytes 58720256
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.1762128Z Uploaded bytes 67108864
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.5602014Z Uploaded bytes 75244247
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.5754905Z Finished uploading artifact content to blob storage!
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.5772620Z SHA256 digest of uploaded artifact zip is 4b39707249b6e7aac9ec5e3595ee6ae8117224aaaaf945eda8e989e4573ed0a4
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.5775667Z Finalizing artifact upload
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.7734668Z Artifact flutter-dev-debug-apk-253f15371f2a0aeef0e7c5feb10af3118494c9e1-34922411533-1.zip successfully finalized. Artifact ID 10378708222
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.7764014Z Artifact flutter-dev-debug-apk-253f15371f2a0aeef0e7c5feb10af3118494c9e1-34922411533-1 has been successfully uploaded! Final size is 75244247 bytes. Artifact ID is 10378708222
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.7791153Z Artifact download URL: https://github.com/Eitan-S-23/E-Track/actions/runs/34922411533/artifacts/10378708222
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.8092014Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.8094110Z Post job cleanup.
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.9811321Z [command]/usr/bin/git version
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:46.9887568Z git version 2.55.0
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.0031840Z Temporarily overriding HOME='/home/runner/work/_temp/8a392888-27b2-435a-88a2-ae7a7fd4ddfa' before making global git config changes
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.0066283Z Adding repository directory to the temporary git global config as a safe directory
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.0081721Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.0198193Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.0337826Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.1175002Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.1312160Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.2002005Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.2131752Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.2700469Z Cleaning up orphan processes
+Flutter self-tests (ubuntu-latest)	UNKNOWN STEP	2026-09-15T02:57:47.3279085Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

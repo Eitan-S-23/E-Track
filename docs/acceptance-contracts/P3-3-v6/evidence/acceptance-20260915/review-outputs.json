@@ -1,0 +1,462 @@
+{
+  "purpose": "Independent read-only admission/evidence review. These records are not executions of the five frozen product commands.",
+  "worktree": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "initial_validation": {
+    "started_utc": "2026-09-14T17:41:11.793Z",
+    "finished_utc": "2026-09-14T17:41:17.468Z",
+    "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+    "command": "python -X utf8 -B -S Tools/acceptance/validate_bundle.py --contract docs/acceptance-contracts/P3-3-v6.contract.json --matrix docs/acceptance-contracts/P3-3-v6/P3-3-v6.evidence-matrix.json --repo-root .",
+    "exit_code": 0,
+    "stdout": "VALIDATION=PASS contract=P3-3-v6 round=P3-3-V6-FREEZE-20260915-R1 overall=NOT_RUN\r\n",
+    "stderr": "",
+    "error": null
+  },
+  "frozen_contract_readback": {
+    "contract_sha256": "b445c209c20da0bc52473950c47d6e1807ef74c23377495f7cb48c6a2b70c171",
+    "objects": {
+      "freeze_commit": "0fb167cf4c44a6e4741e5a42fcd4945cf29f7780",
+      "freeze_tree": "b3d1d311645d584c48419b546a061c5648da740f",
+      "profile_config_blob": "3769369d053aad028b67d7e2c17b5827b2b96f55",
+      "current_head": "c3cc8ca640f5e91a2063bb136384a52b416e542f",
+      "current_tree": "15320d2332b8cb496b90180a84db5612132b8bf9",
+      "freeze": "commit 0fb167cf4c44a6e4741e5a42fcd4945cf29f7780\ntree b3d1d311645d584c48419b546a061c5648da740f\nparent ce301906736d7b4209a09ad7e42ce080fb7a19a6\nauthor eitan <example@ggbond> 1789403709 +0800\ncommitter eitan <example@ggbond> 1789403709 +0800\n\n    docs(ota): P3-3 第十二轮收口——r6 实机验证三缺陷全通过证据回填+v6 fixture 服务登记+两项新需求研究落盘\n    \n    - r6 执行文档 §7/§7.1/§7.2 回填：用户 2026-09-15 确认三缺陷实机验证\n      通过，服务日志时间线闭合(30202→00:06:05 三次自报 30203+3a282768\n      全等→no_update 自洽)，D 清理(隧道 3868/服务 17520 按 PID 终止)\n    - service_config.json 新增 real-30203 release(v6 fixture 四元组绑定)\n    - 两项实测反馈新需求研究笔记(BLE 提速 requestConnectionPriority 主抓手/\n      前台服务+状态栏进度复用 UpdateForegroundService 样板)，用户裁定\n      暂缓不进 v6 冻结范围\n    - 看板第十二轮条目+§10 会话日志回写；本提交为 v6 合同 freeze_commit\n      候选\n    \n    Co-Authored-By: Claude Code <noreply@anthropic.com>\n",
+      "freeze_to_head": 0
+    },
+    "commands": [
+      {
+        "id": "CMD-DEV-CHECKS",
+        "command": "gh workflow run flutter-dev-checks.yml --ref dev/flutter/apk/p3-3-admission -f test_scope=all -f build_apk=false（实际执行轮：push 提交 ce301906…自动触发 run 34861159023 双宿主 success；push 提交 0fb167cf…=freeze_commit 自动触发 run 34869549756 双宿主 success——windows-2022 2026-09-14T16:35:28Z→16:39:11Z、ubuntu-latest 16:35:28Z→16:49:07Z；run URL https://github.com/Eitan-S-23/E-Track/actions/runs/34869549756）",
+        "input_groups": [
+          "flutter",
+          "validation"
+        ],
+        "runner_paths": [
+          ".github/workflows/flutter-dev-checks.yml",
+          "Tools/flutter/dev_checks.py"
+        ],
+        "expected_exit_codes": [
+          0
+        ]
+      },
+      {
+        "id": "CMD-RELEASE-BUILD",
+        "command": "gh workflow run build.yml --ref dev/flutter/apk/p3-3-admission -f publish_release=false -f replace_existing_release=false -f firmware_latest_url=https://quality-lap-aggregate-comment.trycloudflare.com/api/public/firmware/latest -f release_application_id_suffix=.p33acceptance && gh run watch 34864052541（dispatch 提交=ce301906736d7b4209a09ad7e42ce080fb7a19a6（freeze_commit 0fb167c 的直接父提交）；Build Android APK/Build Windows EXE 均 success，Pages/Release 均 skipped；2026-09-14T15:43:42Z 派发；构建输入等价：git diff ce30190 0fb167c -- app/ 为空（0fb167c 仅改 docs/+service_config.json，Flutter 输入组零差异））",
+        "input_groups": [
+          "flutter",
+          "validation"
+        ],
+        "runner_paths": [
+          ".github/workflows/build.yml"
+        ],
+        "expected_exit_codes": [
+          0
+        ]
+      },
+      {
+        "id": "CMD-APK-INSTALL",
+        "command": "<由验收会话绑定：dumpsys 取 codePath + adb pull + 双侧 apksigner verify --print-certs（受验侧基准=第六轮 APK .cache/p3-3-apk-r6/ble-monitor-android.apk，SHA-256 fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13，46,699,144B，已于 r6 轮覆盖安装并实测）；在装受验包与既有安装 com.wen.gaia.gaia 未被触碰的只读确认；BLE 权限/启动/logcat 按既有口径>",
+        "input_groups": [
+          "flutter"
+        ],
+        "runner_paths": [],
+        "expected_exit_codes": [
+          0
+        ]
+      },
+      {
+        "id": "CMD-TOY-LOOP",
+        "command": "<由验收会话绑定：App 操作序列 + BLE/logcat 采集命令；J-Link 采集（若需）按独立授权项绑定>",
+        "input_groups": [
+          "production",
+          "flutter"
+        ],
+        "runner_paths": [],
+        "expected_exit_codes": [
+          0
+        ]
+      },
+      {
+        "id": "CMD-REAL-LOOP",
+        "command": "<由验收会话绑定：App 操作序列 + BLE/logcat 采集命令；J-Link 采集（若需）按独立授权项绑定>",
+        "input_groups": [
+          "production",
+          "flutter"
+        ],
+        "runner_paths": [],
+        "expected_exit_codes": [
+          0
+        ]
+      }
+    ],
+    "external": [
+      {
+        "id": "EXT-HTTP-TEST-SERVICE",
+        "fingerprint": "D1 已部署（r4 轮实测，r1/r2/r3 死亡轮作废已登记）：Quick Tunnel https://describing-substance-databases-past.trycloudflare.com（2026-09-14 04:22:26 起，Connector ID 78d40f42-e9bd-49fe-8610-cb561bc4710b，QUIC 边缘 sjc，--no-autoupdate --url http://127.0.0.1:8443，shell & 形式不受会话进程退出影响；隧道日志 .cache/p3-3-cloudflared/tunnel-r4-20260914.log SHA-256 46afdffed289e5fe161873441952d06600f8d9bb7742db50e08f69fd84a8cfc2）。受控 v2 服务 v5 实例：python PID 22316，2026-09-14 20:21:05 起，监听 127.0.0.1:8443（--public-base-url=r4 隧道地址，--active-release toy-30201，脱离 harness 托管），启动双 fixture 字节级核验通过（toy-30201 e-track-at32f435-v3.2.1-full.etu 284,540B 0219899d…、real-30202 e-track-at32f435-v3.2.2-full.etu 284,573B 0c8ae468…；service-v5-restart.stdout SHA-256 8b03ddb9a787be49d64da494d5368198f09d362e438e9b7e8a40dc09f60e9ecb）；旧 r4 实例（PID 23040，17:01:54 起，供旧 toy fc4ae5a9…，其 O1/O2 请求日志完整保留 service-r4-20260914.log SHA-256 8edb901016cf2311ccf96ceab1ef4b2296f40c51a3edbe789c5da71191ee4d2c）已按 PID 精确核验停止。宿主检查两层：r4 轮 D2 14/14 ALL PASS（2026-09-14 04:2x，当时旧 fixture fc4ae5a9…，登记主执行笔记 §13.2）；v5 fixture 切换后三层验证（2026-09-14 20:2x）：本机 /latest 200（updateAvailable=true，3.2.1/30201，targetImageSha256=aeafc96e…，asset 0219899d…/284,540）+公网隧道 /latest 200 同身份+经签名 downloadUrl 下载 284,540B SHA 0219899d… 与本地实物逐字节全等（探针 v5-download-probe.etu）。endpoint 注入已完成：firmware_latest_url=https://describing-substance-databases-past.trycloudflare.com/api/public/firmware/latest（构建 run 34781909023，dispatch 提交 55b2d07，用户装机确认升级页元数据与冻结基准全等+16:53 真机 latest×3 200 实证生效）。D3 观测期日志 .cache/p3-3-v2-service/service-v5-20260914.log（SHA-256 be1de1e327ac27d958ab59d911e17737ccd7a2e7ea9e8911d1a212b720b32b8e）；D4（toy→真包切换，只重启服务隧道不动）与 D5（完整清理+无残留验证）在 O 序列内执行。evidence：evidence/external/http-test-service.md",
+        "evidence_path": "evidence/external/http-test-service.md",
+        "evidence_sha256": "9AD77BFA37045D1B67F6F7A022EF44C514C737DDED9D5160CD43EE1443930DFE"
+      },
+      {
+        "id": "EXT-TOY-BOOTABLE",
+        "fingerprint": "已按实现侧事实回填：目标 versionCode 30201；最终镜像 raw SHA-256=aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298；ETU=e-track-at32f435-v3.2.1-full.etu SHA-256=0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5 size=284540B。v5 轮实测（实现会话，供冻结会话核对）：verify_v5.py 判据 A-I 全 PASS（rc=0，报告 .cache/p3-3-assets-v5/verify_v5_report.txt——pre-finalize 与 bg 构建原件逐字节相等、finalize 差异仅 0x400..0x45F、头字段/双零摘要/header_crc32 独立复算、etu_unpack --verify-fw-header OK、candidate 与规范名副本逐字节比对、升级检查模拟 30201>30200）；受控服务启动双 fixture 核验通过；公网签名下载探针与实物逐字节全等。evidence 落 evidence/external/toy-bootable-asset.md",
+        "evidence_path": "evidence/external/toy-bootable-asset.md",
+        "evidence_sha256": "57F72DE73D6EAB2D0A1BFC816157461EE0DD0796AE8278169735B63B316AF6DB"
+      },
+      {
+        "id": "EXT-REAL-ETU",
+        "fingerprint": "已按实现侧事实回填：目标 versionCode 30202；最终镜像 raw SHA-256=ab0585f71b9a523863b582e8ed4cc47a279bf6e57c4a1038635593306746ab7e；ETU=e-track-at32f435-v3.2.2-full.etu SHA-256=0c8ae468948d8e85af0e8eaf3ec52e046f1b6a3cdba88f9bd8478790f0590f6f size=284573B。v5 轮实测（实现会话，供冻结会话核对）：verify_v5.py 判据 A-I 全 PASS（报告同目录 verify_v5_report.txt，含 toy/真包镜像间仅 38 字节 0x408..0x45F 版本身份差异的同构判据）；受控服务启动双 fixture 核验（含 real-30202）通过。evidence 落 evidence/external/real-etu-asset.md",
+        "evidence_path": "evidence/external/real-etu-asset.md",
+        "evidence_sha256": "B57AF3013A36A5CFF14345C2D39E7210ACCF91EE7F4BA3CFA73FB62383832681"
+      },
+      {
+        "id": "EXT-BOARD-STATE",
+        "fingerprint": "恢复已执行完毕（2026-09-14 晚，恢复轮 20260914-r2 S1A-S6），完成判据四条全部满足：①生产 Boot 全区恢复，S6 restored_sha256=b6b33a82a56a4e974a9a2e2d887ddc598130aae0ab4940c4007ad1feb89b2dd4 与 S1A 备份全等（loadbin+verifybin+全区读回，含尾部 5,756B 板上原值还原；与 r1 轮 S1A/S6 同 SHA 身份闭合）；②板上 App 身份=3.2.0-fixed（S5 app_vcode=30200、app_result=1(VALID)、app_sha256=24fc02ea389eec37e1eda0f896bbf8e90fa7a50fa8a8072450ba0e057e728126 与 finalize 头 image_sha256 全等、app_sha256_checked=true；App 区 0x08010000 r2 零写入由 S1A/S6 地址范围留证保证）；③BCB 与 App 一致（S5 active=1(A)、state=4 CONFIRMED、cur_vcode=30200、seq=0；ROLLBACK 阻断已消除）；④新鲜终证（S6 复位⑥后 RTT 自报 OTA: BCB already CONFIRMED vcode=30200，RTT 地址 0x200540AC 修复版 map 严格符号行+SEGGER 签名会话双核对，完整启动序列四行在案，黑屏已解除）。额度实账：J-Link 命令会话 10/10、主动复位 6/6、RTT logger 2/2（各 ≤120s）、RTT 签名会话 2/2、WFI 重试 0——零超授权；r1 轮 11/10 偏差已经用户 2026-09-14 追认销账。各 Phase result.json 与 67 文件证据在 .cache/p3-3-recovery-execute/20260914-r2/，统一留证 P3-3-recovery-execution-2026-09-14-r2.md。evidence：evidence/external/board-bcb-state.md",
+        "evidence_path": "evidence/external/board-bcb-state.md",
+        "evidence_sha256": "83393681F756E6560E72490FED279CF2F84AF4FAF2633D419D413B297111266B"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "ART-DEV-LOGS",
+        "path": "evidence/dev-checks/"
+      },
+      {
+        "id": "ART-APK-RELEASE",
+        "path": "artifacts/ble-monitor-android.apk"
+      },
+      {
+        "id": "ART-WINDOWS-RUNTIME",
+        "path": "artifacts/ble-monitor-windows.zip"
+      },
+      {
+        "id": "ART-TOY-ETU",
+        "path": "artifacts/e-track-at32f435-v3.2.1-full.etu"
+      },
+      {
+        "id": "ART-TOY-TARGET-IMAGE",
+        "path": "artifacts/toy-3.2.1-target-image.bin"
+      },
+      {
+        "id": "ART-REAL-ETU",
+        "path": "artifacts/e-track-at32f435-v3.2.3-full.etu"
+      },
+      {
+        "id": "ART-REAL-TARGET-IMAGE",
+        "path": "artifacts/real-3.2.3-target-image.bin"
+      }
+    ],
+    "v6_files": [
+      "evidence",
+      "P3-3-v6.evidence-matrix.json"
+    ]
+  },
+  "entry_bundle_inventory": {
+    "filesystem": [
+      {
+        "path": "docs/acceptance-contracts/P3-3-v6/evidence",
+        "exists": true,
+        "entries": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v5",
+        "exists": true,
+        "entries": [
+          {
+            "name": "evidence",
+            "isFile": false,
+            "isDirectory": true,
+            "size": 0,
+            "birthtime": "2026-09-14T12:52:11.677Z",
+            "mtime": "2026-09-14T12:52:11.678Z"
+          },
+          {
+            "name": "P3-3-v5.evidence-matrix.json",
+            "isFile": true,
+            "isDirectory": false,
+            "size": 4769,
+            "birthtime": "2026-09-14T13:00:29.943Z",
+            "mtime": "2026-09-14T13:02:52.967Z"
+          }
+        ]
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v6/evidence/external",
+        "exists": false,
+        "entries": []
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-3-v5/evidence/external",
+        "exists": true,
+        "entries": [
+          {
+            "name": "board-bcb-state.md",
+            "isFile": true,
+            "isDirectory": false,
+            "size": 6217,
+            "birthtime": "2026-09-14T12:53:40.697Z",
+            "mtime": "2026-09-14T12:53:40.700Z"
+          },
+          {
+            "name": "http-test-service.md",
+            "isFile": true,
+            "isDirectory": false,
+            "size": 7776,
+            "birthtime": "2026-09-14T12:52:11.725Z",
+            "mtime": "2026-09-14T12:52:11.726Z"
+          },
+          {
+            "name": "real-etu-asset.md",
+            "isFile": true,
+            "isDirectory": false,
+            "size": 3166,
+            "birthtime": "2026-09-14T12:53:08.714Z",
+            "mtime": "2026-09-14T12:53:08.715Z"
+          },
+          {
+            "name": "toy-bootable-asset.md",
+            "isFile": true,
+            "isDirectory": false,
+            "size": 5004,
+            "birthtime": "2026-09-14T12:52:51.915Z",
+            "mtime": "2026-09-14T12:52:51.916Z"
+          }
+        ]
+      }
+    ],
+    "matrices": [
+      {
+        "version": 1,
+        "exists": false
+      },
+      {
+        "version": 2,
+        "exists": false
+      },
+      {
+        "version": 3,
+        "path": "docs/acceptance-contracts/P3-3-v3/P3-3-v3.evidence-matrix.json",
+        "sha256": "67cc9dd42d739fc1c63aa9e921f15ac7cedf14e55b4753be17fba50d1c6ee384",
+        "round_id": "P3-3-V3-FREEZE-20260913-R1",
+        "overall_result": "NOT_RUN",
+        "criteria": [
+          {
+            "id": "C-DEV-CHECKS",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-RELEASE-BUILD",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-APK-INSTALL",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-TOY-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-REAL-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          }
+        ]
+      },
+      {
+        "version": 4,
+        "path": "docs/acceptance-contracts/P3-3-v4/P3-3-v4.evidence-matrix.json",
+        "sha256": "cef0ec5011d7ac0d47e2a4662e25290dd4d12ea667b9edbbaa785569caef0f17",
+        "round_id": "P3-3-V4-FREEZE-20260914-R1",
+        "overall_result": "NOT_RUN",
+        "criteria": [
+          {
+            "id": "C-DEV-CHECKS",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-RELEASE-BUILD",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-APK-INSTALL",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-TOY-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-REAL-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          }
+        ]
+      },
+      {
+        "version": 5,
+        "path": "docs/acceptance-contracts/P3-3-v5/P3-3-v5.evidence-matrix.json",
+        "sha256": "c47d8725b4b3c5ee87e91808d3f52108dda6a9b83928491dfede1fb51ac609b3",
+        "round_id": "P3-3-V5-FREEZE-20260914-R1",
+        "overall_result": "NOT_RUN",
+        "criteria": [
+          {
+            "id": "C-DEV-CHECKS",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-RELEASE-BUILD",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-APK-INSTALL",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-TOY-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-REAL-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          }
+        ]
+      },
+      {
+        "version": 6,
+        "path": "docs/acceptance-contracts/P3-3-v6/P3-3-v6.evidence-matrix.json",
+        "sha256": "37a64a107dfe84a531909865b02c90ca25e3cccc26634bf575744459e62ef6b9",
+        "round_id": "P3-3-V6-FREEZE-20260915-R1",
+        "overall_result": "NOT_RUN",
+        "criteria": [
+          {
+            "id": "C-DEV-CHECKS",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-RELEASE-BUILD",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-APK-INSTALL",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-TOY-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          },
+          {
+            "id": "C-REAL-LOOP",
+            "result": "NOT_OBSERVED",
+            "execution": "EXECUTED"
+          }
+        ]
+      }
+    ]
+  },
+  "lineage_and_external_readback": "[\n  {\n    \"id\": \"EXT-HTTP-TEST-SERVICE\",\n    \"source\": \"docs/acceptance-contracts/P3-3-v5/evidence/external/http-test-service.md\",\n    \"size\": 7776,\n    \"actual_sha256\": \"9ad77bfa37045d1b67f6f7a022ef44c514c737dded9d5160cd43ee1443930dfe\",\n    \"frozen_sha256\": \"9AD77BFA37045D1B67F6F7A022EF44C514C737DDED9D5160CD43EE1443930DFE\",\n    \"matches\": true,\n    \"v6_exists\": false\n  },\n  {\n    \"id\": \"EXT-TOY-BOOTABLE\",\n    \"source\": \"docs/acceptance-contracts/P3-3-v5/evidence/external/toy-bootable-asset.md\",\n    \"size\": 5004,\n    \"actual_sha256\": \"57f72de73d6eab2d0a1bfc816157461ee0dd0796ae8278169735b63b316af6db\",\n    \"frozen_sha256\": \"57F72DE73D6EAB2D0A1BFC816157461EE0DD0796AE8278169735B63B316AF6DB\",\n    \"matches\": true,\n    \"v6_exists\": false\n  },\n  {\n    \"id\": \"EXT-REAL-ETU\",\n    \"source\": \"docs/acceptance-contracts/P3-3-v5/evidence/external/real-etu-asset.md\",\n    \"size\": 3166,\n    \"actual_sha256\": \"b57af3013a36a5cff14345c2d39e7210accf91ee7f4ba3cfa73fb62383832681\",\n    \"frozen_sha256\": \"B57AF3013A36A5CFF14345C2D39E7210ACCF91EE7F4BA3CFA73FB62383832681\",\n    \"matches\": true,\n    \"v6_exists\": false\n  },\n  {\n    \"id\": \"EXT-BOARD-STATE\",\n    \"source\": \"docs/acceptance-contracts/P3-3-v5/evidence/external/board-bcb-state.md\",\n    \"size\": 6217,\n    \"actual_sha256\": \"83393681f756e6560e72490fed279cf2f84af4faf2633d419d413b297111266b\",\n    \"frozen_sha256\": \"83393681F756E6560E72490FED279CF2F84AF4FAF2633D419D413B297111266B\",\n    \"matches\": true,\n    \"v6_exists\": false\n  }\n]\n\nINDEX\n| P3-3-v3 | v3 | `421bd290b0f5e30b385a17c2ab82a2b3d8844dc2` | `a178ecc1dca3929e1bca702fb11344f3c5bd2872` | `2ce26b29c395aebdd75b49376755d16c3706feea` | PASS（2026-09-13 FROZEN+NOT_RUN 执行前检查；O 序列执行后另行最终验收） |\n| P3-3-v4 | v3 | `a548d4325d6651264b0867e865e3ee40695aa372` | `bed3aa06f99c3d99291b081069a72ffd426a4e3d` | `6b971c71abcf7ebaa271aee9f6eac6f4ceb66b80` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理经用户授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |\n| P3-3-v5 | v3 | `b2fc1cebfc9c2585026489ac366315e4e89d38d8` | `6415226b8c30abcffa2b9bab52f0db717f8f7cb9` | `4bcf18a82a03f16c813e1b46938962538876ddbd` | PASS（2026-09-14 FROZEN+NOT_RUN 执行前检查；冻结办理依修复轮整体授权由实现会话代办，如实记录授权链；O1-O5 冻结后重跑，另行最终验收） |\n| P3-3-v6 | v3 | `3f7ca7e124c8cc36cbf78fb0eeea9a14b3fe88dc` | `0fb167cf4c44a6e4741e5a42fcd4945cf29f7780` | `b3d1d311645d584c48419b546a061c5648da740f` | PASS（2026-09-15 FROZEN+NOT_RUN 执行前检查；冻结办理经用户授权由实现会话代办，如实记录授权链；合同 SHA-256 B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171，矩阵 37A64A107DFE84A531909865B02C90CA25E3CCCC26634BF575744459E62EF6B9；r6 实机闭环等事实证据由验收会话复核，正式验收另行） |\n- P3-3-v3 行按「只增不改」保留原样，但该轮判定已被 v4 取代：用户 2026-09-13\n- P3-3-v4 行按「只增不改」保留原样，但该轮判定已被 v5 取代：v4 冻结约 40 分钟后\n\nFROZEN BUILD DIFF\n{\"command\":\"git --no-optional-locks diff --name-status ce30190 0fb167c\",\"exit_code\":0,\"stdout\":\"M\\tPLAN-OTA-EXEC.md\\nM\\tTools/ota/p3-3-service/service_config.json\\nA\\tdocs/ota-exec-notes/P3-3-ble-speed-and-background-research-2026-09-15.md\\nA\\tdocs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md\\n\",\"stderr\":\"\"}\n{\"command\":\"git --no-optional-locks diff ce30190 0fb167c -- app/\",\"exit_code\":0,\"stdout\":\"\",\"stderr\":\"\"}\n{\"command\":\"git --no-optional-locks log --oneline -- docs/acceptance-contracts/P3-3-v5/P3-3-v5.evidence-matrix.json\",\"exit_code\":0,\"stdout\":\"b2fc1ce docs(ota): P3-3 合同 v5 定稿 FROZEN——矩阵绑定定稿哈希，执行前检查 PASS\\n475ece5 docs(ota): P3-3 合同升 v5 DRAFT——EXT 四输入改绑 v5 重制事实与 r4 隧道服务\\n\",\"stderr\":\"\"}\n",
+  "local_evidence_readback": "{\n  \"files\": [\n    {\n      \"path\": \".cache/p3-3-apk-r6/ble-monitor-android.apk\",\n      \"exists\": true,\n      \"size\": 46699144,\n      \"sha256\": \"fb6a91e69a0ad30dc0b9c79a69c5e638d376898d6e313836191f2b40ebf80a13\"\n    },\n    {\n      \"path\": \".cache/p3-3-assets-v5/e-track-at32f435-v3.2.1-full.etu\",\n      \"exists\": true,\n      \"size\": 284540,\n      \"sha256\": \"0219899dd993f61f2c75eaec7002bc9c24e0fc629a60e87046e74266d55410c5\"\n    },\n    {\n      \"path\": \".cache/p3-3-assets-v5/toy-3.2.1-30201-final.bin\",\n      \"exists\": true,\n      \"size\": 603764,\n      \"sha256\": \"aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298\"\n    },\n    {\n      \"path\": \".cache/p3-3-assets-v6/e-track-at32f435-v3.2.3-full.etu\",\n      \"exists\": true,\n      \"size\": 284608,\n      \"sha256\": \"a543f952dcd1b0f57770669e253b29e9a93b7ffb94263bc7bdc3b1bdf4ef1915\"\n    },\n    {\n      \"path\": \".cache/p3-3-assets-v6/real-3.2.3-30203-final.bin\",\n      \"exists\": true,\n      \"size\": 603764,\n      \"sha256\": \"3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3\"\n    },\n    {\n      \"path\": \".cache/p3-3-v2-service/service-v5-20260914.log\",\n      \"exists\": true,\n      \"size\": 4000,\n      \"sha256\": \"1f6d2f7e056c286432fb099ff71b887cdab6b2425a8715691adaa8043aaa29b5\"\n    },\n    {\n      \"path\": \".cache/p3-3-v2-service/service-v6-20260914.log\",\n      \"exists\": true,\n      \"size\": 3698,\n      \"sha256\": \"d03ef586995acccf4f8e1f4f4081673c31f08c2cb43d274ea1a7999867cbc5cd\"\n    },\n    {\n      \"path\": \".cache/p3-3-v2-service/service-v6-restart.stdout\",\n      \"exists\": true,\n      \"size\": 3664,\n      \"sha256\": \"a8d5b9324d81b9c5c314fda464ce63a854c91b791040731f33a1adabc93454b0\"\n    },\n    {\n      \"path\": \".cache/p3-3-o-verify/o-verify-boot-rtt.log\",\n      \"exists\": true,\n      \"size\": 573,\n      \"sha256\": \"8d40136f336b16537c1bb34c63990c8e15a7a7d1a8df1779c4667407f0384f56\"\n    }\n  ],\n  \"directories\": [\n    {\n      \"path\": \".cache/p3-3-apk-r6\",\n      \"files\": [\n        \"android-apk-artifact.zip\",\n        \"ble-monitor-android.apk\"\n      ]\n    },\n    {\n      \"path\": \".cache/p3-3-o-verify\",\n      \"files\": [\n        \"app-region-readback.bin\",\n        \"app-region-readback2.bin\",\n        \"o-verify-boot-rtt.log\",\n        \"o5-final-identity.log\",\n        \"read_app.jlink\",\n        \"read_app2.jlink\",\n        \"reread.jlink\",\n        \"reread2.jlink\",\n        \"reset.jlink\",\n        \"rttsig.jlink\"\n      ]\n    },\n    {\n      \"path\": \".cache/p3-3-v2-service\",\n      \"files\": [\n        \"d2_hostcheck.py\",\n        \"d5-cleanup-20260914.log\",\n        \"o-baseline-lines.txt\",\n        \"quicktunnel-hostcheck-r3.log\",\n        \"quicktunnel-hostcheck.log\",\n        \"service-r1-20260913.log\",\n        \"service-r2-20260914.log\",\n        \"service-r4-20260914-part1.bak\",\n        \"service-r4-20260914.log\",\n        \"service-r4-restart.stdout\",\n        \"service-v5-20260914.log\",\n        \"service-v5-r20260914-real.log\",\n        \"service-v5-real-restart.stdout\",\n        \"service-v5-restart.stdout\",\n        \"service-v6-20260914.log\",\n        \"service-v6-restart.stdout\",\n        \"service.log\",\n        \"smoke.log\",\n        \"v5-download-probe.etu\",\n        \"v6-download-probe.etu\",\n        \"v6-latest-probe.json\"\n      ]\n    }\n  ]\n}\n\nLOG .cache/p3-3-v2-service/service-v6-20260914.log\n2026-09-14 23:43:06,498 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30202&currentImageSha=0000000000000000000000000000000000000000000000000000000000000000&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1297 bytes) req=a75ea36883dc48b7af25326935fa735f\r\n2026-09-14 23:43:19,943 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30202&currentImageSha=0000000000000000000000000000000000000000000000000000000000000000&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1297 bytes) req=014cc6f5dfaa4d769fd16daabf1e85b6\r\n2026-09-14 23:43:23,270 INFO GET /api/public/firmware/download?tokenVersion=2&assetId=asset-full-30203&releaseId=release-30203&kind=full&purpose=public-ota&expiresAt=1789400899&keyVersion=1&signature=<redacted> -> 200 (284608 bytes) req=29e4ce737ef548168f26450179778714\r\n2026-09-14 23:59:30,727 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30202&currentImageSha=ab0585f71b9a523863b582e8ed4cc47a279bf6e57c4a1038635593306746ab7e&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1297 bytes) req=f9a0678c518e4bb483126a41c758281d\r\n2026-09-15 00:00:11,605 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30202&currentImageSha=ab0585f71b9a523863b582e8ed4cc47a279bf6e57c4a1038635593306746ab7e&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1297 bytes) req=54283c47e683441582186f5970a5f98c\r\n2026-09-15 00:00:15,657 INFO GET /api/public/firmware/download?tokenVersion=2&assetId=asset-full-30203&releaseId=release-30203&kind=full&purpose=public-ota&expiresAt=1789401911&keyVersion=1&signature=<redacted> -> 200 (284608 bytes) req=2f443854dd2f43de94f3e95ce9c3763b\r\n2026-09-15 00:06:05,449 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30203&currentImageSha=3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=7ce0e2c702874deaa11921351600bcba\r\n2026-09-15 00:06:08,608 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30203&currentImageSha=3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=0b369c5cd48d415caf89c968aa3f1192\r\n2026-09-15 00:07:22,431 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30203&currentImageSha=3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=afe8b338b2ac429381bab5ee403780af\r\n\nLOG .cache/p3-3-v2-service/service-v5-20260914.log\n2026-09-14 20:21:29,041 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30200&currentImageSha=24fc02ea389eec37e1eda0f896bbf8e90fa7a50fa8a8072450ba0e057e728126&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1137 bytes) req=51b2e8cbccef4bcba986140c3001add3\r\n2026-09-14 20:21:57,255 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30200&currentImageSha=24fc02ea389eec37e1eda0f896bbf8e90fa7a50fa8a8072450ba0e057e728126&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1137 bytes) req=bcc413fda5574a149c3ae71a0b4906ab\r\n2026-09-14 20:22:42,217 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30200&currentImageSha=24fc02ea389eec37e1eda0f896bbf8e90fa7a50fa8a8072450ba0e057e728126&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1137 bytes) req=85da2e5de48742ca960dbc3af939f164\r\n2026-09-14 20:22:46,261 INFO GET /api/public/firmware/download?tokenVersion=2&assetId=asset-full-30201&releaseId=release-30201&kind=full&purpose=public-ota&expiresAt=1789388862&keyVersion=1&signature=<redacted> -> 200 (284540 bytes) req=8de2a77e72fe4f8eb3509530c03bd6f2\r\n2026-09-14 21:14:45,731 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30200&currentImageSha=0000000000000000000000000000000000000000000000000000000000000000&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1137 bytes) req=e1ca30d193504fe39cb9db07675863ef\r\n2026-09-14 21:33:38,873 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30200&currentImageSha=d7cc41944fada9ddb4dada923d7efb65e6403cbf8e4fa52959361fccea38e488&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1137 bytes) req=6a931962998d4895b42fb2ad255785c1\r\n2026-09-14 21:33:48,526 INFO GET /api/public/firmware/download?tokenVersion=2&assetId=asset-full-30201&releaseId=release-30201&kind=full&purpose=public-ota&expiresAt=1789393118&keyVersion=1&signature=<redacted> -> 200 (284540 bytes) req=ca6081c1d1fb44bebdbac9583b78ed2a\r\n2026-09-14 21:40:15,699 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30201&currentImageSha=aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=97089eae0cb0436eb9af884227b82a85\r\n2026-09-14 21:40:23,420 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30201&currentImageSha=aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=306b8ad03e2d47559e829005c2644068\r\n2026-09-14 21:40:28,439 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30201&currentImageSha=aeafc96e77d372aea1e893a979f2368ba9176c4999a61090ceb2956cd4085298&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=7bf6374e891143908d744f3f48b736b9\r\n",
+  "app_evolution_and_historical_rtt": "{\n  \"command\": \"git --no-optional-locks diff 6415226 0fb167c -- app/\",\n  \"exit_code\": 0,\n  \"stdout\": \"diff --git a/app/bluetooth_flutter_Trace/lib/ota/ota_device_info.dart b/app/bluetooth_flutter_Trace/lib/ota/ota_device_info.dart\\nindex 7210268..3f313bb 100644\\n--- a/app/bluetooth_flutter_Trace/lib/ota/ota_device_info.dart\\n+++ b/app/bluetooth_flutter_Trace/lib/ota/ota_device_info.dart\\n@@ -33,6 +33,20 @@ class DeviceOtaInfo {\\n   final int protocolVersion;\\n   final int maxWindowSegments;\\n \\n+  /// 人类可读固件版本名（`3.2.2` 式）。\\n+  ///\\n+  /// INFO 帧不携带版本名，按冻结契约 docs/ota-binary-contracts.md\\n+  /// §0.6（PRE-1，`version_code = major*10000+minor*100+patch`，u32）从\\n+  /// [currentVersionCode] 反解；制包端 Tools/etu_pack.py\\n+  /// parse_version_name 是该编码的唯一生成实现（minor/patch 强制\\n+  /// 0..99），约束闭合。\\n+  String get versionName {\\n+    final major = currentVersionCode ~/ 10000;\\n+    final minor = (currentVersionCode ~/ 100) % 100;\\n+    final patch = currentVersionCode % 100;\\n+    return '$major.$minor.$patch';\\n+  }\\n+\\n   /// wire model 8B（含 NUL）精确值 `E-Track\\\\0`（OTA-XC-DEVICE-MODEL）。\\n   static const List<int> wireModelETrack = [\\n     0x45, 0x2D, 0x54, 0x72, 0x61, 0x63, 0x6B, 0x00,\\ndiff --git a/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart b/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart\\nindex db39214..44abdf8 100644\\n--- a/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart\\n+++ b/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart\\n@@ -315,7 +315,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>\\n           const SizedBox(height: 8),\\n           Text(\\n             identityConfirmed\\n-                ? '${deviceInfo.deviceModel} • 固件 vcode ${deviceInfo.currentVersionCode}'\\n+                ? '${deviceInfo.deviceModel} • 固件 v${deviceInfo.versionName}'\\n                 : (widget.connectedDevice ?? _resolvedDevice)?.platformName ??\\n                     '连接码表后自动读取设备身份',\\n             style: const TextStyle(\\n@@ -423,8 +423,13 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>\\n             textAlign: TextAlign.center,\\n           ),\\n           const SizedBox(height: 20),\\n-          Row(\\n-            mainAxisAlignment: MainAxisAlignment.center,\\n+          // Wrap 而非 Row：terminalLocked 态下「检查更新」与「重新读取\\n+          // 身份解锁」两个按钮同排，窄屏总宽溢出会被截断——Wrap 在宽度\\n+          // 不足时把后续按钮换行到第二行居中。\\n+          Wrap(\\n+            spacing: 12,\\n+            runSpacing: 12,\\n+            alignment: WrapAlignment.center,\\n             children: [\\n               ElevatedButton.icon(\\n                 onPressed: canCheck ? _checkForUpdate : null,\\n@@ -451,8 +456,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>\\n               // 恢复入口——重新 GET_INFO 成功即重建查询链并解锁，\\n               // 不只给文字提示。\\n               if (_deviceAddress != null &&\\n-                  (otaService.deviceInfo == null || terminalLocked)) ...[\\n-                const SizedBox(width: 12),\\n+                  (otaService.deviceInfo == null || terminalLocked))\\n                 OutlinedButton.icon(\\n                   onPressed: _isChecking ? null : _readDeviceInfo,\\n                   icon: const Icon(Icons.refresh),\\n@@ -463,7 +467,6 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>\\n                     foregroundColor: const Color(0xFF4A90E2),\\n                   ),\\n                 ),\\n-              ],\\n             ],\\n           ),\\n         ],\\ndiff --git a/app/bluetooth_flutter_Trace/lib/services/ota_service.dart b/app/bluetooth_flutter_Trace/lib/services/ota_service.dart\\nindex 320df2c..2048b1b 100644\\n--- a/app/bluetooth_flutter_Trace/lib/services/ota_service.dart\\n+++ b/app/bluetooth_flutter_Trace/lib/services/ota_service.dart\\n@@ -69,6 +69,10 @@ class OtaService extends GetxController {\\n   /// 空 handler 会把产品代码的真实未处理异常一并吞掉，测试失去鉴别力。\\n   /// [downloadFileGate] 让用例在同资产文件族的串行闸内安排后来者接管\\n   /// （RC3-04/05），生产缺省用进程内共享闸 [OtaFilePathGate.shared]。\\n+  /// [rebootWindow]/[rebootProbeTimeout]/[rebootProbeInterval] 为重启\\n+  /// 复核时序注入点（O4 实测整改）：设备复位→BLE 可连接实测 ≥97s，\\n+  /// 60s 固定窗口造成升级已成功但复核假阴性；生产默认 180s 总窗口 +\\n+  /// 单轮探测 20s 上限 + 3s 轮询间隔，测试注入短值实测时序行为。\\n   OtaService({\\n     BluetoothService? bluetoothService,\\n     Dio? dio,\\n@@ -78,6 +82,9 @@ class OtaService extends GetxController {\\n         latestUriBuilder,\\n     void Function(String title, String message)? onNotify,\\n     OtaFilePathGate? downloadFileGate,\\n+    Duration? rebootWindow,\\n+    Duration? rebootProbeTimeout,\\n+    Duration? rebootProbeInterval,\\n   })  : _bluetoothService = bluetoothService,\\n         _notifyImpl = onNotify,\\n         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,\\n@@ -106,13 +113,28 @@ class OtaService extends GetxController {\\n               ),\\n             ),\\n         _firmwareDirProvider = firmwareDirProvider ?? _defaultFirmwareDir,\\n-        _latestUriBuilder = latestUriBuilder ?? _defaultLatestUriBuilder;\\n+        _latestUriBuilder = latestUriBuilder ?? _defaultLatestUriBuilder,\\n+        _rebootWindow = rebootWindow ?? const Duration(seconds: 180),\\n+        _rebootProbeTimeout = rebootProbeTimeout ?? const Duration(seconds: 20),\\n+        _rebootProbeInterval =\\n+            rebootProbeInterval ?? const Duration(seconds: 3);\\n \\n   final BluetoothService? _bluetoothService;\\n   final void Function(String title, String message)? _notifyImpl;\\n   final Dio _dio;\\n   final Dio _downloadDio;\\n \\n+  /// 重启复核总窗口（O4 实测整改）：设备复位→BLE 可连接实测 ≥97s\\n+  /// （BCB 搬运 ~600KB + 启动 + BLE 起播），旧 60s 固定窗口使升级已\\n+  /// 成功的会话以 REBOOT_RECONNECT_FAILED 假阴性收场。\\n+  final Duration _rebootWindow;\\n+  /// 重启复核单轮探测上限：防单轮 connect 挂起吞掉剩余全部窗口——\\n+  /// O4 logcat 实测第一轮 connect 抛错后后续轮挂起（日志静默），\\n+  /// 外层按剩余总预算封顶的 timeout 一轮即耗尽窗口。\\n+  final Duration _rebootProbeTimeout;\\n+  /// 重启复核轮询间隔。\\n+  final Duration _rebootProbeInterval;\\n+\\n   /// 同资产文件族的跨 attempt 串行闸（RC3-04/05）：下载器的写入/rename/\\n   /// 清理共用它，避免上一 attempt 迟到的清理删掉新 attempt 的同名文件。\\n   final OtaFilePathGate _downloadFileGate;\\n@@ -952,10 +974,14 @@ class OtaService extends GetxController {\\n           case _RebootKind.timedOut:\\n             _terminalState.value = OtaTerminalState(\\n               code: 'REBOOT_RECONNECT_FAILED',\\n-              message: '设备重启后 60 秒内未确认目标固件在运行',\\n+              message: '设备未在 ${_rebootWindow.inSeconds} 秒复核窗口内'\\n+                  '恢复连接确认目标固件——升级可能已完成（设备重启恢复'\\n+                  '慢于窗口），请稍后重新连接设备确认版本',\\n               retryableLater: true,\\n             );\\n-            _upgradeStatus.value = '等待设备重启复核超时';\\n+            _upgradeStatus.value = '等待设备重启复核超时'\\n+                '（${_rebootWindow.inSeconds} 秒，升级可能已完成，可稍后'\\n+                '重连确认）';\\n             _phase.value = OtaPhase.failed;\\n             return false;\\n           case _RebootKind.identityChanged:\\n@@ -1548,8 +1574,9 @@ class OtaService extends GetxController {\\n   ///\\n   /// 1. 先按地址**主动断开**旧连接：设备重启前协议栈可能仍报告已\\n   ///    连接，旧连接上会读到重启前的 INFO/通知（假身份复核）；\\n-  /// 2. 以 60 秒总截止轮询 connect + 发现精确特征 + 绑定 transport\\n-  ///    + GET_INFO 三态判定：\\n+  /// 2. 以总截止窗口（O4 整改后 180s，实测设备复位→BLE 可连接 ≥97s）\\n+  ///    轮询 connect + 发现精确特征 + 绑定 transport + GET_INFO\\n+  ///    三态判定：\\n   ///    - 目标身份（vcode 与 raw image SHA 等于清单目标）→\\n   ///      targetVerified；\\n   ///    - 旧身份（等于会话开始快照）：MCU 尚未重启完成，丢弃本轮\\n@@ -1565,15 +1592,15 @@ class OtaService extends GetxController {\\n     int generation,\\n   ) async {\\n     // RC3-08⑤：截止先于主动断开建立——断开本身可能耗时（等协议栈状态\\n-    // 迁移），60s 总预算必须覆盖断开与全部轮询，不得从断开完成后才\\n-    // 开始计费（否则断开耗时会无声挤占重启等待窗口）。\\n-    final deadline = DateTime.now().add(const Duration(seconds: 60));\\n+    // 迁移），总预算必须覆盖断开与全部轮询，不得从断开完成后才开始\\n+    // 计费（否则断开耗时会无声挤占重启等待窗口）。\\n+    final deadline = DateTime.now().add(_rebootWindow);\\n     // RC3-08⑦：主动断开自身必须有界。disconnectOtaDeviceByAddress 是\\n     // 尽力平台调用（WinBle disconnect / flutter_blue_plus disconnect），\\n     // 协议栈异常或设备已在重启途中时可能永不 resolve——无界 await 会把\\n-    // 「至多 60s 必返回」的重启等待变成永久挂起：deadline 已建立却永远\\n-    // 走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：断开\\n-    // 只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。\\n+    // 「至多一个窗口必返回」的重启等待变成永久挂起：deadline 已建立却\\n+    // 永远走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：\\n+    // 断开只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。\\n     await _ble\\n         .disconnectOtaDeviceByAddress(deviceAddress)\\n         .timeout(const Duration(seconds: 5), onTimeout: () {});\\n@@ -1581,14 +1608,20 @@ class OtaService extends GetxController {\\n       if (generation != _cancelGeneration) {\\n         return const _RebootOutcome(_RebootKind.cancelled);\\n       }\\n-      // RC3-08：单轮探测链（connect/discover/bind/INFO）受剩余总预算\\n-      // 封顶——任一环节挂死不得越过 60s 截止；超时按本轮无判定处理。\\n+      // RC3-08：单轮探测链（connect/discover/bind/INFO）受剩余总预算与\\n+      // 单轮上限（O4 整改 20s）双重封顶——正常成功轮（connect ≤10s +\\n+      // discover/MTU/subscribe/INFO 数秒）不会触顶；任一环节挂死时至多\\n+      // 吞掉单轮上限，后续轮仍有机会，不再一轮挂起耗尽全部剩余窗口\\n+      // （O4 logcat 实测：第一轮 connect 抛错后后续轮挂起即吞掉 59s）。\\n       // 最小 1s 保证 timeout 参数恒为正，总等待至多越线 1s。\\n       // RC3-08⑤：外层超时同时置 abandoned 标志——probe 在每个 await 后\\n       // 检查并提前退出（onTimeout 返回 null 只是放弃等待，并不取消\\n       // probe 内部动作；无标志时迟到的 bind/GET_INFO 会继续占用平台\\n       // 订阅通道）。\\n       final remaining = deadline.difference(DateTime.now());\\n+      final roundCap = remaining < _rebootProbeTimeout\\n+          ? remaining\\n+          : _rebootProbeTimeout;\\n       var probeAbandoned = false;\\n       bool probeAborted() =>\\n           probeAbandoned || generation != _cancelGeneration;\\n@@ -1600,9 +1633,9 @@ class OtaService extends GetxController {\\n           latest,\\n           probeAborted,\\n         ).timeout(\\n-          remaining < const Duration(seconds: 1)\\n+          roundCap < const Duration(seconds: 1)\\n               ? const Duration(seconds: 1)\\n-              : remaining,\\n+              : roundCap,\\n           onTimeout: () {\\n             probeAbandoned = true;\\n             return null;\\n@@ -1612,14 +1645,12 @@ class OtaService extends GetxController {\\n         // 重启期间连接/读取失败是预期路径，继续轮询。\\n       }\\n       if (outcome != null) return outcome;\\n-      // 3s 轮询间隔同样受剩余预算封顶（RC3-08）：不足 3s 按剩余量\\n+      // 轮询间隔同样受剩余预算封顶（RC3-08）：不足一个间隔时按剩余量\\n       // 等待，不越过截止线。\\n       final rest = deadline.difference(DateTime.now());\\n       if (rest > Duration.zero) {\\n         await Future<void>.delayed(\\n-          rest < const Duration(seconds: 3)\\n-              ? rest\\n-              : const Duration(seconds: 3),\\n+          rest < _rebootProbeInterval ? rest : _rebootProbeInterval,\\n         );\\n       }\\n     }\\ndiff --git a/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart b/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart\\nindex b713fe4..307ba74 100644\\n--- a/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart\\n+++ b/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart\\n@@ -41,6 +41,35 @@ void main() {\\n       expect(info.protocolVersion, 1);\\n       expect(info.maxWindowSegments, 32);\\n     });\\n+\\n+    test('versionName 按契约 §0.6 反解（major*10000+minor*100+patch）', () {\\n+      // 实测版本对（etu_pack.py parse_version_name 的镜像值）。\\n+      expect(\\n+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 30200)).versionName,\\n+        '3.2.0',\\n+      );\\n+      expect(\\n+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 30201)).versionName,\\n+        '3.2.1',\\n+      );\\n+      expect(\\n+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 30202)).versionName,\\n+        '3.2.2',\\n+      );\\n+      expect(\\n+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 20801)).versionName,\\n+        '2.8.1',\\n+      );\\n+      // 边界：minor/patch 各自占满两位编码段。\\n+      expect(\\n+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 10099)).versionName,\\n+        '1.0.99',\\n+      );\\n+      expect(\\n+        DeviceOtaInfo.fromInfoPayload(infoPayload(vcode: 0)).versionName,\\n+        '0.0.0',\\n+      );\\n+    });\\n   });\\n \\n   group('DeviceOtaInfo 负例（必须 fail closed）', () {\\ndiff --git a/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart b/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart\\nindex b7cc571..63e664c 100644\\n--- a/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart\\n+++ b/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart\\n@@ -193,6 +193,11 @@ void main() {\\n     // 同资产文件族串行闸替身（RC3-04/05）：用例把清理停在「已取到删除\\n     // 闸、删除体尚未执行」的窗口内，编排后来者在删除 await 中接管。\\n     OtaFilePathGate? downloadFileGate,\\n+    // 重启复核时序注入（O4 整改）：生产默认 180s/20s/3s，用例注入短值\\n+    // 实测单轮上限与窗口轮询行为，不真实等待产品窗口。\\n+    Duration? rebootWindow,\\n+    Duration? rebootProbeTimeout,\\n+    Duration? rebootProbeInterval,\\n   }) {\\n     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条\\n     // 通知即抛 UnsupportedError。默认改为可增长列表。\\n@@ -213,6 +218,9 @@ void main() {\\n       // onNotify 替身（RC3-02）：通知进 log 供断言，不走 Get.snackbar。\\n       onNotify: (title, message) => log.add('$title: $message'),\\n       downloadFileGate: downloadFileGate,\\n+      rebootWindow: rebootWindow,\\n+      rebootProbeTimeout: rebootProbeTimeout,\\n+      rebootProbeInterval: rebootProbeInterval,\\n     );\\n     Get.put<OtaService>(service);\\n     return service;\\n@@ -228,11 +236,18 @@ void main() {\\n   }\\n \\n   /// 常规前置：read → check → download 完成（readyToInstall）。\\n+  ///\\n+  /// [rebootWindow]/[rebootProbeTimeout]/[rebootProbeInterval] 透传\\n+  /// [makeService] 的重启复核时序注入（O4 整改）：前置阶段不走复核\\n+  /// 路径，注入不影响 read/check/download 的建立。\\n   Future<_UpgradeFakeBle> prepareDownloaded({\\n     required Directory tempDir,\\n     required List<String> notifyLog,\\n     List<int> rebootPayload = const [],\\n     int rebootDelayProbes = 0,\\n+    Duration? rebootWindow,\\n+    Duration? rebootProbeTimeout,\\n+    Duration? rebootProbeInterval,\\n   }) async {\\n     final ble = _UpgradeFakeBle(\\n       preRebootPayload: preRebootPayload,\\n@@ -240,7 +255,14 @@ void main() {\\n           rebootPayload.isEmpty ? postRebootPayload : rebootPayload,\\n       rebootDelayProbes: rebootDelayProbes,\\n     );\\n-    final service = makeService(ble: ble, firmwareDir: tempDir, notifyLog: notifyLog);\\n+    final service = makeService(\\n+      ble: ble,\\n+      firmwareDir: tempDir,\\n+      notifyLog: notifyLog,\\n+      rebootWindow: rebootWindow,\\n+      rebootProbeTimeout: rebootProbeTimeout,\\n+      rebootProbeInterval: rebootProbeInterval,\\n+    );\\n     Get.put<AppUpdateService>(_FakeAppUpdateService());\\n \\n     expect(await service.readDeviceInfo('AA:BB'), isNotNull);\\n@@ -324,6 +346,75 @@ void main() {\\n     expect(ble.probeCount, 1);\\n   });\\n \\n+  test('单轮探测 connect 挂起：单轮上限放弃该轮，后续轮确认目标（O4 整改）',\\n+      () async {\\n+    final tempDir = tempFirmwareDir();\\n+    final notifyLog = <String>[];\\n+    final ble = await prepareDownloaded(\\n+      tempDir: tempDir,\\n+      notifyLog: notifyLog,\\n+      rebootWindow: const Duration(seconds: 4),\\n+      rebootProbeTimeout: const Duration(milliseconds: 800),\\n+      rebootProbeInterval: const Duration(milliseconds: 50),\\n+    );\\n+    // 第一轮 connect 永不 resolve（O4 实测 Android BLE 栈挂起模式）。\\n+    ble.connectHangRounds = 1;\\n+    final service = Get.find<OtaService>();\\n+\\n+    final ok = await service.startOtaUpgrade('AA:BB');\\n+    expect(ok, isTrue, reason: '单轮挂起必须被上限放弃，不得吞掉整个窗口');\\n+    expect(service.phase, OtaPhase.completed);\\n+    expect(ble.connectCalls, greaterThanOrEqualTo(2),\\n+        reason: '挂起轮被放弃后必须有后续 connect 重试');\\n+    expect(ble.probeCount, 1, reason: '挂起轮未达 GET_INFO，成功确认在后续轮');\\n+  }, timeout: const Timeout(Duration(seconds: 30)));\\n+\\n+  test('窗口内多轮旧身份后确认目标：interval 注入下轮询推进（O4 整改）',\\n+      () async {\\n+    final tempDir = tempFirmwareDir();\\n+    final notifyLog = <String>[];\\n+    final ble = await prepareDownloaded(\\n+      tempDir: tempDir,\\n+      notifyLog: notifyLog,\\n+      rebootDelayProbes: 3, // 前三轮仍报旧身份（设备恢复慢于单轮）。\\n+      rebootWindow: const Duration(seconds: 4),\\n+      rebootProbeInterval: const Duration(milliseconds: 100),\\n+    );\\n+    final service = Get.find<OtaService>();\\n+\\n+    final ok = await service.startOtaUpgrade('AA:BB');\\n+    expect(ok, isTrue);\\n+    expect(service.phase, OtaPhase.completed);\\n+    expect(ble.probeCount, 4, reason: '三轮旧身份丢弃后第四轮确认目标');\\n+  }, timeout: const Timeout(Duration(seconds: 30)));\\n+\\n+  test('窗口耗尽 timedOut：文案说明升级可能已完成且可稍后重试（O4 整改）',\\n+      () async {\\n+    final tempDir = tempFirmwareDir();\\n+    final notifyLog = <String>[];\\n+    final ble = await prepareDownloaded(\\n+      tempDir: tempDir,\\n+      notifyLog: notifyLog,\\n+      rebootDelayProbes: 1 << 30, // 恒报旧身份：设备在窗口内永不恢复。\\n+      rebootWindow: const Duration(milliseconds: 600),\\n+      rebootProbeInterval: const Duration(milliseconds: 100),\\n+    );\\n+    final service = Get.find<OtaService>();\\n+\\n+    final ok = await service.startOtaUpgrade('AA:BB');\\n+    expect(ok, isFalse);\\n+    expect(service.phase, OtaPhase.failed);\\n+    // 轮询真实发生（非直接超时）：窗口内多轮探测都读到旧身份。\\n+    expect(ble.probeCount, greaterThanOrEqualTo(1));\\n+    final terminal = service.terminalState!;\\n+    expect(terminal.code, 'REBOOT_RECONNECT_FAILED');\\n+    expect(terminal.retryableLater, isTrue,\\n+        reason: '复核超时是「未确认」而非「升级失败」，稍后重连可解锁');\\n+    expect(terminal.message, contains('升级可能已完成'),\\n+        reason: '假阴性修复：文案必须区分「设备未恢复」与「升级失败」');\\n+    expect(service.upgradeStatus, contains('升级可能已完成'));\\n+  }, timeout: const Timeout(Duration(seconds: 30)));\\n+\\n   test('传输在途二次 start：同步段忙锁拒绝，不打断在途传输（RC3-04）',\\n       () async {\\n     final tempDir = tempFirmwareDir();\\n@@ -2485,7 +2576,24 @@ class _UpgradeFakeBle extends BluetoothService {\\n   // ---- BLE 公开方法覆写（OTA 专用链路）----\\n \\n   @override\\n-  Future<bool> connectOtaDeviceByAddress(String deviceAddress) async => true;\\n+  Future<bool> connectOtaDeviceByAddress(String deviceAddress) async {\\n+    _connectCalls++;\\n+    // 测试注入：剩余次数内的 connect 永不 resolve——模拟 O4 实测的\\n+    // Android BLE 栈 connect 挂起（第一轮抛错后后续轮日志静默）。单轮\\n+    // 探测上限必须放弃该轮继续轮询，不得一轮吞掉剩余全部窗口。\\n+    if (_connectHangRemaining > 0) {\\n+      _connectHangRemaining--;\\n+      await Completer<bool>().future;\\n+    }\\n+    return true;\\n+  }\\n+\\n+  /// 挂起注入剩余次数（见 [connectOtaDeviceByAddress]）。\\n+  int _connectHangRemaining = 0;\\n+  set connectHangRounds(int value) => _connectHangRemaining = value;\\n+  int _connectCalls = 0;\\n+  /// connectOtaDeviceByAddress 调用计数（含挂起轮，观测断言用）。\\n+  int get connectCalls => _connectCalls;\\n \\n   @override\\n   Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {}\\ndiff --git a/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart b/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart\\nindex 5ee4b61..e8171ad 100644\\n--- a/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart\\n+++ b/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart\\n@@ -119,8 +119,9 @@ void main() {\\n       await pumpPage(tester, fake: fake, connectedDevice: device);\\n       expect(find.text('设备身份已确认'), findsOneWidget);\\n       expect(\\n-        find.text('e-track-at32f435 • 固件 vcode 20801'),\\n+        find.text('e-track-at32f435 • 固件 v2.8.1'),\\n         findsOneWidget,\\n+        reason: '身份卡显示契约 §0.6 反解的版本名而非裸 vcode',\\n       );\\n       expect(findButton(tester, '检查更新').onPressed, isNotNull);\\n     });\\n@@ -506,6 +507,38 @@ void main() {\\n       expect(findButton(tester, '检查更新').onPressed, isNotNull);\\n       expect(find.text('基于设备身份查询可用固件'), findsOneWidget);\\n     });\\n+\\n+    testWidgets('窄屏终止闭锁：检查更新与解锁按钮换行共存不截断（O4 整改）',\\n+        (tester) async {\\n+      final fake = _FakeOtaService()..readResult = deviceInfoOf();\\n+      final device = BluetoothDevice(\\n+        remoteId: const DeviceIdentifier('11:22:33:44:55:66'),\\n+      );\\n+      await pumpPage(tester, fake: fake, connectedDevice: device);\\n+      // 逻辑宽 360（720 物理 / dpr 2）：「检查更新」+「重新读取身份解锁」\\n+      // 同排总宽溢出——旧 Row 实现抛 RenderFlex overflowed 并截断按钮，\\n+      // Wrap 实现必须换行共存。必须在 pumpPage 之后设置（pumpPage 内部\\n+      // 把 view 固定为 800x1800）。\\n+      tester.view.physicalSize = const Size(720, 1600);\\n+      tester.view.devicePixelRatio = 2.0;\\n+      addTearDown(tester.view.reset);\\n+      fake.terminal$.value = OtaTerminalState(\\n+        code: 'CLIENT_TOO_OLD',\\n+        message: 'App 版本过低',\\n+        minAppVersionCode: 60,\\n+      );\\n+      await tester.pump();\\n+      await tester.pumpAndSettle();\\n+      expect(tester.takeException(), isNull,\\n+          reason: '窄屏两按钮并存不得溢出截断');\\n+      // CLIENT_TOO_OLD 非 retryableLater：检查按钮禁用渲染（findButton 在\\n+      // 按钮缺失时自身抛错，onPressed 断言隐含按钮存在且布局成功）。\\n+      expect(findButton(tester, '检查更新').onPressed, isNull);\\n+      // 解锁入口换行后仍完整渲染且可执行（与正常视口用例同强度断言）。\\n+      final unlock = find.widgetWithText(OutlinedButton, '重新读取身份解锁');\\n+      expect(unlock, findsOneWidget);\\n+      expect(tester.widget<OutlinedButton>(unlock).onPressed, isNotNull);\\n+    });\\n   });\\n \\n   group('连接与生命周期（RC3-08④）', () {\\n\",\n  \"stderr\": \"\"\n}\n\nTOY RTT RAW\n\r\n========================================\r\nOTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0 systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000\r\nReset: NRST WDT\r\nQSPI: JEDEC=0xEF4018 whitelisted, OTA enabled\r\nOTA: BCB already CONFIRMED vcode=30201\r\n\r\n========================================\r\nOTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0 systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000\r\nReset: NRST SW\r\nQSPI: JEDEC=0xEF4018 whitelisted, OTA enabled\r\nOTA: BCB already CONFIRMED vcode=30201\r\n\n",
+  "evidence_copy": {
+    "command": "node -e eval(Buffer.from('CmNvbnN0IGZzPXJlcXVpcmUoJ2ZzJykscGF0aD1yZXF1aXJlKCdwYXRoJyksY3J5cHRvPXJlcXVpcmUoJ2NyeXB0bycpOwpjb25zdCByb290PXByb2Nlc3MuY3dkKCk7CmNvbnN0IGNvcGllcz1bWyJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjUvZXZpZGVuY2UvZXh0ZXJuYWwvaHR0cC10ZXN0LXNlcnZpY2UubWQiLCJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvZXZpZGVuY2UvZXh0ZXJuYWwvaHR0cC10ZXN0LXNlcnZpY2UubWQiXSxbImRvY3MvYWNjZXB0YW5jZS1jb250cmFjdHMvUDMtMy12NS9ldmlkZW5jZS9leHRlcm5hbC90b3ktYm9vdGFibGUtYXNzZXQubWQiLCJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvZXZpZGVuY2UvZXh0ZXJuYWwvdG95LWJvb3RhYmxlLWFzc2V0Lm1kIl0sWyJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjUvZXZpZGVuY2UvZXh0ZXJuYWwvcmVhbC1ldHUtYXNzZXQubWQiLCJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvZXZpZGVuY2UvZXh0ZXJuYWwvcmVhbC1ldHUtYXNzZXQubWQiXSxbImRvY3MvYWNjZXB0YW5jZS1jb250cmFjdHMvUDMtMy12NS9ldmlkZW5jZS9leHRlcm5hbC9ib2FyZC1iY2Itc3RhdGUubWQiLCJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvZXZpZGVuY2UvZXh0ZXJuYWwvYm9hcmQtYmNiLXN0YXRlLm1kIl0sWyJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvUDMtMy12Ni5ldmlkZW5jZS1tYXRyaXguanNvbiIsImRvY3MvYWNjZXB0YW5jZS1jb250cmFjdHMvUDMtMy12Ni9ldmlkZW5jZS9hY2NlcHRhbmNlLTIwMjYwOTE1L2VudHJ5LW1hdHJpeC5qc29uIl0sWyIuY2FjaGUvcDMtMy12Mi1zZXJ2aWNlL3NlcnZpY2UtdjUtMjAyNjA5MTQubG9nIiwiZG9jcy9hY2NlcHRhbmNlLWNvbnRyYWN0cy9QMy0zLXY2L2V2aWRlbmNlL2FjY2VwdGFuY2UtMjAyNjA5MTUvc2VydmljZS12NS0yMDI2MDkxNC5sb2ciXSxbIi5jYWNoZS9wMy0zLXYyLXNlcnZpY2Uvc2VydmljZS12Ni0yMDI2MDkxNC5sb2ciLCJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvZXZpZGVuY2UvYWNjZXB0YW5jZS0yMDI2MDkxNS9zZXJ2aWNlLXY2LTIwMjYwOTE0LmxvZyJdLFsiLmNhY2hlL3AzLTMtby12ZXJpZnkvby12ZXJpZnktYm9vdC1ydHQubG9nIiwiZG9jcy9hY2NlcHRhbmNlLWNvbnRyYWN0cy9QMy0zLXY2L2V2aWRlbmNlL2FjY2VwdGFuY2UtMjAyNjA5MTUvby12ZXJpZnktYm9vdC1ydHQubG9nIl0sWyJkb2NzL290YS1leGVjLW5vdGVzL1AzLTMtby1zZXF1ZW5jZS1leGVjdXRpb24tMjAyNi0wOS0xNC5tZCIsImRvY3MvYWNjZXB0YW5jZS1jb250cmFjdHMvUDMtMy12Ni9ldmlkZW5jZS9hY2NlcHRhbmNlLTIwMjYwOTE1L28tc2VxdWVuY2UtZXhlY3V0aW9uLTIwMjYtMDktMTQubWQiXSxbImRvY3Mvb3RhLWV4ZWMtbm90ZXMvUDMtMy1yNi12ZXJpZmljYXRpb24tZXhlY3V0aW9uLTIwMjYtMDktMTQubWQiLCJkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvZXZpZGVuY2UvYWNjZXB0YW5jZS0yMDI2MDkxNS9yNi12ZXJpZmljYXRpb24tZXhlY3V0aW9uLTIwMjYtMDktMTQubWQiXV07CmNvbnN0IGRpZ2VzdD1iPT5jcnlwdG8uY3JlYXRlSGFzaCgnc2hhMjU2JykudXBkYXRlKGIpLmRpZ2VzdCgnaGV4Jyk7CmNvbnN0IG1hbmlmZXN0PVtdOwpmb3IgKGNvbnN0IFtzb3VyY2UsdGFyZ2V0XSBvZiBjb3BpZXMpIHsKIGNvbnN0IGRlc3Q9cGF0aC5yZXNvbHZlKHJvb3QsdGFyZ2V0KTsKIGNvbnN0IHJlbD1wYXRoLnJlbGF0aXZlKHJvb3QsZGVzdCk7CiBpZiAocmVsLnN0YXJ0c1dpdGgoJy4uJytwYXRoLnNlcCl8fHJlbD09PScuLid8fHBhdGguaXNBYnNvbHV0ZShyZWwpKSB0aHJvdyBuZXcgRXJyb3IoJ291dHNpZGUgd29ya3RyZWUnKTsKIGZvcihsZXQgcD1kZXN0OztwPXBhdGguZGlybmFtZShwKSl7CiAgaWYoZnMuZXhpc3RzU3luYyhwKSYmZnMubHN0YXRTeW5jKHApLmlzU3ltYm9saWNMaW5rKCkpdGhyb3cgbmV3IEVycm9yKCdsaW5rIHRhcmdldCByZWplY3RlZCcpOwogIGNvbnN0IHBhcmVudD1wYXRoLmRpcm5hbWUocCk7aWYocGFyZW50PT09cClicmVhazsKIH0KIGlmKGZzLmV4aXN0c1N5bmMoZGVzdCkpdGhyb3cgbmV3IEVycm9yKCdyZWZ1c2Ugb3ZlcndyaXRlOiAnK2Rlc3QpOwogY29uc3QgYmVmb3JlPWZzLnJlYWRGaWxlU3luYyhwYXRoLnJlc29sdmUocm9vdCxzb3VyY2UpKTsKIGlmKHRhcmdldC5pbmNsdWRlcygnL2V4dGVybmFsLycpKXsKICBjb25zdCBjb250cmFjdD1KU09OLnBhcnNlKGZzLnJlYWRGaWxlU3luYyhwYXRoLmpvaW4ocm9vdCwnZG9jcy9hY2NlcHRhbmNlLWNvbnRyYWN0cy9QMy0zLXY2LmNvbnRyYWN0Lmpzb24nKSwndXRmOCcpKTsKICBjb25zdCBmcm96ZW49Y29udHJhY3QuZXh0ZXJuYWxfaW5wdXRzLmZpbmQoeD0+dGFyZ2V0LmVuZHNXaXRoKCcvJyt4LmV2aWRlbmNlX3BhdGgpKTsKICBpZighZnJvemVufHxkaWdlc3QoYmVmb3JlKSE9PWZyb3plbi5ldmlkZW5jZV9zaGEyNTYudG9Mb3dlckNhc2UoKSl0aHJvdyBuZXcgRXJyb3IoJ2Zyb3plbiBleHRlcm5hbCBldmlkZW5jZSBtaXNtYXRjaCcpOwogfQogZnMubWtkaXJTeW5jKHBhdGguZGlybmFtZShkZXN0KSx7cmVjdXJzaXZlOnRydWV9KTsKIGZzLmNvcHlGaWxlU3luYyhwYXRoLnJlc29sdmUocm9vdCxzb3VyY2UpLGRlc3QsZnMuY29uc3RhbnRzLkNPUFlGSUxFX0VYQ0wpOwogY29uc3QgYWZ0ZXI9ZnMucmVhZEZpbGVTeW5jKGRlc3QpOwogaWYoIWJlZm9yZS5lcXVhbHMoYWZ0ZXIpKXRocm93IG5ldyBFcnJvcignY29weSBtaXNtYXRjaCcpOwogbWFuaWZlc3QucHVzaCh7c291cmNlLHRhcmdldCxzaXplOmFmdGVyLmxlbmd0aCxzaGEyNTY6ZGlnZXN0KGFmdGVyKSxieXRlX2lkZW50aWNhbDp0cnVlfSk7Cn0KY29uc3Qgb3V0cHV0PXBhdGgucmVzb2x2ZShyb290LCdkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1AzLTMtdjYvZXZpZGVuY2UvYWNjZXB0YW5jZS0yMDI2MDkxNS9jb3B5LW1hbmlmZXN0Lmpzb24nKTsKY29uc3QgcmVzdWx0PXtjcmVhdGVkX2F0X3V0YzpuZXcgRGF0ZSgpLnRvSVNPU3RyaW5nKCksd29ya3RyZWU6cm9vdCxvcGVyYXRpb246J2J5dGUtZm9yLWJ5dGUgZXZpZGVuY2UgY29uc29saWRhdGlvbjsgbm8gcHJvZHVjdCBleGVjdXRpb24nLGZpbGVzOm1hbmlmZXN0fTsKZnMud3JpdGVGaWxlU3luYyhvdXRwdXQsSlNPTi5zdHJpbmdpZnkocmVzdWx0LG51bGwsMikrJ1xuJyx7ZmxhZzond3gnfSk7CmNvbnNvbGUubG9nKEpTT04uc3RyaW5naWZ5KHJlc3VsdCxudWxsLDIpKTsK','base64').toString())",
+    "exit_code": 0,
+    "output": {
+      "created_at_utc": "2026-09-14T17:50:45.449Z",
+      "worktree": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+      "operation": "byte-for-byte evidence consolidation; no product execution",
+      "files": [
+        {
+          "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/http-test-service.md",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/http-test-service.md",
+          "size": 7776,
+          "sha256": "9ad77bfa37045d1b67f6f7a022ef44c514c737dded9d5160cd43ee1443930dfe",
+          "byte_identical": true
+        },
+        {
+          "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/toy-bootable-asset.md",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/toy-bootable-asset.md",
+          "size": 5004,
+          "sha256": "57f72de73d6eab2d0a1bfc816157461ee0dd0796ae8278169735b63b316af6db",
+          "byte_identical": true
+        },
+        {
+          "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/real-etu-asset.md",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/real-etu-asset.md",
+          "size": 3166,
+          "sha256": "b57af3013a36a5cff14345c2d39e7210accf91ee7f4ba3cfa73fb62383832681",
+          "byte_identical": true
+        },
+        {
+          "source": "docs/acceptance-contracts/P3-3-v5/evidence/external/board-bcb-state.md",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/external/board-bcb-state.md",
+          "size": 6217,
+          "sha256": "83393681f756e6560e72490fed279cf2f84af4faf2633d419d413b297111266b",
+          "byte_identical": true
+        },
+        {
+          "source": "docs/acceptance-contracts/P3-3-v6/P3-3-v6.evidence-matrix.json",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/entry-matrix.json",
+          "size": 2858,
+          "sha256": "37a64a107dfe84a531909865b02c90ca25e3cccc26634bf575744459e62ef6b9",
+          "byte_identical": true
+        },
+        {
+          "source": ".cache/p3-3-v2-service/service-v5-20260914.log",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/service-v5-20260914.log",
+          "size": 4000,
+          "sha256": "1f6d2f7e056c286432fb099ff71b887cdab6b2425a8715691adaa8043aaa29b5",
+          "byte_identical": true
+        },
+        {
+          "source": ".cache/p3-3-v2-service/service-v6-20260914.log",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/service-v6-20260914.log",
+          "size": 3698,
+          "sha256": "d03ef586995acccf4f8e1f4f4081673c31f08c2cb43d274ea1a7999867cbc5cd",
+          "byte_identical": true
+        },
+        {
+          "source": ".cache/p3-3-o-verify/o-verify-boot-rtt.log",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/o-verify-boot-rtt.log",
+          "size": 573,
+          "sha256": "8d40136f336b16537c1bb34c63990c8e15a7a7d1a8df1779c4667407f0384f56",
+          "byte_identical": true
+        },
+        {
+          "source": "docs/ota-exec-notes/P3-3-o-sequence-execution-2026-09-14.md",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/o-sequence-execution-2026-09-14.md",
+          "size": 11789,
+          "sha256": "fc0d5b9972fc034ce403cb701a1f7bb32b203c86bbb7f3c5881bf743e399de91",
+          "byte_identical": true
+        },
+        {
+          "source": "docs/ota-exec-notes/P3-3-r6-verification-execution-2026-09-14.md",
+          "target": "docs/acceptance-contracts/P3-3-v6/evidence/acceptance-20260915/r6-verification-execution-2026-09-14.md",
+          "size": 11232,
+          "sha256": "2b336ccc2b4889eb6cc7fe244473d84c5ffd3e67bfbba685ea0bc11f4b0d8032",
+          "byte_identical": true
+        }
+      ]
+    }
+  },
+  "executed_frozen_commands": [],
+  "new_ci_dispatches": 0,
+  "phone_commands": 0,
+  "mcu_commands": 0,
+  "service_or_tunnel_starts": 0,
+  "cloud_account_operations": 0
+}

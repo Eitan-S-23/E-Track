@@ -1,0 +1,18 @@
+Picked up JAVA_TOOL_OPTIONS: -Duser.home="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/home" -Djava.io.tmpdir="/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-3b2608dcfb4e476e83678a0637e98a4e/tmp"
+
+Welcome to Gradle 8.14!
+
+Here are the highlights of this release:
+ - Java 24 support
+ - GraalVM Native Image toolchain selection
+ - Enhancements to test reporting
+ - Build Authoring improvements
+
+For more details see https://docs.gradle.org/8.14/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :wrapper
+
+BUILD SUCCESSFUL in 7s
+1 actionable task: 1 executed

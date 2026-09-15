@@ -1,0 +1,300 @@
+{
+  "toy": {
+    "full_log_size": 32087068,
+    "full_log_sha256": "d31d49688d5e2176305da7f6579f8fa3836fe4b95b6fec7eb7656fa7146d6c00",
+    "excerpt_lines": 79,
+    "excerpt_missing": [],
+    "monotonic": true,
+    "checkpoints": [
+      {
+        "line": 197934,
+        "text": "09-15 11:38:02.768 I/flutter (24733): OTA_MONO MONO_BUDGET_START monoUs=22492937 wallUs=1789443482768078",
+        "event": "MONO_BUDGET_START",
+        "mono_us": 22492937
+      },
+      {
+        "line": 307047,
+        "text": "09-15 11:42:22.685 I/flutter (24733): OTA_MONO MONO_END_ACK_OK monoUs=282409794 wallUs=1789443742684934 durable=284581",
+        "event": "MONO_END_ACK_OK",
+        "mono_us": 282409794,
+        "durable": "284581"
+      },
+      {
+        "line": 326690,
+        "text": "09-15 11:43:25.529 I/flutter (24733): OTA_MONO MONO_REBOOT_VERIFIED monoUs=345254661 wallUs=1789443805529804",
+        "event": "MONO_REBOOT_VERIFIED",
+        "mono_us": 345254661
+      }
+    ],
+    "durable_count": 70,
+    "durable_first": 4096,
+    "durable_last": 284581,
+    "durable_progression": [
+      4096,
+      8192,
+      12288,
+      16384,
+      20480,
+      24576,
+      28672,
+      32768,
+      36864,
+      40960,
+      45056,
+      49152,
+      53248,
+      57344,
+      61440,
+      65536,
+      69632,
+      73728,
+      77824,
+      81920,
+      86016,
+      90112,
+      94208,
+      98304,
+      102400,
+      106496,
+      110592,
+      114688,
+      118784,
+      122880,
+      126976,
+      131072,
+      135168,
+      139264,
+      143360,
+      147456,
+      151552,
+      155648,
+      159744,
+      163840,
+      167936,
+      172032,
+      176128,
+      180224,
+      184320,
+      188416,
+      192512,
+      196608,
+      200704,
+      204800,
+      208896,
+      212992,
+      217088,
+      221184,
+      225280,
+      229376,
+      233472,
+      237568,
+      241664,
+      245760,
+      249856,
+      253952,
+      258048,
+      262144,
+      266240,
+      270336,
+      274432,
+      278528,
+      282624,
+      284581
+    ],
+    "other_events": [
+      {
+        "line": 195111,
+        "text": "09-15 11:37:40.275 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=0 wallUs=1789443460275137",
+        "event": "MONO_PAUSE",
+        "mono_us": 0
+      },
+      {
+        "line": 195370,
+        "text": "09-15 11:37:41.012 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=737679 wallUs=1789443461012818",
+        "event": "MONO_PAUSE",
+        "mono_us": 737679
+      },
+      {
+        "line": 195938,
+        "text": "09-15 11:37:53.514 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=13239043 wallUs=1789443473514342",
+        "event": "MONO_PAUSE",
+        "mono_us": 13239043
+      },
+      {
+        "line": 346804,
+        "text": "09-15 11:45:04.619 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=444343883 wallUs=1789443904619021",
+        "event": "MONO_PAUSE",
+        "mono_us": 444343883
+      },
+      {
+        "line": 347111,
+        "text": "09-15 11:45:06.174 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=445898967 wallUs=1789443906174104",
+        "event": "MONO_PAUSE",
+        "mono_us": 445898967
+      }
+    ],
+    "context": [
+      {
+        "line": 184822,
+        "text": "09-15 11:35:31.067 I/ProximityAuth(29741): [RecentAppsMediator] Package removed: (user=UserHandle{0}) com.wen.gaia.gaia.p33acceptance"
+      },
+      {
+        "line": 184861,
+        "text": "09-15 11:35:32.305 I/Icing   (26849): doRemovePackageData com.wen.gaia.gaia.p33acceptance"
+      },
+      {
+        "line": 185361,
+        "text": "09-15 11:35:38.732 I/Finsky  (21048): [2] Received an install/uninstall event for package com.wen.gaia.gaia.p33acceptance"
+      },
+      {
+        "line": 197934,
+        "text": "09-15 11:38:02.768 I/flutter (24733): OTA_MONO MONO_BUDGET_START monoUs=22492937 wallUs=1789443482768078"
+      },
+      {
+        "line": 307047,
+        "text": "09-15 11:42:22.685 I/flutter (24733): OTA_MONO MONO_END_ACK_OK monoUs=282409794 wallUs=1789443742684934 durable=284581"
+      },
+      {
+        "line": 326690,
+        "text": "09-15 11:43:25.529 I/flutter (24733): OTA_MONO MONO_REBOOT_VERIFIED monoUs=345254661 wallUs=1789443805529804"
+      }
+    ]
+  },
+  "real": {
+    "full_log_size": 17964197,
+    "full_log_sha256": "6a8d7d5f8c118e4a52df99ef3317a7a7cb771226ec8c6a9fcff78359625a507b",
+    "excerpt_lines": 77,
+    "excerpt_missing": [],
+    "monotonic": true,
+    "checkpoints": [
+      {
+        "line": 99068,
+        "text": "09-15 13:41:22.794 I/flutter (24733): OTA_MONO MONO_BUDGET_START monoUs=7422519507 wallUs=1789450882794657",
+        "event": "MONO_BUDGET_START",
+        "mono_us": 7422519507
+      },
+      {
+        "line": 147561,
+        "text": "09-15 13:45:29.078 I/flutter (24733): OTA_MONO MONO_END_ACK_OK monoUs=7668803015 wallUs=1789451129078163 durable=284590",
+        "event": "MONO_END_ACK_OK",
+        "mono_us": 7668803015,
+        "durable": "284590"
+      },
+      {
+        "line": 153685,
+        "text": "09-15 13:46:32.251 I/flutter (24733): OTA_MONO MONO_REBOOT_VERIFIED monoUs=7731975809 wallUs=1789451192250968",
+        "event": "MONO_REBOOT_VERIFIED",
+        "mono_us": 7731975809
+      }
+    ],
+    "durable_count": 70,
+    "durable_first": 4096,
+    "durable_last": 284590,
+    "durable_progression": [
+      4096,
+      8192,
+      12288,
+      16384,
+      20480,
+      24576,
+      28672,
+      32768,
+      36864,
+      40960,
+      45056,
+      49152,
+      53248,
+      57344,
+      61440,
+      65536,
+      69632,
+      73728,
+      77824,
+      81920,
+      86016,
+      90112,
+      94208,
+      98304,
+      102400,
+      106496,
+      110592,
+      114688,
+      118784,
+      122880,
+      126976,
+      131072,
+      135168,
+      139264,
+      143360,
+      147456,
+      151552,
+      155648,
+      159744,
+      163840,
+      167936,
+      172032,
+      176128,
+      180224,
+      184320,
+      188416,
+      192512,
+      196608,
+      200704,
+      204800,
+      208896,
+      212992,
+      217088,
+      221184,
+      225280,
+      229376,
+      233472,
+      237568,
+      241664,
+      245760,
+      249856,
+      253952,
+      258048,
+      262144,
+      266240,
+      270336,
+      274432,
+      278528,
+      282624,
+      284590
+    ],
+    "other_events": [
+      {
+        "line": 97857,
+        "text": "09-15 13:41:10.868 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=7410593110 wallUs=1789450870868264",
+        "event": "MONO_PAUSE",
+        "mono_us": 7410593110
+      },
+      {
+        "line": 154701,
+        "text": "09-15 13:46:49.490 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=7749215275 wallUs=1789451209490415",
+        "event": "MONO_PAUSE",
+        "mono_us": 7749215275
+      },
+      {
+        "line": 154740,
+        "text": "09-15 13:46:50.178 I/flutter (24733): OTA_MONO MONO_PAUSE monoUs=7749903577 wallUs=1789451210178720",
+        "event": "MONO_PAUSE",
+        "mono_us": 7749903577
+      }
+    ],
+    "context": [
+      {
+        "line": 99068,
+        "text": "09-15 13:41:22.794 I/flutter (24733): OTA_MONO MONO_BUDGET_START monoUs=7422519507 wallUs=1789450882794657"
+      },
+      {
+        "line": 147561,
+        "text": "09-15 13:45:29.078 I/flutter (24733): OTA_MONO MONO_END_ACK_OK monoUs=7668803015 wallUs=1789451129078163 durable=284590"
+      },
+      {
+        "line": 153685,
+        "text": "09-15 13:46:32.251 I/flutter (24733): OTA_MONO MONO_REBOOT_VERIFIED monoUs=7731975809 wallUs=1789451192250968"
+      }
+    ]
+  }
+}

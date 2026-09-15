@@ -14,10 +14,21 @@ promote AC5 artifacts to OTA or CI release artifacts.
 - Governance-only changes use host regressions, not historical firmware/hardware
   campaigns. Never rewrite frozen bundles to make current HEAD appear green.
 - Self-tests are not independent acceptance. Commit/push/deploy require explicit
-  user authorization; a CI requirement does not grant that authorization.
+  user authorization; a CI requirement does not grant that authorization. The
+  user-approved Flutter development self-test exception below is standing
+  authorization only for its named branches, workflow and development artifacts.
 - Review the bounded change set and consolidate findings before costly formal
   acceptance. Fix and self-test in batches; a targeted test after each fix is
   not a new acceptance round. See the execution contract, section 7.3.
+- Establish a runnable development-validation route before repeated remediation
+  batches. For Flutter, read `docs/flutter-development-validation.md`: use the
+  development-only workflow on `dev/flutter/**` under the standing authorization
+  in that guide and execution contract section 7.3.2 when a contained local SDK
+  is unavailable. Scoped implementation-agent WIP validation commits
+  do not require green tests or a frozen acceptance bundle first; they must not
+  merge, release, deploy or claim completion. No SDK/authorization means NOT_RUN,
+  not permission to substitute repeated static reviews for self-tests. This
+  allowance does not bypass sandbox restrictions or provide missing credentials.
 - For agent commands on Windows, prefer `cmd.exe` until PowerShell startup writes
   are contained or explicitly authorized. `-NoProfile` and TEMP overrides do not
   prevent `StartupProfileData-NonInteractive` writes under LOCALAPPDATA in
@@ -943,8 +954,10 @@ firmware CI 或 CF 固件后台的任务,任何 agent 必须遵守:
    非实现会话执行(实现者不自验收),并通过上节合同/矩阵校验。
 4. **research 落盘**:编码前检索/分析结论写入 `docs/ota-exec-notes/`,
    不许只留在会话回复里。
-5. **提交收口**:子 agent 不执行 `git commit/push/merge`,由主会话在用户
-   确认后小步收口；PR/远端合并后必须完成上节 Git/worktree 收口闭环，未完成
+5. **提交收口**:除执行合同 §7.3.2 的 Flutter 开发自测预授权外，子 agent 不执行
+   `git commit/push/merge`。实现 agent 可在独占验证分支提交/推送本任务 WIP 并运行
+   指定自测工作流，不得合并或发布；共享工作树由主会话串行代办，无需逐批重复请示。
+   正式收口仍由主会话在用户确认后执行；PR/远端合并后必须完成上节 Git/worktree 收口闭环，未完成
    不得宣告该卡或阶段已收口。
 6. **会话收尾**:结束前回写看板任务卡状态并在其 §10 会话日志追加一行。
 7. 真机操作(J-Link 烧录/RTT/断电注错)一律沿用本文件既有流程与防坑清单;
@@ -1011,6 +1024,6 @@ include 路径分隔符不可移植。
 - `MCU Firmware Build` 的"干净 checkout 构建绿"是 PRE-4 及后续 CI 卡的验收
   硬条件;仅 `git ls-files` 入库不够。
 - 证据与复盘详见 `docs/ota-exec-notes/PRE-4-actions-green-rework.md`。
-- 实现 agent 修完后按 OTA 规约**不自行 commit/push**;由主会话收口,非实现
-  会话验收。
+- 本节固件实现仍由主会话提交收口、非实现会话验收；Flutter 实现仅可按执行合同
+  §7.3.2 自行提交/推送专用开发验证分支，不得据此合并、发布或自验收置完成。
 

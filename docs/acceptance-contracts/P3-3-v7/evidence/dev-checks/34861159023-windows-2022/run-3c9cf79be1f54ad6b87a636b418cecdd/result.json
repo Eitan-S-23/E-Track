@@ -1,0 +1,198 @@
+{
+  "schema": "etrack-flutter-dev-checks-v1",
+  "evidence_kind": "development-self-test",
+  "formal_acceptance": "NOT_RUN",
+  "development_result": "PASS",
+  "scope": "all",
+  "apk_requested": false,
+  "apk_result": "NOT_REQUESTED",
+  "source_before": {
+    "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+    "clean": true,
+    "status": "",
+    "dirty_semantic": [],
+    "dirty_semantic_sha": {},
+    "dirty_eol_only": [],
+    "dirty_untracked": []
+  },
+  "host": "Windows-2022Server-10.0.20348-SP0",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "sdk_channel": "stable",
+  "github_run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/34861159023",
+  "github_run_attempt": "1",
+  "lock_sha256_before": "ed54e10209a46f0ed9673245d6d400427db886d08f4bcae04c0e5d26ddb5e0fd",
+  "toolchain_regen": [
+    {
+      "stage": "after_run",
+      "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+      "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+      "effective_sha256": "cfe7a312ea0047e4e756a589789adc3f94e3727a4ce503d3506f7c4510a60c87",
+      "effective_bytes": 1571,
+      "effective_blob": "06dcbd36d182f74df878861592ef511bcee2103c",
+      "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+    },
+    {
+      "stage": "after_run",
+      "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+      "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+      "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+      "effective_bytes": 1196,
+      "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+      "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+    },
+    {
+      "stage": "after_run",
+      "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+      "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+      "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+      "effective_bytes": 869,
+      "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+      "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+    }
+  ],
+  "commands": [
+    {
+      "name": "sdk_checkout",
+      "argv": [
+        "git",
+        "clone",
+        "--config",
+        "core.longpaths=true",
+        "--depth",
+        "1",
+        "--branch",
+        "stable",
+        "https://github.com/flutter/flutter.git",
+        "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk"
+      ],
+      "cwd": "D:\\a\\E-Track\\E-Track",
+      "timeout_seconds": 180,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs\\sdk_checkout.log",
+      "timed_out": false,
+      "launch": [
+        "git",
+        "clone",
+        "--config",
+        "core.longpaths=true",
+        "--depth",
+        "1",
+        "--branch",
+        "stable",
+        "https://github.com/flutter/flutter.git",
+        "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk"
+      ],
+      "pid": 7300,
+      "elapsed_seconds": 5.219
+    },
+    {
+      "name": "sdk_version",
+      "argv": [
+        "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+        "--version",
+        "--machine"
+      ],
+      "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+      "timeout_seconds": 300,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs\\sdk_version.log",
+      "timed_out": false,
+      "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"--version\" \"--machine\"\"",
+      "pid": 2112,
+      "elapsed_seconds": 37.266
+    },
+    {
+      "name": "dependencies",
+      "argv": [
+        "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+        "pub",
+        "get",
+        "--enforce-lockfile"
+      ],
+      "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+      "timeout_seconds": 300,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs\\dependencies.log",
+      "timed_out": false,
+      "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"pub\" \"get\" \"--enforce-lockfile\"\"",
+      "pid": 2764,
+      "elapsed_seconds": 12.906
+    },
+    {
+      "name": "analyze",
+      "argv": [
+        "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+        "analyze",
+        "--no-pub"
+      ],
+      "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+      "timeout_seconds": 300,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs\\analyze.log",
+      "timed_out": false,
+      "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"analyze\" \"--no-pub\"\"",
+      "pid": 4652,
+      "elapsed_seconds": 18.438
+    },
+    {
+      "name": "tests",
+      "argv": [
+        "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "--timeout",
+        "2m",
+        "test"
+      ],
+      "cwd": "D:\\a\\E-Track\\E-Track\\app\\bluetooth_flutter_Trace",
+      "timeout_seconds": 600,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs\\tests.log",
+      "timed_out": false,
+      "launch": "\"C:\\Windows\\System32\\cmd.exe\" /d /s /c \"\"D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-3c9cf79be1f54ad6b87a636b418cecdd\\sdk\\bin\\flutter.bat\" \"test\" \"--no-pub\" \"--reporter\" \"expanded\" \"--timeout\" \"2m\" \"test\"\"",
+      "pid": 3696,
+      "elapsed_seconds": 110.844
+    }
+  ],
+  "lock_sha256_after": "ed54e10209a46f0ed9673245d6d400427db886d08f4bcae04c0e5d26ddb5e0fd",
+  "lockfile_unchanged": true,
+  "source_after": {
+    "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+    "clean": false,
+    "status": "M app/bluetooth_flutter_Trace/analysis_options.yaml\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+    "dirty_semantic": [
+      "app/bluetooth_flutter_Trace/analysis_options.yaml",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake"
+    ],
+    "dirty_semantic_sha": {
+      "app/bluetooth_flutter_Trace/analysis_options.yaml": "06dcbd36d182f74df878861592ef511bcee2103c",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc": "78cbc3a6706333e1c35500de87904494c0692f79",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake": "1b07b9cb7555eb75f34d2663449f786927cb5cf6"
+    },
+    "dirty_eol_only": [
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+    ],
+    "dirty_untracked": []
+  },
+  "source_unchanged": false,
+  "source_deltas_bound_toolchain_regen": true,
+  "source_after_restored": {
+    "head": "ce301906736d7b4209a09ad7e42ce080fb7a19a6",
+    "clean": false,
+    "status": "M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
+    "dirty_semantic": [],
+    "dirty_semantic_sha": {},
+    "dirty_eol_only": [
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+    ],
+    "dirty_untracked": []
+  }
+}

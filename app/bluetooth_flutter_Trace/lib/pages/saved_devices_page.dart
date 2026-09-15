@@ -7,7 +7,7 @@ import '../pages/device_chart_page.dart';
 import '../widgets/saved_device_card.dart';
 
 class SavedDevicesPage extends StatelessWidget {
-  const SavedDevicesPage({Key? key}) : super(key: key);
+  const SavedDevicesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +111,7 @@ class SavedDevicesPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

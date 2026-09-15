@@ -58,6 +58,7 @@
         ".claude/cap.ps1",
         "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts",
         ".github/workflows/acceptance-governance.yml",
+        ".github/workflows/flutter-dev-checks.yml",
         "docs/acceptance-contracts/template.contract.json",
         "docs/acceptance-contracts/template.evidence-matrix.json"
       ],
@@ -69,7 +70,13 @@
         "Tools/acceptance/validate_bundle.py",
         "Tools/provenance/manifest_profiles.json",
         "Tools/provenance/worktree_guard.ps1",
-        "tests/ota/test_acceptance_bundle.py"
+        "tests/ota/test_acceptance_bundle.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p3-3-service/service_config.json",
+        "Tools/ota/p3-3-service/selftest.py",
+        "Tools/ota/p3-3-service/tls_hostcheck.py",
+        "Tools/jlink/p1-6-common.ps1",
+        "Tools/jlink/test-p1-6-recovery-cmd.ps1"
       ]
     },
     "Governance": {
@@ -83,6 +90,7 @@
         "app/bluetooth_flutter_Trace/AGENTS.md",
         "app/bluetooth_flutter_Trace/CLAUDE.md",
         "docs/acceptance-execution-contract.md",
+        "docs/flutter-development-validation.md",
         "docs/ota-cross-system-contracts.md",
         "docs/ota-spec-decisions.md"
       ],

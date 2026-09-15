@@ -1,0 +1,92 @@
+[
+  {
+    "src": "docs/ota-exec-notes/toy-loop-r7-evidence/logcat-decisive-toy.txt",
+    "dst": "evidence/toy/logcat-decisive-toy.txt",
+    "size": 9876,
+    "sha256": "d53328caf315c4cb14e4de658a0c643183c95e77465802a515ab5c9e6f896223"
+  },
+  {
+    "src": "docs/ota-exec-notes/toy-loop-r7-evidence/rtt-device-toy.log",
+    "dst": "evidence/toy/rtt-device-toy.log",
+    "size": 635,
+    "sha256": "679b7cc317e8b963075b6a36c6557c410de0be2112d6aedd19c5759c8f1c9ba6"
+  },
+  {
+    "src": "docs/ota-exec-notes/toy-loop-r7-evidence/service-v7-toy-20260915.log",
+    "dst": "evidence/toy/service-v7-toy-20260915.log",
+    "size": 4656,
+    "sha256": "e6115d041a237cc26c6282b0abe073bba344b37e98c4d6ff62dba91b9cafea85"
+  },
+  {
+    "src": "docs/ota-exec-notes/toy-loop-r7-evidence/SHA256SUMS-toy.txt",
+    "dst": "evidence/toy/SHA256SUMS-toy.txt",
+    "size": 943,
+    "sha256": "315b3898b693401c8b382f57890f71b4c17f823df16ffdaf801bcd05d4f0d3a7"
+  },
+  {
+    "src": "docs/ota-exec-notes/toy-loop-r7-evidence/toy-success-screenshot-user-forward.jpg",
+    "dst": "evidence/toy/toy-success-screenshot-user-forward.jpg",
+    "size": 152028,
+    "sha256": "6ac6a7086007ff79d264c34609bd49f87bbed788cf90f04a845474a915100656"
+  },
+  {
+    "src": "docs/ota-exec-notes/toy-loop-r7-evidence/toy-success-screenshot.jpg",
+    "dst": "evidence/toy/toy-success-screenshot.jpg",
+    "size": 481707,
+    "sha256": "960ce424b73632ee0d2bb00c2f056995d08205cb36ea41e75da7257a23f2fa4e"
+  },
+  {
+    "src": "docs/ota-exec-notes/real-loop-r7-evidence/logcat-decisive-real.txt",
+    "dst": "evidence/real/logcat-decisive-real.txt",
+    "size": 9783,
+    "sha256": "fe2cae2ab69427a3cd09708e8562c7118cf0062a1140bd5032c942455e316fec"
+  },
+  {
+    "src": "docs/ota-exec-notes/real-loop-r7-evidence/real-success-screenshot-user-forward.jpg",
+    "dst": "evidence/real/real-success-screenshot-user-forward.jpg",
+    "size": 108966,
+    "sha256": "fb9da4152cc867a6e81ac275d53c5407fcdd2e0d7a03f378f7aabf15cb252f72"
+  },
+  {
+    "src": "docs/ota-exec-notes/real-loop-r7-evidence/real-success-screenshot.jpg",
+    "dst": "evidence/real/real-success-screenshot.jpg",
+    "size": 510748,
+    "sha256": "c9a782fc9f97d36949403cfa134f3b3e1c8b11d63a45a1d9e1c36a87f8f0bb8c"
+  },
+  {
+    "src": "docs/ota-exec-notes/real-loop-r7-evidence/rtt-device-real.log",
+    "dst": "evidence/real/rtt-device-real.log",
+    "size": 351,
+    "sha256": "a4d6a89d006bd77f2eb43a790aebc49a1cb1132c95048ab28df3129394651b4a"
+  },
+  {
+    "src": "docs/ota-exec-notes/real-loop-r7-evidence/service-v7-real-20260915.log",
+    "dst": "evidence/real/service-v7-real-20260915.log",
+    "size": 2116,
+    "sha256": "699140a428461b39a28e4c674419734d9395bb86620a48f33777ca763bc84557"
+  },
+  {
+    "src": "docs/ota-exec-notes/real-loop-r7-evidence/SHA256SUMS-real.txt",
+    "dst": "evidence/real/SHA256SUMS-real.txt",
+    "size": 880,
+    "sha256": "ff7c4279f72d581973180453b366e7f58f1361c9b77b233ebe73522fca410da4"
+  },
+  {
+    "src": "docs/ota-exec-notes/P3-3-toy-loop-r7-2026-09-15.md",
+    "dst": "evidence/external/P3-3-toy-loop-r7-2026-09-15.md",
+    "size": 8776,
+    "sha256": "91591670abf374b700004a8d8a2de272cff7d1469719a36c379335c29490e67a"
+  },
+  {
+    "src": "docs/ota-exec-notes/P3-3-real-loop-r7-2026-09-15.md",
+    "dst": "evidence/external/P3-3-real-loop-r7-2026-09-15.md",
+    "size": 8803,
+    "sha256": "8942346723140138f146da93bc1d5ebe1e38811feed7b14655d6368b0bbc9d71"
+  },
+  {
+    "src": "docs/ota-exec-notes/P3-3-evidence-recovery-2026-09-15.md",
+    "dst": "evidence/external/P3-3-evidence-recovery-2026-09-15.md",
+    "size": 20328,
+    "sha256": "b624d822da0820691f343ae93853ae09e7d6139f3762befc1b48fe0eff275021"
+  }
+]

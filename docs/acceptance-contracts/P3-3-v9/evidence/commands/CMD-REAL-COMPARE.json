@@ -1,0 +1,12 @@
+{
+  "id": "CMD-REAL-COMPARE",
+  "command": "cmp .cache/p3-3-v8-acceptance/real-unpacked.bin docs/acceptance-contracts/P3-3-v8/artifacts/real-3.2.5-target-image.bin",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "started_at": "2026-09-15T07:10:07.838Z",
+  "ended_at": "2026-09-15T07:10:08.054Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": ""
+}

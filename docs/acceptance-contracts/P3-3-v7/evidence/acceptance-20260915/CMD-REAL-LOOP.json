@@ -1,0 +1,12 @@
+{
+  "id": "CMD-REAL-LOOP",
+  "command": "grep -nE \"asset-full-30203|currentVersionCode=30203\" .cache/p3-3-v2-service/service-v6-20260914.log | head -8 && sha256sum .cache/p3-3-assets-v6/real-3.2.3-30203-final.bin && wc -c < .cache/p3-3-assets-v6/real-3.2.3-30203-final.bin && git diff ce30190 0fb167c -- app/ | wc -l",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission",
+  "shell": "D:/install/Git/bin/bash.exe --noprofile --norc -o pipefail",
+  "started_utc": "2026-09-14T20:02:10.394Z",
+  "finished_utc": "2026-09-14T20:02:10.912Z",
+  "exit_code": 0,
+  "stdout": "5:2026-09-14 23:43:23,270 INFO GET /api/public/firmware/download?tokenVersion=2&assetId=asset-full-30203&releaseId=release-30203&kind=full&purpose=public-ota&expiresAt=1789400899&keyVersion=1&signature=<redacted> -> 200 (284608 bytes) req=29e4ce737ef548168f26450179778714\n8:2026-09-15 00:00:15,657 INFO GET /api/public/firmware/download?tokenVersion=2&assetId=asset-full-30203&releaseId=release-30203&kind=full&purpose=public-ota&expiresAt=1789401911&keyVersion=1&signature=<redacted> -> 200 (284608 bytes) req=2f443854dd2f43de94f3e95ce9c3763b\n9:2026-09-15 00:06:05,449 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30203&currentImageSha=3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=7ce0e2c702874deaa11921351600bcba\n10:2026-09-15 00:06:08,608 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30203&currentImageSha=3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=0b369c5cd48d415caf89c968aa3f1192\n11:2026-09-15 00:07:22,431 INFO GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30203&currentImageSha=3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (114 bytes) req=afe8b338b2ac429381bab5ee403780af\n3a2827683cbd2b557dd5d441927d1a490b3b28fe11f8d7a4b4b5c86a594144a3 *.cache/p3-3-assets-v6/real-3.2.3-30203-final.bin\n603764\n0\n",
+  "stderr": "",
+  "error": null
+}

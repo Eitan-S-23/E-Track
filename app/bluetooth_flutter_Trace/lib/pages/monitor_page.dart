@@ -3,14 +3,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import '../controllers/monitor_controller.dart';
 import '../services/scan_settings_service.dart';
-import '../models/device_data.dart';
 import '../pages/device_chart_page.dart';
 import '../pages/scan_settings_page.dart';
 import '../widgets/device_monitor_card.dart';
 // import 'power_stats_page.dart';
 
 class MonitorPage extends StatelessWidget {
-  const MonitorPage({Key? key}) : super(key: key);
+  const MonitorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +137,7 @@ class MonitorPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

@@ -11,7 +11,7 @@ import '../widgets/selectable_device_card.dart';
 import '../utils/permission_helper.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +109,7 @@ class HomePage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -330,9 +330,9 @@ class HomePage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle,
-                        color: const Color(0xFF4A90E2),
+                        color: Color(0xFF4A90E2),
                         size: 20,
                       ),
                       const SizedBox(width: 8),

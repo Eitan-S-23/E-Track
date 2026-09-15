@@ -1,0 +1,1 @@
+[warn] OTA_AES_KEY 未设，使用 vendor 示例 key（仅开发）

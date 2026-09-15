@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -197,7 +196,7 @@ class AlertService extends GetxController {
       if (exceededThresholds.isNotEmpty) {
         // 创建当前异常数据的哈希值
         final currentDataHash =
-            '${data.current}_${data.voltage}_${data.power}_${powerConsumption}';
+            '${data.current}_${data.voltage}_${data.power}_$powerConsumption';
 
         // 首先检查基本的冷却时间（所有报警间隔至少5秒）
         final lastAlert = _lastAlertTime[data.deviceId];
@@ -206,7 +205,7 @@ class AlertService extends GetxController {
               DateTime.now().difference(lastAlert).inSeconds;
           if (timeSinceLastAlert < alertCooldownSeconds) {
             debugPrint(
-                '距离上次报警仅${timeSinceLastAlert}秒，需要等待${alertCooldownSeconds - timeSinceLastAlert}秒');
+                '距离上次报警仅$timeSinceLastAlert秒，需要等待${alertCooldownSeconds - timeSinceLastAlert}秒');
             return;
           }
         }
@@ -220,7 +219,7 @@ class AlertService extends GetxController {
                 DateTime.now().difference(lastAlert).inSeconds;
             if (timeSinceLastAlert < 60) {
               // 相同数据60秒内只报警一次
-              debugPrint('相同异常数据${timeSinceLastAlert}秒内已报警，跳过');
+              debugPrint('相同异常数据$timeSinceLastAlert秒内已报警，跳过');
               return;
             }
           }
@@ -271,7 +270,7 @@ class AlertService extends GetxController {
         if (timeSinceLastSnackbar < 8) {
           // 8秒内不重复显示相同的Snackbar
           shouldShowSnackbar = false;
-          debugPrint('相同的Snackbar在${timeSinceLastSnackbar}秒前已显示，跳过');
+          debugPrint('相同的Snackbar在$timeSinceLastSnackbar秒前已显示，跳过');
         }
       }
 

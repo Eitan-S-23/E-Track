@@ -1,0 +1,450 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-3-v9",
+  "contract_sha256": "8B0FD07A8E01070D2EDA5745EA73EC0E6759911C45796C3289DADCE54A44950F",
+  "round_id": "P3-3-V9-ACCEPTANCE-20260915-R2",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+  "rerun_plan_path": "v9-rerun-plan.json",
+  "rerun_plan_sha256": "E95F14DF6A6409CED983B24A16F2D7A138F5CC0A14EEC868DC2FEA7AC928E3E1",
+  "criteria": [
+    {
+      "id": "C-DEV-CHECKS",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "REUSED",
+      "reused_from_round": "P3-3-V8-ACCEPTANCE-20260915-R1",
+      "origin_contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "origin_matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "observed": true,
+      "evidence": [
+        "evidence/commands/CMD-DEV-CHECKS.json",
+        "evidence/commands/CMD-DEV-LOGS.json",
+        "evidence/commands/CMD-DEV-DOWNLOAD.json",
+        "evidence/commands/CMD-SOURCE-EQUIVALENCE.json",
+        "evidence/dev-inspection.json",
+        "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/analyze.log",
+        "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/tests.log",
+        "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/result.json",
+        "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/logs/analyze.log",
+        "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/logs/tests.log",
+        "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/result.json"
+      ],
+      "notes": "v9 直接复用 v8 R1 的原始 EXECUTED PASS；本轮未重跑该判据。原结论：独立核对 34922411533@253f153 push 双宿主；strict analyze 两份均 No issues found；Windows 331 passed，Ubuntu 324 passed+7 个 Windows-only skip；新增两打点断言所在端到端成功用例及既有 ACK/SHA/超时负例已执行。工具链再生差异有有效字节绑定，Windows 最终仅 EOL-only 差异无语义改动。与 ceaf8d2 的实际 App/test/runner 构建输入 git diff 为空，不冒用 v7 PASS。"
+    },
+    {
+      "id": "C-RELEASE-BUILD",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "REUSED",
+      "reused_from_round": "P3-3-V8-ACCEPTANCE-20260915-R1",
+      "origin_contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "origin_matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "observed": true,
+      "evidence": [
+        "evidence/commands/CMD-RELEASE-BUILD.json",
+        "evidence/commands/CMD-RELEASE-LOGS.json",
+        "evidence/commands/CMD-RELEASE-DOWNLOAD.json",
+        "evidence/commands/CMD-SOURCE-EQUIVALENCE.json",
+        "evidence/commands/CMD-APK-BADGING.json",
+        "evidence/commands/CMD-APK-CERT.json",
+        "evidence/artifact-inspection.json",
+        "evidence/build-warning-lines.txt",
+        "evidence/external/inputs.json"
+      ],
+      "notes": "v9 直接复用 v8 R1 的原始 EXECUTED PASS；本轮未重跑该判据。原结论：独立核对 34923921739@253f153，Android/Windows success，Pages/Release skipped。CI 下载 APK、本地受验 APK、手机 pull 回件三方 SHA-256=85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9，均46699140B；aapt=.p33verify/86/1.0.60；证书6f51a6a6...2e658，双 ABI 包内均有本隧道 endpoint 和新打点。Windows ZIP 20353958B/b1fa08b1...ded97，EXE/DLL/data/flutter_assets齐全。原构建24行SDK/Gradle/Kotlin/依赖弃用告警已保留，不声称零警告。"
+    },
+    {
+      "id": "C-APK-INSTALL",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/adjudication/CMD-APK-INSTALL.json",
+        "evidence/adjudication/CMD-INSTALLED-CERT.json",
+        "evidence/adjudication/CMD-INSTALLED-HASH.json",
+        "evidence/adjudication/user-confirmation.md",
+        "evidence/adjudication/decision.md",
+        "evidence/commands/CMD-APK-INSTALL.json",
+        "evidence/commands/CMD-APK-PULL.json",
+        "evidence/commands/CMD-APK-CERT.json",
+        "evidence/commands/CMD-INSTALLED-CERT.json",
+        "evidence/commands/CMD-PRODUCTION-INSTALL.json",
+        "evidence/commands/CMD-PREVIOUS-INSTALL.json",
+        "evidence/old-package-removal-context.json",
+        "evidence/artifact-inspection.json"
+      ],
+      "notes": "本轮实际执行三个冻结离线复核命令，均退出0；不是重采手机。原独立 dumpsys 证明 .p33verify=86/1.0.60，lastUpdateTime=2026-09-15 11:36:08；原 pull 件与受验 APK 经本轮重新计算同为46699140B/85ce64dfe7952e3de215a8bf38af5a0766122b6da2bc6aa002bca92f7b6223e9；本轮 apksigner 再验原件，证书6f51a6a64e21b50b0d7cace2fdf0ca4b978fbdff1814d7bbab90fad08832e658全等；原独立生产包检查lastUpdateTime=2026-07-10 19:05:06。旧包确于11:35:31被卸载，用户已明确确认为本人自主操作；不篡改旧包缺失事实，不误归因为产品或agent越权，不拿用户确认代替新APK实物取证。E01关闭。"
+    },
+    {
+      "id": "C-TOY-LOOP",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "REUSED",
+      "reused_from_round": "P3-3-V8-ACCEPTANCE-20260915-R1",
+      "origin_contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "origin_matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "observed": [
+        "ota_session_info_ok",
+        "ota_package_verified",
+        "ota_transfer_durable_complete",
+        "ota_ack_end_ok",
+        "device_reboot",
+        "get_info_target_version_and_raw_sha_match"
+      ],
+      "evidence": [
+        "evidence/commands/CMD-TOY-LOOP.json",
+        "evidence/commands/CMD-TOY-UNPACK.json",
+        "evidence/commands/CMD-TOY-COMPARE.json",
+        "evidence/loop-inspection.json",
+        "evidence/source-control-flow.txt",
+        "evidence/firmware-inspection.json",
+        "evidence/app-pid-provenance.json",
+        "evidence/external/inputs.json",
+        "evidence/toy/logcat-decisive-toy.txt",
+        "evidence/toy/rtt-device-toy.log",
+        "evidence/toy/service-v7-toy-20260915.log",
+        "evidence/toy/SHA256SUMS-toy.txt",
+        "evidence/toy/toy-success-screenshot-user-forward.jpg",
+        "evidence/toy/toy-success-screenshot.jpg"
+      ],
+      "notes": "v9 直接复用 v8 R1 的原始 EXECUTED PASS；本轮未重跑该判据。原结论：采信补测30203→30204。完整logcat32,087,068B/d31d4968...6c00与79行决定性摘录逐行对应；PID24733由包路径和进程启动行绑定.p33verify。同一进程同一升级仅一次BUDGET_START/END_ACK/REBOOT_VERIFIED；70次durable从4096递增至284581；11:42:22.685 END_ACK durable=284581，11:43:25.529目标复核。强制控制流确保传输前包长/SHA已验、收到的ACK经cmd/session/seq关联，非OK不能进入最终复核成功分支；RTT含BLEACT reset和TEST_BOOT confirmed30204；真实截图为升级完成/vcode30204。独立解包/CRC/双零SHA及cmp均通过，完整raw=43faf0ca...3fc13，全量值见冻结输入与firmware-inspection；不靠marker名字或无错误日志判定。"
+    },
+    {
+      "id": "C-REAL-LOOP",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "REUSED",
+      "reused_from_round": "P3-3-V8-ACCEPTANCE-20260915-R1",
+      "origin_contract_sha256": "D739C5BCF5C65D6FCC5E3BA38A616F018C45343C48A65E6267C63F878837FE4F",
+      "origin_matrix_sha256": "634A57B09AB94CEE46F013CCB888884040DC95C23F2A42435B2B3641E35F409F",
+      "observed": [
+        "ota_session_info_ok",
+        "ota_package_verified",
+        "ota_transfer_durable_complete",
+        "ota_ack_end_ok",
+        "device_reboot",
+        "get_info_target_version_and_raw_sha_match"
+      ],
+      "evidence": [
+        "evidence/commands/CMD-REAL-LOOP.json",
+        "evidence/commands/CMD-REAL-UNPACK.json",
+        "evidence/commands/CMD-REAL-COMPARE.json",
+        "evidence/loop-inspection.json",
+        "evidence/source-control-flow.txt",
+        "evidence/firmware-inspection.json",
+        "evidence/app-pid-provenance.json",
+        "evidence/external/inputs.json",
+        "evidence/real/logcat-decisive-real.txt",
+        "evidence/real/real-success-screenshot-user-forward.jpg",
+        "evidence/real/real-success-screenshot.jpg",
+        "evidence/real/rtt-device-real.log",
+        "evidence/real/service-v7-real-20260915.log",
+        "evidence/real/SHA256SUMS-real.txt"
+      ],
+      "notes": "v9 直接复用 v8 R1 的原始 EXECUTED PASS；本轮未重跑该判据。原结论：采信补测30204→30205。完整logcat17,964,197B/6a8d7d5f...a507b与77行决定性摘录逐行对应；同PID24733单调钟跨轮连续，本轮也仅一次开始/END_ACK/目标复核；70次durable至284590；13:45:29.078 END_ACK durable=284590，13:46:32.251 REBOOT_VERIFIED。初始服务请求=30204+toy完整raw，独立real资产30205/ab8528ec...bcfb4；RTT自然reset+TEST_BOOT confirmed30205。实际截图含设备v3.2.5及升级完成/vcode30205，不采纳未见于截图的5分11秒叙述。解包与目标镜像逐字节全等，实际原升级调用经过ack.isOk及新连接GET_INFO双值全等检查后completed，六状态闭合。"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-DEV-CHECKS",
+      "command": "gh run view 34922411533 --repo Eitan-S-23/E-Track --json databaseId,headSha,headBranch,event,status,conclusion,url,jobs",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-DEV-CHECKS.json"
+    },
+    {
+      "id": "CMD-DEV-LOGS",
+      "command": "gh run view 34922411533 --repo Eitan-S-23/E-Track --log",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-DEV-LOGS.json"
+    },
+    {
+      "id": "CMD-DEV-DOWNLOAD",
+      "command": "gh run download 34922411533 --repo Eitan-S-23/E-Track -n flutter-dev-ubuntu-latest-34922411533-1 -n flutter-dev-windows-2022-34922411533-1 -D .cache/p3-3-v8-acceptance/downloads/dev-checks",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-DEV-DOWNLOAD.json"
+    },
+    {
+      "id": "CMD-RELEASE-BUILD",
+      "command": "gh run view 34923921739 --repo Eitan-S-23/E-Track --json databaseId,headSha,headBranch,event,status,conclusion,url,jobs",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-RELEASE-BUILD.json"
+    },
+    {
+      "id": "CMD-RELEASE-LOGS",
+      "command": "gh run view 34923921739 --repo Eitan-S-23/E-Track --log",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-RELEASE-LOGS.json"
+    },
+    {
+      "id": "CMD-RELEASE-DOWNLOAD",
+      "command": "gh run download 34923921739 --repo Eitan-S-23/E-Track -n android-apk -n windows-exe -D .cache/p3-3-v8-acceptance/downloads/release",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-RELEASE-DOWNLOAD.json"
+    },
+    {
+      "id": "CMD-SOURCE-EQUIVALENCE",
+      "command": "git diff 253f15371f2a0aeef0e7c5feb10af3118494c9e1 ceaf8d2b7bb8e78968462af51a57ff1250731b61 -- app/ .github/workflows/build.yml .github/workflows/flutter-dev-checks.yml .github/scripts/ Tools/flutter/",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-SOURCE-EQUIVALENCE.json"
+    },
+    {
+      "id": "CMD-APK-BADGING",
+      "command": ".cache/p3-3-apk/tools/android-15/aapt.exe dump badging docs/acceptance-contracts/P3-3-v8/artifacts/ble-monitor-android.apk",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-APK-BADGING.json"
+    },
+    {
+      "id": "CMD-APK-CERT",
+      "command": "java -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs docs/acceptance-contracts/P3-3-v8/artifacts/ble-monitor-android.apk",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-APK-CERT.json"
+    },
+    {
+      "id": "CMD-APK-INSTALL",
+      "command": "D:/install/Git/usr/bin/cat.exe docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-APK-INSTALL.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-APK-PULL.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-APK-CERT.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-INSTALLED-CERT.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-PRODUCTION-INSTALL.json docs/acceptance-contracts/P3-3-v9/evidence/commands/CMD-PREVIOUS-INSTALL.json docs/acceptance-contracts/P3-3-v9/evidence/old-package-removal-context.json docs/acceptance-contracts/P3-3-v9/evidence/adjudication/user-confirmation.md",
+      "exit_code": 0,
+      "output_evidence": "evidence/adjudication/CMD-APK-INSTALL.json"
+    },
+    {
+      "id": "CMD-INSTALLED-CERT",
+      "command": "D:/install/jdk17/bin/java.exe -jar .cache/p3-3-apk/tools/android-15/lib/apksigner.jar verify --print-certs docs/acceptance-contracts/P3-3-v9/artifacts/installed-base.apk",
+      "exit_code": 0,
+      "output_evidence": "evidence/adjudication/CMD-INSTALLED-CERT.json"
+    },
+    {
+      "id": "CMD-TOY-LOOP",
+      "command": "cat docs/acceptance-contracts/P3-3-v8/evidence/toy/logcat-decisive-toy.txt docs/acceptance-contracts/P3-3-v8/evidence/toy/service-v7-toy-20260915.log docs/acceptance-contracts/P3-3-v8/evidence/toy/rtt-device-toy.log",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-TOY-LOOP.json"
+    },
+    {
+      "id": "CMD-REAL-LOOP",
+      "command": "cat docs/acceptance-contracts/P3-3-v8/evidence/real/logcat-decisive-real.txt docs/acceptance-contracts/P3-3-v8/evidence/real/service-v7-real-20260915.log docs/acceptance-contracts/P3-3-v8/evidence/real/rtt-device-real.log",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-REAL-LOOP.json"
+    },
+    {
+      "id": "CMD-TOY-UNPACK",
+      "command": "python -X utf8 -B -S Tools/etu_unpack.py docs/acceptance-contracts/P3-3-v8/artifacts/e-track-at32f435-v3.2.4-full.etu --out .cache/p3-3-v8-acceptance/toy-unpacked.bin --verify-fw-header",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-TOY-UNPACK.json"
+    },
+    {
+      "id": "CMD-REAL-UNPACK",
+      "command": "python -X utf8 -B -S Tools/etu_unpack.py docs/acceptance-contracts/P3-3-v8/artifacts/e-track-at32f435-v3.2.5-full.etu --out .cache/p3-3-v8-acceptance/real-unpacked.bin --verify-fw-header",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-REAL-UNPACK.json"
+    },
+    {
+      "id": "CMD-TOY-COMPARE",
+      "command": "cmp .cache/p3-3-v8-acceptance/toy-unpacked.bin docs/acceptance-contracts/P3-3-v8/artifacts/toy-3.2.4-target-image.bin",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-TOY-COMPARE.json"
+    },
+    {
+      "id": "CMD-REAL-COMPARE",
+      "command": "cmp .cache/p3-3-v8-acceptance/real-unpacked.bin docs/acceptance-contracts/P3-3-v8/artifacts/real-3.2.5-target-image.bin",
+      "exit_code": 0,
+      "output_evidence": "evidence/commands/CMD-REAL-COMPARE.json"
+    },
+    {
+      "id": "CMD-INSTALLED-HASH",
+      "command": "D:/install/Git/usr/bin/sha256sum.exe docs/acceptance-contracts/P3-3-v9/artifacts/ble-monitor-android.apk docs/acceptance-contracts/P3-3-v9/artifacts/installed-base.apk",
+      "exit_code": 0,
+      "output_evidence": "evidence/adjudication/CMD-INSTALLED-HASH.json"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-DEV-LOGS",
+      "path": "evidence/commands/CMD-DEV-CHECKS.json",
+      "size": 4738,
+      "sha256": "D28943E0D0AFFDA34F436BB7BC3D2CB4B74CFD8F8A7AC6CD9A5E21C3C1601A70"
+    },
+    {
+      "id": "ART-APK-RELEASE",
+      "path": "artifacts/ble-monitor-android.apk",
+      "size": 46699140,
+      "sha256": "85CE64DFE7952E3DE215A8BF38AF5A0766122B6DA2BC6AA002BCA92F7B6223E9"
+    },
+    {
+      "id": "ART-WINDOWS-RUNTIME",
+      "path": "artifacts/ble-monitor-windows.zip",
+      "size": 20353958,
+      "sha256": "B1FA08B1A8CAAE97494BE18C1FF5AD4C7DC6166A7E0254D78D593C1CCE8DED97"
+    },
+    {
+      "id": "ART-INSTALLED-APK",
+      "path": "artifacts/installed-base.apk",
+      "size": 46699140,
+      "sha256": "85CE64DFE7952E3DE215A8BF38AF5A0766122B6DA2BC6AA002BCA92F7B6223E9"
+    },
+    {
+      "id": "ART-GCC-SOURCE",
+      "path": "artifacts/gcc-pre-finalize.bin",
+      "size": 603764,
+      "sha256": "4B16048F5970C9CEF924690A62031E232CD1D2FB8C1B8AF85C18993CFDF830EC"
+    },
+    {
+      "id": "ART-TOY-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.4-full.etu",
+      "size": 284581,
+      "sha256": "81A773363711ADFF31CD788217BA18445B462E675042682BDD22302123F0228B"
+    },
+    {
+      "id": "ART-TOY-TARGET-IMAGE",
+      "path": "artifacts/toy-3.2.4-target-image.bin",
+      "size": 603764,
+      "sha256": "43FAF0CAC092F54D862A4266E661FBF739DB973A224180744D85C0169FF3FC13"
+    },
+    {
+      "id": "ART-REAL-ETU",
+      "path": "artifacts/e-track-at32f435-v3.2.5-full.etu",
+      "size": 284590,
+      "sha256": "32577AA5D0D98CAB071440B455151BCC536F33A9A9D930E832F8BB140A607D77"
+    },
+    {
+      "id": "ART-REAL-TARGET-IMAGE",
+      "path": "artifacts/real-3.2.5-target-image.bin",
+      "size": 603764,
+      "sha256": "AB8528ECB8C4BC756DC2D12FDDEB2EB454FA3C91472129F1881EDECDFF2BCFB4"
+    }
+  ],
+  "evidence_hashes": {
+    "evidence/app-pid-provenance.json": "5497C6CFED39ACD643401CFB0889213CBE76B93A7F01A7AA5FF864196064D21F",
+    "evidence/artifact-copy-manifest.json": "7DD9BF05FB55D21ABC701EE34659AB581F17C2856390D4084CABD0AF79DEB567",
+    "evidence/artifact-inspection.json": "EF34C66C10D3801FCA2F48C2AC9EFBE4BF0D4D41B557A90D441310DCAC6A47F8",
+    "evidence/build-warning-lines.txt": "DAB794FE2968B55B1ED6C0B95385913E827CA4D415D82DEB347D373E9CF1C959",
+    "evidence/ci-discovery.json": "DC6D40712319A82CDB040CDE3E696EAD58EAB5EA4BEAB687F1390A5559A01764",
+    "evidence/cleanup-and-write-audit.json": "79D13CE0CDC7A633C05DAAED1A249C240388742B129BCB9A4EE125833AA2BEE7",
+    "evidence/commands/CMD-APK-BADGING.json": "32A46C58E8BE780C9CE22652B2ED45564F843477D8E7F5B612B353B2A3117867",
+    "evidence/commands/CMD-APK-BADGING.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-APK-BADGING.stdout.txt": "C3EB09A5E8F76DE31DD4ADCC6AE5E8427333A53A76BE3E4EDFB765B00720D420",
+    "evidence/commands/CMD-APK-CERT.json": "5E37DE30D43DFC11521E8F7DD7B5C9E4D0341C57C069E9F2BABD3E1BC6B297C7",
+    "evidence/commands/CMD-APK-CERT.stderr.txt": "3151C532B57BFF498B767712DD367FE559B308EA9CCA1F948E2CA5180EF5BC38",
+    "evidence/commands/CMD-APK-CERT.stdout.txt": "5F5B1635FF82A94CB3EF8B1DD3EB933C4130330E3D5A2773339C34CD5D3E27EF",
+    "evidence/commands/CMD-APK-INSTALL.json": "97000A0928A9CA42F70EE75982D1E16B9675FCCA411D117E9A38E008BD87085B",
+    "evidence/commands/CMD-APK-INSTALL.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-APK-INSTALL.stdout.txt": "09377779D56990AC47BF15AB953AF8CB790D3D59F69CD2BBE6997403D296E2E5",
+    "evidence/commands/CMD-APK-PULL.json": "DB6B624634FF02D7277D508E1E8381E9EE73633EAC836999445BD1749F1DD471",
+    "evidence/commands/CMD-APK-PULL.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-APK-PULL.stdout.txt": "24E8C35B45D897D458248622B7C213A78BF7B43B1D913D983E925865ADED1F41",
+    "evidence/commands/CMD-DEV-CHECKS.json": "D28943E0D0AFFDA34F436BB7BC3D2CB4B74CFD8F8A7AC6CD9A5E21C3C1601A70",
+    "evidence/commands/CMD-DEV-CHECKS.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-DEV-CHECKS.stdout.txt": "67A97D4AAE7AED79EF812AD18D4A81414967445B5C440CF76B89322982A94643",
+    "evidence/commands/CMD-DEV-DOWNLOAD.json": "C185202E43CF3AA971E1921E86AB73566FBC797475F985E38CF017BB6DB7D40B",
+    "evidence/commands/CMD-DEV-DOWNLOAD.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-DEV-DOWNLOAD.stdout.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-DEV-LOGS.json": "DFFE0736ECEB162BC97EE023B95EAA6ED3F6BF7D566F9BB4A66B94FBC0CFEBE3",
+    "evidence/commands/CMD-DEV-LOGS.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-DEV-LOGS.stdout.txt": "25F143730FF3D0CC9488AAC895FA771E22DB7D6E1C0BBB0AB941FC8F673FA8D6",
+    "evidence/commands/CMD-INSTALLED-CERT.json": "C3E464BC1E339EDEE2123E686B7CD4F5E1AB486643DA1B20AEE4954FBF42D548",
+    "evidence/commands/CMD-INSTALLED-CERT.stderr.txt": "3151C532B57BFF498B767712DD367FE559B308EA9CCA1F948E2CA5180EF5BC38",
+    "evidence/commands/CMD-INSTALLED-CERT.stdout.txt": "5F5B1635FF82A94CB3EF8B1DD3EB933C4130330E3D5A2773339C34CD5D3E27EF",
+    "evidence/commands/CMD-PREVIOUS-INSTALL.json": "D87784E7EAF23612D09C0C5F78100EE8C3DDBC9F00A9EF6A2C7B45EEB92CAE7D",
+    "evidence/commands/CMD-PREVIOUS-INSTALL.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-PREVIOUS-INSTALL.stdout.txt": "34FA15F6B4EF86F16155D55B347F53FE7AB7A6F64BE535D16FBBDD950C3AA567",
+    "evidence/commands/CMD-PRODUCTION-INSTALL.json": "5A1774F47454F3C5A1F094C96E2E31F7803E7F299EEF6B82E8A45D4C659DFF0A",
+    "evidence/commands/CMD-PRODUCTION-INSTALL.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-PRODUCTION-INSTALL.stdout.txt": "4DBF6380111D580C436157629986B154738EDEBA1B1D199EBD3BDCF786B9F0A4",
+    "evidence/commands/CMD-REAL-COMPARE.json": "706FB28AF8A423BE699ECF469A8A11C0E8337B3314F8B41263193015C7A821A3",
+    "evidence/commands/CMD-REAL-COMPARE.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-REAL-COMPARE.stdout.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-REAL-LOOP.json": "02F185277CEBDCA9E9E458B8333E358CCCF74FFCED4FFB8FB553C655880ED78E",
+    "evidence/commands/CMD-REAL-LOOP.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-REAL-LOOP.stdout.txt": "8EFC66D7F12C87CB0946752F1776CEF237002616C3D5CF8EE31CA47AF0F1B21A",
+    "evidence/commands/CMD-REAL-UNPACK.json": "10FAAF26D13AD91E93B783E0B65CB583AAB5F1B05CB6B531E8B8A341BA74D12F",
+    "evidence/commands/CMD-REAL-UNPACK.stderr.txt": "3BF01C2DFAD1FC5A9DDC9DCBB15581CC5DA98F6724A88A925075805AB0564A47",
+    "evidence/commands/CMD-REAL-UNPACK.stdout.txt": "4AA380C290426C5F61B834434E9015671DFD751D1E31A87EDE8F5C9A28E53497",
+    "evidence/commands/CMD-RELEASE-BUILD.json": "618433954668FBDE771647477FC48586093F9A933C5DB23BB7661464443ED2D4",
+    "evidence/commands/CMD-RELEASE-BUILD.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-RELEASE-BUILD.stdout.txt": "FF5257301EC4D4F543C2392B5EE8CB0404AC4F26566DFE4A36607DC82E2D56F2",
+    "evidence/commands/CMD-RELEASE-DOWNLOAD.json": "8E12B55911BFAE86F66186886E672E5153BCD8F011962EC5C2B44EF6756B2EC2",
+    "evidence/commands/CMD-RELEASE-DOWNLOAD.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-RELEASE-DOWNLOAD.stdout.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-RELEASE-LOGS.json": "C5762DB56C250E55728C76984FCC288524850165A9FF3977A95C7092B25BD5CF",
+    "evidence/commands/CMD-RELEASE-LOGS.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-RELEASE-LOGS.stdout.txt": "75B25446C0FD81C7B8FE5C07FD5AA546BB55FC1AEEB40F0EF1AFBEB8EFDC6D9B",
+    "evidence/commands/CMD-SOURCE-EQUIVALENCE.json": "6803EB99E086911668AC47E1EF6C5BA424BAE5935BCE0A8809F44384815B9B42",
+    "evidence/commands/CMD-SOURCE-EQUIVALENCE.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-SOURCE-EQUIVALENCE.stdout.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-TOY-COMPARE.json": "5CDDA01B7C37288395F99CCFC4F2B959807CA8AB3C9847B49F3B159458326EB7",
+    "evidence/commands/CMD-TOY-COMPARE.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-TOY-COMPARE.stdout.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-TOY-LOOP.json": "26BBBD181B0D2FA6FCEBFCBE627B59D997C9B9C2B092A69F549F79D62376441A",
+    "evidence/commands/CMD-TOY-LOOP.stderr.txt": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/commands/CMD-TOY-LOOP.stdout.txt": "D6D6ECCF208BE18D02C32EE68C02454E5A8D9051D7EAE9AE4A0440D3F0038E61",
+    "evidence/commands/CMD-TOY-UNPACK.json": "46090030BFF62D716FA5E77DEC5635836FC6FFD8837B70C70A6BF76FA4EAA796",
+    "evidence/commands/CMD-TOY-UNPACK.stderr.txt": "3BF01C2DFAD1FC5A9DDC9DCBB15581CC5DA98F6724A88A925075805AB0564A47",
+    "evidence/commands/CMD-TOY-UNPACK.stdout.txt": "76B04129FDCF571704F2D2DA03B0C08B43A244398B6EFC8224CDF8A577843C85",
+    "evidence/copy-manifest.json": "0469876232DC361F064CC39293E1C7E5D0062EC500093A3829AC6BF8F11827CE",
+    "evidence/dev-artifacts-preflight.json": "2D4DD65FBBE38F1A6033BCFCE7E5A90658FBC2663B0BAE636907BCDA59E9E4E6",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/analyze.log": "DD0E4480C2282578C4D2A1DBEBAF5EB9FCBEF50ED94659C11435C8725BBF2DA9",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_build.log": "F8FEFE7BEBE43D3BE5A03D0858A23486935DFFB89667CD91811E7253E929665A",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_collect.log": "7ECA8D93C22AC079877FEC64938942BD7ED4B8D5889F1F6BBC8A6642B9602BBE",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_install_wrapper.log": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_java.log": "60B68871CDF0AE51DC5CAB1DAEBA0AB82C37B7C18CBC639BC3A55268C918284E",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_prepare.log": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_sdk.log": "4AE2E2C933E1629AF203497DD22E52064263717794599D5F3083977142D87C5F",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_verify.log": "07C1D03CBB8673BF5B990716C225913B03DB1080C39A29344BD789918504C4AE",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/apk_wrapper.log": "179CB5FF3B32D3691D8E3C898971A851729EE935AC82EE484710DB20AE8E3527",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/dependencies.log": "23C033DC910DD76D5277A7DAEEC6119FB4F6CE82648EA9BAF23FA894BCB2850A",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/sdk_checkout.log": "3756F531D5C2F8BC70C44BAEB5A8FE4692ADC5B315E97A11A717CB147CC8BED9",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/sdk_version.log": "F86D6A9D09B8D8203107709081B6456C6205C9A5758CE2E906EFA71C9FD00BFD",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/logs/tests.log": "B987FCD9D6275D045C317B9371CA7132C1D70817C8F073F362442FE68B1F01C0",
+    "evidence/dev-checks/flutter-dev-ubuntu-latest-34922411533-1/run-188d67bd2916402b81dcec9c397f2dcd/result.json": "A0B9B6C97E3E2FD6902E96BDD5066822CC6B14444A2300CE1F822F0F3A088954",
+    "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/logs/analyze.log": "8DD88D1C6D1D224F2E3C1B62B1F4EE15E9AD9118F6AC05D333A33F7D6023BE1A",
+    "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/logs/dependencies.log": "E8C59C022CBA0591E886A43932150175D7915E313A13FD6C752DD050FCCDD4E5",
+    "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/logs/sdk_checkout.log": "FFAA0E70676C79E732D7440EEAA8986854469801F6E9001EABB7FC4C5A9342EE",
+    "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/logs/sdk_version.log": "A4A11AB8EBE01A2744E7EDB7673CC3AE4BB1616DB8BB1D117446C84095BEE4CD",
+    "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/logs/tests.log": "46620275C3A98B33CFF8A58AF08089FDFB2234BB4E43AF6EDEDBFB6BF0A1FFD5",
+    "evidence/dev-checks/flutter-dev-windows-2022-34922411533-1/run-866987b6ef3d4ced89689f02a23351e2/result.json": "B46B29C7D804B4ECA49CE855FD7861B9859D6CBDC6675C126D19C56FBAA689B6",
+    "evidence/dev-inspection.json": "79D4DA11C67B48673C216C98BB81A068DB7F89F42C3410BC365F9D5F5852B462",
+    "evidence/entry-matrix.json": "B6B9FB7FA58A0A803A3ED287D76916BEA93EDE21319F9B9EC55D9532FA6F4F1B",
+    "evidence/external/inputs.json": "5B899AA5D4C45CABFE6037C86628499CC6AB54F8535C34110A8BAC74934AA879",
+    "evidence/external/P3-3-evidence-recovery-2026-09-15.md": "B624D822DA0820691F343AE93853AE09E7D6139F3762BEFC1B48FE0EFF275021",
+    "evidence/external/P3-3-real-loop-r7-2026-09-15.md": "8942346723140138F146DA93BC1D5EBE1E38811FEED7B14655D6368B0BBC9D71",
+    "evidence/external/P3-3-toy-loop-r7-2026-09-15.md": "91591670ABF374B700004A8D8A2DE272CFF7D1469719A36C379335C29490E67A",
+    "evidence/firmware-inspection.json": "192C621F86ACB311B3495B3E81708A52395C9E4181A2F63FEBE3BF8A16F1E821",
+    "evidence/github-identity.json": "B935062608C0C2F7768811E576C3D76234A30FA422EA0355E959E5E14B2F4609",
+    "evidence/initial-validation.json": "AAA57AD4CCA1E09C39F4D19042A245111F57592446DD2BC6D778F8F993952774",
+    "evidence/installed-path-preflight.json": "703CF88078A6068F5DA3A315C1502DB2ECB3D36543AFE8D52A40F5B8306D38BA",
+    "evidence/loop-inspection.json": "DAEFBD007E82E9FB3E022058E6D51F9B396910AFD14C48D2F1315FE37431200B",
+    "evidence/matrix-preflight-case-error.json": "49CD9EFEAFB702AABE47C5809D8130FD6DAC9B23F859040AC805E797794A8FF9",
+    "evidence/old-package-removal-context.json": "5ADDA1646783E6E22CA633BFFF7C1B6B373DBF298AE66FFDBB4EC7AF1C5AA32B",
+    "evidence/phone-preflight.json": "7C333871CF2595EA147D9C161118D16A2370D030F801C7A8D7307582D8E4D7C7",
+    "evidence/process-preflight.json": "F21772139BF215478E1EDB45698D2C9BDC40BAC03DC83D119632BFAC92D6D197",
+    "evidence/real/logcat-decisive-real.txt": "FE2CAE2AB69427A3CD09708E8562C7118CF0062A1140BD5032C942455E316FEC",
+    "evidence/real/real-success-screenshot-user-forward.jpg": "FB9DA4152CC867A6E81AC275D53C5407FCDD2E0D7A03F378F7AABF15CB252F72",
+    "evidence/real/real-success-screenshot.jpg": "C9A782FC9F97D36949403CFA134F3B3E1C8B11D63A45A1D9E1C36A87F8F0BB8C",
+    "evidence/real/rtt-device-real.log": "A4D6A89D006BD77F2EB43A790AEBC49A1CB1132C95048AB28DF3129394651B4A",
+    "evidence/real/service-v7-real-20260915.log": "699140A428461B39A28E4C674419734D9395BB86620A48F33777CA763BC84557",
+    "evidence/real/SHA256SUMS-real.txt": "FF7C4279F72D581973180453B366E7F58F1361C9B77B233EBE73522FCA410DA4",
+    "evidence/release-artifacts-preflight.json": "2298BC947F84FF2650275EBA83EFE884112F3ABD5F365CC54D5B3711C21A2128",
+    "evidence/rerun-plan-command.json": "8B475FCED2492DAD18398315DF2B75D4EFE268B0F0927A8F5095376DB8908F8C",
+    "evidence/source-control-flow.txt": "7A50E666472245AEFA6F37CB9C41564047EBD0B43B003B90CA8B8648815E9EED",
+    "evidence/toy/logcat-decisive-toy.txt": "D53328CAF315C4CB14E4DE658A0C643183C95E77465802A515AB5C9E6F896223",
+    "evidence/toy/rtt-device-toy.log": "679B7CC317E8B963075B6A36C6557C410DE0BE2112D6AEDD19C5759C8F1C9BA6",
+    "evidence/toy/service-v7-toy-20260915.log": "E6115D041A237CC26C6282B0ABE073BBA344B37E98C4D6FF62DBA91B9CAFEA85",
+    "evidence/toy/SHA256SUMS-toy.txt": "315B3898B693401C8B382F57890F71B4C17F823DF16FFDAF801BCD05D4F0D3A7",
+    "evidence/toy/toy-success-screenshot-user-forward.jpg": "6AC6A7086007FF79D264C34609BD49F87BBED788CF90F04A845474A915100656",
+    "evidence/toy/toy-success-screenshot.jpg": "960CE424B73632EE0D2BB00C2F056995D08205CB36EA41E75DA7257A23F2FA4E",
+    "evidence/write-preflight.json": "63E80C6B14B5374A8DBCD58755CA803336C53E3661725D44CEE63FD6C40187CA",
+    "rerun-plan.json": "C92065E47579439802C308DF2CC9FB11EA49FC7F7C9FF9C7916621DBAA7276AA",
+    "evidence/adjudication/user-confirmation.md": "B716B23B9FDF7A29DD6A4C240C1B23FAD378D4037FE137E680A7612C816B93BB",
+    "evidence/adjudication/v8-r2-phone-preflight.json": "CF106E70A327595A74F8B7650A578854132CA7695A47660687D3533C8DCEDF10",
+    "evidence/adjudication/CMD-APK-INSTALL.json": "560CD62D14444B4E1F27B7D1A6D55F7D06414CDD3A5D566152395BB52B2D5AB1",
+    "evidence/adjudication/CMD-INSTALLED-CERT.json": "819C347CB963334975A175EAD90AD7D8457254839022523A71DC7584B510FE9E",
+    "evidence/adjudication/CMD-INSTALLED-HASH.json": "EBF3B85F52933ED9EC310DA02694C0F71C33A91D87B6D7F4DA2B2863F875F8C9",
+    "evidence/adjudication/initial-validation.log": "3A2BADC9C9D412F7249F0905B211910A6ACEEE6C4206E2D460061046A2650BDB",
+    "evidence/adjudication/plan-generation.log": "77EEB60CD13A0114D4B8602933D990D12117D7C481EF60B5B89B158BC3678621",
+    "evidence/adjudication/decision.md": "91A6BFE7B15D23C12C82F8EBF20E2C3F6810F1E006642B551F1FACF08ECF5FAA",
+    "evidence/adjudication/host-cleanup.json": "3072FC557C33704BB32FB10407FA9CDFCDD14CF352A9C3FFB3FA7C909E7B54C2",
+    "v9-rerun-plan.json": "E95F14DF6A6409CED983B24A16F2D7A138F5CC0A14EEC868DC2FEA7AC928E3E1"
+  }
+}

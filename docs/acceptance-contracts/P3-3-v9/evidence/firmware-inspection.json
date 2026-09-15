@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "toy",
+    "image_size": 603764,
+    "raw_sha256": "43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13",
+    "magic": "ETFW",
+    "version_code": 30204,
+    "stored_double_zero_sha256": "a30d8802e69efe4ec729ac045bde3f614ee88ac23d49028a19c2a505946dd88b",
+    "computed_double_zero_sha256": "a30d8802e69efe4ec729ac045bde3f614ee88ac23d49028a19c2a505946dd88b",
+    "body_equal": true,
+    "changed_bytes": 78,
+    "etu_size": 284581,
+    "etu_sha256": "81a773363711adff31cd788217ba18445b462e675042682bdd22302123f0228b",
+    "etu_magic": "ETU1",
+    "flags": 11,
+    "target_vcode": 30204,
+    "base_vcode": 0,
+    "payload_len": 284517,
+    "length_exact": true
+  },
+  {
+    "kind": "real",
+    "image_size": 603764,
+    "raw_sha256": "ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4",
+    "magic": "ETFW",
+    "version_code": 30205,
+    "stored_double_zero_sha256": "5bb216a64dfab6a4bc317598811372a351ab292e1ddb018b54a9646e8e9340da",
+    "computed_double_zero_sha256": "5bb216a64dfab6a4bc317598811372a351ab292e1ddb018b54a9646e8e9340da",
+    "body_equal": true,
+    "changed_bytes": 78,
+    "etu_size": 284590,
+    "etu_sha256": "32577aa5d0d98cab071440b455151bcc536f33a9a9d930e832f8bb140a607d77",
+    "etu_magic": "ETU1",
+    "flags": 11,
+    "target_vcode": 30205,
+    "base_vcode": 0,
+    "payload_len": 284526,
+    "length_exact": true
+  }
+]
