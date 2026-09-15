@@ -1,0 +1,10 @@
+logcat-decisive-toy.txt: 9876B sha256=d53328caf315c4cb14e4de658a0c643183c95e77465802a515ab5c9e6f896223
+rtt-device-toy.log: 635B sha256=679b7cc317e8b963075b6a36c6557c410de0be2112d6aedd19c5759c8f1c9ba6
+service-v7-toy-20260915.log: 4656B sha256=e6115d041a237cc26c6282b0abe073bba344b37e98c4d6ff62dba91b9cafea85
+toy-success-screenshot.jpg: 481707B sha256=960ce424b73632ee0d2bb00c2f056995d08205cb36ea41e75da7257a23f2fa4e
+toy-success-screenshot-user-forward.jpg: 152028B sha256=6ac6a7086007ff79d264c34609bd49f87bbed788cf90f04a845474a915100656
+
+# 原始大文件（留 .cache 原地，未拷贝）
+logcat-live-toy.log(32MB 全量): 32087068B sha256=d31d49688d5e2176305da7f6579f8fa3836fe4b95b6fec7eb7656fa7146d6c00
+rtt-live-toy.stdout(logger 状态): 177629B sha256=884fadfaa107d844ca3c842dcabd7d0dabab2e82853f77ea0ff0dd4ee2833df3
+toy-final-screenshot.jpg(cat 损坏件): 483063B sha256=e2a567ad9be4dfb12f869ceee3ea6552db72286b08dae0b140fa0d1e2c3fd7be

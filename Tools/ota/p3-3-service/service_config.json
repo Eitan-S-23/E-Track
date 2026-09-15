@@ -86,6 +86,56 @@
         "baseImageSha256": null,
         "path": ".cache/p3-3-assets-v6/e-track-at32f435-v3.2.3-full.etu"
       }
+    },
+    "toy-30204": {
+      "releaseId": "release-30204",
+      "versionName": "3.2.4",
+      "versionCode": 30204,
+      "releaseTag": "v3.2.4",
+      "releaseNotes": "P3-3 补测轮 toy 固件包（3.2.4/30204），v7 制包身份见 .cache/p3-3-assets-v7/verify_v7_report.txt（用户批准补测，源=1894f9d GCC 构建同源）",
+      "targetImageSha256": "43faf0cac092f54d862a4266e661fbf739db973a224180744d85c0169ff3fc13",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30204",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.4-full.etu",
+        "sha256": "81a773363711adff31cd788217ba18445b462e675042682bdd22302123f0228b",
+        "sizeBytes": 284581,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v7/e-track-at32f435-v3.2.4-full.etu"
+      }
+    },
+    "real-30205": {
+      "releaseId": "release-30205",
+      "versionName": "3.2.5",
+      "versionCode": 30205,
+      "releaseTag": "v3.2.5",
+      "releaseNotes": "P3-3 补测轮真固件包（3.2.5/30205），v7 制包身份见 .cache/p3-3-assets-v7/verify_v7_report.txt（用户批准补测，源=1894f9d GCC 构建同源）",
+      "targetImageSha256": "ab8528ecb8c4bc756dc2d12fddeb2eb454fa3c91472129f1881edecdff2bcfb4",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "state": "active",
+      "asset": {
+        "assetId": "asset-full-30205",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.5-full.etu",
+        "sha256": "32577aa5d0d98cab071440b455151bcc536f33a9a9d930e832f8bb140a607d77",
+        "sizeBytes": 284590,
+        "baseVersionCode": 0,
+        "baseImageSha256": null,
+        "path": ".cache/p3-3-assets-v7/e-track-at32f435-v3.2.5-full.etu"
+      }
     }
   }
 }
