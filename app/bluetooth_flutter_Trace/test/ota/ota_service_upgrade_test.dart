@@ -337,6 +337,59 @@ void main() {
     expect(ble.abortCalls, 0, reason: '成功路径不得发 ABORT');
   });
 
+  test('P3-4 链路观测 service 接线：upgrade/probe 摘要含绑定与传输字段',
+      () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    await prepareDownloaded(tempDir: tempDir, notifyLog: notifyLog);
+    final service = Get.find<OtaService>();
+
+    // 摘要走 debugPrint（与 OTA_MONO 取证同一通道）。
+    final statsLines = <String>[];
+    final originalPrint = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) {
+      final line = message ?? '';
+      if (line.startsWith('OTA_LINK_STATS ')) statsLines.add(line);
+    };
+    addTearDown(() {
+      debugPrint = originalPrint;
+    });
+
+    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+    expect(service.phase, OtaPhase.completed);
+
+    // upgrade 摘要（service 层接线冒烟）：绑定字段真实填充、DATA 写经
+    // stats 计时外壳、bind/transfer 相位起止成对。
+    final upgradeLine = statsLines.singleWhere(
+        (l) => l.contains('"label":"upgrade"'),
+        orElse: () => '');
+    expect(upgradeLine, isNotEmpty, reason: 'upgrade 摘要行必须输出');
+    final upgrade =
+        jsonDecode(upgradeLine.substring('OTA_LINK_STATS '.length))
+            as Map<String, dynamic>;
+    final bind = upgrade['bind'] as Map<String, dynamic>;
+    expect(bind['found'], isTrue, reason: '特征发现接线');
+    expect(bind['mtuRequested'], 247, reason: 'MTU 请求接线');
+    expect(bind['mtuChunkBytes'], 247, reason: '写净荷上限回填');
+    expect(bind['subscribeOk'], isTrue, reason: '订阅接线');
+    final phases = upgrade['phases'] as Map<String, dynamic>;
+    expect((phases['bind'] as List).length, 2,
+        reason: 'bind 阶段起止成对（phaseStart/End）');
+    expect((phases['transfer'] as List).length, 2,
+        reason: 'transfer 阶段起止成对');
+    final gattWrites = upgrade['gattWrites'] as Map<String, dynamic>;
+    expect(gattWrites['calls'] as int, greaterThan(0),
+        reason: 'DATA 写必须经过 stats 计时外壳（防接线遗漏回归）');
+    expect(gattWrites['bytes'] as int, greaterThan(0));
+    final transfer = upgrade['transfer'] as Map<String, dynamic>;
+    expect(transfer['outcome'], 'ok');
+
+    // probe 摘要独立输出（重启复核的目标身份等待单独计时，不混入
+    // upgrade 实例）。
+    expect(statsLines.any((l) => l.contains('"label":"probe"')), isTrue,
+        reason: 'probe 摘要行必须输出');
+  });
+
   test('MCU 未重启完：旧身份探测不误判，第二次探测确认目标（RC3-08）',
       () async {
     final tempDir = tempFirmwareDir();
