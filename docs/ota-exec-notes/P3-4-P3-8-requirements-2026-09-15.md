@@ -102,3 +102,37 @@ git --no-optional-locks -c core.whitespace=blank-at-eol,blank-at-eof,space-befor
 缓存、快照、日志和临时目录均在活动项目内。未发现主动项目外写入。
 最终报告及看板的验证回写不改变产品/profile 输入，也不将仍待授权的远端治理 CI、
 Flutter analyze/test/APK/EXE、真实吞吐或后台/锁屏观测改记为 PASS。
+
+## 2026-09-16 授权 Git 收口
+
+用户新增授权：“请提交推送收口你的更改，并给出给新agent的提示词”。下列操作发生在
+该授权之后，不追溯改写上文 2026-09-15 的未执行记录，也不扩大后续实现者的操作权限。
+
+- 活动工作树仍为 `D:\github\my\E-Track` / `main`。先核对 origin 的读取/推送 URL、
+  GitHub 凭据身份 `Eitan-S-23`、远端 main 与本地基线一致，以及全局 Git hooks。
+- 使用明确文件列表，只提交已独立复核的 9 份文档/治理测试，未使用 `git add -A`。
+  规范提交为 `d5a0b58e5952f2003bcb408cc8486eceac24c4b6`，随后正常推送
+  `HEAD:refs/heads/main`；无 force、tag、PR 合并或分支/worktree 删除。
+- 提交前检查正常执行并通过；显式提交消息避免调用全局 AI 消息生成器，子进程移除
+  可选本地 webhook 凭据，未修改全局 hooks 或凭据配置。所有可控临时目录与记录位于
+  `.cache/ota-policy-closeout-20260916/`，Git 对象/索引/refs/logs 位于项目内 `.git/`。
+
+| 自然触发的 workflow | 实际结果 |
+|---|---|
+| [Acceptance Governance 35008183321](https://github.com/Eitan-S-23/E-Track/actions/runs/35008183321) | `success`；7 组脚本分别 105/32/3/14/11/52/26 项，共 243 项全通过；P2-6 spec probes 步骤通过 |
+| [Build APK and EXE Release 35008183362](https://github.com/Eitan-S-23/E-Track/actions/runs/35008183362) | `success`；只执行路径检测，Android/Windows/Pages/Release 四个 job 全部 `skipped`，不作为构建证据 |
+| [GitHub Push to WeChat Notification 35008183391](https://github.com/Eitan-S-23/E-Track/actions/runs/35008183391) | `success`；只是既有推送通知，不作为质量门禁或产品证据 |
+
+已读取实际 run/job/step 结论与治理日志，不只依据提交绿点。原始 API JSON、命令退出码
+和治理日志保留在上述项目内缓存；`policy-governance-logs.zip` SHA-256 为
+`9f78efae2bf4996227e2fd319aa10817ea190656078287b702af497719ec5134`。
+本机没有重跑相同宿主输入；远端完整治理回归是现有 workflow 在授权推送后自然执行。
+
+规范提交推送后核对 `HEAD == origin/main == d5a0b58e5952f2003bcb408cc8486eceac24c4b6`。
+本节及看板是后续独立的纯收口记录提交，不改变已测规范/测试内容；其推送后仍须核对
+必要 CI 和主分支同步，不为此追加产品观测或反复制造记录自身 SHA 的提交。
+
+P3-4/P3-8 仍为待办、未认领；本次只完成规范入库。P3-3-v9 及 7 份保护文件保持原字节，
+原 375 份未跟踪资产保留。未新增 SDK/产品实现、workflow dispatch、APK/固件构建、
+安装/卸载、OTA、AT 改速、J-Link、烧录、发布或部署。下一派工建议为先启动 P3-4 的
+测量接线、开发自测和实验准备；具体设备动作另申请明确授权，P3-8 不夹带实施。
