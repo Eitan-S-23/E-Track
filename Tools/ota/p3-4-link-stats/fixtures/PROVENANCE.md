@@ -37,3 +37,20 @@
 块（`SUMMARY_MISSING`）、以及全部摘要变异负例。整份真实日志上的解析结果
 （0 致命 / 143 告警，含上述三类）记录在
 `docs/ota-exec-notes/P3-4-wiring-impl-2026-09-16.md`。
+
+## 行尾与字节身份保障
+
+本目录文件按 `.gitattributes` 既有约定登记为 `-text`（工作树字节 == 索引
+blob 字节，纯 LF）。仓库 `core.autocrlf=true`，缺该条目时新检出会把
+`round6-ubuntu-head.log` 转成 CRLF，字节身份断言与逐行解析会同时失真：
+`git add` 阶段已实测告警「LF will be replaced by CRLF」。
+
+复检命令（任一新检出上应全部为 `i/lf w/lf attr/-text`）：
+
+```text
+git ls-files --eol -- Tools/ota/p3-4-link-stats/
+```
+
+重新生成或替换夹具时，必须同步更新上表 SHA-256、`.gitattributes` 条目与
+`selftest.py` 内的身份常量，三者缺一即为不一致，不得只改其一。
+
