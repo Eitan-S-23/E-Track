@@ -649,7 +649,7 @@
 - 准入整改批交付(实现会话): Claude(P3-3 实现 agent, P3-3-IMPL-20260907, 授权 P3-3-IMPL-AUTH-20260912)/2026-09-12；在独占 worktree dev/flutter/apk/p3-3-admission 完成七项准入整改(提交 b3f7a05→d98d978→2c2b5f0→c1e4051→ee0266c→e1edd9e→095421d→1e641f1→ab6ce3b)：OBS-SEC-01 观测 URL 凭据键校验绕过修复、OBS-01/02/03 扫描三结局区分+唯一终止闸门+target 地址插桩、RC3-07/02 中止四阶段计时、OPS-01 B1-M 台账对账(3/3 用尽)、CI const 两轮修复、build.yml Gradle 8.14 对齐；稳定提交 ab6ce3b 开发自测 run 34730007317 双宿主全绿+debug APK，build-only run 34730618341 全绿(release 模式 APK 46682620B/2a5d5db9…、Windows 完整运行包 8bbbbea4…，均 debug 签名回退，Pages/Release skipped)；治理 CI 首跑绿(34728291114)；验收准备材料落盘：P3-3-v1 合同/矩阵草案(DRAFT/NOT_RUN，freeze 字段占位)、设备/Boot 身份、toy/真包资产清单(golden vectors 不具上板资格)与缺口移交清单，详见 docs/ota-exec-notes/P3-3-admission-remediation-2026-09-12.md。真机操作、合并/发布/部署均未执行；正式验收 NOT_RUN，保持进行中，认领不变；build-only 配额 3/3 用尽、治理 CI 剩 2/3。
 
 #### P3-4 AT 提速实测
-状态: 待办 ｜ 认领: — ｜ 更新: 2026-09-15(按 OTA-DEC-014 补充链路诊断与最小热点优化；未开始实施或实测)
+状态: 进行中 ｜ 认领: Claude(P3-4 实现 agent) / 2026-09-16 ｜ 更新: 2026-09-17(整改批 P34-R01 至 R07 已批量落地：dev/flutter/p3-4-link-stats 3fd464b→1772373→f5dc9fd→e783155；第九轮 CI run 35098277162 步骤级双宿主 analyze/tests PASS(exit=0)，整轮 failure 仅因上传步骤命中 GitHub artifact 存储配额；用户已授权清理 40 个旧开发 APK，释放 3,009,380,972 B，远端剩 305 个 artifact / 1,538,665,642 B，保留 12 个最新或证据引用 APK 及全部非目标产物。计量与上传恢复尚未验证，未重跑 CI；第九轮计数证据仍缺失，正式验收与设备实测 NOT_RUN。清理记录见 docs/ota-exec-notes/P3-4-artifact-cleanup-2026-09-17.md)
 - 依赖: P3-1 已完成；可使用已完成 P3-3 的实际发送器，不新增 P3-8 前置。
 - 目标: 先分解服务发现/GATT 写入/ACK 等待/UART 与 staging 开销，对实测支持的热点做最小优化，再做 115200 基线与至 921600 的 AT 逐档稳定性/吞吐实验；500ms 为初值非契约，流控只用协议 credit，禁启用硬件 RTS/CTS。
 - 范围: 沿用 MCU/发送器配置与统计接口；按 Spec 允许有证据支持的 Flutter 连接内 GATT 复用及必要调用链修改，不扩为无关重构或后台功能实现。源码热点不是已确认根因，不预设加速倍数。
@@ -783,6 +783,17 @@
 <!-- post-p2-6-readiness:end -->
 
 ---
+
+## 8.2 CI 开发产物治理（非产品卡）
+
+#### CI-ARTIFACT-01 按需打包、分级保留与开发日志兜底
+状态: 待办 ｜ 认领: — ｜ 更新: 2026-09-17(用户批准四项改进；主会话已冻结实施范围与派单，尚未实施或启用自动清理)
+- 范围: 开发工作流按需 APK、debug APK 3 天/日志 14 天保留、正式 APK/EXE 验证副本显式 14 天、独立有界维护工作流与配置预算提醒、runner 脱敏诊断输出及相应宿主回归/规范/依赖登记。
+- 边界: 独立 CI 治理批，不计入 P3 产品卡进度，不改 P3-4 产品代码/认领/硬件额度，不重开 P3-3 或其他历史验收；保留既有脏文件。构建/自测/独立复核/上线分别记录。
+- 授权: 本轮批准实施四项策略；提交、推送、合并和远端工作流启用仍须遵守现有授权。本地实施自测禁止新增真实 GitHub 删除或设备操作；长期维护仅在获准主线集成后按固定仓库/开发产物范围执行。
+- 派工书: docs/ota-prompts/prompt-CI-ARTIFACT-01-implementation.md；主会话决策与前置核对见 docs/ota-exec-notes/CI-ARTIFACT-01-dispatch-2026-09-17.md。
+- 验证: 受影响 Python 宿主正反例、完整批次非实现复核和治理 CI；不以静态检查或本地自测冒充远端已生效。
+- 证据: 实施、自测、独立复核与上线均 NOT_RUN；子 agent 启动方式待用户对本轮协调问题作答。
 
 ## 9. 契约变更登记表(回审通道)
 
@@ -1096,3 +1107,6 @@
 - 2026-09-15 ｜ Codex(P3-3 主会话，最终 Git 收口记录) ｜ P3-3(完成，保留 Claude 实现认领及 v9 五项 PASS) ｜ PR #24 在必要 CI 全绿后以 c6465bd merge commit 合并，主树原改动保全于本地分支 81f93ff 与项目内原字节归档后安全同步 main；HEAD == origin/main、freeze -> bundle -> main、367 份证据对象/363 份冻结文件字节及索引均核对通过。最终 CI/合并/同步事实通过后续文档提交入主线并再次同步，不只留在已合并分支；未 squash/rebase/force-push/stash/reset/清理/删分支或工作树，未发布部署或新增硬件操作。详见 docs/ota-exec-notes/P3-3-git-closeout-2026-09-15.md。
 - 2026-09-15 ｜ Codex(BLE 提速/Android 后台 OTA 需求治理，非产品实现) ｜ P3-4(待办，补充链路诊断)、P3-8(新立待办卡) ｜ 按用户要求登记 OTA-DEC-014 并同步根/App 规范、跨系统条款、两卡 Spec、readiness 和治理回归；实际接管前不放行后台，通知依据 MCU durable 与最终身份，提速先测量不承诺倍数。首跑 37 项、复核修订后相关 22 项宿主测试通过；独立复核纠正持久进度示例与生产参数回填要求后确认关闭，无新增问题。P3-3-v9 与历史冻结包不改，P3-5 既有依赖不变；写入审计通过，375 份既有未跟踪文件原字节保留；产品/Flutter/Actions/真机均本批 NOT_RUN，不提交推送、不追加设备额度。记录 docs/ota-exec-notes/P3-4-P3-8-requirements-2026-09-15.md。
 - 2026-09-16 ｜ Codex(BLE/后台 OTA 规范主会话，授权 Git 收口) ｜ P3-4/P3-8(均待办，仅规范入库) ｜ 用户授权后精确提交 9 份已复核文件 d5a0b58e5952f2003bcb408cc8486eceac24c4b6，以 Eitan-S-23 推送 main；治理 CI 35008183321 全绿(243 项宿主测试与 P2-6 探针)，build.yml run 35008183362 只运行路径检测，APK/EXE/Pages/Release 均 skipped。CI 与收口记录随独立后续提交入主线，不改产品/profile/旧冻结包，不执行本地构建、dispatch、安装/OTA/AT/J-Link/发布部署；原 375 份未跟踪资产保留，P3-3-v9 不变。记录 docs/ota-exec-notes/P3-4-P3-8-requirements-2026-09-15.md。
+- 2026-09-17 ｜ Codex(主会话，用户授权 artifact 清理) ｜ P3-4(进行中，上传恢复未验证) ｜ 以 Eitan-S-23 在 E-Track 仓库按固定 ID 删除 40 个已被替代的 flutter-dev-debug-apk 产物，共 3,009,380,972 B；远端由 345 个 / 4,548,046,614 B 降为 305 个 / 1,538,665,642 B。保留 12 个最新或证据引用 APK，全部其他产物元数据与摘要不变；两次 TLS 中断后先只读核对，再以 GitHub CLI 完成剩余原定 ID，40 个唯一 HTTP 204 回执齐全。未删除 run/日志/发布产物/冻结包，未修改可见性或计费，未触发 CI 或设备操作；原实现认领和第九轮证据边界不变。记录 docs/ota-exec-notes/P3-4-artifact-cleanup-2026-09-17.md，操作记录及 CLI 状态均在项目内 .cache/artifact-cleanup-20260917/，未提交推送。
+- 2026-09-17 ｜ Codex(主会话，CI 治理派单准备) ｜ CI-ARTIFACT-01(待办，实施未启动) ｜ 用户批准按需 APK、分级保留、独立维护及日志兜底四项改进；已核对现有工作流/runner/宿主回归与权限边界，新增独立治理卡、docs/ota-prompts/prompt-CI-ARTIFACT-01-implementation.md 和 docs/ota-exec-notes/CI-ARTIFACT-01-dispatch-2026-09-17.md。主会话未转任实现或验收；已询问是否允许本线程启动独立实现及复核子 agent，未答复前不启动。未改工作流/runner/策略，未启用自动删除，未提交推送或触发 CI；P3-4 原认领、产品改动和硬件额度不变。
+- 2026-09-17 ｜ Codex(主会话，文档提交授权) ｜ CI-ARTIFACT-01(待办)、P3-4(进行中) ｜ 用户补充授权提交并推送本会话改动；范围仅为清理记录、CI 治理决策/派工书及主会话看板片段，其他会话的 P3-4 源码、测试与看板记录留在原工作区，不夹带提交。四项改进仍未实现或启用；本次授权不扩为手动重跑 CI、启动子 agent、合并产品或设备操作。此前日志中的“未提交推送”保留为当时事实，实际提交与远端状态由 Git 记录核对。
