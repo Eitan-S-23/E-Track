@@ -81,6 +81,10 @@
 /Tools/jlink/flash-app-gcc.jlink -text
 /Tools/jlink/flash-boot.jlink -text
 /Tools/jlink/prepare-bootstrap-app.py -text
+/Tools/ota/p3-4-link-stats/fixtures/PROVENANCE.md -text
+/Tools/ota/p3-4-link-stats/fixtures/round6-ubuntu-head.log -text
+/Tools/ota/p3-4-link-stats/link_stats.py -text
+/Tools/ota/p3-4-link-stats/selftest.py -text
 /Tools/provenance/source_manifest.ps1 -text
 /Tools/provenance/worktree_guard.ps1 -text
 /Tools/图标/README.md -text
