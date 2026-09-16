@@ -1162,6 +1162,13 @@ class OtaService extends GetxController {
         // P3-4 观测：本实例的一切退出路径（全部早退、取消、三类异常、
         // 成功）都在此落终结摘要——早退路径的失败阶段/原因由上面的
         // fail()/recordFailure 留下，未进入传输的失败不伪装成成功传输。
+        // 传输终态兜底（P34-R05）：未进入传输就退出的轮次（特征缺失、绑定
+        // 失败、取消、异常）此前没有终态，消费者只看 transfer.outcome 时
+        // 会把整轮失败读成"没发生过传输"。本方法幂等，且唯一返回 true 的
+        // 路径在 END ACK 采信点之后、已由 transport 登记 'ok'，因此兜底
+        // 不会改写成功轮次；是否真的开始过传输由 startUs/elapsedUs 是否
+        // 为空区分。
+        linkStats.recordTransferOutcome(ok: false);
         // emitSummary 幂等：已提前输出过的路径不会重复。
         linkStats.emitSummary();
       }

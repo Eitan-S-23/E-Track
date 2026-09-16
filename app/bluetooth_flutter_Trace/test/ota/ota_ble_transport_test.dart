@@ -2566,6 +2566,8 @@ void main() {
 /// 块 0 的 32 段 DATA(seq=11..42) → 块收齐提交 journal durable=4096 →
 /// ABORT teardown（模拟断线：RAM 层清空，durable/字节保留）。返回后
 /// [mcu.stagedDurable] 为 4096，且 MCU 处于 IDLE。
+/// 文件级助手看不到 `main()` 作用域内的 [shaOf]/[etuHeaderOf]，BEGIN
+/// 载荷必须在这里自算：摘要用真实 SHA-256、头用包前 64B（同 main 内定义）。
 Future<void> _prestageCommittedBlock0(_McuSim mcu, Uint8List package) async {
   await mcu.writeChunk(OtaBleCodec.encodeCommand(
     cmd: OtaBleCodec.cmdBegin,
@@ -2573,8 +2575,8 @@ Future<void> _prestageCommittedBlock0(_McuSim mcu, Uint8List package) async {
     seq: 10,
     payload: OtaBleCodec.encodeBeginPayload(
       totalLen: package.length,
-      packageSha256: shaOf(package),
-      etuHeader: etuHeaderOf(package),
+      packageSha256: sha256.convert(package).bytes,
+      etuHeader: Uint8List.fromList(package.sublist(0, 64)),
     ),
   ));
   for (var i = 0; i < 32; i++) {

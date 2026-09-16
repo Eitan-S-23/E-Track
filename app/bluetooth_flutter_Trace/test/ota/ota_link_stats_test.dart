@@ -356,7 +356,8 @@ void main() {
     });
 
     test('probe 轮次：attempt 序号、逐轮结论与阶段窗口（P34-R06）', () {
-      final stats = OtaLinkStats(label: 'probe', device: 'AA:BB', attempt: 2);
+      // 轮次外壳（不带 attempt）：每轮记一条，序号即尝试序号。
+      final stats = OtaLinkStats(label: 'probe', device: 'AA:BB');
       stats.phaseStart('reconnect');
       stats.phaseStart('probe_attempt');
       stats.recordAttemptOutcome('timedOut');
@@ -365,7 +366,7 @@ void main() {
       stats.phaseEnd('reconnect');
       final json = stats.toJson();
       expect(json['label'], 'probe');
-      expect(json['attempt'], 2);
+      expect(json['attempt'], isNull, reason: '轮次外壳不冒充某一轮');
       expect(json['attempts'], <Map<String, Object>>[
         <String, Object>{'n': 1, 'outcome': 'timedOut'},
         <String, Object>{'n': 2, 'outcome': 'completed'},
@@ -376,6 +377,17 @@ void main() {
       final reconnect = phases['reconnect'] as List;
       expect(reconnect.length, 2);
       expect(reconnect[1] as int, greaterThanOrEqualTo(reconnect[0] as int));
+
+      // 单轮实例（带 attempt）：结论序号必须等于本轮的尝试序号，不得回落
+      // 成实例内下标 1——同一份 JSON 里 `attempt=3` 配 `n=1` 会把轮次归属
+      // 读错（P34-R06）。
+      final one = OtaLinkStats(label: 'probe', device: 'AA:BB', attempt: 3);
+      one.recordAttemptOutcome('completed');
+      final oneJson = one.toJson();
+      expect(oneJson['attempt'], 3);
+      expect(oneJson['attempts'], <Map<String, Object>>[
+        <String, Object>{'n': 3, 'outcome': 'completed'},
+      ]);
     });
 
     test('失败往返与失败尝试同样入账（getInfo/discover/platformWrite）'

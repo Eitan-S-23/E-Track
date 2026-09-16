@@ -163,6 +163,10 @@ class OtaLinkStats {
 
   /// 本轮重连尝试的结论（completed / abandoned / cancelled / error /
   /// no_verdict）。每轮独立实例，轮次结论不与后续轮次混组。
+  ///
+  /// 导出时每条记为一个 `{'n': 序号, 'outcome': ...}`：序号是**尝试序号**
+  /// （轮次外壳按记录顺序递增；单轮实例取 [attempt]），不是本实例内的
+  /// 数组下标。
   void recordAttemptOutcome(String outcome) {
     _attemptOutcomes.add(outcome);
     _attemptOutcomeUs ??= nowUs();
@@ -193,6 +197,11 @@ class OtaLinkStats {
   }
 
   /// 传输终态（幂等）：成功 true / 失败 false（错误码由上层 catch 补记）。
+  ///
+  /// 语义是**整轮传输阶段**的结论，而非「是否调用过 transfer」：未进入
+  /// 传输就失败的轮次（特征缺失、绑定失败、取消、异常）同样以 fail 收尾，
+  /// 否则只看本字段的消费者会把整轮失败读成"没发生过传输"（P34-R05）。
+  /// 是否真的开始过传输由 [startUs]/[elapsedUs] 是否为空区分。
   void recordTransferOutcome({required bool ok}) {
     _transferOutcome ??= ok ? 'ok' : 'fail';
     phaseEnd('transfer');
@@ -501,7 +510,10 @@ class OtaLinkStats {
       },
       'attempts': [
         for (var i = 0; i < _attemptOutcomes.length; i++)
-          {'n': i + 1, 'outcome': _attemptOutcomes[i]},
+          // n 恒为重连尝试序号：轮次外壳按记录顺序递增（每轮一条），
+          // 单轮实例直接用其 attempt 序号——同一份 JSON 里 attempt=2
+          // 而 n=1 会让归属被读错（P34-R06）。
+          {'n': attempt ?? (i + 1), 'outcome': _attemptOutcomes[i]},
       ],
       'attemptEndUs': _attemptOutcomeUs,
       'bind': {
