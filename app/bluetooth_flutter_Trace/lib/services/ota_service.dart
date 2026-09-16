@@ -839,18 +839,26 @@ class OtaService extends GetxController {
       // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
       final linkStats = OtaLinkStats(label: 'upgrade', device: deviceAddress);
       OtaBleTransport? activeTransport;
+      // P3-4 观测：早退/取消统一留痕（阶段 + 原因）后返回 false——未进入
+      // 传输的失败不得伪装成成功传输，也不得从终结摘要里静默消失。
+      bool fail(String stage, String reason) {
+        linkStats.recordFailure(stage: stage, reason: reason);
+        return false;
+      }
       try {
         // 就地读取并校验包字节（RC2-04）：锁后一次读取，长度+SHA 校验
         // 与传输共用同一份字节快照，替代原先 verifyFileMatchesAsset 二次
         // 读文件 + readAsBytesSync 再读一次的多份文件视图（文件在两次
         // 读取之间被改将无法被发现）。
         final package = await file.readAsBytes();
-        if (generation != _cancelGeneration) return false;
+        if (generation != _cancelGeneration) {
+          return fail('cancelled', 'generation-changed');
+        }
         final packageDigest = sha256.convert(package);
         if (package.length < 64) {
           _upgradeStatus.value = '固件包长度非法: ${package.length}';
           _phase.value = OtaPhase.failed;
-          return false;
+          return fail('validate', 'package-too-short');
         }
         if (package.length != asset.sizeBytes ||
             packageDigest.toString() != asset.sha256) {
@@ -859,25 +867,24 @@ class OtaService extends GetxController {
           _upgradeStatus.value = '固件文件与清单不符（长度或 SHA-256），请重新下载';
           _notify('错误', '固件文件校验失败，请重新下载');
           _phase.value = OtaPhase.failed;
-          return false;
+          return fail('validate', 'package-mismatch');
         }
         final etuHeader = package.sublist(0, 64);
         final packageSha256 = packageDigest.bytes;
 
-        // P3-4 观测：OTA 特征发现（findExact 整体）耗时与结果。
-        final charsSw = Stopwatch()..start();
+        // P3-4 观测：OTA 特征发现（外壳记录耗时/成败/写模式，内部服务发现
+        // 另行计时——stats 必须透传，否则发现计数与写模式都采不到）。
         final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
           deviceAddress,
+          stats: linkStats,
         );
-        linkStats.recordCharsDiscovery(
-          durationUs: charsSw.elapsedMicroseconds,
-          found: otaChars != null,
-        );
-        if (generation != _cancelGeneration) return false;
+        if (generation != _cancelGeneration) {
+          return fail('cancelled', 'generation-changed');
+        }
         if (otaChars == null) {
           _upgradeStatus.value = '设备未暴露 OTA 服务（FFF0/FFF2/FFF1）';
           _phase.value = OtaPhase.failed;
-          return false;
+          return fail('discover', 'ota-chars-missing');
         }
         // P3-4 观测：绑定阶段（MTU 协商 + 通知订阅）整体起止。
         linkStats.phaseStart('bind');
@@ -893,17 +900,19 @@ class OtaService extends GetxController {
           if (transport != null && identical(_transport, transport)) {
             _transport = null;
           }
-          return false;
+          return fail('cancelled', 'generation-changed');
         }
         if (transport == null) {
           _upgradeStatus.value = 'OTA 通知订阅失败';
           _phase.value = OtaPhase.failed;
-          return false;
+          return fail('bind', 'notify-subscribe-failed');
         }
         activeTransport = transport;
         // 重连身份复核：当前 INFO 必须与会话开始时快照一致。
         final recheck = await transport.getDeviceInfo();
-        if (generation != _cancelGeneration) return false;
+        if (generation != _cancelGeneration) {
+          return fail('cancelled', 'generation-changed');
+        }
         if (!deviceIdentityMatches(recheck, info)) {
           _terminalState.value = OtaTerminalState(
             code: 'DEVICE_IDENTITY_CHANGED',
@@ -911,7 +920,7 @@ class OtaService extends GetxController {
           );
           _upgradeStatus.value = '设备身份复核失败';
           _phase.value = OtaPhase.failed;
-          return false;
+          return fail('recheck', 'device-identity-changed');
         }
 
         // ETU 包字节与身份已在上锁后就地校验（RC2-04）。
@@ -935,10 +944,13 @@ class OtaService extends GetxController {
             debugPrint('OTA sent $sent/$total');
           },
         );
-        // P3-4 观测：传输终态已定（transport finally 已记录 outcome），
-        // 输出本轮升级的聚合摘要（幂等；取消/异常路径由各 catch 补发）。
+        // P3-4 观测：传输终态已定（transport finally 已记录 outcome），先落
+        // 一份摘要——后续重启等待可能长达整个复核窗口，终态摘要不应等到
+        // 那时。幂等：末尾 finally 的收尾摘要不会重复输出。
         linkStats.emitSummary();
-        if (generation != _cancelGeneration) return false;
+        if (generation != _cancelGeneration) {
+          return fail('cancelled', 'generation-changed');
+        }
         if (!ack.isOk) {
           final terminal = OtaTerminalState(
             code: 'MCU_ACK_${ack.status.toRadixString(16).toUpperCase()}',
@@ -949,7 +961,7 @@ class OtaService extends GetxController {
           _terminalState.value = terminal;
           _upgradeStatus.value = '升级失败: ${terminal.code}';
           _phase.value = OtaPhase.failed;
-          return false;
+          return fail('transfer', 'mcu-ack-0x${ack.status.toRadixString(16)}');
         }
         // ---- END OK 只是包传完（PR07）----
         _durableProgress.value = 1.0;
@@ -970,7 +982,7 @@ class OtaService extends GetxController {
           );
           _upgradeStatus.value = '目标身份复核失败（清单缺失）';
           _phase.value = OtaPhase.failed;
-          return false;
+          return fail('manifest', 'manifest-missing');
         }
         final outcome = await _waitForTargetIdentity(
           deviceAddress,
@@ -978,7 +990,9 @@ class OtaService extends GetxController {
           latest,
           generation,
         );
-        if (generation != _cancelGeneration) return false;
+        if (generation != _cancelGeneration) {
+          return fail('cancelled', 'generation-changed');
+        }
         switch (outcome.kind) {
           case _RebootKind.targetVerified:
             // 终点观测（补测轮取证）：复核链在新连接上 GET_INFO 比对
@@ -1004,7 +1018,7 @@ class OtaService extends GetxController {
                 '（${_rebootWindow.inSeconds} 秒，升级可能已完成，可稍后'
                 '重连确认）';
             _phase.value = OtaPhase.failed;
-            return false;
+            return fail('reboot', 'reboot-reconnect-failed');
           case _RebootKind.identityChanged:
             _terminalState.value = OtaTerminalState(
               code: 'DEVICE_IDENTITY_CHANGED',
@@ -1012,13 +1026,12 @@ class OtaService extends GetxController {
             );
             _upgradeStatus.value = '重启后设备身份复核失败';
             _phase.value = OtaPhase.failed;
-            return false;
+            return fail('reboot', 'device-identity-changed');
           case _RebootKind.cancelled:
-            return false; // 静默：状态由 cancelUpgrade 发布
+            // 静默：状态由 cancelUpgrade 发布（观测仍留痕）。
+            return fail('cancelled', 'reboot-wait-cancelled');
         }
       } on OtaTransportException catch (e) {
-        // P3-4 观测：异常退出路径补发摘要（幂等，取消窗口同发）。
-        linkStats.emitSummary();
         if (e.code == 'DISCONNECTED') {
           // 断连使旧身份快照失效（PR09）：恢复须重新 GET_INFO。
           _deviceInfo = null;
@@ -1036,7 +1049,7 @@ class OtaService extends GetxController {
           // 终止语义与包处置由 cancelUpgrade 在本 owner（含 finally）完全退出后
           // 一次性发布，这里静默让出，也不重复 ABORT——取消路径已对取消时刻的
           // transport 做过尽力 ABORT。
-          return false;
+          return fail('cancelled', 'cancel-window');
         }
         if (_consumeFailClosedDecision()) {
           // 后台复核 failClosed 已决定终止（RC3-08/12②）：终止态发布时不
@@ -1044,7 +1057,7 @@ class OtaService extends GetxController {
           // 本分支。终止原因/可重试语义/收尾相位（cancelled）归属
           // failClosed 已发布的 [_terminalState]/[_upgradeStatus]，这里静默
           // 让出，也不重复 ABORT——failClosed 已尽力 ABORT 过。
-          return false;
+          return fail('recheck', 'fail-closed');
         }
         if (e.code != 'CANCELLED') {
           // RC3-07/02 四阶段：此处是「中止决定」，终态发布要等 ABORT
@@ -1063,6 +1076,9 @@ class OtaService extends GetxController {
             }
           }
           otaMonoLog('MONO_TERMINAL', code: e.code);
+          // P3-4 观测：真实链路失败（非取消、非已决终止）留痕。
+          linkStats.recordFailure(
+              stage: 'transfer', reason: 'transport:${e.code}');
           _phase.value = OtaPhase.failed;
         } else {
           // 非取消来源的 CANCELLED：发送循环是被 abortBestEffort 停掉的
@@ -1077,15 +1093,14 @@ class OtaService extends GetxController {
           // 传输层的「OTA 传输已取消」，抢先写会把 failClosed 刚发布的
           // 「设备复核失败（后台恢复），升级已终止，可重试续传」覆盖成
           // 通用链路失败文案，丢掉终止原因与可重试语义。
+          linkStats.recordFailure(
+              stage: 'cancelled', reason: 'transport-cancelled');
           _phase.value = OtaPhase.cancelled;
         }
         // 本 catch 的两支都只在 `generation == _cancelGeneration`（本 owner
         // 仍是当前 owner）时发布：用户取消窗口已在上面统一让出。
         return false;
       } on OtaDeviceIdentityException catch (e) {
-        // P3-4 观测：身份异常多发生在传输前的 GET_INFO 复核，摘要含
-        // 发现/绑定/复核数据（幂等）。
-        linkStats.emitSummary();
         if (generation != _cancelGeneration) {
           // 与上面同一条取消窗口让出规则（RC3-12②），也与重启复核的
           // `_RebootKind.identityChanged` 分支保持一致——那条路径在发布前
@@ -1093,17 +1108,20 @@ class OtaService extends GetxController {
           // 判定就是同一语义的两个出口行为不一致。且 `_terminalState` 不被
           // cancelUpgrade 重置：取消后由迟到身份异常写入的 DEVICE_IDENTITY_*
           // 会一直挂在 phase=cancelled 旁边，UI 展示自相矛盾的终止原因。
-          return false;
+          return fail('cancelled', 'cancel-window');
         }
         if (_consumeFailClosedDecision()) {
           // 同 typed catch（RC3-08/12②）：failClosed 已决终止不得被迟到的
           // 身份异常覆盖成 DEVICE_IDENTITY_* + failed。
-          return false;
+          return fail('recheck', 'fail-closed');
         }
         // RC3-07/02：身份异常路径无在途业务写（GET_INFO 期间不发
         // DATA/END），没有 ABORT 收尾段——决定即终态，两事件同点落盘。
         otaMonoLog('MONO_TERMINAL_DECIDED', code: e.code);
         otaMonoLog('MONO_TERMINAL', code: e.code);
+        // P3-4 观测：身份异常多发生在传输前的 GET_INFO 复核，留痕后由
+        // finally 统一输出终结摘要。
+        linkStats.recordFailure(stage: 'recheck', reason: 'identity:${e.code}');
         _terminalState.value = OtaTerminalState(
           code: e.code,
           message: e.toString(),
@@ -1112,21 +1130,21 @@ class OtaService extends GetxController {
         _phase.value = OtaPhase.failed;
         return false;
       } catch (e) {
-        // P3-4 观测：未知异常路径补发摘要（幂等）。
-        linkStats.emitSummary();
         if (generation != _cancelGeneration) {
           // 原生/未知异常同样不得抢在取消清理前发布失败态（RC3-12②）：
           // 取消引发的在途写异常会走这一支，发布职责归属 cancelUpgrade。
-          return false;
+          return fail('cancelled', 'cancel-window');
         }
         if (_consumeFailClosedDecision()) {
           // 同 typed catch（RC3-08/12②）：failClosed 之后在途写以原生异常
           // 退出走这一支，不得覆盖 failClosed 已发布的终止态。
-          return false;
+          return fail('recheck', 'fail-closed');
         }
         // RC3-07/02 四阶段：同 typed catch——决定、ABORT 收尾、终态发布
         // 分开打点，未知异常的收尾时长同样可观测。
         otaMonoLog('MONO_TERMINAL_DECIDED', code: 'UNKNOWN');
+        // P3-4 观测：未知异常留痕（含异常文本），由 finally 统一输出摘要。
+        linkStats.recordFailure(stage: 'unknown', reason: '$e');
         _upgradeStatus.value = '升级失败: $e';
         final abortTransport = activeTransport;
         if (abortTransport != null) {
@@ -1140,6 +1158,12 @@ class OtaService extends GetxController {
         otaMonoLog('MONO_TERMINAL', code: 'UNKNOWN');
         _phase.value = OtaPhase.failed;
         return false;
+      } finally {
+        // P3-4 观测：本实例的一切退出路径（全部早退、取消、三类异常、
+        // 成功）都在此落终结摘要——早退路径的失败阶段/原因由上面的
+        // fail()/recordFailure 留下，未进入传输的失败不伪装成成功传输。
+        // emitSummary 幂等：已提前输出过的路径不会重复。
+        linkStats.emitSummary();
       }
     }) ?? false;
   }
@@ -1619,11 +1643,12 @@ class OtaService extends GetxController {
     FirmwareLatestInfo latest,
     int generation,
   ) async {
-    // P3-4 链路观测：重启探测独立时钟域实例（跨轮询 attempt 累计共用
-    // 一个实例；与升级传输的 upgrade 实例时间戳不相减）。结束路径
-    // （cancelled/targetVerified/timedOut/identityChanged）统一在返回前
-    // 输出聚合摘要（幂等）。
-    final probeStats = OtaLinkStats(label: 'probe', device: deviceAddress);
+    // P3-4 链路观测：重启等待分两级实例（与升级传输的 upgrade 实例时间戳
+    // 不相减）——roundStats 是整个重连等待的轮次外壳（reconnect 阶段起止 +
+    // 总体结论），每轮连接尝试另有独立实例（见循环内）。所有返回路径统一
+    // 记录结论并输出聚合摘要（幂等）。
+    final roundStats = OtaLinkStats(label: 'probe', device: deviceAddress);
+    roundStats.phaseStart('reconnect');
     // RC3-08⑤：截止先于主动断开建立——断开本身可能耗时（等协议栈状态
     // 迁移），总预算必须覆盖断开与全部轮询，不得从断开完成后才开始
     // 计费（否则断开耗时会无声挤占重启等待窗口）。
@@ -1637,9 +1662,12 @@ class OtaService extends GetxController {
     await _ble
         .disconnectOtaDeviceByAddress(deviceAddress)
         .timeout(const Duration(seconds: 5), onTimeout: () {});
+    var attemptNo = 0;
     while (DateTime.now().isBefore(deadline)) {
       if (generation != _cancelGeneration) {
-        probeStats.emitSummary();
+        roundStats.recordAttemptOutcome('cancelled');
+        roundStats.phaseEnd('reconnect');
+        roundStats.emitSummary();
         return const _RebootOutcome(_RebootKind.cancelled);
       }
       // RC3-08：单轮探测链（connect/discover/bind/INFO）受剩余总预算与
@@ -1660,13 +1688,24 @@ class OtaService extends GetxController {
       bool probeAborted() =>
           probeAbandoned || generation != _cancelGeneration;
       _RebootOutcome? outcome;
+      // P3-4 观测：本轮连接尝试独立成实例（attempt 从 1 起）。绑定阶段字段
+      // （发现/MTU/订阅）幂等只记首次，共享实例会把首轮的失败值带进后续轮
+      // 次的摘要；独立实例还使迟到完成的回调只落在自己的轮次上，且本轮摘要
+      // 在本轮结论时定格（emitSummary 幂等，迟到写入不再改写已发布摘要）。
+      attemptNo++;
+      final attemptStats = OtaLinkStats(
+        label: 'probe',
+        device: deviceAddress,
+        attempt: attemptNo,
+      );
+      attemptStats.phaseStart('probe_attempt');
       try {
         outcome = await _probeTargetIdentity(
           deviceAddress,
           sessionInfo,
           latest,
           probeAborted,
-          stats: probeStats,
+          stats: attemptStats,
         ).timeout(
           roundCap < const Duration(seconds: 1)
               ? const Duration(seconds: 1)
@@ -1679,8 +1718,17 @@ class OtaService extends GetxController {
       } catch (_) {
         // 重启期间连接/读取失败是预期路径，继续轮询。
       }
+      attemptStats.recordAttemptOutcome(
+        outcome != null
+            ? _rebootOutcomeName(outcome.kind)
+            : (probeAbandoned ? 'abandoned' : 'no_verdict'),
+      );
+      attemptStats.phaseEnd('probe_attempt');
+      attemptStats.emitSummary();
       if (outcome != null) {
-        probeStats.emitSummary();
+        roundStats.recordAttemptOutcome(_rebootOutcomeName(outcome.kind));
+        roundStats.phaseEnd('reconnect');
+        roundStats.emitSummary();
         return outcome;
       }
       // 轮询间隔同样受剩余预算封顶（RC3-08）：不足一个间隔时按剩余量
@@ -1692,8 +1740,24 @@ class OtaService extends GetxController {
         );
       }
     }
-    probeStats.emitSummary();
+    roundStats.recordAttemptOutcome('timedOut');
+    roundStats.phaseEnd('reconnect');
+    roundStats.emitSummary();
     return const _RebootOutcome(_RebootKind.timedOut);
+  }
+
+  /// 轮次结论文本（P3-4 观测字段；取值稳定，已发布后勿改）。
+  static String _rebootOutcomeName(_RebootKind kind) {
+    switch (kind) {
+      case _RebootKind.targetVerified:
+        return 'completed';
+      case _RebootKind.timedOut:
+        return 'timedOut';
+      case _RebootKind.identityChanged:
+        return 'identityChanged';
+      case _RebootKind.cancelled:
+        return 'cancelled';
+    }
   }
 
   /// 单轮重启探测（RC3-08 抽出）：connect → discover → bind → GET_INFO
@@ -1715,18 +1779,19 @@ class OtaService extends GetxController {
     try {
       if (await _ble.connectOtaDeviceByAddress(deviceAddress)) {
         if (aborted()) return null;
-        // P3-4 观测：probe 轮的特征发现耗时（跨 attempt 累计共用实例）。
-        final charsSw = stats == null ? null : (Stopwatch()..start());
-        final otaChars =
-            await _ble.findExactOtaCharacteristicsByAddress(deviceAddress);
-        stats?.recordCharsDiscovery(
-          durationUs: charsSw!.elapsedMicroseconds,
-          found: otaChars != null,
+        // P3-4 观测：本轮特征发现（findExact 外壳记录耗时/成败/写模式，
+        // 内部服务发现另行计时——stats 必须透传）。
+        final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
+          deviceAddress,
+          stats: stats,
         );
         if (aborted()) return null;
         if (otaChars != null) {
+          // P3-4 观测：本轮绑定阶段（MTU 协商 + 通知订阅）起止。
+          stats?.phaseStart('bind');
           probe = await _bindProbeTransport(deviceAddress, otaChars, aborted,
               stats: stats);
+          stats?.phaseEnd('bind');
           if (aborted()) return null;
           if (probe != null) {
             _phase.value = OtaPhase.reconnectVerify;

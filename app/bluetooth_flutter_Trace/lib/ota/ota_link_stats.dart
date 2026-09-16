@@ -16,11 +16,14 @@ import 'package:flutter/foundation.dart';
 /// - **只读观测**：不参与任何控制流、超时与判据；`null` 传入时调用点
 ///   零行为差异。
 /// - **观测者效应口径**：采样时间戳全部取自被观测调用（await 边界）前后，
-///   日志输出发生在时间戳之后，单样本值不受输出开销污染；帧间日志会轻
-///   微拉长传输总时长，因此所有对照组合必须使用同一发送器版本（同一
-///   插桩提交），口径一致。
+///   日志输出发生在时间戳之后。帧间日志会轻微拉长传输总时长；外层计时
+///   （如 GATT 写外壳）**包含**其内部记录点与日志开销，因此所有对照组合
+///   必须使用同一插桩版本（同一提交），不同调用次数下的开销不可视为相等。
 /// - **fail-closed 完整性**：`outcome=ok` 的传输若存在已发送但无 ACK 样本
-///   的段，摘要如实输出 `partial:missing=N` 而非静默缺行。
+///   的段，摘要如实输出 `partial:missing=N` 而非静默缺行；确认早于首发
+///   登记、无合法起点的观测另计 `early=M` 并留痕，不截负时间、不造样本。
+/// - **失败可见**：早退、异常与取消都必须经 [recordFailure] 留下终结后的
+///   阶段/原因；未进入传输的失败不得伪装成成功传输。
 ///
 /// 日志契约（logcat 采集）：
 /// - `OTA_LINK_SAMPLE label=<upgrade|probe|query> kind=<...> us=<n> [off=<n>] ...`
@@ -30,17 +33,25 @@ import 'package:flutter/foundation.dart';
 /// ACK 延迟样本语义（OTA-XC-BLE-TUNING 冻结定义的工程映射）：
 /// 从该段**首次完整发送结束**（`recordSegmentSendEnd` 首次记录该字节偏移）
 /// 到**首个由 durable_off/bitmap 明确确认该段的有效 ACK 到达**
-/// （`recordAckConfirm` / `recordBitmapConfirm`）。多个段可共享同一确认
-/// （终点同、起点各异）；重复、无推进、错误与畸形 ACK 不产生样本
-/// （在 ACK 分类计数中如实登记）；重传不创建新样本（首发结束时刻不变）。
+/// （`recordAckConfirm` / `recordBitmapConfirm` / `recordResumeConfirm`）。
+/// 多个段可共享同一确认（终点同、起点各异）；重复、无推进、错误与畸形 ACK
+/// 不产生样本（在 ACK 分类计数中如实登记）；重传不创建新样本（首发结束
+/// 时刻不变）。确认先于首发登记到达时不存在合法起点，该观测作废并计数
+/// （`ackEarlyInvalid`），既不截负时间也不让迟到重复确认补造样本。
 class OtaLinkStats {
-  OtaLinkStats({required this.label, this.device});
+  OtaLinkStats({required this.label, this.device, this.attempt});
 
   /// 绑定用途：升级传输 / 重启探测 / 身份查询。
   final String label;
 
   /// 目标设备地址（仅标识用，不参与任何判据）。
   final String? device;
+
+  /// 重启探测的重连轮次序号（1 起；非探测路径为 null）。
+  ///
+  /// 每次连接尝试必须是独立实例：绑定阶段字段（发现/MTU/订阅）幂等只记
+  /// 首次，共享实例会让首轮失败值污染后续轮次的最终摘要。
+  final int? attempt;
 
   final Stopwatch _clock = Stopwatch()..start();
 
@@ -68,29 +79,45 @@ class OtaLinkStats {
 
   int? _charsDiscoveryUs;
   bool _charsFound = false;
+  String? _charsWriteMode;
   int _mtuRequested = 0;
   int _mtuChunkBytes = 0;
   int? _mtuUs;
+  String? _mtuSource;
   int? _subscribeUs;
   bool _subscribeOk = false;
 
   /// OTA 特征发现（findExact 整体）耗时与结果；幂等只记首次。
-  void recordCharsDiscovery({required int durationUs, required bool found}) {
+  ///
+  /// [writeMode] 为绑定实际使用的写模式（writeWithResponse /
+  /// writeWithoutResponse / unknown），用于核查写模式是否与预期混组。
+  void recordCharsDiscovery({
+    required int durationUs,
+    required bool found,
+    String? writeMode,
+  }) {
     if (_charsDiscoveryUs != null) return;
     _charsDiscoveryUs = durationUs;
     _charsFound = found;
+    _charsWriteMode = writeMode;
   }
 
   /// MTU 协商结果：请求值与协商后的单次写入净荷上限。
+  ///
+  /// [source] 记录该净荷上限的来源（windows-stack-managed /
+  /// device-missing / negotiated / negotiated-too-small / error-fallback）：
+  /// 回退值与真实协商值同为 20，没有来源就无法区分二者。
   void recordMtu({
     required int requested,
     required int chunkBytes,
     required int durationUs,
+    String? source,
   }) {
     if (_mtuUs != null) return;
     _mtuRequested = requested;
     _mtuChunkBytes = chunkBytes;
     _mtuUs = durationUs;
+    _mtuSource = source;
   }
 
   /// OTA 通知订阅耗时与结果；幂等只记首次。
@@ -103,11 +130,42 @@ class OtaLinkStats {
   // ---- GET_INFO 往返 ----
 
   final List<int> _getInfoDurationsUs = [];
+  int _getInfoFailures = 0;
 
   /// 一次 GET_INFO 往返（含实例内部的有界重试）。
-  void recordGetInfo({required int durationUs}) {
+  ///
+  /// [ok] 为 false 时同样登记耗时与失败次数：失败往返同样消耗链路时间，
+  /// 不能因为「没有身份值可采」就从统计中消失。
+  void recordGetInfo({required int durationUs, bool ok = true}) {
     _getInfoDurationsUs.add(durationUs);
-    _emitSample('get_info', durationUs);
+    if (!ok) _getInfoFailures++;
+    _emitSample('get_info', durationUs, extra: ok ? 'ok=1' : 'ok=0');
+  }
+
+  // ---- 失败分类（早退 / 异常 / 取消的统一留痕）----
+
+  String? _failureStage;
+  String? _failureReason;
+
+  /// 记录本实例终结的失败阶段与原因（幂等，只记首次）。
+  ///
+  /// 早退（特征不存在、绑定返回 null、取消、身份不一致）不经异常路径，
+  /// 也必须留下终结摘要与原因；未进入传输的失败不得伪装成成功传输。
+  void recordFailure({required String stage, required String reason}) {
+    _failureStage ??= stage;
+    _failureReason ??= reason;
+  }
+
+  // ---- 重连尝试结论（probe 多轮归属）----
+
+  final List<String> _attemptOutcomes = [];
+  int? _attemptOutcomeUs;
+
+  /// 本轮重连尝试的结论（completed / abandoned / cancelled / error /
+  /// no_verdict）。每轮独立实例，轮次结论不与后续轮次混组。
+  void recordAttemptOutcome(String outcome) {
+    _attemptOutcomes.add(outcome);
+    _attemptOutcomeUs ??= nowUs();
   }
 
   // ---- 传输阶段（BEGIN 首帧写 → END ACK 到达）----
@@ -116,14 +174,20 @@ class OtaLinkStats {
   int? _endAckArrivalUs;
   String? _transferOutcome;
 
-  /// 传输起点：本 transfer 首个 BEGIN 帧写开始（幂等）。
+  /// 传输起点：本 transfer 首个 BEGIN 帧**写调用开始**（幂等）。
+  ///
+  /// 对齐 OTA-XC-BLE-TUNING 冻结边界「首个 BEGIN 帧写调用开始（含写队列
+  /// 排队与帧分片）」：调用方必须在写调用时刻记录，不得在排队完成后才记。
   void recordTransferStart() {
     _transferStartUs ??= nowUs();
     phaseStart('transfer');
   }
 
-  /// END ACK 完整到达（应用层观测点：帧分发；**覆盖式**——END 重试时
-  /// 最后一次到达即「成功 END ACK 完整到达」，与 outcome=ok 配对）。
+  /// END ACK 完整到达（**仅在本次请求的 END ACK 经 waiter 关联校验与
+  /// payload/durable 校验、被采信为本次传输的成功终点时**调用）。
+  ///
+  /// 不采用「帧分发时看到 cmd==ACK_END 即覆盖」：无关、重复或非法的 END
+  /// 应答不得覆盖成功终点的时刻。
   void recordEndAckArrival() {
     _endAckArrivalUs = nowUs();
   }
@@ -148,6 +212,22 @@ class OtaLinkStats {
   /// 已生成 ACK 延迟样本的段（字节偏移）。
   final Set<int> _sampledOffsets = {};
 
+  /// 已收到过有效确认的段（字节偏移），**含尚未登记首发的早到确认**。
+  ///
+  /// 与 [_sampledOffsets] 的区别：早到确认建立了「该段已被确认」这一事实
+  /// （后续迟到重复确认不算新确认），但它不产生样本（无合法起点）。
+  final Set<int> _confirmedOffsets = {};
+
+  /// 早到确认时刻（字节偏移 → 该确认到达时刻）。
+  ///
+  /// 确认先于本段首发发送结束登记到达（同 microtask 内分发的 ACK 或
+  /// 跨实例的 resume 前缀确认）。此时不存在合法起点，既不能把负时间截成
+  /// 0，也不能让随后登记的首发为迟到重复确认造假样本。
+  final Map<int, int> _earlyConfirmUs = {};
+
+  /// 早到确认计数：确认先于首发发送结束登记，无合法起点，不产出样本。
+  int ackEarlyInvalid = 0;
+
   /// ACK 延迟原始样本（us）。跨轮合并与 nearest-rank P99 由分析侧执行。
   final List<int> ackLatencySamplesUs = [];
 
@@ -163,12 +243,24 @@ class OtaLinkStats {
     final now = nowUs();
     if (_sentOffsets.add(offsetBytes)) {
       _firstSendEndUs[offsetBytes] = now;
-      _emitSample('segment_first_send', now,
-          extra: 'off=$offsetBytes len=$lengthBytes');
+      _onSegmentFirstSend(offsetBytes, lengthBytes, now);
     } else {
       _emitSample('segment_retransmit', now,
           extra: 'off=$offsetBytes len=$lengthBytes');
     }
+  }
+
+  /// 首发登记收尾：区分「先被确认」的无效观测与正常首发。
+  void _onSegmentFirstSend(int offsetBytes, int lengthBytes, int now) {
+    final early = _earlyConfirmUs.remove(offsetBytes);
+    if (early != null) {
+      // 确认早于发送结束登记：该段永远得不到合法样本（既不截负时间，
+      // 也不让随后的迟到重复确认顶替）。显式记为无效观测并留痕。
+      ackEarlyInvalid++;
+      _emitSample('ack_early_invalid', early, extra: 'off=$offsetBytes');
+    }
+    _emitSample('segment_first_send', now,
+        extra: 'off=$offsetBytes len=$lengthBytes');
   }
 
   /// ACK 确认集合 → 逐段生成 ACK 延迟样本。
@@ -176,18 +268,29 @@ class OtaLinkStats {
   /// [blockStart] 为确认时刻 MCU 的块起点（= 更新前 durable_off），
   /// [segs] 为本 ACK 明确确认的块内段号集合（ACK 自身段、durable 前移
   /// 回收的旧块在途段、或 bitmap 置位段）。共享同一 ACK 的段各自成样本。
+  /// [atUs] 为该确认的真实到达时刻（缺省取调用时刻）；resume BEGIN 等
+  /// 场景必须传「有效 ACK 自身到达的时刻」，而非后续处理时刻。
   void recordAckConfirm({
     required int blockStart,
     required Iterable<int> segs,
     required int segmentSize,
+    int? atUs,
   }) {
-    final now = nowUs();
+    final now = atUs ?? nowUs();
     for (final seg in segs) {
       final offset = blockStart + seg * segmentSize;
+      if (!_confirmedOffsets.add(offset)) continue; // 已有有效确认
       final firstEnd = _firstSendEndUs[offset];
-      if (firstEnd == null) continue; // 无首发记录（resume 位图跳过段等）
-      if (!_sampledOffsets.add(offset)) continue; // 重复确认不重复采样
-      final latency = math.max(0, now - firstEnd);
+      if (firstEnd == null) {
+        // 早到确认：本段首发尚未登记（或本实例从未发送该段，如 resume
+        // 带回的 durable 前缀）。暂挂时刻待判别；若后续登记首发，则记为
+        // 无效观测而不补造样本。
+        _earlyConfirmUs[offset] = now;
+        _emitSample('ack_early', now, extra: 'off=$offset');
+        continue;
+      }
+      if (!_sampledOffsets.add(offset)) continue; // 已采样则不重复
+      final latency = now - firstEnd; // 首发已登记 ⇒ 非负，不截断
       ackLatencySamplesUs.add(latency);
       _emitSample('ack_latency', latency, extra: 'off=$offset');
     }
@@ -199,6 +302,7 @@ class OtaLinkStats {
     required int durableOff,
     required int bitmap,
     required int segmentSize,
+    int? atUs,
   }) {
     if (bitmap == 0) return;
     final segs = <int>[];
@@ -206,7 +310,45 @@ class OtaLinkStats {
       if ((bitmap >> seg) & 1 == 1) segs.add(seg);
     }
     recordAckConfirm(
-        blockStart: durableOff, segs: segs, segmentSize: segmentSize);
+      blockStart: durableOff,
+      segs: segs,
+      segmentSize: segmentSize,
+      atUs: atUs,
+    );
+  }
+
+  /// 续传 BEGIN 的有效确认并集：durable 前缀 + 当前块 bitmap。
+  ///
+  /// MCU 回带 `durableOff` 意味着 `[0, durableOff)` 已被其明确确认（这些
+  /// 段的 DATA ACK 可能丢失）。本实例确实发送过且尚未采样的前缀段在此获得
+  /// 真实终点样本；本实例从未发送的前缀段（新实例续传）自然进入早到暂存，
+  /// 判为无效观测——**不给未发送的 resume 前缀制造样本**。
+  ///
+  /// [arrivalUs] 为该有效 ACK 的到达时刻（调用方须在 await 返回后立即取，
+  /// 不得在后续处理完成后再取）。
+  void recordResumeConfirm({
+    required int durableOff,
+    required int bitmap,
+    required int segmentSize,
+    required int arrivalUs,
+  }) {
+    if (durableOff > 0) {
+      final segCount = durableOff ~/ segmentSize;
+      if (segCount > 0) {
+        recordAckConfirm(
+          blockStart: 0,
+          segs: List<int>.generate(segCount, (seg) => seg),
+          segmentSize: segmentSize,
+          atUs: arrivalUs,
+        );
+      }
+    }
+    recordBitmapConfirm(
+      durableOff: durableOff,
+      bitmap: bitmap,
+      segmentSize: segmentSize,
+      atUs: arrivalUs,
+    );
   }
 
   // ---- ACK 分类计数 ----
@@ -277,23 +419,35 @@ class OtaLinkStats {
   }
 
   final List<int> discoverDurationsUs = [];
+  int discoverErrors = 0;
 
   /// 一次服务发现调用（discoverServices()，含移动端逐分片写路径内的
   /// 重复发现——P3-4 待测热点归因数据）。
-  void recordDiscover({required int durationUs}) {
+  ///
+  /// 失败尝试同样登记（含其耗时与 [error] 计数）：只统计成功的发现会低估
+  /// 实际调用次数与链路开销。
+  void recordDiscover({required int durationUs, bool error = false}) {
     discoverDurationsUs.add(durationUs);
-    _emitSample('discover', durationUs);
+    if (error) discoverErrors++;
+    _emitSample('discover', durationUs, extra: error ? 'error=1' : '');
   }
 
   final List<int> platformWriteDurationsUs = [];
   int platformWriteBytes = 0;
+  int platformWriteErrors = 0;
 
   /// 一次平台特征写（移动端 ch.write / Windows adapter.writeCharacteristic）
-  /// ——与 GATT 写方法计时的差值即发现/查找开销。
-  void recordPlatformWrite({required int durationUs, required int bytes}) {
+  /// ——与 GATT 写方法计时的差值即发现/查找开销。失败尝试同样计入。
+  void recordPlatformWrite({
+    required int durationUs,
+    required int bytes,
+    bool error = false,
+  }) {
     platformWriteDurationsUs.add(durationUs);
     platformWriteBytes += bytes;
-    _emitSample('platform_write', durationUs, extra: 'bytes=$bytes');
+    if (error) platformWriteErrors++;
+    _emitSample('platform_write', durationUs,
+        extra: 'bytes=$bytes${error ? ' error=1' : ''}');
   }
 
   // ---- 导出 ----
@@ -307,13 +461,19 @@ class OtaLinkStats {
     return sorted[rank - 1];
   }
 
-  /// ACK 样本完整性：`complete` 或 `partial:missing=N`。
+  /// ACK 样本完整性：`complete`，或 `partial:missing=N` /
+  /// `partial:early=M` / `partial:missing=N,early=M`。
   ///
   /// 分母为**已实际发送**的唯一段（resume 位图跳过段未发送、无起点，
-  /// 不计入）；outcome=ok 但存在已发送无样本段时如实报 partial。
+  /// 不计入）。`missing` = 已发送唯一段数 − 已采样段数；`early` = 确认先于
+  /// 首发登记、无合法起点而作废的段数。早到段同时也计入 `missing`
+  /// （它们确实缺样本），`early` 只额外说明缺失的原因。
   String get ackSampleIntegrity {
     final missing = _sentOffsets.length - _sampledOffsets.length;
-    return missing > 0 ? 'partial:missing=$missing' : 'complete';
+    final parts = <String>[];
+    if (missing > 0) parts.add('missing=$missing');
+    if (ackEarlyInvalid > 0) parts.add('early=$ackEarlyInvalid');
+    return parts.isEmpty ? 'complete' : 'partial:${parts.join(',')}';
   }
 
   /// 已发送唯一段数。
@@ -329,16 +489,28 @@ class OtaLinkStats {
       'schema': 1,
       'label': label,
       'device': device,
+      'attempt': attempt,
       'clock': 'stopwatch-mono-us',
       'phases': {
         for (final e in _phases.entries)
           e.key: e.value.length == 2 ? [e.value[0], e.value[1]] : [e.value[0]],
       },
+      'failure': {
+        'stage': _failureStage,
+        'reason': _failureReason,
+      },
+      'attempts': [
+        for (var i = 0; i < _attemptOutcomes.length; i++)
+          {'n': i + 1, 'outcome': _attemptOutcomes[i]},
+      ],
+      'attemptEndUs': _attemptOutcomeUs,
       'bind': {
         'charsUs': _charsDiscoveryUs,
         'found': _charsFound,
+        'writeMode': _charsWriteMode,
         'mtuRequested': _mtuRequested,
         'mtuChunkBytes': _mtuChunkBytes,
+        'mtuSource': _mtuSource,
         'mtuUs': _mtuUs,
         'subscribeUs': _subscribeUs,
         'subscribeOk': _subscribeOk,
@@ -348,6 +520,7 @@ class OtaLinkStats {
       },
       'getInfo': {
         'calls': _getInfoDurationsUs.length,
+        'failures': _getInfoFailures,
         'totalUs': _getInfoDurationsUs.fold(0, (a, b) => a + b),
       },
       'transfer': {
@@ -369,6 +542,8 @@ class OtaLinkStats {
           'abort': acksAbort,
         },
         'ackSamples': ackSampleIntegrity,
+        'ackEarlyInvalid': ackEarlyInvalid,
+        'ackEarlyUnsent': _earlyConfirmUs.length,
         'ackLatency': {
           'count': ackLatencySamplesUs.length,
           'minUs': ackLatencySamplesUs.isEmpty
@@ -401,6 +576,7 @@ class OtaLinkStats {
       },
       'discovers': {
         'calls': discoverDurationsUs.length,
+        'errors': discoverErrors,
         'minUs': discoverDurationsUs.isEmpty
             ? null
             : discoverDurationsUs.reduce(math.min),
@@ -413,6 +589,7 @@ class OtaLinkStats {
       'platformWrites': {
         'calls': platformWriteDurationsUs.length,
         'bytes': platformWriteBytes,
+        'errors': platformWriteErrors,
         'minUs': platformWriteDurationsUs.isEmpty
             ? null
             : platformWriteDurationsUs.reduce(math.min),

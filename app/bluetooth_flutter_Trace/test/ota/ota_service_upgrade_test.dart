@@ -372,6 +372,13 @@ void main() {
     expect(bind['mtuRequested'], 247, reason: 'MTU 请求接线');
     expect(bind['mtuChunkBytes'], 247, reason: '写净荷上限回填');
     expect(bind['subscribeOk'], isTrue, reason: '订阅接线');
+    // P34-R04：绑定字段全部来自被调用外壳回填的同一个 stats 实例——写模式
+    // 只有在服务把 stats 透传给 findExact 外壳时才可能非空，因此这一条同时
+    // 证明「绑定/发现字段没有断在服务层」。外壳自身的记录点（含发现计数与
+    // MTU 来源）由 `ota_link_stats_shell_test.dart` 用真实 BluetoothService
+    // 覆盖，本文件不复用替身上报来充当生产证据。
+    expect(bind['writeMode'], 'with',
+        reason: '服务必须把 stats 透传给 findExact 外壳');
     final phases = upgrade['phases'] as Map<String, dynamic>;
     expect((phases['bind'] as List).length, 2,
         reason: 'bind 阶段起止成对（phaseStart/End）');
@@ -388,6 +395,119 @@ void main() {
     // upgrade 实例）。
     expect(statsLines.any((l) => l.contains('"label":"probe"')), isTrue,
         reason: 'probe 摘要行必须输出');
+  });
+
+  test('P3-4 早退摘要：OTA 特征缺失仍输出终结摘要与失败原因（P34-R05）',
+      () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: notifyLog);
+    final service = Get.find<OtaService>();
+
+    final statsLines = <String>[];
+    final originalPrint = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) {
+      final line = message ?? '';
+      if (line.startsWith('OTA_LINK_STATS ')) statsLines.add(line);
+    };
+    addTearDown(() {
+      debugPrint = originalPrint;
+    });
+
+    // 绑定发现返回「无精确特征」：service 在 BEGIN 之前就早退，不经任何
+    // 异常路径，也不进入传输。
+    final beginCallsBefore = ble.beginCalls;
+    ble.discoverReplies.add(null);
+    expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(service.phase, OtaPhase.failed);
+    expect(ble.beginCalls, beginCallsBefore, reason: '未绑定成功不得发起 BEGIN');
+
+    // 早退路径同样必须有终结摘要：未进入传输的失败不得从观测里静默消失，
+    // 也不得被读成"没有失败"。
+    final line = statsLines
+        .singleWhere((l) => l.contains('"label":"upgrade"'), orElse: () => '');
+    expect(line, isNotEmpty, reason: '早退路径必须输出终结摘要');
+    final json =
+        jsonDecode(line.substring('OTA_LINK_STATS '.length))
+            as Map<String, dynamic>;
+    final failure = json['failure'] as Map<String, dynamic>;
+    expect(failure['stage'], 'discover');
+    expect(failure['reason'], 'ota-chars-missing');
+    final transfer = json['transfer'] as Map<String, dynamic>;
+    expect(transfer['outcome'], 'fail',
+        reason: '未进入传输的失败不得伪装成成功传输');
+    expect(transfer['startUs'], isNull, reason: '未进入传输就没有起点');
+    expect(transfer['elapsedUs'], isNull);
+    expect((json['bind'] as Map<String, dynamic>)['found'], isFalse,
+        reason: '发现失败同样登记在绑定字段上');
+  });
+
+  test('P3-4 probe 轮次归属：每轮独立摘要 + 轮次外壳汇总逐轮结论（P34-R06）',
+      () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    final ble = await prepareDownloaded(
+      tempDir: tempDir,
+      notifyLog: notifyLog,
+      rebootDelayProbes: 1, // 首轮仍报旧身份 → 第二轮才确认目标。
+    );
+    final service = Get.find<OtaService>();
+
+    final statsLines = <String>[];
+    final originalPrint = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) {
+      final line = message ?? '';
+      if (line.startsWith('OTA_LINK_STATS ')) statsLines.add(line);
+    };
+    addTearDown(() {
+      debugPrint = originalPrint;
+    });
+
+    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+    expect(ble.probeCount, 2);
+
+    final parsed = statsLines
+        .where((l) => l.contains('"label":"probe"'))
+        .map((l) => jsonDecode(l.substring('OTA_LINK_STATS '.length))
+            as Map<String, dynamic>)
+        .toList();
+    final perAttempt = parsed.where((j) => j['attempt'] != null).toList();
+    final rounds = parsed.where((j) => j['attempt'] == null).toList();
+
+    // 每轮连接尝试独立成实例：共享实例会把首轮失败/空值带进后续轮次，
+    // 也会让迟到完成的回调改写已发布的轮次摘要。
+    expect(perAttempt, hasLength(2), reason: '两轮探测各输出一份独立摘要');
+    expect(perAttempt.map((j) => j['attempt']).toList(), <int>[1, 2]);
+    expect(perAttempt[0]['attempts'], <Map<String, Object>>[
+      <String, Object>{'n': 1, 'outcome': 'no_verdict'},
+    ], reason: '首轮读到重启前身份 → 无结论，继续轮询');
+    expect(perAttempt[1]['attempts'], <Map<String, Object>>[
+      <String, Object>{'n': 2, 'outcome': 'completed'},
+    ], reason: '次轮确认目标身份');
+    // 轮内阶段窗口成对：绑定阶段（MTU + 订阅）必须在轮内有起止，
+    // 否则无法把轮内耗时归因到绑定还是轮询等待。
+    final firstPhases = perAttempt[0]['phases'] as Map<String, dynamic>;
+    expect(firstPhases['probe_attempt'], hasLength(2));
+    expect(firstPhases['bind'], hasLength(2));
+    expect(
+        (perAttempt[0]['getInfo'] as Map<String, dynamic>)['calls'] as int,
+        greaterThan(0),
+        reason: '轮内 GET_INFO 往返必须计时');
+    expect(firstPhases['reconnect'], isNull,
+        reason: '轮内实例不得冒充轮次外壳的 reconnect 窗口');
+
+    // 轮次外壳：reconnect 窗口 + 逐轮结论汇总，且不混入某一轮的绑定字段。
+    expect(rounds, hasLength(1), reason: '整体重连等待只输出一份轮次摘要');
+    final round = rounds.single;
+    expect(round['attempts'], <Map<String, Object>>[
+      <String, Object>{'n': 1, 'outcome': 'no_verdict'},
+      <String, Object>{'n': 2, 'outcome': 'completed'},
+    ], reason: '轮次摘要必须汇总全部轮次结论，序号与每轮摘要一致');
+    expect((round['phases'] as Map<String, dynamic>)['reconnect'],
+        hasLength(2));
+    expect(round['attemptEndUs'], isNotNull);
+    expect((round['bind'] as Map<String, dynamic>)['charsUs'], isNull,
+        reason: '轮次外壳不承载某一轮的绑定字段（归属不混组）');
   });
 
   test('MCU 未重启完：旧身份探测不误判，第二次探测确认目标（RC3-08）',
@@ -2690,8 +2810,21 @@ class _UpgradeFakeBle extends BluetoothService {
     String serviceUuid = 'fff0',
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
+    OtaLinkStats? stats,
   }) async {
     discoverCalls++;
+    // P3-4：fake 覆写的是带观测外壳的公开方法（真实外壳在此记
+    // recordCharsDiscovery：耗时/成败/写模式），对齐其语义。
+    final sw = stats == null ? null : (Stopwatch()..start());
+    Map<String, String>? finish(Map<String, String>? result) {
+      stats?.recordCharsDiscovery(
+        durationUs: sw!.elapsedMicroseconds,
+        found: result != null,
+        writeMode: result?['writeMode'],
+      );
+      return result;
+    }
+
     // 复核闸门（RC3-04⑦）：绑定调用（startOtaUpgrade/readDeviceInfo）
     // 不设闸，测试只在传输在途后设闸，挂起的是 resume 的重新发现。
     final gate = rediscoverGate;
@@ -2701,14 +2834,14 @@ class _UpgradeFakeBle extends BluetoothService {
     }
     if (discoverReplies.isNotEmpty) {
       final reply = discoverReplies.removeAt(0);
-      return reply == null ? null : Map<String, String>.of(reply);
+      return finish(reply == null ? null : Map<String, String>.of(reply));
     }
-    return {
+    return finish({
       'serviceId': 'fff0',
       'writeCharId': 'fff2',
       'notifyCharId': 'fff1',
       'writeMode': 'with',
-    };
+    });
   }
 
   @override
@@ -2719,6 +2852,9 @@ class _UpgradeFakeBle extends BluetoothService {
   }) async {
     // P3-4：fake 覆写的是带计时的外壳（真实外壳在此记 recordMtu），
     // 对齐外壳的 stats 上报语义；fake 无真实耗时，durationUs 记 0。
+    // source（净荷上限来源）**不在替身侧上报**：真实取值由协商/回退分支
+    // 决定，替身自填只会自证。真实外壳的 source 断言见
+    // `ota_link_stats_shell_test.dart`。
     stats?.recordMtu(
         requested: requested, chunkBytes: otaMtu, durationUs: 0);
     return otaMtu;

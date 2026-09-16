@@ -83,13 +83,19 @@ void main() {
           greaterThan(stats.ackLatencySamplesUs[2]));
     });
 
-    test('无首发记录的段跳过且不计入完整性分母', () {
+    test('无首发记录的段跳过且不计入完整性分母（resume 前缀/bitmap 跳过段）',
+        () {
       final stats = OtaLinkStats(label: 'upgrade');
       // resume 位图跳过段（未发送）被 bitmap 确认：无起点，不产生样本。
       stats.recordAckConfirm(
           blockStart: 4096, segs: const [5], segmentSize: 128);
       expect(stats.ackLatencySamplesUs, isEmpty);
       expect(stats.ackSampleIntegrity, 'complete');
+      // 该确认仍被记为该段「已有有效确认」并暂挂：本实例始终没发过它，
+      // 因此既不是样本，也不算无效观测（P34-R01：无效观测只针对
+      // 「确认早于首发登记」的已发送段）。
+      expect(stats.ackEarlyInvalid, 0);
+      expect(stats.toJson()['transfer']['ackEarlyUnsent'], 1);
     });
 
     test('fail-closed：已发送未确认段如实报 partial:missing=N', () {
@@ -174,8 +180,8 @@ void main() {
       expect(json['bind']['subscribeOk'], isTrue);
     });
 
-    test('transferStart/outcome 幂等；endAckArrival 覆盖式（END 重试取最后）',
-        () async {
+    test('transferStart 幂等、outcome 幂等；endAckArrival 由采信点单次调用'
+        '（P34-R03）', () async {
       final stats = OtaLinkStats(label: 'upgrade');
       stats.recordTransferStart();
       final firstStart = stats.toJson()['transfer']['startUs'];
@@ -185,7 +191,11 @@ void main() {
       stats.recordEndAckArrival();
       final firstEnd = stats.toJson()['transfer']['endAckUs'];
       await Future<void>.delayed(const Duration(milliseconds: 2));
-      stats.recordEndAckArrival(); // 覆盖式：END 重试时最后到达即成功轮
+      // 同一传输内 END 重试只有被采信的那一轮调用本方法（transport 侧
+      // 唯一调用点在采信点，不再由帧分发层按 cmd 覆盖）——这里直接再调
+      // 一次即等价于「同一接收点的最新观测」，语义与 [recordTransferStart]
+      // 的幂等不同，故显式断言其为「后到者胜」以固定该差异。
+      stats.recordEndAckArrival();
       final secondEnd = stats.toJson()['transfer']['endAckUs'];
       expect(secondEnd, greaterThan(firstEnd!));
       stats.recordTransferOutcome(ok: true);
@@ -278,6 +288,143 @@ void main() {
       } finally {
         debugPrint = debugPrintThrottled;
       }
+    });
+  });
+
+  group('P34 整改：早到确认 / 续传确认 / 失败留痕 / 轮次归属', () {
+    test('早到确认：无样本、记为无效观测；随后登记首发也不得造假样本'
+        '（P34-R01）', () {
+      final stats = OtaLinkStats(label: 'upgrade');
+      // 确认先到（本段首发尚未登记）：此刻不存在合法起点。
+      stats.recordAckConfirm(blockStart: 0, segs: const [2], segmentSize: 128);
+      expect(stats.ackLatencySamplesUs, isEmpty);
+      // 首发随后登记：不得把「首发结束」当这次早到确认的起点（起点晚于
+      // 终点，是伪造样本）。如实记为无效观测并进入完整性缺口。
+      stats.recordSegmentSendEnd(offsetBytes: 256, lengthBytes: 128);
+      expect(stats.ackLatencySamplesUs, isEmpty);
+      expect(stats.ackEarlyInvalid, 1);
+      expect(stats.ackSampleIntegrity, 'partial:missing=1,early=1');
+      // 迟到重复确认同样不得顶替出样本（该段已有有效确认）。
+      stats.recordAckConfirm(blockStart: 0, segs: const [2], segmentSize: 128);
+      expect(stats.ackLatencySamplesUs, isEmpty);
+      expect(stats.ackEarlyInvalid, 1);
+      // 摘要双通道一致：JSON 必须暴露同一无效观测事实。
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['ackEarlyInvalid'], 1);
+      expect(t['ackSamples'], 'partial:missing=1,early=1');
+    });
+
+    test('resume BEGIN 确认并集：durable 前缀补样本，未发送前缀只是暂挂'
+        '（P34-R02）', () async {
+      final stats = OtaLinkStats(label: 'upgrade');
+      stats.recordSegmentSendEnd(offsetBytes: 0, lengthBytes: 128);
+      stats.recordSegmentSendEnd(offsetBytes: 128, lengthBytes: 128);
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      stats.recordSegmentSendEnd(offsetBytes: 4096, lengthBytes: 128);
+      // durable 前缀 [0,4096)（本例只发过前两段）+ 当前块 bitmap 段 0。
+      stats.recordResumeConfirm(
+        durableOff: 4096,
+        bitmap: 0x01,
+        segmentSize: 128,
+        arrivalUs: stats.nowUs(),
+      );
+      // 前缀已发送的 2 段（DATA ACK 丢失）+ bitmap 段（off 4096）共 3 样本。
+      expect(stats.ackLatencySamplesUs, hasLength(3));
+      expect(stats.ackSampleIntegrity, 'complete');
+      expect(stats.ackEarlyInvalid, 0);
+      // 终点取该有效 ACK 的到达时刻（非调用时刻）：前缀段样本 = 到达 −
+      // 各自首发结束，含丢 ACK 后的重发等待与 ABORT + resume 全程。
+      expect(stats.ackLatencySamplesUs[0], greaterThanOrEqualTo(4000));
+      expect(stats.ackLatencySamplesUs[1], greaterThanOrEqualTo(4000));
+      // 未发送的 30 个前缀段不制造样本，只暂挂为未发送确认。
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['ackEarlyUnsent'], 30);
+      expect(t['ackSamples'], 'complete');
+    });
+
+    test('失败留痕幂等：只记首次终结阶段与原因（P34-R05）', () {
+      final stats = OtaLinkStats(label: 'upgrade');
+      stats.recordFailure(stage: 'discover', reason: 'ota-chars-missing');
+      stats.recordFailure(stage: 'transfer', reason: 'later-diag');
+      final f = stats.toJson()['failure'] as Map<String, dynamic>;
+      expect(f['stage'], 'discover');
+      expect(f['reason'], 'ota-chars-missing');
+      // 未进入传输的失败不得伪装成成功传输：终态字段与原因并存。
+      stats.recordTransferOutcome(ok: false);
+      expect(stats.toJson()['transfer']['outcome'], 'fail');
+      expect(f['stage'], 'discover');
+    });
+
+    test('probe 轮次：attempt 序号、逐轮结论与阶段窗口（P34-R06）', () {
+      final stats = OtaLinkStats(label: 'probe', device: 'AA:BB', attempt: 2);
+      stats.phaseStart('reconnect');
+      stats.phaseStart('probe_attempt');
+      stats.recordAttemptOutcome('timedOut');
+      stats.phaseEnd('probe_attempt');
+      stats.recordAttemptOutcome('completed');
+      stats.phaseEnd('reconnect');
+      final json = stats.toJson();
+      expect(json['label'], 'probe');
+      expect(json['attempt'], 2);
+      expect(json['attempts'], <Map<String, Object>>[
+        <String, Object>{'n': 1, 'outcome': 'timedOut'},
+        <String, Object>{'n': 2, 'outcome': 'completed'},
+      ]);
+      expect(json['attemptEndUs'], isNotNull);
+      final phases = json['phases'] as Map<String, dynamic>;
+      expect((phases['probe_attempt'] as List).length, 2);
+      final reconnect = phases['reconnect'] as List;
+      expect(reconnect.length, 2);
+      expect(reconnect[1] as int, greaterThanOrEqualTo(reconnect[0] as int));
+    });
+
+    test('失败往返与失败尝试同样入账（getInfo/discover/platformWrite）'
+        '（P34-R04）', () {
+      final stats = OtaLinkStats(label: 'upgrade');
+      stats.recordGetInfo(durationUs: 1000);
+      stats.recordGetInfo(durationUs: 400, ok: false);
+      stats.recordDiscover(durationUs: 900);
+      stats.recordDiscover(durationUs: 120, error: true);
+      stats.recordPlatformWrite(durationUs: 600, bytes: 128);
+      stats.recordPlatformWrite(durationUs: 50, bytes: 0, error: true);
+      final json = stats.toJson();
+      final info = json['getInfo'] as Map<String, dynamic>;
+      expect(info['calls'], 2);
+      expect(info['failures'], 1);
+      expect(info['totalUs'], 1400); // 失败往返的耗时同样登记
+      final disc = json['discovers'] as Map<String, dynamic>;
+      expect(disc['calls'], 2);
+      expect(disc['errors'], 1);
+      expect(disc['minUs'], 120);
+      final pw = json['platformWrites'] as Map<String, dynamic>;
+      expect(pw['calls'], 2);
+      expect(pw['errors'], 1);
+    });
+
+    test('MTU 来源与写模式可区分回退值与真实协商值（P34-R04）', () {
+      final negotiated = OtaLinkStats(label: 'upgrade');
+      negotiated.recordMtu(
+          requested: 517,
+          chunkBytes: 509,
+          durationUs: 400,
+          source: 'negotiated');
+      negotiated.recordCharsDiscovery(
+          durationUs: 700, found: true, writeMode: 'writeWithResponse');
+      final a = negotiated.toJson()['bind'] as Map<String, dynamic>;
+      expect(a['mtuChunkBytes'], 509);
+      expect(a['mtuSource'], 'negotiated');
+      expect(a['writeMode'], 'writeWithResponse');
+      // 回退值与真实协商值同为 20：只有 source 能区分二者。
+      final fallback = OtaLinkStats(label: 'upgrade');
+      fallback.recordMtu(
+          requested: 517,
+          chunkBytes: 20,
+          durationUs: 900,
+          source: 'error-fallback');
+      final b = fallback.toJson()['bind'] as Map<String, dynamic>;
+      expect(b['mtuChunkBytes'], 20);
+      expect(b['mtuSource'], 'error-fallback');
+      expect(b['mtuSource'], isNot(a['mtuSource']));
     });
   });
 }

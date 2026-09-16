@@ -1240,14 +1240,15 @@ class BluetoothService extends GetxController {
   /// 通过设备地址发现服务（用于遥控透传）。
   ///
   /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录每次
-  /// 服务发现调用耗时（含 OTA 写路径内的重复发现——待测热点归因数据）。
+  /// 服务发现调用耗时（含 OTA 写路径内的重复发现——待测热点归因数据），
+  /// 失败尝试同样登记并计入 errors。
   Future<List<dynamic>> discoverServicesByAddress(
     String deviceAddress, {
     OtaLinkStats? stats,
   }) async {
+    final sw = stats == null ? null : (Stopwatch()..start());
     try {
       if (Platform.isWindows) {
-        final sw = stats == null ? null : (Stopwatch()..start());
         final services = await _adapter.discoverServices(deviceAddress);
         stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services;
@@ -1257,12 +1258,15 @@ class BluetoothService extends GetxController {
         if (device == null) {
           throw UnsupportedError('未找到设备，无法发现服务: $deviceAddress');
         }
-        final sw = stats == null ? null : (Stopwatch()..start());
         final services = await device.discoverServices();
         stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services; // 返回动态列表，调用方做解析
       }
     } catch (e) {
+      // P3-4 观测：失败尝试（含未找到设备的立即失败）同样登记耗时与
+      // 错误计数——只统计成功发现会低估实际调用次数与链路开销。
+      stats?.recordDiscover(
+          durationUs: sw!.elapsedMicroseconds, error: true);
       debugPrint('发现服务失败($deviceAddress): $e');
       rethrow;
     }
@@ -1408,13 +1412,24 @@ class BluetoothService extends GetxController {
     try {
       if (Platform.isWindows) {
         final wSw = stats == null ? null : (Stopwatch()..start());
-        await _adapter.writeCharacteristic(
-          deviceAddress,
-          serviceId,
-          characteristicId,
-          data,
-          writeWithResponse: writeWithResponse,
-        );
+        try {
+          await _adapter.writeCharacteristic(
+            deviceAddress,
+            serviceId,
+            characteristicId,
+            data,
+            writeWithResponse: writeWithResponse,
+          );
+        } catch (_) {
+          // P3-4 观测：失败的平台写同样登记耗时与错误计数——只统计成功写
+          // 会让异常尝试从阶段统计中消失。
+          stats?.recordPlatformWrite(
+            durationUs: wSw!.elapsedMicroseconds,
+            bytes: data.length,
+            error: true,
+          );
+          rethrow;
+        }
         stats?.recordPlatformWrite(
           durationUs: wSw!.elapsedMicroseconds,
           bytes: data.length,
@@ -1425,7 +1440,16 @@ class BluetoothService extends GetxController {
           throw UnsupportedError('未找到设备，无法写入: $deviceAddress');
         }
         final dSw = stats == null ? null : (Stopwatch()..start());
-        final services = await device.discoverServices();
+        final List<dynamic> services;
+        try {
+          services = await device.discoverServices();
+        } catch (_) {
+          stats?.recordDiscover(
+            durationUs: dSw!.elapsedMicroseconds,
+            error: true,
+          );
+          rethrow;
+        }
         stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
         for (final svc in services) {
           final sid = svc.uuid.toString();
@@ -1434,8 +1458,17 @@ class BluetoothService extends GetxController {
             final cid = ch.uuid.toString();
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
             final wSw = stats == null ? null : (Stopwatch()..start());
-            await ch.write(Uint8List.fromList(data),
-                withoutResponse: !writeWithResponse);
+            try {
+              await ch.write(Uint8List.fromList(data),
+                  withoutResponse: !writeWithResponse);
+            } catch (_) {
+              stats?.recordPlatformWrite(
+                durationUs: wSw!.elapsedMicroseconds,
+                bytes: data.length,
+                error: true,
+              );
+              rethrow;
+            }
             stats?.recordPlatformWrite(
               durationUs: wSw!.elapsedMicroseconds,
               bytes: data.length,
@@ -1677,14 +1710,47 @@ class BluetoothService extends GetxController {
   /// 精确等价，其他 128-bit UUID 不得冒充标准服务/特征（PR06）。
   /// 返回 { 'serviceId', 'writeCharId'(FFF2), 'notifyCharId'(FFF1),
   /// 'writeMode'('with'/'without'——FFF2 实际支持的写模式) }。
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：以本方法整体
+  /// （含内部服务发现与 Windows 特征枚举）为观测窗口登记一次特征发现耗时、
+  /// 成败与实际采用的写模式，并把 stats 透传给内部 `discoverServicesByAddress`
+  /// ——只测外层、不放内部发现，就无法归因「逐分片重复发现」这一待测热点。
   Future<Map<String, String>?> findExactOtaCharacteristicsByAddress(
     String deviceAddress, {
     String serviceUuid = 'fff0',
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
+    OtaLinkStats? stats,
+  }) async {
+    final sw = stats == null ? null : (Stopwatch()..start());
+    final result = await _findExactOtaCharacteristicsByAddress(
+      deviceAddress,
+      serviceUuid: serviceUuid,
+      writeCharUuid: writeCharUuid,
+      notifyCharUuid: notifyCharUuid,
+      stats: stats,
+    );
+    // P3-4 观测：失败（无精确特征或平台异常）同样登记，found=false 才能
+    // 与「发现了但不合格」区分开；writeMode 记录绑定实际采用的写模式。
+    stats?.recordCharsDiscovery(
+      durationUs: sw!.elapsedMicroseconds,
+      found: result != null,
+      writeMode: result?['writeMode'],
+    );
+    return result;
+  }
+
+  /// [findExactOtaCharacteristicsByAddress] 的私有实现（无观测外壳）。
+  Future<Map<String, String>?> _findExactOtaCharacteristicsByAddress(
+    String deviceAddress, {
+    required String serviceUuid,
+    required String writeCharUuid,
+    required String notifyCharUuid,
+    OtaLinkStats? stats,
   }) async {
     try {
-      final services = await discoverServicesByAddress(deviceAddress);
+      final services =
+          await discoverServicesByAddress(deviceAddress, stats: stats);
       String? normalizeId(dynamic obj) => _extractUuidFromAny(obj);
 
       for (final svc in services) {
@@ -1896,44 +1962,50 @@ class BluetoothService extends GetxController {
   /// 保守值 20（ATT 默认 MTU 23 - 3）。OTA 分片以该值为准。
   ///
   /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录请求值、
-  /// 协商结果净荷上限与耗时。
+  /// 协商结果净荷上限、耗时与**净荷上限来源**。
   Future<int> requestOtaMtu(
     String deviceAddress, {
     int requested = 247,
     OtaLinkStats? stats,
   }) async {
     if (stats == null) {
-      return _requestOtaMtu(deviceAddress, requested: requested);
+      return (await _requestOtaMtu(deviceAddress, requested: requested))
+          .chunkBytes;
     }
     final sw = Stopwatch()..start();
-    final chunk = await _requestOtaMtu(deviceAddress, requested: requested);
+    final outcome = await _requestOtaMtu(deviceAddress, requested: requested);
     stats.recordMtu(
       requested: requested,
-      chunkBytes: chunk,
+      chunkBytes: outcome.chunkBytes,
       durationUs: sw.elapsedMicroseconds,
+      source: outcome.source,
     );
-    return chunk;
+    return outcome.chunkBytes;
   }
 
-  Future<int> _requestOtaMtu(
+  Future<_OtaMtuOutcome> _requestOtaMtu(
     String deviceAddress, {
     int requested = 247,
   }) async {
     try {
       if (Platform.isWindows) {
         // WinBle 由协议栈管理分片；返回保守默认写入大小。
-        return 20;
+        return const _OtaMtuOutcome(20, 'windows-stack-managed');
       }
       final device = _findDeviceByAddress(deviceAddress);
-      if (device == null) return 20;
+      if (device == null) {
+        return const _OtaMtuOutcome(20, 'device-missing');
+      }
       final negotiated = await device.requestMtu(requested);
       if (negotiated >= 23) {
-        return negotiated - 3;
+        return _OtaMtuOutcome(negotiated - 3, 'negotiated');
       }
-      return 20;
+      // 协商值 < 23：拿不到比 ATT 默认更小的写入净荷，回退默认值
+      // （与真实协商的 20 无法靠数值区分，靠 source 区分）。
+      return const _OtaMtuOutcome(20, 'negotiated-too-small');
     } catch (e) {
       debugPrint('协商MTU失败($deviceAddress): $e');
-      return 20;
+      return const _OtaMtuOutcome(20, 'error-fallback');
     }
   }
 
@@ -2628,6 +2700,17 @@ class BluetoothService extends GetxController {
       return false; // 出错时默认为不可连接
     }
   }
+}
+
+/// MTU 协商结果：净荷上限 + 该值的来源标记（P3-4 观测）。
+///
+/// 回退值与真实协商值可以同为 20，只靠数值无法区分「平台自管理」
+/// 「设备未找到」「协商过小」「异常回退」，故必须随值携带来源。
+class _OtaMtuOutcome {
+  const _OtaMtuOutcome(this.chunkBytes, this.source);
+
+  final int chunkBytes;
+  final String source;
 }
 
 /// 设备作用域句柄缓存（RC3-05⑤）：按地址恒定返回同一对象，不随链路代次

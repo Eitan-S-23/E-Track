@@ -111,6 +111,11 @@ class OtaBleTransport {
   bool _cancelled = false;
   bool _disposed = false;
 
+  /// P3-4 观测窗口标志：transfer 执行期间为 true。仅用于区分传输帧与
+  /// transfer 之外的帧（GET_INFO 探针/后台复核），决定 [_writeFrame] 是否
+  /// 可登记传输起点；不参与任何控制流判据。
+  bool _inTransfer = false;
+
   int get session => _session;
   /// 本实例是否已被取消（取消后代次失效，禁止复用，由上层重建）。
   bool get isCancelled => _cancelled;
@@ -128,8 +133,10 @@ class OtaBleTransport {
   /// 用尽仍无证据即抛错，标记保持废弃，绝不假装恢复。
   Future<DeviceOtaInfo> getDeviceInfo(
       {Duration timeout = const Duration(seconds: 10)}) async {
-    // P3-4 观测：一次成功 GET_INFO 往返（含实例内有界重试/探针）。
+    // P3-4 观测：一次 GET_INFO 往返（含实例内有界重试/探针）。失败往返
+    // 同样登记耗时与失败计数（在 finally 收口），不因无身份值可采而消失。
     final statsWatch = stats == null ? null : (Stopwatch()..start());
+    var statsRecorded = false;
     var attempts = 0;
     var probes = 0;
     // 废弃探针序列的端到端预算（RC3-05⑤）：次数上限 × 单次上限。它与
@@ -231,6 +238,7 @@ class OtaBleTransport {
           final info = DeviceOtaInfo.fromInfoPayload(payload);
           stats?.recordGetInfo(
               durationUs: statsWatch!.elapsedMicroseconds);
+          statsRecorded = true;
           return info;
         } on OtaDeviceIdentityException catch (e) {
           if (e.code != 'MALFORMED_INFO' || ++attempts > retries) {
@@ -239,6 +247,10 @@ class OtaBleTransport {
         }
       }
     } finally {
+      if (statsWatch != null && !statsRecorded) {
+        stats!.recordGetInfo(
+            durationUs: statsWatch.elapsedMicroseconds, ok: false);
+      }
       _recoveryClock = null;
       if (_writeChannelPoisoned && _resyncProbeSeq != null) {
         // 恢复事务退休（RC3-07）：本实例不再持有这条恢复事务。budget 用尽
@@ -306,9 +318,10 @@ class OtaBleTransport {
     // 只在 durable 前进时 reset；finally 清空解除对后续命令的约束。
     _noProgressClock = Stopwatch()..start();
     otaMonoLog('MONO_BUDGET_START');
-    // P3-4 观测：传输起点 = BEGIN 首帧写开始前的最后一个同步点
-    //（OTA-XC-BLE-TUNING 冻结计时口径「从 BEGIN 首字节开始发送」）。
-    stats?.recordTransferStart();
+    // P3-4 观测：传输起点改由首个 BEGIN 帧的**写调用**登记（见
+    // [_writeFrame]）。此处只置传输窗口标志：GET_INFO 探针帧与后台复核
+    // 帧在 transfer 之外发生，不得被当作传输起点。
+    _inTransfer = true;
     // P3-4 观测：终态标记（成功点置 true；fail 由 finally 统一登记）。
     var transferOk = false;
     try {
@@ -330,6 +343,10 @@ class OtaBleTransport {
           etuHeader: etuHeader,
           timeout: _capByBudget(ackTimeout),
         );
+        // P3-4 观测：BEGIN 有效 ACK 的到达时刻。必须在 await 返回后**立即**
+        // 取（同 microtask 内），作为该确认所覆盖段的真实终点时间戳；
+        // 放到后续处理之后再取会把处理开销算进 ACK 延迟。
+        final beginAckArrivalUs = stats?.nowUs();
         final beginTerminal = _abortStatusOf(beginAck.status);
         if (beginTerminal != null) {
           return OtaAckResult.terminal(
@@ -348,14 +365,19 @@ class OtaBleTransport {
         }
         _session = beginAck.session;
         view.reset(beginAck.durableOff, beginAck.blockBitmap, total);
-        // P3-4 观测：BEGIN ACK 权威值同样构成确认——resume 位图对既往
-        // 已发送段是「由 durable_off/bitmap 明确确认」的有效 ACK 终点；
+        // P3-4 观测：BEGIN ACK 权威值同样构成确认——resume 带回的 durable
+        // 前缀 `[0, durable_off)` 与当前块 bitmap 对既往已发送段是「由
+        // durable_off/bitmap 明确确认」的有效 ACK 终点；本实例从未发送过的
+        // 前缀段不制造样本（自然落入早到暂存并记为无效观测）。
         // 带回的 durable 进展（丢 ACK 期间 MCU 已提交）也如实登记。
-        stats?.recordBitmapConfirm(
-          durableOff: beginAck.durableOff,
-          bitmap: beginAck.blockBitmap,
-          segmentSize: OtaBleCodec.dataSegmentSize,
-        );
+        if (beginAckArrivalUs != null) {
+          stats!.recordResumeConfirm(
+            durableOff: beginAck.durableOff,
+            bitmap: beginAck.blockBitmap,
+            segmentSize: OtaBleCodec.dataSegmentSize,
+            arrivalUs: beginAckArrivalUs,
+          );
+        }
         stats?.recordDurableAdvance(beginAck.durableOff);
         var durableOff = beginAck.durableOff;
         if (beginAck.durableOff > lastDurable) {
@@ -561,8 +583,13 @@ class OtaBleTransport {
             }
             // 终点观测（补测轮取证）：END ACK OK 收尾是升级会话的关键
             // 六状态之一（App 解析到 ACK_END/OK），此前该路径无打点，
-            // 历史轮次采不到证。durable==total 已由上方校验保证。
+            // 历史轮次采不到证。此处是本次请求的成功终点：帧已由
+            // [_ResponseWaiter]（cmd+session+seq）精确关联，status==OK、
+            // durable==total 与尾块位图均通过上方校验。
+            // P3-4 观测：终点时刻在**采信点**登记，不在帧分发处按 cmd 覆盖
+            // ——无关、重复或非法的 END 应答不得覆盖成功终点的时刻。
             otaMonoLog('MONO_END_ACK_OK', durable: endAck.durableOff);
+            stats?.recordEndAckArrival();
             transferOk = true;
             return OtaAckResult.fromAck(endAck);
           } on TimeoutException {
@@ -585,6 +612,7 @@ class OtaBleTransport {
       _ackView = null;
       _noProgressClock = null; // 解除预算对 transfer 后命令（ABORT 等）约束
       _busy = false;
+      _inTransfer = false;
       // P3-4 观测：终态统一登记（错误码由上层 catch 补记摘要之外的日志）。
       stats?.recordTransferOutcome(ok: transferOk);
     }
@@ -736,11 +764,6 @@ class OtaBleTransport {
     final view = _ackView;
     if (view != null && _viewAccepts(f)) {
       view.onAck(f);
-    }
-    // P3-4 观测：END ACK 到达时刻（应用层观测点=帧分发；END 重试时
-    // 覆盖式更新，成功轮的最后一个 END ACK 即「成功 END ACK 完整到达」）。
-    if (f.cmd == OtaBleCodec.rspAckEnd) {
-      stats?.recordEndAckArrival();
     }
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.offer(f);
@@ -1085,6 +1108,12 @@ class OtaBleTransport {
   /// [resyncProbeSeq] 仅由 [getDeviceInfo] 的探针透传：非 null 表示本帧
   /// 是废弃期间唯一放行的重新同步探针（RC3-05⑤）。
   Future<void> _writeFrame(Uint8List frame, {int? resyncProbeSeq}) async {
+    // P3-4 观测：传输起点 = 本 transfer 首个 BEGIN 帧的**写调用时刻**
+    //（OTA-XC-BLE-TUNING 冻结边界「首个 BEGIN 帧写调用开始（含写队列
+    // 排队与帧分片）」）。幂等，只有首帧生效；排队等待因此计入传输时长。
+    // 仅在传输窗口内登记：transfer 之外的帧（GET_INFO 探针、后台复核）
+    // 不构成传输起点。
+    if (_inTransfer) stats?.recordTransferStart();
     await _writeFrameChecked(frame,
         allowCancelled: false, resyncProbeSeq: resyncProbeSeq);
   }
