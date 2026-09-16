@@ -872,8 +872,11 @@ class OtaService extends GetxController {
         final etuHeader = package.sublist(0, 64);
         final packageSha256 = packageDigest.bytes;
 
-        // P3-4 观测：OTA 特征发现（外壳记录耗时/成败/写模式，内部服务发现
-        // 另行计时——stats 必须透传，否则发现计数与写模式都采不到）。
+        // P3-4 观测：绑定阶段自严格发现起（对齐 research §3.1「绑定 =
+        // 发现 + MTU + 订阅」：发现耗时属于阶段内，不是阶段前）。外壳记录
+        // 耗时/成败/写模式，内部服务发现另行计时——stats 必须透传，否则
+        // 发现计数与写模式都采不到。
+        linkStats.phaseStart('bind');
         final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
           deviceAddress,
           stats: linkStats,
@@ -886,8 +889,7 @@ class OtaService extends GetxController {
           _phase.value = OtaPhase.failed;
           return fail('discover', 'ota-chars-missing');
         }
-        // P3-4 观测：绑定阶段（MTU 协商 + 通知订阅）整体起止。
-        linkStats.phaseStart('bind');
+        // P3-4 观测：绑定阶段终点 = 订阅流就绪（MTU 协商 + 通知订阅完成）。
         final transport = await _bindTransport(deviceAddress, otaChars,
             stats: linkStats);
         linkStats.phaseEnd('bind');
@@ -1725,15 +1727,24 @@ class OtaService extends GetxController {
       } catch (_) {
         // 重启期间连接/读取失败是预期路径，继续轮询。
       }
-      attemptStats.recordAttemptOutcome(
-        outcome != null
-            ? _rebootOutcomeName(outcome.kind)
-            : (probeAbandoned ? 'abandoned' : 'no_verdict'),
-      );
+      // 单轮结论归一：取消代次变化时 probe 内部静默返回 null（与循环顶部的
+      // 取消检查同一语义），不得记成「本轮没有结论」——取消是本 wait 的
+      // 决定性事实，先于等待放弃判定。
+      final cancelled = generation != _cancelGeneration;
+      final attemptOutcome = outcome != null
+          ? _rebootOutcomeName(outcome.kind)
+          : cancelled
+              ? 'cancelled'
+              : (probeAbandoned ? 'abandoned' : 'no_verdict');
+      attemptStats.recordAttemptOutcome(attemptOutcome);
+      // P3-4 观测：轮次外壳逐轮汇总全部尝试结论（含「本轮未获判定」）。
+      // 只在 outcome != null 时记，会让空转的轮次在整体摘要里消失——
+      // 只看轮次摘要的消费者会把「探测 2 次」读成「只探测过 1 次」
+      // （P34-R06）。序号即尝试序号，与每轮独立摘要的 n 一致。
+      roundStats.recordAttemptOutcome(attemptOutcome);
       attemptStats.phaseEnd('probe_attempt');
       attemptStats.emitSummary();
       if (outcome != null) {
-        roundStats.recordAttemptOutcome(_rebootOutcomeName(outcome.kind));
         roundStats.phaseEnd('reconnect');
         roundStats.emitSummary();
         return outcome;
@@ -1786,16 +1797,17 @@ class OtaService extends GetxController {
     try {
       if (await _ble.connectOtaDeviceByAddress(deviceAddress)) {
         if (aborted()) return null;
-        // P3-4 观测：本轮特征发现（findExact 外壳记录耗时/成败/写模式，
-        // 内部服务发现另行计时——stats 必须透传）。
+        // P3-4 观测：本轮绑定阶段自严格发现起（与升级路径同一包含关系，
+        // 对齐 research §3.1「绑定 = 发现 + MTU + 订阅」）。findExact 外壳
+        // 记录耗时/成败/写模式，内部服务发现另行计时——stats 必须透传；
+        // 发现失败时本阶段不闭合，「已开始未完成」如实保留。
+        stats?.phaseStart('bind');
         final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
           deviceAddress,
           stats: stats,
         );
         if (aborted()) return null;
         if (otaChars != null) {
-          // P3-4 观测：本轮绑定阶段（MTU 协商 + 通知订阅）起止。
-          stats?.phaseStart('bind');
           probe = await _bindProbeTransport(deviceAddress, otaChars, aborted,
               stats: stats);
           stats?.phaseEnd('bind');
