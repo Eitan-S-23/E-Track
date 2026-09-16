@@ -561,8 +561,17 @@ class OtaBleTransport {
               needsResume = true;
               break;
             }
-            if (endAck.status == OtaBleCodec.statusOk &&
-                endAck.durableOff != total) {
+            if (endAck.status != OtaBleCodec.statusOk) {
+              // 非 OK 且非终态、无可续传预算的 END 应答（ERR_SHA/ERR_SEQ/
+              // ERR_STATE 余额耗尽等）：按协议既有语义**非抛出**返回，由
+              // 调用方按 isOk 判失败（既有用例依赖此形态，不得改抛）。
+              // P3-4 观测：只有 status==OK 才是「本次请求最终采信的成功
+              // END」，这类应答不得落入下方成功块——否则非 OK 的失败传输
+              // 会被登记成功终点并置 outcome=ok（P34-R03 反例：END 错误
+              // 状态仍报成功）。
+              return OtaAckResult.fromAck(endAck);
+            }
+            if (endAck.durableOff != total) {
               // END OK 核对（RC3-06）：MCU finalize 成功语义是
               // durable==total 且 ETRJ 匹配；OK 但 durable 不符即
               // 状态不可信，fail closed，不得当成功上报。
@@ -570,9 +579,7 @@ class OtaBleTransport {
                   'END ACK OK 但 durable_off != total（MCU 状态不可信）',
                   code: 'ACK_MALFORMED');
             }
-            if (endAck.status == OtaBleCodec.statusOk &&
-                endAck.durableOff == total &&
-                !view.endBitmapValid(endAck.blockBitmap, total)) {
+            if (!view.endBitmapValid(endAck.blockBitmap, total)) {
               // END ACK 权威位图校验（RC3-06）：MCU 真值 END OK ACK 发送
               // 时 teardown 尚未执行（ota_ble_session.c:686-689），bitmap
               // 是活跃块位图残留（可能非 0），故不校验 ==0；但置位段仍
