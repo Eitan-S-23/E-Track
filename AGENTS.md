@@ -52,6 +52,24 @@ promote AC5 artifacts to OTA or CI release artifacts.
 - A task/spec requirement does not grant device operations or new CI permissions.
   Keep development checks, independent acceptance and actual hardware evidence separate.
 
+### Development Artifact Hygiene
+
+- Every `dev/flutter/**` push is checks-only, including `dev/flutter/apk/**`.
+  Request a debug APK explicitly with `flutter-dev-checks.yml` dispatch input
+  `build_apk=true`; both hosts still run the full tests for APK requests.
+- New debug APK artifacts retain for 3 days; development logs and APK/EXE CI
+  verification copies retain for 14 days. This does not change Release assets
+  or existing artifact expiry dates. Archive required evidence before expiry.
+- `artifact-maintenance.yml` is a separate, trusted-main daily maintenance job.
+  Its exact repository/workflow scope, pinned IDs, 72-hour/branch-count policy,
+  50-ID cap and optional repository budget are defined in
+  `Tools/flutter/artifact_maintenance_policy.json` and
+  `docs/flutter-development-validation.md`. Do not widen deletion scope to meet
+  a budget. Pins do not override GitHub's native expiration.
+- Preserve sanitized console diagnostics before artifact upload and keep upload
+  failures strict. Missing test counts and unknown account quotas stay unknown;
+  neither a successful cleanup nor a step-level PASS proves upload recovery.
+
 ## Default Build Entry Point (firmware and/or simulator)
 
 **Default action:** when asked to compile the MCU firmware and simulator, run

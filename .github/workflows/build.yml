@@ -299,6 +299,7 @@ jobs:
           name: android-apk
           path: app/bluetooth_flutter_Trace/release/ble-monitor-android.apk
           if-no-files-found: error
+          retention-days: 14
 
   windows:
     name: Build Windows EXE
@@ -350,6 +351,7 @@ jobs:
             app/bluetooth_flutter_Trace/release/ble-monitor-windows.zip
             app/bluetooth_flutter_Trace/release/ble-monitor-windows.exe
           if-no-files-found: error
+          retention-days: 14
 
   pages:
     name: Deploy GitHub Pages

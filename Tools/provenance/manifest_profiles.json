@@ -59,6 +59,7 @@
         "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts",
         ".github/workflows/acceptance-governance.yml",
         ".github/workflows/flutter-dev-checks.yml",
+        ".github/workflows/artifact-maintenance.yml",
         "docs/acceptance-contracts/template.contract.json",
         "docs/acceptance-contracts/template.evidence-matrix.json"
       ],

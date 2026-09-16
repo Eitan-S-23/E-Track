@@ -60,9 +60,9 @@ Runner: `Tools/flutter/dev_checks.py` (Python 3.9 or newer on the hosted runner)
   and mainline documentation changes do not trigger this workflow. Push to a
   validation branch only for needed feedback, not to repeat unchanged checks.
 - Manual dispatch offers `test_scope=all` or `test_scope=ota`, plus `build_apk`.
-  A push to `dev/flutter/apk/**` also requests a debug APK automatically. APK
-  requests force `all` tests on both hosts; ordinary validation pushes stay
-  checks-only. GitHub must first
+  Only explicit `workflow_dispatch` with `build_apk=true` requests a debug APK.
+  All pushes, including legacy `dev/flutter/apk/**` branches, are checks-only.
+  APK requests force `all` tests on both hosts. GitHub must first
   know the workflow on the default branch for manual dispatch to be available;
   use the authorized validation-branch push for initial bootstrap instead of
   merging an unverified batch just to enable the button.
@@ -86,9 +86,14 @@ git commit -m "WIP: validate Flutter development batch"
 git push -u origin dev/flutter/p3-3-validation
 ```
 
-For an APK-on-push branch, use `dev/flutter/apk/p3-3-validation` as the branch
-name in the example instead. The allowance covers only these bounded development
-actions, not main/master/tag pushes, merge or shipping a red validation commit.
+The legacy `dev/flutter/apk/` branch prefix no longer requests packaging. The
+allowance covers only these bounded development actions, not main/master/tag
+pushes, merge or shipping a red validation commit.
+Existing validation branches must integrate the new workflow and runner before
+they receive this behavior. Actions uses the workflow in the pushed/ref commit;
+rerunning an old commit does not retroactively change its APK trigger, retention
+or console diagnostics. The daily maintenance job independently uses trusted main
+and can classify old development artifacts without rewriting those branches.
 Once a dispatchable workflow exists, a targeted checks-only run is:
 
 ```cmd
@@ -172,8 +177,32 @@ lock hashes. `result.json` and raw combined stdout/stderr logs are uploaded with
 APK mode additionally uploads the debug APK and its metadata, never SDK/cache
 trees. If setup/job cancellation prevents a complete report, use the failed or
 cancelled Actions status and available console logs; never infer PASS from a
-missing log. Artifact retention is 14 days; preserve needed evidence inside an
-approved project evidence directory before expiry.
+missing log. Development log retention is 14 days; preserve needed evidence inside an
+approved project evidence directory before expiry. Debug APK retention is the
+exception: new debug APK artifacts retain for 3 days. New `android-apk` and
+`windows-exe` CI verification copies explicitly retain for 14 days; GitHub Release
+assets are not changed. Existing artifacts keep their original expiry dates.
+
+Before each upload, the runner also emits `DEV_COMMAND`, prefixed `DEV_LOG[name]`
+lines and a final `DEVELOPMENT_RESULT` JSON summary to ordinary job stdout. The
+summary binds the tested commit, host, scope, command status/exit codes, recognized
+SDK identity, terminal test counts and `OTA_LINK_` line counts. SDK identities
+come from `flutter --version --machine`, not a hard-coded SDK version. Test counts
+are parsed only from a recognized terminal expanded-reporter summary; absent or
+unrecognized values are `null`, not zero or a guessed PASS.
+
+Console copies redact known credential environment values, credential fields,
+authorization headers, private-key blocks and URL query/fragment/userinfo.
+Machine summaries sanitize structured values before JSON serialization, so
+redaction cannot break JSON quoting. Private-key blocks are suppressed before
+tail selection so clipping cannot expose a block whose opening marker was lost.
+Child output is prefixed so it cannot inject Actions workflow commands. At most
+64 KiB of complete trailing log lines is mirrored per command; the console marks
+truncation and counts scan the entire raw log. Oversized individual lines are
+omitted from the console, not split into potentially unredactable fragments.
+Raw project-local logs are retained unchanged. Missing logs or a failed console
+copy fail diagnostics without changing the original command exit code. The
+original Job Object/process-group cleanup and strict upload steps still apply.
 
 ## Debug APK Mode
 
@@ -246,6 +275,7 @@ From the project root, without a Flutter SDK, network access or PowerShell:
 ```cmd
 python -B tests/ota/test_flutter_dev_checks.py
 python -B tests/ota/test_flutter_dev_apk.py
+python -B tests/ota/test_artifact_maintenance.py
 ```
 
 This tests the orchestration and real subprocess failure/timeout handling using
@@ -255,3 +285,98 @@ that they compile or pass. The host regression is also wired into both this
 workflow and Acceptance Governance CI. The development workflow belongs to the
 Validation profile and this guide to Governance; historical frozen profile
 blobs and bundles are not rewritten.
+
+## Artifact Maintenance
+
+### Scope And Trigger
+
+`.github/workflows/artifact-maintenance.yml` runs daily at 02:17 UTC (10:17
+Asia/Shanghai), independently of build/upload success. Only the trusted `main`
+workflow in `Eitan-S-23/E-Track` may run. The job alone has `actions: write`;
+development jobs remain read-only. Concurrency is serialized without cancelling
+an in-flight batch. Scheduled runs apply the bounded policy after authorized
+mainline integration. Manual runs default to dry-run; manual apply requires an
+explicit authorized request. This is not a general deletion permission.
+
+### Signatures
+
+CI entry: `python3 -B Tools/flutter/artifact_maintenance.py --repo-root .`
+Optional mode: `--mode dry-run` or `--mode apply`. The normal workflow supplies
+`ARTIFACT_MAINTENANCE_MODE` and the job's `GITHUB_TOKEN`, never a new PAT.
+Read-only manual plan: `gh workflow run artifact-maintenance.yml --ref main -f mode=dry-run`.
+Offline regression: `python -B tests/ota/test_artifact_maintenance.py`.
+
+### Contracts
+
+Policy: `Tools/flutter/artifact_maintenance_policy.json`. The repository ID,
+workflow path, branch prefix and artifact prefix are fixed authorized scopes.
+Only `flutter-dev-debug-apk-<40-hex-commit>-<run-id>-<attempt>` artifacts from
+`flutter-dev-checks.yml` and `dev/flutter/**` qualify. Artifact API metadata,
+repository/head repository, workflow ID, commit, source branch and the exact
+run attempt must agree; the latest run must be completed too.
+
+An unpinned, unexpired artifact from a completed run is eligible at 72 hours old
+OR outside the newest two eligible rolling copies of its source branch. Pins
+and active runs do not consume these two rolling slots. Ordering uses UTC
+creation time then artifact ID, never local time or API page order. The initial
+12 evidence/latest IDs retained on 2026-09-17 are pinned with reasons. Pins only
+protect against this helper: they cannot stop native GitHub expiry. Archive
+required bytes before expiration; TTL configuration does not update old copies.
+
+Each invocation fully enumerates inventory, plans at most 50 IDs, revalidates
+each immediately before DELETE and journals intent/results. Excess backlog waits
+for a future invocation. It never deletes runs, logs, caches, tags, Release assets,
+`android-apk`, `windows-exe`, other prefixes or other repositories.
+
+`CI_ARTIFACT_WARN_BYTES` is an optional positive repository variable in bytes;
+the policy's `warning_budget_bytes` is the fallback. Unconfigured budgets and the
+actual account quota are reported as unknown. Repository artifact bytes are not
+account-wide billed usage; caches/packages/other repositories and delayed GitHub
+accounting can differ. A warning budget never widens deletion scope or promises
+immediate recovery. No visibility, billing or token-scope change is made.
+
+Output is ordinary `ARTIFACT_MAINTENANCE` JSON log lines plus checked workspace
+`.cache/artifact-maintenance/runs/<id>/{operations.jsonl,result.json}`. No artifact
+upload or external `GITHUB_STEP_SUMMARY` write is required. `confirmed_freed_bytes`
+counts only HTTP 204 deletions whose IDs are absent in the final inventory;
+unavailable final inventory leaves that value unknown.
+
+### Validation And Error Matrix
+
+| Condition | Behavior |
+| --- | --- |
+| Dry-run | Complete plan/report; zero DELETE calls |
+| Wrong repo/ref/event/checkout/policy | Nonzero exit; no deletion |
+| Incomplete/changing pagination, duplicate IDs, invalid target metadata | Nonzero exit; no deletion plan applied |
+| Pin, active run, expired artifact, other prefix | Preserve; no scope expansion |
+| Candidate changes before DELETE | Stop batch; preserve prior receipts |
+| DELETE transport/5xx uncertainty | One read-only reconciliation, no automatic retry, no successful-byte credit |
+| API rejection or partial failure | Nonzero exit; no later candidate deleted |
+| Final inventory cannot be verified | Nonzero exit; confirmed freed bytes unknown |
+| Configured budget exceeded | Warning only; protected artifacts remain protected |
+
+### Good, Base And Bad Cases
+
+- Good: four recent, completed, unpinned APKs on one branch produce two oldest
+  candidates; a different branch's newest copies are unaffected.
+- Base: one fresh APK and only pinned/active/other-class artifacts produce no
+  deletions. With no configured budget, usage is reported without quota inference.
+- Bad: a forged artifact name, foreign workflow, missing digest, incomplete page
+  or unsupported event fails closed rather than authorizing a best-effort cleanup.
+
+### Required Tests
+
+`test_artifact_maintenance.py` covers exact identity, attempt reconciliation,
+age/count boundaries, pins, active runs, branch isolation, pagination, metadata
+changes, dry-run, uncertain/partial deletion, caps, capacity and workflow/profile
+coverage with an injected API. Runner tests exercise real stdout/stderr, exit
+codes, timeouts, redaction, unknown counts and strict diagnostics; APK helper tests
+remain in the same governance CI. Local self-tests are not independent acceptance
+or proof that a scheduled GitHub invocation has executed.
+
+### Wrong Versus Correct
+
+Wrong: retry an uncertain DELETE, infer the account quota from past uploads, or
+delete release/log artifacts to reach a target size. Correct: reconcile that ID
+read-only, keep byte credit unknown/zero until proven, stop on failure, and retain
+the original fixed scope and raw failure record.

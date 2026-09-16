@@ -1,0 +1,26 @@
+{
+  "schema": "etrack-artifact-maintenance-v1",
+  "repository": "Eitan-S-23/E-Track",
+  "repository_id": 1310649784,
+  "workflow_path": ".github/workflows/flutter-dev-checks.yml",
+  "branch_prefix": "dev/flutter/",
+  "artifact_prefix": "flutter-dev-debug-apk-",
+  "max_age_hours": 72,
+  "keep_newest_per_branch": 2,
+  "max_deletions": 50,
+  "warning_budget_bytes": null,
+  "pinned_artifacts": [
+    {"id": 10399696022, "reason": "Latest admission-branch APK at authorized cleanup"},
+    {"id": 10397716463, "reason": "P3-3 Git closeout build evidence, run 34970506983"},
+    {"id": 10378708222, "reason": "P3-3-v8/v9 frozen-evidence reference"},
+    {"id": 10298405373, "reason": "Latest T1A-branch APK at authorized cleanup"},
+    {"id": 10295579024, "reason": "Device-observation instrumentation evidence"},
+    {"id": 10274975471, "reason": "Development package-suffix evidence"},
+    {"id": 10269124401, "reason": "T1A instrumentation/A1-gap evidence"},
+    {"id": 10195957620, "reason": "Latest batch6-branch APK at authorized cleanup"},
+    {"id": 10195103592, "reason": "Batch9 delivery evidence"},
+    {"id": 10178414611, "reason": "Batch9 delivery evidence"},
+    {"id": 10142353404, "reason": "Flutter OTA research/development-build evidence"},
+    {"id": 10114677343, "reason": "Flutter OTA research/development-build evidence"}
+  ]
+}

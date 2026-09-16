@@ -457,8 +457,11 @@ dispatch/复跑 `flutter-dev-checks.yml`、读取日志或将产物下载到已�
 复跑须有输入变化、新验证请求或已定位的环境恢复依据，先核对 workflow/ref，不能盲目重复失败。
 无需每个整改批次重新申请相同授权，也不要求测试先绿或先满足正式验收准入。
 
-`dev/flutter/apk/**` 推送或 `build_apk=true` 请求仅生成 debug APK；普通分支默认只跑
-analyze/test，APK 请求必须跑完整测试。任何宿主失败都不能报告整体自测通过，debug APK
+用户于 2026-09-17 收窄自动打包触发：全部 `dev/flutter/**` 推送（包括原
+`dev/flutter/apk/**`）只跑 analyze/test；只有显式 `workflow_dispatch` 且
+`build_apk=true` 才请求 debug APK，APK 请求必须在双宿主跑完整测试。新开发 APK 保留
+3 天，开发日志保留 14 天；上传前输出脱敏诊断，上传失败仍须如实保留。该规则不追溯
+改变已有产物到期时间或历史证据。任何宿主失败都不能报告整体自测通过，debug APK
 也不能替代 release-mode APK/EXE、真机或独立验收证据。不得使用生产签名/发布密钥。
 
 共享工作树/索引不得并发切分支、暂存或提交；先建立项目内独占验证工作树，或由主会话

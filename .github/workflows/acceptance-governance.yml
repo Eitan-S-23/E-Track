@@ -11,6 +11,8 @@ on:
       - "Tools/flutter/**"
       - "tests/ota/test_flutter_dev_checks.py"
       - "tests/ota/test_flutter_dev_apk.py"
+      - "tests/ota/test_artifact_maintenance.py"
+      - ".github/workflows/artifact-maintenance.yml"
       - "docs/flutter-development-validation.md"
       - ".github/workflows/flutter-dev-checks.yml"
       - ".github/workflows/build.yml"
@@ -45,6 +47,8 @@ on:
       - "Tools/flutter/**"
       - "tests/ota/test_flutter_dev_checks.py"
       - "tests/ota/test_flutter_dev_apk.py"
+      - "tests/ota/test_artifact_maintenance.py"
+      - ".github/workflows/artifact-maintenance.yml"
       - "docs/flutter-development-validation.md"
       - ".github/workflows/flutter-dev-checks.yml"
       - ".github/workflows/build.yml"
@@ -102,6 +106,7 @@ jobs:
           python3 tests/ota/test_p2_5_build_provenance.py
           python3 -B tests/ota/test_flutter_dev_checks.py
           python3 -B tests/ota/test_flutter_dev_apk.py
+          python3 -B tests/ota/test_artifact_maintenance.py
 
       # Spec 探针刻意放在本工作流而不是 firmware-build.yml：探针只需要
       # arm-none-eabi-gcc/nm/objdump 与宿主 gcc，不需要完整固件构建链，

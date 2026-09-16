@@ -1,0 +1,48 @@
+name: Development Artifact Maintenance
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run lists the bounded plan; apply deletes only eligible development APK artifacts"
+        type: choice
+        required: true
+        default: dry-run
+        options:
+          - dry-run
+          - apply
+
+permissions:
+  contents: read
+
+concurrency:
+  group: artifact-maintenance-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  maintenance:
+    if: >-
+      github.repository == 'Eitan-S-23/E-Track' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Checkout trusted maintenance commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Inspect capacity and maintain bounded development artifacts
+        working-directory: ${{ github.workspace }}
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARTIFACT_MAINTENANCE_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode || 'dry-run' }}
+          CI_ARTIFACT_WARN_BYTES: ${{ vars.CI_ARTIFACT_WARN_BYTES || '' }}
+        run: python3 -B Tools/flutter/artifact_maintenance.py --repo-root .
