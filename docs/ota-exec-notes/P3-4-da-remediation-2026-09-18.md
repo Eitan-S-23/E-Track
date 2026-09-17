@@ -245,7 +245,19 @@ mutation record; supply a bounded countercheck with the development batch.」
    期望新用例变红。变异体**不合并、不发布**，只作为「这些用例确实观测真实外壳上报
    路径」的凭据。
 
-执行记录（提交 SHA、run URL、逐作业结论）见 §9。
+**执行记录（2026-09-18，开发自测，非验收）**：
+
+- 基线：`b437cea`——R1c 两宿主 `analyze` + `tests` 全绿、`failed: 0`（§9.2），
+  即变异体的父提交本身已验证。
+- 变异体：`caaf01b`（隔离分支 `dev/flutter/p3-4-r07-mutation`，父提交 `b437cea`）：
+  `lib/services/bluetooth_service.dart` **仅 -2 行**（两个成功路径上报点），其余字节
+  与基线逐字一致。**不合并、不发布、不进入交付链**。
+- 结果（run 35262020804，逐作业见 §9.4）：Windows 步骤 6 **失败**，381 passed /
+  **5 failed**（3 个探针/正对应用例 + 2 个真实外壳用例）⇒ 判别力成立；Linux
+  步骤 6 成功、0 failed ⇒ 该路径在 Linux 不可达，本变异的判别力**宿主受限**（原因
+  与后续补强方向见 §9.4）。
+- 变异分支保留在远端（`origin/dev/flutter/p3-4-r07-mutation`）供复核；实现侧不将其
+  合并回 `dev/flutter/p3-4-link-stats`。
 
 ---
 
@@ -280,13 +292,18 @@ mutation record; supply a bounded countercheck with the development batch.」
 
 ## 9. CI 证据（开发自测，非验收）
 
+> **证据与工作树的对应关系**：下列 R1c/R2/R3 的**被测提交是 `b437cea`**（source-bound：
+> runner 自报的 `commit` 字段与本地 `git rev-parse HEAD` 逐字一致）。本文件所在的
+> 文档提交在该提交**之后**，只增加本记录、不触碰任何源码字节；文档提交自身 push 会再
+> 触发一次 checks-only 运行，但**不作为证据链的一环**，也不改变上表结论。
+
 | 编号 | 目的 | 提交 | run URL | 结论 |
 |---|---|---|---|---|
 | R1 | checks-only 对照（source-bound 全量 analyze + test） | `e2f6560` | run 35257955951 | **红（失败，未通过）**：23 项测试失败 + 1 项 analyzer info，根因见下 |
 | R1b | 同目标复测（修 R1 三项缺陷后，checks-only） | `59e7641` | run 35260571963 | **红（失败，未通过）**：analyze 转绿，剩 1 项测试失败（封存用例断言过强，测试缺陷），另有上传配额环境阻断；见 R1b 段 |
-| R1c | 修 R1b 单项失败后复测（checks-only） | 待回填 | 待回填 | 待回填 |
-| R2 | 同提交 source-bound Android debug APK | 待回填 | 待回填 | 待回填 |
-| R3 | 外部变异反证（期望红） | 待回填 | 待回填 | 待回填 |
+| R1c | 修 R1b 单项失败后复测（checks-only） | `b437cea` | run 35261398648 | **开发自测全绿**：两宿主 analyze + tests 均 0 失败；整轮结论红，**唯一**原因是日志上传配额（环境阻断），非产品缺陷；见 9.2 |
+| R2 | 同提交 source-bound Android debug APK | `b437cea` | run 35261942487 | **构建/校验全绿**（`apk_build`/`apk_verify`/`apk_collect` PASS，`apk_result: PASS`）；APK 产物**未发布**（同一配额阻断）；见 9.3 |
+| R3 | 外部变异反证（期望红，隔离分支 `dev/flutter/p3-4-r07-mutation`） | `caaf01b`（父 `b437cea`） | run 35262020804 | **已红**：Windows 检出 5 项失败，Linux 未检出（路径不可达，见 §7 / 9.4） |
 
 ### 9.1 R1b（`59e7641`，run 35260571963）：红，1 项测试失败 + 上传配额环境阻断
 
@@ -327,6 +344,79 @@ new artifacts.`（账号产物存储配额耗尽）。因此本轮**没有任何
 并已落盘为本地日志副本（`.cache/tmp-p34/r1b-linux.log` / `r1b-win.log`，位于独占
 worktree 内）。上传失败按环境阻断记录，**不**因 `diagnostics_complete: true` 或步骤名
 含 PASS 而改写为成功。
+
+### 9.2 R1c（`b437cea`，run 35261398648）：两宿主开发自测全绿，整轮红仅因上传配额
+
+SDK 身份与 R1b 一致（Flutter `3.47.4` stable / Dart `3.13.3` / engine
+`06a2e2a110089dff50fe635cffd2a61e1b24fbcd`），scope `all`，
+`FLUTTER_DEV_BUILD_APK=false`。
+
+| 作业 | 作业 id | analyze | tests | development_result |
+|---|---|---|---|---|
+| Linux (ubuntu-latest) | 105337741447 | PASS（`exit=0`） | **PASS**：378 passed / 8 skipped / **0 failed** | PASS |
+| Windows (windows-2022) | 105337741654 | PASS（`exit=0`） | **PASS**：386 passed / 0 skipped / **0 failed** | PASS |
+
+- 这是本批**开发自测通过**的直接证据：`analyze: PASS (exit=0)`、`tests: PASS (exit=0)`，
+  两宿主 `failed: 0`；`commit` 字段为 `b437cea2b940ea0fd94aaa5b67d635f9e59df333`，
+  与本地 `git rev-parse HEAD` 逐字一致（source-bound）。
+- 整轮 `conclusion: failure`，但失败步骤**只有** `Upload development logs
+  (not acceptance evidence)`：`Failed to CreateArtifact: Artifact storage quota has
+  been hit.`（步骤 7）。步骤 6 `Analyze, test and optionally build a debug APK`
+  两宿主均成功，未出现在失败步骤列表中。
+- 按评审「Keep upload failure strict」：上传失败保持严格、不降级为
+  `continue-on-error`，因此整轮结论仍为红；该红是**环境阻断**（账号产物存储配额
+  耗尽），不是产品缺陷，也**不得**据此写成「绿运行」。
+- 因产物包不可下载，本轮全部观测取自作业原始 stdout（job 105337741447 /
+  105337741654），已落盘为独占 worktree 内
+  `.cache/tmp-p34/r1c-105337741447.log`、`.cache/tmp-p34/r1c-105337741654.log`。
+
+### 9.3 R2（`b437cea`，run 35261942487）：source-bound debug APK 构建与校验全绿，产物未发布
+
+| 作业 | 作业 id | analyze | tests | APK |
+|---|---|---|---|---|
+| Linux (ubuntu-latest) | 105339577804 | PASS | PASS：378 / 8 / 0 | `apk_prepare`/`apk_java`/`apk_sdk`/`apk_wrapper`/`apk_build`/`apk_verify`/`apk_collect` 全 PASS；`apk_result: PASS` |
+| Windows (windows-2022) | 105339578099 | PASS | PASS：386 / 0 / 0 | `apk_result: NOT_REQUESTED`（APK 仅在 Linux 构建） |
+
+APK 身份（runner 自报 `DEV_LOG[apk_collect]` 单行 JSON，取自作业原始 stdout）：
+
+```text
+{"artifact_kind":"development-debug-apk","formal_acceptance":"NOT_RUN",
+ "commit":"b437cea2b940ea0fd94aaa5b67d635f9e59df333",
+ "sha256":"a909676dc6731a45196985f6ddb6459e726f0be07e2a46e5898bb412b797cf1e",
+ "bytes":131563134,"file":"trace-dev-debug.apk","release_signing":false,
+ "application_id":"com.wen.gaia.gaia"}
+```
+
+- 该 JSON 自带 `formal_acceptance: NOT_RUN` 与 `release_signing: false`：这是**开发
+  自测用 debug APK**，不是发布产物，也不构成独立验收。
+- **产物未发布**：`Upload debug APK (not a release)` 步骤被跳过（前序
+  `Upload development logs` 因配额失败）。因此本轮**没有可下载的 APK**，只有
+  runner 记录的哈希与字节数；「构建通过」不能被读成「产物已归档」。
+- 未安装、未清数据、未做任何设备侧操作。
+
+### 9.4 R3（变异体 `caaf01b`，父提交 `b437cea`，run 35262020804）：期望红，Windows 检出 5 项
+
+| 宿主 | 作业 id | tests | 步骤 6 | 结论 |
+|---|---|---|---|---|
+| Windows (windows-2022) | 105339840169 | 381 passed / 0 skipped / **5 failed** | **失败** | **检出变异** |
+| Linux (ubuntu-latest) | 105339840397 | 378 passed / 8 skipped / 0 failed | 成功 | 未检出（路径不可达，见下） |
+
+Windows 失败用例（5/5）：
+
+1. `ota_link_stats_shell_test.dart` → `discoverServicesByAddress 外壳：成功与失败尝试都计入 calls/errors`
+2. `ota_link_stats_shell_test.dart` → `findExact 外壳：发现计时/成败/写模式 + stats 透传到内部服务发现`
+3. `ota_probe_late_attribution_test.dart` → `假适配器挂起第 1 轮发现：封存 → 第 2 轮完成 → 放行，迟到观测显式归因`
+4. `ota_probe_late_attribution_test.dart` → `挂起点在平台调用入口之上（双宿主）：迟到发现同样显式归因`
+5. `ota_probe_late_attribution_test.dart` → `正对照：不封存同一交错会产生越块样本行（本文件鉴别力的凭据）`
+
+**Linux 未检出的原因（如实记录，不掩饰）**：被删的两个上报点位于
+`discoverServicesByAddress` 的**成功分支**内，其中可注入假适配器的那一支由
+`Platform.isWindows` 门控（§6 已声明该平台覆盖边界）；Linux 上该函数只会走
+「未找到设备 → 抛 `UnsupportedError`」，即 **catch 分支**——而 catch 分支的
+`recordDiscover(error: true)` **故意不在本轮变异范围内**（有界变异只删成功路径两行，
+见 §7）。因此该变异体在当前用例集下的鉴别力是**宿主受限**的：Windows 直接判定，
+Linux 无判别力。这既不能被读成「两宿主都验证过」，也不表示变异无效；若要在 Linux
+侧取得同等判别力，需要补一个能触达成功路径的注入点（属新任务，不在本卡范围）。
 
 R1 失败根因（同一批次内一次修完，按执行合同 §7.3 集中处理，不逐错重开）：
 
@@ -499,6 +589,12 @@ MCU 与模块拆到不同速率，MCU 再也无法与模块通信——这不是
   OTA 传输、未做 release/deploy、未删除任何远端产物。
 - 未修改 `PLAN-OTA.md`、`docs/ota-binary-contracts.md`、`docs/ota-cross-system-contracts.md`
   等冻结契约；§10 只提裁定请求。
+- **CI 产物发布被环境阻断（记为未完成，不记为成功）**：本轮三个 run（R1c/R2/R3）
+  的 `Upload development logs` 步骤全部因**账号产物存储配额耗尽**失败
+  （`Failed to CreateArtifact: Artifact storage quota has been hit`），APK 上传
+  步骤随之被跳过；因此**没有可下载的日志或 APK 产物**，全部证据取自 runner 原始
+  stdout（本地落盘副本见 §9）。实现侧未清理、未删除任何既有远端产物，也未绕过
+  或弱化该失败（`continue-on-error` 一律未使用）。
 - 未改动 `P3-4-parser-v1` 的任何冻结证据、证据包或其核验器。
 - 未修改主 worktree 的看板/记录/评审证据目录（`.cache/p3-4-parser-review-20260917/`、
   `.cache/p3-4-parser-rereview-20260917/`、`.cache/p3-4-parser-pr2-followup-20260917/`
@@ -512,3 +608,10 @@ MCU 与模块拆到不同速率，MCU 再也无法与模块通信——这不是
 2. 看板 §9 变更登记表：登记「`referencePackageBytes=1048576` 在冻结规格下不可达」
    的实测结论与 §10.3 的三选一裁定请求（**登记请求，不就地改契约**）。
 3. 待用户裁定后再决定是否升版本、改合同条目与冻结流程。
+4. 开发自测证据（§9）：R1c 两宿主 `analyze` + `tests` 全绿（`b437cea`）、R2 debug
+   APK 构建/校验全绿但**产物未发布**、R3 变异反证在 Windows 检出 5 项（Linux 无
+   判别力）。三个 run 的整轮结论均为红，原因**只有**账号产物存储配额耗尽这一环境
+   阻断（上传步骤失败、APK 上传被跳过）。看板登记时须同时写明：本轮**无产物包可
+   下载**，证据取自带 job id 的原始 stdout；P3-4 仍**不得**据此置「完成」。
+5. 远端新增隔离分支 `dev/flutter/p3-4-r07-mutation`（变异体 `caaf01b`）：仅供复核的
+   反证材料，**不得合并、不得发布**；如需清理该分支，请先明示再由主会话处理。
