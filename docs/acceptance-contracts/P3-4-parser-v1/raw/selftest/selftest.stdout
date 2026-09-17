@@ -1,0 +1,253 @@
+PASS  夹具：逐字节切片身份与 SHA-256
+PASS  正例：真实切片单实例已收口（默认+严格模式）
+PASS  正例：严格契约块零发现（默认+严格模式）
+PASS  正例：独立重算摘要与样本行自洽
+PASS  正例：整改前缺字段逐项申报
+PASS  P01 身份：不同设备不合并
+PASS  P01 身份：不同 MTU 不合并
+PASS  P01 身份：不同写模式不合并
+PASS  P01 身份：拆分后各组保留自身统计
+PASS  P01 侧车：身份声明齐备 → 门槛可用
+PASS  P01 侧车：身份与观测不符 → 致命
+PASS  P01 侧车：日志未绑定 → 致命
+PASS  P01 侧车：声明输入 SHA 不符 → 致命
+PASS  P01 侧车：身份字段不全 → 致命
+PASS  P01 侧车（PR2-02）：空/空白字段不构成声明
+PASS  P01 侧车（PR2-02）：占位符不构成声明
+PASS  P01 侧车（PR2-02）：零参数不构成声明
+PASS  P01 侧车（PR2-02）：零重试是合法声明
+PASS  P01 侧车（PR3-02）：包 SHA 尾随换行不构成声明
+PASS  P01 正例（PR3-02）：合法大写摘要 + 零重试仍构成声明
+PASS  P05 范围（PR3-02）：词法正则必须整串锚定
+PASS  P01 身份：未声明身份不得标为门槛可用
+PASS  P01 资格（PR2-01）：空捕获+侧车不得放行
+PASS  P01 资格（PR2-01）：本轮有致命项不得放行
+PASS  P01 资格（PR2-01）：仅 partial 不得放行
+PASS  P01 资格（PR2-01）：分析失败不得放行
+PASS  P01 身份：单签名结论须带观测身份
+PASS  P02 归属：解析期致命项归属所在块
+PASS  P02 归属：畸形样本取消块洁净资格
+PASS  P02 归属：严格模式结论不被重算洗白
+PASS  P02 留痕：排除轮保留行号与理由
+PASS  P02 留痕：非 ok 终态记入排除而非致命
+PASS  P02 洁净：partial 覆盖不得合并
+PASS  P02 洁净：拖尾轮次不得合并
+PASS  P02 洁净：诊断池与洁净池分离
+PASS  P02 真实污染块被排除且留痕
+PASS  P03 偏移：重复确认被检出
+PASS  P03 偏移：默认模式重复确认仅告警但取消资格
+PASS  P03 偏移：首发缺 off 致命
+PASS  P03 偏移：孤儿重传被检出
+PASS  P03 偏移：无段确认被检出
+PASS  P03 合法：重传不新增唯一段与 ACK 样本
+PASS  P03 合法：多段共用一个确认
+PASS  P03 合法：resume 前缀不被误报为缺失段
+PASS  P04 空捕获：空文件不是成功
+PASS  P04 空捕获：纯噪声输入不是成功
+PASS  P04 收口：null 摘要不是合法收口
+PASS  P04 收口：非对象摘要不是合法收口
+PASS  P04 收口：非法收口块不得进入合并
+PASS  P04 收口：破损摘要不丢弃样本
+PASS  P04 收口：未收口块告警/严格致命
+PASS  P04 收口：未收口统计按 label 归属
+PASS  P05 范围：成功传输零时长非法且不合并
+PASS  P05 范围：单次操作零微秒合法
+PASS  P05 时序（PR2-04）：缺 elapsedUs 致命
+PASS  P05 时序（PR2-04）：缺 startUs/endAckUs 致命
+PASS  P05 时序（PR2-04）：成功传输时序为 null 致命
+PASS  P05 时序（PR2-04）：非成功终态允许 null
+PASS  P05 范围（PR2-04）：负段偏移致命
+PASS  P05 范围（PR2-04）：零段长致命
+PASS  P05 范围（PR2-04）：负阶段时间致命
+PASS  P05 健壮（PR2-04）：非整数阶段边界给结构化结论
+PASS  P05 范围（PR3-01）：非末条 durable 负偏移致命
+PASS  P05 范围（PR3-01）：非末条 durable 缺偏移致命
+PASS  P05 范围（PR3-01）：非末条 durable 偏移非整数致命
+PASS  P05 范围（PR3-01）：重传零长度致命
+PASS  P05 范围（PR3-01）：重传负长度致命
+PASS  P05 范围（PR3-01）：重传缺长度致命
+PASS  P05 范围（PR3-01）：GATT 负字节数致命
+PASS  P05 范围（PR3-01）：platform 负字节数致命
+PASS  P05 正例（PR3-01）：合法重传保持洁净与门槛资格
+PASS  P05 正例（PR3-01）：durable 零偏移是合法 resume 起点
+PASS  P05 正例（PR3-01）：两类写入的合法字节和被正确累加
+PASS  P05 类型：布尔不冒充整数
+PASS  P05 类型：非法类型给结构化结论（无 traceback）
+PASS  P05 重算：阶段分位数篡改被检出
+PASS  P05 重算：getInfo.totalUs 篡改被检出
+PASS  P05 完整性：缺绑定字段降完整性
+PASS  P05 完整性：无合格轮不得声称完整
+PASS  P05 完整性：字段齐全时为真
+PASS  P05 完整性：旧版缺字段仍可诊断合并
+PASS  P06 早到 ACK：发射端合法输出序不报时钟回退
+PASS  P06 早到 ACK：无关联旧时间重放致命
+PASS  P06 早到 ACK：偏移不匹配致命
+PASS  P06 早到 ACK：跨实例挪用被检出
+PASS  P06 早到 ACK：真实时钟回退仍报警
+PASS  P06 早到 ACK：仅该 kind 除外于单调时钟
+PASS  负例·混组：摘要 label 不符 → MIXED_LABEL
+PASS  负例·混组：样本 label 混用 → MIXED_LABEL
+PASS  负例·混组：attempts 序号回退 → MIXED_ATTEMPT
+PASS  负例·错摘要：分位数篡改 → QUANTILE_MISMATCH
+PASS  负例·错摘要：计数虚高 → COUNT_MISMATCH
+PASS  负例·错摘要：缺样本行 → COUNT_MISMATCH
+PASS  负例·错摘要：重传派生量篡改 → 双检出
+PASS  负例·错摘要：传输时长篡改 → INTERNAL_INCONSISTENT
+PASS  负例·错摘要：完整性声明篡改 → INTEGRITY_MISMATCH
+PASS  负例·错摘要：durable 末值不在序列 → COUNT_MISMATCH
+PASS  负例·错摘要：durable 末值落后于样本 → STRAGGLER(warn)
+PASS  负例·错摘要：字节数篡改 → COUNT_MISMATCH
+PASS  负例·错摘要：阶段区间倒置 → PHASE_REVERSED
+PASS  负例·错摘要：bind 阶段时长不符 → INTERNAL_INCONSISTENT
+PASS  负例·时钟域：非冻结域 → CLOCK_DOMAIN
+PASS  负例·时钟域：未知 schema → SCHEMA_UNKNOWN
+PASS  负例·时钟域：负 us → CLOCK_NEGATIVE
+PASS  负例·时钟域：实例回退 → MULTI_INSTANCE / CLOCK_NONMONOTONIC
+PASS  负例·结构：摘要 JSON 破损 → BAD_JSON + 无合法收口
+PASS  负例·结构：样本畸形 → MALFORMED_SAMPLE
+PASS  负例·结构：未知 kind → UNKNOWN_KIND
+PASS  负例·结构：缺必需对象 → SCHEMA_MISSING
+PASS  负例·字段缺失只告警 → FIELD_ABSENT(warn)
+PASS  负例·拖尾样本只告警 → STRAGGLER(warn)
+PASS  口径：nearest-rank 与冻结语义一致
+PASS  口径：分位数核对确实执行（非空转）
+PASS  口径：合并分位数口径一致
+PASS  CLI：退出码与 --json 形状
+PASS  CLI：--log 可重复
+PASS  CLI（PR2-03）：重复输入去重且如实报告
+PASS  CLI（PR2-03）：同名不同目录保留来源标识
+PASS  CLI：真实切片默认/严格模式退出 0
+PASS  CLI：合并统计只纳入洁净轮
+      鉴别力 _check_quantiles -> test_quantile_tamper_is_fatal | 期望=QUANTILE_MISMATCH | 实际=AssertionError: p99 篡改 | 恢复=通过
+      鉴别力 _check_quantiles -> test_quantile_check_runs_and_catches_shift | 期望=QUANTILE_MISMATCH | 实际=AssertionError: p95 位移 | 恢复=通过
+      鉴别力 _check_quantiles -> test_phase_quantile_tamper_is_detected | 期望=QUANTILE_MISMATCH | 实际=AssertionError: gattWrites 分位数篡改未被检出: [] | 恢复=通过
+      鉴别力 _check_quantiles -> test_getinfo_total_tamper_is_detected | 期望=PHASE_TOTAL_MISMATCH | 实际=AssertionError: 合计被篡改应被检出: [] | 恢复=通过
+      鉴别力 _check_integrity -> test_integrity_declaration_tamper_is_fatal | 期望=INTEGRITY_MISMATCH | 实际=AssertionError: 完整性声明篡改 | 恢复=通过
+      鉴别力 _check_counters -> test_missing_sample_line_is_fatal | 期望=COUNT_MISMATCH | 实际=AssertionError: 缺失样本行必须按重算报计数不符: [] | 恢复=通过
+      鉴别力 _check_counters -> test_declared_count_inflation_is_fatal | 期望=COUNT_MISMATCH | 实际=AssertionError: 计数虚高应被检出: [] | 恢复=通过
+      鉴别力 _check_counters -> test_bytes_tamper_is_fatal | 期望=COUNT_MISMATCH | 实际=AssertionError: 字节数篡改: [] | 恢复=通过
+      鉴别力 _check_counters -> test_durable_final_off_tamper_is_fatal | 期望=COUNT_MISMATCH | 实际=AssertionError: durable 末值不在样本序列: [] | 恢复=通过
+      鉴别力 _check_counters -> test_durable_final_off_behind_last_sample_is_warn | 期望=STRAGGLER | 实际=AssertionError: 应报 durable 拖尾而非致命: [] | 恢复=通过
+      鉴别力 _check_counters -> test_straggler_sample_is_warn_not_fatal | 期望=STRAGGLER | 实际=AssertionError: 拖尾样本应报 STRAGGLER: [] | 恢复=通过
+      鉴别力 _check_clock -> test_negative_us_is_fatal | 期望=CLOCK_NEGATIVE | 实际=AssertionError: 负 us 应被检出: [('QUANTILE_MISMATCH', 'fatal'), ('QUANTILE_MISMATCH', 'fat | 恢复=通过
+      鉴别力 _check_clock -> test_clock_rollback_is_multi_instance_then_fatal | 期望=MULTI_INSTANCE+CLOCK_NONMONOTONIC | 实际=AssertionError: 默认模式应报多实例段: [] | 恢复=通过
+      鉴别力 _clock_segments -> test_clock_rollback_is_multi_instance_then_fatal | 期望=MULTI_INSTANCE+CLOCK_NONMONOTONIC | 实际=AssertionError: 默认模式应报多实例段: [('DUPLICATE_ACK_OFFSET', 'warn'), ('DUPLICATE_ACK_OFFSET' | 恢复=通过
+      鉴别力 _check_early_links -> test_unlinked_early_ack_replay_is_fatal | 期望=EARLY_ACK_UNLINKED | 实际=AssertionError: 时间对不上的重放必须致命: [] | 恢复=通过
+      鉴别力 _check_early_links -> test_early_ack_offset_mismatch_is_fatal | 期望=EARLY_ACK_UNLINKED | 实际=AssertionError: 偏移对不上必须致命: [] | 恢复=通过
+      鉴别力 _check_early_links -> test_early_ack_cross_instance_pollution_is_detected | 期望=EARLY_ACK_UNLINKED+MULTI_INSTANCE | 实际=AssertionError: 跨实例挪用必须致命: ['[WARN] MULTI_INSTANCE: 行 3 同一观测块内出现 2 个实例段（实例时钟回退），前序实例未收 | 恢复=通过
+      鉴别力 _check_offset_sets -> test_duplicate_ack_offset_is_detected | 期望=DUPLICATE_ACK_OFFSET | 实际=AssertionError: 应检出重复确认偏移: [] | 恢复=通过
+      鉴别力 _check_offset_sets -> test_missing_first_send_offset_is_fatal | 期望=SEGMENT_OFFSET_MISSING | 实际=AssertionError: 缺偏移必须致命: [] | 恢复=通过
+      鉴别力 _check_offset_sets -> test_orphan_retransmit_is_detected | 期望=ORPHAN_RETRANSMIT | 实际=AssertionError: 应检出孤儿重传: ['[WARN] STRAGGLER: 行 32 transfer.segmentSendTotal 日志观测多于摘要声明 | 恢复=通过
+      鉴别力 _check_offset_sets -> test_ack_without_segment_is_detected | 期望=ACK_WITHOUT_SEGMENT | 实际=AssertionError: 应检出无段确认: ['[WARN] STRAGGLER: 行 32 transfer.ackLatency.count 日志观测多于摘要声明 | 恢复=通过
+      鉴别力 _check_structure -> test_clock_domain_mismatch_is_fatal | 期望=CLOCK_DOMAIN | 实际=AssertionError: 非冻结时钟域 | 恢复=通过
+      鉴别力 _check_structure -> test_unknown_schema_is_fatal | 期望=SCHEMA_UNKNOWN | 实际=AssertionError: 未知 schema | 恢复=通过
+      鉴别力 _check_structure -> test_missing_required_object_is_fatal | 期望=SCHEMA_MISSING | 实际=AssertionError: 缺必需对象应报致命: [('FIELD_ABSENT', 'warn'), ('FIELD_ABSENT', 'warn'), ('FIEL | 恢复=通过
+      鉴别力 _check_derived -> test_retransmit_derivation_tamper_is_fatal | 期望=COUNT_MISMATCH+INTERNAL_INCONSISTENT | 实际=AssertionError: 重传帧数篡改应被计数与派生两层同时检出 | 恢复=通过
+      鉴别力 _check_derived -> test_phase_reversed_is_fatal | 期望=PHASE_REVERSED | 实际=AssertionError: 阶段区间倒置 | 恢复=通过
+      鉴别力 _check_derived -> test_bind_phase_tamper_is_fatal | 期望=INTERNAL_INCONSISTENT | 实际=AssertionError: bind 阶段时长不符 | 恢复=通过
+      鉴别力 _check_attempts -> test_attempt_number_rollback_is_fatal | 期望=MIXED_ATTEMPT | 实际=AssertionError: attempts 序号回退 | 恢复=通过
+      鉴别力 _check_labels -> test_wrong_label_is_fatal | 期望=MIXED_LABEL | 实际=AssertionError: 样本与摘要 label 不符 | 恢复=通过
+      鉴别力 _check_labels -> test_sample_level_label_mixing_is_fatal | 期望=MIXED_LABEL | 实际=AssertionError: 同块混用 label 应被检出: [] | 恢复=通过
+      鉴别力 _check_required_present -> test_missing_binding_fields_lower_strict_completeness | 期望=FIELD_ABSENT | 实际=AssertionError:  | 恢复=通过
+      鉴别力 _check_required_present -> test_absent_field_is_warn_not_fatal | 期望=FIELD_ABSENT | 实际=AssertionError: 缺一个字段只应告警 | 恢复=通过
+      鉴别力 parse_sample -> test_malformed_sample_is_fatal | 期望=MALFORMED_SAMPLE | 实际=AssertionError: 畸形样本行应被检出: [] | 恢复=通过
+      鉴别力 parse_sample -> test_unknown_kind_is_fatal | 期望=UNKNOWN_KIND | 实际=AssertionError: 未知 kind 应被检出: [('COUNT_MISMATCH', 'fatal'), ('COUNT_MISMATCH', 'fatal' | 恢复=通过
+      鉴别力 _classify -> test_partial_ack_population_is_excluded_from_merge | 期望=INTEGRITY_MISMATCH | 实际=AssertionError:  | 恢复=通过
+      鉴别力 _classify -> test_straggler_round_is_excluded_from_merge | 期望=STRAGGLER | 实际=AssertionError: 拖尾轮不得合并: 1 | 恢复=通过
+      鉴别力 _classify -> test_excluded_rounds_keep_line_numbers_and_reasons | 期望=OUTCOME:'fail' | 实际=AssertionError:  | 恢复=通过
+      鉴别力 _sample_off -> test_negative_segment_offset_is_fatal | 期望=SEGMENT_OFFSET_INVALID | 实际=AssertionError: 负偏移必须致命: [] | 恢复=通过
+      鉴别力 _sample_off -> test_zero_length_segment_is_fatal | 期望=SEGMENT_LENGTH_INVALID | 实际=AssertionError: 零段长必须致命: [] | 恢复=通过
+      鉴别力 _sample_off -> test_missing_first_send_offset_is_fatal | 期望=SEGMENT_OFFSET_MISSING | 实际=AssertionError: 缺偏移必须致命: [] | 恢复=通过
+      鉴别力 _check_transfer_timing -> test_elapsed_tamper_is_fatal | 期望=INTERNAL_INCONSISTENT | 实际=AssertionError: 传输时长自洽性被破坏 | 恢复=通过
+      鉴别力 _check_transfer_timing -> test_missing_elapsed_timing_field_is_fatal | 期望=TIMING_INCOMPLETE+FIELD_ABSENT | 实际=AssertionError: 缺 elapsedUs 必须报时序不完整: ['[WARN] FIELD_ABSENT: 行 31 摘要缺少字段 transfer.elap | 恢复=通过
+      鉴别力 _check_transfer_timing -> test_missing_start_or_end_timing_field_is_fatal | 期望=TIMING_INCOMPLETE | 实际=AssertionError: 缺 startUs 必须报时序不完整: ['[WARN] FIELD_ABSENT: 行 31 摘要缺少字段 transfer.startU | 恢复=通过
+      鉴别力 _check_transfer_timing -> test_success_with_null_timing_fields_is_fatal | 期望=TIMING_INCOMPLETE | 实际=AssertionError: 成功传输的 null 时序必须致命: [] | 恢复=通过
+      鉴别力 _check_transfer_timing -> test_success_with_zero_elapsed_is_fatal_and_excluded | 期望=ELAPSED_NOT_POSITIVE | 实际=AssertionError: 应报成功传输的零时长: [] | 恢复=通过
+      鉴别力 _identity_domain_problem -> test_sidecar_blank_identity_values_are_not_declared | 期望=GROUP_IDENTITY_INVALID | 实际=AssertionError: 空身份应退出 1，实际 0 | 恢复=通过
+      鉴别力 _identity_domain_problem -> test_sidecar_placeholder_identity_is_not_declared | 期望=GROUP_IDENTITY_INVALID | 实际=AssertionError: 占位身份应退出 1，实际 0 | 恢复=通过
+      鉴别力 _identity_domain_problem -> test_sidecar_zero_parameters_are_not_declared | 期望=GROUP_IDENTITY_INVALID | 实际=AssertionError: 零参数应退出 1，实际 0 | 恢复=通过
+      鉴别力 _qualification_reasons -> test_merge_without_declared_identity_is_not_threshold_eligible | 期望=GROUP_IDENTITY_NOT_DECLARED | 实际=AssertionError:  | 恢复=通过
+      鉴别力 _qualification_reasons -> test_empty_capture_with_sidecar_is_not_threshold_eligible | 期望=NO_ELIGIBLE_RUNS | 实际=AssertionError: 没有任何合格轮次不得门槛可用: [] | 恢复=通过
+      鉴别力 _qualification_reasons -> test_fatal_round_elsewhere_still_blocks_threshold_eligibility | 期望=FATAL:ELAPSED_NOT_POSITIVE | 实际=AssertionError: 本轮存在致命项不得门槛可用: [] | 恢复=通过
+      鉴别力 _qualification_reasons -> test_partial_round_without_clean_run_is_not_threshold_eligible | 期望=NO_ELIGIBLE_RUNS | 实际=AssertionError: 没有合格洁净轮不得门槛可用: [] | 恢复=通过
+      鉴别力 _qualification_reasons -> test_sidecar_identity_mismatch_is_fatal | 期望=GROUP_IDENTITY_MISMATCH | 实际=AssertionError: 身份不符不得门槛可用: [] | 恢复=通过
+      鉴别力 _observed_counts -> test_negative_nonterminal_durable_offset_is_fatal | 期望=SEGMENT_OFFSET_INVALID | 实际=AssertionError: 非末条负偏移必须致命: [] | 恢复=通过
+      鉴别力 _observed_counts -> test_missing_nonterminal_durable_offset_is_fatal | 期望=SEGMENT_OFFSET_MISSING | 实际=AssertionError: 非末条缺偏移必须致命: [] | 恢复=通过
+      鉴别力 _observed_counts -> test_non_integer_nonterminal_durable_offset_is_fatal | 期望=SEGMENT_OFFSET_MISSING | 实际=AssertionError: 非整数偏移必须致命: [] | 恢复=通过
+      鉴别力 _sample_off -> test_retransmit_zero_length_is_fatal | 期望=SEGMENT_LENGTH_INVALID | 实际=AssertionError: 重传零长度必须致命: [] | 恢复=通过
+      鉴别力 _sample_off -> test_retransmit_negative_length_is_fatal | 期望=SEGMENT_LENGTH_INVALID | 实际=AssertionError: 重传负长度必须致命: [] | 恢复=通过
+      鉴别力 _sample_off -> test_retransmit_missing_length_is_fatal | 期望=SEGMENT_OFFSET_MISSING | 实际=AssertionError: 重传缺长度必须致命: [] | 恢复=通过
+      鉴别力 _sum_bytes -> test_gatt_negative_bytes_is_fatal | 期望=BYTE_COUNT_INVALID | 实际=AssertionError: GATT 负字节数必须致命: [] | 恢复=通过
+      鉴别力 _sum_bytes -> test_platform_negative_bytes_is_fatal | 期望=BYTE_COUNT_INVALID | 实际=AssertionError: platform 负字节数必须致命: [] | 恢复=通过
+      鉴别力 _HEX64_RE -> test_sidecar_package_sha_trailing_newline_is_not_declared | 期望=GROUP_IDENTITY_INVALID | 实际=AssertionError: 包 SHA 含尾部换行应退出 1，实际 0 | 恢复=通过
+      鉴别力 _HEX64_RE -> test_lexical_regexes_reject_trailing_newline | 期望=数字解析必须整串匹配+hex64 域必须整串匹配 | 实际=AssertionError: hex64 域必须整串匹配 | 恢复=通过
+      鉴别力 _INT_RE -> test_lexical_regexes_reject_trailing_newline | 期望=数字解析必须整串匹配+hex64 域必须整串匹配 | 实际=AssertionError: 数字解析必须整串匹配 | 恢复=通过
+PASS  鉴别力：保持类型的变异下负例必须失败（P34-P07）
+PASS  边界：临时文件自净
+PASS  边界：解析器不写解析器目录外路径
+      整份捕获 ci-35034258547/ubuntu: 块=27 样本=801 致命=0 告警={'SUMMARY_MISSING': 1, 'FIELD_ABSENT': 182, 'STRAGGLER': 12} runs=6 excluded=13 unclosed=1/434
+        排除 ci-35034258547/ubuntu 行 481..512 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=8'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/ubuntu 行 513..559 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/ubuntu 行 560..573 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/ubuntu 行 574..619 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=['SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/ubuntu 行 635..643 检出=['FIELD_ABSENT'] 理由=["OUTCOME:'fail'"]
+        排除 ci-35034258547/ubuntu 行 644..656 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/ubuntu 行 661..669 检出=['FIELD_ABSENT'] 理由=["OUTCOME:'fail'"]
+        排除 ci-35034258547/ubuntu 行 670..699 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/ubuntu 行 700..714 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/ubuntu 行 718..733 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/ubuntu 行 735..750 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/ubuntu 行 752..769 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/ubuntu 行 771..784 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        污染块 ci-35034258547/ubuntu label=upgrade 行 787..None 样本=434 实例段=9 确认样本=203 摘要声明确认=None 首发=203 重传=2
+        合法合并范围 ci-35034258547/ubuntu: runs=6 确认样本=48 唯一段=48 唯一重传=0 P99=900 字段完整=False 门槛可用=False 零样本块=0
+      整份捕获 ci-35034258547/windows: 块=27 样本=821 致命=0 告警={'MULTI_INSTANCE': 1, 'DUPLICATE_SEGMENT_OFFSET': 2, 'DUPLICATE_ACK_OFFSET': 2, 'FIELD_ABSENT': 189, 'STRAGGLER': 24} runs=6 excluded=14 unclosed=0/0
+        排除 ci-35034258547/windows 行 307..976 检出=['DUPLICATE_ACK_OFFSET', 'DUPLICATE_SEGMENT_OFFSET', 'FIELD_ABSENT', 'MULTI_INSTANCE', 'STRAGGLER'] 理由=['NOT_SINGLE_INSTANCE', 'OFFSET_SET_INCONSISTENT:DUPLICATE_ACK_OFFSET', 'OFFSET_SET_INCONSISTENT:DUPLICATE_SEGMENT_OFFSET', 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/windows 行 1235..1266 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=8'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/windows 行 1267..1313 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/windows 行 1314..1327 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/windows 行 1328..1392 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=['SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/windows 行 1396..1404 检出=['FIELD_ABSENT'] 理由=["OUTCOME:'fail'"]
+        排除 ci-35034258547/windows 行 1405..1416 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/windows 行 1419..1427 检出=['FIELD_ABSENT'] 理由=["OUTCOME:'fail'"]
+        排除 ci-35034258547/windows 行 1428..1454 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/windows 行 1455..1469 检出=['FIELD_ABSENT', 'STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35034258547/windows 行 1473..1488 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/windows 行 1490..1505 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/windows 行 1507..1524 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35034258547/windows 行 1526..1539 检出=['FIELD_ABSENT'] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        污染块 ci-35034258547/windows label=upgrade 行 307..976 样本=454 实例段=9 确认样本=210 摘要声明确认=8 首发=210 重传=2
+        合法合并范围 ci-35034258547/windows: runs=6 确认样本=48 唯一段=48 唯一重传=0 P99=1328 字段完整=False 门槛可用=False 零样本块=0
+      整份捕获 ci-35094204310/ubuntu: 块=43 样本=443 致命=0 告警={'SUMMARY_MISSING': 1, 'STRAGGLER': 12} runs=6 excluded=12 unclosed=1/85
+        排除 ci-35094204310/ubuntu 行 525..556 检出=[] 理由=["ACK_SAMPLES:'partial:missing=8'", "OUTCOME:'fail'"]
+        排除 ci-35094204310/ubuntu 行 557..602 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/ubuntu 行 620..631 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/ubuntu 行 632..676 检出=['STRAGGLER'] 理由=['SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/ubuntu 行 681..689 检出=[] 理由=["OUTCOME:'fail'"]
+        排除 ci-35094204310/ubuntu 行 690..701 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/ubuntu 行 704..712 检出=[] 理由=["OUTCOME:'fail'"]
+        排除 ci-35094204310/ubuntu 行 717..741 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/ubuntu 行 742..756 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/ubuntu 行 760..775 检出=[] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35094204310/ubuntu 行 777..792 检出=[] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35094204310/ubuntu 行 794..811 检出=[] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        污染块 ci-35094204310/ubuntu label=upgrade 行 813..None 样本=85 实例段=9 确认样本=13 摘要声明确认=None 首发=15 重传=1
+        合法合并范围 ci-35094204310/ubuntu: runs=6 确认样本=48 唯一段=48 唯一重传=0 P99=1184 字段完整=True 门槛可用=False 零样本块=8
+      整份捕获 ci-35094204310/windows: 块=43 样本=448 致命=0 告警={'SUMMARY_MISSING': 1, 'MULTI_INSTANCE': 1, 'STRAGGLER': 29} runs=5 excluded=13 unclosed=1/6
+        排除 ci-35094204310/windows 行 240..450 检出=['MULTI_INSTANCE', 'STRAGGLER'] 理由=['NOT_SINGLE_INSTANCE', 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/windows 行 728..759 检出=[] 理由=["ACK_SAMPLES:'partial:missing=8'", "OUTCOME:'fail'"]
+        排除 ci-35094204310/windows 行 760..805 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/windows 行 826..837 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/windows 行 838..882 检出=['STRAGGLER'] 理由=['SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/windows 行 887..895 检出=[] 理由=["OUTCOME:'fail'"]
+        排除 ci-35094204310/windows 行 896..907 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/windows 行 910..918 检出=[] 理由=["OUTCOME:'fail'"]
+        排除 ci-35094204310/windows 行 919..945 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/windows 行 946..960 检出=['STRAGGLER'] 理由=["OUTCOME:'fail'", 'SAMPLE_POPULATION_NOT_ATTRIBUTABLE:STRAGGLER']
+        排除 ci-35094204310/windows 行 964..979 检出=[] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35094204310/windows 行 981..996 检出=[] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        排除 ci-35094204310/windows 行 998..1015 检出=[] 理由=["ACK_SAMPLES:'partial:missing=1'", "OUTCOME:'fail'"]
+        污染块 ci-35094204310/windows label=upgrade 行 240..450 样本=114 实例段=9 确认样本=21 摘要声明确认=8 首发=22 重传=1
+        合法合并范围 ci-35094204310/windows: runs=5 确认样本=40 唯一段=40 唯一重传=0 P99=1020 字段完整=True 门槛可用=False 零样本块=8
+PASS  可选：整份真实捕获 0 致命（无则 SKIP）
+---- selftest 总计 124 项，失败 0 项 ----

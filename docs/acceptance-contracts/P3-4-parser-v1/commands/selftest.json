@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "python",
+    "-X",
+    "utf8",
+    "-S",
+    "-B",
+    "Tools/ota/p3-4-link-stats/acceptance.py",
+    "--bundle",
+    "docs/acceptance-contracts/P3-4-parser-v1",
+    "--phase",
+    "selftest"
+  ],
+  "command": "python -X utf8 -S -B Tools/ota/p3-4-link-stats/acceptance.py --bundle docs/acceptance-contracts/P3-4-parser-v1 --phase selftest",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+  "elapsed_seconds": 3.346233600008418,
+  "ended_at": "2026-09-17T13:35:31+00:00",
+  "exit_code": 0,
+  "started_at": "2026-09-17T13:35:28+00:00",
+  "stderr": {
+    "bytes": 0,
+    "path": "commands/selftest.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 79,
+    "path": "commands/selftest.stdout",
+    "sha256": "6f3acfe1f6850fc2225c5d7140e66c9ed6b8b994b406632567732b12e5e8f8f7"
+  },
+  "timed_out": false,
+  "timeout_seconds": 300
+}

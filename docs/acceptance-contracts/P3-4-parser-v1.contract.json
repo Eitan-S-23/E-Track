@@ -1,0 +1,289 @@
+{
+  "approved_at": "2026-09-17T13:34:03+00:00",
+  "approved_by": "Codex, non-implementation acceptance reviewer under explicit user delegation; see approval.md",
+  "artifacts": [
+    {
+      "description": "Run the 124 supplied regression cases and 64 mutation slots; no FAIL, SKIP, runtime-exception discrimination, missing captures or temporary leftovers.",
+      "id": "ART-SELFTEST",
+      "path": "results/selftest.json"
+    },
+    {
+      "description": "Run all 33 independently specified positive and negative controls in inputs/plan.json; compare exact exit, fatal-code sets, eligibility/count fields and required source/duplicate bindings.",
+      "id": "ART-CONTROLS",
+      "path": "results/controls.json"
+    },
+    {
+      "description": "Reinterpret all four complete CI captures; compare exact regression counts and percentiles, preserve exclusions, and require threshold eligibility false without declared sidecars. These are not performance gates.",
+      "id": "ART-CAPTURES",
+      "path": "results/captures.json"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python -X utf8 -S -B Tools/ota/p3-4-link-stats/acceptance.py --bundle docs/acceptance-contracts/P3-4-parser-v1 --phase selftest",
+      "description": "product (host parser-tool observation): after frozen NOT_RUN-matrix preflight. Run the 124 supplied regression cases and 64 mutation slots; no FAIL, SKIP, runtime-exception discrimination, missing captures or temporary leftovers. Quota one phase execution; child timeout 120 s, outer timeout 300 s. No recovery action or blind retry; freeze/input changes require a successor contract and rerun plan.",
+      "expected_exit_codes": [
+        0
+      ],
+      "id": "CMD-SELFTEST",
+      "input_groups": [
+        "validation"
+      ],
+      "output_required": true,
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance.py",
+        "Tools/ota/p3-4-link-stats/link_stats.py",
+        "Tools/ota/p3-4-link-stats/selftest.py"
+      ]
+    },
+    {
+      "command": "python -X utf8 -S -B Tools/ota/p3-4-link-stats/acceptance.py --bundle docs/acceptance-contracts/P3-4-parser-v1 --phase controls",
+      "description": "product (host parser-tool observation): after frozen NOT_RUN-matrix preflight. Run all 33 independently specified positive and negative controls in inputs/plan.json; compare exact exit, fatal-code sets, eligibility/count fields and required source/duplicate bindings. Quota one phase execution; child timeout 120 s, outer timeout 300 s. No recovery action or blind retry; freeze/input changes require a successor contract and rerun plan.",
+      "expected_exit_codes": [
+        0
+      ],
+      "id": "CMD-CONTROLS",
+      "input_groups": [
+        "validation"
+      ],
+      "output_required": true,
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance.py",
+        "Tools/ota/p3-4-link-stats/link_stats.py"
+      ]
+    },
+    {
+      "command": "python -X utf8 -S -B Tools/ota/p3-4-link-stats/acceptance.py --bundle docs/acceptance-contracts/P3-4-parser-v1 --phase captures",
+      "description": "product (host parser-tool observation): after frozen NOT_RUN-matrix preflight. Reinterpret all four complete CI captures; compare exact regression counts and percentiles, preserve exclusions, and require threshold eligibility false without declared sidecars. These are not performance gates. Quota one phase execution; child timeout 120 s, outer timeout 300 s. No recovery action or blind retry; freeze/input changes require a successor contract and rerun plan.",
+      "expected_exit_codes": [
+        0
+      ],
+      "id": "CMD-CAPTURES",
+      "input_groups": [
+        "validation"
+      ],
+      "output_required": true,
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance.py",
+        "Tools/ota/p3-4-link-stats/link_stats.py"
+      ]
+    }
+  ],
+  "contract_id": "P3-4-parser-v1",
+  "criteria": [
+    {
+      "artifact_ids": [
+        "ART-SELFTEST"
+      ],
+      "command_ids": [
+        "CMD-SELFTEST"
+      ],
+      "dependency_rationale": "This is acceptance of the offline parser tool, not firmware/Flutter product behavior. Validation contains the parser, committed runner, selftest and source fixture. Approved Evidence does not cover Tools/ota; no profile is narrowed. Exact copied controls and complete captures are bound separately as external fixtures.",
+      "description": "Exactly 124 supplied host-regression cases pass with no FAIL/SKIP/stderr and no temporary residue; original capture bytes remain unchanged. Observation: results/selftest.json#selftests_passed",
+      "evidence_types": [
+        "raw_log",
+        "json_report"
+      ],
+      "external_inputs": [
+        "FIX-PLAN",
+        "HOST-PYTHON",
+        "FIX-CAPTURE-1",
+        "FIX-CAPTURE-2",
+        "FIX-CAPTURE-3",
+        "FIX-CAPTURE-4"
+      ],
+      "gate": {
+        "basis": "frozen_requirement",
+        "expected": true,
+        "type": "boolean"
+      },
+      "id": "PARSER-SELFTEST",
+      "input_groups": [
+        "validation"
+      ],
+      "kind": "process",
+      "required": true
+    },
+    {
+      "artifact_ids": [
+        "ART-SELFTEST"
+      ],
+      "command_ids": [
+        "CMD-SELFTEST"
+      ],
+      "dependency_rationale": "This is acceptance of the offline parser tool, not firmware/Flutter product behavior. Validation contains the parser, committed runner, selftest and source fixture. Approved Evidence does not cover Tools/ota; no profile is narrowed. Exact copied controls and complete captures are bound separately as external fixtures.",
+      "description": "All 64 mutation slots across the frozen 23 entries and 22 targets produce the intended AssertionError, not an incidental runtime exception, and pass after restoration; positive controls are retained. Observation: results/selftest.json#discrimination_passed",
+      "evidence_types": [
+        "raw_log",
+        "json_report"
+      ],
+      "external_inputs": [
+        "FIX-PLAN",
+        "HOST-PYTHON",
+        "FIX-CAPTURE-1",
+        "FIX-CAPTURE-2",
+        "FIX-CAPTURE-3",
+        "FIX-CAPTURE-4"
+      ],
+      "gate": {
+        "basis": "frozen_requirement",
+        "expected": true,
+        "type": "boolean"
+      },
+      "id": "PARSER-DISCRIMINATION",
+      "input_groups": [
+        "validation"
+      ],
+      "kind": "process",
+      "required": true
+    },
+    {
+      "artifact_ids": [
+        "ART-CONTROLS"
+      ],
+      "command_ids": [
+        "CMD-CONTROLS"
+      ],
+      "dependency_rationale": "This is acceptance of the offline parser tool, not firmware/Flutter product behavior. Validation contains the parser, committed runner, selftest and source fixture. Approved Evidence does not cover Tools/ota; no profile is narrowed. Exact copied controls and complete captures are bound separately as external fixtures.",
+      "description": "All 33 frozen independently specified positive/negative parser cases pass exact expected-field checks; includes the original PR2 and PR3 counterexamples and positive eligibility controls. Observation: results/controls.json#passed",
+      "evidence_types": [
+        "raw_log",
+        "json_report"
+      ],
+      "external_inputs": [
+        "FIX-PLAN",
+        "HOST-PYTHON"
+      ],
+      "gate": {
+        "basis": "frozen_requirement",
+        "expected": true,
+        "type": "boolean"
+      },
+      "id": "PARSER-CONTROLS",
+      "input_groups": [
+        "validation"
+      ],
+      "kind": "process",
+      "required": true
+    },
+    {
+      "artifact_ids": [
+        "ART-CAPTURES"
+      ],
+      "command_ids": [
+        "CMD-CAPTURES"
+      ],
+      "dependency_rationale": "This is acceptance of the offline parser tool, not firmware/Flutter product behavior. Validation contains the parser, committed runner, selftest and source fixture. Approved Evidence does not cover Tools/ota; no profile is narrowed. Exact copied controls and complete captures are bound separately as external fixtures.",
+      "description": "All four entire captures satisfy the frozen parser-regression expectations; clean pools remain 6/48, 6/48, 6/48 and 5/40 runs/ACK samples, polluted blocks excluded, no capture eligible for threshold measurement without declared identity. Observation: results/captures.json#passed",
+      "evidence_types": [
+        "raw_log",
+        "json_report"
+      ],
+      "external_inputs": [
+        "FIX-PLAN",
+        "HOST-PYTHON",
+        "FIX-CAPTURE-1",
+        "FIX-CAPTURE-2",
+        "FIX-CAPTURE-3",
+        "FIX-CAPTURE-4"
+      ],
+      "gate": {
+        "basis": "frozen_requirement",
+        "expected": true,
+        "type": "boolean"
+      },
+      "id": "PARSER-CAPTURES",
+      "input_groups": [
+        "validation"
+      ],
+      "kind": "process",
+      "required": true
+    }
+  ],
+  "external_inputs": [
+    {
+      "category": "fixture",
+      "description": "Immutable independently reviewed synthetic controls, exact expected parser fields, and complete CI capture fixtures; all 68 children bind bytes and SHA-256.",
+      "evidence_path": "inputs/plan.json",
+      "evidence_sha256": "5c2de6dc2e43e137f72cfe75a9067f695702d3749649d9b100041b4783f4e82b",
+      "fingerprint": "sha256:5c2de6dc2e43e137f72cfe75a9067f695702d3749649d9b100041b4783f4e82b",
+      "id": "FIX-PLAN"
+    },
+    {
+      "category": "toolchain",
+      "description": "Windows host Python executable SHA-256/version, Git version, cwd and Python startup options; no network or device dependency.",
+      "evidence_path": "inputs/host.json",
+      "evidence_sha256": "98685e7e6604fc4d969ad84cbd89162d02e8e4a00d62fb109fbbda7bc1111ed5",
+      "fingerprint": "sha256:98685e7e6604fc4d969ad84cbd89162d02e8e4a00d62fb109fbbda7bc1111ed5",
+      "id": "HOST-PYTHON"
+    },
+    {
+      "category": "fixture",
+      "description": "Exact complete original CI capture ci-35034258547/ubuntu; parser input, not physical performance evidence.",
+      "evidence_path": "inputs/captures/ci-35034258547-ubuntu.log",
+      "evidence_sha256": "1cc73fa22e4cb692b685a5fb582380de189a84faa0f6d11927219068dc8406e6",
+      "fingerprint": "sha256:1cc73fa22e4cb692b685a5fb582380de189a84faa0f6d11927219068dc8406e6",
+      "id": "FIX-CAPTURE-1"
+    },
+    {
+      "category": "fixture",
+      "description": "Exact complete original CI capture ci-35034258547/windows; parser input, not physical performance evidence.",
+      "evidence_path": "inputs/captures/ci-35034258547-windows.log",
+      "evidence_sha256": "1523f205cffba7a56128703e4fc633e3ee77ffc78cfc5d19ff83f8687107a160",
+      "fingerprint": "sha256:1523f205cffba7a56128703e4fc633e3ee77ffc78cfc5d19ff83f8687107a160",
+      "id": "FIX-CAPTURE-2"
+    },
+    {
+      "category": "fixture",
+      "description": "Exact complete original CI capture ci-35094204310/ubuntu; parser input, not physical performance evidence.",
+      "evidence_path": "inputs/captures/ci-35094204310-ubuntu.log",
+      "evidence_sha256": "f5020377724235d4e35f26d2004734ecc42b531ce11f8105f6a6e237a21cf3ed",
+      "fingerprint": "sha256:f5020377724235d4e35f26d2004734ecc42b531ce11f8105f6a6e237a21cf3ed",
+      "id": "FIX-CAPTURE-3"
+    },
+    {
+      "category": "fixture",
+      "description": "Exact complete original CI capture ci-35094204310/windows; parser input, not physical performance evidence.",
+      "evidence_path": "inputs/captures/ci-35094204310-windows.log",
+      "evidence_sha256": "cc480b8fdaa686b8333bdf1a3f7a7f868de54431c183042dad2672d1b54488e9",
+      "fingerprint": "sha256:cc480b8fdaa686b8333bdf1a3f7a7f868de54431c183042dad2672d1b54488e9",
+      "id": "FIX-CAPTURE-4"
+    }
+  ],
+  "freeze_commit": "f90f603d4d8c56be4bae6dc01553610ff7a07712",
+  "freeze_tree": "6d5c93361c9c1cbb302759a34b925481211e81b2",
+  "implementation_ref": "dev/flutter/p3-4-link-stats@f90f603d4d8c56be4bae6dc01553610ff7a07712",
+  "input_groups": [
+    {
+      "category": "production_source",
+      "id": "production",
+      "profile": "Production"
+    },
+    {
+      "category": "validation_inputs",
+      "id": "validation",
+      "profile": "Validation"
+    },
+    {
+      "category": "governance_inputs",
+      "id": "governance",
+      "profile": "Governance"
+    }
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "parent_contract_sha256": null,
+  "performance_gates": [],
+  "profile_config_blob": "3769369d053aad028b67d7e2c17b5827b2b96f55",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "schema": "etrack-acceptance-contract-v3",
+  "scope_note": "Parser subdelivery only. Parent P3-4 remains in progress; physical timing/AT/throughput/30-of-30/soak/reconnection/production-parameter acceptance is NOT_RUN, not waived. No prior formal parser round or evidence reuse.",
+  "status": "FROZEN",
+  "task_id": "P3-4-parser",
+  "version": 1
+}

@@ -1,0 +1,34 @@
+{
+  "argv": [
+    "python",
+    "-X",
+    "utf8",
+    "-S",
+    "-B",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P3-4-parser-v1.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P3-4-parser-v1/evidence-matrix.json",
+    "--repo-root",
+    "."
+  ],
+  "command": "python -X utf8 -S -B Tools/acceptance/validate_bundle.py --contract docs/acceptance-contracts/P3-4-parser-v1.contract.json --matrix docs/acceptance-contracts/P3-4-parser-v1/evidence-matrix.json --repo-root .",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+  "elapsed_seconds": 2.8221546999993734,
+  "ended_at": "2026-09-17T13:35:10+00:00",
+  "exit_code": 0,
+  "started_at": "2026-09-17T13:35:08+00:00",
+  "stderr": {
+    "bytes": 0,
+    "path": "preflight/validator.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 87,
+    "path": "preflight/validator.stdout",
+    "sha256": "e56214f24451633479f559f0553a908198491291e750f600e4ddd791e5d5080b"
+  },
+  "timed_out": false,
+  "timeout_seconds": 120
+}

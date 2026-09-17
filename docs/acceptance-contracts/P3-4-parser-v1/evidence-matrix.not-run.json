@@ -1,0 +1,63 @@
+{
+  "artifacts": [],
+  "commands": [],
+  "contract_id": "P3-4-parser-v1",
+  "contract_sha256": "E4CDA8F591C7DF15FF0F4996095BA875A41A06713B8E514B5615DC43CD0B9971",
+  "criteria": [
+    {
+      "evidence": [],
+      "execution": "EXECUTED",
+      "failure_owner": null,
+      "id": "PARSER-SELFTEST",
+      "notes": "Initial preflight only; no formal phase has executed.",
+      "observed": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "result": "NOT_OBSERVED",
+      "reused_from_round": null
+    },
+    {
+      "evidence": [],
+      "execution": "EXECUTED",
+      "failure_owner": null,
+      "id": "PARSER-DISCRIMINATION",
+      "notes": "Initial preflight only; no formal phase has executed.",
+      "observed": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "result": "NOT_OBSERVED",
+      "reused_from_round": null
+    },
+    {
+      "evidence": [],
+      "execution": "EXECUTED",
+      "failure_owner": null,
+      "id": "PARSER-CONTROLS",
+      "notes": "Initial preflight only; no formal phase has executed.",
+      "observed": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "result": "NOT_OBSERVED",
+      "reused_from_round": null
+    },
+    {
+      "evidence": [],
+      "execution": "EXECUTED",
+      "failure_owner": null,
+      "id": "PARSER-CAPTURES",
+      "notes": "Initial preflight only; no formal phase has executed.",
+      "observed": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "result": "NOT_OBSERVED",
+      "reused_from_round": null
+    }
+  ],
+  "evidence_hashes": {},
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "round_id": "20260917-P3-4-parser-r1",
+  "schema": "etrack-evidence-matrix-v2"
+}

@@ -1,0 +1,93 @@
+{
+  "active_write_root": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+  "additional_authorized_write_root": "D:\\github\\my\\E-Track\\.git",
+  "additional_write_purpose": "Necessary Git objects, branch/worktree index, refs and local commit metadata only.",
+  "all_formal_commands_cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+  "changed_files": [],
+  "checked_at": "2026-09-17T13:51:07+00:00",
+  "controlled_outputs": [
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-acceptance-20260917",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1.contract.json",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats/declared selftest temporary paths only"
+  ],
+  "core_identities": [
+    {
+      "bytes": 11525,
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\acceptance.py",
+      "sha256": "7158a407aeee2c8594e2b98fbe9e1f103e380af53b3efa4dabddd5276dd8fc2c"
+    },
+    {
+      "bytes": 84728,
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+      "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7"
+    },
+    {
+      "bytes": 164081,
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\selftest.py",
+      "sha256": "fb1ec6f23644189a1ce17a512d47cd5d70bdbd20c261b767be7075637832b3dc"
+    },
+    {
+      "bytes": 600188,
+      "path": "D:\\github\\my\\E-Track\\.git\\index",
+      "sha256": "4e9f0ae884f800ebe894c6f579b3102ed033c2df8e95b9646b978acfff09cab4"
+    },
+    {
+      "bytes": 554236,
+      "path": "D:\\github\\my\\E-Track\\PLAN-OTA-EXEC.md",
+      "sha256": "693f398ad750a73663ed915b17a687b3d41aeecb4f5e9c7b56ab201b69545668"
+    }
+  ],
+  "device_network_powershell_build_actions": "NOT_RUN",
+  "note": "Protected bytes and directory inventories are rechecked, not inferred solely from git status. Git metadata is separately authorized. Old logs were not rerun or overwritten.",
+  "old_review_directories": [
+    {
+      "canonical_path_size_sha256_list_digest": "06335104112e89547f8343996854bfe6e1b021db0d13b12359c95f24ffe92e78",
+      "directory": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917",
+      "files": 124,
+      "unchanged": true
+    },
+    {
+      "canonical_path_size_sha256_list_digest": "5b703bb603ff5a4a03bf488dbcba5b396c616037f2be4e432d586dc01cb102dc",
+      "directory": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917",
+      "files": 134,
+      "unchanged": true
+    },
+    {
+      "canonical_path_size_sha256_list_digest": "eed01c7d70337cb9883af7eaa9cfbf4f3634f045e9da6797ab5d63be638951b3",
+      "directory": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917",
+      "files": 84,
+      "unchanged": true
+    },
+    {
+      "canonical_path_size_sha256_list_digest": "ae7274da532ad52c93abcb0cc879ead8aaf70772355b28e1138c96b7429d05f7",
+      "directory": "D:\\github\\my\\E-Track\\.cache\\p3-4-parser-review-20260917",
+      "files": 77,
+      "unchanged": true
+    }
+  ],
+  "outside_root_source_inputs_read_only": [
+    {
+      "bundle_path": "inputs/captures/ci-35034258547-ubuntu.log",
+      "sha256": "1cc73fa22e4cb692b685a5fb582380de189a84faa0f6d11927219068dc8406e6",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35034258547\\ubuntu\\run-9ed6a289b26f4f9da5c2d3d682df6bdb\\logs\\tests.log"
+    },
+    {
+      "bundle_path": "inputs/captures/ci-35034258547-windows.log",
+      "sha256": "1523f205cffba7a56128703e4fc633e3ee77ffc78cfc5d19ff83f8687107a160",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35034258547\\windows\\run-baccd24b786e464b98495ec3cf82806a\\logs\\tests.log"
+    },
+    {
+      "bundle_path": "inputs/captures/ci-35094204310-ubuntu.log",
+      "sha256": "f5020377724235d4e35f26d2004734ecc42b531ce11f8105f6a6e237a21cf3ed",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35094204310\\ubuntu\\run-460be858f1204f53989268cc4d0a0bad\\logs\\tests.log"
+    },
+    {
+      "bundle_path": "inputs/captures/ci-35094204310-windows.log",
+      "sha256": "cc480b8fdaa686b8333bdf1a3f7a7f868de54431c183042dad2672d1b54488e9",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35094204310\\windows\\run-ed87d9bc3d784552b7bf363e8b2f93ab\\logs\\tests.log"
+    }
+  ],
+  "protected_files": 541,
+  "undeclared_filesystem_output_detected": false
+}

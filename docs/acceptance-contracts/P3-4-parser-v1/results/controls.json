@@ -1,0 +1,4792 @@
+{
+  "cases": [
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C001\\0\\control-valid.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C001\\1\\control-valid.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C001.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2592,
+          "path": "raw/controls/C001.stdout",
+          "sha256": "69d1fd66a39bc85820e8055e75794fb5e3368d7c5fbe24e097cf7f903449e9b5"
+        }
+      },
+      "id": "C001",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C001\\0\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C001\\0\\control-valid.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": true,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C002\\2\\control-no-sidecar.log",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C002.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 1984,
+          "path": "raw/controls/C002.stdout",
+          "sha256": "70f69ad3a273bf9495ca19a0915d54456986e6d782271ac2bf43e26a1c69267a"
+        }
+      },
+      "id": "C002",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-no-sidecar.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C002\\2\\control-no-sidecar.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-no-sidecar.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C002\\2\\control-no-sidecar.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C003\\3\\control-sha-mismatch.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C003\\4\\control-sha-mismatch.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C003.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3284,
+          "path": "raw/controls/C003.stdout",
+          "sha256": "c3ddc83ad14865a2f4a3cd3a0f4d7729b5c203c2fee5be4dc8c0f4cf4e922889"
+        }
+      },
+      "id": "C003",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "INPUT_UNBOUND",
+            "detail": "\u65e5\u5fd7 control-sha-mismatch.log#aca8cf0b533b\uff08sha256=aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74\uff09\u672a\u5217\u5165\u4fa7\u8f66 inputs[]\uff1a\u672a\u7ed1\u5b9a\u7684\u8f93\u5165\u4e0d\u5f97\u53c2\u4e0e\u95e8\u69db\u5408\u5e76",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "INPUT_SHA_MISMATCH",
+            "detail": "\u4fa7\u8f66\u58f0\u660e\u7684\u8f93\u5165 D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-sha-mismatch.log\uff08sha256=2222222222222222222222222222222222222222222222222222222222222222\uff09\u4e0d\u5728\u672c\u8f6e --log \u4e2d\uff0c\u6216\u5b57\u8282\u5df2\u53d8\u5316",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-sha-mismatch.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C003\\3\\control-sha-mismatch.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-sha-mismatch.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C003\\3\\control-sha-mismatch.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-sha-mismatch.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "INPUT_SHA_MISMATCH",
+            "INPUT_UNBOUND"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C004\\5\\qualified-empty-capture.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C004\\6\\qualified-empty-capture.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C004.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2356,
+          "path": "raw/controls/C004.stdout",
+          "sha256": "46aa6937067a55bbbeb8f3d74140c5f2e674dcee8218ba3af693d1d2889f2084"
+        }
+      },
+      "id": "C004",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "NO_OBSERVATIONS",
+            "detail": "\u8f93\u5165\u4e2d\u6ca1\u6709\u53ef\u5224\u5b9a\u7684\u89c2\u6d4b\uff08\u65e2\u65e0\u6837\u672c\u4e5f\u65e0\u6458\u8981\uff09\uff1a\u8fd9\u4e0d\u662f\"\u901a\u8fc7\"\uff0c\u800c\u662f\"\u6ca1\u6709\u6709\u6548\u89c2\u6d4b\"",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 0,
+        "inputs": [
+          {
+            "bytes": 0,
+            "duplicateOf": null,
+            "name": "qualified-empty-capture.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C004\\5\\qualified-empty-capture.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sourceId": "qualified-empty-capture.log#e3b0c44298fc"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C004\\5\\qualified-empty-capture.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-empty-capture.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:NO_OBSERVATIONS"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 0
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C005\\7\\qualified-null-summary.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C005\\8\\qualified-null-summary.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C005.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2529,
+          "path": "raw/controls/C005.stdout",
+          "sha256": "e62052ad4b25c6b5a9ca61bef47120e09e263190949c35e3012a1bb9fdf713ea"
+        }
+      },
+      "id": "C005",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "BAD_JSON",
+            "detail": "\u6458\u8981 JSON \u9876\u5c42\u975e\u5bf9\u8c61\uff08null/\u6570\u7ec4/\u6807\u91cf\u90fd\u4e0d\u80fd\u4f5c\u4e3a\u5408\u6cd5\u6536\u53e3\uff0c\u4e5f\u4e0d\u80fd\u6e05\u9664\u5df2\u6709\u6837\u672c\u7684\u9519\u8bef\u5f52\u5c5e\uff09",
+            "line": 31,
+            "severity": "fatal"
+          },
+          {
+            "code": "SUMMARY_MISSING",
+            "detail": "\u8be5\u5757\u7684\u6458\u8981\u884c\u975e\u6cd5\uff08\u884c 31\uff09\uff0c\u5757\u5185 30 \u6761\u6837\u672c\u6ca1\u6709\u53ef\u6838\u5bf9\u7684\u58f0\u660e",
+            "line": 1,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 1980,
+            "duplicateOf": null,
+            "name": "qualified-null-summary.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C005\\7\\qualified-null-summary.log",
+            "sha256": "a271c02926f224ef811fef10823ca9a6f5bd466e2ebe9c54a2665ef7333d5453",
+            "sourceId": "qualified-null-summary.log#a271c02926f2"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C005\\7\\qualified-null-summary.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-null-summary.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:BAD_JSON",
+            "FATAL:SUMMARY_MISSING"
+          ],
+          "invalidSummaryBlocks": 1,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 1,
+          "unclosedSamples": 30
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C006\\9\\qualified-only-partial.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C006\\10\\qualified-only-partial.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C006.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2287,
+          "path": "raw/controls/C006.stdout",
+          "sha256": "d716658df85c175763bf3775590a31739321fdb468607b4f19e7a57ba79de242"
+        }
+      },
+      "id": "C006",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3214,
+            "duplicateOf": null,
+            "name": "qualified-only-partial.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C006\\9\\qualified-only-partial.log",
+            "sha256": "a5ec95b8d9bc9625ef6851ebf55b81d1854fad88d2a7355032d8e8e642e729a1",
+            "sourceId": "qualified-only-partial.log#a5ec95b8d9bc"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C006\\9\\qualified-only-partial.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [],
+              "firstLine": 1,
+              "reasons": [
+                "ACK_SAMPLES:'partial:missing=1'"
+              ],
+              "source": "qualified-only-partial.log#a5ec95b8d9bc",
+              "summaryLine": 30
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-only-partial.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 29
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C007\\11\\qualified-parse-fatal.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C007\\12\\qualified-parse-fatal.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C007.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2596,
+          "path": "raw/controls/C007.stdout",
+          "sha256": "28a00518686b335e1a802882b8a72a707e0059336b16e53b5f0abbd938d0707a"
+        }
+      },
+      "id": "C007",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "UNKNOWN_KIND",
+            "detail": "\u672a\u77e5\u6837\u672c kind='unsupported'\uff08\u89e3\u6790\u5668\u65e0\u6cd5\u5f52\u7c7b\uff0c\u62d2\u7edd\u7ee7\u7eed\uff09",
+            "line": 31,
+            "severity": "fatal"
+          },
+          {
+            "code": "UNKNOWN_KIND",
+            "detail": "\u672a\u77e5\u6837\u672c kind='unsupported'\uff08\u89e3\u6790\u5668\u65e0\u6cd5\u5f52\u7c7b\uff0c\u62d2\u7edd\u7ee7\u7eed\uff09",
+            "line": 31,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3319,
+            "duplicateOf": null,
+            "name": "qualified-parse-fatal.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C007\\11\\qualified-parse-fatal.log",
+            "sha256": "c4a81438df0c06cbb5a36be2cfa680666ec2640350b16b804b2c26c1debd19a4",
+            "sourceId": "qualified-parse-fatal.log#c4a81438df0c"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C007\\11\\qualified-parse-fatal.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "UNKNOWN_KIND"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:UNKNOWN_KIND"
+              ],
+              "source": "qualified-parse-fatal.log#c4a81438df0c",
+              "summaryLine": 32
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-parse-fatal.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:UNKNOWN_KIND"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C008\\13\\qualified-missing-elapsed.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C008\\14\\qualified-missing-elapsed.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C008.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2858,
+          "path": "raw/controls/C008.stdout",
+          "sha256": "3737a8ea4e9ab81940cfb78076c6095cb778b63b92f67d916ba7162d5acb270a"
+        }
+      },
+      "id": "C008",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "FIELD_ABSENT",
+            "detail": "\u6458\u8981\u7f3a\u5c11\u5b57\u6bb5 transfer.elapsedUs\uff08\u6574\u6539\u524d\u53d1\u5c04\u7aef\u7248\u672c\u5408\u6cd5\u7f3a\u5931\uff1b\u540c\u7248\u672c\u65e5\u5fd7\u51fa\u73b0\u5373\u7f3a\u9677\uff0c\u4e14\u4e0d\u5f97\u636e\u6b64\u58f0\u79f0\u5951\u7ea6\u5b8c\u6574\uff09",
+            "line": 31,
+            "severity": "warn"
+          },
+          {
+            "code": "TIMING_INCOMPLETE",
+            "detail": "\u65f6\u5e8f\u5951\u7ea6\u5b57\u6bb5\u7f3a\u5931\uff1atransfer.elapsedUs\u3002transfer.startUs/endAckUs/elapsedUs \u81ea schema 1 \u8d77\u6052\u7531 toJson \u8f93\u51fa\uff0c\u7f3a\u5931\u5373\u65e0\u4f20\u8f93\u65f6\u957f\u53ef\u5224\u5b9a\uff0c\u5220\u9664\u5448\u73b0\u5b57\u6bb5\u4e0d\u5f97\u7ed5\u8fc7\u65f6\u957f\u6838\u5bf9",
+            "line": 31,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3247,
+            "duplicateOf": null,
+            "name": "qualified-missing-elapsed.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C008\\13\\qualified-missing-elapsed.log",
+            "sha256": "6abd9b191c0af743c478d2163551899c32f3856743071e785ac0075166c9088f",
+            "sourceId": "qualified-missing-elapsed.log#6abd9b191c0a"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C008\\13\\qualified-missing-elapsed.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "FIELD_ABSENT",
+                "TIMING_INCOMPLETE"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:TIMING_INCOMPLETE"
+              ],
+              "source": "qualified-missing-elapsed.log#6abd9b191c0a",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-missing-elapsed.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:TIMING_INCOMPLETE"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C009\\15\\empty-metadata-is-not-identity.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C009\\16\\empty-metadata-is-not-identity.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C009.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3657,
+          "path": "raw/controls/C009.stdout",
+          "sha256": "1083e7276c3f8abf2feacc2c44829f3dadd9f7242e9e8f2b2819b805b33fb6c3"
+        }
+      },
+      "id": "C009",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 baud \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a0\uff080\uff08\u6216\u8d1f\u503c\uff09\u4e0d\u662f\u53ef\u5de5\u4f5c\u7684\u5b9e\u9a8c\u53c2\u6570\u53d6\u503c\uff09",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 timeoutMs \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a0\uff080\uff08\u6216\u8d1f\u503c\uff09\u4e0d\u662f\u53ef\u5de5\u4f5c\u7684\u5b9e\u9a8c\u53c2\u6570\u53d6\u503c\uff09",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 packageSha256 \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a''\uff08\u5305 SHA-256 \u5fc5\u987b\u662f 64 \u4f4d\u5341\u516d\u8fdb\u5236\uff08\u5b9e\u9645 0 \u5b57\u7b26\uff09\uff09",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 packageBytes \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a0\uff080\uff08\u6216\u8d1f\u503c\uff09\u4e0d\u662f\u53ef\u5de5\u4f5c\u7684\u5b9e\u9a8c\u53c2\u6570\u53d6\u503c\uff09",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 senderCommit \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a''\uff08\u7a7a\u4e32\u6216\u7eaf\u7a7a\u767d\u4e0d\u6784\u6210\u58f0\u660e\uff09",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 firmwareCommit \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a''\uff08\u7a7a\u4e32\u6216\u7eaf\u7a7a\u767d\u4e0d\u6784\u6210\u58f0\u660e\uff09",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 captureMethod \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a''\uff08\u7a7a\u4e32\u6216\u7eaf\u7a7a\u767d\u4e0d\u6784\u6210\u58f0\u660e\uff09",
+            "line": null,
+            "severity": "fatal"
+          },
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 appState \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a''\uff08\u7a7a\u4e32\u6216\u7eaf\u7a7a\u767d\u4e0d\u6784\u6210\u58f0\u660e\uff09",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "empty-metadata-is-not-identity.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C009\\15\\empty-metadata-is-not-identity.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "empty-metadata-is-not-identity.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C009\\15\\empty-metadata-is-not-identity.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED",
+            "GROUP_IDENTITY_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C010\\17\\repeated-input-is-not-two-runs.log",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C010\\17\\repeated-input-is-not-two-runs.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C010\\18\\repeated-input-is-not-two-runs.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C010.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3772,
+          "path": "raw/controls/C010.stdout",
+          "sha256": "d578bca51ad458842e30b693e0f29bfb9711e2280175972b918b8d3fc6aadb06"
+        }
+      },
+      "id": "C010",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "DUPLICATE_INPUT",
+            "detail": "\u8f93\u5165 repeated-input-is-not-two-runs.log#aca8cf0b533b \u4e0e repeated-input-is-not-two-runs.log#aca8cf0b533b \u5b57\u8282\u76f8\u540c\uff08sha256=aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74\uff09\uff1a\u540c\u4e00\u6355\u83b7\u7684\u526f\u672c\u4e0d\u662f\u72ec\u7acb\u8f6e\u6b21\uff0c\u91cd\u590d\u5f15\u7528\u4f1a\u4f7f\u8f6e\u6570\u4e0e\u786e\u8ba4\u6837\u672c\u6570\u6210\u500d\u865a\u589e\uff1b\u672c\u8f6e\u6309\u4e00\u6b21\u8f93\u5165\u5408\u5e76\uff0c\u5e76\u636e\u6b64\u5224\u5b9a\u8be5\u8f93\u5165\u96c6\u5408\u4e0d\u5177\u5907\u95e8\u69db\u8d44\u683c",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "repeated-input-is-not-two-runs.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C010\\17\\repeated-input-is-not-two-runs.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "repeated-input-is-not-two-runs.log#aca8cf0b533b"
+          },
+          {
+            "bytes": 3266,
+            "duplicateOf": "repeated-input-is-not-two-runs.log#aca8cf0b533b",
+            "name": "repeated-input-is-not-two-runs.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C010\\17\\repeated-input-is-not-two-runs.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "repeated-input-is-not-two-runs.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C010\\17\\repeated-input-is-not-two-runs.log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C010\\17\\repeated-input-is-not-two-runs.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\repeated-input-is-not-two-runs.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "DUPLICATE_INPUT"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C011\\19\\negative-segment-offset.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C011\\20\\negative-segment-offset.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C011.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2813,
+          "path": "raw/controls/C011.stdout",
+          "sha256": "f66d5eba7d96305cb2ad15db39c55f711be6e77350cb9eef05242786bde58fdd"
+        }
+      },
+      "id": "C011",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SEGMENT_OFFSET_INVALID",
+            "detail": "segment_first_send \u6837\u672c\u7684 off=-128 \u4e3a\u8d1f\uff1a\u504f\u79fb\u662f\u5757\u5185\u5b57\u8282\u4f4d\u7f6e\uff0c\u8d1f\u503c\u4e0d\u6307\u5411\u4efb\u4f55\u6570\u636e\u6bb5\uff08\u8be5\u6837\u672c\u65e0\u6cd5\u4e0e\u4efb\u4f55\u6bb5\u505a\u96c6\u5408\u6838\u5bf9\uff09",
+            "line": 6,
+            "severity": "fatal"
+          },
+          {
+            "code": "SEGMENT_OFFSET_INVALID",
+            "detail": "ack_latency \u6837\u672c\u7684 off=-128 \u4e3a\u8d1f\uff1a\u504f\u79fb\u662f\u5757\u5185\u5b57\u8282\u4f4d\u7f6e\uff0c\u8d1f\u503c\u4e0d\u6307\u5411\u4efb\u4f55\u6570\u636e\u6bb5\uff08\u8be5\u6837\u672c\u65e0\u6cd5\u4e0e\u4efb\u4f55\u6bb5\u505a\u96c6\u5408\u6838\u5bf9\uff09",
+            "line": 7,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3273,
+            "duplicateOf": null,
+            "name": "negative-segment-offset.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C011\\19\\negative-segment-offset.log",
+            "sha256": "49aac9c0a82841680807d6eedad747beeb9f96277d7b5466e37414f507a56605",
+            "sourceId": "negative-segment-offset.log#49aac9c0a828"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C011\\19\\negative-segment-offset.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SEGMENT_OFFSET_INVALID"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SEGMENT_OFFSET_INVALID"
+              ],
+              "source": "negative-segment-offset.log#49aac9c0a828",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\negative-segment-offset.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SEGMENT_OFFSET_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C012\\21\\zero-segment-length.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C012\\22\\zero-segment-length.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C012.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2542,
+          "path": "raw/controls/C012.stdout",
+          "sha256": "9159793a368de1bda78429f5e2e31994e7047294a8388b6eb09f75ceda41b523"
+        }
+      },
+      "id": "C012",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SEGMENT_LENGTH_INVALID",
+            "detail": "segment_first_send \u6837\u672c\u7684 len=0 \u4e0d\u662f\u6709\u6548\u6570\u636e\u6bb5\u957f\u5ea6\uff1a\u96f6\u957f\u5ea6\u6bb5\u53d1\u9001\u4e0d\u5b58\u5728\uff0c\u4e14\u8be5\u6bb5\u4e0d\u4f1a\u88ab\u91cd\u4f20/\u786e\u8ba4\u6837\u672c\u5f15\u7528",
+            "line": 6,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3265,
+            "duplicateOf": null,
+            "name": "zero-segment-length.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C012\\21\\zero-segment-length.log",
+            "sha256": "afd0114866cb2cb8a589b40fb7fc45fdcf813e728d07c9ae3c2ad50e7ae8e797",
+            "sourceId": "zero-segment-length.log#afd0114866cb"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C012\\21\\zero-segment-length.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SEGMENT_LENGTH_INVALID"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SEGMENT_LENGTH_INVALID"
+              ],
+              "source": "zero-segment-length.log#afd0114866cb",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\zero-segment-length.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SEGMENT_LENGTH_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C013\\23\\negative-phase-clock.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C013\\24\\negative-phase-clock.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C013.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2524,
+          "path": "raw/controls/C013.stdout",
+          "sha256": "80889ebb3b65a2319ad0195a5ba90ec7805e660f49ffb9af9cbb1e532b223886"
+        }
+      },
+      "id": "C013",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "PHASE_NEGATIVE",
+            "detail": "phases.bind \u542b\u8d1f\u65f6\u95f4\u6233\uff1a[-10, -1]\uff08\u65f6\u949f\u57df stopwatch-mono-us \u4e0d\u53ef\u80fd\u51fa\u73b0\u8d1f\u503c\uff0c\u8d1f\u503c\u610f\u5473\u7740\u65f6\u949f\u57df\u7528\u9519\u6216\u5b57\u6bb5\u88ab\u6539\u5199\uff09",
+            "line": 31,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3264,
+            "duplicateOf": null,
+            "name": "negative-phase-clock.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C013\\23\\negative-phase-clock.log",
+            "sha256": "b66d3b281f1eec5a6431fdf01ecf8dc90ac130eab5f058641eab0749186faa07",
+            "sourceId": "negative-phase-clock.log#b66d3b281f1e"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C013\\23\\negative-phase-clock.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "PHASE_NEGATIVE"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:PHASE_NEGATIVE"
+              ],
+              "source": "negative-phase-clock.log#b66d3b281f1e",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\negative-phase-clock.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:PHASE_NEGATIVE"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C014\\25\\control-early-clock.log",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C014.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 1644,
+          "path": "raw/controls/C014.stdout",
+          "sha256": "c33dae3d7dfeb4302a4f4e81224efb1f93969dc4aef4dd05a51adb87234bf53c"
+        }
+      },
+      "id": "C014",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 1569,
+            "duplicateOf": null,
+            "name": "control-early-clock.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C014\\25\\control-early-clock.log",
+            "sha256": "a644f2dbe73c63a715dbe08122eb45bea2b9ac71b915e197ab811601abffdb20",
+            "sourceId": "control-early-clock.log#a644f2dbe73c"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C014\\25\\control-early-clock.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [],
+              "firstLine": 1,
+              "reasons": [
+                "ACK_SAMPLES:'partial:missing=1,early=1'"
+              ],
+              "source": "control-early-clock.log#a644f2dbe73c",
+              "summaryLine": 5
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED",
+            "NO_ELIGIBLE_RUNS"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 4
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C015\\26\\control-null-without-sidecar.log",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C015.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 1919,
+          "path": "raw/controls/C015.stdout",
+          "sha256": "2ef6d5fee6fa92cc37d49990b5d7ffdf1f7eca4026e6dd2a63c17c3ef6e4dc4c"
+        }
+      },
+      "id": "C015",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "BAD_JSON",
+            "detail": "\u6458\u8981 JSON \u9876\u5c42\u975e\u5bf9\u8c61\uff08null/\u6570\u7ec4/\u6807\u91cf\u90fd\u4e0d\u80fd\u4f5c\u4e3a\u5408\u6cd5\u6536\u53e3\uff0c\u4e5f\u4e0d\u80fd\u6e05\u9664\u5df2\u6709\u6837\u672c\u7684\u9519\u8bef\u5f52\u5c5e\uff09",
+            "line": 31,
+            "severity": "fatal"
+          },
+          {
+            "code": "SUMMARY_MISSING",
+            "detail": "\u8be5\u5757\u7684\u6458\u8981\u884c\u975e\u6cd5\uff08\u884c 31\uff09\uff0c\u5757\u5185 30 \u6761\u6837\u672c\u6ca1\u6709\u53ef\u6838\u5bf9\u7684\u58f0\u660e",
+            "line": 1,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 1980,
+            "duplicateOf": null,
+            "name": "control-null-without-sidecar.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C015\\26\\control-null-without-sidecar.log",
+            "sha256": "a271c02926f224ef811fef10823ca9a6f5bd466e2ebe9c54a2665ef7333d5453",
+            "sourceId": "control-null-without-sidecar.log#a271c02926f2"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C015\\26\\control-null-without-sidecar.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED",
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:BAD_JSON",
+            "FATAL:SUMMARY_MISSING"
+          ],
+          "invalidSummaryBlocks": 1,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 1,
+          "unclosedSamples": 30
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C016\\27\\control-duplicate-ack.log",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C016.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 1934,
+          "path": "raw/controls/C016.stdout",
+          "sha256": "25afab7ebc26e5a4eb0fe0ee3e6555e2b420ad5fe4b155c99f13a6d540040bdd"
+        }
+      },
+      "id": "C016",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "DUPLICATE_ACK_OFFSET",
+            "detail": "\u540c\u4e00\u5b9e\u4f8b\u6bb5\u5185\u786e\u8ba4\u504f\u79fb off=0 \u51fa\u73b0\u591a\u6761 ack_latency\uff1b\u91cd\u590d\u786e\u8ba4\u4f1a\u9876\u66ff\u53e6\u4e00\u4e2a\u7f3a\u5931\u6bb5\u7684\u6837\u672c",
+            "line": 10,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3264,
+            "duplicateOf": null,
+            "name": "control-duplicate-ack.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C016\\27\\control-duplicate-ack.log",
+            "sha256": "61a9a10da94fadfae16820c28566cbe7ef09cd08424f4ad07c66f619d80474ae",
+            "sourceId": "control-duplicate-ack.log#61a9a10da94f"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C016\\27\\control-duplicate-ack.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "DUPLICATE_ACK_OFFSET"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:DUPLICATE_ACK_OFFSET",
+                "OFFSET_SET_INCONSISTENT:DUPLICATE_ACK_OFFSET"
+              ],
+              "source": "control-duplicate-ack.log#61a9a10da94f",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED",
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:DUPLICATE_ACK_OFFSET"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C017\\28\\zero-duration.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C017\\29\\edge-missing-elapsed-zero-duration.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C017.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2793,
+          "path": "raw/controls/C017.stdout",
+          "sha256": "65209dff772de0afa468c307814a50aa71b480154a68c67f436936f21d13203a"
+        }
+      },
+      "id": "C017",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "FIELD_ABSENT",
+            "detail": "\u6458\u8981\u7f3a\u5c11\u5b57\u6bb5 transfer.elapsedUs\uff08\u6574\u6539\u524d\u53d1\u5c04\u7aef\u7248\u672c\u5408\u6cd5\u7f3a\u5931\uff1b\u540c\u7248\u672c\u65e5\u5fd7\u51fa\u73b0\u5373\u7f3a\u9677\uff0c\u4e14\u4e0d\u5f97\u636e\u6b64\u58f0\u79f0\u5951\u7ea6\u5b8c\u6574\uff09",
+            "line": 31,
+            "severity": "warn"
+          },
+          {
+            "code": "TIMING_INCOMPLETE",
+            "detail": "\u65f6\u5e8f\u5951\u7ea6\u5b57\u6bb5\u7f3a\u5931\uff1atransfer.elapsedUs\u3002transfer.startUs/endAckUs/elapsedUs \u81ea schema 1 \u8d77\u6052\u7531 toJson \u8f93\u51fa\uff0c\u7f3a\u5931\u5373\u65e0\u4f20\u8f93\u65f6\u957f\u53ef\u5224\u5b9a\uff0c\u5220\u9664\u5448\u73b0\u5b57\u6bb5\u4e0d\u5f97\u7ed5\u8fc7\u65f6\u957f\u6838\u5bf9",
+            "line": 31,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3245,
+            "duplicateOf": null,
+            "name": "zero-duration.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C017\\28\\zero-duration.log",
+            "sha256": "bbf4da74d132e0d62e1af2b3bbc170ce9297a4938f8dc02dcf7e45c001bf9ed6",
+            "sourceId": "zero-duration.log#bbf4da74d132"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C017\\28\\zero-duration.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "FIELD_ABSENT",
+                "TIMING_INCOMPLETE"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:TIMING_INCOMPLETE"
+              ],
+              "source": "zero-duration.log#bbf4da74d132",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\zero-duration.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "missing-elapsed-zero-duration",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "missing-elapsed-zero-duration",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:TIMING_INCOMPLETE"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C018\\30\\tests.log",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C018\\31\\tests.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C018\\32\\edge-source-attribution.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C018.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3177,
+          "path": "raw/controls/C018.stdout",
+          "sha256": "de5fc2ac1b30ccb2cb40382e76a6829f5d7cbe3bae1d994013db697dbdaa7adc"
+        }
+      },
+      "id": "C018",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SCHEMA_UNKNOWN",
+            "detail": "\u6458\u8981 schema=2 \u4e0d\u5728\u53d7\u652f\u6301\u96c6\u5408 [1]",
+            "line": 31,
+            "severity": "fatal"
+          },
+          {
+            "code": "SCHEMA_UNKNOWN",
+            "detail": "\u6458\u8981 schema=2 \u4e0d\u5728\u53d7\u652f\u6301\u96c6\u5408 [1]",
+            "line": 31,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 2,
+        "inputs": [
+          {
+            "bytes": 3267,
+            "duplicateOf": null,
+            "name": "tests.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C018\\30\\tests.log",
+            "sha256": "7a2aef8ae6c71fd184fb8a64e6df4660fdaa97a02a37b52bbe9bad4d1ad7ae7d",
+            "sourceId": "tests.log#7a2aef8ae6c7"
+          },
+          {
+            "bytes": 3267,
+            "duplicateOf": null,
+            "name": "tests.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C018\\31\\tests.log",
+            "sha256": "a408d5bfa963b40fab9ac4a714b5709a54159e2c969cc265efa1372057b51a3c",
+            "sourceId": "tests.log#a408d5bfa963"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C018\\30\\tests.log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C018\\31\\tests.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SCHEMA_UNKNOWN"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SCHEMA_UNKNOWN"
+              ],
+              "source": "tests.log#7a2aef8ae6c7",
+              "summaryLine": 31
+            },
+            {
+              "codes": [
+                "SCHEMA_UNKNOWN"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SCHEMA_UNKNOWN"
+              ],
+              "source": "tests.log#a408d5bfa963",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 2,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\a\\tests.log",
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\b\\tests.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "source-attribution",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "source-attribution",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SCHEMA_UNKNOWN"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 60
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C019\\33\\numeric-base.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C019\\34\\numeric-base.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C019.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2592,
+          "path": "raw/controls/C019.stdout",
+          "sha256": "0f1c4e78968a38c85dfd55bc3439c5f06d935e91ab862a29a752bda0c217bc94"
+        }
+      },
+      "id": "C019",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3267,
+            "duplicateOf": null,
+            "name": "numeric-base.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C019\\33\\numeric-base.log",
+            "sha256": "2f77f8b8637018e2ebfb0750ccd9524f6cf329478febb53b9a1b1426dcc5bace",
+            "sourceId": "numeric-base.log#2f77f8b86370"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C019\\33\\numeric-base.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": true,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-base.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C020\\35\\numeric-durable-negative-off.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C020\\36\\numeric-durable-negative-off.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C020.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2603,
+          "path": "raw/controls/C020.stdout",
+          "sha256": "f563e8c3a05b7d1b8793205d41e8390933871073f4bfdc453cdb1e4c06b31524"
+        }
+      },
+      "id": "C020",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SEGMENT_OFFSET_INVALID",
+            "detail": "durable \u6837\u672c\u7684 off=-1 \u4e3a\u8d1f\uff1a\u504f\u79fb\u662f\u5757\u5185\u5b57\u8282\u4f4d\u7f6e\uff0c\u8d1f\u503c\u4e0d\u6307\u5411\u4efb\u4f55\u6570\u636e\u6bb5\uff08\u8be5\u6837\u672c\u65e0\u6cd5\u4e0e\u4efb\u4f55\u6bb5\u505a\u96c6\u5408\u6838\u5bf9\uff09",
+            "line": 4,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3268,
+            "duplicateOf": null,
+            "name": "numeric-durable-negative-off.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C020\\35\\numeric-durable-negative-off.log",
+            "sha256": "1322d40fd0615951061bdaef7e0c7938c68be9b5c166b22c869d9832f666d1e8",
+            "sourceId": "numeric-durable-negative-off.log#1322d40fd061"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C020\\35\\numeric-durable-negative-off.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SEGMENT_OFFSET_INVALID"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SEGMENT_OFFSET_INVALID"
+              ],
+              "source": "numeric-durable-negative-off.log#1322d40fd061",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-negative-off.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SEGMENT_OFFSET_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C021\\37\\numeric-durable-missing-off.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C021\\38\\numeric-durable-missing-off.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C021.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2555,
+          "path": "raw/controls/C021.stdout",
+          "sha256": "1ca5d58146fbff5de91cc95348a220ce8de89b4db3a3702391acfa74a3e855e5"
+        }
+      },
+      "id": "C021",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SEGMENT_OFFSET_MISSING",
+            "detail": "durable \u6837\u672c\u7f3a\u5c11\u552f\u4e00\u5b57\u8282\u504f\u79fb off\uff08\u65e0\u504f\u79fb\u7684\u6bb5/\u786e\u8ba4\u65e0\u6cd5\u505a\u96c6\u5408\u5b8c\u6574\u6027\u6838\u5bf9\uff09",
+            "line": 4,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3262,
+            "duplicateOf": null,
+            "name": "numeric-durable-missing-off.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C021\\37\\numeric-durable-missing-off.log",
+            "sha256": "4956c9478444aff16650c69ee745a1d8c8faf8a7b7f9dadb4ab7d6c7bebd772f",
+            "sourceId": "numeric-durable-missing-off.log#4956c9478444"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C021\\37\\numeric-durable-missing-off.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SEGMENT_OFFSET_MISSING"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SEGMENT_OFFSET_MISSING"
+              ],
+              "source": "numeric-durable-missing-off.log#4956c9478444",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-missing-off.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SEGMENT_OFFSET_MISSING"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C022\\39\\numeric-durable-text-off.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C022\\40\\numeric-durable-text-off.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C022.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2537,
+          "path": "raw/controls/C022.stdout",
+          "sha256": "dc7e9f0cfb02f641f7639590dd817d802dd444a1f3abad2ff3dd8004ebb71e06"
+        }
+      },
+      "id": "C022",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SEGMENT_OFFSET_MISSING",
+            "detail": "durable \u6837\u672c\u7f3a\u5c11\u552f\u4e00\u5b57\u8282\u504f\u79fb off\uff08\u65e0\u504f\u79fb\u7684\u6bb5/\u786e\u8ba4\u65e0\u6cd5\u505a\u96c6\u5408\u5b8c\u6574\u6027\u6838\u5bf9\uff09",
+            "line": 4,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3269,
+            "duplicateOf": null,
+            "name": "numeric-durable-text-off.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C022\\39\\numeric-durable-text-off.log",
+            "sha256": "3f9800e75a7a5fd742f3cd2f751aa0ec57db97d8b430d04b97bf17f05bc7c859",
+            "sourceId": "numeric-durable-text-off.log#3f9800e75a7a"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C022\\39\\numeric-durable-text-off.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SEGMENT_OFFSET_MISSING"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SEGMENT_OFFSET_MISSING"
+              ],
+              "source": "numeric-durable-text-off.log#3f9800e75a7a",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-text-off.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SEGMENT_OFFSET_MISSING"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C023\\41\\numeric-retransmit-len-128.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C023\\42\\numeric-retransmit-len-128.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C023.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2668,
+          "path": "raw/controls/C023.stdout",
+          "sha256": "87fe3a213451bb57e7e6b13157c3b441f52cb0c4325c25b46777f4ffa7a2a20d"
+        }
+      },
+      "id": "C023",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3343,
+            "duplicateOf": null,
+            "name": "numeric-retransmit-len-128.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C023\\41\\numeric-retransmit-len-128.log",
+            "sha256": "c88fd807f2717e611f24a2da08e3917c4c8c1f25efcd0cd30ae7e595c7df45fd",
+            "sourceId": "numeric-retransmit-len-128.log#c88fd807f271"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C023\\41\\numeric-retransmit-len-128.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 1,
+            "retransmitRate": 0.125,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": true,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 1,
+              "retransmitRate": 0.125,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-128.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 1,
+          "retransmitRate": 0.125,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 31
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C024\\43\\numeric-retransmit-len-0.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C024\\44\\numeric-retransmit-len-0.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C024.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2575,
+          "path": "raw/controls/C024.stdout",
+          "sha256": "20627a3aa916c9c2f287206bef5a80c91f79f7e1cc72f0d26193f9fb92e9fbaf"
+        }
+      },
+      "id": "C024",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SEGMENT_LENGTH_INVALID",
+            "detail": "segment_retransmit \u6837\u672c\u7684 len=0 \u4e0d\u662f\u6709\u6548\u6570\u636e\u6bb5\u957f\u5ea6\uff1a\u96f6\u957f\u5ea6\u6bb5\u53d1\u9001\u4e0d\u5b58\u5728\uff0c\u4e14\u8be5\u6bb5\u4e0d\u4f1a\u88ab\u91cd\u4f20/\u786e\u8ba4\u6837\u672c\u5f15\u7528",
+            "line": 7,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3341,
+            "duplicateOf": null,
+            "name": "numeric-retransmit-len-0.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C024\\43\\numeric-retransmit-len-0.log",
+            "sha256": "3ef816172df1972f203e470d16995de9dceef4bcbc888ff16caa5949ad2ecdc8",
+            "sourceId": "numeric-retransmit-len-0.log#3ef816172df1"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C024\\43\\numeric-retransmit-len-0.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SEGMENT_LENGTH_INVALID"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SEGMENT_LENGTH_INVALID"
+              ],
+              "source": "numeric-retransmit-len-0.log#3ef816172df1",
+              "summaryLine": 32
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-0.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SEGMENT_LENGTH_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 31
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C025\\45\\numeric-retransmit-len-minus1.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C025\\46\\numeric-retransmit-len-minus1.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C025.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2606,
+          "path": "raw/controls/C025.stdout",
+          "sha256": "23a02560129457fef9ec866f34e5b183473bbb0846de0c7872acd957dbcf5e18"
+        }
+      },
+      "id": "C025",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "SEGMENT_LENGTH_INVALID",
+            "detail": "segment_retransmit \u6837\u672c\u7684 len=-1 \u4e0d\u662f\u6709\u6548\u6570\u636e\u6bb5\u957f\u5ea6\uff1a\u96f6\u957f\u5ea6\u6bb5\u53d1\u9001\u4e0d\u5b58\u5728\uff0c\u4e14\u8be5\u6bb5\u4e0d\u4f1a\u88ab\u91cd\u4f20/\u786e\u8ba4\u6837\u672c\u5f15\u7528",
+            "line": 7,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3342,
+            "duplicateOf": null,
+            "name": "numeric-retransmit-len-minus1.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C025\\45\\numeric-retransmit-len-minus1.log",
+            "sha256": "6712f86176ceb69424d558d006fef5291c01511254a4c66e24c8bf4bd9f15827",
+            "sourceId": "numeric-retransmit-len-minus1.log#6712f86176ce"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C025\\45\\numeric-retransmit-len-minus1.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "SEGMENT_LENGTH_INVALID"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:SEGMENT_LENGTH_INVALID"
+              ],
+              "source": "numeric-retransmit-len-minus1.log#6712f86176ce",
+              "summaryLine": 32
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-minus1.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:SEGMENT_LENGTH_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 31
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C026\\47\\numeric-gatt-negative-bytes.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C026\\48\\numeric-gatt-negative-bytes.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C026.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2601,
+          "path": "raw/controls/C026.stdout",
+          "sha256": "3650defd7b01ab3ccb2fe21a490249d18cdfad3129df7860e14564cda51a4844"
+        }
+      },
+      "id": "C026",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "BYTE_COUNT_INVALID",
+            "detail": "gatt_write \u6837\u672c\u7684 bytes=-1 \u4e3a\u8d1f\uff1a\u5b57\u8282\u8ba1\u6570\u662f\u5df2\u5199\u51fa\u7684\u5b57\u8282\u6570\uff0c\u8d1f\u503c\u65e2\u4e0d\u53ef\u80fd\u662f\u4efb\u4f55\u5199\u5165\u7684\u7ed3\u679c\uff0c\u4e5f\u4f1a\u62b5\u6d88\u540c\u5757\u5176\u5b83\u6837\u672c\u7684\u8ba1\u6570",
+            "line": 1,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3267,
+            "duplicateOf": null,
+            "name": "numeric-gatt-negative-bytes.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C026\\47\\numeric-gatt-negative-bytes.log",
+            "sha256": "70fa960384d7db440778d8354d667bfef92eede1197b05204d22904721c77cb7",
+            "sourceId": "numeric-gatt-negative-bytes.log#70fa960384d7"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C026\\47\\numeric-gatt-negative-bytes.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 0,
+            "maxUs": null,
+            "minUs": null,
+            "p50Us": null,
+            "p95Us": null,
+            "p99Us": null
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 0,
+              "maxUs": null,
+              "minUs": null,
+              "p50Us": null,
+              "p95Us": null,
+              "p99Us": null
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": null,
+            "runs": 0,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 0
+          },
+          "eligibleForThreshold": false,
+          "excluded": [
+            {
+              "codes": [
+                "BYTE_COUNT_INVALID"
+              ],
+              "firstLine": 1,
+              "reasons": [
+                "FATAL:BYTE_COUNT_INVALID"
+              ],
+              "source": "numeric-gatt-negative-bytes.log#70fa960384d7",
+              "summaryLine": 31
+            }
+          ],
+          "excludedRuns": 1,
+          "findings": [],
+          "groups": [],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-gatt-negative-bytes.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "synthetic-numeric-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "synthetic-numeric-review",
+            "mode": "declared",
+            "observedSignatures": []
+          },
+          "ineligibleReasons": [
+            "NO_ELIGIBLE_RUNS",
+            "FATAL:BYTE_COUNT_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": null,
+          "runs": 0,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 0,
+          "strictFieldsComplete": false,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C027\\49\\control-valid.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C027\\50\\identity-zero-retries.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C027.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2594,
+          "path": "raw/controls/C027.stdout",
+          "sha256": "527f0e120941c4efa38c328a326f69141d129d4f861449162967f69e84d48565"
+        }
+      },
+      "id": "C027",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C027\\49\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C027\\49\\control-valid.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": true,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 0,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C028\\51\\control-valid.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C028\\52\\identity-uppercase-package-sha.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 0,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C028.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2594,
+          "path": "raw/controls/C028.stdout",
+          "sha256": "eea71211d27b1f9b083c9fa3bb1bba7b9cc4d24b0c365a975b91b44f27c87fbb"
+        }
+      },
+      "id": "C028",
+      "issues": [],
+      "observed": {
+        "findings": [],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C028\\51\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C028\\51\\control-valid.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": true,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C029\\53\\control-valid.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C029\\54\\identity-nonhex-package-sha.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C029.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2275,
+          "path": "raw/controls/C029.stdout",
+          "sha256": "ff66cffe7c692201f19156c00e17a1011a74b2ba7d5529981df6a415b215298c"
+        }
+      },
+      "id": "C029",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 packageSha256 \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'\uff08\u5305 SHA-256 \u5fc5\u987b\u662f 64 \u4f4d\u5341\u516d\u8fdb\u5236\uff08\u5b9e\u9645 64 \u5b57\u7b26\uff09\uff09",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C029\\53\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C029\\53\\control-valid.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED",
+            "GROUP_IDENTITY_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C030\\55\\control-valid.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C030\\56\\identity-package-sha-trailing-lf.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C030.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2278,
+          "path": "raw/controls/C030.stdout",
+          "sha256": "826e8ff05d46b7a3ec4edddf8ca1b7cdb8a3a0a0ca43f470f70f11f348c6e3db"
+        }
+      },
+      "id": "C030",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 packageSha256 \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\\n'\uff08\u5305 SHA-256 \u5fc5\u987b\u662f 64 \u4f4d\u5341\u516d\u8fdb\u5236\uff08\u5b9e\u9645 65 \u5b57\u7b26\uff09\uff09",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C030\\55\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C030\\55\\control-valid.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED",
+            "GROUP_IDENTITY_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C031\\57\\control-valid.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C031\\58\\identity-package-sha-trailing-crlf.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C031.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 2281,
+          "path": "raw/controls/C031.stdout",
+          "sha256": "309a39870338b6d5468aa6accfcd4b7b114bd19251c1a5652b48d348bea6b24b"
+        }
+      },
+      "id": "C031",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "GROUP_IDENTITY_INVALID",
+            "detail": "\u4fa7\u8f66\u8eab\u4efd\u5b57\u6bb5 packageSha256 \u7684\u53d6\u503c\u4e0d\u6784\u6210\u6709\u6548\u58f0\u660e\uff1a'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\\r\\n'\uff08\u5305 SHA-256 \u5fc5\u987b\u662f 64 \u4f4d\u5341\u516d\u8fdb\u5236\uff08\u5b9e\u9645 66 \u5b57\u7b26\uff09\uff09",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C031\\57\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C031\\57\\control-valid.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": null,
+            "groupId": null,
+            "mode": "observed",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "GROUP_IDENTITY_NOT_DECLARED",
+            "GROUP_IDENTITY_INVALID"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C032\\60\\control-valid.log",
+          "--log",
+          "docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C032\\60\\control-valid.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C032\\59\\control-valid.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C032.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3446,
+          "path": "raw/controls/C032.stdout",
+          "sha256": "49e2ea7da02852c732b812246202a98d6ebcb6953b2b0a1cb3340edd3a630464"
+        }
+      },
+      "id": "C032",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "DUPLICATE_INPUT",
+            "detail": "\u8f93\u5165 control-valid.log#aca8cf0b533b \u4e0e control-valid.log#aca8cf0b533b \u5b57\u8282\u76f8\u540c\uff08sha256=aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74\uff09\uff1a\u540c\u4e00\u6355\u83b7\u7684\u526f\u672c\u4e0d\u662f\u72ec\u7acb\u8f6e\u6b21\uff0c\u91cd\u590d\u5f15\u7528\u4f1a\u4f7f\u8f6e\u6570\u4e0e\u786e\u8ba4\u6837\u672c\u6570\u6210\u500d\u865a\u589e\uff1b\u672c\u8f6e\u6309\u4e00\u6b21\u8f93\u5165\u5408\u5e76\uff0c\u5e76\u636e\u6b64\u5224\u5b9a\u8be5\u8f93\u5165\u96c6\u5408\u4e0d\u5177\u5907\u95e8\u69db\u8d44\u683c",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C032\\60\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          },
+          {
+            "bytes": 3266,
+            "duplicateOf": "control-valid.log#aca8cf0b533b",
+            "name": "control-valid.log",
+            "path": "docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C032\\60\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C032\\60\\control-valid.log",
+          "docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C032\\60\\control-valid.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "DUPLICATE_INPUT"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    },
+    {
+      "command": {
+        "argv": [
+          "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+          "-X",
+          "utf8",
+          "-S",
+          "-B",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C033\\62\\control-valid.log",
+          "--log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C033\\63\\copied-capture.log",
+          "--group",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C033\\61\\control-valid.group.json",
+          "--device-capture",
+          "--json"
+        ],
+        "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+        "exit": 1,
+        "stderr": {
+          "bytes": 0,
+          "path": "raw/controls/C033.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3573,
+          "path": "raw/controls/C033.stdout",
+          "sha256": "0f7d9387a454c8e0f324da77ccb74deec1fd80fde96507863c8f93e92c881e23"
+        }
+      },
+      "id": "C033",
+      "issues": [],
+      "observed": {
+        "findings": [
+          {
+            "code": "DUPLICATE_INPUT",
+            "detail": "\u8f93\u5165 copied-capture.log#aca8cf0b533b \u4e0e control-valid.log#aca8cf0b533b \u5b57\u8282\u76f8\u540c\uff08sha256=aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74\uff09\uff1a\u540c\u4e00\u6355\u83b7\u7684\u526f\u672c\u4e0d\u662f\u72ec\u7acb\u8f6e\u6b21\uff0c\u91cd\u590d\u5f15\u7528\u4f1a\u4f7f\u8f6e\u6570\u4e0e\u786e\u8ba4\u6837\u672c\u6570\u6210\u500d\u865a\u589e\uff1b\u672c\u8f6e\u6309\u4e00\u6b21\u8f93\u5165\u5408\u5e76\uff0c\u5e76\u636e\u6b64\u5224\u5b9a\u8be5\u8f93\u5165\u96c6\u5408\u4e0d\u5177\u5907\u95e8\u69db\u8d44\u683c",
+            "line": null,
+            "severity": "fatal"
+          }
+        ],
+        "groups": 1,
+        "inputs": [
+          {
+            "bytes": 3266,
+            "duplicateOf": null,
+            "name": "control-valid.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C033\\62\\control-valid.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "control-valid.log#aca8cf0b533b"
+          },
+          {
+            "bytes": 3266,
+            "duplicateOf": "control-valid.log#aca8cf0b533b",
+            "name": "copied-capture.log",
+            "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C033\\63\\copied-capture.log",
+            "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+            "sourceId": "copied-capture.log#aca8cf0b533b"
+          }
+        ],
+        "log": [
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C033\\62\\control-valid.log",
+          "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\docs\\acceptance-contracts\\P3-4-parser-v1\\inputs\\controls\\C033\\63\\copied-capture.log"
+        ],
+        "report": {
+          "ackLatency": {
+            "count": 8,
+            "maxUs": 513,
+            "minUs": 308,
+            "p50Us": 397,
+            "p95Us": 513,
+            "p99Us": 513
+          },
+          "diagnostic": {
+            "ackLatency": {
+              "count": 8,
+              "maxUs": 513,
+              "minUs": 308,
+              "p50Us": 397,
+              "p95Us": 513,
+              "p99Us": 513
+            },
+            "retransmitFrames": 0,
+            "retransmitRate": 0.0,
+            "runs": 1,
+            "runsWithAbsentFields": 0,
+            "runsWithStragglerSamples": 0,
+            "segmentsUnique": 8
+          },
+          "eligibleForThreshold": false,
+          "excluded": [],
+          "excludedRuns": 0,
+          "findings": [],
+          "groups": [
+            {
+              "ackLatency": {
+                "count": 8,
+                "maxUs": 513,
+                "minUs": 308,
+                "p50Us": 397,
+                "p95Us": 513,
+                "p99Us": 513
+              },
+              "retransmitFrames": 0,
+              "retransmitRate": 0.0,
+              "runs": 1,
+              "runsWithAbsentFields": 0,
+              "runsWithStragglerSamples": 0,
+              "segmentsUnique": 8,
+              "signature": {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            }
+          ],
+          "identity": {
+            "declared": {
+              "appState": "foreground",
+              "baud": 115200,
+              "captureMethod": "synthetic-parser-review",
+              "declaredInputs": [
+                "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+              ],
+              "device": "AA:BB",
+              "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "groupId": "independent-synthetic-review",
+              "maxRetries": 5,
+              "mtuChunkBytes": 244,
+              "mtuRequested": 247,
+              "packageBytes": 1024,
+              "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+              "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+              "timeoutMs": 500,
+              "writeMode": "withoutResponse"
+            },
+            "groupId": "independent-synthetic-review",
+            "mode": "declared",
+            "observedSignatures": [
+              {
+                "bind.mtuChunkBytes": 244,
+                "bind.mtuRequested": 247,
+                "bind.mtuSource": "negotiated",
+                "bind.writeMode": "withoutResponse",
+                "device": "AA:BB"
+              }
+            ]
+          },
+          "ineligibleReasons": [
+            "DUPLICATE_INPUT"
+          ],
+          "invalidSummaryBlocks": 0,
+          "label": "upgrade",
+          "retransmitFrames": 0,
+          "retransmitRate": 0.0,
+          "runs": 1,
+          "runsWithAbsentFields": 0,
+          "runsWithStragglerSamples": 0,
+          "segmentsUnique": 8,
+          "strictFieldsComplete": true,
+          "unclosedBlocks": 0,
+          "unclosedSamples": 0
+        },
+        "samples": 30
+      },
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "phase": "controls",
+  "plan_sha256": "5c2de6dc2e43e137f72cfe75a9067f695702d3749649d9b100041b4783f4e82b"
+}
