@@ -470,6 +470,12 @@ void main() {
         final stats =
             OtaLinkStats(label: 'probe', attempt: 2, clockUs: () => fakeUs);
         stats.recordDiscover(durationUs: 900);
+        // 封存前这次发现本身就是一条合法样本：封存只让**之后**的观测不再
+        // 进入样本流，不得回头抹掉已经产生的事实（DA03：不为改善统计而
+        // 静默删除有效样本）。
+        final samplesBeforeSeal =
+            logs.where((l) => l.startsWith('OTA_LINK_SAMPLE ')).length;
+        expect(samplesBeforeSeal, 1, reason: '封存前样本流照常产出');
         fakeUs = 1500000;
         stats.retire(reason: 'outer-timeout');
         expect(stats.retired, isTrue);
@@ -492,8 +498,14 @@ void main() {
             late.every((l) =>
                 l.startsWith('OTA_LINK_LATE label=probe attempt=2 ')),
             isTrue);
-        expect(logs.where((l) => l.startsWith('OTA_LINK_SAMPLE ')), isEmpty,
+        expect(logs.where((l) => l.startsWith('OTA_LINK_SAMPLE ')).length,
+            samplesBeforeSeal,
             reason: '封存后样本行必须停止产出，否则会落进下一轮摘要块');
+        expect(
+            logs.lastIndexWhere((l) => l.startsWith('OTA_LINK_SAMPLE ')) <
+                logs.indexWhere((l) => l.startsWith('OTA_LINK_RETIRE ')),
+            isTrue,
+            reason: '封存后产出的行只能是自带归属的 LATE，不再有无归属样本');
         // 迟到观测不进入本实例数值池。
         final json = stats.toJson();
         expect((json['discovers'] as Map<String, dynamic>)['calls'], 1);

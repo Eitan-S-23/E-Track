@@ -200,7 +200,7 @@ Dart 侧映射（已写入 `ota_link_stats.dart::recordTransferStart`、
 | 文件 | 用例 | 断言的可观测对象 |
 |---|---|---|
 | `test/ota/ota_link_stats_test.dart` | 终点取传入的到达时刻，不回退调用处时钟（DA01） | 传入 `atUs` 与调用处时钟分离时，字段与样本取传入值 |
-| 同上 | 封存：迟到观测走 `OTA_LINK_LATE`，样本流停止且不入数值池（DA03） | 原始行前缀、行序、`discovers.calls` 不增长 |
+| 同上 | 封存：迟到观测走 `OTA_LINK_LATE`，样本流停止且不入数值池（DA03） | 原始行前缀、行序、`discovers.calls` 不增长；封存**前**已产生的合法样本原样保留 |
 | 同上 | 封存闸门覆盖全部样本与计数入口：迟到观测只留 LATE 行，数值池不变（DA03，4.1 的回归） | `bind`/`getInfo`/`transfer`/`gattWrites`/`discovers`/`platformWrites` 六域封存前后逐字相等；恰新增 8 条 LATE；样本行数不再增长 |
 | 同上 | 未封存实例不产出 RETIRE/LATE 行，`retired` 字段为空（对照） | 反向对照，证明上条不是「怎么写都过」 |
 | `test/ota/ota_ble_transport_test.dart` | 传输起点在首个 BEGIN 帧写调用时刻登记（保守代理，含排队等待）（P34-R03） | BEGIN 写永不返回时起点仍已登记 |
@@ -283,9 +283,50 @@ mutation record; supply a bounded countercheck with the development batch.」
 | 编号 | 目的 | 提交 | run URL | 结论 |
 |---|---|---|---|---|
 | R1 | checks-only 对照（source-bound 全量 analyze + test） | `e2f6560` | run 35257955951 | **红（失败，未通过）**：23 项测试失败 + 1 项 analyzer info，根因见下 |
-| R1b | 同目标复测（修 R1 三项缺陷后，checks-only） | 待回填 | 待回填 | 待回填 |
+| R1b | 同目标复测（修 R1 三项缺陷后，checks-only） | `59e7641` | run 35260571963 | **红（失败，未通过）**：analyze 转绿，剩 1 项测试失败（封存用例断言过强，测试缺陷），另有上传配额环境阻断；见 R1b 段 |
+| R1c | 修 R1b 单项失败后复测（checks-only） | 待回填 | 待回填 | 待回填 |
 | R2 | 同提交 source-bound Android debug APK | 待回填 | 待回填 | 待回填 |
 | R3 | 外部变异反证（期望红） | 待回填 | 待回填 | 待回填 |
+
+### 9.1 R1b（`59e7641`，run 35260571963）：红，1 项测试失败 + 上传配额环境阻断
+
+SDK 身份（两作业一致，取自 `sdk_version`）：Flutter `3.47.4` stable，
+frameworkRevision `9584c6713b324636289d067944a46fd6b49df14b`，Dart SDK `3.13.3`，
+engine `06a2e2a110089dff50fe635cffd2a61e1b24fbcd`；scope `all`（`FLUTTER_DEV_TEST_SCOPE=all`），
+`FLUTTER_DEV_BUILD_APK=false`，`TRACE_DEV_APP_ID_SUFFIX` 与 device-observation 输入均为空。
+
+| 作业 | 作业 id | sdk_checkout / sdk_version / dependencies | analyze | tests |
+|---|---|---|---|---|
+| Linux (ubuntu-latest) | 105334953653 | PASS / PASS / PASS | PASS（15.4s，`No issues found!`） | **FAIL**：377 passed / 8 skipped / **1 failed** |
+| Windows (windows-2022) | 105334953334 | PASS / PASS / PASS | PASS | **FAIL**：385 passed / 0 skipped / **1 failed** |
+
+两侧 `development_result: FAIL`、`apk_result: NOT_REQUESTED`、`diagnostics_complete: true`；
+Linux 的 8 项 skip 即 §6 声明的 Windows-only 用例（在 Windows 作业里实际执行并通过，
+385 = 377 + 8）。
+
+唯一失败用例（两作业同名）：
+`test/ota/ota_link_stats_test.dart` → `P34-DA01 到达时刻 / P34-DA03 观测流封存` →
+`封存：迟到观测走 OTA_LINK_LATE，样本流停止且不入数值池（DA03）`。
+
+根因：**测试断言过强，不是实现缺陷**。该用例在封存**之前**先做了一次合法
+`recordDiscover`，那会产生一条 SAMPLE 行；而断言写成「封存后 SAMPLE 行集合为空」，
+把这条**应当保留**的合法样本也一并否掉了——与 DA03「保留有效样本、不得为改善统计而
+静默删除」的要求相反。修法：封存前记下样本基线，封存后断言样本数**不变**，并断言
+最后一条 SAMPLE 行早于 RETIRE 行（即封存后新增的行只能是自带 `label`/`attempt` 的
+LATE）。封存闸门（§4.1）本身无缺陷：同一轮新增的闸门用例、探针用例与正对照全部通过。
+
+**对 R1 根因覆盖面的更正**：R1 的失败清单被日志采集截断（“… and 19 more”），当时把
+失败全集推定为由三项根因覆盖；R1b 证明该推定**不完整**——本项是第 4 类缺陷，三项修复
+并未覆盖它。R1 的「23 项」仍只作修复范围依据，不作为已验证事实。
+
+**环境阻断（如实记录，不记为成功）**：两个作业的 `Upload development logs
+(not acceptance evidence)` 步骤均失败——
+`Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any
+new artifacts.`（账号产物存储配额耗尽）。因此本轮**没有任何产物包可下载**，上表逐条
+观测全部取自作业原始 stdout（`gh run view --repo Eitan-S-23/E-Track --job <id> --log`），
+并已落盘为本地日志副本（`.cache/tmp-p34/r1b-linux.log` / `r1b-win.log`，位于独占
+worktree 内）。上传失败按环境阻断记录，**不**因 `diagnostics_complete: true` 或步骤名
+含 PASS 而改写为成功。
 
 R1 失败根因（同一批次内一次修完，按执行合同 §7.3 集中处理，不逐错重开）：
 
