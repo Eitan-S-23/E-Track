@@ -44,6 +44,7 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 | P3-3-v7 | v3 | `c4a38f802ec81928f1182136ccee9d457068ed1b` | `0fb167cf4c44a6e4741e5a42fcd4945cf29f7780` | `b3d1d311645d584c48419b546a061c5648da740f` | PASS（2026-09-15 FROZEN+NOT_RUN 执行前检查；勘误轮：修正 v6 独立验收 EVIDENCE_GAP 两阻断 G01（五条冻结命令执行轮口径）与 G02（EXT 指纹遗留 v5 身份），freeze 三元组与 v6 相同零实现变化；冻结办理经用户授权（治理质疑答复后「你继续起草吧」，五条命令与指纹改动过目后「冻结吧」）由实现会话代办，如实记录授权链；合同 SHA-256 38279B9FC9F2EBB7E6C18831FF4D8A0DDD719BED1EBDF4CAFB637FE68D721B9B，矩阵 0AE4ABA9ADF63AB3386F807C100D4796E11DB9CA8B61EF9EBCA776C502D07F1B；parent 绑定 v6 合同 B445C209C20DA0BC52473950C47D6E1807EF74C23377495F7CB48C6A2B70C171；后继验收轮 validate 须携带 v6 合同/矩阵为前驱） |
 | P3-3-v8 | v3 | `5695abc5d7cd1402bd0815017a3e383c57571662` | `ceaf8d2b7bb8e78968462af51a57ff1250731b61` | `4fd600a48a25654fe82db3cb6fd6f6338392bc48` | VALIDATION=PASS，overall=EVIDENCE_GAP（2026-09-15 原独立验收 R1 历史终态；四项原始 EXECUTED PASS 为 v9 直接复用来源；R2 准备仍为 NOT_RUN，未替代 R1） |
 | P3-3-v9 | v3 | `5695abc5d7cd1402bd0815017a3e383c57571662` | `ceaf8d2b7bb8e78968462af51a57ff1250731b61` | `4fd600a48a25654fe82db3cb6fd6f6338392bc48` | VALIDATION=PASS，overall=PASS（2026-09-15 当前有效独立验收，五项全部 PASS；本次主会话按移交命令完整性复校通过，非新验收轮次） |
+| P3-4-parser-v1 | v3 | `9331bc529eaeeb5f2f22a94fee4081880d25c329` | `f90f603d4d8c56be4bae6dc01553610ff7a07712` | `6d5c93361c9c1cbb302759a34b925481211e81b2` | VALIDATION=PASS，overall=PASS（2026-09-17 非实现正式验收，四项 EXECUTED PASS；124 回归、64 鉴别力槽位、33 独立控制及四份整捕获；仅解析器子交付，父卡 P3-4 仍进行中，设备/性能验收 NOT_RUN） |
 
 备注：
 
