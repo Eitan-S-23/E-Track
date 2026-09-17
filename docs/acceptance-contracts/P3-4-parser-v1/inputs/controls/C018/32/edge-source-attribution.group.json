@@ -1,0 +1,29 @@
+{
+  "groupId": "source-attribution",
+  "identity": {
+    "appState": "foreground",
+    "baud": 115200,
+    "captureMethod": "synthetic-parser-review",
+    "device": "AA:BB",
+    "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "maxRetries": 5,
+    "mtuChunkBytes": 244,
+    "mtuRequested": 247,
+    "packageBytes": 1024,
+    "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "timeoutMs": 500,
+    "writeMode": "withoutResponse"
+  },
+  "inputs": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\a\\tests.log",
+      "sha256": "7a2aef8ae6c71fd184fb8a64e6df4660fdaa97a02a37b52bbe9bad4d1ad7ae7d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\b\\tests.log",
+      "sha256": "a408d5bfa963b40fab9ac4a714b5709a54159e2c969cc265efa1372057b51a3c"
+    }
+  ],
+  "schema": 1
+}

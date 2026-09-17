@@ -1,0 +1,25 @@
+{
+  "groupId": "independent-synthetic-review",
+  "identity": {
+    "appState": "foreground",
+    "baud": 115200,
+    "captureMethod": "synthetic-parser-review",
+    "device": "AA:BB",
+    "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "maxRetries": 5,
+    "mtuChunkBytes": 244,
+    "mtuRequested": 247,
+    "packageBytes": 1024,
+    "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "timeoutMs": 500,
+    "writeMode": "withoutResponse"
+  },
+  "inputs": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-empty-capture.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "schema": 1
+}

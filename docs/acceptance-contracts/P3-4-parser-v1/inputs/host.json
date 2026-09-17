@@ -1,0 +1,18 @@
+{
+  "core_autocrlf": "true",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats",
+  "git_version": "git version 2.53.0.windows.1",
+  "network_required": false,
+  "python": "3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]",
+  "python_executable": {
+    "bytes": 105816,
+    "path": "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "sha256": "a2a4eff8d0b0c845284c607d50a3b5b966ac5a3121736a2e38e165bd6644d9fe"
+  },
+  "source_python_options": [
+    "-X",
+    "utf8",
+    "-S",
+    "-B"
+  ]
+}

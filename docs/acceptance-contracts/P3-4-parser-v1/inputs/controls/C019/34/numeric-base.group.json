@@ -1,0 +1,24 @@
+{
+  "groupId": "synthetic-numeric-review",
+  "identity": {
+    "appState": "foreground",
+    "baud": 115200,
+    "captureMethod": "synthetic-parser-review",
+    "device": "AA:BB",
+    "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "maxRetries": 5,
+    "mtuChunkBytes": 244,
+    "mtuRequested": 247,
+    "packageBytes": 1024,
+    "packageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "timeoutMs": 500,
+    "writeMode": "withoutResponse"
+  },
+  "inputs": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-base.log",
+      "sha256": "2f77f8b8637018e2ebfb0750ccd9524f6cf329478febb53b9a1b1426dcc5bace"
+    }
+  ]
+}

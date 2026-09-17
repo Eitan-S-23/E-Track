@@ -1,0 +1,25 @@
+{
+  "groupId": "independent-synthetic-review",
+  "identity": {
+    "appState": "",
+    "baud": 0,
+    "captureMethod": "",
+    "device": "AA:BB",
+    "firmwareCommit": "",
+    "maxRetries": 0,
+    "mtuChunkBytes": 244,
+    "mtuRequested": 247,
+    "packageBytes": 0,
+    "packageSha256": "",
+    "senderCommit": "",
+    "timeoutMs": 0,
+    "writeMode": "withoutResponse"
+  },
+  "inputs": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\empty-metadata-is-not-identity.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74"
+    }
+  ],
+  "schema": 1
+}

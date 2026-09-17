@@ -1,0 +1,31 @@
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=3093
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=6177 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7102 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=497 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8412 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=397 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9593 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=337 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10657 off=384 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=370 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11884 off=512 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=308 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=13179 off=640 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=513 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=14665 off=768 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=453 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=16156 off=896 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=506 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=16841 off=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_LINK_STATS {"attempt": null, "attemptEndUs": null, "attempts": [], "bind": {"charsUs": 1000, "found": true, "mtuChunkBytes": 244, "mtuRequested": 247, "mtuSource": "negotiated", "mtuUs": 500, "phaseUs": 6177, "subscribeOk": true, "subscribeUs": 300, "writeMode": "withoutResponse"}, "clock": "stopwatch-mono-us", "device": "AA:BB", "discovers": {"calls": 0, "errors": 0, "maxUs": null, "minUs": null, "p50Us": null, "p95Us": null}, "failure": {"reason": null, "stage": null}, "gattWrites": {"bytes": 1299, "calls": 11, "errors": 0, "maxUs": 0, "minUs": 0, "p50Us": 0, "p95Us": 0}, "getInfo": {"calls": 1, "failures": 0, "totalUs": 3093}, "label": "upgrade", "phases": {"bind": [0, 6177], "transfer": [6177, 6177]}, "platformWrites": {"bytes": 0, "calls": 0, "errors": 0, "maxUs": null, "minUs": null, "p50Us": null, "p95Us": null}, "schema": 1, "transfer": {"ackEarlyInvalid": 0, "ackEarlyUnsent": 0, "ackLatency": {"count": 8, "maxUs": 513, "minUs": 308, "p50Us": 397, "p95Us": 513, "p99Us": 513}, "ackSamples": "complete", "acks": {"abort": 0, "duplicate": 0, "error": 0, "malformed": 0, "noProgress": 0, "ok": 8}, "durable": {"events": 2, "finalOff": 1024}, "endAckUs": 6177, "outcome": "ok", "retransmitFrames": 0, "segmentSendTotal": 8, "segmentsUnique": 8, "startUs": 6177}}

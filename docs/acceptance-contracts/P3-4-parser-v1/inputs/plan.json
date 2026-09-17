@@ -1,0 +1,1324 @@
+{
+  "captures": [
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 48,
+          "report.ackLatency.p99Us": 900,
+          "report.eligibleForThreshold": false,
+          "report.runs": 6,
+          "report.segmentsUnique": 48,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "id": "R01",
+      "logs": [
+        "inputs/captures/ci-35034258547-ubuntu.log"
+      ],
+      "name": "ci-35034258547/ubuntu",
+      "strict": false
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 48,
+          "report.ackLatency.p99Us": 1328,
+          "report.eligibleForThreshold": false,
+          "report.runs": 6,
+          "report.segmentsUnique": 48,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "id": "R02",
+      "logs": [
+        "inputs/captures/ci-35034258547-windows.log"
+      ],
+      "name": "ci-35034258547/windows",
+      "strict": false
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 48,
+          "report.ackLatency.p99Us": 1184,
+          "report.eligibleForThreshold": false,
+          "report.runs": 6,
+          "report.segmentsUnique": 48,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "id": "R03",
+      "logs": [
+        "inputs/captures/ci-35094204310-ubuntu.log"
+      ],
+      "name": "ci-35094204310/ubuntu",
+      "strict": false
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 40,
+          "report.ackLatency.p99Us": 1020,
+          "report.eligibleForThreshold": false,
+          "report.runs": 5,
+          "report.segmentsUnique": 40,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "id": "R04",
+      "logs": [
+        "inputs/captures/ci-35094204310-windows.log"
+      ],
+      "name": "ci-35094204310/windows",
+      "strict": false
+    }
+  ],
+  "controls": [
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": true,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": "inputs/controls/C001/1/control-valid.group.json",
+      "id": "C001",
+      "logs": [
+        "inputs/controls/C001/0/control-valid.log"
+      ],
+      "name": "control-valid",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": null,
+      "id": "C002",
+      "logs": [
+        "inputs/controls/C002/2/control-no-sidecar.log"
+      ],
+      "name": "control-no-sidecar",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "INPUT_SHA_MISMATCH",
+          "INPUT_UNBOUND"
+        ]
+      },
+      "group": "inputs/controls/C003/4/control-sha-mismatch.group.json",
+      "id": "C003",
+      "logs": [
+        "inputs/controls/C003/3/control-sha-mismatch.log"
+      ],
+      "name": "control-sha-mismatch",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "NO_OBSERVATIONS"
+        ]
+      },
+      "group": "inputs/controls/C004/6/qualified-empty-capture.group.json",
+      "id": "C004",
+      "logs": [
+        "inputs/controls/C004/5/qualified-empty-capture.log"
+      ],
+      "name": "qualified-empty-capture",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "BAD_JSON",
+          "SUMMARY_MISSING"
+        ]
+      },
+      "group": "inputs/controls/C005/8/qualified-null-summary.group.json",
+      "id": "C005",
+      "logs": [
+        "inputs/controls/C005/7/qualified-null-summary.log"
+      ],
+      "name": "qualified-null-summary",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": "inputs/controls/C006/10/qualified-only-partial.group.json",
+      "id": "C006",
+      "logs": [
+        "inputs/controls/C006/9/qualified-only-partial.log"
+      ],
+      "name": "qualified-only-partial",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "UNKNOWN_KIND"
+        ]
+      },
+      "group": "inputs/controls/C007/12/qualified-parse-fatal.group.json",
+      "id": "C007",
+      "logs": [
+        "inputs/controls/C007/11/qualified-parse-fatal.log"
+      ],
+      "name": "qualified-parse-fatal",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "TIMING_INCOMPLETE"
+        ]
+      },
+      "group": "inputs/controls/C008/14/qualified-missing-elapsed.group.json",
+      "id": "C008",
+      "logs": [
+        "inputs/controls/C008/13/qualified-missing-elapsed.log"
+      ],
+      "name": "qualified-missing-elapsed",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "GROUP_IDENTITY_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C009/16/empty-metadata-is-not-identity.group.json",
+      "id": "C009",
+      "logs": [
+        "inputs/controls/C009/15/empty-metadata-is-not-identity.log"
+      ],
+      "name": "empty-metadata-is-not-identity",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "duplicate": true,
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "DUPLICATE_INPUT"
+        ]
+      },
+      "group": "inputs/controls/C010/18/repeated-input-is-not-two-runs.group.json",
+      "id": "C010",
+      "logs": [
+        "inputs/controls/C010/17/repeated-input-is-not-two-runs.log",
+        "inputs/controls/C010/17/repeated-input-is-not-two-runs.log"
+      ],
+      "name": "repeated-input-is-not-two-runs",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SEGMENT_OFFSET_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C011/20/negative-segment-offset.group.json",
+      "id": "C011",
+      "logs": [
+        "inputs/controls/C011/19/negative-segment-offset.log"
+      ],
+      "name": "negative-segment-offset",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SEGMENT_LENGTH_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C012/22/zero-segment-length.group.json",
+      "id": "C012",
+      "logs": [
+        "inputs/controls/C012/21/zero-segment-length.log"
+      ],
+      "name": "zero-segment-length",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "PHASE_NEGATIVE"
+        ]
+      },
+      "group": "inputs/controls/C013/24/negative-phase-clock.group.json",
+      "id": "C013",
+      "logs": [
+        "inputs/controls/C013/23/negative-phase-clock.log"
+      ],
+      "name": "negative-phase-clock",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": null,
+      "id": "C014",
+      "logs": [
+        "inputs/controls/C014/25/control-early-clock.log"
+      ],
+      "name": "control-early-clock",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "BAD_JSON",
+          "SUMMARY_MISSING"
+        ]
+      },
+      "group": null,
+      "id": "C015",
+      "logs": [
+        "inputs/controls/C015/26/control-null-without-sidecar.log"
+      ],
+      "name": "control-null-without-sidecar",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "DUPLICATE_ACK_OFFSET"
+        ]
+      },
+      "group": null,
+      "id": "C016",
+      "logs": [
+        "inputs/controls/C016/27/control-duplicate-ack.log"
+      ],
+      "name": "control-duplicate-ack",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "TIMING_INCOMPLETE"
+        ]
+      },
+      "group": "inputs/controls/C017/29/edge-missing-elapsed-zero-duration.group.json",
+      "id": "C017",
+      "logs": [
+        "inputs/controls/C017/28/zero-duration.log"
+      ],
+      "name": "missing-elapsed-zero-duration",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "distinct_exclusion_sources": 2,
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SCHEMA_UNKNOWN"
+        ]
+      },
+      "group": "inputs/controls/C018/32/edge-source-attribution.group.json",
+      "id": "C018",
+      "logs": [
+        "inputs/controls/C018/30/tests.log",
+        "inputs/controls/C018/31/tests.log"
+      ],
+      "name": "source-attribution",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "b23b28bf0c59ee80adbe57e32f69cd23da956cbdc6cd326715b0ccd5e346ef80",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": true,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": "inputs/controls/C019/34/numeric-base.group.json",
+      "id": "C019",
+      "logs": [
+        "inputs/controls/C019/33/numeric-base.log"
+      ],
+      "name": "base",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SEGMENT_OFFSET_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C020/36/numeric-durable-negative-off.group.json",
+      "id": "C020",
+      "logs": [
+        "inputs/controls/C020/35/numeric-durable-negative-off.log"
+      ],
+      "name": "durable-negative-off",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SEGMENT_OFFSET_MISSING"
+        ]
+      },
+      "group": "inputs/controls/C021/38/numeric-durable-missing-off.group.json",
+      "id": "C021",
+      "logs": [
+        "inputs/controls/C021/37/numeric-durable-missing-off.log"
+      ],
+      "name": "durable-missing-off",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SEGMENT_OFFSET_MISSING"
+        ]
+      },
+      "group": "inputs/controls/C022/40/numeric-durable-text-off.group.json",
+      "id": "C022",
+      "logs": [
+        "inputs/controls/C022/39/numeric-durable-text-off.log"
+      ],
+      "name": "durable-text-off",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": true,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": "inputs/controls/C023/42/numeric-retransmit-len-128.group.json",
+      "id": "C023",
+      "logs": [
+        "inputs/controls/C023/41/numeric-retransmit-len-128.log"
+      ],
+      "name": "retransmit-len-128",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SEGMENT_LENGTH_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C024/44/numeric-retransmit-len-0.group.json",
+      "id": "C024",
+      "logs": [
+        "inputs/controls/C024/43/numeric-retransmit-len-0.log"
+      ],
+      "name": "retransmit-len-0",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "SEGMENT_LENGTH_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C025/46/numeric-retransmit-len-minus1.group.json",
+      "id": "C025",
+      "logs": [
+        "inputs/controls/C025/45/numeric-retransmit-len-minus1.log"
+      ],
+      "name": "retransmit-len-minus1",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 0,
+          "report.eligibleForThreshold": false,
+          "report.runs": 0,
+          "report.strictFieldsComplete": false
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "BYTE_COUNT_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C026/48/numeric-gatt-negative-bytes.group.json",
+      "id": "C026",
+      "logs": [
+        "inputs/controls/C026/47/numeric-gatt-negative-bytes.log"
+      ],
+      "name": "gatt-negative-bytes",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": true,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": "inputs/controls/C027/50/identity-zero-retries.group.json",
+      "id": "C027",
+      "logs": [
+        "inputs/controls/C027/49/control-valid.log"
+      ],
+      "name": "zero-retries",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": true,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 0,
+        "fatal_codes": []
+      },
+      "group": "inputs/controls/C028/52/identity-uppercase-package-sha.group.json",
+      "id": "C028",
+      "logs": [
+        "inputs/controls/C028/51/control-valid.log"
+      ],
+      "name": "uppercase-package-sha",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "GROUP_IDENTITY_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C029/54/identity-nonhex-package-sha.group.json",
+      "id": "C029",
+      "logs": [
+        "inputs/controls/C029/53/control-valid.log"
+      ],
+      "name": "nonhex-package-sha",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "GROUP_IDENTITY_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C030/56/identity-package-sha-trailing-lf.group.json",
+      "id": "C030",
+      "logs": [
+        "inputs/controls/C030/55/control-valid.log"
+      ],
+      "name": "package-sha-trailing-lf",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "GROUP_IDENTITY_INVALID"
+        ]
+      },
+      "group": "inputs/controls/C031/58/identity-package-sha-trailing-crlf.group.json",
+      "id": "C031",
+      "logs": [
+        "inputs/controls/C031/57/control-valid.log"
+      ],
+      "name": "package-sha-trailing-crlf",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    },
+    {
+      "expected": {
+        "duplicate": true,
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "DUPLICATE_INPUT"
+        ]
+      },
+      "group": "inputs/controls/C032/59/control-valid.group.json",
+      "id": "C032",
+      "logs": [
+        "inputs/controls/C032/60/control-valid.log",
+        "inputs/controls/C032/60/control-valid.log"
+      ],
+      "name": "duplicate-alias",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [
+        1
+      ],
+      "strict": true
+    },
+    {
+      "expected": {
+        "duplicate": true,
+        "equals": {
+          "report.ackLatency.count": 8,
+          "report.eligibleForThreshold": false,
+          "report.runs": 1,
+          "report.strictFieldsComplete": true
+        },
+        "exit": 1,
+        "fatal_codes": [
+          "DUPLICATE_INPUT"
+        ]
+      },
+      "group": "inputs/controls/C033/61/control-valid.group.json",
+      "id": "C033",
+      "logs": [
+        "inputs/controls/C033/62/control-valid.log",
+        "inputs/controls/C033/63/copied-capture.log"
+      ],
+      "name": "duplicate-copy",
+      "origin_review": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr3-followup-20260917\\previous-probes.json",
+      "origin_review_sha256": "8c4a46c61d40a7cca596b3436c0395e4ab3550e8344b02cc44f7a8505dfd7b25",
+      "relative_logs": [],
+      "strict": true
+    }
+  ],
+  "files": [
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C001/0/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 836,
+      "path": "inputs/controls/C001/1/control-valid.group.json",
+      "sha256": "92a69e0130bb9d6d4220e0cc7425138e36930071c9b0a463848f0e6dde637561",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C002/2/control-no-sidecar.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-no-sidecar.log"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C003/3/control-sha-mismatch.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-sha-mismatch.log"
+    },
+    {
+      "bytes": 843,
+      "path": "inputs/controls/C003/4/control-sha-mismatch.group.json",
+      "sha256": "29f721c20a67e849b91a1e8e700c7bacb677ed69fa9df8535cd612906cbe7d95",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-sha-mismatch.group.json"
+    },
+    {
+      "bytes": 0,
+      "path": "inputs/controls/C004/5/qualified-empty-capture.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-empty-capture.log"
+    },
+    {
+      "bytes": 846,
+      "path": "inputs/controls/C004/6/qualified-empty-capture.group.json",
+      "sha256": "93ea0b77a28303282c101be1b3915b533528c37f0b55164af36146136b42cbb2",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-empty-capture.group.json"
+    },
+    {
+      "bytes": 1980,
+      "path": "inputs/controls/C005/7/qualified-null-summary.log",
+      "sha256": "a271c02926f224ef811fef10823ca9a6f5bd466e2ebe9c54a2665ef7333d5453",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-null-summary.log"
+    },
+    {
+      "bytes": 845,
+      "path": "inputs/controls/C005/8/qualified-null-summary.group.json",
+      "sha256": "e6f866bfb326a417edc55ee60e321e071ee00d1191d8c3ddc223dc6c6a5cddf3",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-null-summary.group.json"
+    },
+    {
+      "bytes": 3214,
+      "path": "inputs/controls/C006/9/qualified-only-partial.log",
+      "sha256": "a5ec95b8d9bc9625ef6851ebf55b81d1854fad88d2a7355032d8e8e642e729a1",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-only-partial.log"
+    },
+    {
+      "bytes": 845,
+      "path": "inputs/controls/C006/10/qualified-only-partial.group.json",
+      "sha256": "a155e4489917cbbc0c749d33c20f55e3aa00338804e62bf3b1c96d5d020c1cf3",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-only-partial.group.json"
+    },
+    {
+      "bytes": 3319,
+      "path": "inputs/controls/C007/11/qualified-parse-fatal.log",
+      "sha256": "c4a81438df0c06cbb5a36be2cfa680666ec2640350b16b804b2c26c1debd19a4",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-parse-fatal.log"
+    },
+    {
+      "bytes": 844,
+      "path": "inputs/controls/C007/12/qualified-parse-fatal.group.json",
+      "sha256": "9cf049023af0a3b87d06b8b606cffa24228c6ae7845a55392fc73bb968438dd3",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-parse-fatal.group.json"
+    },
+    {
+      "bytes": 3247,
+      "path": "inputs/controls/C008/13/qualified-missing-elapsed.log",
+      "sha256": "6abd9b191c0af743c478d2163551899c32f3856743071e785ac0075166c9088f",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-missing-elapsed.log"
+    },
+    {
+      "bytes": 848,
+      "path": "inputs/controls/C008/14/qualified-missing-elapsed.group.json",
+      "sha256": "284331044a78789a8511a724dc4edbddd3ca84c7cbe2153a4ba8a2703af5862c",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\qualified-missing-elapsed.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C009/15/empty-metadata-is-not-identity.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\empty-metadata-is-not-identity.log"
+    },
+    {
+      "bytes": 666,
+      "path": "inputs/controls/C009/16/empty-metadata-is-not-identity.group.json",
+      "sha256": "c7971cb0e12e5753d8e2be4b48ae856fe454393b0541141769d52fa458a8bcd2",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\empty-metadata-is-not-identity.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C010/17/repeated-input-is-not-two-runs.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\repeated-input-is-not-two-runs.log"
+    },
+    {
+      "bytes": 853,
+      "path": "inputs/controls/C010/18/repeated-input-is-not-two-runs.group.json",
+      "sha256": "bddbd1936304338f38cc28016ef591dc83b766dfc12b66204458ce58bf8923e5",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\repeated-input-is-not-two-runs.group.json"
+    },
+    {
+      "bytes": 3273,
+      "path": "inputs/controls/C011/19/negative-segment-offset.log",
+      "sha256": "49aac9c0a82841680807d6eedad747beeb9f96277d7b5466e37414f507a56605",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\negative-segment-offset.log"
+    },
+    {
+      "bytes": 846,
+      "path": "inputs/controls/C011/20/negative-segment-offset.group.json",
+      "sha256": "853c688f38498dd773eb103a933de2516a25f188345f33dc30ab76dcea5fbdb1",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\negative-segment-offset.group.json"
+    },
+    {
+      "bytes": 3265,
+      "path": "inputs/controls/C012/21/zero-segment-length.log",
+      "sha256": "afd0114866cb2cb8a589b40fb7fc45fdcf813e728d07c9ae3c2ad50e7ae8e797",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\zero-segment-length.log"
+    },
+    {
+      "bytes": 842,
+      "path": "inputs/controls/C012/22/zero-segment-length.group.json",
+      "sha256": "24b9fd766da1f9c2f78ccd6b6914c4883343df6785510c10fef77c3a085c356f",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\zero-segment-length.group.json"
+    },
+    {
+      "bytes": 3264,
+      "path": "inputs/controls/C013/23/negative-phase-clock.log",
+      "sha256": "b66d3b281f1eec5a6431fdf01ecf8dc90ac130eab5f058641eab0749186faa07",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\negative-phase-clock.log"
+    },
+    {
+      "bytes": 843,
+      "path": "inputs/controls/C013/24/negative-phase-clock.group.json",
+      "sha256": "b02e63353f39d9ac7046ea6dfa04498c8396fd972995c5cf0a2bc8f5706d291e",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\negative-phase-clock.group.json"
+    },
+    {
+      "bytes": 1569,
+      "path": "inputs/controls/C014/25/control-early-clock.log",
+      "sha256": "a644f2dbe73c63a715dbe08122eb45bea2b9ac71b915e197ab811601abffdb20",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-early-clock.log"
+    },
+    {
+      "bytes": 1980,
+      "path": "inputs/controls/C015/26/control-null-without-sidecar.log",
+      "sha256": "a271c02926f224ef811fef10823ca9a6f5bd466e2ebe9c54a2665ef7333d5453",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-null-without-sidecar.log"
+    },
+    {
+      "bytes": 3264,
+      "path": "inputs/controls/C016/27/control-duplicate-ack.log",
+      "sha256": "61a9a10da94fadfae16820c28566cbe7ef09cd08424f4ad07c66f619d80474ae",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-duplicate-ack.log"
+    },
+    {
+      "bytes": 3245,
+      "path": "inputs/controls/C017/28/zero-duration.log",
+      "sha256": "bbf4da74d132e0d62e1af2b3bbc170ce9297a4938f8dc02dcf7e45c001bf9ed6",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\zero-duration.log"
+    },
+    {
+      "bytes": 842,
+      "path": "inputs/controls/C017/29/edge-missing-elapsed-zero-duration.group.json",
+      "sha256": "8ea1104effb253bdf9fc7d266f8f812d19700ac956ab430f453bc39b57d730c7",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-missing-elapsed-zero-duration.group.json"
+    },
+    {
+      "bytes": 3267,
+      "path": "inputs/controls/C018/30/tests.log",
+      "sha256": "7a2aef8ae6c71fd184fb8a64e6df4660fdaa97a02a37b52bbe9bad4d1ad7ae7d",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\a\\tests.log"
+    },
+    {
+      "bytes": 3267,
+      "path": "inputs/controls/C018/31/tests.log",
+      "sha256": "a408d5bfa963b40fab9ac4a714b5709a54159e2c969cc265efa1372057b51a3c",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-inputs\\b\\tests.log"
+    },
+    {
+      "bytes": 1065,
+      "path": "inputs/controls/C018/32/edge-source-attribution.group.json",
+      "sha256": "29cc63c72f00860b1a911871f9ef646696447c4de8a6231686c3a849aa4c9eb4",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\edge-source-attribution.group.json"
+    },
+    {
+      "bytes": 3267,
+      "path": "inputs/controls/C019/33/numeric-base.log",
+      "sha256": "2f77f8b8637018e2ebfb0750ccd9524f6cf329478febb53b9a1b1426dcc5bace",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-base.log"
+    },
+    {
+      "bytes": 827,
+      "path": "inputs/controls/C019/34/numeric-base.group.json",
+      "sha256": "d64e9edbbd753d612387e671b13fc0b1bbc01ff065d8cf6e33788eadfded47f0",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-base.group.json"
+    },
+    {
+      "bytes": 3268,
+      "path": "inputs/controls/C020/35/numeric-durable-negative-off.log",
+      "sha256": "1322d40fd0615951061bdaef7e0c7938c68be9b5c166b22c869d9832f666d1e8",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-negative-off.log"
+    },
+    {
+      "bytes": 843,
+      "path": "inputs/controls/C020/36/numeric-durable-negative-off.group.json",
+      "sha256": "bd454874f2c3de12a9509583eacb1e16007c8336f0e50f4c88b6fa46ecf3ec1b",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-negative-off.group.json"
+    },
+    {
+      "bytes": 3262,
+      "path": "inputs/controls/C021/37/numeric-durable-missing-off.log",
+      "sha256": "4956c9478444aff16650c69ee745a1d8c8faf8a7b7f9dadb4ab7d6c7bebd772f",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-missing-off.log"
+    },
+    {
+      "bytes": 842,
+      "path": "inputs/controls/C021/38/numeric-durable-missing-off.group.json",
+      "sha256": "6447e5cc907326fd2175b09eb8d3ac6134c05b81bebb0911835734214bd3fbcd",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-missing-off.group.json"
+    },
+    {
+      "bytes": 3269,
+      "path": "inputs/controls/C022/39/numeric-durable-text-off.log",
+      "sha256": "3f9800e75a7a5fd742f3cd2f751aa0ec57db97d8b430d04b97bf17f05bc7c859",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-text-off.log"
+    },
+    {
+      "bytes": 839,
+      "path": "inputs/controls/C022/40/numeric-durable-text-off.group.json",
+      "sha256": "b5ea45444974ce3cb01bda05a3c32ec4be9dc796e77003a921c6d34eeac1eecd",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-durable-text-off.group.json"
+    },
+    {
+      "bytes": 3343,
+      "path": "inputs/controls/C023/41/numeric-retransmit-len-128.log",
+      "sha256": "c88fd807f2717e611f24a2da08e3917c4c8c1f25efcd0cd30ae7e595c7df45fd",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-128.log"
+    },
+    {
+      "bytes": 841,
+      "path": "inputs/controls/C023/42/numeric-retransmit-len-128.group.json",
+      "sha256": "7e79e298358c1dac1258c537097ca6a146795370d7e520bb6916c2f50d2e890e",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-128.group.json"
+    },
+    {
+      "bytes": 3341,
+      "path": "inputs/controls/C024/43/numeric-retransmit-len-0.log",
+      "sha256": "3ef816172df1972f203e470d16995de9dceef4bcbc888ff16caa5949ad2ecdc8",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-0.log"
+    },
+    {
+      "bytes": 839,
+      "path": "inputs/controls/C024/44/numeric-retransmit-len-0.group.json",
+      "sha256": "20768415dced2837cf74d49cc5215a691438ebbb67f54ba29b3fec1b9c4e5088",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-0.group.json"
+    },
+    {
+      "bytes": 3342,
+      "path": "inputs/controls/C025/45/numeric-retransmit-len-minus1.log",
+      "sha256": "6712f86176ceb69424d558d006fef5291c01511254a4c66e24c8bf4bd9f15827",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-minus1.log"
+    },
+    {
+      "bytes": 844,
+      "path": "inputs/controls/C025/46/numeric-retransmit-len-minus1.group.json",
+      "sha256": "a8b424493ff9d1074419292a3e69bebd8109e99e232debc75f4b442035851c20",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-retransmit-len-minus1.group.json"
+    },
+    {
+      "bytes": 3267,
+      "path": "inputs/controls/C026/47/numeric-gatt-negative-bytes.log",
+      "sha256": "70fa960384d7db440778d8354d667bfef92eede1197b05204d22904721c77cb7",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-gatt-negative-bytes.log"
+    },
+    {
+      "bytes": 842,
+      "path": "inputs/controls/C026/48/numeric-gatt-negative-bytes.group.json",
+      "sha256": "c4c71a92f753472e9ffa18baa888b7123c308ae45fd74dfca6b86cce343a6709",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\numeric-gatt-negative-bytes.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C027/49/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 836,
+      "path": "inputs/controls/C027/50/identity-zero-retries.group.json",
+      "sha256": "17c9ba841d7e238f274b28184c27b4fc5ebef01f389644c3b591bf608a2ae58b",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\identity-zero-retries.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C028/51/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 836,
+      "path": "inputs/controls/C028/52/identity-uppercase-package-sha.group.json",
+      "sha256": "0d457f8549271cc383f72c17f93f707a5ce1299c9ccabcbac39f7f57adf794dd",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\identity-uppercase-package-sha.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C029/53/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 836,
+      "path": "inputs/controls/C029/54/identity-nonhex-package-sha.group.json",
+      "sha256": "270eca266774185d670fc48f1e828733ff7ceda1c1134c1e99e071cfdcabaa19",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\identity-nonhex-package-sha.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C030/55/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 838,
+      "path": "inputs/controls/C030/56/identity-package-sha-trailing-lf.group.json",
+      "sha256": "f9ffc0ba9fda4f14517fe0c4e369ae3b357289a2377ada236361ebea39981225",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\identity-package-sha-trailing-lf.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C031/57/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 840,
+      "path": "inputs/controls/C031/58/identity-package-sha-trailing-crlf.group.json",
+      "sha256": "c6e7a68cb2c8e121a3466c644787a98859b962ed8cfbb6bfc217ca6a5e550a9e",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\identity-package-sha-trailing-crlf.group.json"
+    },
+    {
+      "bytes": 836,
+      "path": "inputs/controls/C032/59/control-valid.group.json",
+      "sha256": "92a69e0130bb9d6d4220e0cc7425138e36930071c9b0a463848f0e6dde637561",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C032/60/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 836,
+      "path": "inputs/controls/C033/61/control-valid.group.json",
+      "sha256": "92a69e0130bb9d6d4220e0cc7425138e36930071c9b0a463848f0e6dde637561",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.group.json"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C033/62/control-valid.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-rereview-20260917\\inputs\\control-valid.log"
+    },
+    {
+      "bytes": 3266,
+      "path": "inputs/controls/C033/63/copied-capture.log",
+      "sha256": "aca8cf0b533b86a92cb50dcfe818de92e85b13ed1a90bcf4db4b94c411474d74",
+      "source": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-parser-review-pr2-followup-20260917\\probes\\copied-capture.log"
+    },
+    {
+      "bytes": 179715,
+      "path": "inputs/captures/ci-35034258547-ubuntu.log",
+      "sha256": "1cc73fa22e4cb692b685a5fb582380de189a84faa0f6d11927219068dc8406e6",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35034258547\\ubuntu\\run-9ed6a289b26f4f9da5c2d3d682df6bdb\\logs\\tests.log"
+    },
+    {
+      "bytes": 179425,
+      "path": "inputs/captures/ci-35034258547-windows.log",
+      "sha256": "1523f205cffba7a56128703e4fc633e3ee77ffc78cfc5d19ff83f8687107a160",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35034258547\\windows\\run-baccd24b786e464b98495ec3cf82806a\\logs\\tests.log"
+    },
+    {
+      "bytes": 157291,
+      "path": "inputs/captures/ci-35094204310-ubuntu.log",
+      "sha256": "f5020377724235d4e35f26d2004734ecc42b531ce11f8105f6a6e237a21cf3ed",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35094204310\\ubuntu\\run-460be858f1204f53989268cc4d0a0bad\\logs\\tests.log"
+    },
+    {
+      "bytes": 154037,
+      "path": "inputs/captures/ci-35094204310-windows.log",
+      "sha256": "cc480b8fdaa686b8333bdf1a3f7a7f868de54431c183042dad2672d1b54488e9",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35094204310\\windows\\run-ed87d9bc3d784552b7bf363e8b2f93ab\\logs\\tests.log"
+    }
+  ],
+  "provenance": "Log and sidecar bytes are exact copies of independently reviewed originals. Sidecar path/name fields are informational; SHA bindings are retained unchanged.",
+  "schema": "p34-parser-acceptance-inputs-v1",
+  "scope": "Synthetic parser controls and immutable CI-log parser regression only; not hardware performance acceptance.",
+  "selftest_external_captures": [
+    {
+      "bundle_path": "inputs/captures/ci-35034258547-ubuntu.log",
+      "sha256": "1cc73fa22e4cb692b685a5fb582380de189a84faa0f6d11927219068dc8406e6",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35034258547\\ubuntu\\run-9ed6a289b26f4f9da5c2d3d682df6bdb\\logs\\tests.log"
+    },
+    {
+      "bundle_path": "inputs/captures/ci-35034258547-windows.log",
+      "sha256": "1523f205cffba7a56128703e4fc633e3ee77ffc78cfc5d19ff83f8687107a160",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35034258547\\windows\\run-baccd24b786e464b98495ec3cf82806a\\logs\\tests.log"
+    },
+    {
+      "bundle_path": "inputs/captures/ci-35094204310-ubuntu.log",
+      "sha256": "f5020377724235d4e35f26d2004734ecc42b531ce11f8105f6a6e237a21cf3ed",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35094204310\\ubuntu\\run-460be858f1204f53989268cc4d0a0bad\\logs\\tests.log"
+    },
+    {
+      "bundle_path": "inputs/captures/ci-35094204310-windows.log",
+      "sha256": "cc480b8fdaa686b8333bdf1a3f7a7f868de54431c183042dad2672d1b54488e9",
+      "source": "D:\\github\\my\\E-Track\\.cache\\ci-35094204310\\windows\\run-ed87d9bc3d784552b7bf363e8b2f93ab\\logs\\tests.log"
+    }
+  ],
+  "selftest_temp_paths": [
+    "Tools/ota/p3-4-link-stats/_tmp_bad.log",
+    "Tools/ota/p3-4-link-stats/_tmp_bound.log",
+    "Tools/ota/p3-4-link-stats/_tmp_group.json",
+    "Tools/ota/p3-4-link-stats/_tmp_multi_a.log",
+    "Tools/ota/p3-4-link-stats/_tmp_multi_b.log",
+    "Tools/ota/p3-4-link-stats/_tmp_ok.log",
+    "Tools/ota/p3-4-link-stats/_tmp_repeat.log",
+    "Tools/ota/p3-4-link-stats/_tmp_src_a",
+    "Tools/ota/p3-4-link-stats/_tmp_src_b",
+    "Tools/ota/p3-4-link-stats/_tmp_type.log",
+    "Tools/ota/p3-4-link-stats/_tmp_src_a/tests.log",
+    "Tools/ota/p3-4-link-stats/_tmp_src_b/tests.log"
+  ]
+}

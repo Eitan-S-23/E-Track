@@ -1,0 +1,1625 @@
+00:00 +0: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart
+00:00 +0: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: subscribeOtaNotifyByAddress（Windows 通知路径，RC3-09） notify-only 特征：订阅成功且通知事件透传（不读特征）
+00:00 +1: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: subscribeOtaNotifyByAddress（Windows 通知路径，RC3-09） 连续多片：按序全部送达（轮询读版会丢片）
+00:00 +2: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: subscribeOtaNotifyByAddress（Windows 通知路径，RC3-09） 重复片：不去重（同值通知是有效重发，由协议层幂等）
+00:00 +3: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: subscribeOtaNotifyByAddress（Windows 通知路径，RC3-09） 流取消：取消底层监听并退订特征
+00:00 +4: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: subscribeOtaNotifyByAddress（Windows 通知路径，RC3-09） 订阅失败：返回 null（不静默吞掉）
+OTA订阅特征失败(11:22:33:44:55:66/fff1): PlatformException(subscribe_failed, null, null, null)
+00:00 +5: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: subscribeNotifyByAddress（遥控透传 Windows 通知路径，RC3-09） notify-only 特征：初始读失败被忽略，通知正常透传
+00:00 +6: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: subscribeNotifyByAddress（遥控透传 Windows 通知路径，RC3-09） 可读特征：初始读给出当前值，后续值来自通知且不去重
+00:00 +7: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: findExactOtaCharacteristicsByAddress（真实 win_ble 对象形态，RC3-09） 真实 BleCharacteristic（无 getField）：能力从 Properties 字段读取，精确选择 FFF2/FFF1（RC3-09 修复鉴别）
+00:00 +8: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: findExactOtaCharacteristicsByAddress（真实 win_ble 对象形态，RC3-09） FFF2 仅 writeWithoutResponse：writeMode 绑定为 without
+00:00 +9: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: findExactOtaCharacteristicsByAddress（真实 win_ble 对象形态，RC3-09） FFF2 无任何写能力：整体发现失败，不降级取其他可写特征
+00:00 +10: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: findExactOtaCharacteristicsByAddress（真实 win_ble 对象形态，RC3-09） FFF1 无通知能力：整体发现失败（indicate 不满足时同理）
+00:00 +11: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: findExactOtaCharacteristicsByAddress（真实 win_ble 对象形态，RC3-09） 发现→写入：writeOtaCharacteristicByAddress 按发现结果精确转发
+00:00 +12: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: findExactOtaCharacteristicsByAddress（真实 win_ble 对象形态，RC3-09） 发现→订阅→通知：真实三元组贯通，通知片按序透传
+00:00 +13: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: 重新绑定资源所有权（RC3-09） 取消旧流后再订阅：旧流关闭不再吐值，退订与订阅一一对应
+00:00 +14: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: 重新绑定资源所有权（RC3-09） 订阅失败后再重试：失败不留残留状态，重试可成功
+OTA订阅特征失败(11:22:33:44:55:66/fff1): PlatformException(subscribe_failed, null, null, null)
+00:00 +15: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: 共享 CCCD 所有权（RC3-08⑦） 迟到的旧订阅取消：不得关闭新 owner 的共享 CCCD
+00:00 +16: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: 共享 CCCD 所有权（RC3-08⑦） 发起顺序决定所有权：先发起、后完成的旧订阅不得接管新 owner（RC3-08⑦）
+00:00 +17: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: 共享 CCCD 所有权（RC3-08⑦） 所有权转移后再重订：owner 归属跟随最新一次订阅
+00:00 +18: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_adapter_notify_test.dart: 晚到的断开完成不得拆掉新链路资源（RC3-08⑦） 断开在途期间代次已前进：迟到完成不清新链路设备、不重复前进代次
+00:00 +19: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_service_observation_scan_test.dart
+00:00 +19: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_service_observation_scan_test.dart: 适配器 on 但平台拒绝启动：scan_not_started，不与未见目标混淆
+Windows蓝牙扫描已启动
+Windows蓝牙扫描启动失败: Bad state: platform refused
+开始扫描失败: Binding has not yet been initialized.
+The "instance" getter on the WidgetsBinding binding mixin is only available once that binding has been initialized.
+Typically, this is done by calling "WidgetsFlutterBinding.ensureInitialized()" or "runApp()" (the latter calls the former). Typically this call is done in the "void main()" method. The "ensureInitialized" method is idempotent; calling it multiple times is not harmful. After calling that method, the "instance" getter will return the binding.
+In a test, one can call "TestWidgetsFlutterBinding.ensureInitialized()" as the first line in the test's "main()" method to initialize the binding.
+If WidgetsBinding is a custom binding mixin, there must also be a custom binding class, like WidgetsFlutterBinding, but that mixes in the selected binding, and that is the class that must be constructed before using the "instance" getter.
+00:00 +20: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_service_observation_scan_test.dart: 扫描中流报错：scan_stream_error 经真实 onError 接线通知观测器
+Windows蓝牙扫描已启动
+Windows蓝牙扫描正常启动
+扫描结果监听失败: Bad state: bt stack died
+蓝牙扫描已停止
+00:00 +21: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_service_observation_scan_test.dart: 正常空扫描：窗口到期 target_not_seen，不与启动失败混淆
+Windows蓝牙扫描已启动
+Windows蓝牙扫描正常启动
+蓝牙扫描已停止
+00:01 +22: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/bluetooth_service_observation_scan_test.dart: 扫描批次经真实接线转成 ObservedAdvertisement（含目标匹配）
+Windows蓝牙扫描已启动
+Windows蓝牙扫描正常启动
+Windows平台处理扫描结果，设备数量: 2
+处理设备: ScanResult{device: BluetoothDevice{remoteId: 11:22:33:44:55:66, platformName: , services: null}, advertisementData: AdvertisementData{advName: AIMA, txPowerLevel: null, appearance: 0, connectable: true, manufacturerData: {}, serviceData: {}, serviceUuids: []}, rssi: -70, timeStamp: 2026-09-15 23:09:45.585990}
+===== Windows BLE设备原始数据 =====
+设备对象类型: ScanResult
+设备对象字符串: ScanResult{device: BluetoothDevice{remoteId: 11:22:33:44:55:66, platformName: , services: null}, advertisementData: AdvertisementData{advName: AIMA, txPowerLevel: null, appearance: 0, connectable: true, manufacturerData: {}, serviceData: {}, serviceUuids: []}, rssi: -70, timeStamp: 2026-09-15 23:09:45.585990}
+设备属性访问错误: NoSuchMethodError: Class 'ScanResult' has no instance getter 'address'.
+Receiver: Instance of 'ScanResult'
+Tried calling: address
+新增设备 ，名称: 未知设备
+处理设备: ScanResult{device: BluetoothDevice{remoteId: AA:BB:CC:DD:EE:FF, platformName: , services: null}, advertisementData: AdvertisementData{advName: XTrace, txPowerLevel: null, appearance: 0, connectable: true, manufacturerData: {}, serviceData: {}, serviceUuids: []}, rssi: -55, timeStamp: 2026-09-15 23:09:45.585990}
+===== Windows BLE设备原始数据 =====
+设备对象类型: ScanResult
+设备对象字符串: ScanResult{device: BluetoothDevice{remoteId: AA:BB:CC:DD:EE:FF, platformName: , services: null}, advertisementData: AdvertisementData{advName: XTrace, txPowerLevel: null, appearance: 0, connectable: true, manufacturerData: {}, serviceData: {}, serviceUuids: []}, rssi: -55, timeStamp: 2026-09-15 23:09:45.585990}
+设备属性访问错误: NoSuchMethodError: Class 'ScanResult' has no instance getter 'address'.
+Receiver: Instance of 'ScanResult'
+Tried calling: address
+更新设备 ，最终名称: 未知设备
+蓝牙扫描已停止
+00:01 +23: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart
+00:01 +23: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.crc16（CRC16-CCITT-FALSE） 空输入 = 0xFFFF（初值）
+00:01 +24: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.crc16（CRC16-CCITT-FALSE） 公开向量 "123456789" = 0x29B1
+00:01 +25: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.crc16（CRC16-CCITT-FALSE） 单字节 0x00 序列稳定
+00:01 +26: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.seqCompare（16bit 回绕） 普通差
+00:01 +27: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.seqCompare（16bit 回绕） 回绕：0 与 0xFFFF 相差 1
+00:01 +28: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.encodeCommand / decodeFrame 编解码往返：字段与 CRC 一致
+00:01 +29: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.encodeCommand / decodeFrame CRC 损坏必须拒绝
+00:01 +30: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.encodeCommand / decodeFrame sync 字非法必须拒绝
+00:01 +31: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec.encodeCommand / decodeFrame 长度不符必须拒绝
+00:01 +32: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec payload 编码 BEGIN payload：101B、proto_ver=1、字段位置
+00:01 +33: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec payload 编码 BEGIN payload：sha/etu 长度非法必须拒绝
+00:01 +34: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec payload 编码 DATA payload：off 对齐与 128B 约束
+00:01 +35: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaBleCodec payload 编码 END payload：32B sha 复述
+00:01 +36: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaInfoPayload.parse 合法 50B：字段逐位正确
+00:01 +37: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaInfoPayload.parse 长度非 50B 必须拒绝
+00:01 +38: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaInfoPayload.parse proto_ver != 1 必须拒绝
+00:01 +39: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaInfoPayload.parse max_window_segs = 0 必须拒绝
+00:01 +40: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaAckPayload.parse BEGIN ACK 10B：status/session/durable/bitmap
+00:01 +41: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaAckPayload.parse 普通 ACK 9B：无 session 字段（status+durable4B LE+bitmap4B LE）
+00:01 +42: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaAckPayload.parse 未知 status 必须拒绝（fail closed）
+00:01 +43: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: OtaAckPayload.parse 长度不符必须拒绝
+00:01 +44: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_codec_test.dart: modelHexLower 小写 hex 输出
+00:01 +45: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart
+00:02 +45: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: getDeviceInfo GET_INFO 往返解析身份，INFO session=0 且 seq 回显
+00:02 +46: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: getDeviceInfo 断连：写帧抛 DISCONNECTED
+00:02 +47: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 完整传输 8192：BEGIN→两块 DATA→END ACK OK，durable 逐块前进
+OTA_MONO MONO_BUDGET_START monoUs=3 wallUs=1789513787189181
+OTA_MONO MONO_BUDGET_RESET monoUs=21954 wallUs=1789513787211181 durable=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=38175 wallUs=1789513787227169 durable=8192
+OTA_MONO MONO_END_ACK_OK monoUs=42287 wallUs=1789513787231178 durable=8192
+00:02 +48: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 短尾块 4096+129B：33 段，最后 1 段 1B，全部送达
+OTA_MONO MONO_BUDGET_START monoUs=53881 wallUs=1789513787243184
+OTA_MONO MONO_BUDGET_RESET monoUs=62329 wallUs=1789513787251173 durable=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=63087 wallUs=1789513787252176 durable=4225
+OTA_MONO MONO_END_ACK_OK monoUs=63557 wallUs=1789513787252176 durable=4225
+00:02 +49: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 断点续传（真值 journal）：块 0 已提交，BEGIN 报 [4096,0]，只发块 1，SHA 跨会话前缀连续（RC3-03）
+OTA_MONO MONO_BUDGET_START monoUs=70666 wallUs=1789513787260177
+OTA_MONO MONO_BUDGET_RESET monoUs=71321 wallUs=1789513787260177 durable=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=82979 wallUs=1789513787272177 durable=8192
+OTA_MONO MONO_END_ACK_OK monoUs=83978 wallUs=1789513787273175 durable=8192
+00:02 +50: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer credit 窗口上限：windowSegments=4 时在途段不超过 4
+OTA_MONO MONO_BUDGET_START monoUs=90029 wallUs=1789513787279174
+OTA_MONO MONO_BUDGET_RESET monoUs=351989 wallUs=1789513787541141 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=353215 wallUs=1789513787542149 durable=4096
+00:02 +51: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 重复 ACK 幂等：同段双份 ACK 不破坏传输
+OTA_MONO MONO_BUDGET_START monoUs=360252 wallUs=1789513787549154
+OTA_MONO MONO_BUDGET_RESET monoUs=374802 wallUs=1789513787564151 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=375566 wallUs=1789513787564151 durable=4096
+00:03 +52: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 通知单字节分片：帧重组不受分片粒度影响
+OTA_MONO MONO_BUDGET_START monoUs=382078 wallUs=1789513787571560
+OTA_MONO MONO_BUDGET_RESET monoUs=411108 wallUs=1789513787599688 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=412148 wallUs=1789513787601291 durable=4096
+00:03 +53: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 通知流混入垃圾前缀：丢字节重同步后传输仍成功
+OTA_MONO MONO_BUDGET_START monoUs=420266 wallUs=1789513787609386
+OTA_MONO MONO_BUDGET_RESET monoUs=432155 wallUs=1789513787621500 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=432788 wallUs=1789513787622024 durable=4096
+00:03 +54: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer MCU 谎报提交（落盘静默丢失）：END ERR_STATE 暴露 → resume BEGIN durable 倒退 → fail closed ACK_MALFORMED（RC3-03）
+OTA_MONO MONO_BUDGET_START monoUs=445127 wallUs=1789513787634299
+OTA_MONO MONO_BUDGET_RESET monoUs=456118 wallUs=1789513787645196 durable=4096
+00:03 +55: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer abortStatuses（ERR_OTA_DISABLED）→ terminal，不重试
+OTA_MONO MONO_BUDGET_START monoUs=463130 wallUs=1789513787651733
+00:05 +56: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN ACK 拒绝（ERR_HW_REV）→ 抛 ACK_STATUS
+OTA_MONO MONO_BUDGET_START monoUs=2480053 wallUs=1789513789669280
+00:05 +57: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：target_vcode 不高于当前版本 → ERR_VERSION（RC3-03⑤）
+OTA_MONO MONO_BUDGET_START monoUs=2484120 wallUs=1789513789673272
+00:05 +58: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：ETU 头内容与 CRC 不符 → ERR_HDR（RC3-03⑤）
+OTA_MONO MONO_BUDGET_START monoUs=2487282 wallUs=1789513789676281
+00:05 +59: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：patch 的 base_vcode 不匹配设备当前版本 → ERR_BASE（RC3-03）
+OTA_MONO MONO_BUDGET_START monoUs=2490561 wallUs=1789513789679278
+00:05 +60: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：patch 的 base_sha8 与设备镜像摘要不符 → ERR_BASE（RC3-03）
+OTA_MONO MONO_BUDGET_START monoUs=2494048 wallUs=1789513789683282
+00:05 +61: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：patch payload_len 不大于内层头 40B → ERR_LEN（RC3-03）
+OTA_MONO MONO_BUDGET_START monoUs=2497126 wallUs=1789513789686271
+00:05 +62: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：patch base 域与长度全部合法 → 放行（RC3-03 反向）
+OTA_MONO MONO_BUDGET_START monoUs=2500187 wallUs=1789513789689281
+OTA_MONO MONO_BUDGET_RESET monoUs=2509253 wallUs=1789513789698273 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=2509677 wallUs=1789513789698273 durable=4096
+00:05 +63: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：full 的 payload_len=0 落 ERR_LEN 而非 ERR_BASE（RC3-03）
+OTA_MONO MONO_BUDGET_START monoUs=2512632 wallUs=1789513789701271
+00:05 +64: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer BEGIN 门禁：full 携带非零 base_sha8 仍是 ERR_BASE（RC3-03 反向）
+OTA_MONO MONO_BUDGET_START monoUs=2515971 wallUs=1789513789705279
+00:05 +65: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer fake 门禁：越当前 4KB 窗的段 → ERR_OFFSET（RC3-03⑤）
+00:05 +66: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 未知 ACK status → ACK 解析失败（fail closed）
+OTA_MONO MONO_BUDGET_START monoUs=2522063 wallUs=1789513789711277
+OTA_MONO MONO_BUDGET_RESET monoUs=4535687 wallUs=1789513791724653 durable=4096
+00:07 +67: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 全丢 ACK：DATA 照常提交，内部 ABORT+BEGIN 用 journal 恢复后 END 合法成功（RC3-02⑤）
+OTA_MONO MONO_BUDGET_START monoUs=4540449 wallUs=1789513791729650
+OTA_MONO MONO_BUDGET_RESET monoUs=4681822 wallUs=1789513791870865 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=4682920 wallUs=1789513791871854 durable=4096
+00:07 +68: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 无 ACK 且无 resume 余量（retries=0）：重发超限抛 TIMEOUT，journal 保留可续传（RC3-02⑤）
+OTA_MONO MONO_BUDGET_START monoUs=4687147 wallUs=1789513791875857
+OTA_MONO MONO_BUDGET_START monoUs=4758907 wallUs=1789513791948363
+OTA_MONO MONO_BUDGET_RESET monoUs=4759765 wallUs=1789513791948363 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=4760218 wallUs=1789513791949358 durable=4096
+00:07 +69: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 无 durable 进展超时：NO_DURABLE_PROGRESS 中止
+OTA_MONO MONO_BUDGET_START monoUs=4764242 wallUs=1789513791953350
+OTA_MONO MONO_FAIL_AT monoUs=5065587 wallUs=1789513792254988 code=NO_DURABLE_PROGRESS
+00:07 +70: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer 取消 mid-transfer：抛 CANCELLED 且停止发送循环
+OTA_MONO MONO_BUDGET_START monoUs=5070232 wallUs=1789513792259055
+OTA_MONO MONO_WRITE_STOP monoUs=5172991 wallUs=1789513792361775
+00:07 +71: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer END ACK 非 OK（ERR_SHA）→ isOk false
+OTA_MONO MONO_BUDGET_START monoUs=5281514 wallUs=1789513792470432
+OTA_MONO MONO_BUDGET_RESET monoUs=5287801 wallUs=1789513792476429 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=5288703 wallUs=1789513792477429 durable=4096
+00:07 +72: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer abortBestEffort：连接断开时静默失败不抛
+OTA_MONO MONO_WRITE_STOP monoUs=5292004 wallUs=1789513792481436
+00:07 +73: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: transfer dispose 后复用抛 DISPOSED
+00:07 +74: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） DATA 回 ERR_SEQ（expected_seq 失配）：ABORT+BEGIN 重对齐后续传成功
+OTA_MONO MONO_BUDGET_START monoUs=5298022 wallUs=1789513792487436
+OTA_MONO MONO_BUDGET_RESET monoUs=5514617 wallUs=1789513792703583 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=5515665 wallUs=1789513792704576 durable=4096
+00:08 +75: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） 同一发窗内连环 ERR_SEQ 只消耗一次恢复预算（retries=1 仍成功，RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=5521690 wallUs=1789513792710584
+OTA_MONO MONO_BUDGET_RESET monoUs=5738535 wallUs=1789513792927494 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=5739424 wallUs=1789513792928495 durable=4096
+00:08 +76: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） 恢复预算耗尽后不再重新 BEGIN：第二次 ERR_SEQ 抛 ACK_STATUS（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=5744043 wallUs=1789513792933503
+00:08 +77: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） BEGIN ACK 丢失：重试复用同一 seq，MCU 幂等回进度（expected_seq 未重置）后传输成功
+OTA_MONO MONO_BUDGET_START monoUs=6164625 wallUs=1789513793353722
+OTA_MONO MONO_BUDGET_RESET monoUs=6225897 wallUs=1789513793415145 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=6226760 wallUs=1789513793416145 durable=4096
+00:08 +78: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） 丢部分 DATA ACK：MCU 位图权威置位，窗口按位图回收不重发（RC2-05）
+OTA_MONO MONO_BUDGET_START monoUs=6230920 wallUs=1789513793420153
+OTA_MONO MONO_BUDGET_RESET monoUs=6236777 wallUs=1789513793426143 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=6237209 wallUs=1789513793426143 durable=4096
+00:08 +79: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） 未知 seq 的 ACK_DATA 到达：整帧忽略，不覆盖权威进度（RC2-06）
+OTA_MONO MONO_BUDGET_START monoUs=6241714 wallUs=1789513793431152
+OTA_MONO MONO_BUDGET_RESET monoUs=6249039 wallUs=1789513793438144 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=6249453 wallUs=1789513793438144 durable=4096
+00:08 +80: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） durable 倒退的 ACK：fail closed 抛 ACK_MALFORMED（RC2-06）
+OTA_MONO MONO_BUDGET_START monoUs=6253908 wallUs=1789513793443146
+OTA_MONO MONO_BUDGET_RESET monoUs=6260428 wallUs=1789513793449144 durable=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=6266853 wallUs=1789513793456143 durable=8192
+00:08 +81: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） abortBestEffort 连接正常：MCU 回 ACK ABORTED 并 teardown，此后无 DATA/END 帧
+OTA_MONO MONO_WRITE_STOP monoUs=6271124 wallUs=1789513793460148
+00:08 +82: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: MCU 会话真值对照（RC2-05/06） MCU 真值自检：同包重复 BEGIN 不重置 expected_seq
+00:08 +83: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 块尾段 ACK 丢失：重发触发幂等 ACK 携带 durable 前移，跨块回收在途窗口（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=6331558 wallUs=1789513793520513
+OTA_MONO MONO_BUDGET_RESET monoUs=8339635 wallUs=1789513795528281 durable=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=8348394 wallUs=1789513795537638 durable=8192
+OTA_MONO MONO_END_ACK_OK monoUs=8348953 wallUs=1789513795537638 durable=8192
+00:10 +84: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK durable 伪跳跃（> total）：fail closed 抛 ACK_MALFORMED（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=8354432 wallUs=1789513795543637
+00:10 +85: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK bitmap 越出所属块有效位：fail closed 抛 ACK_MALFORMED（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=8357761 wallUs=1789513795546635
+00:10 +86: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 END ACK 报 OK 但 durable != total：fail closed 抛 ACK_MALFORMED（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=8360953 wallUs=1789513795549634
+OTA_MONO MONO_BUDGET_RESET monoUs=8366871 wallUs=1789513795555642 durable=4096
+00:10 +87: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 MCU 会话超时主动 teardown：异步 rspAckAbort ABORTED → terminal（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=8370713 wallUs=1789513795559639
+00:13 +88: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK 全丢：无 durable 进展预算优先于重试空转（RC3-07）
+OTA_MONO MONO_BUDGET_START monoUs=10385481 wallUs=1789513797574453
+OTA_MONO MONO_FAIL_AT monoUs=10686802 wallUs=1789513797876021 code=NO_DURABLE_PROGRESS
+00:13 +89: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 MTU=23 下取消：在途 DATA 写完后 ABORT 从帧边界发出，无半帧残留（RC3-05⑤）
+OTA_MONO MONO_BUDGET_START monoUs=10691148 wallUs=1789513797880030
+OTA_MONO MONO_WRITE_STOP monoUs=10793608 wallUs=1789513797982880
+00:13 +90: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 快速重连 MCU 仍 ACTIVE：低 seq BEGIN 幂等不重置 expected_seq，落后 DATA 幂等 ACK 不带写入确认 → ERR_STATE 立即 resume 重对齐（RC3-08）
+OTA_MONO MONO_BUDGET_START monoUs=10799062 wallUs=1789513797987893
+OTA_MONO MONO_BUDGET_RESET monoUs=10912085 wallUs=1789513798100750 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=10913039 wallUs=1789513798101751 durable=4096
+00:13 +91: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 慢 ACK（单片接近 ackTimeout）不误杀：整包正常完成（RC3-07）
+OTA_MONO MONO_BUDGET_START monoUs=10916526 wallUs=1789513798105745
+OTA_MONO MONO_BUDGET_RESET monoUs=11573202 wallUs=1789513798761860 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=11574279 wallUs=1789513798762870 durable=4096
+00:14 +92: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 DATA ACK durable 跨块伪跳跃：8192B 包首块在途 ACK 报 durable=8192 → fail closed ACK_MALFORMED（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=11577968 wallUs=1789513798766867
+OTA_MONO MONO_BUDGET_RESET monoUs=11583769 wallUs=1789513798772874 durable=4096
+00:14 +93: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 合法 durable 前移（一个块跨度）不被误杀：块尾 ACK 携带提交（RC3-06 反例）
+OTA_MONO MONO_BUDGET_START monoUs=11586948 wallUs=1789513798775867
+OTA_MONO MONO_BUDGET_RESET monoUs=11595165 wallUs=1789513798783876 durable=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=11603574 wallUs=1789513798792877 durable=8192
+OTA_MONO MONO_END_ACK_OK monoUs=11604177 wallUs=1789513798792877 durable=8192
+00:14 +94: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 块尾提交不得掩盖在途畸形 ACK：块结束消费锁存错误，不进 END（RC3-06⑤）
+OTA_MONO MONO_BUDGET_START monoUs=11608219 wallUs=1789513798796867
+OTA_MONO MONO_BUDGET_RESET monoUs=11613199 wallUs=1789513798801873 durable=4096
+00:14 +95: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 BEGIN ACK 帧头 session 与 payload session 不一致：fail closed ACK_MALFORMED（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=11616641 wallUs=1789513798805869
+00:14 +96: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 END ACK OK 但 bitmap 越出尾块有效位：fail closed ACK_MALFORMED（RC3-06）
+OTA_MONO MONO_BUDGET_START monoUs=11619656 wallUs=1789513798808873
+OTA_MONO MONO_BUDGET_RESET monoUs=11622699 wallUs=1789513798811875 durable=2560
+00:14 +97: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 内容级流式摘要：复述一致但 BEGIN sha 与内容不符 → END ERR_SHA（RC3-03 oracle 鉴别力）
+OTA_MONO MONO_BUDGET_START monoUs=11626047 wallUs=1789513798814872
+OTA_MONO MONO_BUDGET_RESET monoUs=11631356 wallUs=1789513798820864 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=11631735 wallUs=1789513798820864 durable=4096
+00:14 +98: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 ERR_DATA：同 offset 不同内容 → ABORTED + teardown，不喂摘要（RC3-03 fake 真值自检）
+00:14 +99: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 慢写 + 小 MTU：单片不超写超时、累计超预算在片间被 cap 拦截（RC3-07⑤）
+OTA_MONO MONO_BUDGET_START monoUs=11637890 wallUs=1789513798826875
+OTA_MONO MONO_FAIL_AT monoUs=12158890 wallUs=1789513799348027 code=WRITE_TIMEOUT
+00:14 +100: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 接近预算耗尽的写挂起：终止发布不得超出 durable 预算（RC3-07⑤）
+OTA_MONO MONO_BUDGET_START monoUs=12317381 wallUs=1789513799506318
+OTA_MONO MONO_FAIL_AT monoUs=13817993 wallUs=1789513801007170 code=WRITE_TIMEOUT
+00:16 +101: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 写超时后迟到成功：仍抛 WRITE_TIMEOUT，终止发布等到迟到写落地（RC3-07⑤）
+OTA_MONO MONO_BUDGET_START monoUs=13822977 wallUs=1789513801011732
+OTA_MONO MONO_FAIL_AT monoUs=14025887 wallUs=1789513801215026 code=WRITE_TIMEOUT
+00:16 +102: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 写超时后迟到错误：迟到错误不覆盖本帧 WRITE_TIMEOUT 语义（RC3-07⑤）
+OTA_MONO MONO_BUDGET_START monoUs=14031545 wallUs=1789513801221041
+OTA_MONO MONO_FAIL_AT monoUs=14235004 wallUs=1789513801423952 code=WRITE_TIMEOUT
+00:16 +103: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 预算耗尽前取消交错：settle 宽限被预算截断，提前放行的 ABORT 不得与迟到半帧交错（RC3-07⑤）
+OTA_MONO MONO_BUDGET_START monoUs=14239858 wallUs=1789513801428964
+OTA_MONO MONO_WRITE_STOP monoUs=14292102 wallUs=1789513801481445
+OTA_MONO MONO_FAIL_AT monoUs=14841224 wallUs=1789513802030475 code=WRITE_TIMEOUT
+00:18 +104: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 半帧后排队的写在启动时复核通道：取消提前入队的 ABORT 不得写进悬空帧（RC3-05⑤）
+OTA_MONO MONO_BUDGET_START monoUs=15848045 wallUs=1789513803036675
+OTA_MONO MONO_WRITE_STOP monoUs=15890310 wallUs=1789513803079657
+OTA_MONO MONO_FAIL_AT monoUs=16031493 wallUs=1789513803220761 code=WRITE_TIMEOUT
+00:18 +105: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 分片写底层报错同样留下半帧：写通道废弃，尽力 ABORT 被拒（RC3-05⑤）
+OTA_MONO MONO_BUDGET_START monoUs=16288461 wallUs=1789513803477478
+OTA_MONO MONO_WRITE_STOP monoUs=16289925 wallUs=1789513803479478
+00:18 +106: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 迟到写不污染后来的会话：同设备换包装对象与真实重连都仍拒写，GET_INFO 探针证明重新同步后才放行（RC3-05⑤）
+OTA_MONO MONO_BUDGET_START monoUs=16293285 wallUs=1789513803482486
+00:20 +107: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 设备复位后重新同步：本端仍 fail-closed，探针一次即成且不产生坏帧（RC3-05⑤）
+OTA_MONO MONO_BUDGET_START monoUs=17905127 wallUs=1789513805093999
+00:20 +108: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 在途旧物理写未结算时，INFO 应答不得解除隔离（RC3-05⑤ 迟到写）
+OTA_MONO MONO_BUDGET_START monoUs=17910310 wallUs=1789513805098995
+OTA_MONO MONO_FAIL_AT monoUs=18515717 wallUs=1789513805704921 code=WRITE_TIMEOUT
+OTA_MONO MONO_WRITE_STOP monoUs=20421464 wallUs=1789513807610362
+00:23 +109: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 隔离前发出的旧 INFO 重放不得解除隔离：查询 seq 按设备分配（RC3-05⑤ 跨实例串号）
+OTA_MONO MONO_BUDGET_START monoUs=20426926 wallUs=1789513807616369
+OTA_MONO MONO_WRITE_STOP monoUs=20531117 wallUs=1789513807720211
+00:23 +110: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 恢复探针写卡死：端到端预算封顶写/结算等待，到期退休且不解除隔离（RC3-07 黑洞）
+OTA_MONO MONO_BUDGET_START monoUs=20535187 wallUs=1789513807724218
+OTA_MONO MONO_FAIL_AT monoUs=36537249 wallUs=1789513823726467 code=WRITE_TIMEOUT
+00:39 +111: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 探针写完成但 INFO 迟到于恢复预算：到期退休后迟到 INFO 不解除隔离（RC3-07 迟应答）
+OTA_MONO MONO_BUDGET_START monoUs=36544736 wallUs=1789513823733471
+01:01 +112: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 后台暂停/恢复：发窗在帧边界挂起，恢复后传输完成（RC3-08）
+OTA_MONO MONO_BUDGET_START monoUs=58552529 wallUs=1789513845741653
+OTA_MONO MONO_PAUSE monoUs=58754792 wallUs=1789513845944045
+OTA_MONO MONO_RESUME monoUs=59958971 wallUs=1789513847148090
+OTA_MONO MONO_BUDGET_RESET monoUs=60571017 wallUs=1789513847760028 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=60572057 wallUs=1789513847761044 durable=4096
+01:03 +113: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 传输在途 GET_INFO 复核不占会话 seq：DATA 连续不被 ERR_SEQ 打断（RC3-08⑦）
+OTA_MONO MONO_BUDGET_START monoUs=60575949 wallUs=1789513847765039
+OTA_MONO MONO_BUDGET_RESET monoUs=60632725 wallUs=1789513847822030 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=60633550 wallUs=1789513847823042 durable=4096
+01:03 +114: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 暂停挂起中取消：闸门解除不死锁，CANCELLED 立即返回（RC3-08）
+OTA_MONO MONO_BUDGET_START monoUs=60636710 wallUs=1789513847826040
+OTA_MONO MONO_PAUSE monoUs=60688315 wallUs=1789513847877852
+OTA_MONO MONO_WRITE_STOP monoUs=61290578 wallUs=1789513848480035
+01:03 +115: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 延迟写期间取消：命令等待者错误不逃逸为 uncaught async error（RC3-02/04⑦）
+OTA_MONO MONO_WRITE_STOP monoUs=61304528 wallUs=1789513848494033
+01:04 +116: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 延迟写期间释放：命令等待者错误不逃逸为 uncaught async error（RC3-02/04⑦）
+01:04 +117: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 忠实模型与 fail closed 回归 延迟写期间通知流报错：命令等待者错误不逃逸为 uncaught async error（RC3-02/04⑦）
+01:04 +118: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: P3-4 链路观测接线（OtaLinkStats） clean run 8192：每唯一段恰一 ACK 样本，摘要完整、outcome=ok
+OTA_MONO MONO_BUDGET_START monoUs=61548387 wallUs=1789513848737162
+OTA_LINK_SAMPLE label=upgrade kind=durable us=1731 off=0
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2773 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3276 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3797 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4277 off=384 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4740 off=512 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5154 off=640 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5671 off=768 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6133 off=896 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6596 off=1024 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7002 off=1152 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7514 off=1280 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7938 off=1408 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8484 off=1536 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9251 off=1664 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9800 off=1792 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10244 off=1920 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10744 off=2048 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11166 off=2176 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11614 off=2304 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12050 off=2432 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12528 off=2560 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12949 off=2688 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=13482 off=2816 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=13919 off=2944 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=14354 off=3072 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=14763 off=3200 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=15176 off=3328 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=15812 off=3456 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=16591 off=3584 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=17017 off=3712 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=17473 off=3840 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=18009 off=3968 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=16095 off=0
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=16246 off=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=16002 off=256
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=15827 off=384
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=15711 off=512
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=15588 off=640
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=15374 off=768
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=15252 off=896
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=15089 off=1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=14974 off=1152
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=14748 off=1280
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=14737 off=1408
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=14478 off=1536
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=13994 off=1664
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=13829 off=1792
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=13673 off=1920
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=13476 off=2048
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=13405 off=2176
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=13243 off=2304
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=13093 off=2432
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12956 off=2560
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12809 off=2688
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12553 off=2816
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12482 off=2944
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12308 off=3072
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12169 off=3200
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12043 off=3328
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11946 off=3456
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12088 off=3584
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11979 off=3712
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11660 off=3840
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11208 off=3968
+OTA_LINK_SAMPLE label=upgrade kind=durable us=29258 off=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=61577369 wallUs=1789513848766162 durable=4096
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=29622 off=4096 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=29901 off=4224 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=30151 off=4352 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=30421 off=4480 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=30662 off=4608 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=31069 off=4736 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=31375 off=4864 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=31635 off=4992 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=31990 off=5120 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=32174 off=5248 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=32400 off=5376 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=32578 off=5504 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=32710 off=5632 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=32834 off=5760 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=32958 off=5888 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33081 off=6016 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33202 off=6144 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33358 off=6272 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33500 off=6400 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33633 off=6528 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33753 off=6656 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33875 off=6784 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=33997 off=6912 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=34256 off=7040 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=34525 off=7168 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=34776 off=7296 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=35019 off=7424 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=35252 off=7552 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=35498 off=7680 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=35730 off=7808 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=36095 off=7936 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=36519 off=8064 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12848 off=4096
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12750 off=4224
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12591 off=4352
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12391 off=4480
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=12221 off=4608
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11886 off=4736
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11652 off=4864
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11451 off=4992
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11152 off=5120
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11024 off=5248
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10851 off=5376
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10726 off=5504
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10668 off=5632
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10602 off=5760
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10531 off=5888
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10475 off=6016
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10535 off=6144
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10415 off=6272
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10303 off=6400
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10201 off=6528
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10110 off=6656
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10016 off=6784
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=9923 off=6912
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=9692 off=7040
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=9451 off=7168
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=9228 off=7296
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=9012 off=7424
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=8809 off=7552
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=8629 off=7680
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=8456 off=7808
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=8145 off=7936
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=7773 off=8064
+OTA_LINK_SAMPLE label=upgrade kind=durable us=44313 off=8192
+OTA_MONO MONO_BUDGET_RESET monoUs=61592431 wallUs=1789513848782168 durable=8192
+OTA_MONO MONO_END_ACK_OK monoUs=61593231 wallUs=1789513848782168 durable=8192
+01:04 +119: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: P3-4 链路观测接线（OtaLinkStats） 丢部分 DATA ACK：位图确认回收，样本仍每段恰一个
+OTA_MONO MONO_BUDGET_START monoUs=61609424 wallUs=1789513848799170
+OTA_LINK_SAMPLE label=upgrade kind=durable us=731 off=0
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=966 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1778 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2110 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2412 off=384 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1553 off=256
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2697 off=0
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1885 off=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1408 off=384
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4256 off=512 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4618 off=640 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4817 off=768 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4961 off=896 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1432 off=512
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6031 off=1024 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2071 off=640
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1993 off=768
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1917 off=896
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7082 off=1152 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7228 off=1280 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7868 off=1408 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2148 off=1024
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8476 off=1536 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1830 off=1152
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1792 off=1280
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9357 off=1664 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9619 off=1792 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2166 off=1408
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10484 off=1920 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2267 off=1536
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1649 off=1664
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11578 off=2048 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11847 off=2176 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2661 off=1792
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1920 off=1920
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12935 off=2304 len=128
+01:04 +120: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: P3-4 链路观测接线（OtaLinkStats） 块尾段 ACK 丢后重发：重传计入计数，样本不新增（冻结语义）
+01:05 +120: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: P3-4 链路观测接线（OtaLinkStats） 丢部分 DATA ACK：位图确认回收，样本仍每段恰一个
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=13191 off=2432 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2061 off=2048
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1891 off=2176
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=13990 off=2560 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=14113 off=2688 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1737 off=2304
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1627 off=2432
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=15085 off=2816 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=16147 off=2944 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2472 off=2560
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2443 off=2688
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=16822 off=3072 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=16941 off=3200 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2235 off=2816
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=17667 off=3328 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1874 off=2944
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=18799 off=3456 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2292 off=3072
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2245 off=3200
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=19483 off=3584 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=19604 off=3712 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2356 off=3328
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=20472 off=3840 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2091 off=3456
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=21424 off=3968 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2180 off=3584
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2151 off=3712
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1327 off=3840
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1246 off=3968
+OTA_LINK_SAMPLE label=upgrade kind=durable us=22693 off=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=61631886 wallUs=1789513848821160 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=61632270 wallUs=1789513848821160 durable=4096
+OTA_MONO MONO_BUDGET_START monoUs=61638640 wallUs=1789513848828179
+OTA_LINK_SAMPLE label=upgrade kind=durable us=786 off=0
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1028 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1287 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1473 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1650 off=384 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1835 off=512 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2000 off=640 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2209 off=768 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2409 off=896 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2616 off=1024 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2813 off=1152 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3002 off=1280 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3248 off=1408 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3462 off=1536 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3655 off=1664 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3850 off=1792 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4039 off=1920 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4258 off=2048 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4453 off=2176 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4642 off=2304 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4829 off=2432 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5018 off=2560 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5251 off=2688 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5441 off=2816 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5632 off=2944 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5819 off=3072 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6033 off=3200 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6299 off=3328 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6520 off=3456 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6739 off=3584 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6956 off=3712 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7236 off=3840 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7606 off=3968 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6989 off=0
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6876 off=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6750 off=256
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6617 off=384
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6473 off=512
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6351 off=640
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6184 off=768
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6024 off=896
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5870 off=1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5715 off=1152
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5564 off=1280
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5358 off=1408
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5181 off=1536
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5024 off=1664
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4874 off=1792
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4720 off=1920
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4539 off=2048
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4385 off=2176
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4233 off=2304
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4082 off=2432
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3928 off=2560
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3731 off=2688
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3576 off=2816
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3419 off=2944
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3268 off=3072
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3150 off=3200
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2929 off=3328
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2942 off=3456
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2792 off=3584
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2611 off=3712
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2365 off=3840
+01:06 +120: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: P3-4 链路观测接线（OtaLinkStats） 块尾段 ACK 丢后重发：重传计入计数，样本不新增（冻结语义）
+OTA_LINK_SAMPLE label=upgrade kind=segment_retransmit us=2011727 off=3968 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2007596 off=3968
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2015362 off=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=63653768 wallUs=1789513850843042 durable=4096
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2015738 off=4096 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2015905 off=4224 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2016169 off=4352 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2016320 off=4480 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2016445 off=4608 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2016565 off=4736 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2016687 off=4864 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2016810 off=4992 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2016929 off=5120 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2017188 off=5248 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2017340 off=5376 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2017461 off=5504 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2017583 off=5632 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2017709 off=5760 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2017829 off=5888 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2017945 off=6016 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018115 off=6144 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018242 off=6272 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018361 off=6400 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018480 off=6528 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018606 off=6656 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018722 off=6784 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018838 off=6912 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2018959 off=7040 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2019211 off=7168 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2019346 off=7296 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2019467 off=7424 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2019587 off=7552 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2019705 off=7680 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2019823 off=7808 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2019944 off=7936 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2020429 off=8064 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5069 off=4096
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5014 off=4224
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4788 off=4352
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4784 off=4480
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4752 off=4608
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4685 off=4736
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4611 off=4864
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4533 off=4992
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4459 off=5120
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4247 off=5248
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4142 off=5376
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4132 off=5504
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4090 off=5632
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4025 off=5760
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4078 off=5888
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4084 off=6016
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3964 off=6144
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3865 off=6272
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3774 off=6400
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3684 off=6528
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3585 off=6656
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3495 off=6784
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3406 off=6912
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3312 off=7040
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3086 off=7168
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3333 off=7296
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3325 off=7424
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3249 off=7552
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3159 off=7680
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3068 off=7808
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2991 off=7936
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2590 off=8064
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2023041 off=8192
+OTA_MONO MONO_BUDGET_RESET monoUs=63661343 wallUs=1789513850851047 durable=8192
+OTA_MONO MONO_END_ACK_OK monoUs=63662027 wallUs=1789513850851047 durable=8192
+01:06 +121: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: P3-4 链路观测接线（OtaLinkStats） 重复 DATA ACK：duplicate 计数，样本数不变
+OTA_MONO MONO_BUDGET_START monoUs=63698805 wallUs=1789513850888196
+OTA_LINK_SAMPLE label=upgrade kind=durable us=690 off=0
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=939 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1099 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1231 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1357 off=384 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1499 off=512 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1729 off=640 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2069 off=768 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2231 off=896 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2357 off=1024 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2510 off=1152 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2755 off=1280 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2951 off=1408 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3083 off=1536 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3201 off=1664 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3320 off=1792 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3444 off=1920 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3566 off=2048 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3727 off=2176 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4073 off=2304 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4218 off=2432 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4339 off=2560 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4455 off=2688 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4568 off=2816 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4683 off=2944 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4800 off=3072 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5046 off=3200 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5180 off=3328 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5299 off=3456 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5415 off=3584 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5528 off=3712 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5648 off=3840 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5954 off=3968 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5757 off=0
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6150 off=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6141 off=256
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6104 off=384
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6046 off=512
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5896 off=640
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5632 off=768
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5546 off=896
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5532 off=1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5465 off=1152
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5289 off=1280
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5157 off=1408
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5095 off=1536
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5051 off=1664
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4999 off=1792
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4937 off=1920
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5465 off=2048
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5482 off=2176
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5213 off=2304
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5133 off=2432
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5076 off=2560
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5023 off=2688
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4974 off=2816
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4921 off=2944
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4866 off=3072
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5045 off=3200
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5047 off=3328
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5007 off=3456
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4960 off=3584
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4917 off=3712
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4860 off=3840
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4734 off=3968
+OTA_LINK_SAMPLE label=upgrade kind=durable us=11229 off=4096
+OTA_MONO MONO_BUDGET_RESET monoUs=63709989 wallUs=1789513850899197 durable=4096
+OTA_MONO MONO_END_ACK_OK monoUs=63710539 wallUs=1789513850900194 durable=4096
+01:06 +122: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart
+01:06 +122: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: DeviceOtaInfo.fromInfoPayload（正向） 精确 E-Track\0 → e-track-at32f435，全字段映射
+01:06 +123: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: DeviceOtaInfo.fromInfoPayload（正向） versionName 按契约 §0.6 反解（major*10000+minor*100+patch）
+01:06 +124: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: DeviceOtaInfo 负例（必须 fail closed） 未知 model → UNKNOWN_DEVICE_MODEL
+01:06 +125: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: DeviceOtaInfo 负例（必须 fail closed） model 无 NUL 终止（8B 全满）→ UNKNOWN_DEVICE_MODEL
+01:06 +126: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: DeviceOtaInfo 负例（必须 fail closed） model NUL 前有非可打印字节 → UNKNOWN_DEVICE_MODEL
+01:06 +127: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: DeviceOtaInfo 负例（必须 fail closed） 不支持 proto_ver → UNSUPPORTED_PROTOCOL
+01:06 +128: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: DeviceOtaInfo 负例（必须 fail closed） INFO 长度非法 → MALFORMED_INFO
+01:06 +129: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: deviceIdentityMatches（重连身份复核） 同身份 → true
+01:06 +130: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: deviceIdentityMatches（重连身份复核） vcode 漂移 → false（不得静默换设备续传）
+01:06 +131: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: deviceIdentityMatches（重连身份复核） 镜像 sha 漂移 → false
+01:06 +132: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: deviceIdentityMatches（重连身份复核） layoutId/boot/hwRev 漂移 → false
+01:06 +133: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: deviceHardwareMatches（升级后硬件身份复核） 版本/镜像变化（升级成功）→ 仍 true
+01:06 +134: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: deviceHardwareMatches（升级后硬件身份复核） 硬件字段漂移 → false（视为换设备）
+01:06 +135: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: buildInfoPayload（组装辅助） 非法 model/sha 长度拒绝
+01:06 +136: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_info_test.dart: buildInfoPayload（组装辅助） 往返：build → parse → build
+01:06 +137: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart
+01:07 +137: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 默认（未注入）配置不观测，且不算非法配置
+01:07 +138: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: startFromBuild 在默认构建下不装配观测器也不启动扫描
+01:07 +139: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 启用后 target 或 sentinel 缺失即 fail-closed
+01:07 +140: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 目标匹配：地址优先，短名字不得命中地址 hex
+01:07 +141: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 未启用时喂入扫描结果产生零输出
+01:07 +142: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 全量扫描逐台落盘，同一台只报一次明细
+01:07 +143: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 命中目标后先停扫描再连接，成功即读出完整身份并收尾
+01:07 +144: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 连接失败 / 身份失败 / 身份异常都收在确定的终止行
+01:07 +145: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 只绑定一次：绑定完成后后续扫描批次不再触发第二条链路
+01:07 +146: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 扫描未启动：立刻给出 scan_not_started，不等窗口也不伪装成"扫了没看到"
+01:07 +147: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 启动路径自己抛异常：照样收进 scan_not_started，不留野异常
+01:07 +148: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 窗口到期仍未命中：输出确定的 target_not_seen 终止行并停扫描
+01:07 +149: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 窗口内命中即取消窗口：不会补出 target_not_seen
+01:07 +150: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 身份为空时原样转述服务侧原因，不把三类失败压成一个词
+01:07 +151: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 失败原因读不到时用 - 占位，不留空字段
+01:08 +152: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: OBS-03：target 行的地址是字段值，不是对象插值
+01:08 +153: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 启动永不完成：startTimeout 到时给出 scan_start_timeout，不无限等
+01:08 +154: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 连接挂死：connectTimeout 到时给出 connect_timeout，不是无限等待
+01:08 +155: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 读身份挂死：identityTimeout 到时给出 identity_timeout
+01:08 +156: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 扫描流报错：第三结局 scan_stream_error，且终态唯一
+01:08 +157: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 终态之后迟到完成不得覆盖终态：connect 挂死被 timeout 收尾后完成
+01:08 +158: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 启动超时后迟到完成：不得再开窗口或补终态
+01:08 +159: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 终局清理钩子：绑定过的结局带地址清理，未绑定结局收 null
+01:08 +160: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: 清理钩子自身抛异常：不覆盖终态、不留野异常
+01:08 +161: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_device_observation_test.dart: stopScan 抛异常：不吞掉终态行，单独留一行错误
+01:08 +162: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart
+01:09 +162: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 完整下载 200 全量下载 + 长度/SHA 校验 + 原子 rename
+01:09 +163: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 完整下载 进度回调收到 received/total
+01:09 +164: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 续传 已有 partial：发 Range bytes=N-，206 增量追加
+01:09 +165: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 续传 localPartSize == sizeBytes：不发 Range，先整文件校验
+01:09 +166: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 续传 sidecar 身份漂移（不同 sha）：作废旧 partial 从零开始
+01:09 +167: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 校验失败 fail closed 本地 partial 长度==sizeBytes 但字节损坏：删 partial 并抛 LOCAL_CORRUPT（合同 :274 重新 latest，不沿旧 URL 重下）
+01:09 +168: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 校验失败 fail closed localPartSize > sizeBytes：删 partial 并抛 LOCAL_CORRUPT（合同 :275）
+01:09 +169: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 24 小时清理 超时 partial 与 sidecar 被清理；新鲜 partial 保留
+01:09 +170: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 24 小时清理 孤儿 partial（无 sidecar）被清理
+01:09 +171: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: 24 小时清理 孤儿 sidecar（无 .part）与 .tmp 残留被清理
+01:09 +172: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 206 缺 Accept-Ranges 头：作废 partial 从零重下后成功
+01:09 +173: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 206 Content-Range 区间不符：作废 partial 从零重下后成功
+01:09 +174: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 206 无强 ETag（If-Range 已发）：作废 partial 从零重下后成功
+01:09 +175: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 未请求区间却返回 206：作废后仍强制 206 → RESUME_PROTOCOL
+01:09 +176: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 416：删除 partial 并抛 RANGE_AT_END（上层重新 latest）
+01:09 +177: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 401 body TOKEN_EXPIRED：抛 URL_EXPIRED（RC2-11 分流）
+01:09 +178: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 409 ASSET_ARCHIVED：抛 ASSET_CONFLICT（重新 latest 触发器）
+01:09 +179: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: PR13 续传响应头校验（fail closed） 200 Content-Length 与清单不符：抛 RESUME_PROTOCOL
+01:09 +180: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: Content-Digest 交叉核对（RFC 9530） 正确的 sha-256 digest：下载成功
+01:09 +181: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: Content-Digest 交叉核对（RFC 9530） 错误的 digest：抛 DIGEST_MISMATCH
+01:09 +182: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: Content-Digest 交叉核对（RFC 9530） 非法 digest 格式（无 sha-256 项）：RESUME_PROTOCOL（RC2-11）
+01:09 +183: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC2 状态分类与响应模式归一 401 TOKEN_INVALID：URL_EXPIRED 且 partial 保留供重新签发后续传
+01:10 +184: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC2 状态分类与响应模式归一 401 未知 errorCode：HTTP_STATUS fail closed
+01:10 +185: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC2 状态分类与响应模式归一 401 空 body：HTTP_STATUS fail closed
+01:10 +186: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC2 状态分类与响应模式归一 410 ASSET_DISABLED：URL_EXPIRED 且 partial 删除（本地 metadata 作废）
+01:10 +187: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC2 状态分类与响应模式归一 409 ASSET_ARCHIVED：ASSET_CONFLICT 且 partial 保留
+01:10 +188: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC2 状态分类与响应模式归一 If-Range 失配回退 200 完整 body：截断旧 partial 重下成功（RC2-10：期望剩余量在归一后计算）
+01:10 +189: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 409/410 空错误体：HTTP_STATUS fail closed，不猜测刷新、partial 保留（看码分流）
+01:10 +190: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 400/426 非受控状态：Dio badResponse 统一转换 HTTP_STATUS（RC3-10）
+01:10 +191: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 401 错误体超 64KB：有界读取按裸状态码 fail closed，不按前缀猜 TOKEN_*（RC3-11）
+01:10 +192: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 sidecar 强 ETag 内部未转义引号：不信任续传身份，从零重下（RC3-11 sidecar 侧校验）
+01:10 +193: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 206 响应 ETag 内部未转义引号：强校验拒绝 → 作废 partial 从零重下（RC3-11 响应侧校验）
+01:10 +194: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 早退路径有界 drain：Content-Length 不符只消费 ≤64KB+1 片，不以整流排空为代价（RC3-11）
+01:10 +195: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 首块正文停滞：包装流空闲超时兜底，不无限挂起（RC3-11⑤）
+01:10 +196: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 首个 206 头违规：旧响应被真正中止，且从零重下仍成功（RC3-11⑤ attempt token）
+01:10 +197: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 错误体零事件停滞：空闲超时兜底并中止上游，不无限挂起（RC3-11⑥）
+01:10 +198: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 无在途下载时 cancel：既有 partial/sidecar 照常删除（RC3-05⑥）
+01:10 +199: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 无在途下载时 cancel(keepPartial)：字节保留供续传（RC3-05⑥）
+01:10 +200: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 body 传输中取消：等在途写盘方退出后再删 partial（RC3-05）
+01:10 +201: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 在途未退出：cancel 超时不抢删，写盘方退出后补删（RC3-02/05）
+01:15 +202: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 清理的删除边界复核归属：新 attempt 接管的同名文件不被旧清理删掉（RC3-04/05）
+01:20 +203: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 Content-Digest 重复 sha-256 项：RESUME_PROTOCOL（RFC 9530 唯一项）
+01:20 +204: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_download_test.dart: RC3-10/11 看码分流与资源释放 Content-Digest 非规范 base64（长度不足）：RESUME_PROTOCOL
+01:20 +205: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart
+01:21 +205: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（正向） 完整 patch 响应：全字段
+01:21 +206: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（正向） full 资产：baseVersionCode=0、baseImageSha256=null
+01:21 +207: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（正向） NO_UPDATE：HTTP 200 业务结果（合同精简体，无回显字段）
+01:21 +208: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（正向） CHANNEL_STOPPED：可附维护消息
+01:21 +209: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（正向） 固件 versionCode u32 上界 4294967295 通过（RC2-02）
+01:21 +210: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（正向） asset.baseVersionCode u32 上界 4294967295 通过（RC2-02）
+01:21 +211: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（正向） 未知可选字段被忽略（同 major 兼容）
+01:21 +212: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） 未知 schema major 拒绝
+01:21 +213: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） updateAvailable=true 但缺 required 字段拒绝
+01:21 +214: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） updateAvailable=false 但 errorCode 未知拒绝
+01:21 +215: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） recovery 资产拒绝（公开 latest 不得返回）
+01:21 +216: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） 未知 asset.kind 拒绝
+01:21 +217: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） full 但 baseVersionCode != 0 拒绝
+01:21 +218: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） patch 但 baseImageSha256 缺失拒绝
+01:21 +219: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） sha256 非法（大写/短）拒绝
+01:21 +220: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） sizeBytes 非正拒绝
+01:21 +221: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（负例 fail closed） minAppVersionCode 超范围拒绝
+01:21 +222: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） updateAvailable=false 缺 errorCode 键拒绝
+01:21 +223: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） updateAvailable=true 携带 errorCode 拒绝
+01:21 +224: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） appId 回显不符拒绝
+01:21 +225: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） deviceModel 回显不符拒绝（expectedDeviceModel）
+01:21 +226: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） deviceModel 回显一致通过（expectedDeviceModel）
+01:21 +227: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） channel 非法拒绝
+01:21 +228: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） transport 非 ble 拒绝
+01:21 +229: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） versionCode 超 u32（4294967296）拒绝（RC2-02：固件域非 App 域）
+01:21 +230: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） channel 回显不符拒绝（expectedChannel）
+01:21 +231: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） channel 回显一致通过（expectedChannel）
+01:21 +232: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） targetHardware 缺失拒绝
+01:21 +233: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） downloadUrl 非 https（http）拒绝（RC2-11）
+01:21 +234: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） downloadUrl 非 http(s) 拒绝
+01:21 +235: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） downloadUrl 无 host 拒绝
+01:21 +236: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） fileName 含非法字符拒绝
+01:21 +237: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） fileName 超长（>128）拒绝
+01:21 +238: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） fileName 与 kind 后缀不符拒绝
+01:21 +239: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） sizeBytes 超 OTA_ETU_MAX_LENGTH(0x180000) 拒绝
+01:21 +240: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） expiresAt 非正拒绝
+01:21 +241: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） full 缺 baseImageSha256 键拒绝（与显式 null 区分）
+01:21 +242: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） full 带 baseImageSha256 非 null 值拒绝
+01:21 +243: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: FirmwareLatestInfo.parse（PR14 回显与资产校验负例） asset.baseVersionCode 超范围拒绝
+01:21 +244: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError CLIENT_TOO_OLD 终止且携带门槛
+01:21 +245: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError 兼容 409 终止且区分维度
+01:21 +246: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError 未知 errorCode：isUnknown，不可降级
+01:21 +247: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError RATE_LIMITED / BACKEND_UNAVAILABLE 可自动重试
+01:21 +248: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError 缺 errorCode 拒绝
+01:21 +249: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError CHANNEL_STOPPED 挂在 403：不算稍后重试，诊断字段仍保留（RC3-10/11）
+01:21 +250: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError BACKEND_UNAVAILABLE 挂在 500 / RATE_LIMITED 挂在 503：均不可重试（RC3-10/11）
+01:21 +251: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError CHANNEL_STOPPED 的 latest 侧 HTTP 200 形态仍是稍后重试（RC3-10/11）
+01:21 +252: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: OtaHttpError 终止码不受状态约束影响：426 之外的状态仍然终止（RC3-10/11）
+01:21 +253: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: parseLatestResponse UTF-8 字节 → DTO
+01:21 +254: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_firmware_latest_test.dart: parseLatestResponse 非法 JSON 拒绝
+01:21 +255: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart
+01:21 +255: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: nearestRank：空样本返回 null
+01:21 +256: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: nearestRank：N=1 任意分位返回唯一值
+01:21 +257: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: nearestRank：N=100 p99 取第 99 个（ceil 语义，不插值）
+01:21 +258: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: nearestRank：N=3 p99 取最大（ceil(2.97)=3）
+01:21 +259: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 延迟样本规则 首发+确认恰一样本；重发不更新起点、计入重传帧
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=363 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_retransmit us=10188 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10850 off=0
+01:21 +260: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 延迟样本规则 重复确认不重复采样
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=13 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=64 off=0
+01:21 +261: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 延迟样本规则 共享同一 ACK 的多段各自成样本（起点各异）
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4153 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7169 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=7407 off=0
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3264 off=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=248 off=256
+01:21 +262: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 延迟样本规则 无首发记录的段跳过且不计入完整性分母
+01:21 +263: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 延迟样本规则 fail-closed：已发送未确认段如实报 partial:missing=N
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=75 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=109 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=122 off=0
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=104 off=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=70 off=256
+01:21 +264: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 延迟样本规则 bitmap 确认走同一通路：置位段逐段成样本
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=77 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=232 off=0
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=165 off=256
+01:21 +265: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 延迟样本规则 bitmap=0 的 BEGIN 权威确认是 no-op
+01:21 +266: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 分类计数与 durable 推进 六类分类独立累加
+01:21 +267: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: ACK 分类计数与 durable 推进 durable 单调去重：重复与倒退忽略
+OTA_LINK_SAMPLE label=upgrade kind=durable us=176 off=4096
+OTA_LINK_SAMPLE label=upgrade kind=durable us=246 off=8192
+01:21 +268: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: 绑定与传输阶段 charsDiscovery/mtu/subscribe 幂等只记首次
+01:21 +269: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: 绑定与传输阶段 transferStart/outcome 幂等；endAckArrival 覆盖式（END 重试取最后）
+01:21 +270: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: 绑定与传输阶段 getInfo / gattWrite / discover / platformWrite 累计与错误计数
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=1000
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=2000
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=500 bytes=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=700 bytes=128 error=1
+OTA_LINK_SAMPLE label=upgrade kind=discover us=900
+OTA_LINK_SAMPLE label=upgrade kind=platform_write us=600 bytes=128
+01:21 +271: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: toJson / emitSummary schema 与 transfer 域字段齐全
+01:21 +272: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: toJson / emitSummary emitSummary 幂等：仅首次输出一行 OTA_LINK_STATS
+01:21 +273: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_link_stats_test.dart: toJson / emitSummary 流式样本行格式：kind/us/off 字段
+01:21 +274: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart
+01:23 +274: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart: 双击防重入：挂起下载期间 checkFirmwareUpdate 不发新请求
+01:23 +275: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart: 注册前取消：请求未发出（计数断言），取消终态且可重新下载
+OTA_MONO MONO_ABORT_BEGIN monoUs=2 wallUs=1789513867910626 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=2443 wallUs=1789513867912627
+OTA_MONO MONO_ABORT_DONE monoUs=3618 wallUs=1789513867913624 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=3717 wallUs=1789513867913624 code=USER_CANCEL
+01:23 +276: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart: 在途取消：adapter 已进入（entered barrier）后取消 → CANCELLED
+OTA_MONO MONO_ABORT_BEGIN monoUs=23616 wallUs=1789513867933619 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=23903 wallUs=1789513867933619
+OTA_MONO MONO_ABORT_DONE monoUs=28088 wallUs=1789513867938626 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=32197 wallUs=1789513867942623 code=USER_CANCEL
+01:23 +277: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart: 取消清理已校验完成包：keepPackage=false 删文件，true 保留
+OTA_MONO MONO_ABORT_BEGIN monoUs=57672 wallUs=1789513867967612 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=58194 wallUs=1789513867968613
+OTA_MONO MONO_ABORT_DONE monoUs=58670 wallUs=1789513867968613 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=62183 wallUs=1789513867972614 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=73354 wallUs=1789513867983612 code=USER_CANCEL
+01:23 +278: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart: 刷新时取消：URL_EXPIRED → 重新 latest 在途时取消，旧清单不发布
+OTA_MONO MONO_ABORT_BEGIN monoUs=87480 wallUs=1789513867997621 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=87735 wallUs=1789513867997621
+OTA_MONO MONO_ABORT_DONE monoUs=88717 wallUs=1789513867998614 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=91297 wallUs=1789513868001613 code=USER_CANCEL
+01:23 +279: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart: URL_EXPIRED 刷新路径：401 TOKEN_EXPIRED → 重新 latest → 重下成功
+01:23 +280: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_session_test.dart: BACKEND_UNAVAILABLE 三次尝试耗尽 → retryableLater 终态并清资产
+01:25 +281: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart
+01:26 +281: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 端到端成功闭环：read → check → download → start → completed
+01:26 +282: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P3-4 链路观测 service 接线：upgrade/probe 摘要含绑定与传输字段
+01:26 +283: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: MCU 未重启完：旧身份探测不误判，第二次探测确认目标（RC3-08）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=4041
+OTA_MONO MONO_BUDGET_START monoUs=87953 wallUs=1789513871221066
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=6693 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7519 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=157 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8110 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=109 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8862 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=111 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9585 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=130 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10419 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=114 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11055 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=113 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11701 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=103 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12318 off=896 len=128
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=256 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=12631 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=94820 wallUs=1789513871228064 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=96222 wallUs=1789513871229066 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[843,1116],"transfer":[5905,14201]},"bind":{"charsUs":77,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":273},"getInfo":{"calls":1,"totalUs":4041},"transfer":{"startUs":5901,"endAckUs":14079,"elapsedUs":8178,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":103,"p50Us":113,"p95Us":256,"p99Us":256,"maxUs":256},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":11,"bytes":1299,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=799
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1244
+OTA_LINK_STATS {"schema":1,"label":"probe","device":"AA:BB","clock":"stopwatch-mono-us","phases":{},"bind":{"charsUs":25,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":null},"getInfo":{"calls":2,"totalUs":2043},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":null,"segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":2,"bytes":20,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_MONO MONO_REBOOT_VERIFIED monoUs=3102448 wallUs=1789513874235921
+01:29 +284: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 重启后硬件身份变化：identityChanged 终止（RC3-08）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=946
+OTA_MONO MONO_BUDGET_START monoUs=3122944 wallUs=1789513874255945
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2652 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3114 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=114 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3861 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=147 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4578 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=133 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5645 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=145 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6314 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=181 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7029 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=128 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7677 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=129 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8504 off=896 len=128
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=324 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=8894 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=3129919 wallUs=1789513874262924 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=3130741 wallUs=1789513874263926 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[810,993],"transfer":[2045,9883]},"bind":{"charsUs":26,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":183},"getInfo":{"calls":1,"totalUs":946},"transfer":{"startUs":2042,"endAckUs":9768,"elapsedUs":7726,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":114,"p50Us":133,"p95Us":324,"p99Us":324,"maxUs":324},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":11,"bytes":1299,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=577
+OTA_LINK_STATS {"schema":1,"label":"probe","device":"AA:BB","clock":"stopwatch-mono-us","phases":{},"bind":{"charsUs":19,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":null},"getInfo":{"calls":1,"totalUs":577},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":null,"segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":1,"bytes":10,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+01:29 +285: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 单轮探测 connect 挂起：单轮上限放弃该轮，后续轮确认目标（O4 整改）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=898
+OTA_MONO MONO_BUDGET_START monoUs=3163497 wallUs=1789513874296919
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2515 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3087 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=107 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3840 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=110 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4338 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=93 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4909 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=100 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5376 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=96 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5880 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=93 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6329 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=90 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6958 off=896 len=128
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=162 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=7160 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=3168871 wallUs=1789513874301924 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=3169491 wallUs=1789513874302923 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[716,897],"transfer":[1897,7924]},"bind":{"charsUs":29,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":181},"getInfo":{"calls":1,"totalUs":898},"transfer":{"startUs":1894,"endAckUs":7812,"elapsedUs":5918,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":90,"p50Us":96,"p95Us":162,"p99Us":162,"maxUs":162},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":11,"bytes":1299,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1399
+OTA_LINK_STATS {"schema":1,"label":"probe","device":"AA:BB","clock":"stopwatch-mono-us","phases":{},"bind":{"charsUs":47,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":null},"getInfo":{"calls":1,"totalUs":1399},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":null,"segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":1,"bytes":10,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_MONO MONO_REBOOT_VERIFIED monoUs=4224672 wallUs=1789513875357810
+01:30 +286: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 窗口内多轮旧身份后确认目标：interval 注入下轮询推进（O4 整改）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=799
+OTA_MONO MONO_BUDGET_START monoUs=4243540 wallUs=1789513875376804
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2632 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3110 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=104 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3673 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=102 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4135 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=89 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4603 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=101 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5044 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=91 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6179 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=129 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6836 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=117 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7477 off=896 len=128
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=368 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=7899 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=4249584 wallUs=1789513875382811 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=4250321 wallUs=1789513875383810 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[910,1083],"transfer":[1975,8788]},"bind":{"charsUs":27,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":173},"getInfo":{"calls":1,"totalUs":799},"transfer":{"startUs":1972,"endAckUs":8680,"elapsedUs":6708,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":89,"p50Us":102,"p95Us":368,"p99Us":368,"maxUs":368},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":11,"bytes":1299,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=613
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1212
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1254
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1182
+OTA_LINK_STATS {"schema":1,"label":"probe","device":"AA:BB","clock":"stopwatch-mono-us","phases":{},"bind":{"charsUs":22,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":null},"getInfo":{"calls":4,"totalUs":4261},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":null,"segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":4,"bytes":40,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_MONO MONO_REBOOT_VERIFIED monoUs=4561252 wallUs=1789513875694594
+01:31 +287: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 窗口耗尽 timedOut：文案说明升级可能已完成且可稍后重试（O4 整改）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=840
+OTA_MONO MONO_BUDGET_START monoUs=4580246 wallUs=1789513875713587
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2737 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3431 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=127 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4025 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=92 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4454 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=85 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4970 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=95 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5404 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=86 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5939 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=104 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6394 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=112 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7088 off=896 len=128
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=155 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=7277 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=4585544 wallUs=1789513875718587 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=4586181 wallUs=1789513875719589 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[726,987],"transfer":[2120,8047]},"bind":{"charsUs":30,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":261},"getInfo":{"calls":1,"totalUs":840},"transfer":{"startUs":2117,"endAckUs":7950,"elapsedUs":5833,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":85,"p50Us":95,"p95Us":155,"p99Us":155,"maxUs":155},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":11,"bytes":1299,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=545
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1723
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1161
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1169
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1192
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1408
+OTA_LINK_STATS {"schema":1,"label":"probe","device":"AA:BB","clock":"stopwatch-mono-us","phases":{},"bind":{"charsUs":17,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":null},"getInfo":{"calls":6,"totalUs":7198},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":null,"segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":6,"bytes":60,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+01:31 +288: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 传输在途二次 start：同步段忙锁拒绝，不打断在途传输（RC3-04）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=997
+OTA_MONO MONO_BUDGET_START monoUs=5208939 wallUs=1789513876341959
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=3395 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5374 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=978 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7345 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=118 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7855 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=115 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8468 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=180 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9035 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=87 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9438 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=79 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9982 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=85 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10418 off=896 len=128
+01:31 +289: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 传输在途取消：ABORT 送达 MCU、cancelled 终态不被旧 ACK 复活、包保留（RC3-04/05）
+01:31 +290: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 小 MTU 分片在途取消：ABORT 经写串行化完整送达，不撕裂在途帧（RC3-05⑤）
+01:32 +290: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 传输在途二次 start：同步段忙锁拒绝，不打断在途传输（RC3-04）
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=178 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=10614 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=5217401 wallUs=1789513876350952 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=5217764 wallUs=1789513876350952 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[753,930],"transfer":[2454,11052]},"bind":{"charsUs":30,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":177},"getInfo":{"calls":1,"totalUs":997},"transfer":{"startUs":2448,"endAckUs":11009,"elapsedUs":8561,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":79,"p50Us":115,"p95Us":978,"p99Us":978,"maxUs":978},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":11,"bytes":1299,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=1311
+OTA_LINK_STATS {"schema":1,"label":"probe","device":"AA:BB","clock":"stopwatch-mono-us","phases":{},"bind":{"charsUs":15,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":null},"getInfo":{"calls":1,"totalUs":1311},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":null,"segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":1,"bytes":10,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_MONO MONO_REBOOT_VERIFIED monoUs=5219970 wallUs=1789513876353139
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=471
+OTA_MONO MONO_BUDGET_START monoUs=5239871 wallUs=1789513876373136
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=1609 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2591 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2813 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3162 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3361 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3535 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3708 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3981 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4218 off=896 len=128
+OTA sent 1024/1024
+OTA_MONO MONO_ABORT_BEGIN monoUs=5248173 wallUs=1789513876381119 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=5248397 wallUs=1789513876381119
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[635,784],"transfer":[1296,12347]},"bind":{"charsUs":22,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":149},"getInfo":{"calls":1,"totalUs":471},"transfer":{"startUs":1293,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"partial:missing=8","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":10,"bytes":1257,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=5251978 wallUs=1789513876385132 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=5254403 wallUs=1789513876387136 code=USER_CANCEL
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=31729
+OTA_MONO MONO_BUDGET_START monoUs=5404501 wallUs=1789513876537456
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=11
+OTA_LINK_SAMPLE label=upgrade kind=durable us=220969 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=2
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=473682 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=366 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=2
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=730218 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=307 off=128
+OTA_MONO MONO_ABORT_BEGIN monoUs=6104885 wallUs=1789513877238469 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=6104911 wallUs=1789513877238469
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+01:32 +290: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 小 MTU 分片在途取消：ABORT 经写串行化完整送达，不撕裂在途帧（RC3-05⑤）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=20
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=2
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[652,823],"transfer":[32626,985627]},"bind":{"charsUs":23,"found":true,"mtuRequested":247,"mtuChunkBytes":20,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":171},"getInfo":{"calls":1,"totalUs":31729},"transfer":{"startUs":32622,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":2,"segmentSendTotal":2,"retransmitFrames":0,"acks":{"ok":2,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":2,"minUs":307,"p50Us":307,"p95Us":366,"p99Us":366,"maxUs":366},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":31,"bytes":547,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=6389794 wallUs=1789513877523372 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=6391537 wallUs=1789513877524402 code=USER_CANCEL
+01:32 +291: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 清包纳入 owner：清包期间新传输入口被拒，完成后状态一致发布（RC3-12）
+01:32 +292: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 传输在途取消删除包：cancelled 终态与包删除一次性一致发布（RC3-12）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=889
+OTA_MONO MONO_BUDGET_START monoUs=6421466 wallUs=1789513877554990
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2353 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_ABORT_BEGIN monoUs=6422305 wallUs=1789513877555992 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=6422409 wallUs=1789513877555992
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[632,897],"transfer":[1869,2993]},"bind":{"charsUs":22,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":265},"getInfo":{"calls":1,"totalUs":889},"transfer":{"startUs":1867,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":3,"bytes":263,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=6423023 wallUs=1789513877555992 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=6425550 wallUs=1789513877558990 code=USER_CANCEL
+01:33 +293: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 终止闭锁经重新读取身份解锁：身份漂移作废旧清单与包（RC3-08⑤/12⑤）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=890
+OTA_MONO MONO_BUDGET_START monoUs=6546232 wallUs=1789513877679825
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=3091 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3648 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=112 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4100 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=82 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4599 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=111 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5175 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=104 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5819 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=104 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6251 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=77 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6765 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=92 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7194 off=896 len=128
+01:33 +294: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 下载 INVALID_PARAMETER 稳定闭锁：终止态在入口拦截后续下载（RC3-10⑤）
+01:33 +295: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 稳定终止复位刷新标志：解锁重查后的普通失败不得触发本轮自动刷新（RC3-10⑤）
+01:33 +296: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） offset 未按 128B 对齐 → ERR_OFFSET（真值 :526-532）
+01:33 +297: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） 非尾部短段 → ERR_FRAME（真值 :533-541）
+01:33 +298: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） 尾部短段（off+len == total_len）放行（真值 :533-541 反向）
+01:33 +299: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） 整段跨越包尾（off+len > total_len）→ ERR_OFFSET（真值 :542-548）
+01:33 +300: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） off >= total_len → ERR_OFFSET（真值 :542-548）
+01:33 +301: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） 同 offset 同内容重发 → DUPLICATE 幂等 OK（真值 ota_staging_receive :508-516）
+01:33 +302: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） 同 offset 不同内容 → ABORTED 且会话 teardown（真值 ota_staging.c:510-513 → ota_ble_session.c:585-591）
+01:33 +303: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: fake MCU 段判据（RC3-03，直接打帧） 已提交 offset 的重复 DATA 幂等 OK（真值 :550-558）
+01:33 +304: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 身份 A 持有资产 → 读取失败 → 成功读取 B：A 资产整体作废（RC3-12⑦）
+01:33 +305: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 取消清理持闸期间不得发布取消文案或 phase：清理与终态发布原子（RC3-12）
+01:33 +306: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 取消窗口内旧物理写以原生异常退出：不得抢先发布失败文案与 failed（RC3-12②）
+01:33 +307: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 延迟 ABORT 反例：ABORT 在途期间不得提前宣告终止（RC3-07/02）
+01:33 +308: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 取消窗口内同资产重下：旧取消不得拔掉后来者的下载（RC3-04⑦）
+01:33 +309: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 取消清理停在内层 IO 时后来者接管同资产：删除边界归属复核（RC3-04/05）
+01:33 +310: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 清理已取删除闸、删除体未执行时后来者接管：part/sidecar/tmp 均不得按路径删除（RC3-04/05）
+01:33 +311: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 旧清理持删除闸期间，后来者同族写入必须排队：临界区内互斥（RC3-02/04/05）
+01:34 +311: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 终止闭锁经重新读取身份解锁：身份漂移作废旧清单与包（RC3-08⑤/12⑤）
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=145 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=7361 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=6551191 wallUs=1789513877684828 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=6551558 wallUs=1789513877684828 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[926,1435],"transfer":[2504,7816]},"bind":{"charsUs":32,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":509},"getInfo":{"calls":1,"totalUs":890},"transfer":{"startUs":2501,"endAckUs":7773,"elapsedUs":5272,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":77,"p50Us":104,"p95Us":145,"p99Us":145,"maxUs":145},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":11,"bytes":1299,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=probe kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=probe kind=get_info us=509
+OTA_LINK_STATS {"schema":1,"label":"probe","device":"AA:BB","clock":"stopwatch-mono-us","phases":{},"bind":{"charsUs":14,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":null},"getInfo":{"calls":1,"totalUs":509},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":null,"segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":1,"bytes":10,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=345
+OTA_MONO MONO_BUDGET_START monoUs=6651104 wallUs=1789513877784831
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=1726 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_ABORT_BEGIN monoUs=6653752 wallUs=1789513877786830 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=6653774 wallUs=1789513877786830
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[630,766],"transfer":[1205,4008]},"bind":{"charsUs":20,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":136},"getInfo":{"calls":1,"totalUs":345},"transfer":{"startUs":1202,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":3,"bytes":263,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=6655386 wallUs=1789513877788831 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=6656909 wallUs=1789513877789826 code=USER_CANCEL
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=202182
+OTA_MONO MONO_BUDGET_START monoUs=6872887 wallUs=1789513878006266
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=405221 off=0
+OTA_MONO MONO_ABORT_BEGIN monoUs=7075259 wallUs=1789513878208414 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=7075295 wallUs=1789513878208414
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142 error=1
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[608,850],"transfer":[203478,607497]},"bind":{"charsUs":18,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":242},"getInfo":{"calls":1,"totalUs":202182},"transfer":{"startUs":203472,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":3,"bytes":263,"errors":1,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_MONO MONO_ABORT_DONE monoUs=7277354 wallUs=1789513878410492 code=USER_CANCEL
+OTA_MONO MONO_TERMINAL monoUs=7278994 wallUs=1789513878412484 code=USER_CANCEL
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=373
+OTA_MONO MONO_BUDGET_START monoUs=7318092 wallUs=1789513878451711
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=1678 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_ABORT_BEGIN monoUs=7318733 wallUs=1789513878451711 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=7318742 wallUs=1789513878451711
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[630,781],"transfer":[1298,2052]},"bind":{"charsUs":20,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":151},"getInfo":{"calls":1,"totalUs":373},"transfer":{"startUs":1295,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":3,"bytes":263,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=7321841 wallUs=1789513878454701 code=USER_CANCEL
+OTA_MONO MONO_ABORT_BEGIN monoUs=7343515 wallUs=1789513878476706 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=7343543 wallUs=1789513878476706
+OTA_MONO MONO_ABORT_DONE monoUs=7343803 wallUs=1789513878476706 code=USER_CANCEL
+OTA_MONO MONO_ABORT_BEGIN monoUs=7367605 wallUs=1789513878500716 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=7367630 wallUs=1789513878500716
+OTA_MONO MONO_ABORT_DONE monoUs=7367934 wallUs=1789513878500716 code=USER_CANCEL
+OTA_MONO MONO_ABORT_BEGIN monoUs=7410100 wallUs=1789513878543706 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=7410130 wallUs=1789513878543706
+OTA_MONO MONO_ABORT_DONE monoUs=7410434 wallUs=1789513878543706 code=USER_CANCEL
+01:34 +312: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 鉴别力对照：闸被旁路时「持闸期间同族写入必须排队」不再成立（RC3-02/04/05）
+OTA_MONO MONO_ABORT_BEGIN monoUs=8439881 wallUs=1789513879573137 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=8440103 wallUs=1789513879573137
+OTA_MONO MONO_ABORT_DONE monoUs=8440583 wallUs=1789513879574151 code=USER_CANCEL
+01:35 +313: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 后台恢复一级复核：链路代次变化 → DEVICE_LINK_CHANGED 可重试终止（RC3-08⑦）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=690
+OTA_MONO MONO_BUDGET_START monoUs=8473617 wallUs=1789513879607143
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2093 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_PAUSE monoUs=8474698 wallUs=1789513879608144
+OTA_MONO MONO_TERMINAL_DECIDED monoUs=8475578 wallUs=1789513879609151 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_ABORT_BEGIN monoUs=8475648 wallUs=1789513879609151 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_WRITE_STOP monoUs=8475665 wallUs=1789513879609151
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[703,853],"transfer":[1618,3895]},"bind":{"charsUs":19,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":150},"getInfo":{"calls":1,"totalUs":690},"transfer":{"startUs":1615,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":3,"bytes":263,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=8476328 wallUs=1789513879609151 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_TERMINAL monoUs=8476355 wallUs=1789513879609151 code=DEVICE_LINK_CHANGED
+01:35 +314: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） failClosed 已决终止不被迟到在途写原生错误覆盖：DEVICE_LINK_CHANGED保持、phase/文案不回跳（RC3-08/12②）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=202531
+OTA_MONO MONO_BUDGET_START monoUs=8696631 wallUs=1789513879829717
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=405615 off=0
+OTA_MONO MONO_PAUSE monoUs=8899274 wallUs=1789513880032211
+OTA_MONO MONO_TERMINAL_DECIDED monoUs=8899326 wallUs=1789513880032211 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_ABORT_BEGIN monoUs=8899353 wallUs=1789513880032211 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_WRITE_STOP monoUs=8899365 wallUs=1789513880032211
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142 error=1
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[611,747],"transfer":[203405,607933]},"bind":{"charsUs":20,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":136},"getInfo":{"calls":1,"totalUs":202531},"transfer":{"startUs":203399,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":3,"bytes":263,"errors":1,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_MONO MONO_ABORT_DONE monoUs=9101581 wallUs=1789513880234730 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_TERMINAL monoUs=9101618 wallUs=1789513880234730 code=DEVICE_LINK_CHANGED
+01:35 +315: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 后台恢复一级复核补位：复核 await 期间链路代次前进 → DEVICE_LINK_CHANGED（RC3-08⑦）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=852
+OTA_MONO MONO_BUDGET_START monoUs=9120935 wallUs=1789513880253722
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2351 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_PAUSE monoUs=9121932 wallUs=1789513880254725
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2973 off=0 len=128
+OTA sent 128/1024
+OTA_MONO MONO_TERMINAL_DECIDED monoUs=9122425 wallUs=1789513880255725 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_ABORT_BEGIN monoUs=9122467 wallUs=1789513880255725 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_WRITE_STOP monoUs=9122483 wallUs=1789513880255725
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=9123033 wallUs=1789513880256728 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_TERMINAL monoUs=9123076 wallUs=1789513880256728 code=DEVICE_LINK_CHANGED
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[626,806],"transfer":[1739,4198]},"bind":{"charsUs":21,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":180},"getInfo":{"calls":1,"totalUs":852},"transfer":{"startUs":1737,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":1,"segmentSendTotal":1,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":1},"ackSamples":"partial:missing=1","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":4,"bytes":273,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+01:35 +316: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 后台恢复二级复核：特征重发现不一致 → DEVICE_LINK_CHANGED（RC3-08⑦）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=709
+OTA_MONO MONO_BUDGET_START monoUs=9140531 wallUs=1789513880273717
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2437 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_PAUSE monoUs=9141505 wallUs=1789513880274717
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2849 off=0 len=128
+OTA sent 128/1024
+OTA_MONO MONO_TERMINAL_DECIDED monoUs=9142468 wallUs=1789513880275731 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_ABORT_BEGIN monoUs=9142518 wallUs=1789513880275731 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_WRITE_STOP monoUs=9142532 wallUs=1789513880275731
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=9142935 wallUs=1789513880275731 code=DEVICE_LINK_CHANGED
+OTA_MONO MONO_TERMINAL monoUs=9142960 wallUs=1789513880275731 code=DEVICE_LINK_CHANGED
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[717,854],"transfer":[1815,4335]},"bind":{"charsUs":19,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":137},"getInfo":{"calls":1,"totalUs":709},"transfer":{"startUs":1812,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":1,"segmentSendTotal":1,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":1},"ackSamples":"partial:missing=1","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":4,"bytes":273,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+01:35 +317: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 后台恢复三级复核：INFO 身份漂移 → DEVICE_IDENTITY_CHANGED（RC3-08⑦）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=739
+OTA_MONO MONO_BUDGET_START monoUs=9160732 wallUs=1789513880293729
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2145 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_PAUSE monoUs=9161680 wallUs=1789513880294727
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2532 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=750
+OTA_MONO MONO_TERMINAL_DECIDED monoUs=9162678 wallUs=1789513880295730 code=DEVICE_IDENTITY_CHANGED
+OTA_MONO MONO_ABORT_BEGIN monoUs=9162705 wallUs=1789513880295730 code=DEVICE_IDENTITY_CHANGED
+OTA_MONO MONO_WRITE_STOP monoUs=9162716 wallUs=1789513880295730
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=9163099 wallUs=1789513880296721 code=DEVICE_IDENTITY_CHANGED
+OTA_MONO MONO_TERMINAL monoUs=9163125 wallUs=1789513880296721 code=DEVICE_IDENTITY_CHANGED
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[564,699],"transfer":[1525,4005]},"bind":{"charsUs":18,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":135},"getInfo":{"calls":2,"totalUs":1489},"transfer":{"startUs":1522,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":1,"segmentSendTotal":1,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":1},"ackSamples":"partial:missing=1","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":5,"bytes":283,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+01:35 +318: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 后台复检迟到发布：取消后的复核结论不得覆盖取消终态（RC3-04⑦）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=628
+OTA_MONO MONO_BUDGET_START monoUs=9180249 wallUs=1789513880313728
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=2091 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_PAUSE monoUs=9181199 wallUs=1789513880314729
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2618 off=0 len=128
+OTA sent 128/1024
+OTA_MONO MONO_ABORT_BEGIN monoUs=9181447 wallUs=1789513880314729 code=USER_CANCEL
+OTA_MONO MONO_WRITE_STOP monoUs=9181469 wallUs=1789513880314729
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=9181914 wallUs=1789513880314729 code=USER_CANCEL
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[689,866],"transfer":[1581,3388]},"bind":{"charsUs":24,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":177},"getInfo":{"calls":1,"totalUs":628},"transfer":{"startUs":1578,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":1,"segmentSendTotal":1,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":1},"ackSamples":"partial:missing=1","ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":1,"finalOff":0}},"gattWrites":{"calls":4,"bytes":273,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+OTA_MONO MONO_TERMINAL monoUs=9184947 wallUs=1789513880317718 code=USER_CANCEL
+01:35 +319: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: 取消与后台恢复的 owner/资源生命周期（RC3-04⑦/08⑦/12⑦） 后台恢复三级复核通过：恢复发送并完成传输（RC3-08⑦ 正例）
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=1311
+OTA_MONO MONO_BUDGET_START monoUs=9307750 wallUs=1789513880440729
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=3487 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_MONO MONO_PAUSE monoUs=9308829 wallUs=1789513880441723
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4008 off=0 len=128
+OTA sent 128/1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=545
+OTA_MONO MONO_RESUME monoUs=9309876 wallUs=1789513880442720
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1328 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5655 off=128 len=128
+OTA sent 256/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=96 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6192 off=256 len=128
+OTA sent 384/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=96 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7896 off=384 len=128
+OTA sent 512/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=113 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8638 off=512 len=128
+OTA sent 640/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=101 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9110 off=640 len=128
+OTA sent 768/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=74 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9485 off=768 len=128
+OTA sent 896/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=69 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9880 off=896 len=128
+OTA sent 1024/1024
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=134 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=10040 off=1024
+OTA_MONO MONO_BUDGET_RESET monoUs=9315136 wallUs=1789513880448719 durable=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_MONO MONO_END_ACK_OK monoUs=9315640 wallUs=1789513880448719 durable=1024
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","clock":"stopwatch-mono-us","phases":{"bind":[942,1185],"transfer":[2873,10757]},"bind":{"charsUs":37,"found":true,"mtuRequested":247,"mtuChunkBytes":247,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":243},"getInfo":{"calls":2,"totalUs":1856},"transfer":{"startUs":2871,"endAckUs":10661,"elapsedUs":7790,"outcome":"ok","segmentsUnique":8,"segmentSendTotal":8,"retransmitFrames":0,"acks":{"ok":8,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0},"ackSamples":"complete","ackLatency":{"count":8,"minUs":69,"p50Us":96,"p95Us":1328,"p99Us":1328,"maxUs":1328},"durable":{"events":2,"finalOff":1024}},"gattWrites":{"calls":12,"bytes":1309,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+01:35 +320: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart
+01:36 +320: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 连接与身份卡 未连接设备：显示未连接，检查更新按钮禁用
+01:37 +321: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 连接与身份卡 传入设备且 GET_INFO 成功：身份确认卡 + 检查按钮可用
+01:37 +322: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 连接与身份卡 传入设备但身份读取失败：待确认 + 重试读取入口
+01:37 +323: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 升级进度卡（phase 驱动，PR16） downloading：下载进度 + 网络下载行 + 取消下载
+01:38 +324: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 升级进度卡（phase 驱动，PR16） transferring：传输卡 + durable/网络双行 + 取消升级
+01:38 +325: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 升级进度卡（phase 驱动，PR16） waitingReboot：仍按传输样式渲染等待重启
+01:38 +326: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 升级进度卡（phase 驱动，PR16） reconnectVerify：复核阶段按传输样式渲染
+01:38 +327: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 升级进度卡（phase 驱动，PR16） readyToInstall：固件就绪 + 开始 BLE 传输入口
+01:38 +328: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 升级进度卡（phase 驱动，PR16） cancelled：显示取消状态卡
+01:38 +329: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 升级进度卡（phase 驱动，PR16） completed：完成卡显示目标版本与设备 vcode（PR07）
+01:38 +330: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 终止态卡（PR11） CLIENT_TOO_OLD：无法升级 + 门槛文案
+01:38 +331: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 终止态卡（PR11） retryableLater 终止态：暂不可更新样式
+01:38 +332: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 终止态卡（PR11） requestId 透出便于排查
+01:38 +333: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 固件信息卡（发现新版本） hasUpdate 时渲染版本/大小/类型/SHA
+01:38 +334: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 取消对话框（RC3-05① 冻结删除策略） BLE 阶段取消：保留固件包选项传递 keepPackage=true
+01:39 +335: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 取消对话框（RC3-05① 冻结删除策略） BLE 阶段取消：删除固件包选项传递 keepPackage=false
+01:39 +336: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 取消对话框（RC3-05① 冻结删除策略） 下载阶段取消：无保留 partial 选项，确认取消保留已校验包
+01:39 +337: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 取消对话框（RC3-05① 冻结删除策略） cancelled 保留验证包：仍提供开始传输入口
+01:39 +338: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 忽略与清理（RC3-12②） readyToInstall 点忽略：清包后传输入口消失、下载入口恢复
+01:39 +339: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 忽略与清理（RC3-12②） 忙碌时点忽略：清理被拒绝，不崩溃不转换
+01:39 +340: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 终止态入口闭锁（RC3-12③） 非 retryableLater 终止态：检查按钮禁用 + 解锁提示
+01:39 +341: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 终止态入口闭锁（RC3-12③） retryableLater 终止态：检查按钮仍可用
+01:39 +342: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 终止态入口闭锁（RC3-12③） 终止闭锁但身份快照仍在：提供可执行的重新读取身份解锁入口（RC3-12③）
+01:39 +343: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 终止态入口闭锁（RC3-12③） 窄屏终止闭锁：检查更新与解锁按钮换行共存不截断（O4 整改）
+01:39 +344: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 连接与生命周期（RC3-08④） 显式设备参数变化：重新解析并读取新地址身份
+01:40 +345: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: 连接与生命周期（RC3-08④） 后台暂停恢复：回前台重新读取设备身份
+01:40 +346: loading D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart
+01:40 +346: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（正向） 全参数生成 10 个 query 项
+01:40 +347: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（正向） channel 覆盖
+01:40 +348: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（负例） deviceModel 为空拒绝
+01:40 +349: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（负例） currentVersionCode 负数拒绝
+01:40 +350: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（负例） currentImageSha 大写/短/长/非 hex 拒绝
+01:40 +351: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（负例） hardwareRevision 负数拒绝
+01:40 +352: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（负例） layoutId/bootVersion/protocolVersion 超 0..255 拒绝
+01:40 +353: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（负例） appVersionCode 超 0..2100000000 拒绝
+01:40 +354: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/share_links_latest_query_test.dart: ShareLinks.firmwareLatestQuery（负例） channel 非 stable/beta 拒绝
+01:40 +355: All tests passed!

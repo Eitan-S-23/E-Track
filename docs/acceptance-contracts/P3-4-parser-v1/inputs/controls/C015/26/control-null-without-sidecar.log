@@ -1,0 +1,31 @@
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=3093
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=111
+OTA_LINK_SAMPLE label=upgrade kind=durable us=6177 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7102 off=0 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=497 off=0
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8412 off=128 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=397 off=128
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9593 off=256 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=337 off=256
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10657 off=384 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=370 off=384
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11884 off=512 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=308 off=512
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=13179 off=640 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=513 off=640
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=14665 off=768 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=453 off=768
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=142
+OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=16156 off=896 len=128
+OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=506 off=896
+OTA_LINK_SAMPLE label=upgrade kind=durable us=16841 off=1024
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=42
+OTA_LINK_STATS null
