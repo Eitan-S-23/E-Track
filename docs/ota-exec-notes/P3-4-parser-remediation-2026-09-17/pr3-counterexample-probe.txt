@@ -1,0 +1,45 @@
+=== 对照：基线块本身 ===
+baseline                           fatal=[] warn=[] runs=1
+
+=== P34-PR3-01a 非末条 durable 偏移域 ===
+durable off=-1                     fatal=['SEGMENT_OFFSET_INVALID'] warn=[] runs=0
+      [FATAL] SEGMENT_OFFSET_INVALID: 行 4 durable 样本的 off=-1 为负：偏移是块内字节位置，负值不指向任何数据段（该样本无法与任何段做集合核对）
+durable off 缺失                     fatal=['SEGMENT_OFFSET_MISSING'] warn=[] runs=0
+      [FATAL] SEGMENT_OFFSET_MISSING: 行 4 durable 样本缺少唯一字节偏移 off（无偏移的段/确认无法做集合完整性核对）
+durable off=bad                    fatal=['SEGMENT_OFFSET_MISSING'] warn=[] runs=0
+      [FATAL] SEGMENT_OFFSET_MISSING: 行 4 durable 样本缺少唯一字节偏移 off（无偏移的段/确认无法做集合完整性核对）
+
+=== P34-PR3-01b 重传段长度域 ===
+重传 len=128（对照）                     fatal=[] warn=[] runs=1
+重传 len=0                           fatal=['SEGMENT_LENGTH_INVALID'] warn=[] runs=0
+      [FATAL] SEGMENT_LENGTH_INVALID: 行 31 segment_retransmit 样本的 len=0 不是有效数据段长度：零长度段发送不存在，且该段不会被重传/确认样本引用
+重传 len=-1                          fatal=['SEGMENT_LENGTH_INVALID'] warn=[] runs=0
+      [FATAL] SEGMENT_LENGTH_INVALID: 行 31 segment_retransmit 样本的 len=-1 不是有效数据段长度：零长度段发送不存在，且该段不会被重传/确认样本引用
+重传 len 缺失                          fatal=['SEGMENT_OFFSET_MISSING'] warn=[] runs=0
+      [FATAL] SEGMENT_OFFSET_MISSING: 行 31 segment_retransmit 样本缺少 len（无法确认该段长度）
+重传 len=bad                         fatal=['SEGMENT_OFFSET_MISSING'] warn=[] runs=0
+      [FATAL] SEGMENT_OFFSET_MISSING: 行 31 segment_retransmit 样本缺少 len（无法确认该段长度）
+
+=== P34-PR3-01c 字节计数域（GATT 与 platform 两个调用方） ===
+GATT bytes=-1                      fatal=['BYTE_COUNT_INVALID'] warn=[] runs=0
+      [FATAL] BYTE_COUNT_INVALID: 行 1 gatt_write 样本的 bytes=-1 为负：字节计数是已写出的字节数，负值既不可能是任何写入的结果，也会抵消同块其它样本的计数
+platform bytes=100（对照）             fatal=[] warn=[] runs=1
+platform bytes=-5,+5（净零）           fatal=['BYTE_COUNT_INVALID'] warn=[] runs=0
+      [FATAL] BYTE_COUNT_INVALID: 行 31 platform_write 样本的 bytes=-5 为负：字节计数是已写出的字节数，负值既不可能是任何写入的结果，也会抵消同块其它样本的计数
+
+=== P34-PR3-02 包 SHA 尾随换行 ===
+sha = A*64 + \n                    exit=1 invalid=1 eligible=False
+      侧车身份字段 packageSha256 的取值不构成有效声明：'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n'（包 SHA-256 必须是 64 位十六进制（实际 65 字符）） | None
+      reasons=['GROUP_IDENTITY_NOT_DECLARED', 'GROUP_IDENTITY_INVALID']
+sha = A*64（大写对照）                   exit=0 invalid=0 eligible=True
+      reasons=[]
+sha = A*64 + \r\n                  exit=1 invalid=1 eligible=False
+      侧车身份字段 packageSha256 的取值不构成有效声明：'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\n'（包 SHA-256 必须是 64 位十六进制（实际 66 字符）） | None
+      reasons=['GROUP_IDENTITY_NOT_DECLARED', 'GROUP_IDENTITY_INVALID']
+sha = G*64（非十六进制）                  exit=1 invalid=1 eligible=False
+      侧车身份字段 packageSha256 的取值不构成有效声明：'GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG'（包 SHA-256 必须是 64 位十六进制（实际 64 字符）） | None
+      reasons=['GROUP_IDENTITY_NOT_DECLARED', 'GROUP_IDENTITY_INVALID']
+
+=== 遗留临时文件 ===
+[]
+EXIT=0

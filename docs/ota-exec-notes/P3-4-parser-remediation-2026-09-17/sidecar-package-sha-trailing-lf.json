@@ -1,0 +1,24 @@
+{
+  "groupId": "p3-4-remediation-package-sha-trailing-lf",
+  "identity": {
+    "appState": "foreground",
+    "baud": 115200,
+    "captureMethod": "flutter-integration-test",
+    "device": "AA:BB",
+    "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "maxRetries": 3,
+    "mtuChunkBytes": 247,
+    "mtuRequested": 247,
+    "packageBytes": 552960,
+    "packageSha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n",
+    "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "timeoutMs": 20000,
+    "writeMode": "withoutResponse"
+  },
+  "inputs": [
+    {
+      "name": "round6-ubuntu-head.log",
+      "sha256": "d482f9ed386a064146992585fdf93ab2738f1b785c2bdc2e910e0d81c37bf645"
+    }
+  ]
+}

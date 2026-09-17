@@ -1,0 +1,24 @@
+{
+  "groupId": "p3-4-remediation-empty-identity",
+  "identity": {
+    "appState": "",
+    "baud": 0,
+    "captureMethod": "",
+    "device": "",
+    "firmwareCommit": "",
+    "maxRetries": 0,
+    "mtuChunkBytes": 0,
+    "mtuRequested": 0,
+    "packageBytes": 0,
+    "packageSha256": "",
+    "senderCommit": "",
+    "timeoutMs": 0,
+    "writeMode": ""
+  },
+  "inputs": [
+    {
+      "name": "round6-ubuntu-head.log",
+      "sha256": "d482f9ed386a064146992585fdf93ab2738f1b785c2bdc2e910e0d81c37bf645"
+    }
+  ]
+}

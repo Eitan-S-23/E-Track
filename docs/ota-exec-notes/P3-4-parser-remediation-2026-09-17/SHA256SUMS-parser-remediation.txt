@@ -1,0 +1,41 @@
+# P3-4 解析器整改（P34-P01..P34-P07、P34-PR2-01..PR2-05、P34-PR3-01/PR3-02）开发自测证据归档
+
+# 定位：实现认领 + 开发自测结果，不是独立验收 PASS；正式验收仍为 NOT_RUN。
+# 生成命令见 docs/ota-exec-notes/P3-4-parser-remediation-2026-09-17.md §3。
+# 全部条目按**工作树实际字节**绑定；该目录已由 .gitattributes 整目录钉 -text，
+# 新检出字节与工作树字节逐字节相同（审计见 §5）。
+
+build_pr2_inputs.py: 6738B sha256=c23010f7405d4660f2a3a06e64a84f6939332a870f22742af2344501718290f6
+build_pr3_inputs.py: 6116B sha256=827b9f56be678cd89473a47012a651e8d66abbd152111ca2b3eac68e2f672036
+cli-empty-capture.out: 1525B sha256=5062472fbd6e7853d37da399ab98c1eca197603283701b3b9d04ee780cdc3ee3
+cli-fixture-identity-ok.out: 8472B sha256=1abb28965aee3fb7d7785a48ca2b4d98a56e2ccfdcfa8eee6d66a1689cb2ae8f
+cli-fixture-json.out: 7950B sha256=d68fb7aeb18e2e359011f11cdae8696c17d92e52a7a435f45e7fd071e2d4df2f
+cli-fixture-plain.out: 6093B sha256=89beab3bf2aaddd87945457c651aac87fd7771d79690b18323b7e0b34ce31d93
+cli-identity-incomplete.out: 8286B sha256=4ee55e861ef9cf98071d45c0a6a5de3c5f4c4a49ffc43735d5f7ac376699caf7
+cli-identity-sha-bad.out: 9019B sha256=685c15658d0acf471b56d00b0078338b7c8073c0b17b9745fd349531b7b81c1d
+cli-index.txt: 3890B sha256=0c40595789d32fbc4c0ac7522bedb5995f0c1dc400b99c4098604c7d339819f5
+cli-missing-file.out: 128B sha256=ff5d5fb38b0f13e5848642345ed24bf9a9f01be3b5f74a431498302f4ce86885
+cli-pr2-duplicate-input.out: 8767B sha256=2334f9368b6bde640b0d96a4c08c65d61328dcba5e0dcb5cb791ccd88d1642cb
+cli-pr2-empty-capture-sidecar.out: 2053B sha256=f5b84bbe57f0e1048def9983d7805312e366c264514e6d46c79350e0d826b3e2
+cli-pr2-empty-identity.out: 10367B sha256=6389b6f9705b138507a888f7c58d7a06993e94434498de748a019b67e078d7f6
+cli-pr2-numeric-tamper.out: 9460B sha256=7de07b65ea95ff7c5cd15777af83052de1dd057beabfb9de44d4058bba93aca5
+cli-pr2-same-basename.out: 60396B sha256=64a2f7b0505b82dfd62a7b4ed7c1e112d56273e135d2f2ed11905d6989c1fbb8
+cli-pr3-numeric-tamper.out: 10964B sha256=bf5ea67e4647bcf5e5af49567d0125955a3bb568f7c88b84e9a533c50b404c65
+cli-pr3-package-sha-trailing-lf.out: 8264B sha256=f876bd2ae178f9f95e2e0afd808a3ae8a47ce2747dfe6cd07a2a5eb8faf3548b
+cli-pr3-package-sha-uppercase-ok.out: 8500B sha256=3c018e24b25d81bed13f7b52063f6f137105bdd6160e1e6d4a49129793607010
+cli-real-ubuntu-loose.out: 6884B sha256=a1e2577c0998a6b368ed3d95d750a7f7cb20ee7a58f9797c2071a51f75479aaa
+cli-real-ubuntu-strict.out: 6910B sha256=79a53afb21dd3c4f1b36c2bc86c68e3ab2766f731a3ec3bec97ccdb207563edc
+cli-real-win-polluted.out: 53354B sha256=7a4efab01b5786b7b6fc057857ec63ec875bbc72c71156c1ff82f54b52657715
+empty-capture.log: 0B sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+pr2-numeric-tamper.log: 42204B sha256=c27656d82e504d95a729fcd84b13b4220a8985ace59e853cec0743aad145f2d0
+pr3-counterexample-probe.txt: 3942B sha256=cf25efa06c94165bfda6c846a9772008db2f32569f53120f1aaa87779009c59b
+pr3-numeric-tamper.log: 42335B sha256=04642073966478afc76ac289ff26dc61785db8ba569bc6e4fadc1341f3c58dac
+probe_pr3_counterexamples.py: 4747B sha256=3360192af9551a68e33f2bfe1e0585e9d7aacb5ef6faf63634214f8b3af96edd
+selftest-full-2026-09-17.log: 28460B sha256=0454b47f4f0054462a78723a7351432057913c1b90f5fe14543eee0764d63b43
+sidecar-empty-capture.json: 720B sha256=dde75ab891a7c1cfd73d3e3d73192ffc4c28c8f3ea036eeaffcce2a6caa3f9c1
+sidecar-empty-identity.json: 510B sha256=122fa52c2e5ad305b223daf7423a601c742601b40d397602a65bf63170431609
+sidecar-incomplete.json: 663B sha256=7e6f097378bf822749240c678cec79169bc8a4783c8d21bc0c9fbba63231de7c
+sidecar-ok.json: 719B sha256=9a38bc5dd278f5467641155b767cf018908d3c2a73f49c3c336b48d94aa43c32
+sidecar-package-sha-trailing-lf.json: 737B sha256=878b5ee59386e803c0e378442de3c3dbf7341cd477b6894ad64c8571c86e136c
+sidecar-package-sha-uppercase.json: 733B sha256=f29b2b797c491263d78685d5d1e9b61312b1c2722ac93537af0cd4528e885afe
+sidecar-sha-mismatch.json: 719B sha256=3060a72ec817d4c5a2591f1595e6bacbc36cda782e4f6c3e66929fcd3ddd0c1c

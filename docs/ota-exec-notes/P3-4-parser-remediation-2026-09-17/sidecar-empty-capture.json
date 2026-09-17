@@ -1,0 +1,24 @@
+{
+  "groupId": "p3-4-remediation-empty-capture",
+  "identity": {
+    "appState": "foreground",
+    "baud": 115200,
+    "captureMethod": "flutter-integration-test",
+    "device": "AA:BB",
+    "firmwareCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "maxRetries": 3,
+    "mtuChunkBytes": 247,
+    "mtuRequested": 247,
+    "packageBytes": 552960,
+    "packageSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "senderCommit": "0441f7862eaa65d201b49814dbd556ec98e8515a",
+    "timeoutMs": 20000,
+    "writeMode": "withoutResponse"
+  },
+  "inputs": [
+    {
+      "name": "empty-capture.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

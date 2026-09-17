@@ -1,0 +1,30 @@
+[WARN] FIELD_ABSENT: 行 222 摘要缺少字段 transfer.ackEarlyInvalid（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 222 摘要缺少字段 transfer.ackEarlyUnsent（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 222 摘要缺少字段 getInfo.failures（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 222 摘要缺少字段 discovers.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 222 摘要缺少字段 platformWrites.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 222 摘要缺少字段 bind.writeMode（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 222 摘要缺少字段 bind.mtuSource（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 227 摘要缺少字段 transfer.ackEarlyInvalid（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 227 摘要缺少字段 transfer.ackEarlyUnsent（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 227 摘要缺少字段 getInfo.failures（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 227 摘要缺少字段 discovers.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 227 摘要缺少字段 platformWrites.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 227 摘要缺少字段 bind.writeMode（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 227 摘要缺少字段 bind.mtuSource（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 271 摘要缺少字段 transfer.ackEarlyInvalid（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 271 摘要缺少字段 transfer.ackEarlyUnsent（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 271 摘要缺少字段 getInfo.failures（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 271 摘要缺少字段 discovers.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 271 摘要缺少字段 platformWrites.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 271 摘要缺少字段 bind.writeMode（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 271 摘要缺少字段 bind.mtuSource（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 274 摘要缺少字段 transfer.ackEarlyInvalid（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 274 摘要缺少字段 transfer.ackEarlyUnsent（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 274 摘要缺少字段 getInfo.failures（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 274 摘要缺少字段 discovers.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 274 摘要缺少字段 platformWrites.errors（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 274 摘要缺少字段 bind.writeMode（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+[WARN] FIELD_ABSENT: 行 274 摘要缺少字段 bind.mtuSource（整改前发射端版本合法缺失；同版本日志出现即缺陷，且不得据此声称契约完整）
+---- 观测块 4 个，样本 66 条，致命发现 0 项，告警 28 项 ----
+合并统计 upgrade（门槛可用=False）：{"ackLatency": {"count": 16, "maxUs": 580, "minUs": 308, "p50Us": 397, "p95Us": 580, "p99Us": 580}, "diagnostic": {"ackLatency": {"count": 16, "maxUs": 580, "minUs": 308, "p50Us": 397, "p95Us": 580, "p99Us": 580}, "retransmitFrames": 0, "retransmitRate": 0.0, "runs": 2, "runsWithAbsentFields": 2, "runsWithStragglerSamples": 0, "segmentsUnique": 16}, "eligibleForThreshold": false, "excludedRuns": 0, "findings": [], "identity": {"declared": null, "groupId": null, "mode": "observed", "observedSignatures": [{"bind.mtuChunkBytes": 247, "bind.mtuRequested": 247, "bind.mtuSource": null, "bind.writeMode": null, "device": "AA:BB"}]}, "ineligibleReasons": ["GROUP_IDENTITY_NOT_DECLARED"], "invalidSummaryBlocks": 0, "label": "upgrade", "retransmitFrames": 0, "retransmitRate": 0.0, "runs": 2, "runsWithAbsentFields": 2, "runsWithStragglerSamples": 0, "segmentsUnique": 16, "strictFieldsComplete": false, "unclosedBlocks": 0, "unclosedSamples": 0}

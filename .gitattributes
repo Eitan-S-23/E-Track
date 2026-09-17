@@ -18,6 +18,14 @@
 # 入库时被剥掉 CR 的二进制证据。矩阵按字节绑定这些产物，必须逐字节稳定。
 /docs/acceptance-contracts/** -text
 
+# P3-4 解析器整改证据包整目录免转换：包内 .json/.txt/.log 为 LF，.out 为 CRLF，
+# 自测日志为「CRLF + 末尾 LF」混合 EOL。该包由 SHA256SUMS-parser-remediation.txt
+# 按工作树字节绑定 SHA-256，不钉 -text 时新检出会按 autocrlf 重写行尾（LF 文件
+# 变 CRLF、混合文件多出 1 字节），已记录的哈希与检出字节不符。
+# 本条为新增目录的整目录钉法，与上面 /docs/acceptance-contracts/** 同一约定：
+# 不改动任何文件的当前字节，只让 blob 与工作树逐字节相同。
+/docs/ota-exec-notes/P3-4-parser-remediation-2026-09-17/** -text
+
 /.gitattributes -text
 /.github/copilot-instructions.md -text
 /.github/scripts/create_trace_patch.py -text
@@ -233,6 +241,8 @@
 /docs/acceptance-contracts/template.contract.json -text
 /docs/acceptance-contracts/template.evidence-matrix.json -text
 /docs/acceptance-execution-contract.md -text
+/docs/ota-exec-notes/P3-4-parser-remediation-2026-09-17.md -text
+/docs/ota-exec-notes/P3-4-parser-rereview-2026-09-17.md -text
 /docs/ota-exec-notes/P3-7-wiring-evidence.md -text
 /docs/ota-prompts/prompt-P2-6-SD-R5-independent-review.md -text
 /docs/ota-prompts/prompt-P3-6-implementation.md -text
