@@ -459,7 +459,8 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertIn("python -B tests/ota/test_flutter_dev_checks.py", text)
         self.assertIn("python -B tests/ota/test_flutter_dev_apk.py", text)
         self.assertIn("build_apk:", text)
-        self.assertIn("refs/heads/dev/flutter/apk/", text)
+        self.assertNotIn("startsWith(github.ref", text)
+        self.assertIn("github.event_name == 'workflow_dispatch' && inputs.build_apk", text)
         self.assertIn("trace-dev-debug.apk", text)
         self.assertIn("if: always()", text)
         self.assertIn("include-hidden-files: true", text)
@@ -500,6 +501,61 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             self.assertFalse((repo / relative).exists(), relative)
             self.assertEqual("blob", run("cat-file", "-t", f"HEAD:{relative}").strip())
         self.assertTrue(RUNNER.checkout_identity(repo)["clean"])
+
+    def test_workflow_requests_apk_only_on_explicit_dispatch(self):
+        workflow = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
+        expressions = {}
+        for key in ("FLUTTER_DEV_TEST_SCOPE", "FLUTTER_DEV_BUILD_APK"):
+            match = re.search(rf"(?m)^      {key}: \$\{{\{{ (.+) \}}\}}$", workflow)
+            self.assertIsNotNone(match)
+            expressions[key] = match[1].replace("&&", " and ").replace("||", " or ")
+        for event in ("push", "workflow_dispatch"):
+            for ref in ("refs/heads/dev/flutter/normal", "refs/heads/dev/flutter/apk/legacy"):
+                for requested in (False, True):
+                    for host in ("ubuntu-latest", "windows-2022"):
+                        with self.subTest(event=event, ref=ref, requested=requested, host=host):
+                            context = {
+                                "github": SimpleNamespace(event_name=event, ref=ref),
+                                "inputs": SimpleNamespace(build_apk=requested, test_scope="ota" if event != "push" else ""),
+                                "matrix": SimpleNamespace(os=host),
+                            }
+                            actual = {key: eval(expr, {"__builtins__": {}}, context) for key, expr in expressions.items()}
+                            apk = event == "workflow_dispatch" and requested
+                            self.assertEqual("true" if apk and host == "ubuntu-latest" else "false",
+                                             actual["FLUTTER_DEV_BUILD_APK"])
+                            self.assertEqual("all" if apk or event == "push" else "ota", actual["FLUTTER_DEV_TEST_SCOPE"])
+
+    def test_cli_cannot_turn_a_push_into_an_apk_request(self):
+        for event in ("push", "pull_request", ""):
+            with self.subTest(event=event), mock.patch.dict(os.environ, {
+                "GITHUB_ACTIONS": "true", "GITHUB_WORKSPACE": str(self.project),
+                "GITHUB_REF": "refs/heads/dev/flutter/apk/legacy", "GITHUB_EVENT_NAME": event,
+                "FLUTTER_DEV_BUILD_APK": "false", "FLUTTER_DEV_TEST_SCOPE": "all",
+            }), mock.patch.object(RUNNER, "run_checks") as run, \
+                    mock.patch("sys.stderr", new_callable=io.StringIO), self.assertRaises(SystemExit):
+                RUNNER.main(["--repo-root", str(self.project), "--build-apk"])
+            run.assert_not_called()
+        with mock.patch.dict(os.environ, {
+            "GITHUB_ACTIONS": "true", "GITHUB_WORKSPACE": str(self.project),
+            "GITHUB_REF": "refs/heads/dev/flutter/normal", "GITHUB_EVENT_NAME": "workflow_dispatch",
+            "FLUTTER_DEV_BUILD_APK": "true", "FLUTTER_DEV_TEST_SCOPE": "all",
+        }), mock.patch.object(RUNNER, "run_checks", return_value=(0, None)) as run:
+            self.assertEqual(0, RUNNER.main(["--repo-root", str(self.project)]))
+            self.assertTrue(run.call_args.kwargs["build_apk"])
+
+    def test_artifact_retention_is_tiered_without_weakening_uploads(self):
+        development = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
+        logs = development.split("- name: Upload development logs", 1)[1].split("      - name:", 1)[0]
+        apk = development.split("- name: Upload debug APK", 1)[1]
+        self.assertIn("retention-days: 14", logs)
+        self.assertIn("retention-days: 3", apk)
+        for step in (logs, apk):
+            self.assertIn("if-no-files-found: error", step)
+            self.assertNotIn("continue-on-error", step)
+        release = (ROOT / ".github/workflows/build.yml").read_text(encoding="utf-8")
+        for name in ("Upload Android APK", "Upload Windows EXE"):
+            step = release.split("- name: " + name, 1)[1].split("\n\n", 1)[0]
+            self.assertIn("retention-days: 14", step)
 
     def test_workflow_disk_preflight(self):
         workflow = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
@@ -559,6 +615,121 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                     mock.patch("sys.stderr", new_callable=io.StringIO), self.assertRaises(SystemExit):
                 RUNNER.main(["--repo-root", str(self.project)])
             run.assert_not_called()
+
+    def test_real_failure_output_is_published_redacted_without_changing_raw_log(self):
+        result, log = self.command([
+            sys.executable, "-B", "-c",
+            "import sys; print('stdout-marker'); print('token=fixture-private-value',file=sys.stderr); "
+            "print('https://user:pass@host.invalid/path?X-Amz-Signature=signed-value'); sys.exit(7)",
+        ])
+        raw = log.read_bytes()
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as console:
+            diagnostics = RUNNER.log_diagnostics(self.project, log, {"name": "tests", **result}, {})
+        self.assertTrue(diagnostics["available"])
+        self.assertTrue(diagnostics["published"])
+        self.assertIn("stdout-marker", console.getvalue())
+        for secret in ("fixture-private-value", "user:pass", "signed-value"):
+            self.assertNotIn(secret, console.getvalue())
+            self.assertIn(secret.encode(), raw)
+        self.assertEqual(raw, log.read_bytes())
+        self.assertEqual(7, result["exit_code"])
+        self.assertEqual("FAIL", result["status"])
+
+    def test_diagnostic_counts_use_full_log_and_unknown_is_not_zero(self):
+        log = self.write(Path("counts.log"), "OTA_LINK_SAMPLE " + "x" * 100 + "\n")
+        log.write_bytes(log.read_bytes() * 1000 + b"00:12 +348 ~7 -1: Some tests failed.\n")
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as console:
+            result = RUNNER.log_diagnostics(self.project, log, {"name": "tests", "exit_code": 1}, {})
+        self.assertEqual({"passed": 348, "skipped": 7, "failed": 1}, result["test_counts"])
+        self.assertEqual(1000, result["ota_link_lines"])
+        self.assertTrue(result["truncated"])
+        self.assertLess(len(console.getvalue()), 85000)
+        unknown = self.write(Path("unknown.log"), "00:01 +4: still running\nnonstandard output\n")
+        with mock.patch("sys.stdout", new_callable=io.StringIO):
+            result = RUNNER.log_diagnostics(self.project, unknown, {"name": "tests"}, {})
+        self.assertIsNone(result["test_counts"])
+        self.assertEqual(0, result["ota_link_lines"])
+
+    def test_diagnostic_sdk_identity_and_control_sequences(self):
+        identity = {"frameworkVersion": "3.44.0", "frameworkRevision": "a" * 40,
+                    "channel": "stable", "dartSdkVersion": "3.12.0"}
+        log = self.write(Path("sdk.log"), "tool setup\n" + json.dumps(identity) + "\n")
+        with mock.patch("sys.stdout", new_callable=io.StringIO):
+            result = RUNNER.log_diagnostics(self.project, log, {"name": "sdk_version"}, {})
+        self.assertEqual(identity, result["sdk_identity"])
+        raw = "\x1b[31mPASSWORD='fixture secret words'\x1b[0m\nBearer opaque-value\nfrom-env-value"
+        sanitized = RUNNER.redact_diagnostics(raw, {"GITHUB_TOKEN": "from-env-value"})
+        for value in ("fixture secret words", "opaque-value", "from-env-value", "\x1b"):
+            self.assertNotIn(value, sanitized)
+        injected = self.write(Path("inject.log"), "::error::child-controlled command\n")
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as console:
+            RUNNER.log_diagnostics(self.project, injected, {"name": "tests"}, {})
+        self.assertIn("DEV_LOG[tests] ::error::", console.getvalue())
+        self.assertFalse(any(line.startswith("::") for line in console.getvalue().splitlines()))
+
+    def test_diagnostic_failures_do_not_hide_original_command_status(self):
+        command = {"name": "tests", "status": "FAIL", "exit_code": 17}
+        result = RUNNER.log_diagnostics(self.project, self.project / "missing.log", command, {})
+        self.assertFalse(result["available"])
+        self.assertIsNone(result["test_counts"])
+        self.assertIsNone(result["ota_link_lines"])
+        log = self.write(Path("sink.log"), "error details\n")
+        with mock.patch("sys.stdout.write", side_effect=BrokenPipeError):
+            result = RUNNER.log_diagnostics(self.project, log, command, {})
+        self.assertFalse(result["published"])
+        self.assertEqual(17, command["exit_code"])
+        self.assertEqual("FAIL", command["status"])
+
+    def test_machine_diagnostics_remain_json_and_private_blocks_cannot_leak_after_truncation(self):
+        payload = {"message": 'token="fixture value" and a quoted "message"',
+                   "url": "https://host.invalid/path?token=opaque-value", "test_counts": {"passed": 12},
+                   "credentials": {"token": "unlabeled-private-value"}}
+        parsed = json.loads(RUNNER.diagnostic_json(payload, {}))
+        self.assertEqual({"passed": 12}, parsed["test_counts"])
+        self.assertNotIn("fixture value", parsed["message"])
+        self.assertNotIn("opaque-value", parsed["url"])
+        self.assertEqual("[REDACTED]", parsed["credentials"]["token"])
+        raw = ("before-key\n-----BEGIN PRIVATE KEY-----\n" + "private-key-material\n" * 5000
+               + "-----END PRIVATE KEY-----\n00:01 +1: All tests passed!\n")
+        log = self.write(Path("private-block.log"), raw)
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as console:
+            result = RUNNER.log_diagnostics(self.project, log, {"name": "tests"}, {})
+        self.assertNotIn("private-key-material", console.getvalue())
+        self.assertIn("REDACTED PRIVATE KEY", console.getvalue())
+        self.assertEqual({"passed": 1, "skipped": 0, "failed": 0}, result["test_counts"])
+        self.assertEqual(raw, log.read_text(encoding="utf-8"))
+
+    def test_real_timeout_and_invalid_utf8_remain_visible_in_diagnostics(self):
+        result, log = self.command([
+            sys.executable, "-B", "-c",
+            "import sys,time; sys.stdout.buffer.write(b'timeout-marker\\xff\\n'); "
+            "sys.stdout.flush(); time.sleep(60)",
+        ], timeout=2)
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as console:
+            diagnostics = RUNNER.log_diagnostics(self.project, log, {"name": "tests", **result}, {})
+        self.assertEqual("TIMEOUT", result["status"])
+        self.assertTrue(result["timed_out"])
+        self.assertTrue(diagnostics["published"])
+        self.assertIn("timeout-marker", console.getvalue())
+        self.assertIn('"timed_out": true', console.getvalue())
+        self.assertIsNone(diagnostics["test_counts"])
+        self.assertIn(b"\xff", log.read_bytes())
+
+    def test_missing_log_and_broken_summary_fail_without_relabeling_test_exit(self):
+        def remove_log(name):
+            if name == "tests":
+                log = next(self.project.glob(".cache/flutter-dev-checks/runs/*/logs/tests.log"))
+                RUNNER.checked_path(self.project, log).unlink()
+
+        code, report, _, _ = self.fixture_run(after=remove_log)
+        self.assertEqual(1, code)
+        self.assertFalse(report["diagnostics_complete"])
+        self.assertEqual(0, report["commands"][4]["exit_code"])
+        with mock.patch.object(RUNNER, "emit_development_summary", return_value=False):
+            code, report, _, _ = self.fixture_run({"tests": {"status": "FAIL", "exit_code": 17}})
+        self.assertEqual(1, code)
+        self.assertEqual(17, report["commands"][4]["exit_code"])
+        self.assertIn("diagnostic_error", report)
 
     def apk_inputs(self):
         self.write(RUNNER.APP / "android/app/build.gradle.kts", "compileSdk = 35\n")
@@ -804,11 +975,13 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         repo = RUNNER.make_directory(self.project, Path("gitfixture"))
 
         def run(*argv):
-            return subprocess.run(
+            result = subprocess.run(
                 ["git", "-C", str(repo), *argv], capture_output=True,
-                text=True, encoding="utf-8", errors="replace", check=True,
+                cwd=self.project, text=True, encoding="utf-8", errors="replace",
                 timeout=30,
-            ).stdout
+            )
+            self.assertEqual(0, result.returncode, f"Git fixture {argv}: {result.stderr}")
+            return result.stdout
         run("init", "--quiet")
         # 行尾策略写死：宿主 autocrlf 会让行尾用例时红时绿。
         run("config", "core.autocrlf", "false")

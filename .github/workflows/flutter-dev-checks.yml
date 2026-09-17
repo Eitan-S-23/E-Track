@@ -64,8 +64,8 @@ jobs:
     env:
       PYTHONDONTWRITEBYTECODE: "1"
       PYTHONUTF8: "1"
-      FLUTTER_DEV_TEST_SCOPE: ${{ (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'all' || inputs.test_scope || 'all' }}
-      FLUTTER_DEV_BUILD_APK: ${{ matrix.os == 'ubuntu-latest' && (inputs.build_apk || startsWith(github.ref, 'refs/heads/dev/flutter/apk/')) && 'true' || 'false' }}
+      FLUTTER_DEV_TEST_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.build_apk && 'all' || inputs.test_scope || 'all' }}
+      FLUTTER_DEV_BUILD_APK: ${{ github.event_name == 'workflow_dispatch' && inputs.build_apk && matrix.os == 'ubuntu-latest' && 'true' || 'false' }}
       # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
       TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
       # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
@@ -148,4 +148,4 @@ jobs:
             .cache/flutter-dev-checks/runs/*/artifacts/trace-dev-debug.json
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 3

@@ -2,6 +2,7 @@
 """Bounded Flutter CI self-tests. This is not an acceptance-bundle runner."""
 
 import argparse
+from collections import deque
 import ctypes
 from ctypes import wintypes
 import hashlib
@@ -9,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import signal
 import stat
@@ -16,6 +18,7 @@ import subprocess
 import sys
 import time
 import uuid
+from urllib.parse import urlsplit, urlunsplit
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -27,6 +30,139 @@ WINDOWS_LAUNCHER = (
     "command=json.loads(sys.stdin.readline()); "
     "sys.exit(subprocess.call(command,stdin=subprocess.DEVNULL))"
 )
+ANSI_ESCAPE = re.compile(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*(?:\x07|\x1b\\))")
+TEST_TOTALS = re.compile(
+    r"^\d+(?::\d{2}){1,2}\s+\+(\d+)(?:\s+~(\d+))?(?:\s+-(\d+))?:\s*"
+    r"(?:All tests passed!|Some tests failed\.)\s*$"
+)
+
+
+def redact_diagnostics(text, env):
+    """Sanitize console copies; the project-local raw logs are not rewritten."""
+    text = ANSI_ESCAPE.sub("", text)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    for key, value in sorted(env.items(), key=lambda item: len(str(item[1])), reverse=True):
+        if value and re.search(r"TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|AUTHORIZATION|PRIVATE_KEY|API_KEY", key, re.I):
+            text = text.replace(str(value), "[REDACTED]")
+    text = re.sub(r"-----BEGIN [^-]*PRIVATE KEY-----.*?(?:-----END [^-]*PRIVATE KEY-----|\Z)",
+                  "[REDACTED PRIVATE KEY]", text, flags=re.S)
+    text = re.sub(r"\b(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)\b", "[REDACTED]", text)
+    text = re.sub(r"\b(Bearer|Basic)\s+[A-Za-z0-9_./+=-]+", r"\1 [REDACTED]", text, flags=re.I)
+    text = re.sub(
+        r"(?i)(\b(?:password|passwd|secret|api[_-]?key|(?:access[_-]?|refresh[_-]?)?token|"
+        r"authorization|credential|signature)\b[\"']?\s*[:=]\s*)"
+        r"(?:\"[^\"]*\"|'[^']*'|[^\s,;}]+)",
+        r"\1[REDACTED]", text,
+    )
+
+    def safe_url(match):
+        try:
+            url = urlsplit(match[0])
+            host = url.netloc.rsplit("@", 1)[-1]
+            return urlunsplit((url.scheme, host, url.path,
+                               "[REDACTED]" if url.query else "",
+                               "[REDACTED]" if url.fragment else ""))
+        except ValueError:
+            return "[REDACTED URL]"
+
+    return re.sub(r"https?://[^\s<>\"']+", safe_url, text)
+
+
+def sdk_identity(text):
+    decoder = json.JSONDecoder()
+    for match in re.finditer(r"\{", text):
+        try:
+            data, _ = decoder.raw_decode(text[match.start():])
+        except ValueError:
+            continue
+        fields = ("frameworkVersion", "frameworkRevision", "channel", "dartSdkVersion")
+        if isinstance(data, dict) and all(isinstance(data.get(key), str) and data[key] for key in fields):
+            return {key: data[key] for key in (*fields, "engineRevision") if key in data}
+    return None
+
+
+def diagnostic_json(value, env):
+    def clean(item):
+        if isinstance(item, str):
+            return redact_diagnostics(item, env)
+        if isinstance(item, dict):
+            return {key: "[REDACTED]" if re.search(
+                r"(?:token|secret|password|passwd|credential|authorization|api[_-]?key|private[_-]?key)$",
+                str(key), re.I,
+            ) else clean(child) for key, child in item.items()}
+        if isinstance(item, (list, tuple)):
+            return [clean(child) for child in item]
+        return item
+
+    return json.dumps(clean(value), ensure_ascii=True)
+
+
+def log_diagnostics(root, log_path, command, env, *, limit=65536):
+    """Copy a bounded tail, but derive counters from the complete raw log."""
+    result = {"available": False, "published": False, "log_bytes": None,
+              "test_counts": None, "ota_link_lines": None, "sdk_identity": None}
+    tail, tail_size, byte_count, ota_lines = deque(), 0, 0, 0
+    private_key, truncated = False, False
+    try:
+        with checked_path(root, log_path).open("rb") as stream:
+            for raw in stream:
+                byte_count += len(raw)
+                line = ANSI_ESCAPE.sub("", raw.decode("utf-8", "replace")).strip()
+                ota_lines += "OTA_LINK_" in line
+                totals = TEST_TOTALS.fullmatch(line) if command["name"] == "tests" else None
+                if totals:
+                    result["test_counts"] = {
+                        key: int(value or 0) for key, value in zip(("passed", "skipped", "failed"), totals.groups())
+                    }
+                begins_key = re.search(r"-----BEGIN [^-]*PRIVATE KEY-----", line)
+                if private_key or begins_key:
+                    private_key = re.search(r"-----END [^-]*PRIVATE KEY-----", line) is None
+                    if not begins_key:
+                        continue
+                    raw = b"[REDACTED PRIVATE KEY]\n"
+                if len(raw) > limit:
+                    truncated = True
+                    tail.clear()
+                    tail.append(b"[oversized diagnostic line omitted]\n")
+                    tail_size = len(tail[0])
+                else:
+                    tail.append(raw)
+                    tail_size += len(raw)
+                    while tail_size > limit:
+                        truncated = True
+                        tail_size -= len(tail.popleft())
+        text = b"".join(tail).decode("utf-8", "replace")
+        result.update(available=True, log_bytes=byte_count, ota_link_lines=ota_lines,
+                      truncated=truncated)
+        if command["name"] == "sdk_version":
+            result["sdk_identity"] = sdk_identity(text)
+        metadata = {key: command.get(key) for key in ("name", "status", "exit_code", "timed_out", "cleanup_error")}
+        print("DEV_COMMAND " + diagnostic_json({**metadata, **result}, env), flush=True)
+        for line in redact_diagnostics(text, env).splitlines():
+            # A child must not inject Actions workflow commands into the console.
+            print(f"DEV_LOG[{command['name']}] {line}", flush=True)
+        result["published"] = True
+    except (OSError, ValueError, UnicodeError) as exc:
+        result["error"] = f"Diagnostic copy failed ({type(exc).__name__})"
+    return result
+
+
+def emit_development_summary(report, report_path, env):
+    summary = {
+        "commit": report["source_before"]["head"], "host": report["host"],
+        "scope": report["scope"], "development_result": report["development_result"],
+        "apk_result": report["apk_result"], "diagnostics_complete": report["diagnostics_complete"],
+        "commands": [{key: item.get(key) for key in ("name", "status", "exit_code", "diagnostics")}
+                     for item in report["commands"]],
+    }
+    try:
+        for command in report["commands"]:
+            print(f"{command['name']}: {command['status']} (exit={command['exit_code']})", flush=True)
+        print("DEVELOPMENT_RESULT " + diagnostic_json(summary, env), flush=True)
+        print(f"Development report: {report_path}", flush=True)
+        return True
+    except (OSError, UnicodeError):
+        return False
 
 
 class WindowsJob:
@@ -594,6 +730,7 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
         "evidence_kind": "development-self-test",
         "formal_acceptance": "NOT_RUN",
         "development_result": "NOT_RUN",
+        "diagnostics_complete": True,
         "scope": scope,
         "apk_requested": build_apk,
         "apk_result": "NOT_RUN" if build_apk else "NOT_REQUESTED",
@@ -625,7 +762,9 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
     for command in report["commands"]:
         name = command["name"]
         if name == "apk_prepare" and not blocked:
-            if any(item["status"] != "PASS" for item in report["commands"][:5]):
+            if not report["diagnostics_complete"]:
+                blocked = "APK generation requires complete development diagnostics"
+            elif any(item["status"] != "PASS" for item in report["commands"][:5]):
                 blocked = "APK generation requires both analysis and full tests to pass"
             elif source["head"] != os.environ.get("GITHUB_SHA"):
                 blocked = "APK generation requires the tested commit to match GITHUB_SHA"
@@ -664,6 +803,9 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
                 blocked = command["cleanup_error"]
             elif command["status"] != "PASS" and name != "analyze":
                 blocked = f"Prerequisite {name} did not pass"
+            command["diagnostics"] = log_diagnostics(root, logs / (name + ".log"), command, env)
+            if not all(command["diagnostics"][key] for key in ("available", "published")):
+                report["diagnostics_complete"] = False
         save_report(root, report_path, report)
     report["lock_sha256_after"] = file_hash(lockfile)
     report["lockfile_unchanged"] = report["lock_sha256_after"] == lock_before
@@ -684,7 +826,7 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
             and restore_toolchain_regen(root,
                                         report["source_after"]["dirty_semantic"])):
         report["source_after_restored"] = identify(root)
-    passed = report["lockfile_unchanged"] and all(
+    passed = report["diagnostics_complete"] and report["lockfile_unchanged"] and all(
         command["status"] == "PASS" for command in report["commands"]
     )
     if build_apk and not (report["source_unchanged"]
@@ -701,9 +843,11 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
         if report["apk_result"] == "PASS":
             report["apk_metadata"] = "artifacts/trace-dev-debug.json"
     save_report(root, report_path, report)
-    for command in report["commands"]:
-        print(f"{command['name']}: {command['status']} (exit={command['exit_code']})")
-    print(f"Development report: {report_path}")
+    if not emit_development_summary(report, report_path, env):
+        passed = False
+        report.update(development_result="FAIL", diagnostics_complete=False,
+                      diagnostic_error="Console summary could not be published")
+        save_report(root, report_path, report)
     return (0 if passed else 1), report_path
 
 
@@ -727,10 +871,12 @@ def main(argv=None):
         parser.error("Development checks are restricted to dev/flutter/** branches")
     if os.environ.get("FLUTTER_DEV_BUILD_APK", "false") not in ("true", "false"):
         parser.error("FLUTTER_DEV_BUILD_APK must be true or false")
+    if args.build_apk and os.environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch":
+        parser.error("APK generation requires an explicit workflow_dispatch request")
     try:
         return run_checks(root, args.scope, build_apk=args.build_apk)[0]
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
-        print(f"Development checks could not complete: {exc}", file=sys.stderr)
+        print("Development checks could not complete: " + redact_diagnostics(str(exc), os.environ), file=sys.stderr)
         return 1
 
 
