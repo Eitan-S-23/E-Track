@@ -343,10 +343,12 @@ class OtaBleTransport {
           etuHeader: etuHeader,
           timeout: _capByBudget(ackTimeout),
         );
-        // P3-4 观测：BEGIN 有效 ACK 的到达时刻。必须在 await 返回后**立即**
-        // 取（同 microtask 内），作为该确认所覆盖段的真实终点时间戳；
-        // 放到后续处理之后再取会把处理开销算进 ACK 延迟。
-        final beginAckArrivalUs = stats?.nowUs();
+        // P3-4 观测：BEGIN 有效 ACK 的到达时刻由等待者在**分发点**记录
+        // 并随结果带回（P34-DA01）。此前实现是在本 await 返回后立即取
+        // 时钟，取到的是「写结算 + ACK 解析 + 校验」之后的时刻，比真实
+        // 到达晚；它在同一时钟域内仍单调，但会把写结算延迟算进该确认
+        // 覆盖段的 ACK 延迟。
+        final beginAckArrivalUs = beginAck.arrivalUs;
         final beginTerminal = _abortStatusOf(beginAck.status);
         if (beginTerminal != null) {
           return OtaAckResult.terminal(
@@ -595,8 +597,21 @@ class OtaBleTransport {
             // durable==total 与尾块位图均通过上方校验。
             // P3-4 观测：终点时刻在**采信点**登记，不在帧分发处按 cmd 覆盖
             // ——无关、重复或非法的 END 应答不得覆盖成功终点的时刻。
+            // 时刻取该应答帧的到达分发点时刻（等待者在采信匹配帧时打戳，
+            // P34-DA01）：写结算、解析与校验都发生在到达之后，此处另取
+            // 时钟会把它们的耗时算进传输时长。
+            final endAckArrivalUs = waiter.arrivalUs;
+            if (endAckArrivalUs == null) {
+              // 不可达：等待者只由 _dispatchFrame 的成功匹配完成，该路径
+              // 必带到达戳（stats 非 null 时打戳，stats 为 null 时本调用点
+              // 也不执行）。真出现即说明等待者被非分发路径完成，禁止用
+              // 事后时钟补造终点，fail closed。
+              throw const OtaTransportException(
+                  'END ACK 到达时刻缺失（非分发路径完成）',
+                  code: 'ACK_MALFORMED');
+            }
             otaMonoLog('MONO_END_ACK_OK', durable: endAck.durableOff);
-            stats?.recordEndAckArrival();
+            stats?.recordEndAckArrival(atUs: endAckArrivalUs);
             transferOk = true;
             return OtaAckResult.fromAck(endAck);
           } on TimeoutException {
@@ -772,8 +787,13 @@ class OtaBleTransport {
     if (view != null && _viewAccepts(f)) {
       view.onAck(f);
     }
+    // P3-4 观测：应答到达时刻在**分发点**取一次，同一分发内的全部等待者
+    // 共用（同源）。取时刻与投递在同一同步块内完成，中间不插入 await，
+    // 因此该时刻不受后续写结算、ACK 解析或日志开销影响（P34-DA01）。
+    // stats 为 null（无观测绑定）时自然不留戳，行为与未插桩一致。
+    final arrivalUs = stats?.nowUs();
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
-      w.offer(f);
+      w.offer(f, atUs: arrivalUs);
     }
   }
 
@@ -922,6 +942,9 @@ class OtaBleTransport {
           session: session,
           durableOff: ack.durableOff,
           blockBitmap: ack.blockBitmap,
+          // P3-4 观测：随结果带回**该应答帧的到达时刻**，避免调用方在
+          // 整个 BEGIN 往返（含写结算与校验）之后另取时钟（P34-DA01）。
+          arrivalUs: waiter.arrivalUs,
         );
       } on TimeoutException {
         _checkNoProgress(); // 预算耗尽优先终止，不再空转重试（RC3-07）
@@ -1115,11 +1138,12 @@ class OtaBleTransport {
   /// [resyncProbeSeq] 仅由 [getDeviceInfo] 的探针透传：非 null 表示本帧
   /// 是废弃期间唯一放行的重新同步探针（RC3-05⑤）。
   Future<void> _writeFrame(Uint8List frame, {int? resyncProbeSeq}) async {
-    // P3-4 观测：传输起点 = 本 transfer 首个 BEGIN 帧的**写调用时刻**
-    //（OTA-XC-BLE-TUNING 冻结边界「首个 BEGIN 帧写调用开始（含写队列
-    // 排队与帧分片）」）。幂等，只有首帧生效；排队等待因此计入传输时长。
-    // 仅在传输窗口内登记：transfer 之外的帧（GET_INFO 探针、后台复核）
-    // 不构成传输起点。
+    // P3-4 观测：传输起点 = 本 transfer 首个 BEGIN 帧的**写调用时刻**，
+    // 即 Dart 侧唯一可观测的代理点（契约文本见 XC-BLE-THROUGHPUT：
+    // 「从 BEGIN 首字节开始发送」）。它不晚于首字节上线，且早于写串行队列
+    // 排队、帧分片与平台写回调，故测得传输时长是契约时长的保守上界；
+    // 排队等待因此计入传输时长。幂等，只有首帧生效。仅在传输窗口内登记：
+    // transfer 之外的帧（GET_INFO 探针、后台复核）不构成传输起点。
     if (_inTransfer) stats?.recordTransferStart();
     await _writeFrameChecked(frame,
         allowCancelled: false, resyncProbeSeq: resyncProbeSeq);
@@ -1727,10 +1751,23 @@ abstract class _FrameWaiterBase {
 
   Future<OtaBleFrame> get future => _completer.future;
 
+  /// 被采信应答帧的**到达时刻**（同 stats 时钟域，微秒；未采信时为 null）。
+  ///
+  /// 在 [offer] 采信匹配帧的同一同步块内打戳，取自分发调用方传入的
+  /// [OtaLinkStats.nowUs]：这是帧**到达分发点**的时刻，与「写调用返回 /
+  /// 写队列结算」无关。物理写 Future 的结算可能晚于 ACK 到达（写队列
+  /// 排队、平台写回调延迟），在结算之后取时钟会把写结算延迟与处理开销
+  /// 算进 ACK 延迟与传输终点（P34-DA01）。
+  ///
+  /// 只由**匹配且首次**的帧写入：等待者完成后 [offer] 直接返回，重复
+  /// 应答不改写；不匹配的帧在 [matches] 处就被拒绝，无关帧不留戳。
+  int? arrivalUs;
+
   bool matches(OtaBleFrame f);
 
-  void offer(OtaBleFrame f) {
+  void offer(OtaBleFrame f, {int? atUs}) {
     if (_completer.isCompleted || !matches(f)) return;
+    arrivalUs = atUs;
     _completer.complete(f);
   }
 
@@ -1770,12 +1807,19 @@ class OtaBeginAck {
     required this.session,
     required this.durableOff,
     required this.blockBitmap,
+    this.arrivalUs,
   });
 
   final int status;
   final int session;
   final int durableOff;
   final int blockBitmap;
+
+  /// 该应答帧到达分发点的时刻（同 stats 时钟域；无观测绑定时为 null）。
+  ///
+  /// 调用方必须用它作为该确认覆盖段的终点时刻，不得在 BEGIN 往返之后
+  /// 另取时钟（P34-DA01）。
+  final int? arrivalUs;
 }
 
 /// ACK 统一结果（BEGIN/DATA/END）。

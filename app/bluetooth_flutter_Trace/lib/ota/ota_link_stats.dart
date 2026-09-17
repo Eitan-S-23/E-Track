@@ -29,6 +29,11 @@ import 'package:flutter/foundation.dart';
 /// - `OTA_LINK_SAMPLE label=<upgrade|probe|query> kind=<...> us=<n> [off=<n>] ...`
 ///   逐事件流式输出（原始样本，跨轮合并的原料）；
 /// - `OTA_LINK_STATS {json}` 每绑定结束时输出一次聚合摘要（幂等，仅首次）。
+/// - `OTA_LINK_RETIRE label=<...> attempt=<n|-> reason=<...> us=<n>` 与
+///   `OTA_LINK_LATE label=<...> attempt=<n|-> kind=<...> us=<n> [extra]`：
+///   观测流封存标记与其后的迟到观测（见 [retire]）。两种前缀都不在解析器
+///   契约的样本/摘要前缀内，按既定解析语义被忽略——封存只改变**归属**，
+///   不改变任何既有行的字段或数值语义。
 ///
 /// ACK 延迟样本语义（OTA-XC-BLE-TUNING 冻结定义的工程映射）：
 /// 从该段**首次完整发送结束**（`recordSegmentSendEnd` 首次记录该字节偏移）
@@ -39,7 +44,12 @@ import 'package:flutter/foundation.dart';
 /// 时刻不变）。确认先于首发登记到达时不存在合法起点，该观测作废并计数
 /// （`ackEarlyInvalid`），既不截负时间也不让迟到重复确认补造样本。
 class OtaLinkStats {
-  OtaLinkStats({required this.label, this.device, this.attempt});
+  OtaLinkStats({
+    required this.label,
+    this.device,
+    this.attempt,
+    int Function()? clockUs,
+  }) : _clockUs = clockUs;
 
   /// 绑定用途：升级传输 / 重启探测 / 身份查询。
   final String label;
@@ -53,10 +63,21 @@ class OtaLinkStats {
   /// 首次，共享实例会让首轮失败值污染后续轮次的最终摘要。
   final int? attempt;
 
-  final Stopwatch _clock = Stopwatch()..start();
+  late final Stopwatch _clock = Stopwatch()..start();
+
+  /// 测试注入的时钟（微秒）。生产路径恒为 null。
+  ///
+  /// 只为判定性用例提供可控时序（到达戳必须等于分发时刻而非写结算时刻，
+  /// 只有可控时钟能给出精确断言）；注入后 [nowUs] 与所有经它取的时间戳
+  /// 一并改为该时钟，实例内仍是单一时钟域。
+  final int Function()? _clockUs;
 
   /// 实例内单调时钟（微秒）。同实例内时间戳同源。
-  int nowUs() => _clock.elapsedMicroseconds;
+  int nowUs() {
+    final injected = _clockUs;
+    if (injected != null) return injected();
+    return _clock.elapsedMicroseconds;
+  }
 
   // ---- 阶段标记（起止时刻，幂等：只记首次）----
 
@@ -172,6 +193,41 @@ class OtaLinkStats {
     _attemptOutcomeUs ??= nowUs();
   }
 
+  // ---- 废弃尝试的观测流封存（P34-DA03）----
+
+  String? _retiredReason;
+  int? _retiredUs;
+
+  /// 本实例的观测流是否已封存（封存后不再产生 `OTA_LINK_SAMPLE`）。
+  bool get retired => _retiredReason != null;
+
+  /// 封存观测流：此后到达的观测一律记为显式迟到记录，不再进入样本流。
+  ///
+  /// 适用场景是**被放弃的重连尝试**：`.timeout` 只放弃 Future，平台发现
+  /// 调用仍在飞行，其回调稍后仍会落到本实例（`recordDiscover` /
+  /// `recordCharsDiscovery` 等）并在此实例上产生样本行。若继续按普通样本
+  /// 输出，这些迟到样本会落在**下一轮尝试**的摘要块内：解析器按块内计数
+  /// 核对会把它们判为 STRAGGLER（"样本归属不明，不得进入任何数值池"），
+  /// 结果是下一轮的合法观测被降级、本轮的迟到观测又无法归属。
+  ///
+  /// 封存后：
+  /// - 迟到观测仍被**完整记录**（kind、耗时/字节与到达时刻都不丢），只是
+  ///   改走 `OTA_LINK_LATE label=<label> attempt=<n> kind=<...> us=<n>`；
+  ///   该前缀不在解析器契约的样本/摘要前缀内，按既定语义被解析器忽略，
+  ///   因此既不污染任何数值池，也不被静默丢弃。
+  /// - [emitSummary] 仍然按幂等规则输出本实例的**唯一**终结摘要（封存不
+  ///   代替摘要，否则被放弃的尝试会失去 `attempts[].outcome=abandoned`
+  ///   与失败阶段字段）；摘要内 `retired` 段说明该实例已被封存及原因。
+  ///
+  /// 幂等：重复调用只保留首次原因与时刻。
+  void retire({required String reason}) {
+    if (_retiredReason != null) return;
+    _retiredReason = reason;
+    _retiredUs = nowUs();
+    debugPrint('OTA_LINK_RETIRE label=$label attempt=${attempt ?? '-'} '
+        'reason=$reason us=$_retiredUs');
+  }
+
   // ---- 传输阶段（BEGIN 首帧写 → END ACK 到达）----
 
   int? _transferStartUs;
@@ -180,8 +236,14 @@ class OtaLinkStats {
 
   /// 传输起点：本 transfer 首个 BEGIN 帧**写调用开始**（幂等）。
   ///
-  /// 对齐 OTA-XC-BLE-TUNING 冻结边界「首个 BEGIN 帧写调用开始（含写队列
-  /// 排队与帧分片）」：调用方必须在写调用时刻记录，不得在排队完成后才记。
+  /// 契约口径（`docs/ota-cross-system-contracts.md`，XC-BLE-THROUGHPUT）是
+  /// 「从 BEGIN 首字节开始发送到成功 END ACK 完整到达」。Dart 侧唯一可观测
+  /// 的代理点就是**写调用发起时刻**：它不晚于首字节真正上线，且早于写串行
+  /// 队列排队、帧分片与平台写回调，因此本实现测得的传输时长是契约时长的
+  /// **保守上界**（只会偏长）。调用方必须在写调用时刻记录，不得在排队完成
+  /// 后才记；映射与队列行为的完整声明见
+  /// `docs/ota-exec-notes/P3-4-da-remediation-2026-09-18.md`（源注释不改写
+  /// 契约文本）。
   void recordTransferStart() {
     _transferStartUs ??= nowUs();
     phaseStart('transfer');
@@ -190,10 +252,16 @@ class OtaLinkStats {
   /// END ACK 完整到达（**仅在本次请求的 END ACK 经 waiter 关联校验与
   /// payload/durable 校验、被采信为本次传输的成功终点时**调用）。
   ///
+  /// [atUs] 必须是该应答帧**到达分发点**时记录的同源时刻（等待者在
+  /// 采信匹配帧的同一同步块内打戳），不得在本次调用处另取时钟：写 Future
+  /// 结算、ACK 解析与校验、日志输出都发生在到达之后，用它们之后的时刻会
+  /// 把写结算延迟与处理开销算进传输时长（P34-DA01）。参数为必填而非
+  /// 回退取时钟，就是为了让「事后补时刻」无法编译通过。
+  ///
   /// 不采用「帧分发时看到 cmd==ACK_END 即覆盖」：无关、重复或非法的 END
   /// 应答不得覆盖成功终点的时刻。
-  void recordEndAckArrival() {
-    _endAckArrivalUs = nowUs();
+  void recordEndAckArrival({required int atUs}) {
+    _endAckArrivalUs = atUs;
   }
 
   /// 传输终态（幂等）：成功 true / 失败 false（错误码由上层 catch 补记）。
@@ -333,8 +401,10 @@ class OtaLinkStats {
   /// 真实终点样本；本实例从未发送的前缀段（新实例续传）自然进入早到暂存，
   /// 判为无效观测——**不给未发送的 resume 前缀制造样本**。
   ///
-  /// [arrivalUs] 为该有效 ACK 的到达时刻（调用方须在 await 返回后立即取，
-  /// 不得在后续处理完成后再取）。
+  /// [arrivalUs] 为该有效 ACK 帧**到达分发点**的同源时刻（P34-DA01）：由
+  /// 等待者在采信匹配帧的同一同步块内打戳并随结果带回。调用方不得在 await
+  /// 返回后另取时钟——写结算、帧解析与校验都发生在到达之后，事后取时刻会
+  /// 把它们的开销算进该确认覆盖段的 ACK 延迟。
   void recordResumeConfirm({
     required int durableOff,
     required int bitmap,
@@ -516,6 +586,11 @@ class OtaLinkStats {
           {'n': attempt ?? (i + 1), 'outcome': _attemptOutcomes[i]},
       ],
       'attemptEndUs': _attemptOutcomeUs,
+      // 封存标记（P34-DA03）：非 null 说明本实例的观测流在 us 时刻被封存，
+      // 此后到达的观测只出现在 OTA_LINK_LATE 行，不进入本摘要的数值池。
+      'retired': _retiredReason == null
+          ? null
+          : {'reason': _retiredReason, 'us': _retiredUs},
       'bind': {
         'charsUs': _charsDiscoveryUs,
         'found': _charsFound,
@@ -627,7 +702,13 @@ class OtaLinkStats {
   }
 
   void _emitSample(String kind, int us, {String extra = ''}) {
-    final line = StringBuffer('OTA_LINK_SAMPLE label=$label kind=$kind us=$us');
+    // 封存后的观测走显式迟到通道（见 [retire]）：样本行必须停止产出，
+    // 否则它会归属到下一轮尝试的摘要块。迟到记录同样带 label/attempt，
+    // 归属不依赖上下文行序。
+    final prefix = _retiredReason == null ? 'OTA_LINK_SAMPLE' : 'OTA_LINK_LATE';
+    final line = StringBuffer('$prefix label=$label');
+    if (_retiredReason != null) line.write(' attempt=${attempt ?? '-'}');
+    line.write(' kind=$kind us=$us');
     if (extra.isNotEmpty) {
       line.write(' ');
       line.write(extra);

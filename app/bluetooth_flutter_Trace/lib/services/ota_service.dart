@@ -946,10 +946,11 @@ class OtaService extends GetxController {
             debugPrint('OTA sent $sent/$total');
           },
         );
-        // P3-4 观测：传输终态已定（transport finally 已记录 outcome），先落
-        // 一份摘要——后续重启等待可能长达整个复核窗口，终态摘要不应等到
-        // 那时。幂等：末尾 finally 的收尾摘要不会重复输出。
-        linkStats.emitSummary();
+        // P3-4 观测：传输终态已定（transport finally 已记录 outcome），但
+        // 摘要必须等到下面两个**立即失败分支**登记完失败元数据之后再落：
+        // 它们调用的 fail() 会记录阶段/原因，而 emitSummary 幂等（仅首次
+        // 生效），finally 的第二次调用不再输出——先封存会让非 OK END 与
+        // 取消路径的失败原因永远进不了原始日志（P34-DA02）。
         if (generation != _cancelGeneration) {
           return fail('cancelled', 'generation-changed');
         }
@@ -965,6 +966,10 @@ class OtaService extends GetxController {
           _phase.value = OtaPhase.failed;
           return fail('transfer', 'mcu-ack-0x${ack.status.toRadixString(16)}');
         }
+        // P3-4 观测：传输终态与失败元数据都已就位，落一份摘要——后续重启
+        // 等待可能长达整个复核窗口，终态摘要不应等到那时。幂等：末尾
+        // finally 的收尾摘要不会重复输出，整轮仍只有一条 OTA_LINK_STATS。
+        linkStats.emitSummary();
         // ---- END OK 只是包传完（PR07）----
         _durableProgress.value = 1.0;
         _upgradeProgress.value = 1.0;
@@ -1736,6 +1741,28 @@ class OtaService extends GetxController {
           : cancelled
               ? 'cancelled'
               : (probeAbandoned ? 'abandoned' : 'no_verdict');
+      // P3-4 观测：本轮没有等到结论即封存本实例的观测流。
+      //
+      // 外层 `.timeout` 只放弃等待，**不取消**在飞的平台发现/绑定调用：
+      // 它们稍后恢复时仍会在本实例上产生样本行（discover / platform_write
+      // 等），而本实例摘要已经/即将定格。届时这些迟到样本会落在**下一轮**
+      // 尝试的摘要块内，被解析器按块内计数核对判为 STRAGGLER（"样本归属
+      // 不明，不得进入任何数值池"）——下一轮的合法观测被降级，本轮的迟到
+      // 观测又无从归属（P34-DA03）。封存后迟到观测改走 `OTA_LINK_LATE`
+      // （带 label + attempt），归属明确、不被静默丢弃，也不进入任何
+      // 数值池；本实例仍输出唯一终结摘要（含 `attempts[].outcome` 与
+      // `retired`），封存不代替摘要。
+      //
+      // 取得结论的轮次（completed / identityChanged / timedOut）不封存：
+      // 该路径上每个 await 都已返回、平台调用无在飞工作，观测流自然
+      // 排空，样本行不会越过本轮摘要。
+      if (outcome == null) {
+        attemptStats.retire(
+          reason: probeAbandoned
+              ? 'outer-timeout'
+              : (cancelled ? 'cancelled' : 'no-verdict'),
+        );
+      }
       attemptStats.recordAttemptOutcome(attemptOutcome);
       // P3-4 观测：轮次外壳逐轮汇总全部尝试结论（含「本轮未获判定」）。
       // 只在 outcome != null 时记，会让空转的轮次在整体摘要里消失——

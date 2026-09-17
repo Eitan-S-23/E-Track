@@ -188,14 +188,14 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 2));
       stats.recordTransferStart(); // 幂等：起点不变
       expect(stats.toJson()['transfer']['startUs'], firstStart);
-      stats.recordEndAckArrival();
+      stats.recordEndAckArrival(atUs: stats.nowUs());
       final firstEnd = stats.toJson()['transfer']['endAckUs'];
       await Future<void>.delayed(const Duration(milliseconds: 2));
       // 同一传输内 END 重试只有被采信的那一轮调用本方法（transport 侧
       // 唯一调用点在采信点，不再由帧分发层按 cmd 覆盖）——这里直接再调
       // 一次即等价于「同一接收点的最新观测」，语义与 [recordTransferStart]
       // 的幂等不同，故显式断言其为「后到者胜」以固定该差异。
-      stats.recordEndAckArrival();
+      stats.recordEndAckArrival(atUs: stats.nowUs());
       final secondEnd = stats.toJson()['transfer']['endAckUs'];
       expect(secondEnd, greaterThan(firstEnd!));
       stats.recordTransferOutcome(ok: true);
@@ -230,7 +230,7 @@ void main() {
     test('schema 与 transfer 域字段齐全', () {
       final stats = OtaLinkStats(label: 'upgrade', device: 'AA:BB');
       stats.recordTransferStart();
-      stats.recordEndAckArrival();
+      stats.recordEndAckArrival(atUs: stats.nowUs());
       stats.recordTransferOutcome(ok: true);
       final json = stats.toJson();
       expect(json['schema'], 1);
@@ -437,6 +437,99 @@ void main() {
       expect(b['mtuChunkBytes'], 20);
       expect(b['mtuSource'], 'error-fallback');
       expect(b['mtuSource'], isNot(a['mtuSource']));
+    });
+  });
+
+  group('P34-DA01 到达时刻 / P34-DA03 观测流封存', () {
+    test('终点取传入的到达时刻，不回退调用处时钟（DA01）', () {
+      var fakeUs = 7000000;
+      final stats = OtaLinkStats(label: 'upgrade', clockUs: () => fakeUs);
+      stats.recordTransferStart();
+      expect(stats.toJson()['transfer']['startUs'], 7000000);
+      // 到达发生在 7000123，调用发生在写结算与校验之后（时钟已推进到
+      // 7009000）：终点必须是被采信应答帧的到达时刻，而不是调用处读数。
+      fakeUs = 7000123;
+      final arrival = stats.nowUs();
+      fakeUs = 7009000;
+      stats.recordEndAckArrival(atUs: arrival);
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['endAckUs'], 7000123, reason: '终点 = 被采信 ACK 的到达时刻');
+      expect(t['elapsedUs'], 123,
+          reason: '写结算、解析与校验的耗时不得计入传输时长');
+      expect(stats.nowUs(), 7009000,
+          reason: '注入时钟把「到达处」与「调用处」分离，证明断言确实有鉴别力');
+    });
+
+    test('封存：迟到观测走 OTA_LINK_LATE，样本流停止且不入数值池（DA03）', () {
+      final logs = <String>[];
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) logs.add(message);
+      };
+      try {
+        var fakeUs = 1000000;
+        final stats =
+            OtaLinkStats(label: 'probe', attempt: 2, clockUs: () => fakeUs);
+        stats.recordDiscover(durationUs: 900);
+        fakeUs = 1500000;
+        stats.retire(reason: 'outer-timeout');
+        expect(stats.retired, isTrue);
+        final retireLines =
+            logs.where((l) => l.startsWith('OTA_LINK_RETIRE ')).toList();
+        expect(retireLines, hasLength(1));
+        expect(
+            retireLines.single,
+            'OTA_LINK_RETIRE label=probe attempt=2 '
+            'reason=outer-timeout us=1500000');
+        // 平台调用在放弃之后才返回：迟到观测必须仍被完整记录（不静默
+        // 丢弃），但不进入样本流。
+        fakeUs = 1600000;
+        stats.recordDiscover(durationUs: 300);
+        stats.recordPlatformWrite(durationUs: 80, bytes: 20);
+        final late = logs.where((l) => l.startsWith('OTA_LINK_LATE ')).toList();
+        expect(late, hasLength(2));
+        // 归属不依赖行序：每条迟到记录自带 label 与 attempt。
+        expect(
+            late.every((l) =>
+                l.startsWith('OTA_LINK_LATE label=probe attempt=2 ')),
+            isTrue);
+        expect(logs.where((l) => l.startsWith('OTA_LINK_SAMPLE ')), isEmpty,
+            reason: '封存后样本行必须停止产出，否则会落进下一轮摘要块');
+        // 迟到观测不进入本实例数值池。
+        final json = stats.toJson();
+        expect((json['discovers'] as Map<String, dynamic>)['calls'], 1);
+        expect((json['platformWrites'] as Map<String, dynamic>)['calls'], 0);
+        expect(json['retired'],
+            <String, Object>{'reason': 'outer-timeout', 'us': 1500000});
+        // 封存不代替摘要：本实例仍恰好输出一条终结摘要，且自报封存事实。
+        stats.emitSummary();
+        stats.emitSummary();
+        final summaries =
+            logs.where((l) => l.startsWith('OTA_LINK_STATS ')).toList();
+        expect(summaries, hasLength(1));
+        expect(summaries.single,
+            contains('"retired":{"reason":"outer-timeout","us":1500000}'));
+        expect(summaries.single, contains('"attempt":2'));
+      } finally {
+        debugPrint = debugPrintThrottled;
+      }
+    });
+
+    test('未封存实例不产出 RETIRE/LATE 行，retired 字段为空（对照）', () {
+      final logs = <String>[];
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) logs.add(message);
+      };
+      try {
+        final stats = OtaLinkStats(label: 'probe', attempt: 1);
+        stats.recordDiscover(durationUs: 500);
+        expect(stats.retired, isFalse);
+        expect(stats.toJson()['retired'], isNull);
+        expect(logs.where((l) => l.startsWith('OTA_LINK_LATE ')), isEmpty);
+        expect(logs.where((l) => l.startsWith('OTA_LINK_RETIRE ')), isEmpty);
+        expect(logs.where((l) => l.startsWith('OTA_LINK_SAMPLE ')), hasLength(1));
+      } finally {
+        debugPrint = debugPrintThrottled;
+      }
     });
   });
 }

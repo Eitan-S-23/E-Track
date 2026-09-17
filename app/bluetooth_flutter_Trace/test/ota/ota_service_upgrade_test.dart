@@ -442,6 +442,63 @@ void main() {
         reason: '发现失败同样登记在绑定字段上');
   });
 
+  test('P3-4 非 OK END：失败元数据先于终结摘要封存，且整轮只有一份摘要（P34-DA02）',
+      () async {
+    final tempDir = tempFirmwareDir();
+    final notifyLog = <String>[];
+    final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: notifyLog);
+    final service = Get.find<OtaService>();
+    // MCU 整包校验不通过 → END 应答非 OK。真值 transport 对这类应答**不抛**
+    // （非 OK、非终态、无可续传预算 → 按 isOk 交调用方判失败），因此这条路径
+    // 既不进 typed catch 的 recordFailure，也没有 ABORT 收尾段——失败阶段与
+    // 原因的唯一来源就是 service 的 `!ack.isOk` 分支。摘要在该分支之前封存
+    // （P34-DA02 的原始缺陷）会让 failure 域永远停在空值：emitSummary 幂等，
+    // finally 的收尾摘要无法补写已经发布的那一份。
+    ble.endAckStatusOverride = OtaBleCodec.statusErrSha;
+
+    final statsLines = <String>[];
+    final originalPrint = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) {
+      final line = message ?? '';
+      if (line.startsWith('OTA_LINK_STATS ')) statsLines.add(line);
+    };
+    addTearDown(() {
+      debugPrint = originalPrint;
+    });
+
+    expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(service.phase, OtaPhase.failed);
+    expect(service.terminalState?.code, 'MCU_ACK_10');
+    expect(service.terminalState?.retryableLater, isTrue,
+        reason: 'ERR_SHA 不在 abortStatuses：整包重传仍可重试');
+    expect(ble.endCalls, 1, reason: '整包已送达 END；非 OK 非终态应答不重试');
+    expect(ble.stagedDurable, 0,
+        reason: 'MCU 拒绝整包后擦除 staging（真实 ERR_SHA 语义）');
+    expect(ble.probeCount, 0, reason: 'END 未被采信，不得伪造设备已重启');
+    expect(ble.abortCalls, 0,
+        reason: '非 OK END 是正常回包而非异常：不触发异常路径的 ABORT');
+
+    // 唯一终结摘要：早退/取消/异常/成功都走 finally，emitSummary 幂等必须
+    // 保证同一轮只有一份——两份会把一轮失败读成两次运行。
+    final lines =
+        statsLines.where((l) => l.contains('"label":"upgrade"')).toList();
+    expect(lines, hasLength(1), reason: '本轮必须恰好一份 upgrade 终结摘要');
+    final json = jsonDecode(lines.single.substring('OTA_LINK_STATS '.length))
+        as Map<String, dynamic>;
+    final failure = json['failure'] as Map<String, dynamic>;
+    expect(failure['stage'], 'transfer',
+        reason: '非 OK END 的失败阶段必须进原始日志（P34-DA02）');
+    expect(failure['reason'], 'mcu-ack-0x10',
+        reason: '失败原因必须落 MCU 状态码，不得留空或退化成泛化文案');
+    final transfer = json['transfer'] as Map<String, dynamic>;
+    expect(transfer['outcome'], 'fail', reason: 'END 未被采信，不得报成功传输');
+    expect(transfer['startUs'], isNotNull,
+        reason: '本轮确实进入过传输，不能被读成「没发生过传输」');
+    expect(transfer['endAckUs'], isNull,
+        reason: '非 OK END 未被采信，不得登记成功终点');
+    expect(transfer['elapsedUs'], isNull, reason: '没有采信终点就没有传输时长');
+  });
+
   test('P3-4 probe 轮次归属：每轮独立摘要 + 轮次外壳汇总逐轮结论（P34-R06）',
       () async {
     final tempDir = tempFirmwareDir();
@@ -2762,6 +2819,12 @@ class _UpgradeFakeBle extends BluetoothService {
   /// 分支——四阶段打点（DECIDED→ABORT_BEGIN→ABORT_DONE→TERMINAL）
   /// 的反例鉴别就在这条路径上，CANCELLED 路径测不到。
   int? dataAckStatusOverride;
+  /// END ACK 状态覆写（P34-DA02）：非 null 时 END 的最终应答改用该状态回
+  /// （durable 仍按 fake 真实 staging 快照组装）。用于构造「整包已送达、
+  /// MCU 校验不通过」的真实现场——真实 ERR_SHA/ERR_LEN 语义是擦除 staging
+  /// 且**不重启**，非 OK 覆写按同一语义收尾。判定链本身不受影响，注入只
+  /// 改应答状态。
+  int? endAckStatusOverride;
 
   // ---- 观测 ----
   int beginCalls = 0;
@@ -3239,11 +3302,18 @@ class _UpgradeFakeBle extends BluetoothService {
       _teardown();
       return;
     }
+    // 判定链全部通过：正常回 OK 并切新固件重启。P34-DA02 的注入点在**应答
+    // 状态**上，不改判定链——注入非 OK 时按真实拒绝语义（擦除 staging、
+    // 不重启、保持旧身份）收尾，供 service 侧「非 OK END」路径取证。
+    final endAckStatus = endAckStatusOverride ?? OtaBleCodec.statusOk;
     _send(OtaBleCodec.rspAckEnd, _sessionId, f.seq,
-        packAck(OtaBleCodec.statusOk, _stagedDurable, 0));
+        packAck(endAckStatus, _stagedDurable, 0));
     _teardown();
-    // END OK：MCU 校验整包通过，切新固件重启。
-    _rebooted = true;
+    if (endAckStatus == OtaBleCodec.statusOk) {
+      _rebooted = true;
+    } else {
+      _eraseStaged();
+    }
   }
 
   void _onAbort(OtaBleFrame f) {
