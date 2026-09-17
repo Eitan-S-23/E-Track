@@ -1250,7 +1250,6 @@ class BluetoothService extends GetxController {
     try {
       if (Platform.isWindows) {
         final services = await _adapter.discoverServices(deviceAddress);
-        stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services;
       } else {
         // 移动端：直接通过FlutterBluePlus发现服务（要求设备已连接）
@@ -1259,7 +1258,6 @@ class BluetoothService extends GetxController {
           throw UnsupportedError('未找到设备，无法发现服务: $deviceAddress');
         }
         final services = await device.discoverServices();
-        stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services; // 返回动态列表，调用方做解析
       }
     } catch (e) {
