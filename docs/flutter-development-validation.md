@@ -295,15 +295,46 @@ Asia/Shanghai), independently of build/upload success. Only the trusted `main`
 workflow in `Eitan-S-23/E-Track` may run. The job alone has `actions: write`;
 development jobs remain read-only. Concurrency is serialized without cancelling
 an in-flight batch. Scheduled runs apply the bounded policy after authorized
-mainline integration. Manual runs default to dry-run; manual apply requires an
-explicit authorized request. This is not a general deletion permission.
+mainline integration. Manual runs default to dry-run. The user's 2026-09-18
+revocable allowance in execution contract section 7.3.3 permits implementation
+and acceptance agents to initiate a bounded manual cleanup without asking again
+for each batch. It is not general deletion permission or a local DELETE entry.
+
+Before dispatch, coordinate serially with the root session and review a dry-run
+against current task deliveries and evidence dependencies. Pinned, in-use,
+pending-review, acceptance-referenced or ambiguous assets are protected. The
+helper cannot infer all such dependencies: an unpinned protected candidate blocks
+apply until the root session resolves protection through the governance process.
+Do not drop its ID and assume the remaining subset is the same reviewed plan.
+
+Record one cleanup incident, actor, dry-run source, selected IDs/reasons and
+protected assets in the existing task record. The incident permits at most 50
+IDs in total; changing agents/runs or immediately repeating batches cannot reset
+that cap. No eligible candidates means stop, not broaden the scope to free space.
+If the workflow cannot start because of billing or missing access, report the
+blocker to the root session. Do not forge CI variables or substitute direct API
+deletions under this standing allowance. A separately authorized root-session
+local cleanup is a one-off operation, not a new routine entry.
 
 ### Signatures
 
 CI entry: `python3 -B Tools/flutter/artifact_maintenance.py --repo-root .`
 Optional mode: `--mode dry-run` or `--mode apply`. The normal workflow supplies
 `ARTIFACT_MAINTENANCE_MODE` and the job's `GITHUB_TOKEN`, never a new PAT.
-Read-only manual plan: `gh workflow run artifact-maintenance.yml --ref main -f mode=dry-run`.
+Manual apply additionally requires `approved_artifact_ids`, a nonempty CSV of
+1-50 distinct positive decimal artifact IDs from the reviewed dry-run. The
+workflow passes it as `ARTIFACT_MAINTENANCE_APPROVED_IDS`; the CLI equivalent is
+`--approved-artifact-ids`. It binds a set, not the ordering, and cannot override
+selection or pins. Missing/malformed IDs or any difference from the current
+candidate set fails before DELETE. Scheduled apply remains policy-driven.
+
+Non-destructive manual plan (still creates a CI run):
+`gh workflow run artifact-maintenance.yml --ref main -f mode=dry-run`.
+After review, apply only that list:
+`gh workflow run artifact-maintenance.yml --ref main -f mode=apply -f approved_artifact_ids=<id1,id2>`.
+The entry and guard must already exist on trusted `main`; a feature-branch copy
+does not confer production maintenance access. Keep CLI config/cache/temp output
+inside the preflighted active project, without changing existing credentials.
 Offline regression: `python -B tests/ota/test_artifact_maintenance.py`.
 
 ### Contracts
@@ -331,9 +362,13 @@ for a future invocation. It never deletes runs, logs, caches, tags, Release asse
 `CI_ARTIFACT_WARN_BYTES` is an optional positive repository variable in bytes;
 the policy's `warning_budget_bytes` is the fallback. Unconfigured budgets and the
 actual account quota are reported as unknown. Repository artifact bytes are not
-account-wide billed usage; caches/packages/other repositories and delayed GitHub
-accounting can differ. A warning budget never widens deletion scope or promises
-immediate recovery. No visibility, billing or token-scope change is made.
+account-wide billed usage. Actions artifacts and GitHub Packages share an
+allowance; caches have a separate allowance, and other repositories plus delayed
+accounting can affect account limits. Deleting artifacts reduces current storage
+and future accrual, not past storage accrual or consumed runner minutes. Payment
+or spending-limit blocks are separate. A warning budget never widens deletion
+scope or promises immediate recovery. No visibility, billing or token-scope
+change is made. See GitHub's [Actions billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 
 Output is ordinary `ARTIFACT_MAINTENANCE` JSON log lines plus checked workspace
 `.cache/artifact-maintenance/runs/<id>/{operations.jsonl,result.json}`. No artifact
@@ -346,6 +381,9 @@ unavailable final inventory leaves that value unknown.
 | Condition | Behavior |
 | --- | --- |
 | Dry-run | Complete plan/report; zero DELETE calls |
+| Manual apply lacks valid reviewed IDs | Nonzero exit before API client/output creation |
+| Candidate ID set changed since review | Nonzero exit before any DELETE; review a new dry-run |
+| Required/in-use/ambiguous candidate not pinned | Agent must not dispatch apply; coordinate protection first |
 | Wrong repo/ref/event/checkout/policy | Nonzero exit; no deletion |
 | Incomplete/changing pagination, duplicate IDs, invalid target metadata | Nonzero exit; no deletion plan applied |
 | Pin, active run, expired artifact, other prefix | Preserve; no scope expansion |
@@ -361,6 +399,10 @@ unavailable final inventory leaves that value unknown.
   candidates; a different branch's newest copies are unaffected.
 - Base: one fresh APK and only pinned/active/other-class artifacts produce no
   deletions. With no configured budget, usage is reported without quota inference.
+- Good manual apply: reviewed IDs `11,12` equal the current selection; the helper
+  still revalidates both artifacts and source runs before DELETE.
+- Bad manual apply: reviewed ID `11` but a newly eligible `12` appears; neither
+  is deleted. An empty candidate list does not justify deleting other classes.
 - Bad: a forged artifact name, foreign workflow, missing digest, incomplete page
   or unsupported event fails closed rather than authorizing a best-effort cleanup.
 
@@ -373,6 +415,9 @@ coverage with an injected API. Runner tests exercise real stdout/stderr, exit
 codes, timeouts, redaction, unknown counts and strict diagnostics; APK helper tests
 remain in the same governance CI. Local self-tests are not independent acceptance
 or proof that a scheduled GitHub invocation has executed.
+Manual-apply tests additionally assert CSV/type/duplicate/cap rejection, exact-set
+matching, changed pins/active runs, zero mutations on drift, CLI environment
+propagation and unchanged scheduled behavior. No fixture deletes real artifacts.
 
 ### Wrong Versus Correct
 
@@ -380,3 +425,7 @@ Wrong: retry an uncertain DELETE, infer the account quota from past uploads, or
 delete release/log artifacts to reach a target size. Correct: reconcile that ID
 read-only, keep byte credit unknown/zero until proven, stop on failure, and retain
 the original fixed scope and raw failure record.
+Wrong: an implementation/acceptance agent deletes a candidate just because it is
+not pinned, or keeps opening batches until billing clears. Correct: establish
+that no active delivery/evidence needs it, bind the reviewed IDs, stop at the
+incident cap, and report storage/job recovery separately from deletion.

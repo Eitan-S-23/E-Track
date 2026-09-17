@@ -291,16 +291,38 @@ def build_plan(api, policy, now, budget):
     }
 
 
-def maintain(api, policy, now, *, mode="dry-run", budget=None, emit=lambda event: None):
+def parse_approved_ids(value):
+    if value == "":
+        return None
+    if not isinstance(value, str) or not re.fullmatch(r"[1-9][0-9]*(?:,[1-9][0-9]*){0,49}", value):
+        raise ValueError("Approved artifact IDs must be 1-50 comma-separated positive integers")
+    ids = [int(item) for item in value.split(",")]
+    if len(ids) != len(set(ids)):
+        raise ValueError("Duplicate approved artifact IDs")
+    return ids
+
+
+def maintain(api, policy, now, *, mode="dry-run", budget=None, approved_ids=None, emit=lambda event: None):
     validate_policy(policy)
     if mode not in ("dry-run", "apply") or now.tzinfo is None or now.utcoffset() != timedelta(0):
         raise ValueError("Maintenance requires an explicit mode and UTC clock")
+    if approved_ids is not None:
+        if not isinstance(approved_ids, list) or len(approved_ids) > 50:
+            raise ValueError("Approved artifact IDs must be a bounded list")
+        for artifact_id in approved_ids:
+            integer(artifact_id, "approved artifact id", 1)
+        if len(approved_ids) != len(set(approved_ids)):
+            raise ValueError("Duplicate approved artifact IDs")
     budget = policy.get("warning_budget_bytes") if budget is None else integer(budget, "warning budget", 1)
     plan = build_plan(api, policy, now, budget)
     report = {"schema": "etrack-artifact-maintenance-result-v1", "mode": mode,
               "result": "DRY_RUN" if mode == "dry-run" else "PASS", "plan": plan,
+              "approved_artifact_ids": approved_ids,
               "operations": [], "confirmed_freed_bytes": 0, "capacity_after": None}
     emit({"event": "plan", **plan})
+    # A dispatch may wait in the queue while age, pins or branch inventory change.
+    if approved_ids is not None and set(approved_ids) != {item["id"] for item in plan["selected"]}:
+        raise ValueError("Current deletion plan differs from the approved artifact IDs; review a new dry-run")
     if mode == "dry-run" or not plan["selected"]:
         return report
     for item in plan["selected"]:
@@ -370,10 +392,15 @@ def main(argv=None):
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--mode", choices=("dry-run", "apply"),
                         default=os.environ.get("ARTIFACT_MAINTENANCE_MODE", "dry-run"))
+    parser.add_argument("--approved-artifact-ids",
+                        default=os.environ.get("ARTIFACT_MAINTENANCE_APPROVED_IDS", ""))
     args = parser.parse_args(argv)
     try:
         root = checked_path(args.repo_root, Path("."))
         ci_context(root, os.environ)
+        approved_ids = parse_approved_ids(args.approved_artifact_ids)
+        if args.mode == "apply" and os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch" and approved_ids is None:
+            raise ValueError("Manual apply requires the exact approved artifact IDs from a reviewed dry-run")
         policy = validate_policy(json.loads(checked_path(root, POLICY_PATH).read_text(encoding="utf-8")))
         raw_budget = os.environ.get("CI_ARTIFACT_WARN_BYTES", "")
         if raw_budget and not re.fullmatch(r"[1-9][0-9]*", raw_budget):
@@ -397,7 +424,8 @@ def main(argv=None):
                         print("::warning title=Artifact storage budget::Repository artifact bytes exceed the configured "
                               "warning budget. This budget is not the GitHub account quota.", flush=True)
 
-            report = maintain(api, policy, datetime.now(timezone.utc), mode=args.mode, budget=budget, emit=emit)
+            report = maintain(api, policy, datetime.now(timezone.utc), mode=args.mode, budget=budget,
+                              approved_ids=approved_ids, emit=emit)
             with checked_path(root, run / "result.json").open("x", encoding="utf-8", newline="\n") as output:
                 output.write(json.dumps(report, indent=2, ensure_ascii=True) + "\n")
             emit({"event": "result", **report})

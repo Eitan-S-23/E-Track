@@ -139,6 +139,55 @@ class ArtifactMaintenanceTests(unittest.TestCase):
         self.assertEqual(["plan", "delete_intent", "operation", "delete_intent", "operation"],
                          [item["event"] for item in events])
 
+    def test_approved_id_parser_is_bounded_and_rejects_ambiguous_inputs(self):
+        self.assertIsNone(M.parse_approved_ids(""))
+        self.assertEqual([2, 1], M.parse_approved_ids("2,1"))
+        self.assertEqual(list(range(1, 51)), M.parse_approved_ids(",".join(map(str, range(1, 51)))))
+        for value in (None, 1, "0", "-1", "01", "1,1", "1,", "1 2", "1, 2", "1\n",
+                      "1;2", "all", ",".join(map(str, range(1, 52)))):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                M.parse_approved_ids(value)
+
+    def test_approved_ids_allow_only_the_exact_plan_in_any_order(self):
+        api = FakeAPI([artifact(1), artifact(2)])
+        report = self.run_maintenance(api, mode="apply", approved_ids=[2, 1])
+        self.assertEqual("PASS", report["result"])
+        self.assertEqual([2, 1], report["approved_artifact_ids"])
+        self.assertEqual(2, len(api.deletes))
+
+    def test_approved_ids_do_not_select_extra_or_partial_candidates(self):
+        for ids in ([], [1], [2], [1, 2, 3]):
+            api, events = FakeAPI([artifact(1), artifact(2)]), []
+            with self.subTest(ids=ids), self.assertRaisesRegex(ValueError, "differs"):
+                self.run_maintenance(api, mode="apply", approved_ids=ids, emit=events.append)
+            self.assertEqual([], api.deletes)
+            self.assertEqual(["plan"], [event["event"] for event in events])
+
+    def test_new_pin_or_active_run_invalidates_reviewed_ids_before_any_delete(self):
+        for change in ("pin", "active", "young"):
+            api, selected_policy = FakeAPI([artifact(1), artifact(2)]), policy()
+            if change == "pin":
+                selected_policy["pinned_artifacts"] = [{"id": 2, "reason": "New evidence dependency"}]
+            elif change == "active":
+                api.runs[10002].update(status="in_progress", conclusion=None)
+            else:
+                api.items[2].update(artifact(2, hours=1))
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, "differs"):
+                self.run_maintenance(api, selected_policy, mode="apply", approved_ids=[1, 2])
+            self.assertEqual([], api.deletes)
+
+    def test_invalid_approved_ids_fail_before_api_access(self):
+        for ids in ("1", [0], [True], ["1"], [1, 1], list(range(1, 52))):
+            api = FakeAPI([artifact(1)])
+            with self.subTest(ids=ids), self.assertRaises(ValueError):
+                self.run_maintenance(api, mode="apply", approved_ids=ids)
+            self.assertEqual([], api.calls)
+
+    def test_approved_dry_run_is_still_read_only(self):
+        api = FakeAPI([artifact(1)])
+        self.assertEqual("DRY_RUN", self.run_maintenance(api, approved_ids=[1])["result"])
+        self.assertEqual([], api.deletes)
+
     def test_age_count_pins_and_branch_isolation(self):
         items = [artifact(1, hours=1), artifact(2, hours=2), artifact(3, hours=3),
                  artifact(4, hours=72), artifact(5, hours=71.999, branch="dev/flutter/other"),
@@ -381,6 +430,38 @@ class ArtifactMaintenanceTests(unittest.TestCase):
         client.assert_not_called()
         create.assert_not_called()
 
+    def test_manual_apply_requires_reviewed_ids_before_output_or_api_creation(self):
+        for value in ("", "1,1", "all"):
+            with self.subTest(value=value), mock.patch.object(M, "ci_context"), \
+                    mock.patch.dict(os.environ, {"GITHUB_EVENT_NAME": "workflow_dispatch"}), \
+                    mock.patch.object(M, "GitHubAPI") as client, \
+                    mock.patch.object(M, "make_directory") as create, \
+                    mock.patch("sys.stderr", new_callable=io.StringIO):
+                self.assertEqual(1, M.main(["--repo-root", str(ROOT), "--mode", "apply",
+                                            "--approved-artifact-ids", value]))
+            client.assert_not_called()
+            create.assert_not_called()
+
+    def test_cli_passes_reviewed_ids_and_keeps_scheduled_policy_behavior(self):
+        for event, approved, expected in (("workflow_dispatch", "1", 0),
+                                          ("workflow_dispatch", "2", 1), ("schedule", "", 0)):
+            fixture = M.make_directory(ROOT, Path(".cache/artifact-maintenance-tests") / uuid.uuid4().hex,
+                                       exclusive=True)
+            policy_path = M.checked_path(fixture, M.POLICY_PATH)
+            M.make_directory(fixture, policy_path.parent)
+            policy_path.write_text(json.dumps(policy()), encoding="utf-8")
+            api = FakeAPI([artifact(1)])
+            with self.subTest(event=event, approved=approved), mock.patch.object(M, "ci_context"), \
+                    mock.patch.object(M, "GitHubAPI", return_value=api), \
+                    mock.patch.dict(os.environ, {"GITHUB_EVENT_NAME": event, "CI_ARTIFACT_WARN_BYTES": "",
+                                                 "ARTIFACT_MAINTENANCE_APPROVED_IDS": approved}), \
+                    mock.patch.object(M, "datetime", wraps=datetime) as clock, \
+                    mock.patch("sys.stdout", new_callable=io.StringIO), \
+                    mock.patch("sys.stderr", new_callable=io.StringIO):
+                clock.now.return_value = NOW
+                self.assertEqual(expected, M.main(["--repo-root", str(fixture), "--mode", "apply"]))
+            self.assertEqual(0 if expected else 1, len(api.deletes))
+
     def test_cli_dry_run_writes_checked_reports_and_budget_warning_without_upload(self):
         fixture = M.make_directory(ROOT, Path(".cache/artifact-maintenance-tests") / uuid.uuid4().hex, exclusive=True)
         policy_path = M.checked_path(fixture, M.POLICY_PATH)
@@ -412,6 +493,8 @@ class ArtifactMaintenanceTests(unittest.TestCase):
         for text in ('cron: "17 2 * * *"', "default: dry-run", "cancel-in-progress: false",
                      "github.repository == 'Eitan-S-23/E-Track'", "github.ref == 'refs/heads/main'",
                      "github.event_name == 'schedule' && 'apply'", "persist-credentials: false",
+                     "approved_artifact_ids:", "ARTIFACT_MAINTENANCE_APPROVED_IDS:",
+                     "github.event_name == 'workflow_dispatch' && inputs.approved_artifact_ids",
                      "python3 -B Tools/flutter/artifact_maintenance.py --repo-root .", "CI_ARTIFACT_WARN_BYTES"):
             self.assertIn(text, workflow)
         self.assertEqual(1, workflow.count("actions: write"))

@@ -13,6 +13,11 @@ on:
         options:
           - dry-run
           - apply
+      approved_artifact_ids:
+        description: "For apply: exact comma-separated IDs from the reviewed dry-run (at most 50); empty for dry-run"
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -44,5 +49,6 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ARTIFACT_MAINTENANCE_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode || 'dry-run' }}
+          ARTIFACT_MAINTENANCE_APPROVED_IDS: ${{ github.event_name == 'workflow_dispatch' && inputs.approved_artifact_ids || '' }}
           CI_ARTIFACT_WARN_BYTES: ${{ vars.CI_ARTIFACT_WARN_BYTES || '' }}
         run: python3 -B Tools/flutter/artifact_maintenance.py --repo-root .

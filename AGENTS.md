@@ -69,6 +69,17 @@ promote AC5 artifacts to OTA or CI release artifacts.
 - Preserve sanitized console diagnostics before artifact upload and keep upload
   failures strict. Missing test counts and unknown account quotas stay unknown;
   neither a successful cleanup nor a step-level PASS proves upload recovery.
+- User authorization (2026-09-18): implementation and acceptance agents may
+  initiate bounded cleanup of confirmed-unused development APKs through the
+  trusted-main maintenance workflow without per-batch user approval. Follow
+  execution contract section 7.3.3: coordinate serially, review a dry-run, protect
+  current/evidence/ambiguous assets, and bind manual apply to its exact approved
+  artifact IDs. One cleanup incident permits at most 50 IDs, not repeated batches
+  until a quota is met. No eligible candidates means no deletion.
+- This allowance does not authorize direct agent DELETE scripts, removing pins,
+  logs/caches/Release or APK/EXE verification assets, changing billing or token
+  scopes, or bypassing unavailable CI. Escalate a blocked maintenance entry to
+  the root session; a separately authorized local cleanup is not standing access.
 
 ## Default Build Entry Point (firmware and/or simulator)
 
