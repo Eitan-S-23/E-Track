@@ -294,8 +294,17 @@ mutation record; supply a bounded countercheck with the development batch.」
 
 > **证据与工作树的对应关系**：下列 R1c/R2/R3 的**被测提交是 `b437cea`**（source-bound：
 > runner 自报的 `commit` 字段与本地 `git rev-parse HEAD` 逐字一致）。本文件所在的
-> 文档提交在该提交**之后**，只增加本记录、不触碰任何源码字节；文档提交自身 push 会再
-> 触发一次 checks-only 运行，但**不作为证据链的一环**，也不改变上表结论。
+> 文档提交在该提交**之后**，只增加本记录、不触碰任何源码字节；
+> `git diff --stat b437cea..e906556 -- app/` 为空，被测源码树逐字节不变，故上表结论继续
+> 适用于当前分支顶端。
+>
+> **该文档提交的 push（run 35263914189）没有产生任何 CI 证据**：两个作业均在
+> `started_at 2026-09-17T19:16:38Z → completed_at 19:16:40Z`（约 2 秒）内失败，
+> `steps` 数为 0，作业日志取回为 `BlobNotFound`。注解原文：
+> `The job was not started because recent account payments have failed or your spending
+> limit needs to be increased.`（详见 §12 的账号计费阻断）。因此该 run **既不是**
+> 本文档早先预估的「配额导致的红」，也**不进入**任何证据链；上表 R1c/R2/R3 的结论
+> 来自它们各自已完成的实际运行，不受此影响。
 
 | 编号 | 目的 | 提交 | run URL | 结论 |
 |---|---|---|---|---|
@@ -595,6 +604,13 @@ MCU 与模块拆到不同速率，MCU 再也无法与模块通信——这不是
   步骤随之被跳过；因此**没有可下载的日志或 APK 产物**，全部证据取自 runner 原始
   stdout（本地落盘副本见 §9）。实现侧未清理、未删除任何既有远端产物，也未绕过
   或弱化该失败（`continue-on-error` 一律未使用）。
+- **账号计费阻断（更硬的阻断，2026-09-17T19:16Z 起观测）**：除上述配额问题外，账号
+  已进入「近期付款失败 / 需提高支出上限」状态，**任何新的作业都不会启动**。实测样本：
+  run 35263914189（文档提交 `e906556`）两作业 `steps` 数 0、约 2 秒即失败，注解为
+  `The job was not started because recent account payments have failed or your spending
+  limit needs to be increased.`；作业日志 `BlobNotFound`。这意味着**在本项恢复前，
+  实现侧无法再取得任何新的 CI 证据**（既非产品缺陷、也非 harness 缺陷，属
+  `ENV_BLOCKED`）。该阻断不影响 §9 表中 R1c/R2/R3 已完成运行的有效性。
 - 未改动 `P3-4-parser-v1` 的任何冻结证据、证据包或其核验器。
 - 未修改主 worktree 的看板/记录/评审证据目录（`.cache/p3-4-parser-review-20260917/`、
   `.cache/p3-4-parser-rereview-20260917/`、`.cache/p3-4-parser-pr2-followup-20260917/`
@@ -615,3 +631,7 @@ MCU 与模块拆到不同速率，MCU 再也无法与模块通信——这不是
    下载**，证据取自带 job id 的原始 stdout；P3-4 仍**不得**据此置「完成」。
 5. 远端新增隔离分支 `dev/flutter/p3-4-r07-mutation`（变异体 `caaf01b`）：仅供复核的
    反证材料，**不得合并、不得发布**；如需清理该分支，请先明示再由主会话处理。
+6. **账号计费阻断需主会话知悉并转达用户**：自 run 35263914189（2026-09-17T19:16Z）
+   起新作业一概不启动（注解为付款失败/支出上限；`steps` 0，日志 `BlobNotFound`）。
+   在本项恢复前，实现侧**无法**再产生任何新的开发自测证据，请勿把后续 dispatch 的
+   快速红误读为实现侧回归；这属于环境阻断，需用户侧处理 Billing 后才能继续。
