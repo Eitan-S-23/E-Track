@@ -514,6 +514,68 @@ void main() {
       }
     });
 
+    test('封存闸门覆盖全部样本与计数入口：迟到观测只留 LATE 行，数值池不变（DA03）',
+        () {
+      final logs = <String>[];
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) logs.add(message);
+      };
+      try {
+        var fakeUs = 1000000;
+        final stats =
+            OtaLinkStats(label: 'upgrade', attempt: 3, clockUs: () => fakeUs);
+        // 封存前每个入口各一次，建立可逐域比对的基线（样本与计数都在内）。
+        stats.recordGetInfo(durationUs: 100);
+        stats.recordSegmentSendEnd(offsetBytes: 0, lengthBytes: 244);
+        stats.recordAckConfirm(blockStart: 0, segs: <int>[0], segmentSize: 244);
+        stats.recordDurableAdvance(244);
+        stats.recordGattWrite(durationUs: 200, bytes: 248);
+        stats.recordDiscover(durationUs: 300);
+        stats.recordPlatformWrite(durationUs: 40, bytes: 20);
+        stats.recordAckClass('ok');
+        final before = stats.toJson();
+        final samplesBefore =
+            logs.where((l) => l.startsWith('OTA_LINK_SAMPLE ')).length;
+
+        fakeUs = 2000000;
+        stats.retire(reason: 'no-verdict');
+        // 同一批入口在封存后各来一次：只允许新增 LATE 行与各自的迟到记录。
+        stats.recordGetInfo(durationUs: 999, ok: false);
+        stats.recordSegmentSendEnd(offsetBytes: 0, lengthBytes: 244);
+        stats.recordAckConfirm(blockStart: 0, segs: <int>[0], segmentSize: 244);
+        stats.recordDurableAdvance(488);
+        stats.recordGattWrite(durationUs: 999, bytes: 248, error: true);
+        stats.recordDiscover(durationUs: 999, error: true);
+        stats.recordPlatformWrite(durationUs: 999, bytes: 20, error: true);
+        stats.recordAckClass('error');
+
+        final after = stats.toJson();
+        for (final key in <String>[
+          'bind',
+          'getInfo',
+          'transfer',
+          'gattWrites',
+          'discovers',
+          'platformWrites',
+        ]) {
+          expect(after[key], before[key],
+              reason: '封存后 $key 不得再变化：迟到观测只留记录，不进数值池与计数');
+        }
+        final late = logs.where((l) => l.startsWith('OTA_LINK_LATE ')).toList();
+        expect(late, hasLength(8), reason: '八个入口各留一条可独立归属的迟到记录');
+        expect(
+            late.every((l) =>
+                l.startsWith('OTA_LINK_LATE label=upgrade attempt=3 ')),
+            isTrue,
+            reason: '迟到记录自带 label 与 attempt，归属不依赖行序');
+        expect(logs.where((l) => l.startsWith('OTA_LINK_SAMPLE ')).length,
+            samplesBefore,
+            reason: '封存后样本行必须停止产出，否则会落进下一轮摘要块');
+      } finally {
+        debugPrint = debugPrintThrottled;
+      }
+    });
+
     test('未封存实例不产出 RETIRE/LATE 行，retired 字段为空（对照）', () {
       final logs = <String>[];
       debugPrint = (String? message, {int? wrapWidth}) {

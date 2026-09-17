@@ -2656,7 +2656,8 @@ void main() {
       // 重发计数超限后走 ABORT + BEGIN 续传（RC3-08③）。续传 BEGIN 回带的
       // durable 前缀因此覆盖 32 个「已发送但从未获得 ACK 样本」的段。
       final mcu = _McuSim()
-        ..dropAckForOffsets = {for (var i = 0; i < 32; i++) i * 128};
+        ..dropAckForOffsets = {for (var i = 0; i < 32; i++) i * 128}
+        ..ackDelay = const Duration(milliseconds: 1);
       // 闸门只挂在第 2 次 BEGIN（续传那一轮）：第 1 次 BEGIN 不受影响。
       final channel = _FrameGateChannel(mcu)
         ..preGateCmd = OtaBleCodec.cmdBegin
@@ -2668,20 +2669,28 @@ void main() {
       final transport = OtaBleTransport(
         channel: channel,
         stats: stats,
-        ackTimeout: const Duration(milliseconds: 50),
+        // 同「同实例无 ACK 恢复」用例的恢复参数：整块 ACK 全丢 → 重发触顶
+        // （retries=1）→ ABORT + BEGIN 续传。
+        retries: 1,
+        ackTimeout: const Duration(milliseconds: 200),
       );
       final pending = transport.transfer(
         package: package,
         packageSha256: shaOf(package),
         etuHeader: etuHeaderOf(package),
       );
+      // 重传触顶与 ABORT 往返都要真实时钟推进，故这里用非零 tick。
       await _pumpUntil(() => channel.preGateHits == 2,
-          reason: '续传 BEGIN 未到达前置闸门');
+          reason: '续传 BEGIN 未到达前置闸门',
+          tick: const Duration(milliseconds: 5),
+          maxTicks: 4000);
       // 续传 BEGIN ACK 的到达时刻：等待者在分发点打戳。
       fakeUs = 4444000;
       channel.releasePre();
       await _pumpUntil(() => channel.postGateHits == 2,
-          reason: '续传 BEGIN ACK 分发后未进入后置闸门');
+          reason: '续传 BEGIN ACK 分发后未进入后置闸门',
+          tick: const Duration(milliseconds: 5),
+          maxTicks: 4000);
       // 整个 BEGIN 往返（写结算 + 解析 + 校验）之后的时刻：旧实现在
       // await 返回后立即取时钟，读到的是它。
       fakeUs = 5555000;
@@ -2824,11 +2833,18 @@ class _ReboundWrapper implements OtaBleChannel {
 
 /// 轮询等待 [condition] 成立：每个 tick 让出事件循环，超时报 [reason]
 /// 而不是永远挂住（P34-DA01 闸门用例的同步点）。
+///
+/// [tick] 默认零延迟——只让出事件循环，适用于纯微任务/同步推进即可到达的
+/// 闸门。凡是要等**真实时钟**推进的同步点（重传超时、ABORT + BEGIN 续传），
+/// 必须传非零 [tick]：零延迟让出在真实时间上几乎是瞬时的，定时器永远等不到
+/// 到期，条件不会成立（用例会以 [reason] 超时报红，不会挂住）。
 Future<void> _pumpUntil(bool Function() condition,
-    {String reason = '等待条件超时', int maxTicks = 400}) async {
+    {String reason = '等待条件超时',
+    int maxTicks = 400,
+    Duration tick = Duration.zero}) async {
   for (var i = 0; i < maxTicks; i++) {
     if (condition()) return;
-    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(tick);
   }
   fail(reason);
 }

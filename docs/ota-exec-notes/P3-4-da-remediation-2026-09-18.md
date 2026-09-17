@@ -135,7 +135,8 @@ Dart 侧映射（已写入 `ota_link_stats.dart::recordTransferStart`、
 - `OtaLinkStats.retire({required String reason})`：幂等封存，输出
   `OTA_LINK_RETIRE label=<l> attempt=<n> reason=<r> us=<n>`，置 `_retiredReason/_retiredUs`。
 - 封存后该实例的一切观测改走 `OTA_LINK_LATE label=<l> attempt=<n> kind=<k> us=<n> [extra]`
-  ——**自带归属**，不再进入任何数值池（`discovers.calls` 等计数保持封存时刻的值）。
+  ——**自带归属**，并且不再进入任何数值池与计数（`discovers.calls` 等保持封存时刻的值，
+  见 4.1 的实现缺口与封存闸门）。
 - 摘要新增 `'retired': {'reason': <r>, 'us': <n>}`；未封存实例该字段为 `null`。
 - 调用点：`ota_service.dart:1759`，仅在「本轮未获判定」（`outcome == null`）时封存，
   原因三分：`outer-timeout`（外层预算放弃）、`cancelled`（取消代次变化）、
@@ -146,6 +147,34 @@ Dart 侧映射（已写入 `ota_link_stats.dart::recordTransferStart`、
 该轮摘要以 `retired` + `attempts[].outcome='abandoned'` 记明其状态；封存**之后**的
 观测一条不丢，只是换成带 `attempt=` 的 LATE 行。实现中不存在「删除观测以改善
 统计」的分支。
+
+### 4.1 封存闸门：CI 红运行后的一次性静态复查发现的实现缺口
+
+首轮开发自测（run 35257955951，见 §9）为红。在按 §7.3 集中审查该轮失败集时发现
+首版实现只改了**行的前缀**，没有改**数值入账**：`_emitSample` 在封存后改走
+`OTA_LINK_LATE`，但各 `record*` 方法仍无条件 `add()` 到样本列表、累加字节与
+错误计数。后果是封存轮次的数值池被迟到观测悄悄改写——那份摘要早已发射且不可重发，
+迟到数值既不进任何摘要、又会被下游误读成该轮（已放弃）的合法统计。该缺口同时与
+本轮新增的 DA03 断言（`s1['discovers']['calls'] == 0`）直接矛盾，属实现与声明不符。
+
+修复（`lib/ota/ota_link_stats.dart`）：新增单一入账闸门
+`bool _startObservation(String kind, int us, {String extra})`——未封存返回 `true`；
+已封存则只写一条 LATE 行并返回 `false`，调用方立即返回、不改动任何统计字段。
+闸门覆盖全部样本/计数入口共 8 处：`recordGetInfo`、`recordSegmentSendEnd`、
+`recordAckConfirm`（逐段按封存时冻结的 `_firstSendEndUs` 判 `ack_early`/`ack_latency`，
+不写确认集合与早到暂存）、`recordAckClass`、`recordDurableAdvance`、`recordGattWrite`、
+`recordDiscover`、`recordPlatformWrite`。未封存路径的行文与数值逐字不变。
+
+边界（写进代码注释，避免二次歧义）：封存封的是**观测流**，不封**轮次账目**——
+`recordAttemptOutcome`、`phaseEnd`、`recordFailure`、`emitSummary` 与
+`recordTransferStart`/`recordCharsDiscovery`/`recordMtu`/`recordSubscribe` 仍照常登记，
+它们只服务本实例自己的那份摘要，不跨轮次串扰；否则被放弃轮次会失去
+`attempts[].outcome=abandoned`。
+
+新增确定性断言（`test/ota/ota_link_stats_test.dart`，同一 `debugPrint` 捕获）：
+封存前 8 个入口各一次建立基线 → 封存 → 同一批入口各再来一次，断言
+`bind`/`getInfo`/`transfer`/`gattWrites`/`discovers`/`platformWrites` 六个域**逐字不变**、
+恰好新增 8 条自带 `label`/`attempt` 的 LATE 行、且样本行计数不再增长。
 
 ---
 
@@ -172,6 +201,7 @@ Dart 侧映射（已写入 `ota_link_stats.dart::recordTransferStart`、
 |---|---|---|
 | `test/ota/ota_link_stats_test.dart` | 终点取传入的到达时刻，不回退调用处时钟（DA01） | 传入 `atUs` 与调用处时钟分离时，字段与样本取传入值 |
 | 同上 | 封存：迟到观测走 `OTA_LINK_LATE`，样本流停止且不入数值池（DA03） | 原始行前缀、行序、`discovers.calls` 不增长 |
+| 同上 | 封存闸门覆盖全部样本与计数入口：迟到观测只留 LATE 行，数值池不变（DA03，4.1 的回归） | `bind`/`getInfo`/`transfer`/`gattWrites`/`discovers`/`platformWrites` 六域封存前后逐字相等；恰新增 8 条 LATE；样本行数不再增长 |
 | 同上 | 未封存实例不产出 RETIRE/LATE 行，`retired` 字段为空（对照） | 反向对照，证明上条不是「怎么写都过」 |
 | `test/ota/ota_ble_transport_test.dart` | 传输起点在首个 BEGIN 帧写调用时刻登记（保守代理，含排队等待）（P34-R03） | BEGIN 写永不返回时起点仍已登记 |
 | 同上 | END 终点取被采信 ACK 的到达时刻：写结算后时钟再推进也不改判 | 时刻与身份同源，不随后续工作漂移 |
@@ -252,9 +282,30 @@ mutation record; supply a bounded countercheck with the development batch.」
 
 | 编号 | 目的 | 提交 | run URL | 结论 |
 |---|---|---|---|---|
-| R1 | checks-only 对照（source-bound 全量 analyze + test） | 待回填 | 待回填 | 待回填 |
+| R1 | checks-only 对照（source-bound 全量 analyze + test） | `e2f6560` | run 35257955951 | **红（失败，未通过）**：23 项测试失败 + 1 项 analyzer info，根因见下 |
+| R1b | 同目标复测（修 R1 三项缺陷后，checks-only） | 待回填 | 待回填 | 待回填 |
 | R2 | 同提交 source-bound Android debug APK | 待回填 | 待回填 | 待回填 |
 | R3 | 外部变异反证（期望红） | 待回填 | 待回填 | 待回填 |
+
+R1 失败根因（同一批次内一次修完，按执行合同 §7.3 集中处理，不逐错重开）：
+
+1. **END OK 去向错误的 fail-closed**（`lib/ota/ota_ble_transport.dart`）：终点归因在
+   `waiter.arrivalUs == null` 时无条件抛 `ACK_MALFORMED`，而**未绑定观测**（`stats == null`）
+   的构造根本不带到达戳——测试文件里 91 处 `OtaBleTransport(` 仅 13 处传 `stats:`，
+   于是所有未绑定的成功传输全部失败。改为只在**绑定观测却拿不到到达戳**时 fail closed
+   （那是真异常），未绑定时传输语义与插桩前逐字一致。
+2. **analyzer `await_only_futures`**（`test/ota/ota_probe_late_attribution_test.dart`）：
+   `await holdEntered;` 对 `Future<void> Function()` 取 await 是无效 await，strict analyze
+   判 info → 步骤失败。改为 `await holdEntered();`。
+3. **续传用例闸门超时**（`test/ota/ota_ble_transport_test.dart`）：`_pumpUntil` 用零延迟
+   让出（无真实时间）轮询，而「ABORT + BEGIN 续传」需要真实重传超时才会到达同步点。
+   为 `_pumpUntil` 增加显式 `tick`（默认 `Duration.zero` 保持原语义），该用例改传
+   `tick: 5ms`、并对齐既有已通过兄弟用例的参数（`retries: 1`、`ackTimeout: 200ms`、
+   `ackDelay: 1ms`）。超时仍以 `fail(reason)` 报红，不会挂死。
+
+R1 的 23 项失败中，日志采集流（`DEV_LOG[tests]`）把失败清单截断为 4 条 + “… and 19 more”，
+故失败全集由四条可见用例名、逐文件通过计数与上述 `stats` 绑定统计共同推定；该推定不
+写作「已验证」，只作为修复范围依据。
 
 回填时同时记录：被测提交 SHA、SDK 身份（Flutter/Dart 版本）、实际 scope、逐作业
 结论、原始日志与产物清单。**上传配额失败一律记为环境阻断，不记为成功**；产物缺失

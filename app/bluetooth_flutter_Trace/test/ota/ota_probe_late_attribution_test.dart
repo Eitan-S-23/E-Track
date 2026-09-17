@@ -309,7 +309,7 @@ Future<_Interleave> _runAbandonedAttemptTimeline({
   // 第 1 轮：`.timeout` 之后的平台调用仍在飞行，此处不 await。
   final inFlight =
       service.findExactOtaCharacteristicsByAddress('AA:BB', stats: attempt1);
-  await holdEntered;
+  await holdEntered();
 
   clockUs = _retireClockUs;
   if (seal) attempt1.retire(reason: 'outer-timeout');

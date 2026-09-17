@@ -158,9 +158,11 @@ class OtaLinkStats {
   /// [ok] 为 false 时同样登记耗时与失败次数：失败往返同样消耗链路时间，
   /// 不能因为「没有身份值可采」就从统计中消失。
   void recordGetInfo({required int durationUs, bool ok = true}) {
+    final extra = ok ? 'ok=1' : 'ok=0';
+    if (!_startObservation('get_info', durationUs, extra: extra)) return;
     _getInfoDurationsUs.add(durationUs);
     if (!ok) _getInfoFailures++;
-    _emitSample('get_info', durationUs, extra: ok ? 'ok=1' : 'ok=0');
+    _emitSample('get_info', durationUs, extra: extra);
   }
 
   // ---- 失败分类（早退 / 异常 / 取消的统一留痕）----
@@ -215,6 +217,14 @@ class OtaLinkStats {
   ///   改走 `OTA_LINK_LATE label=<label> attempt=<n> kind=<...> us=<n>`；
   ///   该前缀不在解析器契约的样本/摘要前缀内，按既定语义被解析器忽略，
   ///   因此既不污染任何数值池，也不被静默丢弃。
+  /// - **数值池与统计计数同时停止吸收**（见 [_startObservation]）：只写
+  ///   `OTA_LINK_LATE` 行，不再改变任何样本列表、次数计数与字节累计。本
+  ///   实例的终结摘要在封存时刻已经发射且不可重发，迟到数值既进不了那份
+  ///   摘要，又会被误读成本轮（已放弃轮次）的合法统计。
+  /// - 轮次自身的账目仍照常登记：[recordAttemptOutcome]、[phaseEnd]、
+  ///   [recordFailure]、[emitSummary] 与传输/绑定字段（[recordTransferStart]、
+  ///   [recordCharsDiscovery]、[recordMtu]、[recordSubscribe]）不属观测流，
+  ///   它们只服务本实例自己的那份摘要，不会跨轮次串扰。
   /// - [emitSummary] 仍然按幂等规则输出本实例的**唯一**终结摘要（封存不
   ///   代替摘要，否则被放弃的尝试会失去 `attempts[].outcome=abandoned`
   ///   与失败阶段字段）；摘要内 `retired` 段说明该实例已被封存及原因。
@@ -316,14 +326,23 @@ class OtaLinkStats {
     required int offsetBytes,
     required int lengthBytes,
   }) {
-    segmentSendTotal++;
+    final extra = 'off=$offsetBytes len=$lengthBytes';
     final now = nowUs();
+    // 封存后不得再登记首发时刻：那会给已放弃轮次补造可配对的 ACK 样本。
+    if (!_startObservation(
+        _sentOffsets.contains(offsetBytes)
+            ? 'segment_retransmit'
+            : 'segment_first_send',
+        now,
+        extra: extra)) {
+      return;
+    }
+    segmentSendTotal++;
     if (_sentOffsets.add(offsetBytes)) {
       _firstSendEndUs[offsetBytes] = now;
       _onSegmentFirstSend(offsetBytes, lengthBytes, now);
     } else {
-      _emitSample('segment_retransmit', now,
-          extra: 'off=$offsetBytes len=$lengthBytes');
+      _emitSample('segment_retransmit', now, extra: extra);
     }
   }
 
@@ -354,6 +373,20 @@ class OtaLinkStats {
     int? atUs,
   }) {
     final now = atUs ?? nowUs();
+    if (_retiredReason != null) {
+      // 封存后逐段只留迟到记录：不写确认集合、不更新早到时刻、不产出样本。
+      // 判别语句只读封存时的冻结状态，不改变任何统计字段。
+      for (final seg in segs) {
+        final offset = blockStart + seg * segmentSize;
+        final firstEnd = _firstSendEndUs[offset];
+        if (firstEnd == null) {
+          _emitSample('ack_early', now, extra: 'off=$offset');
+        } else {
+          _emitSample('ack_latency', now - firstEnd, extra: 'off=$offset');
+        }
+      }
+      return;
+    }
     for (final seg in segs) {
       final offset = blockStart + seg * segmentSize;
       if (!_confirmedOffsets.add(offset)) continue; // 已有有效确认
@@ -442,6 +475,7 @@ class OtaLinkStats {
   /// ACK 分类：ok / duplicate / error / malformed / noProgress / abort。
   /// 重复、无推进、错误与畸形 ACK 不产生样本，只计数（fail-closed 留痕）。
   void recordAckClass(String kind) {
+    if (!_startObservation('ack_class', nowUs(), extra: 'class=$kind')) return;
     switch (kind) {
       case 'ok':
         acksOk++;
@@ -471,6 +505,7 @@ class OtaLinkStats {
 
   /// durable 推进事件（单调去重；含 resume BEGIN ACK 带回的权威进展）。
   void recordDurableAdvance(int off) {
+    if (!_startObservation('durable', nowUs(), extra: 'off=$off')) return;
     if (durableOffsets.isNotEmpty && off <= durableOffsets.last) return;
     durableOffsets.add(off);
     durableTimesUs.add(nowUs());
@@ -490,11 +525,12 @@ class OtaLinkStats {
     required int bytes,
     bool error = false,
   }) {
+    final extra = 'bytes=$bytes${error ? ' error=1' : ''}';
+    if (!_startObservation('gatt_write', durationUs, extra: extra)) return;
     gattWriteDurationsUs.add(durationUs);
     gattWriteBytes += bytes;
     if (error) gattWriteErrors++;
-    _emitSample('gatt_write', durationUs,
-        extra: 'bytes=$bytes${error ? ' error=1' : ''}');
+    _emitSample('gatt_write', durationUs, extra: extra);
   }
 
   final List<int> discoverDurationsUs = [];
@@ -506,9 +542,11 @@ class OtaLinkStats {
   /// 失败尝试同样登记（含其耗时与 [error] 计数）：只统计成功的发现会低估
   /// 实际调用次数与链路开销。
   void recordDiscover({required int durationUs, bool error = false}) {
+    final extra = error ? 'error=1' : '';
+    if (!_startObservation('discover', durationUs, extra: extra)) return;
     discoverDurationsUs.add(durationUs);
     if (error) discoverErrors++;
-    _emitSample('discover', durationUs, extra: error ? 'error=1' : '');
+    _emitSample('discover', durationUs, extra: extra);
   }
 
   final List<int> platformWriteDurationsUs = [];
@@ -522,11 +560,12 @@ class OtaLinkStats {
     required int bytes,
     bool error = false,
   }) {
+    final extra = 'bytes=$bytes${error ? ' error=1' : ''}';
+    if (!_startObservation('platform_write', durationUs, extra: extra)) return;
     platformWriteDurationsUs.add(durationUs);
     platformWriteBytes += bytes;
     if (error) platformWriteErrors++;
-    _emitSample('platform_write', durationUs,
-        extra: 'bytes=$bytes${error ? ' error=1' : ''}');
+    _emitSample('platform_write', durationUs, extra: extra);
   }
 
   // ---- 导出 ----
@@ -699,6 +738,18 @@ class OtaLinkStats {
     if (_summaryEmitted) return;
     _summaryEmitted = true;
     debugPrint('OTA_LINK_STATS ${convert.jsonEncode(toJson())}');
+  }
+
+  /// 观测入账闸门（封存语义见 [retire]）：未封存返回 true，调用方照常登记
+  /// 数值池与计数；已封存则只写一条显式迟到记录并返回 false，调用方必须
+  /// 立即返回，**不得**改动任何样本列表、次数计数或字节累计。
+  ///
+  /// 封存后仍要写行，是为了让"被放弃轮次里到底还发生了什么"不依赖行序、
+  /// 不被静默丢弃：`OTA_LINK_LATE` 自带 label 与 attempt，可独立归属。
+  bool _startObservation(String kind, int us, {String extra = ''}) {
+    if (_retiredReason == null) return true;
+    _emitSample(kind, us, extra: extra);
+    return false;
   }
 
   void _emitSample(String kind, int us, {String extra = ''}) {

@@ -600,18 +600,23 @@ class OtaBleTransport {
             // 时刻取该应答帧的到达分发点时刻（等待者在采信匹配帧时打戳，
             // P34-DA01）：写结算、解析与校验都发生在到达之后，此处另取
             // 时钟会把它们的耗时算进传输时长。
+            // 未绑定观测（stats 为 null）时等待者不带到达戳，本调用点也
+            // 无终点可记：传输语义与插桩前逐字一致。只有绑定了观测却拿不到
+            // 到达戳才是异常状态，那种情况必须 fail closed（见下）。
+            final endStats = stats;
             final endAckArrivalUs = waiter.arrivalUs;
-            if (endAckArrivalUs == null) {
-              // 不可达：等待者只由 _dispatchFrame 的成功匹配完成，该路径
-              // 必带到达戳（stats 非 null 时打戳，stats 为 null 时本调用点
-              // 也不执行）。真出现即说明等待者被非分发路径完成，禁止用
-              // 事后时钟补造终点，fail closed。
-              throw const OtaTransportException(
-                  'END ACK 到达时刻缺失（非分发路径完成）',
-                  code: 'ACK_MALFORMED');
+            if (endStats != null) {
+              if (endAckArrivalUs == null) {
+                // 不可达：绑定观测时等待者只由 _dispatchFrame 的成功匹配
+                // 完成，该路径必带到达戳。真出现即说明等待者被非分发路径
+                // 完成，禁止用事后时钟补造终点，fail closed。
+                throw const OtaTransportException(
+                    'END ACK 到达时刻缺失（非分发路径完成）',
+                    code: 'ACK_MALFORMED');
+              }
+              endStats.recordEndAckArrival(atUs: endAckArrivalUs);
             }
             otaMonoLog('MONO_END_ACK_OK', durable: endAck.durableOff);
-            stats?.recordEndAckArrival(atUs: endAckArrivalUs);
             transferOk = true;
             return OtaAckResult.fromAck(endAck);
           } on TimeoutException {
