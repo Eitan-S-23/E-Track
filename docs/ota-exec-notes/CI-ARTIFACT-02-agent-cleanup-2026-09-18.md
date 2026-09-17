@@ -96,6 +96,47 @@ hashes are in `tests/` and `evidence/summary.json` under the session directory.
 ## Status
 
 Implementation and local validation are complete; cleanup assessment completed
-with zero eligible artifacts and zero deletions. Governance CI and independent
-acceptance are not yet established. Git submission is authorized and pending;
-CI-ARTIFACT-02 remains in progress, separate from all P3-4 product work.
+with zero eligible artifacts and zero deletions. Implementation commit
+`7664b082dfd86f3b114d823688833f912fb00302` was pushed to `main`; a subsequent
+fetch confirmed local HEAD equals `origin/main`. This follow-up records the
+observed CI/closeout facts in a separate documentation commit.
+
+### CI Environment Block
+
+All observations below came from authenticated GET requests after the push;
+no workflow dispatch or rerun was requested.
+
+| Workflow | Run | Observed result |
+| --- | --- | --- |
+| Acceptance Governance | `35275572903` | failure; governance job `105385262609` has 0 steps |
+| Build APK and EXE Release | `35275572927` | path-detection job has 0 steps; APK/EXE/Pages/Release skipped |
+| GitHub Push to WeChat Notification | `35275572962` | notification job has 0 steps |
+
+All three stopped jobs have the same GitHub annotation:
+
+> The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings
+
+Therefore governance CI is **ENV_BLOCKED / NOT_RUN**, not a test failure and not
+PASS. The generic annotation does not identify the precise account quota or
+prove a specific unpaid bill. It does prove that deleting unrelated artifacts
+or repeatedly rerunning this commit is not a justified recovery action.
+Raw metadata/annotations are under `primary-ci/api/`; the compact result is
+`primary-ci/ci.json` in the session directory. Independent review/acceptance
+remains NOT_RUN; CI-ARTIFACT-02 stays in progress, separate from P3-4.
+
+### Preservation And Write Audit
+
+Only the nine scoped governance/tool/test/record paths were committed. The
+shared board was staged from its original HEAD plus this session's rule, card
+and journal only; other sessions' board entries remain uncommitted. The byte
+audit confirms the original board after removing these owned additions and
+all other 386 pre-existing dirty/untracked files are unchanged.
+
+All actively selected output locations are inside the active project: session
+evidence/runtime under `.cache/artifact-agent-20260918/`, fixture outputs under
+the existing `.cache/artifact-maintenance-tests/`, `.cache/flutter-dev-checks-tests/`
+and `.cache/flutter-dev-apk-tests/`, and Git objects/index/refs under `.git/`.
+No PowerShell, device tools, build/package/install commands or release/deploy
+operations were run. Existing user Git and GitHub CLI configuration bytes remain
+unchanged. Credentials were used only in process memory, never committed or
+written into the evidence. Existing untracked assets and worktrees were retained.
