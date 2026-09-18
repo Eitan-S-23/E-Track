@@ -305,6 +305,11 @@ mutation record; supply a bounded countercheck with the development batch.」
 > limit needs to be increased.`（详见 §12 的账号计费阻断）。因此该 run **既不是**
 > 本文档早先预估的「配额导致的红」，也**不进入**任何证据链；上表 R1c/R2/R3 的结论
 > 来自它们各自已完成的实际运行，不受此影响。
+>
+> **2026-09-18T18:45Z 复核：两项环境阻断均已解除**（R4，见 9.5）。作业 4 秒内正常
+> 启动，第六步与第七步（上传日志）在 ubuntu/windows 均 success，两个日志产物包已
+> 发布并可下载，仓库产物总数 305 → 307。§12 中两条阻断条目保留为历史事实，其
+> 「未完成 / 不可用」状态由 R4 取代。
 
 | 编号 | 目的 | 提交 | run URL | 结论 |
 |---|---|---|---|---|
@@ -313,6 +318,7 @@ mutation record; supply a bounded countercheck with the development batch.」
 | R1c | 修 R1b 单项失败后复测（checks-only） | `b437cea` | run 35261398648 | **开发自测全绿**：两宿主 analyze + tests 均 0 失败；整轮结论红，**唯一**原因是日志上传配额（环境阻断），非产品缺陷；见 9.2 |
 | R2 | 同提交 source-bound Android debug APK | `b437cea` | run 35261942487 | **构建/校验全绿**（`apk_build`/`apk_verify`/`apk_collect` PASS，`apk_result: PASS`）；APK 产物**未发布**（同一配额阻断）；见 9.3 |
 | R3 | 外部变异反证（期望红，隔离分支 `dev/flutter/p3-4-r07-mutation`） | `caaf01b`（父 `b437cea`） | run 35262020804 | **已红**：Windows 检出 5 项失败，Linux 未检出（路径不可达，见 §7 / 9.4） |
+| R4 | 计费/上传恢复后的复测（workflow_dispatch，checks-only） | `ae700e9` | run 35382048849 | **整轮绿**：两宿主 analyze + tests 全绿，日志上传 success，**产物已发布并可下载**；见 9.5 |
 
 ### 9.1 R1b（`59e7641`，run 35260571963）：红，1 项测试失败 + 上传配额环境阻断
 
@@ -450,6 +456,35 @@ R1 的 23 项失败中，日志采集流（`DEV_LOG[tests]`）把失败清单截
 回填时同时记录：被测提交 SHA、SDK 身份（Flutter/Dart 版本）、实际 scope、逐作业
 结论、原始日志与产物清单。**上传配额失败一律记为环境阻断，不记为成功**；产物缺失
 不得用「步骤 PASS」代替。
+
+### 9.5 R4（`ae700e9`，run 35382048849）：环境恢复后的首次整轮绿灯，产物已发布
+
+命令：`gh workflow run flutter-dev-checks.yml --ref dev/flutter/p3-4-link-stats
+-f test_scope=all -f build_apk=false`。run 创建于 `2026-09-18T18:45:36Z`，两作业
+**4 秒内正常启动**（`started_at 18:45:40Z`，各 10 个步骤，**无计费注解**），整轮
+`completed/success`，总耗时约 2 分 44 秒。
+
+| 作业 | 第六步 analyze + test | 第七步 上传日志 | tests 计数 |
+|---|---|---|---|
+| ubuntu-latest | success | **success** | 378 passed / 8 skipped / 0 failed |
+| windows-2022 | success | **success** | 386 passed / 0 failed |
+
+- 产物**已发布**（配额恢复的直接证据）：`flutter-dev-ubuntu-latest-35382048849-1`
+  （33,204 B，artifact id 10562286556）与 `flutter-dev-windows-2022-35382048849-1`
+  （30,868 B，id 10562792273），`expires_at 2026-10-02`；仓库产物总数 305 → 307。
+  ubuntu 包已实际下载复核：内含 `result.json`（11,795 B，sha256
+  `7c818d0897d8c192…`）与 `logs/{analyze,dependencies,sdk_checkout,sdk_version,tests}.log`，
+  其中 `tests.log` 252,133 B（sha256 `be47c4252b7067a4…`）。
+- `result.json` 关键字段：`development_result=PASS`、`apk_result=NOT_REQUESTED`、
+  `scope=all`、`evidence_kind=development-self-test`、`formal_acceptance=NOT_RUN`、
+  `lockfile_unchanged=true`、`github_run_attempt=1`。
+- 源码绑定：`DEVELOPMENT_RESULT` 的 `commit` 字段 = `ae700e9`；SDK 身份与 R1c/R2/R3
+  逐字一致（Flutter 3.47.4 stable、`9584c6713b324636289d067944a46fd6b49df14b`、
+  Dart 3.13.3、engine `06a2e2a110089dff50fe635cffd2a61e1b24fbcd`）。
+- R4 是 workflow_dispatch 的 **checks-only** 运行（`build_apk=false`），不含 APK 构建；
+  APK 路径自 R2 之后未复测，如需**已发布**的 APK 产物须另行 dispatch `build_apk=true`。
+- 本地副本：原始 stdout `.cache/tmp-p34/r4-35382048849.log`，产物解包
+  `.cache/tmp-p34/r4-artifact/`。
 
 ---
 
@@ -603,14 +638,18 @@ MCU 与模块拆到不同速率，MCU 再也无法与模块通信——这不是
   （`Failed to CreateArtifact: Artifact storage quota has been hit`），APK 上传
   步骤随之被跳过；因此**没有可下载的日志或 APK 产物**，全部证据取自 runner 原始
   stdout（本地落盘副本见 §9）。实现侧未清理、未删除任何既有远端产物，也未绕过
-  或弱化该失败（`continue-on-error` 一律未使用）。
+  或弱化该失败（`continue-on-error` 一律未使用）。**〔2026-09-18T18:45Z 已解除〕**
+  见 9.5：R4 的日志上传步骤 success，两个日志产物包已发布并可下载。
 - **账号计费阻断（更硬的阻断，2026-09-17T19:16Z 起观测）**：除上述配额问题外，账号
   已进入「近期付款失败 / 需提高支出上限」状态，**任何新的作业都不会启动**。实测样本：
   run 35263914189（文档提交 `e906556`）两作业 `steps` 数 0、约 2 秒即失败，注解为
   `The job was not started because recent account payments have failed or your spending
-  limit needs to be increased.`；作业日志 `BlobNotFound`。这意味着**在本项恢复前，
-  实现侧无法再取得任何新的 CI 证据**（既非产品缺陷、也非 harness 缺陷，属
-  `ENV_BLOCKED`）。该阻断不影响 §9 表中 R1c/R2/R3 已完成运行的有效性。
+  limit needs to be increased.`；作业日志 `BlobNotFound`。该状态覆盖账号下所有
+  工作流（同期 `Acceptance Governance`、`Development Artifact Maintenance` 同注解），
+  也包含本可用于释放存储的维护作业。**〔2026-09-18T18:45Z 已解除〕** 见 9.5：R4 两作业
+  4 秒内正常启动且无计费注解。
+  历史结论（阻断期内成立）：在本项恢复前，实现侧无法再取得任何新的 CI 证据，属
+  `ENV_BLOCKED`，不是产品缺陷；该阻断不影响 §9 表中 R1c/R2/R3 已完成运行的有效性。
 - 未改动 `P3-4-parser-v1` 的任何冻结证据、证据包或其核验器。
 - 未修改主 worktree 的看板/记录/评审证据目录（`.cache/p3-4-parser-review-20260917/`、
   `.cache/p3-4-parser-rereview-20260917/`、`.cache/p3-4-parser-pr2-followup-20260917/`
@@ -626,12 +665,15 @@ MCU 与模块拆到不同速率，MCU 再也无法与模块通信——这不是
 3. 待用户裁定后再决定是否升版本、改合同条目与冻结流程。
 4. 开发自测证据（§9）：R1c 两宿主 `analyze` + `tests` 全绿（`b437cea`）、R2 debug
    APK 构建/校验全绿但**产物未发布**、R3 变异反证在 Windows 检出 5 项（Linux 无
-   判别力）。三个 run 的整轮结论均为红，原因**只有**账号产物存储配额耗尽这一环境
-   阻断（上传步骤失败、APK 上传被跳过）。看板登记时须同时写明：本轮**无产物包可
-   下载**，证据取自带 job id 的原始 stdout；P3-4 仍**不得**据此置「完成」。
+   判别力）。R1c/R2/R3 三个 run 的整轮结论均为红，原因**只有**账号产物存储配额耗尽
+   这一环境阻断（上传步骤失败、APK 上传被跳过）；阻断已于 2026-09-18T18:45Z 前解除，
+   **R4（`ae700e9`，run 35382048849）为首次整轮绿且产物可下载**（见 9.5）。
+   看板登记时须同时写明：R1c/R2/R3 三个 run **无产物包可下载**、证据取自带 job id 的
+   原始 stdout；R4 有产物包但属 checks-only、不含 APK；P3-4 仍**不得**据此置「完成」。
 5. 远端新增隔离分支 `dev/flutter/p3-4-r07-mutation`（变异体 `caaf01b`）：仅供复核的
    反证材料，**不得合并、不得发布**；如需清理该分支，请先明示再由主会话处理。
-6. **账号计费阻断需主会话知悉并转达用户**：自 run 35263914189（2026-09-17T19:16Z）
-   起新作业一概不启动（注解为付款失败/支出上限；`steps` 0，日志 `BlobNotFound`）。
-   在本项恢复前，实现侧**无法**再产生任何新的开发自测证据，请勿把后续 dispatch 的
-   快速红误读为实现侧回归；这属于环境阻断，需用户侧处理 Billing 后才能继续。
+6. **账号计费阻断：2026-09-17T19:16Z 出现、2026-09-18T18:45Z 前解除**（用户侧处理后）。
+   阻断期内新作业一概不启动（注解为付款失败/支出上限；`steps` 0，日志 `BlobNotFound`），
+   实现侧无法产生任何开发自测证据；解除后 R4 已复测为整轮绿且产物可下载（见 9.5）。
+   看板登记时应按「环境阻断已发生并已恢复」记录，不得把阻断期的快速红计入失败次数，
+   也不得把 R4 当作设备验收或独立验收结论。
