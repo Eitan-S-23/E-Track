@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:path_provider/path_provider.dart';
@@ -311,18 +310,32 @@ class OtaService extends GetxController {
     return _runExclusive((generation) async {
       _deviceInfo = null; // 先失效旧快照，成功才重建
       _deviceInfoAddress = null;
+      final stats = OtaDiagnostics.current.enabled
+          ? OtaLinkStats(label: 'query', device: deviceAddress)
+          : null;
+      DeviceOtaInfo? fail(String stage, String reason) {
+        stats?.recordFailure(stage: stage, reason: reason);
+        return null;
+      }
+
+      stats?.phaseStart('bind');
       try {
         final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
           deviceAddress,
+          stats: stats,
         );
         // 发现链取消检查（RC3-04）：等待发现期间用户取消，不继续
         // 绑定/GET_INFO。
-        if (generation != _cancelGeneration) return null;
+        if (generation != _cancelGeneration) {
+          return fail('cancelled', 'generation-changed');
+        }
         if (otaChars == null) {
           _upgradeStatus.value = '设备未暴露 OTA 服务（FFF0/FFF2/FFF1）';
-          return null;
+          return fail('discover', 'ota-chars-missing');
         }
-        final transport = await _bindTransport(deviceAddress, otaChars);
+        final transport = await _bindTransport(deviceAddress, otaChars,
+            stats: stats);
+        stats?.phaseEnd('bind');
         // 绑定链取消检查（RC3-04）：订阅/MTU 交换期间取消，不发
         // GET_INFO。
         if (generation != _cancelGeneration) {
@@ -333,15 +346,17 @@ class OtaService extends GetxController {
           if (transport != null && identical(_transport, transport)) {
             _transport = null;
           }
-          return null;
+          return fail('cancelled', 'generation-changed');
         }
         if (transport == null) {
           _upgradeStatus.value = 'OTA 通知订阅失败';
-          return null;
+          return fail('bind', 'notify-subscribe-failed');
         }
         final info = await transport.getDeviceInfo();
         // 发布身份前取消检查（RC3-04）：取消后不发布新快照。
-        if (generation != _cancelGeneration) return null;
+        if (generation != _cancelGeneration) {
+          return fail('cancelled', 'generation-changed');
+        }
         _deviceInfo = info;
         // 快照绑定来源地址（RC3-08）：换设备连接时旧快照失效。
         _deviceInfoAddress = deviceAddress;
@@ -376,11 +391,16 @@ class OtaService extends GetxController {
           code: e.code,
           message: e.toString(),
         );
-        return null;
+        return fail('identity', e.code);
       } catch (e) {
         _deviceInfo = null;
         _upgradeStatus.value = 'GET_INFO 失败: $e';
-        return null;
+        return fail('query', e.runtimeType.toString());
+      } finally {
+        stats?.phaseEnd('bind');
+        // The retained transport may receive late callbacks after this query.
+        stats?.retire(reason: 'query-finished');
+        stats?.emitSummary();
       }
     });
   }

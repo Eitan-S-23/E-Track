@@ -310,6 +310,17 @@ void main() {
       final rows = (await file!.readAsLines()).map(jsonDecode).toList();
       final messages = rows.where((row) => row['kind'] == 'line')
           .map((row) => row['message'] as String).toList();
+      final queryRow = rows.singleWhere((row) => row['kind'] == 'line' &&
+          (row['message'] as String).startsWith(
+              'OTA_LINK_SAMPLE label=query kind=get_info '));
+      expect(queryRow['seq'], lessThan(
+          rows.singleWhere((row) => row['kind'] == 'upgrade-start')['seq']));
+      final query = messages.where((line) => line.startsWith('OTA_LINK_STATS '))
+          .map((line) => jsonDecode(line.substring('OTA_LINK_STATS '.length)))
+          .singleWhere((value) => value['label'] == 'query');
+      expect(query['getInfo']['calls'], 1);
+      expect(query['getInfo']['failures'], 0);
+      expect(query['bind']['found'], isTrue);
       expect(messages.any((line) => line.startsWith('OTA_MONO MONO_END_ACK_OK ')), isTrue);
       expect(messages.any((line) => line.startsWith('OTA_MONO MONO_REBOOT_VERIFIED ')), isTrue);
       final identities = messages.where((line) => line.startsWith('OTA_IDENTITY '))
@@ -318,6 +329,25 @@ void main() {
       expect(identities.last['versionCode'], 20900);
       expect(identities.last['imageSha256'], '62' * 32);
       expect(rows.last['outcome'], 'completed');
+
+      // Exercise the host consumer with bytes produced by the real Dart writer.
+      final checkout = Directory.current.parent.parent;
+      final output = Directory('${tempDir.path}/host-import');
+      final imported = await Process.run(
+        Platform.isWindows ? 'python' : 'python3',
+        ['-I', '-S', '-B', '-X', 'utf8',
+          '${checkout.path}/Tools/ota/p3-4-link-stats/observation_capture.py',
+          'extract', '--input', file.path,
+          '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
+          '--expect-target', 'AA:BB', '--out-root', output.path],
+        workingDirectory: checkout.path,
+      ).timeout(const Duration(seconds: 15));
+      expect(imported.exitCode, 0, reason: '${imported.stderr}');
+      final receipt = jsonDecode(imported.stdout as String);
+      expect(receipt['outcome'], 'completed');
+      expect(receipt['eligibleForThreshold'], isFalse);
+      expect(await File('${output.path}/observations.log').readAsString(),
+          '${messages.join('\n')}\n');
     });
   });
 

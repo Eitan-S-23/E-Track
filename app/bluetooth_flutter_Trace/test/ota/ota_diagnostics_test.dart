@@ -97,7 +97,8 @@ void main() {
     await diagnostics.close();
     diagnostics = OtaDiagnostics();
     await initialize();
-    expect(diagnostics.status.value.lastExport!.path, oldPath);
+    expect(await FileSystemEntity.identical(
+        diagnostics.status.value.lastExport!.path, oldPath), isTrue);
     expect(diagnostics.status.value.fromPreviousProcess, isTrue);
     expect(diagnostics.status.value.producerLines, 0);
     expect(await diagnostics.beginUpgrade(input()), isFalse);

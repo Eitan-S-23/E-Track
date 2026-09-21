@@ -218,14 +218,20 @@ class OtaObservationLog {
   static Future<File?> latestSnapshot(Directory root) async {
     if (!await root.exists()) return null;
     if (await FileSystemEntity.type(root.path, followLinks: false) ==
-        FileSystemEntityType.link) return null;
+        FileSystemEntityType.link) {
+      return null;
+    }
     final candidates = <File>[];
     await for (final directory in root.list(followLinks: false)) {
       if (directory is! Directory || !RegExp(r'^\d{13,20}-[0-9a-f]{24}$')
-          .hasMatch(directory.uri.pathSegments.where((s) => s.isNotEmpty).last)) continue;
+          .hasMatch(directory.uri.pathSegments.where((s) => s.isNotEmpty).last)) {
+        continue;
+      }
       await for (final entry in directory.list(followLinks: false)) {
         if (entry is File && RegExp(r'^snapshot-[1-4]\.jsonl$')
-            .hasMatch(entry.uri.pathSegments.last)) candidates.add(entry);
+            .hasMatch(entry.uri.pathSegments.last)) {
+          candidates.add(entry);
+        }
       }
       if (candidates.length > 32) return null;
     }
@@ -246,7 +252,9 @@ class OtaObservationLog {
           if (footer is Map<String, dynamic> && footer['kind'] == 'snapshot' &&
               footer['schema'] == 1 && footer['healthy'] == true &&
               footer['upgradeStarts'] == 1 && footer['upgradeEnds'] == 1 &&
-              footer['bytes'] == start + previousNewline + 1) return file;
+              footer['bytes'] == start + previousNewline + 1) {
+            return file;
+          }
         } finally {
           await reader.close();
         }
@@ -279,7 +287,9 @@ class OtaObservationLog {
   Future<bool> beginUpgrade(Map<String, Object?> input) async {
     // One business invocation per capture. Internal protocol retries stay intact.
     if (!healthy || _exporting || _upgradeStarts != 0 || _producerLines == 0 ||
-        _exports >= 4 || !validInput(input)) return false;
+        _exports >= 4 || !validInput(input)) {
+      return false;
+    }
     if (!_append('upgrade-start', {'input': input})) return false;
     _upgradeStarts++;
     final status = await checkpoint();
