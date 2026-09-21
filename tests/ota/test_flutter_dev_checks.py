@@ -482,8 +482,10 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             ".github/workflows/build.yml", "app/bluetooth_flutter_Trace/pubspec.yaml",
             "app/bluetooth_flutter_Trace/test/ota/probe_test.dart",
             "Tools/flutter/dev_checks.py", "Tools/flutter/dev_apk.py",
+            "Tools/ota/p3-4-link-stats/observation_capture.py",
             "Tools/provenance/manifest_profiles.json",
             "tests/ota/test_flutter_dev_checks.py", "tests/ota/test_flutter_dev_apk.py",
+            "tests/ota/test_p3_4_observation_capture.py",
             "docs/flutter-development-validation.md", "docs/acceptance-execution-contract.md",
         )
         omitted = ("docs/acceptance-contracts/P3-3-v9/artifacts/probe.bin", "bsdiff_lzma_AES128-main/dist/probe.bin")

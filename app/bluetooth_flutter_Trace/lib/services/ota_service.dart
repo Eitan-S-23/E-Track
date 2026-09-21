@@ -13,6 +13,7 @@ import '../config/share_links.dart';
 import '../ota/ota_ble_codec.dart';
 import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
+import '../ota/ota_diagnostics.dart';
 import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../ota/ota_link_stats.dart';
@@ -839,6 +840,9 @@ class OtaService extends GetxController {
       // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
       final linkStats = OtaLinkStats(label: 'upgrade', device: deviceAddress);
       OtaBleTransport? activeTransport;
+      final diagnostics = OtaDiagnostics.current;
+      var diagnosticStarted = false;
+      var diagnosticCompleted = false;
       // P3-4 观测：早退/取消统一留痕（阶段 + 原因）后返回 false——未进入
       // 传输的失败不得伪装成成功传输，也不得从终结摘要里静默消失。
       bool fail(String stage, String reason) {
@@ -871,6 +875,27 @@ class OtaService extends GetxController {
         }
         final etuHeader = package.sublist(0, 64);
         final packageSha256 = packageDigest.bytes;
+
+        if (diagnostics.enabled) {
+          diagnosticStarted = await diagnostics.beginUpgrade({
+            'packageSha256': packageDigest.toString(),
+            'packageBytes': package.length,
+            'currentVersionCode': info.currentVersionCode,
+            'currentImageSha256': info.currentImageSha256Hex,
+            'targetVersionCode': _latestInfo?.versionCode,
+            'targetImageSha256': _latestInfo?.targetImageSha256,
+            'deviceAddress': deviceAddress,
+            'appLifecycle': WidgetsBinding.instance.lifecycleState?.name ?? 'unknown',
+          });
+          if (generation != _cancelGeneration) {
+            return fail('cancelled', 'generation-changed');
+          }
+          if (!diagnosticStarted) {
+            _phase.value = OtaPhase.failed;
+            _upgradeStatus.value = '诊断记录未就绪，未开始 BLE 传输；请先检查记录状态';
+            return fail('observation', 'capture-not-ready');
+          }
+        }
 
         // P3-4 观测：绑定阶段自严格发现起（对齐 research §3.1「绑定 =
         // 发现 + MTU + 订阅」：发现耗时属于阶段内，不是阶段前）。外壳记录
@@ -923,6 +948,14 @@ class OtaService extends GetxController {
           _upgradeStatus.value = '设备身份复核失败';
           _phase.value = OtaPhase.failed;
           return fail('recheck', 'device-identity-changed');
+        }
+        if (diagnostics.enabled) {
+          emitOtaObservation('OTA_IDENTITY ${jsonEncode({
+            'phase': 'pre-transfer',
+            'versionCode': recheck.currentVersionCode,
+            'imageSha256': recheck.currentImageSha256Hex,
+            'deviceAddress': deviceAddress,
+          })}');
         }
 
         // ETU 包字节与身份已在上锁后就地校验（RC2-04）。
@@ -1009,6 +1042,15 @@ class OtaService extends GetxController {
             // 刷新本地快照为升级后身份。
             _deviceInfo = outcome.info;
             _deviceInfoAddress = deviceAddress;
+            diagnosticCompleted = true;
+            if (diagnostics.enabled) {
+              emitOtaObservation('OTA_IDENTITY ${jsonEncode({
+                'phase': 'post-reboot',
+                'versionCode': outcome.info!.currentVersionCode,
+                'imageSha256': outcome.info!.currentImageSha256Hex,
+                'deviceAddress': deviceAddress,
+              })}');
+            }
             _phase.value = OtaPhase.completed;
             _upgradeStatus.value =
                 '固件升级完成: 设备已运行 ${latest.versionName}（vcode ${latest.versionCode}）';
@@ -1178,6 +1220,9 @@ class OtaService extends GetxController {
         linkStats.recordTransferOutcome(ok: false);
         // emitSummary 幂等：已提前输出过的路径不会重复。
         linkStats.emitSummary();
+        if (diagnosticStarted) {
+          await diagnostics.finishUpgrade(completed: diagnosticCompleted);
+        }
       }
     }) ?? false;
   }

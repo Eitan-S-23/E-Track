@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
+import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
@@ -272,6 +273,53 @@ void main() {
     expect(service.phase, OtaPhase.readyToInstall);
     return ble;
   }
+
+  test('diagnostic setup failure prevents BEGIN without touching the package', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final tempDir = tempFirmwareDir();
+    final diagnostics = OtaDiagnostics();
+    addTearDown(diagnostics.close);
+    await diagnostics.initialize(enabled: true, target: 'AA:BB', sentinel: 'invalid',
+        directoryProvider: () async => tempDir);
+    await OtaDiagnostics.withInstance(diagnostics, () async {
+      final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: []);
+      final service = Get.find<OtaService>();
+      final before = await service.downloadedFirmwareFile!.readAsBytes();
+      expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+      expect(ble.beginCalls, 0);
+      expect(await service.downloadedFirmwareFile!.readAsBytes(), before);
+      expect(service.phase, OtaPhase.failed);
+    });
+  });
+
+  test('real service produces a saved trace and actual reboot identity', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final tempDir = tempFirmwareDir();
+    final diagnostics = OtaDiagnostics();
+    addTearDown(diagnostics.close);
+    await diagnostics.initialize(enabled: true, target: 'AA:BB',
+        sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => tempDir);
+    await OtaDiagnostics.withInstance(diagnostics, () async {
+      final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: []);
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+      expect(ble.beginCalls, 1);
+      expect(ble.endCalls, 1);
+      final file = diagnostics.status.value.lastExport;
+      expect(file, isNotNull);
+      final rows = (await file!.readAsLines()).map(jsonDecode).toList();
+      final messages = rows.where((row) => row['kind'] == 'line')
+          .map((row) => row['message'] as String).toList();
+      expect(messages.any((line) => line.startsWith('OTA_MONO MONO_END_ACK_OK ')), isTrue);
+      expect(messages.any((line) => line.startsWith('OTA_MONO MONO_REBOOT_VERIFIED ')), isTrue);
+      final identities = messages.where((line) => line.startsWith('OTA_IDENTITY '))
+          .map((line) => jsonDecode(line.substring('OTA_IDENTITY '.length))).toList();
+      expect(identities.map((value) => value['phase']), ['pre-transfer', 'post-reboot']);
+      expect(identities.last['versionCode'], 20900);
+      expect(identities.last['imageSha256'], '62' * 32);
+      expect(rows.last['outcome'], 'completed');
+    });
+  });
 
   test('端到端成功闭环：read → check → download → start → completed', () async {
     final tempDir = tempFirmwareDir();

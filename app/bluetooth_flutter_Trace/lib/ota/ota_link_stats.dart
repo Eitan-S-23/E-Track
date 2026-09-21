@@ -2,7 +2,7 @@ import 'dart:convert' as convert;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'ota_diagnostics.dart';
 
 /// P3-4 BLE 链路观测统计收集器（单绑定实例，纯观测组件）。
 ///
@@ -234,7 +234,7 @@ class OtaLinkStats {
     if (_retiredReason != null) return;
     _retiredReason = reason;
     _retiredUs = nowUs();
-    debugPrint('OTA_LINK_RETIRE label=$label attempt=${attempt ?? '-'} '
+    emitOtaObservation('OTA_LINK_RETIRE label=$label attempt=${attempt ?? '-'} '
         'reason=$reason us=$_retiredUs');
   }
 
@@ -737,7 +737,7 @@ class OtaLinkStats {
   void emitSummary() {
     if (_summaryEmitted) return;
     _summaryEmitted = true;
-    debugPrint('OTA_LINK_STATS ${convert.jsonEncode(toJson())}');
+    emitOtaObservation('OTA_LINK_STATS ${convert.jsonEncode(toJson())}');
   }
 
   /// 观测入账闸门（封存语义见 [retire]）：未封存返回 true，调用方照常登记
@@ -764,6 +764,6 @@ class OtaLinkStats {
       line.write(' ');
       line.write(extra);
     }
-    debugPrint(line.toString());
+    emitOtaObservation(line.toString());
   }
 }

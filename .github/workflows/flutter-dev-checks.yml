@@ -87,9 +87,11 @@ jobs:
             /.github/
             /app/bluetooth_flutter_Trace/
             /Tools/flutter/
+            /Tools/ota/p3-4-link-stats/observation_capture.py
             /Tools/provenance/manifest_profiles.json
             /tests/ota/test_flutter_dev_checks.py
             /tests/ota/test_flutter_dev_apk.py
+            /tests/ota/test_p3_4_observation_capture.py
             /docs/flutter-development-validation.md
             /docs/acceptance-execution-contract.md
 
@@ -120,6 +122,11 @@ jobs:
       - name: Analyze, test and optionally build a debug APK
         working-directory: ${{ github.workspace }}
         run: python -B Tools/flutter/dev_checks.py --repo-root .
+
+      - name: Verify App observation snapshot integrity
+        timeout-minutes: 5
+        working-directory: ${{ github.workspace }}
+        run: python -B tests/ota/test_p3_4_observation_capture.py
 
       - name: Upload development logs (not acceptance evidence)
         if: always()

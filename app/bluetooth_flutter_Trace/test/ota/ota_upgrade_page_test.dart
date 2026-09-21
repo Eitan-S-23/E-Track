@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
 import 'package:ble_monitor/ota/ota_device_info.dart';
+import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_firmware_latest.dart';
 import 'package:ble_monitor/pages/ota_upgrade_page.dart';
 import 'package:ble_monitor/services/ota_service.dart';
@@ -69,6 +70,7 @@ void main() {
     WidgetTester tester, {
     _FakeOtaService? fake,
     BluetoothDevice? connectedDevice,
+    OtaDiagnostics? diagnostics,
   }) async {
     // 升级页按手机竖屏设计：默认 800x600 测试视口下「取消升级」「忽略」
     // 等操作按钮位于视口外（hit test 落空、对话框不弹出）。统一放大
@@ -80,7 +82,7 @@ void main() {
     // GetMaterialApp（非 MaterialApp）：Get.dialog 依赖 Get.key 挂载，
     // 取消对话框交互用例（RC3-05①）需要可用的根导航。
     await tester.pumpWidget(GetMaterialApp(
-      home: OtaUpgradePage(connectedDevice: connectedDevice),
+      home: OtaUpgradePage(connectedDevice: connectedDevice, diagnostics: diagnostics),
     ));
     // postFrameCallback（自动解析连接 + 读取身份）与入场动画。
     await tester.pump();
@@ -96,6 +98,27 @@ void main() {
     );
     return button;
   }
+
+  testWidgets('diagnostic export is absent in the default configuration', (tester) async {
+    await pumpPage(tester);
+    expect(find.byKey(const ValueKey('ota-export-observations')), findsNothing);
+  });
+
+  testWidgets('diagnostic export is visible, but disabled while OTA owns the UI', (tester) async {
+    final diagnostics = OtaDiagnostics();
+    diagnostics.status.value = const OtaDiagnosticStatus(enabled: true, ready: true,
+        records: 3, producerLines: 2);
+    final fake = _FakeOtaService();
+    await pumpPage(tester, fake: fake, diagnostics: diagnostics);
+    final button = find.byKey(const ValueKey('ota-export-observations'));
+    expect(tester.widget<TextButton>(button).onPressed, isNotNull);
+    fake.isUpgrading$.value = true;
+    await tester.pump();
+    expect(tester.widget<TextButton>(button).onPressed, isNull);
+    fake.isUpgrading$.value = false;
+    await tester.pump();
+    expect(tester.widget<TextButton>(button).onPressed, isNotNull);
+  });
 
   group('连接与身份卡', () {
     testWidgets('未连接设备：显示未连接，检查更新按钮禁用', (tester) async {
