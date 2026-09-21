@@ -20,6 +20,14 @@ promote AC5 artifacts to OTA or CI release artifacts.
 - Review the bounded change set and consolidate findings before costly formal
   acceptance. Fix and self-test in batches; a targeted test after each fix is
   not a new acceptance round. See the execution contract, section 7.3.
+- Questions and remediation feedback between implementation, review, acceptance
+  and root agents follow `docs/agent-collaboration-contract.md`. Give evidence,
+  a preferred actionable direction, invariants, a verification oracle and the
+  next owner. Independence does not justify vague answers or withholding guidance.
+- Before Flutter debugging, APK installation or device-log collection, read the
+  project-local `.agents/skills/e-track-flutter-debug/SKILL.md`. Prepare the entire
+  observation/retrieval route before asking for a short device window; a failed
+  host collector is not permission to repeat a successful upgrade.
 - Establish a runnable development-validation route before repeated remediation
   batches. For Flutter, read `docs/flutter-development-validation.md`: use the
   development-only workflow on `dev/flutter/**` under the standing authorization

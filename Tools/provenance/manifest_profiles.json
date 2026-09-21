@@ -48,6 +48,7 @@
     },
     "Validation": {
       "root_patterns": [
+        ".agents/skills/e-track-flutter-debug/scripts/",
         "Tools/",
         "tests/",
         "app/bluetooth_flutter_Trace/test/",
@@ -82,6 +83,7 @@
     },
     "Governance": {
       "root_patterns": [
+        ".agents/skills/e-track-flutter-debug/",
         "docs/ota-prompts/"
       ],
       "top_files": [
@@ -91,14 +93,17 @@
         "app/bluetooth_flutter_Trace/AGENTS.md",
         "app/bluetooth_flutter_Trace/CLAUDE.md",
         "docs/acceptance-execution-contract.md",
+        "docs/agent-collaboration-contract.md",
         "docs/flutter-development-validation.md",
         "docs/ota-cross-system-contracts.md",
         "docs/ota-spec-decisions.md"
       ],
-      "exclude_prefixes": [],
+      "exclude_prefixes": [".agents/skills/e-track-flutter-debug/scripts/"],
       "required_paths": [
         "AGENTS.md",
         "docs/acceptance-execution-contract.md",
+        "docs/agent-collaboration-contract.md",
+        ".agents/skills/e-track-flutter-debug/SKILL.md",
         "docs/ota-cross-system-contracts.md",
         "docs/ota-spec-decisions.md",
         "docs/ota-prompts/prompt-template-acceptance.md",

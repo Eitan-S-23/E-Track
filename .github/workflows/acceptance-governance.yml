@@ -18,6 +18,8 @@ on:
       - ".github/workflows/build.yml"
       - "docs/acceptance-contracts/**"
       - "docs/acceptance-execution-contract.md"
+      - "docs/agent-collaboration-contract.md"
+      - ".agents/skills/e-track-flutter-debug/**"
       - "docs/ota-cross-system-contracts.md"
       - "docs/ota-spec-decisions.md"
       - "docs/ota-prompts/**"
@@ -54,6 +56,8 @@ on:
       - ".github/workflows/build.yml"
       - "docs/acceptance-contracts/**"
       - "docs/acceptance-execution-contract.md"
+      - "docs/agent-collaboration-contract.md"
+      - ".agents/skills/e-track-flutter-debug/**"
       - "docs/ota-cross-system-contracts.md"
       - "docs/ota-spec-decisions.md"
       - "docs/ota-prompts/**"
@@ -79,6 +83,32 @@ permissions:
   contents: read
 
 jobs:
+  flutter-debug-skill:
+    name: Flutter debugging skill (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test host helpers (Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: >-
+          python3 -I -S -B -X utf8 .agents/skills/e-track-flutter-debug/scripts/selftest.py
+          --root "$GITHUB_WORKSPACE"
+          --out "$GITHUB_WORKSPACE/.cache/flutter-debug-skill-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Test host helpers (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        working-directory: ${{ github.workspace }}
+        run: >-
+          python -I -S -B -X utf8 .agents/skills/e-track-flutter-debug/scripts/selftest.py
+          --root "%GITHUB_WORKSPACE%"
+          --out "%GITHUB_WORKSPACE%\.cache\flutter-debug-skill-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
+
   governance-tests:
     name: Validate acceptance and build governance
     runs-on: ubuntu-latest

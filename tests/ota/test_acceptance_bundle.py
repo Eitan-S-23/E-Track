@@ -1451,6 +1451,21 @@ class GovernancePromptScopeTests(unittest.TestCase):
             "acceptance-governance.yml 的 push 与 pull_request 都必须监听 docs/ota-prompts/**",
         )
 
+    def test_debug_skill_and_feedback_have_separate_input_ownership(self):
+        governance = set(VALIDATOR._profile_paths(ROOT, "Governance"))
+        validation = set(VALIDATOR._profile_paths(ROOT, "Validation"))
+        skill = ".agents/skills/e-track-flutter-debug/"
+        for path in ("docs/agent-collaboration-contract.md", skill + "SKILL.md",
+                     skill + "references/device-session.md"):
+            self.assertIn(path, governance)
+            self.assertNotIn(path, validation)
+        for path in (skill + "scripts/host_io.py", skill + "scripts/selftest.py"):
+            self.assertIn(path, validation)
+            self.assertNotIn(path, governance)
+        workflow = (ROOT / ".github/workflows/acceptance-governance.yml").read_text(encoding="utf-8")
+        for path in ("docs/agent-collaboration-contract.md", skill + "**"):
+            self.assertEqual(2, workflow.count('- "' + path + '"'))
+
     def test_dispatch_prompts_do_not_live_outside_governed_dir(self):
         stray = self.find_stray_dispatch_prompts(self.enumerate_repo_markdown())
         self.assertEqual(
