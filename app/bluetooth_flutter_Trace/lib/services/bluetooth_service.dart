@@ -1501,6 +1501,8 @@ class BluetoothService extends GetxController {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
   }) async {
+    final generation = otaLinkGeneration(deviceAddress);
+    final startBinding = otaGattBindingToken(deviceAddress);
     try {
       if (Platform.isWindows) {
         final wSw = stats == null ? null : (Stopwatch()..start());
@@ -1526,6 +1528,9 @@ class BluetoothService extends GetxController {
           durationUs: wSw!.elapsedMicroseconds,
           bytes: data.length,
         );
+        if (generation != otaLinkGeneration(deviceAddress)) {
+          throw StateError('STALE_OTA_GATT_COMPLETION');
+        }
       } else {
         final device = _findDeviceByAddress(deviceAddress);
         if (device == null) {
@@ -1554,6 +1559,9 @@ class BluetoothService extends GetxController {
           }
           stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
         }
+        if (generation != otaLinkGeneration(deviceAddress) || !device.isConnected) {
+          throw StateError('STALE_OTA_GATT_DISCOVERY');
+        }
         for (final svc in services) {
           final sid = svc.uuid.toString();
           if (!_strictBleUuidEquals(sid, serviceId)) continue;
@@ -1576,6 +1584,9 @@ class BluetoothService extends GetxController {
               durationUs: wSw!.elapsedMicroseconds,
               bytes: data.length,
             );
+            if (generation != otaLinkGeneration(deviceAddress)) {
+              throw StateError('STALE_OTA_GATT_COMPLETION');
+            }
             _checkOtaGattCurrent(deviceAddress, binding);
             return;
           }
@@ -1583,6 +1594,10 @@ class BluetoothService extends GetxController {
         throw UnsupportedError('未找到目标OTA特征: $characteristicId');
       }
     } catch (e) {
+      if (reuseOtaCharacteristics && startBinding != null &&
+          identical(startBinding, otaGattBindingToken(deviceAddress))) {
+        _invalidateOtaGatt(deviceAddress.toLowerCase());
+      }
       debugPrint('OTA写入失败($deviceAddress/$serviceId/$characteristicId): $e');
       rethrow;
     }
@@ -1854,10 +1869,12 @@ class BluetoothService extends GetxController {
   }) async {
     final key = deviceAddress.toLowerCase();
     final reuse = reuseOtaCharacteristics && !Platform.isWindows;
+    final tracked = (reuseOtaCharacteristics || preferOtaWithoutResponse) &&
+        !Platform.isWindows;
     int? token;
     try {
       BluetoothDevice? device;
-      if (reuse) {
+      if (tracked) {
         final previous = _otaGattAddress;
         if (previous != null && previous != key) {
           _bumpOtaLinkGeneration(previous);
@@ -1882,7 +1899,7 @@ class BluetoothService extends GetxController {
       final previousBinding = _otaGattBindings[key];
       final services =
           await discoverServicesByAddress(deviceAddress, stats: stats);
-      bool current() => !reuse ||
+      bool current() => !tracked ||
           (generation == otaLinkGeneration(key) &&
            token == _otaDiscoveryTokens[key] && _otaGattAddress == key &&
            _otaServiceWatchOwners.containsKey(key) && device!.isConnected);

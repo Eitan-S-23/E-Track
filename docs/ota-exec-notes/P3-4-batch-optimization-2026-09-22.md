@@ -85,7 +85,7 @@ of the result to baud.
   metadata. Windows tests cover native-adapter write capability selection;
   Linux tests exercise the real mobile service path with platform objects replaced.
 
-## Next Hardware Boundary
+## Development Feedback
 
 Development feedback is recorded separately from hardware:
 
@@ -105,6 +105,13 @@ Development feedback is recorded separately from hardware:
   colliding with the plugin's stream getter. Both are repaired as one source
   batch; the original failed job logs remain `logs-35657253106.zip`. This is not
   a performance result or an independent acceptance round.
+- Corrected WIP `6df2af3d4a78efea84e86b670d9f1300f0d28dd7` passed
+  [both Flutter hosts](https://github.com/Eitan-S-23/E-Track/actions/runs/35657959730).
+  The follow-up batch adds uncached-discovery invalidation and native-error
+  revocation tests, including proof that an old failed completion cannot erase
+  a newer binding. Those added inputs require their own development run.
+
+## Next Hardware Boundary
 
 The earlier one-transfer authorization is spent. The installed 30207 target is
 not an equivalent starting state for replaying the old 30206-to-30207 FULL.

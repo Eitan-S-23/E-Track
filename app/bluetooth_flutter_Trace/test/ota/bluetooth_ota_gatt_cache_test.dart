@@ -30,6 +30,7 @@ class _GattCharacteristic extends Fake implements fbp.BluetoothCharacteristic {
   final notifyEntered = Completer<void>();
   Completer<void>? writeGate;
   Completer<void>? notifyGate;
+  Object? writeError;
 
   @override
   Stream<List<int>> get onValueReceived => values.stream;
@@ -41,6 +42,8 @@ class _GattCharacteristic extends Fake implements fbp.BluetoothCharacteristic {
     modes.add(withoutResponse);
     if (!writeEntered.isCompleted) writeEntered.complete();
     await writeGate?.future;
+    final error = writeError;
+    if (error != null) throw error;
   }
 
   @override
@@ -277,12 +280,15 @@ void main() {
       final result = expectLater(write(stats: stats), throwsStateError);
       await device.writer.writeEntered.future;
       device.resets.add(null);
+      await discover();
+      final current = service.otaGattBindingToken(device.remoteId.str);
       device.writer.writeGate!.complete();
       await result;
       expect((stats.toJson()['platformWrites'] as Map)['errors'], 0);
       expect((stats.toJson()['gattWrites'] as Map)['errors'], 1);
-      await expectLater(write(), throwsStateError);
-      expect(device.writer.writes, hasLength(1));
+      expect(identical(current, service.otaGattBindingToken(device.remoteId.str)), isTrue);
+      await write();
+      expect(device.writer.writes, hasLength(2), reason: 'new binding survives old completion');
     });
 
     test('late notify readiness after reset is rejected', () async {
@@ -293,6 +299,38 @@ void main() {
       device.resets.add(null);
       device.notifier.notifyGate!.complete();
       expect(await pending, isNull);
+    });
+
+    for (final disconnect in [false, true]) {
+      test('uncached discovery cannot write after invalidation; disconnect=$disconnect', () async {
+        configure(reuse: false, preferWithout: true);
+        await discover();
+        final gate = Completer<List<fbp.BluetoothService>>();
+        device.discoveryGate = gate;
+        final pending = expectLater(write(withResponse: false), throwsStateError);
+        await Future<void>.delayed(Duration.zero);
+        expect(device.discoveries, 2);
+        if (disconnect) {
+          device.drop();
+        } else {
+          device.resets.add(null);
+        }
+        gate.complete(device.discoveredServices);
+        await pending;
+        expect(device.writer.writes, isEmpty);
+      });
+    }
+
+    test('platform write failure revokes cache rather than silently retrying it', () async {
+      await discover();
+      device.writer.writeError = StateError('native failure');
+      final stats = OtaLinkStats(label: 'upgrade');
+      await expectLater(write(stats: stats), throwsStateError);
+      expect((stats.toJson()['platformWrites'] as Map)['errors'], 1);
+      expect(service.otaGattBindingToken(device.remoteId.str), isNull);
+      await expectLater(write(), throwsStateError);
+      expect(device.writer.writes, hasLength(1));
+      expect(device.discoveries, 1);
     });
 
     test('canceling an old notify owner does not disable the new owner', () async {
