@@ -87,6 +87,25 @@ of the result to baud.
 
 ## Next Hardware Boundary
 
+Development feedback is recorded separately from hardware:
+
+- Governance/skill commit `73a3563af99ac5a9e0931126be1bc508490cb049` passed
+  [Acceptance Governance](https://github.com/Eitan-S-23/E-Track/actions/runs/35652854571)
+  on both helper hosts and the governance regression job. Original logs are kept
+  under `.cache/governance-skill-feedback-20260922/`.
+- Local host batch: 62 development-runner, 28 APK-helper and 19 observation-parser
+  tests passed. The first host run's long-path failure is preserved under
+  `.cache/p3-4-batch-20260922/host-test-001/`. Read-only reproduction showed
+  `git hash-object` failing with `Filename too long`; process-local
+  `core.longpaths=true` fixed that same fixture. No external short directory or
+  global Git configuration was used. The corrected batch is `host-test-002/`.
+- First WIP `6c6928b788c2c8b6db88a102ce493698c8b529a0` failed
+  [Flutter development CI](https://github.com/Eitan-S-23/E-Track/actions/runs/35657253106):
+  missing explicit const constructors in default expressions and a fake field
+  colliding with the plugin's stream getter. Both are repaired as one source
+  batch; the original failed job logs remain `logs-35657253106.zip`. This is not
+  a performance result or an independent acceptance round.
+
 The earlier one-transfer authorization is spent. The installed 30207 target is
 not an equivalent starting state for replaying the old 30206-to-30207 FULL.
 Before another full-OTA matrix, root must obtain a bounded authorization and a

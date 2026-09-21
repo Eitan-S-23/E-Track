@@ -71,7 +71,7 @@ class _GattDevice extends Fake implements fbp.BluetoothDevice {
   final resets = StreamController<void>.broadcast(sync: true);
   final writer = _GattCharacteristic('fff2', write: true, without: true);
   final notifier = _GattCharacteristic('fff1', notify: true);
-  late List<fbp.BluetoothService> services = [_GattService([writer, notifier])];
+  late List<fbp.BluetoothService> discoveredServices = [_GattService([writer, notifier])];
   int discoveries = 0;
   final discoveryEntered = Completer<void>();
   Completer<List<fbp.BluetoothService>>? discoveryGate;
@@ -87,7 +87,7 @@ class _GattDevice extends Fake implements fbp.BluetoothDevice {
     if (!discoveryEntered.isCompleted) discoveryEntered.complete();
     final gate = discoveryGate;
     discoveryGate = null;
-    return gate == null ? services : await gate.future;
+    return gate == null ? discoveredServices : await gate.future;
   }
 
   void drop() {
@@ -189,7 +189,7 @@ void main() {
     });
 
     test('nonstandard service UUID cannot populate the cache', () async {
-      device.services = [_GattService([device.writer, device.notifier],
+      device.discoveredServices = [_GattService([device.writer, device.notifier],
           id: '1111fff0-0000-1000-8000-00805f9b34fb')];
       expect(await discover(), isNull);
       await expectLater(write(), throwsStateError);
@@ -198,7 +198,7 @@ void main() {
 
     test('missing FFF1 revokes a previously valid binding', () async {
       await discover();
-      device.services = [_GattService([device.writer])];
+      device.discoveredServices = [_GattService([device.writer])];
       expect(await discover(), isNull);
       expect(service.otaGattBindingToken(device.remoteId.str), isNull);
       await expectLater(write(), throwsStateError);
@@ -241,7 +241,7 @@ void main() {
       device.resets.add(null);
       expect(await discover(), isNotNull);
       final current = service.otaGattBindingToken(device.remoteId.str);
-      gate.complete(device.services);
+      gate.complete(device.discoveredServices);
       expect(await old, isNull);
       expect(identical(current, service.otaGattBindingToken(device.remoteId.str)), isTrue);
     });
@@ -313,7 +313,7 @@ void main() {
       final pending = discover();
       await device.discoveryEntered.future;
       service.onClose();
-      gate.complete(device.services);
+      gate.complete(device.discoveredServices);
       expect(await pending, isNull);
       expect(service.otaGattBindingToken(device.remoteId.str), isNull);
     });

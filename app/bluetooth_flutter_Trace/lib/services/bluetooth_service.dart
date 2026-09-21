@@ -463,9 +463,9 @@ class WinBleAdapter implements BluetoothAdapter {
 class BluetoothService extends GetxController {
   BluetoothService({
     this.reuseOtaCharacteristics =
-        kDebugMode && bool.fromEnvironment('OTA_P34_REUSE_GATT'),
+        kDebugMode && const bool.fromEnvironment('OTA_P34_REUSE_GATT'),
     this.preferOtaWithoutResponse =
-        kDebugMode && bool.fromEnvironment('OTA_P34_PREFER_WITHOUT_RESPONSE'),
+        kDebugMode && const bool.fromEnvironment('OTA_P34_PREFER_WITHOUT_RESPONSE'),
   });
 
   // Development candidates, not selected production link parameters.
