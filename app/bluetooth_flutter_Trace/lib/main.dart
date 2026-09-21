@@ -5,6 +5,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'controllers/ble_controller.dart';
 import 'controllers/monitor_controller.dart';
 import 'ota/ota_device_observation.dart';
+import 'ota/ota_diagnostics.dart';
 import 'pages/main_app_page.dart';
 import 'pages/home_page.dart';
 import 'pages/monitor_page.dart';
@@ -25,6 +26,13 @@ import 'services/background_task_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  const observation = OtaDeviceObservationConfig.fromBuild;
+  await OtaDiagnostics.current.initialize(
+    enabled: observation.enabled,
+    target: observation.target,
+    sentinel: observation.sentinel,
+  );
 
   // Windows/Linux/macOS平台数据库初始化
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {

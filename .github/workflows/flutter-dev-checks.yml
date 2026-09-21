@@ -24,6 +24,16 @@ on:
         required: false
         type: string
         default: ""
+      ota_link_candidate:
+        description: "P3-4 debug-only screening candidate; not a production baud or performance result"
+        required: false
+        type: choice
+        default: baseline
+        options:
+          - baseline
+          - reuse-with
+          - discover-without
+          - reuse-without
       device_observation:
         description: "Explicit opt-in device-observation debug APK; requires observation_target and observation_firmware_latest_url"
         required: false
@@ -68,6 +78,7 @@ jobs:
       FLUTTER_DEV_BUILD_APK: ${{ github.event_name == 'workflow_dispatch' && inputs.build_apk && matrix.os == 'ubuntu-latest' && 'true' || 'false' }}
       # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
       TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
+      TRACE_DEV_OTA_LINK_CANDIDATE: ${{ inputs.ota_link_candidate || 'baseline' }}
       # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
       TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}
       TRACE_DEV_OBSERVATION_TARGET: ${{ inputs.observation_target || '' }}
@@ -87,9 +98,11 @@ jobs:
             /.github/
             /app/bluetooth_flutter_Trace/
             /Tools/flutter/
+            /Tools/ota/p3-4-link-stats/observation_capture.py
             /Tools/provenance/manifest_profiles.json
             /tests/ota/test_flutter_dev_checks.py
             /tests/ota/test_flutter_dev_apk.py
+            /tests/ota/test_p3_4_observation_capture.py
             /docs/flutter-development-validation.md
             /docs/acceptance-execution-contract.md
 
@@ -120,6 +133,11 @@ jobs:
       - name: Analyze, test and optionally build a debug APK
         working-directory: ${{ github.workspace }}
         run: python -B Tools/flutter/dev_checks.py --repo-root .
+
+      - name: Verify App observation snapshot integrity
+        timeout-minutes: 5
+        working-directory: ${{ github.workspace }}
+        run: python -B tests/ota/test_p3_4_observation_capture.py
 
       - name: Upload development logs (not acceptance evidence)
         if: always()

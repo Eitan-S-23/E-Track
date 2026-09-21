@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
+import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
@@ -474,7 +475,11 @@ class _FakeBle extends BluetoothService {
     String serviceUuid = 'fff0',
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
+    OtaLinkStats? stats,
   }) async {
+    // P3-4：对齐真实外壳的 stats 上报语义（外壳记录耗时/成败/写模式）。
+    stats?.recordCharsDiscovery(
+        durationUs: 0, found: true, writeMode: 'with');
     return {
       'serviceId': 'fff0',
       'writeCharId': 'fff2',
@@ -484,7 +489,11 @@ class _FakeBle extends BluetoothService {
   }
 
   @override
-  Future<int> requestOtaMtu(String deviceAddress, {int requested = 247}) async {
+  Future<int> requestOtaMtu(
+    String deviceAddress, {
+    int requested = 247,
+    OtaLinkStats? stats,
+  }) async {
     return 247;
   }
 
@@ -492,8 +501,9 @@ class _FakeBle extends BluetoothService {
   Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(
     String deviceAddress,
     String serviceId,
-    String characteristicId,
-  ) async {
+    String characteristicId, {
+    OtaLinkStats? stats,
+  }) async {
     return _notifyController.stream;
   }
 
@@ -504,6 +514,7 @@ class _FakeBle extends BluetoothService {
     String characteristicId,
     List<int> data, {
     bool writeWithResponse = false,
+    OtaLinkStats? stats,
   }) async {
     // 只应答 GET_INFO：INFO 帧 session=0、seq 回显请求 seq（§5.6）。
     final f = OtaBleCodec.decodeFrame(data);
