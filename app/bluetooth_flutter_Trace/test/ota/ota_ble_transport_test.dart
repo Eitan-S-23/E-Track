@@ -167,6 +167,76 @@ void main() {
     });
   });
 
+  group('P34 durable recovery under liveness ACKs', () {
+    for (final unknownSeq in [false, true]) {
+      test('missing block tail is retried despite ignored ACKs '
+          '(unknownSeq=$unknownSeq)', () async {
+        final package = packageBytes(8192);
+        final mcu = _TailLossWithLivenessMcu(unknownSeq: unknownSeq);
+        final stats = OtaLinkStats(label: 'upgrade');
+        final transport = OtaBleTransport(
+          channel: mcu,
+          stats: stats,
+          ackTimeout: const Duration(milliseconds: 150),
+          noProgressTimeout: const Duration(milliseconds: 900),
+        );
+        try {
+          final ack = await transport.transfer(
+            package: package,
+            packageSha256: shaOf(package),
+            etuHeader: etuHeaderOf(package),
+          );
+          expect(ack.isOk, isTrue);
+          expect(ack.durableOff, package.length);
+          expect(mcu.stagedDurable, package.length);
+          expect(mcu._stagedBytes, orderedEquals(package));
+          expect(mcu.tailAttempts, hasLength(2));
+          expect(mcu.tailAttempts.last.seq, mcu.tailAttempts.first.seq);
+          expect(mcu.tailAttempts.last.payload,
+              orderedEquals(mcu.tailAttempts.first.payload));
+          expect(mcu.livenessAcks, greaterThan(0));
+          expect(stats.acksDuplicate, greaterThan(0));
+          expect(stats.retransmitFrames, 1);
+          expect(mcu.beginCalls, 1);
+          expect(mcu.abortCalls, 0);
+          expect(mcu.endCalls, 1);
+        } finally {
+          mcu.stopLiveness();
+          await transport.dispose();
+        }
+      });
+    }
+
+    test('liveness ACKs do not extend the durable deadline', () async {
+      final package = packageBytes(8192);
+      final mcu = _TailLossWithLivenessMcu(permanentLoss: true);
+      final transport = OtaBleTransport(
+        channel: mcu,
+        ackTimeout: const Duration(milliseconds: 150),
+        noProgressTimeout: const Duration(milliseconds: 900),
+        retries: 999,
+      );
+      try {
+        await expectLater(
+          transport.transfer(
+            package: package,
+            packageSha256: shaOf(package),
+            etuHeader: etuHeaderOf(package),
+          ),
+          throwsA(isA<OtaTransportException>().having(
+              (error) => error.code, 'code', 'NO_DURABLE_PROGRESS')),
+        );
+        expect(mcu.tailAttempts.length, greaterThan(1));
+        expect(mcu.tailAttempts.map((frame) => frame.seq).toSet(), hasLength(1));
+        expect(mcu.stagedDurable, 4096);
+        expect(mcu.endCalls, 0);
+      } finally {
+        mcu.stopLiveness();
+        await transport.dispose();
+      }
+    });
+  });
+
   group('transfer', () {
     test('完整传输 8192：BEGIN→两块 DATA→END ACK OK，durable 逐块前进',
         () async {
@@ -3323,6 +3393,46 @@ abstract class _FakeMcuHost implements OtaBleChannel {
 ///   连续，RC3-03）；
 /// - ACK bitmap：ACTIVE 报 RAM segment_bitmap，IDLE 恒 0（真值
 ///   session_progress_bitmap）。
+class _TailLossWithLivenessMcu extends _McuSim {
+  _TailLossWithLivenessMcu({
+    this.unknownSeq = false,
+    this.permanentLoss = false,
+  });
+
+  final bool unknownSeq;
+  final bool permanentLoss;
+  final tailAttempts = <OtaBleFrame>[];
+  Timer? _livenessTimer;
+  int livenessAcks = 0;
+
+  void stopLiveness() {
+    _livenessTimer?.cancel();
+    _livenessTimer = null;
+  }
+
+  @override
+  void onDataFrame(OtaBleFrame frame) {
+    final off = ByteData.sublistView(frame.payload).getUint32(0, Endian.little);
+    if (off == 8064) {
+      tailAttempts.add(frame);
+      if (permanentLoss || tailAttempts.length == 1) {
+        // Drop DATA before the receiver sees it. Repeat the real preceding
+        // ACK faster than ackTimeout, like the MCU's 500 ms liveness path.
+        final previous = sentFrames.lastWhere(
+            (sent) => sent.cmd == OtaBleCodec.rspAckData);
+        _livenessTimer ??= Timer.periodic(const Duration(milliseconds: 25), (_) {
+          livenessAcks++;
+          sendFrame(OtaBleCodec.rspAckData, previous.session,
+              unknownSeq ? 0xffff : previous.seq, previous.payload);
+        });
+        return;
+      }
+      stopLiveness();
+    }
+    super.onDataFrame(frame);
+  }
+}
+
 class _McuSim extends _FakeMcuHost {
   // ---- 会话 RAM 层（teardown 清空）----
   static const int _idle = 0;
