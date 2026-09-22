@@ -8,6 +8,8 @@ import 'package:get/get.dart';
 import 'package:win_ble/win_ble.dart';
 
 import '../ota/ota_device_observation.dart';
+import '../ota/ota_link_stats.dart';
+import '../ota/ota_experiment_config.dart';
 
 // 抽象蓝牙适配器接口
 abstract class BluetoothAdapter {
@@ -460,6 +462,25 @@ class WinBleAdapter implements BluetoothAdapter {
 /// 跨平台蓝牙服务
 /// 为不同平台提供统一的蓝牙接口
 class BluetoothService extends GetxController {
+  BluetoothService({
+    bool? reuseOtaCharacteristics,
+    bool? preferOtaWithoutResponse,
+    OtaExperimentRuntime? experiment,
+  }) : _experiment = experiment ?? OtaExperimentRuntime.current,
+       reuseOtaCharacteristics =
+           (experiment ?? OtaExperimentRuntime.current).config?.reuseGatt ??
+           reuseOtaCharacteristics ??
+           (kDebugMode && const bool.fromEnvironment('OTA_P34_REUSE_GATT')),
+       preferOtaWithoutResponse =
+           (experiment ?? OtaExperimentRuntime.current).config?.withoutResponse ??
+           preferOtaWithoutResponse ??
+           (kDebugMode && const bool.fromEnvironment('OTA_P34_PREFER_WITHOUT_RESPONSE'));
+
+  // Development candidates, not selected production link parameters.
+  final bool reuseOtaCharacteristics;
+  final bool preferOtaWithoutResponse;
+  final OtaExperimentRuntime _experiment;
+
   static BluetoothService get to => Get.find();
 
   // 蓝牙适配器状态
@@ -498,6 +519,16 @@ class BluetoothService extends GetxController {
   /// OTA 链路观测订阅（RC3-08⑦）：与 [_deviceConnectionSubscriptions]
   /// 分开保存，避免与遥控连接路径互相顶掉对方的监听。
   final Map<String, StreamSubscription> _otaLinkWatchers = {};
+  final Map<String, Object> _otaLinkWatchOwners = {};
+  final Map<String, StreamSubscription<void>> _otaServiceWatchers = {};
+  final Map<String, Object> _otaServiceWatchOwners = {};
+  final Map<String, _OtaGattBinding> _otaGattBindings = {};
+  final Map<String, int> _otaDiscoveryTokens = {};
+  int _otaDiscoverySequence = 0;
+  String? _otaGattAddress;
+
+  Object? otaGattBindingToken(String deviceAddress) =>
+      _otaGattBindings[deviceAddress.toLowerCase()];
 
   /// 读取 [deviceAddress] 当前的 OTA 物理连接代次（RC3-08⑦）。
   int otaLinkGeneration(String deviceAddress) =>
@@ -535,6 +566,61 @@ class BluetoothService extends GetxController {
   void _bumpOtaLinkGeneration(String deviceAddress) {
     final key = deviceAddress.toLowerCase();
     _otaLinkGenerations[key] = (_otaLinkGenerations[key] ?? 0) + 1;
+    _invalidateOtaGatt(key);
+  }
+
+  void _invalidateOtaGatt(String key) {
+    _otaGattBindings.remove(key);
+    _otaDiscoveryTokens[key] = ++_otaDiscoverySequence;
+  }
+
+  void _watchOtaServices(BluetoothDevice device) {
+    final key = device.remoteId.str.toLowerCase();
+    final owner = Object();
+    _otaServiceWatchOwners[key] = owner;
+    _otaServiceWatchers.remove(key)?.cancel();
+    void changed() {
+      if (identical(_otaServiceWatchOwners[key], owner)) {
+        _bumpOtaLinkGeneration(key);
+      }
+    }
+    _otaServiceWatchers[key] = device.onServicesReset.listen(
+      (_) => changed(),
+      onError: (Object _) => changed(),
+      onDone: () {
+        changed();
+        if (identical(_otaServiceWatchOwners[key], owner)) {
+          _otaServiceWatchOwners.remove(key);
+          _otaServiceWatchers.remove(key);
+        }
+      },
+    );
+  }
+
+  _OtaGattBinding _requireOtaGatt(String address, String serviceId,
+      String characteristicId, {bool notify = false}) {
+    final key = address.toLowerCase();
+    final binding = _otaGattBindings[key];
+    if (binding == null ||
+        binding.generation != otaLinkGeneration(key) ||
+        _otaGattAddress != key ||
+        !_otaServiceWatchOwners.containsKey(key) ||
+        !binding.device.isConnected ||
+        !_strictBleUuidEquals(binding.serviceId, serviceId) ||
+        !_strictBleUuidEquals(
+            notify ? binding.notifyId : binding.writeId, characteristicId)) {
+      throw StateError('STALE_OTA_GATT_BINDING');
+    }
+    return binding;
+  }
+
+  void _checkOtaGattCurrent(String address, _OtaGattBinding? binding) {
+    if (binding != null &&
+        (!identical(otaGattBindingToken(address), binding) ||
+            binding.generation != otaLinkGeneration(address) ||
+            !binding.device.isConnected)) {
+      throw StateError('STALE_OTA_GATT_COMPLETION');
+    }
   }
 
   /// 监听平台上报的断开事件（RC3-08⑦）：断开即代次前进。
@@ -543,12 +629,19 @@ class BluetoothService extends GetxController {
   /// 挂多个监听把一次断开计成多次。
   void _watchOtaLink(String deviceAddress, Stream<bool> connectedStream) {
     final key = deviceAddress.toLowerCase();
+    final owner = Object();
+    _otaLinkWatchOwners[key] = owner;
     _otaLinkWatchers.remove(key)?.cancel();
-    _otaLinkWatchers[key] = connectedStream.listen((isConnected) {
-      if (!isConnected) {
+    void invalidate() {
+      if (identical(_otaLinkWatchOwners[key], owner)) {
         _bumpOtaLinkGeneration(deviceAddress);
       }
-    });
+    }
+    _otaLinkWatchers[key] = connectedStream.listen((isConnected) {
+      if (!isConnected) {
+        invalidate();
+      }
+    }, onError: (Object _) => invalidate(), onDone: invalidate);
   }
 
   /// OTA 通知通道所有者令牌（RC3-08⑦）。
@@ -635,10 +728,19 @@ class BluetoothService extends GetxController {
     }
     _deviceConnectionSubscriptions.clear();
     // OTA 链路观测订阅同样释放（RC3-08⑦）。
+    _otaLinkWatchOwners.clear();
+    _otaServiceWatchOwners.clear();
+    for (final key in _otaGattBindings.keys.toList()) {
+      _bumpOtaLinkGeneration(key);
+    }
     for (var subscription in _otaLinkWatchers.values) {
       subscription.cancel();
     }
     _otaLinkWatchers.clear();
+    for (var subscription in _otaServiceWatchers.values) {
+      subscription.cancel();
+    }
+    _otaServiceWatchers.clear();
 
     super.onClose();
   }
@@ -1236,11 +1338,21 @@ class BluetoothService extends GetxController {
     }
   }
 
-  /// 通过设备地址发现服务（用于遥控透传）
-  Future<List<dynamic>> discoverServicesByAddress(String deviceAddress) async {
+  /// 通过设备地址发现服务（用于遥控透传）。
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录每次
+  /// 服务发现调用耗时（含 OTA 写路径内的重复发现——待测热点归因数据），
+  /// 失败尝试同样登记并计入 errors。
+  Future<List<dynamic>> discoverServicesByAddress(
+    String deviceAddress, {
+    OtaLinkStats? stats,
+  }) async {
+    final sw = stats == null ? null : (Stopwatch()..start());
     try {
       if (Platform.isWindows) {
-        return await _adapter.discoverServices(deviceAddress);
+        final services = await _adapter.discoverServices(deviceAddress);
+        stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
+        return services;
       } else {
         // 移动端：直接通过FlutterBluePlus发现服务（要求设备已连接）
         final device = _findDeviceByAddress(deviceAddress);
@@ -1248,9 +1360,14 @@ class BluetoothService extends GetxController {
           throw UnsupportedError('未找到设备，无法发现服务: $deviceAddress');
         }
         final services = await device.discoverServices();
+        stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services; // 返回动态列表，调用方做解析
       }
     } catch (e) {
+      // P3-4 观测：失败尝试（含未找到设备的立即失败）同样登记耗时与
+      // 错误计数——只统计成功发现会低估实际调用次数与链路开销。
+      stats?.recordDiscover(
+          durationUs: sw!.elapsedMicroseconds, error: true);
       debugPrint('发现服务失败($deviceAddress): $e');
       rethrow;
     }
@@ -1339,42 +1456,158 @@ class BluetoothService extends GetxController {
   /// OTA 传输（OTA-XC-FLUTTER-TRANSPORT 红线：非 FFF2 特征不得被
   /// 模糊匹配命中）。serviceId/characteristicId 必须来自
   /// [findExactOtaCharacteristicsByAddress] 的发现结果。
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：方法级 GATT
+  /// 写计时（channel 层观测点）；私有实现内再拆分平台写与移动端逐分片
+  /// discoverServices() 的各自耗时。
   Future<void> writeOtaCharacteristicByAddress(
     String deviceAddress,
     String serviceId,
     String characteristicId,
     List<int> data, {
     bool writeWithResponse = false,
+    OtaLinkStats? stats,
   }) async {
+    _experiment.requireForOta()?.requireDevice(deviceAddress);
+    if (stats == null) {
+      await _writeOtaCharacteristicByAddress(
+        deviceAddress,
+        serviceId,
+        characteristicId,
+        data,
+        writeWithResponse: writeWithResponse,
+      );
+      return;
+    }
+    final sw = Stopwatch()..start();
+    try {
+      await _writeOtaCharacteristicByAddress(
+        deviceAddress,
+        serviceId,
+        characteristicId,
+        data,
+        writeWithResponse: writeWithResponse,
+        stats: stats,
+      );
+      stats.recordGattWrite(
+        durationUs: sw.elapsedMicroseconds,
+        bytes: data.length,
+      );
+    } catch (e) {
+      stats.recordGattWrite(
+        durationUs: sw.elapsedMicroseconds,
+        bytes: data.length,
+        error: true,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> _writeOtaCharacteristicByAddress(
+    String deviceAddress,
+    String serviceId,
+    String characteristicId,
+    List<int> data, {
+    bool writeWithResponse = false,
+    OtaLinkStats? stats,
+  }) async {
+    final generation = otaLinkGeneration(deviceAddress);
+    final startBinding = otaGattBindingToken(deviceAddress);
     try {
       if (Platform.isWindows) {
-        await _adapter.writeCharacteristic(
-          deviceAddress,
-          serviceId,
-          characteristicId,
-          data,
-          writeWithResponse: writeWithResponse,
+        final wSw = stats == null ? null : (Stopwatch()..start());
+        try {
+          await _adapter.writeCharacteristic(
+            deviceAddress,
+            serviceId,
+            characteristicId,
+            data,
+            writeWithResponse: writeWithResponse,
+          );
+        } catch (_) {
+          // P3-4 观测：失败的平台写同样登记耗时与错误计数——只统计成功写
+          // 会让异常尝试从阶段统计中消失。
+          stats?.recordPlatformWrite(
+            durationUs: wSw!.elapsedMicroseconds,
+            bytes: data.length,
+            error: true,
+          );
+          rethrow;
+        }
+        stats?.recordPlatformWrite(
+          durationUs: wSw!.elapsedMicroseconds,
+          bytes: data.length,
         );
+        if (generation != otaLinkGeneration(deviceAddress)) {
+          throw StateError('STALE_OTA_GATT_COMPLETION');
+        }
       } else {
         final device = _findDeviceByAddress(deviceAddress);
         if (device == null) {
           throw UnsupportedError('未找到设备，无法写入: $deviceAddress');
         }
-        final services = await device.discoverServices();
+        final binding = reuseOtaCharacteristics
+            ? _requireOtaGatt(deviceAddress, serviceId, characteristicId)
+            : null;
+        if (binding != null &&
+            writeWithResponse != (binding.writeMode == 'with')) {
+          throw StateError('OTA_GATT_WRITE_MODE_MISMATCH');
+        }
+        final List<dynamic> services;
+        if (binding != null) {
+          services = [binding.service];
+        } else {
+          final dSw = stats == null ? null : (Stopwatch()..start());
+          try {
+            services = await device.discoverServices();
+          } catch (_) {
+            stats?.recordDiscover(
+              durationUs: dSw!.elapsedMicroseconds,
+              error: true,
+            );
+            rethrow;
+          }
+          stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
+        }
+        if (generation != otaLinkGeneration(deviceAddress) || !device.isConnected) {
+          throw StateError('STALE_OTA_GATT_DISCOVERY');
+        }
         for (final svc in services) {
           final sid = svc.uuid.toString();
           if (!_strictBleUuidEquals(sid, serviceId)) continue;
           for (final ch in svc.characteristics) {
             final cid = ch.uuid.toString();
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
-            await ch.write(Uint8List.fromList(data),
-                withoutResponse: !writeWithResponse);
+            final wSw = stats == null ? null : (Stopwatch()..start());
+            try {
+              await ch.write(Uint8List.fromList(data),
+                  withoutResponse: !writeWithResponse);
+            } catch (_) {
+              stats?.recordPlatformWrite(
+                durationUs: wSw!.elapsedMicroseconds,
+                bytes: data.length,
+                error: true,
+              );
+              rethrow;
+            }
+            stats?.recordPlatformWrite(
+              durationUs: wSw!.elapsedMicroseconds,
+              bytes: data.length,
+            );
+            if (generation != otaLinkGeneration(deviceAddress)) {
+              throw StateError('STALE_OTA_GATT_COMPLETION');
+            }
+            _checkOtaGattCurrent(deviceAddress, binding);
             return;
           }
         }
         throw UnsupportedError('未找到目标OTA特征: $characteristicId');
       }
     } catch (e) {
+      if (reuseOtaCharacteristics && startBinding != null &&
+          identical(startBinding, otaGattBindingToken(deviceAddress))) {
+        _invalidateOtaGatt(deviceAddress.toLowerCase());
+      }
       debugPrint('OTA写入失败($deviceAddress/$serviceId/$characteristicId): $e');
       rethrow;
     }
@@ -1606,14 +1839,82 @@ class BluetoothService extends GetxController {
   /// 精确等价，其他 128-bit UUID 不得冒充标准服务/特征（PR06）。
   /// 返回 { 'serviceId', 'writeCharId'(FFF2), 'notifyCharId'(FFF1),
   /// 'writeMode'('with'/'without'——FFF2 实际支持的写模式) }。
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：以本方法整体
+  /// （含内部服务发现与 Windows 特征枚举）为观测窗口登记一次特征发现耗时、
+  /// 成败与实际采用的写模式，并把 stats 透传给内部 `discoverServicesByAddress`
+  /// ——只测外层、不放内部发现，就无法归因「逐分片重复发现」这一待测热点。
   Future<Map<String, String>?> findExactOtaCharacteristicsByAddress(
     String deviceAddress, {
     String serviceUuid = 'fff0',
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
+    OtaLinkStats? stats,
   }) async {
+    _experiment.requireForOta()?.requireDevice(deviceAddress);
+    final sw = stats == null ? null : (Stopwatch()..start());
+    final result = await _findExactOtaCharacteristicsByAddress(
+      deviceAddress,
+      serviceUuid: serviceUuid,
+      writeCharUuid: writeCharUuid,
+      notifyCharUuid: notifyCharUuid,
+      stats: stats,
+    );
+    // P3-4 观测：失败（无精确特征或平台异常）同样登记，found=false 才能
+    // 与「发现了但不合格」区分开；writeMode 记录绑定实际采用的写模式。
+    stats?.recordCharsDiscovery(
+      durationUs: sw!.elapsedMicroseconds,
+      found: result != null,
+      writeMode: result?['writeMode'],
+    );
+    return result;
+  }
+
+  /// [findExactOtaCharacteristicsByAddress] 的私有实现（无观测外壳）。
+  Future<Map<String, String>?> _findExactOtaCharacteristicsByAddress(
+    String deviceAddress, {
+    required String serviceUuid,
+    required String writeCharUuid,
+    required String notifyCharUuid,
+    OtaLinkStats? stats,
+  }) async {
+    final key = deviceAddress.toLowerCase();
+    final reuse = reuseOtaCharacteristics && !Platform.isWindows;
+    final tracked = (reuseOtaCharacteristics || preferOtaWithoutResponse) &&
+        !Platform.isWindows;
+    int? token;
     try {
-      final services = await discoverServicesByAddress(deviceAddress);
+      BluetoothDevice? device;
+      if (tracked) {
+        final previous = _otaGattAddress;
+        if (previous != null && previous != key) {
+          _bumpOtaLinkGeneration(previous);
+          _otaServiceWatchOwners.remove(previous);
+          _otaServiceWatchers.remove(previous)?.cancel();
+          _otaLinkWatchOwners.remove(previous);
+          _otaLinkWatchers.remove(previous)?.cancel();
+        }
+        _otaGattAddress = key;
+        token = ++_otaDiscoverySequence;
+        _otaDiscoveryTokens[key] = token;
+        device = _findDeviceByAddress(deviceAddress);
+        if (device == null || !device.isConnected) {
+          _otaGattBindings.remove(key);
+          return null;
+        }
+        _watchOtaLink(deviceAddress, device.connectionState
+            .map((state) => state == BluetoothConnectionState.connected));
+        _watchOtaServices(device);
+      }
+      final generation = otaLinkGeneration(key);
+      final previousBinding = _otaGattBindings[key];
+      final services =
+          await discoverServicesByAddress(deviceAddress, stats: stats);
+      bool current() => !tracked ||
+          (generation == otaLinkGeneration(key) &&
+           token == _otaDiscoveryTokens[key] && _otaGattAddress == key &&
+           _otaServiceWatchOwners.containsKey(key) && device!.isConnected);
+      if (!current()) return null;
       String? normalizeId(dynamic obj) => _extractUuidFromAny(obj);
 
       for (final svc in services) {
@@ -1624,6 +1925,7 @@ class BluetoothService extends GetxController {
         final characteristics = Platform.isWindows
             ? await _adapter.discoverCharacteristics(deviceAddress, sid)
             : _safeMobileCharacteristicsList(svc);
+        if (!current()) return null;
 
         String? writeId;
         String? writeMode;
@@ -1649,7 +1951,27 @@ class BluetoothService extends GetxController {
         }
         if (writeId == null || notifyId == null) {
           // 精确匹配失败：不做任何降级，直接视为无 OTA 特征。
+          if (reuse) _otaGattBindings.remove(key);
           return null;
+        }
+        if (reuse) {
+          // A fresh, identical background recheck must not revoke its own
+          // paused transport. A changed device/generation/capability must.
+          final unchanged = previousBinding != null &&
+              identical(previousBinding, _otaGattBindings[key]) &&
+              identical(previousBinding.device, device) &&
+              previousBinding.generation == generation &&
+              _strictBleUuidEquals(previousBinding.serviceId, sid) &&
+              _strictBleUuidEquals(previousBinding.writeId, writeId) &&
+              _strictBleUuidEquals(previousBinding.notifyId, notifyId) &&
+              previousBinding.writeMode == writeMode;
+          if (!unchanged) {
+            _otaGattBindings[key] = _OtaGattBinding(
+              device: device!, generation: generation, service: svc,
+              serviceId: sid, writeId: writeId, notifyId: notifyId,
+              writeMode: writeMode!,
+            );
+          }
         }
         return {
           'serviceId': sid,
@@ -1658,8 +1980,12 @@ class BluetoothService extends GetxController {
           'writeMode': writeMode!,
         };
       }
+      if (reuse) _otaGattBindings.remove(key);
       return null;
     } catch (e) {
+      if (reuse && token == _otaDiscoveryTokens[key]) {
+        _otaGattBindings.remove(key);
+      }
       debugPrint('精确发现OTA特征失败($deviceAddress): $e');
       return null;
     }
@@ -1687,11 +2013,39 @@ class BluetoothService extends GetxController {
   /// 关掉新 owner 依赖的共享 CCCD——新 transport 读写都成功却收不到任何
   /// 通知，表现为全部 ACK 超时。等平台订阅返回后若已易主，本地直接放弃：
   /// 既不建立监听，也不动平台开关（那是新 owner 的）。
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录订阅
+  /// 整体耗时与成败；移动端分支内的重复 discoverServices() 由私有实现
+  /// 内的 discover 计时覆盖。
   Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(
     String deviceAddress,
     String serviceId,
-    String characteristicId,
-  ) async {
+    String characteristicId, {
+    OtaLinkStats? stats,
+  }) async {
+    if (stats == null) {
+      return _subscribeOtaNotifyByAddress(
+          deviceAddress, serviceId, characteristicId);
+    }
+    final sw = Stopwatch()..start();
+    final stream = await _subscribeOtaNotifyByAddress(
+      deviceAddress,
+      serviceId,
+      characteristicId,
+      stats: stats,
+    );
+    stats.recordSubscribe(
+      durationUs: sw.elapsedMicroseconds,
+      ok: stream != null,
+    );
+    return stream;
+  }
+
+  Future<Stream<List<int>>?> _subscribeOtaNotifyByAddress(
+    String deviceAddress,
+    String serviceId,
+    String characteristicId, {
+    OtaLinkStats? stats,
+  }) async {
     final ownerKey =
         _otaNotifyKey(deviceAddress, serviceId, characteristicId);
     final ownerToken = ++_otaNotifyTokenSeq;
@@ -1740,7 +2094,18 @@ class BluetoothService extends GetxController {
           _releaseNotifyOwner(ownerKey, ownerToken);
           return null;
         }
-        final services = await device.discoverServices();
+        final binding = reuseOtaCharacteristics
+            ? _requireOtaGatt(deviceAddress, serviceId, characteristicId,
+                notify: true)
+            : null;
+        final List<dynamic> services;
+        if (binding != null) {
+          services = [binding.service];
+        } else {
+          final dSw = stats == null ? null : (Stopwatch()..start());
+          services = await device.discoverServices();
+          stats?.recordDiscover(durationUs: dSw!.elapsedMicroseconds);
+        }
         for (final svc in services) {
           final sid = svc.uuid.toString();
           if (!_strictBleUuidEquals(sid, serviceId)) continue;
@@ -1749,8 +2114,11 @@ class BluetoothService extends GetxController {
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
             // 先完成 CCCD 订阅再返回流：resolve 后即可安全发命令。
             try {
-              await _runNotifyOwnerOp(
-                  ownerKey, ownerToken, () => ch.setNotifyValue(true));
+              await _runNotifyOwnerOp(ownerKey, ownerToken, () async {
+                _checkOtaGattCurrent(deviceAddress, binding);
+                await ch.setNotifyValue(true);
+              });
+              _checkOtaGattCurrent(deviceAddress, binding);
             } catch (e) {
               debugPrint(
                   'OTA订阅通知失败($deviceAddress/$characteristicId): $e');
@@ -1771,6 +2139,10 @@ class BluetoothService extends GetxController {
               // 非 owner 不得关闭。
               await _runNotifyOwnerOp(ownerKey, ownerToken, () async {
                 _releaseNotifyOwner(ownerKey, ownerToken);
+                if (binding != null &&
+                    !identical(otaGattBindingToken(deviceAddress), binding)) {
+                  return;
+                }
                 try {
                   await ch.setNotifyValue(false);
                 } catch (_) {}
@@ -1793,22 +2165,52 @@ class BluetoothService extends GetxController {
   ///
   /// 返回协商后的单次写入净荷上限（MTU-3）；失败或平台不支持时返回
   /// 保守值 20（ATT 默认 MTU 23 - 3）。OTA 分片以该值为准。
-  Future<int> requestOtaMtu(String deviceAddress, {int requested = 247}) async {
+  ///
+  /// [stats] 为可选 P3-4 链路观测（默认 null 零行为差异）：记录请求值、
+  /// 协商结果净荷上限、耗时与**净荷上限来源**。
+  Future<int> requestOtaMtu(
+    String deviceAddress, {
+    int requested = 247,
+    OtaLinkStats? stats,
+  }) async {
+    if (stats == null) {
+      return (await _requestOtaMtu(deviceAddress, requested: requested))
+          .chunkBytes;
+    }
+    final sw = Stopwatch()..start();
+    final outcome = await _requestOtaMtu(deviceAddress, requested: requested);
+    stats.recordMtu(
+      requested: requested,
+      chunkBytes: outcome.chunkBytes,
+      durationUs: sw.elapsedMicroseconds,
+      source: outcome.source,
+    );
+    return outcome.chunkBytes;
+  }
+
+  Future<_OtaMtuOutcome> _requestOtaMtu(
+    String deviceAddress, {
+    int requested = 247,
+  }) async {
     try {
       if (Platform.isWindows) {
         // WinBle 由协议栈管理分片；返回保守默认写入大小。
-        return 20;
+        return const _OtaMtuOutcome(20, 'windows-stack-managed');
       }
       final device = _findDeviceByAddress(deviceAddress);
-      if (device == null) return 20;
+      if (device == null) {
+        return const _OtaMtuOutcome(20, 'device-missing');
+      }
       final negotiated = await device.requestMtu(requested);
       if (negotiated >= 23) {
-        return negotiated - 3;
+        return _OtaMtuOutcome(negotiated - 3, 'negotiated');
       }
-      return 20;
+      // 协商值 < 23：拿不到比 ATT 默认更小的写入净荷，回退默认值
+      // （与真实协商的 20 无法靠数值区分，靠 source 区分）。
+      return const _OtaMtuOutcome(20, 'negotiated-too-small');
     } catch (e) {
       debugPrint('协商MTU失败($deviceAddress): $e');
-      return 20;
+      return const _OtaMtuOutcome(20, 'error-fallback');
     }
   }
 
@@ -1827,6 +2229,8 @@ class BluetoothService extends GetxController {
     final key = deviceAddress.toLowerCase();
     final startGeneration = otaLinkGeneration(key);
     final startWatcher = _otaLinkWatchers[key];
+    final startServiceWatcher = _otaServiceWatchers[key];
+    _invalidateOtaGatt(key);
     try {
       if (Platform.isWindows) {
         await _adapter.disconnect(deviceAddress);
@@ -1854,7 +2258,12 @@ class BluetoothService extends GetxController {
         _bumpOtaLinkGeneration(deviceAddress);
       }
       if (identical(_otaLinkWatchers[key], startWatcher)) {
+        _otaLinkWatchOwners.remove(key);
         _otaLinkWatchers.remove(key)?.cancel();
+      }
+      if (identical(_otaServiceWatchers[key], startServiceWatcher)) {
+        _otaServiceWatchOwners.remove(key);
+        _otaServiceWatchers.remove(key)?.cancel();
       }
     }
   }
@@ -1865,6 +2274,7 @@ class BluetoothService extends GetxController {
   /// 设备对象，否则按 remoteId 直接构造（设备重启后不在任何缓存里）。
   /// 返回是否成功；失败由调用方继续轮询。
   Future<bool> connectOtaDeviceByAddress(String deviceAddress) async {
+    _invalidateOtaGatt(deviceAddress.toLowerCase());
     try {
       if (Platform.isWindows) {
         await _adapter.connect(deviceAddress);
@@ -2288,6 +2698,7 @@ class BluetoothService extends GetxController {
         withResp = ch.properties.write == true;
         withoutResp = ch.properties.writeWithoutResponse == true;
       }
+      if (preferOtaWithoutResponse && withoutResp) return 'without';
       if (withResp) return 'with';
       if (withoutResp) return 'without';
       return null;
@@ -2505,9 +2916,32 @@ class BluetoothService extends GetxController {
   }
 }
 
-/// 设备作用域句柄缓存（RC3-05⑤）：按地址恒定返回同一对象，不随链路代次
-/// 变化——写通道废弃标记的作用域是「MCU 侧帧解析器状态所属的设备」，
-/// 见 [BluetoothService.otaDeviceScope]。
+/// MTU 协商结果：净荷上限 + 该值的来源标记（P3-4 观测）。
+///
+/// 回退值与真实协商值可以同为 20，只靠数值无法区分「平台自管理」
+/// 「设备未找到」「协商过小」「异常回退」，故必须随值携带来源。
+class _OtaMtuOutcome {
+  const _OtaMtuOutcome(this.chunkBytes, this.source);
+
+  final int chunkBytes;
+  final String source;
+}
+
+class _OtaGattBinding {
+  _OtaGattBinding({required this.device, required this.generation,
+    required this.service, required this.serviceId, required this.writeId,
+    required this.notifyId, required this.writeMode});
+
+  final BluetoothDevice device;
+  final int generation;
+  final dynamic service;
+  final String serviceId;
+  final String writeId;
+  final String notifyId;
+  final String writeMode;
+}
+
+/// Device parser identity deliberately survives BLE reconnection.
 class _OtaDeviceScope {
   _OtaDeviceScope(this.identity);
 

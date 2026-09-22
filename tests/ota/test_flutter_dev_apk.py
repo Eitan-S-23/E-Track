@@ -49,7 +49,8 @@ class DevelopmentApkTests(unittest.TestCase):
         # test_debug_application_id_suffix_... 与 test_device_observation_...
         # 显式覆盖。
         for name in (APK.APPLICATION_ID_ENV, APK.DEVICE_OBSERVATION_ENV,
-                     APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV):
+                     APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV,
+                     APK.OTA_LINK_CANDIDATE_ENV):
             base.pop(name, None)
         base.update({"ANDROID_HOME": str(self.root / "host-sdk"),
                      "JAVA_HOME_17_X64": str(self.root / "host-java")})
@@ -272,6 +273,63 @@ class DevelopmentApkTests(unittest.TestCase):
         sdk = next(argv for name, argv, _, _ in plan if name == "apk_sdk")
         self.assertIn(f"--sdk_root={self.run / 'android-sdk'}", sdk)
         self.assertIn("platforms;android-35", sdk)
+
+    def test_link_candidates_form_an_explicit_bounded_build_matrix(self):
+        for value in ("", "baseline"):
+            self.assertIsNone(APK.ota_link_candidate({APK.OTA_LINK_CANDIDATE_ENV: value}))
+        self.assertEqual([], APK.ota_link_defines(None))
+        for name, reuse, without in (("reuse-with", True, False),
+                                     ("discover-without", False, True),
+                                     ("reuse-without", True, True)):
+            env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: name}
+            candidate = APK.ota_link_candidate(env)
+            self.assertEqual(dict(name=name, reuse_gatt=reuse,
+                                  prefer_without_response=without), candidate)
+            plan = APK.plan(self.root, self.run, env)
+            build = next(argv for step, argv, _, _ in plan if step == "apk_build")
+            self.assertIn("--dart-define=OTA_P34_REUSE_GATT=" + str(reuse).lower(), build)
+            self.assertIn("--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" + str(without).lower(), build)
+            self.assertIn("--debug", build)
+        for invalid in ("fast", "921600", "reuse-without --release"):
+            with self.assertRaisesRegex(ValueError, "TRACE_DEV_OTA_LINK_CANDIDATE"):
+                APK.plan(self.root, self.run, {**self.env, APK.OTA_LINK_CANDIDATE_ENV: invalid})
+
+    def test_collect_records_link_candidate_as_intent_not_performance_evidence(self):
+        self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture")]))
+        env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: "reuse-without"}
+        with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture"), \
+                mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, env)
+        metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        self.assertEqual(APK.ota_link_candidate(env), metadata["requested_ota_link_candidate"])
+        self.assertEqual("NOT_RUN", metadata["formal_acceptance"])
+
+    def test_runtime_experiment_requires_mac_observation_and_keeps_rates_out_of_builds(self):
+        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",
+               APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF"}
+        candidate = APK.ota_link_candidate(env)
+        self.assertEqual(dict(name="runtime", runtime_config=True), candidate)
+        defines = APK.ota_link_defines(candidate)
+        self.assertEqual(["--dart-define=OTA_P34_RUNTIME_CONFIG=true"], defines)
+        build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, env) if name == "apk_build")
+        self.assertIn(defines[0], build)
+        self.assertNotIn("921600", " ".join(build))
+        for invalid in ({APK.OTA_LINK_CANDIDATE_ENV: "runtime"},
+                        {**env, APK.DEVICE_OBSERVATION_ENV: "false"},
+                        {**env, APK.OBSERVATION_TARGET_ENV: "XTrace"}):
+            with self.subTest(env=invalid), self.assertRaisesRegex(ValueError, "Runtime OTA experiment"):
+                APK.ota_link_candidate(invalid)
+
+    def test_runtime_build_can_use_an_explicit_non_live_default_endpoint(self):
+        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",
+               APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF",
+               APK.OBSERVATION_FIRMWARE_URL_ENV:
+                   "https://p34-runtime-required.invalid/api/public/firmware/latest"}
+        plan = APK.plan(self.root, self.run, env)
+        build = next(argv for name, argv, _, _ in plan if name == "apk_build")
+        self.assertIn("--dart-define=OTA_P34_RUNTIME_CONFIG=true", build)
+        self.assertIn("--dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=" +
+                      env[APK.OBSERVATION_FIRMWARE_URL_ENV], build)
 
     def observation_env(self):
         """显式启用的设备观测构建环境（不含任何凭据）。"""

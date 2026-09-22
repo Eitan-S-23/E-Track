@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
+import 'package:ble_monitor/ota/ota_link_stats.dart';
 
 /// OtaBleTransport：fake MCU 严格对照 Libraries/OTA/ota_ble_session.c 真值
 /// （seq 模型 §5.1、BEGIN 幂等/新会话分支、DATA 段校验链、END durable+sha
@@ -2259,6 +2260,487 @@ void main() {
       expect(outcome.zoneErrors, isEmpty);
     });
   });
+
+  group('P3-4 链路观测接线（OtaLinkStats）', () {
+    test('clean run 8192：每唯一段恰一 ACK 样本，摘要完整、outcome=ok',
+        () async {
+      final package = packageBytes(8192); // 2 块 64 段
+      // ACK 延迟 1ms：只为还原「确认到达晚于首发发送结束登记」这一正常
+      // 时序（真机 ACK 至少一个连接间隔后才到），使本用例聚焦样本完整性
+      // 而非早到竞态。零延迟下的早到确认由本组 P34-R01 反例专门覆盖，
+      // 不得再用「真机不存在该竞争」回避该路径。
+      final mcu = _McuSim()..ackDelay = const Duration(milliseconds: 1);
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      // 64 唯一段，每段恰一 ACK 样本（冻结语义：首发结束→首个有效确认）。
+      expect(stats.segmentsUnique, 64);
+      expect(stats.ackLatencySamplesUs, hasLength(64));
+      expect(stats.ackSampleIntegrity, 'complete');
+      // 正常时序下不得出现早到无效观测（提前判失败即早到路径被误触）。
+      expect(stats.ackEarlyInvalid, 0);
+      expect(stats.retransmitFrames, 0);
+      // 每段一 DATA ACK、无重复/错误/畸形。
+      expect(stats.acksOk, 64);
+      expect(stats.acksDuplicate, 0);
+      expect(stats.acksMalformed, 0);
+      // durable 序列：BEGIN ACK 起点 0 + 两次块提交（单调递增）。
+      expect(stats.durableOffsets, [0, 4096, 8192]);
+      // 传输时长（BEGIN 首帧写开始 → END ACK 到达，同一时钟域）> 0。
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['outcome'], 'ok');
+      expect(t['elapsedUs'] as int?, greaterThan(0));
+      expect(t['segmentsUnique'], 64);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('丢部分 DATA ACK：位图确认回收，样本仍每段恰一个', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()
+        ..dropAckForOffsets = {0, 128} // 段 0/1 的 ACK 丢
+        ..ackDelay = const Duration(milliseconds: 1); // 还原确认晚于首发的正常时序
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+        windowSegments: 4,
+      );
+      expect(ack.isOk, isTrue);
+      // 32 段全部送达且零重发（位图回收，RC2-05）。
+      expect(
+        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
+        32,
+      );
+      // 丢 ACK 段（0/1）的确认来自后续段 ACK 的 bitmap 置位——共享
+      // 同一 ACK 的段各自成样本，终点相同、起点各异。
+      expect(stats.segmentsUnique, 32);
+      expect(stats.ackLatencySamplesUs, hasLength(32));
+      expect(stats.ackSampleIntegrity, 'complete');
+      expect(stats.ackEarlyInvalid, 0);
+      expect(stats.retransmitFrames, 0);
+      // 送达的 ACK 30 份（段 0/1 的被丢），全部 ok。
+      expect(stats.acksOk, 30);
+      expect(stats.acksDuplicate, 0);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('块尾段 ACK 丢后重发：重传计入计数，样本不新增（冻结语义）',
+        () async {
+      final package = packageBytes(8192);
+      final mcu = _McuSim()
+        ..dropAckOnceForOffsets = {31 * 128} // 块 0 尾段
+        ..ackDelay = const Duration(milliseconds: 1); // 还原确认晚于首发的正常时序
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      // 首发 64 段 + 块 0 尾段一次重发（首发 ACK 丢失），无其他重发。
+      expect(
+        mcu.writtenFrames.where((f) => f[2] == OtaBleCodec.cmdData).length,
+        65,
+      );
+      // 重传不创建新样本：唯一段仍 64、样本仍 64、起点仍是首发结束。
+      expect(stats.segmentsUnique, 64);
+      expect(stats.retransmitFrames, 1);
+      expect(stats.ackLatencySamplesUs, hasLength(64));
+      expect(stats.ackSampleIntegrity, 'complete');
+      expect(stats.ackEarlyInvalid, 0);
+      // 重发段（off 3968）的确认来自重发触发的幂等 ACK（durable 前移
+      // 4096，advanced 回收自身段）——样本终点含超时等待与重发全程。
+      expect(stats.durableOffsets, [0, 4096, 8192]);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('重复 DATA ACK：duplicate 计数，样本数不变', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()
+        ..duplicateDataAck = true
+        ..ackDelay = const Duration(milliseconds: 1); // 还原确认晚于首发的正常时序
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      // 每段两份 ACK：第二份 seq 已不在途 → duplicate 分类，不产生样本。
+      expect(stats.acksOk, 32);
+      expect(stats.acksDuplicate, 32);
+      expect(stats.ackLatencySamplesUs, hasLength(32));
+      expect(stats.ackSampleIntegrity, 'complete');
+      expect(stats.ackEarlyInvalid, 0);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('零延迟 ACK 早到：不造假样本，显式计为无效观测（P34-R01）',
+        () async {
+      final package = packageBytes(4096);
+      // ackDelay=0：DATA ACK 在写调用内同步 emit，其流监听微任务先于发送
+      // 循环 recordSegmentSendEnd 的 continuation 运行——确认到达时本段
+      // 首发尚未登记。此时既没有合法起点（不得把负延迟截成 0），也不得
+      // 让随后的迟到重复确认顶替出「起点=重发结束」的假样本；必须显式
+      // 记为无效观测并进入完整性缺口。
+      final mcu = _McuSim();
+      expect(mcu.ackDelay, Duration.zero);
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      // 观测缺陷不影响控制流：确认仍被视图消费，会话照常成功。
+      expect(ack.isOk, isTrue);
+      expect(stats.segmentsUnique, 32);
+      // 32 段确认全部早到：零样本、零假样本，缺口如实上报。
+      expect(stats.ackEarlyInvalid, 32);
+      expect(stats.ackLatencySamplesUs, isEmpty);
+      expect(stats.ackSampleIntegrity, 'partial:missing=32,early=32');
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['ackEarlyInvalid'], 32);
+      expect(t['ackSamples'], 'partial:missing=32,early=32');
+      expect((t['ackLatency'] as Map<String, dynamic>)['count'], 0);
+      expect(t['elapsedUs'] as int?, greaterThan(0));
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('同实例无 ACK 恢复：resume BEGIN 回带的 durable 前缀补齐丢失确认'
+        '段的样本（P34-R02）', () async {
+      final package = packageBytes(8192); // 2 块
+      // 块 0 的 32 段 DATA ACK 全丢（MCU staging 照常提交）：客户端看不到
+      // 任何确认 → 重发触顶 → ABORT + BEGIN resume。resume 的 BEGIN ACK
+      // 回带 durable=4096，这 32 段由 durable_off 明确确认，样本终点即该
+      // ACK 的到达时刻——不得因 DATA ACK 丢失在完整性分母里留下缺口。
+      final mcu = _McuSim()
+        ..dropAckForOffsets = {for (var i = 0; i < 32; i++) i * 128}
+        ..ackDelay = const Duration(milliseconds: 1);
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(
+        channel: mcu,
+        stats: stats,
+        retries: 1,
+        ackTimeout: const Duration(milliseconds: 200),
+      );
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      expect(mcu.beginCalls, 2); // BEGIN + resume BEGIN
+      expect(mcu.abortCalls, 1); // resume 前主动 ABORT teardown
+      // 64 唯一段：块 0 的样本由 resume BEGIN ACK 补记，块 1 由 DATA ACK 采。
+      expect(stats.segmentsUnique, 64);
+      expect(stats.ackLatencySamplesUs, hasLength(64));
+      expect(stats.ackSampleIntegrity, 'complete');
+      expect(stats.ackEarlyInvalid, 0);
+      // 丢 ACK 期间 MCU 已提交的 durable 进展如实登记（BEGIN ACK 带回）。
+      expect(stats.durableOffsets, [0, 4096, 8192]);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('新实例续传：resume 前缀本实例从未发送 ⇒ 不制造样本，如实记为'
+        '无效观测（P34-R02）', () async {
+      final package = packageBytes(8192); // 2 块
+      final mcu = _McuSim()..ackDelay = const Duration(milliseconds: 1);
+      // 断线续传真值：上次会话在块 0 提交后中断（journal durable=4096，
+      // RAM 层清空）。新实例——新 stats——只发块 1。
+      await _prestageCommittedBlock0(mcu, package);
+      expect(mcu.stagedDurable, 4096);
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      expect(stats.segmentsUnique, 32); // 只有块 1 由本实例发送
+      expect(stats.ackLatencySamplesUs, hasLength(32));
+      // BEGIN ACK 回带的 durable 前缀（块 0 的 32 段）本实例从未发送：
+      // 不得为它们补造样本，只如实记为未发送的早到确认（暂挂），既不进
+      // 样本也不进完整性缺口——完整性只对「本实例发过的段」负责。
+      expect(stats.ackEarlyInvalid, 0);
+      expect(stats.ackSampleIntegrity, 'complete');
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['ackEarlyUnsent'], 32, reason: '未发送前缀段必须留痕可审计');
+      expect(t['ackSamples'], 'complete');
+      expect(t['ackEarlyInvalid'], 0);
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('END 终点在采信点登记：重复/迟到的真 ACK_END 不覆盖终点'
+        '（P34-R03）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()..ackDelay = const Duration(milliseconds: 1);
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final ack = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(ack.isOk, isTrue);
+      final before = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(before['endAckUs'], isNotNull);
+      // 重放同一条真 ACK_END（通知缓冲重放/迟到重复：真实链路可能）：
+      // 该帧与任何在途请求都无关联，不得据此改写已采信的成功终点。
+      final endIdx = mcu.sentFrameBytes
+          .lastIndexWhere((f) => f[2] == OtaBleCodec.rspAckEnd);
+      expect(endIdx, isNonNegative, reason: '本次传输必有 ACK_END 应答');
+      mcu.replaySentFrame(endIdx);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final after = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(after['endAckUs'], before['endAckUs']);
+      expect(after['elapsedUs'], before['elapsedUs']);
+      // 重放帧只按重复 ACK 分类，端点时刻与样本均不受影响。
+      expect(stats.ackLatencySamplesUs, hasLength(32));
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('未采信的 END 应答不登记终点：失败传输的 endAckUs/elapsedUs 为空'
+        '（P34-R03）', () async {
+      final package = packageBytes(4096);
+      // END 整包校验失败（ERR_SHA）：MCU 确实发出 ACK_END 帧，但它是错误
+      // 终态，不是成功终点——统计终点必须保持为空，摘要如实报 fail。
+      final mcu = _McuSim()
+        ..ackDelay = const Duration(milliseconds: 1)
+        ..endAckStatus = OtaBleCodec.statusErrSha;
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: mcu, stats: stats);
+      final result = await transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      expect(result.isOk, isFalse);
+      expect(
+        mcu.sentFrameBytes.any((f) => f[2] == OtaBleCodec.rspAckEnd),
+        isTrue,
+        reason: 'MCU 已回 ACK_END；本用例判据是它不得被登记为成功终点',
+      );
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['endAckUs'], isNull, reason: '错误终态不得登记成功终点');
+      expect(t['elapsedUs'], isNull);
+      expect(t['outcome'], 'fail');
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('传输起点在首个 BEGIN 帧写调用时刻登记（保守代理，含排队等待）'
+        '（P34-R03）', () async {
+      final package = packageBytes(4096);
+      // BEGIN 写永不返回（写通道黑洞）：若起点在写完成后才登记，本用例
+      // 观测到的起点必为空。契约文本是「从 BEGIN 首字节开始发送」；Dart 侧
+      // 代理点取首个 BEGIN 帧的**写调用**开始（早于排队/分片/上线，故为
+      // 保守上界），终点取被采信 ACK 的到达分发点时刻。
+      final mcu = _McuSim()..hangControlCmd = OtaBleCodec.cmdBegin;
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(
+        channel: mcu,
+        stats: stats,
+        writeTimeout: const Duration(milliseconds: 300),
+      );
+      final pending = transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(mcu.controlChunkWrites, greaterThan(0), reason: 'BEGIN 已开始写');
+      expect(stats.toJson()['transfer']['startUs'], isNotNull,
+          reason: '写调用未返回前起点必须已登记（含排队等待）');
+      // 收尾：写超时终止本次传输，不留悬挂 future。
+      await expectLater(
+        pending,
+        throwsA(isA<OtaTransportException>()
+            .having((e) => e.code, 'code', 'WRITE_TIMEOUT')),
+      );
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('END 终点取被采信 ACK 的到达时刻：写结算后时钟再推进也不改判'
+        '（P34-DA01）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim();
+      final channel = _FrameGateChannel(mcu)
+        ..preGateCmd = OtaBleCodec.cmdEnd
+        ..postGateCmd = OtaBleCodec.cmdEnd;
+      var fakeUs = 1000000;
+      final stats = OtaLinkStats(label: 'upgrade', clockUs: () => fakeUs);
+      final transport = OtaBleTransport(channel: channel, stats: stats);
+      final pending = transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      // END 写进入前置闸门：此刻 MCU 尚未产生任何 ACK_END，到达时刻还
+      // 不存在，天然排除「先到帧打戳」的混淆。
+      await _pumpUntil(() => channel.preGateHits == 1,
+          reason: 'END 写未到达前置闸门');
+      // 到达窗口：时钟设为可辨识的到达时刻，再放行写。
+      fakeUs = 7777000;
+      channel.releasePre();
+      // 真 ACK_END 已在分发点打戳（读到的时钟即 7777000），写仍被后置
+      // 闸门挡住——「应答到达」与「写结算」由此分离成两个可辨识时刻。
+      await _pumpUntil(() => channel.postGateHits == 1,
+          reason: 'ACK_END 分发后未进入后置闸门');
+      // 写结算之后的时刻：事后另取时钟的实现（含本用例的变异体）读到它。
+      fakeUs = 8888000;
+      channel.releasePost();
+      final ack = await pending;
+      expect(ack.isOk, isTrue);
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['endAckUs'], 7777000,
+          reason: '终点必须是被采信 ACK 帧到达分发点的时刻');
+      expect(t['elapsedUs'], 7777000 - 1000000,
+          reason: '写结算与校验耗时不得计入传输时长');
+      // 重复控制：同一条真 ACK_END 迟到重放（时钟已推进）不得改写终点。
+      final endIdx = mcu.sentFrameBytes
+          .lastIndexWhere((f) => f[2] == OtaBleCodec.rspAckEnd);
+      expect(endIdx, isNonNegative, reason: '本次传输必有 ACK_END 应答');
+      fakeUs = 9999000;
+      mcu.replaySentFrame(endIdx);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final after = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(after['endAckUs'], 7777000);
+      expect(after['elapsedUs'], 7777000 - 1000000);
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('未采信的 END 类帧到达不登记终点：伪造 ACK_END 只按无关应答处理'
+        '（P34-DA01）', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim();
+      final channel = _FrameGateChannel(mcu)
+        ..preGateCmd = OtaBleCodec.cmdEnd
+        ..postGateCmd = OtaBleCodec.cmdEnd;
+      var fakeUs = 1000000;
+      final stats = OtaLinkStats(label: 'upgrade', clockUs: () => fakeUs);
+      final transport = OtaBleTransport(channel: channel, stats: stats);
+      final pending = transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      await _pumpUntil(() => channel.preGateHits == 1,
+          reason: 'END 写未到达前置闸门');
+      // 伪造一条 seq 不在途的 ACK_END：它是「到达的 END 类帧」，但不是
+      // 本次请求的应答，分发点不得为等待者留下时刻。
+      fakeUs = 1111000;
+      mcu.sendFrame(OtaBleCodec.rspAckEnd, 1, 0x5A5A,
+          packAck(OtaBleCodec.statusOk, package.length, 0));
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      // 之后才放行真 END 写，其 ACK 在 2222000 到达并被采信。
+      fakeUs = 2222000;
+      channel.releasePre();
+      await _pumpUntil(() => channel.postGateHits == 1,
+          reason: 'ACK_END 分发后未进入后置闸门');
+      fakeUs = 3333000;
+      channel.releasePost();
+      final ack = await pending;
+      expect(ack.isOk, isTrue);
+      final t = stats.toJson()['transfer'] as Map<String, dynamic>;
+      expect(t['endAckUs'], 2222000,
+          reason: '终点只能来自被采信的应答，不得被先到的无关 END 类帧占用');
+      expect(t['endAckUs'], isNot(1111000));
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+
+    test('resume BEGIN 前缀样本终点取该 BEGIN ACK 的到达时刻（P34-DA01）',
+        () async {
+      final package = packageBytes(4096); // 单块 32 段
+      // 整块 DATA ACK 全丢：MCU 照常提交（staging 落盘），发送端无从得知，
+      // 重发计数超限后走 ABORT + BEGIN 续传（RC3-08③）。续传 BEGIN 回带的
+      // durable 前缀因此覆盖 32 个「已发送但从未获得 ACK 样本」的段。
+      final mcu = _McuSim()
+        ..dropAckForOffsets = {for (var i = 0; i < 32; i++) i * 128}
+        ..ackDelay = const Duration(milliseconds: 1);
+      // 闸门只挂在第 2 次 BEGIN（续传那一轮）：第 1 次 BEGIN 不受影响。
+      final channel = _FrameGateChannel(mcu)
+        ..preGateCmd = OtaBleCodec.cmdBegin
+        ..preGateAt = 2
+        ..postGateCmd = OtaBleCodec.cmdBegin
+        ..postGateAt = 2;
+      var fakeUs = 1000000;
+      final stats = OtaLinkStats(label: 'upgrade', clockUs: () => fakeUs);
+      final transport = OtaBleTransport(
+        channel: channel,
+        stats: stats,
+        // 同「同实例无 ACK 恢复」用例的恢复参数：整块 ACK 全丢 → 重发触顶
+        // （retries=1）→ ABORT + BEGIN 续传。
+        retries: 1,
+        ackTimeout: const Duration(milliseconds: 200),
+      );
+      final pending = transport.transfer(
+        package: package,
+        packageSha256: shaOf(package),
+        etuHeader: etuHeaderOf(package),
+      );
+      // 重传触顶与 ABORT 往返都要真实时钟推进，故这里用非零 tick。
+      await _pumpUntil(() => channel.preGateHits == 2,
+          reason: '续传 BEGIN 未到达前置闸门',
+          tick: const Duration(milliseconds: 5),
+          maxTicks: 4000);
+      // 续传 BEGIN ACK 的到达时刻：等待者在分发点打戳。
+      fakeUs = 4444000;
+      channel.releasePre();
+      await _pumpUntil(() => channel.postGateHits == 2,
+          reason: '续传 BEGIN ACK 分发后未进入后置闸门',
+          tick: const Duration(milliseconds: 5),
+          maxTicks: 4000);
+      // 整个 BEGIN 往返（写结算 + 解析 + 校验）之后的时刻：旧实现在
+      // await 返回后立即取时钟，读到的是它。
+      fakeUs = 5555000;
+      channel.releasePost();
+      final ack = await pending;
+      expect(ack.isOk, isTrue, reason: '续传后应正常收尾成功');
+      // 32 个前缀段在续传确认中首次获得合法终点样本：终点 = 该 ACK 的
+      // 到达时刻 − 各自首发结束时刻（首发发生在时钟恒为 1000000 期间）。
+      expect(stats.ackLatencySamplesUs, hasLength(32));
+      expect(stats.ackLatencySamplesUs.toSet(), {4444000 - 1000000},
+          reason: '前缀样本终点必须取续传 BEGIN ACK 的到达时刻');
+      expect(stats.ackLatencySamplesUs, isNot(contains(5555000 - 1000000)),
+          reason: '往返返回后的时刻不得成为样本终点');
+      await transport.dispose();
+    }, timeout: const Timeout(Duration(seconds: 60)));
+  });
+}
+
+/// 构造「上次会话在块 0 提交后中断」的 journal 状态：BEGIN(seq=10) +
+/// 块 0 的 32 段 DATA(seq=11..42) → 块收齐提交 journal durable=4096 →
+/// ABORT teardown（模拟断线：RAM 层清空，durable/字节保留）。返回后
+/// [mcu.stagedDurable] 为 4096，且 MCU 处于 IDLE。
+/// 文件级助手看不到 `main()` 作用域内的 [shaOf]/[etuHeaderOf]，BEGIN
+/// 载荷必须在这里自算：摘要用真实 SHA-256、头用包前 64B（同 main 内定义）。
+Future<void> _prestageCommittedBlock0(_McuSim mcu, Uint8List package) async {
+  await mcu.writeChunk(OtaBleCodec.encodeCommand(
+    cmd: OtaBleCodec.cmdBegin,
+    session: 0,
+    seq: 10,
+    payload: OtaBleCodec.encodeBeginPayload(
+      totalLen: package.length,
+      packageSha256: sha256.convert(package).bytes,
+      etuHeader: Uint8List.fromList(package.sublist(0, 64)),
+    ),
+  ));
+  for (var i = 0; i < 32; i++) {
+    await mcu.writeChunk(OtaBleCodec.encodeCommand(
+      cmd: OtaBleCodec.cmdData,
+      session: 1,
+      seq: 11 + i,
+      payload: OtaBleCodec.encodeDataPayload(
+          i * 128,
+          package.sublist(i * 128, i * 128 + OtaBleCodec.dataSegmentSize)),
+    ));
+  }
+  await mcu.writeChunk(OtaBleCodec.encodeCommand(
+    cmd: OtaBleCodec.cmdAbort,
+    session: 1,
+    seq: 43,
+  ));
 }
 
 /// 通知流链路错误注入对象（RC3-02/04⑦）：自定义类型便于与产品异常
@@ -2347,6 +2829,93 @@ class _ReboundWrapper implements OtaBleChannel {
 
   @override
   bool get isConnected => inner.isConnected;
+}
+
+/// 轮询等待 [condition] 成立：每个 tick 让出事件循环，超时报 [reason]
+/// 而不是永远挂住（P34-DA01 闸门用例的同步点）。
+///
+/// [tick] 默认零延迟——只让出事件循环，适用于纯微任务/同步推进即可到达的
+/// 闸门。凡是要等**真实时钟**推进的同步点（重传超时、ABORT + BEGIN 续传），
+/// 必须传非零 [tick]：零延迟让出在真实时间上几乎是瞬时的，定时器永远等不到
+/// 到期，条件不会成立（用例会以 [reason] 超时报红，不会挂住）。
+Future<void> _pumpUntil(bool Function() condition,
+    {String reason = '等待条件超时',
+    int maxTicks = 400,
+    Duration tick = Duration.zero}) async {
+  for (var i = 0; i < maxTicks; i++) {
+    if (condition()) return;
+    await Future<void>.delayed(tick);
+  }
+  fail(reason);
+}
+
+/// 控制帧写闸门的直通通道（P34-DA01 确定性打戳用例）：写原样交给 [inner]
+/// （应答照常产生），但在指定 cmd 的第 N 次写入前后各设一道闸门——
+/// 前置闸门挂在进入内层之前（内层尚未产生应答），后置闸门挂在内层返回
+/// 之后而写 Future 仍未结算（应答已可分发）。两道闸门把「应答到达」与
+/// 「写结算」稳定分离，配合注入时钟即可判定终点取的是哪一个时刻。
+///
+/// 只门控**单分片**控制帧（首片即以同步字开头）：本组用例的 BEGIN/END
+/// 帧在 247 字节 MTU 下都是单片，续片不参与门控。
+class _FrameGateChannel implements OtaBleChannel {
+  _FrameGateChannel(this.inner);
+
+  final OtaBleChannel inner;
+
+  /// 前置闸门：该 cmd 的第 [preGateAt] 次写入在进入内层前挂起。
+  int? preGateCmd;
+  int preGateAt = 1;
+  /// 后置闸门：该 cmd 的第 [postGateAt] 次写入在内层返回后挂起。
+  int? postGateCmd;
+  int postGateAt = 1;
+
+  final _preGate = Completer<void>();
+  final _postGate = Completer<void>();
+  int preGateHits = 0;
+  int postGateHits = 0;
+
+  void releasePre() {
+    if (!_preGate.isCompleted) _preGate.complete();
+  }
+
+  void releasePost() {
+    if (!_postGate.isCompleted) _postGate.complete();
+  }
+
+  int? _frameCmd(List<int> chunk) {
+    if (chunk.length >= 3 &&
+        chunk[0] == OtaBleCodec.frameSync0 &&
+        chunk[1] == OtaBleCodec.frameSync1) {
+      return chunk[2];
+    }
+    return null;
+  }
+
+  @override
+  Future<void> writeChunk(List<int> chunk) async {
+    final cmd = _frameCmd(chunk);
+    if (cmd != null && cmd == preGateCmd) {
+      preGateHits++;
+      if (preGateHits == preGateAt) await _preGate.future;
+    }
+    await inner.writeChunk(chunk);
+    if (cmd != null && cmd == postGateCmd) {
+      postGateHits++;
+      if (postGateHits == postGateAt) await _postGate.future;
+    }
+  }
+
+  @override
+  Stream<List<int>> get notifications => inner.notifications;
+
+  @override
+  Future<int> maxWriteChunkSize() => inner.maxWriteChunkSize();
+
+  @override
+  bool get isConnected => inner.isConnected;
+
+  @override
+  Object? get deviceScope => inner.deviceScope;
 }
 
 /// 在「GET_INFO 等待者已注册、物理写仍挂起」的窗口内执行 [disturb]，

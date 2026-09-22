@@ -167,6 +167,41 @@ def observation_config(env):
     }
 
 
+OTA_LINK_CANDIDATE_ENV = "TRACE_DEV_OTA_LINK_CANDIDATE"
+
+
+def ota_link_candidate(env):
+    name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip()
+    if name in ("", "baseline"):
+        return None
+    if name == "runtime":
+        observation = observation_config(env)
+        if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
+            raise ValueError("Runtime OTA experiment requires device observation with a MAC target")
+        return {"name": name, "runtime_config": True}
+    candidates = {
+        "reuse-with": (True, False),
+        "discover-without": (False, True),
+        "reuse-without": (True, True),
+    }
+    if name not in candidates:
+        raise ValueError("Unknown " + OTA_LINK_CANDIDATE_ENV)
+    reuse, without = candidates[name]
+    return {"name": name, "reuse_gatt": reuse, "prefer_without_response": without}
+
+
+def ota_link_defines(config):
+    if config is None:
+        return []
+    if config.get("runtime_config") is True:
+        return ["--dart-define=OTA_P34_RUNTIME_CONFIG=true"]
+    return [
+        "--dart-define=OTA_P34_REUSE_GATT=" + str(config["reuse_gatt"]).lower(),
+        "--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" +
+        str(config["prefer_without_response"]).lower(),
+    ]
+
+
 def observation_defines(config):
     """观测配置对应的 `--dart-define` 列表；未启用时为空（不注入任何定义）。"""
     if config is None:
@@ -241,7 +276,8 @@ def environment(root, run_dir, env):
 def plan(root, run_dir, env):
     version, compile_sdk = android_versions(root)
     # 观测配置在这里先校验一次：非法取值在下载/构建之前失败，不浪费一轮构建。
-    defines = observation_defines(observation_config(env))
+    defines = (observation_defines(observation_config(env)) +
+               ota_link_defines(ota_link_candidate(env)))
     helper = [sys.executable, "-B", str(root / "Tools/flutter/dev_apk.py")]
     common = ["--repo-root", str(root), "--run-dir", str(run_dir)]
     source = Path(env.get("ETRACK_ANDROID_SDK_SOURCE") or run_dir / "missing-android-tools")
@@ -399,6 +435,7 @@ def install_wrapper(root, run_dir):
 
 
 def collect(root, run_dir, commit, env):
+    link_candidate = ota_link_candidate(env)
     source = checked_path(root, root / APK_RELATIVE)
     if not source.is_file() or not source.stat().st_size:
         raise ValueError("Debug APK is missing or empty")
@@ -442,6 +479,9 @@ def collect(root, run_dir, commit, env):
             "sentinel": observation["sentinel"],
             "firmware_latest_url": observation["firmware_latest_url"],
         }
+    if link_candidate is not None:
+        # Build intent is not a measured or selected production configuration.
+        metadata["requested_ota_link_candidate"] = link_candidate
     write_new(root, target.with_suffix(".json"), json.dumps(metadata, indent=2) + "\n")
     print(json.dumps(metadata))
 
