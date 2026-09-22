@@ -1451,6 +1451,57 @@ class GovernancePromptScopeTests(unittest.TestCase):
             "acceptance-governance.yml 的 push 与 pull_request 都必须监听 docs/ota-prompts/**",
         )
 
+    def test_debug_skill_and_feedback_have_separate_input_ownership(self):
+        governance = set(VALIDATOR._profile_paths(ROOT, "Governance"))
+        validation = set(VALIDATOR._profile_paths(ROOT, "Validation"))
+        skill = ".agents/skills/e-track-flutter-debug/"
+        for path in ("docs/agent-collaboration-contract.md", "docs/device-experiment-policy.md", skill + "SKILL.md",
+                     skill + "references/device-session.md"):
+            self.assertIn(path, governance)
+            self.assertNotIn(path, validation)
+        for path in (skill + "scripts/host_io.py", skill + "scripts/selftest.py"):
+            self.assertIn(path, validation)
+            self.assertNotIn(path, governance)
+        workflow = (ROOT / ".github/workflows/acceptance-governance.yml").read_text(encoding="utf-8")
+        for path in ("docs/agent-collaboration-contract.md", "docs/device-experiment-policy.md",
+                     "docs/agent-collaboration/**", skill + "**"):
+            self.assertEqual(2, workflow.count('- "' + path + '"'))
+
+    def test_shared_activity_does_not_invalidate_acceptance_inputs(self):
+        records = {"docs/agent-collaboration/index.md",
+                   "docs/agent-collaboration/project-workflow.md"}
+        for path in records:
+            self.assertTrue((ROOT / path).is_file(), path)
+        for profile in VALIDATOR.PROFILE_DEFINITIONS:
+            self.assertFalse(records & set(VALIDATOR._profile_paths(ROOT, profile)), profile)
+
+    def test_project_entry_points_route_to_shared_records(self):
+        for entry, prefix in (("AGENTS.md", ""),
+                              ("app/bluetooth_flutter_Trace/AGENTS.md", "../../")):
+            content = (ROOT / entry).read_text(encoding="utf-8-sig")
+            for path in ("docs/agent-collaboration-contract.md",
+                         "docs/agent-collaboration/index.md", "docs/device-experiment-policy.md"):
+                self.assertIn("`" + prefix + path + "`", content)
+                self.assertEqual((ROOT / path).resolve(),
+                                 (ROOT / entry).parent.joinpath(prefix + path).resolve())
+        for entry in ("CLAUDE.md", "app/bluetooth_flutter_Trace/CLAUDE.md"):
+            self.assertIn("@AGENTS.md", (ROOT / entry).read_text(encoding="utf-8-sig"))
+
+    def test_shared_documents_have_resolvable_project_local_links(self):
+        documents = [ROOT / "docs/agent-collaboration-contract.md",
+                     ROOT / "docs/device-experiment-policy.md",
+                     *sorted((ROOT / "docs/agent-collaboration").glob("*.md")),
+                     ROOT / ".agents/skills/e-track-flutter-debug/SKILL.md",
+                     ROOT / ".agents/skills/e-track-flutter-debug/references/device-session.md"]
+        for document in documents:
+            links = re.findall(r"\[[^\]]+\]\(([^)]+)\)", document.read_text(encoding="utf-8"))
+            self.assertTrue(links, str(document))
+            for link in links:
+                target = (document.parent / link.split("#", 1)[0]).resolve()
+                self.assertTrue(target.is_relative_to(ROOT.resolve()), link)
+                self.assertNotIn(".cache", target.relative_to(ROOT.resolve()).parts, link)
+                self.assertTrue(target.is_file(), str(target))
+
     def test_dispatch_prompts_do_not_live_outside_governed_dir(self):
         stray = self.find_stray_dispatch_prompts(self.enumerate_repo_markdown())
         self.assertEqual(

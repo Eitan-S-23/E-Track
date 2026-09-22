@@ -12,6 +12,16 @@ This project must not be built locally.
 
 ### Development Validation Before Acceptance
 
+- Before debugging, installing an approved APK or collecting OTA observations,
+  read `../../.agents/skills/e-track-flutter-debug/SKILL.md`. It covers contained
+  host tooling, real APK/device identity, finished logs and batch experiments.
+- Use `../../docs/agent-collaboration-contract.md` for implementation questions
+  and review feedback: evidence, preferred repair route, invariants, a bounded
+  verification oracle and next owner. A bare rejection or spec link is not enough.
+- Read `../../docs/agent-collaboration/index.md` for project-wide handoffs, and
+  `../../docs/device-experiment-policy.md` for already-authorized device batches.
+  Installation and OTA authority is task-specific, not granted by CI; once granted,
+  do not require another approval per install, transfer, reset or host-window renewal.
 - Read `../../docs/flutter-development-validation.md` before implementing or reviewing Flutter changes. Establish the SDK/host, commands, output boundary and authorization route early, not after repeated source-only remediation batches.
 - Standing authorization (user decision, 2026-09-09): implementation agents may stage/commit their assigned changes on an exclusively owned `dev/flutter/**` branch, push that branch using `Eitan-S-23`, and dispatch or rerun `.github/workflows/flutter-dev-checks.yml` on it without asking again for each self-test batch. Reruns need changed inputs, a new validation request or a diagnosed environment recovery, not blind repetition. Read the exact boundaries in `../../docs/flutter-development-validation.md` and execution contract section 7.3.2 before acting.
 - The workflow runs strict analyze and tests on Ubuntu/Windows. All `dev/flutter/**` pushes, including `dev/flutter/apk/**`, are checks-only. Request an Android debug APK only by explicit `workflow_dispatch` with `build_apk=true`; APK requests use full tests, and the Linux build requires its checks to pass. The workflow has no release signing secrets, publishing, deployment or Windows packaging. Any Windows failure keeps the overall run red even if a Linux debug APK exists.

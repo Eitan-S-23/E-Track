@@ -5,6 +5,22 @@ project. Keil ARM Compiler 5 remains an auxiliary path for local hardware
 debugging, toolchain comparison, and compatibility checks. Agents must not
 promote AC5 artifacts to OTA or CI release artifacts.
 
+## Project-Wide Agent Workflow
+
+- `docs/agent-collaboration-contract.md` applies to every component and every
+  implementation, review, acceptance and root agent, not only OTA or P3-4.
+  Read `docs/agent-collaboration/index.md` for shared decisions and handoffs.
+  The canonical rules and index live in the project root and are delivered on
+  `main`; a task worktree, ignored cache or chat must not be their only copy.
+- Existing worktrees must consume the published governance revision before new
+  work. A push to a feature branch does not update `main`, other worktrees or an
+  already-running agent. Follow the contract's handoff and boundary rules rather
+  than copying another worktree's product changes or altering frozen evidence.
+- For authorized OTA/device development, read `docs/device-experiment-policy.md`.
+  Execute the task's finite experiment matrix without per-OTA/per-reset approval;
+  old agent-invented one-shot caps do not become permanent project policy. Real
+  safety/scope changes, unresolved device state and explicit user caps still apply.
+
 ## Task Entry and Acceptance Scope
 
 - Read `docs/acceptance-execution-contract.md` before independent acceptance or
@@ -20,6 +36,14 @@ promote AC5 artifacts to OTA or CI release artifacts.
 - Review the bounded change set and consolidate findings before costly formal
   acceptance. Fix and self-test in batches; a targeted test after each fix is
   not a new acceptance round. See the execution contract, section 7.3.
+- Questions and remediation feedback between implementation, review, acceptance
+  and root agents follow `docs/agent-collaboration-contract.md`. Give evidence,
+  a preferred actionable direction, invariants, a verification oracle and the
+  next owner. Independence does not justify vague answers or withholding guidance.
+- Before Flutter debugging, APK installation or device-log collection, read the
+  project-local `.agents/skills/e-track-flutter-debug/SKILL.md`. Prepare the entire
+  observation/retrieval route before asking for a short device window; a failed
+  host collector is not permission to repeat a successful upgrade.
 - Establish a runnable development-validation route before repeated remediation
   batches. For Flutter, read `docs/flutter-development-validation.md`: use the
   development-only workflow on `dev/flutter/**` under the standing authorization

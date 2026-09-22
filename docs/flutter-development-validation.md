@@ -239,6 +239,13 @@ signing verification, Windows EXE verification or independent acceptance. It
 does not need a shipping version bump. Its signing identity can differ from an
 installed release and from another CI run. Do not install it, uninstall an
 existing app or clear device data without separate hardware authorization.
+An already-authorized device task uses [the experiment policy](device-experiment-policy.md)
+for its finite installation/OTA matrix; separate hardware authority does not mean
+asking again for each approved operation. Uninstall/data clearing remain separate.
+
+Use the project-wide [shared index](agent-collaboration/index.md) and
+[Flutter debugging skill](../.agents/skills/e-track-flutter-debug/SKILL.md) for
+cross-agent handoffs, collector preparation and original device-log retrieval.
 
 ## Completion And Review
 
