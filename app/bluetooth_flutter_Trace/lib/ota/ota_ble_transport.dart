@@ -468,6 +468,13 @@ class OtaBleTransport {
               if ((view.blockBitmap >> seg) & 1 == 1) continue;
               view.trackSend(entry.key, seg); // 累计发送计数 +1
               if (view.sendCountOf(seg) > retries) overLimit = true;
+              if (stats != null) {
+                otaMonoLog('MONO_DATA_RETRY',
+                    code: 'session:$_session,seq:${entry.key},'
+                        'offset:${blockStart + seg * OtaBleCodec.dataSegmentSize},'
+                        'attempt:${view.sendCountOf(seg)}',
+                    durable: view.durableOff);
+              }
               await _sendSegment(package, blockStart, seg, entry.key);
               final segLen = _segmentLength(package, blockStart, seg);
               sentBytes += segLen;
@@ -1553,12 +1560,15 @@ class _TransferAckView {
     final seg = inFlight.remove(f.seq);
     if (seg == null) {
       stats?.recordAckClass('duplicate');
-      _signal();
+      _recordAckDiagnostic('MONO_ACK_IGNORED', f, ack);
+      // No state changed. Waking here lets periodic MCU liveness ACKs restart
+      // the ACK timeout forever, starving a missing in-flight segment's retry.
       return;
     }
     if (ack.status != OtaBleCodec.statusOk) {
       // 首错保留（??=）：不覆盖更早锁存的错误（如异步 ABORTED）。
       stats?.recordAckClass('error');
+      _recordAckDiagnostic('MONO_DATA_NAK', f, ack);
       _error ??= _AckError(ack.status, f.cmd, f.seq);
       _signal();
       return;
@@ -1631,6 +1641,15 @@ class _TransferAckView {
     }
     _harvestBitmap();
     _signal();
+  }
+
+  void _recordAckDiagnostic(
+      String event, OtaBleFrame frame, OtaAckPayload ack) {
+    if (stats == null) return;
+    otaMonoLog(event,
+        code: 'status:${ack.status},session:${frame.session},seq:${frame.seq},'
+            'bitmap:0x${ack.blockBitmap.toRadixString(16)},pending:${inFlight.length}',
+        durable: ack.durableOff);
   }
 
   /// durable_off 合法性：0..total，且为块边界（4KB 对齐）或包尾。

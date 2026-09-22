@@ -3373,26 +3373,6 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   bool get isConnected => connected;
 }
 
-/// MCU 语义模拟（Libraries/OTA/ota_ble_session.c 真值）：
-/// - seq（§5.1）：delta=0 推进 expected_seq；delta<0 重发帧幂等回当前
-///   ACK；delta>0 断档 ERR_SEQ 且不推进、不 teardown；
-/// - BEGIN：新会话分配 session_id（非零回绕）、expected_seq=seq+1、
-///   staging resume/重建 + 流式 SHA 重建（sha_init + journal durable
-///   前缀回填，真值 :449-456 session_digest_resume_prefix）；ACTIVE
-///   同 sha 同包长重复 BEGIN 幂等回当前进度（不重置 expected_seq，
-///   真值 :377-386）；
-/// - DATA：state→session→seq→段校验链→staging 接收（块收齐同步提交
-///   durable 并清位图）；新写入段以 wire 数据喂流式 SHA（真值 :571，
-///   按接收顺序）；幂等路径（delta<0 / off<durable / DUPLICATE）不喂；
-///   同 offset 不同内容 ABORTED+teardown（ERR_DATA）；
-/// - END：sha 复述 → durable==total → 内容级流式摘要 final 比对
-///   （真值 :646/:655/:664，复述一致但内容不符同样 ERR_SHA）；
-/// - ABORT/超时/缺段 teardown：清 RAM 层（段内容 + segment_bitmap +
-///   会话 SHA 流，真值 memset receiver），journal durable 与字节保留，
-///   重新 BEGIN 同 sha 报 [durable, 0] 并以前缀重建 SHA（跨会话摘要
-///   连续，RC3-03）；
-/// - ACK bitmap：ACTIVE 报 RAM segment_bitmap，IDLE 恒 0（真值
-///   session_progress_bitmap）。
 class _TailLossWithLivenessMcu extends _McuSim {
   _TailLossWithLivenessMcu({
     this.unknownSeq = false,
@@ -3433,6 +3413,26 @@ class _TailLossWithLivenessMcu extends _McuSim {
   }
 }
 
+/// MCU 语义模拟（Libraries/OTA/ota_ble_session.c 真值）：
+/// - seq（§5.1）：delta=0 推进 expected_seq；delta<0 重发帧幂等回当前
+///   ACK；delta>0 断档 ERR_SEQ 且不推进、不 teardown；
+/// - BEGIN：新会话分配 session_id（非零回绕）、expected_seq=seq+1、
+///   staging resume/重建 + 流式 SHA 重建（sha_init + journal durable
+///   前缀回填，真值 :449-456 session_digest_resume_prefix）；ACTIVE
+///   同 sha 同包长重复 BEGIN 幂等回当前进度（不重置 expected_seq，
+///   真值 :377-386）；
+/// - DATA：state→session→seq→段校验链→staging 接收（块收齐同步提交
+///   durable 并清位图）；新写入段以 wire 数据喂流式 SHA（真值 :571，
+///   按接收顺序）；幂等路径（delta<0 / off<durable / DUPLICATE）不喂；
+///   同 offset 不同内容 ABORTED+teardown（ERR_DATA）；
+/// - END：sha 复述 → durable==total → 内容级流式摘要 final 比对
+///   （真值 :646/:655/:664，复述一致但内容不符同样 ERR_SHA）；
+/// - ABORT/超时/缺段 teardown：清 RAM 层（段内容 + segment_bitmap +
+///   会话 SHA 流，真值 memset receiver），journal durable 与字节保留，
+///   重新 BEGIN 同 sha 报 [durable, 0] 并以前缀重建 SHA（跨会话摘要
+///   连续，RC3-03）；
+/// - ACK bitmap：ACTIVE 报 RAM segment_bitmap，IDLE 恒 0（真值
+///   session_progress_bitmap）。
 class _McuSim extends _FakeMcuHost {
   // ---- 会话 RAM 层（teardown 清空）----
   static const int _idle = 0;
