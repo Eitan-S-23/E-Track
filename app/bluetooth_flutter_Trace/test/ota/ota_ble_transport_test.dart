@@ -984,6 +984,135 @@ void main() {
           reason: '前置：两次注入都必须真的命中，否则用例没走到目标分支');
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    for (final status in [
+      OtaBleCodec.statusErrCrc,
+      OtaBleCodec.statusErrFrame,
+    ]) {
+      test('BEGIN frame error $status retries the identical frame', () async {
+        final package = packageBytes(4096);
+        final mcu = _McuSim()..beginFailures = [status];
+        final transport = OtaBleTransport(channel: mcu, retries: 2);
+        final durable = <int>[];
+        final ack = await transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+          onDurableProgress: (off, _) => durable.add(off),
+        );
+        expect(ack.isOk, isTrue);
+        expect(mcu.beginCalls, 2);
+        final begins = mcu.writtenFrames
+            .where((frame) => frame[2] == OtaBleCodec.cmdBegin)
+            .toList();
+        expect(begins, hasLength(2));
+        expect(begins[1], orderedEquals(begins[0]));
+        expect(mcu.dataFrames, hasLength(32));
+        expect(mcu.dataFrames.first.seq, mcu.beginFrames.last.seq + 1);
+        expect(mcu.abortCalls, 0);
+        expect(durable, [0, 4096]);
+        await transport.dispose();
+      });
+
+      test('BEGIN frame error $status stops at the retry limit', () async {
+        final package = packageBytes(4096);
+        final mcu = _McuSim()..beginFailures = [status, status, status];
+        final transport = OtaBleTransport(channel: mcu, retries: 2);
+        await expectLater(
+          transport.transfer(
+            package: package,
+            packageSha256: shaOf(package),
+            etuHeader: etuHeaderOf(package),
+          ),
+          throwsA(isA<OtaTransportException>()
+              .having((error) => error.code, 'code', 'ACK_STATUS')
+              .having((error) => error.status, 'status', status)),
+        );
+        expect(mcu.beginCalls, 3);
+        expect(mcu.beginFrames.map((frame) => frame.seq).toSet(), hasLength(1));
+        expect(mcu.dataFrames, isEmpty);
+        expect(mcu.stagedDurable, 0);
+        await transport.dispose();
+      });
+    }
+
+    test('BEGIN errors and timeouts share one retry allowance', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()
+        ..beginFailures = [
+          OtaBleCodec.statusErrCrc,
+          null,
+          OtaBleCodec.statusErrFrame,
+        ];
+      final transport = OtaBleTransport(
+        channel: mcu,
+        retries: 2,
+        ackTimeout: const Duration(milliseconds: 30),
+      );
+      await expectLater(
+        transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        ),
+        throwsA(isA<OtaTransportException>()
+            .having((error) => error.code, 'code', 'ACK_STATUS')
+            .having((error) => error.status, 'status', OtaBleCodec.statusErrFrame)),
+      );
+      expect(mcu.beginCalls, 3);
+      expect(mcu.beginFrames.map((frame) => frame.seq).toSet(), hasLength(1));
+      expect(mcu.dataFrames, isEmpty);
+      await transport.dispose();
+    });
+
+    test('BEGIN frame errors never reset the no-progress deadline', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()
+        ..beginFailures = List<int?>.filled(20, OtaBleCodec.statusErrCrc)
+        ..beginFailureDelay = const Duration(milliseconds: 40);
+      final transport = OtaBleTransport(
+        channel: mcu,
+        retries: 100,
+        ackTimeout: const Duration(seconds: 1),
+        noProgressTimeout: const Duration(milliseconds: 150),
+      );
+      await expectLater(
+        transport.transfer(
+          package: package,
+          packageSha256: shaOf(package),
+          etuHeader: etuHeaderOf(package),
+        ),
+        throwsA(isA<OtaTransportException>()
+            .having((error) => error.code, 'code', 'NO_DURABLE_PROGRESS')),
+      );
+      expect(mcu.beginCalls, lessThan(20));
+      expect(mcu.dataFrames, isEmpty);
+      await transport.dispose();
+    });
+
+    for (final fields in [(9, 0, 0), (10, 7, 0), (10, 0, 7), (10, 7, 7)]) {
+      test('malformed failed BEGIN ACK $fields is never retried', () async {
+        final package = packageBytes(4096);
+        final mcu = _McuSim()
+          ..beginFailures = [OtaBleCodec.statusErrCrc]
+          ..beginFailurePayloadLength = fields.$1
+          ..beginFailureHeaderSession = fields.$2
+          ..beginFailurePayloadSession = fields.$3;
+        final transport = OtaBleTransport(channel: mcu, retries: 2);
+        await expectLater(
+          transport.transfer(
+            package: package,
+            packageSha256: shaOf(package),
+            etuHeader: etuHeaderOf(package),
+          ),
+          throwsA(isA<OtaTransportException>()
+              .having((error) => error.code, 'code', 'ACK_MALFORMED')),
+        );
+        expect(mcu.beginCalls, 1);
+        expect(mcu.dataFrames, isEmpty);
+        await transport.dispose();
+      });
+    }
+
     test('BEGIN ACK 丢失：重试复用同一 seq，MCU 幂等回进度（expected_seq '
         '未重置）后传输成功', () async {
       final package = packageBytes(4096);
@@ -3478,6 +3607,12 @@ class _McuSim extends _FakeMcuHost {
   int? endAckBitmapLie;
   /// BEGIN ACK 强制 status（模拟 inspect 阶段拒绝）。
   int? beginAckStatus;
+  // Null models a rejected/dropped frame with no ACK, not a valid BEGIN.
+  List<int?> beginFailures = [];
+  int beginFailurePayloadLength = 10;
+  int beginFailureHeaderSession = 0;
+  int beginFailurePayloadSession = 0;
+  Duration beginFailureDelay = Duration.zero;
   /// DATA ACK 强制 status（模拟会话中故障/终止态）。
   int? dataAckStatus;
   /// END ACK 强制 status（模拟整包校验失败）。
@@ -3636,6 +3771,27 @@ class _McuSim extends _FakeMcuHost {
       // inspect 阶段拒绝（真值 :337-368）：session=0，不动现有状态。
       sendFrame(OtaBleCodec.rspAckBegin, 0, f.seq,
           packBeginAck(beginAckStatus!, 0, 0, 0));
+      return;
+    }
+    if (beginFailures.isNotEmpty) {
+      final status = beginFailures.removeAt(0);
+      if (status != null) {
+        void respond() {
+          sendFrame(
+            OtaBleCodec.rspAckBegin,
+            beginFailureHeaderSession,
+            f.seq,
+            packBeginAck(status, beginFailurePayloadSession, 0, 0)
+                .sublist(0, beginFailurePayloadLength),
+          );
+        }
+
+        if (beginFailureDelay == Duration.zero) {
+          respond();
+        } else {
+          _timers.add(Timer(beginFailureDelay, respond));
+        }
+      }
       return;
     }
     // ---- BEGIN 门禁（RC3-03⑤，真值 session_handle_begin :331-368）----

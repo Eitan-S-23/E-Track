@@ -928,6 +928,22 @@ class OtaBleTransport {
             .timeout(_capByBudget(timeout), onTimeout: () => throw TimeoutException('BEGIN ACK 超时'));
         final ack = _parseAck(respFrame);
         if (ack.status != OtaBleCodec.statusOk) {
+          if (ack.session != 0 || respFrame.session != 0) {
+            throw const OtaTransportException(
+                'Failed BEGIN ACK must carry session 0',
+                code: 'ACK_MALFORMED');
+          }
+          // Frame rejection grants no session or progress. Retry the same
+          // locally validated frame within the shared timeout/retry budget.
+          final retryable = ack.status == OtaBleCodec.statusErrCrc ||
+              ack.status == OtaBleCodec.statusErrFrame;
+          if (retryable) {
+            _checkNoProgress();
+            if (attempts < retries) {
+              attempts++;
+              continue;
+            }
+          }
           throw OtaTransportException(
             'BEGIN ACK 失败: status=0x${ack.status.toRadixString(16)}',
             code: 'ACK_STATUS',
