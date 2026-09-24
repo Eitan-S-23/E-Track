@@ -39,6 +39,8 @@ enum OtaPhase {
   reconnectVerify,
   /// 目标身份确认，升级完成。
   completed,
+  /// Debug prefix durably received and aborted; no firmware was installed.
+  probeCompleted,
   /// 用户取消。
   cancelled,
   /// 失败（终态或可稍后重试，见 terminalState）。
@@ -198,6 +200,8 @@ class OtaService extends GetxController {
   final _isUpgrading = false.obs;
   final _terminalState = Rxn<OtaTerminalState>();
   final _phase = OtaPhase.idle.obs;
+
+  bool get isPrefixProbe => OtaExperimentRuntime.current.config?.isPrefixProbe ?? false;
 
   DeviceOtaInfo? _deviceInfo;
   FirmwareLatestInfo? _latestInfo;
@@ -825,6 +829,7 @@ class OtaService extends GetxController {
   /// 流程：GET_INFO（重连身份复核）→ BEGIN（同 package_sha256 续传）→
   /// credit 窗口推进 → END → 等待设备重启 → 重连 GET_INFO → 目标身份
   /// （versionCode/raw image SHA）复核（PR07 完整闭环）。
+  /// Debug prefix mode returns false (not an upgrade), with phase=probeCompleted.
   Future<bool> startOtaUpgrade(String deviceAddress) async {
     final file = _firmwareFile;
     final info = _deviceInfo;
@@ -873,7 +878,7 @@ class OtaService extends GetxController {
       _phase.value = OtaPhase.transferring;
       // P3-4 链路观测：本轮升级的单一时钟域实例（发现→绑定→复核→传输
       // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
-      final linkStats = OtaLinkStats(label: 'upgrade', device: deviceAddress);
+      final linkStats = OtaLinkStats(label: isPrefixProbe ? 'prefix-probe' : 'upgrade', device: deviceAddress);
       OtaBleTransport? activeTransport;
       final diagnostics = OtaDiagnostics.current;
       var diagnosticStarted = false;
@@ -885,6 +890,8 @@ class OtaService extends GetxController {
         return false;
       }
       try {
+        final experiment = OtaExperimentRuntime.current.requireForOta();
+        final prefixBytes = experiment?.isPrefixProbe == true ? experiment!.prefixBytes : null;
         // 就地读取并校验包字节（RC2-04）：锁后一次读取，长度+SHA 校验
         // 与传输共用同一份字节快照，替代原先 verifyFileMatchesAsset 二次
         // 读文件 + readAsBytesSync 再读一次的多份文件视图（文件在两次
@@ -910,9 +917,7 @@ class OtaService extends GetxController {
         }
         final etuHeader = package.sublist(0, 64);
         final packageSha256 = packageDigest.bytes;
-
-        if (diagnostics.enabled) {
-          diagnosticStarted = await diagnostics.beginUpgrade({
+        final observationInput = <String, Object?>{
             'packageSha256': packageDigest.toString(),
             'packageBytes': package.length,
             'currentVersionCode': info.currentVersionCode,
@@ -921,7 +926,19 @@ class OtaService extends GetxController {
             'targetImageSha256': _latestInfo?.targetImageSha256,
             'deviceAddress': deviceAddress,
             'appLifecycle': WidgetsBinding.instance.lifecycleState?.name ?? 'unknown',
-          });
+        };
+        if (experiment != null && !experiment.matchesUpgrade(observationInput)) {
+          _phase.value = OtaPhase.failed;
+          _upgradeStatus.value = '实验配置与设备或固件包不符，未开始传输';
+          return fail('experiment', 'input-mismatch');
+        }
+        if (prefixBytes != null && !diagnostics.enabled) {
+          _phase.value = OtaPhase.failed;
+          _upgradeStatus.value = '短测需要完整诊断记录，未开始传输';
+          return fail('observation', 'probe-capture-required');
+        }
+        if (diagnostics.enabled) {
+          diagnosticStarted = await diagnostics.beginUpgrade(observationInput);
           if (generation != _cancelGeneration) {
             return fail('cancelled', 'generation-changed');
           }
@@ -995,26 +1012,58 @@ class OtaService extends GetxController {
 
         // ETU 包字节与身份已在上锁后就地校验（RC2-04）。
 
-        _upgradeStatus.value = 'BLE 传输中...';
-        final ack = await transport.transfer(
-          package: package,
-          packageSha256: packageSha256,
-          etuHeader: etuHeader,
-          // Keep both receiver credit and the sender's return-path cap.
-          windowSegments: recheck.maxWindowSegments < _senderWindowSegments
+        final requestedWindow = experiment?.senderWindowSegments ?? _senderWindowSegments;
+        final effectiveWindow = recheck.maxWindowSegments < requestedWindow
               ? recheck.maxWindowSegments
-              : _senderWindowSegments,
-          onDurableProgress: (durableOff, total) {
+              : requestedWindow;
+        void onDurableProgress(int durableOff, int total) {
             final p = total > 0 ? (durableOff / total).clamp(0.0, 1.0) : 0.0;
             _durableProgress.value = p;
             _upgradeProgress.value = p;
             _upgradeStatus.value =
-                '传输中: ${_formatBytes(durableOff)}/${_formatBytes(total)}（MCU 落盘确认）';
-          },
-          onSent: (sent, total) {
+                '${prefixBytes == null ? '传输中' : '短测中'}: ${_formatBytes(durableOff)}/${_formatBytes(total)}（MCU 落盘确认）';
+        }
+        void onSent(int sent, int total) {
             // GATT 已写字节只作为传输活性参考，不进 durable 进度。
             debugPrint('OTA sent $sent/$total');
-          },
+        }
+        _upgradeStatus.value = prefixBytes == null ? 'BLE 传输中...' : 'BLE 短测中，不安装固件...';
+        if (prefixBytes != null) {
+          final result = await transport.probePrefix(
+            package: package, packageSha256: packageSha256, etuHeader: etuHeader,
+            prefixBytes: prefixBytes, windowSegments: effectiveWindow,
+            onDurableProgress: onDurableProgress, onSent: onSent,
+          );
+          if (generation != _cancelGeneration) return fail('cancelled', 'generation-changed');
+          final retained = await transport.getDeviceInfo();
+          if (generation != _cancelGeneration) return fail('cancelled', 'generation-changed');
+          if (!deviceIdentityMatches(retained, info)) {
+            throw const OtaTransportException('Probe source identity changed', code: 'PROBE_IDENTITY');
+          }
+          await transport.dispose();
+          activeTransport = null;
+          _transport = null;
+          if (generation != _cancelGeneration) return fail('cancelled', 'generation-changed');
+          emitOtaObservation('OTA_PREFIX_PROBE ${jsonEncode({
+            ...result.toJson(),
+            'runId': experiment!.runId,
+            'configSha256': experiment.sourceSha256,
+            'deviceAddress': deviceAddress,
+            'sourceVersionCode': retained.currentVersionCode,
+            'sourceImageSha256': retained.currentImageSha256Hex,
+            'sourceIdentityVerified': true,
+          })}');
+          _phase.value = OtaPhase.probeCompleted;
+          _upgradeStatus.value = '短测完成: ${_formatBytes(prefixBytes)} 已落盘，ABORT 已确认；未安装固件';
+          return false;
+        }
+        final ack = await transport.transfer(
+          package: package,
+          packageSha256: packageSha256,
+          etuHeader: etuHeader,
+          windowSegments: effectiveWindow,
+          onDurableProgress: onDurableProgress,
+          onSent: onSent,
         );
         // P3-4 观测：传输终态已定（transport finally 已记录 outcome），但
         // 摘要必须等到下面两个**立即失败分支**登记完失败元数据之后再落：

@@ -29,6 +29,68 @@ OtaExperimentConfig parse(Map<String, Object?> value) =>
     OtaExperimentConfig.parse(jsonEncode(value), expectedTarget: target);
 
 void main() {
+  Map<String, Object?> probeProfile() => {
+    ...profile(baud: 460800), 'schema': 2, 'senderWindowSegments': 8,
+    'transferMode': 'prefix', 'prefixBytes': 32768,
+  };
+
+  test('schema 1 retains full transfer and constructor window defaults', () {
+    final config = parse(profile());
+    expect(config.schema, 1);
+    expect(config.senderWindowSegments, isNull);
+    expect(config.prefixBytes, 0);
+    expect(config.isPrefixProbe, isFalse);
+    expect(config.observationLine, isNot(contains('transferMode')));
+  });
+
+  for (final window in [1, 4, 8, 16, 32]) {
+    test('schema 2 binds prefix and sender window $window in one profile', () {
+      final config = parse({...probeProfile(), 'senderWindowSegments': window});
+      expect(config.senderWindowSegments, window);
+      expect(config.isPrefixProbe, isTrue);
+      expect(config.prefixBytes, 32768);
+      final line = jsonDecode(config.observationLine.substring('OTA_EXPERIMENT '.length));
+      expect(line['schema'], 2);
+      expect(line['senderWindowSegments'], window);
+      expect(line['transferMode'], 'prefix');
+      expect(line['prefixBytes'], 32768);
+      expect(line.containsKey('actualBaud'), isFalse);
+      expect(config.matchesUpgrade(upgradeInput()), isTrue);
+    });
+  }
+
+  test('schema 2 full transfer requires an explicit zero prefix', () {
+    final config = parse({...probeProfile(), 'transferMode': 'full', 'prefixBytes': 0});
+    expect(config.isPrefixProbe, isFalse);
+    expect(config.senderWindowSegments, 8);
+  });
+
+  test('schema 2 rejects ambiguous, nonintegral and out-of-budget probes', () {
+    for (final value in [
+      {...probeProfile(), 'schema': 3},
+      {...probeProfile(), 'schema': 1},
+      {...profile(), 'schema': 2},
+      {...probeProfile()}..remove('transferMode'),
+      {...probeProfile(), 'senderWindowSegments': 0},
+      {...probeProfile(), 'senderWindowSegments': 33},
+      {...probeProfile(), 'senderWindowSegments': 4.0},
+      {...probeProfile(), 'senderWindowSegments': true},
+      {...probeProfile(), 'prefixBytes': 0},
+      {...probeProfile(), 'prefixBytes': -4096},
+      {...probeProfile(), 'prefixBytes': 4097},
+      {...probeProfile(), 'prefixBytes': 36864},
+      {...probeProfile(), 'prefixBytes': 32768.0},
+      {...probeProfile(), 'packageBytes': 32768},
+      {...probeProfile(), 'packageBytes': 8192},
+      {...probeProfile(), 'transferMode': 'full'},
+      {...probeProfile(), 'transferMode': 'Prefix'},
+      {...probeProfile(), 'transferMode': true},
+      {...probeProfile(), 'extra': 1},
+    ]) {
+      expect(() => parse(value), throwsFormatException, reason: '$value');
+    }
+  });
+
   for (final baud in [115200, 460800, 921600]) {
     test('accepts requested $baud without claiming actual hardware baud', () {
       final text = '${jsonEncode(profile(baud: baud))}\n';

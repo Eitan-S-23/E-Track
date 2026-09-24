@@ -13,6 +13,7 @@ import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
+import 'package:ble_monitor/ota/ota_experiment_config.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
@@ -160,10 +161,10 @@ void main() {
   /// 前 64B 为合法 ETU 头（RC3-03⑤）：fake BEGIN inspect 门禁对齐
   /// 真值 ota_sd_inspect_header，随机字节会被 ERR_HDR 拒绝，全部
   /// 正常路径用例失去意义。
-  Uint8List assetBytes() {
+  Uint8List assetBytes([int size = 1024]) {
     final bytes = Uint8List.fromList(
-        List<int>.generate(1024, (i) => (i * 7 + 3) & 0xFF));
-    bytes.setRange(0, 64, buildEtuHeader(1024 - 64));
+        List<int>.generate(size, (i) => (i * 7 + 3) & 0xFF));
+    bytes.setRange(0, 64, buildEtuHeader(size - 64));
     return bytes;
   }
 
@@ -255,6 +256,8 @@ void main() {
     Duration? rebootProbeInterval,
     int? senderWindowSegments,
     int receiverWindowSegments = 32,
+    Uint8List? package,
+    String address = 'AA:BB',
   }) async {
     final ble = _UpgradeFakeBle(
       preRebootPayload: Uint8List.fromList(preRebootPayload)
@@ -271,10 +274,12 @@ void main() {
       rebootProbeTimeout: rebootProbeTimeout,
       rebootProbeInterval: rebootProbeInterval,
       senderWindowSegments: senderWindowSegments,
+      latestAdapter: package == null ? null : _LatestOkAdapter(latestBody(package)),
+      downloadAdapter: package == null ? null : _DownloadOkAdapter(package),
     );
     Get.put<AppUpdateService>(_FakeAppUpdateService());
 
-    expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+    expect(await service.readDeviceInfo(address), isNotNull);
     expect(await service.checkFirmwareUpdate(), isNotNull);
     expect(await service.downloadFirmware(), isTrue);
     expect(service.phase, OtaPhase.readyToInstall);
@@ -292,6 +297,145 @@ void main() {
     expect(ble.dataOffsets.length, count,
         reason: 'new DATA must wait for MCU bitmap credit');
   }
+
+  const probeAddress = 'AA:BB:CC:DD:EE:FF';
+  Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true}) async {
+    final runtime = OtaExperimentRuntime(enabled: true);
+    await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
+      'schema': 2, 'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
+      'reuseGatt': true, 'withoutResponse': true,
+      'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
+      'packageBytes': bytes.length, 'packageSha256': sha256.convert(bytes).toString(),
+      'currentVersionCode': 20801,
+      'currentImageSha256': List<int>.generate(32, (i) => i * 3)
+          .map((v) => v.toRadixString(16).padLeft(2, '0')).join(),
+      'targetVersionCode': 20900, 'targetImageSha256': '62' * 32,
+      'senderWindowSegments': window, 'transferMode': prefix ? 'prefix' : 'full',
+      'prefixBytes': prefix ? 32768 : 0,
+    }));
+    expect(runtime.ready, isTrue);
+    return runtime;
+  }
+
+  for (final entry in [(window: 4, receiver: 32), (window: 8, receiver: 32),
+      (window: 16, receiver: 32), (window: 16, receiver: 2)]) {
+    test('runtime prefix window ${entry.window}/${entry.receiver} produces a non-upgrade snapshot', () async {
+      final bytes = assetBytes(40960);
+      final runtime = await probeRuntime(bytes, window: entry.window);
+      final tempDir = tempFirmwareDir();
+      final diagnostics = OtaDiagnostics();
+      addTearDown(diagnostics.close);
+      await diagnostics.initialize(enabled: true, target: probeAddress,
+          sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => tempDir);
+      await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
+        final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [], package: bytes,
+            address: probeAddress, senderWindowSegments: 1, receiverWindowSegments: entry.receiver);
+        final service = Get.find<OtaService>();
+        ble.dataGate = Completer<void>();
+        final transfer = service.startOtaUpgrade(probeAddress);
+        try {
+          await ble.dataGated.future;
+          final effective = entry.window < entry.receiver ? entry.window : entry.receiver;
+          await expectGatedDataCount(ble, effective);
+          ble.releaseDataGate();
+          expect(await transfer, isFalse, reason: 'a probe is not a completed upgrade');
+          expect(service.phase, OtaPhase.probeCompleted);
+          expect(service.terminalState, isNull);
+          expect(service.isUpgrading, isFalse);
+          expect(service.deviceInfo!.currentVersionCode, 20801);
+          expect(ble.dataOffsets, List.generate(256, (i) => i * 128));
+          expect(ble.stagedDurable, 32768);
+          expect(ble._stagedBytes, bytes.sublist(0, 32768));
+          expect(ble.abortCalls, 1);
+          expect(ble.endCalls, 0);
+          expect(ble.probeCount, 0);
+          expect(ble._notifyController.hasListener, isFalse);
+          expect(service.upgradeStatus, contains('未安装固件'));
+          final file = diagnostics.status.value.lastExport!;
+          final rows = (await file.readAsLines()).map(jsonDecode).toList();
+          final messages = rows.where((row) => row['kind'] == 'line')
+              .map((row) => row['message'] as String).toList();
+          final result = jsonDecode(messages.singleWhere((line) => line.startsWith('OTA_PREFIX_PROBE '))
+              .substring('OTA_PREFIX_PROBE '.length));
+          expect(result['senderWindowSegments'], effective);
+          expect(result['sentUniqueBytes'], 32768);
+          expect(result['sourceVersionCode'], 20801);
+          expect(result['sourceIdentityVerified'], isTrue);
+          expect(result['configSha256'], runtime.config!.sourceSha256);
+          expect(messages.any((line) => line.contains('MONO_END_ACK_OK')), isFalse);
+          expect(messages.any((line) => line.contains('MONO_REBOOT_VERIFIED')), isFalse);
+          expect(rows.last['outcome'], 'not-completed');
+          expect(rows.last['healthy'], isTrue);
+          final checkout = Directory.current.parent.parent;
+          final imported = await Process.run(Platform.isWindows ? 'python' : 'python3',
+            ['-I', '-S', '-B', '-X', 'utf8',
+              '${checkout.path}/Tools/ota/p3-4-link-stats/observation_capture.py',
+              'inspect', '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
+              '--expect-target', probeAddress, '--require-prefix-probe'], workingDirectory: checkout.path,
+          ).timeout(const Duration(seconds: 15));
+          expect(imported.exitCode, 0, reason: '${imported.stderr}');
+          final receipt = jsonDecode(imported.stdout as String);
+          expect(receipt['prefixProbe']['sentUniqueBytes'], 32768);
+          expect(receipt['eligibleForThreshold'], isFalse);
+        } finally {
+          ble.releaseDataGate();
+          if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+          await transfer;
+        }
+      }));
+    });
+  }
+
+  for (final failure in ['abort', 'identity']) {
+    test('prefix $failure failure never emits a successful verdict', () async {
+      final bytes = assetBytes(40960);
+      final runtime = await probeRuntime(bytes);
+      final tempDir = tempFirmwareDir();
+      final diagnostics = OtaDiagnostics();
+      addTearDown(diagnostics.close);
+      await diagnostics.initialize(enabled: true, target: probeAddress,
+          sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => tempDir);
+      await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
+        final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [],
+            package: bytes, address: probeAddress);
+        if (failure == 'abort') ble.abortAckStatusOverride = OtaBleCodec.statusErrState;
+        if (failure == 'identity') ble.identityAfterAbort = postRebootPayload;
+        final service = Get.find<OtaService>();
+        expect(await service.startOtaUpgrade(probeAddress), isFalse);
+        expect(service.phase, OtaPhase.failed);
+        expect(ble.endCalls, 0);
+        final text = await diagnostics.status.value.lastExport!.readAsString();
+        expect(text, isNot(contains('OTA_PREFIX_PROBE ')));
+        expect(jsonDecode(text.trim().split('\n').last)['outcome'], 'not-completed');
+      }));
+    });
+  }
+
+  test('prefix mode refuses missing diagnostics before BEGIN', () async {
+    final bytes = assetBytes(40960);
+    final runtime = await probeRuntime(bytes);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress);
+      expect(await Get.find<OtaService>().startOtaUpgrade(probeAddress), isFalse);
+      expect(ble.beginCalls, 0);
+      expect(ble.dataOffsets, isEmpty);
+    });
+  });
+
+  test('schema 2 full mode still verifies a real full upgrade', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress);
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade(probeAddress), isTrue);
+      expect(service.phase, OtaPhase.completed);
+      expect(ble.endCalls, 1);
+      expect(ble.abortCalls, 0);
+    });
+  });
 
   for (final entry in [
     (receiver: 32, sender: null, expected: 4),
@@ -3050,6 +3194,8 @@ class _UpgradeFakeBle extends BluetoothService {
   /// 且**不重启**，非 OK 覆写按同一语义收尾。判定链本身不受影响，注入只
   /// 改应答状态。
   int? endAckStatusOverride;
+  int? abortAckStatusOverride;
+  List<int>? identityAfterAbort;
 
   // ---- 观测 ----
   int beginCalls = 0;
@@ -3555,8 +3701,9 @@ class _UpgradeFakeBle extends BluetoothService {
     }
     // session 匹配或非 ACTIVE：ACK ABORTED + teardown（durable 保留）。
     _send(OtaBleCodec.rspAckAbort, _sessionId, f.seq,
-        packAck(OtaBleCodec.statusAborted, _stagedDurable, 0));
+        packAck(abortAckStatusOverride ?? OtaBleCodec.statusAborted, _stagedDurable, 0));
     _teardown();
+    if (identityAfterAbort != null) infoOverride = identityAfterAbort;
   }
 
   /// DATA ACK 发射（应答时刻组装 payload 快照，RC3-03；受 dataGate

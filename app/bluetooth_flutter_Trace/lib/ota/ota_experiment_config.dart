@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 /// A requested experiment profile, never evidence of the MCU's actual baud.
 class OtaExperimentConfig {
   const OtaExperimentConfig._({
+    required this.schema,
     required this.runId,
     required this.target,
     required this.requestedBaud,
@@ -23,6 +24,8 @@ class OtaExperimentConfig {
     required this.targetVersionCode,
     required this.targetImageSha256,
     required this.sourceSha256,
+    required this.senderWindowSegments,
+    required this.prefixBytes,
   });
 
   static const maxConfigBytes = 8192;
@@ -31,7 +34,12 @@ class OtaExperimentConfig {
     'firmwareLatestUrl', 'packageBytes', 'packageSha256', 'currentVersionCode',
     'currentImageSha256', 'targetVersionCode', 'targetImageSha256',
   };
+  static const _v2Fields = {
+    ..._fields, 'senderWindowSegments', 'transferMode', 'prefixBytes',
+  };
+  static const maxPrefixBytes = 32768;
 
+  final int schema;
   final String runId;
   final String target;
   final int requestedBaud;
@@ -45,6 +53,9 @@ class OtaExperimentConfig {
   final int targetVersionCode;
   final String targetImageSha256;
   final String sourceSha256;
+  final int? senderWindowSegments;
+  final int prefixBytes;
+  bool get isPrefixProbe => prefixBytes > 0;
 
   factory OtaExperimentConfig.parse(String text, {required String expectedTarget}) {
     final bytes = utf8.encode(text);
@@ -52,8 +63,13 @@ class OtaExperimentConfig {
       throw const FormatException('experiment-config-too-large');
     }
     final decoded = jsonDecode(text);
-    if (decoded is! Map<String, dynamic> || decoded.length != _fields.length ||
-        !_fields.containsAll(decoded.keys) || decoded['schema'] is! int || decoded['schema'] != 1) {
+    if (decoded is! Map<String, dynamic> || decoded['schema'] is! int ||
+        !const {1, 2}.contains(decoded['schema'])) {
+      throw const FormatException('experiment-config-schema');
+    }
+    final schema = decoded['schema'] as int;
+    final fields = schema == 1 ? _fields : _v2Fields;
+    if (decoded.length != fields.length || !fields.containsAll(decoded.keys)) {
       throw const FormatException('experiment-config-schema');
     }
     String string(String key, RegExp pattern) {
@@ -94,18 +110,33 @@ class OtaExperimentConfig {
     if (targetVersion <= currentVersion) {
       throw const FormatException('experiment-config-version-order');
     }
+    final packageBytes = integer('packageBytes', 64, 0xffffffff);
+    final senderWindow = schema == 2 ? integer('senderWindowSegments', 1, 32) : null;
+    final prefixBytes = schema == 2 ? integer('prefixBytes', 0, maxPrefixBytes) : 0;
+    if (schema == 2) {
+      final mode = decoded['transferMode'];
+      if ((mode != 'full' && mode != 'prefix') ||
+          (mode == 'full' && prefixBytes != 0) ||
+          (mode == 'prefix' && (prefixBytes == 0 || prefixBytes % 4096 != 0 ||
+              prefixBytes >= packageBytes))) {
+        throw const FormatException('experiment-config-transfer-mode');
+      }
+    }
     return OtaExperimentConfig._(
+      schema: schema,
       runId: runId, target: target, requestedBaud: baud,
       reuseGatt: decoded['reuseGatt'] as bool,
       withoutResponse: decoded['withoutResponse'] as bool,
       firmwareLatestUri: uri,
-      packageBytes: integer('packageBytes', 64, 0xffffffff),
+      packageBytes: packageBytes,
       packageSha256: string('packageSha256', digest),
       currentVersionCode: currentVersion,
       currentImageSha256: string('currentImageSha256', digest),
       targetVersionCode: targetVersion,
       targetImageSha256: string('targetImageSha256', digest),
       sourceSha256: sha256.convert(bytes).toString(),
+      senderWindowSegments: senderWindow,
+      prefixBytes: prefixBytes,
     );
   }
 
@@ -132,13 +163,18 @@ class OtaExperimentConfig {
       (input['deviceAddress'] as String).toLowerCase() == target.toLowerCase();
 
   String get observationLine => 'OTA_EXPERIMENT ${jsonEncode({
-    'schema': 1, 'runId': runId, 'configSha256': sourceSha256,
+    'schema': schema, 'runId': runId, 'configSha256': sourceSha256,
     'requestedBaud': requestedBaud, 'reuseGatt': reuseGatt,
     'withoutResponse': withoutResponse, 'endpointHost': firmwareLatestUri.host,
     'deviceAddress': target, 'packageBytes': packageBytes,
     'packageSha256': packageSha256, 'currentVersionCode': currentVersionCode,
     'currentImageSha256': currentImageSha256, 'targetVersionCode': targetVersionCode,
     'targetImageSha256': targetImageSha256,
+    if (schema == 2) ...{
+      'senderWindowSegments': senderWindowSegments,
+      'transferMode': isPrefixProbe ? 'prefix' : 'full',
+      'prefixBytes': prefixBytes,
+    },
   })}';
 }
 

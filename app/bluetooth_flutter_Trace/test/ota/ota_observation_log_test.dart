@@ -110,6 +110,20 @@ void main() {
     expect(await exported.readAsBytes(), bytes);
   });
 
+  test('prefix verdict is retained without turning the envelope into upgrade success', () async {
+    final log = await open();
+    expect(log.record(sample), isTrue);
+    expect(await log.beginUpgrade(input()), isTrue);
+    const message = 'OTA_PREFIX_PROBE {"schema":1,"outcome":"durable-prefix-aborted"}';
+    expect(log.record(message), isTrue);
+    await log.endUpgrade(completed: false);
+    final file = await log.exportSnapshot();
+    final rows = (await file.readAsLines()).map(jsonDecode).toList();
+    expect(rows.any((row) => row['message'] == message), isTrue);
+    expect(rows.last['outcome'], 'not-completed');
+    expect(rows.last['healthy'], isTrue);
+  });
+
   test('no export during an invocation and no second invocation', () async {
     final log = await open();
     log.record(sample);

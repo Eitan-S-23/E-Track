@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+
 import 'ota_ble_codec.dart';
 import 'ota_device_info.dart';
 import 'ota_link_stats.dart';
@@ -298,6 +300,60 @@ class OtaBleTransport {
     int? windowSegments,
     void Function(int durableOff, int total)? onDurableProgress,
     void Function(int sentBytes, int total)? onSent,
+  }) => _transferCore<OtaAckResult>(
+    package: package,
+    packageSha256: packageSha256,
+    etuHeader: etuHeader,
+    windowSegments: windowSegments,
+    onDurableProgress: onDurableProgress,
+    onSent: onSent,
+    onFullResult: (ack) => ack,
+  );
+
+  /// Debug-only staging probe. It never sends END or reports a full OTA result.
+  Future<OtaPrefixProbeResult> probePrefix({
+    required Uint8List package,
+    required List<int> packageSha256,
+    required List<int> etuHeader,
+    required int prefixBytes,
+    int? windowSegments,
+    void Function(int durableOff, int total)? onDurableProgress,
+    void Function(int sentBytes, int total)? onSent,
+  }) async {
+    const blockSize = OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize;
+    if (!kDebugMode || prefixBytes <= 0 || prefixBytes > 32768 ||
+        prefixBytes % blockSize != 0 || prefixBytes >= package.length) {
+      throw const OtaTransportException('Invalid debug prefix probe', code: 'PROBE_CONFIG');
+    }
+    if (stats == null || stats!.transferStartUs != null) {
+      throw const OtaTransportException('Fresh probe observations required', code: 'PROBE_CONFIG');
+    }
+    return _transferCore<OtaPrefixProbeResult>(
+      package: package,
+      packageSha256: packageSha256,
+      etuHeader: etuHeader,
+      prefixBytes: prefixBytes,
+      windowSegments: windowSegments,
+      onDurableProgress: onDurableProgress,
+      onSent: onSent,
+      onFullResult: (ack) => throw OtaTransportException(
+        'Prefix probe terminated before verified closure',
+        code: 'PROBE_TERMINATED', status: ack.status,
+      ),
+      onPrefixResult: (result) => result,
+    );
+  }
+
+  Future<T> _transferCore<T>({
+    required Uint8List package,
+    required List<int> packageSha256,
+    required List<int> etuHeader,
+    required T Function(OtaAckResult) onFullResult,
+    T Function(OtaPrefixProbeResult)? onPrefixResult,
+    int? prefixBytes,
+    int? windowSegments,
+    void Function(int durableOff, int total)? onDurableProgress,
+    void Function(int sentBytes, int total)? onSent,
   }) async {
     if (_busy) {
       throw const OtaTransportException('transport 忙：会话进行中', code: 'BUSY');
@@ -311,6 +367,7 @@ class OtaBleTransport {
           OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize,
       segmentSize: OtaBleCodec.dataSegmentSize,
       stats: stats,
+      captureDurableArrival: prefixBytes != null,
     );
     _ackView = view;
     // 无 durable 进展总预算（RC3-07）：单调时钟实例字段，覆盖 transfer
@@ -326,6 +383,26 @@ class OtaBleTransport {
     var transferOk = false;
     try {
       final total = package.length;
+      final dataLimit = prefixBytes ?? total;
+      final probeOffsets = prefixBytes == null ? null : <int>{};
+      var firstBegin = true;
+      void validateProbeCoverage(int durable, int bitmap) {
+        if (probeOffsets == null) return;
+        if (durable > dataLimit || (durable == dataLimit && bitmap != 0)) {
+          throw const OtaTransportException('Probe progress exceeds prefix', code: 'ACK_MALFORMED');
+        }
+        for (var offset = 0; offset < durable; offset += OtaBleCodec.dataSegmentSize) {
+          if (!probeOffsets.contains(offset)) {
+            throw const OtaTransportException('Unsent probe bytes confirmed', code: 'PROBE_COVERAGE');
+          }
+        }
+        for (var seg = 0; seg < OtaBleCodec.segmentsPerBlock; seg++) {
+          if ((bitmap >> seg) & 1 == 1 &&
+              !probeOffsets.contains(durable + seg * OtaBleCodec.dataSegmentSize)) {
+            throw const OtaTransportException('Unsent probe bitmap confirmed', code: 'PROBE_COVERAGE');
+          }
+        }
+      }
       var resumeLeft = retries; // ERR_SEQ/ERR_SESSION/ERR_STATE → ABORT+BEGIN
       var sentBytes = 0;
       var lastDurable = 0; // 跨 BEGIN 保留：resume 不得倒退（RC3-06）
@@ -351,12 +428,12 @@ class OtaBleTransport {
         final beginAckArrivalUs = beginAck.arrivalUs;
         final beginTerminal = _abortStatusOf(beginAck.status);
         if (beginTerminal != null) {
-          return OtaAckResult.terminal(
+          return onFullResult(OtaAckResult.terminal(
               beginTerminal,
               OtaAckResult(
                   status: beginAck.status,
                   durableOff: beginAck.durableOff,
-                  blockBitmap: beginAck.blockBitmap));
+                  blockBitmap: beginAck.blockBitmap)));
         }
         if (beginAck.durableOff < lastDurable) {
           // BEGIN ACK 权威值校验（RC3-06）：MCU staging durable 单调，
@@ -367,6 +444,14 @@ class OtaBleTransport {
         }
         _session = beginAck.session;
         view.reset(beginAck.durableOff, beginAck.blockBitmap, total);
+        if (prefixBytes != null && firstBegin &&
+            (beginAck.durableOff != 0 || beginAck.blockBitmap != 0)) {
+          throw const OtaTransportException('Probe requires zero initial durable and bitmap',
+              code: 'PROBE_INITIAL_STATE');
+        }
+        firstBegin = false;
+        validateProbeCoverage(beginAck.durableOff, beginAck.blockBitmap);
+        view.durableArrivalUs = beginAck.arrivalUs;
         // P3-4 观测：BEGIN ACK 权威值同样构成确认——resume 带回的 durable
         // 前缀 `[0, durable_off)` 与当前块 bitmap 对既往已发送段是「由
         // durable_off/bitmap 明确确认」的有效 ACK 终点；本实例从未发送过的
@@ -389,14 +474,14 @@ class OtaBleTransport {
           _noProgressClock?.reset();
           otaMonoLog('MONO_BUDGET_RESET', durable: beginAck.durableOff);
         }
-        _notifyDurable(onDurableProgress, durableOff, total);
+        _notifyDurable(onDurableProgress, durableOff, dataLimit);
         needsResume = false;
         // ---- 块循环：块起点按字节换算（durableOff ~/ blockSize）----
-        while (durableOff < total && !needsResume) {
+        while (durableOff < dataLimit && !needsResume) {
           _checkUsable();
           final blockStart = (view.durableOff ~/ view.blockSize) * view.blockSize;
-          if (blockStart >= total) break;
-          final blockEnd = (blockStart + view.blockSize).clamp(0, total);
+          if (blockStart >= dataLimit) break;
+          final blockEnd = (blockStart + view.blockSize).clamp(0, dataLimit);
           // 尾块段数向上取整（4096+129B → 33 段，最后一段 1B）。
           final segsInBlock =
               ((blockEnd - blockStart) + OtaBleCodec.dataSegmentSize - 1) ~/
@@ -412,8 +497,8 @@ class OtaBleTransport {
                 break;
               }
               if (decision.terminal != null) {
-                return OtaAckResult.terminal(
-                    decision.terminal!, view.result());
+                return onFullResult(OtaAckResult.terminal(
+                    decision.terminal!, view.result()));
               }
               throw _ackErrorException(midErr);
             }
@@ -437,6 +522,7 @@ class OtaBleTransport {
               final seq = _nextSeq();
               view.trackSend(seq, seg);
               await _sendSegment(package, blockStart, seg, seq);
+              probeOffsets?.add(blockStart + seg * OtaBleCodec.dataSegmentSize);
               final segLen = _segmentLength(package, blockStart, seg);
               sentBytes += segLen;
               // P3-4 观测：段发送结束（首发/重发由 stats 按字节偏移去重）。
@@ -444,7 +530,7 @@ class OtaBleTransport {
                 offsetBytes: blockStart + seg * OtaBleCodec.dataSegmentSize,
                 lengthBytes: segLen,
               );
-              onSent?.call(sentBytes, total);
+              onSent?.call(sentBytes, dataLimit);
             }
             if (view.durableOff >= blockEnd) break;
             _checkNoProgress();
@@ -476,6 +562,7 @@ class OtaBleTransport {
                     durable: view.durableOff);
               }
               await _sendSegment(package, blockStart, seg, entry.key);
+              probeOffsets?.add(blockStart + seg * OtaBleCodec.dataSegmentSize);
               final segLen = _segmentLength(package, blockStart, seg);
               sentBytes += segLen;
               // P3-4 观测：重发段同样登记（stats 侧按偏移识别为重传）。
@@ -483,7 +570,7 @@ class OtaBleTransport {
                 offsetBytes: blockStart + seg * OtaBleCodec.dataSegmentSize,
                 lengthBytes: segLen,
               );
-              onSent?.call(sentBytes, total);
+              onSent?.call(sentBytes, dataLimit);
             }
             if (overLimit) {
               if (resumeLeft > 0) {
@@ -502,7 +589,8 @@ class OtaBleTransport {
           // 块结束：同步权威 durable（最后一段的 ACK 可能刚到）。
           if (view.durableOff > durableOff) {
             durableOff = view.durableOff;
-            _notifyDurable(onDurableProgress, durableOff, total);
+            validateProbeCoverage(durableOff, view.blockBitmap);
+            _notifyDurable(onDurableProgress, durableOff, dataLimit);
             _noProgressClock?.reset(); // durable 前进即重置预算窗口
             otaMonoLog('MONO_BUDGET_RESET', durable: durableOff);
           }
@@ -521,8 +609,8 @@ class OtaBleTransport {
               resumeLeft--;
               needsResume = true;
             } else if (decision.terminal != null) {
-              return OtaAckResult.terminal(
-                  decision.terminal!, view.result());
+              return onFullResult(OtaAckResult.terminal(
+                  decision.terminal!, view.result()));
             } else {
               throw _ackErrorException(blockEndErr);
             }
@@ -534,6 +622,23 @@ class OtaBleTransport {
           await _abortRoundTrip();
           _session = 0;
           continue;
+        }
+        if (prefixBytes != null) {
+          validateProbeCoverage(view.durableOff, view.blockBitmap);
+          final beginWriteUs = stats!.transferStartUs;
+          final durableAckUs = view.durableArrivalUs;
+          if (view.durableOff != prefixBytes || view.blockBitmap != 0 ||
+              probeOffsets!.length * OtaBleCodec.dataSegmentSize != prefixBytes ||
+              beginWriteUs == null || durableAckUs == null || durableAckUs <= beginWriteUs) {
+            throw const OtaTransportException('Incomplete prefix coverage or timing', code: 'PROBE_COVERAGE');
+          }
+          final closure = await _abortProbeStrict(view, prefixBytes);
+          return onPrefixResult!(OtaPrefixProbeResult._(
+            prefixBytes: prefixBytes, sentTotalBytes: sentBytes,
+            senderWindowSegments: effectiveWindow, beginWriteUs: beginWriteUs,
+            durableAckUs: durableAckUs, abortWriteUs: closure.writeUs,
+            abortAckUs: closure.arrivalUs, session: closure.session, abortSeq: closure.seq,
+          ));
         }
         // ---- END：复述 package_sha256（seq 复用重试，先注册等待者再发送）----
         final endSeq = _nextSeq(); // 循环外分配一次：重试复用（MCU 对
@@ -561,8 +666,8 @@ class OtaBleTransport {
             final endAck = _parseAck(endFrame);
             final endTerminal = _abortStatusOf(endAck.status);
             if (endTerminal != null) {
-              return OtaAckResult.terminal(
-                  endTerminal, OtaAckResult.fromAck(endAck));
+              return onFullResult(OtaAckResult.terminal(
+                  endTerminal, OtaAckResult.fromAck(endAck)));
             }
             if (endAck.status == OtaBleCodec.statusErrState &&
                 resumeLeft > 0) {
@@ -578,7 +683,7 @@ class OtaBleTransport {
               // END」，这类应答不得落入下方成功块——否则非 OK 的失败传输
               // 会被登记成功终点并置 outcome=ok（P34-R03 反例：END 错误
               // 状态仍报成功）。
-              return OtaAckResult.fromAck(endAck);
+              return onFullResult(OtaAckResult.fromAck(endAck));
             }
             if (endAck.durableOff != total) {
               // END OK 核对（RC3-06）：MCU finalize 成功语义是
@@ -625,7 +730,7 @@ class OtaBleTransport {
             }
             otaMonoLog('MONO_END_ACK_OK', durable: endAck.durableOff);
             transferOk = true;
-            return OtaAckResult.fromAck(endAck);
+            return onFullResult(OtaAckResult.fromAck(endAck));
           } on TimeoutException {
             _checkNoProgress(); // 预算耗尽优先终止，不再空转重试（RC3-07）
             if (++endAttempts > retries) {
@@ -822,6 +927,7 @@ class OtaBleTransport {
           f.payload[0] != OtaBleCodec.statusOk;
     }
     if (f.cmd == OtaBleCodec.rspAckAbort) {
+      if (f.seq == _strictAbortSeq && f.session == _session) return false;
       return f.session == _session || f.session == 0;
     }
     return false;
@@ -1008,6 +1114,43 @@ class OtaBleTransport {
     } on TimeoutException {
       // 尽力而为：不等待重试，BEGIN 会按新会话语义处理。
     } finally {
+      _waiters.remove(waiter);
+    }
+  }
+
+  int? _strictAbortSeq;
+
+  Future<({int writeUs, int arrivalUs, int session, int seq})> _abortProbeStrict(
+      _TransferAckView view, int expectedDurable) async {
+    final session = _session;
+    final seq = _nextSeq();
+    final waiter = _ResponseWaiter(OtaBleCodec.rspAckAbort, session, seq);
+    _strictAbortSeq = seq;
+    _waiters.add(waiter);
+    try {
+      _checkUsable();
+      final writeUs = stats!.nowUs();
+      await _writeFrame(OtaBleCodec.encodeCommand(
+        cmd: OtaBleCodec.cmdAbort, session: session, seq: seq,
+      ));
+      final frame = await waiter.future.timeout(_capByBudget(ackTimeout),
+          onTimeout: () => throw const OtaTransportException(
+              'Prefix ABORT ACK missing', code: 'PROBE_ABORT_UNVERIFIED'));
+      _checkUsable();
+      final ack = _parseAck(frame);
+      final pendingError = view.takeError();
+      if (pendingError != null) throw _ackErrorException(pendingError);
+      final arrivalUs = waiter.arrivalUs;
+      if (session == 0 || frame.session != session || ack.status != OtaBleCodec.statusAborted ||
+          ack.durableOff != expectedDurable || ack.blockBitmap != 0 ||
+          arrivalUs == null || arrivalUs < writeUs) {
+        throw const OtaTransportException('Prefix ABORT ACK not authoritative',
+            code: 'PROBE_ABORT_UNVERIFIED');
+      }
+      _session = 0;
+      return (writeUs: writeUs, arrivalUs: arrivalUs, session: session, seq: seq);
+    } finally {
+      _strictAbortSeq = null;
       _waiters.remove(waiter);
     }
   }
@@ -1503,16 +1646,19 @@ class _TransferAckView {
     required this.blockSize,
     required this.segmentSize,
     this.stats,
+    this.captureDurableArrival = false,
   });
 
   final int blockSize;
   final int segmentSize;
+  final bool captureDurableArrival;
   /// P3-4 链路观测（可选；null 时零行为差异）。
   final OtaLinkStats? stats;
 
   int durableOff = 0;
   int blockBitmap = 0;
   int totalLen = 0;
+  int? durableArrivalUs;
   /// 在途段：请求 seq → 段号（ACK/位图置位即回收；窗口按此计数）。
   final Map<int, int> inFlight = {};
   /// 每段累计发送次数（首发+重发；超限由传输循环终止）。
@@ -1555,6 +1701,7 @@ class _TransferAckView {
   }
 
   void onAck(OtaBleFrame f) {
+    final arrivalUs = captureDurableArrival ? stats?.nowUs() : null;
     final OtaAckPayload ack;
     try {
       ack = OtaAckPayload.parse(f.cmd, f.payload);
@@ -1633,6 +1780,7 @@ class _TransferAckView {
     // MCU 只按整块提交）。
     final statsConfirmedSegs = <int>{seg};
     if (advanced) {
+      durableArrivalUs = arrivalUs;
       statsConfirmedSegs.addAll(inFlight.values);
     } else {
       for (final s in inFlight.values) {
@@ -1860,6 +2008,53 @@ class OtaBeginAck {
   /// 调用方必须用它作为该确认覆盖段的终点时刻，不得在 BEGIN 往返之后
   /// 另取时钟（P34-DA01）。
   final int? arrivalUs;
+}
+
+/// A durably received, strictly aborted prefix, not an installed firmware image.
+class OtaPrefixProbeResult {
+  const OtaPrefixProbeResult._({
+    required this.prefixBytes,
+    required this.sentTotalBytes,
+    required this.senderWindowSegments,
+    required this.beginWriteUs,
+    required this.durableAckUs,
+    required this.abortWriteUs,
+    required this.abortAckUs,
+    required this.session,
+    required this.abortSeq,
+  });
+
+  final int prefixBytes;
+  final int sentTotalBytes;
+  final int senderWindowSegments;
+  final int beginWriteUs;
+  final int durableAckUs;
+  final int abortWriteUs;
+  final int abortAckUs;
+  final int session;
+  final int abortSeq;
+
+  Map<String, Object> toJson() => {
+    'schema': 1,
+    'outcome': 'durable-prefix-aborted',
+    'prefixBytes': prefixBytes,
+    'sentUniqueBytes': prefixBytes,
+    'uniqueSegments': prefixBytes ~/ OtaBleCodec.dataSegmentSize,
+    'sentTotalBytes': sentTotalBytes,
+    'senderWindowSegments': senderWindowSegments,
+    'beginWriteUs': beginWriteUs,
+    'durableAckUs': durableAckUs,
+    'abortWriteUs': abortWriteUs,
+    'abortAckUs': abortAckUs,
+    'elapsedUs': durableAckUs - beginWriteUs,
+    'abortElapsedUs': abortAckUs - abortWriteUs,
+    'session': session,
+    'abortSeq': abortSeq,
+    'abortStatus': OtaBleCodec.statusAborted,
+    'durableOff': prefixBytes,
+    'blockBitmap': 0,
+    'endSent': false,
+  };
 }
 
 /// ACK 统一结果（BEGIN/DATA/END）。

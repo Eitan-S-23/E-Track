@@ -52,6 +52,33 @@ def encoded(items, footer_changes=None):
     return prefix + (json.dumps(footer, separators=(",", ":")) + "\n").encode()
 
 
+def prefix_rows():
+    items = rows(complete=False)
+    experiment = dict(schema=2, runId="prefix-001", configSha256="e"*64, requestedBaud=460800,
+        reuseGatt=True, withoutResponse=True, endpointHost="fixture.example", senderWindowSegments=8,
+        transferMode="prefix", prefixBytes=32768, **{k: v for k, v in INPUT.items() if k != "appLifecycle"})
+    probe = dict(schema=1, outcome="durable-prefix-aborted", prefixBytes=32768, sentUniqueBytes=32768,
+        uniqueSegments=256, sentTotalBytes=32768, senderWindowSegments=8, beginWriteUs=10,
+        durableAckUs=1000, abortWriteUs=1010, abortAckUs=1020, elapsedUs=990, abortElapsedUs=10,
+        session=1, abortSeq=257, abortStatus=255, durableOff=32768, blockBitmap=0, endSent=False,
+        runId="prefix-001", configSha256="e"*64, deviceAddress=TARGET, sourceVersionCode=30206,
+        sourceImageSha256="b"*64, sourceIdentityVerified=True)
+    items += [dict(kind="line", message="OTA_EXPERIMENT " + json.dumps(experiment)),
+              dict(kind="upgrade-start", input=copy.deepcopy(INPUT)),
+              dict(kind="line", message="OTA_MONO MONO_BUDGET_START monoUs=10 wallUs=100"),
+              dict(kind="line", message="OTA_IDENTITY " + json.dumps(dict(phase="pre-transfer",
+                  versionCode=30206, imageSha256="b"*64, deviceAddress=TARGET)))]
+    items += [dict(kind="line", message=f"OTA_LINK_SAMPLE label=prefix-probe kind=segment_first_send us=20 off={off} len=128")
+              for off in range(0, 32768, 128)]
+    items += [dict(kind="line", message=f"OTA_LINK_SAMPLE label=prefix-probe kind=durable us=30 off={off}")
+              for off in range(0, 32769, 4096)]
+    items += [dict(kind="line", message="OTA_PREFIX_PROBE " + json.dumps(probe)),
+              dict(kind="line", message="OTA_LINK_STATS " + json.dumps(dict(label="prefix-probe", transfer=dict(
+                  startUs=10, endAckUs=None, elapsedUs=None, outcome="fail", segmentsUnique=256, segmentSendTotal=256)))),
+              dict(kind="upgrade-end", outcome="not-completed")]
+    return [dict(row, seq=i) for i, row in enumerate(items, 1)]
+
+
 class CaptureTests(unittest.TestCase):
     def setUp(self):
         self.base = m.checked(ROOT / ".cache/p3-4-observation-capture-tests")
@@ -72,6 +99,74 @@ class CaptureTests(unittest.TestCase):
         self.assertEqual(result["independentAcceptance"], "NOT_RUN")
         self.assertEqual(result["input"], INPUT)
         self.assertIn("MONO_REBOOT_VERIFIED", log)
+
+    def test_prefix_verdict_is_a_diagnostic_not_an_upgrade_or_threshold_pass(self):
+        result, _ = self.verify(encoded(prefix_rows()), require_prefix_probe=True)
+        self.assertEqual(result["outcome"], "not-completed")
+        self.assertEqual(result["prefixProbe"]["sentUniqueBytes"], 32768)
+        self.assertFalse(result["eligibleForThreshold"])
+        self.assertEqual(result["independentAcceptance"], "NOT_RUN")
+
+    def test_prefix_rejects_invalid_timing_coverage_config_and_identity(self):
+        cases = [("OTA_PREFIX_PROBE ", changes) for changes in (
+            dict(prefixBytes=0), dict(sentUniqueBytes=4096), dict(sentTotalBytes=32769),
+            dict(uniqueSegments=32), dict(durableOff=4096), dict(blockBitmap=1),
+            dict(endSent=True), dict(endSent=0), dict(sourceIdentityVerified=1),
+            dict(abortStatus=0), dict(session=0), dict(abortSeq=65536),
+            dict(senderWindowSegments=16), dict(sourceVersionCode=30207),
+            dict(sourceImageSha256="d"*64), dict(beginWriteUs=1000),
+            dict(abortAckUs=999), dict(elapsedUs=True), dict(elapsedUs=999),
+            dict(configSha256="d"*64), dict(runId="different"), dict(extra=1),
+        )] + [("OTA_EXPERIMENT ", changes) for changes in (
+            dict(schema=1), dict(transferMode="full"), dict(prefixBytes=32768.0),
+            dict(senderWindowSegments=4), dict(requestedBaud=230400),
+            dict(packageSha256="f"*64), dict(packageBytes=True), dict(extra=True),
+        )]
+        for prefix, changes in cases:
+            items = prefix_rows()
+            row = next(row for row in items if row.get("message", "").startswith(prefix))
+            value = json.loads(row["message"][len(prefix):])
+            value.update(changes)
+            row["message"] = prefix + json.dumps(value)
+            with self.subTest(prefix=prefix, changes=changes), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_requires_original_sender_coverage_and_one_verdict(self):
+        for fragment in ("OTA_PREFIX_PROBE ", "OTA_EXPERIMENT ", "OTA_IDENTITY ",
+                         "OTA_LINK_STATS ", "kind=segment_first_send us=20 off=0 ",
+                         "kind=durable us=30 off=32768"):
+            items = [row for row in prefix_rows() if fragment not in row.get("message", "")]
+            items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+            with self.subTest(fragment=fragment), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items), require_prefix_probe=True)
+        items = prefix_rows()
+        items.insert(-1, copy.deepcopy(next(row for row in items if row.get("message", "").startswith("OTA_PREFIX_PROBE "))))
+        items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+        with self.assertRaises(m.CaptureError): self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_cannot_include_a_full_upgrade_end(self):
+        for event in ("MONO_END_ACK_OK", "MONO_REBOOT_VERIFIED"):
+            items = prefix_rows()
+            items.insert(-1, dict(kind="line", message=f"OTA_MONO {event} monoUs=10 wallUs=100"))
+            items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+            with self.assertRaises(m.CaptureError): self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_cli_and_failed_import_preserve_original_bytes(self):
+        source, out = self.tmp / "prefix.jsonl", self.tmp / "prefix-import"
+        raw = encoded(prefix_rows())
+        source.write_bytes(raw)
+        cmd = [sys.executable, "-I", "-S", "-B", "-X", "utf8", m.__file__, "extract",
+               "--input", str(source), "--expect-sentinel", SENTINEL, "--expect-target", TARGET,
+               "--require-prefix-probe", "--out-root", str(out)]
+        good = subprocess.run(cmd, cwd=ROOT, capture_output=True, timeout=15)
+        self.assertEqual(good.returncode, 0, good.stderr.decode(errors="replace"))
+        self.assertEqual(json.loads(good.stdout)["prefixProbe"]["prefixBytes"], 32768)
+        self.assertEqual(source.read_bytes(), raw)
+        bad_source, bad_out = self.tmp / "full.jsonl", self.tmp / "not-a-probe"
+        bad_source.write_bytes(encoded(rows()))
+        with self.assertRaises(m.CaptureError):
+            m.extract(bad_source, bad_out, SENTINEL, TARGET, require_prefix_probe=True)
+        self.assertFalse(bad_out.exists())
 
     def test_query_capture_is_only_a_readiness_check(self):
         data = encoded(rows(complete=False))

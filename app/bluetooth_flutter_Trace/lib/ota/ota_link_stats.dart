@@ -244,6 +244,9 @@ class OtaLinkStats {
   int? _endAckArrivalUs;
   String? _transferOutcome;
 
+  /// Shared origin for diagnostic prefix timing; never an END substitute.
+  int? get transferStartUs => _transferStartUs;
+
   /// 传输起点：本 transfer 首个 BEGIN 帧**写调用开始**（幂等）。
   ///
   /// 契约口径（`docs/ota-cross-system-contracts.md`，XC-BLE-THROUGHPUT）是

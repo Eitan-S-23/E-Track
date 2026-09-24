@@ -762,6 +762,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     if (!otaService.isUpgrading &&
         phase != OtaPhase.readyToInstall &&
         phase != OtaPhase.completed &&
+        phase != OtaPhase.probeCompleted &&
         phase != OtaPhase.cancelled &&
         phase != OtaPhase.failed &&
         !hasFirmware) {
@@ -769,6 +770,27 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     }
     if (phase == OtaPhase.completed) {
       return _buildCompletedCard();
+    }
+    if (phase == OtaPhase.probeCompleted) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('BLE 短测完成（未安装固件）',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            Text(otaService.upgradeStatus),
+            const SizedBox(height: 8),
+            const Text('暂存数据仍保留。下一组测试须先恢复并核验零起点，不可直接重测。'),
+          ],
+        ),
+      );
     }
 
     final busy = inDownload || inTransfer;
@@ -879,7 +901,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                 onPressed:
                     _deviceReady && !otaService.isUpgrading ? _startUpgrade : null,
                 icon: const Icon(Icons.bluetooth_audio),
-                label: const Text('开始 BLE 传输'),
+                label: Text(otaService.isPrefixProbe ? '开始 BLE 短测（不安装）' : '开始 BLE 传输'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4CAF50),
                   foregroundColor: Colors.white,

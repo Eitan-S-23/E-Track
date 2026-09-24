@@ -140,6 +140,178 @@ void main() {
   /// 撞 END ERR_SHA，使全部正常路径用例失去意义。
   List<int> shaOf(Uint8List package) => sha256.convert(package).bytes;
 
+  group('durable prefix probe', () {
+    final bytes = packageBytes(40960);
+    Future<OtaPrefixProbeResult> probe(OtaBleTransport transport, {int limit = 32768, int window = 4}) =>
+        transport.probePrefix(package: bytes, packageSha256: shaOf(bytes),
+            etuHeader: etuHeaderOf(bytes), prefixBytes: limit, windowSegments: window);
+
+    for (final window in [4, 8, 16]) {
+      test('window $window sends exactly eight real blocks and strictly aborts without END', () async {
+        final mcu = _ProbeMcu()..ackDelay = const Duration(milliseconds: 2);
+        final stats = OtaLinkStats(label: 'prefix-probe');
+        final transport = OtaBleTransport(channel: mcu, stats: stats);
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        final progress = <int>[];
+        final result = await transport.probePrefix(
+          package: bytes, packageSha256: shaOf(bytes), etuHeader: etuHeaderOf(bytes),
+          prefixBytes: 32768, windowSegments: window,
+          onDurableProgress: (durable, total) { expect(total, 32768); progress.add(durable); },
+          onSent: (_, total) => expect(total, 32768),
+        );
+        expect(mcu.dataOffsets, List.generate(256, (i) => i * 128));
+        expect(mcu.maxInFlight, inInclusiveRange(1, window));
+        expect(mcu.stagedDurable, 32768);
+        expect(mcu._stagedBytes, bytes.sublist(0, 32768));
+        expect(progress.last, 32768);
+        expect(mcu.beginCalls, 1);
+        expect(mcu.abortCalls, 1);
+        expect(mcu.endCalls, 0);
+        expect(mcu._state, _McuSim._idle);
+        final report = result.toJson();
+        expect(report['sentUniqueBytes'], 32768);
+        expect(report['uniqueSegments'], 256);
+        expect(report['sentTotalBytes'], 32768);
+        expect(report['senderWindowSegments'], window);
+        expect(report['elapsedUs'], greaterThan(0));
+        expect(report['abortElapsedUs'], greaterThanOrEqualTo(0));
+        expect(report['endSent'], isFalse);
+        final transfer = stats.toJson()['transfer'] as Map<String, dynamic>;
+        expect(transfer['endAckUs'], isNull);
+        expect(transfer['elapsedUs'], isNull);
+        expect(transfer['outcome'], 'fail', reason: 'not a complete ETU transfer');
+        expect(transfer['segmentsUnique'], 256);
+        expect(stats.acksAbort, 0, reason: 'solicited closure is not an asynchronous abort error');
+      });
+    }
+
+    test('invalid prefix length is rejected before any command', () async {
+      final mcu = _ProbeMcu();
+      final transport = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'prefix-probe'));
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      for (final limit in [-1, 0, 128, 4095, 32769, 36864, bytes.length]) {
+        await expectLater(probe(transport, limit: limit),
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'PROBE_CONFIG')));
+      }
+      expect(mcu.writtenFrames, isEmpty);
+    });
+
+    test('requires fresh timing observations', () async {
+      final mcu = _ProbeMcu();
+      addTearDown(mcu.close);
+      for (final stats in [null, OtaLinkStats(label: 'old')..recordTransferStart()]) {
+        final transport = OtaBleTransport(channel: mcu, stats: stats);
+        await expectLater(probe(transport), throwsA(isA<OtaTransportException>()));
+        await transport.dispose();
+      }
+      expect(mcu.writtenFrames, isEmpty);
+    });
+
+    for (final state in [(durable: 4096, bitmap: 0), (durable: 0, bitmap: 1)]) {
+      test('rejects nonzero initial state $state before DATA', () async {
+        final mcu = _ProbeMcu()
+          ..beginAckDurableOverride = state.durable
+          ..beginAckBitmapOverride = state.bitmap;
+        final transport = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'prefix-probe'));
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        await expectLater(probe(transport),
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'PROBE_INITIAL_STATE')));
+        expect(mcu.dataFrames, isEmpty);
+        expect(mcu.endCalls, 0);
+      });
+    }
+
+    test('ABORT retains staging, so a second probe cannot count old bytes', () async {
+      final mcu = _ProbeMcu();
+      addTearDown(mcu.close);
+      final first = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'first'));
+      await probe(first);
+      await first.dispose();
+      final second = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'second'));
+      addTearDown(second.dispose);
+      await expectLater(probe(second),
+          throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'PROBE_INITIAL_STATE')));
+      expect(mcu.dataFrames.length, 256);
+      expect(mcu.stagedDurable, 32768);
+      expect(mcu.endCalls, 0);
+    });
+
+    test('shares bounded resume machinery without losing unique byte accounting', () async {
+      final mcu = _ProbeMcu()..errSeqAtDataCounts = {35};
+      final transport = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'prefix-probe'));
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      final result = await probe(transport);
+      expect(mcu.beginCalls, greaterThan(1));
+      expect(result.sentTotalBytes, greaterThan(32768));
+      expect(result.toJson()['sentUniqueBytes'], 32768);
+      expect(mcu._stagedBytes, bytes.sublist(0, 32768));
+      expect(mcu.endCalls, 0);
+    });
+
+    test('a forged one-block durable advance cannot invent unsent bytes', () async {
+      final mcu = _ProbeMcu()..dataAckDurableJump = 4096;
+      final transport = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'prefix-probe'));
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      await expectLater(probe(transport),
+          throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'PROBE_COVERAGE')));
+      expect(mcu.dataFrames.length, lessThan(32));
+      expect(mcu.abortCalls, 0);
+      expect(mcu.endCalls, 0);
+    });
+
+    test('malformed ACK latched at final durable boundary blocks probe closure', () async {
+      final mcu = _ProbeMcu()..malformedAtPrefix = true;
+      final transport = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'prefix-probe'));
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      await expectLater(probe(transport),
+          throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'ACK_MALFORMED')));
+      expect(mcu.stagedDurable, 32768);
+      expect(mcu.abortCalls, 0);
+      expect(mcu.endCalls, 0);
+    });
+
+    for (final fault in ['missing', 'short', 'unknown', 'status', 'session', 'sequence',
+        'durable', 'bitmap', 'unsolicited', 'late-data-error']) {
+      test('ABORT $fault cannot count as verified closure', () async {
+        final mcu = _ProbeMcu()..abortFault = fault;
+        final stats = OtaLinkStats(label: 'prefix-probe');
+        final transport = OtaBleTransport(channel: mcu, stats: stats,
+            ackTimeout: const Duration(milliseconds: 50));
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        await expectLater(probe(transport), throwsA(isA<OtaTransportException>()));
+        expect(mcu.stagedDurable, 32768);
+        expect(mcu.abortCalls, 1);
+        expect(mcu.endCalls, 0);
+        expect((stats.toJson()['transfer'] as Map)['outcome'], 'fail');
+      });
+    }
+
+    for (final cancel in [false, true]) {
+      test('ACK before physical ABORT ${cancel ? 'cancellation' : 'write failure'} is not closure', () async {
+        final mcu = _ProbeMcu()
+          ..abortWriteGate = Completer<void>()
+          ..failAbortWrite = !cancel;
+        final transport = OtaBleTransport(channel: mcu, stats: OtaLinkStats(label: 'prefix-probe'));
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        final result = probe(transport);
+        final rejected = expectLater(result, throwsA(isA<OtaTransportException>()));
+        await mcu.abortWriteStarted.future;
+        if (cancel) transport.cancel();
+        mcu.abortWriteGate!.complete();
+        await rejected;
+        expect(mcu.endCalls, 0);
+      });
+    }
+  });
+
   group('getDeviceInfo', () {
     test('GET_INFO 往返解析身份，INFO session=0 且 seq 回显', () async {
       final mcu = _McuSim();
@@ -3563,6 +3735,56 @@ class _TailLossWithLivenessMcu extends _McuSim {
 ///   连续，RC3-03）；
 /// - ACK bitmap：ACTIVE 报 RAM segment_bitmap，IDLE 恒 0（真值
 ///   session_progress_bitmap）。
+class _ProbeMcu extends _McuSim {
+  String? abortFault;
+  bool malformedAtPrefix = false;
+  Completer<void>? abortWriteGate;
+  final abortWriteStarted = Completer<void>();
+  bool failAbortWrite = false;
+
+  Future<void> close() async {
+    for (final timer in _timers) { timer.cancel(); }
+    await _notifyController.close();
+  }
+
+  @override
+  Future<void> writeChunk(List<int> chunk) async {
+    final isAbort = _chunkFrameCmd(chunk) == OtaBleCodec.cmdAbort;
+    await super.writeChunk(chunk);
+    if (isAbort) {
+      if (!abortWriteStarted.isCompleted) abortWriteStarted.complete();
+      await abortWriteGate?.future;
+      if (failAbortWrite) throw StateError('ABORT physical write failed after ACK');
+    }
+  }
+
+  @override
+  void sendFrame(int cmd, int session, int seq, List<int> payload) {
+    if (cmd == OtaBleCodec.rspAckData && malformedAtPrefix && _stagedDurable == 32768) {
+      malformedAtPrefix = false;
+      super.sendFrame(cmd, session, seq, payload.sublist(0, 8));
+    }
+    if (cmd == OtaBleCodec.rspAckAbort) {
+      switch (abortFault) {
+        case 'missing': return;
+        case 'short': payload = payload.sublist(0, 8);
+        case 'unknown': payload = [0x7f, ...payload.skip(1)];
+        case 'status': payload = [OtaBleCodec.statusOk, ...payload.skip(1)];
+        case 'session': session = 0;
+        case 'sequence': seq = (seq + 1) & 0xffff;
+        case 'durable': payload = packAck(OtaBleCodec.statusAborted, 36864, 0);
+        case 'bitmap': payload = packAck(OtaBleCodec.statusAborted, 32768, 1);
+        case 'unsolicited':
+          super.sendFrame(cmd, session, (seq + 1) & 0xffff, payload);
+        case 'late-data-error':
+          super.sendFrame(OtaBleCodec.rspAckData, session, dataFrames.last.seq,
+              packAck(OtaBleCodec.statusOk, 32768, 0).sublist(0, 8));
+      }
+    }
+    super.sendFrame(cmd, session, seq, payload);
+  }
+}
+
 class _McuSim extends _FakeMcuHost {
   // ---- 会话 RAM 层（teardown 清空）----
   static const int _idle = 0;

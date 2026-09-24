@@ -16,7 +16,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[3]
 MAX_BYTES = 64 * 1024 * 1024
 PREFIXES = ("OTA_LINK_SAMPLE ", "OTA_LINK_STATS ", "OTA_LINK_RETIRE ",
-            "OTA_LINK_LATE ", "OTA_MONO ", "OTA_IDENTITY ", "OTA_EXPERIMENT ")
+            "OTA_LINK_LATE ", "OTA_MONO ", "OTA_IDENTITY ", "OTA_EXPERIMENT ",
+            "OTA_PREFIX_PROBE ")
 INPUT_FIELDS = {"packageSha256", "packageBytes", "currentVersionCode",
                 "currentImageSha256", "targetVersionCode", "targetImageSha256",
                 "deviceAddress", "appLifecycle"}
@@ -73,7 +74,7 @@ def validate_input(value):
             "lifecycle must be observed, not guessed")
 
 
-def verify(data: bytes, *, sentinel: str, target: str, require_upgrade=True):
+def verify(data: bytes, *, sentinel: str, target: str, require_upgrade=True, require_prefix_probe=False):
     require(0 < len(data) <= MAX_BYTES + 8192 and data.endswith(b"\n"), "size or final line terminator")
     require(not data.startswith(b"\xef\xbb\xbf"), "BOM is not part of the format")
     raw_lines = data.splitlines(keepends=True)
@@ -163,7 +164,103 @@ def verify(data: bytes, *, sentinel: str, target: str, require_upgrade=True):
                   outcome=outcomes[0] if outcomes else None, rawSha256=hashlib.sha256(data).hexdigest(),
                   eligibleForThreshold=False, independentAcceptance="NOT_RUN",
                   scope="envelope/identity integrity only; original timing/grouping gates still required")
+    if require_prefix_probe:
+        result["prefixProbe"] = verify_prefix_probe(result, messages)
+        result["scope"] = "durable-prefix diagnostic only; no END, installation or full-ETU throughput acceptance"
     return result, "".join(line + "\n" for line in messages)
+
+
+def verify_prefix_probe(envelope, messages):
+    """Validate the App verdict against its input and original sender records."""
+    require(envelope["outcome"] == "not-completed" and envelope["input"] is not None,
+            "prefix probe must not claim a completed upgrade")
+
+    def one(prefix):
+        values = [decode(line[len(prefix):]) for line in messages if line.startswith(prefix)]
+        require(len(values) == 1, "one original record required: " + prefix.strip())
+        return values[0]
+
+    probe = one("OTA_PREFIX_PROBE ")
+    experiment = one("OTA_EXPERIMENT ")
+    fields = {"schema", "outcome", "prefixBytes", "sentUniqueBytes", "uniqueSegments", "sentTotalBytes",
+              "senderWindowSegments", "beginWriteUs", "durableAckUs", "abortWriteUs", "abortAckUs",
+              "elapsedUs", "abortElapsedUs", "session", "abortSeq", "abortStatus", "durableOff",
+              "blockBitmap", "endSent", "runId", "configSha256", "deviceAddress", "sourceVersionCode",
+              "sourceImageSha256", "sourceIdentityVerified"}
+    require(set(probe) == fields and type(probe["schema"]) is int and probe["schema"] == 1 and
+            probe["outcome"] == "durable-prefix-aborted", "prefix verdict schema")
+    numbers = fields - {"outcome", "endSent", "runId", "configSha256", "deviceAddress",
+                        "sourceImageSha256", "sourceIdentityVerified"}
+    require(all(uint(probe[key], (1 << 63)-1) for key in numbers), "prefix numeric fields")
+    size = probe["prefixBytes"]
+    require(4096 <= size <= 32768 and size % 4096 == 0 and size < envelope["input"]["packageBytes"] and
+            probe["sentUniqueBytes"] == probe["durableOff"] == size and
+            probe["uniqueSegments"] == size // 128 and probe["sentTotalBytes"] >= size and
+            probe["sentTotalBytes"] % 128 == 0, "prefix DATA coverage")
+    require(1 <= probe["senderWindowSegments"] <= 32 and 1 <= probe["session"] <= 255 and
+            probe["abortSeq"] <= 65535 and probe["abortStatus"] == 255 and probe["blockBitmap"] == 0 and
+            probe["endSent"] is False and probe["sourceIdentityVerified"] is True, "prefix closure")
+    require(probe["beginWriteUs"] < probe["durableAckUs"] <= probe["abortWriteUs"] <= probe["abortAckUs"] and
+            probe["elapsedUs"] == probe["durableAckUs"] - probe["beginWriteUs"] and
+            probe["abortElapsedUs"] == probe["abortAckUs"] - probe["abortWriteUs"], "prefix timing")
+    expected_fields = {"schema", "runId", "configSha256", "requestedBaud", "reuseGatt", "withoutResponse",
+                       "endpointHost", "deviceAddress", "packageBytes", "packageSha256", "currentVersionCode",
+                       "currentImageSha256", "targetVersionCode", "targetImageSha256", "senderWindowSegments",
+                       "transferMode", "prefixBytes"}
+    require(set(experiment) == expected_fields and type(experiment["schema"]) is int and
+            experiment["schema"] == 2 and experiment["transferMode"] == "prefix" and
+            type(experiment["prefixBytes"]) is int and experiment["prefixBytes"] == size and
+            type(experiment["senderWindowSegments"]) is int and
+            probe["senderWindowSegments"] <= experiment["senderWindowSegments"] <= 32 and
+            type(experiment["requestedBaud"]) is int and experiment["requestedBaud"] in (115200, 460800, 921600) and
+            type(experiment["reuseGatt"]) is bool and type(experiment["withoutResponse"]) is bool,
+            "prefix experiment profile")
+    require(isinstance(experiment["endpointHost"], str) and re.fullmatch(
+        r"[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,}", experiment["endpointHost"]), "prefix endpoint host")
+    require(isinstance(probe["runId"], str) and re.fullmatch(r"[a-z][a-z0-9-]{0,47}", probe["runId"]) and
+            digest(probe["configSha256"]) and probe["runId"] == experiment["runId"] and
+            probe["configSha256"] == experiment["configSha256"], "prefix config binding")
+    source = envelope["input"]
+    for key in INPUT_FIELDS - {"appLifecycle"}:
+        require(type(experiment[key]) is type(source[key]) and experiment[key] == source[key],
+                "prefix experiment input binding: " + key)
+    require(probe["deviceAddress"] == source["deviceAddress"] and
+            probe["sourceVersionCode"] == source["currentVersionCode"] and
+            probe["sourceImageSha256"] == source["currentImageSha256"], "prefix retained identity")
+    identity = one("OTA_IDENTITY ")
+    require(set(identity) == {"phase", "versionCode", "imageSha256", "deviceAddress"} and
+            identity["phase"] == "pre-transfer" and type(identity["versionCode"]) is int and
+            identity["versionCode"] == source["currentVersionCode"] and
+            identity["imageSha256"] == source["currentImageSha256"] and
+            identity["deviceAddress"] == source["deviceAddress"], "prefix initial identity")
+    require(not any(line.startswith(("OTA_MONO MONO_END_ACK_OK ", "OTA_MONO MONO_REBOOT_VERIFIED "))
+                    for line in messages), "prefix cannot include END/reboot success")
+    require(sum(line.startswith("OTA_MONO MONO_BUDGET_START ") for line in messages) == 1,
+            "prefix sender start missing/ambiguous")
+
+    summaries = [decode(line[len("OTA_LINK_STATS "):]) for line in messages if line.startswith("OTA_LINK_STATS ")]
+    summaries = [value for value in summaries if value.get("label") == "prefix-probe"]
+    require(len(summaries) == 1 and isinstance(summaries[0].get("transfer"), dict), "prefix link summary")
+    transfer = summaries[0]["transfer"]
+    require(transfer.get("outcome") == "fail" and transfer.get("endAckUs") is None and
+            transfer.get("elapsedUs") is None and type(transfer.get("startUs")) is int and
+            transfer["startUs"] == probe["beginWriteUs"] and
+            type(transfer.get("segmentsUnique")) is int and transfer["segmentsUnique"] == size // 128 and
+            type(transfer.get("segmentSendTotal")) is int and
+            transfer["segmentSendTotal"] * 128 == probe["sentTotalBytes"], "prefix/full-transfer accounting")
+    samples, durable = set(), set()
+    for line in messages:
+        match = re.fullmatch(r"OTA_LINK_SAMPLE label=prefix-probe kind=segment_(first_send|retransmit) "
+                             r"us=(\d+) off=(\d+) len=(\d+)", line)
+        if match:
+            offset, length = int(match[3]), int(match[4])
+            require(offset % 128 == 0 and 0 <= offset < size and length == 128, "prefix raw DATA bounds")
+            if match[1] == "first_send": samples.add(offset)
+        match = re.fullmatch(r"OTA_LINK_SAMPLE label=prefix-probe kind=durable us=\d+ off=(\d+)", line)
+        if match: durable.add(int(match[1]))
+    require(samples == set(range(0, size, 128)) and durable == set(range(0, size+1, 4096)),
+            "prefix original DATA/durable observations incomplete")
+    return probe
 
 
 def checked(path):
@@ -180,14 +277,14 @@ def checked(path):
     return path
 
 
-def extract(source, out, sentinel, target):
+def extract(source, out, sentinel, target, *, require_prefix_probe=False):
     out = checked(out)
     require(not out.exists(), "preserve existing extraction")
     for name in ("observations.log", "capture.json"):
         checked(out / name)
     require(source.stat().st_size <= MAX_BYTES + 8192, "oversize input")
     data = source.read_bytes()
-    result, messages = verify(data, sentinel=sentinel, target=target)
+    result, messages = verify(data, sentinel=sentinel, target=target, require_prefix_probe=require_prefix_probe)
     out.mkdir(parents=True)
     with (out / "observations.log").open("x", encoding="utf-8", newline="\n") as stream:
         stream.write(messages)
@@ -206,16 +303,19 @@ def main():
     parser.add_argument("--expect-sentinel", required=True)
     parser.add_argument("--expect-target", required=True)
     parser.add_argument("--out-root", type=Path)
+    parser.add_argument("--require-prefix-probe", action="store_true")
     args = parser.parse_args()
     if args.mode == "extract":
         require(args.out_root is not None, "explicit output root required")
         require(Path.cwd().resolve() == ROOT and sys.dont_write_bytecode, "active worktree and Python -B required")
-        result = extract(args.input, args.out_root, args.expect_sentinel, args.expect_target)
+        result = extract(args.input, args.out_root, args.expect_sentinel, args.expect_target,
+                         require_prefix_probe=args.require_prefix_probe)
     else:
         require(args.out_root is None, "inspect is read-only")
         require(args.input.stat().st_size <= MAX_BYTES + 8192, "oversize input")
         result, _ = verify(args.input.read_bytes(), sentinel=args.expect_sentinel,
-                           target=args.expect_target, require_upgrade=False)
+                           target=args.expect_target, require_upgrade=False,
+                           require_prefix_probe=args.require_prefix_probe)
     print(json.dumps(result, indent=2))
     return 0
 

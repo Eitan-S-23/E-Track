@@ -253,6 +253,20 @@ void main() {
       expect(find.text('开始 BLE 传输'), findsNothing);
     });
 
+    testWidgets('probe completion cannot display firmware upgrade success or direct retry', (tester) async {
+      final fake = _FakeOtaService();
+      await pumpPage(tester, fake: fake);
+      fake.hasFile = true;
+      fake.phase$.value = OtaPhase.probeCompleted;
+      fake.status$.value = '32 KiB 已落盘，ABORT 已确认；未安装固件';
+      await tester.pumpAndSettle();
+      expect(find.text('BLE 短测完成（未安装固件）'), findsOneWidget);
+      expect(find.text('32 KiB 已落盘，ABORT 已确认；未安装固件'), findsOneWidget);
+      expect(find.textContaining('下一组测试须先恢复并核验零起点'), findsOneWidget);
+      expect(find.text('固件升级完成'), findsNothing);
+      expect(find.text('开始 BLE 传输'), findsNothing);
+    });
+
     testWidgets('completed：完成卡显示目标版本与设备 vcode（PR07）',
         (tester) async {
       final fake = _FakeOtaService();

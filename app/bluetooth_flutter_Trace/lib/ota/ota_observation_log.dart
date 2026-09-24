@@ -93,6 +93,7 @@ class OtaObservationLog {
     'OTA_MONO ',
     'OTA_IDENTITY ',
     'OTA_EXPERIMENT ',
+    'OTA_PREFIX_PROBE ',
   ];
 
   final Directory root;
