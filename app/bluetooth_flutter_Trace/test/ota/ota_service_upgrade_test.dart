@@ -65,6 +65,7 @@ int crc32Of(List<int> bytes) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
     Get.testMode = true;
   });
@@ -200,6 +201,7 @@ void main() {
     Duration? rebootWindow,
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
+    int? senderWindowSegments,
   }) {
     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条
     // 通知即抛 UnsupportedError。默认改为可增长列表。
@@ -223,6 +225,7 @@ void main() {
       rebootWindow: rebootWindow,
       rebootProbeTimeout: rebootProbeTimeout,
       rebootProbeInterval: rebootProbeInterval,
+      senderWindowSegments: senderWindowSegments,
     );
     Get.put<OtaService>(service);
     return service;
@@ -250,9 +253,12 @@ void main() {
     Duration? rebootWindow,
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
+    int? senderWindowSegments,
+    int receiverWindowSegments = 32,
   }) async {
     final ble = _UpgradeFakeBle(
-      preRebootPayload: preRebootPayload,
+      preRebootPayload: Uint8List.fromList(preRebootPayload)
+        ..[49] = receiverWindowSegments,
       postRebootPayload:
           rebootPayload.isEmpty ? postRebootPayload : rebootPayload,
       rebootDelayProbes: rebootDelayProbes,
@@ -264,6 +270,7 @@ void main() {
       rebootWindow: rebootWindow,
       rebootProbeTimeout: rebootProbeTimeout,
       rebootProbeInterval: rebootProbeInterval,
+      senderWindowSegments: senderWindowSegments,
     );
     Get.put<AppUpdateService>(_FakeAppUpdateService());
 
@@ -273,6 +280,119 @@ void main() {
     expect(service.phase, OtaPhase.readyToInstall);
     return ble;
   }
+
+  Future<void> expectGatedDataCount(_UpgradeFakeBle ble, int count) async {
+    final watch = Stopwatch()..start();
+    while (ble.dataOffsets.length < count) {
+      expect(watch.elapsed, lessThan(const Duration(seconds: 2)),
+          reason: 'sender did not fill the admitted window');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(ble.dataOffsets.length, count,
+        reason: 'new DATA must wait for MCU bitmap credit');
+  }
+
+  for (final entry in [
+    (receiver: 32, sender: null, expected: 4),
+    (receiver: 2, sender: null, expected: 2),
+    (receiver: 32, sender: 1, expected: 1),
+    (receiver: 2, sender: 8, expected: 2),
+  ]) {
+    test('sender cap ${entry.sender} and receiver ${entry.receiver} '
+        'admit ${entry.expected} outstanding DATA', () async {
+      final ble = await prepareDownloaded(
+        tempDir: tempFirmwareDir(),
+        notifyLog: <String>[],
+        senderWindowSegments: entry.sender,
+        receiverWindowSegments: entry.receiver,
+      );
+      final service = Get.find<OtaService>();
+      ble.dataGate = Completer<void>();
+      final transfer = service.startOtaUpgrade('AA:BB');
+      try {
+        await ble.dataGated.future;
+        await expectGatedDataCount(ble, entry.expected);
+        expect(service.durableProgress, 0);
+        expect(ble.endCalls, 0);
+        ble.releaseDataGate();
+        expect(await transfer, isTrue);
+        expect(ble.dataOffsets.length, 8);
+        expect(ble.dataOffsets.toSet().length, 8);
+        expect(ble.beginCalls, 1);
+      } finally {
+        ble.releaseDataGate();
+        if (service.isUpgrading) {
+          await service.cancelUpgrade(keepPackage: true);
+        }
+        await transfer;
+      }
+    });
+  }
+
+  test('sender cap rejects invalid configuration before any BLE work', () {
+    for (final size in [-1, 0, 33]) {
+      expect(() => OtaService(senderWindowSegments: size), throwsRangeError);
+    }
+    expect(OtaService.defaultSenderWindowSegments, 4);
+  });
+
+  test('one cumulative bitmap ACK releases four credits without durable progress',
+      () async {
+    final ble = await prepareDownloaded(
+      tempDir: tempFirmwareDir(), notifyLog: <String>[]);
+    final service = Get.find<OtaService>();
+    ble.dataGate = Completer<void>();
+    final transfer = service.startOtaUpgrade('AA:BB');
+    try {
+      await ble.dataGated.future;
+      await expectGatedDataCount(ble, 4);
+      expect(ble.stagedDurable, 0);
+      ble.releaseLatestDataAck();
+      await expectGatedDataCount(ble, 8);
+      expect(ble.stagedDurable, 1024);
+      expect(service.durableProgress, 0,
+          reason: 'sent bytes and non-durable bitmap credit are not UI progress');
+      expect(ble.endCalls, 0);
+      ble.releaseDataGate();
+      expect(await transfer, isTrue);
+      expect(ble.beginCalls, 1);
+      expect(ble.dataOffsets.toSet().length, 8);
+    } finally {
+      ble.releaseDataGate();
+      if (service.isUpgrading) {
+        await service.cancelUpgrade(keepPackage: true);
+      }
+      await transfer;
+    }
+  });
+
+  test('cancel a full sender window without new DATA after late ACKs', () async {
+    final ble = await prepareDownloaded(
+      tempDir: tempFirmwareDir(), notifyLog: <String>[]);
+    final service = Get.find<OtaService>();
+    ble.dataGate = Completer<void>();
+    final transfer = service.startOtaUpgrade('AA:BB');
+    try {
+      await ble.dataGated.future;
+      await expectGatedDataCount(ble, 4);
+      await service.cancelUpgrade(keepPackage: true);
+      expect(await transfer, isFalse);
+      ble.releaseDataGate();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(ble.dataOffsets.length, 4);
+      expect(ble.abortCalls, 1);
+      expect(ble.stagedDurable, 0);
+      expect(ble.endCalls, 0);
+      expect(service.phase, OtaPhase.cancelled);
+    } finally {
+      ble.releaseDataGate();
+      if (service.isUpgrading) {
+        await service.cancelUpgrade(keepPackage: true);
+      }
+      await transfer;
+    }
+  });
 
   test('diagnostic setup failure prevents BEGIN without touching the package', () async {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -812,6 +932,8 @@ void main() {
     final ble = await prepareDownloaded(
       tempDir: tempDir,
       notifyLog: notifyLog,
+      // This case requires the complete tail block staged behind withheld ACKs.
+      senderWindowSegments: 8,
     );
     final service = Get.find<OtaService>();
 
@@ -3459,6 +3581,13 @@ class _UpgradeFakeBle extends BluetoothService {
       return;
     }
     emit();
+  }
+
+  // Drop earlier ACKs while retaining the latest cumulative bitmap and gate.
+  void releaseLatestDataAck() {
+    final latest = _gatedAcks.last;
+    _gatedAcks.clear();
+    latest();
   }
 
   /// 释放 ACK 闸门：挂起的 ACK 按接收顺序补发。

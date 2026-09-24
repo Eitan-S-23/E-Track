@@ -62,6 +62,9 @@ enum OtaPhase {
 class OtaService extends GetxController {
   static OtaService get to => Get.find();
 
+  // Receiver capacity is not a safe burst size for the BLE return path.
+  static const int defaultSenderWindowSegments = 4;
+
   /// [downloadDio]/[firmwareDirProvider]/[latestUriBuilder]/[onNotify]/
   /// [downloadFileGate]
   /// 为测试注入点：生产缺省用独立下载 Dio、应用文档目录下的
@@ -87,7 +90,14 @@ class OtaService extends GetxController {
     Duration? rebootWindow,
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
-  })  : _bluetoothService = bluetoothService,
+    int? senderWindowSegments,
+  })  : _senderWindowSegments = RangeError.checkValueInInterval(
+          senderWindowSegments ?? defaultSenderWindowSegments,
+          1,
+          OtaBleCodec.segmentsPerBlock,
+          'senderWindowSegments',
+        ),
+        _bluetoothService = bluetoothService,
         _notifyImpl = onNotify,
         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
         _dio = dio ??
@@ -122,6 +132,7 @@ class OtaService extends GetxController {
             rebootProbeInterval ?? const Duration(seconds: 3);
 
   final BluetoothService? _bluetoothService;
+  final int _senderWindowSegments;
   final void Function(String title, String message)? _notifyImpl;
   final Dio _dio;
   final Dio _downloadDio;
@@ -989,8 +1000,10 @@ class OtaService extends GetxController {
           package: package,
           packageSha256: packageSha256,
           etuHeader: etuHeader,
-          // INFO.max_window_segs 消费：在途段上限（PR04 附带）。
-          windowSegments: recheck.maxWindowSegments,
+          // Keep both receiver credit and the sender's return-path cap.
+          windowSegments: recheck.maxWindowSegments < _senderWindowSegments
+              ? recheck.maxWindowSegments
+              : _senderWindowSegments,
           onDurableProgress: (durableOff, total) {
             final p = total > 0 ? (durableOff / total).clamp(0.0, 1.0) : 0.0;
             _durableProgress.value = p;
