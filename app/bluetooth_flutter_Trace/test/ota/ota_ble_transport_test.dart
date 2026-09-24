@@ -1067,7 +1067,8 @@ void main() {
     test('BEGIN frame errors never reset the no-progress deadline', () async {
       final package = packageBytes(4096);
       final mcu = _McuSim()
-        ..beginFailures = List<int?>.filled(20, OtaBleCodec.statusErrCrc)
+        ..beginFailures = List<int?>.filled(
+            20, OtaBleCodec.statusErrCrc, growable: true)
         ..beginFailureDelay = const Duration(milliseconds: 40);
       final transport = OtaBleTransport(
         channel: mcu,
