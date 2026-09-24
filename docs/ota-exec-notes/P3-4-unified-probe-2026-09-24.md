@@ -90,3 +90,21 @@ before any physical cell. Do not replay a successful full upgrade for missing lo
 N03 still needs the whole-region verifier running in the receiving firmware.
 N04 installation/candidate/backup/Boot/reconnect timings belong to a planned full
 upgrade, not this prefix test. No physical speedup or acceptance is claimed here.
+
+## Development Results
+
+- Local host regressions: 62 development-runner, 30 APK-helper and 26 snapshot/
+  prefix-consumer cases passed (118 total). Original logs and hashes are under
+  `.cache/p34-next/validation/host-tests-001/` in the active project root.
+- First development CI: `f6ae97a76b175ac5f71e3bb40afe7182cb2a79d7`,
+  <https://github.com/Eitan-S-23/E-Track/actions/runs/35997719442>.
+  Both analyses passed with no issues. Both hosts reported one test failure:
+  the new physical-ABORT-write-failure negative expected `OtaTransportException`
+  but the sender correctly preserved the injected native `StateError`.
+  The native exception propagation contract is unchanged; the assertion now
+  checks that exact native message, while cancellation checks `CANCELLED`.
+  This is a test-oracle correction, not a suppressed failure or product rollback.
+- Original first-run artifacts are retained and bound in
+  `.cache/p34-next/validation/ci-run-35997719442.json`. Linux ran 503 passing,
+  16 skipped and 1 failing test. Flutter 3.47.5 / Dart 3.13.4 was actually used.
+  No APK was requested in that push run; no device operation occurred.

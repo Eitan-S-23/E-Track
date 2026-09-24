@@ -302,7 +302,10 @@ void main() {
         addTearDown(mcu.close);
         addTearDown(transport.dispose);
         final result = probe(transport);
-        final rejected = expectLater(result, throwsA(isA<OtaTransportException>()));
+        final rejected = expectLater(result, throwsA(cancel
+            ? isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')
+            : isA<StateError>().having((e) => e.message, 'native error',
+                'ABORT physical write failed after ACK')));
         await mcu.abortWriteStarted.future;
         if (cancel) transport.cancel();
         mcu.abortWriteGate!.complete();
