@@ -476,6 +476,7 @@ class _FakeBle extends BluetoothService {
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
     OtaLinkStats? stats,
+    int? discoveryTimeoutSeconds,
   }) async {
     // P3-4：对齐真实外壳的 stats 上报语义（外壳记录耗时/成败/写模式）。
     stats?.recordCharsDiscovery(

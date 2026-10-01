@@ -76,6 +76,8 @@ class _GattDevice extends Fake implements fbp.BluetoothDevice {
   final notifier = _GattCharacteristic('fff1', notify: true);
   late List<fbp.BluetoothService> discoveredServices = [_GattService([writer, notifier])];
   int discoveries = 0;
+  final discoveryTimeouts = <int>[];
+  Object? discoveryError;
   final discoveryEntered = Completer<void>();
   Completer<List<fbp.BluetoothService>>? discoveryGate;
 
@@ -87,6 +89,9 @@ class _GattDevice extends Fake implements fbp.BluetoothDevice {
   Future<List<fbp.BluetoothService>> discoverServices(
       {bool subscribeToServicesChanged = true, int timeout = 15}) async {
     discoveries++;
+    discoveryTimeouts.add(timeout);
+    final error = discoveryError;
+    if (error != null) throw error;
     if (!discoveryEntered.isCompleted) discoveryEntered.complete();
     final gate = discoveryGate;
     discoveryGate = null;
@@ -343,6 +348,51 @@ void main() {
       expect(device.notifier.notifyChanges, [true, true]);
       await second.cancel();
       expect(device.notifier.notifyChanges, [true, true, false]);
+    });
+
+    test('probe timeout reaches native discovery without changing normal calls', () async {
+      await discover();
+      final found = await service.findExactOtaCharacteristicsByAddress(
+          device.remoteId.str, discoveryTimeoutSeconds: 3);
+      expect(found, isNotNull);
+      final stats = OtaLinkStats(label: 'probe');
+      await service.findExactOtaCharacteristicsByAddress(device.remoteId.str,
+          discoveryTimeoutSeconds: 3, stats: stats);
+      await discover();
+      expect(device.discoveryTimeouts, [15, 3, 3, 15]);
+    });
+
+    test('native discovery timeout clears its binding and records an error', () async {
+      await discover();
+      device.discoveryError = TimeoutException('native discovery deadline');
+      final stats = OtaLinkStats(label: 'probe');
+      expect(await service.findExactOtaCharacteristicsByAddress(device.remoteId.str,
+          discoveryTimeoutSeconds: 3, stats: stats), isNull);
+      expect(service.otaGattBindingToken(device.remoteId.str), isNull);
+      expect((stats.toJson()['discovers'] as Map)['errors'], 1);
+      device.discoveryError = null;
+      expect(await discover(), isNotNull);
+    });
+
+    test('late probe discovery cannot replace a newer binding', () async {
+      final gate = Completer<List<fbp.BluetoothService>>();
+      device.discoveryGate = gate;
+      final old = service.findExactOtaCharacteristicsByAddress(device.remoteId.str,
+          discoveryTimeoutSeconds: 3);
+      await device.discoveryEntered.future;
+      expect(await discover(), isNotNull);
+      final current = service.otaGattBindingToken(device.remoteId.str);
+      gate.complete(device.discoveredServices);
+      expect(await old, isNull);
+      expect(service.otaGattBindingToken(device.remoteId.str), same(current));
+    });
+
+    test('invalid discovery deadlines never reach the device', () async {
+      for (final value in [0, -1, 16]) {
+        await expectLater(service.discoverServicesByAddress(device.remoteId.str,
+            timeoutSeconds: value), throwsArgumentError);
+      }
+      expect(device.discoveries, 0);
     });
 
     test('closing service prevents an in-flight discovery from publishing', () async {

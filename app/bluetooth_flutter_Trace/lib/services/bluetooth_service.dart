@@ -1365,7 +1365,11 @@ class BluetoothService extends GetxController {
   Future<List<dynamic>> discoverServicesByAddress(
     String deviceAddress, {
     OtaLinkStats? stats,
+    int? timeoutSeconds,
   }) async {
+    if (timeoutSeconds != null && (timeoutSeconds < 1 || timeoutSeconds > 15)) {
+      throw ArgumentError.value(timeoutSeconds, 'timeoutSeconds', 'expected 1..15');
+    }
     final sw = stats == null ? null : (Stopwatch()..start());
     try {
       if (Platform.isWindows) {
@@ -1378,7 +1382,9 @@ class BluetoothService extends GetxController {
         if (device == null) {
           throw UnsupportedError('未找到设备，无法发现服务: $deviceAddress');
         }
-        final services = await device.discoverServices();
+        final services = timeoutSeconds == null
+            ? await device.discoverServices()
+            : await device.discoverServices(timeout: timeoutSeconds);
         stats?.recordDiscover(durationUs: sw!.elapsedMicroseconds);
         return services; // 返回动态列表，调用方做解析
       }
@@ -1869,6 +1875,7 @@ class BluetoothService extends GetxController {
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
     OtaLinkStats? stats,
+    int? discoveryTimeoutSeconds,
   }) async {
     _experiment.requireForOta()?.requireDevice(deviceAddress);
     final sw = stats == null ? null : (Stopwatch()..start());
@@ -1878,6 +1885,7 @@ class BluetoothService extends GetxController {
       writeCharUuid: writeCharUuid,
       notifyCharUuid: notifyCharUuid,
       stats: stats,
+      discoveryTimeoutSeconds: discoveryTimeoutSeconds,
     );
     // P3-4 观测：失败（无精确特征或平台异常）同样登记，found=false 才能
     // 与「发现了但不合格」区分开；writeMode 记录绑定实际采用的写模式。
@@ -1896,6 +1904,7 @@ class BluetoothService extends GetxController {
     required String writeCharUuid,
     required String notifyCharUuid,
     OtaLinkStats? stats,
+    int? discoveryTimeoutSeconds,
   }) async {
     final key = deviceAddress.toLowerCase();
     final reuse = reuseOtaCharacteristics && !Platform.isWindows;
@@ -1927,8 +1936,8 @@ class BluetoothService extends GetxController {
       }
       final generation = otaLinkGeneration(key);
       final previousBinding = _otaGattBindings[key];
-      final services =
-          await discoverServicesByAddress(deviceAddress, stats: stats);
+      final services = await discoverServicesByAddress(deviceAddress,
+          stats: stats, timeoutSeconds: discoveryTimeoutSeconds);
       bool current() => !tracked ||
           (generation == otaLinkGeneration(key) &&
            token == _otaDiscoveryTokens[key] && _otaGattAddress == key &&

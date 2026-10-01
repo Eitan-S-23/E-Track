@@ -991,6 +991,62 @@ void main() {
         reason: '轮次外壳不承载某一轮的绑定字段（归属不混组）');
   });
 
+  test('failed reboot discovery is bounded and its own link is retired', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        rebootProbeInterval: const Duration(milliseconds: 10));
+    ble.failedRebootDiscoveries = 2;
+    final service = Get.find<OtaService>();
+    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+    expect(ble.rebootDiscoveryTimeouts, [3, 3, 3]);
+    expect(ble.discoveryTimeouts, contains(null));
+    expect(ble.disconnectCalls, Platform.isWindows ? 1 : 3);
+    expect(ble.endCalls, 1);
+    expect(ble.probeCount, 1);
+  });
+
+  test('late failed discovery cannot disconnect a newer link generation', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        rebootProbeInterval: const Duration(milliseconds: 10));
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    ble.failedRebootDiscoveries = 1;
+    ble.onRebootDiscovery = () async {
+      if (!entered.isCompleted) {
+        entered.complete();
+        await release.future;
+      }
+    };
+    final running = Get.find<OtaService>().startOtaUpgrade('AA:BB');
+    await entered.future;
+    ble.linkGeneration++;
+    release.complete();
+    expect(await running, isTrue);
+    expect(ble.disconnectCalls, 1);
+    expect(ble.rebootDiscoveryTimeouts, [3, 3]);
+  });
+
+  test('abandoned discovery cannot disconnect a later successful probe', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        rebootWindow: const Duration(seconds: 3),
+        rebootProbeTimeout: const Duration(milliseconds: 500),
+        rebootProbeInterval: const Duration(milliseconds: 10));
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    ble.onRebootDiscovery = () async {
+      if (!entered.isCompleted) {
+        entered.complete();
+        await release.future;
+      }
+    };
+    final running = Get.find<OtaService>().startOtaUpgrade('AA:BB');
+    await entered.future;
+    expect(await running, isTrue);
+    release.complete();
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(ble.disconnectCalls, 1);
+    expect(ble.endCalls, 1);
+  });
+
   test('MCU 未重启完：旧身份探测不误判，第二次探测确认目标（RC3-08）',
       () async {
     final tempDir = tempFirmwareDir();
@@ -3241,6 +3297,11 @@ class _UpgradeFakeBle extends BluetoothService {
   /// findExact 调用观测计数：断言二级复核是否真的执行了重新发现
   /// （一级复核失败时不得触发），与 getInfoCalls 配对使用。
   int discoverCalls = 0;
+  final discoveryTimeouts = <int?>[];
+  final rebootDiscoveryTimeouts = <int?>[];
+  int failedRebootDiscoveries = 0;
+  Future<void> Function()? onRebootDiscovery;
+  int disconnectCalls = 0;
 
   /// 重新发现应答队列（RC3-08⑦ 二级复核）：非空时
   /// [findExactOtaCharacteristicsByAddress] 按调用顺序弹出（元素 null
@@ -3325,7 +3386,9 @@ class _UpgradeFakeBle extends BluetoothService {
   int get connectCalls => _connectCalls;
 
   @override
-  Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {}
+  Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {
+    disconnectCalls++;
+  }
 
   @override
   int otaLinkGeneration(String deviceAddress) => linkGeneration;
@@ -3340,8 +3403,10 @@ class _UpgradeFakeBle extends BluetoothService {
     String writeCharUuid = 'fff2',
     String notifyCharUuid = 'fff1',
     OtaLinkStats? stats,
+    int? discoveryTimeoutSeconds,
   }) async {
     discoverCalls++;
+    discoveryTimeouts.add(discoveryTimeoutSeconds);
     // P3-4：fake 覆写的是带观测外壳的公开方法（真实外壳在此记
     // recordCharsDiscovery：耗时/成败/写模式），对齐其语义。
     final sw = stats == null ? null : (Stopwatch()..start());
@@ -3352,6 +3417,15 @@ class _UpgradeFakeBle extends BluetoothService {
         writeMode: result?['writeMode'],
       );
       return result;
+    }
+
+    if (_rebooted) {
+      rebootDiscoveryTimeouts.add(discoveryTimeoutSeconds);
+      await onRebootDiscovery?.call();
+      if (failedRebootDiscoveries > 0) {
+        failedRebootDiscoveries--;
+        return finish(null);
+      }
     }
 
     // 复核闸门（RC3-04⑦）：绑定调用（startOtaUpgrade/readDeviceInfo）

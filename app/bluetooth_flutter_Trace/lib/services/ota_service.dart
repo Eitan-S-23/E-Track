@@ -1960,9 +1960,12 @@ class OtaService extends GetxController {
     Duration infoTimeout = const Duration(seconds: 10),
   }) async {
     OtaBleTransport? probe;
+    int? connectedGeneration;
+    var resolvedIdentity = false;
     try {
       if (await _ble.connectOtaDeviceByAddress(deviceAddress)) {
         if (aborted()) return null;
+        connectedGeneration = _ble.otaLinkGeneration(deviceAddress);
         // P3-4 观测：本轮绑定阶段自严格发现起（与升级路径同一包含关系，
         // 对齐 research §3.1「绑定 = 发现 + MTU + 订阅」）。findExact 外壳
         // 记录耗时/成败/写模式，内部服务发现另行计时——stats 必须透传；
@@ -1971,6 +1974,9 @@ class OtaService extends GetxController {
         final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
           deviceAddress,
           stats: stats,
+          // Bound the plugin's response wait, not just the outer Future. A
+          // post-reboot discovery otherwise occupies its default 15 seconds.
+          discoveryTimeoutSeconds: 3,
         );
         if (aborted()) return null;
         if (otaChars != null) {
@@ -1983,10 +1989,12 @@ class OtaService extends GetxController {
             final target = await probe.getDeviceInfo(timeout: infoTimeout);
             if (aborted()) return null;
             if (!deviceHardwareMatches(target, sessionInfo)) {
+              resolvedIdentity = true;
               return const _RebootOutcome(_RebootKind.identityChanged);
             }
             if (target.currentVersionCode == latest.versionCode &&
                 target.currentImageSha256Hex == latest.targetImageSha256) {
+              resolvedIdentity = true;
               // 目标身份确认：连接已不需要，身份交给主流程。
               return _RebootOutcome(_RebootKind.targetVerified, info: target);
             }
@@ -1999,6 +2007,17 @@ class OtaService extends GetxController {
     } finally {
       if (probe != null) {
         await probe.dispose();
+      }
+      // Closing the owned failed link retires a pending native discovery.
+      // An abandoned probe or a newer connection must never be disconnected.
+      if (!Platform.isWindows &&
+          !resolvedIdentity &&
+          connectedGeneration != null &&
+          !aborted() &&
+          _ble.otaLinkGeneration(deviceAddress) == connectedGeneration) {
+        await _ble
+            .disconnectOtaDeviceByAddress(deviceAddress)
+            .timeout(const Duration(seconds: 5), onTimeout: () {});
       }
     }
   }

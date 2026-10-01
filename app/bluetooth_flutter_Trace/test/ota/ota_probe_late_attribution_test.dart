@@ -183,13 +183,15 @@ class _HoldBeforePlatformService extends BluetoothService {
   Future<List<dynamic>> discoverServicesByAddress(
     String deviceAddress, {
     OtaLinkStats? stats,
+    int? timeoutSeconds,
   }) async {
     discoverCalls++;
     if (holdCall != 0 && discoverCalls == holdCall) {
       if (!entered.isCompleted) entered.complete();
       await _released.future;
     }
-    return super.discoverServicesByAddress(deviceAddress, stats: stats);
+    return super.discoverServicesByAddress(deviceAddress,
+        stats: stats, timeoutSeconds: timeoutSeconds);
   }
 }
 
