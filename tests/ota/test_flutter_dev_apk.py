@@ -2,6 +2,7 @@
 """Offline fixtures for the development APK helper. Never builds an APK."""
 
 import hashlib
+import base64
 import io
 import json
 import os
@@ -50,7 +51,8 @@ class DevelopmentApkTests(unittest.TestCase):
         # 显式覆盖。
         for name in (APK.APPLICATION_ID_ENV, APK.DEVICE_OBSERVATION_ENV,
                      APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV,
-                     APK.OTA_LINK_CANDIDATE_ENV):
+                     APK.OTA_LINK_CANDIDATE_ENV, APK.FIXED_SIGNING_ENV,
+                     APK.SIGNING_SECRET_ENV, "TRACE_DEV_SIGNING_STORE_FILE"):
             base.pop(name, None)
         base.update({"ANDROID_HOME": str(self.root / "host-sdk"),
                      "JAVA_HOME_17_X64": str(self.root / "host-java")})
@@ -61,6 +63,75 @@ class DevelopmentApkTests(unittest.TestCase):
         CHECKS.make_directory(self.root, path.parent)
         path.write_bytes(data)
         return path
+
+    def signing_env(self):
+        return dict(self.env, TRACE_DEV_FIXED_SIGNING="true", TRACE_DEV_APP_ID_SUFFIX=".dev",
+                    TRACE_DEV_SIGNING_KEYSTORE_SECRET=base64.b64encode(b"k" * 2048).decode())
+
+    def test_fixed_signing_rejects_invalid_mode_and_production_identity(self):
+        self.assertFalse(APK.fixed_signing({}))
+        self.assertFalse(APK.fixed_signing({APK.FIXED_SIGNING_ENV: "false"}))
+        for env in ({APK.FIXED_SIGNING_ENV: "yes"}, {APK.FIXED_SIGNING_ENV: "true"},
+                    {APK.FIXED_SIGNING_ENV: "true", APK.APPLICATION_ID_ENV: "bad"}):
+            with self.subTest(env=env), self.assertRaises(ValueError):
+                APK.fixed_signing(env)
+
+    def test_fixed_signing_missing_malformed_and_oversized_secret_fail_before_writes(self):
+        for secret in ("", "not-base64", "x" * 32769, base64.b64encode(b"small").decode()):
+            env = dict(self.signing_env(), **{APK.SIGNING_SECRET_ENV: secret})
+            with self.subTest(length=len(secret)), self.assertRaises(ValueError):
+                APK.prepare_signing(self.root, self.run, env)
+            self.assertFalse((self.run / "development-signing").exists())
+
+    def test_fixed_signing_validates_key_and_refuses_overwrite(self):
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=0, stdout=b"certificate"))
+        with mock.patch.object(APK, "SIGNING_CERT_SHA256", hashlib.sha256(b"certificate").hexdigest()):
+            APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+            path = self.run / "development-signing/development.jks"
+            self.assertEqual(path.read_bytes(), b"k" * 2048)
+            self.assertIn(str(path), runner.call_args.args[0])
+            self.assertEqual(runner.call_args.kwargs["cwd"], self.root)
+            with self.assertRaises(FileExistsError):
+                APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+            self.assertEqual(runner.call_count, 1)
+
+    def test_fixed_signing_wrong_certificate_rejected(self):
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=0, stdout=b"wrong certificate"))
+        with self.assertRaisesRegex(ValueError, "pinned identity"):
+            APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+
+    def test_fixed_signing_keytool_failure_rejected(self):
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=1, stdout=b""))
+        with self.assertRaisesRegex(ValueError, "pinned identity"):
+            APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+
+    def test_actual_signer_requires_exact_one_verified_certificate(self):
+        good = "Signer #1 certificate SHA-256 digest: " + APK.SIGNING_CERT_SHA256 + "\n"
+        path = self.root / APK.APK_RELATIVE
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=0, stdout=good))
+        self.assertEqual(APK.signing_certificate(self.root, self.run, path, run=runner), APK.SIGNING_CERT_SHA256)
+        for code, text in ((1, good), (0, ""), (0, good * 2), (0, good.replace(APK.SIGNING_CERT_SHA256, "0" * 64))):
+            runner.return_value = SimpleNamespace(returncode=code, stdout=text)
+            with self.subTest(code=code, text=text), self.assertRaises(ValueError):
+                APK.signing_certificate(self.root, self.run, path, run=runner)
+
+    def test_fixed_signing_environment_is_contained_and_disabled_secret_removed(self):
+        enabled = APK.environment(self.root, self.run, self.signing_env())
+        self.assertEqual(enabled["TRACE_DEV_SIGNING_STORE_FILE"], str(self.run / "development-signing/development.jks"))
+        disabled = APK.environment(self.root, self.run, dict(enabled, TRACE_DEV_FIXED_SIGNING="false"))
+        self.assertNotIn(APK.SIGNING_SECRET_ENV, disabled)
+        self.assertNotIn("TRACE_DEV_SIGNING_STORE_FILE", disabled)
+
+    def test_fixed_signing_metadata_records_verified_certificate_only(self):
+        self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture")]))
+        with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture.dev"), \
+             mock.patch.object(APK, "signing_certificate", return_value=APK.SIGNING_CERT_SHA256) as signer, \
+             mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, self.signing_env())
+        signer.assert_called_once()
+        meta = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        self.assertEqual(meta["development_signing"], dict(fixed=True, certificate_sha256=APK.SIGNING_CERT_SHA256))
+        self.assertNotIn(self.signing_env()[APK.SIGNING_SECRET_ENV], json.dumps(meta))
 
     def archive_bytes(self, entries):
         buffer = io.BytesIO()

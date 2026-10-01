@@ -50,6 +50,29 @@ The automated entry below is deliberately CI-only, not a local SDK installer.
 
 ## Entry Point
 
+### Persistent Development Signing
+
+Suffix-bearing debug APK requests use the dedicated repository secret
+`ETRACK_DEV_SIGNING_KEYSTORE`. The private key is never committed or uploaded as
+an artifact and is separate from release signing. Checks-only runs and APKs with
+an empty suffix do not receive it. Never replace this secret to repair a build.
+
+The helper pins certificate SHA-256
+`9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579`,
+verifies the injected keystore before downloading/building, and independently
+verifies the actual APK signer before collecting it. Missing/malformed/wrong keys
+fail closed; Gradle cannot silently generate a replacement debug key. Metadata
+records `development_signing.fixed` and `certificate_sha256`. Secret bytes and
+the private run-local keystore are excluded from log/APK upload paths.
+
+The Android debug alias/password are conventional, not a release credential.
+Access control and the secret store protect the private key. Keep its protected
+backup; losing the key prevents updating that installed signer. A fixed new key
+does not allow overwriting an older APK signed with a lost random key. Any initial
+migration must preserve/export evidence and must not silently uninstall or clear
+data. Thereafter keep application ID and certificate stable and use ordinary
+in-place updates. Runtime-only OTA parameter changes need no APK update.
+
 Workflow: `.github/workflows/flutter-dev-checks.yml` (Flutter Development Checks).
 Runner: `Tools/flutter/dev_checks.py` (Python 3.9 or newer on the hosted runner).
 

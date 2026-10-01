@@ -111,6 +111,21 @@ android {
     }
 
     signingConfigs {
+        getByName("debug") {
+            if (System.getenv("TRACE_DEV_FIXED_SIGNING") == "true") {
+                require(!System.getenv("TRACE_DEV_APP_ID_SUFFIX").isNullOrBlank()) {
+                    "Fixed development signing requires a separate application id"
+                }
+                val developmentStore = System.getenv("TRACE_DEV_SIGNING_STORE_FILE")
+                require(!developmentStore.isNullOrBlank() && file(developmentStore).isFile) {
+                    "Fixed development keystore is required; random fallback is forbidden"
+                }
+                storeFile = file(developmentStore)
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
         create("release") {
             if (hasReleaseSigningConfig) {
                 storeFile = releaseKeystoreFile

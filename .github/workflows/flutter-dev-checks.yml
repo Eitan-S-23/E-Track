@@ -133,6 +133,9 @@ jobs:
 
       - name: Analyze, test and optionally build a debug APK
         working-directory: ${{ github.workspace }}
+        env:
+          TRACE_DEV_FIXED_SIGNING: ${{ env.FLUTTER_DEV_BUILD_APK == 'true' && inputs.app_id_suffix != '' && 'true' || '' }}
+          TRACE_DEV_SIGNING_KEYSTORE_SECRET: ${{ env.FLUTTER_DEV_BUILD_APK == 'true' && inputs.app_id_suffix != '' && secrets.ETRACK_DEV_SIGNING_KEYSTORE || '' }}
         run: python -B Tools/flutter/dev_checks.py --repo-root .
 
       - name: Verify App observation snapshot integrity
