@@ -709,6 +709,25 @@ class BluetoothService extends GetxController {
   @visibleForTesting
   set adapterForTest(BluetoothAdapter adapter) => _adapter = adapter;
 
+  BluetoothDevice Function(String) _otaDeviceFactory = BluetoothDevice.fromId;
+
+  @visibleForTesting
+  set otaDeviceFactoryForTest(BluetoothDevice Function(String) factory) =>
+      _otaDeviceFactory = factory;
+
+  BluetoothDevice _mobileOtaDevice(String address) {
+    // Android's native GATT maps use getAddress(), not our lowercase keys.
+    // UUID identifiers on Apple platforms must retain their original spelling.
+    final cached = _findDeviceByAddress(address);
+    if (!RegExp(r'^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$').hasMatch(address)) {
+      return cached ?? _otaDeviceFactory(address);
+    }
+    final canonical = address.toUpperCase();
+    return cached != null && cached.remoteId.str == canonical
+        ? cached
+        : _otaDeviceFactory(canonical);
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -2239,8 +2258,7 @@ class BluetoothService extends GetxController {
           _deviceConnectionSubscriptions.remove(deviceAddress);
         }
       } else {
-        final device = _findDeviceByAddress(deviceAddress) ??
-            BluetoothDevice.fromId(deviceAddress);
+        final device = _mobileOtaDevice(deviceAddress);
         await device.disconnect();
       }
       if (otaLinkGeneration(key) == startGeneration) {
@@ -2285,10 +2303,14 @@ class BluetoothService extends GetxController {
         _watchOtaLink(deviceAddress, WinBle.connectionStreamOf(deviceAddress));
         return true;
       }
-      final device = _findDeviceByAddress(deviceAddress) ??
-          BluetoothDevice.fromId(deviceAddress);
-      // flutter_blue_plus 对已连接设备 connect 是幂等成功，不会抛错。
-      await device.connect(timeout: const Duration(seconds: 10));
+      final device = _mobileOtaDevice(deviceAddress);
+      // Negotiate MTU once in requestOtaMtu after connection and discovery.
+      // connect() otherwise requests 512 before the probe can bind or observe it.
+      await device.connect(timeout: const Duration(seconds: 10), mtu: null);
+      if (!device.isConnected) return false;
+      connectedDevices.removeWhere((cached) =>
+          cached.remoteId.str.toLowerCase() == deviceAddress.toLowerCase() &&
+          cached.remoteId.str != device.remoteId.str);
       if (!connectedDevices.contains(device)) {
         connectedDevices.add(device);
       }
