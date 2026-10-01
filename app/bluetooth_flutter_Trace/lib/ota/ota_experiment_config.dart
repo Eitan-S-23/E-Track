@@ -26,6 +26,8 @@ class OtaExperimentConfig {
     required this.sourceSha256,
     required this.senderWindowSegments,
     required this.prefixBytes,
+    required this.rebootInfoTimeout,
+    required this.rebootProbeInterval,
   });
 
   static const maxConfigBytes = 8192;
@@ -38,6 +40,9 @@ class OtaExperimentConfig {
     ..._fields, 'senderWindowSegments', 'transferMode', 'prefixBytes',
   };
   static const maxPrefixBytes = 32768;
+  static const _v3Fields = {
+    ..._v2Fields, 'rebootInfoTimeoutMs', 'rebootProbeIntervalMs',
+  };
 
   final int schema;
   final String runId;
@@ -55,6 +60,8 @@ class OtaExperimentConfig {
   final String sourceSha256;
   final int? senderWindowSegments;
   final int prefixBytes;
+  final Duration? rebootInfoTimeout;
+  final Duration? rebootProbeInterval;
   bool get isPrefixProbe => prefixBytes > 0;
 
   factory OtaExperimentConfig.parse(String text, {required String expectedTarget}) {
@@ -64,11 +71,11 @@ class OtaExperimentConfig {
     }
     final decoded = jsonDecode(text);
     if (decoded is! Map<String, dynamic> || decoded['schema'] is! int ||
-        !const {1, 2}.contains(decoded['schema'])) {
+        !const {1, 2, 3}.contains(decoded['schema'])) {
       throw const FormatException('experiment-config-schema');
     }
     final schema = decoded['schema'] as int;
-    final fields = schema == 1 ? _fields : _v2Fields;
+    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : _v3Fields;
     if (decoded.length != fields.length || !fields.containsAll(decoded.keys)) {
       throw const FormatException('experiment-config-schema');
     }
@@ -111,9 +118,9 @@ class OtaExperimentConfig {
       throw const FormatException('experiment-config-version-order');
     }
     final packageBytes = integer('packageBytes', 64, 0xffffffff);
-    final senderWindow = schema == 2 ? integer('senderWindowSegments', 1, 32) : null;
-    final prefixBytes = schema == 2 ? integer('prefixBytes', 0, maxPrefixBytes) : 0;
-    if (schema == 2) {
+    final senderWindow = schema >= 2 ? integer('senderWindowSegments', 1, 32) : null;
+    final prefixBytes = schema >= 2 ? integer('prefixBytes', 0, maxPrefixBytes) : 0;
+    if (schema >= 2) {
       final mode = decoded['transferMode'];
       if ((mode != 'full' && mode != 'prefix') ||
           (mode == 'full' && prefixBytes != 0) ||
@@ -121,6 +128,9 @@ class OtaExperimentConfig {
               prefixBytes >= packageBytes))) {
         throw const FormatException('experiment-config-transfer-mode');
       }
+    }
+    if (schema == 3 && decoded['transferMode'] != 'full') {
+      throw const FormatException('experiment-config-reboot-full-only');
     }
     return OtaExperimentConfig._(
       schema: schema,
@@ -137,6 +147,10 @@ class OtaExperimentConfig {
       sourceSha256: sha256.convert(bytes).toString(),
       senderWindowSegments: senderWindow,
       prefixBytes: prefixBytes,
+      rebootInfoTimeout: schema == 3
+          ? Duration(milliseconds: integer('rebootInfoTimeoutMs', 500, 10000)) : null,
+      rebootProbeInterval: schema == 3
+          ? Duration(milliseconds: integer('rebootProbeIntervalMs', 100, 3000)) : null,
     );
   }
 
@@ -170,10 +184,14 @@ class OtaExperimentConfig {
     'packageSha256': packageSha256, 'currentVersionCode': currentVersionCode,
     'currentImageSha256': currentImageSha256, 'targetVersionCode': targetVersionCode,
     'targetImageSha256': targetImageSha256,
-    if (schema == 2) ...{
+    if (schema >= 2) ...{
       'senderWindowSegments': senderWindowSegments,
       'transferMode': isPrefixProbe ? 'prefix' : 'full',
       'prefixBytes': prefixBytes,
+    },
+    if (schema == 3) ...{
+      'rebootInfoTimeoutMs': rebootInfoTimeout!.inMilliseconds,
+      'rebootProbeIntervalMs': rebootProbeInterval!.inMilliseconds,
     },
   })}';
 }

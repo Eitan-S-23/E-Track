@@ -40,6 +40,8 @@ void main() {
     expect(config.senderWindowSegments, isNull);
     expect(config.prefixBytes, 0);
     expect(config.isPrefixProbe, isFalse);
+    expect(config.rebootInfoTimeout, isNull);
+    expect(config.rebootProbeInterval, isNull);
     expect(config.observationLine, isNot(contains('transferMode')));
   });
 
@@ -63,6 +65,60 @@ void main() {
     final config = parse({...probeProfile(), 'transferMode': 'full', 'prefixBytes': 0});
     expect(config.isPrefixProbe, isFalse);
     expect(config.senderWindowSegments, 8);
+    expect(config.rebootInfoTimeout, isNull);
+    expect(config.rebootProbeInterval, isNull);
+  });
+
+  Map<String, Object?> reconnectProfile() => {
+    ...probeProfile(), 'schema': 3, 'transferMode': 'full', 'prefixBytes': 0,
+    'rebootInfoTimeoutMs': 2000, 'rebootProbeIntervalMs': 500,
+  };
+
+  test('schema 3 binds explicit full-OTA cadence and records requested values', () {
+    final config = parse(reconnectProfile());
+    expect(config.rebootInfoTimeout, const Duration(seconds: 2));
+    expect(config.rebootProbeInterval, const Duration(milliseconds: 500));
+    expect(config.senderWindowSegments, 8);
+    expect(config.matchesUpgrade(upgradeInput()), isTrue);
+    final line = jsonDecode(config.observationLine.substring('OTA_EXPERIMENT '.length));
+    expect(line['schema'], 3);
+    expect(line['transferMode'], 'full');
+    expect(line['rebootInfoTimeoutMs'], 2000);
+    expect(line['rebootProbeIntervalMs'], 500);
+  });
+
+  test('schema 3 accepts bounded endpoints without changing identity gates', () {
+    for (final info in [500, 10000]) {
+      for (final interval in [100, 3000]) {
+        final config = parse({...reconnectProfile(),
+          'rebootInfoTimeoutMs': info, 'rebootProbeIntervalMs': interval});
+        expect(config.rebootInfoTimeout!.inMilliseconds, info);
+        expect(config.rebootProbeInterval!.inMilliseconds, interval);
+        expect(config.matchesUpgrade({...upgradeInput(), 'targetImageSha256': 'd' * 64}), isFalse);
+      }
+    }
+  });
+
+  test('schema 3 rejects missing, nonintegral, unbounded and prefix cadence', () {
+    for (final value in [
+      {...reconnectProfile()}..remove('rebootInfoTimeoutMs'),
+      {...reconnectProfile()}..remove('rebootProbeIntervalMs'),
+      {...reconnectProfile(), 'rebootInfoTimeoutMs': 499},
+      {...reconnectProfile(), 'rebootInfoTimeoutMs': 10001},
+      {...reconnectProfile(), 'rebootInfoTimeoutMs': 2000.0},
+      {...reconnectProfile(), 'rebootInfoTimeoutMs': true},
+      {...reconnectProfile(), 'rebootProbeIntervalMs': 0},
+      {...reconnectProfile(), 'rebootProbeIntervalMs': 99},
+      {...reconnectProfile(), 'rebootProbeIntervalMs': 3001},
+      {...reconnectProfile(), 'rebootProbeIntervalMs': '500'},
+      {...reconnectProfile(), 'rebootProbeIntervalMs': 500.0},
+      {...reconnectProfile(), 'transferMode': 'prefix', 'prefixBytes': 32768},
+      {...reconnectProfile(), 'schema': 2},
+      {...reconnectProfile(), 'schema': 4},
+      {...reconnectProfile(), 'unknown': true},
+    ]) {
+      expect(() => parse(value), throwsFormatException, reason: '$value');
+    }
   });
 
   test('schema 2 rejects ambiguous, nonintegral and out-of-budget probes', () {

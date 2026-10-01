@@ -1115,6 +1115,8 @@ class OtaService extends GetxController {
           info,
           latest,
           generation,
+          infoTimeout: experiment?.rebootInfoTimeout,
+          probeInterval: experiment?.rebootProbeInterval,
         );
         if (generation != _cancelGeneration) {
           return fail('cancelled', 'generation-changed');
@@ -1786,8 +1788,12 @@ class OtaService extends GetxController {
     String deviceAddress,
     DeviceOtaInfo sessionInfo,
     FirmwareLatestInfo latest,
-    int generation,
-  ) async {
+    int generation, {
+    Duration? infoTimeout,
+    Duration? probeInterval,
+  }) async {
+    // Diagnostic cadence does not alter the total window or recovery budget.
+    final interval = probeInterval ?? _rebootProbeInterval;
     // P3-4 链路观测：重启等待分两级实例（与升级传输的 upgrade 实例时间戳
     // 不相减）——roundStats 是整个重连等待的轮次外壳（reconnect 阶段起止 +
     // 总体结论），每轮连接尝试另有独立实例（见循环内）。所有返回路径统一
@@ -1851,6 +1857,7 @@ class OtaService extends GetxController {
           latest,
           probeAborted,
           stats: attemptStats,
+          infoTimeout: infoTimeout ?? const Duration(seconds: 10),
         ).timeout(
           roundCap < const Duration(seconds: 1)
               ? const Duration(seconds: 1)
@@ -1912,7 +1919,7 @@ class OtaService extends GetxController {
       final rest = deadline.difference(DateTime.now());
       if (rest > Duration.zero) {
         await Future<void>.delayed(
-          rest < _rebootProbeInterval ? rest : _rebootProbeInterval,
+          rest < interval ? rest : interval,
         );
       }
     }
@@ -1950,6 +1957,7 @@ class OtaService extends GetxController {
     FirmwareLatestInfo latest,
     bool Function() aborted, {
     OtaLinkStats? stats,
+    Duration infoTimeout = const Duration(seconds: 10),
   }) async {
     OtaBleTransport? probe;
     try {
@@ -1972,7 +1980,7 @@ class OtaService extends GetxController {
           if (aborted()) return null;
           if (probe != null) {
             _phase.value = OtaPhase.reconnectVerify;
-            final target = await probe.getDeviceInfo();
+            final target = await probe.getDeviceInfo(timeout: infoTimeout);
             if (aborted()) return null;
             if (!deviceHardwareMatches(target, sessionInfo)) {
               return const _RebootOutcome(_RebootKind.identityChanged);

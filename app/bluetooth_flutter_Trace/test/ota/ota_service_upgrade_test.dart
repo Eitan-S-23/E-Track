@@ -299,10 +299,12 @@ void main() {
   }
 
   const probeAddress = 'AA:BB:CC:DD:EE:FF';
-  Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true}) async {
+  Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
+      int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': 2, 'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
+      'schema': rebootInfoTimeoutMs == null ? 2 : 3,
+      'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
       'packageBytes': bytes.length, 'packageSha256': sha256.convert(bytes).toString(),
@@ -312,6 +314,10 @@ void main() {
       'targetVersionCode': 20900, 'targetImageSha256': '62' * 32,
       'senderWindowSegments': window, 'transferMode': prefix ? 'prefix' : 'full',
       'prefixBytes': prefix ? 32768 : 0,
+      if (rebootInfoTimeoutMs != null) ...{
+        'rebootInfoTimeoutMs': rebootInfoTimeoutMs,
+        'rebootProbeIntervalMs': rebootProbeIntervalMs,
+      },
     }));
     expect(runtime.ready, isTrue);
     return runtime;
@@ -434,6 +440,82 @@ void main() {
       expect(service.phase, OtaPhase.completed);
       expect(ble.endCalls, 1);
       expect(ble.abortCalls, 0);
+    });
+  });
+
+  for (final cadence in [(info: 500, interval: 250), (info: 1000, interval: 500)]) {
+    test('schema 3 retries silent INFO with ${cadence.info}/${cadence.interval} cadence', () async {
+      final bytes = assetBytes();
+      final runtime = await probeRuntime(bytes, prefix: false,
+          rebootInfoTimeoutMs: cadence.info, rebootProbeIntervalMs: cadence.interval);
+      await OtaExperimentRuntime.withInstance(runtime, () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+            package: bytes, address: probeAddress,
+            rebootWindow: const Duration(seconds: 3));
+        ble.silentRebootProbes = 1;
+        final service = Get.find<OtaService>();
+        expect(await service.startOtaUpgrade(probeAddress), isTrue);
+        expect(service.phase, OtaPhase.completed);
+        expect(ble.probeCount, 2);
+        expect(ble.probeInfoTimes[1] - ble.probeInfoTimes[0],
+            greaterThanOrEqualTo(Duration(milliseconds: cadence.info + cadence.interval - 20)));
+        expect(ble.endCalls, 1);
+        expect(ble.abortCalls, 0);
+        ble.releaseSilentInfo();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(service.phase, OtaPhase.completed);
+      });
+    }, timeout: const Timeout(Duration(seconds: 15)));
+  }
+
+  test('schema 2 retains the ordinary INFO wait without diagnostic cadence', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress,
+          rebootWindow: const Duration(seconds: 1),
+          rebootProbeInterval: const Duration(milliseconds: 100));
+      ble.silentRebootProbes = 1;
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade(probeAddress), isFalse);
+      expect(service.terminalState?.code, 'REBOOT_RECONNECT_FAILED');
+      expect(ble.probeCount, 1);
+      ble.releaseSilentInfo();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(service.phase, OtaPhase.failed,
+          reason: 'late INFO cannot revive the abandoned probe');
+    });
+  }, timeout: const Timeout(Duration(seconds: 15)));
+
+  test('schema 3 never treats repeated old identity as completed', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false,
+        rebootInfoTimeoutMs: 500, rebootProbeIntervalMs: 100);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress, rebootDelayProbes: 1 << 30,
+          rebootWindow: const Duration(milliseconds: 700));
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade(probeAddress), isFalse);
+      expect(service.terminalState?.code, 'REBOOT_RECONNECT_FAILED');
+      expect(ble.probeCount, greaterThan(1));
+      expect(ble.endCalls, 1);
+    });
+  }, timeout: const Timeout(Duration(seconds: 15)));
+
+  test('schema 3 preserves the hardware identity rejection', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false,
+        rebootInfoTimeoutMs: 500, rebootProbeIntervalMs: 100);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress, rebootPayload: postRebootOtherHardwarePayload);
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade(probeAddress), isFalse);
+      expect(service.terminalState?.code, 'DEVICE_IDENTITY_CHANGED');
+      expect(ble.probeCount, 1);
+      expect(ble.endCalls, 1);
     });
   });
 
@@ -3020,6 +3102,16 @@ class _UpgradeFakeBle extends BluetoothService {
   // ---- 重启状态机（RC3-08）----
   bool _rebooted = false;
   int _probeCount = 0;
+  int silentRebootProbes = 0;
+  final _probeClock = Stopwatch()..start();
+  final probeInfoTimes = <Duration>[];
+  final _silentInfo = <OtaBleFrame>[];
+  void releaseSilentInfo() {
+    for (final frame in _silentInfo) {
+      _send(OtaBleCodec.rspInfo, 0, frame.seq, postRebootPayload);
+    }
+    _silentInfo.clear();
+  }
   /// END OK 后的 GET_INFO 探测次数（观测断言用）。
   int get probeCount => _probeCount;
   /// journal durable 落盘偏移（观测断言用；teardown 保留）。
@@ -3434,6 +3526,11 @@ class _UpgradeFakeBle extends BluetoothService {
       payload = preRebootPayload;
     } else {
       _probeCount++;
+      probeInfoTimes.add(_probeClock.elapsed);
+      if (_probeCount <= silentRebootProbes) {
+        _silentInfo.add(f);
+        return;
+      }
       payload =
           _probeCount <= rebootDelayProbes ? preRebootPayload : postRebootPayload;
     }
