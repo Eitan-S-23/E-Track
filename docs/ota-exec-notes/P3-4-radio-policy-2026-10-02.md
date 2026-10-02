@@ -56,3 +56,22 @@ Run the full development CI on both hosts. Runtime schema4 also needs a new
 source-bound host observation adapter before device use; do not weaken or rewrite
 the old schema3 parser or frozen trial evidence. This revision is WIP until CI
 and the declared hardware screen have actual results.
+
+## Recorder Integration Correction
+
+The off/off baseline verified30246 at8.771912KiB/s and23.154605s END-to-identity.
+The on/off arm installed30247, independently confirmed by complete target/Boot
+readback, but its recorder latched `invalid-record` at the first `OTA_RADIO`
+acknowledgement. No valid finished snapshot exists; its speed is unavailable.
+Do not rewrite the failed capture or repeat the successful upgrade to recover it.
+
+Root cause: the service introduced a diagnostic prefix that neither the real
+Dart writer nor the Python envelope reader admitted. The original radio tests
+disabled diagnostics, leaving this producer/consumer boundary untested.
+Both prefix allowlists now explicitly admit `OTA_RADIO ` while retaining all
+credential, multiline, length, footer, loss, sequence and digest checks. Four
+real-service tests enable diagnostics for every radio combination, export real
+Dart snapshots and run the actual Python consumer on those bytes. A writer test
+also preserves cleanup-error messages without confusing recorder health with
+radio-policy success. This correction requires both-host development CI; it is
+not evidence that either performance goal has been achieved.

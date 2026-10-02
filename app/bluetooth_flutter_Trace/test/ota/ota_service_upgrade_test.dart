@@ -491,6 +491,46 @@ void main() {
             if (high) 'priority-release', if (pause) 'scan-release']);
         });
       });
+
+      test('schema 4 radio axes $pause/$high survive the real recorder and host parser', () async {
+        final bytes = assetBytes();
+        final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
+            pauseScan: pause, highPriority: high);
+        final tempDir = tempFirmwareDir();
+        final diagnostics = OtaDiagnostics();
+        addTearDown(diagnostics.close);
+        await diagnostics.initialize(enabled: true, target: probeAddress,
+            sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => tempDir);
+        await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
+          final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [],
+              package: bytes, address: probeAddress);
+          final service = Get.find<OtaService>();
+          expect(await service.startOtaUpgrade(probeAddress), isTrue);
+          expect(ble.radioCalls, [if (pause) 'scan', if (high) 'priority',
+            if (high) 'priority-release', if (pause) 'scan-release']);
+          final file = diagnostics.status.value.lastExport!;
+          final rows = (await file.readAsLines()).map(jsonDecode).toList();
+          final messages = rows.where((row) => row['kind'] == 'line')
+              .map((row) => row['message'] as String).toList();
+          expect(messages.where((line) => line == 'OTA_RADIO scan=paused'), hasLength(pause ? 1 : 0));
+          expect(messages.where((line) => line == 'OTA_RADIO priority=request-accepted negotiated=unknown'),
+              hasLength(high ? 1 : 0));
+          expect(rows.last['healthy'], isTrue);
+          expect(rows.last['lost'], 0);
+          expect(rows.last['upgradeStarts'], 1);
+          expect(rows.last['upgradeEnds'], 1);
+          expect(rows.last['outcome'], 'completed');
+          final checkout = Directory.current.parent.parent;
+          final imported = await Process.run(Platform.isWindows ? 'python' : 'python3',
+            ['-I', '-S', '-B', '-X', 'utf8',
+              '${checkout.path}/Tools/ota/p3-4-link-stats/observation_capture.py',
+              'inspect', '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
+              '--expect-target', probeAddress], workingDirectory: checkout.path,
+          ).timeout(const Duration(seconds: 15));
+          expect(imported.exitCode, 0, reason: '${imported.stderr}');
+          expect(jsonDecode(imported.stdout as String)['outcome'], 'completed');
+        }));
+      });
     }
   }
 

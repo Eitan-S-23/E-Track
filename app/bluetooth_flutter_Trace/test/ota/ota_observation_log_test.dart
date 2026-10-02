@@ -136,6 +136,28 @@ void main() {
     expect(footer['outcome'], 'not-completed');
   });
 
+  test('radio acknowledgements and cleanup errors preserve a healthy envelope', () async {
+    final log = await open();
+    expect(log.record(sample), isTrue);
+    expect(await log.beginUpgrade(input()), isTrue);
+    const messages = [
+      'OTA_RADIO scan=paused',
+      'OTA_RADIO priority=request-accepted negotiated=unknown',
+      'OTA_RADIO cleanup=unresolved error=TimeoutException',
+    ];
+    for (final message in messages) {
+      expect(log.record(message), isTrue);
+    }
+    await log.endUpgrade(completed: false);
+    final rows = (await (await log.exportSnapshot()).readAsLines()).map(jsonDecode).toList();
+    for (final message in messages) {
+      expect(rows.where((row) => row['message'] == message), hasLength(1));
+    }
+    expect(rows.last['healthy'], isTrue);
+    expect(rows.last['lost'], 0);
+    expect(rows.last['outcome'], 'not-completed');
+  });
+
   test('identity input is closed and typed', () async {
     final log = await open();
     log.record(sample);
@@ -161,6 +183,9 @@ void main() {
       'OTA_MONO https://example.invalid/?signature=fixture',
       'OTA_MONO authorization: fixture',
       'OTA_MONO token=fixture',
+      'OTA_RADIO token=fixture',
+      'OTA_RADIO https://example.invalid/',
+      'OTA_RADIO scan=paused\nOTA_RADIO scan=paused',
       'OTA_MONO ${'x' * OtaObservationLog.maxLineBytes}',
     ];
     for (var i = 0; i < badLines.length; i++) {
