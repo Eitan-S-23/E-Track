@@ -122,6 +122,27 @@ void main() {
     }
   });
 
+  test('schema 6 explicitly binds reboot link reuse and preserves old defaults', () {
+    final old = {...reconnectProfile(), 'schema': 5,
+      'pauseScanDuringOta': true, 'androidHighPriority': true, 'dataBatchFrames': 3};
+    expect(parse(old).reuseRebootInfoLink, isFalse);
+    expect(parse(profile()).reuseRebootInfoLink, isFalse);
+    for (final enabled in [false, true]) {
+      final config = parse({...old, 'schema': 6, 'reuseRebootInfoLink': enabled});
+      expect(config.reuseRebootInfoLink, enabled);
+      expect(config.dataBatchFrames, 3);
+      final line = jsonDecode(config.observationLine.substring('OTA_EXPERIMENT '.length));
+      expect(line['schema'], 6);
+      expect(line['reuseRebootInfoLink'], enabled);
+    }
+    for (final wrong in [null, 1, 0, 'true']) {
+      expect(() => parse({...old, 'schema': 6, 'reuseRebootInfoLink': wrong}), throwsFormatException);
+    }
+    expect(() => parse({...old, 'schema': 6}), throwsFormatException);
+    expect(() => parse({...old, 'reuseRebootInfoLink': true}), throwsFormatException);
+    expect(() => parse({...old, 'schema': 6, 'reuseRebootInfoLink': true, 'unknown': 1}), throwsFormatException);
+  });
+
   test('schema 4 rejects missing or nonboolean radio policy fields', () {
     final good = {...reconnectProfile(), 'schema': 4,
       'pauseScanDuringOta': true, 'androidHighPriority': false};

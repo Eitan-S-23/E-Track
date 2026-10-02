@@ -303,10 +303,10 @@ void main() {
   const probeAddress = 'AA:BB:CC:DD:EE:FF';
   Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
       int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500,
-      bool? pauseScan, bool highPriority = false, int? batchFrames}) async {
+      bool? pauseScan, bool highPriority = false, int? batchFrames, bool? reuseInfoLink}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
+      'schema': reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
       'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
@@ -326,6 +326,7 @@ void main() {
         'androidHighPriority': highPriority,
       },
       if (batchFrames != null) 'dataBatchFrames': batchFrames,
+      if (reuseInfoLink != null) 'reuseRebootInfoLink': reuseInfoLink,
     }));
     expect(runtime.ready, isTrue);
     return runtime;
@@ -450,6 +451,60 @@ void main() {
       expect(ble.abortCalls, 0);
     });
   });
+
+  for (final reuse in [false, true]) {
+    test('schema 6 reuses INFO binding only when enabled: $reuse', () async {
+      final bytes = assetBytes();
+      final runtime = await probeRuntime(bytes, prefix: false,
+          rebootInfoTimeoutMs: 500, rebootProbeIntervalMs: 100,
+          pauseScan: false, batchFrames: 1, reuseInfoLink: reuse);
+      await OtaExperimentRuntime.withInstance(runtime, () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+            package: bytes, address: probeAddress, rebootWindow: const Duration(seconds: 4));
+        ble.silentRebootProbes = 2;
+        final service = Get.find<OtaService>();
+        expect(await service.startOtaUpgrade(probeAddress), isTrue);
+        expect(ble.probeCount, 3);
+        expect(ble.rebootDiscoveryTimeouts.length, reuse ? 1 : 3);
+        expect(ble.endCalls, 1);
+        expect(ble.abortCalls, 0);
+        ble.releaseSilentInfo();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(service.phase, OtaPhase.completed);
+      });
+    });
+  }
+
+  for (final outcome in ['old', 'wrong-hardware', 'abandoned']) {
+    test('schema 6 preserves $outcome identity and deadline semantics', () async {
+      final bytes = assetBytes();
+      final runtime = await probeRuntime(bytes, prefix: false,
+          rebootInfoTimeoutMs: 500, rebootProbeIntervalMs: 100,
+          pauseScan: false, batchFrames: 1, reuseInfoLink: true);
+      await OtaExperimentRuntime.withInstance(runtime, () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+            package: bytes, address: probeAddress,
+            rebootPayload: outcome == 'wrong-hardware' ? postRebootOtherHardwarePayload : [],
+            rebootDelayProbes: outcome == 'old' ? 1 : 0,
+            rebootWindow: outcome == 'abandoned' ? const Duration(milliseconds: 300) : const Duration(seconds: 4));
+        if (outcome == 'abandoned') ble.silentRebootProbes = 100;
+        final service = Get.find<OtaService>();
+        expect(await service.startOtaUpgrade(probeAddress), outcome == 'old');
+        if (outcome == 'old') {
+          expect(ble.rebootDiscoveryTimeouts.length, 2);
+        } else {
+          expect(service.terminalState?.code, outcome == 'wrong-hardware'
+              ? 'DEVICE_IDENTITY_CHANGED' : 'REBOOT_RECONNECT_FAILED');
+          final probes = ble.probeCount;
+          ble.releaseSilentInfo();
+          await Future<void>.delayed(const Duration(milliseconds: 150));
+          expect(ble.probeCount, probes);
+          expect(service.phase, OtaPhase.failed);
+        }
+        expect(ble.endCalls, 1);
+      });
+    });
+  }
 
   for (final cadence in [(info: 500, interval: 250), (info: 1000, interval: 500)]) {
     test('schema 3 retries silent INFO with ${cadence.info}/${cadence.interval} cadence', () async {

@@ -18,6 +18,7 @@ import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../ota/ota_link_stats.dart';
 import '../ota/ota_mono.dart';
+import '../ota/ota_probe_retry.dart';
 import '../ota/ota_radio_lease.dart';
 import 'app_update_service.dart';
 import 'bluetooth_service.dart';
@@ -1133,6 +1134,7 @@ class OtaService extends GetxController {
           generation,
           infoTimeout: experiment?.rebootInfoTimeout,
           probeInterval: experiment?.rebootProbeInterval,
+          reuseInfoLink: experiment?.reuseRebootInfoLink ?? false,
         );
         if (generation != _cancelGeneration) {
           return fail('cancelled', 'generation-changed');
@@ -1817,6 +1819,7 @@ class OtaService extends GetxController {
     int generation, {
     Duration? infoTimeout,
     Duration? probeInterval,
+    bool reuseInfoLink = false,
   }) async {
     // Diagnostic cadence does not alter the total window or recovery budget.
     final interval = probeInterval ?? _rebootProbeInterval;
@@ -1884,6 +1887,8 @@ class OtaService extends GetxController {
           probeAborted,
           stats: attemptStats,
           infoTimeout: infoTimeout ?? const Duration(seconds: 10),
+          reuseInfoLink: reuseInfoLink,
+          infoRetryInterval: interval,
         ).timeout(
           roundCap < const Duration(seconds: 1)
               ? const Duration(seconds: 1)
@@ -1984,9 +1989,13 @@ class OtaService extends GetxController {
     bool Function() aborted, {
     OtaLinkStats? stats,
     Duration infoTimeout = const Duration(seconds: 10),
+    bool reuseInfoLink = false,
+    Duration infoRetryInterval = const Duration(milliseconds: 500),
   }) async {
     OtaBleTransport? probe;
     int? connectedGeneration;
+    Object? probeBindingToken;
+    var bindingCaptured = false;
     var resolvedIdentity = false;
     try {
       if (await _ble.connectOtaDeviceByAddress(deviceAddress)) {
@@ -2012,8 +2021,21 @@ class OtaService extends GetxController {
           if (aborted()) return null;
           if (probe != null) {
             _phase.value = OtaPhase.reconnectVerify;
-            final target = await probe.getDeviceInfo(timeout: infoTimeout);
-            if (aborted()) return null;
+            final bindingToken = _ble.otaGattBindingToken(deviceAddress);
+            probeBindingToken = bindingToken;
+            bindingCaptured = true;
+            bool current() => !aborted() &&
+                _ble.otaLinkGeneration(deviceAddress) == connectedGeneration &&
+                identical(bindingToken, _ble.otaGattBindingToken(deviceAddress));
+            final boundProbe = probe;
+            final target = reuseInfoLink
+                ? await retryInfoOnCurrentLink<DeviceOtaInfo>(
+                    query: () => boundProbe.getDeviceInfo(timeout: infoTimeout),
+                    isCurrent: current,
+                    interval: infoRetryInterval,
+                  )
+                : await boundProbe.getDeviceInfo(timeout: infoTimeout);
+            if (!current() || target == null) return null;
             if (!deviceHardwareMatches(target, sessionInfo)) {
               resolvedIdentity = true;
               return const _RebootOutcome(_RebootKind.identityChanged);
@@ -2040,6 +2062,8 @@ class OtaService extends GetxController {
           !resolvedIdentity &&
           connectedGeneration != null &&
           !aborted() &&
+          (!bindingCaptured || identical(probeBindingToken,
+              _ble.otaGattBindingToken(deviceAddress))) &&
           _ble.otaLinkGeneration(deviceAddress) == connectedGeneration) {
         await _ble
             .disconnectOtaDeviceByAddress(deviceAddress)
