@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import sys
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,6 +34,12 @@ def fixture():
 
 
 class Tests(unittest.TestCase):
+    def test_isolated_cli_resolves_only_its_local_reader(self):
+        result = subprocess.run([sys.executable, '-I', '-S', '-B',
+            str(ROOT / 'Tools/ota/p3-4-link-stats/batch_timing.py'), '--help'],
+            cwd=ROOT, capture_output=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_batch_accounting_does_not_sum_shared_frame_writes_twice(self):
         value = timing.analyze(fixture(), 384)
         self.assertEqual(value["data_gatt_seconds"], .0002)

@@ -3,7 +3,9 @@ import argparse
 import json
 from pathlib import Path
 import re
+import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from observation_capture import require, verify, MAX_BYTES
 
 
@@ -82,6 +84,7 @@ def main():
     require(args.input.stat().st_size <= MAX_BYTES + 8192, "oversized snapshot")
     envelope, messages = verify(args.input.read_bytes(), sentinel=args.expect_sentinel,
                                 target=args.expect_target)
+    messages = messages.splitlines()
     require(envelope["outcome"] == "completed", "completed original snapshot required")
     stamps = [json.loads(m[len("OTA_EXPERIMENT "):]) for m in messages if m.startswith("OTA_EXPERIMENT ")]
     require(len(stamps) == 1 and stamps[0]["schema"] == 5 and stamps[0]["dataBatchFrames"] == 3,
