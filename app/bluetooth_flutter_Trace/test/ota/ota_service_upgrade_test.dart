@@ -14,6 +14,7 @@ import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
 import 'package:ble_monitor/ota/ota_experiment_config.dart';
+import 'package:ble_monitor/ota/ota_radio_lease.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
@@ -300,10 +301,11 @@ void main() {
 
   const probeAddress = 'AA:BB:CC:DD:EE:FF';
   Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
-      int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500}) async {
+      int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500,
+      bool? pauseScan, bool highPriority = false}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': rebootInfoTimeoutMs == null ? 2 : 3,
+      'schema': pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
       'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
@@ -317,6 +319,10 @@ void main() {
       if (rebootInfoTimeoutMs != null) ...{
         'rebootInfoTimeoutMs': rebootInfoTimeoutMs,
         'rebootProbeIntervalMs': rebootProbeIntervalMs,
+      },
+      if (pauseScan != null) ...{
+        'pauseScanDuringOta': pauseScan,
+        'androidHighPriority': highPriority,
       },
     }));
     expect(runtime.ready, isTrue);
@@ -467,6 +473,60 @@ void main() {
       });
     }, timeout: const Timeout(Duration(seconds: 15)));
   }
+
+  for (final pause in [false, true]) {
+    for (final high in [false, true]) {
+      test('schema 4 radio axes $pause/$high preserve full OTA and release without diagnostics', () async {
+        final bytes = assetBytes();
+        final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
+            pauseScan: pause, highPriority: high);
+        await OtaExperimentRuntime.withInstance(runtime, () async {
+          final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+              package: bytes, address: probeAddress);
+          final service = Get.find<OtaService>();
+          expect(await service.startOtaUpgrade(probeAddress), isTrue);
+          expect(ble.endCalls, 1);
+          expect(service.phase, OtaPhase.completed);
+          expect(ble.radioCalls, [if (pause) 'scan', if (high) 'priority',
+            if (high) 'priority-release', if (pause) 'scan-release']);
+        });
+      });
+    }
+  }
+
+  test('failed radio acquisition cannot send BEGIN and still releases', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
+        pauseScan: true, highPriority: true);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress);
+      ble.failRadioPause = true;
+      expect(await Get.find<OtaService>().startOtaUpgrade(probeAddress), isFalse);
+      expect(ble.beginCalls, 0);
+      expect(ble.radioCalls, ['scan', 'scan-release']);
+    });
+  });
+
+  test('cancel during radio acquisition cannot proceed to priority or BEGIN', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
+        pauseScan: true, highPriority: true);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress);
+      ble.radioPauseGate = Completer<void>();
+      final service = Get.find<OtaService>();
+      final upgrade = service.startOtaUpgrade(probeAddress);
+      await ble.radioPauseEntered.future;
+      final cancel = service.cancelUpgrade(keepPackage: true);
+      ble.radioPauseGate!.complete();
+      await cancel;
+      expect(await upgrade, isFalse);
+      expect(ble.beginCalls, 0);
+      expect(ble.radioCalls, ['scan', 'scan-release']);
+    });
+  });
 
   test('schema 2 retains the ordinary INFO wait without diagnostic cadence', () async {
     final bytes = assetBytes();
@@ -3123,6 +3183,25 @@ void _writeU32(Uint8List p, int at, int v) {
 /// - END OK 后（MCU 已切新固件）：前 [rebootDelayProbes] 次探测仍报
 ///   旧身份（重启未完成的快速重连窗口），之后报 postRebootPayload。
 class _UpgradeFakeBle extends BluetoothService {
+  final radioCalls = <String>[];
+  bool failRadioPause = false;
+  Completer<void>? radioPauseGate;
+  final radioPauseEntered = Completer<void>();
+
+  @override
+  OtaRadioLease pauseOtaScanning() {
+    radioCalls.add('scan');
+    if (!radioPauseEntered.isCompleted) radioPauseEntered.complete();
+    return OtaRadioLease(failRadioPause ? Future<void>.error(StateError('pause-failed')) :
+        radioPauseGate?.future ?? Future<void>.value(), () async { radioCalls.add('scan-release'); });
+  }
+
+  @override
+  OtaRadioLease requestOtaHighPriority(String address) {
+    radioCalls.add('priority');
+    return OtaRadioLease(Future<void>.value(), () async { radioCalls.add('priority-release'); });
+  }
+
   _UpgradeFakeBle({
     required this.preRebootPayload,
     required this.postRebootPayload,

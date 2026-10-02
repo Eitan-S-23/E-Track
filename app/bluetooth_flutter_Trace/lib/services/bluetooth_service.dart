@@ -10,6 +10,8 @@ import 'package:win_ble/win_ble.dart';
 import '../ota/ota_device_observation.dart';
 import '../ota/ota_link_stats.dart';
 import '../ota/ota_experiment_config.dart';
+import '../ota/ota_radio_lease.dart';
+import '../ota/ota_scan_pause.dart';
 
 // 抽象蓝牙适配器接口
 abstract class BluetoothAdapter {
@@ -480,6 +482,35 @@ class BluetoothService extends GetxController {
   final bool reuseOtaCharacteristics;
   final bool preferOtaWithoutResponse;
   final OtaExperimentRuntime _experiment;
+  OtaScanPause? _otaScanPause;
+  final Map<String, OtaPriorityQueue> _otaPriorityQueues = {};
+  bool get _scanPauseEnabled => _experiment.config?.pauseScanDuringOta == true;
+  OtaScanPause get _scanPause => _otaScanPause ??= OtaScanPause(
+    startNative: _startScan,
+    stopNative: () => _stopScanNative(strict: true),
+    isScanning: () => isScanning.value,
+  );
+
+  OtaRadioLease pauseOtaScanning() {
+    if (!_scanPauseEnabled) throw StateError('ota-scan-policy-not-enabled');
+    return _scanPause.pause();
+  }
+
+  @visibleForTesting
+  bool get supportsOtaAndroidPriority => Platform.isAndroid;
+
+  OtaRadioLease requestOtaHighPriority(String address) {
+    if (!supportsOtaAndroidPriority) throw UnsupportedError('ota-priority-android-only');
+    final device = _mobileOtaDevice(address);
+    final generation = otaLinkGeneration(address);
+    final queue = _otaPriorityQueues.putIfAbsent(address.toLowerCase(), OtaPriorityQueue.new);
+    return queue.acquire(
+      isCurrent: () => device.isConnected && otaLinkGeneration(address) == generation,
+      request: (high) => device.requestConnectionPriority(
+        connectionPriorityRequest: high ? ConnectionPriority.high : ConnectionPriority.balanced,
+      ),
+    );
+  }
 
   static BluetoothService get to => Get.find();
 
@@ -736,6 +767,12 @@ class BluetoothService extends GetxController {
 
   @override
   void onClose() {
+    final pause = _otaScanPause;
+    if (pause != null) {
+      unawaited(pause.dispose().catchError((Object error) {
+        debugPrint('OTA scan disposal failed: $error');
+      }));
+    }
     _scanTimeoutTimer?.cancel();
     _scanSubscription?.cancel();
     _adapterSubscription?.cancel();
@@ -831,6 +868,14 @@ class BluetoothService extends GetxController {
 
   /// 开始扫描设备
   Future<void> startScan({Duration? timeout}) async {
+    if (_scanPauseEnabled) {
+      try {
+        await _scanPause.start(timeout: timeout);
+      } catch (error) {
+        debugPrint('OTA-aware scan start failed: $error');
+      }
+      return;
+    }
     if (isScanning.value) {
       debugPrint('扫描已在进行中');
       return;
@@ -1211,13 +1256,26 @@ class BluetoothService extends GetxController {
 
   /// 停止扫描
   Future<void> stopScan() async {
-    if (!isScanning.value) return;
+    if (_scanPauseEnabled) {
+      try {
+        await _scanPause.stop();
+      } catch (error) {
+        debugPrint('OTA-aware scan stop failed: $error');
+      }
+      return;
+    }
+    await _stopScanNative();
+  }
+
+  Future<void> _stopScanNative({bool strict = false}) async {
+    if (!strict && !isScanning.value) return;
 
     try {
       await _adapter.stopScan();
       debugPrint('蓝牙扫描已停止');
     } catch (e) {
       debugPrint('停止扫描失败: $e');
+      if (strict) rethrow;
     } finally {
       _scanTimeoutTimer?.cancel();
       _scanTimeoutTimer = null;

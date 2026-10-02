@@ -18,6 +18,7 @@ import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../ota/ota_link_stats.dart';
 import '../ota/ota_mono.dart';
+import '../ota/ota_radio_lease.dart';
 import 'app_update_service.dart';
 import 'bluetooth_service.dart';
 
@@ -880,6 +881,8 @@ class OtaService extends GetxController {
       // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
       final linkStats = OtaLinkStats(label: isPrefixProbe ? 'prefix-probe' : 'upgrade', device: deviceAddress);
       OtaBleTransport? activeTransport;
+      OtaRadioLease? scanLease;
+      OtaRadioLease? priorityLease;
       final diagnostics = OtaDiagnostics.current;
       var diagnosticStarted = false;
       var diagnosticCompleted = false;
@@ -947,6 +950,19 @@ class OtaService extends GetxController {
             _upgradeStatus.value = '诊断记录未就绪，未开始 BLE 传输；请先检查记录状态';
             return fail('observation', 'capture-not-ready');
           }
+        }
+
+        if (experiment?.pauseScanDuringOta == true) {
+          scanLease = _ble.pauseOtaScanning();
+          await scanLease.ready.timeout(const Duration(seconds: 5));
+          if (generation != _cancelGeneration) return fail('cancelled', 'radio-policy-cancelled');
+          emitOtaObservation('OTA_RADIO scan=paused');
+        }
+        if (experiment?.androidHighPriority == true) {
+          priorityLease = _ble.requestOtaHighPriority(deviceAddress);
+          await priorityLease.ready.timeout(const Duration(seconds: 5));
+          if (generation != _cancelGeneration) return fail('cancelled', 'radio-policy-cancelled');
+          emitOtaObservation('OTA_RADIO priority=request-accepted negotiated=unknown');
         }
 
         // P3-4 观测：绑定阶段自严格发现起（对齐 research §3.1「绑定 =
@@ -1308,6 +1324,16 @@ class OtaService extends GetxController {
         linkStats.recordTransferOutcome(ok: false);
         // emitSummary 幂等：已提前输出过的路径不会重复。
         linkStats.emitSummary();
+        // Queues retain late native work; closing a timed-out lease never
+        // permits an old restore to overwrite a newer connection/scan owner.
+        for (final lease in [priorityLease, scanLease]) {
+          if (lease == null) continue;
+          try {
+            await lease.close().timeout(const Duration(seconds: 5));
+          } catch (error) {
+            emitOtaObservation('OTA_RADIO cleanup=unresolved error=${error.runtimeType}');
+          }
+        }
         if (diagnosticStarted) {
           await diagnostics.finishUpgrade(completed: diagnosticCompleted);
         }

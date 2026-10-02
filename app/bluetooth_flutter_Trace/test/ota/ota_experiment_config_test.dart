@@ -74,6 +74,35 @@ void main() {
     'rebootInfoTimeoutMs': 2000, 'rebootProbeIntervalMs': 500,
   };
 
+  test('schema 4 independently binds both radio policy axes', () {
+    for (final pause in [false, true]) {
+      for (final high in [false, true]) {
+        final config = parse({...reconnectProfile(), 'schema': 4,
+          'pauseScanDuringOta': pause, 'androidHighPriority': high});
+        expect(config.pauseScanDuringOta, pause);
+        expect(config.androidHighPriority, high);
+        final line = jsonDecode(config.observationLine.substring('OTA_EXPERIMENT '.length));
+        expect(line['pauseScanDuringOta'], pause);
+        expect(line['androidHighPriority'], high);
+        expect(line['rebootInfoTimeoutMs'], 2000);
+      }
+    }
+    expect(parse(reconnectProfile()).pauseScanDuringOta, isFalse);
+    expect(parse(reconnectProfile()).androidHighPriority, isFalse);
+  });
+
+  test('schema 4 rejects missing or nonboolean radio policy fields', () {
+    final good = {...reconnectProfile(), 'schema': 4,
+      'pauseScanDuringOta': true, 'androidHighPriority': false};
+    for (final key in ['pauseScanDuringOta', 'androidHighPriority']) {
+      expect(() => parse({...good}..remove(key)), throwsFormatException);
+      for (final wrong in [null, 0, 1, 'true']) {
+        expect(() => parse({...good, key: wrong}), throwsFormatException);
+      }
+    }
+    expect(() => parse({...good, 'schema': 3}), throwsFormatException);
+  });
+
   test('schema 3 binds explicit full-OTA cadence and records requested values', () {
     final config = parse(reconnectProfile());
     expect(config.rebootInfoTimeout, const Duration(seconds: 2));
