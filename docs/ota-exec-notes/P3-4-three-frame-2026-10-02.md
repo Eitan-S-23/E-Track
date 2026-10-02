@@ -47,6 +47,13 @@ frame. Original recorder/exporter prefixes are unchanged. Full service tests
 exercise both modes through the real recorder and Python envelope reader.
 
 The old one-GATT-write-per-segment timing partition must not analyze these logs;
-it rejects their changed pairing. A batch-aware host timing/admission path and
-finite hardware preparation remain required before requesting another same-signer
-development APK. Retain verified firmware30249 meanwhile.
+it rejects their changed pairing. `batch_timing.py` consumes completed batch
+chunks once, checks exact DATA byte/offset coverage, and reports DATA GATT time
+plus the unsplit remainder of the original transfer interval. It explicitly
+preserves incomplete/early ACK latency status and does not invent P99 evidence.
+Five synthetic negative tests and the real exported App snapshot cover this
+reader. It requires unsplit clean control frames; retransmissions and smaller
+control MTUs remain outside this initial analyzer's admitted scope.
+
+Finite hardware preparation remains required before requesting another
+same-signer development APK. Retain verified firmware30249 meanwhile.

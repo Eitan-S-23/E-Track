@@ -576,6 +576,14 @@ void main() {
               'inspect', '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
               '--expect-target', probeAddress], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
         expect(imported.exitCode, 0, reason: '${imported.stderr}');
+        if (frames == 3) {
+          final measured = await Process.run(Platform.isWindows ? 'python' : 'python3',
+              ['-I', '-S', '-B', '-X', 'utf8', '${checkout.path}/Tools/ota/p3-4-link-stats/batch_timing.py',
+                '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
+                '--expect-target', probeAddress], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
+          expect(measured.exitCode, 0, reason: '${measured.stderr}');
+          expect(jsonDecode(measured.stdout as String)['chunks'], 22);
+        }
       }));
     });
   }
