@@ -1585,8 +1585,11 @@ class OtaBleTransport {
     var frameComplete = false;
     try {
       for (var offset = 0; offset < frame.length;) {
+        if (frameEnds != null && _paused && (offset == 0 || frameEnds.contains(offset))) {
+          await _waitIfPaused();
+        }
         final stoppingBatch = frameEnds != null && (_cancelled || _disposed);
-        if (stoppingBatch && frameEnds.contains(offset)) break;
+        if (stoppingBatch && (offset == 0 || frameEnds.contains(offset))) break;
         // 逐片重算预算（RC3-07）：帧外一次计算会让 142B DATA 帧在
         // MTU=23 下的 8 个分片各按 10s 上限（均未单片超时）累计 72s，
         // 绕过 30s 总预算。每个分片以当次剩余预算封顶，片间预算耗尽
@@ -1597,7 +1600,7 @@ class OtaBleTransport {
         final perChunkTimeout =
             allowCancelled ? writeTimeout : _capByBudget(writeTimeout);
         var end = (offset + chunkSize).clamp(0, frame.length);
-        if (stoppingBatch) {
+        if (frameEnds != null && (stoppingBatch || _paused)) {
           final boundary = frameEnds.firstWhere((boundary) => boundary > offset);
           if (boundary < end) end = boundary;
         }

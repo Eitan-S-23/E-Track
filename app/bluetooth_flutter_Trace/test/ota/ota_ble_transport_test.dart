@@ -231,6 +231,85 @@ void main() {
       expect(stats.toJson()['transfer']['segmentsUnique'], 32);
     });
 
+    for (final cancelPaused in [false, true]) {
+      test('pause drains only partial frame; cancel=$cancelPaused', () async {
+        final mcu = _McuSim();
+        final channel = _BatchTapChannel(mcu);
+        final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3);
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        channel.afterWrite = (_) async {
+          if (mcu.dataChunkWrites == 1) transport.pauseForBackground();
+        };
+        final pending = transfer(transport, packageBytes(4096));
+        final checked = cancelPaused ? expectLater(pending, throwsA(
+            isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED'))) : null;
+        await _pumpUntil(() => mcu.dataOffsets.length == 2);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(mcu.dataOffsets, [0, 128]);
+        expect(mcu.pendingByteCount, 0);
+        if (cancelPaused) {
+          transport.cancel();
+          await checked;
+          expect(mcu.dataOffsets, [0, 128]);
+        } else {
+          transport.resumeFromBackground();
+          expect((await pending).isOk, isTrue);
+          expect(mcu._stagedBytes, packageBytes(4096));
+        }
+      });
+    }
+
+    test('cancel at a frame-aligned chunk does not start another frame', () async {
+      final mcu = _McuSim()..mtu = 145;
+      final channel = _BatchTapChannel(mcu);
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3);
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      channel.afterWrite = (_) async {
+        if (mcu.dataChunkWrites == 1) transport.cancel();
+      };
+      await expectLater(transfer(transport, packageBytes(4096)), throwsA(
+          isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+      expect(mcu.dataOffsets, [0]);
+      expect(mcu.pendingByteCount, 0);
+    });
+
+    test('send-end accounting follows each completing chunk, not batch end', () async {
+      final mcu = _McuSim();
+      final channel = _BatchTapChannel(mcu);
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3, stats: stats);
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      final counts = <int>[];
+      channel.afterWrite = (_) async {
+        if (mcu.dataChunkWrites == 1 || mcu.dataChunkWrites == 2) {
+          counts.add(stats.toJson()['transfer']['segmentsUnique'] as int);
+        }
+      };
+      expect((await transfer(transport, packageBytes(4096))).isOk, isTrue);
+      expect(counts, [0, 1]);
+      expect(stats.toJson()['transfer']['segmentsUnique'], 32);
+    });
+
+    test('late batch write cannot clear poison or launch a later batch', () async {
+      final mcu = _McuSim()
+        ..slowDataChunkAt = 2
+        ..slowDataChunkDelay = const Duration(milliseconds: 200);
+      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3,
+          writeTimeout: const Duration(milliseconds: 20));
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      await expectLater(transfer(transport, packageBytes(4096)), throwsA(
+          isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
+      await _expectBusinessWriteRefused(transport, 'before late batch');
+      await Future<void>.delayed(const Duration(milliseconds: 220));
+      expect(mcu.dataOffsets, [0, 128, 256]);
+      expect(mcu.endCalls, 0);
+      await _expectBusinessWriteRefused(transport, 'after late batch');
+    });
+
     test('partial batch timeout poisons business writes', () async {
       final mcu = _McuSim()..hangAtDataChunk = 2;
       final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3,
