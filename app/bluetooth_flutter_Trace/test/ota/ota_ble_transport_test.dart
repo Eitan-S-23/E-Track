@@ -3873,11 +3873,6 @@ class _ProbeMcu extends _McuSim {
   final abortWriteStarted = Completer<void>();
   bool failAbortWrite = false;
 
-  Future<void> close() async {
-    for (final timer in _timers) { timer.cancel(); }
-    await _notifyController.close();
-  }
-
   @override
   Future<void> writeChunk(List<int> chunk) async {
     final isAbort = _chunkFrameCmd(chunk) == OtaBleCodec.cmdAbort;
@@ -4020,6 +4015,11 @@ class _McuSim extends _FakeMcuHost {
   int _inFlight = 0;
   int maxInFlight = 0;
   final _timers = <Timer>[];
+
+  Future<void> close() async {
+    for (final timer in _timers) { timer.cancel(); }
+    await _notifyController.close();
+  }
 
   static const int _segmentSize = OtaBleCodec.dataSegmentSize;
   static const int _blockSize =

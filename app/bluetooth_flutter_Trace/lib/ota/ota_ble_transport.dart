@@ -789,7 +789,7 @@ class OtaBleTransport {
     return segEnd - segOffset;
   }
 
-  /// 发送一个 DATA 段（首发与重发共用；重发复用原 seq）。
+  /// First-send batch; retries retain their original single-frame path.
   Future<void> _sendSegmentBatch(Uint8List package, int blockStart,
       List<int> segments, _TransferAckView view, void Function(int) completed) async {
     final bytes = BytesBuilder(copy: false);
