@@ -248,6 +248,8 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 10));
         expect(mcu.dataOffsets, [0, 128]);
         expect(mcu.pendingByteCount, 0);
+        // Resume rechecks use this same serial writer and must not deadlock.
+        await transport.getDeviceInfo().timeout(const Duration(seconds: 1));
         if (cancelPaused) {
           transport.cancel();
           await checked;

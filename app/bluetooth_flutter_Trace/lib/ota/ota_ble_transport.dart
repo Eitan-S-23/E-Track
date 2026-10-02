@@ -808,21 +808,28 @@ class OtaBleTransport {
     }
     var registered = 0;
     var finished = 0;
-    await _writeFrameChecked(bytes.takeBytes(), allowCancelled: false,
-      frameEnds: ends,
-      onChunkStarting: (end) {
-        // A reserved frame is not ACK-eligible until its final bytes are dispatched.
-        while (registered < ends.length && ends[registered] <= end) {
-          view.trackSend(sequences[registered], segments[registered]);
-          registered++;
-        }
-      },
-      onChunkCompleted: (end) {
-        while (finished < ends.length && ends[finished] <= end) {
-          completed(segments[finished++]);
-        }
-      },
-    );
+    final stream = bytes.takeBytes();
+    while (finished < ends.length) {
+      // Release stream ownership at a pause boundary so resume INFO can run.
+      await _waitIfPaused();
+      _checkUsable();
+      final base = finished == 0 ? 0 : ends[finished - 1];
+      await _writeFrameChecked(Uint8List.sublistView(stream, base), allowCancelled: false,
+        frameEnds: ends.skip(finished).map((end) => end - base).toList(),
+        onChunkStarting: (end) {
+          // A reserved frame is not ACK-eligible until its final bytes are dispatched.
+          while (registered < ends.length && ends[registered] <= base + end) {
+            view.trackSend(sequences[registered], segments[registered]);
+            registered++;
+          }
+        },
+        onChunkCompleted: (end) {
+          while (finished < ends.length && ends[finished] <= base + end) {
+            completed(segments[finished++]);
+          }
+        },
+      );
+    }
   }
 
   Future<void> _sendSegment(
@@ -1585,10 +1592,7 @@ class OtaBleTransport {
     var frameComplete = false;
     try {
       for (var offset = 0; offset < frame.length;) {
-        if (frameEnds != null && _paused && (offset == 0 || frameEnds.contains(offset))) {
-          await _waitIfPaused();
-        }
-        final stoppingBatch = frameEnds != null && (_cancelled || _disposed);
+        final stoppingBatch = frameEnds != null && (_cancelled || _disposed || _paused);
         if (stoppingBatch && (offset == 0 || frameEnds.contains(offset))) break;
         // 逐片重算预算（RC3-07）：帧外一次计算会让 142B DATA 帧在
         // MTU=23 下的 8 个分片各按 10s 上限（均未单片超时）累计 72s，
@@ -1600,7 +1604,7 @@ class OtaBleTransport {
         final perChunkTimeout =
             allowCancelled ? writeTimeout : _capByBudget(writeTimeout);
         var end = (offset + chunkSize).clamp(0, frame.length);
-        if (frameEnds != null && (stoppingBatch || _paused)) {
+        if (stoppingBatch) {
           final boundary = frameEnds.firstWhere((boundary) => boundary > offset);
           if (boundary < end) end = boundary;
         }
