@@ -1,5 +1,5 @@
 import 'package:ble_monitor/services/bluetooth_service.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' show BluetoothDevice, ConnectionPriority;
 import 'package:flutter_test/flutter_test.dart';
 
 class _Service extends BluetoothService {
