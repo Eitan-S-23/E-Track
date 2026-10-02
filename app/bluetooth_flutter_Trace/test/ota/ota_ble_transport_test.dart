@@ -140,6 +140,121 @@ void main() {
   /// 撞 END ERR_SHA，使全部正常路径用例失去意义。
   List<int> shaOf(Uint8List package) => sha256.convert(package).bytes;
 
+  group('default-off three-frame DATA batching', () {
+    Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
+        {int window = 28}) => transport.transfer(package: bytes,
+            packageSha256: shaOf(bytes), etuHeader: etuHeaderOf(bytes), windowSegments: window);
+
+    test('rejects unsupported batch sizes before listening or writing', () {
+      final mcu = _McuSim();
+      addTearDown(mcu.close);
+      for (final size in [0, 2, 4, 32]) {
+        expect(() => OtaBleTransport(channel: mcu, dataBatchFrames: size), throwsArgumentError);
+      }
+      expect(mcu.writtenFrames, isEmpty);
+    });
+
+    for (final mode in [1, 3]) {
+      test('mode $mode preserves full block and expected GATT calls', () async {
+        final mcu = _McuSim();
+        final transport = OtaBleTransport(channel: mcu, dataBatchFrames: mode);
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        final bytes = packageBytes(4096);
+        expect((await transfer(transport, bytes)).isOk, isTrue);
+        expect(mcu._stagedBytes, bytes);
+        expect(mcu.dataChunkWrites, mode == 1 ? 32 : 22);
+        expect(mcu.dataOffsets, List.generate(32, (i) => i * 128));
+      });
+    }
+
+    for (final mtu in [23, 145, 247]) {
+      test('MTU $mtu preserves short tail and block boundary', () async {
+        final mcu = _McuSim()..mtu = mtu;
+        final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3);
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        final bytes = packageBytes(4225);
+        expect((await transfer(transport, bytes)).durableOff, bytes.length);
+        expect(mcu._stagedBytes, bytes);
+        expect(mcu.dataOffsets, List.generate(34, (i) => i * 128));
+      });
+    }
+
+    for (final window in [1, 2, 3, 4, 28]) {
+      test('free-credit reservation obeys window $window', () async {
+        final mcu = _McuSim()..ackDelay = const Duration(milliseconds: 2);
+        final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3);
+        addTearDown(mcu.close);
+        addTearDown(transport.dispose);
+        expect((await transfer(transport, packageBytes(4096), window: window)).isOk, isTrue);
+        expect(mcu.maxInFlight, lessThanOrEqualTo(window));
+      });
+    }
+
+    test('cancel completes partial frame but does not start reserved third frame', () async {
+      final mcu = _McuSim();
+      final channel = _BatchTapChannel(mcu);
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3);
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      channel.afterWrite = (_) async {
+        if (mcu.dataChunkWrites == 1) transport.cancel();
+      };
+      await expectLater(transfer(transport, packageBytes(4096)), throwsA(
+          isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+      expect(mcu.dataOffsets, [0, 128]);
+      expect(mcu.pendingByteCount, 0);
+      expect(mcu.endCalls, 0);
+      expect(channel.chunks.where((c) => c.length == 40), hasLength(1));
+    });
+
+    test('unknown reserved-frame ACK cannot confirm unsent data', () async {
+      final mcu = _McuSim();
+      final channel = _BatchTapChannel(mcu);
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3, stats: stats);
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      channel.afterWrite = (_) async {
+        if (mcu.dataChunkWrites == 1) {
+          final first = mcu.dataFrames.first;
+          mcu.sendFrame(OtaBleCodec.rspAckData, first.session, first.seq + 2,
+              packAck(OtaBleCodec.statusOk, 0, 7));
+          await Future<void>.delayed(Duration.zero);
+        }
+      };
+      final bytes = packageBytes(4096);
+      expect((await transfer(transport, bytes)).isOk, isTrue);
+      expect(mcu._stagedBytes, bytes);
+      expect(stats.acksDuplicate, greaterThan(0));
+      expect(stats.toJson()['transfer']['segmentsUnique'], 32);
+    });
+
+    test('partial batch timeout poisons business writes', () async {
+      final mcu = _McuSim()..hangAtDataChunk = 2;
+      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3,
+          writeTimeout: const Duration(milliseconds: 20));
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      await expectLater(transfer(transport, packageBytes(4096)), throwsA(
+          isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
+      expect(mcu.pendingByteCount, greaterThan(0));
+      await _expectBusinessWriteRefused(transport, 'partial batch');
+    });
+
+    test('recoverable DATA error keeps ordinary resume and SHA verification', () async {
+      final mcu = _McuSim()..errSeqAtDataCounts = {3};
+      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3);
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      final bytes = packageBytes(4225);
+      expect((await transfer(transport, bytes)).isOk, isTrue);
+      expect(mcu._stagedBytes, bytes);
+      expect(mcu.beginCalls, greaterThan(1));
+    });
+  });
+
   group('durable prefix probe', () {
     final bytes = packageBytes(40960);
     Future<OtaPrefixProbeResult> probe(OtaBleTransport transport, {int limit = 32768, int window = 4}) =>
@@ -3185,6 +3300,19 @@ class _GatedWriteChannel implements OtaBleChannel {
 /// 同一设备的新包装对象（RC3-05⑤）：除自身对象身份外全部转发给
 /// [inner]，`deviceScope` 也如实透传，模拟真实路径上「同一台设备、
 /// 每次 bind 新建 `_ChannelAdapter`」——包装对象换了，设备没换。
+class _BatchTapChannel extends _ReboundWrapper {
+  _BatchTapChannel(super.inner);
+  final chunks = <List<int>>[];
+  Future<void> Function(List<int>)? afterWrite;
+
+  @override
+  Future<void> writeChunk(List<int> chunk) async {
+    chunks.add(List<int>.of(chunk));
+    await inner.writeChunk(chunk);
+    await afterWrite?.call(chunk);
+  }
+}
+
 class _ReboundWrapper implements OtaBleChannel {
   _ReboundWrapper(this.inner);
 

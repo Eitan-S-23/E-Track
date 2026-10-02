@@ -59,7 +59,11 @@ class OtaBleTransport {
     this.retries = maxRetries,
     this.noProgressTimeout = defaultNoProgressTimeout,
     this.writeTimeout = defaultWriteTimeout,
+    this.dataBatchFrames = 1,
   })  : _channel = channel {
+    if (dataBatchFrames != 1 && dataBatchFrames != 3) {
+      throw ArgumentError.value(dataBatchFrames, 'dataBatchFrames', 'expected 1 or 3');
+    }
     // 通知流订阅必须在构造内同步建立：async* 生成器的初始运行被延迟到
     // 微任务，此前「写入回调里同步回投的 ACK」在 broadcast 通知源上
     // 因无监听者被整帧丢弃（真实 BLE 通知流即 broadcast 语义）。显式
@@ -93,6 +97,8 @@ class OtaBleTransport {
   final int retries;
   final Duration noProgressTimeout;
   final Duration writeTimeout;
+  /// Development-only opt-in. The service still uses the default single frame.
+  final int dataBatchFrames;
 
   /// 帧等待者队列（一问一答）：注册后才开始发送，响应到达即分发。
   final List<_FrameWaiterBase> _waiters = [];
@@ -519,6 +525,25 @@ class OtaBleTransport {
               if (view.inFlightCount >= effectiveWindow) break;
               if ((view.blockBitmap >> seg) & 1 == 1) continue; // 已收段幂等跳过
               if (view.isSegmentInFlight(seg)) continue; // 在途未确认
+              if (dataBatchFrames == 3) {
+                final selected = <int>[];
+                final free = effectiveWindow - view.inFlightCount;
+                for (var next = seg; next < segsInBlock && selected.length < 3 && selected.length < free; next++) {
+                  if ((view.blockBitmap >> next) & 1 == 0 && !view.isSegmentInFlight(next)) {
+                    selected.add(next);
+                  }
+                }
+                await _sendSegmentBatch(package, blockStart, selected, view, (segment) {
+                  final offset = blockStart + segment * OtaBleCodec.dataSegmentSize;
+                  final length = _segmentLength(package, blockStart, segment);
+                  probeOffsets?.add(offset);
+                  sentBytes += length;
+                  stats?.recordSegmentSendEnd(offsetBytes: offset, lengthBytes: length);
+                });
+                onSent?.call(sentBytes, dataLimit);
+                seg = selected.last;
+                continue;
+              }
               final seq = _nextSeq();
               view.trackSend(seq, seg);
               await _sendSegment(package, blockStart, seg, seq);
@@ -765,6 +790,41 @@ class OtaBleTransport {
   }
 
   /// 发送一个 DATA 段（首发与重发共用；重发复用原 seq）。
+  Future<void> _sendSegmentBatch(Uint8List package, int blockStart,
+      List<int> segments, _TransferAckView view, void Function(int) completed) async {
+    final bytes = BytesBuilder(copy: false);
+    final ends = <int>[];
+    final sequences = <int>[];
+    for (final segment in segments) {
+      final offset = blockStart + segment * OtaBleCodec.dataSegmentSize;
+      final seq = _nextSeq();
+      sequences.add(seq);
+      bytes.add(OtaBleCodec.encodeCommand(
+        cmd: OtaBleCodec.cmdData, session: _session, seq: seq,
+        payload: OtaBleCodec.encodeDataPayload(offset,
+            package.sublist(offset, offset + _segmentLength(package, blockStart, segment))),
+      ));
+      ends.add(bytes.length);
+    }
+    var registered = 0;
+    var finished = 0;
+    await _writeFrameChecked(bytes.takeBytes(), allowCancelled: false,
+      frameEnds: ends,
+      onChunkStarting: (end) {
+        // A reserved frame is not ACK-eligible until its final bytes are dispatched.
+        while (registered < ends.length && ends[registered] <= end) {
+          view.trackSend(sequences[registered], segments[registered]);
+          registered++;
+        }
+      },
+      onChunkCompleted: (end) {
+        while (finished < ends.length && ends[finished] <= end) {
+          completed(segments[finished++]);
+        }
+      },
+    );
+  }
+
   Future<void> _sendSegment(
       Uint8List package, int blockStart, int seg, int seq) async {
     final segOffset = blockStart + seg * OtaBleCodec.dataSegmentSize;
@@ -1444,6 +1504,9 @@ class OtaBleTransport {
     Uint8List frame, {
     required bool allowCancelled,
     int? resyncProbeSeq,
+    List<int>? frameEnds,
+    void Function(int)? onChunkStarting,
+    void Function(int)? onChunkCompleted,
   }) {
     if (_writeChannelPoisoned && resyncProbeSeq == null) {
       throw const OtaTransportException(
@@ -1455,6 +1518,9 @@ class OtaBleTransport {
           frame,
           allowCancelled: allowCancelled,
           resyncProbeSeq: resyncProbeSeq,
+          frameEnds: frameEnds,
+          onChunkStarting: onChunkStarting,
+          onChunkCompleted: onChunkCompleted,
         ));
     _writeSerial = task.catchError((_) {});
     return task;
@@ -1477,6 +1543,9 @@ class OtaBleTransport {
     Uint8List frame, {
     required bool allowCancelled,
     int? resyncProbeSeq,
+    List<int>? frameEnds,
+    void Function(int)? onChunkStarting,
+    void Function(int)? onChunkCompleted,
   }) async {
     // 排队期间通道可能已被前序帧废弃（RC3-05⑤）：[_writeFrameChecked] 只在
     // 入队时刻检查，而取消路径的 ABORT 常常在前序 DATA 写超时**之前**就已
@@ -1515,7 +1584,9 @@ class OtaBleTransport {
     var dispatchedAny = false;
     var frameComplete = false;
     try {
-      for (var offset = 0; offset < frame.length; offset += chunkSize) {
+      for (var offset = 0; offset < frame.length;) {
+        final stoppingBatch = frameEnds != null && (_cancelled || _disposed);
+        if (stoppingBatch && frameEnds.contains(offset)) break;
         // 逐片重算预算（RC3-07）：帧外一次计算会让 142B DATA 帧在
         // MTU=23 下的 8 个分片各按 10s 上限（均未单片超时）累计 72s，
         // 绕过 30s 总预算。每个分片以当次剩余预算封顶，片间预算耗尽
@@ -1525,7 +1596,11 @@ class OtaBleTransport {
         }
         final perChunkTimeout =
             allowCancelled ? writeTimeout : _capByBudget(writeTimeout);
-        final end = (offset + chunkSize).clamp(0, frame.length);
+        var end = (offset + chunkSize).clamp(0, frame.length);
+        if (stoppingBatch) {
+          final boundary = frameEnds.firstWhere((boundary) => boundary > offset);
+          if (boundary < end) end = boundary;
+        }
         // 迟到物理写隔离（RC3-05⑤）：Future.timeout 不取消底层 writeChunk——
         // 直接上抛会让串行队列（_writeSerial）立即放行下一帧（含取消路径的
         // ABORT），迟到分片在 ABORT 之后落地，MCU 收到交错的半帧流。超时后
@@ -1545,6 +1620,7 @@ class OtaBleTransport {
         // 取消路径在 transfer 退出后预算已解除（[_noProgressClock] 置空），
         // 宽限仍取 2×writeTimeout——该路径的终止上界是
         // writeTimeout + 2×writeTimeout，以单次写超时为唯一依据。
+        onChunkStarting?.call(end);
         final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
         _trackOutstandingWrite(pendingWrite);
         dispatchedAny = true;
@@ -1562,6 +1638,8 @@ class OtaBleTransport {
               'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
               code: 'WRITE_TIMEOUT');
         }
+        onChunkCompleted?.call(end);
+        offset = end;
       }
       frameComplete = true;
     } catch (_) {
