@@ -241,6 +241,25 @@ class OtaLinkStats {
   // ---- 传输阶段（BEGIN 首帧写 → END ACK 到达）----
 
   int? _transferStartUs;
+  int _dataBatchFrames = 1;
+  int _batchChunks = 0;
+  int _batchBytes = 0;
+
+  void configureDataBatch(int frames) {
+    if ((frames != 1 && frames != 3) || _transferStartUs != null) {
+      throw StateError('invalid-data-batch-observation-binding');
+    }
+    _dataBatchFrames = frames;
+  }
+
+  void recordDataBatchChunk({required int bytes, required int completedFrames}) {
+    final now = nowUs();
+    final extra = 'bytes=$bytes frames=$completedFrames';
+    if (!_startObservation('batch_chunk', now, extra: extra)) return;
+    _batchChunks++;
+    _batchBytes += bytes;
+    _emitSample('batch_chunk', now, extra: extra);
+  }
   int? _endAckArrivalUs;
   String? _transferOutcome;
 
@@ -653,6 +672,10 @@ class OtaLinkStats {
         'totalUs': _getInfoDurationsUs.fold(0, (a, b) => a + b),
       },
       'transfer': {
+        if (_dataBatchFrames != 1) 'dataBatch': {
+          'schema': 1, 'maxFrames': _dataBatchFrames,
+          'chunks': _batchChunks, 'bytes': _batchBytes,
+        },
         'startUs': _transferStartUs,
         'endAckUs': _endAckArrivalUs,
         'elapsedUs': (_transferStartUs != null && _endAckArrivalUs != null)

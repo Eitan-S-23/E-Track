@@ -30,6 +30,7 @@ class OtaExperimentConfig {
     required this.rebootProbeInterval,
     required this.pauseScanDuringOta,
     required this.androidHighPriority,
+    required this.dataBatchFrames,
   });
 
   static const maxConfigBytes = 8192;
@@ -48,6 +49,7 @@ class OtaExperimentConfig {
   static const _v4Fields = {
     ..._v3Fields, 'pauseScanDuringOta', 'androidHighPriority',
   };
+  static const _v5Fields = {..._v4Fields, 'dataBatchFrames'};
 
   final int schema;
   final String runId;
@@ -69,6 +71,7 @@ class OtaExperimentConfig {
   final Duration? rebootProbeInterval;
   final bool pauseScanDuringOta;
   final bool androidHighPriority;
+  final int dataBatchFrames;
   bool get isPrefixProbe => prefixBytes > 0;
 
   factory OtaExperimentConfig.parse(String text, {required String expectedTarget}) {
@@ -78,11 +81,11 @@ class OtaExperimentConfig {
     }
     final decoded = jsonDecode(text);
     if (decoded is! Map<String, dynamic> || decoded['schema'] is! int ||
-        !const {1, 2, 3, 4}.contains(decoded['schema'])) {
+        !const {1, 2, 3, 4, 5}.contains(decoded['schema'])) {
       throw const FormatException('experiment-config-schema');
     }
     final schema = decoded['schema'] as int;
-    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : _v4Fields;
+    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : schema == 4 ? _v4Fields : _v5Fields;
     if (decoded.length != fields.length || !fields.containsAll(decoded.keys)) {
       throw const FormatException('experiment-config-schema');
     }
@@ -139,8 +142,13 @@ class OtaExperimentConfig {
     if (schema >= 3 && decoded['transferMode'] != 'full') {
       throw const FormatException('experiment-config-reboot-full-only');
     }
-    if (schema == 4 && (decoded['pauseScanDuringOta'] is! bool || decoded['androidHighPriority'] is! bool)) {
+    if (schema >= 4 && (decoded['pauseScanDuringOta'] is! bool || decoded['androidHighPriority'] is! bool)) {
       throw const FormatException('experiment-config-radio-policy');
+    }
+    final batchFrames = schema >= 5 ? integer('dataBatchFrames', 1, 3) : 1;
+    if (batchFrames == 2 || (batchFrames == 3 &&
+        (decoded['reuseGatt'] != true || decoded['withoutResponse'] != true))) {
+      throw const FormatException('experiment-config-data-batch');
     }
     return OtaExperimentConfig._(
       schema: schema,
@@ -161,8 +169,9 @@ class OtaExperimentConfig {
           ? Duration(milliseconds: integer('rebootInfoTimeoutMs', 500, 10000)) : null,
       rebootProbeInterval: schema >= 3
           ? Duration(milliseconds: integer('rebootProbeIntervalMs', 100, 3000)) : null,
-      pauseScanDuringOta: schema == 4 && decoded['pauseScanDuringOta'] == true,
-      androidHighPriority: schema == 4 && decoded['androidHighPriority'] == true,
+      pauseScanDuringOta: schema >= 4 && decoded['pauseScanDuringOta'] == true,
+      androidHighPriority: schema >= 4 && decoded['androidHighPriority'] == true,
+      dataBatchFrames: batchFrames,
     );
   }
 
@@ -205,10 +214,11 @@ class OtaExperimentConfig {
       'rebootInfoTimeoutMs': rebootInfoTimeout!.inMilliseconds,
       'rebootProbeIntervalMs': rebootProbeInterval!.inMilliseconds,
     },
-    if (schema == 4) ...{
+    if (schema >= 4) ...{
       'pauseScanDuringOta': pauseScanDuringOta,
       'androidHighPriority': androidHighPriority,
     },
+    if (schema >= 5) 'dataBatchFrames': dataBatchFrames,
   })}';
 }
 

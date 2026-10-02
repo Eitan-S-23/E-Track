@@ -91,6 +91,37 @@ void main() {
     expect(parse(reconnectProfile()).androidHighPriority, isFalse);
   });
 
+  test('schema 5 explicitly selects batching without changing old profiles', () {
+    final old = {...reconnectProfile(), 'schema': 4,
+      'pauseScanDuringOta': true, 'androidHighPriority': true};
+    expect(parse(old).dataBatchFrames, 1);
+    expect(parse(profile()).dataBatchFrames, 1);
+    for (final frames in [1, 3]) {
+      final config = parse({...old, 'schema': 5, 'dataBatchFrames': frames});
+      expect(config.dataBatchFrames, frames);
+      expect(config.pauseScanDuringOta, isTrue);
+      expect(config.androidHighPriority, isTrue);
+      final observation = jsonDecode(config.observationLine.substring('OTA_EXPERIMENT '.length));
+      expect(observation['dataBatchFrames'], frames);
+      expect(observation['schema'], 5);
+    }
+  });
+
+  test('schema 5 rejects ambiguous batch profiles and wrong write policy', () {
+    final good = {...reconnectProfile(), 'schema': 5,
+      'pauseScanDuringOta': false, 'androidHighPriority': false, 'dataBatchFrames': 3};
+    for (final wrong in [null, true, 0, 2, 4, 3.0, '3']) {
+      expect(() => parse({...good, 'dataBatchFrames': wrong}), throwsFormatException);
+    }
+    for (final wrong in [
+      {...good}..remove('dataBatchFrames'), {...good, 'schema': 4},
+      {...good, 'reuseGatt': false}, {...good, 'withoutResponse': false},
+      {...good, 'transferMode': 'prefix', 'prefixBytes': 32768},
+    ]) {
+      expect(() => parse(wrong), throwsFormatException);
+    }
+  });
+
   test('schema 4 rejects missing or nonboolean radio policy fields', () {
     final good = {...reconnectProfile(), 'schema': 4,
       'pauseScanDuringOta': true, 'androidHighPriority': false};

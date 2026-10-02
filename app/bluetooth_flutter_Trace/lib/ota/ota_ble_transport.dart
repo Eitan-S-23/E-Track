@@ -64,6 +64,7 @@ class OtaBleTransport {
     if (dataBatchFrames != 1 && dataBatchFrames != 3) {
       throw ArgumentError.value(dataBatchFrames, 'dataBatchFrames', 'expected 1 or 3');
     }
+    if (dataBatchFrames != 1) stats?.configureDataBatch(dataBatchFrames);
     // 通知流订阅必须在构造内同步建立：async* 生成器的初始运行被延迟到
     // 微任务，此前「写入回调里同步回投的 ACK」在 broadcast 通知源上
     // 因无监听者被整帧丢弃（真实 BLE 通知流即 broadcast 语义）。显式
@@ -814,6 +815,7 @@ class OtaBleTransport {
       await _waitIfPaused();
       _checkUsable();
       final base = finished == 0 ? 0 : ends[finished - 1];
+      var previousChunkEnd = 0;
       await _writeFrameChecked(Uint8List.sublistView(stream, base), allowCancelled: false,
         frameEnds: ends.skip(finished).map((end) => end - base).toList(),
         onChunkStarting: (end) {
@@ -824,6 +826,9 @@ class OtaBleTransport {
           }
         },
         onChunkCompleted: (end) {
+          final completing = ends.skip(finished).takeWhile((boundary) => boundary <= base + end).length;
+          stats?.recordDataBatchChunk(bytes: end - previousChunkEnd, completedFrames: completing);
+          previousChunkEnd = end;
           while (finished < ends.length && ends[finished] <= base + end) {
             completed(segments[finished++]);
           }

@@ -2168,7 +2168,12 @@ class OtaService extends GetxController {
         writeWithResponse: writeWithResponse,
         stats: stats,
       );
-      final transport = OtaBleTransport(channel: channel, stats: stats);
+      final batchFrames = OtaExperimentRuntime.current.requireForOta()?.dataBatchFrames ?? 1;
+      if (batchFrames == 3 && writeWithResponse) {
+        throw StateError('OTA_BATCH_REQUIRES_WITHOUT_RESPONSE');
+      }
+      final transport = OtaBleTransport(channel: channel, stats: stats,
+          dataBatchFrames: batchFrames);
       if (!linkCurrent()) {
         await transport.dispose();
         return null;

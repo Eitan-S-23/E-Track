@@ -259,6 +259,7 @@ void main() {
     int receiverWindowSegments = 32,
     Uint8List? package,
     String address = 'AA:BB',
+    String writeMode = 'with',
   }) async {
     final ble = _UpgradeFakeBle(
       preRebootPayload: Uint8List.fromList(preRebootPayload)
@@ -266,7 +267,7 @@ void main() {
       postRebootPayload:
           rebootPayload.isEmpty ? postRebootPayload : rebootPayload,
       rebootDelayProbes: rebootDelayProbes,
-    );
+    )..defaultWriteMode = writeMode;
     final service = makeService(
       ble: ble,
       firmwareDir: tempDir,
@@ -302,10 +303,10 @@ void main() {
   const probeAddress = 'AA:BB:CC:DD:EE:FF';
   Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
       int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500,
-      bool? pauseScan, bool highPriority = false}) async {
+      bool? pauseScan, bool highPriority = false, int? batchFrames}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
+      'schema': batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
       'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
@@ -324,6 +325,7 @@ void main() {
         'pauseScanDuringOta': pauseScan,
         'androidHighPriority': highPriority,
       },
+      if (batchFrames != null) 'dataBatchFrames': batchFrames,
     }));
     expect(runtime.ready, isTrue);
     return runtime;
@@ -533,6 +535,63 @@ void main() {
       });
     }
   }
+
+  for (final frames in [1, 3]) {
+    test('schema 5 batch $frames traverses service, recorder and exported snapshot', () async {
+      final bytes = assetBytes(4096);
+      final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
+          pauseScan: true, highPriority: true, batchFrames: frames);
+      final tempDir = tempFirmwareDir();
+      final diagnostics = OtaDiagnostics();
+      addTearDown(diagnostics.close);
+      await diagnostics.initialize(enabled: true, target: probeAddress,
+          sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => tempDir);
+      await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
+        final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [],
+            package: bytes, address: probeAddress, writeMode: 'without');
+        expect(await Get.find<OtaService>().startOtaUpgrade(probeAddress), isTrue);
+        expect(ble._stagedBytes, bytes);
+        final file = diagnostics.status.value.lastExport!;
+        final rows = (await file.readAsLines()).map(jsonDecode).toList();
+        final messages = rows.where((r) => r['kind'] == 'line').map((r) => r['message'] as String).toList();
+        final summaries = messages.where((line) => line.startsWith('OTA_LINK_STATS '))
+            .map((line) => jsonDecode(line.substring('OTA_LINK_STATS '.length)))
+            .where((value) => value['label'] == 'upgrade').toList();
+        expect(summaries, hasLength(1));
+        final summary = summaries.single['transfer'];
+        expect(summary['segmentsUnique'], 32);
+        if (frames == 3) {
+          expect(summary['dataBatch'], {'schema': 1, 'maxFrames': 3, 'chunks': 22, 'bytes': 4544});
+          expect(messages.where((line) => line.contains('kind=batch_chunk')), hasLength(22));
+        } else {
+          expect(summary.containsKey('dataBatch'), isFalse);
+          expect(messages.where((line) => line.contains('kind=batch_chunk')), isEmpty);
+        }
+        expect(rows.last['healthy'], isTrue);
+        expect(rows.last['lost'], 0);
+        expect(rows.last['outcome'], 'completed');
+        final checkout = Directory.current.parent.parent;
+        final imported = await Process.run(Platform.isWindows ? 'python' : 'python3',
+            ['-I', '-S', '-B', '-X', 'utf8', '${checkout.path}/Tools/ota/p3-4-link-stats/observation_capture.py',
+              'inspect', '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
+              '--expect-target', probeAddress], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
+        expect(imported.exitCode, 0, reason: '${imported.stderr}');
+      }));
+    });
+  }
+
+  test('schema 5 refuses actual with-response binding before BEGIN', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
+        pauseScan: false, batchFrames: 3);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress, writeMode: 'without');
+      ble.defaultWriteMode = 'with';
+      expect(await Get.find<OtaService>().startOtaUpgrade(probeAddress), isFalse);
+      expect(ble.beginCalls, 0);
+    });
+  });
 
   test('failed radio acquisition cannot send BEGIN and still releases', () async {
     final bytes = assetBytes();
@@ -3223,6 +3282,7 @@ void _writeU32(Uint8List p, int at, int v) {
 /// - END OK 后（MCU 已切新固件）：前 [rebootDelayProbes] 次探测仍报
 ///   旧身份（重启未完成的快速重连窗口），之后报 postRebootPayload。
 class _UpgradeFakeBle extends BluetoothService {
+  String defaultWriteMode = 'with';
   final radioCalls = <String>[];
   bool failRadioPause = false;
   Completer<void>? radioPauseGate;
@@ -3562,7 +3622,7 @@ class _UpgradeFakeBle extends BluetoothService {
       'serviceId': 'fff0',
       'writeCharId': 'fff2',
       'notifyCharId': 'fff1',
-      'writeMode': 'with',
+      'writeMode': defaultWriteMode,
     });
   }
 
