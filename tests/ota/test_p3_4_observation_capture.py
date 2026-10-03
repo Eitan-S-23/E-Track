@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -99,6 +100,43 @@ class CaptureTests(unittest.TestCase):
         self.assertEqual(result["independentAcceptance"], "NOT_RUN")
         self.assertEqual(result["input"], INPUT)
         self.assertIn("MONO_REBOOT_VERIFIED", log)
+
+    def test_app_and_host_prefix_registries_match(self):
+        source = (ROOT / "app/bluetooth_flutter_Trace/lib/ota/ota_observation_log.dart").read_text(encoding="utf-8")
+        block = re.search(r"static const prefixes = \[(.*?)\];", source, re.S)
+        self.assertIsNotNone(block)
+        prefixes = re.findall(r"'([^']+)'", block.group(1))
+        self.assertEqual(len(prefixes), len(set(prefixes)))
+        self.assertEqual(tuple(prefixes), m.PREFIXES)
+
+    def test_phy_records_preserve_completed_and_failed_envelopes(self):
+        messages = ("OTA_PHY " + json.dumps(dict(schema=1, status="observed", txPhy=2, rxPhy=2)),
+                    "OTA_PHY_CANCEL nativeAcknowledged=false")
+        for outcome in ("completed", "not-completed"):
+            items = rows(outcome=outcome)
+            items[-1:-1] = [dict(kind="line", message=line) for line in messages]
+            items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+            result, log = self.verify(encoded(items))
+            self.assertEqual(result["outcome"], outcome)
+            self.assertFalse(result["eligibleForThreshold"])
+            for line in messages:
+                self.assertIn(line, log)
+
+    def test_phy_registration_does_not_weaken_line_or_health_guards(self):
+        bad = ["OTA_PHY_UNKNOWN status=observed", "OTA_PHY_CANCELLED nativeAcknowledged=false"]
+        for prefix in ("OTA_PHY ", "OTA_PHY_CANCEL "):
+            bad += [prefix + value for value in ("token=fixture", "https://example.invalid/",
+                "authorization: fixture", "ok\nok", "ok\r", "ok\0", "x" * 16384)]
+        for message in bad:
+            items = rows()
+            items[1]["message"] = message
+            with self.subTest(message=message[:80]), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items))
+        items = rows()
+        items[1]["message"] = "OTA_PHY_CANCEL nativeAcknowledged=false"
+        for change in (dict(lost=1), dict(error="invalid-record"), dict(healthy=False)):
+            with self.subTest(change=change), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items, change))
 
     def test_prefix_verdict_is_a_diagnostic_not_an_upgrade_or_threshold_pass(self):
         result, _ = self.verify(encoded(prefix_rows()), require_prefix_probe=True)

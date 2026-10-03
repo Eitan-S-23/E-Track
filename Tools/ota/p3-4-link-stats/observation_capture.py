@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[3]
 MAX_BYTES = 64 * 1024 * 1024
 PREFIXES = ("OTA_LINK_SAMPLE ", "OTA_LINK_STATS ", "OTA_LINK_RETIRE ",
             "OTA_LINK_LATE ", "OTA_MONO ", "OTA_IDENTITY ", "OTA_EXPERIMENT ",
-            "OTA_PREFIX_PROBE ", "OTA_RADIO ")
+            "OTA_PREFIX_PROBE ", "OTA_RADIO ", "OTA_PHY ", "OTA_PHY_CANCEL ")
 INPUT_FIELDS = {"packageSha256", "packageBytes", "currentVersionCode",
                 "currentImageSha256", "targetVersionCode", "targetImageSha256",
                 "deviceAddress", "appLifecycle"}

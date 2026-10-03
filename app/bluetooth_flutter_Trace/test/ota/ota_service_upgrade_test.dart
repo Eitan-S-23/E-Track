@@ -339,51 +339,99 @@ void main() {
     return runtime;
   }
 
-  for (final scenario in ['off', 'observe', 'prefer2m', 'not-2m', 'cancel', 'close']) {
+  for (final scenario in ['off', 'observe', 'prefer2m', 'not-2m',
+      'cancel', 'close', 'cancel-nack', 'close-nack']) {
     test('PHY $scenario gates BEGIN without changing durable or identity semantics', () async {
       final bytes = assetBytes();
+      final cancelling = scenario.startsWith('cancel');
+      final closing = scenario.startsWith('close');
+      final nack = scenario.endsWith('-nack');
+      final permitted = const {'off', 'observe', 'prefer2m'}.contains(scenario);
       final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 2000,
           pauseScan: true, highPriority: true, batchFrames: 12, reuseInfoLink: true,
-          phyPolicy: const {'not-2m', 'cancel', 'close'}.contains(scenario) ? 'prefer2m' : scenario);
+          phyPolicy: permitted ? scenario : 'prefer2m');
       final pending = Completer<Object?>();
       final called = Completer<Map<String, Object?>>();
+      final cancelled = <Map<String, Object?>>[];
       final client = OtaPhyClient(isAndroid: true, invoke: (method, request) {
-        if (method == 'p34CancelPhy') return Future<Object?>.value(true);
+        if (method == 'p34CancelPhy') {
+          cancelled.add(request);
+          return Future<Object?>.value(!nack);
+        }
         called.complete(request);
         return pending.future;
       });
-      await OtaExperimentRuntime.withInstance(runtime, () async {
-        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+      final tempDir = tempFirmwareDir();
+      final diagnostics = OtaDiagnostics();
+      addTearDown(diagnostics.close);
+      const sentinel = 'OTAOBS0123456789abcdef01234567';
+      await diagnostics.initialize(enabled: true, target: probeAddress,
+          sentinel: sentinel, directoryProvider: () async => tempDir);
+      await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
+        final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [],
             address: probeAddress, package: bytes, phyClient: client, writeMode: 'without');
         final service = Get.find<OtaService>();
         final future = service.startOtaUpgrade(probeAddress);
         if (scenario == 'off') {
           expect(await future, isTrue);
           expect(called.isCompleted, isFalse);
-          return;
+        } else {
+          final request = await called.future.timeout(const Duration(seconds: 2));
+          expect(ble.beginCalls, 0);
+          expect(ble.dataOffsets, isEmpty);
+          expect(ble.endCalls, 0);
+          final cancellation = cancelling ? service.cancelUpgrade(keepPackage: true) : null;
+          if (closing) service.onClose();
+          pending.complete({
+            ...request, 'schema': 1, 'connectionGeneration': 1, 'elapsedMicros': 3000,
+            'status': 'observed', 'beforeReadStatus': 0, 'beforeTxPhy': 1, 'beforeRxPhy': 1,
+            'txPhy': scenario == 'not-2m' ? 1 : 2, 'rxPhy': 2,
+            'updateStatus': 0, 'readStatus': 0, 'updateTxPhy': 2, 'updateRxPhy': 2,
+          });
+          expect(await future, permitted);
+          if (cancellation != null) await cancellation;
+          expect(cancelled, hasLength(cancelling || closing ? 1 : 0));
+          if (cancelled.isNotEmpty) expect(cancelled.single, request);
         }
-        final request = await called.future.timeout(const Duration(seconds: 2));
-        expect(ble.beginCalls, 0);
-        expect(ble.dataOffsets, isEmpty);
-        expect(ble.endCalls, 0);
-        final cancellation = scenario == 'cancel' ? service.cancelUpgrade(keepPackage: true) : null;
-        if (scenario == 'close') service.onClose();
-        pending.complete({
-          ...request, 'schema': 1, 'connectionGeneration': 1, 'elapsedMicros': 3000,
-          'status': 'observed', 'beforeReadStatus': 0, 'beforeTxPhy': 1, 'beforeRxPhy': 1,
-          'txPhy': scenario == 'not-2m' ? 1 : 2, 'rxPhy': 2,
-          'updateStatus': 0, 'readStatus': 0, 'updateTxPhy': 2, 'updateRxPhy': 2,
-        });
-        final permitted = scenario == 'observe' || scenario == 'prefer2m';
-        expect(await future, permitted);
-        if (cancellation != null) await cancellation;
         if (!permitted) {
           expect(ble.beginCalls, 0);
           expect(ble.dataOffsets, isEmpty);
           expect(ble.endCalls, 0);
         }
         expect(service.isUpgrading, isFalse);
-      });
+        expect(diagnostics.status.value.ready, isTrue);
+        expect(diagnostics.status.value.error, isNull);
+        final file = diagnostics.status.value.lastExport!;
+        final rows = (await file.readAsLines()).map(jsonDecode).toList();
+        final messages = rows.where((row) => row['kind'] == 'line')
+            .map((row) => row['message'] as String).toList();
+        final phyLines = messages.where((line) => line.startsWith('OTA_PHY ')).toList();
+        expect(phyLines, hasLength(scenario == 'off' || cancelling || closing ? 0 : 1));
+        if (phyLines.isNotEmpty) {
+          final observation = jsonDecode(phyLines.single.substring('OTA_PHY '.length));
+          expect(observation['configSha256'], runtime.config!.sourceSha256);
+          expect(observation['policy'], runtime.config!.androidPhyPolicy);
+          expect(observation['remoteId'], probeAddress);
+          expect(observation['txPhy'], scenario == 'not-2m' ? 1 : 2);
+        }
+        expect(messages.where((line) => line == 'OTA_PHY_CANCEL nativeAcknowledged=false'),
+            hasLength(nack ? 1 : 0));
+        expect(rows.last['healthy'], isTrue);
+        expect(rows.last['lost'], 0);
+        expect(rows.last['error'], isNull);
+        expect(rows.last['upgradeStarts'], 1);
+        expect(rows.last['upgradeEnds'], 1);
+        expect(rows.last['outcome'], permitted ? 'completed' : 'not-completed');
+        final checkout = Directory.current.parent.parent;
+        final imported = await Process.run(Platform.isWindows ? 'python' : 'python3',
+          ['-I', '-S', '-B', '-X', 'utf8',
+            '${checkout.path}/Tools/ota/p3-4-link-stats/observation_capture.py',
+            'inspect', '--input', file.path, '--expect-sentinel', sentinel,
+            '--expect-target', probeAddress], workingDirectory: checkout.path,
+        ).timeout(const Duration(seconds: 15));
+        expect(imported.exitCode, 0, reason: '${imported.stderr}');
+        expect(jsonDecode(imported.stdout as String)['eligibleForThreshold'], isFalse);
+      }));
     });
   }
 

@@ -95,6 +95,8 @@ class OtaObservationLog {
     'OTA_EXPERIMENT ',
     'OTA_PREFIX_PROBE ',
     'OTA_RADIO ',
+    'OTA_PHY ',
+    'OTA_PHY_CANCEL ',
   ];
 
   final Directory root;
