@@ -225,6 +225,32 @@ void main() {
     }
   });
 
+  test('schema 9 binds retries without changing schemas 1 through 8', () {
+    final old = {...reconnectProfile(), 'schema': 8,
+      'pauseScanDuringOta': true, 'androidHighPriority': true,
+      'dataBatchFrames': 12, 'reuseRebootInfoLink': true, 'androidPhyPolicy': 'prefer2m'};
+    expect(parse(profile()).rebootInfoMaxAttempts, 3);
+    expect(parse(old).rebootInfoMaxAttempts, 3);
+    expect(parse(old).observationLine, isNot(contains('rebootInfoMaxAttempts')));
+    for (final limit in [1, 3, 6, 12]) {
+      final config = parse({...old, 'schema': 9, 'rebootInfoMaxAttempts': limit});
+      expect(config.rebootInfoMaxAttempts, limit);
+      expect(config.observationLine, contains('"rebootInfoMaxAttempts":$limit'));
+      expect(config.rebootInfoTimeout, const Duration(seconds: 2));
+      expect(config.rebootProbeInterval, const Duration(milliseconds: 500));
+    }
+    for (final wrong in [null, true, 0, 13, 3.0, '3']) {
+      expect(() => parse({...old, 'schema': 9, 'rebootInfoMaxAttempts': wrong}), throwsFormatException);
+    }
+    for (final wrong in [
+      {...old, 'schema': 9}, {...old, 'rebootInfoMaxAttempts': 3},
+      {...old, 'schema': 10, 'rebootInfoMaxAttempts': 3},
+      {...old, 'schema': 9, 'rebootInfoMaxAttempts': 3, 'reuseRebootInfoLink': false},
+    ]) {
+      expect(() => parse(wrong), throwsFormatException);
+    }
+  });
+
   test('schema 3 rejects missing, nonintegral, unbounded and prefix cadence', () {
     for (final value in [
       {...reconnectProfile()}..remove('rebootInfoTimeoutMs'),

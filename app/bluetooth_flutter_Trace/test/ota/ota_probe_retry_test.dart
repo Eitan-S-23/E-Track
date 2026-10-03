@@ -17,7 +17,7 @@ void main() {
     expect(calls, 3);
   });
 
-  for (final limit in [1, 3]) {
+  for (final limit in [1, 3, 12]) {
     test('persistent timeout is bounded to $limit attempts', () async {
       var calls = 0;
       await expectLater(retryInfoOnCurrentLink<int>(
@@ -60,6 +60,7 @@ void main() {
       query: () => reply.future,
       isCurrent: () => current,
       interval: Duration.zero,
+      maxAttempts: 12,
     );
     current = false;
     reply.complete(42);
@@ -92,13 +93,14 @@ void main() {
       },
       isCurrent: () => current,
       interval: const Duration(milliseconds: 20),
+      maxAttempts: 12,
     );
     expect(await result, isNull);
     expect(calls, 1);
   });
 
   test('rejects unbounded policy before calling the transport', () async {
-    for (final limit in [0, 4]) {
+    for (final limit in [0, 13]) {
       await expectLater(retryInfoOnCurrentLink<int>(
         query: () async => 42,
         isCurrent: () => true,
@@ -106,5 +108,16 @@ void main() {
         maxAttempts: limit,
       ), throwsRangeError);
     }
+  });
+
+  test('expanded diagnostic budget reaches a later response on one binding', () async {
+    var calls = 0;
+    expect(await retryInfoOnCurrentLink<int>(
+      query: () async { if (++calls < 12) throw timeout; return 42; },
+      isCurrent: () => true,
+      interval: Duration.zero,
+      maxAttempts: 12,
+    ), 42);
+    expect(calls, 12);
   });
 }

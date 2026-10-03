@@ -1163,6 +1163,7 @@ class OtaService extends GetxController {
           infoTimeout: experiment?.rebootInfoTimeout,
           probeInterval: experiment?.rebootProbeInterval,
           reuseInfoLink: experiment?.reuseRebootInfoLink ?? false,
+          infoMaxAttempts: experiment?.rebootInfoMaxAttempts ?? defaultRebootInfoAttempts,
         );
         if (generation != _cancelGeneration) {
           return fail('cancelled', 'generation-changed');
@@ -1851,6 +1852,7 @@ class OtaService extends GetxController {
     Duration? infoTimeout,
     Duration? probeInterval,
     bool reuseInfoLink = false,
+    int infoMaxAttempts = defaultRebootInfoAttempts,
   }) async {
     // Diagnostic cadence does not alter the total window or recovery budget.
     final interval = probeInterval ?? _rebootProbeInterval;
@@ -1919,6 +1921,7 @@ class OtaService extends GetxController {
           stats: attemptStats,
           infoTimeout: infoTimeout ?? const Duration(seconds: 10),
           reuseInfoLink: reuseInfoLink,
+          infoMaxAttempts: infoMaxAttempts,
           infoRetryInterval: interval,
         ).timeout(
           roundCap < const Duration(seconds: 1)
@@ -2022,6 +2025,7 @@ class OtaService extends GetxController {
     Duration infoTimeout = const Duration(seconds: 10),
     bool reuseInfoLink = false,
     Duration infoRetryInterval = const Duration(milliseconds: 500),
+    int infoMaxAttempts = defaultRebootInfoAttempts,
   }) async {
     OtaBleTransport? probe;
     int? connectedGeneration;
@@ -2064,6 +2068,7 @@ class OtaService extends GetxController {
                     query: () => boundProbe.getDeviceInfo(timeout: infoTimeout),
                     isCurrent: current,
                     interval: infoRetryInterval,
+                    maxAttempts: infoMaxAttempts,
                   )
                 : await boundProbe.getDeviceInfo(timeout: infoTimeout);
             if (!current() || target == null) return null;

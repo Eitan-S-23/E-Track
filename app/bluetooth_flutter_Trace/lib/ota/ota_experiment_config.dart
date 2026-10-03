@@ -7,6 +7,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'ota_probe_retry.dart';
+
 /// A requested experiment profile, never evidence of the MCU's actual baud.
 class OtaExperimentConfig {
   const OtaExperimentConfig._({
@@ -33,6 +35,7 @@ class OtaExperimentConfig {
     required this.dataBatchFrames,
     required this.reuseRebootInfoLink,
     required this.androidPhyPolicy,
+    required this.rebootInfoMaxAttempts,
   });
 
   static const maxConfigBytes = 8192;
@@ -54,6 +57,7 @@ class OtaExperimentConfig {
   static const _v5Fields = {..._v4Fields, 'dataBatchFrames'};
   static const _v6Fields = {..._v5Fields, 'reuseRebootInfoLink'};
   static const _v8Fields = {..._v6Fields, 'androidPhyPolicy'};
+  static const _v9Fields = {..._v8Fields, 'rebootInfoMaxAttempts'};
 
   final int schema;
   final String runId;
@@ -78,6 +82,7 @@ class OtaExperimentConfig {
   final int dataBatchFrames;
   final bool reuseRebootInfoLink;
   final String androidPhyPolicy;
+  final int rebootInfoMaxAttempts;
   bool get isPrefixProbe => prefixBytes > 0;
 
   factory OtaExperimentConfig.parse(String text, {required String expectedTarget}) {
@@ -87,11 +92,11 @@ class OtaExperimentConfig {
     }
     final decoded = jsonDecode(text);
     if (decoded is! Map<String, dynamic> || decoded['schema'] is! int ||
-        !const {1, 2, 3, 4, 5, 6, 7, 8}.contains(decoded['schema'])) {
+        !const {1, 2, 3, 4, 5, 6, 7, 8, 9}.contains(decoded['schema'])) {
       throw const FormatException('experiment-config-schema');
     }
     final schema = decoded['schema'] as int;
-    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : schema == 4 ? _v4Fields : schema == 5 ? _v5Fields : schema == 8 ? _v8Fields : _v6Fields;
+    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : schema == 4 ? _v4Fields : schema == 5 ? _v5Fields : schema == 9 ? _v9Fields : schema == 8 ? _v8Fields : _v6Fields;
     if (decoded.length != fields.length || !fields.containsAll(decoded.keys)) {
       throw const FormatException('experiment-config-schema');
     }
@@ -159,6 +164,9 @@ class OtaExperimentConfig {
     if (schema >= 6 && decoded['reuseRebootInfoLink'] is! bool) {
       throw const FormatException('experiment-config-reboot-link');
     }
+    if (schema >= 9 && decoded['reuseRebootInfoLink'] != true) {
+      throw const FormatException('experiment-config-retry-requires-link');
+    }
     if (!const {1, 3, 12}.contains(batchFrames) || (batchFrames > 1 &&
         (decoded['reuseGatt'] != true || decoded['withoutResponse'] != true))) {
       throw const FormatException('experiment-config-data-batch');
@@ -187,6 +195,9 @@ class OtaExperimentConfig {
       dataBatchFrames: batchFrames,
       reuseRebootInfoLink: schema >= 6 && decoded['reuseRebootInfoLink'] == true,
       androidPhyPolicy: phyPolicy as String,
+      rebootInfoMaxAttempts: schema >= 9
+          ? integer('rebootInfoMaxAttempts', 1, maxRebootInfoAttempts)
+          : defaultRebootInfoAttempts,
     );
   }
 
@@ -236,6 +247,7 @@ class OtaExperimentConfig {
     if (schema >= 5) 'dataBatchFrames': dataBatchFrames,
     if (schema >= 6) 'reuseRebootInfoLink': reuseRebootInfoLink,
     if (schema >= 8) 'androidPhyPolicy': androidPhyPolicy,
+    if (schema >= 9) 'rebootInfoMaxAttempts': rebootInfoMaxAttempts,
   })}';
 }
 

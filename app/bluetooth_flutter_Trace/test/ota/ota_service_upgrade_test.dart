@@ -309,10 +309,10 @@ void main() {
   Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
       int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500,
       bool? pauseScan, bool highPriority = false, int? batchFrames, bool? reuseInfoLink,
-      String? phyPolicy}) async {
+      String? phyPolicy, int? infoMaxAttempts}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': phyPolicy != null ? 8 : batchFrames == 12 ? 7 : reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
+      'schema': infoMaxAttempts != null ? 9 : phyPolicy != null ? 8 : batchFrames == 12 ? 7 : reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
       'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
@@ -334,6 +334,7 @@ void main() {
       if (batchFrames != null) 'dataBatchFrames': batchFrames,
       if (reuseInfoLink != null || batchFrames == 12) 'reuseRebootInfoLink': reuseInfoLink ?? false,
       if (phyPolicy != null) 'androidPhyPolicy': phyPolicy,
+      if (infoMaxAttempts != null) 'rebootInfoMaxAttempts': infoMaxAttempts,
     }));
     expect(runtime.ready, isTrue);
     return runtime;
@@ -608,6 +609,53 @@ void main() {
       });
     });
   }
+
+  for (final limit in [3, 6]) {
+    test('schema 9 uses the requested same-link retry budget $limit', () async {
+      final bytes = assetBytes();
+      final runtime = await probeRuntime(bytes, prefix: false,
+          rebootInfoTimeoutMs: 500, rebootProbeIntervalMs: 100,
+          pauseScan: false, batchFrames: 1, reuseInfoLink: true,
+          phyPolicy: 'off', infoMaxAttempts: limit);
+      await OtaExperimentRuntime.withInstance(runtime, () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+            package: bytes, address: probeAddress, rebootWindow: const Duration(seconds: 6));
+        ble.silentRebootProbes = 4;
+        final service = Get.find<OtaService>();
+        expect(await service.startOtaUpgrade(probeAddress), isTrue);
+        expect(ble.probeCount, 5);
+        expect(ble.rebootDiscoveryTimeouts.length, limit == 3 ? 2 : 1);
+        expect(ble.endCalls, 1);
+        expect(ble.abortCalls, 0);
+        ble.releaseSilentInfo();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(service.phase, OtaPhase.completed);
+      });
+    });
+  }
+
+  test('schema 9 cannot extend the outer deadline or accept a late identity', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, prefix: false,
+        rebootInfoTimeoutMs: 500, rebootProbeIntervalMs: 100,
+        pauseScan: false, batchFrames: 1, reuseInfoLink: true,
+        phyPolicy: 'off', infoMaxAttempts: 12);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress,
+          rebootWindow: const Duration(milliseconds: 300));
+      ble.silentRebootProbes = 100;
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade(probeAddress), isFalse);
+      expect(service.terminalState?.code, 'REBOOT_RECONNECT_FAILED');
+      final calls = ble.probeCount;
+      ble.releaseSilentInfo();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(ble.probeCount, calls);
+      expect(service.phase, OtaPhase.failed);
+      expect(ble.endCalls, 1);
+    });
+  });
 
   for (final cadence in [(info: 500, interval: 250), (info: 1000, interval: 500)]) {
     test('schema 3 retries silent INFO with ${cadence.info}/${cadence.interval} cadence', () async {

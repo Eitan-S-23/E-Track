@@ -1,14 +1,17 @@
 import 'ota_ble_transport.dart';
 
+const defaultRebootInfoAttempts = 3;
+const maxRebootInfoAttempts = 12;
+
 /// Reuse only a still-owned probe binding after a completed INFO timeout.
 /// The caller retains its outer attempt deadline and identity checks.
 Future<T?> retryInfoOnCurrentLink<T>({
   required Future<T> Function() query,
   required bool Function() isCurrent,
   required Duration interval,
-  int maxAttempts = 3,
+  int maxAttempts = defaultRebootInfoAttempts,
 }) async {
-  RangeError.checkValueInInterval(maxAttempts, 1, 3, 'maxAttempts');
+  RangeError.checkValueInInterval(maxAttempts, 1, maxRebootInfoAttempts, 'maxAttempts');
   if (interval < Duration.zero) throw ArgumentError.value(interval, 'interval');
   for (var attempt = 0; attempt < maxAttempts; attempt++) {
     if (!isCurrent()) return null;
