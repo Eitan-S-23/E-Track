@@ -309,6 +309,12 @@ class OtaService extends GetxController {
 
   @override
   void onClose() {
+    if (_phyClient.isActive) {
+      _cancelGeneration++;
+      unawaited(_phyClient.cancelActive().then((acknowledged) {
+        if (!acknowledged) emitOtaObservation('OTA_PHY_CANCEL nativeAcknowledged=false');
+      }));
+    }
     _transport?.dispose();
     _dio.close(force: true);
     _downloadDio.close(force: true);

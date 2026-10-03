@@ -339,12 +339,12 @@ void main() {
     return runtime;
   }
 
-  for (final scenario in ['off', 'observe', 'prefer2m', 'not-2m', 'cancel']) {
+  for (final scenario in ['off', 'observe', 'prefer2m', 'not-2m', 'cancel', 'close']) {
     test('PHY $scenario gates BEGIN without changing durable or identity semantics', () async {
       final bytes = assetBytes();
       final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 2000,
           pauseScan: true, highPriority: true, batchFrames: 12, reuseInfoLink: true,
-          phyPolicy: scenario == 'not-2m' || scenario == 'cancel' ? 'prefer2m' : scenario);
+          phyPolicy: const {'not-2m', 'cancel', 'close'}.contains(scenario) ? 'prefer2m' : scenario);
       final pending = Completer<Object?>();
       final called = Completer<Map<String, Object?>>();
       final client = OtaPhyClient(isAndroid: true, invoke: (method, request) {
@@ -367,6 +367,7 @@ void main() {
         expect(ble.dataOffsets, isEmpty);
         expect(ble.endCalls, 0);
         final cancellation = scenario == 'cancel' ? service.cancelUpgrade(keepPackage: true) : null;
+        if (scenario == 'close') service.onClose();
         pending.complete({
           ...request, 'schema': 1, 'connectionGeneration': 1, 'elapsedMicros': 3000,
           'status': 'observed', 'beforeReadStatus': 0, 'beforeTxPhy': 1, 'beforeRxPhy': 1,
