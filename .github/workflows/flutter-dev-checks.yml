@@ -140,6 +140,10 @@ jobs:
           TRACE_DEV_SIGNING_KEYSTORE_SECRET: ${{ env.FLUTTER_DEV_BUILD_APK == 'true' && inputs.app_id_suffix != '' && secrets.ETRACK_DEV_SIGNING_KEYSTORE || '' }}
         run: python -B Tools/flutter/dev_checks.py --repo-root .
 
+      - name: Verify PHY native lifecycle
+        working-directory: ${{ github.workspace }}
+        run: python -I -S -B Tools/flutter/test_phy_native.py --repo-root .
+
       - name: Verify App observation snapshot integrity
         timeout-minutes: 5
         working-directory: ${{ github.workspace }}
@@ -158,6 +162,8 @@ jobs:
           path: |
             .cache/flutter-dev-checks/runs/*/result.json
             .cache/flutter-dev-checks/runs/*/logs/*.log
+            .cache/p34-phy-native/runs/*/result.json
+            .cache/p34-phy-native/runs/*/logs/*.log
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 14

@@ -279,12 +279,11 @@ packages:
     source: hosted
     version: "1.35.5"
   flutter_blue_plus_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_blue_plus_android
-      sha256: "9723dd4ba7dcc3f27f8202e1159a302eb4cdb88ae482bb8e0dd733b82230a258"
-      url: "https://pub.dev"
-    source: hosted
+      path: "vendor/flutter_blue_plus_android"
+      relative: true
+    source: path
     version: "4.0.5"
   flutter_blue_plus_darwin:
     dependency: transitive

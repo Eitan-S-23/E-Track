@@ -14,6 +14,7 @@ import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
 import '../ota/ota_diagnostics.dart';
 import '../ota/ota_experiment_config.dart';
+import '../ota/ota_phy.dart';
 import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../ota/ota_link_stats.dart';
@@ -95,6 +96,7 @@ class OtaService extends GetxController {
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
     int? senderWindowSegments,
+    OtaPhyClient? phyClient,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ?? defaultSenderWindowSegments,
           1,
@@ -102,6 +104,7 @@ class OtaService extends GetxController {
           'senderWindowSegments',
         ),
         _bluetoothService = bluetoothService,
+        _phyClient = phyClient ?? const OtaPhyClient(),
         _notifyImpl = onNotify,
         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
         _dio = dio ??
@@ -136,6 +139,7 @@ class OtaService extends GetxController {
             rebootProbeInterval ?? const Duration(seconds: 3);
 
   final BluetoothService? _bluetoothService;
+  final OtaPhyClient _phyClient;
   final int _senderWindowSegments;
   final void Function(String title, String message)? _notifyImpl;
   final Dio _dio;
@@ -1004,6 +1008,24 @@ class OtaService extends GetxController {
           return fail('bind', 'notify-subscribe-failed');
         }
         activeTransport = transport;
+        if (experiment != null && experiment.androidPhyPolicy != 'off') {
+          final observation = await _phyClient.observe(
+            policy: experiment.androidPhyPolicy,
+            remoteId: deviceAddress,
+            requestId: experiment.runId,
+          );
+          if (generation != _cancelGeneration) {
+            return fail('cancelled', 'phy-generation-changed');
+          }
+          emitOtaObservation('OTA_PHY ${jsonEncode({
+            ...observation.fields, 'configSha256': experiment.sourceSha256,
+          })}');
+          if (!observation.permitsTransfer) {
+            _upgradeStatus.value = 'PHY experiment precondition not met';
+            _phase.value = OtaPhase.failed;
+            return fail('phy', 'actual-phy-unconfirmed');
+          }
+        }
         // 重连身份复核：当前 INFO 必须与会话开始时快照一致。
         final recheck = await transport.getDeviceInfo();
         if (generation != _cancelGeneration) {

@@ -194,6 +194,25 @@ void main() {
     expect(line['rebootProbeIntervalMs'], 500);
   });
 
+  test('schema 8 alone enables strict PHY policy and keeps old profiles off', () {
+    final old = {...reconnectProfile(), 'schema': 7,
+      'pauseScanDuringOta': true, 'androidHighPriority': true,
+      'dataBatchFrames': 12, 'reuseRebootInfoLink': true};
+    expect(parse(old).androidPhyPolicy, 'off');
+    expect(parse(profile()).androidPhyPolicy, 'off');
+    for (final policy in ['off', 'observe', 'prefer2m']) {
+      final config = parse({...old, 'schema': 8, 'androidPhyPolicy': policy});
+      expect(config.androidPhyPolicy, policy);
+      expect(config.dataBatchFrames, 12);
+      expect(config.observationLine, contains('"androidPhyPolicy":"$policy"'));
+    }
+    for (final wrong in [null, 1, true, '2M', 'auto']) {
+      expect(() => parse({...old, 'schema': 8, 'androidPhyPolicy': wrong}), throwsFormatException);
+    }
+    expect(() => parse({...old, 'schema': 8}), throwsFormatException);
+    expect(() => parse({...old, 'androidPhyPolicy': 'observe'}), throwsFormatException);
+  });
+
   test('schema 3 accepts bounded endpoints without changing identity gates', () {
     for (final info in [500, 10000]) {
       for (final interval in [100, 3000]) {

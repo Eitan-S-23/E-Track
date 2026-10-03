@@ -14,6 +14,7 @@ import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
 import 'package:ble_monitor/ota/ota_experiment_config.dart';
+import 'package:ble_monitor/ota/ota_phy.dart';
 import 'package:ble_monitor/ota/ota_radio_lease.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
@@ -204,6 +205,7 @@ void main() {
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
     int? senderWindowSegments,
+    OtaPhyClient? phyClient,
   }) {
     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条
     // 通知即抛 UnsupportedError。默认改为可增长列表。
@@ -228,6 +230,7 @@ void main() {
       rebootProbeTimeout: rebootProbeTimeout,
       rebootProbeInterval: rebootProbeInterval,
       senderWindowSegments: senderWindowSegments,
+      phyClient: phyClient,
     );
     Get.put<OtaService>(service);
     return service;
@@ -260,6 +263,7 @@ void main() {
     Uint8List? package,
     String address = 'AA:BB',
     String writeMode = 'with',
+    OtaPhyClient? phyClient,
   }) async {
     final ble = _UpgradeFakeBle(
       preRebootPayload: Uint8List.fromList(preRebootPayload)
@@ -278,6 +282,7 @@ void main() {
       senderWindowSegments: senderWindowSegments,
       latestAdapter: package == null ? null : _LatestOkAdapter(latestBody(package)),
       downloadAdapter: package == null ? null : _DownloadOkAdapter(package),
+      phyClient: phyClient,
     );
     Get.put<AppUpdateService>(_FakeAppUpdateService());
 
@@ -303,10 +308,11 @@ void main() {
   const probeAddress = 'AA:BB:CC:DD:EE:FF';
   Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
       int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500,
-      bool? pauseScan, bool highPriority = false, int? batchFrames, bool? reuseInfoLink}) async {
+      bool? pauseScan, bool highPriority = false, int? batchFrames, bool? reuseInfoLink,
+      String? phyPolicy}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': batchFrames == 12 ? 7 : reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
+      'schema': phyPolicy != null ? 8 : batchFrames == 12 ? 7 : reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
       'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
@@ -327,9 +333,55 @@ void main() {
       },
       if (batchFrames != null) 'dataBatchFrames': batchFrames,
       if (reuseInfoLink != null || batchFrames == 12) 'reuseRebootInfoLink': reuseInfoLink ?? false,
+      if (phyPolicy != null) 'androidPhyPolicy': phyPolicy,
     }));
     expect(runtime.ready, isTrue);
     return runtime;
+  }
+
+  for (final scenario in ['off', 'observe', 'prefer2m', 'not-2m', 'cancel']) {
+    test('PHY $scenario gates BEGIN without changing durable or identity semantics', () async {
+      final bytes = assetBytes();
+      final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 2000,
+          pauseScan: true, highPriority: true, batchFrames: 12, reuseInfoLink: true,
+          phyPolicy: scenario == 'not-2m' || scenario == 'cancel' ? 'prefer2m' : scenario);
+      final pending = Completer<Object?>();
+      final called = Completer<Map<String, Object?>>();
+      final client = OtaPhyClient(isAndroid: true, invoke: (_, request) {
+        called.complete(request);
+        return pending.future;
+      });
+      await OtaExperimentRuntime.withInstance(runtime, () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+            address: probeAddress, package: bytes, phyClient: client);
+        final service = Get.find<OtaService>();
+        final future = service.startOtaUpgrade(probeAddress);
+        if (scenario == 'off') {
+          expect(await future, isTrue);
+          expect(called.isCompleted, isFalse);
+          return;
+        }
+        final request = await called.future.timeout(const Duration(seconds: 2));
+        expect(ble.beginCalls, 0);
+        expect(ble.dataOffsets, isEmpty);
+        expect(ble.endCalls, 0);
+        if (scenario == 'cancel') await service.cancelUpgrade(keepPackage: true);
+        pending.complete({
+          ...request, 'schema': 1, 'connectionGeneration': 1, 'elapsedMicros': 3000,
+          'status': 'observed', 'beforeReadStatus': 0, 'beforeTxPhy': 1, 'beforeRxPhy': 1,
+          'txPhy': scenario == 'not-2m' ? 1 : 2, 'rxPhy': 2,
+          'updateStatus': 0, 'readStatus': 0, 'updateTxPhy': 2, 'updateRxPhy': 2,
+        });
+        final permitted = scenario == 'observe' || scenario == 'prefer2m';
+        expect(await future, permitted);
+        if (!permitted) {
+          expect(ble.beginCalls, 0);
+          expect(ble.dataOffsets, isEmpty);
+          expect(ble.endCalls, 0);
+        }
+        expect(service.isUpgrading, isFalse);
+      });
+    });
   }
 
   for (final entry in [(window: 4, receiver: 32), (window: 8, receiver: 32),

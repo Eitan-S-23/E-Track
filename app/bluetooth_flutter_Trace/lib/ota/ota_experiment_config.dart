@@ -32,6 +32,7 @@ class OtaExperimentConfig {
     required this.androidHighPriority,
     required this.dataBatchFrames,
     required this.reuseRebootInfoLink,
+    required this.androidPhyPolicy,
   });
 
   static const maxConfigBytes = 8192;
@@ -52,6 +53,7 @@ class OtaExperimentConfig {
   };
   static const _v5Fields = {..._v4Fields, 'dataBatchFrames'};
   static const _v6Fields = {..._v5Fields, 'reuseRebootInfoLink'};
+  static const _v8Fields = {..._v6Fields, 'androidPhyPolicy'};
 
   final int schema;
   final String runId;
@@ -75,6 +77,7 @@ class OtaExperimentConfig {
   final bool androidHighPriority;
   final int dataBatchFrames;
   final bool reuseRebootInfoLink;
+  final String androidPhyPolicy;
   bool get isPrefixProbe => prefixBytes > 0;
 
   factory OtaExperimentConfig.parse(String text, {required String expectedTarget}) {
@@ -84,11 +87,11 @@ class OtaExperimentConfig {
     }
     final decoded = jsonDecode(text);
     if (decoded is! Map<String, dynamic> || decoded['schema'] is! int ||
-        !const {1, 2, 3, 4, 5, 6, 7}.contains(decoded['schema'])) {
+        !const {1, 2, 3, 4, 5, 6, 7, 8}.contains(decoded['schema'])) {
       throw const FormatException('experiment-config-schema');
     }
     final schema = decoded['schema'] as int;
-    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : schema == 4 ? _v4Fields : schema == 5 ? _v5Fields : _v6Fields;
+    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : schema == 4 ? _v4Fields : schema == 5 ? _v5Fields : schema == 8 ? _v8Fields : _v6Fields;
     if (decoded.length != fields.length || !fields.containsAll(decoded.keys)) {
       throw const FormatException('experiment-config-schema');
     }
@@ -149,6 +152,10 @@ class OtaExperimentConfig {
       throw const FormatException('experiment-config-radio-policy');
     }
     final batchFrames = schema >= 5 ? integer('dataBatchFrames', 1, schema >= 7 ? 12 : 3) : 1;
+    final phyPolicy = schema >= 8 ? decoded['androidPhyPolicy'] : 'off';
+    if (!const {'off', 'observe', 'prefer2m'}.contains(phyPolicy)) {
+      throw const FormatException('experiment-config-phy-policy');
+    }
     if (schema >= 6 && decoded['reuseRebootInfoLink'] is! bool) {
       throw const FormatException('experiment-config-reboot-link');
     }
@@ -179,6 +186,7 @@ class OtaExperimentConfig {
       androidHighPriority: schema >= 4 && decoded['androidHighPriority'] == true,
       dataBatchFrames: batchFrames,
       reuseRebootInfoLink: schema >= 6 && decoded['reuseRebootInfoLink'] == true,
+      androidPhyPolicy: phyPolicy as String,
     );
   }
 
@@ -227,6 +235,7 @@ class OtaExperimentConfig {
     },
     if (schema >= 5) 'dataBatchFrames': dataBatchFrames,
     if (schema >= 6) 'reuseRebootInfoLink': reuseRebootInfoLink,
+    if (schema >= 8) 'androidPhyPolicy': androidPhyPolicy,
   })}';
 }
 
