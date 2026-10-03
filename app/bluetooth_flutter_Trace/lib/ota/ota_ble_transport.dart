@@ -61,8 +61,8 @@ class OtaBleTransport {
     this.writeTimeout = defaultWriteTimeout,
     this.dataBatchFrames = 1,
   })  : _channel = channel {
-    if (dataBatchFrames != 1 && dataBatchFrames != 3) {
-      throw ArgumentError.value(dataBatchFrames, 'dataBatchFrames', 'expected 1 or 3');
+    if (dataBatchFrames != 1 && dataBatchFrames != 3 && dataBatchFrames != 12) {
+      throw ArgumentError.value(dataBatchFrames, 'dataBatchFrames', 'expected 1, 3 or 12');
     }
     if (dataBatchFrames != 1) stats?.configureDataBatch(dataBatchFrames);
     // 通知流订阅必须在构造内同步建立：async* 生成器的初始运行被延迟到
@@ -526,10 +526,10 @@ class OtaBleTransport {
               if (view.inFlightCount >= effectiveWindow) break;
               if ((view.blockBitmap >> seg) & 1 == 1) continue; // 已收段幂等跳过
               if (view.isSegmentInFlight(seg)) continue; // 在途未确认
-              if (dataBatchFrames == 3) {
+              if (dataBatchFrames > 1) {
                 final selected = <int>[];
                 final free = effectiveWindow - view.inFlightCount;
-                for (var next = seg; next < segsInBlock && selected.length < 3 && selected.length < free; next++) {
+                for (var next = seg; next < segsInBlock && selected.length < dataBatchFrames && selected.length < free; next++) {
                   if ((view.blockBitmap >> next) & 1 == 0 && !view.isSegmentInFlight(next)) {
                     selected.add(next);
                   }

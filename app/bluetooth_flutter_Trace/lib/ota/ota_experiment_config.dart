@@ -84,7 +84,7 @@ class OtaExperimentConfig {
     }
     final decoded = jsonDecode(text);
     if (decoded is! Map<String, dynamic> || decoded['schema'] is! int ||
-        !const {1, 2, 3, 4, 5, 6}.contains(decoded['schema'])) {
+        !const {1, 2, 3, 4, 5, 6, 7}.contains(decoded['schema'])) {
       throw const FormatException('experiment-config-schema');
     }
     final schema = decoded['schema'] as int;
@@ -148,11 +148,11 @@ class OtaExperimentConfig {
     if (schema >= 4 && (decoded['pauseScanDuringOta'] is! bool || decoded['androidHighPriority'] is! bool)) {
       throw const FormatException('experiment-config-radio-policy');
     }
-    final batchFrames = schema >= 5 ? integer('dataBatchFrames', 1, 3) : 1;
+    final batchFrames = schema >= 5 ? integer('dataBatchFrames', 1, schema >= 7 ? 12 : 3) : 1;
     if (schema >= 6 && decoded['reuseRebootInfoLink'] is! bool) {
       throw const FormatException('experiment-config-reboot-link');
     }
-    if (batchFrames == 2 || (batchFrames == 3 &&
+    if (!const {1, 3, 12}.contains(batchFrames) || (batchFrames > 1 &&
         (decoded['reuseGatt'] != true || decoded['withoutResponse'] != true))) {
       throw const FormatException('experiment-config-data-batch');
     }

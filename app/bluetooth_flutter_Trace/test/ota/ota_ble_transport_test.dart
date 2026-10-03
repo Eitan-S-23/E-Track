@@ -140,7 +140,8 @@ void main() {
   /// 撞 END ERR_SHA，使全部正常路径用例失去意义。
   List<int> shaOf(Uint8List package) => sha256.convert(package).bytes;
 
-  group('default-off three-frame DATA batching', () {
+  for (final batchFrames in [3, 12]) {
+  group('default-off $batchFrames-frame DATA batching', () {
     Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
         {int window = 28}) => transport.transfer(package: bytes,
             packageSha256: shaOf(bytes), etuHeader: etuHeaderOf(bytes), windowSegments: window);
@@ -148,13 +149,13 @@ void main() {
     test('rejects unsupported batch sizes before listening or writing', () {
       final mcu = _McuSim();
       addTearDown(mcu.close);
-      for (final size in [0, 2, 4, 32]) {
+      for (final size in [0, 2, 4, 8, 11, 13, 32]) {
         expect(() => OtaBleTransport(channel: mcu, dataBatchFrames: size), throwsArgumentError);
       }
       expect(mcu.writtenFrames, isEmpty);
     });
 
-    for (final mode in [1, 3]) {
+    for (final mode in [1, batchFrames]) {
       test('mode $mode preserves full block and expected GATT calls', () async {
         final mcu = _McuSim();
         final transport = OtaBleTransport(channel: mcu, dataBatchFrames: mode);
@@ -163,7 +164,7 @@ void main() {
         final bytes = packageBytes(4096);
         expect((await transfer(transport, bytes)).isOk, isTrue);
         expect(mcu._stagedBytes, bytes);
-        expect(mcu.dataChunkWrites, mode == 1 ? 32 : 22);
+        expect(mcu.dataChunkWrites, mode == 1 ? 32 : mode == 3 ? 22 : 19);
         expect(mcu.dataOffsets, List.generate(32, (i) => i * 128));
       });
     }
@@ -171,7 +172,7 @@ void main() {
     for (final mtu in [23, 145, 247]) {
       test('MTU $mtu preserves short tail and block boundary', () async {
         final mcu = _McuSim()..mtu = mtu;
-        final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3);
+        final transport = OtaBleTransport(channel: mcu, dataBatchFrames: batchFrames);
         addTearDown(mcu.close);
         addTearDown(transport.dispose);
         final bytes = packageBytes(4225);
@@ -181,10 +182,10 @@ void main() {
       });
     }
 
-    for (final window in [1, 2, 3, 4, 28]) {
+    for (final window in [1, 2, 3, 4, 8, 11, 12, 13, 28]) {
       test('free-credit reservation obeys window $window', () async {
         final mcu = _McuSim()..ackDelay = const Duration(milliseconds: 2);
-        final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3);
+        final transport = OtaBleTransport(channel: mcu, dataBatchFrames: batchFrames);
         addTearDown(mcu.close);
         addTearDown(transport.dispose);
         expect((await transfer(transport, packageBytes(4096), window: window)).isOk, isTrue);
@@ -195,7 +196,7 @@ void main() {
     test('cancel completes partial frame but does not start reserved third frame', () async {
       final mcu = _McuSim();
       final channel = _BatchTapChannel(mcu);
-      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3);
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: batchFrames);
       addTearDown(mcu.close);
       addTearDown(transport.dispose);
       channel.afterWrite = (_) async {
@@ -213,7 +214,7 @@ void main() {
       final mcu = _McuSim();
       final channel = _BatchTapChannel(mcu);
       final stats = OtaLinkStats(label: 'upgrade');
-      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3, stats: stats);
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: batchFrames, stats: stats);
       addTearDown(mcu.close);
       addTearDown(transport.dispose);
       channel.afterWrite = (_) async {
@@ -235,7 +236,7 @@ void main() {
       test('pause drains only partial frame; cancel=$cancelPaused', () async {
         final mcu = _McuSim();
         final channel = _BatchTapChannel(mcu);
-        final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3);
+        final transport = OtaBleTransport(channel: channel, dataBatchFrames: batchFrames);
         addTearDown(mcu.close);
         addTearDown(transport.dispose);
         channel.afterWrite = (_) async {
@@ -265,7 +266,7 @@ void main() {
     test('cancel at a frame-aligned chunk does not start another frame', () async {
       final mcu = _McuSim()..mtu = 145;
       final channel = _BatchTapChannel(mcu);
-      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3);
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: batchFrames);
       addTearDown(mcu.close);
       addTearDown(transport.dispose);
       channel.afterWrite = (_) async {
@@ -281,7 +282,7 @@ void main() {
       final mcu = _McuSim();
       final channel = _BatchTapChannel(mcu);
       final stats = OtaLinkStats(label: 'upgrade');
-      final transport = OtaBleTransport(channel: channel, dataBatchFrames: 3, stats: stats);
+      final transport = OtaBleTransport(channel: channel, dataBatchFrames: batchFrames, stats: stats);
       addTearDown(mcu.close);
       addTearDown(transport.dispose);
       final counts = <int>[];
@@ -299,7 +300,7 @@ void main() {
       final mcu = _McuSim()
         ..slowDataChunkAt = 2
         ..slowDataChunkDelay = const Duration(milliseconds: 200);
-      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3,
+      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: batchFrames,
           writeTimeout: const Duration(milliseconds: 20));
       addTearDown(mcu.close);
       addTearDown(transport.dispose);
@@ -314,7 +315,7 @@ void main() {
 
     test('partial batch timeout poisons business writes', () async {
       final mcu = _McuSim()..hangAtDataChunk = 2;
-      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3,
+      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: batchFrames,
           writeTimeout: const Duration(milliseconds: 20));
       addTearDown(mcu.close);
       addTearDown(transport.dispose);
@@ -326,7 +327,7 @@ void main() {
 
     test('recoverable DATA error keeps ordinary resume and SHA verification', () async {
       final mcu = _McuSim()..errSeqAtDataCounts = {3};
-      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: 3);
+      final transport = OtaBleTransport(channel: mcu, dataBatchFrames: batchFrames);
       addTearDown(mcu.close);
       addTearDown(transport.dispose);
       final bytes = packageBytes(4225);
@@ -335,6 +336,8 @@ void main() {
       expect(mcu.beginCalls, greaterThan(1));
     });
   });
+
+  }
 
   group('durable prefix probe', () {
     final bytes = packageBytes(40960);

@@ -155,6 +155,32 @@ void main() {
     expect(() => parse({...good, 'schema': 3}), throwsFormatException);
   });
 
+  test('schema 7 alone admits batch12 and preserves old profile limits', () {
+    final good = {...reconnectProfile(), 'schema': 7,
+      'pauseScanDuringOta': true, 'androidHighPriority': true,
+      'dataBatchFrames': 12, 'reuseRebootInfoLink': true};
+    for (final frames in [1, 3, 12]) {
+      final config = parse({...good, 'dataBatchFrames': frames});
+      expect(config.dataBatchFrames, frames);
+      expect(config.reuseRebootInfoLink, isTrue);
+      final line = jsonDecode(config.observationLine.substring('OTA_EXPERIMENT '.length));
+      expect(line['schema'], 7);
+      expect(line['dataBatchFrames'], frames);
+    }
+    for (final wrong in [null, true, 0, 2, 4, 8, 11, 13, 32, 12.0, '12']) {
+      expect(() => parse({...good, 'dataBatchFrames': wrong}), throwsFormatException);
+    }
+    for (final wrong in [
+      {...good, 'schema': 6},
+      {...good, 'schema': 5}..remove('reuseRebootInfoLink'),
+      {...good, 'reuseGatt': false}, {...good, 'withoutResponse': false},
+      {...good}..remove('reuseRebootInfoLink'),
+      {...good, 'transferMode': 'prefix', 'prefixBytes': 32768},
+    ]) {
+      expect(() => parse(wrong), throwsFormatException);
+    }
+  });
+
   test('schema 3 binds explicit full-OTA cadence and records requested values', () {
     final config = parse(reconnectProfile());
     expect(config.rebootInfoTimeout, const Duration(seconds: 2));

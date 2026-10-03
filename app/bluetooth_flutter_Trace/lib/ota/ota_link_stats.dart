@@ -246,7 +246,7 @@ class OtaLinkStats {
   int _batchBytes = 0;
 
   void configureDataBatch(int frames) {
-    if ((frames != 1 && frames != 3) || _transferStartUs != null) {
+    if ((frames != 1 && frames != 3 && frames != 12) || _transferStartUs != null) {
       throw StateError('invalid-data-batch-observation-binding');
     }
     _dataBatchFrames = frames;

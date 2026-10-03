@@ -28,7 +28,7 @@ def analyze(messages, total):
             writes.append(dict(us=stamp, bytes=fields["bytes"], assigned=False))
         elif kind == "batch_chunk":
             require(not awaiting and writes and not writes[-1]["assigned"], "missing/duplicate batch write")
-            require(fields["bytes"] == writes[-1]["bytes"] and 0 <= fields["frames"] <= 3,
+            require(fields["bytes"] == writes[-1]["bytes"] and 0 <= fields["frames"] <= 12,
                     "batch geometry differs")
             writes[-1]["assigned"] = True
             awaiting = fields["frames"]
@@ -45,8 +45,10 @@ def analyze(messages, total):
     batch = transfer["dataBatch"]
     count = (total + 127) // 128
     require(summary["schema"] == 1 and summary["clock"] == "stopwatch-mono-us" and
-            transfer["outcome"] == "ok" and batch["schema"] == 1 and batch["maxFrames"] == 3,
+            transfer["outcome"] == "ok" and batch["schema"] == 1 and
+            type(batch["maxFrames"]) is int and batch["maxFrames"] in (3, 12),
             "unsupported batch timing schema")
+    require(all(c["frames"] <= batch["maxFrames"] for c in chunks), "chunk exceeds declared batch")
     require(segments == [(off, min(128, total - off)) for off in range(0, total, 128)] and
             transfer["segmentsUnique"] == transfer["segmentSendTotal"] == count and
             transfer["retransmitFrames"] == 0, "incomplete/duplicate DATA coverage")
@@ -70,9 +72,18 @@ def analyze(messages, total):
                 throughput_kib_s=total / 1024 / (elapsed / 1e6), data_gatt_seconds=data_us / 1e6,
                 remaining_transfer_seconds=(elapsed - data_us) / 1e6,
                 chunks=len(chunks), data_frames=count,
+                maximum_batch_frames=batch["maxFrames"],
                 ack_sample_integrity=transfer["ackSamples"], ack_early_invalid=transfer["ackEarlyInvalid"],
                 scope="App clock only; remainder is not isolated ACK/flash cost; no independent acceptance",
                 device_operations=0)
+
+
+def verify_batch_stamp(stamp, measured_frames):
+    require(type(stamp.get("schema")) is int and stamp["schema"] in (5, 6, 7) and
+            type(stamp.get("dataBatchFrames")) is int and
+            stamp["dataBatchFrames"] == measured_frames and
+            measured_frames in ((3, 12) if stamp["schema"] == 7 else (3,)),
+            "batch experiment stamp differs from measured profile")
 
 
 def main():
@@ -87,11 +98,11 @@ def main():
     messages = messages.splitlines()
     require(envelope["outcome"] == "completed", "completed original snapshot required")
     stamps = [json.loads(m[len("OTA_EXPERIMENT "):]) for m in messages if m.startswith("OTA_EXPERIMENT ")]
-    require(len(stamps) == 1 and stamps[0]["schema"] == 5 and stamps[0]["dataBatchFrames"] == 3,
-            "batch experiment stamp required")
+    require(len(stamps) == 1, "one batch experiment stamp required")
     require(stamps[0]["packageBytes"] == envelope["input"]["packageBytes"] and
             stamps[0]["packageSha256"] == envelope["input"]["packageSha256"], "package stamp mismatch")
     result = analyze(messages, envelope["input"]["packageBytes"])
+    verify_batch_stamp(stamps[0], result["maximum_batch_frames"])
     result["snapshot_sha256"] = envelope["rawSha256"]
     print(json.dumps(result))
 

@@ -306,7 +306,7 @@ void main() {
       bool? pauseScan, bool highPriority = false, int? batchFrames, bool? reuseInfoLink}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
+      'schema': batchFrames == 12 ? 7 : reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
       'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
@@ -326,7 +326,7 @@ void main() {
         'androidHighPriority': highPriority,
       },
       if (batchFrames != null) 'dataBatchFrames': batchFrames,
-      if (reuseInfoLink != null) 'reuseRebootInfoLink': reuseInfoLink,
+      if (reuseInfoLink != null || batchFrames == 12) 'reuseRebootInfoLink': reuseInfoLink ?? false,
     }));
     expect(runtime.ready, isTrue);
     return runtime;
@@ -591,10 +591,10 @@ void main() {
     }
   }
 
-  for (final frames in [1, 3]) {
-    test('schema 5 batch $frames traverses service, recorder and exported snapshot', () async {
+  for (final frames in [1, 3, 12]) {
+    test('batch $frames traverses service, recorder and exported snapshot', () async {
       final bytes = assetBytes(4096);
-      final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
+      final runtime = await probeRuntime(bytes, window: 28, prefix: false, rebootInfoTimeoutMs: 500,
           pauseScan: true, highPriority: true, batchFrames: frames);
       final tempDir = tempFirmwareDir();
       final diagnostics = OtaDiagnostics();
@@ -615,9 +615,10 @@ void main() {
         expect(summaries, hasLength(1));
         final summary = summaries.single['transfer'];
         expect(summary['segmentsUnique'], 32);
-        if (frames == 3) {
-          expect(summary['dataBatch'], {'schema': 1, 'maxFrames': 3, 'chunks': 22, 'bytes': 4544});
-          expect(messages.where((line) => line.contains('kind=batch_chunk')), hasLength(22));
+        if (frames > 1) {
+          final expectedChunks = frames == 3 ? 22 : 19;
+          expect(summary['dataBatch'], {'schema': 1, 'maxFrames': frames, 'chunks': expectedChunks, 'bytes': 4544});
+          expect(messages.where((line) => line.contains('kind=batch_chunk')), hasLength(expectedChunks));
         } else {
           expect(summary.containsKey('dataBatch'), isFalse);
           expect(messages.where((line) => line.contains('kind=batch_chunk')), isEmpty);
@@ -631,22 +632,23 @@ void main() {
               'inspect', '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
               '--expect-target', probeAddress], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
         expect(imported.exitCode, 0, reason: '${imported.stderr}');
-        if (frames == 3) {
+        if (frames > 1) {
           final measured = await Process.run(Platform.isWindows ? 'python' : 'python3',
               ['-I', '-S', '-B', '-X', 'utf8', '${checkout.path}/Tools/ota/p3-4-link-stats/batch_timing.py',
                 '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
                 '--expect-target', probeAddress], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
           expect(measured.exitCode, 0, reason: '${measured.stderr}');
-          expect(jsonDecode(measured.stdout as String)['chunks'], 22);
+          expect(jsonDecode(measured.stdout as String)['chunks'], frames == 3 ? 22 : 19);
         }
       }));
     });
   }
 
-  test('schema 5 refuses actual with-response binding before BEGIN', () async {
+  for (final frames in [3, 12]) {
+  test('batch $frames refuses actual with-response binding before BEGIN', () async {
     final bytes = assetBytes();
     final runtime = await probeRuntime(bytes, prefix: false, rebootInfoTimeoutMs: 500,
-        pauseScan: false, batchFrames: 3);
+        pauseScan: false, batchFrames: frames);
     await OtaExperimentRuntime.withInstance(runtime, () async {
       final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
           package: bytes, address: probeAddress, writeMode: 'without');
@@ -655,6 +657,7 @@ void main() {
       expect(ble.beginCalls, 0);
     });
   });
+  }
 
   test('failed radio acquisition cannot send BEGIN and still releases', () async {
     final bytes = assetBytes();

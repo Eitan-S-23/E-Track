@@ -2193,7 +2193,7 @@ class OtaService extends GetxController {
         stats: stats,
       );
       final batchFrames = OtaExperimentRuntime.current.requireForOta()?.dataBatchFrames ?? 1;
-      if (batchFrames == 3 && writeWithResponse) {
+      if (batchFrames > 1 && writeWithResponse) {
         throw StateError('OTA_BATCH_REQUIRES_WITHOUT_RESPONSE');
       }
       final transport = OtaBleTransport(channel: channel, stats: stats,

@@ -34,6 +34,27 @@ def fixture():
 
 
 class Tests(unittest.TestCase):
+    def test_schema7_twelve_frame_batch_and_old_limits(self):
+        for schema, frames in ((5, 3), (6, 3), (7, 3), (7, 12)):
+            timing.verify_batch_stamp(dict(schema=schema, dataBatchFrames=frames), frames)
+        for stamp, frames in ((dict(schema=5, dataBatchFrames=12), 12),
+                              (dict(schema=6, dataBatchFrames=12), 12),
+                              (dict(schema=7, dataBatchFrames=3), 12),
+                              (dict(schema=7, dataBatchFrames=12), 3),
+                              (dict(schema=7, dataBatchFrames=12.0), 12),
+                              (dict(schema=8, dataBatchFrames=12), 12)):
+            with self.subTest(stamp=stamp, frames=frames), self.assertRaises(ValueError):
+                timing.verify_batch_stamp(stamp, frames)
+
+    def test_partial_final_batch_keeps_declared_maximum(self):
+        rows = fixture()
+        summary = json.loads(rows[-1].removeprefix('OTA_LINK_STATS '))
+        summary['transfer']['dataBatch']['maxFrames'] = 12
+        rows[-1] = 'OTA_LINK_STATS ' + json.dumps(summary)
+        value = timing.analyze(rows, 384)
+        self.assertEqual(value['maximum_batch_frames'], 12)
+        self.assertEqual(value['chunks'], 2)
+
     def test_isolated_cli_resolves_only_its_local_reader(self):
         result = subprocess.run([sys.executable, '-I', '-S', '-B',
             str(ROOT / 'Tools/ota/p3-4-link-stats/batch_timing.py'), '--help'],
