@@ -20,11 +20,31 @@ class OtaPhyObservation {
 }
 
 class OtaPhyClient {
-  const OtaPhyClient({this.invoke, this.isAndroid});
+  OtaPhyClient({this.invoke, this.isAndroid});
 
   static const channel = MethodChannel('etrack/ota_phy');
   final PhyMethodInvoker? invoke;
   final bool? isAndroid;
+  Map<String, Object?>? _active;
+  bool get isActive => _active != null;
+
+  Future<bool> cancelActive() async {
+    final request = _active;
+    if (request == null) return true;
+    try {
+      final result = await (invoke != null
+          ? invoke!('p34CancelPhy', request)
+          : channel.invokeMethod<Object?>('p34CancelPhy', request))
+          .timeout(const Duration(seconds: 1));
+      return result == true;
+    } on TimeoutException {
+      return false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
 
   Future<OtaPhyObservation> observe({required String policy,
       required String remoteId, required String requestId}) async {
@@ -41,6 +61,8 @@ class OtaPhyClient {
     if (!(isAndroid ?? (!kIsWeb && defaultTargetPlatform == TargetPlatform.android))) {
       return failed('unsupported-platform');
     }
+    if (_active != null) return failed('probe-already-active');
+    _active = binding;
     try {
       final raw = await (invoke != null
           ? invoke!('p34ObservePhy', binding)
@@ -51,7 +73,7 @@ class OtaPhyClient {
           raw['policy'] != policy || raw['connectionGeneration'] is! int ||
           (raw['connectionGeneration'] as int) <= 0 ||
           raw['elapsedMicros'] is! int || (raw['elapsedMicros'] as int) < 0 ||
-          !const {'observed', 'disconnected', 'timeout', 'read-failed',
+          !const {'observed', 'disconnected', 'cancelled', 'timeout', 'read-failed',
             'update-failed', 'invalid-phy', 'native-call-failed'}.contains(raw['status'])) {
         return failed('invalid-native-result');
       }
@@ -73,6 +95,8 @@ class OtaPhyClient {
       return failed('platform-error:${error.code}');
     } on MissingPluginException {
       return failed('plugin-unavailable');
+    } finally {
+      if (identical(_active, binding)) _active = null;
     }
   }
 }

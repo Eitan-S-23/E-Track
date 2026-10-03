@@ -104,7 +104,7 @@ class OtaService extends GetxController {
           'senderWindowSegments',
         ),
         _bluetoothService = bluetoothService,
-        _phyClient = phyClient ?? const OtaPhyClient(),
+        _phyClient = phyClient ?? OtaPhyClient(),
         _notifyImpl = onNotify,
         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
         _dio = dio ??
@@ -1419,6 +1419,9 @@ class OtaService extends GetxController {
     // 下载清理会等待在途请求退出，传输先停可避免等待期间仍在发送
     // 数据段。
     final transport = _transport;
+    if (_phyClient.isActive && !await _phyClient.cancelActive()) {
+      emitOtaObservation('OTA_PHY_CANCEL nativeAcknowledged=false');
+    }
     if (transport != null && !transport.isCancelled) {
       // RC3-07/02 四阶段：用户取消路径同样区分决定/收尾——取消的
       // 「决定」是用户动作（无对应日志事件），这里只标记停止业务写

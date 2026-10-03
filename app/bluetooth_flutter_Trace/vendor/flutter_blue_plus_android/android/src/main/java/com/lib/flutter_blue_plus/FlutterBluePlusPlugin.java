@@ -208,7 +208,7 @@ public class FlutterBluePlusPlugin implements
         methodChannel.setMethodCallHandler(this);
         phyChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "etrack/ota_phy");
         phyChannel.setMethodCallHandler((call, result) -> {
-            if (call.method.equals("p34ObservePhy")) onMethodCall(call, result);
+            if (call.method.equals("p34ObservePhy") || call.method.equals("p34CancelPhy")) onMethodCall(call, result);
             else result.notImplemented();
         });
 
@@ -1349,6 +1349,15 @@ public class FlutterBluePlusPlugin implements
                     map.put("le_coded", mBluetoothAdapter.isLeCodedPhySupported());
 
                     result.success(map);
+                    break;
+                }
+
+                case "p34CancelPhy":
+                {
+                    String remoteId = call.argument("remoteId");
+                    String requestId = call.argument("requestId");
+                    BluetoothGatt gatt = remoteId == null ? null : mConnectedDevices.get(remoteId);
+                    result.success(gatt != null && requestId != null && phyProbe.cancel(gatt, requestId));
                     break;
                 }
 

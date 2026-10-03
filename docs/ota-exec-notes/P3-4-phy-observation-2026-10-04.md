@@ -39,13 +39,27 @@ address, native connection generation and the App config hash in `OTA_PHY`.
 
 ## Verification
 
-Pure Java host regression passed 173 assertions with `--release 8 -Xlint:all
+Pure Java host regression initially passed 173 assertions with `--release 8 -Xlint:all
 -Werror`, zero warnings/errors. It covers actual readback, callback ordering,
 status failures, malformed PHY, all timeout/disconnect/clear stages, GATT reuse,
 stale callbacks, synchronous native exceptions and generation invalidation.
 App tests cover schema compatibility, channel identity/shape validation,
 unsupported platforms, late completion and pre-BEGIN cancellation/failure guards.
 App analyze/tests on both CI hosts and explicit APK compilation are still required.
+
+First CI: `57a06316a7fc560d9f0c60dcc2e5be568e6ae21f`, run 37137053728 failed
+on both hosts. Six upstream vendored Dart lints and five new fixture failures
+were consolidated. All five fixtures used the default with-response fake while
+explicitly selecting batch12; the existing fail-closed transport correctly rejected
+them before PHY. Fixtures now explicitly use without-response, not weakened guards.
+Original result: Linux 651 pass/16 skipped/5 fail, Windows 634 pass/33 skipped/5 fail.
+
+The same remediation batch adds request-bound native cancellation. Without it,
+discarding the Dart result alone could still permit a pending read to trigger a
+later PHY preference. The updated pure Java regression passed 215 assertions,
+zero warnings/errors, including cancellation in all three native stages.
+Legacy profiles add no new await in the cancellation path. The PHY observations
+are pre-BEGIN samples, not a continuous guarantee of unchanged PHY during DATA.
 
 ## Next Hardware Matrix
 

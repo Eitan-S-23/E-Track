@@ -347,13 +347,14 @@ void main() {
           phyPolicy: scenario == 'not-2m' || scenario == 'cancel' ? 'prefer2m' : scenario);
       final pending = Completer<Object?>();
       final called = Completer<Map<String, Object?>>();
-      final client = OtaPhyClient(isAndroid: true, invoke: (_, request) {
+      final client = OtaPhyClient(isAndroid: true, invoke: (method, request) {
+        if (method == 'p34CancelPhy') return Future<Object?>.value(true);
         called.complete(request);
         return pending.future;
       });
       await OtaExperimentRuntime.withInstance(runtime, () async {
         final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-            address: probeAddress, package: bytes, phyClient: client);
+            address: probeAddress, package: bytes, phyClient: client, writeMode: 'without');
         final service = Get.find<OtaService>();
         final future = service.startOtaUpgrade(probeAddress);
         if (scenario == 'off') {
@@ -365,7 +366,7 @@ void main() {
         expect(ble.beginCalls, 0);
         expect(ble.dataOffsets, isEmpty);
         expect(ble.endCalls, 0);
-        if (scenario == 'cancel') await service.cancelUpgrade(keepPackage: true);
+        final cancellation = scenario == 'cancel' ? service.cancelUpgrade(keepPackage: true) : null;
         pending.complete({
           ...request, 'schema': 1, 'connectionGeneration': 1, 'elapsedMicros': 3000,
           'status': 'observed', 'beforeReadStatus': 0, 'beforeTxPhy': 1, 'beforeRxPhy': 1,
@@ -374,6 +375,7 @@ void main() {
         });
         final permitted = scenario == 'observe' || scenario == 'prefer2m';
         expect(await future, permitted);
+        if (cancellation != null) await cancellation;
         if (!permitted) {
           expect(ble.beginCalls, 0);
           expect(ble.dataOffsets, isEmpty);

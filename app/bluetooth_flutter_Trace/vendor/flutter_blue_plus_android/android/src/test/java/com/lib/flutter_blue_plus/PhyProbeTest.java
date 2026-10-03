@@ -74,15 +74,18 @@ public final class PhyProbeTest {
         }
 
         for (int phase = 0; phase < 3; phase++) {
-            for (String failure : new String[]{"timeout", "disconnect", "clear"}) {
+            for (String failure : new String[]{"timeout", "disconnect", "clear", "cancel"}) {
                 Fixture f = new Fixture();
                 f.start(true);
                 if (phase >= 1) f.read(1, 1, 0);
                 if (phase == 2) f.update(2, 2, 0);
-                if (failure.equals("timeout")) { f.now = 4000000000L; f.timeout.run(); }
+                check(!f.probe.cancel(f.gatt, "wrong-request"));
+                if (failure.equals("cancel")) check(f.probe.cancel(f.gatt, "trial-1"));
+                else if (failure.equals("timeout")) { f.now = 4000000000L; f.timeout.run(); }
                 else if (failure.equals("disconnect")) f.probe.disconnected(f.gatt);
                 else f.probe.clear();
-                actual = f.result(failure.equals("timeout") ? "timeout" : "disconnected");
+                actual = f.result(failure.equals("timeout") ? "timeout" :
+                    failure.equals("cancel") ? "cancelled" : "disconnected");
                 f.read(2, 2, 0);
                 f.update(2, 2, 0);
                 check(f.results.size() == 1);

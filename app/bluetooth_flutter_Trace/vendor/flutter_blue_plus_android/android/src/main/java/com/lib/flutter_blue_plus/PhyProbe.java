@@ -64,6 +64,13 @@ final class PhyProbe {
         // Do not clear spent: a late callback must not satisfy a reused GATT object.
     }
 
+    synchronized boolean cancel(Object gatt, String request) {
+        Pending item = pending.get(gatt);
+        if (item == null || !request.equals(item.value.get("requestId"))) return false;
+        finish(item, "cancelled");
+        return true;
+    }
+
     synchronized void start(Object gatt, String remote, String request, boolean prefer,
                             Actions actions, Listener listener) {
         if (!connections.containsKey(gatt)) throw new IllegalStateException("disconnected");

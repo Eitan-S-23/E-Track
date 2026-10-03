@@ -27,7 +27,7 @@ void main() {
       return reply(request);
     });
     addTearDown(() => messenger.setMockMethodCallHandler(OtaPhyClient.channel, null));
-    final result = await run(const OtaPhyClient(isAndroid: true));
+    final result = await run(OtaPhyClient(isAndroid: true));
     expect(result.permitsTransfer, isTrue);
     expect(result.fields['beforeTxPhy'], 1);
     expect(() => result.fields['txPhy'] = 1, throwsUnsupportedError);
@@ -68,7 +68,7 @@ void main() {
     final accepted = await run(OtaPhyClient(isAndroid: true, invoke: (_, __) async => true));
     expect(accepted.permitsTransfer, isFalse);
   });
-  for (final status in ['timeout', 'disconnected', 'read-failed', 'update-failed', 'native-call-failed']) {
+  for (final status in ['timeout', 'disconnected', 'cancelled', 'read-failed', 'update-failed', 'native-call-failed']) {
     test('native $status cannot confirm transfer', () async {
       final result = await run(OtaPhyClient(isAndroid: true,
           invoke: (_, request) async => {...reply(request), 'status': status}));
@@ -79,6 +79,25 @@ void main() {
     final result = await run(OtaPhyClient(isAndroid: false,
         invoke: (_, __) async => throw StateError('must not invoke')));
     expect(result.fields['status'], 'unsupported-platform');
+  });
+
+  test('cancel targets only the active request, and late success is not a new probe', () async {
+    final pending = Completer<Object?>();
+    Map<String, Object?>? active;
+    final client = OtaPhyClient(isAndroid: true, invoke: (method, request) async {
+      if (method == 'p34CancelPhy') {
+        expect(request, active);
+        pending.complete({...reply(request), 'status': 'cancelled'});
+        return true;
+      }
+      active = request;
+      return pending.future;
+    });
+    final future = run(client);
+    expect((await run(client)).fields['status'], 'probe-already-active');
+    expect(await client.cancelActive(), isTrue);
+    expect((await future).permitsTransfer, isFalse);
+    expect(await client.cancelActive(), isTrue);
   });
   test('missing plugin and platform failures are explicit, not observed PHY', () async {
     for (final error in [MissingPluginException(), PlatformException(code: 'PHY_STALE')]) {
