@@ -1,0 +1,1366 @@
+{
+  "schema": 1,
+  "status": "DEVELOPMENT_CHECKPOINT_NOT_ACCEPTANCE",
+  "base_commit": "1e1f92f2254bf826b44d9807c5522051991906e8",
+  "archive": {
+    "bytes": 1661507,
+    "sha256": "169c0c64e8373e9b757dbe112419911882b6c19a0001091851226ff81f079cf9"
+  },
+  "patch": {
+    "bytes": 2510720,
+    "sha256": "12d8e77cbcd2389f3c5bd5031501d23229fd4f033098ad93dcd4f16e07243a33"
+  },
+  "source_inputs": [
+    {
+      "path": "boot/include/boot_crypto.h",
+      "bytes": 801,
+      "sha256": "50e2a2dcab26dea6cc89f74247a4df8d8162cc0ea1a8f3b05db91c141725b8b5",
+      "base_git_blob": "042b6e77ff12c88eedce82221329130b2cc943fe"
+    },
+    {
+      "path": "boot/include/boot_fw_header.h",
+      "bytes": 2203,
+      "sha256": "8c2b72d6b6926158188bd439c83d2caf53c9c37dd3d00abb187a1832c73452b5",
+      "archive_member": "source-overrides/boot/include/boot_fw_header.h"
+    },
+    {
+      "path": "boot/include/boot_handoff.h",
+      "bytes": 415,
+      "sha256": "0d241f31c7a2bacbf7f07f171956653d0a99a1d6c3eb58581619f3f7041302df",
+      "base_git_blob": "21785a505c167b804b8546b089a141a2fc6aa954"
+    },
+    {
+      "path": "boot/include/boot_p1_6_test.h",
+      "bytes": 893,
+      "sha256": "66119965bd610868440ede1ede912361d5432ebd93eca61cb4d57b33de4f848f",
+      "archive_member": "source-overrides/boot/include/boot_p1_6_test.h"
+    },
+    {
+      "path": "boot/include/boot_platform.h",
+      "bytes": 1255,
+      "sha256": "6ffcc647b7a5e547a458bacf6c177dc50f877e1163a1adb441c7220f327c17a7",
+      "archive_member": "source-overrides/boot/include/boot_platform.h"
+    },
+    {
+      "path": "boot/include/boot_recovery.h",
+      "bytes": 175,
+      "sha256": "27c5a22f927877b97523822fa629e40df801e9b5ede12cd83b92c51eb2e05b47",
+      "base_git_blob": "1b680cef76b24e1058b44d8f19242151df874148"
+    },
+    {
+      "path": "boot/include/boot_slot.h",
+      "bytes": 1003,
+      "sha256": "aa2d4abf38d16015b95c746c0c2e5428c4a2c49ef6bf45e56c5e56d2c5c916ec",
+      "base_git_blob": "6f410d40537aa762c46107983f3ce5dcecc7d3c5"
+    },
+    {
+      "path": "boot/include/boot_state_machine.h",
+      "bytes": 1821,
+      "sha256": "fe99868ea053da573bddd2cf004d846c93b86f0e9bba25300779a5bb8f6a6cd9",
+      "base_git_blob": "2737360903ef1ccfc0392773ddbf7c73b7aa7c14"
+    },
+    {
+      "path": "boot/include/boot_ymodem.h",
+      "bytes": 1085,
+      "sha256": "c4c91a87b039cea6331800bdb2211da1c0e4b517a9d7b6537197391db0224195",
+      "base_git_blob": "710b2f5d8a2e41d9d3cfa9ededcabdb47b75fde8"
+    },
+    {
+      "path": "boot/include/p34_boot_checkpoint.h",
+      "bytes": 627,
+      "sha256": "01dc17cfd305c2765c5f4eb80109fdf6eab77a678a0c5ebb4c7db7fcaae4b7b1",
+      "archive_member": "source-overrides/boot/include/p34_boot_checkpoint.h"
+    },
+    {
+      "path": "boot/platform/at32/boot_handoff_at32.c",
+      "bytes": 3168,
+      "sha256": "7772e18f5c6b3198ad034d2de78b7fca99c3a7d146a397b47e5323544245849d",
+      "base_git_blob": "96c5454143a12f810a6ed819ef72281601148081"
+    },
+    {
+      "path": "boot/platform/at32/boot_platform_at32.c",
+      "bytes": 22712,
+      "sha256": "3813078fb78a42b32caa7efa3859faf4389702011a9da3cd9b681d3289152ab5",
+      "archive_member": "source-overrides/boot/platform/at32/boot_platform_at32.c"
+    },
+    {
+      "path": "boot/src/boot_crc32.c",
+      "bytes": 1591,
+      "sha256": "128a591a5692a1a2aa5c9050e2bc24322d7a5835e781e596f08ebc534c844160",
+      "archive_member": "source-overrides/boot/src/boot_crc32.c"
+    },
+    {
+      "path": "boot/src/boot_fw_header.c",
+      "bytes": 8046,
+      "sha256": "2332eb95d0ce245b23b218812959d556cba8025e6e120464c328ac80809c858f",
+      "archive_member": "source-overrides/boot/src/boot_fw_header.c"
+    },
+    {
+      "path": "boot/src/boot_main.c",
+      "bytes": 7518,
+      "sha256": "56306307351eda73e7c8ac5962267bceb0ac98c562993d890eaf06062a4fe9b9",
+      "archive_member": "source-overrides/boot/src/boot_main.c"
+    },
+    {
+      "path": "boot/src/boot_recovery.c",
+      "bytes": 6830,
+      "sha256": "1245f34d7ea605ef0800f46e4ba6d742ed3da361e888bfb801717c102dd2afe2",
+      "base_git_blob": "80a1d824a39ca564b2889f08f3014b62f2bf89c4"
+    },
+    {
+      "path": "boot/src/boot_runtime.c",
+      "bytes": 100,
+      "sha256": "2640383cb096661911c8c0928ac031cf85e3851df3ae6a7bf6f5a2113c86fbf6",
+      "base_git_blob": "356a12fbb81dc8a171bc54750957b2db0d0361fa"
+    },
+    {
+      "path": "boot/src/boot_sha256.c",
+      "bytes": 5164,
+      "sha256": "311107ef6a987fb23d602070391b8bc3a356688e3e1f03e1ea8ed905c4374073",
+      "base_git_blob": "a5ad5f2b972aec9580133ea1631044db669eb3c8"
+    },
+    {
+      "path": "boot/src/boot_slot.c",
+      "bytes": 2062,
+      "sha256": "de82110955e1c3a103dc16b6ac32088e3c5a9f43e6a6a917e74c028f985a17b0",
+      "base_git_blob": "067d8ea9345c3d411bceb30eb729f08a952591c3"
+    },
+    {
+      "path": "boot/src/boot_state_machine.c",
+      "bytes": 29305,
+      "sha256": "7710df775b1d05521710d3f4b48fd279572c9af11f0a92305ab27e7aa2e5b568",
+      "archive_member": "source-overrides/boot/src/boot_state_machine.c"
+    },
+    {
+      "path": "boot/src/boot_ymodem.c",
+      "bytes": 8791,
+      "sha256": "261975112668d52bdde6238007af15d1e62538963cf7223c9392a5da25917ea4",
+      "base_git_blob": "b2ae0710df2d95248c9e605b4d7adfb05d2489e9"
+    },
+    {
+      "path": "cmake/arm-none-eabi-toolchain.cmake",
+      "bytes": 1583,
+      "sha256": "ff1f2f31ac9eeb272c7a2c9b05ad6b2903f1bfccb976595a612093aee14c719e",
+      "base_git_blob": "743d3b92b8f861a2776a840364cd440329825fb0"
+    },
+    {
+      "path": "cmake/reproducible_build.cmake",
+      "bytes": 1416,
+      "sha256": "23ae0e43c3ef49e647d8d4a0c829dc6a397b4f250ee11a63de84e9565468d978",
+      "archive_member": "source-overrides/cmake/reproducible_build.cmake"
+    },
+    {
+      "path": "cmake/startup_at32f435_437_gcc.S",
+      "bytes": 13472,
+      "sha256": "35fbb87be3e190102ee49c89ac9cd0e5ca1439b433ff8c55a1297f18bab3a7c4",
+      "base_git_blob": "db35d65cf4dd1f3277840395dfce3be7395b3803"
+    },
+    {
+      "path": "Libraries/EEPROM/eeprom_bcb.c",
+      "bytes": 9314,
+      "sha256": "143fa828043bb8332427dc524912126d824511624f02a660c3505d1e9891b499",
+      "base_git_blob": "f8207aa9c525d2501af658a783c574aaf349357f"
+    },
+    {
+      "path": "Libraries/EEPROM/eeprom_bcb.h",
+      "bytes": 6626,
+      "sha256": "301f1416f34e6bd8f1bea013a6f5bede9be9deca9cffba9ad0fb7dac6a19b9d8",
+      "base_git_blob": "c46ca7529d9b9589fbefe8a06fcd87a9425d690b"
+    },
+    {
+      "path": "Libraries/OTA/ota_layout.h",
+      "bytes": 2275,
+      "sha256": "8f9688334f1de948f31f4736b2718f3615e4f35e6c05e9d906938a867238f5dd",
+      "archive_member": "source-overrides/Libraries/OTA/ota_layout.h"
+    },
+    {
+      "path": "Libraries/OTA/ota_p1_6_test.h",
+      "bytes": 8374,
+      "sha256": "c59aa11d435e926d88895ed495b0723f7c8fc3b01fbbc7077078a8cb4f2edf6d",
+      "archive_member": "source-overrides/Libraries/OTA/ota_p1_6_test.h"
+    },
+    {
+      "path": "MDK-ARM_F435/cmake-generated/cmake/arm-none-eabi-toolchain.cmake",
+      "bytes": 2327,
+      "sha256": "1ecf3ecd97a10f3afcad931c1341b890fff285845d502c2825579f375522bb42",
+      "base_git_blob": "bcdb518c342ca37d29a6d269a4045316c9ff9b9a"
+    },
+    {
+      "path": "MDK-ARM_F435/cmake-generated/cmake/copy_if_exists.cmake",
+      "bytes": 432,
+      "sha256": "304b22467fb70f4acc4b7cadea274db4c996c2b0ce6acc440255770e1ae7e6a9",
+      "base_git_blob": "6ac0bdfaf03060b58b5f3d48c20597bd4106aad1"
+    },
+    {
+      "path": "MDK-ARM_F435/cmake-generated/cmake/gcc_compat.h",
+      "bytes": 355,
+      "sha256": "69dbed5fa16acac2ab40b8c4bab63ac2b0be4f2904107d5fe4899e82ec69d102",
+      "base_git_blob": "a12e468bd445292c291a6cc6be525c6f3982d51a"
+    },
+    {
+      "path": "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
+      "bytes": 55828,
+      "sha256": "d30451e0a56cf189057e5347e2c8c81bf2cfe84c61eca4acba347697f803e88f",
+      "archive_member": "source-overrides/MDK-ARM_F435/cmake-generated/CMakeLists.txt"
+    },
+    {
+      "path": "MDK-ARM_F435/Platform/Core/at32f435_437_clock.c",
+      "bytes": 4632,
+      "sha256": "5b11022a3c13008bf0913887e4ff02690cb066b237aef7b3c109c9d4373e764d",
+      "archive_member": "source-overrides/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c"
+    },
+    {
+      "path": "MDK-ARM_F435/Platform/Core/at32f435_437_clock.h",
+      "bytes": 1733,
+      "sha256": "bf1037a314335fae3bcfe98010647db1d6a0292dd63d6d0f8d43ed549888773f",
+      "archive_member": "source-overrides/MDK-ARM_F435/Platform/Core/at32f435_437_clock.h"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/_X-Track/RTE_Components.h",
+      "bytes": 2272,
+      "sha256": "14feddf2494cedc2b468f661114359119fc3a9199fe4bbc958e24f2fafb842f6",
+      "base_git_blob": "6034ca73521bcd11e97e0553853caca42422610b"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_conf.h",
+      "bytes": 5250,
+      "sha256": "e877dddd3d07e8806e3a2fc88014c4e95445b5c3a8abf75dd3c930c28e7c28b4",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_conf.h"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c",
+      "bytes": 34486,
+      "sha256": "86777d8e4cc9087bf8e5b7f49ff9a0d5b56967bd0ebff8b15bcc9008f68dc4b1",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c",
+      "bytes": 35586,
+      "sha256": "a3cbd09aa22e127e14bf733d5710bbc1b7feb800ae51c4cedae21effd2e11696",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c",
+      "bytes": 15778,
+      "sha256": "d460c16449f7ea3338a9c7b9b5461ff04b8c2b43bd6a34a9a50f016939ac39ea",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c",
+      "bytes": 6726,
+      "sha256": "35f7814f30f2c9e88e272fbd57ae3828a8065212ce74ceb14147d00e14a38ad5",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c",
+      "bytes": 15543,
+      "sha256": "a882a245a50572483b0b7de4d52af36e95f884dad483a1183a12f59c3cbb0539",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c",
+      "bytes": 29200,
+      "sha256": "a65a31ea6e65598cd7077842d8e83e963a2213b32cb765aa5da0ed2b71c5897a",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c",
+      "bytes": 3683,
+      "sha256": "16b87bcbbbe1213b174226c90b1b85672eb60b6f9af4a9438b4224d1e517af23",
+      "archive_member": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c"
+    },
+    {
+      "path": "MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c",
+      "bytes": 5581,
+      "sha256": "885ef3fa41c3fa9d4f8ac54aa849c5e6371243944c30c022960942714a126931",
+      "base_git_blob": "fa3acb8150d6f545ec18ac32abadec01c2b995b4"
+    },
+    {
+      "path": "tests/boot/validate_boot_artifact.py",
+      "bytes": 7014,
+      "sha256": "3130992047ffdd2990e4db32202e8025af43cf2c1643630deb86e4d337ad240f",
+      "archive_member": "source-overrides/tests/boot/validate_boot_artifact.py"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Device/Include/at32f435_437.h",
+      "bytes": 51849,
+      "sha256": "042566a87f97b8059d0f31c97a235f48920feea2c99095b35ce2924e8b9ebd12",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Device/Include/at32f435_437.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Device/Include/at32f435_437_conf.h",
+      "bytes": 5263,
+      "sha256": "52d16fb6d2d2ac3063e6322f4fbf319cd28d4e34e23d336435ed1c2fe3d6ed6c",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Device/Include/at32f435_437_conf.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Device/Include/system_at32f435_437.h",
+      "bytes": 2324,
+      "sha256": "f9521ac6057f3bc65b92a952a48365186a8a16452d73d4a5c4c59fdaeddddde4",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Device/Include/system_at32f435_437.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_acc.h",
+      "bytes": 5670,
+      "sha256": "c120e3045e781c363ad7628f4a026b55d38468e0dd5c745773c9287fc1f2b179",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_acc.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_adc.h",
+      "bytes": 42923,
+      "sha256": "834ff598ce6254e66174e4565f725a7f7ac92d379c844fb8142d3e3f52ff16f4",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_adc.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_can.h",
+      "bytes": 39979,
+      "sha256": "6adf32cdaa96dc9a985627089e7e08f9c5b1b176e944172ba80f72f9d98795ae",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_can.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_crc.h",
+      "bytes": 5229,
+      "sha256": "ffbb7147594e51400bc09fd3da65b7c394893c16171a8a15c99fe7c6f24dbf47",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_crc.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_crm.h",
+      "bytes": 85011,
+      "sha256": "61dc3c4e570eeeb8acf00cd6751a6800d6889ae2bdadfd6ee7eadfb66e669c83",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_crm.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dac.h",
+      "bytes": 12654,
+      "sha256": "09793f1ac1d6a9b8977d13999490ed30f5565a5f52cb0ca93f603d32d5b0ce36",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dac.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_debug.h",
+      "bytes": 7903,
+      "sha256": "b118dcd948d961156f8a6a5583bc536bbe72b960b589636f6688f8a3c3c568df",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_debug.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_def.h",
+      "bytes": 2189,
+      "sha256": "4e560a38c9d4a9a14a1dbe48489f8f0cf1a44318d781c38d6aba6c50c9738f9c",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_def.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dma.h",
+      "bytes": 45724,
+      "sha256": "fa7b0e4f6c02257c480edbbb1123422051298c96eac2e87569691d028f84bbb2",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dma.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dvp.h",
+      "bytes": 18051,
+      "sha256": "0ae2a99cdde4b95bc83566fab14177b31ac025656fb19bed3c3032a02acda065",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dvp.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_edma.h",
+      "bytes": 56183,
+      "sha256": "2f239dcd733e495b1d22705f2ca9e13f064f535534b28c498dc532d6e74283c7",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_edma.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_emac.h",
+      "bytes": 65586,
+      "sha256": "657fb09214e15aa86ab7d72cc7a11f06f12025eecebddb6139d1b77dbadb700b",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_emac.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_ertc.h",
+      "bytes": 38482,
+      "sha256": "06356aabbc6a8587aabda3d0376cb2d9e99018519486ea056b660e79207839ca",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_ertc.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_exint.h",
+      "bytes": 8055,
+      "sha256": "c190bbf6c6ae7de1ed5e0797a54097a6911a7bb94fc2ab5600a0f64e1da278ad",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_exint.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_flash.h",
+      "bytes": 23243,
+      "sha256": "4be0baa804355d4aeb003df4500396e24cfa9b41b66d9e4cb052a22988ff7939",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_flash.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_gpio.h",
+      "bytes": 23191,
+      "sha256": "5a6601ded659bad22fa37cf5382a967b42840d76d6586c33e4ed78a2ef23dfb5",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_gpio.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_i2c.h",
+      "bytes": 17805,
+      "sha256": "2c6c5af3b9f23693f59685844ef45e4ebf16183d3d9170910b19d510c1c72a7f",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_i2c.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_misc.h",
+      "bytes": 4090,
+      "sha256": "a41aad1ca6e586d15226f898915d07cea9ec46b608d4d031a1381e519a2f6585",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_misc.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_pwc.h",
+      "bytes": 7254,
+      "sha256": "19feb5fed2ac2dedfc7d7a0fc446b3ba1b5192344d3c351de611ea9c7de86d90",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_pwc.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_qspi.h",
+      "bytes": 19035,
+      "sha256": "2bd21b5774ea4a5c550a5d1c819790df632a58c47f4420bde3736df76daf899a",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_qspi.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_scfg.h",
+      "bytes": 10336,
+      "sha256": "5d89e117fe7062b6564e857dd6ed5f68a8fff54cf4d833b59cb1d5491e48b11b",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_scfg.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_sdio.h",
+      "bytes": 23545,
+      "sha256": "db66bac987c9b9e897883fd07c7229b5fef96ee63193720954d64b01a4bb78ad",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_sdio.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_spi.h",
+      "bytes": 18754,
+      "sha256": "212a5ae4a2bd3ec5c33ac4832f4b9b320713b9a7f01782807abc423641e44bc5",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_spi.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_tmr.h",
+      "bytes": 41606,
+      "sha256": "bc5a53fc6b790ac3a85dc3ddda58948b434aec2c91821274b9418bde67c4d0d7",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_tmr.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_usart.h",
+      "bytes": 16192,
+      "sha256": "f7dd46d9a9de0784dafa5537580c567992ea76302c3cfec7ec3256b42090bf10",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_usart.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_usb.h",
+      "bytes": 56656,
+      "sha256": "e9a6242614e2fefce69318093bca08727218be47527fd328d28469db19f37d63",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_usb.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_wdt.h",
+      "bytes": 5269,
+      "sha256": "441e390db9d01b6846e6c7e936836c71e3e592875267d3855356daa2b205ba13",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_wdt.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_wwdt.h",
+      "bytes": 4038,
+      "sha256": "624167d30a99e52a385dd4e7386c2558b3301e49f440836f1bf57c33a27dafd4",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_wwdt.h"
+    },
+    {
+      "path": "vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_xmc.h",
+      "bytes": 39514,
+      "sha256": "c6a8a7f06886430bcc309a43eaa4515e3d76964ee0d16f154701739115458324",
+      "archive_member": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_xmc.h"
+    },
+    {
+      "path": "vendor/CMSIS/Include/cmsis_compiler.h",
+      "bytes": 9764,
+      "sha256": "869640702d811c4c63abb52206715c891a93fd03be954df5ad40d378355af3d6",
+      "archive_member": "source-overrides/vendor/CMSIS/Include/cmsis_compiler.h"
+    },
+    {
+      "path": "vendor/CMSIS/Include/cmsis_gcc.h",
+      "bytes": 64795,
+      "sha256": "0837f98e834d6a529854c8c86336e9d99eb8e379bf1deb964858d7863950f862",
+      "archive_member": "source-overrides/vendor/CMSIS/Include/cmsis_gcc.h"
+    },
+    {
+      "path": "vendor/CMSIS/Include/cmsis_version.h",
+      "bytes": 1715,
+      "sha256": "dd03af200b23bdd8d091ffa7beb3d1a2c4fc5611557567bd57ec613205f6df1f",
+      "archive_member": "source-overrides/vendor/CMSIS/Include/cmsis_version.h"
+    },
+    {
+      "path": "vendor/CMSIS/Include/core_cm4.h",
+      "bytes": 122991,
+      "sha256": "cdc0c5ab9ba0f24c065e891d26c3e686ed04106700ce6a572cc7e83e71965b59",
+      "archive_member": "source-overrides/vendor/CMSIS/Include/core_cm4.h"
+    },
+    {
+      "path": "vendor/CMSIS/Include/mpu_armv7.h",
+      "bytes": 11962,
+      "sha256": "e504a7d47dfdb3d61dfae3cf08d27ba9bc69aa4b2b81ca568efdafd65d6abdcc",
+      "archive_member": "source-overrides/vendor/CMSIS/Include/mpu_armv7.h"
+    }
+  ],
+  "external_toolchain_inputs": [
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\_ansi.h",
+      "bytes": 2625,
+      "sha256": "5c6403b471ee897c9a6c12e00a58617247804eb3ee72d7baeb7c08616090dd1d"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\_newlib_version.h",
+      "bytes": 336,
+      "sha256": "bfc4b55e8665b5c4ae407e090a6aac2fb829905f04a5a7519686631eb1633fff"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\machine\\_default_types.h",
+      "bytes": 6650,
+      "sha256": "5d8f9f7ead7927e4b8b7ed00172e84f2ae82ea7f5f6ba3240ff813a9236771b3"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\machine\\_types.h",
+      "bytes": 112,
+      "sha256": "44544ecbbc10c8aa58ca2da6d0617ffeee5af847af24515ab108c8218d6d92c8"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\machine\\ieeefp.h",
+      "bytes": 11362,
+      "sha256": "a01f46795677820323740962d3bbf519a68e426556b345590778302cf8aec2e8"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\newlib.h",
+      "bytes": 11805,
+      "sha256": "f5b1f4cb2854a583795145eeb2b3f4115411bbd216a683356cdddaa208adb9ad"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\stdint.h",
+      "bytes": 12432,
+      "sha256": "99fe201684856075ccd92704f63b702f6fa882b9dab61bd7a9bcce2588275861"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\string.h",
+      "bytes": 5555,
+      "sha256": "79722fe25a7d01447fee06a0b8efe7535c1b891568730ba154a139c59c068ffc"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\_intsup.h",
+      "bytes": 5741,
+      "sha256": "1af8abe244b43a3a5b5a85f6c834aa206930b6938e8109fbec430bc140b68df5"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\_stdint.h",
+      "bytes": 1824,
+      "sha256": "49f8328943afa2a83ed4a35fcb808ed08b8c9fcb55373c786fb1b1d3a21952d7"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\_types.h",
+      "bytes": 5094,
+      "sha256": "1abe39aca5104bafbde2e0219e7cdc3e96129b22ce1ef5cd58b66d8d147d3fb7"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\cdefs.h",
+      "bytes": 24504,
+      "sha256": "9dcd9f554b32c40791b8f081f34c83767c61c0bc567b4a486066edda39812f3e"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\config.h",
+      "bytes": 7342,
+      "sha256": "583e381e7184a477bcea569149f6154ccf4f0faa0829a9d8363954adb7aecf14"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\features.h",
+      "bytes": 16440,
+      "sha256": "0f4735889b0edf8c2674a16f18d4e52f6eff4496f8878bf43aa125235f97500a"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\lock.h",
+      "bytes": 2455,
+      "sha256": "f5cad9196ce745967fd2673e085b5c03df7887d4d11d7544aff05ff6679be6b8"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\reent.h",
+      "bytes": 30155,
+      "sha256": "948b8a04507fd331248a164f0dfd12443e9942d3893b0159efd0865d787405f7"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\arm-none-eabi\\include\\sys\\string.h",
+      "bytes": 116,
+      "sha256": "b7164ee36ccb0a08bc27c7e381ea417c97d8c3fd3157de62b75d2a6bf7a0a589"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\lib\\gcc\\arm-none-eabi\\13.3.1\\include\\stddef.h",
+      "bytes": 13735,
+      "sha256": "9efc696d6c7eb8bb1831b149c6a92f88a775809cd63e4007312b617915f81188"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\lib\\gcc\\arm-none-eabi\\13.3.1\\include\\stdint.h",
+      "bytes": 328,
+      "sha256": "86a7914ab7d6a18465a6fb9a7b54f945cad604fdbf3ca0d10e4e0254e0037911"
+    }
+  ],
+  "members": [
+    {
+      "path": "derived/boot-compile-commands.json",
+      "bytes": 43559,
+      "sha256": "cc871ff4b9191783e9a979352d7e34530595f6fe775fd2b0b0859e7527f97925"
+    },
+    {
+      "path": "derived/ninja-dependencies.txt",
+      "bytes": 83072,
+      "sha256": "88f9fbe02e9dbbb0adbf70e4524155a1930c46c997772192a464487c8b8351f0"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/b16/boot/X-Track-Boot.bin",
+      "bytes": 14800,
+      "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/b16/boot/X-Track-Boot.elf",
+      "bytes": 36860,
+      "sha256": "f0917cd4332444ae41afb2da49dc17b82b4536a62417b69300c2e41d6c82e036"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/b16/boot/X-Track-Boot.map",
+      "bytes": 110639,
+      "sha256": "cde67dc4fcc63c24fcb98342acdd602eb75a4f3ce0e5c0ad365f583c70520433"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/b16/boot/x-track-boot-gcc.ld",
+      "bytes": 2981,
+      "sha256": "26620445b1f5583b3dcb7d212eed03486edfbfd9a041271fee0289b84da01836"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/b16/reproducible-build.txt",
+      "bytes": 106,
+      "sha256": "47ebbb77be29a2436da01a9701f74213ca2dda24f1c7c69e5282d870af5e0a5e"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/compiler-version.log",
+      "bytes": 293,
+      "sha256": "522a982d97f278e7d50ef117f9de007cd43b29f2bb046449fa933cf38588e203"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-build.json",
+      "bytes": 447,
+      "sha256": "8de64f0017f88ec8212e643b29c8383901ccf231bc34ce6e65e901794353bf68"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-build.log",
+      "bytes": 3607,
+      "sha256": "1b2e2784ac577a7b652acdacef64866bbbd799e397f6787ae96840503083dbae"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-configure.json",
+      "bytes": 1064,
+      "sha256": "0e21573852646b7b7dd2b5c196a3be65dc3e7d3c3ea0176b608fca3e293513cb"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-configure.log",
+      "bytes": 964,
+      "sha256": "9d2b7e3de930b91f9546fcf525b375dac2282bd0b8564c95db10fad88fe97003"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-size.json",
+      "bytes": 477,
+      "sha256": "f234e96980dc9c0d2aee7e57631e5fc33fba3765764de985bebded9efbddc2e8"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-size.log",
+      "bytes": 158,
+      "sha256": "18d2ecdf6e2d0f8fe3f3c0725827758eb767da77df6ee1aa4e474e130f7db13b"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-validate.json",
+      "bytes": 568,
+      "sha256": "1fb87530164dcb682b18aa6e675ad349b92bc619eaf075237bb846002c7b5995"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g1-validate.log",
+      "bytes": 93,
+      "sha256": "3956145f31cb15a447da55c3c1bd3b2dc0a13731bf2b47678519c9d1d14457ce"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-build.json",
+      "bytes": 449,
+      "sha256": "1824e368ae23d162576cef11991f9c2e7eaf69c4f1ad329c11966c5a03799414"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-build.log",
+      "bytes": 3608,
+      "sha256": "b6998f406eba07eedaf26c338a84eeb03db03dafaf0d866bf4c20c0680cc57b7"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-configure.json",
+      "bytes": 1068,
+      "sha256": "3cc475a0f57bea2c69f5bf41e11ef61df09a3f1b40788459e391985615e796a1"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-configure.log",
+      "bytes": 965,
+      "sha256": "99a2e269f9d47451e1f5fd5d9aeab49c39985f2de1a9a3f386e9830f2f3d557b"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-size.json",
+      "bytes": 479,
+      "sha256": "d07ce26b6bd727f7d3e06fb0f6af332fdbdd86340ea1abb8c4419de03be08f97"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-size.log",
+      "bytes": 159,
+      "sha256": "62df936c6b67b9e2e3485ff556b13aeb222d0721c668733b34f8e84c1d461c85"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-validate.json",
+      "bytes": 570,
+      "sha256": "8d04fe4132e9c6c5c0064af73149f75d5fc33890974368de75e977250beda604"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/g16-validate.log",
+      "bytes": 93,
+      "sha256": "34f28829a52acd2ba06bfbdbfb7c88c5fab5f74c77548823cdb20c2cbc2e3da2"
+    },
+    {
+      "path": "original/.cache/p34-bc-target/result.json",
+      "bytes": 18812,
+      "sha256": "ce02cabb551dffe94e483953303a2c046033fb2554039fbf921821ce5828b964"
+    },
+    {
+      "path": "original/.cache/p34-boot16-assets1/candidate-first16.bin",
+      "bytes": 16384,
+      "sha256": "8599a7162ad64a6daa2571653f4ea575d297fde6c032ee8355d55312492bbb9e"
+    },
+    {
+      "path": "original/.cache/p34-boot16-assets1/expected-complete-boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    {
+      "path": "original/.cache/p34-boot16-assets1/restore-first16.bin",
+      "bytes": 16384,
+      "sha256": "9c8daee1f93668ced63a03bfa23d4eb31791a1d7496d84c39be5ae77fbcbe6f7"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/before/command.jlink",
+      "bytes": 2146,
+      "sha256": "c214deabedf6a9c132e19c41bef0318a3f715299d9d7ec22ed2c343a927a4844"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/before/console.json",
+      "bytes": 827,
+      "sha256": "753341bec6e8f7f205a94a2de7ae76639b1fc6f8742a3f1353c29d3aa525bf61"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/before/console.log",
+      "bytes": 7312,
+      "sha256": "06ff9e9367be8dc6ed7eec68f1ff3671a292276d5ae7186a3589b2d31d7a4000"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/before/result.json",
+      "bytes": 1050,
+      "sha256": "81261e5cf3957407619b27f319917457d7b74718ec5fb3e285c620cb2446fca0"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/before/sdk.log",
+      "bytes": 12175,
+      "sha256": "96011c620ae4b91ac0b1243881c638b8f00a9e5261913bbb1aa1f3730a053ca3"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/before/settings.jlink",
+      "bytes": 898,
+      "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/health/command.jlink",
+      "bytes": 2354,
+      "sha256": "5d701fa260e59c62c3f32df8e18a865e17f37b04910e916688d1fd572ebfb023"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/health/console.json",
+      "bytes": 827,
+      "sha256": "a73a663cdb44ba27d4426a88255886d16009525092dbdbf38fc810ecbebd37b2"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/health/console.log",
+      "bytes": 7886,
+      "sha256": "a894995c781ef14dc194da92b21ccaefb3a6f5fe2137f12f4626506c072a2ea6"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/health/result.json",
+      "bytes": 1048,
+      "sha256": "2f6ab28ad968b8a9ac6fec06224b2fccd51b504e3aa2ad8987d1eb68998f1dc7"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/health/sdk.log",
+      "bytes": 12786,
+      "sha256": "055df05637aee34219ed427a362d9026cd91f96ad0ca8cf2fd58ba4e48e08265"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/health/settings.jlink",
+      "bytes": 898,
+      "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/hold/command.jlink",
+      "bytes": 1995,
+      "sha256": "582f7910baebe78fae6a3b92d8dec6d7315d2f8a757fecd8a5170db55926a9c7"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/hold/console.json",
+      "bytes": 819,
+      "sha256": "c679c19f400be4cf869c0bd8b01af9905d16035bea1918b884ef4cac59b9d1d2"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/hold/console.log",
+      "bytes": 7935,
+      "sha256": "195cc546caee60284831b4b0e1c6f289d6f179195a61c46d4a7260fc59412d02"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/hold/result.json",
+      "bytes": 1053,
+      "sha256": "2cf16c183deab61ab011ec7f5f8a0fa8c8db3ad293ca51e4108bf59c97a270d0"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/hold/sdk.log",
+      "bytes": 15203,
+      "sha256": "495c098c5a6dc51943e01dc8ba0233e479efcdf5560d1a66db530902eee798e9"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/hold/settings.jlink",
+      "bytes": 898,
+      "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/program/command.jlink",
+      "bytes": 2447,
+      "sha256": "1b1263fd287ed8979263c2024a0f9baee8170944713fb694c15778223fbe8caf"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/program/console.json",
+      "bytes": 831,
+      "sha256": "c4d0c46336b323906159e400542d50e49d8ddaf97e72142239be4d1a016a6639"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/program/console.log",
+      "bytes": 8830,
+      "sha256": "b9c9790f8389202d1c819b965713137166d9492f374ceeef3e33a3daff49fe5c"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/program/result.json",
+      "bytes": 1064,
+      "sha256": "149afa7a8940c11ca87ba84e10d261892f41def4a646b626b5de6fcf8699542b"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/program/sdk.log",
+      "bytes": 19878,
+      "sha256": "35695564f8d44f30b7c5e36a8beca278fb8bc9ab99e954d5aefb1ebbb8781b3e"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/program/settings.jlink",
+      "bytes": 898,
+      "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/start/command.jlink",
+      "bytes": 1949,
+      "sha256": "ce7ff325cfaffafce9e37180a20785dd46d71ac53918e04ef907a3c369aaaad4"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/start/console.json",
+      "bytes": 823,
+      "sha256": "f4dcc38fe5086f245324e94307708f7dfb5f51b56d00d1a78825c39c10476dc1"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/start/console.log",
+      "bytes": 7033,
+      "sha256": "43fe7cd1ea0ae97c35f2fb8d149661b227671e8a222fba67dc57d02d9455cb27"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/start/result.json",
+      "bytes": 1047,
+      "sha256": "493742b289c0dcdfb71b3376cf2116841afce14d8ede45afba29d0f05c85a919"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/start/sdk.log",
+      "bytes": 13018,
+      "sha256": "e142725949560883563539e1ce9b98b9156e6a601c7d4fa9357d6b5c4885a86a"
+    },
+    {
+      "path": "original/.cache/p34-group16-commander1/start/settings.jlink",
+      "bytes": 898,
+      "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/analysis/comparison1.json",
+      "bytes": 23281,
+      "sha256": "d10fffa7979efa94ec83010acf4ee6b9fd77f4977cccff1a843dfdc42b98d698"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/analysis/output-audit1.json",
+      "bytes": 23663,
+      "sha256": "724eec389ecaa99d813102ebd5c4f26b4a5ad7319b7d44f7ab1811cbab15e4b9"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/analysis/output-audit2.json",
+      "bytes": 5467,
+      "sha256": "6b5acf77437e2ee2496cf708dc2f71058f262b41d9ca21fb473a8cfe0f4b47b7"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/assets/full.etu",
+      "bytes": 294068,
+      "sha256": "c5564c76efafa8b8e7cea766eae0d46de59881a45b8c0c394c954bcdab3477f5"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/assets/result.json",
+      "bytes": 25572,
+      "sha256": "b81206fdf695a99bec4365398315830bfd96dd0a4c1bbec721c3d3d75f68356e"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/app.bin",
+      "bytes": 619580,
+      "sha256": "71b762978eed25aa30978db1131c25264b0cbbab6d7b97768501649f82d8d95a"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/cfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/command.jlink",
+      "bytes": 1118,
+      "sha256": "492d954755ee72ea4a5ce2f9205f15d3d886ca0b6e4bc669e86b48214cd34eaa"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/console.json",
+      "bytes": 819,
+      "sha256": "8b70d6491eaf7036dc004f3565874210d7a39f51df6882c6d9d0adab0dd35d31"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/console.log",
+      "bytes": 4526,
+      "sha256": "0df09f68a4ee5f6e73a7349c35e965eaa49ed1fe60e0fa74b78ad57a033c3f24"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/dhcsr.bin",
+      "bytes": 4,
+      "sha256": "52a5c4a10657220cac05c63adfa923c7771c55d868a58ee360eb3d1511985c3e"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/flags.bin",
+      "bytes": 4,
+      "sha256": "35ba39dbab54ef031c7bf6fe7db90c88a86e1c4f38ebf4dab2200bf76e033dc7"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/health0.bin",
+      "bytes": 36,
+      "sha256": "68f2d20fe00b50bcfcbe8e7565c0160b912a89024bd3e2c33b11d4e7e16d150f"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/health1.bin",
+      "bytes": 36,
+      "sha256": "ca5eab64ebb05836a3fb84dd28288d78221c1ae6c01143dc36c83502c0b581e1"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/hfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/result.json",
+      "bytes": 5716,
+      "sha256": "b8693e3f4af6febac325b0ed6c81d5482612e876abc850aa43db7fbcbb7cbfbc"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/sd.bin",
+      "bytes": 4,
+      "sha256": "67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/sdk.log",
+      "bytes": 10211,
+      "sha256": "a5bb55cf9c03337e48090f19c2dbd71f70056fd23744b102fc763b1a01294855"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/settings.jlink",
+      "bytes": 898,
+      "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/post-ota/vtor.bin",
+      "bytes": 4,
+      "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/trial/cells/s04/finished/snapshot.jsonl",
+      "bytes": 1011018,
+      "sha256": "17748eaea5d7297b0c26edd2688bc3895fc547b50f083db2faf097dc36f2fe56"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/trial/cells/s04/runtime-config.json",
+      "bytes": 830,
+      "sha256": "40823d83160d96c84027f017252d8e0e62c868f23a55c0bab01f72af23bea811"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/trial/coordinator-result.json",
+      "bytes": 6823,
+      "sha256": "273e8626cbdaeec8b100fe5633c7a78d70ffa3e763742111f1be8f4ac5fb78c7"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/trial/runtime/coordinator/closed.json",
+      "bytes": 369,
+      "sha256": "9da527ebd7166670a920168d4f0f071f7da7210ba4ad535c72efe7d1cbe316f8"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/trial/runtime/network/closed.json",
+      "bytes": 368,
+      "sha256": "900e1777d2bacc84122deaaa82c95d6c71c549cd7c4715a6374403b7d8b9da06"
+    },
+    {
+      "path": "original/.cache/p34-group16-screen/trial/runtime/s04/closed.json",
+      "bytes": 369,
+      "sha256": "f175cfdf8809bbd3f280458b4806b55de37782730bf12ad8e17b0eb39e434f48"
+    },
+    {
+      "path": "original/.cache/p34-native-acquire1/boot-readback.bin",
+      "bytes": 65536,
+      "sha256": "a63346db0dc673dc42adf6064892c466af5c4571df53cb55fe5b6ea154c1fdf4"
+    },
+    {
+      "path": "original/.cache/p34-r2-normal-ota1/cells/s04/finished/snapshot.jsonl",
+      "bytes": 1013333,
+      "sha256": "d5a6fc35145ff32913880505928531c5e92d38050827a4a50958b5504c0108b1"
+    },
+    {
+      "path": "original/.cache/p34-r2-normal-ota1/cells/s04/runtime-config.json",
+      "bytes": 832,
+      "sha256": "6545fc5d85275b29eb6481b8c2fa76241b15436ab959d8c59c0c748a9316d118"
+    },
+    {
+      "path": "original/.cache/p34-r2-normal-ota1/coordinator-result.json",
+      "bytes": 6751,
+      "sha256": "c56f4ded9c3fa4eba2d4ba750f61cbda6109f175ce29920b684b4469fdeb2ee3"
+    },
+    {
+      "path": "original/.cache/p34-recovery-sources1/r2-b.bin",
+      "bytes": 619580,
+      "sha256": "e4737cfcbbb884c4a7fa407ea733486425674c7ed2723d0f8cf3263beb4e8802"
+    },
+    {
+      "path": "source-overrides/Libraries/OTA/ota_layout.h",
+      "bytes": 2275,
+      "sha256": "8f9688334f1de948f31f4736b2718f3615e4f35e6c05e9d906938a867238f5dd"
+    },
+    {
+      "path": "source-overrides/Libraries/OTA/ota_p1_6_test.h",
+      "bytes": 8374,
+      "sha256": "c59aa11d435e926d88895ed495b0723f7c8fc3b01fbbc7077078a8cb4f2edf6d"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c",
+      "bytes": 4632,
+      "sha256": "5b11022a3c13008bf0913887e4ff02690cb066b237aef7b3c109c9d4373e764d"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/Platform/Core/at32f435_437_clock.h",
+      "bytes": 1733,
+      "sha256": "bf1037a314335fae3bcfe98010647db1d6a0292dd63d6d0f8d43ed549888773f"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_conf.h",
+      "bytes": 5250,
+      "sha256": "e877dddd3d07e8806e3a2fc88014c4e95445b5c3a8abf75dd3c930c28e7c28b4"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c",
+      "bytes": 34486,
+      "sha256": "86777d8e4cc9087bf8e5b7f49ff9a0d5b56967bd0ebff8b15bcc9008f68dc4b1"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c",
+      "bytes": 35586,
+      "sha256": "a3cbd09aa22e127e14bf733d5710bbc1b7feb800ae51c4cedae21effd2e11696"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c",
+      "bytes": 15778,
+      "sha256": "d460c16449f7ea3338a9c7b9b5461ff04b8c2b43bd6a34a9a50f016939ac39ea"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c",
+      "bytes": 6726,
+      "sha256": "35f7814f30f2c9e88e272fbd57ae3828a8065212ce74ceb14147d00e14a38ad5"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c",
+      "bytes": 15543,
+      "sha256": "a882a245a50572483b0b7de4d52af36e95f884dad483a1183a12f59c3cbb0539"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c",
+      "bytes": 29200,
+      "sha256": "a65a31ea6e65598cd7077842d8e83e963a2213b32cb765aa5da0ed2b71c5897a"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c",
+      "bytes": 3683,
+      "sha256": "16b87bcbbbe1213b174226c90b1b85672eb60b6f9af4a9438b4224d1e517af23"
+    },
+    {
+      "path": "source-overrides/MDK-ARM_F435/cmake-generated/CMakeLists.txt",
+      "bytes": 55828,
+      "sha256": "d30451e0a56cf189057e5347e2c8c81bf2cfe84c61eca4acba347697f803e88f"
+    },
+    {
+      "path": "source-overrides/boot/include/boot_fw_header.h",
+      "bytes": 2203,
+      "sha256": "8c2b72d6b6926158188bd439c83d2caf53c9c37dd3d00abb187a1832c73452b5"
+    },
+    {
+      "path": "source-overrides/boot/include/boot_p1_6_test.h",
+      "bytes": 893,
+      "sha256": "66119965bd610868440ede1ede912361d5432ebd93eca61cb4d57b33de4f848f"
+    },
+    {
+      "path": "source-overrides/boot/include/boot_platform.h",
+      "bytes": 1255,
+      "sha256": "6ffcc647b7a5e547a458bacf6c177dc50f877e1163a1adb441c7220f327c17a7"
+    },
+    {
+      "path": "source-overrides/boot/include/p34_boot_checkpoint.h",
+      "bytes": 627,
+      "sha256": "01dc17cfd305c2765c5f4eb80109fdf6eab77a678a0c5ebb4c7db7fcaae4b7b1"
+    },
+    {
+      "path": "source-overrides/boot/platform/at32/boot_platform_at32.c",
+      "bytes": 22712,
+      "sha256": "3813078fb78a42b32caa7efa3859faf4389702011a9da3cd9b681d3289152ab5"
+    },
+    {
+      "path": "source-overrides/boot/src/boot_crc32.c",
+      "bytes": 1591,
+      "sha256": "128a591a5692a1a2aa5c9050e2bc24322d7a5835e781e596f08ebc534c844160"
+    },
+    {
+      "path": "source-overrides/boot/src/boot_fw_header.c",
+      "bytes": 8046,
+      "sha256": "2332eb95d0ce245b23b218812959d556cba8025e6e120464c328ac80809c858f"
+    },
+    {
+      "path": "source-overrides/boot/src/boot_main.c",
+      "bytes": 7518,
+      "sha256": "56306307351eda73e7c8ac5962267bceb0ac98c562993d890eaf06062a4fe9b9"
+    },
+    {
+      "path": "source-overrides/boot/src/boot_state_machine.c",
+      "bytes": 29305,
+      "sha256": "7710df775b1d05521710d3f4b48fd279572c9af11f0a92305ab27e7aa2e5b568"
+    },
+    {
+      "path": "source-overrides/cmake/reproducible_build.cmake",
+      "bytes": 1416,
+      "sha256": "23ae0e43c3ef49e647d8d4a0c829dc6a397b4f250ee11a63de84e9565468d978"
+    },
+    {
+      "path": "source-overrides/tests/boot/validate_boot_artifact.py",
+      "bytes": 7014,
+      "sha256": "3130992047ffdd2990e4db32202e8025af43cf2c1643630deb86e4d337ad240f"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Device/Include/at32f435_437.h",
+      "bytes": 51849,
+      "sha256": "042566a87f97b8059d0f31c97a235f48920feea2c99095b35ce2924e8b9ebd12"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Device/Include/at32f435_437_conf.h",
+      "bytes": 5263,
+      "sha256": "52d16fb6d2d2ac3063e6322f4fbf319cd28d4e34e23d336435ed1c2fe3d6ed6c"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Device/Include/system_at32f435_437.h",
+      "bytes": 2324,
+      "sha256": "f9521ac6057f3bc65b92a952a48365186a8a16452d73d4a5c4c59fdaeddddde4"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_acc.h",
+      "bytes": 5670,
+      "sha256": "c120e3045e781c363ad7628f4a026b55d38468e0dd5c745773c9287fc1f2b179"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_adc.h",
+      "bytes": 42923,
+      "sha256": "834ff598ce6254e66174e4565f725a7f7ac92d379c844fb8142d3e3f52ff16f4"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_can.h",
+      "bytes": 39979,
+      "sha256": "6adf32cdaa96dc9a985627089e7e08f9c5b1b176e944172ba80f72f9d98795ae"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_crc.h",
+      "bytes": 5229,
+      "sha256": "ffbb7147594e51400bc09fd3da65b7c394893c16171a8a15c99fe7c6f24dbf47"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_crm.h",
+      "bytes": 85011,
+      "sha256": "61dc3c4e570eeeb8acf00cd6751a6800d6889ae2bdadfd6ee7eadfb66e669c83"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dac.h",
+      "bytes": 12654,
+      "sha256": "09793f1ac1d6a9b8977d13999490ed30f5565a5f52cb0ca93f603d32d5b0ce36"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_debug.h",
+      "bytes": 7903,
+      "sha256": "b118dcd948d961156f8a6a5583bc536bbe72b960b589636f6688f8a3c3c568df"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_def.h",
+      "bytes": 2189,
+      "sha256": "4e560a38c9d4a9a14a1dbe48489f8f0cf1a44318d781c38d6aba6c50c9738f9c"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dma.h",
+      "bytes": 45724,
+      "sha256": "fa7b0e4f6c02257c480edbbb1123422051298c96eac2e87569691d028f84bbb2"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_dvp.h",
+      "bytes": 18051,
+      "sha256": "0ae2a99cdde4b95bc83566fab14177b31ac025656fb19bed3c3032a02acda065"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_edma.h",
+      "bytes": 56183,
+      "sha256": "2f239dcd733e495b1d22705f2ca9e13f064f535534b28c498dc532d6e74283c7"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_emac.h",
+      "bytes": 65586,
+      "sha256": "657fb09214e15aa86ab7d72cc7a11f06f12025eecebddb6139d1b77dbadb700b"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_ertc.h",
+      "bytes": 38482,
+      "sha256": "06356aabbc6a8587aabda3d0376cb2d9e99018519486ea056b660e79207839ca"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_exint.h",
+      "bytes": 8055,
+      "sha256": "c190bbf6c6ae7de1ed5e0797a54097a6911a7bb94fc2ab5600a0f64e1da278ad"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_flash.h",
+      "bytes": 23243,
+      "sha256": "4be0baa804355d4aeb003df4500396e24cfa9b41b66d9e4cb052a22988ff7939"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_gpio.h",
+      "bytes": 23191,
+      "sha256": "5a6601ded659bad22fa37cf5382a967b42840d76d6586c33e4ed78a2ef23dfb5"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_i2c.h",
+      "bytes": 17805,
+      "sha256": "2c6c5af3b9f23693f59685844ef45e4ebf16183d3d9170910b19d510c1c72a7f"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_misc.h",
+      "bytes": 4090,
+      "sha256": "a41aad1ca6e586d15226f898915d07cea9ec46b608d4d031a1381e519a2f6585"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_pwc.h",
+      "bytes": 7254,
+      "sha256": "19feb5fed2ac2dedfc7d7a0fc446b3ba1b5192344d3c351de611ea9c7de86d90"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_qspi.h",
+      "bytes": 19035,
+      "sha256": "2bd21b5774ea4a5c550a5d1c819790df632a58c47f4420bde3736df76daf899a"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_scfg.h",
+      "bytes": 10336,
+      "sha256": "5d89e117fe7062b6564e857dd6ed5f68a8fff54cf4d833b59cb1d5491e48b11b"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_sdio.h",
+      "bytes": 23545,
+      "sha256": "db66bac987c9b9e897883fd07c7229b5fef96ee63193720954d64b01a4bb78ad"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_spi.h",
+      "bytes": 18754,
+      "sha256": "212a5ae4a2bd3ec5c33ac4832f4b9b320713b9a7f01782807abc423641e44bc5"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_tmr.h",
+      "bytes": 41606,
+      "sha256": "bc5a53fc6b790ac3a85dc3ddda58948b434aec2c91821274b9418bde67c4d0d7"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_usart.h",
+      "bytes": 16192,
+      "sha256": "f7dd46d9a9de0784dafa5537580c567992ea76302c3cfec7ec3256b42090bf10"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_usb.h",
+      "bytes": 56656,
+      "sha256": "e9a6242614e2fefce69318093bca08727218be47527fd328d28469db19f37d63"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_wdt.h",
+      "bytes": 5269,
+      "sha256": "441e390db9d01b6846e6c7e936836c71e3e592875267d3855356daa2b205ba13"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_wwdt.h",
+      "bytes": 4038,
+      "sha256": "624167d30a99e52a385dd4e7386c2558b3301e49f440836f1bf57c33a27dafd4"
+    },
+    {
+      "path": "source-overrides/vendor/AT32F435_437_DFP/Peripherals/inc/at32f435_437_xmc.h",
+      "bytes": 39514,
+      "sha256": "c6a8a7f06886430bcc309a43eaa4515e3d76964ee0d16f154701739115458324"
+    },
+    {
+      "path": "source-overrides/vendor/CMSIS/Include/cmsis_compiler.h",
+      "bytes": 9764,
+      "sha256": "869640702d811c4c63abb52206715c891a93fd03be954df5ad40d378355af3d6"
+    },
+    {
+      "path": "source-overrides/vendor/CMSIS/Include/cmsis_gcc.h",
+      "bytes": 64795,
+      "sha256": "0837f98e834d6a529854c8c86336e9d99eb8e379bf1deb964858d7863950f862"
+    },
+    {
+      "path": "source-overrides/vendor/CMSIS/Include/cmsis_version.h",
+      "bytes": 1715,
+      "sha256": "dd03af200b23bdd8d091ffa7beb3d1a2c4fc5611557567bd57ec613205f6df1f"
+    },
+    {
+      "path": "source-overrides/vendor/CMSIS/Include/core_cm4.h",
+      "bytes": 122991,
+      "sha256": "cdc0c5ab9ba0f24c065e891d26c3e686ed04106700ce6a572cc7e83e71965b59"
+    },
+    {
+      "path": "source-overrides/vendor/CMSIS/Include/mpu_armv7.h",
+      "bytes": 11962,
+      "sha256": "e504a7d47dfdb3d61dfae3cf08d27ba9bc69aa4b2b81ca568efdafd65d6abdcc"
+    }
+  ],
+  "product_defaults_changed": false,
+  "new_hardware_operations": false,
+  "clean_checkout_rebuild": "NOT_RUN",
+  "full_p34_worktree_included": false,
+  "source_patch_base_index_check": "PASS (git apply --check --cached; no application)"
+}
