@@ -18,7 +18,7 @@ class _PipelineWire {
 }
 
 class _PipelineAck {
-  _PipelineAck(OtaBleFrame frame) {
+  _PipelineAck(OtaBleFrame frame, {this.arrivalUs}) {
     final base = frame.cmd == _PipelineWire.ackBegin ? 2 : 1;
     if (frame.payload.length != base + OtaPipelineWindow.ackBytes ||
         !OtaBleCodec.knownStatuses.contains(frame.payload[0])) {
@@ -40,6 +40,7 @@ class _PipelineAck {
 
   late final int status, session, epoch, durable, accepted, credit;
   late final Uint8List body;
+  final int? arrivalUs;
 }
 
 class _PipelineWaiter extends _ResponseWaiter {
@@ -175,7 +176,7 @@ extension _PipelineTransfer on OtaBleTransport {
       try {
         await _writeFrame(frame);
         final response = await waiter.future.timeout(_capByBudget(ackTimeout));
-        final ack = _PipelineAck(response);
+        final ack = _PipelineAck(response, arrivalUs: waiter.arrivalUs);
         if (ack.status == OtaBleCodec.statusOk && ack.epoch == epoch) return ack;
         if (attempt < retries &&
             (ack.status == OtaBleCodec.statusErrCrc || ack.status == OtaBleCodec.statusErrFrame)) {
@@ -338,6 +339,10 @@ extension _PipelineTransfer on OtaBleTransport {
       if (endAck.durable != package.length || endAck.accepted != package.length ||
           endAck.credit != package.length) {
         throw const OtaTransportException('Incomplete v2 END ACK', code: 'ACK_MALFORMED');
+      }
+      final endStats = stats;
+      if (endStats != null && endAck.arrivalUs != null) {
+        endStats.recordEndAckArrival(atUs: endAck.arrivalUs!);
       }
       _seq = (endSeq + 1) & 0xffff;
       _pipelineEpoch = null;

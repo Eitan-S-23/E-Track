@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
+import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Protocol peer only: synthetic bytes are never offered to a real device.
@@ -22,6 +23,7 @@ class _Peer implements OtaBleChannel {
   int resume = 0;
   Uint8List received = Uint8List(0);
   void Function(OtaBleFrame)? onData;
+  void Function(OtaBleFrame)? onEnd;
   void Function(Uint8List)? mutateDataAck;
 
   @override
@@ -117,6 +119,10 @@ class _Peer implements OtaBleChannel {
           break;
         case 0x13:
           expect(frame.seq, (beginSeq + 1 + (total - resume + 127) ~/ 128) & 0xffff);
+          if (onEnd != null) {
+            onEnd!(frame);
+            break;
+          }
           ack(0x93, frame.seq, off: badEnd ? 0 : total);
           break;
         case 0x14:
@@ -166,6 +172,34 @@ Future<void> until(bool Function() condition) async {
 }
 
 void main() {
+  test('v2 END timing uses only validated matched arrival, not later write settlement', () async {
+    var clock = 100;
+    final peer = _Peer();
+    final stats = OtaLinkStats(label: 'pipeline', clockUs: () => clock);
+    final transport = OtaBleTransport(channel: peer, enablePipeline: true, stats: stats);
+    peer.onEnd = (frame) {
+      clock = 300;
+      peer.ack(0x93, frame.seq);
+      clock = 350;
+      peer.ack(0x93, (frame.seq + 1) & 0xffff);
+      clock = 900;
+    };
+    expect((await transfer(transport, package(1000))).isOk, isTrue);
+    expect((stats.toJson()['transfer'] as Map)['endAckUs'], 300);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  test('incomplete v2 END does not record a successful transfer endpoint', () async {
+    final peer = _Peer()..badEnd = true;
+    final stats = OtaLinkStats(label: 'pipeline');
+    final transport = OtaBleTransport(channel: peer, enablePipeline: true, stats: stats);
+    await expectLater(transfer(transport, package(1000)), throwsA(isA<OtaTransportException>()));
+    expect((stats.toJson()['transfer'] as Map)['endAckUs'], isNull);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
   test('batch12 cancellation completes only the partially dispatched frame before ABORT2', () async {
     final peer = _Peer();
     final transport = sender(peer, batch: 12);
