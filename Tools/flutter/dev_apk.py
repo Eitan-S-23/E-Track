@@ -223,11 +223,14 @@ def ota_link_candidate(env):
     name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip()
     if name in ("", "baseline"):
         return None
-    if name == "runtime":
+    if name in ("runtime", "runtime-pipeline"):
         observation = observation_config(env)
         if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
             raise ValueError("Runtime OTA experiment requires device observation with a MAC target")
-        return {"name": name, "runtime_config": True}
+        config = {"name": name, "runtime_config": True}
+        if name == "runtime-pipeline":
+            config["pipeline"] = True
+        return config
     candidates = {
         "reuse-with": (True, False),
         "discover-without": (False, True),
@@ -243,7 +246,10 @@ def ota_link_defines(config):
     if config is None:
         return []
     if config.get("runtime_config") is True:
-        return ["--dart-define=OTA_P34_RUNTIME_CONFIG=true"]
+        defines = ["--dart-define=OTA_P34_RUNTIME_CONFIG=true"]
+        if config.get("pipeline") is True:
+            defines.append("--dart-define=P34_OTA_PIPELINE=true")
+        return defines
     return [
         "--dart-define=OTA_P34_REUSE_GATT=" + str(config["reuse_gatt"]).lower(),
         "--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" +

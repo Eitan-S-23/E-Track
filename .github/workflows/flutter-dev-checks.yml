@@ -35,6 +35,7 @@ on:
           - discover-without
           - reuse-without
           - runtime
+          - runtime-pipeline
       device_observation:
         description: "Explicit opt-in device-observation debug APK; requires observation_target and observation_firmware_latest_url"
         required: false

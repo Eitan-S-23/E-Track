@@ -391,6 +391,23 @@ class DevelopmentApkTests(unittest.TestCase):
             with self.subTest(env=invalid), self.assertRaisesRegex(ValueError, "Runtime OTA experiment"):
                 APK.ota_link_candidate(invalid)
 
+    def test_pipeline_build_is_explicit_and_preserves_runtime_observation_guards(self):
+        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime-pipeline",
+               APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF"}
+        candidate = APK.ota_link_candidate(env)
+        self.assertEqual(dict(name="runtime-pipeline", runtime_config=True, pipeline=True), candidate)
+        build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, env) if name == "apk_build")
+        self.assertIn("--dart-define=P34_OTA_PIPELINE=true", build)
+        self.assertIn("--dart-define=OTA_P34_RUNTIME_CONFIG=true", build)
+        for name in ("baseline", "runtime", "reuse-without"):
+            defines = APK.ota_link_defines(APK.ota_link_candidate({**env, APK.OTA_LINK_CANDIDATE_ENV: name}))
+            self.assertNotIn("--dart-define=P34_OTA_PIPELINE=true", defines)
+        for invalid in ({APK.OTA_LINK_CANDIDATE_ENV: "runtime-pipeline"},
+                        {**env, APK.DEVICE_OBSERVATION_ENV: "false"},
+                        {**env, APK.OBSERVATION_TARGET_ENV: "XTrace"}):
+            with self.subTest(env=invalid), self.assertRaisesRegex(ValueError, "Runtime OTA experiment"):
+                APK.ota_link_candidate(invalid)
+
     def test_runtime_build_can_use_an_explicit_non_live_default_endpoint(self):
         env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",
                APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF",
