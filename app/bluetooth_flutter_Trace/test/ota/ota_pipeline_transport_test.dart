@@ -151,7 +151,7 @@ Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
     {void Function(int, int)? progress}) => transport.transfer(package: bytes,
       packageSha256: List.filled(32, 1), etuHeader: bytes.sublist(0, 64), onDurableProgress: progress);
 
-OtaBleTransport sender(_Peer peer, {bool enabled = true, Duration? budget, int batch = 1}) =>
+OtaBleTransport sender(OtaBleChannel peer, {bool enabled = true, Duration? budget, int batch = 1}) =>
     OtaBleTransport(channel: peer, enablePipeline: enabled,
       dataBatchFrames: batch,
       ackTimeout: const Duration(milliseconds: 30),
@@ -166,6 +166,19 @@ Future<void> until(bool Function() condition) async {
 }
 
 void main() {
+  test('batch12 cancellation completes only the partially dispatched frame before ABORT2', () async {
+    final peer = _Peer();
+    final transport = sender(peer, batch: 12);
+    peer.onData = (_) => transport.cancel();
+    await expectLater(transfer(transport, package(9000)),
+        throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+    await transport.abortBestEffort();
+    expect(peer.frames.where((f) => f.cmd == 0x12).length, lessThanOrEqualTo(2));
+    expect(peer.frames.last.cmd, 0x14);
+    expect(peer.pending, isEmpty);
+    await transport.dispose();
+    await peer.events.close();
+  });
   test('pipeline preserves measured batch12 and rejects undispatched reservations', () async {
     final peer = _Peer();
     final transport = sender(peer, batch: 12);

@@ -987,9 +987,10 @@ class OtaBleTransport {
 
   void _dispatchFrame(OtaBleFrame f) {
     _pipelineView?.onAck(f);
+    final pipelineStats = stats;
     if (f.cmd == _PipelineWire.ackEnd && f.session == _session && f.payload.length == 17 &&
-        ByteData.sublistView(f.payload).getUint32(1, Endian.little) == _pipelineEpoch) {
-      stats?.recordEndAckArrival();
+        ByteData.sublistView(f.payload).getUint32(1, Endian.little) == _pipelineEpoch && pipelineStats != null) {
+      pipelineStats.recordEndAckArrival(atUs: pipelineStats.nowUs());
     }
     // 重新同步证据（RC3-05⑤）：INFO 只可能由「被 MCU 完整解析的 GET_INFO」
     // 触发，因此收到本实例在废弃状态下发出的那个 seq 的 INFO，就证明 MCU

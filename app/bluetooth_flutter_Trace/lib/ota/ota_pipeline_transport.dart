@@ -74,14 +74,20 @@ class _PipelineAckView {
 
   void onAck(OtaBleFrame frame) {
     if (!window.active || frame.session != session ||
-        (frame.cmd != _PipelineWire.ackData && frame.cmd != _PipelineWire.ackAbort)) return;
+        (frame.cmd != _PipelineWire.ackData && frame.cmd != _PipelineWire.ackAbort)) {
+      return;
+    }
     if (frame.payload.length >= 5 &&
-        ByteData.sublistView(frame.payload).getUint32(1, Endian.little) != window.epoch) return;
+        ByteData.sublistView(frame.payload).getUint32(1, Endian.little) != window.epoch) {
+      return;
+    }
     try {
       final ack = _PipelineAck(frame);
       if (ack.epoch != window.epoch) return;
       if (frame.cmd == _PipelineWire.ackData &&
-          !sentSeqs.contains(frame.seq) && frame.seq != beginSeq) return;
+          !sentSeqs.contains(frame.seq) && frame.seq != beginSeq) {
+        return;
+      }
       if (ack.status != OtaBleCodec.statusOk) {
         stats?.recordAckClass('error');
         if (frame.cmd == _PipelineWire.ackData &&
@@ -172,7 +178,9 @@ extension _PipelineTransfer on OtaBleTransport {
         final ack = _PipelineAck(response);
         if (ack.status == OtaBleCodec.statusOk && ack.epoch == epoch) return ack;
         if (attempt < retries &&
-            (ack.status == OtaBleCodec.statusErrCrc || ack.status == OtaBleCodec.statusErrFrame)) continue;
+            (ack.status == OtaBleCodec.statusErrCrc || ack.status == OtaBleCodec.statusErrFrame)) {
+          continue;
+        }
         throw OtaTransportException('v2 command rejected', code: 'ACK_STATUS', status: ack.status);
       } on TimeoutException {
         _checkNoProgress();
