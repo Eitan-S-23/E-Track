@@ -10,7 +10,6 @@ class _PipelineWire {
   static const capsReply = 0x90;
   static const ackBegin = 0x91;
   static const ackData = 0x92;
-  static const ackEnd = 0x93;
   static const ackAbort = 0x94;
 
   static Uint8List word(int value) =>
