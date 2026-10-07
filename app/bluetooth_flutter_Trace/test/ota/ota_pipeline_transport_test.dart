@@ -1,0 +1,314 @@
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ble_monitor/ota/ota_ble_codec.dart';
+import 'package:ble_monitor/ota/ota_ble_transport.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+// Protocol peer only: synthetic bytes are never offered to a real device.
+class _Peer implements OtaBleChannel {
+  final events = StreamController<List<int>>.broadcast(sync: true);
+  final pending = <int>[];
+  final frames = <OtaBleFrame>[];
+  final offsetsBeforeCommit = <int>[];
+  final sequences = <int, List<int>>{};
+  bool connected = true, supports = true, badCaps = false, holdDurable = false;
+  bool badEnd = false, badBegin = false;
+  int? dropOffset;
+  int dropBegin = 0;
+  int chunkSize = 244, notifySize = 3;
+  int nonce = 0, total = 0, durable = 0, accepted = 0, beginSeq = 0, lastSeq = 0;
+  int resume = 0;
+  Uint8List received = Uint8List(0);
+  void Function(OtaBleFrame)? onData;
+  void Function(Uint8List)? mutateDataAck;
+
+  @override
+  Object get deviceScope => this;
+  @override
+  bool get isConnected => connected;
+  @override
+  Stream<List<int>> get notifications => events.stream;
+  @override
+  Future<int> maxWriteChunkSize() async => chunkSize;
+
+  int word(List<int> bytes, int offset) => ByteData.sublistView(Uint8List.fromList(bytes))
+      .getUint32(offset, Endian.little);
+
+  void reply(int cmd, int session, int seq, List<int> payload) {
+    final frame = OtaBleCodec.encodeCommand(cmd: cmd, session: session, seq: seq, payload: payload);
+    for (var offset = 0; offset < frame.length; offset += notifySize) {
+      events.add(frame.sublist(offset, math.min(offset + notifySize, frame.length)));
+    }
+  }
+
+  void ack(int cmd, int seq, {int status = 0, int? epoch, int? off, int? receivedOff}) {
+    final base = cmd == 0x91 ? 2 : 1;
+    final data = ByteData(base + 16);
+    data.setUint8(0, status);
+    if (base == 2) data.setUint8(1, 7);
+    data.setUint32(base, epoch ?? nonce, Endian.little);
+    data.setUint32(base + 4, off ?? durable, Endian.little);
+    data.setUint32(base + 8, receivedOff ?? accepted, Endian.little);
+    data.setUint32(base + 12, math.min(durable + 8192, total), Endian.little);
+    final payload = data.buffer.asUint8List();
+    if (cmd == 0x92) mutateDataAck?.call(payload);
+    reply(cmd, 7, seq, payload);
+  }
+
+  void commit() {
+    durable = accepted;
+    ack(0x92, lastSeq);
+  }
+
+  @override
+  Future<void> writeChunk(List<int> chunk) async {
+    if (!connected) throw StateError('disconnected');
+    pending.addAll(chunk);
+    while (pending.length >= 10) {
+      final size = 10 + pending[6] + (pending[7] << 8);
+      if (pending.length < size) return;
+      final frame = OtaBleCodec.decodeFrame(pending.sublist(0, size));
+      pending.removeRange(0, size);
+      frames.add(frame);
+      switch (frame.cmd) {
+        case 0x10:
+          if (!supports) break;
+          nonce = word(frame.payload, 0);
+          final caps = ByteData(16);
+          caps.buffer.asUint8List().setRange(0, 8, [80, 50, 66, 76, 2, 2, 128, 0]);
+          caps.setUint32(8, nonce, Endian.little);
+          caps.setUint32(12, badCaps ? 28 : 24, Endian.little);
+          reply(0x90, 0, frame.seq, caps.buffer.asUint8List());
+          break;
+        case 0x11:
+          expect(word(frame.payload, 101), nonce);
+          total = word(frame.payload, 1);
+          durable = accepted = resume;
+          received = Uint8List(total);
+          beginSeq = frame.seq;
+          if (dropBegin > 0) { dropBegin--; break; }
+          ack(0x91, frame.seq, receivedOff: badBegin ? resume + 128 : resume);
+          break;
+        case 0x12:
+          final offset = word(frame.payload, 4);
+          expect(word(frame.payload, 0), nonce);
+          expect(frame.seq, (beginSeq + 1 + (offset - resume) ~/ 128) & 0xffff);
+          sequences.putIfAbsent(offset, () => []).add(frame.seq);
+          onData?.call(frame);
+          if (dropOffset == offset) { dropOffset = null; break; }
+          if (offset > accepted) { ack(0x92, frame.seq, status: 6); break; }
+          if (offset == accepted) {
+            expect(offset + frame.payload.length - 8, lessThanOrEqualTo(math.min(total, durable + 8192)));
+            received.setRange(offset, offset + frame.payload.length - 8, frame.payload.sublist(8));
+            accepted += frame.payload.length - 8;
+            lastSeq = frame.seq;
+            if (durable == 0) offsetsBeforeCommit.add(offset);
+          }
+          if (!holdDurable) {
+            if (accepted == total) {
+              durable = total;
+            } else if (accepted - durable == 8192) {
+              durable += 4096;
+            }
+          }
+          ack(0x92, frame.seq);
+          break;
+        case 0x13:
+          expect(frame.seq, (beginSeq + 1 + (total - resume + 127) ~/ 128) & 0xffff);
+          ack(0x93, frame.seq, off: badEnd ? 0 : total);
+          break;
+        case 0x14:
+          expect(word(frame.payload, 0), nonce);
+          ack(0x94, frame.seq, status: 0xff);
+          break;
+        case 1:
+          total = word(frame.payload, 1);
+          final payload = Uint8List(10)..[1] = 7;
+          reply(0x81, 7, frame.seq, payload);
+          break;
+        case 2:
+          accepted = word(frame.payload, 0) + frame.payload.length - 4;
+          if (accepted == total || accepted % 4096 == 0) durable = accepted;
+          final bytes = ByteData(9)..setUint32(1, durable, Endian.little);
+          final segments = (accepted - durable + 127) ~/ 128;
+          bytes.setUint32(5, (1 << segments) - 1, Endian.little);
+          reply(0x82, 7, frame.seq, bytes.buffer.asUint8List());
+          break;
+        case 3:
+          final bytes = ByteData(9)..setUint32(1, total, Endian.little);
+          reply(0x83, 7, frame.seq, bytes.buffer.asUint8List());
+          break;
+      }
+    }
+  }
+}
+
+Uint8List package(int len) => Uint8List.fromList(List.generate(len, (i) => i & 255));
+
+Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
+    {void Function(int, int)? progress}) => transport.transfer(package: bytes,
+      packageSha256: List.filled(32, 1), etuHeader: bytes.sublist(0, 64), onDurableProgress: progress);
+
+OtaBleTransport sender(_Peer peer, {bool enabled = true, Duration? budget, int batch = 1}) =>
+    OtaBleTransport(channel: peer, enablePipeline: enabled,
+      dataBatchFrames: batch,
+      ackTimeout: const Duration(milliseconds: 30),
+      noProgressTimeout: budget ?? const Duration(seconds: 3));
+
+Future<void> until(bool Function() condition) async {
+  for (var i = 0; i < 1000; i++) {
+    if (condition()) return;
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+  }
+  fail('condition did not become true within bounded wait');
+}
+
+void main() {
+  test('pipeline preserves measured batch12 and rejects undispatched reservations', () async {
+    final peer = _Peer();
+    final transport = sender(peer, batch: 12);
+    expect((await transfer(transport, package(9000))).isOk, isTrue);
+    expect(peer.offsetsBeforeCommit, contains(4096));
+    await transport.dispose();
+    await peer.events.close();
+    final bad = _Peer();
+    bad.mutateDataAck = (payload) => ByteData.sublistView(payload).setUint32(9, 12 * 128, Endian.little);
+    final rejected = sender(bad, batch: 12);
+    await expectLater(transfer(rejected, package(9000)),
+        throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'ACK_MALFORMED')));
+    expect(bad.frames.any((f) => f.cmd == 0x13), isFalse);
+    await rejected.dispose();
+    await bad.events.close();
+  });
+  test('real transport crosses block boundary, fragments frames and waits for durable END', () async {
+    final peer = _Peer()..chunkSize = 20;
+    final transport = sender(peer);
+    final bytes = package(9000);
+    final progress = <int>[];
+    final result = await transfer(transport, bytes, progress: (off, _) => progress.add(off));
+    expect(result.isOk, isTrue);
+    expect(peer.offsetsBeforeCommit, contains(4096));
+    expect(peer.received, bytes);
+    expect(progress, [0, 4096, 9000]);
+    expect(peer.frames.where((f) => f.cmd == 0x13).length, 1);
+    expect(peer.pending, isEmpty);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  test('missing capability falls back to v1; default makes no probe', () async {
+    for (final enabled in [true, false]) {
+      final peer = _Peer()..supports = false;
+      final transport = sender(peer, enabled: enabled);
+      expect((await transfer(transport, package(1000))).isOk, isTrue);
+      expect(peer.frames.any((f) => f.cmd == 0x10), enabled);
+      expect(peer.frames.any((f) => f.cmd == 1), isTrue);
+      expect(peer.frames.any((f) => f.cmd == 0x11), isFalse);
+      await transport.dispose();
+      await peer.events.close();
+    }
+  });
+
+  test('malformed capability or BEGIN never grants DATA or falls back', () async {
+    for (final badBegin in [false, true]) {
+      final peer = _Peer()..badCaps = !badBegin..badBegin = badBegin;
+      final transport = sender(peer);
+      await expectLater(transfer(transport, package(1000)),
+          throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'ACK_MALFORMED')));
+      expect(peer.frames.any((f) => f.cmd == 0x12 || f.cmd == 1), isFalse);
+      await transport.dispose();
+      await peer.events.close();
+    }
+  });
+
+  test('lost BEGIN and DATA retries retain sequence and package bytes', () async {
+    final peer = _Peer()..dropBegin = 1..dropOffset = 0;
+    final transport = sender(peer);
+    final bytes = package(9000);
+    expect((await transfer(transport, bytes)).isOk, isTrue);
+    expect(peer.frames.where((f) => f.cmd == 0x11).map((f) => f.seq).toSet().length, 1);
+    expect(peer.sequences[0]!.length, 2);
+    for (final seqs in peer.sequences.values) { expect(seqs.toSet().length, 1); }
+    expect(peer.received, bytes);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  test('accepted RAM does not report durable progress or authorize END', () async {
+    final peer = _Peer()..holdDurable = true;
+    final transport = sender(peer);
+    final progress = <int>[];
+    final pending = transfer(transport, package(8192), progress: (off, _) => progress.add(off));
+    await until(() => peer.accepted == 8192);
+    expect(progress, [0]);
+    expect(peer.frames.any((f) => f.cmd == 0x13), isFalse);
+    peer.commit();
+    expect((await pending).isOk, isTrue);
+    expect(progress, [0, 8192]);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  test('stale epoch is ignored but future accepted credit fails closed', () async {
+    final peer = _Peer();
+    final transport = sender(peer);
+    peer.onData = (frame) => peer.ack(0x92, frame.seq, epoch: peer.nonce ^ 1, receivedOff: 0x100000);
+    expect((await transfer(transport, package(1000))).isOk, isTrue);
+    await transport.dispose();
+    await peer.events.close();
+    final badPeer = _Peer();
+    badPeer.mutateDataAck = (payload) => ByteData.sublistView(payload).setUint32(9, 8192, Endian.little);
+    final badTransport = sender(badPeer);
+    await expectLater(transfer(badTransport, package(9000)),
+        throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'ACK_MALFORMED')));
+    expect(badPeer.frames.where((f) => f.cmd == 0x12).length, 1);
+    expect(badPeer.frames.any((f) => f.cmd == 0x13), isFalse);
+    await badTransport.dispose();
+    await badPeer.events.close();
+  });
+
+  test('cancel or background transition stops DATA and sends epoch-bound ABORT2', () async {
+    for (final background in [false, true]) {
+      final peer = _Peer()..chunkSize = 20;
+      final transport = sender(peer);
+      peer.onData = (_) { if (background) { transport.pauseForBackground(); } else { transport.cancel(); } };
+      await expectLater(transfer(transport, package(9000)),
+          throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+      if (!background) await transport.abortBestEffort();
+      await until(() => peer.frames.any((f) => f.cmd == 0x14));
+      expect(peer.frames.where((f) => f.cmd == 0x12).length, 1);
+      expect(peer.frames.any((f) => f.cmd == 4 || f.cmd == 0x13), isFalse);
+      expect(peer.pending, isEmpty);
+      await transport.dispose();
+      await peer.events.close();
+    }
+  });
+
+  test('new transport resumes durable prefix with a fresh epoch', () async {
+    final peer = _Peer()..resume = 4096;
+    var lastEpoch = 0;
+    for (var i = 0; i < 2; i++) {
+      final transport = sender(peer);
+      expect((await transfer(transport, package(4113))).isOk, isTrue);
+      expect(peer.nonce, isNot(lastEpoch));
+      lastEpoch = peer.nonce;
+      expect(peer.sequences.keys, [4096]);
+      expect(peer.received.sublist(4096), package(4113).sublist(4096));
+      await transport.dispose();
+    }
+    await peer.events.close();
+  });
+
+  test('no durable progress, disconnect and invalid END cannot become success', () async {
+    for (final mode in [0, 1, 2]) {
+      final peer = _Peer()..holdDurable = mode == 0..badEnd = mode == 2;
+      if (mode == 1) peer.onData = (_) => peer.connected = false;
+      final transport = sender(peer, budget: const Duration(milliseconds: 150));
+      await expectLater(transfer(transport, package(1000)), throwsA(isA<OtaTransportException>()));
+      await transport.dispose();
+      await peer.events.close();
+    }
+  });
+}

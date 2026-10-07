@@ -96,6 +96,7 @@ class OtaService extends GetxController {
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
     int? senderWindowSegments,
+    bool enablePipeline = const bool.fromEnvironment('P34_OTA_PIPELINE'),
     OtaPhyClient? phyClient,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ?? defaultSenderWindowSegments,
@@ -103,6 +104,7 @@ class OtaService extends GetxController {
           OtaBleCodec.segmentsPerBlock,
           'senderWindowSegments',
         ),
+        _enablePipeline = enablePipeline,
         _bluetoothService = bluetoothService,
         _phyClient = phyClient ?? OtaPhyClient(),
         _notifyImpl = onNotify,
@@ -141,6 +143,7 @@ class OtaService extends GetxController {
   final BluetoothService? _bluetoothService;
   final OtaPhyClient _phyClient;
   final int _senderWindowSegments;
+  final bool _enablePipeline;
   final void Function(String title, String message)? _notifyImpl;
   final Dio _dio;
   final Dio _downloadDio;
@@ -2233,7 +2236,7 @@ class OtaService extends GetxController {
         throw StateError('OTA_BATCH_REQUIRES_WITHOUT_RESPONSE');
       }
       final transport = OtaBleTransport(channel: channel, stats: stats,
-          dataBatchFrames: batchFrames);
+          dataBatchFrames: batchFrames, enablePipeline: _enablePipeline);
       if (!linkCurrent()) {
         await transport.dispose();
         return null;

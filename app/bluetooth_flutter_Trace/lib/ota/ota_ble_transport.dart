@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,9 @@ import 'ota_ble_codec.dart';
 import 'ota_device_info.dart';
 import 'ota_link_stats.dart';
 import 'ota_mono.dart';
+import 'ota_pipeline_window.dart';
+
+part 'ota_pipeline_transport.dart';
 
 /// OTA BLE 传输测试注入点：生产实现绑定 flutter_blue_plus 的真实特征，
 /// 测试用 fake 模拟 MCU 行为（ACK、丢帧、乱序、断连）。
@@ -60,6 +64,7 @@ class OtaBleTransport {
     this.noProgressTimeout = defaultNoProgressTimeout,
     this.writeTimeout = defaultWriteTimeout,
     this.dataBatchFrames = 1,
+    this.enablePipeline = false,
   })  : _channel = channel {
     if (dataBatchFrames != 1 && dataBatchFrames != 3 && dataBatchFrames != 12) {
       throw ArgumentError.value(dataBatchFrames, 'dataBatchFrames', 'expected 1, 3 or 12');
@@ -100,6 +105,9 @@ class OtaBleTransport {
   final Duration writeTimeout;
   /// Development-only opt-in. The service still uses the default single frame.
   final int dataBatchFrames;
+  final bool enablePipeline;
+  int? _pipelineEpoch;
+  _PipelineAckView? _pipelineView;
 
   /// 帧等待者队列（一问一答）：注册后才开始发送，响应到达即分发。
   final List<_FrameWaiterBase> _waiters = [];
@@ -307,7 +315,17 @@ class OtaBleTransport {
     int? windowSegments,
     void Function(int durableOff, int total)? onDurableProgress,
     void Function(int sentBytes, int total)? onSent,
-  }) => _transferCore<OtaAckResult>(
+  }) async {
+    if (_busy) throw const OtaTransportException('transport busy', code: 'BUSY');
+    _checkUsable();
+    if (enablePipeline) {
+      final result = await _tryPipelineTransfer(package: package,
+        packageSha256: packageSha256, etuHeader: etuHeader,
+        windowSegments: windowSegments, onDurableProgress: onDurableProgress, onSent: onSent);
+      if (result != null) return result;
+      _checkUsable();
+    }
+    return _transferCore<OtaAckResult>(
     package: package,
     packageSha256: packageSha256,
     etuHeader: etuHeader,
@@ -315,7 +333,8 @@ class OtaBleTransport {
     onDurableProgress: onDurableProgress,
     onSent: onSent,
     onFullResult: (ack) => ack,
-  );
+    );
+  }
 
   /// Debug-only staging probe. It never sends END or reports a full OTA result.
   Future<OtaPrefixProbeResult> probePrefix({
@@ -870,6 +889,7 @@ class OtaBleTransport {
     _resyncProbeSeq = null;
     _resyncProbeAuthoritative = false;
     const err = OtaTransportException('OTA 传输已取消', code: 'CANCELLED');
+    _pipelineView?.fail(err);
     _ackView?.fail(err);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.fail(err);
@@ -887,9 +907,10 @@ class OtaBleTransport {
     if (_disposed) return;
     try {
       final frame = OtaBleCodec.encodeCommand(
-        cmd: OtaBleCodec.cmdAbort,
+        cmd: _pipelineEpoch == null ? OtaBleCodec.cmdAbort : _PipelineWire.abort,
         session: _session,
         seq: _nextSeq(),
+        payload: _pipelineEpoch == null ? const [] : _PipelineWire.word(_pipelineEpoch!),
       );
       await _writeFrameAfterCancel(frame);
     } catch (_) {
@@ -905,6 +926,7 @@ class OtaBleTransport {
     _resyncProbeSeq = null;
     _resyncProbeAuthoritative = false;
     const err = OtaTransportException('transport 已释放', code: 'DISPOSED');
+    _pipelineView?.fail(err);
     _ackView?.fail(err);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.fail(err);
@@ -924,6 +946,10 @@ class OtaBleTransport {
   /// 不应烧掉无进展预算。幂等；取消/释放会解除等待（不必先恢复）。
   void pauseForBackground() {
     if (_disposed || _cancelled) return;
+    if (_pipelineEpoch != null && _busy) {
+      unawaited(abortBestEffort());
+      return;
+    }
     _paused = true;
     _noProgressClock?.stop();
     otaMonoLog('MONO_PAUSE');
@@ -960,6 +986,11 @@ class OtaBleTransport {
   // ---- 内部：帧分发 ----
 
   void _dispatchFrame(OtaBleFrame f) {
+    _pipelineView?.onAck(f);
+    if (f.cmd == _PipelineWire.ackEnd && f.session == _session && f.payload.length == 17 &&
+        ByteData.sublistView(f.payload).getUint32(1, Endian.little) == _pipelineEpoch) {
+      stats?.recordEndAckArrival();
+    }
     // 重新同步证据（RC3-05⑤）：INFO 只可能由「被 MCU 完整解析的 GET_INFO」
     // 触发，因此收到本实例在废弃状态下发出的那个 seq 的 INFO，就证明 MCU
     // 帧解析器已脱离悬空态。必须 seq 匹配——废弃前发出的 GET_INFO 其迟到
@@ -1006,6 +1037,7 @@ class OtaBleTransport {
   }
 
   void _dispatchError(Object e) {
+    _pipelineView?.fail(e);
     _ackView?.fail(e);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.fail(e);
@@ -2194,6 +2226,17 @@ class OtaAckResult {
 ///
 /// 账本随设备身份对象一起回收（Expando），不产生全局泄漏。
 class _DeviceWriteLedger {
+  int? _pipelineNonce;
+
+  int nextPipelineEpoch() {
+    final previous = _pipelineNonce;
+    final next = previous == null
+        ? math.Random.secure().nextInt(0xffffffff) + 1
+        : (previous % 0xffffffff) + 1;
+    _pipelineNonce = next;
+    return next;
+  }
+
   /// 会话外查询（GET_INFO，session=0）的 seq 空间。合同 §5.1 的 seq 只
   /// 约束会话内帧；GET_INFO 不参与会话状态（§5.2），seq 仅作应答回显关联。
   int _querySeq = 0;
