@@ -236,6 +236,7 @@ extension _PipelineTransfer on OtaBleTransport {
       prefix[0] = 2;
       final beginSeq = _nextSeq();
       _noProgressClock = Stopwatch()..start();
+      otaMonoLog('MONO_BUDGET_START');
       _inTransfer = true;
       transferStarted = true;
       final beginAck = await _pipelineRoundTrip(cmd: _PipelineWire.begin, seq: beginSeq,
@@ -245,8 +246,13 @@ extension _PipelineTransfer on OtaBleTransport {
         durableOffset: beginAck.durable, maxInFlightSegments: (windowSegments ?? 24).clamp(1, 24).toInt());
       window.acknowledge(beginAck.body);
       final resume = beginAck.durable;
+      if (resume > 0) {
+        _noProgressClock?.reset();
+        otaMonoLog('MONO_BUDGET_RESET', durable: resume);
+      }
       final view = _PipelineAckView(window, _session, beginSeq, (durable) {
         _noProgressClock?.reset();
+        otaMonoLog('MONO_BUDGET_RESET', durable: durable);
         onDurableProgress?.call(durable, package.length);
       }, stats);
       _pipelineView = view;
@@ -340,6 +346,7 @@ extension _PipelineTransfer on OtaBleTransport {
         throw const OtaTransportException('Incomplete v2 END ACK', code: 'ACK_MALFORMED');
       }
       final endStats = stats;
+      otaMonoLog('MONO_END_ACK_OK', durable: endAck.durable);
       if (endStats != null && endAck.arrivalUs != null) {
         endStats.recordEndAckArrival(atUs: endAck.arrivalUs!);
       }

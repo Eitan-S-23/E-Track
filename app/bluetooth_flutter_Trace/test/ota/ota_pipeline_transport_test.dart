@@ -6,6 +6,7 @@ import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 
 // Protocol peer only: synthetic bytes are never offered to a real device.
 class _Peer implements OtaBleChannel {
@@ -172,6 +173,42 @@ Future<void> until(bool Function() condition) async {
 }
 
 void main() {
+  test('v2 success and v1 fallback emit one compatible start and END marker', () async {
+    final previousPrint = debugPrint;
+    final logs = <String>[];
+    debugPrint = (String? message, {int? wrapWidth}) {
+      if (message != null) logs.add(message);
+    };
+    addTearDown(() => debugPrint = previousPrint);
+    for (final supports in [true, false]) {
+      logs.clear();
+      final peer = _Peer()..supports = supports..dropBegin = supports ? 1 : 0;
+      final transport = sender(peer);
+      expect((await transfer(transport, package(1000))).isOk, isTrue);
+      expect(logs.where((s) => s.startsWith('OTA_MONO MONO_BUDGET_START ')).length, 1);
+      expect(logs.where((s) => s.startsWith('OTA_MONO MONO_END_ACK_OK ')).length, 1);
+      expect(logs.any((s) => s.startsWith('OTA_MONO MONO_END_ACK_OK ') && s.endsWith('durable=1000')), isTrue);
+      await transport.dispose();
+      await peer.events.close();
+    }
+  });
+
+  test('invalid v2 END emits no successful endpoint marker', () async {
+    final previousPrint = debugPrint;
+    final logs = <String>[];
+    debugPrint = (String? message, {int? wrapWidth}) {
+      if (message != null) logs.add(message);
+    };
+    addTearDown(() => debugPrint = previousPrint);
+    final peer = _Peer()..badEnd = true;
+    final transport = sender(peer);
+    await expectLater(transfer(transport, package(1000)), throwsA(isA<OtaTransportException>()));
+    expect(logs.where((s) => s.startsWith('OTA_MONO MONO_BUDGET_START ')).length, 1);
+    expect(logs.any((s) => s.startsWith('OTA_MONO MONO_END_ACK_OK ')), isFalse);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
   test('v2 END timing uses only validated matched arrival, not later write settlement', () async {
     var clock = 100;
     final peer = _Peer();
