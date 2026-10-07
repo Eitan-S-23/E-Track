@@ -6,7 +6,7 @@ import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 // Protocol peer only: synthetic bytes are never offered to a real device.
 class _Peer implements OtaBleChannel {
