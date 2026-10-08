@@ -344,6 +344,7 @@ class OtaService extends GetxController {
     return _runExclusive((generation) async {
       _deviceInfo = null; // 先失效旧快照，成功才重建
       _deviceInfoAddress = null;
+      await OtaDiagnostics.current.startNativeWrites();
       final stats = OtaDiagnostics.current.enabled
           ? OtaLinkStats(label: 'query', device: deviceAddress)
           : null;

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ble_monitor/ota/ota_native_write_trace.dart';
 import 'package:ble_monitor/ota/ota_observation_log.dart';
+import 'package:ble_monitor/ota/ota_diagnostics.dart';
 
 const capture = '1791437508254294-28859c8670dc4095b0eae5c2';
 const target = 'E3:49:E1:14:D6:CB';
@@ -144,7 +146,8 @@ void main() {
     final lines = <String>[];
     final trace = OtaNativeWriteTrace(isAndroid: true, invoke: (method, _) async {
       calls.add(method);
-      return method == 'p34TraceSnapshot' ? response.future : true;
+      if (method == 'p34TraceSnapshot') return await response.future;
+      return true;
     });
     await trace.start(captureId: capture, target: target, record: lines.add);
     final first = trace.collect(record: lines.add, flush: () async {});
@@ -155,7 +158,37 @@ void main() {
     response.complete(snapshot());
     await Future.wait([first, second, closed]);
     expect(calls.last, 'p34TraceStop');
+    expect(lines.any((s) => s.startsWith('OTA_LINK_NATIVE_META ')), isTrue, reason: lines.join('\n'));
     final meta = lines.singleWhere((s) => s.startsWith('OTA_LINK_NATIVE_META '));
     expect(jsonDecode(meta.substring('OTA_LINK_NATIVE_META '.length))['sampleCount'], 1);
+  });
+
+  test('diagnostics preserve the first runtime stamp and start native once before INFO', () async {
+    final root = await Directory.systemTemp.createTemp('native-observation-order-');
+    final calls = <String>[];
+    final native = OtaNativeWriteTrace(isAndroid: true, invoke: (method, args) async {
+      calls.add(method);
+      if (method == 'p34TraceSnapshot') return {...snapshot(count: 0), ...args};
+      return true;
+    });
+    final diagnostics = OtaDiagnostics(nativeTrace: native);
+    try {
+      await diagnostics.initialize(enabled: true, target: target,
+          sentinel: 'OTAOBS96bb2c74d5ad6ccecaf30e40', directoryProvider: () async => root);
+      expect(calls, isEmpty);
+      diagnostics.record('OTA_EXPERIMENT {}');
+      await diagnostics.startNativeWrites();
+      await diagnostics.startNativeWrites();
+      expect(calls, ['p34TraceStart']);
+      await diagnostics.captureNativeWrites();
+      await diagnostics.close();
+      final directory = await Directory('${root.path}/p34-observations').list().single as Directory;
+      final rows = await File('${directory.path}/events.jsonl').readAsLines();
+      expect(jsonDecode(rows[1])['message'], 'OTA_EXPERIMENT {}');
+      expect(calls, ['p34TraceStart', 'p34TraceSnapshot', 'p34TraceStop']);
+    } finally {
+      await diagnostics.close();
+      await root.delete(recursive: true);
+    }
   });
 }

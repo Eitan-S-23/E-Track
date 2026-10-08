@@ -36,6 +36,8 @@ class OtaDiagnostics {
 
   final status = ValueNotifier(const OtaDiagnosticStatus());
   final OtaNativeWriteTrace _nativeTrace;
+  Future<void>? _nativeStarting;
+  String? _nativeTarget;
   OtaObservationLog? _log;
   bool _initialized = false;
   String? _exportError;
@@ -47,6 +49,7 @@ class OtaDiagnostics {
     if (_initialized) return;
     _initialized = true;
     if (!enabled) return;
+    _nativeTarget = target;
     status.value = const OtaDiagnosticStatus(enabled: true);
     try {
       final base = await (directoryProvider ?? getApplicationSupportDirectory)();
@@ -65,7 +68,6 @@ class OtaDiagnostics {
             fromPreviousProcess: status.value.fromPreviousProcess);
         },
       );
-      await _nativeTrace.start(captureId: _log!.captureId, target: target, record: record);
     } catch (_) {
       status.value = OtaDiagnosticStatus(enabled: true,
           error: 'capture-initialization', lastExport: status.value.lastExport,
@@ -120,6 +122,14 @@ class OtaDiagnostics {
     }
   }
 
+  Future<void> startNativeWrites() {
+    final log = _log;
+    if (!enabled || log == null) return Future<void>.value();
+    // Main records its runtime configuration first; start before the first INFO write.
+    return _nativeStarting ??= _nativeTrace.start(
+        captureId: log.captureId, target: _nativeTarget!, record: record);
+  }
+
   Future<void> captureNativeWrites() async {
     final log = _log;
     if (!enabled || log == null) return;
@@ -136,6 +146,7 @@ class OtaDiagnostics {
   }
 
   Future<void> close() async {
+    await _nativeStarting;
     await _nativeTrace.close();
     await _log?.close();
   }
