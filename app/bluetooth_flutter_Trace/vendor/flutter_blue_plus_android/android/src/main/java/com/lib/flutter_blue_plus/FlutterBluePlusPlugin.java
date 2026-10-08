@@ -86,7 +86,7 @@ public class FlutterBluePlusPlugin implements
     ActivityResultListener,
     ActivityAware
 {
-    private static final String TAG = "[FBP-Android]";
+    private static final String TAG = "FBP-Android";
 
     private LogLevel logLevel = LogLevel.DEBUG;
 

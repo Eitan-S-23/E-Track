@@ -2,10 +2,32 @@
 import argparse
 import os
 from pathlib import Path
+import re
 import runpy
 import shutil
 import sys
 import uuid
+
+
+def log_property(tag):
+    if not isinstance(tag, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", tag):
+        raise ValueError("native log tag is not Android property-compatible")
+    return "log.tag." + tag
+
+
+def check_native_log_tag(source):
+    if log_property("FBP-Android") != "log.tag.FBP-Android":
+        raise AssertionError("native log property differs")
+    for tag in ("[FBP-Android]", "", "tag space", "tag/name", "tag:name"):
+        try:
+            log_property(tag)
+        except ValueError:
+            continue
+        raise AssertionError("invalid Android property name admitted")
+    tags = re.findall(r'private static final String TAG = "([^"]+)";', source)
+    if tags != ["FBP-Android"]:
+        raise ValueError("native plugin tag differs from its scoped collector binding")
+    return dict(tag=tags[0], property=log_property(tags[0]), checks=6)
 
 
 def main():
@@ -22,6 +44,9 @@ def main():
     sources = root / "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/src"
     inputs = [sources / "main/java/com/lib/flutter_blue_plus/PhyProbe.java",
               sources / "test/java/com/lib/flutter_blue_plus/PhyProbeTest.java"]
+    plugin = checked(sources / "main/java/com/lib/flutter_blue_plus/FlutterBluePlusPlugin.java")
+    logging = check_native_log_tag(plugin.read_text(encoding="utf-8"))
+    print("NATIVE_LOG_TAG_TESTS_PASS", logging["checks"], logging["property"], flush=True)
     for path in inputs + [out / "result.json", logs / "compile.log", logs / "run.log"]:
         checked(path)
     classes.mkdir(parents=True)
@@ -53,7 +78,8 @@ def main():
             break
     passed = len(results) == 2 and all(item["status"] == "PASS" for item in results)
     h["save_report"](root, out / "result.json", dict(passed=passed, results=results,
-        inputs={str(p.relative_to(root)): h["file_hash"](p) for p in inputs},
+        inputs={str(p.relative_to(root)): h["file_hash"](p) for p in [*inputs, plugin]},
+        logging=logging,
         hardware=False, android_plugin_compiled=False))
     print("PHY_NATIVE_RESULT", passed, str(out), flush=True)
     return 0 if passed else 1

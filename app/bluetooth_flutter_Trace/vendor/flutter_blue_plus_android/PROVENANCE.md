@@ -28,3 +28,12 @@ claim to undo a preference already handed to Android.
 The pure Java coordinator tests run on both development CI hosts. Android plugin
 compilation still requires the explicit CI debug APK build. Neither proves 2M
 negotiation or throughput on hardware. No firmware or Boot changes belong here.
+
+The native Android log tag is `FBP-Android` without square brackets. Android
+property names reject brackets, so the upstream tag cannot use a per-tag
+`log.tag.<tag>` override when the phone's global logging threshold is INFO.
+This name-only change permits a temporary, independently restored debug override
+without enabling debug logging for other apps. Log levels, write serialization,
+callbacks, payloads and PHY behavior are unchanged. The existing native CI entry
+checks the tag's property-name compatibility; live timing still requires actual
+device observations and must not be inferred from a successful APK build.
