@@ -97,6 +97,11 @@ class OtaObservationLog {
     'OTA_RADIO ',
     'OTA_PHY ',
     'OTA_PHY_CANCEL ',
+    'OTA_LINK_NATIVE_READY ',
+    'OTA_LINK_NATIVE_META ',
+    'OTA_LINK_NATIVE_WRITE ',
+    'OTA_LINK_NATIVE_END ',
+    'OTA_LINK_NATIVE_ERROR ',
   ];
 
   final Directory root;

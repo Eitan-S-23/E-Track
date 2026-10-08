@@ -43,11 +43,13 @@ def main():
     classes, logs = checked(out / "classes"), checked(out / "logs")
     sources = root / "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/src"
     inputs = [sources / "main/java/com/lib/flutter_blue_plus/PhyProbe.java",
-              sources / "test/java/com/lib/flutter_blue_plus/PhyProbeTest.java"]
+              sources / "test/java/com/lib/flutter_blue_plus/PhyProbeTest.java",
+              sources / "main/java/com/lib/flutter_blue_plus/NativeWriteTrace.java",
+              sources / "test/java/com/lib/flutter_blue_plus/NativeWriteTraceTest.java"]
     plugin = checked(sources / "main/java/com/lib/flutter_blue_plus/FlutterBluePlusPlugin.java")
     logging = check_native_log_tag(plugin.read_text(encoding="utf-8"))
     print("NATIVE_LOG_TAG_TESTS_PASS", logging["checks"], logging["property"], flush=True)
-    for path in inputs + [out / "result.json", logs / "compile.log", logs / "run.log"]:
+    for path in inputs + [out / "result.json", logs / "compile.log", logs / "run.log", logs / "native-write.log"]:
         checked(path)
     classes.mkdir(parents=True)
     logs.mkdir()
@@ -67,6 +69,7 @@ def main():
         ("compile", [tool("javac"), *("-J" + item for item in java_options),
             "--release", "8", "-Xlint:all", "-Werror", "-d", str(classes), *map(str, inputs)]),
         ("run", [tool("java"), *java_options, "-cp", str(classes), "com.lib.flutter_blue_plus.PhyProbeTest"]),
+        ("native-write", [tool("java"), *java_options, "-cp", str(classes), "com.lib.flutter_blue_plus.NativeWriteTraceTest"]),
     ]
     results = []
     for name, argv in commands:
@@ -76,10 +79,14 @@ def main():
         print(log.read_text(encoding="utf-8", errors="replace"), flush=True)
         if result["status"] != "PASS":
             break
-    passed = len(results) == 2 and all(item["status"] == "PASS" for item in results)
+    passed = len(results) == 3 and all(item["status"] == "PASS" for item in results)
+    native_checks = re.findall(r"^NATIVE_WRITE_TRACE_TESTS_PASS (\d+)$",
+        (logs / "native-write.log").read_text(encoding="utf-8"), re.M) if passed else []
+    passed = passed and len(native_checks) == 1 and int(native_checks[0]) >= 24
     h["save_report"](root, out / "result.json", dict(passed=passed, results=results,
         inputs={str(p.relative_to(root)): h["file_hash"](p) for p in [*inputs, plugin]},
         logging=logging,
+        write_trace=dict(checks=int(native_checks[0]) if native_checks else 0),
         hardware=False, android_plugin_compiled=False))
     print("PHY_NATIVE_RESULT", passed, str(out), flush=True)
     return 0 if passed else 1

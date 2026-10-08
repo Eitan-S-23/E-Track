@@ -37,3 +37,30 @@ without enabling debug logging for other apps. Log levels, write serialization,
 callbacks, payloads and PHY behavior are unchanged. The existing native CI entry
 checks the tag's property-name compatibility; live timing still requires actual
 device observations and must not be inferred from a successful APK build.
+
+## Native Write Timing
+
+The scoped tag override did not produce usable markers on the authorized phone
+during successful App queries. The existing HCI trace cannot split native callback
+latency from main-thread delivery. Rather than widen global phone logging or
+rewrite the sender speculatively, this fork adds a bounded in-memory observer.
+
+The same `etrack/ota_phy` channel exposes `p34TraceStart`, `p34TraceSnapshot` and
+`p34TraceStop` only to the debuggable `com.wen.gaia.gaia.p34probe` application.
+The existing development diagnostic capture explicitly starts it with an exact
+capture ID and target. It observes only FFF0/FFF2 writes to that target. Production
+and non-Android paths do not start it. It performs no Bluetooth operations.
+
+Each sample contains its sequence, native GATT object generation, length, CRC32,
+method-entry/submission/return/callback/main-thread-dispatch timestamps, native
+API result and GATT status. Timestamps are relative `System.nanoTime` nanoseconds,
+not the App, HCI or radio clock. Early callbacks are retained, not clamped. Missing
+events, ambiguous/late callbacks, write errors and the 8192-sample bound are explicit.
+The recorder never changes the write result, retries, backpressure or delivery order.
+
+Snapshot export runs after identity queries and at the existing diagnostic export,
+not in the DATA loop. It uses the existing App writer in bounded flush batches;
+there is no per-write disk I/O or extra MethodChannel round trip. No payload bytes
+are retained. Pure Java and Dart tests cover binding, lifecycle, failure, clocks,
+capacity and export. Actual query records are still required to validate native
+hooks, and short INFO queries cannot establish saturated DATA throughput.

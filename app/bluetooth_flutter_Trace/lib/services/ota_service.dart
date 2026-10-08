@@ -435,6 +435,7 @@ class OtaService extends GetxController {
         // The retained transport may receive late callbacks after this query.
         stats?.retire(reason: 'query-finished');
         stats?.emitSummary();
+        await OtaDiagnostics.current.captureNativeWrites();
       }
     });
   }

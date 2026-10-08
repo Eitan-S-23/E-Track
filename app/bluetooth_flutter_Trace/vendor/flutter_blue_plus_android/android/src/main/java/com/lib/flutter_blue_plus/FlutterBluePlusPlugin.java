@@ -105,6 +105,7 @@ public class FlutterBluePlusPlugin implements
 
     private final Semaphore mMethodCallMutex = new Semaphore(1);
     private MethodChannel phyChannel;
+    private final NativeWriteTrace nativeWriteTrace = new NativeWriteTrace(System::nanoTime);
     private final Handler phyHandler = new Handler(Looper.getMainLooper());
     private final PhyProbe phyProbe = new PhyProbe((milliseconds, task) -> {
         phyHandler.postDelayed(task, milliseconds);
@@ -209,6 +210,8 @@ public class FlutterBluePlusPlugin implements
         phyChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "etrack/ota_phy");
         phyChannel.setMethodCallHandler((call, result) -> {
             if (call.method.equals("p34ObservePhy") || call.method.equals("p34CancelPhy")) onMethodCall(call, result);
+            else if (call.method.equals("p34TraceStart") || call.method.equals("p34TraceSnapshot") ||
+                     call.method.equals("p34TraceStop")) nativeTraceMethod(call, result);
             else result.notImplemented();
         });
 
@@ -229,6 +232,7 @@ public class FlutterBluePlusPlugin implements
         phyChannel.setMethodCallHandler(null);
         phyChannel = null;
         phyProbe.clear();
+        nativeWriteTrace.clear();
 
         invokeMethodUIThread("OnDetachedFromEngine", new HashMap<>());
 
@@ -307,6 +311,7 @@ public class FlutterBluePlusPlugin implements
     public void onMethodCall(@NonNull MethodCall call,
                                  @NonNull Result result)
     {
+        final long nativeEntered = nativeWriteTrace.entered();
         try {
             acquireMutex(mMethodCallMutex);
 
@@ -982,10 +987,14 @@ public class FlutterBluePlusPlugin implements
                     String key = remoteId + ":" + serviceUuid + ":" + characteristicUuid + ":" + primaryServiceUuid;
                     mWriteChr.put(key, value);
 
+                    NativeWriteTrace.Entry trace = nativeEntered != 0 && isOtaWrite(characteristic)
+                        ? nativeWriteTrace.begin(gatt, characteristic, remoteId, value, nativeEntered) : null;
+
                     // write characteristic
                     if (Build.VERSION.SDK_INT >= 33) { // Android 13 (August 2022)
 
                         int rv = gatt.writeCharacteristic(characteristic, value, writeType);
+                        nativeWriteTrace.returned(trace, rv);
 
                         if (rv != BluetoothStatusCodes.SUCCESS) {
                             String s = "gatt.writeCharacteristic() returned " + rv + " : " + bluetoothStatusString(rv);
@@ -996,6 +1005,7 @@ public class FlutterBluePlusPlugin implements
                     } else {
                         // set value
                         if(!characteristic.setValue(value)) {
+                            nativeWriteTrace.returned(trace, -2);
                             result.error("writeCharacteristic", "characteristic.setValue() returned false", null);
                             break;
                         }
@@ -1004,7 +1014,9 @@ public class FlutterBluePlusPlugin implements
                         characteristic.setWriteType(writeType);
 
                         // Write Char
-                        if(!gatt.writeCharacteristic(characteristic)){
+                        boolean accepted = gatt.writeCharacteristic(characteristic);
+                        nativeWriteTrace.returned(trace, accepted ? 0 : -2);
+                        if(!accepted){
                             result.error("writeCharacteristic", "gatt.writeCharacteristic() returned false", null);
                             break;
                         }
@@ -2243,6 +2255,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
+            if (newState == BluetoothProfile.STATE_DISCONNECTED) nativeWriteTrace.disconnected(gatt);
             try {
                 // Prevent callback thread & method call thread from writing to
                 // mConnectedDevices & mCurrentlyConnectingDevices concurrently.
@@ -2476,6 +2489,8 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
+            NativeWriteTrace.Entry trace = isOtaWrite(characteristic)
+                ? nativeWriteTrace.callback(gatt, characteristic, status) : null;
             LogLevel level = status == BluetoothGatt.GATT_SUCCESS ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onCharacteristicWrite:");
             log(level, "  chr: " + uuidStr(characteristic.getUuid()));
@@ -2513,7 +2528,7 @@ public class FlutterBluePlusPlugin implements
                 response.put("primary_service_uuid", uuidStr(primaryService.getUuid()));
             }
 
-            invokeMethodUIThread("OnCharacteristicWritten", response);
+            invokeMethodUIThread("OnCharacteristicWritten", response, trace);
         }
 
         @Override
@@ -2931,11 +2946,49 @@ public class FlutterBluePlusPlugin implements
         }
     }
 
+    private void nativeTraceMethod(MethodCall call, Result result)
+    {
+        if (context == null || !context.getPackageName().equals("com.wen.gaia.gaia.p34probe") ||
+                (context.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+            result.error("p34Trace", "development probe only", null);
+            return;
+        }
+        try {
+            String capture = call.argument("captureId");
+            String remote = call.argument("remoteId");
+            if (call.method.equals("p34TraceStart")) {
+                result.success(nativeWriteTrace.start(capture, remote));
+            } else if (call.method.equals("p34TraceStop")) {
+                result.success(nativeWriteTrace.stop(capture, remote));
+            } else {
+                Map<String, Object> snapshot = nativeWriteTrace.snapshot(capture, remote);
+                snapshot.put("pid", android.os.Process.myPid());
+                result.success(snapshot);
+            }
+        } catch (RuntimeException error) {
+            result.error("p34Trace", "invalid trace binding", null);
+        }
+    }
+
+    private boolean isOtaWrite(BluetoothGattCharacteristic characteristic)
+    {
+        return characteristic.getService() != null &&
+            characteristic.getUuid().toString().equals("0000fff2-0000-1000-8000-00805f9b34fb") &&
+            characteristic.getService().getUuid().toString().equals("0000fff0-0000-1000-8000-00805f9b34fb");
+    }
+
     private void invokeMethodUIThread(final String method, HashMap<String, Object> data)
+    {
+        invokeMethodUIThread(method, data, null);
+    }
+
+    private void invokeMethodUIThread(final String method, HashMap<String, Object> data,
+                                     NativeWriteTrace.Entry trace)
     {
         new Handler(Looper.getMainLooper()).post(() -> {
             //Could already be teared down at this moment
             if (methodChannel != null) {
+                nativeWriteTrace.dispatched(trace);
                 methodChannel.invokeMethod(method, data);
             } else {
                 log(LogLevel.WARNING, "invokeMethodUIThread: tried to call method on closed channel: " + method);

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'ota_observation_log.dart';
 import 'ota_experiment_config.dart';
+import 'ota_native_write_trace.dart';
 
 class OtaDiagnosticStatus {
   const OtaDiagnosticStatus({this.enabled = false, this.ready = false,
@@ -22,7 +23,8 @@ class OtaDiagnosticStatus {
 
 /// Development-only file capture; it never supplies OTA state or timings.
 class OtaDiagnostics {
-  OtaDiagnostics();
+  OtaDiagnostics({OtaNativeWriteTrace? nativeTrace})
+      : _nativeTrace = nativeTrace ?? OtaNativeWriteTrace();
   static final _shared = OtaDiagnostics();
   static final _zoneKey = Object();
   static OtaDiagnostics get current =>
@@ -33,6 +35,7 @@ class OtaDiagnostics {
       runZoned(body, zoneValues: {_zoneKey: instance});
 
   final status = ValueNotifier(const OtaDiagnosticStatus());
+  final OtaNativeWriteTrace _nativeTrace;
   OtaObservationLog? _log;
   bool _initialized = false;
   String? _exportError;
@@ -62,6 +65,7 @@ class OtaDiagnostics {
             fromPreviousProcess: status.value.fromPreviousProcess);
         },
       );
+      await _nativeTrace.start(captureId: _log!.captureId, target: target, record: record);
     } catch (_) {
       status.value = OtaDiagnosticStatus(enabled: true,
           error: 'capture-initialization', lastExport: status.value.lastExport,
@@ -103,6 +107,7 @@ class OtaDiagnostics {
     final log = _log;
     if (!enabled || log == null) throw StateError('diagnostic capture unavailable');
     try {
+      await captureNativeWrites();
       final output = await log.exportSnapshot();
       final old = status.value;
       status.value = OtaDiagnosticStatus(enabled: true, ready: old.ready,
@@ -115,6 +120,12 @@ class OtaDiagnostics {
     }
   }
 
+  Future<void> captureNativeWrites() async {
+    final log = _log;
+    if (!enabled || log == null) return;
+    await _nativeTrace.collect(record: record, flush: () async { await log.checkpoint(); });
+  }
+
   void _exportFailed() {
     _exportError = 'capture-export';
     final old = status.value;
@@ -125,6 +136,7 @@ class OtaDiagnostics {
   }
 
   Future<void> close() async {
+    await _nativeTrace.close();
     await _log?.close();
   }
 }
