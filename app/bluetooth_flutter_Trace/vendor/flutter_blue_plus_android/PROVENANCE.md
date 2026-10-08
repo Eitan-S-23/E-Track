@@ -64,3 +64,26 @@ there is no per-write disk I/O or extra MethodChannel round trip. No payload byt
 are retained. Pure Java and Dart tests cover binding, lifecycle, failure, clocks,
 capacity and export. Actual query records are still required to validate native
 hooks, and short INFO queries cannot establish saturated DATA throughput.
+
+## Main-Looper Callback Scheduling Candidate
+
+The 2026-10-09 trial6 offline analysis matched all 1322 native writes, including
+two retired-instance ABORT observations. Its 1303 DATA fragments spent 2.009790
+seconds between native callback entry and main-looper dispatch. API-return
+overlap reduces the entire interval's optimistic removable upper bound to
+1.997279 seconds; callback body work and main-thread execution remain necessary.
+No measured speed gain or synchronization-barrier duration is established yet.
+
+This candidate changes only the callback scheduler: one shared main-looper
+Handler dispatches all plugin events, asynchronous on Android API 28+ and ordinary
+on older versions. Android's async Handler API bypasses synchronization barriers
+and retains FIFO among its own messages. It does not create a worker thread,
+prioritize selected write events over peer BLE events, skip write callbacks,
+return success early, batch writes, change MTU/credit, or modify the Flutter UI.
+Existing main-channel availability checks, API results and backpressure remain.
+
+The native CI runner tests the actual factory with SDK/Looper/Handler doubles
+and checks its single-handler/dispatch-guard wiring. Those host models do not
+measure Android scheduling or prove performance; a real APK build and a bounded
+equivalent-state device screen are separate requirements. This development fork
+is pending integration, not a production or independent acceptance result.

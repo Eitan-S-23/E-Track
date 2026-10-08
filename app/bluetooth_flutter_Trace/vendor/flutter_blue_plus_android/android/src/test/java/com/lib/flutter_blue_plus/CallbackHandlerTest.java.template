@@ -1,0 +1,93 @@
+package com.lib.flutter_blue_plus;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/** Tests the injected actual factory, not Android's real Looper or device timing. */
+public final class CallbackHandlerTest {
+    private static int checks;
+
+    private static void check(boolean condition, String reason) {
+        checks++;
+        if (!condition) throw new AssertionError(reason);
+    }
+
+    /* ACTUAL_CALLBACK_FACTORY */
+
+    static final class Build {
+        static final class VERSION { static int SDK_INT; }
+        static final class VERSION_CODES { static final int P = 28; }
+    }
+
+    static final class Looper {
+        static final Looper MAIN = new Looper();
+        final List<Message> queue = new ArrayList<>();
+        boolean barrier;
+        static Looper getMainLooper() { return MAIN; }
+
+        void drain() {
+            while (true) {
+                int next = -1;
+                for (int i = 0; i < queue.size(); i++) {
+                    if (!barrier || queue.get(i).async) { next = i; break; }
+                }
+                if (next < 0) return;
+                queue.remove(next).task.run();
+            }
+        }
+    }
+
+    static final class Message {
+        final boolean async;
+        final Runnable task;
+        Message(boolean async, Runnable task) { this.async = async; this.task = task; }
+    }
+
+    static final class Handler {
+        final Looper looper;
+        final boolean async;
+        Handler(Looper looper) { this(looper, false); }
+        private Handler(Looper looper, boolean async) { this.looper = looper; this.async = async; }
+        static Handler createAsync(Looper looper) {
+            if (Build.VERSION.SDK_INT < 28) throw new AssertionError("unsupported Android API");
+            return new Handler(looper, true);
+        }
+        boolean post(Runnable task) {
+            looper.queue.add(new Message(async, task));
+            return true;
+        }
+    }
+
+    private static void exercise(int sdk) {
+        Build.VERSION.SDK_INT = sdk;
+        Looper main = Looper.MAIN;
+        main.queue.clear();
+        main.barrier = true;
+        Handler handler = createCallbackHandler();
+        check(handler.looper == main, "must retain the main looper");
+        check(handler.async == (sdk >= 28), "SDK-specific barrier policy");
+        List<String> delivered = new ArrayList<>();
+        Handler ui = new Handler(main);
+        ui.post(() -> delivered.add("ui"));
+        handler.post(() -> delivered.add("notify"));
+        handler.post(() -> delivered.add("write"));
+        handler.post(() -> delivered.add("disconnect"));
+        check(delivered.isEmpty(), "post must not execute inline");
+        main.drain();
+        check(delivered.equals(sdk >= 28 ? Arrays.asList("notify", "write", "disconnect")
+                                        : new ArrayList<String>()),
+              "all BLE callback kinds use the same ordered policy");
+        main.barrier = false;
+        main.drain();
+        check(delivered.equals(sdk >= 28 ? Arrays.asList("notify", "write", "disconnect", "ui")
+                                        : Arrays.asList("ui", "notify", "write", "disconnect")),
+              "normal messages remain deliverable and BLE FIFO is preserved");
+        check(main.queue.isEmpty(), "no duplicate or stranded callback");
+    }
+
+    public static void main(String[] args) {
+        for (int sdk : new int[] {21, 27, 28, 33, 35}) exercise(sdk);
+        System.out.println("CALLBACK_HANDLER_TESTS_PASS " + checks);
+    }
+}

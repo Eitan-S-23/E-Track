@@ -104,6 +104,7 @@ public class FlutterBluePlusPlugin implements
     static final private String CCCD = "2902";
 
     private final Semaphore mMethodCallMutex = new Semaphore(1);
+    private final Handler callbackHandler = createCallbackHandler();
     private MethodChannel phyChannel;
     private final NativeWriteTrace nativeWriteTrace = new NativeWriteTrace(System::nanoTime);
     private final Handler phyHandler = new Handler(Looper.getMainLooper());
@@ -2977,6 +2978,14 @@ public class FlutterBluePlusPlugin implements
             characteristic.getService().getUuid().toString().equals("0000fff0-0000-1000-8000-00805f9b34fb");
     }
 
+    static Handler createCallbackHandler() {
+        // Keep BLE callbacks on one main-thread FIFO, without display sync barriers.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return Handler.createAsync(Looper.getMainLooper());
+        }
+        return new Handler(Looper.getMainLooper());
+    }
+
     private void invokeMethodUIThread(final String method, HashMap<String, Object> data)
     {
         invokeMethodUIThread(method, data, null);
@@ -2985,7 +2994,7 @@ public class FlutterBluePlusPlugin implements
     private void invokeMethodUIThread(final String method, HashMap<String, Object> data,
                                      NativeWriteTrace.Entry trace)
     {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        callbackHandler.post(() -> {
             //Could already be teared down at this moment
             if (methodChannel != null) {
                 nativeWriteTrace.dispatched(trace);
