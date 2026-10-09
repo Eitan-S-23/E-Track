@@ -173,9 +173,9 @@ bool HAL::SD_Init()
         SdFile::dateTimeCallback(SD_GetDateTime);
         SD_CheckDir(CONFIG_TRACK_RECORD_FILE_DIR_NAME);
         CONFIG_DEBUG_SERIAL.printf(
-            "success, Type: %s, Size: %0.2f GB\r\n",
+            "success, Type: %s, Sectors: %lu (512 bytes)\r\n",
             SD_GetTypeName(),
-            SD_GetCardSizeMB() / 1024.0f
+            (unsigned long)SD_CardSize
         );
 
         /* 诊断：打印 SDIO 硬件实际位宽与时钟，确认是否跑在 4 位并行 */

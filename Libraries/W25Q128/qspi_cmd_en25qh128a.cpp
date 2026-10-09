@@ -226,6 +226,10 @@ qspi_status_t qspi_write_enable(void);
 qspi_status_t qspi_cmd_send(qspi_cmd_type* qspi_cmd_struct);
 static qspi_status_t qspi_cmd_send_ex(qspi_cmd_type* qspi_cmd_struct, uint32_t timeout_ms);
 
+#if defined(P34_OTA_PIPELINE_WAIT_RX) && P34_OTA_PIPELINE_WAIT_RX
+void HAL_OTA_QspiWaitRx(void);
+#endif
+
 /**
   * @brief  带超时地等待某个 QSPI 标志置位（fail-closed：超时返错，绝不死循环）
   * @param  flag: 待等待的标志位
@@ -239,6 +243,11 @@ static qspi_status_t qspi_wait_flag(uint32_t flag, uint32_t timeout_ms)
   {
     if((millis() - start) >= timeout_ms)
       return QSPI_ERR_TIMEOUT;
+#if defined(P34_OTA_PIPELINE_WAIT_RX) && P34_OTA_PIPELINE_WAIT_RX
+    /* Keep the existing exclusive XIP scope and physical completion protocol.
+     * The callback only consumes RAM frames while a pipeline start owns IO. */
+    HAL_OTA_QspiWaitRx();
+#endif
   }
   return QSPI_OK;
 }
@@ -595,6 +604,46 @@ qspi_status_t qspi_erase(uint32_t sec_addr)
   return qspi_erase_core(sec_addr);
 }
 
+qspi_status_t qspi_erase_64k(uint32_t block_addr)
+{
+  qspi_status_t st;
+  if((block_addr & 0xFFFFu) != 0u)
+    return QSPI_ERR_PARAM;
+  if(!qspi_range_ok(block_addr, 0x10000u))
+    return QSPI_ERR_REGION;
+  st = qspi_write_enable();
+  if(st != QSPI_OK)
+    return st;
+  en25qh128a_cmd_config = en25qh128a_erase_para;
+  en25qh128a_cmd_config.instruction_code = 0xD8u;
+  en25qh128a_cmd_config.address_code = block_addr;
+  st = qspi_cmd_send(&en25qh128a_cmd_config);
+  if(st != QSPI_OK)
+    return st;
+  return qspi_cmd_send_ex((qspi_cmd_type*)&en25qh128a_rdsr_para,
+                          QSPI_BLOCK_ERASE_TIMEOUT_MS);
+}
+
+qspi_status_t qspi_erase_32k(uint32_t block_addr)
+{
+  qspi_status_t st;
+  if((block_addr & 0x7FFFu) != 0u)
+    return QSPI_ERR_PARAM;
+  if(!qspi_range_ok(block_addr, 0x8000u))
+    return QSPI_ERR_REGION;
+  st = qspi_write_enable();
+  if(st != QSPI_OK)
+    return st;
+  en25qh128a_cmd_config = en25qh128a_erase_para;
+  en25qh128a_cmd_config.instruction_code = 0x52u;
+  en25qh128a_cmd_config.address_code = block_addr;
+  st = qspi_cmd_send(&en25qh128a_cmd_config);
+  if(st != QSPI_OK)
+    return st;
+  return qspi_cmd_send_ex((qspi_cmd_type*)&en25qh128a_rdsr_para,
+                          QSPI_BLOCK_ERASE_TIMEOUT_MS);
+}
+
 /**
   * @brief  qspi erase data（自检专用，仅允许自检保留区内）
   * @retval QSPI_OK / QSPI_ERR_REGION / QSPI_ERR_TIMEOUT
@@ -820,6 +869,61 @@ qspi_status_t en25qh128a_qspi_xip_init(void)
   /* initial xip */
   qspi_xip_init(QSPI1, (qspi_xip_type*)&en25qh128a_xip_init_para);
   qspi_xip_enable(QSPI1, TRUE);
+  return QSPI_OK;
+}
+
+static qspi_status_t qspi_read_status_byte(uint8_t opcode, uint8_t* value)
+{
+  qspi_cmd_type cmd;
+  qspi_status_t st;
+
+  if(value == NULL || (opcode != 0x05u && opcode != 0x35u))
+    return QSPI_ERR_PARAM;
+
+  cmd = qspi_rdid_para;
+  cmd.instruction_code = opcode;
+  cmd.data_counter = 1u;
+  qspi_cmd_operation_kick(QSPI1, &cmd);
+
+  /* A one-byte read cannot reach RXFIFORDY's FIFO threshold. */
+  st = qspi_wait_flag(QSPI_CMDSTS_FLAG, QSPI_CMD_TIMEOUT_MS);
+  if(st != QSPI_OK)
+    return st;
+  qspi_flag_clear(QSPI1, QSPI_CMDSTS_FLAG);
+  *value = qspi_byte_read(QSPI1);
+  return QSPI_OK;
+}
+
+qspi_status_t qspi_xip_restore_checked(uint32_t verified_jedec_id,
+                                      bool* reused_qe)
+{
+  qspi_status_t st;
+  uint8_t sr1, sr2;
+
+  if(reused_qe != NULL)
+    *reused_qe = false;
+  /* SR2 semantics are not assumed for the other whitelisted chips. */
+  if(verified_jedec_id != QSPI_JEDEC_W25Q128)
+    return en25qh128a_qspi_xip_init();
+
+  st = qspi_flash_reset();
+  if(st != QSPI_OK)
+    return st;
+  st = qspi_read_status_byte(0x05u, &sr1);
+  if(st != QSPI_OK)
+    return st;
+  st = qspi_read_status_byte(0x35u, &sr2);
+  if(st != QSPI_OK)
+    return st;
+
+  /* Match the full initializer's entire configuration, not just the QE bit. */
+  if(sr1 != 0x00u || sr2 != 0x02u)
+    return en25qh128a_qspi_xip_init();
+
+  qspi_xip_init(QSPI1, (qspi_xip_type*)&en25qh128a_xip_init_para);
+  qspi_xip_enable(QSPI1, TRUE);
+  if(reused_qe != NULL)
+    *reused_qe = true;
   return QSPI_OK;
 }
 

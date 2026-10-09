@@ -12,11 +12,35 @@ promote AC5 artifacts to OTA or CI release artifacts.
   Read `docs/agent-collaboration/index.md` for shared decisions and handoffs.
   The canonical rules and index live in the project root and are delivered on
   `main`; a task worktree, ignored cache or chat must not be their only copy.
+- When using cc-connect, send a manual real @mention only for a necessary
+  mid-task intervention while keeping the current execution open; check its
+  receipt before waiting. Normal final reports, handoffs and final approval
+  questions already receive the bridge's automatic completion notification:
+  do not send a duplicate manual @mention. Follow **User Intervention
+  Notifications** in `docs/agent-collaboration-contract.md` and `PROJECT-06` in
+  `docs/agent-collaboration/project-workflow.md`; continue autonomously when
+  no user action is needed.
+- Before building or extending support tooling, follow **Reuse Before Custom
+  Tooling** in `docs/agent-collaboration-contract.md`. Validate existing tools
+  first; a custom replacement needs an evidenced capability gap, not an
+  agent-invented constraint. See `PROJECT-04` in
+  `docs/agent-collaboration/project-workflow.md` for the group16 flash-tool lesson.
+- For candidate-firmware installation before OTA testing, follow **Candidate
+  Installation: J-Link Before Extra OTA** in `docs/device-experiment-policy.md`.
+  Prefer standard J-Link after state checks; do not make the user perform an
+  extra OTA solely to install a receiver change. Any exception needs a concrete
+  test requirement or evidenced device-state constraint. See `PROJECT-05` in
+  `docs/agent-collaboration/project-workflow.md`.
 - Existing worktrees must consume the published governance revision before new
   work. A push to a feature branch does not update `main`, other worktrees or an
   already-running agent. Follow the contract's handoff and boundary rules rather
   than copying another worktree's product changes or altering frozen evidence.
 - For authorized OTA/device development, read `docs/device-experiment-policy.md`.
+  User standing authorization (2026-10-07) covers J-Link automatic native
+  history/config updates under `C:/Users/SU/AppData/Roaming/SEGGER/`, principally
+  `JLinkDLL.ini`, for this authorized device work. Do not ask again for the same
+  updates. This excludes cleanup, adjacent directories and expanded device scope;
+  controllable logs, settings, readbacks and caches remain project-local.
   Execute the task's finite experiment matrix without per-OTA/per-reset approval;
   old agent-invented one-shot caps do not become permanent project policy. Real
   safety/scope changes, unresolved device state and explicit user caps still apply.

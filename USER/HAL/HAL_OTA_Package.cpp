@@ -13,6 +13,8 @@
 #include "boot_crypto.h"
 #endif
 #include "OTA/ota_staging.h"
+#include "OTA/ota_erase_plan.h"
+#include "OTA/ota_half_erase_plan.h"
 #include "W25Q128/qspi_cmd_en25qh128a.h"
 #if !defined(_WIN32)
 #include "wdg.h"
@@ -27,6 +29,154 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
+#ifndef CONFIG_OTA_INSTALL_QE_REUSE
+#define CONFIG_OTA_INSTALL_QE_REUSE 0
+#endif
+#ifndef CONFIG_OTA_INSTALL_PROFILE
+#define CONFIG_OTA_INSTALL_PROFILE 0
+#endif
+
+#ifndef CONFIG_OTA_INSTALL_BLOCK_ERASE
+#define CONFIG_OTA_INSTALL_BLOCK_ERASE 0
+#endif
+
+#ifndef CONFIG_OTA_INSTALL_HALF_ERASE
+#define CONFIG_OTA_INSTALL_HALF_ERASE 0
+#endif
+
+#ifndef CONFIG_OTA_INSTALL_COST
+#define CONFIG_OTA_INSTALL_COST 0
+#endif
+
+#if CONFIG_OTA_INSTALL_COST
+#include "SEGGER_RTT.h"
+#include "HAL/ota_install_cost.h"
+static ota_cost_stats_t s_ota_cost;
+static bool s_ota_cost_active;
+#define OTA_COST_START(name) const uint32_t name = millis()
+#define OTA_COST_END(kind, start, bytes, rc) do { \
+    if (s_ota_cost_active) \
+        ota_cost_add(&s_ota_cost, kind, start, millis(), bytes, rc); \
+} while (0)
+static void install_cost_begin(void)
+{
+    ota_cost_begin(&s_ota_cost, millis());
+    s_ota_cost_active = true;
+}
+static void install_cost_end(const char *phase, int result)
+{
+    uint32_t now = millis();
+    uint32_t residual = 0;
+    int valid = ota_cost_finish(&s_ota_cost, now, &residual);
+    s_ota_cost_active = false;
+    SEGGER_RTT_printf(0,
+        "P34COST: phase=%s rc=%ld clock=millis total=%lu rest=%lu valid=%u\r\n",
+        phase, (long)result, (unsigned long)(now - s_ota_cost.start),
+        (unsigned long)residual, (unsigned)valid);
+    for (unsigned i = 0; i < OTA_COST_KINDS; ++i)
+    {
+        const ota_cost_bucket_t *b = &s_ota_cost.io[i];
+        SEGGER_RTT_printf(0,
+            "P34COST_IO: phase=%s kind=%u calls=%lu fail=%lu bytes=%lu:%lu ticks=%lu:%lu\r\n",
+            phase, i, (unsigned long)b->calls, (unsigned long)b->failures,
+            (unsigned long)(b->bytes >> 32), (unsigned long)(b->bytes & UINT32_MAX),
+            (unsigned long)(b->ticks >> 32), (unsigned long)(b->ticks & UINT32_MAX));
+    }
+}
+#else
+#define OTA_COST_START(name) ((void)0)
+#define OTA_COST_END(kind, start, bytes, rc) ((void)0)
+#define install_cost_begin() ((void)0)
+#define install_cost_end(phase, result) ((void)0)
+#endif
+
+#if CONFIG_OTA_INSTALL_PROFILE
+#include "SEGGER_RTT.h"
+
+typedef struct ota_install_restore_stats_t
+{
+    uint32_t core_hz;
+    uint32_t calls;
+    uint32_t reused;
+    uint32_t failures;
+    uint32_t invalid_cycles;
+    uint32_t ticks_ms;
+    uint32_t max_cycles;
+    uint64_t legacy_cycles;
+    uint64_t reuse_cycles;
+} ota_install_restore_stats_t;
+
+static ota_install_restore_stats_t s_ota_install_restore;
+
+static bool install_profile_clock_enabled(void)
+{
+    return (CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk) != 0u &&
+           (DWT->CTRL & DWT_CTRL_CYCCNTENA_Msk) != 0u;
+}
+
+static void install_profile_begin(void)
+{
+    memset(&s_ota_install_restore, 0, sizeof(s_ota_install_restore));
+    s_ota_install_restore.core_hz = SystemCoreClock;
+}
+
+static void install_profile_record(uint32_t start_cycles, uint32_t start_ms,
+                                    uint32_t core_hz, bool clock_enabled,
+                                    bool reused, int result)
+{
+    uint32_t cycles = DWT->CYCCNT - start_cycles;
+    uint32_t ticks = millis() - start_ms;
+    ota_install_restore_stats_t *stats = &s_ota_install_restore;
+
+    ++stats->calls;
+    stats->reused += reused ? 1u : 0u;
+    stats->failures += result != 0 ? 1u : 0u;
+    stats->ticks_ms += ticks;
+    /* Only bounded successful calls enter cycle totals. A whole apply phase
+     * can outlast one CYCCNT wrap, so it must never be timed this way. */
+    if (!clock_enabled || !install_profile_clock_enabled() || core_hz == 0u ||
+        core_hz != SystemCoreClock || core_hz != stats->core_hz ||
+        cycles == 0u || result != 0 || ticks > QSPI_BUSY_TIMEOUT_MS)
+    {
+        ++stats->invalid_cycles;
+        return;
+    }
+    if (reused)
+    {
+        stats->reuse_cycles += cycles;
+    }
+    else
+    {
+        stats->legacy_cycles += cycles;
+    }
+    if (cycles > stats->max_cycles)
+    {
+        stats->max_cycles = cycles;
+    }
+}
+
+static void install_profile_end(const char *phase, int result)
+{
+    const ota_install_restore_stats_t *s = &s_ota_install_restore;
+
+    SEGGER_RTT_printf(0,
+        "P34INSTALL: phase=%s rc=%ld opt=%u hz=%lu calls=%lu reused=%lu "
+        "fail=%lu invalid=%lu ticks=%lu legacy=%lu:%lu reuse=%lu:%lu max=%lu\r\n",
+        phase, (long)result, (unsigned)CONFIG_OTA_INSTALL_QE_REUSE,
+        (unsigned long)s->core_hz, (unsigned long)s->calls,
+        (unsigned long)s->reused, (unsigned long)s->failures,
+        (unsigned long)s->invalid_cycles, (unsigned long)s->ticks_ms,
+        (unsigned long)(s->legacy_cycles >> 32),
+        (unsigned long)(s->legacy_cycles & UINT32_MAX),
+        (unsigned long)(s->reuse_cycles >> 32),
+        (unsigned long)(s->reuse_cycles & UINT32_MAX),
+        (unsigned long)s->max_cycles);
+}
+#else
+#define install_profile_begin() ((void)0)
+#define install_profile_end(phase, result) ((void)0)
+#endif
 
 enum ota_overlay_owner_t
 {
@@ -311,13 +461,41 @@ static void overlay_release(uint8_t owner)
     leave_critical(primask);
 }
 
-static int qspi_restore_xip(void)
+static int qspi_restore_xip(bool allow_reuse = true)
 {
     int result;
+    bool reused = false;
+    OTA_COST_START(cost);
 
     service_app_watchdog();
+#if CONFIG_OTA_INSTALL_PROFILE
+    uint32_t start_ms = millis();
+    uint32_t core_hz = SystemCoreClock;
+    bool clock_enabled = install_profile_clock_enabled();
+    uint32_t start_cycles = DWT->CYCCNT;
+#endif
+#if CONFIG_OTA_INSTALL_QE_REUSE
+    if (allow_reuse)
+    {
+        result = qspi_xip_restore_checked(HAL::Qspi_GetJedecId(), &reused) ==
+                         QSPI_OK ? 0 : -1;
+    }
+    else
+    {
+        result = en25qh128a_qspi_xip_init() == QSPI_OK ? 0 : -1;
+    }
+#else
+    (void)allow_reuse;
     result = en25qh128a_qspi_xip_init() == QSPI_OK ? 0 : -1;
+#endif
+#if CONFIG_OTA_INSTALL_PROFILE
+    install_profile_record(start_cycles, start_ms, core_hz, clock_enabled,
+                            reused, result);
+#else
+    (void)reused;
+#endif
     service_app_watchdog();
+    OTA_COST_END(OTA_COST_RESTORE, cost, 0u, result);
     return result;
 }
 
@@ -347,12 +525,33 @@ static int package_read(void *ctx, uint32_t offset,
         return -1;
     }
     service_app_watchdog();
+    OTA_COST_START(cost);
     memcpy(dst,
            (const void *)(QSPI1_MEM_BASE + OTA_EXT_STAGING +
                           OTA_STAGING_PAYLOAD_OFFSET + offset),
            len);
+    OTA_COST_END(OTA_COST_PACKAGE_READ, cost, len, 0);
     service_app_watchdog();
     return 0;
+}
+
+static bool install_block_erase_enabled(void)
+{
+#if CONFIG_OTA_INSTALL_BLOCK_ERASE
+    return !HAL::Qspi_IsOtaDisabled() &&
+           HAL::Qspi_GetJedecId() == QSPI_JEDEC_W25Q128;
+#else
+    return false;
+#endif
+}
+
+static bool install_half_erase_enabled(void)
+{
+#if CONFIG_OTA_INSTALL_HALF_ERASE
+    return install_block_erase_enabled();
+#else
+    return false;
+#endif
 }
 
 static int candidate_prepare(void *ctx, uint32_t image_len)
@@ -363,6 +562,8 @@ static int candidate_prepare(void *ctx, uint32_t image_len)
     uint32_t offset;
     qspi_status_t result = QSPI_OK;
     int restore_result;
+    const bool block_erase = install_block_erase_enabled();
+    const bool half_erase = install_half_erase_enabled();
 
     (void)ctx;
     if (image_len == 0u || image_len > OTA_APP_LENGTH ||
@@ -381,16 +582,43 @@ static int candidate_prepare(void *ctx, uint32_t image_len)
     ++port->candidate_prepares;
     service_app_watchdog();
     qspi_xip_enable(QSPI1, FALSE);
-    for (offset = 0u; offset < erase_len;
-         offset += OTA_STAGING_BLOCK_SIZE)
+    for (offset = 0u; offset < erase_len;)
     {
+        uint32_t step = ota_erase_next_size_mixed(OTA_EXT_CANDIDATE + offset,
+                                            erase_len - offset,
+                                            offset != 0u && block_erase,
+                                            offset != 0u && half_erase);
+        if (step == 0u)
+        {
+            result = QSPI_ERR_PARAM;
+            break;
+        }
         service_app_watchdog();
-        result = qspi_erase(OTA_EXT_CANDIDATE + offset);
+        OTA_COST_START(cost);
+#if CONFIG_OTA_INSTALL_BLOCK_ERASE
+        if (step == OTA_ERASE_BLOCK_SIZE)
+        {
+            result = qspi_erase_64k(OTA_EXT_CANDIDATE + offset);
+        }
+        else
+#endif
+#if CONFIG_OTA_INSTALL_HALF_ERASE
+        if (step == OTA_ERASE_HALF_BLOCK_SIZE)
+        {
+            result = qspi_erase_32k(OTA_EXT_CANDIDATE + offset);
+        }
+        else
+#endif
+        {
+            result = qspi_erase(OTA_EXT_CANDIDATE + offset);
+        }
+        OTA_COST_END(OTA_COST_ERASE, cost, step, (int)result);
         service_app_watchdog();
         if (result != QSPI_OK)
         {
             break;
         }
+        offset += step;
     }
     restore_result = qspi_restore_xip();
     return result == QSPI_OK && restore_result == 0 ? 0 : -1;
@@ -414,9 +642,11 @@ static int candidate_program(void *ctx, uint32_t offset,
     port->candidate_bytes += len;
     service_app_watchdog();
     qspi_xip_enable(QSPI1, FALSE);
+    OTA_COST_START(cost);
     result = qspi_data_write(OTA_EXT_CANDIDATE + OTA_SLOT_HEADER_SIZE +
                                  offset,
                              len, (uint8_t *)src);
+    OTA_COST_END(OTA_COST_PROGRAM, cost, len, (int)result);
     service_app_watchdog();
     restore_result = qspi_restore_xip();
     return result == QSPI_OK && restore_result == 0 ? 0 : -1;
@@ -432,10 +662,12 @@ static int candidate_read(void *ctx, uint32_t offset,
         return -1;
     }
     service_app_watchdog();
+    OTA_COST_START(cost);
     memcpy(dst,
            (const void *)(QSPI1_MEM_BASE + OTA_EXT_CANDIDATE +
                           OTA_SLOT_HEADER_SIZE + offset),
            len);
+    OTA_COST_END(OTA_COST_CANDIDATE_READ, cost, len, 0);
     service_app_watchdog();
     return 0;
 }
@@ -499,6 +731,11 @@ bool HAL::OTA_OverlayIsOtaOwned()
     return g_ota_overlay_owner == OTA_OVERLAY_PACKAGE;
 }
 
+bool HAL::OTA_OverlayIsBleOwned()
+{
+    return g_ota_overlay_owner == OTA_OVERLAY_BLE;
+}
+
 /* 基版镜像读：内部 flash XIP 直读当前运行 App。按块取到调用方的 1KiB 缓冲，
  * 不把整个基版镜像复制到 RAM（契约 §512）。 */
 static int base_read(void *ctx, uint32_t offset,
@@ -511,7 +748,9 @@ static int base_read(void *ctx, uint32_t offset,
         return -1;
     }
     service_app_watchdog();
+    OTA_COST_START(cost);
     memcpy(dst, (const void *)(uintptr_t)(OTA_APP_ORIGIN + offset), len);
+    OTA_COST_END(OTA_COST_BASE_READ, cost, len, 0);
     service_app_watchdog();
     return 0;
 }
@@ -555,7 +794,9 @@ static int backup_flash_read(void *ctx, uint32_t address,
         return -1;
     }
     service_app_watchdog();
+    OTA_COST_START(cost);
     memcpy(dst, (const void *)(QSPI1_MEM_BASE + address), len);
+    OTA_COST_END(OTA_COST_SLOT_READ, cost, len, 0);
     service_app_watchdog();
     return 0;
 }
@@ -574,11 +815,63 @@ static int backup_flash_erase_4k(void *ctx, uint32_t address)
     }
     service_app_watchdog();
     qspi_xip_enable(QSPI1, FALSE);
+    OTA_COST_START(cost);
     result = qspi_erase(address);
+    OTA_COST_END(OTA_COST_ERASE, cost, OTA_SLOT_HEADER_SIZE, (int)result);
     service_app_watchdog();
     restore_result = qspi_restore_xip();
     return result == QSPI_OK && restore_result == 0 ? 0 : -1;
 }
+
+#if CONFIG_OTA_INSTALL_BLOCK_ERASE
+static int backup_flash_erase_64k(void *ctx, uint32_t address)
+{
+    qspi_status_t result;
+    int restore_result;
+    (void)ctx;
+    if (!install_block_erase_enabled() ||
+        (address & (OTA_ERASE_BLOCK_SIZE - 1u)) != 0u ||
+        address < OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE ||
+        address >= OTA_EXT_BACKUP + OTA_EXT_SLOT_LENGTH ||
+        !backup_slot_range_ok(address, OTA_ERASE_BLOCK_SIZE, 0))
+    {
+        return -1;
+    }
+    service_app_watchdog();
+    qspi_xip_enable(QSPI1, FALSE);
+    OTA_COST_START(cost);
+    result = qspi_erase_64k(address);
+    OTA_COST_END(OTA_COST_ERASE, cost, OTA_ERASE_BLOCK_SIZE, (int)result);
+    service_app_watchdog();
+    restore_result = qspi_restore_xip();
+    return result == QSPI_OK && restore_result == 0 ? 0 : -1;
+}
+#endif
+
+#if CONFIG_OTA_INSTALL_HALF_ERASE
+static int backup_flash_erase_32k(void *ctx, uint32_t address)
+{
+    qspi_status_t result;
+    int restore_result;
+    (void)ctx;
+    if (!install_half_erase_enabled() ||
+        (address & (OTA_ERASE_HALF_BLOCK_SIZE - 1u)) != 0u ||
+        address < OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE ||
+        address >= OTA_EXT_BACKUP + OTA_EXT_SLOT_LENGTH ||
+        !backup_slot_range_ok(address, OTA_ERASE_HALF_BLOCK_SIZE, 0))
+    {
+        return -1;
+    }
+    service_app_watchdog();
+    qspi_xip_enable(QSPI1, FALSE);
+    OTA_COST_START(cost);
+    result = qspi_erase_32k(address);
+    OTA_COST_END(OTA_COST_ERASE, cost, OTA_ERASE_HALF_BLOCK_SIZE, (int)result);
+    service_app_watchdog();
+    restore_result = qspi_restore_xip();
+    return result == QSPI_OK && restore_result == 0 ? 0 : -1;
+}
+#endif
 
 static int backup_flash_program(void *ctx, uint32_t address,
                                 const uint8_t *src, uint32_t len)
@@ -595,7 +888,9 @@ static int backup_flash_program(void *ctx, uint32_t address,
     }
     service_app_watchdog();
     qspi_xip_enable(QSPI1, FALSE);
+    OTA_COST_START(cost);
     result = qspi_data_write(address, len, (uint8_t *)src);
+    OTA_COST_END(OTA_COST_PROGRAM, cost, len, (int)result);
     service_app_watchdog();
     restore_result = qspi_restore_xip();
     return result == QSPI_OK && restore_result == 0 ? 0 : -1;
@@ -605,8 +900,12 @@ ota_backup_result_t HAL::OTA_BackupStage(ota_backup_info_t *out)
 {
     ota_backup_io_t io;
 
-    if (Qspi_IsOtaDisabled() || qspi_restore_xip() != 0)
+    install_cost_begin();
+    install_profile_begin();
+    if (Qspi_IsOtaDisabled() || qspi_restore_xip(false) != 0)
     {
+        install_cost_end("backup", OTA_BACKUP_ERR_DISABLED);
+        install_profile_end("backup", OTA_BACKUP_ERR_DISABLED);
         return OTA_BACKUP_ERR_DISABLED;
     }
     memset(&io, 0, sizeof(io));
@@ -615,7 +914,25 @@ ota_backup_result_t HAL::OTA_BackupStage(ota_backup_info_t *out)
     io.flash_read = backup_flash_read;
     io.flash_erase_4k = backup_flash_erase_4k;
     io.flash_program = backup_flash_program;
-    return ota_backup_stage(&io, HAL::OTA_GetBcbHal(), out);
+    ota_backup_result_t result;
+#if CONFIG_OTA_INSTALL_BLOCK_ERASE
+    if (install_block_erase_enabled())
+    {
+#if CONFIG_OTA_INSTALL_HALF_ERASE
+        result = ota_backup_stage_with_mixed_erase(
+            &io, HAL::OTA_GetBcbHal(), out, backup_flash_erase_64k,
+            install_half_erase_enabled() ? backup_flash_erase_32k : 0);
+#else
+        result = ota_backup_stage_with_block_erase(
+            &io, HAL::OTA_GetBcbHal(), out, backup_flash_erase_64k);
+#endif
+    }
+    else
+#endif
+        result = ota_backup_stage(&io, HAL::OTA_GetBcbHal(), out);
+    install_cost_end("backup", (int)result);
+    install_profile_end("backup", (int)result);
+    return result;
 }
 
 ota_package_result_t HAL::OTA_PackageApplyStaging(
@@ -625,12 +942,16 @@ ota_package_result_t HAL::OTA_PackageApplyStaging(
 {
     ota_package_io_t io;
     ota_package_device_t device;
+    install_cost_begin();
+    install_profile_begin();
 #if defined(P2_6_TEST_ENABLE)
     p2_6_measure_begin(1u);
 #endif
 
-    if (Qspi_IsOtaDisabled() || qspi_restore_xip() != 0)
+    if (Qspi_IsOtaDisabled() || qspi_restore_xip(false) != 0)
     {
+        install_cost_end("full", OTA_PACKAGE_ERR_READ);
+        install_profile_end("full", OTA_PACKAGE_ERR_READ);
 #if defined(P2_6_TEST_ENABLE)
         p2_6_measure_end();
 #endif
@@ -650,6 +971,8 @@ ota_package_result_t HAL::OTA_PackageApplyStaging(
     device.boot_version = 1u;
     ota_package_result_t result =
         ota_package_apply_full(&io, &device, package_len, out_info);
+    install_cost_end("full", (int)result);
+    install_profile_end("full", (int)result);
 #if defined(P2_6_TEST_ENABLE)
     p2_6_measure_end();
 #endif
@@ -665,19 +988,25 @@ ota_patch_result_t HAL::OTA_PatchApplyStaging(
 {
     ota_patch_io_t io;
     ota_patch_device_t device;
+    install_cost_begin();
+    install_profile_begin();
 #if defined(P2_6_TEST_ENABLE)
     p2_6_measure_begin(2u);
 #endif
 
     if (base_image_sha8 == 0)
     {
+        install_cost_end("patch", OTA_PATCH_ERR_ARGUMENT);
+        install_profile_end("patch", OTA_PATCH_ERR_ARGUMENT);
 #if defined(P2_6_TEST_ENABLE)
         p2_6_measure_end();
 #endif
         return OTA_PATCH_ERR_ARGUMENT;
     }
-    if (Qspi_IsOtaDisabled() || qspi_restore_xip() != 0)
+    if (Qspi_IsOtaDisabled() || qspi_restore_xip(false) != 0)
     {
+        install_cost_end("patch", OTA_PATCH_ERR_READ);
+        install_profile_end("patch", OTA_PATCH_ERR_READ);
 #if defined(P2_6_TEST_ENABLE)
         p2_6_measure_end();
 #endif
@@ -701,6 +1030,8 @@ ota_patch_result_t HAL::OTA_PatchApplyStaging(
            sizeof(device.base_image_sha8));
     ota_patch_result_t result =
         ota_patch_apply(&io, &device, package_len, out_info);
+    install_cost_end("patch", (int)result);
+    install_profile_end("patch", (int)result);
 #if defined(P2_6_TEST_ENABLE)
     p2_6_measure_end();
 #endif

@@ -20,6 +20,13 @@ an already verified APK/package when still applicable instead of rebuilding to
 work around a host collector failure. An embedded endpoint must really be live;
 an expired accountless tunnel cannot be recreated under the same hostname.
 
+For necessary mid-task intervention while the current execution stays open,
+such as reinserting an SD card, follow
+[User Intervention Notifications](../../../../docs/agent-collaboration-contract.md#user-intervention-notifications):
+send a real current-session @mention and check the send receipt before waiting.
+A normal final reply, including a handoff or approval question, already has the
+bridge's automatic completion notification; do not send another manual reminder.
+
 ## CI And Installation
 
 Read the actual [development workflow guide](../../../../docs/flutter-development-validation.md)

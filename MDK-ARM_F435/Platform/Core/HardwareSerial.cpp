@@ -83,6 +83,9 @@ HardwareSerial::HardwareSerial(usart_type* usart)
     , _rxBufferTail(0)
 {
     memset(_rxBuffer, 0, sizeof(_rxBuffer));
+#if CONFIG_OTA_BLE_PROFILE
+    resetRxDiagnostics();
+#endif
 }
 
 /**
@@ -94,6 +97,16 @@ void HardwareSerial::IRQHandler()
 {
     if(usart_flag_get(_USARTx, USART_RDBF_FLAG) != RESET)
     {
+#if CONFIG_OTA_BLE_PROFILE
+        uint32_t errors = _USARTx->sts & (USART_PERR_FLAG | USART_FERR_FLAG |
+                                        USART_NERR_FLAG | USART_ROERR_FLAG);
+        if (errors != 0u)
+        {
+            ++_rxErrorEvents;
+            _rxErrorFlags |= errors;
+        }
+#endif
+        // DT already clears RDBF; do not clear a byte arriving in the callback.
         uint8_t c = usart_data_receive(_USARTx);
         uint16_t i = (uint16_t)(_rxBufferHead + 1) % SERIAL_RX_BUFFER_SIZE;
         if (i != _rxBufferTail)
@@ -101,12 +114,17 @@ void HardwareSerial::IRQHandler()
             _rxBuffer[_rxBufferHead] = c;
             _rxBufferHead = i;
         }
+#if CONFIG_OTA_BLE_PROFILE
+        else
+        {
+            ++_rxBufferDropped;
+        }
+#endif
 
         if(_callbackFunction)
         {
             _callbackFunction(this);
         }
-        usart_flag_clear(_USARTx, USART_RDBF_FLAG);
     }
 }
 
@@ -330,4 +348,3 @@ extern "C" SERIAL_5_IRQ_HANDLER_DEF()
     Serial5.IRQHandler();
 }
 #endif
-

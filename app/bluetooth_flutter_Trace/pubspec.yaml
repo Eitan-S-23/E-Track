@@ -59,6 +59,10 @@ dependencies:
   vcdiff_decoder:
     path: third_party/vcdiff_decoder
 
+dependency_overrides:
+  flutter_blue_plus_android:
+    path: vendor/flutter_blue_plus_android
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

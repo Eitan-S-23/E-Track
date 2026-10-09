@@ -119,12 +119,27 @@ public:
 
     void IRQHandler();
 
+#if CONFIG_OTA_BLE_PROFILE
+    void resetRxDiagnostics()
+    {
+        _rxBufferDropped = _rxErrorEvents = _rxErrorFlags = 0u;
+    }
+    uint32_t rxBufferDropped() const { return _rxBufferDropped; }
+    uint32_t rxErrorEvents() const { return _rxErrorEvents; }
+    uint32_t rxErrorFlags() const { return _rxErrorFlags; }
+#endif
+
 private:
     usart_type* _USARTx;
     CallbackFunction_t _callbackFunction;
     volatile uint16_t _rxBufferHead;
     volatile uint16_t _rxBufferTail;
     uint8_t _rxBuffer[SERIAL_RX_BUFFER_SIZE];
+#if CONFIG_OTA_BLE_PROFILE
+    volatile uint32_t _rxBufferDropped;
+    volatile uint32_t _rxErrorEvents;
+    volatile uint32_t _rxErrorFlags;
+#endif
 };
 
 #if SERIAL_1_ENABLE

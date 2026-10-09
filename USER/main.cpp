@@ -25,12 +25,25 @@
 #include "HAL/HAL.h"
 #include "lvgl/lvgl.h"
 #include "lv_port/lv_port.h"
+#include "HAL/ota_ui_cadence.h"
+
+#if defined(OTA_TARGET_APP) && CONFIG_OTA_UI_CADENCE
+#include "HAL/HAL_OTA_Package.h"
+#endif
 
 #if defined(OTA_TARGET_APP)
 #include "OTA/ota_vtor_check.h"
 #include "HAL/HAL_OTA_Backup.h"
 #include "OTA/ota_confirm_health.h"
 #include "EEPROM/eeprom_bcb.h"
+
+#if CONFIG_OTA_BLE_PROFILE
+extern "C" {
+extern char end;
+extern char __StackGuardStart;
+void *_sbrk(ptrdiff_t increment);
+}
+#endif
 
 static ota_confirm_health_t g_ota_health;
 static bool g_ota_confirm_done;
@@ -165,6 +178,18 @@ static void setup()
 
     App_Init();
 
+#if defined(OTA_TARGET_APP) && CONFIG_OTA_BLE_PROFILE
+    lv_mem_monitor_t memory;
+    lv_mem_monitor(&memory);
+    uintptr_t heapBase = (uintptr_t)&end;
+    uintptr_t heapLimit = (uintptr_t)&__StackGuardStart;
+    uintptr_t heapNow = (uintptr_t)_sbrk(0);
+    SEGGER_RTT_printf(0, "P34MEM: sysCapacity=%lu sysUsed=%lu lvPool=%lu lvFree=%lu lvLargest=%lu\r\n",
+        (unsigned long)(heapLimit - heapBase), (unsigned long)(heapNow - heapBase),
+        (unsigned long)LV_MEM_SIZE, (unsigned long)memory.free_size,
+        (unsigned long)memory.free_biggest_size);
+#endif
+
     HAL::Power_SetEventCallback(App_Uninit);
     HAL::Memory_DumpInfo();
 
@@ -176,7 +201,16 @@ static void setup()
 static void loop()
 {
     HAL::HAL_Update();
+#if defined(OTA_TARGET_APP) && CONFIG_OTA_UI_CADENCE
+    // Keep RX/health/watchdog service running between expensive UI refreshes.
+    static OtaUiCadence uiCadence;
+    if (uiCadence.due(millis(), HAL::OTA_OverlayIsBleOwned()))
+    {
+        lv_task_handler();
+    }
+#else
     lv_task_handler();
+#endif
 #if defined(OTA_TARGET_APP)
     OTA_ConfirmUpdate();
 #endif

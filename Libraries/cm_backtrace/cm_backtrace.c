@@ -658,3 +658,13 @@ void cm_backtrace_fault(uint32_t fault_handler_lr, uint32_t fault_handler_sp) {
 
     print_call_stack(stack_pointer);
 }
+
+#if defined(P34_EARLY_FAULT_VECTORS)
+#ifdef CMB_USING_OS_PLATFORM
+#error OS-dependent backtrace is outside the reviewed experiment
+#endif
+int p34_backtrace_ready(void)
+{
+    return init_ok && main_stack_size != 0 && code_size != 0;
+}
+#endif

@@ -47,6 +47,12 @@ OTA, publishing, or writes outside the authorized project root.
    user to install/export files the authorized USB route can handle. During an
    observed foreground OTA, do not ask them to switch to chat to acknowledge it.
 
+Follow [User Intervention Notifications](../../../docs/agent-collaboration-contract.md#user-intervention-notifications)
+for a necessary mid-task user action while keeping the current execution open:
+send a real current-session @mention and check its receipt. A normal final reply,
+including a handoff or approval question, already receives the bridge's completion
+notification; do not send a duplicate manual reminder.
+
 ## Host Reliability
 
 - Prefer cmd.exe on Windows. PowerShell -NoProfile and TEMP overrides do not

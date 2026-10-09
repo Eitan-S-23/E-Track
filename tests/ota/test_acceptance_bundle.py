@@ -1487,6 +1487,68 @@ class GovernancePromptScopeTests(unittest.TestCase):
         for entry in ("CLAUDE.md", "app/bluetooth_flutter_Trace/CLAUDE.md"):
             self.assertIn("@AGENTS.md", (ROOT / entry).read_text(encoding="utf-8-sig"))
 
+    def test_jlink_candidate_installation_lesson_is_routed(self):
+        entry = (ROOT / "AGENTS.md").read_text(encoding="utf-8-sig")
+        index = (ROOT / "docs/agent-collaboration/index.md").read_text(encoding="utf-8")
+        record = (ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8")
+        policy = (ROOT / "docs/device-experiment-policy.md").read_text(encoding="utf-8")
+        self.assertIn("`PROJECT-05`", entry)
+        self.assertIn("`docs/device-experiment-policy.md`", entry)
+        self.assertIn("project-workflow.md#project-05-j-link-installation-before-ota-measurement", index)
+        self.assertEqual(1, record.count("## PROJECT-05: J-Link Installation Before OTA Measurement"))
+        self.assertIn("../device-experiment-policy.md#candidate-installation-j-link-before-extra-ota", record)
+        self.assertEqual(1, policy.count("## Candidate Installation: J-Link Before Extra OTA"))
+
+    def test_user_intervention_notifications_distinguish_mid_task_from_final(self):
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        heading = "## User Intervention Notifications"
+        self.assertEqual(1, contract.count(heading))
+        section = contract.split(heading, 1)[1].split("\n## ", 1)[0]
+        normalized = " ".join(section.split())
+        self.assertIn("Only when the current execution is being kept open", normalized)
+        self.assertIn("automatic completion @mention for a normal final reply", normalized)
+        self.assertIn("even when it asks for a response", normalized)
+        self.assertIn("Check the send receipt", section)
+        self.assertIn("current session's project, session key and requester identity", section)
+        self.assertIn('<at user_id="CURRENT_REQUESTER_OPEN_ID">', section)
+        self.assertIn("Do not send test reminders or repeat an unchanged pending request", normalized)
+        self.assertNotIn(
+            "any genuinely required user action must be requested through cc-connect",
+            normalized.lower(),
+        )
+        scenarios = {
+            "Normal final report": "Automatic completion only; no manual @mention",
+            "Final handoff or approval question": "Automatic completion only; no manual @mention",
+            "Mid-task SD card, cable or phone action": "Manual real @mention plus send receipt",
+            "Mid-task blocking approval with execution kept open": "Manual real @mention plus send receipt",
+            "Ordinary progress or autonomous work": "No manual @mention",
+        }
+        for scenario, action in scenarios.items():
+            with self.subTest(scenario=scenario):
+                self.assertIn(f"| {scenario} | {action} |", section)
+
+    def test_mid_task_notification_lesson_and_skill_routes_are_consistent(self):
+        entry = (ROOT / "AGENTS.md").read_text(encoding="utf-8-sig")
+        index = (ROOT / "docs/agent-collaboration/index.md").read_text(encoding="utf-8")
+        record = (ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8")
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        lesson = "project-workflow.md#project-06-only-manual-mentions-for-mid-task-blockers"
+        policy = "agent-collaboration-contract.md#user-intervention-notifications"
+        self.assertIn("`PROJECT-06`", entry)
+        self.assertIn("do not send a duplicate manual @mention", entry)
+        self.assertEqual(1, index.count(lesson))
+        self.assertIn("agent-collaboration/" + lesson, contract)
+        self.assertEqual(1, record.count("## PROJECT-06: Only Manual Mentions For Mid-Task Blockers"))
+        self.assertIn("../" + policy, record)
+        skill = ".agents/skills/e-track-flutter-debug/"
+        for path, prefix in ((skill + "SKILL.md", "../../../docs/"),
+                             (skill + "references/device-session.md", "../../../../docs/")):
+            with self.subTest(path=path):
+                content = (ROOT / path).read_text(encoding="utf-8")
+                self.assertEqual(1, content.count(prefix + policy))
+                self.assertIn("mid-task", content)
+                self.assertIn("normal final reply", content)
+
     def test_shared_documents_have_resolvable_project_local_links(self):
         documents = [ROOT / "docs/agent-collaboration-contract.md",
                      ROOT / "docs/device-experiment-policy.md",
@@ -1501,6 +1563,56 @@ class GovernancePromptScopeTests(unittest.TestCase):
                 self.assertTrue(target.is_relative_to(ROOT.resolve()), link)
                 self.assertNotIn(".cache", target.relative_to(ROOT.resolve()).parts, link)
                 self.assertTrue(target.is_file(), str(target))
+
+    def test_p34_v2_scope_has_versioned_governance_routes(self):
+        path = "docs/ota-ble-v2-contract.md"
+        supplement = (ROOT / path).read_text(encoding="utf-8")
+        governance = VALIDATOR.PROFILE_DEFINITIONS["Governance"]
+        self.assertIn(path, governance["top_files"])
+        self.assertIn(path, governance["required_paths"])
+        self.assertIn(path, VALIDATOR._profile_paths(ROOT, "Governance"))
+        self.assertIn("Revision: 1 (2026-10-09). Decision: `OTA-DEC-015`", supplement)
+        self.assertIn("production freeze and release are NOT approved", supplement)
+        self.assertIn("`credit_end = min(total_len, durable_off + 8192)`", supplement)
+        self.assertIn("at most 24 submitted, not-yet-accepted DATA segments", supplement)
+        self.assertIn("1048576-byte ETU", supplement)
+        self.assertIn("clamp(3*P99_ACK, 500 ms, 2000 ms)", supplement)
+        for document in ("docs/ota-spec-decisions.md", "docs/ota-cross-system-contracts.md",
+                         "docs/ota-prompts/prompt-P3-4-experiment.md",
+                         "docs/ota-prompts/supplement-P3-4-remediation-2026-10-09.md"):
+            self.assertIn("ota-ble-v2-contract.md", (ROOT / document).read_text(encoding="utf-8"))
+        workflow = (ROOT / ".github/workflows/acceptance-governance.yml").read_text(encoding="utf-8")
+        self.assertEqual(2, workflow.count('- "' + path + '"'))
+        for link in re.findall(r"\[[^\]]+\]\(([^)]+)\)", supplement):
+            self.assertTrue((ROOT / "docs" / link.split("#", 1)[0]).resolve().is_file(), link)
+        batch = ROOT / "docs/ota-prompts/supplement-P3-4-remediation-2026-10-09.md"
+        self.assertIsNone(PostP26SpecGovernanceTests.PROMPT_FILENAME_HINT_RE.fullmatch(batch.name))
+        self.assertNotRegex(batch.read_text(encoding="utf-8"), r"(?m)^task_id:")
+        self.assertIn(batch.relative_to(ROOT).as_posix(), VALIDATOR._profile_paths(ROOT, "Governance"))
+
+    def test_p34_plugin_and_compiled_ack_inputs_have_real_owners(self):
+        vendor = "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/"
+        plugin = vendor + "android/src/main/java/com/lib/flutter_blue_plus/FlutterBluePlusPlugin.java"
+        native_test = vendor + "android/src/test/java/com/lib/flutter_blue_plus/NativeWriteTraceTest.java"
+        ack_header = "Tools/ota/p34_timed_ack_batch.h"
+        erase_header = "Tools/ota/p34_staging_erase.h"
+        collector = "Tools/ota/p34_observation.py"
+        candidates = [plugin, native_test, ack_header, erase_header, collector]
+        selected = {
+            profile: set(VALIDATOR._filter_profile_paths(candidates, definition))
+            for profile, definition in VALIDATOR.PROFILE_DEFINITIONS.items()
+        }
+        for profile in ("Production", "Flutter"):
+            self.assertIn(plugin, selected[profile])
+            self.assertNotIn(native_test, selected[profile])
+        self.assertIn(native_test, selected["Validation"])
+        for profile in ("Production", "Firmware"):
+            self.assertIn(ack_header, selected[profile])
+            self.assertIn(erase_header, selected[profile])
+            self.assertNotIn(collector, selected[profile])
+        self.assertNotIn(plugin, selected["Firmware"])
+        self.assertIn(collector, selected["Validation"])
+        self.assertNotIn(collector, selected["Capture"])
 
     def test_dispatch_prompts_do_not_live_outside_governed_dir(self):
         stray = self.find_stray_dispatch_prompts(self.enumerate_repo_markdown())

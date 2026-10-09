@@ -465,7 +465,15 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertIn("if: always()", text)
         self.assertIn("include-hidden-files: true", text)
         self.assertIn("if-no-files-found: error", text)
-        for forbidden in ("secrets.", "contents: write", "pages: write", "id-token:",
+        allowed_secret = "TRACE_DEV_SIGNING_KEYSTORE_SECRET: ${{ env.FLUTTER_DEV_BUILD_APK == 'true' && inputs.app_id_suffix != '' && secrets.ETRACK_DEV_SIGNING_KEYSTORE || '' }}"
+        self.assertEqual(text.count(allowed_secret), 1)
+        self.assertNotIn("secrets.", text.replace(allowed_secret, ""))
+        step = text.split("- name: Analyze, test and optionally build a debug APK", 1)[1].split("- name:", 1)[0]
+        self.assertIn(allowed_secret, step)
+        self.assertNotIn("development-signing", text)
+        self.assertNotIn("*.jks", text)
+        self.assertNotIn("*.keystore", text)
+        for forbidden in ("contents: write", "pages: write", "id-token:",
                           "continue-on-error", "flutter build", "wrangler", "pwsh",
                           "pull_request_target:", "publish_release", "git push"):
             self.assertNotIn(forbidden, text)
@@ -482,8 +490,10 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             ".github/workflows/build.yml", "app/bluetooth_flutter_Trace/pubspec.yaml",
             "app/bluetooth_flutter_Trace/test/ota/probe_test.dart",
             "Tools/flutter/dev_checks.py", "Tools/flutter/dev_apk.py",
+            "Tools/ota/p3-4-link-stats/observation_capture.py",
             "Tools/provenance/manifest_profiles.json",
             "tests/ota/test_flutter_dev_checks.py", "tests/ota/test_flutter_dev_apk.py",
+            "tests/ota/test_p3_4_observation_capture.py",
             "docs/flutter-development-validation.md", "docs/acceptance-execution-contract.md",
         )
         omitted = ("docs/acceptance-contracts/P3-3-v9/artifacts/probe.bin", "bsdiff_lzma_AES128-main/dist/probe.bin")
