@@ -2,6 +2,9 @@
 
 A valid envelope is not throughput acceptance. UART baud, APK/source binding,
 measurement grouping and the existing statistics parser remain separate gates.
+
+Promoted from the N01 verifier at aea62c6490a529a47f74dde86669dc3e3c7605ff.
+Repeated identical runtime stamps are legal; conflicting stamps are not.
 """
 from __future__ import annotations
 
@@ -13,13 +16,11 @@ import re
 import stat
 import sys
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 MAX_BYTES = 64 * 1024 * 1024
 PREFIXES = ("OTA_LINK_SAMPLE ", "OTA_LINK_STATS ", "OTA_LINK_RETIRE ",
             "OTA_LINK_LATE ", "OTA_MONO ", "OTA_IDENTITY ", "OTA_EXPERIMENT ",
-            "OTA_PREFIX_PROBE ", "OTA_RADIO ", "OTA_PHY ", "OTA_PHY_CANCEL ",
-            "OTA_LINK_NATIVE_READY ", "OTA_LINK_NATIVE_META ", "OTA_LINK_NATIVE_WRITE ",
-            "OTA_LINK_NATIVE_END ", "OTA_LINK_NATIVE_ERROR ")
+            "OTA_PREFIX_PROBE ")
 INPUT_FIELDS = {"packageSha256", "packageBytes", "currentVersionCode",
                 "currentImageSha256", "targetVersionCode", "targetImageSha256",
                 "deviceAddress", "appLifecycle"}
@@ -61,6 +62,26 @@ def uint(value, maximum=0xFFFFFFFF):
 
 def digest(value):
     return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+
+
+def same_device(left, right):
+    """Only MAC letter case is normalized; other identifiers remain exact."""
+    mac = r"[0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){5}"
+    if isinstance(left, str) and isinstance(right, str):
+        if re.fullmatch(mac, left) and re.fullmatch(mac, right):
+            return left.lower() == right.lower()
+        return left == right
+    return False
+
+
+def experiment_record(messages):
+    values = [decode(line[len("OTA_EXPERIMENT "):]) for line in messages
+              if line.startswith("OTA_EXPERIMENT ")]
+    require(values, "original runtime experiment record missing")
+    canonical = [json.dumps(value, sort_keys=True, allow_nan=False) for value in values]
+    require(all(value == canonical[0] for value in canonical),
+            "conflicting runtime experiment records")
+    return values[0]
 
 
 def validate_input(value):
@@ -183,7 +204,7 @@ def verify_prefix_probe(envelope, messages):
         return values[0]
 
     probe = one("OTA_PREFIX_PROBE ")
-    experiment = one("OTA_EXPERIMENT ")
+    experiment = experiment_record(messages)
     fields = {"schema", "outcome", "prefixBytes", "sentUniqueBytes", "uniqueSegments", "sentTotalBytes",
               "senderWindowSegments", "beginWriteUs", "durableAckUs", "abortWriteUs", "abortAckUs",
               "elapsedUs", "abortElapsedUs", "session", "abortSeq", "abortStatus", "durableOff",
@@ -223,10 +244,11 @@ def verify_prefix_probe(envelope, messages):
             digest(probe["configSha256"]) and probe["runId"] == experiment["runId"] and
             probe["configSha256"] == experiment["configSha256"], "prefix config binding")
     source = envelope["input"]
-    for key in INPUT_FIELDS - {"appLifecycle"}:
+    for key in INPUT_FIELDS - {"appLifecycle", "deviceAddress"}:
         require(type(experiment[key]) is type(source[key]) and experiment[key] == source[key],
                 "prefix experiment input binding: " + key)
-    require(probe["deviceAddress"] == source["deviceAddress"] and
+    require(same_device(experiment["deviceAddress"], source["deviceAddress"]) and
+            same_device(probe["deviceAddress"], source["deviceAddress"]) and
             probe["sourceVersionCode"] == source["currentVersionCode"] and
             probe["sourceImageSha256"] == source["currentImageSha256"], "prefix retained identity")
     identity = one("OTA_IDENTITY ")
@@ -234,7 +256,7 @@ def verify_prefix_probe(envelope, messages):
             identity["phase"] == "pre-transfer" and type(identity["versionCode"]) is int and
             identity["versionCode"] == source["currentVersionCode"] and
             identity["imageSha256"] == source["currentImageSha256"] and
-            identity["deviceAddress"] == source["deviceAddress"], "prefix initial identity")
+            same_device(identity["deviceAddress"], source["deviceAddress"]), "prefix initial identity")
     require(not any(line.startswith(("OTA_MONO MONO_END_ACK_OK ", "OTA_MONO MONO_REBOOT_VERIFIED "))
                     for line in messages), "prefix cannot include END/reboot success")
     require(sum(line.startswith("OTA_MONO MONO_BUDGET_START ") for line in messages) == 1,

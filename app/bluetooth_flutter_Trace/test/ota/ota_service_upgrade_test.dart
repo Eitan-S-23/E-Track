@@ -309,10 +309,10 @@ void main() {
   Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
       int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500,
       bool? pauseScan, bool highPriority = false, int? batchFrames, bool? reuseInfoLink,
-      String? phyPolicy, int? infoMaxAttempts}) async {
+      String? phyPolicy, int? infoMaxAttempts, int? ackTimeoutMs}) async {
     final runtime = OtaExperimentRuntime(enabled: true);
     await runtime.initialize(expectedTarget: probeAddress, readConfig: () async => jsonEncode({
-      'schema': infoMaxAttempts != null ? 9 : phyPolicy != null ? 8 : batchFrames == 12 ? 7 : reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
+      'schema': ackTimeoutMs != null ? 10 : infoMaxAttempts != null ? 9 : phyPolicy != null ? 8 : batchFrames == 12 ? 7 : reuseInfoLink != null ? 6 : batchFrames != null ? 5 : pauseScan != null ? 4 : rebootInfoTimeoutMs == null ? 2 : 3,
       'runId': 'prefix-001', 'target': probeAddress, 'requestedBaud': 460800,
       'reuseGatt': true, 'withoutResponse': true,
       'firmwareLatestUrl': 'https://fixture.example/api/public/firmware/latest',
@@ -335,10 +335,39 @@ void main() {
       if (reuseInfoLink != null || batchFrames == 12) 'reuseRebootInfoLink': reuseInfoLink ?? false,
       if (phyPolicy != null) 'androidPhyPolicy': phyPolicy,
       if (infoMaxAttempts != null) 'rebootInfoMaxAttempts': infoMaxAttempts,
+      if (ackTimeoutMs != null) 'ackTimeoutMs': ackTimeoutMs,
     }));
     expect(runtime.ready, isTrue);
     return runtime;
   }
+
+  test('runtime ACK timeout reaches the real service transport', () async {
+    final bytes = assetBytes();
+    final runtime = await probeRuntime(bytes, window: 4, prefix: false,
+        rebootInfoTimeoutMs: 2000, pauseScan: false, batchFrames: 1,
+        reuseInfoLink: true, phyPolicy: 'off', infoMaxAttempts: 3, ackTimeoutMs: 500);
+    await OtaExperimentRuntime.withInstance(runtime, () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          package: bytes, address: probeAddress, writeMode: 'without');
+      ble.dataGate = Completer<void>();
+      final service = Get.find<OtaService>();
+      final upgrade = service.startOtaUpgrade(probeAddress);
+      late final bool completed;
+      try {
+        await expectGatedDataCount(ble, 4);
+        await Future<void>.delayed(const Duration(milliseconds: 700));
+        expect(ble.dataOffsets.length, greaterThan(4),
+            reason: '500 ms must be injected instead of the 2000 ms default');
+        expect(ble.dataOffsets.toSet().length, 4,
+            reason: 'timeout retries cannot grant new DATA credit');
+        expect(ble.endCalls, 0);
+      } finally {
+        ble.releaseDataGate();
+        completed = await upgrade;
+      }
+      expect(completed, isTrue);
+    });
+  });
 
   for (final scenario in ['off', 'observe', 'prefer2m', 'not-2m',
       'cancel', 'close', 'cancel-nack', 'close-nack']) {

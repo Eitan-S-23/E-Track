@@ -157,7 +157,7 @@ class CaptureTests(unittest.TestCase):
             dict(configSha256="d"*64), dict(runId="different"), dict(extra=1),
         )] + [("OTA_EXPERIMENT ", changes) for changes in (
             dict(schema=1), dict(transferMode="full"), dict(prefixBytes=32768.0),
-            dict(senderWindowSegments=4), dict(requestedBaud=230400),
+            dict(senderWindowSegments=4), dict(requestedBaud=123456),
             dict(packageSha256="f"*64), dict(packageBytes=True), dict(extra=True),
         )]
         for prefix, changes in cases:
@@ -167,6 +167,16 @@ class CaptureTests(unittest.TestCase):
             value.update(changes)
             row["message"] = prefix + json.dumps(value)
             with self.subTest(prefix=prefix, changes=changes), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_accepts_all_supported_requested_bauds(self):
+        for baud in (115200, 230400, 460800, 921600):
+            items = prefix_rows()
+            row = next(row for row in items if row.get("message", "").startswith("OTA_EXPERIMENT "))
+            value = json.loads(row["message"][len("OTA_EXPERIMENT "):])
+            value["requestedBaud"] = baud
+            row["message"] = "OTA_EXPERIMENT " + json.dumps(value)
+            with self.subTest(baud=baud):
                 self.verify(encoded(items), require_prefix_probe=True)
 
     def test_prefix_requires_original_sender_coverage_and_one_verdict(self):
