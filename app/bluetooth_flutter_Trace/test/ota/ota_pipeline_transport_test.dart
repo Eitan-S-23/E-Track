@@ -158,9 +158,10 @@ Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
     {void Function(int, int)? progress}) => transport.transfer(package: bytes,
       packageSha256: List.filled(32, 1), etuHeader: bytes.sublist(0, 64), onDurableProgress: progress);
 
-OtaBleTransport sender(OtaBleChannel peer, {bool enabled = true, Duration? budget, int batch = 1}) =>
+OtaBleTransport sender(OtaBleChannel peer, {bool enabled = true, Duration? budget,
+    int batch = 1, OtaLinkStats? stats}) =>
     OtaBleTransport(channel: peer, enablePipeline: enabled,
-      dataBatchFrames: batch,
+      dataBatchFrames: batch, stats: stats,
       ackTimeout: const Duration(milliseconds: 30),
       noProgressTimeout: budget ?? const Duration(seconds: 3));
 
@@ -173,6 +174,81 @@ Future<void> until(bool Function() condition) async {
 }
 
 void main() {
+  for (final status in [0x0f, 0x7e]) {
+    test('first matching v2 error preserves raw status $status without credit', () async {
+      final peer = _Peer()..holdDurable = true;
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = sender(peer, stats: stats);
+      final progress = <int>[];
+      peer.onData = (frame) => peer.ack(0x92, frame.seq, status: status);
+      await expectLater(transfer(transport, package(1000), progress: (value, _) => progress.add(value)),
+        throwsA(isA<OtaTransportException>().having((error) => error.code, 'code',
+          status == 0x0f ? 'ACK_STATUS' : 'ACK_MALFORMED')));
+      final error = ((stats.toJson()['transfer'] as Map)['acks'] as Map)['firstError'] as Map;
+      expect(error['status'], status);
+      expect(error['cmd'], 0x92);
+      expect(error['session'], 7);
+      expect(error['seq'], peer.frames.firstWhere((frame) => frame.cmd == 0x12).seq);
+      expect(error['epoch'], peer.nonce);
+      expect(error['durable'], 0);
+      expect(error['accepted'], 0);
+      expect(error['credit'], 1000);
+      expect(progress, [0]);
+      expect(peer.frames.any((frame) => frame.cmd == 0x13 || frame.cmd == 1), isFalse);
+      await transport.dispose();
+      await peer.events.close();
+    });
+  }
+
+  test('stale epoch and unsent sequence errors cannot poison the active first error', () async {
+    final peer = _Peer();
+    final stats = OtaLinkStats(label: 'upgrade');
+    final transport = sender(peer, stats: stats);
+    peer.onData = (frame) {
+      peer.ack(0x92, frame.seq, status: 15, epoch: peer.nonce ^ 1);
+      peer.ack(0x92, (frame.seq + 2048) & 0xffff, status: 0x7e);
+    };
+    expect((await transfer(transport, package(1000))).isOk, isTrue);
+    expect((stats.toJson()['transfer'] as Map)['acks'], isNot(contains('firstError')));
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  test('truncated matching ACK preserves missing fields as null, not zero', () async {
+    final peer = _Peer();
+    final stats = OtaLinkStats(label: 'upgrade');
+    final transport = sender(peer, stats: stats);
+    peer.onData = (frame) => peer.reply(0x92, 7, frame.seq, [15]);
+    await expectLater(transfer(transport, package(1000)),
+      throwsA(isA<OtaTransportException>().having((error) => error.code, 'code', 'ACK_MALFORMED')));
+    final error = ((stats.toJson()['transfer'] as Map)['acks'] as Map)['firstError'] as Map;
+    expect(error['payloadBytes'], 1);
+    expect(error['status'], 15);
+    for (final field in ['epoch', 'durable', 'accepted', 'credit']) {
+      expect(error[field], isNull);
+    }
+    expect(peer.frames.any((frame) => frame.cmd == 0x13), isFalse);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  for (final badBegin in [true, false]) {
+    test('invalid v2 ${badBegin ? 'BEGIN' : 'END'} credit is retained', () async {
+      final peer = _Peer()..badBegin = badBegin..badEnd = !badBegin;
+      final stats = OtaLinkStats(label: 'upgrade');
+      final transport = sender(peer, stats: stats);
+      await expectLater(transfer(transport, package(1000)),
+        throwsA(isA<OtaTransportException>().having((error) => error.code, 'code', 'ACK_MALFORMED')));
+      final error = ((stats.toJson()['transfer'] as Map)['acks'] as Map)['firstError'] as Map;
+      expect(error['cmd'], badBegin ? 0x91 : 0x93);
+      expect(error['reason'], 'ACK_MALFORMED');
+      expect(error['status'], 0);
+      expect(error['epoch'], peer.nonce);
+      await transport.dispose();
+      await peer.events.close();
+    });
+  }
+
   test('v2 success and v1 fallback emit one compatible start and END marker', () async {
     final previousPrint = debugPrint;
     final logs = <String>[];

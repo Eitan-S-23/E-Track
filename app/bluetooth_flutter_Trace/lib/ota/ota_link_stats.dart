@@ -494,6 +494,31 @@ class OtaLinkStats {
   int acksNoProgress = 0;
   int acksAbort = 0;
 
+  Map<String, Object?>? _firstAckError;
+
+  /// One immutable diagnostic snapshot; it never supplies credit or ACK timing.
+  void recordFirstAckError({
+    required int command,
+    required int session,
+    required int sequence,
+    required int payloadBytes,
+    required String reason,
+    int? status,
+    int? epoch,
+    int? durableOffset,
+    int? acceptedOffset,
+    int? creditEnd,
+  }) {
+    if (_firstAckError != null || _retiredReason != null || _summaryEmitted) return;
+    _firstAckError = Map<String, Object?>.unmodifiable({
+      'schema': 1, 'cmd': command, 'session': session, 'seq': sequence,
+      'payloadBytes': payloadBytes, 'reason': reason, 'status': status,
+      'epoch': epoch, 'durable': durableOffset, 'accepted': acceptedOffset,
+      'credit': creditEnd, 'us': nowUs(),
+    });
+    emitOtaObservation('OTA_LINK_ACK_ERROR label=$label ${convert.jsonEncode(_firstAckError)}');
+  }
+
   /// ACK 分类：ok / duplicate / error / malformed / noProgress / abort。
   /// 重复、无推进、错误与畸形 ACK 不产生样本，只计数（fail-closed 留痕）。
   void recordAckClass(String kind) {
@@ -692,6 +717,7 @@ class OtaLinkStats {
           'malformed': acksMalformed,
           'noProgress': acksNoProgress,
           'abort': acksAbort,
+          if (_firstAckError != null) 'firstError': _firstAckError,
         },
         'ackSamples': ackSampleIntegrity,
         'ackEarlyInvalid': ackEarlyInvalid,

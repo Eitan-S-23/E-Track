@@ -15,6 +15,44 @@ import 'package:ble_monitor/ota/ota_link_stats.dart';
 /// transport 层接线（真实 transfer + fake MCU）在
 /// `ota_ble_transport_test.dart` 的 `P3-4 链路观测接线` 组覆盖。
 void main() {
+  test('first ACK error is bounded, immutable and observation only', () {
+    final previousPrint = debugPrint;
+    final lines = <String>[];
+    debugPrint = (String? value, {int? wrapWidth}) {
+      if (value != null) lines.add(value);
+    };
+    addTearDown(() => debugPrint = previousPrint);
+    final stats = OtaLinkStats(label: 'upgrade', clockUs: () => 123);
+    void record(int status) => stats.recordFirstAckError(command: 0x92, session: 7,
+      sequence: 400, payloadBytes: 17, reason: 'ACK_STATUS', status: status,
+      epoch: 9, durableOffset: 45056, acceptedOffset: 49152, creditEnd: 53248);
+    record(15);
+    record(255);
+    final snapshot = ((stats.toJson()['transfer'] as Map)['acks'] as Map)['firstError'] as Map;
+    expect(snapshot, {'schema': 1, 'cmd': 0x92, 'session': 7, 'seq': 400,
+      'payloadBytes': 17, 'reason': 'ACK_STATUS', 'status': 15, 'epoch': 9,
+      'durable': 45056, 'accepted': 49152, 'credit': 53248, 'us': 123});
+    expect(() => snapshot['status'] = 0, throwsUnsupportedError);
+    expect(lines.where((line) => line.startsWith('OTA_LINK_ACK_ERROR ')), hasLength(1));
+    expect(stats.acksError, 0);
+    expect(stats.ackLatencySamplesUs, isEmpty);
+    expect(stats.durableOffsets, isEmpty);
+  });
+
+  test('retired or summarized stats cannot acquire a late ACK error', () {
+    for (final retire in [true, false]) {
+      final stats = OtaLinkStats(label: 'probe');
+      if (retire) {
+        stats.retire(reason: 'closed');
+      } else {
+        stats.emitSummary();
+      }
+      stats.recordFirstAckError(command: 0x92, session: 7, sequence: 1,
+        payloadBytes: 1, reason: 'ACK_MALFORMED', status: 15);
+      expect((stats.toJson()['transfer'] as Map)['acks'], isNot(contains('firstError')));
+    }
+  });
+
   test('nearestRank：空样本返回 null', () {
     expect(OtaLinkStats.nearestRank(const <int>[], 0.99), isNull);
   });

@@ -17,7 +17,7 @@ class _PipelineWire {
 }
 
 class _PipelineAck {
-  _PipelineAck(OtaBleFrame frame, {this.arrivalUs}) {
+  _PipelineAck(this.frame, {this.arrivalUs}) {
     final base = frame.cmd == _PipelineWire.ackBegin ? 2 : 1;
     if (frame.payload.length != base + OtaPipelineWindow.ackBytes ||
         !OtaBleCodec.knownStatuses.contains(frame.payload[0])) {
@@ -38,8 +38,22 @@ class _PipelineAck {
   }
 
   late final int status, session, epoch, durable, accepted, credit;
+  final OtaBleFrame frame;
   late final Uint8List body;
   final int? arrivalUs;
+}
+
+void _recordPipelineAckError(OtaLinkStats? stats, OtaBleFrame frame, String reason) {
+  if (stats == null) return;
+  final base = frame.cmd == _PipelineWire.ackBegin ? 2 : 1;
+  final bytes = ByteData.sublistView(frame.payload);
+  int? word(int offset) => bytes.lengthInBytes >= offset + 4
+      ? bytes.getUint32(offset, Endian.little) : null;
+  stats.recordFirstAckError(command: frame.cmd, session: frame.session, sequence: frame.seq,
+    payloadBytes: frame.payload.length, reason: reason,
+    status: frame.payload.isEmpty ? null : frame.payload.first,
+    epoch: word(base), durableOffset: word(base + 4),
+    acceptedOffset: word(base + 8), creditEnd: word(base + 12));
 }
 
 class _PipelineWaiter extends _ResponseWaiter {
@@ -81,14 +95,15 @@ class _PipelineAckView {
         ByteData.sublistView(frame.payload).getUint32(1, Endian.little) != window.epoch) {
       return;
     }
+    if (frame.cmd == _PipelineWire.ackData &&
+        !sentSeqs.contains(frame.seq) && frame.seq != beginSeq) {
+      return;
+    }
     try {
       final ack = _PipelineAck(frame);
       if (ack.epoch != window.epoch) return;
-      if (frame.cmd == _PipelineWire.ackData &&
-          !sentSeqs.contains(frame.seq) && frame.seq != beginSeq) {
-        return;
-      }
       if (ack.status != OtaBleCodec.statusOk) {
+        _recordPipelineAckError(stats, frame, 'ACK_STATUS');
         stats?.recordAckClass('error');
         if (frame.cmd == _PipelineWire.ackData &&
             const {OtaBleCodec.statusErrFrame, OtaBleCodec.statusErrCrc,
@@ -117,8 +132,10 @@ class _PipelineAckView {
       }
       if (changed) _signal();
     } on FormatException {
+      _recordPipelineAckError(stats, frame, 'ACK_MALFORMED');
       fail(const OtaTransportException('Invalid v2 credit', code: 'ACK_MALFORMED'));
     } on OtaTransportException catch (error) {
+      _recordPipelineAckError(stats, frame, error.code ?? 'ACK_MALFORMED');
       fail(error);
     }
   }
@@ -175,8 +192,15 @@ extension _PipelineTransfer on OtaBleTransport {
       try {
         await _writeFrame(frame);
         final response = await waiter.future.timeout(_capByBudget(ackTimeout));
-        final ack = _PipelineAck(response, arrivalUs: waiter.arrivalUs);
+        final _PipelineAck ack;
+        try {
+          ack = _PipelineAck(response, arrivalUs: waiter.arrivalUs);
+        } on OtaTransportException catch (error) {
+          _recordPipelineAckError(stats, response, error.code ?? 'ACK_MALFORMED');
+          rethrow;
+        }
         if (ack.status == OtaBleCodec.statusOk && ack.epoch == epoch) return ack;
+        _recordPipelineAckError(stats, response, 'ACK_STATUS');
         if (attempt < retries &&
             (ack.status == OtaBleCodec.statusErrCrc || ack.status == OtaBleCodec.statusErrFrame)) {
           continue;
@@ -244,7 +268,12 @@ extension _PipelineTransfer on OtaBleTransport {
       _session = beginAck.session;
       final window = OtaPipelineWindow(epoch: epoch, totalBytes: package.length,
         durableOffset: beginAck.durable, maxInFlightSegments: (windowSegments ?? 24).clamp(1, 24).toInt());
-      window.acknowledge(beginAck.body);
+      try {
+        window.acknowledge(beginAck.body);
+      } on FormatException {
+        _recordPipelineAckError(stats, beginAck.frame, 'ACK_MALFORMED');
+        rethrow;
+      }
       final resume = beginAck.durable;
       if (resume > 0) {
         _noProgressClock?.reset();
@@ -343,6 +372,7 @@ extension _PipelineTransfer on OtaBleTransport {
       _checkUsable();
       if (endAck.durable != package.length || endAck.accepted != package.length ||
           endAck.credit != package.length) {
+        _recordPipelineAckError(stats, endAck.frame, 'ACK_MALFORMED');
         throw const OtaTransportException('Incomplete v2 END ACK', code: 'ACK_MALFORMED');
       }
       final endStats = stats;
