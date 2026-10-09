@@ -201,7 +201,7 @@ jobs:
           python3 tests/ota/test_ota_patch.py
           python3 tests/ota/test_ota_ble_frame.py
           python3 tests/ota/test_ota_ble_session.py
-          python3 tests/ota/p3_1_verify_contract_alignment.py
+          python3 -B tests/ota/test_ota_ble_contract.py
           python3 tests/ota/p3_1_verify_text_isolation.py
           python3 tests/ota/p3_1_verify_portability.py
           python3 tests/ota/test_ota_device_info.py
@@ -344,6 +344,7 @@ jobs:
           echo "X-Track-App-GCC.bin: ${bin_size} bytes, sha256=${sha256}"
 
       - name: Build the P3-4 acceptance candidate
+        id: p34_candidate
         if: github.event_name == 'pull_request' && github.head_ref == 'acceptance/p3-4-v2-20261009'
         shell: bash
         run: |
@@ -353,7 +354,7 @@ jobs:
             --out "$GITHUB_WORKSPACE/.cache/p34-ci" --toolchain "$toolchain"
 
       - name: Preserve the P3-4 candidate build evidence
-        if: always() && github.event_name == 'pull_request' && github.head_ref == 'acceptance/p3-4-v2-20261009'
+        if: always() && steps.p34_candidate.outcome != 'skipped' && github.event_name == 'pull_request' && github.head_ref == 'acceptance/p3-4-v2-20261009'
         uses: actions/upload-artifact@v4
         with:
           name: p34-candidate-${{ github.event.pull_request.head.sha }}
