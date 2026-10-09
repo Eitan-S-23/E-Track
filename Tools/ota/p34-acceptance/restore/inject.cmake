@@ -8,10 +8,11 @@ function(configure_restore_app)
         message(FATAL_ERROR "Exactly the production App main must be replaced")
     endif()
     set_property(TARGET X_Track_App_GCC PROPERTY SOURCES "${sources}")
+    get_filename_component(fw "${CMAKE_SOURCE_DIR}/../.." ABSOLUTE)
     target_sources(X_Track_App_GCC PRIVATE
         "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/restore_main.cpp"
         "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/restore_core.c"
-        "D:/github/my/E-Track/.cache/p34-acceptance1/f/boot/src/boot_slot.c")
+        "${fw}/boot/src/boot_slot.c")
     target_include_directories(X_Track_App_GCC PRIVATE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}")
 endfunction()
 cmake_language(DEFER CALL configure_restore_app)

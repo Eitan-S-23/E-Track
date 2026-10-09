@@ -44,27 +44,37 @@ resolved, directly applicable decision and states how it applies here.
 
 ## User Intervention Notifications
 
-When the current session uses cc-connect, distinguish mid-task intervention from
-normal completion (user clarification, 2026-10-09). The bridge already sends an
+When the current session uses cc-connect, distinguish an out-of-chat action from
+requesting a chat reply (user clarifications, 2026-10-09 and 2026-10-10). The bridge already sends an
 automatic completion @mention for a normal final reply. Do not send an additional
 manual reminder for a final report, handoff or approval question delivered with
 that reply, even when it asks for a response. A project still being unfinished
 does not turn a final reply into a mid-task intervention.
 
-Only when the current execution is being kept open and a genuinely required
-user action blocks its next step, request that action through cc-connect with
-a real platform @mention of the requesting user in that same session, before
-waiting. Examples include reinserting an SD card, handling a phone dialog or
-granting missing authorization needed to continue the active operation.
-Existing standing authority does not require another permission request;
-continue independent safe work.
+Only when the current execution is being kept open, an already-authorized user
+action blocks its next step, and the user can perform it outside chat without
+sending a chat reply, request that action through cc-connect with a real platform
+@mention of the requesting user in that same session. All three conditions are
+required. Examples include reinserting an SD card, reconnecting a cable or
+handling an already-authorized phone dialog. After checking the send receipt,
+observe the actual action/state change; do not require an "OK" reply in chat.
+
+Requests requiring a chat reply never use manual @mentions. Authorization,
+permission, a choice, confirmation or missing information requested in chat must
+be asked in a normal final reply: end the current execution, let the bridge send
+its automatic completion notification, and resume after the user's answer.
+Keeping another task or worker running does not create an exception. Existing
+standing authority does not require another permission request; continue
+independent safe work until the normal final reply.
 
 | Situation | Notification |
 | --- | --- |
 | Normal final report | Automatic completion only; no manual @mention |
 | Final handoff or approval question | Automatic completion only; no manual @mention |
-| Mid-task SD card, cable or phone action | Manual real @mention plus send receipt |
-| Mid-task blocking approval with execution kept open | Manual real @mention plus send receipt |
+| Mid-task SD card, cable or phone action without a chat reply | Manual real @mention plus send receipt |
+| Authorization or permission requested in chat | End with the question; automatic completion only; no manual @mention |
+| Choice, confirmation or missing information requested in chat | End with the question; automatic completion only; no manual @mention |
+| Approval while another task or worker is still running | End with the question; automatic completion only; no manual @mention |
 | Ordinary progress or autonomous work | No manual @mention |
 
 For a required mid-task reminder:

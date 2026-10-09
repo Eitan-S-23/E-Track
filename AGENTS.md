@@ -12,11 +12,15 @@ promote AC5 artifacts to OTA or CI release artifacts.
   Read `docs/agent-collaboration/index.md` for shared decisions and handoffs.
   The canonical rules and index live in the project root and are delivered on
   `main`; a task worktree, ignored cache or chat must not be their only copy.
-- When using cc-connect, send a manual real @mention only for a necessary
-  mid-task intervention while keeping the current execution open; check its
-  receipt before waiting. Normal final reports, handoffs and final approval
-  questions already receive the bridge's automatic completion notification:
-  do not send a duplicate manual @mention. Follow **User Intervention
+- When using cc-connect, a manual real @mention is only for a necessary,
+  already-authorized action outside chat while the current execution stays open,
+  such as reinserting an SD card or handling a phone dialog, without sending a
+  chat reply. Check its receipt, then observe the actual action/state change.
+  Requests requiring a chat reply never use manual @mentions. Ask authorization,
+  choices or missing information in a normal final reply and resume after the
+  answer; keeping another task or worker running does not create an exception.
+  Final reports and handoffs already receive the bridge's automatic completion
+  notification: do not send a duplicate manual @mention. Follow **User Intervention
   Notifications** in `docs/agent-collaboration-contract.md` and `PROJECT-06` in
   `docs/agent-collaboration/project-workflow.md`; continue autonomously when
   no user action is needed.

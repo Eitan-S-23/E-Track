@@ -36,6 +36,7 @@ class OtaExperimentConfig {
     required this.reuseRebootInfoLink,
     required this.androidPhyPolicy,
     required this.rebootInfoMaxAttempts,
+    required this.ackTimeout,
   });
 
   static const maxConfigBytes = 8192;
@@ -58,6 +59,7 @@ class OtaExperimentConfig {
   static const _v6Fields = {..._v5Fields, 'reuseRebootInfoLink'};
   static const _v8Fields = {..._v6Fields, 'androidPhyPolicy'};
   static const _v9Fields = {..._v8Fields, 'rebootInfoMaxAttempts'};
+  static const _v10Fields = {..._v9Fields, 'ackTimeoutMs'};
 
   final int schema;
   final String runId;
@@ -83,6 +85,7 @@ class OtaExperimentConfig {
   final bool reuseRebootInfoLink;
   final String androidPhyPolicy;
   final int rebootInfoMaxAttempts;
+  final Duration? ackTimeout;
   bool get isPrefixProbe => prefixBytes > 0;
 
   factory OtaExperimentConfig.parse(String text, {required String expectedTarget}) {
@@ -92,11 +95,11 @@ class OtaExperimentConfig {
     }
     final decoded = jsonDecode(text);
     if (decoded is! Map<String, dynamic> || decoded['schema'] is! int ||
-        !const {1, 2, 3, 4, 5, 6, 7, 8, 9}.contains(decoded['schema'])) {
+        !const {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.contains(decoded['schema'])) {
       throw const FormatException('experiment-config-schema');
     }
     final schema = decoded['schema'] as int;
-    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : schema == 4 ? _v4Fields : schema == 5 ? _v5Fields : schema == 9 ? _v9Fields : schema == 8 ? _v8Fields : _v6Fields;
+    final fields = schema == 1 ? _fields : schema == 2 ? _v2Fields : schema == 3 ? _v3Fields : schema == 4 ? _v4Fields : schema == 5 ? _v5Fields : schema == 10 ? _v10Fields : schema == 9 ? _v9Fields : schema == 8 ? _v8Fields : _v6Fields;
     if (decoded.length != fields.length || !fields.containsAll(decoded.keys)) {
       throw const FormatException('experiment-config-schema');
     }
@@ -120,7 +123,7 @@ class OtaExperimentConfig {
       throw const FormatException('experiment-config-target');
     }
     final baud = integer('requestedBaud', 1, 1000000);
-    if (!const {115200, 460800, 921600}.contains(baud) ||
+    if (!const {115200, 230400, 460800, 921600}.contains(baud) ||
         decoded['reuseGatt'] is! bool || decoded['withoutResponse'] is! bool) {
       throw const FormatException('experiment-config-profile');
     }
@@ -198,6 +201,8 @@ class OtaExperimentConfig {
       rebootInfoMaxAttempts: schema >= 9
           ? integer('rebootInfoMaxAttempts', 1, maxRebootInfoAttempts)
           : defaultRebootInfoAttempts,
+      ackTimeout: schema >= 10
+          ? Duration(milliseconds: integer('ackTimeoutMs', 500, 2000)) : null,
     );
   }
 
@@ -248,6 +253,7 @@ class OtaExperimentConfig {
     if (schema >= 6) 'reuseRebootInfoLink': reuseRebootInfoLink,
     if (schema >= 8) 'androidPhyPolicy': androidPhyPolicy,
     if (schema >= 9) 'rebootInfoMaxAttempts': rebootInfoMaxAttempts,
+    if (schema >= 10) 'ackTimeoutMs': ackTimeout!.inMilliseconds,
   })}';
 }
 

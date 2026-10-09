@@ -736,8 +736,8 @@ target_compile_definitions(X_Track_App_GCC PRIVATE
     "OTA_TARGET_APP"
 )
 option(P3_4_LINK_PROFILE "Development-only runtime baud and BLE staging counters" OFF)
-option(P34_OTA_CANDIDATE "Fixed v2/WAIT_RX candidate without runtime experiment controls" OFF)
-set(P34_OTA_UART_BAUD "921600" CACHE STRING "Fixed candidate UART rate; module must match before installation")
+option(P34_OTA_CANDIDATE "V2/WAIT_RX candidate without runtime experiment controls" OFF)
+set(P34_OTA_UART_BAUD "921600" CACHE STRING "Fallback UART rate without a valid retained setting; module must match")
 if(P34_OTA_CANDIDATE)
     if(P3_4_LINK_PROFILE OR NOT P34_EARLY_FAULT_VECTORS)
         message(FATAL_ERROR "P34 candidate requires early vectors and forbids the experiment profile")

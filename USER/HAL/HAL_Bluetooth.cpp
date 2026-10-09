@@ -3,6 +3,7 @@
 #include "HAL/HAL_OTA_Backup.h"
 #include "HAL/HAL_OTA_Package.h"
 #include "HAL/HAL_OTA_Staging.h"
+#include "HAL/ota_uart_baud.h"
 #include "OTA/ota_ble_session.h"
 #include "OTA/ota_device_info.h"
 #include "OTA/ota_layout.h"
@@ -824,12 +825,16 @@ void HAL::BT_Init()
     start = p34_clock();
     __NOP(); __NOP(); __NOP(); __NOP();
     s_p34_clock_ok = p34_clock() != start ? 1u : 0u;
-#if CONFIG_OTA_BLE_PROFILE
+#if CONFIG_OTA_BLE_PROFILE || defined(P34_OTA_FIXED_CONFIG)
+    uint32_t retained_word;
     uint32_t selected_baud;
     crm_periph_clock_enable(CRM_PWC_PERIPH_CLOCK, TRUE);
     pwc_battery_powered_domain_access(TRUE);
-    g_p34_retained_word = ertc_bpr_data_read(ERTC_DT20);
-    selected_baud = p34_baud_from_word(g_p34_retained_word);
+    retained_word = ertc_bpr_data_read(ERTC_DT20);
+    selected_baud = p34_baud_from_word(retained_word);
+#endif
+#if CONFIG_OTA_BLE_PROFILE
+    g_p34_retained_word = retained_word;
     g_p34_retention_error = g_p34_retained_word != 0u && selected_baud == 0u ? 1u : 0u;
     g_p34_boot_baud = selected_baud != 0u ? selected_baud : CONFIG_BT_BAUD_EXPERIMENT_RATE;
 #endif
@@ -843,6 +848,9 @@ void HAL::BT_Init()
 #else
     BT_SERIAL.begin(CONFIG_BT_BAUD_EXPERIMENT_RATE);
 #endif
+#elif defined(P34_OTA_FIXED_CONFIG)
+    /* Same executable/package at each admitted module rate, without an AT console. */
+    BT_SERIAL.begin(selected_baud != 0u ? selected_baud : CONFIG_BT_FIXED_BAUD);
 #else
     BT_SERIAL.begin(CONFIG_BT_FIXED_BAUD);
 #endif

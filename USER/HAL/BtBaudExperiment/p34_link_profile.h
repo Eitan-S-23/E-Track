@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 #include <string.h>
+#include "../ota_uart_baud.h"
 
 #define P34_PROFILE_MAGIC 0x50334250u
 #define P34_PROFILE_SCHEMA 2u
-#define P34_BAUD_WORD_MAGIC 0x50340000u
 
 enum p34_profile_phase
 {
@@ -65,19 +65,6 @@ typedef struct p34_profile_t
 } p34_profile_t;
 
 typedef char p34_profile_layout_check[(sizeof(p34_profile_t) == 336u) ? 1 : -1];
-
-static uint32_t p34_baud_word(uint32_t baud)
-{
-    uint32_t slot = baud == 115200u ? 5u : baud == 460800u ? 7u : baud == 921600u ? 8u : 0u;
-    return slot == 0u ? 0u : P34_BAUD_WORD_MAGIC | ((slot ^ 0xffu) << 8) | slot;
-}
-
-static uint32_t p34_baud_from_word(uint32_t word)
-{
-    uint32_t slot = word & 0xffu;
-    uint32_t baud = slot == 5u ? 115200u : slot == 7u ? 460800u : slot == 8u ? 921600u : 0u;
-    return baud != 0u && p34_baud_word(baud) == word ? baud : 0u;
-}
 
 static void p34_add_cycles(uint32_t *lo, uint32_t *hi, uint32_t cycles)
 {

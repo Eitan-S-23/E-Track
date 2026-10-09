@@ -251,6 +251,32 @@ void main() {
     }
   });
 
+  test('schema 10 binds the measured ACK timeout without changing old defaults', () {
+    final old = {...reconnectProfile(), 'schema': 9,
+      'pauseScanDuringOta': true, 'androidHighPriority': true,
+      'dataBatchFrames': 12, 'reuseRebootInfoLink': true,
+      'androidPhyPolicy': 'off', 'rebootInfoMaxAttempts': 3};
+    expect(parse(profile()).ackTimeout, isNull);
+    expect(parse(old).ackTimeout, isNull);
+    expect(parse(old).observationLine, isNot(contains('ackTimeoutMs')));
+    for (final timeout in [500, 750, 2000]) {
+      final config = parse({...old, 'schema': 10, 'ackTimeoutMs': timeout});
+      expect(config.ackTimeout, Duration(milliseconds: timeout));
+      expect(config.observationLine, contains('"ackTimeoutMs":$timeout'));
+      expect(config.senderWindowSegments, 8);
+      expect(config.dataBatchFrames, 12);
+    }
+    for (final wrong in [null, true, 499, 2001, 500.0, '500']) {
+      expect(() => parse({...old, 'schema': 10, 'ackTimeoutMs': wrong}), throwsFormatException);
+    }
+    for (final wrong in [
+      {...old, 'schema': 10}, {...old, 'ackTimeoutMs': 500},
+      {...old, 'schema': 11, 'ackTimeoutMs': 500},
+    ]) {
+      expect(() => parse(wrong), throwsFormatException);
+    }
+  });
+
   test('schema 3 rejects missing, nonintegral, unbounded and prefix cadence', () {
     for (final value in [
       {...reconnectProfile()}..remove('rebootInfoTimeoutMs'),
@@ -299,7 +325,7 @@ void main() {
     }
   });
 
-  for (final baud in [115200, 460800, 921600]) {
+  for (final baud in [115200, 230400, 460800, 921600]) {
     test('accepts requested $baud without claiming actual hardware baud', () {
       final text = '${jsonEncode(profile(baud: baud))}\n';
       final config = OtaExperimentConfig.parse(text, expectedTarget: target);
@@ -317,7 +343,7 @@ void main() {
       {...profile(), 'extra': true},
       {...profile()}..remove('packageSha256'),
       {...profile(), 'schema': 1.0},
-      {...profile(), 'requestedBaud': 230400},
+      {...profile(), 'requestedBaud': 123456},
       {...profile(), 'requestedBaud': 921600.0},
       {...profile(), 'requestedBaud': '921600'},
       {...profile(), 'reuseGatt': 1},

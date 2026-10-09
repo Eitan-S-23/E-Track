@@ -235,7 +235,7 @@ def verify_prefix_probe(envelope, messages):
             type(experiment["prefixBytes"]) is int and experiment["prefixBytes"] == size and
             type(experiment["senderWindowSegments"]) is int and
             probe["senderWindowSegments"] <= experiment["senderWindowSegments"] <= 32 and
-            type(experiment["requestedBaud"]) is int and experiment["requestedBaud"] in (115200, 460800, 921600) and
+            type(experiment["requestedBaud"]) is int and experiment["requestedBaud"] in (115200, 230400, 460800, 921600) and
             type(experiment["reuseGatt"]) is bool and type(experiment["withoutResponse"]) is bool,
             "prefix experiment profile")
     require(isinstance(experiment["endpointHost"], str) and re.fullmatch(
@@ -350,4 +350,3 @@ if __name__ == "__main__":
     except (CaptureError, OSError) as error:
         print("CAPTURE_REJECTED: " + str(error), file=sys.stderr)
         raise SystemExit(2)
-

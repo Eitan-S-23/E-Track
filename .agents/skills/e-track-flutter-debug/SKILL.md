@@ -48,10 +48,14 @@ OTA, publishing, or writes outside the authorized project root.
    observed foreground OTA, do not ask them to switch to chat to acknowledge it.
 
 Follow [User Intervention Notifications](../../../docs/agent-collaboration-contract.md#user-intervention-notifications)
-for a necessary mid-task user action while keeping the current execution open:
-send a real current-session @mention and check its receipt. A normal final reply,
-including a handoff or approval question, already receives the bridge's completion
-notification; do not send a duplicate manual reminder.
+only for a necessary, already-authorized mid-task action outside chat while the
+current execution stays open, without sending a chat reply: send a real
+current-session @mention, check its receipt and observe the actual state change.
+Requests requiring a chat reply never use manual @mentions. Ask authorization,
+choices or missing information in a normal final reply, then resume after the
+answer; keeping a worker running does not create an exception. A normal final
+reply, including a handoff, already receives the bridge's completion notification;
+do not send a duplicate manual reminder.
 
 ## Host Reliability
 

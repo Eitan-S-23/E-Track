@@ -1519,13 +1519,36 @@ class GovernancePromptScopeTests(unittest.TestCase):
         scenarios = {
             "Normal final report": "Automatic completion only; no manual @mention",
             "Final handoff or approval question": "Automatic completion only; no manual @mention",
-            "Mid-task SD card, cable or phone action": "Manual real @mention plus send receipt",
-            "Mid-task blocking approval with execution kept open": "Manual real @mention plus send receipt",
+            "Mid-task SD card, cable or phone action without a chat reply": "Manual real @mention plus send receipt",
+            "Authorization or permission requested in chat": "End with the question; automatic completion only; no manual @mention",
+            "Choice, confirmation or missing information requested in chat": "End with the question; automatic completion only; no manual @mention",
+            "Approval while another task or worker is still running": "End with the question; automatic completion only; no manual @mention",
             "Ordinary progress or autonomous work": "No manual @mention",
         }
         for scenario, action in scenarios.items():
             with self.subTest(scenario=scenario):
                 self.assertIn(f"| {scenario} | {action} |", section)
+
+    def test_chat_reply_requests_never_trigger_manual_mentions(self):
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        section = contract.split("## User Intervention Notifications", 1)[1].split("\n## ", 1)[0]
+        normalized = " ".join(section.split())
+        self.assertIn("All three conditions are required", normalized)
+        self.assertIn("end the current execution", normalized)
+        self.assertIn("resume after the user's answer", normalized)
+        self.assertIn("Keeping another task or worker running does not create an exception", normalized)
+        self.assertIn('do not require an "OK" reply in chat', normalized)
+        self.assertNotIn("granting missing authorization needed to continue", normalized)
+        self.assertNotIn("Mid-task blocking approval with execution kept open", section)
+        for path in ("AGENTS.md", "docs/agent-collaboration-contract.md",
+                     ".agents/skills/e-track-flutter-debug/SKILL.md",
+                     ".agents/skills/e-track-flutter-debug/references/device-session.md"):
+            with self.subTest(path=path):
+                text = " ".join((ROOT / path).read_text(encoding="utf-8-sig").split())
+                self.assertIn("without sending a chat reply", text)
+                self.assertIn("Requests requiring a chat reply never use manual @mentions", text)
+        record = " ".join((ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8").split())
+        self.assertIn('The earlier "mid-task blocking approval" exception is withdrawn', record)
 
     def test_mid_task_notification_lesson_and_skill_routes_are_consistent(self):
         entry = (ROOT / "AGENTS.md").read_text(encoding="utf-8-sig")
