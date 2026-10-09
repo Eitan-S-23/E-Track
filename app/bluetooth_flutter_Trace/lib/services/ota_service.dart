@@ -69,6 +69,7 @@ class OtaService extends GetxController {
 
   // Receiver capacity is not a safe burst size for the BLE return path.
   static const int defaultSenderWindowSegments = 4;
+  static const int defaultPipelineWindowSegments = 24;
 
   /// [downloadDio]/[firmwareDirProvider]/[latestUriBuilder]/[onNotify]/
   /// [downloadFileGate]
@@ -99,7 +100,8 @@ class OtaService extends GetxController {
     bool enablePipeline = const bool.fromEnvironment('P34_OTA_PIPELINE'),
     OtaPhyClient? phyClient,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
-          senderWindowSegments ?? defaultSenderWindowSegments,
+          senderWindowSegments ??
+              (enablePipeline ? defaultPipelineWindowSegments : defaultSenderWindowSegments),
           1,
           OtaBleCodec.segmentsPerBlock,
           'senderWindowSegments',
@@ -2233,7 +2235,8 @@ class OtaService extends GetxController {
         writeWithResponse: writeWithResponse,
         stats: stats,
       );
-      final batchFrames = OtaExperimentRuntime.current.requireForOta()?.dataBatchFrames ?? 1;
+      final batchFrames = OtaExperimentRuntime.current.requireForOta()?.dataBatchFrames ??
+          (_enablePipeline && !writeWithResponse ? OtaBleTransport.defaultPipelineBatchFrames : 1);
       if (batchFrames > 1 && writeWithResponse) {
         throw StateError('OTA_BATCH_REQUIRES_WITHOUT_RESPONSE');
       }

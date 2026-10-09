@@ -63,13 +63,14 @@ class OtaBleTransport {
     this.retries = maxRetries,
     this.noProgressTimeout = defaultNoProgressTimeout,
     this.writeTimeout = defaultWriteTimeout,
-    this.dataBatchFrames = 1,
+    int? dataBatchFrames,
     this.enablePipeline = false,
-  })  : _channel = channel {
-    if (dataBatchFrames != 1 && dataBatchFrames != 3 && dataBatchFrames != 12) {
+  })  : dataBatchFrames = dataBatchFrames ?? (enablePipeline ? defaultPipelineBatchFrames : 1),
+        _channel = channel {
+    if (this.dataBatchFrames != 1 && this.dataBatchFrames != 3 && this.dataBatchFrames != 12) {
       throw ArgumentError.value(dataBatchFrames, 'dataBatchFrames', 'expected 1, 3 or 12');
     }
-    if (dataBatchFrames != 1) stats?.configureDataBatch(dataBatchFrames);
+    if (this.dataBatchFrames != 1) stats?.configureDataBatch(this.dataBatchFrames);
     // 通知流订阅必须在构造内同步建立：async* 生成器的初始运行被延迟到
     // 微任务，此前「写入回调里同步回投的 ACK」在 broadcast 通知源上
     // 因无监听者被整帧丢弃（真实 BLE 通知流即 broadcast 语义）。显式
@@ -103,7 +104,8 @@ class OtaBleTransport {
   final int retries;
   final Duration noProgressTimeout;
   final Duration writeTimeout;
-  /// Development-only opt-in. The service still uses the default single frame.
+  static const int defaultPipelineBatchFrames = 12;
+  /// V2 defaults to the measured batch. V1 fallback retains single-frame writes.
   final int dataBatchFrames;
   final bool enablePipeline;
   int? _pipelineEpoch;
@@ -329,7 +331,8 @@ class OtaBleTransport {
     package: package,
     packageSha256: packageSha256,
     etuHeader: etuHeader,
-    windowSegments: windowSegments,
+    windowSegments: enablePipeline ? math.min(windowSegments ?? 4, 4) : windowSegments,
+    batchFrames: enablePipeline ? 1 : dataBatchFrames,
     onDurableProgress: onDurableProgress,
     onSent: onSent,
     onFullResult: (ack) => ack,
@@ -378,6 +381,7 @@ class OtaBleTransport {
     T Function(OtaPrefixProbeResult)? onPrefixResult,
     int? prefixBytes,
     int? windowSegments,
+    int? batchFrames,
     void Function(int durableOff, int total)? onDurableProgress,
     void Function(int sentBytes, int total)? onSent,
   }) async {
@@ -388,6 +392,7 @@ class OtaBleTransport {
     _busy = true;
     final effectiveWindow = (windowSegments ?? OtaBleCodec.segmentsPerBlock)
         .clamp(1, OtaBleCodec.segmentsPerBlock);
+    final effectiveBatchFrames = batchFrames ?? dataBatchFrames;
     final view = _TransferAckView(
       blockSize:
           OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize,
@@ -545,10 +550,10 @@ class OtaBleTransport {
               if (view.inFlightCount >= effectiveWindow) break;
               if ((view.blockBitmap >> seg) & 1 == 1) continue; // 已收段幂等跳过
               if (view.isSegmentInFlight(seg)) continue; // 在途未确认
-              if (dataBatchFrames > 1) {
+              if (effectiveBatchFrames > 1) {
                 final selected = <int>[];
                 final free = effectiveWindow - view.inFlightCount;
-                for (var next = seg; next < segsInBlock && selected.length < dataBatchFrames && selected.length < free; next++) {
+                for (var next = seg; next < segsInBlock && selected.length < effectiveBatchFrames && selected.length < free; next++) {
                   if ((view.blockBitmap >> next) & 1 == 0 && !view.isSegmentInFlight(next)) {
                     selected.add(next);
                   }

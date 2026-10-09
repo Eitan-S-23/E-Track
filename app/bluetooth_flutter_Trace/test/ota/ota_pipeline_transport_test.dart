@@ -13,10 +13,12 @@ class _Peer implements OtaBleChannel {
   final events = StreamController<List<int>>.broadcast(sync: true);
   final pending = <int>[];
   final frames = <OtaBleFrame>[];
+  final writes = <List<int>>[];
   final offsetsBeforeCommit = <int>[];
   final sequences = <int, List<int>>{};
   bool connected = true, supports = true, badCaps = false, holdDurable = false;
   bool badEnd = false, badBegin = false;
+  bool holdLegacyAcks = false;
   int? dropOffset;
   int dropBegin = 0;
   int chunkSize = 244, notifySize = 3;
@@ -68,6 +70,7 @@ class _Peer implements OtaBleChannel {
   @override
   Future<void> writeChunk(List<int> chunk) async {
     if (!connected) throw StateError('disconnected');
+    writes.add(List<int>.of(chunk));
     pending.addAll(chunk);
     while (pending.length >= 10) {
       final size = 10 + pending[6] + (pending[7] << 8);
@@ -138,6 +141,7 @@ class _Peer implements OtaBleChannel {
         case 2:
           accepted = word(frame.payload, 0) + frame.payload.length - 4;
           if (accepted == total || accepted % 4096 == 0) durable = accepted;
+          if (holdLegacyAcks) break;
           final bytes = ByteData(9)..setUint32(1, durable, Endian.little);
           final segments = (accepted - durable + 127) ~/ 128;
           bytes.setUint32(5, (1 << segments) - 1, Endian.little);
@@ -174,6 +178,46 @@ Future<void> until(bool Function() condition) async {
 }
 
 void main() {
+  test('v2 defaults preserve batch12 without an experiment configuration', () async {
+    final peer = _Peer();
+    final transport = OtaBleTransport(channel: peer, enablePipeline: true);
+    expect(transport.dataBatchFrames, 12);
+    final bytes = package(9000);
+    expect((await transfer(transport, bytes)).isOk, isTrue);
+    expect(peer.received, bytes);
+    expect(peer.writes.any((chunk) => chunk.length == 244), isTrue);
+    expect(peer.offsetsBeforeCommit, contains(4096));
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  test('v2 default falls back to four v1 credits and single-frame writes', () async {
+    final peer = _Peer()..supports = false..holdLegacyAcks = true;
+    final transport = OtaBleTransport(channel: peer, enablePipeline: true,
+        ackTimeout: const Duration(milliseconds: 300));
+    final bytes = package(1000);
+    final pending = transport.transfer(package: bytes, packageSha256: List.filled(32, 1),
+        etuHeader: bytes.sublist(0, 64), windowSegments: 24);
+    // Observe the pending result even if an assertion below fails.
+    final settled = pending.then<Object>((value) => value, onError: (Object error) => error);
+    try {
+      await until(() => peer.frames.where((frame) => frame.cmd == 2).length >= 4);
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      expect(peer.frames.where((frame) => frame.cmd == 2).length, 4);
+      peer.holdLegacyAcks = false;
+      final ack = ByteData(9)..setUint32(5, 0x0f, Endian.little);
+      peer.reply(0x82, 7, peer.frames.lastWhere((frame) => frame.cmd == 2).seq,
+          ack.buffer.asUint8List());
+      expect((await pending).isOk, isTrue);
+      expect(peer.writes.where((chunk) => chunk.length >= 3 && chunk[2] == 2)
+          .every((chunk) => chunk.length <= 142), isTrue);
+    } finally {
+      await transport.dispose();
+      await settled;
+      await peer.events.close();
+    }
+  });
+
   for (final status in [0x0f, 0x7e]) {
     test('first matching v2 error preserves raw status $status without credit', () async {
       final peer = _Peer()..holdDurable = true;

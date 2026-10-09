@@ -935,8 +935,10 @@ void main() {
   test('sender cap rejects invalid configuration before any BLE work', () {
     for (final size in [-1, 0, 33]) {
       expect(() => OtaService(senderWindowSegments: size), throwsRangeError);
+      expect(() => OtaService(senderWindowSegments: size, enablePipeline: true), throwsRangeError);
     }
     expect(OtaService.defaultSenderWindowSegments, 4);
+    expect(OtaService.defaultPipelineWindowSegments, 24);
   });
 
   test('one cumulative bitmap ACK releases four credits without durable progress',
