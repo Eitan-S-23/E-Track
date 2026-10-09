@@ -237,8 +237,11 @@ void main() {
   }
 
   Directory tempFirmwareDir() {
-    final tempDir =
-        Directory.systemTemp.createTempSync('ota_service_upgrade_test');
+    // The host extractor requires project-local output even without CI TEMP overrides.
+    final fixtureRoot = Directory(
+      '${Directory.current.path}/.dart_tool/ota-service-tests',
+    )..createSync(recursive: true);
+    final tempDir = fixtureRoot.createTempSync('firmware-');
     addTearDown(() {
       if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
     });
