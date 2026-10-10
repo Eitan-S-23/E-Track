@@ -18,6 +18,8 @@ GROUPS = {
     "governance": ("test_acceptance_bundle.py", "test_acceptance_efficiency.py"),
     "observation": ("test_p3_4_observation_capture.py",),
     "admission": ("test_ota_link_metrics.py", "test_p34_batch_timing.py", "test_p34_acceptance_stats.py"),
+    "service": ("test_p34_service_patch.py",),
+    "live": ("test_p34_live_route.py",),
 }
 SESSION_SOURCES = ("Libraries/OTA/ota_ble_session.c", "Libraries/OTA/ota_ble_frame.c",
     "Libraries/OTA/ota_ble_ring.c", "Libraries/OTA/ota_sd.c", "Libraries/OTA/ota_staging.c",
