@@ -109,7 +109,9 @@ class OtaBleTransport {
   final int dataBatchFrames;
   final bool enablePipeline;
   int? _pipelineEpoch;
+  int? _pipelineObservationEpoch, _pipelineObservationSession;
   _PipelineAckView? _pipelineView;
+  int _observationWindowSegments = 0;
 
   /// 帧等待者队列（一问一答）：注册后才开始发送，响应到达即分发。
   final List<_FrameWaiterBase> _waiters = [];
@@ -393,6 +395,8 @@ class OtaBleTransport {
     final effectiveWindow = (windowSegments ?? OtaBleCodec.segmentsPerBlock)
         .clamp(1, OtaBleCodec.segmentsPerBlock);
     final effectiveBatchFrames = batchFrames ?? dataBatchFrames;
+    _observationWindowSegments = effectiveWindow.toInt();
+    if (stats?.transferStartUs == null) stats?.configureDataBatch(effectiveBatchFrames);
     final view = _TransferAckView(
       blockSize:
           OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize,
@@ -938,6 +942,7 @@ class OtaBleTransport {
     }
     _waiters.clear();
     await _frameSub.cancel();
+    stats?.sealIgnoredAckErrors();
   }
 
   // ---- 后台暂停（RC3-08）----
@@ -991,7 +996,9 @@ class OtaBleTransport {
   // ---- 内部：帧分发 ----
 
   void _dispatchFrame(OtaBleFrame f) {
-    _pipelineView?.onAck(f);
+    final arrivalUs = stats?.nowUs();
+    _observeIgnoredPipelineError(f, arrivalUs);
+    _pipelineView?.onAck(f, atUs: arrivalUs);
     // 重新同步证据（RC3-05⑤）：INFO 只可能由「被 MCU 完整解析的 GET_INFO」
     // 触发，因此收到本实例在废弃状态下发出的那个 seq 的 INFO，就证明 MCU
     // 帧解析器已脱离悬空态。必须 seq 匹配——废弃前发出的 GET_INFO 其迟到
@@ -1012,7 +1019,6 @@ class OtaBleTransport {
     // 共用（同源）。取时刻与投递在同一同步块内完成，中间不插入 await，
     // 因此该时刻不受后续写结算、ACK 解析或日志开销影响（P34-DA01）。
     // stats 为 null（无观测绑定）时自然不留戳，行为与未插桩一致。
-    final arrivalUs = stats?.nowUs();
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.offer(f, atUs: arrivalUs);
     }
@@ -1175,6 +1181,12 @@ class OtaBleTransport {
           throw const OtaTransportException(
               'BEGIN ACK 帧头 session 与 payload session 不一致',
               code: 'ACK_MALFORMED');
+        }
+        if (_inTransfer && waiter.arrivalUs != null) {
+          stats!.recordBeginAck(protocol: 1, session: session, sequence: seq,
+            durableOffset: ack.durableOff, bitmap: ack.blockBitmap, atUs: waiter.arrivalUs!,
+            ackTimeoutMs: ackTimeout.inMilliseconds, maxRetries: retries,
+            windowSegments: _observationWindowSegments);
         }
         return OtaBeginAck(
           status: ack.status,
@@ -1421,8 +1433,10 @@ class OtaBleTransport {
     // 排队等待因此计入传输时长。幂等，只有首帧生效。仅在传输窗口内登记：
     // transfer 之外的帧（GET_INFO 探针、后台复核）不构成传输起点。
     if (_inTransfer) stats?.recordTransferStart();
+    _observeControlFrame(frame, completed: false);
     await _writeFrameChecked(frame,
         allowCancelled: false, resyncProbeSeq: resyncProbeSeq);
+    _observeControlFrame(frame, completed: true);
   }
 
   /// 取消旁路写通路（RC2-03）：仅用于取消后的尽力 ABORT——
@@ -1432,7 +1446,15 @@ class OtaBleTransport {
     if (_disposed) {
       throw const OtaTransportException('transport 已释放', code: 'DISPOSED');
     }
+    _observeControlFrame(frame, completed: false);
     await _writeFrameChecked(frame, allowCancelled: true);
+    _observeControlFrame(frame, completed: true);
+  }
+
+  void _observeControlFrame(Uint8List frame, {required bool completed}) {
+    if (frame.length < 10 || frame[2] == OtaBleCodec.cmdData || frame[2] == _PipelineWire.data) return;
+    stats?.recordControlFrame(completed: completed, command: frame[2], session: frame[3],
+        sequence: frame[4] | (frame[5] << 8), bytes: frame.length);
   }
 
   /// 写帧串行化队列（RC3-05）：DATA 分片写是多次 writeChunk 的序列，
@@ -2061,6 +2083,7 @@ abstract class _FrameWaiterBase {
   final Completer<OtaBleFrame> _completer = Completer<OtaBleFrame>();
 
   Future<OtaBleFrame> get future => _completer.future;
+  bool get completed => _completer.isCompleted;
 
   /// 被采信应答帧的**到达时刻**（同 stats 时钟域，微秒；未采信时为 null）。
   ///

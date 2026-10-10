@@ -38,6 +38,7 @@ struct OtaStagingError
 /* Read only between port calls on the owning thread. GetIo starts a new record.
  * mismatch_address is UINT32_MAX unless an actual differing byte was observed. */
 bool OTA_StagingGetFirstError(OtaStagingError *error);
+void OTA_StagingResetFirstError();
 void OTA_StagingGetIo(ota_staging_io_t *io);
 
 #if defined(P2_1_TEST_ENABLE)

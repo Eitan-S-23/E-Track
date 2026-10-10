@@ -43,12 +43,22 @@ class _PipelineAck {
   final int? arrivalUs;
 }
 
-void _recordPipelineAckError(OtaLinkStats? stats, OtaBleFrame frame, String reason) {
+void _recordPipelineAckError(OtaLinkStats? stats, OtaBleFrame frame, String reason,
+    {bool ignored = false, int? atUs, int? expectedSession, int? expectedEpoch}) {
   if (stats == null) return;
   final base = frame.cmd == _PipelineWire.ackBegin ? 2 : 1;
   final bytes = ByteData.sublistView(frame.payload);
   int? word(int offset) => bytes.lengthInBytes >= offset + 4
       ? bytes.getUint32(offset, Endian.little) : null;
+  if (ignored) {
+    stats.recordIgnoredAckError(reason: reason, command: frame.cmd,
+      session: frame.session, sequence: frame.seq, payloadBytes: frame.payload.length,
+      atUs: atUs ?? stats.nowUs(), expectedSession: expectedSession, expectedEpoch: expectedEpoch,
+      status: frame.payload.isEmpty ? null : frame.payload.first,
+      epoch: word(base), durableOffset: word(base + 4),
+      acceptedOffset: word(base + 8), creditEnd: word(base + 12));
+    return;
+  }
   stats.recordFirstAckError(command: frame.cmd, session: frame.session, sequence: frame.seq,
     payloadBytes: frame.payload.length, reason: reason,
     status: frame.payload.isEmpty ? null : frame.payload.first,
@@ -86,19 +96,25 @@ class _PipelineAckView {
   bool retryRequested = false;
   Completer<void>? _change;
 
-  void onAck(OtaBleFrame frame) {
-    if (!window.active || frame.session != session ||
-        (frame.cmd != _PipelineWire.ackData && frame.cmd != _PipelineWire.ackAbort)) {
-      return;
+  String? rejectionReason(OtaBleFrame frame) {
+    if (!window.active) return 'inactive';
+    if (frame.session != session) return 'session';
+    if (frame.cmd != _PipelineWire.ackData && frame.cmd != _PipelineWire.ackAbort) {
+      return 'unmatched';
     }
     if (frame.payload.length >= 5 &&
         ByteData.sublistView(frame.payload).getUint32(1, Endian.little) != window.epoch) {
-      return;
+      return 'epoch';
     }
     if (frame.cmd == _PipelineWire.ackData &&
         !sentSeqs.contains(frame.seq) && frame.seq != beginSeq) {
-      return;
+      return 'sequence';
     }
+    return null;
+  }
+
+  void onAck(OtaBleFrame frame, {int? atUs}) {
+    if (rejectionReason(frame) != null) return;
     try {
       final ack = _PipelineAck(frame);
       if (ack.epoch != window.epoch) return;
@@ -126,8 +142,8 @@ class _PipelineAckView {
       if (window.durableOffset > before) {
         stats?.recordAckConfirm(blockStart: before,
           segs: List.generate((window.durableOffset - before + 127) ~/ 128, (i) => i),
-          segmentSize: 128);
-        stats?.recordDurableAdvance(window.durableOffset);
+          segmentSize: 128, atUs: atUs);
+        stats?.recordDurableAdvance(window.durableOffset, atUs: atUs);
         onDurable(window.durableOffset);
       }
       if (changed) _signal();
@@ -175,6 +191,38 @@ class _PipelineAckView {
 }
 
 extension _PipelineTransfer on OtaBleTransport {
+  void _observeIgnoredPipelineError(OtaBleFrame frame, int? atUs) {
+    if (stats == null || !const {0x91, 0x92, 0x93, 0x94}.contains(frame.cmd)) return;
+    final base = frame.cmd == _PipelineWire.ackBegin ? 2 : 1;
+    if (frame.payload.length == base + OtaPipelineWindow.ackBytes &&
+        frame.payload.first == OtaBleCodec.statusOk) return;
+    String? reason;
+    int? expectedEpoch = _pipelineObservationEpoch;
+    int? expectedSession = _pipelineObservationSession;
+    if (_cancelled || _disposed || stats!.retired) {
+      reason = 'retired';
+    } else {
+      final waiters = _waiters.whereType<_PipelineWaiter>()
+          .where((w) => w.expectedCmd == frame.cmd && !w.completed).toList();
+      if (waiters.any((w) => w.matches(frame))) return;
+      if (waiters.isNotEmpty) {
+        final waiter = waiters.first;
+        expectedEpoch = waiter.epoch;
+        expectedSession = waiter.session < 0 ? null : waiter.session;
+        reason = frame.seq != waiter.seq ? 'sequence'
+            : (waiter.session >= 0 && frame.session != waiter.session && frame.session != 0)
+                ? 'session' : 'epoch';
+      } else {
+        final view = _pipelineView;
+        reason = view?.rejectionReason(frame) ?? (view == null ? 'inactive' : null);
+      }
+    }
+    if (reason != null) {
+      _recordPipelineAckError(stats, frame, reason, ignored: true, atUs: atUs,
+          expectedSession: expectedSession, expectedEpoch: expectedEpoch);
+    }
+  }
+
   Future<_PipelineAck> _pipelineRoundTrip({
     required int cmd,
     required int seq,
@@ -236,6 +284,8 @@ extension _PipelineTransfer on OtaBleTransport {
       // Fresh per attempt, never inherited from a prior connection/transport.
       final epoch = _deviceWriteLedger.nextPipelineEpoch();
       _pipelineEpoch = epoch;
+      _pipelineObservationEpoch = epoch;
+      _pipelineObservationSession = null;
       final querySeq = _nextQuerySeq();
       await _waitIfPaused();
       _checkUsable();
@@ -266,6 +316,7 @@ extension _PipelineTransfer on OtaBleTransport {
       final beginAck = await _pipelineRoundTrip(cmd: _PipelineWire.begin, seq: beginSeq,
         epoch: epoch, session: 0, payload: Uint8List.fromList([...prefix, ..._PipelineWire.word(epoch)]));
       _session = beginAck.session;
+      _pipelineObservationSession = _session;
       final window = OtaPipelineWindow(epoch: epoch, totalBytes: package.length,
         durableOffset: beginAck.durable, maxInFlightSegments: (windowSegments ?? 24).clamp(1, 24).toInt());
       try {
@@ -275,6 +326,14 @@ extension _PipelineTransfer on OtaBleTransport {
         rethrow;
       }
       final resume = beginAck.durable;
+      final beginAt = beginAck.arrivalUs;
+      if (beginAt != null) {
+        stats!.recordBeginAck(protocol: 2, session: _session, sequence: beginSeq,
+          epoch: epoch, durableOffset: resume, bitmap: 0, atUs: beginAt,
+          ackTimeoutMs: ackTimeout.inMilliseconds, maxRetries: retries,
+          windowSegments: window.maxInFlightSegments);
+        stats!.recordDurableAdvance(resume, atUs: beginAt);
+      }
       if (resume > 0) {
         _noProgressClock?.reset();
         otaMonoLog('MONO_BUDGET_RESET', durable: resume);

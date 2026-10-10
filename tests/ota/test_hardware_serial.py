@@ -15,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--source-root", type=Path, default=ROOT)
+    parser.add_argument("--metrics", action="store_true")
     args = parser.parse_args()
     guard = runpy.run_path(str(ROOT / ".agents/skills/e-track-flutter-debug/scripts/host_io.py"))["checked_output"]
     if Path.cwd().resolve() != ROOT:
@@ -41,6 +42,7 @@ def main():
     env["PATH"] = str(Path(compiler).parent) + os.pathsep + env.get("PATH", "")
     binary = guard(ROOT, out / "test.exe")
     command = [compiler, "-std=c++11", "-Wall", "-Wextra", "-Werror", "-O2",
+        *(["-DCONFIG_OTA_LINK_METRICS=1"] if args.metrics else []),
         "-I" + str(ROOT / "tests/ota/serial_stubs"),
         "-I" + str(source / "MDK-ARM_F435/Platform/Core"), "-I" + str(source / "Libraries"),
         str(ROOT / "tests/ota/test_hardware_serial.cpp"),

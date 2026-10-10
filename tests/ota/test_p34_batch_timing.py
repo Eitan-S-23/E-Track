@@ -34,6 +34,20 @@ def fixture():
 
 
 class Tests(unittest.TestCase):
+    def test_v2_data_and_control_geometry_and_schema10(self):
+        rows = [s.replace("bytes=111", "bytes=115").replace("bytes=42", "bytes=46")
+                 .replace("bytes=182", "bytes=194") for s in fixture()]
+        value = json.loads(rows[-1][len("OTA_LINK_STATS "):])
+        value["gattWrites"]["bytes"] = 609
+        value["transfer"]["dataBatch"]["bytes"] = 438
+        rows[-1] = "OTA_LINK_STATS " + json.dumps(value)
+        self.assertEqual(timing.analyze(rows, 384, protocol=2)["protocol"], 2)
+        stamp = dict(schema=10, dataBatchFrames=12, androidPhyPolicy="off",
+                     rebootInfoMaxAttempts=8, ackTimeoutMs=2000)
+        timing.verify_batch_stamp(stamp, 12)
+        with self.assertRaises(ValueError): timing.verify_batch_stamp({**stamp, "ackTimeoutMs": 0}, 12)
+        with self.assertRaises(ValueError): timing.analyze(rows, 384, protocol=1)
+
     def test_schema7_twelve_frame_batch_and_old_limits(self):
         for schema, frames in ((5, 3), (6, 3), (7, 3), (7, 12)):
             timing.verify_batch_stamp(dict(schema=schema, dataBatchFrames=frames), frames)

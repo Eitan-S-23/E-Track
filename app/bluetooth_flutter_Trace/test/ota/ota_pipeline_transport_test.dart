@@ -1,10 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
+import 'package:ble_monitor/ota/ota_diagnostics.dart';
+import 'package:ble_monitor/ota/ota_observation_log.dart';
+import 'package:ble_monitor/ota/ota_mono.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 
@@ -19,6 +25,8 @@ class _Peer implements OtaBleChannel {
   bool connected = true, supports = true, badCaps = false, holdDurable = false;
   bool badEnd = false, badBegin = false;
   bool holdLegacyAcks = false;
+  bool deferReplies = false;
+  OtaLinkStats? writeStats;
   int? dropOffset;
   int dropBegin = 0;
   int chunkSize = 244, notifySize = 3;
@@ -43,23 +51,27 @@ class _Peer implements OtaBleChannel {
 
   void reply(int cmd, int session, int seq, List<int> payload) {
     final frame = OtaBleCodec.encodeCommand(cmd: cmd, session: session, seq: seq, payload: payload);
-    for (var offset = 0; offset < frame.length; offset += notifySize) {
-      events.add(frame.sublist(offset, math.min(offset + notifySize, frame.length)));
+    void deliver() {
+      if (events.isClosed) return;
+      for (var offset = 0; offset < frame.length; offset += notifySize) {
+        events.add(frame.sublist(offset, math.min(offset + notifySize, frame.length)));
+      }
     }
+    if (deferReplies) { Timer.run(deliver); } else { deliver(); }
   }
 
-  void ack(int cmd, int seq, {int status = 0, int? epoch, int? off, int? receivedOff}) {
+  void ack(int cmd, int seq, {int status = 0, int session = 7, int? epoch, int? off, int? receivedOff}) {
     final base = cmd == 0x91 ? 2 : 1;
     final data = ByteData(base + 16);
     data.setUint8(0, status);
-    if (base == 2) data.setUint8(1, 7);
+    if (base == 2) data.setUint8(1, session);
     data.setUint32(base, epoch ?? nonce, Endian.little);
     data.setUint32(base + 4, off ?? durable, Endian.little);
     data.setUint32(base + 8, receivedOff ?? accepted, Endian.little);
     data.setUint32(base + 12, math.min(durable + 8192, total), Endian.little);
     final payload = data.buffer.asUint8List();
     if (cmd == 0x92) mutateDataAck?.call(payload);
-    reply(cmd, 7, seq, payload);
+    reply(cmd, session, seq, payload);
   }
 
   void commit() {
@@ -69,6 +81,8 @@ class _Peer implements OtaBleChannel {
 
   @override
   Future<void> writeChunk(List<int> chunk) async {
+    final before = writeStats?.nowUs();
+    try {
     if (!connected) throw StateError('disconnected');
     writes.add(List<int>.of(chunk));
     pending.addAll(chunk);
@@ -153,6 +167,11 @@ class _Peer implements OtaBleChannel {
           break;
       }
     }
+    } finally {
+      if (before != null) {
+        writeStats!.recordGattWrite(durationUs: writeStats!.nowUs() - before, bytes: chunk.length);
+      }
+    }
   }
 }
 
@@ -178,6 +197,178 @@ Future<void> until(bool Function() condition) async {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('real v2 transport schema10 snapshot reaches formal statistics without early ACK fabrication', () async {
+    const sentinel = 'OTAOBS0123456789abcdef01234567';
+    const address = 'AA:BB:CC:DD:EE:FF';
+    final parent = Directory('${Directory.current.path}/.dart_tool/p34-v2-statistics');
+    await parent.create(recursive: true);
+    final root = await parent.createTemp('case-');
+    addTearDown(() => root.delete(recursive: true));
+    final diagnostics = OtaDiagnostics();
+    await diagnostics.initialize(enabled: true, target: address, sentinel: sentinel,
+        directoryProvider: () async => root);
+    addTearDown(diagnostics.close);
+    await OtaDiagnostics.withInstance(diagnostics, () async {
+      final bytes = package(9000);
+      final input = <String, Object?>{'packageSha256': sha256.convert(bytes).toString(),
+        'packageBytes': bytes.length, 'currentVersionCode': 30286, 'currentImageSha256': 'b' * 64,
+        'targetVersionCode': 30287, 'targetImageSha256': 'c' * 64,
+        'deviceAddress': address, 'appLifecycle': 'resumed'};
+      final stamp = {'schema': 10, 'runId': 'test-v2', 'configSha256': 'e' * 64,
+        'requestedBaud': 921600, 'reuseGatt': true, 'withoutResponse': false,
+        'endpointHost': 'fixture.invalid', 'senderWindowSegments': 24, 'transferMode': 'full',
+        'prefixBytes': null, 'dataBatchFrames': 12, 'androidPhyPolicy': 'off',
+        'rebootInfoMaxAttempts': 8, 'ackTimeoutMs': 2000,
+        for (final e in input.entries) if (e.key != 'appLifecycle') e.key: e.value};
+      emitOtaObservation('OTA_EXPERIMENT ${jsonEncode(stamp)}');
+      expect(await diagnostics.beginUpgrade(input), isTrue);
+      emitOtaObservation('OTA_EXPERIMENT ${jsonEncode(stamp)}');
+      emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'pre-transfer',
+        'versionCode': 30286, 'imageSha256': 'b' * 64, 'deviceAddress': address})}');
+      final stats = OtaLinkStats(label: 'upgrade', device: address);
+      final peer = _Peer()..deferReplies = true..writeStats = stats;
+      final transport = OtaBleTransport(channel: peer, enablePipeline: true, stats: stats);
+      stats.recordMtu(requested: 247, chunkBytes: 244, durationUs: 0, source: 'negotiated');
+      stats.recordCharsDiscovery(durationUs: 0, found: true, writeMode: 'writeWithResponse');
+      try {
+        expect((await transport.transfer(package: bytes, packageSha256: sha256.convert(bytes).bytes,
+            etuHeader: bytes.sublist(0, 64))).isOk, isTrue);
+        expect(peer.received, bytes);
+        stats.emitSummary();
+        emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'post-reboot',
+          'versionCode': 30287, 'imageSha256': 'c' * 64, 'deviceAddress': address})}');
+        otaMonoLog('MONO_REBOOT_VERIFIED');
+      } finally {
+        await transport.dispose();
+        await peer.events.close();
+      }
+      await diagnostics.finishUpgrade(completed: true);
+      expect(diagnostics.status.value.error, isNull);
+      final file = diagnostics.status.value.lastExport!;
+      final checkout = Directory.current.parent.parent;
+      final imported = await Process.run(Platform.isWindows ? 'python' : 'python3',
+          ['-I', '-S', '-B', '-X', 'utf8', '${checkout.path}/Tools/ota/p3-4-link-stats/acceptance_stats.py',
+            '--input', file.path, '--expect-sentinel', sentinel, '--expect-target', address],
+          workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
+      expect(imported.exitCode, 0, reason: '${imported.stderr}');
+      final result = jsonDecode(imported.stdout as String) as Map;
+      expect(result['fullZeroStart'], isTrue);
+      expect(result['ackEligible'], isTrue);
+      expect(result['earlyAckSamples'], 0);
+      expect(result['dataFrames'], 71);
+      expect(result['reference'], isFalse);
+    });
+  });
+
+  for (final scenario in ['none', 'matching', 'unknown', 'epoch', 'sequence', 'session', 'retired']) {
+    test('real snapshot preserves $scenario ACK ownership through strict reader', () async {
+      const sentinel = 'OTAOBS0123456789abcdef01234567';
+      const address = 'AA:BB:CC:DD:EE:FF';
+      final parent = Directory('${Directory.current.path}/.dart_tool/p34-ack-observations');
+      await parent.create(recursive: true);
+      final root = await parent.createTemp('case-');
+      addTearDown(() => root.delete(recursive: true));
+      final diagnostics = OtaDiagnostics();
+      await diagnostics.initialize(enabled: true, target: address, sentinel: sentinel,
+          directoryProvider: () async => root);
+      addTearDown(diagnostics.close);
+      await OtaDiagnostics.withInstance(diagnostics, () async {
+        final input = <String, Object?>{'packageSha256': 'a' * 64, 'packageBytes': 1000,
+          'currentVersionCode': 30286, 'currentImageSha256': 'b' * 64,
+          'targetVersionCode': 30287, 'targetImageSha256': 'c' * 64,
+          'deviceAddress': address, 'appLifecycle': 'resumed'};
+        emitOtaObservation('OTA_LINK_SAMPLE label=query kind=get_info us=10 ok=1');
+        expect(await diagnostics.beginUpgrade(input), isTrue);
+        emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'pre-transfer',
+          'versionCode': 30286, 'imageSha256': 'b' * 64, 'deviceAddress': address})}');
+        final peer = _Peer();
+        final stats = OtaLinkStats(label: 'upgrade', device: address);
+        final transport = sender(peer, stats: stats);
+        final progress = <int>[];
+        final matched = scenario == 'matching' || scenario == 'unknown';
+        peer.onData = (frame) {
+          if (matched) peer.ack(0x92, frame.seq, status: scenario == 'unknown' ? 0x7e : 15);
+          for (var i = 0; i < 10; i++) {
+            if (scenario == 'epoch') peer.ack(0x92, frame.seq, status: 15, epoch: peer.nonce ^ 1);
+            if (scenario == 'sequence') peer.ack(0x92, (frame.seq + 2048) & 0xffff, status: 0x7e);
+            if (scenario == 'session') peer.ack(0x92, frame.seq, status: 15, session: 8);
+          }
+        };
+        try {
+          final pending = transfer(transport, package(1000), progress: (value, _) => progress.add(value));
+          if (matched) {
+            await expectLater(pending, throwsA(isA<OtaTransportException>()));
+            expect(progress, [0]);
+          } else {
+            expect((await pending).isOk, isTrue);
+            expect(progress, [0, 1000]);
+            emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'post-reboot',
+              'versionCode': 30287, 'imageSha256': 'c' * 64, 'deviceAddress': address})}');
+            otaMonoLog('MONO_REBOOT_VERIFIED');
+          }
+          stats.emitSummary();
+          if (scenario == 'retired') {
+            stats.retire(reason: 'test-completed-binding');
+            for (var i = 0; i < 10; i++) {
+              peer.ack(0x92, peer.lastSeq, status: 0x7e);
+            }
+          }
+        } finally {
+          await transport.dispose();
+          await peer.events.close();
+        }
+        await diagnostics.finishUpgrade(completed: !matched);
+        expect(diagnostics.status.value.error, isNull);
+        final file = diagnostics.status.value.lastExport!;
+        expect(OtaObservationLog.prefixes, contains('OTA_LINK_ACK_IGNORED '));
+        final checkout = Directory.current.parent.parent;
+        Future<ProcessResult> inspect(File source) => Process.run(
+          Platform.isWindows ? 'python' : 'python3', ['-I', '-S', '-B', '-X', 'utf8',
+            '${checkout.path}/Tools/ota/p3-4-link-stats/observation_capture.py',
+            'inspect', '--input', source.path, '--expect-sentinel', sentinel,
+            '--expect-target', address], workingDirectory: checkout.path,
+        ).timeout(const Duration(seconds: 15));
+        final imported = await inspect(file);
+        expect(imported.exitCode, 0, reason: '${imported.stderr}');
+        final result = jsonDecode(imported.stdout as String) as Map;
+        final errors = result['ackErrorObservations'] as Map;
+        expect(errors['matching'], hasLength(matched ? 1 : 0));
+        final ignored = !matched && scenario != 'none';
+        expect(errors['ignored'], hasLength(ignored ? 1 : 0));
+        if (ignored) {
+          final first = (errors['ignored'] as List).single as Map;
+          expect(first['reason'], scenario);
+          expect(first['expectedEpoch'], peer.nonce);
+          expect(first['expectedSession'], 7);
+          expect(first['status'], scenario == 'sequence' || scenario == 'retired' ? 0x7e : 15);
+          final count = ((errors['sealedCounts'] as List).single as Map)['counts'] as Map;
+          expect(count[scenario], scenario == 'retired' ? 10 : 80);
+          expect((stats.toJson()['transfer'] as Map)['acks'], isNot(contains('firstError')));
+        }
+        final raw = await file.readAsLines();
+        for (final mutation in ['drop', 'footer', 'unknown']) {
+          final bad = File('${root.path}/$mutation.jsonl');
+          final lines = List<String>.of(raw);
+          if (mutation == 'drop') lines.removeAt(1);
+          if (mutation == 'footer') {
+            final footer = jsonDecode(lines.last) as Map<String, dynamic>;
+            footer['lost'] = 1;
+            lines[lines.length - 1] = jsonEncode(footer);
+          }
+          if (mutation == 'unknown') {
+            final footer = jsonDecode(lines.last) as Map<String, dynamic>;
+            footer['unrecognized'] = true;
+            lines[lines.length - 1] = jsonEncode(footer);
+          }
+          await bad.writeAsString('${lines.join('\n')}\n', flush: true);
+          expect((await inspect(bad)).exitCode, isNot(0));
+        }
+      });
+    });
+  }
+
   test('v2 defaults preserve batch12 without an experiment configuration', () async {
     final peer = _Peer();
     final transport = OtaBleTransport(channel: peer, enablePipeline: true);

@@ -90,6 +90,8 @@ class OtaObservationLog {
     'OTA_LINK_STATS ',
     'OTA_LINK_RETIRE ',
     'OTA_LINK_LATE ',
+    'OTA_LINK_ACK_ERROR ',
+    'OTA_LINK_ACK_IGNORED ',
     'OTA_MONO ',
     'OTA_IDENTITY ',
     'OTA_EXPERIMENT ',

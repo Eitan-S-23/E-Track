@@ -5,6 +5,7 @@
 
 usart_type serial_test_usarts[4];
 gpio_type serial_test_gpios[2];
+serial_test_dwt_type serial_test_dwt;
 static unsigned checks, failures, explicit_clears, overrun_events, callbacks;
 static int after_read = -1, during_callback = -1;
 static std::vector<uint8_t> observed;
@@ -25,11 +26,13 @@ static void arrive(usart_type *uart, uint8_t byte)
 
 int usart_flag_get(usart_type *uart, uint32_t flag)
 {
+    serial_test_dwt.CYCCNT += 2u;
     return (uart->sts & flag) ? SET : RESET;
 }
 
 uint16_t usart_data_receive(usart_type *uart)
 {
+    serial_test_dwt.CYCCNT += 3u;
     const uint16_t value = uart->dt;
     // Vendor contract: reading DT consumes RDBF; STS then DT clears errors.
     uart->sts &= ~(USART_RDBF_FLAG | USART_PERR_FLAG | USART_FERR_FLAG |
@@ -54,6 +57,7 @@ void usart_data_transmit(usart_type *uart, uint16_t value) { uart->dt = value; }
 
 static void collect(HardwareSerial *serial)
 {
+    serial_test_dwt.CYCCNT += 5u;
     ++callbacks;
     while (serial->available()) observed.push_back((uint8_t)serial->read());
     if (during_callback >= 0)
@@ -87,6 +91,16 @@ static void ordinary()
     CHECK(observed.size() == 1u && callbacks == 1u);
     CHECK(explicit_clears == 0u);
     CHECK(overrun_events == 0u);
+#if CONFIG_OTA_LINK_METRICS
+    CHECK(serial.rxIrqCalls() == 1u && serial.rxIrqCyclesLo() == 10u);
+    CHECK(serial.rxIrqCyclesHi() == 0u && serial.rxIrqMax() == 10u && serial.rxTimingOverflow() == 0u);
+    serial.resetRxDiagnostics();
+    CHECK(serial.rxIrqCalls() == 0u && serial.rxIrqCyclesLo() == 0u && serial.rxIrqMax() == 0u);
+    serial_test_dwt.CYCCNT = UINT32_MAX - 4u;
+    arrive(USART1, 0x43u);
+    serial.IRQHandler();
+    CHECK(serial.rxIrqCyclesLo() == 10u && serial.rxIrqCalls() == 1u);
+#endif
 }
 
 static void overlap(bool callback)

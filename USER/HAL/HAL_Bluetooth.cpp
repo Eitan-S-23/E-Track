@@ -73,6 +73,13 @@ static ota_pipeline_io_t s_ble_pipeline_io;
  * 运行期镜像不变故快照缓存复用，重启清零重建（派工书快照失效语义）。 */
 static ota_device_identity_t s_ble_identity;
 
+#if CONFIG_OTA_LINK_METRICS
+#if CONFIG_OTA_BLE_PROFILE || CONFIG_BT_BAUD_EXPERIMENT
+#error "Production metrics must not enable the experiment controller"
+#endif
+#include "ota_link_metrics_port.h"
+#endif
+
 #if CONFIG_OTA_BLE_PROFILE
 #if !CONFIG_BT_BAUD_EXPERIMENT
 #error "P3-4 profile requires the bounded baud controller"
@@ -227,7 +234,7 @@ static int ble_uart_send(const uint8_t *frame, uint16_t len)
 {
     uint16_t i;
     int result = 0;
-#if CONFIG_OTA_BLE_PROFILE
+#if CONFIG_OTA_BLE_PROFILE || CONFIG_OTA_LINK_METRICS
     uint32_t start = p34_clock(), start_ms = millis();
 #endif
 
@@ -246,6 +253,9 @@ static int ble_uart_send(const uint8_t *frame, uint16_t len)
 #if CONFIG_OTA_BLE_PROFILE
     p34_record(P34_ACK_TX_CALL, start, start_ms, len, result);
 #endif
+#if CONFIG_OTA_LINK_METRICS
+    metrics_add(OTA_METRICS_ACK_TX, start, start_ms, len, result);
+#endif
     return result;
 }
 
@@ -257,6 +267,21 @@ static uint32_t ble_ack_u32(const uint8_t *bytes)
 
 static int ble_env_send(const uint8_t *frame, uint16_t len)
 {
+#if CONFIG_OTA_LINK_METRICS
+    if (g_ota_link_metrics.active && frame[8] == OTA_BLE_STATUS_OK) {
+        const bool begin1 = len == 20u && frame[2] == OTA_BLE_CMD_ACK_BEGIN;
+        const bool begin2 = len == 28u && frame[2] == OTA_BLE_CMD_ACK_BEGIN2;
+        if ((begin1 || begin2) && g_ota_link_metrics.initial_durable == UINT32_MAX) {
+            g_ota_link_metrics.protocol = begin2 ? 2u : 1u;
+            g_ota_link_metrics.session = frame[3];
+            g_ota_link_metrics.epoch = begin2 ? ble_ack_u32(frame + 10) : 0u;
+            g_ota_link_metrics.initial_durable = ble_ack_u32(frame + (begin2 ? 14 : 10));
+        }
+        if ((len == 19u && frame[2] == OTA_BLE_CMD_ACK_END) ||
+            (len == 27u && frame[2] == OTA_BLE_CMD_ACK_END2))
+            g_ota_link_metrics.terminal = 0u;
+    }
+#endif
     const bool data_ok = len == 19u && frame[2] == OTA_BLE_CMD_ACK_DATA &&
                          frame[8] == OTA_BLE_STATUS_OK;
 #if OTA_BLE_PIPELINE_ENABLED
@@ -308,6 +333,9 @@ static int ble_env_overlay_acquire(void)
         /* 真实会话获取边界：代次递增使所有旧 epoch 下行命令与在飞探针失效 */
         s_ble_epoch++;
         (void)s_p34_ack_batch.rebind(s_ble_epoch);
+#if CONFIG_OTA_LINK_METRICS
+        metrics_begin();
+#endif
 #if CONFIG_OTA_BLE_PROFILE
         p34_begin();
 #endif
@@ -318,6 +346,9 @@ static int ble_env_overlay_acquire(void)
 static void ble_env_overlay_release(void)
 {
     (void)s_p34_ack_batch.drain(ble_uart_send);
+#if CONFIG_OTA_LINK_METRICS
+    metrics_finish();
+#endif
     HAL::OTA_OverlayReleaseBle();
     /* 真实会话释放边界：释放后进入的观测属于下一代 */
     s_ble_epoch++;
@@ -523,6 +554,9 @@ static void ble_env_system_reset(void)
  * 文本协议路径。 */
 static void ble_isr_hook(HardwareSerial *serial)
 {
+#if CONFIG_OTA_LINK_METRICS
+    uint32_t metrics_bytes = 0u;
+#endif
 #if CONFIG_OTA_BLE_PROFILE
     if (s_p34_profile.active)
     {
@@ -541,6 +575,14 @@ static void ble_isr_hook(HardwareSerial *serial)
     {
         ota_ble_session_isr_feed(&s_ble_session,
                                  (uint8_t)serial->read());
+#if CONFIG_OTA_LINK_METRICS
+        if (g_ota_link_metrics.active) {
+            ++metrics_bytes;
+            const uint32_t queued = ota_ble_ring_count(&s_ble_session.rx_ring);
+            if (queued > g_ota_link_metrics.rx_ring_peak) g_ota_link_metrics.rx_ring_peak = queued;
+            g_ota_link_metrics.overlay_dropped = s_ble_session.rx_ring.dropped;
+        }
+#endif
 #if CONFIG_OTA_BLE_PROFILE
         if (s_p34_profile.active)
         {
@@ -554,6 +596,11 @@ static void ble_isr_hook(HardwareSerial *serial)
         }
 #endif
     }
+#if CONFIG_OTA_LINK_METRICS
+    if (g_ota_link_metrics.active) {
+        ota_metrics_sum(&g_ota_link_metrics, &g_ota_link_metrics.rx_bytes, metrics_bytes);
+    }
+#endif
 }
 
 /* 文本协议出口：demux 判定的非帧字节喂 TinyBTPlus（会话活跃期
@@ -879,6 +926,9 @@ void HAL::BT_Init()
     env.activate_staged = ble_env_activate_staged;
     env.system_reset = ble_env_system_reset;
     HAL::OTA_StagingGetIo(&s_ble_staging_io);
+#if CONFIG_OTA_LINK_METRICS
+    metrics_bind();
+#endif
 #if CONFIG_OTA_BLE_PROFILE
     s_p34_staging_io = s_ble_staging_io;
     s_ble_staging_io.read = p34_staging_read;

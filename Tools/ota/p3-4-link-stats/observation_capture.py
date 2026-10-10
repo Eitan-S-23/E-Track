@@ -16,7 +16,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[3]
 MAX_BYTES = 64 * 1024 * 1024
 PREFIXES = ("OTA_LINK_SAMPLE ", "OTA_LINK_STATS ", "OTA_LINK_RETIRE ",
-            "OTA_LINK_LATE ", "OTA_MONO ", "OTA_IDENTITY ", "OTA_EXPERIMENT ",
+            "OTA_LINK_LATE ", "OTA_LINK_ACK_ERROR ", "OTA_LINK_ACK_IGNORED ",
+            "OTA_MONO ", "OTA_IDENTITY ", "OTA_EXPERIMENT ",
             "OTA_PREFIX_PROBE ", "OTA_RADIO ", "OTA_PHY ", "OTA_PHY_CANCEL ",
             "OTA_LINK_NATIVE_READY ", "OTA_LINK_NATIVE_META ", "OTA_LINK_NATIVE_WRITE ",
             "OTA_LINK_NATIVE_END ", "OTA_LINK_NATIVE_ERROR ")
@@ -74,6 +75,63 @@ def validate_input(value):
             value["deviceAddress"]), "device address domain")
     require(value["appLifecycle"] in ("resumed", "inactive", "paused", "hidden", "detached", "unknown"),
             "lifecycle must be observed, not guessed")
+
+
+def ack_error_records(messages):
+    """Retained error observations, never ACK credit or a transfer verdict."""
+    matching, ignored, counts = [], [], []
+    seen, sealed = set(), set()
+    raw_fields = {"schema", "cmd", "session", "seq", "payloadBytes", "reason",
+                  "status", "epoch", "durable", "accepted", "credit", "us"}
+    reasons = {"session", "epoch", "sequence", "inactive", "retired", "unmatched"}
+    for line in messages:
+        if line.startswith("OTA_LINK_ACK_ERROR "):
+            match = re.fullmatch(r"OTA_LINK_ACK_ERROR label=([a-z0-9-]+) (.*)", line)
+            require(match is not None, "ACK error label")
+            item = decode(match[2])
+            require(set(item) == raw_fields, "ACK error fields")
+            require(item["reason"] in ("ACK_STATUS", "ACK_MALFORMED"), "ACK error reason")
+            matching.append(dict(label=match[1], **item))
+        elif line.startswith("OTA_LINK_ACK_IGNORED "):
+            item = decode(line[len("OTA_LINK_ACK_IGNORED "):])
+            require({"label", "attempt"} <= set(item) and isinstance(item.get("label"), str) and
+                    re.fullmatch(r"[a-z0-9-]+", item["label"]) and
+                    (item.get("attempt") is None or uint(item["attempt"])), "ignored ACK owner")
+            owner = (item["label"], item["attempt"])
+            require(owner not in sealed, "ignored ACK after sealed counters")
+            if item.get("kind") == "counts":
+                require(set(item) == {"schema", "kind", "label", "attempt", "counts", "saturated", "us"},
+                        "ignored ACK count fields")
+                values = item["counts"]
+                require(isinstance(values, dict) and values and set(values) <= reasons and
+                        all(uint(v) and v > 0 for v in values.values()) and
+                        type(item["saturated"]) is bool and
+                        set(values) == {r for label, attempt, r in seen if (label, attempt) == owner},
+                        "ignored ACK count/first mismatch")
+                require(type(item["schema"]) is int and item["schema"] == 1 and
+                        uint(item["us"], (1 << 63)-1), "ignored ACK count schema/clock")
+                counts.append(item)
+                sealed.add(owner)
+                continue
+            require(item.get("kind") == "first" and set(item) == raw_fields |
+                    {"kind", "label", "attempt", "expectedSession", "expectedEpoch"}, "ignored ACK fields")
+            require(item["reason"] in reasons, "ignored ACK category")
+            key = (*owner, item["reason"])
+            require(key not in seen, "duplicate ignored ACK first")
+            seen.add(key)
+            for field, maximum in (("expectedSession", 255), ("expectedEpoch", 0xffffffff)):
+                require(item[field] is None or uint(item[field], maximum), "ignored ACK expected identity")
+            ignored.append(item)
+        else:
+            continue
+        require(type(item["schema"]) is int and item["schema"] == 1 and
+                item["cmd"] in (0x91, 0x92, 0x93, 0x94) and
+                uint(item["session"], 255) and uint(item["seq"], 65535) and
+                uint(item["payloadBytes"], 65535) and uint(item["us"], (1 << 63)-1), "ACK raw domains")
+        for field in ("status", "epoch", "durable", "accepted", "credit"):
+            require(item[field] is None or uint(item[field], 255 if field == "status" else 0xffffffff),
+                    "ACK nullable raw field")
+    return dict(matching=matching, ignored=ignored, sealedCounts=counts)
 
 
 def verify(data: bytes, *, sentinel: str, target: str, require_upgrade=True, require_prefix_probe=False):
@@ -166,6 +224,7 @@ def verify(data: bytes, *, sentinel: str, target: str, require_upgrade=True, req
                   outcome=outcomes[0] if outcomes else None, rawSha256=hashlib.sha256(data).hexdigest(),
                   eligibleForThreshold=False, independentAcceptance="NOT_RUN",
                   scope="envelope/identity integrity only; original timing/grouping gates still required")
+    result["ackErrorObservations"] = ack_error_records(messages)
     if require_prefix_probe:
         result["prefixProbe"] = verify_prefix_probe(result, messages)
         result["scope"] = "durable-prefix diagnostic only; no END, installation or full-ETU throughput acceptance"

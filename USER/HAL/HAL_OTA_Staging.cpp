@@ -35,6 +35,11 @@ static staging_port_context_t g_staging_port;
 /* Retain the bounded fault state for quiescent debugger readback as well. */
 static volatile HAL::OtaStagingError g_staging_first_error;
 
+void HAL::OTA_StagingResetFirstError()
+{
+    g_staging_first_error.phase = OTA_STAGING_ERROR_NONE;
+}
+
 static void staging_forget_erased(void)
 {
 #if CONFIG_OTA_STAGING_BLOCK_ERASE
@@ -538,7 +543,7 @@ void HAL::OTA_StagingGetIo(ota_staging_io_t *io)
     }
     io->ctx = &g_staging_port;
     staging_forget_erased();
-    g_staging_first_error.phase = OTA_STAGING_ERROR_NONE;
+    OTA_StagingResetFirstError();
 #if CONFIG_OTA_STAGING_QE_REUSE
     g_staging_port.restore_initialized = 0u;
 #endif

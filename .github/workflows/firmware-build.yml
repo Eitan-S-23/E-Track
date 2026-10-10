@@ -205,6 +205,8 @@ jobs:
           python3 tests/ota/p3_1_verify_text_isolation.py
           python3 tests/ota/p3_1_verify_portability.py
           python3 tests/ota/test_ota_device_info.py
+          python3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py admission --out "$GITHUB_WORKSPACE/.cache/p34-admission-tests"
+          python3 -I -S -B -X utf8 tests/ota/test_hardware_serial.py --metrics --out "$GITHUB_WORKSPACE/.cache/p34-uart-metrics-tests"
 
       - name: Validate OTA App layout
         shell: bash

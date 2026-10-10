@@ -262,6 +262,30 @@ class OtaLinkStats {
   }
   int? _endAckArrivalUs;
   String? _transferOutcome;
+  Map<String, int>? _firstBegin;
+  int _beginAcks = 0;
+
+  void recordBeginAck({required int protocol, required int session,
+      required int sequence, required int durableOffset, required int bitmap,
+      required int atUs, required int ackTimeoutMs, required int maxRetries,
+      required int windowSegments, int epoch = 0}) {
+    final fields = <String, int>{'protocol': protocol, 'session': session,
+      'seq': sequence, 'epoch': epoch, 'off': durableOffset, 'bitmap': bitmap,
+      'ackTimeoutMs': ackTimeoutMs, 'maxRetries': maxRetries, 'windowSegments': windowSegments};
+    if (!_startObservation('begin_ack', atUs)) return;
+    _firstBegin ??= {...fields, 'us': atUs};
+    _beginAcks++;
+    _emitSample('begin_ack', atUs,
+        extra: fields.entries.map((e) => '${e.key}=${e.value}').join(' '));
+  }
+
+  void recordControlFrame({required bool completed, required int command,
+      required int session, required int sequence, required int bytes}) {
+    final kind = completed ? 'control_end' : 'control_start';
+    final at = nowUs();
+    final extra = 'cmd=$command session=$session seq=$sequence bytes=$bytes';
+    if (_startObservation(kind, at, extra: extra)) _emitSample(kind, at, extra: extra);
+  }
 
   /// Shared origin for diagnostic prefix timing; never an END substitute.
   int? get transferStartUs => _transferStartUs;
@@ -495,6 +519,53 @@ class OtaLinkStats {
   int acksAbort = 0;
 
   Map<String, Object?>? _firstAckError;
+  final Map<String, int> _ignoredAckCounts = {};
+  final Map<String, Map<String, Object?>> _ignoredAckFirst = {};
+  bool _ignoredAckSaturated = false;
+  bool _ignoredAckSealed = false;
+
+  /// At most six first records and one final count record per binding. These
+  /// diagnostics stay separate even after the active timing summary is sealed.
+  void recordIgnoredAckError({required String reason, required int command,
+      required int session, required int sequence, required int payloadBytes,
+      required int atUs, int? expectedSession, int? expectedEpoch, int? status,
+      int? epoch, int? durableOffset, int? acceptedOffset, int? creditEnd}) {
+    if (_ignoredAckSealed || !const {'session', 'epoch', 'sequence', 'inactive',
+        'retired', 'unmatched'}.contains(reason)) return;
+    final count = _ignoredAckCounts[reason] ?? 0;
+    if (count == 0xffffffff) {
+      _ignoredAckSaturated = true;
+    } else {
+      _ignoredAckCounts[reason] = count + 1;
+    }
+    if (_ignoredAckFirst.containsKey(reason)) return;
+    final record = <String, Object?>{
+      'schema': 1, 'kind': 'first', 'label': label, 'attempt': attempt,
+      'reason': reason, 'expectedSession': expectedSession,
+      'expectedEpoch': expectedEpoch, 'cmd': command, 'session': session,
+      'seq': sequence, 'payloadBytes': payloadBytes, 'status': status,
+      'epoch': epoch, 'durable': durableOffset, 'accepted': acceptedOffset,
+      'credit': creditEnd, 'us': atUs,
+    };
+    _ignoredAckFirst[reason] = Map.unmodifiable(record);
+    emitOtaObservation('OTA_LINK_ACK_IGNORED ${convert.jsonEncode(record)}');
+  }
+
+  Map<String, Object?> get ignoredAckErrors => {
+    'schema': 1, 'counts': Map<String, int>.of(_ignoredAckCounts),
+    'saturated': _ignoredAckSaturated,
+  };
+
+  /// Called only once the notification subscription has been closed.
+  void sealIgnoredAckErrors() {
+    if (_ignoredAckSealed) return;
+    _ignoredAckSealed = true;
+    if (_ignoredAckCounts.isEmpty) return;
+    emitOtaObservation('OTA_LINK_ACK_IGNORED ${convert.jsonEncode({
+      ...ignoredAckErrors, 'kind': 'counts', 'label': label, 'attempt': attempt,
+      'us': nowUs(),
+    })}');
+  }
 
   /// One immutable diagnostic snapshot; it never supplies credit or ACK timing.
   void recordFirstAckError({
@@ -551,12 +622,13 @@ class OtaLinkStats {
   final List<int> durableOffsets = [];
 
   /// durable 推进事件（单调去重；含 resume BEGIN ACK 带回的权威进展）。
-  void recordDurableAdvance(int off) {
-    if (!_startObservation('durable', nowUs(), extra: 'off=$off')) return;
+  void recordDurableAdvance(int off, {int? atUs}) {
+    final now = atUs ?? nowUs();
+    if (!_startObservation('durable', now, extra: 'off=$off')) return;
     if (durableOffsets.isNotEmpty && off <= durableOffsets.last) return;
     durableOffsets.add(off);
-    durableTimesUs.add(nowUs());
-    _emitSample('durable', nowUs(), extra: 'off=$off');
+    durableTimesUs.add(now);
+    _emitSample('durable', now, extra: 'off=$off');
   }
 
   // ---- GATT 写 / 服务发现 / 平台写 ----
@@ -697,6 +769,7 @@ class OtaLinkStats {
         'totalUs': _getInfoDurationsUs.fold(0, (a, b) => a + b),
       },
       'transfer': {
+        if (_firstBegin != null) 'begin': {'first': _firstBegin, 'count': _beginAcks},
         if (_dataBatchFrames != 1) 'dataBatch': {
           'schema': 1, 'maxFrames': _dataBatchFrames,
           'chunks': _batchChunks, 'bytes': _batchBytes,
@@ -718,6 +791,7 @@ class OtaLinkStats {
           'noProgress': acksNoProgress,
           'abort': acksAbort,
           if (_firstAckError != null) 'firstError': _firstAckError,
+          'ignoredErrors': ignoredAckErrors,
         },
         'ackSamples': ackSampleIntegrity,
         'ackEarlyInvalid': ackEarlyInvalid,

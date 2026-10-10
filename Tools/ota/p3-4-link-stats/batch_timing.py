@@ -9,8 +9,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from observation_capture import require, verify, MAX_BYTES
 
 
-def analyze(messages, total):
+def analyze(messages, total, protocol=1):
     require(type(total) is int and 64 <= total <= 1048576, "bounded package required")
+    require(type(protocol) is int and protocol in (1, 2), "explicit v1/v2 geometry required")
     summaries, writes, chunks, segments = [], [], [], []
     awaiting = 0
     for line in messages:
@@ -54,13 +55,14 @@ def analyze(messages, total):
             transfer["retransmitFrames"] == 0, "incomplete/duplicate DATA coverage")
     require(all(transfer["acks"][key] == 0 for key in ("duplicate", "error", "malformed", "noProgress", "abort")),
             "not a clean transfer")
-    require(len(chunks) == batch["chunks"] and sum(c["bytes"] for c in chunks) == batch["bytes"] == total + count * 14,
+    require(len(chunks) == batch["chunks"] and sum(c["bytes"] for c in chunks) == batch["bytes"] == total + count * (14 if protocol == 1 else 18),
             "batch byte/count mismatch")
     require(len(writes) == gatt["calls"] and gatt["errors"] == 0 and
             sum(w["bytes"] for w in writes) == gatt["bytes"], "write count/bytes mismatch")
     controls = [w["bytes"] for w in writes if not w["assigned"]]
-    require(controls.count(111) == controls.count(42) == 1 and
-            all(size in (10, 111, 42) for size in controls),
+    begin_bytes, end_bytes = (111, 42) if protocol == 1 else (115, 46)
+    require(controls.count(begin_bytes) == controls.count(end_bytes) == 1 and
+            all(size in (10, 14, begin_bytes, end_bytes) for size in controls),
             "unexpected control writes; this analysis requires unsplit clean controls")
     start, end, elapsed = transfer["startUs"], transfer["endAckUs"], transfer["elapsedUs"]
     require(type(start) is int and type(end) is int and elapsed == end - start > 0 and
@@ -68,7 +70,7 @@ def analyze(messages, total):
             [c["at"] for c in chunks] == sorted(c["at"] for c in chunks), "invalid monotonic timing")
     data_us = sum(c["us"] for c in chunks)
     require(0 <= data_us <= elapsed, "write times exceed transfer interval")
-    return dict(result="BATCH_TIMING_OBSERVED", transfer_seconds=elapsed / 1e6,
+    return dict(result="BATCH_TIMING_OBSERVED", protocol=protocol, transfer_seconds=elapsed / 1e6,
                 throughput_kib_s=total / 1024 / (elapsed / 1e6), data_gatt_seconds=data_us / 1e6,
                 remaining_transfer_seconds=(elapsed - data_us) / 1e6,
                 chunks=len(chunks), data_frames=count,
@@ -79,11 +81,19 @@ def analyze(messages, total):
 
 
 def verify_batch_stamp(stamp, measured_frames):
-    require(type(stamp.get("schema")) is int and stamp["schema"] in (5, 6, 7) and
+    require(type(stamp.get("schema")) is int and 5 <= stamp["schema"] <= 10 and
             type(stamp.get("dataBatchFrames")) is int and
             stamp["dataBatchFrames"] == measured_frames and
-            measured_frames in ((3, 12) if stamp["schema"] == 7 else (3,)),
+            measured_frames in ((3, 12) if stamp["schema"] >= 7 else (3,)),
             "batch experiment stamp differs from measured profile")
+    if stamp["schema"] >= 8:
+        require(stamp.get("androidPhyPolicy") in ("off", "observe", "prefer2m"), "PHY stamp missing")
+    if stamp["schema"] >= 9:
+        require(type(stamp.get("rebootInfoMaxAttempts")) is int and
+                1 <= stamp["rebootInfoMaxAttempts"] <= 120, "reboot attempt stamp missing")
+    if stamp["schema"] >= 10:
+        require(type(stamp.get("ackTimeoutMs")) is int and 500 <= stamp["ackTimeoutMs"] <= 2000,
+                "ACK timeout stamp missing")
 
 
 def main():
@@ -91,6 +101,7 @@ def main():
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--expect-sentinel", required=True)
     parser.add_argument("--expect-target", required=True)
+    parser.add_argument("--protocol", type=int, choices=(1, 2), default=1)
     args = parser.parse_args()
     require(args.input.stat().st_size <= MAX_BYTES + 8192, "oversized snapshot")
     envelope, messages = verify(args.input.read_bytes(), sentinel=args.expect_sentinel,
@@ -98,10 +109,10 @@ def main():
     messages = messages.splitlines()
     require(envelope["outcome"] == "completed", "completed original snapshot required")
     stamps = [json.loads(m[len("OTA_EXPERIMENT "):]) for m in messages if m.startswith("OTA_EXPERIMENT ")]
-    require(len(stamps) == 1, "one batch experiment stamp required")
+    require(stamps and all(stamp == stamps[0] for stamp in stamps), "missing/conflicting experiment stamps")
     require(stamps[0]["packageBytes"] == envelope["input"]["packageBytes"] and
             stamps[0]["packageSha256"] == envelope["input"]["packageSha256"], "package stamp mismatch")
-    result = analyze(messages, envelope["input"]["packageBytes"])
+    result = analyze(messages, envelope["input"]["packageBytes"], protocol=args.protocol)
     verify_batch_stamp(stamps[0], result["maximum_batch_frames"])
     result["snapshot_sha256"] = envelope["rawSha256"]
     print(json.dumps(result))

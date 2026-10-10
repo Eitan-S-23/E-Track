@@ -119,14 +119,24 @@ public:
 
     void IRQHandler();
 
-#if CONFIG_OTA_BLE_PROFILE
+#if CONFIG_OTA_BLE_PROFILE || CONFIG_OTA_LINK_METRICS
     void resetRxDiagnostics()
     {
         _rxBufferDropped = _rxErrorEvents = _rxErrorFlags = 0u;
+#if CONFIG_OTA_LINK_METRICS
+        _rxIrqCalls = _rxIrqCyclesLo = _rxIrqCyclesHi = _rxIrqMax = _rxTimingOverflow = 0u;
+#endif
     }
     uint32_t rxBufferDropped() const { return _rxBufferDropped; }
     uint32_t rxErrorEvents() const { return _rxErrorEvents; }
     uint32_t rxErrorFlags() const { return _rxErrorFlags; }
+#if CONFIG_OTA_LINK_METRICS
+    uint32_t rxIrqCalls() const { return _rxIrqCalls; }
+    uint32_t rxIrqCyclesLo() const { return _rxIrqCyclesLo; }
+    uint32_t rxIrqCyclesHi() const { return _rxIrqCyclesHi; }
+    uint32_t rxIrqMax() const { return _rxIrqMax; }
+    uint32_t rxTimingOverflow() const { return _rxTimingOverflow; }
+#endif
 #endif
 
 private:
@@ -135,10 +145,13 @@ private:
     volatile uint16_t _rxBufferHead;
     volatile uint16_t _rxBufferTail;
     uint8_t _rxBuffer[SERIAL_RX_BUFFER_SIZE];
-#if CONFIG_OTA_BLE_PROFILE
+#if CONFIG_OTA_BLE_PROFILE || CONFIG_OTA_LINK_METRICS
     volatile uint32_t _rxBufferDropped;
     volatile uint32_t _rxErrorEvents;
     volatile uint32_t _rxErrorFlags;
+#if CONFIG_OTA_LINK_METRICS
+    volatile uint32_t _rxIrqCalls, _rxIrqCyclesLo, _rxIrqCyclesHi, _rxIrqMax, _rxTimingOverflow;
+#endif
 #endif
 };
 
