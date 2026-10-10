@@ -412,12 +412,18 @@ void main() {
       ble.dataWriteError = null;
       ble.linkGeneration++;
       ble._teardown(); // A new peer session retains its committed staging prefix.
-      expect(await service.readDeviceInfo(probeAddress), isNotNull);
-      expect(await service.startOtaUpgrade(probeAddress), isTrue);
+      final resumeDiagnostics = OtaDiagnostics();
+      addTearDown(resumeDiagnostics.close);
+      await resumeDiagnostics.initialize(enabled: true, target: probeAddress,
+          sentinel: sentinel, directoryProvider: () async => tempDir);
+      await OtaDiagnostics.withInstance(resumeDiagnostics, () async {
+        expect(await service.readDeviceInfo(probeAddress), isNotNull);
+        expect(await service.startOtaUpgrade(probeAddress), isTrue);
+      });
       expect(ble._stagedBytes, bytes);
-      final resumed = diagnostics.status.value.lastExport!;
+      final resumed = resumeDiagnostics.status.value.lastExport!;
       expect(resumed.path, isNot(disconnected.path));
-      expect(diagnostics.status.value.error, isNull);
+      expect(resumeDiagnostics.status.value.error, isNull);
 
       final runs = <Map<String, Object?>>[];
       for (final entry in [(role: 'disconnect', file: disconnected), (role: 'resume', file: resumed)]) {
