@@ -15,7 +15,8 @@ from observation_capture import decode, digest, require, uint, verify, MAX_BYTES
 from batch_timing import verify_batch_stamp
 
 SAMPLE = re.compile(r"OTA_LINK_SAMPLE label=upgrade kind=(\w+) us=(-?\d+)(?: (.*))?")
-CONTROL_BYTES = {1: 111, 3: 42, 4: 10, 5: 10, 0x10: 14, 0x11: 115, 0x13: 46, 0x14: 14}
+CONTROL_BYTES = {0: 10, 1: 111, 3: 42, 4: 10, 0x10: 14, 0x11: 115, 0x13: 46, 0x14: 14}
+DISCONNECT_REASONS = {"transport:DISCONNECTED", "transport:DEVICE_LINK_CHANGED"}
 GROUP_FIELDS = ("requestedBaud reuseGatt withoutResponse senderWindowSegments dataBatchFrames "
                 "pauseScanDuringOta androidHighPriority androidPhyPolicy reuseRebootInfoLink "
                 "rebootInfoTimeoutMs rebootProbeIntervalMs rebootInfoMaxAttempts").split()
@@ -217,8 +218,9 @@ def analyze(envelope, messages, *, historical=False):
         require(durable and durable[-1][1] == total, "no final durable confirmation")
         if not historical:
             end_cmd, begin_cmd = ((0x13, 0x11) if protocol == 2 else (3, 1))
-            require(not pending_controls and any(f["cmd"] == begin_cmd for f, _ in control_ends) and
-                    any(f["cmd"] == end_cmd for f, _ in control_ends), "missing successful BEGIN/END write")
+            required_controls = {0, begin_cmd, end_cmd} | ({0x10} if protocol == 2 else set())
+            require(not pending_controls and required_controls <= {f["cmd"] for f, _ in control_ends},
+                    "missing successful GET_INFO/CAPS/BEGIN/END write")
             require(gatt["errors"] == 0 and gatt["bytes"] == wire_data + sum(f["bytes"] for f, _ in control_ends),
                     "DATA/control/query/ABORT byte accounting mismatch")
         else:
@@ -337,20 +339,25 @@ def aggregate(runs, *, expected_count):
         pair = recoveries.setdefault(case, {})
         require(run["role"] not in pair, "duplicate recovery role")
         pair[run["role"]] = run.get("observation")
-    recovery_ok, recovery_offsets = 0, []
+    recovery_ok, recovery_offsets, recovery_groups = 0, [], set()
     for pair in recoveries.values():
         a, b = pair.get("disconnect"), pair.get("resume")
         if not a or not b: continue
-        reason = (a.get("failure") or {}).get("reason")
-        recovered = bool(not a["success"] and reason in ("DISCONNECTED", "DEVICE_LINK_CHANGED") and
+        failure = a.get("failure") or {}
+        recovered = bool(not a["success"] and failure.get("stage") == "transfer" and
+            failure.get("reason") in DISCONNECT_REASONS and
             b["success"] and a["parameters"] == b["parameters"] and
             a["finalDurable"] == b["initialDurable"] and (b["initialDurable"] or 0) > 0)
         recovery_ok += recovered
+        if recovered:
+            recovery_groups.add(json.dumps(a["parameters"], sort_keys=True, separators=(",", ":")))
         if recovered and a["reference"] and b["reference"]: recovery_offsets.append(b["initialDurable"])
     return dict(plannedAttempts=expected_count, observedAttempts=len(captures), evidenceGaps=gaps, groups=results,
         recoveryCases=len(recoveries), successfulRecoveries=recovery_ok,
         recoveryOffsets=recovery_offsets,
-        recovery10MeetsObservedGates=len(recoveries) == recovery_ok == 10 and not gaps and
+        recoveryParameterGroups=len(recovery_groups),
+        recoveryParameters=json.loads(next(iter(recovery_groups))) if len(recovery_groups) == 1 else None,
+        recovery10MeetsObservedGates=len(recoveries) == recovery_ok == 10 and not gaps and len(recovery_groups) == 1 and
             sorted(recovery_offsets) == sorted([n * 1024 for n in (8, 64, 256, 512, 768) for _ in range(2)]),
         independentAcceptance="NOT_RUN", soakDurationSeconds=None,
         scope="All listed attempts retained; groups never mix baud/timeout/retry/MTU/assets/APK. "

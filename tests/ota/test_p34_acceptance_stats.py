@@ -14,6 +14,8 @@ import acceptance_stats as m
 from observation_capture import checked
 from test_p3_4_observation_capture import rows, encoded, SENTINEL, TARGET
 
+CONTROL_FRAME_BYTES = {0: 10, 1: 111, 3: 42, 4: 10, 0x10: 14, 0x11: 115, 0x13: 46, 0x14: 14}
+
 
 def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, early=False, retry=False):
     source = dict(packageSha256="a" * 64, packageBytes=total, currentVersionCode=30286,
@@ -32,11 +34,12 @@ def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, ea
         sample("gatt_write", 10, bytes=size)
         writes.append(size)
     def control(cmd, at, seq):
-        f = dict(cmd=cmd, session=0 if cmd in (0x10, 1, 0x11) else 7, seq=seq, bytes=m.CONTROL_BYTES[cmd])
+        f = dict(cmd=cmd, session=0 if cmd in (0, 0x10, 1, 0x11) else 7, seq=seq, bytes=CONTROL_FRAME_BYTES[cmd])
         sample("control_start", at, **f)
         gatt(f["bytes"])
         sample("control_end", at + 20, **f)
-    if protocol == 2: control(0x10, 10, 50)
+    control(0, 1, 49)
+    if protocol == 2: control(0x10, 30, 50)
     control(0x11 if protocol == 2 else 1, 100, 0)
     begin = dict(protocol=protocol, session=7, seq=0, epoch=123 if protocol == 2 else 0,
                  off=initial, bitmap=0, ackTimeoutMs=2000, maxRetries=5, windowSegments=24)
@@ -96,7 +99,7 @@ def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, ea
     gatt_summary.pop("count"); gatt_summary.pop("p99Us")
     summary = dict(schema=1, label="upgrade", clock="stopwatch-mono-us",
         bind=dict(mtuChunkBytes=244, writeMode="writeWithResponse"),
-        failure=dict(stage="transfer" if failed else None, reason="DISCONNECTED" if failed else None),
+        failure=dict(stage="transfer" if failed else None, reason="transport:DISCONNECTED" if failed else None),
         gattWrites=dict(calls=len(writes), bytes=sum(writes), errors=0, **gatt_summary),
         transfer=dict(startUs=100, endAckUs=end, elapsedUs=end - 100 if end else None,
             outcome="fail" if failed else "ok", begin=dict(first=dict(us=115, **begin), count=1),
@@ -132,7 +135,47 @@ def observed(**kwargs):
     return m.inspect(snapshot(*fixture(**kwargs)), SENTINEL, TARGET)
 
 
+def recovery_runs():
+    """Aggregate-only checkpoint fixture, not parsed 1 MiB device evidence."""
+    a, b = observed(total=8192, failed=True), observed(total=8192, initial=4096)
+    runs = []
+    for i, checkpoint in enumerate([n * 1024 for n in (8, 64, 256, 512, 768) for _ in range(2)]):
+        for role, original in (("disconnect", a), ("resume", b)):
+            value = copy.deepcopy(original)
+            value["captureId"] = value["rawSha256"] = f"{i}-{role}"
+            value["reference"] = True
+            value["parameters"]["input"]["packageBytes"] = 1048576
+            value["finalDurable" if role == "disconnect" else "initialDurable"] = checkpoint
+            runs.append(dict(id=f"{i}-{role}", role=role, recoveryCase=str(i), observation=value))
+    return runs
+
+
 class Tests(unittest.TestCase):
+    def test_get_info_is_control_zero_and_unknown_commands_are_rejected(self):
+        self.assertEqual(m.CONTROL_BYTES, CONTROL_FRAME_BYTES)
+        source, good = fixture()
+        cases = [
+            [s.replace("cmd=0 ", "cmd=5 ") for s in good],
+            [s.replace("bytes=10", "bytes=11") if "cmd=0 " in s else s for s in good],
+            [s for s in good if not ("kind=control_end " in s and "cmd=0 " in s)],
+            [s for s in good if not ("kind=control_" in s and "cmd=0 " in s)],
+        ]
+        without_query_gatt = list(good)
+        query = next(i for i, line in enumerate(good) if "kind=control_start " in line and "cmd=0 " in line)
+        del without_query_gatt[query + 1]
+        cases.append(without_query_gatt)
+        without_query = good[:query] + good[query + 3:]
+        index = next(i for i, line in enumerate(without_query) if line.startswith("OTA_LINK_STATS "))
+        summary = json.loads(without_query[index][len("OTA_LINK_STATS "):])
+        summary["gattWrites"]["calls"] -= 1
+        summary["gattWrites"]["bytes"] -= 10
+        without_query[index] = "OTA_LINK_STATS " + json.dumps(summary)
+        cases.append(without_query)
+        for number, bad in enumerate(cases):
+            with self.subTest(case=number), self.assertRaises(ValueError):
+                m.inspect(snapshot(source, bad), SENTINEL, TARGET)
+        self.assertTrue(m.inspect(snapshot(source, good), SENTINEL, TARGET)["ackEligible"])
+
     def test_retry_denominator_and_clean_are_not_error_free_selection(self):
         value = observed(retry=True)
         self.assertEqual(value["retransmitRate"], 1 / 3)
@@ -242,6 +285,49 @@ class Tests(unittest.TestCase):
         result = m.aggregate(runs, expected_count=20)
         self.assertEqual(result["successfulRecoveries"], 9)
         self.assertFalse(result["recovery10MeetsObservedGates"])
+
+    def test_recovery_reason_requires_exact_service_format_and_transfer_stage(self):
+        for reason in ("transport:DISCONNECTED", "transport:DEVICE_LINK_CHANGED"):
+            runs = recovery_runs()
+            runs[0]["observation"]["failure"]["reason"] = reason
+            self.assertTrue(m.aggregate(runs, expected_count=20)["recovery10MeetsObservedGates"])
+            self.assertEqual(runs[0]["observation"]["failure"]["reason"], reason)
+        for stage, reason in (("transfer", "DISCONNECTED"), ("transfer", "CANCELLED"),
+                ("transfer", "transport:CANCELLED"), ("transfer", "transport:ABORT"),
+                ("transfer", "prefix:transport:DISCONNECTED"),
+                ("transfer", "transport:DISCONNECTED_EXTRA"),
+                ("reboot", "transport:DISCONNECTED"), (None, "transport:DISCONNECTED")):
+            runs = recovery_runs()
+            runs[0]["observation"]["failure"] = dict(stage=stage, reason=reason)
+            with self.subTest(stage=stage, reason=reason):
+                result = m.aggregate(runs, expected_count=20)
+                self.assertEqual(result["successfulRecoveries"], 9)
+                self.assertFalse(result["recovery10MeetsObservedGates"])
+        runs = recovery_runs()
+        runs[0]["observation"]["success"] = True
+        self.assertFalse(m.aggregate(runs, expected_count=20)["recovery10MeetsObservedGates"])
+
+    def test_ten_recoveries_cannot_stitch_parameter_or_asset_groups(self):
+        good = recovery_runs()
+        result = m.aggregate(good, expected_count=20)
+        self.assertTrue(result["recovery10MeetsObservedGates"])
+        self.assertEqual(result["recoveryParameterGroups"], 1)
+        self.assertEqual(result["recoveryParameters"], good[0]["observation"]["parameters"])
+        for key, changed in (("requestedBaud", 115200), ("ackTimeoutMs", 500),
+                             ("maxRetries", 4), ("packageSha256", "f" * 64)):
+            runs = copy.deepcopy(good)
+            for run in runs[:2]:
+                parameters = run["observation"]["parameters"]
+                (parameters["input"] if key == "packageSha256" else parameters)[key] = changed
+            with self.subTest(field=key):
+                result = m.aggregate(runs, expected_count=20)
+                self.assertEqual(result["successfulRecoveries"], 10)
+                self.assertEqual(result["recoveryParameterGroups"], 2)
+                self.assertIsNone(result["recoveryParameters"])
+                self.assertFalse(result["recovery10MeetsObservedGates"])
+        for run in good[:10]:
+            run["observation"]["parameters"]["requestedBaud"] = 115200
+        self.assertFalse(m.aggregate(good, expected_count=20)["recovery10MeetsObservedGates"])
 
     def test_plan_keeps_missing_and_changed_originals_as_gaps(self):
         parent = checked(ROOT / ".cache/p34-stats-plan-tests")

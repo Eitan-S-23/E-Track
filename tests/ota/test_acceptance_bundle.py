@@ -1637,6 +1637,38 @@ class GovernancePromptScopeTests(unittest.TestCase):
         self.assertIn(collector, selected["Validation"])
         self.assertNotIn(collector, selected["Capture"])
 
+    def test_p34_build_inputs_are_exact_exceptions_not_generated_outputs(self):
+        helper = "Tools/ota/p34-acceptance/build.py"
+        gradle = [
+            "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+            "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+            "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle",
+        ]
+        generated = [
+            "Tools/ota/p34-acceptance/build-cache/result.json",
+            "Tools/ota/p34-acceptance/build-extra.py",
+            "app/bluetooth_flutter_Trace/android/app/build/outputs/app.apk",
+            "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build/intermediates/classes.dex",
+        ]
+        candidates = [helper, *gradle, *generated]
+        selected = {
+            profile: set(VALIDATOR._filter_profile_paths(candidates, definition))
+            for profile, definition in VALIDATOR.PROFILE_DEFINITIONS.items()
+        }
+        for profile, paths in (("Validation", [helper]), ("Production", gradle), ("Flutter", gradle)):
+            definition = VALIDATOR.PROFILE_DEFINITIONS[profile]
+            for path in paths:
+                self.assertIn(path, selected[profile])
+                self.assertIn(path, definition["top_files"])
+                self.assertIn(path, definition["required_paths"])
+                mutant = copy.deepcopy(definition)
+                mutant["top_files"].remove(path)
+                self.assertNotIn(path, VALIDATOR._filter_profile_paths(candidates, mutant))
+        for profile, paths in selected.items():
+            self.assertFalse(paths.intersection(generated), profile)
+        self.assertNotIn(helper, selected["Firmware"])
+        self.assertFalse(set(gradle).intersection(selected["Firmware"]))
+
     def test_dispatch_prompts_do_not_live_outside_governed_dir(self):
         stray = self.find_stray_dispatch_prompts(self.enumerate_repo_markdown())
         self.assertEqual(

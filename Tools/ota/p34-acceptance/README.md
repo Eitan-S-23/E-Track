@@ -74,6 +74,10 @@ strict `observation_capture.py`, not the older `p34_observation.py`. The simpler
 group gate. V1/V2 DATA overhead is 14/18 bytes, BEGIN 111/115, END 42/46; queries,
 capability negotiation and ABORTs remain separate control records.
 
+GET_INFO is command `0x00` (10 bytes), not the undefined `0x05`. Complete formal
+captures require its actual write, plus CAPS2 for V2 and BEGIN/END; a handwritten
+identity line does not replace missing control/GATT evidence.
+
     python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --input SNAPSHOT --expect-sentinel APK_SENTINEL --expect-target DEVICE
     python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --plan RUN_PLAN_JSON
 
@@ -110,6 +114,12 @@ Normal retries remain in the same run and latency pool. Recovery entries
 use `recoveryCase` and `role:disconnect|resume`; an actual disconnect failure and
 matching durable resume are required, not ABORT or an ordinary success. Ten-case
 qualification also checks two each at 8/64/256/512/768 KiB on the 1 MiB reference.
+Disconnect classification requires the real service's `failure.stage=transfer`
+and exact `transport:DISCONNECTED` or `transport:DEVICE_LINK_CHANGED` reason.
+The original reason is retained; bare, substring-matched, cancelled or reboot
+failures cannot qualify. All ten pairs must share one parameter/asset group;
+`recoveryParameters` exposes that group for comparison with the frozen production
+selection, and is null when recovered pairs span multiple groups.
 The physical intervention evidence remains the independent controller's input.
 Four-hour soak duration requires its single-host monotonic schedule/idle/failure
 log, **not** summed App durations or cross-process timestamps; the App-only tool

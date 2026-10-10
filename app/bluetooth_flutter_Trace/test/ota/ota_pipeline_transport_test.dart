@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
+import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_observation_log.dart';
@@ -93,6 +94,12 @@ class _Peer implements OtaBleChannel {
       pending.removeRange(0, size);
       frames.add(frame);
       switch (frame.cmd) {
+        case OtaBleCodec.cmdGetInfo:
+          reply(OtaBleCodec.rspInfo, 0, frame.seq, buildInfoPayload(
+            model: DeviceOtaInfo.wireModelETrack, hardwareRevision: 3, layoutId: 5,
+            bootVersion: 2, currentVersionCode: 30286,
+            imageSha256: List<int>.filled(32, 0xbb)));
+          break;
         case 0x10:
           if (!supports) break;
           nonce = word(frame.payload, 0);
@@ -225,16 +232,21 @@ void main() {
       emitOtaObservation('OTA_EXPERIMENT ${jsonEncode(stamp)}');
       expect(await diagnostics.beginUpgrade(input), isTrue);
       emitOtaObservation('OTA_EXPERIMENT ${jsonEncode(stamp)}');
-      emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'pre-transfer',
-        'versionCode': 30286, 'imageSha256': 'b' * 64, 'deviceAddress': address})}');
       final stats = OtaLinkStats(label: 'upgrade', device: address);
       final peer = _Peer()..deferReplies = true..writeStats = stats;
       final transport = OtaBleTransport(channel: peer, enablePipeline: true, stats: stats);
       stats.recordMtu(requested: 247, chunkBytes: 244, durationUs: 0, source: 'negotiated');
       stats.recordCharsDiscovery(durationUs: 0, found: true, writeMode: 'writeWithResponse');
       try {
+        final info = await transport.getDeviceInfo();
+        expect(info.currentVersionCode, input['currentVersionCode']);
+        expect(info.currentImageSha256Hex, input['currentImageSha256']);
+        emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'pre-transfer',
+          'versionCode': info.currentVersionCode, 'imageSha256': info.currentImageSha256Hex,
+          'deviceAddress': address})}');
         expect((await transport.transfer(package: bytes, packageSha256: sha256.convert(bytes).bytes,
             etuHeader: bytes.sublist(0, 64))).isOk, isTrue);
+        expect(peer.frames.take(3).map((frame) => frame.cmd), [0, 0x10, 0x11]);
         expect(peer.received, bytes);
         stats.emitSummary();
         emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'post-reboot',

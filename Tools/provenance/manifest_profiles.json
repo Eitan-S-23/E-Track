@@ -30,6 +30,9 @@
         "MDK-ARM_F435/build_f435.ps1",
         "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
         "MDK-ARM_F435/proj.uvprojx",
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle",
         "Tools/etu_pack.py",
         "Tools/ota/p34_timed_ack_batch.h",
         "Tools/ota/p34_staging_erase.h"
@@ -46,7 +49,10 @@
       "required_paths": [
         ".github/workflows/firmware-build.yml",
         "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
-        "build_f435_and_simulator.bat"
+        "build_f435_and_simulator.bat",
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle"
       ]
     },
     "Validation": {
@@ -65,6 +71,7 @@
         ".github/workflows/acceptance-governance.yml",
         ".github/workflows/flutter-dev-checks.yml",
         ".github/workflows/artifact-maintenance.yml",
+        "Tools/ota/p34-acceptance/build.py",
         "docs/acceptance-contracts/template.contract.json",
         "docs/acceptance-contracts/template.evidence-matrix.json"
       ],
@@ -76,6 +83,7 @@
         "Tools/acceptance/validate_bundle.py",
         "Tools/provenance/manifest_profiles.json",
         "Tools/provenance/worktree_guard.ps1",
+        "Tools/ota/p34-acceptance/build.py",
         "tests/ota/test_acceptance_bundle.py",
         "Tools/ota/p3-3-service/service.py",
         "Tools/ota/p3-3-service/service_config.json",
@@ -150,12 +158,20 @@
       "top_files": [
         "app/bluetooth_flutter_Trace/pubspec.yaml", "app/bluetooth_flutter_Trace/pubspec.lock",
         "app/bluetooth_flutter_Trace/analysis_options.yaml", ".github/workflows/build.yml",
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle",
         ".github/scripts/create_trace_patch.py", ".github/scripts/create_vcdiff_patch.py"
       ],
       "exclude_prefixes": [
         "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/src/test/"
       ],
-      "required_paths": ["app/bluetooth_flutter_Trace/pubspec.yaml", ".github/workflows/build.yml"]
+      "required_paths": [
+        "app/bluetooth_flutter_Trace/pubspec.yaml", ".github/workflows/build.yml",
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle"
+      ]
     },
     "Cloudflare": {
       "category": "production_source",

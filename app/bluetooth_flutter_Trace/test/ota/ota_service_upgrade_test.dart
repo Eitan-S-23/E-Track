@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
+import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
@@ -370,6 +371,79 @@ void main() {
       }
       expect(completed, isTrue);
     });
+  });
+
+  test('service disconnect and durable resume snapshots reach formal recovery accounting', () async {
+    final bytes = assetBytes(8192);
+    final runtime = await probeRuntime(bytes, window: 32, prefix: false,
+        rebootInfoTimeoutMs: 2000, pauseScan: false, batchFrames: 12,
+        reuseInfoLink: true, phyPolicy: 'off', infoMaxAttempts: 3, ackTimeoutMs: 2000);
+    final tempDir = tempFirmwareDir();
+    final diagnostics = OtaDiagnostics();
+    addTearDown(diagnostics.close);
+    const sentinel = 'OTAOBS0123456789abcdef01234567';
+    await diagnostics.initialize(enabled: true, target: probeAddress,
+        sentinel: sentinel, directoryProvider: () async => tempDir);
+    await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
+      final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [],
+          package: bytes, address: probeAddress, writeMode: 'without');
+      final service = Get.find<OtaService>();
+      ble.dataGate = Completer<void>();
+      final upgrade = service.startOtaUpgrade(probeAddress);
+      try {
+        await expectGatedDataCount(ble, 32);
+        expect(ble.stagedDurable, 4096);
+        // Fail the first write after a real durable ACK. Only the service writes
+        // the failure record; the test does not manufacture its stage/reason.
+        ble.dataWriteError = const OtaTransportException('fixture link lost', code: 'DISCONNECTED');
+        ble.releaseLatestDataAck();
+        expect(await upgrade, isFalse);
+      } finally {
+        ble.releaseDataGate();
+        if (service.isUpgrading) {
+          await service.cancelUpgrade(keepPackage: true);
+        }
+        await upgrade;
+      }
+      final disconnected = diagnostics.status.value.lastExport!;
+      expect(service.phase, OtaPhase.failed);
+      expect(ble.stagedDurable, 4096);
+
+      ble.dataWriteError = null;
+      ble.linkGeneration++;
+      ble._teardown(); // A new peer session retains its committed staging prefix.
+      expect(await service.readDeviceInfo(probeAddress), isNotNull);
+      expect(await service.startOtaUpgrade(probeAddress), isTrue);
+      expect(ble._stagedBytes, bytes);
+      final resumed = diagnostics.status.value.lastExport!;
+      expect(resumed.path, isNot(disconnected.path));
+      expect(diagnostics.status.value.error, isNull);
+
+      final runs = <Map<String, Object?>>[];
+      for (final entry in [(role: 'disconnect', file: disconnected), (role: 'resume', file: resumed)]) {
+        runs.add({'id': entry.role, 'role': entry.role, 'recoveryCase': 'link-drop',
+          'input': entry.file.path, 'sha256': sha256.convert(await entry.file.readAsBytes()).toString(),
+          'sentinel': sentinel, 'target': probeAddress});
+      }
+      final plan = File('${tempDir.path}/recovery-plan.json');
+      await plan.writeAsString(jsonEncode({'schema': 1, 'expectedCount': 2, 'runs': runs}));
+      final checkout = Directory.current.parent.parent;
+      final imported = await Process.run(Platform.isWindows ? 'python' : 'python3',
+          ['-I', '-S', '-B', '-X', 'utf8', '${checkout.path}/Tools/ota/p3-4-link-stats/acceptance_stats.py',
+            '--plan', plan.path], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
+      expect(imported.exitCode, 0, reason: '${imported.stderr}');
+      final result = jsonDecode(imported.stdout as String) as Map;
+      expect(result['evidenceGaps'], isEmpty, reason: '${result['runs']}');
+      expect(result['successfulRecoveries'], 1);
+      expect(result['recoveryOffsets'], isEmpty, reason: 'small host fixture is not a 1 MiB checkpoint');
+      expect(result['recoveryParameterGroups'], 1);
+      expect(result['recovery10MeetsObservedGates'], isFalse);
+      final observed = result['runs'] as List;
+      expect(observed[0]['observation']['failure'],
+          {'stage': 'transfer', 'reason': 'transport:DISCONNECTED'});
+      expect(observed[1]['observation']['initialDurable'], 4096);
+      expect(observed[1]['observation']['fullZeroStart'], isFalse);
+    }));
   });
 
   for (final scenario in ['off', 'observe', 'prefer2m', 'not-2m',

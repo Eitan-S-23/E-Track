@@ -188,6 +188,48 @@ class AcceptanceEfficiencyTests(unittest.TestCase):
         self.assertEqual([], V.validate_contract(contract))
         self.assertEqual([], V.validate_freeze_objects(contract, self.repo))
 
+    def test_p34_build_input_mutations_invalidate_only_their_consumers(self):
+        helper = "Tools/ota/p34-acceptance/build.py"
+        runner = "Tools/ota/p34-acceptance/selftest.py"
+        gradle = [
+            "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+            "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+            "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle",
+        ]
+        base.commit_fixture_files(self.repo, {runner: b"print('fixture runner')\n"})
+        previous = self.scoped_contract()
+        previous["input_groups"].append({"id": "flutter", "profile": "Flutter", "category": "production_source"})
+        for command_id, criterion_id, command, groups, paths in (
+            ("CMD-P34", "P34-RUNNER", "python " + runner + " admission --out .cache/admission",
+             ["firmware", "validation"], [runner, helper]),
+            ("CMD-APK", "APK-INPUTS", "gradle -p app/bluetooth_flutter_Trace/android assembleDebug",
+             ["flutter"], gradle),
+        ):
+            previous["commands"].append(dict(id=command_id, description="Fixture dependency consumer.",
+                command=command, expected_exit_codes=[0], output_required=True,
+                input_groups=groups, runner_paths=paths))
+            criterion = copy.deepcopy(previous["criteria"][0])
+            criterion.update(id=criterion_id, input_groups=groups, command_ids=[command_id],
+                dependency_rationale="Firmware supplies the candidate; Validation supplies the runner; Flutter supplies APK build inputs.")
+            previous["criteria"].append(criterion)
+        self.assertEqual([], V.validate_contract(previous))
+        self.assertEqual([], V.validate_freeze_objects(previous, self.repo))
+        for path, command_id, criterion_id in [(helper, "CMD-P34", "P34-RUNNER")] + [
+                (path, "CMD-APK", "APK-INPUTS") for path in gradle]:
+            with self.subTest(path=path):
+                matrix = base.valid_matrix(previous)
+                template = matrix["criteria"][0]
+                matrix["criteria"] = [dict(copy.deepcopy(template), id=c["id"]) for c in previous["criteria"]]
+                current = base.successor_contract(previous)
+                base.commit_fixture_files(self.repo, {path: b"changed input\n"})
+                self.freeze(current)
+                plan = V.compute_rerun_plan(current, previous, matrix, repo_root=self.repo)
+                self.assertEqual([command_id], plan["required_commands"])
+                self.assertEqual([criterion_id], [item["id"] for item in plan["rerun_criteria"]])
+                self.assertIn("FUNC-1", plan["reusable_criteria"])
+                self.assertIn("PACK-1", plan["reusable_criteria"])
+                previous = current
+
     def test_inline_interpreter_variants_cannot_hide_unbound_code(self):
         for command in (
             'python -c"import Tools.jlink.probe"',
