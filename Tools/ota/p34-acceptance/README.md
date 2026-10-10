@@ -58,6 +58,39 @@ verified after a fresh same-process query and the downloader's final-file
 replacement. An unchanged cached file is not App selection/readiness. The operator uses the existing notification policy for a necessary UI
 action. No automatic tap or notification is sent by this tool.
 
+Phone timing is phase-based, not one 300-second window. Host `upgradeStarts=1`
+ends the click wait; the first complete MCU terminal publication begins a new
+terminal-observation budget before the old-App Commander read. Neither poll
+refreshes a deadline. These are collection limits, not new transfer criteria:
+BEGIN/END performance, >=9 KiB/s, P95<=120 s, every run<=150 s and the product's
+30-second no-durable abort remain unchanged. A slow nonqualifying run still
+needs its complete terminal evidence.
+
+| Host phase | Budget (seconds) | Boundary/reason |
+| --- | --- | --- |
+| Prepare | 600 | Current MCU, service and fresh phone/capture preparation; no transfer invitation yet. |
+| Query/download | 300 | Existing download allowance, after query-ready; real new file/query required. |
+| Click wait | 120 | Starts only after start-ready, ends on this capture's upgrade-start. |
+| Transfer observation | 300 | Existing host allowance now exclusive of click/reboot; includes App setup/retries, not a BLE PASS threshold. |
+| Terminal observation | 420 | Existing 180 s Commander read + full 180 s App identity window + 60 s observation/teardown allowance. Allocated upper bounds may overlap; this is not measured elapsed time. |
+| App snapshot | 300 | Retrieve and validate the actual sealed capture. |
+| Ordinary Boot confirmation | 345 | Existing 300 s wait plus 45 s command-owner/closure overhead. |
+| Full MCU readback | 345 | Existing 300 s read plus the same overhead; no shorter J-Link timeout. |
+| Capture archive | 300 | Existing verified archive/prune route, with a shared phase deadline across ADB commands. |
+| Failure retrieval reserve | 300 | Retrieve existing originals without restarting, pruning or repeating OTA. |
+| Closure reserve | 60 | Existing bounded logger/private ADB/tunnel closure. |
+
+The default `--seconds=3390` is the sum of these upper bounds, not a wait or an
+expected OTA duration. Before either query-ready or start-ready, the entry checks
+the *remaining* private-ADB lifetime against all remaining phases and failure/
+closure reserves. An explicitly shorter lifetime that cannot fit is rejected
+before inviting the action; increasing it cannot disable individual phase limits.
+Each `phase-*.json` records its actual host-monotonic boundary and allowance.
+Every ADB command is capped by its remaining phase; a late successful command
+cannot silently extend the phase. Normal J-Link 180 s and Boot/readback 300 s
+operation limits remain in `live_mcu.py`. A phase/collector failure preserves the
+originals and device lock. Completion/closure errors still propagate to the caller.
+
 One RTT reader starts before Start. On the complete 420-byte terminal publication,
 it stops; standard Commander immediately reads the still-running old App's frozen
 metrics, stack paint/guard, clock/SysTick and WDT registers without halting. Header,

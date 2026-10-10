@@ -1,11 +1,13 @@
 """Finite live-adapter host tests. Synthetic device bytes are never hardware PASS."""
 import hashlib
+from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
 import struct
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 import zlib
@@ -288,6 +290,35 @@ class LiveRouteTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "owner changed"):
                 phone.cmd(["get-state"])
 
+    def test_private_adb_commands_inherit_remaining_phase_not_a_fresh_timeout(self):
+        phone = self.phone()
+        phone.server = Mock(alive=lambda: True)
+        phone.operation_deadline = 10
+        with patch.object(p.time, "monotonic", return_value=8), patch.object(h, "listening", return_value=True), \
+             patch.object(h, "command", return_value=b"original") as command:
+            self.assertEqual(phone.cmd(["get-state"], seconds=60), b"original")
+            self.assertEqual(command.call_args.kwargs["seconds"], 2)
+        with patch.object(p.time, "monotonic", return_value=10), patch.object(h, "listening", return_value=True), \
+             patch.object(h, "command") as command:
+            with self.assertRaisesRegex(RuntimeError, "phase deadline"):
+                phone.cmd(["get-state"])
+            command.assert_not_called()
+
+    def test_private_adb_success_after_phase_expiry_is_not_accepted(self):
+        phone = self.phone()
+        phone.server = Mock(alive=lambda: True)
+        phone.operation_deadline = 10
+        now = [8]
+
+        def late_command(*args, **kwargs):
+            now[0] = 11
+            return b"late result"
+
+        with patch.object(p.time, "monotonic", side_effect=lambda: now[0]), patch.object(h, "listening", return_value=True), \
+             patch.object(h, "command", side_effect=late_command):
+            with self.assertRaisesRegex(RuntimeError, "phase deadline"):
+                phone.cmd(["get-state"])
+
     def test_remote_path_checks_allow_missing_children_not_links_or_escapes(self):
         phone = self.phone()
         def command(args, **kwargs):
@@ -418,6 +449,225 @@ class LiveRouteTests(unittest.TestCase):
         result = h.read_json(clock / "clock-result.json")
         self.assertEqual(result["max_heartbeat_gap_ns"], 1000000000)
         self.assertFalse(result["independent_acceptance"])
+
+
+class PhoneCellTests(unittest.TestCase):
+    """Run the complete entry; only physical I/O and the clock are synthetic."""
+
+    def setUp(self):
+        parent = h.checked(ROOT / ".cache/p34-live-tests")
+        parent.mkdir(parents=True, exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(prefix="cell-", dir=parent)
+        self.addCleanup(self.temp.cleanup)
+        self.out = Path(self.temp.name)
+
+    def cell(self, label="run", *, user_delay=0, transfer=100, reboot=170,
+             seconds=3390, prepare=0, download=0, terminal_read=0,
+             snapshot_read=0, boot=0, readback=0, archive=0,
+             health_error=None, collector_exit=None, command_failure=False,
+             archive_error=False, close_error=False, missing_metrics=False,
+             terminal_error=False, ota_success=True):
+        out = h.fresh(self.out / label)
+        now, calls = [0.0], []
+        start_at = prepare + download + user_delay
+        terminal_at, complete_at = start_at + transfer, start_at + transfer + reboot
+
+        def advance(delay):
+            now[0] += delay
+
+        def event(name, delay=0):
+            calls.append((name, now[0]))
+            advance(delay)
+
+        phone = Mock(out=out / "phone", deadline=float(seconds))
+        phone.exists.return_value = False
+
+        def provision(*args):
+            h.raw(phone.out / "runtime.json", b"synthetic runtime\n")
+            return 123, "synthetic-capture"
+
+        def downloaded(*args):
+            if now[0] < prepare + download:
+                return False
+            h.raw(phone.out / "downloaded.etu", b"synthetic package\n")
+            return True
+
+        def health(*args):
+            return dict(lost=int(health_error == "lost"), error=health_error if health_error != "lost" else None,
+                upgradeStarts=int(now[0] >= start_at), upgradeEnds=int(now[0] >= complete_at))
+
+        def finished(*args):
+            event("finished", snapshot_read)
+            h.raw(phone.out / "snapshot.jsonl", b"synthetic sealed snapshot\n")
+            if command_failure:
+                h.command(out, "failed-read", [sys.executable, "-I", "-S", "-B", "-c", "raise SystemExit(7)"],
+                          h.environment(out), seconds=10)
+            value = dict(success=ota_success, initialDurable=0)
+            h.save(phone.out / "statistics.json", value)
+            return value
+
+        def archive_capture():
+            event("archive", archive)
+            if archive_error:
+                raise RuntimeError("archive readback mismatch")
+            h.raw(phone.out / "archive/snapshot.jsonl", (phone.out / "snapshot.jsonl").read_bytes())
+
+        phone.provision.side_effect = provision
+        phone.downloaded.side_effect = downloaded
+        phone.health.side_effect = health
+        phone.finished.side_effect = finished
+        phone.archive_capture.side_effect = archive_capture
+        phone.salvage.side_effect = lambda: h.raw(phone.out / "salvage/original.jsonl", b"synthetic partial original\n")
+        if close_error:
+            phone.close.side_effect = RuntimeError("private ADB close failed")
+        mcu = Mock()
+
+        def inspect(role, name):
+            event(name, prepare if name == "pre-transfer-current-boot" else readback)
+            return dict(storage=dict(journal=dict(expected_begin_durable=0)))
+
+        mcu.inspect.side_effect = inspect
+        mcu.wait_boot.side_effect = lambda *args: event("boot", boot)
+        mcu.transfer_snapshot.side_effect = lambda *args: event("terminal-read", terminal_read)
+        if terminal_error:
+            mcu.transfer_snapshot.side_effect = RuntimeError("terminal stack/clock window missed")
+        mcu.start_logger.return_value.read_bytes.side_effect = lambda: (
+            b"P34_METRICS " + b"0" * 840 + b"\n" if not missing_metrics and now[0] >= terminal_at else b"")
+        mcu.logger.alive.return_value = True
+        network = Mock()
+        network.start.return_value = "https://synthetic.example"
+        network.tunnel.alive.side_effect = lambda: collector_exit is None or now[0] < collector_exit
+        plan = dict(package=dict(sha256="a" * 64), sentinel="synthetic", ble_address="synthetic")
+        args = SimpleNamespace(run_role="clean", checkpoint_kib=None, previous_cell=None,
+            seconds=seconds, run_id="host-probe", baud=921600, timeout_ms=2000)
+        decoded = dict(epoch=7, total_len=1048576, package_sha256="a" * 64, uart_baud_actual=921600, terminal=0)
+        error = None
+        with ExitStack() as stack:
+            for owner, name, replacement in (
+                (live, "MCU", Mock(return_value=mcu)), (live, "Phone", Mock(return_value=phone)),
+                (live, "Network", Mock(return_value=network)), (live, "config", Mock(return_value={})),
+                (live.time, "monotonic", lambda: now[0]), (live.time, "sleep", advance),
+                (live.metrics, "from_rtt", Mock(return_value=decoded)),
+                (live.observation_capture, "verify", Mock(return_value=(None, "x kind=begin_ack epoch=7 x"))),
+                (h, "ROOT", out),
+            ):
+                stack.enter_context(patch.object(owner, name, replacement))
+            try:
+                with h.device_owner(out):
+                    live.phone_cell(plan, out, args)
+            except Exception as caught:
+                error = caught
+        phone.close.assert_called_once()
+        network.close.assert_called_once()
+        return SimpleNamespace(out=out, error=error, calls=calls, phone=phone, mcu=mcu,
+            stopped_at=now[0], complete_at=complete_at, terminal_at=terminal_at,
+            lock=out / ".cache/p34-live-device.lock")
+
+    def assert_complete(self, case):
+        self.assertIsNone(case.error, str(case.error))
+        case.phone.finished.assert_called_once()
+        case.phone.archive_capture.assert_called_once()
+        case.phone.salvage.assert_not_called()
+        self.assertGreaterEqual(dict(case.calls)["finished"], case.complete_at)
+        self.assertGreaterEqual(dict(case.calls)["archive"], dict(case.calls)["finished"])
+        self.assertTrue((case.out / "observations.json").is_file())
+        self.assertFalse(case.lock.exists())
+
+    def assert_failed(self, case, reason):
+        self.assertIsNotNone(case.error)
+        self.assertRegex(str(case.error), reason)
+        self.assertTrue(case.lock.is_file())
+        self.assertFalse((case.out / "observations.json").exists())
+        case.phone.salvage.assert_called_once()
+        self.assertEqual((case.phone.out / "salvage/original.jsonl").read_bytes(), b"synthetic partial original\n")
+
+    def test_short_complete_control_flow(self):
+        self.assert_complete(self.cell())
+
+    def test_click_transfer_and_full_identity_window_do_not_share_300_seconds(self):
+        case = self.cell(user_delay=25, transfer=110, reboot=170)
+        self.assert_complete(case)
+        self.assertEqual(case.stopped_at, 305)
+        for phase, began in (("start", 0), ("transfer", 25), ("terminal", 135), ("snapshot", 305)):
+            self.assertEqual(h.read_json(case.out / ("phase-" + phase + ".json"))["started_monotonic"], began)
+
+    def test_slow_run_is_archived_without_claiming_a_throughput_pass(self):
+        for seconds in (3390, 18000):
+            with self.subTest(seconds=seconds):
+                case = self.cell(str(seconds), transfer=140, seconds=seconds)
+                self.assert_complete(case)
+                self.assertEqual(case.stopped_at, 310)
+                self.assertFalse(h.read_json(case.out / "observations.json")["independent_acceptance"])
+
+    def test_full_readback_and_archive_keep_their_own_allowances(self):
+        case = self.cell(user_delay=110, transfer=140, terminal_read=179,
+                         snapshot_read=250, boot=290, readback=290, archive=250)
+        self.assert_complete(case)
+        self.assertGreater(case.stopped_at, 900)
+
+    def test_preparation_exhaustion_never_invites_start(self):
+        for name, kwargs in (("short-life", dict(seconds=900)), ("spent-life", dict(seconds=3100, prepare=500)),
+                             ("prepare-timeout", dict(prepare=601))):
+            with self.subTest(name=name):
+                case = self.cell(name, **kwargs)
+                self.assert_failed(case, "budget|deadline")
+                self.assertFalse((case.out / "start-ready.json").exists())
+                case.phone.finished.assert_not_called()
+                case.phone.archive_capture.assert_not_called()
+
+    def test_actual_phase_timeouts_fail_and_keep_originals_and_lock(self):
+        for name, kwargs in (("download", dict(download=301)), ("start", dict(user_delay=121)),
+                             ("transfer", dict(transfer=301)), ("terminal", dict(reboot=421)),
+                             ("snapshot", dict(snapshot_read=301)), ("boot", dict(boot=346)),
+                             ("readback", dict(readback=346)), ("archive", dict(archive=301))):
+            with self.subTest(phase=name):
+                case = self.cell(name, **kwargs)
+                self.assert_failed(case, "deadline")
+
+    def test_health_loss_and_error_cannot_become_complete(self):
+        for error in ("lost", "io-health"):
+            with self.subTest(error=error):
+                case = self.cell(error, health_error=error)
+                self.assert_failed(case, "observation failed")
+                case.phone.finished.assert_not_called()
+
+    def test_collector_death_at_terminal_is_not_hidden_by_completion(self):
+        case = self.cell(collector_exit=270)
+        self.assert_failed(case, "collector/service exited")
+        case.phone.finished.assert_not_called()
+
+    def test_nonzero_command_in_full_entry_preserves_exit_and_original_snapshot(self):
+        case = self.cell(command_failure=True)
+        self.assert_failed(case, "standard tool failed")
+        self.assertEqual(h.read_json(case.out / "failed-read.closed.json")["exit_code"], 7)
+        self.assertEqual((case.phone.out / "snapshot.jsonl").read_bytes(), b"synthetic sealed snapshot\n")
+        case.phone.archive_capture.assert_not_called()
+
+    def test_archive_error_cannot_emit_observations(self):
+        self.assert_failed(self.cell(archive_error=True), "archive readback mismatch")
+
+    def test_full_180_second_app_window_is_available(self):
+        self.assert_complete(self.cell(user_delay=110, transfer=140, reboot=180))
+
+    def test_missing_metrics_or_missed_preboot_capture_cannot_be_complete(self):
+        for label, kwargs, reason in (("missing", dict(missing_metrics=True), "deadline"),
+                                      ("missed", dict(terminal_error=True), "stack/clock window missed")):
+            with self.subTest(label=label):
+                case = self.cell(label, **kwargs)
+                self.assert_failed(case, reason)
+                case.phone.archive_capture.assert_not_called()
+
+    def test_app_failure_stays_failure_even_with_complete_health_counts(self):
+        case = self.cell(ota_success=False)
+        self.assert_failed(case, "observed OTA failure")
+        case.phone.archive_capture.assert_not_called()
+        self.assertTrue((case.phone.out / "snapshot.jsonl").is_file())
+
+    def test_close_error_is_propagated_and_retains_lock(self):
+        case = self.cell(close_error=True)
+        self.assertIsNotNone(case.error)
+        self.assertIn("private ADB close failed", str(case.error))
+        self.assertTrue(case.lock.exists())
 
 
 if __name__ == "__main__":

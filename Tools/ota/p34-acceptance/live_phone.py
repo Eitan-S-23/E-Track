@@ -124,6 +124,7 @@ class Phone:
         self.port, self.serial, self.pkg = plan["adb_port"], plan["phone_serial"], plan["app_id"]
         self.base = [str(h.pinned(plan["tools"]["adb"])), "-H", "127.0.0.1", "-P", str(self.port), "-s", self.serial]
         self.deadline, self.count, self.server = time.monotonic() + seconds, 0, None
+        self.operation_deadline = None
         self.capture = self.pid = None
 
     def start(self, *, verify_apk=True):
@@ -137,6 +138,10 @@ class Phone:
 
     def cmd(self, args, *, stdin=None, seconds=30, success_codes=(0,)):
         h.require(self.server and self.server.alive() and h.listening(self.port), "private ADB owner not live")
+        if self.operation_deadline is not None:
+            remaining = self.operation_deadline - time.monotonic()
+            h.require(remaining > 0, "phone operation phase deadline; preserve originals")
+            seconds = min(seconds, remaining)
         h.require(time.monotonic() + seconds + 5 < self.deadline, "insufficient private ADB lifetime")
         self.count += 1
         # adb joins shell/exec arguments; explicitly quote the remote shell layer.
@@ -145,6 +150,8 @@ class Phone:
         result = h.command(self.out, "adb-%05d" % self.count, self.base + list(map(str, args)), self.env,
                            seconds=seconds, stdin=stdin, success_codes=success_codes)
         h.require(self.server.alive() and h.listening(self.port), "private ADB owner changed during command; reconcile")
+        h.require(self.operation_deadline is None or time.monotonic() < self.operation_deadline,
+                  "phone operation phase deadline; preserve original command result")
         return result
 
     def installed(self):

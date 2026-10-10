@@ -25,6 +25,47 @@ COMMON_RUNNERS = ["Tools/ota/p34-acceptance/live.py", "Tools/ota/p34-acceptance/
     "Tools/ota/p3-4-link-stats/batch_timing.py", "Tools/acceptance/validate_bundle.py",
     "Tools/provenance/manifest_profiles.json"]
 
+# Host observation limits, not BLE performance thresholds. The terminal phase
+# reserves the existing 180 s Commander read, the App's full 180 s identity
+# window, and 60 s for observation/teardown. Boot/readback retain their 300 s
+# tool limits plus 45 s for process ownership/closure. Unused time is not slept.
+PHONE_PHASE_SECONDS = dict(prepare=600, download=300, start=120, transfer=300,
+    terminal=180 + 180 + 60, snapshot=300, boot=300 + 45,
+    readback=300 + 45, archive=300)
+PHONE_SALVAGE_SECONDS = 300
+PHONE_CLOSE_SECONDS = 60
+DEFAULT_PHONE_SECONDS = sum(PHONE_PHASE_SECONDS.values()) + PHONE_SALVAGE_SECONDS + PHONE_CLOSE_SECONDS
+
+
+class PhoneBudget:
+    def __init__(self, phone, out):
+        self.phone, self.out = phone, out
+        self.phase, self.deadline = None, None
+
+    def enter(self, phase):
+        now = time.monotonic()
+        seconds = PHONE_SALVAGE_SECONDS if phase == "salvage" else PHONE_PHASE_SECONDS[phase]
+        required = seconds + PHONE_CLOSE_SECONDS
+        if phase != "salvage":
+            required += PHONE_SALVAGE_SECONDS
+        if phase in ("download", "start"):
+            names = list(PHONE_PHASE_SECONDS)
+            required += sum(PHONE_PHASE_SECONDS[name] for name in names[names.index(phase) + 1:])
+        available = self.phone.deadline - now
+        h.require(available >= required,
+            "insufficient phone phase budget before %s: need %.1fs, have %.1fs; do not invite transfer" %
+            (phase, required, available))
+        self.phase, self.deadline = phase, now + seconds
+        self.phone.operation_deadline = self.deadline
+        h.save(self.out / ("phase-" + phase + ".json"), dict(phase=phase,
+            started_monotonic=now, deadline_monotonic=self.deadline,
+            lifetime_deadline_monotonic=self.phone.deadline, required_seconds=required,
+            available_seconds=available, scope="host observation budget, not transfer timing or PASS"))
+
+    def check(self):
+        h.require(time.monotonic() < self.deadline,
+            "phone %s phase deadline; preserve existing originals, no OTA replay" % self.phase)
+
 
 def validate_inputs(plan):
     h.require(plan.get("schema") == 1 and plan.get("device") == "C30286", "wrong task/device input")
@@ -110,8 +151,10 @@ def phone_cell(plan, out, args):
     mcu = MCU(plan, h.fresh(out / "mcu"))
     network = Network(plan, out / "network")
     phone = Phone(plan, out / "phone", args.seconds)
+    budget = PhoneBudget(phone, out)
     error = None
     try:
+        budget.enter("prepare")
         before = mcu.inspect("base", "pre-transfer-current-boot")
         h.require(args.run_role in ("clean", "soak", "disconnect", "resume"), "unplanned phone role")
         h.require(args.run_role not in ("disconnect", "resume") or
@@ -131,40 +174,63 @@ def phone_cell(plan, out, args):
         cfg = config(plan, args.run_id, origin, args.baud, args.timeout_ms)
         pid, capture = phone.provision(cfg, args.previous_cell)
         rtt = mcu.start_logger("base", "transfer")
+        budget.check()
+        budget.enter("download")
         h.save(out / "query-ready.json", dict(pid=pid, capture=capture, origin=origin,
             next_user_action="connect device, check/download in original firmware UI; do not start until start-ready.json"))
         print("P34_QUERY_READY " + str(out / "query-ready.json"), flush=True)
-        h.wait_for(lambda: phone.downloaded(package_path, previous_stamp), min(300, args.seconds - 450), interval=1)
+        h.wait_for(lambda: phone.downloaded(package_path, previous_stamp), PHONE_PHASE_SECONDS["download"], interval=1)
+        budget.check()
+        budget.enter("start")
         h.save(out / "start-ready.json", dict(pid=pid, capture=capture, runtime=h.record(phone.out / "runtime.json"),
             package=h.record(phone.out / "downloaded.etu"), role=args.run_role, checkpoint_kib=args.checkpoint_kib,
+            phase_budgets_seconds=PHONE_PHASE_SECONDS, salvage_seconds=PHONE_SALVAGE_SECONDS,
+            close_seconds=PHONE_CLOSE_SECONDS,
             next_user_action="tap Start BLE transfer once in the original UI; any physical fault follows the frozen operator command"))
         print("P34_START_READY " + str(out / "start-ready.json"), flush=True)
-        deadline = time.monotonic() + min(300, phone.deadline - time.monotonic() - 150)
         decoded = None
+
+        def collectors_alive():
+            h.require((decoded is not None or mcu.logger.alive()) and network.tunnel.alive(),
+                      "collector/service exited; no OTA replay")
+
         def terminal_capture():
+            collectors_alive()
             data = rtt.read_bytes()
             lines = [line for line in data.splitlines(keepends=True) if line.startswith(b"P34_METRICS ") and line.endswith(b"\n")]
             if not lines:
                 return None
             h.require(len(lines) == 1, "duplicate terminal metrics; wrong session/reader")
+            if budget.phase != "terminal":
+                budget.enter("terminal")
             mcu.stop_logger()
             result = metrics.from_rtt(rtt.read_bytes())
             mcu.transfer_snapshot(bytes.fromhex(lines[0].strip()[12:].decode("ascii")))
+            budget.check()
             return result
-        while time.monotonic() < deadline:
+        while True:
+            budget.check()
             if decoded is None:
                 decoded = terminal_capture()
             health = phone.health(capture)
+            budget.check()
             h.require(health.get("lost") == 0 and health.get("error") is None, "App observation failed; retrieve existing originals")
-            if health.get("upgradeStarts") == health.get("upgradeEnds") == 1:
+            starts, ends = health.get("upgradeStarts"), health.get("upgradeEnds")
+            h.require(type(starts) is int and type(ends) is int and 0 <= ends <= starts <= 1,
+                      "unexpected App upgrade count; preserve original capture")
+            collectors_alive()
+            if starts == 1 and budget.phase == "start":
+                budget.enter("transfer")
+            if starts == ends == 1:
                 break
-            h.require((decoded is not None or mcu.logger.alive()) and network.tunnel.alive(), "collector/service exited; no OTA replay")
-            time.sleep(.5)
-        else:
-            raise RuntimeError("App observation deadline; collect existing snapshot before any new action")
-        value = phone.finished(pid, capture, cfg)
+            time.sleep(min(.5, max(0, budget.deadline - time.monotonic())))
         if decoded is None:
+            budget.enter("terminal")
             decoded = h.wait_for(terminal_capture, 45)
+            budget.check()
+        budget.enter("snapshot")
+        value = phone.finished(pid, capture, cfg)
+        budget.check()
         _, messages = observation_capture.verify((phone.out / "snapshot.jsonl").read_bytes(),
             sentinel=plan["sentinel"], target=plan["ble_address"])
         begins = [line for line in messages.splitlines() if " kind=begin_ack " in line]
@@ -179,22 +245,31 @@ def phone_cell(plan, out, args):
                 value["failure"].get("reason") in ("transport:DISCONNECTED", "transport:DEVICE_LINK_CHANGED") and
                 value["finalDurable"] == args.checkpoint_kib * 1024 and decoded["terminal"] == 1,
                 "not the planned actual disconnect; ABORT/cancellation does not qualify")
+            budget.enter("readback")
             mcu.inspect("base", "post-disconnect-readback")
         else:
             h.require(value["success"] and decoded["terminal"] == 0, "observed OTA failure; preserve originals")
             h.require(value["initialDurable"] == (args.checkpoint_kib * 1024 if args.run_role == "resume" else 0), "wrong zero/resume initial state")
             if args.run_role == "resume":
                 h.require(previous["parameters"] == value["parameters"], "cross-parameter recovery pair")
+            budget.enter("boot")
             mcu.wait_boot("target")
+            budget.check()
+            budget.enter("readback")
             mcu.inspect("target", "post-transfer-full-readback")
+        budget.check()
+        budget.enter("archive")
         phone.archive_capture()
+        budget.check()
         h.save(out / "observations.json", dict(outcome="OBSERVATIONS_CAPTURED", statistics=h.record(phone.out / "statistics.json"),
             snapshot=h.record(phone.out / "snapshot.jsonl"), mcu_metrics=h.record(out / "metrics.json"),
             role=args.run_role, checkpoint_kib=args.checkpoint_kib, independent_acceptance=False))
     except BaseException as caught:
         error = caught
         try:
+            budget.enter("salvage")
             phone.salvage()
+            budget.check()
         except BaseException as salvage_error:
             h.save(out / "salvage-failed.json", dict(error=str(salvage_error)))
     finally:
@@ -269,7 +344,8 @@ def main():
     parser.add_argument("--run-role", choices=("clean", "soak", "disconnect", "resume"), default="clean")
     parser.add_argument("--checkpoint-kib", type=int, choices=(8, 64, 256, 512, 768))
     parser.add_argument("--previous-cell", type=Path)
-    parser.add_argument("--seconds", type=int, default=900)
+    parser.add_argument("--seconds", type=int, default=DEFAULT_PHONE_SECONDS,
+                        help="finite owner lifetime; phone readiness reserves all remaining phases (default: %(default)s)")
     parser.add_argument("--observe-root", type=Path)
     parser.add_argument("--contract", type=Path)
     parser.add_argument("--matrix", type=Path)
