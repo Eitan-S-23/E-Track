@@ -1742,19 +1742,30 @@ void main() {
         ackTimeout: const Duration(milliseconds: 200),
         noProgressTimeout: const Duration(milliseconds: 300),
       );
-      try {
-        await transport.transfer(
-          package: package,
-          packageSha256: shaOf(package),
-          etuHeader: etuHeaderOf(package),
-        );
-        fail('应中止');
-      } on OtaTransportException catch (e) {
-        // 预算（300ms）跨 BEGIN 重试保留：第一次 200ms 超时后剩余
-        // 100ms 封顶第二次等待，耗尽即 NO_DURABLE_PROGRESS，而非跑满
-        // 全部 BEGIN 重试轮次。
-        expect(e.code, 'NO_DURABLE_PROGRESS');
-      }
+      await runZoned(() async {
+        try {
+          await transport.transfer(
+            package: package,
+            packageSha256: shaOf(package),
+            etuHeader: etuHeaderOf(package),
+          );
+          fail('应中止');
+        } on OtaTransportException catch (e) {
+          // 预算（300ms）跨 BEGIN 重试保留：第一次 200ms 超时后剩余
+          // 100ms 封顶第二次等待，耗尽即 NO_DURABLE_PROGRESS，而非跑满
+          // 全部 BEGIN 重试轮次。
+          expect(e.code, 'NO_DURABLE_PROGRESS');
+        }
+      }, zoneSpecification: ZoneSpecification(
+        createTimer: (self, parent, zone, delay, callback) {
+          // This deadline test must not floor the last fractional millisecond
+          // into zero-delay retries before the microsecond stopwatch expires.
+          final rounded = delay.inMicroseconds > 0
+              ? Duration(milliseconds: (delay.inMicroseconds + 999) ~/ 1000)
+              : delay;
+          return parent.createTimer(zone, rounded, callback);
+        },
+      ));
       // 断言意图是「预算优先于跑满重试（默认 5 次）」，不是精确 2 次：
       // 200ms+100ms 恰好压在 300ms 预算边界上，BEGIN#2 的超时唤醒与
       // 预算时钟读数之间存在调度间隙（CI 负载下毫秒级），间隙大于
