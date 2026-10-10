@@ -195,7 +195,9 @@ extension _PipelineTransfer on OtaBleTransport {
     if (stats == null || !const {0x91, 0x92, 0x93, 0x94}.contains(frame.cmd)) return;
     final base = frame.cmd == _PipelineWire.ackBegin ? 2 : 1;
     if (frame.payload.length == base + OtaPipelineWindow.ackBytes &&
-        frame.payload.first == OtaBleCodec.statusOk) return;
+        frame.payload.first == OtaBleCodec.statusOk) {
+      return;
+    }
     String? reason;
     int? expectedEpoch = _pipelineObservationEpoch;
     int? expectedSession = _pipelineObservationSession;

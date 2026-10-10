@@ -6,7 +6,7 @@
 static uint8_t storage[256], original[256];
 static unsigned writes, erases;
 static int fail_read, fail_write, fail_erase, corrupt_write;
-static restore_expect_t expected = {30287,30286,612020,1106165360u};
+static restore_expect_t expected = {30287,30286,613952,2889683253u};
 static int read_bytes(uint8_t reg, uint8_t *data, uint16_t size)
 {
     if (fail_read || (unsigned)reg + size > sizeof(storage)) return -1;
@@ -44,7 +44,7 @@ static void fixture(uint16_t seq, int active_b)
     value.backup_crc32 = expected.backup_crc32;
     value.backup_vcode = expected.to_version;
     value.cand_addr = 0x1000;
-    value.cand_len = 612020;
+    value.cand_len = 613952;
     value.cand_vcode = 30287;
     value.cand_crc32 = 0x12345678;
     value.seq = seq;

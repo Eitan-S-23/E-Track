@@ -46,6 +46,7 @@ class Tests(unittest.TestCase):
                      rebootInfoMaxAttempts=8, ackTimeoutMs=2000)
         timing.verify_batch_stamp(stamp, 12)
         with self.assertRaises(ValueError): timing.verify_batch_stamp({**stamp, "ackTimeoutMs": 0}, 12)
+        with self.assertRaises(ValueError): timing.verify_batch_stamp({**stamp, "rebootInfoMaxAttempts": 13}, 12)
         with self.assertRaises(ValueError): timing.analyze(rows, 384, protocol=1)
 
     def test_schema7_twelve_frame_batch_and_old_limits(self):

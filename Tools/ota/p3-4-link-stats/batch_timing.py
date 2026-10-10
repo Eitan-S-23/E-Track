@@ -90,7 +90,7 @@ def verify_batch_stamp(stamp, measured_frames):
         require(stamp.get("androidPhyPolicy") in ("off", "observe", "prefer2m"), "PHY stamp missing")
     if stamp["schema"] >= 9:
         require(type(stamp.get("rebootInfoMaxAttempts")) is int and
-                1 <= stamp["rebootInfoMaxAttempts"] <= 120, "reboot attempt stamp missing")
+                1 <= stamp["rebootInfoMaxAttempts"] <= 12, "reboot attempt stamp missing")
     if stamp["schema"] >= 10:
         require(type(stamp.get("ackTimeoutMs")) is int and 500 <= stamp["ackTimeoutMs"] <= 2000,
                 "ACK timeout stamp missing")

@@ -4,16 +4,18 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "Tools/ota/p3-4-link-stats"))
 sys.path.insert(0, str(ROOT / "tests/ota"))
 import acceptance_stats as m
+from observation_capture import checked
 from test_p3_4_observation_capture import rows, encoded, SENTINEL, TARGET
 
 
-def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, early=False):
+def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, early=False, retry=False):
     source = dict(packageSha256="a" * 64, packageBytes=total, currentVersionCode=30286,
                   currentImageSha256="b" * 64, targetVersionCode=30287, targetImageSha256="c" * 64,
                   deviceAddress=TARGET, appLifecycle="resumed")
@@ -42,6 +44,7 @@ def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, ea
     sample("durable", 115, off=initial)
     sent, latencies, durable = {}, [], [(115, initial)]
     data_wire = 0
+    retry_count = 0
     limit = min(4096, total - 128) if failed else total
     pending = []
     for off in range(initial, limit, 128):
@@ -54,6 +57,12 @@ def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, ea
         sample("segment_first_send", at + 1, off=off, len=length)
         sent[off] = at + 1
         pending.append(off)
+        if retry and off == initial:
+            gatt(wire)
+            sample("batch_chunk", at + 20, bytes=wire, frames=1)
+            sample("segment_retransmit", at + 21, off=off, len=length)
+            data_wire += wire
+            retry_count += 1
         if off + length == total or (off + length) % 4096 == 0:
             confirm = at + 100
             for offset in pending:
@@ -91,13 +100,13 @@ def fixture(*, total=384, protocol=2, initial=0, failed=False, missing=False, ea
         gattWrites=dict(calls=len(writes), bytes=sum(writes), errors=0, **gatt_summary),
         transfer=dict(startUs=100, endAckUs=end, elapsedUs=end - 100 if end else None,
             outcome="fail" if failed else "ok", begin=dict(first=dict(us=115, **begin), count=1),
-            segmentsUnique=len(sent), segmentSendTotal=len(sent), retransmitFrames=0,
-            acks=dict(ok=len(sent), duplicate=0, error=0, malformed=0, noProgress=0, abort=0,
+            segmentsUnique=len(sent), segmentSendTotal=len(sent) + retry_count, retransmitFrames=retry_count,
+            acks=dict(ok=len(sent), duplicate=0, error=retry_count, malformed=0, noProgress=0, abort=0,
                       ignoredErrors=dict(schema=1, counts={}, saturated=False)),
             ackSamples="partial:" + ",".join(parts) if parts else "complete",
             ackEarlyInvalid=early_count, ackEarlyUnsent=0, ackLatency=m.distribution(latencies),
             durable=dict(events=len(durable), finalOff=durable[-1][1]),
-            dataBatch=dict(schema=1, maxFrames=12, chunks=len(sent), bytes=data_wire)))
+            dataBatch=dict(schema=1, maxFrames=12, chunks=len(sent) + retry_count, bytes=data_wire)))
     messages.append("OTA_LINK_STATS " + json.dumps(summary))
     messages.append("OTA_MONO MONO_BUDGET_START monoUs=1000 wallUs=5000")
     messages.append("OTA_IDENTITY " + json.dumps(dict(phase="pre-transfer", versionCode=30286,
@@ -124,6 +133,14 @@ def observed(**kwargs):
 
 
 class Tests(unittest.TestCase):
+    def test_retry_denominator_and_clean_are_not_error_free_selection(self):
+        value = observed(retry=True)
+        self.assertEqual(value["retransmitRate"], 1 / 3)
+        self.assertFalse(value["errorFree"])
+        group = m.aggregate([dict(id="retry", role="clean", observation=value)], expected_count=1)["groups"][0]
+        self.assertTrue(group["ackP99Eligible"])
+        self.assertEqual(group["observedAckP99Us"], 2659)
+
     def test_v1_and_complete_v2_schema10_and_same_stamp(self):
         for protocol in (1, 2):
             source, messages = fixture(protocol=protocol)
@@ -173,7 +190,7 @@ class Tests(unittest.TestCase):
             value = copy.deepcopy(template)
             value["captureId"] = str(i)
             value["rawSha256"] = hashlib.sha256(str(i).encode()).hexdigest()
-            runs.append(dict(id=str(i), observation=value))
+            runs.append(dict(id=str(i), role="clean", observation=value))
         result = m.aggregate(runs, expected_count=30)
         self.assertTrue(result["groups"][0]["stability30MeetsObservedGates"])
         self.assertEqual(result["groups"][0]["successes"], 30)
@@ -190,11 +207,19 @@ class Tests(unittest.TestCase):
             a, b = observed(), observed()
             b["captureId"], b["rawSha256"] = "different", "different"
             b["parameters"][key] = changed
-            result = m.aggregate([dict(id="a", observation=a), dict(id="b", observation=b),
-                                  dict(id="c", gap="original not captured")], expected_count=3)
+            result = m.aggregate([dict(id="a", role="clean", observation=a), dict(id="b", role="clean", observation=b),
+                                  dict(id="c", role="clean", gap="original not captured")], expected_count=3)
             self.assertEqual(len(result["groups"]), 2)
             self.assertEqual(len(result["evidenceGaps"]), 1)
             self.assertTrue(all(not g["ackP99Eligible"] for g in result["groups"]))
+
+    def test_failure_before_parameter_binding_cannot_be_dropped_from_tuning(self):
+        good, failed = observed(), observed()
+        failed.update(success=False, captureId="pre-bind", rawSha256="pre-bind", ackEligible=False)
+        for key in ("protocol", "maxRetries", "mtuChunkBytes"): failed["parameters"][key] = None
+        result = m.aggregate([dict(id="good", role="clean", observation=good), dict(id="early-failure", role="clean", observation=failed)], expected_count=2)
+        self.assertTrue(all(not g["ackP99Eligible"] for g in result["groups"]))
+        self.assertEqual(result["groups"][0]["unresolvedParameterFailures"], ["early-failure"])
 
     def test_ten_recoveries_require_disconnect_and_durable_resume_not_abort(self):
         a, b = observed(total=8192, failed=True), observed(total=8192, initial=4096)
@@ -206,11 +231,36 @@ class Tests(unittest.TestCase):
                 runs.append(dict(id=f"{i}-{role}", role=role, recoveryCase=str(i), observation=value))
         result = m.aggregate(runs, expected_count=20)
         self.assertEqual(result["successfulRecoveries"], 10)
-        self.assertTrue(result["recovery10MeetsObservedGates"])
+        self.assertFalse(result["recovery10MeetsObservedGates"])
+        # Counting ten small resumes is not the required 1 MiB checkpoint matrix.
+        for n, checkpoint in enumerate([n * 1024 for n in (8, 64, 256, 512, 768) for _ in range(2)]):
+            runs[n * 2]["observation"]["finalDurable"] = checkpoint
+            runs[n * 2 + 1]["observation"]["initialDurable"] = checkpoint
+            for offset in (0, 1): runs[n * 2 + offset]["observation"]["reference"] = True
+        self.assertTrue(m.aggregate(runs, expected_count=20)["recovery10MeetsObservedGates"])
         runs[0]["observation"]["failure"]["reason"] = "CANCELLED"
         result = m.aggregate(runs, expected_count=20)
         self.assertEqual(result["successfulRecoveries"], 9)
         self.assertFalse(result["recovery10MeetsObservedGates"])
+
+    def test_plan_keeps_missing_and_changed_originals_as_gaps(self):
+        parent = checked(ROOT / ".cache/p34-stats-plan-tests")
+        parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=parent) as temp:
+            folder = Path(temp)
+            raw = snapshot(*fixture())
+            checked(folder / "good.jsonl").write_bytes(raw)
+            entries = [dict(id="good", role="clean", input="good.jsonl", sha256=hashlib.sha256(raw).hexdigest(),
+                            sentinel=SENTINEL, target=TARGET),
+                       dict(id="missing", role="clean", input=None, sha256=None, sentinel=SENTINEL, target=TARGET),
+                       dict(id="changed", role="clean", input="good.jsonl", sha256="f" * 64, sentinel=SENTINEL, target=TARGET)]
+            plan = checked(folder / "plan.json")
+            plan.write_text(json.dumps(dict(schema=1, expectedCount=3, runs=entries)), encoding="utf-8")
+            result = m.read_plan(plan)
+            self.assertEqual(result["plannedAttempts"], 3)
+            self.assertEqual(result["observedAttempts"], 1)
+            self.assertEqual(len(result["evidenceGaps"]), 2)
+            self.assertIsNone(result["groups"][0]["recommendedAckTimeoutMs"])
 
 
 if __name__ == "__main__":

@@ -234,15 +234,16 @@ def analyze(envelope, messages, *, historical=False):
         require(set(mono) == {"MONO_BUDGET_START", "MONO_END_ACK_OK", "MONO_REBOOT_VERIFIED"} and
                 mono["MONO_BUDGET_START"] < mono["MONO_END_ACK_OK"] <= mono["MONO_REBOOT_VERIFIED"],
                 "missing END/reboot or mixed public clock")
-    full = (initial == 0 and begins[0]["bitmap"] == 0 and len(begins) == 1 and
+    full = (initial == 0 and begins[0]["bitmap"] == 0 and
             list(sends) == list(range(0, total, 128))) if begins else False
     ack_eligible = bool(not historical and success and full and sends and missing == 0)
     params = {key: stamp.get(key) for key in GROUP_FIELDS}
     params.update(protocol=protocol, ackTimeoutMs=begins[0]["ackTimeoutMs"] if begins else stamp.get("ackTimeoutMs"),
                   maxRetries=begins[0]["maxRetries"] if begins else None,
                   sentinel=envelope["sentinel"], platform=envelope["platform"],
+                  appLifecycle=envelope["input"]["appLifecycle"],
                   input={k: v for k, v in envelope["input"].items() if k != "appLifecycle"},
-                  mtuChunkBytes=summary.get("bind", {}).get("mtuChunkBytes"),
+                  mtuChunkBytes=summary.get("bind", {}).get("mtuChunkBytes") or None,
                   writeMode=summary.get("bind", {}).get("writeMode"))
     params["requestedWindowSegments"] = stamp.get("senderWindowSegments")
     params["requestedDataBatchFrames"] = stamp.get("dataBatchFrames")
@@ -251,17 +252,17 @@ def analyze(envelope, messages, *, historical=False):
     params["input"]["deviceAddress"] = params["input"]["deviceAddress"].lower()
     elapsed = t["elapsedUs"]
     ignored = t["acks"].get("ignoredErrors", {}).get("counts", {})
-    clean = (not any(t["acks"].get(k, 0) for k in ("error", "malformed", "noProgress", "abort")) and
+    error_free = (not any(t["acks"].get(k, 0) for k in ("error", "malformed", "noProgress", "abort")) and
              "firstError" not in t["acks"] and not ignored and not envelope["ackErrorObservations"]["ignored"])
     return dict(captureId=envelope["captureId"], rawSha256=envelope["rawSha256"], parameters=params,
         success=success, transferOutcome=t["outcome"], initialDurable=initial,
         firstSentOffset=next(iter(sends), None), finalDurable=durable[-1][1] if durable else None,
-        fullZeroStart=full, reference=total == 1048576, historical=historical, clean=clean,
+        fullZeroStart=full, reference=total == 1048576, historical=historical, errorFree=error_free,
         transferUs=elapsed, publicTransferUs=mono.get("MONO_END_ACK_OK", 0) - mono["MONO_BUDGET_START"]
             if "MONO_END_ACK_OK" in mono and "MONO_BUDGET_START" in mono else None,
         throughputKiBs=total * 1000000 / (1024 * elapsed) if elapsed and full else None,
         dataFrames=len(sends), dataSendTotal=len(sends) + len(retries), retransmitFrames=len(retries),
-        retransmitRate=len(retries) / (len(sends) + len(retries)) if sends else None,
+        retransmitRate=len(retries) / len(sends) if full and sends else None,
         missingAckSamples=missing, earlyAckSamples=len(early_invalid), ackSamplesUs=list(latencies.values()),
         ackEligible=ack_eligible, observedAckP99Us=rank(list(latencies.values()), 99),
         failure=summary.get("failure"), ignoredAckErrors=envelope["ackErrorObservations"],
@@ -294,20 +295,37 @@ def aggregate(runs, *, expected_count):
     results = []
     for key, entries in groups.items():
         values = [e["observation"] for e in entries]
-        samples_all = [sample for v in values for sample in v["ackSamplesUs"]]
-        eligible = not gaps and all(v["success"] and v["ackEligible"] and v["clean"] for v in values)
+        clean_entries = [e for e in entries if e.get("role") in ("clean", "soak")]
+        clean_values = [e["observation"] for e in clean_entries]
+        samples_all = [sample for v in clean_values for sample in v["ackSamplesUs"]]
+        params = json.loads(key)
+        ambiguous = []
+        for run in runs:
+            if run.get("role") not in ("clean", "soak", None): continue
+            candidate = run.get("observation")
+            if candidate is None or candidate["success"]: continue
+            other = candidate["parameters"]
+            if (any(other.get(k) is None for k in ("protocol", "maxRetries", "ackTimeoutMs", "mtuChunkBytes")) and
+                    all(v is None or other.get(k) is None or other[k] == v for k, v in params.items())):
+                ambiguous.append(run["id"])
+        eligible = bool(clean_values and not gaps and not ambiguous and
+                        not any(e.get("role") is None for e in entries) and
+                        all(v["success"] and v["ackEligible"] for v in clean_values))
         p99 = rank(samples_all, 99)
-        full = [v for v in values if v["success"] and v["fullZeroStart"] and v["reference"]]
+        full = [v for v in clean_values if v["success"] and v["fullZeroStart"] and v["reference"]]
         durations = [v["transferUs"] for v in full]
         p95 = rank(durations, 95)
         stability = (len(entries) == expected_count == 30 and len(full) == 30 and not gaps and eligible and
+            all(e.get("role") == "clean" for e in entries) and params["maxRetries"] == 5 and
             all(v["transferUs"] <= 150000000 and v["throughputKiBs"] >= 9 and
                 v["retransmitRate"] <= .01 for v in full) and p95 <= 120000000)
         results.append(dict(parameters=json.loads(key), attempts=len(entries),
             ids=[e["id"] for e in entries], successes=sum(v["success"] for v in values),
             failures=sum(not v["success"] for v in values), fullReferenceSuccesses=len(full),
+            cleanAttempts=len(clean_values), cleanFailures=sum(not v["success"] for v in clean_values),
             missingAckSamples=sum(v["missingAckSamples"] for v in values),
             earlyAckSamples=sum(v["earlyAckSamples"] for v in values),
+            unresolvedParameterFailures=ambiguous,
             observedAckP99Us=p99, ackP99Eligible=eligible,
             recommendedAckTimeoutMs=min(2000, max(500, (3 * p99 + 999) // 1000)) if eligible and p99 is not None else None,
             fullReferenceP95Us=p95, stability30MeetsObservedGates=stability))
@@ -319,17 +337,21 @@ def aggregate(runs, *, expected_count):
         pair = recoveries.setdefault(case, {})
         require(run["role"] not in pair, "duplicate recovery role")
         pair[run["role"]] = run.get("observation")
-    recovery_ok = 0
+    recovery_ok, recovery_offsets = 0, []
     for pair in recoveries.values():
         a, b = pair.get("disconnect"), pair.get("resume")
         if not a or not b: continue
         reason = (a.get("failure") or {}).get("reason")
-        recovery_ok += bool(not a["success"] and reason in ("DISCONNECTED", "DEVICE_LINK_CHANGED") and
+        recovered = bool(not a["success"] and reason in ("DISCONNECTED", "DEVICE_LINK_CHANGED") and
             b["success"] and a["parameters"] == b["parameters"] and
             a["finalDurable"] == b["initialDurable"] and (b["initialDurable"] or 0) > 0)
+        recovery_ok += recovered
+        if recovered and a["reference"] and b["reference"]: recovery_offsets.append(b["initialDurable"])
     return dict(plannedAttempts=expected_count, observedAttempts=len(captures), evidenceGaps=gaps, groups=results,
         recoveryCases=len(recoveries), successfulRecoveries=recovery_ok,
-        recovery10MeetsObservedGates=len(recoveries) == recovery_ok == 10 and not gaps,
+        recoveryOffsets=recovery_offsets,
+        recovery10MeetsObservedGates=len(recoveries) == recovery_ok == 10 and not gaps and
+            sorted(recovery_offsets) == sorted([n * 1024 for n in (8, 64, 256, 512, 768) for _ in range(2)]),
         independentAcceptance="NOT_RUN", soakDurationSeconds=None,
         scope="All listed attempts retained; groups never mix baud/timeout/retry/MTU/assets/APK. "
               "Soak wall duration and physical disconnect actions require the frozen host/controller evidence, not summed App clocks.")
@@ -343,7 +365,8 @@ def read_plan(path):
     runs = []
     for item in plan["runs"]:
         require(set(item) <= {"id", "input", "sha256", "sentinel", "target", "role", "recoveryCase"} and
-                {"id", "input", "sha256", "sentinel", "target"} <= set(item) and
+                {"id", "input", "sha256", "sentinel", "target", "role"} <= set(item) and
+                item["role"] in ("clean", "soak", "disconnect", "resume", "injected") and
                 isinstance(item["id"], str) and re.fullmatch(r"[a-zA-Z0-9_-]{1,80}", item["id"]), "planned input fields")
         row = {k: item[k] for k in ("id", "role", "recoveryCase") if k in item}
         try:

@@ -531,7 +531,9 @@ class OtaLinkStats {
       required int atUs, int? expectedSession, int? expectedEpoch, int? status,
       int? epoch, int? durableOffset, int? acceptedOffset, int? creditEnd}) {
     if (_ignoredAckSealed || !const {'session', 'epoch', 'sequence', 'inactive',
-        'retired', 'unmatched'}.contains(reason)) return;
+        'retired', 'unmatched'}.contains(reason)) {
+      return;
+    }
     final count = _ignoredAckCounts[reason] ?? 0;
     if (count == 0xffffffff) {
       _ignoredAckSaturated = true;

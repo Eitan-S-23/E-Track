@@ -81,6 +81,22 @@ def prefix_rows():
 
 
 class CaptureTests(unittest.TestCase):
+    def test_error_record_unknown_fields_and_unbound_counts_are_rejected(self):
+        record = dict(schema=1, kind="first", label="upgrade", attempt=None, reason="epoch",
+            expectedSession=7, expectedEpoch=123, cmd=0x92, session=7, seq=1, payloadBytes=17,
+            status=0x7e, epoch=124, durable=0, accepted=128, credit=8192, us=100)
+        line = "OTA_LINK_ACK_IGNORED " + json.dumps(record)
+        self.assertEqual(m.ack_error_records([line])["ignored"][0]["status"], 0x7e)
+        for changed in ({**record, "unknown": 0}, {**record, "status": True},
+                        {**record, "kind": "unknown"}, {k: v for k, v in record.items() if k != "attempt"}):
+            with self.assertRaises(ValueError):
+                m.ack_error_records(["OTA_LINK_ACK_IGNORED " + json.dumps(changed)])
+        with self.assertRaises(ValueError): m.ack_error_records([line, line])
+        counts = dict(schema=1, kind="counts", label="upgrade", attempt=None, counts={"epoch": 9}, saturated=False, us=200)
+        with self.assertRaises(ValueError):
+            m.ack_error_records(["OTA_LINK_ACK_IGNORED " + json.dumps(counts)])
+        self.assertEqual(m.ack_error_records([line, "OTA_LINK_ACK_IGNORED " + json.dumps(counts)])["sealedCounts"][0]["counts"], {"epoch": 9})
+
     def setUp(self):
         self.base = m.checked(ROOT / ".cache/p3-4-observation-capture-tests")
         self.base.mkdir(exist_ok=True, parents=True)
