@@ -104,12 +104,20 @@ if(P2_3_TEST_ENABLE)
     list(APPEND OTA_TEST_LINKER_DEFINES "-DP2_3_TEST_ENABLE=1")
 endif()
 
+
+option(P34_EARLY_FAULT_VECTORS "Use reviewed early exception Flash vectors" OFF)
+set(P34_EARLY_LINKER_DEFINE)
+if(P34_EARLY_FAULT_VECTORS)
+    set(P34_EARLY_LINKER_DEFINE "-DP34_EARLY_FAULT_VECTORS=1")
+endif()
+
 add_custom_command(
     OUTPUT "${APP_LINKER_SCRIPT}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${APP_OUTPUT_DIR}"
     COMMAND "${CMAKE_C_COMPILER}" -E -P -x assembler-with-cpp
         "-I${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA"
         ${OTA_TEST_LINKER_DEFINES}
+        ${P34_EARLY_LINKER_DEFINE}
         "${APP_LINKER_SOURCE}"
         -o "${APP_LINKER_SCRIPT}"
     DEPENDS "${APP_LINKER_SOURCE}" "${OTA_LAYOUT_HEADER}"
@@ -538,6 +546,8 @@ list(APPEND APP_PROJECT_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_ble_ring.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_ble_frame.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_ble_session.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_pipeline.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_pipeline_sync.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_confirm_health.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../Libraries/OTA/ota_vtor_check.c"
     "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_crc32.c"
@@ -725,6 +735,44 @@ endif()
 target_compile_definitions(X_Track_App_GCC PRIVATE
     "OTA_TARGET_APP"
 )
+option(P3_4_LINK_PROFILE "Development-only runtime baud and BLE staging counters" OFF)
+option(P34_OTA_CANDIDATE "V2/WAIT_RX candidate without runtime experiment controls" OFF)
+set(P34_OTA_UART_BAUD "921600" CACHE STRING "Fallback UART rate without a valid retained setting; module must match")
+if(P34_OTA_CANDIDATE)
+    if(P3_4_LINK_PROFILE OR NOT P34_EARLY_FAULT_VECTORS)
+        message(FATAL_ERROR "P34 candidate requires early vectors and forbids the experiment profile")
+    endif()
+    if(NOT P34_OTA_UART_BAUD MATCHES "^(115200|230400|460800|921600)$")
+        message(FATAL_ERROR "Unsupported fixed P34 candidate UART rate")
+    endif()
+    target_compile_definitions(X_Track_App_GCC PRIVATE
+        P34_OTA_FIXED_CONFIG=1
+        P34_OTA_PIPELINE=1 P34_OTA_PIPELINE_SYNC=1
+        P34_OTA_PIPELINE_ACK_BIND=1 P34_OTA_PIPELINE_WAIT_RX=1
+        CONFIG_BT_FIXED_BAUD=${P34_OTA_UART_BAUD}u
+        CONFIG_BT_BAUD_EXPERIMENT=0 CONFIG_OTA_BLE_PROFILE=0
+        CONFIG_OTA_LINK_METRICS=1
+        CONFIG_RTT_DEBUG_CMD_ENABLE=0
+        CONFIG_OTA_INSTALL_PROFILE=0 CONFIG_OTA_INSTALL_COST=0
+        CONFIG_OTA_INSTALL_QE_REUSE=1 CONFIG_OTA_STAGING_QE_REUSE=1
+        CONFIG_OTA_INSTALL_BLOCK_ERASE=1 CONFIG_OTA_INSTALL_HALF_ERASE=1
+        CONFIG_OTA_STAGING_BLOCK_ERASE=1
+        CONFIG_OTA_UI_CADENCE=1 CONFIG_OTA_ACTIVE_PUMP=1
+        OTA_PATCH_COALESCE_WRITES=1 CONFIG_OTA_APP_CRC32_NIBBLE=1
+        LV_MEM_SIZE=126976U
+    )
+    target_link_options(X_Track_App_GCC PRIVATE "-Wl,--defsym=__p34_heap_min=4096")
+endif()
+if(P3_4_LINK_PROFILE)
+    target_compile_definitions(X_Track_App_GCC PRIVATE
+        CONFIG_OTA_BLE_PROFILE=1
+        CONFIG_BT_BAUD_EXPERIMENT=1
+        CONFIG_RTT_DEBUG_CMD_ENABLE=0
+        LV_MEM_SIZE=126976U
+    )
+    # Keep the profiling BSS from exhausting newlib's separate heap.
+    target_link_options(X_Track_App_GCC PRIVATE "-Wl,--defsym=__p34_heap_min=4096")
+endif()
 if(P1_6_TEST_ENABLE)
     target_compile_definitions(X_Track_Boot PRIVATE "P1_6_TEST_ENABLE")
     target_compile_definitions(X_Track_App_GCC PRIVATE "P1_6_TEST_ENABLE")
@@ -955,3 +1003,18 @@ add_custom_target(X_Track_artifacts ALL
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     VERBATIM
 )
+
+# P3-4 local screen: preserve Boot and all other compilation options.
+set_property(SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_sha256.c"
+    APPEND PROPERTY COMPILE_OPTIONS
+    "$<$<STREQUAL:$<TARGET_PROPERTY:NAME>,X_Track_App_GCC>:-O2>")
+
+# Reviewed isolated App experiment; OFF is production-equivalent.
+option(P34_EARLY_FAULT_VECTORS "Use reviewed early exception Flash vectors" OFF)
+if(P34_EARLY_FAULT_VECTORS)
+    target_compile_definitions(X_Track_App_GCC PRIVATE P34_EARLY_FAULT_VECTORS=1)
+    target_sources(X_Track_App_GCC PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/p34_early_fault.cpp")
+    add_custom_command(OUTPUT "${APP_LINKER_SCRIPT}" APPEND
+        DEPENDS "${CMAKE_CURRENT_LIST_DIR}/../../USER/HAL/p34_early_fault_policy.h")
+endif()

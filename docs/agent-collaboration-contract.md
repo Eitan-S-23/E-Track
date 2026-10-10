@@ -42,6 +42,115 @@ resolved, directly applicable decision and states how it applies here.
   task board. Put normative changes here or in the relevant governed contract;
   a task note cannot grant permissions or redefine acceptance criteria.
 
+## User Intervention Notifications
+
+When the current session uses cc-connect, distinguish an out-of-chat action from
+requesting a chat reply (user clarifications, 2026-10-09 and 2026-10-10). The bridge already sends an
+automatic completion @mention for a normal final reply. Do not send an additional
+manual reminder for a final report, handoff or approval question delivered with
+that reply, even when it asks for a response. A project still being unfinished
+does not turn a final reply into a mid-task intervention.
+
+Only when the current execution is being kept open, an already-authorized user
+action blocks its next step, and the user can perform it outside chat without
+sending a chat reply, request that action through cc-connect with a real platform
+@mention of the requesting user in that same session. All three conditions are
+required. Examples include reinserting an SD card, reconnecting a cable or
+handling an already-authorized phone dialog. After checking the send receipt,
+observe the actual action/state change; do not require an "OK" reply in chat.
+
+Requests requiring a chat reply never use manual @mentions. Authorization,
+permission, a choice, confirmation or missing information requested in chat must
+be asked in a normal final reply: end the current execution, let the bridge send
+its automatic completion notification, and resume after the user's answer.
+Keeping another task or worker running does not create an exception. Existing
+standing authority does not require another permission request; continue
+independent safe work until the normal final reply.
+
+| Situation | Notification |
+| --- | --- |
+| Normal final report | Automatic completion only; no manual @mention |
+| Final handoff or approval question | Automatic completion only; no manual @mention |
+| Mid-task SD card, cable or phone action without a chat reply | Manual real @mention plus send receipt |
+| Authorization or permission requested in chat | End with the question; automatic completion only; no manual @mention |
+| Choice, confirmation or missing information requested in chat | End with the question; automatic completion only; no manual @mention |
+| Approval while another task or worker is still running | End with the question; automatic completion only; no manual @mention |
+| Ordinary progress or autonomous work | No manual @mention |
+
+For a required mid-task reminder:
+
+- Use the current session's project, session key and requester identity, not
+  IDs copied from another conversation. Never print credentials or session keys.
+- Use the existing `cc-connect send --project <current-project> --session
+  <current-session> --stdin` route. For Feishu, include a real mention such as
+  `<at user_id="CURRENT_REQUESTER_OPEN_ID">requester</at>` in the message body,
+  replacing the placeholder with the actual requester ID. A plain `@name`, a
+  normal reply or a local progress message does not satisfy this mid-task
+  reminder requirement; this is not a reason to duplicate a final notification.
+- State the exact action needed and why, plus any real timing constraint.
+  Prepare the required observation route before asking for a short device window;
+  do not ask the user to leave an App mid-transfer just to acknowledge a message.
+- Check the send receipt. If delivery fails or the route is unavailable, report
+  that fact in the current conversation; do not claim the user was notified or
+  silently wait. Keep controllable notification files and receipts project-local.
+- Do not send test reminders or repeat an unchanged pending request on each
+  poll. Ordinary progress and work that can continue autonomously need no
+  manual @mention.
+
+The clarification and duplicate-notification lesson are recorded in
+[PROJECT-06](agent-collaboration/project-workflow.md#project-06-only-manual-mentions-for-mid-task-blockers).
+
+## Reuse Before Custom Tooling
+
+Applies before creating or substantially extending supporting tools: flashing,
+debugging, builds, collection, packaging, archiving and recovery. Product work
+must not silently turn into a general-purpose tooling project.
+
+1. Identify the next user-visible result and its necessary prerequisites. Separate
+   explicit user constraints, existing contracts and demonstrated safety risks
+   from agent preferences. For example, uninterrupted power does not itself mean
+   no MCU reset; same-context resume is not an automatic flashing requirement.
+   Do not remove a real constraint merely to make an existing tool fit.
+2. Read the project's supported route and check installed/vendor tools first.
+   Prefer existing applicable evidence, then documentation/help and the smallest
+   authorized discriminating check. Unknown capability is not a proved gap. Do
+   not run a destructive trial, replay a successful operation or expand device
+   authority just to qualify a tool.
+3. When the tool covers the requirement, use it. A small wrapper for arguments,
+   output containment, deadlines, logs and verification is appropriate; replacing
+   its protocol, Flash algorithm or state machine is a different decision.
+4. Before a custom replacement, record in the existing task note: required missing
+   capability; tool/version and original evidence of the gap; why configuration
+   or a thin adapter is insufficient; smallest replacement scope; comparison with
+   the standard route's remaining effort/risk; verification oracle and exit rule.
+   If evidence is missing, investigate that gap instead of implementing a driver.
+   This is a short engineering decision, not another mandatory approval ceremony.
+5. Reassess before support work needs another new controller, recovery layer or
+   audit harness, or becomes the obstacle to the next product measurement. Compare
+   remaining work rather than sunk effort; retire unsupported self-imposed
+   constraints and switch to a qualified simpler route. Preserve failed evidence
+   and safely close owned processes; do not abandon an unresolved device state.
+6. Report preparation, installed changes and measured benefit separately. More
+   tooling tests or a reviewed design are not product progress or speed evidence.
+   Once necessary safety checks pass, run the prepared bounded experiment rather
+   than perfecting optional infrastructure first. Reviewers must question the
+   necessity of the route, not only correctness within its chosen constraints.
+
+| Situation | Required decision |
+| --- | --- |
+| Existing tool meets real constraints; only invocation/logging is missing | Reuse it with a thin adapter |
+| Tool behavior is unknown or a host collector failed | Check capability or repair collection; do not infer a missing Flash algorithm |
+| A sourced safety requirement cannot be met by the existing route | Retain the requirement; justify the smallest alternative and its tests |
+| Agent-preferred no-reset mode drives a replacement without a demonstrated need | Reassess that preference before writing more tooling |
+| Support-tool scope keeps growing without the planned product measurement | Recompare routes and stop the unnecessary branch, not the safety checks |
+
+This does not weaken write boundaries, backup/integrity checks, device ownership,
+recovery admission, frozen evidence or approval rules. It neither bans justified
+custom tools nor mandates a new hardware comparison when existing evidence is
+sufficient. Apply the rule to future work; do not rerun completed experiments to
+document it. The motivating incident is recorded as
+[PROJECT-04](agent-collaboration/project-workflow.md#project-04-reuse-tools-before-replacing-them).
+
 ## Question Packet
 
 Keep a stable question/finding ID and include only decision-relevant information:

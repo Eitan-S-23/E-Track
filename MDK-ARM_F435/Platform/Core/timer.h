@@ -32,8 +32,14 @@ extern "C" {
    
 typedef void(*Timer_CallbackFunction_t)(void);
 
+#define TIMER_HAS_CONFIGURABLE_IRQ_PRIORITY 1
+
 void     Timer_SetEnable(tmr_type* TIMx, bool Enable);
 void     Timer_SetInterrupt(tmr_type* TIMx, uint32_t time, Timer_CallbackFunction_t Function);
+void     Timer_SetInterruptWithPriority(
+    tmr_type* TIMx, uint32_t Time, Timer_CallbackFunction_t Function,
+    uint8_t PreemptionPriority, uint8_t SubPriority
+);
 void     Timer_SetInterruptTimeUpdate(tmr_type* TIMx, uint32_t Time);
 bool     Timer_SetInterruptFreqUpdate(tmr_type* TIMx, uint32_t Freq);
 void     Timer_SetInterruptBase(

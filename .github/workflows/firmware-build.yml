@@ -201,10 +201,12 @@ jobs:
           python3 tests/ota/test_ota_patch.py
           python3 tests/ota/test_ota_ble_frame.py
           python3 tests/ota/test_ota_ble_session.py
-          python3 tests/ota/p3_1_verify_contract_alignment.py
+          python3 -B tests/ota/test_ota_ble_contract.py
           python3 tests/ota/p3_1_verify_text_isolation.py
           python3 tests/ota/p3_1_verify_portability.py
           python3 tests/ota/test_ota_device_info.py
+          python3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py admission --out "$GITHUB_WORKSPACE/.cache/p34-admission-tests"
+          python3 -I -S -B -X utf8 tests/ota/test_hardware_serial.py --metrics --out "$GITHUB_WORKSPACE/.cache/p34-uart-metrics-tests"
 
       - name: Validate OTA App layout
         shell: bash
@@ -342,6 +344,32 @@ jobs:
           echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
           echo "bin_size=${bin_size}" >> "$GITHUB_OUTPUT"
           echo "X-Track-App-GCC.bin: ${bin_size} bytes, sha256=${sha256}"
+
+      - name: Build the P3-4 acceptance candidate
+        id: p34_candidate
+        if: github.event_name == 'pull_request' && github.head_ref == 'acceptance/p3-4-v2-20261009'
+        shell: bash
+        run: |
+          set -euo pipefail
+          toolchain="$(dirname "$(dirname "$(command -v arm-none-eabi-gcc)")")"
+          python3 -I -S -B -X utf8 Tools/ota/p34-acceptance/build.py candidate \
+            --out "$GITHUB_WORKSPACE/.cache/p34-ci" --toolchain "$toolchain"
+
+      - name: Preserve the P3-4 candidate build evidence
+        if: always() && steps.p34_candidate.outcome != 'skipped' && github.event_name == 'pull_request' && github.head_ref == 'acceptance/p3-4-v2-20261009'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p34-candidate-${{ github.event.pull_request.head.sha }}
+          path: |
+            .cache/p34-ci/*.json
+            .cache/p34-ci/*.log
+            .cache/p34-ci/b/app-gcc/X-Track-App-GCC.bin
+            .cache/p34-ci/b/app-gcc/X-Track-App-GCC.elf
+            .cache/p34-ci/b/app-gcc/X-Track-App-GCC.hex
+            .cache/p34-ci/b/app-gcc/X-Track-App-GCC.map
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4

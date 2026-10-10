@@ -27,11 +27,14 @@ typedef struct fixture_t
     uint32_t interrupt_checkpoint;
     uint32_t checkpoint_hits;
     int corrupt_data_read_once;
+    uint32_t verify_calls;
+    ota_staging_result_t verify_error;
 } fixture_t;
 
 static fixture_t fixture;
 static int checks;
 static int failures;
+static int use_verify;
 
 static const uint8_t golden_sha256[32] = {
     0xD8, 0xE2, 0x6E, 0x51, 0xCF, 0x57, 0x45, 0x70,
@@ -158,15 +161,37 @@ static int fixture_checkpoint(void *ctx, uint32_t point,
     return 0;
 }
 
+static ota_staging_result_t fixture_verify(void *ctx, uint32_t address,
+                                          const uint8_t *expected, uint32_t len)
+{
+    fixture_t *state = (fixture_t *)ctx;
+    uint8_t observed[OTA_STAGING_BLOCK_SIZE];
+
+    ++state->verify_calls;
+    if (state->verify_error != OTA_STAGING_OK)
+    {
+        return state->verify_error;
+    }
+    if (len > sizeof(observed) ||
+        fixture_read(ctx, address, observed, len) != 0)
+    {
+        return OTA_STAGING_ERR_IO;
+    }
+    return memcmp(observed, expected, len) == 0
+               ? OTA_STAGING_OK : OTA_STAGING_ERR_VERIFY;
+}
+
 static ota_staging_io_t fixture_io(void)
 {
     ota_staging_io_t io;
 
+    memset(&io, 0, sizeof(io));
     io.ctx = &fixture;
     io.read = fixture_read;
     io.erase_4k = fixture_erase;
     io.program = fixture_program;
     io.checkpoint = fixture_checkpoint;
+    io.verify = use_verify ? fixture_verify : 0;
     return io;
 }
 
@@ -372,10 +397,18 @@ static void test_golden_vector_receive_and_finalize(void)
 
     result = ota_staging_receive(&receiver, 128u, package + 128u,
                                  128u, &progress);
-    check("out-of-order segment is buffered only in the 4 KiB RAM window",
+    check("out-of-order segment has no programmed or durable payload",
           result == OTA_STAGING_OK && progress.durable_off == 0u &&
               progress.segment_bitmap == 0x2u &&
-              count_operations(OP_ERASE, data_address) == 0u);
+              count_operations(OP_PROGRAM, data_address) == 0u &&
+              fixture.flash[OTA_STAGING_BITMAP_OFFSET] == 0xFFu);
+#if defined(P34_STAGING_EARLY_ERASE) && P34_STAGING_EARLY_ERASE
+    check("candidate erases once at the first valid out-of-order segment",
+          count_operations(OP_ERASE, data_address) == 1u);
+#else
+    check("default defers erase until the RAM block is complete",
+          count_operations(OP_ERASE, data_address) == 0u);
+#endif
     check("same in-RAM segment retransmit is idempotent",
           ota_staging_receive(&receiver, 128u, package + 128u,
                               128u, &progress) == OTA_STAGING_DUPLICATE);
@@ -594,15 +627,58 @@ static void test_input_guards(void)
               OTA_STAGING_ERR_STATE);
 }
 
+static void test_verify_errors(void)
+{
+    static const ota_staging_result_t errors[] = {
+        OTA_STAGING_ERR_IO, OTA_STAGING_ERR_VERIFY,
+        OTA_STAGING_BLOCK_COMMITTED, OTA_STAGING_INTERRUPTED,
+        OTA_STAGING_ERR_PARAM
+    };
+    uint32_t index;
+
+    for (index = 0u; index < sizeof(errors) / sizeof(errors[0]); ++index)
+    {
+        ota_staging_receiver_t receiver;
+        ota_staging_progress_t progress;
+        ota_staging_io_t io;
+        uint8_t data[OTA_STAGING_BLOCK_SIZE];
+        ota_staging_result_t expected = errors[index] == OTA_STAGING_ERR_VERIFY
+                                          ? OTA_STAGING_ERR_VERIFY
+                                          : OTA_STAGING_ERR_IO;
+        reset_fixture();
+        fill_pattern(data);
+        io = fixture_io();
+        check("callback-error fixture starts with a real verified journal",
+              ota_staging_begin(&receiver, &io, golden_sha256, sizeof(data),
+                                &progress) == OTA_STAGING_OK);
+        fixture.verify_error = errors[index];
+        check("invalid or failed verify callback cannot become block success",
+              send_all_segments(&receiver, data, sizeof(data), &progress) == expected);
+        check("verify callback failure preserves uncommitted progress",
+              progress.durable_off == 0u && progress.segment_bitmap == 0u &&
+              fixture.flash[OTA_STAGING_BITMAP_OFFSET] == 0xFFu);
+    }
+}
+
 int main(void)
 {
     printf("=== P2-1 OTA staging tests ===\n");
     test_contract_crc_sample();
-    test_begin_and_session_rebuild();
-    test_golden_vector_receive_and_finalize();
-    test_readback_checkpoint_reentry();
-    test_readback_failure_and_marker_interruption();
-    test_input_guards();
+    for (use_verify = 0; use_verify <= 1; ++use_verify)
+    {
+        printf("=== verify path: %s ===\n", use_verify ? "callback" : "read fallback");
+        test_begin_and_session_rebuild();
+        test_golden_vector_receive_and_finalize();
+        test_readback_checkpoint_reentry();
+        test_readback_failure_and_marker_interruption();
+        test_input_guards();
+        check("verify callback is used only when supplied",
+              (fixture.verify_calls > 0u) == use_verify);
+        if (use_verify)
+        {
+            test_verify_errors();
+        }
+    }
     printf("=== summary: %d checks, %d failure(s) ===\n", checks, failures);
     if (failures == 0)
     {

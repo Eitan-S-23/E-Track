@@ -22,7 +22,13 @@ extern "C" {
 #define OTA_BLE_HEADER_SIZE 8u
 #define OTA_BLE_CRC_SIZE 2u
 /* DATA payload 上限 = u32 off + 128B 段净荷（合同 §5.4/§5.5） */
+#if defined(P34_OTA_PIPELINE) && P34_OTA_PIPELINE
+#define OTA_BLE_PIPELINE_ENABLED 1
+#define OTA_BLE_MAX_PAYLOAD 136u
+#else
+#define OTA_BLE_PIPELINE_ENABLED 0
 #define OTA_BLE_MAX_PAYLOAD 132u
+#endif
 #define OTA_BLE_MAX_FRAME \
     (OTA_BLE_HEADER_SIZE + OTA_BLE_MAX_PAYLOAD + OTA_BLE_CRC_SIZE)
 
@@ -37,6 +43,24 @@ extern "C" {
 #define OTA_BLE_CMD_ACK_DATA 0x82u
 #define OTA_BLE_CMD_ACK_END 0x83u
 #define OTA_BLE_CMD_ACK_ABORT 0x84u
+
+#if OTA_BLE_PIPELINE_ENABLED
+/* Development extension: v1 INFO and command lengths remain unchanged. */
+#define OTA_BLE_CMD_CAPS2 0x10u
+#define OTA_BLE_CMD_BEGIN2 0x11u
+#define OTA_BLE_CMD_DATA2 0x12u
+#define OTA_BLE_CMD_END2 0x13u
+#define OTA_BLE_CMD_ABORT2 0x14u
+#define OTA_BLE_CMD_CAPS2_REPLY 0x90u
+#define OTA_BLE_CMD_ACK_BEGIN2 0x91u
+#define OTA_BLE_CMD_ACK_DATA2 0x92u
+#define OTA_BLE_CMD_ACK_END2 0x93u
+#define OTA_BLE_CMD_ACK_ABORT2 0x94u
+#define OTA_BLE_LEN_BEGIN2 105u
+#define OTA_BLE_LEN_END2 36u
+#define OTA_BLE_LEN_ACK_BEGIN2 18u
+#define OTA_BLE_LEN_ACK_OTHER2 17u
+#endif
 
 /* payload 定长（合同 §5.2.1/§5.3/§5.6） */
 #define OTA_BLE_LEN_GET_INFO 0u

@@ -96,6 +96,29 @@
 #define CONFIG_BT_RX_PIN           PA10
 //#define CONFIG_BT_EN_PIN           PA15
 
+/* BT 波特率实验开关（P3-4 实测定档；生产默认 0）。
+ * 置 1 时启用实验控制面（实现见 USER/HAL/BtBaudExperiment/bt_baud_experiment.h）：
+ * MCU 侧 BT UART 以 CONFIG_BT_BAUD_EXPERIMENT_RATE 起串，RTT down channel 0
+ * 提供 `status` / `rx!` / `at <epoch> <AT>` / `uart <epoch> <baud>` /
+ * `probe <epoch> <baud>` / `rate set <epoch> <baud>` / `rate rearm <epoch>`
+ * 控制台：空闲期 RX 字节按静默分帧以 `BXRX(<seq> b=<baud> e=<epoch> len=<n>):<HEX>`
+ * 无丢失记录，切速只改 MCU UART 分频、不发模块 AT、不复位模块、不重烧。
+ * 四档 115200/230400/460800/921600 由同一份镜像在运行期切换，因此不再需要
+ * 逐档构建；旧的逐档 BIN 仅作历史证据保留。
+ * 同一路 UART 上 AT 与 OTA 数据共用（CONFIG_BT_USE_TRANSPARENT 0），没有主机
+ * 旁路：模块改速后只有处于同速率的 MCU 才能再与其通信，这是恢复流程必须
+ * 走 `uart <epoch> <baud>` 而不是重烧的原因。
+ * 置 0 时实验代码整体预处理移除，生产镜像不含任何 AT 通道。 */
+#ifndef CONFIG_BT_BAUD_EXPERIMENT
+#  define CONFIG_BT_BAUD_EXPERIMENT 0
+#endif
+
+#if CONFIG_BT_BAUD_EXPERIMENT
+#  ifndef CONFIG_BT_BAUD_EXPERIMENT_RATE
+#    define CONFIG_BT_BAUD_EXPERIMENT_RATE 115200u
+#  endif
+#endif
+
 /* BLE OTA 传输（P3-1；实验基线，P3-4 实测定档，禁止冻结为契约）。
  * RX 环尺寸在 mcu_config.h（受控 RX buffer，需 overlay 子分配预算联动）。 */
 #define CONFIG_OTA_BLE_PUMP_PERIOD_MS     20u   /* BLE 泵节拍 */

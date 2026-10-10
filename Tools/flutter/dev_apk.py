@@ -2,6 +2,8 @@
 """Workspace-contained Android debug APK support for the development workflow."""
 
 import argparse
+import base64
+import binascii
 import hashlib
 import json
 import os
@@ -23,6 +25,53 @@ from Tools.flutter.dev_checks import APP, checked_path, make_directory
 APK_RELATIVE = APP / "build/app/outputs/flutter-apk/app-debug.apk"
 APPLICATION_ID_ENV = "TRACE_DEV_APP_ID_SUFFIX"
 APPLICATION_ID_SUFFIX_PATTERN = re.compile(r"^\.[A-Za-z][A-Za-z0-9_]*$")
+FIXED_SIGNING_ENV = "TRACE_DEV_FIXED_SIGNING"
+SIGNING_SECRET_ENV = "TRACE_DEV_SIGNING_KEYSTORE_SECRET"
+SIGNING_CERT_SHA256 = "9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579"
+
+
+def fixed_signing(env):
+    mode = env.get(FIXED_SIGNING_ENV, "")
+    if mode not in ("", "false", "true"):
+        raise ValueError("Invalid development signing mode")
+    if mode == "true" and not application_id_suffix(env):
+        raise ValueError("Fixed development signing requires a separate application id")
+    return mode == "true"
+
+
+def prepare_signing(root, run_dir, env, run=subprocess.run):
+    if not fixed_signing(env):
+        return
+    encoded = env.get(SIGNING_SECRET_ENV, "")
+    if not encoded or len(encoded) > 32768:
+        raise ValueError("Fixed development signing secret missing or oversized")
+    try:
+        data = base64.b64decode(encoded, validate=True)
+    except (ValueError, binascii.Error):
+        raise ValueError("Invalid development signing secret encoding") from None
+    if not 1024 <= len(data) <= 24576:
+        raise ValueError("Invalid development keystore size")
+    path = checked_path(root, run_dir / "development-signing/development.jks")
+    make_directory(root, path.parent)
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb") as stream:
+        stream.write(data)
+    path.chmod(0o600)
+    tool = Path(env["JAVA_HOME"]) / "bin/keytool"
+    result = run([str(tool), "-exportcert", "-keystore", str(path), "-storepass", "android",
+                  "-alias", "androiddebugkey"], cwd=root, env=env, capture_output=True, timeout=30)
+    if result.returncode != 0 or hashlib.sha256(result.stdout).hexdigest() != SIGNING_CERT_SHA256:
+        raise ValueError("Development signing certificate does not match the pinned identity")
+
+
+def signing_certificate(root, run_dir, apk, run=subprocess.run):
+    tool = checked_path(root, run_dir / "android-sdk/build-tools/35.0.0/apksigner")
+    result = run([str(tool), "verify", "--print-certs", str(apk)], cwd=root,
+                 capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+    found = re.findall(r"^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]{64})$",
+                       result.stdout, re.MULTILINE)
+    if result.returncode != 0 or [x.lower() for x in found] != [SIGNING_CERT_SHA256]:
+        raise ValueError("APK signer differs from the pinned development certificate")
+    return SIGNING_CERT_SHA256
 
 # 设备观测构建开关（P3-3 T1a）。三项都显式启用；默认全部为空 = 不观测。
 DEVICE_OBSERVATION_ENV = "TRACE_DEV_DEVICE_OBSERVATION"
@@ -167,6 +216,47 @@ def observation_config(env):
     }
 
 
+OTA_LINK_CANDIDATE_ENV = "TRACE_DEV_OTA_LINK_CANDIDATE"
+
+
+def ota_link_candidate(env):
+    name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip()
+    if name in ("", "baseline"):
+        return None
+    if name in ("runtime", "runtime-pipeline"):
+        observation = observation_config(env)
+        if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
+            raise ValueError("Runtime OTA experiment requires device observation with a MAC target")
+        config = {"name": name, "runtime_config": True}
+        if name == "runtime-pipeline":
+            config["pipeline"] = True
+        return config
+    candidates = {
+        "reuse-with": (True, False),
+        "discover-without": (False, True),
+        "reuse-without": (True, True),
+    }
+    if name not in candidates:
+        raise ValueError("Unknown " + OTA_LINK_CANDIDATE_ENV)
+    reuse, without = candidates[name]
+    return {"name": name, "reuse_gatt": reuse, "prefer_without_response": without}
+
+
+def ota_link_defines(config):
+    if config is None:
+        return []
+    if config.get("runtime_config") is True:
+        defines = ["--dart-define=OTA_P34_RUNTIME_CONFIG=true"]
+        if config.get("pipeline") is True:
+            defines.append("--dart-define=P34_OTA_PIPELINE=true")
+        return defines
+    return [
+        "--dart-define=OTA_P34_REUSE_GATT=" + str(config["reuse_gatt"]).lower(),
+        "--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" +
+        str(config["prefer_without_response"]).lower(),
+    ]
+
+
 def observation_defines(config):
     """观测配置对应的 `--dart-define` 列表；未启用时为空（不注入任何定义）。"""
     if config is None:
@@ -232,6 +322,11 @@ def environment(root, run_dir, env):
         f'-Duser.home="{env["HOME"]}" -Djava.io.tmpdir="{env["TMPDIR"]}"'
     )
     env["GRADLE_OPTS"] = "-Dorg.gradle.daemon=false"
+    if fixed_signing(env):
+        env["TRACE_DEV_SIGNING_STORE_FILE"] = str(checked_path(root, run_dir / "development-signing/development.jks"))
+    else:
+        env.pop("TRACE_DEV_SIGNING_STORE_FILE", None)
+        env.pop(SIGNING_SECRET_ENV, None)
     for name in list(env):
         if name.startswith(("ANDROID_RELEASE_", "SIDELOAD_")):
             del env[name]
@@ -241,7 +336,8 @@ def environment(root, run_dir, env):
 def plan(root, run_dir, env):
     version, compile_sdk = android_versions(root)
     # 观测配置在这里先校验一次：非法取值在下载/构建之前失败，不浪费一轮构建。
-    defines = observation_defines(observation_config(env))
+    defines = (observation_defines(observation_config(env)) +
+               ota_link_defines(ota_link_candidate(env)))
     helper = [sys.executable, "-B", str(root / "Tools/flutter/dev_apk.py")]
     common = ["--repo-root", str(root), "--run-dir", str(run_dir)]
     source = Path(env.get("ETRACK_ANDROID_SDK_SOURCE") or run_dir / "missing-android-tools")
@@ -344,6 +440,7 @@ def prepare(root, run_dir, env, fetch=download):
         raise ValueError("Refusing to reuse a pre-existing APK")
     if (root / APP / "android/key.properties").exists():
         raise ValueError("Development APK mode must not use release signing properties")
+    prepare_signing(root, run_dir, env)
     licenses = source / "licenses"
     accepted = sorted(licenses.glob("*-license"))
     if not accepted:
@@ -399,6 +496,7 @@ def install_wrapper(root, run_dir):
 
 
 def collect(root, run_dir, commit, env):
+    link_candidate = ota_link_candidate(env)
     source = checked_path(root, root / APK_RELATIVE)
     if not source.is_file() or not source.stat().st_size:
         raise ValueError("Debug APK is missing or empty")
@@ -429,12 +527,15 @@ def collect(root, run_dir, commit, env):
                     f"{label}; refusing to record an APK that is not observation-ready"
                 )
     target = checked_path(root, run_dir / "artifacts/trace-dev-debug.apk")
+    certificate = signing_certificate(root, run_dir, source) if fixed_signing(env) else None
     copy_new(root, source, target)
     metadata = {
         "artifact_kind": "development-debug-apk", "formal_acceptance": "NOT_RUN",
         "commit": commit, "sha256": sha256(target), "bytes": target.stat().st_size,
         "file": target.name, "release_signing": False, "application_id": observed,
     }
+    if certificate is not None:
+        metadata["development_signing"] = {"fixed": True, "certificate_sha256": certificate}
     if observation is not None:
         metadata["device_observation"] = {
             "enabled": True,
@@ -442,6 +543,9 @@ def collect(root, run_dir, commit, env):
             "sentinel": observation["sentinel"],
             "firmware_latest_url": observation["firmware_latest_url"],
         }
+    if link_candidate is not None:
+        # Build intent is not a measured or selected production configuration.
+        metadata["requested_ota_link_candidate"] = link_candidate
     write_new(root, target.with_suffix(".json"), json.dumps(metadata, indent=2) + "\n")
     print(json.dumps(metadata))
 

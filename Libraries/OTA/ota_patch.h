@@ -21,6 +21,13 @@ extern "C" {
 #define OTA_PATCH_STREAM_SIZE 1024u
 /* bspatch 差分/extra 写缓冲：与解压缓冲分开，流式写 candidate。 */
 #define OTA_PATCH_WORK_SIZE 1024u
+/* Opt-in only: coalesce contiguous output without changing the buffer budget. */
+#ifndef OTA_PATCH_COALESCE_WRITES
+#define OTA_PATCH_COALESCE_WRITES 0
+#endif
+#if OTA_PATCH_COALESCE_WRITES != 0 && OTA_PATCH_COALESCE_WRITES != 1
+#error OTA_PATCH_COALESCE_WRITES_must_be_0_or_1
+#endif
 /* 基版镜像身份长度：SHA-256 前 8B（契约 §2.1 off52）。 */
 #define OTA_PATCH_BASE_SHA8_SIZE 8u
 

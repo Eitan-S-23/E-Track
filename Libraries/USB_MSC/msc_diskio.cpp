@@ -25,6 +25,15 @@
 #include "msc_class/msc_bot_scsi.h"
 #include <string.h>
 
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+#include "HAL/HAL.h"
+int p34_msc_media_ready(uint8_t lun)
+{
+  return lun == 0 && HAL::SD_GetReady();
+}
+#endif
+
+
 #ifdef MSC_USE_SD_CARD
 /* SD Card backend */
 #include "SdFat.h"
@@ -131,6 +140,12 @@ uint8_t *get_inquiry(uint8_t lun)
   */
 usb_sts_type msc_disk_capacity(uint8_t lun, uint32_t *blk_nbr, uint32_t *blk_size)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(blk_nbr) *blk_nbr = 0;
+  if(blk_size) *blk_size = 0;
+  if(!p34_msc_media_ready(lun)) return USB_FAIL;
+#endif
+
   if(blk_nbr == NULL || blk_size == NULL)
     return USB_FAIL;
 
@@ -171,6 +186,10 @@ usb_sts_type msc_disk_capacity(uint8_t lun, uint32_t *blk_nbr, uint32_t *blk_siz
   */
 usb_sts_type msc_disk_read(uint8_t lun, uint64_t addr, uint8_t *read_buf, uint32_t len)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(!p34_msc_media_ready(lun)) return USB_FAIL;
+#endif
+
   /* LUN 0 maps to selected storage backend */
   if(lun == 0)
   {
@@ -226,6 +245,10 @@ usb_sts_type msc_disk_read(uint8_t lun, uint64_t addr, uint8_t *read_buf, uint32
   */
 usb_sts_type msc_disk_write(uint8_t lun, uint64_t addr, uint8_t *buf, uint32_t len)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(!p34_msc_media_ready(lun)) return USB_FAIL;
+#endif
+
   /* LUN 0 maps to selected storage backend */
   if(lun == 0)
   {

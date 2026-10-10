@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:share_plus/share_plus.dart';
+import '../ota/ota_diagnostics.dart';
+import '../ota/ota_experiment_config.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../services/ota_service.dart';
 
@@ -19,8 +22,9 @@ import '../services/ota_service.dart';
 /// - 终止态（CLIENT_TOO_OLD/兼容 409/未知设备）：明确提示且不提供盲目重试。
 class OtaUpgradePage extends StatefulWidget {
   final BluetoothDevice? connectedDevice;
+  final OtaDiagnostics? diagnostics;
 
-  const OtaUpgradePage({super.key, this.connectedDevice});
+  const OtaUpgradePage({super.key, this.connectedDevice, this.diagnostics});
 
   @override
   State<OtaUpgradePage> createState() => _OtaUpgradePageState();
@@ -33,8 +37,10 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   OtaService get otaService => Get.isRegistered<OtaService>()
       ? Get.find<OtaService>()
       : Get.put(OtaService(), permanent: true);
+  OtaDiagnostics get _diagnostics => widget.diagnostics ?? OtaDiagnostics.current;
 
   bool _isChecking = false;
+  bool _isExporting = false;
   /// 自动解析出的已连接设备（无显式 connectedDevice 参数时，
   /// PR18：speedometer 等入口 `Get.to(OtaUpgradePage())` 不传参）。
   BluetoothDevice? _resolvedDevice;
@@ -199,6 +205,40 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (OtaExperimentRuntime.current.enabled)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(OtaExperimentRuntime.current.config == null
+                    ? '实验配置未就绪，已禁止 OTA：${OtaExperimentRuntime.current.error ?? "尚未初始化"}'
+                    : '实验 ${OtaExperimentRuntime.current.config!.runId} | '
+                      '请求 UART ${OtaExperimentRuntime.current.config!.requestedBaud}\n'
+                      '配置已锁定；实际波特率以 MCU 回读为准'),
+              ),
+            ValueListenableBuilder<OtaDiagnosticStatus>(
+              valueListenable: _diagnostics.status,
+              builder: (context, value, _) {
+                if (!value.enabled) return const SizedBox.shrink();
+                return Obx(() => Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(value.error == null
+                          ? '诊断记录：${value.producerLines} 条 App 观测'
+                          : '诊断记录不完整：${value.error}'),
+                      TextButton.icon(
+                        key: const ValueKey('ota-export-observations'),
+                        onPressed: otaService.isUpgrading || _isExporting
+                            ? null : _exportObservations,
+                        icon: const Icon(Icons.ios_share),
+                        label: Text(value.fromPreviousProcess
+                            ? '导出上次诊断记录' : '导出诊断记录'),
+                      ),
+                    ],
+                  ),
+                ));
+              },
+            ),
             // 连接状态卡片
             _buildConnectionStatusCard()
                 .animate()
@@ -722,6 +762,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     if (!otaService.isUpgrading &&
         phase != OtaPhase.readyToInstall &&
         phase != OtaPhase.completed &&
+        phase != OtaPhase.probeCompleted &&
         phase != OtaPhase.cancelled &&
         phase != OtaPhase.failed &&
         !hasFirmware) {
@@ -729,6 +770,27 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     }
     if (phase == OtaPhase.completed) {
       return _buildCompletedCard();
+    }
+    if (phase == OtaPhase.probeCompleted) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('BLE 短测完成（未安装固件）',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            Text(otaService.upgradeStatus),
+            const SizedBox(height: 8),
+            const Text('暂存数据仍保留。下一组测试须先恢复并核验零起点，不可直接重测。'),
+          ],
+        ),
+      );
     }
 
     final busy = inDownload || inTransfer;
@@ -839,7 +901,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                 onPressed:
                     _deviceReady && !otaService.isUpgrading ? _startUpgrade : null,
                 icon: const Icon(Icons.bluetooth_audio),
-                label: const Text('开始 BLE 传输'),
+                label: Text(otaService.isPrefixProbe ? '开始 BLE 短测（不安装）' : '开始 BLE 传输'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4CAF50),
                   foregroundColor: Colors.white,
@@ -1075,6 +1137,35 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     final success = await otaService.startOtaUpgrade(address);
     if (!success) return;
     if (mounted) setState(() {});
+  }
+
+  Future<void> _exportObservations() async {
+    if (otaService.isUpgrading || _isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      final diagnostics = _diagnostics;
+      final file = diagnostics.status.value.lastExport ??
+          await diagnostics.exportSnapshot();
+      if (!mounted) return;
+      final box = context.findRenderObject() as RenderBox?;
+      final result = await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path, mimeType: 'application/x-ndjson')],
+        title: 'OTA 诊断记录',
+        sharePositionOrigin: box == null || !box.hasSize
+            ? null : box.localToGlobal(Offset.zero) & box.size,
+      ));
+      if (mounted && result.status == ShareResultStatus.unavailable) {
+        Get.snackbar('诊断记录', '系统分享不可用；原始记录仍保留在应用内',
+            snackPosition: SnackPosition.TOP);
+      }
+    } catch (_) {
+      if (mounted) {
+        Get.snackbar('诊断记录', '导出未完成；原始记录仍保留在应用内',
+            snackPosition: SnackPosition.TOP);
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   /// 取消确认对话框（RC3-05①：冻结取消策略不在 UI 放宽）。

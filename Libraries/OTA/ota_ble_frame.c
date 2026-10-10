@@ -101,6 +101,9 @@ void ota_ble_parser_reset(ota_ble_parser_t *parser)
 
 static int ota_ble_cmd_known(uint8_t cmd)
 {
+#if OTA_BLE_PIPELINE_ENABLED
+    if (cmd >= OTA_BLE_CMD_CAPS2 && cmd <= OTA_BLE_CMD_ABORT2) return 1;
+#endif
     return cmd == OTA_BLE_CMD_GET_INFO || cmd == OTA_BLE_CMD_BEGIN ||
            cmd == OTA_BLE_CMD_DATA || cmd == OTA_BLE_CMD_END ||
            cmd == OTA_BLE_CMD_ABORT;
@@ -121,7 +124,18 @@ static int ota_ble_len_accept(uint8_t cmd, uint16_t len)
     case OTA_BLE_CMD_ABORT:
         return len == OTA_BLE_LEN_ABORT;
     case OTA_BLE_CMD_DATA:
-        return len >= OTA_BLE_LEN_DATA_MIN && len <= OTA_BLE_MAX_PAYLOAD;
+        return len >= OTA_BLE_LEN_DATA_MIN && len <= 132u;
+#if OTA_BLE_PIPELINE_ENABLED
+    case OTA_BLE_CMD_CAPS2:
+    case OTA_BLE_CMD_ABORT2:
+        return len == 4u;
+    case OTA_BLE_CMD_BEGIN2:
+        return len == OTA_BLE_LEN_BEGIN2;
+    case OTA_BLE_CMD_END2:
+        return len == OTA_BLE_LEN_END2;
+    case OTA_BLE_CMD_DATA2:
+        return len >= 9u && len <= 136u;
+#endif
     default:
         return 0;
     }

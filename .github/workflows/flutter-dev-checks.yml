@@ -24,6 +24,18 @@ on:
         required: false
         type: string
         default: ""
+      ota_link_candidate:
+        description: "P3-4 debug-only screening candidate; not a production baud or performance result"
+        required: false
+        type: choice
+        default: baseline
+        options:
+          - baseline
+          - reuse-with
+          - discover-without
+          - reuse-without
+          - runtime
+          - runtime-pipeline
       device_observation:
         description: "Explicit opt-in device-observation debug APK; requires observation_target and observation_firmware_latest_url"
         required: false
@@ -68,6 +80,7 @@ jobs:
       FLUTTER_DEV_BUILD_APK: ${{ github.event_name == 'workflow_dispatch' && inputs.build_apk && matrix.os == 'ubuntu-latest' && 'true' || 'false' }}
       # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
       TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
+      TRACE_DEV_OTA_LINK_CANDIDATE: ${{ inputs.ota_link_candidate || 'baseline' }}
       # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
       TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}
       TRACE_DEV_OBSERVATION_TARGET: ${{ inputs.observation_target || '' }}
@@ -87,9 +100,15 @@ jobs:
             /.github/
             /app/bluetooth_flutter_Trace/
             /Tools/flutter/
+            /Tools/ota/p3-4-link-stats/observation_capture.py
+            /Tools/ota/p3-4-link-stats/batch_timing.py
+            /Tools/ota/p3-4-link-stats/acceptance_stats.py
             /Tools/provenance/manifest_profiles.json
             /tests/ota/test_flutter_dev_checks.py
             /tests/ota/test_flutter_dev_apk.py
+            /tests/ota/test_p3_4_observation_capture.py
+            /tests/ota/test_p34_batch_timing.py
+            /tests/ota/test_p34_acceptance_stats.py
             /docs/flutter-development-validation.md
             /docs/acceptance-execution-contract.md
 
@@ -119,7 +138,28 @@ jobs:
 
       - name: Analyze, test and optionally build a debug APK
         working-directory: ${{ github.workspace }}
+        env:
+          TRACE_DEV_FIXED_SIGNING: ${{ env.FLUTTER_DEV_BUILD_APK == 'true' && inputs.app_id_suffix != '' && 'true' || '' }}
+          TRACE_DEV_SIGNING_KEYSTORE_SECRET: ${{ env.FLUTTER_DEV_BUILD_APK == 'true' && inputs.app_id_suffix != '' && secrets.ETRACK_DEV_SIGNING_KEYSTORE || '' }}
         run: python -B Tools/flutter/dev_checks.py --repo-root .
+
+      - name: Verify PHY native lifecycle
+        working-directory: ${{ github.workspace }}
+        run: python -I -S -B Tools/flutter/test_phy_native.py --repo-root .
+
+      - name: Verify App observation snapshot integrity
+        timeout-minutes: 5
+        working-directory: ${{ github.workspace }}
+        run: python -B tests/ota/test_p3_4_observation_capture.py
+
+      - name: Verify batch timing accounting
+        timeout-minutes: 5
+        working-directory: ${{ github.workspace }}
+        run: python -I -S -B tests/ota/test_p34_batch_timing.py
+
+      - name: Verify v2 full-run and stability accounting
+        working-directory: ${{ github.workspace }}
+        run: python -I -S -B -X utf8 tests/ota/test_p34_acceptance_stats.py
 
       - name: Upload development logs (not acceptance evidence)
         if: always()
@@ -129,6 +169,8 @@ jobs:
           path: |
             .cache/flutter-dev-checks/runs/*/result.json
             .cache/flutter-dev-checks/runs/*/logs/*.log
+            .cache/p34-phy-native/runs/*/result.json
+            .cache/p34-phy-native/runs/*/logs/*.log
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 14

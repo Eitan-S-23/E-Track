@@ -55,6 +55,7 @@ typedef enum
 #define QSPI_FIFO_TIMEOUT_MS             100u
 #define QSPI_DMA_TIMEOUT_MS              1000u
 #define QSPI_BUSY_TIMEOUT_MS             2000u
+#define QSPI_BLOCK_ERASE_TIMEOUT_MS      4000u
 
 /* 容量与自检保留区（契约 §0.4：EXT_SELFTEST=0x7F0000 64KB 永久避让）。 */
 #define QSPI_FLASH_CAPACITY              (8u * 1024u * 1024u)  /* contracted 8MB window */
@@ -95,6 +96,12 @@ void qspi_edma_init(void);
   * @retval QSPI_OK 成功；越界/触自检区 QSPI_ERR_REGION；忙等超时 QSPI_ERR_TIMEOUT
   */
 qspi_status_t qspi_erase(uint32_t sec_addr);
+
+/* Opt-in 64 KiB erase. Requires exact alignment and the entire production
+ * range to be allowed. The caller must first establish chip capability. */
+qspi_status_t qspi_erase_64k(uint32_t block_addr);
+/* Caller must establish W25Q128 52h support before invoking this raw port. */
+qspi_status_t qspi_erase_32k(uint32_t block_addr);
 
 /**
   * @brief  qspi erase data（自检专用，仅允许落在自检保留区 0x7F0000..0x7FFFFF 内）
@@ -159,6 +166,14 @@ bool qspi_jedec_is_whitelisted(uint32_t id);
 qspi_status_t qspi_probe_timeout(uint32_t timeout_ms);
 
 qspi_status_t en25qh128a_qspi_xip_init(void);
+
+/* Opt-in restore after a completed erase/program. The caller supplies its
+ * boot-verified JEDEC ID. Only W25Q128 with freshly read SR1=0/SR2=2 skips
+ * status programming; other configurations retain full initialization.
+ * Reset/read failures leave XIP disabled and propagate the original error.
+ * reused_qe is optional and becomes true only on a successful skipped write. */
+qspi_status_t qspi_xip_restore_checked(uint32_t verified_jedec_id,
+                                      bool* reused_qe);
 
 /**
   * @brief  get transfer mode statistics

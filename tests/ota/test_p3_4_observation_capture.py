@@ -1,0 +1,387 @@
+"""Synthetic snapshot-integrity tests, never device or performance evidence."""
+import copy
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+spec = importlib.util.spec_from_file_location("capture", ROOT / "Tools/ota/p3-4-link-stats/observation_capture.py")
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+SENTINEL = "OTAOBS0123456789abcdef01234567"
+TARGET = "AA:BB:CC:DD:EE:FF"
+CAPTURE = "1789990000000000-0123456789abcdef01234567"
+INPUT = dict(packageSha256="a"*64, packageBytes=284466, currentVersionCode=30206,
+             currentImageSha256="b"*64, targetVersionCode=30207,
+             targetImageSha256="c"*64, deviceAddress=TARGET, appLifecycle="resumed")
+
+
+def rows(*, complete=True, outcome="completed"):
+    items = [dict(kind="open", schema=1, captureId=CAPTURE, sentinel=SENTINEL,
+                  target=TARGET, pid=12345, platform="android", openedAt="2026-09-21T12:00:00Z",
+                  limits=dict(captureBytes=67108864, pendingBytes=1048576)),
+             dict(kind="line", message="OTA_LINK_SAMPLE label=query kind=get_info us=10 ok=1")]
+    if complete:
+        items.append(dict(kind="upgrade-start", input=copy.deepcopy(INPUT)))
+        for event in ("MONO_BUDGET_START", "MONO_END_ACK_OK", "MONO_REBOOT_VERIFIED"):
+            items.append(dict(kind="line", message="OTA_MONO " + event + " monoUs=10 wallUs=100"))
+        for phase, version, sha in (("pre-transfer", 30206, "b"*64), ("post-reboot", 30207, "c"*64)):
+            items.append(dict(kind="line", message="OTA_IDENTITY " + json.dumps(
+                dict(phase=phase, versionCode=version, imageSha256=sha, deviceAddress=TARGET))))
+        items.append(dict(kind="upgrade-end", outcome=outcome))
+    return [dict(seq=i, **item) for i, item in enumerate(items, 1)]
+
+
+def encoded(items, footer_changes=None):
+    prefix = b"".join((json.dumps(row, separators=(",", ":")) + "\n").encode() for row in items)
+    outcomes = [row["outcome"] for row in items if row["kind"] == "upgrade-end"]
+    footer = dict(kind="snapshot", schema=1, captureId=CAPTURE, bytes=len(prefix),
+                  records=len(items), producerLines=sum(row["kind"] == "line" for row in items),
+                  upgradeStarts=sum(row["kind"] == "upgrade-start" for row in items),
+                  upgradeEnds=len(outcomes), outcome=outcomes[-1] if outcomes else None,
+                  lost=0, error=None, healthy=True, sha256=hashlib.sha256(prefix).hexdigest(),
+                  exportedAt="2026-09-21T12:01:00Z")
+    footer.update(footer_changes or {})
+    return prefix + (json.dumps(footer, separators=(",", ":")) + "\n").encode()
+
+
+def prefix_rows():
+    items = rows(complete=False)
+    experiment = dict(schema=2, runId="prefix-001", configSha256="e"*64, requestedBaud=460800,
+        reuseGatt=True, withoutResponse=True, endpointHost="fixture.example", senderWindowSegments=8,
+        transferMode="prefix", prefixBytes=32768, **{k: v for k, v in INPUT.items() if k != "appLifecycle"})
+    probe = dict(schema=1, outcome="durable-prefix-aborted", prefixBytes=32768, sentUniqueBytes=32768,
+        uniqueSegments=256, sentTotalBytes=32768, senderWindowSegments=8, beginWriteUs=10,
+        durableAckUs=1000, abortWriteUs=1010, abortAckUs=1020, elapsedUs=990, abortElapsedUs=10,
+        session=1, abortSeq=257, abortStatus=255, durableOff=32768, blockBitmap=0, endSent=False,
+        runId="prefix-001", configSha256="e"*64, deviceAddress=TARGET, sourceVersionCode=30206,
+        sourceImageSha256="b"*64, sourceIdentityVerified=True)
+    items += [dict(kind="line", message="OTA_EXPERIMENT " + json.dumps(experiment)),
+              dict(kind="upgrade-start", input=copy.deepcopy(INPUT)),
+              dict(kind="line", message="OTA_MONO MONO_BUDGET_START monoUs=10 wallUs=100"),
+              dict(kind="line", message="OTA_IDENTITY " + json.dumps(dict(phase="pre-transfer",
+                  versionCode=30206, imageSha256="b"*64, deviceAddress=TARGET)))]
+    items += [dict(kind="line", message=f"OTA_LINK_SAMPLE label=prefix-probe kind=segment_first_send us=20 off={off} len=128")
+              for off in range(0, 32768, 128)]
+    items += [dict(kind="line", message=f"OTA_LINK_SAMPLE label=prefix-probe kind=durable us=30 off={off}")
+              for off in range(0, 32769, 4096)]
+    items += [dict(kind="line", message="OTA_PREFIX_PROBE " + json.dumps(probe)),
+              dict(kind="line", message="OTA_LINK_STATS " + json.dumps(dict(label="prefix-probe", transfer=dict(
+                  startUs=10, endAckUs=None, elapsedUs=None, outcome="fail", segmentsUnique=256, segmentSendTotal=256)))),
+              dict(kind="upgrade-end", outcome="not-completed")]
+    return [dict(row, seq=i) for i, row in enumerate(items, 1)]
+
+
+class CaptureTests(unittest.TestCase):
+    def test_error_record_unknown_fields_and_unbound_counts_are_rejected(self):
+        record = dict(schema=1, kind="first", label="upgrade", attempt=None, reason="epoch",
+            expectedSession=7, expectedEpoch=123, cmd=0x92, session=7, seq=1, payloadBytes=17,
+            status=0x7e, epoch=124, durable=0, accepted=128, credit=8192, us=100)
+        line = "OTA_LINK_ACK_IGNORED " + json.dumps(record)
+        self.assertEqual(m.ack_error_records([line])["ignored"][0]["status"], 0x7e)
+        for changed in ({**record, "unknown": 0}, {**record, "status": True},
+                        {**record, "kind": "unknown"}, {k: v for k, v in record.items() if k != "attempt"}):
+            with self.assertRaises(ValueError):
+                m.ack_error_records(["OTA_LINK_ACK_IGNORED " + json.dumps(changed)])
+        with self.assertRaises(ValueError): m.ack_error_records([line, line])
+        counts = dict(schema=1, kind="counts", label="upgrade", attempt=None, counts={"epoch": 9}, saturated=False, us=200)
+        with self.assertRaises(ValueError):
+            m.ack_error_records(["OTA_LINK_ACK_IGNORED " + json.dumps(counts)])
+        self.assertEqual(m.ack_error_records([line, "OTA_LINK_ACK_IGNORED " + json.dumps(counts)])["sealedCounts"][0]["counts"], {"epoch": 9})
+
+    def setUp(self):
+        self.base = m.checked(ROOT / ".cache/p3-4-observation-capture-tests")
+        self.base.mkdir(exist_ok=True, parents=True)
+        self.tmp = m.checked(Path(tempfile.mkdtemp(prefix="case-", dir=self.base)))
+
+    def tearDown(self):
+        shutil.rmtree(m.checked(self.tmp))
+
+    def verify(self, data, **kwargs):
+        return m.verify(data, sentinel=SENTINEL, target=TARGET, **kwargs)
+
+    def test_complete_envelope_is_not_performance_acceptance(self):
+        data = encoded(rows())
+        result, log = self.verify(data)
+        self.assertEqual(result["rawSha256"], hashlib.sha256(data).hexdigest())
+        self.assertFalse(result["eligibleForThreshold"])
+        self.assertEqual(result["independentAcceptance"], "NOT_RUN")
+        self.assertEqual(result["input"], INPUT)
+        self.assertIn("MONO_REBOOT_VERIFIED", log)
+
+    def test_app_and_host_prefix_registries_match(self):
+        source = (ROOT / "app/bluetooth_flutter_Trace/lib/ota/ota_observation_log.dart").read_text(encoding="utf-8")
+        block = re.search(r"static const prefixes = \[(.*?)\];", source, re.S)
+        self.assertIsNotNone(block)
+        prefixes = re.findall(r"'([^']+)'", block.group(1))
+        self.assertEqual(len(prefixes), len(set(prefixes)))
+        self.assertEqual(tuple(prefixes), m.PREFIXES)
+
+    def test_phy_records_preserve_completed_and_failed_envelopes(self):
+        messages = ("OTA_PHY " + json.dumps(dict(schema=1, status="observed", txPhy=2, rxPhy=2)),
+                    "OTA_PHY_CANCEL nativeAcknowledged=false")
+        for outcome in ("completed", "not-completed"):
+            items = rows(outcome=outcome)
+            items[-1:-1] = [dict(kind="line", message=line) for line in messages]
+            items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+            result, log = self.verify(encoded(items))
+            self.assertEqual(result["outcome"], outcome)
+            self.assertFalse(result["eligibleForThreshold"])
+            for line in messages:
+                self.assertIn(line, log)
+
+    def test_phy_registration_does_not_weaken_line_or_health_guards(self):
+        bad = ["OTA_PHY_UNKNOWN status=observed", "OTA_PHY_CANCELLED nativeAcknowledged=false"]
+        for prefix in ("OTA_PHY ", "OTA_PHY_CANCEL "):
+            bad += [prefix + value for value in ("token=fixture", "https://example.invalid/",
+                "authorization: fixture", "ok\nok", "ok\r", "ok\0", "x" * 16384)]
+        for message in bad:
+            items = rows()
+            items[1]["message"] = message
+            with self.subTest(message=message[:80]), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items))
+        items = rows()
+        items[1]["message"] = "OTA_PHY_CANCEL nativeAcknowledged=false"
+        for change in (dict(lost=1), dict(error="invalid-record"), dict(healthy=False)):
+            with self.subTest(change=change), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items, change))
+
+    def test_prefix_verdict_is_a_diagnostic_not_an_upgrade_or_threshold_pass(self):
+        result, _ = self.verify(encoded(prefix_rows()), require_prefix_probe=True)
+        self.assertEqual(result["outcome"], "not-completed")
+        self.assertEqual(result["prefixProbe"]["sentUniqueBytes"], 32768)
+        self.assertFalse(result["eligibleForThreshold"])
+        self.assertEqual(result["independentAcceptance"], "NOT_RUN")
+
+    def test_prefix_rejects_invalid_timing_coverage_config_and_identity(self):
+        cases = [("OTA_PREFIX_PROBE ", changes) for changes in (
+            dict(prefixBytes=0), dict(sentUniqueBytes=4096), dict(sentTotalBytes=32769),
+            dict(uniqueSegments=32), dict(durableOff=4096), dict(blockBitmap=1),
+            dict(endSent=True), dict(endSent=0), dict(sourceIdentityVerified=1),
+            dict(abortStatus=0), dict(session=0), dict(abortSeq=65536),
+            dict(senderWindowSegments=16), dict(sourceVersionCode=30207),
+            dict(sourceImageSha256="d"*64), dict(beginWriteUs=1000),
+            dict(abortAckUs=999), dict(elapsedUs=True), dict(elapsedUs=999),
+            dict(configSha256="d"*64), dict(runId="different"), dict(extra=1),
+        )] + [("OTA_EXPERIMENT ", changes) for changes in (
+            dict(schema=1), dict(transferMode="full"), dict(prefixBytes=32768.0),
+            dict(senderWindowSegments=4), dict(requestedBaud=123456),
+            dict(packageSha256="f"*64), dict(packageBytes=True), dict(extra=True),
+        )]
+        for prefix, changes in cases:
+            items = prefix_rows()
+            row = next(row for row in items if row.get("message", "").startswith(prefix))
+            value = json.loads(row["message"][len(prefix):])
+            value.update(changes)
+            row["message"] = prefix + json.dumps(value)
+            with self.subTest(prefix=prefix, changes=changes), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_accepts_all_supported_requested_bauds(self):
+        for baud in (115200, 230400, 460800, 921600):
+            items = prefix_rows()
+            row = next(row for row in items if row.get("message", "").startswith("OTA_EXPERIMENT "))
+            value = json.loads(row["message"][len("OTA_EXPERIMENT "):])
+            value["requestedBaud"] = baud
+            row["message"] = "OTA_EXPERIMENT " + json.dumps(value)
+            with self.subTest(baud=baud):
+                self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_requires_original_sender_coverage_and_one_verdict(self):
+        for fragment in ("OTA_PREFIX_PROBE ", "OTA_EXPERIMENT ", "OTA_IDENTITY ",
+                         "OTA_LINK_STATS ", "kind=segment_first_send us=20 off=0 ",
+                         "kind=durable us=30 off=32768"):
+            items = [row for row in prefix_rows() if fragment not in row.get("message", "")]
+            items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+            with self.subTest(fragment=fragment), self.assertRaises(m.CaptureError):
+                self.verify(encoded(items), require_prefix_probe=True)
+        items = prefix_rows()
+        items.insert(-1, copy.deepcopy(next(row for row in items if row.get("message", "").startswith("OTA_PREFIX_PROBE "))))
+        items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+        with self.assertRaises(m.CaptureError): self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_cannot_include_a_full_upgrade_end(self):
+        for event in ("MONO_END_ACK_OK", "MONO_REBOOT_VERIFIED"):
+            items = prefix_rows()
+            items.insert(-1, dict(kind="line", message=f"OTA_MONO {event} monoUs=10 wallUs=100"))
+            items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+            with self.assertRaises(m.CaptureError): self.verify(encoded(items), require_prefix_probe=True)
+
+    def test_prefix_cli_and_failed_import_preserve_original_bytes(self):
+        source, out = self.tmp / "prefix.jsonl", self.tmp / "prefix-import"
+        raw = encoded(prefix_rows())
+        source.write_bytes(raw)
+        cmd = [sys.executable, "-I", "-S", "-B", "-X", "utf8", m.__file__, "extract",
+               "--input", str(source), "--expect-sentinel", SENTINEL, "--expect-target", TARGET,
+               "--require-prefix-probe", "--out-root", str(out)]
+        good = subprocess.run(cmd, cwd=ROOT, capture_output=True, timeout=15)
+        self.assertEqual(good.returncode, 0, good.stderr.decode(errors="replace"))
+        self.assertEqual(json.loads(good.stdout)["prefixProbe"]["prefixBytes"], 32768)
+        self.assertEqual(source.read_bytes(), raw)
+        bad_source, bad_out = self.tmp / "full.jsonl", self.tmp / "not-a-probe"
+        bad_source.write_bytes(encoded(rows()))
+        with self.assertRaises(m.CaptureError):
+            m.extract(bad_source, bad_out, SENTINEL, TARGET, require_prefix_probe=True)
+        self.assertFalse(bad_out.exists())
+
+    def test_query_capture_is_only_a_readiness_check(self):
+        data = encoded(rows(complete=False))
+        result, _ = self.verify(data, require_upgrade=False)
+        self.assertIsNone(result["outcome"])
+        with self.assertRaises(m.CaptureError): self.verify(data)
+
+    def test_experiment_record_is_preserved_without_changing_upgrade_identity(self):
+        items = rows()
+        message = "OTA_EXPERIMENT " + json.dumps(dict(schema=1, runId="b921600-001",
+            configSha256="e" * 64, requestedBaud=921600, reuseGatt=True, withoutResponse=True,
+            endpointHost="fixture.trycloudflare.com"))
+        items.insert(2, dict(kind="line", message=message))
+        for index, item in enumerate(items, 1): item["seq"] = index
+        result, log = self.verify(encoded(items))
+        self.assertEqual(result["input"], INPUT)
+        self.assertIn(message, log)
+        self.assertFalse(result["eligibleForThreshold"])
+
+    def test_experiment_record_does_not_bypass_sensitive_line_rejection(self):
+        items = rows()
+        items[1]["message"] = "OTA_EXPERIMENT https://fixture.invalid/?token=secret"
+        with self.assertRaisesRegex(m.CaptureError, "credential-shaped"):
+            self.verify(encoded(items))
+
+    def test_header_only_or_host_marker_cannot_prove_app_logging(self):
+        items = rows(complete=False)
+        for bad in (items[:1], [items[0], dict(seq=2, kind="line", message="P34_CAPTURE_PROBE host")]):
+            with self.subTest(rows=len(bad)), self.assertRaises(m.CaptureError):
+                self.verify(encoded(bad), require_upgrade=False)
+
+    def test_truncated_or_appended_export_is_rejected(self):
+        data = encoded(rows())
+        for bad in (data[:-1], data[:-100], b"\xef\xbb\xbf"+data, data+b"{}\n", data.replace(b"\n", b"\r\n")):
+            with self.subTest(size=len(bad)), self.assertRaises(m.CaptureError): self.verify(bad)
+
+    def test_digest_and_all_footer_counters_are_checked(self):
+        for changes in (dict(sha256="d"*64), dict(bytes=1), dict(bytes=True), dict(records=1),
+                        dict(producerLines=100), dict(upgradeStarts=0), dict(upgradeEnds=0),
+                        dict(healthy=False), dict(healthy=1), dict(lost=1), dict(lost=False),
+                        dict(error="io-write"), dict(outcome="not-completed"), dict(schema=True)):
+            with self.subTest(changes=changes), self.assertRaises(m.CaptureError):
+                self.verify(encoded(rows(), changes))
+
+    def test_missing_duplicate_and_reordered_rows_fail_even_with_new_hash(self):
+        original = rows()
+        variants = [original[:2]+original[3:], original[:2]+[original[1]]+original[2:],
+                    [original[0], original[2], original[1]]+original[3:]]
+        for value in variants:
+            with self.assertRaises(m.CaptureError): self.verify(encoded(value))
+
+    def test_duplicate_json_keys_rejected_not_last_value_wins(self):
+        data = encoded(rows()).replace(b'"seq":1,', b'"seq":1,"seq":1,', 1)
+        prefix, footer = data.rsplit(b"\n", 2)[:2]
+        meta = json.loads(footer)
+        prefix += b"\n"
+        meta.update(bytes=len(prefix), sha256=hashlib.sha256(prefix).hexdigest())
+        bad = prefix+(json.dumps(meta)+"\n").encode()
+        with self.assertRaisesRegex(m.CaptureError, "duplicate"): self.verify(bad)
+
+    def test_wrong_build_or_target_is_rejected(self):
+        for changes in (dict(sentinel="OTAOBS"+"f"*24), dict(target="different"),
+                        dict(captureId="1789990000000001-"+"f"*24)):
+            items = rows()
+            items[0].update(changes)
+            with self.assertRaises(m.CaptureError): self.verify(encoded(items))
+
+    def test_input_identity_domains_and_unknown_fields(self):
+        for changes in (dict(packageBytes=True), dict(packageBytes=63), dict(currentVersionCode=-1),
+                        dict(targetVersionCode=0x100000000), dict(packageSha256="A"*64),
+                        dict(appLifecycle="assumed-foreground"), dict(deviceAddress="https://invalid/"),
+                        dict(extra="unbound")):
+            items = rows()
+            items[2]["input"].update(changes)
+            with self.subTest(changes=changes), self.assertRaises(m.CaptureError): self.verify(encoded(items))
+
+    def test_multiple_invocations_not_merged_into_one(self):
+        items = rows()
+        items += [dict(seq=len(items)+1, kind="upgrade-start", input=copy.deepcopy(INPUT))]
+        with self.assertRaises(m.CaptureError): self.verify(encoded(items))
+
+    def test_missing_end_is_not_a_complete_capture(self):
+        with self.assertRaises(m.CaptureError): self.verify(encoded(rows()[:-1]), require_upgrade=False)
+
+    def test_success_requires_actual_before_after_identity_and_sender_events(self):
+        for fragment in ("MONO_END_ACK_OK", "MONO_REBOOT_VERIFIED", "MONO_BUDGET_START", "post-reboot", "pre-transfer"):
+            items = [row for row in rows() if fragment not in row.get("message", "")]
+            for i, row in enumerate(items, 1): row["seq"] = i
+            with self.subTest(fragment=fragment), self.assertRaises(m.CaptureError): self.verify(encoded(items))
+
+    def test_changed_post_reboot_sha_cannot_be_called_success(self):
+        items = rows()
+        for row in items:
+            if "post-reboot" in row.get("message", ""):
+                row["message"] = row["message"].replace("c"*64, "d"*64)
+        with self.assertRaises(m.CaptureError): self.verify(encoded(items))
+
+    def test_failed_invocation_can_be_preserved_without_success_events(self):
+        items = rows(outcome="not-completed")
+        items = [row for row in items if not row.get("message", "").startswith(("OTA_IDENTITY", "OTA_MONO"))]
+        for i, row in enumerate(items, 1): row["seq"] = i
+        result, _ = self.verify(encoded(items))
+        self.assertEqual(result["outcome"], "not-completed")
+        self.assertFalse(result["eligibleForThreshold"])
+
+    def test_arbitrary_multiline_or_sensitive_content_is_not_exportable(self):
+        for message in ("ordinary console line", "OTA_MONO token=fixture", "OTA_MONO https://invalid/",
+                        "OTA_LINK_STATS {}\nOTA_MONO fake", "OTA_MONO "+"x"*16384):
+            items = rows()
+            items[1]["message"] = message
+            with self.assertRaises(m.CaptureError): self.verify(encoded(items))
+
+    def test_invalid_input_creates_no_output_and_preserves_source(self):
+        source, out = self.tmp / "source.jsonl", self.tmp / "extracted"
+        data = encoded(rows(), dict(lost=1))
+        source.write_bytes(data)
+        with self.assertRaises(m.CaptureError): m.extract(source, out, SENTINEL, TARGET)
+        self.assertFalse(out.exists())
+        self.assertEqual(data, source.read_bytes())
+
+    def test_scoped_extraction_will_not_overwrite_evidence(self):
+        source, out = self.tmp / "source.jsonl", self.tmp / "extracted"
+        data = encoded(rows())
+        source.write_bytes(data)
+        result = m.extract(source, out, SENTINEL, TARGET)
+        self.assertEqual(source.read_bytes(), data)
+        unwrapped = (out / "observations.log").read_bytes()
+        self.assertEqual(hashlib.sha256(unwrapped).hexdigest(), result["unwrappedSha256"])
+        with self.assertRaises(m.CaptureError): m.extract(source, out, SENTINEL, TARGET)
+
+    def test_outside_worktree_and_prefix_collision_are_rejected(self):
+        source = self.tmp / "source.jsonl"
+        source.write_bytes(encoded(rows()))
+        for out in (ROOT.parent / ("outside-"+self.tmp.name), Path(str(ROOT)+"-other") / self.tmp.name):
+            with self.assertRaises(m.CaptureError): m.extract(source, out, SENTINEL, TARGET)
+            self.assertFalse(out.exists())
+
+    def test_cli_executes_and_returns_nonzero_for_corruption(self):
+        source = self.tmp / "source.jsonl"
+        source.write_bytes(encoded(rows()))
+        cmd = [sys.executable, "-I", "-S", "-B", "-X", "utf8", m.__file__, "extract",
+               "--input", str(source), "--expect-sentinel", SENTINEL, "--expect-target", TARGET,
+               "--out-root", str(self.tmp / "cli")]
+        good = subprocess.run(cmd, cwd=ROOT, capture_output=True, timeout=15)
+        self.assertEqual(0, good.returncode, good.stderr.decode(errors="replace"))
+        source.write_bytes(encoded(rows(), dict(sha256="f"*64)))
+        cmd[-1] = str(self.tmp / "bad-cli")
+        bad = subprocess.run(cmd, cwd=ROOT, capture_output=True, timeout=15)
+        self.assertEqual(2, bad.returncode)
+        self.assertFalse((self.tmp / "bad-cli").exists())
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

@@ -46,7 +46,7 @@ static int roundtrip_once(uint8_t cmd, uint8_t session, uint16_t seq,
 {
     uint8_t wire[OTA_BLE_MAX_FRAME];
     ota_ble_parser_t parser;
-    ota_ble_frame_t frame;
+    ota_ble_frame_t frame = {0};
     ota_ble_parse_result_t result = OTA_BLE_PARSE_IDLE;
     size_t wire_len;
     uint32_t i;

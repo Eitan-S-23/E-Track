@@ -73,6 +73,10 @@ extern "C" {
 /* SD Card configuration */
 #define SD_CARD_BLOCK_SIZE               512         /* 512 bytes per block (standard) */
 
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+int p34_msc_media_ready(uint8_t lun);
+#endif
+
 uint8_t *get_inquiry(uint8_t lun);
 usb_sts_type msc_disk_read(uint8_t lun, uint64_t addr, uint8_t *read_buf, uint32_t len);
 usb_sts_type msc_disk_write(uint8_t lun, uint64_t addr, uint8_t *buf, uint32_t len);

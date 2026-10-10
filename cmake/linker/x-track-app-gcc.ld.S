@@ -8,6 +8,7 @@ _Min_Heap_Size = 0x200;
 _Min_Stack_Size = 0x1000;
 OTA_STACK_RESERVE = 0x2000;
 OTA_STACK_GUARD_SIZE = 0x20;
+PROVIDE(__p34_heap_min = 0);
 
 MEMORY
 {
@@ -58,6 +59,18 @@ SECTIONS
          "Firmware header is not at the contracted offset")
   ASSERT(SIZEOF(.fw_header) == OTA_FW_HEADER_SIZE,
          "Firmware header placeholder must be exactly 96 bytes")
+
+
+#if defined(P34_EARLY_FAULT_VECTORS)
+  .p34_runtime_vectors ALIGN(1024) :
+  {
+    KEEP(*(.p34_runtime_vectors))
+  } > FLASH
+  ASSERT((ADDR(.p34_runtime_vectors) % 1024) == 0, "Runtime VTOR alignment")
+  ASSERT(SIZEOF(.p34_runtime_vectors) == SIZEOF(.isr_vector), "Vector size mismatch")
+  ASSERT(ADDR(.p34_runtime_vectors) >= ADDR(.fw_header) + SIZEOF(.fw_header), "Header overlap")
+  ASSERT(ADDR(.p34_runtime_vectors) + SIZEOF(.p34_runtime_vectors) <= ORIGIN(FLASH) + LENGTH(FLASH), "Vector overflow")
+#endif
 
   .text :
   {
@@ -339,6 +352,8 @@ SECTIONS
   ASSERT(ADDR(._user_heap_stack) + SIZEOF(._user_heap_stack) <=
              ADDR(.ota_stack_guard),
          "A5: Data/heap region overlaps the OTA stack guard area")
+  ASSERT(ADDR(.ota_stack_guard) - ADDR(._user_heap_stack) >= __p34_heap_min,
+         "P34: insufficient system heap for diagnostic runtime")
   ASSERT(__StackLimit == ADDR(.ota_stack),
          "A6: __StackLimit must be derived from ADDR(.ota_stack)")
   ASSERT(__StackGuardStart == ADDR(.ota_stack_guard),
