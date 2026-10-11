@@ -209,5 +209,5 @@ def wait_for(check, seconds, *, interval=.2):
         value = check()
         if value:
             return value
-        time.sleep(interval)
+        time.sleep(min(interval, max(0, deadline - time.monotonic())))
     raise RuntimeError("observation deadline; preserve partial evidence, no replay")

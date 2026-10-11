@@ -167,7 +167,8 @@ def phone_cell(plan, out, args):
             h.require(previous.get("failure", {}).get("stage") == "transfer" and
                 previous["failure"].get("reason") in ("transport:DISCONNECTED", "transport:DEVICE_LINK_CHANGED") and
                 previous.get("finalDurable") == args.checkpoint_kib * 1024, "missing actual checkpoint disconnect")
-        origin = network.start()
+        origin = network.start(deadline=budget.deadline)
+        budget.check()
         phone.start()
         package_path = "app_flutter/firmware/e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu"
         previous_stamp = phone.file_stamp(package_path) if phone.exists(package_path) else None

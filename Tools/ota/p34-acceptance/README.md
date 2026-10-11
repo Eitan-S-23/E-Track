@@ -58,6 +58,24 @@ verified after a fresh same-process query and the downloader's final-file
 replacement. An unchanged cached file is not App selection/readiness. The operator uses the existing notification policy for a necessary UI
 action. No automatic tap or notification is sent by this tool.
 
+`Network.start(deadline=...)` consumes the existing absolute prepare deadline.
+The URL banner and a registered tunnel connection are not HTTPS readiness.
+Only typed DNS `gaierror` 11001 (the observed Windows startup case) or
+`EAI_AGAIN` permits a bounded retry on the **same** tunnel/origin. Metadata and
+the complete package are rechecked; HTTP/TLS/identity/byte errors and read
+timeouts fail without retry. No resolver, proxy, hosts or trust setting changes.
+
+The existing `Process`/Windows Job owns each isolated HTTPS read through
+`live_phone.py --https-read`; this is an internal read helper, not a second
+controller or an alternate live entry. It is needed because `getaddrinfo` runs
+before the socket timeout is applied. Each request has the lesser of its existing
+20/30 s limit and the remaining prepare time. Raw stdout/stderr and real exit
+receipts are retained; exit 75 carries only the recognized DNS error, never a
+success. Polling cannot extend the deadline. Exhaustion or other startup failure
+closes the owned network services, leaves failure evidence, and never starts the
+phone. `Network.close()` is idempotent for the caller's final cleanup. A fix to
+these source files does not modify or reopen a sealed acceptance matrix.
+
 Phone timing is phase-based, not one 300-second window. Host `upgradeStarts=1`
 ends the click wait; the first complete MCU terminal publication begins a new
 terminal-observation budget before the old-App Commander read. Neither poll

@@ -1,16 +1,20 @@
 """Finite live-adapter host tests. Synthetic device bytes are never hardware PASS."""
 import hashlib
-from contextlib import ExitStack
+from contextlib import contextmanager, ExitStack
+import io
 import json
 import os
 from pathlib import Path
 import struct
+import ssl
 import sys
 import tempfile
+import traceback
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 import zlib
+from urllib.error import HTTPError, URLError
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "Tools/ota/p34-acceptance"), str(ROOT / "tests/ota")]
@@ -449,6 +453,309 @@ class LiveRouteTests(unittest.TestCase):
         result = h.read_json(clock / "clock-result.json")
         self.assertEqual(result["max_heartbeat_gap_ns"], 1000000000)
         self.assertFalse(result["independent_acceptance"])
+
+
+class NetworkStartupTests(unittest.TestCase):
+    def setUp(self):
+        parent = h.checked(ROOT / ".cache/p34-live-tests")
+        parent.mkdir(parents=True, exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(prefix="network-", dir=parent)
+        self.addCleanup(self.temp.cleanup)
+        self.out = Path(self.temp.name)
+        source = os.environ.get("P34_REFERENCE_ETU")
+        self.payload = Path(source).read_bytes() if source else service_fixture.container("patch")
+        self.package = h.raw(self.out / "reference.etu", self.payload)
+        self.plan = dict(package=self.package,
+            tools=dict(cloudflared=h.raw(self.out / "synthetic-cloudflared", b"never executed")),
+            images=dict(base=dict(image=dict(sha256=service_fixture.BASE)),
+                        target=dict(image=dict(sha256=service_fixture.TARGET))))
+
+    @staticmethod
+    def reader_program(mode):
+        # Patch network I/O inside the child, not the actual HTTPS-reader entry.
+        return ("import io,os,runpy,socket,sys,time,urllib.request\n"
+                "from urllib.error import URLError\n"
+                "def forbidden(*a,**k): raise AssertionError('real network forbidden')\n"
+                "socket.create_connection=forbidden\n"
+                "class Opener:\n"
+                " def open(self,url,timeout):\n"
+                "  if " + repr(mode) + " == 'block':\n"
+                "   sys.stderr.write('BLOCKING_RESOLVER_FIXTURE pid=%d\\n'%os.getpid());sys.stderr.flush();time.sleep(60)\n"
+                "  if " + repr(mode) + " == 'dns': raise URLError(socket.gaierror(11001,'fixture'))\n"
+                "  return io.BytesIO(b'\\x00\\xfforiginal')\n"
+                "urllib.request.build_opener=lambda *a: Opener()\n"
+                "sys.argv=[" + repr(str(ROOT / "Tools/ota/p34-acceptance/live_phone.py")) + ", '--https-read']\n"
+                "runpy.run_path(sys.argv[0],run_name='__main__')\n")
+
+    @contextmanager
+    def network(self, label="case", *, dns_until=0, dns_code=11001, exit_at=None,
+                request_error=None, metadata_change=None, package_data=None,
+                package_dns_once=False, real_clock=False, block_reader=False):
+        out = h.fresh(self.out / label)
+        world = SimpleNamespace(out=out, now=0.0, tools=[], requests=[], sleeps=[], package_dns=False,
+                                origin="https://synthetic-startup.trycloudflare.com")
+        world.network = p.Network(self.plan, out / "network")
+        real_process = h.Process
+
+        def advance(seconds):
+            world.sleeps.append(seconds)
+            world.now += seconds
+
+        def open_url(url, timeout):
+            world.requests.append(dict(url=url, timeout=timeout, at=world.now))
+            if request_error is not None:
+                raise request_error
+            is_package = url.endswith("/package.etu")
+            if world.now < dns_until or (is_package and package_dns_once and not world.package_dns):
+                world.package_dns |= is_package
+                raise URLError(p.socket.gaierror(dns_code, "synthetic resolver"))
+            if is_package:
+                return io.BytesIO(self.payload if package_data is None else package_data)
+            asset = dict(kind="patch", baseImageSha256=service_fixture.BASE,
+                sha256=self.package["sha256"], sizeBytes=len(self.payload),
+                downloadUrl=world.origin + "/package.etu")
+            asset.update(metadata_change or {})
+            return io.BytesIO(json.dumps(dict(updateAvailable=True, asset=asset)).encode())
+
+        def opener(handler):
+            self.assertEqual(handler.proxies, {})
+            return SimpleNamespace(open=open_url)
+
+        class Tool:
+            def __init__(inner, output, name, argv, env, *, stdin=None):
+                inner.label, inner.closed, inner.stdin = name, False, stdin
+                inner.process = SimpleNamespace(returncode=None)
+                inner.paths = {key: output / (name + "." + key) for key in ("stdout", "stderr", "closed.json")}
+                world.tools.append(inner)
+                if name == "https-tunnel":
+                    h.raw(inner.paths["stderr"], (world.origin + "\n").encode())
+                    h.raw(inner.paths["stdout"], b"")
+
+            def alive(inner):
+                return not inner.closed and (exit_at is None or world.now < exit_at)
+
+            def wait(inner, seconds, success_codes=(0,)):
+                self.assertGreater(seconds, 0)
+                packet = json.loads(inner.stdin)
+                self.assertLessEqual(seconds, packet["timeout"])
+                body, errors = io.BytesIO(), io.StringIO()
+                try:
+                    code = p._https_read(packet, body, errors)
+                except Exception:
+                    code = 1
+                    errors.write(traceback.format_exc())
+                h.raw(inner.paths["stdout"], body.getvalue())
+                h.raw(inner.paths["stderr"], errors.getvalue().encode())
+                inner.process.returncode = code
+                inner.close()
+                h.require(code in success_codes, "standard tool failed; inspect original command streams")
+                return body.getvalue()
+
+            def close(inner, reason="completed"):
+                if inner.closed:
+                    return
+                inner.closed = True
+                if inner.process.returncode is None:
+                    inner.process.returncode = -15
+                h.save(inner.paths["closed.json"], dict(synthetic=True, exit_code=inner.process.returncode, reason=reason))
+
+        def process(output, name, argv, env, *, stdin=None):
+            if name != "https-tunnel" and block_reader:
+                value = real_process(output, name,
+                    [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c", self.reader_program("block")], env, stdin=stdin)
+                world.tools.append(value)
+                return value
+            return Tool(output, name, argv, env, stdin=stdin)
+
+        with ExitStack() as stack:
+            stack.enter_context(patch.object(h, "Process", side_effect=process))
+            stack.enter_context(patch.object(p, "build_opener", side_effect=opener))
+            if not real_clock:
+                stack.enter_context(patch.object(p.time, "monotonic", side_effect=lambda: world.now))
+                stack.enter_context(patch.object(p.time, "sleep", side_effect=advance))
+            try:
+                yield world
+            finally:
+                world.network.close()
+                self.assertFalse(h.listening(world.network.server.server_address[1]) if world.network.server else False)
+                self.assertTrue(all(not tool.alive() for tool in world.tools))
+
+    def assert_failed_closed(self, world):
+        self.assertFalse((world.network.out / "ready.json").exists())
+        self.assertTrue((world.network.out / "startup-failed.json").is_file())
+        self.assertTrue(world.network.closed)
+        self.assertTrue(h.read_json(world.network.out / "closed.json")["tunnel_closed"])
+        self.assertTrue(all(not tool.alive() for tool in world.tools))
+        if world.network.server:
+            self.assertFalse(h.listening(world.network.server.server_address[1]))
+
+    def test_actual_start_recovers_dns_on_one_tunnel_with_original_deadline(self):
+        with self.network(dns_until=2) as world:
+            self.assertEqual(world.network.start(deadline=8), world.origin)
+            self.assertEqual(world.now, 2)
+            self.assertEqual(sum(tool.label == "https-tunnel" for tool in world.tools), 1)
+            self.assertEqual((world.network.out / "https-package.etu").read_bytes(), self.payload)
+            self.assertEqual(h.read_json(world.network.out / "ready.json")["prepare_deadline_monotonic"], 8)
+            self.assertEqual([r["timeout"] for r in world.requests], [8, 7, 6, 6])
+            for number in (1, 2):
+                self.assertEqual(h.read_json(world.network.out / ("https-read-%03d.closed.json" % number))["exit_code"], 75)
+
+    def test_dns_again_and_package_dns_do_not_restart_tunnel(self):
+        for label, options in (("again", dict(dns_until=1, dns_code=p.socket.EAI_AGAIN)),
+                               ("package", dict(package_dns_once=True))):
+            with self.subTest(label=label), self.network(label, **options) as world:
+                world.network.start(deadline=10)
+                self.assertEqual(sum(tool.label == "https-tunnel" for tool in world.tools), 1)
+                self.assertEqual((world.network.out / "https-package.etu").read_bytes(), self.payload)
+
+    def test_permanent_dns_fails_within_original_budget_and_closes(self):
+        with self.network(dns_until=1000) as world:
+            with self.assertRaisesRegex(RuntimeError, "deadline"):
+                world.network.start(deadline=2.25)
+            self.assertEqual(world.now, 2.25)
+            self.assertEqual(world.sleeps, [1, 1, .25])
+            self.assertEqual(sum(tool.label == "https-tunnel" for tool in world.tools), 1)
+            self.assert_failed_closed(world)
+
+    def test_expired_prepare_deadline_never_creates_tunnel(self):
+        with self.network() as world:
+            with self.assertRaisesRegex(RuntimeError, "deadline"):
+                world.network.start(deadline=0)
+            self.assertFalse(world.tools)
+            self.assert_failed_closed(world)
+
+    def test_tunnel_exit_during_dns_wait_fails_without_another_request(self):
+        with self.network(dns_until=100, exit_at=.5) as world:
+            with self.assertRaisesRegex(RuntimeError, "tunnel stopped"):
+                world.network.start(deadline=10)
+            self.assertEqual(len(world.requests), 1)
+            self.assert_failed_closed(world)
+
+    def test_wrong_metadata_is_not_retried_or_downloaded(self):
+        changes = [dict(kind="full"), dict(baseImageSha256="0" * 64), dict(sha256="0" * 64),
+                   dict(sizeBytes=len(self.payload) + 1), dict(downloadUrl="https://different.invalid/package.etu")]
+        for index, change in enumerate(changes):
+            with self.subTest(change=change), self.network(str(index), metadata_change=change) as world:
+                with self.assertRaisesRegex(RuntimeError, "metadata identity"):
+                    world.network.start(deadline=10)
+                self.assertEqual(len(world.requests), 1)
+                self.assert_failed_closed(world)
+
+    def test_wrong_or_short_package_is_not_retried(self):
+        for index, data in enumerate((self.payload[:-1], self.payload + b"x", self.payload[:-1] + bytes([self.payload[-1] ^ 1]))):
+            with self.subTest(index=index), self.network(str(index), package_data=data) as world:
+                with self.assertRaisesRegex(RuntimeError, "original bytes mismatch"):
+                    world.network.start(deadline=10)
+                self.assertEqual(len(world.requests), 2)
+                self.assert_failed_closed(world)
+
+    def test_tls_http_unknown_dns_and_non_dns_errors_are_not_retried(self):
+        errors = [URLError(ssl.SSLCertVerificationError(1, "synthetic certificate")),
+                  HTTPError("https://synthetic.invalid", 503, "synthetic", {}, None),
+                  URLError(p.socket.gaierror(11003, "synthetic permanent resolver error")),
+                  URLError(ConnectionRefusedError("synthetic connection refusal")),
+                  URLError("11001 is text, not a DNS exception")]
+        for index, error in enumerate(errors):
+            with self.subTest(index=index), self.network(str(index), request_error=error) as world:
+                with self.assertRaisesRegex(RuntimeError, "standard tool failed"):
+                    world.network.start(deadline=10)
+                self.assertEqual(len(world.requests), 1)
+                self.assert_failed_closed(world)
+
+    def test_actual_phone_cell_uses_remaining_prepare_time_and_gates_phone(self):
+        for label, ready in (("ready", True), ("not-ready", False)):
+            with self.subTest(label=label), self.network(label, dns_until=597 if ready else 1000) as world:
+                phone = Mock(out=world.out / "phone", deadline=3390)
+                mcu = Mock()
+
+                def inspect(*args):
+                    world.now = 595
+                    return dict(storage=dict(journal=dict(expected_begin_durable=0)))
+
+                def phone_start():
+                    self.assertTrue((world.network.out / "ready.json").is_file())
+                    self.assertEqual(world.now, 597)
+                    raise RuntimeError("stop before any phone I/O")
+
+                mcu.inspect.side_effect = inspect
+                phone.start.side_effect = phone_start
+                args = SimpleNamespace(seconds=3390, run_role="clean", checkpoint_kib=None, previous_cell=None)
+                with patch.object(live, "MCU", return_value=mcu), patch.object(live, "Phone", return_value=phone), \
+                     patch.object(live, "Network", return_value=world.network):
+                    with self.assertRaisesRegex(RuntimeError, "stop before any phone I/O" if ready else "deadline"):
+                        live.phone_cell(self.plan, world.out, args)
+                self.assertEqual(phone.start.call_count, int(ready))
+                phone.provision.assert_not_called()
+                phone.cmd.assert_not_called()
+                self.assertEqual(world.now, 597 if ready else 600)
+
+    def test_actual_isolated_https_reader_preserves_binary_and_typed_dns_exit(self):
+        packet = json.dumps(dict(url="https://synthetic.invalid", timeout=5, limit=100)).encode()
+        for mode, exit_code in (("ok", 0), ("dns", 75)):
+            with self.subTest(mode=mode):
+                data = h.command(self.out, mode, [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c",
+                    self.reader_program(mode)], h.environment(self.out), seconds=10, stdin=packet,
+                    success_codes=(exit_code,))
+                self.assertEqual(data, b"\x00\xfforiginal" if mode == "ok" else b"")
+                self.assertEqual(h.read_json(self.out / (mode + ".closed.json"))["exit_code"], exit_code)
+                if mode == "dns":
+                    self.assertEqual(h.read_json(self.out / "dns.stderr"), dict(dns_errno=11001))
+
+    def test_blocking_resolver_is_killed_by_existing_process_owner(self):
+        packet = json.dumps(dict(url="https://synthetic.invalid", timeout=2, limit=100)).encode()
+        started = p.time.monotonic()
+        reader = h.Process(self.out, "blocking-resolver", [sys.executable, "-I", "-S", "-B", "-X", "utf8",
+            "-c", self.reader_program("block")], h.environment(self.out), stdin=packet)
+        self.addCleanup(reader.close, "fixture_finished")
+
+        def entered():
+            self.assertTrue(reader.alive(), "reader exited before blocking fixture handshake")
+            marker = reader.paths["stderr"].read_text(encoding="utf-8")
+            if not marker.endswith("\n"):
+                return None
+            self.assertRegex(marker, r"^BLOCKING_RESOLVER_FIXTURE pid=[1-9][0-9]*\n$")
+            return int(marker.split("=", 1)[1])
+
+        # Startup is not the fault under test. Actual Network.start/phone_cell
+        # cases above separately verify the unchanged absolute prepare budget.
+        child_pid = h.wait_for(entered, 30)
+        startup_seconds = p.time.monotonic() - started
+        self.assertNotEqual(child_pid, reader.process.pid)
+        wait_child = child_handle = None
+        if os.name == "nt":
+            from ctypes import wintypes
+            kernel = reader.job.kernel
+            kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+            kernel.OpenProcess.restype = wintypes.HANDLE
+            kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+            kernel.WaitForSingleObject.restype = wintypes.DWORD
+            child_handle = kernel.OpenProcess(0x00100000, False, child_pid)  # SYNCHRONIZE
+            self.assertTrue(child_handle, "cannot observe the actual reader process")
+            self.addCleanup(kernel.CloseHandle, child_handle)
+            wait_child = kernel.WaitForSingleObject
+            self.assertEqual(wait_child(child_handle, 0), 258)  # WAIT_TIMEOUT: still running
+
+        termination_started = p.time.monotonic()
+        deadline = termination_started + 2
+        with self.assertRaisesRegex(RuntimeError, "tool timeout"):
+            reader.wait(deadline - p.time.monotonic())
+        termination_seconds = p.time.monotonic() - termination_started
+        self.assertLess(termination_seconds, 17)  # Existing Job/launcher close allowance.
+        self.assertTrue(reader.closed)
+        self.assertFalse(reader.alive())
+        child_wait_result = wait_child(child_handle, 0) if wait_child else None
+        if wait_child:
+            self.assertEqual(child_wait_result, 0)  # WAIT_OBJECT_0: retained child handle signaled
+        receipt = h.read_json(reader.paths["closed.json"])
+        self.assertEqual(receipt["reason"], "timeout_outcome_unknown")
+        self.assertTrue(receipt["stopped_while_running"])
+        self.assertEqual(reader.paths["stdout"].read_bytes(), b"")
+        marker = reader.paths["stderr"].read_text(encoding="utf-8")
+        self.assertIn("BLOCKING_RESOLVER_FIXTURE pid=%d" % child_pid, marker)
+        print("BLOCKING_RESOLVER_PROOF " + json.dumps(dict(marker=marker.strip(),
+            startup_seconds=startup_seconds, timeout_seconds=2, termination_seconds=termination_seconds,
+            reason=receipt["reason"], exit_code=receipt["exit_code"],
+            launcher_exited=not reader.alive(), child_wait_result=child_wait_result)), flush=True)
 
 
 class PhoneCellTests(unittest.TestCase):

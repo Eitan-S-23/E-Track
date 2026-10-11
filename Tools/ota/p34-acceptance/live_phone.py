@@ -2,15 +2,19 @@
 import hashlib
 import json
 import logging
+from pathlib import Path
 import re
 import secrets
 import shlex
+import socket
 import sys
 import threading
 import time
+from urllib.error import URLError
 from urllib.parse import urlencode, urlsplit
 from urllib.request import build_opener, ProxyHandler
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import live_host as h
 
 sys.path.insert(0, str(h.ROOT / "Tools/ota/p3-4-link-stats"))
@@ -18,6 +22,25 @@ import acceptance_stats
 import observation_capture
 
 service = h.host.load("p34_live_service", h.ROOT / "Tools/ota/p3-3-service/service.py")
+DNS_RETRY_CODES = {11001, socket.EAI_AGAIN}
+DNS_RETRY_EXIT = 75
+
+
+def _https_read(request, output, errors):
+    """One read, owned by Process: socket timeouts do not bound getaddrinfo."""
+    h.require(urlsplit(request["url"]).scheme == "https" and
+        0 < request["timeout"] <= 30 and 0 < request["limit"] <= 8 * 1024 * 1024,
+        "invalid bounded HTTPS read")
+    try:
+        with build_opener(ProxyHandler({})).open(request["url"], timeout=request["timeout"]) as response:
+            data = response.read(request["limit"])
+    except URLError as error:
+        if not isinstance(error.reason, socket.gaierror) or error.reason.errno not in DNS_RETRY_CODES:
+            raise
+        errors.write(json.dumps(dict(dns_errno=error.reason.errno)) + "\n")
+        return DNS_RETRY_EXIT
+    output.write(data)
+    return 0
 
 
 def config(plan, run_id, origin, baud, timeout):
@@ -56,8 +79,28 @@ class Network:
         self.plan, self.out = plan, h.fresh(out)
         self.env = h.environment(out)
         self.server = self.thread = self.tunnel = self.log_handler = None
+        self.closed = False
 
-    def start(self):
+    def start(self, *, deadline):
+        h.require(not self.closed and self.server is None, "network owner is single-use; do not replay")
+        try:
+            return self._start(deadline)
+        except BaseException as error:
+            try:
+                h.save(self.out / "startup-failed.json", dict(error_type=type(error).__name__, message=str(error)))
+            finally:
+                self.close()
+            raise
+
+    def _start(self, deadline):
+        h.require(type(deadline) in (int, float), "explicit prepare deadline required")
+
+        def remaining():
+            seconds = deadline - time.monotonic()
+            h.require(0 < seconds <= 18000, "network prepare deadline; preserve originals")
+            return seconds
+
+        remaining()
         cfg = service_config(self.plan, "https://runtime-required.invalid")
         state = service.V2ServiceState(cfg, str(h.ROOT))
         logger = logging.getLogger("p34-live-" + str(self.out))
@@ -74,35 +117,73 @@ class Network:
             "tunnel", "--no-autoupdate", "--protocol", "quic", "--edge-ip-version", "4",
             "--metrics", "127.0.0.1:0", "--url", "http://127.0.0.1:%d" % self.server.server_address[1]], self.env)
         def ready():
+            remaining()
             h.require(self.tunnel.alive(), "HTTPS tunnel stopped before readiness")
             text = self.tunnel.paths["stderr"].read_text(encoding="utf-8", errors="replace")
             urls = set(re.findall(r"https://[a-z0-9-]+\.trycloudflare\.com", text))
             h.require(len(urls) <= 1, "ambiguous HTTPS endpoint")
             return next(iter(urls)) if urls else None
-        origin = h.wait_for(ready, 90)
+        origin = h.wait_for(ready, min(90, remaining()))
         cfg["publicBaseUrl"] = state.public_base_url = origin
         h.save(self.out / "service-config.json", cfg)
         query = dict(appId="trace", deviceModel="e-track-at32f435", channel="stable", currentVersionCode=30286,
             currentImageSha=self.plan["images"]["base"]["image"]["sha256"], hardwareRevision=1,
             layoutId=1, bootVersion=1, protocolVersion=1, appVersionCode=86)
-        opener = build_opener(ProxyHandler({}))
-        with opener.open(origin + service.LATEST_PATH + "?" + urlencode(query), timeout=20) as response:
-            body = json.load(response)
-        asset = body.get("asset", {})
-        h.require(body.get("updateAvailable") is True and asset.get("kind") == "patch" and
-            asset.get("baseImageSha256") == query["currentImageSha"] and
-            asset.get("sha256") == self.plan["package"]["sha256"] and
-            asset.get("sizeBytes") == self.plan["package"]["bytes"] and
-            urlsplit(asset.get("downloadUrl", "")).hostname == urlsplit(origin).hostname, "HTTPS metadata identity")
-        with opener.open(asset["downloadUrl"], timeout=30) as response:
-            downloaded = response.read(self.plan["package"]["bytes"] + 1)
-        h.require(downloaded == h.pinned(self.plan["package"]).read_bytes(), "HTTPS download original bytes mismatch")
+        requests = 0
+
+        def read(url, seconds, limit):
+            nonlocal requests
+            remaining()
+            h.require(self.tunnel.alive(), "HTTPS tunnel stopped before readiness")
+            requests += 1
+            packet = dict(url=url, timeout=min(seconds, remaining()), limit=limit)
+            process = h.Process(self.out, "https-read-%03d" % requests,
+                [sys.executable, "-I", "-S", "-B", "-X", "utf8", Path(__file__), "--https-read"],
+                self.env, stdin=json.dumps(packet).encode("utf-8"))
+            try:
+                data = process.wait(min(seconds, remaining()), success_codes=(0, DNS_RETRY_EXIT))
+                remaining()
+                h.require(self.tunnel.alive(), "HTTPS tunnel stopped before readiness")
+                if process.process.returncode == DNS_RETRY_EXIT:
+                    error = h.read_json(process.paths["stderr"])
+                    h.require(not data and set(error) == {"dns_errno"} and
+                              error["dns_errno"] in DNS_RETRY_CODES, "invalid DNS retry receipt")
+                    return None
+                return data
+            finally:
+                process.close("network_read_finished")
+
+        def available():
+            data = read(origin + service.LATEST_PATH + "?" + urlencode(query), 20, 8 * 1024 * 1024)
+            if data is None:
+                return None
+            body = json.loads(data)
+            asset = body.get("asset", {})
+            h.require(body.get("updateAvailable") is True and asset.get("kind") == "patch" and
+                asset.get("baseImageSha256") == query["currentImageSha"] and
+                asset.get("sha256") == self.plan["package"]["sha256"] and
+                asset.get("sizeBytes") == self.plan["package"]["bytes"] and
+                urlsplit(asset.get("downloadUrl", "")).hostname == urlsplit(origin).hostname, "HTTPS metadata identity")
+            downloaded = read(asset["downloadUrl"], 30, self.plan["package"]["bytes"] + 1)
+            if downloaded is None:
+                return None
+            h.require(downloaded == h.pinned(self.plan["package"]).read_bytes(), "HTTPS download original bytes mismatch")
+            remaining()
+            return downloaded
+
+        downloaded = h.wait_for(available, remaining(), interval=1)
+        remaining()
         h.raw(self.out / "https-package.etu", downloaded)
+        remaining()
+        h.require(self.tunnel.alive(), "HTTPS tunnel stopped before readiness")
         h.save(self.out / "ready.json", dict(origin=origin, package=h.record(self.out / "https-package.etu"),
-            service_config=h.record(self.out / "service-config.json"), local_port=self.server.server_address[1]))
+            service_config=h.record(self.out / "service-config.json"), local_port=self.server.server_address[1],
+            prepare_deadline_monotonic=deadline, https_requests=requests))
         return origin
 
     def close(self):
+        if self.closed:
+            return
         if self.tunnel:
             self.tunnel.close("planned_service_close")
         if self.server:
@@ -115,6 +196,7 @@ class Network:
             self.log_handler.close()
         h.save(self.out / "closed.json", dict(thread_closed=not self.thread or not self.thread.is_alive(),
             tunnel_closed=not self.tunnel or not self.tunnel.alive()))
+        self.closed = True
 
 
 class Phone:
@@ -371,3 +453,10 @@ class Phone:
             h.require(not h.listening(self.port), "ADB port still live; do not claim closure")
         h.save(self.out / "closed.json", dict(private_port=self.port, listening=h.listening(self.port),
             server_closed=not self.server or not self.server.alive()))
+
+
+if __name__ == "__main__":
+    h.require(sys.argv[1:] == ["--https-read"] and Path.cwd() == h.ROOT and
+              sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
+              "isolated candidate HTTPS read entry required")
+    raise SystemExit(_https_read(json.load(sys.stdin), sys.stdout.buffer, sys.stderr))
