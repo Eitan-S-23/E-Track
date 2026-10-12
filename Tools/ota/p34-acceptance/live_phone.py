@@ -24,6 +24,8 @@ import observation_capture
 service = h.host.load("p34_live_service", h.ROOT / "Tools/ota/p3-3-service/service.py")
 DNS_RETRY_CODES = {11001, socket.EAI_AGAIN}
 DNS_RETRY_EXIT = 75
+HEALTH_FIELDS = {"schema", "captureId", "time", "records", "bytes", "producerLines",
+                 "upgradeStarts", "upgradeEnds", "outcome", "lost", "error", "healthy"}
 
 
 def _https_read(request, output, errors):
@@ -257,7 +259,7 @@ class Phone:
             h.require(digest in self.plan["replace_apk_sha256"], "foreign APK; no replacement")
             for capture in self.captures():
                 health = self.health(capture)
-                h.require(health.get("upgradeStarts") == health.get("upgradeEnds"), "active/unknown old upgrade")
+                h.require(health["upgradeStarts"] == health["upgradeEnds"], "active/unknown old upgrade")
         result = self.cmd(["install", "-r", "--no-streaming", h.pinned(self.plan["apk"])], seconds=180)
         h.require(result.strip().splitlines()[-1:] == [b"Success"], "APK installation result unknown")
         self.installed()
@@ -290,6 +292,15 @@ class Phone:
         h.require(len(data) == int(size), "App file changed during read")
         return data
 
+    def live_file(self, remote, limit=64 * 1024 * 1024 + 8192, *, allow_empty=False):
+        # One open sees one atomically replaced health file, or a live log prefix.
+        h.require(type(limit) is int and 0 < limit <= observation_capture.MAX_BYTES + 8192,
+                  "invalid live App read limit")
+        self.safe_remote(remote)
+        data = self.cmd(["exec-out", "run-as", self.pkg, "head", "-c", str(limit + 1), remote], seconds=60)
+        h.require((0 if allow_empty else 1) <= len(data) <= limit, "App live file size/missing original")
+        return data
+
     def file_stamp(self, remote):
         self.safe_remote(remote)
         stamp = self.cmd(["exec-out", "run-as", self.pkg, "stat", "-c", "%d:%i:%s:%Y:%Z", remote]).strip().decode()
@@ -297,7 +308,9 @@ class Phone:
         return stamp
 
     def downloaded(self, remote, previous_stamp):
-        h.require(self.health(self.capture).get("upgradeStarts") == 0, "transfer started before qualification")
+        health = self.health(self.capture)
+        h.require(health["healthy"], "App observation failed; retrieve existing originals")
+        h.require(health["upgradeStarts"] == 0, "transfer started before qualification")
         if not self.exists(remote) or self.file_stamp(remote) == previous_stamp:
             return False
         prefix = self.file("files/p34-observations/" + self.capture + "/events.jsonl", prefix=True)
@@ -344,8 +357,8 @@ class Phone:
             h.require(hashlib.sha256(raw).hexdigest() in owned, "unknown runtime config; collect/reconcile first")
             h.raw(self.out / "previous-runtime.json", raw)
         for name in previous:
-            health = json.loads(self.file("files/p34-observations/" + name + "/health.json", 8192))
-            h.require(health.get("upgradeStarts", 0) == health.get("upgradeEnds", 0), "active/unknown App transfer; no stop/restart")
+            health = self.health(name)
+            h.require(health["upgradeStarts"] == health["upgradeEnds"], "active/unknown App transfer; no stop/restart")
         h.require(len(previous) < 8, "App capture store full; archive verified owned captures first")
         self.cmd(["shell", "am", "force-stop", self.pkg])
         h.require(not self.cmd(["shell", "pidof", self.pkg], success_codes=(0, 1)).strip(), "App stop outcome unknown")
@@ -371,16 +384,59 @@ class Phone:
         return int(pid), capture
 
     def health(self, capture):
-        return json.loads(self.file("files/p34-observations/" + capture + "/health.json", 8192))
+        h.require(isinstance(capture, str) and re.fullmatch(r"\d{13,20}-[0-9a-f]{24}", capture),
+                  "invalid App capture identity")
+        raw = self.live_file("files/p34-observations/" + capture + "/health.json", 8192)
+        h.require(raw.endswith(b"\n"), "App health snapshot is truncated")
+        value = observation_capture.decode(raw)
+        h.require(set(value) == HEALTH_FIELDS, "App health fields missing/unknown")
+        h.require(type(value["schema"]) is int and value["schema"] == 1 and value["captureId"] == capture,
+                  "App health schema/capture identity")
+        h.require(isinstance(value["time"], str) and value["time"], "App health timestamp missing")
+        h.require(all(observation_capture.uint(value[key]) for key in
+            ("records", "bytes", "producerLines", "upgradeStarts", "upgradeEnds", "lost")),
+            "App health integer domain")
+        starts, ends = value["upgradeStarts"], value["upgradeEnds"]
+        h.require(0 <= ends <= starts <= 1 and
+            value["records"] == 1 + value["producerLines"] + starts + ends and
+            0 < value["bytes"] <= observation_capture.MAX_BYTES, "App health counter domain")
+        h.require((value["outcome"] is None if ends == 0 else
+                   value["outcome"] in ("completed", "not-completed")), "App health outcome/count mismatch")
+        h.require(value["error"] is None or isinstance(value["error"], str) and bool(value["error"]),
+                  "App health error domain")
+        h.require(type(value["healthy"]) is bool and
+            value["healthy"] == (value["lost"] == 0 and value["error"] is None), "App health status mismatch")
+        return value
 
     def finished(self, pid, capture, cfg):
         remote = "files/p34-observations/" + capture
-        health = self.health(capture)
-        h.require(health.get("upgradeStarts") == health.get("upgradeEnds") == 1, "not one sealed upgrade")
-        names = self.cmd(["exec-out", "run-as", self.pkg, "ls", "-1", remote]).decode().splitlines()
-        snapshots = sorted(n for n in names if re.fullmatch(r"snapshot-[1-4]\.jsonl", n))
-        h.require(snapshots, "finished snapshot missing; never replay a successful OTA")
-        raw = self.file(remote + "/" + snapshots[-1])
+        deadline = min(self.deadline - 5, self.operation_deadline if self.operation_deadline is not None
+                       else time.monotonic() + 300)
+
+        def ready():
+            health = self.health(capture)
+            h.require(health["healthy"], "App observation failed; retrieve existing originals")
+            h.require(health["upgradeStarts"] == health["upgradeEnds"] == 1, "not one sealed upgrade")
+            names = self.cmd(["exec-out", "run-as", self.pkg, "ls", "-1", remote]).decode().splitlines()
+            snapshots = sorted(n for n in names if re.fullmatch(r"snapshot-[1-4]\.jsonl", n))
+            for name in reversed(snapshots):
+                candidate = remote + "/" + name
+                data = self.live_file(candidate, allow_empty=True)
+                if not data.endswith(b"\n"):
+                    continue
+                footer = observation_capture.decode(data.rsplit(b"\n", 2)[-2])
+                if footer.get("kind") != "snapshot":
+                    continue
+                # Query-only exports are not upgrade results, even if sealed.
+                if footer.get("upgradeStarts") == footer.get("upgradeEnds") == 0:
+                    continue
+                # The footer seals the file. Retain the strict immutable readback.
+                h.require(self.file(candidate) == data, "completed App snapshot changed during read")
+                return data
+            return None
+
+        raw = h.wait_for(ready, max(0, deadline - time.monotonic()), interval=.5)
+        h.require(time.monotonic() < deadline, "App snapshot phase deadline; preserve originals, no OTA replay")
         path = self.out / "snapshot.jsonl"
         h.raw(path, raw)
         value = acceptance_stats.inspect(raw, self.plan["sentinel"], self.plan["ble_address"])
@@ -438,10 +494,13 @@ class Phone:
         for name in ("health.json", "events.jsonl", *("snapshot-%d.jsonl" % n for n in range(1, 5))):
             try:
                 if self.exists(remote + "/" + name):
-                    collected.append(h.raw(self.out / "salvage" / name, self.file(remote + "/" + name, allow_empty=True)))
+                    limit = 8192 if name == "health.json" else observation_capture.MAX_BYTES + 8192
+                    data = self.live_file(remote + "/" + name, limit, allow_empty=True)
+                    collected.append(h.raw(self.out / "salvage" / name, data))
             except Exception as error:
                 errors.append(dict(file=name, error=str(error)))
-        h.save(self.out / "salvage.json", dict(originals=collected, errors=errors, no_restart_or_ota=True))
+        h.save(self.out / "salvage.json", dict(originals=collected, errors=errors,
+            read_mode="bounded-live-prefix; not a finished snapshot", no_restart_or_ota=True))
 
     def close(self):
         if self.server:

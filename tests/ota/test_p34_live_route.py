@@ -47,6 +47,45 @@ class LiveRouteTests(unittest.TestCase):
             apk=dict(sha256="f" * 64), owned_configs=[])
         return p.Phone(plan, self.out / "phone", 900)
 
+    @staticmethod
+    def health_bytes(capture, **changes):
+        value = dict(schema=1, captureId=capture, time="2026-10-12T09:55:15.933207Z",
+            records=3, bytes=640, producerLines=2, upgradeStarts=0, upgradeEnds=0,
+            outcome=None, lost=0, error=None, healthy=True)
+        value.update(changes)
+        return (json.dumps(value) + "\n").encode()
+
+    @contextmanager
+    def app_files(self, phone, files, *, listing=None):
+        """Mock only remote commands; execute the actual guards/readers/parsers."""
+        calls = []
+        def command(args, **kwargs):
+            calls.append(args)
+            if args[-3:] == ["readlink", "-f", "."]:
+                return ("/data/user/0/" + phone.pkg + "\n").encode()
+            if args[3:5] == ["sh", "-c"]:
+                self.assertTrue(args[-1].startswith("test ! -L "), args)
+                return b""
+            remote, mode = args[-1], args[3]
+            if mode == "ls":
+                names = listing() if listing else sorted(path.rsplit("/", 1)[-1]
+                    for path in files if path.rsplit("/", 1)[0] == remote)
+                return ("\n".join(names) + "\n").encode()
+            self.assertIn(mode, ("head", "cat", "stat"), args)
+            raw = files[remote](mode) if callable(files[remote]) else files[remote]
+            if mode == "stat":
+                return str(len(raw)).encode()
+            return raw[:int(args[-2])] if mode == "head" else raw
+        with patch.object(phone, "cmd", side_effect=command):
+            yield calls
+
+    def snapshot_files(self, phone, raw):
+        remote = "files/p34-observations/" + phone.capture
+        footer = json.loads(raw.splitlines()[-1])
+        health = {key: footer[key] for key in p.HEALTH_FIELDS - {"time"}}
+        return {remote + "/health.json": self.health_bytes(phone.capture, **health),
+                remote + "/snapshot-1.jsonl": raw}
+
     def test_standard_process_binary_streams_exit_and_timeout_are_preserved(self):
         env = h.environment(self.out)
         result = h.command(self.out, "binary", [sys.executable, "-I", "-S", "-B", "-c",
@@ -339,6 +378,116 @@ class LiveRouteTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 phone.safe_remote("files/new.json")
 
+    def test_live_health_accepts_atomic_replacement_without_stat_cat_race(self):
+        phone = self.phone()
+        capture = "1790000000000000-" + "1" * 24
+        old = self.health_bytes(capture, records=10, producerLines=9, bytes=9999)
+        new = self.health_bytes(capture, records=11, producerLines=10, bytes=10000)
+        self.assertNotEqual(len(old), len(new))
+        files = {"files/p34-observations/" + capture + "/health.json":
+                 lambda mode: old if mode == "stat" else new}
+        with self.app_files(phone, files) as calls:
+            value = phone.health(capture)
+        self.assertEqual(value["producerLines"], 10)
+        self.assertEqual([args[3] for args in calls].count("head"), 1)
+        self.assertFalse(any(args[3] in ("stat", "cat") for args in calls))
+        self.assertEqual(next(args for args in calls if args[3] == "head")[-2], "8193")
+
+    def test_health_schema_identity_and_counters_fail_closed(self):
+        phone = self.phone()
+        capture = "1790000000000000-" + "1" * 24
+        cases = [b"{}\n", b"[]\n", b"{broken}\n", b"\xff\n"]
+        changes = [dict(schema=True), dict(schema=2), dict(captureId="other"),
+            dict(time=None), dict(records=0), dict(records=4), dict(bytes=0),
+            dict(bytes=p.observation_capture.MAX_BYTES + 1), dict(producerLines="2"),
+            dict(upgradeStarts=False), dict(upgradeStarts="0"), dict(upgradeEnds="0"),
+            dict(upgradeStarts=2, records=5), dict(upgradeEnds=1, records=4),
+            dict(lost=-1), dict(lost=1.5), dict(healthy=1), dict(healthy=False),
+            dict(error=12), dict(error="io-write"), dict(outcome="completed")]
+        cases.extend(self.health_bytes(capture, **change) for change in changes)
+        cases += [self.health_bytes(capture).replace(b'"schema": 1', b'"schema": 1, "schema": 1'),
+                  self.health_bytes(capture).replace(b'"lost": 0', b'"lost": NaN')]
+        for raw in cases:
+            with self.subTest(raw=raw), self.app_files(phone, {
+                    "files/p34-observations/" + capture + "/health.json": raw}):
+                with self.assertRaises((RuntimeError, p.observation_capture.CaptureError)):
+                    phone.health(capture)
+
+    def test_live_health_bounds_truncation_and_io_errors_are_not_retried(self):
+        phone = self.phone()
+        capture = "1790000000000000-" + "1" * 24
+        remote = "files/p34-observations/" + capture + "/health.json"
+        for raw in (b"", b" " * 8193, self.health_bytes(capture)[:-1]):
+            with self.subTest(raw=raw[:30]), self.app_files(phone, {remote: raw}) as calls:
+                with self.assertRaises(RuntimeError):
+                    phone.health(capture)
+                self.assertEqual(sum(args[3] == "head" for args in calls), 1)
+        def failed_read(mode):
+            raise OSError("actual ADB read failure")
+        with self.app_files(phone, {remote: failed_read}) as calls:
+            with self.assertRaisesRegex(OSError, "actual ADB"):
+                phone.health(capture)
+        self.assertEqual(sum(args[3] == "head" for args in calls), 1)
+
+    def test_unhealthy_capture_cannot_reach_download_readiness(self):
+        phone = self.phone()
+        phone.capture = "1790000000000000-" + "1" * 24
+        remote = "files/p34-observations/" + phone.capture + "/health.json"
+        for changes in (dict(lost=1, healthy=False), dict(error="io-write", healthy=False)):
+            with self.subTest(changes=changes), self.app_files(phone, {
+                    remote: self.health_bytes(phone.capture, **changes)}), \
+                    patch.object(phone, "exists") as exists:
+                with self.assertRaisesRegex(RuntimeError, "App observation failed"):
+                    phone.downloaded("app_flutter/firmware/reference.etu", None)
+                exists.assert_not_called()
+
+    def test_provision_rejects_unknown_or_active_health_before_mutation(self):
+        phone = self.phone()
+        capture = "1790000000000000-" + "1" * 24
+        remote = "files/p34-observations/" + capture + "/health.json"
+        cases = [b"{}\n", self.health_bytes(capture, captureId="other"),
+            self.health_bytes(capture, upgradeStarts="0", upgradeEnds="0"),
+            self.health_bytes(capture, upgradeStarts=1, records=4)]
+        for raw in cases:
+            with self.subTest(raw=raw), self.app_files(phone, {remote: raw}) as calls, \
+                    patch.object(phone, "captures", return_value={capture}), \
+                    patch.object(phone, "exists", return_value=False):
+                with self.assertRaises((RuntimeError, p.observation_capture.CaptureError)):
+                    phone.provision({})
+                self.assertFalse(any("force-stop" in args for args in calls))
+        self.assertFalse((phone.out / "runtime.json").exists())
+
+    def test_install_rejects_unknown_health_before_replacement(self):
+        phone = self.phone()
+        phone.plan["replace_apk_sha256"] = ["a" * 64]
+        capture = "1790000000000000-" + "1" * 24
+        with self.app_files(phone, {"files/p34-observations/" + capture + "/health.json": b"{}\n"}), \
+                patch.object(phone, "start"), patch.object(phone, "captures", return_value={capture}):
+            remote_command = phone.cmd
+            def command(args, **kwargs):
+                if args[:4] == ["shell", "pm", "list", "packages"]:
+                    return ("package:" + phone.pkg).encode()
+                if args[:3] == ["shell", "pm", "path"]:
+                    return b"package:/data/app/synthetic/base.apk"
+                if args[:2] == ["shell", "sha256sum"]:
+                    return ("a" * 64 + "  /data/app/synthetic/base.apk").encode()
+                self.assertNotEqual(args[0], "install")
+                return remote_command(args, **kwargs)
+            with patch.object(phone, "cmd", side_effect=command):
+                with self.assertRaisesRegex(RuntimeError, "health fields"):
+                    phone.install()
+
+    def test_static_file_keeps_exact_size_and_limit_checks(self):
+        phone = self.phone()
+        remote = "app_flutter/firmware/reference.etu"
+        with self.app_files(phone, {remote: lambda mode: b"old" if mode == "stat" else b"new!"}):
+            with self.assertRaisesRegex(RuntimeError, "changed during read"):
+                phone.file(remote)
+        with self.app_files(phone, {remote: b"oversize"}) as calls:
+            with self.assertRaisesRegex(RuntimeError, "file size"):
+                phone.file(remote, 3)
+        self.assertFalse(any(args[3] == "cat" for args in calls))
+
     def test_old_cached_package_alone_cannot_signal_start_ready(self):
         phone = self.phone()
         phone.pid, phone.capture = 123, "capture"
@@ -349,7 +498,7 @@ class LiveRouteTests(unittest.TestCase):
             if remote.endswith("events.jsonl"):
                 return b"".join((json.dumps(row) + "\n").encode() for row in records)
             return b"synthetic download"
-        with patch.object(phone, "health", return_value=dict(upgradeStarts=0)), patch.object(phone, "exists", return_value=True), \
+        with patch.object(phone, "health", return_value=dict(upgradeStarts=0, healthy=True)), patch.object(phone, "exists", return_value=True), \
              patch.object(phone, "file_stamp", side_effect=lambda path: current[0]), patch.object(phone, "file", side_effect=file):
             self.assertFalse(phone.downloaded("app_flutter/firmware/reference.etu", old))
             current[0] = "1:3:18:101:101"
@@ -373,9 +522,7 @@ class LiveRouteTests(unittest.TestCase):
     def test_actual_snapshot_reader_requires_pid_runtime_and_original_bytes(self):
         phone = self.phone()
         raw, cfg = self.snapshot(phone)
-        with patch.object(phone, "health", return_value=dict(upgradeStarts=1, upgradeEnds=1)), \
-             patch.object(phone, "cmd", return_value=b"events.jsonl\nsnapshot-1.jsonl\n"), \
-             patch.object(phone, "file", return_value=raw):
+        with self.app_files(phone, self.snapshot_files(phone, raw)):
             value = phone.finished(phone.pid, phone.capture, cfg)
             self.assertTrue(value["success"])
         self.assertEqual((phone.out / "snapshot.jsonl").read_bytes(), raw)
@@ -384,13 +531,137 @@ class LiveRouteTests(unittest.TestCase):
     def test_wrong_runtime_stamp_keeps_snapshot_and_cannot_be_archived(self):
         phone = self.phone()
         raw, cfg = self.snapshot(phone, wrong_stamp=True)
-        with patch.object(phone, "health", return_value=dict(upgradeStarts=1, upgradeEnds=1)), \
-             patch.object(phone, "cmd", return_value=b"snapshot-1.jsonl\n"), patch.object(phone, "file", return_value=raw):
+        with self.app_files(phone, self.snapshot_files(phone, raw)):
             with self.assertRaisesRegex(RuntimeError, "runtime config"):
                 phone.finished(phone.pid, phone.capture, cfg)
         self.assertEqual((phone.out / "snapshot.jsonl").read_bytes(), raw)
         with self.assertRaisesRegex(RuntimeError, "unverified capture"):
             phone.archive_capture()
+
+    def test_finished_waits_for_snapshot_creation_and_footer_in_original_budget(self):
+        phone = self.phone()
+        raw, cfg = self.snapshot(phone)
+        files = self.snapshot_files(phone, raw)
+        snapshot = "files/p34-observations/" + phone.capture + "/snapshot-1.jsonl"
+        now = [0.0]
+        phone.deadline, phone.operation_deadline = 10, 4
+        versions = (b"", b"", raw.rsplit(b"\n", 2)[0] + b"\n", raw[:-4], raw)
+        files[snapshot] = lambda mode: versions[min(int(now[0] * 2), 4)]
+        def sleep(seconds):
+            now[0] += seconds
+        with patch.object(p.time, "monotonic", side_effect=lambda: now[0]), \
+                patch.object(p.time, "sleep", side_effect=sleep), \
+                self.app_files(phone, files, listing=lambda: [] if now[0] == 0 else ["snapshot-1.jsonl"]):
+            value = phone.finished(phone.pid, phone.capture, cfg)
+        self.assertTrue(value["success"])
+        self.assertEqual(now[0], 2)
+        self.assertEqual(phone.operation_deadline, 4)
+        self.assertEqual((phone.out / "snapshot.jsonl").read_bytes(), raw)
+
+    def test_finished_missing_partial_and_query_only_snapshots_share_deadline(self):
+        phone = self.phone()
+        raw, cfg = self.snapshot(phone)
+        rows = [json.loads(line) for line in raw.splitlines()]
+        query = [row for row in rows[:-1] if row["kind"] not in ("upgrade-start", "upgrade-end")]
+        for index, row in enumerate(query, 1):
+            row["seq"] = index
+        prefix = b"".join((json.dumps(row) + "\n").encode() for row in query)
+        footer = dict(rows[-1], records=len(query), bytes=len(prefix), sha256=hashlib.sha256(prefix).hexdigest(),
+                      upgradeStarts=0, upgradeEnds=0, outcome=None)
+        query_raw = prefix + (json.dumps(footer) + "\n").encode()
+        header = (json.dumps(query[0]) + "\n").encode()
+        header_footer = dict(footer, records=1, producerLines=0, bytes=len(header),
+                             sha256=hashlib.sha256(header).hexdigest())
+        header_only = header + (json.dumps(header_footer) + "\n").encode()
+        for pending in (None, raw[:-4], query_raw, header_only):
+            files = self.snapshot_files(phone, raw)
+            snapshot = "files/p34-observations/" + phone.capture + "/snapshot-1.jsonl"
+            if pending is None:
+                del files[snapshot]
+            else:
+                files[snapshot] = pending
+            now = [0.0]
+            phone.deadline, phone.operation_deadline = 10, 1.5
+            def sleep(seconds):
+                now[0] += seconds
+            with self.subTest(pending=None if pending is None else len(pending)), \
+                    patch.object(p.time, "monotonic", side_effect=lambda: now[0]), \
+                    patch.object(p.time, "sleep", side_effect=sleep), self.app_files(phone, files):
+                with self.assertRaisesRegex(RuntimeError, "observation deadline"):
+                    phone.finished(phone.pid, phone.capture, cfg)
+            self.assertEqual(now[0], 1.5)
+            self.assertFalse((phone.out / "snapshot.jsonl").exists())
+
+    def test_finished_rejects_sealed_corruption_without_waiting(self):
+        phone = self.phone()
+        raw, cfg = self.snapshot(phone)
+        prefix, footer_raw, _ = raw.rsplit(b"\n", 2)
+        footer = json.loads(footer_raw)
+        footer["sha256"] = "0" * 64
+        damaged = prefix + b"\n" + (json.dumps(footer) + "\n").encode()
+        with self.app_files(phone, self.snapshot_files(phone, damaged)), patch.object(p.time, "sleep") as sleep:
+            with self.assertRaisesRegex(p.observation_capture.CaptureError, "SHA-256 mismatch"):
+                phone.finished(phone.pid, phone.capture, cfg)
+            sleep.assert_not_called()
+        self.assertEqual((phone.out / "snapshot.jsonl").read_bytes(), damaged)
+
+    def test_finished_rejects_same_size_replacement_after_footer(self):
+        phone = self.phone()
+        raw, cfg = self.snapshot(phone)
+        files = self.snapshot_files(phone, raw)
+        changed = raw.replace(b'"seq":1,', b'"seq":9,', 1)
+        self.assertTrue(raw != changed and len(raw) == len(changed), "fixture must change bytes, not size")
+        files["files/p34-observations/" + phone.capture + "/snapshot-1.jsonl"] = \
+            lambda mode: changed if mode == "cat" else raw
+        with self.app_files(phone, files), patch.object(p.time, "sleep") as sleep:
+            with self.assertRaisesRegex(RuntimeError, "completed App snapshot changed"):
+                phone.finished(phone.pid, phone.capture, cfg)
+            sleep.assert_not_called()
+
+    def test_finished_propagates_read_error_without_retry(self):
+        phone = self.phone()
+        raw, cfg = self.snapshot(phone)
+        files = self.snapshot_files(phone, raw)
+        def failed_read(mode):
+            raise OSError("actual ADB snapshot read failure")
+        files["files/p34-observations/" + phone.capture + "/snapshot-1.jsonl"] = failed_read
+        with self.app_files(phone, files), patch.object(p.time, "sleep") as sleep:
+            with self.assertRaisesRegex(OSError, "actual ADB snapshot"):
+                phone.finished(phone.pid, phone.capture, cfg)
+            sleep.assert_not_called()
+
+    def test_salvage_keeps_growing_and_partial_originals_without_restart(self):
+        phone = self.phone()
+        phone.capture = "1790000000000000-" + "1" * 24
+        phone.server = SimpleNamespace(alive=lambda: True)
+        remote = "files/p34-observations/" + phone.capture
+        originals = {"health.json": self.health_bytes(phone.capture),
+            "events.jsonl": b'{"seq":1}\n{"seq":2}\n', "snapshot-1.jsonl": b'{"seq":1}\n{"seq":'}
+        files = {remote + "/" + name: (lambda mode, raw=raw: raw[:-1] if mode == "stat" else raw)
+                 for name, raw in originals.items()}
+        with self.app_files(phone, files) as calls, patch.object(phone, "exists", side_effect=lambda path: path in files):
+            phone.salvage()
+        receipt = h.read_json(phone.out / "salvage.json")
+        self.assertEqual(receipt["errors"], [])
+        self.assertEqual(len(receipt["originals"]), 3)
+        self.assertIn("not a finished snapshot", receipt["read_mode"])
+        self.assertFalse(any(args[3] in ("stat", "cat", "rm", "force-stop") for args in calls))
+        for name, raw in originals.items():
+            self.assertEqual((phone.out / "salvage" / name).read_bytes(), raw)
+
+    def test_salvage_preserves_other_originals_after_one_read_error(self):
+        phone = self.phone()
+        phone.capture = "1790000000000000-" + "1" * 24
+        phone.server = SimpleNamespace(alive=lambda: True)
+        remote = "files/p34-observations/" + phone.capture
+        def failed_read(mode):
+            raise OSError("health read failed")
+        files = {remote + "/health.json": failed_read, remote + "/events.jsonl": b"exact partial bytes"}
+        with self.app_files(phone, files), patch.object(phone, "exists", side_effect=lambda path: path in files):
+            phone.salvage()
+        receipt = h.read_json(phone.out / "salvage.json")
+        self.assertEqual(receipt["errors"], [dict(file="health.json", error="health read failed")])
+        self.assertEqual((phone.out / "salvage/events.jsonl").read_bytes(), b"exact partial bytes")
 
     def test_capture_archive_verifies_all_bytes_before_bounded_unlink(self):
         phone = self.phone()
