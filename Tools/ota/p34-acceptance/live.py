@@ -1,7 +1,9 @@
 """Finite P3-4 command entry. Hardware needs the actual frozen contract gate."""
 import argparse
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -37,12 +39,114 @@ PHONE_CLOSE_SECONDS = 60
 DEFAULT_PHONE_SECONDS = sum(PHONE_PHASE_SECONDS.values()) + PHONE_SALVAGE_SECONDS + PHONE_CLOSE_SECONDS
 
 
+class StartNotices:
+    """Thin operator adapter: send(kind, text, seconds) must verify its real receipt.
+
+    Poll while the existing live process runs; an error withdraws its invitation,
+    not its collectors. Inspect error only after collecting the live process exit.
+    """
+    START_TEXT = "\u624b\u673a\u7aef\u5347\u7ea7\u5305\u548c\u67e5\u8be2\u5df2\u6838\u5bf9\u3002\u8bf7\u5728 {expires_at} \u524d\u4ec5\u70b9\u4e00\u6b21\u5f00\u59cb BLE \u5347\u7ea7\uff08\u53d1\u4fe1\u65f6\u5269\u4f59 {remaining} \u79d2\uff09\u3002\u8fc7\u671f\u540e\u4e0d\u8981\u5f00\u59cb\uff1b\u5df2\u7ecf\u5f00\u59cb\u5219\u4fdd\u6301 App \u524d\u53f0\u3001\u4eae\u5c4f\u548c\u8fde\u63a5\uff0c\u7b49\u5f85\u5b8c\u6210\uff0c\u4e0d\u8981\u53d6\u6d88\u6216\u91cd\u8bd5\u3002\u65e0\u9700\u56de\u590d\u804a\u5929\u3002"
+    EXPIRED_TEXT = "\u672c\u6b21\u5f00\u59cb\u9080\u8bf7\u5df2\u5931\u6548\u3002\u82e5\u5c1a\u672a\u5f00\u59cb\uff0c\u8bf7\u4e0d\u8981\u518d\u70b9\u5347\u7ea7\uff1b\u5982\u679c\u5df2\u7ecf\u5f00\u59cb\uff0c\u8bf7\u4fdd\u6301 App \u524d\u53f0\u3001\u4eae\u5c4f\u548c\u8fde\u63a5\uff0c\u8ba9\u672c\u6b21\u5347\u7ea7\u7ed3\u675f\uff0c\u4e0d\u8981\u53d6\u6d88\u3001\u91cd\u8bd5\u6216\u5207\u56de\u804a\u5929\u3002\u91c7\u96c6\u6b63\u5728\u6709\u754c\u6536\u5c3e\uff0c\u65e0\u9700\u56de\u590d\u3002"
+
+    def __init__(self, out, package, send):
+        self.out, self.package, self.send = h.checked(out), package, send
+        self.error = None
+
+    def _withdraw(self, reason):
+        path = self.out / "start-withdrawn.json"
+        if not path.exists():
+            h.save(path, dict(reason=reason, monotonic=time.monotonic(), no_ota_cancel=True))
+
+    def _send_once(self, kind, body, seconds, ready, *, deadline=None):
+        intent = self.out / ("notice-" + kind + ".intent.json")
+        if intent.exists():
+            try:
+                sent = self.out / ("notice-" + kind + ".sent.json")
+                h.require(sent.is_file(), "previous notification result is unknown")
+                receipt = h.read_json(sent)
+                h.require(receipt.get("delivered") is True and h.pinned(receipt["intent"]) == intent.resolve(),
+                          "previous notification delivery receipt is invalid")
+            except Exception as error:
+                self.error = error
+                self._withdraw("previous notification outcome must not be retried")
+            return  # Includes unknown outcomes: never resend an invitation.
+        h.save(intent, dict(kind=kind, body=body, ready=h.record(ready),
+            attempted_monotonic=time.monotonic(), seconds=seconds, no_chat_reply_required=True))
+        if kind == "start":
+            if time.monotonic() >= deadline:
+                self._withdraw("start deadline reached before notification invocation")
+                return
+            if any((self.out / name).exists() for name in
+                   ("start-observed.json", "start-expired.json", "start-withdrawn.json", "failed.json")):
+                return
+            seconds = min(seconds, deadline - time.monotonic())
+        try:
+            h.require(self.send(kind, body, seconds) is True, "notification delivery not confirmed")
+            h.save(self.out / ("notice-" + kind + ".sent.json"),
+                   dict(delivered=True, monotonic=time.monotonic(), intent=h.record(intent)))
+        except Exception as error:
+            self.error = error
+            h.save(self.out / ("notice-" + kind + ".failed.json"),
+                   dict(error_type=type(error).__name__, message=str(error), no_automatic_retry=True))
+            self._withdraw("notification result missing or failed")
+
+    def poll(self, *, owner_alive):
+        h.require(type(owner_alive) is bool, "explicit live owner state required")
+        ready_path = self.out / "start-ready.json"
+        if not owner_alive or not ready_path.is_file():
+            return
+        expired = lambda: any((self.out / name).exists() for name in
+            ("start-expired.json", "start-withdrawn.json", "failed.json"))
+        if expired():
+            return self._send_once("expired", self.EXPIRED_TEXT, 30, ready_path)
+        if (self.out / "start-observed.json").exists():
+            return
+        try:
+            ready = h.read_json(ready_path)
+            phase_path = h.pinned(ready["phase"])
+            h.require(phase_path == (self.out / "phase-start.json").resolve(), "foreign start phase")
+            phase = h.read_json(phase_path)
+            started, deadline = phase["started_monotonic"], phase["deadline_monotonic"]
+            h.require(all(type(x) in (int, float) and math.isfinite(x) for x in (started, deadline)) and
+                phase["phase"] == "start" and deadline > started and
+                deadline - started == PHONE_PHASE_SECONDS["start"], "invalid original start boundary")
+            state = ready["start_state"]
+            h.require(type(ready["pid"]) is int and ready["pid"] > 0 and
+                isinstance(ready["capture"], str) and bool(ready["capture"]) and
+                isinstance(ready["run_id"], str) and bool(ready["run_id"]) and
+                state == dict(pid=ready["pid"], capture=ready["capture"], run_id=ready["run_id"],
+                              upgradeStarts=0, upgradeEnds=0) and
+                type(state["upgradeStarts"]) is int and type(state["upgradeEnds"]) is int,
+                "missing or mismatched explicit start state")
+            h.require(datetime.fromisoformat(ready["expires_at"]).utcoffset() is not None,
+                      "start expiry display needs an explicit timezone")
+            for key, leaf in (("runtime", "runtime.json"), ("package", "downloaded.etu")):
+                h.require(h.pinned(ready[key]) == (self.out / "phone" / leaf).resolve(),
+                          "notification input belongs to another cell")
+            h.require(all(ready["package"][k] == self.package[k] for k in ("bytes", "sha256")),
+                      "notification package differs from reference")
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                self._withdraw("original start deadline reached")
+            elif not expired() and not (self.out / "start-observed.json").exists():
+                self._send_once("start", self.START_TEXT.format(expires_at=ready["expires_at"],
+                    remaining=math.floor(remaining)), min(30, remaining), ready_path, deadline=deadline)
+            if time.monotonic() >= deadline:
+                self._withdraw("start invitation expired, including delivery time")
+        except Exception as error:
+            self.error = error
+            self._withdraw("invalid start notification admission")
+        if expired():
+            self._send_once("expired", self.EXPIRED_TEXT, 30, ready_path)
+
+
 class PhoneBudget:
     def __init__(self, phone, out):
         self.phone, self.out = phone, out
-        self.phase, self.deadline = None, None
+        self.phase, self.deadline, self.entered = None, None, set()
 
     def enter(self, phase):
+        h.require(phase not in self.entered, "phone phase cannot be restarted: " + phase)
         now = time.monotonic()
         seconds = PHONE_SALVAGE_SECONDS if phase == "salvage" else PHONE_PHASE_SECONDS[phase]
         required = seconds + PHONE_CLOSE_SECONDS
@@ -56,6 +160,7 @@ class PhoneBudget:
             "insufficient phone phase budget before %s: need %.1fs, have %.1fs; do not invite transfer" %
             (phase, required, available))
         self.phase, self.deadline = phase, now + seconds
+        self.entered.add(phase)
         self.phone.operation_deadline = self.deadline
         h.save(self.out / ("phase-" + phase + ".json"), dict(phase=phase,
             started_monotonic=now, deadline_monotonic=self.deadline,
@@ -153,6 +258,9 @@ def phone_cell(plan, out, args):
     phone = Phone(plan, out / "phone", args.seconds)
     budget = PhoneBudget(phone, out)
     error = None
+    pid = capture = cfg = rtt = terminal_probe = None
+    terminal_state = dict(attempted=False, captured=False)
+    start_deadline = None
     try:
         budget.enter("prepare")
         before = mcu.inspect("base", "pre-transfer-current-boot")
@@ -183,43 +291,82 @@ def phone_cell(plan, out, args):
         h.wait_for(lambda: phone.downloaded(package_path, previous_stamp), PHONE_PHASE_SECONDS["download"], interval=1)
         budget.check()
         budget.enter("start")
-        h.save(out / "start-ready.json", dict(pid=pid, capture=capture, runtime=h.record(phone.out / "runtime.json"),
+        start_deadline = budget.deadline
+        initial_health = phone.health(capture)
+        budget.check()
+        h.require(initial_health["healthy"] is True and
+                  initial_health["upgradeStarts"] == initial_health["upgradeEnds"] == 0,
+                  "transfer started before the start invitation")
+        ready = dict(pid=pid, capture=capture, run_id=args.run_id,
+            start_state=dict(pid=pid, capture=capture, run_id=args.run_id, upgradeStarts=0, upgradeEnds=0),
+            phase=h.record(out / "phase-start.json"),
+            expires_at=(datetime.now(timezone.utc) + timedelta(seconds=budget.deadline-time.monotonic())).astimezone().isoformat(timespec="seconds"),
+            runtime=h.record(phone.out / "runtime.json"),
             package=h.record(phone.out / "downloaded.etu"), role=args.run_role, checkpoint_kib=args.checkpoint_kib,
             phase_budgets_seconds=PHONE_PHASE_SECONDS, salvage_seconds=PHONE_SALVAGE_SECONDS,
             close_seconds=PHONE_CLOSE_SECONDS,
-            next_user_action="tap Start BLE transfer once in the original UI; any physical fault follows the frozen operator command"))
+            next_user_action="use StartNotices; invitation expires at the original phase deadline; never start after expiry")
+        h.require(not (out / "start-ready.json").exists(), "start invitation already exists")
+        h.host.io.write_json(h.ROOT, out / "start-ready.json", ready, replace=True)
         print("P34_START_READY " + str(out / "start-ready.json"), flush=True)
         decoded = None
+
+        def mark_started(source):
+            path = out / "start-observed.json"
+            if not path.exists():
+                h.save(path, dict(pid=pid, capture=capture, run_id=args.run_id, source=source,
+                    monotonic=time.monotonic(), within_start_window=time.monotonic() < start_deadline,
+                    scope="host observation, not an exact user tap timestamp"))
 
         def collectors_alive():
             h.require((decoded is not None or mcu.logger.alive()) and network.tunnel.alive(),
                       "collector/service exited; no OTA replay")
 
-        def terminal_capture():
-            collectors_alive()
+        def terminal_lines():
             data = rtt.read_bytes()
             lines = [line for line in data.splitlines(keepends=True) if line.startswith(b"P34_METRICS ") and line.endswith(b"\n")]
+            h.require(len(lines) <= 1, "duplicate terminal metrics; wrong session/reader")
+            return lines
+
+        def terminal_ready():
+            return not terminal_state["attempted"] and bool(terminal_lines())
+
+        def terminal_capture():
+            if budget.phase != "salvage":
+                collectors_alive()
+            if terminal_state["attempted"]:
+                return None
+            lines = terminal_lines()
             if not lines:
                 return None
-            h.require(len(lines) == 1, "duplicate terminal metrics; wrong session/reader")
-            if budget.phase != "terminal":
+            terminal_state["attempted"] = True
+            if budget.phase not in ("terminal", "salvage"):
                 budget.enter("terminal")
             mcu.stop_logger()
             result = metrics.from_rtt(rtt.read_bytes())
-            mcu.transfer_snapshot(bytes.fromhex(lines[0].strip()[12:].decode("ascii")))
+            mark_started("MCU terminal publication")
+            mcu.transfer_snapshot(bytes.fromhex(lines[0].strip()[12:].decode("ascii")), deadline=budget.deadline)
             budget.check()
+            terminal_state["captured"] = True
             return result
+        terminal_probe = terminal_capture
         while True:
             budget.check()
+            h.require(not (out / "start-withdrawn.json").exists(), "start invitation withdrawn; preserve original outcome")
             if decoded is None:
                 decoded = terminal_capture()
-            health = phone.health(capture)
+            try:
+                health = phone.health(capture, terminal_ready=terminal_ready)
+            except h.ObservationReady:
+                continue
             budget.check()
             h.require(health.get("lost") == 0 and health.get("error") is None, "App observation failed; retrieve existing originals")
             starts, ends = health.get("upgradeStarts"), health.get("upgradeEnds")
             h.require(type(starts) is int and type(ends) is int and 0 <= ends <= starts <= 1,
                       "unexpected App upgrade count; preserve original capture")
             collectors_alive()
+            if starts == 1:
+                mark_started("App health checkpoint")
             if starts == 1 and budget.phase == "start":
                 budget.enter("transfer")
             if starts == ends == 1:
@@ -267,10 +414,69 @@ def phone_cell(plan, out, args):
             role=args.run_role, checkpoint_kib=args.checkpoint_kib, independent_acceptance=False))
     except BaseException as caught:
         error = caught
+        drain_start = budget.phase in ("start", "transfer", "terminal") and terminal_probe is not None
+        if (out / "start-ready.json").exists():
+            h.save(out / "start-expired.json", dict(error_type=type(caught).__name__, message=str(caught),
+                start_deadline_monotonic=start_deadline, observed_monotonic=time.monotonic(),
+                no_new_start=True, no_ota_cancel=True, original_error_preserved=True))
+            print("P34_START_EXPIRED " + str(out / "start-expired.json"), flush=True)
         try:
             budget.enter("salvage")
-            phone.salvage()
-            budget.check()
+            if drain_start:
+                # Expiry ends admission, not the observation of a possibly late OTA.
+                # Do not reset the terminal budget or block it with bulk ADB reads.
+                last_health, health_error, terminal_error = None, None, None
+                complete = False
+                while time.monotonic() < budget.deadline:
+                    if not terminal_state["attempted"] and terminal_error is None:
+                        try:
+                            value = terminal_probe()
+                            if value is not None:
+                                h.save(out / "salvage-metrics.json", value)
+                        except Exception as probe_error:
+                            terminal_error = str(probe_error)
+                    if time.monotonic() >= budget.deadline:
+                        break
+                    if health_error is None:
+                        try:
+                            last_health = phone.health(capture, terminal_ready=terminal_ready if terminal_error is None else None)
+                            budget.check()
+                            starts, ends = last_health["upgradeStarts"], last_health["upgradeEnds"]
+                            h.require(type(starts) is int and type(ends) is int and 0 <= ends <= starts <= 1,
+                                      "unknown late-upgrade state")
+                            if starts:
+                                mark_started("App health checkpoint during failure drain")
+                            if terminal_error is None and terminal_ready():
+                                continue
+                            if starts == ends == 1:
+                                complete = True
+                                break
+                        except h.ObservationReady:
+                            continue
+                        except Exception as read_error:
+                            health_error = str(read_error)
+                    time.sleep(min(.5, max(0, budget.deadline-time.monotonic())))
+                retrieved = False
+                try:
+                    if complete and time.monotonic() < budget.deadline:
+                        phone.salvage()
+                        budget.check()
+                        receipt = phone.out / "salvage.json"
+                        if receipt.is_file():
+                            saved = h.read_json(receipt)
+                            retrieved = bool(saved.get("originals")) and not saved.get("errors")
+                finally:
+                    h.save(out / "start-drain.json", dict(deadline_monotonic=budget.deadline,
+                        ended_monotonic=time.monotonic(), last_health=last_health,
+                        health_error=health_error, terminal_error=terminal_error, terminal=dict(terminal_state),
+                        complete_observed=complete, original_error_preserved=True,
+                        no_restart_or_ota=True, pending_phone_retrieval=not retrieved,
+                        retained_files_require_strict_verification=True))
+                # Otherwise all existing ADB stdout and RTT remain original evidence;
+                # retrieving phone files later never authorizes another transfer.
+            else:
+                phone.salvage()
+                budget.check()
         except BaseException as salvage_error:
             h.save(out / "salvage-failed.json", dict(error=str(salvage_error)))
     finally:

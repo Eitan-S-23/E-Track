@@ -2,6 +2,7 @@
 import csv
 import hashlib
 import io
+import math
 import os
 import re
 import struct
@@ -189,11 +190,23 @@ class MCU:
         self.bound[role] = result
         return result
 
-    def execute(self, commands, reads, label, *, seconds=180):
+    @staticmethod
+    def remaining(seconds, deadline):
+        h.require(type(seconds) in (int, float) and math.isfinite(seconds),
+                  "finite MCU operation allowance required")
+        if deadline is not None:
+            h.require(type(deadline) in (int, float) and math.isfinite(deadline),
+                      "finite MCU observation deadline required")
+            seconds = min(seconds, deadline - time.monotonic())
+        h.require(seconds > 0, "MCU observation deadline; preserve existing originals")
+        return seconds
+
+    def execute(self, commands, reads, label, *, seconds=180, deadline=None):
         h.require(self.logger is None, "Commander must not race the RTT reader")
+        self.remaining(seconds, deadline)
         self.count += 1
         out = h.fresh(self.out / ("%04d-" % self.count + label))
-        self.foreign_debuggers(out)
+        self.foreign_debuggers(out, deadline=deadline)
         paths = {name: h.checked(out / (name + ".bin")) for name in reads}
         lines = list(START)
         for command in commands:
@@ -211,16 +224,19 @@ class MCU:
             "-If", "SWD", "-Speed", "1000", "-USB", str(self.plan["probe_serial"]),
             "-AutoConnect", "0", "-ExitOnError", "1", "-NoGui", "1",
             "-SettingsFile", out / "settings.jlink", "-Log", out / "sdk.log",
-            "-CommandFile", out / "commands.jlink"], self.env, seconds=seconds)
+            "-CommandFile", out / "commands.jlink"], self.env,
+            seconds=self.remaining(seconds, deadline), deadline=deadline)
         data = {}
         for name, size in reads.items():
             h.require(paths[name].is_file() and paths[name].stat().st_size == size, "missing/short original readback")
             data[name] = paths[name].read_bytes()
+        self.remaining(seconds, deadline)
         return data, console.decode("utf-8", "replace"), out
 
-    def foreign_debuggers(self, out):
+    def foreign_debuggers(self, out, *, deadline=None):
         h.require(os.name == "nt", "this physical device route requires the authorized Windows host")
-        raw = h.command(out, "processes", ["tasklist", "/FO", "CSV", "/NH"], self.env, seconds=15)
+        raw = h.command(out, "processes", ["tasklist", "/FO", "CSV", "/NH"], self.env,
+                        seconds=self.remaining(15, deadline), deadline=deadline)
         names = {row[0].lower() for row in csv.reader(io.StringIO(raw.decode("utf-8", "replace"))) if row}
         excluded = {"jlink.exe", "jlinkrttlogger.exe", "jlinkrttviewer.exe", "jlinkrttclient.exe",
                     "jlinkgdbserver.exe", "jlinkgdbservercl.exe"}
@@ -311,8 +327,11 @@ class MCU:
             self.logger.close("planned_capture_stop_not_a_success_verdict")
             self.logger = None
 
-    def transfer_snapshot(self, raw_metrics):
+    def transfer_snapshot(self, raw_metrics, *, deadline=None):
         """After END/terminal publication, before reboot: read, never halt/apply a write."""
+        if deadline is not None:
+            h.require("base" in self.bound, "terminal observation requires the prebound original base")
+            self.remaining(180, deadline)
         bound = self.bind("base")
         table = bound["table"]
         requested = [("header_before", 0x08010400, 96),
@@ -324,7 +343,8 @@ class MCU:
             ("vtor", REGISTERS["vtor"], 4), ("wdt", 0x40003004, 8),
             ("tick0", table["SystemTickCount"][0], 4), "sleep 100",
             ("tick1", table["SystemTickCount"][0], 4), ("header_after", 0x08010400, 96)]
-        data, _, out = self.execute(requested, {row[0]: row[2] for row in requested if isinstance(row, tuple)}, "terminal-before-reboot")
+        data, _, out = self.execute(requested, {row[0]: row[2] for row in requested if isinstance(row, tuple)},
+                                   "terminal-before-reboot", deadline=deadline)
         header = bound["image"].read_bytes()[0x400:0x460]
         h.require(data["header_before"] == data["header_after"] == header and data["metrics"] == raw_metrics,
                   "terminal stack/clock window missed or MCU reset; preserve OTA, do not replay")

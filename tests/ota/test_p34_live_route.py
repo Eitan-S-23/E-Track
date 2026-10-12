@@ -113,6 +113,144 @@ class LiveRouteTests(unittest.TestCase):
         self.assertIn(b"--previous-cell", text)
         self.assertIn(b"--contract", text)
 
+    def test_real_readonly_child_yields_to_terminal_and_is_reaped(self):
+        env = h.environment(self.out)
+        def terminal():
+            output = self.out / "yielding.stdout"
+            return output.is_file() and b"HEALTH_READ_ENTERED" in output.read_bytes()
+        with self.assertRaises(h.ObservationReady):
+            h.command(self.out, "yielding", [sys.executable, "-I", "-S", "-B", "-c",
+                "import time;print('HEALTH_READ_ENTERED',flush=True);time.sleep(30)"],
+                env, seconds=15, read_ready=terminal)
+        receipt = h.read_json(self.out / "yielding.closed.json")
+        self.assertEqual(receipt["reason"], "readonly_query_yielded_to_terminal")
+        self.assertTrue(receipt["stopped_while_running"])
+        self.assertIsInstance(receipt["exit_code"], int)
+        self.assertIn(b"HEALTH_READ_ENTERED", (self.out / "yielding.stdout").read_bytes())
+
+    def test_readonly_watch_cannot_refresh_timeout_or_swallow_probe_errors(self):
+        env = h.environment(self.out)
+        command = [sys.executable, "-I", "-S", "-B", "-c", "import time;time.sleep(30)"]
+        with self.assertRaisesRegex(RuntimeError, "timeout"):
+            h.command(self.out, "watch-timeout", command, env, seconds=.2, read_ready=lambda: False)
+        self.assertEqual(h.read_json(self.out / "watch-timeout.closed.json")["reason"], "timeout_outcome_unknown")
+        def failed_probe():
+            raise ValueError("damaged terminal marker")
+        with self.assertRaisesRegex(ValueError, "damaged terminal"):
+            h.command(self.out, "probe-error", command, env, seconds=15, read_ready=failed_probe)
+        self.assertEqual(h.read_json(self.out / "probe-error.closed.json")["reason"], "caller_failed")
+
+    def test_terminal_readiness_cannot_mask_an_observed_nonzero_exit(self):
+        for exited_before_poll in (True, False):
+            with self.subTest(exited_before_poll=exited_before_poll):
+                owned = h.Process.__new__(h.Process)
+                owned.argv = ["synthetic-read-only"]
+                owned.process = Mock()
+                owned.process.poll.return_value = 7 if exited_before_poll else None
+                owned.process.wait.return_value = 7
+                owned.close = Mock()
+                ready = Mock(return_value=True) if exited_before_poll else Mock(side_effect=[False, True])
+                with self.assertRaisesRegex(RuntimeError, "standard tool failed") as caught:
+                    owned.wait(10, read_ready=ready)
+                self.assertNotIsInstance(caught.exception, h.ObservationReady)
+                if exited_before_poll:
+                    ready.assert_not_called()
+                    owned.process.wait.assert_not_called()
+                else:
+                    self.assertEqual(ready.call_count, 1)
+                    owned.process.wait.assert_called_once()
+
+    def test_health_priority_hook_is_cleared_before_other_commands(self):
+        phone = self.phone()
+        phone.server = Mock()
+        capture = "1700000000000000-" + "a" * 24
+        ready = lambda: True
+        def read(out, label, argv, env, **kwargs):
+            self.assertIs(kwargs["read_ready"], ready)
+            raise h.ObservationReady("terminal ready")
+        with patch.object(h, "listening", return_value=True), patch.object(h, "command", side_effect=read):
+            with self.assertRaises(h.ObservationReady):
+                phone.health(capture, terminal_ready=ready)
+        self.assertIsNone(phone.read_ready)
+        with patch.object(h, "listening", return_value=True), patch.object(h, "command", return_value=b"device") as cmd:
+            phone.cmd(["get-state"])
+        self.assertIsNone(cmd.call_args.kwargs["read_ready"])
+        self.assertEqual(cmd.call_args.kwargs["deadline"], phone.deadline - 5)
+
+    def test_absolute_command_deadline_includes_process_creation(self):
+        process_type = h.Process
+        for elapsed in (.75, 1.25):
+            with self.subTest(elapsed=elapsed):
+                now = [0.0]
+                owned = process_type.__new__(process_type)
+                owned.argv = ["synthetic-read-only"]
+                owned.process = Mock()
+                owned.process.wait.return_value = 0
+                owned.close = Mock()
+                path = self.out / ("absolute-%s.stdout" % elapsed)
+                h.raw(path, b"original")
+                owned.paths = dict(stdout=path)
+                def construct(*args, **kwargs):
+                    now[0] += elapsed
+                    return owned
+                with patch.object(h.time, "monotonic", lambda: now[0]), \
+                     patch.object(h, "Process", side_effect=construct):
+                    if elapsed < 1:
+                        self.assertEqual(h.command(self.out, "synthetic", [], {}, seconds=1, deadline=1), b"original")
+                        owned.process.wait.assert_called_once_with(timeout=.25)
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, "tool timeout"):
+                            h.command(self.out, "synthetic", [], {}, seconds=1, deadline=1)
+                        owned.process.wait.assert_not_called()
+                        owned.close.assert_any_call("timeout_outcome_unknown")
+        with patch.object(h.time, "monotonic", return_value=1), patch.object(h, "Process") as construct:
+            with self.assertRaisesRegex(RuntimeError, "before launch"):
+                h.command(self.out, "expired", [], {}, seconds=1, deadline=1)
+        construct.assert_not_called()
+
+    def test_mcu_process_check_and_commander_share_absolute_deadline(self):
+        mcu = m.MCU(dict(probe_serial=123456), self.out / "mcu")
+        now, calls = [0.0], []
+        def command(out, label, argv, env, **kwargs):
+            calls.append((label, kwargs["seconds"]))
+            self.assertEqual(kwargs["deadline"], 5)
+            now[0] += 2
+            return b""
+        with patch.object(m.time, "monotonic", lambda: now[0]), \
+             patch.object(m, "os", SimpleNamespace(name="nt")), \
+             patch.object(mcu, "tool", return_value=Path(sys.executable)), \
+             patch.object(h, "command", side_effect=command):
+            mcu.execute([], {}, "bounded", deadline=5)
+            self.assertEqual(calls, [("processes", 5), ("commander", 3)])
+            with self.assertRaisesRegex(RuntimeError, "observation deadline"):
+                mcu.execute([], {}, "expired", deadline=4)
+            self.assertEqual(len(calls), 2)
+        for deadline in (True, float("nan"), float("inf")):
+            with self.assertRaisesRegex(RuntimeError, "finite MCU"):
+                m.MCU.remaining(180, deadline)
+
+    def test_mcu_does_not_launch_commander_after_precheck_uses_remainder(self):
+        mcu = m.MCU(dict(probe_serial=123456), self.out / "mcu")
+        now, calls = [0.0], []
+        def command(out, label, argv, env, **kwargs):
+            calls.append(label)
+            now[0] = 6
+            return b""
+        with patch.object(m.time, "monotonic", lambda: now[0]), \
+             patch.object(m, "os", SimpleNamespace(name="nt")), \
+             patch.object(mcu, "tool", return_value=Path(sys.executable)), \
+             patch.object(h, "command", side_effect=command):
+            with self.assertRaisesRegex(RuntimeError, "observation deadline"):
+                mcu.execute([], {}, "spent-precheck", deadline=5)
+        self.assertEqual(calls, ["processes"])
+
+    def test_terminal_deadline_cannot_trigger_a_new_symbol_binding(self):
+        mcu = m.MCU({}, self.out / "mcu")
+        with patch.object(mcu, "bind") as binding, \
+             self.assertRaisesRegex(RuntimeError, "prebound original base"):
+            mcu.transfer_snapshot(b"synthetic", deadline=999)
+        binding.assert_not_called()
+
     def test_uncertain_device_action_retains_lock_and_blocks_next_action(self):
         # Patch only the lock root; all writes still pass the real boundary guard.
         with patch.object(h, "ROOT", self.out):
@@ -1044,7 +1182,7 @@ class PhoneCellTests(unittest.TestCase):
              snapshot_read=0, boot=0, readback=0, archive=0,
              health_error=None, collector_exit=None, command_failure=False,
              archive_error=False, close_error=False, missing_metrics=False,
-             terminal_error=False, ota_success=True):
+             terminal_error=False, ota_success=True, health_delay=0, withdraw_at=None):
         out = h.fresh(self.out / label)
         now, calls = [0.0], []
         start_at = prepare + download + user_delay
@@ -1052,6 +1190,9 @@ class PhoneCellTests(unittest.TestCase):
 
         def advance(delay):
             now[0] += delay
+            if withdraw_at is not None and now[0] >= withdraw_at and not (out / "start-withdrawn.json").exists():
+                h.save(out / "start-withdrawn.json", dict(reason="synthetic late notification result",
+                    monotonic=now[0], no_ota_cancel=True))
 
         def event(name, delay=0):
             calls.append((name, now[0]))
@@ -1070,7 +1211,13 @@ class PhoneCellTests(unittest.TestCase):
             h.raw(phone.out / "downloaded.etu", b"synthetic package\n")
             return True
 
-        def health(*args):
+        def health(*args, terminal_ready=None):
+            if not (out / "start-ready.json").exists():
+                return dict(upgradeStarts=0, upgradeEnds=0, healthy=True)
+            if health_delay and not mcu.transfer_snapshot.called:
+                event("health-query", health_delay)
+            if terminal_ready and terminal_ready():
+                raise h.ObservationReady("synthetic read yielded to terminal")
             return dict(lost=int(health_error == "lost"), error=health_error if health_error != "lost" else None,
                 upgradeStarts=int(now[0] >= start_at), upgradeEnds=int(now[0] >= complete_at))
 
@@ -1106,7 +1253,7 @@ class PhoneCellTests(unittest.TestCase):
 
         mcu.inspect.side_effect = inspect
         mcu.wait_boot.side_effect = lambda *args: event("boot", boot)
-        mcu.transfer_snapshot.side_effect = lambda *args: event("terminal-read", terminal_read)
+        mcu.transfer_snapshot.side_effect = lambda *args, **kwargs: event("terminal-read", terminal_read)
         if terminal_error:
             mcu.transfer_snapshot.side_effect = RuntimeError("terminal stack/clock window missed")
         mcu.start_logger.return_value.read_bytes.side_effect = lambda: (
@@ -1246,6 +1393,240 @@ class PhoneCellTests(unittest.TestCase):
         self.assertIsNotNone(case.error)
         self.assertIn("private ADB close failed", str(case.error))
         self.assertTrue(case.lock.exists())
+
+    def test_late_start_is_drained_without_restarting_terminal_budget(self):
+        case = self.cell(user_delay=121, transfer=71, reboot=170)
+        self.assert_failed(case, "deadline")
+        self.assertEqual(dict(case.calls)["terminal-read"], 192)
+        self.assertTrue(h.read_json(case.out / "start-drain.json")["complete_observed"])
+        self.assertTrue(h.read_json(case.out / "start-drain.json")["terminal"]["captured"])
+        self.assertEqual(case.mcu.transfer_snapshot.call_args.kwargs["deadline"], 420)
+        self.assertFalse((case.out / "phase-terminal.json").exists())
+        self.assertTrue((case.out / "start-expired.json").is_file())
+        case.phone.archive_capture.assert_not_called()
+        case.mcu.wait_boot.assert_not_called()
+        case.mcu.start_logger.assert_called_once()
+
+    def test_start_in_last_drain_second_does_not_extend_or_cancel(self):
+        case = self.cell(user_delay=419, transfer=71)
+        self.assertIsNotNone(case.error)
+        self.assertEqual(case.stopped_at, 420)
+        drain = h.read_json(case.out / "start-drain.json")
+        self.assertEqual(drain["last_health"]["upgradeStarts"], 1)
+        self.assertEqual(drain["last_health"]["upgradeEnds"], 0)
+        self.assertFalse(drain["complete_observed"])
+        self.assertTrue(drain["pending_phone_retrieval"])
+        case.phone.salvage.assert_not_called()
+        case.phone.archive_capture.assert_not_called()
+        case.phone.finished.assert_not_called()
+        case.mcu.transfer_snapshot.assert_not_called()
+        self.assertTrue(case.lock.exists())
+        self.assertFalse((case.out / "observations.json").exists())
+
+    def test_no_start_does_not_close_early_or_bulk_read_over_terminal_watch(self):
+        case = self.cell(user_delay=10000)
+        self.assertEqual(case.stopped_at, 420)
+        case.phone.salvage.assert_not_called()
+        self.assertFalse(h.read_json(case.out / "start-drain.json")["complete_observed"])
+        self.assertTrue(case.lock.exists())
+
+    def test_start_at_exact_boundary_is_not_admitted(self):
+        case = self.cell(user_delay=120, transfer=71, reboot=170)
+        self.assert_failed(case, "deadline")
+        observed = h.read_json(case.out / "start-observed.json")
+        self.assertFalse(observed["within_start_window"])
+        self.assertEqual(h.read_json(case.out / "phase-salvage.json")["deadline_monotonic"], 420)
+
+    def test_terminal_during_health_read_has_priority_in_normal_and_late_paths(self):
+        for delay in (0, 121):
+            with self.subTest(delay=delay):
+                case = self.cell(str(delay), user_delay=delay, transfer=70, health_delay=10)
+                case.mcu.transfer_snapshot.assert_called_once()
+                self.assertLessEqual(dict(case.calls)["terminal-read"], case.terminal_at + 10)
+                if delay:
+                    self.assert_failed(case, "deadline")
+                else:
+                    self.assert_complete(case)
+
+    def test_late_terminal_failure_is_not_retried_or_made_successful(self):
+        case = self.cell(user_delay=121, transfer=71, terminal_error=True)
+        self.assert_failed(case, "deadline")
+        case.mcu.transfer_snapshot.assert_called_once()
+        drain = h.read_json(case.out / "start-drain.json")
+        self.assertIn("window missed", drain["terminal_error"])
+        self.assertFalse(drain["terminal"]["captured"])
+        self.assertTrue(drain["original_error_preserved"])
+
+    def test_withdrawal_after_start_or_terminal_keeps_observing_until_end(self):
+        for when in (.5, 110):
+            with self.subTest(when=when):
+                case = self.cell(str(when), withdraw_at=when)
+                self.assert_failed(case, "withdrawn")
+                case.mcu.transfer_snapshot.assert_called_once()
+                self.assertEqual(dict(case.calls)["terminal-read"], 100)
+                self.assertEqual(case.stopped_at, 270)
+                drain = h.read_json(case.out / "start-drain.json")
+                self.assertEqual(drain["deadline_monotonic"], when + 300)
+                self.assertTrue(drain["complete_observed"])
+                self.assertTrue(drain["terminal"]["captured"])
+                case.phone.archive_capture.assert_not_called()
+
+
+class StartNoticeTests(unittest.TestCase):
+    def setUp(self):
+        parent = h.checked(ROOT / ".cache/p34-live-tests")
+        parent.mkdir(parents=True, exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(prefix="notice-", dir=parent)
+        self.addCleanup(self.temp.cleanup)
+        self.out = Path(self.temp.name)
+        self.now, self.sent = [0.0], []
+        self.clock = patch.object(live.time, "monotonic", lambda: self.now[0])
+        self.clock.start()
+        self.addCleanup(self.clock.stop)
+
+    def notices(self, name="run", *, mutate=None, send=None, phase=None):
+        out = h.fresh(self.out / name)
+        h.raw(out / "phase-start.json", json.dumps(phase or
+            dict(phase="start", started_monotonic=0, deadline_monotonic=120)).encode())
+        runtime = h.raw(out / "phone/runtime.json", b"synthetic-runtime")
+        package = h.raw(out / "phone/downloaded.etu", b"synthetic-package")
+        state = dict(pid=123, capture="synthetic", run_id="case", upgradeStarts=0, upgradeEnds=0)
+        ready = dict(pid=123, capture="synthetic", run_id="case", start_state=state,
+            phase=h.record(out / "phase-start.json"), runtime=runtime, package=package,
+            expires_at="2026-10-12T13:02:00+00:00")
+        if mutate:
+            mutate(ready)
+        h.save(out / "start-ready.json", ready)
+        def delivered(kind, body, seconds):
+            self.sent.append((kind, body, seconds))
+            return True
+        return live.StartNotices(out, package, send or delivered)
+
+    def test_fixed_deadline_explicit_message_and_once_only_withdrawal(self):
+        notice = self.notices()
+        notice.poll(owner_alive=True)
+        self.assertIn("2026-10-12T13:02:00+00:00", self.sent[0][1])
+        self.assertIn("120", self.sent[0][1])
+        original = (notice.out / "start-ready.json").read_bytes()
+        self.now[0] = 119
+        notice.poll(owner_alive=True)
+        self.assertEqual(len(self.sent), 1)
+        self.now[0] = 120
+        for _ in range(3):
+            notice.poll(owner_alive=True)
+        self.assertEqual([x[0] for x in self.sent], ["start", "expired"])
+        self.assertEqual((notice.out / "start-ready.json").read_bytes(), original)
+        self.assertIn("\u5df2\u7ecf\u5f00\u59cb", self.sent[-1][1])
+        self.assertIn("\u4e0d\u8981\u53d6\u6d88", self.sent[-1][1])
+
+    def test_expired_started_and_dead_owner_override_stale_ready(self):
+        for state in ("start-observed.json", "start-expired.json", "failed.json", "dead"):
+            with self.subTest(state=state):
+                self.sent.clear()
+                notice = self.notices(state)
+                if state != "dead":
+                    h.save(notice.out / state, dict(actual_state=state))
+                notice.poll(owner_alive=state != "dead")
+                self.assertNotIn("start", [x[0] for x in self.sent])
+        notice = self.notices("started-and-failed")
+        h.save(notice.out / "start-observed.json", {})
+        h.save(notice.out / "failed.json", {})
+        notice.poll(owner_alive=True)
+        self.assertEqual(self.sent[-1][0], "expired")
+
+    def test_expiry_during_delivery_revokes_without_repeating_start(self):
+        def delayed(kind, body, seconds):
+            self.sent.append((kind, body, seconds))
+            if kind == "start":
+                self.now[0] = 120
+            return True
+        notice = self.notices(send=delayed)
+        notice.poll(owner_alive=True)
+        notice.poll(owner_alive=True)
+        self.assertEqual([x[0] for x in self.sent], ["start", "expired"])
+        self.assertTrue((notice.out / "start-withdrawn.json").is_file())
+
+    def test_unknown_send_is_not_retried_or_treated_as_delivery(self):
+        def unknown(kind, body, seconds):
+            self.sent.append((kind, body, seconds))
+            if kind == "start":
+                raise RuntimeError("unknown send result")
+            return True
+        notice = self.notices(send=unknown)
+        for _ in range(3):
+            notice.poll(owner_alive=True)
+        self.assertIsNotNone(notice.error)
+        self.assertEqual([x[0] for x in self.sent], ["start", "expired"])
+        self.assertFalse((notice.out / "notice-start.sent.json").exists())
+        self.assertTrue((notice.out / "notice-start.failed.json").is_file())
+
+    def test_missing_or_mismatched_state_never_sends_start(self):
+        mutations = [
+            lambda r: r.pop("start_state"),
+            lambda r: r["start_state"].update(capture="foreign"),
+            lambda r: r["start_state"].update(upgradeStarts=False),
+            lambda r: r.update(pid=True),
+            lambda r: r["package"].update(sha256="0" * 64),
+            lambda r: r.update(expires_at="2026-10-12T13:02:00"),
+        ]
+        for i, mutate in enumerate(mutations):
+            with self.subTest(i=i):
+                self.sent.clear()
+                notice = self.notices(str(i), mutate=mutate)
+                notice.poll(owner_alive=True)
+                self.assertIsNotNone(notice.error)
+                self.assertEqual([x[0] for x in self.sent], ["expired"])
+
+    def test_deadline_boolean_nan_and_cross_cell_phase_fail_closed(self):
+        for i, deadline in enumerate((True, float("nan"), float("inf"), 0, 121)):
+            with self.subTest(deadline=deadline):
+                self.sent.clear()
+                notice = self.notices(str(i), phase=dict(phase="start", started_monotonic=0,
+                    deadline_monotonic=deadline))
+                notice.poll(owner_alive=True)
+                self.assertEqual([x[0] for x in self.sent], ["expired"])
+        self.sent.clear()
+        other = self.notices("other")
+        notice = self.notices("foreign", mutate=lambda r: r.update(phase=h.record(other.out / "phase-start.json")))
+        notice.poll(owner_alive=True)
+        self.assertEqual([x[0] for x in self.sent], ["expired"])
+
+    def test_restart_does_not_replay_an_unknown_notification_intent(self):
+        notice = self.notices()
+        h.save(notice.out / "notice-start.intent.json", dict(outcome="unknown"))
+        notice.poll(owner_alive=True)
+        self.assertIsNotNone(notice.error)
+        self.assertEqual([x[0] for x in self.sent], ["expired"])
+
+    def test_unknown_expiry_receipt_survives_notifier_restart_without_resend(self):
+        notice = self.notices()
+        h.save(notice.out / "start-expired.json", {})
+        h.save(notice.out / "notice-expired.intent.json", dict(outcome="unknown"))
+        notice.poll(owner_alive=True)
+        self.assertIsNotNone(notice.error)
+        self.assertEqual(self.sent, [])
+
+    def test_deadline_is_rechecked_immediately_before_send(self):
+        notice = self.notices()
+        real_save = h.save
+        def saving(path, value):
+            result = real_save(path, value)
+            if path.name == "notice-start.intent.json":
+                self.now[0] = 120
+            return result
+        with patch.object(h, "save", side_effect=saving):
+            notice.poll(owner_alive=True)
+        self.assertEqual([x[0] for x in self.sent], ["expired"])
+
+    def test_phase_budget_cannot_refresh_a_previously_entered_phase(self):
+        out = h.fresh(self.out / "budgets")
+        budget = live.PhoneBudget(SimpleNamespace(deadline=3390), out)
+        budget.enter("start")
+        original = (out / "phase-start.json").read_bytes()
+        self.now[0] = 30
+        with self.assertRaisesRegex(RuntimeError, "cannot be restarted"):
+            budget.enter("start")
+        self.assertEqual((out / "phase-start.json").read_bytes(), original)
 
 
 if __name__ == "__main__":

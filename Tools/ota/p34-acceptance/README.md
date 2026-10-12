@@ -58,6 +58,35 @@ verified after a fresh same-process query and the downloader's final-file
 replacement. An unchanged cached file is not App selection/readiness. The operator uses the existing notification policy for a necessary UI
 action. No automatic tap or notification is sent by this tool.
 
+For a new operator invocation, use the source-controlled
+`StartNotices(cell_out, reference_package, send_and_check_receipt)` helper from
+`live.py`, not the historical cached `qualification1.py` message literals.
+`send_and_check_receipt(kind, text, seconds)` adapts the existing current-session
+cc-connect route, preserves its command output and returns `True` only for a real
+successful send receipt. It must honor `seconds`; a send receipt is not proof the
+user read it. Keep its outputs and cc-connect environment contained as before.
+
+Call `notices.poll(owner_alive=process.alive())` while the existing live process
+runs. If `notices.error` is set, keep collecting that same process to closure;
+report the notification error afterwards. Do not kill collectors from an operator
+`finally` block merely because a notification failed. The helper writes a
+withdrawal which the live start loop consumes.
+
+`start-ready.json` is atomically published with `run_id`, PID/capture,
+`start_state`, a hash-bound `phase-start.json`, exact runtime/download records and
+`expires_at` with a timezone. Only the original phase's host-monotonic deadline
+controls admission. The displayed expiry is not a phone/host clock mapping.
+Messages state the remaining time and expiry, and explicitly distinguish
+"not started: do not start" from "already started: do not cancel or retry."
+Missing/mismatched state, Boolean/non-finite deadlines and foreign-cell records
+fail closed. `start-observed.json`, `start-expired.json`, `start-withdrawn.json`
+and `failed.json` override a stale ready file.
+
+Notification intents and real delivery/error receipts are write-once under the
+cell. An unknown send is not resent, including after operator restart. The
+original deadline is checked again immediately before sending and after the send
+returns; crossing it triggers one expiry notice, never a fresh 120 seconds.
+
 `Network.start(deadline=...)` consumes the existing absolute prepare deadline.
 The URL banner and a registered tunnel connection are not HTTPS readiness.
 Only typed DNS `gaierror` 11001 (the observed Windows startup case) or
@@ -108,6 +137,58 @@ Every ADB command is capped by its remaining phase; a late successful command
 cannot silently extend the phase. Normal J-Link 180 s and Boot/readback 300 s
 operation limits remain in `live_mcu.py`. A phase/collector failure preserves the
 originals and device lock. Completion/closure errors still propagate to the caller.
+
+### Expired Start And Terminal Priority
+
+A start, transfer or terminal-observation error first latches the original exception and writes
+`start-expired.json`. It then uses exactly one existing 300-second salvage phase,
+with the same RTT logger/private ADB owner. A zero-start checkpoint does not close
+this drain early: the operator invitation can arrive late. No new start, reset,
+archive/prune, ABORT or App force-stop is issued in this branch.
+This also covers a delayed notification result arriving after the App has started
+or the terminal was already sampled; withdrawal must not close its observation.
+
+Health polling uses `Phone.health(capture, terminal_ready=predicate)`. Only this
+read-only path can yield its current ADB client via `ObservationReady`; the private
+ADB server and OTA remain untouched. `Process.wait(..., read_ready=predicate)`
+keeps its original timeout and accepts the same absolute `deadline` through
+`command`, including construction/Job/Popen time, and records
+`readonly_query_yielded_to_terminal`, including the real exit/partial bytes.
+This prevents a slow health query from holding up the terminal RAM read.
+An already observed native nonzero exit still raises the original tool failure,
+whether it precedes polling or is returned by wait at the terminal boundary.
+Only an actually running expendable read is actively stopped for terminal priority;
+its real stop code is not confused with a native command failure.
+
+The original terminal path stops the sole logger, then calls
+`MCU.transfer_snapshot(raw, deadline=salvage_deadline)`. `execute` and its
+foreign-debugger check share that absolute deadline, including time already spent
+stopping/checking tools. The drain must not call `enter("terminal")` or renew a
+phase. A terminal sampling attempt, even a failed one, is never repeated.
+
+Bulk phone salvage runs once, only after the App end was observed and after the
+terminal priority check, using time still left in the same phase. There is no
+unconditional switch to large file reads at second 240. At second 300, an
+in-flight/unknown transfer leaves raw ADB stdout/RTT, `start-drain.json`, the device
+lock and the phone files intact. Remaining phone originals can be retrieved in a
+later read-only host window without another OTA. A finite drain cannot guarantee
+complete evidence for an arbitrarily late click; partial evidence stays partial.
+
+| Case | Required result |
+| --- | --- |
+| On-time start, complete observations | Existing normal route and all original guards. |
+| Start at the deadline, or delivery crosses it | Expired invitation; original failure retained. |
+| Late start/end within salvage | Terminal sampled before reboot; originals retained, still FAIL/exit 1. |
+| Start at salvage second 299 | No renewal or cancellation; in-flight/partial, never PASS. |
+| Terminal arrives during a blocked health read | Only that read client yields; one standard MCU capture. |
+| Terminal read consumes its remaining allowance or fails | Preserve its command/originals, no second attempt. |
+
+Regression coverage is in `test_p34_live_route.py`: complete `phone_cell` late and
+boundary cases, notification send/expiry races and restarts, real owned-child
+preemption/timeout, health-only hook isolation, and shared MCU absolute deadlines.
+These are host tests, not a replacement qualification OTA. The failed v10 bundle
+and consumed 1/1 qualification remain unchanged; formal continuation needs a
+reviewed successor, not edited v10 evidence or replay of its command.
 
 One RTT reader starts before Start. On the complete 420-byte terminal publication,
 it stops; standard Commander immediately reads the still-running old App's frozen

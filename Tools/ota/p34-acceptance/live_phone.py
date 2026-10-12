@@ -209,6 +209,7 @@ class Phone:
         self.base = [str(h.pinned(plan["tools"]["adb"])), "-H", "127.0.0.1", "-P", str(self.port), "-s", self.serial]
         self.deadline, self.count, self.server = time.monotonic() + seconds, 0, None
         self.operation_deadline = None
+        self.read_ready = None
         self.capture = self.pid = None
 
     def start(self, *, verify_apk=True):
@@ -232,7 +233,9 @@ class Phone:
         if args[0] in ("shell", "exec-out", "exec-in"):
             args = [args[0], " ".join(shlex.quote(str(part)) for part in args[1:])]
         result = h.command(self.out, "adb-%05d" % self.count, self.base + list(map(str, args)), self.env,
-                           seconds=seconds, stdin=stdin, success_codes=success_codes)
+                           seconds=seconds, stdin=stdin, success_codes=success_codes, read_ready=self.read_ready,
+                           deadline=min(self.deadline - 5, self.operation_deadline
+                                        if self.operation_deadline is not None else self.deadline))
         h.require(self.server.alive() and h.listening(self.port), "private ADB owner changed during command; reconcile")
         h.require(self.operation_deadline is None or time.monotonic() < self.operation_deadline,
                   "phone operation phase deadline; preserve original command result")
@@ -383,10 +386,16 @@ class Phone:
         h.save(self.out / "launched.json", dict(pid=int(pid), capture=capture, config=h.record(self.out / "runtime.json"), apk=self.plan["apk"]))
         return int(pid), capture
 
-    def health(self, capture):
+    def health(self, capture, *, terminal_ready=None):
         h.require(isinstance(capture, str) and re.fullmatch(r"\d{13,20}-[0-9a-f]{24}", capture),
                   "invalid App capture identity")
-        raw = self.live_file("files/p34-observations/" + capture + "/health.json", 8192)
+        h.require(self.read_ready is None, "nested read-only observation")
+        # Only this read-only path may yield its ADB client; never a mutation.
+        self.read_ready = terminal_ready
+        try:
+            raw = self.live_file("files/p34-observations/" + capture + "/health.json", 8192)
+        finally:
+            self.read_ready = None
         h.require(raw.endswith(b"\n"), "App health snapshot is truncated")
         value = observation_capture.decode(raw)
         h.require(set(value) == HEALTH_FIELDS, "App health fields missing/unknown")

@@ -4,6 +4,7 @@ import csv
 from contextlib import contextmanager
 import hashlib
 import json
+import math
 import os
 import io
 from pathlib import Path
@@ -108,6 +109,10 @@ raise SystemExit(p.returncode)
 """
 
 
+class ObservationReady(RuntimeError):
+    """An expendable read yielded to the existing terminal MCU observation."""
+
+
 class Process:
     """Reuse the existing Windows Job class; preserve split binary stdout/stderr."""
     def __init__(self, out, label, argv, env, *, stdin=None):
@@ -177,22 +182,50 @@ class Process:
             ended_monotonic_ns=time.monotonic_ns(), stdout=record(self.paths["stdout"]),
             stderr=record(self.paths["stderr"])))
 
-    def wait(self, seconds, success_codes=(0,)):
+    def wait(self, seconds, success_codes=(0,), *, read_ready=None, deadline=None):
         require(0 < seconds <= 18000, "finite command timeout required")
+        if deadline is not None:
+            require(type(deadline) in (int, float) and math.isfinite(deadline), "finite absolute command deadline required")
+        deadline = min(time.monotonic() + seconds, deadline) if deadline is not None else time.monotonic() + seconds
         try:
-            code = self.process.wait(timeout=seconds)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise subprocess.TimeoutExpired(self.argv, seconds)
+            if read_ready is None:
+                code = self.process.wait(timeout=remaining)
+            else:
+                while True:
+                    code = self.process.poll()
+                    if code is not None:
+                        break
+                    if read_ready():
+                        self.close("readonly_query_yielded_to_terminal")
+                        raise ObservationReady("read-only query yielded to terminal MCU observation")
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise subprocess.TimeoutExpired(self.argv, seconds)
+                    try:
+                        code = self.process.wait(timeout=min(.1, remaining))
+                        break
+                    except subprocess.TimeoutExpired:
+                        pass
         except subprocess.TimeoutExpired:
             self.close("timeout_outcome_unknown")
             raise RuntimeError("tool timeout; reconcile device, no next action") from None
         self.close()
         require(code in success_codes, "standard tool failed; inspect original command streams")
+        if read_ready is not None and read_ready():
+            raise ObservationReady("completed read yielded to terminal MCU observation")
         return self.paths["stdout"].read_bytes()
 
 
-def command(out, label, argv, env, *, seconds=180, stdin=None, success_codes=(0,)):
+def command(out, label, argv, env, *, seconds=180, stdin=None, success_codes=(0,), read_ready=None, deadline=None):
+    if deadline is not None:
+        require(type(deadline) in (int, float) and math.isfinite(deadline) and time.monotonic() < deadline,
+                "command deadline reached before launch")
     process = Process(out, label, argv, env, stdin=stdin)
     try:
-        return process.wait(seconds, success_codes)
+        return process.wait(seconds, success_codes, read_ready=read_ready, deadline=deadline)
     finally:
         process.close("caller_failed")
 
