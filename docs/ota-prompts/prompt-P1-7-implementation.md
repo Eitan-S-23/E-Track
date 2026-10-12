@@ -219,7 +219,11 @@ build_f435_and_simulator.bat --no-pause
 需报告 `Program Size` 行与产物时间戳；有 warning 要明说「有警告、零错误」，
 不得把警告伪装成成功细节。
 
-## 7. 真机自测（J-Link；正式验收由非实现会话重跑）
+## 7. 真机自测（J-Link；正式验收先由非实现者核验原件）
+
+2026-10-13 后续验收按 `docs/acceptance-execution-contract.md` 第 0 节及 `OTA-DEC-016`
+承接已有实现/用户实测，核对版本、条件和原始结果，不因换验收者重做。只补当前候选真正
+缺失或失效的观察；纯电池供电、按键和启动时序要求不降，J-Link 供电不能代替电池证据。
 
 严格按 `AGENTS.md`「J-Link 闭环防卡死清单」：烧录后**重查
 `MDK-ARM_F435/Listings/X-Track.map`（或对应 boot map）取 `_SEGGER_RTT`** →

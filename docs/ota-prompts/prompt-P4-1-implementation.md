@@ -14,6 +14,10 @@ task_id: P4-1
 
 把现有单 bin 注册链扩展为冻结顺序要求的正式三资产链：finalize 最终 App、生成 full/patch/recovery、patch 逐字节自验、创建不可变 GitHub Release 资产、R2 上传/回读、生成 assets 数组 metadata 并注册 D1 ready 候选，同时保留 nightly 只构建不发布的隔离。
 
+按 `OTA-DEC-016`，本卡在 P5 前的完成边界是实现及 staging rehearsal 资格，不是实际生产
+发布。与 P4-4 共用一次获授权的演练原件；production promotion 留在 P5 通过及 owner/
+environment 审批之后，不以生产 Release 作为进入 P5 的前置。
+
 ## 非目标
 
 - 不修改 MCU/Flutter 产品实现或 binary contract。
@@ -27,6 +31,7 @@ task_id: P4-1
 - `P1-5` bootstrap 已完成，但 `OTA_BOOT_CHAIN_READY` 解锁仍受 P4-1 演练顺序约束。
 - `P4-2` 必须先提供由 `OTA-XC-SCHEMA-FIXTURE` 约束的真实 register API、多资产 D1 model 和 ready 语义；依赖方向固定为 `P4-2 -> P4-1`。
 - P4-1 与 `P3-5` 之间不建立自动依赖。资产命名、镜像摘要域和 rehearsal/production gate 的用户裁定已传播到并冻结在共享合同。
+- P4-4 配置准备消费已交付 workflow 接线与目标环境接口，不要求先完成本卡的演练验收；两卡在配置可用后共用真实 rehearsal，避免相互等待完成态。
 
 ## 权威合同
 
@@ -108,9 +113,17 @@ task_id: P4-1
 
 - 在共享冻结合同下的 rehearsal 路径生成 full/patch/recovery，所有 hash/size 与 metadata 一致。
 - patch 对上一正式最终 App 自验逐字节一致，recovery 验证通过。
-- GitHub Release 精确含三类正式资产，R2 对象与 Release/metadata 同字节。
+- staging R2 三资产与本次产物/metadata 同字节，register ready/idempotency 和 rehearsal 前后 production D1/R2/channel/GitHub Release 零副作用均有证据；本阶段不创建 GitHub Release 或 prerelease。
 - register 后 D1 release 达到 P4-2 的 ready 门槛；失败路径无 ready 残留。
 - nightly/pull request 行为不回退，warning/error/退出码明确报告。
+
+### P5 后 production promotion
+
+此阶段不是本卡进入 P5 的前置，不能用 staging PASS 冒充已执行生产发布。
+
+- 生产晋升仍须在 P5 通过后按 `OTA-XC-RELEASE-GATE` 重新构建并核对已批准 rehearsal 的三资产及 canonical metadata 摘要，完成 owner/environment 独立审批后才创建正式资产。
+- 发布后核验 GitHub Release 精确含三类正式资产，数量/类型/名称符合 `OTA-XC-ASSET-NAMING`，R2 对象与 Release/metadata 同字节；实际 Release/R2 全字节摘要和长度须等于已批准目标，不只验证上传前的本地文件。
+- 保留实际发布 run、审批、Release 资产清单、Release/R2 发布后 readback、metadata SHA 和注册 ready/idempotency 原件；任一失败按正式发布合同停止并记录，不能由发布前重建校验代替。
 
 ## 停止条件
 
@@ -122,7 +135,7 @@ task_id: P4-1
 
 ## 后续证据
 
-保存 workflow run/commit、environment 审批、全部 step 退出码、App/三资产/metadata SHA、上一正式基版来源、patch apply 比对、GitHub/R2 列表、D1 注册响应和冲突负例。
+保存 workflow run/commit、environment 审批、全部 step 退出码、App/三资产/metadata SHA、上一正式基版来源、patch apply 比对、staging R2/D1 注册响应、冲突负例和生产零副作用快照。与 P4-4 共享原件并分别判定，不重做演练；后续生产晋升另保留其真实重建/审批/发布后资产清单及字节一致性记录。
 
 ## Luna 可自行决定
 

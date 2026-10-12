@@ -1858,6 +1858,179 @@ class AcceptanceExecutionPolicyTests(unittest.TestCase):
         self.assertIn("不授予操作权限或追加配额", rules)
         self.assertNotIn("重算 manifest", rules)
 
+    @staticmethod
+    def redundant_acceptance_directives(text):
+        obsolete = (
+            "独立冻结 agent 完成后才能验收",
+            "推荐值经独立复跑得到一致结论",
+            "失败轮必须从计数中剔除",
+            "该轮失效并从已知起点重跑",
+            "三类 manifest 可生成",
+            "创建 P5-3 的版本化验收合同",
+            "prompt 骨架（复制此段并填空）",
+            "正式验收由非实现会话重跑",
+            "只补不同故障条件",
+        )
+        errors = [directive for directive in obsolete if directive in text]
+        before_promotion = text.split("### P5 后 production promotion", 1)[0]
+        if "GitHub Release 精确含三类正式资产" in before_promotion:
+            errors.append("GitHub Release 精确含三类正式资产")
+        return errors
+
+    def test_canonical_specs_remove_redundant_handoffs_and_replays(self):
+        for name in (
+            "template-implementation", "template-acceptance", "P1-7-implementation", "P3-4-experiment",
+            "P3-5-integration", "P3-8-implementation", "P4-1-implementation",
+            "P4-4-integration", "P5-1-acceptance", "P5-2-acceptance", "P5-3-acceptance",
+        ):
+            with self.subTest(prompt=name):
+                text = (ROOT / f"docs/ota-prompts/prompt-{name}.md").read_text(encoding="utf-8")
+                self.assertEqual([], self.redundant_acceptance_directives(text))
+
+    def test_redundant_directive_guard_rejects_regressions(self):
+        text = (ROOT / "docs/ota-prompts/prompt-P5-1-acceptance.md").read_text(encoding="utf-8")
+        for directive in (
+            "独立冻结 agent 完成后才能验收",
+            "失败轮必须从计数中剔除",
+            "该轮失效并从已知起点重跑",
+            "三类 manifest 可生成",
+            "创建 P5-3 的版本化验收合同",
+            "GitHub Release 精确含三类正式资产",
+            "正式验收由非实现会话重跑",
+            "只补不同故障条件",
+        ):
+            with self.subTest(directive=directive):
+                self.assertEqual([directive], self.redundant_acceptance_directives(text + "\n" + directive))
+
+    def test_two_owner_handoff_keeps_one_spec_and_real_authority(self):
+        contract = self.CONTRACT_DOC.read_text(encoding="utf-8")
+        for marker in ("不需要第三个冻结 agent", "已有唯一任务 Spec 时双方共用它",
+                       "新增标准/权限仍由获授权的责任人裁定"):
+            self.assertIn(marker, contract)
+        for role in ("implementation", "acceptance"):
+            text = (ROOT / f"docs/ota-prompts/prompt-template-{role}.md").read_text(encoding="utf-8")
+            self.assertIn("readiness 的唯一 Spec", text)
+            self.assertIn("不复制成第二份 Spec", text)
+            self.assertNotIn("（非实现方）撰写", text)
+        collaboration = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        self.assertIn("one independent acceptance reviewer", collaboration)
+        self.assertIn("not an extra mandatory approval layer", collaboration)
+
+    def test_raw_evidence_adoption_does_not_invent_physical_execution(self):
+        contract = self.CONTRACT_DOC.read_text(encoding="utf-8")
+        section = contract.split("### 0.1 ", 1)[1].split("### 0.2 ", 1)[0]
+        for marker in ("`REUSED`", "同任务谱系", "`external_inputs`", "独立离线核验",
+                       "不表示又做了一次硬件", "原操作、日期、操作者", "缺失/污染原件",
+                       "未决产品失败", "不能事后挑选成功笔", "绝对截止时间",
+                       "同一次采样内不自动重试", "不重置计数、不延长期限", "不用重启后状态冒充重启前观察"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, section)
+        self.assertEqual([], self.sampling_retry_scope_violations(section))
+
+    @staticmethod
+    def sampling_retry_scope_violations(text):
+        text = " ".join(text.split())
+        required = (
+            "同一次采样内不自动重试、不重置计数、不延长期限",
+            "保存的原件仍可离线重释",
+            "真实修复或有证据的状态变化后",
+            "按已有授权和 rerun plan 最小复验",
+            "原失败和已用额度必须保留",
+        )
+        return [clause for clause in required if clause not in text]
+
+    def test_sampling_retry_guard_allows_justified_later_verification(self):
+        text = self.CONTRACT_DOC.read_text(encoding="utf-8")
+        section = text.split("### 0.1 ", 1)[1].split("### 0.2 ", 1)[0]
+        self.assertEqual([], self.sampling_retry_scope_violations(section))
+        changes = (
+            ("同一次采样内不自动重试", "所有后续复测都禁止"),
+            ("保存的原件仍可离线重释", "不允许重新解释原件"),
+            ("真实修复或有证据的状态变化后", "不论有无修复或变化"),
+            ("按已有授权和 rerun plan 最小复验", "不允许后续复验"),
+        )
+        for before, after in changes:
+            with self.subTest(change=after):
+                self.assertIn(before, section)
+                self.assertTrue(self.sampling_retry_scope_violations(section.replace(before, after)))
+
+    def test_p5_uses_v3_and_docs_review_does_not_require_another_bundle(self):
+        for task in ("P5-1", "P5-2"):
+            text = (ROOT / f"docs/ota-prompts/prompt-{task}-acceptance.md").read_text(encoding="utf-8")
+            for marker in ("freeze_commit", "freeze_tree", "profile_config_blob", "external_inputs",
+                           "独立离线", "原操作日期", "真实依赖"):
+                with self.subTest(task=task, marker=marker):
+                    self.assertIn(marker, text)
+        docs = (ROOT / "docs/ota-prompts/prompt-P5-3-acceptance.md").read_text(encoding="utf-8")
+        for marker in ("不强制新建 P5-3 版本化 JSON 合同", "已有正式冻结义务不能改名逃避",
+                       "轻量仅减封包", "不为审文档再做 OTA", "无副作用 dry-run"):
+            self.assertIn(marker, docs)
+
+    def test_final_campaign_ownership_preserves_numerical_gates(self):
+        shared = (ROOT / "docs/ota-cross-system-contracts.md").read_text(encoding="utf-8")
+        tuning = shared.split("### OTA-XC-BLE-TUNING", 1)[1].split("### OTA-XC-FLUTTER-TRANSPORT", 1)[0]
+        for marker in (
+            "| 同组 30/30 完整成功、真实四小时 soak、性能统计 | P5-1 |",
+            "| 真实后端的 10/10 断连恢复 | P3-5 |",
+            "referencePackageBytes=1048576", "120 秒", "150 秒",
+            "effectiveThroughputKiBps >= 9", "1%", "maxRetries=5",
+            "30 秒无 durable", "clamp(3*P99_ACK, 500ms, 2000ms)",
+            "nearest-rank", "不能为共用原件隐去变化或失败",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, tuning)
+        p51 = (ROOT / "docs/ota-prompts/prompt-P5-1-acceptance.md").read_text(encoding="utf-8")
+        for marker in ("SD/BLE × full/patch", "30/30", "四小时不可恢复错误数为 0",
+                       "不能剔除后凑 30/30", "不等待本卡自己的长测"):
+            self.assertIn(marker, p51)
+        p38 = (ROOT / "docs/ota-prompts/prompt-P3-8-implementation.md").read_text(encoding="utf-8")
+        self.assertIn("前台成功不能代替后台/锁屏", p38)
+        for name in ("P3-5-integration", "P5-2-acceptance"):
+            text = (ROOT / f"docs/ota-prompts/prompt-{name}.md").read_text(encoding="utf-8")
+            self.assertIn("原件仍有效时", text)
+            self.assertIn("未覆盖或按真实依赖判定失效", text)
+            self.assertNotIn("只补不同故障条件", text)
+
+    def test_staging_qualifies_p4_but_production_still_waits_for_p5(self):
+        shared = (ROOT / "docs/ota-cross-system-contracts.md").read_text(encoding="utf-8")
+        gate = shared.split("### OTA-XC-RELEASE-GATE", 1)[1].split("## 7.", 1)[0]
+        for marker in ("且 P5 验收通过后", "OTA_BOOT_CHAIN_READY=true",
+                       "产生任何远端副作用前必须重新构建", "摘要与 rehearsal 完全一致",
+                       "不得创建 GitHub prerelease", "独立审批"):
+            self.assertIn(marker, gate)
+        for name in ("P4-1-implementation", "P4-4-integration"):
+            text = (ROOT / f"docs/ota-prompts/prompt-{name}.md").read_text(encoding="utf-8")
+            self.assertIn("staging", text)
+            self.assertIn("不相互等待完成态" if name.startswith("P4-4") else "避免相互等待完成态", text)
+            self.assertIn("零副作用", text)
+
+    def test_production_asset_checks_are_required_after_p5_not_before(self):
+        text = (ROOT / "docs/ota-prompts/prompt-P4-1-implementation.md").read_text(encoding="utf-8")
+        heading = "### P5 后 production promotion"
+        before, after = text.split(heading, 1)
+        self.assertNotIn("GitHub Release 精确含三类正式资产", before)
+        for marker in ("GitHub Release 精确含三类正式资产", "R2 对象与 Release/metadata 同字节",
+                       "数量/类型/名称", "Release/R2 发布后 readback", "owner/environment"):
+            self.assertIn(marker, after)
+        self.assertEqual([], self.redundant_acceptance_directives(text))
+        self.assertIn("GitHub Release 精确含三类正式资产",
+                      self.redundant_acceptance_directives(text.replace(heading, "")))
+
+    def test_historical_prompt_is_preserved_under_its_supplement_name(self):
+        old = ROOT / "docs/ota-prompts/prompt-P3-4-implementation.md"
+        new = ROOT / "docs/ota-prompts/supplement-P3-4-host-remediation-2026-09-20.md"
+        self.assertFalse(old.exists())
+        # Checkout EOL conversion is distinct from the byte-pinned move audit.
+        raw = new.read_bytes().replace(b"\r\n", b"\n")
+        self.assertEqual(13533, len(raw))
+        self.assertEqual("fc119919f0efef2be5c9295574a763982ab8027cc2bd1515cce04c0111c79158",
+                         hashlib.sha256(raw).hexdigest())
+        record = (ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8")
+        self.assertIn(old.relative_to(ROOT).as_posix(), record)
+        self.assertIn(new.name, record)
+        index = (ROOT / "docs/agent-collaboration/index.md").read_text(encoding="utf-8")
+        self.assertIn("PROJECT-ACCEPTANCE-FLOW", index)
+
     P33_HARDWARE_EVIDENCE = (
         "APK 实际安装",
         "toy 包实机闭环",

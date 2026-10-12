@@ -85,6 +85,23 @@ related findings and incomplete checks into one batch, as required by the
 
 ## Independence And Closeout
 
+The default is an implementation owner and one independent acceptance reviewer,
+not a mandatory implementation -> pre-review -> freeze-agent -> acceptance chain.
+The same non-implementer may review the batch, prepare/check the frozen inputs,
+execute admitted commands and adjudicate results. Freezing records the tested
+identity and criteria; it is not another product test or a grant of authority.
+Use the existing canonical task Spec for both roles and the existing task note
+for handoffs, rather than creating competing role-specific specifications.
+
+Start by reconciling existing observations and user-confirmed outcomes. Follow
+[execution contract section 0](acceptance-execution-contract.md)
+for lightweight reviews and independently evaluated historical raw inputs.
+An independently executed offline evaluation is not a newly executed device
+operation. Keep formal reuse origins, missing observations and failed attempts
+honest; a current empty matrix is not evidence of an empty project history.
+The user-requested two-agent review of this process change is a bounded task,
+not an extra mandatory approval layer for every future card.
+
 Review/acceptance agents may identify concrete functions, recommend a design and
 provide test oracles without becoming the implementation author. Independence
 does not require withholding useful guidance. They must not edit production code,

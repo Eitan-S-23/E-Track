@@ -25,6 +25,7 @@ task_id: P4-4
 
 - P4-1 workflow 已按共享 secret 名称和硬失败规则接线。
 - P4-2 Worker/R2 endpoint 已部署到目标环境。
+- 以上是配置准备所需的已实现接线与环境，不是要求 P4-1 已完成验收。按 `OTA-DEC-016`，两卡共用一次 staging rehearsal，分别判定发布链与配置要求，不相互等待完成态。
 - rehearsal 与 production 的隔离、证据、独立 reviewer、人工 gate 和 production 审批已传播到并冻结在 `OTA-XC-RELEASE-GATE` 与 `OTA-XC-SECRETS`。
 - 用户/owner 可操作 GitHub environment、repository secrets/variables、Cloudflare token/bucket/Worker secrets。
 
@@ -83,14 +84,15 @@ task_id: P4-4
 - 负例：逐项缺失/错误 token/bucket/URL，日志无值泄露。
 - 权限最小化验证：R2 token 只具有所需 bucket/operation，deploy token 只接受目标 Worker。
 - environment 审批前 job 等待，拒绝/批准行为可见。
-- P4-1 rehearsal/正式 run 按共享冻结合同区分 staging/rehearsal 与 production，并验证 gate 不可绕过。
+- P4-1 rehearsal 与配置要求共用原件，验证 staging 隔离和 gate 不可绕过；不得为了完成本卡提前发起 production 发布。
 
 ## 完成判据
 
 - `OTA-XC-SECRETS` 中每项配置均存在于正确平台和作用域，证据不含明文。
-- `firmware-production` 至少有独立 reviewer，正式 job 确实等待审批。
-- P4-1 能通过 R2 上传/回读和 Worker 注册，且失败负例不泄露 secret。
+- `firmware-production` 至少有独立 reviewer，workflow 接线与平台审批配置可核验；本阶段由 rehearsal 验证等待/拒绝行为，production job 的实际审批与执行留在 P5 后晋升时留证，不能写成已执行。
+- P4-1 在隔离 staging 通过 R2 上传/回读和 Worker 注册，且失败负例不泄露 secret，生产资源前后快照证明零副作用。
 - 配置 owner、轮换方式和应急撤销路径有记录。
+- 本卡 P5 前完成仅表示配置/演练资格，不授权 `OTA_BOOT_CHAIN_READY=true`。P5 通过、独立 reviewer 与 owner/environment 审批及生产重建摘要一致性要求均保留。
 
 ## 停止条件
 

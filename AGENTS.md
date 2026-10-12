@@ -25,6 +25,11 @@ promote AC5 artifacts to OTA or CI release artifacts.
 
 - Read `docs/acceptance-execution-contract.md` before independent acceptance or
   changing governance. It owns dependency scopes, evidence reuse and rerun rules.
+- Apply section 0 first: reuse existing observations through independent review,
+  not another physical execution. One independent reviewer may prepare, freeze
+  and execute the same acceptance; no separate freezing agent is required.
+  Lightweight document/governance review does not need a new hardware-style
+  bundle, but cannot waive real checks, existing frozen obligations or authority.
 - Use approved component profiles and direct original EXECUTED PASS anchors;
   missing dependencies/evidence are not permission to skip checks or rerun all.
 - Governance-only changes use host regressions, not historical firmware/hardware
@@ -925,8 +930,10 @@ Before reporting success:
 任何需要独立验收的任务都必须遵守
 `docs/acceptance-execution-contract.md`：
 
-1. 验收前在 `docs/acceptance-contracts/` 冻结并审批版本化合同；`.claude`
-   prompt 不能作为唯一标准。执行中改变条件必须升版本重新审批。
+1. 先按执行合同第 0 节区分轻量审阅与正式执行型验收。正式执行型在
+   `docs/acceptance-contracts/` 冻结并审批版本化合同；`.claude` prompt 不能作为唯一标准。
+   同一独立验收者可准备、冻结、执行，不另设冻结 agent。下文冻结对象/矩阵/封包条款针对
+   正式执行型，不强加给纯文档审阅；已有正式义务不得改名逃避。执行中改变条件须升版审批。
 2. 任务状态与单轮验收结果分离。单轮结果只允许 `PASS`、`PRODUCT_FAIL`、
    `HARNESS_FAIL`、`EVIDENCE_GAP`、`ENV_BLOCKED`；验收者不得覆盖实现认领人。
 3. 合同（v3）必须在顶层写死 `freeze_commit`（被验实现所在的提交）、
@@ -1007,6 +1014,10 @@ Before reporting success:
     问题和未覆盖项，不能首错即打回、每修一个点就重开正式验收。已知阻断问题未修完时不
     启动依赖它的高成本流程；范围内普通缺陷可批量修复，安全/越权问题仅暂停受影响动作。
     红线违反按证据与依赖确定失效范围，不默认整卡重来。局部自测仍须做，真实失败仍须报。
+15. **先承接成果，不因换角色重演。** 按执行合同 §0.1 复核实现方、用户或其他任务原件，
+    保留原输入、日期、操作归属和适用性；离线核验不虚记为新硬件执行。未知覆盖先对账，
+    缺失瞬时证据不能伪造。已有唯一 Spec 双方共用，不另写竞争入口。长测只组织一套，
+    阶段完成与最终发布资格分开，权限、数值门槛及历史失败不因简化流程而改变。
 
 ## OTA 执行规约（强制,适用一切 OTA 相关任务）
 

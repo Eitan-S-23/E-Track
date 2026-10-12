@@ -3,6 +3,8 @@
 import copy
 import hashlib
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -206,6 +208,113 @@ class AcceptanceEfficiencyTests(unittest.TestCase):
                                                  "runner_paths": ["Tools/acceptance/package.py"]})
                 contract["criteria"][0]["input_groups"] = ["firmware", "evidence"]
                 self.assertTrue(V.validate_freeze_objects(contract, self.repo))
+
+    def offline_evaluation_bundle(self):
+        # This is fixture-only raw data and a real read-only evaluator, not OTA.
+        evaluator = b'''import hashlib, json, sys
+from pathlib import Path
+raw = Path(sys.argv[1]).read_bytes()
+assert hashlib.sha256(raw).hexdigest().upper() == sys.argv[2]
+original = json.loads(raw)
+for field in ("operation", "observed_at", "operator", "firmware_sha256", "confirmed"):
+    assert field in original
+accepted = original["confirmed"] == 4 and original["firmware_sha256"] == sys.argv[3]
+print(json.dumps({"evaluation_only": True, "original": original, "accepted": accepted}))
+sys.exit(0 if accepted else 1)
+'''
+        base.commit_fixture_files(self.repo, {"Tools/acceptance/evaluate.py": evaluator})
+        bundle = self.root / "offline"
+        source = bundle / "raw/implementation-observation.json"
+        firmware_sha = hashlib.sha256(b"fw\n").hexdigest().upper()
+        original = {
+            "operation": "implementation-fixture-ota", "observed_at": "2026-10-07T12:00:00Z",
+            "operator": "implementation-fixture", "firmware_sha256": firmware_sha, "confirmed": 4,
+        }
+        raw = json.dumps(original, sort_keys=True).encode("utf-8")
+        argv = [sys.executable, "-I", "-S", "-B", "-X", "utf8", "Tools/acceptance/evaluate.py",
+                str(source), hashlib.sha256(raw).hexdigest().upper(), firmware_sha]
+        contract = base.valid_contract()
+        contract["input_groups"].extend([
+            {"id": "firmware", "profile": "Firmware", "category": "production_source"},
+            {"id": "evidence", "profile": "Evidence", "category": "validation_inputs"},
+        ])
+        contract["external_inputs"] = [{
+            "id": "prior-observation", "category": "fixture",
+            "description": "Archived implementation observation, not a formal PASS origin.",
+            "fingerprint": argv[-2], "evidence_path": "raw/implementation-observation.json",
+            "evidence_sha256": argv[-2],
+        }]
+        command = subprocess.list2cmdline(argv)
+        contract["commands"][0].update({
+            "description": "Independently evaluate archived raw data; no device operation.",
+            "command": command, "input_groups": ["firmware", "evidence"],
+            "runner_paths": ["Tools/acceptance/evaluate.py"],
+        })
+        contract["criteria"][0].update({
+            "description": "The archived observation confirms the expected fixture image.",
+            "input_groups": ["firmware", "evidence"], "external_inputs": ["prior-observation"],
+            "dependency_rationale": "Expected image identity and the offline evaluator are both required.",
+        })
+        cp, mp, contract, matrix = base.write_bundle(bundle, self.repo, contract)
+        source.write_bytes(raw)
+        result = subprocess.run(argv, cwd=self.repo, capture_output=True, timeout=20)
+        self.assertEqual(0, result.returncode, result.stderr.decode("utf-8"))
+        evaluated = json.loads(result.stdout)
+        output = bundle / "raw/func-1.log"
+        output.write_bytes(result.stdout)
+        matrix["commands"][0].update({"command": command, "exit_code": result.returncode})
+        matrix["criteria"][0].update({"observed": evaluated["accepted"],
+                                       "notes": "EXECUTED means offline evaluation, not a new OTA."})
+        matrix["evidence_hashes"]["raw/func-1.log"] = digest(output)
+        base.rewrite_contract_and_matrix(cp, mp, contract, matrix)
+        return (cp, mp, contract, matrix), argv, original
+
+    def test_archived_raw_input_allows_real_offline_evaluation_without_device_replay(self):
+        bundle, argv, original = self.offline_evaluation_bundle()
+        source_hash = digest(argv[-3])
+        cp, mp, contract, matrix = bundle
+        code, _, errors = base.run_main(["--contract", str(cp), "--matrix", str(mp),
+                                        "--repo-root", str(self.repo)])
+        self.assertEqual(0, code, errors)
+        evaluated = json.loads((mp.parent / "raw/func-1.log").read_bytes())
+        self.assertTrue(evaluated["evaluation_only"])
+        self.assertEqual(original, evaluated["original"])
+        self.assertEqual(source_hash, digest(argv[-3]))
+        self.assertEqual("EXECUTED", matrix["criteria"][0]["execution"])
+        self.assertIsNone(matrix["criteria"][0]["reused_from_round"])
+        self.assertEqual(["Tools/acceptance/evaluate.py"], contract["commands"][0]["runner_paths"])
+
+    def test_archived_raw_input_missing_or_tampered_cannot_pass(self):
+        bundle, argv, _ = self.offline_evaluation_bundle()
+        cp, mp, _, _ = bundle
+        source = Path(argv[-3])
+        source.write_bytes(b"tampered\n")
+        for kind in ("SHA-256 mismatch", "is missing"):
+            with self.subTest(kind=kind):
+                if kind == "is missing":
+                    source.unlink()
+                code, _, errors = base.run_main(["--contract", str(cp), "--matrix", str(mp),
+                                                "--repo-root", str(self.repo)])
+                self.assertEqual(1, code, errors)
+                self.assertIn("external input evidence " + kind, errors)
+
+    def test_offline_evaluator_cannot_supply_unobserved_or_mismatched_fields(self):
+        _, argv, original = self.offline_evaluation_bundle()
+        for kind in ("missing", "wrong-image", "unconfirmed"):
+            with self.subTest(kind=kind):
+                changed = dict(original)
+                if kind == "missing":
+                    del changed["confirmed"]
+                elif kind == "wrong-image":
+                    changed["firmware_sha256"] = "0" * 64
+                else:
+                    changed["confirmed"] = 3
+                source = Path(argv[-3])
+                source.write_text(json.dumps(changed), encoding="utf-8")
+                changed_argv = list(argv)
+                changed_argv[-2] = digest(source)
+                result = subprocess.run(changed_argv, cwd=self.repo, capture_output=True, timeout=20)
+                self.assertNotEqual(0, result.returncode)
 
     def source(self, bundle):
         cp, mp, contract, matrix = bundle
