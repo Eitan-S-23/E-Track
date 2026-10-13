@@ -57,8 +57,12 @@ def decode(raw):
                 64 <= m["total_len"] <= 1048576 and m["final_durable"] == m["total_len"] and
                 m["initial_durable"] <= m["total_len"], "MCU final staging state")
         if m["initial_durable"] == 0:
-            required = ("payload_read", "payload_program", "payload_erase", "payload_verify",
+            # Independent verify bypasses read(); zero-origin DATA hashes are
+            # incremental, so there is no durable prefix to read back either.
+            required = ("payload_program", "payload_erase", "payload_verify",
                         "journal_read", "journal_program", "uart_rx_irq", "ack_tx")
+            if m["phase"]["payload_read"]["calls"]:
+                required += ("payload_read",)
             require(all(m["phase"][p]["calls"] > 0 and m["phase"][p]["cycles"] > 0 for p in required),
                     "missing required MCU stage measurements")
     m["elapsed_ms"] = (m["end_ms"] - m["start_ms"]) & 0xffffffff
@@ -72,11 +76,16 @@ def decode(raw):
     return m
 
 
-def from_rtt(data):
+def raw_from_rtt(data):
+    """Check only framing before preserving a time-critical, prebound RAM read."""
     lines = [line for line in data.splitlines() if line.startswith(b"P34_METRICS ")]
     require(len(lines) == 1, "one complete original MCU metrics record required")
     require(re.fullmatch(rb"P34_METRICS [0-9a-f]{840}", lines[0]), "truncated/invalid MCU metrics record")
-    return decode(bytes.fromhex(lines[0][12:].decode("ascii")))
+    return bytes.fromhex(lines[0][12:].decode("ascii"))
+
+
+def from_rtt(data):
+    return decode(raw_from_rtt(data))
 
 
 def main():

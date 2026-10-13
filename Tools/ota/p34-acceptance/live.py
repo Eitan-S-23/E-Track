@@ -314,8 +314,9 @@ def phone_cell(plan, out, args):
         def mark_started(source):
             path = out / "start-observed.json"
             if not path.exists():
+                observed = time.monotonic()
                 h.save(path, dict(pid=pid, capture=capture, run_id=args.run_id, source=source,
-                    monotonic=time.monotonic(), within_start_window=time.monotonic() < start_deadline,
+                    monotonic=observed, within_start_window=observed < start_deadline,
                     scope="host observation, not an exact user tap timestamp"))
 
         def collectors_alive():
@@ -340,15 +341,19 @@ def phone_cell(plan, out, args):
             if not lines:
                 return None
             terminal_state["attempted"] = True
+            budget.check()
+            raw_metrics = metrics.raw_from_rtt(lines[0])
+            mark_started("MCU terminal publication")
             if budget.phase not in ("terminal", "salvage"):
                 budget.enter("terminal")
             mcu.stop_logger()
-            result = metrics.from_rtt(rtt.read_bytes())
-            mark_started("MCU terminal publication")
-            mcu.transfer_snapshot(bytes.fromhex(lines[0].strip()[12:].decode("ascii")), deadline=budget.deadline)
+            budget.check()
+            # Preserve the single old-App RAM sample before repeatable semantic
+            # decoding. Addresses come from the prebound ELF, never this record.
+            mcu.transfer_snapshot(raw_metrics, deadline=budget.deadline)
             budget.check()
             terminal_state["captured"] = True
-            return result
+            return metrics.from_rtt(rtt.read_bytes())
         terminal_probe = terminal_capture
         while True:
             budget.check()

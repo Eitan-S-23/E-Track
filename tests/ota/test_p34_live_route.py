@@ -24,11 +24,12 @@ import live_mcu as m
 import live_phone as p
 import test_p34_acceptance_stats as stats_fixture
 import test_p34_service_patch as service_fixture
+import test_ota_link_metrics as metrics_fixture
 
 
 class LiveRouteTests(unittest.TestCase):
     def setUp(self):
-        parent = h.checked(ROOT / ".cache/p34-live-tests")
+        parent = h.checked(Path(os.environ.get("P34_HOST_TEST_OUT", ROOT / ".cache/p34-live-tests")))
         parent.mkdir(parents=True, exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(prefix="case-", dir=parent)
         self.addCleanup(self.temp.cleanup)
@@ -88,21 +89,21 @@ class LiveRouteTests(unittest.TestCase):
 
     def test_standard_process_binary_streams_exit_and_timeout_are_preserved(self):
         env = h.environment(self.out)
-        result = h.command(self.out, "binary", [sys.executable, "-I", "-S", "-B", "-c",
+        result = h.command(self.out, "binary", [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c",
             "import sys;sys.stdout.buffer.write(b'\\x00\\xff');sys.stderr.write('diagnostic')"], env, seconds=10)
         self.assertEqual(result, b"\x00\xff")
         payload = b"runtime\x00\xff\n"
-        copied = h.command(self.out, "stdin", [sys.executable, "-I", "-S", "-B", "-c",
+        copied = h.command(self.out, "stdin", [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c",
             "import sys;sys.stdout.buffer.write(sys.stdin.buffer.read())"], env, seconds=10, stdin=payload)
         self.assertEqual(copied, payload)
         self.assertEqual((self.out / "binary.stderr").read_bytes(), b"diagnostic")
         with self.assertRaisesRegex(RuntimeError, "duplicate"):
             h.command(self.out, "binary", [sys.executable], env, seconds=1)
         with self.assertRaisesRegex(RuntimeError, "standard tool failed"):
-            h.command(self.out, "nonzero", [sys.executable, "-I", "-S", "-B", "-c", "raise SystemExit(7)"], env, seconds=10)
+            h.command(self.out, "nonzero", [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c", "raise SystemExit(7)"], env, seconds=10)
         self.assertEqual(h.read_json(self.out / "nonzero.closed.json")["exit_code"], 7)
         with self.assertRaisesRegex(RuntimeError, "timeout"):
-            h.command(self.out, "timeout", [sys.executable, "-I", "-S", "-B", "-c", "import time;time.sleep(30)"], env, seconds=.2)
+            h.command(self.out, "timeout", [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c", "import time;time.sleep(30)"], env, seconds=.2)
         receipt = h.read_json(self.out / "timeout.closed.json")
         self.assertEqual(receipt["reason"], "timeout_outcome_unknown")
         self.assertTrue(receipt["stopped_while_running"])
@@ -119,7 +120,7 @@ class LiveRouteTests(unittest.TestCase):
             output = self.out / "yielding.stdout"
             return output.is_file() and b"HEALTH_READ_ENTERED" in output.read_bytes()
         with self.assertRaises(h.ObservationReady):
-            h.command(self.out, "yielding", [sys.executable, "-I", "-S", "-B", "-c",
+            h.command(self.out, "yielding", [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c",
                 "import time;print('HEALTH_READ_ENTERED',flush=True);time.sleep(30)"],
                 env, seconds=15, read_ready=terminal)
         receipt = h.read_json(self.out / "yielding.closed.json")
@@ -130,7 +131,7 @@ class LiveRouteTests(unittest.TestCase):
 
     def test_readonly_watch_cannot_refresh_timeout_or_swallow_probe_errors(self):
         env = h.environment(self.out)
-        command = [sys.executable, "-I", "-S", "-B", "-c", "import time;time.sleep(30)"]
+        command = [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c", "import time;time.sleep(30)"]
         with self.assertRaisesRegex(RuntimeError, "timeout"):
             h.command(self.out, "watch-timeout", command, env, seconds=.2, read_ready=lambda: False)
         self.assertEqual(h.read_json(self.out / "watch-timeout.closed.json")["reason"], "timeout_outcome_unknown")
@@ -250,6 +251,15 @@ class LiveRouteTests(unittest.TestCase):
              self.assertRaisesRegex(RuntimeError, "prebound original base"):
             mcu.transfer_snapshot(b"synthetic", deadline=999)
         binding.assert_not_called()
+
+    def test_expired_terminal_snapshot_never_starts_a_bound_read(self):
+        mcu = m.MCU({}, self.out / "mcu")
+        mcu.bound["base"] = {}
+        with patch.object(m.time, "monotonic", return_value=100), \
+             patch.object(mcu, "execute") as execute:
+            with self.assertRaisesRegex(RuntimeError, "observation deadline"):
+                mcu.transfer_snapshot(bytes(420), deadline=100)
+        execute.assert_not_called()
 
     def test_uncertain_device_action_retains_lock_and_blocks_next_action(self):
         # Patch only the lock root; all writes still pass the real boundary guard.
@@ -866,7 +876,7 @@ class LiveRouteTests(unittest.TestCase):
 
 class NetworkStartupTests(unittest.TestCase):
     def setUp(self):
-        parent = h.checked(ROOT / ".cache/p34-live-tests")
+        parent = h.checked(Path(os.environ.get("P34_HOST_TEST_OUT", ROOT / ".cache/p34-live-tests")))
         parent.mkdir(parents=True, exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(prefix="network-", dir=parent)
         self.addCleanup(self.temp.cleanup)
@@ -1171,7 +1181,7 @@ class PhoneCellTests(unittest.TestCase):
     """Run the complete entry; only physical I/O and the clock are synthetic."""
 
     def setUp(self):
-        parent = h.checked(ROOT / ".cache/p34-live-tests")
+        parent = h.checked(Path(os.environ.get("P34_HOST_TEST_OUT", ROOT / ".cache/p34-live-tests")))
         parent.mkdir(parents=True, exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(prefix="cell-", dir=parent)
         self.addCleanup(self.temp.cleanup)
@@ -1182,7 +1192,8 @@ class PhoneCellTests(unittest.TestCase):
              snapshot_read=0, boot=0, readback=0, archive=0,
              health_error=None, collector_exit=None, command_failure=False,
              archive_error=False, close_error=False, missing_metrics=False,
-             terminal_error=False, ota_success=True, health_delay=0, withdraw_at=None):
+             terminal_error=False, ota_success=True, health_delay=0, withdraw_at=None,
+             decode_error=None, real_decode=False, metric_raw=None, logger_stop=0):
         out = h.fresh(self.out / label)
         now, calls = [0.0], []
         start_at = prepare + download + user_delay
@@ -1225,7 +1236,7 @@ class PhoneCellTests(unittest.TestCase):
             event("finished", snapshot_read)
             h.raw(phone.out / "snapshot.jsonl", b"synthetic sealed snapshot\n")
             if command_failure:
-                h.command(out, "failed-read", [sys.executable, "-I", "-S", "-B", "-c", "raise SystemExit(7)"],
+                h.command(out, "failed-read", [sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c", "raise SystemExit(7)"],
                           h.environment(out), seconds=10)
             value = dict(success=ota_success, initialDurable=0)
             h.save(phone.out / "statistics.json", value)
@@ -1253,11 +1264,47 @@ class PhoneCellTests(unittest.TestCase):
 
         mcu.inspect.side_effect = inspect
         mcu.wait_boot.side_effect = lambda *args: event("boot", boot)
-        mcu.transfer_snapshot.side_effect = lambda *args, **kwargs: event("terminal-read", terminal_read)
-        if terminal_error:
-            mcu.transfer_snapshot.side_effect = RuntimeError("terminal stack/clock window missed")
-        mcu.start_logger.return_value.read_bytes.side_effect = lambda: (
-            b"P34_METRICS " + b"0" * 840 + b"\n" if not missing_metrics and now[0] >= terminal_at else b"")
+        sample = bytes(420) if metric_raw is None else metric_raw
+        image = h.pinned(h.raw(out / "base-fixture.bin", bytes(0x400) + b"h" * 96))
+        names = ("g_ota_link_metrics", "g_ota_metrics_publish_bytes", "__StackGuardStart",
+                 "__StackLimit", "system_core_clock", "SystemTickCount")
+        observer = m.MCU.__new__(m.MCU)
+        observer.bound = {"base": dict(image=image,
+            table={name: (0x20000100 + i * 10000, 4) for i, name in enumerate(names)})}
+        ram_out = out / "mcu/terminal-before-reboot"
+
+        def read_memory(commands, sizes, label, *, deadline):
+            observer.remaining(180, deadline)
+            event("terminal-read", terminal_read)
+            reads = {row[0]: row[1:] for row in commands if isinstance(row, tuple)}
+            self.assertEqual(reads["metrics"], (observer.bound["base"]["table"]["g_ota_link_metrics"][0], 420))
+            self.assertEqual(reads["header_before"], (0x08010400, 96))
+            self.assertEqual(reads["header_after"], (0x08010400, 96))
+            data = dict(header_before=b"h" * 96, header_after=bytes(96) if terminal_error else b"h" * 96,
+                metrics=sample, published=struct.pack("<I", 853), guard=b"\x5a" * 32,
+                stack=b"\xa5" * 4096 + bytes(4096), clock=struct.pack("<I", 288000000),
+                systick=struct.pack("<3I", 7, 287999, 10), vtor=struct.pack("<I", 0x08010800),
+                wdt=struct.pack("<2I", 6, 1561), tick0=struct.pack("<I", 123000), tick1=struct.pack("<I", 123100))
+            self.assertEqual({key: len(value) for key, value in data.items()}, sizes)
+            h.fresh(ram_out)
+            for name, raw in data.items():
+                h.raw(ram_out / (name + ".bin"), raw)
+            observer.remaining(180, deadline)
+            return data, "", ram_out
+
+        observer.execute = Mock(side_effect=read_memory)
+        mcu.transfer_snapshot.side_effect = observer.transfer_snapshot
+
+        def rtt_bytes():
+            if missing_metrics or now[0] < terminal_at:
+                return b""
+            path = out / "mcu/transfer.rtt"
+            if not path.exists():
+                h.raw(path, b"P34_METRICS " + sample.hex().encode("ascii") + b"\n")
+            return path.read_bytes()
+
+        mcu.start_logger.return_value.read_bytes.side_effect = rtt_bytes
+        mcu.stop_logger.side_effect = lambda: event("stop-logger", logger_stop if mcu.stop_logger.call_count == 1 else 0)
         mcu.logger.alive.return_value = True
         network = Mock()
         network.start.return_value = "https://synthetic.example"
@@ -1265,15 +1312,27 @@ class PhoneCellTests(unittest.TestCase):
         plan = dict(package=dict(sha256="a" * 64), sentinel="synthetic", ble_address="synthetic")
         args = SimpleNamespace(run_role="clean", checkpoint_kib=None, previous_cell=None,
             seconds=seconds, run_id="host-probe", baud=921600, timeout_ms=2000)
-        decoded = dict(epoch=7, total_len=1048576, package_sha256="a" * 64, uart_baud_actual=921600, terminal=0)
+        epoch = 7 if metric_raw is None else struct.unpack_from("<I", sample, 15 * 4)[0]
+        package_sha = "a" * 64 if metric_raw is None else sample[112:144].hex()
+        plan["package"]["sha256"] = package_sha
+        decoded = dict(epoch=epoch, total_len=1048576, package_sha256=package_sha, uart_baud_actual=921600, terminal=0)
+        original_decoder = live.metrics.from_rtt
+
+        def decode(data):
+            event("decode")
+            if decode_error is not None:
+                raise decode_error
+            return original_decoder(data) if real_decode else decoded
+
+        decoder = Mock(side_effect=decode)
         error = None
         with ExitStack() as stack:
             for owner, name, replacement in (
                 (live, "MCU", Mock(return_value=mcu)), (live, "Phone", Mock(return_value=phone)),
                 (live, "Network", Mock(return_value=network)), (live, "config", Mock(return_value={})),
                 (live.time, "monotonic", lambda: now[0]), (live.time, "sleep", advance),
-                (live.metrics, "from_rtt", Mock(return_value=decoded)),
-                (live.observation_capture, "verify", Mock(return_value=(None, "x kind=begin_ack epoch=7 x"))),
+                (live.metrics, "from_rtt", decoder),
+                (live.observation_capture, "verify", Mock(return_value=(None, "x kind=begin_ack epoch=%d x" % epoch))),
                 (h, "ROOT", out),
             ):
                 stack.enter_context(patch.object(owner, name, replacement))
@@ -1285,6 +1344,7 @@ class PhoneCellTests(unittest.TestCase):
         phone.close.assert_called_once()
         network.close.assert_called_once()
         return SimpleNamespace(out=out, error=error, calls=calls, phone=phone, mcu=mcu,
+            decoder=decoder, observer=observer, ram_out=ram_out,
             stopped_at=now[0], complete_at=complete_at, terminal_at=terminal_at,
             lock=out / ".cache/p34-live-device.lock")
 
@@ -1293,6 +1353,9 @@ class PhoneCellTests(unittest.TestCase):
         case.phone.finished.assert_called_once()
         case.phone.archive_capture.assert_called_once()
         case.phone.salvage.assert_not_called()
+        case.mcu.transfer_snapshot.assert_called_once()
+        case.observer.execute.assert_called_once()
+        case.decoder.assert_called_once()
         self.assertGreaterEqual(dict(case.calls)["finished"], case.complete_at)
         self.assertGreaterEqual(dict(case.calls)["archive"], dict(case.calls)["finished"])
         self.assertTrue((case.out / "observations.json").is_file())
@@ -1308,6 +1371,95 @@ class PhoneCellTests(unittest.TestCase):
 
     def test_short_complete_control_flow(self):
         self.assert_complete(self.cell())
+
+    def test_real_v11_decoder_runs_after_one_original_ram_snapshot(self):
+        raw = metrics_fixture.v11_record()
+        case = self.cell(metric_raw=raw, real_decode=True, terminal_read=12)
+        self.assert_complete(case)
+        self.assertEqual((case.ram_out / "metrics.bin").read_bytes(), raw)
+        self.assertEqual([name for name, _ in case.calls if name in ("terminal-read", "decode")],
+                         ["terminal-read", "decode"])
+        self.assertEqual(dict(case.calls)["decode"], 112)
+        self.assertEqual(case.mcu.transfer_snapshot.call_args.kwargs["deadline"], 520)
+        print("TERMINAL_ORDER real_v11 read=100 decode=112 deadline=520 samples=1")
+
+    def test_decoder_exception_preserves_real_snapshot_and_original_failure(self):
+        error = ValueError("injected semantic rejection")
+        case = self.cell(decode_error=error, terminal_read=12)
+        self.assert_failed(case, "injected semantic rejection")
+        self.assertIs(case.error, error)
+        case.mcu.transfer_snapshot.assert_called_once()
+        case.observer.execute.assert_called_once()
+        case.decoder.assert_called_once()
+        self.assertEqual((case.ram_out / "metrics.bin").read_bytes(), bytes(420))
+        self.assertTrue((case.ram_out / "stack.bin").is_file())
+        self.assertEqual(dict(case.calls)["terminal-read"], 100)
+        self.assertEqual(dict(case.calls)["decode"], 112)
+        self.assertEqual(h.read_json(case.out / "start-expired.json")["message"], str(error))
+        drain = h.read_json(case.out / "start-drain.json")
+        self.assertEqual(drain["terminal"], dict(attempted=True, captured=True))
+        case.phone.finished.assert_not_called()
+        case.phone.archive_capture.assert_not_called()
+        print("TERMINAL_ORDER rejected read=100 decode=112 samples=1 original_error_preserved=true")
+
+    def test_crc_rejection_keeps_original_rtt_and_ram_without_a_second_sample(self):
+        raw = metrics_fixture.v11_record()
+        damaged = raw[:-1] + bytes([raw[-1] ^ 1])
+        case = self.cell(metric_raw=damaged, real_decode=True)
+        self.assert_failed(case, "CRC/torn read")
+        case.mcu.transfer_snapshot.assert_called_once()
+        case.decoder.assert_called_once()
+        self.assertEqual((case.ram_out / "metrics.bin").read_bytes(), damaged)
+        self.assertEqual((case.out / "mcu/transfer.rtt").read_bytes(), b"P34_METRICS " + damaged.hex().encode() + b"\n")
+
+    def test_failure_drain_decoder_error_cannot_restart_or_extend_terminal_capture(self):
+        case = self.cell(user_delay=121, transfer=71, terminal_read=12,
+                         decode_error=ValueError("drain semantic rejection"))
+        self.assert_failed(case, "start phase deadline")
+        case.mcu.transfer_snapshot.assert_called_once()
+        case.decoder.assert_called_once()
+        self.assertFalse((case.out / "phase-terminal.json").exists())
+        self.assertEqual(case.mcu.transfer_snapshot.call_args.kwargs["deadline"], 420)
+        drain = h.read_json(case.out / "start-drain.json")
+        self.assertEqual(drain["deadline_monotonic"], 420)
+        self.assertEqual(drain["terminal_error"], "drain semantic rejection")
+        self.assertEqual(drain["terminal"], dict(attempted=True, captured=True))
+        self.assertEqual((case.ram_out / "metrics.bin").read_bytes(), bytes(420))
+        print("TERMINAL_DRAIN read=192 decode=204 deadline=420 samples=1 result=original_start_failure")
+
+    def test_discovery_timestamp_precedes_blocking_logger_stop_and_ram_read(self):
+        case = self.cell(user_delay=110, transfer=0, logger_stop=15, terminal_read=20)
+        self.assert_complete(case)
+        observed = h.read_json(case.out / "start-observed.json")
+        self.assertEqual(observed["source"], "MCU terminal publication")
+        self.assertEqual(observed["monotonic"], 110)
+        self.assertTrue(observed["within_start_window"])
+        self.assertEqual(dict(case.calls)["terminal-read"], 125)
+        self.assertEqual(dict(case.calls)["decode"], 145)
+
+    def test_expiry_during_logger_close_never_starts_or_retries_ram_read(self):
+        for label, options in (("normal", dict(logger_stop=420)),
+                               ("drain", dict(user_delay=121, transfer=298, logger_stop=1))):
+            with self.subTest(label=label):
+                case = self.cell(label, **options)
+                self.assertIsNotNone(case.error)
+                case.mcu.transfer_snapshot.assert_not_called()
+                case.observer.execute.assert_not_called()
+                case.decoder.assert_not_called()
+                self.assertTrue(case.lock.is_file())
+                self.assertFalse((case.out / "observations.json").exists())
+                self.assertEqual(h.read_json(case.out / "start-drain.json")["terminal"],
+                                 dict(attempted=True, captured=False))
+                if label == "drain":
+                    self.assertEqual(case.stopped_at, 420)
+                    self.assertFalse((case.out / "phase-terminal.json").exists())
+
+    def test_short_frame_fails_before_any_ram_read_and_is_not_retried(self):
+        case = self.cell(metric_raw=bytes(419))
+        self.assert_failed(case, "truncated/invalid MCU metrics record")
+        case.mcu.transfer_snapshot.assert_not_called()
+        case.decoder.assert_not_called()
+        self.assertTrue((case.out / "mcu/transfer.rtt").is_file())
 
     def test_click_transfer_and_full_identity_window_do_not_share_300_seconds(self):
         case = self.cell(user_delay=25, transfer=110, reboot=170)
@@ -1474,7 +1626,7 @@ class PhoneCellTests(unittest.TestCase):
 
 class StartNoticeTests(unittest.TestCase):
     def setUp(self):
-        parent = h.checked(ROOT / ".cache/p34-live-tests")
+        parent = h.checked(Path(os.environ.get("P34_HOST_TEST_OUT", ROOT / ".cache/p34-live-tests")))
         parent.mkdir(parents=True, exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(prefix="notice-", dir=parent)
         self.addCleanup(self.temp.cleanup)
