@@ -451,3 +451,17 @@ The first CI full log ZIP is preserved at
 The failed log, run/job metadata, process exit and closed receipts remain beside
 it. Native CI and independent review of the repair are next; P42-EXT-02/03,
 formal P4-2 acceptance and main integration are not claimed by local green tests.
+
+The production repair was pushed as `9b2af3e3a9d37be5ecd647caab1b247cdeb2238f`.
+Native run `38590614768` passed all six original failing download cases and the
+five malformed-identity tests: 155 passed, one failed (156 total). The remaining
+failure is in the newly added R2 contract test: the native binding throws
+`TypeError: Conditional ETag should not be wrapped in quotes`, rather than
+returning a metadata-only result for that invalid argument. The continuation
+owner corrects this test-oracle/double error, not the already-passing product
+fix. The corrected regression separately requires that quoted arguments throw
+and that a valid but nonmatching raw value returns metadata without a body.
+Both native failures and the first local reproduction remain preserved. The
+second full CI ZIP is `commands/native-ci-fixed-original-zip.stdout` beneath
+the Git/CI record directory, SHA-256
+`b604135db019cad102b38906f4ecf686d4104ee545a9366505678fe55ed3d818`.

@@ -50,9 +50,12 @@ class MemoryBucket {
       } };
   }
   async get(key: string, options: R2GetOptions = {}) {
+    const condition = options.onlyIf as R2Conditional | undefined;
+    if (condition?.etagMatches?.startsWith('"') && condition.etagMatches.endsWith('"')) {
+      throw new TypeError("Conditional ETag should not be wrapped in quotes");
+    }
     const head = await this.head(key);
     if (!head) return null;
-    const condition = options.onlyIf as R2Conditional | undefined;
     if (condition?.etagMatches !== undefined && condition.etagMatches !== head.etag) return head;
     const bytes = this.objects.get(key)!.bytes;
     const range = options.range as { offset?: number; length?: number } | undefined;

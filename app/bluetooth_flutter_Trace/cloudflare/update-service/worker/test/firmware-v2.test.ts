@@ -99,9 +99,12 @@ describe("P4-2 latest and public download", () => {
     const matched = await env.RELEASES_BUCKET.get(key, { onlyIf: { etagMatches: head.etag } });
     expect(matched && "body" in matched).toBe(true);
     if (matched && "body" in matched) await matched.body.cancel();
-    const quoted = await env.RELEASES_BUCKET.get(key, { onlyIf: { etagMatches: head.httpEtag } });
-    expect(quoted).not.toBeNull();
-    expect(quoted && "body" in quoted).toBe(false);
+    await expect(async () => {
+      await env.RELEASES_BUCKET.get(key, { onlyIf: { etagMatches: head.httpEtag } });
+    }).rejects.toThrow(/Conditional ETag.*quotes/);
+    const mismatched = await env.RELEASES_BUCKET.get(key, { onlyIf: { etagMatches: "not-the-etag" } });
+    expect(mismatched).not.toBeNull();
+    expect(mismatched && "body" in mismatched).toBe(false);
   });
   it.each(["opaque", 'W/"opaque"', '""', '"bad"quote"', '"bad\netag"'])(
     "rejects a noncanonical stored HTTP entity tag %j", async (etag) => {
