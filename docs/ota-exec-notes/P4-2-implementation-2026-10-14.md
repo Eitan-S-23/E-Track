@@ -528,3 +528,11 @@ its normal runtime records; no session/config/history files were edited directly
 The existing task card and this record retain P42-EXT-02/03 and formal acceptance
 as open. The delivery includes code, development checks and independent repair
 review, not main integration, deployment, remote mutation or additional OTA.
+
+Before remote delivery, the index completeness check found that the repository's
+ordinary `*.log` ignore rule had excluded seven copied originals; the two review
+files also needed a later stage after their copy completed. The missing files
+were explicitly staged, without changing ignores or raw bytes. A single
+`git cat-file --batch` comparison then verified all 32 archive files byte-for-byte
+against the index. The initial local records commit is retained, not amended;
+the following records commit supplies the missing originals before pushing.

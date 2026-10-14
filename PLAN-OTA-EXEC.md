@@ -758,7 +758,7 @@
 - 证据: —
 
 #### P4-2 D1 多资产模型与 latest 选包
-状态: 进行中 ｜ 认领: Codex(P4-2 实现/接续) / 2026-10-14 ｜ 更新: 2026-10-14(专属分支已提交推送；原生 Worker CI 156/156、本地回归 190/190；真实 legacy/云端观察与正式验收未完成，未合入 main)
+状态: 进行中 ｜ 认领: Codex(P4-2 实现/接续) / 2026-10-14 ｜ 更新: 2026-10-15(专属分支已提交推送；原生 Worker CI 156/156、本地回归 190/190，R2 修复独立复核 APPROVE；真实 legacy/云端观察与正式验收未完成，未合入 main)
 - 依赖: P0 阶段门槛已完成；不依赖 P4-1。
 - 目标: §6.2-1/2:新迁移 `firmware_release_assets`(kind∈{full,patch,recovery};`base_image_sha256 NOT NULL` 哨兵 `''`+CHECK+唯一键 `(release_id,kind,base_image_sha256)`);release 增 draft/ready 原子门槛(事务内校验恰一 full+R2 digest 全过才 ready,渠道晋升仅接受 ready);latest 增 `currentImageSha` 选包(patch 匹配否则退 full);注册脚本改资产数组;recovery 不自动分发;旧单资产数据迁移回填 full。
 - 验收: **SQL 实测:同 release 插第二个 full 被拒、同基版第二个 patch 被拒、缺 full 置 ready 被拒(R8-5)**;latest 三场景(匹配 patch/退 full/无更新)接口测试绿。

@@ -1,0 +1,21 @@
+{"root":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation","cwd":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker","command":["D:\\install\\nvm\\nodejs\\node.exe","node_modules/vitest/vitest.mjs","run","--cache=false","--config","D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-independent-review-20261014\\vitest.review.config.ts"],"startedAt":"2026-10-14T12:18:59.321Z","node":"v24.13.0","controlledOutputs":[".cache/tmp",".cache/home",".cache/appdata",".cache/localappdata",".cache/npm",".cache/wrangler",".cache/xdg-cache",".cache/xdg-config",".cache/node-compile",".cache/types",".cache/workerd",".cache/p4-2-logs",".cache/p4-2-script-fixtures","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.wrangler","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.vite","app/bluetooth_flutter_Trace/cloudflare/update-service/admin/node_modules","app/bluetooth_flutter_Trace/cloudflare/update-service/public/node_modules"]}
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p4-2-implementation/.cache/p4-2-independent-review-20261014
+
+(node:23020) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ review-probes.test.ts > P42-REVIEW-01 invalid Access assertions > returns 401 without side effects for missing assertion 36ms
+ ✓ review-probes.test.ts > P42-REVIEW-01 invalid Access assertions > returns 401 without side effects for wrong segment count 2ms
+ ✓ review-probes.test.ts > P42-REVIEW-01 invalid Access assertions > returns 401 without side effects for unsupported algorithm 2ms
+ ✓ review-probes.test.ts > P42-REVIEW-01 invalid Access assertions > returns 401 without side effects for invalid base64url 4ms
+ ✓ review-probes.test.ts > P42-REVIEW-01 invalid Access assertions > returns 401 without side effects for invalid header JSON 3ms
+ ✓ review-probes.test.ts > P42-REVIEW-01 invalid Access assertions > returns 401 without side effects for null header 2ms
+ ✓ review-probes.test.ts > P42-REVIEW-01 invalid Access assertions > returns 401 without side effects for null payload 5ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  20:19:00
+   Duration  1.33s (transform 376ms, setup 0ms, import 469ms, tests 57ms, environment 0ms)
+
+
+{"label":"p42-review-01-independent-recheck-01","startedAt":"2026-10-14T12:18:59.321Z","finishedAt":"2026-10-14T12:19:02.177Z","cwd":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker","command":["D:\\install\\nvm\\nodejs\\node.exe","node_modules/vitest/vitest.mjs","run","--cache=false","--config","D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-independent-review-20261014\\vitest.review.config.ts"],"exitCode":0,"signal":null,"log":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-logs\\p42-review-01-independent-recheck-01.log"}

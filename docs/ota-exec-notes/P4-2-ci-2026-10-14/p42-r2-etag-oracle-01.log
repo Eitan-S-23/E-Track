@@ -1,0 +1,168 @@
+{"root":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation","cwd":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker","command":["D:\\install\\nvm\\nodejs\\node.exe","node_modules/vitest/vitest.mjs","run","--cache=false","--config","test/vitest.host.config.ts","test/firmware-v2.test.ts"],"startedAt":"2026-10-14T15:40:05.908Z","node":"v24.13.0","controlledOutputs":[".cache/tmp",".cache/home",".cache/appdata",".cache/localappdata",".cache/npm",".cache/wrangler",".cache/xdg-cache",".cache/xdg-config",".cache/node-compile",".cache/types",".cache/workerd",".cache/p4-2-logs",".cache/p4-2-script-fixtures","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.wrangler","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.vite","app/bluetooth_flutter_Trace/cloudflare/update-service/admin/node_modules","app/bluetooth_flutter_Trace/cloudflare/update-service/public/node_modules"]}
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p4-2-implementation/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+(node:19480) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > registers all three assets atomically and replays canonical reordered metadata without another audit 273ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > conflicts on changed releaseNotes 8ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > conflicts on changed commitSha 7ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > conflicts on changed runId 6ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > conflicts on changed targetImageSha256 7ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects unknown root before SQL side effects 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects unknown asset before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects unknown kind before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects duplicate full before SQL side effects 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects missing recovery before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects null full base before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects bad version before SQL side effects 3ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects wrong formula before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects u32 overflow before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects App overflow before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects unverified before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects asset path before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects mutable URL before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects wrong URL file before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects wrong R2 key before SQL side effects 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects non-formal releases and invalid/multiple bearer credentials 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > requires Content-Type 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > requires Accept 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects R2 missing mismatch without partial registration 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects R2 size mismatch without partial registration 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects R2 metadata digest mismatch without partial registration 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rejects R2 bytes mismatch without partial registration 3ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > rolls back release/assets/channels when audit insertion fails 5ms
+ ✓ test/firmware-v2.test.ts > P4-2 register/schema v2 > serializes 20 identical concurrent registrations to one release and audit 60ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > distinguishes raw R2 conditions from quoted HTTP entity tags 4ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects a noncanonical stored HTTP entity tag "opaque" 6ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects a noncanonical stored HTTP entity tag "W/\"opaque\"" 6ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects a noncanonical stored HTTP entity tag "\"\"" 11ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects a noncanonical stored HTTP entity tag "\"bad\"quote\"" 6ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects a noncanonical stored HTTP entity tag "\"bad\netag\"" 7ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > honors independent latest/download stop flags with already-issued URLs 24ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > fails closed on a deliberately corrupted draft channel read model 13ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > fails closed on a deliberately corrupted missing full channel read model 14ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > selects exact raw-SHA patch, falls back to full, hides recovery and returns no update 14ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > falls back when matching patch is archived but rejects an archived full even when patch matches 11ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest appVersionCode= without download information 9ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest appVersionCode=1e2 without download information 7ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest appVersionCode=-1 without download information 7ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest appVersionCode=2100000001 without download information 11ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest currentImageSha=11 without download information 8ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest currentImageSha=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA without download information 8ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest deviceModel=igpsport-bsc300 without download information 9ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest unknown=x without download information 12ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest hardwareRevision=2 without download information 7ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest layoutId=2 without download information 12ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest bootVersion=0 without download information 91ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects latest protocolVersion=2 without download information 42ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > applies App gate before the ordered hardware/layout/Boot/protocol checks 709ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects missing or duplicate query parameters 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > defensively rejects missing and duplicate full read models 14ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > enforces headers, byte identity and correct full/partial digest semantics 30ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects Range bytes=-3 9ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects Range bytes=1-2 16ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects Range bytes=1-,3- 15ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects Range bytes=1e2- 12ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > rejects Range items=1- 20ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > returns 416 at/past EOF and rejects a mutated immutable R2 object 14ms
+ ✓ test/firmware-v2.test.ts > P4-2 latest and public download > revokes public URLs when the release is no longer published 19ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > matches the frozen 67-byte token golden vector 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects missing token mutation 10ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects empty token mutation 9ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects duplicate token mutation 9ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects unknown token mutation 10ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects purpose token mutation 9ms
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects the second full, not an application precheck
+SQL_REJECT XC-D1-DUP-FULL: Error: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects the second patch for the same raw base
+SQL_REJECT XC-D1-DUP-PATCH: Error: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects the second recovery asset
+SQL_REJECT duplicate-recovery: Error: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: NULL full
+SQL_REJECT NULL full: Error: NOT NULL constraint failed: firmware_release_assets.base_image_sha256
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: full with SHA
+SQL_REJECT full with SHA: Error: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: full with version
+SQL_REJECT full with version: Error: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: empty patch
+SQL_REJECT empty patch: Error: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: zero patch version
+SQL_REJECT zero patch version: Error: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: uppercase SHA
+SQL_REJECT uppercase SHA: Error: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: unknown kind
+SQL_REJECT unknown kind: Error: CHECK constraint failed: kind IN ('full','patch','recovery')
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: recovery base
+SQL_REJECT recovery base: Error: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: patch ahead of target
+SQL_REJECT patch ahead of target: Error: firmware patch base version must precede target
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects ready without full, and retains draft
+SQL_REJECT XC-D1-NO-FULL-READY: Error: firmware ready requires exactly one full and verified assets
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects unpublished asset readiness and draft/cross-scope channel pointers
+SQL_REJECT unverified-ready: Error: firmware ready requires exactly one full and verified assets
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects unpublished asset readiness and draft/cross-scope channel pointers
+SQL_REJECT draft-pointer: Error: firmware channel requires same-scope ready release
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > rejects direct channel changes without CAS and admin audit without a reason
+SQL_REJECT channel-CAS: Error: firmware channel mutation requires CAS revision
+
+stdout | test/firmware-v2.test.ts > P4-2 actual SQL constraints > rejects direct channel changes without CAS and admin audit without a reason
+SQL_REJECT admin-reason: Error: firmware admin reason required
+
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects kind token mutation 9ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects asset token mutation 10ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > rejects signature token mutation 9ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > expires v2 at the exact deadline and never signs v1 15ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > accepts a rotated previous v2 key and binds actual asset kind, not just the signature 8ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > accepts only public v1 inside the fixed cutover window and rejects at cutoff 10ms
+ ✓ test/firmware-v2.test.ts > P4-2 token v2 and bounded v1 verifier > fails signing closed without an auditable cutover 0ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects the second full, not an application precheck 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects the second patch for the same raw base 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects the second recovery asset 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: NULL full 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: full with SHA 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: full with version 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: empty patch 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: zero patch version 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: uppercase SHA 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: unknown kind 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: recovery base 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > SQL rejects illegal kind/base: patch ahead of target 1ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects ready without full, and retains draft 3ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > database rejects unpublished asset readiness and draft/cross-scope channel pointers 2ms
+ ✓ test/firmware-v2.test.ts > P4-2 actual SQL constraints > rejects direct channel changes without CAS and admin audit without a reason 7ms
+
+ Test Files  1 passed (1)
+      Tests  91 passed (91)
+   Start at  23:40:08
+   Duration  2.68s (transform 459ms, setup 143ms, import 281ms, tests 1.77s, environment 0ms)
+
+
+{"label":"p42-r2-etag-oracle-01","startedAt":"2026-10-14T15:40:05.908Z","finishedAt":"2026-10-14T15:40:10.925Z","cwd":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker","command":["D:\\install\\nvm\\nodejs\\node.exe","node_modules/vitest/vitest.mjs","run","--cache=false","--config","test/vitest.host.config.ts","test/firmware-v2.test.ts"],"exitCode":0,"signal":null,"log":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-logs\\p42-r2-etag-oracle-01.log"}

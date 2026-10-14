@@ -1,0 +1,61 @@
+{"root":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation","cwd":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker","command":["D:\\install\\nvm\\nodejs\\node.exe","node_modules/vitest/vitest.mjs","run","--cache=false","--config","test/vitest.host.config.ts","test/firmware-admin.test.ts","--testNamePattern","keeps invalid signatures|keeps JWKS|unexpected decoder|validates a real test JWT|rejects an expired valid JWT"],"startedAt":"2026-10-14T12:20:32.815Z","node":"v24.13.0","controlledOutputs":[".cache/tmp",".cache/home",".cache/appdata",".cache/localappdata",".cache/npm",".cache/wrangler",".cache/xdg-cache",".cache/xdg-config",".cache/node-compile",".cache/types",".cache/workerd",".cache/p4-2-logs",".cache/p4-2-script-fixtures","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.wrangler","app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.vite","app/bluetooth_flutter_Trace/cloudflare/update-service/admin/node_modules","app/bluetooth_flutter_Trace/cloudflare/update-service/public/node_modules"]}
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p4-2-implementation/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+(node:21228) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > issues a recovery-only URL for unpublished ready firmware and a sanitized atomic audit
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > returns the identical URL and original requestId on replay without another audit
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rejects changed reason/action fingerprints across both endpoints
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > handles 20 concurrent same-key requests with one completed result and one audit
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > expires the original URL at exactly 300 seconds; a new key is required
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > starts issuance time after R2 verification, not before a slow readback
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > different canonical owners can reuse a key but reason bytes are exact
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > records a tombstone on an expired conflicting request before result cleanup
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > revokes recovery URLs immediately when the asset becomes archived
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > keeps the 24h key guard under request-first scheduling
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > keeps the 24h key guard under cleanup-first scheduling
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > keeps the 24h key guard under concurrent scheduling
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > keeps disable replay valid until the exclusive 24h boundary and never re-enables disabled firmware
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > uses real SQL to prevent pending commits, body deletion without tombstone, and tombstone deletion
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rolls back result cleanup if a tombstone cannot be written
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rolls back pending/result/audit and disable mutation on an audit failure
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rejects recovery for draft
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rejects recovery for disabled
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rejects recovery for archived
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rejects recovery for asset archived
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rejects recovery for not uploaded
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > rejects recovery for R2 missing
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > cannot disable a channel-referenced release or publish a draft/stale revision/regression
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > publishes and audits atomically; rejects SQL disable and identity changes on a referenced release
+ ↓ test/firmware-admin.test.ts > P4-2 owner recovery and permanent idempotency > returns the versioned multi-asset admin read model
+ ✓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > validates a real test JWT and preserves original requestId in replay JSON and header 353ms
+ ✓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects an expired valid JWT and malformed response-correlation headers 16ms
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > returns TOKEN_INVALID/401 for missing assertion before network or database access
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > returns TOKEN_INVALID/401 for wrong segment count before network or database access
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > returns TOKEN_INVALID/401 for unsupported algorithm before network or database access
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > returns TOKEN_INVALID/401 for invalid Base64URL before network or database access
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > returns TOKEN_INVALID/401 for invalid header JSON before network or database access
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > returns TOKEN_INVALID/401 for null header before network or database access
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > returns TOKEN_INVALID/401 for null payload before network or database access
+ ✓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > keeps invalid signatures as TOKEN_INVALID/401 without a database access 4ms
+ ✓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > keeps JWKS HTTP failure as BACKEND_UNAVAILABLE/503 3ms
+ ✓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > keeps JWKS invalid JSON as BACKEND_UNAVAILABLE/503 3ms
+ ✓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > keeps JWKS network failure as BACKEND_UNAVAILABLE/503 2ms
+ ✓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > does not classify an unexpected decoder failure as invalid credentials 2ms
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects publisher without a success audit
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects unknown actor without a success audit
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects origin without a success audit
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects csrf without a success audit
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects bad key without a success audit
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects empty reason without a success audit
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects unknown field without a success audit
+ ↓ test/firmware-admin.test.ts > P4-2 existing Access Pages facade > rejects invalid JWT without a success audit
+
+ Test Files  1 passed (1)
+      Tests  7 passed | 40 skipped (47)
+   Start at  20:20:33
+   Duration  2.22s (transform 514ms, setup 126ms, import 335ms, tests 1.25s, environment 0ms)
+
+
+{"label":"p42-review-01-independent-controls-01","startedAt":"2026-10-14T12:20:32.815Z","finishedAt":"2026-10-14T12:20:36.084Z","cwd":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker","command":["D:\\install\\nvm\\nodejs\\node.exe","node_modules/vitest/vitest.mjs","run","--cache=false","--config","test/vitest.host.config.ts","test/firmware-admin.test.ts","--testNamePattern","keeps invalid signatures|keeps JWKS|unexpected decoder|validates a real test JWT|rejects an expired valid JWT"],"exitCode":0,"signal":null,"log":"D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-logs\\p42-review-01-independent-controls-01.log"}
