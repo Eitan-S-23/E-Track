@@ -1,0 +1,182 @@
+{
+  "utc": "2026-10-14T16:07:52.984855+00:00",
+  "result": "PASS",
+  "scope": "Selected controllable outputs and preserved hashes; not a machine-wide write trace",
+  "source_commit": "fc4fbbb8193fcc536ef408b7b662d44b30f869dc",
+  "unchanged_main": "7e71f694bcf97c78bcfde9e3220dcf399d99f1a0",
+  "preserved_inputs": 85,
+  "intentional_changes": [
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/src/firmware_download.ts",
+      "before": "56fa36f364c0fc55240f4f6b0bd2e411f3c6b24c5fbd8bdf897c6dbe5ee9f450",
+      "after": "fbf6a6f8cd230c6373e852756b836853b480cc10c5420e3fbd78b57bd00b2b29"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-v2.test.ts",
+      "before": "57f84bb06bc8923b95e1cb73619849cf88dc8fef10bcf9a249cb8bee95299921",
+      "after": "f2365292bde34df492aee0a60da27838dc32abf3aa0499f24789eee130f4ab37"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/host/platform.ts",
+      "before": "f266b903b58bb3f9e1501cf75d908480196098f85606f0bcfa429ee40e032a56",
+      "after": "fc00ad00311407f0782c15afdd8179482b09d055351be1551ea46120c0764084"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-2-implementation-2026-10-14.md",
+      "before": "a31c44a4c985268042192019824e2daa295b0b61220a02fb793c543af086f15c",
+      "after": "c42b5326ab8f3e7194b31228a5def9d7c90fad779252d3ffa7b51daab853fdbb"
+    }
+  ],
+  "archived_originals_verified": 26,
+  "commands": [
+    {
+      "label": "auth-identity",
+      "exit_code": 0
+    },
+    {
+      "label": "commit-precheck",
+      "exit_code": 0
+    },
+    {
+      "label": "commit-r2-etag-fix",
+      "exit_code": 0
+    },
+    {
+      "label": "commit-r2-oracle",
+      "exit_code": 0
+    },
+    {
+      "label": "commit-source",
+      "exit_code": 0
+    },
+    {
+      "label": "dispatch-native-ci-final",
+      "exit_code": 0
+    },
+    {
+      "label": "dispatch-native-ci-fixed",
+      "exit_code": 0
+    },
+    {
+      "label": "dispatch-native-ci",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-details",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-discovery",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-failed-log",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-final-details",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-final-original-zip",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-fixed-details",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-fixed-discovery",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-fixed-log",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-fixed-original-zip",
+      "exit_code": 0
+    },
+    {
+      "label": "native-ci-original-zip",
+      "exit_code": 0
+    },
+    {
+      "label": "push-r2-etag-fix",
+      "exit_code": 0
+    },
+    {
+      "label": "push-r2-oracle",
+      "exit_code": 0
+    },
+    {
+      "label": "push-source",
+      "exit_code": 0
+    },
+    {
+      "label": "remote-before",
+      "exit_code": 0
+    },
+    {
+      "label": "remote-source",
+      "exit_code": 0
+    },
+    {
+      "label": "stage-continuation-note",
+      "exit_code": 0
+    },
+    {
+      "label": "stage-normalized",
+      "exit_code": 0
+    },
+    {
+      "label": "stage-r2-etag-fix",
+      "exit_code": 0
+    },
+    {
+      "label": "stage-r2-oracle",
+      "exit_code": 0
+    },
+    {
+      "label": "stage-source",
+      "exit_code": 0
+    },
+    {
+      "label": "staged-whitespace-normalized",
+      "exit_code": 0
+    },
+    {
+      "label": "staged-whitespace",
+      "exit_code": 2
+    },
+    {
+      "label": "watch-native-ci",
+      "exit_code": 1
+    }
+  ],
+  "selected_output_roots": [
+    ".cache\\p4-2-git-ci-20261014",
+    ".cache\\p42-session-resume-20261014",
+    "docs\\ota-exec-notes\\P4-2-ci-2026-10-14",
+    ".cache\\p4-2-logs",
+    ".cache\\p4-2-script-fixtures",
+    ".cache\\tmp",
+    ".cache\\home",
+    ".cache\\appdata",
+    ".cache\\localappdata",
+    ".cache\\npm",
+    ".cache\\wrangler",
+    ".cache\\xdg-cache",
+    ".cache\\xdg-config",
+    ".cache\\node-compile",
+    ".cache\\types",
+    ".cache\\workerd"
+  ],
+  "git_writes": "Dedicated branch/index/objects/refs/reflogs under D:/github/my/E-Track/.git",
+  "external_config_and_hooks_unchanged": true,
+  "session_operations": "Native exact-session status/stop and read-only review request; runtime-managed bridge/Codex records only",
+  "prior_external_npm_incident": "P42-WRITE-01 remains unresolved; no cleanup or npm invocation performed here",
+  "devices": 0,
+  "deployments": 0,
+  "main_merges": 0
+}

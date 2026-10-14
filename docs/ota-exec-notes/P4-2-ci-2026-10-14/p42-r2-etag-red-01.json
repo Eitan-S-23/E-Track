@@ -1,0 +1,20 @@
+{
+  "label": "p42-r2-etag-red-01",
+  "startedAt": "2026-10-14T15:26:43.807Z",
+  "finishedAt": "2026-10-14T15:26:50.980Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker",
+  "command": [
+    "D:\\install\\nvm\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--cache=false",
+    "--config",
+    "test/vitest.host.config.ts",
+    "test/firmware-v2.test.ts",
+    "test/firmware-admin.test.ts",
+    "test/invariants.test.ts"
+  ],
+  "exitCode": 1,
+  "signal": null,
+  "log": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-logs\\p42-r2-etag-red-01.log"
+}

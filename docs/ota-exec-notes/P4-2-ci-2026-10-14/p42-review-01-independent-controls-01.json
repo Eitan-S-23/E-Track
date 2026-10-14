@@ -1,0 +1,20 @@
+{
+  "label": "p42-review-01-independent-controls-01",
+  "startedAt": "2026-10-14T12:20:32.815Z",
+  "finishedAt": "2026-10-14T12:20:36.084Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker",
+  "command": [
+    "D:\\install\\nvm\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--cache=false",
+    "--config",
+    "test/vitest.host.config.ts",
+    "test/firmware-admin.test.ts",
+    "--testNamePattern",
+    "keeps invalid signatures|keeps JWKS|unexpected decoder|validates a real test JWT|rejects an expired valid JWT"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "log": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-logs\\p42-review-01-independent-controls-01.log"
+}

@@ -1,0 +1,228 @@
+{
+  "utc": "2026-10-14T15:53:59.553300+00:00",
+  "task": "P4-2",
+  "scope": "Development CI and local originals; not formal acceptance or remote-account evidence",
+  "runs": [
+    {
+      "run_id": 38588241206,
+      "commit": "4413bf9bd9705eef5de9f40c4abbaa5501048452",
+      "conclusion": "failure",
+      "tests": "6 failed | 144 passed (150)",
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38588241206",
+      "jobs": [
+        {
+          "name": "Public Pages Typecheck",
+          "conclusion": "success"
+        },
+        {
+          "name": "Admin Facade Typecheck",
+          "conclusion": "success"
+        },
+        {
+          "name": "Worker Typecheck and Invariants",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "run_id": 38590614768,
+      "commit": "9b2af3e3a9d37be5ecd647caab1b247cdeb2238f",
+      "conclusion": "failure",
+      "tests": "1 failed | 155 passed (156)",
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38590614768",
+      "jobs": [
+        {
+          "name": "Public Pages Typecheck",
+          "conclusion": "success"
+        },
+        {
+          "name": "Admin Facade Typecheck",
+          "conclusion": "success"
+        },
+        {
+          "name": "Worker Typecheck and Invariants",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "run_id": 38591559979,
+      "commit": "fc4fbbb8193fcc536ef408b7b662d44b30f869dc",
+      "conclusion": "success",
+      "tests": "156 passed (156)",
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38591559979",
+      "jobs": [
+        {
+          "name": "Public Pages Typecheck",
+          "conclusion": "success"
+        },
+        {
+          "name": "Worker Typecheck and Invariants",
+          "conclusion": "success"
+        },
+        {
+          "name": "Admin Facade Typecheck",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "run-38588241206.json",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-details.stdout",
+      "bytes": 5135,
+      "sha256": "107e8b8b86513b4d06692c8f12658646818441d5bf2c44a42782c2a63542c0d1"
+    },
+    {
+      "path": "run-38588241206.zip",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-original-zip.stdout",
+      "bytes": 57695,
+      "sha256": "01d3e6ffd3da5ce979f597527370c93beeb0b2d13032d131e98c8989e06d0965"
+    },
+    {
+      "path": "run-38588241206-retrieval.json",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-original-zip.closed.json",
+      "bytes": 840,
+      "sha256": "28f1dfd09d41e60a9141418b187a75a6c10f35e496b73134c2a9fb19e3314f14"
+    },
+    {
+      "path": "run-38590614768.json",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-fixed-details.stdout",
+      "bytes": 5135,
+      "sha256": "526309652bcf32379da6ce39bf722a7eb698f5a7794362c3e437bff1529135ce"
+    },
+    {
+      "path": "run-38590614768.zip",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-fixed-original-zip.stdout",
+      "bytes": 51272,
+      "sha256": "b604135db019cad102b38906f4ecf686d4104ee545a9366505678fe55ed3d818"
+    },
+    {
+      "path": "run-38590614768-retrieval.json",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-fixed-original-zip.closed.json",
+      "bytes": 852,
+      "sha256": "42afab1c0c27ddb8ef1686a65114ecb488a702eec4a784342de15cf4427a3c91"
+    },
+    {
+      "path": "run-38591559979.json",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-final-details.stdout",
+      "bytes": 5135,
+      "sha256": "b9273684a5c65d4755703140b091035c3fbbd68b1ccac8a6d952b4206da72e0c"
+    },
+    {
+      "path": "run-38591559979.zip",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-final-original-zip.stdout",
+      "bytes": 46634,
+      "sha256": "110f8206e3d9563d244890d9f5af51a6c67cf13d97a55f957009ca259ad7e3cf"
+    },
+    {
+      "path": "run-38591559979-retrieval.json",
+      "original": ".cache\\p4-2-git-ci-20261014\\commands\\native-ci-final-original-zip.closed.json",
+      "bytes": 852,
+      "sha256": "e4abb11c2050d8139e3f4941b6ae3a21fa8131403be27e18bb031045738fdc06"
+    },
+    {
+      "path": "p42-r2-etag-red-01.log",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-red-01.log",
+      "bytes": 33254,
+      "sha256": "0149b60e4450af3804800386c29a34ffc63b172c5d49108ec29a6c8a56acf4ff"
+    },
+    {
+      "path": "p42-r2-etag-red-01.json",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-red-01.json",
+      "bytes": 676,
+      "sha256": "57cfe7cd2fcc3ae7dd387f9436cb86e46d7a57cd3426bfe3a788db8dc5b215fc"
+    },
+    {
+      "path": "p42-r2-etag-green-01.log",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-green-01.log",
+      "bytes": 73355,
+      "sha256": "960cc8789f0cb611fbbd016d45676bf1e2986b90f5c3b5e599918a4e7ecdc5be"
+    },
+    {
+      "path": "p42-r2-etag-green-01.json",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-green-01.json",
+      "bytes": 582,
+      "sha256": "f6bc143622b8604997be00ff019ecc88303650df014510c034101d8b56b3d944"
+    },
+    {
+      "path": "p42-r2-etag-oracle-01.log",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-oracle-01.log",
+      "bytes": 17956,
+      "sha256": "cbd5070cc46b57e94be21c3d0e0958a22f6298e3fe087e50e130c3c6ffd500e2"
+    },
+    {
+      "path": "p42-r2-etag-oracle-01.json",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-oracle-01.json",
+      "bytes": 616,
+      "sha256": "42d0ba8016978c43a5a709c9cab5bd32a1390dc19eeb740dedfad8bab6e60243"
+    },
+    {
+      "path": "p42-r2-etag-final-host-01.log",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-final-host-01.log",
+      "bytes": 73368,
+      "sha256": "775c44a96b150a67b0b2803028f5331555109620443640ec5803313bf9abe018"
+    },
+    {
+      "path": "p42-r2-etag-final-host-01.json",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-final-host-01.json",
+      "bytes": 592,
+      "sha256": "f37aba9e41b67417463cd57bfd0bc314e7bd223bb9070da79bb3146bdce20a82"
+    },
+    {
+      "path": "p42-r2-etag-typecheck-02.log",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-typecheck-02.log",
+      "bytes": 1447,
+      "sha256": "5c1386e923d22a16138bac24955e7186d50fc00ca5339aeefe8a24f82aabe145"
+    },
+    {
+      "path": "p42-r2-etag-typecheck-02.json",
+      "original": ".cache\\p4-2-logs\\p42-r2-etag-typecheck-02.json",
+      "bytes": 525,
+      "sha256": "9585cf7ac7c960094d29b70a3262e5d30e1f5025198228188ff7298f9bacf834"
+    },
+    {
+      "path": "p42-review-01-independent-recheck-01.log",
+      "original": ".cache\\p4-2-logs\\p42-review-01-independent-recheck-01.log",
+      "bytes": 3104,
+      "sha256": "5026d1609de7ad758b8266a58c8aa7e26e04b7d21543b80bb62b387c1c63e775"
+    },
+    {
+      "path": "p42-review-01-independent-recheck-01.json",
+      "original": ".cache\\p4-2-logs\\p42-review-01-independent-recheck-01.json",
+      "bytes": 707,
+      "sha256": "e3a31b372c5fe12eab46c616d7f2bdc890cfc421a2bef3ab2ba0fd4af7d02577"
+    },
+    {
+      "path": "p42-review-01-independent-controls-01.log",
+      "original": ".cache\\p4-2-logs\\p42-review-01-independent-controls-01.log",
+      "bytes": 8993,
+      "sha256": "b4ee636a325c4651190f8524f8ee6a59af0bdb2d25da44419346c58e7db7bc48"
+    },
+    {
+      "path": "p42-review-01-independent-controls-01.json",
+      "original": ".cache\\p4-2-logs\\p42-review-01-independent-controls-01.json",
+      "bytes": 793,
+      "sha256": "8d2a101fd0d75792a6ad441e5d313fc3ca856b16a4c10c07675bfa662944bb6c"
+    },
+    {
+      "path": "review.md",
+      "original": ".cache\\p4-2-independent-review-20261014\\review.md",
+      "bytes": 9693,
+      "sha256": "1b168d7658a498d70e868fc7e0d6fe6dc0628674d7cad5a73b308ba279b21974"
+    },
+    {
+      "path": "p42-review-01-recheck.md",
+      "original": ".cache\\p4-2-independent-review-20261014\\p42-review-01-recheck.md",
+      "bytes": 6491,
+      "sha256": "b7a6a592355e33bee858a9b495c2fa4980050d32c66bd1f1810002724b3ded84"
+    },
+    {
+      "path": "p42-review-01-recheck-audit.json",
+      "original": ".cache\\p4-2-independent-review-20261014\\p42-review-01-recheck-audit.json",
+      "bytes": 2988,
+      "sha256": "fbc0b98f17525f193e861df676aad9fd0cc3f672bd2e4139dcf1bcbfc0e3284e"
+    }
+  ]
+}

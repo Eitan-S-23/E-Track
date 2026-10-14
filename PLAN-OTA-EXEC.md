@@ -758,11 +758,11 @@
 - 证据: —
 
 #### P4-2 D1 多资产模型与 latest 选包
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex(P4-2 实现/接续) / 2026-10-14 ｜ 更新: 2026-10-14(专属分支已提交推送；原生 Worker CI 156/156、本地回归 190/190；真实 legacy/云端观察与正式验收未完成，未合入 main)
 - 依赖: P0 阶段门槛已完成；不依赖 P4-1。
 - 目标: §6.2-1/2:新迁移 `firmware_release_assets`(kind∈{full,patch,recovery};`base_image_sha256 NOT NULL` 哨兵 `''`+CHECK+唯一键 `(release_id,kind,base_image_sha256)`);release 增 draft/ready 原子门槛(事务内校验恰一 full+R2 digest 全过才 ready,渠道晋升仅接受 ready);latest 增 `currentImageSha` 选包(patch 匹配否则退 full);注册脚本改资产数组;recovery 不自动分发;旧单资产数据迁移回填 full。
 - 验收: **SQL 实测:同 release 插第二个 full 被拒、同基版第二个 patch 被拒、缺 full 置 ready 被拒(R8-5)**;latest 三场景(匹配 patch/退 full/无更新)接口测试绿。
-- 证据: —
+- 证据: `docs/ota-exec-notes/P4-2-implementation-2026-10-14.md`；`docs/ota-exec-notes/P4-2-ci-2026-10-14/inventory.json`。源码提交 `fc4fbbb8193fcc536ef408b7b662d44b30f869dc`，检查 CI `38591559979` PASS；前两轮失败原件保留。分支 `p4-2-implementation-20261014` 待集成，开发检查不代替正式独立验收。
 
 #### P4-3 admin 撤回语义与运营开关
 状态: 待办 ｜ 认领: — ｜ 更新: —
@@ -892,6 +892,8 @@
 | 2026-09-16 | P3-4/P3-8 / Codex 规范 Git 收口 | 用户明确授权提交、推送本会话规范改动并要求新 agent 派工提示词 | 精确提交 9 份已复核文件为 d5a0b58，使用 Eitan-S-23 推送 main；自然触发治理回归与路径检测，随后独立回写 CI/收口记录 | 不改产品、历史冻结包或 CI；旧未跟踪资产保留；本次授权不外延至新 agent 的设备实验、发布或主干操作 | 规范已入 main；治理 CI 35008183321 success，243 项宿主测试及 P2-6 探针通过；两卡仍待办，产品实测 NOT_RUN |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-15 ｜ Codex(P4-2 接续) ｜ P4-2(进行中) ｜ 承接原会话完成专属分支提交/推送及原生后端 CI，修复 R2 HTTP/raw ETag 混用，校正替身与新增反例；最终 `fc4fbbb` 的 CI `38591559979` 三项 job 成功、Worker 156/156，本地完整回归 190/190。三轮原件已归档，R2 修复独立复核另行登记；真实 legacy/D1/R2/Access 与正式验收仍待办，不合并 main、不部署、不追加 OTA。详见 `docs/ota-exec-notes/P4-2-implementation-2026-10-14.md`。
 
 - 2026-10-12 | Codex independent acceptance/root | P3-4 in progress, waiting for physical phone connection | Preserved missing old host result; unchanged v8 standard planning/full preflight now PASS with observed processes and Git activity. Fixed phone absent throughout the bounded USB window after one delivered physical-action mention; ADB closed, no device lock or formal command. Active matrix NOT_RUN, OTA 0/1 and calibration 0/12; no repeated cleanup, product/runner change, new contract, commit or push. Latest facts and raw receipts: docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
 

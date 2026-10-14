@@ -1,0 +1,17 @@
+{
+  "label": "p42-r2-etag-final-host-01",
+  "startedAt": "2026-10-14T15:41:07.502Z",
+  "finishedAt": "2026-10-14T15:41:21.214Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker",
+  "command": [
+    "D:\\install\\nvm\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--cache=false",
+    "--config",
+    "test/vitest.host.config.ts"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "log": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation\\.cache\\p4-2-logs\\p42-r2-etag-final-host-01.log"
+}

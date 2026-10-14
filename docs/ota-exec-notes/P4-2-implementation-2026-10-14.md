@@ -465,3 +465,66 @@ Both native failures and the first local reproduction remain preserved. The
 second full CI ZIP is `commands/native-ci-fixed-original-zip.stdout` beneath
 the Git/CI record directory, SHA-256
 `b604135db019cad102b38906f4ecf686d4104ee545a9366505678fe55ed3d818`.
+
+### Checks-Only Delivery Result
+
+The final corrected source/test commit is
+`fc4fbbb8193fcc536ef408b7b662d44b30f869dc`, pushed on the dedicated branch.
+Native CI run `38591559979` completed successfully on that exact commit:
+Public and Admin typechecks, Wrangler type generation, Worker typecheck and
+all 156 native Worker tests passed. The final unchanged local test scope also
+passed 190/190, and the affected 91-test run plus Worker typecheck passed.
+The native checks include real workerd-backed test D1/R2 behavior; they do not
+establish anything about deployed Cloudflare accounts or actual legacy rows.
+
+Original CI metadata, all three complete log ZIPs, the red/green/final local
+logs/receipts and prior independent JWT-review originals are archived without
+rewriting their bytes in `docs/ota-exec-notes/P4-2-ci-2026-10-14/`. Its
+`inventory.json` binds all 26 selected originals and the actual test counts.
+The final CI ZIP SHA-256 is
+`110f8206e3d9563d244890d9f5af51a6c67cf13d97a55f957009ca259ad7e3cf`.
+No failing CI, warning or earlier NOT_RUN result was replaced by the green run.
+
+P42-EXT-01 now has the missing native runtime development evidence. The
+independent original session was asked to review only the three-file R2 repair,
+read-only, without repeating tests. The transport's short wait ended before
+its reply, but the original session log confirms receipt and the reviewer has
+begun its read-only check. No duplicate request was sent. Its verdict is separate
+from the continuation owner's implementation/self-test and remains pending here.
+
+Remaining gates are P42-EXT-02 (actual legacy rows, authoritative artifact/raw
+image provenance and approved backfill manifest), P42-EXT-03 (fixed real cutover,
+origin/signing bindings and bounded actual D1/R2/Access observations), then
+formal independent P4-2 acceptance and main integration. This checks-only work
+did not deploy, mutate remote D1/R2, merge main, change device state or add OTA.
+The card is in progress on this branch; P3-4 remains complete and P3-5/P5 are
+not waived. Original P42-WRITE-01 remains disclosed and untouched.
+
+### Independent Repair Review And Write Audit (2026-10-15)
+
+At 00:06:57 Asia/Shanghai, the original independent P4-2 review session returned
+`DECIDED APPROVE` for P42-R2-ETAG-01, with no required fix. It verified the three
+files against `fc4fbbb8193fcc536ef408b7b662d44b30f869dc`, the unchanged production
+blob after `9b2af3e`, the negative/Range/identity invariants, native failure
+history and final 190/190 host/typecheck originals. It did not rerun tests, query
+accounts or author this repair. Its verbatim response and provenance are now
+`P4-2-ci-2026-10-14/independent-r2-review.md` and `.json` beside this record.
+
+The reviewer explicitly did not adjudicate the last native run. The continuation
+owner separately checked that run's exact commit, all three successful jobs and
+156/156 test summary against the archived original ZIP. These two statements do
+not constitute formal P4-2 acceptance or deployed-cloud evidence.
+
+`P4-2-ci-2026-10-14/write-audit.json` records 85 unchanged protected inputs,
+26 byte-identical copied originals, 31 fully closed Git/CI commands and only the
+three explained backend/test changes plus authorized task-note appends relative
+to the earlier baseline. Shared main/worktree metadata and the seven external
+Git/GitHub configuration/hook inputs were unchanged. All selected local outputs
+resolve within this worktree; permitted shared Git writes are confined to the
+dedicated branch/index/object/ref/log operations. This is a bounded output/hash
+audit, not a machine-wide write trace. Native session management updated only
+its normal runtime records; no session/config/history files were edited directly.
+
+The existing task card and this record retain P42-EXT-02/03 and formal acceptance
+as open. The delivery includes code, development checks and independent repair
+review, not main integration, deployment, remote mutation or additional OTA.
