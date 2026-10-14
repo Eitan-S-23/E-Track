@@ -874,6 +874,348 @@ class LiveRouteTests(unittest.TestCase):
         self.assertFalse(result["independent_acceptance"])
 
 
+class ProcessCloseTests(unittest.TestCase):
+    """Execute the real lifecycle methods with local streams and modeled APIs."""
+    def setUp(self):
+        parent = h.checked(Path(os.environ.get("P34_HOST_TEST_OUT", ROOT / ".cache/p34-live-tests")))
+        parent.mkdir(parents=True, exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(prefix="close-", dir=parent)
+        self.addCleanup(self.temp.cleanup)
+        self.out = Path(self.temp.name)
+        platform = patch.object(h, "os", SimpleNamespace(name="nt"))
+        platform.start()
+        self.addCleanup(platform.stop)
+
+    def owner(self, label="owned", code=0):
+        owned = h.Process.__new__(h.Process)
+        owned.out, owned.label = self.out, label
+        owned.argv, owned.started, owned.closed = ["modeled-tool"], 1, False
+        owned.paths = {name: h.checked(self.out / (label + "." + name))
+                       for name in ("stdout", "stderr", "closed.json")}
+        owned.streams = []
+        for name, data in (("stdout", b"original\x00\xff\n"), ("stderr", b"original diagnostic\n")):
+            stream = owned.paths[name].open("xb")
+            self.addCleanup(stream.close)
+            stream.write(data)
+            stream.flush()
+            owned.streams.append(stream)
+        owned.process = Mock(returncode=code, pid=123, stdin=io.BytesIO())
+        owned.process.poll.side_effect = lambda: owned.process.returncode
+        def wait(timeout):
+            if owned.process.returncode is None:
+                raise h.subprocess.TimeoutExpired(owned.argv, timeout)
+            return owned.process.returncode
+        def stop():
+            if owned.process.returncode is None:
+                owned.process.returncode = 1
+        owned.process.wait.side_effect = wait
+        owned.process.kill.side_effect = stop
+        owned.job = Mock()
+        owned.job.terminate.side_effect = stop
+        return owned
+
+    def receipt(self, owned):
+        self.assertTrue(owned.paths["closed.json"].is_file())
+        value = h.read_json(owned.paths["closed.json"])
+        self.assertEqual(owned.paths["stdout"].read_bytes(), b"original\x00\xff\n")
+        self.assertEqual(owned.paths["stderr"].read_bytes(), b"original diagnostic\n")
+        return value
+
+    def assert_failed_once(self, owned, error):
+        self.assertFalse(owned.closed)
+        path = owned.paths["closed.json"]
+        original, modified = path.read_bytes(), path.stat().st_mtime_ns
+        job_calls, process_calls = list(owned.job.mock_calls), list(owned.process.mock_calls)
+        with self.assertRaises(type(error)) as caught:
+            owned.close("duplicate")
+        self.assertIs(caught.exception, error)
+        self.assertEqual(owned.job.mock_calls, job_calls)
+        self.assertEqual(owned.process.mock_calls, process_calls)
+        self.assertEqual((path.read_bytes(), path.stat().st_mtime_ns), (original, modified))
+
+    def test_close_normal_and_nonzero_exit_receipts_are_idempotent(self):
+        for code in (0, 7):
+            with self.subTest(code=code):
+                owned = self.owner(str(code), code)
+                owned.close()
+                value = self.receipt(owned)
+                self.assertEqual(value["exit_code"], code)
+                self.assertEqual(value["exit_status"], "exited")
+                self.assertEqual(value["cleanup_errors"], [])
+                self.assertTrue(value["cleanup_complete"])
+                self.assertTrue(owned.closed)
+                self.assertTrue(all(stream.closed for stream in owned.streams))
+                original = owned.paths["closed.json"].read_bytes()
+                calls = list(owned.process.mock_calls)
+                owned.close("duplicate")
+                self.assertEqual(owned.paths["closed.json"].read_bytes(), original)
+                self.assertEqual(owned.process.mock_calls, calls)
+                owned.job.terminate.assert_called_once()
+                owned.job.close.assert_called_once()
+
+    def test_terminate_error_still_closes_handle_and_preserves_streams(self):
+        owned = self.owner(code=None)
+        error = OSError("terminate denied")
+        owned.job.terminate.side_effect = error
+        owned.job.close.side_effect = owned.process.kill.side_effect
+        with self.assertRaises(OSError) as caught:
+            owned.close("cancelled")
+        self.assertIs(caught.exception, error)
+        owned.job.close.assert_called_once()
+        owned.process.wait.assert_called_once_with(timeout=5)
+        value = self.receipt(owned)
+        self.assertEqual(value["reason"], "cancelled")
+        self.assertEqual(value["exit_code"], 1)
+        self.assertFalse(value["job_terminated"])
+        self.assertTrue(value["job_handle_closed"])
+        self.assertFalse(value["cleanup_complete"])
+        self.assertEqual(value["cleanup_errors"], [dict(step="job_terminate", type="OSError", message=str(error))])
+        self.assertTrue(all(stream.closed for stream in owned.streams))
+        self.assert_failed_once(owned, error)
+
+    def test_handle_close_error_retains_known_exit_and_failure(self):
+        owned = self.owner(code=None)
+        error = OSError("handle close denied")
+        owned.job.close.side_effect = error
+        with self.assertRaises(OSError) as caught:
+            owned.close()
+        self.assertIs(caught.exception, error)
+        value = self.receipt(owned)
+        self.assertEqual(value["exit_code"], 1)
+        self.assertEqual(value["exit_status"], "exited")
+        self.assertTrue(value["job_terminated"])
+        self.assertFalse(value["job_handle_closed"])
+        self.assertEqual(value["cleanup_errors"][0]["step"], "job_close")
+        self.assertFalse(value["cleanup_complete"])
+        self.assert_failed_once(owned, error)
+
+    def test_unreaped_process_is_unknown_after_bounded_fallback(self):
+        owned = self.owner(code=None)
+        errors = [OSError("terminate denied"), OSError("handle close denied"), OSError("kill denied")]
+        owned.job.terminate.side_effect, owned.job.close.side_effect, owned.process.kill.side_effect = errors
+        with self.assertRaises(OSError) as caught:
+            owned.close()
+        self.assertIs(caught.exception, errors[0])
+        self.assertEqual([call.kwargs for call in owned.process.wait.call_args_list], [dict(timeout=5)] * 2)
+        owned.process.kill.assert_called_once()
+        value = self.receipt(owned)
+        self.assertIsNone(value["exit_code"])
+        self.assertEqual(value["exit_status"], "unknown")
+        self.assertFalse(value["cleanup_complete"])
+        self.assertEqual([item["step"] for item in value["cleanup_errors"]],
+                         ["job_terminate", "job_close", "process_kill", "process_wait_after_kill"])
+        self.assertIn("kill denied", "\n".join(caught.exception.__notes__))
+        self.assert_failed_once(owned, errors[0])
+
+    def test_fallback_reaps_after_first_wait_timeout(self):
+        owned = self.owner(code=None)
+        owned.job.terminate.side_effect = None
+        owned.close()
+        value = self.receipt(owned)
+        self.assertEqual(value["exit_code"], 1)
+        self.assertTrue(value["cleanup_complete"])
+        self.assertEqual([call.kwargs for call in owned.process.wait.call_args_list], [dict(timeout=5)] * 2)
+        owned.process.kill.assert_called_once()
+
+    def test_wait_error_still_tries_bounded_owned_fallback(self):
+        owned = self.owner(code=None)
+        error = OSError("wait handle error")
+        owned.process.wait.side_effect = [error, 1]
+        with self.assertRaises(OSError) as caught:
+            owned.close()
+        self.assertIs(caught.exception, error)
+        owned.process.kill.assert_called_once()
+        self.assertEqual(owned.process.wait.call_count, 2)
+        value = self.receipt(owned)
+        self.assertEqual(value["exit_code"], 1)
+        self.assertEqual(value["cleanup_errors"][0]["step"], "process_wait")
+
+    def test_stream_close_error_does_not_skip_other_stream_or_receipt(self):
+        owned = self.owner()
+        stream = owned.streams[0]
+        owned.streams[0] = Mock(wraps=stream)
+        error = OSError("stdout close denied")
+        owned.streams[0].close.side_effect = error
+        with self.assertRaises(OSError) as caught:
+            owned.close()
+        self.assertIs(caught.exception, error)
+        self.assertTrue(owned.streams[1].closed)
+        self.assertTrue(owned.process.stdin.closed)
+        value = self.receipt(owned)
+        self.assertEqual(value["cleanup_errors"][0]["step"], "stdout_close")
+        self.assertFalse(value["cleanup_complete"])
+        self.assert_failed_once(owned, error)
+
+    def test_receipt_failure_is_explicit_and_not_retried(self):
+        owned = self.owner()
+        error = OSError("receipt disk full")
+        with patch.object(h, "save", side_effect=error) as save:
+            for _ in range(2):
+                with self.assertRaises(OSError) as caught:
+                    owned.close()
+                self.assertIs(caught.exception, error)
+            save.assert_called_once()
+        self.assertFalse(owned.closed)
+        self.assertFalse(owned.paths["closed.json"].exists())
+        self.assertTrue(all(stream.closed for stream in owned.streams))
+        self.assertIn("close_receipt", "\n".join(error.__notes__))
+        owned.job.terminate.assert_called_once()
+        owned.job.close.assert_called_once()
+
+    def test_command_preserves_primary_error_with_secondary_cleanup(self):
+        for index, primary in enumerate((ValueError("primary operation failed"), KeyboardInterrupt("cancelled"))):
+            with self.subTest(error=type(primary).__name__):
+                owned = self.owner(str(index))
+                secondary = OSError("secondary cleanup failed")
+                owned.job.terminate.side_effect = secondary
+                original_cause = LookupError("original cause")
+                primary.__cause__ = original_cause
+                owned.process.wait.side_effect = [primary, 0]
+                observed, frames = None, []
+                with patch.object(h, "Process", return_value=owned):
+                    try:
+                        h.command(self.out, "modeled", [], {}, seconds=1)
+                    except BaseException as caught:
+                        observed, frames = caught, traceback.extract_tb(caught.__traceback__)
+                self.assertIs(observed, primary)
+                self.assertIs(primary.__cause__, original_cause)
+                self.assertIs(primary.process_cleanup_error, secondary)
+                self.assertIn("secondary cleanup failed", "\n".join(primary.__notes__))
+                self.assertIn("wait", [frame.name for frame in frames])
+                self.assertEqual(self.receipt(owned)["reason"], "caller_failed")
+                self.assert_failed_once(owned, secondary)
+
+    def test_timeout_keeps_primary_with_cleanup_error(self):
+        owned = self.owner(code=None)
+        error = OSError("terminate denied")
+        owned.job.terminate.side_effect = error
+        owned.job.close.side_effect = owned.process.kill.side_effect
+        with patch.object(h, "Process", return_value=owned):
+            with self.assertRaisesRegex(RuntimeError, "tool timeout") as caught:
+                h.command(self.out, "modeled", [], {}, seconds=1)
+        self.assertIs(caught.exception.process_cleanup_error, error)
+        self.assertEqual(self.receipt(owned)["reason"], "timeout_outcome_unknown")
+        self.assertEqual(owned.process.wait.call_count, 2)
+
+    def test_primary_reports_cleanup_and_receipt_failure_without_retries(self):
+        owned = self.owner()
+        primary, secondary = ValueError("operation failed"), OSError("terminate denied")
+        owned.job.terminate.side_effect = secondary
+        owned.process.wait.side_effect = [primary, 0]
+        with patch.object(h, "Process", return_value=owned), \
+             patch.object(h, "save", side_effect=OSError("receipt disk full")) as save:
+            with self.assertRaises(ValueError) as caught:
+                h.command(self.out, "modeled", [], {}, seconds=1)
+            self.assertIs(caught.exception, primary)
+            self.assertIs(primary.process_cleanup_error, secondary)
+            notes = "\n".join(primary.__notes__)
+            self.assertIn("terminate denied", notes)
+            self.assertIn("close_receipt: OSError: receipt disk full", notes)
+            with self.assertRaises(OSError) as repeated:
+                owned.close()
+            self.assertIs(repeated.exception, secondary)
+            save.assert_called_once()
+        self.assertFalse(owned.closed)
+        self.assertFalse(owned.paths["closed.json"].exists())
+        self.assertTrue(all(stream.closed for stream in owned.streams))
+        owned.job.terminate.assert_called_once()
+        owned.job.close.assert_called_once()
+
+    def test_nonzero_exit_keeps_primary_with_cleanup_error(self):
+        owned = self.owner(code=7)
+        error = OSError("handle close denied")
+        owned.job.close.side_effect = error
+        with patch.object(h, "Process", return_value=owned):
+            with self.assertRaisesRegex(RuntimeError, "standard tool failed") as caught:
+                h.command(self.out, "modeled", [], {}, seconds=1)
+        self.assertIs(caught.exception.process_cleanup_error, error)
+        value = self.receipt(owned)
+        self.assertEqual((value["reason"], value["exit_code"]), ("completed", 7))
+
+    def test_ready_yield_cannot_hide_cleanup_error(self):
+        owned = self.owner(code=None)
+        error = OSError("handle close denied")
+        owned.job.close.side_effect = error
+        with patch.object(h, "Process", return_value=owned):
+            with self.assertRaises(OSError) as caught:
+                h.command(self.out, "modeled", [], {}, seconds=1, read_ready=lambda: True)
+        self.assertIs(caught.exception, error)
+        self.assertEqual(self.receipt(owned)["reason"], "readonly_query_yielded_to_terminal")
+
+    def test_poll_and_stream_record_failures_still_write_truthful_receipt(self):
+        owned = self.owner()
+        error = OSError("poll denied")
+        owned.process.poll.side_effect = error
+        real_record = h.record
+        def record(path):
+            if path == owned.paths["stdout"]:
+                raise OSError("stdout record unavailable")
+            return real_record(path)
+        with patch.object(h, "record", side_effect=record):
+            with self.assertRaises(OSError) as caught:
+                owned.close()
+        self.assertIs(caught.exception, error)
+        value = self.receipt(owned)
+        self.assertIsNone(value["stopped_while_running"])
+        self.assertEqual(value["exit_code"], 0)
+        self.assertIsNone(value["stdout"])
+        self.assertEqual(value["stderr"], h.record(owned.paths["stderr"]))
+        self.assertEqual([item["step"] for item in value["cleanup_errors"]], ["poll_before_close", "stdout_record"])
+
+    def test_launch_failure_preserves_error_and_closes_owned_streams(self):
+        model = self.owner(code=None)
+        primary, secondary = ValueError("assignment failed"), OSError("terminate denied")
+        model.job.assign.side_effect = primary
+        model.job.terminate.side_effect = secondary
+        model.job.close.side_effect = model.process.kill.side_effect
+        owned = h.Process.__new__(h.Process)
+        with patch.object(h.host.owned, "WindowsJob", return_value=model.job), \
+             patch.object(h.subprocess, "CREATE_NO_WINDOW", 0, create=True), \
+             patch.object(h.subprocess, "Popen", return_value=model.process) as popen:
+            with self.assertRaises(ValueError) as caught:
+                owned.__init__(self.out, "launch", ["modeled-tool"], {})
+        self.assertIs(caught.exception, primary)
+        self.assertIs(primary.process_cleanup_error, secondary)
+        self.assertTrue(all(stream.closed for stream in owned.streams))
+        self.assertFalse(owned.closed)
+        self.assertEqual(h.read_json(owned.paths["closed.json"])["reason"], "launch_failed")
+        popen.assert_called_once()
+
+    def test_command_success_cannot_swallow_cleanup_error(self):
+        owned = self.owner()
+        error = OSError("handle close denied")
+        owned.job.close.side_effect = error
+        with patch.object(h, "Process", return_value=owned), patch.object(owned, "wait", return_value=b"result"):
+            with self.assertRaises(OSError) as caught:
+                h.command(self.out, "modeled", [], {}, seconds=1)
+        self.assertIs(caught.exception, error)
+        self.assertFalse(self.receipt(owned)["cleanup_complete"])
+
+    def test_no_process_launch_receipt_has_no_fabricated_exit(self):
+        owned = self.owner()
+        owned.process, owned.job = None, None
+        owned.close("launch_failed")
+        value = self.receipt(owned)
+        self.assertIsNone(value["exit_code"])
+        self.assertEqual(value["exit_status"], "not_started")
+        self.assertTrue(value["cleanup_complete"])
+
+    def test_posix_signal_error_does_not_skip_kill_or_receipt(self):
+        owned = self.owner()
+        owned.job = None
+        error = OSError("SIGTERM denied")
+        killpg = Mock(side_effect=[error, None])
+        signals = SimpleNamespace(SIGTERM=15, SIGKILL=9)
+        with patch.object(h, "os", SimpleNamespace(name="posix", killpg=killpg)), \
+             patch.object(h, "signal", signals):
+            with self.assertRaises(OSError) as caught:
+                owned.close()
+        self.assertIs(caught.exception, error)
+        self.assertEqual([call.args for call in killpg.call_args_list],
+                         [(123, signals.SIGTERM), (123, signals.SIGKILL)])
+        self.assertEqual(self.receipt(owned)["cleanup_errors"][0]["step"], "process_group_sigterm")
+
+
 class NetworkStartupTests(unittest.TestCase):
     def setUp(self):
         parent = h.checked(Path(os.environ.get("P34_HOST_TEST_OUT", ROOT / ".cache/p34-live-tests")))
@@ -941,6 +1283,8 @@ class NetworkStartupTests(unittest.TestCase):
             return SimpleNamespace(open=open_url)
 
         class Tool:
+            _close_after_error = real_process._close_after_error
+
             def __init__(inner, output, name, argv, env, *, stdin=None):
                 inner.label, inner.closed, inner.stdin = name, False, stdin
                 inner.process = SimpleNamespace(returncode=None)
@@ -1175,6 +1519,379 @@ class NetworkStartupTests(unittest.TestCase):
             startup_seconds=startup_seconds, timeout_seconds=2, termination_seconds=termination_seconds,
             reason=receipt["reason"], exit_code=receipt["exit_code"],
             launcher_exited=not reader.alive(), child_wait_result=child_wait_result)), flush=True)
+
+
+class CallerCloseTests(unittest.TestCase):
+    """Caller methods and Process are real; device and Job APIs stay modeled."""
+    owner = ProcessCloseTests.owner
+    file = LiveRouteTests.file
+    phone = LiveRouteTests.phone
+
+    def setUp(self):
+        NetworkStartupTests.setUp(self)
+        platform = patch.object(h, "os", SimpleNamespace(**(vars(os) | dict(name="nt"))))
+        platform.start()
+        self.addCleanup(platform.stop)
+
+    def network_model(self, label="network"):
+        network = p.Network(self.plan, self.out / label)
+        network.tunnel = self.owner(label + "-tunnel")
+        network.server = Mock()
+        network.thread = Mock(ident=123)
+        network.thread.is_alive.return_value = False
+        network.log_handler = Mock()
+        return network
+
+    def phone_model(self):
+        phone = self.phone()
+        phone.server = self.owner("private-server", code=None)
+        return phone
+
+    def assert_network_drained_once(self, network):
+        network.server.shutdown.assert_called_once()
+        network.server.server_close.assert_called_once()
+        network.thread.join.assert_called_once_with(timeout=5)
+        network.log_handler.close.assert_called_once()
+        network.tunnel.job.terminate.assert_called_once()
+        network.tunnel.job.close.assert_called_once()
+
+    def assert_duplicate_failure(self, owner, error):
+        receipt = owner.out / "closed.json"
+        original = (receipt.read_bytes(), receipt.stat().st_mtime_ns) if receipt.exists() else None
+        with patch.object(h, "save") as save, patch.object(h, "command") as command, \
+             patch.object(h, "listening") as listening:
+            with self.assertRaises(type(error)) as caught:
+                owner.close()
+            self.assertIs(caught.exception, error)
+            save.assert_not_called()
+            command.assert_not_called()
+            listening.assert_not_called()
+        self.assertEqual((receipt.read_bytes(), receipt.stat().st_mtime_ns) if receipt.exists() else None, original)
+
+    def failed_start(self, label, *, code=7, reader_error=None, tunnel_error=None):
+        network = p.Network(self.plan, self.out / label)
+        tunnel = self.owner(label + "-tunnel", code=None)
+        tunnel.streams[1].write(b"https://caller-fixture.trycloudflare.com\n")
+        tunnel.streams[1].flush()
+        reader = self.owner(label + "-reader", code=code)
+        reader.job.close.side_effect = reader_error
+        tunnel.job.close.side_effect = tunnel_error
+        observed = []
+        real_wait = reader.wait
+        def wait(*args, **kwargs):
+            try:
+                return real_wait(*args, **kwargs)
+            except BaseException as error:
+                observed.append(error)
+                raise
+        def release_fixture():
+            if network.thread and network.thread.is_alive():
+                network.server.shutdown()
+                network.thread.join(timeout=5)
+            if network.server and network.server.fileno() >= 0:
+                network.server.server_close()
+            if network.log_handler and network.log_handler.stream is not None:
+                network.log_handler.close()
+        self.addCleanup(release_fixture)
+        error, frames = None, []
+        with patch.object(h, "Process", side_effect=[tunnel, reader]) as construct, \
+             patch.object(reader, "wait", side_effect=wait):
+            try:
+                network.start(deadline=p.time.monotonic() + 10)
+            except BaseException as caught:
+                error, frames = caught, traceback.extract_tb(caught.__traceback__)
+        self.assertEqual(construct.call_count, 2)
+        self.assertIsNotNone(error)
+        self.assertEqual(len(observed), 1)
+        self.assertFalse(network.thread.is_alive())
+        self.assertEqual(network.server.fileno(), -1)
+        self.assertIsNone(network.log_handler.stream)
+        return SimpleNamespace(network=network, tunnel=tunnel, reader=reader, error=error,
+                               primary=observed[0], frames=frames)
+
+    def test_network_normal_close_is_idempotent(self):
+        network = self.network_model()
+        network.close()
+        value = h.read_json(network.out / "closed.json")
+        self.assertTrue(network.closed)
+        self.assertTrue(value["cleanup_complete"])
+        self.assertTrue(value["thread_closed"] and value["tunnel_closed"])
+        self.assertEqual(value["cleanup_errors"], [])
+        original = (network.out / "closed.json").read_bytes()
+        network.close()
+        self.assertEqual((network.out / "closed.json").read_bytes(), original)
+        self.assert_network_drained_once(network)
+
+    def test_network_tunnel_failure_does_not_skip_remaining_cleanup(self):
+        for stage in ("terminate", "close"):
+            with self.subTest(stage=stage):
+                network = self.network_model(stage)
+                error = OSError("tunnel " + stage + " failed")
+                getattr(network.tunnel.job, stage).side_effect = error
+                with self.assertRaises(OSError) as caught:
+                    network.close()
+                self.assertIs(caught.exception, error)
+                self.assert_network_drained_once(network)
+                self.assertFalse(network.closed)
+                value = h.read_json(network.out / "closed.json")
+                self.assertFalse(value["cleanup_complete"])
+                self.assertTrue(value["thread_closed"])
+                self.assertEqual(value["cleanup_errors"][0]["step"], "tunnel_close")
+                self.assert_duplicate_failure(network, error)
+                self.assert_network_drained_once(network)
+
+    def test_network_multiple_cleanup_failures_are_retained(self):
+        network = self.network_model()
+        first = OSError("tunnel close failed")
+        network.tunnel.job.close.side_effect = first
+        network.server.shutdown.side_effect = OSError("shutdown failed")
+        network.server.server_close.side_effect = OSError("server close failed")
+        network.thread.join.side_effect = OSError("join failed")
+        network.log_handler.close.side_effect = OSError("log close failed")
+        with self.assertRaises(OSError) as caught:
+            network.close()
+        self.assertIs(caught.exception, first)
+        self.assert_network_drained_once(network)
+        value = h.read_json(network.out / "closed.json")
+        self.assertEqual([item["step"] for item in value["cleanup_errors"]],
+                         ["tunnel_close", "http_shutdown", "http_server_close", "http_thread_join", "http_log_close"])
+        self.assertIn("log close failed", "\n".join(first.__notes__))
+        self.assertFalse(value["cleanup_complete"])
+        self.assert_duplicate_failure(network, first)
+
+    def test_network_receipt_failure_does_not_retry_cleanup(self):
+        network = self.network_model()
+        error, real_save = OSError("network receipt unavailable"), h.save
+        def save(path, value):
+            if path == network.out / "closed.json":
+                raise error
+            return real_save(path, value)
+        with patch.object(h, "save", side_effect=save):
+            with self.assertRaises(OSError) as caught:
+                network.close()
+        self.assertIs(caught.exception, error)
+        self.assertFalse(network.closed)
+        self.assertIn("close_receipt", "\n".join(error.__notes__))
+        self.assert_duplicate_failure(network, error)
+        self.assert_network_drained_once(network)
+
+    def test_network_unstarted_http_thread_is_not_shutdown_or_joined(self):
+        network = p.Network(self.plan, self.out / "unstarted")
+        network.server = p.service.ThreadingHTTPServer(("127.0.0.1", 0), p.service.P33RequestHandler)
+        self.addCleanup(network.server.server_close)
+        network.thread = p.threading.Thread(target=network.server.serve_forever, daemon=True)
+        network.log_handler = Mock()
+        with patch.object(network.server, "shutdown", side_effect=AssertionError("unstarted shutdown can deadlock")) as shutdown, \
+             patch.object(network.thread, "join", side_effect=AssertionError("cannot join before start")) as join:
+            network.close()
+            shutdown.assert_not_called()
+            join.assert_not_called()
+        self.assertTrue(network.closed)
+        self.assertEqual(network.server.fileno(), -1)
+        network.log_handler.close.assert_called_once()
+        self.assertTrue(h.read_json(network.out / "closed.json")["thread_closed"])
+
+    def test_network_live_or_unknown_thread_is_not_confirmed_closed(self):
+        for label, observation in (("alive", True), ("unknown", OSError("thread state unknown"))):
+            with self.subTest(label=label):
+                network = self.network_model(label)
+                if isinstance(observation, BaseException):
+                    network.thread.is_alive.side_effect = observation
+                else:
+                    network.thread.is_alive.return_value = observation
+                with self.assertRaises((RuntimeError, OSError)) as caught:
+                    network.close()
+                value = h.read_json(network.out / "closed.json")
+                self.assertIs(value["thread_closed"], False if label == "alive" else None)
+                self.assertFalse(value["cleanup_complete"])
+                self.assert_duplicate_failure(network, caught.exception)
+                self.assert_network_drained_once(network)
+
+    def test_network_read_preserves_nonzero_error_and_cleanup_diagnostics(self):
+        for label, cleanup in (("normal", None), ("cleanup-failed", OSError("reader handle close failed"))):
+            with self.subTest(label=label):
+                case = self.failed_start(label, reader_error=cleanup)
+                self.assertIs(case.error, case.primary)
+                self.assertIsInstance(case.error, RuntimeError)
+                self.assertIn("standard tool failed", str(case.error))
+                self.assertIn("wait", [frame.name for frame in case.frames])
+                if cleanup:
+                    self.assertIs(case.error.process_cleanup_error, cleanup)
+                value = h.read_json(case.network.out / "startup-failed.json")
+                self.assertEqual((value["error_type"], value["message"]), ("RuntimeError", str(case.primary)))
+                self.assertEqual(h.read_json(case.reader.paths["closed.json"])["exit_code"], 7)
+                case.reader.job.terminate.assert_called_once()
+                case.reader.job.close.assert_called_once()
+
+    def test_network_reader_cleanup_failure_alone_stays_failure(self):
+        error = OSError("reader cleanup failed after exit zero")
+        case = self.failed_start("read-success", code=0, reader_error=error)
+        self.assertIs(case.error, error)
+        self.assertEqual(h.read_json(case.reader.paths["closed.json"])["exit_code"], 0)
+        self.assertFalse((case.network.out / "ready.json").exists())
+        self.assertEqual(h.read_json(case.network.out / "startup-failed.json")["error_type"], "OSError")
+
+    def test_network_start_retains_reader_and_outer_cleanup_errors(self):
+        reader_error, tunnel_error = OSError("reader handle close failed"), OSError("tunnel close failed")
+        case = self.failed_start("both-cleanups", reader_error=reader_error, tunnel_error=tunnel_error)
+        self.assertIs(case.error, case.primary)
+        self.assertIs(case.error.process_cleanup_error, reader_error)
+        self.assertIs(case.error.network_cleanup_error, tunnel_error)
+        notes = "\n".join(case.error.__notes__)
+        self.assertIn(str(reader_error), notes)
+        self.assertIn(str(tunnel_error), notes)
+        value = h.read_json(case.network.out / "startup-failed.json")
+        self.assertEqual(value["error_type"], "RuntimeError")
+        self.assertIn(str(reader_error), "\n".join(value["notes"]))
+        self.assertIn(str(tunnel_error), "\n".join(value["notes"]))
+        self.assertFalse(case.network.closed)
+        self.assert_duplicate_failure(case.network, tunnel_error)
+
+    def test_network_start_receipt_failure_preserves_primary_and_drains(self):
+        for label, close_error in (("clean-close", None), ("failed-close", OSError("outer cleanup failed"))):
+            with self.subTest(label=label):
+                network = self.network_model(label)
+                network.tunnel.job.close.side_effect = close_error
+                primary, receipt_error = ValueError("startup operation failed"), OSError("startup receipt unavailable")
+                cause = LookupError("original cause")
+                primary.__cause__ = cause
+                resources = {name: getattr(network, name) for name in ("server", "thread", "tunnel", "log_handler")}
+                for name in resources:
+                    setattr(network, name, None)
+                def fail_start(deadline):
+                    for name, resource in resources.items():
+                        setattr(network, name, resource)
+                    raise primary
+                real_save = h.save
+                def save(path, value):
+                    if path == network.out / "startup-failed.json":
+                        raise receipt_error
+                    return real_save(path, value)
+                with patch.object(network, "_start", side_effect=fail_start) as start, patch.object(h, "save", side_effect=save):
+                    with self.assertRaises(ValueError) as caught:
+                        network.start(deadline=p.time.monotonic() + 10)
+                    self.assertIs(caught.exception, primary)
+                    self.assertIs(primary.__cause__, cause)
+                    self.assertIs(primary.startup_receipt_error, receipt_error)
+                    self.assertIn(str(receipt_error), "\n".join(primary.__notes__))
+                    if close_error:
+                        self.assertIs(primary.network_cleanup_error, close_error)
+                    with self.assertRaisesRegex(RuntimeError, "single-use"):
+                        network.start(deadline=p.time.monotonic() + 10)
+                    start.assert_called_once()
+                self.assert_network_drained_once(network)
+                self.assertFalse((network.out / "startup-failed.json").exists())
+                self.assertEqual(network.closed, close_error is None)
+
+    def test_phone_normal_close_is_single_use(self):
+        phone = self.phone_model()
+        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
+             patch.object(h, "command", return_value=b"") as stop:
+            phone.close()
+            original = (phone.out / "closed.json").read_bytes()
+            phone.close()
+            self.assertEqual((phone.out / "closed.json").read_bytes(), original)
+            stop.assert_called_once()
+            self.assertEqual(stop.call_args.kwargs["seconds"], 10)
+            self.assertEqual(stop.call_args.args[1], "adb-stop")
+        self.assertTrue(phone.closed)
+        self.assertTrue(h.read_json(phone.out / "closed.json")["cleanup_complete"])
+        phone.server.job.terminate.assert_called_once()
+        phone.server.job.close.assert_called_once()
+
+    def test_phone_stop_error_survives_server_cleanup_failure(self):
+        phone = self.phone_model()
+        primary, cleanup = ValueError("private stop failed"), OSError("server handle close failed")
+        phone.server.job.close.side_effect = cleanup
+        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
+             patch.object(h, "command", side_effect=primary) as stop:
+            with self.assertRaises(BaseException) as caught:
+                phone.close()
+            self.assertIs(caught.exception, primary)
+            self.assertIs(primary.process_cleanup_error, cleanup)
+            self.assertIn(str(cleanup), "\n".join(primary.__notes__))
+            self.assert_duplicate_failure(phone, primary)
+            stop.assert_called_once()
+        value = h.read_json(phone.out / "closed.json")
+        self.assertFalse(value["cleanup_complete"])
+        self.assertTrue(value["server_closed"])
+        self.assertFalse(value["listening"])
+        self.assertIn(str(cleanup), json.dumps(value["cleanup_errors"]))
+        self.assertFalse(phone.closed)
+        phone.server.job.terminate.assert_called_once()
+        phone.server.job.close.assert_called_once()
+
+    def test_phone_stop_error_with_successful_cleanup_remains_primary(self):
+        phone = self.phone_model()
+        error = ValueError("stop operation failed")
+        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
+             patch.object(h, "command", side_effect=error) as stop:
+            with self.assertRaises(ValueError) as caught:
+                phone.close()
+            self.assertIs(caught.exception, error)
+            self.assert_duplicate_failure(phone, error)
+            stop.assert_called_once()
+        self.assertFalse(phone.closed)
+        value = h.read_json(phone.out / "closed.json")
+        self.assertEqual(value["cleanup_errors"][0]["step"], "adb_stop")
+        self.assertTrue(value["server_closed"])
+
+    def test_phone_successful_stop_does_not_hide_cleanup_failure(self):
+        phone = self.phone_model()
+        error = OSError("server close failed")
+        phone.server.job.close.side_effect = error
+        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
+             patch.object(h, "command", return_value=b"") as stop:
+            with self.assertRaises(OSError) as caught:
+                phone.close()
+            self.assertIs(caught.exception, error)
+            self.assert_duplicate_failure(phone, error)
+            stop.assert_called_once()
+        self.assertFalse(h.read_json(phone.out / "closed.json")["cleanup_complete"])
+
+    def test_phone_receipt_failure_never_repeats_stop_or_cleanup(self):
+        phone = self.phone_model()
+        error, real_save = OSError("phone receipt unavailable"), h.save
+        def save(path, value):
+            if path == phone.out / "closed.json":
+                raise error
+            return real_save(path, value)
+        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
+             patch.object(h, "command", return_value=b"") as stop, patch.object(h, "save", side_effect=save):
+            with self.assertRaises(OSError) as caught:
+                phone.close()
+            self.assertIs(caught.exception, error)
+            self.assert_duplicate_failure(phone, error)
+            stop.assert_called_once()
+        self.assertFalse(phone.closed)
+        self.assertFalse((phone.out / "closed.json").exists())
+        self.assertIn("close_receipt", "\n".join(error.__notes__))
+        phone.server.job.terminate.assert_called_once()
+        phone.server.job.close.assert_called_once()
+
+    def test_phone_unknown_port_state_does_not_claim_closure(self):
+        phone = self.phone_model()
+        error = OSError("port observation unavailable")
+        with patch.object(h, "listening", side_effect=[True, error]), patch.object(h, "command", return_value=b""):
+            with self.assertRaises(OSError) as caught:
+                phone.close()
+            self.assertIs(caught.exception, error)
+            self.assert_duplicate_failure(phone, error)
+        value = h.read_json(phone.out / "closed.json")
+        self.assertIsNone(value["listening"])
+        self.assertFalse(value["cleanup_complete"])
+
+    def test_phone_live_foreign_port_is_not_killed_or_marked_closed(self):
+        phone = self.phone_model()
+        phone.server = None
+        with patch.object(h, "listening", return_value=True), patch.object(h, "command") as stop:
+            with self.assertRaisesRegex(RuntimeError, "ADB port still live") as caught:
+                phone.close()
+            self.assert_duplicate_failure(phone, caught.exception)
+            stop.assert_not_called()
+        value = h.read_json(phone.out / "closed.json")
+        self.assertTrue(value["listening"])
+        self.assertFalse(value["cleanup_complete"])
 
 
 class PhoneCellTests(unittest.TestCase):

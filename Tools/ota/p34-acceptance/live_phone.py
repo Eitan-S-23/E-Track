@@ -76,22 +76,50 @@ def service_config(plan, origin):
                 baseImageSha256=plan["images"]["base"]["image"]["sha256"]))))
 
 
+def _finish_close(owner, errors, **state):
+    state.update(cleanup_complete=not errors, cleanup_errors=[dict(step=step,
+        type=type(error).__name__, message=str(error), notes=list(getattr(error, "__notes__", ())))
+        for step, error in errors])
+    try:
+        h.save(owner.out / "closed.json", state)
+    except BaseException as error:
+        errors.append(("close_receipt", error))
+    if errors:
+        owner.close_error = errors[0][1]
+        for step, error in errors:
+            owner.close_error.add_note("%s cleanup %s: %s: %s" %
+                                      (type(owner).__name__, step, type(error).__name__, error))
+        raise owner.close_error
+    owner.closed, owner.close_error = True, None
+
+
 class Network:
     def __init__(self, plan, out):
         self.plan, self.out = plan, h.fresh(out)
         self.env = h.environment(out)
         self.server = self.thread = self.tunnel = self.log_handler = None
-        self.closed = False
+        self.closed, self.close_attempted, self.close_error = False, False, None
 
     def start(self, *, deadline):
-        h.require(not self.closed and self.server is None, "network owner is single-use; do not replay")
+        h.require(not self.closed and not self.close_attempted and self.server is None,
+                  "network owner is single-use; do not replay")
         try:
             return self._start(deadline)
         except BaseException as error:
             try:
-                h.save(self.out / "startup-failed.json", dict(error_type=type(error).__name__, message=str(error)))
-            finally:
                 self.close()
+            except BaseException as cleanup:
+                if cleanup is not error:
+                    error.network_cleanup_error = cleanup
+                    error.add_note("Secondary network cleanup failure (%s): %s" % (type(cleanup).__name__, cleanup))
+                    for note in getattr(cleanup, "__notes__", ()):
+                        error.add_note(note)
+            try:
+                h.save(self.out / "startup-failed.json", dict(error_type=type(error).__name__, message=str(error),
+                    notes=list(getattr(error, "__notes__", ()))))
+            except BaseException as receipt_error:
+                error.startup_receipt_error = receipt_error
+                error.add_note("Startup failure receipt (%s): %s" % (type(receipt_error).__name__, receipt_error))
             raise
 
     def _start(self, deadline):
@@ -150,10 +178,12 @@ class Network:
                     error = h.read_json(process.paths["stderr"])
                     h.require(not data and set(error) == {"dns_errno"} and
                               error["dns_errno"] in DNS_RETRY_CODES, "invalid DNS retry receipt")
-                    return None
-                return data
-            finally:
-                process.close("network_read_finished")
+                    data = None
+            except BaseException as error:
+                process._close_after_error("network_read_finished", error)
+                raise
+            process.close("network_read_finished")
+            return data
 
         def available():
             data = read(origin + service.LATEST_PATH + "?" + urlencode(query), 20, 8 * 1024 * 1024)
@@ -186,19 +216,40 @@ class Network:
     def close(self):
         if self.closed:
             return
+        if self.close_attempted:
+            raise self.close_error
+        self.close_error = RuntimeError("network close interrupted; outcome unknown, do not retry")
+        self.close_attempted = True
+        errors = []
+
+        def attempt(step, operation):
+            try:
+                return True, operation()
+            except BaseException as error:
+                errors.append((step, error))
+                return False, None
+
         if self.tunnel:
-            self.tunnel.close("planned_service_close")
-        if self.server:
-            self.server.shutdown()
-            self.server.server_close()
+            attempt("tunnel_close", lambda: self.tunnel.close("planned_service_close"))
+        started = False
         if self.thread:
-            self.thread.join(timeout=5)
-            h.require(not self.thread.is_alive(), "HTTP thread still live")
+            _, started = attempt("http_thread_started", lambda: self.thread.ident is not None)
+        if self.server:
+            # shutdown waits for serve_forever; calling it before thread.start deadlocks.
+            if started:
+                attempt("http_shutdown", self.server.shutdown)
+            attempt("http_server_close", self.server.server_close)
+        if self.thread and started is not False:
+            attempt("http_thread_join", lambda: self.thread.join(timeout=5))
         if self.log_handler:
-            self.log_handler.close()
-        h.save(self.out / "closed.json", dict(thread_closed=not self.thread or not self.thread.is_alive(),
-            tunnel_closed=not self.tunnel or not self.tunnel.alive()))
-        self.closed = True
+            attempt("http_log_close", self.log_handler.close)
+        _, thread_closed = attempt("http_thread_state", lambda: not self.thread or not self.thread.is_alive())
+        _, tunnel_closed = attempt("tunnel_state", lambda: not self.tunnel or not self.tunnel.alive())
+        if thread_closed is False:
+            errors.append(("http_thread_state", RuntimeError("HTTP thread still live")))
+        if tunnel_closed is False:
+            errors.append(("tunnel_state", RuntimeError("HTTPS tunnel still live; do not claim closure")))
+        _finish_close(self, errors, thread_closed=thread_closed, tunnel_closed=tunnel_closed)
 
 
 class Phone:
@@ -208,6 +259,7 @@ class Phone:
         self.port, self.serial, self.pkg = plan["adb_port"], plan["phone_serial"], plan["app_id"]
         self.base = [str(h.pinned(plan["tools"]["adb"])), "-H", "127.0.0.1", "-P", str(self.port), "-s", self.serial]
         self.deadline, self.count, self.server = time.monotonic() + seconds, 0, None
+        self.closed, self.close_attempted, self.close_error = False, False, None
         self.operation_deadline = None
         self.read_ready = None
         self.capture = self.pid = None
@@ -512,15 +564,38 @@ class Phone:
             read_mode="bounded-live-prefix; not a finished snapshot", no_restart_or_ota=True))
 
     def close(self):
+        if self.closed:
+            return
+        if self.close_attempted:
+            raise self.close_error
+        self.close_error = RuntimeError("phone close interrupted; outcome unknown, do not retry")
+        self.close_attempted = True
+        errors = []
+
+        def attempt(step, operation):
+            try:
+                return True, operation()
+            except BaseException as error:
+                errors.append((step, error))
+                return False, None
+
         if self.server:
             try:
                 if self.server.alive() and h.listening(self.port):
                     h.command(self.out, "adb-stop", [self.base[0], "-H", "127.0.0.1", "-P", str(self.port), "kill-server"], self.env, seconds=10)
-            finally:
-                self.server.close("planned_private_adb_close")
-            h.require(not h.listening(self.port), "ADB port still live; do not claim closure")
-        h.save(self.out / "closed.json", dict(private_port=self.port, listening=h.listening(self.port),
-            server_closed=not self.server or not self.server.alive()))
+            except BaseException as error:
+                errors.append(("adb_stop", error))
+            if errors:
+                attempt("server_close", lambda: self.server._close_after_error("planned_private_adb_close", errors[0][1]))
+            else:
+                attempt("server_close", lambda: self.server.close("planned_private_adb_close"))
+        _, listening = attempt("port_state", lambda: h.listening(self.port))
+        _, server_closed = attempt("server_state", lambda: not self.server or not self.server.alive())
+        if listening is True:
+            errors.append(("port_state", RuntimeError("ADB port still live; do not claim closure")))
+        if server_closed is False:
+            errors.append(("server_state", RuntimeError("private ADB server still live; do not claim closure")))
+        _finish_close(self, errors, private_port=self.port, listening=listening, server_closed=server_closed)
 
 
 if __name__ == "__main__":

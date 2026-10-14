@@ -126,10 +126,13 @@ class Process:
         self.out.mkdir(parents=True, exist_ok=True)
         save(self.paths["started.json"], dict(argv=self.argv, cwd=str(ROOT),
             monotonic_ns=self.started, stdin_sha256=hashlib.sha256(stdin).hexdigest() if stdin is not None else None))
-        self.streams = [self.paths[k].open("xb") for k in ("stdout", "stderr")]
-        self.job = host.owned.WindowsJob() if os.name == "nt" else None
-        self.process, self.closed = None, False
+        self.streams = []
+        self.process, self.job, self.closed = None, None, False
+        self.close_attempted, self.close_error = False, None
         try:
+            for name in ("stdout", "stderr"):
+                self.streams.append(self.paths[name].open("xb"))
+            self.job = host.owned.WindowsJob() if os.name == "nt" else None
             options = dict(cwd=ROOT, env=env, stdin=subprocess.PIPE, stdout=self.streams[0], stderr=self.streams[1])
             if os.name == "nt":
                 options["creationflags"] = subprocess.CREATE_NO_WINDOW
@@ -141,10 +144,8 @@ class Process:
             packet = dict(argv=self.argv, stdin=base64.b64encode(stdin).decode("ascii") if stdin is not None else None)
             self.process.stdin.write((json.dumps(packet, ensure_ascii=True) + "\n").encode("ascii"))
             self.process.stdin.close()
-        except BaseException:
-            if self.alive():
-                self.process.kill()
-            self.close("launch_failed")
+        except BaseException as error:
+            self._close_after_error("launch_failed", error)
             raise
 
     def alive(self):
@@ -153,34 +154,77 @@ class Process:
     def close(self, reason="completed"):
         if self.closed:
             return
-        running = self.alive()
+        if getattr(self, "close_attempted", False):
+            raise self.close_error
+        self.close_error = RuntimeError("process close interrupted; outcome unknown, do not retry")
+        self.close_attempted = True
+        errors = []
+
+        def attempt(step, operation):
+            # One bounded pass: a failed owned step cannot skip later cleanup or evidence IO.
+            try:
+                return True, operation()
+            except BaseException as error:
+                errors.append((step, error))
+                return False, None
+
+        def signal_group(sig):
+            try:
+                os.killpg(self.process.pid, sig)
+            except ProcessLookupError:
+                pass
+
+        _, running = attempt("poll_before_close", self.alive)
+        job_terminated = job_handle_closed = None
+        if self.job:
+            job_terminated, _ = attempt("job_terminate", self.job.terminate)
+            job_handle_closed, _ = attempt("job_close", self.job.close)
+        elif self.process:
+            if os.name == "nt":
+                attempt("process_kill", self.process.kill)
+            else:
+                for name, sig in (("sigterm", signal.SIGTERM), ("sigkill", signal.SIGKILL)):
+                    attempt("process_group_" + name, lambda: signal_group(sig))
+        if self.process:
+            if self.process.stdin is not None:
+                attempt("stdin_close", self.process.stdin.close)
+            try:
+                self.process.wait(timeout=5)
+            except BaseException as error:
+                if not isinstance(error, subprocess.TimeoutExpired):
+                    errors.append(("process_wait", error))
+                attempt("process_kill", self.process.kill if os.name == "nt"
+                        else lambda: signal_group(signal.SIGKILL))
+                attempt("process_wait_after_kill", lambda: self.process.wait(timeout=5))
+        code = self.process.returncode if self.process else None
+        if self.process and code is None and not errors:
+            errors.append(("process_exit", RuntimeError("owned process exit remains unknown after bounded cleanup")))
+        for name, stream in zip(("stdout", "stderr"), self.streams):
+            attempt(name + "_close", stream.close)
+        _, stdout = attempt("stdout_record", lambda: record(self.paths["stdout"]))
+        _, stderr = attempt("stderr_record", lambda: record(self.paths["stderr"]))
+        value = dict(argv=self.argv, reason=reason, stopped_while_running=running,
+            exit_code=code, exit_status="not_started" if self.process is None else "unknown" if code is None else "exited",
+            started_monotonic_ns=self.started, ended_monotonic_ns=time.monotonic_ns(), stdout=stdout, stderr=stderr,
+            job_terminated=job_terminated, job_handle_closed=job_handle_closed, cleanup_complete=not errors,
+            cleanup_errors=[dict(step=step, type=type(error).__name__, message=str(error)) for step, error in errors])
+        attempt("close_receipt", lambda: save(self.paths["closed.json"], value))
+        if errors:
+            self.close_error = errors[0][1]
+            for step, error in errors:
+                self.close_error.add_note("Process cleanup %s: %s: %s" % (step, type(error).__name__, error))
+            raise self.close_error
+        self.close_error, self.closed = None, True
+
+    def _close_after_error(self, reason, error):
         try:
-            if self.job:
-                self.job.terminate()
-                self.job.close()
-            elif self.process:
-                for sig in (signal.SIGTERM, signal.SIGKILL):
-                    try:
-                        os.killpg(self.process.pid, sig)
-                    except ProcessLookupError:
-                        pass
-            if self.process:
-                try:
-                    self.process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    if os.name == "nt":
-                        self.process.kill()
-                    else:
-                        os.killpg(self.process.pid, signal.SIGKILL)
-                    self.process.wait(timeout=5)
-        finally:
-            for stream in self.streams:
-                stream.close()
-            self.closed = True
-        save(self.paths["closed.json"], dict(argv=self.argv, reason=reason, stopped_while_running=running,
-            exit_code=self.process.returncode if self.process else None, started_monotonic_ns=self.started,
-            ended_monotonic_ns=time.monotonic_ns(), stdout=record(self.paths["stdout"]),
-            stderr=record(self.paths["stderr"])))
+            self.close(reason)
+        except BaseException as cleanup:
+            if cleanup is not error and getattr(error, "process_cleanup_error", None) is not cleanup:
+                error.process_cleanup_error = cleanup
+                error.add_note("Secondary process cleanup failure (%s): %s" % (type(cleanup).__name__, cleanup))
+                for note in getattr(cleanup, "__notes__", ()):
+                    error.add_note(note)
 
     def wait(self, seconds, success_codes=(0,), *, read_ready=None, deadline=None):
         require(0 < seconds <= 18000, "finite command timeout required")
@@ -210,10 +254,15 @@ class Process:
                     except subprocess.TimeoutExpired:
                         pass
         except subprocess.TimeoutExpired:
-            self.close("timeout_outcome_unknown")
-            raise RuntimeError("tool timeout; reconcile device, no next action") from None
+            error = RuntimeError("tool timeout; reconcile device, no next action")
+            self._close_after_error("timeout_outcome_unknown", error)
+            raise error from None
+        try:
+            require(code in success_codes, "standard tool failed; inspect original command streams")
+        except BaseException as error:
+            self._close_after_error("completed", error)
+            raise
         self.close()
-        require(code in success_codes, "standard tool failed; inspect original command streams")
         if read_ready is not None and read_ready():
             raise ObservationReady("completed read yielded to terminal MCU observation")
         return self.paths["stdout"].read_bytes()
@@ -225,9 +274,12 @@ def command(out, label, argv, env, *, seconds=180, stdin=None, success_codes=(0,
                 "command deadline reached before launch")
     process = Process(out, label, argv, env, stdin=stdin)
     try:
-        return process.wait(seconds, success_codes, read_ready=read_ready, deadline=deadline)
-    finally:
-        process.close("caller_failed")
+        result = process.wait(seconds, success_codes, read_ready=read_ready, deadline=deadline)
+    except BaseException as error:
+        process._close_after_error("caller_failed", error)
+        raise
+    process.close("caller_failed")
+    return result
 
 
 def listening(port):
