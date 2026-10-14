@@ -1,0 +1,115 @@
+{
+  "utc": "2026-10-14T17:15:56.848558+00:00",
+  "remote_mutations": 0,
+  "files": [
+    {
+      "path": "account-read.started.json",
+      "original": ".cache/p42-closeout-20261015/commands/account-read.started.json",
+      "bytes": 368,
+      "sha256": "b2edca7086daf14eecb6c37963f94562be4c2b0f3be5d3b1d0b60acbaf07b92c"
+    },
+    {
+      "path": "account-read.closed.json",
+      "original": ".cache/p42-closeout-20261015/commands/account-read.closed.json",
+      "bytes": 937,
+      "sha256": "6f795a593c117cef9d60db472c2a779d50be5cf3b69b694e5a4bd8a693999083"
+    },
+    {
+      "path": "account-read.stdout.txt",
+      "original": ".cache/p42-closeout-20261015/commands/account-read.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "account-read.stderr.txt",
+      "original": ".cache/p42-closeout-20261015/commands/account-read.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "wrangler-version-direct.started.json",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-version-direct.started.json",
+      "bytes": 368,
+      "sha256": "5b4f13ad6310a0f517adcd9b1b29e7f8cfa27d70936c092c581aca8c5157f763"
+    },
+    {
+      "path": "wrangler-version-direct.closed.json",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-version-direct.closed.json",
+      "bytes": 948,
+      "sha256": "b4cc00779211dcbef58299b9d68e1ee1ff240d2e7253983ab5007f1162f8de2c"
+    },
+    {
+      "path": "wrangler-version-direct.stdout.txt",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-version-direct.stdout",
+      "bytes": 8,
+      "sha256": "b563c6d4fc4c1aed7d908e689e15bb77c98a94ce36d3405ac32c6aec41f12282"
+    },
+    {
+      "path": "wrangler-version-direct.stderr.txt",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-version-direct.stderr",
+      "bytes": 136,
+      "sha256": "6205e22497347c74bf6517d7c67792b17cc2051d7b12f33098353c4b1b9bed4a"
+    },
+    {
+      "path": "d1-api-list-read.started.json",
+      "original": ".cache/p42-closeout-20261015/commands/d1-api-list-read.started.json",
+      "bytes": 335,
+      "sha256": "bd35eaddc811c8c73ea3ac21543e9936c4c365f1a716999d460c53ba736c977a"
+    },
+    {
+      "path": "d1-api-list-read.closed.json",
+      "original": ".cache/p42-closeout-20261015/commands/d1-api-list-read.closed.json",
+      "bytes": 841,
+      "sha256": "3c783f9c2d5aad4159d1abc1aeae4fd99d098d10f4b7bf933ddc9a346205ea82"
+    },
+    {
+      "path": "d1-api-list-read.stdout.txt",
+      "original": ".cache/p42-closeout-20261015/commands/d1-api-list-read.stdout",
+      "bytes": 104,
+      "sha256": "72daaf6117191255b9f2a0424a43b55a6d59a69c2cf0aa0c7ff25fd1e4f1cea9"
+    },
+    {
+      "path": "d1-api-list-read.stderr.txt",
+      "original": ".cache/p42-closeout-20261015/commands/d1-api-list-read.stderr",
+      "bytes": 50,
+      "sha256": "38f13acf2933b831b66e2024f2de6235dcc4c1ae97e0c5724cb37c69a623aad7"
+    },
+    {
+      "path": "wrangler-account-direct.started.json",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-account-direct.started.json",
+      "bytes": 365,
+      "sha256": "396af2c8e8362119a710ba0b65f7ab17d91ef4ca90796f95ed8da69ddfe02535"
+    },
+    {
+      "path": "wrangler-account-direct.closed.json",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-account-direct.closed.json",
+      "bytes": 947,
+      "sha256": "ab2fe6a83b35fbaa30274e91121768937dba2fbcbfe201c1d45e842cba476c87"
+    },
+    {
+      "path": "wrangler-account-direct.stdout.txt",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-account-direct.stdout",
+      "bytes": 113,
+      "sha256": "0d8bf73eeef1c5763fd7c5f1a0f0d5dc6000a59878fd560a370564242475fea5"
+    },
+    {
+      "path": "wrangler-account-direct.stderr.txt",
+      "original": ".cache/p42-closeout-20261015/commands/wrangler-account-direct.stderr",
+      "bytes": 611,
+      "sha256": "76b2b51303784398b2fd2e47cae7b0c329eefdd0f0625d70709292df76c219ab"
+    },
+    {
+      "path": "independent-scope-request.txt",
+      "original": ".cache/p42-closeout-20261015/independent-scope-request.txt",
+      "bytes": 2949,
+      "sha256": "4eefe55c98cfb7fe9c66d26620eb340d4254c711c26d0f88343cf10eca05ab2b"
+    },
+    {
+      "path": "independent-scope-send.json",
+      "original": ".cache/p42-closeout-20261015/independent-scope-send.json",
+      "bytes": 242,
+      "sha256": "0981912729f3fd2c607566d23119823c074034e69e3e74cd92f0e599bfcd7ff4"
+    }
+  ],
+  "auth_configuration_archived": false
+}

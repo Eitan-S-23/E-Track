@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "D:\\install\\nvm\\nodejs\\node.exe",
+    "--no-warnings",
+    "--experimental-vm-modules",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/wrangler/wrangler-dist/cli.js",
+    "--version"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1116373390292700,
+  "ended_monotonic_ns": 1116406586933700,
+  "stdout": {
+    "path": ".cache\\p42-closeout-20261015\\commands\\wrangler-version-direct.stdout",
+    "bytes": 8,
+    "sha256": "b563c6d4fc4c1aed7d908e689e15bb77c98a94ce36d3405ac32c6aec41f12282"
+  },
+  "stderr": {
+    "path": ".cache\\p42-closeout-20261015\\commands\\wrangler-version-direct.stderr",
+    "bytes": 136,
+    "sha256": "6205e22497347c74bf6517d7c67792b17cc2051d7b12f33098353c4b1b9bed4a"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

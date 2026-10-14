@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "curl.exe",
+    "--silent",
+    "--show-error",
+    "--fail-with-body",
+    "--max-time",
+    "45",
+    "--config",
+    "-"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation",
+  "monotonic_ns": 1116238385667800,
+  "stdin_sha256": "4835efb1e01219620169a24faa721e3719dfb2da622a2465ab98e462259fe3d0"
+}

@@ -1,0 +1,27 @@
+DECIDED：P4-2 可进入基于既有原件的最终独立裁决。没有发现必须追加真实账号观察才能关闭这张实现卡的条款；但真实环境启用门槛不能被取消。本回复不是最终 PASS。
+
+**完成判据对账**
+已核对当前 `4043ca2` 与测试源 `fc4fbbb8193fcc536ef408b7b662d44b30f869dc` 的关系：后续仅增加记录和证据。26 份归档原件的长度、SHA-256 全部匹配。
+
+| [Spec 完成判据](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-prompts/prompt-P4-2-implementation.md:115) | 已有证据 |
+|---|---|
+| 空库、旧库迁移 | 实际 SQLite schema dump、迁移前后样本、legacy 隔离、幂等及失败回滚原件齐备。 |
+| 三项 R8 SQL 负例 | 最终原生 CI ZIP 中存在 D1 实际 UNIQUE/触发器拒绝输出，不是应用预检查。 |
+| latest 三场景及错误行为 | 原生 `firmware-v2` 91 项通过，覆盖选包、错误、注册原子性、下载及 token。 |
+| owner-only recovery、latest 不分发 recovery | 原生 Admin 47 项及相关选包测试通过；JWT 和 R2 整改的独立结论保持。 |
+| typecheck、Worker、migration、脚本测试 | 原生 CI **156/156**、三处类型检查通过；宿主 **190/190** 包含迁移、脚本各 17 项。两组不叠加计数。 |
+
+依据是[最终原生 ZIP](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-exec-notes/P4-2-ci-2026-10-14/run-38591559979.zip)及[宿主完整原件](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-exec-notes/P4-2-ci-2026-10-14/p42-r2-etag-final-host-01.log:243)，不只是手写 PASS。
+
+**四项范围裁定**
+- **真实 legacy 清查：目标库启用门槛，不是无条件的实现卡前置。** [D1-MIGRATION](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-cross-system-contracts.md:482)要求真实迁移/回填前取得批准 manifest、权威镜像和对象证据，未解决的旧 pointer 不得切换规范读取；第 502 行明确允许实际 SQLite/D1 约束测试。实际对账仍由 Cloudflare/D1 迁移责任人与 OTA 发布链审查人承担，root 纳入启用计划，不能随意甩给 P4-1。
+- **已部署 Worker、真实 Access 会话：不属于本卡新增必测项。** 本卡必须验证[鉴权及 owner 语义](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-cross-system-contracts.md:639)，现有测试覆盖的是这些行为，不证明平台策略生效。真实配置由 P4-4/root 承接，Admin 演练由 [P4-3](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-prompts/prompt-P4-3-implementation.md:107)承接。
+- **实际 cutover：明确属于部署义务。** [HTTP-DOWNLOAD 第 251 行](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-cross-system-contracts.md:251)写的是“部署必须记录”。配置 owner 必须落实固定 epoch、origin、签名绑定及回滚约束；测试时钟不能证明实际配置。
+- **真实 uploader 全字节回读：每次真实上传仍必需，但演练归下游。** [R2-UPLOAD](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-cross-system-contracts.md:947)不允许拿 HEAD/2xx 代替回读；[SCHEMA-FIXTURE](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/ota-cross-system-contracts.md:928)明确 `P4-2 → P4-1/P3-5`。真实三资产演练由 P4-1/P4-4 共用原件，P3-5 保留真实后端闭环要求，不能反向阻塞 P4-2 实现验收。
+
+**最小收口计划**
+适用[执行合同第 0 节轻量独立原件审阅](/D:/github/my/E-Track/.cache/p4-2-implementation/docs/acceptance-execution-contract.md:27)。未发现已有 P4-2 冻结执行合同；本次无需新建 v3 或追加云端测试。
+
+root 只需追加上述判据映射及启用门槛责任，保留 P42-EXT 历史记录，提交后续最终独立裁决包；裁决通过后再完成已授权的集成交付。当前认证失败只阻断真实环境启用，不阻断这条离线收口路线。未来正式外部状态验收仍按第 0 节进入 v3，不得借“轻量”绕过。
+
+本轮全程只读，未重跑测试或操作账号。

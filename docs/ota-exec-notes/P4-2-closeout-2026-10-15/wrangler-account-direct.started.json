@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "D:\\install\\nvm\\nodejs\\node.exe",
+    "--no-warnings",
+    "--experimental-vm-modules",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/wrangler/wrangler-dist/cli.js",
+    "whoami"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-2-implementation",
+  "monotonic_ns": 1116594880457400,
+  "stdin_sha256": null
+}

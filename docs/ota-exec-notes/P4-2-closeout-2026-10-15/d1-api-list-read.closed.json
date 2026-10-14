@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "curl.exe",
+    "--silent",
+    "--show-error",
+    "--fail-with-body",
+    "--max-time",
+    "45",
+    "--config",
+    "-"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 22,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1116238385667800,
+  "ended_monotonic_ns": 1116246480888500,
+  "stdout": {
+    "path": ".cache\\p42-closeout-20261015\\commands\\d1-api-list-read.stdout",
+    "bytes": 104,
+    "sha256": "72daaf6117191255b9f2a0424a43b55a6d59a69c2cf0aa0c7ff25fd1e4f1cea9"
+  },
+  "stderr": {
+    "path": ".cache\\p42-closeout-20261015\\commands\\d1-api-list-read.stderr",
+    "bytes": 50,
+    "sha256": "38f13acf2933b831b66e2024f2de6235dcc4c1ae97e0c5724cb37c69a623aad7"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

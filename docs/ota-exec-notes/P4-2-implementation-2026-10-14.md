@@ -536,3 +536,87 @@ were explicitly staged, without changing ignores or raw bytes. A single
 `git cat-file --batch` comparison then verified all 32 archive files byte-for-byte
 against the index. The initial local records commit is retained, not amended;
 the following records commit supplies the missing originals before pushing.
+
+## P4-2 Closeout Continuation (2026-10-15)
+
+### P42-CLOSEOUT-AUTH-20261015
+
+After root proposed environment reconciliation, independent acceptance and main
+integration, the user explicitly instructed: "做吧，直到收口完成P4-2再停下，我在此全权授权给你，不用再请求授权".
+This supersedes the earlier checks-only limitation for necessary, bounded P4-2
+closeout actions, including commits, dedicated-branch pushes and main integration.
+Do not ask again for those actions. It does not waive the canonical Spec, the
+P5/owner production-release gates, legacy identity provenance, existing device
+pause, immutable evidence or project-local filesystem boundaries. No hardware
+operation or additional OTA is needed for this card.
+
+The explicit project root remains `D:/github/my/E-Track`; implementation work
+continues in `.cache/p4-2-implementation`, at the unchanged delivered source and
+records HEAD `4043ca24e7b18d569fe159c3c914a2e593e4a454`. Shared root/user changes
+and the separate main worktree are preserved. The published collaboration and
+acceptance rules and the sole P4-2 Spec were reloaded before further work.
+
+### Read-Only Environment Entry
+
+The configured staging D1 also supports Trace App updates. It is not a disposable
+P4-2 fixture. No schema, release, channel, R2 object, Access policy or deployment
+has been changed. Existing CLI/process/IO tooling was reused with a task-local
+invocation adapter under `.cache/p42-closeout-20261015`; this is not a new product
+API, acceptance runner or competing Spec.
+
+The first installed-Wrangler `whoami` entry timed out at its 90-second bound
+without output; its owned process job was closed. A direct invocation of the
+same vendor CLI returned version 4.105.0. A subsequent direct `whoami` returned
+an explicit expired-login/failed-refresh error. The original OAuth configuration
+was copied to project-contained XDG configuration before CLI use; no external
+authentication file was edited. The existing project-local API token also
+returned HTTP 401 / Cloudflare code 10000 for the read-only D1 list request.
+These are environment-entry failures, not P4-2 product-test failures and not
+evidence of an empty remote database. No blind retry or remote mutation followed.
+
+### P42-CLOSEOUT-01: Scope Reconciliation Requested
+
+The original independent reviewer received a read-only request to map the actual
+Spec criteria to the committed originals and distinguish implementation-card
+acceptance from activation/release obligations. In particular, P42-EXT-02/03 are
+operational follow-ups, not authority to invent acceptance requirements. Their
+applicability must be decided against the frozen clauses and task ownership;
+missing real-account evidence cannot be fabricated or silently waived.
+
+The request binds HEAD `4043ca2`, native source `fc4fbbb`, CI `38591559979`, the
+190/190 host originals and prior independent reviews. The reviewer remains a
+non-implementer; root is the sole writer. Scope and final adjudication are
+separate from author self-tests. No new test, acceptance PASS or task completion
+is claimed at this entry. Request/transport records are preserved under the
+task-local closeout directory; the original reviewer transcript confirms receipt.
+
+### P42-CLOSEOUT-01 Decided: Implementation Versus Activation
+
+At 2026-10-14 17:13:50.587 UTC, the independent reviewer returned `DECIDED`:
+the existing original evidence is sufficient to enter final independent P4-2
+adjudication. Its actual checks verified all 26 bound originals, the final native
+156/156 and SQL rejection output, plus the host 190/190 with schema dumps,
+legacy migration samples and 17 migration/17 script tests. Source equivalence
+between tested `fc4fbbb` and delivery `4043ca2` was also checked.
+
+The reviewer found no frozen clause requiring a new real-account observation to
+close this implementation card. Actual legacy identity/pointers, Access policy,
+cutover/signing configuration and every real uploader readback remain mandatory
+at target-environment activation and the relevant downstream rehearsal. They are
+not waived or represented as PASS. Their owners and exact gates are recorded in
+`P4-2-acceptance-2026-10-15.md`, preserving Cloudflare/D1 migration-owner plus OTA
+reviewer responsibility rather than casually transferring legacy work to P4-1.
+
+The applicable route is execution contract section 0's lightweight independent
+original-evidence review. No existing P4-2 frozen execution contract was found;
+no new v3 contract, cloud mutation, credential workaround or repeated test is
+required for this implementation review. Future formal external observations
+still require their own admitted execution plan. The initial suggestion to make
+all real-environment checks prerequisites to this card was too broad; this
+scope correction follows the existing Spec and changes no product criterion.
+
+The verbatim scope response and exact transcript timestamp/hash are preserved in
+`P4-2-closeout-2026-10-15/independent-scope-verdict.txt` and its provenance JSON.
+This scope decision is not final PASS. Root now submits the criterion mapping,
+retained activation obligations and unchanged implementation for the separate
+final independent verdict, then the already-authorized main integration.
