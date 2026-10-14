@@ -71,7 +71,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: firmware-build-${{ github.ref }}
@@ -87,6 +87,36 @@ env:
   SOURCE_DATE_EPOCH: "1786320000"
 
 jobs:
+  release-development-checks:
+    name: Release tooling development checks (no cloud credentials)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      WRANGLER_SEND_METRICS: "false"
+      WRANGLER_LOG_PATH: ${{ github.workspace }}/.cache/p41/wrangler-logs
+      npm_config_cache: ${{ github.workspace }}/.cache/p41/npm
+    defaults:
+      run:
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install pinned Worker dependencies
+        run: npm ci
+      - name: Run script and migration host tests explicitly (not workerd)
+        run: npm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts
+      - name: Run native workerd D1 R2 and registration invariants (not host doubles)
+        run: npm test -- --reporter=verbose
+      - name: Check Worker and shared script types
+        run: npm run check
+
   build:
     name: Build firmware (arm-none-eabi-gcc)
     runs-on: ubuntu-latest
@@ -401,6 +431,9 @@ jobs:
     name: Register firmware to Cloudflare
     runs-on: ubuntu-latest
     needs: build
+    environment: firmware-production
+    permissions:
+      contents: write
     # PRE-3 / PLAN-OTA.md §6.1：仅 workflow_dispatch publish=true 走正式注册链；
     # push/PR 永不进入本 job（nightly 不建 Release、不注册 CF）。
     if: >-

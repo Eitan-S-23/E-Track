@@ -751,11 +751,11 @@
 ## 7. P4 CI/CF(估时 2-3d;门槛:P0 完成,可与 P1/P2 并行;验收:正式发布→推送→BLE 升级全链演练)
 
 #### P4-1 firmware-build.yml 正式发布链
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-15(用户授权无人值守开发；先建立真实测试/CI 反馈；真实 rehearsal 与独立验收仍 NOT_RUN)
 - 目标: §6.1 制包顺序①-⑥:构建占位头 app.bin→`etu_pack.py --finalize`→full.etu+patch.etu(基版=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→**bspatch 自验逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)**→recovery 资产(app.bin+尾 8B)→GitHub Release 三资产→注册链;`firmware-production` environment 人工审批;vcode>CF 现值校验;PRE-1 新编码。
 - 依赖: PRE-3/4、P0-2、P4-2；P4-2 是前置任务，P4-1 不得先行。
 - 验收: P5 前按 OTA-XC-RELEASE-GATE 完成一次获授权的隔离 staging rehearsal，三资产/readback/metadata/注册及生产零副作用证据齐全；不创建 production Release。与 P4-4 共用这次原件。正式 Release/晋升在 P5 通过及 owner/environment 审批后，仍须规定的重建与哈希一致性检查。
-- 证据: —
+- 证据: `docs/ota-exec-notes/P4-1-implementation-2026-10-15.md`；专属分支 `dev/p4-1/unattended-20261015`，不合入 main、不操作设备或真实云资源。
 
 #### P4-2 D1 多资产模型与 latest 选包
 状态: 完成 ｜ 认领: Codex(P4-2 实现/接续) / 2026-10-14 ｜ 更新: 2026-10-15(P42-CLOSEOUT-02 最终独立实现验收 PASS；原生 Worker CI 156/156、宿主回归 190/190 原件独立核验；完成边界为实现交付，不代表真实环境已启用或生产放行)
@@ -822,7 +822,7 @@
 | 6 | P3-6 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-6-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main，两套 BLE 测试文件已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 7 | P3-7 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-7-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1、P3-6 均已完成并合入 main，三条待接脚本已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 8 | P3-8 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-8-implementation.md |  | `OTA-XC-ANDROID-OTA-BACKGROUND`, `OTA-XC-OTA-PROGRESS`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | SATISFIED | P3-3 已完成并合入 main；设备操作须另批 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
+| 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | PRE-3/4、P0-2、P4-2 已完成并交付 main；本批用户仅授权开发验证 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 10 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
 | 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1 工作流接口、P4-2 目标环境就绪，再共用 rehearsal | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1, P4-2 |
