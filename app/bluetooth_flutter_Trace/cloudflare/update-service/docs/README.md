@@ -184,3 +184,165 @@ The committed Wrangler config intentionally contains only non-secret settings an
 ## Phase 3 Boundary
 
 The current admin UI is a lightweight static operator surface. The fuller React console, R2 retention cleanup UI, backup controls, manifest preview polish, and lightweight statistics remain Phase 3+ work.
+
+## P4-2 Firmware Backend
+
+This is an implementation guide, not another Spec or an acceptance decision.
+The normative source is repository-root
+`docs/ota-prompts/prompt-P4-2-implementation.md` and its frozen OTA-XC clauses.
+The Android/Windows `candidate` lifecycle above is unchanged. Firmware uses
+schema v2 and `draft` / `ready` / `disabled` instead.
+
+### Entry Points And Signatures
+
+| Entry | Implementation / input |
+| --- | --- |
+| `POST /api/ci/firmware/releases` | `worker/src/firmware.ts`; exact schema v2 metadata, HTTPS, Bearer, JSON Content-Type and Accept |
+| `GET /api/public/firmware/latest` | Same module; the ten typed query fields in `OTA-XC-CLOUD-QUERY-MAPPING` |
+| `GET /api/public/firmware/download` | Same module and `firmware_download.ts`; exact token v2 query, optional single `Range: bytes=N-` |
+| Firmware admin reads and existing publish/disable | Existing Access Pages facade, delegated to `worker/src/firmware_admin.ts`; no new public admin surface |
+| `POST /api/admin/firmware/releases/{id}/recovery-download` | Owner, same-origin, CSRF, exact scope/reason body and canonical UUIDv4 Idempotency-Key |
+| `cleanupFirmwareIdempotency(db, epochSeconds?)` | Hourly Worker scheduled handler; tombstone first, full result removal second in one batch |
+| `backfillFirmwareV2({db,bucket,manifest,approvedManifestSha256,readArtifact})` | `scripts/backfill-firmware-v2.mjs`; explicit bindings and an immutable-locator artifact reader, no credential discovery or implicit deployment |
+
+`worker/test/fixtures/firmware-release-v2.json` is the versioned schema fixture.
+Its tiny synthetic asset bodies are defined in `worker/test/firmware-fixture.ts`;
+they are not deployable firmware. Worker registration and all three scripts use
+the same `scripts/firmware-schema.mjs` parser, canonicalization and naming policy.
+P4-1 consumes this fixture/API; it does not define a competing schema.
+
+### Migration And Backfill
+
+`0005_firmware_multi_asset.sql` is a forward migration; `0003` is untouched.
+It preserves the original release/channel tables as immutable `_legacy` tables,
+creates the canonical v2 tables and maps the old `rollback` label to `retract`
+without moving a logical pointer or incrementing its revision. An unresolved
+pointer is retained as `legacy_current_release_id`, never as a distributable
+release. Latest fails closed while that marker exists.
+
+For a future authorized migration, quiesce v1 writers and retain a database
+snapshot. Stage and validate the approved manifests/artifacts before enabling
+v2 reads. The old code must not run against the new canonical schema. Resolve
+every published legacy pointer through verified backfill or an explicit approved
+channel mutation; do not turn migration failure into NO_UPDATE. This session did
+not apply a remote migration or approve any real manifest.
+
+The backfill input has `manifestSchemaVersion: 1`,
+`approvedBy: {migrationOwner, otaReleaseReviewer}` and `records`. Each record
+contains all release identity fields specified by `OTA-XC-D1-MIGRATION`, plus:
+
+| Object | Required fields |
+| --- | --- |
+| `artifact` | Immutable `locator`, `sha256`, `sizeBytes`, exactly matching the old asset |
+| `image` | Immutable `locator`, full raw `sha256`, `imageLength` |
+| `verification` | `toolVersion`, immutable `evidenceLocator`, `evidenceSha256`, `verifiedBy`, UTC `verifiedAt` |
+
+The externally approved SHA is SHA-256 of the canonical manifest JSON. Names of
+approvers alone are not real approval; the caller must obtain the actual scoped
+approval for that digest. The supplied reader must return original bytes, not
+assertions. All unresolved published records are checked before the first batch
+write. Unverifiable unpublished records remain isolated; no default hardware,
+zero identity or asset digest is substituted. Replays compare the canonical
+per-record manifest identity, preserve creation time and create no second full.
+
+Database CHECK/UNIQUE/FK/triggers enforce kind/base combinations, full/patch/
+recovery uniqueness, full readiness, sealed ready asset sets, state transitions,
+immutable identity, same-scope ready pointers, CAS revisions and atomic audit.
+`r2_etag` pins the verified object version for conditional downloads. Optional
+missing old custom metadata does not bypass the backfill's byte readback.
+
+### Signing And Recovery
+
+Before any authorized activation, set one fixed, auditable
+`FIRMWARE_V2_CUTOVER_EPOCH` on the Worker, public Pages and admin Pages. It has no
+runtime default. Use matching `DOWNLOAD_TOKEN_KEY_VERSION` and signing keys on
+all signers/verifiers. The admin facade additionally needs
+`FIRMWARE_DOWNLOAD_ORIGIN`, the approved public download origin. Never derive it
+from a caller-controlled header or silently use the admin Pages origin.
+
+Only v2 tokens are signed. V1 verification is restricted to old full/patch IDs,
+their original canonical message, and the fixed cutover + 300-second window.
+At the boundary it stops automatically. Remove the v1 verifier at the first
+subsequent deployment after that window, as required by the shared contract.
+
+Public downloads require a current channel reference. A stop on any referencing
+channel blocks a public token, since the frozen token schema has no channel field.
+Recovery does not require public publication; it still checks ready/archive/R2
+state and the app-wide download stop. Latest never signs recovery.
+
+Admin idempotency reserves pending in the atomic D1 batch. A deferred self-FK
+prevents pending from committing, and completed results are immutable. HMAC
+calculation is pure; only the winning committed result issues a capability.
+Replay returns the original requestId/URL, not a newly signed token. At 300 seconds
+the old recovery key cannot re-sign; at 86400 seconds its permanent tombstone
+survives body cleanup. Neither URL nor Idempotency-Key is copied into audit logs.
+
+### Firmware Script Usage
+
+`build-firmware-release-metadata.mjs` now requires `--assets-dir`, `--final-image`,
+`--release-tag`, `--run-id`, `--commit-sha`, `--version-name`, `--target-hardware`,
+`--hardware-revision`, `--layout-id`, `--min-boot-version`, `--min-protocol-version`
+and `--min-app-version-code`. `--patch-bases` optionally names a JSON array of
+`{baseImageSha256,baseVersionCode}`. It hashes final image/asset bytes, emits
+deterministic array metadata with `r2Verified=false`, and does not package firmware.
+Production must explicitly reuse the approved rehearsal runId, per P4-1.
+
+`upload-firmware-r2-asset.mjs --metadata FILE --assets-dir DIR --asset FILE_NAME`
+selects one array entry. `--dry-run` verifies local input only and does not modify
+metadata. Actual uploads require explicit `--remote`, `--bucket` and `--account-id`
+(or their documented environment variables) and separate operating authority.
+Each successful invocation emits exactly one `R2AssetUploadResult` and only then
+marks that entry verified. Invoke once per asset, then register the complete array.
+The old `--skip-readback` option is rejected.
+
+The installed Wrangler 4.105.0 `r2 object put` command exposes neither conditional
+create nor custom metadata. Its `--force` only skips a catalog prompt, not an
+immutability check. The uploader therefore reuses Wrangler's documented
+`getPlatformProxy` binding API, with an R2-only, explicitly remote temporary config.
+It performs HEAD, `put(onlyIf: {etagDoesNotMatch: "*"})` when absent, and full
+readback. A competing write is read and compared, never overwritten. SHA/kind are
+custom metadata; the HTTP digest is supplied with upload metadata and retained as
+`content-digest` custom metadata. Download synthesizes the required RFC 9530 header
+from verified D1 identity. No new public upload endpoint or custom R2 protocol exists.
+The proxy's actual remote behavior is NOT_RUN in this handoff.
+
+`register-firmware-release.mjs METADATA_FILE` still uses
+`TRACE_UPDATE_SERVICE_URL` / `TRACE_DEPLOY_TOKEN`. It validates schema before
+fetch, refuses redirects/non-HTTPS, and validates the full ready response. Only
+network failures without an HTTP response may retry (at most 3, at most 30 seconds
+per attempt); an HTTP 400/409/503 is not retried. CLI configuration errors exit 2,
+operation failures exit 1. No script prints credentials or raw server error bodies.
+
+Wrong: upload with unconditional overwrite, trust `r2Verified`, or mark a dry-run
+as verified. Correct: conditional create, byte readback, canonical metadata and
+one atomic registration batch, leaving failures unavailable.
+
+### Development Checks And Limits
+
+Run `npm run check` in Worker, admin and public packages. Worker `npm test` is the
+normal Cloudflare runtime route. `npm test -- --config test/vitest.host.config.ts`
+is an explicit supplemental host route, not a substitute claim that workerd passed.
+It runs the same handlers with real Node SQLite (including triggers, deferred FK,
+batch rollback and SQL rejection) and labeled memory R2/KV/DO plus DigestStream
+platform doubles. Access tests use cryptographically verified synthetic JWTs and
+test JWKS, not a live Access session.
+
+| Checks | Required assertions |
+| --- | --- |
+| Worker/schema | Full/patch/recovery, canonical replay/conflict, invalid fields, R2 mismatch, rollback |
+| Latest/download | Patch match/full/no update, App and device gates, no recovery, stop/retract/archive, digest/Range/token v1-v2 |
+| Actual SQL | Duplicate full/base patch/recovery, invalid kind/base, no-full ready, pending commit, CAS/audit/tombstone guards |
+| Migration | Empty and populated databases, immutable originals, approved byte-bound backfill, legacy isolation, reentry and rollback |
+| Admin | Owner-only recovery, first/replay/concurrent/expired results, cleanup races, no key/URL in audit |
+| Scripts | Real file metadata, conditional upload/readback, dry-run isolation, bounded registration and real CLI exit codes |
+
+Contain all npm, HOME, TEMP, Wrangler and test outputs per root AGENTS. The host
+script fixtures are retained under the active worktree's `.cache/p4-2-script-fixtures`.
+Do not run the tests from another worktree with a shared writable cache.
+
+P4-1 owns adaptation of the two old firmware workflow callers; their v1 CLI
+arguments intentionally fail closed rather than fabricate missing identity.
+P4-3 owns UI/retract/stop/resume endpoints and interaction changes. This backend
+does not add those channel mutation routes. Remote D1/R2/Access checks, actual
+cutover configuration, publication, deployment and formal acceptance remain
+separate, explicitly authorized work.

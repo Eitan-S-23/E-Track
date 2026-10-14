@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 2,
+  "appId": "trace",
+  "deviceModel": "e-track-at32f435",
+  "releaseTag": "mcu-e-track-at32f435-v2.8.1",
+  "runId": "9001",
+  "commitSha": "1111111111111111111111111111111111111111",
+  "versionName": "2.8.1",
+  "versionCode": 20801,
+  "releaseNotes": "P4-2 synthetic schema fixture, not deployable firmware",
+  "targetImageSha256": "1c947b92383b14434b0b67a95dcc0aa6ea54ae8e65850da74efc83234955d4e8",
+  "hardwareRevision": 1,
+  "layoutId": 1,
+  "minBootVersion": 1,
+  "minProtocolVersion": 1,
+  "targetHardware": "AT32F435RGT7",
+  "transport": "ble",
+  "minAppVersionCode": 0,
+  "isFormalRelease": true,
+  "assets": [
+    {
+      "kind": "full",
+      "fileName": "e-track-at32f435-v2.8.1-full.etu",
+      "sha256": "96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3",
+      "sizeBytes": 18,
+      "baseImageSha256": "",
+      "baseVersionCode": 0,
+      "githubUrl": "https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "r2Verified": true
+    },
+    {
+      "kind": "patch",
+      "fileName": "e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "sha256": "022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee",
+      "sizeBytes": 19,
+      "baseImageSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "baseVersionCode": 20800,
+      "githubUrl": "https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "r2Verified": true
+    },
+    {
+      "kind": "recovery",
+      "fileName": "recovery-v2.8.1.bin",
+      "sha256": "d078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379",
+      "sizeBytes": 22,
+      "baseImageSha256": "",
+      "baseVersionCode": 0,
+      "githubUrl": "https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin",
+      "r2Verified": true
+    }
+  ]
+}

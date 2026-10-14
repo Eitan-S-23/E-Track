@@ -1,3 +1,7 @@
+import { ApiError } from "../../../../worker/src/errors";
+import { firmwareReleaseAction, listFirmware, publishFirmware } from "../../../../worker/src/firmware_admin";
+import { requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
+
 type Platform = "android" | "windows";
 type ChannelName = "stable" | "beta";
 type ActorRole = "viewer" | "publisher" | "owner";
@@ -13,6 +17,12 @@ interface AdminEnv {
   ADMIN_PUBLISHER_EMAILS?: string;
   ADMIN_OWNER_EMAILS?: string;
   ADMIN_ALLOWED_ORIGINS?: string;
+  DOWNLOAD_TOKEN_KEY_VERSION: string;
+  DOWNLOAD_TOKEN_PREVIOUS_KEY_VERSION?: string;
+  DOWNLOAD_HMAC_KEY_CURRENT?: string;
+  DOWNLOAD_HMAC_KEY_PREVIOUS?: string;
+  FIRMWARE_V2_CUTOVER_EPOCH?: string;
+  FIRMWARE_DOWNLOAD_ORIGIN?: string;
 }
 
 interface Actor {
@@ -54,26 +64,6 @@ interface ReleaseAssetRow {
   size_bytes: number;
   r2_key: string | null;
   r2_state: "not_uploaded" | "available" | "r2_deleted" | "archived";
-}
-
-interface FirmwareReleaseRow {
-  id: string;
-  app_id: string;
-  device_model: string;
-  version_name: string;
-  version_code: number;
-  release_tag: string;
-  state: "candidate" | "disabled";
-  release_notes: string;
-  file_name: string;
-  sha256: string;
-  size_bytes: number;
-  r2_key: string | null;
-  r2_state: "not_uploaded" | "available" | "r2_deleted" | "archived";
-  github_url: string;
-  target_hardware: string | null;
-  transport: string;
-  archived: number;
 }
 
 interface FirmwareChannelRow {
@@ -142,9 +132,18 @@ export const onRequest: PagesFunction<AdminEnv> = async (context) => {
   try {
     const actor = await requireAccessActor(context.request, context.env, requestId);
     const response = await routeAdminRequest(context, actor);
-    response.headers.set("X-Request-Id", requestId);
+    response.headers.set("X-Request-Id", response.headers.get("X-Request-Id") ?? requestId);
     return response;
   } catch (error) {
+    if (new URL(context.request.url).pathname.startsWith("/api/admin/firmware/")
+      && error instanceof AdminError && error.status === 403 && error.code === "TOKEN_INVALID") {
+      const code = error.message.includes("CSRF") ? "CSRF_INVALID"
+        : error.message.includes("origin") ? "ORIGIN_FORBIDDEN"
+        : error.message.includes("role") ? "ROLE_FORBIDDEN" : "ACCESS_FORBIDDEN";
+      const response = json({ errorCode: code, message: error.message, requestId }, 403);
+      response.headers.set("X-Request-Id", requestId);
+      return response;
+    }
     const response = errorJson(error, requestId);
     response.headers.set("X-Request-Id", requestId);
     return response;
@@ -158,6 +157,13 @@ async function routeAdminRequest(
   const url = new URL(context.request.url);
   const method = context.request.method.toUpperCase();
   const route = routeSegments(context.params.path);
+  if (route[0] === "firmware") {
+    if (url.protocol !== "https:") throw new AdminError("INVALID_PARAMETER", "HTTPS required", 400);
+    if (method === "POST") {
+      requireFirmwareJsonHeaders(context.request);
+      if (url.search || url.pathname.endsWith("/")) throw new AdminError("INVALID_PARAMETER", "Invalid firmware mutation path", 400);
+    }
+  }
 
   if (method === "OPTIONS") {
     return new Response(null, { status: 204 });
@@ -230,12 +236,12 @@ async function routeAdminRequest(
 
   if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "releases") {
     requireRole(actor, "viewer");
-    return listFirmwareReleases(context.env, url);
+    return listFirmware(context.env, url, actor.requestId, false);
   }
 
   if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "channels") {
     requireRole(actor, "viewer");
-    return listFirmwareChannels(context.env, url);
+    return listFirmware(context.env, url, actor.requestId, true);
   }
 
   if (
@@ -291,7 +297,7 @@ async function routeAdminRequest(
     const channel = parseChannel(route[2]);
     requireRole(actor, channel === "stable" ? "owner" : "publisher");
     const body = await requestJson(context.request);
-    return publishFirmwareRelease(context.env, actor, channel, body);
+    return publishFirmware(context.env, actor, channel, body);
   }
 
   if (
@@ -299,10 +305,10 @@ async function routeAdminRequest(
     route.length === 4 &&
     route[0] === "firmware" &&
     route[1] === "releases" &&
-    route[3] === "disable"
+    (route[3] === "disable" || route[3] === "recovery-download")
   ) {
     requireRole(actor, "owner");
-    return disableFirmwareRelease(context.env, actor, route[2]);
+    return firmwareReleaseAction(context.request, context.env, actor, route[2], route[3]);
   }
 
   throw new AdminError("NOT_FOUND", "Admin route not found", 404);
@@ -411,12 +417,12 @@ async function storageSummary(env: AdminEnv, url: URL): Promise<Response> {
             AND disabled = 0
             AND r2_state = 'available'
           UNION ALL
-          SELECT 'firmware' AS type, size_bytes
-          FROM firmware_releases
-          WHERE app_id = ?
-            AND archived = 0
-            AND state <> 'disabled'
-            AND r2_state = 'available'
+          SELECT 'firmware' AS type, a.size_bytes
+          FROM firmware_release_assets a JOIN firmware_releases r ON r.id=a.release_id
+          WHERE r.app_id = ?
+            AND r.archived = 0
+            AND r.state <> 'disabled'
+            AND a.r2_state = 'available'
         )
         GROUP BY type
         ORDER BY type
@@ -437,12 +443,12 @@ async function storageSummary(env: AdminEnv, url: URL): Promise<Response> {
             AND disabled = 0
             AND r2_state = 'available'
           UNION ALL
-          SELECT size_bytes
-          FROM firmware_releases
-          WHERE app_id = ?
-            AND archived = 0
-            AND state <> 'disabled'
-            AND r2_state = 'available'
+          SELECT a.size_bytes
+          FROM firmware_release_assets a JOIN firmware_releases r ON r.id=a.release_id
+          WHERE r.app_id = ?
+            AND r.archived = 0
+            AND r.state <> 'disabled'
+            AND a.r2_state = 'available'
         )
       `
     )
@@ -631,53 +637,6 @@ async function deleteAnnouncement(env: AdminEnv, actor: Actor, announcementId: s
   return json({ ok: true });
 }
 
-async function listFirmwareReleases(env: AdminEnv, url: URL): Promise<Response> {
-  const appId = queryString(url, "appId") ?? env.APP_ID;
-  const deviceModel = optionalDeviceModel(queryString(url, "deviceModel"));
-  const baseSql = `
-      SELECT
-        f.*,
-        group_concat(c.name) AS published_channels
-      FROM firmware_releases f
-      LEFT JOIN firmware_channels c ON c.current_release_id = f.id
-      WHERE f.app_id = ?
-        AND f.archived = 0
-        AND f.r2_state = 'available'
-        ${deviceModel ? "AND f.device_model = ?" : ""}
-      GROUP BY f.id
-      ORDER BY f.device_model ASC, f.version_code DESC, f.created_at DESC
-      LIMIT 100
-    `;
-  const statement = env.DB.prepare(baseSql);
-  const result = deviceModel
-    ? await statement.bind(appId, deviceModel).all()
-    : await statement.bind(appId).all();
-  return json({ ok: true, firmwareReleases: result.results });
-}
-
-async function listFirmwareChannels(env: AdminEnv, url: URL): Promise<Response> {
-  const appId = queryString(url, "appId") ?? env.APP_ID;
-  const deviceModel = optionalDeviceModel(queryString(url, "deviceModel"));
-  const baseSql = `
-      SELECT
-        c.*,
-        f.release_tag,
-        f.version_name,
-        f.version_code,
-        f.state AS release_state
-      FROM firmware_channels c
-      LEFT JOIN firmware_releases f ON f.id = c.current_release_id
-      WHERE c.app_id = ?
-        ${deviceModel ? "AND c.device_model = ?" : ""}
-      ORDER BY c.device_model ASC, c.name ASC
-    `;
-  const statement = env.DB.prepare(baseSql);
-  const result = deviceModel
-    ? await statement.bind(appId, deviceModel).all()
-    : await statement.bind(appId).all();
-  return json({ ok: true, firmwareChannels: result.results });
-}
-
 async function publishRelease(
   env: AdminEnv,
   actor: Actor,
@@ -767,117 +726,6 @@ async function publishRelease(
   return json({ ok: true, revision: updatedChannel.revision });
 }
 
-async function publishFirmwareRelease(
-  env: AdminEnv,
-  actor: Actor,
-  channelName: ChannelName,
-  body: Record<string, unknown>
-): Promise<Response> {
-  const appId = requireString(body.appId ?? env.APP_ID, "appId");
-  const deviceModel = parseDeviceModel(body.deviceModel);
-  const releaseId = requireString(body.releaseId, "releaseId");
-  const expectedRevision = requireInt(body.expectedRevision, "expectedRevision");
-  const rollback = body.rollback === true;
-
-  const channel = await env.DB.prepare(
-    "SELECT * FROM firmware_channels WHERE app_id = ? AND device_model = ? AND name = ? LIMIT 1"
-  )
-    .bind(appId, deviceModel, channelName)
-    .first<FirmwareChannelRow>();
-  if (!channel) throw new AdminError("RELEASE_NOT_FOUND", "Firmware channel not found", 404);
-
-  const target = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id = ? LIMIT 1")
-    .bind(releaseId)
-    .first<FirmwareReleaseRow>();
-  if (!target || target.app_id !== appId || target.device_model !== deviceModel) {
-    throw new AdminError("RELEASE_NOT_FOUND", "Firmware release not found", 404);
-  }
-  if (target.state === "disabled") {
-    throw new AdminError("RELEASE_DISABLED", "Disabled firmware release cannot be published", 410);
-  }
-  if (target.archived === 1 || target.r2_state !== "available" || !target.r2_key) {
-    throw new AdminError("ASSET_ARCHIVED", "Firmware R2 asset is not available", 409);
-  }
-
-  if (channel.current_release_id && !rollback) {
-    const current = await env.DB.prepare("SELECT version_code FROM firmware_releases WHERE id = ? LIMIT 1")
-      .bind(channel.current_release_id)
-      .first<{ version_code: number }>();
-    if (current && target.version_code <= current.version_code) {
-      throw new AdminError(
-        "VERSION_REGRESSION",
-        "Publishing a non-rollback firmware versionCode regression is blocked",
-        409
-      );
-    }
-  }
-
-  const beforeJson = canonicalJson(firmwareChannelSnapshot(channel));
-  const afterJson = canonicalJson(firmwareChannelSnapshot(channel, releaseId));
-  const updatedChannel = await env.DB.prepare(
-    `
-      UPDATE firmware_channels
-      SET
-        current_release_id = ?,
-        revision = revision + 1,
-        last_action = ?,
-        last_actor = ?,
-        last_actor_type = 'access',
-        last_request_id = ?,
-        last_before_json = ?,
-        last_after_json = ?,
-        updated_at = datetime('now')
-      WHERE id = ? AND revision = ? AND disable_latest = 0
-      RETURNING revision
-    `
-  )
-    .bind(
-      releaseId,
-      rollback ? "rollback" : "publish",
-      actor.email,
-      actor.requestId,
-      beforeJson,
-      afterJson,
-      channel.id,
-      expectedRevision
-    )
-    .first<{ revision: number }>();
-
-  if (!updatedChannel) {
-    throw new AdminError("CAS_CONFLICT", "Firmware channel revision changed or latest is disabled", 409);
-  }
-
-  await env.DB.prepare(
-    `
-      INSERT INTO audit_logs (
-        id,
-        app_id,
-        actor,
-        actor_type,
-        action,
-        target_type,
-        target_id,
-        request_id,
-        before_json,
-        after_json
-      )
-      VALUES (?, ?, ?, 'access', 'publish_firmware', 'firmware_channel', ?, ?, ?, ?)
-    `
-  )
-    .bind(
-      crypto.randomUUID(),
-      appId,
-      actor.email,
-      channel.id,
-      actor.requestId,
-      beforeJson,
-      afterJson
-    )
-    .run();
-
-  return json({ ok: true, revision: updatedChannel.revision });
-}
-
 async function editReleaseNotes(
   env: AdminEnv,
   actor: Actor,
@@ -940,68 +788,6 @@ async function editReleaseNotes(
       `
     ).bind(actor.email, actor.requestId, beforeJson, afterJson, releaseId)
   ]);
-
-  return json({ ok: true });
-}
-
-async function disableFirmwareRelease(
-  env: AdminEnv,
-  actor: Actor,
-  releaseId: string
-): Promise<Response> {
-  const referenced = await env.DB.prepare(
-    "SELECT id FROM firmware_channels WHERE current_release_id = ? LIMIT 1"
-  )
-    .bind(releaseId)
-    .first<{ id: string }>();
-  if (referenced) {
-    throw new AdminError(
-      "RELEASE_DISABLED",
-      "Published firmware cannot be disabled before moving the channel",
-      409
-    );
-  }
-
-  const release = await env.DB.prepare("SELECT app_id, state FROM firmware_releases WHERE id = ? LIMIT 1")
-    .bind(releaseId)
-    .first<{ app_id: string; state: string }>();
-  if (!release) throw new AdminError("RELEASE_NOT_FOUND", "Firmware release not found", 404);
-
-  const result = await env.DB.prepare(
-    "UPDATE firmware_releases SET state = 'disabled', updated_at = datetime('now') WHERE id = ?"
-  )
-    .bind(releaseId)
-    .run();
-  if (result.meta.changes !== 1) {
-    throw new AdminError("RELEASE_NOT_FOUND", "Firmware release not found", 404);
-  }
-
-  await env.DB.prepare(
-    `
-      INSERT INTO audit_logs (
-        id,
-        app_id,
-        actor,
-        actor_type,
-        action,
-        target_type,
-        target_id,
-        request_id,
-        before_json,
-        after_json
-      )
-      VALUES (?, ?, ?, 'access', 'disable_firmware', 'firmware_release', ?, ?, ?, '{"state":"disabled"}')
-    `
-  )
-    .bind(
-      crypto.randomUUID(),
-      release.app_id,
-      actor.email,
-      releaseId,
-      actor.requestId,
-      canonicalJson({ state: release.state })
-    )
-    .run();
 
   return json({ ok: true });
 }
@@ -1243,7 +1029,7 @@ async function requireAccessActor(
     throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT signature is invalid", 401);
   }
 
-  const email = typeof payload.email === "string" ? payload.email.toLowerCase() : "";
+  const email = typeof payload.email === "string" ? payload.email.trim().toLowerCase() : "";
   if (!email) {
     throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT email is missing", 401);
   }
@@ -1351,7 +1137,7 @@ function json(data: unknown, status = 200, headers?: HeadersInit): Response {
 }
 
 function errorJson(error: unknown, requestId: string): Response {
-  if (error instanceof AdminError) {
+  if (error instanceof AdminError || error instanceof ApiError) {
     return json({ errorCode: error.code, message: error.message, requestId }, error.status);
   }
   const message = error instanceof Error ? error.message : String(error);
@@ -1367,7 +1153,8 @@ function routeSegments(value: string | string[] | undefined): string[] {
 }
 
 function requestIdFrom(request: Request): string {
-  return request.headers.get("X-Request-Id") ?? crypto.randomUUID();
+  const value = request.headers.get("X-Request-Id");
+  return value && /^[A-Za-z0-9._:-]{1,128}$/.test(value) ? value : crypto.randomUUID();
 }
 
 function queryString(url: URL, key: string): string | null {
@@ -1579,7 +1366,13 @@ function bearerToken(request: Request): string | null {
 
 function jsonFromBase64Url(value: string): Record<string, unknown> {
   const text = new TextDecoder().decode(bytesFromBase64Url(value));
-  const parsed = JSON.parse(text) as unknown;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text) as unknown;
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
+    throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT payload is invalid", 401);
+  }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT payload is invalid", 401);
   }
@@ -1589,7 +1382,13 @@ function jsonFromBase64Url(value: string): Record<string, unknown> {
 function bytesFromBase64Url(value: string): Uint8Array {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-  const binary = atob(padded);
+  let binary: string;
+  try {
+    binary = atob(padded);
+  } catch (error) {
+    if (!(error instanceof DOMException) || error.name !== "InvalidCharacterError") throw error;
+    throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT encoding is invalid", 401);
+  }
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) {
     bytes[index] = binary.charCodeAt(index);

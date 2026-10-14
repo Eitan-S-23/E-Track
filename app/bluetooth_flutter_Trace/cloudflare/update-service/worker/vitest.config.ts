@@ -8,6 +8,8 @@ export default defineConfig({
       wrangler: { configPath: "./wrangler.jsonc" },
       miniflare: {
         bindings: {
+          FIRMWARE_V2_CUTOVER_EPOCH: "1780000000",
+          RATE_LIMIT_MAX_REQUESTS: "10000",
           DEPLOY_TOKEN_SHA256:
             "c23a45cfa237db77c09def37bfb4bfc7e263fd92bdbc6663021240f5f788f9b5",
           DOWNLOAD_HMAC_KEY_CURRENT: "test-download-hmac-key",
@@ -21,6 +23,8 @@ export default defineConfig({
     }))
   ],
   test: {
+    include: ["test/*.test.ts"],
+    exclude: ["test/*.host.test.ts"],
     setupFiles: ["./test/apply-migrations.ts"]
   }
 });

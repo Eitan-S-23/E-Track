@@ -24,7 +24,13 @@ export interface WorkerEnv {
   DEPLOY_TOKEN_SHA256?: string;
   DOWNLOAD_HMAC_KEY_CURRENT?: string;
   DOWNLOAD_HMAC_KEY_PREVIOUS?: string;
+  FIRMWARE_V2_CUTOVER_EPOCH?: string;
 }
+
+export type FirmwareStorageEnv = Pick<WorkerEnv, "DB" | "RELEASES_BUCKET">;
+export type FirmwareSigningEnv = Pick<WorkerEnv, "DOWNLOAD_TOKEN_KEY_VERSION" |
+  "DOWNLOAD_TOKEN_PREVIOUS_KEY_VERSION" | "DOWNLOAD_HMAC_KEY_CURRENT" |
+  "DOWNLOAD_HMAC_KEY_PREVIOUS" | "FIRMWARE_V2_CUTOVER_EPOCH">;
 
 export interface AppConfigRow {
   app_id: string;
@@ -96,18 +102,35 @@ export interface FirmwareReleaseRow {
   release_tag: string;
   commit_sha: string;
   run_id: string;
-  state: ReleaseState;
+  state: "draft" | "ready" | "disabled";
   release_notes: string;
+  target_image_sha256: string;
+  hardware_rev: number;
+  layout_id: number;
+  min_boot_version: number;
+  min_protocol_version: number;
+  target_hardware: string;
+  transport: string;
+  min_app_version_code: number;
+  archived: number;
+  registration_json: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FirmwareAssetRow {
+  id: string;
+  release_id: string;
+  kind: "full" | "patch" | "recovery";
   file_name: string;
   sha256: string;
   size_bytes: number;
   r2_key: string | null;
+  r2_etag: string | null;
   r2_state: "not_uploaded" | "available" | "r2_deleted" | "archived";
   github_url: string;
-  target_hardware: string | null;
-  transport: string;
-  min_app_version_code: number;
-  archived: number;
+  base_image_sha256: string;
+  base_vcode: number;
 }
 
 export interface FirmwareChannelRow {
@@ -116,6 +139,7 @@ export interface FirmwareChannelRow {
   device_model: string;
   name: ChannelName;
   current_release_id: string | null;
+  legacy_current_release_id: string | null;
   revision: number;
   disable_latest: number;
   disable_downloads: number;

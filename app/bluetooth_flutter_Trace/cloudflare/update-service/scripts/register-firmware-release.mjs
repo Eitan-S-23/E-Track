@@ -1,73 +1,54 @@
 #!/usr/bin/env node
-
 import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { canonicalJson, parseFirmwareRegistration } from "./firmware-schema.mjs";
+import { CliError, failure } from "./firmware-cli.mjs";
 
-const serviceUrl = process.env.TRACE_UPDATE_SERVICE_URL;
-const deployToken = process.env.TRACE_DEPLOY_TOKEN;
-const metadataPath = process.argv[2] ?? process.env.TRACE_FIRMWARE_METADATA_JSON;
-const registerRetries = parsePositiveInteger(process.env.TRACE_REGISTER_RETRIES ?? "3", "TRACE_REGISTER_RETRIES");
-const registerTimeoutMs = parsePositiveInteger(
-  process.env.TRACE_REGISTER_TIMEOUT_MS ?? "30000",
-  "TRACE_REGISTER_TIMEOUT_MS"
-);
-
-if (!serviceUrl || !deployToken || !metadataPath) {
-  process.stderr.write(
-    "Usage: TRACE_UPDATE_SERVICE_URL=<url> TRACE_DEPLOY_TOKEN=<token> node scripts/register-firmware-release.mjs metadata.json\n"
-  );
-  process.exit(2);
-}
-
-const metadata = JSON.parse(await readFile(metadataPath, "utf8"));
-const response = await fetchWithRetry(new URL("/api/ci/firmware/releases", serviceUrl), {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${deployToken}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(metadata)
-});
-
-const body = await response.text();
-if (!response.ok) {
-  process.stderr.write(`Cloudflare firmware candidate registration failed: HTTP ${response.status}\n`);
-  process.stderr.write(`${body}\n`);
-  process.exit(1);
-}
-
-process.stdout.write(`${body}\n`);
-
-async function fetchWithRetry(url, init) {
-  let lastError;
-  for (let attempt = 1; attempt <= registerRetries; attempt += 1) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), registerTimeoutMs);
+export async function registerFirmware(metadata, { serviceUrl, deployToken, fetcher = fetch, retries = 3, timeoutMs = 30000 }) {
+  if (!serviceUrl || !deployToken) throw new CliError("Service URL and deploy token are required");
+  const url = new URL(serviceUrl);
+  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) throw new CliError("Registration requires a credential-free HTTPS origin");
+  if (!Number.isInteger(retries) || retries < 1 || retries > 3 || !Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30000) {
+    throw new CliError("Invalid registration retry/timeout bounds");
+  }
+  const input = parseFirmwareRegistration(metadata);
+  const requestId = crypto.randomUUID();
+  for (let attempt = 0; attempt < retries; attempt++) {
+    let response;
     try {
-      return await fetch(url, { ...init, signal: controller.signal });
-    } catch (error) {
-      lastError = error;
-      if (attempt >= registerRetries) break;
-      const delayMs = 1500 * attempt;
-      process.stderr.write(`Cloudflare firmware registration attempt ${attempt} failed; retrying in ${delayMs}ms...\n`);
-      await sleep(delayMs);
-    } finally {
-      clearTimeout(timeout);
+      response = await fetcher(new URL("/api/ci/firmware/releases", url), { method: "POST", redirect: "error",
+        signal: AbortSignal.timeout(timeoutMs), headers: { Authorization: `Bearer ${deployToken}`,
+          "Content-Type": "application/json", Accept: "application/json", "X-Request-Id": requestId },
+        body: canonicalJson(input) });
+    } catch {
+      if (attempt + 1 < retries) continue;
+      throw new CliError("Registration network request failed", "BACKEND_UNAVAILABLE", 1);
     }
+    // An HTTP response (including 503/409) is definitive: never blindly retry it.
+    if (![200, 201].includes(response.status)) {
+      const error = await response.json().catch(() => null);
+      const allowed = ["INVALID_PARAMETER", "FORMAL_RELEASE_REQUIRED", "RELEASE_CONFLICT", "RELEASE_INCOMPLETE",
+        "TOKEN_INVALID", "TOKEN_EXPIRED", "RATE_LIMITED", "BACKEND_UNAVAILABLE"];
+      const code = allowed.includes(error?.errorCode) ? error.errorCode : "BACKEND_UNAVAILABLE";
+      throw new CliError(`Registration rejected: HTTP ${response.status}`, code, 1, requestId);
+    }
+    const result = await response.json();
+    if (result.ok !== true || result.state !== "ready" || typeof result.releaseId !== "string" || !result.releaseId
+      || result.assetsRegistered !== input.assets.length || typeof result.requestId !== "string"
+      || result.requestId !== response.headers.get("X-Request-Id")
+      || result.idempotent !== (response.status === 200)) throw new CliError("Invalid registration result", "BACKEND_UNAVAILABLE", 1);
+    return result;
   }
-  throw lastError;
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
+async function main() {
+  const input = process.argv[2] ?? process.env.TRACE_FIRMWARE_METADATA_JSON;
+  if (!input || process.argv.length > 3) throw new CliError("Provide one firmware metadata path");
+  const result = await registerFirmware(JSON.parse(await readFile(input, "utf8")), {
+    serviceUrl: process.env.TRACE_UPDATE_SERVICE_URL, deployToken: process.env.TRACE_DEPLOY_TOKEN,
+    retries: Number(process.env.TRACE_REGISTER_RETRIES ?? "3"), timeoutMs: Number(process.env.TRACE_REGISTER_TIMEOUT_MS ?? "30000")
   });
+  process.stdout.write(JSON.stringify(result) + "\n");
 }
-
-function parsePositiveInteger(value, fieldName) {
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isInteger(parsed) || parsed < 1 || String(parsed) !== String(value)) {
-    process.stderr.write(`${fieldName} must be a positive integer\n`);
-    process.exit(2);
-  }
-  return parsed;
-}
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch(failure);

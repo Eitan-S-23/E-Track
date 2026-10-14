@@ -10,6 +10,7 @@ import {
   handleRegisterFirmwareRelease
 } from "./firmware";
 import { handleLatest } from "./latest";
+import { cleanupFirmwareIdempotency } from "./firmware_admin";
 import type { WorkerEnv } from "./types";
 
 export { RateLimiter } from "./rate_limiter";
@@ -79,5 +80,8 @@ app.notFound(() => json({ errorCode: "NOT_FOUND", message: "Not found" }, 404));
 app.onError((error, c) => errorJson(error, c.get("requestId") ?? crypto.randomUUID()));
 
 export default {
-  fetch: app.fetch
+  fetch: app.fetch,
+  async scheduled(_event, env) {
+    await cleanupFirmwareIdempotency(env.DB);
+  }
 } satisfies ExportedHandler<WorkerEnv>;

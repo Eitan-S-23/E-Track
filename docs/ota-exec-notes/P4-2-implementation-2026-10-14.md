@@ -1,0 +1,410 @@
+# P4-2 Implementation And Development Self-Tests
+
+## Ownership And Baseline
+
+- Role: implementation only. The canonical Spec remains
+  `docs/ota-prompts/prompt-P4-2-implementation.md` and its frozen OTA-XC clauses.
+- Rechecked main/R HEAD: `7e71f694bcf97c78bcfde9e3220dcf399d99f1a0`.
+- S is on `archive/p34-root-before-delivery-20261014` at
+  `cb317affcd291695f42271084b4b305b0d7e6f8b`, with existing user changes.
+- R has no tracked changes and retains existing untracked P3-4 originals.
+- Writable worktree: `D:/github/my/E-Track/.cache/p4-2-implementation`.
+- Exclusive branch: `p4-2-implementation-20261014`, created from the exact main
+  commit above. No commit, push, CI, deployment, remote D1/R2 or device operation
+  is authorized by this handoff. S/R are read-only inputs.
+- Worktree registration is the only shared Git write: the dedicated branch
+  ref/reflog and `.git/worktrees/p4-2-implementation`. Checkout hooks and LFS
+  smudging were disabled for that command; no shared configuration was changed.
+- P3-4 completion, frozen originals, failures, device pause and 3/3 are unchanged.
+
+## Bounded Reconciliation
+
+| ID | Classification | Original / finding | Disposition |
+| --- | --- | --- | --- |
+| P42-01 | Reusable | `0001`-`0004`, Worker/Hono routing, R2 bindings, crypto primitives, Vitest Workers pool, Access facade | Extend these entries, not a new backend or acceptance platform. |
+| P42-02 | Missing on main | `0003` and `firmware.ts` are single-asset/schema v1; no P4-named branch, migration or implementation note found | Add forward migration, verified backfill and schema v2. Do not edit `0003`. |
+| P42-03 | Existing, needs repair | register compares only run/commit; uploader performs unconditional put and can mark dry-run/skip-readback verified | Full canonical comparison, actual R2 verification and immutable upload. `--force` itself only skips a catalog prompt. |
+| P42-04 | Missing on main | typed latest compatibility/selection, firmware token v2/Range, owner recovery, durable idempotency/tombstones | Implement within firmware backend. No Flutter/MCU/P4-3 UI changes. |
+| P42-05 | Existing, needs repair | firmware publish/update and audit are separate statements; candidate gate, single-asset reads | Adapt the existing facade and enforce ready/CAS/atomic audit. |
+| P42-06 | Not reconciled remotely | Actual legacy D1 rows, approved manifests, R2 originals, cutover epoch and deployed bindings | NOT_RUN remotely; do not infer authority or identity from local defaults. |
+
+The bounded `git log --all` search found only historical P3-3 references to P4-2,
+not a P4-2 implementation. P3-3 controlled-service evidence is not proof of the
+real P4-2 D1/R2 backend. No historical OTA is being repeated.
+
+## Development Route
+
+No `.trellis` exists on this main. Loaded start/before-dev, Cloudflare, Workers
+best-practices and Wrangler skills, collaboration and acceptance contracts
+(especially sections 0 and 7.3), app AGENTS, P4-2 Spec and its shared clauses.
+Cloudflare's current D1 documentation confirms that a failed `DB.batch` rolls
+back the complete sequence; implementation will use this existing API.
+
+The existing test entry is Worker `npm run check` / `npm test`, using real local
+workerd D1/R2 and `applyD1Migrations`. Local SQLite migration/script tests will
+supplement it. No mock will substitute for SQL constraint observations.
+
+The existing output guard is PowerShell-only; this session forbids its startup
+writes. `.cache/local-run.cjs` is a thin invocation/logging adapter, not a new
+acceptance runner: it calls the existing Node/npm entry points and confines
+HOME/APPDATA/LOCALAPPDATA/TEMP/TMP/npm/Wrangler/Vite outputs to this worktree.
+Dependency lifecycle scripts are initially disabled. Test logs and exit receipts
+are append-only per run label under `.cache/p4-2-logs/`.
+
+## Implemented Batch And Source Identity
+
+The local implementation batch is ready for independent code/evidence review.
+This is not a formal PASS or a P4-2 completion decision. The unchanged task board
+and readiness remain authoritative; this note does not change them.
+
+- Implementation commit: NOT_CREATED. This handoff grants no staging/commit/push
+  permission. HEAD and main still equal the baseline above; HEAD alone is NOT
+  the identity of the modified source.
+- Branch: `p4-2-implementation-20261014`.
+- Working-source binding: 35 changed/new backend files, plus this task note.
+- Backend fingerprint:
+  `bb25c276f21a93d273c97c567841d01cc6b7d8fa8520217d83a5380b95d3427e`.
+  Method: sort backend paths, concatenate each path + NUL + its raw-file SHA-256
+  + LF, then SHA-256. The full per-file inventory, baseline, command identities
+  and log hashes are in `.cache/p4-2-delivery/final/source-identity.json`.
+- The tracked diff is `.cache/p4-2-delivery/final/source.diff`; new files are
+  explicitly listed and hashed in the inventory and remain in this worktree.
+  The diff alone does not include untracked files.
+- `0003_firmware_releases.sql` remains unchanged. No workflow, MCU, Flutter,
+  P3-4 evidence, acceptance contract, device lock, production channel or frozen
+  governance file was edited.
+
+The minimal additional routing glue is `worker/src/index.ts` plus the hourly
+Cron in `worker/wrangler.jsonc`, necessary for the Spec's idempotency cleanup.
+TypeScript/test config changes enable the shared JSON fixture and explicit host
+test route. They are not new release/CI permissions or P4-3 channel features.
+
+## Spec Coverage And Remaining Gaps
+
+Paths below are relative to `app/bluetooth_flutter_Trace/cloudflare/update-service/`.
+
+| Criteria / clauses | Implementation and reusable input | Development evidence / remaining gap |
+| --- | --- | --- |
+| Forward migration, release/asset/state, R8 SQL invariants; `D1-RELEASE`, `D1-ASSET`, `D1-STATE` | New `migrations/0005_firmware_multi_asset.sql`; existing `0001`-`0004` preserved | Real SQLite rejects duplicate full/base patch/recovery, NULL/invalid base, no-full ready, invalid pointer and unverified ready. No remote D1 execution. |
+| Legacy migration/identity and reentry; `D1-MIGRATION`, `INFO-MAPPING`, `IMAGE-IDENTITY` | Immutable `_legacy` originals, unresolved channel marker; `scripts/backfill-firmware-v2.mjs` | Empty/populated schema, byte-bound manifest/R2/raw-image/evidence checks, ready/draft/disabled mapping, preserved timestamps/revision, replay and atomic failure tested. Actual remote rows/manifests remain unreconciled, not guessed. |
+| v2 fixture/register; `SCHEMA-FIXTURE`, `RELEASE-METADATA`, `HTTP-REGISTER`, `IDEMPOTENCY`, `UNKNOWN-FIELDS` | Versioned `worker/test/fixtures/firmware-release-v2.json`, shared `scripts/firmware-schema.mjs`, `worker/src/firmware.ts` | Three assets, full canonical comparison, unknown/invalid fields, R2 size/metadata/body mismatch, 20 concurrent replays, audit failure rollback. Existing 17 non-firmware invariants retained. |
+| Latest selection/compatibility; `CLOUD-QUERY-MAPPING`, `HTTP-LATEST`, `ASSET-SELECTION` | `worker/src/firmware.ts`; no changed Flutter/MCU protocol | Patch by complete raw SHA, full fallback, no update, App/hardware/layout/Boot/protocol errors, invalid/corrupted data, independent stop flags; recovery hidden. |
+| Download/token/resume/errors; `HTTP-DOWNLOAD`, `HTTP-RESUME`, `HTTP-ERROR` | `worker/src/firmware_download.ts`, shared crypto/error/http primitives | Frozen 67-byte HMAC golden, exact query/actual-kind/purpose, exclusive expiry, previous key, bounded v1, headers/digest/Range/If-Range/416, archive/retract/stop. Native R2/DigestStream runtime observation is still unavailable. |
+| Owner recovery and Admin idempotency; `HTTP-ADMIN`, `ADMIN-IDEMPOTENCY`, `D1-AUDIT` | Existing Access facade delegates to `worker/src/firmware_admin.ts`; same-origin/CSRF/owner remain required | Real test RSA JWT verification; role/origin/CSRF/expiry rejection; recovery state/R2 checks; first/replay/20 concurrent results; pending commit rejection; exact 300/86400 boundaries; tombstone-first cleanup races and rollback. JWKS/R2 are test doubles, not live Access/R2. |
+| Ready publish, CAS, regression and atomic audit; `D1-CHANNEL` | Existing publish backend, D1 pointer/revision/audit triggers | Draft/stale/equal-or-lower version rejected, audit failure leaves pointer/revision unchanged, referenced release cannot disable; legacy pointer version also participates in the existing non-regression guard. P4-3 UI/retract/stop/resume routes are not implemented here. |
+| Metadata/upload/register scripts; `R2-UPLOAD`, `R2-IMMUTABILITY`, `RELEASE-METADATA` | Shared schema, final-image raw hashing, conditional Wrangler R2 binding put, HEAD plus byte readback | Real builder/dry-run CLI exit codes; conditional race, collision, false-positive put/readback, no skip-readback verification; real handler/SQLite client registration. Remote Wrangler proxy path has NOT_RUN status. |
+| Retention and audit preservation; `D1-RETENTION` | No firmware deletion API; immutable identity and no-delete release/asset/audit/tombstone triggers | No R2/GitHub cleanup, production state mutation or retention campaign was run. The hourly cleanup removes only expired Admin response bodies after permanent key guards. |
+
+The base firmware backend originated in existing tracked code; it was not rebuilt
+as a new service. The small host adapter exists because both installed and isolated
+official workerd binaries fail before loading tests on this Windows host. It runs
+the same business modules and actual SQLite, not an in-memory constraint mock.
+R2/KV/DO and the Cloudflare DigestStream extension are explicitly platform doubles.
+Do not label this result `D1 EXECUTED PASS`, a remote rehearsal, or independent
+acceptance. Corrupt-read-model tests temporarily disable local SQL guards and
+restore them; separate real SQL tests prove the guards reject those writes.
+
+## Commands And Original Outputs
+
+Environment: Windows 10.0.19045, Node `v24.13.0`, npm `11.6.2`, TypeScript `6.0.3`,
+Vitest `4.1.9`, local SQLite `3.50.4`, Wrangler `4.105.0`. Lockfiles were not changed.
+All commands used `cmd.exe`, `login:false`, with explicit cwd under this worktree.
+No Python, PowerShell, local Flutter build, device tool or remote account command
+was executed. npm dependency installs used `--ignore-scripts --no-audit --no-fund`.
+
+All original stdout/stderr is retained in `.cache/p4-2-logs/<label>.log`; the paired
+JSON records exact executable/arguments, cwd, start/end and exit code. Paths below
+are relative to this worktree. Counts are actual test output, not accumulated
+across repeated targeted runs.
+
+| Command / cwd | Exit / actual result | Full log |
+| --- | --- | --- |
+| `npm run check`, Worker | 0, final typecheck | `.cache/p4-2-logs/final-worker-check.log` |
+| `npm run check`, admin | 0 | `.cache/p4-2-logs/admin-check-3.log` |
+| `npm run check`, public | 0 | `.cache/p4-2-logs/public-check-3.log` |
+| `npm test -- --config test/vitest.host.config.ts`, Worker | 0; 5 files, 172 passed, 0 failed/skipped | `.cache/p4-2-logs/final-host-tests.log` |
+| Standard `npm test`, Worker baseline | 1; 0 tests executed, 1 runtime startup error | `.cache/p4-2-logs/baseline-tests.log` |
+| New official runtime, targeted existing CAS probe | 1; 0 tests executed, same startup failure | `.cache/p4-2-logs/new-runtime-probe.log` |
+| `git diff --check` plus all new/changed-file whitespace scan | 0; no whitespace violations | `.cache/p4-2-delivery/final/git-diff-check.log` and source inventory |
+
+The final host run contains 18 existing/updated invariant cases, 85 firmware/SQL
+cases, 35 Admin cases, 17 migration/backfill cases and 17 script cases. The schema
+dump, actual `SQL_REJECT` exceptions, before/after backfill samples, negative HTTP
+cases and CLI 0/2 results are in that complete log. Five SQLite experimental
+warnings are retained, not hidden. Git emits 14 LF-to-CRLF conversion warnings;
+these are recorded and not whitespace errors. Typechecks have no diagnostics.
+
+Earlier targeted successes remain under labels `firmware-host-1` (97),
+`admin-host-1` (30), `migration-host-1` (15), `scripts-host-1` (17), and
+`guards-host-1` (119). They are development iterations, not additional acceptance
+rounds or numbers to add to 172. Earlier typecheck failures are also retained:
+test helper types and the shared streaming-hash typing were repaired, then all
+three package checks passed. No test was weakened or failure output deleted.
+
+The normal runtime uses `workerd 1.20260625.1`. The isolated official
+`1.20261014.1` under `.cache/workerd/` also failed with `0xc0000005`; the latter
+also reported a native stack overflow. The pre-existing `docs/STAGING-SETUP.md`
+documents the Windows failure. Neither run reached D1 migrations or any test.
+This is an environment limitation, not a passing Worker runtime test. No global
+runtime/VC installation or CI bypass was attempted.
+
+## External And Follow-On Work
+
+| ID | Status / owner | Bounded next action and oracle |
+| --- | --- | --- |
+| P42-EXT-01 | NOT_RUN; root + independent reviewer | Under actual CI/host authority, run the unchanged normal Worker test route with a working workerd. Verify real D1 batch/deferred-FK semantics and R2/DigestStream integration, preserving this source binding. No device/OTA replay is needed. |
+| P42-EXT-02 | NOT_RUN; Cloudflare migration owner + OTA reviewer | Obtain actual legacy rows, immutable artifacts/evidence and approved manifest digest. Resolve every published legacy pointer before activating canonical reads; never invent missing identity. |
+| P42-EXT-03 | NOT_RUN; root/Cloudflare owner | Select actual fixed cutover epoch, public origin and shared signing bindings. Perform bounded authorized real D1/R2/Access checks and uploader readback; no local fixture claims remote effectiveness. |
+| P42-NEXT-01 | P4-1, not a P4-2 dependency | Adapt `.github/workflows/firmware-build.yml` and `mcu-firmware-release.yml` v1 CLI calls to the shared array fixture and required identity inputs, then the authorized rehearsal. No workflow was edited or dispatched here. |
+| P42-NEXT-02 | P4-3 | Consume the new read/publish/disable backend shapes and implement its own UI/retract/stop/resume interactions. Do not restore the old rollback flag or bypass ready/CAS. |
+| P42-NEXT-03 | Root + independent reviewer | Review this bounded uncommitted batch, authorize any commit/integration separately, then freeze/admit formal execution if required. This implementation note is not its own approval. |
+
+## Output And Write Audit
+
+Normal controllable outputs were confined to this worktree: source/docs,
+`worker/admin/public/node_modules`, Worker `.wrangler`/Vite outputs, and `.cache/`
+subdirectories for npm, HOME/APPDATA/LOCALAPPDATA, temp, Wrangler logs/state, Node
+compile cache, downloaded official type/runtime packages, test fixtures, complete
+logs and delivery inventories. No existing S/R file was reset, cleaned or copied
+over. Shared Git writes were limited to the approved dedicated worktree/branch
+registration. Main was rechecked at the original SHA; R remains tracked-clean,
+and the S backend has no diff. Known crash-dump/WER locations contain no observed
+new node/workerd report from these probes. The audit is not based on Git alone.
+
+**P42-WRITE-01: unauthorized external side effect, reported, not cleaned.**
+
+- Exact new file:
+  `D:/DevCache/npm/_logs/2026-10-14T09_47_43_168Z-debug-0.log`.
+- Size: 983 bytes. SHA-256:
+  `5e8050d938c9755783ca1cb7b1da233107fc3c2ce633ba695fb5abe04baac873`.
+- Cause: an intended read-only Node audit expression was passed to cmd without
+  protecting regex `|` characters. cmd made a pipeline and invoked npm outside
+  the contained runner. npm used the user's pre-existing `cache=D:/DevCache/npm`.
+- The log also reports `start cleaning logs, removing 1 files`. It records neither
+  target nor completion. The attempted cleanup boundary is
+  `D:/DevCache/npm/_logs/`; the exact old target and deletion outcome cannot be
+  established from the available observation. No earlier file list was captured,
+  so no claim of zero deletion or guessed restoration is made.
+- The incident was disclosed immediately after confirming the new file. No
+  subsequent agent write, move, cleanup or overwrite occurred in that external
+  directory. The file remains there awaiting an explicit, exact-path decision.
+  Recommended action: retain the copy below for audit; root/user may separately
+  authorize removal of this one new log. Do not widen this into cache cleanup or
+  fabricate recovery of an unidentified prior log.
+- Exact original copied, read-only from the external source, into
+  `.cache/p4-2-delivery/final/external-npm-log.original.txt`. The final
+  `.cache/p4-2-delivery/final/output-audit.json` records the incident, controlled
+  path scans and known external checks. This session therefore does NOT claim a
+  clean write-boundary audit.
+
+All shell-sensitive audit logic subsequently ran from an inspected, project-local
+script instead of inline cmd expressions. This mitigation does not erase or
+retroactively authorize P42-WRITE-01. P3-4 conclusions/failures/frozen originals,
+device pause and the cumulative 3/3 remain unchanged.
+
+## P42-REVIEW-01 Remediation (2026-10-14)
+
+Disposition: DECIDED, required repair implemented and development-self-tested;
+independent recheck is pending. This is not formal PASS or P4-2 completion.
+The sole Spec and readiness remain unchanged.
+
+### Basis And Minimal Change
+
+The independent original is
+`.cache/p4-2-independent-review-20261014/review.md`. Its seven executed probes
+remain five passed and two failed on the original source. Neither that probe,
+its config/cache, its audit, nor either failed invocation log was edited or
+rerun. The original 172-test result above remains historical, not a result for
+this changed source.
+
+The defect violated `OTA-XC-HTTP-ERROR` and `OTA-XC-HTTP-ADMIN`: malformed JWT
+Base64URL and decoded JSON escaped to the generic backend-error handler.
+The repair changes only two backend files relative to the reviewed batch:
+
+- `admin/functions/api/admin/[[path]].ts`: `jsonFromBase64Url()` translates only
+  JSON `SyntaxError`; `bytesFromBase64Url()` translates only the Base64 decoder's
+  `DOMException` named `InvalidCharacterError`. Both return generic 401
+  `TOKEN_INVALID` messages without reflecting the assertion. Unexpected
+  exceptions are rethrown. No catch was added around `requireAccessActor()`,
+  JWKS fetch/JSON/key import, signature verification, or database work.
+- `worker/test/firmware-admin.test.ts`: adds the two exact failing input classes
+  and the five independent controls to the existing Pages-entry tests. Each
+  asserts 401, `TOKEN_INVALID`, no credential/detail/download URL, matching
+  request IDs, no fetch, and no D1 prepare. Five further regression cases cover
+  invalid signatures, JWKS HTTP/JSON/network failures, and unexpected decoder
+  failure. Existing valid signed JWT, replay, expiry, role, origin, CSRF and
+  business tests are retained. JWKS failure tests expire the local JWKS cache
+  before observing the fetch, rather than passing against a cached key.
+
+The wrong fix would blanket-map authentication exceptions to 401. The preserved
+oracle is: malformed input -> 401 `TOKEN_INVALID`; valid-but-expired JWT -> 401
+`TOKEN_EXPIRED`; genuine JWKS/backend/runtime failures -> 503
+`BACKEND_UNAVAILABLE`. No authentication bypass or unauthorized business effect
+was observed in this development batch.
+
+### Source And Difference Binding
+
+- Rechecked worktree/branch: `D:/github/my/E-Track/.cache/p4-2-implementation`,
+  `p4-2-implementation-20261014`.
+- HEAD and main are still `7e71f694bcf97c78bcfde9e3220dcf399d99f1a0`.
+  No stage, commit, push, CI, deployment, device or remote D1/R2 action occurred.
+- Prior backend fingerprint:
+  `bb25c276f21a93d273c97c567841d01cc6b7d8fa8520217d83a5380b95d3427e`.
+- New backend fingerprint, using the same sorted-path/raw-SHA method:
+  `b1514a2130e60be59d4cbb05f4d1a8677a19e377376cc97d2cf67272e362954a`.
+- Before/after inventories:
+  `.cache/p4-2-delivery/p42-review-01-before/source-identity.json` and
+  `.cache/p4-2-delivery/p42-review-01-after/source-identity.json`.
+- Focused diffs: `.cache/p42-review-01/admin-fix.diff` and
+  `.cache/p42-review-01/tests-fix.diff`. Both were generated with
+  `git --no-optional-locks diff --no-index --no-ext-diff --no-textconv` from
+  preserved before-files to the corresponding working files. Exit 1 denotes
+  differences, not a failed test. Their paired `*.stderr.log` files preserve
+  the two LF-to-CRLF warnings per command.
+- `.cache/p42-review-01/admin-before.ts`, `tests-before.ts` and `note-before.md`
+  retain the exact pre-repair bytes. This section is appended to the existing
+  task note; the original note prefix is not rewritten.
+
+### Development Commands And Results
+
+Environment remains Node `v24.13.0`, npm `11.6.2`, TypeScript `6.0.3`, Vitest
+`4.1.9`, SQLite `3.50.4`, on the same Windows host. No dependency or lockfile
+change was needed. Each command ran through the unchanged `.cache/local-run.cjs`
+adapter, with `cmd.exe`, `login:false`, explicit package cwd, contained outputs
+and a unique log label. Exact executable/arguments/cwd/timestamps/exit codes are
+in the JSON receipt beside each full stdout/stderr log.
+
+| Command / package cwd | Exit / actual count | Full log under `.cache/p4-2-logs/` |
+| --- | --- | --- |
+| `npm run check`, Admin | 0; no diagnostics | `p42-review-01-admin-check.log` |
+| `npm run check`, Worker | 0; no diagnostics | `p42-review-01-worker-check.log` |
+| `npm run check`, Public | 0; no diagnostics | `p42-review-01-public-check.log` |
+| `npm test -- --config test/vitest.host.config.ts --cache=false test/firmware-admin.test.ts`, Worker | 0; 1 file, 47 passed, 0 failed/skipped | `p42-review-01-admin-tests.log` |
+| `npm test -- --config test/vitest.host.config.ts --cache=false`, Worker | 0; 5 files, 184 passed, 0 failed/skipped | `p42-review-01-host-tests.log` |
+
+The full 184 includes the original 172 plus 12 added Admin cases; do not add the
+targeted 47 to that total. One SQLite experimental warning in the targeted run
+and five in the full run are retained. `--cache=false` avoids replacing cached
+test-result records; original logs/receipts remain untouched. These tests still
+use real SQLite and production handlers with the disclosed platform doubles,
+not native workerd/D1/R2/Access evidence.
+
+### Preserved Evidence And Remaining Work
+
+`.cache/p42-review-01/protected-inputs.json` compares the original source/log
+inventory, the unchanged runner and original diff, and every artifact in the
+independent review audit. Only the two authorized source files and this appended
+note differ from the original 65 inputs; their original bytes are preserved in
+the before-files. All 27 original developer logs and all eight independently
+hashed review artifacts remain byte-identical. The old note prefix also matches.
+
+The final controlled-output scan is
+`.cache/p4-2-delivery/p42-review-01-after/output-audit.json`. New selected outputs
+are the local before-files, focused diffs, preservation check, five new logs and
+receipts, before/after inventories, and normal contained npm/Node/Vite/fixture
+outputs. There were no shared Git metadata writes in this repair turn. S/R,
+`0003`, workflows, contracts, device state and P3-4 originals were not modified.
+
+P42-WRITE-01 remains disclosed and unresolved: the external npm log is unchanged
+at its recorded 983 bytes/SHA-256 and was only read. No cleanup was attempted;
+the older log deletion outcome remains unknown. This repair does not turn the
+earlier write-boundary exception into a clean-audit claim.
+
+P42-EXT-01/02/03 remain open. Standard Worker tests were NOT_RUN in this repair:
+the two saved host probes already fail before test execution, and this task has
+no P4-2 commit/push/CI authority. The next authorized native check must reuse
+`.github/workflows/cloudflare-update-service.yml` on the exact reviewed source;
+no new workflow or acceptance runner was added. Actual legacy rows/manifests,
+remote D1/R2/Access/uploader behavior and deployment configuration still require
+their bounded authorized observations. No remote success is claimed.
+
+Next owner: the current independent reviewer rechecks P42-REVIEW-01 against the
+new fingerprint, focused diff and actual logs. Root retains the separate
+commit/push/CI/environment decisions. P3-4 closure and the cumulative 3/3 do not
+change, and no device replay is requested.
+
+## Independent Recheck And Checks-Only Delivery (2026-10-14)
+
+### P42-REVIEW-01 Closed
+
+The same independent reviewer verified the focused repair on backend fingerprint
+`b1514a2130e60be59d4cbb05f4d1a8677a19e377376cc97d2cf67272e362954a`.
+The unchanged original probe passed 7/7; seven selected authentication/backend
+controls also passed, with 40 unrelated cases intentionally unselected. The
+developer's 47/47, 184/184 and three typechecks were independently reconciled;
+these counts are not added together. No new finding was identified in the
+bounded repair. P42-REVIEW-01 is CLOSED for the local code/evidence scope, not a
+formal P4-2 PASS.
+
+Original independent records remain unchanged. The recheck addendum and audit
+are `.cache/p4-2-independent-review-20261014/p42-review-01-recheck.md` and
+`p42-review-01-recheck-audit.json`; the latter verifies 79 protected entries.
+New command originals are
+`.cache/p4-2-logs/p42-review-01-independent-recheck-01.*` and
+`.cache/p4-2-logs/p42-review-01-independent-controls-01.*`.
+
+### User Authorization: P42-GIT-CI-20261014
+
+The user explicitly reiterated full authorization, and then reiterated that
+execution must continue unless user intervention is genuinely necessary, in
+response to the proposal to commit/push the dedicated P4-2 branch and run the
+existing backend checks. This is actual P4-2 authority, not an inference from
+the older P3-4 authorization. Do not ask again for the same scoped operations,
+ordinary command continuation, or a new agent/turn.
+
+The authorized checks-only scope is:
+
+- Preserve and commit the reviewed P4-2 implementation, tests, and necessary
+  task/review/CI records on `p4-2-implementation-20261014`.
+- Push that dedicated branch to `Eitan-S-23/E-Track` with the existing
+  `Eitan-S-23` GitHub identity, and run
+  `.github/workflows/cloudflare-update-service.yml` on the exact branch revision.
+- Inspect and archive actual CI results, continue necessary same-scope checks
+  and record updates, and consolidate any real failures for the implementation
+  owner. A failed check is not permission to weaken it or to claim completion.
+- Write within `D:/github/my/E-Track/.cache/p4-2-implementation` and perform the
+  necessary dedicated-branch/index/object/ref/log operations in the shared
+  `D:/github/my/E-Track/.git` metadata. Preserve other worktrees and their indexes.
+
+This step does not merge main, deploy/publish, operate a device, add an OTA,
+rewrite history, change global configuration or credential scopes, clean
+external files, or mutate real remote D1/R2/Access resources. P3-4 closure,
+historical failures and originals, device pause and 3/3 remain unchanged.
+P42-WRITE-01 remains disclosed; the external npm log is not cleaned and the old
+log deletion result remains unknown.
+
+The operation record is `.cache/p4-2-git-ci-20261014/`. Its baseline preserves
+the pre-append task note and protected source/log/shared-metadata identities.
+It reuses the existing contained host process/receipt primitives only, not any
+device or OTA entry. Existing Git safety hooks remain enabled; automated
+external notification/API environment variables are removed for these commands.
+No new workflow, competing Spec, approval system or acceptance runner is needed.
+
+At this entry, commit/push/native CI have not yet executed. Their actual results
+will be appended below. P42-EXT-01/02/03 and P4-2 completion remain open until
+their respective evidence and applicability checks are satisfied.
+
+### Session Continuation And Staging Repair
+
+At 2026-10-14 23:12 Asia/Shanghai, the user-authorized continuation session
+verified the exact original cc-connect session through its native bridge. The
+normal stop command returned `No execution in progress`; the original writer
+lock was readable and all four prior Git/CI command receipts were closed. The
+continuation session now owns the remaining checks-only Git/CI steps, without
+starting a second writer or changing the original session ID/history. Local
+control receipts are `.cache/p42-session-resume-20261014/`. No daemon restart,
+configuration edit, device action, deployment or main merge was performed.
+
+The initial isolated Git environment omitted the system `core.autocrlf=true`
+setting. The staged Wrangler file consequently retained mixed line endings and
+`staged-whitespace` failed. The original owner added explicit command-local
+`core.autocrlf=true`; the continuation used `git add --renormalize` on the same
+36-path inventory. `staged-whitespace-normalized` then passed. This changes only
+the selected index representation, not the reviewed worktree source bytes or
+any global Git setting. The initial failure and both staging receipts remain.
+
+The original baseline's 35 backend files and all protected log/review files
+still match their recorded hashes. Only the already-authorized task-note append
+differs; the five shared metadata files and seven external config/hook inputs
+also match. The user reiterated full authorization to continue this session's
+work; the existing checks-only boundary and open external observations remain.

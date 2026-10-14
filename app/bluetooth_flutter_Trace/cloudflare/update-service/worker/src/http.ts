@@ -15,6 +15,7 @@ export function errorJson(error: unknown, requestId: string): Response {
   if (error instanceof ApiError) {
     return json(
       {
+        ...error.details,
         errorCode: error.code,
         message: error.message,
         requestId
@@ -46,7 +47,8 @@ export function withRequestId(response: Response, requestId: string): Response {
 }
 
 export function requestIdFrom(request: Request): string {
-  return request.headers.get("X-Request-Id") ?? crypto.randomUUID();
+  const value = request.headers.get("X-Request-Id");
+  return value && /^[A-Za-z0-9._:-]{1,128}$/.test(value) ? value : crypto.randomUUID();
 }
 
 export function clientIpFrom(request: Request): string {

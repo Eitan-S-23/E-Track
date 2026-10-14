@@ -1,656 +1,238 @@
 import { ApiError, backendUnavailable, invalidParameter } from "./errors";
-import { verifyBearerToken } from "./crypto";
+import { sha256Hex, verifyBearerToken } from "./crypto";
 import { clientIpFrom, json } from "./http";
-import { writeLog } from "./logger";
 import { enforceRateLimit } from "./rate_limiter";
-import { signDownloadToken, verifyDownloadToken } from "./downloads";
-import { optionalString, parseChannel, requireInt, requireSha256, requireString } from "./validation";
-import type { ChannelName, FirmwareChannelRow, FirmwareReleaseRow, WorkerEnv } from "./types";
+import { signFirmwareDownload, streamFirmwareObject, verifyFirmwareDownload, verifyFirmwareObject } from "./firmware_download";
+import { APP_VERSION_MAX, FIRMWARE_MODEL, FirmwareSchemaError, U32_MAX, canonicalJson,
+  parseFirmwareRegistration } from "../../scripts/firmware-schema.mjs";
+import type { FirmwareRegistration } from "../../scripts/firmware-schema.mjs";
+import type { FirmwareAssetRow, FirmwareChannelRow, FirmwareReleaseRow, WorkerEnv } from "./types";
 
-const FIRMWARE_LATEST_QUERY_PARAMS = new Set([
-  "appId",
-  "deviceModel",
-  "channel",
-  "currentVersion",
-  "currentVersionCode"
-]);
+const QUERY = ["appId", "deviceModel", "channel", "currentVersionCode", "currentImageSha",
+  "hardwareRevision", "layoutId", "bootVersion", "protocolVersion", "appVersionCode"];
 
-interface RegisterFirmwareReleaseRequest {
-  appId: string;
-  deviceModel: string;
-  releaseTag: string;
-  runId: string;
-  commitSha: string;
-  versionName: string;
-  versionCode: number;
-  releaseNotes: string;
-  fileName: string;
-  sha256: string;
-  sizeBytes: number;
-  githubUrl: string;
-  r2Key?: string;
-  r2Verified: boolean;
-  targetHardware?: string;
-  transport: string;
-  minAppVersionCode: number;
-  isFormalRelease: boolean;
-  r2Backfill: boolean;
-}
-
-interface FirmwareDownloadStateRow extends FirmwareReleaseRow {
-  channel_id: string | null;
-  channel_disable_downloads: number | null;
-  app_disable_downloads: number | null;
-}
-
-export async function handleFirmwareLatest(
-  request: Request,
-  env: WorkerEnv,
-  requestId: string
-): Promise<Response> {
-  const url = new URL(request.url);
-  for (const key of url.searchParams.keys()) {
-    if (!FIRMWARE_LATEST_QUERY_PARAMS.has(key)) {
-      throw invalidParameter(`Unsupported query parameter: ${key}`);
-    }
-  }
-
-  const appId = url.searchParams.get("appId") ?? env.APP_ID;
-  const deviceModel = normalizeDeviceModel(requireString(url.searchParams.get("deviceModel"), "deviceModel"));
-  const channel = parseChannel(url.searchParams.get("channel") ?? "stable");
-  const currentVersion = optionalString(url.searchParams.get("currentVersion"));
-  const currentVersionCode = parseOptionalVersionCode(url.searchParams.get("currentVersionCode"));
-
-  const rate = await enforceRateLimit(
-    env,
-    `firmware-latest:${clientIpFrom(request)}:${appId}:${deviceModel}:${channel}`
-  );
-  if (!rate.allowed) {
-    return json(
-      { errorCode: "RATE_LIMITED", message: "Too many firmware update checks", retryAfter: rate.retryAfter },
-      429,
-      { "Retry-After": String(rate.retryAfter) }
-    );
-  }
-
-  try {
-    const state = await loadFirmwareLatestState(env, appId, deviceModel, channel);
-    if (!state.channel?.current_release_id || !state.release) {
-      return noFirmwareUpdate();
-    }
-    if (state.channel.disable_latest === 1) {
-      return json({
-        errorCode: "CHANNEL_STOPPED",
-        updateAvailable: false,
-        maintenanceMessage: state.channel.maintenance_message
-      });
-    }
-    if (state.release.state === "disabled" || state.release.archived === 1) {
-      return noFirmwareUpdate();
-    }
-    if (!isFirmwareNewer(state.release, currentVersionCode, currentVersion)) {
-      return noFirmwareUpdate();
-    }
-    if (state.release.r2_state !== "available" || !state.release.r2_key) {
-      throw backendUnavailable("Firmware R2 asset is not available");
-    }
-
-    const origin = new URL(request.url).origin;
-    const urls = await signedFirmwareDownloadUrls(env, origin, state.release);
-    return json({
-      schemaVersion: 1,
-      updateAvailable: true,
-      appId: state.release.app_id,
-      deviceModel: state.release.device_model,
-      channel: state.channel.name,
-      releaseId: state.release.id,
-      versionName: state.release.version_name,
-      versionCode: state.release.version_code,
-      releaseTag: state.release.release_tag,
-      releaseNotes: state.release.release_notes,
-      fileName: state.release.file_name,
-      sha256: state.release.sha256,
-      sizeBytes: state.release.size_bytes,
-      targetHardware: state.release.target_hardware,
-      transport: state.release.transport,
-      downloadUrl: urls.downloadUrl,
-      expiresAt: urls.expiresAt
-    });
-  } catch (error) {
+export async function firmwareOperation(action: () => Promise<Response>): Promise<Response> {
+  try { return await action(); } catch (error) {
     if (error instanceof ApiError) throw error;
-    const message = error instanceof Error ? error.message : String(error);
-    writeLog("error", "firmware_latest_failed", { requestId, message });
+    if (error instanceof FirmwareSchemaError) {
+      throw new ApiError(error.code, error.message, error.code === "FORMAL_RELEASE_REQUIRED" ? 403 : 400);
+    }
+    // D1 errors can contain SQL/values. Do not log a recovery capability or key.
     throw backendUnavailable();
   }
 }
 
-export async function handleFirmwareDownload(
-  request: Request,
-  env: WorkerEnv,
-  requestId: string
-): Promise<Response> {
-  const url = new URL(request.url);
-  const assetId = requiredQuery(url, "assetId");
-  const releaseId = requiredQuery(url, "releaseId");
-  const expiresAt = Number(requiredQuery(url, "expiresAt"));
-  const keyVersion = requiredQuery(url, "keyVersion");
-  const signature = requiredQuery(url, "signature");
-
-  await verifyDownloadToken(env, request.method, assetId, releaseId, expiresAt, keyVersion, signature);
-  const state = await loadFirmwareDownloadState(env, assetId, releaseId);
-  ensureFirmwareDownloadAllowed(state);
-  return streamFirmwareR2Asset(env, state, requestId);
-}
-
-export async function handleRegisterFirmwareRelease(
-  request: Request,
-  env: WorkerEnv,
-  requestId: string
-): Promise<Response> {
-  const token = bearerToken(request);
-  const authorized = await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256);
-  if (!authorized) {
-    throw new ApiError("TOKEN_INVALID", "CI deploy token is invalid", 401);
-  }
-
-  const input = parseRegisterFirmwareReleaseRequest(await request.json());
-  if (!input.isFormalRelease) {
-    throw new ApiError("FORMAL_RELEASE_REQUIRED", "Firmware candidates require a formal release", 403);
-  }
-  await validateFirmwareAsset(input, env);
-
-  const releaseId = firmwareReleaseIdFor(input.appId, input.deviceModel, input.releaseTag);
-  const existing = await env.DB.prepare(
-    "SELECT id, run_id, commit_sha FROM firmware_releases WHERE app_id = ? AND device_model = ? AND release_tag = ? LIMIT 1"
-  )
-    .bind(input.appId, input.deviceModel, input.releaseTag)
-    .first<{ id: string; run_id: string; commit_sha: string }>();
-  if (existing) {
-    if (existing.run_id === input.runId && existing.commit_sha === input.commitSha) {
-      const r2AssetsUpdated = await updateFirmwareR2AssetState(env, input, existing.id, requestId);
-      return json({ ok: true, releaseId: existing.id, idempotent: true, r2AssetsUpdated });
-    }
-    if (input.r2Backfill) {
-      if (existing.commit_sha !== input.commitSha) {
-        throw invalidParameter("r2Backfill commitSha must match the existing firmware release");
-      }
-      const r2AssetsUpdated = await updateFirmwareR2AssetState(env, input, existing.id, requestId);
-      return json({
-        ok: true,
-        releaseId: existing.id,
-        idempotent: false,
-        r2Backfill: true,
-        r2AssetsUpdated
-      });
-    }
-    throw invalidParameter("firmware releaseTag already exists with different runId or commitSha");
-  }
-  if (input.r2Backfill) {
-    throw invalidParameter("r2Backfill can only update an existing firmware release");
-  }
-
-  const statements: D1PreparedStatement[] = [
-    env.DB.prepare("INSERT OR IGNORE INTO apps (id, name) VALUES (?, ?)").bind(
-      input.appId,
-      input.appId
-    ),
-    env.DB.prepare("INSERT OR IGNORE INTO app_config (app_id) VALUES (?)").bind(input.appId),
-    env.DB.prepare(
-      "INSERT OR IGNORE INTO firmware_channels (id, app_id, device_model, name) VALUES (?, ?, ?, 'stable')"
-    ).bind(firmwareChannelIdFor(input.appId, input.deviceModel, "stable"), input.appId, input.deviceModel),
-    env.DB.prepare(
-      "INSERT OR IGNORE INTO firmware_channels (id, app_id, device_model, name) VALUES (?, ?, ?, 'beta')"
-    ).bind(firmwareChannelIdFor(input.appId, input.deviceModel, "beta"), input.appId, input.deviceModel),
-    env.DB.prepare(
-      `
-        INSERT INTO firmware_releases (
-          id,
-          app_id,
-          device_model,
-          version_name,
-          version_code,
-          release_tag,
-          commit_sha,
-          run_id,
-          state,
-          release_notes,
-          file_name,
-          sha256,
-          size_bytes,
-          r2_key,
-          r2_state,
-          github_url,
-          target_hardware,
-          transport,
-          min_app_version_code
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `
-    ).bind(
-      releaseId,
-      input.appId,
-      input.deviceModel,
-      input.versionName,
-      input.versionCode,
-      input.releaseTag,
-      input.commitSha,
-      input.runId,
-      input.releaseNotes,
-      input.fileName,
-      input.sha256,
-      input.sizeBytes,
-      input.r2Key ?? null,
-      input.r2Key ? "available" : "not_uploaded",
-      input.githubUrl,
-      input.targetHardware ?? null,
-      input.transport,
-      input.minAppVersionCode
-    ),
-    env.DB.prepare(
-      `
-        INSERT INTO audit_logs (
-          id,
-          app_id,
-          actor,
-          actor_type,
-          action,
-          target_type,
-          target_id,
-          request_id,
-          after_json
-        )
-        VALUES (?, ?, 'github-actions', 'ci', 'register_firmware_candidate', 'firmware_release', ?, ?, ?)
-      `
-    ).bind(
-      crypto.randomUUID(),
-      input.appId,
-      releaseId,
-      requestId,
-      JSON.stringify({
-        deviceModel: input.deviceModel,
-        releaseTag: input.releaseTag,
-        versionCode: input.versionCode,
-        fileName: input.fileName,
-        sha256: input.sha256,
-        sizeBytes: input.sizeBytes,
-        r2Key: input.r2Key ?? null
-      })
-    )
-  ];
-
-  await env.DB.batch(statements);
-  return json({ ok: true, releaseId, idempotent: false }, 201);
-}
-
-async function signedFirmwareDownloadUrls(
-  env: WorkerEnv,
-  origin: string,
-  release: FirmwareReleaseRow
-): Promise<{ downloadUrl: string; expiresAt: number }> {
-  const ttlSeconds = Number(env.DOWNLOAD_TOKEN_TTL_SECONDS || "300");
-  const expiresAt = Math.floor(Date.now() / 1000) + ttlSeconds;
-  const keyVersion = env.DOWNLOAD_TOKEN_KEY_VERSION;
-  const assetId = firmwareAssetIdFor(release.id, release.file_name);
-  const signature = await signDownloadToken(env, "GET", assetId, release.id, expiresAt, keyVersion);
-  const query = new URLSearchParams({
-    assetId,
-    releaseId: release.id,
-    expiresAt: String(expiresAt),
-    keyVersion,
-    signature
-  });
-  return {
-    downloadUrl: `${origin}/api/public/firmware/download?${query.toString()}`,
-    expiresAt
-  };
-}
-
-async function loadFirmwareLatestState(
-  env: WorkerEnv,
-  appId: string,
-  deviceModel: string,
-  channelName: ChannelName
-): Promise<{ channel: FirmwareChannelRow | null; release: FirmwareReleaseRow | null }> {
-  const channel = await env.DB.prepare(
-    "SELECT * FROM firmware_channels WHERE app_id = ? AND device_model = ? AND name = ? LIMIT 1"
-  )
-    .bind(appId, deviceModel, channelName)
-    .first<FirmwareChannelRow>();
-  if (!channel?.current_release_id) {
-    return { channel: channel ?? null, release: null };
-  }
-
-  const release = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id = ? LIMIT 1")
-    .bind(channel.current_release_id)
-    .first<FirmwareReleaseRow>();
-  return { channel, release: release ?? null };
-}
-
-async function loadFirmwareDownloadState(
-  env: WorkerEnv,
-  assetId: string,
-  releaseId: string
-): Promise<FirmwareDownloadStateRow> {
-  const row = await env.DB.prepare(
-    `
-      SELECT
-        f.*,
-        c.id AS channel_id,
-        c.disable_downloads AS channel_disable_downloads,
-        ac.disable_all_downloads AS app_disable_downloads
-      FROM firmware_releases f
-      LEFT JOIN firmware_channels c ON c.current_release_id = f.id
-      LEFT JOIN app_config ac ON ac.app_id = f.app_id
-      WHERE f.id = ?
-      LIMIT 1
-    `
-  )
-    .bind(releaseId)
-    .first<FirmwareDownloadStateRow>();
-
-  if (!row || firmwareAssetIdFor(row.id, row.file_name) !== assetId) {
-    throw new ApiError("ASSET_DISABLED", "Firmware asset is not available", 410);
-  }
-  return row;
-}
-
-function ensureFirmwareDownloadAllowed(row: FirmwareDownloadStateRow): void {
-  if (row.state === "disabled") {
-    throw new ApiError("ASSET_DISABLED", "Firmware release is disabled", 410);
-  }
-  if (row.archived === 1 || row.r2_state === "archived" || row.r2_state === "r2_deleted") {
-    throw new ApiError("ASSET_ARCHIVED", "Firmware asset is archived", 409);
-  }
-  if (row.app_disable_downloads === 1 || row.channel_disable_downloads === 1) {
-    throw new ApiError("CHANNEL_STOPPED", "Firmware downloads are temporarily disabled", 503);
-  }
-  if (!row.channel_id) {
-    throw new ApiError("ASSET_DISABLED", "Firmware release is not currently published to a channel", 410);
-  }
-  if (row.r2_state !== "available" || !row.r2_key) {
-    throw backendUnavailable("Firmware R2 asset is not available");
+export function requireFirmwareJsonHeaders(request: Request): void {
+  if (new URL(request.url).protocol !== "https:"
+    || request.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase() !== "application/json"
+    || !request.headers.get("Accept")?.split(",").some((v) => v.split(";")[0].trim() === "application/json")) {
+    throw invalidParameter("HTTPS, Content-Type and Accept application/json are required");
   }
 }
 
-async function streamFirmwareR2Asset(
-  env: WorkerEnv,
-  state: FirmwareDownloadStateRow,
-  requestId: string
-): Promise<Response> {
-  if (!state.r2_key) throw backendUnavailable("Firmware R2 asset is not available");
-  let object: R2ObjectBody | null;
+export async function readFirmwareJson(request: Request): Promise<unknown> {
+  const reader = request.body?.getReader();
+  if (!reader) throw invalidParameter("JSON body is required");
+  const chunks: Uint8Array[] = [];
+  let length = 0;
   try {
-    object = await env.RELEASES_BUCKET.get(state.r2_key);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    writeLog("error", "firmware_r2_download_failed", {
-      requestId,
-      releaseId: state.id,
-      r2Key: state.r2_key,
-      message
-    });
-    throw backendUnavailable("Firmware R2 asset could not be read");
-  }
+    for (;;) {
+      const item = await reader.read();
+      if (item.done) break;
+      length += item.value.byteLength;
+      if (length > 1024 * 1024) throw invalidParameter("Firmware metadata exceeds 1 MiB");
+      chunks.push(item.value);
+    }
+  } finally { await reader.cancel(); }
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  try { return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)); }
+  catch { throw invalidParameter("Invalid JSON body"); }
+}
 
-  if (!object) throw backendUnavailable("Firmware R2 asset is missing");
-  if (object.size !== state.size_bytes) throw backendUnavailable("Firmware R2 asset size mismatch");
-
-  const headers = new Headers();
-  object.writeHttpMetadata(headers);
-  headers.set("Content-Type", headers.get("Content-Type") ?? "application/octet-stream");
-  headers.set("Content-Length", String(object.size));
-  headers.set("ETag", object.httpEtag);
-  headers.set("Cache-Control", "public, max-age=31536000, immutable");
-  headers.set("Content-Disposition", `attachment; filename="${contentDispositionFileName(state.file_name)}"`);
-  headers.set("X-Request-Id", requestId);
-  headers.set("X-Trace-Asset-Source", "r2");
-  headers.set("X-Trace-Asset-Type", "firmware");
-
-  writeLog("info", "firmware_download_stream", {
-    requestId,
-    releaseId: state.id,
-    channel: state.channel_id,
-    bytes: object.size,
-    status: "ok"
+export function handleFirmwareLatest(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
+  return firmwareOperation(async () => {
+    const url = new URL(request.url);
+    const get = (name: string) => url.searchParams.get(name)!;
+    if (get("deviceModel") !== FIRMWARE_MODEL) throw new ApiError("UNKNOWN_DEVICE_MODEL", "Unknown firmware deviceModel", 400);
+    for (const name of url.searchParams.keys()) if (!QUERY.includes(name)) throw invalidParameter("Unsupported latest query parameter");
+    for (const name of QUERY) {
+      if (url.searchParams.getAll(name).length !== 1 || !get(name)) throw invalidParameter(`${name} must occur exactly once`);
+    }
+    if (url.protocol !== "https:" || get("appId") !== "trace" || !["stable", "beta"].includes(get("channel"))) {
+      throw invalidParameter("Invalid firmware appId/channel or non-HTTPS request");
+    }
+    const number = (name: string, max: number) => {
+      const value = get(name);
+      if (!/^[0-9]+$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) > max) {
+        throw invalidParameter(`${name} is not a valid decimal integer`);
+      }
+      return Number(value);
+    };
+    const current = number("currentVersionCode", U32_MAX);
+    const appVersion = number("appVersionCode", APP_VERSION_MAX);
+    const hardware = number("hardwareRevision", 65535);
+    const layout = number("layoutId", 255);
+    const boot = number("bootVersion", 255);
+    const protocol = number("protocolVersion", 255);
+    if (!/^[0-9a-f]{64}$/.test(get("currentImageSha"))) throw invalidParameter("currentImageSha must be a complete lowercase raw SHA-256");
+    const rate = await enforceRateLimit(env, `firmware-latest:${clientIpFrom(request)}:trace:${FIRMWARE_MODEL}:${get("channel")}`);
+    if (!rate.allowed) return json({ errorCode: "RATE_LIMITED", message: "Too many firmware checks", requestId,
+      retryAfter: rate.retryAfter }, 429, { "Retry-After": String(rate.retryAfter) });
+    const channel = await env.DB.prepare("SELECT * FROM firmware_channels WHERE app_id=? AND device_model=? AND name=?")
+      .bind("trace", FIRMWARE_MODEL, get("channel")).first<FirmwareChannelRow>();
+    const noUpdate = (errorCode = "NO_UPDATE") => json({ schemaVersion: 2, requestId, updateAvailable: false, errorCode,
+      ...(errorCode === "CHANNEL_STOPPED" ? { maintenanceMessage: channel?.maintenance_message ?? null } : {}) });
+    if (channel?.legacy_current_release_id) throw backendUnavailable("Channel references unverified legacy firmware");
+    if (channel?.disable_latest === 1) return noUpdate("CHANNEL_STOPPED");
+    if (!channel?.current_release_id) return noUpdate();
+    const release = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?")
+      .bind(channel.current_release_id).first<FirmwareReleaseRow>();
+    if (!release || release.app_id !== channel.app_id || release.device_model !== channel.device_model
+      || release.state !== "ready" || release.archived !== 0) throw backendUnavailable("Invalid firmware channel target");
+    if (release.version_code <= current) return noUpdate();
+    if (appVersion < release.min_app_version_code) {
+      throw new ApiError("CLIENT_TOO_OLD", "App update required", 426, { minAppVersionCode: release.min_app_version_code });
+    }
+    const compatibility = { releaseId: release.id };
+    if (hardware !== release.hardware_rev) throw new ApiError("HARDWARE_INCOMPATIBLE", "Hardware revision mismatch", 409,
+      { ...compatibility, requiredHardwareRevision: release.hardware_rev, hardwareRevision: hardware });
+    if (layout !== release.layout_id) throw new ApiError("LAYOUT_INCOMPATIBLE", "Layout mismatch", 409,
+      { ...compatibility, requiredLayoutId: release.layout_id, layoutId: layout });
+    if (boot < release.min_boot_version) throw new ApiError("BOOT_TOO_OLD", "Boot update required", 409,
+      { ...compatibility, minBootVersion: release.min_boot_version, bootVersion: boot });
+    if (protocol < release.min_protocol_version || protocol !== 1) throw new ApiError("PROTOCOL_UNSUPPORTED", "Unsupported BLE protocol", 409,
+      { ...compatibility, minProtocolVersion: release.min_protocol_version, protocolVersion: protocol });
+    const assets = await firmwareAssets(env.DB, release.id);
+    const full = requireFirmwareFull(release, assets);
+    const patches = assets.filter((a) => a.kind === "patch" && a.base_image_sha256 === get("currentImageSha"));
+    if (patches.length > 1) throw backendUnavailable("Ambiguous patch base");
+    const asset = patches.length === 1 && usableFirmwareAsset(patches[0]) ? patches[0] : full;
+    const signed = await signFirmwareDownload(env, url.origin, asset, "public-ota");
+    return json({ schemaVersion: 2, requestId, updateAvailable: true, appId: release.app_id,
+      deviceModel: release.device_model, channel: channel.name, releaseId: release.id,
+      versionName: release.version_name, versionCode: release.version_code, releaseTag: release.release_tag,
+      releaseNotes: release.release_notes, targetImageSha256: release.target_image_sha256,
+      targetHardware: release.target_hardware, transport: release.transport, minAppVersionCode: release.min_app_version_code,
+      asset: { assetId: asset.id, kind: asset.kind, fileName: asset.file_name, sha256: asset.sha256,
+        sizeBytes: asset.size_bytes, baseVersionCode: asset.base_vcode,
+        baseImageSha256: asset.kind === "patch" ? asset.base_image_sha256 : null, ...signed } });
   });
-
-  return new Response(object.body, { headers });
 }
 
-function parseRegisterFirmwareReleaseRequest(value: unknown): RegisterFirmwareReleaseRequest {
-  if (!value || typeof value !== "object") {
-    throw invalidParameter("request body must be an object");
+export async function firmwareAssets(db: D1Database, releaseId: string): Promise<FirmwareAssetRow[]> {
+  return (await db.prepare("SELECT * FROM firmware_release_assets WHERE release_id=? ORDER BY kind,base_vcode,file_name")
+    .bind(releaseId).all<FirmwareAssetRow>()).results;
+}
+
+export function usableFirmwareAsset(asset: FirmwareAssetRow): boolean {
+  return asset.r2_state === "available" && !!asset.r2_key && !!asset.r2_etag
+    && /^[0-9a-f]{64}$/.test(asset.sha256) && Number.isSafeInteger(asset.size_bytes) && asset.size_bytes > 0;
+}
+
+export function requireFirmwareFull(release: FirmwareReleaseRow, assets: FirmwareAssetRow[]): FirmwareAssetRow {
+  const full = assets.filter((a) => a.kind === "full");
+  if (!/^[0-9a-f]{64}$/.test(release.target_image_sha256) || full.length !== 1 || !usableFirmwareAsset(full[0])
+    || full[0].base_vcode !== 0 || full[0].base_image_sha256 !== ""
+    || assets.some((a) => !["full", "patch", "recovery"].includes(a.kind)
+      || (a.kind === "patch" && (!/^[0-9a-f]{64}$/.test(a.base_image_sha256) || a.base_vcode <= 0 || a.base_vcode >= release.version_code)))) {
+    throw backendUnavailable("Firmware release lacks a complete verified full fallback");
   }
-  const body = value as Record<string, unknown>;
-  return {
-    appId: requireString(body.appId, "appId"),
-    deviceModel: normalizeDeviceModel(requireString(body.deviceModel, "deviceModel")),
-    releaseTag: requireString(body.releaseTag, "releaseTag"),
-    runId: requireString(body.runId, "runId"),
-    commitSha: requireString(body.commitSha, "commitSha"),
-    versionName: normalizeVersionName(requireString(body.versionName, "versionName")),
-    versionCode: requireInt(body.versionCode, "versionCode"),
-    releaseNotes: String(body.releaseNotes ?? ""),
-    fileName: requireString(body.fileName, "fileName"),
-    sha256: requireSha256(body.sha256, "sha256"),
-    sizeBytes: requireInt(body.sizeBytes, "sizeBytes"),
-    githubUrl: requireString(body.githubUrl, "githubUrl"),
-    r2Key: typeof body.r2Key === "string" ? body.r2Key : undefined,
-    r2Verified: body.r2Verified === true,
-    targetHardware: optionalString(body.targetHardware),
-    transport: optionalString(body.transport) ?? "ble",
-    minAppVersionCode: body.minAppVersionCode ? requireInt(body.minAppVersionCode, "minAppVersionCode") : 0,
-    isFormalRelease: body.isFormalRelease === true,
-    r2Backfill: body.r2Backfill === true
-  };
+  return full[0];
 }
 
-async function validateFirmwareAsset(
-  input: RegisterFirmwareReleaseRequest,
-  env: WorkerEnv
-): Promise<void> {
-  assertSafeFileName(input.fileName);
-  assertImmutableGitHubAssetUrl(input.githubUrl, env, input.releaseTag);
-  if (!input.r2Key) return;
-  assertExpectedFirmwareR2Key(input);
-  if (!input.r2Verified) {
-    throw invalidParameter("r2Verified must be true when r2Key is provided");
-  }
-  const object = await env.RELEASES_BUCKET.head(input.r2Key);
-  if (!object) {
-    throw invalidParameter(`R2 object is missing: ${input.fileName}`);
-  }
-  if (object.size !== input.sizeBytes) {
-    throw invalidParameter(`R2 object size mismatch: ${input.fileName}`);
-  }
-  const metadataSha256 = object.customMetadata?.sha256?.toLowerCase();
-  if (metadataSha256 && metadataSha256 !== input.sha256) {
-    throw invalidParameter(`R2 object sha256 metadata mismatch: ${input.fileName}`);
-  }
+export function handleFirmwareDownload(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
+  return firmwareOperation(async () => {
+    const token = await verifyFirmwareDownload(request, env);
+    const asset = await env.DB.prepare("SELECT * FROM firmware_release_assets WHERE id=? AND release_id=?")
+      .bind(token.assetId, token.releaseId).first<FirmwareAssetRow>();
+    if (!asset) throw new ApiError("ASSET_DISABLED", "Firmware asset unavailable", 410);
+    if ((token.kind && token.kind !== asset.kind) || (token.purpose === "admin-recovery") !== (asset.kind === "recovery")) {
+      throw new ApiError("TOKEN_INVALID", "Firmware token asset/purpose mismatch", 401);
+    }
+    const release = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(asset.release_id).first<FirmwareReleaseRow>();
+    if (!release || release.state !== "ready") throw new ApiError("ASSET_DISABLED", "Firmware release unavailable", 410);
+    if (release.archived || ["archived", "r2_deleted"].includes(asset.r2_state)) throw new ApiError("ASSET_ARCHIVED", "Firmware asset archived", 409);
+    const visibility = await env.DB.prepare(`SELECT
+      (SELECT disable_all_downloads FROM app_config WHERE app_id=?) AS stopped,
+      (SELECT count(*) FROM firmware_channels WHERE current_release_id=?) AS published,
+      (SELECT count(*) FROM firmware_channels WHERE current_release_id=? AND disable_downloads=1) AS channel_stopped`)
+      .bind(release.app_id, release.id, release.id).first<{ stopped: number; published: number; channel_stopped: number }>();
+    if (visibility?.stopped || (token.purpose === "public-ota" && visibility?.channel_stopped)) {
+      throw new ApiError("CHANNEL_STOPPED", "Firmware downloads are stopped", 503);
+    }
+    if (token.purpose === "public-ota" && !visibility?.published) throw new ApiError("ASSET_DISABLED", "Firmware release withdrawn", 410);
+    if (!usableFirmwareAsset(asset)) throw backendUnavailable("Firmware R2 asset unavailable");
+    return streamFirmwareObject(request, env.RELEASES_BUCKET, asset, requestId);
+  });
 }
 
-async function updateFirmwareR2AssetState(
-  env: WorkerEnv,
-  input: RegisterFirmwareReleaseRequest,
-  releaseId: string,
-  requestId: string
-): Promise<number> {
-  if (!input.r2Key) return 0;
-  const result = await env.DB.prepare(
-    `
-      UPDATE firmware_releases
-      SET r2_key = ?, r2_state = 'available', updated_at = datetime('now')
-      WHERE id = ?
-        AND sha256 = ?
-        AND size_bytes = ?
-        AND file_name = ?
-        AND state <> 'disabled'
-    `
-  )
-    .bind(input.r2Key, releaseId, input.sha256, input.sizeBytes, input.fileName)
-    .run();
-  if (result.meta.changes !== 1) {
-    throw invalidParameter(`registered firmware does not match R2 metadata: ${input.fileName}`);
-  }
-  await env.DB.prepare(
-    `
-      INSERT INTO audit_logs (
-        id,
-        app_id,
-        actor,
-        actor_type,
-        action,
-        target_type,
-        target_id,
-        request_id,
-        after_json
-      )
-      VALUES (?, ?, 'github-actions', 'ci', 'update_firmware_r2_asset', 'firmware_release', ?, ?, ?)
-    `
-  )
-    .bind(
-      crypto.randomUUID(),
-      input.appId,
-      releaseId,
-      requestId,
-      JSON.stringify({ r2AssetsUpdated: 1, r2Key: input.r2Key })
-    )
-    .run();
-  return 1;
+export function handleRegisterFirmwareRelease(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
+  return firmwareOperation(async () => {
+    const authorization = request.headers.get("Authorization");
+    const token = authorization && /^Bearer [^\s,]+$/.test(authorization) ? authorization.slice(7) : null;
+    if (!await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256)) throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+    requireFirmwareJsonHeaders(request);
+    const input = parseFirmwareRegistration(await readFirmwareJson(request), `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`);
+    const canonical = canonicalJson(input);
+    const existing = () => env.DB.prepare("SELECT * FROM firmware_releases WHERE app_id=? AND device_model=? AND release_tag=?")
+      .bind(input.appId, input.deviceModel, input.releaseTag).first<FirmwareReleaseRow>();
+    const replay = async (row: FirmwareReleaseRow) => {
+      if (row.registration_json !== canonical) throw new ApiError("RELEASE_CONFLICT", "Firmware metadata conflicts with registered identity", 409);
+      const assets = await firmwareAssets(env.DB, row.id);
+      if (row.state !== "ready" || row.archived || assets.length !== input.assets.length || assets.some((a) => !usableFirmwareAsset(a))) {
+        throw new ApiError("RELEASE_INCOMPLETE", "Registered firmware is no longer ready/available", 409);
+      }
+      return json({ ok: true, requestId, releaseId: row.id, state: "ready", idempotent: true, assetsRegistered: assets.length });
+    };
+    const previous = await existing();
+    if (previous && previous.registration_json !== canonical) return replay(previous);
+    const verifiedEtags: string[] = [];
+    for (const asset of input.assets) verifiedEtags.push(await verifyFirmwareObject(env.RELEASES_BUCKET, asset));
+    if (previous) return replay(previous);
+    // Do not shadow an unverified legacy tag/version/run with a fresh registration.
+    const legacy = await env.DB.prepare(`SELECT id FROM firmware_releases_legacy
+      WHERE app_id=? AND device_model=? AND (release_tag=? OR version_code=? OR run_id=?)`)
+      .bind(input.appId, input.deviceModel, input.releaseTag, input.versionCode, input.runId).first();
+    if (legacy) throw new ApiError("RELEASE_CONFLICT", "Legacy firmware requires approved backfill", 409);
+    const releaseId = `fw_${await sha256Hex(`${input.appId}\n${input.deviceModel}\n${input.releaseTag}`)}`;
+    const statements: D1PreparedStatement[] = [
+      env.DB.prepare("INSERT OR IGNORE INTO apps(id,name) VALUES (?,?)").bind(input.appId, input.appId),
+      env.DB.prepare("INSERT OR IGNORE INTO app_config(app_id) VALUES (?)").bind(input.appId),
+      firmwareReleaseInsert(env.DB, input, releaseId, canonical)
+    ];
+    for (let index = 0; index < input.assets.length; index++) {
+      const asset = input.assets[index];
+      const id = `fw_asset_${await sha256Hex(`${releaseId}\n${asset.kind}\n${asset.baseImageSha256}`)}`;
+      statements.push(env.DB.prepare(`INSERT INTO firmware_release_assets
+        (id,release_id,kind,file_name,sha256,size_bytes,r2_key,r2_etag,r2_state,github_url,base_image_sha256,base_vcode)
+        VALUES (?,?,?,?,?,?,?,?,'available',?,?,?)`).bind(id, releaseId, asset.kind, asset.fileName,
+        asset.sha256, asset.sizeBytes, asset.r2Key, verifiedEtags[index], asset.githubUrl, asset.baseImageSha256, asset.baseVersionCode));
+    }
+    statements.push(env.DB.prepare("UPDATE firmware_releases SET state='ready',updated_at=datetime('now') WHERE id=? AND state='draft'").bind(releaseId));
+    for (const channel of ["stable", "beta"]) statements.push(env.DB.prepare(`INSERT OR IGNORE INTO firmware_channels
+      (id,app_id,device_model,name) VALUES (?,?,?,?)`).bind(`fw_ch_${input.appId}_${input.deviceModel}_${channel}`, input.appId, input.deviceModel, channel));
+    statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,after_json)
+      VALUES (?,?,'github-actions','ci','register_firmware_release','firmware_release',?,?,?)`)
+      .bind(crypto.randomUUID(), input.appId, releaseId, requestId, canonicalJson({ releaseId, state: "ready", assetsRegistered: input.assets.length })));
+    try { await env.DB.batch(statements); } catch (error) {
+      const concurrent = await existing();
+      if (concurrent) return replay(concurrent);
+      const conflict = await env.DB.prepare("SELECT id FROM firmware_releases WHERE app_id=? AND device_model=? AND (version_code=? OR run_id=?)")
+        .bind(input.appId, input.deviceModel, input.versionCode, input.runId).first();
+      if (conflict) throw new ApiError("RELEASE_CONFLICT", "Firmware version/run already registered", 409);
+      throw error;
+    }
+    return json({ ok: true, requestId, releaseId, state: "ready", idempotent: false, assetsRegistered: input.assets.length }, 201);
+  });
 }
 
-function isFirmwareNewer(
-  release: FirmwareReleaseRow,
-  currentVersionCode: number | null,
-  currentVersion: string | undefined
-): boolean {
-  if (currentVersionCode !== null) {
-    return currentVersionCode < release.version_code;
-  }
-  if (!currentVersion) return true;
-  const compared = compareVersionNames(currentVersion, release.version_name);
-  return compared < 0;
-}
-
-function compareVersionNames(left: string, right: string): number {
-  const leftParts = versionParts(left);
-  const rightParts = versionParts(right);
-  if (!leftParts || !rightParts) return normalizeVersionName(left) === normalizeVersionName(right) ? 0 : -1;
-  const length = Math.max(leftParts.length, rightParts.length);
-  for (let index = 0; index < length; index += 1) {
-    const diff = (leftParts[index] ?? 0) - (rightParts[index] ?? 0);
-    if (diff !== 0) return diff < 0 ? -1 : 1;
-  }
-  return 0;
-}
-
-function versionParts(value: string): number[] | null {
-  const normalized = normalizeVersionName(value);
-  if (!/^\d+(?:\.\d+)*$/.test(normalized)) return null;
-  return normalized.split(".").map((part) => Number(part));
-}
-
-function normalizeVersionName(value: string): string {
-  return value.trim().replace(/^v/i, "");
-}
-
-function parseOptionalVersionCode(value: string | null): number | null {
-  if (!value) return null;
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < 0) {
-    throw invalidParameter("currentVersionCode must be a non-negative integer");
-  }
-  return parsed;
-}
-
-function normalizeDeviceModel(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, "-");
-}
-
-function assertImmutableGitHubAssetUrl(value: string, env: WorkerEnv, releaseTag: string): void {
-  if (value.includes("/latest/download/")) {
-    throw invalidParameter("GitHub latest download URLs are not allowed");
-  }
-  const url = new URL(value);
-  if (url.hostname !== "github.com") {
-    throw invalidParameter("Firmware assets must use github.com immutable release URLs");
-  }
-  const expectedPrefix = `/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/releases/download/`;
-  if (!url.pathname.startsWith(expectedPrefix) || !url.pathname.includes(`/${releaseTag}/`)) {
-    throw invalidParameter("GitHub firmware asset URL must match releaseTag");
-  }
-}
-
-function assertExpectedFirmwareR2Key(input: RegisterFirmwareReleaseRequest): void {
-  const expected = firmwareR2KeyForRelease(input);
-  if (input.r2Key !== expected) {
-    throw invalidParameter(`R2 key does not match the firmware object key policy: ${input.fileName}`);
-  }
-}
-
-function firmwareR2KeyForRelease(input: RegisterFirmwareReleaseRequest): string {
-  assertSafeFileName(input.fileName);
-  assertSafePathPart(input.appId, "appId");
-  assertSafePathPart(input.deviceModel, "deviceModel");
-  assertSafePathPart(input.releaseTag, "releaseTag");
-  return `${input.appId}/firmware/${input.deviceModel}/${input.versionCode}-${input.releaseTag}/${input.fileName}`;
-}
-
-function assertSafeFileName(fileName: string): void {
-  if (
-    fileName.includes("/") ||
-    fileName.includes("\\") ||
-    fileName === "." ||
-    fileName === ".." ||
-    fileName.trim() === ""
-  ) {
-    throw invalidParameter("firmware fileName must be a plain file name");
-  }
-}
-
-function assertSafePathPart(value: string, fieldName: string): void {
-  if (
-    value.includes("/") ||
-    value.includes("\\") ||
-    value.includes("..") ||
-    value.trim() === ""
-  ) {
-    throw invalidParameter(`${fieldName} contains invalid R2 path characters`);
-  }
-}
-
-function firmwareReleaseIdFor(appId: string, deviceModel: string, releaseTag: string): string {
-  return `fw_${slug(appId)}_${slug(deviceModel)}_${slug(releaseTag)}`;
-}
-
-function firmwareChannelIdFor(appId: string, deviceModel: string, channel: string): string {
-  return `fw_ch_${slug(appId)}_${slug(deviceModel)}_${channel}`;
-}
-
-function firmwareAssetIdFor(releaseId: string, fileName: string): string {
-  return `fw_asset_${releaseId}_${slug(fileName)}`;
-}
-
-function slug(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-}
-
-function requiredQuery(url: URL, key: string): string {
-  const value = url.searchParams.get(key);
-  if (!value) throw new ApiError("TOKEN_INVALID", `${key} is required`, 401);
-  return value;
-}
-
-function contentDispositionFileName(fileName: string): string {
-  return fileName.replace(/["\\\r\n]/g, "_");
-}
-
-function bearerToken(request: Request): string | null {
-  const authorization = request.headers.get("Authorization");
-  if (authorization?.startsWith("Bearer ")) return authorization.slice("Bearer ".length);
-  return request.headers.get("X-Deploy-Token");
-}
-
-function noFirmwareUpdate(): Response {
-  return json({ errorCode: "NO_UPDATE", updateAvailable: false });
+export function firmwareReleaseInsert(db: D1Database, input: FirmwareRegistration, id: string, canonical: string): D1PreparedStatement {
+  return db.prepare(`INSERT INTO firmware_releases (id,app_id,device_model,version_name,version_code,release_tag,
+    commit_sha,run_id,release_notes,target_image_sha256,hardware_rev,layout_id,min_boot_version,min_protocol_version,
+    target_hardware,transport,min_app_version_code,registration_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(id, input.appId, input.deviceModel, input.versionName, input.versionCode, input.releaseTag, input.commitSha,
+      input.runId, input.releaseNotes, input.targetImageSha256, input.hardwareRevision, input.layoutId,
+      input.minBootVersion, input.minProtocolVersion, input.targetHardware, input.transport, input.minAppVersionCode, canonical);
 }
