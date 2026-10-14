@@ -20,6 +20,18 @@ an already verified APK/package when still applicable instead of rebuilding to
 work around a host collector failure. An embedded endpoint must really be live;
 an expired accountless tunnel cannot be recreated under the same hostname.
 
+For a necessary, already-authorized mid-task action outside chat while the
+current execution stays open, such as reinserting an SD card without sending a
+chat reply, follow
+[User Intervention Notifications](../../../../docs/agent-collaboration-contract.md#user-intervention-notifications):
+send a real current-session @mention, check the send receipt and observe the
+actual state change; do not require a chat acknowledgement.
+Requests requiring a chat reply never use manual @mentions. Ask authorization,
+choices or missing information in a normal final reply, then resume after the
+answer; keeping a worker running does not create an exception. A normal final
+reply, including a handoff, already has the bridge's automatic completion
+notification; do not send another manual reminder.
+
 ## CI And Installation
 
 Read the actual [development workflow guide](../../../../docs/flutter-development-validation.md)

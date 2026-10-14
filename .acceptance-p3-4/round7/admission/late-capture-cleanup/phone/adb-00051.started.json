@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "exec-out",
+    "run-as com.wen.gaia.gaia.p34probe sh -c 'test ! -L files || exit 41; if test -e files; then test \"$(readlink -f files)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files || exit 42; fi; test ! -L files/p34-observations || exit 41; if test -e files/p34-observations; then test \"$(readlink -f files/p34-observations)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations || exit 42; fi; test ! -L files/p34-observations/1791733411743571-151409df12fd3ec70569f908 || exit 41; if test -e files/p34-observations/1791733411743571-151409df12fd3ec70569f908; then test \"$(readlink -f files/p34-observations/1791733411743571-151409df12fd3ec70569f908)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1791733411743571-151409df12fd3ec70569f908 || exit 42; fi; test ! -L files/p34-observations/1791733411743571-151409df12fd3ec70569f908/health.json || exit 41; if test -e files/p34-observations/1791733411743571-151409df12fd3ec70569f908/health.json; then test \"$(readlink -f files/p34-observations/1791733411743571-151409df12fd3ec70569f908/health.json)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1791733411743571-151409df12fd3ec70569f908/health.json || exit 42; fi'"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 856415939746400,
+  "stdin_sha256": null
+}

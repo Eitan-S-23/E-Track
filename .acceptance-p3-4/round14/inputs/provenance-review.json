@@ -1,0 +1,371 @@
+{
+  "review_kind": "Supplemental independent applicability review; not another physical or formal test run",
+  "head": "02013607ca38eaf5cff0d5c4fc3de8259fbff916",
+  "artifact_source_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+  "ci_commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+  "profile_review": {
+    "Production": {
+      "definition_changed": true,
+      "old_scope_changes": [],
+      "current_scope_changes": [],
+      "current_scope_path_count": 3183
+    },
+    "Firmware": {
+      "definition_changed": false,
+      "old_scope_changes": [],
+      "current_scope_changes": [],
+      "current_scope_path_count": 2942
+    },
+    "Flutter": {
+      "definition_changed": true,
+      "old_scope_changes": [],
+      "current_scope_changes": [],
+      "current_scope_path_count": 170
+    },
+    "Validation": {
+      "definition_changed": true,
+      "old_scope_changes": [
+        ".github/workflows/acceptance-governance.yml",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p34-acceptance/README.md",
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p34-acceptance/selftest.py",
+        "Tools/provenance/manifest_profiles.json",
+        "app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart",
+        "app/bluetooth_flutter_Trace/test/ota/ota_pipeline_transport_test.dart",
+        "app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart",
+        "tests/ota/fixtures/p34-v11-metrics.hex",
+        "tests/ota/test_acceptance_bundle.py",
+        "tests/ota/test_acceptance_efficiency.py",
+        "tests/ota/test_ota_link_metrics.c",
+        "tests/ota/test_ota_link_metrics.py",
+        "tests/ota/test_p34_acceptance_stats.py",
+        "tests/ota/test_p34_live_route.py",
+        "tests/ota/test_p34_service_patch.py"
+      ],
+      "current_scope_changes": [
+        ".github/workflows/acceptance-governance.yml",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p34-acceptance/README.md",
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p34-acceptance/selftest.py",
+        "Tools/provenance/manifest_profiles.json",
+        "app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart",
+        "app/bluetooth_flutter_Trace/test/ota/ota_pipeline_transport_test.dart",
+        "app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart",
+        "tests/ota/fixtures/p34-v11-metrics.hex",
+        "tests/ota/test_acceptance_bundle.py",
+        "tests/ota/test_acceptance_efficiency.py",
+        "tests/ota/test_ota_link_metrics.c",
+        "tests/ota/test_ota_link_metrics.py",
+        "tests/ota/test_p34_acceptance_stats.py",
+        "tests/ota/test_p34_live_route.py",
+        "tests/ota/test_p34_service_patch.py"
+      ],
+      "current_scope_path_count": 252
+    }
+  },
+  "added_build_inputs_unchanged": [
+    "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+    "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+    "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle"
+  ],
+  "profile_definition_change_is_not_runtime_source_change": true,
+  "formal_changed_group_gate_retained": true,
+  "initial_scope_probe": "Stopped on definition-level invalidation; two original Git receipts preserved. No evidence of changed runtime sources; no frozen contract or matrix changed.",
+  "ci_runs": [
+    {
+      "id": 38047823595,
+      "name": "Acceptance Governance",
+      "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+      "conclusion": "success",
+      "attempt": 1,
+      "original_zip_crc_valid": true,
+      "archive_members": 24,
+      "job_conclusions": {
+        "Flutter debugging skill (windows-latest)": "success",
+        "Flutter debugging skill (ubuntu-latest)": "success",
+        "Validate acceptance and build governance": "success"
+      }
+    },
+    {
+      "id": 38047823559,
+      "name": "MCU Firmware Build",
+      "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+      "conclusion": "success",
+      "attempt": 1,
+      "original_zip_crc_valid": true,
+      "archive_members": 21,
+      "job_conclusions": {
+        "Build firmware (arm-none-eabi-gcc)": "success",
+        "Register firmware to Cloudflare": "skipped"
+      }
+    },
+    {
+      "id": 38047820907,
+      "name": "Flutter Development Checks",
+      "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+      "conclusion": "success",
+      "attempt": 1,
+      "original_zip_crc_valid": true,
+      "archive_members": 29,
+      "job_conclusions": {
+        "Flutter self-tests (windows-2022)": "success",
+        "Flutter self-tests (ubuntu-latest)": "success"
+      }
+    },
+    {
+      "id": 38047823551,
+      "name": "Build APK and EXE Release",
+      "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+      "conclusion": "success",
+      "attempt": 1,
+      "original_zip_crc_valid": true,
+      "archive_members": 43,
+      "job_conclusions": {
+        "Detect changed paths": "success",
+        "Build Android APK": "success",
+        "Build Windows EXE": "success",
+        "Deploy GitHub Pages": "skipped",
+        "Create GitHub Release": "skipped"
+      }
+    }
+  ],
+  "ci_hosts": [
+    {
+      "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "counts": {
+        "passed": 722,
+        "skipped": 16,
+        "failed": 0
+      },
+      "complete_test_log_verified": true,
+      "report_verified": true
+    },
+    {
+      "host": "Windows-2022Server-10.0.20348-SP0",
+      "counts": {
+        "passed": 705,
+        "skipped": 33,
+        "failed": 0
+      },
+      "complete_test_log_verified": true,
+      "report_verified": true
+    }
+  ],
+  "ci_to_current_flutter_test_source_changes": [],
+  "firmware_host_suites": [
+    {
+      "test": "test_ota_ble_frame.py",
+      "exit_code": 0,
+      "summaries": [
+        "P3_1_BLE_FRAME=PASS checks=39 failures=0"
+      ]
+    },
+    {
+      "test": "test_ota_ble_session.py",
+      "exit_code": 0,
+      "summaries": [
+        "P3_1_BLE_SESSION=PASS checks=171 failures=0"
+      ]
+    },
+    {
+      "test": "test_ota_staging.py",
+      "exit_code": 0,
+      "summaries": [
+        "P2_1_STAGING=PASS checks=114 failures=0",
+        "OTA_STAGING_HAL=PASS checks=187 failures=0",
+        "OTA_STAGING_HAL=PASS checks=187 failures=0",
+        "OTA_STAGING_HAL=PASS checks=187 failures=0",
+        "STAGING_ERASE_AHEAD=PASS checks=1536 failures=0",
+        "OTA_STAGING_HAL=PASS checks=187 failures=0",
+        "STAGING_ERASE_AHEAD=PASS checks=1536 failures=0"
+      ]
+    },
+    {
+      "test": "test_ota_package.py",
+      "exit_code": 0,
+      "summaries": [
+        "P2_2_PACKAGE=PASS checks=102"
+      ]
+    },
+    {
+      "test": "test_ota_patch.py",
+      "exit_code": 0,
+      "summaries": [
+        "P2_3_VECTOR_PREFLIGHT=PASS vendor_controls=11 oldpos_only=9 invalid_control=[0,0,0]"
+      ]
+    },
+    {
+      "test": "test_ota_backup.py",
+      "exit_code": 0,
+      "summaries": [
+        "P2_5_OTA_BACKUP_ALL=PASS"
+      ]
+    },
+    {
+      "test": "test_ota_device_info.py",
+      "exit_code": 0,
+      "summaries": [
+        "P3_2_OTA_DEVICE_INFO_ALL=PASS"
+      ]
+    }
+  ],
+  "firmware_test_source_changes": [],
+  "candidate_build": {
+    "ninja_sha256": "d995df432e02abae9a02c9c8f9c20eca370f53af54f4efa1b0e36fe3ace3ac40",
+    "definition_rows": 387,
+    "expected_defines": {
+      "CONFIG_BT_BAUD_EXPERIMENT": "0",
+      "CONFIG_OTA_BLE_PROFILE": "0",
+      "CONFIG_RTT_DEBUG_CMD_ENABLE": "0",
+      "CONFIG_OTA_INSTALL_PROFILE": "0",
+      "CONFIG_OTA_INSTALL_COST": "0",
+      "CONFIG_OTA_LINK_METRICS": "1"
+    },
+    "disabled_command_markers_absent": true
+  },
+  "verified_inputs": {
+    "D:\\install\\Git\\cmd\\git.exe": {
+      "bytes": 46480,
+      "sha256": "da240fe9bc24895b3e04150a4990b8a6ff329ecabcd8f19684c2cc310da5ef3f"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\source-lock-v4.json": {
+      "bytes": 26404,
+      "sha256": "030559344ee3fdf80c5e5e2d1d2161c6136b84be36f02feb238d0f74eb732afb"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-remediation-20261010\\source-lock-v3.json": {
+      "bytes": 30960,
+      "sha256": "4929eba892d46497d9475cfe2503696cf4bbae34f57c0c246dd47e5169ea01e3"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\identity-final.json": {
+      "bytes": 7218,
+      "sha256": "070f17eca868aaa916a4d46c956357775c392253c5bb37302c502653b1ed9d50"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823595\\metadata.json": {
+      "bytes": 23648,
+      "sha256": "441a559fb3ddae3df87860db3bd66de2c20592aa28b6b1ebc471357481034cf8"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823595\\logs\\original.zip": {
+      "bytes": 56190,
+      "sha256": "e20e8cba6a9c9082c3e98f9249244323a166e18c41deafbfc86126f6aa628d11"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823595\\result.json": {
+      "bytes": 7251,
+      "sha256": "d4d82301724dd992890c9f9d9dc88153dc665c5cf16d9383a87a1cd90aa36f62"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\metadata.json": {
+      "bytes": 22227,
+      "sha256": "58f291ca8592c243695c42c605e076656ebe5c5f07cd8149c86563c8c1e36cdb"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\original.zip": {
+      "bytes": 183734,
+      "sha256": "5f4cc1dfe8062140e752fab19c000c10dbfc53ca3021e81a013945fe51f682f9"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\result.json": {
+      "bytes": 6492,
+      "sha256": "0a78b217bda266fc5dc4de7d03da6aa2e7992a42c1869cafb4481c4c551d99cc"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\metadata.json": {
+      "bytes": 24707,
+      "sha256": "e1dc82ef5847234bece144105b276a2505f210d5dc73fcb06391a83631cbe4d5"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\original.zip": {
+      "bytes": 135657,
+      "sha256": "7bf245545176dada099cda01ff4497bf35303479026462aff7090cdcb858793d"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\result.json": {
+      "bytes": 8859,
+      "sha256": "08d44383fb4c445d188eaebcfcd1820c6ec22d303dea7e30fb72fa9f4e2f45c4"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\metadata.json": {
+      "bytes": 30422,
+      "sha256": "3e361982dfabe4c4d8abaa2e77e56490b7b28c61f95eb65480a3ab8877575a05"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\original.zip": {
+      "bytes": 1418162,
+      "sha256": "4fb05fab2ee4f770fe1cc9b23df0974d87ed88b04fc40645a64987b17f334982"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\result.json": {
+      "bytes": 12146,
+      "sha256": "88d489b21a1eefca1bbafd9b47141bd258615790c00b4fd08af1beae5c074efe"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\artifact-11668247499\\files\\flutter-dev-checks\\runs\\run-8c04b481f3fa441b90476ecee256dcce\\result.json": {
+      "bytes": 11799,
+      "sha256": "1e4f878b21a302c114117ddccd1e59e22912509412fd620f545f57517a67e565"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\artifact-11668247499\\files\\flutter-dev-checks\\runs\\run-8c04b481f3fa441b90476ecee256dcce\\logs\\tests.log": {
+      "bytes": 2083289,
+      "sha256": "504129b74a1521a8c28be84decc343ff46f1274c4db4de4e095532f23f2fd9bd"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\artifact-11668711016\\files\\flutter-dev-checks\\runs\\run-8a19d0ca1db14cfabe8e1e1f23bfed83\\result.json": {
+      "bytes": 12146,
+      "sha256": "dcc509a1766e027064f16a7078cc0d4aee303fa072c7332cf4c32d9eecfcc094"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\artifact-11668711016\\files\\flutter-dev-checks\\runs\\run-8a19d0ca1db14cfabe8e1e1f23bfed83\\logs\\tests.log": {
+      "bytes": 2170311,
+      "sha256": "2fa4ef522d0e72c3decbc973a3f0b312978e96a33c1130e5183124c3ea724394"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\result.json": {
+      "bytes": 2230,
+      "sha256": "b212f15be20412126b9f943f9d5afb424bdd986b2df9d5108528a688dca2c129"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\test_ota_ble_frame.py.log": {
+      "bytes": 3126,
+      "sha256": "3af60eccf7b007a2fb916af023e7fcf4aa759a7971091f0eb0a7409f64b5dd68"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\test_ota_ble_session.py.log": {
+      "bytes": 13450,
+      "sha256": "0ae239f2b6a82cd1ab813860a9cbdb6fafeab86d68d3727bd2b32078dde4dc95"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\test_ota_staging.py.log": {
+      "bytes": 277671,
+      "sha256": "dbb92a28e95e1a3389ce34f9cd0243e652fb190b6b94720b1c6376642c27e2a6"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\test_ota_package.py.log": {
+      "bytes": 8088,
+      "sha256": "b9b100897c6abd30422b2f2b31b2c0a37b6a74c0c5cbc88890c79d28c3269730"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\test_ota_patch.py.log": {
+      "bytes": 13689,
+      "sha256": "33959ec0efc5f0ea9d38976bed1ee0d58b1b968d9e9bfaa99d4852d995dbbf78"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\test_ota_backup.py.log": {
+      "bytes": 114,
+      "sha256": "610d80ae6364a72d27a2778ea16d53d6bb7a9f1ac64da803bdb7277ba9e0db5a"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-offline2\\firmware\\test_ota_device_info.py.log": {
+      "bytes": 75,
+      "sha256": "8432dd700bb585f3a6685ae26e0461179a52f05b224026c5c9194b87bf1b9ac8"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf": {
+      "bytes": 885784,
+      "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+    },
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\base.bin": {
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    }
+  },
+  "scope_limits": [
+    "CI originals prove their registered commits, not a new CI run at current HEAD.",
+    "Changed Validation inputs require their separately completed host reviews.",
+    "Ordinary success and host fault models do not prove physical cold power-cycle or electrical fault coverage.",
+    "This does not close all P3-4 Spec deliverables or any P5 reliability/release gate."
+  ],
+  "device_operations": 0,
+  "new_builds": 0,
+  "new_ci_runs": 0,
+  "new_test_executions": 0,
+  "frozen_contract_or_matrix_writes": 0
+}

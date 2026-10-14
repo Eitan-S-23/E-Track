@@ -1,0 +1,32 @@
+{
+  "operator": "Codex independent acceptance/root takeover on 2026-10-12",
+  "source": "cfe9af88d994c106c6601c6dfd1d59b37fbbdcb1",
+  "contract": "P3-4-v8",
+  "formal_commands_started": [
+    "CMD-Q-TRANSFER"
+  ],
+  "formal_command_exit": 1,
+  "qualification_ota_starts": 0,
+  "qualification_limit": 1,
+  "calibration_ota_starts": 0,
+  "calibration_limit": 12,
+  "new_apk_installs": 0,
+  "app_launches": 0,
+  "runtime_writes": 0,
+  "new_app_captures": 0,
+  "remote_capture_deletions": 0,
+  "flash_programs": 0,
+  "resets": 0,
+  "baud_changes": 0,
+  "network_tunnels_started": 0,
+  "ui_start_invitations": 0,
+  "passive_storage_diagnostics": 1,
+  "historical_captures_retained": 7,
+  "failure_phase": "pre-transfer MCU storage admission, before Network.start or Phone.start inside formal command",
+  "recovery_or_replay_performed": false,
+  "closure": {
+    "path": ".acceptance-p3-4\\round8\\admission\\takeover3-closure.json",
+    "bytes": 1219,
+    "sha256": "38782d0e7072ca56a1ecb919636ea01e3716f3a3840a617071abd9ed6b06392e"
+  }
+}

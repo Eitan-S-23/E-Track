@@ -1,0 +1,20 @@
+SEGGER J-Link Commander V8.18 (Compiled Mar  5 2025 14:43:35)
+DLL version V8.18, compiled Mar  5 2025 14:42:43
+
+J-Link Commander will now exit on Error
+Connecting to J-Link via USB...O.K.
+Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+Hardware version: V7.00
+J-Link uptime (since boot): N/A (Not supported by this model)
+S/N: -1
+License(s): RDI,FlashDL,FlashBP,JFlash,GDB
+VTref=3.300V
+
+
+Type "connect" to establish a target connection, '?' for help
+J-Link>J-Link>J-Link>VTref=3.300V
+ITarget=0mA
+TCK=0 TDI=0 TDO=1 TMS=0 TRES=1 TRST=0
+Supported target interface speeds:
+ - 16 MHz/n, (n>=4). => 4000kHz, 3200kHz, 2666kHz, ...
+J-Link>

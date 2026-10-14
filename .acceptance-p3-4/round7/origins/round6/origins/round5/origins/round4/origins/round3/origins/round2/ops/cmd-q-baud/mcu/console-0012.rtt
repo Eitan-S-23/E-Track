@@ -1,0 +1,6 @@
+BXPB: abort why=0 baud=0
+BXRX(1 b=921600 e=0 len=9): 2b554152543a380d0a
+BXPB: done baud=921600 comm=1 idx=8 useq=1 vseq=0
+BXRATE: known state=1 known=921600 old=0 target=0 step=1 deferred=0 seteff=0
+BXRX(2 b=921600 e=0 len=13): 2b5645523a56312e332e310d0a
+BXST: baud=921600 epoch=0 busy=0 state=1 known=921600 old=0 target=0 restored=0 rb=0 step=1 probe=0 ready=0 rxc=0 q=0 seq=2 rx=22 emit=2 drop=0 rej=0 logdrop=0 cmdr=0 disc=0

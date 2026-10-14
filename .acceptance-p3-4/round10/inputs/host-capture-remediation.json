@@ -1,0 +1,144 @@
+{
+  "source_commit": "9dd7b5502fa7fe553afba521db02d290b503127e",
+  "files": {
+    "Tools/ota/p34-acceptance/live_phone.py": "c2f65a4bad2751fb5abac08d9fe9a8aa9d1d5aa07efc697b5a01605499e812c4",
+    "tests/ota/test_p34_live_route.py": "451fd3da1ae165cbd9a08ade52f9cbeb762dc4f272188a73b55a4d3305b11c35"
+  },
+  "independent_review": {
+    "agent": "p34_host_fix_review",
+    "verdict": "DECIDED: no blocking findings",
+    "regressions": 20,
+    "boundary_probes": 3
+  },
+  "implementation_regressions": 66,
+  "query_only_capture_reconciled": true,
+  "retained_captures": [
+    "1790873190640854-e74f259a6cf81bd47609ba5e",
+    "1790882915541398-f0e7c878e47e73001842b7e8",
+    "1790886478814858-966a83c7a649c78702af5243",
+    "1790891079051299-33907bf1f4188996f192722e",
+    "1790895078341757-825e5ceec9021c26eb02cf1e",
+    "1791470681659748-6b319b3ac1f35fcbf637e008",
+    "1791485067506601-646e66bbbe96e9c037f0f0d7"
+  ],
+  "actual_previous_matrix": {
+    "path": ".acceptance-p3-4\\round9\\evidence-matrix.json",
+    "bytes": 98227,
+    "sha256": "f6a08c357231859db26a7dcb0d7a95d46c07ac069efc01513e5660c4ff240bd8"
+  },
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\live-route-final.started.json",
+      "bytes": 303,
+      "sha256": "f254f7b7a71aca216b06faa7d2eb632cbd12a84e68fad6202508381ef6d7f9b5"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\live-route-final.closed.json",
+      "bytes": 733,
+      "sha256": "993f45998591e34767873df73ed63e383732bc3cedda0080d94b6fea6d2d7868"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\live-route-final.stdout",
+      "bytes": 5414,
+      "sha256": "319c66eea23f1b02a7b9f971a5a84890b06f1b4e5bbd268d89dcdf4f5076662a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\live-route-final.stderr",
+      "bytes": 10272,
+      "sha256": "9d01948aed0715d91f2fba18e9a5b888c64f686b50f143c10abc629d32e77402"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\original-health.started.json",
+      "bytes": 1385,
+      "sha256": "d01a3e81efde83a23300231331fe65f5fc26ee5936fd996eca7a46b64dc5c7c1"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\original-health.closed.json",
+      "bytes": 1808,
+      "sha256": "a42b01ad7148135c77ee98364fbabe411912ae95941865d4c2aa2c96c0136da8"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\original-health.stdout",
+      "bytes": 441,
+      "sha256": "191678128fa971ec53af2876179bcdbc694e0dcac1fb478f8fa80b63bd33a0e2"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\self-test\\original-health.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\relevant-regressions.started.json",
+      "bytes": 1235,
+      "sha256": "a10033a8de793e678ed7af7ef7b38ebcf23f0d8c26e708fe14ed83f5f7a3eccd"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\relevant-regressions.closed.json",
+      "bytes": 1712,
+      "sha256": "cb54ed4a0ade02521fc76e81458c2b81fef6336cf222caf2dfac48970aad2137"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\relevant-regressions.stdout",
+      "bytes": 1379,
+      "sha256": "e388ce6e9ecc1317809757e2432fa28943edc0937e94c38a544a24cadb82fc0d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\relevant-regressions.stderr",
+      "bytes": 3438,
+      "sha256": "3e22945ebdd04b96915306f23c6e2195ee5075a97d546231c595bfcce80b7d2b"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\independent-probes.started.json",
+      "bytes": 3499,
+      "sha256": "39eb7e5b7e268f65eed58184faed50594da77f2a81bcb3e5ddd0e959b5bf60fa"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\independent-probes.closed.json",
+      "bytes": 3969,
+      "sha256": "588ab57f8e033cb6a9e3c24c8e5c4f48d921f95a38f40ea1fcc99b177fd65513"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\independent-probes.stdout",
+      "bytes": 92,
+      "sha256": "fd6aa841b713a1f5dae85e5662ae04e31a571bfcd28a33fed170f6e0a0be0fae"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\host-fix\\independent\\independent-probes.stderr",
+      "bytes": 486,
+      "sha256": "894a68c729ce9354ca743392e2dcb2e6d2e6f86dc2b7ad936ba1f06c1416d4ac"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\capture-reconciliation\\result.json",
+      "bytes": 819,
+      "sha256": "b922da03fc127b4f9b759b1d5bc797ca690575ad187f41980a618727c1d36aa1"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\capture-reconciliation\\archive.json",
+      "bytes": 946,
+      "sha256": "76f82cd296c59b497b1481a3906784d693b864568d6c59987c3fb3fbfa8b67e8"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\capture-reconciliation\\archive\\events.jsonl",
+      "bytes": 21188,
+      "sha256": "2461ba6e552e6e0a4c1bacc2c50cd163d70c51ee530838fb9834d46f6e56675d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\capture-reconciliation\\archive\\health.json",
+      "bytes": 238,
+      "sha256": "062ec3e64b5991d375a49dcd2385ef7fb6dcec82c70c5c9af709e86ce7aab5b9"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\capture-reconciliation\\runtime-restored.json",
+      "bytes": 834,
+      "sha256": "06883c92f7dec0df07d0fe57a954dfc7341bcd9c63c3e327791ecb68b7c0a6cc"
+    },
+    {
+      "path": ".acceptance-p3-4\\round10\\admission\\capture-reconciliation\\phone\\closed.json",
+      "bytes": 74,
+      "sha256": "c68a97e0104f2098f6fdae36270cc8d49fafc512f0eafa76e3f77fdec235e0d7"
+    }
+  ],
+  "qualification_ota_started": 0,
+  "calibration_ota_started": 0,
+  "product_or_criteria_changed": false
+}

@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0011-down-descriptor\\settings.jlink",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0011-down-descriptor\\sdk.log",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0011-down-descriptor\\commands.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 822506298808800,
+  "ended_monotonic_ns": 822506649465500,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0011-down-descriptor\\commander.stdout",
+    "bytes": 2235,
+    "sha256": "f92f65945eb135f29861ce6f236082f5c2031969fa0c3ab27ba65f19d24cd07d"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0011-down-descriptor\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

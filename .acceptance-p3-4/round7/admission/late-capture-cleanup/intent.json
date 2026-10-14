@@ -1,0 +1,30 @@
+{
+  "authorization": "User allowed exact preceding 7887-byte late-capture cleanup and requested fast continuation.",
+  "directory": "/data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1791733411743571-151409df12fd3ec70569f908",
+  "files": [
+    "events.jsonl",
+    "health.json"
+  ],
+  "previous_contract": {
+    "path": "docs\\acceptance-contracts\\P3-4-v6.contract.json",
+    "bytes": 163334,
+    "sha256": "7771bcfd35bec7ad4394abf1c6b33d8475f289d805c9be5840b5bc45ad86951c"
+  },
+  "previous_matrix": {
+    "path": ".acceptance-p3-4\\round6\\evidence-matrix.json",
+    "bytes": 365447,
+    "sha256": "8b6d268f6f797478704aa84298fd0f20b9cd8619fd6e0f0fd7283199c36f243d"
+  },
+  "archive": [
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\late-capture-archive\\capture\\events.jsonl",
+      "bytes": 7650,
+      "sha256": "3cb884bee8e561356ea590f9febe8b0412dd51c2ba8fdbb923d055adaa3bfe8d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\late-capture-archive\\capture\\health.json",
+      "bytes": 237,
+      "sha256": "43d62d3f0c6f7ecb09403951e24adc41625c91ed2b3f73c300823ec5e571c6fe"
+    }
+  ]
+}

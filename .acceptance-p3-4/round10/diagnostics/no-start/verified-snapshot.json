@@ -1,0 +1,45 @@
+{
+  "original": {
+    "path": ".acceptance-p3-4\\round10\\diagnostics\\no-start\\phone\\salvage\\snapshot-1.jsonl",
+    "bytes": 4801006,
+    "sha256": "33ba9b04ee56e3dc7505e9d15de499c9819af7edd4fc9e31b509fbca0fbb2d18"
+  },
+  "envelope": {
+    "schema": 1,
+    "captureId": "1791806205073776-2639ebf186f273ac86fb0c92",
+    "sentinel": "OTAOBS96bb2c74d5ad6ccecaf30e40",
+    "target": "E3:49:E1:14:D6:CB",
+    "pid": 13122,
+    "platform": "android",
+    "records": 39564,
+    "producerLines": 39561,
+    "input": {
+      "packageSha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+      "packageBytes": 1048576,
+      "currentVersionCode": 30286,
+      "currentImageSha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+      "targetVersionCode": 30287,
+      "targetImageSha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+      "deviceAddress": "e3:49:e1:14:d6:cb",
+      "appLifecycle": "resumed"
+    },
+    "outcome": "completed",
+    "rawSha256": "33ba9b04ee56e3dc7505e9d15de499c9819af7edd4fc9e31b509fbca0fbb2d18",
+    "eligibleForThreshold": false,
+    "independentAcceptance": "NOT_RUN",
+    "scope": "envelope/identity integrity only; original timing/grouping gates still required",
+    "ackErrorObservations": {
+      "matching": [],
+      "ignored": [],
+      "sealedCounts": []
+    }
+  },
+  "runtime_sha256": "978ae28d68458a069b1d6afcca29a0619df6347ebc3ee206fc722573ed7c0aaa",
+  "original_entry_failed": true,
+  "no_new_ota": true,
+  "statistics": {
+    "path": ".acceptance-p3-4\\round10\\diagnostics\\no-start\\app-statistics.json",
+    "bytes": 100295,
+    "sha256": "3787e7fe7c3a4211d4cc2eefe927608054d3b7da8e0d36773520e881eb721960"
+  }
+}

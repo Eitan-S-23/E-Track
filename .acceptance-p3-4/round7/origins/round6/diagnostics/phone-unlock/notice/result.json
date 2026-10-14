@@ -1,0 +1,12 @@
+{
+  "sent": true,
+  "current_session": true,
+  "real_mention": true,
+  "requires_chat_reply": false,
+  "request": "Unlock V2312A, remain on home screen, keep screen on; no query/download/start.",
+  "receipt": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\phone-unlock\\notice\\unlock-reminder.stdout",
+    "bytes": 27,
+    "sha256": "49b5012ab2d22dd621998ea4fbda7a03af5f9af1c5fb9ef76bccf66fd07a019a"
+  }
+}

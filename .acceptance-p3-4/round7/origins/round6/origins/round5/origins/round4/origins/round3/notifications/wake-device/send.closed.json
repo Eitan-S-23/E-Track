@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "D:/github/my/cc-connect-thread-guard/build/cc-connect.exe",
+    "send",
+    "--project",
+    "codex-project",
+    "--data-dir",
+    "C:\\Users\\SU\\.cc-connect",
+    "--stdin"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 843300773544100,
+  "ended_monotonic_ns": 843301812764600,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round3\\notifications\\wake-device\\send.stdout",
+    "bytes": 27,
+    "sha256": "49b5012ab2d22dd621998ea4fbda7a03af5f9af1c5fb9ef76bccf66fd07a019a"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round3\\notifications\\wake-device\\send.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

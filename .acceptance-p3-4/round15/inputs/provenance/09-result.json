@@ -1,0 +1,118 @@
+{
+  "run": 38047823559,
+  "name": "firmware",
+  "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+  "conclusion": "success",
+  "archive": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\original.zip",
+    "bytes": 183734,
+    "sha256": "5f4cc1dfe8062140e752fab19c000c10dbfc53ca3021e81a013945fe51f682f9"
+  },
+  "files": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\1_Build firmware (arm-none-eabi-gcc).txt",
+      "bytes": 890689,
+      "sha256": "3e0b65713fe33e1bc19326f7aaff2f255f5da727be977123f07ac8da5e52f617"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\system.txt",
+      "bytes": 582,
+      "sha256": "a6b0627e1b6add5c87033431762ea6067fc6724760d7d04ea63128862e95d0b1"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\1_Set up job.txt",
+      "bytes": 2200,
+      "sha256": "a5f2657188b2772e6c04a0927dc8cd9f6a90442d2e41b2c89996bc966fecaafb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\2_Checkout repository.txt",
+      "bytes": 15567,
+      "sha256": "ef21cc42310aa9cf40efcc6a7a2c260ea3c9847c8c26ff2a7df81b1745765d11"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\3_Install Arm GNU Toolchain 13.3.Rel1.txt",
+      "bytes": 1577,
+      "sha256": "b037743bdcf76bfb452c16e2b3c8edad4533ff5010233b27af4c104f5a9d53a0"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\4_Install Ninja.txt",
+      "bytes": 6937,
+      "sha256": "afc1f42acb5ca33b102c50fac4e3fea3a6ee21b1433f77cc6309ecda05eb6b60"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\5_Install OTA host test dependencies.txt",
+      "bytes": 1492,
+      "sha256": "7b064eeca005b7dc174b93d4135a84366f18af4c7cfe04adc73c3e787891043f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\6_Verify reproducible GCC timestamps.txt",
+      "bytes": 1100,
+      "sha256": "05fe3f32f3e7fdf838ca8345f4bc42eab6aebb946d76155404000b1c742fd453"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\7_Extract firmware version.txt",
+      "bytes": 4621,
+      "sha256": "70057aae9d92be014ce61cdd8c40549e379754959b212279bf88812f7924cf31"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\8_Configure (CMake + Ninja).txt",
+      "bytes": 2128,
+      "sha256": "003c2086c8a7840076ededfee864cad111b02ca7454b0147d3fe80cef671b0fe"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\9_Build firmware.txt",
+      "bytes": 377777,
+      "sha256": "b1b59678474aa322c2841cafd05845709b31b23d73501787c35e6ccadcc115d4"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\10_Run host tests (boot vectors, OTA host tests, P3-1 product regressions).txt",
+      "bytes": 452357,
+      "sha256": "3fa05d03c755ae4eaa4ccd790ee652d5af75a11660e2de8635424c9f049dea4a"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\11_Validate OTA App layout.txt",
+      "bytes": 9423,
+      "sha256": "d65f142521fe0537843639358b0e6a782600b5c3a4b87e676df7e7e506809566"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\12_Validate OTA Boot skeleton.txt",
+      "bytes": 1151,
+      "sha256": "88dd575eadcb58451dd9e3bf9b96daa2c4bcc92aca9f78a11ba115a660b4db67"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\13_Report firmware artifacts.txt",
+      "bytes": 1660,
+      "sha256": "0b1985ffe7104dda5ee034867ab6cee24268663d2eb8aff40f7c8b9d2d436902"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\14_Build the P3-4 acceptance candidate.txt",
+      "bytes": 2010,
+      "sha256": "fd4e6832751e64450de6916a829d403b32b27108e974d36bf68cb7b8c2252d8f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\15_Preserve the P3-4 candidate build evidence.txt",
+      "bytes": 2738,
+      "sha256": "48031efe41766874338a16f16f416543c8ebc3c277eabe79af59058b7fa5b2da"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\16_Upload firmware artifact.txt",
+      "bytes": 2820,
+      "sha256": "b116cd76810d5bd931a9d80645faf6d06fe7050f5cf9c71a40134b9fde6ab462"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\17_Upload Boot artifact.txt",
+      "bytes": 2777,
+      "sha256": "8f76a96da5d48e8d30461e3e761cc3098788f6bf68d380d3f8ae7c622211f05b"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\34_Post Checkout repository.txt",
+      "bytes": 1709,
+      "sha256": "34bae3407990eb9b59153b353e895adf63188206d54f772d39febbb8f8e6c03c"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\files\\Build firmware (arm-none-eabi-gcc)\\35_Complete job.txt",
+      "bytes": 699,
+      "sha256": "4c7e26fd8d33f04af7ede5eef697b906e700ec205b576a41a0625f8983b17f05"
+    }
+  ]
+}

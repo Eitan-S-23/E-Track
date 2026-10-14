@@ -1487,6 +1487,91 @@ class GovernancePromptScopeTests(unittest.TestCase):
         for entry in ("CLAUDE.md", "app/bluetooth_flutter_Trace/CLAUDE.md"):
             self.assertIn("@AGENTS.md", (ROOT / entry).read_text(encoding="utf-8-sig"))
 
+    def test_jlink_candidate_installation_lesson_is_routed(self):
+        entry = (ROOT / "AGENTS.md").read_text(encoding="utf-8-sig")
+        index = (ROOT / "docs/agent-collaboration/index.md").read_text(encoding="utf-8")
+        record = (ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8")
+        policy = (ROOT / "docs/device-experiment-policy.md").read_text(encoding="utf-8")
+        self.assertIn("`PROJECT-05`", entry)
+        self.assertIn("`docs/device-experiment-policy.md`", entry)
+        self.assertIn("project-workflow.md#project-05-j-link-installation-before-ota-measurement", index)
+        self.assertEqual(1, record.count("## PROJECT-05: J-Link Installation Before OTA Measurement"))
+        self.assertIn("../device-experiment-policy.md#candidate-installation-j-link-before-extra-ota", record)
+        self.assertEqual(1, policy.count("## Candidate Installation: J-Link Before Extra OTA"))
+
+    def test_user_intervention_notifications_distinguish_mid_task_from_final(self):
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        heading = "## User Intervention Notifications"
+        self.assertEqual(1, contract.count(heading))
+        section = contract.split(heading, 1)[1].split("\n## ", 1)[0]
+        normalized = " ".join(section.split())
+        self.assertIn("Only when the current execution is being kept open", normalized)
+        self.assertIn("automatic completion @mention for a normal final reply", normalized)
+        self.assertIn("even when it asks for a response", normalized)
+        self.assertIn("Check the send receipt", section)
+        self.assertIn("current session's project, session key and requester identity", section)
+        self.assertIn('<at user_id="CURRENT_REQUESTER_OPEN_ID">', section)
+        self.assertIn("Do not send test reminders or repeat an unchanged pending request", normalized)
+        self.assertNotIn(
+            "any genuinely required user action must be requested through cc-connect",
+            normalized.lower(),
+        )
+        scenarios = {
+            "Normal final report": "Automatic completion only; no manual @mention",
+            "Final handoff or approval question": "Automatic completion only; no manual @mention",
+            "Mid-task SD card, cable or phone action without a chat reply": "Manual real @mention plus send receipt",
+            "Authorization or permission requested in chat": "End with the question; automatic completion only; no manual @mention",
+            "Choice, confirmation or missing information requested in chat": "End with the question; automatic completion only; no manual @mention",
+            "Approval while another task or worker is still running": "End with the question; automatic completion only; no manual @mention",
+            "Ordinary progress or autonomous work": "No manual @mention",
+        }
+        for scenario, action in scenarios.items():
+            with self.subTest(scenario=scenario):
+                self.assertIn(f"| {scenario} | {action} |", section)
+
+    def test_chat_reply_requests_never_trigger_manual_mentions(self):
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        section = contract.split("## User Intervention Notifications", 1)[1].split("\n## ", 1)[0]
+        normalized = " ".join(section.split())
+        self.assertIn("All three conditions are required", normalized)
+        self.assertIn("end the current execution", normalized)
+        self.assertIn("resume after the user's answer", normalized)
+        self.assertIn("Keeping another task or worker running does not create an exception", normalized)
+        self.assertIn('do not require an "OK" reply in chat', normalized)
+        self.assertNotIn("granting missing authorization needed to continue", normalized)
+        self.assertNotIn("Mid-task blocking approval with execution kept open", section)
+        for path in ("AGENTS.md", "docs/agent-collaboration-contract.md",
+                     ".agents/skills/e-track-flutter-debug/SKILL.md",
+                     ".agents/skills/e-track-flutter-debug/references/device-session.md"):
+            with self.subTest(path=path):
+                text = " ".join((ROOT / path).read_text(encoding="utf-8-sig").split())
+                self.assertIn("without sending a chat reply", text)
+                self.assertIn("Requests requiring a chat reply never use manual @mentions", text)
+        record = " ".join((ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8").split())
+        self.assertIn('The earlier "mid-task blocking approval" exception is withdrawn', record)
+
+    def test_mid_task_notification_lesson_and_skill_routes_are_consistent(self):
+        entry = (ROOT / "AGENTS.md").read_text(encoding="utf-8-sig")
+        index = (ROOT / "docs/agent-collaboration/index.md").read_text(encoding="utf-8")
+        record = (ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8")
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        lesson = "project-workflow.md#project-06-only-manual-mentions-for-mid-task-blockers"
+        policy = "agent-collaboration-contract.md#user-intervention-notifications"
+        self.assertIn("`PROJECT-06`", entry)
+        self.assertIn("do not send a duplicate manual @mention", entry)
+        self.assertEqual(1, index.count(lesson))
+        self.assertIn("agent-collaboration/" + lesson, contract)
+        self.assertEqual(1, record.count("## PROJECT-06: Only Manual Mentions For Mid-Task Blockers"))
+        self.assertIn("../" + policy, record)
+        skill = ".agents/skills/e-track-flutter-debug/"
+        for path, prefix in ((skill + "SKILL.md", "../../../docs/"),
+                             (skill + "references/device-session.md", "../../../../docs/")):
+            with self.subTest(path=path):
+                content = (ROOT / path).read_text(encoding="utf-8")
+                self.assertEqual(1, content.count(prefix + policy))
+                self.assertIn("mid-task", content)
+                self.assertIn("normal final reply", content)
+
     def test_shared_documents_have_resolvable_project_local_links(self):
         documents = [ROOT / "docs/agent-collaboration-contract.md",
                      ROOT / "docs/device-experiment-policy.md",
@@ -1501,6 +1586,88 @@ class GovernancePromptScopeTests(unittest.TestCase):
                 self.assertTrue(target.is_relative_to(ROOT.resolve()), link)
                 self.assertNotIn(".cache", target.relative_to(ROOT.resolve()).parts, link)
                 self.assertTrue(target.is_file(), str(target))
+
+    def test_p34_v2_scope_has_versioned_governance_routes(self):
+        path = "docs/ota-ble-v2-contract.md"
+        supplement = (ROOT / path).read_text(encoding="utf-8")
+        governance = VALIDATOR.PROFILE_DEFINITIONS["Governance"]
+        self.assertIn(path, governance["top_files"])
+        self.assertIn(path, governance["required_paths"])
+        self.assertIn(path, VALIDATOR._profile_paths(ROOT, "Governance"))
+        self.assertIn("Revision: 1 (2026-10-09). Decision: `OTA-DEC-015`", supplement)
+        self.assertIn("production freeze and release are NOT approved", supplement)
+        self.assertIn("`credit_end = min(total_len, durable_off + 8192)`", supplement)
+        self.assertIn("at most 24 submitted, not-yet-accepted DATA segments", supplement)
+        self.assertIn("1048576-byte ETU", supplement)
+        self.assertIn("clamp(3*P99_ACK, 500 ms, 2000 ms)", supplement)
+        for document in ("docs/ota-spec-decisions.md", "docs/ota-cross-system-contracts.md",
+                         "docs/ota-prompts/prompt-P3-4-experiment.md",
+                         "docs/ota-prompts/supplement-P3-4-remediation-2026-10-09.md"):
+            self.assertIn("ota-ble-v2-contract.md", (ROOT / document).read_text(encoding="utf-8"))
+        workflow = (ROOT / ".github/workflows/acceptance-governance.yml").read_text(encoding="utf-8")
+        self.assertEqual(2, workflow.count('- "' + path + '"'))
+        for link in re.findall(r"\[[^\]]+\]\(([^)]+)\)", supplement):
+            self.assertTrue((ROOT / "docs" / link.split("#", 1)[0]).resolve().is_file(), link)
+        batch = ROOT / "docs/ota-prompts/supplement-P3-4-remediation-2026-10-09.md"
+        self.assertIsNone(PostP26SpecGovernanceTests.PROMPT_FILENAME_HINT_RE.fullmatch(batch.name))
+        self.assertNotRegex(batch.read_text(encoding="utf-8"), r"(?m)^task_id:")
+        self.assertIn(batch.relative_to(ROOT).as_posix(), VALIDATOR._profile_paths(ROOT, "Governance"))
+
+    def test_p34_plugin_and_compiled_ack_inputs_have_real_owners(self):
+        vendor = "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/"
+        plugin = vendor + "android/src/main/java/com/lib/flutter_blue_plus/FlutterBluePlusPlugin.java"
+        native_test = vendor + "android/src/test/java/com/lib/flutter_blue_plus/NativeWriteTraceTest.java"
+        ack_header = "Tools/ota/p34_timed_ack_batch.h"
+        erase_header = "Tools/ota/p34_staging_erase.h"
+        collector = "Tools/ota/p34_observation.py"
+        candidates = [plugin, native_test, ack_header, erase_header, collector]
+        selected = {
+            profile: set(VALIDATOR._filter_profile_paths(candidates, definition))
+            for profile, definition in VALIDATOR.PROFILE_DEFINITIONS.items()
+        }
+        for profile in ("Production", "Flutter"):
+            self.assertIn(plugin, selected[profile])
+            self.assertNotIn(native_test, selected[profile])
+        self.assertIn(native_test, selected["Validation"])
+        for profile in ("Production", "Firmware"):
+            self.assertIn(ack_header, selected[profile])
+            self.assertIn(erase_header, selected[profile])
+            self.assertNotIn(collector, selected[profile])
+        self.assertNotIn(plugin, selected["Firmware"])
+        self.assertIn(collector, selected["Validation"])
+        self.assertNotIn(collector, selected["Capture"])
+
+    def test_p34_build_inputs_are_exact_exceptions_not_generated_outputs(self):
+        helper = "Tools/ota/p34-acceptance/build.py"
+        gradle = [
+            "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+            "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+            "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle",
+        ]
+        generated = [
+            "Tools/ota/p34-acceptance/build-cache/result.json",
+            "Tools/ota/p34-acceptance/build-extra.py",
+            "app/bluetooth_flutter_Trace/android/app/build/outputs/app.apk",
+            "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build/intermediates/classes.dex",
+        ]
+        candidates = [helper, *gradle, *generated]
+        selected = {
+            profile: set(VALIDATOR._filter_profile_paths(candidates, definition))
+            for profile, definition in VALIDATOR.PROFILE_DEFINITIONS.items()
+        }
+        for profile, paths in (("Validation", [helper]), ("Production", gradle), ("Flutter", gradle)):
+            definition = VALIDATOR.PROFILE_DEFINITIONS[profile]
+            for path in paths:
+                self.assertIn(path, selected[profile])
+                self.assertIn(path, definition["top_files"])
+                self.assertIn(path, definition["required_paths"])
+                mutant = copy.deepcopy(definition)
+                mutant["top_files"].remove(path)
+                self.assertNotIn(path, VALIDATOR._filter_profile_paths(candidates, mutant))
+        for profile, paths in selected.items():
+            self.assertFalse(paths.intersection(generated), profile)
+        self.assertNotIn(helper, selected["Firmware"])
+        self.assertFalse(set(gradle).intersection(selected["Firmware"]))
 
     def test_dispatch_prompts_do_not_live_outside_governed_dir(self):
         stray = self.find_stray_dispatch_prompts(self.enumerate_repo_markdown())
@@ -1857,6 +2024,179 @@ class AcceptanceExecutionPolicyTests(unittest.TestCase):
         self.assertIn("freeze_tree", rules)
         self.assertIn("不授予操作权限或追加配额", rules)
         self.assertNotIn("重算 manifest", rules)
+
+    @staticmethod
+    def redundant_acceptance_directives(text):
+        obsolete = (
+            "独立冻结 agent 完成后才能验收",
+            "推荐值经独立复跑得到一致结论",
+            "失败轮必须从计数中剔除",
+            "该轮失效并从已知起点重跑",
+            "三类 manifest 可生成",
+            "创建 P5-3 的版本化验收合同",
+            "prompt 骨架（复制此段并填空）",
+            "正式验收由非实现会话重跑",
+            "只补不同故障条件",
+        )
+        errors = [directive for directive in obsolete if directive in text]
+        before_promotion = text.split("### P5 后 production promotion", 1)[0]
+        if "GitHub Release 精确含三类正式资产" in before_promotion:
+            errors.append("GitHub Release 精确含三类正式资产")
+        return errors
+
+    def test_canonical_specs_remove_redundant_handoffs_and_replays(self):
+        for name in (
+            "template-implementation", "template-acceptance", "P1-7-implementation", "P3-4-experiment",
+            "P3-5-integration", "P3-8-implementation", "P4-1-implementation",
+            "P4-4-integration", "P5-1-acceptance", "P5-2-acceptance", "P5-3-acceptance",
+        ):
+            with self.subTest(prompt=name):
+                text = (ROOT / f"docs/ota-prompts/prompt-{name}.md").read_text(encoding="utf-8")
+                self.assertEqual([], self.redundant_acceptance_directives(text))
+
+    def test_redundant_directive_guard_rejects_regressions(self):
+        text = (ROOT / "docs/ota-prompts/prompt-P5-1-acceptance.md").read_text(encoding="utf-8")
+        for directive in (
+            "独立冻结 agent 完成后才能验收",
+            "失败轮必须从计数中剔除",
+            "该轮失效并从已知起点重跑",
+            "三类 manifest 可生成",
+            "创建 P5-3 的版本化验收合同",
+            "GitHub Release 精确含三类正式资产",
+            "正式验收由非实现会话重跑",
+            "只补不同故障条件",
+        ):
+            with self.subTest(directive=directive):
+                self.assertEqual([directive], self.redundant_acceptance_directives(text + "\n" + directive))
+
+    def test_two_owner_handoff_keeps_one_spec_and_real_authority(self):
+        contract = self.CONTRACT_DOC.read_text(encoding="utf-8")
+        for marker in ("不需要第三个冻结 agent", "已有唯一任务 Spec 时双方共用它",
+                       "新增标准/权限仍由获授权的责任人裁定"):
+            self.assertIn(marker, contract)
+        for role in ("implementation", "acceptance"):
+            text = (ROOT / f"docs/ota-prompts/prompt-template-{role}.md").read_text(encoding="utf-8")
+            self.assertIn("readiness 的唯一 Spec", text)
+            self.assertIn("不复制成第二份 Spec", text)
+            self.assertNotIn("（非实现方）撰写", text)
+        collaboration = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        self.assertIn("one independent acceptance reviewer", collaboration)
+        self.assertIn("not an extra mandatory approval layer", collaboration)
+
+    def test_raw_evidence_adoption_does_not_invent_physical_execution(self):
+        contract = self.CONTRACT_DOC.read_text(encoding="utf-8")
+        section = contract.split("### 0.1 ", 1)[1].split("### 0.2 ", 1)[0]
+        for marker in ("`REUSED`", "同任务谱系", "`external_inputs`", "独立离线核验",
+                       "不表示又做了一次硬件", "原操作、日期、操作者", "缺失/污染原件",
+                       "未决产品失败", "不能事后挑选成功笔", "绝对截止时间",
+                       "同一次采样内不自动重试", "不重置计数、不延长期限", "不用重启后状态冒充重启前观察"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, section)
+        self.assertEqual([], self.sampling_retry_scope_violations(section))
+
+    @staticmethod
+    def sampling_retry_scope_violations(text):
+        text = " ".join(text.split())
+        required = (
+            "同一次采样内不自动重试、不重置计数、不延长期限",
+            "保存的原件仍可离线重释",
+            "真实修复或有证据的状态变化后",
+            "按已有授权和 rerun plan 最小复验",
+            "原失败和已用额度必须保留",
+        )
+        return [clause for clause in required if clause not in text]
+
+    def test_sampling_retry_guard_allows_justified_later_verification(self):
+        text = self.CONTRACT_DOC.read_text(encoding="utf-8")
+        section = text.split("### 0.1 ", 1)[1].split("### 0.2 ", 1)[0]
+        self.assertEqual([], self.sampling_retry_scope_violations(section))
+        changes = (
+            ("同一次采样内不自动重试", "所有后续复测都禁止"),
+            ("保存的原件仍可离线重释", "不允许重新解释原件"),
+            ("真实修复或有证据的状态变化后", "不论有无修复或变化"),
+            ("按已有授权和 rerun plan 最小复验", "不允许后续复验"),
+        )
+        for before, after in changes:
+            with self.subTest(change=after):
+                self.assertIn(before, section)
+                self.assertTrue(self.sampling_retry_scope_violations(section.replace(before, after)))
+
+    def test_p5_uses_v3_and_docs_review_does_not_require_another_bundle(self):
+        for task in ("P5-1", "P5-2"):
+            text = (ROOT / f"docs/ota-prompts/prompt-{task}-acceptance.md").read_text(encoding="utf-8")
+            for marker in ("freeze_commit", "freeze_tree", "profile_config_blob", "external_inputs",
+                           "独立离线", "原操作日期", "真实依赖"):
+                with self.subTest(task=task, marker=marker):
+                    self.assertIn(marker, text)
+        docs = (ROOT / "docs/ota-prompts/prompt-P5-3-acceptance.md").read_text(encoding="utf-8")
+        for marker in ("不强制新建 P5-3 版本化 JSON 合同", "已有正式冻结义务不能改名逃避",
+                       "轻量仅减封包", "不为审文档再做 OTA", "无副作用 dry-run"):
+            self.assertIn(marker, docs)
+
+    def test_final_campaign_ownership_preserves_numerical_gates(self):
+        shared = (ROOT / "docs/ota-cross-system-contracts.md").read_text(encoding="utf-8")
+        tuning = shared.split("### OTA-XC-BLE-TUNING", 1)[1].split("### OTA-XC-FLUTTER-TRANSPORT", 1)[0]
+        for marker in (
+            "| 同组 30/30 完整成功、真实四小时 soak、性能统计 | P5-1 |",
+            "| 真实后端的 10/10 断连恢复 | P3-5 |",
+            "referencePackageBytes=1048576", "120 秒", "150 秒",
+            "effectiveThroughputKiBps >= 9", "1%", "maxRetries=5",
+            "30 秒无 durable", "clamp(3*P99_ACK, 500ms, 2000ms)",
+            "nearest-rank", "不能为共用原件隐去变化或失败",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, tuning)
+        p51 = (ROOT / "docs/ota-prompts/prompt-P5-1-acceptance.md").read_text(encoding="utf-8")
+        for marker in ("SD/BLE × full/patch", "30/30", "四小时不可恢复错误数为 0",
+                       "不能剔除后凑 30/30", "不等待本卡自己的长测"):
+            self.assertIn(marker, p51)
+        p38 = (ROOT / "docs/ota-prompts/prompt-P3-8-implementation.md").read_text(encoding="utf-8")
+        self.assertIn("前台成功不能代替后台/锁屏", p38)
+        for name in ("P3-5-integration", "P5-2-acceptance"):
+            text = (ROOT / f"docs/ota-prompts/prompt-{name}.md").read_text(encoding="utf-8")
+            self.assertIn("原件仍有效时", text)
+            self.assertIn("未覆盖或按真实依赖判定失效", text)
+            self.assertNotIn("只补不同故障条件", text)
+
+    def test_staging_qualifies_p4_but_production_still_waits_for_p5(self):
+        shared = (ROOT / "docs/ota-cross-system-contracts.md").read_text(encoding="utf-8")
+        gate = shared.split("### OTA-XC-RELEASE-GATE", 1)[1].split("## 7.", 1)[0]
+        for marker in ("且 P5 验收通过后", "OTA_BOOT_CHAIN_READY=true",
+                       "产生任何远端副作用前必须重新构建", "摘要与 rehearsal 完全一致",
+                       "不得创建 GitHub prerelease", "独立审批"):
+            self.assertIn(marker, gate)
+        for name in ("P4-1-implementation", "P4-4-integration"):
+            text = (ROOT / f"docs/ota-prompts/prompt-{name}.md").read_text(encoding="utf-8")
+            self.assertIn("staging", text)
+            self.assertIn("不相互等待完成态" if name.startswith("P4-4") else "避免相互等待完成态", text)
+            self.assertIn("零副作用", text)
+
+    def test_production_asset_checks_are_required_after_p5_not_before(self):
+        text = (ROOT / "docs/ota-prompts/prompt-P4-1-implementation.md").read_text(encoding="utf-8")
+        heading = "### P5 后 production promotion"
+        before, after = text.split(heading, 1)
+        self.assertNotIn("GitHub Release 精确含三类正式资产", before)
+        for marker in ("GitHub Release 精确含三类正式资产", "R2 对象与 Release/metadata 同字节",
+                       "数量/类型/名称", "Release/R2 发布后 readback", "owner/environment"):
+            self.assertIn(marker, after)
+        self.assertEqual([], self.redundant_acceptance_directives(text))
+        self.assertIn("GitHub Release 精确含三类正式资产",
+                      self.redundant_acceptance_directives(text.replace(heading, "")))
+
+    def test_historical_prompt_is_preserved_under_its_supplement_name(self):
+        old = ROOT / "docs/ota-prompts/prompt-P3-4-implementation.md"
+        new = ROOT / "docs/ota-prompts/supplement-P3-4-host-remediation-2026-09-20.md"
+        self.assertFalse(old.exists())
+        # Checkout EOL conversion is distinct from the byte-pinned move audit.
+        raw = new.read_bytes().replace(b"\r\n", b"\n")
+        self.assertEqual(13533, len(raw))
+        self.assertEqual("fc119919f0efef2be5c9295574a763982ab8027cc2bd1515cce04c0111c79158",
+                         hashlib.sha256(raw).hexdigest())
+        record = (ROOT / "docs/agent-collaboration/project-workflow.md").read_text(encoding="utf-8")
+        self.assertIn(old.relative_to(ROOT).as_posix(), record)
+        self.assertIn(new.name, record)
+        index = (ROOT / "docs/agent-collaboration/index.md").read_text(encoding="utf-8")
+        self.assertIn("PROJECT-ACCEPTANCE-FLOW", index)
 
     P33_HARDWARE_EVIDENCE = (
         "APK 实际安装",

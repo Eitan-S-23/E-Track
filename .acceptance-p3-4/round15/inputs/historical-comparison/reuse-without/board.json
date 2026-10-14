@@ -1,0 +1,87 @@
+{
+  "started": "2026-09-22T11:04:03.065770+00:00",
+  "candidate": "reuse-without",
+  "result": "TARGET_VERIFIED_RETAINED",
+  "source": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\capture.py",
+    "bytes": 9447,
+    "sha256": "8a1b97aec2ad7c61cf07033fac53d794c172ae0a3cece3a444ae7508ddf289f8"
+  },
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10680649265\\contents\\run-ae4251be3a6842cdba86ebe02d39fade\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131603030,
+    "sha256": "f1e84d318d83727da93d81d8299c685680b5e8fedf5ef607b3abd203c473031f"
+  },
+  "map_bindings": {
+    "rtt": 537215148,
+    "tick": 536888344,
+    "core_clock": 536871184,
+    "systick_reload": 3758153748,
+    "handler": 134314304,
+    "handler_bytes": "024a136801331360704700bf18440020"
+  },
+  "baseline_sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+  "target_sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+  "preflight_ready": true,
+  "reset_started": true,
+  "flash": 0,
+  "at": 0,
+  "ota_frames_sent_by_host": 0,
+  "independent_acceptance": false,
+  "native_history_before": {
+    "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+    "size": 2270,
+    "sha256": "7e0d3213291563004b2590fd94e98b68739966b442be978de714f34689599f90",
+    "mtime_ns": 1789989701750462700
+  },
+  "baseline_image": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\image.bin",
+    "size": 603764,
+    "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+    "mtime_ns": 1790075062248839000
+  },
+  "baseline_boot": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\boot-region.bin",
+    "size": 65536,
+    "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+    "mtime_ns": 1790075064360959000
+  },
+  "final_image": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\final-image.bin",
+    "size": 603764,
+    "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+    "mtime_ns": 1790075862480970700
+  },
+  "final_boot": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\final-boot-region.bin",
+    "size": 65536,
+    "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+    "mtime_ns": 1790075864544437800
+  },
+  "sd_ready": 1,
+  "final_identity": {
+    "version_code": 30207,
+    "version_name": "3.2.7-p34b",
+    "image_len": 603764,
+    "raw_image_sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe"
+  },
+  "ended": "2026-09-22T11:17:44.663651+00:00",
+  "elapsed_seconds": 821.5979116000235,
+  "state": {
+    "epoch": 1,
+    "baseline_confirmed": false,
+    "target_bcb_observed": true,
+    "begin_reserved": true,
+    "begin_epoch": 0,
+    "ready_to_begin": false,
+    "ready_for_final_readback": true
+  },
+  "reader_closed": true,
+  "native_history_after": {
+    "path": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+    "size": 2270,
+    "sha256": "7e0d3213291563004b2590fd94e98b68739966b442be978de714f34689599f90",
+    "mtime_ns": 1789989701750462700
+  },
+  "discarded_partial_bytes": 0
+}

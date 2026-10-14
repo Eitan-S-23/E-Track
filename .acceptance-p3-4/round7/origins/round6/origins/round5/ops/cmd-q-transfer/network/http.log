@@ -1,0 +1,2 @@
+GET /api/public/firmware/latest?appId=trace&deviceModel=e-track-at32f435&channel=stable&currentVersionCode=30286&currentImageSha=9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc&hardwareRevision=1&layoutId=1&bootVersion=1&protocolVersion=1&appVersionCode=86 -> 200 (1112 bytes) req=dbe3444ed76440ccb5c153811631cc51
+GET /api/public/firmware/download?tokenVersion=2&assetId=p34-reference-patch&releaseId=p34-reference&kind=patch&purpose=public-ota&expiresAt=1791728084&keyVersion=1&signature=<redacted> -> 200 (1048576 bytes) req=44e40d3c2945494db5cad67831228f24

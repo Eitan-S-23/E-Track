@@ -1,0 +1,220 @@
+{
+  "criterion": "Q-INITIAL",
+  "result": "PASS",
+  "execution": "EXECUTED",
+  "observed": true,
+  "health": {
+    "health": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        52204708,
+        52204708,
+        30015,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        52204960,
+        52204960,
+        30015,
+        1,
+        1
+      ]
+    ],
+    "registers": {
+      "vtor": 134285312,
+      "cfsr": 0,
+      "hfsr": 0,
+      "dhcsr": 16842753,
+      "sdio": 0,
+      "freeze": 0
+    },
+    "confirmed_state": 4,
+    "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+  },
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5044,
+    "high_water_bytes": 3148,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "storage": {
+    "jedec": 15679512,
+    "capacity_bytes": 16777216,
+    "slots": {
+      "candidate_slot": {
+        "erased": false,
+        "bytes": 623124,
+        "crc32": 363595034,
+        "version": 30286,
+        "sha8": "f5668644929f260a"
+      },
+      "backup_slot": {
+        "erased": false,
+        "bytes": 623124,
+        "crc32": 363595034,
+        "version": 30285,
+        "sha8": "4fc19f0408945589"
+      },
+      "recovery_slot": {
+        "erased": false,
+        "bytes": 619580,
+        "crc32": 2429394932,
+        "version": 30276,
+        "sha8": "deb4484dd0614f49"
+      }
+    },
+    "staging_header_hex": "4554534c03ffffff4d86040099f067754e7600006bc750062eeb9a53544d4f43",
+    "staging_journal_sha256": "8e38e6cef30ebfb17d145d165c446a9847adce51b37d08cb9ec2e483af19fde4",
+    "staging_erased": false,
+    "journal": {
+      "erased": false,
+      "package_sha256": "6bc750062eeb9a536e9173ba2ce8d5cec1284873d8c4a2da3bf2e46bc9b802dc",
+      "bytes": 296525,
+      "durable": 296525,
+      "matches_reference": false,
+      "expected_begin_durable": 0,
+      "committed_target": 30286
+    }
+  },
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\active.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\app.bin",
+      "bytes": 623124,
+      "sha256": "a2800b07b7de0311b91eebeaa3a9a6012542ae2306d693c14d067877470eac51"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\backup_slot.bin",
+      "bytes": 32,
+      "sha256": "2a187681945460f97c68fee52eada1ccf69030c5b64bad47a3db1bfc39b16b34"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\candidate_slot.bin",
+      "bytes": 32,
+      "sha256": "b7e762aa5e48e58419d2be240f1d7b73a407e123ff74750ec14fbe90010597b4"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\cfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\confirmed.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\dhcsr.bin",
+      "bytes": 4,
+      "sha256": "52a5c4a10657220cac05c63adfa923c7771c55d868a58ee360eb3d1511985c3e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\disabled.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\freeze.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\guard.bin",
+      "bytes": 32,
+      "sha256": "60bf07c488aad18fda339df07e4fbc47b4f00be71711936f18d04d352ad01890"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\header_after.bin",
+      "bytes": 96,
+      "sha256": "7429b1620dfb9ccb9d165d6fa4cdcebe9df40d65a5d2ccbdf6ef0e63e548e6c4"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\health0.bin",
+      "bytes": 36,
+      "sha256": "cc08d799d2b2a984edd9697ffe7afff4a321555ec249563cf14091c69406b7fd"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\health1.bin",
+      "bytes": 36,
+      "sha256": "6e41cbf73140dbebf968783c8ffe779a20e2bd8670715778fa378cc5d5e918c5"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\hfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\isr.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\jedec.bin",
+      "bytes": 4,
+      "sha256": "e218e2eccee7ced0261a4dc71db73c31d71724cfe7cb65e7467ef7d174f81a02"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\owner.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\recovery_slot.bin",
+      "bytes": 32,
+      "sha256": "c0e11ef1523fc0dc94bf759ee8e4d85344738e9096ae1fdefa10ad7ac30aec6c"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\sd.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\sdio.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\snapped.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\stack.bin",
+      "bytes": 8192,
+      "sha256": "4874dae09c17141c61f176d17f067416a886a25802c1b5dba2a7f18bc1a6a646"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\staging.bin",
+      "bytes": 4096,
+      "sha256": "8e38e6cef30ebfb17d145d165c446a9847adce51b37d08cb9ec2e483af19fde4"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\state.bin",
+      "bytes": 1,
+      "sha256": "e52d9c508c502347344d8c07ad91cbd6068afc75ff6292f062a09ca381c89e71"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\0001-inspect\\vtor.bin",
+      "bytes": 4,
+      "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+    }
+  ],
+  "scope": "initial-image qualification only; not candidate OTA or rollback qualification"
+}

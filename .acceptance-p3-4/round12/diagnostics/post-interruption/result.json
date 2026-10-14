@@ -1,0 +1,28 @@
+{
+  "target_version": 30287,
+  "full_target_and_boot_verified": true,
+  "confirmed_state": 4,
+  "no_reset_or_flash": true,
+  "extra_ota": 0,
+  "new_capture_archived_and_pruned": true,
+  "remaining_captures": 7,
+  "v11_original_unchanged": true,
+  "private_adb_closed": true,
+  "original_command_exit_unknown": true,
+  "not_a_retroactive_frozen_command_pass": true,
+  "statistics": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phone\\statistics.json",
+    "bytes": 100233,
+    "sha256": "f69d0989917b797bb45fd4b65eb8d3f28df9a5ae368bc6e37062adce122b6c35"
+  },
+  "target": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\current-target.json",
+    "bytes": 2288,
+    "sha256": "00706bf633dd25f280d6c5d974b80969db72bf57dbead19a41423e64d9d56efd"
+  },
+  "archive": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\phone\\closed-capture.json",
+    "bytes": 1093,
+    "sha256": "9ca21a0ccf2f906ad00409e76426e9890c625781fdfbe9f57a8487a55c315872"
+  }
+}

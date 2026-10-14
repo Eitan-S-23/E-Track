@@ -1,0 +1,22 @@
+{
+  "command": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\review.py",
+    "suite"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "timeout_seconds": 120,
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 18.597,
+  "log": {
+    "path": ".cache\\p34-host-close-01-callers-review-20261014\\suite\\tests.log",
+    "bytes": 3149,
+    "sha256": "fb78858ef1cdd394f5765f341aa9c28788ade27b826fec007b6c3f3704916cd0"
+  }
+}

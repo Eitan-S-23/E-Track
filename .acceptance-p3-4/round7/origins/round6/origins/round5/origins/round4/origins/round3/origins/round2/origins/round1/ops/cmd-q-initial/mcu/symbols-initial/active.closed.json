@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.exe",
+    "-d",
+    "--disassemble=ota_ble_session_active",
+    "D:\\github\\my\\E-Track\\.cache\\p34-overlap1\\fw-wait2\\b\\app-gcc\\X-Track-App-GCC.elf"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 806105643329400,
+  "ended_monotonic_ns": 806105878523900,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\symbols-initial\\active.stdout",
+    "bytes": 467,
+    "sha256": "7b9e89c3436c1956d744a8f8d280c4118bc5584962eb229c95524b6787255161"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-initial\\mcu\\symbols-initial\\active.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

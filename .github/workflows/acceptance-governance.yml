@@ -8,6 +8,10 @@ on:
     paths:
       - "Tools/acceptance/**"
       - "Tools/provenance/**"
+      - "Tools/ota/p34-acceptance/**"
+      - "Tools/ota/p3-3-service/**"
+      - "tests/ota/test_p34_live_route.py"
+      - "tests/ota/test_p34_service_patch.py"
       - "Tools/flutter/**"
       - "tests/ota/test_flutter_dev_checks.py"
       - "tests/ota/test_flutter_dev_apk.py"
@@ -23,6 +27,7 @@ on:
       - "docs/device-experiment-policy.md"
       - ".agents/skills/e-track-flutter-debug/**"
       - "docs/ota-cross-system-contracts.md"
+      - "docs/ota-ble-v2-contract.md"
       - "docs/ota-spec-decisions.md"
       - "docs/ota-prompts/**"
       - "tests/ota/spec-probes/**"
@@ -48,6 +53,10 @@ on:
     paths:
       - "Tools/acceptance/**"
       - "Tools/provenance/**"
+      - "Tools/ota/p34-acceptance/**"
+      - "Tools/ota/p3-3-service/**"
+      - "tests/ota/test_p34_live_route.py"
+      - "tests/ota/test_p34_service_patch.py"
       - "Tools/flutter/**"
       - "tests/ota/test_flutter_dev_checks.py"
       - "tests/ota/test_flutter_dev_apk.py"
@@ -63,6 +72,7 @@ on:
       - "docs/device-experiment-policy.md"
       - ".agents/skills/e-track-flutter-debug/**"
       - "docs/ota-cross-system-contracts.md"
+      - "docs/ota-ble-v2-contract.md"
       - "docs/ota-spec-decisions.md"
       - "docs/ota-prompts/**"
       - "tests/ota/spec-probes/**"
@@ -112,6 +122,35 @@ jobs:
           python -I -S -B -X utf8 .agents/skills/e-track-flutter-debug/scripts/selftest.py
           --root "%GITHUB_WORKSPACE%"
           --out "%GITHUB_WORKSPACE%\.cache\flutter-debug-skill-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
+      - name: Test P3-4 controlled service and live adapters (Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          python3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py service --out "$GITHUB_WORKSPACE/.cache/p34-service-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          python3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py live --out "$GITHUB_WORKSPACE/.cache/p34-live-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Test P3-4 controlled service and live adapters (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        working-directory: ${{ github.workspace }}
+        run: |
+          python -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py service --out "%GITHUB_WORKSPACE%\.cache\p34-service-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
+          if errorlevel 1 exit /b 1
+          python -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py live --out "%GITHUB_WORKSPACE%\.cache\p34-live-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
+          if errorlevel 1 exit /b 1
+      - name: Preserve P3-4 adapter self-test originals
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p34-live-host-${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/p34-service-${{ github.run_id }}-${{ github.run_attempt }}/*.json
+            .cache/p34-service-${{ github.run_id }}-${{ github.run_attempt }}/*.log
+            .cache/p34-live-${{ github.run_id }}-${{ github.run_attempt }}/*.json
+            .cache/p34-live-${{ github.run_id }}-${{ github.run_attempt }}/*.log
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 14
 
   governance-tests:
     name: Validate acceptance and build governance

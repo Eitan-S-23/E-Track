@@ -1,0 +1,51 @@
+{
+  "contract": {
+    "path": "docs\\acceptance-contracts\\P3-4-v14.contract.json",
+    "bytes": 59213,
+    "sha256": "7aa4ed3bb760ce0cc0a5acdaaa9e15a85bad30785f73cd0644da29ddbb76cad4"
+  },
+  "matrix": {
+    "path": ".acceptance-p3-4\\round14\\evidence-matrix.json",
+    "bytes": 1902,
+    "sha256": "832d6bf1eb99c5f21871b4a1122915ac5b7f080d67992e65ae9de92921435bd2"
+  },
+  "plan": {
+    "path": ".acceptance-p3-4\\round14\\rerun-plan.json",
+    "bytes": 5866,
+    "sha256": "ba3bd6bb8d708ac32ee536afe4e6dcdf8cf5e4dc731b6c190815bed5df4fcab2"
+  },
+  "preflight": {
+    "path": ".cache\\p34-local-closeout-20261014\\candidate-host-corrected\\lineage-preflight.closed.json",
+    "bytes": 4541,
+    "sha256": "96ba13a4530110a8667855d094d6fb708d2e774142e08a2d951f95e2c4a44608"
+  },
+  "required_commands": [
+    "CMD-CANDIDATE-ARCHIVE-04",
+    "CMD-CANDIDATE-ARCHIVE-07",
+    "CMD-CANDIDATE-ARCHIVE-10",
+    "CMD-CANDIDATE-ARCHIVE-13",
+    "CMD-CANDIDATE-CI",
+    "CMD-CANDIDATE-SOURCE",
+    "CMD-Q-PREP-BOOT",
+    "CMD-Q-PREP-RESTORE",
+    "CMD-Q-TRANSFER",
+    "CMD-Q-TRANSFER-APP",
+    "CMD-Q-TRANSFER-BASE",
+    "CMD-Q-TRANSFER-BOOT",
+    "CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "CMD-Q-TRANSFER-MCU",
+    "CMD-Q-TRANSFER-RAM",
+    "CMD-REFERENCE-MCU",
+    "CMD-REFERENCE-V10",
+    "CMD-REFERENCE-V11"
+  ],
+  "physical_device_operations": 0,
+  "old_results_unchanged": true,
+  "source_commit": "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+  "metadata_correction": {
+    "path": ".cache\\p34-local-closeout-20261014\\metadata-correction-applied.json",
+    "bytes": 2370,
+    "sha256": "d6b9abb29706036ea8f8cfe8361ec247ae41ce083ded81ec2f6d17feb6fbd238"
+  }
+}

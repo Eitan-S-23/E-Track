@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0003-install-base\\settings.jlink",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0003-install-base\\sdk.log",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0003-install-base\\commands.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 806415957595300,
+  "ended_monotonic_ns": 806473044343000,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0003-install-base\\commander.stdout",
+    "bytes": 10847,
+    "sha256": "be116a021ea02090a597862bf6313eb582e564be932f7b3ad99893f4ddca7e65"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0003-install-base\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

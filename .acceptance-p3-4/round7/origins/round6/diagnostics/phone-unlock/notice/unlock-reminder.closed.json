@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "import os,subprocess,sys; p=subprocess.run([sys.argv[1],'send','--project',os.environ['CC_PROJECT'],'--session',os.environ['CC_SESSION_KEY'],'--stdin'],input=sys.stdin.buffer.read(),timeout=60);sys.exit(p.returncode)",
+    "D:/github/my/cc-connect-thread-guard/build/cc-connect.exe"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 852919534469000,
+  "ended_monotonic_ns": 852921897911700,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\phone-unlock\\notice\\unlock-reminder.stdout",
+    "bytes": 27,
+    "sha256": "49b5012ab2d22dd621998ea4fbda7a03af5f9af1c5fb9ef76bccf66fd07a019a"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\phone-unlock\\notice\\unlock-reminder.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -24,6 +24,28 @@
 #include "msc_bot_scsi.h"
 #include "../msc_diskio.h"
 
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+static usb_sts_type p34_msc_failure(void *udev, uint8_t lun,
+                                     uint8_t key, uint8_t asc)
+{
+  usbd_core_type *pudev = (usbd_core_type *)udev;
+  msc_type *pmsc = (msc_type *)pudev->class_handler->pdata;
+  if(lun < MSC_SUPPORT_MAX_LUN && key == SENSE_KEY_NOT_READY)
+  {
+    pmsc->blk_nbr[lun] = 0;
+    pmsc->blk_size[lun] = 0;
+  }
+  pmsc->data_len = 0;
+  pmsc->blk_len = 0;
+  for(unsigned i = 0; i < 12; ++i) pmsc->data[i] = 0;
+  pmsc->msc_state = MSC_STATE_MACHINE_FAILED;
+  pmsc->csw_struct.bCSWStatus = CSW_BCSWSTATUS_FAILED;
+  bot_scsi_sense_code(udev, key, asc);
+  return USB_FAIL;
+}
+#endif
+
+
 /** @addtogroup AT32F435_437_middlewares_usbd_class
   * @{
   */
@@ -347,6 +369,11 @@ void bot_scsi_stall(void *udev)
   */
 usb_sts_type bot_scsi_test_unit(void *udev, uint8_t lun)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(!p34_msc_media_ready(lun))
+    return p34_msc_failure(udev, lun, SENSE_KEY_NOT_READY, MEDIUM_NOT_PRESENT);
+#endif
+
   usb_sts_type status = USB_OK;
   usbd_core_type *pudev = (usbd_core_type *)udev;
   msc_type *pmsc = (msc_type *)pudev->class_handler->pdata;
@@ -478,10 +505,21 @@ usb_sts_type bot_scsi_mode_sense10(void *udev, uint8_t lun)
   */
 usb_sts_type bot_scsi_capacity(void *udev, uint8_t lun)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(!p34_msc_media_ready(lun))
+    return p34_msc_failure(udev, lun, SENSE_KEY_NOT_READY, MEDIUM_NOT_PRESENT);
+#endif
+
   usbd_core_type *pudev = (usbd_core_type *)udev;
   msc_type *pmsc = (msc_type *)pudev->class_handler->pdata;
   uint8_t *pdata = pmsc->data;
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(msc_disk_capacity(lun, &pmsc->blk_nbr[lun], &pmsc->blk_size[lun]) != USB_OK ||
+     pmsc->blk_nbr[lun] == 0 || pmsc->blk_size[lun] == 0)
+    return p34_msc_failure(udev, lun, SENSE_KEY_NOT_READY, MEDIUM_NOT_PRESENT);
+#else
   msc_disk_capacity(lun, &pmsc->blk_nbr[lun], &pmsc->blk_size[lun]);
+#endif
 
   pdata[0] = (uint8_t)((pmsc->blk_nbr[lun] - 1) >> 24);
   pdata[1] = (uint8_t)((pmsc->blk_nbr[lun] - 1) >> 16);
@@ -505,6 +543,11 @@ usb_sts_type bot_scsi_capacity(void *udev, uint8_t lun)
   */
 usb_sts_type bot_scsi_format_capacity(void *udev, uint8_t lun)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(!p34_msc_media_ready(lun))
+    return p34_msc_failure(udev, lun, SENSE_KEY_NOT_READY, MEDIUM_NOT_PRESENT);
+#endif
+
   usbd_core_type *pudev = (usbd_core_type *)udev;
   msc_type *pmsc = (msc_type *)pudev->class_handler->pdata;
   uint8_t *pdata = pmsc->data;
@@ -514,7 +557,13 @@ usb_sts_type bot_scsi_format_capacity(void *udev, uint8_t lun)
   pdata[2] = 0;
   pdata[3] = 0x08;
 
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(msc_disk_capacity(lun, &pmsc->blk_nbr[lun], &pmsc->blk_size[lun]) != USB_OK ||
+     pmsc->blk_nbr[lun] == 0 || pmsc->blk_size[lun] == 0)
+    return p34_msc_failure(udev, lun, SENSE_KEY_NOT_READY, MEDIUM_NOT_PRESENT);
+#else
   msc_disk_capacity(lun, &pmsc->blk_nbr[lun], &pmsc->blk_size[lun]);
+#endif
 
   pdata[4] = (uint8_t)((pmsc->blk_nbr[lun] - 1) >> 24);
   pdata[5] = (uint8_t)((pmsc->blk_nbr[lun] - 1) >> 16);
@@ -599,6 +648,11 @@ usb_sts_type bot_scsi_verify(void *udev, uint8_t lun)
   */
 usb_sts_type bot_scsi_read10(void *udev, uint8_t lun)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(!p34_msc_media_ready(lun))
+    return p34_msc_failure(udev, lun, SENSE_KEY_NOT_READY, MEDIUM_NOT_PRESENT);
+#endif
+
   usbd_core_type *pudev = (usbd_core_type *)udev;
   msc_type *pmsc = (msc_type *)pudev->class_handler->pdata;
   uint8_t *cmd = pmsc->cbw_struct.CBWCB;
@@ -635,7 +689,14 @@ usb_sts_type bot_scsi_read10(void *udev, uint8_t lun)
   len = MIN(pmsc->blk_len, MSC_MAX_DATA_BUF_LEN);
   if( msc_disk_read(lun, pmsc->blk_addr, pmsc->data, len) != USB_OK)
   {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+    int ready = p34_msc_media_ready(lun);
+    return p34_msc_failure(udev, lun,
+        ready ? SENSE_KEY_MEDIUM_ERROR : SENSE_KEY_NOT_READY,
+        ready ? 0x11 : MEDIUM_NOT_PRESENT);
+#else
     bot_scsi_sense_code(udev, SENSE_KEY_HARDWARE_ERROR, MEDIUM_NOT_PRESENT);
+#endif
     return USB_FAIL;
   }
   usbd_ept_send(pudev, USBD_MSC_BULK_IN_EPT, pmsc->data, len);
@@ -660,6 +721,11 @@ usb_sts_type bot_scsi_read10(void *udev, uint8_t lun)
   */
 usb_sts_type bot_scsi_write10(void *udev, uint8_t lun)
 {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+  if(!p34_msc_media_ready(lun))
+    return p34_msc_failure(udev, lun, SENSE_KEY_NOT_READY, MEDIUM_NOT_PRESENT);
+#endif
+
   usbd_core_type *pudev = (usbd_core_type *)udev;
   msc_type *pmsc = (msc_type *)pudev->class_handler->pdata;
   uint8_t *cmd = pmsc->cbw_struct.CBWCB;
@@ -700,7 +766,14 @@ usb_sts_type bot_scsi_write10(void *udev, uint8_t lun)
     len = MIN(pmsc->blk_len, MSC_MAX_DATA_BUF_LEN);
     if(msc_disk_write(lun, pmsc->blk_addr, pmsc->data, len) != USB_OK)
     {
+#if defined(P34_EARLY_FAULT_VECTORS) && defined(MSC_USE_SD_CARD)
+    int ready = p34_msc_media_ready(lun);
+    return p34_msc_failure(udev, lun,
+        ready ? SENSE_KEY_MEDIUM_ERROR : SENSE_KEY_NOT_READY,
+        ready ? 0x0C : MEDIUM_NOT_PRESENT);
+#else
       bot_scsi_sense_code(udev, SENSE_KEY_HARDWARE_ERROR, MEDIUM_NOT_PRESENT);
+#endif
       return USB_FAIL;
     }
 

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 850900737674800,
+  "ended_monotonic_ns": 850901404826900,
+  "stdout": {
+    "path": ".cache\\p34-authorized-capture-cleanup-20261011\\owner-processes.stdout",
+    "bytes": 13325,
+    "sha256": "9503ea66bc7bfa382d4cd3e48f1fef64266df6a7ff3b29aca88242a11ae59b20"
+  },
+  "stderr": {
+    "path": ".cache\\p34-authorized-capture-cleanup-20261011\\owner-processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "netstat",
+    "-ano",
+    "-p",
+    "tcp"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 842484114460300,
+  "stdin_sha256": null
+}

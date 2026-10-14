@@ -1,0 +1,29 @@
+{
+  "status": "AUTHORIZED",
+  "user_message": "\u6388\u6743\uff0c\u4e4b\u540e\u7684\u6388\u6743\u4e5f\u4e00\u5e76\u5e94\u8bb8\uff0c\u4e0d\u8981\u91cd\u590d\u8bf7\u6c42\u6388\u6743\u6d6a\u8d39\u65f6\u95f4",
+  "recorded_at": "2026-10-14T01:19:59.395298+00:00",
+  "active_root": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "additional_git_metadata_root": "D:\\github\\my\\E-Track\\.git",
+  "source": "Current user response to P34-V14-PREFLIGHT-01 and continuation request",
+  "proposal": {
+    "path": ".cache\\p34-local-closeout-20261014\\metadata-correction-proposal.json",
+    "bytes": 3012,
+    "sha256": "9c461d46fdcad987bbe10e0e752af3157e0f08fad5747eb1ece14b28c52402df"
+  },
+  "approved_correction": "Exactly four runner_paths and associated contract copy / derived hash bindings; retain all before-correction originals and the failed preflight",
+  "continuation_scope": "Necessary subsequent local preparation, offline evaluation, evidence/record commits and later freeze-index closeout in this same bounded P3-4 chain; do not request the same authorization again",
+  "not_a_blanket_scope_expansion": true,
+  "excluded": [
+    "Device operations or new OTA",
+    "Shared main worktree/ref/index changes",
+    "Push, merge, CI or release",
+    "Rewriting old v11/v12/v13 outcomes, evidence or the 3/3 accounting",
+    "Product or acceptance-gate changes, unrelated commits, global configuration changes"
+  ],
+  "current_head": "62aacfee4568c8d11372eebf5456558037a2bfb5",
+  "previous_authority": {
+    "path": ".cache\\p34-local-closeout-20261014\\authorization.json",
+    "bytes": 1574,
+    "sha256": "b9d62e432bd757ad04323ef7520773cb745c2be0082409f2121da51aab4fc6e8"
+  }
+}

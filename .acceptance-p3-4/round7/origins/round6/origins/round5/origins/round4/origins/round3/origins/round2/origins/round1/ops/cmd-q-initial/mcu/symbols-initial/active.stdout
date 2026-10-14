@@ -1,0 +1,15 @@
+
+D:\github\my\E-Track\.cache\p34-overlap1\fw-wait2\b\app-gcc\X-Track-App-GCC.elf:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+0804d95e <ota_ble_session_active>:
+ 804d95e:	b120      	cbz	r0, 804d96a <ota_ble_session_active+0xc>
+ 804d960:	f890 00d4 	ldrb.w	r0, [r0, #212]	@ 0xd4
+ 804d964:	3800      	subs	r0, #0
+ 804d966:	bf18      	it	ne
+ 804d968:	2001      	movne	r0, #1
+ 804d96a:	4770      	bx	lr
+
+Disassembly of section RAMCODE:

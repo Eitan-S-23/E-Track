@@ -1,0 +1,36 @@
+{
+  "read_only": true,
+  "private_adb_closed": true,
+  "files": [
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\app-logcat.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\windows.txt",
+      "bytes": 64979,
+      "sha256": "faa80ab7346c082b5f1a5044ca45ef0207e67654acf13c097a52db9ddd09f60d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\activity-top.txt",
+      "bytes": 662055,
+      "sha256": "2349d718ac7514ecdaf36c3d75fc1732f22c08b732cc635b15a5f84b74c1aec8"
+    },
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\screen.png",
+      "bytes": 15503,
+      "sha256": "7b01218438a5f71c1d9ec464a809926eae5e8d8ea1ea2adc78fab4d72c72ea22"
+    },
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\observed.json",
+      "bytes": 3275,
+      "sha256": "83a85564093a14a095c1d80d02db2690791a576d8ba51712ae704f558f9535ed"
+    },
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\current-runtime.json",
+      "bytes": 875,
+      "sha256": "416ab308e85a255167565d0ecb76981dcfc7ac39dddd20ece9094c801b6a88b1"
+    }
+  ]
+}

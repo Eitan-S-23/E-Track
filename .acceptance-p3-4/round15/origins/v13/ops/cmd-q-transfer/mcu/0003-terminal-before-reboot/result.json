@@ -1,0 +1,85 @@
+{
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5092,
+    "high_water_bytes": 3100,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "clock_hz": 288000000,
+  "systick": [
+    65543,
+    287999,
+    66931
+  ],
+  "ticks": [
+    357439,
+    357542
+  ],
+  "watchdog_registers": [
+    5,
+    3124
+  ],
+  "originals": {
+    "header_before": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_before.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    },
+    "metrics": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\metrics.bin",
+      "bytes": 420,
+      "sha256": "82df59ba3f8136179d524c6e9c410142c316b86f6ec0056abad37d2ed32bc403"
+    },
+    "published": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\published.bin",
+      "bytes": 4,
+      "sha256": "a91cf1c9bda306dc018f38b73a8f35a1898a0e862f0ede975bc430eb96376819"
+    },
+    "guard": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\guard.bin",
+      "bytes": 32,
+      "sha256": "60bf07c488aad18fda339df07e4fbc47b4f00be71711936f18d04d352ad01890"
+    },
+    "stack": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\stack.bin",
+      "bytes": 8192,
+      "sha256": "8e6646af495e036f67215422117f86a423c38eb67348ba8e3b5e0d9a8dc9326c"
+    },
+    "clock": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\clock.bin",
+      "bytes": 4,
+      "sha256": "2f0039351de33d777941ede3a63ae173a3f906473e2708748f2cbd429e8e2d41"
+    },
+    "systick": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\systick.bin",
+      "bytes": 12,
+      "sha256": "2c93ae2f4d915c244cf8906906733a73037769b2df1eb4f74936bc7a94ce1ffa"
+    },
+    "vtor": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\vtor.bin",
+      "bytes": 4,
+      "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+    },
+    "wdt": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\wdt.bin",
+      "bytes": 8,
+      "sha256": "ec3b4eee2db5db33a0717eb2519c02f32c5f02e109a28d26546ca4ba1d7bca87"
+    },
+    "tick0": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\tick0.bin",
+      "bytes": 4,
+      "sha256": "c864d4ac6f5a9a9635f2a2482929a8f4b5556efa69b492ab78a28a7aa72705e0"
+    },
+    "tick1": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\tick1.bin",
+      "bytes": 4,
+      "sha256": "f2a7826315261d5701e15e8f6f4357233380a607d67d24cd2698655edd587aac"
+    },
+    "header_after": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    }
+  },
+  "scope": "Old App terminal session before reboot; includes any subsequent apply stack use. Read-only, no WDT feed/write."
+}

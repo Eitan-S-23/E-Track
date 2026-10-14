@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "C:\\Windows\\System32\\fc.exe",
+    "/B",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 1011175386729300,
+  "ended_monotonic_ns": 1011175574779000,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round13\\commands\\CMD-Q-TRANSFER-CONTEXT-AFTER.stdout",
+    "bytes": 300,
+    "sha256": "6b915b4efbd321d5d352fb25367f624140d45ebcad25a2d1dcc72d4ff0557572"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round13\\commands\\CMD-Q-TRANSFER-CONTEXT-AFTER.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "error_type": "ValueError",
+  "message": "missing required MCU stage measurements",
+  "unknown_outcome_requires_reconciliation": true,
+  "device_attempted": true,
+  "no_automatic_retry": true
+}

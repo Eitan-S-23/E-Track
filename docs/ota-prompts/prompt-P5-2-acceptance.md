@@ -12,18 +12,18 @@ task_id: P5-2
 
 ## 验收范围
 
-按 `PLAN-OTA.md` §8 和冻结状态机，对每个持久化提交点、擦写/搬运、窗口 ACK、HTTP/BLE 重连及运营停发执行可重复故障注入；每例必须输出状态轨迹、最终版本摘要以及“可启动或进入恢复”的二判。覆盖弱信号、低电量、满 staging、降级包、坏包、错板、TEST_BOOT 三连失败、recovery 和物理断电抽样。
+按 `PLAN-OTA.md` §8 和冻结状态机，核验每个持久化提交点、擦写/搬运、窗口 ACK、HTTP/BLE 重连及运营停发的真实故障证据；先对账 P1-6/P3-5 等已有原件，再对确实未覆盖或失效的条件执行最小注入。每例必须输出状态轨迹、最终版本摘要以及“可启动或进入恢复”的二判。覆盖弱信号、低电量、满 staging、降级包、坏包、错板、TEST_BOOT 三连失败、recovery 和物理断电抽样，不能因采用旧原件删减条件。
 
 ## 非目标
 
 - 不通过一次随机“拔电试试”替代系统矩阵。
-- 不把 P1-6 已有证据无条件复制为当前候选通过；只可在 manifest/判据完全匹配时复用并说明。
+- 不把 P1-6/P3-5 已有证据无条件复制为当前候选通过；按执行合同第 0.1 节核验实际依赖、参数、注入条件和原始结果。同任务正式 REUSED 与跨任务原件的独立离线评估严格区分，不伪造新物理执行或正式来源。
 - 不在验收卡发明新的恢复状态、错误码或降级例外。
 - 不提前创建 `docs/acceptance-contracts/P5-2-v1.contract.json`。
 
 ## 前置依赖
 
-- P1-P4 全部完成，P5-1 基本双通道主路径通过。
+- P1-P4 适用阶段完成，P5-1 基本双通道主路径通过；P3-4 候选阶段和 P4 staging 演练是前置，不要求 P5 后生产晋升先完成。
 - 所有注入点、触发方法、恢复判据和安全边界可由冻结实现/合同定位。
 - 物理断电、低电量和手机弱信号项目需要用户配合。
 - HTTP 恢复、BLE 参数、App 兼容、保留策略、rehearsal gate、Admin 幂等和 token v2 的用户裁定已传播到并冻结在共享合同；验收输入必须绑定冻结版本。
@@ -58,6 +58,8 @@ task_id: P5-2
 ## 输入输出与调用方向
 
 - 输入矩阵每行定义：caseId、通道/包型、起点、注入点、触发方法、期望不变量、允许恢复路径、required evidence、清理步骤。
+- 正式输入按 v3 绑定 `freeze_commit`、`freeze_tree`、`profile_config_blob`、已审批组件 profile 和真实 `depends_on`；已有原件以哈希绑定 `external_inputs`，保留原操作日期、操作者和输入身份，不生成旧工作树 manifest。
+- 按 `OTA-DEC-016`，P3-5 已承担真实后端十次恢复组。本卡先独立核验，原件仍有效时不另复制；未覆盖或按真实依赖判定失效的条件仍须补验，不限于不同故障类型。新注入须说明旧证据为何不足、受影响要求和最小新观察，不默认重跑整组。
 - 输出每例保存注入前后 BCB/ETSL/ETRJ/bitmap/Flash/INFO、HTTP/BLE/admin 状态和最终可启动性。
 - harness 注入只能作用于该 case 指定位置；下一例前恢复并验证干净起点。
 
@@ -92,7 +94,7 @@ task_id: P5-2
 
 ## 证据分类与采集
 
-- Production：每层生产源和 artifacts manifest。
+- Production：每层生产源的冻结 Git 对象及 artifacts SHA-256。
 - Validation：注入 harness、case matrix、命令、工具版本、raw logs、Flash/EEPROM/D1/API snapshots、照片/录像。
 - Governance：合同/提示词/正式 acceptance contract、审批、CI 和 rerun lineage。
 - 每例记录实际注入时间/位置、前后状态、启动结果、最终 version/hash 和清理确认。
@@ -101,18 +103,20 @@ task_id: P5-2
 
 - 每个 case 的 required 不变量全部满足且最终“可启动或进恢复”二判成立才 PASS。
 - 拒绝类案例必须证明 current confirmed image 未被破坏；恢复类必须证明从持久化点继续而非从错误中间状态猜测。
-- 任何 required case 未执行或证据不可信，矩阵不能“全绿”。
+- 任何 required case 没有可信实际观察或独立核验未通过，矩阵不能“全绿”；旧原件可覆盖不等于本轮又执行了故障操作。
 - 物理案例可因用户不可用记环境阻断，但不能降低矩阵要求。
 
 ## 结果分类
 
 使用 `PASS`、`PRODUCT_FAIL`、`EVIDENCE_GAP`、`ENV_BLOCKED`、`HARNESS_FAIL`。多次运行保留 lineage，最新 PASS 不覆盖旧 PRODUCT_FAIL 的根因记录。
 
+失败不自动触发整组重跑，也不剔除后补齐成功数；先分类、取回原件并定位。真实修复后按受影响依赖和计算的 rerun plan 最小复验，不能把宿主故障计作产品失败或反过来洗白未决产品缺陷。
+
 ## 失效条件
 
 - 注入点未实际触发、触发位置无法证明或注入改变了其他状态。
 - case 间未恢复干净起点，或 Flash/SD/R2/logger 地址污染。
-- manifest、contract、harness 或生产 artifact 在矩阵执行中变化。
+- 当前命令依赖的冻结输入、contract、harness 或生产 artifact 在执行中变化；按真实依赖判定影响，不放弃 v3 前检/终检或覆盖计算的复验范围。
 - 证据只含汇总结论，没有原始状态/命令/文件 hash。
 
 ## 必须新增或调整的测试
@@ -131,18 +135,18 @@ task_id: P5-2
 
 ## 停止条件
 
-- 任一受影响共享条款发生未重新冻结的变更、P1-P4 未完成，或 P5-1 主路径未通过时，不开始正式矩阵。
+- 任一受影响共享条款发生未重新冻结的变更、P1-P4 适用阶段未完成，或 P5-1 主路径未通过时，不开始正式矩阵。
 - 注入可能永久损坏 Boot/硬件且无批准恢复方案时停止。
 - 用户物理配合不可用时停止对应 case 并准确分类。
 - 发现产品失败时停止相关分支，回实现/整改，不继续累积污染证据。
 
 ## 正式 acceptance contract 前置
 
-只有在最终生产提交点/符号/接口已稳定、全部 caseId/注入方法/required evidence 可精确描述、test-only 隔离可静态证明、物理配合边界获得确认并经独立审查后，才创建首个版本化 P5-2 contract。
+只有在最终生产提交点/符号/接口已稳定、全部 caseId/注入方法/required evidence 可精确描述、test-only 隔离可静态证明、物理配合边界获得确认且 v3 冻结对象可核对后，才由同一独立验收者准备/核对首个版本化 P5-2 contract，不另设冻结 agent。缺少物理条件或必要原件仍为缺口，不能靠换证据类型放行。
 
 ## 后续证据
 
-版本化矩阵、每例 raw 目录、J-Link/RTT/Flash/EEPROM/API/SQL/手机证据、manifest、harness 自检、失败整改和最终清理报告。
+版本化矩阵、每例 raw 目录、J-Link/RTT/Flash/EEPROM/API/SQL/手机证据、冻结对象与输入哈希、旧原件独立评估、harness 自检、失败整改和最终清理报告。
 
 ## Luna 可自行决定
 

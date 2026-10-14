@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "C:/Windows/System32/nslookup.exe",
+    "-timeout=3",
+    "-retry=1",
+    "sky-gotten-hopefully-petroleum.trycloudflare.com"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 823101358531400,
+  "ended_monotonic_ns": 823102053269000,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\current-entry\\failure-diagnostics\\dns-current-default.stdout",
+    "bytes": 166,
+    "sha256": "e20c15f3883f5d7bb3b06963b2ef5e9a1fa5a95897161350dba919134adbb1a0"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\current-entry\\failure-diagnostics\\dns-current-default.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

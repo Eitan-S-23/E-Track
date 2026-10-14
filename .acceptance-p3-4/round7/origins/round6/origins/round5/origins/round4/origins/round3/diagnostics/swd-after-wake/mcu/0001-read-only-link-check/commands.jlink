@@ -1,0 +1,10 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round3\diagnostics\swd-after-wake\mcu\0001-read-only-link-check\vtor.bin", 0xE000ED08, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round3\diagnostics\swd-after-wake\mcu\0001-read-only-link-check\header.bin", 0x08010400, 0x60
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round3\diagnostics\swd-after-wake\mcu\0001-read-only-link-check\dhcsr.bin", 0xE000EDF0, 0x4
+qc

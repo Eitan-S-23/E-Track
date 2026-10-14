@@ -1,0 +1,9 @@
+{
+  "delivered": true,
+  "monotonic": 935532.8860431,
+  "intent": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\notice-start.intent.json",
+    "bytes": 830,
+    "sha256": "a179d278b081e200ad7177dd38bdbebd3cb1618b2ff96077be6a2e429bf91553"
+  }
+}

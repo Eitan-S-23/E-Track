@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "exec-out",
+    "run-as com.wen.gaia.gaia.p34probe sh -c 'test ! -L app_flutter || exit 41; if test -e app_flutter; then test \"$(readlink -f app_flutter)\" = /data/user/0/com.wen.gaia.gaia.p34probe/app_flutter || exit 42; fi; test ! -L app_flutter/firmware || exit 41; if test -e app_flutter/firmware; then test \"$(readlink -f app_flutter/firmware)\" = /data/user/0/com.wen.gaia.gaia.p34probe/app_flutter/firmware || exit 42; fi; test ! -L app_flutter/firmware/e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu || exit 41; if test -e app_flutter/firmware/e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu; then test \"$(readlink -f app_flutter/firmware/e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu)\" = /data/user/0/com.wen.gaia.gaia.p34probe/app_flutter/firmware/e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu || exit 42; fi'"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 851958666366600,
+  "stdin_sha256": null
+}

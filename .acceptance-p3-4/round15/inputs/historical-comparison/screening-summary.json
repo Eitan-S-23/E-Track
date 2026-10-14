@@ -1,0 +1,156 @@
+{
+  "time": "2026-09-22T11:22:32.733540+00:00",
+  "package_bytes": 284643,
+  "package_sha256": "da82725792afeb88b353de7c595596eafa47f1c1db9bfa4905803693b159d600",
+  "baud": 115200,
+  "rows": [
+    {
+      "candidate": "baseline",
+      "measurement": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\measurement.json",
+        "bytes": 2125,
+        "sha256": "a55b8613a55302a7fe1b270ea90c933232a9ce6559be799951fbf77d395cf0fb"
+      },
+      "binding": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\finished\\binding.json",
+        "bytes": 2007,
+        "sha256": "a86ff079bdefee71e9e797df7116a9c8d179a7f11e0aebc757002b18c7c1c340"
+      },
+      "board": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\mcu-r2\\result.json",
+        "bytes": 3261,
+        "sha256": "24231b313baebda16505ce2225a68fd29cc04856016d9f2f46851ef3f0a755f9"
+      },
+      "transfer_seconds": 244.870742,
+      "kib_s": 1.1351771853882813,
+      "discoveries": 2229,
+      "write_mode": "with",
+      "retransmissions": 0,
+      "ack_samples": "partial:missing=3,early=3",
+      "ack_latency": {
+        "count": 0,
+        "maxUs": null,
+        "minUs": null,
+        "p50Us": null,
+        "p95Us": null,
+        "p99Us": null
+      },
+      "parser_exclusions": 1,
+      "threshold_eligible": false,
+      "throughput_relative_to_baseline": 1.0
+    },
+    {
+      "candidate": "reuse-with",
+      "measurement": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\measurement.json",
+        "bytes": 2258,
+        "sha256": "d1220ca89ce447118ae40b1e6872576cb8caa9c52c7db9a2de42db193ee84dd9"
+      },
+      "binding": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\finished\\binding.json",
+        "bytes": 2007,
+        "sha256": "99b4e371f8c83e34e581ed5e55574ead9a65017b3779b64b28e51e0479bd589e"
+      },
+      "board": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\mcu\\result.json",
+        "bytes": 3365,
+        "sha256": "64bd647efefb60b90403791e4cb79f82fdb22c90d3198b249d7a71e67e33d82c"
+      },
+      "transfer_seconds": 247.039059,
+      "kib_s": 1.125213481676596,
+      "discoveries": 1,
+      "write_mode": "with",
+      "retransmissions": 0,
+      "ack_samples": "partial:missing=11,early=11",
+      "ack_latency": {
+        "count": 0,
+        "maxUs": null,
+        "minUs": null,
+        "p50Us": null,
+        "p95Us": null,
+        "p99Us": null
+      },
+      "parser_exclusions": 1,
+      "threshold_eligible": false,
+      "throughput_relative_to_baseline": 0.9912227766379242
+    },
+    {
+      "candidate": "discover-without",
+      "measurement": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\measurement.json",
+        "bytes": 2294,
+        "sha256": "533564542515683c1350b2773799a002b8baa3de6f7bd545cc605d965b1327cc"
+      },
+      "binding": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\finished\\binding.json",
+        "bytes": 2000,
+        "sha256": "dec77fa7b7517340728a69e08d498ce65b852f5d1fca534b0dcdb62bca0ecd11"
+      },
+      "board": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\mcu\\result.json",
+        "bytes": 3334,
+        "sha256": "46a34c2c9c34155e62c648cc6e9bc1b64ae0bd26d1190a66effcf644830fb39c"
+      },
+      "transfer_seconds": 79.003209,
+      "kib_s": 3.518485935014361,
+      "discoveries": 2229,
+      "write_mode": "without",
+      "retransmissions": 0,
+      "ack_samples": "complete",
+      "ack_latency": {
+        "count": 2224,
+        "maxUs": 1070934,
+        "minUs": 54246,
+        "p50Us": 228767,
+        "p95Us": 413669,
+        "p99Us": 666156
+      },
+      "parser_exclusions": 0,
+      "threshold_eligible": false,
+      "throughput_relative_to_baseline": 3.0995037429428978
+    },
+    {
+      "candidate": "reuse-without",
+      "measurement": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\measurement.json",
+        "bytes": 2279,
+        "sha256": "f1cb7319d5396508a3f332611c160939a271c19b2787a3d80e6491e2711ade65"
+      },
+      "binding": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\finished\\binding.json",
+        "bytes": 1995,
+        "sha256": "74c14e826ea5c54c6232c914608b088daa13e1dfb3d00ac159456afe185e6ae0"
+      },
+      "board": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\result.json",
+        "bytes": 3319,
+        "sha256": "50f1e1a244358a0c6622ba8bd25f92ce83c34f8b84fbd8a2f38657cf13bf0909"
+      },
+      "transfer_seconds": 74.326403,
+      "kib_s": 3.7398780038837613,
+      "discoveries": 1,
+      "write_mode": "without",
+      "retransmissions": 0,
+      "ack_samples": "complete",
+      "ack_latency": {
+        "count": 2224,
+        "maxUs": 1025643,
+        "minUs": 54135,
+        "p50Us": 299882,
+        "p95Us": 499946,
+        "p99Us": 861596
+      },
+      "parser_exclusions": 0,
+      "threshold_eligible": false,
+      "throughput_relative_to_baseline": 3.2945323884434448
+    }
+  ],
+  "shortlist": [
+    "discover-without",
+    "reuse-without"
+  ],
+  "preferred_next_sender": "reuse-without",
+  "reason": "No-response is the large screening effect; reuse removes repeated discovery but its 6.29 percent throughput increment requires repeats.",
+  "limits": "One run per cell, incomplete C0/C1 ACK samples, no formal group declaration, no 1 MiB/soak/reliability acceptance.",
+  "target_retained": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe"
+}

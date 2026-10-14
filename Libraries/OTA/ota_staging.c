@@ -87,6 +87,17 @@ static ota_staging_result_t verify_region(const ota_staging_io_t *io,
     uint8_t observed[128];
     uint32_t offset = 0u;
 
+    if (io->verify != 0)
+    {
+        ota_staging_result_t result =
+            io->verify(io->ctx, address, expected, len);
+        if (result == OTA_STAGING_OK || result == OTA_STAGING_ERR_VERIFY)
+        {
+            return result;
+        }
+        return OTA_STAGING_ERR_IO;
+    }
+
     while (offset < len)
     {
         uint32_t take = len - offset;
@@ -368,8 +379,39 @@ static uint32_t required_segment_mask(uint32_t block_len)
 static void discard_ram_block(ota_staging_receiver_t *receiver)
 {
     receiver->segment_bitmap = 0u;
+#if defined(P34_STAGING_EARLY_ERASE) && P34_STAGING_EARLY_ERASE
+    receiver->block_erased = 0u;
+#endif
     memset(receiver->block, 0xFF, sizeof(receiver->block));
 }
+
+#if defined(P34_STAGING_EARLY_ERASE) && P34_STAGING_EARLY_ERASE
+static ota_staging_result_t prepare_current_block(ota_staging_receiver_t *receiver)
+{
+    uint32_t block = receiver->durable_off / OTA_STAGING_BLOCK_SIZE;
+    uint32_t address = OTA_EXT_STAGING + OTA_STAGING_PAYLOAD_OFFSET +
+                       block * OTA_STAGING_BLOCK_SIZE;
+    ota_staging_result_t result;
+
+    if (receiver->block_erased)
+    {
+        return OTA_STAGING_OK;
+    }
+    result = checkpoint(&receiver->io, OTA_STAGING_CP_BEFORE_BLOCK_ERASE,
+                        block, receiver->durable_off);
+    if (result != OTA_STAGING_OK)
+    {
+        return result;
+    }
+    if (receiver->io.erase_4k(receiver->io.ctx, address) != 0)
+    {
+        discard_ram_block(receiver);
+        return OTA_STAGING_ERR_IO;
+    }
+    receiver->block_erased = 1u;
+    return OTA_STAGING_OK;
+}
+#endif
 
 static ota_staging_result_t clear_persistent_block_bit(
     ota_staging_receiver_t *receiver,
@@ -406,6 +448,37 @@ static ota_staging_result_t clear_persistent_block_bit(
                       block, committed);
 }
 
+#if defined(P34_OTA_PIPELINE) && P34_OTA_PIPELINE
+ota_staging_result_t ota_staging_commit_buffer(
+    ota_staging_receiver_t *receiver, uint32_t offset,
+    const uint8_t *data, uint32_t len, ota_staging_progress_t *progress)
+{
+    ota_staging_result_t result;
+    uint32_t block;
+    if (receiver == 0 || receiver->guard != OTA_STAGING_RECEIVER_GUARD ||
+        data == 0 || receiver->durable_off >= receiver->total_len)
+        return OTA_STAGING_ERR_PARAM;
+    if (offset != receiver->durable_off || len != current_block_length(receiver))
+        return OTA_STAGING_ERR_RANGE;
+    block = offset / OTA_STAGING_BLOCK_SIZE;
+    result = verify_region(&receiver->io,
+        OTA_EXT_STAGING + OTA_STAGING_PAYLOAD_OFFSET + offset, data, len);
+    if (result == OTA_STAGING_OK)
+        result = checkpoint(&receiver->io, OTA_STAGING_CP_AFTER_BLOCK_READBACK, block, offset);
+    if (result == OTA_STAGING_OK)
+        result = clear_persistent_block_bit(receiver, block);
+    if (result == OTA_STAGING_OK)
+    {
+        receiver->durable_off += len;
+        receiver->segment_bitmap = 0u;
+        result = receiver->durable_off == receiver->total_len
+            ? OTA_STAGING_PACKAGE_COMPLETE : OTA_STAGING_BLOCK_COMMITTED;
+    }
+    set_progress(receiver, 0, progress);
+    return result;
+}
+#endif
+
 static ota_staging_result_t commit_current_block(
     ota_staging_receiver_t *receiver)
 {
@@ -415,6 +488,13 @@ static ota_staging_result_t commit_current_block(
                        block * OTA_STAGING_BLOCK_SIZE;
     ota_staging_result_t result;
 
+#if defined(P34_STAGING_EARLY_ERASE) && P34_STAGING_EARLY_ERASE
+    result = prepare_current_block(receiver);
+    if (result != OTA_STAGING_OK)
+    {
+        return result;
+    }
+#else
     result = checkpoint(&receiver->io, OTA_STAGING_CP_BEFORE_BLOCK_ERASE,
                         block, receiver->durable_off);
     if (result != OTA_STAGING_OK)
@@ -426,6 +506,7 @@ static ota_staging_result_t commit_current_block(
         discard_ram_block(receiver);
         return OTA_STAGING_ERR_IO;
     }
+#endif
     result = program_exact(&receiver->io, address, receiver->block, block_len);
     if (result != OTA_STAGING_OK)
     {
@@ -515,6 +596,16 @@ ota_staging_result_t ota_staging_receive(
         return OTA_STAGING_DUPLICATE;
     }
 
+#if defined(P34_STAGING_EARLY_ERASE) && P34_STAGING_EARLY_ERASE
+    /* Keep the existing driver and write bounds. Only move the erase earlier;
+     * neither RAM receipt nor an erased block advances persistent progress. */
+    result = prepare_current_block(receiver);
+    if (result != OTA_STAGING_OK)
+    {
+        set_progress(receiver, 0, progress);
+        return result;
+    }
+#endif
     memcpy(receiver->block + block_offset, data, len);
     receiver->segment_bitmap |= segment_mask;
     if ((receiver->segment_bitmap &

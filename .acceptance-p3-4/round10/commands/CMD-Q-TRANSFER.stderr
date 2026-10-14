@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 411, in <module>
+    main()
+    ~~~~^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 378, in main
+    phone_cell(plan, out, args)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 284, in phone_cell
+    raise error
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 216, in phone_cell
+    health = phone.health(capture)
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 389, in health
+    raw = self.live_file("files/p34-observations/" + capture + "/health.json", 8192)
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 299, in live_file
+    self.safe_remote(remote)
+    ~~~~~~~~~~~~~~~~^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 277, in safe_remote
+    self.cmd(["exec-out", "run-as", self.pkg, "sh", "-c", "; ".join(checks)])
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 237, in cmd
+    h.require(self.operation_deadline is None or time.monotonic() < self.operation_deadline,
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              "phone operation phase deadline; preserve original command result")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_host.py", line 23, in require
+    raise RuntimeError(message)
+RuntimeError: phone operation phase deadline; preserve original command result

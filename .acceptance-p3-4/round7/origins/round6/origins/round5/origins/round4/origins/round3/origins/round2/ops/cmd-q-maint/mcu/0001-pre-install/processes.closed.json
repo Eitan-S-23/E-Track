@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 822230702059100,
+  "ended_monotonic_ns": 822233416838900,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-maint\\mcu\\0001-pre-install\\processes.stdout",
+    "bytes": 13580,
+    "sha256": "6b7f2483f8799451889931bd9638e32c3796cc13f9d75a924e89af492cd5fd59"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-maint\\mcu\\0001-pre-install\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

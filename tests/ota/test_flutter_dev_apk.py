@@ -2,6 +2,7 @@
 """Offline fixtures for the development APK helper. Never builds an APK."""
 
 import hashlib
+import base64
 import io
 import json
 import os
@@ -49,7 +50,9 @@ class DevelopmentApkTests(unittest.TestCase):
         # test_debug_application_id_suffix_... 与 test_device_observation_...
         # 显式覆盖。
         for name in (APK.APPLICATION_ID_ENV, APK.DEVICE_OBSERVATION_ENV,
-                     APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV):
+                     APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV,
+                     APK.OTA_LINK_CANDIDATE_ENV, APK.FIXED_SIGNING_ENV,
+                     APK.SIGNING_SECRET_ENV, "TRACE_DEV_SIGNING_STORE_FILE"):
             base.pop(name, None)
         base.update({"ANDROID_HOME": str(self.root / "host-sdk"),
                      "JAVA_HOME_17_X64": str(self.root / "host-java")})
@@ -60,6 +63,75 @@ class DevelopmentApkTests(unittest.TestCase):
         CHECKS.make_directory(self.root, path.parent)
         path.write_bytes(data)
         return path
+
+    def signing_env(self):
+        return dict(self.env, TRACE_DEV_FIXED_SIGNING="true", TRACE_DEV_APP_ID_SUFFIX=".dev",
+                    TRACE_DEV_SIGNING_KEYSTORE_SECRET=base64.b64encode(b"k" * 2048).decode())
+
+    def test_fixed_signing_rejects_invalid_mode_and_production_identity(self):
+        self.assertFalse(APK.fixed_signing({}))
+        self.assertFalse(APK.fixed_signing({APK.FIXED_SIGNING_ENV: "false"}))
+        for env in ({APK.FIXED_SIGNING_ENV: "yes"}, {APK.FIXED_SIGNING_ENV: "true"},
+                    {APK.FIXED_SIGNING_ENV: "true", APK.APPLICATION_ID_ENV: "bad"}):
+            with self.subTest(env=env), self.assertRaises(ValueError):
+                APK.fixed_signing(env)
+
+    def test_fixed_signing_missing_malformed_and_oversized_secret_fail_before_writes(self):
+        for secret in ("", "not-base64", "x" * 32769, base64.b64encode(b"small").decode()):
+            env = dict(self.signing_env(), **{APK.SIGNING_SECRET_ENV: secret})
+            with self.subTest(length=len(secret)), self.assertRaises(ValueError):
+                APK.prepare_signing(self.root, self.run, env)
+            self.assertFalse((self.run / "development-signing").exists())
+
+    def test_fixed_signing_validates_key_and_refuses_overwrite(self):
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=0, stdout=b"certificate"))
+        with mock.patch.object(APK, "SIGNING_CERT_SHA256", hashlib.sha256(b"certificate").hexdigest()):
+            APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+            path = self.run / "development-signing/development.jks"
+            self.assertEqual(path.read_bytes(), b"k" * 2048)
+            self.assertIn(str(path), runner.call_args.args[0])
+            self.assertEqual(runner.call_args.kwargs["cwd"], self.root)
+            with self.assertRaises(FileExistsError):
+                APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+            self.assertEqual(runner.call_count, 1)
+
+    def test_fixed_signing_wrong_certificate_rejected(self):
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=0, stdout=b"wrong certificate"))
+        with self.assertRaisesRegex(ValueError, "pinned identity"):
+            APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+
+    def test_fixed_signing_keytool_failure_rejected(self):
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=1, stdout=b""))
+        with self.assertRaisesRegex(ValueError, "pinned identity"):
+            APK.prepare_signing(self.root, self.run, self.signing_env(), run=runner)
+
+    def test_actual_signer_requires_exact_one_verified_certificate(self):
+        good = "Signer #1 certificate SHA-256 digest: " + APK.SIGNING_CERT_SHA256 + "\n"
+        path = self.root / APK.APK_RELATIVE
+        runner = mock.Mock(return_value=SimpleNamespace(returncode=0, stdout=good))
+        self.assertEqual(APK.signing_certificate(self.root, self.run, path, run=runner), APK.SIGNING_CERT_SHA256)
+        for code, text in ((1, good), (0, ""), (0, good * 2), (0, good.replace(APK.SIGNING_CERT_SHA256, "0" * 64))):
+            runner.return_value = SimpleNamespace(returncode=code, stdout=text)
+            with self.subTest(code=code, text=text), self.assertRaises(ValueError):
+                APK.signing_certificate(self.root, self.run, path, run=runner)
+
+    def test_fixed_signing_environment_is_contained_and_disabled_secret_removed(self):
+        enabled = APK.environment(self.root, self.run, self.signing_env())
+        self.assertEqual(enabled["TRACE_DEV_SIGNING_STORE_FILE"], str(self.run / "development-signing/development.jks"))
+        disabled = APK.environment(self.root, self.run, dict(enabled, TRACE_DEV_FIXED_SIGNING="false"))
+        self.assertNotIn(APK.SIGNING_SECRET_ENV, disabled)
+        self.assertNotIn("TRACE_DEV_SIGNING_STORE_FILE", disabled)
+
+    def test_fixed_signing_metadata_records_verified_certificate_only(self):
+        self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture")]))
+        with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture.dev"), \
+             mock.patch.object(APK, "signing_certificate", return_value=APK.SIGNING_CERT_SHA256) as signer, \
+             mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, self.signing_env())
+        signer.assert_called_once()
+        meta = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        self.assertEqual(meta["development_signing"], dict(fixed=True, certificate_sha256=APK.SIGNING_CERT_SHA256))
+        self.assertNotIn(self.signing_env()[APK.SIGNING_SECRET_ENV], json.dumps(meta))
 
     def archive_bytes(self, entries):
         buffer = io.BytesIO()
@@ -272,6 +344,80 @@ class DevelopmentApkTests(unittest.TestCase):
         sdk = next(argv for name, argv, _, _ in plan if name == "apk_sdk")
         self.assertIn(f"--sdk_root={self.run / 'android-sdk'}", sdk)
         self.assertIn("platforms;android-35", sdk)
+
+    def test_link_candidates_form_an_explicit_bounded_build_matrix(self):
+        for value in ("", "baseline"):
+            self.assertIsNone(APK.ota_link_candidate({APK.OTA_LINK_CANDIDATE_ENV: value}))
+        self.assertEqual([], APK.ota_link_defines(None))
+        for name, reuse, without in (("reuse-with", True, False),
+                                     ("discover-without", False, True),
+                                     ("reuse-without", True, True)):
+            env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: name}
+            candidate = APK.ota_link_candidate(env)
+            self.assertEqual(dict(name=name, reuse_gatt=reuse,
+                                  prefer_without_response=without), candidate)
+            plan = APK.plan(self.root, self.run, env)
+            build = next(argv for step, argv, _, _ in plan if step == "apk_build")
+            self.assertIn("--dart-define=OTA_P34_REUSE_GATT=" + str(reuse).lower(), build)
+            self.assertIn("--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" + str(without).lower(), build)
+            self.assertIn("--debug", build)
+        for invalid in ("fast", "921600", "reuse-without --release"):
+            with self.assertRaisesRegex(ValueError, "TRACE_DEV_OTA_LINK_CANDIDATE"):
+                APK.plan(self.root, self.run, {**self.env, APK.OTA_LINK_CANDIDATE_ENV: invalid})
+
+    def test_collect_records_link_candidate_as_intent_not_performance_evidence(self):
+        self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture")]))
+        env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: "reuse-without"}
+        with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture"), \
+                mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, env)
+        metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        self.assertEqual(APK.ota_link_candidate(env), metadata["requested_ota_link_candidate"])
+        self.assertEqual("NOT_RUN", metadata["formal_acceptance"])
+
+    def test_runtime_experiment_requires_mac_observation_and_keeps_rates_out_of_builds(self):
+        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",
+               APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF"}
+        candidate = APK.ota_link_candidate(env)
+        self.assertEqual(dict(name="runtime", runtime_config=True), candidate)
+        defines = APK.ota_link_defines(candidate)
+        self.assertEqual(["--dart-define=OTA_P34_RUNTIME_CONFIG=true"], defines)
+        build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, env) if name == "apk_build")
+        self.assertIn(defines[0], build)
+        self.assertNotIn("921600", " ".join(build))
+        for invalid in ({APK.OTA_LINK_CANDIDATE_ENV: "runtime"},
+                        {**env, APK.DEVICE_OBSERVATION_ENV: "false"},
+                        {**env, APK.OBSERVATION_TARGET_ENV: "XTrace"}):
+            with self.subTest(env=invalid), self.assertRaisesRegex(ValueError, "Runtime OTA experiment"):
+                APK.ota_link_candidate(invalid)
+
+    def test_pipeline_build_is_explicit_and_preserves_runtime_observation_guards(self):
+        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime-pipeline",
+               APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF"}
+        candidate = APK.ota_link_candidate(env)
+        self.assertEqual(dict(name="runtime-pipeline", runtime_config=True, pipeline=True), candidate)
+        build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, env) if name == "apk_build")
+        self.assertIn("--dart-define=P34_OTA_PIPELINE=true", build)
+        self.assertIn("--dart-define=OTA_P34_RUNTIME_CONFIG=true", build)
+        for name in ("baseline", "runtime", "reuse-without"):
+            defines = APK.ota_link_defines(APK.ota_link_candidate({**env, APK.OTA_LINK_CANDIDATE_ENV: name}))
+            self.assertNotIn("--dart-define=P34_OTA_PIPELINE=true", defines)
+        for invalid in ({APK.OTA_LINK_CANDIDATE_ENV: "runtime-pipeline"},
+                        {**env, APK.DEVICE_OBSERVATION_ENV: "false"},
+                        {**env, APK.OBSERVATION_TARGET_ENV: "XTrace"}):
+            with self.subTest(env=invalid), self.assertRaisesRegex(ValueError, "Runtime OTA experiment"):
+                APK.ota_link_candidate(invalid)
+
+    def test_runtime_build_can_use_an_explicit_non_live_default_endpoint(self):
+        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",
+               APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF",
+               APK.OBSERVATION_FIRMWARE_URL_ENV:
+                   "https://p34-runtime-required.invalid/api/public/firmware/latest"}
+        plan = APK.plan(self.root, self.run, env)
+        build = next(argv for name, argv, _, _ in plan if name == "apk_build")
+        self.assertIn("--dart-define=OTA_P34_RUNTIME_CONFIG=true", build)
+        self.assertIn("--dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=" +
+                      env[APK.OBSERVATION_FIRMWARE_URL_ENV], build)
 
     def observation_env(self):
         """显式启用的设备观测构建环境（不含任何凭据）。"""

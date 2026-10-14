@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "C:\\Windows\\System32\\fc.exe",
+    "/B",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-boot.bin",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\boot.bin"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1061792272249900,
+  "ended_monotonic_ns": 1061792455977600,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-PREP-BOOT.stdout",
+    "bytes": 274,
+    "sha256": "566d596810d4526a192bb1b332db213cff85026b9bddc607f68717800848ac61"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-PREP-BOOT.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

@@ -103,6 +103,22 @@ ota_backup_result_t ota_backup_stage(const ota_backup_io_t *io,
                                      const bcb_hal_t *bcb_hal,
                                      ota_backup_info_t *out);
 
+/* Additive opt-in: only complete aligned payload blocks may use this port.
+ * Slot headers still use flash_erase_4k, and erase_count remains successful
+ * 4 KiB coverage units, not the number of physical erase commands.
+ * A null callback retains the original sector-only behavior. */
+typedef int (*ota_backup_erase_64k_fn)(void *ctx, uint32_t address);
+ota_backup_result_t ota_backup_stage_with_block_erase(
+    const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k);
+
+/* Optional 32 KiB payload-only port; old wrappers never invoke it. */
+typedef int (*ota_backup_erase_32k_fn)(void *ctx, uint32_t address);
+ota_backup_result_t ota_backup_stage_with_mixed_erase(
+    const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k,
+    ota_backup_erase_32k_fn erase_32k);
+
 const char *ota_backup_result_name(ota_backup_result_t result);
 
 #ifdef __cplusplus

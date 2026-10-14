@@ -522,8 +522,13 @@ static void test_vendor_multicontrol(void)
     check("vendor multi-control metadata reports full decoded stream",
           info.target_vcode == 20802u && info.base_vcode == 20700u &&
           info.decoded_len == 4360u && info.image_len == vendor_image_len);
+#if OTA_PATCH_COALESCE_WRITES
+    check("vendor multi-control path coalesces to four bounded writes",
+          fixture.program_count == 4u &&
+#else
     check("vendor multi-control path performs six bounded writes",
           fixture.program_count == 6u &&
+#endif
           fixture.max_write_len == OTA_PATCH_WORK_SIZE &&
           fixture.max_write_end == vendor_image_len);
     check("vendor multi-control path stays inside fixed workspace",

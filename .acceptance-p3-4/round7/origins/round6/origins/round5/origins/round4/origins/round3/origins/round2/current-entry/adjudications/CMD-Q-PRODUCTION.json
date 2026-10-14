@@ -1,0 +1,178 @@
+{
+  "verified": true,
+  "before": {
+    "role": "maintenance",
+    "app_sha256": "23CE89FC5D77E4CF5664D05621CAFF2CEFB6DD22237189042DE4BC5DBCF8B0D2",
+    "boot_sha256": "01E4B9E162BFAAF9FDA070AA13C0CEC3F377B8D696DB01F731E0AB3D1464E527",
+    "health": {
+      "health": [
+        [
+          30000,
+          30,
+          1000,
+          0,
+          80469,
+          80469,
+          0,
+          1,
+          1
+        ],
+        [
+          30000,
+          30,
+          1000,
+          0,
+          80735,
+          80735,
+          0,
+          1,
+          1
+        ]
+      ],
+      "registers": {
+        "vtor": 134285312,
+        "cfsr": 0,
+        "hfsr": 0,
+        "dhcsr": 16842753,
+        "sdio": 0,
+        "freeze": 0
+      },
+      "confirmed_state": 4,
+      "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+    },
+    "stack": {
+      "guard_intact": true,
+      "free_painted_bytes": 5052,
+      "high_water_bytes": 3140,
+      "scope": "Paint observed at this read, not a whole-program worst-case proof"
+    },
+    "storage": {
+      "jedec": 15679512,
+      "capacity_bytes": 16777216,
+      "slots": {
+        "candidate_slot": {
+          "erased": false,
+          "bytes": 623124,
+          "crc32": 363595034,
+          "version": 30286,
+          "sha8": "f5668644929f260a"
+        },
+        "backup_slot": {
+          "erased": false,
+          "bytes": 623124,
+          "crc32": 363595034,
+          "version": 30285,
+          "sha8": "4fc19f0408945589"
+        },
+        "recovery_slot": {
+          "erased": false,
+          "bytes": 619580,
+          "crc32": 2429394932,
+          "version": 30276,
+          "sha8": "deb4484dd0614f49"
+        }
+      },
+      "staging_header_hex": "4554534c03ffffff4d86040099f067754e7600006bc750062eeb9a53544d4f43",
+      "staging_journal_sha256": "8e38e6cef30ebfb17d145d165c446a9847adce51b37d08cb9ec2e483af19fde4",
+      "staging_erased": false,
+      "journal": {
+        "erased": false,
+        "package_sha256": "6bc750062eeb9a536e9173ba2ce8d5cec1284873d8c4a2da3bf2e46bc9b802dc",
+        "bytes": 296525,
+        "durable": 296525,
+        "matches_reference": false,
+        "expected_begin_durable": 0,
+        "committed_target": 30286
+      }
+    }
+  },
+  "after": {
+    "role": "base",
+    "app_sha256": "9B3A4A21409C59B916976385EC877B7D90BD7E4C90B3553F0B8DF2B02FD787DC",
+    "boot_sha256": "01E4B9E162BFAAF9FDA070AA13C0CEC3F377B8D696DB01F731E0AB3D1464E527",
+    "health": {
+      "health": [
+        [
+          30000,
+          30,
+          1000,
+          0,
+          7426,
+          7426,
+          0,
+          1,
+          1
+        ],
+        [
+          30000,
+          30,
+          1000,
+          0,
+          7708,
+          7708,
+          0,
+          1,
+          1
+        ]
+      ],
+      "registers": {
+        "vtor": 134285312,
+        "cfsr": 0,
+        "hfsr": 0,
+        "dhcsr": 17104897,
+        "sdio": 0,
+        "freeze": 0
+      },
+      "confirmed_state": 4,
+      "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+    },
+    "stack": {
+      "guard_intact": true,
+      "free_painted_bytes": 5092,
+      "high_water_bytes": 3100,
+      "scope": "Paint observed at this read, not a whole-program worst-case proof"
+    },
+    "storage": {
+      "jedec": 15679512,
+      "capacity_bytes": 16777216,
+      "slots": {
+        "candidate_slot": {
+          "erased": false,
+          "bytes": 623124,
+          "crc32": 363595034,
+          "version": 30286,
+          "sha8": "f5668644929f260a"
+        },
+        "backup_slot": {
+          "erased": false,
+          "bytes": 623124,
+          "crc32": 363595034,
+          "version": 30285,
+          "sha8": "4fc19f0408945589"
+        },
+        "recovery_slot": {
+          "erased": false,
+          "bytes": 619580,
+          "crc32": 2429394932,
+          "version": 30276,
+          "sha8": "deb4484dd0614f49"
+        }
+      },
+      "staging_header_hex": "4554534c03ffffff4d86040099f067754e7600006bc750062eeb9a53544d4f43",
+      "staging_journal_sha256": "8e38e6cef30ebfb17d145d165c446a9847adce51b37d08cb9ec2e483af19fde4",
+      "staging_erased": false,
+      "journal": {
+        "erased": false,
+        "package_sha256": "6bc750062eeb9a536e9173ba2ce8d5cec1284873d8c4a2da3bf2e46bc9b802dc",
+        "bytes": 296525,
+        "durable": 296525,
+        "matches_reference": false,
+        "expected_begin_durable": 0,
+        "committed_target": 30286
+      }
+    }
+  },
+  "storage_idle_halt_verified": true,
+  "debug_freeze_restored": true,
+  "boot_unchanged": true
+}

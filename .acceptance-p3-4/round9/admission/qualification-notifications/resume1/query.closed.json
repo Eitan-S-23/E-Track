@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "import os,re,subprocess,sys\nkey=os.environ['CC_SESSION_KEY']\nuid=key.split(':',2)[-1]\nassert re.fullmatch(r'ou_[a-zA-Z0-9]+',uid)\nbody=('<at user_id=\"'+uid+'\">requester</at> '+sys.stdin.buffer.read().decode('utf-8')).encode('utf-8')\nr=subprocess.run(['D:/github/my/cc-connect-thread-guard/build/cc-connect.exe','send','--project',os.environ['CC_PROJECT'],'--session',key,'--stdin'],input=body)\nraise SystemExit(r.returncode)\n"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 918071244230900,
+  "ended_monotonic_ns": 918073356900200,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round9\\admission\\qualification-notifications\\resume1\\query.stdout",
+    "bytes": 27,
+    "sha256": "49b5012ab2d22dd621998ea4fbda7a03af5f9af1c5fb9ef76bccf66fd07a019a"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round9\\admission\\qualification-notifications\\resume1\\query.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-4-v14",
+  "current_contract_sha256": "B7489A111D7708200623CCF9C25C595B68501A6D20E564318E23C45D765B1DEE",
+  "previous_contract_id": "P3-4-v13",
+  "previous_contract_sha256": "747CFF42A2CDD74C286E2E361E8658F3766617EB3B20BCC3269FA3F3F6BD5B32",
+  "contract_lineage": "direct_successor",
+  "current_round_id": null,
+  "previous_round_id": "P3-4-20261013-offline-original-evaluation",
+  "previous_matrix_sha256": "A106CDEA4FDCE187DB9D7352B6717F8C01A307DDDC40A47D0757378012940D4E",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "adopted-originals",
+    "host-source-commit",
+    "local-closeout-authorization",
+    "v13-parent-matrix"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P34-CANDIDATE-REFERENCE",
+      "reasons": [
+        "artifact_definition_changed:ART-CMD-REFERENCE-MCU",
+        "artifact_definition_changed:ART-CMD-REFERENCE-V10",
+        "artifact_definition_changed:ART-CMD-REFERENCE-V11",
+        "command_definition_changed:CMD-REFERENCE-MCU",
+        "command_definition_changed:CMD-REFERENCE-V10",
+        "command_definition_changed:CMD-REFERENCE-V11",
+        "criterion_definition_changed",
+        "external_input_changed:adopted-originals",
+        "external_input_changed:host-source-commit",
+        "external_input_changed:local-closeout-authorization",
+        "external_input_changed:v13-parent-matrix",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "Q-PREP-RESTORE",
+      "reasons": [
+        "artifact_definition_changed:ART-CMD-Q-PREP-BOOT",
+        "artifact_definition_changed:ART-CMD-Q-PREP-RESTORE",
+        "command_definition_changed:CMD-Q-PREP-BOOT",
+        "command_definition_changed:CMD-Q-PREP-RESTORE",
+        "criterion_definition_changed",
+        "external_input_changed:adopted-originals",
+        "external_input_changed:host-source-commit",
+        "external_input_changed:local-closeout-authorization",
+        "external_input_changed:v13-parent-matrix",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "Q-TRANSFER",
+      "reasons": [
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-APP",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-BASE",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-BOOT",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-CONTEXT-AFTER",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-MCU",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-RAM",
+        "command_definition_changed:CMD-Q-TRANSFER",
+        "command_definition_changed:CMD-Q-TRANSFER-APP",
+        "command_definition_changed:CMD-Q-TRANSFER-BASE",
+        "command_definition_changed:CMD-Q-TRANSFER-BOOT",
+        "command_definition_changed:CMD-Q-TRANSFER-CONTEXT-AFTER",
+        "command_definition_changed:CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "command_definition_changed:CMD-Q-TRANSFER-MCU",
+        "command_definition_changed:CMD-Q-TRANSFER-RAM",
+        "criterion_definition_changed",
+        "external_input_changed:adopted-originals",
+        "external_input_changed:host-source-commit",
+        "external_input_changed:local-closeout-authorization",
+        "external_input_changed:v13-parent-matrix",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P34-CANDIDATE-CLOSEOUT",
+      "reasons": [
+        "artifact_definition_changed:ART-CMD-CANDIDATE-ARCHIVE-04",
+        "artifact_definition_changed:ART-CMD-CANDIDATE-ARCHIVE-07",
+        "artifact_definition_changed:ART-CMD-CANDIDATE-ARCHIVE-10",
+        "artifact_definition_changed:ART-CMD-CANDIDATE-ARCHIVE-13",
+        "artifact_definition_changed:ART-CMD-CANDIDATE-CI",
+        "artifact_definition_changed:ART-CMD-CANDIDATE-SOURCE",
+        "command_definition_changed:CMD-CANDIDATE-ARCHIVE-04",
+        "command_definition_changed:CMD-CANDIDATE-ARCHIVE-07",
+        "command_definition_changed:CMD-CANDIDATE-ARCHIVE-10",
+        "command_definition_changed:CMD-CANDIDATE-ARCHIVE-13",
+        "command_definition_changed:CMD-CANDIDATE-CI",
+        "command_definition_changed:CMD-CANDIDATE-SOURCE",
+        "external_input_changed:adopted-originals",
+        "external_input_changed:host-source-commit",
+        "external_input_changed:local-closeout-authorization",
+        "external_input_changed:v13-parent-matrix",
+        "input_group_changed:validation",
+        "new_criterion",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-CANDIDATE-ARCHIVE-04",
+    "CMD-CANDIDATE-ARCHIVE-07",
+    "CMD-CANDIDATE-ARCHIVE-10",
+    "CMD-CANDIDATE-ARCHIVE-13",
+    "CMD-CANDIDATE-CI",
+    "CMD-CANDIDATE-SOURCE",
+    "CMD-Q-PREP-BOOT",
+    "CMD-Q-PREP-RESTORE",
+    "CMD-Q-TRANSFER",
+    "CMD-Q-TRANSFER-APP",
+    "CMD-Q-TRANSFER-BASE",
+    "CMD-Q-TRANSFER-BOOT",
+    "CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "CMD-Q-TRANSFER-MCU",
+    "CMD-Q-TRANSFER-RAM",
+    "CMD-REFERENCE-MCU",
+    "CMD-REFERENCE-V10",
+    "CMD-REFERENCE-V11"
+  ],
+  "required_artifacts": [
+    "ART-CMD-CANDIDATE-ARCHIVE-04",
+    "ART-CMD-CANDIDATE-ARCHIVE-07",
+    "ART-CMD-CANDIDATE-ARCHIVE-10",
+    "ART-CMD-CANDIDATE-ARCHIVE-13",
+    "ART-CMD-CANDIDATE-CI",
+    "ART-CMD-CANDIDATE-SOURCE",
+    "ART-CMD-Q-PREP-BOOT",
+    "ART-CMD-Q-PREP-RESTORE",
+    "ART-CMD-Q-TRANSFER",
+    "ART-CMD-Q-TRANSFER-APP",
+    "ART-CMD-Q-TRANSFER-BASE",
+    "ART-CMD-Q-TRANSFER-BOOT",
+    "ART-CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "ART-CMD-Q-TRANSFER-MCU",
+    "ART-CMD-Q-TRANSFER-RAM",
+    "ART-CMD-REFERENCE-MCU",
+    "ART-CMD-REFERENCE-V10",
+    "ART-CMD-REFERENCE-V11"
+  ]
+}

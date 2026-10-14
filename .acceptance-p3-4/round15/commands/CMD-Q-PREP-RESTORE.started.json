@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "C:\\Windows\\System32\\fc.exe",
+    "/B",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-base.bin",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\app.bin"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 1061792025235800,
+  "stdin_sha256": null
+}

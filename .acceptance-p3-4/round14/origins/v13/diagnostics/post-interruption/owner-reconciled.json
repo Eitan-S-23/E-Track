@@ -1,0 +1,22 @@
+{
+  "original_lock": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\previous-owner.lock",
+    "bytes": 157,
+    "sha256": "a7c66df8c21b9eb4c16923b83c6261ab72c2db41ffaea078e5a34738f87e7931"
+  },
+  "target": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\current-target.json",
+    "bytes": 2288,
+    "sha256": "00706bf633dd25f280d6c5d974b80969db72bf57dbead19a41423e64d9d56efd"
+  },
+  "original_completed_snapshot": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phone\\snapshot.jsonl",
+    "bytes": 4775779,
+    "sha256": "930a7114799d882e10287362ba2a723d489d96d71f4c3248a1f11641704b2170"
+  },
+  "owner_absent": true,
+  "old_services_closed": true,
+  "no_new_transfer": true,
+  "original_command_outcome": "UNKNOWN_EXIT_INTERRUPTED_CLOSEOUT",
+  "not_pid_age_only": true
+}

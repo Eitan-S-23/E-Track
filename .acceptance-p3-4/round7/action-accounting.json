@@ -1,0 +1,18 @@
+{
+  "qualification_ota_starts": 0,
+  "qualification_remaining": 1,
+  "calibration_ota_starts": 0,
+  "calibration_remaining": 12,
+  "app_installs": 0,
+  "app_launches": 0,
+  "flash_operations": 0,
+  "resets": 0,
+  "late_capture_files_deleted": 2,
+  "late_capture_bytes_deleted": 7887,
+  "original_historical_captures": 7,
+  "manual_mentions": 0,
+  "environment_failure": "Quick-tunnel API DNS lookup failed before phone start",
+  "state_change": "Bounded standard getaddrinfo(api.trycloudflare.com) subsequently resolved in 0.118 seconds",
+  "no_phone_runtime_write": true,
+  "next": "Same-source direct successor after preserving this failed entry; no duplicate ancestor copies needed if original source bundles stay included in the candidate."
+}

@@ -56,6 +56,11 @@ typedef struct ota_staging_io_t
                    const uint8_t *src, uint32_t len);
     int (*checkpoint)(void *ctx, uint32_t checkpoint,
                       uint32_t arg0, uint32_t arg1);
+    /* Optional synchronous full readback, without progress side effects.
+     * Compare every requested byte; return only OK, ERR_IO or ERR_VERIFY.
+     * NULL keeps the bounded read() fallback. Zero-initialize this structure. */
+    ota_staging_result_t (*verify)(void *ctx, uint32_t address,
+                                   const uint8_t *expected, uint32_t len);
 } ota_staging_io_t;
 
 typedef struct ota_staging_progress_t
@@ -74,6 +79,10 @@ typedef struct ota_staging_receiver_t
     uint32_t durable_off;
     uint32_t segment_bitmap;
     uint32_t guard;
+#if defined(P34_STAGING_EARLY_ERASE) && P34_STAGING_EARLY_ERASE
+    /* Volatile only: a new BEGIN must erase an uncommitted block again. */
+    uint8_t block_erased;
+#endif
     uint8_t block[OTA_STAGING_BLOCK_SIZE];
 } ota_staging_receiver_t;
 
@@ -97,6 +106,14 @@ ota_staging_result_t ota_staging_finalize(
     ota_staging_receiver_t *receiver,
     uint32_t payload_crc32,
     uint32_t target_vcode);
+
+#if defined(P34_OTA_PIPELINE) && P34_OTA_PIPELINE
+/* Payload operations must be quiescent. Read back before committing the existing
+ * journal; never erase/program payload here or recycle a pipeline-owned buffer. */
+ota_staging_result_t ota_staging_commit_buffer(
+    ota_staging_receiver_t *receiver, uint32_t offset,
+    const uint8_t *data, uint32_t len, ota_staging_progress_t *progress);
+#endif
 
 #ifdef __cplusplus
 }

@@ -345,10 +345,12 @@ class P25BuildProvenanceTests(unittest.TestCase):
         self.assertNotIn(FREEZE_INDEX, governance)
         self.assertNotIn("docs/acceptance-contracts/template.contract.json", governance)
 
-        # Tools/etu_pack.py 是唯一被两个 profile 共享的路径：它既是 OTA 打包器
-        # （Production top_files），又落在 Validation 的 Tools/ 根模式下。除它以外
-        # 生产源与验收工具必须完全分开，否则改测试会打红产品判据、反之亦然。
-        self.assertEqual({"Tools/etu_pack.py"}, production & validation)
+        # These Tools inputs are compiled/shipped, not validation-only helpers.
+        self.assertEqual(
+            {"Tools/etu_pack.py", "Tools/ota/p34_timed_ack_batch.h",
+             "Tools/ota/p34_staging_erase.h"},
+            production & validation,
+        )
         self.assertEqual(set(), production & governance)
         self.assertEqual(set(), validation & governance)
 

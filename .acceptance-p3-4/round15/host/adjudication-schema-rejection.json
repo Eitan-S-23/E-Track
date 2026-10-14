@@ -1,0 +1,16 @@
+{
+  "actual_exit_code": 1,
+  "entry": {
+    "path": ".cache\\p34-local-closeout-20261014\\successor15\\adjudicate.measurement-key.py",
+    "bytes": 29767,
+    "sha256": "fba67238d6d6c094a4666f014245a0b6c519c15f73f89667071fea25063005b6"
+  },
+  "error_type": "KeyError",
+  "field": "raw_finished_snapshot",
+  "source": "Observed second one-off adjudication invocation",
+  "cause": "The baseline measurement uses inline fields; the other three originals already bind snapshot/report/APK through per-record fingerprints.",
+  "resolution": "Use each existing binding summary sourcePath and rawSha256; verify either the baseline scalar metadata or the other three original fingerprint records. Do not add fields to old evidence.",
+  "formal_matrix_unchanged": true,
+  "formal_commands_replayed": 0,
+  "device_operations": 0
+}

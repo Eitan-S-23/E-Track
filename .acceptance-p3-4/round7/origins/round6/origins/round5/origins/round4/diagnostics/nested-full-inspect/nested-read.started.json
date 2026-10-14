@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "import sys,json\nfrom pathlib import Path\nr=Path.cwd();sys.path.insert(0,str(r/'Tools/ota/p34-acceptance'));import live_host as h;from live_mcu import MCU\nout=h.fresh(r/'.acceptance-p3-4/round4/diagnostics/nested-full-inspect/child');p=h.read_json(r/'.cache/p34-live-inputs1/inputs.json');m=MCU(p,out/'mcu')\ntry:\n with h.device_owner(out,read_only=True):\n  value=m.inspect('base','nested-current-base');h.save(out/'result.json',value);print('NESTED_FULL_CURRENT_BASE_VERIFIED',value['image']['sha256'])\nexcept Exception as e:\n h.save(out/'failed.json',dict(error_type=type(e).__name__,message=str(e)));print('NESTED_READ_FAILED '+str(e));raise SystemExit(1)\nfinally:m.stop_logger()\n"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 846061840521800,
+  "stdin_sha256": null
+}

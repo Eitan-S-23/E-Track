@@ -1,0 +1,55 @@
+{
+  "source_commit": "85b62f01cb2a16dc4e07b2203e5a2e5d8c4a56f7",
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\review.json",
+      "bytes": 2001,
+      "sha256": "7b90acdeb869e81716c9b964d250575eb1004f45be0670b603c7a66e57313804"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\selftest.json",
+      "bytes": 441,
+      "sha256": "18bd258c7b474ca240dd77f73164e7cd89e060596077e4a7cd0c9db174673eca"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\selftest.log",
+      "bytes": 24282,
+      "sha256": "75e3a7e4e09a672ec962d717c50accbc4ddd19e799f28b15b045a920d4aed16c"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\current-state.json",
+      "bytes": 6571,
+      "sha256": "70db32711ba79c14ab1ae4d165fd151fc4164519fc916d4476a28b74c51aa41f"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\capture-cleanup.json",
+      "bytes": 674,
+      "sha256": "bab2594850d4da475aa5d44543c1f8f6b44c55da22ca73f25d4664f08ddc85ed"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\capture-archive.json",
+      "bytes": 729,
+      "sha256": "89ca1f910bb63f1eaaf495ba568e561d2944f41154c2fd0556fdc9020b840d9e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\owner-reconciliation.json",
+      "bytes": 380,
+      "sha256": "cf11389950fa0e6376b7d032da12ba653c5c91577d685c1cd12ca0da98c661c5"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\admission\\v10-accounting.json",
+      "bytes": 4006,
+      "sha256": "88275d6fdd0365755724139278d117056a355231585f28d40d8b901ba2003bb4"
+    }
+  ],
+  "authorization": "User approved the host repair and one qualification supplement, then expressly authorized the necessary described v10 capture cleanup and immediate acceptance continuation on 2026-10-12.",
+  "previous_qualification_consumed": 1,
+  "additional_qualification": 1,
+  "cumulative_qualification_limit": 2,
+  "calibration_consumed": 0,
+  "calibration_limit": 12,
+  "current_state": "Full target 3.2.87, unchanged group16 Boot, confirmed=4, idle SD/OTA, base backup slot present; same reference durable=1048576.",
+  "decision": "Exactly one preparatory complete-state rollback is necessary for zero-durable base. It is not the failed v10 Q-RESTORE and cannot qualify the post-transfer recovery gate.",
+  "recovery": "Reuse pinned MCU.restore: storage-idle standard Commander install of restore App only; READY mailbox verifies complete base backup/Boot/config before arming; ordinary Boot rollback; full base/Boot/health and erased journal. No Boot programming or App-only downgrade.",
+  "invariant": "v10 remains EVIDENCE_GAP and 1/1 consumed. Q-TRANSFER original evidence/product criteria and post-Q Q-RESTORE remain mandatory. Only the new observer qualification may follow preparatory restoration; calibration cannot start until both new Q gates pass."
+}

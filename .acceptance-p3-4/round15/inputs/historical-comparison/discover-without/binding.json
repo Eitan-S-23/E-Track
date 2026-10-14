@@ -1,0 +1,44 @@
+{
+  "time": "2026-09-22T10:58:30.295835+00:00",
+  "summary": {
+    "schema": 1,
+    "captureId": "1790074252711045-cf589bbac8383bf2decb0465",
+    "sentinel": "OTAOBS555aebbd12536a63ba1dd537",
+    "target": "E3:49:E1:14:D6:CB",
+    "pid": 29910,
+    "platform": "android",
+    "records": 11419,
+    "producerLines": 11416,
+    "input": {
+      "packageSha256": "da82725792afeb88b353de7c595596eafa47f1c1db9bfa4905803693b159d600",
+      "packageBytes": 284643,
+      "currentVersionCode": 30206,
+      "currentImageSha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+      "targetVersionCode": 30207,
+      "targetImageSha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+      "deviceAddress": "e3:49:e1:14:d6:cb",
+      "appLifecycle": "resumed"
+    },
+    "outcome": "completed",
+    "rawSha256": "d8de2e5079dfab374cda36626e7c0a48481be44442f72dfa73331c03a591a80d",
+    "eligibleForThreshold": false,
+    "independentAcceptance": "NOT_RUN",
+    "scope": "envelope/identity integrity only; original timing/grouping gates still required",
+    "unwrappedSha256": "b8f010356937372693942cad8001b4ff95b498e13e6776cb6427fb5f6f15769a",
+    "sourcePath": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\finished\\snapshot.jsonl"
+  },
+  "pid": 29910,
+  "remote": "files/p34-observations/1790074252711045-cf589bbac8383bf2decb0465",
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681318429\\contents\\run-d68b8de6936f4de4938234d0c91a5d3d\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131603682,
+    "sha256": "759439401e7c52d3723379aedd0f3b179ed1e5868d3fa11190e59ffd73b3747b"
+  },
+  "parser": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+    "bytes": 84728,
+    "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7"
+  },
+  "parser_exit": 0,
+  "independent_acceptance": false
+}

@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-single-ota-20260921\\bin\\cloudflared.exe",
+    "tunnel",
+    "--no-autoupdate",
+    "--protocol",
+    "quic",
+    "--edge-ip-version",
+    "4",
+    "--metrics",
+    "127.0.0.1:0",
+    "--url",
+    "http://127.0.0.1:60364"
+  ],
+  "reason": "planned_service_close",
+  "stopped_while_running": true,
+  "exit_code": 1,
+  "started_monotonic_ns": 851929746628100,
+  "ended_monotonic_ns": 852027233930900,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round6\\ops\\cmd-q-transfer\\network\\https-tunnel.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round6\\ops\\cmd-q-transfer\\network\\https-tunnel.stderr",
+    "bytes": 5870,
+    "sha256": "f57449296d5d6bfbaa0b85ca26956b068e8739f6b9be7ffa5c4fb652611e5cf7"
+  }
+}

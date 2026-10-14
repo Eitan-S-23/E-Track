@@ -1,0 +1,18 @@
+{
+  "phone_unlocked": true,
+  "awake": true,
+  "power": {
+    "path": ".acceptance-p3-4\\round8\\admission\\phone-ready\\takeover3\\power-000.txt",
+    "bytes": 21589,
+    "sha256": "bcab5b52b978b9291db65c2710d0135f89ab416ba6ed32a6386c64606335c905"
+  },
+  "policy": {
+    "path": ".acceptance-p3-4\\round8\\admission\\phone-ready\\takeover3\\policy-000.txt",
+    "bytes": 2839,
+    "sha256": "b8731c75b1394f147b3169a37842ffb460605f0e3a90a716559cffb31d66346d"
+  },
+  "retained_capture_count": 7,
+  "apk_sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f",
+  "ota_starts": 0,
+  "monotonic_ns": 911666623984800
+}

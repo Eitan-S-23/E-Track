@@ -1,0 +1,5 @@
+ERROR: command CMD-CANDIDATE-ARCHIVE-04 must bind interpreter runner_paths
+ERROR: command CMD-CANDIDATE-ARCHIVE-07 must bind interpreter runner_paths
+ERROR: command CMD-CANDIDATE-ARCHIVE-10 must bind interpreter runner_paths
+ERROR: command CMD-CANDIDATE-ARCHIVE-13 must bind interpreter runner_paths
+VALIDATION=FAIL errors=4

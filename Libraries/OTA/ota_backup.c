@@ -13,6 +13,8 @@
 #include "OTA/ota_backup.h"
 
 #include "OTA/ota_layout.h"
+#include "OTA/ota_erase_plan.h"
+#include "OTA/ota_half_erase_plan.h"
 #include "OTA/ota_slot_header.h"
 #include "boot_crypto.h"
 #include "boot_fw_header.h"
@@ -327,9 +329,10 @@ static ota_backup_result_t classify_commit(const bcb_hal_t *bcb_hal,
     return OTA_BACKUP_ERR_COMMIT_AMBIGUOUS;
 }
 
-ota_backup_result_t ota_backup_stage(const ota_backup_io_t *io,
-                                     const bcb_hal_t *bcb_hal,
-                                     ota_backup_info_t *out)
+static ota_backup_result_t ota_backup_stage_impl(
+    const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k,
+    ota_backup_erase_32k_fn erase_32k)
 {
     bcb_arbiter_result_t active;
     bcb_t current;
@@ -434,15 +437,31 @@ ota_backup_result_t ota_backup_stage(const ota_backup_io_t *io,
     info.erase_count++;
     payload_end = align_up_4k(info.backup_len);
     for (erase_address = OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE;
-         erase_address < OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE + payload_end;
-         erase_address += OTA_SLOT_HEADER_SIZE)
+         erase_address < OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE + payload_end;)
     {
-        if (io->flash_erase_4k(io->ctx, erase_address) != 0)
+        uint32_t remaining = OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE +
+                             payload_end - erase_address;
+        uint32_t step = ota_erase_next_size_mixed(erase_address, remaining,
+                                                 erase_64k != 0, erase_32k != 0);
+        int erased;
+
+        if (step == 0u)
         {
             if (out != 0) *out = info;
             return result;
         }
-        info.erase_count++;
+        erased = step == OTA_ERASE_BLOCK_SIZE ?
+            erase_64k(io->ctx, erase_address) :
+            (step == OTA_ERASE_HALF_BLOCK_SIZE ?
+             erase_32k(io->ctx, erase_address) :
+             io->flash_erase_4k(io->ctx, erase_address));
+        if (erased != 0)
+        {
+            if (out != 0) *out = info;
+            return result;
+        }
+        info.erase_count += step / OTA_SLOT_HEADER_SIZE;
+        erase_address += step;
     }
 
     /* 5) 分块自拷：4KB 块读当前 App → 更新 CRC → 写 backup → 读回比对。
@@ -580,6 +599,28 @@ ota_backup_result_t ota_backup_stage(const ota_backup_io_t *io,
      * 不得直接判定“仍 CONFIRMED”。（阻断 6） */
     (void)bcb_commit(bcb_hal, active, &next);
     return classify_commit(bcb_hal, &next, &info, out);
+}
+
+ota_backup_result_t ota_backup_stage(const ota_backup_io_t *io,
+                                     const bcb_hal_t *bcb_hal,
+                                     ota_backup_info_t *out)
+{
+    return ota_backup_stage_impl(io, bcb_hal, out, 0, 0);
+}
+
+ota_backup_result_t ota_backup_stage_with_block_erase(
+    const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k)
+{
+    return ota_backup_stage_impl(io, bcb_hal, out, erase_64k, 0);
+}
+
+ota_backup_result_t ota_backup_stage_with_mixed_erase(
+    const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k,
+    ota_backup_erase_32k_fn erase_32k)
+{
+    return ota_backup_stage_impl(io, bcb_hal, out, erase_64k, erase_32k);
 }
 
 const char *ota_backup_result_name(ota_backup_result_t result)

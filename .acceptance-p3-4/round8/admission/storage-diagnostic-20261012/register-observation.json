@@ -1,0 +1,32 @@
+{
+  "observed": {
+    "gpioa_idt": 50782,
+    "sd": 0,
+    "disabled": 1,
+    "jedec": 131072,
+    "sd_card_detect_inserted": true
+  },
+  "raw": {
+    "gpioa_idt": {
+      "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\mcu\\0001-storage-read-only\\gpioa_idt.bin",
+      "bytes": 4,
+      "sha256": "f371bde3673f6b626bad6ad9479504a5540a810723c3a627f69f67eb1e3330dc"
+    },
+    "sd": {
+      "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\mcu\\0001-storage-read-only\\sd.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    "disabled": {
+      "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\mcu\\0001-storage-read-only\\disabled.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    "jedec": {
+      "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\mcu\\0001-storage-read-only\\jedec.bin",
+      "bytes": 4,
+      "sha256": "313588ae36b23498c072b8718f9a3614d9e52b444cdcea74ecd49c93044741b3"
+    }
+  },
+  "not_a_root_cause_verdict": true
+}

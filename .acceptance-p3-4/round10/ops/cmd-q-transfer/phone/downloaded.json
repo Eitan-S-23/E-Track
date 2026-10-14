@@ -1,0 +1,15 @@
+{
+  "previous_stamp": "65043:866400:1048576:1791798922:1791798922",
+  "current_stamp": "65043:895476:1048576:1791806285:1791806285",
+  "fresh_query": true,
+  "package": {
+    "path": ".acceptance-p3-4\\round10\\ops\\cmd-q-transfer\\phone\\downloaded.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "query_prefix": {
+    "path": ".acceptance-p3-4\\round10\\ops\\cmd-q-transfer\\phone\\query-events.jsonl",
+    "bytes": 12980,
+    "sha256": "76916210a85f5c1909c665b0f3b170e958bf9ff82a6f8585d80864c0c012e3bd"
+  }
+}

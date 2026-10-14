@@ -1,0 +1,6 @@
+{
+  "kind": "read-only diagnostic",
+  "reason": "Commander ClrBP reports nonexistent handle in a new process; inspect actual FPB without another install/reset",
+  "not_an_ota": true,
+  "no_criterion_change": true
+}

@@ -1,0 +1,470 @@
+POWER MANAGER (dumpsys power)
+
+Power Manager State:
+  Settings power_manager_constants:
+    no_cached_wake_locks=true
+  mDirty=0x0
+  mWakefulness=Asleep
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=2
+  mBatteryLevel=38
+  mBatteryLevelWhenDreamStarted=0
+  mDockState=0
+  mStayOn=true
+  mProximityPositive=false
+  mBootCompleted=true
+  mSystemReady=true
+  mEnhancedDischargeTimeElapsed=0
+  mLastEnhancedDischargeTimeUpdatedElapsed=0
+  mEnhancedDischargePredictionIsPersonalized=false
+  mHalAutoSuspendModeEnabled=true
+  mHalInteractiveModeEnabled=false
+  mWakeLockSummary=0x1
+  mNotifyLongScheduled=+12s989ms
+  mNotifyLongDispatched=-47s326ms
+  mNotifyLongNextCheck=(none)
+  mRequestWaitForNegativeProximity=false
+  mInterceptedPowerKeyForProximity=false
+  mSandmanScheduled=false
+  mBatteryLevelLow=false
+  mLightDeviceIdleMode=false
+  mDeviceIdleMode=false
+  mDeviceIdleWhitelist=[1000, 1001, 2000, 10029, 10031, 10037, 10040, 10046, 10051, 10064, 10065, 10066, 10067, 10076, 10087, 10120, 10133, 10136, 10146, 10159, 10161, 10164, 10168, 10221, 10287, 10295, 10305, 10307, 10351, 10364, 10376]
+  mDeviceIdleTempWhitelist=[]
+  mLowPowerStandbyActive=false
+  mLastWakeTime=877152577 (456023 ms ago)
+  mLastSleepTime=877180055 (428545 ms ago)
+  mLastSleepReason=power_button
+  mLastInteractivePowerHintTime=877181163 (427437 ms ago)
+  mLastScreenBrightnessBoostTime=0 (877608600 ms ago)
+  mScreenBrightnessBoostInProgress=false
+  mHoldingWakeLockSuspendBlocker=true
+  mHoldingDisplaySuspendBlocker=false
+  mLastFlipTime=821195197
+  mIsFaceDown=false
+
+Settings and Configuration:
+  mDecoupleHalAutoSuspendModeFromDisplayConfig=false
+  mDecoupleHalInteractiveModeFromDisplayConfig=false
+  mWakeUpWhenPluggedOrUnpluggedConfig=true
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mTheaterModeEnabled=false
+  mSuspendWhenScreenOffDueToProximityConfig=true
+  mDreamsSupportedConfig=true
+  mDreamsEnabledByDefaultConfig=true
+  mDreamsActivatedOnSleepByDefaultConfig=false
+  mDreamsActivatedOnDockByDefaultConfig=true
+  mDreamsEnabledOnBatteryConfig=false
+  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1
+  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15
+  mDreamsBatteryLevelDrainCutoffConfig=5
+  mDreamsEnabledSetting=true
+  mDreamsActivateOnSleepSetting=false
+  mDreamsActivateOnDockSetting=true
+  mDozeAfterScreenOff=true
+  mMinimumScreenOffTimeoutConfig=5000
+  mMaximumScreenDimDurationConfig=7000
+  mMaximumScreenDimRatioConfig=0.20000005
+  mAttentiveTimeoutConfig=-1
+  mAttentiveTimeoutSetting=-1
+  mAttentiveWarningDurationConfig=30000
+  mScreenOffTimeoutSetting=300000
+  mSleepTimeoutSetting=-1
+  mMaximumScreenOffTimeoutFromDeviceAdmin=9223372036854775807 (enforced=false)
+  mStayOnWhilePluggedInSetting=7
+  mScreenBrightnessModeSetting=0
+  mScreenBrightnessOverrideFromWindowManager=NaN
+  mUserActivityTimeoutOverrideFromWindowManager=7000
+  mUserInactiveOverrideFromWindowManager=false
+  mDozeScreenStateOverrideFromDreamManager=1
+  mDrawWakeLockOverrideFromSidekick=false
+  mDozeScreenBrightnessOverrideFromDreamManager=0
+  mScreenBrightnessMinimum=7.0E-5
+  mScreenBrightnessMaximum=1.0
+  mScreenBrightnessDefault=0.39763778
+  mDoubleTapWakeEnabled=false
+  mIsVrModeEnabled=false
+  mButtonLightOn=true
+  mButtonLightAlwaysOn=false
+  mButtonLightSensorControl=false
+  buttonLightControlMode=0
+  isButtonLightSpecialScene=true
+  isButtonLightSpecialSceneException=false
+  isButtonNeedReflectGlobal=false
+  mForegroundProfile=0
+  mUserId=0
+
+Attentive timeout: -1 ms
+Sleep timeout: -1 ms
+Screen off timeout: 7000 ms
+Screen dim duration: 1400 ms
+
+UID states (changing=false changed=false):
+  UID 1000:   ACTIVE  count=0 state=0
+  UID 1001:   ACTIVE  count=0 state=0
+  UID 1002:   ACTIVE  count=0 state=0
+  UID 1041: INACTIVE  count=2 state=20
+  UID 1068:   ACTIVE  count=0 state=0
+  UID u0a0:   ACTIVE  count=0 state=0
+  UID u0a27: INACTIVE  count=0 state=10
+  UID u0a29: INACTIVE  count=0 state=10
+  UID u0a35:   ACTIVE  count=0 state=0
+  UID u0a37: INACTIVE  count=0 state=10
+  UID u0a40: INACTIVE  count=0 state=8
+  UID u0a46: INACTIVE  count=0 state=8
+  UID u0a51: INACTIVE  count=0 state=10
+  UID u0a57:   ACTIVE  count=0 state=5
+  UID u0a64:   ACTIVE  count=0 state=5
+  UID u0a66: INACTIVE  count=0 state=19
+  UID u0a69: INACTIVE  count=0 state=10
+  UID u0a74:   ACTIVE  count=0 state=5
+  UID u0a90:   ACTIVE  count=0 state=5
+  UID u0a92:   ACTIVE  count=0 state=5
+  UID u0a93:   ACTIVE  count=0 state=0
+  UID u0a96:   ACTIVE  count=0 state=5
+  UID u0a109: INACTIVE  count=0 state=10
+  UID u0a111:   ACTIVE  count=0 state=7
+  UID u0a115:   ACTIVE  count=0 state=5
+  UID u0a120: INACTIVE  count=0 state=10
+  UID u0a125: INACTIVE  count=0 state=10
+  UID u0a129:   ACTIVE  count=0 state=5
+  UID u0a130: INACTIVE  count=0 state=10
+  UID u0a134:   ACTIVE  count=0 state=5
+  UID u0a136:   ACTIVE  count=0 state=0
+  UID u0a139:   ACTIVE  count=0 state=0
+  UID u0a142:   ACTIVE  count=0 state=0
+  UID u0a146:   ACTIVE  count=0 state=5
+  UID u0a164:   ACTIVE  count=0 state=0
+  UID u0a165:   ACTIVE  count=0 state=0
+  UID u0a168:   ACTIVE  count=0 state=0
+  UID u0a170:   ACTIVE  count=0 state=0
+  UID u0a176:   ACTIVE  count=0 state=0
+  UID u0a184:   ACTIVE  count=0 state=5
+  UID u0a214: INACTIVE  count=0 state=19
+  UID u0a221: INACTIVE  count=0 state=10
+  UID u0a236: INACTIVE  count=0 state=10
+  UID u0a260: INACTIVE  count=0 state=10
+  UID u0a266: INACTIVE  count=0 state=19
+  UID u0a286: INACTIVE  count=0 state=12
+  UID u0a295: INACTIVE  count=0 state=10
+  UID u0a298:   ACTIVE  count=0 state=7
+  UID u0a305:   ACTIVE  count=0 state=6
+  UID u0a307: INACTIVE  count=1 state=10
+  UID u0a364:   ACTIVE  count=0 state=6
+  UID u0a379:   ACTIVE  count=1 state=4
+  UID u0a418: INACTIVE  count=0 state=15
+  UID u0a421: INACTIVE  count=0 state=19
+  UID u0i361:   ACTIVE  count=0 state=4
+  UID u0i911:   ACTIVE  count=0 state=5
+  UID u0i923: INACTIVE  count=0 state=10
+  UID u999a307: INACTIVE  count=1 state=10
+
+Looper state:
+  Looper (PowerManagerService, tid 72) {d0365d}
+    Message 0: { id=17017709 when=+12s988ms what=4 target=android.os.Handler }
+    (Total messages: 1, polling=true, quitting=false)
+
+Wake Locks: size=5
+  PARTIAL_WAKE_LOCK              'AudioIn' ACQ=-3h56m28s630ms LONG (uid=1041 ws=WorkSource{1000})
+  PARTIAL_WAKE_LOCK              'AudioMix' ACQ=-2m47s334ms LONG (uid=1041 ws=WorkSource{10379})
+  PARTIAL_WAKE_LOCK              'VFS:Maintenance' ACQ=-6m36s731ms LONG (uid=10307 pid=13582)
+  PARTIAL_WAKE_LOCK              'VFS:Maintenance' ACQ=-6m36s642ms LONG (uid=99910307 pid=15229)
+  PARTIAL_WAKE_LOCK              'ExoPlayer:WakeLockManager' ACQ=-2m47s394ms LONG (uid=10379 pid=19019)
+
+Suspend Blockers: size=5
+  PowerManagerService.Booting: ref count=0 []
+  PowerManagerService.WakeLocks: ref count=1 [unknown: (10-11 13:02:51.158)]
+  PowerManagerService.Display: ref count=0 []
+  PowerManagerService.Broadcasts: ref count=0 []
+  PowerManagerService.WirelessChargerDetector: ref count=0 []
+
+Display Power: com.android.server.power.PowerManagerService$1@225abd2
+
+Battery saving stats:
+  Battery Saver is currently: OFF
+    Times full enabled: 0
+    Times adaptive enabled: 0
+  
+  Drain stats:
+                     Battery saver OFF                          ON
+  NonDoze NonIntr:    918m   3961mAh(113%)    258.9mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:   3256m  39534mAh(759%)    728.3mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Deep    NonIntr:    350m   1350mAh( 25%)    231.6mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m     35mAh(  0%)   2215.8mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Light   NonIntr:   1163m   7515mAh(110%)    387.7mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:    155m   1123mAh( 18%)    433.1mAh/h          0m      0mAh(  0%)      0.0mAh/h
+
+Battery saver policy (*NOTE* they only apply when battery saver is ON):
+  Settings: battery_saver_constants
+    value: 
+  Settings: (overlay)
+    value: 
+  DeviceConfig: battery_saver
+    location_mode: 
+  mAccessibilityEnabled=true
+  mAutomotiveProjectionActive=false
+  mPolicyLevel=0
+  
+  Policy 'default full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=false
+  
+  Policy 'current full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=false
+  
+  Policy 'default adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'current adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'effective'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+
+Battery saver state machine:
+  Enabled=false
+    full=false
+    adaptive=false
+  mState=1
+  mLastChangedIntReason=0
+  mLastChangedStrReason=null
+  mBootCompleted=true
+  mSettingsLoaded=true
+  mBatteryStatusSet=true
+  mIsPowered=true
+  mBatteryLevel=38
+  mIsBatteryLevelLow=false
+  mSettingAutomaticBatterySaver=0
+  mSettingBatterySaverEnabled=false
+  mSettingBatterySaverEnabledSticky=false
+  mSettingBatterySaverStickyAutoDisableEnabled=true
+  mSettingBatterySaverStickyAutoDisableThreshold=100
+  mSettingBatterySaverTriggerThreshold=0
+  mBatterySaverStickyBehaviourDisabled=false
+  mDynamicPowerSavingsDefaultDisableThreshold=80
+  mDynamicPowerSavingsDisableThreshold=80
+  mDynamicPowerSavingsEnableBatterySaver=false
+  mLastAdaptiveBatterySaverChangedExternallyElapsed=0
+AttentionDetector:
+ mIsSettingEnabled=false
+ mMaxExtensionMillis=900000
+ mPreDimCheckDurationMillis=2000
+ mEffectivePostDimTimeout=0
+ mLastUserActivityTime(excludingAttention)=877181163
+ mAttentionServiceSupported=false
+ mRequested=false
+
+Profile power states: size=0
+Display Group User Activity:
+  displayGroupId=0
+  userActivitySummary=0x0
+  lastUserActivityTime=877177139 (431464 ms ago)
+  lastUserActivityTimeNoChangeLights=874557063 (3051540 ms ago)
+  mWakeLockSummary=0x1
+
+Wireless Charger Detector State:
+  mGravitySensor={Sensor name="gravity  Non-wakeup", vendor="QTI", version=1, type=9, maxRange=156.91, resolution=0.01, power=0.515, minDelay=5000}
+  mPoweredWirelessly=false
+  mAtRest=false
+  mRestX=0.0, mRestY=0.0, mRestZ=0.0
+  mDetectionInProgress=false
+  mDetectionStartTime=0 (never)
+  mMustUpdateRestPosition=false
+  mTotalSamples=0
+  mMovingSamples=0
+  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0
+  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0
+Wake Lock Log
+  10-11 23:50:35.874 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:35.907 - 1000 - REL NetworkStats
+  10-11 23:50:36.285 - 10146 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-11 23:50:36.312 - 10146 - ACQ IntentOp:.g.c.MessageRetryIntentOperation (partial)
+  10-11 23:50:36.313 - 10146 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-11 23:50:36.316 - 10146 - ACQ GOOGLE_C2DM (partial)
+  10-11 23:50:36.323 - 10146 - REL GOOGLE_C2DM
+  10-11 23:50:36.334 - 10146 - REL IntentOp:.g.c.MessageRetryIntentOperation
+  10-11 23:50:36.909 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:36.948 - 1000 - REL NetworkStats
+  10-11 23:50:37.950 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:37.989 - 1000 - REL NetworkStats
+  10-11 23:50:38.991 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:39.028 - 1000 - REL NetworkStats
+  10-11 23:50:40.029 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:40.068 - 1000 - REL NetworkStats
+  10-11 23:50:40.716 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:40.748 - 1000 - REL NetworkStats
+  10-11 23:50:41.070 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:41.108 - 1000 - REL NetworkStats
+  10-11 23:50:41.109 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:41.141 - 1000 - REL NetworkStats
+  10-11 23:50:42.111 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:42.148 - 1000 - REL NetworkStats
+  10-11 23:50:43.150 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:43.183 - 1000 - REL NetworkStats
+  10-11 23:50:44.186 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:44.222 - 1000 - REL NetworkStats
+  10-11 23:50:45.225 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:45.275 - 1000 - REL NetworkStats
+  10-11 23:50:46.278 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:46.357 - 1000 - REL NetworkStats
+  10-11 23:50:47.360 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:47.421 - 1000 - REL NetworkStats
+  10-11 23:50:48.424 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:48.474 - 1000 - REL NetworkStats
+  10-11 23:50:49.477 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:49.518 - 1000 - REL NetworkStats
+  10-11 23:50:50.521 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:50.579 - 1000 - REL NetworkStats
+  10-11 23:50:51.178 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:51.236 - 1000 - REL NetworkStats
+  10-11 23:50:51.581 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:51.621 - 1000 - REL NetworkStats
+  10-11 23:50:52.623 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:52.677 - 1000 - REL NetworkStats
+  10-11 23:50:53.680 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:53.743 - 1000 - REL NetworkStats
+  10-11 23:50:54.745 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:54.794 - 1000 - REL NetworkStats
+  10-11 23:50:55.797 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:55.835 - 1000 - REL NetworkStats
+  10-11 23:50:56.838 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:56.878 - 1000 - REL NetworkStats
+  10-11 23:50:57.799 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:57.861 - 1000 - REL NetworkStats
+  10-11 23:50:57.880 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:57.913 - 1000 - REL NetworkStats
+  10-11 23:50:58.914 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:50:58.976 - 1000 - REL NetworkStats
+  10-11 23:50:59.979 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:00.013 - 1000 - REL NetworkStats
+  10-11 23:51:01.016 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:01.076 - 1000 - REL NetworkStats
+  10-11 23:51:01.250 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:01.283 - 1000 - REL NetworkStats
+  10-11 23:51:02.078 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:02.115 - 1000 - REL NetworkStats
+  10-11 23:51:03.116 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:03.216 - 1000 - REL NetworkStats
+  10-11 23:51:04.219 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:04.284 - 1000 - REL NetworkStats
+  10-11 23:51:05.287 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:05.345 - 1000 - REL NetworkStats
+  10-11 23:51:05.715 - 10146 - ACQ GCM_READ (partial)
+  10-11 23:51:05.718 - 10146 - ACQ GCM_WORK (partial)
+  10-11 23:51:05.719 - 10146 - REL GCM_READ
+  10-11 23:51:05.746 - 10146 - ACQ GOOGLE_C2DM (partial)
+  10-11 23:51:05.764 - 10146 - REL GCM_WORK
+  10-11 23:51:05.790 - 10146 - REL GOOGLE_C2DM
+  10-11 23:51:06.348 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:51:06.395 - 1000 - REL NetworkStats
+  -
+  Events: 82, Time-Resets: 34
+  Buffer, Bytes used: 511
+FaceDownDetector:
+  mFaceDown=false
+  mActive=false
+  mLastFlipTime=0
+  mSensorMaxLatencyMicros=2000000
+  mUserInteractionBackoffMillis=60000
+  mPreviousResultTime=821363152
+  mPreviousResultType=3
+  mMillisSaved=13055
+  mZAccelerationThreshold=-9.5
+  mAccelerationThreshold=0.2
+  mTimeThreshold=PT1S
+AmbientDisplaySuppressionController:
+ ambientDisplaySuppressed=false
+ mSuppressionTokens={}
+
+Low Power Standby Controller:
+  mIsActive=false
+  mIsEnabled=false
+  mSupportedConfig=false
+  mEnabledByDefaultConfig=false
+  mStandbyTimeoutConfig=0
+  mAllowlistUids=[]

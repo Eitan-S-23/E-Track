@@ -1,0 +1,52 @@
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 55880)
+Traceback (most recent call last):
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 449, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 415, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+                           ~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 719, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 411, in <module>
+    main()
+    ~~~~^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 378, in main
+    phone_cell(plan, out, args)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 284, in phone_cell
+    raise error
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 183, in phone_cell
+    h.wait_for(lambda: phone.downloaded(package_path, previous_stamp), PHONE_PHASE_SECONDS["download"], interval=1)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_host.py", line 209, in wait_for
+    value = check()
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 183, in <lambda>
+    h.wait_for(lambda: phone.downloaded(package_path, previous_stamp), PHONE_PHASE_SECONDS["download"], interval=1)
+                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 300, in downloaded
+    h.require(self.health(self.capture).get("upgradeStarts") == 0, "transfer started before qualification")
+              ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 374, in health
+    return json.loads(self.file("files/p34-observations/" + capture + "/health.json", 8192))
+                      ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 290, in file
+    h.require(len(data) == int(size), "App file changed during read")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_host.py", line 23, in require
+    raise RuntimeError(message)
+RuntimeError: App file changed during read

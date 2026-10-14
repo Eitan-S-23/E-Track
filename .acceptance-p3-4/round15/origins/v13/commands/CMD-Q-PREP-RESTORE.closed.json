@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p34-acceptance/live.py",
+    "restore",
+    "--inputs",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\inputs\\live-inputs.json",
+    "--out",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore",
+    "--seconds",
+    "3390",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json",
+    "--command-id",
+    "CMD-Q-PREP-RESTORE"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 1005591871883600,
+  "ended_monotonic_ns": 1005706363021800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round12\\commands\\CMD-Q-PREP-RESTORE.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round12\\commands\\CMD-Q-PREP-RESTORE.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

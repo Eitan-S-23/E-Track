@@ -1,0 +1,9 @@
+{
+  "phase": "snapshot",
+  "started_monotonic": 1006064.2988963,
+  "deadline_monotonic": 1006364.2988963,
+  "lifetime_deadline_monotonic": 1009198.856909,
+  "required_seconds": 660,
+  "available_seconds": 3134.558012699941,
+  "scope": "host observation budget, not transfer timing or PASS"
+}

@@ -1,0 +1,32 @@
+{
+  "calls": {
+    "server_shutdown": 1,
+    "server_close": 1,
+    "thread_join": 1,
+    "log_close": 1,
+    "tunnel_terminate": 1,
+    "tunnel_handle_close": 1
+  },
+  "surfaced": [
+    "OSError",
+    "OSError"
+  ],
+  "duplicate_receipt_unchanged": true,
+  "receipt": {
+    "thread_closed": true,
+    "tunnel_closed": true,
+    "cleanup_complete": false,
+    "cleanup_errors": [
+      {
+        "step": "tunnel_close",
+        "type": "OSError",
+        "message": "modeled original tunnel handle close failure",
+        "notes": [
+          "Process cleanup job_close: OSError: modeled original tunnel handle close failure"
+        ]
+      }
+    ]
+  },
+  "confirmed_closed": false,
+  "scope": "Actual Network.close/Process.close; modeled resources, no device-reader leak claim"
+}

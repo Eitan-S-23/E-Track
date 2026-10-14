@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkRTTLogger.exe",
+    "-Device",
+    "CORTEX-M4",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-RTTAddress",
+    "0x200534A8",
+    "-RTTChannel",
+    "0",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\mcu\\transfer.rtt"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 935488086187900,
+  "stdin_sha256": null
+}

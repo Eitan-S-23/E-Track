@@ -1,0 +1,29 @@
+{
+  "deadline_monotonic": 935919.7349764,
+  "ended_monotonic": 935674.4614761,
+  "last_health": {
+    "schema": 1,
+    "captureId": "1791816279392731-a2312e444373b13472f7c4f6",
+    "time": "2026-10-12T14:47:34.441189Z",
+    "records": 39789,
+    "bytes": 4812697,
+    "producerLines": 39786,
+    "upgradeStarts": 1,
+    "upgradeEnds": 1,
+    "outcome": "completed",
+    "lost": 0,
+    "error": null,
+    "healthy": true
+  },
+  "health_error": null,
+  "terminal_error": null,
+  "terminal": {
+    "attempted": true,
+    "captured": false
+  },
+  "complete_observed": true,
+  "original_error_preserved": true,
+  "no_restart_or_ota": true,
+  "pending_phone_retrieval": false,
+  "retained_files_require_strict_verification": true
+}

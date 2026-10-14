@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "exec-out",
+    "run-as com.wen.gaia.gaia.p34probe sh -c 'test ! -L files || exit 41; if test -e files; then test \"$(readlink -f files)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files || exit 42; fi; test ! -L files/p34-observations || exit 41; if test -e files/p34-observations; then test \"$(readlink -f files/p34-observations)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations || exit 42; fi; test ! -L files/p34-observations/1790891079051299-33907bf1f4188996f192722e || exit 41; if test -e files/p34-observations/1790891079051299-33907bf1f4188996f192722e; then test \"$(readlink -f files/p34-observations/1790891079051299-33907bf1f4188996f192722e)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1790891079051299-33907bf1f4188996f192722e || exit 42; fi; test ! -L files/p34-observations/1790891079051299-33907bf1f4188996f192722e/health.json || exit 41; if test -e files/p34-observations/1790891079051299-33907bf1f4188996f192722e/health.json; then test \"$(readlink -f files/p34-observations/1790891079051299-33907bf1f4188996f192722e/health.json)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1790891079051299-33907bf1f4188996f192722e/health.json || exit 42; fi'"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 822095183432900,
+  "ended_monotonic_ns": 822096196273900,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-apk\\phone\\adb-00015.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-apk\\phone\\adb-00015.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

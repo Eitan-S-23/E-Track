@@ -13,26 +13,28 @@
 ## 0. 看板操作规则(细则;强制条款见 AGENTS.md 规约)
 
 1. **认领**:把任务卡"状态"从 `待办` 改 `进行中`,填"认领"(实现 agent 标识+日期)。一个会话一次只认领一张卡;不越卡"范围"改文件。验收者不得覆盖实现认领人。
-2. **验收合同**:独立验收前必须按 `docs/acceptance-execution-contract.md` 在 `docs/acceptance-contracts/` 冻结、审批版本化合同。执行中新增或改变门禁必须升版本重新审批,不得靠临时 prompt 漂移合同。
-3. **完成**:必须先在"证据"栏填入可核查内容(命令+关键输出摘录、产物路径+时间戳、哈希、截图路径;长输出落盘 `docs/ota-exec-notes/<卡ID>-*.md` 后填链接),并通过合同/矩阵校验,才允许置 `完成`。空证据的"完成"视为未完成。
-4. **验收分离**:置 `完成` 前,验收命令须由非实现会话执行(另起 agent 或主会话跑验收),验收者在证据栏追加"验收人+轮次+单轮结果",不得改写实现认领。
-5. **结果分类**:单轮验收结果固定为 `PASS` / `PRODUCT_FAIL` / `HARNESS_FAIL` / `EVIDENCE_GAP` / `ENV_BLOCKED`。产品失败通常保持 `进行中` 进入整改;harness、证据或环境问题只失效相应证据,不得自动触发无关全量回归。复用证据必须由校验器按两轮合同的 `freeze_tree` 与各自冻结的 profile 配置计算 rerun plan,并由当前矩阵绑定上一矩阵与计划的 SHA-256;禁止相同矩阵、相同轮次或链式 `REUSED` 自证。计划只计算失效范围,不授予操作权限或追加配额;预检、观测、封包及最小重跑按 `docs/acceptance-execution-contract.md` §7.1 执行。
+2. **验收形式**:先按 `docs/acceptance-execution-contract.md` §0 区分轻量审阅与正式执行型。正式执行型才在 `docs/acceptance-contracts/` 冻结版本化合同；执行中改变门禁须升版审批。已有正式义务不得改名逃避，同一独立验收者可准备、冻结和执行，不另设冻结 agent。
+3. **完成**:先在"证据"栏填入可核查原件、实际检查和独立结论；正式执行型还须通过合同/矩阵校验，才可置 `完成`。纯文档审阅不强制新建硬件式合同。空证据或仅流程整理不能置完成；阶段完成不等于最终可靠性或发布通过。
+4. **验收分离**:最终判断由非实现会话负责，可独立核验实现方/用户的已有原件，不要求由它重新实施同一动作。在证据栏追加验收人、实际核验与结果，不改实现认领，不把离线核验虚记为新硬件执行。
+5. **结果分类**:单轮验收结果固定为 `PASS` / `PRODUCT_FAIL` / `HARNESS_FAIL` / `EVIDENCE_GAP` / `ENV_BLOCKED`。产品失败通常保持 `进行中` 进入整改;harness、证据或环境问题只失效相应证据,不得自动触发无关全量回归。正式同任务 `REUSED` 复用须由校验器按两轮合同的 `freeze_tree` 与各自冻结的 profile 配置计算 rerun plan,并由当前矩阵绑定上一矩阵与计划的 SHA-256;禁止相同矩阵、相同轮次或链式 `REUSED` 自证。开发/用户或跨任务原件采用走执行合同 §0.1 的独立核验路径，不伪造上述来源。计划只计算失效范围,不授予操作权限或追加配额;预检、观测、封包及最小重跑按 `docs/acceptance-execution-contract.md` §7.1 执行。
 6. **阻塞**:仅发现契约矛盾、不可实现、必需外部依赖缺失时,状态置 `阻塞`,在卡内追加"阻塞记录:"并在 §9 登记,然后**停止该卡**。普通产品缺陷、harness 失败和证据缺口不使用 `阻塞`。
 7. **research 落盘**:编码前检索/上下文分析结论一律写 `docs/ota-exec-notes/<卡ID>-<主题>.md`,不许只留在会话回复里(会话会被压缩,文件不会)。
 8. **提交收口**:正式提交/合并/主干收口仍由主会话在用户明确授权后执行；实现 agent 的 Flutter 开发自测仅按执行合同 §7.3.2 的预授权，可在独占 dev/flutter/** 分支暂存/提交本任务改动、推送并触发指定开发工作流，无需逐批重复申请，不能并发操作共享索引或夹带无关改动。该例外不允许推主干/标签、force-push、合并、发布、部署或真机操作。PR/远端合并后仍须按 AGENTS.md 的 Git / Worktree 收口规约同步主 worktree，验证 HEAD == origin/main；收口记录未入 main 不得宣告完成。
 9. **会话收尾**:每个工作会话结束前,回写所动任务卡的状态,并在 §10 会话日志追加一行。
 10. 任务状态取值固定四种:`待办` / `进行中` / `阻塞` / `完成`;不得把单轮验收结果写入状态字段。
-11. **派单前冻结提示词**:把任务卡派给实现会话前,必须先由**非实现会话**在 `docs/ota-prompts/prompt-<卡ID>-implementation.md` 冻结实现提示词;派给独立验收会话前,同理冻结 `docs/ota-prompts/prompt-<卡ID>-acceptance.md`。模板与撰写检查表:`docs/ota-prompts/prompt-template-implementation.md`、`docs/ota-prompts/prompt-template-acceptance.md`(参考实例 `docs/ota-prompts/prompt-P1-7-implementation.md`)。要求:
-    - **只冻结验收抓不住的决策**:时序/顺序硬约束、必须复用的既有组件与链路、语义选择及其理由、已有证据不必重做的实验、预算与判定口径、红线及违反后果。**不规定**函数划分、命名、日志文案、局部写法——那些验收一眼可见,写进去只会稀释红线。
-    - **必须写停止条件**:改范围外文件、遇到未列出的失效模式、同一项连续 3 次失败、真机进入不可恢复态、红线互相矛盾 → 落盘现象后停止等裁决。范围裁决不属于执行会话(P1-7 的 260 行提示词仍未能预见缺陷 C 与 BCB 死锁,细节不可穷举)。
-    - **验收侧同样受上限约束**:harness 一次性冻结 + dry-run,之后只做增量审计,完整 provenance 复核只在封包前与最终报告前各一次;轮次上限写死,开新轮次的唯一判据是 `validate_bundle.py --write-rerun-plan` 生成的 rerun plan(`rerun_criteria` 为空且不存在任何 required 命令/产物/证据缺口时不得开新轮),不得以人工判断「产品证据增量为 0」代替;因 `HARNESS_FAIL`/`EVIDENCE_GAP`/`ENV_BLOCKED` 修复后重新采集同一条产品观测值是允许的;数值门禁只允许 `product_sla` / `protocol_contract` / `safety_ratio` 三类来源,历史观测值加余量必须先请用户裁定(P2-5 的审计递归与 917 ms 自指门禁即由此而来)。
-    - 提示词只解释合同,不构成验收标准;与冻结合同冲突时以合同为准。
+11. **唯一 Spec，共用交接**:实现与验收共用 readiness 路由的唯一任务 Spec。已有 Spec 不因换角色再生成 `prompt-<卡ID>-implementation.md` 或 `prompt-<卡ID>-acceptance.md`；交接仅在现有任务记录补输入、原件、未覆盖项和下一步。无 Spec 的新任务才按任务类型建立唯一入口。两份模板是按需参考，不是每卡都要复制和派审的文件清单。
+    - 只补必要的时序、组件复用、语义理由、已有成果、预算和安全/授权停止条件；不规定局部命名或机械重复完整背景。
+    - 同一非实现者负责审查、冻结核对与验收；稳定批次只作必要前检/终检，不递归审计工具，不因普通修复再派冻结会话。
+    - 新高成本动作先说明具体缺口和旧原件不足的原因，再按实际授权与 rerun plan 执行；无变化不盲试，解析/封包修复先重释原件。不设置新的固定三轮上限，也不重置历史累计额度。
+    - 正式冻结合同仍约束执行，新增标准/权限仍须真实裁定；提示词不能代替合同或授权。
 
 12. **组件范围与原始实测复用**：按 `docs/acceptance-execution-contract.md` §5.1/§6.1 审批组件依赖，构建、采集、解析、封包分判据。多轮复用直接绑定原始 EXECUTED PASS 的合同/矩阵哈希，实际上一轮与所需中间计划仍需只读核验；不能跳过 FAIL、缺证据或真实输入变化。不得因封包器修改或曾经 REUSED 就无条件重开产品观测，也不得为省时删除真实依赖。
 13. **治理变更范围**：规范/模板/校验器改动先做对应宿主正反例、独立代码复核和治理 CI，不自动重开已完成的产品卡或硬件全量验收。自测、独立验收、CI、提交与主分支收口分别记录；未经用户授权不提交推送，未运行的检查明确列为待验证。
 14. **批量审查与整改准入**：按执行合同 §7.3 集中检查当前可安全覆盖的范围，一次汇总问题与未覆盖项，批量修复并局部自测；已知阻断问题清理后再进入正式验收，不能首错即打回或每修一点全量重跑。安全/越权问题暂停受影响动作，普通范围内缺陷不自动停整卡；失效范围按依赖判定。首轮后即使没有 REUSED 也须给校验器实际前轮参数；计划生成不等于最终通过，计划外 EXECUTED PASS 不得用于收口。
 
 15. **开发产物按需清理**：实现/验收 agent 可按执行合同 §7.3.3 的用户预授权发起有界清理；仅限受审策略匹配且确认不再使用的旧开发 APK。先 dry-run、核对证据保护并串行执行，手动 apply 必须绑定已审 ID 清单，每次事件总计最多 50 个；用途不明、计划变化或额度不足不得扩大删除范围。清理结果不等于上传恢复或产品验收通过。
+
+16. **候选与最终验收分层**：按 `OTA-DEC-016`，P3-4 先完成候选阶段；同组 30/30 和真实四小时由 P5-1 集中验收，真实后端十次恢复由 P3-5 负责。P5-2 先核验原件，原件仍有效时不复制整组；未覆盖或按真实依赖判定失效的条件仍须最小补验，不默认整组重跑。P4-1/P4-4 以隔离 staging rehearsal 完成 P5 前置，生产晋升及发布后资产核验仍在 P5 与正式审批之后。必要局部安全检查不一概后移；当前状态/派单资格不会因这条规则自动变为完成或可派单。
 
 ## 1. 阶段状态总表
 
@@ -441,9 +443,11 @@
 - 目标: 注错全回滚:候选 CRC 坏/搬运中断电/三连失败;断电矩阵 20 点(§8):J-Link halt+复位注入可自动化的点全自动跑,**标注"物理"的点(擦/写指令飞行中真断电)列清单请用户在场配合**;每例记录状态轨迹+最终版本哈希+"可启动或进恢复"二判。
 - 验收: 20 点矩阵表全绿(证据落 `docs/ota-exec-notes/P1-6-*.md`)。
 - 证据: `docs/ota-exec-notes/P1-6-implementation-evidence-2026-07-29.md`(实现会话进行中；不得据此置完成)
+- 后续验收先核对已记录的 14 个 AUTO 原件与当前依赖，不因换验收者重跑 20 点；物理断电必须有真实条件证据。与 P5-2 共用适用原件，未知覆盖先对账，不默认作废或通过。
 
 #### P1-7 boot 启动耗时与 POWER_EN 重复锁存修复
 状态: 进行中 ｜ 认领: Claude(实现会话) / 2026-08-04 ｜ 更新: 2026-08-05(缺陷 A 提频已实现并真机生效;新增缺陷 C=开机键冲突已修复并真机验证;验收 1-5 仍待非实现会话执行)
+- 后续按执行合同 §0.1 逐项承接既有实现/静态/实测原件；下列历史“待执行”不表示今天必须全部重做。当前候选时钟/按键/电池条件确实缺失时才补相应观察，J-Link 供电不能替代电池证据。
 - 背景(实测,非推断): 复位到 App 第一行代码实测 **15.5 s**,全程黑屏;且 App 在 t=15.00s 把 `POWER_EN`(PD2) 拉低 1 秒——该动作与 `Power_EventMonitor()` 的关机动作**完全相同**,故电池供电且手指已松开时设备会在此刻关机。**当前固件在纯电池供电下无法开机**;此前未被发现是因为全部观测均为 J-Link/USB 外部供电,外部供电掩盖了该窗口。
 - 缺陷 A(启动耗时): `boot/platform/at32/boot_platform_at32.c:117` 的 `boot_platform_init()` 只调 `system_core_clock_update()`(仅读寄存器反算频率),从不调 `system_clock_config()`,boot 全程运行在 **8.07 MHz**(实测:26 次 PC 采样 CycleCnt 每 500 ms 推进 ≈4.03 M)。而 `boot_state_machine.c` 的 `BCB_STATE_CONFIRMED` 分支**每次开机**调 `validate_internal_app()`,对全部 598,680 字节做软件 SHA-256(实测 PC 热点为 `sha256_transform` 与 `memcpy`),于是被放大 36 倍。
 - 缺陷 B(重复锁存): boot 的 `configure_power_hold()`(同文件 :50-65)已完成"拉低→延时 1000ms→拉高"并锁存 PD2;App 的 `HAL::Power_Init()`(`MDK-ARM_F435/Platform/HAL/HAL_Power.cpp:108-111`)又**无条件重做一遍**同样序列。该序列在单体固件时代是唯一锁存点且在复位后数毫秒执行(手指仍按住按键顶住供电),现在中间隔了 15 s 的 boot,语义变成"主动撤除供电保持 1 秒"。
@@ -651,13 +655,48 @@
 - 准入整改批交付(实现会话): Claude(P3-3 实现 agent, P3-3-IMPL-20260907, 授权 P3-3-IMPL-AUTH-20260912)/2026-09-12；在独占 worktree dev/flutter/apk/p3-3-admission 完成七项准入整改(提交 b3f7a05→d98d978→2c2b5f0→c1e4051→ee0266c→e1edd9e→095421d→1e641f1→ab6ce3b)：OBS-SEC-01 观测 URL 凭据键校验绕过修复、OBS-01/02/03 扫描三结局区分+唯一终止闸门+target 地址插桩、RC3-07/02 中止四阶段计时、OPS-01 B1-M 台账对账(3/3 用尽)、CI const 两轮修复、build.yml Gradle 8.14 对齐；稳定提交 ab6ce3b 开发自测 run 34730007317 双宿主全绿+debug APK，build-only run 34730618341 全绿(release 模式 APK 46682620B/2a5d5db9…、Windows 完整运行包 8bbbbea4…，均 debug 签名回退，Pages/Release skipped)；治理 CI 首跑绿(34728291114)；验收准备材料落盘：P3-3-v1 合同/矩阵草案(DRAFT/NOT_RUN，freeze 字段占位)、设备/Boot 身份、toy/真包资产清单(golden vectors 不具上板资格)与缺口移交清单，详见 docs/ota-exec-notes/P3-3-admission-remediation-2026-09-12.md。真机操作、合并/发布/部署均未执行；正式验收 NOT_RUN，保持进行中，认领不变；build-only 配额 3/3 用尽、治理 CI 剩 2/3。
 
 #### P3-4 AT 提速实测
-状态: 进行中 ｜ 认领: Claude(P3-4 实现 agent) / 2026-09-16 ｜ 更新: 2026-09-17(整改批 P34-R01 至 R07 已批量落地：dev/flutter/p3-4-link-stats 3fd464b→1772373→f5dc9fd→e783155；第九轮 CI run 35098277162 步骤级双宿主 analyze/tests PASS(exit=0)，整轮 failure 仅因上传步骤命中 GitHub artifact 存储配额；用户已授权清理 40 个旧开发 APK，释放 3,009,380,972 B，远端剩 305 个 artifact / 1,538,665,642 B，保留 12 个最新或证据引用 APK 及全部非目标产物。计量与上传恢复尚未验证，未重跑 CI；第九轮计数证据仍缺失，正式验收与设备实测 NOT_RUN。清理记录见 docs/ota-exec-notes/P3-4-artifact-cleanup-2026-09-17.md)
+- 2026-10-14 | Same independent reviewer/root | User authorized Git integration/delivery | Existing PR #26 is being updated with the accepted source/evidence chain and governance cb317aff; necessary CI, merge-commit main delivery and safe record synchronization are authorized. Candidate v15 PASS and 3/3 remain; no device action or release. The earlier local-only exclusions below are historical. Actual delivery is not yet claimed. See the Git Integration And Delivery section of the existing v13 closeout note.
+- 2026-10-13 验收分层：按 `OTA-DEC-016` 和当前 Spec 交付有原件支撑的候选参数、实现及必要功能/安全检查；不再要求另做一套 30/30、四小时和十次恢复后才能交给后续集成。最终稳定参数须待共同最终门槛通过。本条不关闭 v11 的 harness/瞬时证据缺口，不改历史失败、额度或当前进行中状态。
+- 2026-10-14 | Same independent reviewer | Candidate-stage acceptance/local evidence delivery complete | v15 PASS and standard bundle self-validation PASS; full history and failed preparations retained, main/PR delivery still separate. No device action, new OTA, push, merge, CI or release. See the existing closeout record; older entries below are historical, not current admission status.
+- 2026-10-12 Codex independent acceptance/root takeover: phone serial/model/APK, awake/unlocked state and seven retained captures passed. Frozen v8 CMD-Q-TRANSFER exited 1 before network/App/OTA: SD ready=0 and QSPI disabled with JEDEC 0x020000; exact App/Boot unchanged. Passive RTT corroborates startup ID failure, PA8 detects the card. P34-LIVE-08 is current storage admission ENV_BLOCKED, cause unresolved; v8 sealed with 1 environment FAIL and 41 NOT_OBSERVED. Qualification 0/1, calibration 0/12; all processes closed, failed lock retained. No reset/flash/cleanup/source edit/commit/push or trial5 reopening. See docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+- 2026-10-12 Codex independent acceptance/root: v8 standard plan and full lineage preflight PASS (158.368 s / 153.622 s), unchanged source/contract and 300 s host bound; 42 required commands, CMD-Q-TRANSFER first. P34-LIVE-07: exact phone absent on USB; one real reconnect mention delivered, bounded observation expired, private ADB closed. No formal command/App/MCU/OTA action; qualification 0/1, calibration 0/12, active v8 matrix remains NOT_RUN. Prior late-capture cleanup is complete; no repeated cleanup/PRE/packaging or commit/push. See docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+- 2026-10-12 Codex independent acceptance/root: v6 ENV_BLOCKED, full lineage PASS. Authorized old 530 B capture cleanup completed; original seven preserved. App capture missed the entry deadline; late same-PID/runtime capture has zero OTA starts and is archived (7887 B), not deleted. Phone unlock observed; App stopped and prior runtime restored. Qualification 0/1, calibration 0/12; no source changes/flash/reset/commit/push. See docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+- 2026-10-11 Codex independent acceptance/root: R1 independent 1/1 + 52/52 retained, source cfe9af8. v3/v4/v5 preserve real ENV_BLOCKED entries with complete lineage; latest MCU/full-reference HTTPS/APK admission passed, then P34-LIVE-03 found 8/8 captures. One inactive header-only capture (530 B) archived and SHA-verified, not deleted; exact cleanup authorization pending. OTA 0/1, calibration 0/12; original ownership and trial5 risk unchanged. See docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+- 2026-10-11 P34-LIVE-01-R1 唯一测试门禁整改（Codex root，待独立关闭，原认领不变）：只改阻塞解析测试夹具，先有界确认真实子进程进入标记/PID，再检查既有 owner 的两秒超时和进程句柄结束信号；产品 prepare 与手机门禁不变。定向 1 项、完整 52 项通过，原独立 51/52 失败和实网原件不覆盖；证据 `.cache/p34-dns-fixture-fix-20261011/`，整改说明见 `docs/ota-exec-notes/P3-4-DNS-host-remediation-2026-10-11.md`。无宿主实现改动、提交推送、新隧道或设备操作，不清锁；资格 0/1、校准 0/12 不变，P3-4 未完成。
+- 2026-10-11 P34-LIVE-01 修正后真实宿主入口通过（Codex root，原认领不变）：按用户要求补验证而非提前申请验收；一个新隧道经实际 Network.start 在 19.877 秒通过正常 HTTPS、元数据及完整原 1 MiB 包核验，两个请求退出 0，服务/端口关闭。未遇 DNS 暂态，不冒称本次实网重试复现；前批 52 项宿主测试覆盖恢复、超时与手机门禁。原始诊断、实测及审计见 `.cache/p34-dns-real-20261011/` 和 `docs/ota-exec-notes/P3-4-DNS-host-remediation-2026-10-11.md`。2444 份保护原件未变；无设备/OTA/提交推送，不改冻结合同、round2 或锁。宿主问题已修复并验证，不代表正式验收或 P3-4 完成，资格 0/1、校准 0/12 保持。
+- 2026-10-11 P34-LIVE-01 宿主整改交付（Codex root，待独立复核，原认领不变）：同一隧道按 prepare 剩余预算重试明确 DNS 暂态，复用受控进程限制阻塞读取，保留 HTTPS/元数据/完整字节校验，失败关闭服务且不启动手机；新增 11 项与既有 41 项共 52 项宿主测试通过，原 1 MiB 输入未变。报告 `docs/ota-exec-notes/P3-4-DNS-host-remediation-2026-10-11.md`；仅改候选，未提交推送/启动真实隧道/操作设备/重跑 PRE 或长测。冻结合同、round2 ENV_BLOCKED、失败锁和历史证据不改，资格 0/1、校准 0/12 保持，由原冻结执行者在独立复核后安排最小接续。
+- 2026-10-11 P34-LIVE-01 DNS 启动整改（Codex root，进行中，原认领不变）：用户本轮明确同意最小宿主修正；保持一个临时隧道，在已有 prepare 绝对截止内仅重试已识别 DNS 暂态，保留正常 HTTPS/身份/全包字节检查，网络成功前不启动手机。复用现有等待和受控进程，补真实 Network.start 宿主测试；只写候选，不提交推送、不操作设备、不改冻结合同/round2/失败锁。资格 OTA 0/1、校准 0/12 和已封存 ENV_BLOCKED 保持，详见 `docs/ota-exec-notes/P3-4-DNS-host-remediation-2026-10-11.md`。
+
+- 2026-10-11 环境恢复优先与接续准入复查（原独立验收会话）：用户要求不以改代码为前提，撤回此前必修入口的解读。09:00 UTC 一次原样 Network.start 主机检查仍在新域名报 DNS 11001，未启动手机/OTA；单个自有隧道已关闭，1484 个保护原件未变。证据 `.cache/p34-env-reentry-20261011/`，最新裁定见 `docs/ota-exec-notes/P3-4-DNS-host-followup-2026-10-11.md`。原 round2 ENV_BLOCKED/锁/历史证据保留，资格 0/1、校准 0/12；网络实际准入及受控接续尚未满足，不改源码、不重复设备操作或长测，P3-4 仍未完成。
+- 2026-10-11 DNS/HTTPS 主机跟进（原独立验收会话，零设备操作）：两次新隧道均复现原 Network.start 在约 6 s 的 DNS 11001 提前退出；保持同一隧道等待后，12.458/16.723 s 解析恢复，22.471/29.023 s 完成 HTTPS 与原 1 MiB 字节校验。无系统 DNS/代理改变，无 ADB/J-Link/OTA；P34-LIVE-01 最小修正已收敛到原入口就绪等待，冻结 runner/round2 ENV_BLOCKED/失败锁均保留，正式接续仍待原维护者与冻结者。另登记本次 curl 原生 CRL 两项项目外缓存写入 P34-DNS-IO-01，未清理；见 `docs/ota-exec-notes/P3-4-DNS-host-followup-2026-10-11.md`。不称首阶段或整卡完成。
+- 2026-10-11 v2 首阶段独立现场收口（Codex 独立验收，原认领不变）：完整谱系前检通过后，Q-APK/Q-MAINT/Q-BAUD/Q-PRODUCTION 实测通过；Q-TRANSFER 在新 HTTPS 域名 DNS 准入失败，未启动手机采集/OTA。唯一 round2 矩阵为 ENV_BLOCKED：4 新 PASS、2 直接 REUSED、1 environment FAIL、41 NOT_OBSERVED，带真实前轮的最终校验通过。资格 OTA 0/1、校准 0/12，服务均关闭，失败锁保留，最后本轮完整回读为 production base/group16 Boot 与健康确认。P34-LIVE-01 集中交原入口维护者及冻结执行者处理有限就绪/后继，见 `docs/ota-exec-notes/P3-4-v2-stage1-live-acceptance-2026-10-11.md`；不重做 PRE、旧安装、长测或 trial5，不猜后段参数，未改产品/runner、未提交推送。首阶段及 P3-4 均未完成。
+- 2026-10-11 v2 首阶段验收交付补齐（原 Codex 复核/冻结会话，零设备操作）：已冻结 `P3-4-v2`，完整前轮谱系的标准 NOT_RUN 前检通过；输入组未变，Q-INITIAL/Q-BASE 两项复用、46 项待执行，实际 live 门禁及复用正反例通过。v1 ENV_BLOCKED/失败原件保持，遗留宿主锁在核清只读查询失败、确认 owner/ADB 关闭并保留原字节后解除。首阶段包可交独立验收 agent，详见 `docs/ota-exec-notes/P3-4-v2-acceptance-handoff-2026-10-11.md`；手机实时准入及首次 OTA/回滚/校准尚未执行，最终参数须由真实校准结果后继冻结，30/30、4h、10/10 仍待验。未改产品/runner、未重跑已通过准备项，未提交/推送/操作设备；P3-4 仍进行中，不是整卡 PASS。
+- 2026-10-11 本批独立复核收口及范围更正（Codex，原认领不变）：PRE-06 阶段预算已验证关闭，41 项通过，真实合同及 NOT_RUN 前检完成。独立会话提前执行了 Q-INITIAL 和一次 Q-BASE 安装，超出最新一批应收口于复核/前检的范围，已披露并停止新增现场操作；Q-APK 首条 USB 查询报指定手机不存在，未安装 APK、无 OTA，只读观察已结束并关闭 5062。真实矩阵为 2 PASS/1 environment FAIL/45 NOT_OBSERVED、整体 ENV_BLOCKED，标准最终实物校验通过仅证明该矩阵有效。当前板卡为已验证的 production base，group16 Boot 不变；不再要求用户为本批连接手机。报告 `docs/ota-exec-notes/P3-4-independent-phase-budget-review-2026-10-11.md`；历史失败/旧关闭结论及 trial5 未知/延期保留，P3-4 整卡仍未完成。
+- 2026-10-11 独立阶段预算复核及阶段一启动（Codex，原认领不变）：`530a57c5` 的 PRE-06 阶段预算已独立验证关闭，受影响 live 41 项通过，既有关闭结论及 trial5 原因未知/专项延期保留。真实 `P3-4-v1` 阶段一合同已审批冻结，修正本会话矩阵哈希大小写后标准 NOT_RUN 前检通过，首个失败原件保留。`CMD-Q-INITIAL` 已完成旧 App/group16 Boot 完整只读回读与当前确认/健康/存储检查；将依合同继续标准安装、首次 OTA/回滚资格及四档校准，不追加安装用途 OTA，不重跑已通过准备项。原件在候选 `.acceptance-p3-4/round1/`，操作计划见接续记录顶部。阶段一不等于整卡 PASS，30/30、4h、10/10 后段尚未执行，P3-4 仍进行中。
+- 2026-10-11 PRE-06 阶段预算整改交付（Codex root，待原独立会话复核，仍进行中）：本地候选提交 `530a57c5` 仅含入口、ADB 阶段时限、README 和测试四文件；完整 phone_cell 宿主测试最终 41 项通过，305/310 s 反例及完整 180 s 复核不再提前关采集，真实超时/采集/非零退出/终态与关闭错误保留失败和锁。19 项原资产哈希未变；证据在候选 `.cache/p34-phase-budget-20261011/`，提示词在共享根 `.cache/P3-4-live-budget-handoff-2026-10-11.md`。未推送或追加 CI/固件/APK 构建，未操作设备，旧报告与失败保留；PRE-05、PRE-01/07 关闭及 trial5 未知/延期不变，正式冻结、首次现场和唯一正式矩阵仍 NOT_RUN。
+- 2026-10-11 PRE-06 阶段预算整改（Codex root，进行中，原认领不变）：仅处理独立 live-route 报告的混合 300 s 窗口；按实际开始/MCU 终态切换宿主预算，启动前预留 App 完整复核、回读、归档和失败取证时间，补真实 phone_cell 控制流测试。只修现有入口及必要超时传递，不改 App/固件/服务/门槛，不操作设备或重做长测；PRE-05、PRE-01/07 关闭结论及 trial5 未知/延期保留，正式合同与矩阵仍 NOT_RUN。
+- 2026-10-11 PRE-05/06 现场接线独立复核（Codex，原认领不变）：`352ad286` 的严格 PATCH 服务和 14 条 runner 入库/依赖绑定已核验，373 条原件登记匹配，独立 service 6/live 25 项通过，CI 原始 ZIP/日志及五类离线绑定已直接核对。PRE-06 新入口仍有一个时间窗阻断：start-ready 后硬限 300 s，25 s 点击等待 + 110 s 传输 + 170 s 正常复核在 300 s 被提前关采集，增大 --seconds 无效；4 个时钟场景留证，最小修正与 oracle 见 `docs/ota-exec-notes/P3-4-independent-live-route-review-2026-10-11.md`。合同/首次现场/唯一正式矩阵仍 NOT_RUN，P3-4 未完成；PRE-01/07 源码关闭与 trial5 原因未知/专项延期保留。不重建旧资产、不重复长测，无设备操作或产品修复；relay 无绑定，未自动派发或手动 @。
+- 2026-10-11 PRE-05/06 最小现场接线交付（Codex root，待原独立会话复核，仍进行中）：`352ad286` 已提交推送十个必要文件；严格 1 MiB PATCH 服务与标准 J-Link/RTTLogger/私有 ADB 现场入口入候选。本地及双宿主服务 6/现场入口 25 项通过，五类旧资产离线绑定、14 条 runner 的标准 Git/profile API 核对通过；三个自动 PR CI 成功，未追加开发 APK dispatch，19 项选定资产及生产运行输入不变。来源为共享根 `.cache/p34-route-20261010/source-lock-v5.json`，提示词 `.cache/P3-4-live-route-handoff-2026-10-11.md`。原失败、独立报告与未提交操作记录保留；PR #26 仍草稿未合并。PRE-01/07 不重开，trial5 原因未知/专项延期；未操作设备或发送手动 @，正式合同、首次现场、30/30、4h、10/10 均 NOT_RUN，不能据此称 P3-4 完成。
+- 2026-10-10 PRE-05/06 现场接线整改（Codex root，进行中）：独立方已关闭 `6942ae06` 的统计/profile 整改，现仅处理受控服务不能接纳固定 PATCH 和现场命令链未入候选两项；复用标准 J-Link/RTTLogger/私有 ADB 与既有资产，补严格基版匹配、命令绑定及宿主正反例，不代做首次现场或重复长测。依据 `docs/ota-exec-notes/P3-4-independent-pre06-review-2026-10-10.md`，PRE-01/07 关闭与 trial5 延期保留，正式合同和矩阵仍 NOT_RUN。
+- 2026-10-10 PRE-06 独立复核及正式路线检查（Codex，原认领不变）：`6942ae06` 本批 GET_INFO、真实 service 恢复统计、同组十次门禁及四路径 profile 整改已验证关闭；171 项直接登记匹配，本轮统计 13 tests 和两条 profile/Git 变异测试通过，双宿主完整 CI 原件已核。继续冻结检查确认两项剩余阻断：PRE-05 指定受控服务只收 full、真实 1 MiB PATCH 被拒；PRE-06 实际现场薄适配/命令链仍在共享根旧脚本而不在候选提交。已集中给出最小方向和 oracle，见 `docs/ota-exec-notes/P3-4-independent-pre06-review-2026-10-10.md`。PRE-01/07 源码关闭与 trial5 原因未知/专项延期保持，不要求实现方重做长测；合同未冻结，首次现场/正式矩阵 NOT_RUN，P3-4 未完成。无设备/产品修改/提交/手动 @；当前 relay 无绑定，未自动派发。
+- 2026-10-10 PRE-06 review2 整改交付（Codex root，待独立复核，仍进行中）：`6942ae06` 已提交推送，GET_INFO/非法命令、真实 service 断连原因、十次恢复同参数资产组及四项 profile 输入遗漏已修正；本地 13/116/33 项测试、最终开发/治理/固件/APK-EXE 四项 CI 通过，双宿主 722/16 skipped、705/33 skipped。两次真实测试失败与有限夹具修正均保留；运行期 App/固件未改，19 项旧资产输入与哈希不变，新来源为共享根 `.cache/p34-pre06-20261010/source-lock-v4.json`，交接为 `.cache/P3-4-pre06-remediation-handoff-2026-10-10.md`。PRE-01/07 源码关闭证据不重开，trial5 专项仍延期；PR #26 未合并，未操作设备或发送手动 @。独立复核及正式合同/首次现场/30次/4h/10次仍待执行，不宣称正式准入或 P3-4 完成。
+- 2026-10-10 PRE-06 第二次复核整改（Codex root，进行中）：按独立 review2 仅修 GET_INFO 控制表、实际 service 断连原因、恢复组一致性和四个被 build 排除规则误漏的输入；补真实 transport/service 快照链及 profile 变异回归。PRE-01/07 源码关闭证据保留，不改运行期 App/固件，不重开 trial5 专项；现有成套资产须证明输入不变后复用，正式合同与现场矩阵仍 NOT_RUN。
+- 2026-10-10 第二批独立复核（Codex，原认领不变）：`1c3f7f49` 的 119 项登记与 909 项 GCC 仓库依赖已核对；本轮执行 metrics 5/C core 14、batch 9、stats 10、封套 31 项检查，直接核验双宿主 CI 原件。PRE-01 生产统计和 PRE-07 过滤错误链有关闭证据，PRE-06 仍阻断：合法 GET_INFO=0 被统计拒绝、未定义 5 被接受，真实 service 断连原因格式漏计，10 次恢复可跨参数拼接，实际 build.py/三个 Gradle 输入被 profile 排除。最小反例、整改方向和责任人见 `docs/ota-exec-notes/P3-4-independent-remediation-review2-2026-10-10.md`；交回 root 有限整改，不代修自验，不重做实现侧长测。合同/首次现场/正式矩阵 NOT_RUN，P3-4 未完成；trial5 原因未知、专项延期，旧报告与失败保留。
+- 2026-10-10 三项必要整改交付（Codex root，待独立复核，仍进行中）：`1c3f7f49` 已实现 PRE-01 的 420 B 生产 MCU 测量、PRE-06 的 v2/schema10 正式统计及 PRE-07 的有界迟到错误原件链；针对性自测与五项最终 CI 通过，双端 721/16 skipped、704/33 skipped。新固件/1 MiB/回滚/APK 成套来源为共享根 `.cache/p34-remediation-20261010/source-lock-v3.json`，新接续提示词为 `.cache/P3-4-remediation-handoff-2026-10-10.md`；旧来源和独立退回报告保留。产品/runner 已提交，PR #26 未合并；本地候选 641 warnings/0 errors，未安装。独立方下一步只复核本批及直接依赖，准入满足后冻结真实合同并执行首次现场资格和唯一矩阵；这些仍 NOT_RUN，不把自测/CI 绿当独立 PASS，不重开 trial5 专项。
+- 2026-10-10 Codex root 接续实施：按用户指令只补 PRE-01 生产 MCU 分阶段统计、PRE-06 v2/schema 10 统计入口和 PRE-07 迟到错误快照链；原认领与独立复核结论保持，先实现并自测，再重新绑定受影响候选。无设备操作，不重开 trial5 专项，正式矩阵仍 NOT_RUN。
+- 2026-10-10 独立整改复核（Codex，原认领不变）：沿用 P34-PRE-01 至 07 完成本批集中核对。26 项原件哈希及 907 项 GCC 仓库依赖覆盖通过；当前候选 containment 10 场景/327 checks、mutation 负例和快照入口 30 测试已执行。PRE-01 生产测量路线、PRE-06 v2/schema10 正式统计入口、PRE-07 迟到错误原件仍需最小补件，暂不冻结或启动正式矩阵；trial5 因果未知、专项延期，不称修复。报告 `docs/ota-exec-notes/P3-4-independent-remediation-review-2026-10-10.md`，现场/30次/4h/10次均 NOT_RUN；无设备操作、产品修复、提交推送或手动 @。
+- 2026-10-10 最终 CI 通过（Codex root，仍进行中）：候选已更新到 `625e0a58`，PR #26 未合并；固件 `37983524994`、治理 `37983524840`、App APK/EXE `37983524854` 均通过，双端完整测试分别为 Ubuntu 713/16 skipped、Windows 696/33 skipped。最终修正仅把快照测试临时目录置于项目内，运行期 APK/固件/1 MiB 资产未变；旧失败原件保留，当前来源登记为 `source-lock-v2.json`，提示词已更新。独立执行的合同/命令冻结、首次现场初态和正式矩阵仍待完成，不宣称正式 READY/PASS。
+- 2026-10-10 候选提交与 CI 收尾（Codex root，原认领不变）：`38bd66ea` 已推送 `acceptance/p3-4-v2-20261009`，待审 PR #26；实际候选固件 CI `37980146495`、治理 CI `37980146534` 通过，App 全树与已通过双宿主的 `691aa3df` 一致。原 CI 失败保留，v1/v2 检查接线及 profile 测试已批量修复。配套本地 612020 B GCC 基版/合法 1 MiB/回滚资产已登记；CI 612024 B 产物不混用。交接文件为 `.cache/P3-4-independent-acceptance-2026-10-10.md`，独立验收者先冻结实际命令/合同并完成首次等价初态资格，再执行唯一正式矩阵；这些尚未完成，不称正式 READY/PASS。未操作设备、发送手动 @、合并或发布，详见现有接续记录。
+- 2026-10-10 通知规约纠正（Codex root，P3-4 仍进行中，原认领不变）：手动 @ 仅用于保持当前执行且用户无需聊天回复的已授权实际操作；授权、方案选择、确认与补充信息必须通过正常结束回复和自动提醒处理，后台任务仍运行不是例外。根目录与候选工作树已同步，相关回归各 4 项通过；未发送提醒、推进设备/CI 或改变产品，既有误发回执保留，详见现有接续记录。
+- 专项当前进度（2026-09-24，Codex root 维护）：见 [P3-4 项目进度表](P3-4项目进度表.md)。汇总历史实测、传输与安装/重启两条优化线、N01 起的后续工作及证据；新短测矩阵尚未执行，总体仍进行中，原认领与正式验收状态不变。下列记录按原时间和证据保留，不将历史待执行描述视为当前现场状态。
+状态: 进行中 ｜ 认领: Claude(P3-4 实现 agent) / 2026-09-16 ｜ 更新: 2026-10-14 (candidate-stage independent acceptance and local evidence delivery COMPLETE; P3-4-v15 PASS, source fcbace8b, bundle 15a025b9c2690e864456a32fb2820422846fb85b. Main/PR integration remains unperformed and outside this local authority; not a product retest gap or production-release approval.)
 - 依赖: P3-1 已完成；可使用已完成 P3-3 的实际发送器，不新增 P3-8 前置。
-- 目标: 先分解服务发现/GATT 写入/ACK 等待/UART 与 staging 开销，对实测支持的热点做最小优化，再做 115200 基线与至 921600 的 AT 逐档稳定性/吞吐实验；500ms 为初值非契约，流控只用协议 credit，禁启用硬件 RTS/CTS。
+- 目标: Per the existing Spec at cb317aff and OTA-DEC-016, deliver the evidence-supported candidate and necessary local functional/safety evidence. Candidate: v2, 921600 baud, timeout 2000 ms, retries 5, window 24, batch 12, write payload 244. Existing observations are reconciled before any proposed new measurement; no automatic four-rate replay.
 - 范围: 沿用 MCU/发送器配置与统计接口；按 Spec 允许有证据支持的 Flutter 连接内 GATT 复用及必要调用链修改，不扩为无关重构或后台功能实现。源码热点不是已确认根因，不预设加速倍数。
-- 验收: 按 OTA-XC-BLE-PERFORMANCE 提供同一资产/参数组的分阶段和前后对照；按原 OTA-XC-BLE-TUNING 门槛独立复核唯一生产参数组合，审批后将选定生产 baud/timeout/retry 回填共享契约文档，不改写原性能门槛。
-- 派工书: docs/ota-prompts/prompt-P3-4-experiment.md；本次只是规范补充，实机操作与配额须另批，产品与正式验收 NOT_RUN，P3-3-v9 不变。
-- 证据: —
+- 验收: P3-4-v15 has four candidate-scope PASS criteria: one direct v14 EXECUTED PASS anchor REUSED and three criteria evaluated by 16 actual offline commands. P3-5 owns real-backend 10/10; P5-1 owns final selected-group 30/30 and real four hours; P5-2 assesses fault applicability. Those gates and trial5 deferral are not waived, and production parameters are not released by this result.
+- 生产回填: 按 OTA-XC-BLE-PERFORMANCE / OTA-XC-BLE-TUNING 保留最终共同门槛；审批后将选定生产 baud/timeout/retry 回填共享契约文档。候选阶段 PASS 和本次 Git 交付均不提前授予生产稳定性或发布结论。
+- 派工书: docs/ota-prompts/prompt-P3-4-experiment.md remains the single Spec, consumed from cb317aff without merging governance into frozen inputs. This continuation added no physical OTA; old results and cumulative 3/3 are preserved. Same-scope local closeout authorizations are recorded and must not be requested again.
+- 证据: docs/acceptance-contracts/P3-4-v15.contract.json; .acceptance-p3-4/round15/evidence-matrix.json; docs/acceptance-contracts/FREEZE-INDEX.md; docs/ota-exec-notes/P3-4-v13-offline-acceptance-2026-10-13.md#candidate-stage-closure. Verified local bundle: 15a025b9c2690e864456a32fb2820422846fb85b, 8838 byte-exact Git blobs.
 - 规范收口: 2026-09-16 用户授权后，规范提交 d5a0b58 已推送 main，治理 CI run 35008183321 通过；不代表产品提速已实现，任务仍待办。详情见 docs/ota-exec-notes/P3-4-P3-8-requirements-2026-09-15.md 的授权收口记录。
 
 #### P3-5 真机 BLE 闭环
@@ -665,7 +704,8 @@
 - 依赖: P3-1、P3-2、P3-3、P3-4、P4-2；与 P4-1 无自动依赖。
 - 目标: 手机 APP→查询→下载→BLE 传输→MCU 升级→重连 GET_INFO 确认新版本;断连×10 续传成功(§8)。
 - 验收: 每轮的 durable_off 恢复记录+最终版本哈希;10/10 通过。
-- 与 P3-3 的边界: `OTA-DEC-013` 保留本卡真实 P4-2 后端候选链、P3-4 生产参数和十次独立断连续传；不是替 P3-3 补做安装/toy/真包门槛，也不得把 P3-3 的普通成功传输计入 10 次。按 `docs/ota-prompts/prompt-P3-5-integration.md` 执行，既有依赖和待办状态不变。
+- 十次真实后端恢复由本卡统一组织；按 `OTA-DEC-016` 供 P5-2 核验，原件仍有效时不另组重复，失效部分按真实依赖最小补验。失败和未知尝试全部保留，不删除失败凑 10/10，不把普通成功当断连。既有真实闭环若满足同一条件，可独立复核，不额外 OTA 只给采集器取得资格。
+- 与 P3-3 的边界: `OTA-DEC-013` 保留本卡真实 P4-2 后端候选链、P3-4 候选参数和十次独立断连续传；不是替 P3-3 补做安装/toy/真包门槛，也不得把 P3-3 的普通成功传输计入 10 次。按 `docs/ota-prompts/prompt-P3-5-integration.md` 执行，既有依赖和待办状态不变。
 - 证据: —
 
 #### P3-6 BLE 帧层测试 CI 接线
@@ -713,7 +753,7 @@
 状态: 待办 ｜ 认领: — ｜ 更新: —
 - 目标: §6.1 制包顺序①-⑥:构建占位头 app.bin→`etu_pack.py --finalize`→full.etu+patch.etu(基版=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→**bspatch 自验逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)**→recovery 资产(app.bin+尾 8B)→GitHub Release 三资产→注册链;`firmware-production` environment 人工审批;vcode>CF 现值校验;PRE-1 新编码。
 - 依赖: PRE-3/4、P0-2、P4-2；P4-2 是前置任务，P4-1 不得先行。
-- 验收: dispatch 演练一轮全绿;Release 含三资产且哈希与 metadata 一致。
+- 验收: P5 前按 OTA-XC-RELEASE-GATE 完成一次获授权的隔离 staging rehearsal，三资产/readback/metadata/注册及生产零副作用证据齐全；不创建 production Release。与 P4-4 共用这次原件。正式 Release/晋升在 P5 通过及 owner/environment 审批后，仍须规定的重建与哈希一致性检查。
 - 证据: —
 
 #### P4-2 D1 多资产模型与 latest 选包
@@ -732,29 +772,34 @@
 #### P4-4 Secrets 与 environment 配置
 状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **需用户操作**
 - 目标: 用户配置 `CLOUDFLARE_ACCOUNT_ID/API_TOKEN`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量、`firmware-production` environment 审批人;AES 生产 key 入 CI Secrets(P0-2 打包器读取)。
-- 验收: P4-1 演练能走通注册(即 Secrets 生效)。
+- 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
 - 证据: —
 
 ---
 
-## 8. P5 联调验收(估时 3-5d;门槛:P1-P4 全部完成)
+## 8. P5 联调验收(估时 3-5d;门槛:P1-P4 适用阶段完成)
+
+适用阶段按 `OTA-DEC-016`：P3-4 为候选阶段，P4 为实现/配置与隔离 rehearsal；不把 P5
+自己的长测或 P5 后的 production promotion 反作入场条件。其他未关闭功能/安全前置仍阻断。
 
 #### P5-1 双通道回归
 状态: 待办 ｜ 认领: — ｜ 更新: —
-- 目标: SD/BLE × 全量/差分 四组合各至少一轮真机升级;升级后 GET_INFO 与 fw_header 复核。
-- 验收: 4/4 通过,版本哈希留证。
+- 目标: 稳定候选的 SD/BLE × 全量/差分四组合实际升级证据，升级后 GET_INFO 与 fw_header 复核；统一完成 OTA-XC-BLE-TUNING 的同组 30/30 与真实四小时长测，不让实现方/验收方各跑一套。
+- 验收: 4/4 与上述最终性能/可靠性门槛均满足；适用旧原件先独立核验，同一观察可支撑多个判据，不跨参数组拼接。
 - 证据: —
 
 #### P5-2 故障注入矩阵
 状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **部分需用户物理配合**
 - 目标: §8 注入点=每个持久化提交点/擦写/窗口 ACK/重连;每例输出状态轨迹+最终版本哈希+"可启动或进恢复"二判;弱信号/低电量/满 staging/降级包/坏包/错板(hw_rev/layout_id)全过;含 TEST_BOOT 三连失败回滚、recovery 路径、物理断电抽样点。
 - 验收: 矩阵表全绿,证据落 `docs/ota-exec-notes/P5-2-*.md`。
+- 先逐项核验 P1-6 和 P3-5 等适用原件，只补最终候选仍缺的注错条件；不无条件复制旧 PASS，也不把每张上游卡的故障矩阵再执行一遍。
 - 证据: —
 
 #### P5-3 文档收尾
 状态: 待办 ｜ 认领: — ｜ 更新: —
 - 目标: bootstrap 手册、升级操作手册(用户视角)、风险台账更新(§9 开口项逐条关闭或转 v2);AGENTS.md 增补 OTA 维护期防坑条目(实施中沉淀的新教训)。
 - 验收: 文档齐,§9 开口项无悬空。
+- 采用独立轻量文档/链接/命令/风险审阅，消费 P5-1/P5-2 原结论；不另建硬件式版本化合同，不重新操作设备来证明手册存在。
 - 证据: —
 
 <!-- post-p2-6-readiness:start -->
@@ -769,7 +814,7 @@
 | 1 | P3-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-1-implementation.md |  | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 2 | P3-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-2-implementation.md |  | `OTA-XC-INFO-MAPPING`, `OTA-XC-DEVICE-MODEL`, `OTA-XC-IMAGE-IDENTITY` | READY | FROZEN | SATISFIED | P2-1、P2-2 均完成 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 3 | P3-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-3-implementation.md |  | `OTA-XC-FLUTTER-DEVICE-DTO`, `OTA-XC-HTTP-LATEST`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | SATISFIED | P3-1、P3-2 均已完成并合入 main | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 4 | P3-4 | EXPERIMENT | docs/ota-prompts/prompt-P3-4-experiment.md |  | `OTA-XC-BLE-PERFORMANCE`, `OTA-XC-BLE-TUNING`, `OTA-XC-TEST-VECTORS` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 4 | P3-4 | EXPERIMENT | docs/ota-prompts/prompt-P3-4-experiment.md |  | `OTA-XC-BLE-PERFORMANCE`, `OTA-XC-BLE-TUNING`, `OTA-XC-TEST-VECTORS` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main; v15 candidate PASS/local bundle verified, main delivery pending | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 5 | P3-5 | INTEGRATION | docs/ota-prompts/prompt-P3-5-integration.md |  | `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT`, `OTA-XC-D1-STATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P3-4、P4-2；P3-1/P3-2/P3-3 已完成 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P3-4, P4-2 |
 | 6 | P3-6 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-6-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main，两套 BLE 测试文件已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 7 | P3-7 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-7-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1、P3-6 均已完成并合入 main，三条待接脚本已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
@@ -777,10 +822,10 @@
 | 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
 | 10 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
-| 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1、P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1, P4-2 |
-| 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
-| 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
-| 15 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 全部完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
+| 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1 工作流接口、P4-2 目标环境就绪，再共用 rehearsal | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1, P4-2 |
+| 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS`, `OTA-XC-BLE-TUNING` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用候选/rehearsal阶段完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
+| 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
+| 15 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
 
 <!-- post-p2-6-readiness:end -->
 
@@ -846,6 +891,32 @@
 | 2026-09-16 | P3-4/P3-8 / Codex 规范 Git 收口 | 用户明确授权提交、推送本会话规范改动并要求新 agent 派工提示词 | 精确提交 9 份已复核文件为 d5a0b58，使用 Eitan-S-23 推送 main；自然触发治理回归与路径检测，随后独立回写 CI/收口记录 | 不改产品、历史冻结包或 CI；旧未跟踪资产保留；本次授权不外延至新 agent 的设备实验、发布或主干操作 | 规范已入 main；治理 CI 35008183321 success，243 项宿主测试及 P2-6 探针通过；两卡仍待办，产品实测 NOT_RUN |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-12 | Codex independent acceptance/root | P3-4 in progress, waiting for physical phone connection | Preserved missing old host result; unchanged v8 standard planning/full preflight now PASS with observed processes and Git activity. Fixed phone absent throughout the bounded USB window after one delivered physical-action mention; ADB closed, no device lock or formal command. Active matrix NOT_RUN, OTA 0/1 and calibration 0/12; no repeated cleanup, product/runner change, new contract, commit or push. Latest facts and raw receipts: docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+
+- 2026-10-12 ｜ Codex root（验收经验备忘） ｜ P3-4（状态不变） ｜ 新增 `docs/ota-exec-notes/P3-4-stage1-acceptance-lessons-2026-10-12.md` 并在接续记录加入口，供执行方按当前问题速查，不增加验收规则或必跑项。仅文档，未重跑规划/测试/设备、未改冻结合同或原件，未提交推送。
+
+- 2026-10-11 ｜ Codex root（P34-LIVE-01-R1 测试夹具整改） ｜ P3-4（仍进行中，待独立复核） ｜ 修正阻塞点进入握手与子进程退出判据，定向 1 项和完整 52 项自测通过；宿主实现不改，独立失败及实网证据保留。新证据 `.cache/p34-dns-fixture-fix-20261011/`；无提交推送、新隧道、设备操作或清锁，不称整卡完成。
+
+- 2026-10-11 ｜ Codex root（P34-LIVE-01 真实入口补证） ｜ P3-4（仍进行中） ｜ 实际 Network.start 单隧道 19.877 秒核验正常 HTTPS/原 1 MiB 包，服务关闭；本次未遇 DNS 暂态，未把自测或本次实测称作正式验收。源码与前批 52 项测试绑定一致，2444 份原件不变；证据 `.cache/p34-dns-real-20261011/`。无设备、OTA、提交推送或清锁，资格 0/1、校准 0/12 不变。
+
+- 2026-10-11 ｜ Codex root（P34-LIVE-01 宿主 DNS 启动整改） ｜ P3-4（仍进行中，待独立复核） ｜ 同隧道、原 prepare 截止、仅明确 DNS 重试及失败关闭接线完成；新增 11 项实际入口测试，共 52 项通过。未提交推送、修改冻结证据/锁、启动真实隧道或操作设备；资格 OTA 0/1、校准 0/12 和旧 round2 ENV_BLOCKED 保持。报告 `docs/ota-exec-notes/P3-4-DNS-host-remediation-2026-10-11.md`。
+
+- 2026-10-11 ｜ Codex 独立验收（用户批准的纯主机 DNS 跟进） ｜ P3-4（仍进行中） ｜ 两次真实新域名复现原入口早于 DNS 就绪退出，同隧道等待均恢复并核验完整 HTTPS/1 MiB；零设备操作，旧 round2/runner/锁保留。就绪接线方向与两项 curl 原生证书缓存越界事件均留证，未清理项目外文件，未提交推送；详见 DNS 主机跟进报告。
+
+- 2026-10-11 ｜ Codex 独立现场验收 ｜ P3-4（首阶段 ENV_BLOCKED，仍进行中） ｜ v2 按冻结顺序完成四项现场准备，Q-INITIAL/Q-BASE 只复用；Q-TRANSFER 在 HTTPS DNS 准入失败且未发起 OTA，实际资格 0/1、校准 0/12。唯一矩阵 6 PASS/1 environment FAIL/41 NOT_OBSERVED，完整谱系校验通过；原件/失败锁保留，服务全关，保留本轮核验的 production base/group16 Boot。P34-LIVE-01 的最小处置/oracle 交原维护者和冻结方；无产品修复或提交推送，未重开 trial5、未宣称整卡完成。
+
+- 2026-10-11 ｜ Codex root（PRE-06 阶段预算整改） ｜ P3-4（仍进行中，待独立复核） ｜ `530a57c5` 四文件本地提交，41 项宿主自测通过，旧 300 s 反例修正且失败取证/锁保留；19 项资产未变，交接提示词已落共享根 `.cache/P3-4-live-budget-handoff-2026-10-11.md`。不代签独立关闭，不推送/追加构建/操作设备或手动 @；正式合同与现场矩阵仍 NOT_RUN。
+
+- 2026-10-11 ｜ Codex（PRE-05/06 独立现场接线复核） ｜ P3-4（仍进行中，正式准入未通过） ｜ 服务整改及源/资产绑定已验证，独立 6+25 项宿主测试通过；实际 phone_cell 的 300 s 混合时间窗被 4 场景鉴别为一项 PRE-06 必修缺口，集中交回原 root。报告 `docs/ota-exec-notes/P3-4-independent-live-route-review-2026-10-11.md`；不代修自验、不重开 trial5，无设备/正式冻结/重复长测/手动 @，relay 未绑定。
+
+- 2026-10-11 ｜ Codex root（PRE-05/06 现场接线整改） ｜ P3-4（仍进行中，待独立复核） ｜ `352ad286` 十文件已提交推送，服务 6/现场入口 25 项本地与双宿主自测通过，保存资产和完整 runner 绑定已核验；原件、失败、source-lock-v5 和新交接文件已落盘。仅源代码/宿主整改，未操作设备、合并发布或手动 @；正式冻结和现场矩阵未执行，交回原独立会话。
+
+- 2026-10-10 ｜ Codex（PRE-06 独立复核与正式路线检查） ｜ P3-4（仍进行中，正式准入未完成） ｜ 本批统计/profile 三类整改关闭，13+2 项针对性测试、171 项登记和完整双宿主原件核验通过；真实参考 PATCH 被 full-only 服务拒绝，当前现场命令依赖仍未入候选，集中交回 root 两项最小接线。报告 `docs/ota-exec-notes/P3-4-independent-pre06-review-2026-10-10.md`；PRE-01/07 不重开，trial5 未知风险保留，无设备操作、产品修复、假冻结或正式 PASS，relay 无绑定且未手动 @。
+- 2026-10-10 ｜ Codex root（PRE-06 review2 有限整改交付） ｜ P3-4（仍进行中，待独立复核） ｜ 九文件范围已提交到 `6942ae06`，真实控制查询/断连续传/同组门禁与四项输入覆盖的正反例通过，本地 13/116/33 项及最终四项 CI 通过；两次夹具失败原件保留。新 source-lock-v4 绑定原来的 19 项未变资产和本批证据，接续提示词已保存；无 relay 绑定，需转给原独立会话。未操作设备、合并发布或手动 @，PRE-01/07 源码关闭与 trial5 延期不变，合同及唯一正式矩阵 NOT_RUN。
+- 2026-10-10 ｜ Codex（P3-4 第二批独立整改复核） ｜ P3-4（仍进行中，正式准入未通过） ｜ 完成本批及直接依赖核验，PRE-01/07 原整改有关闭证据，PRE-06 的真实 GET_INFO/恢复统计和四个冻结输入漏项仍需 root 批量修正；已有正反例和明确验证方法，不要求整套重测。报告 `docs/ota-exec-notes/P3-4-independent-remediation-review2-2026-10-10.md`；未改产品/runner、未操作设备、未假冻结，正式矩阵 NOT_RUN，trial5 专项不重开。
+- 2026-10-10 ｜ Codex root（PRE-01/06/07 实施与交付） ｜ P3-4（仍进行中，待独立复核） ｜ 三项必要整改已提交推送至 `1c3f7f49`，针对性自测及五项最终 CI 通过；新 APK、原始日志和成套固件/1 MiB/恢复资产已归档并写入 source-lock-v3 与新临时接续提示词。未操作设备或手动 @，未合并发布；正式合同、首次现场资格、30/30、4h、10/10 仍 NOT_RUN，trial5 原因未知且专项延期，独立退回报告和无关改动保留。
+- 2026-10-10 ｜ Codex（P3-4 独立整改复核） ｜ P3-4（仍进行中，正式准入未通过） ｜ 完成七项整改复核及当前候选局部宿主核验，保留 trial5 未知历史风险；集中交回生产测量、v2 统计、迟到错误三项必要补件。报告 `docs/ota-exec-notes/P3-4-independent-remediation-review-2026-10-10.md`；正式合同未冻结，现场和稳定性矩阵 NOT_RUN，原实现认领及失败原件不变。
 
 - 2026-09-03 ｜ Claude(P3-2 实现 agent) ｜ P3-2(设备身份链实现 + host 测试 114/114 + GCC/AC5 构建 + 真机 INFO 取证 22/22 断言 PASS) ｜ 实现完成待独立验收，证据落盘 docs/ota-exec-notes/P3-2-implementation-evidence.md；真机取证遇 GDB call 副作用致固件 crash 与 J-Link USB 链路故障，按三次失败纪律停止重试，R10 补证方案（send 指针换 bx lr 桩 + seq=0x1234 请求）已就绪待环境恢复
 
@@ -1123,3 +1194,10 @@
 - 2026-09-17 ｜ Codex(CI-ARTIFACT-01 验证与 Git 收口) ｜ CI-ARTIFACT-01(四项已实施入主线，独立验收与首轮定时执行待办) ｜ 用户授权下提交推送 2d81a4b：所有开发 push 只检查、APK 显式 dispatch；新 debug APK 3 天、日志及 APK/EXE 验证副本 14 天；每日有界维护、12 个固定保留 ID、单次最多 50 个、预算未知不猜配额；上传前输出脱敏诊断和真实可解析计数，失败仍严格传递。本地 109 项宿主测试与语法检查通过；Git 环境空值问题、JSON/私钥裁剪边界已修复留痕；实网 GET-only 预检保留全部 305 个产物，无 DELETE。治理 CI 35155229025 success；build.yml 35155229120 仅路径检测，构建/发布/部署均 skipped；维护 workflow active 不等于首次运行。看板与验证记录另行文档提交，不夹带 P3-4 既有源码、测试和他会话记录；写入与外部配置审计通过，详见实施记录。
 
 - 2026-09-18 ｜ Codex(CI-ARTIFACT-02 主会话) ｜ CI-ARTIFACT-02(进行中，清理评估为零候选) ｜ 用户批准实现/验收 agent 有界预授权、当前范围内清理和提交推送；新增手动 apply 的精确候选 ID 门禁，不改变选择策略/固定保护项，117 项宿主回归及 Python/YAML 接线检查 PASS。Eitan-S-23 实网 19 次 GET 核对 305 个 / 1,538,665,642 B，12 个开发 APK 全为 pin，候选与积压均为 0，因此未 DELETE、释放 0 B，不扩大到其他资产，不宣称配额恢复。既有 P3-4 源码/测试/认领/看板记录保持，规范与操作记录独立提交；治理 CI 和独立验收尚未完成。详见 docs/ota-exec-notes/CI-ARTIFACT-02-agent-cleanup-2026-09-18.md。
+
+- 2026-10-10 ｜ Codex root ｜ P3-4（仅通知治理纠正，仍进行中） ｜ 删除“运行中等待授权可手动 @”例外；明确无需聊天回复的实际操作才适用手动提醒，授权/选择/确认走正常结束与自动通知。根目录及候选工作树各 4 项针对性回归通过，日志在共享根 `.cache/p34-notification-rule-20261010/`。未操作设备、触发 CI、提交推送或发送测试 @；历史误发回执与无关改动保留。
+- 2026-10-10 ｜ Codex root ｜ P3-4（候选已提交、待独立准入与验收，仍进行中） ｜ 按最新授权完成候选提交/推送与待审 PR #26，修复首轮 CI 两项真实集成缺口；候选固件与治理 CI 通过，原日志及资产已归档。来源登记和独立接续提示词已写入项目内，最后的命令/合同冻结、等价初态和正式硬件仍 NOT_RUN；不重复实现方长测，不重启 trial5 专项。共享 HEAD/index 及历史证据保留，无设备操作、手动 @、合并/发布/部署。
+- 2026-10-10 ｜ Codex root ｜ P3-4（最终候选 CI 通过，独立验收未执行） ｜ `625e0a58` 修正 App 测试 fixture 越界，完整双端 App、候选固件及治理 CI 通过，原始最终日志归档。交接以 `source-lock-v2.json` 与 `.cache/P3-4-independent-acceptance-2026-10-10.md` 为准；没有重复打 debug APK 或操作设备，不把源码干净检查冒充合同前检。最终记录仅更新看板/接续材料，主线和历史冻结包不变。
+- 2026-10-11 | Codex independent acceptance/root | P3-4 in progress, live ENV_BLOCKED | Continued committed DNS candidate through controlled v3-v5; preserved DAP failures and capture-capacity failure. Full state/network/APK checks recovered; zero qualification/calibration OTA, no flash/reset/new product edits. Only one archived header-only phone capture needs exact deletion authority; other seven records remain. Report: docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+- 2026-10-12 | Codex independent acceptance/root | P3-4 in progress, v6 ENV_BLOCKED | Exact authorized old capture deletion completed. New App record missed admission deadline; late same-process record archived with zero OTA starts. Original seven retained, App stopped, prior runtime restored; phone unlocked observed. Full lineage PASS; qualification 0/1 and calibration 0/12. No product/runner repair or commit/push. See docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+- 2026-10-12 | Codex independent acceptance/root takeover | P3-4 in progress, v8 storage ENV_BLOCKED | Phone admission recovered; one actual qualification command stopped before OTA because SD and QSPI are unavailable. Full App/Boot identities unchanged, inserted-card GPIO and passive startup RTT preserved. Q-TRANSFER environment FAIL, 41 NOT_OBSERVED, qualification 0/1 and calibration 0/12; services closed, failed owner lock retained. Board-state clarification precedes supported recovery and a controlled successor; no blind reset/flash, source changes, old cleanup or long-campaign replay. See P34-LIVE-08 in docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.

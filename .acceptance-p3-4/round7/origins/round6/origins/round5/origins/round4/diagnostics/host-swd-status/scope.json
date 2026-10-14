@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "exec DisableAutoUpdateFW",
+    "exec SetRestartOnClose = 0",
+    "st",
+    "qc"
+  ],
+  "target_connect_requested": false,
+  "reset_or_flash_requested": false,
+  "other_debuggers": []
+}

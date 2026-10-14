@@ -1,0 +1,42 @@
+{
+  "separate_user_authorization": true,
+  "authorization": {
+    "path": ".cache\\p34-v12-candidate-20261013\\authorization.json",
+    "bytes": 1818,
+    "sha256": "722ebb085269384faa9749453b029c69fbd6cde4af6971ae2b1777f043d914ce"
+  },
+  "proposal": {
+    "path": ".cache\\p34-v12-candidate-20261013\\capture-slot-proposal\\proposal.json",
+    "bytes": 2253,
+    "sha256": "3ee1def0eafa658d37aa4876ae74a5218f0de0484231ece7ae68816098dc11df"
+  },
+  "first_predelete_failure": {
+    "path": ".cache\\p34-v12-candidate-20261013\\capture-slot-release\\failed.json",
+    "bytes": 165,
+    "sha256": "367c4b16b8d50690c80ce046351da689a5a451421fff24c31be5bf3b46232cbe"
+  },
+  "completed_attempt": ".cache\\p34-v12-candidate-20261013\\capture-slot-release\\heartbeat-resume",
+  "remaining": 7,
+  "retained": [
+    "1790882915541398-f0e7c878e47e73001842b7e8",
+    "1790886478814858-966a83c7a649c78702af5243",
+    "1790891079051299-33907bf1f4188996f192722e",
+    "1790895078341757-825e5ceec9021c26eb02cf1e",
+    "1791470681659748-6b319b3ac1f35fcbf637e008",
+    "1791485067506601-646e66bbbe96e9c037f0f0d7",
+    "1791816279392731-a2312e444373b13472f7c4f6"
+  ],
+  "files_deleted": 2,
+  "bytes_archived": 5390,
+  "directory_deleted": true,
+  "v11_original_unchanged": true,
+  "other_seven_preserved": true,
+  "non_health_byte_hashes_unchanged": true,
+  "health_only_time_refresh_permitted": true,
+  "runtime_unchanged": true,
+  "local_originals_preserved": true,
+  "private_adb_closed": true,
+  "new_ota_consumed": 0,
+  "no_app_force_stop": true,
+  "no_mcu_command": true
+}

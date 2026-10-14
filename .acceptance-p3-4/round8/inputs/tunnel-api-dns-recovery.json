@@ -1,0 +1,25 @@
+{
+  "originals": [
+    {
+      "path": "admission/dns-recovery/resolve-api.started.json",
+      "bytes": 555,
+      "sha256": "E89CF145F517975A85ED4D6CBB74A94B3FD96A0530DC2E3647879690C25D8CF9"
+    },
+    {
+      "path": "admission/dns-recovery/resolve-api.closed.json",
+      "bytes": 1014,
+      "sha256": "35E4CC29DAED37A48DE36B865B21277892D5B8C3E7010DF9AA88B7425CD55C6E"
+    },
+    {
+      "path": "admission/dns-recovery/resolve-api.stdout",
+      "bytes": 185,
+      "sha256": "FEFEF68A304431703F3C15E98E1EF2F97131AFFED181ECFDDC90EDA9F489B9D3"
+    },
+    {
+      "path": "admission/dns-recovery/resolve-api.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    }
+  ],
+  "scope": "Standard bounded getaddrinfo resolved the actual API hostname after its earlier NX lookup. No resolver/proxy/trust changes, tunnel creation or phone operation in this diagnostic."
+}

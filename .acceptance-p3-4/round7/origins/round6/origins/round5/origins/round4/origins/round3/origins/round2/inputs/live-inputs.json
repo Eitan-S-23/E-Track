@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "device": "C30286",
+  "phone_serial": "10ADA4197U001CK",
+  "phone_model": "V2312A",
+  "ble_address": "E3:49:E1:14:D6:CB",
+  "app_id": "com.wen.gaia.gaia.p34probe",
+  "adb_port": 5062,
+  "probe_serial": "123456",
+  "sentinel": "OTAOBS96bb2c74d5ad6ccecaf30e40",
+  "tools": {
+    "commander": {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+      "bytes": 414672,
+      "sha256": "9a498039ffc3446fdf9c033683c6b3d699e206d0b08e9faa336e79bed0b37d85"
+    },
+    "rttlogger": {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkRTTLogger.exe",
+      "bytes": 221648,
+      "sha256": "670dcb2a248caf6919aa02f91b47c3852459e70fab5026f061b42e03e5e17be0"
+    },
+    "adb": {
+      "path": "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+      "bytes": 5916440,
+      "sha256": "705ddc21f33ac52105d1b075b019962ad0e44fb3d560bde69ce8cb3a36bca183"
+    },
+    "cloudflared": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-single-ota-20260921\\bin\\cloudflared.exe",
+      "bytes": 54976432,
+      "sha256": "2837888cc0f5d58f15b6dc478376de90b4d3ba5241c7947455d1e0a0df429712"
+    },
+    "python": {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "bytes": 105816,
+      "sha256": "a2a4eff8d0b0c845284c607d50a3b5b966ac5a3121736a2e38e165bd6644d9fe"
+    },
+    "git": {
+      "path": "D:\\install\\Git\\cmd\\git.exe",
+      "bytes": 46480,
+      "sha256": "da240fe9bc24895b3e04150a4990b8a6ff329ecabcd8f19684c2cc310da5ef3f"
+    },
+    "nm": {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-nm.exe",
+      "bytes": 1374856,
+      "sha256": "d2a2d9eb8c24c6ed2467c8a1539dd931206e67878a28fe3f0f8d9e42b450efb9"
+    },
+    "objdump": {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.exe",
+      "bytes": 2089128,
+      "sha256": "b583366d8e5a61bf91fd94451bea816ce079760362cff102fc43687748c020e8"
+    },
+    "objcopy": {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objcopy.exe",
+      "bytes": 1496832,
+      "sha256": "b0b80ad85e53ca2785513b7905f97bd8458be46137c2e92a998c7bf202cb831b"
+    }
+  },
+  "tool_dependencies": [
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python3.dll",
+      "bytes": 72536,
+      "sha256": "ca9313dce359c129edc385af4d0c2322e6b3fdad4969d5c2fbc36e0886da58bf"
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python313.dll",
+      "bytes": 6117208,
+      "sha256": "265a27242ee97f81eeac6a556fd7de56baff2222f2334386d8f948e359a649d8"
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\vcruntime140.dll",
+      "bytes": 120400,
+      "sha256": "052ad6a20d375957e82aa6a3c441ea548d89be0981516ca7eb306e063d5027f4"
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\vcruntime140_1.dll",
+      "bytes": 49776,
+      "sha256": "6a99bc0128e0c7d6cbbf615fcc26909565e17d4ca3451b97f8987f9c6acbc6c8"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\concrt140.dll",
+      "bytes": 316816,
+      "sha256": "b3fdb569b567c2b82369c1dbbac1b6c5bbd74b5e03d2357491985be064dfeff7"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink_x64.dll",
+      "bytes": 24077776,
+      "sha256": "6b6f7f15c0f3dfe93c985e14dc6e7e3efa47ad563579def9370602a019873908"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkARM.dll",
+      "bytes": 22625232,
+      "sha256": "750846b83fb0499a9d0e0c421c49421d8d1cb3164843fd0cf1965e43a56bc603"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\msvcp140.dll",
+      "bytes": 565648,
+      "sha256": "7c4ce9d6bfcd6d9db4eef4e75ecdcf5a8e5320106e80f1eca617439fa43f33e8"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\msvcp140_1.dll",
+      "bytes": 23952,
+      "sha256": "5c27f359ba7f801f283e1c49d4cc668b6c1505d424b15dfa42d879f57a1f5fdb"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\msvcp140_2.dll",
+      "bytes": 185720,
+      "sha256": "36989971c020461cebb0777318272a1cf49b6b1a0ae55c87d7cba3d55fd1f407"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\msvcp140_atomic_wait.dll",
+      "bytes": 56208,
+      "sha256": "b3c793966c992a1489cca247828a2e33790f4adad51f1ad04033f0eb5b09fdd5"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\msvcp140_codecvt_ids.dll",
+      "bytes": 20368,
+      "sha256": "ad8627ab2af003e47f62ed2b4e41460cd4b66b06b63f573456f2db41d60ad180"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\QtCore4.dll",
+      "bytes": 2808272,
+      "sha256": "a077281198d3b8a3d27d8ab69cf7e985934b16fad6a5d517f5204f00d3059aa6"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\QtGui4.dll",
+      "bytes": 8446928,
+      "sha256": "ff6dbe18e47216d7403ac9bdf86e9e3e0785bdb99c4fda469566128db36aed9b"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\vccorlib140.dll",
+      "bytes": 334736,
+      "sha256": "5a2b9d589418b17f729239552fa41f7ed6a57f4fe8ae641d0fbcc91fc29f76a3"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\vcruntime140.dll",
+      "bytes": 97168,
+      "sha256": "ded5adaa94341e6c62aea03845762591666381dca30eb7c17261dd154121b83e"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\vcruntime140_1.dll",
+      "bytes": 37240,
+      "sha256": "1554b5802968fdb2705a67cbb61585e9560b9e429d043a5aa742ef3c9bbfb6bf"
+    },
+    {
+      "path": "D:\\install\\leidian\\LDPlayer4\\AdbWinApi.dll",
+      "bytes": 108312,
+      "sha256": "9ffacedc41b2752075571e1a474ff50c5dcbe1f64db56db24aaec78aea1126df"
+    },
+    {
+      "path": "D:\\install\\leidian\\LDPlayer4\\AdbWinUsbApi.dll",
+      "bytes": 73496,
+      "sha256": "13918fdab0c3ac77d077453a6036247cfeca10910aec845f188c41148c630bb2"
+    }
+  ],
+  "boot": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-native-data1\\measure\\postcheck\\boot.bin",
+    "bytes": 65536,
+    "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+  },
+  "images": {
+    "base": {
+      "image": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\base.bin",
+        "bytes": 613952,
+        "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+      },
+      "elf": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf",
+        "bytes": 885784,
+        "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+      },
+      "map": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map",
+        "bytes": 2650755,
+        "sha256": "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c"
+      }
+    },
+    "target": {
+      "image": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\target.bin",
+        "bytes": 613952,
+        "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+      },
+      "elf": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf",
+        "bytes": 885784,
+        "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+      },
+      "map": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map",
+        "bytes": 2650755,
+        "sha256": "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c"
+      }
+    },
+    "maintenance": {
+      "image": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-images2\\maintenance.bin",
+        "bytes": 616616,
+        "sha256": "23ce89fc5d77e4cf5664d05621caff2cefb6dd22237189042de4bc5dbcf8b0d2"
+      },
+      "elf": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-build2\\b\\app-gcc\\X-Track-App-GCC.elf",
+        "bytes": 891044,
+        "sha256": "e7889e3b0ba23f3d9ce9976c90a0d51191ad27dfa4f88c85ac72d81b00378c09"
+      },
+      "map": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-build2\\b\\app-gcc\\X-Track-App-GCC.map",
+        "bytes": 2666747,
+        "sha256": "efb01413bac17fc7dd385f7e1673debf1275b97ea37099822571fc4b89c69084"
+      }
+    },
+    "restore": {
+      "image": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-images2\\restore.bin",
+        "bytes": 111804,
+        "sha256": "9f3643e99dcc3734518dacac52bfdb3b7a36544299ceaa859154ddb26cd0b58d"
+      },
+      "elf": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-restore-build3\\b\\app-gcc\\X-Track-App-GCC.elf",
+        "bytes": 217536,
+        "sha256": "2fb09f5677977311350b7ab3e51aef15dcdc1e2abb88334b281b7b0fafbbdf5e"
+      },
+      "map": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-restore-build3\\b\\app-gcc\\X-Track-App-GCC.map",
+        "bytes": 2517580,
+        "sha256": "287c0bf596d6834f6a498b4509eede9b47870a84b7dd88bd7233e380a9971c63"
+      }
+    },
+    "initial": {
+      "image": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-native-data1\\measure\\postcheck\\app.bin",
+        "bytes": 623124,
+        "sha256": "a2800b07b7de0311b91eebeaa3a9a6012542ae2306d693c14d067877470eac51"
+      },
+      "map": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-overlap1\\fw-wait2\\b\\app-gcc\\X-Track-App-GCC.map",
+        "bytes": 2736044,
+        "sha256": "7f7ab6931b85ad6a412c0546e080f7d8b30b9a958d3039604489cf8059afb756"
+      },
+      "elf": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-overlap1\\fw-wait2\\b\\app-gcc\\X-Track-App-GCC.elf",
+        "bytes": 898700,
+        "sha256": "efe13390dcb04f1fe03ae4ade0e5422aeb0f22c6c44e418925dc67ecbebef885"
+      }
+    }
+  },
+  "package": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\cases\\reference-1MiB.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-remediation-20261010\\final-archive\\original\\flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1\\run-35c6e3aa3a624461aeecb85ea4d25a22\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131722750,
+    "sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f"
+  },
+  "apk_metadata": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-remediation-20261010\\final-archive\\original\\flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1\\run-35c6e3aa3a624461aeecb85ea4d25a22\\artifacts\\trace-dev-debug.json",
+    "bytes": 846,
+    "sha256": "db5cc59ccd6974b392bf5f5252ad937e4c6b7dc5d4dd27fec0f9d111322cdbce"
+  },
+  "adb_key": {
+    "path": "C:\\Users\\SU\\.android\\adbkey",
+    "bytes": 1704,
+    "sha256": "f751c81ef35e6469d54d5decc0403b000cd00962989082ff7176671e8a2dd566"
+  },
+  "owned_configs": [
+    "06883c92f7dec0df07d0fe57a954dfc7341bcd9c63c3e327791ecb68b7c0a6cc"
+  ],
+  "replace_apk_sha256": [
+    "c9809a339d19d60f6e686ed99dd9329263c21ed2f66679cff76dd2e6417ea25a"
+  ],
+  "source_lock": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\source-lock-v4.json",
+    "bytes": 26404,
+    "sha256": "030559344ee3fdf80c5e5e2d1d2161c6136b84be36f02feb238d0f74eb732afb"
+  },
+  "formal_freeze": false,
+  "hardware_qualification": "NOT_RUN"
+}

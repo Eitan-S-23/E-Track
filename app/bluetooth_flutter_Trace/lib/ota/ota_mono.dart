@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'ota_diagnostics.dart';
 
 /// OTA 观测插桩专用单调时钟（P3-3 T1a 设备观测；dev 分支 + dev APK）。
 ///
@@ -21,5 +21,5 @@ void otaMonoLog(String event, {String? code, int? durable}) {
   if (durable != null) {
     line.write(' durable=$durable');
   }
-  debugPrint(line.toString());
+  emitOtaObservation(line.toString());
 }

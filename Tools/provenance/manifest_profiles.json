@@ -30,20 +30,29 @@
         "MDK-ARM_F435/build_f435.ps1",
         "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
         "MDK-ARM_F435/proj.uvprojx",
-        "Tools/etu_pack.py"
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle",
+        "Tools/etu_pack.py",
+        "Tools/ota/p34_timed_ack_batch.h",
+        "Tools/ota/p34_staging_erase.h"
       ],
       "exclude_prefixes": [
         "app/bluetooth_flutter_Trace/AGENTS.md",
         "app/bluetooth_flutter_Trace/CLAUDE.md",
         "app/bluetooth_flutter_Trace/test/",
         "app/bluetooth_flutter_Trace/integration_test/",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/src/test/",
         "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/",
         "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts"
       ],
       "required_paths": [
         ".github/workflows/firmware-build.yml",
         "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
-        "build_f435_and_simulator.bat"
+        "build_f435_and_simulator.bat",
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle"
       ]
     },
     "Validation": {
@@ -53,6 +62,7 @@
         "tests/",
         "app/bluetooth_flutter_Trace/test/",
         "app/bluetooth_flutter_Trace/integration_test/",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/src/test/",
         "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/"
       ],
       "top_files": [
@@ -61,6 +71,7 @@
         ".github/workflows/acceptance-governance.yml",
         ".github/workflows/flutter-dev-checks.yml",
         ".github/workflows/artifact-maintenance.yml",
+        "Tools/ota/p34-acceptance/build.py",
         "docs/acceptance-contracts/template.contract.json",
         "docs/acceptance-contracts/template.evidence-matrix.json"
       ],
@@ -72,6 +83,7 @@
         "Tools/acceptance/validate_bundle.py",
         "Tools/provenance/manifest_profiles.json",
         "Tools/provenance/worktree_guard.ps1",
+        "Tools/ota/p34-acceptance/build.py",
         "tests/ota/test_acceptance_bundle.py",
         "Tools/ota/p3-3-service/service.py",
         "Tools/ota/p3-3-service/service_config.json",
@@ -97,6 +109,7 @@
         "docs/device-experiment-policy.md",
         "docs/flutter-development-validation.md",
         "docs/ota-cross-system-contracts.md",
+        "docs/ota-ble-v2-contract.md",
         "docs/ota-spec-decisions.md"
       ],
       "exclude_prefixes": [".agents/skills/e-track-flutter-debug/scripts/"],
@@ -107,6 +120,7 @@
         "docs/device-experiment-policy.md",
         ".agents/skills/e-track-flutter-debug/SKILL.md",
         "docs/ota-cross-system-contracts.md",
+        "docs/ota-ble-v2-contract.md",
         "docs/ota-spec-decisions.md",
         "docs/ota-prompts/prompt-template-acceptance.md",
         "docs/ota-prompts/prompt-template-implementation.md"
@@ -125,7 +139,9 @@
         ".github/workflows/firmware-build.yml", "CMakeLists.txt",
         "build_f435_and_simulator.bat", "MDK-ARM_F435/build_f435.ps1",
         "MDK-ARM_F435/cmake-generated/CMakeLists.txt", "MDK-ARM_F435/proj.uvprojx",
-        "Simulator/LVGL.Simulator.sln", "Tools/etu_pack.py"
+        "Simulator/LVGL.Simulator.sln", "Tools/etu_pack.py",
+        "Tools/ota/p34_timed_ack_batch.h",
+        "Tools/ota/p34_staging_erase.h"
       ],
       "exclude_prefixes": [],
       "required_paths": ["MDK-ARM_F435/cmake-generated/CMakeLists.txt", "Tools/etu_pack.py"]
@@ -136,15 +152,26 @@
         "app/bluetooth_flutter_Trace/lib/", "app/bluetooth_flutter_Trace/android/",
         "app/bluetooth_flutter_Trace/windows/", "app/bluetooth_flutter_Trace/assets/",
         "app/bluetooth_flutter_Trace/third_party/", "app/bluetooth_flutter_Trace/ios/",
+        "app/bluetooth_flutter_Trace/vendor/",
         "app/bluetooth_flutter_Trace/linux/", "app/bluetooth_flutter_Trace/macos/"
       ],
       "top_files": [
         "app/bluetooth_flutter_Trace/pubspec.yaml", "app/bluetooth_flutter_Trace/pubspec.lock",
         "app/bluetooth_flutter_Trace/analysis_options.yaml", ".github/workflows/build.yml",
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle",
         ".github/scripts/create_trace_patch.py", ".github/scripts/create_vcdiff_patch.py"
       ],
-      "exclude_prefixes": [],
-      "required_paths": ["app/bluetooth_flutter_Trace/pubspec.yaml", ".github/workflows/build.yml"]
+      "exclude_prefixes": [
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/src/test/"
+      ],
+      "required_paths": [
+        "app/bluetooth_flutter_Trace/pubspec.yaml", ".github/workflows/build.yml",
+        "app/bluetooth_flutter_Trace/android/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/android/app/build.gradle.kts",
+        "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle"
+      ]
     },
     "Cloudflare": {
       "category": "production_source",

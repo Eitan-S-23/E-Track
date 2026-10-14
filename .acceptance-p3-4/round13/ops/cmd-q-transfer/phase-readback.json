@@ -1,0 +1,9 @@
+{
+  "phase": "readback",
+  "started_monotonic": 1006094.8965565,
+  "deadline_monotonic": 1006439.8965565,
+  "lifetime_deadline_monotonic": 1009198.856909,
+  "required_seconds": 705,
+  "available_seconds": 3103.9603524999693,
+  "scope": "host observation budget, not transfer timing or PASS"
+}

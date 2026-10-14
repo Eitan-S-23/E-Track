@@ -225,6 +225,17 @@ void Timer_SetEnable(tmr_type* TIMx, bool Enable)
   */
 void Timer_SetInterrupt(tmr_type* TIMx, uint32_t Time, Timer_CallbackFunction_t Function)
 {
+    Timer_SetInterruptWithPriority(
+        TIMx, Time, Function,
+        TIMER_PREEMPTIONPRIORITY_DEFAULT, TIMER_SUBPRIORITY_DEFAULT
+    );
+}
+
+void Timer_SetInterruptWithPriority(
+    tmr_type* TIMx, uint32_t Time, Timer_CallbackFunction_t Function,
+    uint8_t PreemptionPriority, uint8_t SubPriority
+)
+{
     uint16_t period = 0;
     uint16_t prescaler = 0;
     uint32_t clock = Timer_GetClockMax(TIMx);
@@ -248,8 +259,8 @@ void Timer_SetInterrupt(tmr_type* TIMx, uint32_t Time, Timer_CallbackFunction_t 
         period,
         prescaler,
         Function,
-        TIMER_PREEMPTIONPRIORITY_DEFAULT,
-        TIMER_SUBPRIORITY_DEFAULT
+        PreemptionPriority,
+        SubPriority
     );
 }
 

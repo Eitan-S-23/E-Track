@@ -1,0 +1,22 @@
+{
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\phone\\salvage\\health.json",
+      "bytes": 253,
+      "sha256": "fae60100f30d558de0bb6278d36c6fe70c16fba480735ee07bd744ef8182f4ce"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\phone\\salvage\\events.jsonl",
+      "bytes": 4812697,
+      "sha256": "52c0307c47bcec93da01ec793005a6bac84ef8710d73a0400ed3d7f55cf65a7b"
+    },
+    {
+      "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\phone\\salvage\\snapshot-1.jsonl",
+      "bytes": 4813050,
+      "sha256": "743e8e88e79580ffa8c1b6682bc01cc7c63431c68c89b9455bd4ac0d5e1180c6"
+    }
+  ],
+  "errors": [],
+  "read_mode": "bounded-live-prefix; not a finished snapshot",
+  "no_restart_or_ota": true
+}

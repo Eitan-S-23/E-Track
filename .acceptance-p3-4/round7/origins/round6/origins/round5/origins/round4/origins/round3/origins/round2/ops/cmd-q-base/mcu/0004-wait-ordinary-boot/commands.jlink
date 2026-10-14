@@ -1,0 +1,11 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round1\ops\cmd-q-base\mcu\0004-wait-ordinary-boot\header.bin", 0x08010400, 0x60
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round1\ops\cmd-q-base\mcu\0004-wait-ordinary-boot\vtor.bin", 0xE000ED08, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round1\ops\cmd-q-base\mcu\0004-wait-ordinary-boot\state.bin", 0x2005355C, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round1\ops\cmd-q-base\mcu\0004-wait-ordinary-boot\confirmed.bin", 0x2005355E, 0x1
+qc

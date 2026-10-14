@@ -1,0 +1,12 @@
+{
+  "id": "P34-LIVE-09",
+  "disposition": "HARNESS_FAIL",
+  "cause": "Stat/cat crossed atomic health.json replacements: stat 237, valid cat 238; not ETU corruption",
+  "source": "cfe9af88d994c106c6601c6dfd1d59b37fbbdcb1",
+  "ota_started": false,
+  "original_error": "App file changed during read",
+  "host_fix_commit": "9dd7b5502fa7fe553afba521db02d290b503127e",
+  "no_product_failure_claim": true,
+  "repair_review": "Independent non-author: 20 related regressions and 3 boundary probes passed",
+  "next": "Reviewed committed host fix, reconciled phone and controlled successor; no quota or product gate change"
+}

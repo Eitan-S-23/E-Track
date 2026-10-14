@@ -1,0 +1,11 @@
+{
+  "delivered": true,
+  "real_current_session_mention": true,
+  "trigger": {
+    "path": ".acceptance-p3-4\\round9\\ops\\cmd-q-transfer\\query-ready.json",
+    "bytes": 267,
+    "sha256": "61368df2326d999af37e94f0786aa6f84b5ba83f8faa06ebb1c65f43a94f8d99"
+  },
+  "no_chat_reply_required": true,
+  "monotonic_ns": 918073410972200
+}

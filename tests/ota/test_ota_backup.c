@@ -17,6 +17,7 @@
 #include "OTA/ota_backup.h"
 #include "OTA/ota_slot_header.h"
 #include "OTA/ota_layout.h"
+#include "OTA/ota_erase_plan.h"
 #include "EEPROM/eeprom_bcb.h"
 #include "boot_crypto.h"
 #include "boot_fw_header.h"
@@ -28,10 +29,10 @@
 enum
 {
     IMAGE_BYTES = 4096,
-    MAX_IMAGE = 8192 + 512,        /* 多块回归最大镜像 */
+    MAX_IMAGE = OTA_APP_LENGTH,   /* Includes full-size block-erase cases. */
     FLASH_BYTES = 0x200000,        /* candidate + backup 两槽窗口 */
     EEPROM_BYTES = 256,
-    PROGRAM_LOG_MAX = 128
+    PROGRAM_LOG_MAX = 512
 };
 
 static uint8_t g_flash[FLASH_BYTES];
@@ -47,6 +48,9 @@ static uint32_t g_erase_count;
 static uint32_t g_program_count;
 static uint32_t g_eeprom_read_count;
 static uint32_t g_eeprom_write_count;
+static unsigned g_block_attempts, g_block_success, g_block_fail_on;
+static int g_block_corrupt;
+static uint32_t g_erase_limit;
 
 static int g_fail_erase_addr;
 static int g_fail_program_addr;
@@ -252,6 +256,8 @@ static const ota_backup_io_t g_flash_io = {
 
 static void reset_faults(void)
 {
+    g_block_fail_on = 0;
+    g_block_corrupt = 0;
     g_fail_erase_addr = -1;
     g_fail_program_addr = -1;
     g_fail_program_done = 0;
@@ -263,6 +269,7 @@ static void reset_faults(void)
 
 static void reset_counters(void)
 {
+    g_block_attempts = g_block_success = 0;
     g_erase_count = 0u;
     g_program_count = 0u;
     g_program_log_count = 0;
@@ -840,6 +847,127 @@ static void t10_copy_mid_failure(void)
     check("T10 no STAGED", eeprom_active_state() == BCB_STATE_CONFIRMED);
 }
 
+static void block_image(uint8_t *image, uint32_t len, uint32_t version)
+{
+    uint8_t *header = image + OTA_FW_HEADER_OFFSET;
+    boot_sha256_ctx_t sha;
+    uint8_t digest[32];
+    uint32_t i, crc;
+    build_valid_image_ex(image, len, version, "block-test");
+    for (i = OTA_SLOT_HEADER_SIZE; i < len; ++i)
+        image[i] = (uint8_t)((i * 31u) ^ 0xA5u);
+    memset(header + 40, 0, 32);
+    memset(header + 92, 0, 4);
+    boot_sha256_init(&sha);
+    boot_sha256_update(&sha, image, len);
+    boot_sha256_final(&sha, digest);
+    memcpy(header + 40, digest, 32);
+    crc = boot_crc32(header, 92);
+    for (i = 0; i < 4; ++i) header[92 + i] = (uint8_t)(crc >> (8u * i));
+}
+
+static void block_setup(uint32_t len)
+{
+    reset_all();
+    g_current_len = g_candidate_len = len;
+    block_image(g_current, len, 20700u);
+    block_image(g_candidate, len, 20800u);
+    setup_flash_with_candidate();
+    setup_eeprom_confirmed(20700u);
+    memset(g_flash + OTA_EXT_BACKUP, 0, OTA_EXT_SLOT_LENGTH);
+    g_erase_limit = OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE + ((len + 4095u) & ~4095u);
+    g_flash[g_erase_limit] = 0xA7;
+}
+
+static int f_flash_erase_64k(void *ctx, uint32_t address)
+{
+    uint32_t i;
+    (void)ctx;
+    check("block aligned payload only", address % OTA_ERASE_BLOCK_SIZE == 0 &&
+          address >= OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE &&
+          address <= g_erase_limit && OTA_ERASE_BLOCK_SIZE <= g_erase_limit - address);
+    check("block erase precedes all programming", g_program_count == 0);
+    for (i = 0; i < OTA_SLOT_HEADER_SIZE; ++i)
+        check("backup header invalidated first", g_flash[OTA_EXT_BACKUP + i] == 0xFF);
+    ++g_block_attempts;
+    if (g_block_fail_on == g_block_attempts)
+    {
+        memset(g_flash + address, 0xFF, 4096); /* Unknown partial failed command. */
+        return -1;
+    }
+    memset(g_flash + address, 0xFF, OTA_ERASE_BLOCK_SIZE);
+    if (g_block_corrupt && g_block_attempts == 1) g_flash[address] = 0;
+    ++g_block_success;
+    g_erase_count += OTA_ERASE_BLOCK_SIZE / OTA_SLOT_HEADER_SIZE;
+    return 0;
+}
+
+static void t11_block_erase_normal_and_fallback(void)
+{
+    static const uint32_t lengths[] = {1120, 61440, 65536, 69632, 131089, 616048, OTA_APP_LENGTH};
+    unsigned enabled, i;
+    for (enabled = 0; enabled <= 1; ++enabled)
+    {
+        for (i = 0; i < sizeof(lengths) / sizeof(lengths[0]); ++i)
+        {
+            ota_backup_info_t info;
+            ota_backup_result_t result;
+            block_setup(lengths[i]);
+            result = ota_backup_stage_with_block_erase(&g_flash_io, &g_bcb_hal,
+                &info, enabled ? f_flash_erase_64k : 0);
+            check("block stage succeeds", result == OTA_BACKUP_OK);
+            check("block verified STAGED", info.commit_state == OTA_BACKUP_COMMIT_VERIFIED_STAGED &&
+                  eeprom_active_state() == BCB_STATE_STAGED);
+            check("block counters retain sector units", info.erase_count == g_erase_count &&
+                  info.erase_count == (lengths[i] + 4095u) / 4096u + 2u);
+            check("block preserves exact backup", memcmp(g_flash + OTA_EXT_BACKUP + 4096,
+                  g_current, lengths[i]) == 0);
+            check("block preserves candidate payload", memcmp(g_flash + OTA_EXT_CANDIDATE + 4096,
+                  g_candidate, lengths[i]) == 0);
+            check("block does not widen final extent", g_flash[g_erase_limit] == 0xA7);
+            check("null callback stays sector only", enabled || g_block_attempts == 0);
+            if (lengths[i] == 616048u)
+                check("measured image uses eight bulk operations", g_block_success == (enabled ? 8u : 0u));
+        }
+    }
+}
+
+static void t12_block_erase_fail_closed(void)
+{
+    unsigned mode;
+    for (mode = 0; mode < 7; ++mode)
+    {
+        ota_backup_info_t info;
+        ota_backup_result_t result;
+        block_setup(262161u);
+        if (mode < 2) g_block_fail_on = mode + 1;
+        if (mode == 2) g_block_corrupt = 1;
+        if (mode == 3) g_fail_erase_addr = OTA_EXT_BACKUP;
+        if (mode == 4) g_fail_program_addr = OTA_EXT_BACKUP + 4096 + 65536;
+        if (mode == 5) g_fail_program_addr = OTA_EXT_BACKUP + 28;
+        if (mode == 6) g_eeprom_write_fail = 1;
+        result = ota_backup_stage_with_block_erase(&g_flash_io, &g_bcb_hal,
+                                                  &info, f_flash_erase_64k);
+        check("bulk failure not successful", result != OTA_BACKUP_OK);
+        check("bulk failure preserves CONFIRMED", eeprom_active_state() == BCB_STATE_CONFIRMED);
+        check("bulk failure sector count honest", info.erase_count == g_erase_count);
+        check("bulk failure does not widen", g_flash[g_erase_limit] == 0xA7);
+        if (mode < 2)
+        {
+            check("failed bulk stops immediately", g_block_attempts == mode + 1 &&
+                  g_program_count == 0 && g_eeprom_write_count == 0);
+            check("failed bulk not counted successful", info.erase_count == 16u + mode * 16u);
+        }
+        if (mode == 2) check("bad erased bytes caught by readback", result == OTA_BACKUP_ERR_READBACK);
+        if (mode == 3) check("header failure precedes bulk", g_block_attempts == 0);
+    }
+    block_setup(616048u);
+    g_flash[OTA_EXT_CANDIDATE + OTA_SLOT_HEADER_SIZE + 100] ^= 1;
+    check("invalid candidate blocks bulk", ota_backup_stage_with_block_erase(
+          &g_flash_io, &g_bcb_hal, 0, f_flash_erase_64k) != OTA_BACKUP_OK &&
+          g_block_attempts == 0 && g_erase_count == 0 && g_eeprom_write_count == 0);
+}
+
 int main(int argc, char** argv)
 {
     (void)argc;
@@ -863,6 +991,8 @@ int main(int argc, char** argv)
     t8_candidate_old_marker();
     t9_downgrade_reject();
     t10_copy_mid_failure();
+    t11_block_erase_normal_and_fallback();
+    t12_block_erase_fail_closed();
 
     printf("P2_5_OTA_BACKUP checks=%d failures=%d\n", checks, failures);
     return failures == 0 ? 0 : 1;

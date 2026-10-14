@@ -1,0 +1,20 @@
+{
+  "result": "PASS",
+  "contract": {
+    "path": "docs\\acceptance-contracts\\P3-4-v15.contract.json",
+    "bytes": 60528,
+    "sha256": "e315dc6c39da8d995baea2ee2d30292d957451ba23a82e5790b597ed2ae201ed"
+  },
+  "matrix": {
+    "path": ".acceptance-p3-4\\round15\\evidence-matrix.json",
+    "bytes": 263823,
+    "sha256": "07ca9f24cecbda7025e652c20a0708bd31b7afc81203fe5eb90a12944c1dd211"
+  },
+  "review": {
+    "path": ".acceptance-p3-4\\round15\\adjudications\\candidate-original-review.json",
+    "bytes": 38931,
+    "sha256": "93bb9d7af86acb37e2db920f1099072585edc04aeebb62ba7f1e07d8b4c9f2ec"
+  },
+  "physical_operations": 0,
+  "candidate_only": true
+}

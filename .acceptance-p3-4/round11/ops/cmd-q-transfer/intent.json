@@ -1,0 +1,34 @@
+{
+  "action": "phone",
+  "inputs": {
+    "path": ".cache\\p34-live-inputs1\\inputs.json",
+    "bytes": 11635,
+    "sha256": "ae48a2f2f836651dd9e02bb70485696bb89f4f1ed203d3d71c6cb021335786b3"
+  },
+  "argv": [
+    "Tools/ota/p34-acceptance/live.py",
+    "phone",
+    "--inputs",
+    "D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json",
+    "--out",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round11/ops/cmd-q-transfer",
+    "--run-id",
+    "p34-qualification-02",
+    "--run-role",
+    "clean",
+    "--baud",
+    "921600",
+    "--timeout-ms",
+    "2000",
+    "--seconds",
+    "3390",
+    "--contract",
+    "docs/acceptance-contracts/P3-4-v11.contract.json",
+    "--matrix",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round11/evidence-matrix.json",
+    "--command-id",
+    "CMD-Q-TRANSFER"
+  ],
+  "started_monotonic_ns": 935298436876800,
+  "formal_acceptance": false
+}

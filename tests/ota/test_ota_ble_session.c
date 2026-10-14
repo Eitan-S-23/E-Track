@@ -286,7 +286,7 @@ static int env_info_provider(ota_ble_info_t *out_info)
     }
     memset(out_info, 0, sizeof(*out_info));
     memcpy(out_info->model, "X-Track", sizeof("X-Track"));
-    out_info->hw_rev = te.device.hardware_rev;
+    out_info->hw_rev = (uint16_t)te.device.hardware_rev;
     out_info->layout_id = te.device.layout_id;
     out_info->boot_ver = te.device.boot_version;
     out_info->cur_vcode = te.device.current_vcode;
@@ -787,6 +787,173 @@ static uint32_t send_segments(uint32_t pkg_len, const uint8_t *pkg,
         pump_once();
     }
     return count;
+}
+
+static void test_frame_error_ack_shapes(void)
+{
+    static const uint8_t commands[] = {
+        OTA_BLE_CMD_BEGIN, OTA_BLE_CMD_DATA, OTA_BLE_CMD_END, OTA_BLE_CMD_ABORT
+    };
+    static const uint16_t lengths[] = {
+        OTA_BLE_LEN_BEGIN, OTA_BLE_LEN_DATA_MIN, OTA_BLE_LEN_END, OTA_BLE_LEN_ABORT
+    };
+    static const uint16_t bad_lengths[] = {100u, 3u, 31u, 1u};
+    uint8_t payload[OTA_BLE_MAX_PAYLOAD] = {0};
+    uint8_t sha[32];
+    uint8_t *pkg;
+    unsigned active, command, bad_length;
+    const uint32_t pkg_len = 5000u;
+
+    begin_case();
+    pkg = make_full_package(pkg_len);
+    check("frame-error fixture package is generated", pkg != NULL);
+    if (pkg == NULL)
+    {
+        return;
+    }
+    sha256_of(pkg, pkg_len, sha);
+
+    for (active = 0u; active < 2u; ++active)
+    {
+        for (command = 0u; command < sizeof(commands); ++command)
+        {
+            for (bad_length = 0u; bad_length < 2u; ++bad_length)
+            {
+                ota_ble_session_t before;
+                tx_view_t v;
+                uint32_t tx_before, ops_before, acquires, releases;
+                uint32_t base = command == 0u ? 2u : 1u;
+                uint16_t length = bad_length ? bad_lengths[command] : lengths[command];
+                uint8_t status = bad_length ? OTA_BLE_STATUS_ERR_FRAME : OTA_BLE_STATUS_ERR_CRC;
+                char label[96];
+
+                begin_case();
+                wire_len = (uint16_t)build_begin_frame(10u, pkg_len, sha, pkg, 1u);
+                feed_idle(wire_len);
+                (void)send_segments(4096u + 128u, pkg, 0u, 11u);
+                if (!active)
+                {
+                    wire_len = (uint16_t)build_abort_frame(44u, session.session_id);
+                    feed_isr(wire_len);
+                    pump_once();
+                }
+                before = session;
+                tx_before = te.tx_count;
+                ops_before = flash_fixture.operation_count;
+                acquires = te.overlay_acquire_count;
+                releases = te.overlay_release_count;
+                ++te.now_ms;
+
+                wire_len = (uint16_t)ota_ble_frame_encode(wire, sizeof(wire),
+                    commands[command], 0x7fu, 0xbeefu, payload, length);
+                if (bad_length)
+                {
+                    /* The parser rejects a bad length as soon as its header arrives. */
+                    wire_len = OTA_BLE_HEADER_SIZE;
+                }
+                else
+                {
+                    wire[wire_len - 1u] ^= 1u;
+                }
+                if (active)
+                {
+                    feed_isr(wire_len);
+                    pump_once();
+                }
+                else
+                {
+                    feed_idle(wire_len);
+                }
+                memset(&v, 0, sizeof(v));
+                snprintf(label, sizeof(label), "cmd %u %s error, %s: exact ACK shape/CRC/session/seq",
+                    commands[command], bad_length ? "length" : "CRC", active ? "active" : "idle");
+                check(label, te.tx_count == tx_before + 1u && last_tx(&v) &&
+                    v.cmd == (uint8_t)(0x80u | commands[command]) && v.seq == 0xbeefu &&
+                    v.len == (command == 0u ? OTA_BLE_LEN_ACK_BEGIN : OTA_BLE_LEN_ACK_OTHER) &&
+                    tx_status(&v) == status && v.session == (command == 0u ? 0u : before.session_id) &&
+                    (command != 0u || v.payload[1] == 0u));
+                check("frame error ACK reports existing durable offset and active-only bitmap",
+                    tx_durable_off(&v, base) == 4096u && tx_bitmap(&v, base) == (active ? 1u : 0u));
+                check("frame error cannot allocate, advance, teardown, touch timers, or write flash",
+                    session.state == before.state && session.session_id == before.session_id &&
+                    session.next_session_id == before.next_session_id && session.expected_seq == before.expected_seq &&
+                    session.isr_active == before.isr_active && session.receiver == before.receiver &&
+                    session.last_frame_ms == before.last_frame_ms && session.last_data_ms == before.last_data_ms &&
+                    memcmp(&session.progress, &before.progress, sizeof(session.progress)) == 0 &&
+                    memcmp(&session.sha, &before.sha, sizeof(session.sha)) == 0 &&
+                    memcmp(&session.pkg_crc, &before.pkg_crc, sizeof(session.pkg_crc)) == 0 &&
+                    te.overlay_acquire_count == acquires && te.overlay_release_count == releases &&
+                    flash_fixture.operation_count == ops_before && te.activate_calls == 0u && te.reset_calls == 0u);
+            }
+        }
+    }
+    free(pkg);
+
+    begin_case();
+    wire_len = (uint16_t)build_get_info_frame(10u, 0u);
+    wire[wire_len - 1u] ^= 1u;
+    feed_idle(wire_len);
+    check("GET_INFO frame errors remain silent", te.tx_count == 0u);
+    wire_len = (uint16_t)ota_ble_frame_encode(wire, sizeof(wire), 0xffu, 0u, 10u, NULL, 0u);
+    feed_idle(wire_len);
+    check("unknown command frame errors remain silent", te.tx_count == 0u);
+}
+
+static void test_begin_byte_loss_replay(void)
+{
+    /* P3-4 2026-09-24 RX10/RX11: byte 26 (0x52) was absent from the
+     * first BEGIN; GET_INFO preceded it and retry BEGIN + ABORT followed. */
+    static const uint8_t captured_begin[] =
+        "\xa5\x5a\x01\x00\x00\x00\x65\x00\x01\x5f\x70\x04\x00"
+        "\x32\x6d\x30\xcc\xa1\x83\x83\x3e\x0d\xa3\x4d\xcf\xcb\x52\x65\x9a"
+        "\x0d\x2a\xf4\x06\x2d\x36\xa7\x1f\xb3\x6f\x2c\x5d\x23\x1a\x97\xf8"
+        "\x45\x54\x55\x31\x40\x00\x0b\x00\x01\x00\x00\x00\x01\x00\x00\x00"
+        "\x7c\x97\x3f\x79\x16\xd4\xa1\xbb\x33\x25\x57\xab\x71\xd0\x63\x6b"
+        "\x1f\x70\x04\x00\xb9\x14\x85\xfc\x03\x76\x00\x00\x00\x00\x00\x00"
+        "\x01\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\xed\x58\x43\x56"
+        "\x60\xae";
+    size_t i;
+    tx_view_t v;
+
+    begin_case();
+    check("captured BEGIN fixture length and missing byte match original RX",
+        sizeof(captured_begin) - 1u == 111u && captured_begin[26] == 0x52u);
+    wire_len = (uint16_t)build_get_info_frame(4u, 0u);
+    feed_idle(wire_len);
+    for (i = 0u; i < sizeof(captured_begin) - 1u; ++i)
+    {
+        if (i != 26u)
+        {
+            ota_ble_session_feed_idle(&session, NULL, NULL, captured_begin[i]);
+        }
+    }
+    check("truncated BEGIN waits for its missing final CRC byte", te.tx_count == 1u);
+    ota_ble_session_feed_idle(&session, NULL, NULL, captured_begin[0]);
+    memset(&v, 0, sizeof(v));
+    check("retry sync byte completes bad CRC and produces a legal failed BEGIN ACK",
+        te.tx_count == 2u && last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_BEGIN &&
+        v.len == OTA_BLE_LEN_ACK_BEGIN && v.session == 0u && v.seq == 0u &&
+        tx_status(&v) == OTA_BLE_STATUS_ERR_CRC && v.payload[1] == 0u);
+    for (i = 1u; i < sizeof(captured_begin) - 1u; ++i)
+    {
+        ota_ble_session_feed_idle(&session, NULL, NULL, captured_begin[i]);
+    }
+    check("retry whose sync was consumed cannot open a session or stage data",
+        te.tx_count == 2u && !ota_ble_session_active(&session) &&
+        te.overlay_acquire_count == 0u && flash_fixture.operation_count == 0u);
+    wire_len = (uint16_t)build_abort_frame(1u, 0u);
+    feed_idle(wire_len);
+    check("original ABORT resynchronizes with a legal nine-byte ACK",
+        te.tx_count == 3u && last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_ABORT &&
+        v.len == OTA_BLE_LEN_ACK_OTHER && v.seq == 1u && tx_status(&v) == OTA_BLE_STATUS_ABORTED);
+    for (i = 0u; i < sizeof(captured_begin) - 1u; ++i)
+    {
+        ota_ble_session_feed_idle(&session, NULL, NULL, captured_begin[i]);
+    }
+    check("a later intact BEGIN still opens a normal session",
+        te.tx_count == 4u && last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_BEGIN &&
+        v.len == OTA_BLE_LEN_ACK_BEGIN && tx_status(&v) == OTA_BLE_STATUS_OK &&
+        v.session != 0u && v.payload[1] == v.session && ota_ble_session_active(&session));
 }
 
 static void test_full_transfer(void)
@@ -1596,6 +1763,8 @@ int main(void)
     printf("=== P3-1 BLE session tests ===\n");
     test_get_info();
     test_begin_rejections();
+    test_frame_error_ack_shapes();
+    test_begin_byte_loss_replay();
     test_full_transfer();
     test_duplicate_begin_and_idempotent_data();
     test_seq_semantics();

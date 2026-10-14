@@ -1,0 +1,10 @@
+{
+  "verified": true,
+  "phone": "10ADA4197U001CK",
+  "model": "V2312A",
+  "previous_apk_sha256": "c9809a339d19d60f6e686ed99dd9329263c21ed2f66679cff76dd2e6417ea25a",
+  "installed_apk_sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f",
+  "actual_installs": 1,
+  "serial_bound_client_calls": 45,
+  "private_adb_closed": true
+}

@@ -1,0 +1,32 @@
+SEGGER J-Link Commander V8.18 (Compiled Mar  5 2025 14:43:35)
+DLL version V8.18, compiled Mar  5 2025 14:42:43
+
+J-Link Commander will now exit on Error
+
+J-Link Command File read successfully.
+Processing script file...
+J-Link>exec DisableAutoUpdateFW
+J-Link>exec SetRestartOnClose = 0
+J-Link connection not established yet but required for command.
+Connecting to J-Link via USB...O.K.
+Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+Hardware version: V7.00
+J-Link uptime (since boot): N/A (Not supported by this model)
+S/N: -1
+License(s): RDI,FlashDL,FlashBP,JFlash,GDB
+VTref=3.300V
+J-Link>exec InhibitConnectRetries = 1
+J-Link>exec SetEnableMemCache = 0
+J-Link>connect
+Device "AT32F435RGT7" selected.
+
+
+Connecting to target via SWD
+InitTarget() start
+Error: Failed to initialized DAP.
+InitTarget() end - Took 58.7ms
+Error occurred: Could not connect to the target device.
+For troubleshooting steps visit: https://wiki.segger.com/J-Link_Troubleshooting
+
+Script processing completed.
+

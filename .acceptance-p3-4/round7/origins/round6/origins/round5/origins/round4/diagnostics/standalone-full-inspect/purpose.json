@@ -1,0 +1,5 @@
+{
+  "scope": "One bounded standalone full read-only inspection using the same pinned tools, device, speed, base ELF/map and guards; distinguish full-read availability from the failed phone-command context.",
+  "formal_ota": false,
+  "reset_or_flash": false
+}

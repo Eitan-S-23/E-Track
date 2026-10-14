@@ -1,0 +1,523 @@
+POWER MANAGER (dumpsys power)
+
+Power Manager State:
+  Settings power_manager_constants:
+    no_cached_wake_locks=true
+  mDirty=0x0
+  mWakefulness=Asleep
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=2
+  mBatteryLevel=38
+  mBatteryLevelWhenDreamStarted=0
+  mDockState=0
+  mStayOn=true
+  mProximityPositive=false
+  mBootCompleted=true
+  mSystemReady=true
+  mEnhancedDischargeTimeElapsed=0
+  mLastEnhancedDischargeTimeUpdatedElapsed=0
+  mEnhancedDischargePredictionIsPersonalized=false
+  mHalAutoSuspendModeEnabled=true
+  mHalInteractiveModeEnabled=false
+  mWakeLockSummary=0x1
+  mNotifyLongScheduled=+44s314ms
+  mNotifyLongDispatched=-16s672ms
+  mNotifyLongNextCheck=(none)
+  mRequestWaitForNegativeProximity=false
+  mInterceptedPowerKeyForProximity=false
+  mSandmanScheduled=false
+  mBatteryLevelLow=false
+  mLightDeviceIdleMode=false
+  mDeviceIdleMode=false
+  mDeviceIdleWhitelist=[1000, 1001, 2000, 10029, 10031, 10037, 10040, 10046, 10051, 10064, 10065, 10066, 10067, 10076, 10087, 10120, 10133, 10136, 10146, 10159, 10161, 10164, 10168, 10221, 10287, 10295, 10305, 10307, 10351, 10364, 10376]
+  mDeviceIdleTempWhitelist=[1000]
+  mLowPowerStandbyActive=false
+  mLastWakeTime=877152577 (256752 ms ago)
+  mLastSleepTime=877180055 (229274 ms ago)
+  mLastSleepReason=power_button
+  mLastInteractivePowerHintTime=877181163 (228166 ms ago)
+  mLastScreenBrightnessBoostTime=0 (877409329 ms ago)
+  mScreenBrightnessBoostInProgress=false
+  mHoldingWakeLockSuspendBlocker=true
+  mHoldingDisplaySuspendBlocker=false
+  mLastFlipTime=821195197
+  mIsFaceDown=false
+
+Settings and Configuration:
+  mDecoupleHalAutoSuspendModeFromDisplayConfig=false
+  mDecoupleHalInteractiveModeFromDisplayConfig=false
+  mWakeUpWhenPluggedOrUnpluggedConfig=true
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mTheaterModeEnabled=false
+  mSuspendWhenScreenOffDueToProximityConfig=true
+  mDreamsSupportedConfig=true
+  mDreamsEnabledByDefaultConfig=true
+  mDreamsActivatedOnSleepByDefaultConfig=false
+  mDreamsActivatedOnDockByDefaultConfig=true
+  mDreamsEnabledOnBatteryConfig=false
+  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1
+  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15
+  mDreamsBatteryLevelDrainCutoffConfig=5
+  mDreamsEnabledSetting=true
+  mDreamsActivateOnSleepSetting=false
+  mDreamsActivateOnDockSetting=true
+  mDozeAfterScreenOff=true
+  mMinimumScreenOffTimeoutConfig=5000
+  mMaximumScreenDimDurationConfig=7000
+  mMaximumScreenDimRatioConfig=0.20000005
+  mAttentiveTimeoutConfig=-1
+  mAttentiveTimeoutSetting=-1
+  mAttentiveWarningDurationConfig=30000
+  mScreenOffTimeoutSetting=300000
+  mSleepTimeoutSetting=-1
+  mMaximumScreenOffTimeoutFromDeviceAdmin=9223372036854775807 (enforced=false)
+  mStayOnWhilePluggedInSetting=7
+  mScreenBrightnessModeSetting=0
+  mScreenBrightnessOverrideFromWindowManager=NaN
+  mUserActivityTimeoutOverrideFromWindowManager=7000
+  mUserInactiveOverrideFromWindowManager=false
+  mDozeScreenStateOverrideFromDreamManager=1
+  mDrawWakeLockOverrideFromSidekick=false
+  mDozeScreenBrightnessOverrideFromDreamManager=0
+  mScreenBrightnessMinimum=7.0E-5
+  mScreenBrightnessMaximum=1.0
+  mScreenBrightnessDefault=0.39763778
+  mDoubleTapWakeEnabled=false
+  mIsVrModeEnabled=false
+  mButtonLightOn=true
+  mButtonLightAlwaysOn=false
+  mButtonLightSensorControl=false
+  buttonLightControlMode=0
+  isButtonLightSpecialScene=true
+  isButtonLightSpecialSceneException=false
+  isButtonNeedReflectGlobal=false
+  mForegroundProfile=0
+  mUserId=0
+
+Attentive timeout: -1 ms
+Sleep timeout: -1 ms
+Screen off timeout: 7000 ms
+Screen dim duration: 1400 ms
+
+UID states (changing=false changed=false):
+  UID 1000:   ACTIVE  count=0 state=0
+  UID 1001:   ACTIVE  count=0 state=0
+  UID 1002:   ACTIVE  count=0 state=0
+  UID 1041: INACTIVE  count=2 state=20
+  UID 1068:   ACTIVE  count=0 state=0
+  UID u0a0:   ACTIVE  count=0 state=0
+  UID u0a27: INACTIVE  count=0 state=10
+  UID u0a29: INACTIVE  count=0 state=10
+  UID u0a35:   ACTIVE  count=0 state=0
+  UID u0a37: INACTIVE  count=0 state=10
+  UID u0a40: INACTIVE  count=0 state=8
+  UID u0a46: INACTIVE  count=0 state=8
+  UID u0a51: INACTIVE  count=0 state=10
+  UID u0a57:   ACTIVE  count=0 state=5
+  UID u0a64:   ACTIVE  count=0 state=5
+  UID u0a66: INACTIVE  count=0 state=19
+  UID u0a69: INACTIVE  count=0 state=10
+  UID u0a74:   ACTIVE  count=0 state=5
+  UID u0a90:   ACTIVE  count=0 state=5
+  UID u0a92:   ACTIVE  count=0 state=5
+  UID u0a93:   ACTIVE  count=0 state=0
+  UID u0a96:   ACTIVE  count=0 state=5
+  UID u0a109: INACTIVE  count=0 state=10
+  UID u0a111:   ACTIVE  count=0 state=7
+  UID u0a115:   ACTIVE  count=0 state=5
+  UID u0a120: INACTIVE  count=0 state=10
+  UID u0a125: INACTIVE  count=0 state=10
+  UID u0a129:   ACTIVE  count=0 state=5
+  UID u0a130: INACTIVE  count=0 state=10
+  UID u0a134:   ACTIVE  count=0 state=5
+  UID u0a136:   ACTIVE  count=0 state=0
+  UID u0a139:   ACTIVE  count=0 state=0
+  UID u0a142:   ACTIVE  count=0 state=0
+  UID u0a146:   ACTIVE  count=0 state=5
+  UID u0a164:   ACTIVE  count=0 state=0
+  UID u0a165:   ACTIVE  count=0 state=0
+  UID u0a168:   ACTIVE  count=0 state=0
+  UID u0a170:   ACTIVE  count=0 state=0
+  UID u0a176:   ACTIVE  count=0 state=0
+  UID u0a184:   ACTIVE  count=0 state=5
+  UID u0a214: INACTIVE  count=0 state=19
+  UID u0a221: INACTIVE  count=0 state=10
+  UID u0a236: INACTIVE  count=0 state=10
+  UID u0a260: INACTIVE  count=0 state=10
+  UID u0a286: INACTIVE  count=0 state=12
+  UID u0a295: INACTIVE  count=0 state=10
+  UID u0a298:   ACTIVE  count=0 state=7
+  UID u0a305:   ACTIVE  count=0 state=6
+  UID u0a307: INACTIVE  count=1 state=10
+  UID u0a364:   ACTIVE  count=0 state=6
+  UID u0a379:   ACTIVE  count=1 state=4
+  UID u0a418: INACTIVE  count=0 state=15
+  UID u0a421: INACTIVE  count=0 state=19
+  UID u0i361:   ACTIVE  count=0 state=4
+  UID u0i911:   ACTIVE  count=0 state=5
+  UID u0i923: INACTIVE  count=0 state=10
+  UID u999a307: INACTIVE  count=1 state=10
+
+Looper state:
+  Looper (PowerManagerService, tid 72) {d0365d}
+    Message 0: { id=17017068 when=+44s313ms what=4 target=android.os.Handler }
+    (Total messages: 1, polling=true, quitting=false)
+
+Wake Locks: size=5
+  PARTIAL_WAKE_LOCK              'AudioIn' ACQ=-3h53m9s360ms LONG (uid=1041 ws=WorkSource{1000})
+  PARTIAL_WAKE_LOCK              'AudioMix' ACQ=-4m34s395ms LONG (uid=1041 ws=WorkSource{10379})
+  PARTIAL_WAKE_LOCK              'ExoPlayer:WakeLockManager' ACQ=-4m34s461ms LONG (uid=10379 pid=19019)
+  PARTIAL_WAKE_LOCK              'VFS:Maintenance' ACQ=-3m17s461ms LONG (uid=10307 pid=13582)
+  PARTIAL_WAKE_LOCK              'VFS:Maintenance' ACQ=-3m17s372ms LONG (uid=99910307 pid=15229)
+
+Suspend Blockers: size=5
+  PowerManagerService.Booting: ref count=0 []
+  PowerManagerService.WakeLocks: ref count=1 [unknown: (10-11 13:02:51.158)]
+  PowerManagerService.Display: ref count=0 []
+  PowerManagerService.Broadcasts: ref count=0 []
+  PowerManagerService.WirelessChargerDetector: ref count=0 []
+
+Display Power: com.android.server.power.PowerManagerService$1@225abd2
+
+Battery saving stats:
+  Battery Saver is currently: OFF
+    Times full enabled: 0
+    Times adaptive enabled: 0
+  
+  Drain stats:
+                     Battery saver OFF                          ON
+  NonDoze NonIntr:    918m   3961mAh(113%)    258.9mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:   3256m  39534mAh(759%)    728.3mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Deep    NonIntr:    350m   1350mAh( 25%)    231.6mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m     35mAh(  0%)   2215.8mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Light   NonIntr:   1163m   7515mAh(110%)    387.7mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:    155m   1123mAh( 18%)    433.1mAh/h          0m      0mAh(  0%)      0.0mAh/h
+
+Battery saver policy (*NOTE* they only apply when battery saver is ON):
+  Settings: battery_saver_constants
+    value: 
+  Settings: (overlay)
+    value: 
+  DeviceConfig: battery_saver
+    location_mode: 
+  mAccessibilityEnabled=true
+  mAutomotiveProjectionActive=false
+  mPolicyLevel=0
+  
+  Policy 'default full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=false
+  
+  Policy 'current full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=false
+  
+  Policy 'default adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'current adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'effective'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+
+Battery saver state machine:
+  Enabled=false
+    full=false
+    adaptive=false
+  mState=1
+  mLastChangedIntReason=0
+  mLastChangedStrReason=null
+  mBootCompleted=true
+  mSettingsLoaded=true
+  mBatteryStatusSet=true
+  mIsPowered=true
+  mBatteryLevel=38
+  mIsBatteryLevelLow=false
+  mSettingAutomaticBatterySaver=0
+  mSettingBatterySaverEnabled=false
+  mSettingBatterySaverEnabledSticky=false
+  mSettingBatterySaverStickyAutoDisableEnabled=true
+  mSettingBatterySaverStickyAutoDisableThreshold=100
+  mSettingBatterySaverTriggerThreshold=0
+  mBatterySaverStickyBehaviourDisabled=false
+  mDynamicPowerSavingsDefaultDisableThreshold=80
+  mDynamicPowerSavingsDisableThreshold=80
+  mDynamicPowerSavingsEnableBatterySaver=false
+  mLastAdaptiveBatterySaverChangedExternallyElapsed=0
+AttentionDetector:
+ mIsSettingEnabled=false
+ mMaxExtensionMillis=900000
+ mPreDimCheckDurationMillis=2000
+ mEffectivePostDimTimeout=0
+ mLastUserActivityTime(excludingAttention)=877181163
+ mAttentionServiceSupported=false
+ mRequested=false
+
+Profile power states: size=0
+Display Group User Activity:
+  displayGroupId=0
+  userActivitySummary=0x0
+  lastUserActivityTime=877177139 (232192 ms ago)
+  lastUserActivityTimeNoChangeLights=874557063 (2852268 ms ago)
+  mWakeLockSummary=0x1
+
+Wireless Charger Detector State:
+  mGravitySensor={Sensor name="gravity  Non-wakeup", vendor="QTI", version=1, type=9, maxRange=156.91, resolution=0.01, power=0.515, minDelay=5000}
+  mPoweredWirelessly=false
+  mAtRest=false
+  mRestX=0.0, mRestY=0.0, mRestZ=0.0
+  mDetectionInProgress=false
+  mDetectionStartTime=0 (never)
+  mMustUpdateRestPosition=false
+  mTotalSamples=0
+  mMovingSamples=0
+  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0
+  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0
+Wake Lock Log
+  10-11 23:47:29.711 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:29.742 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.747 - 1000 - REL NetworkStats
+  10-11 23:47:29.774 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.811 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.812 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.825 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.826 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.826 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.837 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.837 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.837 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.842 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.843 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.843 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.848 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.848 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.849 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.854 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.855 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.855 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.859 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.859 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.859 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.863 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.863 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.863 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.867 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.877 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.889 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.890 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.902 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.927 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.937 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.938 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.950 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.971 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:29.980 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.981 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:29.990 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.009 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.015 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:30.019 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.019 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.030 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.041 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.043 - 1000 - REL NetworkStats
+  10-11 23:47:30.050 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.050 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.062 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.073 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.081 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.082 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.092 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.138 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.150 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.151 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.160 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.188 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.198 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.199 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.209 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.245 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.256 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.256 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.269 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.504 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.505 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-11 23:47:30.520 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.525 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.552 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.579 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.606 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.644 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.675 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.706 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.737 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:30.749 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-11 23:47:31.045 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:31.084 - 1000 - REL NetworkStats
+  10-11 23:47:32.087 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:32.189 - 1000 - REL NetworkStats
+  10-11 23:47:33.193 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:33.256 - 1000 - REL NetworkStats
+  10-11 23:47:34.259 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:34.294 - 1000 - REL NetworkStats
+  10-11 23:47:34.883 - 10146 - ACQ GCM_READ (partial)
+  10-11 23:47:34.885 - 10146 - ACQ GCM_WORK (partial)
+  10-11 23:47:34.886 - 10146 - REL GCM_READ
+  10-11 23:47:34.912 - 10146 - ACQ GOOGLE_C2DM (partial)
+  10-11 23:47:34.922 - 10146 - REL GCM_WORK
+  10-11 23:47:34.952 - 10146 - REL GOOGLE_C2DM
+  10-11 23:47:35.297 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:35.335 - 1000 - REL NetworkStats
+  10-11 23:47:36.339 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:36.376 - 1000 - REL NetworkStats
+  10-11 23:47:37.380 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:37.418 - 1000 - REL NetworkStats
+  10-11 23:47:38.421 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:38.475 - 1000 - REL NetworkStats
+  10-11 23:47:39.478 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:39.532 - 1000 - REL NetworkStats
+  10-11 23:47:39.760 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:39.810 - 1000 - REL NetworkStats
+  10-11 23:47:39.973 - 10146 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-11 23:47:40.001 - 10146 - ACQ IntentOp:.g.c.MessageRetryIntentOperation (partial)
+  10-11 23:47:40.003 - 10146 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-11 23:47:40.007 - 10146 - ACQ GOOGLE_C2DM (partial)
+  10-11 23:47:40.014 - 10146 - REL IntentOp:.g.c.MessageRetryIntentOperation
+  10-11 23:47:40.018 - 10146 - REL GOOGLE_C2DM
+  10-11 23:47:40.535 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:40.598 - 1000 - REL NetworkStats
+  10-11 23:47:41.601 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:41.665 - 1000 - REL NetworkStats
+  10-11 23:47:42.668 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:42.724 - 1000 - REL NetworkStats
+  10-11 23:47:43.727 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:43.791 - 1000 - REL NetworkStats
+  10-11 23:47:44.793 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:44.809 - 10146 - ACQ GCM_READ (partial)
+  10-11 23:47:44.811 - 10146 - ACQ GCM_WORK (partial)
+  10-11 23:47:44.815 - 10146 - REL GCM_READ
+  10-11 23:47:44.831 - 1000 - REL NetworkStats
+  10-11 23:47:44.836 - 10146 - ACQ GOOGLE_C2DM (partial)
+  10-11 23:47:44.849 - 10146 - REL GCM_WORK
+  10-11 23:47:44.850 - 10146 - ACQ GCM_WORK (partial)
+  10-11 23:47:44.862 - 10146 - REL GCM_WORK
+  10-11 23:47:44.865 - 10146 - REL GOOGLE_C2DM
+  10-11 23:47:45.473 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:45.534 - 1000 - REL NetworkStats
+  10-11 23:47:45.835 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:45.892 - 1000 - REL NetworkStats
+  10-11 23:47:46.895 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:46.937 - 1000 - REL NetworkStats
+  10-11 23:47:47.609 - 1000 - ACQ NetworkStats (partial)
+  10-11 23:47:47.640 - 1000 - REL NetworkStats
+  -
+  Events: 136, Time-Resets: 19
+  Buffer, Bytes used: 510
+FaceDownDetector:
+  mFaceDown=false
+  mActive=false
+  mLastFlipTime=0
+  mSensorMaxLatencyMicros=2000000
+  mUserInteractionBackoffMillis=60000
+  mPreviousResultTime=821363152
+  mPreviousResultType=3
+  mMillisSaved=13055
+  mZAccelerationThreshold=-9.5
+  mAccelerationThreshold=0.2
+  mTimeThreshold=PT1S
+AmbientDisplaySuppressionController:
+ ambientDisplaySuppressed=false
+ mSuppressionTokens={}
+
+Low Power Standby Controller:
+  mIsActive=false
+  mIsEnabled=false
+  mSupportedConfig=false
+  mEnabledByDefaultConfig=false
+  mStandbyTimeoutConfig=0
+  mAllowlistUids=[]

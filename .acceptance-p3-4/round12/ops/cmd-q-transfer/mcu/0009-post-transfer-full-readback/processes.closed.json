@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 1006094942205100,
+  "ended_monotonic_ns": 1006095536950200,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0009-post-transfer-full-readback\\processes.stdout",
+    "bytes": 14398,
+    "sha256": "fb2b2e5686cc781824bd6a88f64ea5bb6ab560ce7fc323157775b05aa83e9370"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0009-post-transfer-full-readback\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+  "tree": "67978f75d86c3b1522175b841aa881d90cf38230",
+  "profile_config_blob": "c1fd80a844680ac760ee0e3b9b70b86f84d6b136",
+  "dependency_probe": {
+    "freeze_commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+    "freeze_tree": "67978f75d86c3b1522175b841aa881d90cf38230",
+    "profile_config_blob": "c1fd80a844680ac760ee0e3b9b70b86f84d6b136",
+    "input_groups": [
+      {
+        "id": "production",
+        "profile": "Production",
+        "category": "production_source"
+      },
+      {
+        "id": "validation",
+        "profile": "Validation",
+        "category": "validation_inputs"
+      },
+      {
+        "id": "governance",
+        "profile": "Governance",
+        "category": "governance_inputs"
+      },
+      {
+        "id": "firmware",
+        "profile": "Firmware",
+        "category": "production_source"
+      },
+      {
+        "id": "flutter",
+        "profile": "Flutter",
+        "category": "production_source"
+      }
+    ],
+    "commands": [
+      {
+        "id": "ADMISSION_DEPENDENCIES",
+        "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py admission --out .cache/admission",
+        "input_groups": [
+          "firmware",
+          "validation"
+        ],
+        "runner_paths": [
+          "Tools/ota/p34-acceptance/selftest.py",
+          "Tools/ota/p34-acceptance/build.py",
+          "Tools/flutter/dev_checks.py",
+          ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+          "tests/ota/test_p34_acceptance_stats.py",
+          "tests/ota/test_p3_4_observation_capture.py",
+          "tests/ota/test_p34_batch_timing.py",
+          "tests/ota/test_ota_link_metrics.py",
+          "tests/ota/test_ota_link_metrics.c",
+          "USER/HAL/ota_link_metrics.h",
+          "Tools/ota/p34-acceptance/metrics.py",
+          "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+          "Tools/ota/p3-4-link-stats/observation_capture.py",
+          "Tools/ota/p3-4-link-stats/batch_timing.py"
+        ]
+      }
+    ]
+  },
+  "standard_api_errors": [],
+  "required_input_coverage": {
+    "Tools/ota/p34-acceptance/build.py": [
+      "Validation"
+    ],
+    "app/bluetooth_flutter_Trace/android/build.gradle.kts": [
+      "Production",
+      "Flutter"
+    ],
+    "app/bluetooth_flutter_Trace/android/app/build.gradle.kts": [
+      "Production",
+      "Flutter"
+    ],
+    "app/bluetooth_flutter_Trace/vendor/flutter_blue_plus_android/android/build.gradle": [
+      "Production",
+      "Flutter"
+    ]
+  },
+  "profile_path_counts": {
+    "Production": 3183,
+    "Validation": 245,
+    "Governance": 37,
+    "Firmware": 2942,
+    "Flutter": 170,
+    "Cloudflare": 54,
+    "Capture": 18,
+    "Evidence": 7
+  },
+  "unchanged_runtime_build_input_paths": {
+    "Production": [],
+    "Firmware": [],
+    "Flutter": []
+  },
+  "unchanged_selected_artifacts": [
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/base.bin",
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/target.bin",
+      "bytes": 613952,
+      "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/cases/reference-1MiB.etu",
+      "bytes": 1048576,
+      "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 885784,
+      "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 1722962,
+      "sha256": "bcdd313cedb2f6d52f7f0c43336cde5806487579908c4c7ad0e116298ad1bcc8"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 613952,
+      "sha256": "7e556d3f9bc3d689a46648fd1c5e27cbe833a99fd2776ba1fb28bee983ebafa1"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2650755,
+      "sha256": "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 891044,
+      "sha256": "e7889e3b0ba23f3d9ce9976c90a0d51191ad27dfa4f88c85ac72d81b00378c09"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 1730461,
+      "sha256": "b4e25f2824bf98c0712ac121106b6891b2d5aba70f6fcc61f3deebde35e4ec76"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 616616,
+      "sha256": "fe88f4efd496d2d626c6354aecb056617af3e4262ee352e7925438ec836b2690"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2666747,
+      "sha256": "efb01413bac17fc7dd385f7e1673debf1275b97ea37099822571fc4b89c69084"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 217536,
+      "sha256": "2fb09f5677977311350b7ab3e51aef15dcdc1e2abb88334b281b7b0fafbbdf5e"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 310538,
+      "sha256": "84e6feacda3d374fb8fb4c51f47890f2b7cea45a6fe012f6498f401d0442a30c"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 111804,
+      "sha256": "3935132e563baa6625bfad2c140e4994a9bce33a63c561ffdbd378b1e2b086b0"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2517580,
+      "sha256": "287c0bf596d6834f6a498b4509eede9b47870a84b7dd88bd7233e380a9971c63"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/maintenance.bin",
+      "bytes": 616616,
+      "sha256": "23ce89fc5d77e4cf5664d05621caff2cefb6dd22237189042de4bc5dbcf8b0d2"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/restore.bin",
+      "bytes": 111804,
+      "sha256": "9f3643e99dcc3734518dacac52bfdb3b7a36544299ceaa859154ddb26cd0b58d"
+    },
+    {
+      "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1/run-35c6e3aa3a624461aeecb85ea4d25a22/artifacts/trace-dev-debug.apk",
+      "bytes": 131722750,
+      "sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f"
+    },
+    {
+      "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1/run-35c6e3aa3a624461aeecb85ea4d25a22/artifacts/trace-dev-debug.json",
+      "bytes": 846,
+      "sha256": "db5cc59ccd6974b392bf5f5252ad937e4c6b7dc5d4dd27fec0f9d111322cdbce"
+    }
+  ],
+  "artifact_source_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+  "formal_contract_frozen": false,
+  "not_run_precheck": false,
+  "independent_acceptance": false,
+  "device_operations": 0
+}

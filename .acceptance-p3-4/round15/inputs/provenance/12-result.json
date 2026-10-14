@@ -1,0 +1,158 @@
+{
+  "run": 38047820907,
+  "name": "development",
+  "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+  "conclusion": "success",
+  "archive": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\original.zip",
+    "bytes": 135657,
+    "sha256": "7bf245545176dada099cda01ff4497bf35303479026462aff7090cdcb858793d"
+  },
+  "files": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\0_Flutter self-tests (ubuntu-latest).txt",
+      "bytes": 187322,
+      "sha256": "7c46f1f1e3170ec15700f625535760b40edcae95d8241c375b9a86a1603f1b7f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\system.txt",
+      "bytes": 619,
+      "sha256": "fcb2f85a3c2c7279d1258bdf3dc465a4c3974e4b4d7171c77da1c71935cb15a9"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\1_Set up job.txt",
+      "bytes": 2053,
+      "sha256": "ed7cd2fd69a2739cc322b340d9569cc1e43b4b553cd4da2f5c48afb0f80fb24c"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\2_Checkout validation commit.txt",
+      "bytes": 14671,
+      "sha256": "f846c2b1a61a639b348e34ef5cc2a57560ff742ec833c283fbc234495cce7035"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\4_Verify development runner.txt",
+      "bytes": 14073,
+      "sha256": "236846cb4110e47f3d8fe95e9b5f510d71f71a9ede7558f012cc8a084d6fab9f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\5_Verify debug APK helper.txt",
+      "bytes": 8644,
+      "sha256": "bf4345c36c5adcb30894ae00a62ca7a9bc931ea18f9c86d117d702b7f518269d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\6_Analyze, test and optionally build a debug APK.txt",
+      "bytes": 128191,
+      "sha256": "70ac8d0eb2bb4dd534021697d1dd0ed9b2863f2459a8fb7e176e710e9b1ba611"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\7_Verify PHY native lifecycle.txt",
+      "bytes": 1358,
+      "sha256": "cfeec225e4f2e91cda848a71e3592ba9d9f2f111f5752f59bd2507492da663c2"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\8_Verify App observation snapshot integrity.txt",
+      "bytes": 6445,
+      "sha256": "d86654cae23e0b8102dcdfa7e6781a487dc17aa45e3822b433e473c150f24754"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\9_Verify batch timing accounting.txt",
+      "bytes": 2521,
+      "sha256": "f419efd6283f74e2274349e517a36a0ebc71bed998eea5fdae51e15c64878161"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\10_Verify v2 full-run and stability accounting.txt",
+      "bytes": 3416,
+      "sha256": "5624b4e6a69915e69960b24625c7585894f2f2a5d415ddef937ad5157d4215c6"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\11_Upload development logs (not acceptance evidence).txt",
+      "bytes": 3086,
+      "sha256": "07851061de123408120bca67b69cb0cbb05c769f054481ef000a211b51e8cea2"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\12_Report final workspace disk use.txt",
+      "bytes": 996,
+      "sha256": "8697a2ffa5310582ba2ec55854ff65cc3f45ba2132f10736f34e0f79139e869a"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\26_Post Checkout validation commit.txt",
+      "bytes": 1528,
+      "sha256": "3afaf2e27c1d37eb99e1676fd63d68fcdb7381bed14ebb6364abcd524a8a79f8"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (ubuntu-latest)\\27_Complete job.txt",
+      "bytes": 376,
+      "sha256": "76d4ad1e58ce276c02df3b6c6f4b6fe7b253f892f1a0fac51fdf77aa4fe1c75f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\1_Flutter self-tests (windows-2022).txt",
+      "bytes": 184626,
+      "sha256": "9c60a73ac22e3b43644b213e0878d697e29b283d5da9f1eefde66d7657bc8292"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\system.txt",
+      "bytes": 618,
+      "sha256": "8c06ff3b534fde899b4e3cfce7beb4c8500c67e9a979d239d60ba54f677f106e"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\1_Set up job.txt",
+      "bytes": 2114,
+      "sha256": "b5c866989552aa301f76c3ddf63ffe04027abf243a5d903481e17bd8f0cdbd5b"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\2_Checkout validation commit.txt",
+      "bytes": 14376,
+      "sha256": "7eab0f8eaa99c37f6913d3e60fb6a28ce45fa2eec4ac6d3d863e3cbda210a6b9"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\4_Verify development runner.txt",
+      "bytes": 14165,
+      "sha256": "cc973eccaeee7a143d7e60bdde957f2dbc70969fa7935a14946c643b0e8bcd25"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\5_Verify debug APK helper.txt",
+      "bytes": 8702,
+      "sha256": "731696301125e8768f84a73e0c7ce3d785443b840e1bbb658a73acb54277165b"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\6_Analyze, test and optionally build a debug APK.txt",
+      "bytes": 126206,
+      "sha256": "410e11e8b8e9643aec69934164cafa9801ca02562b82084a64592efc7f257c1f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\7_Verify PHY native lifecycle.txt",
+      "bytes": 1377,
+      "sha256": "e8b33802e40ddb58b100f13f93fb6f879b0678a8a055401a163b55cb92e74066"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\8_Verify App observation snapshot integrity.txt",
+      "bytes": 6506,
+      "sha256": "94ff8d9a0c47f2590e216c13dc5724768c56a6a8718bb0b91448fdf7e7e9b1da"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\9_Verify batch timing accounting.txt",
+      "bytes": 2560,
+      "sha256": "75efecb8f09b3556b08a7151d93b3cbe6088ee193d41e8850ba49dd5e0fdfbaa"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\10_Verify v2 full-run and stability accounting.txt",
+      "bytes": 3459,
+      "sha256": "a36c2a47c13047accee21abb893808ca6fce4d588d420c341474403498236787"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\11_Upload development logs (not acceptance evidence).txt",
+      "bytes": 3106,
+      "sha256": "c1e124d3b4822a99d053ff6b8374279320f518b38509b8f02cbd4cff624579af"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\26_Post Checkout validation commit.txt",
+      "bytes": 1710,
+      "sha256": "27428d50edd78b54aca5288ccb6f71bdbd5aac2f61079ae75bf6b6158db6363a"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\files\\Flutter self-tests (windows-2022)\\27_Complete job.txt",
+      "bytes": 378,
+      "sha256": "31dbe9aa372bc9659aebdb559c02b2c9aaca1f69952dbd882dc81999b06050fc"
+    }
+  ]
+}

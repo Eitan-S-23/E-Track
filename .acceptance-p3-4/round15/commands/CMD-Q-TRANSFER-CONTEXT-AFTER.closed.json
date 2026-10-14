@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "C:\\Windows\\System32\\fc.exe",
+    "/B",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1061790860797700,
+  "ended_monotonic_ns": 1061791976604500,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-CONTEXT-AFTER.stdout",
+    "bytes": 324,
+    "sha256": "4b850b9b0f10f2611bddc7ad45708d48d82bb49b946ad19aebdbe57e6ba67885"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-CONTEXT-AFTER.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

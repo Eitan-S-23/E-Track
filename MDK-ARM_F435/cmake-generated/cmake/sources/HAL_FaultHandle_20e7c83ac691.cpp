@@ -330,3 +330,18 @@ extern "C"
         );
     }
 }
+
+#if defined(P34_EARLY_FAULT_VECTORS)
+#if !CONFIG_DEBUG_SERIAL_ENABLE || !CONFIG_DEBUG_RTT_ENABLE || CONFIG_HARDFAULT_AUTO_REBOOT || CONFIG_HARDFAULT_DUMP_DISPLAY
+#error Unreviewed diagnostic configuration for early-vector experiment
+#endif
+extern "C" int p34_backtrace_ready(void);
+extern "C" int p34_runtime_diagnostics_ready(void)
+{
+    return s_faultHandleReady && p34_backtrace_ready() &&
+        (&CONFIG_DEBUG_SERIAL == &Serial5) && UART5->ctrl1_bit.uen &&
+        UART5->ctrl1_bit.ten && _SEGGER_RTT.MaxNumUpBuffers > 0 &&
+        _SEGGER_RTT.aUp[0].pBuffer != 0 && _SEGGER_RTT.aUp[0].SizeOfBuffer > 0 &&
+        _SEGGER_RTT.aUp[0].Flags == SEGGER_RTT_MODE_NO_BLOCK_TRIM;
+}
+#endif

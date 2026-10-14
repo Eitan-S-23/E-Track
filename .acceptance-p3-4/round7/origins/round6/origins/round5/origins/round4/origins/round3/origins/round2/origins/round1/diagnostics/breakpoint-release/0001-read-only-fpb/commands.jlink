@@ -1,0 +1,10 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round1\diagnostics\breakpoint-release\0001-read-only-fpb\fpb.bin", 0xE0002000, 0x28
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round1\diagnostics\breakpoint-release\0001-read-only-fpb\freeze.bin", 0xE0042008, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round1\diagnostics\breakpoint-release\0001-read-only-fpb\dhcsr.bin", 0xE000EDF0, 0x4
+qc

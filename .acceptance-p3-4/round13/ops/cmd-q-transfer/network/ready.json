@@ -1,0 +1,16 @@
+{
+  "origin": "https://sec-deemed-incoming-facial.trycloudflare.com",
+  "package": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\network\\https-package.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "service_config": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\network\\service-config.json",
+    "bytes": 1307,
+    "sha256": "380f5fb928247b569dfa526be424a3960844864a3744fac1e089a323260aac1a"
+  },
+  "local_port": 49303,
+  "prepare_deadline_monotonic": 1006408.8569289,
+  "https_requests": 2
+}

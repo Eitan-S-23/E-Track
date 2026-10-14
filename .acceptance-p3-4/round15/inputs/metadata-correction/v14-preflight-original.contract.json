@@ -1,0 +1,1094 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-4-v14",
+  "version": 14,
+  "task_id": "P3-4",
+  "parent_contract_sha256": "747CFF42A2CDD74C286E2E361E8658F3766617EB3B20BCC3269FA3F3F6BD5B32",
+  "status": "FROZEN",
+  "approved_by": "Current user explicitly approved the bounded local source/evidence closeout chain on 2026-10-14; same independent reviewer prepares/freezes/evaluates. No device or release authority.",
+  "approved_at": "2026-10-14T00:35:35.496549+00:00",
+  "implementation_ref": "acceptance/p3-4-v2-20261009@fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+  "freeze_commit": "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+  "freeze_tree": "7038ea9de58dba625d487caee57c6dfb130d04b6",
+  "profile_config_blob": "c1fd80a844680ac760ee0e3b9b70b86f84d6b136",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "firmware",
+      "profile": "Firmware",
+      "category": "production_source"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "p34-live-inputs",
+      "category": "fixture",
+      "description": "Unchanged product/tool identities plus the independently bound current v11 runtime as an owned configuration.",
+      "fingerprint": "sha256:6b926b9f086dd0edcc898c2f77a22cf11f02bd3c427000f3822cc27f3c9d365a",
+      "evidence_path": "origins/v13/inputs/live-inputs.json",
+      "evidence_sha256": "6B926B9F086DD0EDCC898C2F77A22CF11F02BD3C427000F3822CC27F3C9D365A"
+    },
+    {
+      "id": "prepared-history",
+      "category": "fixture",
+      "description": "Actual v11 parent, original provisioning anchors and cumulative two physical qualifications.",
+      "fingerprint": "sha256:f975eb2a1a2f9a29d693e27f586ec9e78a1b3c62e508d875d813fae47c6d180c",
+      "evidence_path": "origins/v13/inputs/prepared-history.json",
+      "evidence_sha256": "F975EB2A1A2F9A29D693E27F586EC9E78A1B3C62E508D875D813FAE47C6D180C"
+    },
+    {
+      "id": "successor-admission",
+      "category": "fixture",
+      "description": "Approved candidate scope, committed host repair, fresh read-only state, unresolved capture capacity and historical boundaries.",
+      "fingerprint": "sha256:f42bff2a947a2aa6b2cfc3f9e2e308008536b0ab2afba4473f15a3f7640eaa84",
+      "evidence_path": "origins/v13/inputs/successor-admission.json",
+      "evidence_sha256": "F42BFF2A947A2AA6B2CFC3F9E2E308008536B0AB2AFBA4473F15A3F7640EAA84"
+    },
+    {
+      "id": "reference-v10",
+      "category": "fixture",
+      "description": "Byte-exact historical original evaluated offline; not a new OTA, calibration sample, final campaign sample or retroactive PASS.",
+      "fingerprint": "sha256:33ba9b04ee56e3dc7505e9d15de499c9819af7edd4fc9e31b509fbca0fbb2d18",
+      "evidence_path": "origins/v13/inputs/reference-v10.jsonl",
+      "evidence_sha256": "33BA9B04EE56E3DC7505E9D15DE499C9819AF7EDD4FC9E31B509FBCA0FBB2D18"
+    },
+    {
+      "id": "reference-v11",
+      "category": "fixture",
+      "description": "Byte-exact historical original evaluated offline; not a new OTA, calibration sample, final campaign sample or retroactive PASS.",
+      "fingerprint": "sha256:743e8e88e79580ffa8c1b6682bc01cc7c63431c68c89b9455bd4ac0d5e1180c6",
+      "evidence_path": "origins/v13/inputs/reference-v11.jsonl",
+      "evidence_sha256": "743E8E88E79580FFA8C1B6682BC01CC7C63431C68C89B9455BD4AC0D5E1180C6"
+    },
+    {
+      "id": "reference-v11-mcu",
+      "category": "fixture",
+      "description": "Byte-exact historical original evaluated offline; not a new OTA, calibration sample, final campaign sample or retroactive PASS.",
+      "fingerprint": "sha256:7bb961716dfc19bf08b3f1831547f31b83b68131ecbc6e9ab160675a160fe2cd",
+      "evidence_path": "origins/v13/inputs/reference-v11-mcu.rtt",
+      "evidence_sha256": "7BB961716DFC19BF08B3F1831547F31B83B68131ECBC6E9AB160675A160FE2CD"
+    },
+    {
+      "id": "capture-slot-release",
+      "category": "fixture",
+      "description": "Separately authorized exact old-query capture archival/unlink; other seven captures including v11 unchanged.",
+      "fingerprint": "sha256:74babd3912b9d4a205cd2b496d899aac4109a7bfbfd42facd8ca1e5fe3146bc0",
+      "evidence_path": "origins/v13/admission/capture-slot-release.json",
+      "evidence_sha256": "74BABD3912B9D4A205CD2B496D899AAC4109A7BFBFD42FACD8CA1E5FE3146BC0"
+    },
+    {
+      "id": "v12-original-matrix",
+      "category": "fixture",
+      "description": "Actual interrupted parent, including its two directly executed PASS anchors and unobserved full transfer completion.",
+      "fingerprint": "sha256:25a9ffd13aede3659969ad64f45957e282323096faa286ecda365f26d1148e62",
+      "evidence_path": "origins/v13/inputs/v12-matrix.json",
+      "evidence_sha256": "25A9FFD13AEDE3659969AD64F45957E282323096FAA286ECDA365F26D1148E62"
+    },
+    {
+      "id": "v12-observations",
+      "category": "fixture",
+      "description": "Hash-bound original product observations; no synthetic old exit or new physical operation.",
+      "fingerprint": "sha256:5886d4b8a26fa631630d2ccf4a8a25d72269e3f4f82ad3b582e39990751a9f4a",
+      "evidence_path": "origins/v13/inputs/v12-observations.json",
+      "evidence_sha256": "5886D4B8A26FA631630D2CCF4A8A25D72269E3F4F82AD3B582E39990751A9F4A"
+    },
+    {
+      "id": "offline-admission",
+      "category": "fixture",
+      "description": "Already-approved original-evidence assessment, preserved interruption, unchanged product conditions and zero device activity.",
+      "fingerprint": "sha256:0abb7f8561d72824b8cca0f5a926397d5ad022e531ba88b09b351eb370445436",
+      "evidence_path": "origins/v13/inputs/offline-admission.json",
+      "evidence_sha256": "0ABB7F8561D72824B8CCA0F5A926397D5AD022E531BA88B09B351EB370445436"
+    },
+    {
+      "id": "fc-tool",
+      "category": "fixture",
+      "description": "Installed standard binary file comparator; its executable is pinned before execution.",
+      "fingerprint": "sha256:e7c8c19eb9a2116b9366143816756f85d043a2f47a481ace7777477f452b5f03",
+      "evidence_path": "origins/v13/inputs/fc-tool.json",
+      "evidence_sha256": "E7C8C19EB9A2116B9366143816756F85D043A2F47A481ACE7777477F452B5F03"
+    },
+    {
+      "id": "expected-base",
+      "category": "fixture",
+      "description": "Byte-exact copy of the already bound base image, not a rebuild.",
+      "fingerprint": "sha256:9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+      "evidence_path": "origins/v13/inputs/expected-base.bin",
+      "evidence_sha256": "9B3A4A21409C59B916976385EC877B7D90BD7E4C90B3553F0B8DF2B02FD787DC"
+    },
+    {
+      "id": "expected-target",
+      "category": "fixture",
+      "description": "Byte-exact copy of the already bound target image, not a rebuild.",
+      "fingerprint": "sha256:58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+      "evidence_path": "origins/v13/inputs/expected-target.bin",
+      "evidence_sha256": "58EEBD962BA1B39369F85954A167516EC5F5E519C5D894C3DB5EB0EDCCEA76A1"
+    },
+    {
+      "id": "expected-boot",
+      "category": "fixture",
+      "description": "Byte-exact copy of the already bound boot image, not a rebuild.",
+      "fingerprint": "sha256:01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+      "evidence_path": "origins/v13/inputs/expected-boot.bin",
+      "evidence_sha256": "01E4B9E162BFAAF9FDA070AA13C0CEC3F377B8D696DB01F731E0AB3D1464E527"
+    },
+    {
+      "id": "local-closeout-authorization",
+      "category": "fixture",
+      "description": "Current user local-only commit/evidence authority; no extra physical operation.",
+      "fingerprint": "sha256:b9d62e432bd757ad04323ef7520773cb745c2be0082409f2121da51aab4fc6e8",
+      "evidence_path": "inputs/local-authorization.json",
+      "evidence_sha256": "B9D62E432BD757AD04323EF7520773CB745C2BE0082409F2121DA51AAB4FC6E8"
+    },
+    {
+      "id": "adopted-originals",
+      "category": "fixture",
+      "description": "Original CI/source/receiver/caller evidence and byte-exact copy index; no new test execution.",
+      "fingerprint": "sha256:518a64379407542280d5569743e9f058a47f8cf68b9dbc033741a89c2560d1f6",
+      "evidence_path": "inputs/adopted-originals.json",
+      "evidence_sha256": "518A64379407542280D5569743E9F058A47F8CF68B9DBC033741A89C2560D1F6"
+    },
+    {
+      "id": "host-source-commit",
+      "category": "fixture",
+      "description": "Actual committed three-file host repair; unchanged independently tested bytes.",
+      "fingerprint": "sha256:f2277e2db3a542d10fb7e0be5c79d81d42120430ff6f56ba90b243eeeff4af8b",
+      "evidence_path": "inputs/host-source-commit.json",
+      "evidence_sha256": "F2277E2DB3A542D10FB7E0BE5C79D81D42120430FF6F56BA90B243EEEFF4AF8B"
+    },
+    {
+      "id": "v13-parent-matrix",
+      "category": "fixture",
+      "description": "Actual directly preceding scoped PASS, retained with its task/release limits.",
+      "fingerprint": "sha256:a106cdea4fdce187db9d7352b6717f8c01a307dddc40a47d0757378012940d4e",
+      "evidence_path": "origins/v13/evidence-matrix.json",
+      "evidence_sha256": "A106CDEA4FDCE187DB9D7352B6717F8C01A307DDDC40A47D0757378012940D4E"
+    }
+  ],
+  "stage": {
+    "id": "candidate-stage-local-closeout",
+    "task_completion_allowed": true,
+    "purpose": "Complete local candidate-stage adjudication and source/evidence delivery without new physical observations.",
+    "max_qualification_ota": 3,
+    "max_calibration_ota": 0,
+    "calibration_per_supported_rate": 0,
+    "rates": [
+      921600
+    ],
+    "qualification_excluded_from_statistics": true,
+    "parameter_selection": "Candidate only from independently evaluated existing originals; no claim of final highest stable production rate. 115200 history retained, 460800 incomplete/resumed cases distinguished, 230400 remains unreconciled. Do not repeat four rates by default.",
+    "successor_required": "Final campaigns move to P5-1 and P3-5 under OTA-DEC-016; P5-2 evaluates applicability. Any failed necessary local safety observation remains blocking and preserved.",
+    "unsupported_or_failed_cell": "Stop affected dependent actions, retain raw state and do not infer unsupported from silence. A supported-rate failure is not a skip. Any supported-rate subset or changed previous-cell path needs an explicit successor before more device commands; no extra measurement quota is created.",
+    "final_retained_state_this_stage": "Retain verified target 3.2.87, original group16 Boot and confirmation; no unnecessary post-transfer restore.",
+    "remaining_required_not_executed": [
+      {
+        "id": "P34-FINAL-30",
+        "requirement": "One selected same-parameter group: 30/30 complete zero-start successful 1 MiB transfers; >=9 KiB/s, P95<=120 s, every transfer<=150 s, clean unique-DATA retransmission<=1%, maxRetries=5."
+      },
+      {
+        "id": "P34-FINAL-SOAK",
+        "requirement": "One 4-hour continuous-transfer soak with a single host-monotonic observer started before the first cell; preserve action/idle/recovery/failure records, do not use summed App times or long idle as proof; stop new starts at 4 h and complete in-flight apply/readback."
+      },
+      {
+        "id": "P34-FINAL-RECOVERY",
+        "requirement": "Ten actual physical disconnect/recovery pairs, two each at durable 8/64/256/512/768 KiB, one selected parameter/asset group; exact fault route/checkpoint evidence required, no ABORT/force-stop/ordinary-success substitute."
+      },
+      {
+        "id": "P34-FINAL-INTEGRITY",
+        "requirement": "All selected campaign observations require valid clock/metrics/guard, no integrity/unrecoverable failure, actual full target/unchanged group16 Boot/confirmation and complete original App snapshots; retain target safely at final closeout."
+      }
+    ],
+    "calibration_snapshots": [],
+    "artifact_source_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+    "resume": {
+      "previous_round_id": "P3-4-20261013-offline-original-evaluation",
+      "previous_result": "PASS",
+      "previous_matrix_sha256": "A106CDEA4FDCE187DB9D7352B6717F8C01A307DDDC40A47D0757378012940D4E",
+      "completed_setup_history": [
+        "Q-APK",
+        "Q-BASE",
+        "Q-BAUD",
+        "Q-INITIAL",
+        "Q-MAINT",
+        "Q-PRODUCTION"
+      ],
+      "history_evidence": "inputs/prepared-history.json",
+      "first_active_command": "CMD-REFERENCE-V10",
+      "completed_ota": 3,
+      "completed_calibration": 0,
+      "remaining_qualification_ota": 0,
+      "remaining_calibration_ota": 0,
+      "completed_apk_installs": 1,
+      "last_verified_state": "Full target 3.2.87, unchanged group16 Boot, confirmed=4, idle SD/OTA, base backup slot present; same reference durable=1048576.",
+      "current_state_check": "CMD-Q-PREP-RESTORE rechecks full target/Boot/idle and validates READY backup/config before arming; then full zero-durable base. Q-TRANSFER rechecks current base and APK before invitation.",
+      "scope_reason": "Committed host Validation changed; required evaluations use preserved originals only.",
+      "failure_preserved": "Old v11 HARNESS_FAIL, v12 EVIDENCE_GAP and v13 limited PASS remain unchanged.",
+      "entry_state_change": {
+        "path": "inputs/successor-admission.json",
+        "sha256": "F42BFF2A947A2AA6B2CFC3F9E2E308008536B0AB2AFBA4473F15A3F7640EAA84",
+        "scope": "Retain current target until all admission checks pass. Restore only through the existing verified backup/config/Boot transaction, not App-only downgrade."
+      }
+    },
+    "current_round_qualification_ota": 0,
+    "preparatory_complete_restorations": 1,
+    "candidate_stage_decision_allowed": true,
+    "production_release_allowed": false,
+    "task_completion_scope": "P3-4 candidate stage only under OTA-DEC-016, not final campaign or production release."
+  },
+  "operating_rules": {
+    "authority": "Explicit 2026-10-14 local closeout authority recorded in inputs/local-authorization.json.",
+    "operator": "Assigned non-implementation acceptance/root session under the user's explicit instruction to continue here after the approved local commit.",
+    "writable_root": "D:/github/my/E-Track/.cache/p34-final",
+    "serialized_device": "C30286 / phone 10ADA4197U001CK V2312A / BLE E3:49:E1:14:D6:CB / probe 123456",
+    "private_adb_port": 5062,
+    "standard_tools": "Pinned J-Link Commander/RTTLogger, private ADB, existing controlled PATCH service and runtime config; no custom flasher, native sender or UI taps.",
+    "host_phase_seconds": {
+      "prepare": 600,
+      "download": 300,
+      "start": 120,
+      "transfer": 300,
+      "terminal": 420,
+      "snapshot": 300,
+      "boot": 345,
+      "readback": 345,
+      "archive": 300
+    },
+    "phone_lifetime_seconds": 3390,
+    "failure_retrieval_seconds": 300,
+    "closure_seconds": 60,
+    "normal_jlink_seconds": 180,
+    "ordinary_boot_operation_seconds": 300,
+    "full_readback_operation_seconds": 300,
+    "debug_register_exception": {
+      "address": "0xE0042008",
+      "operation": "Save current value, temporarily OR 0x1000 for the storage-idle HAL_Update hardware-breakpoint/programming sequence; restore exact saved value before run.",
+      "persistent": false,
+      "limits": "Only the existing standard install adapter; never arbitrary WDT feeding, PC/function injection or EEPROM edits. Unknown halt/program outcome quarantines further mutations."
+    },
+    "native_history_exception": "Only authorized automatic SEGGER history/config updates under C:/Users/SU/AppData/Roaming/SEGGER/; controllable settings/logs/readbacks/caches stay in the candidate. No cleanup.",
+    "rollback": "No device query, restore, rollback, reset, installation, cleanup or OTA is admitted.",
+    "evidence": "Preserve every failed/uncertain action and original bytes. Raw App/RTT/Commander/phase/closure files are evidence, not generated summary replacements. Terminal old-App stack/clock must be before reset; missed windows are EVIDENCE_GAP, never re-run a successful OTA. The one explicitly authorized supplemental qualification measures the changed committed observer; it does not fabricate or repair v10 terminal evidence.",
+    "stop": "New integrity/recovery/clock/guard failure pauses affected tests; no blind retry or new directory to erase uncertainty. trial5 is cause-unknown and its separate investigation remains deferred.",
+    "notifications": "No manual mention for this contract/report. Only a necessary, already-authorized physical UI/card action while execution remains open and requires no chat reply uses current-session real mention plus receipt. Requests requiring a reply end normally.",
+    "publication": "No new commit/push/CI/merge/release/shared-root writes.",
+    "foreground": "Keep the original upgrade UI foreground. No P3-8/background expansion, automatic taps, native sender or custom collector replacement.",
+    "lineage_preflight_command": "python -I -S -B -X utf8 Tools/acceptance/validate_bundle.py --contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v14.contract.json' --matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\evidence-matrix.json' --repo-root D:/github/my/E-Track/.cache/p34-final --previous-contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v13.contract.json' --previous-matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\evidence-matrix.json' --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\P3-4-v10.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\evidence-matrix.json' --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/P3-4-v9.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/P3-4-v8.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/P3-4-v7.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/P3-4-v6.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/P3-4-v5.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/P3-4-v4.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/P3-4-v3.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/P3-4-v2.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/P3-4-v1.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/evidence-matrix.json --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v11.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\evidence-matrix.json' --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json'",
+    "plan_generation_command": "python -I -S -B -X utf8 Tools/acceptance/validate_bundle.py --contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v14.contract.json' --matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\evidence-matrix.json' --repo-root D:/github/my/E-Track/.cache/p34-final --previous-contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v13.contract.json' --previous-matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\evidence-matrix.json' --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\P3-4-v10.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\evidence-matrix.json' --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/P3-4-v9.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/P3-4-v8.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/P3-4-v7.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/P3-4-v6.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/P3-4-v5.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/P3-4-v4.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/P3-4-v3.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/P3-4-v2.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/P3-4-v1.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/evidence-matrix.json --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v11.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\evidence-matrix.json' --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json' --write-rerun-plan rerun-plan.json",
+    "matrix_lifecycle": "Only round14 is writable; all predecessors and their original outcomes remain unchanged.",
+    "history_commands": "Evaluate original observations offline when the changed Validation profile prevents formal reuse; no physical replay.",
+    "usb_admission": "Require actual phone presence and an unoccupied private port. Use the installed exact APK verification in Phone.start; do not reinstall the previously verified APK. No automatic UI taps. Request only necessary authorized physical actions.",
+    "phone_admission": "Before the live cold launch, use existing private ADB read-only power/keyguard checks for current awake/unlocked state. Request only necessary already-authorized physical action; no UI taps or system setting changes.",
+    "lineage_source_packages": [
+      ".acceptance-p3-4/round11",
+      ".acceptance-p3-4/round10",
+      ".acceptance-p3-4/round9",
+      ".acceptance-p3-4/round8",
+      ".acceptance-p3-4/round7",
+      ".acceptance-p3-4/round7/origins/round6",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1"
+    ]
+  },
+  "commands": [
+    {
+      "id": "CMD-REFERENCE-V10",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Independent offline evaluation of the original v10 reference; not new physical execution or entry in a calibration/final statistical group.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --input .acceptance-p3-4/round14/origins/v13/inputs/reference-v10.jsonl --expect-sentinel OTAOBS96bb2c74d5ad6ccecaf30e40 --expect-target E3:49:E1:14:D6:CB",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-REFERENCE-V11",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Independent offline evaluation of the original v11 reference; not new physical execution or entry in a calibration/final statistical group.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --input .acceptance-p3-4/round14/origins/v13/inputs/reference-v11.jsonl --expect-sentinel OTAOBS96bb2c74d5ad6ccecaf30e40 --expect-target E3:49:E1:14:D6:CB",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-REFERENCE-MCU",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Independently decode and bind the preserved v11 420-byte record; does not supply missing old-App RAM.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/metrics.py --input .acceptance-p3-4/round14/origins/v13/inputs/reference-v11-mcu.rtt --elf .acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.elf --map .acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.map --expect-elf-sha256 69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4 --expect-map-sha256 a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c --package .acceptance-p3-4/round14/inputs/metrics/reference-1MiB.etu --expect-epoch 712951994 --expect-baud 921600",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/flutter/dev_checks.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/metrics.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Offline strict interpretation of the existing v12 complete App snapshot; this command does not start OTA or certify the old collector exit.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --input .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/phone/snapshot.jsonl --expect-sentinel OTAOBS96bb2c74d5ad6ccecaf30e40 --expect-target E3:49:E1:14:D6:CB",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-MCU",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Offline production decoder against the already captured MCU original, exact ELF/map/package/session/baud; not a live read.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/metrics.py --input .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/transfer.rtt --elf .acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.elf --map .acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.map --expect-elf-sha256 69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4 --expect-map-sha256 a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c --package .acceptance-p3-4/round14/inputs/metrics/reference-1MiB.etu --expect-epoch 1724752335 --expect-baud 921600",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/flutter/dev_checks.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/metrics.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-RAM",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Offline production decoder against the already captured RAM original, exact ELF/map/package/session/baud; not a live read.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/metrics.py --input .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0003-terminal-before-reboot/metrics.bin --binary --elf .acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.elf --map .acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.map --expect-elf-sha256 69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4 --expect-map-sha256 a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c --package .acceptance-p3-4/round14/inputs/metrics/reference-1MiB.etu --expect-epoch 1724752335 --expect-baud 921600",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/flutter/dev_checks.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/metrics.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-BASE",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Standard read-only byte comparison of bound BASE originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-base.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0001-pre-transfer-current-boot/app.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-APP",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Standard read-only byte comparison of bound APP originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-target.bin .acceptance-p3-4/round14/origins/v13/diagnostics/post-interruption/mcu/0001-current-target-after-interruption/app.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-BOOT",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Standard read-only byte comparison of bound BOOT originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-boot.bin .acceptance-p3-4/round14/origins/v13/diagnostics/post-interruption/mcu/0001-current-target-after-interruption/boot.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Standard read-only byte comparison of bound CONTEXT-BEFORE originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0001-pre-transfer-current-boot/header_after.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0003-terminal-before-reboot/header_before.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-CONTEXT-AFTER",
+      "description": "Re-evaluate preserved originals after the changed Validation input; Standard read-only byte comparison of bound CONTEXT-AFTER originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0001-pre-transfer-current-boot/header_after.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0003-terminal-before-reboot/header_after.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-PREP-RESTORE",
+      "description": "Offline byte comparison of the original v12 preparatory recovery; no restoration is performed.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-base.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-prep-restore/mcu/0016-rollback-full-readback/app.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-PREP-BOOT",
+      "description": "Offline byte comparison of the original v12 preparatory recovery; no restoration is performed.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-boot.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-prep-restore/mcu/0016-rollback-full-readback/boot.bin",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-CANDIDATE-SOURCE",
+      "description": "Compare actual candidate runtime sources with their registered artifact source; not a rebuild.",
+      "command": "'D:\\install\\Git\\cmd\\git.exe' --no-optional-locks diff --no-ext-diff --no-textconv --exit-code 1c3f7f49baa27c42452f7796839cea57ddd734b7 fcbace8b3f782714a139a77a12cb9305dbaef7cc -- Libraries USER boot cmake MDK-ARM_F435/Platform MDK-ARM_F435/cmake-generated app/bluetooth_flutter_Trace/lib app/bluetooth_flutter_Trace/android app/bluetooth_flutter_Trace/vendor app/bluetooth_flutter_Trace/pubspec.yaml app/bluetooth_flutter_Trace/pubspec.lock",
+      "input_groups": [
+        "production",
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-CANDIDATE-CI",
+      "description": "Check applicability of the registered complete Flutter CI logs; not a new CI execution.",
+      "command": "'D:\\install\\Git\\cmd\\git.exe' --no-optional-locks diff --no-ext-diff --no-textconv --exit-code 6942ae068f6c57b1b42c679a2ebe039d5b9b0fef fcbace8b3f782714a139a77a12cb9305dbaef7cc -- app/bluetooth_flutter_Trace/test app/bluetooth_flutter_Trace/integration_test",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-CANDIDATE-ARCHIVE-04",
+      "description": "Standard-library CRC/integrity test of an existing original CI archive; no extraction or CI call.",
+      "command": "python -I -S -B -X utf8 -m zipfile -t .acceptance-p3-4/round14/inputs/provenance/05-original.zip",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-CANDIDATE-ARCHIVE-07",
+      "description": "Standard-library CRC/integrity test of an existing original CI archive; no extraction or CI call.",
+      "command": "python -I -S -B -X utf8 -m zipfile -t .acceptance-p3-4/round14/inputs/provenance/08-original.zip",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-CANDIDATE-ARCHIVE-10",
+      "description": "Standard-library CRC/integrity test of an existing original CI archive; no extraction or CI call.",
+      "command": "python -I -S -B -X utf8 -m zipfile -t .acceptance-p3-4/round14/inputs/provenance/11-original.zip",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-CANDIDATE-ARCHIVE-13",
+      "description": "Standard-library CRC/integrity test of an existing original CI archive; no extraction or CI call.",
+      "command": "python -I -S -B -X utf8 -m zipfile -t .acceptance-p3-4/round14/inputs/provenance/14-original.zip",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Current independent reviewer; local offline evidence only.",
+      "process_timeout_seconds": 120
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-CMD-REFERENCE-V10",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-REFERENCE-V10.closed.json"
+    },
+    {
+      "id": "ART-CMD-REFERENCE-V11",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-REFERENCE-V11.closed.json"
+    },
+    {
+      "id": "ART-CMD-REFERENCE-MCU",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-REFERENCE-MCU.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-MCU",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER-MCU.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-RAM",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER-RAM.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-BASE",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER-BASE.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-APP",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER-APP.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-BOOT",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER-BOOT.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER-CONTEXT-BEFORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-CONTEXT-AFTER",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-TRANSFER-CONTEXT-AFTER.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-PREP-RESTORE",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-PREP-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-PREP-BOOT",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-Q-PREP-BOOT.closed.json"
+    },
+    {
+      "id": "ART-CMD-CANDIDATE-SOURCE",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-CANDIDATE-SOURCE.closed.json"
+    },
+    {
+      "id": "ART-CMD-CANDIDATE-CI",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-CANDIDATE-CI.closed.json"
+    },
+    {
+      "id": "ART-CMD-CANDIDATE-ARCHIVE-04",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-CANDIDATE-ARCHIVE-04.closed.json"
+    },
+    {
+      "id": "ART-CMD-CANDIDATE-ARCHIVE-07",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-CANDIDATE-ARCHIVE-07.closed.json"
+    },
+    {
+      "id": "ART-CMD-CANDIDATE-ARCHIVE-10",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-CANDIDATE-ARCHIVE-10.closed.json"
+    },
+    {
+      "id": "ART-CMD-CANDIDATE-ARCHIVE-13",
+      "description": "Actual bounded offline command closure and original stdout/stderr identity.",
+      "path": "commands/CMD-CANDIDATE-ARCHIVE-13.closed.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P34-CANDIDATE-REFERENCE",
+      "description": "Evaluate original v10/v11 observations without physical replay. Both are the same legal 1 MiB, v2/window24/batch12/921600/timeout2000/retries5 group, zero-origin complete App observations with original target/Boot identity corroboration. Preserve all ACK samples and failures. Reference nearest-rank P99 supports the unchanged 2000 ms candidate timeout; valid v11 MCU phases bind the package/ELF/map. Prior host/local-function evidence remains hash-bound. This is candidate evidence only, not old calibration or final production/performance reliability PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_app_snapshot",
+        "group_statistics",
+        "plan"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware and flutter produce the measured session and its negotiated/runtime parameters; validation validates raw capture identities and computes the statistics without pooling groups.",
+      "external_inputs": [
+        "p34-live-inputs",
+        "prepared-history",
+        "successor-admission",
+        "reference-v10",
+        "reference-v11",
+        "reference-v11-mcu",
+        "local-closeout-authorization",
+        "adopted-originals",
+        "host-source-commit",
+        "v13-parent-matrix"
+      ],
+      "command_ids": [
+        "CMD-REFERENCE-V10",
+        "CMD-REFERENCE-V11",
+        "CMD-REFERENCE-MCU"
+      ],
+      "artifact_ids": [
+        "ART-CMD-REFERENCE-V10",
+        "ART-CMD-REFERENCE-V11",
+        "ART-CMD-REFERENCE-MCU"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "Q-PREP-RESTORE",
+      "description": "Independently evaluate the unchanged original v12 preparatory recovery: full base/Boot byte comparisons, original executed PASS/command exit, raw READY/committed mailbox/configuration/confirmation/health and erased journal. This executes only offline evaluation, not a new physical restoration and not the old unobserved post-transfer Q-RESTORE.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs",
+        "prepared-history",
+        "successor-admission",
+        "local-closeout-authorization",
+        "adopted-originals",
+        "host-source-commit",
+        "v13-parent-matrix"
+      ],
+      "command_ids": [
+        "CMD-Q-PREP-RESTORE",
+        "CMD-Q-PREP-BOOT"
+      ],
+      "artifact_ids": [
+        "ART-CMD-Q-PREP-RESTORE",
+        "ART-CMD-Q-PREP-BOOT"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "Q-TRANSFER",
+      "description": "Independently evaluate original v12 product observations offline under execution-contract section 0.1. Require same-process fresh query/download/runtime/package, full zero-origin 1 MiB App success, exact MCU package/CRC/epoch/baud/clean terminal, one original old-App RAM sample within its original deadline, header context, stack guard/paint, 288 MHz/SysTick/advancing tick and configured WDT, later full target/unchanged Boot/current confirmation/health, and actual final owned-tool/archive closure. The reviewer checks the remaining raw register/guard/health bindings using the unchanged committed pure gates. New offline commands must actually exit 0. This PASS, if earned, is the offline product-evidence evaluation only: v12 original command deadline/exit/action-result remains unobserved and EVIDENCE_GAP, never backfilled. No new physical OTA, stability campaign, or production release claim.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs",
+        "prepared-history",
+        "successor-admission",
+        "capture-slot-release",
+        "v12-original-matrix",
+        "v12-observations",
+        "offline-admission",
+        "fc-tool",
+        "expected-base",
+        "expected-target",
+        "expected-boot",
+        "local-closeout-authorization",
+        "adopted-originals",
+        "host-source-commit",
+        "v13-parent-matrix"
+      ],
+      "command_ids": [
+        "CMD-Q-TRANSFER",
+        "CMD-Q-TRANSFER-MCU",
+        "CMD-Q-TRANSFER-RAM",
+        "CMD-Q-TRANSFER-BASE",
+        "CMD-Q-TRANSFER-APP",
+        "CMD-Q-TRANSFER-BOOT",
+        "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "CMD-Q-TRANSFER-CONTEXT-AFTER"
+      ],
+      "artifact_ids": [
+        "ART-CMD-Q-TRANSFER",
+        "ART-CMD-Q-TRANSFER-MCU",
+        "ART-CMD-Q-TRANSFER-RAM",
+        "ART-CMD-Q-TRANSFER-BASE",
+        "ART-CMD-Q-TRANSFER-APP",
+        "ART-CMD-Q-TRANSFER-BOOT",
+        "ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "ART-CMD-Q-TRANSFER-CONTEXT-AFTER"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "P34-CANDIDATE-CLOSEOUT",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_ci_logs",
+        "original_host_regressions",
+        "source_identity",
+        "candidate_report"
+      ],
+      "input_groups": [
+        "production",
+        "firmware",
+        "flutter",
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Actual runtime/CI source applicability, original local safety and caller tests, and the approved candidate-stage Spec boundary.",
+      "external_inputs": [
+        "local-closeout-authorization",
+        "adopted-originals",
+        "host-source-commit",
+        "v13-parent-matrix"
+      ],
+      "command_ids": [
+        "CMD-CANDIDATE-SOURCE",
+        "CMD-CANDIDATE-CI",
+        "CMD-CANDIDATE-ARCHIVE-04",
+        "CMD-CANDIDATE-ARCHIVE-07",
+        "CMD-CANDIDATE-ARCHIVE-10",
+        "CMD-CANDIDATE-ARCHIVE-13"
+      ],
+      "artifact_ids": [
+        "ART-CMD-CANDIDATE-SOURCE",
+        "ART-CMD-CANDIDATE-CI",
+        "ART-CMD-CANDIDATE-ARCHIVE-04",
+        "ART-CMD-CANDIDATE-ARCHIVE-07",
+        "ART-CMD-CANDIDATE-ARCHIVE-10",
+        "ART-CMD-CANDIDATE-ARCHIVE-13"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      },
+      "description": "Adjudicate the complete P3-4 candidate-stage Spec checklist from actual source/CI originals, historical declared factorial observations, current same-group reference parameters, original receiver fault-containment checks and committed independently reviewed host repair. Recompute bindings and inspect raw successful/negative test results, not a handwritten PASS alone. Preserve trial5 deferral/unknown cause, v11/v12 failures, missing old command completion, timing limits, unreconciled rates and 3/3 physical consumption. Candidate-stage completion is not final highest stable production selection, P3-5 recovery, P5 30/30/four-hour/fault acceptance or main delivery."
+    }
+  ],
+  "screening_parameters": {
+    "protocol": 2,
+    "runtime_schema": 10,
+    "reference_bytes": 1048576,
+    "package_sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+    "package_crc32": 3263681715,
+    "base_vcode": 30286,
+    "target_vcode": 30287,
+    "window_segments": 24,
+    "data_batch_frames": 12,
+    "calibration_ack_timeout_ms": 2000,
+    "max_retries": 5,
+    "foreground": true,
+    "bauds": [
+      921600
+    ]
+  },
+  "performance_gates": [
+    {
+      "id": "P34-REFERENCE",
+      "metric": "package_bytes",
+      "unit": "bytes",
+      "limit": 1048576,
+      "basis": "protocol_contract",
+      "rationale": "Fixed legal reference ETU, never a small/resumed substitute."
+    },
+    {
+      "id": "P34-RATE",
+      "metric": "effective_payload_throughput",
+      "unit": "KiB/s",
+      "limit": 9,
+      "basis": "product_sla",
+      "rationale": "Original selected-group minimum, not a host timeout."
+    },
+    {
+      "id": "P34-P95",
+      "metric": "BEGIN_to_END_ACK_p95",
+      "unit": "s",
+      "limit": 120,
+      "basis": "product_sla",
+      "rationale": "Original required selected-group bound."
+    },
+    {
+      "id": "P34-MAX",
+      "metric": "BEGIN_to_END_ACK_each_max",
+      "unit": "s",
+      "limit": 150,
+      "basis": "product_sla",
+      "rationale": "BLE qualification bound, never an apply/Boot kill timer."
+    },
+    {
+      "id": "P34-RETRANSMISSION",
+      "metric": "clean_unique_DATA_retransmission_fraction",
+      "unit": "fraction",
+      "limit": 0.01,
+      "basis": "protocol_contract",
+      "rationale": "Original retransmission bound with unique DATA denominator."
+    },
+    {
+      "id": "P34-NO-DURABLE",
+      "metric": "no_durable_progress_abort",
+      "unit": "s",
+      "limit": 30,
+      "basis": "protocol_contract",
+      "rationale": "Existing durable watchdog must not be relaxed."
+    }
+  ]
+}

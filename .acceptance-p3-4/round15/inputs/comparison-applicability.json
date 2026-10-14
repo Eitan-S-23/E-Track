@@ -1,0 +1,83 @@
+{
+  "result": "HISTORICAL_DECLARED_FACTORIAL_RECONCILED",
+  "rows": [
+    {
+      "candidate": "baseline",
+      "commit": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+      "apk_sha256": "b9705ea2286f3818d85927f2c15cdf2613421d9cfbac73f5439d2248e91189b3",
+      "requested": null,
+      "baseline_request_field_omitted": true,
+      "actual_write_mode": "with",
+      "actual_discoveries": 2229,
+      "seconds": 244.870742,
+      "metadata": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681253386\\contents\\run-f0e34bb377b44ce99cd24e7bcc04a550\\artifacts\\trace-dev-debug.json",
+        "bytes": 601,
+        "sha256": "8122bd7d5bad1b991343fea9300447103ed2def8ac86e85d5b22d51e53199579"
+      }
+    },
+    {
+      "candidate": "reuse-with",
+      "commit": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+      "apk_sha256": "8980d854d7f4c02727455d3b88d1fff44340b6225d095cdcf167e8d8e6d34b94",
+      "requested": {
+        "name": "reuse-with",
+        "reuse_gatt": true,
+        "prefer_without_response": false
+      },
+      "baseline_request_field_omitted": false,
+      "actual_write_mode": "with",
+      "actual_discoveries": 1,
+      "seconds": 247.039059,
+      "metadata": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681577975\\contents\\run-3063f6263dad49009cd2f9de5efd52bb\\artifacts\\trace-dev-debug.json",
+        "bytes": 729,
+        "sha256": "551eec061e18bc921182f94598b37f9152770c823420990d30a0e15607571a56"
+      }
+    },
+    {
+      "candidate": "discover-without",
+      "commit": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+      "apk_sha256": "759439401e7c52d3723379aedd0f3b179ed1e5868d3fa11190e59ffd73b3747b",
+      "requested": {
+        "name": "discover-without",
+        "reuse_gatt": false,
+        "prefer_without_response": true
+      },
+      "baseline_request_field_omitted": false,
+      "actual_write_mode": "without",
+      "actual_discoveries": 2229,
+      "seconds": 79.003209,
+      "metadata": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681318429\\contents\\run-d68b8de6936f4de4938234d0c91a5d3d\\artifacts\\trace-dev-debug.json",
+        "bytes": 735,
+        "sha256": "5f98f1fa058d4892453d3eb730a065de875c61ba4542ddb5c12b66ac14f4d12a"
+      }
+    },
+    {
+      "candidate": "reuse-without",
+      "commit": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+      "apk_sha256": "f1e84d318d83727da93d81d8299c685680b5e8fedf5ef607b3abd203c473031f",
+      "requested": {
+        "name": "reuse-without",
+        "reuse_gatt": true,
+        "prefer_without_response": true
+      },
+      "baseline_request_field_omitted": false,
+      "actual_write_mode": "without",
+      "actual_discoveries": 1,
+      "seconds": 74.326403,
+      "metadata": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10680649265\\contents\\run-ae4251be3a6842cdba86ebe02d39fade\\artifacts\\trace-dev-debug.json",
+        "bytes": 731,
+        "sha256": "b21b15bf14da4f040a5662451020e65feb0105c17099cd59e0609a7123049344"
+      }
+    }
+  ],
+  "source_commit_available_in_current_local_object_database": false,
+  "source_code_diff_not_claimed": true,
+  "decision": "APK byte differences alone do not invalidate this declared same-source two-factor historical comparison. Preserve same-package observed outcomes; do not claim current-v2 causal speedup. The Spec does not require another current-v2 comparison solely to rename this candidate stage.",
+  "scope": "Existing observations only; no changes to Spec, frozen criteria, failure outcomes or numerical gates.",
+  "device_operations": 0,
+  "ota_replayed": 0
+}

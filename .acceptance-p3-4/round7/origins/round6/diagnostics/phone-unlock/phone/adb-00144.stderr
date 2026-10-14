@@ -1,0 +1,2 @@
+* cannot start server on remote host
+adb.exe: cannot connect to daemon at tcp:127.0.0.1:5062: cannot connect to 127.0.0.1:5062: 由于目标计算机积极拒绝，无法连接。 (10061)

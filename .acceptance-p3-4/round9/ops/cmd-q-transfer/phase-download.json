@@ -1,0 +1,9 @@
+{
+  "phase": "download",
+  "started_monotonic": 918071.0021996,
+  "deadline_monotonic": 918371.0021996,
+  "lifetime_deadline_monotonic": 921338.5024454,
+  "required_seconds": 2790,
+  "available_seconds": 3267.500245800009,
+  "scope": "host observation budget, not transfer timing or PASS"
+}

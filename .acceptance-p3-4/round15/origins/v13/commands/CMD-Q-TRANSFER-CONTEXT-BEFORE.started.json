@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "C:\\Windows\\System32\\fc.exe",
+    "/B",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_before.bin"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 1011175164687100,
+  "stdin_sha256": null
+}

@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "install",
+    "-r",
+    "--no-streaming",
+    "D:\\github\\my\\E-Track\\.cache\\p34-remediation-20261010\\final-archive\\original\\flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1\\run-35c6e3aa3a624461aeecb85ea4d25a22\\artifacts\\trace-dev-debug.apk"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 822111742581600,
+  "ended_monotonic_ns": 822127344708700,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-apk\\phone\\adb-00042.stdout",
+    "bytes": 320,
+    "sha256": "7bd8513f2b7470644551ff00de7b3b198fd037cff5dcd7928a7da1fbc9e02b8b"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-apk\\phone\\adb-00042.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

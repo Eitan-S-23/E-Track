@@ -1,0 +1,34 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-m",
+    "zipfile",
+    "-t",
+    ".acceptance-p3-4/round14/inputs/provenance/11-original.zip"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1061795045892800,
+  "ended_monotonic_ns": 1061795357753500,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-ARCHIVE-10.stdout",
+    "bytes": 14,
+    "sha256": "71aa2112e114731b9ccc30bdbe2593a527bf453e3d1ba46777b521e3d4ddf4b4"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-ARCHIVE-10.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

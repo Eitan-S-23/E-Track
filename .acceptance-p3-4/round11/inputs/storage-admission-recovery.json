@@ -1,0 +1,615 @@
+{
+  "schema": 1,
+  "reported_user_change": "User restarted the code meter and requested continued acceptance",
+  "observed_change": "After preserved DAP failures and a delivered physical-wake notice, exact full current base/Boot/health/storage admission passed",
+  "cause_not_proven": true,
+  "sd_ready": 1,
+  "qspi_ota_disabled": 0,
+  "qspi_jedec": 15679512,
+  "expected_reference_begin_durable": 0,
+  "base": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\base.bin",
+    "bytes": 613952,
+    "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+  },
+  "boot_sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+  "originals": [
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\active.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\active.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\app.bin",
+        "bytes": 613952,
+        "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\app.bin",
+        "bytes": 613952,
+        "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\backup_slot.bin",
+        "bytes": 32,
+        "sha256": "2a187681945460f97c68fee52eada1ccf69030c5b64bad47a3db1bfc39b16b34"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\backup_slot.bin",
+        "bytes": 32,
+        "sha256": "2a187681945460f97c68fee52eada1ccf69030c5b64bad47a3db1bfc39b16b34"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\boot.bin",
+        "bytes": 65536,
+        "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\boot.bin",
+        "bytes": 65536,
+        "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\candidate_slot.bin",
+        "bytes": 32,
+        "sha256": "b7e762aa5e48e58419d2be240f1d7b73a407e123ff74750ec14fbe90010597b4"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\candidate_slot.bin",
+        "bytes": 32,
+        "sha256": "b7e762aa5e48e58419d2be240f1d7b73a407e123ff74750ec14fbe90010597b4"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\cfsr.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\cfsr.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\commander.closed.json",
+        "bytes": 1336,
+        "sha256": "88ad727c5b1f379c98e92372332d2bc3d1a2b27a2061c720b3d82fb930bd4473"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\commander.closed.json",
+        "bytes": 1336,
+        "sha256": "88ad727c5b1f379c98e92372332d2bc3d1a2b27a2061c720b3d82fb930bd4473"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\commander.started.json",
+        "bytes": 841,
+        "sha256": "35f05619113347fb9159f9c6762a87bbfea6ec018df94dd9639f8a1018b3033a"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\commander.started.json",
+        "bytes": 841,
+        "sha256": "35f05619113347fb9159f9c6762a87bbfea6ec018df94dd9639f8a1018b3033a"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\commander.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\commander.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\commander.stdout",
+        "bytes": 11385,
+        "sha256": "b8bfbae141a838ea9bc51af170a564825edfac4d761f751e7c28e8351fbcde8a"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\commander.stdout",
+        "bytes": 11385,
+        "sha256": "b8bfbae141a838ea9bc51af170a564825edfac4d761f751e7c28e8351fbcde8a"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\commands.jlink",
+        "bytes": 3956,
+        "sha256": "8be2ce63341c2d4367d1a025537a1306d0837783ac44fd767e5b93399ff997e9"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\commands.jlink",
+        "bytes": 3956,
+        "sha256": "8be2ce63341c2d4367d1a025537a1306d0837783ac44fd767e5b93399ff997e9"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\confirmed.bin",
+        "bytes": 1,
+        "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\confirmed.bin",
+        "bytes": 1,
+        "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\dhcsr.bin",
+        "bytes": 4,
+        "sha256": "254b909a4d306a60b686963cf833d5b638ec1e605df617e1abbd22cb4c27e4ef"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\dhcsr.bin",
+        "bytes": 4,
+        "sha256": "254b909a4d306a60b686963cf833d5b638ec1e605df617e1abbd22cb4c27e4ef"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\disabled.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\disabled.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\freeze.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\freeze.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\guard.bin",
+        "bytes": 32,
+        "sha256": "60bf07c488aad18fda339df07e4fbc47b4f00be71711936f18d04d352ad01890"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\guard.bin",
+        "bytes": 32,
+        "sha256": "60bf07c488aad18fda339df07e4fbc47b4f00be71711936f18d04d352ad01890"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\header_after.bin",
+        "bytes": 96,
+        "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\header_after.bin",
+        "bytes": 96,
+        "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\health0.bin",
+        "bytes": 36,
+        "sha256": "cdd309023c8694d04411bd4d43d892125e3783b965640afa0e750ad03378bdc2"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\health0.bin",
+        "bytes": 36,
+        "sha256": "cdd309023c8694d04411bd4d43d892125e3783b965640afa0e750ad03378bdc2"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\health1.bin",
+        "bytes": 36,
+        "sha256": "f1e2303f3b8ce1851b70c244aaefbd906fbfd7741a35666658b3615d60026632"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\health1.bin",
+        "bytes": 36,
+        "sha256": "f1e2303f3b8ce1851b70c244aaefbd906fbfd7741a35666658b3615d60026632"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\hfsr.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\hfsr.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\isr.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\isr.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\jedec.bin",
+        "bytes": 4,
+        "sha256": "e218e2eccee7ced0261a4dc71db73c31d71724cfe7cb65e7467ef7d174f81a02"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\jedec.bin",
+        "bytes": 4,
+        "sha256": "e218e2eccee7ced0261a4dc71db73c31d71724cfe7cb65e7467ef7d174f81a02"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\owner.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\owner.bin",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\processes.closed.json",
+        "bytes": 677,
+        "sha256": "f5a352a3cc8b617401fdbf7fa63dbfe0d8b5b4258723a2a5f2e0b82ebc6eef71"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\processes.closed.json",
+        "bytes": 677,
+        "sha256": "f5a352a3cc8b617401fdbf7fa63dbfe0d8b5b4258723a2a5f2e0b82ebc6eef71"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\processes.started.json",
+        "bytes": 182,
+        "sha256": "13dc4fe9ce9757a2f8b958577515655fe5b10a627d9fe808e7fa434487beb427"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\processes.started.json",
+        "bytes": 182,
+        "sha256": "13dc4fe9ce9757a2f8b958577515655fe5b10a627d9fe808e7fa434487beb427"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\processes.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\processes.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\processes.stdout",
+        "bytes": 13407,
+        "sha256": "7ac2c447e5ff340d8fa03a85d2a6d5d536e7a51a475f55f730d02bf54c4436f3"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\processes.stdout",
+        "bytes": 13407,
+        "sha256": "7ac2c447e5ff340d8fa03a85d2a6d5d536e7a51a475f55f730d02bf54c4436f3"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\recovery_slot.bin",
+        "bytes": 32,
+        "sha256": "c0e11ef1523fc0dc94bf759ee8e4d85344738e9096ae1fdefa10ad7ac30aec6c"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\recovery_slot.bin",
+        "bytes": 32,
+        "sha256": "c0e11ef1523fc0dc94bf759ee8e4d85344738e9096ae1fdefa10ad7ac30aec6c"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\result.json",
+        "bytes": 2237,
+        "sha256": "d03e0659a6a3187f3255011b49bee4175282cfe1d318eb5f9adcf15bf7f70ecd"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\result.json",
+        "bytes": 2237,
+        "sha256": "d03e0659a6a3187f3255011b49bee4175282cfe1d318eb5f9adcf15bf7f70ecd"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\sd.bin",
+        "bytes": 1,
+        "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\sd.bin",
+        "bytes": 1,
+        "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\sdio.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\sdio.bin",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\sdk.log",
+        "bytes": 13866,
+        "sha256": "08bb58b63078cf5f1be1369666eb97785c1f0bacb9f2fa445e7e177ccb09d382"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\sdk.log",
+        "bytes": 13866,
+        "sha256": "08bb58b63078cf5f1be1369666eb97785c1f0bacb9f2fa445e7e177ccb09d382"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\settings.jlink",
+        "bytes": 898,
+        "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\settings.jlink",
+        "bytes": 898,
+        "sha256": "a65fd6f6d0d6a1a019543b3b6ef3e4f1050072df7781e7c32729063bb1534759"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\snapped.bin",
+        "bytes": 1,
+        "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\snapped.bin",
+        "bytes": 1,
+        "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\stack.bin",
+        "bytes": 8192,
+        "sha256": "efeed88065f016ce1dfc725b9e46b619731eb6632e028d6193f28892773ac305"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\stack.bin",
+        "bytes": 8192,
+        "sha256": "efeed88065f016ce1dfc725b9e46b619731eb6632e028d6193f28892773ac305"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\staging.bin",
+        "bytes": 4096,
+        "sha256": "8e38e6cef30ebfb17d145d165c446a9847adce51b37d08cb9ec2e483af19fde4"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\staging.bin",
+        "bytes": 4096,
+        "sha256": "8e38e6cef30ebfb17d145d165c446a9847adce51b37d08cb9ec2e483af19fde4"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\state.bin",
+        "bytes": 1,
+        "sha256": "e52d9c508c502347344d8c07ad91cbd6068afc75ff6292f062a09ca381c89e71"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\state.bin",
+        "bytes": 1,
+        "sha256": "e52d9c508c502347344d8c07ad91cbd6068afc75ff6292f062a09ca381c89e71"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\0001-post-wake-current\\vtor.bin",
+        "bytes": 4,
+        "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\vtor.bin",
+        "bytes": 4,
+        "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\result.json",
+        "bytes": 2557,
+        "sha256": "a5840fc79307eb0840593cc13285000de4768851be26122fa2bb8f13792b563f"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\inspection-result.json",
+        "bytes": 2557,
+        "sha256": "a5840fc79307eb0840593cc13285000de4768851be26122fa2bb8f13792b563f"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\intent.json",
+        "bytes": 247,
+        "sha256": "6391b80cbfee6a7d10d2a0607c4d910154a1c5c3a32b34e8decab9ad63d73ef5"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\inspection-intent.json",
+        "bytes": 247,
+        "sha256": "6391b80cbfee6a7d10d2a0607c4d910154a1c5c3a32b34e8decab9ad63d73ef5"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\wake\\observed\\mcu\\symbols-base\\result.json",
+        "bytes": 1504,
+        "sha256": "3d066c73ce7dead10f4fd1c32b5f0d66fe48c7861951e77a9950e197d355777e"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\post-reboot-current\\symbol-binding.json",
+        "bytes": 1504,
+        "sha256": "3d066c73ce7dead10f4fd1c32b5f0d66fe48c7861951e77a9950e197d355777e"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\read-only\\mcu\\0001-post-user-reboot-current\\commander.stdout",
+        "bytes": 1027,
+        "sha256": "9a0d09bdbeaf2463eca1ccce864f7ebc9b75748996a0d9f4ca41a15f3e40f702"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\initial-dap\\commander.stdout",
+        "bytes": 1027,
+        "sha256": "9a0d09bdbeaf2463eca1ccce864f7ebc9b75748996a0d9f4ca41a15f3e40f702"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\read-only\\mcu\\0001-post-user-reboot-current\\commander.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\initial-dap\\commander.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\read-only\\mcu\\0001-post-user-reboot-current\\commander.closed.json",
+        "bytes": 1345,
+        "sha256": "be97b7eac2bc1ef856292640a8813794c9afec6401ebad6477f05b85c59fc01c"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\initial-dap\\commander.closed.json",
+        "bytes": 1345,
+        "sha256": "be97b7eac2bc1ef856292640a8813794c9afec6401ebad6477f05b85c59fc01c"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\read-only\\mcu\\0001-post-user-reboot-current\\sdk.log",
+        "bytes": 5015,
+        "sha256": "a7bc56a80e5a19de949d500a904718573d225d49719b843594bb3b457b8ff857"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\initial-dap\\sdk.log",
+        "bytes": 5015,
+        "sha256": "a7bc56a80e5a19de949d500a904718573d225d49719b843594bb3b457b8ff857"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\link-probe\\mcu\\0001-header-probe\\commander.stdout",
+        "bytes": 1027,
+        "sha256": "79b2e6893454281e45bb19004421430b2c04cd118df29e45b57724a666822311"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\header-dap\\commander.stdout",
+        "bytes": 1027,
+        "sha256": "79b2e6893454281e45bb19004421430b2c04cd118df29e45b57724a666822311"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\link-probe\\mcu\\0001-header-probe\\commander.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\header-dap\\commander.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\link-probe\\mcu\\0001-header-probe\\commander.closed.json",
+        "bytes": 1290,
+        "sha256": "3fe411371d800cbe532dd077f35a5d25dbb0c826448ea29027a6296005e2b146"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\header-dap\\commander.closed.json",
+        "bytes": 1290,
+        "sha256": "3fe411371d800cbe532dd077f35a5d25dbb0c826448ea29027a6296005e2b146"
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p34-reboot-20261012\\link-probe\\mcu\\0001-header-probe\\sdk.log",
+        "bytes": 4993,
+        "sha256": "30d6b7ce5c5dcd70bb13e7c4519a6540db0e192391edeb3447637cf7f2e79871"
+      },
+      "contained": {
+        "path": ".acceptance-p3-4\\round9\\admission\\pre-recovery-dap\\header-dap\\sdk.log",
+        "bytes": 4993,
+        "sha256": "30d6b7ce5c5dcd70bb13e7c4519a6540db0e192391edeb3447637cf7f2e79871"
+      }
+    }
+  ],
+  "prior_round": "P3-4-20261012-stage1-api-dns-recovered",
+  "prior_matrix": {
+    "path": ".acceptance-p3-4\\round8\\evidence-matrix.json",
+    "bytes": 31735,
+    "sha256": "6328704ee126ef037ea89167ece851533d8fdd15f06bee665edf6c8b56edc1ff"
+  },
+  "qualification_ota_started": 0,
+  "calibration_ota_started": 0,
+  "agent_reset_or_flash": false
+}

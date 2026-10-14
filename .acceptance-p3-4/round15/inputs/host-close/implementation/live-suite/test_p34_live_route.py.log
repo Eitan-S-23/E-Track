@@ -1,0 +1,251 @@
+test_network_live_or_unknown_thread_is_not_confirmed_closed (__main__.CallerCloseTests.test_network_live_or_unknown_thread_is_not_confirmed_closed) ... ok
+test_network_multiple_cleanup_failures_are_retained (__main__.CallerCloseTests.test_network_multiple_cleanup_failures_are_retained) ... ok
+test_network_normal_close_is_idempotent (__main__.CallerCloseTests.test_network_normal_close_is_idempotent) ... ok
+test_network_read_preserves_nonzero_error_and_cleanup_diagnostics (__main__.CallerCloseTests.test_network_read_preserves_nonzero_error_and_cleanup_diagnostics) ... ok
+test_network_reader_cleanup_failure_alone_stays_failure (__main__.CallerCloseTests.test_network_reader_cleanup_failure_alone_stays_failure) ... ok
+test_network_receipt_failure_does_not_retry_cleanup (__main__.CallerCloseTests.test_network_receipt_failure_does_not_retry_cleanup) ... ok
+test_network_start_receipt_failure_preserves_primary_and_drains (__main__.CallerCloseTests.test_network_start_receipt_failure_preserves_primary_and_drains) ... ok
+test_network_start_retains_reader_and_outer_cleanup_errors (__main__.CallerCloseTests.test_network_start_retains_reader_and_outer_cleanup_errors) ... ok
+test_network_tunnel_failure_does_not_skip_remaining_cleanup (__main__.CallerCloseTests.test_network_tunnel_failure_does_not_skip_remaining_cleanup) ... ok
+test_network_unstarted_http_thread_is_not_shutdown_or_joined (__main__.CallerCloseTests.test_network_unstarted_http_thread_is_not_shutdown_or_joined) ... ok
+test_phone_live_foreign_port_is_not_killed_or_marked_closed (__main__.CallerCloseTests.test_phone_live_foreign_port_is_not_killed_or_marked_closed) ... ok
+test_phone_normal_close_is_single_use (__main__.CallerCloseTests.test_phone_normal_close_is_single_use) ... ok
+test_phone_receipt_failure_never_repeats_stop_or_cleanup (__main__.CallerCloseTests.test_phone_receipt_failure_never_repeats_stop_or_cleanup) ... ok
+test_phone_stop_error_survives_server_cleanup_failure (__main__.CallerCloseTests.test_phone_stop_error_survives_server_cleanup_failure) ... ok
+test_phone_stop_error_with_successful_cleanup_remains_primary (__main__.CallerCloseTests.test_phone_stop_error_with_successful_cleanup_remains_primary) ... ok
+test_phone_successful_stop_does_not_hide_cleanup_failure (__main__.CallerCloseTests.test_phone_successful_stop_does_not_hide_cleanup_failure) ... ok
+test_phone_unknown_port_state_does_not_claim_closure (__main__.CallerCloseTests.test_phone_unknown_port_state_does_not_claim_closure) ... ok
+test_absolute_command_deadline_includes_process_creation (__main__.LiveRouteTests.test_absolute_command_deadline_includes_process_creation) ... ok
+test_actual_accessor_parser_rejects_ambiguous_or_unrecognized_layout (__main__.LiveRouteTests.test_actual_accessor_parser_rejects_ambiguous_or_unrecognized_layout) ... ok
+test_actual_runner_dependencies_are_covered_by_standard_profiles (__main__.LiveRouteTests.test_actual_runner_dependencies_are_covered_by_standard_profiles) ... ok
+test_actual_snapshot_reader_requires_pid_runtime_and_original_bytes (__main__.LiveRouteTests.test_actual_snapshot_reader_requires_pid_runtime_and_original_bytes) ... ok
+test_capture_archive_verifies_all_bytes_before_bounded_unlink (__main__.LiveRouteTests.test_capture_archive_verifies_all_bytes_before_bounded_unlink) ... ok
+test_expired_terminal_snapshot_never_starts_a_bound_read (__main__.LiveRouteTests.test_expired_terminal_snapshot_never_starts_a_bound_read) ... ok
+test_finished_missing_partial_and_query_only_snapshots_share_deadline (__main__.LiveRouteTests.test_finished_missing_partial_and_query_only_snapshots_share_deadline) ... ok
+test_finished_propagates_read_error_without_retry (__main__.LiveRouteTests.test_finished_propagates_read_error_without_retry) ... ok
+test_finished_rejects_same_size_replacement_after_footer (__main__.LiveRouteTests.test_finished_rejects_same_size_replacement_after_footer) ... ok
+test_finished_rejects_sealed_corruption_without_waiting (__main__.LiveRouteTests.test_finished_rejects_sealed_corruption_without_waiting) ... ok
+test_finished_waits_for_snapshot_creation_and_footer_in_original_budget (__main__.LiveRouteTests.test_finished_waits_for_snapshot_creation_and_footer_in_original_budget) ... ok
+test_full_frozen_command_not_substring_or_parameter_mix (__main__.LiveRouteTests.test_full_frozen_command_not_substring_or_parameter_mix) ... ok
+test_health_priority_hook_is_cleared_before_other_commands (__main__.LiveRouteTests.test_health_priority_hook_is_cleared_before_other_commands) ... ok
+test_health_requires_confirmed_advancing_idle_current_boot (__main__.LiveRouteTests.test_health_requires_confirmed_advancing_idle_current_boot) ... ok
+test_health_schema_identity_and_counters_fail_closed (__main__.LiveRouteTests.test_health_schema_identity_and_counters_fail_closed) ... ok
+test_install_matrix_rejects_app_only_downgrade_before_any_device_command (__main__.LiveRouteTests.test_install_matrix_rejects_app_only_downgrade_before_any_device_command) ... ok
+test_install_rejects_unknown_health_before_replacement (__main__.LiveRouteTests.test_install_rejects_unknown_health_before_replacement) ... ok
+test_isolated_real_cli_imports_without_cwd_on_sys_path (__main__.LiveRouteTests.test_isolated_real_cli_imports_without_cwd_on_sys_path) ... ok
+test_journal_reference_zero_resume_and_noncontiguous_rejection (__main__.LiveRouteTests.test_journal_reference_zero_resume_and_noncontiguous_rejection) ... ok
+test_live_health_accepts_atomic_replacement_without_stat_cat_race (__main__.LiveRouteTests.test_live_health_accepts_atomic_replacement_without_stat_cat_race) ... ok
+test_live_health_bounds_truncation_and_io_errors_are_not_retried (__main__.LiveRouteTests.test_live_health_bounds_truncation_and_io_errors_are_not_retried) ... ok
+test_mcu_does_not_launch_commander_after_precheck_uses_remainder (__main__.LiveRouteTests.test_mcu_does_not_launch_commander_after_precheck_uses_remainder) ... ok
+test_mcu_process_check_and_commander_share_absolute_deadline (__main__.LiveRouteTests.test_mcu_process_check_and_commander_share_absolute_deadline) ... ok
+test_missing_contract_never_calls_a_tool (__main__.LiveRouteTests.test_missing_contract_never_calls_a_tool) ... ok
+test_old_cached_package_alone_cannot_signal_start_ready (__main__.LiveRouteTests.test_old_cached_package_alone_cannot_signal_start_ready) ... ok
+test_outputs_and_pins_fail_closed (__main__.LiveRouteTests.test_outputs_and_pins_fail_closed) ... ok
+test_private_adb_commands_inherit_remaining_phase_not_a_fresh_timeout (__main__.LiveRouteTests.test_private_adb_commands_inherit_remaining_phase_not_a_fresh_timeout) ... ok
+test_private_adb_owner_death_cannot_be_hidden_by_a_successful_client (__main__.LiveRouteTests.test_private_adb_owner_death_cannot_be_hidden_by_a_successful_client) ... ok
+test_private_adb_quotes_remote_shell_as_one_command (__main__.LiveRouteTests.test_private_adb_quotes_remote_shell_as_one_command) ... ok
+test_private_adb_success_after_phase_expiry_is_not_accepted (__main__.LiveRouteTests.test_private_adb_success_after_phase_expiry_is_not_accepted) ... ok
+test_provision_rejects_unknown_or_active_health_before_mutation (__main__.LiveRouteTests.test_provision_rejects_unknown_or_active_health_before_mutation) ... ok
+test_readonly_watch_cannot_refresh_timeout_or_swallow_probe_errors (__main__.LiveRouteTests.test_readonly_watch_cannot_refresh_timeout_or_swallow_probe_errors) ... ok
+test_real_readonly_child_yields_to_terminal_and_is_reaped (__main__.LiveRouteTests.test_real_readonly_child_yields_to_terminal_and_is_reaped) ... ok
+test_remote_path_checks_allow_missing_children_not_links_or_escapes (__main__.LiveRouteTests.test_remote_path_checks_allow_missing_children_not_links_or_escapes) ... ok
+test_restore_mailbox_requires_exact_phase_backup_and_preserved_config (__main__.LiveRouteTests.test_restore_mailbox_requires_exact_phase_backup_and_preserved_config) ... ok
+test_rtt_down_uses_live_ring_indices_and_rejects_arbitrary_commands (__main__.LiveRouteTests.test_rtt_down_uses_live_ring_indices_and_rejects_arbitrary_commands) ... ok
+test_runtime_and_real_service_configuration_are_compatible (__main__.LiveRouteTests.test_runtime_and_real_service_configuration_are_compatible) ... ok
+test_safe_install_waits_for_boot_and_rejects_wrong_storage_halt (__main__.LiveRouteTests.test_safe_install_waits_for_boot_and_rejects_wrong_storage_halt) ... ok
+test_salvage_keeps_growing_and_partial_originals_without_restart (__main__.LiveRouteTests.test_salvage_keeps_growing_and_partial_originals_without_restart) ... ok
+test_salvage_preserves_other_originals_after_one_read_error (__main__.LiveRouteTests.test_salvage_preserves_other_originals_after_one_read_error) ... ok
+test_soak_clock_uses_one_identity_real_gaps_and_excludes_prior_actions (__main__.LiveRouteTests.test_soak_clock_uses_one_identity_real_gaps_and_excludes_prior_actions) ... ok
+test_stack_and_qspi_capacity_observations_are_not_constant_pass (__main__.LiveRouteTests.test_stack_and_qspi_capacity_observations_are_not_constant_pass) ... ok
+test_standard_process_binary_streams_exit_and_timeout_are_preserved (__main__.LiveRouteTests.test_standard_process_binary_streams_exit_and_timeout_are_preserved) ... ok
+test_static_file_keeps_exact_size_and_limit_checks (__main__.LiveRouteTests.test_static_file_keeps_exact_size_and_limit_checks) ... ok
+test_terminal_deadline_cannot_trigger_a_new_symbol_binding (__main__.LiveRouteTests.test_terminal_deadline_cannot_trigger_a_new_symbol_binding) ... ok
+test_terminal_readiness_cannot_mask_an_observed_nonzero_exit (__main__.LiveRouteTests.test_terminal_readiness_cannot_mask_an_observed_nonzero_exit) ... ok
+test_terminal_stack_is_bound_before_reboot_not_the_next_boot (__main__.LiveRouteTests.test_terminal_stack_is_bound_before_reboot_not_the_next_boot) ... ok
+test_uncertain_device_action_retains_lock_and_blocks_next_action (__main__.LiveRouteTests.test_uncertain_device_action_retains_lock_and_blocks_next_action) ... ok
+test_unhealthy_capture_cannot_reach_download_readiness (__main__.LiveRouteTests.test_unhealthy_capture_cannot_reach_download_readiness) ... ok
+test_wrong_runtime_stamp_keeps_snapshot_and_cannot_be_archived (__main__.LiveRouteTests.test_wrong_runtime_stamp_keeps_snapshot_and_cannot_be_archived) ... ok
+test_actual_isolated_https_reader_preserves_binary_and_typed_dns_exit (__main__.NetworkStartupTests.test_actual_isolated_https_reader_preserves_binary_and_typed_dns_exit) ... ok
+test_actual_phone_cell_uses_remaining_prepare_time_and_gates_phone (__main__.NetworkStartupTests.test_actual_phone_cell_uses_remaining_prepare_time_and_gates_phone) ... ok
+test_actual_start_recovers_dns_on_one_tunnel_with_original_deadline (__main__.NetworkStartupTests.test_actual_start_recovers_dns_on_one_tunnel_with_original_deadline) ... ok
+test_blocking_resolver_is_killed_by_existing_process_owner (__main__.NetworkStartupTests.test_blocking_resolver_is_killed_by_existing_process_owner) ... BLOCKING_RESOLVER_PROOF {"marker": "BLOCKING_RESOLVER_FIXTURE pid=11532", "startup_seconds": 0.7797944999765605, "timeout_seconds": 2, "termination_seconds": 2.034321299986914, "reason": "timeout_outcome_unknown", "exit_code": 1, "launcher_exited": true, "child_wait_result": 0}
+ok
+test_dns_again_and_package_dns_do_not_restart_tunnel (__main__.NetworkStartupTests.test_dns_again_and_package_dns_do_not_restart_tunnel) ... ok
+test_expired_prepare_deadline_never_creates_tunnel (__main__.NetworkStartupTests.test_expired_prepare_deadline_never_creates_tunnel) ... ok
+test_permanent_dns_fails_within_original_budget_and_closes (__main__.NetworkStartupTests.test_permanent_dns_fails_within_original_budget_and_closes) ... ok
+test_tls_http_unknown_dns_and_non_dns_errors_are_not_retried (__main__.NetworkStartupTests.test_tls_http_unknown_dns_and_non_dns_errors_are_not_retried) ... ok
+test_tunnel_exit_during_dns_wait_fails_without_another_request (__main__.NetworkStartupTests.test_tunnel_exit_during_dns_wait_fails_without_another_request) ... ok
+test_wrong_metadata_is_not_retried_or_downloaded (__main__.NetworkStartupTests.test_wrong_metadata_is_not_retried_or_downloaded) ... ok
+test_wrong_or_short_package_is_not_retried (__main__.NetworkStartupTests.test_wrong_or_short_package_is_not_retried) ... ok
+test_actual_phase_timeouts_fail_and_keep_originals_and_lock (__main__.PhoneCellTests.test_actual_phase_timeouts_fail_and_keep_originals_and_lock) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\download\query-ready.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\start\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\start\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\start\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\transfer\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\transfer\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\transfer\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\terminal\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\terminal\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\terminal\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\snapshot\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\snapshot\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\snapshot\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\boot\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\boot\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\boot\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\readback\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\readback\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\readback\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\archive\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\archive\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-zxp5vtm0\archive\start-expired.json
+ok
+test_app_failure_stays_failure_even_with_complete_health_counts (__main__.PhoneCellTests.test_app_failure_stays_failure_even_with_complete_health_counts) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-hxyk6fdo\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-hxyk6fdo\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-hxyk6fdo\run\start-expired.json
+ok
+test_archive_error_cannot_emit_observations (__main__.PhoneCellTests.test_archive_error_cannot_emit_observations) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-25h9d8ce\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-25h9d8ce\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-25h9d8ce\run\start-expired.json
+ok
+test_click_transfer_and_full_identity_window_do_not_share_300_seconds (__main__.PhoneCellTests.test_click_transfer_and_full_identity_window_do_not_share_300_seconds) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-v6iipl03\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-v6iipl03\run\start-ready.json
+ok
+test_close_error_is_propagated_and_retains_lock (__main__.PhoneCellTests.test_close_error_is_propagated_and_retains_lock) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-k8w4jmkd\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-k8w4jmkd\run\start-ready.json
+ok
+test_collector_death_at_terminal_is_not_hidden_by_completion (__main__.PhoneCellTests.test_collector_death_at_terminal_is_not_hidden_by_completion) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-759cg9gz\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-759cg9gz\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-759cg9gz\run\start-expired.json
+ok
+test_crc_rejection_keeps_original_rtt_and_ram_without_a_second_sample (__main__.PhoneCellTests.test_crc_rejection_keeps_original_rtt_and_ram_without_a_second_sample) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-kw7h291o\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-kw7h291o\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-kw7h291o\run\start-expired.json
+ok
+test_decoder_exception_preserves_real_snapshot_and_original_failure (__main__.PhoneCellTests.test_decoder_exception_preserves_real_snapshot_and_original_failure) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-wkemelta\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-wkemelta\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-wkemelta\run\start-expired.json
+ok
+test_discovery_timestamp_precedes_blocking_logger_stop_and_ram_read (__main__.PhoneCellTests.test_discovery_timestamp_precedes_blocking_logger_stop_and_ram_read) ... TERMINAL_ORDER rejected read=100 decode=112 samples=1 original_error_preserved=true
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-et9byaln\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-et9byaln\run\start-ready.json
+ok
+test_expiry_during_logger_close_never_starts_or_retries_ram_read (__main__.PhoneCellTests.test_expiry_during_logger_close_never_starts_or_retries_ram_read) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mb8v4swm\normal\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mb8v4swm\normal\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mb8v4swm\normal\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mb8v4swm\drain\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mb8v4swm\drain\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mb8v4swm\drain\start-expired.json
+ok
+test_failure_drain_decoder_error_cannot_restart_or_extend_terminal_capture (__main__.PhoneCellTests.test_failure_drain_decoder_error_cannot_restart_or_extend_terminal_capture) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mc_yunqw\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mc_yunqw\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-mc_yunqw\run\start-expired.json
+ok
+test_full_180_second_app_window_is_available (__main__.PhoneCellTests.test_full_180_second_app_window_is_available) ... TERMINAL_DRAIN read=192 decode=204 deadline=420 samples=1 result=original_start_failure
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-c9kftuhn\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-c9kftuhn\run\start-ready.json
+ok
+test_full_readback_and_archive_keep_their_own_allowances (__main__.PhoneCellTests.test_full_readback_and_archive_keep_their_own_allowances) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-736kkz0w\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-736kkz0w\run\start-ready.json
+ok
+test_health_loss_and_error_cannot_become_complete (__main__.PhoneCellTests.test_health_loss_and_error_cannot_become_complete) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-1ffv8to8\lost\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-1ffv8to8\lost\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-1ffv8to8\lost\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-1ffv8to8\io-health\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-1ffv8to8\io-health\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-1ffv8to8\io-health\start-expired.json
+ok
+test_late_start_is_drained_without_restarting_terminal_budget (__main__.PhoneCellTests.test_late_start_is_drained_without_restarting_terminal_budget) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-nv3zwqb8\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-nv3zwqb8\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-nv3zwqb8\run\start-expired.json
+ok
+test_late_terminal_failure_is_not_retried_or_made_successful (__main__.PhoneCellTests.test_late_terminal_failure_is_not_retried_or_made_successful) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-8cbi_6p1\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-8cbi_6p1\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-8cbi_6p1\run\start-expired.json
+ok
+test_missing_metrics_or_missed_preboot_capture_cannot_be_complete (__main__.PhoneCellTests.test_missing_metrics_or_missed_preboot_capture_cannot_be_complete) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-6hsuhips\missing\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-6hsuhips\missing\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-6hsuhips\missing\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-6hsuhips\missed\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-6hsuhips\missed\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-6hsuhips\missed\start-expired.json
+ok
+test_no_start_does_not_close_early_or_bulk_read_over_terminal_watch (__main__.PhoneCellTests.test_no_start_does_not_close_early_or_bulk_read_over_terminal_watch) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-v86nwui4\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-v86nwui4\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-v86nwui4\run\start-expired.json
+ok
+test_nonzero_command_in_full_entry_preserves_exit_and_original_snapshot (__main__.PhoneCellTests.test_nonzero_command_in_full_entry_preserves_exit_and_original_snapshot) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-2zbe0b5k\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-2zbe0b5k\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-2zbe0b5k\run\start-expired.json
+ok
+test_preparation_exhaustion_never_invites_start (__main__.PhoneCellTests.test_preparation_exhaustion_never_invites_start) ... ok
+test_real_v11_decoder_runs_after_one_original_ram_snapshot (__main__.PhoneCellTests.test_real_v11_decoder_runs_after_one_original_ram_snapshot) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-wevgbee0\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-wevgbee0\run\start-ready.json
+ok
+test_short_complete_control_flow (__main__.PhoneCellTests.test_short_complete_control_flow) ... TERMINAL_ORDER real_v11 read=100 decode=112 deadline=520 samples=1
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-aaw2n44y\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-aaw2n44y\run\start-ready.json
+ok
+test_short_frame_fails_before_any_ram_read_and_is_not_retried (__main__.PhoneCellTests.test_short_frame_fails_before_any_ram_read_and_is_not_retried) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-gbbf42_t\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-gbbf42_t\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-gbbf42_t\run\start-expired.json
+ok
+test_slow_run_is_archived_without_claiming_a_throughput_pass (__main__.PhoneCellTests.test_slow_run_is_archived_without_claiming_a_throughput_pass) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-o7pl485o\3390\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-o7pl485o\3390\start-ready.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-o7pl485o\18000\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-o7pl485o\18000\start-ready.json
+ok
+test_start_at_exact_boundary_is_not_admitted (__main__.PhoneCellTests.test_start_at_exact_boundary_is_not_admitted) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-cdf75gqf\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-cdf75gqf\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-cdf75gqf\run\start-expired.json
+ok
+test_start_in_last_drain_second_does_not_extend_or_cancel (__main__.PhoneCellTests.test_start_in_last_drain_second_does_not_extend_or_cancel) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-kyhutl6o\run\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-kyhutl6o\run\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-kyhutl6o\run\start-expired.json
+ok
+test_terminal_during_health_read_has_priority_in_normal_and_late_paths (__main__.PhoneCellTests.test_terminal_during_health_read_has_priority_in_normal_and_late_paths) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-a780887h\0\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-a780887h\0\start-ready.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-a780887h\121\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-a780887h\121\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-a780887h\121\start-expired.json
+ok
+test_withdrawal_after_start_or_terminal_keeps_observing_until_end (__main__.PhoneCellTests.test_withdrawal_after_start_or_terminal_keeps_observing_until_end) ... P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-3267qpu2\0.5\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-3267qpu2\0.5\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-3267qpu2\0.5\start-expired.json
+P34_QUERY_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-3267qpu2\110\query-ready.json
+P34_START_READY D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-3267qpu2\110\start-ready.json
+P34_START_EXPIRED D:\github\my\E-Track\.cache\p34-final\.cache\p34-host-close-01-callers-20261013\live-cases\cell-3267qpu2\110\start-expired.json
+ok
+test_close_normal_and_nonzero_exit_receipts_are_idempotent (__main__.ProcessCloseTests.test_close_normal_and_nonzero_exit_receipts_are_idempotent) ... ok
+test_command_preserves_primary_error_with_secondary_cleanup (__main__.ProcessCloseTests.test_command_preserves_primary_error_with_secondary_cleanup) ... ok
+test_command_success_cannot_swallow_cleanup_error (__main__.ProcessCloseTests.test_command_success_cannot_swallow_cleanup_error) ... ok
+test_fallback_reaps_after_first_wait_timeout (__main__.ProcessCloseTests.test_fallback_reaps_after_first_wait_timeout) ... ok
+test_handle_close_error_retains_known_exit_and_failure (__main__.ProcessCloseTests.test_handle_close_error_retains_known_exit_and_failure) ... ok
+test_launch_failure_preserves_error_and_closes_owned_streams (__main__.ProcessCloseTests.test_launch_failure_preserves_error_and_closes_owned_streams) ... ok
+test_no_process_launch_receipt_has_no_fabricated_exit (__main__.ProcessCloseTests.test_no_process_launch_receipt_has_no_fabricated_exit) ... ok
+test_nonzero_exit_keeps_primary_with_cleanup_error (__main__.ProcessCloseTests.test_nonzero_exit_keeps_primary_with_cleanup_error) ... ok
+test_poll_and_stream_record_failures_still_write_truthful_receipt (__main__.ProcessCloseTests.test_poll_and_stream_record_failures_still_write_truthful_receipt) ... ok
+test_posix_signal_error_does_not_skip_kill_or_receipt (__main__.ProcessCloseTests.test_posix_signal_error_does_not_skip_kill_or_receipt) ... ok
+test_primary_reports_cleanup_and_receipt_failure_without_retries (__main__.ProcessCloseTests.test_primary_reports_cleanup_and_receipt_failure_without_retries) ... ok
+test_ready_yield_cannot_hide_cleanup_error (__main__.ProcessCloseTests.test_ready_yield_cannot_hide_cleanup_error) ... ok
+test_receipt_failure_is_explicit_and_not_retried (__main__.ProcessCloseTests.test_receipt_failure_is_explicit_and_not_retried) ... ok
+test_stream_close_error_does_not_skip_other_stream_or_receipt (__main__.ProcessCloseTests.test_stream_close_error_does_not_skip_other_stream_or_receipt) ... ok
+test_terminate_error_still_closes_handle_and_preserves_streams (__main__.ProcessCloseTests.test_terminate_error_still_closes_handle_and_preserves_streams) ... ok
+test_timeout_keeps_primary_with_cleanup_error (__main__.ProcessCloseTests.test_timeout_keeps_primary_with_cleanup_error) ... ok
+test_unreaped_process_is_unknown_after_bounded_fallback (__main__.ProcessCloseTests.test_unreaped_process_is_unknown_after_bounded_fallback) ... ok
+test_wait_error_still_tries_bounded_owned_fallback (__main__.ProcessCloseTests.test_wait_error_still_tries_bounded_owned_fallback) ... ok
+test_deadline_boolean_nan_and_cross_cell_phase_fail_closed (__main__.StartNoticeTests.test_deadline_boolean_nan_and_cross_cell_phase_fail_closed) ... ok
+test_deadline_is_rechecked_immediately_before_send (__main__.StartNoticeTests.test_deadline_is_rechecked_immediately_before_send) ... ok
+test_expired_started_and_dead_owner_override_stale_ready (__main__.StartNoticeTests.test_expired_started_and_dead_owner_override_stale_ready) ... ok
+test_expiry_during_delivery_revokes_without_repeating_start (__main__.StartNoticeTests.test_expiry_during_delivery_revokes_without_repeating_start) ... ok
+test_fixed_deadline_explicit_message_and_once_only_withdrawal (__main__.StartNoticeTests.test_fixed_deadline_explicit_message_and_once_only_withdrawal) ... ok
+test_missing_or_mismatched_state_never_sends_start (__main__.StartNoticeTests.test_missing_or_mismatched_state_never_sends_start) ... ok
+test_phase_budget_cannot_refresh_a_previously_entered_phase (__main__.StartNoticeTests.test_phase_budget_cannot_refresh_a_previously_entered_phase) ... ok
+test_restart_does_not_replay_an_unknown_notification_intent (__main__.StartNoticeTests.test_restart_does_not_replay_an_unknown_notification_intent) ... ok
+test_unknown_expiry_receipt_survives_notifier_restart_without_resend (__main__.StartNoticeTests.test_unknown_expiry_receipt_survives_notifier_restart_without_resend) ... ok
+test_unknown_send_is_not_retried_or_treated_as_delivery (__main__.StartNoticeTests.test_unknown_send_is_not_retried_or_treated_as_delivery) ... ok
+
+----------------------------------------------------------------------
+Ran 134 tests in 171.795s
+
+OK

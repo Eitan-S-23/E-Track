@@ -1,0 +1,16 @@
+{
+  "schema": "p34-action-accounting-v1",
+  "stage": "CANDIDATE_LOCAL_OFFLINE_CLOSEOUT",
+  "prior_qualification_consumed": 3,
+  "this_round_qualification_consumed": 0,
+  "cumulative_qualification_consumed": 3,
+  "cumulative_qualification_limit": 3,
+  "additional_authorized": 0,
+  "physical_device_operations": 0,
+  "preparatory_restore_completed": 0,
+  "post_qualification_restore_completed": 0,
+  "new_ota_after_failure": 0,
+  "historical_v11_result": "HARNESS_FAIL",
+  "historical_v12_result": "EVIDENCE_GAP",
+  "historical_v13_result": "PASS, original-evidence scope only"
+}

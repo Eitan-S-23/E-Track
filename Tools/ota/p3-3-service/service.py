@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""P3-3 受控固件 OTA v2 测试服务（冻结源码，版本 2）。
+"""P3-3/P3-4 受控固件 OTA v2 测试服务（源码版本 3）。
+
+版本 3：在既有单资产 fixture 上增加精确 raw 基版身份的 PATCH 支持。
+保留 token v2、兼容门禁、full 和 Range/TLS 路径；不实现 P4-2 发布后端。
 
 版本 2（用户 2026-09-13 第四轮裁定整改）：
 - requestId 一次请求单一生成：HTTP 层生成后传入状态层，日志、响应体、
@@ -48,13 +51,15 @@ import logging
 import os
 import re
 import ssl
+import struct
 import sys
 import time
 import uuid
+import zlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qsl, urlencode, urlsplit
 
-SERVICE_VERSION = '2'
+SERVICE_VERSION = '3'
 
 # ---- 冻结契约常量 ----
 
@@ -151,7 +156,7 @@ def sign_token_v2(key_bytes, asset_id, release_id, kind, purpose,
 
 
 class ReleaseAsset:
-    """一份 fixture 资产（full .etu），启动时绑定字节身份。"""
+    """One immutable full or PATCH fixture; never a production release backend."""
 
     def __init__(self, release_key, raw):
         self.release_key = release_key
@@ -181,7 +186,8 @@ class ReleaseAsset:
         if not os.path.isfile(path):
             raise ServiceConfigError(
                 'fixture 文件不存在: %s（release=%s）' % (path, self.release_key))
-        data = open(path, 'rb').read()
+        with open(path, 'rb') as stream:
+            data = stream.read()
         actual_sha = hashlib.sha256(data).hexdigest()
         if len(data) != self.size_bytes:
             raise ServiceConfigError(
@@ -202,7 +208,7 @@ class ReleaseAsset:
 
 
 class Release:
-    """一个受控 release 条目（含兼容元数据与 full 资产）。"""
+    """A controlled release with one full or exact-base PATCH asset."""
 
     def __init__(self, key, raw, config_dir):
         self.key = key
@@ -229,14 +235,29 @@ class Release:
         if self.state not in ('active', 'archived'):
             raise ServiceConfigError(
                 'release %s 非法 state: %s' % (self.key, self.state))
-        if self.asset.kind != 'full':
+        if self.asset.kind not in PUBLIC_OTA_KINDS:
             raise ServiceConfigError(
-                '本服务 fixture 仅支持 kind=full（release=%s）' % self.key)
-        if self.asset.base_version_code != 0 or \
-                self.asset.base_image_sha256 is not None:
+                'fixture kind must be full or patch (release=%s)' % self.key)
+        if not isinstance(self.asset.file_name, str) or \
+                not re.fullmatch(r'[A-Za-z0-9._-]{1,128}', self.asset.file_name) or \
+                not self.asset.file_name.endswith('-%s.etu' % self.asset.kind):
+            raise ServiceConfigError('fixture filename/kind mismatch')
+        if self.asset.kind == 'full' and (self.asset.base_version_code != 0 or
+                self.asset.base_image_sha256 is not None):
             raise ServiceConfigError(
                 'full 资产 baseVersionCode 必须为 0 且 baseImageSha256 为 null'
                 '（release=%s）' % self.key)
+        if self.asset.kind == 'patch':
+            base = self.asset.base_version_code
+            if type(base) is not int or not 0 < base < self.version_code or \
+                    not isinstance(self.asset.base_image_sha256, str) or \
+                    not _SHA256_HEX_RE.fullmatch(self.asset.base_image_sha256):
+                raise ServiceConfigError('PATCH requires an exact earlier raw base identity')
+            version = lambda n: '%d.%d.%d' % (n // 10000, n // 100 % 100, n % 100)
+            expected_name = 'e-track-at32f435-v%s-to-v%s-patch.etu' % (
+                version(base), version(self.version_code))
+            if self.asset.file_name != expected_name:
+                raise ServiceConfigError('PATCH filename/version mismatch')
         if not _SHA256_HEX_RE.match(self.target_image_sha256):
             raise ServiceConfigError(
                 'release %s targetImageSha256 非 64 位小写 hex' % self.key)
@@ -251,6 +272,31 @@ class Release:
             if not isinstance(v, int) or not (0 <= v <= U8_MAX):
                 raise ServiceConfigError(
                     'release %s %s 超域 0..255' % (self.key, name))
+        self._validate_container()
+
+    def _validate_container(self):
+        # Check the public outer header without an AES key or a second decoder.
+        # Full raw base SHA stays in metadata/query matching; base_sha8 alone
+        # cannot authorize a PATCH. Existing payload decoding remains on device.
+        data = self.asset.data
+        if self.asset.kind == 'full':
+            # Preserve the original FULL fixture contract, while preventing the
+            # selected PATCH bytes from being relabelled as a full download.
+            if len(data) >= 8 and data[:4] == b'ETU1' and struct.unpack_from('<H', data, 6)[0] & 4:
+                raise ServiceConfigError('PATCH bytes cannot be served as full')
+            return
+        if len(data) < 64 or len(data) > 0x180000 or data[:4] != b'ETU1':
+            raise ServiceConfigError('fixture is not a bounded ETU1 container')
+        header_len, flags, algorithm, key_id = struct.unpack_from('<HHII', data, 4)
+        length, crc, target, base, hw, layout, boot = struct.unpack_from('<IIIIHBB', data, 32)
+        expected_base = bytes.fromhex(self.asset.base_image_sha256)[:8]
+        if (header_len, flags, algorithm, key_id) != (64, 7, 1, 1) or \
+                len(data) != 64 + length or zlib.crc32(data[64:]) != crc or \
+                zlib.crc32(data[:60]) != struct.unpack_from('<I', data, 60)[0] or \
+                (target, base, hw, layout, boot) != (self.version_code,
+                    self.asset.base_version_code, self.hardware_revision,
+                    self.layout_id, self.min_boot_version) or data[52:60] != expected_base:
+            raise ServiceConfigError('fixture ETU header/kind/base/target/CRC mismatch')
 
 
 class V2ServiceState:
@@ -379,8 +425,12 @@ class V2ServiceState:
                 minProtocolVersion=release.min_protocol_version,
                 protocolVersion=params['protocolVersion'],
                 releaseId=release.release_id)
-        # 选包：本服务 fixture 为唯一 full 资产（无 patch，无 recovery）。
+        # This fixture has one asset, not the P4-2 multi-asset selection backend.
         asset = release.asset
+        if asset.kind == 'patch' and (params['currentVersionCode'] != asset.base_version_code or
+                params['currentImageSha'] != asset.base_image_sha256):
+            raise ServiceError(503, 'BACKEND_UNAVAILABLE',
+                'no matching PATCH and no verified full fallback', request_id=request_id)
         # 签发 URL（TTL 固定 300s；expiresAt 为排他截止时刻）。
         expires_at = int(self.now_fn()) + TOKEN_TTL_SECONDS
         signature = sign_token_v2(
@@ -483,6 +533,7 @@ class V2ServiceState:
         return {
             'deviceModel': seen['deviceModel'],
             'channel': seen['channel'],
+            'currentImageSha': seen['currentImageSha'],
             'currentVersionCode': _decimal(
                 'currentVersionCode', 0, FIRMWARE_VCODE_MAX),
             'hardwareRevision': _decimal('hardwareRevision', 0, U8_MAX),

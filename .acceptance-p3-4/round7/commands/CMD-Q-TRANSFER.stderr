@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 411, in <module>
+    main()
+    ~~~~^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 378, in main
+    phone_cell(plan, out, args)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 284, in phone_cell
+    raise error
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live.py", line 170, in phone_cell
+    origin = network.start(deadline=budget.deadline)
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 87, in start
+    return self._start(deadline)
+           ~~~~~~~~~~~^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 126, in _start
+    origin = h.wait_for(ready, min(90, remaining()))
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_host.py", line 209, in wait_for
+    value = check()
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_phone.py", line 121, in ready
+    h.require(self.tunnel.alive(), "HTTPS tunnel stopped before readiness")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p34-final\Tools\ota\p34-acceptance\live_host.py", line 23, in require
+    raise RuntimeError(message)
+RuntimeError: HTTPS tunnel stopped before readiness

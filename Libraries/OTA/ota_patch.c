@@ -111,6 +111,10 @@ typedef struct ota_patch_state_t
     /* diff/extra 合成缓冲，也用于 candidate 回读比对。 */
     uint8_t work[OTA_PATCH_WORK_SIZE];
     uint8_t verify[OTA_PATCH_WORK_SIZE];
+#if OTA_PATCH_COALESCE_WRITES
+    uint32_t candidate_buffered;
+    uint32_t candidate_programmed;
+#endif
     uint32_t input_pos;
     uint32_t input_len;
     uint32_t cipher_read;
@@ -823,6 +827,51 @@ static ota_patch_result_t write_candidate_chunk(
     return OTA_PATCH_OK;
 }
 
+#if OTA_PATCH_COALESCE_WRITES
+static ota_patch_result_t flush_candidate_buffer(
+    const ota_patch_io_t *io,
+    uint32_t image_len,
+    ota_patch_state_t *state)
+{
+    ota_patch_result_t result = write_candidate_chunk(
+        io, image_len, state->candidate_programmed, state,
+        state->candidate_buffered);
+
+    if (result == OTA_PATCH_OK)
+    {
+        state->candidate_programmed += state->candidate_buffered;
+        state->candidate_buffered = 0u;
+    }
+    return result;
+}
+
+/* Decoded output is contiguous even when oldpos jumps between control groups. */
+static ota_patch_result_t append_candidate_chunk(
+    const ota_patch_io_t *io,
+    uint32_t image_len,
+    uint32_t offset,
+    ota_patch_state_t *state,
+    uint32_t len)
+{
+    if (state->candidate_buffered >= sizeof(state->work) || len == 0u ||
+        len > sizeof(state->work) - state->candidate_buffered ||
+        state->candidate_programmed > image_len ||
+        state->candidate_buffered > image_len - state->candidate_programmed ||
+        offset != state->candidate_programmed + state->candidate_buffered ||
+        offset > image_len || len > image_len - offset ||
+        offset > OTA_APP_LENGTH || len > OTA_APP_LENGTH - offset)
+    {
+        return OTA_PATCH_ERR_IMAGE_LENGTH;
+    }
+    state->candidate_buffered += len;
+    if (state->candidate_buffered == sizeof(state->work))
+    {
+        return flush_candidate_buffer(io, image_len, state);
+    }
+    return OTA_PATCH_OK;
+}
+#endif
+
 /* diff 段：解压出的差分字节 + 基版对应字节，逐 1KiB 块合成并写 candidate。
  * 基版越界部分按 0 处理，与 vendor bspatch.c:77 的
  * (oldpos+i>=0)&&(oldpos+i<oldsize) 语义一致。 */
@@ -843,12 +892,21 @@ static ota_patch_result_t synthesize_diff(
         uint32_t take = len - done;
         int64_t block_oldpos = oldpos + (int64_t)done;
         uint32_t index;
+        uint32_t work_offset = 0u;
 
-        if (take > sizeof(state->work))
+#if OTA_PATCH_COALESCE_WRITES
+        work_offset = state->candidate_buffered;
+        if (work_offset >= sizeof(state->work))
         {
-            take = (uint32_t)sizeof(state->work);
+            return OTA_PATCH_ERR_IMAGE_LENGTH;
         }
-        result = patch_stream_read(io, header, state, state->work, take);
+#endif
+        if (take > sizeof(state->work) - work_offset)
+        {
+            take = (uint32_t)sizeof(state->work) - work_offset;
+        }
+        result = patch_stream_read(io, header, state,
+                                   state->work + work_offset, take);
         if (result != OTA_PATCH_OK)
         {
             return result;
@@ -883,13 +941,18 @@ static ota_patch_result_t synthesize_diff(
             }
             for (index = 0u; index < base_take; ++index)
             {
-                state->work[base_skip + index] =
-                    (uint8_t)(state->work[base_skip + index] +
+                state->work[work_offset + base_skip + index] =
+                    (uint8_t)(state->work[work_offset + base_skip + index] +
                               state->verify[index]);
             }
         }
+#if OTA_PATCH_COALESCE_WRITES
+        result = append_candidate_chunk(io, inner->ph_nsize,
+                                       newpos + done, state, take);
+#else
         result = write_candidate_chunk(io, inner->ph_nsize,
                                       newpos + done, state, take);
+#endif
         if (result != OTA_PATCH_OK)
         {
             return result;
@@ -914,18 +977,32 @@ static ota_patch_result_t synthesize_extra(
     {
         ota_patch_result_t result;
         uint32_t take = len - done;
+        uint32_t work_offset = 0u;
 
-        if (take > sizeof(state->work))
+#if OTA_PATCH_COALESCE_WRITES
+        work_offset = state->candidate_buffered;
+        if (work_offset >= sizeof(state->work))
         {
-            take = (uint32_t)sizeof(state->work);
+            return OTA_PATCH_ERR_IMAGE_LENGTH;
         }
-        result = patch_stream_read(io, header, state, state->work, take);
+#endif
+        if (take > sizeof(state->work) - work_offset)
+        {
+            take = (uint32_t)sizeof(state->work) - work_offset;
+        }
+        result = patch_stream_read(io, header, state,
+                                   state->work + work_offset, take);
         if (result != OTA_PATCH_OK)
         {
             return result;
         }
+#if OTA_PATCH_COALESCE_WRITES
+        result = append_candidate_chunk(io, inner->ph_nsize,
+                                       newpos + done, state, take);
+#else
         result = write_candidate_chunk(io, inner->ph_nsize,
                                       newpos + done, state, take);
+#endif
         if (result != OTA_PATCH_OK)
         {
             return result;
@@ -946,10 +1023,14 @@ static ota_patch_result_t synthesize_candidate(
     int64_t oldpos = 0;
     uint32_t newpos = 0u;
     uint32_t control_groups = 0u;
+    ota_patch_result_t result;
 
+#if OTA_PATCH_COALESCE_WRITES
+    state->candidate_buffered = 0u;
+    state->candidate_programmed = 0u;
+#endif
     while (newpos < inner->ph_nsize)
     {
-        ota_patch_result_t result;
         int64_t ctrl[3];
         int64_t oldpos_after_diff;
         int64_t oldpos_after_seek;
@@ -1027,8 +1108,24 @@ static ota_patch_result_t synthesize_candidate(
     {
         return OTA_PATCH_ERR_PATCH_CONTROL;
     }
-    return finish_decoded_stream(io, header, state,
-                                 inner->ph_original_size);
+    result = finish_decoded_stream(io, header, state, inner->ph_original_size);
+    if (result != OTA_PATCH_OK)
+    {
+        return result;
+    }
+#if OTA_PATCH_COALESCE_WRITES
+    if (state->candidate_programmed > inner->ph_nsize ||
+        state->candidate_buffered != inner->ph_nsize - state->candidate_programmed)
+    {
+        return OTA_PATCH_ERR_IMAGE_LENGTH;
+    }
+    /* A failed control/stream must never flush its pending partial output. */
+    if (state->candidate_buffered != 0u)
+    {
+        return flush_candidate_buffer(io, inner->ph_nsize, state);
+    }
+#endif
+    return OTA_PATCH_OK;
 }
 
 /* 契约 §158 第 5 步：合成后用 candidate 回读复核 ph_nsize / ph_ncrc。 */

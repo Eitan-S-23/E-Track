@@ -1,0 +1,78 @@
+{
+  "passed": true,
+  "group": "firmware",
+  "tests": [
+    {
+      "test": "test_ota_ble_frame.py",
+      "exit": 0,
+      "timed_out": false,
+      "log": {
+        "path": ".cache\\p34-offline2\\firmware\\test_ota_ble_frame.py.log",
+        "bytes": 3126,
+        "sha256": "3af60eccf7b007a2fb916af023e7fcf4aa759a7971091f0eb0a7409f64b5dd68"
+      }
+    },
+    {
+      "test": "test_ota_ble_session.py",
+      "exit": 0,
+      "timed_out": false,
+      "log": {
+        "path": ".cache\\p34-offline2\\firmware\\test_ota_ble_session.py.log",
+        "bytes": 13450,
+        "sha256": "0ae239f2b6a82cd1ab813860a9cbdb6fafeab86d68d3727bd2b32078dde4dc95"
+      }
+    },
+    {
+      "test": "test_ota_staging.py",
+      "exit": 0,
+      "timed_out": false,
+      "log": {
+        "path": ".cache\\p34-offline2\\firmware\\test_ota_staging.py.log",
+        "bytes": 277671,
+        "sha256": "dbb92a28e95e1a3389ce34f9cd0243e652fb190b6b94720b1c6376642c27e2a6"
+      }
+    },
+    {
+      "test": "test_ota_package.py",
+      "exit": 0,
+      "timed_out": false,
+      "log": {
+        "path": ".cache\\p34-offline2\\firmware\\test_ota_package.py.log",
+        "bytes": 8088,
+        "sha256": "b9b100897c6abd30422b2f2b31b2c0a37b6a74c0c5cbc88890c79d28c3269730"
+      }
+    },
+    {
+      "test": "test_ota_patch.py",
+      "exit": 0,
+      "timed_out": false,
+      "log": {
+        "path": ".cache\\p34-offline2\\firmware\\test_ota_patch.py.log",
+        "bytes": 13689,
+        "sha256": "33959ec0efc5f0ea9d38976bed1ee0d58b1b968d9e9bfaa99d4852d995dbbf78"
+      }
+    },
+    {
+      "test": "test_ota_backup.py",
+      "exit": 0,
+      "timed_out": false,
+      "log": {
+        "path": ".cache\\p34-offline2\\firmware\\test_ota_backup.py.log",
+        "bytes": 114,
+        "sha256": "610d80ae6364a72d27a2778ea16d53d6bb7a9f1ac64da803bdb7277ba9e0db5a"
+      }
+    },
+    {
+      "test": "test_ota_device_info.py",
+      "exit": 0,
+      "timed_out": false,
+      "log": {
+        "path": ".cache\\p34-offline2\\firmware\\test_ota_device_info.py.log",
+        "bytes": 75,
+        "sha256": "8432dd700bb585f3a6685ae26e0461179a52f05b224026c5c9194b87bf1b9ac8"
+      }
+    }
+  ],
+  "device_operations": 0,
+  "independent_acceptance": false
+}

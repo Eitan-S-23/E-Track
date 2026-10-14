@@ -1,0 +1,4 @@
+{
+  "error_type": "RuntimeError",
+  "message": "HTTPS tunnel stopped before readiness"
+}

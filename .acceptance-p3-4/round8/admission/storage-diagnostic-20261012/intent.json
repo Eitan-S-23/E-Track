@@ -1,0 +1,7 @@
+{
+  "scope": "Read-only diagnosis of already observed admission failure; not a repeated OTA/qualification command",
+  "device_writes": false,
+  "reset": false,
+  "sd_detect_source": "HAL_Config.h CONFIG_SD_CD_PIN=PA8 active-low; GPIOA IDT at 0x40020010 per pinned device header",
+  "rtt_seconds": 5
+}

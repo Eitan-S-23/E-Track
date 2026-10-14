@@ -1,0 +1,11 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round8\admission\storage-diagnostic-20261012\mcu\0001-storage-read-only\gpioa_idt.bin", 0x40020010, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round8\admission\storage-diagnostic-20261012\mcu\0001-storage-read-only\sd.bin", 0x200528A0, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round8\admission\storage-diagnostic-20261012\mcu\0001-storage-read-only\disabled.bin", 0x2000017D, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round8\admission\storage-diagnostic-20261012\mcu\0001-storage-read-only\jedec.bin", 0x2005301C, 0x4
+qc

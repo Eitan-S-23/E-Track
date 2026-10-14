@@ -1,0 +1,11 @@
+
+========================================
+OTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0 systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000
+Reset: NRST POR
+QSPI: JEDEC=0xEF4018 whitelisted, OTA enabled
+OTA: BCB already CONFIRMED vcode=30286
+LiveMap start: tiles=0 imgCache=8 view=240x320
+LiveMap stat: update=51 reload=1 lineHit=600 lineMiss=44 lineReadKB=352 sdMs=40 refrMs=225 refrCnt=20 refrPxK=393
+LiveMap stat: update=59 reload=0 lineHit=2 lineMiss=2 lineReadKB=16 sdMs=1 refrMs=84 refrCnt=5 refrPxK=174
+LiveMap stat: update=58 reload=0 lineHit=4 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=92 refrCnt=4 refrPxK=233
+LiveMap stat: update=55 reload=0 lineHit=8 lineMiss=0 lineReadKB=0 sdMs=0 refrMs=124 refrCnt=6 refrPxK=313

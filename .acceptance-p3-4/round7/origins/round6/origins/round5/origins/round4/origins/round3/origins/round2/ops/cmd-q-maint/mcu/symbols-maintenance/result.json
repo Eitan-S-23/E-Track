@@ -1,0 +1,78 @@
+{
+  "image": {
+    "image": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-images2\\maintenance.bin",
+      "bytes": 616616,
+      "sha256": "23ce89fc5d77e4cf5664d05621caff2cefb6dd22237189042de4bc5dbcf8b0d2"
+    },
+    "elf": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-build2\\b\\app-gcc\\X-Track-App-GCC.elf",
+      "bytes": 891044,
+      "sha256": "e7889e3b0ba23f3d9ce9976c90a0d51191ad27dfa4f88c85ac72d81b00378c09"
+    },
+    "map": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-build2\\b\\app-gcc\\X-Track-App-GCC.map",
+      "bytes": 2666747,
+      "sha256": "efb01413bac17fc7dd385f7e1673debf1275b97ea37099822571fc4b89c69084"
+    }
+  },
+  "rtt": 537213440,
+  "offsets": {
+    "active": 204,
+    "isr": 428
+  },
+  "symbols": {
+    "_ZL12g_ota_health": [
+      537213612,
+      36
+    ],
+    "_ZL18g_ota_confirm_done": [
+      537213610,
+      1
+    ],
+    "_ZL20g_ota_state_snapshot": [
+      537213608,
+      1
+    ],
+    "_ZL19g_ota_state_snapped": [
+      537213609,
+      1
+    ],
+    "_ZL10SD_IsReady": [
+      537210360,
+      1
+    ],
+    "_ZL19g_ota_overlay_owner": [
+      537213660,
+      1
+    ],
+    "_ZL13s_ble_session": [
+      537209224,
+      576
+    ],
+    "_SEGGER_RTT": [
+      537213440,
+      168
+    ],
+    "_ZN3HAL10HAL_UpdateEv": [
+      134483704,
+      24
+    ],
+    "_ZL19g_qspi_ota_disabled": [
+      536871293,
+      1
+    ],
+    "_ZL15g_qspi_jedec_id": [
+      537212276,
+      4
+    ],
+    "g_p34_retained_word": [
+      537208408,
+      4
+    ],
+    "g_p34_retention_error": [
+      537208404,
+      4
+    ]
+  }
+}

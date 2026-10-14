@@ -1,0 +1,103 @@
+  golden package length is frozen                                        PASS
+  golden image length is frozen                                          PASS
+  golden outer header remains full-package v1                            PASS
+  toy-full returns success                                               PASS
+  toy-full output matches toy-new byte-for-byte                          PASS
+  toy-full metadata lengths and vcode match                              PASS
+  toy-full fw_header double-zero SHA matches expected                    PASS
+  toy-full writes bounded 1KiB chunks                                    PASS
+  toy-full workspace stays within fixed 40KiB arena                      PASS
+  toy-full workspace is acquired, wiped, and released once               PASS
+  toy-full leaves BCB byte-identical                                     PASS
+  bad magic returns magic                                                PASS
+  bad magic performs no candidate prepare/write                          PASS
+  bad magic leaves BCB byte-identical                                    PASS
+  bad header_len returns header_length                                   PASS
+  bad header_len performs no candidate prepare/write                     PASS
+  bad header_len leaves BCB byte-identical                               PASS
+  bad header CRC returns header_crc                                      PASS
+  bad header CRC performs no candidate prepare/write                     PASS
+  bad header CRC leaves BCB byte-identical                               PASS
+  patch flags in P2-2 returns flags                                      PASS
+  patch flags in P2-2 performs no candidate prepare/write                PASS
+  patch flags in P2-2 leaves BCB byte-identical                          PASS
+  unsupported algorithm returns algorithm                                PASS
+  unsupported algorithm performs no candidate prepare/write              PASS
+  unsupported algorithm leaves BCB byte-identical                        PASS
+  unsupported key returns key                                            PASS
+  unsupported key performs no candidate prepare/write                    PASS
+  unsupported key leaves BCB byte-identical                              PASS
+  hardware mismatch returns hardware                                     PASS
+  hardware mismatch performs no candidate prepare/write                  PASS
+  hardware mismatch leaves BCB byte-identical                            PASS
+  layout mismatch returns layout                                         PASS
+  layout mismatch performs no candidate prepare/write                    PASS
+  layout mismatch leaves BCB byte-identical                              PASS
+  minimum boot mismatch returns min_boot                                 PASS
+  minimum boot mismatch performs no candidate prepare/write              PASS
+  minimum boot mismatch leaves BCB byte-identical                        PASS
+  equal-version package is rejected                                      PASS
+  equal-version rejection performs no candidate operation                PASS
+  equal-version package leaves BCB byte-identical                        PASS
+  full package nonzero base_vcode returns base                           PASS
+  full package nonzero base_vcode performs no candidate prepare/write    PASS
+  full package nonzero base_vcode leaves BCB byte-identical              PASS
+  full package nonzero base_sha8 returns base                            PASS
+  full package nonzero base_sha8 performs no candidate prepare/write     PASS
+  full package nonzero base_sha8 leaves BCB byte-identical               PASS
+  payload length mismatch returns package_length                         PASS
+  payload length mismatch performs no candidate prepare/write            PASS
+  payload length mismatch leaves BCB byte-identical                      PASS
+  stored payload CRC mismatch returns payload_crc                        PASS
+  stored payload CRC mismatch performs no candidate prepare/write        PASS
+  stored payload CRC mismatch leaves BCB byte-identical                  PASS
+  ciphertext corruption returns payload_crc                              PASS
+  ciphertext corruption performs no candidate prepare/write              PASS
+  ciphertext corruption leaves BCB byte-identical                        PASS
+  payload read error returns read                                        PASS
+  payload read error performs no candidate prepare/write                 PASS
+  payload read error leaves BCB byte-identical                           PASS
+  workspace acquire failure returns workspace                            PASS
+  workspace acquire failure performs no candidate prepare/write          PASS
+  workspace acquire failure leaves BCB byte-identical                    PASS
+  short workspace returns workspace                                      PASS
+  short workspace performs no candidate prepare/write                    PASS
+  short workspace leaves BCB byte-identical                              PASS
+  short workspace is wiped and released                                  PASS
+  decrypt properties fixture                                             PASS
+  reencrypt bad properties fixture                                       PASS
+  unsupported lc/lp/pb returns lzma_properties                           PASS
+  unsupported lc/lp/pb performs no candidate prepare/write               PASS
+  unsupported lc/lp/pb leaves BCB byte-identical                         PASS
+  decrypt dictionary fixture                                             PASS
+  reencrypt large dictionary fixture                                     PASS
+  dictionary over 16KiB returns lzma_properties                          PASS
+  dictionary over 16KiB performs no candidate prepare/write              PASS
+  dictionary over 16KiB leaves BCB byte-identical                        PASS
+  decrypt output length fixture                                          PASS
+  reencrypt oversized output fixture                                     PASS
+  output length over app limit returns image_length                      PASS
+  output length over app limit performs no candidate prepare/write       PASS
+  output length over app limit leaves BCB byte-identical                 PASS
+  decrypt damaged LZMA fixture                                           PASS
+  reencrypt damaged LZMA fixture                                         PASS
+  damaged LZMA stream returns lzma_data                                  PASS
+  damaged LZMA stream leaves BCB byte-identical                          PASS
+  candidate prepare failure returns candidate_prepare                    PASS
+  candidate prepare failure leaves BCB byte-identical                    PASS
+  prepare failure writes no payload                                      PASS
+  candidate program failure returns candidate_write                      PASS
+  candidate program failure leaves BCB byte-identical                    PASS
+  candidate readback failure returns candidate_verify                    PASS
+  candidate readback failure leaves BCB byte-identical                   PASS
+  candidate readback corruption returns candidate_verify                 PASS
+  candidate readback corruption leaves BCB byte-identical                PASS
+  outer/fw_header vcode mismatch returns image_metadata                  PASS
+  outer/fw_header vcode mismatch leaves BCB byte-identical               PASS
+  metadata mismatch still wrote only declared image                      PASS
+  null io is rejected                                                    PASS
+  null device is rejected                                                PASS
+  short package is rejected                                              PASS
+  result names expose stable diagnostics                                 PASS
+  development key is explicit in default test build                      PASS
+P2_2_PACKAGE=PASS checks=102

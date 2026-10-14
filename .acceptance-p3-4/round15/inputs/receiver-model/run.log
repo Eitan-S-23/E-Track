@@ -1,0 +1,348 @@
+  initialize real synchronous adapter                                  PASS
+CASE control
+  negotiated synchronous receiver active                               PASS
+  stopped receiver cannot return a success snapshot without fields     PASS
+  stopped receiver cannot encode uninitialized ACK bytes               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=control durable=53248 first_status=0 frames=431
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE missing_pages
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  model recreates original two FF pages and 511 byte differences       PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=missing_pages durable=53248 first_status=15 frames=498
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE program_io
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=program_io durable=53248 first_status=15 frames=498
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE restore_io
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=restore_io durable=53248 first_status=15 frames=498
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE read_io
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=read_io durable=53248 first_status=15 frames=498
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE mapped_mismatch
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=mapped_mismatch durable=53248 first_status=15 frames=498
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE journal_io
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=journal_io durable=53248 first_status=15 frames=498
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE callback_abort
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  callback cancellation enters draining, not freed state               PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=callback_abort durable=53248 first_status=255 frames=466
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE callback_end
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  callback cancellation enters draining, not freed state               PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=callback_end durable=53248 first_status=5 frames=466
+  incomplete prefix closes without END or activation                   PASS
+  initialize real synchronous adapter                                  PASS
+CASE callback_conflict
+  negotiated synchronous receiver active                               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  callback cancellation enters draining, not freed state               PASS
+  borrowed source unchanged across receive callback                    PASS
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  failed block stays uncommitted with durable at 45056                 PASS
+  first model error retains its real status and epoch                  PASS
+  negotiated synchronous receiver active                               PASS
+  new epoch reloads journal rather than volatile accepted credit       PASS
+  bounded synchronous drain                                            PASS
+  resume erases the uncommitted twelfth block again                    PASS
+  healthy or recovered thirteen-block prefix is byte-exact             PASS
+MODEL_RESULT mode=callback_conflict durable=53248 first_status=255 frames=466
+  incomplete prefix closes without END or activation                   PASS
+RECEIVER_FAILURE checks=327 failures=0 cases=10 mutation=0

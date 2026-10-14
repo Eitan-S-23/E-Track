@@ -1,0 +1,31 @@
+{
+  "image": {
+    "image": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-maintenance-images2\\restore.bin",
+      "bytes": 111804,
+      "sha256": "9f3643e99dcc3734518dacac52bfdb3b7a36544299ceaa859154ddb26cd0b58d"
+    },
+    "elf": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-restore-build3\\b\\app-gcc\\X-Track-App-GCC.elf",
+      "bytes": 217536,
+      "sha256": "2fb09f5677977311350b7ab3e51aef15dcdc1e2abb88334b281b7b0fafbbdf5e"
+    },
+    "map": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-restore-build3\\b\\app-gcc\\X-Track-App-GCC.map",
+      "bytes": 2517580,
+      "sha256": "287c0bf596d6834f6a498b4509eede9b47870a84b7dd88bd7233e380a9971c63"
+    }
+  },
+  "rtt": 537041024,
+  "offsets": {},
+  "symbols": {
+    "_SEGGER_RTT": [
+      537041024,
+      168
+    ],
+    "g_restore_control": [
+      537041320,
+      640
+    ]
+  }
+}

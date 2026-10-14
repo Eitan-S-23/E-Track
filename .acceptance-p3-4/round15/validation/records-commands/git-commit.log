@@ -1,0 +1,5 @@
+[0;32m✅ Pre-commit 检查通过[0m
+[acceptance/p3-4-v2-20261009 62aacfe] docs(ota): record local authority and candidate admission failure
+ 3 files changed, 1058 insertions(+)
+ create mode 100644 docs/ota-exec-notes/P3-4-v12-candidate-acceptance-2026-10-13.md
+ create mode 100644 docs/ota-exec-notes/P3-4-v13-offline-acceptance-2026-10-13.md

@@ -1,0 +1,7 @@
+{
+  "sent": true,
+  "exit_code": 0,
+  "response": "Message sent successfully.\n",
+  "real_current_requester_mention": true,
+  "requires_chat_reply": false
+}

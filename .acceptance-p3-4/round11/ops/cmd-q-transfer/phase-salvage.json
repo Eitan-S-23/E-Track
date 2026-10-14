@@ -1,0 +1,9 @@
+{
+  "phase": "salvage",
+  "started_monotonic": 935619.7349764,
+  "deadline_monotonic": 935919.7349764,
+  "lifetime_deadline_monotonic": 938705.4080244,
+  "required_seconds": 360,
+  "available_seconds": 3085.673047999968,
+  "scope": "host observation budget, not transfer timing or PASS"
+}

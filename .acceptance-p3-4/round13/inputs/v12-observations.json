@@ -1,0 +1,65 @@
+{
+  "original_contract_sha256": "8218d395b105303798163adbe812c4d2593a55816f2f203ea0e2b8554ce4ea1e",
+  "original_matrix_sha256": "25a9ffd13aede3659969ad64f45957e282323096faa286ecda365f26d1148e62",
+  "original_result": "EVIDENCE_GAP",
+  "files": {
+    "snapshot": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\phone\\snapshot.jsonl",
+      "bytes": 4775779,
+      "sha256": "930a7114799d882e10287362ba2a723d489d96d71f4c3248a1f11641704b2170"
+    },
+    "rtt": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\transfer.rtt",
+      "bytes": 1139,
+      "sha256": "b84981478d22f59a4bba51982ca702a2426258f6103cfd8d949b54293c8efcca"
+    },
+    "terminal_metrics": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\metrics.bin",
+      "bytes": 420,
+      "sha256": "82df59ba3f8136179d524c6e9c410142c316b86f6ec0056abad37d2ed32bc403"
+    },
+    "runtime": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\phone\\runtime.json",
+      "bytes": 867,
+      "sha256": "16ffa235d210886928805a3997c44d25a14c9dbe6a1149e5f458781b5ace31f6"
+    },
+    "downloaded": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\phone\\downloaded.etu",
+      "bytes": 1048576,
+      "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+    },
+    "pre_app": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\app.bin",
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    },
+    "pre_header": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    },
+    "terminal_header_before": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_before.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    },
+    "terminal_header_after": {
+      "path": ".acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    },
+    "final_app": {
+      "path": ".acceptance-p3-4\\round13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\app.bin",
+      "bytes": 613952,
+      "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+    },
+    "final_boot": {
+      "path": ".acceptance-p3-4\\round13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    }
+  },
+  "already_observed_ota": 1,
+  "new_physical_ota": 0,
+  "scope": "Original-evidence index only, not a source manifest, new device observation, or invented original command exit."
+}

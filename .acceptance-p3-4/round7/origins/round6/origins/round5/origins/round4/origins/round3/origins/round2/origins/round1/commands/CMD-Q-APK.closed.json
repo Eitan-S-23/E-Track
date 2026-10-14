@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p34-acceptance/live.py",
+    "install-apk",
+    "--inputs",
+    "D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json",
+    "--out",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round1/ops/cmd-q-apk",
+    "--seconds",
+    "3390",
+    "--contract",
+    "docs/acceptance-contracts/P3-4-v1.contract.json",
+    "--matrix",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round1/evidence-matrix.json",
+    "--command-id",
+    "CMD-Q-APK"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 1,
+  "started_monotonic_ns": 806787092575100,
+  "ended_monotonic_ns": 806811171124800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round1\\commands\\CMD-Q-APK.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round1\\commands\\CMD-Q-APK.stderr",
+    "bytes": 1710,
+    "sha256": "0f8530a6ddec835293f260a1252e8688a9ce1ca4cb8492e88fd5abd2256b37ce"
+  }
+}

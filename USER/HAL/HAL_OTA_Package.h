@@ -10,6 +10,7 @@ namespace HAL
 bool OTA_OverlayAcquireLiveMap();
 void OTA_OverlayReleaseLiveMap();
 bool OTA_OverlayIsOtaOwned();
+bool OTA_OverlayIsBleOwned();
 
 /* P3-1 BLE 会话 overlay 通道（与 LIVE_MAP/PACKAGE 互斥）：
  * acquire 成功后可用 GetWorkspace 取基址做子分配（RX 环 + staging

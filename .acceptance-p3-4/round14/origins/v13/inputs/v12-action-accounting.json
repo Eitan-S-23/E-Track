@@ -1,0 +1,35 @@
+{
+  "schema": "p34-action-accounting-v1",
+  "prior_qualification_consumed": 2,
+  "this_round_qualification_consumed": 1,
+  "cumulative_qualification_consumed": 3,
+  "cumulative_qualification_limit": 3,
+  "calibration_consumed": 0,
+  "calibration_limit": 0,
+  "preparatory_restore_completed": 1,
+  "post_qualification_restore_completed": 0,
+  "new_ota_after_failure": 0,
+  "target": "3.2.87",
+  "target_verified": true,
+  "target_observation": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\current-target.json",
+    "bytes": 2288,
+    "sha256": "00706bf633dd25f280d6c5d974b80969db72bf57dbead19a41423e64d9d56efd"
+  },
+  "stage": "PRODUCT_OBSERVATIONS_RECONCILED_ORIGINAL_COMMAND_CLOSE_RECEIPT_MISSING",
+  "original_v11_result": "HARNESS_FAIL",
+  "old_v11_allowance": "2/2 unchanged",
+  "additional_authorized": 1,
+  "phone_old_capture_cleanup_authorized": true,
+  "phone_old_capture_cleanup_performed": true,
+  "phone_old_capture_cleanup": {
+    "path": ".cache\\p34-v12-candidate-20261013\\capture-slot-release\\result.json",
+    "bytes": 1559,
+    "sha256": "74babd3912b9d4a205cd2b496d899aac4109a7bfbfd42facd8ca1e5fe3146bc0"
+  },
+  "original_transfer_exit_code": null,
+  "interrupted_final_readback": true,
+  "diagnostic_readback_completed": true,
+  "new_capture_archived": true,
+  "new_capture_pruned": true
+}

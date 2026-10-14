@@ -1,0 +1,86 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-4-v15",
+  "current_contract_sha256": "E315DC6C39DA8D995BAEA2EE2D30292D957451BA23A82E5790B597ED2AE201ED",
+  "previous_contract_id": "P3-4-v14",
+  "previous_contract_sha256": "7AA4ED3BB760CE0CC0A5ACDAAA9E15A85BAD30785F73CD0644DA29DDBB76CAD4",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P3-4-20261014-candidate-native-path-closeout",
+  "previous_round_id": "P3-4-20261014-candidate-local-closeout",
+  "previous_matrix_sha256": "C03262D050940304BB923D4266547DE771B18CFB7AEA6861AA315AEA280D0E53",
+  "changed_input_groups": [],
+  "changed_external_inputs": [],
+  "rerun_criteria": [
+    {
+      "id": "Q-PREP-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-Q-PREP-BOOT",
+        "command_definition_changed:CMD-Q-PREP-RESTORE",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "Q-TRANSFER",
+      "reasons": [
+        "command_definition_changed:CMD-Q-TRANSFER-APP",
+        "command_definition_changed:CMD-Q-TRANSFER-BASE",
+        "command_definition_changed:CMD-Q-TRANSFER-BOOT",
+        "command_definition_changed:CMD-Q-TRANSFER-CONTEXT-AFTER",
+        "command_definition_changed:CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P34-CANDIDATE-CLOSEOUT",
+      "reasons": [
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [
+    "P34-CANDIDATE-REFERENCE"
+  ],
+  "reuse_origins": {
+    "P34-CANDIDATE-REFERENCE": {
+      "contract_sha256": "7AA4ED3BB760CE0CC0A5ACDAAA9E15A85BAD30785F73CD0644DA29DDBB76CAD4",
+      "matrix_sha256": "C03262D050940304BB923D4266547DE771B18CFB7AEA6861AA315AEA280D0E53",
+      "round_id": "P3-4-20261014-candidate-local-closeout"
+    }
+  },
+  "required_commands": [
+    "CMD-CANDIDATE-ARCHIVE-04",
+    "CMD-CANDIDATE-ARCHIVE-07",
+    "CMD-CANDIDATE-ARCHIVE-10",
+    "CMD-CANDIDATE-ARCHIVE-13",
+    "CMD-CANDIDATE-CI",
+    "CMD-CANDIDATE-SOURCE",
+    "CMD-Q-PREP-BOOT",
+    "CMD-Q-PREP-RESTORE",
+    "CMD-Q-TRANSFER",
+    "CMD-Q-TRANSFER-APP",
+    "CMD-Q-TRANSFER-BASE",
+    "CMD-Q-TRANSFER-BOOT",
+    "CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "CMD-Q-TRANSFER-MCU",
+    "CMD-Q-TRANSFER-RAM"
+  ],
+  "required_artifacts": [
+    "ART-CMD-CANDIDATE-ARCHIVE-04",
+    "ART-CMD-CANDIDATE-ARCHIVE-07",
+    "ART-CMD-CANDIDATE-ARCHIVE-10",
+    "ART-CMD-CANDIDATE-ARCHIVE-13",
+    "ART-CMD-CANDIDATE-CI",
+    "ART-CMD-CANDIDATE-SOURCE",
+    "ART-CMD-Q-PREP-BOOT",
+    "ART-CMD-Q-PREP-RESTORE",
+    "ART-CMD-Q-TRANSFER",
+    "ART-CMD-Q-TRANSFER-APP",
+    "ART-CMD-Q-TRANSFER-BASE",
+    "ART-CMD-Q-TRANSFER-BOOT",
+    "ART-CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "ART-CMD-Q-TRANSFER-MCU",
+    "ART-CMD-Q-TRANSFER-RAM"
+  ]
+}

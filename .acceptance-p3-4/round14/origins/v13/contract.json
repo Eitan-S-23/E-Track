@@ -1,0 +1,846 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-4-v13",
+  "version": 13,
+  "task_id": "P3-4",
+  "parent_contract_sha256": "8218D395B105303798163ADBE812C4D2593A55816F2F203EA0E2B8554CE4EA1E",
+  "status": "FROZEN",
+  "approved_by": "Existing user-approved original-evidence/independent-acceptance scope; same non-implementer prepares, freezes and judges. No new product gate or device authority.",
+  "approved_at": "2026-10-13T11:23:16.375301+00:00",
+  "implementation_ref": "acceptance/p3-4-v2-20261009@02013607ca38eaf5cff0d5c4fc3de8259fbff916",
+  "freeze_commit": "02013607ca38eaf5cff0d5c4fc3de8259fbff916",
+  "freeze_tree": "7bd36eb09fa8ee2d8bae5cdb58dc4373661d2c19",
+  "profile_config_blob": "c1fd80a844680ac760ee0e3b9b70b86f84d6b136",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "firmware",
+      "profile": "Firmware",
+      "category": "production_source"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "p34-live-inputs",
+      "category": "fixture",
+      "description": "Unchanged product/tool identities plus the independently bound current v11 runtime as an owned configuration.",
+      "fingerprint": "sha256:6b926b9f086dd0edcc898c2f77a22cf11f02bd3c427000f3822cc27f3c9d365a",
+      "evidence_path": "inputs/live-inputs.json",
+      "evidence_sha256": "6B926B9F086DD0EDCC898C2F77A22CF11F02BD3C427000F3822CC27F3C9D365A"
+    },
+    {
+      "id": "prepared-history",
+      "category": "fixture",
+      "description": "Actual v11 parent, original provisioning anchors and cumulative two physical qualifications.",
+      "fingerprint": "sha256:f975eb2a1a2f9a29d693e27f586ec9e78a1b3c62e508d875d813fae47c6d180c",
+      "evidence_path": "inputs/prepared-history.json",
+      "evidence_sha256": "F975EB2A1A2F9A29D693E27F586EC9E78A1B3C62E508D875D813FAE47C6D180C"
+    },
+    {
+      "id": "successor-admission",
+      "category": "fixture",
+      "description": "Approved candidate scope, committed host repair, fresh read-only state, unresolved capture capacity and historical boundaries.",
+      "fingerprint": "sha256:f42bff2a947a2aa6b2cfc3f9e2e308008536b0ab2afba4473f15a3f7640eaa84",
+      "evidence_path": "inputs/successor-admission.json",
+      "evidence_sha256": "F42BFF2A947A2AA6B2CFC3F9E2E308008536B0AB2AFBA4473F15A3F7640EAA84"
+    },
+    {
+      "id": "reference-v10",
+      "category": "fixture",
+      "description": "Byte-exact historical original evaluated offline; not a new OTA, calibration sample, final campaign sample or retroactive PASS.",
+      "fingerprint": "sha256:33ba9b04ee56e3dc7505e9d15de499c9819af7edd4fc9e31b509fbca0fbb2d18",
+      "evidence_path": "inputs/reference-v10.jsonl",
+      "evidence_sha256": "33BA9B04EE56E3DC7505E9D15DE499C9819AF7EDD4FC9E31B509FBCA0FBB2D18"
+    },
+    {
+      "id": "reference-v11",
+      "category": "fixture",
+      "description": "Byte-exact historical original evaluated offline; not a new OTA, calibration sample, final campaign sample or retroactive PASS.",
+      "fingerprint": "sha256:743e8e88e79580ffa8c1b6682bc01cc7c63431c68c89b9455bd4ac0d5e1180c6",
+      "evidence_path": "inputs/reference-v11.jsonl",
+      "evidence_sha256": "743E8E88E79580FFA8C1B6682BC01CC7C63431C68C89B9455BD4AC0D5E1180C6"
+    },
+    {
+      "id": "reference-v11-mcu",
+      "category": "fixture",
+      "description": "Byte-exact historical original evaluated offline; not a new OTA, calibration sample, final campaign sample or retroactive PASS.",
+      "fingerprint": "sha256:7bb961716dfc19bf08b3f1831547f31b83b68131ecbc6e9ab160675a160fe2cd",
+      "evidence_path": "inputs/reference-v11-mcu.rtt",
+      "evidence_sha256": "7BB961716DFC19BF08B3F1831547F31B83B68131ECBC6E9AB160675A160FE2CD"
+    },
+    {
+      "id": "capture-slot-release",
+      "category": "fixture",
+      "description": "Separately authorized exact old-query capture archival/unlink; other seven captures including v11 unchanged.",
+      "fingerprint": "sha256:74babd3912b9d4a205cd2b496d899aac4109a7bfbfd42facd8ca1e5fe3146bc0",
+      "evidence_path": "admission/capture-slot-release.json",
+      "evidence_sha256": "74BABD3912B9D4A205CD2B496D899AAC4109A7BFBFD42FACD8CA1E5FE3146BC0"
+    },
+    {
+      "id": "v12-original-matrix",
+      "category": "fixture",
+      "description": "Actual interrupted parent, including its two directly executed PASS anchors and unobserved full transfer completion.",
+      "fingerprint": "sha256:25a9ffd13aede3659969ad64f45957e282323096faa286ecda365f26d1148e62",
+      "evidence_path": "inputs/v12-matrix.json",
+      "evidence_sha256": "25A9FFD13AEDE3659969AD64F45957E282323096FAA286ECDA365F26D1148E62"
+    },
+    {
+      "id": "v12-observations",
+      "category": "fixture",
+      "description": "Hash-bound original product observations; no synthetic old exit or new physical operation.",
+      "fingerprint": "sha256:5886d4b8a26fa631630d2ccf4a8a25d72269e3f4f82ad3b582e39990751a9f4a",
+      "evidence_path": "inputs/v12-observations.json",
+      "evidence_sha256": "5886D4B8A26FA631630D2CCF4A8A25D72269E3F4F82AD3B582E39990751A9F4A"
+    },
+    {
+      "id": "offline-admission",
+      "category": "fixture",
+      "description": "Already-approved original-evidence assessment, preserved interruption, unchanged product conditions and zero device activity.",
+      "fingerprint": "sha256:0abb7f8561d72824b8cca0f5a926397d5ad022e531ba88b09b351eb370445436",
+      "evidence_path": "inputs/offline-admission.json",
+      "evidence_sha256": "0ABB7F8561D72824B8CCA0F5A926397D5AD022E531BA88B09B351EB370445436"
+    },
+    {
+      "id": "fc-tool",
+      "category": "fixture",
+      "description": "Installed standard binary file comparator; its executable is pinned before execution.",
+      "fingerprint": "sha256:e7c8c19eb9a2116b9366143816756f85d043a2f47a481ace7777477f452b5f03",
+      "evidence_path": "inputs/fc-tool.json",
+      "evidence_sha256": "E7C8C19EB9A2116B9366143816756F85D043A2F47A481ACE7777477F452B5F03"
+    },
+    {
+      "id": "expected-base",
+      "category": "fixture",
+      "description": "Byte-exact copy of the already bound base image, not a rebuild.",
+      "fingerprint": "sha256:9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+      "evidence_path": "inputs/expected-base.bin",
+      "evidence_sha256": "9B3A4A21409C59B916976385EC877B7D90BD7E4C90B3553F0B8DF2B02FD787DC"
+    },
+    {
+      "id": "expected-target",
+      "category": "fixture",
+      "description": "Byte-exact copy of the already bound target image, not a rebuild.",
+      "fingerprint": "sha256:58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+      "evidence_path": "inputs/expected-target.bin",
+      "evidence_sha256": "58EEBD962BA1B39369F85954A167516EC5F5E519C5D894C3DB5EB0EDCCEA76A1"
+    },
+    {
+      "id": "expected-boot",
+      "category": "fixture",
+      "description": "Byte-exact copy of the already bound boot image, not a rebuild.",
+      "fingerprint": "sha256:01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+      "evidence_path": "inputs/expected-boot.bin",
+      "evidence_sha256": "01E4B9E162BFAAF9FDA070AA13C0CEC3F377B8D696DB01F731E0AB3D1464E527"
+    }
+  ],
+  "stage": {
+    "id": "candidate-original-evidence-offline-closeout",
+    "task_completion_allowed": false,
+    "purpose": "Complete independent assessment of captured product evidence without another physical operation; preserve the v12 collector interruption.",
+    "max_qualification_ota": 3,
+    "max_calibration_ota": 0,
+    "calibration_per_supported_rate": 0,
+    "rates": [
+      921600
+    ],
+    "qualification_excluded_from_statistics": true,
+    "parameter_selection": "Candidate only from independently evaluated existing originals; no claim of final highest stable production rate. 115200 history retained, 460800 incomplete/resumed cases distinguished, 230400 remains unreconciled. Do not repeat four rates by default.",
+    "successor_required": "Final campaigns move to P5-1 and P3-5 under OTA-DEC-016; P5-2 evaluates applicability. Any failed necessary local safety observation remains blocking and preserved.",
+    "unsupported_or_failed_cell": "Stop affected dependent actions, retain raw state and do not infer unsupported from silence. A supported-rate failure is not a skip. Any supported-rate subset or changed previous-cell path needs an explicit successor before more device commands; no extra measurement quota is created.",
+    "final_retained_state_this_stage": "Retain verified target 3.2.87, original group16 Boot and confirmation; no unnecessary post-transfer restore.",
+    "remaining_required_not_executed": [
+      {
+        "id": "P34-FINAL-30",
+        "requirement": "One selected same-parameter group: 30/30 complete zero-start successful 1 MiB transfers; >=9 KiB/s, P95<=120 s, every transfer<=150 s, clean unique-DATA retransmission<=1%, maxRetries=5."
+      },
+      {
+        "id": "P34-FINAL-SOAK",
+        "requirement": "One 4-hour continuous-transfer soak with a single host-monotonic observer started before the first cell; preserve action/idle/recovery/failure records, do not use summed App times or long idle as proof; stop new starts at 4 h and complete in-flight apply/readback."
+      },
+      {
+        "id": "P34-FINAL-RECOVERY",
+        "requirement": "Ten actual physical disconnect/recovery pairs, two each at durable 8/64/256/512/768 KiB, one selected parameter/asset group; exact fault route/checkpoint evidence required, no ABORT/force-stop/ordinary-success substitute."
+      },
+      {
+        "id": "P34-FINAL-INTEGRITY",
+        "requirement": "All selected campaign observations require valid clock/metrics/guard, no integrity/unrecoverable failure, actual full target/unchanged group16 Boot/confirmation and complete original App snapshots; retain target safely at final closeout."
+      }
+    ],
+    "calibration_snapshots": [],
+    "artifact_source_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+    "resume": {
+      "previous_round_id": "P3-4-20261013-candidate-runtime-supplement",
+      "previous_result": "EVIDENCE_GAP",
+      "previous_matrix_sha256": "25A9FFD13AEDE3659969AD64F45957E282323096FAA286ECDA365F26D1148E62",
+      "completed_setup_history": [
+        "Q-APK",
+        "Q-BASE",
+        "Q-BAUD",
+        "Q-INITIAL",
+        "Q-MAINT",
+        "Q-PRODUCTION"
+      ],
+      "history_evidence": "inputs/prepared-history.json",
+      "first_active_command": "CMD-Q-TRANSFER",
+      "completed_ota": 3,
+      "completed_calibration": 0,
+      "remaining_qualification_ota": 0,
+      "remaining_calibration_ota": 0,
+      "completed_apk_installs": 1,
+      "last_verified_state": "Full target 3.2.87, unchanged group16 Boot, confirmed=4, idle SD/OTA, base backup slot present; same reference durable=1048576.",
+      "current_state_check": "CMD-Q-PREP-RESTORE rechecks full target/Boot/idle and validates READY backup/config before arming; then full zero-durable base. Q-TRANSFER rechecks current base and APK before invitation.",
+      "scope_reason": "Offline original-evidence assessment only, using actual v12 as parent and retaining its full-command gap.",
+      "failure_preserved": "v11 HARNESS_FAIL, v12 EVIDENCE_GAP and all three actual physical qualifications remain unchanged.",
+      "entry_state_change": {
+        "path": "inputs/successor-admission.json",
+        "sha256": "F42BFF2A947A2AA6B2CFC3F9E2E308008536B0AB2AFBA4473F15A3F7640EAA84",
+        "scope": "Retain current target until all admission checks pass. Restore only through the existing verified backup/config/Boot transaction, not App-only downgrade."
+      }
+    },
+    "current_round_qualification_ota": 0,
+    "preparatory_complete_restorations": 1,
+    "candidate_stage_decision_allowed": true,
+    "production_release_allowed": false
+  },
+  "operating_rules": {
+    "authority": "Existing approved independent acceptance and original-evidence reuse; this successor performs no device, publication or source-edit action.",
+    "operator": "Assigned non-implementation acceptance/root session under the user's explicit instruction to continue here after the approved local commit.",
+    "writable_root": "D:/github/my/E-Track/.cache/p34-final",
+    "serialized_device": "C30286 / phone 10ADA4197U001CK V2312A / BLE E3:49:E1:14:D6:CB / probe 123456",
+    "private_adb_port": 5062,
+    "standard_tools": "Pinned J-Link Commander/RTTLogger, private ADB, existing controlled PATCH service and runtime config; no custom flasher, native sender or UI taps.",
+    "host_phase_seconds": {
+      "prepare": 600,
+      "download": 300,
+      "start": 120,
+      "transfer": 300,
+      "terminal": 420,
+      "snapshot": 300,
+      "boot": 345,
+      "readback": 345,
+      "archive": 300
+    },
+    "phone_lifetime_seconds": 3390,
+    "failure_retrieval_seconds": 300,
+    "closure_seconds": 60,
+    "normal_jlink_seconds": 180,
+    "ordinary_boot_operation_seconds": 300,
+    "full_readback_operation_seconds": 300,
+    "debug_register_exception": {
+      "address": "0xE0042008",
+      "operation": "Save current value, temporarily OR 0x1000 for the storage-idle HAL_Update hardware-breakpoint/programming sequence; restore exact saved value before run.",
+      "persistent": false,
+      "limits": "Only the existing standard install adapter; never arbitrary WDT feeding, PC/function injection or EEPROM edits. Unknown halt/program outcome quarantines further mutations."
+    },
+    "native_history_exception": "Only authorized automatic SEGGER history/config updates under C:/Users/SU/AppData/Roaming/SEGGER/; controllable settings/logs/readbacks/caches stay in the candidate. No cleanup.",
+    "rollback": "No rollback, reset, installation, device query, phone cleanup or further OTA in this successor.",
+    "evidence": "Preserve every failed/uncertain action and original bytes. Raw App/RTT/Commander/phase/closure files are evidence, not generated summary replacements. Terminal old-App stack/clock must be before reset; missed windows are EVIDENCE_GAP, never re-run a successful OTA. The one explicitly authorized supplemental qualification measures the changed committed observer; it does not fabricate or repair v10 terminal evidence.",
+    "stop": "New integrity/recovery/clock/guard failure pauses affected tests; no blind retry or new directory to erase uncertainty. trial5 is cause-unknown and its separate investigation remains deferred.",
+    "notifications": "No manual mention for this contract/report. Only a necessary, already-authorized physical UI/card action while execution remains open and requires no chat reply uses current-session real mention plus receipt. Requests requiring a reply end normally.",
+    "publication": "No new commit/push/CI/merge/release/shared-root writes.",
+    "foreground": "Keep the original upgrade UI foreground. No P3-8/background expansion, automatic taps, native sender or custom collector replacement.",
+    "lineage_preflight_command": "python -I -S -B -X utf8 Tools/acceptance/validate_bundle.py --contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v13.contract.json' --matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\evidence-matrix.json' --repo-root D:/github/my/E-Track/.cache/p34-final --previous-contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json' --previous-matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json' --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\P3-4-v10.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\evidence-matrix.json' --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/P3-4-v9.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/P3-4-v8.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/P3-4-v7.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/P3-4-v6.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/P3-4-v5.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/P3-4-v4.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/P3-4-v3.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/P3-4-v2.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/P3-4-v1.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/evidence-matrix.json --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v11.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\evidence-matrix.json'",
+    "plan_generation_command": "python -I -S -B -X utf8 Tools/acceptance/validate_bundle.py --contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v13.contract.json' --matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\evidence-matrix.json' --repo-root D:/github/my/E-Track/.cache/p34-final --previous-contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json' --previous-matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json' --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\P3-4-v10.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\evidence-matrix.json' --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/P3-4-v9.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/P3-4-v8.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/P3-4-v7.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/P3-4-v6.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/P3-4-v5.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/P3-4-v4.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/P3-4-v3.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/P3-4-v2.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/P3-4-v1.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/evidence-matrix.json --reuse-source 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v11.contract.json' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\evidence-matrix.json' --write-rerun-plan rerun-plan.json",
+    "matrix_lifecycle": "Only round13 is writable. Preserve v12 and all older contracts, matrices and original receipts. New PASS means a new offline evaluation, not an old physical PASS.",
+    "history_commands": "Reuse the direct v12 EXECUTED PASS criteria; never repeat their commands. All required successor commands are offline readers or FC byte comparisons.",
+    "usb_admission": "Require actual phone presence and an unoccupied private port. Use the installed exact APK verification in Phone.start; do not reinstall the previously verified APK. No automatic UI taps. Request only necessary authorized physical actions.",
+    "phone_admission": "Before the live cold launch, use existing private ADB read-only power/keyguard checks for current awake/unlocked state. Request only necessary already-authorized physical action; no UI taps or system setting changes.",
+    "lineage_source_packages": [
+      ".acceptance-p3-4/round11",
+      ".acceptance-p3-4/round10",
+      ".acceptance-p3-4/round9",
+      ".acceptance-p3-4/round8",
+      ".acceptance-p3-4/round7",
+      ".acceptance-p3-4/round7/origins/round6",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1"
+    ]
+  },
+  "commands": [
+    {
+      "id": "CMD-REFERENCE-V10",
+      "description": "Independent offline evaluation of the original v10 reference; not new physical execution or entry in a calibration/final statistical group.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --input 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\inputs\\reference-v10.jsonl' --expect-sentinel OTAOBS96bb2c74d5ad6ccecaf30e40 --expect-target E3:49:E1:14:D6:CB",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-REFERENCE-V11",
+      "description": "Independent offline evaluation of the original v11 reference; not new physical execution or entry in a calibration/final statistical group.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --input 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\inputs\\reference-v11.jsonl' --expect-sentinel OTAOBS96bb2c74d5ad6ccecaf30e40 --expect-target E3:49:E1:14:D6:CB",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-REFERENCE-MCU",
+      "description": "Independently decode and bind the preserved v11 420-byte record; does not supply missing old-App RAM.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/metrics.py --input 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\inputs\\reference-v11-mcu.rtt' --elf 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf' --map 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map' --expect-elf-sha256 69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4 --expect-map-sha256 a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c --package 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\cases\\reference-1MiB.etu' --expect-epoch 712951994 --expect-baud 921600",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/flutter/dev_checks.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/metrics.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-PREP-RESTORE",
+      "description": "One necessary preparatory ordinary-Boot complete-state rollback, preserving configuration and original Boot; no calibration follows.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\inputs\\live-inputs.json' --out 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore' --seconds 3390 --contract 'D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json' --matrix 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json' --command-id CMD-Q-PREP-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-Q-TRANSFER",
+      "description": "Offline strict interpretation of the existing v12 complete App snapshot; this command does not start OTA or certify the old collector exit.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --input 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\phone\\snapshot.jsonl' --expect-sentinel OTAOBS96bb2c74d5ad6ccecaf30e40 --expect-target E3:49:E1:14:D6:CB",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-MCU",
+      "description": "Offline production decoder against the already captured MCU original, exact ELF/map/package/session/baud; not a live read.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/metrics.py --input 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\transfer.rtt' --elf 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf' --map 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map' --expect-elf-sha256 69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4 --expect-map-sha256 a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c --package 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\cases\\reference-1MiB.etu' --expect-epoch 1724752335 --expect-baud 921600",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/flutter/dev_checks.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/metrics.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-RAM",
+      "description": "Offline production decoder against the already captured RAM original, exact ELF/map/package/session/baud; not a live read.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/metrics.py --input 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\metrics.bin' --binary --elf 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf' --map 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map' --expect-elf-sha256 69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4 --expect-map-sha256 a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c --package 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\cases\\reference-1MiB.etu' --expect-epoch 1724752335 --expect-baud 921600",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/flutter/dev_checks.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/metrics.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-BASE",
+      "description": "Standard read-only byte comparison of bound BASE originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\inputs\\expected-base.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\app.bin'",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-APP",
+      "description": "Standard read-only byte comparison of bound APP originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\inputs\\expected-target.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\app.bin'",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-BOOT",
+      "description": "Standard read-only byte comparison of bound BOOT originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\inputs\\expected-boot.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\boot.bin'",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+      "description": "Standard read-only byte comparison of bound CONTEXT-BEFORE originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_before.bin'",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    },
+    {
+      "id": "CMD-Q-TRANSFER-CONTEXT-AFTER",
+      "description": "Standard read-only byte comparison of bound CONTEXT-AFTER originals; no debugger, reset, installation or new observation.",
+      "command": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin'",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 120
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-CMD-REFERENCE-V10",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-REFERENCE-V10.closed.json"
+    },
+    {
+      "id": "ART-CMD-REFERENCE-V11",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-REFERENCE-V11.closed.json"
+    },
+    {
+      "id": "ART-CMD-REFERENCE-MCU",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-REFERENCE-MCU.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-PREP-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-PREP-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-MCU",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER-MCU.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-RAM",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER-RAM.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-BASE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER-BASE.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-APP",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER-APP.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-BOOT",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER-BOOT.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER-CONTEXT-BEFORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-TRANSFER-CONTEXT-AFTER",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER-CONTEXT-AFTER.closed.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P34-CANDIDATE-REFERENCE",
+      "description": "Evaluate original v10/v11 observations without physical replay. Both are the same legal 1 MiB, v2/window24/batch12/921600/timeout2000/retries5 group, zero-origin complete App observations with original target/Boot identity corroboration. Preserve all ACK samples and failures. Reference nearest-rank P99 supports the unchanged 2000 ms candidate timeout; valid v11 MCU phases bind the package/ELF/map. Prior host/local-function evidence remains hash-bound. This is candidate evidence only, not old calibration or final production/performance reliability PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_app_snapshot",
+        "group_statistics",
+        "plan"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware and flutter produce the measured session and its negotiated/runtime parameters; validation validates raw capture identities and computes the statistics without pooling groups.",
+      "external_inputs": [
+        "p34-live-inputs",
+        "prepared-history",
+        "successor-admission",
+        "reference-v10",
+        "reference-v11",
+        "reference-v11-mcu"
+      ],
+      "command_ids": [
+        "CMD-REFERENCE-V10",
+        "CMD-REFERENCE-V11",
+        "CMD-REFERENCE-MCU"
+      ],
+      "artifact_ids": [
+        "ART-CMD-REFERENCE-V10",
+        "ART-CMD-REFERENCE-V11",
+        "ART-CMD-REFERENCE-MCU"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "Q-PREP-RESTORE",
+      "description": "Necessary preparatory recovery: complete READY/committed mailbox, configuration preservation, ordinary Boot full base/unchanged Boot/confirmation/health and erased journal, with decisive originals. Q-TRANSFER follows. This is not the old unobserved post-transfer Q-RESTORE.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs",
+        "prepared-history",
+        "successor-admission"
+      ],
+      "command_ids": [
+        "CMD-Q-PREP-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-Q-PREP-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "Q-TRANSFER",
+      "description": "Independently evaluate original v12 product observations offline under execution-contract section 0.1. Require same-process fresh query/download/runtime/package, full zero-origin 1 MiB App success, exact MCU package/CRC/epoch/baud/clean terminal, one original old-App RAM sample within its original deadline, header context, stack guard/paint, 288 MHz/SysTick/advancing tick and configured WDT, later full target/unchanged Boot/current confirmation/health, and actual final owned-tool/archive closure. The reviewer checks the remaining raw register/guard/health bindings using the unchanged committed pure gates. New offline commands must actually exit 0. This PASS, if earned, is the offline product-evidence evaluation only: v12 original command deadline/exit/action-result remains unobserved and EVIDENCE_GAP, never backfilled. No new physical OTA, stability campaign, or production release claim.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs",
+        "prepared-history",
+        "successor-admission",
+        "capture-slot-release",
+        "v12-original-matrix",
+        "v12-observations",
+        "offline-admission",
+        "fc-tool",
+        "expected-base",
+        "expected-target",
+        "expected-boot"
+      ],
+      "command_ids": [
+        "CMD-Q-TRANSFER",
+        "CMD-Q-TRANSFER-MCU",
+        "CMD-Q-TRANSFER-RAM",
+        "CMD-Q-TRANSFER-BASE",
+        "CMD-Q-TRANSFER-APP",
+        "CMD-Q-TRANSFER-BOOT",
+        "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "CMD-Q-TRANSFER-CONTEXT-AFTER"
+      ],
+      "artifact_ids": [
+        "ART-CMD-Q-TRANSFER",
+        "ART-CMD-Q-TRANSFER-MCU",
+        "ART-CMD-Q-TRANSFER-RAM",
+        "ART-CMD-Q-TRANSFER-BASE",
+        "ART-CMD-Q-TRANSFER-APP",
+        "ART-CMD-Q-TRANSFER-BOOT",
+        "ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "ART-CMD-Q-TRANSFER-CONTEXT-AFTER"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    }
+  ],
+  "screening_parameters": {
+    "protocol": 2,
+    "runtime_schema": 10,
+    "reference_bytes": 1048576,
+    "package_sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+    "package_crc32": 3263681715,
+    "base_vcode": 30286,
+    "target_vcode": 30287,
+    "window_segments": 24,
+    "data_batch_frames": 12,
+    "calibration_ack_timeout_ms": 2000,
+    "max_retries": 5,
+    "foreground": true,
+    "bauds": [
+      921600
+    ]
+  },
+  "performance_gates": [
+    {
+      "id": "P34-REFERENCE",
+      "metric": "package_bytes",
+      "unit": "bytes",
+      "limit": 1048576,
+      "basis": "protocol_contract",
+      "rationale": "Fixed legal reference ETU, never a small/resumed substitute."
+    },
+    {
+      "id": "P34-RATE",
+      "metric": "effective_payload_throughput",
+      "unit": "KiB/s",
+      "limit": 9,
+      "basis": "product_sla",
+      "rationale": "Original selected-group minimum, not a host timeout."
+    },
+    {
+      "id": "P34-P95",
+      "metric": "BEGIN_to_END_ACK_p95",
+      "unit": "s",
+      "limit": 120,
+      "basis": "product_sla",
+      "rationale": "Original required selected-group bound."
+    },
+    {
+      "id": "P34-MAX",
+      "metric": "BEGIN_to_END_ACK_each_max",
+      "unit": "s",
+      "limit": 150,
+      "basis": "product_sla",
+      "rationale": "BLE qualification bound, never an apply/Boot kill timer."
+    },
+    {
+      "id": "P34-RETRANSMISSION",
+      "metric": "clean_unique_DATA_retransmission_fraction",
+      "unit": "fraction",
+      "limit": 0.01,
+      "basis": "protocol_contract",
+      "rationale": "Original retransmission bound with unique DATA denominator."
+    },
+    {
+      "id": "P34-NO-DURABLE",
+      "metric": "no_durable_progress_abort",
+      "unit": "s",
+      "limit": 30,
+      "basis": "protocol_contract",
+      "rationale": "Existing durable watchdog must not be relaxed."
+    }
+  ]
+}

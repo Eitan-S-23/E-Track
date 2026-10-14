@@ -1,0 +1,28 @@
+{
+  "id": "P34-HOST-OWNER-INTERRUPTED-01",
+  "disposition": "EVIDENCE_GAP",
+  "observation_owner": "host-execution-chain",
+  "original_exit_code": null,
+  "original_command_started": true,
+  "physical_ota_completed": true,
+  "original_command_completion_not_observed": true,
+  "original_close_receipt_missing": true,
+  "original_action_result_missing": true,
+  "cause": "Original host owner disappeared during final App readback; underlying cause remains unestablished.",
+  "first_partial_app_read_bytes": 0,
+  "original_deadlines_not_extended": true,
+  "diagnostic_closeout": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\result.json",
+    "bytes": 1011,
+    "sha256": "0e1bf62939dbef4e72b68903c2a82c69e7856ff81f710bb17582eb9c72314914"
+  },
+  "runtime_observations": {
+    "path": ".acceptance-p3-4\\round12\\adjudications\\runtime-observations.json",
+    "bytes": 4985,
+    "sha256": "be9adb37d2dac0152abe1b5e28f9a05be806150c7c7af310edf3c7ee9b5ce8d2"
+  },
+  "missing_product_runtime_originals": false,
+  "original_v12_formal_obligation_not_waived": true,
+  "formal_representation": "Q-TRANSFER NOT_OBSERVED means its full frozen command completion was not observed; it does not mean no physical OTA or no valid runtime evidence. No integer exit code or closed receipt is invented.",
+  "next": "Consume the bound originals for any separately admitted offline successor evaluation; never replay this successful OTA to manufacture a host close receipt. Do not reopen A/B or claim this source-free interruption is a product defect."
+}

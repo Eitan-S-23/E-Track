@@ -1,0 +1,63 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-4-v14",
+  "contract_sha256": "F760EE663F786F474B8BDE0297A8B076C98B86C7D4FC21A8B572B3D6BCB0EB74",
+  "round_id": "P3-4-20261014-candidate-local-closeout",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P34-CANDIDATE-REFERENCE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Await required offline evaluation; no new physical execution."
+    },
+    {
+      "id": "Q-PREP-RESTORE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Await required offline evaluation; no new physical execution."
+    },
+    {
+      "id": "Q-TRANSFER",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Await required offline evaluation; no new physical execution."
+    },
+    {
+      "id": "P34-CANDIDATE-CLOSEOUT",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Await required offline evaluation; no new physical execution."
+    }
+  ],
+  "commands": [],
+  "artifacts": [],
+  "evidence_hashes": {}
+}

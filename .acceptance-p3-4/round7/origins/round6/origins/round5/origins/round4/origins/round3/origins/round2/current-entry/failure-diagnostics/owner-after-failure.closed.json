@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 823315424922700,
+  "ended_monotonic_ns": 823316124313700,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\current-entry\\failure-diagnostics\\owner-after-failure.stdout",
+    "bytes": 13105,
+    "sha256": "84af3896dbfa5463ed7d861755562675e1b5f1c11ce0a75a0fa0d564cf5e1bbd"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\current-entry\\failure-diagnostics\\owner-after-failure.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

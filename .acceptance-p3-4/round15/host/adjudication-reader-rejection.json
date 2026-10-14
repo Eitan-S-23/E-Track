@@ -1,0 +1,17 @@
+{
+  "actual_exit_code": 1,
+  "entry": {
+    "path": ".cache\\p34-local-closeout-20261014\\successor15\\adjudicate.modern-reader.py",
+    "bytes": 25376,
+    "sha256": "98bbfe8ca475632be03b2d8773339be15ec53deffe2252300ce0ed2555ef6fce"
+  },
+  "failed_call": "acceptance_stats.inspect(..., historical=True)",
+  "error_type": "observation_capture.CaptureError",
+  "error": "missing/conflicting runtime configuration",
+  "source": "Observed tool exit from the first one-off adjudication invocation",
+  "scope": "The historical baseline has no modern OTA_EXPERIMENT stamp. Do not synthesize one or relax the committed parser.",
+  "direction": "Use the committed strict envelope and sample readers plus the original hash-bound historical parser report; preserve exclusions and derive the limited timing/frame facts from original producer records.",
+  "formal_matrix_unchanged": true,
+  "formal_commands_replayed": 0,
+  "device_operations": 0
+}

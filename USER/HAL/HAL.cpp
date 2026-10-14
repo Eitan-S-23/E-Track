@@ -1,8 +1,12 @@
+#if defined(P34_EARLY_FAULT_VECTORS)
+extern "C" void p34_enable_runtime_vectors(void);
+#endif
 #include "HAL.h"
 #include "HAL/HAL_OTA_Package.h"
 #include "HAL/HAL_OTA_Staging.h"
 #include "App/Version.h"
 #include "MillisTaskManager/MillisTaskManager.h"
+#include "HAL/ota_pump_cadence.h"
 
 #if CONFIG_DEBUG_RTT_ENABLE
 HAL_RTT_Stream RTTSerial;
@@ -129,11 +133,18 @@ void HAL::HAL_Init()
 #endif
 
 	// USB needs QSPI XIP mode, so init after Qspi_Init
+#if defined(P34_EARLY_FAULT_VECTORS)
+	SD_Init();
+	CONFIG_DEBUG_SERIAL.printf("USB: Initializing...\r\n");
+	Usb_Init();
+	CONFIG_DEBUG_SERIAL.printf("USB: Ready\r\n");
+#else
 	CONFIG_DEBUG_SERIAL.printf("USB: Initializing...\r\n");
 	Usb_Init();
 	CONFIG_DEBUG_SERIAL.printf("USB: Ready\r\n");
 
 	SD_Init();
+#endif
 
   Display_Init();
 	Touch_Init();
@@ -154,11 +165,23 @@ void HAL::HAL_Init()
     taskManager.Register(Memory_DumpInfo, 1000);
 	//taskManager.Register(Touch_Update, 100);
 
+#if defined(TIMER_HAS_CONFIGURABLE_IRQ_PRIORITY) && TIMER_HAS_CONFIGURABLE_IRQ_PRIORITY
+    // UART RX (priority 1) must preempt the periodic power/encoder/audio work.
+    Timer_SetInterruptWithPriority(CONFIG_HAL_UPDATE_TIM, 10 * 1000, HAL_TimerInterrputUpdate, 2, 0);
+#else
     Timer_SetInterrupt(CONFIG_HAL_UPDATE_TIM, 10 * 1000, HAL_TimerInterrputUpdate);
+#endif
     Timer_SetEnable(CONFIG_HAL_UPDATE_TIM, true);
+#if defined(P34_EARLY_FAULT_VECTORS)
+    p34_enable_runtime_vectors();
+#endif
 }
 
 void HAL::HAL_Update()
 {
+#if CONFIG_OTA_ACTIVE_PUMP
+    taskManager.SetIntervalTime(BT_OtaPump,
+        ota_pump_period(OTA_OverlayIsBleOwned(), CONFIG_OTA_BLE_PUMP_PERIOD_MS));
+#endif
     taskManager.Running(millis());
 }

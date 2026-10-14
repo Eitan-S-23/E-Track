@@ -83,6 +83,9 @@ HardwareSerial::HardwareSerial(usart_type* usart)
     , _rxBufferTail(0)
 {
     memset(_rxBuffer, 0, sizeof(_rxBuffer));
+#if CONFIG_OTA_BLE_PROFILE || CONFIG_OTA_LINK_METRICS
+    resetRxDiagnostics();
+#endif
 }
 
 /**
@@ -92,8 +95,21 @@ HardwareSerial::HardwareSerial(usart_type* usart)
   */
 void HardwareSerial::IRQHandler()
 {
+#if CONFIG_OTA_LINK_METRICS
+    const uint32_t rx_start = DWT->CYCCNT;
+#endif
     if(usart_flag_get(_USARTx, USART_RDBF_FLAG) != RESET)
     {
+#if CONFIG_OTA_BLE_PROFILE || CONFIG_OTA_LINK_METRICS
+        uint32_t errors = _USARTx->sts & (USART_PERR_FLAG | USART_FERR_FLAG |
+                                        USART_NERR_FLAG | USART_ROERR_FLAG);
+        if (errors != 0u)
+        {
+            if (_rxErrorEvents != UINT32_MAX) ++_rxErrorEvents;
+            _rxErrorFlags |= errors;
+        }
+#endif
+        // DT already clears RDBF; do not clear a byte arriving in the callback.
         uint8_t c = usart_data_receive(_USARTx);
         uint16_t i = (uint16_t)(_rxBufferHead + 1) % SERIAL_RX_BUFFER_SIZE;
         if (i != _rxBufferTail)
@@ -101,12 +117,31 @@ void HardwareSerial::IRQHandler()
             _rxBuffer[_rxBufferHead] = c;
             _rxBufferHead = i;
         }
+#if CONFIG_OTA_BLE_PROFILE || CONFIG_OTA_LINK_METRICS
+        else
+        {
+            if (_rxBufferDropped != UINT32_MAX) ++_rxBufferDropped;
+        }
+#endif
 
         if(_callbackFunction)
         {
             _callbackFunction(this);
         }
-        usart_flag_clear(_USARTx, USART_RDBF_FLAG);
+#if CONFIG_OTA_LINK_METRICS
+        /* Includes hardware byte capture, ring insertion and the OTA callback;
+         * excludes exception entry/exit and this counter update itself. */
+        const uint32_t cycles = DWT->CYCCNT - rx_start;
+        const uint32_t before = _rxIrqCyclesLo;
+        if (_rxIrqCalls != UINT32_MAX) ++_rxIrqCalls;
+        else _rxTimingOverflow = 1u;
+        _rxIrqCyclesLo += cycles;
+        if (_rxIrqCyclesLo < before) {
+            if (_rxIrqCyclesHi != UINT32_MAX) ++_rxIrqCyclesHi;
+            else _rxTimingOverflow = 1u;
+        }
+        if (cycles > _rxIrqMax) _rxIrqMax = cycles;
+#endif
     }
 }
 
@@ -330,4 +365,3 @@ extern "C" SERIAL_5_IRQ_HANDLER_DEF()
     Serial5.IRQHandler();
 }
 #endif
-

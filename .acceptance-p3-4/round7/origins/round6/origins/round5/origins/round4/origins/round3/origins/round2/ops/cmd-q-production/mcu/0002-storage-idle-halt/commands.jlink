@@ -1,0 +1,14 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+w4 0xE0042008, 0x00001000
+SetBP 0x08040EF8, T, H
+g
+sleep 500
+regs
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round2\ops\cmd-q-production\mcu\0002-storage-idle-halt\sdio.bin", 0x4002C434, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round2\ops\cmd-q-production\mcu\0002-storage-idle-halt\dhcsr.bin", 0xE000EDF0, 0x4
+qc

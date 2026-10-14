@@ -1,0 +1,14 @@
+{
+  "owner_exited": true,
+  "original_failure_preserved": true,
+  "read_only_recovery": {
+    "dap_connected": true,
+    "header_matches_base": true,
+    "vtor": "0x8010800",
+    "dhcsr": "0x1010001",
+    "raw_directory": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round3\\diagnostics\\swd-after-wake\\mcu\\0001-read-only-link-check",
+    "scope": "Read-only post-notification connectivity observation, not full current-state or OTA acceptance"
+  },
+  "qualification_ota_starts": 0,
+  "only_retired_path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-live-device.lock"
+}
