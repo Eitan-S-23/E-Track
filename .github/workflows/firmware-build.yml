@@ -96,6 +96,10 @@ jobs:
       WRANGLER_SEND_METRICS: "false"
       WRANGLER_LOG_PATH: ${{ github.workspace }}/.cache/p41/wrangler-logs
       npm_config_cache: ${{ github.workspace }}/.cache/p41/npm
+      PIP_CACHE_DIR: ${{ github.workspace }}/.cache/p41/pip
+      TMPDIR: ${{ github.workspace }}/.cache/p41/tmp
+      PYTHONDONTWRITEBYTECODE: "1"
+      BSDIFF_EXE: ${{ github.workspace }}/.cache/bsdiff/bin/bsdiff
     defaults:
       run:
         working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/worker
@@ -108,6 +112,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
+      - name: Prepare contained test temporary directory
+        run: mkdir -p "$TMPDIR"
       - name: Install pinned Worker dependencies
         run: npm ci --registry=https://registry.npmjs.org --replace-registry-host=always
       - name: Run script and migration host tests explicitly (not workerd)
@@ -116,6 +122,29 @@ jobs:
         run: npm test -- --reporter=verbose
       - name: Check Worker and shared script types
         run: npm run check
+      - name: Install byte test dependency
+        run: python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0
+      - name: Build the existing vendor bsdiff for this host
+        working-directory: .
+        run: |
+          cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/bsdiff --target bsdiff
+      - name: Check real package generation and approved-envelope replay
+        working-directory: .
+        run: python3 -B tests/ota/test_firmware_pack.py
+      - name: Execute production byte preparation with isolated fixtures
+        id: byte_tests
+        working-directory: .
+        run: node --test tests/ota/test_firmware_release.mjs
+      - name: Preserve development byte fixtures and step originals
+        if: always() && steps.byte_tests.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p41-development-${{ github.sha }}
+          path: .cache/firmware-release-tests/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
 
   build:
     name: Build firmware (arm-none-eabi-gcc)

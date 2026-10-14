@@ -18,6 +18,7 @@ AES key 默认值 = vendor 示例 key（仅开发；生产由 env OTA_AES_KEY=32
   CRC §0.2；上限 §0.5；version_code §0.6（PRE-1）。
 """
 import argparse
+import re
 import hashlib
 import os
 import secrets
@@ -273,13 +274,20 @@ def check_limits(image_len: int, etu_total: int, label: str):
 
 def run_bsdiff(bsdiff_exe: str, old: bytes, new: bytes) -> tuple:
     """调用 bsdiff.exe 产 40B 头 + LZMA 流（-aes 0 不加密，由本工具接管加密）。"""
+    bsdiff_exe = os.path.abspath(bsdiff_exe)
     with tempfile.TemporaryDirectory() as td:
         old_p = os.path.join(td, "old.bin"); new_p = os.path.join(td, "new.bin")
         patch_p = os.path.join(td, "patch.bin")
         with open(old_p, "wb") as f: f.write(old)
         with open(new_p, "wb") as f: f.write(new)
         cmd = [bsdiff_exe, old_p, new_p, patch_p, "-aes", "0"]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        # The vendor tool also writes temp_diff.data in its working directory.
+        proc = subprocess.run(cmd, cwd=td, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace", timeout=300)
+        if (proc.returncode != 0
+                or "Successfully created compressed patch:" not in proc.stdout
+                or re.search(r"(?im)^\s*(error|fatal)\b", proc.stdout + proc.stderr)):
+            raise RuntimeError("bsdiff did not report successful patch creation")
         # 四坑1：bsdiff.exe exit code 恒 0，不看 returncode，看产物
         if not os.path.exists(patch_p):
             sys.stderr.write(f"[err] bsdiff.exe 未产 patch：rc={proc.returncode}\n"
@@ -292,6 +300,27 @@ def run_bsdiff(bsdiff_exe: str, old: bytes, new: bytes) -> tuple:
         return blob[:PATCH_HEADER_SIZE], blob[PATCH_HEADER_SIZE:]
 
 
+def package_nonce(args, key: bytes, plaintext: bytes, *, flags: int,
+                  target_vcode: int, base_vcode: int, base_sha8: bytes) -> bytes:
+    """Replay an existing envelope, never reuse its nonce for different bytes."""
+    reference = getattr(args, "reproduce_from", None)
+    if reference is None:
+        return secrets.token_bytes(16)
+    from etu_unpack import parse_etu_header
+    with open(reference, "rb") as stream:
+        blob = stream.read()
+    info = parse_etu_header(blob)
+    nonce = info["nonce"]
+    payload = aes_ctr_xcrypt(key, nonce, plaintext, encrypt=True)
+    header = build_etu_header(flags, nonce, payload, target_vcode, base_vcode,
+                              base_sha8, key_id=args.key_id)
+    # Full ciphertext equality binds the key and compressed plaintext. Comparing
+    # only the target SHA or a supplied nonce would permit unsafe CTR reuse.
+    if header + payload != blob:
+        raise ValueError("reproduction input differs from the approved package")
+    return nonce
+
+
 def cmd_pack_full(args):
     key = get_aes_key()
     with open(args.app, "rb") as f:
@@ -302,10 +331,12 @@ def cmd_pack_full(args):
     target_vcode = args.target_vcode if args.target_vcode is not None else parse_version_name(args.ver_name)
     # 明文 payload = LZMA-Alone 全量
     plaintext = lzma_alone_encode(app, dict_size=args.lzma_dict)
-    nonce = secrets.token_bytes(16)  # 每包随机（§2.1）
-    payload = aes_ctr_xcrypt(key, nonce, plaintext, encrypt=True)
     flags = FLAG_AES | FLAG_LZMA | FLAG_FULL
     base_sha8 = b"\x00" * 8  # 全量 base_sha8 全 0
+    nonce = package_nonce(args, key, plaintext, flags=flags,
+                          target_vcode=target_vcode, base_vcode=0,
+                          base_sha8=base_sha8)
+    payload = aes_ctr_xcrypt(key, nonce, plaintext, encrypt=True)
     hdr = build_etu_header(flags, nonce, payload, target_vcode, 0, base_sha8,
                            key_id=args.key_id)
     etu = hdr + payload
@@ -335,12 +366,14 @@ def cmd_pack_patch(args):
     native_hdr, lzma_stream = run_bsdiff(bsdiff_exe, old, new)
     norm_hdr = normalize_patch_header(native_hdr, len(lzma_stream), old, new)
     plaintext = norm_hdr + lzma_stream  # §2.2 差分明文 = 40B 内层头 + LZMA 流
-    nonce = secrets.token_bytes(16)
-    payload = aes_ctr_xcrypt(key, nonce, plaintext, encrypt=True)
     target_vcode = args.target_vcode if args.target_vcode is not None else parse_version_name(args.ver_name)
     base_vcode = args.base_vcode if args.base_vcode is not None else parse_version_name(args.base_ver_name)
     base_sha8 = sha256(old)[:8]
     flags = FLAG_AES | FLAG_LZMA | FLAG_DIFF
+    nonce = package_nonce(args, key, plaintext, flags=flags,
+                          target_vcode=target_vcode, base_vcode=base_vcode,
+                          base_sha8=base_sha8)
+    payload = aes_ctr_xcrypt(key, nonce, plaintext, encrypt=True)
     hdr = build_etu_header(flags, nonce, payload, target_vcode, base_vcode, base_sha8,
                            key_id=args.key_id)
     etu = hdr + payload
@@ -379,6 +412,7 @@ def build_parser():
     pfull.add_argument("--ver-name", help="目标 version_name（推导 vcode 用）")
     pfull.add_argument("--lzma-dict", type=int, default=1 << 14, help="LZMA 字典字节，默认 16KB")
     pfull.add_argument("--key-id", type=int, default=1)
+    pfull.add_argument("--reproduce-from", help="Reproduce an identical approved .etu; any byte/input drift fails")
     pfull.set_defaults(func=cmd_pack_full)
 
     ppat = sub.add_parser("pack-patch", help="差分 .etu")
@@ -391,6 +425,7 @@ def build_parser():
     ppat.add_argument("--base-ver-name", help="基版 version_name（推导 base_vcode 用）")
     ppat.add_argument("--bsdiff-exe", help="bsdiff.exe 路径（缺省 bsdiff_lzma_AES128-main/bsdiff/build/bin/bsdiff.exe）")
     ppat.add_argument("--key-id", type=int, default=1)
+    ppat.add_argument("--reproduce-from", help="Reproduce an identical approved .etu; any byte/input drift fails")
     ppat.set_defaults(func=cmd_pack_patch)
     return p
 

@@ -63,3 +63,41 @@ are never inferred from fixtures or local doubles. P4-1 remains in progress.
   is authorized or attempted. Native evidence must come from Linux Actions.
 - Build outputs move from `/tmp/etfw` to the Actions workspace `.cache/etfw`;
   the build inputs, targets and path-length setting are unchanged.
+
+## Milestone 1: Runnable Feedback
+
+- WIP `1735f9d4da8fc423f4fe8364cd1cdd2f333941d7`, run `38630966396`:
+  explicit host script/migration tests 34/34, native workerd 156/156, Worker
+  typecheck and GCC App/Boot build passed. Release job skipped under
+  `publish=false`; no cloud credentials in the development job.
+- Raw ZIP is `.cache/github/batch1-logs.zip` (234558 bytes). Its actual command
+  lines, CLI output, `SQL_REJECT` constraints and separate 34/156 count lines were
+  inspected. Duplicate job/step log copies in the ZIP are not additional tests.
+- Negative originals include bad raw digest/missing artifact migration rejection
+  before SQL writes, R2 collision rejection without overwrite, missing readback,
+  skip-readback CLI exit 2 and actual native D1 ready/uniqueness constraints.
+- Local repaired host run is also 34/34 (exit 0); local typecheck exit 0.
+
+## Batch 2: Byte Preparation
+
+The production preparation script calls the existing finalize, full/patch pack,
+unpack and recovery helper. It checks subprocess exit/stdout, actual candidate
+bytes, raw/base identities, recovery tail/header and same-run GCC App/Boot inputs.
+The P4-2 builder remains the sole registration schema and naming implementation.
+
+`--reproduce-from` reuses an approved envelope only after recomputed header plus
+ciphertext equals every reference byte under the configured key. It is not a
+nonce override; changed plaintext, key, header or corrupt reference fails before
+output. Normal packaging keeps its random nonce. The vendor algorithm is not
+changed. Its scratch cwd is contained and its success stdout is checked.
+
+Local self-tests: production preparation 14/14 (actual Python/vendor processes),
+package/replay 8/8, exits 0. The first Python run had 7 passing cases and one
+harness error caused by `tempfile` caching a deleted test directory; the scoped
+test override restores that cache per case. Original failure is preserved as
+`batch2-pack`, corrected run as `batch2-pack-fixed`; no assertion was weakened.
+Linux byte-generation CI is required before treating the host adapter as tested.
+
+The Windows test artifacts are deliberately synthetic, not an approved formal
+base or a rehearsal. The production transport must obtain and verify actual
+source provenance before calling this offline preparation entry.
