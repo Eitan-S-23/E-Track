@@ -1,0 +1,24 @@
+{
+  "target_verified": true,
+  "mcu": {
+    "path": ".acceptance-p3-4\\round11\\diagnostics\\post-upgrade\\current-target.json",
+    "bytes": 2261,
+    "sha256": "0c90d4cdf0f92fb863b8641ca4091882f8aeb6e92d1db6a3bc6e14a0b92201a1"
+  },
+  "statistics": {
+    "path": ".acceptance-p3-4\\round11\\diagnostics\\post-upgrade\\app-statistics.json",
+    "bytes": 100347,
+    "sha256": "37688ab158f52e3a9ef0c7832a5e8c05257163f882e4e0bcd4424a32699854d5"
+  },
+  "snapshot": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\phone\\salvage\\snapshot-1.jsonl",
+    "bytes": 4813050,
+    "sha256": "743e8e88e79580ffa8c1b6682bc01cc7c63431c68c89b9455bd4ac0d5e1180c6"
+  },
+  "no_reset_flash_ota": true,
+  "old_lock_retained": {
+    "path": ".cache\\p34-live-device.lock",
+    "bytes": 157,
+    "sha256": "540eec0b9dd0697e3de6448865b1edaad18ceddd5aec3003fc41ea16c14c8f0c"
+  }
+}

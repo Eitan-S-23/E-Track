@@ -1,0 +1,5 @@
+{
+  "reason": "Local diagnostic predicate used mKeyguardDelegate; actual dumpsys uses KeyguardServiceDelegate. Preserve all original power/policy receipts; stop owned read-only window, no device retry.",
+  "formal_runner_changed": false,
+  "phone_mutations": 0
+}

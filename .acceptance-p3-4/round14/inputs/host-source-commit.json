@@ -1,0 +1,51 @@
+{
+  "commit": "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+  "parent": "02013607ca38eaf5cff0d5c4fc3de8259fbff916",
+  "tree": "7038ea9de58dba625d487caee57c6dfb130d04b6",
+  "profile_config_blob": "c1fd80a844680ac760ee0e3b9b70b86f84d6b136",
+  "files": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_host.py",
+      "bytes": 13164,
+      "sha256": "a0d98161aadccee0346b8f7438cf65566ae6e72d7cf8cc576641e833d7cc6431"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+      "bytes": 35564,
+      "sha256": "3c524300133818dfed7d056a525ffe044082d0dc5c185aea8a16b98532b89723"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+      "bytes": 139395,
+      "sha256": "848e5e1902982052da0d8be0d5fd6a82c8992e77e0564165f6a673e7191c5cb5"
+    }
+  ],
+  "command_receipts": [
+    {
+      "path": ".cache\\p34-local-closeout-20261014\\source-commands\\git-add.json",
+      "bytes": 681,
+      "sha256": "6ecd6788a51608eb1a3b5dd5d60ab696ee06e5837178f4b2ed7fa85ca8ebecb6"
+    },
+    {
+      "path": ".cache\\p34-local-closeout-20261014\\source-commands\\git-commit.json",
+      "bytes": 627,
+      "sha256": "a3126c37cd3df632ac1316e0f22b6bbe80ae07d6fddef90427ea44e4ec43e77a"
+    }
+  ],
+  "worktree_index_before": {
+    "path": "D:\\github\\my\\E-Track\\.git\\worktrees\\p34-final\\index",
+    "bytes": 616447,
+    "sha256": "a8dbbf93536188c7c0f1b8a93362a88c6d396a2842f06248cbf61b01b9dd6ef3"
+  },
+  "worktree_index_after": {
+    "path": "D:\\github\\my\\E-Track\\.git\\worktrees\\p34-final\\index",
+    "bytes": 616447,
+    "sha256": "e53b18901e79a3dc40f3b3ff1229e1230f8a53877d18775ebdb8b0dacd0cdbd2"
+  },
+  "shared_index_unchanged": true,
+  "shared_main_unchanged": true,
+  "reviewed_bytes_unchanged": true,
+  "device_operations": 0,
+  "push_merge_ci": 0,
+  "external_hook_calls": 0
+}

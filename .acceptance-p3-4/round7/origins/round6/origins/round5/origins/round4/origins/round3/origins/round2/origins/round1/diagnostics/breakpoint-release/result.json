@@ -1,0 +1,35 @@
+{
+  "fpb_words": [
+    609,
+    536870912,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "active_comparators": [],
+  "freeze": 0,
+  "dhcsr": 16842753,
+  "originals": {
+    "fpb": {
+      "path": ".acceptance-p3-4\\round1\\diagnostics\\breakpoint-release\\0001-read-only-fpb\\fpb.bin",
+      "bytes": 40,
+      "sha256": "0599a0b5653dbec1a79e7b8e666487b42d581b6de0dbfe366a4ec0bd07b29a75"
+    },
+    "freeze": {
+      "path": ".acceptance-p3-4\\round1\\diagnostics\\breakpoint-release\\0001-read-only-fpb\\freeze.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    "dhcsr": {
+      "path": ".acceptance-p3-4\\round1\\diagnostics\\breakpoint-release\\0001-read-only-fpb\\dhcsr.bin",
+      "bytes": 4,
+      "sha256": "52a5c4a10657220cac05c63adfa923c7771c55d868a58ee360eb3d1511985c3e"
+    }
+  },
+  "formal_matrix_unchanged": true
+}

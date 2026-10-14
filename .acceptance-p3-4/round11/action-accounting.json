@@ -1,0 +1,17 @@
+{
+  "schema": "p34-action-accounting-v1",
+  "prior_qualification_consumed": 1,
+  "this_round_qualification_consumed": 1,
+  "cumulative_qualification_consumed": 2,
+  "cumulative_qualification_limit": 2,
+  "calibration_consumed": 0,
+  "calibration_limit": 12,
+  "preparatory_restore_completed": 1,
+  "post_qualification_restore_completed": 0,
+  "target": "3.2.87",
+  "target_verified": true,
+  "new_ota_after_failure": 0,
+  "final_campaigns": "NOT_RUN",
+  "failed_capture_retained": true,
+  "old_app_stack_clock_terminal_not_captured": true
+}

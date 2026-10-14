@@ -1,0 +1,37 @@
+{
+  "publicBaseUrl": "https://conventions-harvard-francis-trials.trycloudflare.com",
+  "token": {
+    "keyVersion": 1,
+    "keyHex": "c6de25230097bcce124e8dd028b9c744b3b18ba3513eccff4c76ea42ef42d7b4",
+    "ttlSeconds": 300
+  },
+  "channels": {
+    "stable": "reference"
+  },
+  "releases": {
+    "reference": {
+      "releaseId": "p34-reference",
+      "versionName": "3.2.87",
+      "versionCode": 30287,
+      "releaseTag": "mcu-e-track-at32f435-v3.2.87",
+      "releaseNotes": "P3-4 controlled reference",
+      "targetImageSha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+      "targetHardware": "e-track-at32f435",
+      "minAppVersionCode": 0,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "minBootVersion": 1,
+      "minProtocolVersion": 1,
+      "asset": {
+        "assetId": "p34-reference-patch",
+        "kind": "patch",
+        "fileName": "e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu",
+        "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\cases\\reference-1MiB.etu",
+        "sizeBytes": 1048576,
+        "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+        "baseVersionCode": 30286,
+        "baseImageSha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+      }
+    }
+  }
+}

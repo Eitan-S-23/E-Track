@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 1005630125405900,
+  "ended_monotonic_ns": 1005631761493100,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0003-install-restore\\processes.stdout",
+    "bytes": 14022,
+    "sha256": "30b2fa5296c45fdacf6b696511db788718193c5d8938a263c115df6525482ed5"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0003-install-restore\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

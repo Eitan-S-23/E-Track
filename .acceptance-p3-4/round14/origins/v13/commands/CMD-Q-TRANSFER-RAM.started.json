@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p34-acceptance/metrics.py",
+    "--input",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\metrics.bin",
+    "--binary",
+    "--elf",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf",
+    "--map",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map",
+    "--expect-elf-sha256",
+    "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4",
+    "--expect-map-sha256",
+    "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c",
+    "--package",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\cases\\reference-1MiB.etu",
+    "--expect-epoch",
+    "1724752335",
+    "--expect-baud",
+    "921600"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 1011172960477800,
+  "stdin_sha256": null
+}

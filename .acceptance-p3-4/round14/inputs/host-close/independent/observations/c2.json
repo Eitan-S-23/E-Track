@@ -1,0 +1,85 @@
+[
+  {
+    "case": "normal",
+    "surfaced_type": "RuntimeError",
+    "primary_identity_preserved": true,
+    "secondary_identity_preserved": true,
+    "startup_failure": {
+      "error_type": "RuntimeError",
+      "message": "standard tool failed; inspect original command streams",
+      "notes": []
+    },
+    "reader_close": {
+      "argv": [
+        "modeled-tool"
+      ],
+      "reason": "completed",
+      "stopped_while_running": false,
+      "exit_code": 7,
+      "exit_status": "exited",
+      "started_monotonic_ns": 1,
+      "ended_monotonic_ns": 1052482151648900,
+      "stdout": {
+        "path": ".cache\\p34-host-close-01-callers-review-20261014\\suite\\cases\\network-2iatdx1n\\original-c2-normal-reader.stdout",
+        "bytes": 11,
+        "sha256": "381133571b9fb2e8217eb2147952137073e9511bf01b57b19ae28d722a3887a1"
+      },
+      "stderr": {
+        "path": ".cache\\p34-host-close-01-callers-review-20261014\\suite\\cases\\network-2iatdx1n\\original-c2-normal-reader.stderr",
+        "bytes": 20,
+        "sha256": "575d26652b82a84c17d4a5645a76e848abe231c69112afea7845942043f90e79"
+      },
+      "job_terminated": true,
+      "job_handle_closed": true,
+      "cleanup_complete": true,
+      "cleanup_errors": []
+    },
+    "network_closed": true
+  },
+  {
+    "case": "cleanup-error",
+    "surfaced_type": "RuntimeError",
+    "primary_identity_preserved": true,
+    "secondary_identity_preserved": true,
+    "startup_failure": {
+      "error_type": "RuntimeError",
+      "message": "standard tool failed; inspect original command streams",
+      "notes": [
+        "Secondary process cleanup failure (OSError): modeled original reader close failure",
+        "Process cleanup job_close: OSError: modeled original reader close failure"
+      ]
+    },
+    "reader_close": {
+      "argv": [
+        "modeled-tool"
+      ],
+      "reason": "completed",
+      "stopped_while_running": false,
+      "exit_code": 7,
+      "exit_status": "exited",
+      "started_monotonic_ns": 1,
+      "ended_monotonic_ns": 1052482928337900,
+      "stdout": {
+        "path": ".cache\\p34-host-close-01-callers-review-20261014\\suite\\cases\\network-2iatdx1n\\original-c2-cleanup-error-reader.stdout",
+        "bytes": 11,
+        "sha256": "381133571b9fb2e8217eb2147952137073e9511bf01b57b19ae28d722a3887a1"
+      },
+      "stderr": {
+        "path": ".cache\\p34-host-close-01-callers-review-20261014\\suite\\cases\\network-2iatdx1n\\original-c2-cleanup-error-reader.stderr",
+        "bytes": 20,
+        "sha256": "575d26652b82a84c17d4a5645a76e848abe231c69112afea7845942043f90e79"
+      },
+      "job_terminated": true,
+      "job_handle_closed": false,
+      "cleanup_complete": false,
+      "cleanup_errors": [
+        {
+          "step": "job_close",
+          "type": "OSError",
+          "message": "modeled original reader close failure"
+        }
+      ]
+    },
+    "network_closed": true
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "phase": "prepare",
+  "started_monotonic": 846873.0787174,
+  "deadline_monotonic": 847473.0787174,
+  "lifetime_deadline_monotonic": 850263.0787055,
+  "required_seconds": 960,
+  "available_seconds": 3389.999988100026,
+  "scope": "host observation budget, not transfer timing or PASS"
+}

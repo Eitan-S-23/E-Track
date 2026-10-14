@@ -1,0 +1,464 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-4-v11",
+  "current_contract_sha256": "5EBC5E8676DFE4D12C9492FAA2D6CFE59CF53163C365630710B2FFCADA44A24A",
+  "previous_contract_id": "P3-4-v10",
+  "previous_contract_sha256": "7AE9B1736674D6D2D934DCA0AD1158187EFA0ABD807754D7B32A349DAC5DE65F",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P3-4-20261012-stage1-start-lifecycle-fixed",
+  "previous_round_id": "P3-4-20261012-stage1-host-capture-fixed",
+  "previous_matrix_sha256": "0FE9BE4D0AC85B826E8825692C94FA3723E8E7967B5EEAB8353E51E206959D61",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "successor-admission"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "Q-PREP-RESTORE",
+      "reasons": [
+        "artifact_definition_changed:ART-CMD-Q-PREP-RESTORE",
+        "command_definition_changed:CMD-Q-PREP-RESTORE",
+        "external_input_changed:successor-admission",
+        "input_group_changed:validation",
+        "new_criterion",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "Q-TRANSFER",
+      "reasons": [
+        "command_definition_changed:CMD-Q-TRANSFER",
+        "criterion_definition_changed",
+        "external_input_changed:successor-admission",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "Q-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-Q-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-MAINT",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-MAINT",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-BAUD",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-BAUD",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-BASE",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-BASE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-01",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-01",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-01-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-01-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-02",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-02",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-02-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-02-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-03",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-03",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C115200-03-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C115200-03-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P34-CAL-115200",
+      "reasons": [
+        "command_definition_changed:CMD-S115200",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-MAINT",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-MAINT",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-BAUD",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-BAUD",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-BASE",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-BASE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-01",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-01",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-01-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-01-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-02",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-02",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-02-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-02-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-03",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-03",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C230400-03-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C230400-03-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P34-CAL-230400",
+      "reasons": [
+        "command_definition_changed:CMD-S230400",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-MAINT",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-MAINT",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-BAUD",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-BAUD",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-BASE",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-BASE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-01",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-01",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-01-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-01-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-02",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-02",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-02-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-02-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-03",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-03",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C460800-03-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C460800-03-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P34-CAL-460800",
+      "reasons": [
+        "command_definition_changed:CMD-S460800",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-MAINT",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-MAINT",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-BAUD",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-BAUD",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-BASE",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-BASE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-01",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-01",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-01-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-01-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-02",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-02",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-02-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-02-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-03",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-03",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C921600-03-RESTORE",
+      "reasons": [
+        "command_definition_changed:CMD-C921600-03-RESTORE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P34-CAL-921600",
+      "reasons": [
+        "command_definition_changed:CMD-S921600",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-C115200-01",
+    "CMD-C115200-01-RESTORE",
+    "CMD-C115200-02",
+    "CMD-C115200-02-RESTORE",
+    "CMD-C115200-03",
+    "CMD-C115200-03-RESTORE",
+    "CMD-C115200-BASE",
+    "CMD-C115200-BAUD",
+    "CMD-C115200-MAINT",
+    "CMD-C230400-01",
+    "CMD-C230400-01-RESTORE",
+    "CMD-C230400-02",
+    "CMD-C230400-02-RESTORE",
+    "CMD-C230400-03",
+    "CMD-C230400-03-RESTORE",
+    "CMD-C230400-BASE",
+    "CMD-C230400-BAUD",
+    "CMD-C230400-MAINT",
+    "CMD-C460800-01",
+    "CMD-C460800-01-RESTORE",
+    "CMD-C460800-02",
+    "CMD-C460800-02-RESTORE",
+    "CMD-C460800-03",
+    "CMD-C460800-03-RESTORE",
+    "CMD-C460800-BASE",
+    "CMD-C460800-BAUD",
+    "CMD-C460800-MAINT",
+    "CMD-C921600-01",
+    "CMD-C921600-01-RESTORE",
+    "CMD-C921600-02",
+    "CMD-C921600-02-RESTORE",
+    "CMD-C921600-03",
+    "CMD-C921600-03-RESTORE",
+    "CMD-C921600-BASE",
+    "CMD-C921600-BAUD",
+    "CMD-C921600-MAINT",
+    "CMD-Q-PREP-RESTORE",
+    "CMD-Q-RESTORE",
+    "CMD-Q-TRANSFER",
+    "CMD-S115200",
+    "CMD-S230400",
+    "CMD-S460800",
+    "CMD-S921600"
+  ],
+  "required_artifacts": [
+    "ART-CMD-C115200-01",
+    "ART-CMD-C115200-01-RESTORE",
+    "ART-CMD-C115200-02",
+    "ART-CMD-C115200-02-RESTORE",
+    "ART-CMD-C115200-03",
+    "ART-CMD-C115200-03-RESTORE",
+    "ART-CMD-C115200-BASE",
+    "ART-CMD-C115200-BAUD",
+    "ART-CMD-C115200-MAINT",
+    "ART-CMD-C230400-01",
+    "ART-CMD-C230400-01-RESTORE",
+    "ART-CMD-C230400-02",
+    "ART-CMD-C230400-02-RESTORE",
+    "ART-CMD-C230400-03",
+    "ART-CMD-C230400-03-RESTORE",
+    "ART-CMD-C230400-BASE",
+    "ART-CMD-C230400-BAUD",
+    "ART-CMD-C230400-MAINT",
+    "ART-CMD-C460800-01",
+    "ART-CMD-C460800-01-RESTORE",
+    "ART-CMD-C460800-02",
+    "ART-CMD-C460800-02-RESTORE",
+    "ART-CMD-C460800-03",
+    "ART-CMD-C460800-03-RESTORE",
+    "ART-CMD-C460800-BASE",
+    "ART-CMD-C460800-BAUD",
+    "ART-CMD-C460800-MAINT",
+    "ART-CMD-C921600-01",
+    "ART-CMD-C921600-01-RESTORE",
+    "ART-CMD-C921600-02",
+    "ART-CMD-C921600-02-RESTORE",
+    "ART-CMD-C921600-03",
+    "ART-CMD-C921600-03-RESTORE",
+    "ART-CMD-C921600-BASE",
+    "ART-CMD-C921600-BAUD",
+    "ART-CMD-C921600-MAINT",
+    "ART-CMD-Q-PREP-RESTORE",
+    "ART-CMD-Q-RESTORE",
+    "ART-CMD-Q-TRANSFER",
+    "ART-CMD-S115200",
+    "ART-CMD-S230400",
+    "ART-CMD-S460800",
+    "ART-CMD-S921600",
+    "ART-PLAN-115200",
+    "ART-PLAN-230400",
+    "ART-PLAN-460800",
+    "ART-PLAN-921600"
+  ]
+}

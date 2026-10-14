@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "exec-out",
+    "run-as com.wen.gaia.gaia.p34probe sh -c 'test ! -L files || exit 41; if test -e files; then test \"$(readlink -f files)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files || exit 42; fi; test ! -L files/p34-observations || exit 41; if test -e files/p34-observations; then test \"$(readlink -f files/p34-observations)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations || exit 42; fi; test ! -L files/p34-observations/1791733411743571-151409df12fd3ec70569f908 || exit 41; if test -e files/p34-observations/1791733411743571-151409df12fd3ec70569f908; then test \"$(readlink -f files/p34-observations/1791733411743571-151409df12fd3ec70569f908)\" = /data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1791733411743571-151409df12fd3ec70569f908 || exit 42; fi'"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 856447789584800,
+  "ended_monotonic_ns": 856449364385800,
+  "stdout": {
+    "path": ".cache\\p34-v7-stage1-20261012\\admission-cleanup\\phone\\adb-00073.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p34-v7-stage1-20261012\\admission-cleanup\\phone\\adb-00073.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+    "--input",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\inputs\\reference-v11.jsonl",
+    "--expect-sentinel",
+    "OTAOBS96bb2c74d5ad6ccecaf30e40",
+    "--expect-target",
+    "E3:49:E1:14:D6:CB"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 1005342316056700,
+  "ended_monotonic_ns": 1005345482474600,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round12\\commands\\CMD-REFERENCE-V11.stdout",
+    "bytes": 108608,
+    "sha256": "40b5e686021872c40b25029f35fc3da5f620b99fa274dcb2b1970936f172235c"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round12\\commands\\CMD-REFERENCE-V11.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

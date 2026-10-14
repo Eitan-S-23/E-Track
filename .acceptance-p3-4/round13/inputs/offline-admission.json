@@ -1,0 +1,17 @@
+{
+  "authority": "Existing user-approved P3-4 independent acceptance and original-evidence reuse under execution-contract section 0.1; latest continuation explicitly requests completion without unnecessary intervention.",
+  "governance_commit": "cb317affcd291695f42271084b4b305b0d7e6f8b",
+  "unique_spec": "docs/ota-prompts/prompt-P3-4-experiment.md at the governance revision",
+  "evaluation_form": "New independently EXECUTED offline evaluation of already captured observations. Not a REUSED physical Q-TRANSFER PASS and not a new OTA.",
+  "product_requirements_unchanged": true,
+  "v12_original_closeout_requirement_not_waived": true,
+  "v12_exit_code_stays_unknown": true,
+  "v11_harness_failure_preserved": true,
+  "new_device_actions": 0,
+  "cumulative_physical_qualifications": 3,
+  "additional_physical_allowance": 0,
+  "original_terminal_deadline_still_required": true,
+  "final_readback_context": "The later diagnostic full readback is explicitly later; it corroborates the completed target, not timely completion of the interrupted v12 collector.",
+  "closure": "Existing diagnostic process/port and exact archive receipts prove final owned-tool closure. No recreated v12 closed.json or action result.json.",
+  "scope": "Candidate evidence/local runtime safety only. P5-1 final 30/30 and four hours, P3-5 backend recovery, and future host-owner lifecycle qualification remain separate."
+}

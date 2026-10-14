@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0011-restore-mailbox-b\\settings.jlink",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0011-restore-mailbox-b\\sdk.log",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0011-restore-mailbox-b\\commands.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 935176198786100,
+  "ended_monotonic_ns": 935176573746200,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0011-restore-mailbox-b\\commander.stdout",
+    "bytes": 2259,
+    "sha256": "b46f12b0f2079f5fc5a023994dc29e57ad19ec04ec9806a6b7e846f130489855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0011-restore-mailbox-b\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

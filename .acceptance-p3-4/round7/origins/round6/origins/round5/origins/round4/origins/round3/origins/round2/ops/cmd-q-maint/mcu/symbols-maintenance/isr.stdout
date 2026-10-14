@@ -1,0 +1,15 @@
+
+D:\github\my\E-Track\.cache\p34-final\.cache\p34-maintenance-build2\b\app-gcc\X-Track-App-GCC.elf:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+0804c974 <ota_ble_session_isr_active>:
+ 804c974:	b120      	cbz	r0, 804c980 <ota_ble_session_isr_active+0xc>
+ 804c976:	f890 01ac 	ldrb.w	r0, [r0, #428]	@ 0x1ac
+ 804c97a:	3800      	subs	r0, #0
+ 804c97c:	bf18      	it	ne
+ 804c97e:	2001      	movne	r0, #1
+ 804c980:	4770      	bx	lr
+
+Disassembly of section RAMCODE:

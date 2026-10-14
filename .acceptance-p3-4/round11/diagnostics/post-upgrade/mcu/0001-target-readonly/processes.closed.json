@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 935798966972700,
+  "ended_monotonic_ns": 935799515308800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round11\\diagnostics\\post-upgrade\\mcu\\0001-target-readonly\\processes.stdout",
+    "bytes": 13148,
+    "sha256": "3527710f375b1b001072a932648b1683773f06ba37e5a1b8709c9dfa5f23bc88"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round11\\diagnostics\\post-upgrade\\mcu\\0001-target-readonly\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

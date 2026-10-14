@@ -1,0 +1,44 @@
+{
+  "time": "2026-09-22T10:02:31.277613+00:00",
+  "summary": {
+    "schema": 1,
+    "captureId": "1790069222136425-4417abd1b3a1edf70e23eac9",
+    "sentinel": "OTAOBS555aebbd12536a63ba1dd537",
+    "target": "E3:49:E1:14:D6:CB",
+    "pid": 21272,
+    "platform": "android",
+    "records": 9146,
+    "producerLines": 9143,
+    "input": {
+      "packageSha256": "da82725792afeb88b353de7c595596eafa47f1c1db9bfa4905803693b159d600",
+      "packageBytes": 284643,
+      "currentVersionCode": 30206,
+      "currentImageSha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+      "targetVersionCode": 30207,
+      "targetImageSha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+      "deviceAddress": "e3:49:e1:14:d6:cb",
+      "appLifecycle": "resumed"
+    },
+    "outcome": "completed",
+    "rawSha256": "5f01e04c2b4039596908dd1d08c33d7434d7d9ce56b7ace1cdebf95a2d6ee24d",
+    "eligibleForThreshold": false,
+    "independentAcceptance": "NOT_RUN",
+    "scope": "envelope/identity integrity only; original timing/grouping gates still required",
+    "unwrappedSha256": "eefd24d05af3a66b576ec7af1baf29e416230da224b681244a215cada431fa9b",
+    "sourcePath": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\finished\\snapshot.jsonl"
+  },
+  "pid": 21272,
+  "remote": "files/p34-observations/1790069222136425-4417abd1b3a1edf70e23eac9",
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681577975\\contents\\run-3063f6263dad49009cd2f9de5efd52bb\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131603378,
+    "sha256": "8980d854d7f4c02727455d3b88d1fff44340b6225d095cdcf167e8d8e6d34b94"
+  },
+  "parser": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+    "bytes": 84728,
+    "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7"
+  },
+  "parser_exit": 0,
+  "independent_acceptance": false
+}

@@ -1,0 +1,34 @@
+{
+  "classification": "HARNESS_COMMAND_PATH_ERROR_WITH_INCOMPLETE_CRITERIA",
+  "original_failure": {
+    "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER-BASE.closed.json",
+    "bytes": 930,
+    "sha256": "2fa9e06f7ea1074f319267f771d2786d3d52c8a3663e4d627a155cfe2d4f0fdf"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER-BASE.stderr",
+    "bytes": 103,
+    "sha256": "dd3db4550900d6edc3168974593eee4f04056efe7522b966c4566b18a3a13a66"
+  },
+  "actual_exit": 2,
+  "both_inputs_exist": true,
+  "exact_input_bytes_equal": true,
+  "input_sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+  "previous_native_path_success": {
+    "path": ".acceptance-p3-4\\round13\\commands\\CMD-Q-TRANSFER-BASE.closed.json",
+    "bytes": 869,
+    "sha256": "8ced77761db079f32b4901f4e714ae04ee37d0e990da0b20824d879cd087ad69"
+  },
+  "diagnosis": "fc.exe cannot open the POSIX-spelled filenames; identical files have a prior successful native absolute-path comparison.",
+  "current_round_result": "EVIDENCE_GAP",
+  "reason": "Q-TRANSFER is incomplete: the saved FC failure stopped the remaining commands. No missing command exit or artifact is fabricated to label the whole criterion FAIL.",
+  "next_scope": "Correct only the seven FC filename spellings in a direct successor; preserve this attempt, reuse the complete reference PASS, and execute the standard minimum offline plan.",
+  "authority": {
+    "path": ".cache\\p34-local-closeout-20261014\\metadata-correction-authorization.json",
+    "bytes": 1681,
+    "sha256": "67928af25f04f521ed3a9f3efca4905e78374e0ae9c6e184055d68c8c37948b3"
+  },
+  "no_new_product_failure": true,
+  "physical_device_operations": 0,
+  "qualification_total": 3
+}

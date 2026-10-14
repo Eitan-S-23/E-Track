@@ -1,0 +1,30 @@
+{
+  "action": "install",
+  "inputs": {
+    "path": ".cache\\p34-live-inputs1\\inputs.json",
+    "bytes": 11635,
+    "sha256": "ae48a2f2f836651dd9e02bb70485696bb89f4f1ed203d3d71c6cb021335786b3"
+  },
+  "argv": [
+    "Tools/ota/p34-acceptance/live.py",
+    "install",
+    "--inputs",
+    "D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json",
+    "--out",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round1/ops/cmd-q-base",
+    "--role",
+    "initial",
+    "--install-role",
+    "base",
+    "--seconds",
+    "3390",
+    "--contract",
+    "docs/acceptance-contracts/P3-4-v1.contract.json",
+    "--matrix",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round1/evidence-matrix.json",
+    "--command-id",
+    "CMD-Q-BASE"
+  ],
+  "started_monotonic_ns": 806370221181300,
+  "formal_acceptance": false
+}

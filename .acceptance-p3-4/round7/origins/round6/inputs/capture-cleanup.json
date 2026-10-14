@@ -1,0 +1,1538 @@
+{
+  "source": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-authorized-capture-cleanup-20261011",
+  "receipt": "admission/capture-cleanup/result.json",
+  "originals": [
+    {
+      "path": "admission\\capture-cleanup\\authorized-deletion.json",
+      "bytes": 1045,
+      "sha256": "53AF3FF5786796F308311517BC3065899CF0E3EA8B1854D6C4633B3E42538A63"
+    },
+    {
+      "path": "admission\\capture-cleanup\\owner-lock.original.json",
+      "bytes": 156,
+      "sha256": "A8A68BF2A9BA89DB67E00B5DBCBACA58B355820360C2CE6ED7097BA90D096A4B"
+    },
+    {
+      "path": "admission\\capture-cleanup\\owner-processes.closed.json",
+      "bytes": 639,
+      "sha256": "0FC6E3D0E2FE22DBF09A348C96D786141C2DE5DCAA9E73CAF6D500CE4D7EDD77"
+    },
+    {
+      "path": "admission\\capture-cleanup\\owner-processes.started.json",
+      "bytes": 182,
+      "sha256": "A99EB622EC385301083946BAD6EF09210DC12C0B1EA65BF8EC27EAFF82E4C3DD"
+    },
+    {
+      "path": "admission\\capture-cleanup\\owner-processes.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\owner-processes.stdout",
+      "bytes": 13325,
+      "sha256": "9503EA66BC7BFA382D4CD3E48F1FEF64266DF6A7FF3B29ACA88242A11AE59B20"
+    },
+    {
+      "path": "admission\\capture-cleanup\\preflight.json",
+      "bytes": 1878,
+      "sha256": "3B8FEB5A1B28D383284A429393BF98EFC756B97E10980CA105A89AF07621D400"
+    },
+    {
+      "path": "admission\\capture-cleanup\\reconciled-owner.json",
+      "bytes": 232,
+      "sha256": "CD61179E60D157D5A073F18B70783CD4E4EE5DD34B4988ADA29DD3289A895798"
+    },
+    {
+      "path": "admission\\capture-cleanup\\result.json",
+      "bytes": 1042,
+      "sha256": "CF5E195463DEC38D64EE5E1B99FA83C494AD42B23EBB05B396BF7E432B16D49E"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00001.closed.json",
+      "bytes": 739,
+      "sha256": "C66131B1898C95DBA32EAE2DEC5658BA72F47A0735C873FAC56083FC912F6A33"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00001.started.json",
+      "bytes": 283,
+      "sha256": "313F0A8624F0A3009242480DE53597DDC560CAE6E5B48769414DDBBA64059E5E"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00001.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00001.stdout",
+      "bytes": 17,
+      "sha256": "38FE124C6914E84BA8BD93D43F8FCFDFA89CE8FBC40F71C4594EDE0651577DDD"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00002.closed.json",
+      "bytes": 763,
+      "sha256": "66A3128B7D09EDB7368F32185F3319F44D5029A5ADB1E23602ECC8BCFDE8701D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00002.started.json",
+      "bytes": 308,
+      "sha256": "90EF7EE5FFA25297CF102263475D3D2AC81C6434EF5362B2E1755AC1B778917D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00002.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00002.stdout",
+      "bytes": 8,
+      "sha256": "68B523CB3BE9B39FF8A483E481D51CFC671301456FF81F13F09E852EC7E82F4C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00003.closed.json",
+      "bytes": 783,
+      "sha256": "E48F33CFEFF7652A569FBCF6A0FB80168566AA1C33C9E34742CB06911CA4072F"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00003.started.json",
+      "bytes": 327,
+      "sha256": "9059D2393401A4354468E6DD3E912F2AFC396EB0FA761EE73D811DC6E8E65C59"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00003.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00003.stdout",
+      "bytes": 36,
+      "sha256": "035DC32613F9BFFF98314D11AEB2BC652D93D7628DD4D70FDAD2CB4D70D202FF"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00004.closed.json",
+      "bytes": 775,
+      "sha256": "649FDF737E74EA2894D636079BA7A1124985CF60362A8375285C6820C3D421F8"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00004.started.json",
+      "bytes": 318,
+      "sha256": "729F2DDBC31C01BA31A662DEFD027F01E4EEC5F6FB672B5C316665703223C833"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00004.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00004.stdout",
+      "bytes": 107,
+      "sha256": "BBC458CCF25083F5513C03008A10C480F9B7F3D8C64D475859F081816EDC060B"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00005.closed.json",
+      "bytes": 850,
+      "sha256": "4E1EF230799F75EA3A784DD401307E264F3AAE2E37592F0362FE732DD2135336"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00005.started.json",
+      "bytes": 393,
+      "sha256": "65DBCED793C7CC8D9835F6E289456AE9EDFEA7BDDD2EE7CE3582B9AFDE632B45"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00005.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00005.stdout",
+      "bytes": 165,
+      "sha256": "13BBF61F500955F9BDFE64B6F18FFA72D993011742B12A6BCC00B157E7916C99"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00006.closed.json",
+      "bytes": 771,
+      "sha256": "6C7C0D48E14E1F7BF4BDE7129998F92CAB1E5F78BBC746DD6363692D36B92E12"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00006.started.json",
+      "bytes": 316,
+      "sha256": "CA70B270A3E5453AB7EAD4106C281113AFF5C0137411523B78A391837E0866D2"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00006.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00006.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00007.closed.json",
+      "bytes": 790,
+      "sha256": "7B97392A21C7786C755AE5E9D6B7B91DA6321254202BF0D0947FBAF202DFD633"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00007.started.json",
+      "bytes": 334,
+      "sha256": "2C541AAC6F1398481CDF7A705B1B2E76B8FB88E0C4A57696133C23C51321C2D6"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00007.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00007.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00008.closed.json",
+      "bytes": 1140,
+      "sha256": "A643105DEF3BFE8DA73FDDA82EFFF970EE601F4191D68F1FD3662BD1AF7759DF"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00008.started.json",
+      "bytes": 685,
+      "sha256": "CAFE9C05C12BFAFE61F1FA62DD440E5FCE6483823EECF5C157C211DDDB0AAF0B"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00008.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00008.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00009.closed.json",
+      "bytes": 854,
+      "sha256": "AD03F0BBD0D434DD0E3A44394EA1AE9F9C08D822F583ADC9ADB0BC1F4E4645FD"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00009.started.json",
+      "bytes": 399,
+      "sha256": "A428FC95C1CE90F6C24C1FF3E15EB72BCDDA5D9E0CB54415BF42D5B39E4CACCB"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00009.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00009.stdout",
+      "bytes": 3,
+      "sha256": "8A798890FE93817163B10B5F7BD2CA4D25D84C52739A645A889C173EEE7D9D3D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00010.closed.json",
+      "bytes": 806,
+      "sha256": "7B84499E507EC7B880E8689396BDC17CD395DA155910F1C7E8886BB0E778BDA7"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00010.started.json",
+      "bytes": 349,
+      "sha256": "8C38BF27D8618BAE499FDF1BE40908BD1DEC15D99B40FD00FA13CE9CCE41DDCC"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00010.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00010.stdout",
+      "bytes": 336,
+      "sha256": "69BDF3BC7D319214DC3444186B1E2E6406B79FD23DBD8569DC0C66F7A003774C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00011.closed.json",
+      "bytes": 790,
+      "sha256": "BD4989378F5B38A69402DC927D0700E06A41AA4B6ED6B99B71398373CD7BA7C7"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00011.started.json",
+      "bytes": 334,
+      "sha256": "AFED16510586A18CC446C90AE1CC89D0532601154D65A5AA09DA6D8FDD26E75D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00011.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00011.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00012.closed.json",
+      "bytes": 1950,
+      "sha256": "880ED77A0BEFA6B06DF79ADEEA6A94ADD79902D2C30E509D93777439583D691F"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00012.started.json",
+      "bytes": 1495,
+      "sha256": "A8F261D3E2191E47CA6E3578CFD12393FCAED112F2DD131A00C01BF58AFEA4E9"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00012.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00012.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00013.closed.json",
+      "bytes": 863,
+      "sha256": "12C95F19208B1876132F43721F174B131E0534391D1584476D4977445F2E53B0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00013.started.json",
+      "bytes": 408,
+      "sha256": "BD5F236866F023F50697E1C1E1FFB9524E8FE830AAA73B3A48647447A2447B50"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00013.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00013.stdout",
+      "bytes": 4,
+      "sha256": "E10726F2A9B7F9E3F2769F8419135018C030DC3CD5570FAED34EBC178D142434"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00014.closed.json",
+      "bytes": 858,
+      "sha256": "AFB4B5C1907D6F1EB453A27C93F27317F3185A61E10F07017F741E0798248FE0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00014.started.json",
+      "bytes": 401,
+      "sha256": "11FEDB40F5E8CE6E38904DB1645245B2DD2E12F81E421F0D494F663777D38440"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00014.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00014.stdout",
+      "bytes": 237,
+      "sha256": "9722218CA5119E9F03BCB967C402E796D9FA3248316F44047820DE4EA4D2AD32"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00015.closed.json",
+      "bytes": 790,
+      "sha256": "B4491835B1B669352C25DE5840FB729215A165B6C880804487542E9626D8F30A"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00015.started.json",
+      "bytes": 334,
+      "sha256": "48DA6DD641E0CD937CF7B26A9D351D1C73F0E6301D283CB3D7FB11DB44C5219D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00015.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00015.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00016.closed.json",
+      "bytes": 1950,
+      "sha256": "62C074AE241470D07A0DC2D9B6AA470C5039BAAB66C6D4C2B5C431FD4A567F7F"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00016.started.json",
+      "bytes": 1495,
+      "sha256": "15817222C157EC37DF08E3823CEA3F7BBAD7E52E896CA81372483A9AC83BBF09"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00016.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00016.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00017.closed.json",
+      "bytes": 863,
+      "sha256": "B75EA354AFBA43E97F98BDBC8E33AA13B275C2C248619341DECF0D3BA45261A3"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00017.started.json",
+      "bytes": 408,
+      "sha256": "9F15FB65C20E111B3A3D70311307785B3CDB9D8B629DDA6423E5036570AF6040"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00017.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00017.stdout",
+      "bytes": 4,
+      "sha256": "3FD73C76DBB0414BE1E7F5AD353AE43C89C55454ADAD30F8D0F0A74D8F702708"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00018.closed.json",
+      "bytes": 858,
+      "sha256": "6048430FCEF15C698926B45D39DE65E14BE0ACAA38FA4261E10FDF2DD0D47A09"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00018.started.json",
+      "bytes": 401,
+      "sha256": "9071CA621C5AB3007F3FCD38752D28CA78F1049C0AC490B89C3E4454AD31E8A5"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00018.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00018.stdout",
+      "bytes": 251,
+      "sha256": "140FBAA7968BCECC78319C2B968B255BD7D247BFF878078DCC3518C62C94DB58"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00019.closed.json",
+      "bytes": 790,
+      "sha256": "A3AECAD999F1C2DFDB3367B6C37C72E4ED74052A577578FAAEABD150910EE5C0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00019.started.json",
+      "bytes": 334,
+      "sha256": "54EA3226779FB7334302917A90CF5C7751F0F859726584991C96735E49E26CA0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00019.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00019.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00020.closed.json",
+      "bytes": 1950,
+      "sha256": "3684657FB9A45ED710DEC8434BC9AE8EC7EB3A0365C0DFE8A6BDD09270C95E31"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00020.started.json",
+      "bytes": 1495,
+      "sha256": "57E858FB91298B3F0AF1928C48E05C27AF536872AEB4278B45F9868C5E98B2C4"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00020.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00020.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00021.closed.json",
+      "bytes": 863,
+      "sha256": "DBE00CBB0610FAB0D306912577AD745208756345467942F2DFE1A59C05B44266"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00021.started.json",
+      "bytes": 408,
+      "sha256": "BBC810E4D441E5C60E8740471BB1F12949E821593495EEFC935ED0F079A52B01"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00021.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00021.stdout",
+      "bytes": 4,
+      "sha256": "935C13C9DD91BE5099B33B68EB3E7BAE188757853DFDFF01AC9E0FDA758E8552"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00022.closed.json",
+      "bytes": 858,
+      "sha256": "35E4B72777254046E855415FABE5844647317B2989B34989DD8EEBE9B2520DA2"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00022.started.json",
+      "bytes": 401,
+      "sha256": "D1C252B83C88D77426DD2020FADA21EA1D5034FBE9BD65EC9C11A24222A56458"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00022.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00022.stdout",
+      "bytes": 254,
+      "sha256": "D3027589E956D48C57AB91A33B876737C072E84388EB85D0F74B74CA599239B3"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00023.closed.json",
+      "bytes": 790,
+      "sha256": "02D73146C8B07CC058F178CA835769B2C1301AEC3EED00ECB387711A4686BF1E"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00023.started.json",
+      "bytes": 334,
+      "sha256": "5AF12199018DAFE4EC9C7F118E179136CA69585F24646562B7737B3963AE881C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00023.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00023.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00024.closed.json",
+      "bytes": 1950,
+      "sha256": "13B3597F9312D7D8C341D02D1743607A8F0DCD178278ED913D811003D5C2FF33"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00024.started.json",
+      "bytes": 1495,
+      "sha256": "2E483F123876D2B39FDDD5A657EB4D8C511B1769383EE48CD41FE580D807BC19"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00024.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00024.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00025.closed.json",
+      "bytes": 863,
+      "sha256": "D13746332085439C67FCDA19A2A8697A3DD25D0BDF427826715D549E365D11C9"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00025.started.json",
+      "bytes": 408,
+      "sha256": "01866276B731B492F6B3C0D59DAADBE6C64DA89A173EAAB6EE7738656D764217"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00025.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00025.stdout",
+      "bytes": 4,
+      "sha256": "FC68F3B1C9B809CE39D3142D79D18A22DF73914008F0378EB23A487F12C895DE"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00026.closed.json",
+      "bytes": 858,
+      "sha256": "F9157A662509DD8F1A6FF7D8E7C463635DD352BCB68625F556F32B64ECF23EE4"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00026.started.json",
+      "bytes": 401,
+      "sha256": "B0F04F671BB1F761D4258F40EFDA6405D800E310C16EBE61D5130BDF92A14646"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00026.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00026.stdout",
+      "bytes": 234,
+      "sha256": "B5422AD8235DB8E0546B5224E31A7F2DE2F8F9EB73A464186143B551794FF5D1"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00027.closed.json",
+      "bytes": 790,
+      "sha256": "23DA19264FAD40CE4BEECC700D4C8DAF2252F33A9048A9F25F846FDD0D869998"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00027.started.json",
+      "bytes": 334,
+      "sha256": "916054FE771FD0EEDCEB7DA8630A5F08CB5DDE3095BEAB78F0CF94BC49445F73"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00027.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00027.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00028.closed.json",
+      "bytes": 1950,
+      "sha256": "F1A233C3E13176216B35B36A49148EF416554CD1E822F911DD91F90A6C9F24B2"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00028.started.json",
+      "bytes": 1495,
+      "sha256": "CDC4910A94372A05484BCAEB2DCE15E0C7D1057804121D9B6D4F7209CEE6420C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00028.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00028.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00029.closed.json",
+      "bytes": 863,
+      "sha256": "9AFEC1607B056BF7A54A34782A0576B6CB649DD434D3F99133EED99545DC995E"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00029.started.json",
+      "bytes": 408,
+      "sha256": "733A725DFBBCEAC60A0DB27DE771357CF8A4D222E852B275864CD3F87C005427"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00029.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00029.stdout",
+      "bytes": 4,
+      "sha256": "CE8BAFB38615AEB5D44EBBABE78EC14AC35A5DE87BDC5AD5EA82A72656024CE4"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00030.closed.json",
+      "bytes": 858,
+      "sha256": "518F200D88DF4A1540D541FEAB229807984F53907916E9600226465FB35FD5E2"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00030.started.json",
+      "bytes": 401,
+      "sha256": "849A1DCC6D89BF2C96FDB45B5925E375B8344CE3695209988BCC459DEB97351A"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00030.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00030.stdout",
+      "bytes": 255,
+      "sha256": "F49A11D660AA44FFA166C82A683905E779F124A505C28C231DBB1829F33A5945"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00031.closed.json",
+      "bytes": 790,
+      "sha256": "02A28F8238684AC49B1734FC36F5C8C769A14A8A00ECBED13F4CF757CBB10A9E"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00031.started.json",
+      "bytes": 334,
+      "sha256": "BFF55FEF511F7E0338A4B936A044B8A4E7CB1D0C1CF45AA3BACBB2B8855F8701"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00031.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00031.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00032.closed.json",
+      "bytes": 1950,
+      "sha256": "E3E277828A22CD5174BF0769FC77834DD55C958F6E7A85D1579D06A1CC62F873"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00032.started.json",
+      "bytes": 1495,
+      "sha256": "8003CB21D9ED5CBA04ACFD06360747963F506C58ACB019673AC77F53457D73ED"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00032.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00032.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00033.closed.json",
+      "bytes": 863,
+      "sha256": "F238D4667EE46F8025714A4FEE6E5507A8841EAF0B4A25A000014ABB6F1D34BA"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00033.started.json",
+      "bytes": 408,
+      "sha256": "6D5BF1924C9000F6A4D1F720FF974D7270DEDBAD5453DA9799C0EBE4888B2CEB"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00033.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00033.stdout",
+      "bytes": 4,
+      "sha256": "3FD73C76DBB0414BE1E7F5AD353AE43C89C55454ADAD30F8D0F0A74D8F702708"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00034.closed.json",
+      "bytes": 858,
+      "sha256": "00807F9188CAE76F9CF36DB393B9B52307EFA620E6249A04C941B154F98169BF"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00034.started.json",
+      "bytes": 401,
+      "sha256": "F0C63ABD41B01F36788AF8FE2068F6DFE796A6F9B0451D9884DBB6507E2772C0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00034.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00034.stdout",
+      "bytes": 251,
+      "sha256": "AB53E6BDCB6CD0430A6B1D592F005A9593CE4333448A76698DF6F0CE2993D943"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00035.closed.json",
+      "bytes": 790,
+      "sha256": "7316857452175D25F74DCA554F633E16F296C9A8B22DC81200D68B84F95B8075"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00035.started.json",
+      "bytes": 334,
+      "sha256": "4B979662D96F214D5B217E1F60E51D0F766B2165FAB2667A5F5DEB2A85A9D8B2"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00035.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00035.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00036.closed.json",
+      "bytes": 1950,
+      "sha256": "45FA7981958EF19746367A04FD740DD77F934639F8958E4CA1C21DB644701515"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00036.started.json",
+      "bytes": 1495,
+      "sha256": "D9552DFDE76DEA139D94654C3D24BFEF833D23981A4C422C44EBA18F69F44805"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00036.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00036.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00037.closed.json",
+      "bytes": 863,
+      "sha256": "17EA3F4EC03E7B05428544E0792A8B6BC6134315A02CFB2C23EEDE9ED2E151AE"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00037.started.json",
+      "bytes": 408,
+      "sha256": "432EC4C3E398D122B174DF7869F68DD847E2DAA1186AC4346435C349ECAF33A4"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00037.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00037.stdout",
+      "bytes": 4,
+      "sha256": "E4150F95F4C8EE60D27C7E7FBF59F1F3EEBE130E1262CB9EA4788A1A20C109E6"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00038.closed.json",
+      "bytes": 858,
+      "sha256": "83FE1AB20EF1FF5ECEE263B5B93A5E074DB145B6D49B647F1D6E6404ADC06702"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00038.started.json",
+      "bytes": 401,
+      "sha256": "D0A9EF823E2D390FE8A9E7970B79931E569586950268E184C8A1A9E8B42C5938"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00038.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00038.stdout",
+      "bytes": 238,
+      "sha256": "A26D9129BAF8A6D7A961E626AA6799672BB40C63F4B115AC1D010C5D8D294813"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00039.closed.json",
+      "bytes": 790,
+      "sha256": "F0BE5C5C9D6529C34F48B6F703BFFF4AF526DAAE09A652397EAF8249F8ECFBA1"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00039.started.json",
+      "bytes": 334,
+      "sha256": "051C4DBFC2762BE4B1019F0287763BC0327A912C500E19C1B152533B3237030E"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00039.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00039.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00040.closed.json",
+      "bytes": 1950,
+      "sha256": "728A121823020DC54C38A9448FF6BCF2EDEBBDA362E56E99934498B677912FB5"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00040.started.json",
+      "bytes": 1495,
+      "sha256": "28CDAB7E88967CD2B87B4AF333E5F740832CC658286770BDD7F644B6983CEAAA"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00040.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00040.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00041.closed.json",
+      "bytes": 863,
+      "sha256": "5E48E6312C0054AEF9E19EA329239695F34F17B24D541162B172CA6361B841E3"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00041.started.json",
+      "bytes": 408,
+      "sha256": "9DF43AB948D7890E83F9B81B5B78CB62D8D3F94E3707E089DEF1221C157143C9"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00041.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00041.stdout",
+      "bytes": 4,
+      "sha256": "E10726F2A9B7F9E3F2769F8419135018C030DC3CD5570FAED34EBC178D142434"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00042.closed.json",
+      "bytes": 858,
+      "sha256": "40743CF7808F9B6BA2CF5DBB7B97415BFB469DB6E0AFA28CD90AC3220CAAB41F"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00042.started.json",
+      "bytes": 401,
+      "sha256": "0F48044CF067F77DCC5012AF28A8F46838A67EF2552376444652F91673D7B4D8"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00042.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00042.stdout",
+      "bytes": 237,
+      "sha256": "EAA530B2D956B97264E5D92A8EB631397BF9F62A01A806BF8A52A43FCF18DE1D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00043.closed.json",
+      "bytes": 790,
+      "sha256": "7B0B16CF69566E164588C667C18BCF73F76ECA7CDFB57B4042FCFA5459E2CBBA"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00043.started.json",
+      "bytes": 334,
+      "sha256": "EAED153D93367506BF207496B0E085DC95B2B31F756DE3DD349650DA1DB5C542"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00043.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00043.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00044.closed.json",
+      "bytes": 1521,
+      "sha256": "386ED664C639A0314353E538AA60CADBC8226F0FE62D660B11CBC8EA2F5A94EE"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00044.started.json",
+      "bytes": 1066,
+      "sha256": "F909CB8E6273677FC95B4737F84FAD4F06A8FC792F4FFDF8421826BFC402A8F3"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00044.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00044.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00045.closed.json",
+      "bytes": 790,
+      "sha256": "A39565C52BF6FA749473D0DEC7D185226F71ED613E42249622788D877D115433"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00045.started.json",
+      "bytes": 334,
+      "sha256": "292A6E4B74AA95F69B31384CCC2639E04DDE857BF03BE70801BE0B9622BC7029"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00045.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00045.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00046.closed.json",
+      "bytes": 848,
+      "sha256": "E9F9A69BD3037BB3E931F918B2C4BCD613C73DEAAC84B00396CD4527DC8412F1"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00046.started.json",
+      "bytes": 392,
+      "sha256": "5A0B548E3E76FA502CEF5701A72EADC59D75BCB381BE6EEBE59231495D98AF18"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00046.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00046.stdout",
+      "bytes": 30,
+      "sha256": "688943CBCAD5BFF79D0A22B136BF3DD4EEA6E6D2B77A8B0B7A47D470B27E8DC0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00047.closed.json",
+      "bytes": 790,
+      "sha256": "A138A23190BB3DA57BAC8C475A093F7D7303E4CA3D2D68922278C12D28FE97BE"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00047.started.json",
+      "bytes": 334,
+      "sha256": "486FFB569AE96025285C9FA4BD1CEE034AA16917AE3786115E2AE70E29A0AFAE"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00047.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00047.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00048.closed.json",
+      "bytes": 1954,
+      "sha256": "81EDCF814797F01BD43B7CE651812B3C1980FE51043A4E6EAC4C8461DE4F4FAE"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00048.started.json",
+      "bytes": 1499,
+      "sha256": "0D0F69412E1A6F54780665BD97DE0027254F7DA9A3D4EB2DF24C10F6ADFA3EC5"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00048.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00048.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00049.closed.json",
+      "bytes": 864,
+      "sha256": "E4AC876FB282404E38F75C27798B89369A6C108E4FAEF27638A92A09AF5A57AF"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00049.started.json",
+      "bytes": 409,
+      "sha256": "BDADE98AC58AEF7A5879D6D9213E6F07B7299E7B3D953E5EF6A3941F49BE5661"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00049.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00049.stdout",
+      "bytes": 4,
+      "sha256": "AE52ED8EFC8F80657F8CC7AF72C6D75336BDF7654A65585D4569739E1D2CAEC3"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00050.closed.json",
+      "bytes": 859,
+      "sha256": "6F548756422A4D13C7DF98DE76FA1EA46994F5CDC601E658AC185C3E8EA0172B"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00050.started.json",
+      "bytes": 402,
+      "sha256": "6DA23BDC6A8650163B65665EAE95D99E3C6753F51B75F64DADA85D73CC879403"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00050.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00050.stdout",
+      "bytes": 296,
+      "sha256": "12727ADBC757FC144C2BFD158A176A1820A7AC362A399B29B4B1EC70A4BE8C6F"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00051.closed.json",
+      "bytes": 790,
+      "sha256": "5DF3676BBFD672E7DF3E885C84243806D7D2266F55F63881CCF7F58C976B7A99"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00051.started.json",
+      "bytes": 334,
+      "sha256": "9F5C0A16AB7552D071A219FC0D4271D3C65CE534E3CB91DE9DF56E1D445BB7F3"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00051.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00051.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00052.closed.json",
+      "bytes": 1950,
+      "sha256": "3C8D36F18F3DA7826618170BDBB6A33E517ADA2E06B80521484C38C5F721C52A"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00052.started.json",
+      "bytes": 1495,
+      "sha256": "7E12F6A752CB2F473A821F3FFFDA19C8D4596AE6224B08FE0A0F516F7B40E3B8"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00052.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00052.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00053.closed.json",
+      "bytes": 863,
+      "sha256": "63C034427248793BFBA58FCFE2C9507FC2242C692F589E36CEA7B69B043E7720"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00053.started.json",
+      "bytes": 408,
+      "sha256": "5D5DAF746BB78F732C68F0DF06C8C9BB255DE2617465710292C822D3067ED124"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00053.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00053.stdout",
+      "bytes": 4,
+      "sha256": "FC68F3B1C9B809CE39D3142D79D18A22DF73914008F0378EB23A487F12C895DE"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00054.closed.json",
+      "bytes": 858,
+      "sha256": "199570ACF706ACA624FC9404A30AC3B0D7FD969FA31B6FD057A47685B1E05643"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00054.started.json",
+      "bytes": 401,
+      "sha256": "AD1DE56DB96EA665679D1E544BBB4753FA783912A5133348BFDCE394E3E4D194"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00054.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00054.stdout",
+      "bytes": 234,
+      "sha256": "B5422AD8235DB8E0546B5224E31A7F2DE2F8F9EB73A464186143B551794FF5D1"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00055.closed.json",
+      "bytes": 848,
+      "sha256": "5C5E87FEBE466A487414FDD4DF46A86FC5C8A39E97CDB27FDDC577866ED6D055"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00055.started.json",
+      "bytes": 392,
+      "sha256": "A428E66486EC1B5A49C799F8B6F30E3A5BEA40828DC5AC567199B39B95852A61"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00055.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00055.stdout",
+      "bytes": 30,
+      "sha256": "688943CBCAD5BFF79D0A22B136BF3DD4EEA6E6D2B77A8B0B7A47D470B27E8DC0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00056.closed.json",
+      "bytes": 771,
+      "sha256": "4516FA7E2846205C9EFA5EE9DE34E651B9FF16FCEBE8727506A65976ACF40BFC"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00056.started.json",
+      "bytes": 316,
+      "sha256": "4E39C1C44EAF65DA9DCF5D2FA2913DE95872A1AD578C194068660D3CF37BBD8A"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00056.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00056.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00057.closed.json",
+      "bytes": 790,
+      "sha256": "D67CDED3C45C3BF78A1CF488B4768E6CB77519EE750165C1FCBC80A1BB39CFAF"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00057.started.json",
+      "bytes": 334,
+      "sha256": "48FB895A479F2150E57EF20859C7766CCF6B72456A2CF54D37E9CB3A2A62F115"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00057.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00057.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00058.closed.json",
+      "bytes": 1954,
+      "sha256": "08DE3AF7384A88749464DAD779455C6F341867934F9E362103A1506E13791908"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00058.started.json",
+      "bytes": 1499,
+      "sha256": "284A3B5A651E64D9ED3381F6DFD60705853F60DAFB9801AE2ED591E12499C4C4"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00058.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00058.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00059.closed.json",
+      "bytes": 865,
+      "sha256": "36999BFECD24E2AD6417E8C63D2CF4972F52E1646CFECB6F222D341F8A1A422B"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00059.started.json",
+      "bytes": 408,
+      "sha256": "A7732967F97B9976C6204C5DB6728B57412AAEC80EEC60ECCAF134C632B3AD60"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00059.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00059.stdout",
+      "bytes": 144,
+      "sha256": "0A51775FE7532AE72A202F9BA2CA7C7068D0B4C7DD1D5459CD97A084FB1086CF"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00060.closed.json",
+      "bytes": 859,
+      "sha256": "2BC74832907C99086DCE7AFDC635E958C0A5610838CEF049896B51377D2690E4"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00060.started.json",
+      "bytes": 404,
+      "sha256": "3423C8198108349015F96819B927C4F339F0A11D6DD728A608B0F7FEBB6134AA"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00060.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00060.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00061.closed.json",
+      "bytes": 790,
+      "sha256": "284F9A010E38D96A4415BA7E2369E82D644C09DF245FB22EB435A61B6F183F6A"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00061.started.json",
+      "bytes": 334,
+      "sha256": "226E984459316437D290BF71EACABD19825D2B3DC31970294AF917F135AF7C88"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00061.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00061.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00062.closed.json",
+      "bytes": 1950,
+      "sha256": "1B5E758E8876EBEA0011EE7E0E81821F70E0432951BAB030550C2A4C32C2F975"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00062.started.json",
+      "bytes": 1495,
+      "sha256": "C6560FD42133D27A9A64C33985E2D290483ACB278AFF27A73A575AD22C98FF0E"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00062.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00062.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00063.closed.json",
+      "bytes": 864,
+      "sha256": "B94520867D58528D65BB53E964D8D0B8126EF47BC080846169CEFE8B9EF6A3BA"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00063.started.json",
+      "bytes": 407,
+      "sha256": "BB330E3AABDB9DA0DAEF690CC402A102A2DB5F7542C1FA2B1D0BB6DCCF1611E2"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00063.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00063.stdout",
+      "bytes": 143,
+      "sha256": "B260E0F1D2186476DFC3D8F11F3E1B047BD06FFF54EDFD819110D23D88494C7D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00064.closed.json",
+      "bytes": 858,
+      "sha256": "7070D7C7732D616B8285B399FE6E6168BB945C5DF84206E86A3E991AEFFF16CF"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00064.started.json",
+      "bytes": 403,
+      "sha256": "B051CF7679E67222B853DE7E00EB536A789B583BE84D7552F0E7B04ABE182BB1"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00064.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00064.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00065.closed.json",
+      "bytes": 846,
+      "sha256": "9158766DF58B9287B39F09AC53ECE11EE3CEF0A7DB2118AAC1A8DDA6B6C69DF7"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00065.started.json",
+      "bytes": 391,
+      "sha256": "96A5E1529E5E202B398FE89D5B4FC519B188CA5AD08E2097778E7CDA77DE8F11"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00065.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00065.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00066.closed.json",
+      "bytes": 790,
+      "sha256": "0D7C128BF9AEC996D657351B277186E6573B1AC4CF3519497D0510D51A88B8E0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00066.started.json",
+      "bytes": 334,
+      "sha256": "45D21290631EF6CB71FBF4FD711DF2A9C738D4C05F891ED77A42813EBD0A5231"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00066.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00066.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00067.closed.json",
+      "bytes": 1140,
+      "sha256": "B7DAB84EBFF66B2AA09BA389C64407A2E4506B1A6AAC40ABBE9B00AFF34767B6"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00067.started.json",
+      "bytes": 685,
+      "sha256": "D82FAB71B57AD65C6E9B6723042D68182DF8FF4E4E4513EC75809B7F85868E24"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00067.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00067.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00068.closed.json",
+      "bytes": 854,
+      "sha256": "6366D108C5D8EBAA480B83FAB6E736756F16D1CA8845EBDBF95073303CDAB4A6"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00068.started.json",
+      "bytes": 399,
+      "sha256": "8DE88FEC55ABECC9B17A7D2BE8DE52D71F1034CD3B19340DD35F5BA8AC3F49F0"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00068.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00068.stdout",
+      "bytes": 3,
+      "sha256": "8A798890FE93817163B10B5F7BD2CA4D25D84C52739A645A889C173EEE7D9D3D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00069.closed.json",
+      "bytes": 806,
+      "sha256": "E7658BDB5DA24E19377211374E70A783F3E88BBA1A74484C4C8A63C7F5DB6C18"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00069.started.json",
+      "bytes": 349,
+      "sha256": "7F19589C817DFB7D3007B54C7445CA44F6415B912D75C24FEE3DD6F1B35FA371"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00069.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00069.stdout",
+      "bytes": 294,
+      "sha256": "04DD220EFE26552D1DF02B50AB506DB85F78CCB5FDF883AF4CCA1FFDBC7EB456"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00070.closed.json",
+      "bytes": 790,
+      "sha256": "A450BD6A90E32AF9AAA07F5D05F24811D06525006FCDF94FF5F41A3ABB6900A8"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00070.started.json",
+      "bytes": 334,
+      "sha256": "23E0CD8A996070DF1A61B302B24B806C3E36BADC0575F806F631BEA312974606"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00070.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00070.stdout",
+      "bytes": 40,
+      "sha256": "77C843C8C2352AF6A88CCEEF2FF0B8E3DA50B230C1165D2B1B4C8AB3AC1D9B3C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00071.closed.json",
+      "bytes": 1521,
+      "sha256": "991DFA6E34E3A316B7DFFD8EF2DFE8D314DC369E6E2E9BC08B68381C948F5BB2"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00071.started.json",
+      "bytes": 1066,
+      "sha256": "2FC3BA0F5FD5A9D84A43A01B42D3CA27718ED63E4157CF509A4C454A9FFB9DF3"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00071.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00071.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00072.closed.json",
+      "bytes": 896,
+      "sha256": "53D01256A2227340FCBAFC98D82CB1043DB78674BFAD71766F4BF6D1EE39DD0A"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00072.started.json",
+      "bytes": 441,
+      "sha256": "6FB8E18B1B7F9432C7A4DBC6F4A995B3291F103ADB0AB10A718564FD63D2829C"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00072.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-00072.stdout",
+      "bytes": 2,
+      "sha256": "9390298F3FB0C5B160498935D79CB139AEF28E1C47358B4BBBA61862B9C26E59"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-server.closed.json",
+      "bytes": 709,
+      "sha256": "10E358B19398757D158EC75F5A61EA86391B7D015F7DD79FA77AB261893ADBD1"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-server.started.json",
+      "bytes": 233,
+      "sha256": "DC4D4441198D97197D2F53F61990E9824B6D0F076EA8BEB1567626009F778A83"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-server.stderr",
+      "bytes": 1635,
+      "sha256": "3C428265D72EFA68049E42197D15C156B4CC4B6DE5A81D730516A7F6A4883F67"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-server.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-stop.closed.json",
+      "bytes": 702,
+      "sha256": "29CE31FAC989CCADBE251B5FFCDFCE36DCF105936C780CD1B6B0D2B1E7DD6EB7"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-stop.started.json",
+      "bytes": 249,
+      "sha256": "722E70EF69AFECF7D506CC316492ACC5EAE59818079B86B378E4CEE4CBDBE39D"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-stop.stderr",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\adb-stop.stdout",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "admission\\capture-cleanup\\phone\\closed.json",
+      "bytes": 74,
+      "sha256": "C68A97E0104F2098F6FDAE36270CC8D49FAFC512F0EAFA76E3F77FDEC235E0D7"
+    }
+  ],
+  "remote_directory": "/data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1790867452971819-7ff7efab9a8da2f63aa2790a",
+  "scope": "Exact user-authorized inactive header-only two-file prune; seven other captures retained; no OTA."
+}

@@ -1,0 +1,8 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-prep-restore\mcu\0007-restore-mailbox-a\value.bin", 0x200299A8, 0x280
+qc

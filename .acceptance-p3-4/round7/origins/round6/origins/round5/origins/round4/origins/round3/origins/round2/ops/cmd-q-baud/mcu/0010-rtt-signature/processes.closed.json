@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 822503577573800,
+  "ended_monotonic_ns": 822504168087700,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0010-rtt-signature\\processes.stdout",
+    "bytes": 13301,
+    "sha256": "55c3ed1f30a5de4998c1a11af18a23f6670d4906d5911ae705f0b30007452b1b"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0010-rtt-signature\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

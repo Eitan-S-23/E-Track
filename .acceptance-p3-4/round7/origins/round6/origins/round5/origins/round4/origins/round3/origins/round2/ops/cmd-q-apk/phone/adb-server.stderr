@@ -1,0 +1,15 @@
+10-11 15:14:42.217 16168 18728 I adb.exe : auth.cpp:416 adb_auth_init...
+10-11 15:14:42.233 16168 18728 I adb.exe : auth.cpp:152 loaded new key from 'C:\Users\SU\.android\adbkey' with fingerprint 74D7C2E0800CB8C7494D9100D6184550F0C83EC285AA7C60567892FF42DDF9F0
+10-11 15:14:42.233 16168 18728 I adb.exe : auth.cpp:158 load_keys 'C:\Users\SU\.android\adbkey'...
+10-11 15:14:42.235 16168 18728 I adb.exe : auth.cpp:152 ignored already-loaded key from 'C:\Users\SU\.android\adbkey' with fingerprint 74D7C2E0800CB8C7494D9100D6184550F0C83EC285AA7C60567892FF42DDF9F0
+10-11 15:14:42.235 16168 21632 I adb.exe : transport.cpp:335 10ADA4197U001CK: read thread spawning
+10-11 15:14:42.235 16168 12368 I adb.exe : transport.cpp:307 10ADA4197U001CK: write thread spawning
+10-11 15:14:42.243 16168 18728 I adb.exe : transport.cpp:1727 fetching keys for transport 10ADA4197U001CK
+10-11 15:14:42.243 16168 18728 I adb.exe : auth.cpp:468 Calling send_auth_response
+10-11 15:14:42.282 16168 18728 I adb.exe : adb.cpp:179 10ADA4197U001CK: offline
+adb server killed by remote request
+10-11 15:15:27.766 16168 18728 I adb.exe : transport.cpp:1155 kicking transport 016d2938 10ADA4197U001CK
+10-11 15:15:27.766 16168 18728 I adb.exe : transport.cpp:407 BlockingConnectionAdapter(10ADA4197U001CK): stopping
+10-11 15:15:27.784 16168 21632 I adb.exe : transport.cpp:339 10ADA4197U001CK: read failed: Input/output error
+10-11 15:15:27.784 16168 21632 I adb.exe : transport.cpp:1248 10ADA4197U001CK: connection terminated: read failed
+10-11 15:15:27.784 16168 18728 I adb.exe : transport.cpp:425 BlockingConnectionAdapter(10ADA4197U001CK): stopped

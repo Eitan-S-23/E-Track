@@ -1,0 +1,27 @@
+{
+  "command": [
+    "D:\\install\\Git\\cmd\\git.exe",
+    "--no-optional-locks",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+    "-c",
+    "core.fsmonitor=false",
+    "add",
+    "--",
+    "Tools/ota/p34-acceptance/live_host.py",
+    "Tools/ota/p34-acceptance/live_phone.py",
+    "tests/ota/test_p34_live_route.py"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "timeout_seconds": 60,
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 0.395,
+  "log": {
+    "path": ".cache\\p34-local-closeout-20261014\\source-commands\\git-add.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

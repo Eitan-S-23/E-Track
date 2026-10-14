@@ -1,0 +1,20 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\header_before.bin", 0x08010400, 0x60
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\metrics.bin", 0x200521E4, 0x1A4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\published.bin", 0x200521E0, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\guard.bin", 0x20055FE0, 0x20
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\stack.bin", 0x20056000, 0x2000
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\clock.bin", 0x20000110, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\systick.bin", 0xE000E010, 0xC
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\vtor.bin", 0xE000ED08, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\wdt.bin", 0x40003004, 0x8
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\tick0.bin", 0x20004478, 0x4
+sleep 100
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\tick1.bin", 0x20004478, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\ops\cmd-q-transfer\mcu\0003-terminal-before-reboot\header_after.bin", 0x08010400, 0x60
+qc

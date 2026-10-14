@@ -1,0 +1,26 @@
+{
+  "action": "restore",
+  "inputs": {
+    "path": ".acceptance-p3-4\\round12\\inputs\\live-inputs.json",
+    "bytes": 11707,
+    "sha256": "6b926b9f086dd0edcc898c2f77a22cf11f02bd3c427000f3822cc27f3c9d365a"
+  },
+  "argv": [
+    "Tools/ota/p34-acceptance/live.py",
+    "restore",
+    "--inputs",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\inputs\\live-inputs.json",
+    "--out",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore",
+    "--seconds",
+    "3390",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json",
+    "--command-id",
+    "CMD-Q-PREP-RESTORE"
+  ],
+  "started_monotonic_ns": 1005594995896900,
+  "formal_acceptance": false
+}

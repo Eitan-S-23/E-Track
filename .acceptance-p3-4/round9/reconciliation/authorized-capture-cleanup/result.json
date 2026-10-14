@@ -1,0 +1,28 @@
+{
+  "deleted": true,
+  "remaining": 7,
+  "capture": "1791798860874797-a78f29fcaa5f2a572f98029f",
+  "files": [
+    "events.jsonl",
+    "health.json"
+  ],
+  "archived_bytes": 21426,
+  "runtime_restored": true,
+  "retained": [
+    "1790873190640854-e74f259a6cf81bd47609ba5e",
+    "1790882915541398-f0e7c878e47e73001842b7e8",
+    "1790886478814858-966a83c7a649c78702af5243",
+    "1790891079051299-33907bf1f4188996f192722e",
+    "1790895078341757-825e5ceec9021c26eb02cf1e",
+    "1791470681659748-6b319b3ac1f35fcbf637e008",
+    "1791485067506601-646e66bbbe96e9c037f0f0d7"
+  ],
+  "ota_starts": 0,
+  "app_stopped": true,
+  "private_adb_closed": true,
+  "owner_lock_retained": {
+    "path": ".cache\\p34-live-device.lock",
+    "bytes": 156,
+    "sha256": "4252c80094523d39fe48b752bf3edf2a55e29f4d495f3818a1a749bdc2baef6b"
+  }
+}

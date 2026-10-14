@@ -1,0 +1,96 @@
+{
+  "schema": "p34-action-accounting-v1",
+  "round_id": "P3-4-20261012-stage1-host-capture-fixed",
+  "reconciled_at": "2026-10-12T12:34:50.542438+00:00",
+  "contract_sha256": "7ae9b1736674d6d2d934dca0ad1158187efa0abd807754d7b32a349dac5de65f",
+  "action_id": "p34-qualification-01",
+  "command_id": "CMD-Q-TRANSFER",
+  "host_status": "failed",
+  "host_exit_code": 1,
+  "device_status": "completed",
+  "formal_result": "EVIDENCE_GAP",
+  "formal_criterion_result": "NOT_OBSERVED",
+  "counts": {
+    "qualification_ota": {
+      "consumed": 1,
+      "limit": 1,
+      "remaining": 0
+    },
+    "calibration_ota": {
+      "consumed": 0,
+      "limit": 12,
+      "remaining": 12
+    },
+    "restore_actions": 0,
+    "final_30_success_campaign": "NOT_RUN",
+    "final_4h_soak": "NOT_RUN",
+    "final_10_recovery_pairs": "NOT_RUN"
+  },
+  "observed": {
+    "capture_id": "1791806205073776-2639ebf186f273ac86fb0c92",
+    "app_pid": 13122,
+    "initial_durable": 0,
+    "final_durable": 1048576,
+    "transfer_us": 71582792,
+    "throughput_kib_s": 14.305114000023917,
+    "retransmit_frames": 0,
+    "missing_ack_samples": 0,
+    "early_ack_samples": 0,
+    "scope": "One actual qualification transfer, excluded from calibration and final performance statistics.",
+    "snapshot": "diagnostics/no-start/phone/salvage/snapshot-1.jsonl",
+    "statistics": "diagnostics/no-start/app-statistics.json"
+  },
+  "retained": {
+    "target_version": "3.2.87",
+    "target_version_code": 30287,
+    "confirmation": 4,
+    "target_image_sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+    "group16_boot_sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+    "current_state_evidence": "diagnostics/post-upgrade/current-target.json",
+    "phone_capture_deleted": false,
+    "runtime_rolled_back": false,
+    "new_ota_reset_or_flash_after_reconciliation": false,
+    "device_lock": {
+      "path": ".cache/p34-live-device.lock",
+      "value": {
+        "pid": 23844,
+        "out": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\ops\\cmd-q-transfer",
+        "monotonic_ns": 925065160396000
+      },
+      "bytes": 157,
+      "sha256": "574dd381e5e8cdf16b6ab92b2ebe8028cc70528bd19311dbf5b331f5f97fbc2e",
+      "cleared": false
+    }
+  },
+  "missing": [
+    "Same-attempt pre-reboot MCU terminal metrics: package/epoch/actual baud, clean terminal, package CRC.",
+    "Same-attempt pre-reboot MCU clock/WDT and old-App stack guard observations.",
+    "Original successful action result.json; the actual command failed and its result must not be manufactured."
+  ],
+  "decision": {
+    "independent_disposition": "adjudications/p34-v10-disposition.md",
+    "dependent_restore_and_calibration": "NOT_RUN: frozen v10 requires a complete and valid Q-TRANSFER.",
+    "next_owner": "Codex root",
+    "next_step": "Retain the verified target and originals. A reviewed and frozen successor plus actual scope authority is required before changing admission or increasing the consumed qualification limit.",
+    "no_retry_for_host_receipt": true,
+    "no_product_failure_demonstrated": true,
+    "trial5": "Cause unknown; separate investigation remains deferred."
+  },
+  "timing": {
+    "host_start_window_seconds": 120,
+    "start_observed_in_original_window": false,
+    "original_last_health": "ops/cmd-q-transfer/phone/salvage/health.json",
+    "original_command": "commands/CMD-Q-TRANSFER.closed.json",
+    "later_completed_capture": "diagnostics/no-start/phone/salvage/health.json",
+    "communication_gap": "The invitation did not state the 120-second window or its expiry. This does not establish a user-error cause or exact tap time.",
+    "clock_mapping": "No host/App clock subtraction used."
+  },
+  "closure": {
+    "checked_at": "2026-10-12T12:34:50.542438+00:00",
+    "original_owner_pid": 23844,
+    "original_owner_absent": true,
+    "private_adb_listening": false,
+    "current_jlink_processes": [],
+    "original_failure_preserved": true
+  }
+}

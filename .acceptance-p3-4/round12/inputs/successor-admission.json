@@ -1,0 +1,124 @@
+{
+  "source_commit": "02013607ca38eaf5cff0d5c4fc3de8259fbff916",
+  "governance": [
+    {
+      "commit": "cb317affcd291695f42271084b4b305b0d7e6f8b",
+      "path": "docs/ota-prompts/prompt-P3-4-experiment.md",
+      "sha256": "addb873ef5ff8fb93c773563b72c32969d2c5c6a6baa5ba8ecbbfed976edaaff",
+      "original": {
+        "path": ".cache\\p34-v12-candidate-20261013\\draft-build\\governance-0.stdout",
+        "bytes": 9522,
+        "sha256": "addb873ef5ff8fb93c773563b72c32969d2c5c6a6baa5ba8ecbbfed976edaaff"
+      }
+    },
+    {
+      "commit": "cb317affcd291695f42271084b4b305b0d7e6f8b",
+      "path": "docs/acceptance-execution-contract.md",
+      "sha256": "cda0c9538a2253164e1775444cf24ecb1bf6519c922f27cd5b5518b798f5d30c",
+      "original": {
+        "path": ".cache\\p34-v12-candidate-20261013\\draft-build\\governance-1.stdout",
+        "bytes": 47603,
+        "sha256": "cda0c9538a2253164e1775444cf24ecb1bf6519c922f27cd5b5518b798f5d30c"
+      }
+    },
+    {
+      "commit": "cb317affcd291695f42271084b4b305b0d7e6f8b",
+      "path": "docs/ota-spec-decisions.md",
+      "sha256": "0c1c6f777e000bc6261058a9309bf026d2fd99c33adf261baad328e7b5dd8c14",
+      "original": {
+        "path": ".cache\\p34-v12-candidate-20261013\\draft-build\\governance-2.stdout",
+        "bytes": 44495,
+        "sha256": "0c1c6f777e000bc6261058a9309bf026d2fd99c33adf261baad328e7b5dd8c14"
+      }
+    },
+    {
+      "commit": "cb317affcd291695f42271084b4b305b0d7e6f8b",
+      "path": "docs/ota-cross-system-contracts.md",
+      "sha256": "0fa5d49a2efc47cee638707b59a65d0020421bb80778634311c3cdb628d25430",
+      "original": {
+        "path": ".cache\\p34-v12-candidate-20261013\\draft-build\\governance-3.stdout",
+        "bytes": 112378,
+        "sha256": "0fa5d49a2efc47cee638707b59a65d0020421bb80778634311c3cdb628d25430"
+      }
+    }
+  ],
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round12\\admission\\current-target.json",
+      "bytes": 2595,
+      "sha256": "44f372ef962596137aca4d65f57f3faba46a522fadd7ea23de581856120f32b0"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\admission\\phone-admission.json",
+      "bytes": 4263,
+      "sha256": "374da53c1c3e6dbc03b756a60dd08665addc82e27d71ad5b150a3ec77035a797"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\admission\\v11-accounting.json",
+      "bytes": 541,
+      "sha256": "ec45906d48ea5e3a661443ea0eecd230adecc09ce0787d0f4c8768d53d201ac3"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\admission\\host-ab-review.md",
+      "bytes": 7499,
+      "sha256": "785a02deb1af88390a715c8ca8a1fb5fbd7684a8ee15ea75a9bcac57f7e0af34"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\admission\\host-ab-closeout.json",
+      "bytes": 3070,
+      "sha256": "2ab70dad31f50d881ba516ba1d055bf6f10e95a93374e986470e2a8b8a063350"
+    }
+  ],
+  "authorization": "Current user approved this minimum successor and scoped device-pause release on 2026-10-13: at most one new qualification OTA, necessary ordinary-Boot preparatory restoration, and complete capture/verification/closure. No old capture deletion is authorized by this plan.",
+  "prior_qualification_consumed": 2,
+  "additional_qualification": 1,
+  "cumulative_qualification_limit": 3,
+  "preparation": "Retain current target until all admission checks pass. Restore only through the existing verified backup/config/Boot transaction, not App-only downgrade.",
+  "prospective_removed_criteria": [
+    "Q-RESTORE",
+    "C115200-MAINT",
+    "C115200-BAUD",
+    "C115200-BASE",
+    "C115200-01",
+    "C115200-01-RESTORE",
+    "C115200-02",
+    "C115200-02-RESTORE",
+    "C115200-03",
+    "C115200-03-RESTORE",
+    "P34-CAL-115200",
+    "C230400-MAINT",
+    "C230400-BAUD",
+    "C230400-BASE",
+    "C230400-01",
+    "C230400-01-RESTORE",
+    "C230400-02",
+    "C230400-02-RESTORE",
+    "C230400-03",
+    "C230400-03-RESTORE",
+    "P34-CAL-230400",
+    "C460800-MAINT",
+    "C460800-BAUD",
+    "C460800-BASE",
+    "C460800-01",
+    "C460800-01-RESTORE",
+    "C460800-02",
+    "C460800-02-RESTORE",
+    "C460800-03",
+    "C460800-03-RESTORE",
+    "P34-CAL-460800",
+    "C921600-MAINT",
+    "C921600-BAUD",
+    "C921600-BASE",
+    "C921600-01",
+    "C921600-01-RESTORE",
+    "C921600-02",
+    "C921600-02-RESTORE",
+    "C921600-03",
+    "C921600-03-RESTORE",
+    "P34-CAL-921600"
+  ],
+  "scope_change": "OTA-DEC-016 and the approved candidate-only plan replace future four-rate calibration and post-calibration restoration scheduling. Old required criteria/results are not modified or backfilled. Final campaigns belong to P5-1/P3-5, applicability to P5-2.",
+  "runtime_gap": "Only a new transfer-context observation can supply the absent stack/guard/SysTick/tick/WDT originals. Old valid RTT and post-reboot RAM cannot reconstruct them.",
+  "capture_admission": "Eight of eight slots occupied at entry. A separately authorized, archived old-capture slot release must precede freeze/device mutation; v11 stays protected.",
+  "final_state": "Retain verified target 3.2.87, original group16 Boot and confirmation; no unnecessary post-transfer restore."
+}

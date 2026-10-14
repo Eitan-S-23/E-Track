@@ -1,0 +1,65 @@
+{
+  "status": "APPLIED_WITH_EXPLICIT_USER_AUTHORITY",
+  "authority": {
+    "path": ".cache\\p34-local-closeout-20261014\\metadata-correction-authorization.json",
+    "bytes": 1681,
+    "sha256": "67928af25f04f521ed3a9f3efca4905e78374e0ae9c6e184055d68c8c37948b3"
+  },
+  "proposal": {
+    "path": ".cache\\p34-local-closeout-20261014\\metadata-correction-proposal.json",
+    "bytes": 3012,
+    "sha256": "9c461d46fdcad987bbe10e0e752af3157e0f08fad5747eb1ece14b28c52402df"
+  },
+  "originals": [
+    {
+      "path": ".cache\\p34-local-closeout-20261014\\v14-preflight-original.contract.json",
+      "bytes": 58389,
+      "sha256": "f760ee663f786f474b8bde0297a8b076c98b86c7d4fc21a8b572b3d6bcb0eb74"
+    },
+    {
+      "path": ".cache\\p34-local-closeout-20261014\\v14-preflight-original.matrix.json",
+      "bytes": 1902,
+      "sha256": "5ca03b6e247ab344068f1d1224ab4ae56e4dfeb612ce053cadc456dd077f6364"
+    },
+    {
+      "path": ".cache\\p34-local-closeout-20261014\\v14-preflight-original.plan.json",
+      "bytes": 5866,
+      "sha256": "68f8ee344d1dabcde4947548e9c3aca574c19e412cba5e5071924f41b25d45b0"
+    }
+  ],
+  "corrected": [
+    {
+      "path": "docs\\acceptance-contracts\\P3-4-v14.contract.json",
+      "bytes": 59213,
+      "sha256": "7aa4ed3bb760ce0cc0a5acdaaa9e15a85bad30785f73cd0644da29ddbb76cad4"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\P3-4-v14.contract.json",
+      "bytes": 59213,
+      "sha256": "7aa4ed3bb760ce0cc0a5acdaaa9e15a85bad30785f73cd0644da29ddbb76cad4"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\evidence-matrix.json",
+      "bytes": 1902,
+      "sha256": "832d6bf1eb99c5f21871b4a1122915ac5b7f080d67992e65ae9de92921435bd2"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\rerun-plan.json",
+      "bytes": 5866,
+      "sha256": "ba3bd6bb8d708ac32ee536afe4e6dcdf8cf5e4dc731b6c190815bed5df4fcab2"
+    }
+  ],
+  "changed_runner_bindings": [
+    "CMD-CANDIDATE-ARCHIVE-04",
+    "CMD-CANDIDATE-ARCHIVE-07",
+    "CMD-CANDIDATE-ARCHIVE-10",
+    "CMD-CANDIDATE-ARCHIVE-13"
+  ],
+  "failed_preflight_preserved": {
+    "path": ".cache\\p34-local-closeout-20261014\\candidate-host\\lineage-preflight.closed.json",
+    "bytes": 4522,
+    "sha256": "da4dba0aba86bb9205aeb83d0cc5814f6c41b7408f2799df2dca66f573214e81"
+  },
+  "no_gate_argv_source_or_accounting_change": true,
+  "applied_at": "2026-10-14T01:22:26.577326+00:00"
+}

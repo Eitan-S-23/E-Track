@@ -1,0 +1,3251 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-4-v8",
+  "version": 8,
+  "task_id": "P3-4",
+  "parent_contract_sha256": "5C45F031D80BE8DEDAAD325EA00B890F7E84BBD0EEA745D8936943A0A52519F3",
+  "status": "FROZEN",
+  "approved_by": "Codex independent acceptance/root; same-source continuation after observed API DNS recovery",
+  "approved_at": "2026-10-11T17:27:39.782579Z",
+  "implementation_ref": "acceptance/p3-4-v2-20261009@cfe9af88d994c106c6601c6dfd1d59b37fbbdcb1 (local only; no new CI claimed)",
+  "freeze_commit": "cfe9af88d994c106c6601c6dfd1d59b37fbbdcb1",
+  "freeze_tree": "49ce708f23dbf968449fe862b3ad8a130e969853",
+  "profile_config_blob": "c1fd80a844680ac760ee0e3b9b70b86f84d6b136",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "firmware",
+      "profile": "Firmware",
+      "category": "production_source"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "p34-live-inputs",
+      "category": "fixture",
+      "description": "Exact pinned image/package/APK/tool/DLL/read-only-key inventory and authorized device scope. Historical register flags do not assert current state or grant FROZEN status. Live current state must be separately observed.",
+      "fingerprint": "sha256:ae48a2f2f836651dd9e02bb70485696bb89f4f1ed203d3d71c6cb021335786b3",
+      "evidence_path": "inputs/live-inputs.json",
+      "evidence_sha256": "ae48a2f2f836651dd9e02bb70485696bb89f4f1ed203d3d71c6cb021335786b3"
+    },
+    {
+      "id": "prepared-history",
+      "category": "fixture",
+      "description": "Immutable completed provisioning/action history; not a current-tree reuse verdict or live readiness.",
+      "fingerprint": "sha256:ac78d817383dd18e3f97d50ecca568561b2ccea84f7616ca099f2f90d1b645be",
+      "evidence_path": "inputs/prepared-history.json",
+      "evidence_sha256": "AC78D817383DD18E3F97D50ECCA568561B2CCEA84F7616CA099F2F90D1B645BE"
+    },
+    {
+      "id": "capture-cleanup",
+      "category": "fixture",
+      "description": "Exact authorized old capture maintenance; not a transfer or product PASS.",
+      "fingerprint": "sha256:604da43a28298f2b2574bf77a91238934f2d13c3a002a49598b5b3e6d01755ce",
+      "evidence_path": "inputs/capture-cleanup.json",
+      "evidence_sha256": "604DA43A28298F2B2574BF77A91238934F2D13C3A002A49598B5B3E6D01755CE"
+    },
+    {
+      "id": "late-capture-cleanup",
+      "category": "fixture",
+      "description": "Exact authorized inactive late capture cleanup; no transfer PASS.",
+      "fingerprint": "sha256:0e25f9f11ad4383f9e8190f4fcf71948c22bdf03ab30c676453c252915837ef1",
+      "evidence_path": "inputs/late-capture-cleanup.json",
+      "evidence_sha256": "0E25F9F11AD4383F9E8190F4FCF71948C22BDF03AB30C676453C252915837EF1"
+    },
+    {
+      "id": "tunnel-api-dns-recovery",
+      "category": "fixture",
+      "description": "Bounded actual API DNS recovery observation, no device operation.",
+      "fingerprint": "sha256:49b4fc97ff6e8889505d8b9cdd022c2b5735106a26b701acc761c69f4fe18705",
+      "evidence_path": "inputs/tunnel-api-dns-recovery.json",
+      "evidence_sha256": "49B4FC97FF6E8889505D8B9CDD022C2B5735106A26B701ACC761C69F4FE18705"
+    }
+  ],
+  "stage": {
+    "id": "first-live-qualification-and-baud-calibration",
+    "task_completion_allowed": false,
+    "purpose": "Executable first stage of the one approved campaign; no measured baud/P99 is invented to pre-freeze final numeric arguments.",
+    "max_qualification_ota": 1,
+    "max_calibration_ota": 12,
+    "calibration_per_supported_rate": 3,
+    "rates": [
+      115200,
+      230400,
+      460800,
+      921600
+    ],
+    "qualification_excluded_from_statistics": true,
+    "parameter_selection": "For each actually supported rate use exactly its three predeclared zero-start successes with complete valid ACK samples, clean integrity, >=9 KiB/s, P95<=120 s, every run<=150 s and unique-DATA retransmission<=1%. Choose the highest qualifying stable rate; no mixing or replacement of failed attempts. Use that group's nearest-rank P99_us: timeout_ms=clamp(ceil(3*P99_us/1000),500,2000). Freeze the derived integer and rate in a successor before final campaigns.",
+    "successor_required": "After actual qualification/calibration, freeze a direct-successor contract binding the selected numeric baud/timeout, full run IDs, current previous-cell and exact physical disconnect route/checkpoints. Preserve original EXECUTED anchors and compute minimum reruns; do not repeat calibration or change criteria to fit results.",
+    "unsupported_or_failed_cell": "Stop affected dependent actions, retain raw state and do not infer unsupported from silence. A supported-rate failure is not a skip. Any supported-rate subset or changed previous-cell path needs an explicit successor before more device commands; no extra measurement quota is created.",
+    "final_retained_state_this_stage": "Verified base after the last qualified rollback, with phone captures archived and services closed. The final full-task retained target belongs to the later successful campaign.",
+    "remaining_required_not_executed": [
+      {
+        "id": "P34-FINAL-30",
+        "requirement": "One selected same-parameter group: 30/30 complete zero-start successful 1 MiB transfers; >=9 KiB/s, P95<=120 s, every transfer<=150 s, clean unique-DATA retransmission<=1%, maxRetries=5."
+      },
+      {
+        "id": "P34-FINAL-SOAK",
+        "requirement": "One 4-hour continuous-transfer soak with a single host-monotonic observer started before the first cell; preserve action/idle/recovery/failure records, do not use summed App times or long idle as proof; stop new starts at 4 h and complete in-flight apply/readback."
+      },
+      {
+        "id": "P34-FINAL-RECOVERY",
+        "requirement": "Ten actual physical disconnect/recovery pairs, two each at durable 8/64/256/512/768 KiB, one selected parameter/asset group; exact fault route/checkpoint evidence required, no ABORT/force-stop/ordinary-success substitute."
+      },
+      {
+        "id": "P34-FINAL-INTEGRITY",
+        "requirement": "All selected campaign observations require valid clock/metrics/guard, no integrity/unrecoverable failure, actual full target/unchanged group16 Boot/confirmation and complete original App snapshots; retain target safely at final closeout."
+      }
+    ],
+    "calibration_snapshots": [
+      {
+        "id": "p34-cal-115200-01",
+        "command_id": "CMD-C115200-01",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-01/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-115200-02",
+        "command_id": "CMD-C115200-02",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-02/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-115200-03",
+        "command_id": "CMD-C115200-03",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-03/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-230400-01",
+        "command_id": "CMD-C230400-01",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-01/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-230400-02",
+        "command_id": "CMD-C230400-02",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-02/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-230400-03",
+        "command_id": "CMD-C230400-03",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-03/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-460800-01",
+        "command_id": "CMD-C460800-01",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-01/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-460800-02",
+        "command_id": "CMD-C460800-02",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-02/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-460800-03",
+        "command_id": "CMD-C460800-03",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-03/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-921600-01",
+        "command_id": "CMD-C921600-01",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-01/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-921600-02",
+        "command_id": "CMD-C921600-02",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-02/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      },
+      {
+        "id": "p34-cal-921600-03",
+        "command_id": "CMD-C921600-03",
+        "input": "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-03/phone/snapshot.jsonl",
+        "hash_binding_rule": "computed from the actual immutable snapshot before invoking the statistics command"
+      }
+    ],
+    "artifact_source_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+    "resume": {
+      "previous_round_id": "P3-4-20261012-stage1-unlocked-phone",
+      "previous_result": "ENV_BLOCKED",
+      "previous_matrix_sha256": "51B0AE88681F13BB1644D9874D5307A4F1BC88E3B976C40389393357768ADA7D",
+      "completed_setup_history": [
+        "Q-APK",
+        "Q-BASE",
+        "Q-BAUD",
+        "Q-INITIAL",
+        "Q-MAINT",
+        "Q-PRODUCTION"
+      ],
+      "history_evidence": "inputs/prepared-history.json",
+      "first_active_command": "CMD-Q-TRANSFER",
+      "completed_ota": 0,
+      "completed_calibration": 0,
+      "remaining_qualification_ota": 1,
+      "remaining_calibration_ota": 12,
+      "completed_apk_installs": 1,
+      "last_verified_state": "Exact production base / unchanged group16 Boot / 921600 handshake; historical, not live readiness.",
+      "current_state_check": "Existing phone_cell inspect(base) and Phone.start/installed, before runtime writes and any UI Start.",
+      "scope_reason": "Completed one-time provisioning is prior-stage history, not rescored or replayed. Changed Validation is not waived. All 42 remaining qualification/recovery/calibration/statistics criteria retain their original gates and dependencies.",
+      "failure_preserved": "Actual sealed round7 and its contained origins remain under .acceptance-p3-4/round7, read-only. Deliver these source packages together with round8; no duplicate raw ancestor copies.",
+      "entry_state_change": {
+        "path": "admission/dns-recovery/resolve-api.stdout",
+        "sha256": "FEFEF68A304431703F3C15E98E1EF2F97131AFFED181ECFDDC90EDA9F489B9D3",
+        "scope": "API DNS resolved after actual startup failure; not proof a new tunnel or OTA succeeds. Live checks remain unchanged."
+      }
+    }
+  },
+  "operating_rules": {
+    "authority": "Current user P3-4 independent-acceptance instructions and docs/device-experiment-policy.md; existing task authority only, no release/merge/push/Boot replacement or unrelated device actions.",
+    "operator": "Assigned non-implementation acceptance/root session under the user's explicit instruction to continue here after the approved local commit.",
+    "writable_root": "D:/github/my/E-Track/.cache/p34-final",
+    "serialized_device": "C30286 / phone 10ADA4197U001CK V2312A / BLE E3:49:E1:14:D6:CB / probe 123456",
+    "private_adb_port": 5062,
+    "standard_tools": "Pinned J-Link Commander/RTTLogger, private ADB, existing controlled PATCH service and runtime config; no custom flasher, native sender or UI taps.",
+    "host_phase_seconds": {
+      "prepare": 600,
+      "download": 300,
+      "start": 120,
+      "transfer": 300,
+      "terminal": 420,
+      "snapshot": 300,
+      "boot": 345,
+      "readback": 345,
+      "archive": 300
+    },
+    "phone_lifetime_seconds": 3390,
+    "failure_retrieval_seconds": 300,
+    "closure_seconds": 60,
+    "normal_jlink_seconds": 180,
+    "ordinary_boot_operation_seconds": 300,
+    "full_readback_operation_seconds": 300,
+    "debug_register_exception": {
+      "address": "0xE0042008",
+      "operation": "Save current value, temporarily OR 0x1000 for the storage-idle HAL_Update hardware-breakpoint/programming sequence; restore exact saved value before run.",
+      "persistent": false,
+      "limits": "Only the existing standard install adapter; never arbitrary WDT feeding, PC/function injection or EEPROM edits. Unknown halt/program outcome quarantines further mutations."
+    },
+    "native_history_exception": "Only authorized automatic SEGGER history/config updates under C:/Users/SU/AppData/Roaming/SEGGER/; controllable settings/logs/readbacks/caches stay in the candidate. No cleanup.",
+    "rollback": "Pinned restore firmware, actual READY and committed 640-byte mailbox, guarded command/inverse and ordinary Boot; validate complete App/Boot/EEPROM configuration/journal restoration, never App-only target-to-base downgrade.",
+    "evidence": "Preserve every failed/uncertain action and original bytes. Raw App/RTT/Commander/phase/closure files are evidence, not generated summary replacements. Terminal old-App stack/clock must be before reset; missed windows are EVIDENCE_GAP, never re-run a successful OTA.",
+    "stop": "New integrity/recovery/clock/guard failure pauses affected tests; no blind retry or new directory to erase uncertainty. trial5 is cause-unknown and its separate investigation remains deferred.",
+    "notifications": "No manual mention for this contract/report. Only a necessary, already-authorized physical UI/card action while execution remains open and requires no chat reply uses current-session real mention plus receipt. Requests requiring a reply end normally.",
+    "publication": "No additional commit, push, merge, release or shared-root source writes. The one authorized DNS commit is already complete.",
+    "foreground": "Keep the original upgrade UI foreground. No P3-8/background expansion, automatic taps, native sender or custom collector replacement.",
+    "lineage_preflight_command": "python -I -S -B -X utf8 Tools/acceptance/validate_bundle.py --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --repo-root D:/github/my/E-Track/.cache/p34-final --previous-contract D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/P3-4-v7.contract.json --previous-matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/P3-4-v6.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/P3-4-v5.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/P3-4-v4.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/P3-4-v3.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/P3-4-v2.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/P3-4-v1.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/evidence-matrix.json",
+    "plan_generation_command": "python -I -S -B -X utf8 Tools/acceptance/validate_bundle.py --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --repo-root D:/github/my/E-Track/.cache/p34-final --previous-contract D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/P3-4-v7.contract.json --previous-matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/P3-4-v6.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/P3-4-v5.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/P3-4-v4.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/P3-4-v3.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/P3-4-v2.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/evidence-matrix.json --reuse-source D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/P3-4-v1.contract.json D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1/evidence-matrix.json --write-rerun-plan rerun-plan.json",
+    "matrix_lifecycle": "Only round8 active; all actual predecessor packages stay sealed and included in this candidate. Full history preflight required. NOT_RUN during capture; seal actual results once; no live after seal or failure replacement.",
+    "history_commands": "The six completed setup criteria remain only in original history. Do not rerun initial/base/APK/qualification-baud provisioning to compensate for the host correction.",
+    "usb_admission": "Require actual phone presence and an unoccupied private port. Use the installed exact APK verification in Phone.start; do not reinstall the previously verified APK. No automatic UI taps. Request only necessary authorized physical actions.",
+    "phone_admission": "Before the live cold launch, use existing private ADB read-only power/keyguard checks for current awake/unlocked state. Request only necessary already-authorized physical action; no UI taps or system setting changes.",
+    "lineage_source_packages": [
+      ".acceptance-p3-4/round7",
+      ".acceptance-p3-4/round7/origins/round6",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2",
+      ".acceptance-p3-4/round7/origins/round6/origins/round5/origins/round4/origins/round3/origins/round2/origins/round1"
+    ]
+  },
+  "commands": [
+    {
+      "id": "CMD-Q-TRANSFER",
+      "description": "Qualification continuation after completed round2 provisioning and committed independently reviewed DNS correction. Reconcile the retained host lock from original closed receipts; confirm USB presence and no foreign owner. The existing entry rechecks full current base/Boot, health, guard, storage and exact installed APK. Exactly one zero-start reference OTA through the original UI; qualification is excluded from performance statistics.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-q-transfer --run-id p34-qualification-01 --run-role clean --baud 921600 --timeout-ms 2000 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-Q-TRANSFER",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-Q-RESTORE",
+      "description": "recovery qualification: Q-TRANSFER complete and valid, exact target confirmed. Install only the pinned restore image; firmware mailbox/command-inverse transaction followed by ordinary Boot rollback; no direct target-to-base App-only downgrade.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-q-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-Q-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-MAINT",
+      "description": "calibration setup: Q-RESTORE and all preceding executed cells are valid and closed, current base confirmed/idle. Supported baud screening only; no added speed/QSPI branch.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-maint --role base --install-role maintenance --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-MAINT",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-BAUD",
+      "description": "calibration setup: preceding maintenance install passed. Establish actual supported module/MCU rate and retained state. If unsupported/uncertain, retain all evidence and stop dependent cells; amend the stage with actual state/previous-cell binding before proceeding, without repeating successful observations.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py baud --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-baud --baud 115200 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-BAUD",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-BASE",
+      "description": "calibration setup: this rate's handshake passed; restore the identical production base while retaining the verified rate.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-base --role maintenance --install-role base --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-BASE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-01",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-01 --run-id p34-cal-115200-01 --run-role clean --baud 115200 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-q-transfer --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-01",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-01-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-01-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-01-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-02",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-02 --run-id p34-cal-115200-02 --run-role clean --baud 115200 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-01 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-02",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-02-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-02-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-02-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-03",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-03 --run-id p34-cal-115200-03 --run-role clean --baud 115200 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-02 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-03",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C115200-03-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-03-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C115200-03-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-S115200",
+      "description": "evidence only: after the three declared 115200 attempts have originals, bind each planned ID to its exact snapshot path/SHA (null only for a real missing original), then run this existing strict statistics entry. Do not add the qualification cell, omit failures or mix groups.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --plan D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/plans/calibration-115200.json",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 180
+    },
+    {
+      "id": "CMD-C230400-MAINT",
+      "description": "calibration setup: Q-RESTORE and all preceding executed cells are valid and closed, current base confirmed/idle. Supported baud screening only; no added speed/QSPI branch.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-maint --role base --install-role maintenance --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-MAINT",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-BAUD",
+      "description": "calibration setup: preceding maintenance install passed. Establish actual supported module/MCU rate and retained state. If unsupported/uncertain, retain all evidence and stop dependent cells; amend the stage with actual state/previous-cell binding before proceeding, without repeating successful observations.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py baud --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-baud --baud 230400 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-BAUD",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-BASE",
+      "description": "calibration setup: this rate's handshake passed; restore the identical production base while retaining the verified rate.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-base --role maintenance --install-role base --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-BASE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-01",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-01 --run-id p34-cal-230400-01 --run-role clean --baud 230400 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c115200-03 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-01",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-01-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-01-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-01-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-02",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-02 --run-id p34-cal-230400-02 --run-role clean --baud 230400 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-01 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-02",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-02-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-02-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-02-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-03",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-03 --run-id p34-cal-230400-03 --run-role clean --baud 230400 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-02 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-03",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C230400-03-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-03-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C230400-03-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-S230400",
+      "description": "evidence only: after the three declared 230400 attempts have originals, bind each planned ID to its exact snapshot path/SHA (null only for a real missing original), then run this existing strict statistics entry. Do not add the qualification cell, omit failures or mix groups.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --plan D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/plans/calibration-230400.json",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 180
+    },
+    {
+      "id": "CMD-C460800-MAINT",
+      "description": "calibration setup: Q-RESTORE and all preceding executed cells are valid and closed, current base confirmed/idle. Supported baud screening only; no added speed/QSPI branch.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-maint --role base --install-role maintenance --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-MAINT",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-BAUD",
+      "description": "calibration setup: preceding maintenance install passed. Establish actual supported module/MCU rate and retained state. If unsupported/uncertain, retain all evidence and stop dependent cells; amend the stage with actual state/previous-cell binding before proceeding, without repeating successful observations.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py baud --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-baud --baud 460800 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-BAUD",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-BASE",
+      "description": "calibration setup: this rate's handshake passed; restore the identical production base while retaining the verified rate.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-base --role maintenance --install-role base --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-BASE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-01",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-01 --run-id p34-cal-460800-01 --run-role clean --baud 460800 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c230400-03 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-01",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-01-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-01-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-01-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-02",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-02 --run-id p34-cal-460800-02 --run-role clean --baud 460800 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-01 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-02",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-02-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-02-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-02-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-03",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-03 --run-id p34-cal-460800-03 --run-role clean --baud 460800 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-02 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-03",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C460800-03-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-03-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C460800-03-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-S460800",
+      "description": "evidence only: after the three declared 460800 attempts have originals, bind each planned ID to its exact snapshot path/SHA (null only for a real missing original), then run this existing strict statistics entry. Do not add the qualification cell, omit failures or mix groups.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --plan D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/plans/calibration-460800.json",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 180
+    },
+    {
+      "id": "CMD-C921600-MAINT",
+      "description": "calibration setup: Q-RESTORE and all preceding executed cells are valid and closed, current base confirmed/idle. Supported baud screening only; no added speed/QSPI branch.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-maint --role base --install-role maintenance --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-MAINT",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-BAUD",
+      "description": "calibration setup: preceding maintenance install passed. Establish actual supported module/MCU rate and retained state. If unsupported/uncertain, retain all evidence and stop dependent cells; amend the stage with actual state/previous-cell binding before proceeding, without repeating successful observations.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py baud --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-baud --baud 921600 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-BAUD",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-BASE",
+      "description": "calibration setup: this rate's handshake passed; restore the identical production base while retaining the verified rate.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py install --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-base --role maintenance --install-role base --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-BASE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-01",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-01 --run-id p34-cal-921600-01 --run-role clean --baud 921600 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c460800-03 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-01",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-01-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-01-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-01-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-02",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-02 --run-id p34-cal-921600-02 --run-role clean --baud 921600 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-01 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-02",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-02-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-02-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-02-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-03",
+      "description": "product calibration: current zero-durable base, this rate's setup and preceding restoration passed. Exactly one original-UI reference transfer; v2/window24/batch12/timeout2000/retries5. Retain slow or failed attempts; never replace them with favorable samples.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py phone --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-03 --run-id p34-cal-921600-03 --run-role clean --baud 921600 --timeout-ms 2000 --previous-cell D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-02 --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-03",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 3600,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-C921600-03-RESTORE",
+      "description": "recovery: this preceding calibration transfer is fully captured and valid. Use only the qualified mailbox/ordinary-Boot rollback, prove same reference zero durable before any next transfer.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p34-acceptance/live.py restore --inputs D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json --out D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/ops/cmd-c921600-03-restore --seconds 3390 --contract docs/acceptance-contracts/P3-4-v8.contract.json --matrix D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/evidence-matrix.json --command-id CMD-C921600-03-RESTORE",
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 7200,
+      "success_exit_code": 0,
+      "negative_exit_policy": "Exit 1 is retained for FAIL/ENV_BLOCKED only, never PASS. No automatic retry."
+    },
+    {
+      "id": "CMD-S921600",
+      "description": "evidence only: after the three declared 921600 attempts have originals, bind each planned ID to its exact snapshot path/SHA (null only for a real missing original), then run this existing strict statistics entry. Do not add the qualification cell, omit failures or mix groups.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p3-4-link-stats/acceptance_stats.py --plan D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round8/plans/calibration-921600.json",
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true,
+      "owner": "Assigned non-implementation acceptance/root session; one C30286 owner.",
+      "process_timeout_seconds": 180
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-CMD-Q-TRANSFER",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-TRANSFER.closed.json"
+    },
+    {
+      "id": "ART-CMD-Q-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-Q-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-MAINT",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-MAINT.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-BAUD",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-BAUD.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-BASE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-BASE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-01",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-01.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-01-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-01-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-02",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-02.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-02-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-02-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-03",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-03.closed.json"
+    },
+    {
+      "id": "ART-CMD-C115200-03-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C115200-03-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-S115200",
+      "description": "Full strict statistics JSON stdout for this one fixed calibration group.",
+      "path": "commands/CMD-S115200.stdout"
+    },
+    {
+      "id": "ART-PLAN-115200",
+      "description": "All three predeclared attempts with immutable snapshot hashes, preserving failures/missing originals.",
+      "path": "plans/calibration-115200.json"
+    },
+    {
+      "id": "ART-CMD-C230400-MAINT",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-MAINT.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-BAUD",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-BAUD.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-BASE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-BASE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-01",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-01.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-01-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-01-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-02",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-02.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-02-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-02-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-03",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-03.closed.json"
+    },
+    {
+      "id": "ART-CMD-C230400-03-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C230400-03-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-S230400",
+      "description": "Full strict statistics JSON stdout for this one fixed calibration group.",
+      "path": "commands/CMD-S230400.stdout"
+    },
+    {
+      "id": "ART-PLAN-230400",
+      "description": "All three predeclared attempts with immutable snapshot hashes, preserving failures/missing originals.",
+      "path": "plans/calibration-230400.json"
+    },
+    {
+      "id": "ART-CMD-C460800-MAINT",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-MAINT.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-BAUD",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-BAUD.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-BASE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-BASE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-01",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-01.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-01-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-01-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-02",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-02.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-02-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-02-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-03",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-03.closed.json"
+    },
+    {
+      "id": "ART-CMD-C460800-03-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C460800-03-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-S460800",
+      "description": "Full strict statistics JSON stdout for this one fixed calibration group.",
+      "path": "commands/CMD-S460800.stdout"
+    },
+    {
+      "id": "ART-PLAN-460800",
+      "description": "All three predeclared attempts with immutable snapshot hashes, preserving failures/missing originals.",
+      "path": "plans/calibration-460800.json"
+    },
+    {
+      "id": "ART-CMD-C921600-MAINT",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-MAINT.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-BAUD",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-BAUD.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-BASE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-BASE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-01",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-01.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-01-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-01-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-02",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-02.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-02-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-02-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-03",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-03.closed.json"
+    },
+    {
+      "id": "ART-CMD-C921600-03-RESTORE",
+      "description": "Original owned-process closure receipt including argv and raw stdout/stderr hashes; not a standalone product-success oracle.",
+      "path": "commands/CMD-C921600-03-RESTORE.closed.json"
+    },
+    {
+      "id": "ART-CMD-S921600",
+      "description": "Full strict statistics JSON stdout for this one fixed calibration group.",
+      "path": "commands/CMD-S921600.stdout"
+    },
+    {
+      "id": "ART-PLAN-921600",
+      "description": "All three predeclared attempts with immutable snapshot hashes, preserving failures/missing originals.",
+      "path": "plans/calibration-921600.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "Q-TRANSFER",
+      "description": "Fresh same-process query/download and exact runtime/package bindings; original App success and new target identity; MCU total/package/epoch/baud match, terminal=0 and clean=true, package_crc32=3263681715, required metrics/clock/WDT/old-App stack guard valid before reboot; full target/Boot readback and all collectors closed. No performance PASS is claimed by this qualification cell. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs",
+        "prepared-history",
+        "capture-cleanup",
+        "late-capture-cleanup",
+        "tunnel-api-dns-recovery"
+      ],
+      "command_ids": [
+        "CMD-Q-TRANSFER"
+      ],
+      "artifact_ids": [
+        "ART-CMD-Q-TRANSFER"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "Q-RESTORE",
+      "description": "The actual 640-byte READY and committed mailbox verifies the base backup/Boot, preserves EEPROM config, clears staging and commits supported rollback; ordinary Boot produces full original base/Boot, current confirmation/health and an erased same-package journal. This is the gate before calibration. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-Q-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-Q-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-MAINT",
+      "description": "The same finalized maintenance image and unchanged Boot are installed safely and fully verified. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-MAINT"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-MAINT"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-BAUD",
+      "description": "The current-epoch module/MCU handshake and retained baud equal 115200 with no retention/ownership error; a timeout or transport failure alone is not an unsupported-rate conclusion. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-BAUD"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-BAUD"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-BASE",
+      "description": "Exact production base and unchanged group16 Boot are confirmed by full readback/health; no per-rate image rebuild or changed base SHA. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-BASE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-BASE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-01",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-01"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-01"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-01-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-01-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-01-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-02",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-02"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-02"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-02-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-02-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-02-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-03",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-03"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-03"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C115200-03-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C115200-03-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C115200-03-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "P34-CAL-115200",
+      "description": "Strictly account for exactly the three predeclared calibration attempts at 115200, same effective v2/window24/batch12/timeout2000/retries5 and package/APK/foreground/platform identity. Compute nearest-rank P99 only from all valid per-segment durable ACK samples; expose excluded/early/missing samples and all failures. Source this rate's recommendation only from this group. A slow group's valid report is not a selected-rate or P3-4 PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_app_snapshot",
+        "group_statistics",
+        "plan"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware and flutter produce the measured session and its negotiated/runtime parameters; validation validates raw capture identities and computes the statistics without pooling groups.",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-S115200"
+      ],
+      "artifact_ids": [
+        "ART-CMD-S115200",
+        "ART-PLAN-115200"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-MAINT",
+      "description": "The same finalized maintenance image and unchanged Boot are installed safely and fully verified. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-MAINT"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-MAINT"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-BAUD",
+      "description": "The current-epoch module/MCU handshake and retained baud equal 230400 with no retention/ownership error; a timeout or transport failure alone is not an unsupported-rate conclusion. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-BAUD"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-BAUD"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-BASE",
+      "description": "Exact production base and unchanged group16 Boot are confirmed by full readback/health; no per-rate image rebuild or changed base SHA. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-BASE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-BASE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-01",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-01"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-01"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-01-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-01-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-01-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-02",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-02"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-02"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-02-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-02-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-02-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-03",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-03"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-03"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C230400-03-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C230400-03-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C230400-03-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "P34-CAL-230400",
+      "description": "Strictly account for exactly the three predeclared calibration attempts at 230400, same effective v2/window24/batch12/timeout2000/retries5 and package/APK/foreground/platform identity. Compute nearest-rank P99 only from all valid per-segment durable ACK samples; expose excluded/early/missing samples and all failures. Source this rate's recommendation only from this group. A slow group's valid report is not a selected-rate or P3-4 PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_app_snapshot",
+        "group_statistics",
+        "plan"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware and flutter produce the measured session and its negotiated/runtime parameters; validation validates raw capture identities and computes the statistics without pooling groups.",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-S230400"
+      ],
+      "artifact_ids": [
+        "ART-CMD-S230400",
+        "ART-PLAN-230400"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-MAINT",
+      "description": "The same finalized maintenance image and unchanged Boot are installed safely and fully verified. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-MAINT"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-MAINT"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-BAUD",
+      "description": "The current-epoch module/MCU handshake and retained baud equal 460800 with no retention/ownership error; a timeout or transport failure alone is not an unsupported-rate conclusion. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-BAUD"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-BAUD"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-BASE",
+      "description": "Exact production base and unchanged group16 Boot are confirmed by full readback/health; no per-rate image rebuild or changed base SHA. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-BASE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-BASE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-01",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-01"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-01"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-01-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-01-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-01-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-02",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-02"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-02"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-02-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-02-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-02-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-03",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-03"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-03"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C460800-03-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C460800-03-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C460800-03-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "P34-CAL-460800",
+      "description": "Strictly account for exactly the three predeclared calibration attempts at 460800, same effective v2/window24/batch12/timeout2000/retries5 and package/APK/foreground/platform identity. Compute nearest-rank P99 only from all valid per-segment durable ACK samples; expose excluded/early/missing samples and all failures. Source this rate's recommendation only from this group. A slow group's valid report is not a selected-rate or P3-4 PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_app_snapshot",
+        "group_statistics",
+        "plan"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware and flutter produce the measured session and its negotiated/runtime parameters; validation validates raw capture identities and computes the statistics without pooling groups.",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-S460800"
+      ],
+      "artifact_ids": [
+        "ART-CMD-S460800",
+        "ART-PLAN-460800"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-MAINT",
+      "description": "The same finalized maintenance image and unchanged Boot are installed safely and fully verified. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-MAINT"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-MAINT"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-BAUD",
+      "description": "The current-epoch module/MCU handshake and retained baud equal 921600 with no retention/ownership error; a timeout or transport failure alone is not an unsupported-rate conclusion. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-BAUD"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-BAUD"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-BASE",
+      "description": "Exact production base and unchanged group16 Boot are confirmed by full readback/health; no per-rate image rebuild or changed base SHA. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-BASE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-BASE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-01",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-01"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-01"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-01-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-01-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-01-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-02",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-02"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-02"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-02-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-02-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-02-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-03",
+      "description": "One complete zero-start 1048576-byte transfer has independent App/MCU/raw-target identity and clean integrity/guard/clock evidence. All actual timings/retries and parameter group are retained. This is measurement validity, not a >=9 KiB/s or final stability verdict. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; flutter supplies the real UI, transport and immutable App capture; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-03"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-03"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C921600-03-RESTORE",
+      "description": "Ordinary Boot restores the identical full base/Boot and confirmed healthy state; unchanged user configuration and fully erased staging journal prove equivalent next-run initial state. PASS additionally requires the action result.json and decisive original readbacks/snapshots/phase records as evidence_hashes. A closure receipt alone is insufficient.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "firmware",
+        "validation"
+      ],
+      "dependency_rationale": "firmware supplies the running MCU, storage, recovery and metrics implementation; validation supplies the actual guarded tool, decoder, ownership and lifecycle chain",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-C921600-03-RESTORE"
+      ],
+      "artifact_ids": [
+        "ART-CMD-C921600-03-RESTORE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "P34-CAL-921600",
+      "description": "Strictly account for exactly the three predeclared calibration attempts at 921600, same effective v2/window24/batch12/timeout2000/retries5 and package/APK/foreground/platform identity. Compute nearest-rank P99 only from all valid per-segment durable ACK samples; expose excluded/early/missing samples and all failures. Source this rate's recommendation only from this group. A slow group's valid report is not a selected-rate or P3-4 PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_app_snapshot",
+        "group_statistics",
+        "plan"
+      ],
+      "input_groups": [
+        "firmware",
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "firmware and flutter produce the measured session and its negotiated/runtime parameters; validation validates raw capture identities and computes the statistics without pooling groups.",
+      "external_inputs": [
+        "p34-live-inputs"
+      ],
+      "command_ids": [
+        "CMD-S921600"
+      ],
+      "artifact_ids": [
+        "ART-CMD-S921600",
+        "ART-PLAN-921600"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    }
+  ],
+  "screening_parameters": {
+    "protocol": 2,
+    "runtime_schema": 10,
+    "reference_bytes": 1048576,
+    "package_sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+    "package_crc32": 3263681715,
+    "base_vcode": 30286,
+    "target_vcode": 30287,
+    "window_segments": 24,
+    "data_batch_frames": 12,
+    "calibration_ack_timeout_ms": 2000,
+    "max_retries": 5,
+    "foreground": true,
+    "bauds": [
+      115200,
+      230400,
+      460800,
+      921600
+    ]
+  },
+  "performance_gates": [
+    {
+      "id": "P34-REFERENCE",
+      "metric": "package_bytes",
+      "unit": "bytes",
+      "limit": 1048576,
+      "basis": "protocol_contract",
+      "rationale": "Fixed legal reference ETU, never a small/resumed substitute."
+    },
+    {
+      "id": "P34-RATE",
+      "metric": "effective_payload_throughput",
+      "unit": "KiB/s",
+      "limit": 9,
+      "basis": "product_sla",
+      "rationale": "Original selected-group minimum, not a host timeout."
+    },
+    {
+      "id": "P34-P95",
+      "metric": "BEGIN_to_END_ACK_p95",
+      "unit": "s",
+      "limit": 120,
+      "basis": "product_sla",
+      "rationale": "Original required selected-group bound."
+    },
+    {
+      "id": "P34-MAX",
+      "metric": "BEGIN_to_END_ACK_each_max",
+      "unit": "s",
+      "limit": 150,
+      "basis": "product_sla",
+      "rationale": "BLE qualification bound, never an apply/Boot kill timer."
+    },
+    {
+      "id": "P34-RETRANSMISSION",
+      "metric": "clean_unique_DATA_retransmission_fraction",
+      "unit": "fraction",
+      "limit": 0.01,
+      "basis": "protocol_contract",
+      "rationale": "Original retransmission bound with unique DATA denominator."
+    },
+    {
+      "id": "P34-NO-DURABLE",
+      "metric": "no_durable_progress_abort",
+      "unit": "s",
+      "limit": 30,
+      "basis": "protocol_contract",
+      "rationale": "Existing durable watchdog must not be relaxed."
+    }
+  ]
+}

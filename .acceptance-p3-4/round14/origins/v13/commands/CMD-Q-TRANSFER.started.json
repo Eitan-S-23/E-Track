@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+    "--input",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round13\\ops\\cmd-q-transfer\\phone\\snapshot.jsonl",
+    "--expect-sentinel",
+    "OTAOBS96bb2c74d5ad6ccecaf30e40",
+    "--expect-target",
+    "E3:49:E1:14:D6:CB"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 1011169702920300,
+  "stdin_sha256": null
+}

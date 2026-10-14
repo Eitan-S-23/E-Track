@@ -1,0 +1,32 @@
+  initialize real synchronous adapter                                  PASS
+CASE control
+  negotiated synchronous receiver active                               PASS
+  stopped receiver cannot return a success snapshot without fields     PASS
+  stopped receiver cannot encode uninitialized ACK bytes               PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  bounded synchronous drain                                            PASS
+  eleven committed blocks match the original package                   PASS
+  twelfth block source has the exact original bytes                    PASS
+  twelfth program pins both source and overlay                         PASS
+  nested poll cannot finish an owned synchronous operation             PASS
+  thirteenth block accepted during twelfth program                     PASS
+  borrowed source unchanged across receive callback                    FAIL
+  callback cannot release overlay or report durable progress           PASS
+  bounded synchronous drain                                            PASS
+  twelfth-block callback occurred exactly once                         PASS
+  every captured model frame has valid length and CRC                  PASS
+  old committed prefix survives every failure                          PASS
+  no prefix test activates or resets firmware                          PASS
+  healthy or recovered thirteen-block prefix is byte-exact             FAIL
+MODEL_RESULT mode=control durable=53248 first_status=0 frames=431
+  incomplete prefix closes without END or activation                   PASS
+RECEIVER_FAILURE checks=29 failures=2 cases=1 mutation=1

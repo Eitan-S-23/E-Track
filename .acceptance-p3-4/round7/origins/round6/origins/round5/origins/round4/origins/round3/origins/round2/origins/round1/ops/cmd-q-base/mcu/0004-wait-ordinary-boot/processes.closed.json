@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 806473097308700,
+  "ended_monotonic_ns": 806473679799500,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0004-wait-ordinary-boot\\processes.stdout",
+    "bytes": 12774,
+    "sha256": "97681aedf5d29f6c865f034e664c0d6bff626e2fbc563ce1245e43f2914970b8"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0004-wait-ordinary-boot\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

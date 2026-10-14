@@ -1,0 +1,8 @@
+
+========================================
+OTA: HANDOFF vtor=0x08010000 primask=0 basepri=0 faultmask=0 control=0 systick=0x00000000 icsr=0x00000000 iser=0x00000000 ispr=0x00000000
+Reset: NRST SW
+P34BOOT: requested=921600 actual=923076 retained=921600 error=0 clock=1
+QSPI: JEDEC=0xEF4018 whitelisted, OTA enabled
+P34MEM: sysCapacity=4912 sysUsed=1128 lvPool=126976 lvFree=78848 lvLargest=78760
+OTA: BCB already CONFIRMED vcode=30286

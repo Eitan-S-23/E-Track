@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "shell",
+    "dumpsys power"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 1,
+  "started_monotonic_ns": 853141475286800,
+  "ended_monotonic_ns": 853143781081200,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\phone-unlock\\phone\\adb-00144.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\phone-unlock\\phone\\adb-00144.stderr",
+    "bytes": 190,
+    "sha256": "b10d65b1ba4e7b2c0cdde0b45e8393841d122339506e1e9d2aacb6473d997e76"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "error_type": "AssertionError",
+  "message": "",
+  "completed": [
+    {
+      "path": ".acceptance-p3-4\\round14\\commands\\CMD-REFERENCE-V10.closed.json",
+      "bytes": 1023,
+      "sha256": "d4b3c0b118cd9e05468f819ca4b4d152ec058767f4389bd1ace0e30b3050c0f7"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\commands\\CMD-REFERENCE-V11.closed.json",
+      "bytes": 1023,
+      "sha256": "aa324a11e50be547a5f9f94381ecda01e4575400da2d4241d6441a5e112ea53e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\commands\\CMD-REFERENCE-MCU.closed.json",
+      "bytes": 1417,
+      "sha256": "2e9d0aa90fad823c3350ef61e7d5285e0bafb03bb0f6a00f1e10f14cece7f06e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER.closed.json",
+      "bytes": 1030,
+      "sha256": "e5048b88bcd00aa2aa7eabe2bb98ab420cf23c0f3cee1ce14602ca1836d24d9e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER-MCU.closed.json",
+      "bytes": 1427,
+      "sha256": "70ef4bc36d932a8b694dcd76be01387f4b2a46cbad9dbbb7eb692e67a92336e5"
+    },
+    {
+      "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER-RAM.closed.json",
+      "bytes": 1470,
+      "sha256": "8a53331a3a4170020f09b1fe6705583224caace7d5ee5f2b345eae1e070a10be"
+    }
+  ],
+  "preserve_outputs": true,
+  "no_automatic_replay": true,
+  "device_operations": 0
+}

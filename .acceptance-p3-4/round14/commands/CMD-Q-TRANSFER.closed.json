@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+    "--input",
+    ".acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/phone/snapshot.jsonl",
+    "--expect-sentinel",
+    "OTAOBS96bb2c74d5ad6ccecaf30e40",
+    "--expect-target",
+    "E3:49:E1:14:D6:CB"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1060408227443200,
+  "ended_monotonic_ns": 1060410638822100,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER.stdout",
+    "bytes": 108494,
+    "sha256": "236fea16cc504384182ed31fc1621465551aae29cb8ad546288d328908bb1845"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

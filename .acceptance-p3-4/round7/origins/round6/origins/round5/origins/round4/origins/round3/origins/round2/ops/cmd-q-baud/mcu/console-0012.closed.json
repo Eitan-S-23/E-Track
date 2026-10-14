@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkRTTLogger.exe",
+    "-Device",
+    "CORTEX-M4",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-RTTAddress",
+    "0x20053A00",
+    "-RTTChannel",
+    "0",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\console-0012.rtt"
+  ],
+  "reason": "planned_capture_stop_not_a_success_verdict",
+  "stopped_while_running": true,
+  "exit_code": 1,
+  "started_monotonic_ns": 822512738175200,
+  "ended_monotonic_ns": 822515215765500,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\console-0012.stdout",
+    "bytes": 1070,
+    "sha256": "7d49dc7ca1a7b2ebe0f2040be7047a31aeac74dcbe9e842fcf9981cbe0db9924"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\console-0012.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

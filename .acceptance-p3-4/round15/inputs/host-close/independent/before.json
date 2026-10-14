@@ -1,0 +1,102 @@
+{
+  "head": "02013607ca38eaf5cff0d5c4fc3de8259fbff916",
+  "sources": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+      "bytes": 35564,
+      "sha256": "3c524300133818dfed7d056a525ffe044082d0dc5c185aea8a16b98532b89723"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+      "bytes": 139395,
+      "sha256": "848e5e1902982052da0d8be0d5fd6a82c8992e77e0564165f6a673e7191c5cb5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_host.py",
+      "bytes": 13164,
+      "sha256": "a0d98161aadccee0346b8f7438cf65566ae6e72d7cf8cc576641e833d7cc6431"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live.py",
+      "bytes": 37065,
+      "sha256": "978937032a886b501b942cbcd3db98b4a948ca874f9e80181963983743c7621d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_mcu.py",
+      "bytes": 28088,
+      "sha256": "169f2e4fdafec40b1aabd91000b0374c4a008abe55b58623322a62543efdf019"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\build.py",
+      "bytes": 9035,
+      "sha256": "174a62ace063eb21fec5c96f92c3f3b1daa8653cc8fb60bac7962f7445a3b8fb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\selftest.py",
+      "bytes": 5665,
+      "sha256": "b9283304aded443741d631095e259b26b60cfad7929950ddb50f5fb5e64c71ae"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\flutter\\dev_checks.py",
+      "bytes": 42285,
+      "sha256": "86a36fdddcc68e4e74f1957d1c2c9a5e1db42b7e8f01d93317947776a23cbf9d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.agents\\skills\\e-track-flutter-debug\\scripts\\host_io.py",
+      "bytes": 4236,
+      "sha256": "296ea468d649133a29ee70b3d019b62b77f2f7a4aec76618f02f9dca858e16f9"
+    }
+  ],
+  "implementation_inputs": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\before.json",
+      "bytes": 9466204,
+      "sha256": "21772c3a43e8d00c7373301583b2f0ad744a7460eea19b70259426df68caf9ad"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\audit.json",
+      "bytes": 13022,
+      "sha256": "5527d46892925042fee2037b0a3d1d27589fe060392eac1def99d78b346a674d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\handoff.md",
+      "bytes": 11196,
+      "sha256": "f2513edf63d213a08a43a4098061db79b0f711368b6282830de0aed3d1588f65"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\changes.patch",
+      "bytes": 30079,
+      "sha256": "5a3b0decde00bb1d0ab58a0dc3f747f6766a3ce5d2717feae2b460a3a3a4e557"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused-2\\summary.json",
+      "bytes": 2658,
+      "sha256": "695bdd7d443c9bae64436330d11e7ee277656abd4ae229154b09a81c5c2081b7"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-command\\summary.json",
+      "bytes": 2676,
+      "sha256": "da22992dd11bd52cf9812c15a17324234c81442ccbfeafefd54e18c28bad05ab"
+    }
+  ],
+  "note": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\ota-exec-notes\\P3-4-v13-offline-acceptance-2026-10-13.md",
+    "bytes": 30528,
+    "sha256": "03b375df199196053e96a54a9f9364d08d2a8e9049ff87e7af5d2e21a2545d86"
+  },
+  "index": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\agent-collaboration\\index.md",
+    "bytes": 3552,
+    "sha256": "9a0dc8e0b850803cb4d4663e9337e78ba70eb7bfa1aa3bff398143778bb8eb28"
+  },
+  "reviewer": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\review.py",
+    "bytes": 8849,
+    "sha256": "1878a23456b1b5b36460d13cad2c46d46aef8309c2012dd64fa5b41594c8dcef"
+  },
+  "prior_review": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-review-20261013\\final-review.json",
+    "bytes": 8335,
+    "sha256": "601f26e1920932051dc53db9c6948193d3ff5f2aa10469594ce94d6e3cf220f2"
+  }
+}

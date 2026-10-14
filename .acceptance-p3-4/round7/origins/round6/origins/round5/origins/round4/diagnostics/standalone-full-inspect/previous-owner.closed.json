@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH",
+    "/FI",
+    "PID eq 23616"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 845857420787300,
+  "ended_monotonic_ns": 845857900942400,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round4\\diagnostics\\standalone-full-inspect\\previous-owner.stdout",
+    "bytes": 36,
+    "sha256": "cb1256981f7b3ac53e3cfc7c6a13d4b058702bb707431b31e202abfcf6782f07"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round4\\diagnostics\\standalone-full-inspect\\previous-owner.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

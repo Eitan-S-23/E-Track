@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 935212442319900,
+  "ended_monotonic_ns": 935213232144800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0017-rollback-staging-zero\\processes.stdout",
+    "bytes": 13443,
+    "sha256": "5a515376e07d418660015dd6dad5d586bc293493f250b8a14b14a06386170041"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0017-rollback-staging-zero\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

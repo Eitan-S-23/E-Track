@@ -1,0 +1,152 @@
+{
+  "result": "CURRENT_CANDIDATE_MODEL_CONTAINMENT_PASS",
+  "checks": 327,
+  "cases": 10,
+  "source_mutation_detected": true,
+  "sources": [
+    {
+      "path": "tests\\ota\\test_p34_receiver_failure.c",
+      "bytes": 12168,
+      "sha256": "88aa946454887d1dcda949cc8c35760637aa6a1c65b68cffb9e7da3d7aa9bf96"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_pipeline.c",
+      "bytes": 9471,
+      "sha256": "121caa84db2b1ee39bd916000fa170d6801d9b7a84b1caf46d82feb0f2492e31"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_pipeline_sync.c",
+      "bytes": 1832,
+      "sha256": "ec4ae585b5a62e1b9326fb61aec590ec76a74b0054d8e726aa0675442042dfb3"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_ble_session.c",
+      "bytes": 45775,
+      "sha256": "a449c6b1ce50f4ad116151e6aab4e59df5fa64a2d1f2da80c0a8d9495e38238c"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_ble_frame.c",
+      "bytes": 12149,
+      "sha256": "de2405e2ea64c168d238bbead71ec5b87bffa1f003a403b89de8f13afd9f1da5"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_ble_ring.c",
+      "bytes": 1689,
+      "sha256": "3a12520ca852e052dd00f7392021a7efbcd5f6dc8fb6a0c209a4dea16e27ea9e"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_sd.c",
+      "bytes": 18760,
+      "sha256": "0be97f26cc096eba66e9a0bdca1d5f5f6db2921bf003355b90ff110bdaa8aab0"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_staging.c",
+      "bytes": 22688,
+      "sha256": "d173e2aa31aeef05d522cfe83216aec677f78d8a8c862bb014e12c756ff6652a"
+    },
+    {
+      "path": "boot\\src\\boot_crc32.c",
+      "bytes": 1591,
+      "sha256": "128a591a5692a1a2aa5c9050e2bc24322d7a5835e781e596f08ebc534c844160"
+    },
+    {
+      "path": "boot\\src\\boot_sha256.c",
+      "bytes": 5164,
+      "sha256": "311107ef6a987fb23d602070391b8bc3a356688e3e1f03e1ea8ed905c4374073"
+    }
+  ],
+  "package_sha256": "6bc750062eeb9a536e9173ba2ce8d5cec1284873d8c4a2da3bf2e46bc9b802dc",
+  "hardware": false,
+  "trial5_root_cause_proved": false,
+  "formal_acceptance": "NOT_RUN",
+  "commands": [
+    {
+      "command": [
+        "D:/install/mingw64/bin/gcc.EXE",
+        "--version"
+      ],
+      "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+      "timeout_seconds": 30,
+      "exit": 0,
+      "timed_out": false,
+      "elapsed_seconds": 0.171,
+      "log": {
+        "path": ".cache\\p34-independent-review-20261010\\receiver1\\compiler.log",
+        "bytes": 277,
+        "sha256": "42ede4bc83c76230a1d42918c1341ecb292bbd04c9a0aa47ed1166a6bae1e63b"
+      }
+    },
+    {
+      "command": [
+        "D:/install/mingw64/bin/gcc.EXE",
+        "-std=c99",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-O2",
+        "-DP34_OTA_PIPELINE=1",
+        "-DP34_OTA_PIPELINE_SYNC=1",
+        "-DP34_OTA_PIPELINE_WAIT_RX=1",
+        "-DP34_TEST_STOPPED_ACK=1",
+        "-ID:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota",
+        "-ID:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries",
+        "-ID:\\github\\my\\E-Track\\.cache\\p34-final\\boot\\include",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_receiver_failure.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_pipeline.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_pipeline_sync.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_ble_session.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_ble_frame.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_ble_ring.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_sd.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_staging.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\boot\\src\\boot_crc32.c",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\boot\\src\\boot_sha256.c",
+        "-o",
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-independent-review-20261010\\receiver1\\receiver.exe"
+      ],
+      "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+      "timeout_seconds": 180,
+      "exit": 0,
+      "timed_out": false,
+      "elapsed_seconds": 7.85,
+      "log": {
+        "path": ".cache\\p34-independent-review-20261010\\receiver1\\compile.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": [
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-independent-review-20261010\\receiver1\\receiver.exe",
+        "D:\\github\\my\\E-Track\\.cache\\p34-native-data1\\assets1\\full.etu"
+      ],
+      "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+      "timeout_seconds": 60,
+      "exit": 0,
+      "timed_out": false,
+      "elapsed_seconds": 0.242,
+      "log": {
+        "path": ".cache\\p34-independent-review-20261010\\receiver1\\run.log",
+        "bytes": 26149,
+        "sha256": "35284614b87ec131193092fbc70209b7ab2780079bbf38ecc7e0e0edd7c2653f"
+      }
+    },
+    {
+      "command": [
+        "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-independent-review-20261010\\receiver1\\receiver.exe",
+        "D:\\github\\my\\E-Track\\.cache\\p34-native-data1\\assets1\\full.etu",
+        "--mutate-source"
+      ],
+      "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+      "timeout_seconds": 60,
+      "exit": 1,
+      "timed_out": false,
+      "elapsed_seconds": 0.15,
+      "log": {
+        "path": ".cache\\p34-independent-review-20261010\\receiver1\\mutant.log",
+        "bytes": 2372,
+        "sha256": "a27626fa2cbf5cec8e29a2413374759991dd87e0d0a531d808ba8ecfae5e41f9"
+      }
+    }
+  ]
+}

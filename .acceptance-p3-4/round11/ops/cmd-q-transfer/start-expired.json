@@ -1,0 +1,9 @@
+{
+  "error_type": "ValueError",
+  "message": "missing required MCU stage measurements",
+  "start_deadline_monotonic": 935648.0532793,
+  "observed_monotonic": 935619.705151,
+  "no_new_start": true,
+  "no_ota_cancel": true,
+  "original_error_preserved": true
+}

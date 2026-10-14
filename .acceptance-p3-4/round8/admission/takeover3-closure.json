@@ -1,0 +1,31 @@
+{
+  "owned_device_processes_closed": true,
+  "private_adb_listening": false,
+  "failed_owner_pid_absent": 19588,
+  "retained_lock_unchanged": {
+    "path": ".cache\\p34-live-device.lock",
+    "bytes": 156,
+    "sha256": "0a684344620426ecd388b96251801b917cbf99ea6a0ed8b8b9cbb1e0c95d0c75"
+  },
+  "formal_exit": {
+    "path": ".acceptance-p3-4\\round8\\commands\\CMD-Q-TRANSFER.closed.json",
+    "bytes": 1263,
+    "sha256": "acb683974615d99a178753aaf5b6c2d7b1f89d01bb2359f140fffb3bfe5b0aed"
+  },
+  "phone": {
+    "path": ".acceptance-p3-4\\round8\\ops\\cmd-q-transfer\\phone\\closed.json",
+    "bytes": 74,
+    "sha256": "c68a97e0104f2098f6fdae36270cc8d49fafc512f0eafa76e3f77fdec235e0d7"
+  },
+  "network": {
+    "path": ".acceptance-p3-4\\round8\\ops\\cmd-q-transfer\\network\\closed.json",
+    "bytes": 53,
+    "sha256": "fd337ed75d53a5be8e798494accf4f03d080bdea6d9e4ddf6fb64a49b65c6ed7"
+  },
+  "passive_logger": {
+    "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\mcu\\storage-passive.closed.json",
+    "bytes": 1039,
+    "sha256": "ea2a9f0e1d6d4792f04b3afa0e936c307d8a98a4cff6c6e2e6495603b0f3d3d5"
+  },
+  "scope": "Actual process/port and original closure checks; no stale lock removal"
+}

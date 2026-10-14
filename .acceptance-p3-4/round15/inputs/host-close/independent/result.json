@@ -1,0 +1,71 @@
+{
+  "methods": 20,
+  "exit_code": 0,
+  "timed_out": false,
+  "outcome": "OK",
+  "log": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\suite\\tests.log",
+    "bytes": 3149,
+    "sha256": "fb78858ef1cdd394f5765f341aa9c28788ade27b826fec007b6c3f3704916cd0"
+  },
+  "receipt": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\suite\\tests.json",
+    "bytes": 621,
+    "sha256": "436c5f13571a5caaf1fe63ac8e04b1e090be5d9b61ca89b128f829675d14d4aa"
+  },
+  "sources": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+      "bytes": 35564,
+      "sha256": "3c524300133818dfed7d056a525ffe044082d0dc5c185aea8a16b98532b89723"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+      "bytes": 139395,
+      "sha256": "848e5e1902982052da0d8be0d5fd6a82c8992e77e0564165f6a673e7191c5cb5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_host.py",
+      "bytes": 13164,
+      "sha256": "a0d98161aadccee0346b8f7438cf65566ae6e72d7cf8cc576641e833d7cc6431"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live.py",
+      "bytes": 37065,
+      "sha256": "978937032a886b501b942cbcd3db98b4a948ca874f9e80181963983743c7621d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_mcu.py",
+      "bytes": 28088,
+      "sha256": "169f2e4fdafec40b1aabd91000b0374c4a008abe55b58623322a62543efdf019"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\build.py",
+      "bytes": 9035,
+      "sha256": "174a62ace063eb21fec5c96f92c3f3b1daa8653cc8fb60bac7962f7445a3b8fb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\selftest.py",
+      "bytes": 5665,
+      "sha256": "b9283304aded443741d631095e259b26b60cfad7929950ddb50f5fb5e64c71ae"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\flutter\\dev_checks.py",
+      "bytes": 42285,
+      "sha256": "86a36fdddcc68e4e74f1957d1c2c9a5e1db42b7e8f01d93317947776a23cbf9d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.agents\\skills\\e-track-flutter-debug\\scripts\\host_io.py",
+      "bytes": 4236,
+      "sha256": "296ea468d649133a29ee70b3d019b62b77f2f7a4aec76618f02f9dca858e16f9"
+    }
+  ],
+  "inherited_caller_methods": 17,
+  "original_discriminators": 3,
+  "full_134_originals_independently_bound_not_replayed": true,
+  "primitive_18_unchanged_not_replayed": true,
+  "implementation_edits": 0,
+  "device_operations": 0,
+  "ota_added": 0,
+  "formal_acceptance_round": false
+}

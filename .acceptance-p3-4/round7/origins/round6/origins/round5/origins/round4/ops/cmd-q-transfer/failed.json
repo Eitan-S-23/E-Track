@@ -1,0 +1,7 @@
+{
+  "error_type": "RuntimeError",
+  "message": "standard tool failed; inspect original command streams",
+  "unknown_outcome_requires_reconciliation": true,
+  "device_attempted": true,
+  "no_automatic_retry": true
+}

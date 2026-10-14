@@ -1,0 +1,636 @@
+{
+  "schema": "p34-candidate-handoff-v1",
+  "branch": "acceptance/p3-4-v2-20261009",
+  "source_worktree": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "pr": "https://github.com/Eitan-S-23/E-Track/pull/26",
+  "merged": false,
+  "restore_expected": [
+    30287,
+    30286,
+    613952,
+    2889683253
+  ],
+  "formal_contract_status": "NOT_FROZEN",
+  "formal_hardware": "NOT_RUN",
+  "initial_state_qualification": "NOT_RUN",
+  "installed": false,
+  "independent_acceptance": false,
+  "trial5": "CAUSE_UNKNOWN_SPECIAL_INVESTIGATION_DEFERRED",
+  "build_platform_note": "Selected Windows raw BIN is 613952 bytes; Ubuntu CI candidate is 613964 bytes with a different SHA. Never substitute CI bytes into the selected base/target/reference/restore set.",
+  "runtime_service": "NOT_CONFIGURED: compiled .invalid URL is only a runtime-required placeholder",
+  "register_only": "Artifact/source registration, not a worktree manifest, frozen contract or independent PASS.",
+  "source_lock_revision": 4,
+  "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+  "tree": "67978f75d86c3b1522175b841aa881d90cf38230",
+  "profile_config_blob": "c1fd80a844680ac760ee0e3b9b70b86f84d6b136",
+  "supersedes": {
+    "path": ".cache/p34-remediation-20261010/source-lock-v3.json",
+    "bytes": 30960,
+    "sha256": "4929eba892d46497d9475cfe2503696cf4bbae34f57c0c246dd47e5169ea01e3"
+  },
+  "artifact_source_registration": {
+    "path": ".cache/p34-remediation-20261010/source-lock-v3.json",
+    "bytes": 30960,
+    "sha256": "4929eba892d46497d9475cfe2503696cf4bbae34f57c0c246dd47e5169ea01e3"
+  },
+  "artifact_source_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+  "app_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+  "app_runtime_same": true,
+  "assets_rebuilt_this_batch": false,
+  "artifacts": {
+    "base": {
+      "path": ".cache/p34-final/.cache/p34-reference2/base.bin",
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    },
+    "target": {
+      "path": ".cache/p34-final/.cache/p34-reference2/target.bin",
+      "bytes": 613952,
+      "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+    },
+    "package": {
+      "path": ".cache/p34-final/.cache/p34-reference2/cases/reference-1MiB.etu",
+      "bytes": 1048576,
+      "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+    },
+    "firmware_elf": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 885784,
+      "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+    },
+    "firmware_hex": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 1722962,
+      "sha256": "bcdd313cedb2f6d52f7f0c43336cde5806487579908c4c7ad0e116298ad1bcc8"
+    },
+    "firmware_bin": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 613952,
+      "sha256": "7e556d3f9bc3d689a46648fd1c5e27cbe833a99fd2776ba1fb28bee983ebafa1"
+    },
+    "firmware_map": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2650755,
+      "sha256": "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c"
+    },
+    "maintenance_elf": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 891044,
+      "sha256": "e7889e3b0ba23f3d9ce9976c90a0d51191ad27dfa4f88c85ac72d81b00378c09"
+    },
+    "maintenance_hex": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 1730461,
+      "sha256": "b4e25f2824bf98c0712ac121106b6891b2d5aba70f6fcc61f3deebde35e4ec76"
+    },
+    "maintenance_bin": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 616616,
+      "sha256": "fe88f4efd496d2d626c6354aecb056617af3e4262ee352e7925438ec836b2690"
+    },
+    "maintenance_map": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2666747,
+      "sha256": "efb01413bac17fc7dd385f7e1673debf1275b97ea37099822571fc4b89c69084"
+    },
+    "restore_elf": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 217536,
+      "sha256": "2fb09f5677977311350b7ab3e51aef15dcdc1e2abb88334b281b7b0fafbbdf5e"
+    },
+    "restore_hex": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 310538,
+      "sha256": "84e6feacda3d374fb8fb4c51f47890f2b7cea45a6fe012f6498f401d0442a30c"
+    },
+    "restore_bin": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 111804,
+      "sha256": "3935132e563baa6625bfad2c140e4994a9bce33a63c561ffdbd378b1e2b086b0"
+    },
+    "restore_map": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2517580,
+      "sha256": "287c0bf596d6834f6a498b4509eede9b47870a84b7dd88bd7233e380a9971c63"
+    },
+    "maintenance": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/maintenance.bin",
+      "bytes": 616616,
+      "sha256": "23ce89fc5d77e4cf5664d05621caff2cefb6dd22237189042de4bc5dbcf8b0d2"
+    },
+    "restore": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/restore.bin",
+      "bytes": 111804,
+      "sha256": "9f3643e99dcc3734518dacac52bfdb3b7a36544299ceaa859154ddb26cd0b58d"
+    },
+    "apk": {
+      "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1/run-35c6e3aa3a624461aeecb85ea4d25a22/artifacts/trace-dev-debug.apk",
+      "bytes": 131722750,
+      "sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f"
+    },
+    "apk_metadata": {
+      "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1/run-35c6e3aa3a624461aeecb85ea4d25a22/artifacts/trace-dev-debug.json",
+      "bytes": 846,
+      "sha256": "db5cc59ccd6974b392bf5f5252ad937e4c6b7dc5d4dd27fec0f9d111322cdbce"
+    }
+  },
+  "development_evidence": [
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/result.json",
+      "bytes": 765,
+      "sha256": "0f7876170d70bf453cb8d00eacde518aac4b26281bb30089efbc7a339112d776"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_bundle.py.json",
+      "bytes": 647,
+      "sha256": "47733af77032db4a0b1ecd7fb7afdf35d3b7783efbeed0035e2664a0321d93d4"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_bundle.py.log",
+      "bytes": 223,
+      "sha256": "8b6cee04786fd6414b5ea38806a80074e6de4a0304ccfdc94b56a77d8d39891f"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_efficiency.py.json",
+      "bytes": 656,
+      "sha256": "ffd079fd49c0996c29f56c1bb3404d98afbe3370ebd359c008cb8525b92079c3"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_efficiency.py.log",
+      "bytes": 4971,
+      "sha256": "7d3b6af58cfcd645f86c77c3055c57031d8d0fc44d417e5f938476279f216158"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/statistics/result.json",
+      "bytes": 446,
+      "sha256": "286bd212f34e715f835074c9e07386460213d9fd923f88695bb72a3d002557dc"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/statistics/test_p34_acceptance_stats.py.json",
+      "bytes": 652,
+      "sha256": "7e7d4120c4478e2d053c2cac9543cd5e10154bdd69e240fab651c43428c7e46c"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-pre06-tests1/statistics/test_p34_acceptance_stats.py.log",
+      "bytes": 1989,
+      "sha256": "fc620cc9ab811f67a7ab39d80fa91182b4eda3cf3b6e2efe1ec459f01ed461f3"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/before.json",
+      "bytes": 3617,
+      "sha256": "5ce2008e0305d335db50fa30e74ce393b5b9d426caca4c252d80821bc8070df2"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/commit.json",
+      "bytes": 654,
+      "sha256": "d536ebe3667539a88e07906e180b5e65826676834f1fd20a4983ed25887fe784"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/push.json",
+      "bytes": 309,
+      "sha256": "05caf234e206134f578af1b95b9d591c8dce571e7ac11f3f63d743208a5f0595"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/commit2.json",
+      "bytes": 299,
+      "sha256": "6e3bbccae9e6a42b2cbcd493920d9e2833ea8824daf2ef5b520fb8aa9cfc77d1"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/push2.json",
+      "bytes": 238,
+      "sha256": "9c199555b06d7efdc6ef6a9efe9e6c65b4a723d56ecf83ff7e27e0b5497e5e4c"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/commit3.json",
+      "bytes": 297,
+      "sha256": "e4834537540dcf2e843db8a13a8b5363b19052dabc3ba5e377894f14bc1ffebb"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/push3.json",
+      "bytes": 238,
+      "sha256": "31a8536391f34b6a1e8c9fe33ef82f37f0ced2661f1ecbf273f7e8d8bf9475b8"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/identity-final.json",
+      "bytes": 7218,
+      "sha256": "070f17eca868aaa916a4d46c956357775c392253c5bb37302c502653b1ed9d50"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/query-regression.json",
+      "bytes": 1172,
+      "sha256": "f282fc43a8fd80b42649af48752bc57d91f0686fb8df41a66dde46b7f4b8f063"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/trial6-current.json",
+      "bytes": 30782,
+      "sha256": "98b3474ee99908a6f06d0a1fb0ab0f5ce035a516937560fb5bd5ea3e5fb89f06"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/trial6-current.log",
+      "bytes": 27483,
+      "sha256": "d49f0b5599d26155a8d35c9f7cdf23afefd1089d85435989701fd91dd8124dbc"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/ci-final-summary.json",
+      "bytes": 12581,
+      "sha256": "669f9ed9df0d3c6f49ed9266c5435385641f34da1cb715a933a44d69c00135d7"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/pr-final.json",
+      "bytes": 18558,
+      "sha256": "965af2437475dabe080cee9f4897710720bd772112cc622d9a59ec89d3ac7cb2"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/fixture-failure.json",
+      "bytes": 701,
+      "sha256": "c609eeffd2e88d8cfeab737a470909cd9236c56840dde52a09c2eebd1c7adbf3"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/timer-test-scope.json",
+      "bytes": 1150,
+      "sha256": "6ac2dfb7f235023f6b3914583b8094453e72e50a253c6fe254a67a629fbdff68"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/ci-4838dd13-dev-failed.log",
+      "bytes": 424348,
+      "sha256": "a7462cc16c8d4785279cddb638208928758dce501ec987d47f3eff1c51d29fdd"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/ci-4838dd13-android-job.log",
+      "bytes": 2816114,
+      "sha256": "eb30bb47d4998a35adfdcf60b0a030903463b1d1867de40a051982c1516d9a65"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/dev-c9fb0291-archive.json",
+      "bytes": 2879,
+      "sha256": "e2514f69c21979049448868260f6ffb2c76d477e77ff4ebdae6ed8bdb97473d1"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/post-push-read-failure.json",
+      "bytes": 208,
+      "sha256": "7e9ba924ccf3bc4f3d22d886a489f23f5ad3e63ea653bd4a70f2efafacccc473"
+    },
+    {
+      "path": ".cache/p34-pre06-20261010/identity-probe-failure.json",
+      "bytes": 348,
+      "sha256": "45257d6af6ce37dd807853dd01259117f2919be7014093a7e66cd2461125fdcc"
+    }
+  ],
+  "ci_final": {
+    "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+    "runs": [
+      {
+        "id": 38047823595,
+        "name": "Acceptance Governance",
+        "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "event": "pull_request",
+        "attempt": 1,
+        "conclusion": "success",
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38047823595",
+        "metadata": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047823595/metadata.json",
+          "bytes": 23648,
+          "sha256": "441a559fb3ddae3df87860db3bd66de2c20592aa28b6b1ebc471357481034cf8"
+        },
+        "original_archive": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823595\\logs\\original.zip",
+          "bytes": 56190,
+          "sha256": "e20e8cba6a9c9082c3e98f9249244323a166e18c41deafbfc86126f6aa628d11"
+        },
+        "archive_receipt": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047823595/result.json",
+          "bytes": 7251,
+          "sha256": "d4d82301724dd992890c9f9d9dc88153dc665c5cf16d9383a87a1cd90aa36f62"
+        },
+        "jobs": [
+          {
+            "id": 114200812263,
+            "name": "Flutter debugging skill (windows-latest)",
+            "conclusion": "success"
+          },
+          {
+            "id": 114200812427,
+            "name": "Flutter debugging skill (ubuntu-latest)",
+            "conclusion": "success"
+          },
+          {
+            "id": 114200812459,
+            "name": "Validate acceptance and build governance",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 38047823559,
+        "name": "MCU Firmware Build",
+        "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "event": "pull_request",
+        "attempt": 1,
+        "conclusion": "success",
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38047823559",
+        "metadata": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047823559/metadata.json",
+          "bytes": 22227,
+          "sha256": "58f291ca8592c243695c42c605e076656ebe5c5f07cd8149c86563c8c1e36cdb"
+        },
+        "original_archive": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823559\\logs\\original.zip",
+          "bytes": 183734,
+          "sha256": "5f4cc1dfe8062140e752fab19c000c10dbfc53ca3021e81a013945fe51f682f9"
+        },
+        "archive_receipt": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047823559/result.json",
+          "bytes": 6492,
+          "sha256": "0a78b217bda266fc5dc4de7d03da6aa2e7992a42c1869cafb4481c4c551d99cc"
+        },
+        "jobs": [
+          {
+            "id": 114200812524,
+            "name": "Build firmware (arm-none-eabi-gcc)",
+            "conclusion": "success"
+          },
+          {
+            "id": 114201049677,
+            "name": "Register firmware to Cloudflare",
+            "conclusion": "skipped"
+          }
+        ]
+      },
+      {
+        "id": 38047820907,
+        "name": "Flutter Development Checks",
+        "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "event": "push",
+        "attempt": 1,
+        "conclusion": "success",
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38047820907",
+        "metadata": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047820907/metadata.json",
+          "bytes": 24707,
+          "sha256": "e1dc82ef5847234bece144105b276a2505f210d5dc73fcb06391a83631cbe4d5"
+        },
+        "original_archive": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047820907\\logs\\original.zip",
+          "bytes": 135657,
+          "sha256": "7bf245545176dada099cda01ff4497bf35303479026462aff7090cdcb858793d"
+        },
+        "archive_receipt": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047820907/result.json",
+          "bytes": 8859,
+          "sha256": "08d44383fb4c445d188eaebcfcd1820c6ec22d303dea7e30fb72fa9f4e2f45c4"
+        },
+        "jobs": [
+          {
+            "id": 114200804232,
+            "name": "Flutter self-tests (windows-2022)",
+            "conclusion": "success"
+          },
+          {
+            "id": 114200804360,
+            "name": "Flutter self-tests (ubuntu-latest)",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 38047823551,
+        "name": "Build APK and EXE Release",
+        "head_sha": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "event": "pull_request",
+        "attempt": 1,
+        "conclusion": "success",
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38047823551",
+        "metadata": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047823551/metadata.json",
+          "bytes": 30422,
+          "sha256": "3e361982dfabe4c4d8abaa2e77e56490b7b28c61f95eb65480a3ab8877575a05"
+        },
+        "original_archive": {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\original.zip",
+          "bytes": 1418162,
+          "sha256": "4fb05fab2ee4f770fe1cc9b23df0974d87ed88b04fc40645a64987b17f334982"
+        },
+        "archive_receipt": {
+          "path": ".cache/p34-pre06-20261010/ci-final/38047823551/result.json",
+          "bytes": 12146,
+          "sha256": "88d489b21a1eefca1bbafd9b47141bd258615790c00b4fd08af1beae5c074efe"
+        },
+        "jobs": [
+          {
+            "id": 114200812042,
+            "name": "Detect changed paths",
+            "conclusion": "success"
+          },
+          {
+            "id": 114200850402,
+            "name": "Build Android APK",
+            "conclusion": "success"
+          },
+          {
+            "id": 114200850438,
+            "name": "Build Windows EXE",
+            "conclusion": "success"
+          },
+          {
+            "id": 114200851530,
+            "name": "Deploy GitHub Pages",
+            "conclusion": "skipped"
+          },
+          {
+            "id": 114202023703,
+            "name": "Create GitHub Release",
+            "conclusion": "skipped"
+          }
+        ]
+      }
+    ],
+    "hosts": [
+      {
+        "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "counts": {
+          "passed": 722,
+          "skipped": 16,
+          "failed": 0
+        },
+        "report": {
+          "path": ".cache/p34-pre06-20261010/ci-final/artifact-11668247499/files/flutter-dev-checks/runs/run-8c04b481f3fa441b90476ecee256dcce/result.json",
+          "bytes": 11799,
+          "sha256": "1e4f878b21a302c114117ddccd1e59e22912509412fd620f545f57517a67e565"
+        },
+        "tests_log": {
+          "path": ".cache/p34-pre06-20261010/ci-final/artifact-11668247499/files/flutter-dev-checks/runs/run-8c04b481f3fa441b90476ecee256dcce/logs/tests.log",
+          "bytes": 2083289,
+          "sha256": "504129b74a1521a8c28be84decc343ff46f1274c4db4de4e095532f23f2fd9bd"
+        },
+        "final_line": "01:45 +722 ~16: All tests passed!",
+        "key_tests": [
+          {
+            "needle": "real v2 transport schema10 snapshot reaches formal statistics without early ACK fabrication",
+            "line": 10047,
+            "text": "00:24 +340 ~15: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_pipeline_transport_test.dart: real v2 transport schema10 snapshot reaches formal statistics without early ACK fabrication"
+          },
+          {
+            "needle": "service disconnect and durable resume snapshots reach formal recovery accounting",
+            "line": 144,
+            "text": "00:00 +66: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: service disconnect and durable resume snapshots reach formal recovery accounting"
+          },
+          {
+            "needle": "RC3-07",
+            "line": 14905,
+            "text": "00:51 +679 ~16: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 \u5fe0\u5b9e\u6a21\u578b\u4e0e fail closed \u56de\u5f52 BEGIN ACK \u5168\u4e22\uff1a\u65e0 durable \u8fdb\u5c55\u9884\u7b97\u4f18\u5148\u4e8e\u91cd\u8bd5\u7a7a\u8f6c\uff08RC3-07\uff09"
+          }
+        ],
+        "actual_service_failure_line": 276,
+        "sdk": {
+          "frameworkVersion": "3.47.7",
+          "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+          "channel": "stable",
+          "dartSdkVersion": "3.13.5",
+          "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca"
+        },
+        "analyze": "PASS",
+        "console_excerpt_truncated": true,
+        "full_log_preserved": true
+      },
+      {
+        "host": "Windows-2022Server-10.0.20348-SP0",
+        "counts": {
+          "passed": 705,
+          "skipped": 33,
+          "failed": 0
+        },
+        "report": {
+          "path": ".cache/p34-pre06-20261010/ci-final/artifact-11668711016/files/flutter-dev-checks/runs/run-8a19d0ca1db14cfabe8e1e1f23bfed83/result.json",
+          "bytes": 12146,
+          "sha256": "dcc509a1766e027064f16a7078cc0d4aee303fa072c7332cf4c32d9eecfcc094"
+        },
+        "tests_log": {
+          "path": ".cache/p34-pre06-20261010/ci-final/artifact-11668711016/files/flutter-dev-checks/runs/run-8a19d0ca1db14cfabe8e1e1f23bfed83/logs/tests.log",
+          "bytes": 2170311,
+          "sha256": "2fa4ef522d0e72c3decbc973a3f0b312978e96a33c1130e5183124c3ea724394"
+        },
+        "final_line": "01:15 +705 ~33: All tests passed!",
+        "key_tests": [
+          {
+            "needle": "real v2 transport schema10 snapshot reaches formal statistics without early ACK fabrication",
+            "line": 3647,
+            "text": "00:21 +447 ~33: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_pipeline_transport_test.dart: real v2 transport schema10 snapshot reaches formal statistics without early ACK fabrication"
+          },
+          {
+            "needle": "service disconnect and durable resume snapshots reach formal recovery accounting",
+            "line": 6417,
+            "text": "00:31 +545 ~33: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: service disconnect and durable resume snapshots reach formal recovery accounting"
+          },
+          {
+            "needle": "RC3-07",
+            "line": 3624,
+            "text": "00:20 +425 ~33: D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_ble_transport_test.dart: RC3 \u5fe0\u5b9e\u6a21\u578b\u4e0e fail closed \u56de\u5f52 BEGIN ACK \u5168\u4e22\uff1a\u65e0 durable \u8fdb\u5c55\u9884\u7b97\u4f18\u5148\u4e8e\u91cd\u8bd5\u7a7a\u8f6c\uff08RC3-07\uff09"
+          }
+        ],
+        "actual_service_failure_line": 6549,
+        "sdk": {
+          "frameworkVersion": "3.47.7",
+          "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+          "channel": "stable",
+          "dartSdkVersion": "3.13.5",
+          "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca"
+        },
+        "analyze": "PASS",
+        "console_excerpt_truncated": true,
+        "full_log_preserved": true
+      }
+    ],
+    "local_tests": [
+      {
+        "test": "test_p34_acceptance_stats.py",
+        "count": 13,
+        "exit_code": 0,
+        "receipt": {
+          "path": ".cache/p34-final/.cache/p34-pre06-tests1/statistics/test_p34_acceptance_stats.py.json",
+          "bytes": 652,
+          "sha256": "7e7d4120c4478e2d053c2cac9543cd5e10154bdd69e240fab651c43428c7e46c"
+        },
+        "log": {
+          "path": ".cache/p34-final/.cache/p34-pre06-tests1/statistics/test_p34_acceptance_stats.py.log",
+          "bytes": 1989,
+          "sha256": "fc620cc9ab811f67a7ab39d80fa91182b4eda3cf3b6e2efe1ec459f01ed461f3"
+        }
+      },
+      {
+        "test": "test_acceptance_bundle.py",
+        "count": 116,
+        "exit_code": 0,
+        "receipt": {
+          "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_bundle.py.json",
+          "bytes": 647,
+          "sha256": "47733af77032db4a0b1ecd7fb7afdf35d3b7783efbeed0035e2664a0321d93d4"
+        },
+        "log": {
+          "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_bundle.py.log",
+          "bytes": 223,
+          "sha256": "8b6cee04786fd6414b5ea38806a80074e6de4a0304ccfdc94b56a77d8d39891f"
+        }
+      },
+      {
+        "test": "test_acceptance_efficiency.py",
+        "count": 33,
+        "exit_code": 0,
+        "receipt": {
+          "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_efficiency.py.json",
+          "bytes": 656,
+          "sha256": "ffd079fd49c0996c29f56c1bb3404d98afbe3370ebd359c008cb8525b92079c3"
+        },
+        "log": {
+          "path": ".cache/p34-final/.cache/p34-pre06-tests1/governance/test_acceptance_efficiency.py.log",
+          "bytes": 4971,
+          "sha256": "7d3b6af58cfcd645f86c77c3055c57031d8d0fc44d417e5f938476279f216158"
+        }
+      }
+    ],
+    "all_required_ci_success": true,
+    "formal_acceptance": "NOT_RUN",
+    "device_operations": 0,
+    "debug_apk_requested": false,
+    "archive_sessions": [
+      {
+        "id": 44596,
+        "exit": 0
+      },
+      {
+        "id": 78873,
+        "exit": 0
+      }
+    ]
+  },
+  "ci_evidence": {
+    "path": ".cache/p34-pre06-20261010/ci-final-summary.json",
+    "bytes": 12581,
+    "sha256": "669f9ed9df0d3c6f49ed9266c5435385641f34da1cb715a933a44d69c00135d7"
+  },
+  "tool_readme": {
+    "path": ".cache/p34-final/Tools/ota/p34-acceptance/README.md",
+    "bytes": 10018,
+    "sha256": "b2bd48d2a90347aa367f97371564d624c725ac02c5baa2d1d81d45584b5334c1"
+  },
+  "historical_reinterpretation": {
+    "path": ".cache/p34-pre06-20261010/trial6-current.json",
+    "bytes": 30782,
+    "sha256": "98b3474ee99908a6f06d0a1fb0ab0f5ce035a516937560fb5bd5ea3e5fb89f06"
+  },
+  "runtime_build_input_identity": {
+    "path": ".cache/p34-pre06-20261010/identity-final.json",
+    "bytes": 7218,
+    "sha256": "070f17eca868aaa916a4d46c956357775c392253c5bb37302c502653b1ed9d50"
+  },
+  "review2": {
+    "path": ".cache/p34-final/docs/ota-exec-notes/P3-4-independent-remediation-review2-2026-10-10.md",
+    "bytes": 17640,
+    "sha256": "74616615069b71c58660231a06473c06885092804cab8052725db6a5ed8557bf"
+  },
+  "pre06_status": "IMPLEMENTED_SELF_TESTED_PENDING_INDEPENDENT_REVIEW",
+  "pre01_pre07": "SOURCE_REMEDIATION_CLOSED_BY_REVIEW2_FIRST_LIVE_QUALIFICATION_NOT_RUN",
+  "failure_history": "First new service fixture reused sealed diagnostics; corrected to new recorder. Next Linux run exposed existing RC3-07 fractional-ms timer race; only fixture timer rounding changed, production behavior unchanged. All failed originals retained.",
+  "next_owner": "Independent reviewer: PRE-06 and direct dependencies only, then actual P3-4-v1 contract/precheck and single live matrix if admitted.",
+  "manual_mentions": 0,
+  "device_operations": 0
+}

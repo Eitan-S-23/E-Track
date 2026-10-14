@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "import socket,json,time; t=time.monotonic(); rows=socket.getaddrinfo('api.trycloudflare.com',443,type=socket.SOCK_STREAM); print(json.dumps({'host':'api.trycloudflare.com','resolved':bool(rows),'addresses':sorted(set(x[4][0] for x in rows)),'elapsed_s':time.monotonic()-t}))"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 858368223020400,
+  "ended_monotonic_ns": 858368783381600,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round7\\diagnostics\\tunnel-api-dns\\resolve-api.stdout",
+    "bytes": 185,
+    "sha256": "fefef68a304431703f3c15e98e1ef2f97131affed181ecfddc90eda9f489b9d3"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round7\\diagnostics\\tunnel-api-dns\\resolve-api.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

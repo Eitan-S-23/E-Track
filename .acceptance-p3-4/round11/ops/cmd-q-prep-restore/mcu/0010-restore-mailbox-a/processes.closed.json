@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 935173405004900,
+  "ended_monotonic_ns": 935174018765900,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0010-restore-mailbox-a\\processes.stdout",
+    "bytes": 13613,
+    "sha256": "3b361e938c2a7c7182a0c6a2505daaff3b0ba0c897517a518e8792385a2062b5"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0010-restore-mailbox-a\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

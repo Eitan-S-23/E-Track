@@ -1,0 +1,15 @@
+{
+  "scope": "passive existing-buffer diagnostic only",
+  "rtt": {
+    "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\mcu\\storage-passive.rtt",
+    "bytes": 297,
+    "sha256": "e6b5ed193811d56b65fa6aca712df5e625b1f4b0facd6c4c7fefb58aa403dcb7"
+  },
+  "registers": {
+    "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\register-observation.json",
+    "bytes": 1176,
+    "sha256": "035ac974640777f492a7326e7ce1d8e92ad5a34ab2ae120286e678604de76f6c"
+  },
+  "no_reset_or_flash": true,
+  "retained_failure_lock": true
+}

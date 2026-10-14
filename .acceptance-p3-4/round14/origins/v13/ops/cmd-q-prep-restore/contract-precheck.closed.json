@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\acceptance\\validate_bundle.py",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 1005595150216200,
+  "ended_monotonic_ns": 1005601652846500,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\contract-precheck.stdout",
+    "bytes": 100,
+    "sha256": "f0553a5d15ceaa88744e772b63f3dc83a7fc25c4d465eb65ffc3613e750f5314"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\contract-precheck.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

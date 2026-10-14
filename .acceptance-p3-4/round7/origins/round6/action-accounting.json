@@ -1,0 +1,22 @@
+{
+  "qualification_ota_starts": 0,
+  "qualification_remaining": 1,
+  "calibration_ota_starts": 0,
+  "calibration_remaining": 12,
+  "app_installs": 0,
+  "app_launches": 1,
+  "flash_operations": 0,
+  "resets": 0,
+  "phone_runtime_writes": 2,
+  "old_capture_deleted": "1790867452971819-7ff7efab9a8da2f63aa2790a",
+  "phone_capture_files_deleted": 2,
+  "phone_capture_bytes_deleted": 530,
+  "late_capture": "1791733411743571-151409df12fd3ec70569f908",
+  "late_capture_deleted": false,
+  "late_capture_bytes": 7887,
+  "manual_mentions": 1,
+  "last_phone_unlocked": true,
+  "final_app_stopped": true,
+  "runtime_restored": true,
+  "next_owner": "User: decide exact late-capture prune scope; root: maintain original seven, preflight awake/unlocked phone, then same-source successor for unspent qualification."
+}

@@ -1,0 +1,43 @@
+{
+  "actions": [
+    {
+      "command": "CMD-Q-APK",
+      "state": "completed"
+    },
+    {
+      "command": "CMD-Q-MAINT",
+      "state": "completed"
+    },
+    {
+      "command": "CMD-Q-BAUD",
+      "state": "completed"
+    },
+    {
+      "command": "CMD-Q-PRODUCTION",
+      "state": "completed"
+    },
+    {
+      "command": "CMD-Q-TRANSFER",
+      "state": "failed"
+    }
+  ],
+  "actual_apk_installs": 1,
+  "actual_mcu_app_installs": 2,
+  "initial_base_install_replayed": false,
+  "qualification_command_invocations": 1,
+  "qualification_actual_ota_starts": 0,
+  "qualification_remaining": 1,
+  "calibration_actual_ota_starts": 0,
+  "calibration_remaining": 12,
+  "recovery_operations": 0,
+  "qualification_success": false,
+  "calibration_complete": false,
+  "later_campaigns": "NOT_RUN",
+  "manual_mentions": 1,
+  "ui_start_invitations": 0,
+  "retained_state": "verified production base / unchanged group16 Boot",
+  "failure_id": "P34-LIVE-01",
+  "failure_owner": "environment",
+  "lock_retained": true,
+  "no_live_commands_after_matrix_seal": true
+}

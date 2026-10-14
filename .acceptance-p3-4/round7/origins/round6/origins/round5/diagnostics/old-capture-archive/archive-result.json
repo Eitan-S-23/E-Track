@@ -1,0 +1,53 @@
+{
+  "capture_id": "1790867452971819-7ff7efab9a8da2f63aa2790a",
+  "remote_directory": "/data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1790867452971819-7ff7efab9a8da2f63aa2790a",
+  "capture_count": 8,
+  "current_app_pid": null,
+  "header": {
+    "seq": 1,
+    "kind": "open",
+    "schema": 1,
+    "captureId": "1790867452971819-7ff7efab9a8da2f63aa2790a",
+    "sentinel": "OTAOBS96bb2c74d5ad6ccecaf30e40",
+    "target": "E3:49:E1:14:D6:CB",
+    "pid": 28808,
+    "platform": "android",
+    "openedAt": "2026-10-01T15:10:52.982969Z",
+    "limits": {
+      "captureBytes": 67108864,
+      "pendingBytes": 1048576
+    }
+  },
+  "health": {
+    "schema": 1,
+    "captureId": "1790867452971819-7ff7efab9a8da2f63aa2790a",
+    "time": "2026-10-01T15:11:05.026440Z",
+    "records": 1,
+    "bytes": 296,
+    "producerLines": 0,
+    "upgradeStarts": 0,
+    "upgradeEnds": 0,
+    "outcome": null,
+    "lost": 0,
+    "error": null,
+    "healthy": true
+  },
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round5\\diagnostics\\old-capture-archive\\capture\\events.jsonl",
+      "bytes": 296,
+      "sha256": "12727adbc757fc144c2bfd158a176a1820a7ac362a399b29b4b1ec70a4be8c6f"
+    },
+    {
+      "path": ".acceptance-p3-4\\round5\\diagnostics\\old-capture-archive\\capture\\health.json",
+      "bytes": 234,
+      "sha256": "b5422ad8235db8e0546b5224e31a7f2de2f8f9eb73a464186143b551794ff5d1"
+    }
+  ],
+  "all_remote_hashes_match": true,
+  "stable_directory": true,
+  "upgrade_attempts": 0,
+  "phone_file_mutations": 0,
+  "deletion_performed": false,
+  "minimum_cleanup": "Only this inactive header-only capture would free one slot; preserve all seven other captures including failed OTA histories."
+}

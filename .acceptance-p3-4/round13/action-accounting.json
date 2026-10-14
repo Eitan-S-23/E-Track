@@ -1,0 +1,20 @@
+{
+  "schema": "p34-action-accounting-v1",
+  "stage": "OFFLINE_ORIGINAL_EVALUATION",
+  "prior_qualification_consumed": 3,
+  "this_round_qualification_consumed": 0,
+  "cumulative_qualification_consumed": 3,
+  "cumulative_qualification_limit": 3,
+  "additional_authorized": 0,
+  "physical_device_operations": 0,
+  "preparatory_restore_completed": 0,
+  "post_qualification_restore_completed": 0,
+  "new_ota_after_failure": 0,
+  "historical_v11_result": "HARNESS_FAIL",
+  "historical_v12_result": "EVIDENCE_GAP",
+  "historical_accounting": {
+    "path": ".acceptance-p3-4\\round13\\inputs\\v12-action-accounting.json",
+    "bytes": 1339,
+    "sha256": "81c1c85680ef50021f7450ba69c843f2a2e444ad01ee9c2c06fc2c859839f8ea"
+  }
+}

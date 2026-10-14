@@ -1,0 +1,16 @@
+{
+  "origin": "https://hepatitis-dual-partners-formats.trycloudflare.com",
+  "package": {
+    "path": ".acceptance-p3-4\\round9\\ops\\cmd-q-transfer\\network\\https-package.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "service_config": {
+    "path": ".acceptance-p3-4\\round9\\ops\\cmd-q-transfer\\network\\service-config.json",
+    "bytes": 1312,
+    "sha256": "d7da4dfb65687b8f5a62a5962e31fc181c17928d796ecb5d61542d2214482dc0"
+  },
+  "local_port": 55855,
+  "prepare_deadline_monotonic": 918548.5024622,
+  "https_requests": 17
+}

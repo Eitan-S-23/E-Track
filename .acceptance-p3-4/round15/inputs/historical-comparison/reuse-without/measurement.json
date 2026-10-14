@@ -1,0 +1,66 @@
+{
+  "candidate": "reuse-without",
+  "package_bytes": 284643,
+  "package_sha256": "da82725792afeb88b353de7c595596eafa47f1c1db9bfa4905803693b159d600",
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10680649265\\contents\\run-ae4251be3a6842cdba86ebe02d39fade\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131603030,
+    "sha256": "f1e84d318d83727da93d81d8299c685680b5e8fedf5ef607b3abd203c473031f"
+  },
+  "transfer_seconds": 74.326403,
+  "payload_kib_s": 3.7398780038837613,
+  "data_segments_unique": 2224,
+  "data_retransmit_frames": 0,
+  "write_mode": "without",
+  "mtu_chunk_bytes": 244,
+  "gatt_writes": {
+    "calls": 2227,
+    "bytes": 315942,
+    "errors": 0,
+    "minUs": 2421,
+    "p50Us": 5324,
+    "p95Us": 13296,
+    "maxUs": 59140
+  },
+  "discovers": {
+    "calls": 1,
+    "errors": 0,
+    "minUs": 15220,
+    "p50Us": 15220,
+    "p95Us": 15220,
+    "maxUs": 15220
+  },
+  "platform_writes": {
+    "calls": 2227,
+    "bytes": 315942,
+    "errors": 0,
+    "minUs": 2290,
+    "p50Us": 5086,
+    "p95Us": 13007,
+    "maxUs": 58865
+  },
+  "ack_sample_status": "complete",
+  "ack_early_invalid": 0,
+  "reconnect_phase_seconds": 62.747975,
+  "threshold_eligible": false,
+  "independent_acceptance": "NOT_RUN",
+  "limits": "Screening only. Partial/early ACKs cannot establish P99; discovery is nested in GATT time.",
+  "binding": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\finished\\binding.json",
+    "bytes": 1995,
+    "sha256": "74c14e826ea5c54c6232c914608b088daa13e1dfb3d00ac159456afe185e6ae0"
+  },
+  "statistics": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\finished\\statistics.json",
+    "bytes": 1958,
+    "sha256": "7f277f9a97f92eb4becdddc29595cf626c29892406ef6866ebfbaf876c616b1a"
+  },
+  "device_result": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\result.json",
+    "bytes": 3319,
+    "sha256": "50f1e1a244358a0c6622ba8bd25f92ce83c34f8b84fbd8a2f38657cf13bf0909"
+  },
+  "final_image_sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+  "whole_boot_sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+  "sd_ready": 1
+}

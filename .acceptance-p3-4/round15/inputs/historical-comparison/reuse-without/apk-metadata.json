@@ -1,0 +1,21 @@
+{
+  "artifact_kind": "development-debug-apk",
+  "formal_acceptance": "NOT_RUN",
+  "commit": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+  "sha256": "f1e84d318d83727da93d81d8299c685680b5e8fedf5ef607b3abd203c473031f",
+  "bytes": 131603030,
+  "file": "trace-dev-debug.apk",
+  "release_signing": false,
+  "application_id": "com.wen.gaia.gaia.p34c3",
+  "device_observation": {
+    "enabled": true,
+    "target": "E3:49:E1:14:D6:CB",
+    "sentinel": "OTAOBS555aebbd12536a63ba1dd537",
+    "firmware_latest_url": "https://declaration-drivers-enabled-zshops.trycloudflare.com/api/public/firmware/latest"
+  },
+  "requested_ota_link_candidate": {
+    "name": "reuse-without",
+    "reuse_gatt": true,
+    "prefer_without_response": true
+  }
+}

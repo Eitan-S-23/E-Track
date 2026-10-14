@@ -1,0 +1,183 @@
+{
+  "criterion": "Q-BASE",
+  "result": "PASS",
+  "execution": "EXECUTED",
+  "observed": true,
+  "health": {
+    "health": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        7255,
+        7255,
+        0,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        7533,
+        7533,
+        0,
+        1,
+        1
+      ]
+    ],
+    "registers": {
+      "vtor": 134285312,
+      "cfsr": 0,
+      "hfsr": 0,
+      "dhcsr": 16842753,
+      "sdio": 0,
+      "freeze": 0
+    },
+    "confirmed_state": 4,
+    "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+  },
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5092,
+    "high_water_bytes": 3100,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\active.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\app.bin",
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\backup_slot.bin",
+      "bytes": 32,
+      "sha256": "2a187681945460f97c68fee52eada1ccf69030c5b64bad47a3db1bfc39b16b34"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\candidate_slot.bin",
+      "bytes": 32,
+      "sha256": "b7e762aa5e48e58419d2be240f1d7b73a407e123ff74750ec14fbe90010597b4"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\cfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\confirmed.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\dhcsr.bin",
+      "bytes": 4,
+      "sha256": "52a5c4a10657220cac05c63adfa923c7771c55d868a58ee360eb3d1511985c3e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\disabled.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\freeze.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\guard.bin",
+      "bytes": 32,
+      "sha256": "60bf07c488aad18fda339df07e4fbc47b4f00be71711936f18d04d352ad01890"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\header_after.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\health0.bin",
+      "bytes": 36,
+      "sha256": "413772be55df1c8aa5eaba208d5472921171008b74fcbc1ac4b7503f8df36fe2"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\health1.bin",
+      "bytes": 36,
+      "sha256": "ad90c49b8d078479e57dd3c1d35f260a7d1e97dca0a1b9a0b26b8a377717e0a6"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\hfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\isr.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\jedec.bin",
+      "bytes": 4,
+      "sha256": "e218e2eccee7ced0261a4dc71db73c31d71724cfe7cb65e7467ef7d174f81a02"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\owner.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\recovery_slot.bin",
+      "bytes": 32,
+      "sha256": "c0e11ef1523fc0dc94bf759ee8e4d85344738e9096ae1fdefa10ad7ac30aec6c"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\sd.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\sdio.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\snapped.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\stack.bin",
+      "bytes": 8192,
+      "sha256": "68995182c439265ef6bc92c6242cb88bacf0e581ad831ded9fc15b5f29130210"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\staging.bin",
+      "bytes": 4096,
+      "sha256": "8e38e6cef30ebfb17d145d165c446a9847adce51b37d08cb9ec2e483af19fde4"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\state.bin",
+      "bytes": 1,
+      "sha256": "e52d9c508c502347344d8c07ad91cbd6068afc75ff6292f062a09ca381c89e71"
+    },
+    {
+      "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0005-post-install\\vtor.bin",
+      "bytes": 4,
+      "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+    }
+  ],
+  "debug_freeze_restored": true,
+  "nonfatal_console_diagnostic": "ClrBP handle not found in later Commander; separate actual FPB read has all eight comparators zero, no remaining halt/breakpoint",
+  "ota_count": 0
+}

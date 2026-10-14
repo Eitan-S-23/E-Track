@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "C:\\Windows\\System32\\fc.exe",
+    "/B",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-base.bin",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\app.bin"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1061789848387700,
+  "ended_monotonic_ns": 1061790057403300,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-BASE.stdout",
+    "bytes": 272,
+    "sha256": "08701e9c0f6c407e1571ba18efd3ea6d41de6f0baa96b1af20935e3af6186eb3"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-BASE.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

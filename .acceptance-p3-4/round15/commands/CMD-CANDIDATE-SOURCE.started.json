@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "D:\\install\\Git\\cmd\\git.exe",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--exit-code",
+    "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+    "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+    "--",
+    "Libraries",
+    "USER",
+    "boot",
+    "cmake",
+    "MDK-ARM_F435/Platform",
+    "MDK-ARM_F435/cmake-generated",
+    "app/bluetooth_flutter_Trace/lib",
+    "app/bluetooth_flutter_Trace/android",
+    "app/bluetooth_flutter_Trace/vendor",
+    "app/bluetooth_flutter_Trace/pubspec.yaml",
+    "app/bluetooth_flutter_Trace/pubspec.lock"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 1061792499628500,
+  "stdin_sha256": null
+}

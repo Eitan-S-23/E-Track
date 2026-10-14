@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "import os,re,subprocess,sys\nkey=os.environ['CC_SESSION_KEY']\nuid=key.split(':',2)[-1]\nassert re.fullmatch(r'ou_[a-zA-Z0-9]+',uid)\nbody=('<at user_id=\"'+uid+'\">requester</at> '+sys.stdin.buffer.read().decode('utf-8')).encode('utf-8')\nr=subprocess.run(['D:/github/my/cc-connect-thread-guard/build/cc-connect.exe','send','--project',os.environ['CC_PROJECT'],'--session',key,'--stdin'],input=body,cwd='D:/github/my/E-Track/.cache/p34-final')\nraise SystemExit(r.returncode)\n"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 1005958520579800,
+  "stdin_sha256": "86b4c893d61c344f98aa61d074ce76d09704a42bfca86aff36f2ad71ed6ef2c3"
+}

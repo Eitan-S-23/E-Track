@@ -1,0 +1,32 @@
+{
+  "original_command": "CMD-Q-TRANSFER",
+  "original_command_exit_code": null,
+  "original_close_receipt_missing": true,
+  "original_action_result_missing": true,
+  "latest_original_phase": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phase-readback.json",
+    "bytes": 293,
+    "sha256": "eae38ef145440327ce5bd8b1988883da88d68a40cda4dffb1a841d9875901565"
+  },
+  "latest_phase_expired": true,
+  "partial_readback": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0009-post-transfer-full-readback\\app.bin",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "original_start": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\start-observed.json",
+    "bytes": 275,
+    "sha256": "f5b3151705fe6cac3b515cde8d6c914a874d67e7fa2bde8290c5ebee8b0e809d"
+  },
+  "original_snapshot": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phone\\snapshot.jsonl",
+    "bytes": 4775779,
+    "sha256": "930a7114799d882e10287362ba2a723d489d96d71f4c3248a1f11641704b2170"
+  },
+  "physical_ota_completed": true,
+  "cause": "Original host owner disappeared during final readback; cause not established.",
+  "scope": "New diagnostic read-only target reconciliation and authorized completed-capture archive only. Not an extension, rerun, replacement receipt or PASS for the expired frozen command.",
+  "extra_ota": 0,
+  "reset_or_flash": 0
+}

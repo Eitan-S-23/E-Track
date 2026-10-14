@@ -1,0 +1,238 @@
+{
+  "metadata": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\metadata.json",
+    "bytes": 30422,
+    "sha256": "3e361982dfabe4c4d8abaa2e77e56490b7b28c61f95eb65480a3ab8877575a05"
+  },
+  "archive": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\original.zip",
+    "bytes": 1418162,
+    "sha256": "4fb05fab2ee4f770fe1cc9b23df0974d87ed88b04fc40645a64987b17f334982"
+  },
+  "files": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\2_Build Windows EXE.txt",
+      "bytes": 2812380,
+      "sha256": "274afbc3b5ce0dbe2e65d2f5b832e4c4f98324446dfc647ea1c8ac4b7bf7ea59"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\system.txt",
+      "bytes": 702,
+      "sha256": "292036b7a7ffe9f2c096b1bfd8fc46eb01f0e4e5df4f409519405ea3ac4ea588"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\1_Set up job.txt",
+      "bytes": 2456,
+      "sha256": "1f7c26b8869761a45a362499436093349d4e513da355ea3bd4ec55000fbbebae"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\2_Checkout repository.txt",
+      "bytes": 10542,
+      "sha256": "627df23ef2d20eb2baf7238094a32c031117577e8f19b7509e69ee91be9c7e5e"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\3_Set up Flutter.txt",
+      "bytes": 9033,
+      "sha256": "c11f50090f1ef5eae7226baf5fc579c8311dece2bc7d400018785de6e82686b2"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\4_Enable Windows desktop.txt",
+      "bytes": 901,
+      "sha256": "eb9e5a79f8a9496396e19c18e1fbe7a90beea6c4900255aacd50703d049a57c8"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\5_Install dependencies.txt",
+      "bytes": 7951,
+      "sha256": "f1eea15bdd6c93ea07321247101c5495d2dc33e3ba28f58324b0f1f380692ca7"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\6_Analyze project.txt",
+      "bytes": 931,
+      "sha256": "b33e344085a2cf044833812c2e91f3d7fe2e9d040ffea94a1de11e457ec7aa4f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\7_Run Flutter tests.txt",
+      "bytes": 2769832,
+      "sha256": "761abfe45bab262bc01ea9c94637d48a44b0cc43387672ae0eb4ea9fcda694c0"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\8_Build Windows release.txt",
+      "bytes": 998,
+      "sha256": "7ae1f792ab87fcce98137e5bd765f54330c1d6af9f3b2889ba9fe1f74ca1cb01"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\9_Prepare Windows release assets.txt",
+      "bytes": 1024,
+      "sha256": "b55b5da1f6c4c8f1c0a6daad8dc7baceb27b2238d7d167ca35c06f85a8eb63c2"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\10_Upload Windows EXE.txt",
+      "bytes": 2906,
+      "sha256": "8b9c216be467e8b97232cd63193c1fd4bcdccfc73d51c71dc7a8fe6720690b19"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\19_Post Set up Flutter.txt",
+      "bytes": 1095,
+      "sha256": "4079cc9eb8ae32c11cafbbf9e844aa8da5d17a12275da075039bb6f7498d21ca"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\20_Post Checkout repository.txt",
+      "bytes": 4315,
+      "sha256": "84d68929a43ee34d17a34559e6f7e3c1e13016c1196d047b6f7ff8549e451bb8"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Windows EXE\\21_Complete job.txt",
+      "bytes": 432,
+      "sha256": "47ac76c63d16e0200b48dd9d2a805becd4aebb6f5935bf137ea80b4ba1ad6e98"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\3_Build Android APK.txt",
+      "bytes": 2857944,
+      "sha256": "7efedebc79601426a1dedbbdf03ba0e2bb266dffbb70f8d19a9968216b74c733"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\system.txt",
+      "bytes": 703,
+      "sha256": "5939e60da5689b9914c12723d939db95fd017f7746300899f0e90dfd91fbc667"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\1_Set up job.txt",
+      "bytes": 2640,
+      "sha256": "685dea0b005b9cbe48a5654c47c409affad0b2c4961d982abd06f655243fb710"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\2_Checkout repository.txt",
+      "bytes": 9977,
+      "sha256": "0a6a003524cf658b96fad51d0e035a50cd8863a8345eddd23f3f4a98ec38f389"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\3_Set up Java.txt",
+      "bytes": 4593,
+      "sha256": "4901b453bf521ac943ea856c0a84045d172bb115fb709c57c6b6712572503e4f"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\4_Set up Gradle.txt",
+      "bytes": 3269,
+      "sha256": "a9decab3a5e6d7b07216c44bfac0e75f820dbf7dd9e85d869fa75b5d62df9366"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\5_Set up Flutter.txt",
+      "bytes": 12794,
+      "sha256": "53f084bcfa52e613bd62d225a0552b1407e971442b325ca7cf9dd3cee094ec11"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\6_Install dependencies.txt",
+      "bytes": 8526,
+      "sha256": "1370aa3243e78e75a282eb85c53fa983d19a767d0554380aaac5da6fd6a0be2c"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\7_Restore Android Gradle wrapper.txt",
+      "bytes": 10748,
+      "sha256": "1d5224350579da3288505accb128943badf87953fff4294f13fd81dc14aaae32"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\8_Configure Android release signing.txt",
+      "bytes": 6113,
+      "sha256": "cb1d990a67887826eb76f377fb5e73cc4eaa72bb5f9620f0e39030723b083a6a"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\9_Analyze project.txt",
+      "bytes": 1600,
+      "sha256": "0f890a47f4c0850750f991f3eb68e64758e22f606c75e59e052e7a45aec6b612"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\10_Run Flutter tests.txt",
+      "bytes": 2766584,
+      "sha256": "85243278fc688f8e8e114d3f078de898f5e2750049e4f95a5559e4d2e793a854"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\11_Clear cached Flutter Android artifacts.txt",
+      "bytes": 1516,
+      "sha256": "69af2213325a871634d1c59f558d15e4a7e673cdc50f96643fe5f503cfc8945a"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\12_Build release APK.txt",
+      "bytes": 15393,
+      "sha256": "9a8c8b26f29542eb35349d961b1c01bf1557294dca590fabccd18fbd3588ebdf"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\13_Prepare Android release asset.txt",
+      "bytes": 1466,
+      "sha256": "d293f77c538028157bb410f4ad0b04b6a68f37a197b0838f9b4a9ac707d3b478"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\14_Upload Android APK.txt",
+      "bytes": 3306,
+      "sha256": "eaa4e32a7c305e5484b4cb15a0c78a90340310e7ccdbc9ca6f05328f957a2f57"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\25_Post Set up Flutter.txt",
+      "bytes": 1083,
+      "sha256": "90d48a9d4bb4787272e57ab234dc37db82e3ac326cba03022a1a2d42869ebd67"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\26_Post Set up Gradle.txt",
+      "bytes": 3253,
+      "sha256": "78ebddf21f6a9b8e6a78c944bf52d1a95a3e43ea2a1cbad17a07f860ab555f37"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\27_Post Set up Java.txt",
+      "bytes": 431,
+      "sha256": "04629b060821e3c185cd404d99899740d160c448c50f45c9127b86046e756807"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\28_Post Checkout repository.txt",
+      "bytes": 4080,
+      "sha256": "0f1fbd29c05cb30be795d1d82fcb7c7c745b4b805e58fe59f9591a137fa53c0d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Build Android APK\\29_Complete job.txt",
+      "bytes": 626,
+      "sha256": "51d0a2b900631a59e1013f270ca9be07422439ca6e77f1249950d92ddc66d305"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\4_Detect changed paths.txt",
+      "bytes": 25712,
+      "sha256": "514a2cb96373ec0382705a2be2d7031bef5131ac118b852e4f1e60b451d5c660"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Detect changed paths\\system.txt",
+      "bytes": 575,
+      "sha256": "292c2bdb509ef60e7b0debdd4411f8bdeedafaa0cd4e30ddfdb10061031f0211"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Detect changed paths\\1_Set up job.txt",
+      "bytes": 1952,
+      "sha256": "9ee4b91dfe1fa4a56eadb212ddd75c50c41d5686cc14210131e1d03f97474683"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Detect changed paths\\2_Checkout repository.txt",
+      "bytes": 16479,
+      "sha256": "d62d8dcb050165fb42780df43698119c75a3249e91dc84faf4538ecd27c1e7cd"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Detect changed paths\\3_Detect docs and app build inputs.txt",
+      "bytes": 2978,
+      "sha256": "ad077fffb732e97ff85041adc5f6d5f6c720a8527b93a731d8159624119c88b4"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Detect changed paths\\6_Post Checkout repository.txt",
+      "bytes": 4080,
+      "sha256": "61ae240641615c7bb849171b3a687ad0be6bf749485596078080d274dbf155c5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-pre06-20261010\\ci-final\\38047823551\\logs\\files\\Detect changed paths\\7_Complete job.txt",
+      "bytes": 235,
+      "sha256": "df06af695509662766d43a32f7aa28f55e34abb297c04d83799719f8b67f1f42"
+    }
+  ],
+  "download": {
+    "args": [
+      "C:/Program Files/GitHub CLI/gh.exe",
+      "api",
+      "repos/Eitan-S-23/E-Track/actions/runs/38047823551/logs"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  }
+}

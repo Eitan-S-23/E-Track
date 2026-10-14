@@ -1,0 +1,92 @@
+{
+  "health": [
+    [
+      30000,
+      30,
+      1000,
+      0,
+      18585180,
+      18585180,
+      0,
+      1,
+      1
+    ],
+    [
+      30000,
+      30,
+      1000,
+      0,
+      18585446,
+      18585446,
+      0,
+      1,
+      1
+    ]
+  ],
+  "registers": {
+    "vtor": 134285312,
+    "cfsr": 0,
+    "hfsr": 0,
+    "dhcsr": 16842753,
+    "sdio": 0,
+    "freeze": 0
+  },
+  "confirmed_state": 4,
+  "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump",
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5092,
+    "high_water_bytes": 3100,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "storage": {
+    "jedec": 15679512,
+    "capacity_bytes": 16777216,
+    "slots": {
+      "candidate_slot": {
+        "erased": false,
+        "bytes": 613952,
+        "crc32": 2889683253,
+        "version": 30287,
+        "sha8": "21a9d1ef8828498e"
+      },
+      "backup_slot": {
+        "erased": false,
+        "bytes": 613952,
+        "crc32": 2889683253,
+        "version": 30286,
+        "sha8": "9a5b5a40fcbd2056"
+      },
+      "recovery_slot": {
+        "erased": false,
+        "bytes": 619580,
+        "crc32": 2429394932,
+        "version": 30276,
+        "sha8": "deb4484dd0614f49"
+      }
+    },
+    "staging_header_hex": "4554534c03ffffff00001000b3d487c24f7600008373305b68170811544d4f43",
+    "staging_journal_sha256": "89b99a93c4b0dce009d76a30323af3f943518bba8d81d0c7f492e2a81921be1f",
+    "staging_erased": false,
+    "journal": {
+      "erased": false,
+      "package_sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+      "bytes": 1048576,
+      "durable": 1048576,
+      "matches_reference": true,
+      "expected_begin_durable": 1048576,
+      "committed_target": 30287
+    }
+  },
+  "role": "target",
+  "image": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\target.bin",
+    "bytes": 613952,
+    "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+  },
+  "boot": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0001-pre-install\\boot.bin",
+    "bytes": 65536,
+    "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+  }
+}

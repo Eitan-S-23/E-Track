@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 822482524930500,
+  "ended_monotonic_ns": 822483182833900,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0004-down-descriptor\\processes.stdout",
+    "bytes": 13346,
+    "sha256": "9caa16b5fc8cf9dbdf1e22b30b3bece64030778d8780a53190ba34848092cdf5"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0004-down-descriptor\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

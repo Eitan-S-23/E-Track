@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 806413008715200,
+  "ended_monotonic_ns": 806413581771800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0002-storage-idle-halt\\processes.stdout",
+    "bytes": 12755,
+    "sha256": "419a5f70101cc8f3c3a727b1ddb067c2bb7802c16b117a64fb5039fbef66212a"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round1\\ops\\cmd-q-base\\mcu\\0002-storage-idle-halt\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

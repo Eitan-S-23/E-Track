@@ -1,0 +1,66 @@
+{
+  "mode": "live",
+  "exit": 0,
+  "timed_out": false,
+  "actual_test_count": 134,
+  "log": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-suite\\test_p34_live_route.py.log",
+    "bytes": 36857,
+    "sha256": "e3b3363ed9bf3ee4a7562633f72b92ebf26182808c858e61c3404198e83ebca6"
+  },
+  "command_receipt": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-command\\tests.json",
+    "bytes": 717,
+    "sha256": "e7444d0492c8d1ab7489816d3d17a4647a8df1a2e33fe64a0e91da55a1116551"
+  },
+  "unittest_outcome": "OK",
+  "sources": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+      "bytes": 35564,
+      "sha256": "3c524300133818dfed7d056a525ffe044082d0dc5c185aea8a16b98532b89723"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+      "bytes": 139395,
+      "sha256": "848e5e1902982052da0d8be0d5fd6a82c8992e77e0564165f6a673e7191c5cb5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_host.py",
+      "bytes": 13164,
+      "sha256": "a0d98161aadccee0346b8f7438cf65566ae6e72d7cf8cc576641e833d7cc6431"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live.py",
+      "bytes": 37065,
+      "sha256": "978937032a886b501b942cbcd3db98b4a948ca874f9e80181963983743c7621d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_mcu.py",
+      "bytes": 28088,
+      "sha256": "169f2e4fdafec40b1aabd91000b0374c4a008abe55b58623322a62543efdf019"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\build.py",
+      "bytes": 9035,
+      "sha256": "174a62ace063eb21fec5c96f92c3f3b1daa8653cc8fb60bac7962f7445a3b8fb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\selftest.py",
+      "bytes": 5665,
+      "sha256": "b9283304aded443741d631095e259b26b60cfad7929950ddb50f5fb5e64c71ae"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\flutter\\dev_checks.py",
+      "bytes": 42285,
+      "sha256": "86a36fdddcc68e4e74f1957d1c2c9a5e1db42b7e8f01d93317947776a23cbf9d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.agents\\skills\\e-track-flutter-debug\\scripts\\host_io.py",
+      "bytes": 4236,
+      "sha256": "296ea468d649133a29ee70b3d019b62b77f2f7a4aec76618f02f9dca858e16f9"
+    }
+  ],
+  "device_operations": 0,
+  "independent_acceptance": false
+}

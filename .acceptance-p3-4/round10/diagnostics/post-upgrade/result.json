@@ -1,0 +1,15 @@
+{
+  "current_target_verified": true,
+  "readback": {
+    "path": ".acceptance-p3-4\\round10\\diagnostics\\post-upgrade\\current-target.json",
+    "bytes": 2593,
+    "sha256": "92e122a3f871d66be7ae6c7fe456eb014026d2bed1c7360ee90ccb980756fb52"
+  },
+  "rtt": {
+    "path": ".acceptance-p3-4\\round10\\diagnostics\\post-upgrade\\mcu\\post-reboot.rtt",
+    "bytes": 284,
+    "sha256": "e6e82f15c6294ea18c93681e677ef89502addae4465c333f87a460e3bec20341"
+  },
+  "terminal_metric_lines": 0,
+  "mcu_reset_or_flash": false
+}

@@ -1,0 +1,28 @@
+{
+  "qualification_ota_started": 0,
+  "qualification_limit": 1,
+  "calibration_ota_started": 0,
+  "calibration_limit": 12,
+  "command_invocations": [
+    "CMD-Q-TRANSFER"
+  ],
+  "query_ready": true,
+  "start_ready": false,
+  "host_reference_download_verified": true,
+  "phone_download_gate_completed": false,
+  "app_launches": 1,
+  "apk_installs": 0,
+  "mcu_flash_or_reset": 0,
+  "failed_capture_archive": {
+    "path": ".acceptance-p3-4\\round9\\reconciliation\\authorized-capture-cleanup\\archive.json",
+    "bytes": 946,
+    "sha256": "76f82cd296c59b497b1481a3906784d693b864568d6c59987c3fb3fbfa8b67e8"
+  },
+  "cleanup": {
+    "path": ".acceptance-p3-4\\round9\\reconciliation\\authorized-capture-cleanup\\result.json",
+    "bytes": 819,
+    "sha256": "b922da03fc127b4f9b759b1d5bc797ca690575ad187f41980a618727c1d36aa1"
+  },
+  "final_campaigns": "NOT_RUN",
+  "trial5": "cause unknown; investigation remains paused"
+}

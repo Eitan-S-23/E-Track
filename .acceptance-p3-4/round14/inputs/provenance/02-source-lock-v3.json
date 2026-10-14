@@ -1,0 +1,787 @@
+{
+  "schema": "p34-candidate-handoff-v1",
+  "commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+  "tree": "765d607ace0ce3d4908e673b536a04f6631db3de",
+  "profile_config_blob": "a4355236f2d53235d0b144c3bceb70618f05a4da",
+  "branch": "acceptance/p3-4-v2-20261009",
+  "app_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+  "app_runtime_same": true,
+  "source_worktree": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "pr": "https://github.com/Eitan-S-23/E-Track/pull/26",
+  "merged": false,
+  "artifacts": {
+    "base": {
+      "path": ".cache/p34-final/.cache/p34-reference2/base.bin",
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    },
+    "target": {
+      "path": ".cache/p34-final/.cache/p34-reference2/target.bin",
+      "bytes": 613952,
+      "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+    },
+    "package": {
+      "path": ".cache/p34-final/.cache/p34-reference2/cases/reference-1MiB.etu",
+      "bytes": 1048576,
+      "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+    },
+    "firmware_elf": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 885784,
+      "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+    },
+    "firmware_hex": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 1722962,
+      "sha256": "bcdd313cedb2f6d52f7f0c43336cde5806487579908c4c7ad0e116298ad1bcc8"
+    },
+    "firmware_bin": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 613952,
+      "sha256": "7e556d3f9bc3d689a46648fd1c5e27cbe833a99fd2776ba1fb28bee983ebafa1"
+    },
+    "firmware_map": {
+      "path": ".cache/p34-final/.cache/p34-build3/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2650755,
+      "sha256": "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c"
+    },
+    "maintenance_elf": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 891044,
+      "sha256": "e7889e3b0ba23f3d9ce9976c90a0d51191ad27dfa4f88c85ac72d81b00378c09"
+    },
+    "maintenance_hex": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 1730461,
+      "sha256": "b4e25f2824bf98c0712ac121106b6891b2d5aba70f6fcc61f3deebde35e4ec76"
+    },
+    "maintenance_bin": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 616616,
+      "sha256": "fe88f4efd496d2d626c6354aecb056617af3e4262ee352e7925438ec836b2690"
+    },
+    "maintenance_map": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2666747,
+      "sha256": "efb01413bac17fc7dd385f7e1673debf1275b97ea37099822571fc4b89c69084"
+    },
+    "restore_elf": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.elf",
+      "bytes": 217536,
+      "sha256": "2fb09f5677977311350b7ab3e51aef15dcdc1e2abb88334b281b7b0fafbbdf5e"
+    },
+    "restore_hex": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.hex",
+      "bytes": 310538,
+      "sha256": "84e6feacda3d374fb8fb4c51f47890f2b7cea45a6fe012f6498f401d0442a30c"
+    },
+    "restore_bin": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.bin",
+      "bytes": 111804,
+      "sha256": "3935132e563baa6625bfad2c140e4994a9bce33a63c561ffdbd378b1e2b086b0"
+    },
+    "restore_map": {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/b/app-gcc/X-Track-App-GCC.map",
+      "bytes": 2517580,
+      "sha256": "287c0bf596d6834f6a498b4509eede9b47870a84b7dd88bd7233e380a9971c63"
+    },
+    "maintenance": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/maintenance.bin",
+      "bytes": 616616,
+      "sha256": "23ce89fc5d77e4cf5664d05621caff2cefb6dd22237189042de4bc5dbcf8b0d2"
+    },
+    "restore": {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/restore.bin",
+      "bytes": 111804,
+      "sha256": "9f3643e99dcc3734518dacac52bfdb3b7a36544299ceaa859154ddb26cd0b58d"
+    },
+    "apk": {
+      "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1/run-35c6e3aa3a624461aeecb85ea4d25a22/artifacts/trace-dev-debug.apk",
+      "bytes": 131722750,
+      "sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f"
+    },
+    "apk_metadata": {
+      "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1/run-35c6e3aa3a624461aeecb85ea4d25a22/artifacts/trace-dev-debug.json",
+      "bytes": 846,
+      "sha256": "db5cc59ccd6974b392bf5f5252ad937e4c6b7dc5d4dd27fec0f9d111322cdbce"
+    }
+  },
+  "development_evidence": [
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/build.json",
+      "bytes": 530,
+      "sha256": "3127ed5d1e4287ee0657a90c6c5627b095ae5b67ebc87d6ac62f9ed3b8aa9bbc"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/build.log",
+      "bytes": 312815,
+      "sha256": "e37e3ceada5ecca0a148cb1017a45af5ad136979f04f66146041755bd89bf62f"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/configure.json",
+      "bytes": 1669,
+      "sha256": "0dc89937f5c9ad5214b9b568a73132ed396087bbb75da77e85f0783926f842be"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/configure.log",
+      "bytes": 825,
+      "sha256": "dcf1f73a8c85efaf14d10f0d32e4a6a508fbe5687be028dbef3373b82f2c45a2"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/intent.json",
+      "bytes": 174,
+      "sha256": "bd3dcdf384d88afe928712b4359839589da01929ba9d692ba5f8c6e164ee7f54"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/result.json",
+      "bytes": 1030,
+      "sha256": "6a97349c4c517dc1c14fd3015791a0ca0167233bea7bea9d6530fc7120f932bf"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/size.json",
+      "bytes": 536,
+      "sha256": "208cacd28021b31f26bef56c0fb315d9f3dfdd384c04a95bcb204bedd294be7c"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-build3/size.log",
+      "bytes": 177,
+      "sha256": "c0229c2ddd2be7b1fa092aa32e1103f5aa664c9a34156e8cd80b9e75da14d23a"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-admission5/result.json",
+      "bytes": 1034,
+      "sha256": "74be5dd1afc316da324620b7a17cd0025347e0d14e6c97be6a01893d7d6365e9"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-admission5/test_ota_link_metrics.py.json",
+      "bytes": 629,
+      "sha256": "587de95fb44a3ad53f394c9e46cf9d9c20b2ccca2ca2c1bbbabd48d676b27f81"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-admission5/test_ota_link_metrics.py.log",
+      "bytes": 1566,
+      "sha256": "755d838101897f0ea52ca50c8d0157a0ae04aae99b18f531f599b596a6efa9ec"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-admission5/test_p34_acceptance_stats.py.json",
+      "bytes": 638,
+      "sha256": "497d90233d5b2522117fd96fa193ece75570334cfa9889c89648e925542e99b3"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-admission5/test_p34_acceptance_stats.py.log",
+      "bytes": 1526,
+      "sha256": "7bff8e9a07654d16815df1d97a06dc27321300ad9d6dccc6ed20b9b193ed9157"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-admission5/test_p34_batch_timing.py.json",
+      "bytes": 630,
+      "sha256": "70275e075ce709da6b91610fe66d02061314e4e8009286074026216cbe2a7fdf"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-admission5/test_p34_batch_timing.py.log",
+      "bytes": 1230,
+      "sha256": "15aee17f15224c7ad8b55fcb7411d00e45bb5112dfcb6bd4913dde3bbdd2e218"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-observation4/result.json",
+      "bytes": 444,
+      "sha256": "e9cd27adb5f637b2ea90345ee073dd2de99a53b475c57566e9fb7416f34ce4e5"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-observation4/test_p3_4_observation_capture.py.json",
+      "bytes": 649,
+      "sha256": "6305473521c381fd311c945f639a5d80763906bf9ec987bcbad3e9d1e3f3c32c"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-observation4/test_p3_4_observation_capture.py.log",
+      "bytes": 4534,
+      "sha256": "550fe12fc03e0bcf6be5b58c1cd7c423f72cef7b66aeeb584366545035dc8624"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/result.json",
+      "bytes": 2230,
+      "sha256": "b212f15be20412126b9f943f9d5afb424bdd986b2df9d5108528a688dca2c129"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_backup.py.json",
+      "bytes": 625,
+      "sha256": "927a8442e07694e7eb4e21a7681decdfa41abd404acac4e65e31d7fa5078b1cc"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_backup.py.log",
+      "bytes": 114,
+      "sha256": "610d80ae6364a72d27a2778ea16d53d6bb7a9f1ac64da803bdb7277ba9e0db5a"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_ble_frame.py.json",
+      "bytes": 631,
+      "sha256": "64f47cf1d091d18e80e48fb7b0ed97130bc2afaa1e882dfce7f74ba499e0e2cd"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_ble_frame.py.log",
+      "bytes": 3126,
+      "sha256": "3af60eccf7b007a2fb916af023e7fcf4aa759a7971091f0eb0a7409f64b5dd68"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_ble_session.py.json",
+      "bytes": 636,
+      "sha256": "66963f29787c46d460cec1c5b1523b9d061cd45fd26b5821b766e8d7635e6371"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_ble_session.py.log",
+      "bytes": 13450,
+      "sha256": "0ae239f2b6a82cd1ab813860a9cbdb6fafeab86d68d3727bd2b32078dde4dc95"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_device_info.py.json",
+      "bytes": 634,
+      "sha256": "c928b3043eda08e1cbb473fe27ba350042874d99657a77004838dc147e1e8025"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_device_info.py.log",
+      "bytes": 75,
+      "sha256": "8432dd700bb585f3a6685ae26e0461179a52f05b224026c5c9194b87bf1b9ac8"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_package.py.json",
+      "bytes": 628,
+      "sha256": "99a9ebe5f799600e7e5b8b7a79b313128855d2ca8c91799c97d7e47153d0c45b"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_package.py.log",
+      "bytes": 8088,
+      "sha256": "b9b100897c6abd30422b2f2b31b2c0a37b6a74c0c5cbc88890c79d28c3269730"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_patch.py.json",
+      "bytes": 624,
+      "sha256": "94b210c00292cfd5b1b824815de4e6f0ddfd8f391cd7cf6a69fcb592a38db0d5"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_patch.py.log",
+      "bytes": 13689,
+      "sha256": "33959ec0efc5f0ea9d38976bed1ee0d58b1b968d9e9bfaa99d4852d995dbbf78"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_staging.py.json",
+      "bytes": 631,
+      "sha256": "dd947c7b067f98571f9db2297b6a6b00f40eb8a8fe305208511d8c4cc6cfa194"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/firmware/test_ota_staging.py.log",
+      "bytes": 277671,
+      "sha256": "dbb92a28e95e1a3389ce34f9cd0243e652fb190b6b94720b1c6376642c27e2a6"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/uart/compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-offline2/uart/run.log",
+      "bytes": 236,
+      "sha256": "48eeb6c3c3b127dc4f3553a74fd8521e408d6f189de5f057beec3e567510b261"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/compile.json",
+      "bytes": 1625,
+      "sha256": "5741bf4ff0bd167100f0278ecde2e9db29335780c523025545d2e69a75ef6f71"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/compiler.json",
+      "bytes": 388,
+      "sha256": "caa10419f4986dc19e8ad8031de4a0b83ae2593276333b58e525b6cb496a1b09"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/compiler.log",
+      "bytes": 277,
+      "sha256": "f2937c0729ff6adff7534f4c5dfc01457f3338c5ff6f9b184c4878fec7640455"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/intent.json",
+      "bytes": 365,
+      "sha256": "446c1c8062e20c14711419de8866d30e460262af223082acfe2a92709992afa0"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/payload-crc.json",
+      "bytes": 704,
+      "sha256": "1858197779b019d780d464c7297f435bb00b04b77ba6124cd3bb1b5158e37b7b"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/payload-crc.log",
+      "bytes": 323,
+      "sha256": "c3728b4ae91c2f6ff838347305d48f984485f010908542efe13f08113e435b7a"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/positive.json",
+      "bytes": 702,
+      "sha256": "253eaabe55d06b0c1a799d0c7c5b9be3b0b375a30befed5d05409249d4a33a58"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/positive.log",
+      "bytes": 340,
+      "sha256": "203b1a285126542abb7f0cc50ba956c565e390297cb018154a82ac3375bdfdfe"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/result.json",
+      "bytes": 6126,
+      "sha256": "45ba67bb43fe6d8ebbd92b7120204713f61a0fa32056996a3839e900bf787eb3"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/same-version.json",
+      "bytes": 702,
+      "sha256": "02902c3cd8562f698434dfeb5e424fedb70f9ccade073a8ae70764de64e04e7b"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/same-version.log",
+      "bytes": 316,
+      "sha256": "1aa27feb6594d054f486439157ecffe16f5bfb4068e1860767058c6a51f16d38"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/search.log",
+      "bytes": 21130,
+      "sha256": "9d8e4c1f7ed165910a2df8f8d45dd7b0ce6b26b1ebdb5c65fc15cfea2628b494"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/truncated.json",
+      "bytes": 703,
+      "sha256": "2b1854451e9f84bc46ac730a32594af702746ab6d9bad7cbd11adc269ae0feee"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/truncated.log",
+      "bytes": 323,
+      "sha256": "dd361d4b9660e2b63c317e8929ff33015b084b116a4d1285c0337df78e28cc9d"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/wrong-base-sha.json",
+      "bytes": 708,
+      "sha256": "3c788bbd338192564f9666843293aa616f92bcf8551c67f9638d03d778bd22ce"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-reference2/wrong-base-sha.log",
+      "bytes": 318,
+      "sha256": "e371b5c19d717b1955fbcd22a267638530a3d42327539e15e612fdcec80ef3f2"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-test2/compile.json",
+      "bytes": 898,
+      "sha256": "c407e02bd6fc2c89be29ac4b22dee65e4acdc7261fc4a76795bb4e5ffa85a1d3"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-test2/compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-test2/result.json",
+      "bytes": 871,
+      "sha256": "3d6da7f46618eb89df6fc71caaf0b7ea53e583861bec6629b85e3305ed4ab66f"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-test2/test.json",
+      "bytes": 425,
+      "sha256": "b7419edaaff402dc183716f573013495c6973ae3e099d6414bdd950d1895f932"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-test2/test.log",
+      "bytes": 88,
+      "sha256": "43d2cd2e3031f4dab1479b51e044e2f5899d7286dec9a453e5b8e025a1aa178d"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/build.json",
+      "bytes": 546,
+      "sha256": "3df324d8cda9c8cd03d5d3f18d9c0796414933b23dd8c2561e213d294e02491b"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/build.log",
+      "bytes": 313903,
+      "sha256": "e76cbd1af9deff348fa56a625af7c1f29b5d16508ac3e7d7723dcab55d997971"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/configure.json",
+      "bytes": 1818,
+      "sha256": "fd8438e62cc66f1e9c721184b510ffc88fb5d2cbf62b2583066e19b4d27b395d"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/configure.log",
+      "bytes": 833,
+      "sha256": "b99858c90f96895835eb612c087e0adc38979ad37b196a9f18579bacb0d52c4c"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/intent.json",
+      "bytes": 172,
+      "sha256": "c454c6a671dffccbd696ca05c0efdfa3409ba0d05bf30b4e36da21559b0f4f34"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/result.json",
+      "bytes": 1059,
+      "sha256": "532b4e115f85bd4e4c011691704766a92d682505c3d5c1960eb8a5adaca07625"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/size.json",
+      "bytes": 552,
+      "sha256": "46823a1a49d0fbe652b16d90b3a7c02bbb921690498f955c54aa880a520a612d"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-restore-build3/size.log",
+      "bytes": 185,
+      "sha256": "c79c291c4e742de99ffa98208fa281644c543f7d02b9680c55eaf65a22043453"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/build.json",
+      "bytes": 554,
+      "sha256": "a299ea1ba4e53744b7a4f4afa525f34fddbb4a2e1d9b0c367aa5c07a98ee35cf"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/build.log",
+      "bytes": 312827,
+      "sha256": "87e29b62bb002ce792612ea7170b1da3c6e6aece9894d892b01d1b92dd25bfe6"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/configure.json",
+      "bytes": 1704,
+      "sha256": "9c982684aafd654d3b179b1667d39fa4d45cd01412b0b6a9cde3dac4b88fc01e"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/configure.log",
+      "bytes": 837,
+      "sha256": "74ae465ddfb4780aa095641a1f58889d575f97b23029f0887254ee65fa84c272"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/intent.json",
+      "bytes": 176,
+      "sha256": "398ab121387860e572a275ffc427aff735e1de06913335f03f108f32460c90d3"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/result.json",
+      "bytes": 1080,
+      "sha256": "9d7e56460600a981c5487dd485ec79a3a8ed2a30c4699f6cb234504de823c5c5"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/size.json",
+      "bytes": 560,
+      "sha256": "130e8230c92af9bb88aaedc04388c6b15dc37ba9d3edbbef684dfb506dd9ce5b"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-build2/size.log",
+      "bytes": 189,
+      "sha256": "4b867a28f7f9735db1b4b335333611d48d4b8ed5bb59160fa6b122e7d0c64262"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/finalize.log",
+      "bytes": 520,
+      "sha256": "29d83a84939b6619ef350d6d3ef5362f686ed036126b297e45f3ab9f38848736"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-maintenance-images2/result.json",
+      "bytes": 2367,
+      "sha256": "080e5c2071b3083ad55448c615bb8cae41acd1710215631a9fde4f6da4884c3e"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-identity2/candidate-input-diff.json",
+      "bytes": 578,
+      "sha256": "6074a43eccdc8a2bb949c071b0da6c95c5b34d1089bc901c75fa80c4724d5456"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-identity2/candidate-input-diff.log",
+      "bytes": 458,
+      "sha256": "995aa6410d3bdc7d91cd26e58e742b541f386983a456925dddb22f3f0da369ed"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-identity2/dependencies.json",
+      "bytes": 507,
+      "sha256": "8ba6d666c6977c47838a7dffc967d6169ff20391994e99eb9763be04b573ac07"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-identity2/dependencies.log",
+      "bytes": 4703790,
+      "sha256": "b1e3043a5efbab820969fddf5fbcc902daa5906e15cfdf32fa73a5ccbdbc6816"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-identity2/result.json",
+      "bytes": 1065,
+      "sha256": "18c5ae43a3867a105ad444ed857bfcbce9a077c1cfb7fe3111e12bffbd9d416a"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-identity2/symbols.json",
+      "bytes": 557,
+      "sha256": "cc3d5930a2f9b8df6289edd9752e1019386456f3810c87d13f3982c37942c5d4"
+    },
+    {
+      "path": ".cache/p34-final/.cache/p34-identity2/symbols.log",
+      "bytes": 165256,
+      "sha256": "e99a4844508a6d882e799483a93da153964bb8cfbeb2713fc0107443c73ba7e2"
+    }
+  ],
+  "ci_evidence": [
+    {
+      "path": ".cache/p34-remediation-20261010/ci-final-summary.json",
+      "bytes": 7691,
+      "sha256": "e4e552dda361726e7d5b145dfe38ecf71a3e1e75b4455cf659c27e7ff4dd2fd4"
+    },
+    {
+      "path": ".cache/p34-remediation-20261010/ci-candidate2-checks.json",
+      "bytes": 74339,
+      "sha256": "3776d4fff05bf8a16d85e76690baecd7e3301be49d9be7cc2b2635cfac9665a2"
+    },
+    {
+      "path": ".cache/p34-remediation-20261010/final-archive/result.json",
+      "bytes": 15180,
+      "sha256": "a1a5d3efc39328a65f6783eb0244308cb1bfb74896eb345625ba83f1c96f439c"
+    },
+    {
+      "path": ".cache/p34-remediation-20261010/artifacts-38031162314.json",
+      "bytes": 1772,
+      "sha256": "7265c6dd045e5f85f2bd3cd5987fd0cf9b9cfcf52d061a202a987a2ebece76c2"
+    }
+  ],
+  "ci_final": {
+    "commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+    "runs": [
+      {
+        "name": "firmware",
+        "id": 38031162380,
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38031162380",
+        "commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+        "conclusion": "success",
+        "event": "pull_request",
+        "log": {
+          "path": ".cache/p34-remediation-20261010/firmware-candidate2.log",
+          "bytes": 1498099,
+          "sha256": "54334d28db96443ea62be017d960dbcd69f6b1c0c90cf63e8b8bec019d94f9e2"
+        }
+      },
+      {
+        "name": "governance",
+        "id": 38031162315,
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38031162315",
+        "commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+        "conclusion": "success",
+        "event": "pull_request",
+        "log": {
+          "path": ".cache/p34-remediation-20261010/governance-candidate2.log",
+          "bytes": 153443,
+          "sha256": "414622433b4aa6801c7d75069a86eac412e40d4acc1426ee28562477ac523d1c"
+        }
+      },
+      {
+        "name": "development",
+        "id": 38031160555,
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38031160555",
+        "commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+        "conclusion": "success",
+        "event": "push",
+        "log": {
+          "path": ".cache/p34-remediation-20261010/development-candidate2.log",
+          "bytes": 606738,
+          "sha256": "0aafa78b63b808761ca028d5332ce0dfd38c1c4c5fc375bcf26f83a41ebb8022"
+        }
+      },
+      {
+        "id": 38031649785,
+        "head_sha": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38031649785",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "log": {
+          "path": ".cache/p34-remediation-20261010/final-archive/diagnostic.log",
+          "bytes": 703122,
+          "sha256": "c65b86363bb72fd2b5d0863a27c4d966812a5559311bbad9431b879ed4c6954e"
+        },
+        "jobs": [
+          {
+            "id": 114153674301,
+            "name": "Flutter self-tests (windows-2022)",
+            "conclusion": "success"
+          },
+          {
+            "id": 114153674351,
+            "name": "Flutter self-tests (ubuntu-latest)",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 38031162314,
+        "head_sha": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38031162314",
+        "conclusion": "success",
+        "event": "pull_request",
+        "log": {
+          "path": ".cache/p34-remediation-20261010/final-archive/app-pr.log",
+          "bytes": 7382398,
+          "sha256": "faa06dd94b0601c171072776a7e25a9a96cf9e8dd2f87975b6a9e535d94cdc96"
+        },
+        "jobs": [
+          {
+            "id": 114152214276,
+            "name": "Detect changed paths",
+            "conclusion": "success"
+          },
+          {
+            "id": 114152268508,
+            "name": "Build Android APK",
+            "conclusion": "success"
+          },
+          {
+            "id": 114152268520,
+            "name": "Build Windows EXE",
+            "conclusion": "success"
+          },
+          {
+            "id": 114152269341,
+            "name": "Deploy GitHub Pages",
+            "conclusion": "skipped"
+          },
+          {
+            "id": 114153423948,
+            "name": "Create GitHub Release",
+            "conclusion": "skipped"
+          }
+        ]
+      }
+    ],
+    "diagnostic_hosts": [
+      {
+        "host": "Windows-2022Server-10.0.20348-SP0",
+        "scope": "all",
+        "counts": {
+          "passed": 704,
+          "skipped": 33,
+          "failed": 0
+        },
+        "report": {
+          "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-windows-2022-38031649785-1/flutter-dev-checks/runs/run-23affdac837942789f283fa407483449/result.json",
+          "bytes": 12147,
+          "sha256": "29b8222e062ec3e335fa6cef92425bd893cebd12d3dd774c8cbaf8c76eaaae5c"
+        },
+        "test_log": {
+          "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-windows-2022-38031649785-1/flutter-dev-checks/runs/run-23affdac837942789f283fa407483449/logs/tests.log",
+          "bytes": 2162963,
+          "sha256": "07042004f3fc69afa6c6d0e67c1b48168a41e3fb77c4fd756d26ff88667fe50d"
+        }
+      },
+      {
+        "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "scope": "all",
+        "counts": {
+          "passed": 721,
+          "skipped": 16,
+          "failed": 0
+        },
+        "report": {
+          "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-ubuntu-latest-38031649785-1/flutter-dev-checks/runs/run-35c6e3aa3a624461aeecb85ea4d25a22/result.json",
+          "bytes": 22455,
+          "sha256": "463032171ea6731e309cb35e3671e8267f94c929a9dc8d5c71b7c432cfc6958b"
+        },
+        "test_log": {
+          "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-ubuntu-latest-38031649785-1/flutter-dev-checks/runs/run-35c6e3aa3a624461aeecb85ea4d25a22/logs/tests.log",
+          "bytes": 2071168,
+          "sha256": "450955509c2c3cfe512fb7eda7e1bd1d45215cceeed9b4aeb2904e51d9703b41"
+        }
+      }
+    ],
+    "pr_test_counts": {
+      "Build Android APK": {
+        "passed": 721,
+        "skipped": 16,
+        "original_line": "Build Android APK\tRun Flutter tests\t2026-10-10T06:34:34.7823482Z \ud83c\udf89 721 tests passed, 16 skipped."
+      },
+      "Build Windows EXE": {
+        "passed": 704,
+        "skipped": 33,
+        "original_line": "Build Windows EXE\tRun Flutter tests\t2026-10-10T06:34:37.8348723Z \ud83c\udf89 704 tests passed, 33 skipped."
+      }
+    },
+    "ci_candidate": {
+      "result": "APP_BUILT",
+      "variant": "candidate",
+      "default_baud": 921600,
+      "artifacts": [
+        {
+          "path": ".cache/p34-ci/b/app-gcc/X-Track-App-GCC.elf",
+          "bytes": 885768,
+          "sha256": "e9601a2467798e59f1ff8e231b72b670b3b4c8d4dc9ddb8bdb9dedd1fd22f0bb"
+        },
+        {
+          "path": ".cache/p34-ci/b/app-gcc/X-Track-App-GCC.hex",
+          "bytes": 1722999,
+          "sha256": "ac5c8d5b714075f690e07f0f12f2b124b62ec016ba3048d20b6ab5adf71937fd"
+        },
+        {
+          "path": ".cache/p34-ci/b/app-gcc/X-Track-App-GCC.bin",
+          "bytes": 613964,
+          "sha256": "61296706e98bcc1ff833bd1dda41ee5855d4c4982c6acf2503930e24fb5676ce"
+        },
+        {
+          "path": ".cache/p34-ci/b/app-gcc/X-Track-App-GCC.map",
+          "bytes": 2660636,
+          "sha256": "96bf3fe7b54e323f59f8bdae82f791d5ee0c7bd81603b19b53f429f425579ad5"
+        }
+      ],
+      "warnings": 641,
+      "errors": 0,
+      "boot_built": false,
+      "source_date_epoch": 1786320000,
+      "installed": false,
+      "formal_freeze": false,
+      "independent_acceptance": false
+    },
+    "ci_candidate_selected_for_installation": false,
+    "apk": {
+      "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1/run-35c6e3aa3a624461aeecb85ea4d25a22/artifacts/trace-dev-debug.apk",
+      "bytes": 131722750,
+      "sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f"
+    },
+    "native_reports": [
+      {
+        "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-windows-2022-38031649785-1/p34-phy-native/runs/899f83d3a7354e56b531a709b6ea8426/result.json",
+        "bytes": 4650,
+        "sha256": "979ee3b49c9d5038300b3bbfb0939168855445cafda1aeb0678aa7a36bd4cd7f"
+      },
+      {
+        "path": ".cache/p34-remediation-20261010/final-archive/original/flutter-dev-ubuntu-latest-38031649785-1/p34-phy-native/runs/089ba0410ab0420d831c26712b8411b6/result.json",
+        "bytes": 4512,
+        "sha256": "c17279e0ed913181a19fd973fc18e77e871875afeae153772b45466f616df9d9"
+      }
+    ],
+    "release_deployment": "SKIPPED",
+    "device_operations": 0,
+    "independent_acceptance": false
+  },
+  "tool_readme": {
+    "path": ".cache/p34-final/Tools/ota/p34-acceptance/README.md",
+    "bytes": 9332,
+    "sha256": "1775ed1062e7d7c3a984441648568155f7b7538455d970597a0bbd3991be425e"
+  },
+  "historical_reinterpretation": {
+    "path": ".cache/p34-remediation-20261010/trial6-final.json",
+    "bytes": 30786,
+    "sha256": "a0eecb822f35ad03475dbf2f96a8cac06d91fb8ecb44b7b8a517a7b0bedbf8b3"
+  },
+  "supersedes": {
+    "path": ".cache/p34-integration1/delivery1/source-lock-v2.json",
+    "bytes": 7526,
+    "sha256": "8a767931a0dcd947961f3863d460ceb4502df3a8e7ed02211f30d7d507908992"
+  },
+  "restore_expected": [
+    30287,
+    30286,
+    613952,
+    2889683253
+  ],
+  "formal_contract_status": "NOT_FROZEN",
+  "formal_hardware": "NOT_RUN",
+  "initial_state_qualification": "NOT_RUN",
+  "installed": false,
+  "independent_acceptance": false,
+  "trial5": "CAUSE_UNKNOWN_SPECIAL_INVESTIGATION_DEFERRED",
+  "build_platform_note": "Selected Windows raw BIN is 613952 bytes; Ubuntu CI candidate is 613964 bytes with a different SHA. Never substitute CI bytes into the selected base/target/reference/restore set.",
+  "runtime_service": "NOT_CONFIGURED: compiled .invalid URL is only a runtime-required placeholder",
+  "register_only": "Artifact/source registration, not a worktree manifest, frozen contract or independent PASS."
+}

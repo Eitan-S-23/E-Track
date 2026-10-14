@@ -1,0 +1,15 @@
+{
+  "owner_lock": {
+    "path": ".cache\\p34-live-device.lock",
+    "bytes": 156,
+    "sha256": "e2da3b350cd7c6f946271f2c9bdea5e841329bea2d49e7a14f035ef052e776a7"
+  },
+  "owner_pid_18428_present": false,
+  "private_adb_5062_listening": false,
+  "http_50145_listening": false,
+  "jlink_present": false,
+  "rtt_logger_present": false,
+  "adb_present": false,
+  "cloudflared_present": false,
+  "lock_retained": true
+}

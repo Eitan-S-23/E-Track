@@ -1,0 +1,52 @@
+{
+  "id": "P34-LIVE-08",
+  "disposition": "NEED_EVIDENCE",
+  "classification": "ENV_BLOCKED: current storage admission unavailable; root cause not established",
+  "observed": {
+    "sd": 0,
+    "owner": 0,
+    "active": 0,
+    "isr": 0,
+    "state": 4,
+    "snapped": 1,
+    "confirmed": 1,
+    "disabled": 1,
+    "jedec": 131072,
+    "vtor": 134285312,
+    "cfsr": 0,
+    "hfsr": 0,
+    "dhcsr": 16842753,
+    "sdio": 0,
+    "freeze": 0
+  },
+  "card_detect": {
+    "gpioa_idt": 50782,
+    "sd": 0,
+    "disabled": 1,
+    "jedec": 131072,
+    "sd_card_detect_inserted": true
+  },
+  "phone_admission": {
+    "path": ".acceptance-p3-4\\round8\\admission\\phone-ready\\takeover3\\ready.json",
+    "bytes": 634,
+    "sha256": "df74c001e4cb5ba41d9acd6a2d34462f0ccc7ae74d96f4ef1e9abd662cb7a8f8"
+  },
+  "app_bytes": 613952,
+  "app_sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+  "boot_sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+  "passive_rtt": {
+    "path": ".acceptance-p3-4\\round8\\admission\\storage-diagnostic-20261012\\mcu\\storage-passive.rtt",
+    "bytes": 297,
+    "sha256": "e6b5ed193811d56b65fa6aca712df5e625b1f4b0facd6c4c7fefb58aa403dcb7"
+  },
+  "decisive_rtt": "QSPI: JEDEC=0x020000 rc=0 NOT whitelisted, OTA disabled",
+  "rejected_routes": [
+    "No blind reset, reflash, lock deletion or repeated qualification",
+    "Do not re-open trial5 or expand into QSPI implementation",
+    "Do not blame phone or declare firmware corruption from an admission failure"
+  ],
+  "next_owner": "Root and authorized device operator; firmware maintainer only if the bounded board-state/recovery check warrants it",
+  "next_action": "Clarify intervening board power/SD/external Flash connection changes and establish the supported current-state recovery route before mutations; preserve failed v8 and complete minimum successor rules before another formal attempt",
+  "verification_oracle": "Exact base/unchanged group16 Boot and normal confirmation/health, SD ready=1, known QSPI JEDEC with OTA enabled, valid matching storage/journal with expected zero durable, then original phone/network gates",
+  "no_final_campaign_or_task_pass": true
+}

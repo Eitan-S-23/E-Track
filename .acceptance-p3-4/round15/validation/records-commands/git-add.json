@@ -1,0 +1,27 @@
+{
+  "command": [
+    "D:\\install\\Git\\cmd\\git.exe",
+    "--no-optional-locks",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+    "-c",
+    "core.fsmonitor=false",
+    "add",
+    "--",
+    "docs/agent-collaboration/index.md",
+    "docs/ota-exec-notes/P3-4-v12-candidate-acceptance-2026-10-13.md",
+    "docs/ota-exec-notes/P3-4-v13-offline-acceptance-2026-10-13.md"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "timeout_seconds": 90,
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 0.236,
+  "log": {
+    "path": ".cache\\p34-local-closeout-20261014\\records-commands\\git-add.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

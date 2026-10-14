@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "print(__import__('socket').getaddrinfo('sky-gotten-hopefully-petroleum.trycloudflare.com',443,type=__import__('socket').SOCK_STREAM))"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 823211895468400,
+  "ended_monotonic_ns": 823212389225200,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\current-entry\\failure-diagnostics\\dns-current-runtime.stdout",
+    "bytes": 394,
+    "sha256": "940209c2d79a0eda23dbde93d451b669c143d7b68171915be6e8fb92944ea1b1"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\current-entry\\failure-diagnostics\\dns-current-runtime.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,92 @@
+T5DDC 000:001.543   SEGGER J-Link V8.18 Log File
+T5DDC 000:001.764   DLL Compiled: Mar  5 2025 14:42:43
+T5DDC 000:001.798   Logging started @ 2026-10-11 13:32
+T5DDC 000:001.830   Process: C:\Users\SU\SEGGER\JLink_V818\JLink.exe
+T5DDC 000:001.877 - 1.862ms 
+T5DDC 000:002.407 JLINK_ExecCommand("DisableAutoUpdateFW", ...). 
+T5DDC 000:002.565 - 0.158ms returns 0x00
+T5DDC 000:002.774 JLINK_EMU_SelectByUSBSN(SerialNo = 123456)
+T5DDC 000:015.428 - 12.662ms returns 0x00
+T5DDC 000:015.605 JLINK_SetWarnOutHandler(...)
+T5DDC 000:015.673 - 0.079ms 
+T5DDC 000:015.735 JLINK_ExecCommand("SuppressGUI = 1", ...). 
+T5DDC 000:015.795 - 0.059ms returns 0x00
+T5DDC 000:015.866 JLINK_OpenEx(...)
+T5DDC 000:025.739   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T5DDC 000:027.613   Hardware: V7.00
+T5DDC 000:027.643   S/N: 4294967295
+T5DDC 000:027.662   OEM: SEGGER
+T5DDC 000:027.680   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T5DDC 000:027.915   Bootloader: (FW returned invalid version)
+T5DDC 000:028.591   TELNET listener socket opened on port 19021
+T5DDC 000:029.044 - 13.128ms returns "O.K."
+T5DDC 000:029.107 JLINK_SetFlashProgProgressCallback(...)
+T5DDC 000:029.132 - 0.033ms 
+T5DDC 000:029.150 JLINK_GetFirmwareString(...)
+T5DDC 000:029.163 - 0.012ms 
+T5DDC 000:029.187 JLINK_GetHardwareVersion()
+T5DDC 000:029.203 - 0.015ms returns 70000
+T5DDC 000:029.229 JLINK_GetHWInfo(...)
+T5DDC 000:029.443 - 0.217ms returns 0
+T5DDC 000:029.485 JLINK_GetSN()
+T5DDC 000:029.509 - 0.023ms returns -1
+T5DDC 000:029.534 JLINK_GetOEMString(...)
+T5DDC 000:029.806 JLINK_EMU_GetCurrConnectionInfo()
+T5DDC 000:029.832 - 0.036ms returns 0
+T5DDC 000:029.857 JLINK_EMU_HasCapEx(0x00000026)
+T5DDC 000:029.877 - 0.019ms returns 0
+T5DDC 000:029.898 JLINK_GetEmuCaps()
+T5DDC 000:029.919 - 0.019ms returns 0x88EA5833
+T5DDC 000:029.937 JLINK_GetEmuCaps()
+T5DDC 000:029.950 - 0.012ms returns 0x88EA5833
+T5DDC 000:029.964 JLINK_GetHWStatus(...)
+T5DDC 000:030.085 - 0.121ms returns 0
+T5DDC 000:030.105 JLINK_EMU_HasCapEx(0x00000044)
+T5DDC 000:030.117 - 0.012ms returns 0
+T5DDC 000:030.133 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round4\ops\cmd-q-transfer\mcu\0001-pre-transfer-current-boot\settings.jlink", ...). 
+T5DDC 000:089.382 - 59.247ms returns 0x00
+T5DDC 000:089.431 JLINK_ExecCommand("SetRestartOnClose = 0", ...). 
+T5DDC 000:089.478 - 0.023ms returns 0x01
+T5DDC 000:089.541 JLINK_ExecCommand("InhibitConnectRetries = 1", ...). 
+T5DDC 000:089.576 - 0.011ms returns 0x00
+T5DDC 000:089.599 JLINK_ExecCommand("SetEnableMemCache = 0", ...). 
+T5DDC 000:089.616 - 0.001ms returns 0x01
+T5DDC 000:089.640 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round4\ops\cmd-q-transfer\mcu\0001-pre-transfer-current-boot\settings.jlink", ...). 
+T5DDC 000:091.402 - 1.760ms returns 0x00
+T5DDC 000:091.456 JLINK_DEVICE_GetIndex(sDeviceName = AT32F435RGT7)
+T5DDC 000:091.484 - 0.027ms returns 443
+T5DDC 000:091.500 JLINK_ExecCommand("device=AT32F435RGT7", ...). 
+T5DDC 000:091.608   Flash bank @ 0x08000000: SFL: Parsing sectorization info from ELF file
+T5DDC 000:091.629     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x08000000
+T5DDC 000:091.647   FlashBank @0x08000000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T5DDC 000:092.011   Flash bank @ 0x1FFFC000: SFL: Parsing sectorization info from ELF file
+T5DDC 000:092.034     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x00000000
+T5DDC 000:092.052   FlashBank @0x1FFFC000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T5DDC 000:092.132   Flash bank @ 0x90000000: SFL: Parsing sectorization info from ELF file
+T5DDC 000:092.152     FlashDevice.SectorInfo[0]: .SectorSize = 0x00010000, .SectorStartAddr = 0x00000000
+T5DDC 000:093.119   Device "AT32F435RGT7" selected.
+T5DDC 000:093.836 - 2.321ms returns 0x00
+T5DDC 000:093.863 JLINK_EnableLog(...)
+T5DDC 000:093.914 - 0.051ms 
+T5DDC 000:093.945 JLINK_GetEmuCaps()
+T5DDC 000:093.960 - 0.014ms returns 0x88EA5833
+T5DDC 000:093.975 JLINK_TIF_GetAvailable(...)
+T5DDC 000:094.129 - 0.154ms 
+T5DDC 000:094.162 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T5DDC 000:094.504 - 0.346ms returns 0x00
+T5DDC 000:094.526 JLINK_IsConnected()
+T5DDC 000:094.539 - 0.012ms returns FALSE
+T5DDC 000:094.552 JLINK_SetSpeed(1000)
+T5DDC 000:094.623 - 0.070ms 
+T5DDC 000:094.642 JLINK_Connect()
+T5DDC 000:094.824   InitTarget() start
+T5DDC 000:094.848    J-Link Script File: Executing InitTarget()
+T5DDC 000:533.913   Error: Failed to initialized DAP.
+T5DDC 000:533.972   InitTarget() end - Took 439ms
+T5DDC 000:533.996 - 439.353ms returns 0xFFFFFFFF
+T5DDC 000:534.064 JLINK_IsOpen()
+T5DDC 000:534.081 - 0.017ms returns 0x01
+T5DDC 000:541.365 JLINK_Close()
+T5DDC 000:547.237 - 5.871ms
+T5DDC 000:547.296   
+T5DDC 000:547.310   Closed

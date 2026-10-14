@@ -1,0 +1,70 @@
+{
+  "image": {
+    "image": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-reference2\\base.bin",
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    },
+    "elf": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf",
+      "bytes": 885784,
+      "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+    },
+    "map": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map",
+      "bytes": 2650755,
+      "sha256": "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c"
+    }
+  },
+  "rtt": 537212072,
+  "offsets": {
+    "active": 212,
+    "isr": 479
+  },
+  "symbols": {
+    "_ZL12g_ota_health": [
+      537212256,
+      36
+    ],
+    "_ZL18g_ota_confirm_done": [
+      537212254,
+      1
+    ],
+    "_ZL20g_ota_state_snapshot": [
+      537212252,
+      1
+    ],
+    "_ZL19g_ota_state_snapped": [
+      537212253,
+      1
+    ],
+    "_ZL10SD_IsReady": [
+      537208992,
+      1
+    ],
+    "_ZL19g_ota_overlay_owner": [
+      537212304,
+      1
+    ],
+    "_ZL13s_ble_session": [
+      537207792,
+      632
+    ],
+    "_SEGGER_RTT": [
+      537212072,
+      168
+    ],
+    "_ZN3HAL10HAL_UpdateEv": [
+      134484168,
+      48
+    ],
+    "_ZL19g_qspi_ota_disabled": [
+      536871293,
+      1
+    ],
+    "_ZL15g_qspi_jedec_id": [
+      537210908,
+      4
+    ]
+  }
+}

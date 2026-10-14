@@ -1,0 +1,12 @@
+{
+  "kind": "expired",
+  "body": "\u672c\u6b21\u5f00\u59cb\u9080\u8bf7\u5df2\u5931\u6548\u3002\u82e5\u5c1a\u672a\u5f00\u59cb\uff0c\u8bf7\u4e0d\u8981\u518d\u70b9\u5347\u7ea7\uff1b\u5982\u679c\u5df2\u7ecf\u5f00\u59cb\uff0c\u8bf7\u4fdd\u6301 App \u524d\u53f0\u3001\u4eae\u5c4f\u548c\u8fde\u63a5\uff0c\u8ba9\u672c\u6b21\u5347\u7ea7\u7ed3\u675f\uff0c\u4e0d\u8981\u53d6\u6d88\u3001\u91cd\u8bd5\u6216\u5207\u56de\u804a\u5929\u3002\u91c7\u96c6\u6b63\u5728\u6709\u754c\u6536\u5c3e\uff0c\u65e0\u9700\u56de\u590d\u3002",
+  "ready": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\start-ready.json",
+    "bytes": 1374,
+    "sha256": "8a54cdf207b9732b37be10171373b42acb00bda47ddd3d70893a9e7f5306cf3b"
+  },
+  "attempted_monotonic": 935620.1677849,
+  "seconds": 30,
+  "no_chat_reply_required": true
+}

@@ -1,0 +1,44 @@
+{
+  "pid": 4902,
+  "capture": "1791886690742329-94e77ea025b6ce69ae706f64",
+  "run_id": "p34-qualification-03",
+  "start_state": {
+    "pid": 4902,
+    "capture": "1791886690742329-94e77ea025b6ce69ae706f64",
+    "run_id": "p34-qualification-03",
+    "upgradeStarts": 0,
+    "upgradeEnds": 0
+  },
+  "phase": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phase-start.json",
+    "bytes": 288,
+    "sha256": "dcd6448925ef40cb3e55b14e4824121f1a5a24874c95cb21560cfc8cd59b0227"
+  },
+  "expires_at": "2026-10-13T18:21:14+08:00",
+  "runtime": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phone\\runtime.json",
+    "bytes": 867,
+    "sha256": "16ffa235d210886928805a3997c44d25a14c9dbe6a1149e5f458781b5ace31f6"
+  },
+  "package": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phone\\downloaded.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "role": "clean",
+  "checkpoint_kib": null,
+  "phase_budgets_seconds": {
+    "prepare": 600,
+    "download": 300,
+    "start": 120,
+    "transfer": 300,
+    "terminal": 420,
+    "snapshot": 300,
+    "boot": 345,
+    "readback": 345,
+    "archive": 300
+  },
+  "salvage_seconds": 300,
+  "close_seconds": 60,
+  "next_user_action": "use StartNotices; invitation expires at the original phase deadline; never start after expiry"
+}

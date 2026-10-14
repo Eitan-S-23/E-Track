@@ -1,0 +1,30 @@
+{
+  "pid": 13122,
+  "capture": "1791806205073776-2639ebf186f273ac86fb0c92",
+  "runtime": {
+    "path": ".acceptance-p3-4\\round10\\ops\\cmd-q-transfer\\phone\\runtime.json",
+    "bytes": 870,
+    "sha256": "978ae28d68458a069b1d6afcca29a0619df6347ebc3ee206fc722573ed7c0aaa"
+  },
+  "package": {
+    "path": ".acceptance-p3-4\\round10\\ops\\cmd-q-transfer\\phone\\downloaded.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "role": "clean",
+  "checkpoint_kib": null,
+  "phase_budgets_seconds": {
+    "prepare": 600,
+    "download": 300,
+    "start": 120,
+    "transfer": 300,
+    "terminal": 420,
+    "snapshot": 300,
+    "boot": 345,
+    "readback": 345,
+    "archive": 300
+  },
+  "salvage_seconds": 300,
+  "close_seconds": 60,
+  "next_user_action": "tap Start BLE transfer once in the original UI; any physical fault follows the frozen operator command"
+}

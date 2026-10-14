@@ -1,0 +1,25 @@
+{
+  "command": [
+    "D:\\install\\Git\\cmd\\git.exe",
+    "--no-optional-locks",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+    "-c",
+    "core.fsmonitor=false",
+    "commit",
+    "-m",
+    "fix(ota): preserve bounded caller cleanup and primary errors"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "timeout_seconds": 90,
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 10.286,
+  "log": {
+    "path": ".cache\\p34-local-closeout-20261014\\source-commands\\git-commit.log",
+    "bytes": 191,
+    "sha256": "aafba7580fb072930f3f2e82f3d2a60935f1ba84a473e1f3c29e0439b3c519e4"
+  }
+}

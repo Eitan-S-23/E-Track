@@ -1,0 +1,255 @@
+T453C 000:001.905   SEGGER J-Link V8.18 Log File
+T453C 000:002.140   DLL Compiled: Mar  5 2025 14:42:43
+T453C 000:002.174   Logging started @ 2026-10-13 10:36
+T453C 000:002.204   Process: C:\Users\SU\SEGGER\JLink_V818\JLink.exe
+T453C 000:002.250 - 2.235ms 
+T453C 000:002.607 JLINK_ExecCommand("DisableAutoUpdateFW", ...). 
+T453C 000:002.665 - 0.058ms returns 0x00
+T453C 000:002.731 JLINK_EMU_SelectByUSBSN(SerialNo = 123456)
+T453C 000:012.750 - 10.021ms returns 0x00
+T453C 000:012.872 JLINK_SetWarnOutHandler(...)
+T453C 000:012.913 - 0.048ms 
+T453C 000:012.956 JLINK_ExecCommand("SuppressGUI = 1", ...). 
+T453C 000:012.990 - 0.033ms returns 0x00
+T453C 000:013.032 JLINK_OpenEx(...)
+T453C 000:030.092   
+  ***** Warning: 
+T453C 000:030.187   Out of sync , resynchronizing...
+T453C 001:659.793   J-Link communication resynchronized
+T453C 001:660.507   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T453C 001:674.915   Hardware: V7.00
+T453C 001:674.983   S/N: 4294967295
+T453C 001:675.009   OEM: SEGGER
+T453C 001:675.036   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T453C 001:675.507   Bootloader: (FW returned invalid version)
+T453C 001:676.300   TELNET listener socket opened on port 19021
+T453C 001:676.852 - 1663.804ms returns "O.K."
+T453C 001:676.936 JLINK_SetFlashProgProgressCallback(...)
+T453C 001:676.983 - 0.059ms 
+T453C 001:677.010 JLINK_GetFirmwareString(...)
+T453C 001:677.033 - 0.022ms 
+T453C 001:677.061 JLINK_GetHardwareVersion()
+T453C 001:677.084 - 0.022ms returns 70000
+T453C 001:677.128 JLINK_GetHWInfo(...)
+T453C 001:677.773 - 0.649ms returns 0
+T453C 001:677.910 JLINK_GetSN()
+T453C 001:677.940 - 0.029ms returns -1
+T453C 001:677.968 JLINK_GetOEMString(...)
+T453C 001:678.033 JLINK_EMU_GetCurrConnectionInfo()
+T453C 001:678.091 - 0.069ms returns 0
+T453C 001:678.140 JLINK_EMU_HasCapEx(0x00000026)
+T453C 001:678.187 - 0.047ms returns 0
+T453C 001:678.244 JLINK_GetEmuCaps()
+T453C 001:678.297 - 0.052ms returns 0x88EA5833
+T453C 001:678.348 JLINK_GetEmuCaps()
+T453C 001:678.375 - 0.026ms returns 0x88EA5833
+T453C 001:678.397 JLINK_GetHWStatus(...)
+T453C 001:678.842 - 0.444ms returns 0
+T453C 001:678.883 JLINK_EMU_HasCapEx(0x00000044)
+T453C 001:678.938 - 0.055ms returns 0
+T453C 001:678.969 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\settings.jlink", ...). 
+T453C 001:913.078 - 234.106ms returns 0x00
+T453C 001:913.125 JLINK_ExecCommand("SetRestartOnClose = 0", ...). 
+T453C 001:913.173 - 0.023ms returns 0x01
+T453C 001:913.238 JLINK_ExecCommand("InhibitConnectRetries = 1", ...). 
+T453C 001:913.278 - 0.012ms returns 0x00
+T453C 001:913.313 JLINK_ExecCommand("SetEnableMemCache = 0", ...). 
+T453C 001:913.336 - 0.001ms returns 0x01
+T453C 001:913.364 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\settings.jlink", ...). 
+T453C 001:920.724 - 7.357ms returns 0x00
+T453C 001:920.872 JLINK_DEVICE_GetIndex(sDeviceName = AT32F435RGT7)
+T453C 001:920.924 - 0.051ms returns 443
+T453C 001:920.947 JLINK_ExecCommand("device=AT32F435RGT7", ...). 
+T453C 001:921.142   Flash bank @ 0x08000000: SFL: Parsing sectorization info from ELF file
+T453C 001:921.179     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x08000000
+T453C 001:921.262   FlashBank @0x08000000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T453C 001:921.718   Flash bank @ 0x1FFFC000: SFL: Parsing sectorization info from ELF file
+T453C 001:921.755     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x00000000
+T453C 001:921.782   FlashBank @0x1FFFC000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T453C 001:921.906   Flash bank @ 0x90000000: SFL: Parsing sectorization info from ELF file
+T453C 001:921.937     FlashDevice.SectorInfo[0]: .SectorSize = 0x00010000, .SectorStartAddr = 0x00000000
+T453C 001:923.501   Device "AT32F435RGT7" selected.
+T453C 001:924.762 - 3.792ms returns 0x00
+T453C 001:924.803 JLINK_EnableLog(...)
+T453C 001:924.826 - 0.022ms 
+T453C 001:924.867 JLINK_GetEmuCaps()
+T453C 001:924.890 - 0.022ms returns 0x88EA5833
+T453C 001:924.914 JLINK_TIF_GetAvailable(...)
+T453C 001:925.109 - 0.193ms 
+T453C 001:925.175 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T453C 001:925.601 - 0.432ms returns 0x00
+T453C 001:925.644 JLINK_IsConnected()
+T453C 001:925.668 - 0.023ms returns FALSE
+T453C 001:925.691 JLINK_SetSpeed(1000)
+T453C 001:925.794 - 0.103ms 
+T453C 001:925.824 JLINK_Connect()
+T453C 001:926.107   InitTarget() start
+T453C 001:926.151    J-Link Script File: Executing InitTarget()
+T453C 001:928.512   DAP initialized successfully.
+T453C 001:930.439     No Protection is set.
+T453C 001:930.543   InitTarget() end - Took 4.38ms
+T453C 001:931.821   Found SW-DP with ID 0x2BA01477
+T453C 001:937.689   Old FW that does not support reading DPIDR via DAP jobs
+T453C 001:941.288   DPv0 detected
+T453C 001:941.376   CoreSight SoC-400 or earlier
+T453C 001:941.396   Scanning AP map to find all available APs
+T453C 001:943.579   AP[1]: Stopped AP scan as end of AP map has been reached
+T453C 001:943.610   AP[0]: AHB-AP (IDR: 0x24770011, ADDR: 0x00000000)
+T453C 001:943.629   Iterating through AP map to find AHB-AP to use
+T453C 001:947.429   AP[0]: Core found
+T453C 001:947.468   AP[0]: AHB-AP ROM base: 0xE00FF000
+T453C 001:949.346   CPUID register: 0x410FC241. Implementer code: 0x41 (ARM)
+T453C 001:949.384   Found Cortex-M4 r0p1, Little endian.
+T453C 001:949.638   -- Max. mem block: 0x00002C18
+T453C 001:950.190   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T453C 001:951.039   CPU_ReadMem(4 bytes @ 0xE0002000)
+T453C 001:951.856   FPUnit: 6 code (BP) slots and 2 literal slots
+T453C 001:951.880   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T453C 001:952.698   CPU_ReadMem(4 bytes @ 0xE0001000)
+T453C 001:953.538   CPU_WriteMem(4 bytes @ 0xE0001000)
+T453C 001:954.433   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T453C 001:955.262   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T453C 001:956.132   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T453C 001:956.960   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T453C 001:957.834   CoreSight components:
+T453C 001:957.857   ROMTbl[0] @ E00FF000
+T453C 001:957.878   CPU_ReadMem(64 bytes @ 0xE00FF000)
+T453C 001:960.299   CPU_ReadMem(32 bytes @ 0xE000EFE0)
+T453C 001:961.925   [0][0]: E000E000 CID B105E00D PID 000BB00C SCS-M7
+T453C 001:961.953   CPU_ReadMem(32 bytes @ 0xE0001FE0)
+T453C 001:963.502   [0][1]: E0001000 CID B105E00D PID 003BB002 DWT
+T453C 001:963.525   CPU_ReadMem(32 bytes @ 0xE0002FE0)
+T453C 001:965.077   [0][2]: E0002000 CID B105E00D PID 002BB003 FPB
+T453C 001:965.102   CPU_ReadMem(32 bytes @ 0xE0000FE0)
+T453C 001:966.651   [0][3]: E0000000 CID B105E00D PID 003BB001 ITM
+T453C 001:966.684   CPU_ReadMem(32 bytes @ 0xE0040FE0)
+T453C 001:968.254   [0][4]: E0040000 CID B105900D PID 000BB9A1 TPIU
+T453C 001:968.280   CPU_ReadMem(32 bytes @ 0xE0041FE0)
+T453C 001:969.838   [0][5]: E0041000 CID 00000000 PID 00000000 ???
+T453C 001:969.908 - 44.083ms returns 0x00
+T453C 001:969.992 JLINK_GetIdData(pIdData)
+T453C 001:970.438   pIdData->ScanLen=4
+T453C 001:970.845   pIdData->NumDevices=1
+T453C 001:970.880   pIdData->aId[0]=0x2BA01477
+T453C 001:970.908   pIdData->aIrRead[0]=0
+T453C 001:970.936   pIdData->aScanLen[0]=0
+T453C 001:970.963   pIdData->aScanRead[0]=0
+T453C 001:970.992 - 0.999ms 
+T453C 001:971.013 JLINK_GetMemZones(...)
+T453C 001:971.026 - 0.013ms returns 1
+T453C 001:971.044 JLINK_HasError()
+T453C 001:971.060 JLINK_CORE_GetFound()
+T453C 001:971.073 - 0.012ms returns 0xE0000FF
+T453C 001:971.119 JLINK_ExecCommand("ExcludeFlashCacheRange 0x08000000-0x080FFFFF", ...). 
+T453C 001:971.140 - 0.006ms returns 0x00
+T453C 001:972.034 JLINK_ReadMemEx_64(0x08000000, 0x10000 Bytes, ...)
+T453C 001:972.099   CPU_ReadMem(65536 bytes @ 0x08000000)
+T453C 003:708.484   Data:  00 80 05 20 CD 28 00 08 1D 29 00 08 1D 29 00 08 ...
+T453C 003:708.531 - 1736.497ms returns 65536 (0x10000)
+T453C 003:710.558 JLINK_ReadMemEx_64(0x08010000, 0x95E40 Bytes, ...)
+T453C 003:710.614   CPU_ReadMem(613952 bytes @ 0x08010000)
+T453C 020:524.532   Data:  00 80 05 20 AD BF 01 08 37 C0 01 08 37 C0 01 08 ...
+T453C 020:524.578 - 16814.020ms returns 613952 (0x95E40)
+T453C 020:526.660 JLINK_ReadMemEx_64(0x20053560, 0x24 Bytes, ...)
+T453C 020:527.124   CPU_ReadMem(36 bytes @ 0x20053560)
+T453C 020:528.862   Data:  30 75 00 00 1E 00 00 00 E8 03 00 00 00 00 00 00 ...
+T453C 020:528.944 - 2.283ms returns 36 (0x24)
+T453C 021:531.032 JLINK_ReadMemEx_64(0x20053560, 0x24 Bytes, ...)
+T453C 021:531.078   CPU_ReadMem(36 bytes @ 0x20053560)
+T453C 021:532.810   Data:  30 75 00 00 1E 00 00 00 E8 03 00 00 00 00 00 00 ...
+T453C 021:532.842 - 1.809ms returns 36 (0x24)
+T453C 021:533.730 JLINK_ReadMemEx_64(0x2005355E, 0x1 Bytes, ...)
+T453C 021:533.764   CPU_ReadMem(1 bytes @ 0x2005355E)
+T453C 021:534.630   Data:  01
+T453C 021:534.658 - 0.929ms returns 1 (0x1)
+T453C 021:535.672 JLINK_ReadMemEx_64(0x2005355C, 0x1 Bytes, ...)
+T453C 021:535.708   CPU_ReadMem(1 bytes @ 0x2005355C)
+T453C 021:536.570   Data:  04
+T453C 021:536.612 - 0.939ms returns 1 (0x1)
+T453C 021:537.620 JLINK_ReadMemEx_64(0x2005355D, 0x1 Bytes, ...)
+T453C 021:537.660   CPU_ReadMem(1 bytes @ 0x2005355D)
+T453C 021:538.532   Data:  01
+T453C 021:538.562 - 0.941ms returns 1 (0x1)
+T453C 021:539.640 JLINK_ReadMemEx_64(0x200528A0, 0x1 Bytes, ...)
+T453C 021:539.678   CPU_ReadMem(1 bytes @ 0x200528A0)
+T453C 021:540.532   Data:  01
+T453C 021:540.564 - 0.923ms returns 1 (0x1)
+T453C 021:541.462 JLINK_ReadMemEx_64(0x20053590, 0x1 Bytes, ...)
+T453C 021:541.498   CPU_ReadMem(1 bytes @ 0x20053590)
+T453C 021:542.410   Data:  00
+T453C 021:542.438 - 0.976ms returns 1 (0x1)
+T453C 021:543.574 JLINK_ReadMemEx_64(0x2000017D, 0x1 Bytes, ...)
+T453C 021:543.610   CPU_ReadMem(1 bytes @ 0x2000017D)
+T453C 021:544.482   Data:  00
+T453C 021:544.510 - 0.935ms returns 1 (0x1)
+T453C 021:545.324 JLINK_ReadMemEx_64(0x2005301C, 0x4 Bytes, ...)
+T453C 021:545.354   CPU_ReadMem(4 bytes @ 0x2005301C)
+T453C 021:546.214   Data:  18 40 EF 00
+T453C 021:546.244 - 0.920ms returns 4 (0x4)
+T453C 021:547.214 JLINK_ReadMemEx_64(0x200524C4, 0x1 Bytes, ...)
+T453C 021:547.246   CPU_ReadMem(1 bytes @ 0x200524C4)
+T453C 021:548.158   Data:  00
+T453C 021:548.188 - 0.974ms returns 1 (0x1)
+T453C 021:549.028 JLINK_ReadMemEx_64(0x200525CF, 0x1 Bytes, ...)
+T453C 021:549.060   CPU_ReadMem(1 bytes @ 0x200525CF)
+T453C 021:549.908   Data:  00
+T453C 021:549.938 - 0.909ms returns 1 (0x1)
+T453C 021:550.788 JLINK_ReadMemEx_64(0xE000ED08, 0x4 Bytes, ...)
+T453C 021:550.820   CPU_ReadMem(4 bytes @ 0xE000ED08)
+T453C 021:551.690   Data:  00 08 01 08
+T453C 021:551.724 - 0.936ms returns 4 (0x4)
+T453C 021:552.688 JLINK_ReadMemEx_64(0xE000ED28, 0x4 Bytes, ...)
+T453C 021:552.724   CPU_ReadMem(4 bytes @ 0xE000ED28)
+T453C 021:553.616   Data:  00 00 00 00
+T453C 021:553.648 - 0.959ms returns 4 (0x4)
+T453C 021:557.300 JLINK_ReadMemEx_64(0xE000ED2C, 0x4 Bytes, ...)
+T453C 021:557.348   CPU_ReadMem(4 bytes @ 0xE000ED2C)
+T453C 021:558.244   Data:  00 00 00 00
+T453C 021:558.276 - 0.976ms returns 4 (0x4)
+T453C 021:559.292 JLINK_ReadMemEx_64(0xE000EDF0, 0x4 Bytes, ...)
+T453C 021:559.328   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T453C 021:560.212   Data:  01 00 01 01
+T453C 021:560.244   Debug reg: DHCSR
+T453C 021:560.260 - 0.968ms returns 4 (0x4)
+T453C 021:561.122 JLINK_ReadMemEx_64(0x4002C434, 0x4 Bytes, ...)
+T453C 021:561.154   CPU_ReadMem(4 bytes @ 0x4002C434)
+T453C 021:562.016   Data:  00 00 00 00
+T453C 021:562.052 - 0.929ms returns 4 (0x4)
+T453C 021:563.050 JLINK_ReadMemEx_64(0xE0042008, 0x4 Bytes, ...)
+T453C 021:563.102   CPU_ReadMem(4 bytes @ 0xE0042008)
+T453C 021:563.986   Data:  00 00 00 00
+T453C 021:564.016 - 0.980ms returns 4 (0x4)
+T453C 021:565.052 JLINK_ReadMemEx_64(0x08010400, 0x60 Bytes, ...)
+T453C 021:565.080   CPU_ReadMem(96 bytes @ 0x08010400)
+T453C 021:568.612   Data:  45 54 46 57 01 00 00 00 4F 76 00 00 33 2E 32 2E ...
+T453C 021:568.908 - 3.857ms returns 96 (0x60)
+T453C 021:570.774 JLINK_ReadMemEx_64(0x20055FE0, 0x20 Bytes, ...)
+T453C 021:570.864   CPU_ReadMem(32 bytes @ 0x20055FE0)
+T453C 021:572.548   Data:  5A 5A 5A 5A 5A 5A 5A 5A 5A 5A 5A 5A 5A 5A 5A 5A ...
+T453C 021:572.588 - 1.814ms returns 32 (0x20)
+T453C 021:573.682 JLINK_ReadMemEx_64(0x20056000, 0x2000 Bytes, ...)
+T453C 021:573.724   CPU_ReadMem(8192 bytes @ 0x20056000)
+T453C 021:790.586   Data:  A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 ...
+T453C 021:790.638 - 216.957ms returns 8192 (0x2000)
+T453C 021:791.760 JLINK_ReadMemEx_64(0x90000000, 0x20 Bytes, ...)
+T453C 021:791.796   CPU_ReadMem(32 bytes @ 0x90000000)
+T453C 021:793.524   Data:  45 54 53 4C 01 FF FF FF 40 5E 09 00 35 11 3D AC ...
+T453C 021:793.578 - 1.818ms returns 32 (0x20)
+T453C 021:794.978 JLINK_ReadMemEx_64(0x90100000, 0x20 Bytes, ...)
+T453C 021:795.026   CPU_ReadMem(32 bytes @ 0x90100000)
+T453C 021:797.596   Data:  45 54 53 4C 02 FF FF FF 40 5E 09 00 35 11 3D AC ...
+T453C 021:797.650 - 2.672ms returns 32 (0x20)
+T453C 021:798.762 JLINK_ReadMemEx_64(0x90200000, 0x20 Bytes, ...)
+T453C 021:798.794   CPU_ReadMem(32 bytes @ 0x90200000)
+T453C 021:802.268   Data:  45 54 53 4C 04 FF FF FF 3C 74 09 00 F4 9F CD 90 ...
+T453C 021:802.344 - 3.583ms returns 32 (0x20)
+T453C 021:803.710 JLINK_ReadMemEx_64(0x90300000, 0x1000 Bytes, ...)
+T453C 021:803.760   CPU_ReadMem(4096 bytes @ 0x90300000)
+T453C 021:913.068   Data:  45 54 53 4C 03 FF FF FF 00 00 10 00 B3 D4 87 C2 ...
+T453C 021:913.120 - 109.409ms returns 4096 (0x1000)
+T453C 021:913.438 JLINK_IsOpen()
+T453C 021:913.468 - 0.029ms returns 0x01
+T453C 021:925.220 JLINK_Close()
+T453C 021:940.380 - 15.158ms
+T453C 021:940.704   
+T453C 021:940.730   Closed

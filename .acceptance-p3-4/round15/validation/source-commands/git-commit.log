@@ -1,0 +1,3 @@
+[0;32m✅ Pre-commit 检查通过[0m
+[acceptance/p3-4-v2-20261009 fcbace8] fix(ota): preserve bounded caller cleanup and primary errors
+ 3 files changed, 907 insertions(+), 63 deletions(-)

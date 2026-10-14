@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkRTTLogger.exe",
+    "-Device",
+    "CORTEX-M4",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-RTTAddress",
+    "0x200534A8",
+    "-RTTChannel",
+    "0",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round10\\diagnostics\\post-upgrade\\mcu\\post-reboot.rtt"
+  ],
+  "reason": "planned_capture_stop_not_a_success_verdict",
+  "stopped_while_running": true,
+  "exit_code": 1,
+  "started_monotonic_ns": 926716914297700,
+  "ended_monotonic_ns": 926725608548100,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round10\\diagnostics\\post-upgrade\\mcu\\post-reboot.stdout",
+    "bytes": 1691,
+    "sha256": "38354872730e96015e626d36d46933c47d81aad2e72a98ac777381db93857975"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round10\\diagnostics\\post-upgrade\\mcu\\post-reboot.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

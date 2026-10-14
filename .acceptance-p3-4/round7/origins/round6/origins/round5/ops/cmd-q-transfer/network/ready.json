@@ -1,0 +1,16 @@
+{
+  "origin": "https://poultry-sauce-scientific-commonly.trycloudflare.com",
+  "package": {
+    "path": ".acceptance-p3-4\\round5\\ops\\cmd-q-transfer\\network\\https-package.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "service_config": {
+    "path": ".acceptance-p3-4\\round5\\ops\\cmd-q-transfer\\network\\service-config.json",
+    "bytes": 1314,
+    "sha256": "7ea97cdd76a9a0434358fc1cd5969b5fd860e5ed3bdb7cc3b06981a24e3521ba"
+  },
+  "local_port": 58398,
+  "prepare_deadline_monotonic": 847473.0787174,
+  "https_requests": 39
+}

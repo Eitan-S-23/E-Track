@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-P",
+    "5062",
+    "nodaemon",
+    "server"
+  ],
+  "reason": "planned_private_adb_close",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 852292075918900,
+  "ended_monotonic_ns": 852331552940200,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\phone\\adb-server.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\phone\\adb-server.stderr",
+    "bytes": 1635,
+    "sha256": "546370e18ee4aac6d40d807a2864662fc98a195facc804b4d60d5782033b749e"
+  }
+}

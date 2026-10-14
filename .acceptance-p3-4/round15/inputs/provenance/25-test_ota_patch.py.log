@@ -1,0 +1,181 @@
+P2_3_VECTOR_PREFLIGHT=PASS vendor_controls=11 oldpos_only=9 invalid_control=[0,0,0]
+P2-3 patch package tests
+ golden vectors
+  toy-patch returns success                                              PASS
+  toy-patch output matches toy-new byte-for-byte                         PASS
+  toy-patch outer metadata matches expected.json                         PASS
+  toy-patch inner header fields match expected.json                      PASS
+  toy-patch fw_header double-zero SHA matches expected                   PASS
+  toy-patch writes bounded 1KiB chunks                                   PASS
+  toy-patch workspace stays within fixed 40KiB arena                     PASS
+  toy-patch workspace is acquired, wiped, and released once              PASS
+  toy-patch reads base image in bounded blocks, never whole              PASS
+  toy-patch leaves BCB byte-identical                                    PASS
+  [info] workspace_peak=21848 bytes, ceiling=40960 bytes
+  [info] work buffer=1024, stream buffer=1024, input window=4096
+ vendor multi-control regression
+  vendor multi-control patch returns success                             PASS
+  vendor multi-control output matches expected image byte-for-byte       PASS
+  vendor multi-control metadata reports full decoded stream              PASS
+  vendor multi-control path performs six bounded writes                  PASS
+  vendor multi-control path stays inside fixed workspace                 PASS
+  vendor multi-control patch leaves BCB byte-identical                   PASS
+ outer header rejections
+  bad magic returns magic                                                PASS
+  bad magic performs no candidate prepare/write                          PASS
+  bad magic leaves BCB byte-identical                                    PASS
+  bad header_len returns header_length                                   PASS
+  bad header_len performs no candidate prepare/write                     PASS
+  bad header_len leaves BCB byte-identical                               PASS
+  bad header CRC returns header_crc                                      PASS
+  bad header CRC performs no candidate prepare/write                     PASS
+  bad header CRC leaves BCB byte-identical                               PASS
+  full-package flags in P2-3 returns flags                               PASS
+  full-package flags in P2-3 performs no candidate prepare/write         PASS
+  full-package flags in P2-3 leaves BCB byte-identical                   PASS
+  unsupported algorithm returns algorithm                                PASS
+  unsupported algorithm performs no candidate prepare/write              PASS
+  unsupported algorithm leaves BCB byte-identical                        PASS
+  unsupported key returns key                                            PASS
+  unsupported key performs no candidate prepare/write                    PASS
+  unsupported key leaves BCB byte-identical                              PASS
+  hardware mismatch returns hardware                                     PASS
+  hardware mismatch performs no candidate prepare/write                  PASS
+  hardware mismatch leaves BCB byte-identical                            PASS
+  layout mismatch returns layout                                         PASS
+  layout mismatch performs no candidate prepare/write                    PASS
+  layout mismatch leaves BCB byte-identical                              PASS
+  min_boot_ver above device returns min_boot                             PASS
+  min_boot_ver above device performs no candidate prepare/write          PASS
+  min_boot_ver above device leaves BCB byte-identical                    PASS
+  equal target_vcode is rejected as downgrade                            PASS
+  equal target_vcode performs no candidate write                         PASS
+  equal target_vcode leaves BCB byte-identical                           PASS
+  newer device vcode is rejected as downgrade                            PASS
+  newer device vcode leaves BCB byte-identical                           PASS
+  base_vcode not equal to current returns base_vcode                     PASS
+  base_vcode not equal to current performs no candidate prepare/write    PASS
+  base_vcode not equal to current leaves BCB byte-identical              PASS
+  zero base_vcode (full-package form) returns base_vcode                 PASS
+  zero base_vcode (full-package form) performs no candidate prepare/write PASS
+  zero base_vcode (full-package form) leaves BCB byte-identical          PASS
+  base_sha8 mismatch returns base_sha8                                   PASS
+  base_sha8 mismatch performs no candidate prepare/write                 PASS
+  base_sha8 mismatch leaves BCB byte-identical                           PASS
+  all-zero base_sha8 (full-package form) returns base_sha8               PASS
+  all-zero base_sha8 (full-package form) performs no candidate prepare/write PASS
+  all-zero base_sha8 (full-package form) leaves BCB byte-identical       PASS
+  device image identity mismatch is rejected                             PASS
+  device image identity mismatch leaves BCB byte-identical               PASS
+  payload_len disagrees with package_len returns package_length          PASS
+  payload_len disagrees with package_len performs no candidate prepare/write PASS
+  payload_len disagrees with package_len leaves BCB byte-identical       PASS
+  payload_len leaves no patch stream returns package_length              PASS
+  payload_len leaves no patch stream performs no candidate prepare/write PASS
+  payload_len leaves no patch stream leaves BCB byte-identical           PASS
+  payload CRC mismatch returns payload_crc                               PASS
+  payload CRC mismatch performs no candidate prepare/write               PASS
+  payload CRC mismatch leaves BCB byte-identical                         PASS
+  outer header read failure returns read                                 PASS
+  outer header read failure performs no candidate prepare/write          PASS
+  outer header read failure leaves BCB byte-identical                    PASS
+  payload read failure during CRC returns read                           PASS
+  payload read failure during CRC performs no candidate prepare/write    PASS
+  payload read failure during CRC leaves BCB byte-identical              PASS
+ inner header rejections
+  inner header CRC mismatch returns inner_crc                            PASS
+  inner header CRC mismatch performs no candidate prepare/write          PASS
+  inner header CRC mismatch leaves BCB byte-identical                    PASS
+  ph_psize disagrees with payload_len returns inner_psize                PASS
+  ph_psize disagrees with payload_len performs no candidate prepare/write PASS
+  ph_psize disagrees with payload_len leaves BCB byte-identical          PASS
+  inner pad must be explicit zero returns inner_pad                      PASS
+  inner pad must be explicit zero performs no candidate prepare/write    PASS
+  inner pad must be explicit zero leaves BCB byte-identical              PASS
+  non-frozen LZMA lc returns lzma_properties                             PASS
+  non-frozen LZMA lc performs no candidate prepare/write                 PASS
+  non-frozen LZMA lc leaves BCB byte-identical                           PASS
+  dictionary below 4KiB returns lzma_properties                          PASS
+  dictionary below 4KiB performs no candidate prepare/write              PASS
+  dictionary below 4KiB leaves BCB byte-identical                        PASS
+  dictionary above 16KiB returns lzma_properties                         PASS
+  dictionary above 16KiB performs no candidate prepare/write             PASS
+  dictionary above 16KiB leaves BCB byte-identical                       PASS
+  ph_nsize cannot hold fw_header returns image_length                    PASS
+  ph_nsize cannot hold fw_header performs no candidate prepare/write     PASS
+  ph_nsize cannot hold fw_header leaves BCB byte-identical               PASS
+  ph_nsize exceeds candidate capacity returns image_length               PASS
+  ph_nsize exceeds candidate capacity performs no candidate prepare/write PASS
+  ph_nsize exceeds candidate capacity leaves BCB byte-identical          PASS
+  ph_original_size below nsize+control returns decoded_length            PASS
+  ph_original_size below nsize+control performs no candidate prepare/write PASS
+  ph_original_size below nsize+control leaves BCB byte-identical         PASS
+  ph_original_size control bytes unaligned returns decoded_length        PASS
+  ph_original_size control bytes unaligned performs no candidate prepare/write PASS
+  ph_original_size control bytes unaligned leaves BCB byte-identical     PASS
+  ph_osize disagrees with base image length returns base_length          PASS
+  ph_osize disagrees with base image length performs no candidate prepare/write PASS
+  ph_osize disagrees with base image length leaves BCB byte-identical    PASS
+  zero ph_osize returns base_length                                      PASS
+  zero ph_osize performs no candidate prepare/write                      PASS
+  zero ph_osize leaves BCB byte-identical                                PASS
+  ph_ocrc disagrees with base image returns base_crc                     PASS
+  ph_ocrc disagrees with base image performs no candidate prepare/write  PASS
+  ph_ocrc disagrees with base image leaves BCB byte-identical            PASS
+  modified base image caught by ph_ocrc returns base_crc                 PASS
+  modified base image caught by ph_ocrc performs no candidate prepare/write PASS
+  modified base image caught by ph_ocrc leaves BCB byte-identical        PASS
+  base read failure before prepare returns read                          PASS
+  base read failure before prepare performs no candidate prepare/write   PASS
+  base read failure before prepare leaves BCB byte-identical             PASS
+  ph_original_size longer than actual stream returns decoded_length      PASS
+  decoded_length rejection precedes base validation                      PASS
+  decoded_length rejection precedes candidate prepare                    PASS
+  ph_original_size longer than actual stream leaves BCB byte-identical   PASS
+  ph_ncrc disagrees with synthesized candidate returns result_crc        PASS
+  ph_ncrc disagrees with synthesized candidate leaves BCB byte-identical PASS
+ stream and flash failures
+  corrupt LZMA stream returns lzma_data                                  PASS
+  corrupt LZMA stream performs no candidate prepare/write                PASS
+  corrupt LZMA stream leaves BCB byte-identical                          PASS
+  candidate prepare failure is reported                                  PASS
+  candidate prepare failure writes nothing                               PASS
+  candidate prepare failure leaves BCB byte-identical                    PASS
+  candidate program failure is reported                                  PASS
+  candidate program failure leaves BCB byte-identical                    PASS
+  candidate readback mismatch is reported                                PASS
+  candidate readback mismatch leaves BCB byte-identical                  PASS
+  candidate read failure is reported                                     PASS
+  candidate read failure leaves BCB byte-identical                       PASS
+ final image rejections
+  candidate fw_header mismatch returns fw_header                         PASS
+  fw_header rejection occurs after candidate synthesis                   PASS
+  candidate fw_header mismatch leaves BCB byte-identical                 PASS
+  candidate version mismatch returns image_metadata                      PASS
+  image_metadata rejection occurs after candidate synthesis              PASS
+  candidate version metadata mismatch leaves BCB byte-identical          PASS
+ workspace and argument handling
+  workspace acquire failure is reported                                  PASS
+  workspace acquire failure writes no candidate                          PASS
+  workspace acquire failure leaves BCB byte-identical                    PASS
+  short workspace is refused                                             PASS
+  short workspace is wiped and released                                  PASS
+  short workspace writes no candidate                                    PASS
+  null io is rejected                                                    PASS
+  null device is rejected                                                PASS
+  missing base_read callback is rejected                                 PASS
+  undersized package_len is rejected                                     PASS
+  oversized package_len is rejected                                      PASS
+  argument rejections never touch candidate or BCB                       PASS
+ control sanity
+  all-zero non-progress control returns patch_control                    PASS
+  patch_control rejection prepares but never writes candidate            PASS
+  all-zero non-progress control leaves BCB byte-identical                PASS
+  truncated patch stream is rejected                                     PASS
+  truncated patch stream writes no candidate                             PASS
+  truncated patch stream leaves BCB byte-identical                       PASS
+  short LZMA stream fails during validation pass                         PASS
+  short LZMA stream is rejected before base/candidate                    PASS
+  short LZMA stream leaves BCB byte-identical                            PASS
+
+167/167 checks passed

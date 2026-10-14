@@ -1,0 +1,48 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p34-acceptance/metrics.py",
+    "--input",
+    ".acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0003-terminal-before-reboot/metrics.bin",
+    "--binary",
+    "--elf",
+    ".acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.elf",
+    "--map",
+    ".acceptance-p3-4/round14/inputs/metrics/X-Track-App-GCC.map",
+    "--expect-elf-sha256",
+    "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4",
+    "--expect-map-sha256",
+    "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c",
+    "--package",
+    ".acceptance-p3-4/round14/inputs/metrics/reference-1MiB.etu",
+    "--expect-epoch",
+    "1724752335",
+    "--expect-baud",
+    "921600"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1060411150921800,
+  "ended_monotonic_ns": 1060411584696800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER-RAM.stdout",
+    "bytes": 4525,
+    "sha256": "25827e40de525e18e464d300d89c45340bd7332197abce6ac98c5a14a0457ccc"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round14\\commands\\CMD-Q-TRANSFER-RAM.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

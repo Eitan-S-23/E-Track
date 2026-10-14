@@ -1,0 +1,16 @@
+{
+  "origin": "https://conventions-harvard-francis-trials.trycloudflare.com",
+  "package": {
+    "path": ".acceptance-p3-4\\round6\\ops\\cmd-q-transfer\\network\\https-package.etu",
+    "bytes": 1048576,
+    "sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47"
+  },
+  "service_config": {
+    "path": ".acceptance-p3-4\\round6\\ops\\cmd-q-transfer\\network\\service-config.json",
+    "bytes": 1315,
+    "sha256": "097846a5cd7245f2b0cd64670f5b59319e35b501b22e07c8ae21e3095b1aebec"
+  },
+  "local_port": 60364,
+  "prepare_deadline_monotonic": 852503.1504822,
+  "https_requests": 2
+}

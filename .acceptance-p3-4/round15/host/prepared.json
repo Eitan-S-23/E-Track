@@ -1,0 +1,166 @@
+{
+  "contract": {
+    "path": "docs\\acceptance-contracts\\P3-4-v15.contract.json",
+    "bytes": 60528,
+    "sha256": "e315dc6c39da8d995baea2ee2d30292d957451ba23a82e5790b597ed2ae201ed"
+  },
+  "matrix": {
+    "path": ".acceptance-p3-4\\round15\\evidence-matrix.json",
+    "bytes": 7376,
+    "sha256": "d00b47e4a9bc8b5e5949d5309c3b92e879503f4d178b9fec6bdcfbae230b27a6"
+  },
+  "plan": {
+    "path": ".acceptance-p3-4\\round15\\rerun-plan.json",
+    "bytes": 2812,
+    "sha256": "22b706ac6c56d882a054c848f0d74e90e856f6b560b24c3aee77fc3b73394c10"
+  },
+  "preflight": {
+    "path": ".cache\\p34-local-closeout-20261014\\successor15\\host\\preflight.closed.json",
+    "bytes": 4735,
+    "sha256": "971b634d804d7945b8dfb3ac42af2fe489dba0402306ce4a2b538ddb0b436188"
+  },
+  "required_commands": [
+    "CMD-CANDIDATE-ARCHIVE-04",
+    "CMD-CANDIDATE-ARCHIVE-07",
+    "CMD-CANDIDATE-ARCHIVE-10",
+    "CMD-CANDIDATE-ARCHIVE-13",
+    "CMD-CANDIDATE-CI",
+    "CMD-CANDIDATE-SOURCE",
+    "CMD-Q-PREP-BOOT",
+    "CMD-Q-PREP-RESTORE",
+    "CMD-Q-TRANSFER",
+    "CMD-Q-TRANSFER-APP",
+    "CMD-Q-TRANSFER-BASE",
+    "CMD-Q-TRANSFER-BOOT",
+    "CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "CMD-Q-TRANSFER-MCU",
+    "CMD-Q-TRANSFER-RAM"
+  ],
+  "reused_criteria": [
+    "P34-CANDIDATE-REFERENCE"
+  ],
+  "changed_commands": [
+    {
+      "id": "CMD-Q-TRANSFER-BASE",
+      "before": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-base.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0001-pre-transfer-current-boot/app.bin",
+      "inputs": [
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-base.bin",
+          "bytes": 613952,
+          "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+        },
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\app.bin",
+          "bytes": 613952,
+          "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+        }
+      ],
+      "after": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-base.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\app.bin'"
+    },
+    {
+      "id": "CMD-Q-TRANSFER-APP",
+      "before": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-target.bin .acceptance-p3-4/round14/origins/v13/diagnostics/post-interruption/mcu/0001-current-target-after-interruption/app.bin",
+      "inputs": [
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-target.bin",
+          "bytes": 613952,
+          "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+        },
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\app.bin",
+          "bytes": 613952,
+          "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+        }
+      ],
+      "after": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-target.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\app.bin'"
+    },
+    {
+      "id": "CMD-Q-TRANSFER-BOOT",
+      "before": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-boot.bin .acceptance-p3-4/round14/origins/v13/diagnostics/post-interruption/mcu/0001-current-target-after-interruption/boot.bin",
+      "inputs": [
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-boot.bin",
+          "bytes": 65536,
+          "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+        },
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\boot.bin",
+          "bytes": 65536,
+          "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+        }
+      ],
+      "after": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-boot.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\boot.bin'"
+    },
+    {
+      "id": "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+      "before": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0001-pre-transfer-current-boot/header_after.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0003-terminal-before-reboot/header_before.bin",
+      "inputs": [
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin",
+          "bytes": 96,
+          "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+        },
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_before.bin",
+          "bytes": 96,
+          "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+        }
+      ],
+      "after": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_before.bin'"
+    },
+    {
+      "id": "CMD-Q-TRANSFER-CONTEXT-AFTER",
+      "before": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0001-pre-transfer-current-boot/header_after.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-transfer/mcu/0003-terminal-before-reboot/header_after.bin",
+      "inputs": [
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin",
+          "bytes": 96,
+          "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+        },
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin",
+          "bytes": 96,
+          "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+        }
+      ],
+      "after": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\header_after.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin'"
+    },
+    {
+      "id": "CMD-Q-PREP-RESTORE",
+      "before": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-base.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-prep-restore/mcu/0016-rollback-full-readback/app.bin",
+      "inputs": [
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-base.bin",
+          "bytes": 613952,
+          "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+        },
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\app.bin",
+          "bytes": 613952,
+          "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+        }
+      ],
+      "after": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-base.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\app.bin'"
+    },
+    {
+      "id": "CMD-Q-PREP-BOOT",
+      "before": "'C:\\Windows\\System32\\fc.exe' /B .acceptance-p3-4/round14/origins/v13/inputs/expected-boot.bin .acceptance-p3-4/round14/origins/v13/ops/cmd-q-prep-restore/mcu/0016-rollback-full-readback/boot.bin",
+      "inputs": [
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-boot.bin",
+          "bytes": 65536,
+          "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+        },
+        {
+          "path": ".acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\boot.bin",
+          "bytes": 65536,
+          "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+        }
+      ],
+      "after": "'C:\\Windows\\System32\\fc.exe' /B 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\inputs\\expected-boot.bin' 'D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round14\\origins\\v13\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\boot.bin'"
+    }
+  ],
+  "physical_operations": 0,
+  "prior_failure_preserved": true
+}

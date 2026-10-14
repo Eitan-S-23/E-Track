@@ -1,0 +1,22 @@
+{
+  "command": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+    "CallerCloseTests"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "timeout_seconds": 660,
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 15.407,
+  "log": {
+    "path": ".cache\\p34-host-close-01-callers-20261013\\focused-2\\tests.log",
+    "bytes": 2619,
+    "sha256": "c8b793653ce6c697bfb92d69452477e7fa1c0a56b4d825e7e454f3a7818d8ad0"
+  }
+}

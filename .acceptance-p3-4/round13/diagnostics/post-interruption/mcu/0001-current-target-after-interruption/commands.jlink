@@ -1,0 +1,34 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\boot.bin", 0x08000000, 0x10000
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\app.bin", 0x08010000, 0x95E40
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\health0.bin", 0x20053560, 0x24
+sleep 1000
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\health1.bin", 0x20053560, 0x24
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\confirmed.bin", 0x2005355E, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\state.bin", 0x2005355C, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\snapped.bin", 0x2005355D, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\sd.bin", 0x200528A0, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\owner.bin", 0x20053590, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\disabled.bin", 0x2000017D, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\jedec.bin", 0x2005301C, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\active.bin", 0x200524C4, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\isr.bin", 0x200525CF, 0x1
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\vtor.bin", 0xE000ED08, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\cfsr.bin", 0xE000ED28, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\hfsr.bin", 0xE000ED2C, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\dhcsr.bin", 0xE000EDF0, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\sdio.bin", 0x4002C434, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\freeze.bin", 0xE0042008, 0x4
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\header_after.bin", 0x08010400, 0x60
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\guard.bin", 0x20055FE0, 0x20
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\stack.bin", 0x20056000, 0x2000
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\candidate_slot.bin", 0x90000000, 0x20
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\backup_slot.bin", 0x90100000, 0x20
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\recovery_slot.bin", 0x90200000, 0x20
+savebin "D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round12\diagnostics\post-interruption\mcu\0001-current-target-after-interruption\staging.bin", 0x90300000, 0x1000
+qc

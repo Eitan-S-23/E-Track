@@ -1,0 +1,568 @@
+--- a/Tools/ota/p34-acceptance/live_phone.py
++++ b/Tools/ota/p34-acceptance/live_phone.py
+@@ -76,22 +76,50 @@
+                 baseImageSha256=plan["images"]["base"]["image"]["sha256"]))))
+ 
+ 
++def _finish_close(owner, errors, **state):
++    state.update(cleanup_complete=not errors, cleanup_errors=[dict(step=step,
++        type=type(error).__name__, message=str(error), notes=list(getattr(error, "__notes__", ())))
++        for step, error in errors])
++    try:
++        h.save(owner.out / "closed.json", state)
++    except BaseException as error:
++        errors.append(("close_receipt", error))
++    if errors:
++        owner.close_error = errors[0][1]
++        for step, error in errors:
++            owner.close_error.add_note("%s cleanup %s: %s: %s" %
++                                      (type(owner).__name__, step, type(error).__name__, error))
++        raise owner.close_error
++    owner.closed, owner.close_error = True, None
++
++
+ class Network:
+     def __init__(self, plan, out):
+         self.plan, self.out = plan, h.fresh(out)
+         self.env = h.environment(out)
+         self.server = self.thread = self.tunnel = self.log_handler = None
+-        self.closed = False
++        self.closed, self.close_attempted, self.close_error = False, False, None
+ 
+     def start(self, *, deadline):
+-        h.require(not self.closed and self.server is None, "network owner is single-use; do not replay")
++        h.require(not self.closed and not self.close_attempted and self.server is None,
++                  "network owner is single-use; do not replay")
+         try:
+             return self._start(deadline)
+         except BaseException as error:
+             try:
+-                h.save(self.out / "startup-failed.json", dict(error_type=type(error).__name__, message=str(error)))
+-            finally:
+                 self.close()
++            except BaseException as cleanup:
++                if cleanup is not error:
++                    error.network_cleanup_error = cleanup
++                    error.add_note("Secondary network cleanup failure (%s): %s" % (type(cleanup).__name__, cleanup))
++                    for note in getattr(cleanup, "__notes__", ()):
++                        error.add_note(note)
++            try:
++                h.save(self.out / "startup-failed.json", dict(error_type=type(error).__name__, message=str(error),
++                    notes=list(getattr(error, "__notes__", ()))))
++            except BaseException as receipt_error:
++                error.startup_receipt_error = receipt_error
++                error.add_note("Startup failure receipt (%s): %s" % (type(receipt_error).__name__, receipt_error))
+             raise
+ 
+     def _start(self, deadline):
+@@ -150,10 +178,12 @@
+                     error = h.read_json(process.paths["stderr"])
+                     h.require(not data and set(error) == {"dns_errno"} and
+                               error["dns_errno"] in DNS_RETRY_CODES, "invalid DNS retry receipt")
+-                    return None
+-                return data
+-            finally:
+-                process.close("network_read_finished")
++                    data = None
++            except BaseException as error:
++                process._close_after_error("network_read_finished", error)
++                raise
++            process.close("network_read_finished")
++            return data
+ 
+         def available():
+             data = read(origin + service.LATEST_PATH + "?" + urlencode(query), 20, 8 * 1024 * 1024)
+@@ -186,19 +216,40 @@
+     def close(self):
+         if self.closed:
+             return
++        if self.close_attempted:
++            raise self.close_error
++        self.close_error = RuntimeError("network close interrupted; outcome unknown, do not retry")
++        self.close_attempted = True
++        errors = []
++
++        def attempt(step, operation):
++            try:
++                return True, operation()
++            except BaseException as error:
++                errors.append((step, error))
++                return False, None
++
+         if self.tunnel:
+-            self.tunnel.close("planned_service_close")
++            attempt("tunnel_close", lambda: self.tunnel.close("planned_service_close"))
++        started = False
++        if self.thread:
++            _, started = attempt("http_thread_started", lambda: self.thread.ident is not None)
+         if self.server:
+-            self.server.shutdown()
+-            self.server.server_close()
+-        if self.thread:
+-            self.thread.join(timeout=5)
+-            h.require(not self.thread.is_alive(), "HTTP thread still live")
++            # shutdown waits for serve_forever; calling it before thread.start deadlocks.
++            if started:
++                attempt("http_shutdown", self.server.shutdown)
++            attempt("http_server_close", self.server.server_close)
++        if self.thread and started is not False:
++            attempt("http_thread_join", lambda: self.thread.join(timeout=5))
+         if self.log_handler:
+-            self.log_handler.close()
+-        h.save(self.out / "closed.json", dict(thread_closed=not self.thread or not self.thread.is_alive(),
+-            tunnel_closed=not self.tunnel or not self.tunnel.alive()))
+-        self.closed = True
++            attempt("http_log_close", self.log_handler.close)
++        _, thread_closed = attempt("http_thread_state", lambda: not self.thread or not self.thread.is_alive())
++        _, tunnel_closed = attempt("tunnel_state", lambda: not self.tunnel or not self.tunnel.alive())
++        if thread_closed is False:
++            errors.append(("http_thread_state", RuntimeError("HTTP thread still live")))
++        if tunnel_closed is False:
++            errors.append(("tunnel_state", RuntimeError("HTTPS tunnel still live; do not claim closure")))
++        _finish_close(self, errors, thread_closed=thread_closed, tunnel_closed=tunnel_closed)
+ 
+ 
+ class Phone:
+@@ -208,6 +259,7 @@
+         self.port, self.serial, self.pkg = plan["adb_port"], plan["phone_serial"], plan["app_id"]
+         self.base = [str(h.pinned(plan["tools"]["adb"])), "-H", "127.0.0.1", "-P", str(self.port), "-s", self.serial]
+         self.deadline, self.count, self.server = time.monotonic() + seconds, 0, None
++        self.closed, self.close_attempted, self.close_error = False, False, None
+         self.operation_deadline = None
+         self.read_ready = None
+         self.capture = self.pid = None
+@@ -512,15 +564,38 @@
+             read_mode="bounded-live-prefix; not a finished snapshot", no_restart_or_ota=True))
+ 
+     def close(self):
++        if self.closed:
++            return
++        if self.close_attempted:
++            raise self.close_error
++        self.close_error = RuntimeError("phone close interrupted; outcome unknown, do not retry")
++        self.close_attempted = True
++        errors = []
++
++        def attempt(step, operation):
++            try:
++                return True, operation()
++            except BaseException as error:
++                errors.append((step, error))
++                return False, None
++
+         if self.server:
+             try:
+                 if self.server.alive() and h.listening(self.port):
+                     h.command(self.out, "adb-stop", [self.base[0], "-H", "127.0.0.1", "-P", str(self.port), "kill-server"], self.env, seconds=10)
+-            finally:
+-                self.server.close("planned_private_adb_close")
+-            h.require(not h.listening(self.port), "ADB port still live; do not claim closure")
+-        h.save(self.out / "closed.json", dict(private_port=self.port, listening=h.listening(self.port),
+-            server_closed=not self.server or not self.server.alive()))
++            except BaseException as error:
++                errors.append(("adb_stop", error))
++            if errors:
++                attempt("server_close", lambda: self.server._close_after_error("planned_private_adb_close", errors[0][1]))
++            else:
++                attempt("server_close", lambda: self.server.close("planned_private_adb_close"))
++        _, listening = attempt("port_state", lambda: h.listening(self.port))
++        _, server_closed = attempt("server_state", lambda: not self.server or not self.server.alive())
++        if listening is True:
++            errors.append(("port_state", RuntimeError("ADB port still live; do not claim closure")))
++        if server_closed is False:
++            errors.append(("server_state", RuntimeError("private ADB server still live; do not claim closure")))
++        _finish_close(self, errors, private_port=self.port, listening=listening, server_closed=server_closed)
+ 
+ 
+ if __name__ == "__main__":
+--- a/tests/ota/test_p34_live_route.py
++++ b/tests/ota/test_p34_live_route.py
+@@ -1283,6 +1283,8 @@
+             return SimpleNamespace(open=open_url)
+ 
+         class Tool:
++            _close_after_error = real_process._close_after_error
++
+             def __init__(inner, output, name, argv, env, *, stdin=None):
+                 inner.label, inner.closed, inner.stdin = name, False, stdin
+                 inner.process = SimpleNamespace(returncode=None)
+@@ -1517,6 +1519,379 @@
+             startup_seconds=startup_seconds, timeout_seconds=2, termination_seconds=termination_seconds,
+             reason=receipt["reason"], exit_code=receipt["exit_code"],
+             launcher_exited=not reader.alive(), child_wait_result=child_wait_result)), flush=True)
++
++
++class CallerCloseTests(unittest.TestCase):
++    """Caller methods and Process are real; device and Job APIs stay modeled."""
++    owner = ProcessCloseTests.owner
++    file = LiveRouteTests.file
++    phone = LiveRouteTests.phone
++
++    def setUp(self):
++        NetworkStartupTests.setUp(self)
++        platform = patch.object(h, "os", SimpleNamespace(**(vars(os) | dict(name="nt"))))
++        platform.start()
++        self.addCleanup(platform.stop)
++
++    def network_model(self, label="network"):
++        network = p.Network(self.plan, self.out / label)
++        network.tunnel = self.owner(label + "-tunnel")
++        network.server = Mock()
++        network.thread = Mock(ident=123)
++        network.thread.is_alive.return_value = False
++        network.log_handler = Mock()
++        return network
++
++    def phone_model(self):
++        phone = self.phone()
++        phone.server = self.owner("private-server", code=None)
++        return phone
++
++    def assert_network_drained_once(self, network):
++        network.server.shutdown.assert_called_once()
++        network.server.server_close.assert_called_once()
++        network.thread.join.assert_called_once_with(timeout=5)
++        network.log_handler.close.assert_called_once()
++        network.tunnel.job.terminate.assert_called_once()
++        network.tunnel.job.close.assert_called_once()
++
++    def assert_duplicate_failure(self, owner, error):
++        receipt = owner.out / "closed.json"
++        original = (receipt.read_bytes(), receipt.stat().st_mtime_ns) if receipt.exists() else None
++        with patch.object(h, "save") as save, patch.object(h, "command") as command, \
++             patch.object(h, "listening") as listening:
++            with self.assertRaises(type(error)) as caught:
++                owner.close()
++            self.assertIs(caught.exception, error)
++            save.assert_not_called()
++            command.assert_not_called()
++            listening.assert_not_called()
++        self.assertEqual((receipt.read_bytes(), receipt.stat().st_mtime_ns) if receipt.exists() else None, original)
++
++    def failed_start(self, label, *, code=7, reader_error=None, tunnel_error=None):
++        network = p.Network(self.plan, self.out / label)
++        tunnel = self.owner(label + "-tunnel", code=None)
++        tunnel.streams[1].write(b"https://caller-fixture.trycloudflare.com\n")
++        tunnel.streams[1].flush()
++        reader = self.owner(label + "-reader", code=code)
++        reader.job.close.side_effect = reader_error
++        tunnel.job.close.side_effect = tunnel_error
++        observed = []
++        real_wait = reader.wait
++        def wait(*args, **kwargs):
++            try:
++                return real_wait(*args, **kwargs)
++            except BaseException as error:
++                observed.append(error)
++                raise
++        def release_fixture():
++            if network.thread and network.thread.is_alive():
++                network.server.shutdown()
++                network.thread.join(timeout=5)
++            if network.server and network.server.fileno() >= 0:
++                network.server.server_close()
++            if network.log_handler and network.log_handler.stream is not None:
++                network.log_handler.close()
++        self.addCleanup(release_fixture)
++        error, frames = None, []
++        with patch.object(h, "Process", side_effect=[tunnel, reader]) as construct, \
++             patch.object(reader, "wait", side_effect=wait):
++            try:
++                network.start(deadline=p.time.monotonic() + 10)
++            except BaseException as caught:
++                error, frames = caught, traceback.extract_tb(caught.__traceback__)
++        self.assertEqual(construct.call_count, 2)
++        self.assertIsNotNone(error)
++        self.assertEqual(len(observed), 1)
++        self.assertFalse(network.thread.is_alive())
++        self.assertEqual(network.server.fileno(), -1)
++        self.assertIsNone(network.log_handler.stream)
++        return SimpleNamespace(network=network, tunnel=tunnel, reader=reader, error=error,
++                               primary=observed[0], frames=frames)
++
++    def test_network_normal_close_is_idempotent(self):
++        network = self.network_model()
++        network.close()
++        value = h.read_json(network.out / "closed.json")
++        self.assertTrue(network.closed)
++        self.assertTrue(value["cleanup_complete"])
++        self.assertTrue(value["thread_closed"] and value["tunnel_closed"])
++        self.assertEqual(value["cleanup_errors"], [])
++        original = (network.out / "closed.json").read_bytes()
++        network.close()
++        self.assertEqual((network.out / "closed.json").read_bytes(), original)
++        self.assert_network_drained_once(network)
++
++    def test_network_tunnel_failure_does_not_skip_remaining_cleanup(self):
++        for stage in ("terminate", "close"):
++            with self.subTest(stage=stage):
++                network = self.network_model(stage)
++                error = OSError("tunnel " + stage + " failed")
++                getattr(network.tunnel.job, stage).side_effect = error
++                with self.assertRaises(OSError) as caught:
++                    network.close()
++                self.assertIs(caught.exception, error)
++                self.assert_network_drained_once(network)
++                self.assertFalse(network.closed)
++                value = h.read_json(network.out / "closed.json")
++                self.assertFalse(value["cleanup_complete"])
++                self.assertTrue(value["thread_closed"])
++                self.assertEqual(value["cleanup_errors"][0]["step"], "tunnel_close")
++                self.assert_duplicate_failure(network, error)
++                self.assert_network_drained_once(network)
++
++    def test_network_multiple_cleanup_failures_are_retained(self):
++        network = self.network_model()
++        first = OSError("tunnel close failed")
++        network.tunnel.job.close.side_effect = first
++        network.server.shutdown.side_effect = OSError("shutdown failed")
++        network.server.server_close.side_effect = OSError("server close failed")
++        network.thread.join.side_effect = OSError("join failed")
++        network.log_handler.close.side_effect = OSError("log close failed")
++        with self.assertRaises(OSError) as caught:
++            network.close()
++        self.assertIs(caught.exception, first)
++        self.assert_network_drained_once(network)
++        value = h.read_json(network.out / "closed.json")
++        self.assertEqual([item["step"] for item in value["cleanup_errors"]],
++                         ["tunnel_close", "http_shutdown", "http_server_close", "http_thread_join", "http_log_close"])
++        self.assertIn("log close failed", "\n".join(first.__notes__))
++        self.assertFalse(value["cleanup_complete"])
++        self.assert_duplicate_failure(network, first)
++
++    def test_network_receipt_failure_does_not_retry_cleanup(self):
++        network = self.network_model()
++        error, real_save = OSError("network receipt unavailable"), h.save
++        def save(path, value):
++            if path == network.out / "closed.json":
++                raise error
++            return real_save(path, value)
++        with patch.object(h, "save", side_effect=save):
++            with self.assertRaises(OSError) as caught:
++                network.close()
++        self.assertIs(caught.exception, error)
++        self.assertFalse(network.closed)
++        self.assertIn("close_receipt", "\n".join(error.__notes__))
++        self.assert_duplicate_failure(network, error)
++        self.assert_network_drained_once(network)
++
++    def test_network_unstarted_http_thread_is_not_shutdown_or_joined(self):
++        network = p.Network(self.plan, self.out / "unstarted")
++        network.server = p.service.ThreadingHTTPServer(("127.0.0.1", 0), p.service.P33RequestHandler)
++        self.addCleanup(network.server.server_close)
++        network.thread = p.threading.Thread(target=network.server.serve_forever, daemon=True)
++        network.log_handler = Mock()
++        with patch.object(network.server, "shutdown", side_effect=AssertionError("unstarted shutdown can deadlock")) as shutdown, \
++             patch.object(network.thread, "join", side_effect=AssertionError("cannot join before start")) as join:
++            network.close()
++            shutdown.assert_not_called()
++            join.assert_not_called()
++        self.assertTrue(network.closed)
++        self.assertEqual(network.server.fileno(), -1)
++        network.log_handler.close.assert_called_once()
++        self.assertTrue(h.read_json(network.out / "closed.json")["thread_closed"])
++
++    def test_network_live_or_unknown_thread_is_not_confirmed_closed(self):
++        for label, observation in (("alive", True), ("unknown", OSError("thread state unknown"))):
++            with self.subTest(label=label):
++                network = self.network_model(label)
++                if isinstance(observation, BaseException):
++                    network.thread.is_alive.side_effect = observation
++                else:
++                    network.thread.is_alive.return_value = observation
++                with self.assertRaises((RuntimeError, OSError)) as caught:
++                    network.close()
++                value = h.read_json(network.out / "closed.json")
++                self.assertIs(value["thread_closed"], False if label == "alive" else None)
++                self.assertFalse(value["cleanup_complete"])
++                self.assert_duplicate_failure(network, caught.exception)
++                self.assert_network_drained_once(network)
++
++    def test_network_read_preserves_nonzero_error_and_cleanup_diagnostics(self):
++        for label, cleanup in (("normal", None), ("cleanup-failed", OSError("reader handle close failed"))):
++            with self.subTest(label=label):
++                case = self.failed_start(label, reader_error=cleanup)
++                self.assertIs(case.error, case.primary)
++                self.assertIsInstance(case.error, RuntimeError)
++                self.assertIn("standard tool failed", str(case.error))
++                self.assertIn("wait", [frame.name for frame in case.frames])
++                if cleanup:
++                    self.assertIs(case.error.process_cleanup_error, cleanup)
++                value = h.read_json(case.network.out / "startup-failed.json")
++                self.assertEqual((value["error_type"], value["message"]), ("RuntimeError", str(case.primary)))
++                self.assertEqual(h.read_json(case.reader.paths["closed.json"])["exit_code"], 7)
++                case.reader.job.terminate.assert_called_once()
++                case.reader.job.close.assert_called_once()
++
++    def test_network_reader_cleanup_failure_alone_stays_failure(self):
++        error = OSError("reader cleanup failed after exit zero")
++        case = self.failed_start("read-success", code=0, reader_error=error)
++        self.assertIs(case.error, error)
++        self.assertEqual(h.read_json(case.reader.paths["closed.json"])["exit_code"], 0)
++        self.assertFalse((case.network.out / "ready.json").exists())
++        self.assertEqual(h.read_json(case.network.out / "startup-failed.json")["error_type"], "OSError")
++
++    def test_network_start_retains_reader_and_outer_cleanup_errors(self):
++        reader_error, tunnel_error = OSError("reader handle close failed"), OSError("tunnel close failed")
++        case = self.failed_start("both-cleanups", reader_error=reader_error, tunnel_error=tunnel_error)
++        self.assertIs(case.error, case.primary)
++        self.assertIs(case.error.process_cleanup_error, reader_error)
++        self.assertIs(case.error.network_cleanup_error, tunnel_error)
++        notes = "\n".join(case.error.__notes__)
++        self.assertIn(str(reader_error), notes)
++        self.assertIn(str(tunnel_error), notes)
++        value = h.read_json(case.network.out / "startup-failed.json")
++        self.assertEqual(value["error_type"], "RuntimeError")
++        self.assertIn(str(reader_error), "\n".join(value["notes"]))
++        self.assertIn(str(tunnel_error), "\n".join(value["notes"]))
++        self.assertFalse(case.network.closed)
++        self.assert_duplicate_failure(case.network, tunnel_error)
++
++    def test_network_start_receipt_failure_preserves_primary_and_drains(self):
++        for label, close_error in (("clean-close", None), ("failed-close", OSError("outer cleanup failed"))):
++            with self.subTest(label=label):
++                network = self.network_model(label)
++                network.tunnel.job.close.side_effect = close_error
++                primary, receipt_error = ValueError("startup operation failed"), OSError("startup receipt unavailable")
++                cause = LookupError("original cause")
++                primary.__cause__ = cause
++                resources = {name: getattr(network, name) for name in ("server", "thread", "tunnel", "log_handler")}
++                for name in resources:
++                    setattr(network, name, None)
++                def fail_start(deadline):
++                    for name, resource in resources.items():
++                        setattr(network, name, resource)
++                    raise primary
++                real_save = h.save
++                def save(path, value):
++                    if path == network.out / "startup-failed.json":
++                        raise receipt_error
++                    return real_save(path, value)
++                with patch.object(network, "_start", side_effect=fail_start) as start, patch.object(h, "save", side_effect=save):
++                    with self.assertRaises(ValueError) as caught:
++                        network.start(deadline=p.time.monotonic() + 10)
++                    self.assertIs(caught.exception, primary)
++                    self.assertIs(primary.__cause__, cause)
++                    self.assertIs(primary.startup_receipt_error, receipt_error)
++                    self.assertIn(str(receipt_error), "\n".join(primary.__notes__))
++                    if close_error:
++                        self.assertIs(primary.network_cleanup_error, close_error)
++                    with self.assertRaisesRegex(RuntimeError, "single-use"):
++                        network.start(deadline=p.time.monotonic() + 10)
++                    start.assert_called_once()
++                self.assert_network_drained_once(network)
++                self.assertFalse((network.out / "startup-failed.json").exists())
++                self.assertEqual(network.closed, close_error is None)
++
++    def test_phone_normal_close_is_single_use(self):
++        phone = self.phone_model()
++        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
++             patch.object(h, "command", return_value=b"") as stop:
++            phone.close()
++            original = (phone.out / "closed.json").read_bytes()
++            phone.close()
++            self.assertEqual((phone.out / "closed.json").read_bytes(), original)
++            stop.assert_called_once()
++            self.assertEqual(stop.call_args.kwargs["seconds"], 10)
++            self.assertEqual(stop.call_args.args[1], "adb-stop")
++        self.assertTrue(phone.closed)
++        self.assertTrue(h.read_json(phone.out / "closed.json")["cleanup_complete"])
++        phone.server.job.terminate.assert_called_once()
++        phone.server.job.close.assert_called_once()
++
++    def test_phone_stop_error_survives_server_cleanup_failure(self):
++        phone = self.phone_model()
++        primary, cleanup = ValueError("private stop failed"), OSError("server handle close failed")
++        phone.server.job.close.side_effect = cleanup
++        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
++             patch.object(h, "command", side_effect=primary) as stop:
++            with self.assertRaises(BaseException) as caught:
++                phone.close()
++            self.assertIs(caught.exception, primary)
++            self.assertIs(primary.process_cleanup_error, cleanup)
++            self.assertIn(str(cleanup), "\n".join(primary.__notes__))
++            self.assert_duplicate_failure(phone, primary)
++            stop.assert_called_once()
++        value = h.read_json(phone.out / "closed.json")
++        self.assertFalse(value["cleanup_complete"])
++        self.assertTrue(value["server_closed"])
++        self.assertFalse(value["listening"])
++        self.assertIn(str(cleanup), json.dumps(value["cleanup_errors"]))
++        self.assertFalse(phone.closed)
++        phone.server.job.terminate.assert_called_once()
++        phone.server.job.close.assert_called_once()
++
++    def test_phone_stop_error_with_successful_cleanup_remains_primary(self):
++        phone = self.phone_model()
++        error = ValueError("stop operation failed")
++        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
++             patch.object(h, "command", side_effect=error) as stop:
++            with self.assertRaises(ValueError) as caught:
++                phone.close()
++            self.assertIs(caught.exception, error)
++            self.assert_duplicate_failure(phone, error)
++            stop.assert_called_once()
++        self.assertFalse(phone.closed)
++        value = h.read_json(phone.out / "closed.json")
++        self.assertEqual(value["cleanup_errors"][0]["step"], "adb_stop")
++        self.assertTrue(value["server_closed"])
++
++    def test_phone_successful_stop_does_not_hide_cleanup_failure(self):
++        phone = self.phone_model()
++        error = OSError("server close failed")
++        phone.server.job.close.side_effect = error
++        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
++             patch.object(h, "command", return_value=b"") as stop:
++            with self.assertRaises(OSError) as caught:
++                phone.close()
++            self.assertIs(caught.exception, error)
++            self.assert_duplicate_failure(phone, error)
++            stop.assert_called_once()
++        self.assertFalse(h.read_json(phone.out / "closed.json")["cleanup_complete"])
++
++    def test_phone_receipt_failure_never_repeats_stop_or_cleanup(self):
++        phone = self.phone_model()
++        error, real_save = OSError("phone receipt unavailable"), h.save
++        def save(path, value):
++            if path == phone.out / "closed.json":
++                raise error
++            return real_save(path, value)
++        with patch.object(h, "listening", side_effect=lambda port: phone.server.process.returncode is None), \
++             patch.object(h, "command", return_value=b"") as stop, patch.object(h, "save", side_effect=save):
++            with self.assertRaises(OSError) as caught:
++                phone.close()
++            self.assertIs(caught.exception, error)
++            self.assert_duplicate_failure(phone, error)
++            stop.assert_called_once()
++        self.assertFalse(phone.closed)
++        self.assertFalse((phone.out / "closed.json").exists())
++        self.assertIn("close_receipt", "\n".join(error.__notes__))
++        phone.server.job.terminate.assert_called_once()
++        phone.server.job.close.assert_called_once()
++
++    def test_phone_unknown_port_state_does_not_claim_closure(self):
++        phone = self.phone_model()
++        error = OSError("port observation unavailable")
++        with patch.object(h, "listening", side_effect=[True, error]), patch.object(h, "command", return_value=b""):
++            with self.assertRaises(OSError) as caught:
++                phone.close()
++            self.assertIs(caught.exception, error)
++            self.assert_duplicate_failure(phone, error)
++        value = h.read_json(phone.out / "closed.json")
++        self.assertIsNone(value["listening"])
++        self.assertFalse(value["cleanup_complete"])
++
++    def test_phone_live_foreign_port_is_not_killed_or_marked_closed(self):
++        phone = self.phone_model()
++        phone.server = None
++        with patch.object(h, "listening", return_value=True), patch.object(h, "command") as stop:
++            with self.assertRaisesRegex(RuntimeError, "ADB port still live") as caught:
++                phone.close()
++            self.assert_duplicate_failure(phone, caught.exception)
++            stop.assert_not_called()
++        value = h.read_json(phone.out / "closed.json")
++        self.assertTrue(value["listening"])
++        self.assertFalse(value["cleanup_complete"])
+ 
+ 
+ class PhoneCellTests(unittest.TestCase):

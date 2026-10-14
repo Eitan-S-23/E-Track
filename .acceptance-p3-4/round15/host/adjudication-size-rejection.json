@@ -1,0 +1,16 @@
+{
+  "actual_exit_code": 1,
+  "entry": {
+    "path": ".cache\\p34-local-closeout-20261014\\successor15\\adjudicate.size-key.py",
+    "bytes": 30283,
+    "sha256": "6dec582c344abaf1c6ddbd7e6aede973cfc90e2c64da68e85c9cd849cd3d9a8f"
+  },
+  "error_type": "KeyError",
+  "field": "bytes",
+  "source": "Observed third one-off adjudication invocation",
+  "cause": "Historical board file fingerprints use size instead of bytes in three records families.",
+  "resolution": "Accept the two explicit byte-length field names, require a nonnegative integer and exact current file length/SHA-256, and reject conflicting lengths. No original record or integrity check is changed.",
+  "formal_matrix_unchanged": true,
+  "formal_commands_replayed": 0,
+  "device_operations": 0
+}

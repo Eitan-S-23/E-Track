@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "import socket,json,time; t=time.monotonic(); rows=socket.getaddrinfo('api.trycloudflare.com',443,type=socket.SOCK_STREAM); print(json.dumps({'host':'api.trycloudflare.com','resolved':bool(rows),'addresses':sorted(set(x[4][0] for x in rows)),'elapsed_s':time.monotonic()-t}))"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 858368223020400,
+  "stdin_sha256": null
+}

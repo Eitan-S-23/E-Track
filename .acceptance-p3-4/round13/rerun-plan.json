@@ -1,0 +1,88 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-4-v13",
+  "current_contract_sha256": "747CFF42A2CDD74C286E2E361E8658F3766617EB3B20BCC3269FA3F3F6BD5B32",
+  "previous_contract_id": "P3-4-v12",
+  "previous_contract_sha256": "8218D395B105303798163ADBE812C4D2593A55816F2F203EA0E2B8554CE4EA1E",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P3-4-20261013-offline-original-evaluation",
+  "previous_round_id": "P3-4-20261013-candidate-runtime-supplement",
+  "previous_matrix_sha256": "25A9FFD13AEDE3659969AD64F45957E282323096FAA286ECDA365F26D1148E62",
+  "changed_input_groups": [],
+  "changed_external_inputs": [
+    "expected-base",
+    "expected-boot",
+    "expected-target",
+    "fc-tool",
+    "offline-admission",
+    "v12-observations",
+    "v12-original-matrix"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "Q-TRANSFER",
+      "reasons": [
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-APP",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-BASE",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-BOOT",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-CONTEXT-AFTER",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-MCU",
+        "artifact_definition_changed:ART-CMD-Q-TRANSFER-RAM",
+        "command_definition_changed:CMD-Q-TRANSFER",
+        "command_definition_changed:CMD-Q-TRANSFER-APP",
+        "command_definition_changed:CMD-Q-TRANSFER-BASE",
+        "command_definition_changed:CMD-Q-TRANSFER-BOOT",
+        "command_definition_changed:CMD-Q-TRANSFER-CONTEXT-AFTER",
+        "command_definition_changed:CMD-Q-TRANSFER-CONTEXT-BEFORE",
+        "command_definition_changed:CMD-Q-TRANSFER-MCU",
+        "command_definition_changed:CMD-Q-TRANSFER-RAM",
+        "criterion_definition_changed",
+        "external_input_changed:expected-base",
+        "external_input_changed:expected-boot",
+        "external_input_changed:expected-target",
+        "external_input_changed:fc-tool",
+        "external_input_changed:offline-admission",
+        "external_input_changed:v12-observations",
+        "external_input_changed:v12-original-matrix",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [
+    "P34-CANDIDATE-REFERENCE",
+    "Q-PREP-RESTORE"
+  ],
+  "reuse_origins": {
+    "P34-CANDIDATE-REFERENCE": {
+      "contract_sha256": "8218D395B105303798163ADBE812C4D2593A55816F2F203EA0E2B8554CE4EA1E",
+      "matrix_sha256": "25A9FFD13AEDE3659969AD64F45957E282323096FAA286ECDA365F26D1148E62",
+      "round_id": "P3-4-20261013-candidate-runtime-supplement"
+    },
+    "Q-PREP-RESTORE": {
+      "contract_sha256": "8218D395B105303798163ADBE812C4D2593A55816F2F203EA0E2B8554CE4EA1E",
+      "matrix_sha256": "25A9FFD13AEDE3659969AD64F45957E282323096FAA286ECDA365F26D1148E62",
+      "round_id": "P3-4-20261013-candidate-runtime-supplement"
+    }
+  },
+  "required_commands": [
+    "CMD-Q-TRANSFER",
+    "CMD-Q-TRANSFER-APP",
+    "CMD-Q-TRANSFER-BASE",
+    "CMD-Q-TRANSFER-BOOT",
+    "CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "CMD-Q-TRANSFER-MCU",
+    "CMD-Q-TRANSFER-RAM"
+  ],
+  "required_artifacts": [
+    "ART-CMD-Q-TRANSFER",
+    "ART-CMD-Q-TRANSFER-APP",
+    "ART-CMD-Q-TRANSFER-BASE",
+    "ART-CMD-Q-TRANSFER-BOOT",
+    "ART-CMD-Q-TRANSFER-CONTEXT-AFTER",
+    "ART-CMD-Q-TRANSFER-CONTEXT-BEFORE",
+    "ART-CMD-Q-TRANSFER-MCU",
+    "ART-CMD-Q-TRANSFER-RAM"
+  ]
+}

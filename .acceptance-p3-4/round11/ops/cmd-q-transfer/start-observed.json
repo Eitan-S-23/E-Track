@@ -1,0 +1,9 @@
+{
+  "pid": 1596,
+  "capture": "1791816279392731-a2312e444373b13472f7c4f6",
+  "run_id": "p34-qualification-02",
+  "source": "App health checkpoint",
+  "monotonic": 935548.7388558,
+  "within_start_window": true,
+  "scope": "host observation, not an exact user tap timestamp"
+}

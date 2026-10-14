@@ -1,0 +1,90 @@
+{
+  "required_count": 16,
+  "commands": [
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER.closed.json",
+      "bytes": 1030,
+      "sha256": "7a74296e67ea145dbd8fbcf91587c48655aef3520a9b7250565a9f7eab276488"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-MCU.closed.json",
+      "bytes": 1427,
+      "sha256": "95c5dac77c3f9a7cd8e1b43327c11de147331c206252e991574b3701b1f905c9"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-RAM.closed.json",
+      "bytes": 1470,
+      "sha256": "0ffcaebe14dca1491b8aaecb5e8530825796bf66e43653a2be2e1f38d36788a2"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-BASE.closed.json",
+      "bytes": 1031,
+      "sha256": "befc26599887c6ac53626f84a9ea2f651047486dfe39c825f326958205a5526e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-APP.closed.json",
+      "bytes": 1050,
+      "sha256": "f3e83969c13cb285cb2384a349a92d9ac65e2724fd8d952e2e2c2ab4fc453a36"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-BOOT.closed.json",
+      "bytes": 1051,
+      "sha256": "66f0a8373d24fe10b4c81fd1fddff7b0d1cc9f06a94956627ea0a9bac5f76826"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-CONTEXT-BEFORE.closed.json",
+      "bytes": 1107,
+      "sha256": "3a3953e3823556778c42cd80a05e93b4cad57bed858579c0ba3b90b4740ff655"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-TRANSFER-CONTEXT-AFTER.closed.json",
+      "bytes": 1104,
+      "sha256": "950981d02c7d33a8858211eb1295ea26c12241d29a93cd135b05d03033cec857"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-PREP-RESTORE.closed.json",
+      "bytes": 1030,
+      "sha256": "67c7c85cf08cf80ddab4a41ae2b8868e8d71465cc115dd40ea6babdf02afb62d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-Q-PREP-BOOT.closed.json",
+      "bytes": 1025,
+      "sha256": "d780075f9b6ea5ea5670ef7353a9085b13d44b51042f37d22894e377325b5cd6"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-SOURCE.closed.json",
+      "bytes": 1291,
+      "sha256": "812d92866c1940884f5ba163017db79d93d01fc6c7e9c6bb0a454fc4235f963d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-CI.closed.json",
+      "bytes": 1036,
+      "sha256": "8a74359557186b63c7625841804b19f65491a2e7e45dbc073733affae1afb1dc"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-ARCHIVE-04.closed.json",
+      "bytes": 884,
+      "sha256": "bd063a75a5d59b396c912a1f53bc9fef1bc71749b5af3b13f29623dacdd63ec7"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-ARCHIVE-07.closed.json",
+      "bytes": 884,
+      "sha256": "bd753b63f80f2bd8073df417aa7e46a78e261bf752f21e1fa595612e09ea7e52"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-ARCHIVE-10.closed.json",
+      "bytes": 884,
+      "sha256": "18f7b937f32f11de01faa70fa79931afe2c03a5f2daa50c888f9bb092b103f8e"
+    },
+    {
+      "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-ARCHIVE-13.closed.json",
+      "bytes": 884,
+      "sha256": "55d7987178c6cfcd7f3bb2937968c029382ab4aac82b26f4d1f026bd5108fd9b"
+    }
+  ],
+  "reused_criteria": [
+    "P34-CANDIDATE-REFERENCE"
+  ],
+  "physical_device_operations": 0,
+  "qualification_total": 3
+}

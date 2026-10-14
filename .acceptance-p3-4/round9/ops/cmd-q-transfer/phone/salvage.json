@@ -1,0 +1,16 @@
+{
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round9\\ops\\cmd-q-transfer\\phone\\salvage\\health.json",
+      "bytes": 238,
+      "sha256": "29b40e5bedb51096d6df32a70e4efbcaf155e1199c0df6254c40a7611f95b841"
+    },
+    {
+      "path": ".acceptance-p3-4\\round9\\ops\\cmd-q-transfer\\phone\\salvage\\events.jsonl",
+      "bytes": 15734,
+      "sha256": "cf84515c4a1f5822b46e89cdfc2d64b4c838d154d2f012e715fe459768cc8a49"
+    }
+  ],
+  "errors": [],
+  "no_restart_or_ota": true
+}

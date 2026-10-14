@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-c",
+    "print(__import__('socket').getaddrinfo('sky-gotten-hopefully-petroleum.trycloudflare.com',443,type=__import__('socket').SOCK_STREAM))"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 823211895468400,
+  "stdin_sha256": null
+}

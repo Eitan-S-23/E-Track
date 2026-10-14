@@ -1,0 +1,13 @@
+{
+  "phone_serial_in_connected_pnp": true,
+  "probe_serial_in_connected_pnp": true,
+  "device_processes": [],
+  "private_port_rows": [],
+  "lock": {
+    "path": ".cache\\p34-live-device.lock",
+    "bytes": 156,
+    "sha256": "e2da3b350cd7c6f946271f2c9bdea5e841329bea2d49e7a14f035ef052e776a7"
+  },
+  "native_history_root": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER",
+  "native_update_authorization": "Standing user authorization 2026-10-07; automatic SEGGER history/config only"
+}

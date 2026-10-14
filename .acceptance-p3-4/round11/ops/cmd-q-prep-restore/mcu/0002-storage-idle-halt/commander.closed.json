@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0002-storage-idle-halt\\settings.jlink",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0002-storage-idle-halt\\sdk.log",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0002-storage-idle-halt\\commands.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 935137835405800,
+  "ended_monotonic_ns": 935138707554800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0002-storage-idle-halt\\commander.stdout",
+    "bytes": 3869,
+    "sha256": "16d6fd2d6417afb87bb3d732a4303710b575118464488df8d4f3a693b4c84691"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\0002-storage-idle-halt\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

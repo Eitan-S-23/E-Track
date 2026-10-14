@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 846065524335400,
+  "ended_monotonic_ns": 846067178230100,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round4\\diagnostics\\nested-full-inspect\\child\\mcu\\0001-nested-current-base\\processes.stdout",
+    "bytes": 13415,
+    "sha256": "18f1e138973e57b1a850d382a9a6af8764143b9c2d06d6784399604859e985ba"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round4\\diagnostics\\nested-full-inspect\\child\\mcu\\0001-nested-current-base\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

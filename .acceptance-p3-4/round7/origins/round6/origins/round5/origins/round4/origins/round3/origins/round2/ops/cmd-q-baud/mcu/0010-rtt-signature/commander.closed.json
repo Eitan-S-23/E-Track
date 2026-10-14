@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0010-rtt-signature\\settings.jlink",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0010-rtt-signature\\sdk.log",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0010-rtt-signature\\commands.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 822504266052500,
+  "ended_monotonic_ns": 822504625838600,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0010-rtt-signature\\commander.stdout",
+    "bytes": 2231,
+    "sha256": "5e1f470690c24fc4dedfd6bac7a3608727a907ec4094eb86ab22e0e7d26a91ab"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-baud\\mcu\\0010-rtt-signature\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

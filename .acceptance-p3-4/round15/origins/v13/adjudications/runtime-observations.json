@@ -1,0 +1,119 @@
+{
+  "independent_original_verification": true,
+  "product_observations_satisfied": true,
+  "formal_q_transfer_pass": false,
+  "actual_new_qualification_ota": 1,
+  "additional_ota_after_interruption": 0,
+  "source": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phone\\snapshot.jsonl",
+    "bytes": 4775779,
+    "sha256": "930a7114799d882e10287362ba2a723d489d96d71f4c3248a1f11641704b2170"
+  },
+  "runtime": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\phone\\runtime.json",
+    "bytes": 867,
+    "sha256": "16ffa235d210886928805a3997c44d25a14c9dbe6a1149e5f458781b5ace31f6"
+  },
+  "fresh_query": true,
+  "same_candidate_parameters": true,
+  "start_within_original_window": true,
+  "transfer_us": 63708034,
+  "throughput_kib_s": 16.07332601097061,
+  "data_retransmit_rate": 0.0,
+  "ack_samples": 8192,
+  "initial_durable": 0,
+  "final_durable": 1048576,
+  "mcu_clean": true,
+  "crc_valid": true,
+  "one_pre_reboot_sample": true,
+  "terminal_within_original_deadline": true,
+  "terminal_originals": {
+    "clock": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\clock.bin",
+      "bytes": 4,
+      "sha256": "2f0039351de33d777941ede3a63ae173a3f906473e2708748f2cbd429e8e2d41"
+    },
+    "guard": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\guard.bin",
+      "bytes": 32,
+      "sha256": "60bf07c488aad18fda339df07e4fbc47b4f00be71711936f18d04d352ad01890"
+    },
+    "header_after": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_after.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    },
+    "header_before": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\header_before.bin",
+      "bytes": 96,
+      "sha256": "eaae31dd708322b936675b48578d1dce9602b2fce7e449592e9b3e3d46631f6b"
+    },
+    "metrics": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\metrics.bin",
+      "bytes": 420,
+      "sha256": "82df59ba3f8136179d524c6e9c410142c316b86f6ec0056abad37d2ed32bc403"
+    },
+    "published": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\published.bin",
+      "bytes": 4,
+      "sha256": "a91cf1c9bda306dc018f38b73a8f35a1898a0e862f0ede975bc430eb96376819"
+    },
+    "stack": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\stack.bin",
+      "bytes": 8192,
+      "sha256": "8e6646af495e036f67215422117f86a423c38eb67348ba8e3b5e0d9a8dc9326c"
+    },
+    "systick": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\systick.bin",
+      "bytes": 12,
+      "sha256": "2c93ae2f4d915c244cf8906906733a73037769b2df1eb4f74936bc7a94ce1ffa"
+    },
+    "tick0": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\tick0.bin",
+      "bytes": 4,
+      "sha256": "c864d4ac6f5a9a9635f2a2482929a8f4b5556efa69b492ab78a28a7aa72705e0"
+    },
+    "tick1": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\tick1.bin",
+      "bytes": 4,
+      "sha256": "f2a7826315261d5701e15e8f6f4357233380a607d67d24cd2698655edd587aac"
+    },
+    "vtor": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\vtor.bin",
+      "bytes": 4,
+      "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+    },
+    "wdt": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\mcu\\0003-terminal-before-reboot\\wdt.bin",
+      "bytes": 8,
+      "sha256": "ec3b4eee2db5db33a0717eb2519c02f32c5f02e109a28d26546ca4ba1d7bca87"
+    }
+  },
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5092,
+    "high_water_bytes": 3100,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "clock_hz": 288000000,
+  "systick_valid": true,
+  "tick_delta": 103,
+  "watchdog_registers": [
+    5,
+    3124
+  ],
+  "nominal_watchdog_ms": 10000,
+  "watchdog_basis": [
+    "USER/HAL/HAL_Config.h:CONFIG_WATCH_DOG_TIMEOUT",
+    "MDK-ARM_F435/Platform/Core/wdg.c:WDG_Init"
+  ],
+  "target_sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+  "boot_sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+  "confirmed_state": 4,
+  "current_target_after_interruption": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\current-target.json",
+    "bytes": 2288,
+    "sha256": "00706bf633dd25f280d6c5d974b80969db72bf57dbead19a41423e64d9d56efd"
+  },
+  "scope": "Necessary local runtime originals are now captured. Later full target readback reconciles product state, not the interrupted original command deadline. No final campaign or production release claim."
+}

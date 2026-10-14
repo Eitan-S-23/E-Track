@@ -1,0 +1,16 @@
+{
+  "id": "P34-HOST-METRICS-READ-01",
+  "disposition": "HARNESS_FAIL",
+  "cause": "Zero-start direct-verify streaming path does not call payload_read; decoder incorrectly requires nonzero payload_read. Original CRC-valid terminal record has payload_read=0, payload_verify=256 and no transport/staging error. Semantic decoding aborted before the old-App terminal RAM read.",
+  "source_anchors": [
+    "Libraries/OTA/ota_ble_session.c:session_digest_resume_prefix",
+    "Libraries/OTA/ota_ble_session.c:boot_sha256_update",
+    "USER/HAL/ota_link_metrics_port.h:metrics_verify",
+    "Tools/ota/p34-acceptance/metrics.py:decode",
+    "Tools/ota/p34-acceptance/live.py:terminal_capture"
+  ],
+  "product_failure_proved": false,
+  "original_ota_succeeded": true,
+  "old_app_stack_clock_evidence": "missing; target RAM is not a substitute",
+  "direction": "Fix zero-read false rejection and collect the one terminal RAM snapshot before semantic decoding; preserve all CRC/clock/domain and actually required stage guards. Independent review before formal continuation."
+}

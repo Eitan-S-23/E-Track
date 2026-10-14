@@ -1,0 +1,25 @@
+test_independent_c1_original_drain_discriminator (__main__.IndependentCallerTests.test_independent_c1_original_drain_discriminator) ... ok
+test_independent_c2_original_primary_discriminator (__main__.IndependentCallerTests.test_independent_c2_original_primary_discriminator) ... ok
+test_independent_c3_original_primary_discriminator (__main__.IndependentCallerTests.test_independent_c3_original_primary_discriminator) ... ok
+test_network_live_or_unknown_thread_is_not_confirmed_closed (__main__.IndependentCallerTests.test_network_live_or_unknown_thread_is_not_confirmed_closed) ... ok
+test_network_multiple_cleanup_failures_are_retained (__main__.IndependentCallerTests.test_network_multiple_cleanup_failures_are_retained) ... ok
+test_network_normal_close_is_idempotent (__main__.IndependentCallerTests.test_network_normal_close_is_idempotent) ... ok
+test_network_read_preserves_nonzero_error_and_cleanup_diagnostics (__main__.IndependentCallerTests.test_network_read_preserves_nonzero_error_and_cleanup_diagnostics) ... ok
+test_network_reader_cleanup_failure_alone_stays_failure (__main__.IndependentCallerTests.test_network_reader_cleanup_failure_alone_stays_failure) ... ok
+test_network_receipt_failure_does_not_retry_cleanup (__main__.IndependentCallerTests.test_network_receipt_failure_does_not_retry_cleanup) ... ok
+test_network_start_receipt_failure_preserves_primary_and_drains (__main__.IndependentCallerTests.test_network_start_receipt_failure_preserves_primary_and_drains) ... ok
+test_network_start_retains_reader_and_outer_cleanup_errors (__main__.IndependentCallerTests.test_network_start_retains_reader_and_outer_cleanup_errors) ... ok
+test_network_tunnel_failure_does_not_skip_remaining_cleanup (__main__.IndependentCallerTests.test_network_tunnel_failure_does_not_skip_remaining_cleanup) ... ok
+test_network_unstarted_http_thread_is_not_shutdown_or_joined (__main__.IndependentCallerTests.test_network_unstarted_http_thread_is_not_shutdown_or_joined) ... ok
+test_phone_live_foreign_port_is_not_killed_or_marked_closed (__main__.IndependentCallerTests.test_phone_live_foreign_port_is_not_killed_or_marked_closed) ... ok
+test_phone_normal_close_is_single_use (__main__.IndependentCallerTests.test_phone_normal_close_is_single_use) ... ok
+test_phone_receipt_failure_never_repeats_stop_or_cleanup (__main__.IndependentCallerTests.test_phone_receipt_failure_never_repeats_stop_or_cleanup) ... ok
+test_phone_stop_error_survives_server_cleanup_failure (__main__.IndependentCallerTests.test_phone_stop_error_survives_server_cleanup_failure) ... ok
+test_phone_stop_error_with_successful_cleanup_remains_primary (__main__.IndependentCallerTests.test_phone_stop_error_with_successful_cleanup_remains_primary) ... ok
+test_phone_successful_stop_does_not_hide_cleanup_failure (__main__.IndependentCallerTests.test_phone_successful_stop_does_not_hide_cleanup_failure) ... ok
+test_phone_unknown_port_state_does_not_claim_closure (__main__.IndependentCallerTests.test_phone_unknown_port_state_does_not_claim_closure) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 17.691s
+
+OK

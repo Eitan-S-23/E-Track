@@ -1,0 +1,9 @@
+{
+  "delivered": true,
+  "monotonic": 935622.2359186,
+  "intent": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-transfer\\notice-expired.intent.json",
+    "bytes": 801,
+    "sha256": "3a15f057c0ddd4507b94893c8078326d82504c2bf5a0e2ebaa0364f69051d73f"
+  }
+}

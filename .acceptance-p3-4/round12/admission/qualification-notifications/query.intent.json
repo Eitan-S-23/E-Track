@@ -1,0 +1,8 @@
+{
+  "trigger": {
+    "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-transfer\\query-ready.json",
+    "bytes": 261,
+    "sha256": "d3284636a40fbe5d6b026ae99ad6b375d889bb262b01ae1393d1dc9ebc452a54"
+  },
+  "no_chat_reply_required": true
+}

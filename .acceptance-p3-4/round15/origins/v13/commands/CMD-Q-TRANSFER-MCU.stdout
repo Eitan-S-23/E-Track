@@ -1,0 +1,146 @@
+{
+  "metrics": {
+    "magic": 1345539377,
+    "schema": 1,
+    "size": 420,
+    "ready": 1,
+    "active": 0,
+    "run": 1,
+    "clock_hz": 288000000,
+    "clock_ok": 1,
+    "overflow": 0,
+    "uart_baud_actual": 923076,
+    "retained_baud": 921600,
+    "total_len": 1048576,
+    "terminal": 0,
+    "protocol": 2,
+    "session": 1,
+    "epoch": 1724752335,
+    "initial_durable": 0,
+    "final_durable": 1048576,
+    "start_ms": 289640,
+    "end_ms": 353464,
+    "rx_bytes": 1196078,
+    "rx_ring_peak": 3452,
+    "overlay_dropped": 0,
+    "hw_dropped": 0,
+    "uart_errors": 0,
+    "uart_error_flags": 0,
+    "parser_bad_frames": 0,
+    "package_crc32": 3263681715,
+    "package_sha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+    "first_error": null,
+    "phase": {
+      "payload_read": {
+        "calls": 0,
+        "errors": 0,
+        "bytes_requested": 0,
+        "cycles": 0,
+        "max_cycles": 0,
+        "elapsed_us": null,
+        "max_us": null
+      },
+      "payload_program": {
+        "calls": 256,
+        "errors": 0,
+        "bytes_requested": 1048576,
+        "cycles": 658386804,
+        "max_cycles": 4046597,
+        "elapsed_us": 2286065.2916666665,
+        "max_us": 14050.684027777777
+      },
+      "payload_erase": {
+        "calls": 256,
+        "errors": 0,
+        "bytes_requested": 1048576,
+        "cycles": 1334778584,
+        "max_cycles": 67809011,
+        "elapsed_us": 4634647.861111111,
+        "max_us": 235447.95486111112
+      },
+      "payload_verify": {
+        "calls": 256,
+        "errors": 0,
+        "bytes_requested": 1048576,
+        "cycles": 42077243,
+        "max_cycles": 193622,
+        "elapsed_us": 146101.53819444444,
+        "max_us": 672.2986111111111
+      },
+      "journal_read": {
+        "calls": 262,
+        "errors": 0,
+        "bytes_requested": 508,
+        "cycles": 11631600,
+        "max_cycles": 2733376,
+        "elapsed_us": 40387.5,
+        "max_us": 9490.888888888889
+      },
+      "journal_program": {
+        "calls": 259,
+        "errors": 0,
+        "bytes_requested": 332,
+        "cycles": 10085338,
+        "max_cycles": 60188,
+        "elapsed_us": 35018.53472222222,
+        "max_us": 208.98611111111111
+      },
+      "journal_erase": {
+        "calls": 1,
+        "errors": 0,
+        "bytes_requested": 4096,
+        "cycles": 15372909,
+        "max_cycles": 15372909,
+        "elapsed_us": 53378.15625,
+        "max_us": 53378.15625
+      },
+      "journal_verify": {
+        "calls": 259,
+        "errors": 0,
+        "bytes_requested": 332,
+        "cycles": 8484926,
+        "max_cycles": 35869,
+        "elapsed_us": 29461.54861111111,
+        "max_us": 124.54513888888889
+      },
+      "uart_rx_irq": {
+        "calls": 1196078,
+        "errors": 0,
+        "bytes_requested": 1196078,
+        "cycles": 531861292,
+        "max_cycles": 4268,
+        "elapsed_us": 1846740.5972222222,
+        "max_us": 14.819444444444445
+      },
+      "ack_tx": {
+        "calls": 3677,
+        "errors": 0,
+        "bytes_requested": 228151,
+        "cycles": 1780505955,
+        "max_cycles": 1306100,
+        "elapsed_us": 6182312.34375,
+        "max_us": 4535.069444444444
+      }
+    },
+    "elapsed_ms": 63824,
+    "clean": true,
+    "scope": "MCU DWT intervals only. Staging callbacks include XIP restore, IRQs and WAIT_RX/ACK; do not sum nested stages or subtract App clocks. UART includes IRQ body/hardware capture/hook, not exception entry/exit. Erase bytes are logical 4 KiB requests, not physical erase-ahead bytes. terminal=0 is validated staging/END, not installation or independent acceptance."
+  },
+  "binding": {
+    "elf": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf",
+      "sha256": "69cbd892ed4d38311be66c1525c9e8ca3fadadfa7b21c56d90d124ba8697cdf4"
+    },
+    "map": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.map",
+      "sha256": "a073bd3dede1b299875e9cd3ce207558cd7d493c9c37ad7b464c710577a6675c"
+    },
+    "addresses": {
+      "g_ota_link_metrics": "0x200521e4",
+      "g_ota_metrics_publish_bytes": "0x200521e0",
+      "_SEGGER_RTT": "0x200534a8"
+    }
+  },
+  "raw_sha256": "b84981478d22f59a4bba51982ca702a2426258f6103cfd8d949b54293c8efcca",
+  "independent_acceptance": false
+}

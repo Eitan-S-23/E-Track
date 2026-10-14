@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "D:\\install\\Git\\cmd\\git.exe",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--exit-code",
+    "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+    "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+    "--",
+    "app/bluetooth_flutter_Trace/test",
+    "app/bluetooth_flutter_Trace/integration_test"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1061793941768600,
+  "ended_monotonic_ns": 1061794199715000,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-CI.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-CI.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

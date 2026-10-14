@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "shell",
+    "cmd package resolve-activity --brief com.wen.gaia.gaia.p34probe"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 851997139561800,
+  "ended_monotonic_ns": 851997448465000,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round6\\ops\\cmd-q-transfer\\phone\\adb-00060.stdout",
+    "bytes": 136,
+    "sha256": "cb04f9e79aef4a114c0c8101ee3ceacffac0e1ddb0895b76c4090065537652a8"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round6\\ops\\cmd-q-transfer\\phone\\adb-00060.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

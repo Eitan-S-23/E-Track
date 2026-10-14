@@ -1,0 +1,2 @@
+# Preserve original frozen evidence bytes on add and checkout.
+* -text

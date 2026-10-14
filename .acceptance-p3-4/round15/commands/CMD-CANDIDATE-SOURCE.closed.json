@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "D:\\install\\Git\\cmd\\git.exe",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--exit-code",
+    "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+    "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+    "--",
+    "Libraries",
+    "USER",
+    "boot",
+    "cmake",
+    "MDK-ARM_F435/Platform",
+    "MDK-ARM_F435/cmake-generated",
+    "app/bluetooth_flutter_Trace/lib",
+    "app/bluetooth_flutter_Trace/android",
+    "app/bluetooth_flutter_Trace/vendor",
+    "app/bluetooth_flutter_Trace/pubspec.yaml",
+    "app/bluetooth_flutter_Trace/pubspec.lock"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1061792499628500,
+  "ended_monotonic_ns": 1061793875865000,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-SOURCE.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round15\\commands\\CMD-CANDIDATE-SOURCE.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

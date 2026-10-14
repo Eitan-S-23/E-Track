@@ -1,0 +1,123 @@
+{
+  "id": "P34-HOST-CLOSE-01",
+  "disposition": "DECIDED_CLOSED",
+  "result": "PASS",
+  "review_form": "Lightweight independent host review; not a new formal bundle",
+  "head": "02013607ca38eaf5cff0d5c4fc3de8259fbff916",
+  "branch": "acceptance/p3-4-v2-20261009",
+  "sources": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+      "bytes": 35564,
+      "sha256": "3c524300133818dfed7d056a525ffe044082d0dc5c185aea8a16b98532b89723"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+      "bytes": 139395,
+      "sha256": "848e5e1902982052da0d8be0d5fd6a82c8992e77e0564165f6a673e7191c5cb5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_host.py",
+      "bytes": 13164,
+      "sha256": "a0d98161aadccee0346b8f7438cf65566ae6e72d7cf8cc576641e833d7cc6431"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live.py",
+      "bytes": 37065,
+      "sha256": "978937032a886b501b942cbcd3db98b4a948ca874f9e80181963983743c7621d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_mcu.py",
+      "bytes": 28088,
+      "sha256": "169f2e4fdafec40b1aabd91000b0374c4a008abe55b58623322a62543efdf019"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\build.py",
+      "bytes": 9035,
+      "sha256": "174a62ace063eb21fec5c96f92c3f3b1daa8653cc8fb60bac7962f7445a3b8fb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\selftest.py",
+      "bytes": 5665,
+      "sha256": "b9283304aded443741d631095e259b26b60cfad7929950ddb50f5fb5e64c71ae"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\flutter\\dev_checks.py",
+      "bytes": 42285,
+      "sha256": "86a36fdddcc68e4e74f1957d1c2c9a5e1db42b7e8f01d93317947776a23cbf9d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.agents\\skills\\e-track-flutter-debug\\scripts\\host_io.py",
+      "bytes": 4236,
+      "sha256": "296ea468d649133a29ee70b3d019b62b77f2f7a4aec76618f02f9dca858e16f9"
+    }
+  ],
+  "implementation_handoff": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\handoff.md",
+    "bytes": 11196,
+    "sha256": "f2513edf63d213a08a43a4098061db79b0f711368b6282830de0aed3d1588f65"
+  },
+  "independent_result": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\result.json",
+    "bytes": 2843,
+    "sha256": "c1c866eb468e18779a52888a96bb9364fcda066822fd3bea70a1c1e9574db03d"
+  },
+  "observations": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\observations\\c1.json",
+      "bytes": 782,
+      "sha256": "c4e106c9d59d516ac27fb0b7f9278261532a8773e625dd141d2716d457047b82"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\observations\\c2.json",
+      "bytes": 2903,
+      "sha256": "df7f32020b7df79f06cc44206a5c25dba16fd2b545ca87fb481aa72ec25e9031"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-review-20261014\\observations\\c3.json",
+      "bytes": 757,
+      "sha256": "10078727efb85f3ee13d52625a11ca45f928fc4d65587819349bac2bedc3e69c"
+    }
+  ],
+  "closed_subitems": [
+    "C1 remaining cleanup attempted once and truthful failure retained",
+    "C2 reader/startup primary and secondary errors preserved",
+    "C3 stop primary and cleanup errors preserved without replay"
+  ],
+  "additional_coverage": "Caller negative/control coverage: startup receipt failure, nested cleanup errors, successful operation with failed cleanup, partial startup, live/unknown state and repeat-close protection",
+  "independent_methods": 20,
+  "implementation_original_counts": [
+    17,
+    134
+  ],
+  "implementation_full_suite_not_replayed": true,
+  "accepted_primitive_and_18_tests_unchanged": true,
+  "new_findings": [],
+  "limits": [
+    "Process and Job failure APIs are modeled; no actual leaked device reader is claimed",
+    "No attribution of historical v12 interruption",
+    "Uncommitted source identities are hashes, not a claimed new Git or CI-tested revision"
+  ],
+  "canonical_spec": "cb317affcd291695f42271084b4b305b0d7e6f8b:docs/ota-prompts/prompt-P3-4-experiment.md",
+  "candidate_evidence": "Existing v13 original-evidence PASS and prior comparison/local-safety review remain usable within recorded scope",
+  "task_completion_allowed": false,
+  "production_release_allowed": false,
+  "next_scope": [
+    "Source/record integration and task-level closeout under actual Git and shared-root authority",
+    "Trial5 remains explicitly deferred, not repaired or waived",
+    "P3-5 real-backend 10/10; P5-1 final same-group 30/30 and actual four hours; P5-2 applicability"
+  ],
+  "new_device_observations_proposed": [],
+  "current_ready_state_not_rewritten": true,
+  "ab": "CLOSED unchanged",
+  "v11": "HARNESS_FAIL unchanged",
+  "v12": "EVIDENCE_GAP unchanged",
+  "v13": "candidate-original-evidence PASS unchanged",
+  "physical_qualification_total": "3/3 unchanged",
+  "historical_v12_cause": "UNESTABLISHED",
+  "implementation_edits": 0,
+  "device_operations": 0,
+  "ota_added": 0,
+  "commit_push_merge_ci": 0,
+  "utc": "2026-10-13T23:20:44.982696+00:00"
+}

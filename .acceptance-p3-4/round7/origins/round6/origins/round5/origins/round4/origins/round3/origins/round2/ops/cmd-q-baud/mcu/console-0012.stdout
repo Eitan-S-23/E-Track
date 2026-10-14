@@ -1,0 +1,31 @@
+SEGGER J-Link RTT Logger
+Compiled Mar  5 2025 14:43:57
+(c) 2016-2017 SEGGER Microcontroller GmbH, www.segger.com
+         Solutions for real time microcontroller applications
+
+Default logfile path: D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round2\ops\cmd-q-baud\mcu\host\userprofile\AppData\Roaming\SEGGER
+
+------------------------------------------------------------ 
+
+
+------------------------------------------------------------ 
+Connected to:
+  SEGGER J-Link
+  S/N: 4294967295
+
+Searching for RTT Control Block...OK.
+3 up-channels found:
+0: Terminal
+1: 
+2: 
+Selected RTT Channel description: 
+  Index: 0
+  Name:  Terminal
+  Size:  1024 bytes.
+
+Output file: D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round2\ops\cmd-q-baud\mcu\console-0012.rtt
+
+Getting RTT data from target. Press any key to quit.
+------------------------------------------------------------ 
+
+Transfer rate: 753 Bytes/s Data written: 435 Bytes Transfer rate: 0 Bytes/s Data written: 435 Bytes Transfer rate: 0 Bytes/s Data written: 435 Bytes 

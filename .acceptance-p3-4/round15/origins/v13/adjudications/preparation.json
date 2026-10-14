@@ -1,0 +1,84 @@
+{
+  "independent_original_verification": true,
+  "result": "PASS",
+  "physical_restorations": 1,
+  "physical_ota": 0,
+  "base_sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+  "boot_sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+  "complete_mailbox_phases": [
+    1,
+    1,
+    1,
+    1,
+    3,
+    3
+  ],
+  "configuration_preserved": true,
+  "confirmed_state": 4,
+  "journal_erased": true,
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5092,
+    "high_water_bytes": 3100,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "readback_originals": {
+    "app": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\app.bin",
+      "bytes": 613952,
+      "sha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc"
+    },
+    "boot": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    "health0": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\health0.bin",
+      "bytes": 36,
+      "sha256": "c4efb83d93df206a39bf5919afbcb9d0a4292ebfd61804af9f2be4c393380010"
+    },
+    "health1": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\health1.bin",
+      "bytes": 36,
+      "sha256": "6c469ce35db32d76ce33e4015f7875e04f1367e4fea323378f6facb941bd456a"
+    },
+    "staging": {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0016-rollback-full-readback\\staging.bin",
+      "bytes": 4096,
+      "sha256": "f47a8ec3e9aff2318d896942282ad4fe37d6391c82914f54a5da8a37de1300c6"
+    }
+  },
+  "mailbox_originals": [
+    {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0005-restore-mailbox-a\\value.bin",
+      "bytes": 640,
+      "sha256": "07bb6362d875574e4a3f8e1f846b99bacc6ecf696c7ec81984a384d17b883d0a"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0006-restore-mailbox-b\\value.bin",
+      "bytes": 640,
+      "sha256": "01ca9c6e617274639730f64b5b1043e6443e0c2fb813cc70c737ffcf91af55dd"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0007-restore-mailbox-a\\value.bin",
+      "bytes": 640,
+      "sha256": "b8ce0868e6588421549b61ee06890941fadd8efa83e33662db5568cbd2913218"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0008-restore-mailbox-b\\value.bin",
+      "bytes": 640,
+      "sha256": "b040a8fd53374a05e39ae186e98925edc577df8dedcc01ff13a752de1db15a35"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0010-restore-mailbox-a\\value.bin",
+      "bytes": 640,
+      "sha256": "5ac075c756e293b30fa3c7d9a246b47cae4b3c60fd82b3651b2bfab3edee4b60"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\ops\\cmd-q-prep-restore\\mcu\\0011-restore-mailbox-b\\value.bin",
+      "bytes": 640,
+      "sha256": "f6af6662b5bc4b470292391d4d224976e2a7510055557cb12087909714c09348"
+    }
+  ]
+}

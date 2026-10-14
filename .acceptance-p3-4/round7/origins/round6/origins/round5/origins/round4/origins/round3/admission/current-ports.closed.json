@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "netstat",
+    "-ano",
+    "-p",
+    "tcp"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 842484114460300,
+  "ended_monotonic_ns": 842484315827100,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round3\\admission\\current-ports.stdout",
+    "bytes": 10331,
+    "sha256": "9002a1f9643e510bc28af587967971725182039816ae96ee0749517978f44ee2"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round3\\admission\\current-ports.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "original_failure": {
+    "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\failed.json",
+    "bytes": 205,
+    "sha256": "326153bd7354d3e48a458e1c06a8a54449344647dd80bf575626e07a95bb6d9c"
+  },
+  "phone_closed": {
+    "private_port": 5062,
+    "listening": false,
+    "server_closed": true
+  },
+  "network_closed": {
+    "thread_closed": true,
+    "tunnel_closed": true
+  },
+  "closed_child_receipts": [
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\contract-precheck.closed.json",
+      "bytes": 1064,
+      "sha256": "bdb678f5f5bbfc520e38b188250aa65965c7a4bfa970a484e44a8213796109d9"
+    },
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\network\\https-tunnel.closed.json",
+      "bytes": 911,
+      "sha256": "599954cc412a911c2260ede093519bff8d4e77beebdf9fe17ec5a6058a8257d2"
+    },
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\commander.closed.json",
+      "bytes": 1386,
+      "sha256": "2ea1b73617123379323fd6091aa885f8e033b41c26b48023535fbbb963e9f9a7"
+    },
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\mcu\\0001-pre-transfer-current-boot\\processes.closed.json",
+      "bytes": 697,
+      "sha256": "15fade32dd4d18bd0268b5cabe15cc4af2206b5ec688be0d3328336ae1120d90"
+    },
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\mcu\\symbols-base\\active.closed.json",
+      "bytes": 873,
+      "sha256": "a1b482cfeace3583366469353d45b3e933d9538e1de00a1f772c742fbe8bdd4c"
+    },
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\mcu\\symbols-base\\isr.closed.json",
+      "bytes": 871,
+      "sha256": "3d9bc40ab1176d471931e255b80a90c6e22524702c0235a46fc61797724225d2"
+    },
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\mcu\\symbols-base\\nm.closed.json",
+      "bytes": 829,
+      "sha256": "851aa23f83d72df89d31631edeb0efa829c0b5ba449df50c40f841d3f7fc7c16"
+    },
+    {
+      "path": ".acceptance-p3-4\\round2\\ops\\cmd-q-transfer\\mcu\\symbols-base\\objcopy.closed.json",
+      "bytes": 968,
+      "sha256": "dea78c7c64582d0decf4c6512b787767bcd0fe2ba88b8379be8fda754d9a3f7b"
+    }
+  ],
+  "mcu_scripts_read_only": 1,
+  "phone_commands": 0,
+  "ota_starts": 0,
+  "owner_pid_present": false,
+  "decision": "Retire only this archived closed host lock; next live entry independently verifies current base and APK; no state recovery or OTA replay."
+}

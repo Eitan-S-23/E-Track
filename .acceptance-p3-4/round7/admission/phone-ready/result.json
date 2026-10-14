@@ -1,0 +1,5 @@
+{
+  "awake": true,
+  "private_adb_closed": true,
+  "no_app_launch_or_ota": true
+}

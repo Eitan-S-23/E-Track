@@ -1,0 +1,16 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+w1 0x200535F0, 0x73
+w1 0x200535F1, 0x74
+w1 0x200535F2, 0x61
+w1 0x200535F3, 0x74
+w1 0x200535F4, 0x75
+w1 0x200535F5, 0x73
+w1 0x200535F6, 0x0A
+w4 0x20053A6C, 0x00000007
+sleep 50
+qc

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH",
+    "/FI",
+    "PID eq 16256"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 923232784257000,
+  "stdin_sha256": null
+}

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 1007006513421500,
+  "ended_monotonic_ns": 1007007126284800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\processes.stdout",
+    "bytes": 13830,
+    "sha256": "1385d0daa6e47df36922469bbcf8e65f7243f891e910f6250eec3eda5cb6edbf"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\mcu\\0001-current-target-after-interruption\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

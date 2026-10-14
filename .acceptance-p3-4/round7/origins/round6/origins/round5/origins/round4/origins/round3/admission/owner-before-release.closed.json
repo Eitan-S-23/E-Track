@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 842811217576900,
+  "ended_monotonic_ns": 842811903101000,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round3\\admission\\owner-before-release.stdout",
+    "bytes": 13391,
+    "sha256": "82b1cba15a6546f132c9b08c2b867bcdd4fe8b5382aad9ce56e9095183d461b8"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round3\\admission\\owner-before-release.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

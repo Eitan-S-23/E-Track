@@ -1,0 +1,92 @@
+{
+  "independent_offline_evaluation": true,
+  "physical_ota": 0,
+  "scope": "Two historical reference observations, not old calibration, a final campaign, or retroactive formal PASS.",
+  "groups": {
+    "plannedAttempts": 2,
+    "observedAttempts": 2,
+    "evidenceGaps": [],
+    "groups": [
+      {
+        "parameters": {
+          "ackTimeoutMs": 2000,
+          "androidHighPriority": false,
+          "androidPhyPolicy": "off",
+          "appLifecycle": "resumed",
+          "dataBatchFrames": 12,
+          "input": {
+            "currentImageSha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+            "currentVersionCode": 30286,
+            "deviceAddress": "e3:49:e1:14:d6:cb",
+            "packageBytes": 1048576,
+            "packageSha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+            "targetImageSha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+            "targetVersionCode": 30287
+          },
+          "maxRetries": 5,
+          "mtuChunkBytes": 244,
+          "pauseScanDuringOta": false,
+          "platform": "android",
+          "protocol": 2,
+          "rebootInfoMaxAttempts": 3,
+          "rebootInfoTimeoutMs": 2000,
+          "rebootProbeIntervalMs": 1500,
+          "requestedBaud": 921600,
+          "requestedDataBatchFrames": 12,
+          "requestedWindowSegments": 24,
+          "reuseGatt": true,
+          "reuseRebootInfoLink": true,
+          "senderWindowSegments": 24,
+          "sentinel": "OTAOBS96bb2c74d5ad6ccecaf30e40",
+          "withoutResponse": true,
+          "writeMode": "without"
+        },
+        "attempts": 2,
+        "ids": [
+          "original-v10",
+          "original-v11"
+        ],
+        "successes": 2,
+        "failures": 0,
+        "fullReferenceSuccesses": 2,
+        "cleanAttempts": 2,
+        "cleanFailures": 0,
+        "missingAckSamples": 0,
+        "earlyAckSamples": 0,
+        "unresolvedParameterFailures": [],
+        "observedAckP99Us": 827159,
+        "ackP99Eligible": true,
+        "recommendedAckTimeoutMs": 2000,
+        "fullReferenceP95Us": 71582792,
+        "stability30MeetsObservedGates": false
+      }
+    ],
+    "recoveryCases": 0,
+    "successfulRecoveries": 0,
+    "recoveryOffsets": [],
+    "recoveryParameterGroups": 0,
+    "recoveryParameters": null,
+    "recovery10MeetsObservedGates": false,
+    "independentAcceptance": "NOT_RUN",
+    "soakDurationSeconds": null,
+    "scope": "All listed attempts retained; groups never mix baud/timeout/retry/MTU/assets/APK. Soak wall duration and physical disconnect actions require the frozen host/controller evidence, not summed App clocks."
+  },
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round12\\inputs\\reference-v10.jsonl",
+      "bytes": 4801006,
+      "sha256": "33ba9b04ee56e3dc7505e9d15de499c9819af7edd4fc9e31b509fbca0fbb2d18"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\inputs\\reference-v11.jsonl",
+      "bytes": 4813050,
+      "sha256": "743e8e88e79580ffa8c1b6682bc01cc7c63431c68c89b9455bd4ac0d5e1180c6"
+    }
+  ],
+  "mcu_evaluation": {
+    "path": ".acceptance-p3-4\\round12\\commands\\CMD-REFERENCE-MCU.stdout",
+    "bytes": 4514,
+    "sha256": "232b8d2d2f4ae87208c7c96e177f337305e5c85de5db5a38249085d59f084709"
+  },
+  "reference_criterion_pass": true
+}

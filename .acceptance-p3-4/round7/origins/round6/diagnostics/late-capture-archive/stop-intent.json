@@ -1,0 +1,5 @@
+{
+  "reason": "Stop only this entry owned inactive App; no OTA, preserve late capture and restore only own failed runtime write.",
+  "pid": 26049,
+  "capture": "1791733411743571-151409df12fd3ec70569f908"
+}

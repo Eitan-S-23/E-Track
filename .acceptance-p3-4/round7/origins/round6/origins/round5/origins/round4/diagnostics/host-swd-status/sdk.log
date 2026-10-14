@@ -1,0 +1,65 @@
+T599C 000:006.916   SEGGER J-Link V8.18 Log File
+T599C 000:007.791   DLL Compiled: Mar  5 2025 14:42:43
+T599C 000:007.826   Logging started @ 2026-10-11 13:47
+T599C 000:007.858   Process: C:\Users\SU\SEGGER\JLink_V818\JLink.exe
+T599C 000:008.299 - 7.889ms 
+T599C 000:008.524 JLINK_EMU_SelectByUSBSN(SerialNo = 123456)
+T599C 000:017.608 - 9.233ms returns 0x00
+T599C 000:017.773 JLINK_SetWarnOutHandler(...)
+T599C 000:017.836 - 0.066ms 
+T599C 000:018.334 JLINK_ExecCommand("SuppressGUI = 1", ...). 
+T599C 000:018.393 - 0.060ms returns 0x00
+T599C 000:018.433 JLINK_OpenEx(...)
+T599C 000:027.944   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T599C 000:028.870   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T599C 000:030.781   Hardware: V7.00
+T599C 000:030.816   S/N: 4294967295
+T599C 000:030.841   OEM: SEGGER
+T599C 000:030.867   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T599C 000:031.537   Bootloader: (FW returned invalid version)
+T599C 000:032.506   TELNET listener socket opened on port 19021
+T599C 000:033.332 - 14.716ms returns "O.K."
+T599C 000:033.402 JLINK_SetFlashProgProgressCallback(...)
+T599C 000:033.419 - 0.019ms 
+T599C 000:033.434 JLINK_GetFirmwareString(...)
+T599C 000:033.446 - 0.012ms 
+T599C 000:033.461 JLINK_GetHardwareVersion()
+T599C 000:033.473 - 0.012ms returns 70000
+T599C 000:033.494 JLINK_GetHWInfo(...)
+T599C 000:033.642 - 0.149ms returns 0
+T599C 000:033.666 JLINK_GetSN()
+T599C 000:033.680 - 0.013ms returns -1
+T599C 000:033.695 JLINK_GetOEMString(...)
+T599C 000:033.714 JLINK_EMU_GetCurrConnectionInfo()
+T599C 000:033.727 - 0.014ms returns 0
+T599C 000:033.743 JLINK_EMU_HasCapEx(0x00000026)
+T599C 000:033.760 - 0.017ms returns 0
+T599C 000:033.774 JLINK_GetEmuCaps()
+T599C 000:033.786 - 0.012ms returns 0x88EA5833
+T599C 000:033.799 JLINK_GetEmuCaps()
+T599C 000:033.811 - 0.011ms returns 0x88EA5833
+T599C 000:033.824 JLINK_GetHWStatus(...)
+T599C 000:033.975 - 0.151ms returns 0
+T599C 000:033.993 JLINK_EMU_HasCapEx(0x00000044)
+T599C 000:034.006 - 0.012ms returns 0
+T599C 000:034.021 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p34-final\.acceptance-p3-4\round4\diagnostics\host-swd-status\settings.jlink", ...). 
+T599C 000:118.483 - 84.460ms returns 0x00
+T599C 000:118.590 JLINK_ExecCommand("DisableAutoUpdateFW", ...). 
+T599C 000:118.612 - 0.021ms returns 0x00
+T599C 000:118.639 JLINK_ExecCommand("SetRestartOnClose = 0", ...). 
+T599C 000:118.658 - 0.005ms returns 0x01
+T599C 000:118.706 JLINK_GetHWStatus(...)
+T599C 000:118.905 - 0.198ms returns 0
+T599C 000:118.928 JLINK_GetHWInfo(...)
+T599C 000:119.098 - 0.169ms returns 0
+T599C 000:119.125 JLINK_GetSpeedInfo()
+T599C 000:119.139   16000000 Hz / n, n >= 4
+T599C 000:119.157 - 0.031ms 
+T599C 000:119.170 JLINK_EMU_HasCapEx(0x00000044)
+T599C 000:119.183 - 0.012ms returns 0
+T599C 000:119.205 JLINK_IsOpen()
+T599C 000:119.218 - 0.012ms returns 0x01
+T599C 000:129.678 JLINK_Close()
+T599C 000:134.531 - 4.852ms
+T599C 000:134.796   
+T599C 000:134.817   Closed

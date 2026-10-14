@@ -1,0 +1,39 @@
+{
+  "command": [
+    "D:/install/mingw64/bin/gcc.EXE",
+    "-std=c99",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-O2",
+    "-DP34_OTA_PIPELINE=1",
+    "-DP34_OTA_PIPELINE_SYNC=1",
+    "-DP34_OTA_PIPELINE_WAIT_RX=1",
+    "-DP34_TEST_STOPPED_ACK=1",
+    "-ID:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota",
+    "-ID:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries",
+    "-ID:\\github\\my\\E-Track\\.cache\\p34-final\\boot\\include",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_receiver_failure.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_pipeline.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_pipeline_sync.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_ble_session.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_ble_frame.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_ble_ring.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_sd.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Libraries\\OTA\\ota_staging.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\boot\\src\\boot_crc32.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\boot\\src\\boot_sha256.c",
+    "-o",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-independent-review-20261010\\receiver1\\receiver.exe"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "timeout_seconds": 180,
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 7.85,
+  "log": {
+    "path": ".cache\\p34-independent-review-20261010\\receiver1\\compile.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

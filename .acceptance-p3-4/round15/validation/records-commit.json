@@ -1,0 +1,43 @@
+{
+  "commit": "62aacfee4568c8d11372eebf5456558037a2bfb5",
+  "parent": "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+  "tree": "392144844f48b31f20f9eae44a5d6304a7b7cf27",
+  "paths": [
+    {
+      "path": "docs/agent-collaboration/index.md",
+      "bytes": 4627,
+      "sha256": "d8f1052205f288112f8624fa1c57bcd762dafd8bb3d9f96e01809f33b0b73da0"
+    },
+    {
+      "path": "docs/ota-exec-notes/P3-4-v12-candidate-acceptance-2026-10-13.md",
+      "bytes": 21818,
+      "sha256": "981642a96bebad81aff88debb6b4a9b86ca6df3fa3f64ef6a4ea99a67df1c44c"
+    },
+    {
+      "path": "docs/ota-exec-notes/P3-4-v13-offline-acceptance-2026-10-13.md",
+      "bytes": 50277,
+      "sha256": "199de6d5056d8501fe7a8eab335c11495d1f0fa78bee8178d696e82c24505e67"
+    }
+  ],
+  "command_receipts": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-local-closeout-20261014\\records-commands\\git-add.json",
+      "bytes": 732,
+      "sha256": "98437175a93c88e812c498a261b80e9049b931d36eff62fda99c485cecc3cfe8"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-local-closeout-20261014\\records-commands\\git-commit.json",
+      "bytes": 633,
+      "sha256": "fb832ded2f18fecf90bbad71e639c195cf0327201a63dfde16ab470fefef62da"
+    }
+  ],
+  "staged_and_committed_bytes_identical": true,
+  "shared_main_and_index_unchanged": true,
+  "accepted_source_bytes_unchanged": true,
+  "v14_not_admitted": true,
+  "freeze_index_added": false,
+  "device_operations": 0,
+  "push_merge_ci": 0,
+  "external_hook_calls": 0,
+  "utc": "2026-10-14T01:08:50.948775+00:00"
+}

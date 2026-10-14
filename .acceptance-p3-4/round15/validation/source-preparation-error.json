@@ -1,0 +1,11 @@
+{
+  "phase": "source preparation before staging",
+  "observed_exit": 1,
+  "error_type": "ValueError",
+  "cause": "The project-relative h.record helper was incorrectly used for the read-only external Git executable",
+  "correction": "Use the existing absolute fingerprint helper for external tool identity; preserve initial source/host directory and use fresh source-commands outputs",
+  "git_staging_or_commit_executed": false,
+  "head_and_worktree_index_unchanged": true,
+  "product_or_accepted_harness_defect": false,
+  "device_operations": 0
+}

@@ -1,0 +1,320 @@
+{
+  "result": "PASS",
+  "head": {
+    "command": [
+      "git",
+      "--no-optional-locks",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+    "exit": 0,
+    "stdout": "02013607ca38eaf5cff0d5c4fc3de8259fbff916\n",
+    "stderr": ""
+  },
+  "sources_before": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+      "bytes": 31652,
+      "sha256": "8b0d22329acf2f2c877fd8dccdb0d19d3ffa872de6f42358602bb224e001594b"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+      "bytes": 119095,
+      "sha256": "751ef1833852ab39ee113a6fa9ae7f67f24bd60062f790b8aa452febf3ad336d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_host.py",
+      "bytes": 13164,
+      "sha256": "a0d98161aadccee0346b8f7438cf65566ae6e72d7cf8cc576641e833d7cc6431"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live.py",
+      "bytes": 37065,
+      "sha256": "978937032a886b501b942cbcd3db98b4a948ca874f9e80181963983743c7621d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_mcu.py",
+      "bytes": 28088,
+      "sha256": "169f2e4fdafec40b1aabd91000b0374c4a008abe55b58623322a62543efdf019"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\build.py",
+      "bytes": 9035,
+      "sha256": "174a62ace063eb21fec5c96f92c3f3b1daa8653cc8fb60bac7962f7445a3b8fb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\selftest.py",
+      "bytes": 5665,
+      "sha256": "b9283304aded443741d631095e259b26b60cfad7929950ddb50f5fb5e64c71ae"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\flutter\\dev_checks.py",
+      "bytes": 42285,
+      "sha256": "86a36fdddcc68e4e74f1957d1c2c9a5e1db42b7e8f01d93317947776a23cbf9d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.agents\\skills\\e-track-flutter-debug\\scripts\\host_io.py",
+      "bytes": 4236,
+      "sha256": "296ea468d649133a29ee70b3d019b62b77f2f7a4aec76618f02f9dca858e16f9"
+    }
+  ],
+  "sources_after": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+      "bytes": 35564,
+      "sha256": "3c524300133818dfed7d056a525ffe044082d0dc5c185aea8a16b98532b89723"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\tests\\ota\\test_p34_live_route.py",
+      "bytes": 139395,
+      "sha256": "848e5e1902982052da0d8be0d5fd6a82c8992e77e0564165f6a673e7191c5cb5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_host.py",
+      "bytes": 13164,
+      "sha256": "a0d98161aadccee0346b8f7438cf65566ae6e72d7cf8cc576641e833d7cc6431"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live.py",
+      "bytes": 37065,
+      "sha256": "978937032a886b501b942cbcd3db98b4a948ca874f9e80181963983743c7621d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_mcu.py",
+      "bytes": 28088,
+      "sha256": "169f2e4fdafec40b1aabd91000b0374c4a008abe55b58623322a62543efdf019"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\build.py",
+      "bytes": 9035,
+      "sha256": "174a62ace063eb21fec5c96f92c3f3b1daa8653cc8fb60bac7962f7445a3b8fb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\selftest.py",
+      "bytes": 5665,
+      "sha256": "b9283304aded443741d631095e259b26b60cfad7929950ddb50f5fb5e64c71ae"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\flutter\\dev_checks.py",
+      "bytes": 42285,
+      "sha256": "86a36fdddcc68e4e74f1957d1c2c9a5e1db42b7e8f01d93317947776a23cbf9d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.agents\\skills\\e-track-flutter-debug\\scripts\\host_io.py",
+      "bytes": 4236,
+      "sha256": "296ea468d649133a29ee70b3d019b62b77f2f7a4aec76618f02f9dca858e16f9"
+    }
+  ],
+  "protected_files_checked": 25496,
+  "protected_changes": [],
+  "immutable_source_changes": [],
+  "primitive_tests_unchanged": true,
+  "unrelated_phone_definition_changes": [],
+  "unexpected_status": [],
+  "diff_check": {
+    "command": [
+      "git",
+      "--no-optional-locks",
+      "diff",
+      "--check",
+      "--",
+      "Tools/ota/p34-acceptance/live_phone.py",
+      "tests/ota/test_p34_live_route.py"
+    ],
+    "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of 'Tools/ota/p34-acceptance/live_phone.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/ota/test_p34_live_route.py', LF will be replaced by CRLF the next time Git touches it\n"
+  },
+  "syntax_valid": true,
+  "python": "3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]",
+  "unittest_methods": {
+    "LiveRouteTests": 50,
+    "ProcessCloseTests": 18,
+    "NetworkStartupTests": 11,
+    "CallerCloseTests": 17,
+    "PhoneCellTests": 28,
+    "StartNoticeTests": 10
+  },
+  "final_selftests": [
+    {
+      "run": "focused-2",
+      "actual_test_count": 17,
+      "exit": 0,
+      "timed_out": false,
+      "sources_match": true,
+      "original_log_matches": true
+    },
+    {
+      "run": "live-command",
+      "actual_test_count": 134,
+      "exit": 0,
+      "timed_out": false,
+      "sources_match": true,
+      "original_log_matches": true
+    }
+  ],
+  "external_metadata_before": [
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\PowerShell",
+      "exists": true,
+      "mtime_ns": 1790149993028298200
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell",
+      "exists": true,
+      "mtime_ns": 1781430842611857900
+    }
+  ],
+  "external_metadata_after": [
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\PowerShell",
+      "exists": true,
+      "mtime_ns": 1790149993028298200
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell",
+      "exists": true,
+      "mtime_ns": 1781430842611857900
+    }
+  ],
+  "inventory": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\baseline-focus\\intent.json",
+      "bytes": 3050,
+      "sha256": "d484c2869c8f20889dfcb7e688afb852fe72ed89139689c6a8b33e1c4e218702"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\baseline-focus\\summary.json",
+      "bytes": 2689,
+      "sha256": "9f8a08455923b6d1143d9642d651e7bfcbe1b929e386b24a33225d60c83f5848"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\baseline-focus\\tests.json",
+      "bytes": 835,
+      "sha256": "3d70862866aef0c015f2b1a6095a9667bca9a56c3006cb10fea5de7c920d90a5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\baseline-focus\\tests.log",
+      "bytes": 4671,
+      "sha256": "5602786e8b21b2b69ccf6729fbf6218963b9aa4175aaaaabd62db861efda66d2"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\before.json",
+      "bytes": 9466204,
+      "sha256": "21772c3a43e8d00c7373301583b2f0ad744a7460eea19b70259426df68caf9ad"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\changes.patch",
+      "bytes": 30079,
+      "sha256": "5a3b0decde00bb1d0ab58a0dc3f747f6766a3ce5d2717feae2b460a3a3a4e557"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\evidence.py",
+      "bytes": 12390,
+      "sha256": "c54435608d7b0135cb83580a2fc189449881fb9b39d732798eed2cd30d3a8c99"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused\\intent.json",
+      "bytes": 2816,
+      "sha256": "52be29e265a9210a8095dfb79d203e61b55a0336bf291fc96fa3f10386922330"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused\\summary.json",
+      "bytes": 2667,
+      "sha256": "29e4b6b96970a6e1fd68139e898ad7bf27937df8cde82480be5da6cb8494ec51"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused\\tests.json",
+      "bytes": 601,
+      "sha256": "94280f0fd82b44b94f032641e76eae8fbeee5bdfc91f47ed5de52ea21290d84e"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused\\tests.log",
+      "bytes": 5338,
+      "sha256": "a44c1667832e7272735ea6509633a96edf3c7803b2f5733882ba9866af449460"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused-2\\intent.json",
+      "bytes": 2818,
+      "sha256": "ae0bd951ad7b3c0706cc315af57f4628491659307e941cea8e381d2c0c2e6dcc"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused-2\\summary.json",
+      "bytes": 2658,
+      "sha256": "695bdd7d443c9bae64436330d11e7ee277656abd4ae229154b09a81c5c2081b7"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused-2\\tests.json",
+      "bytes": 603,
+      "sha256": "7feb2fd2b03dd74ff797c5c87a051987ebd1a6c8161e719a641b29ee2db66dd5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\focused-2\\tests.log",
+      "bytes": 2619,
+      "sha256": "c8b793653ce6c697bfb92d69452477e7fa1c0a56b4d825e7e454f3a7818d8ad0"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\handoff.md",
+      "bytes": 11196,
+      "sha256": "f2513edf63d213a08a43a4098061db79b0f711368b6282830de0aed3d1588f65"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-command\\intent.json",
+      "bytes": 2924,
+      "sha256": "740b8adedee25199ff5228d90c7006a473e58664eeae292eb41d1a208e3fcdf5"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-command\\summary.json",
+      "bytes": 2676,
+      "sha256": "da22992dd11bd52cf9812c15a17324234c81442ccbfeafefd54e18c28bad05ab"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-command\\tests.json",
+      "bytes": 717,
+      "sha256": "e7444d0492c8d1ab7489816d3d17a4647a8df1a2e33fe64a0e91da55a1116551"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-command\\tests.log",
+      "bytes": 83,
+      "sha256": "dcf259e2f2a3a35f66eecd0efb73fb3a6c5cddf7e7057d3f44e85a0ece9dd067"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-suite\\result.json",
+      "bytes": 448,
+      "sha256": "3a0e7a1172eaaf3c3d3a5c2ddc2fca6e5dbb4c46e9c18f7468b87492afbf2902"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-suite\\test_p34_live_route.py.json",
+      "bytes": 661,
+      "sha256": "71ae0a5f0b9c20251751d1b9a5b16d715f5f7df0ba2a0fe4f34f76ea840e1f8a"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\live-suite\\test_p34_live_route.py.log",
+      "bytes": 36857,
+      "sha256": "e3b3363ed9bf3ee4a7562633f72b92ebf26182808c858e61c3404198e83ebca6"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\originals\\live_phone.py",
+      "bytes": 31652,
+      "sha256": "8b0d22329acf2f2c877fd8dccdb0d19d3ffa872de6f42358602bb224e001594b"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-host-close-01-callers-20261013\\originals\\test_p34_live_route.py",
+      "bytes": 119095,
+      "sha256": "751ef1833852ab39ee113a6fa9ae7f67f24bd60062f790b8aa452febf3ad336d"
+    }
+  ],
+  "selected_external_outputs": [],
+  "outputs_within_active_root": true,
+  "monitoring_limit": "No machine-wide trace; no PowerShell or external output selected.",
+  "device_operations": 0,
+  "ota_added": 0,
+  "commit_push_merge_ci": 0,
+  "new_formal_rounds": 0,
+  "historical_v12_cause": "UNESTABLISHED",
+  "independent_acceptance": false,
+  "utc": "2026-10-13T16:05:56.563953+00:00",
+  "audit_excludes_own_hash": true
+}

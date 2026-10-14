@@ -1,0 +1,47 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p34-acceptance/live.py",
+    "phone",
+    "--inputs",
+    "D:/github/my/E-Track/.cache/p34-final/.cache/p34-live-inputs1/inputs.json",
+    "--out",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/ops/cmd-q-transfer",
+    "--run-id",
+    "p34-qualification-01",
+    "--run-role",
+    "clean",
+    "--baud",
+    "921600",
+    "--timeout-ms",
+    "2000",
+    "--seconds",
+    "3390",
+    "--contract",
+    "docs/acceptance-contracts/P3-4-v9.contract.json",
+    "--matrix",
+    "D:/github/my/E-Track/.cache/p34-final/.acceptance-p3-4/round9/evidence-matrix.json",
+    "--command-id",
+    "CMD-Q-TRANSFER"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 1,
+  "started_monotonic_ns": 917926385525000,
+  "ended_monotonic_ns": 918143640472800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round9\\commands\\CMD-Q-TRANSFER.stdout",
+    "bytes": 115,
+    "sha256": "4c7edaddfaa0b1ff5ae2bbdd84a2426aa5a0c8543e98f168558c9c760e2134ce"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round9\\commands\\CMD-Q-TRANSFER.stderr",
+    "bytes": 3645,
+    "sha256": "cdeda7e7e5af6123b4b251a386f27f201e776553c5732c4fe3b76a535ded8317"
+  }
+}

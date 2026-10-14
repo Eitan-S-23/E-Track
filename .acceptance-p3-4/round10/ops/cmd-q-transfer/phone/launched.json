@@ -1,0 +1,14 @@
+{
+  "pid": 13122,
+  "capture": "1791806205073776-2639ebf186f273ac86fb0c92",
+  "config": {
+    "path": ".acceptance-p3-4\\round10\\ops\\cmd-q-transfer\\phone\\runtime.json",
+    "bytes": 870,
+    "sha256": "978ae28d68458a069b1d6afcca29a0619df6347ebc3ee206fc722573ed7c0aaa"
+  },
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-remediation-20261010\\final-archive\\original\\flutter-dev-debug-apk-1c3f7f49baa27c42452f7796839cea57ddd734b7-38031649785-1\\run-35c6e3aa3a624461aeecb85ea4d25a22\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131722750,
+    "sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f"
+  }
+}

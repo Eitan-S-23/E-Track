@@ -1,0 +1,599 @@
+POWER MANAGER (dumpsys power)
+
+Power Manager State:
+  Settings power_manager_constants:
+    no_cached_wake_locks=true
+  mDirty=0x0
+  mWakefulness=Awake
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=2
+  mBatteryLevel=44
+  mBatteryLevelWhenDreamStarted=0
+  mDockState=0
+  mStayOn=true
+  mProximityPositive=false
+  mBootCompleted=true
+  mSystemReady=true
+  mEnhancedDischargeTimeElapsed=0
+  mLastEnhancedDischargeTimeUpdatedElapsed=0
+  mEnhancedDischargePredictionIsPersonalized=false
+  mHalAutoSuspendModeEnabled=false
+  mHalInteractiveModeEnabled=true
+  mWakeLockSummary=0x1
+  mNotifyLongScheduled=+23s897ms
+  mNotifyLongDispatched=-26s837ms
+  mNotifyLongNextCheck=+23s897ms
+  mRequestWaitForNegativeProximity=false
+  mInterceptedPowerKeyForProximity=false
+  mSandmanScheduled=false
+  mBatteryLevelLow=false
+  mLightDeviceIdleMode=false
+  mDeviceIdleMode=false
+  mDeviceIdleWhitelist=[1000, 1001, 2000, 10029, 10031, 10037, 10040, 10046, 10051, 10064, 10065, 10066, 10067, 10076, 10087, 10120, 10133, 10136, 10146, 10159, 10161, 10164, 10168, 10221, 10287, 10295, 10305, 10307, 10351, 10364, 10376]
+  mDeviceIdleTempWhitelist=[]
+  mLowPowerStandbyActive=false
+  mLastWakeTime=880305082 (686017 ms ago)
+  mLastSleepTime=880300920 (690179 ms ago)
+  mLastSleepReason=power_button
+  mLastInteractivePowerHintTime=880984835 (6264 ms ago)
+  mLastScreenBrightnessBoostTime=0 (880991099 ms ago)
+  mScreenBrightnessBoostInProgress=false
+  mHoldingWakeLockSuspendBlocker=true
+  mHoldingDisplaySuspendBlocker=true
+  mLastFlipTime=821195197
+  mIsFaceDown=false
+
+Settings and Configuration:
+  mDecoupleHalAutoSuspendModeFromDisplayConfig=false
+  mDecoupleHalInteractiveModeFromDisplayConfig=false
+  mWakeUpWhenPluggedOrUnpluggedConfig=true
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mTheaterModeEnabled=false
+  mSuspendWhenScreenOffDueToProximityConfig=true
+  mDreamsSupportedConfig=true
+  mDreamsEnabledByDefaultConfig=true
+  mDreamsActivatedOnSleepByDefaultConfig=false
+  mDreamsActivatedOnDockByDefaultConfig=true
+  mDreamsEnabledOnBatteryConfig=false
+  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1
+  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15
+  mDreamsBatteryLevelDrainCutoffConfig=5
+  mDreamsEnabledSetting=true
+  mDreamsActivateOnSleepSetting=false
+  mDreamsActivateOnDockSetting=true
+  mDozeAfterScreenOff=true
+  mMinimumScreenOffTimeoutConfig=5000
+  mMaximumScreenDimDurationConfig=7000
+  mMaximumScreenDimRatioConfig=0.20000005
+  mAttentiveTimeoutConfig=-1
+  mAttentiveTimeoutSetting=-1
+  mAttentiveWarningDurationConfig=30000
+  mScreenOffTimeoutSetting=300000
+  mSleepTimeoutSetting=-1
+  mMaximumScreenOffTimeoutFromDeviceAdmin=9223372036854775807 (enforced=false)
+  mStayOnWhilePluggedInSetting=7
+  mScreenBrightnessModeSetting=0
+  mScreenBrightnessOverrideFromWindowManager=NaN
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+  mUserInactiveOverrideFromWindowManager=false
+  mDozeScreenStateOverrideFromDreamManager=1
+  mDrawWakeLockOverrideFromSidekick=false
+  mDozeScreenBrightnessOverrideFromDreamManager=0
+  mScreenBrightnessMinimum=7.0E-5
+  mScreenBrightnessMaximum=1.0
+  mScreenBrightnessDefault=0.39763778
+  mDoubleTapWakeEnabled=false
+  mIsVrModeEnabled=false
+  mButtonLightOn=true
+  mButtonLightAlwaysOn=false
+  mButtonLightSensorControl=false
+  buttonLightControlMode=0
+  isButtonLightSpecialScene=true
+  isButtonLightSpecialSceneException=false
+  isButtonNeedReflectGlobal=false
+  mForegroundProfile=0
+  mUserId=0
+
+Attentive timeout: -1 ms
+Sleep timeout: -1 ms
+Screen off timeout: 300000 ms
+Screen dim duration: 7000 ms
+
+UID states (changing=false changed=false):
+  UID 1000:   ACTIVE  count=6 state=0
+  UID 1001:   ACTIVE  count=0 state=0
+  UID 1002:   ACTIVE  count=0 state=0
+  UID 1041: INACTIVE  count=2 state=20
+  UID 1068:   ACTIVE  count=0 state=0
+  UID u0a0:   ACTIVE  count=0 state=0
+  UID u0a27: INACTIVE  count=0 state=10
+  UID u0a29: INACTIVE  count=0 state=10
+  UID u0a35:   ACTIVE  count=0 state=0
+  UID u0a37: INACTIVE  count=0 state=10
+  UID u0a40: INACTIVE  count=0 state=8
+  UID u0a46: INACTIVE  count=0 state=8
+  UID u0a51: INACTIVE  count=0 state=10
+  UID u0a54: INACTIVE  count=0 state=19
+  UID u0a57:   ACTIVE  count=0 state=0
+  UID u0a64:   ACTIVE  count=0 state=5
+  UID u0a66:   ACTIVE  count=0 state=19
+  UID u0a69: INACTIVE  count=0 state=10
+  UID u0a74:   ACTIVE  count=0 state=5
+  UID u0a90:   ACTIVE  count=0 state=5
+  UID u0a92:   ACTIVE  count=0 state=5
+  UID u0a93:   ACTIVE  count=0 state=0
+  UID u0a95: INACTIVE  count=0 state=10
+  UID u0a96:   ACTIVE  count=0 state=6
+  UID u0a109: INACTIVE  count=0 state=10
+  UID u0a111:   ACTIVE  count=0 state=7
+  UID u0a115:   ACTIVE  count=0 state=3
+  UID u0a120: INACTIVE  count=0 state=10
+  UID u0a125: INACTIVE  count=0 state=10
+  UID u0a129:   ACTIVE  count=0 state=6
+  UID u0a130: INACTIVE  count=0 state=10
+  UID u0a134:   ACTIVE  count=0 state=5
+  UID u0a136:   ACTIVE  count=0 state=0
+  UID u0a139:   ACTIVE  count=0 state=0
+  UID u0a142:   ACTIVE  count=0 state=0
+  UID u0a146:   ACTIVE  count=0 state=5
+  UID u0a155: INACTIVE  count=0 state=19
+  UID u0a164:   ACTIVE  count=0 state=0
+  UID u0a165:   ACTIVE  count=0 state=0
+  UID u0a168:   ACTIVE  count=0 state=0
+  UID u0a170:   ACTIVE  count=0 state=0
+  UID u0a176:   ACTIVE  count=0 state=0
+  UID u0a184:   ACTIVE  count=0 state=5
+  UID u0a221: INACTIVE  count=0 state=10
+  UID u0a236: INACTIVE  count=0 state=10
+  UID u0a260: INACTIVE  count=0 state=10
+  UID u0a266: INACTIVE  count=0 state=19
+  UID u0a286: INACTIVE  count=0 state=15
+  UID u0a295: INACTIVE  count=0 state=10
+  UID u0a298:   ACTIVE  count=0 state=7
+  UID u0a305:   ACTIVE  count=0 state=5
+  UID u0a307: INACTIVE  count=0 state=10
+  UID u0a364:   ACTIVE  count=0 state=5
+  UID u0a379:   ACTIVE  count=1 state=4
+  UID u0a405:   ACTIVE  count=0 state=2
+  UID u0a408:   ACTIVE  count=0 state=19
+  UID u0a421: INACTIVE  count=0 state=19
+  UID u0i361:   ACTIVE  count=0 state=4
+  UID u0i911:   ACTIVE  count=0 state=5
+  UID u0i923: INACTIVE  count=0 state=10
+  UID u999a307: INACTIVE  count=0 state=10
+
+Looper state:
+  Looper (PowerManagerService, tid 72) {d0365d}
+    Message 0: { id=17109334 when=+23s896ms what=4 target=android.os.Handler }
+    Message 1: { id=17111277 when=+4m46s735ms what=1 target=android.os.Handler }
+    (Total messages: 2, polling=true, quitting=false)
+
+Wake Locks: size=9
+  PARTIAL_WAKE_LOCK              'AudioIn' ACQ=-4h52m51s131ms LONG (uid=1041 ws=WorkSource{1000})
+  PARTIAL_WAKE_LOCK              'AudioMix' ACQ=-36s28ms (uid=1041 ws=WorkSource{10379})
+  PARTIAL_WAKE_LOCK              'ExoPlayer:WakeLockManager' ACQ=-36s105ms (uid=10379 pid=19019)
+  PARTIAL_WAKE_LOCK              '*job*/com.auto.fairy/androidx.work.impl.background.systemjob.SystemJobService' ACQ=-114ms (uid=1000 pid=1697 ws=WorkSource{10364 com.auto.fairy})
+  PARTIAL_WAKE_LOCK              '*job*/com.auto.fairy/androidx.work.impl.background.systemjob.SystemJobService' ACQ=-110ms (uid=1000 pid=1697 ws=WorkSource{10364 com.auto.fairy})
+  PARTIAL_WAKE_LOCK              '*job*/com.auto.fairy/androidx.work.impl.background.systemjob.SystemJobService' ACQ=-107ms (uid=1000 pid=1697 ws=WorkSource{10364 com.auto.fairy})
+  PARTIAL_WAKE_LOCK              '*job*/com.auto.fairy/androidx.work.impl.background.systemjob.SystemJobService' ACQ=-103ms (uid=1000 pid=1697 ws=WorkSource{10364 com.auto.fairy})
+  PARTIAL_WAKE_LOCK              '*job*/com.auto.fairy/androidx.work.impl.background.systemjob.SystemJobService' ACQ=-82ms (uid=1000 pid=1697 ws=WorkSource{10364 com.auto.fairy})
+  PARTIAL_WAKE_LOCK              '*job*/com.auto.fairy/androidx.work.impl.background.systemjob.SystemJobService' ACQ=-43ms (uid=1000 pid=1697 ws=WorkSource{10364 com.auto.fairy})
+
+Suspend Blockers: size=5
+  PowerManagerService.Booting: ref count=0 []
+  PowerManagerService.WakeLocks: ref count=1 [unknown: (10-11 13:02:51.158)]
+  PowerManagerService.Display: ref count=1 [, holding display: (10-12 00:36:03.529)]
+  PowerManagerService.Broadcasts: ref count=0 []
+  PowerManagerService.WirelessChargerDetector: ref count=0 []
+
+Display Power: com.android.server.power.PowerManagerService$1@225abd2
+
+Battery saving stats:
+  Battery Saver is currently: OFF
+    Times full enabled: 0
+    Times adaptive enabled: 0
+  
+  Drain stats:
+                     Battery saver OFF                          ON
+  NonDoze NonIntr:    918m   3961mAh(113%)    258.9mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:   3256m  39534mAh(759%)    728.3mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Deep    NonIntr:    350m   1350mAh( 25%)    231.6mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m     35mAh(  0%)   2215.8mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Light   NonIntr:   1163m   7515mAh(110%)    387.7mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:    155m   1123mAh( 18%)    433.1mAh/h          0m      0mAh(  0%)      0.0mAh/h
+
+Battery saver policy (*NOTE* they only apply when battery saver is ON):
+  Settings: battery_saver_constants
+    value: 
+  Settings: (overlay)
+    value: 
+  DeviceConfig: battery_saver
+    location_mode: 
+  mAccessibilityEnabled=true
+  mAutomotiveProjectionActive=false
+  mPolicyLevel=0
+  
+  Policy 'default full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=false
+  
+  Policy 'current full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=false
+  
+  Policy 'default adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'current adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'effective'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+
+Battery saver state machine:
+  Enabled=false
+    full=false
+    adaptive=false
+  mState=1
+  mLastChangedIntReason=0
+  mLastChangedStrReason=null
+  mBootCompleted=true
+  mSettingsLoaded=true
+  mBatteryStatusSet=true
+  mIsPowered=true
+  mBatteryLevel=44
+  mIsBatteryLevelLow=false
+  mSettingAutomaticBatterySaver=0
+  mSettingBatterySaverEnabled=false
+  mSettingBatterySaverEnabledSticky=false
+  mSettingBatterySaverStickyAutoDisableEnabled=true
+  mSettingBatterySaverStickyAutoDisableThreshold=100
+  mSettingBatterySaverTriggerThreshold=0
+  mBatterySaverStickyBehaviourDisabled=false
+  mDynamicPowerSavingsDefaultDisableThreshold=80
+  mDynamicPowerSavingsDisableThreshold=80
+  mDynamicPowerSavingsEnableBatterySaver=false
+  mLastAdaptiveBatterySaverChangedExternallyElapsed=0
+AttentionDetector:
+ mIsSettingEnabled=false
+ mMaxExtensionMillis=900000
+ mPreDimCheckDurationMillis=2000
+ mEffectivePostDimTimeout=0
+ mLastUserActivityTime(excludingAttention)=880984835
+ mAttentionServiceSupported=false
+ mRequested=false
+
+Profile power states: size=0
+Display Group User Activity:
+  displayGroupId=0
+  userActivitySummary=0x1
+  lastUserActivityTime=880984835 (6269 ms ago)
+  lastUserActivityTimeNoChangeLights=880590811 (400293 ms ago)
+  mWakeLockSummary=0x1
+
+Wireless Charger Detector State:
+  mGravitySensor={Sensor name="gravity  Non-wakeup", vendor="QTI", version=1, type=9, maxRange=156.91, resolution=0.01, power=0.515, minDelay=5000}
+  mPoweredWirelessly=false
+  mAtRest=false
+  mRestX=0.0, mRestY=0.0, mRestZ=0.0
+  mDetectionInProgress=false
+  mDetectionStartTime=0 (never)
+  mMustUpdateRestPosition=false
+  mTotalSamples=0
+  mMovingSamples=0
+  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0
+  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0
+Wake Lock Log
+  10-12 00:47:26.888 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.912 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.913 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.913 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.924 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.924 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.925 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.933 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.933 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.933 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.936 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.937 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.937 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.940 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.940 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.941 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.944 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.949 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.963 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.963 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:26.978 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:26.993 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.010 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.011 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.021 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.037 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.049 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.050 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.054 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.079 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.093 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.094 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.114 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.134 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.140 - 10168 - ACQ QcrilOemhookMsgTunnel (partial)
+  10-12 00:47:27.145 - 10168 - REL QcrilOemhookMsgTunnel
+  10-12 00:47:27.148 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.148 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.151 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.169 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.181 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.182 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.193 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.219 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.231 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.231 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.245 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.311 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.324 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.324 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.335 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.372 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.384 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.386 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.404 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.447 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.464 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.465 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.469 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.485 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.501 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.501 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.514 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.537 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.549 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.549 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.562 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.584 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.587 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.587 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.590 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.608 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.613 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.613 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:27.616 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:27.816 - 1000 - ACQ NetworkStats (partial)
+  10-12 00:47:27.850 - 1000 - REL NetworkStats
+  10-12 00:47:28.049 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.064 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.065 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.076 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.118 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.131 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.132 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.142 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.184 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.195 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.195 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.205 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.242 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.254 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.255 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.268 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.315 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.364 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.400 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.436 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.471 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.506 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.555 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.556 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.569 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.570 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.572 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.578 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.579 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.579 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.583 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.584 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.584 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.588 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.589 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.589 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.592 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.593 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.593 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.596 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.608 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.619 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.620 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.625 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.647 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.659 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.660 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.669 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.695 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.706 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.707 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.717 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.758 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.770 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.771 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.781 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.809 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.820 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.822 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.830 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.852 - 1000 - ACQ NetworkStats (partial)
+  10-12 00:47:28.872 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.880 - 1000 - REL NetworkStats
+  10-12 00:47:28.890 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.891 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.897 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.943 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.961 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.961 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.966 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.982 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:28.987 - 1001 - ACQ *telephony-radio* (partial)
+  10-12 00:47:28.988 - 1001 - REL *telephony-radio*
+  10-12 00:47:28.988 - 1001 - ACQ *telephony-radio* (partial)
+  10-12 00:47:28.994 - 1001 - ACQ *telephony-radio* (partial)
+  10-12 00:47:28.995 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.995 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:28.996 - 1001 - REL *telephony-radio*
+  10-12 00:47:28.996 - 1001 - ACQ *telephony-radio* (partial)
+  10-12 00:47:28.999 - 1001 - REL *telephony-radio*
+  10-12 00:47:28.999 - 1001 - ACQ *telephony-radio* (partial)
+  10-12 00:47:29.000 - 1001 - REL *telephony-radio*
+  10-12 00:47:29.005 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.008 - 1001 - REL *telephony-radio*
+  10-12 00:47:29.008 - 1001 - ACQ *telephony-radio* (partial)
+  10-12 00:47:29.008 - 1001 - REL *telephony-radio*
+  10-12 00:47:29.026 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.036 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.037 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.040 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.077 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.088 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.088 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.100 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.129 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.197 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.243 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.283 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.320 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.350 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.395 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.396 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.412 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.412 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.413 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.428 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.429 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.430 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.434 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.434 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.434 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.437 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.437 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.438 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.441 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.441 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.441 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.444 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.448 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.461 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.462 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.468 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.482 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  10-12 00:47:29.500 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.501 - 1000 - ACQ *job*/c.a.f/a.w.i.b.s.SystemJobService (partial)
+  10-12 00:47:29.534 - 1000 - REL *job*/c.a.f/a.w.i.b.s.SystemJobService
+  -
+  Events: 203, Time-Resets: 0
+  Buffer, Bytes used: 510
+FaceDownDetector:
+  mFaceDown=false
+  mActive=true
+  mLastFlipTime=0
+  mSensorMaxLatencyMicros=2000000
+  mUserInteractionBackoffMillis=60000
+  mPreviousResultTime=821363152
+  mPreviousResultType=3
+  mMillisSaved=13055
+  mZAccelerationThreshold=-9.5
+  mAccelerationThreshold=0.2
+  mTimeThreshold=PT1S
+AmbientDisplaySuppressionController:
+ ambientDisplaySuppressed=false
+ mSuppressionTokens={}
+
+Low Power Standby Controller:
+  mIsActive=false
+  mIsEnabled=false
+  mSupportedConfig=false
+  mEnabledByDefaultConfig=false
+  mStandbyTimeoutConfig=0
+  mAllowlistUids=[]

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.exe",
+    "-d",
+    "--disassemble=ota_ble_session_isr_active",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\app-gcc\\X-Track-App-GCC.elf"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 935110844315700,
+  "ended_monotonic_ns": 935111111378200,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\symbols-target\\isr.stdout",
+    "bytes": 482,
+    "sha256": "03eaf1290fd4f6396750ef3a9cf2a885b4656dfd615a9af9a0051c77e31991f2"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round11\\ops\\cmd-q-prep-restore\\mcu\\symbols-target\\isr.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

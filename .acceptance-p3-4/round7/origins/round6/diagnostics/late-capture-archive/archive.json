@@ -1,0 +1,62 @@
+{
+  "capture": "1791733411743571-151409df12fd3ec70569f908",
+  "remote_directory": "/data/user/0/com.wen.gaia.gaia.p34probe/files/p34-observations/1791733411743571-151409df12fd3ec70569f908",
+  "header": {
+    "seq": 1,
+    "kind": "open",
+    "schema": 1,
+    "captureId": "1791733411743571-151409df12fd3ec70569f908",
+    "sentinel": "OTAOBS96bb2c74d5ad6ccecaf30e40",
+    "target": "E3:49:E1:14:D6:CB",
+    "pid": 26049,
+    "platform": "android",
+    "openedAt": "2026-10-11T15:43:31.772393Z",
+    "limits": {
+      "captureBytes": 67108864,
+      "pendingBytes": 1048576
+    }
+  },
+  "health": {
+    "schema": 1,
+    "captureId": "1791733411743571-151409df12fd3ec70569f908",
+    "time": "2026-10-11T16:05:26.867268Z",
+    "records": 28,
+    "bytes": 7650,
+    "producerLines": 27,
+    "upgradeStarts": 0,
+    "upgradeEnds": 0,
+    "outcome": null,
+    "lost": 0,
+    "error": null,
+    "healthy": true
+  },
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\late-capture-archive\\capture\\events.jsonl",
+      "bytes": 7650,
+      "sha256": "3cb884bee8e561356ea590f9febe8b0412dd51c2ba8fdbb923d055adaa3bfe8d"
+    },
+    {
+      "path": ".acceptance-p3-4\\round6\\diagnostics\\late-capture-archive\\capture\\health.json",
+      "bytes": 237,
+      "sha256": "43d62d3f0c6f7ecb09403951e24adc41625c91ed2b3f73c300823ec5e571c6fe"
+    }
+  ],
+  "runtime_restored": {
+    "path": ".acceptance-p3-4\\round6\\ops\\cmd-q-transfer\\phone\\previous-runtime.json",
+    "bytes": 834,
+    "sha256": "06883c92f7dec0df07d0fe57a954dfc7341bcd9c63c3e327791ecb68b7c0a6cc"
+  },
+  "captures_retained": [
+    "1790873190640854-e74f259a6cf81bd47609ba5e",
+    "1790882915541398-f0e7c878e47e73001842b7e8",
+    "1790886478814858-966a83c7a649c78702af5243",
+    "1790891079051299-33907bf1f4188996f192722e",
+    "1790895078341757-825e5ceec9021c26eb02cf1e",
+    "1791470681659748-6b319b3ac1f35fcbf637e008",
+    "1791485067506601-646e66bbbe96e9c037f0f0d7",
+    "1791733411743571-151409df12fd3ec70569f908"
+  ],
+  "phone_unlocked": true,
+  "phone_file_deletions": 0
+}

@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "exec-out",
+    "run-as com.wen.gaia.gaia.p34probe stat -c %s files/p34-observations/1790891079051299-33907bf1f4188996f192722e/health.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "started_monotonic_ns": 852328117366300,
+  "ended_monotonic_ns": 852328406479800,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\phone\\adb-00041.stdout",
+    "bytes": 4,
+    "sha256": "3fd73c76dbb0414be1e7f5ad353ae43c89c55454adad30f8d0f0a74d8f702708"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round6\\diagnostics\\app-no-capture\\phone\\adb-00041.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

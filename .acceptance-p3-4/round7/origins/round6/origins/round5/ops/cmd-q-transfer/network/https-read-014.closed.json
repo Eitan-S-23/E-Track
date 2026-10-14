@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p34-final\\Tools\\ota\\p34-acceptance\\live_phone.py",
+    "--https-read"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 75,
+  "started_monotonic_ns": 846933458535500,
+  "ended_monotonic_ns": 846935357179500,
+  "stdout": {
+    "path": ".acceptance-p3-4\\round5\\ops\\cmd-q-transfer\\network\\https-read-014.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-4\\round5\\ops\\cmd-q-transfer\\network\\https-read-014.stderr",
+    "bytes": 22,
+    "sha256": "f4d5d540bcbe47bbf7ed15d9c1d5d4ae2b2f64438994343413d5246a85deef9c"
+  }
+}

@@ -1,0 +1,950 @@
+{
+  "preparation": {
+    "result": "PASS",
+    "interpretation": "New offline evaluation of the single original v12 restoration, not another restoration.",
+    "mailbox_phases": [
+      1,
+      1,
+      1,
+      1,
+      3,
+      3
+    ],
+    "configuration_preserved": true,
+    "full_base_and_original_boot_equal": true,
+    "health": {
+      "health": [
+        [
+          30000,
+          30,
+          1000,
+          0,
+          6863,
+          6863,
+          0,
+          1,
+          1
+        ],
+        [
+          30000,
+          30,
+          1000,
+          0,
+          7142,
+          7142,
+          0,
+          1,
+          1
+        ]
+      ],
+      "registers": {
+        "vtor": 134285312,
+        "cfsr": 0,
+        "hfsr": 0,
+        "dhcsr": 16842753,
+        "sdio": 0,
+        "freeze": 0
+      },
+      "confirmed_state": 4,
+      "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+    },
+    "stack": {
+      "guard_intact": true,
+      "free_painted_bytes": 5092,
+      "high_water_bytes": 3100,
+      "scope": "Paint observed at this read, not a whole-program worst-case proof"
+    },
+    "storage": {
+      "jedec": 15679512,
+      "capacity_bytes": 16777216,
+      "slots": {
+        "candidate_slot": {
+          "erased": false,
+          "bytes": 613952,
+          "crc32": 2889683253,
+          "version": 30287,
+          "sha8": "21a9d1ef8828498e"
+        },
+        "backup_slot": {
+          "erased": false,
+          "bytes": 613952,
+          "crc32": 2889683253,
+          "version": 30286,
+          "sha8": "9a5b5a40fcbd2056"
+        },
+        "recovery_slot": {
+          "erased": false,
+          "bytes": 619580,
+          "crc32": 2429394932,
+          "version": 30276,
+          "sha8": "deb4484dd0614f49"
+        }
+      },
+      "staging_header_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "staging_journal_sha256": "f47a8ec3e9aff2318d896942282ad4fe37d6391c82914f54a5da8a37de1300c6",
+      "staging_erased": true,
+      "journal": {
+        "erased": true,
+        "expected_begin_durable": 0,
+        "committed_target": null
+      }
+    },
+    "journal_erased": true,
+    "original_executed_pass_preserved": true,
+    "new_physical_restorations": 0
+  },
+  "transfer": {
+    "result": "PASS",
+    "interpretation": "Offline evaluation of original v12 product observations, not old command completion or another OTA.",
+    "transfer_us": 63708034,
+    "throughput_kib_s": 16.07332601097061,
+    "retransmit_rate": 0.0,
+    "ack_samples": 8192,
+    "app_rtt_ram_integrity": true,
+    "one_timely_old_app_sample": true,
+    "stack": {
+      "guard_intact": true,
+      "free_painted_bytes": 5092,
+      "high_water_bytes": 3100,
+      "scope": "Paint observed at this read, not a whole-program worst-case proof"
+    },
+    "clock_hz": 288000000,
+    "tick_delta": 103,
+    "watchdog_registers": [
+      5,
+      3124
+    ],
+    "health": {
+      "health": [
+        [
+          30000,
+          30,
+          1000,
+          0,
+          273325,
+          273326,
+          30009,
+          1,
+          1
+        ],
+        [
+          30000,
+          30,
+          1000,
+          0,
+          273604,
+          273604,
+          30009,
+          1,
+          1
+        ]
+      ],
+      "registers": {
+        "vtor": 134285312,
+        "cfsr": 0,
+        "hfsr": 0,
+        "dhcsr": 16842753,
+        "sdio": 0,
+        "freeze": 0
+      },
+      "confirmed_state": 4,
+      "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+    },
+    "full_target_and_unchanged_boot": true,
+    "final_archive_and_owned_tool_closure": true,
+    "original_v12_exit": null,
+    "original_v12_result": "EVIDENCE_GAP",
+    "original_interruption_cause": "UNESTABLISHED",
+    "sample_limit": "Observed stack paint, clock and WDT configuration only; not whole-program worst case or electrical fault testing.",
+    "same_group_candidate_statistics": {
+      "plannedAttempts": 3,
+      "observedAttempts": 3,
+      "evidenceGaps": [],
+      "groups": [
+        {
+          "parameters": {
+            "ackTimeoutMs": 2000,
+            "androidHighPriority": false,
+            "androidPhyPolicy": "off",
+            "appLifecycle": "resumed",
+            "dataBatchFrames": 12,
+            "input": {
+              "currentImageSha256": "9b3a4a21409c59b916976385ec877b7d90bd7e4c90b3553f0b8df2b02fd787dc",
+              "currentVersionCode": 30286,
+              "deviceAddress": "e3:49:e1:14:d6:cb",
+              "packageBytes": 1048576,
+              "packageSha256": "8373305b6817081106ad35c840ef87bf2d4210ffa2e8b9e881e0799ad1ff9e47",
+              "targetImageSha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+              "targetVersionCode": 30287
+            },
+            "maxRetries": 5,
+            "mtuChunkBytes": 244,
+            "pauseScanDuringOta": false,
+            "platform": "android",
+            "protocol": 2,
+            "rebootInfoMaxAttempts": 3,
+            "rebootInfoTimeoutMs": 2000,
+            "rebootProbeIntervalMs": 1500,
+            "requestedBaud": 921600,
+            "requestedDataBatchFrames": 12,
+            "requestedWindowSegments": 24,
+            "reuseGatt": true,
+            "reuseRebootInfoLink": true,
+            "senderWindowSegments": 24,
+            "sentinel": "OTAOBS96bb2c74d5ad6ccecaf30e40",
+            "withoutResponse": true,
+            "writeMode": "without"
+          },
+          "attempts": 3,
+          "ids": [
+            "original-v10",
+            "original-v11",
+            "original-v12"
+          ],
+          "successes": 3,
+          "failures": 0,
+          "fullReferenceSuccesses": 3,
+          "cleanAttempts": 3,
+          "cleanFailures": 0,
+          "missingAckSamples": 0,
+          "earlyAckSamples": 0,
+          "unresolvedParameterFailures": [],
+          "observedAckP99Us": 761183,
+          "ackP99Eligible": true,
+          "recommendedAckTimeoutMs": 2000,
+          "fullReferenceP95Us": 71582792,
+          "stability30MeetsObservedGates": false
+        }
+      ],
+      "recoveryCases": 0,
+      "successfulRecoveries": 0,
+      "recoveryOffsets": [],
+      "recoveryParameterGroups": 0,
+      "recoveryParameters": null,
+      "recovery10MeetsObservedGates": false,
+      "independentAcceptance": "NOT_RUN",
+      "soakDurationSeconds": null,
+      "scope": "All listed attempts retained; groups never mix baud/timeout/retry/MTU/assets/APK. Soak wall duration and physical disconnect actions require the frozen host/controller evidence, not summed App clocks."
+    },
+    "new_physical_operations": 0
+  },
+  "closeout": {
+    "result": "PASS",
+    "scope": "P3-4 candidate stage only under the existing Spec and OTA-DEC-016.",
+    "source_commit": "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+    "artifact_source_commit": "1c3f7f49baa27c42452f7796839cea57ddd734b7",
+    "actual_original_ci_commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+    "ci_runs": [
+      {
+        "name": "Acceptance Governance",
+        "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "conclusion": "success",
+        "archive_members": 24,
+        "crc_check": "Actual frozen archive command exited zero; not rerun during adjudication."
+      },
+      {
+        "name": "MCU Firmware Build",
+        "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "conclusion": "success",
+        "archive_members": 21,
+        "crc_check": "Actual frozen archive command exited zero; not rerun during adjudication."
+      },
+      {
+        "name": "Flutter Development Checks",
+        "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "conclusion": "success",
+        "archive_members": 29,
+        "crc_check": "Actual frozen archive command exited zero; not rerun during adjudication."
+      },
+      {
+        "name": "Build APK and EXE Release",
+        "commit": "6942ae068f6c57b1b42c679a2ebe039d5b9b0fef",
+        "conclusion": "success",
+        "archive_members": 43,
+        "crc_check": "Actual frozen archive command exited zero; not rerun during adjudication."
+      }
+    ],
+    "flutter_hosts": [
+      {
+        "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "counts": {
+          "passed": 722,
+          "skipped": 16,
+          "failed": 0
+        }
+      },
+      {
+        "host": "Windows-2022Server-10.0.20348-SP0",
+        "counts": {
+          "passed": 705,
+          "skipped": 33,
+          "failed": 0
+        }
+      }
+    ],
+    "firmware_host_suites": [
+      {
+        "test": "test_ota_ble_frame.py",
+        "summaries": [
+          "P3_1_BLE_FRAME=PASS checks=39 failures=0"
+        ]
+      },
+      {
+        "test": "test_ota_ble_session.py",
+        "summaries": [
+          "P3_1_BLE_SESSION=PASS checks=171 failures=0"
+        ]
+      },
+      {
+        "test": "test_ota_staging.py",
+        "summaries": [
+          "P2_1_STAGING=PASS checks=114 failures=0",
+          "OTA_STAGING_HAL=PASS checks=187 failures=0",
+          "OTA_STAGING_HAL=PASS checks=187 failures=0",
+          "OTA_STAGING_HAL=PASS checks=187 failures=0",
+          "STAGING_ERASE_AHEAD=PASS checks=1536 failures=0",
+          "OTA_STAGING_HAL=PASS checks=187 failures=0",
+          "STAGING_ERASE_AHEAD=PASS checks=1536 failures=0"
+        ]
+      },
+      {
+        "test": "test_ota_package.py",
+        "summaries": [
+          "P2_2_PACKAGE=PASS checks=102"
+        ]
+      },
+      {
+        "test": "test_ota_patch.py",
+        "summaries": [
+          "P2_3_VECTOR_PREFLIGHT=PASS vendor_controls=11 oldpos_only=9 invalid_control=[0,0,0]"
+        ]
+      },
+      {
+        "test": "test_ota_backup.py",
+        "summaries": [
+          "P2_5_OTA_BACKUP_ALL=PASS"
+        ]
+      },
+      {
+        "test": "test_ota_device_info.py",
+        "summaries": [
+          "P3_2_OTA_DEVICE_INFO_ALL=PASS"
+        ]
+      }
+    ],
+    "candidate_build_definition_rows": 387,
+    "disabled_test_commands_absent": true,
+    "receiver_model_checks": 327,
+    "receiver_model_cases": 10,
+    "receiver_mutant_rejected": true,
+    "receiver_model_is_not_hardware": true,
+    "caller_independent_checks": 20,
+    "caller_implementation_checks": [
+      17,
+      134
+    ],
+    "host_repairs": "A/B and P34-HOST-CLOSE-01 CLOSED",
+    "historical_comparison": [
+      {
+        "candidate": "baseline",
+        "seconds": 244.870742,
+        "protocol": 1,
+        "declared_source": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+        "apk_sha256": "b9705ea2286f3818d85927f2c15cdf2613421d9cfbac73f5439d2248e91189b3",
+        "write_mode": "with",
+        "discoveries": 2229,
+        "missing_ack_samples": 3,
+        "early_ack_samples": 3,
+        "threshold_eligible": false,
+        "original_parser_exclusions": [
+          {
+            "codes": [],
+            "firstLine": 55,
+            "reasons": [
+              "ACK_SAMPLES:'partial:missing=3,early=3'"
+            ],
+            "source": "observations.log#26c20487f5c4",
+            "summaryLine": 11334
+          }
+        ],
+        "modern_runtime_stamp_not_synthesized": true,
+        "scope": "Historical declared factorial observation, not current-v2 causal speedup or final reference statistics."
+      },
+      {
+        "candidate": "reuse-with",
+        "seconds": 247.039059,
+        "protocol": 1,
+        "declared_source": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+        "apk_sha256": "8980d854d7f4c02727455d3b88d1fff44340b6225d095cdcf167e8d8e6d34b94",
+        "write_mode": "with",
+        "discoveries": 1,
+        "missing_ack_samples": 11,
+        "early_ack_samples": 11,
+        "threshold_eligible": false,
+        "original_parser_exclusions": [
+          {
+            "codes": [],
+            "firstLine": 50,
+            "reasons": [
+              "ACK_SAMPLES:'partial:missing=11,early=11'"
+            ],
+            "source": "observations.log#eefd24d05af3",
+            "summaryLine": 9109
+          }
+        ],
+        "modern_runtime_stamp_not_synthesized": true,
+        "scope": "Historical declared factorial observation, not current-v2 causal speedup or final reference statistics."
+      },
+      {
+        "candidate": "discover-without",
+        "seconds": 79.003209,
+        "protocol": 1,
+        "declared_source": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+        "apk_sha256": "759439401e7c52d3723379aedd0f3b179ed1e5868d3fa11190e59ffd73b3747b",
+        "write_mode": "without",
+        "discoveries": 2229,
+        "missing_ack_samples": 0,
+        "early_ack_samples": 0,
+        "threshold_eligible": false,
+        "original_parser_exclusions": [],
+        "modern_runtime_stamp_not_synthesized": true,
+        "scope": "Historical declared factorial observation, not current-v2 causal speedup or final reference statistics."
+      },
+      {
+        "candidate": "reuse-without",
+        "seconds": 74.326403,
+        "protocol": 1,
+        "declared_source": "fbc3b5aae468e9ab382ac018c1247de43d890491",
+        "apk_sha256": "f1e84d318d83727da93d81d8299c685680b5e8fedf5ef607b3abd203c473031f",
+        "write_mode": "without",
+        "discoveries": 1,
+        "missing_ack_samples": 0,
+        "early_ack_samples": 0,
+        "threshold_eligible": false,
+        "original_parser_exclusions": [],
+        "modern_runtime_stamp_not_synthesized": true,
+        "scope": "Historical declared factorial observation, not current-v2 causal speedup or final reference statistics."
+      }
+    ],
+    "historical_source_object_not_available": true,
+    "candidate": {
+      "protocol": 2,
+      "baud": 921600,
+      "timeout_ms": 2000,
+      "max_retries": 5,
+      "window": 24,
+      "batch": 12,
+      "write_payload": 244
+    },
+    "reference_times_us": [
+      71582792,
+      71316310,
+      63708034
+    ],
+    "timeout_basis": "Same-group original ACK samples and the unchanged shared-contract clamp; reference and supplemental three-observation groups kept explicit.",
+    "timing_limits": "BLE BEGIN-to-END ACK is not installation or reconnect time. Discovery is nested in GATT; ACK samples overlap work. No cross-clock subtraction or summed exclusive cost claim.",
+    "rates": {
+      "baud115200": "Historical comparison reconciled",
+      "baud230400": "Unreconciled, not unsupported",
+      "baud460800": "Old failure/resume evidence is not a clean current-v2 comparator",
+      "baud921600": "Supported candidate, not final highest stable production choice"
+    },
+    "trial5": "Deferred by the existing user direction; unresolved, not repaired or waived.",
+    "deferred": {
+      "P3_5": "Real-backend 10/10 recovery",
+      "P5_1": "Final selected-group 30/30 and real four-hour campaign",
+      "P5_2": "Fault/applicability coverage"
+    },
+    "final_release_allowed": false,
+    "new_physical_observations_required_for_this_candidate_scope": [],
+    "no_new_build_ci_test_or_device_execution": true,
+    "qualification_total": 3
+  },
+  "retained_originals": [
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.acceptance-p3-4\\round12\\evidence-matrix.json",
+      "bytes": 144128,
+      "sha256": "25a9ffd13aede3659969ad64f45957e282323096faa286ecda365f26d1148e62",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\original-v12.matrix.json",
+        "bytes": 144128,
+        "sha256": "25a9ffd13aede3659969ad64f45957e282323096faa286ecda365f26d1148e62"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\docs\\acceptance-contracts\\P3-4-v12.contract.json",
+      "bytes": 36568,
+      "sha256": "8218d395b105303798163adbe812c4d2593a55816f2f203ea0e2b8554ce4ea1e",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\original-v12.contract.json",
+        "bytes": 36568,
+        "sha256": "8218d395b105303798163adbe812c4d2593a55816f2f203ea0e2b8554ce4ea1e"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-final\\.cache\\p34-build3\\b\\build.ninja",
+      "bytes": 5535992,
+      "sha256": "d995df432e02abae9a02c9c8f9c20eca370f53af54f4efa1b0e36fe3ace3ac40",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\candidate-build.ninja",
+        "bytes": 5535992,
+        "sha256": "d995df432e02abae9a02c9c8f9c20eca370f53af54f4efa1b0e36fe3ace3ac40"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycle-checkpoints\\screening-summary.json",
+      "bytes": 5906,
+      "sha256": "fb3018606b545d5f3db49dbf121aa757149fb80a1b1dd202ae445457ffafbd4e",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\screening-summary.json",
+        "bytes": 5906,
+        "sha256": "fb3018606b545d5f3db49dbf121aa757149fb80a1b1dd202ae445457ffafbd4e"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\measurement.json",
+      "bytes": 2125,
+      "sha256": "a55b8613a55302a7fe1b270ea90c933232a9ce6559be799951fbf77d395cf0fb",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\measurement.json",
+        "bytes": 2125,
+        "sha256": "a55b8613a55302a7fe1b270ea90c933232a9ce6559be799951fbf77d395cf0fb"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\finished\\binding.json",
+      "bytes": 2007,
+      "sha256": "a86ff079bdefee71e9e797df7116a9c8d179a7f11e0aebc757002b18c7c1c340",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\binding.json",
+        "bytes": 2007,
+        "sha256": "a86ff079bdefee71e9e797df7116a9c8d179a7f11e0aebc757002b18c7c1c340"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\mcu-r2\\result.json",
+      "bytes": 3261,
+      "sha256": "24231b313baebda16505ce2225a68fd29cc04856016d9f2f46851ef3f0a755f9",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\board.json",
+        "bytes": 3261,
+        "sha256": "24231b313baebda16505ce2225a68fd29cc04856016d9f2f46851ef3f0a755f9"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\finished\\snapshot.jsonl",
+      "bytes": 1233163,
+      "sha256": "fb69e7b99627d93d9fceb3e55c69d057c65cf021ca6ba5f3bf08a4f38c11c6d5",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\snapshot.jsonl",
+        "bytes": 1233163,
+        "sha256": "fb69e7b99627d93d9fceb3e55c69d057c65cf021ca6ba5f3bf08a4f38c11c6d5"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\finished\\statistics.json",
+      "bytes": 1561,
+      "sha256": "50859cf421bbb40a2ac9dcbd4db41bb4578f91d6c1081b0704890d81358177fb",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\original-statistics.json",
+        "bytes": 1561,
+        "sha256": "50859cf421bbb40a2ac9dcbd4db41bb4578f91d6c1081b0704890d81358177fb"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+      "bytes": 84728,
+      "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\parser-0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7.py",
+        "bytes": 84728,
+        "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681253386\\contents\\run-f0e34bb377b44ce99cd24e7bcc04a550\\artifacts\\trace-dev-debug.json",
+      "bytes": 601,
+      "sha256": "8122bd7d5bad1b991343fea9300447103ed2def8ac86e85d5b22d51e53199579",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\apk-metadata.json",
+        "bytes": 601,
+        "sha256": "8122bd7d5bad1b991343fea9300447103ed2def8ac86e85d5b22d51e53199579"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\mcu-r2\\image.bin",
+      "bytes": 603764,
+      "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\baseline_image.bin",
+        "bytes": 603764,
+        "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\mcu-r2\\boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\baseline_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\mcu-r2\\final-image.bin",
+      "bytes": 603764,
+      "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\final_image.bin",
+        "bytes": 603764,
+        "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\baseline\\mcu-r2\\final-boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\baseline\\final_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\measurement.json",
+      "bytes": 2258,
+      "sha256": "d1220ca89ce447118ae40b1e6872576cb8caa9c52c7db9a2de42db193ee84dd9",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\measurement.json",
+        "bytes": 2258,
+        "sha256": "d1220ca89ce447118ae40b1e6872576cb8caa9c52c7db9a2de42db193ee84dd9"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\finished\\binding.json",
+      "bytes": 2007,
+      "sha256": "99b4e371f8c83e34e581ed5e55574ead9a65017b3779b64b28e51e0479bd589e",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\binding.json",
+        "bytes": 2007,
+        "sha256": "99b4e371f8c83e34e581ed5e55574ead9a65017b3779b64b28e51e0479bd589e"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\mcu\\result.json",
+      "bytes": 3365,
+      "sha256": "64bd647efefb60b90403791e4cb79f82fdb22c90d3198b249d7a71e67e33d82c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\board.json",
+        "bytes": 3365,
+        "sha256": "64bd647efefb60b90403791e4cb79f82fdb22c90d3198b249d7a71e67e33d82c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\finished\\snapshot.jsonl",
+      "bytes": 1029030,
+      "sha256": "5f01e04c2b4039596908dd1d08c33d7434d7d9ce56b7ace1cdebf95a2d6ee24d",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\snapshot.jsonl",
+        "bytes": 1029030,
+        "sha256": "5f01e04c2b4039596908dd1d08c33d7434d7d9ce56b7ace1cdebf95a2d6ee24d"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\finished\\statistics.json",
+      "bytes": 1565,
+      "sha256": "1ad63ef057dc181fa1b5d0f0d97a717a65a8c240a45e054cd150dc18f7b2b379",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\original-statistics.json",
+        "bytes": 1565,
+        "sha256": "1ad63ef057dc181fa1b5d0f0d97a717a65a8c240a45e054cd150dc18f7b2b379"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+      "bytes": 84728,
+      "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\parser-0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7.py",
+        "bytes": 84728,
+        "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681577975\\contents\\run-3063f6263dad49009cd2f9de5efd52bb\\artifacts\\trace-dev-debug.json",
+      "bytes": 729,
+      "sha256": "551eec061e18bc921182f94598b37f9152770c823420990d30a0e15607571a56",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\apk-metadata.json",
+        "bytes": 729,
+        "sha256": "551eec061e18bc921182f94598b37f9152770c823420990d30a0e15607571a56"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\mcu\\image.bin",
+      "bytes": 603764,
+      "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\baseline_image.bin",
+        "bytes": 603764,
+        "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\mcu\\boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\baseline_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\mcu\\final-image.bin",
+      "bytes": 603764,
+      "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\final_image.bin",
+        "bytes": 603764,
+        "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\batch-r3\\cells\\reuse-with\\mcu\\final-boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-with\\final_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\measurement.json",
+      "bytes": 2294,
+      "sha256": "533564542515683c1350b2773799a002b8baa3de6f7bd545cc605d965b1327cc",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\measurement.json",
+        "bytes": 2294,
+        "sha256": "533564542515683c1350b2773799a002b8baa3de6f7bd545cc605d965b1327cc"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\finished\\binding.json",
+      "bytes": 2000,
+      "sha256": "dec77fa7b7517340728a69e08d498ce65b852f5d1fca534b0dcdb62bca0ecd11",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\binding.json",
+        "bytes": 2000,
+        "sha256": "dec77fa7b7517340728a69e08d498ce65b852f5d1fca534b0dcdb62bca0ecd11"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\mcu\\result.json",
+      "bytes": 3334,
+      "sha256": "46a34c2c9c34155e62c648cc6e9bc1b64ae0bd26d1190a66effcf644830fb39c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\board.json",
+        "bytes": 3334,
+        "sha256": "46a34c2c9c34155e62c648cc6e9bc1b64ae0bd26d1190a66effcf644830fb39c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\finished\\snapshot.jsonl",
+      "bytes": 1237530,
+      "sha256": "d8de2e5079dfab374cda36626e7c0a48481be44442f72dfa73331c03a591a80d",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\snapshot.jsonl",
+        "bytes": 1237530,
+        "sha256": "d8de2e5079dfab374cda36626e7c0a48481be44442f72dfa73331c03a591a80d"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\finished\\statistics.json",
+      "bytes": 1965,
+      "sha256": "c4733ca5f3ff8e3b2909465ee93ff09869b22a2ec0a2bb825db805ae83aaafb2",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\original-statistics.json",
+        "bytes": 1965,
+        "sha256": "c4733ca5f3ff8e3b2909465ee93ff09869b22a2ec0a2bb825db805ae83aaafb2"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+      "bytes": 84728,
+      "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\parser-0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7.py",
+        "bytes": 84728,
+        "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681318429\\contents\\run-d68b8de6936f4de4938234d0c91a5d3d\\artifacts\\trace-dev-debug.json",
+      "bytes": 735,
+      "sha256": "5f98f1fa058d4892453d3eb730a065de875c61ba4542ddb5c12b66ac14f4d12a",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\apk-metadata.json",
+        "bytes": 735,
+        "sha256": "5f98f1fa058d4892453d3eb730a065de875c61ba4542ddb5c12b66ac14f4d12a"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\mcu\\image.bin",
+      "bytes": 603764,
+      "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\baseline_image.bin",
+        "bytes": 603764,
+        "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\mcu\\boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\baseline_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\mcu\\final-image.bin",
+      "bytes": 603764,
+      "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\final_image.bin",
+        "bytes": 603764,
+        "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\mcu\\final-boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\discover-without\\final_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\measurement.json",
+      "bytes": 2279,
+      "sha256": "f1cb7319d5396508a3f332611c160939a271c19b2787a3d80e6491e2711ade65",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\measurement.json",
+        "bytes": 2279,
+        "sha256": "f1cb7319d5396508a3f332611c160939a271c19b2787a3d80e6491e2711ade65"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\finished\\binding.json",
+      "bytes": 1995,
+      "sha256": "74c14e826ea5c54c6232c914608b088daa13e1dfb3d00ac159456afe185e6ae0",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\binding.json",
+        "bytes": 1995,
+        "sha256": "74c14e826ea5c54c6232c914608b088daa13e1dfb3d00ac159456afe185e6ae0"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\result.json",
+      "bytes": 3319,
+      "sha256": "50f1e1a244358a0c6622ba8bd25f92ce83c34f8b84fbd8a2f38657cf13bf0909",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\board.json",
+        "bytes": 3319,
+        "sha256": "50f1e1a244358a0c6622ba8bd25f92ce83c34f8b84fbd8a2f38657cf13bf0909"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\finished\\snapshot.jsonl",
+      "bytes": 1018112,
+      "sha256": "6dd1f86b300f2ec94eb1096983c793272449c58239dceacec5d768de333e3af6",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\snapshot.jsonl",
+        "bytes": 1018112,
+        "sha256": "6dd1f86b300f2ec94eb1096983c793272449c58239dceacec5d768de333e3af6"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\finished\\statistics.json",
+      "bytes": 1958,
+      "sha256": "7f277f9a97f92eb4becdddc29595cf626c29892406ef6866ebfbaf876c616b1a",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\original-statistics.json",
+        "bytes": 1958,
+        "sha256": "7f277f9a97f92eb4becdddc29595cf626c29892406ef6866ebfbaf876c616b1a"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\Tools\\ota\\p3-4-link-stats\\link_stats.py",
+      "bytes": 84728,
+      "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\parser-0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7.py",
+        "bytes": 84728,
+        "sha256": "0cf95913612c688c6414b2becddcacffebc5b5aa92641eb989a299737b6b82c7"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10680649265\\contents\\run-ae4251be3a6842cdba86ebe02d39fade\\artifacts\\trace-dev-debug.json",
+      "bytes": 731,
+      "sha256": "b21b15bf14da4f040a5662451020e65feb0105c17099cd59e0609a7123049344",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\apk-metadata.json",
+        "bytes": 731,
+        "sha256": "b21b15bf14da4f040a5662451020e65feb0105c17099cd59e0609a7123049344"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\image.bin",
+      "bytes": 603764,
+      "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\baseline_image.bin",
+        "bytes": 603764,
+        "sha256": "415589cb342ffe1986fd141cc29ba192489a85bd13b86cbb9c0939cf85ffad3b"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\baseline_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\final-image.bin",
+      "bytes": 603764,
+      "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\final_image.bin",
+        "bytes": 603764,
+        "sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe"
+      }
+    },
+    {
+      "original_path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c3-001\\cells\\reuse-without\\mcu\\final-boot-region.bin",
+      "bytes": 65536,
+      "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+      "copy": {
+        "path": ".acceptance-p3-4\\round15\\inputs\\historical-comparison\\reuse-without\\final_boot.bin",
+        "bytes": 65536,
+        "sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c"
+      }
+    }
+  ],
+  "old_v11": "HARNESS_FAIL",
+  "old_v12": "EVIDENCE_GAP",
+  "old_v13": "PASS for its original-evidence scope",
+  "old_v14": "EVIDENCE_GAP with native FC failure preserved",
+  "new_physical_operations": 0
+}

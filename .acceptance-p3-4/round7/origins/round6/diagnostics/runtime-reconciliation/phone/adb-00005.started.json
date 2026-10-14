@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5062",
+    "-s",
+    "10ADA4197U001CK",
+    "shell",
+    "sha256sum '/data/app/~~HMWYgHTwCRWTizjT1jHHxA==/com.wen.gaia.gaia.p34probe-BwK2NHzAarjBiOKaEgyJ3A==/base.apk'"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "monotonic_ns": 853333000020100,
+  "stdin_sha256": null
+}

@@ -1,0 +1,28 @@
+{
+  "capture": "1791886690742329-94e77ea025b6ce69ae706f64",
+  "pid": 4902,
+  "originals": [
+    {
+      "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\phone\\archive\\events.jsonl",
+      "bytes": 4775426,
+      "sha256": "271f4e8e775a9ec3543669628b109b58cbcb774e31635062756070a4ec4aec25"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\phone\\archive\\health.json",
+      "bytes": 253,
+      "sha256": "caf1e36656b20acd5cc7248d936bab0d11bcab1221228026b13967edb862d4e5"
+    },
+    {
+      "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\phone\\archive\\snapshot-1.jsonl",
+      "bytes": 4775779,
+      "sha256": "930a7114799d882e10287362ba2a723d489d96d71f4c3248a1f11641704b2170"
+    }
+  ],
+  "runtime": {
+    "path": ".acceptance-p3-4\\round12\\diagnostics\\post-interruption\\phone\\runtime.json",
+    "bytes": 867,
+    "sha256": "16ffa235d210886928805a3997c44d25a14c9dbe6a1149e5f458781b5ace31f6"
+  },
+  "remote_pruned": true,
+  "apk_sha256": "858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f"
+}

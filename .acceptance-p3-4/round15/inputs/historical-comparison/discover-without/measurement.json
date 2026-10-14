@@ -1,0 +1,66 @@
+{
+  "candidate": "discover-without",
+  "package_bytes": 284643,
+  "package_sha256": "da82725792afeb88b353de7c595596eafa47f1c1db9bfa4905803693b159d600",
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p3-4-screening-20260922\\resume\\artifacts\\10681318429\\contents\\run-d68b8de6936f4de4938234d0c91a5d3d\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131603682,
+    "sha256": "759439401e7c52d3723379aedd0f3b179ed1e5868d3fa11190e59ffd73b3747b"
+  },
+  "transfer_seconds": 79.003209,
+  "payload_kib_s": 3.518485935014361,
+  "data_segments_unique": 2224,
+  "data_retransmit_frames": 0,
+  "write_mode": "without",
+  "mtu_chunk_bytes": 244,
+  "gatt_writes": {
+    "calls": 2227,
+    "bytes": 315942,
+    "errors": 0,
+    "minUs": 5916,
+    "p50Us": 13299,
+    "p95Us": 24138,
+    "maxUs": 198701
+  },
+  "discovers": {
+    "calls": 2229,
+    "errors": 0,
+    "minUs": 3319,
+    "p50Us": 7223,
+    "p95Us": 14068,
+    "maxUs": 54697
+  },
+  "platform_writes": {
+    "calls": 2227,
+    "bytes": 315942,
+    "errors": 0,
+    "minUs": 2279,
+    "p50Us": 4766,
+    "p95Us": 10392,
+    "maxUs": 184761
+  },
+  "ack_sample_status": "complete",
+  "ack_early_invalid": 0,
+  "reconnect_phase_seconds": 62.673783,
+  "threshold_eligible": false,
+  "independent_acceptance": "NOT_RUN",
+  "limits": "Screening only. Partial/early ACKs cannot establish P99; discovery is nested in GATT time.",
+  "binding": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\finished\\binding.json",
+    "bytes": 2000,
+    "sha256": "dec77fa7b7517340728a69e08d498ce65b852f5d1fca534b0dcdb62bca0ecd11"
+  },
+  "statistics": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\finished\\statistics.json",
+    "bytes": 1965,
+    "sha256": "c4733ca5f3ff8e3b2909465ee93ff09869b22a2ec0a2bb825db805ae83aaafb2"
+  },
+  "device_result": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p34-cycles\\c2-001\\cells\\discover-without\\mcu\\result.json",
+    "bytes": 3334,
+    "sha256": "46a34c2c9c34155e62c648cc6e9bc1b64ae0bd26d1190a66effcf644830fb39c"
+  },
+  "final_image_sha256": "16b4442d4d88aed0195513808862b64459159b4b40afdf5b94b2ecc30e2929fe",
+  "whole_boot_sha256": "e6618f50b6fce014beb2b8fe5cd4317b904d609d05c07a86e510a4bd772f2b7c",
+  "sd_ready": 1
+}

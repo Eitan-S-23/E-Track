@@ -1,0 +1,33 @@
+{
+  "result": "EVIDENCE_GAP",
+  "contract": {
+    "path": "docs\\acceptance-contracts\\P3-4-v14.contract.json",
+    "bytes": 59213,
+    "sha256": "7aa4ed3bb760ce0cc0a5acdaaa9e15a85bad30785f73cd0644da29ddbb76cad4"
+  },
+  "matrix": {
+    "path": ".acceptance-p3-4\\round14\\evidence-matrix.json",
+    "bytes": 126102,
+    "sha256": "c03262d050940304bb923d4266547de771b18cfb7aea6861aa315aea280d0e53"
+  },
+  "final_validation": {
+    "path": ".cache\\p34-local-closeout-20261014\\v14-final-host\\final-validation.closed.json",
+    "bytes": 4520,
+    "sha256": "53cad296a0addbd96b8618a1642e3700e483f38d0dc0419e8117bf859aa726ed"
+  },
+  "complete_executed_pass": [
+    "P34-CANDIDATE-REFERENCE"
+  ],
+  "actual_commands": [
+    "CMD-REFERENCE-V10",
+    "CMD-REFERENCE-V11",
+    "CMD-REFERENCE-MCU",
+    "CMD-Q-TRANSFER",
+    "CMD-Q-TRANSFER-MCU",
+    "CMD-Q-TRANSFER-RAM",
+    "CMD-Q-TRANSFER-BASE"
+  ],
+  "incomplete_due_to_host_path_error": true,
+  "physical_device_operations": 0,
+  "qualification_total": 3
+}

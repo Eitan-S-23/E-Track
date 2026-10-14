@@ -1,0 +1,7 @@
+{
+  "error_type": "URLError",
+  "message": "<urlopen error [Errno 11001] getaddrinfo failed>",
+  "unknown_outcome_requires_reconciliation": true,
+  "device_attempted": true,
+  "no_automatic_retry": true
+}
