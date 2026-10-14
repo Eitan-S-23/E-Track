@@ -1,0 +1,123 @@
+{
+  "head": "719737d9fae89f6d361df2d263ff10dda28948af",
+  "result": "PASS",
+  "runs": [
+    {
+      "run": 38515974934,
+      "workflow": "Build APK and EXE Release",
+      "head": "719737d9fae89f6d361df2d263ff10dda28948af",
+      "result": "success",
+      "jobs": {
+        "Detect changed paths": "success",
+        "Build Android APK": "success",
+        "Build Windows EXE": "success",
+        "Deploy GitHub Pages": "skipped",
+        "Create GitHub Release": "skipped"
+      },
+      "required_jobs": [
+        "Detect changed paths",
+        "Build Android APK",
+        "Build Windows EXE"
+      ],
+      "forbidden_effect_jobs_skipped": [
+        "Deploy GitHub Pages",
+        "Create GitHub Release"
+      ],
+      "metadata": {
+        "path": ".acceptance-p3-4\\integration-20261014\\38515974934.json",
+        "bytes": 7564,
+        "sha256": "97b44210b8ffe1ccc93e797761f382a0b9ab74ad224a70891363a5b38528f53f"
+      },
+      "logs": {
+        "path": ".acceptance-p3-4\\integration-20261014\\38515974934.logs.zip",
+        "bytes": 1397282,
+        "sha256": "ec50e7b489b683109bc95b24d7cf72553445a8d2a477ecd76b8327cb6b05af56"
+      },
+      "zip_crc_pass": true,
+      "archive_entries": 43,
+      "warning_lines": 21,
+      "error_diagnostic_lines": 0,
+      "test_summaries": []
+    },
+    {
+      "run": 38516515572,
+      "workflow": "Acceptance Governance",
+      "head": "719737d9fae89f6d361df2d263ff10dda28948af",
+      "result": "success",
+      "jobs": {
+        "Flutter debugging skill (windows-latest)": "success",
+        "Validate acceptance and build governance": "success",
+        "Flutter debugging skill (ubuntu-latest)": "success"
+      },
+      "required_jobs": [
+        "Flutter debugging skill (ubuntu-latest)",
+        "Flutter debugging skill (windows-latest)",
+        "Validate acceptance and build governance"
+      ],
+      "forbidden_effect_jobs_skipped": [],
+      "metadata": {
+        "path": ".acceptance-p3-4\\integration-20261014\\38516515572.json",
+        "bytes": 5534,
+        "sha256": "59741a04d44da55f2490ef24e2b163db3dca70e33af65c5ab2cd9eb4ed3a82ec"
+      },
+      "logs": {
+        "path": ".acceptance-p3-4\\integration-20261014\\38516515572.logs.zip",
+        "bytes": 61047,
+        "sha256": "f15173fc24bee8b1e08b22e73d18c967e8565339fe8c3cdc8084037b18792b59"
+      },
+      "zip_crc_pass": true,
+      "archive_entries": 28,
+      "warning_lines": 0,
+      "error_diagnostic_lines": 0,
+      "test_summaries": [
+        "Ran 17 tests in 0.417s",
+        "Ran 126 tests in 2.855s",
+        "Ran 36 tests in 4.240s",
+        "Ran 3 tests in 0.001s",
+        "Ran 14 tests in 0.011s",
+        "Ran 11 tests in 3.340s",
+        "Ran 62 tests in 7.546s",
+        "Ran 39 tests in 1.388s",
+        "Ran 29 tests in 0.119s",
+        "Ran 17 tests in 0.321s"
+      ]
+    },
+    {
+      "run": 38516523273,
+      "workflow": "MCU Firmware Build",
+      "head": "719737d9fae89f6d361df2d263ff10dda28948af",
+      "result": "success",
+      "jobs": {
+        "Build firmware (arm-none-eabi-gcc)": "success",
+        "Register firmware to Cloudflare": "skipped"
+      },
+      "required_jobs": [
+        "Build firmware (arm-none-eabi-gcc)"
+      ],
+      "forbidden_effect_jobs_skipped": [
+        "Register firmware to Cloudflare"
+      ],
+      "metadata": {
+        "path": ".acceptance-p3-4\\integration-20261014\\38516523273.json",
+        "bytes": 4069,
+        "sha256": "9ef9b52084f47ececdd6e3a438e800651c3c337947ad318d287db8f99b70fdee"
+      },
+      "logs": {
+        "path": ".acceptance-p3-4\\integration-20261014\\38516523273.logs.zip",
+        "bytes": 180520,
+        "sha256": "1ca86f029eb37d0361d020f3d6689d737508d170a405b3d58a3488308de4c507"
+      },
+      "zip_crc_pass": true,
+      "archive_entries": 19,
+      "warning_lines": 640,
+      "error_diagnostic_lines": 0,
+      "test_summaries": [
+        "Ran 1 test in 0.022s",
+        "Ran 9 tests in 0.027s"
+      ]
+    }
+  ],
+  "no_new_device_or_ota": true,
+  "release_and_deployment_jobs_skipped": true,
+  "note": "CI integration validation, not new physical qualification or final reliability"
+}

@@ -1,0 +1,53 @@
+{
+  "task_id": "P3-4",
+  "scope": "candidate stage only",
+  "result": "COMPLETE",
+  "pr": 26,
+  "merge_commit": "17147e4265336945576ec218c8541079d4d8bf6c",
+  "merged_at": "2026-10-14T05:34:11Z",
+  "accepted_source": "fcbace8b3f782714a139a77a12cb9305dbaef7cc",
+  "accepted_tree": "7038ea9de58dba625d487caee57c6dfb130d04b6",
+  "bundle_commit": "15a025b9c2690e864456a32fb2820422846fb85b",
+  "freeze_index_commit": "e63ea9e41bfce2a3cb8a0dfc74ff68130ff613f0",
+  "governance_commit": "cb317affcd291695f42271084b4b305b0d7e6f8b",
+  "contract": {
+    "path": "docs\\acceptance-contracts\\P3-4-v15.contract.json",
+    "bytes": 60528,
+    "sha256": "e315dc6c39da8d995baea2ee2d30292d957451ba23a82e5790b597ed2ae201ed"
+  },
+  "matrix": {
+    "path": ".acceptance-p3-4\\round15\\evidence-matrix.json",
+    "bytes": 263823,
+    "sha256": "07ca9f24cecbda7025e652c20a0708bd31b7afc81203fe5eb90a12944c1dd211"
+  },
+  "ci": {
+    "path": ".acceptance-p3-4\\integration-20261014\\ci-summary.json",
+    "bytes": 4123,
+    "sha256": "c6fe4b8b9a594633a6b76a206358a9ca25efd09dac735f45ce8fb0de96ad4b23"
+  },
+  "post_merge_ci": {
+    "path": ".acceptance-p3-4\\integration-20261014\\main-build-summary.json",
+    "bytes": 733,
+    "sha256": "af14f3659d585cefb2e8db95765dc05c5b11fec130fb4495618c7a2d54634c67"
+  },
+  "main_worktree": "D:\\github\\my\\E-Track\\.cache\\p34-final",
+  "shared_preservation_branch": "archive/p34-root-before-delivery-20261014",
+  "shared_files_unchanged": 1220,
+  "shared_index_entries_unchanged": true,
+  "no_unrelated_commit_or_cleanup": true,
+  "new_device_actions": 0,
+  "new_ota": 0,
+  "physical_chain": "3/3 preserved",
+  "production_release_allowed": false,
+  "remaining_tasks": {
+    "P3-5": "real backend 10/10; P4-2 readiness remains",
+    "P5-1": "final same-group 30/30 and actual four hours",
+    "P5-2": "applicable physical faults"
+  },
+  "trial5": "deferred, unresolved, not waived",
+  "authority": {
+    "user_statement": "\u90a3\u5c31\u505a\u5427\uff0c\u5168\u6743\u6388\u6743\u7ed9\u4f60",
+    "scope": "the proposed Git/CI/PR/main closeout, not device or release",
+    "same_scope_reapproval_needed": false
+  }
+}

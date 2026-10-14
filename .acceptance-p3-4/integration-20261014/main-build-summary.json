@@ -1,0 +1,23 @@
+{
+  "run": 38517340721,
+  "head": "17147e4265336945576ec218c8541079d4d8bf6c",
+  "jobs": {
+    "Detect changed paths": "success",
+    "Build Windows EXE": "success",
+    "Build Android APK": "success",
+    "Deploy GitHub Pages": "skipped",
+    "Create GitHub Release": "skipped"
+  },
+  "metadata": {
+    "path": ".acceptance-p3-4\\integration-20261014\\38517340721.json",
+    "bytes": 7486,
+    "sha256": "95d92d9238039a1dcdf753cf5ae494615a98ea8e1965c419cb9725f92fadcc8d"
+  },
+  "logs": {
+    "path": ".acceptance-p3-4\\integration-20261014\\38517340721.logs.zip",
+    "bytes": 1408273,
+    "sha256": "abfd3ee955f40a6449a44e27b4e5c0c01eff48403b9cc50a48856925957be365"
+  },
+  "zip_crc_pass": true,
+  "no_release_or_deployment": true
+}

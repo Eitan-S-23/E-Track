@@ -1,8 +1,14 @@
 # P3-4 Offline Original-Evidence Closeout
 
-Date: 2026-10-13. Same independent reviewer; no implementer role change.
+Started: 2026-10-13. Same independent reviewer; no product implementer role change.
 
-Latest continuation (2026-10-14): candidate-stage independent acceptance is PASS
+Latest status (2026-10-14): P3-4 candidate-stage acceptance and main delivery are
+COMPLETE. PR #26 merged as `17147e4265336945576ec218c8541079d4d8bf6c` after the
+required CI passed; source, original evidence and freeze-index commits are all
+reachable. See Delivered Result below. Earlier scope/authority/status entries
+remain historical. This is not completion of P3-5/P5 or production release.
+
+Candidate acceptance checkpoint (2026-10-14): independent acceptance is PASS
 under `P3-4-v15`. The verified local evidence commit is
 `15a025b9c2690e864456a32fb2820422846fb85b`, with 8838 raw Git blob checks and a
 successful standard validation at that commit. See Candidate Stage Closure below.
@@ -897,3 +903,48 @@ host-remediation supplement also retains its byte-pinned final blank line rather
 than changing approved historical content merely to silence `git diff --check`.
 All other edited paths pass the whitespace check. The current progress entry is
 updated so its old October 7 preparation notes cannot be mistaken for new status.
+
+### Delivered Result
+
+PR #26 merged at 2026-10-14T05:34:11Z as
+`17147e4265336945576ec218c8541079d4d8bf6c`, using a merge commit, not squash or
+rebase. Its tree exactly matches the checked head
+`719737d9fae89f6d361df2d263ff10dda28948af`. The original source `fcbace8b`, bundle
+`15a025b9`, index `e63ea9e` and governance `cb317aff` are reachable from main.
+No accepted firmware, App, host implementation, contract, matrix or original
+evidence was modified during this integration.
+
+| Actual CI | Identity | Result and scope |
+| --- | --- | --- |
+| App APK/EXE 38515974934 | PR head 719737d | SUCCESS; Android and Windows jobs passed; Pages and Release skipped. |
+| Acceptance Governance 38516515572 | Explicit existing workflow on 719737d | SUCCESS; both host adapters and full governance job passed. |
+| MCU Firmware Build 38516523273 | Explicit existing workflow on 719737d, publish=false | SUCCESS; firmware build/checks passed, Cloudflare registration skipped; not another candidate installation. |
+| App APK/EXE 38517340721 | Merged main 17147e4 | SUCCESS; Android and Windows jobs passed; Pages and Release skipped. |
+
+The first automatic PR update exposed only the App workflow. The two other
+required checks were therefore dispatched once on the exact same head using
+existing entries; no missing check was treated as a pass. Original metadata
+and complete CRC-checked log ZIPs are retained in
+`.acceptance-p3-4/integration-20261014/`, with `ci-summary.json`,
+`main-build-summary.json` and `delivery-summary.json`. The firmware CI contains
+640 warning lines, App CI 21; originals retain these diagnostics. Successful
+builds are not a zero-warning claim. The local 61/62 initial check and corrected
+1/1 remain separate real runs, not a fabricated single all-green invocation.
+
+Main is now checked out in `D:/github/my/E-Track/.cache/p34-final`. The shared
+`D:/github/my/E-Track` tree retains its exact original files and index entries on
+`archive/p34-root-before-delivery-20261014`, based on `cb317aff`. All 1220 selected
+shared files (54 tracked modifications plus 1166 untracked inputs) were checked
+unchanged. No unrelated work was committed, stashed, reset, deleted or published.
+This preservation tree is deliberately not a checkout of the latest main;
+agents needing delivered code/rules must use main in R or read the main Git
+objects, not overwrite the shared user's work to make its branch label match.
+
+The P3-4 board is marked COMPLETE for the candidate stage authorized by the v15
+contract and OTA-DEC-016. P3-5's remaining readiness dependency is P4-2; neither
+that status nor the P5 final campaigns is declared complete. The candidate scope
+needs no further device observation. Trial5 is still deferred/unresolved, old
+v11/v12/v13/v14 outcomes remain, and the physical chain remains 3/3. Zero new
+device actions or OTA occurred during this delivery. Production release remains
+prohibited. This records-only follow-up and its CI/archive/audit do not reopen
+product acceptance or grant new device permission.

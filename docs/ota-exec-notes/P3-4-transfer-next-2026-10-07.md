@@ -1,6 +1,6 @@
 # Transfer Screening After Group16
 
-## 2026-10-14 Candidate Acceptance And Local Delivery Complete
+## 2026-10-14 Candidate Acceptance And Main Delivery Complete
 
 Current independent result: `P3-4-v15` candidate-stage PASS, not production
 release or completion of the P3-5/P5 campaigns. Source is `fcbace8b`; verified
@@ -14,14 +14,17 @@ index. A/B and P34-HOST-CLOSE-01 are CLOSED. No new device operation or OTA is
 needed for this accepted candidate scope; v11 HARNESS_FAIL, v12 EVIDENCE_GAP,
 v13 scoped PASS, v14 partial EVIDENCE_GAP and the physical total 3/3 remain.
 
-The user approved the local source/evidence/record/index chain, its v14 metadata
-correction and subsequent necessary authorizations within that same scope.
-Do not ask again for in-scope local steps or repeat already-completed actions.
-Shared main worktree/ref/index, push/merge/CI/release and devices remain outside
-this authority. Main/PR integration is not performed. P3-5 retains real-backend
-10/10; P5-1 retains final 30/30 and a real four-hour campaign; P5-2 assesses
-physical-fault applicability. Trial5 remains deferred and unresolved. Earlier
-dated statements below are history, not the current admission state.
+The user subsequently authorized the concrete PR/CI/main delivery. App,
+governance and firmware CI passed on `719737d`; PR #26 was merged as
+`17147e4265336945576ec218c8541079d4d8bf6c`, preserving the original commit IDs.
+Post-merge App CI also passed. Main is checked out in p34-final; the shared dirty
+tree is preserved on `archive/p34-root-before-delivery-20261014`, not reset or
+mixed into the published result. See the [delivered result](P3-4-v13-offline-acceptance-2026-10-13.md#delivered-result).
+Do not request the same authority or repeat this completed candidate acceptance.
+P3-5 retains real-backend 10/10; P5-1 retains final 30/30 and a real four-hour
+campaign; P5-2 assesses physical-fault applicability. Trial5 remains deferred and
+unresolved. Device pause and production-release restrictions remain. Earlier
+dated statements below are history, not the current admission or delivery state.
 
 ## 2026-10-12 验收操作经验速查
 
