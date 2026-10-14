@@ -82,7 +82,7 @@ env:
   TARGET_HARDWARE: AT32F435RGT7
   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
   # Short build tree avoids CMAKE_OBJECT_PATH_MAX warnings on Linux runners.
-  BUILD_DIR: /tmp/etfw
+  BUILD_DIR: ${{ github.workspace }}/.cache/etfw
   BUILD_TYPE: Release
   SOURCE_DATE_EPOCH: "1786320000"
 
@@ -109,7 +109,7 @@ jobs:
         with:
           node-version: "24"
       - name: Install pinned Worker dependencies
-        run: npm ci
+        run: npm ci --registry=https://registry.npmjs.org --replace-registry-host=always
       - name: Run script and migration host tests explicitly (not workerd)
         run: npm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts
       - name: Run native workerd D1 R2 and registration invariants (not host doubles)

@@ -46,3 +46,20 @@ Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen refer
 Every meaningful batch obtains runtime feedback before further product changes.
 Real R2/D1/Access, production-zero-side-effect snapshots and independent acceptance
 are never inferred from fixtures or local doubles. P4-1 remains in progress.
+
+## Initial Feedback
+
+- npm mirror download failed with ECONNRESET; original `batch1-npm-ci` output is
+  preserved. The pinned install succeeded (87 packages, exit 0) after explicitly
+  switching the registry host to npmjs with integrity still enforced. No lockfile
+  or tool version changed.
+- Initial host run: migration 17/17 PASS, script suite failed to import (exit 1).
+  Vite's `hashbangRE = /^#!.*\n/` does not strip CRLF shebangs, while direct Node
+  imports succeed. These mode-100644 files are always invoked with Node. Removing
+  only their unused shebangs fixes the cross-platform test entry without changing
+  schema or business behavior; all three firmware CLI consumers are covered.
+- Windows native run: zero tests, three workerd startup access violations (exit 1),
+  consistent with the accepted P4-2 host limitation. No system runtime installation
+  is authorized or attempted. Native evidence must come from Linux Actions.
+- Build outputs move from `/tmp/etfw` to the Actions workspace `.cache/etfw`;
+  the build inputs, targets and path-length setting are unchanged.
