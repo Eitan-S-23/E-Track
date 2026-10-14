@@ -3,7 +3,7 @@ import { SELF } from "cloudflare:test";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { signHmacSha256 } from "../src/crypto";
 import { firmwareAssets, requireFirmwareFull } from "../src/firmware";
-import { firmwareTokenMessage, signFirmwareDownload } from "../src/firmware_download";
+import { firmwareTokenMessage, signFirmwareDownload, streamFirmwareObject } from "../src/firmware_download";
 import { contentDigest } from "../../scripts/firmware-schema.mjs";
 import { canonicalJson } from "../../scripts/firmware-schema.mjs";
 import { channelSnapshot } from "../src/firmware_admin";
@@ -90,6 +90,26 @@ describe("P4-2 register/schema v2", () => {
 });
 
 describe("P4-2 latest and public download", () => {
+  it("distinguishes raw R2 conditions from quoted HTTP entity tags", async () => {
+    const input = metadata();
+    await uploadFixture(input);
+    const key = input.assets.find((asset) => asset.kind === "full")!.r2Key;
+    const head = (await env.RELEASES_BUCKET.head(key))!;
+    expect(head.httpEtag).toBe(`"${head.etag}"`);
+    const matched = await env.RELEASES_BUCKET.get(key, { onlyIf: { etagMatches: head.etag } });
+    expect(matched && "body" in matched).toBe(true);
+    if (matched && "body" in matched) await matched.body.cancel();
+    const quoted = await env.RELEASES_BUCKET.get(key, { onlyIf: { etagMatches: head.httpEtag } });
+    expect(quoted).not.toBeNull();
+    expect(quoted && "body" in quoted).toBe(false);
+  });
+  it.each(["opaque", 'W/"opaque"', '""', '"bad"quote"', '"bad\netag"'])(
+    "rejects a noncanonical stored HTTP entity tag %j", async (etag) => {
+      const { releaseId } = await registered(false);
+      const asset = (await firmwareAssets(env.DB, releaseId)).find((row) => row.kind === "full")!;
+      await expect(streamFirmwareObject(new Request("https://example.com/asset"), env.RELEASES_BUCKET,
+        { ...asset, r2_etag: etag }, "etag-negative")).rejects.toThrow("lacks verified R2 identity");
+    });
   async function flags(disableLatest: number, disableDownloads: number, message: string | null) {
     const c = (await env.DB.prepare("SELECT * FROM firmware_channels WHERE app_id='trace' AND device_model='e-track-at32f435' AND name='stable'")
       .first<FirmwareChannelRow>())!;
@@ -194,6 +214,7 @@ describe("P4-2 latest and public download", () => {
     expect(full.headers.get("Content-Type")).toBe("application/vnd.e-track.etu");
     expect(full.headers.get("Content-Digest")).toBe(contentDigest(body.asset.sha256));
     expect(full.headers.get("Content-Length")).toBe(String(body.asset.sizeBytes));
+    expect(full.headers.get("ETag")).toMatch(/^"[^\"]+"$/);
     expect(full.headers.get("X-Request-Id")).toBeTruthy();
     expect(new Uint8Array(await full.arrayBuffer())).toEqual(bytesFor("patch"));
     const partial = await SELF.fetch(body.asset.downloadUrl, { headers: { Range: "bytes=3-", "If-Range": full.headers.get("ETag")! } });

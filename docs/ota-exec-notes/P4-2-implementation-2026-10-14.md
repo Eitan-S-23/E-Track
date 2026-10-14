@@ -408,3 +408,46 @@ still match their recorded hashes. Only the already-authorized task-note append
 differs; the five shared metadata files and seven external config/hook inputs
 also match. The user reiterated full authorization to continue this session's
 work; the existing checks-only boundary and open external observations remain.
+
+### P42-R2-ETAG-01: Native Runtime Failure And Minimal Repair
+
+The reviewed implementation was committed and pushed as
+`4413bf9bd9705eef5de9f40c4abbaa5501048452`. Existing checks-only workflow
+`cloudflare-update-service.yml`, run `38588241206`, executed its native Ubuntu
+Worker tests: 144 passed and six failed (150 total). Public, Admin and Worker
+typechecks passed. All six failures returned 503 instead of a successful
+firmware download, including owner recovery. This is a real integration defect,
+not another local workerd startup failure or an authorization blocker.
+
+Root cause: registration/backfill store `R2Object.httpEtag`, including its HTTP
+quotes. `streamFirmwareObject()` passed that quoted value to the structured
+`R2Conditional.etagMatches`, which compares the raw `etag`. The local memory
+bucket incorrectly stripped quotes and therefore hid the failure. The current
+Cloudflare Workers R2 API reference explicitly distinguishes `etag`, quoted
+`httpEtag`, structured conditions and conditional HTTP headers:
+https://developers.cloudflare.com/r2/api/workers/workers-api-reference/.
+
+The continuation owner implemented this bounded repair, so these new tests are
+development self-tests, not its own independent acceptance. The three-file
+change keeps the stored/HTTP identity quoted, validates a strong quoted entity
+tag, and removes only its outer quotes for the R2 condition. The memory bucket
+now compares structured conditions exactly. Added regressions distinguish raw
+and quoted R2 conditions and reject five malformed stored entity tags; existing
+full/partial downloads, If-Range fallback, immutable-object mutation, token and
+recovery checks remain unchanged.
+
+Validation originals under `.cache/p4-2-logs/`:
+
+- `p42-r2-etag-red-01`: with only the corrected double and the new R2 contract
+  test, all six native failures reproduced locally (145 passed, six failed).
+- `p42-r2-etag-green-01`: after the production fix, all 190 local tests passed,
+  including real SQLite migration and script tests. SQLite experimental warnings
+  remain visible; local platform doubles are not remote-account evidence.
+- `p42-r2-etag-typecheck-01`: Worker typecheck passed; `git diff --check` passed.
+
+The first CI full log ZIP is preserved at
+`.cache/p4-2-git-ci-20261014/commands/native-ci-original-zip.stdout`, SHA-256
+`01d3e6ffd3da5ce979f597527370c93beeb0b2d13032d131e98c8989e06d0965`.
+The failed log, run/job metadata, process exit and closed receipts remain beside
+it. Native CI and independent review of the repair are next; P42-EXT-02/03,
+formal P4-2 acceptance and main integration are not claimed by local green tests.

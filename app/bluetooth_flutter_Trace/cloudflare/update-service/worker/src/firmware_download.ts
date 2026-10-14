@@ -115,7 +115,9 @@ export async function verifyFirmwareObject(bucket: R2Bucket, asset: {
 }
 
 export async function streamFirmwareObject(request: Request, bucket: R2Bucket, asset: FirmwareAssetRow, requestId: string): Promise<Response> {
-  if (!asset.r2_key || !asset.r2_etag) throw backendUnavailable("Firmware asset lacks verified R2 identity");
+  // R2 conditions use raw entity tags; stored identity and HTTP headers stay quoted.
+  const etag = asset.r2_etag?.match(/^"([\x21\x23-\x7e\x80-\xff]+)"$/)?.[1];
+  if (!asset.r2_key || !etag) throw backendUnavailable("Firmware asset lacks verified R2 identity");
   const rawRange = request.headers.get("Range");
   let offset: number | undefined;
   if (rawRange !== null) {
@@ -126,7 +128,7 @@ export async function streamFirmwareObject(request: Request, bucket: R2Bucket, a
       "Content-Range": `bytes */${asset.size_bytes}`, "X-Request-Id": requestId, "Cache-Control": "no-store" } });
     if (request.headers.has("If-Range") && request.headers.get("If-Range") !== asset.r2_etag) offset = undefined;
   }
-  const object = await bucket.get(asset.r2_key, { onlyIf: { etagMatches: asset.r2_etag },
+  const object = await bucket.get(asset.r2_key, { onlyIf: { etagMatches: etag },
     ...(offset === undefined ? {} : { range: { offset } }) });
   if (!object || !("body" in object) || object.size !== asset.size_bytes || object.httpEtag !== asset.r2_etag
     || (object.customMetadata?.sha256 && object.customMetadata.sha256 !== asset.sha256)
