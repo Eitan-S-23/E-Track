@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Program Files\\GitHub CLI\\gh.exe",
+    "api",
+    "repos/Eitan-S-23/E-Track/actions/runs/38610901739/logs"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1120043864422300,
+  "ended_monotonic_ns": 1120050861898000,
+  "stdout": {
+    "path": ".cache\\p4-2-git-ci-20261014\\commands\\p42-main-governance-zip.stdout",
+    "bytes": 61271,
+    "sha256": "75df74f3eb1075301a7dfe56b331825332e6fc9fa4ef82086701989b976bc561"
+  },
+  "stderr": {
+    "path": ".cache\\p4-2-git-ci-20261014\\commands\\p42-main-governance-zip.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

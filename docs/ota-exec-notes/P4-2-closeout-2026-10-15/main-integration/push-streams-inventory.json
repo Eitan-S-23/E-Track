@@ -1,0 +1,17 @@
+{
+  "files": [
+    {
+      "path": "p42-main-fast-forward.stderr.txt",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-fast-forward.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "p42-main-push.stderr.txt",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-push.stderr",
+      "bytes": 79,
+      "sha256": "a6092a4842eb132b9f17c270e9e0ec1fc0175aa11ebc1081a9572f98ec1c2e08"
+    }
+  ],
+  "byte_exact": true
+}

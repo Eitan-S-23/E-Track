@@ -1,0 +1,130 @@
+{
+  "utc": "2026-10-14T18:03:03.033209+00:00",
+  "main": "9627a0fe4a6c7da53a737fe3ae30994a16723268",
+  "original_root_unchanged": true,
+  "git_config_and_hooks_unchanged": true,
+  "main_original_untracked_preserved": 18426,
+  "main_archives_byte_exact": 59,
+  "selected_evidence_credentials_absent": true,
+  "user_oauth_config_unchanged": true,
+  "owned_project_credential_copy_removed": {
+    "path": ".cache\\p42-closeout-20261015\\host\\xdg_config_home\\.wrangler\\config\\default.toml",
+    "bytes": 801,
+    "sha256": "b9465b9ffbc527a8fd51da6ad5543678b0ba1f6a29d7e74814fbb681f515f54a"
+  },
+  "commands_closed": [
+    {
+      "path": ".cache/p42-closeout-20261015/commands/account-read.closed.json",
+      "exit_code": 1
+    },
+    {
+      "path": ".cache/p42-closeout-20261015/commands/d1-api-list-read.closed.json",
+      "exit_code": 22
+    },
+    {
+      "path": ".cache/p42-closeout-20261015/commands/wrangler-account-direct.closed.json",
+      "exit_code": 1
+    },
+    {
+      "path": ".cache/p42-closeout-20261015/commands/wrangler-version-direct.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-authored-whitespace.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-docs-diff-check.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-pass-commit.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-pass-index-check.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-pass-push.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-remote-before.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-scope-commit.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-scope-index-check.closed.json",
+      "exit_code": 2
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-scope-push.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-stage-pass.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-stage-readme.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-closeout-stage-scope.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-backend-details.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-backend-zip.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-build-details.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-ci-list-01.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-fast-forward.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-governance-details.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-governance-zip.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-protection-read.closed.json",
+      "exit_code": 0
+    },
+    {
+      "path": ".cache/p4-2-git-ci-20261014/commands/p42-main-push.closed.json",
+      "exit_code": 0
+    }
+  ],
+  "outputs": [
+    ".cache/p42-closeout-20261015",
+    ".cache/p4-2-git-ci-20261014",
+    "docs/ota-exec-notes/P4-2-closeout-2026-10-15",
+    "docs/ota-exec-notes/P4-2-implementation-2026-10-14.md",
+    "docs/ota-exec-notes/P4-2-acceptance-2026-10-15.md",
+    "PLAN-OTA-EXEC.md",
+    "docs/agent-collaboration/index.md"
+  ],
+  "permitted_shared_outputs": "D:/github/my/E-Track/.git and the checked P4-2 checkout paths under .cache/p34-final",
+  "external_agent_selected_outputs": [],
+  "scope": "Bounded path/hash/receipt audit, not a machine-wide write trace",
+  "historical_P42_WRITE_01": "Unchanged unresolved historical incident; no external cleanup or retroactive authorization"
+}

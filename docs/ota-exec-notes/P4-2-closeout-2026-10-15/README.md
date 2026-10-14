@@ -18,3 +18,9 @@ The original CI/test data remains in the adjacent `P4-2-ci-2026-10-14` archive;
 it is referenced, not duplicated. Review provenance records identify the exact
 original-session message timestamp and response hash. Scope approval is not the
 final implementation verdict; see `../P4-2-acceptance-2026-10-15.md`.
+
+`main-integration/` preserves main's exact CI metadata, full backend/governance
+log ZIPs, fast-forward/push receipts and the scoped write audit. Its inventory
+records the successful 156/156 native summary from the actual ZIP and the
+App build/release/deployment skips. These are delivery checks, not an assertion
+that real Cloudflare resources were deployed or that activation gates passed.

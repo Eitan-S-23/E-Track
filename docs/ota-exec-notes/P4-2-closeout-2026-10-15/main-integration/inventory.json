@@ -1,0 +1,115 @@
+{
+  "utc": "2026-10-14T18:02:24.221324+00:00",
+  "runs": [
+    {
+      "run": 38610901848,
+      "name": "Cloudflare Update Service Checks",
+      "head": "9627a0fe4a6c7da53a737fe3ae30994a16723268",
+      "conclusion": "success"
+    },
+    {
+      "run": 38610901739,
+      "name": "Acceptance Governance",
+      "head": "9627a0fe4a6c7da53a737fe3ae30994a16723268",
+      "conclusion": "success"
+    },
+    {
+      "run": 38610901596,
+      "name": "Build APK and EXE Release",
+      "head": "9627a0fe4a6c7da53a737fe3ae30994a16723268",
+      "conclusion": "success"
+    }
+  ],
+  "native_tests": 156,
+  "native_summary_lines": [
+    "2026-10-14T17:56:59.8994486Z       Tests  156 passed (156)",
+    "2026-10-14T17:56:59.8994475Z       Tests  156 passed (156)"
+  ],
+  "app_build_release_deploy_skipped": true,
+  "files": [
+    {
+      "path": "run-38610901848.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-backend-details.stdout",
+      "bytes": 5200,
+      "sha256": "cab8059d5911d38ea16511dfb086e288d47ece252608d1631ef26959e694c589"
+    },
+    {
+      "path": "run-38610901848-metadata-receipt.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-backend-details.closed.json",
+      "bytes": 958,
+      "sha256": "dfdb912a4a75625ccba3bb27392b7379c4faa100c58a15e128c73e4596601334"
+    },
+    {
+      "path": "run-38610901848.zip",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-backend-zip.stdout",
+      "bytes": 45717,
+      "sha256": "4768b635b44430b63f6a51c51daf5601a4fb308996383b3c6fcb1613ac539131"
+    },
+    {
+      "path": "run-38610901848-logs-receipt.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-backend-zip.closed.json",
+      "bytes": 836,
+      "sha256": "ce72ddf8775bfef55719755618fc42258a36d14cdc61ad0b194aa578860443f4"
+    },
+    {
+      "path": "run-38610901739.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-governance-details.stdout",
+      "bytes": 5521,
+      "sha256": "5eb0b6b57473d17151327076a46021e53b506500fda4a46fe2b85cc999bc7e0f"
+    },
+    {
+      "path": "run-38610901739-metadata-receipt.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-governance-details.closed.json",
+      "bytes": 964,
+      "sha256": "0b902a85fb4e944015b214067b1bd5a6ebabf26dbba060efeb0f3bb4ca7b7945"
+    },
+    {
+      "path": "run-38610901739.zip",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-governance-zip.stdout",
+      "bytes": 61271,
+      "sha256": "75df74f3eb1075301a7dfe56b331825332e6fc9fa4ef82086701989b976bc561"
+    },
+    {
+      "path": "run-38610901739-logs-receipt.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-governance-zip.closed.json",
+      "bytes": 842,
+      "sha256": "6bf6e1f92a3cb3799a962aede38af976c31c37c6decb03befb57743eb1633d67"
+    },
+    {
+      "path": "run-38610901596.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-build-details.stdout",
+      "bytes": 2482,
+      "sha256": "d68e9183e04c5d4d3e6452b0606963cd027d7f91bc444b988e87f0775f503b6d"
+    },
+    {
+      "path": "run-38610901596-metadata-receipt.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-build-details.closed.json",
+      "bytes": 954,
+      "sha256": "7e230840399b12d05908a68220b9a9533f58fcb2536f6b7f4b75d6b2d590b3a3"
+    },
+    {
+      "path": "p42-main-fast-forward.stdout.txt",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-fast-forward.stdout",
+      "bytes": 13892,
+      "sha256": "581ba93ea22000a409b225b193c3c18e0c13c0f0437ff43d66690b4591c26998"
+    },
+    {
+      "path": "p42-main-fast-forward.closed.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-fast-forward.closed.json",
+      "bytes": 1165,
+      "sha256": "72e34ce228ff18e11ba70c8bad353f64cbe2b525458ad26df832a3bab64b46bc"
+    },
+    {
+      "path": "p42-main-push.stdout.txt",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-push.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "p42-main-push.closed.json",
+      "original": ".cache/p4-2-git-ci-20261014/commands/p42-main-push.closed.json",
+      "bytes": 1122,
+      "sha256": "d3656804b85b1bb6bdd576129a325780653a9ac25da494d916725b38104c0cd6"
+    }
+  ]
+}

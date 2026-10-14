@@ -106,3 +106,14 @@ whitespace exception and historical P42-WRITE-01 remain disclosed. Root is
 authorized to archive this conclusion, close the implementation card and
 integrate it while preserving commit history. All activation gates above remain
 open and are not prerequisites invented for this completed implementation card.
+
+## Main Integration
+
+Accepted implementation and records were delivered by controlled fast-forward
+to main at `9627a0fe4a6c7da53a737fe3ae30994a16723268`. Its automatic backend CI
+`38610901848` passed all three jobs and 156/156 native tests; governance CI
+`38610901739` passed all three jobs. App run `38610901596` executed path detection
+only; APK/EXE/release/deployment jobs were skipped. Original metadata, complete
+backend/governance ZIPs and integration receipts are in
+`P4-2-closeout-2026-10-15/main-integration/` with a byte-bound inventory and audit.
+Subsequent record-only delivery does not change the accepted product identity.

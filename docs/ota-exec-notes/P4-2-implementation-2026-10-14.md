@@ -638,3 +638,38 @@ Root now performs the authorized history-preserving main integration and verifie
 its normal checks. No deployed-cloud/Access/production PASS, schema mutation,
 device action or OTA is implied. The activation-owner table in the acceptance
 record and historical P42-WRITE-01 remain in force.
+
+### Main Delivery Verified
+
+Main was fast-forwarded from `7e71f694bcf97c78bcfde9e3220dcf399d99f1a0` to
+`9627a0fe4a6c7da53a737fe3ae30994a16723268` and pushed using the existing
+`Eitan-S-23` identity. All implementation, repair, original-evidence and review
+commits remain reachable; no squash, rebase, force-push or source rewrite was
+used. The shared archive-branch worktree was not switched or cleaned.
+
+The normal main-push checks completed on that exact revision:
+
+- `38610901848`, Cloudflare Update Service Checks: all three jobs successful;
+  the original log ZIP confirms 156/156 native Worker tests.
+- `38610901739`, Acceptance Governance: all three jobs successful, including
+  Linux/Windows host checks and governance/spec regressions. No device test ran.
+- `38610901596`, App workflow: path-detection job successful; Android APK,
+  Windows EXE, GitHub Pages deployment and GitHub Release jobs all skipped.
+
+Sixteen exact main-CI/integration originals, their inventories, and the bounded
+write audit are under `P4-2-closeout-2026-10-15/main-integration/`. The two Git
+stderr originals supplement the fourteen-entry inventory; the push confirmation
+is on stderr, not its empty stdout. Main's 59
+previously committed archive files were byte-identical after checkout. All
+18,426 pre-existing untracked main-worktree paths remained unchanged as a path
+set; root HEAD/index/config and the seven monitored Git/config/hook inputs
+matched their prior hashes. This is a bounded audit, not a machine-wide trace
+or a byte-hash claim about every historical untracked file.
+
+The only cleanup was the exact project-local OAuth copy created for this
+continuation. Its original user-directory file remained byte-identical. All
+25 selected owned command receipts were closed at the audit, including expected
+authentication/initial-whitespace failures; no external cleanup was attempted.
+Later records-only commits preserve this tested product and do not represent
+another product execution. P4-2 implementation is accepted and delivered;
+activation obligations and P42-WRITE-01 stay explicit, with no new OTA.

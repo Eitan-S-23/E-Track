@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "C:\\Program Files\\GitHub CLI\\gh.exe",
+    "run",
+    "view",
+    "38610901596",
+    "--repo",
+    "Eitan-S-23/E-Track",
+    "--json",
+    "databaseId,headSha,status,conclusion,event,jobs,url,workflowName,createdAt,updatedAt"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1119975297731400,
+  "ended_monotonic_ns": 1119978151869200,
+  "stdout": {
+    "path": ".cache\\p4-2-git-ci-20261014\\commands\\p42-main-build-details.stdout",
+    "bytes": 2482,
+    "sha256": "d68e9183e04c5d4d3e6452b0606963cd027d7f91bc444b988e87f0775f503b6d"
+  },
+  "stderr": {
+    "path": ".cache\\p4-2-git-ci-20261014\\commands\\p42-main-build-details.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

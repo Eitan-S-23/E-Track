@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "D:\\install\\Git\\cmd\\git.exe",
+    "--no-optional-locks",
+    "--literal-pathspecs",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+    "-c",
+    "core.fsmonitor=false",
+    "-c",
+    "core.quotePath=false",
+    "-c",
+    "core.autocrlf=true",
+    "-c",
+    "http.sslBackend=openssl",
+    "-C",
+    "D:/github/my/E-Track/.cache/p34-final",
+    "merge",
+    "--ff-only",
+    "9627a0fe4a6c7da53a737fe3ae30994a16723268"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1119749362175700,
+  "ended_monotonic_ns": 1119751777795700,
+  "stdout": {
+    "path": ".cache\\p4-2-git-ci-20261014\\commands\\p42-main-fast-forward.stdout",
+    "bytes": 13892,
+    "sha256": "581ba93ea22000a409b225b193c3c18e0c13c0f0437ff43d66690b4591c26998"
+  },
+  "stderr": {
+    "path": ".cache\\p4-2-git-ci-20261014\\commands\\p42-main-fast-forward.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}
