@@ -417,3 +417,24 @@ hand this stable batch and its original evidence to a non-implementer for bounde
 review, without an extra mandatory freezing agent. The configuration handoff and
 real-observation owner list above remain the next steps. P4-1 stays IN_PROGRESS;
 P3-5, P4-3 and P4-4 were not started as tasks.
+
+### Delivery And Audit Follow-Up
+
+Evidence/record commit `4c149e7810f816316dc038398f70642565a9391e` was pushed as
+`Eitan-S-23` and its exact remote branch SHA was read back. All 154 evidence files
+also match their staged Git blob bytes; product-input diff from `fa74905` is empty.
+The two subsequent task-record changes do not alter this immutable archive or
+the tested source. Final source/prose `diff --check` exits 0; Git's two ordinary
+LF/CRLF notices do not apply to the byte-preserved evidence.
+
+P41-AUDIT-01's last cache timestamp is `2026-10-14T22:10:18.610491Z`, not unchanged
+since the first audit. A bounded metadata-only event inspection found Engine 400
+starts at `21:55:19.4687459Z` and `22:10:18.1941546Z`; both HostApplication values
+have SHA-256 `f93c863cedace81dae5c45c428f5b556d8d5c3564cbd12c9a69dceb747696302`
+and include the `Export-StartLayout` cmdlet. Neither references this worktree or
+its helpers. This narrows the observed command but does not establish its invoking
+process or grant cleanup authority. The original audit is retained unchanged.
+Root can reconcile that exact command/two event times rather than repeat product
+tests or scan unrelated credentials. At the post-push check, all 36 then-existing
+local child receipts were closed, none of their PIDs remained and the shared root
+index still matched its entry SHA.
