@@ -21,6 +21,14 @@ export function releaseConfig(env) {
     "GITHUB_REPOSITORY", "GITHUB_SHA", "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "OTA_PREVIOUS_RELEASE_JSON",
     "TRACE_FIRMWARE_MIN_APP_VERSION_CODE", "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION"];
   for (const key of keys) if (!env[key]) throw new CliError(`Missing release configuration: ${key}`);
+  for (const key of ["CLOUDFLARE_API_TOKEN", "TRACE_DEPLOY_TOKEN", "GITHUB_TOKEN"]) {
+    if (/\s/.test(env[key])) throw new CliError("Release credentials must not contain whitespace");
+  }
+  for (const [key, max] of [["TRACE_FIRMWARE_MIN_APP_VERSION_CODE", 2100000000], ["TRACE_FIRMWARE_MIN_PROTOCOL_VERSION", 255]]) {
+    if (!/^(0|[1-9][0-9]*)$/.test(env[key]) || !Number.isSafeInteger(Number(env[key])) || Number(env[key]) > max) {
+      throw new CliError(`Invalid numeric release configuration: ${key}`);
+    }
+  }
   if (!/^[0-9a-f]{32}$/.test(env.CLOUDFLARE_ACCOUNT_ID) || !/^[0-9a-fA-F]{32}$/.test(env.OTA_AES_KEY)
     || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(env.TRACE_D1_DATABASE_ID)
     || !/^[a-zA-Z0-9_-]+$/.test(env.TRACE_D1_DATABASE_NAME)

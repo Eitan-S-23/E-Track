@@ -160,3 +160,70 @@ firmware environment must configure the matching repository without breaking the
 Trace App updater's bindings. Existing staging D1 is not assumed disposable or
 independent. P4-4/root must verify actual Worker/D1/R2 identity and permissions;
 this implementation neither changes nor claims those deployed settings.
+
+## Final Hardening Feedback
+
+Batch 3 CI `38639059128` on `81b42bd5d9b61b36145f2cf2fe01ac63b67e4453`
+passed: host 34, pipeline host 19, native 156, workflow 15, package 8 and byte 14.
+It additionally prepared full/recovery from the actual 605072-byte GCC App and
+14724-byte Boot input; no formal base was invented. Both cloud jobs were skipped.
+Compiler warnings remain in the originals; zero-warning success is not claimed.
+
+The cross-layer check then added explicit ETU outer target/base/hardware/length
+checks through the existing parser, identity snapshots against late asset swaps,
+error-over-success stdout rejection and register request-id binding. The local
+byte suite now passes 19/19, pipeline host 20/20, shared script host 17/17 and
+golden-vector compatibility 9/9; Worker typecheck exits 0. The legacy golden
+fixture's development-key warning is expected and retained. Production preparation
+still requires its explicit key and never uses that fallback. Final CI is pending.
+
+## Configuration Consumption Handoff
+
+This is an inventory of the implemented interfaces, not a new Spec, a P4-4 task
+start or permission to configure/deploy anything. No values below were set or
+retrieved from Cloudflare in this session. The shared entry is
+`node .github/scripts/firmware-release.mjs execute`; `capture` binds build inputs,
+and `development` uses a non-installable test-key path with cloud entry absent.
+
+| Runtime name | GitHub source / scope | Required verification by configuration owner |
+| --- | --- | --- |
+| `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | In `firmware-rehearsal`, secrets `FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID` / `FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN`; production uses the unprefixed secrets in `firmware-production`. | Exact account and least-privilege target R2 read/write plus D1 read. Qualify any additional Wrangler remote-binding preview requirement rather than guessing or broadening permissions. Actual remote proxy startup is NOT_RUN. |
+| `TRACE_UPDATE_SERVICE_URL`, `TRACE_DEPLOY_TOKEN` | Rehearsal secrets `FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL` / `FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN`; production uses unprefixed names. | Credential-free HTTPS origin; `/healthz` must report `staging` / `prod`; real Worker `DEPLOY_TOKEN_SHA256` must match. Verify actual Worker bindings, not only its environment label. |
+| `OTA_AES_KEY` | Rehearsal secret `FIRMWARE_REHEARSAL_OTA_AES_KEY`; production secret `OTA_AES_KEY`. | Explicit 32-hex approved device/package key for key slot 1. The approved envelope must reproduce under the configured key. Separate secret storage does not permit different package bytes; never copy a test key or expose values. |
+| `TRACE_R2_BUCKET` | Rehearsal variable `FIRMWARE_REHEARSAL_TRACE_R2_BUCKET`; production variable `TRACE_R2_BUCKET`. | Rehearsal must be exactly `trace-update-staging-releases`; production must use its explicitly approved other bucket. Inventory actual bindings and zero production effects independently. |
+| `TRACE_D1_DATABASE_ID`, `TRACE_D1_DATABASE_NAME` | Rehearsal variables prefixed `FIRMWARE_REHEARSAL_`; production unprefixed variables. | Exact independently scoped migrated v2 database. Preserve P42-EXT-02 legacy/backfill authority; unresolved pointers or unknown inventory are not an empty database. No D1 migration/write is done by P4-1 except the real register API. |
+| `OTA_PREVIOUS_RELEASE_JSON` | Environment variable in each release environment. | Approved descriptor fields: `isFormalRelease`, `kind` (`app` or `recovery`), canonical `versionName`/`versionCode`, `releaseTag`, `commitSha`, raw `imageSha256`, exact `sourceSha256`/`sourceSizeBytes`, immutable `sourceUrl`. An App source is `X-Track-App-GCC.bin`; recovery uses `recovery-vVERSION.bin` with separate file and stripped-image hashes. Populate from real authoritative provenance, not these tests. The client independently enumerates releases, resolves the tag and reads all source bytes. |
+| `TRACE_FIRMWARE_MIN_APP_VERSION_CODE`, `TRACE_FIRMWARE_MIN_PROTOCOL_VERSION` | Explicit environment variables, no guessed defaults in release execution. | Canonical integers in 0..2100000000 and 0..255; choose values compatible with the approved clients and device. Hardware/layout/min-Boot remain the current compiled 1/1/1 target, not arbitrary metadata claims. |
+| `OTA_BOOT_CHAIN_READY` | Repository/environment variable. | Exactly `false` for rehearsal. Only the repository owner may later set `true` after independent approval AND P5; this session never changes it. |
+| `OTA_APPROVED_REHEARSAL_RUN_ID`, `OTA_APPROVED_REHEARSAL_ATTEMPT`, `OTA_APPROVED_REHEARSAL_METADATA_SHA256`, `OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256` | Production approval variables. | Independent reviewer/owner binds the successful original run/attempt and exact metadata/evidence bytes. Dispatch `approved_rehearsal_run_id` must match; current production execution id never enters canonical metadata. |
+| `firmware-rehearsal`, `firmware-production` | Protected GitHub environments. | Rehearsal receives no production cloud/publish credential. Production retains independent environment approval. Secret prefixes deliberately prevent fallback to repository production secrets. No environment/policy/secrets were configured here. |
+| Worker `GITHUB_OWNER` / `GITHUB_REPO`, cutover and signing bindings | Existing P4-2 deployment configuration, not new P4-1 output fields. | Dedicated firmware origin must accept `Eitan-S-23/E-Track`; retain the actual P42-EXT-03 cutover/HMAC/legacy gates and protect the Trace App update environment. |
+
+Rehearsal produces `p41-rehearsal-RUN_ID-ATTEMPT` Actions artifacts; later production
+downloads that exact artifact and verifies its successful run/attempt and approved
+hashes. A retry without the original artifact stops, rather than generating new
+nonces over partially uploaded keys. Archive originals before their 14-day expiry.
+
+## Remaining Real Observations And Owners
+
+1. Root assigns a non-implementer to review this bounded branch, original tests
+   and the sole P4-1 Spec. Self-tests do not count as that review or acceptance.
+2. P4-4/root prepares and independently inventories actual isolated Worker/D1/R2,
+   credentials, environment approval and the official finalized base. The prior
+   D1 401/code 10000 and expired login were not retried. P42-EXT-02 stays with the
+   migration owner plus OTA reviewer; P4-1 does not hand-write or activate D1 rows.
+3. Under separate real-operation authority, P4-1/P4-4 share ONE staging rehearsal:
+   actual three assets, complete R2 readback, real ready and idempotency responses,
+   and external before/after production D1/R2/channel/GitHub Release snapshots.
+   The rehearsal job itself cannot collect production snapshots using production
+   credentials; an independently authorized observer supplies those originals.
+4. Independent acceptance adjudicates that evidence under the existing execution
+   contract. All these real observations remain NOT_RUN, so P4-1 stays in progress.
+   Production promotion remains after P5/owner/environment approval. Do not start
+   P3-5 or P4-3 as a continuation of this development batch.
+
+For formal component-profile admission, do not use `Firmware` alone: it omits the
+new `.github/scripts/` entry and backend script consumers. Existing base groups
+`Production` + `Validation` cover them and the real runners; a narrower profile
+change belongs to the governance owner with its own checks, not an incidental
+edit here. No profile, frozen Spec or historical bundle was changed.

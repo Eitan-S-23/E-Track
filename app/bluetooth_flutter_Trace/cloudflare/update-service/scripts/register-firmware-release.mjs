@@ -6,7 +6,9 @@ import { CliError, failure } from "./firmware-cli.mjs";
 
 export async function registerFirmware(metadata, { serviceUrl, deployToken, fetcher = fetch, retries = 3, timeoutMs = 30000, signal }) {
   if (!serviceUrl || !deployToken) throw new CliError("Service URL and deploy token are required");
-  const url = new URL(serviceUrl);
+  if (/\s/.test(deployToken)) throw new CliError("Deploy token must be one credential without whitespace");
+  let url;
+  try { url = new URL(serviceUrl); } catch { throw new CliError("Invalid registration origin"); }
   if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname !== "/") throw new CliError("Registration requires a credential-free HTTPS origin");
   if (!Number.isInteger(retries) || retries < 1 || retries > 3 || !Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30000) {
     throw new CliError("Invalid registration retry/timeout bounds");
@@ -37,6 +39,7 @@ export async function registerFirmware(metadata, { serviceUrl, deployToken, fetc
     const result = await response.json();
     if (result.ok !== true || result.state !== "ready" || typeof result.releaseId !== "string" || !result.releaseId
       || result.assetsRegistered !== input.assets.length || typeof result.requestId !== "string"
+      || result.requestId !== requestId
       || result.requestId !== response.headers.get("X-Request-Id")
       || result.idempotent !== (response.status === 200)) throw new CliError("Invalid registration result", "BACKEND_UNAVAILABLE", 1);
     return result;

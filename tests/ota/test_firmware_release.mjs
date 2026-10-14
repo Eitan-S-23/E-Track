@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { crc32 } from "node:zlib";
 import { mkdir, mkdtemp, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -185,4 +186,47 @@ test("actual preparation CLI returns one JSON result and configuration exit 2", 
   assert.equal(missing.status, 2); assert.equal(JSON.parse(missing.stderr).errorCode, "INVALID_PARAMETER");
   process.stdout.write(`PREPARATION_CLI ${JSON.stringify({ exitCode: run.status, stdout: run.stdout,
     missingKeyExit: missing.status, missingKeyStderr: missing.stderr })}\n`);
+});
+
+for (const mutation of ["target", "base", "trailer"]) test(`rejects ETU outer ${mutation} drift despite a byte-equal unpack result`, async () => {
+  const options = await input();
+  const execute = (exe, argv, config) => {
+    const result = spawnSync(exe, argv, config);
+    const stage = mutation === "base" ? "pack-patch" : "pack-full";
+    if (argv.includes(stage)) {
+      const out = outputPath(root, argv[argv.indexOf("--out") + 1]);
+      let bytes = readFileSync(out);
+      if (mutation === "trailer") bytes = Buffer.concat([bytes, Buffer.from("illegal trailing bytes")]);
+      else {
+        if (mutation === "target") bytes.writeUInt32LE(20802, 40);
+        else bytes[52] ^= 1;
+        bytes.writeUInt32LE(crc32(bytes.subarray(0, 60)), 60);
+      }
+      writeFileSync(out, bytes);
+    }
+    return result;
+  };
+  await assert.rejects(prepareFirmwareRelease({ ...options, execute }), /outer-verify/);
+  assert.equal(existsSync(path.join(options.outputDir, "cloudflare-firmware-release-metadata.json")), false);
+});
+
+test("late asset replacement cannot change the verified metadata identity", async () => {
+  const options = await input();
+  const execute = (exe, argv, config) => {
+    const result = spawnSync(exe, argv, config);
+    if (argv.includes("--recovery-output")) writeFileSync(outputPath(root, path.join(options.outputDir,
+      "e-track-at32f435-v2.8.1-full.etu")), Buffer.from("late altered package"));
+    return result;
+  };
+  await assert.rejects(prepareFirmwareRelease({ ...options, execute }), /changed after byte verification/);
+});
+
+test("an explicit error overrides a simultaneous success stdout marker", async () => {
+  const options = await input();
+  const execute = (exe, argv, config) => {
+    const result = spawnSync(exe, argv, config);
+    if (argv.includes("pack-full")) result.stdout += "\n[err] injected error after success marker\n";
+    return result;
+  };
+  await assert.rejects(prepareFirmwareRelease({ ...options, execute }), /full-pack failed exit\/stdout/);
 });

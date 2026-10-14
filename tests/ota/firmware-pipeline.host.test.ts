@@ -197,6 +197,10 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
       expect(() => releaseConfig({ ...s.env, ...change })).toThrow();
     }
     expect(s.calls).toEqual([]);
+    for (const change of [{ TRACE_FIRMWARE_MIN_APP_VERSION_CODE: "2100000001" }, { TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: "256" },
+      { TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: "not-a-number" }, { TRACE_DEPLOY_TOKEN: "two credentials" }]) {
+      expect(() => releaseConfig({ ...s.env, ...change })).toThrow();
+    }
   });
 
   it("production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register", async () => {
@@ -256,6 +260,15 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
     await expect(registerFirmware(readyProjection(s.metadata), { serviceUrl: "https://example.com/path", deployToken: "test", fetcher }))
       .rejects.toMatchObject({ exitCode: 2 });
     expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("rejects a stale register response even if body and response header agree", async () => {
+    const s = await setup();
+    const fetcher = vi.fn(async () => Response.json({ ok: true, state: "ready", releaseId: "stale", requestId: "stale-request",
+      assetsRegistered: 3, idempotent: false }, { status: 201, headers: { "X-Request-Id": "stale-request" } }));
+    await expect(registerFirmware(readyProjection(s.metadata), { serviceUrl: "https://example.com", deployToken: "test", fetcher }))
+      .rejects.toThrow(/Invalid registration result/);
+    expect(fetcher).toHaveBeenCalledTimes(1);
   });
 
   it.each(["valid", "wrong commit", "wrong digest", "not previous", "draft", "missing asset"])

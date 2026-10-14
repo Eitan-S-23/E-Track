@@ -86,7 +86,8 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
     steps.push({ label, executable: python, argv: ["-B", script, ...argv], exitCode: result.status,
       stdoutSha256: digest(Buffer.from(result.stdout ?? "")), stderrSha256: digest(Buffer.from(result.stderr ?? "")) });
     await writeOutput(root, path.join(out, "steps.json"), JSON.stringify(steps, null, 2) + "\n");
-    if (result.error || result.status !== 0 || (marker && !(result.stdout ?? "").includes(marker))) {
+    if (result.error || result.status !== 0 || (marker && !(result.stdout ?? "").includes(marker))
+      || /^\s*(?:\[err\]|error\b|fatal\b|\S+=FAIL\b)/im.test((result.stdout ?? "") + "\n" + (result.stderr ?? ""))) {
       throw badInput(`${label} failed exit/stdout verification; see preserved step output`);
     }
     return result.stdout;
@@ -115,29 +116,39 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
     ["--placeholder", app, "--placeholder-sha256", build.app.sha256]);
   if (fields.build_ts !== build.buildTimestamp) throw badInput("Finalized build timestamp mismatch");
   const full = path.join(out, names[0]);
+  const verifiedAssets = [];
   const reproduce = file => referenceDir ? ["--reproduce-from", path.join(referenceDir, path.basename(file))] : [];
   await run("full-pack", "Tools/etu_pack.py", ["pack-full", "--app", finalImage, "--out", full,
     "--ver-name", release.versionName, ...reproduce(full)], "pack-full OK:");
+  verifiedAssets.push(await fileIdentity(full));
   const fullCandidate = path.join(out, "work", "full-candidate.bin");
   await run("full-apply", "Tools/etu_unpack.py", [full, "--out", fullCandidate, "--verify-fw-header"], "unpack(full) OK:");
   if (!(await readFile(fullCandidate)).equals(finalized)) throw badInput("Full roundtrip byte mismatch");
+  await verify(finalImage, "app", release.versionName, targetSha, "full-outer-verify", ["--package", full]);
   if (base) {
     const patch = path.join(out, names[1]);
     await run("patch-pack", "Tools/etu_pack.py", ["pack-patch", "--old", baseApp, "--new", finalImage, "--out", patch,
       "--ver-name", release.versionName, "--base-ver-name", base.versionName, "--bsdiff-exe", path.resolve(bsdiff),
       ...reproduce(patch)], "pack-patch OK:");
+    verifiedAssets.push(await fileIdentity(patch));
     const candidate = path.join(out, "work", "patch-candidate.bin");
     await run("patch-apply", "Tools/etu_unpack.py", [patch, "--old", baseApp, "--out", candidate,
       "--verify-fw-header"], "unpack(patch) OK:");
     if (!(await readFile(candidate)).equals(finalized)) throw badInput("Patch application byte mismatch");
+    await verify(finalImage, "app", release.versionName, targetSha, "patch-outer-verify", ["--package", patch, "--base-image", baseApp]);
   }
   const recovery = path.join(out, names.at(-1));
   await run("recovery-create", "Tools/jlink/prepare-bootstrap-app.py", ["prepare", "--input", finalImage,
     "--input-kind", "app", "--output", path.join(out, "work", "recovery-app.bin"),
     "--recovery-output", recovery], "P1_5_APP_PREPARE=PASS");
+  verifiedAssets.push(await fileIdentity(recovery));
   await verify(recovery, "recovery", release.versionName, targetSha, "recovery-verify");
   const metadata = await buildFirmwareMetadata({ release, assetsDir: out, finalImage, repository,
     patchBases: base ? [{ baseImageSha256: base.imageSha256, baseVersionCode: base.versionCode }] : [] });
+  for (const asset of metadata.assets) {
+    const verified = verifiedAssets.find(a => a.fileName === asset.fileName);
+    if (!verified || verified.sha256 !== asset.sha256 || verified.sizeBytes !== asset.sizeBytes) throw badInput("Asset changed after byte verification");
+  }
   if (canonicalJson(await captureBuildInputs({ app, boot, commitSha: build.commitSha,
     versionName: build.versionName, buildTimestamp: build.buildTimestamp })) !== canonicalJson(build)) throw badInput("GCC source changed during preparation");
   const prepared = metadataBytes(metadata);
