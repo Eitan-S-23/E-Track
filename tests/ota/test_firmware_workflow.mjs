@@ -69,6 +69,7 @@ test("development wiring explicitly executes host, native, byte and production-G
   assert.match(checks, /p41-host.config.mjs/);
   assert.match(checks, /npm test -- --reporter=verbose/);
   assert.match(checks, /test_firmware_pack.py/);
+  assert.match(checks, /PYTHONPATH="\$GITHUB_WORKSPACE\/Tools" python3 -B tests\/ota-vectors\/test_vectors.py/);
   assert.match(checks, /node --test tests\/ota\/test_firmware_release.mjs/);
   const build = workflow.jobs.build.steps.map(step => step.run ?? "").join("\n");
   assert.match(build, /--target X_Track_App_GCC X_Track_Boot/);

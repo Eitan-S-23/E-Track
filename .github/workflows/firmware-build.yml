@@ -161,7 +161,7 @@ jobs:
         working-directory: .
         run: |
           python3 -B tests/ota/test_firmware_pack.py
-          python3 -B tests/ota-vectors/test_vectors.py
+          PYTHONPATH="$GITHUB_WORKSPACE/Tools" python3 -B tests/ota-vectors/test_vectors.py
       - name: Check workflow execution graph and configuration gates
         working-directory: .
         run: node --test tests/ota/test_firmware_workflow.mjs

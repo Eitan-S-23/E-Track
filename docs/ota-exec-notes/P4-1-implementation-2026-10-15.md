@@ -227,3 +227,19 @@ new `.github/scripts/` entry and backend script consumers. Existing base groups
 `Production` + `Validation` cover them and the real runners; a narrower profile
 change belongs to the governance owner with its own checks, not an incidental
 edit here. No profile, frozen Spec or historical bundle was changed.
+
+## Preserved Final-CI Harness Failure
+
+Run `38641534498` on `1eed86222e1ac3ef14281fc1b1b4a26a94b73375` is FAILED,
+not a delivery PASS. GCC build and real-GCC packaging, host 34, pipeline host 20,
+native 156 and package 8 completed successfully. The newly wired legacy golden
+suite then failed to import `etu_pack`: its existing `tools` path is lowercase,
+whereas the tracked directory is `Tools`. Windows' case-insensitive filesystem
+had concealed this. Workflow/19-byte tests were skipped after that failure.
+
+The remediation is confined to the P4-1 workflow invocation:
+`PYTHONPATH="$GITHUB_WORKSPACE/Tools" python3 -B tests/ota-vectors/test_vectors.py`.
+Historical vector source/bytes and assertions are unchanged. The original failed
+ZIP is `.cache/github/batch4-logs.zip` (262496 bytes), with the failure at the
+package/golden step. This is a test-entry portability repair, not a firmware or
+cloud product failure; the changed invocation receives a new CI run.
