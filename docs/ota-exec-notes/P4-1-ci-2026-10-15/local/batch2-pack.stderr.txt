@@ -1,0 +1,31 @@
+test_bsdiff_error_line_overrides_success_marker (__main__.PackageReplayTests.test_bsdiff_error_line_overrides_success_marker) ... ok
+test_bsdiff_exit_zero_and_a_file_do_not_replace_stdout_verification (__main__.PackageReplayTests.test_bsdiff_exit_zero_and_a_file_do_not_replace_stdout_verification) ... ERROR
+test_default_nonce_remains_random (__main__.PackageReplayTests.test_default_nonce_remains_random) ... ok
+test_refuses_corrupted_reference (__main__.PackageReplayTests.test_refuses_corrupted_reference) ... ok
+test_refuses_different_header_identity (__main__.PackageReplayTests.test_refuses_different_header_identity) ... ok
+test_refuses_different_key (__main__.PackageReplayTests.test_refuses_different_key) ... ok
+test_refuses_different_plaintext_before_output (__main__.PackageReplayTests.test_refuses_different_plaintext_before_output) ... ok
+test_replays_actual_full_package (__main__.PackageReplayTests.test_replays_actual_full_package) ... ok
+
+======================================================================
+ERROR: test_bsdiff_exit_zero_and_a_file_do_not_replace_stdout_verification (__main__.PackageReplayTests.test_bsdiff_exit_zero_and_a_file_do_not_replace_stdout_verification)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p41-dev-20261015\tests\ota\test_firmware_pack.py", line 85, in test_bsdiff_exit_zero_and_a_file_do_not_replace_stdout_verification
+    pack.run_bsdiff(str(self.root / "fake.exe"), b"old", b"new")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p41-dev-20261015\Tools\etu_pack.py", line 278, in run_bsdiff
+    with tempfile.TemporaryDirectory() as td:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\tempfile.py", line 887, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SU\AppData\Local\Programs\Python\Python313\Lib\tempfile.py", line 385, in mkdtemp
+    _os.mkdir(file, 0o700)
+    ~~~~~~~~~^^^^^^^^^^^^^
+FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\firmware-pack-tests\\tmpuib6a601\\tmpffkuaptz'
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.286s
+
+FAILED (errors=1)

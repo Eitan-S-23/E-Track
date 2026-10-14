@@ -1,0 +1,923 @@
+{
+  "testedCommit": "fa74905e84c489cccc248617d37ab9f56c8f961c",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "source": "Manual evidence byte-preservation rule"
+    },
+    {
+      "path": "artifact-members.json",
+      "sizeBytes": 198156,
+      "sha256": "6a386c75dc293664402638c566c7021279035f44c2e04fd64c225fc0f3012a5c",
+      "source": "Derived from all four original artifact ZIPs"
+    },
+    {
+      "path": "ci-inspection.json",
+      "sizeBytes": 27044,
+      "sha256": "8b2b0ca76b9c5e4417920595b5b5ded76520f5af88645da182053f083ed15c45",
+      "source": "Derived from the archived original logs and artifact bytes"
+    },
+    {
+      "path": "github/backend-final-jobs.json",
+      "sizeBytes": 6937,
+      "sha256": "309007ba428a77204378fa111c934d745e7a577ba1796d05dd64e8bfede3c672",
+      "source": ".cache/github/backend-final-jobs.json"
+    },
+    {
+      "path": "github/backend-final-logs.zip",
+      "sizeBytes": 46700,
+      "sha256": "8f926e100e09d4c2212e0f26baebbd6b767b28f711152cd53033bca9bc35e28c",
+      "source": ".cache/github/backend-final-logs.zip"
+    },
+    {
+      "path": "github/backend-runs-after-retrieval-failure.json",
+      "sizeBytes": 12113,
+      "sha256": "7299923b12c6ee6dac8dcdfa0f4d03e66d81e4c0445ef376357036da360e77d6",
+      "source": ".cache/github/backend-runs-after-retrieval-failure.json"
+    },
+    {
+      "path": "github/batch1-artifacts.json",
+      "sizeBytes": 1433,
+      "sha256": "e8cde407a81da6b265171f3304e068e7beb488f161c3ed5cc354854b3907fa5f",
+      "source": ".cache/github/batch1-artifacts.json"
+    },
+    {
+      "path": "github/batch1-dispatch.json",
+      "sizeBytes": 54,
+      "sha256": "22e0f6642d4f9531a33f8662bc494ba0e5679bc751f53673d93605d0f11ede94",
+      "source": ".cache/github/batch1-dispatch.json"
+    },
+    {
+      "path": "github/batch1-jobs.json",
+      "sizeBytes": 7728,
+      "sha256": "cb77ab1a046f416cd2b8f397176676a71baa2863f4247024fee7862dde6a082c",
+      "source": ".cache/github/batch1-jobs.json"
+    },
+    {
+      "path": "github/batch1-logs.zip",
+      "sizeBytes": 234558,
+      "sha256": "e6784c52bec3c522ad4096f31b8c0560bd07990cad45a141a5f43a7f83de178c",
+      "source": ".cache/github/batch1-logs.zip"
+    },
+    {
+      "path": "github/batch1-push.json",
+      "sizeBytes": 444,
+      "sha256": "aa06842e8fcd5e0669a6aa3eb85c22edb5d3e3b31361344c3b98cc9724d33924",
+      "source": ".cache/github/batch1-push.json"
+    },
+    {
+      "path": "github/batch1-runs.json",
+      "sizeBytes": 12070,
+      "sha256": "5df4c62cbf63528d71b19f70252802e103d6782744d48144ec5297edaee158b4",
+      "source": ".cache/github/batch1-runs.json"
+    },
+    {
+      "path": "github/batch2-dispatch.json",
+      "sizeBytes": 54,
+      "sha256": "22e0f6642d4f9531a33f8662bc494ba0e5679bc751f53673d93605d0f11ede94",
+      "source": ".cache/github/batch2-dispatch.json"
+    },
+    {
+      "path": "github/batch2-logs.zip",
+      "sizeBytes": 252337,
+      "sha256": "50595f4429f701225e47c7e35c675ffb493268f29a8730fd99a0dd9f2f781d76",
+      "source": ".cache/github/batch2-logs.zip"
+    },
+    {
+      "path": "github/batch2-push.json",
+      "sizeBytes": 229,
+      "sha256": "ccc3536f8b6f5bcbe0273173feac830b462ec9ab4f3a6455e7a482a11dcd6a75",
+      "source": ".cache/github/batch2-push.json"
+    },
+    {
+      "path": "github/batch2-runs.json",
+      "sizeBytes": 24111,
+      "sha256": "80d9885e17a41357f9304e5519c6eb9ba590721b573308022189121e0fbf5b34",
+      "source": ".cache/github/batch2-runs.json"
+    },
+    {
+      "path": "github/batch3-dispatch.json",
+      "sizeBytes": 54,
+      "sha256": "22e0f6642d4f9531a33f8662bc494ba0e5679bc751f53673d93605d0f11ede94",
+      "source": ".cache/github/batch3-dispatch.json"
+    },
+    {
+      "path": "github/batch3-logs.zip",
+      "sizeBytes": 269517,
+      "sha256": "7bb39fe01e589b686e988995964c7c4335cef691d497d1157522e6bf45106431",
+      "source": ".cache/github/batch3-logs.zip"
+    },
+    {
+      "path": "github/batch3-push.json",
+      "sizeBytes": 229,
+      "sha256": "2cfb098868fee03c0d3b152f3a5c57246baad0dfb6a8e35fa1bc9ed3f1166be2",
+      "source": ".cache/github/batch3-push.json"
+    },
+    {
+      "path": "github/batch3-runs.json",
+      "sizeBytes": 36156,
+      "sha256": "39383af3b51ab09158ded00c56567d252986f4dee687270dd1cda9a3d2045881",
+      "source": ".cache/github/batch3-runs.json"
+    },
+    {
+      "path": "github/batch4-dispatch.json",
+      "sizeBytes": 54,
+      "sha256": "22e0f6642d4f9531a33f8662bc494ba0e5679bc751f53673d93605d0f11ede94",
+      "source": ".cache/github/batch4-dispatch.json"
+    },
+    {
+      "path": "github/batch4-jobs.json",
+      "sizeBytes": 11351,
+      "sha256": "e78644b63ba7c78df17e1f292ac87e5ccf944cc77b02d77d04a92e1a6f034419",
+      "source": ".cache/github/batch4-jobs.json"
+    },
+    {
+      "path": "github/batch4-logs.zip",
+      "sizeBytes": 262496,
+      "sha256": "ddad5edc57015aa1cf5456782f9d2d8eb0624b3a634bed97293e7cd52628d707",
+      "source": ".cache/github/batch4-logs.zip"
+    },
+    {
+      "path": "github/batch4-push.json",
+      "sizeBytes": 229,
+      "sha256": "25bf3445d682258e8e1a3301bbbf487d06b3945ce2e1d904705a637be8a42691",
+      "source": ".cache/github/batch4-push.json"
+    },
+    {
+      "path": "github/batch5-artifact-app-retry-download.txt",
+      "sizeBytes": 163,
+      "sha256": "49a12e16c0addbb6c95ccdbf1551065a2bfa2bc27f9ea3a6e3b03991b8d39bb3",
+      "source": ".cache/github/batch5-artifact-app-retry-download.txt"
+    },
+    {
+      "path": "github/batch5-artifact-app-retry.zip",
+      "sizeBytes": 1468555,
+      "sha256": "d689a968383672b42be2253365be90db6a25973c28127755b08ab3fa2ef16859",
+      "source": ".cache/github/batch5-artifact-app-retry.zip"
+    },
+    {
+      "path": "github/batch5-artifact-boot-download.txt",
+      "sizeBytes": 156,
+      "sha256": "5241eb33ac0c0da90d5c60ed2f105b54c70647f6924dff6c86401f342d8b12e5",
+      "source": ".cache/github/batch5-artifact-boot-download.txt"
+    },
+    {
+      "path": "github/batch5-artifact-boot.zip",
+      "sizeBytes": 54830,
+      "sha256": "b3965ba603e9bbef96495b4c5a2134f7d957aa63322f477439eaed42cba61c96",
+      "source": ".cache/github/batch5-artifact-boot.zip"
+    },
+    {
+      "path": "github/batch5-artifact-gcc.zip",
+      "sizeBytes": 1607336,
+      "sha256": "4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149",
+      "source": ".cache/github/batch5-artifact-gcc.zip"
+    },
+    {
+      "path": "github/batch5-artifact-tests-download.txt",
+      "sizeBytes": 158,
+      "sha256": "3823cbc875e894ca6208089a245637b8d5ddb39905e20564172cac4589caf68a",
+      "source": ".cache/github/batch5-artifact-tests-download.txt"
+    },
+    {
+      "path": "github/batch5-artifact-tests.zip",
+      "sizeBytes": 228666,
+      "sha256": "24582a9f367df84b62fc05c31c412282e4c4c509d880370afadb2b03ee8d20f0",
+      "source": ".cache/github/batch5-artifact-tests.zip"
+    },
+    {
+      "path": "github/batch5-artifacts.json",
+      "sizeBytes": 2928,
+      "sha256": "b280edb167ebe57e1b33b75361c44a05bd535aed5694c8024ce456039eb0e0bb",
+      "source": ".cache/github/batch5-artifacts.json"
+    },
+    {
+      "path": "github/batch5-dispatch.json",
+      "sizeBytes": 54,
+      "sha256": "22e0f6642d4f9531a33f8662bc494ba0e5679bc751f53673d93605d0f11ede94",
+      "source": ".cache/github/batch5-dispatch.json"
+    },
+    {
+      "path": "github/batch5-jobs.json",
+      "sizeBytes": 11351,
+      "sha256": "ce8c86b880623cb6ba7f8c8dc82310901e50369f5db302b9663863749c05c191",
+      "source": ".cache/github/batch5-jobs.json"
+    },
+    {
+      "path": "github/batch5-logs.zip",
+      "sizeBytes": 271279,
+      "sha256": "55c87a95e794200790069f6a89dde173515d3eba392f5e5a363fa57f894f221c",
+      "source": ".cache/github/batch5-logs.zip"
+    },
+    {
+      "path": "github/batch5-push.json",
+      "sizeBytes": 229,
+      "sha256": "38f542b1d3cf67ed87101f79c8a5934273ca95f1b65af924f103be54c691838c",
+      "source": ".cache/github/batch5-push.json"
+    },
+    {
+      "path": "github/batch5-runs.json",
+      "sizeBytes": 60245,
+      "sha256": "c656ae7eb6cb7f55e25888bdd9b9c352a71df19c9018c558aae4dc7e951c4796",
+      "source": ".cache/github/batch5-runs.json"
+    },
+    {
+      "path": "github/final-backend-dispatch.json",
+      "sizeBytes": 54,
+      "sha256": "22e0f6642d4f9531a33f8662bc494ba0e5679bc751f53673d93605d0f11ede94",
+      "source": ".cache/github/final-backend-dispatch.json"
+    },
+    {
+      "path": "github/final-firmware-runs.json",
+      "sizeBytes": 48196,
+      "sha256": "59a0211687362394c936db8359511823ea543f41d7f64726466a42be11442dc9",
+      "source": ".cache/github/final-firmware-runs.json"
+    },
+    {
+      "path": "github/handoff-branch-ref.json",
+      "sizeBytes": 417,
+      "sha256": "f2671464871981531ce40468e58573049f0574896f95521a24b1ee8aea6c2de3",
+      "source": ".cache/github/handoff-branch-ref.json"
+    },
+    {
+      "path": "github/handoff-main-ref.json",
+      "sizeBytes": 334,
+      "sha256": "971cdb32402069732bedecdeecbe30c5c9c828bc4cac50718e9cd7c68ac5f6e5",
+      "source": ".cache/github/handoff-main-ref.json"
+    },
+    {
+      "path": "local/archive-p41.py",
+      "sizeBytes": 11081,
+      "sha256": "378177b2cf8dbc12672db87642911aeb0cedf28bd839b078126ba0fe758cac0f",
+      "source": ".cache/archive-p41.py"
+    },
+    {
+      "path": "local/batch1-commit.json",
+      "sizeBytes": 1968,
+      "sha256": "3e5b2255d6d4b9db6f413eec9fc46b18cf4e9714731d2e121a89cd927d4701cf",
+      "source": ".cache/logs/batch1-commit.json"
+    },
+    {
+      "path": "local/batch1-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-commit.stderr.txt"
+    },
+    {
+      "path": "local/batch1-commit.stdout.txt",
+      "sizeBytes": 229,
+      "sha256": "b8d954db6ed3288e251817ac58c7b231fdbc3da77171ebb0f897cafe1249dbb7",
+      "source": ".cache/logs/batch1-commit.stdout.txt"
+    },
+    {
+      "path": "local/batch1-host-portable.json",
+      "sizeBytes": 2013,
+      "sha256": "f7b8fe416a23ac699659293b181bf08513197ae24ba4b10bd2eec0a0ed71bbb1",
+      "source": ".cache/logs/batch1-host-portable.json"
+    },
+    {
+      "path": "local/batch1-host-portable.stderr.txt",
+      "sizeBytes": 337,
+      "sha256": "dfcc34570759fbd2bb0101f1b9df58ecf10bf357904c9f3f4d907ee49163dcc4",
+      "source": ".cache/logs/batch1-host-portable.stderr.txt"
+    },
+    {
+      "path": "local/batch1-host-portable.stdout.txt",
+      "sizeBytes": 45090,
+      "sha256": "4009e6447ee0e2456130bb47fb5b8ee7efd2fec820ba2be360a341c5f87a67d1",
+      "source": ".cache/logs/batch1-host-portable.stdout.txt"
+    },
+    {
+      "path": "local/batch1-host.json",
+      "sizeBytes": 1995,
+      "sha256": "baca91afb5d6bc7973559a5c14571fd0864904d74f1136073c6c3d9f2cecf368",
+      "source": ".cache/logs/batch1-host.json"
+    },
+    {
+      "path": "local/batch1-host.stderr.txt",
+      "sizeBytes": 601,
+      "sha256": "62632b77c250a8799eeabc1139f416714fd6912538190b9b1e8c5c366001b266",
+      "source": ".cache/logs/batch1-host.stderr.txt"
+    },
+    {
+      "path": "local/batch1-host.stdout.txt",
+      "sizeBytes": 41663,
+      "sha256": "9c3a019b4adc2aa44939241bb3fc10a0757cc91e4c2175b0681d854fcbf7818e",
+      "source": ".cache/logs/batch1-host.stdout.txt"
+    },
+    {
+      "path": "local/batch1-native.json",
+      "sizeBytes": 1888,
+      "sha256": "8eb0c60fa5bd35b73563f6562a4d1a18e2309d8c7cd2f131f18c3563a5967167",
+      "source": ".cache/logs/batch1-native.json"
+    },
+    {
+      "path": "local/batch1-native.stderr.txt",
+      "sizeBytes": 7160,
+      "sha256": "767856557ca8b7ab8b2c89ad73cc99ab0648493ede95decd9a9773d74f431106",
+      "source": ".cache/logs/batch1-native.stderr.txt"
+    },
+    {
+      "path": "local/batch1-native.stdout.txt",
+      "sizeBytes": 297,
+      "sha256": "0b8dae88d5bdd1ba118fa8f7dbc4a181a646ba84ec0fbfe911f849483c8a0a3f",
+      "source": ".cache/logs/batch1-native.stdout.txt"
+    },
+    {
+      "path": "local/batch1-npm-ci.json",
+      "sizeBytes": 1944,
+      "sha256": "8586fb1c9c32a25f0c80fac82d47f683c452d838a97c00b7eb6f960d21e2d4e1",
+      "source": ".cache/logs/batch1-npm-ci.json"
+    },
+    {
+      "path": "local/batch1-npm-ci.stderr.txt",
+      "sizeBytes": 2148,
+      "sha256": "464d4c32343363051d4b9acb12355b024a77ee0bfb00fc69ef01ecae31a59297",
+      "source": ".cache/logs/batch1-npm-ci.stderr.txt"
+    },
+    {
+      "path": "local/batch1-npm-ci.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-npm-ci.stdout.txt"
+    },
+    {
+      "path": "local/batch1-npm-registry-recovery.json",
+      "sizeBytes": 2135,
+      "sha256": "d75b6218075b973fc7262c511f2ad72fa45024fed519c7d772061430e7771a49",
+      "source": ".cache/logs/batch1-npm-registry-recovery.json"
+    },
+    {
+      "path": "local/batch1-npm-registry-recovery.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-npm-registry-recovery.stderr.txt"
+    },
+    {
+      "path": "local/batch1-npm-registry-recovery.stdout.txt",
+      "sizeBytes": 26,
+      "sha256": "3a4f4b8517818cca2884c7c632c460be97e8a89a8252e54c951e289f62cd4bc2",
+      "source": ".cache/logs/batch1-npm-registry-recovery.stdout.txt"
+    },
+    {
+      "path": "local/batch1-portable-commit.json",
+      "sizeBytes": 1987,
+      "sha256": "c70c2194efbaa2444f3fa9af438c2cb0c66d5cdab9430f0a3e9441df14b68f8d",
+      "source": ".cache/logs/batch1-portable-commit.json"
+    },
+    {
+      "path": "local/batch1-portable-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-portable-commit.stderr.txt"
+    },
+    {
+      "path": "local/batch1-portable-commit.stdout.txt",
+      "sizeBytes": 153,
+      "sha256": "593c6675f202655cbd7eae6fb3c10ab5540b17cb9f30a9952edd4e90d9ba142e",
+      "source": ".cache/logs/batch1-portable-commit.stdout.txt"
+    },
+    {
+      "path": "local/batch1-portable-stage.json",
+      "sizeBytes": 2252,
+      "sha256": "66a2e101f5c61b751935a670848e15ac12dca886146efa0246419639aecc778f",
+      "source": ".cache/logs/batch1-portable-stage.json"
+    },
+    {
+      "path": "local/batch1-portable-stage.stderr.txt",
+      "sizeBytes": 703,
+      "sha256": "0312b006477389db8929fe87ba48ce895555f7f2195402137aecc868daae6237",
+      "source": ".cache/logs/batch1-portable-stage.stderr.txt"
+    },
+    {
+      "path": "local/batch1-portable-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-portable-stage.stdout.txt"
+    },
+    {
+      "path": "local/batch1-stage.json",
+      "sizeBytes": 1956,
+      "sha256": "6a469f9398ca2ad6c1bda7fdc9d6cadac68c13822bbb20d478b13073d926d724",
+      "source": ".cache/logs/batch1-stage.json"
+    },
+    {
+      "path": "local/batch1-stage.stderr.txt",
+      "sizeBytes": 146,
+      "sha256": "7d2f3df6e08f3454586e9ea071ea12d8280c8693d7e5c225b1b74fe96ab10d74",
+      "source": ".cache/logs/batch1-stage.stderr.txt"
+    },
+    {
+      "path": "local/batch1-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-stage.stdout.txt"
+    },
+    {
+      "path": "local/batch1-types.json",
+      "sizeBytes": 1867,
+      "sha256": "fd85da47a03ec83566438e80eec7bffe08631d3d811b485d1024a7cc488898df",
+      "source": ".cache/logs/batch1-types.json"
+    },
+    {
+      "path": "local/batch1-types.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-types.stderr.txt"
+    },
+    {
+      "path": "local/batch1-types.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch1-types.stdout.txt"
+    },
+    {
+      "path": "local/batch2-byte.json",
+      "sizeBytes": 1801,
+      "sha256": "61ca960c9781a3e353990f98f793e6027f6a86916d91b3c77e98979f34018267",
+      "source": ".cache/logs/batch2-byte.json"
+    },
+    {
+      "path": "local/batch2-byte.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch2-byte.stderr.txt"
+    },
+    {
+      "path": "local/batch2-byte.stdout.txt",
+      "sizeBytes": 3630,
+      "sha256": "8f96cdf2532c40ec5fe1c10d7e6ded598a61bc08cd54eb5fc4929933eaf29fc3",
+      "source": ".cache/logs/batch2-byte.stdout.txt"
+    },
+    {
+      "path": "local/batch2-commit.json",
+      "sizeBytes": 1969,
+      "sha256": "715d7785a7f6bc21fcd7c52743fd7c12d7c7c9e0826e23c91413c84a76cd8609",
+      "source": ".cache/logs/batch2-commit.json"
+    },
+    {
+      "path": "local/batch2-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch2-commit.stderr.txt"
+    },
+    {
+      "path": "local/batch2-commit.stdout.txt",
+      "sizeBytes": 490,
+      "sha256": "b22c3972707e5bde58ffaca2ae6d70678a547403fb4b1515151b0be8b8c090ac",
+      "source": ".cache/logs/batch2-commit.stdout.txt"
+    },
+    {
+      "path": "local/batch2-pack-fixed.json",
+      "sizeBytes": 1828,
+      "sha256": "b9cb8b06e1bb9c37f02dd76ad60badcdc3ec568e96d76c8fe7e5923cd089f7df",
+      "source": ".cache/logs/batch2-pack-fixed.json"
+    },
+    {
+      "path": "local/batch2-pack-fixed.stderr.txt",
+      "sizeBytes": 1065,
+      "sha256": "f042a0ce64699a76a097c01db9eede87eac86bcc91e0f7a171aa145e6592c22d",
+      "source": ".cache/logs/batch2-pack-fixed.stderr.txt"
+    },
+    {
+      "path": "local/batch2-pack-fixed.stdout.txt",
+      "sizeBytes": 2792,
+      "sha256": "591cac9115a07a663e34357c1b794f2056db245011ad3d235134b229af36b478",
+      "source": ".cache/logs/batch2-pack-fixed.stdout.txt"
+    },
+    {
+      "path": "local/batch2-pack.json",
+      "sizeBytes": 1817,
+      "sha256": "f4753165b5d08b146617f4e632260c4970a5fb84d1b9285cbef6e5ac18d7cd43",
+      "source": ".cache/logs/batch2-pack.json"
+    },
+    {
+      "path": "local/batch2-pack.stderr.txt",
+      "sizeBytes": 2448,
+      "sha256": "d73a9ba9b6bed91c02f13be77ed3540c5a067037da9d19c7acd2f57719bea0a7",
+      "source": ".cache/logs/batch2-pack.stderr.txt"
+    },
+    {
+      "path": "local/batch2-pack.stdout.txt",
+      "sizeBytes": 2792,
+      "sha256": "eb735316565921d1ea620379391a48a3b22dafb4a84e9d7c6d58e307bd6db77e",
+      "source": ".cache/logs/batch2-pack.stdout.txt"
+    },
+    {
+      "path": "local/batch2-stage.json",
+      "sizeBytes": 2229,
+      "sha256": "05f53c40b7f68c5cd5319cb71369c7bfd16a9d3d49ea4873fa39035ca4dad80f",
+      "source": ".cache/logs/batch2-stage.json"
+    },
+    {
+      "path": "local/batch2-stage.stderr.txt",
+      "sizeBytes": 842,
+      "sha256": "6d5d3a57e1a2f3f2da7e8313d7ffb138bcda27e885d5891de216bee0ba5d1265",
+      "source": ".cache/logs/batch2-stage.stderr.txt"
+    },
+    {
+      "path": "local/batch2-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch2-stage.stdout.txt"
+    },
+    {
+      "path": "local/batch3-commit.json",
+      "sizeBytes": 1969,
+      "sha256": "a55e3ea7fb1eadc23990eeaeade37d3a65fbb2fd163fb33e45a95f5d911f1ca0",
+      "source": ".cache/logs/batch3-commit.json"
+    },
+    {
+      "path": "local/batch3-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch3-commit.stderr.txt"
+    },
+    {
+      "path": "local/batch3-commit.stdout.txt",
+      "sizeBytes": 618,
+      "sha256": "29b4c97ab01e28564acfbd924c616ea03e8413524869b7d135c9325726638a1b",
+      "source": ".cache/logs/batch3-commit.stdout.txt"
+    },
+    {
+      "path": "local/batch3-pipeline-bound.json",
+      "sizeBytes": 1953,
+      "sha256": "959f108cd88e4a191da74f754c6a618330594c51ca646b8c4b4fe91194df3bbd",
+      "source": ".cache/logs/batch3-pipeline-bound.json"
+    },
+    {
+      "path": "local/batch3-pipeline-bound.stderr.txt",
+      "sizeBytes": 169,
+      "sha256": "f911c8117e26198d5db94023b095249272770f107aa895807053674e8f9ac2ec",
+      "source": ".cache/logs/batch3-pipeline-bound.stderr.txt"
+    },
+    {
+      "path": "local/batch3-pipeline-bound.stdout.txt",
+      "sizeBytes": 7583,
+      "sha256": "286e686e06f7268ac99ab110f0c879369dad6e1e10f1c33435aa8612ce2bcf40",
+      "source": ".cache/logs/batch3-pipeline-bound.stdout.txt"
+    },
+    {
+      "path": "local/batch3-pipeline-fixed.json",
+      "sizeBytes": 1953,
+      "sha256": "280cc0b69cbc1b69b5303f044f8a2359e1adce4cdc1cb796e0b5bb0de93080a0",
+      "source": ".cache/logs/batch3-pipeline-fixed.json"
+    },
+    {
+      "path": "local/batch3-pipeline-fixed.stderr.txt",
+      "sizeBytes": 169,
+      "sha256": "6dd69abd4772898339ae32d22ad8b2990d9bb37c5afb3bb87118a16d59b730eb",
+      "source": ".cache/logs/batch3-pipeline-fixed.stderr.txt"
+    },
+    {
+      "path": "local/batch3-pipeline-fixed.stdout.txt",
+      "sizeBytes": 7586,
+      "sha256": "e47b8df928a87eec9eeed3e565621a8f061e4c86c973243a14354d419693af85",
+      "source": ".cache/logs/batch3-pipeline-fixed.stdout.txt"
+    },
+    {
+      "path": "local/batch3-pipeline-host.json",
+      "sizeBytes": 1949,
+      "sha256": "016441438d43e6dc54c6d4327dd59d20393de92d552521d7a7036efa2890ce38",
+      "source": ".cache/logs/batch3-pipeline-host.json"
+    },
+    {
+      "path": "local/batch3-pipeline-host.stderr.txt",
+      "sizeBytes": 2520,
+      "sha256": "409661d8be7c8cb6fbcb60282b81c6da4856708fb6462685c3bf73e6fa7f3457",
+      "source": ".cache/logs/batch3-pipeline-host.stderr.txt"
+    },
+    {
+      "path": "local/batch3-pipeline-host.stdout.txt",
+      "sizeBytes": 3719,
+      "sha256": "c3f8374a46bcda9cf0ec9fc5218f2797a65a63e1e31b93e68ad1272592f709e8",
+      "source": ".cache/logs/batch3-pipeline-host.stdout.txt"
+    },
+    {
+      "path": "local/batch3-shared-host.json",
+      "sizeBytes": 1965,
+      "sha256": "bbf56de0f57f85221ade176a6c61ab20263a2aa5fb56f3d28720e761e6d05ba5",
+      "source": ".cache/logs/batch3-shared-host.json"
+    },
+    {
+      "path": "local/batch3-shared-host.stderr.txt",
+      "sizeBytes": 168,
+      "sha256": "d728a635ab7aaf4dc6712b4d948b80f7bd4c6dc8320542207b393efb60c87ee6",
+      "source": ".cache/logs/batch3-shared-host.stderr.txt"
+    },
+    {
+      "path": "local/batch3-shared-host.stdout.txt",
+      "sizeBytes": 3729,
+      "sha256": "8cda60bf4381b3b1fb02f7202863a392027edee30375710d2d00c63483ab355b",
+      "source": ".cache/logs/batch3-shared-host.stdout.txt"
+    },
+    {
+      "path": "local/batch3-stage.json",
+      "sizeBytes": 2706,
+      "sha256": "c38d5f943104fc86b44304333d1fd145b47f3a744e17b67ea8e0fe1e47b70875",
+      "source": ".cache/logs/batch3-stage.json"
+    },
+    {
+      "path": "local/batch3-stage.stderr.txt",
+      "sizeBytes": 1898,
+      "sha256": "5e4acab0304206ece99dd26f47a3b23936d3bc71a75efeaccc864c540f72810f",
+      "source": ".cache/logs/batch3-stage.stderr.txt"
+    },
+    {
+      "path": "local/batch3-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch3-stage.stdout.txt"
+    },
+    {
+      "path": "local/batch3-types.json",
+      "sizeBytes": 1867,
+      "sha256": "a8503e73d092d94222aa1112757f81875c046815c7b8a515d3f6e68a5f5614e2",
+      "source": ".cache/logs/batch3-types.json"
+    },
+    {
+      "path": "local/batch3-types.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch3-types.stderr.txt"
+    },
+    {
+      "path": "local/batch3-types.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch3-types.stdout.txt"
+    },
+    {
+      "path": "local/batch3-workflow-fixed.json",
+      "sizeBytes": 1821,
+      "sha256": "d1c0e41109a317e9c8c747f9bc3548f5dd34b6fadc4bea54ddfef1080fddf98f",
+      "source": ".cache/logs/batch3-workflow-fixed.json"
+    },
+    {
+      "path": "local/batch3-workflow-fixed.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch3-workflow-fixed.stderr.txt"
+    },
+    {
+      "path": "local/batch3-workflow-fixed.stdout.txt",
+      "sizeBytes": 1839,
+      "sha256": "56437743c1eae80dde6fa4fd30b7f2620d388fa16083644b1c00937ce1b52904",
+      "source": ".cache/logs/batch3-workflow-fixed.stdout.txt"
+    },
+    {
+      "path": "local/batch3-workflow.json",
+      "sizeBytes": 1810,
+      "sha256": "51fbb90c0f90dc796bf2ef74d3ddac0f6ce622a6cd16d44aa7f2e0fa8c0dfbe7",
+      "source": ".cache/logs/batch3-workflow.json"
+    },
+    {
+      "path": "local/batch3-workflow.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch3-workflow.stderr.txt"
+    },
+    {
+      "path": "local/batch3-workflow.stdout.txt",
+      "sizeBytes": 1471,
+      "sha256": "35b6a0d9b83cda807e273babf5f3e0e79b1798b48fdb893bd9911131b12fef94",
+      "source": ".cache/logs/batch3-workflow.stdout.txt"
+    },
+    {
+      "path": "local/batch4-bytes.json",
+      "sizeBytes": 1803,
+      "sha256": "851328a63855a09d0b3b09d3140596fd86455589260c87cb553c59673c0e878f",
+      "source": ".cache/logs/batch4-bytes.json"
+    },
+    {
+      "path": "local/batch4-bytes.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch4-bytes.stderr.txt"
+    },
+    {
+      "path": "local/batch4-bytes.stdout.txt",
+      "sizeBytes": 4052,
+      "sha256": "d84da5fc1ecf68fa18a2a11a53161854211d1716a2f0ebf745cca78733e41b5d",
+      "source": ".cache/logs/batch4-bytes.stdout.txt"
+    },
+    {
+      "path": "local/batch4-commit.json",
+      "sizeBytes": 1969,
+      "sha256": "14024d106b550bfc87b9609038787a434ca6bfaf2af5a99e45f34c4cc7e3fea2",
+      "source": ".cache/logs/batch4-commit.json"
+    },
+    {
+      "path": "local/batch4-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch4-commit.stderr.txt"
+    },
+    {
+      "path": "local/batch4-commit.stdout.txt",
+      "sizeBytes": 156,
+      "sha256": "5cd709b106d03d12dc7ed95d10bff4b7189e4ccb08b3ab98e7a37f7b8c7f986e",
+      "source": ".cache/logs/batch4-commit.stdout.txt"
+    },
+    {
+      "path": "local/batch4-golden.json",
+      "sizeBytes": 1822,
+      "sha256": "8b271870d5d42738cbfe3404dac16b994f5beb4c989cb90d1e8eef8a49444d90",
+      "source": ".cache/logs/batch4-golden.json"
+    },
+    {
+      "path": "local/batch4-golden.stderr.txt",
+      "sizeBytes": 1035,
+      "sha256": "553be7da595e2b48cb65bfbbda4ae81acbbbad6b0d5521217f979d66a870226a",
+      "source": ".cache/logs/batch4-golden.stderr.txt"
+    },
+    {
+      "path": "local/batch4-golden.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch4-golden.stdout.txt"
+    },
+    {
+      "path": "local/batch4-pipeline.json",
+      "sizeBytes": 1941,
+      "sha256": "dd7e4f66ecac24fbeb2495e0782b5b8a3f02247cb415ccacc6d8e500af121a8b",
+      "source": ".cache/logs/batch4-pipeline.json"
+    },
+    {
+      "path": "local/batch4-pipeline.stderr.txt",
+      "sizeBytes": 169,
+      "sha256": "87ccc2fa80583cd9f19e9de100e99a15bc47128278012eceef4319837f679bdd",
+      "source": ".cache/logs/batch4-pipeline.stderr.txt"
+    },
+    {
+      "path": "local/batch4-pipeline.stdout.txt",
+      "sizeBytes": 7796,
+      "sha256": "d25b2dbd48346a5cd1aca60a807852f97acb6785e0bbab44d1d5da59aac031f7",
+      "source": ".cache/logs/batch4-pipeline.stdout.txt"
+    },
+    {
+      "path": "local/batch4-shared-host.json",
+      "sizeBytes": 1965,
+      "sha256": "6ac43e0188fdfdebdaaf3158509f13ddd427986ad8f6ff3b9164e8c10b87a6f5",
+      "source": ".cache/logs/batch4-shared-host.json"
+    },
+    {
+      "path": "local/batch4-shared-host.stderr.txt",
+      "sizeBytes": 169,
+      "sha256": "4dfa524d42e37a8cd003e4e6aef1551f70187b2efbc44d98ead85383555cbcd8",
+      "source": ".cache/logs/batch4-shared-host.stderr.txt"
+    },
+    {
+      "path": "local/batch4-shared-host.stdout.txt",
+      "sizeBytes": 3729,
+      "sha256": "7a2570fd6b8d40c8c1a303de50efaae6894da9419433b8c31b100a4998bca968",
+      "source": ".cache/logs/batch4-shared-host.stdout.txt"
+    },
+    {
+      "path": "local/batch4-stage.json",
+      "sizeBytes": 2366,
+      "sha256": "fb18e1569edd3353facb2378cb4bc5f98719151d72b636e8bdcfa6655048650b",
+      "source": ".cache/logs/batch4-stage.json"
+    },
+    {
+      "path": "local/batch4-stage.stderr.txt",
+      "sizeBytes": 1218,
+      "sha256": "1d9a74ec5f84f4e45af41c08d169c3105b93d971ae3bc5ca762073dde7e84a85",
+      "source": ".cache/logs/batch4-stage.stderr.txt"
+    },
+    {
+      "path": "local/batch4-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch4-stage.stdout.txt"
+    },
+    {
+      "path": "local/batch4-types.json",
+      "sizeBytes": 1866,
+      "sha256": "054c449996d1c97126e4489f6df5b6903d719e78b51e1471593bc596b296d06f",
+      "source": ".cache/logs/batch4-types.json"
+    },
+    {
+      "path": "local/batch4-types.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch4-types.stderr.txt"
+    },
+    {
+      "path": "local/batch4-types.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch4-types.stdout.txt"
+    },
+    {
+      "path": "local/batch5-commit.json",
+      "sizeBytes": 1969,
+      "sha256": "638961f806062a0c5a32d9e9614011122283b7b1d64372553c49addd6c42cb7e",
+      "source": ".cache/logs/batch5-commit.json"
+    },
+    {
+      "path": "local/batch5-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch5-commit.stderr.txt"
+    },
+    {
+      "path": "local/batch5-commit.stdout.txt",
+      "sizeBytes": 163,
+      "sha256": "90befddd91dcbc67030e649cb20d0983e0e8d66c647dc4050f3598ac53bdcdb6",
+      "source": ".cache/logs/batch5-commit.stdout.txt"
+    },
+    {
+      "path": "local/batch5-stage.json",
+      "sizeBytes": 1976,
+      "sha256": "f734b9bce889c30c042285ec6bdc47ccaea3e723201e298fc9aca782d7801574",
+      "source": ".cache/logs/batch5-stage.json"
+    },
+    {
+      "path": "local/batch5-stage.stderr.txt",
+      "sizeBytes": 404,
+      "sha256": "d3142c4f1fd1a190df4b8e4e719b98bd6bca272ae3733b2323b7fd21298a29d7",
+      "source": ".cache/logs/batch5-stage.stderr.txt"
+    },
+    {
+      "path": "local/batch5-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch5-stage.stdout.txt"
+    },
+    {
+      "path": "local/batch5-workflow.json",
+      "sizeBytes": 1810,
+      "sha256": "23f152e4bf898e563b2fc7a58827de46b8f3e5f6871406bfeb1827e9997dbc65",
+      "source": ".cache/logs/batch5-workflow.json"
+    },
+    {
+      "path": "local/batch5-workflow.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/batch5-workflow.stderr.txt"
+    },
+    {
+      "path": "local/batch5-workflow.stdout.txt",
+      "sizeBytes": 1839,
+      "sha256": "f870b3659b2144b9b6687d9dd3dd05fe065ece07915802dd3af42df385f51cb0",
+      "source": ".cache/logs/batch5-workflow.stdout.txt"
+    },
+    {
+      "path": "local/gh.cjs",
+      "sizeBytes": 4097,
+      "sha256": "0a1da2b44eba83097434f427a90d8874fc4857b00211236060e872d479c2f7f0",
+      "source": ".cache/gh.cjs"
+    },
+    {
+      "path": "local/handoff-write-audit.json",
+      "sizeBytes": 14104,
+      "sha256": "d08508cde6045eae9db56f914cdded6a821e57fe3f32da3b2c6788141eddfd29",
+      "source": ".cache/logs/handoff-write-audit.json"
+    },
+    {
+      "path": "local/run.cjs",
+      "sizeBytes": 3364,
+      "sha256": "ed8b4b6fbc1e63e13dc91d268f5f75eef18413f3cc80f204c0d6ee4a725609e3",
+      "source": ".cache/run.cjs"
+    },
+    {
+      "path": "selected/gcc-build-inputs.json",
+      "sizeBytes": 463,
+      "sha256": "3f16930508f5ccd19142c6a8108b230844134e426eb82d58dcca5abdbf4f188c",
+      "source": "github/batch5-artifact-app-retry.zip!gcc-build-inputs.json"
+    },
+    {
+      "path": "selected/gcc-development/DEVELOPMENT-ONLY.json",
+      "sizeBytes": 127,
+      "sha256": "cf1bd38281c979fb07a5e66c52043d4f7e311b8733b9baaa8b0c6b87095fd71a",
+      "source": "github/batch5-artifact-gcc.zip!DEVELOPMENT-ONLY.json"
+    },
+    {
+      "path": "selected/gcc-development/cloudflare-firmware-release-metadata.json",
+      "sizeBytes": 1441,
+      "sha256": "0850c7b9fa35e8fd4ace12f69ddf4eaaa17b58614e318a0030d6beef75284bb8",
+      "source": "github/batch5-artifact-gcc.zip!cloudflare-firmware-release-metadata.json"
+    },
+    {
+      "path": "selected/gcc-development/verification.json",
+      "sizeBytes": 7034,
+      "sha256": "6c85dfeddc3ee5b9e7098b31042c19b29b79e374db3ed0e3a96c81c0f5fb3bce",
+      "source": "github/batch5-artifact-gcc.zip!verification.json"
+    },
+    {
+      "path": "selected/synthetic-three-assets/cloudflare-firmware-release-metadata.json",
+      "sizeBytes": 1989,
+      "sha256": "476920e84f39d7b83dd2941bfb6d0eddf7857a9fd8617070bb03365df741b800",
+      "source": "github/batch5-artifact-tests.zip!firmware-release-tests/case-aTieJp/prepared/cloudflare-firmware-release-metadata.json"
+    },
+    {
+      "path": "selected/synthetic-three-assets/verification.json",
+      "sizeBytes": 12585,
+      "sha256": "a882131f9f438051796f2506785f1d617c22a68dc8a70a6994aa51f8767639ac",
+      "source": "github/batch5-artifact-tests.zip!firmware-release-tests/case-aTieJp/prepared/verification.json"
+    }
+  ]
+}

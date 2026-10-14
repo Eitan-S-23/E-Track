@@ -1,0 +1,7 @@
+[dev/p4-1/unattended-20261015 84aa6a7] feat(ota): prepare and verify immutable firmware release bytes
+ 8 files changed, 624 insertions(+), 5 deletions(-)
+ create mode 100644 .github/scripts/bsdiff/CMakeLists.txt
+ create mode 100644 .github/scripts/firmware-byte-check.py
+ create mode 100644 app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs
+ create mode 100644 tests/ota/test_firmware_pack.py
+ create mode 100644 tests/ota/test_firmware_release.mjs

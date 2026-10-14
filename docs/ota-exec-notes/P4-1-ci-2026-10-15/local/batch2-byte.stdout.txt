@@ -1,0 +1,24 @@
+BYTE_FIXTURE {"path":"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\firmware-release-tests\\case-a5LZaA\\prepared","assets":[{"kind":"full","baseImageSha256":"","baseVersionCode":0,"fileName":"e-track-at32f435-v2.8.1-full.etu","sha256":"1878cd55ac20899d527b137adcf47fae710a4935f810124ff297c55d4d107f58","sizeBytes":202,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Verified":false},{"baseImageSha256":"074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1","baseVersionCode":20800,"kind":"patch","fileName":"e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","sha256":"7a2f10654ad222e492483c27762f1a7722382c344ac07f286680901a034540e0","sizeBytes":208,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Verified":false},{"kind":"recovery","baseImageSha256":"","baseVersionCode":0,"fileName":"recovery-v2.8.1.bin","sha256":"0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c","sizeBytes":8200,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Verified":false}],"finalImage":{"fileName":"app-final.bin","sizeBytes":8192,"sha256":"d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5"},"metadataSha256":"b6b8b2018afa54d518a920547cebc8ec28dfe81710ce4145a28d638dc11641de"}
+✔ real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundtrip (5056.3765ms)
+✔ approved-envelope reproduction is byte-identical, including canonical provenance (9865.906ms)
+✔ a fresh generation still uses independent random package nonces (5530.9627ms)
+✔ missing/invalid key fails configuration before outputs (missing) (348.0879ms)
+✔ missing/invalid key fails configuration before outputs (invalid) (305.9514ms)
+✔ wrong cross-stage GCC digest fails before preparation (293.3334ms)
+✔ wrong base image SHA rejects before full/patch/recovery output (549.8222ms)
+✔ base source drift, wrong version, nightly and ETU sources are rejected (2039.602ms)
+✔ exit zero with a patch stdout failure does not advance to recovery or metadata (3358.7131ms)
+✔ a successful patch tool with wrong candidate bytes is rejected (4304.9497ms)
+✔ damaged recovery trailer fails actual verification before metadata (4774.6911ms)
+✔ builder refuses missing full/recovery assets instead of emitting metadata (275.2185ms)
+✔ output path and unsupported compiled identity fail closed (280.1845ms)
+PREPARATION_CLI {"exitCode":0,"stdout":"{\"ok\":true,\"outputDir\":\"D:\\\\github\\\\my\\\\E-Track\\\\.cache\\\\p41-dev-20261015\\\\.cache\\\\firmware-release-tests\\\\case-VKZobR\\\\prepared\",\"assetsPrepared\":3,\"r2Verified\":false,\"metadataSha256\":\"4d3c0f9dbe05c4600ba92f6b1d294a525d5b9b02693025f694f08fb121d6daf3\"}\n","missingKeyExit":2,"missingKeyStderr":"{\"errorCode\":\"INVALID_PARAMETER\",\"message\":\"OTA_AES_KEY must be configured as 32 hex characters\",\"requestId\":\"0b394c95-8649-4bf7-bd9b-44d771cc254f\"}\n"}
+✔ actual preparation CLI returns one JSON result and configuration exit 2 (5542.6158ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 42942.8417

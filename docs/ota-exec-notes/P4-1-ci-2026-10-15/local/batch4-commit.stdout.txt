@@ -1,0 +1,2 @@
+[dev/p4-1/unattended-20261015 1eed862] fix(ota): bind verified package bytes and registration responses
+ 8 files changed, 169 insertions(+), 4 deletions(-)

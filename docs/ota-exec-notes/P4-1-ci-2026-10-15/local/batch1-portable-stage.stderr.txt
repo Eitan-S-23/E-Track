@@ -1,0 +1,4 @@
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/build-firmware-release-metadata.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-exec-notes/P4-1-implementation-2026-10-15.md', LF will be replaced by CRLF the next time Git touches it

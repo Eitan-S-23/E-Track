@@ -1,0 +1,32 @@
+✔ production remains explicit dispatch/publish with a first-step hard gate and protected environment (2.5817ms)
+✔ rehearsal has only separately named staging secrets and read-only GitHub permissions (0.4414ms)
+✔ nightly/checks jobs cannot acquire release secrets or execute the cloud pipeline (0.5288ms)
+✔ both release environments use the identical production implementation and same-run App/Boot inputs (0.8443ms)
+✔ development wiring explicitly executes host, native, byte and production-GCC paths (0.577ms)
+GATE_CASE {"label":"production locked","exitCode":1}
+✔ actual shell gate: production locked (204.5407ms)
+GATE_CASE {"label":"production missing approval","exitCode":2}
+✔ actual shell gate: production missing approval (138.9876ms)
+GATE_CASE {"label":"production ambiguous mode","exitCode":2}
+✔ actual shell gate: production ambiguous mode (138.166ms)
+GATE_CASE {"label":"production wrong approval","exitCode":2}
+✔ actual shell gate: production wrong approval (138.0309ms)
+GATE_CASE {"label":"production approved shell gate only","exitCode":0}
+✔ actual shell gate: production approved shell gate only (158.8556ms)
+GATE_CASE {"label":"rehearsal locked","exitCode":0}
+✔ actual shell gate: rehearsal locked (134.9765ms)
+GATE_CASE {"label":"rehearsal unlocked","exitCode":1}
+✔ actual shell gate: rehearsal unlocked (143.6723ms)
+GATE_CASE {"label":"rehearsal cannot publish","exitCode":1}
+✔ actual shell gate: rehearsal cannot publish (152.1776ms)
+GATE_CASE {"label":"rehearsal retry binds original attempt","exitCode":0}
+✔ actual shell gate: rehearsal retry binds original attempt (162.9911ms)
+✔ actual execute CLI rejects a checks context with exit 2 before any cloud path (1238.3452ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4896.9675

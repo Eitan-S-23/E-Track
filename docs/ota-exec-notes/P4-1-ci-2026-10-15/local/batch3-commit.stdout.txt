@@ -1,0 +1,8 @@
+[dev/p4-1/unattended-20261015 81b42bd] feat(ota): wire isolated rehearsal and immutable release registration
+ 12 files changed, 1389 insertions(+), 300 deletions(-)
+ create mode 100644 .github/scripts/firmware-release.mjs
+ create mode 100644 .github/scripts/p41-host.config.mjs
+ create mode 100644 app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-github-release.mjs
+ create mode 100644 app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs
+ create mode 100644 tests/ota/firmware-pipeline.host.test.ts
+ create mode 100644 tests/ota/test_firmware_workflow.mjs

@@ -751,11 +751,12 @@
 ## 7. P4 CI/CF(估时 2-3d;门槛:P0 完成,可与 P1/P2 并行;验收:正式发布→推送→BLE 升级全链演练)
 
 #### P4-1 firmware-build.yml 正式发布链
-状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-15(用户授权无人值守开发；先建立真实测试/CI 反馈；真实 rehearsal 与独立验收仍 NOT_RUN)
+状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-15(无人值守开发实现与实际 CI 验证完成，原件已归档；真实 rehearsal 与独立验收仍 NOT_RUN，未合入 main)
 - 目标: §6.1 制包顺序①-⑥:构建占位头 app.bin→`etu_pack.py --finalize`→full.etu+patch.etu(基版=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→**bspatch 自验逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)**→recovery 资产(app.bin+尾 8B)→GitHub Release 三资产→注册链;`firmware-production` environment 人工审批;vcode>CF 现值校验;PRE-1 新编码。
 - 依赖: PRE-3/4、P0-2、P4-2；P4-2 是前置任务，P4-1 不得先行。
 - 验收: P5 前按 OTA-XC-RELEASE-GATE 完成一次获授权的隔离 staging rehearsal，三资产/readback/metadata/注册及生产零副作用证据齐全；不创建 production Release。与 P4-4 共用这次原件。正式 Release/晋升在 P5 通过及 owner/environment 审批后，仍须规定的重建与哈希一致性检查。
 - 证据: `docs/ota-exec-notes/P4-1-implementation-2026-10-15.md`；专属分支 `dev/p4-1/unattended-20261015`，不合入 main、不操作设备或真实云资源。
+- 开发交付: 宿主脚本/迁移 34、编排 20、原生 workerd 156、制包 8、golden 9、workflow 15、字节 19 均通过；GCC App/Boot 与真实 GCC 开发制包通过。编译/链接 640 条 warning、vendor 6 条 warning 和失败历史保留。实测基版/云权限/隔离 rehearsal/独立验收及 P41-AUDIT-01 外部缓存归因均未冒充完成；配置清单与责任人见同一任务记录。
 
 #### P4-2 D1 多资产模型与 latest 选包
 状态: 完成 ｜ 认领: Codex(P4-2 实现/接续) / 2026-10-14 ｜ 更新: 2026-10-15(P42-CLOSEOUT-02 最终独立实现验收 PASS；原生 Worker CI 156/156、宿主回归 190/190 原件独立核验；完成边界为实现交付，不代表真实环境已启用或生产放行)
@@ -1206,3 +1207,4 @@
 - 2026-10-11 | Codex independent acceptance/root | P3-4 in progress, live ENV_BLOCKED | Continued committed DNS candidate through controlled v3-v5; preserved DAP failures and capture-capacity failure. Full state/network/APK checks recovered; zero qualification/calibration OTA, no flash/reset/new product edits. Only one archived header-only phone capture needs exact deletion authority; other seven records remain. Report: docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
 - 2026-10-12 | Codex independent acceptance/root | P3-4 in progress, v6 ENV_BLOCKED | Exact authorized old capture deletion completed. New App record missed admission deadline; late same-process record archived with zero OTA starts. Original seven retained, App stopped, prior runtime restored; phone unlocked observed. Full lineage PASS; qualification 0/1 and calibration 0/12. No product/runner repair or commit/push. See docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
 - 2026-10-12 | Codex independent acceptance/root takeover | P3-4 in progress, v8 storage ENV_BLOCKED | Phone admission recovered; one actual qualification command stopped before OTA because SD and QSPI are unavailable. Full App/Boot identities unchanged, inserted-card GPIO and passive startup RTT preserved. Q-TRANSFER environment FAIL, 41 NOT_OBSERVED, qualification 0/1 and calibration 0/12; services closed, failed owner lock retained. Board-state clarification precedes supported recovery and a controlled successor; no blind reset/flash, source changes, old cleanup or long-campaign replay. See P34-LIVE-08 in docs/ota-exec-notes/P3-4-stage1-live-blockers-2026-10-11.md.
+- 2026-10-15 | Codex P4-1 implementation | P4-1 only, IN_PROGRESS | Completed authorized unattended development on the exclusive branch: real shared byte/pipeline/host/native tests, final firmware and backend CI, original failure history and hash-bound artifacts archived in docs/ota-exec-notes/P4-1-ci-2026-10-15. Configuration and real-rehearsal handoff are in the existing P4-1 note. No main merge, release/deployment, cloud mutation or device action; P3-5/P4-3/P4-4 not started. External PowerShell-cache timestamp attribution remains P41-AUDIT-01, without cleanup or an unqualified no-external-write claim.

@@ -1,0 +1,12 @@
+warning: in the working copy of '.github/workflows/firmware-build.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.d.mts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.d.mts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-exec-notes/P4-1-implementation-2026-10-15.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/scripts/firmware-release.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/scripts/p41-host.config.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-github-release.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/firmware-pipeline.host.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/test_firmware_workflow.mjs', LF will be replaced by CRLF the next time Git touches it

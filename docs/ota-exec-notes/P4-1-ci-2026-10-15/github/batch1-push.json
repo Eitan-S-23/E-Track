@@ -1,0 +1,7 @@
+{
+  "identity": "Eitan-S-23",
+  "branch": "dev/p4-1/unattended-20261015",
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "remote: \nremote: Create a pull request for 'dev/p4-1/unattended-20261015' on GitHub by visiting:        \nremote:      https://github.com/Eitan-S-23/E-Track/pull/new/dev/p4-1/unattended-20261015        \nremote: \nTo https://github.com/Eitan-S-23/E-Track.git\n * [new branch]      HEAD -> dev/p4-1/unattended-20261015\n"
+}

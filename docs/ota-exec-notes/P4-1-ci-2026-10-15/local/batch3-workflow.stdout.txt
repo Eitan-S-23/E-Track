@@ -1,0 +1,39 @@
+node:internal/modules/cjs/loader:1421
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module 'yaml'
+Require stack:
+- D:\github\my\E-Track\.cache\p41-dev-20261015\app\bluetooth_flutter_Trace\cloudflare\update-service\worker\package.json
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at file:///D:/github/my/E-Track/.cache/p41-dev-20261015/tests/ota/test_firmware_workflow.mjs:12:19
+    at ModuleJob.run (node:internal/modules/esm/module_job:413:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\package.json'
+  ]
+}
+
+Node.js v24.13.0
+✖ tests\ota\test_firmware_workflow.mjs (149.3621ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 164.1662
+
+✖ failing tests:
+
+test at tests\ota\test_firmware_workflow.mjs:1:1
+✖ tests\ota\test_firmware_workflow.mjs (149.3621ms)
+  'test failed'

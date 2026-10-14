@@ -1,0 +1,90 @@
+There was an access violation in the runtime.
+On Windows, this may be caused by an outdated Microsoft Visual C++ Redistributable library.
+Check that you have the latest version installed.
+See https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist
+There was an access violation in the runtime.
+On Windows, this may be caused by an outdated Microsoft Visual C++ Redistributable library.
+Check that you have the latest version installed.
+See https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist
+There was an access violation in the runtime.
+On Windows, this may be caused by an outdated Microsoft Visual C++ Redistributable library.
+Check that you have the latest version installed.
+See https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 3 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start cloudflare-pool worker for test files D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/invariants.test.ts.
+ ❯ node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ Pool.schedule node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:5
+
+Caused by: MiniflareCoreError [ERR_RUNTIME_FAILURE]: The Workers runtime failed to start. There was likely a problem with the workerd binary or your configuration.
+Runtime stderr:
+*** Received structured exception #0xc0000005: access violation; stack: 7ffaf46c8c33 7ff66116d96d 7ff66116da33 7ff66114b0dc 7ff66114b090 7ff6605dfa16 7ff6605e019f 7ff65f105e2f 7ff66078c3f2 7ff6607932f6 7ff66078c94b 7ff6607932f6 7ff660789e9b 7ff65f0f1e77 7ff6625a999e 7ffb2f2e7373 7ffb2fc9cc90
+ ❯ StartupLogBuffer.handleStartupFailure node_modules/miniflare/dist/src/index.js:71769:13
+ ❯ Runtime.updateConfig node_modules/miniflare/dist/src/index.js:71859:24
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ _Miniflare.#assembleAndUpdateConfig node_modules/miniflare/dist/src/index.js:91795:30
+ ❯ Mutex.runWith node_modules/miniflare/dist/src/index.js:60102:48
+ ❯ _Miniflare.#waitForReady node_modules/miniflare/dist/src/index.js:91916:5
+ ❯ getProjectMiniflare node_modules/@cloudflare/vitest-pool-workers/dist/pool/index.mjs:3228:2
+ ❯ CloudflarePoolWorker.start node_modules/@cloudflare/vitest-pool-workers/dist/pool/index.mjs:2713:13
+ ❯ PoolRunner.start node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:2899:4
+ ❯ Pool.schedule node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_RUNTIME_FAILURE' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start cloudflare-pool worker for test files D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-v2.test.ts.
+ ❯ node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ Pool.schedule node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:5
+
+Caused by: MiniflareCoreError [ERR_RUNTIME_FAILURE]: The Workers runtime failed to start. There was likely a problem with the workerd binary or your configuration.
+Runtime stderr:
+*** Received structured exception #0xc0000005: access violation; stack: 7ffaf46c8c33 7ff66116d96d 7ff66116da33 7ff66114b0dc 7ff66114b090 7ff6605dfa16 7ff6605e019f 7ff65f105e2f 7ff66078c3f2 7ff6607932f6 7ff66078c94b 7ff6607932f6 7ff660789e9b 7ff65f0f1e77 7ff6625a999e 7ffb2f2e7373 7ffb2fc9cc90
+ ❯ StartupLogBuffer.handleStartupFailure node_modules/miniflare/dist/src/index.js:71769:13
+ ❯ Runtime.updateConfig node_modules/miniflare/dist/src/index.js:71859:24
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ _Miniflare.#assembleAndUpdateConfig node_modules/miniflare/dist/src/index.js:91795:30
+ ❯ Mutex.runWith node_modules/miniflare/dist/src/index.js:60102:48
+ ❯ _Miniflare.#waitForReady node_modules/miniflare/dist/src/index.js:91916:5
+ ❯ getProjectMiniflare node_modules/@cloudflare/vitest-pool-workers/dist/pool/index.mjs:3228:2
+ ❯ CloudflarePoolWorker.start node_modules/@cloudflare/vitest-pool-workers/dist/pool/index.mjs:2713:13
+ ❯ PoolRunner.start node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:2899:4
+ ❯ Pool.schedule node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_RUNTIME_FAILURE' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start cloudflare-pool worker for test files D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-admin.test.ts.
+ ❯ node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ Pool.schedule node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:5
+
+Caused by: MiniflareCoreError [ERR_RUNTIME_FAILURE]: The Workers runtime failed to start. There was likely a problem with the workerd binary or your configuration.
+Runtime stderr:
+*** Received structured exception #0xc0000005: access violation; stack: 7ffaf46c8c33 7ff66116d96d 7ff66116da33 7ff66114b0dc 7ff66114b090 7ff6605dfa16 7ff6605e019f 7ff65f105e2f 7ff66078c3f2 7ff6607932f6 7ff66078c94b 7ff6607932f6 7ff660789e9b 7ff65f0f1e77 7ff6625a999e 7ffb2f2e7373 7ffb2fc9cc90
+ ❯ StartupLogBuffer.handleStartupFailure node_modules/miniflare/dist/src/index.js:71769:13
+ ❯ Runtime.updateConfig node_modules/miniflare/dist/src/index.js:71859:24
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ _Miniflare.#assembleAndUpdateConfig node_modules/miniflare/dist/src/index.js:91795:30
+ ❯ Mutex.runWith node_modules/miniflare/dist/src/index.js:60102:48
+ ❯ _Miniflare.#waitForReady node_modules/miniflare/dist/src/index.js:91916:5
+ ❯ getProjectMiniflare node_modules/@cloudflare/vitest-pool-workers/dist/pool/index.mjs:3228:2
+ ❯ CloudflarePoolWorker.start node_modules/@cloudflare/vitest-pool-workers/dist/pool/index.mjs:2713:13
+ ❯ PoolRunner.start node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:2899:4
+ ❯ Pool.schedule node_modules/vitest/dist/chunks/cli-api.24X8XwN1.js:3465:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_RUNTIME_FAILURE' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+close timed out after 10000ms
+Tests closed successfully but something prevents Vite server from exiting
+You can try to identify the cause by enabling "hanging-process" reporter. See https://vitest.dev/guide/reporters.html#hanging-process-reporter

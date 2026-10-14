@@ -1,6 +1,9 @@
 # P4-1 Unattended Development
 
-Status: IN_PROGRESS. Implementation self-tests are not independent acceptance.
+Status: IN_PROGRESS (whole card). Unattended development implementation and
+validation are complete on `fa74905e84c489cccc248617d37ab9f56c8f961c`.
+Implementation self-tests are not independent acceptance. Main integration,
+real rehearsal and the retained external audit question are not declared complete.
 Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen references.
 
 ## Entry And Authority
@@ -24,11 +27,11 @@ Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen refer
 
 | ID | Observed gap and invariant | Bounded action / owner | Feedback |
 | --- | --- | --- | --- |
-| P41-01 | `publish=false` skips release tooling; native Worker tests exclude `*.host.test.ts`. | P4-1 adds credential-free development execution in the existing firmware workflow; explicitly separate host script/migration and native workerd runs. | Pending first batch. |
-| P41-02 | Workflow still supplies removed single-bin metadata flags and omits uploader asset/remote selectors. P4-2 scripts already enforce v2. | Replace only P4-1's consumers; retain one schema/backend. Enumerate other consumers without modifying their workflows. | Pending. |
-| P41-03 | No formal base provenance/patch byte validation/recovery packaging in the workflow. | Thin orchestration of existing finalize/pack/unpack/recovery owners; actual byte and negative tests before widening. | Pending. |
-| P41-04 | Existing release step edits tags and clobbers assets, defaults to staging bucket, and has no production environment declaration. | Immutable publish/readback, explicit environment configuration, first-step gate and shared rehearsal path; no real publish execution this batch. | Pending. |
-| P41-05 | Canonical rehearsal provenance/rebuild comparison and version monotonicity are not wired. | Preserve frozen canonical `runId`; audit-only execution id; fail before remote writes on inconsistent inputs. | Pending. |
+| P41-01 | `publish=false` skips release tooling; native Worker tests exclude `*.host.test.ts`. | P4-1 adds credential-free development execution in the existing firmware workflow; explicitly separate host script/migration and native workerd runs. | Final CI: host 34/34, pipeline host 20/20, native 156/156; separate commands and raw counts verified. |
+| P41-02 | Workflow still supplies removed single-bin metadata flags and omits uploader asset/remote selectors. P4-2 scripts already enforce v2. | Replace only P4-1's consumers; retain one schema/backend. Enumerate other consumers without modifying their workflows. | In-scope consumer uses v2. Legacy workflow remains an explicitly recorded out-of-scope unsafe consumer. |
+| P41-03 | No formal base provenance/patch byte validation/recovery packaging in the workflow. | Thin orchestration of existing finalize/pack/unpack/recovery owners; actual byte and negative tests before widening. | Byte 19/19, pack 8/8, golden 9/9 and actual GCC full/recovery preparation pass. Authoritative real base remains NOT_RUN. |
+| P41-04 | Existing release step edits tags and clobbers assets, defaults to staging bucket, and has no production environment declaration. | Immutable publish/readback, explicit environment configuration, first-step gate and shared rehearsal path; no real publish execution this batch. | Pipeline host 20/20 and workflow 15/15 pass. External GitHub/R2 surfaces in those tests are doubles, not a real release/rehearsal. |
+| P41-05 | Canonical rehearsal provenance/rebuild comparison and version monotonicity are not wired. | Preserve frozen canonical `runId`; audit-only execution id; fail before remote writes on inconsistent inputs. | Approved-envelope byte replay and changed provenance/hash/version negatives pass. Actual approval and cloud binding observations remain NOT_RUN. |
 | P41-EXT | Actual isolated bindings/uploader credentials, approved formal base, rehearsal and independent approval unavailable. | P4-4/root configuration owner plus independent reviewer; keep real observations NOT_RUN. Do not retry expired login or D1 401. | NOT_RUN. |
 
 ## Batch Plan
@@ -142,7 +145,8 @@ Workflow tests are 15/15, including nine actual Bash gate executions with expect
 0/1/2 exits and an actual execute-CLI rejection of a checks context before cloud
 entry. An initial harness dependency error (`yaml` is bundled, not an installed
 Worker module) was preserved and fixed using explicitly pinned PyYAML 6.0.3.
-No cloud gate was opened to test its failure. CI on this batch is pending.
+No cloud gate was opened to test its failure. This batch's CI result is recorded
+in Final Hardening Feedback below.
 
 ## Shared Consumers
 
@@ -175,7 +179,8 @@ error-over-success stdout rejection and register request-id binding. The local
 byte suite now passes 19/19, pipeline host 20/20, shared script host 17/17 and
 golden-vector compatibility 9/9; Worker typecheck exits 0. The legacy golden
 fixture's development-key warning is expected and retained. Production preparation
-still requires its explicit key and never uses that fallback. Final CI is pending.
+still requires its explicit key and never uses that fallback. Final CI and its
+preserved failed predecessor are recorded below.
 
 ## Configuration Consumption Handoff
 
@@ -243,3 +248,172 @@ Historical vector source/bytes and assertions are unchanged. The original failed
 ZIP is `.cache/github/batch4-logs.zip` (262496 bytes), with the failure at the
 package/golden step. This is a test-entry portability repair, not a firmware or
 cloud product failure; the changed invocation receives a new CI run.
+
+## Final Development Verification
+
+Tested product commit: `fa74905e84c489cccc248617d37ab9f56c8f961c` on
+`dev/p4-1/unattended-20261015`. Firmware run
+<https://github.com/Eitan-S-23/E-Track/actions/runs/38642386248> is SUCCESS.
+Both release jobs are SKIPPED under the explicitly dispatched `publish=false`,
+`rehearsal=false`; the P3-4 candidate-only steps are also skipped. Actual job/step
+metadata and console commands, rather than only the workflow conclusion, were
+inspected. No real `publish=true` dispatch was used as a negative test.
+
+The final Ubuntu runners report 24.04.5, Node 24.21.0 and npm 11.19.0. The GCC
+action consumes Arm GNU 13.3.Rel1. Let `W` mean
+`app/bluetooth_flutter_Trace/cloudflare/update-service/worker`; other commands
+below run at the repository root. Counts are separate suites, not an aggregate
+claim that repeats across runs or duplicate ZIP members are new tests.
+
+| Scope / cwd | Actual command | Final result |
+| --- | --- | --- |
+| Script and migration host / W | `npm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts` | 34/34, exit 0; 17 script plus 17 migration tests |
+| Pipeline host / W | `npm test -- --config ../../../../../.github/scripts/p41-host.config.mjs` | 20/20, exit 0; actual P4-2 handler with SQLite host ports |
+| Native Worker / W | `npm test -- --reporter=verbose` | 156/156, exit 0; native workerd D1/R2/register/Admin tests, not host doubles |
+| Worker types / W | `npm run check` | exit 0 |
+| Package replay | `python3 -B tests/ota/test_firmware_pack.py` | 8/8, exit 0 |
+| Existing golden vectors | `PYTHONPATH="$GITHUB_WORKSPACE/Tools" python3 -B tests/ota-vectors/test_vectors.py` | 9/9, exit 0; historical test bytes unchanged |
+| Workflow and gates | `node --test tests/ota/test_firmware_workflow.mjs` | 15/15, exit 0; actual Bash gates and execute-CLI rejection included |
+| Production preparation | `node --test tests/ota/test_firmware_release.mjs` | 19/19, exit 0; actual finalize/pack/unpack/recovery processes |
+| GCC App and Boot | `cmake -S MDK-ARM_F435/cmake-generated -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OBJECT_PATH_MAX=1024`, then `cmake --build "$BUILD_DIR" --target X_Track_App_GCC X_Track_Boot --parallel` | configure/build exit 0, `SOURCE_DATE_EPOCH=1786320000` |
+| Actual GCC packaging | `node .github/scripts/firmware-release.mjs capture ...`, then `node .github/scripts/firmware-release.mjs development ...` | exit 0; seven real tool steps, complete argv/stdout/stderr identities in the original verification JSON |
+
+The existing build job also ran its Boot/OTA/P3 host regressions and layout/handoff
+assertions. These are existing CI host checks, not reopening old cards or new
+device observations. No local Flutter/Gradle/APK build or simulator build was
+performed for this task.
+
+Backend run <https://github.com/Eitan-S-23/E-Track/actions/runs/38641540543>
+passed Worker, Public Pages and Admin facade checks, including 156 native tests,
+on `1eed86222e1ac3ef14281fc1b1b4a26a94b73375`. Its backend/workflow inputs are
+byte-unchanged in `fa74905` (`git diff --exit-code` over those paths returned 0).
+This is identified separately, not relabeled as a run on a different SHA or
+counted as another 156 unique tests.
+
+Compiler/linker diagnostics in the final build step: **640 warnings, 0 errors**.
+The same 640 warning lines occur in each of the four preceding firmware runs;
+firmware sources were not modified here. Vendor bsdiff adds **6 format warnings**.
+The native log also retains 21 error-like constraint/rollback diagnostic lines
+inside passing negative tests, including 17 explicit `SQL_REJECT` anchors.
+These are not compiler failures and were not suppressed or removed. Counts use
+one original step/aggregate representation, never both duplicate ZIP copies.
+
+GCC size output: App `text=603632 data=940 bss=561992 dec=1166564`; Boot
+`text=14720 data=4 bss=9780 dec=24504`. App FLASH is 605072/983040 bytes. The
+linker reports RAM/overlay reservations at 100%; this is not a new runtime RAM
+measurement. All warnings remain visible to the independent reviewer.
+
+## Original Evidence And Artifact Identity
+
+The tracked directory `docs/ota-exec-notes/P4-1-ci-2026-10-15/` contains all five
+firmware ZIPs, including failed run `38641534498`, the final backend ZIP, actual
+job/run API responses, four final artifact ZIPs and local failure/success outputs
+with closed process receipts. `inventory.json` binds 153 files, excluding itself;
+the directory contains 154 files and 5481822 bytes. Its own SHA-256 is
+`b2987506a1ac1dcf620f6c47d5a984240210c9dede0c838b796f776531565293`.
+
+`artifact-members.json` records length, SHA-256 and original ZIP timestamp for all
+591 members in the four artifact ZIPs. Every downloaded ZIP exactly matched the
+GitHub API digest, size, run ID and source commit. `ci-inspection.json` binds the
+actual counts and selected byte observations to these originals. Selected metadata
+and verification files are exact extracted bytes, not rewritten summaries.
+`.gitattributes` preserves raw bytes; raw console whitespace must not be normalized
+to make `diff --check` quiet. Source/prose checks exclude those original streams.
+
+The actual GCC development artifact is intentionally not installable or a formal
+release. It has no invented previous formal base, so its patch result is null;
+all `r2Verified` flags remain false. Its retained `DEVELOPMENT-ONLY.json` explicitly
+marks this boundary. The following are hashes of downloaded original bytes:
+
+| Actual GCC item | Bytes | SHA-256 |
+| --- | --- | --- |
+| Placeholder App `X-Track-App-GCC.bin` | 605072 | `5f7c42bd43acef12a262e53c378fa1fee3f44a6571c081a373d60b494d23fe8e` |
+| Boot `X-Track-Boot.bin` | 14724 | `3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34` |
+| Finalized `app-final.bin` | 605072 | `aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f` |
+| `e-track-at32f435-v3.2.7-full.etu` | 285764 | `f81c9dce2655a64031fab02b44ac1ba5a68ef96abf214133f3b8096643e2958d` |
+| `recovery-v3.2.7.bin` | 605080 | `81f40793e84be3fc90313e8425e0269180bfbcb690c2819f4c82c65ab8ec0c05` |
+| Unverified v2 metadata | 1441 | `0850c7b9fa35e8fd4ace12f69ddf4eaaa17b58614e318a0030d6beef75284bb8` |
+| Preparation verification JSON | 7034 | `6c85dfeddc3ee5b9e7098b31042c19b29b79e374db3ed0e3a96c81c0f5fb3bce` |
+
+Original App/Boot ZIP timestamps are `2026-10-14 21:43:54`; finalized App/metadata
+are `2026-10-14 21:44:04` (ZIP fields have no timezone field). GitHub artifact
+creation timestamps are separately retained in the API response. These are not
+the local download times. Raw App/Boot input manifests and all eight GCC output
+files remain in their original ZIPs.
+
+The three-asset positive test is separately identified as synthetic: original
+`BYTE_FIXTURE` path `firmware-release-tests/case-aTieJp/prepared/` in artifact
+`11930178698`, using the P4-2 fixture's `Trace` identity. No such source is approved
+as the production base. Its full/patch applied outputs both equal the exact
+8192-byte finalized target, raw SHA
+`d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5`.
+
+| Synthetic item | Bytes | SHA-256 |
+| --- | --- | --- |
+| `e-track-at32f435-v2.8.1-full.etu` | 202 | `946a097406b3cd467783df0594e4241396b38ce36465dc73497b5a43d0cbedf6` |
+| `e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu` | 208 | `06775c91a8d118394bccdeafb0ad15eb3feece1239a2c1b146a348a7a7bee191` |
+| `recovery-v2.8.1.bin` | 8200 | `0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c` |
+| Unverified v2 metadata | 1989 | `476920e84f39d7b83dd2941bfb6d0eddf7857a9fd8617070bb03365df741b800` |
+
+Archival verification additionally rechecked every successful tool step's exit
+code and stdout/stderr digest, all asset sizes/digests and full/patch/recovery App
+byte equality. It did not rerun generation, cloud operations or a successful CI.
+One App artifact download terminated before producing a file; the exact artifact
+ID was retrieved once more after other downloads succeeded and its digest was
+verified. That collection failure is not a failed firmware observation.
+
+## Discriminating Negative Evidence
+
+Final `batch5-logs.zip`, the test artifact's step originals and the tested source
+assertions jointly demonstrate the following, rather than only a green summary:
+
+| Negative | Observed oracle and downstream boundary |
+| --- | --- |
+| Wrong GCC/base digest, invalid/nonformal/ETU base | Real validation rejects; no finalized target or registration metadata is produced. |
+| Patch subprocess exit 0 with failure stdout | `patch-apply failed exit/stdout` is rejected; recovery does not start. |
+| Patch reports success but candidate bytes differ | Byte comparison rejects; no metadata is emitted. |
+| Corrupt recovery tail or ETU outer identity/length | Existing parser/helper verification rejects before metadata. |
+| Missing assets or late asset replacement | Builder/snapshot checks reject rather than recording new unchecked digests. |
+| Missing key through actual CLI | Original `PREPARATION_CLI` records positive exit 0 and missing-key exit 2 with `INVALID_PARAMETER`. |
+| R2 put appears successful but readback is missing | Actual shared uploader rejects; no persisted verified metadata or D1 registration. |
+| Cancellation after first upload | Later uploads and registration never run. |
+| Conflicting register metadata and duplicate/missing-ready assets | Real handler/SQLite host tests and separate native D1 constraint tests reject; no partial ready/channel promotion is claimed. |
+| Wrong approved run/hash/commit, wrong version or release gate | Shared pipeline and actual local Bash/CLI tests fail before publishing; no real production dispatch is used. |
+
+## Write, Process And Handoff Audit
+
+- Final read-only remote/local main is still
+  `b42d3e25db85d6aba397cb4d0fb34bb5b653904f`. The shared root remains on
+  `archive/p34-root-before-delivery-20261014` at `cb317affcd291695f42271084b4b305b0d7e6f8b`.
+  Its index SHA-256 remains
+  `2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`, with the
+  original `2026-10-12T19:53:21.544Z` mtime. Other worktrees were not changed.
+- All selected implementation/cache/test/download/archive outputs are in this
+  exclusive worktree. Normalized paths and reparse parents were checked before
+  writing, including the archive's exact 153-target plan. The only parent-root
+  writes permitted are this branch/worktree's own Git metadata, not another index.
+- `local/handoff-write-audit.json` records 34 closed local child receipts, no
+  receipt PID still present and no workerd/bsdiff/bspatch helper left running.
+  Evidence processing is foreground and bounded. No device collector was started.
+- No temporary credential file was created; the selected GitHub identity was
+  verified as `Eitan-S-23` and its token lived only in process memory. No Cloudflare
+  credential refresh/login was attempted. No credential/configuration cache was
+  copied into the evidence, and the archive credential-pattern check passed.
+- **P41-AUDIT-01, ATTRIBUTION_UNRESOLVED:** the metadata-only external cache audit
+  found `C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+  modified at `2026-10-14T21:55:19.828153Z`. It is a Windows PowerShell startup
+  cache. All task-selected shells use `cmd.exe`, `login:false`; the bounded
+  read-only Windows event query confirms an engine start/stop then, but contains
+  no current-worktree/helper reference. The writer is not established. No cleanup,
+  move or overwrite was attempted, and an unqualified machine-wide "no external
+  writes" claim is not made. Root owns cross-session/host attribution; any cleanup
+  still needs path-specific user authorization. Other inspected npm/Wrangler/GitHub
+  CLI/crash cache files had no mtime updates since this worktree's creation.
+
+The final delivery is record/evidence-only after the tested product SHA; no
+rebuild or repeated product tests are justified by those records. The branch is
+pending main integration, which is not authorized in this session. Root should
+hand this stable batch and its original evidence to a non-implementer for bounded
+review, without an extra mandatory freezing agent. The configuration handoff and
+real-observation owner list above remain the next steps. P4-1 stays IN_PROGRESS;
+P3-5, P4-3 and P4-4 were not started as tasks.
