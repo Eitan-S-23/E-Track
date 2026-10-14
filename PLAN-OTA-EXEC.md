@@ -758,11 +758,13 @@
 - 证据: —
 
 #### P4-2 D1 多资产模型与 latest 选包
-状态: 进行中 ｜ 认领: Codex(P4-2 实现/接续) / 2026-10-14 ｜ 更新: 2026-10-15(专属分支已提交推送；原生 Worker CI 156/156、本地回归 190/190，R2 修复独立复核 APPROVE；真实 legacy/云端观察与正式验收未完成，未合入 main)
+状态: 完成 ｜ 认领: Codex(P4-2 实现/接续) / 2026-10-14 ｜ 更新: 2026-10-15(P42-CLOSEOUT-02 最终独立实现验收 PASS；原生 Worker CI 156/156、宿主回归 190/190 原件独立核验；完成边界为实现交付，不代表真实环境已启用或生产放行)
 - 依赖: P0 阶段门槛已完成；不依赖 P4-1。
 - 目标: §6.2-1/2:新迁移 `firmware_release_assets`(kind∈{full,patch,recovery};`base_image_sha256 NOT NULL` 哨兵 `''`+CHECK+唯一键 `(release_id,kind,base_image_sha256)`);release 增 draft/ready 原子门槛(事务内校验恰一 full+R2 digest 全过才 ready,渠道晋升仅接受 ready);latest 增 `currentImageSha` 选包(patch 匹配否则退 full);注册脚本改资产数组;recovery 不自动分发;旧单资产数据迁移回填 full。
 - 验收: **SQL 实测:同 release 插第二个 full 被拒、同基版第二个 patch 被拒、缺 full 置 ready 被拒(R8-5)**;latest 三场景(匹配 patch/退 full/无更新)接口测试绿。
-- 证据: `docs/ota-exec-notes/P4-2-implementation-2026-10-14.md`；`docs/ota-exec-notes/P4-2-ci-2026-10-14/inventory.json`。源码提交 `fc4fbbb8193fcc536ef408b7b662d44b30f869dc`，检查 CI `38591559979` PASS；前两轮失败原件保留。分支 `p4-2-implementation-20261014` 待集成，开发检查不代替正式独立验收。
+- 独立验收: 原 P4-2 非实现审查会话 / 2026-10-15 / 轻量第 1 轮 PASS（执行合同 §0，独立核验既有原件；没有伪造新执行）。被验交付 `d57ada8023fbd09925c59aa244a7a968372930e5`，测试产品仍为 `fc4fbbb8193fcc536ef408b7b662d44b30f869dc`。
+- 证据: `docs/ota-exec-notes/P4-2-acceptance-2026-10-15.md`、`docs/ota-exec-notes/P4-2-closeout-2026-10-15/independent-final-verdict.txt`；原实现记录与 `P4-2-ci-2026-10-14/inventory.json` 保留完整失败、修复及 CI 原件。
+- 启用交接: P42-EXT-02 的真实 legacy/manifest 仍由 Cloudflare/D1 迁移责任人与 OTA 发布链审查人共同负责，root 协调；P42-EXT-03 的绑定/cutover/Access/真实上传回读按验收记录交 P4-4、P4-3、P4-1/P3-5 的相应门槛。均未宣称实测通过，不得未对账就启用规范读取；P5/生产门槛不变。
 
 #### P4-3 admin 撤回语义与运营开关
 状态: 待办 ｜ 认领: — ｜ 更新: —

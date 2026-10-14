@@ -1,0 +1,6 @@
+{
+  "utc": "2026-10-14T17:43:55.393Z",
+  "target_verified": true,
+  "request_sha256": "1b2e3be159474c8a5d0abd3c061293ad25d924210f1fd93fdd89a08f689bc724",
+  "disposition": "send-attempt-recorded; verify original transcript before any retry"
+}
