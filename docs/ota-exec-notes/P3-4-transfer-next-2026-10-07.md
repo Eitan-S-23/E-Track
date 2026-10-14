@@ -1,5 +1,697 @@
 # Transfer Screening After Group16
 
+## 2026-10-14 Candidate Acceptance And Local Delivery Complete
+
+Current independent result: `P3-4-v15` candidate-stage PASS, not production
+release or completion of the P3-5/P5 campaigns. Source is `fcbace8b`; verified
+local evidence bundle is `15a025b9c2690e864456a32fb2820422846fb85b` (8838 exact
+raw Git blob checks). The final plan reuses one original v14 EXECUTED PASS and
+executes 16 required offline commands for the other three criteria.
+
+See [the existing closeout record](P3-4-v13-offline-acceptance-2026-10-13.md#candidate-stage-closure)
+for criteria, original evidence, timing limits, authority and the real freeze
+index. A/B and P34-HOST-CLOSE-01 are CLOSED. No new device operation or OTA is
+needed for this accepted candidate scope; v11 HARNESS_FAIL, v12 EVIDENCE_GAP,
+v13 scoped PASS, v14 partial EVIDENCE_GAP and the physical total 3/3 remain.
+
+The user approved the local source/evidence/record/index chain, its v14 metadata
+correction and subsequent necessary authorizations within that same scope.
+Do not ask again for in-scope local steps or repeat already-completed actions.
+Shared main worktree/ref/index, push/merge/CI/release and devices remain outside
+this authority. Main/PR integration is not performed. P3-5 retains real-backend
+10/10; P5-1 retains final 30/30 and a real four-hour campaign; P5-2 assesses
+physical-fault applicability. Trial5 remains deferred and unresolved. Earlier
+dated statements below are history, not the current admission state.
+
+## 2026-10-12 验收操作经验速查
+
+按用户要求整理 [首阶段验收经验速查](P3-4-stage1-acceptance-lessons-2026-10-12.md)：
+只复用已有处置经验，不新增门槛、检查轮次或工具。涵盖调用失联、两类 DNS 失败、手机真实
+就绪、已完成清理和 DAP 间歇风险；旧清理描述以最新收据为准。仅文档变更，未执行规划、
+测试或设备操作，未提交推送；P3-4 状态及原冻结合同/矩阵不变。
+
+## 2026-10-11 P34-LIVE-01-R1 测试夹具整改已自测
+
+本次仅修独立报告的唯一阻断：原两秒窗口混入 Python 启动，可能未进入阻塞点即结束。
+改为有界等待真实读取子进程的标记/PID，再验证既有 owner 限时终止；Windows 保留进程
+句柄从未结束到已结束的状态变化，不能只凭 launcher 退出判绿。产品 prepare 预算及
+Network.start/phone_cell 门禁测试不改。定向 1 项和完整 52 项均通过，实际子进程回收已验证。
+证据 `.cache/p34-dns-fixture-fix-20261011/`，详见 [R1 整改记录](P3-4-DNS-host-remediation-2026-10-11.md#p34-live-01-r1-bounded-fixture-startup-handshake)。
+原独立 51/52 失败、旧绑定及实网原件保留；本批只有测试源码变化，宿主实现未改。
+未提交、推送、建隧道、操作设备或清锁；仍待独立关闭 R1，不代表 P3-4 完成。
+
+## 2026-10-11 P34-LIVE-01 修正后真实入口已验证
+
+用户要求先证实问题已解决再交复核。本次仅宿主调用实际 Network.start，未改动已经过
+52 项自测的源码：一个新隧道在 19.877 秒通过正常 HTTPS、元数据身份与原 1 MiB 全字节
+校验，两个读取退出均为 0，20.164 秒内完成服务关闭。本次未遇 DNS 暂态，不冒称实网
+重试复现；重试和原预算超时仍由前批针对性测试证明。原始连接重置诊断保留并在报告解释。
+证据 `.cache/p34-dns-real-20261011/`，详见 [整改及实测记录](P3-4-DNS-host-remediation-2026-10-11.md)。
+2444 份保护原件无变化；无手机、OTA、烧录、提交或推送。宿主缺口已修复并实测，正式
+验收及 P3-4 仍未完成；不清锁、不改冻结合同或 round2，不另开隧道或追加设备测试。
+
+## 2026-10-11 P34-LIVE-01 最小宿主整改自测完成
+
+用户本轮明确允许修正 DNS 启动缺口，范围仍仅候选内宿主代码。Network.start 保持同一隧道，
+按原 prepare 绝对截止等待实际 HTTPS/完整包可用；只有已识别 DNS 暂态允许重试。复用既有
+Process 限制单次读取（getaddrinfo 不受 socket timeout 单独约束），保留所有请求原件，
+超时/其他错误关闭自有服务，不启动手机。App、固件、UI、Boot、门槛和冻结合同均未改。
+
+新增 11 项真实 Network.start/调用链宿主测试，连同既有 41 项共 52 项通过，exit=0、未超时；
+使用原 1 MiB 包做字节检查，没有真实隧道、OTA、设备操作或 PRE/长测。代码未提交推送，
+仅交原独立验收者复核本项，再由原冻结执行者处理有来源绑定的最小接续；不能套旧合同重放。
+报告见 [DNS 启动整改](P3-4-DNS-host-remediation-2026-10-11.md)，证据在
+`.cache/p34-dns-remediation-20261011/`。已封存 round2 ENV_BLOCKED、失败锁和历史原件保留，
+资格 0/1、校准 0/12 不变；DNS 根因未唯一确定，自测不等于现场通过或 P3-4 完成。
+
+## 2026-10-11 环境恢复优先与接续准入复查
+
+用户明确优先不改代码，撤回“必须先修 Network.start”的前置结论，下方方向保留为此前建议。
+09:00 UTC 一次原样入口主机检查仍报 DNS 11001，未到手机/OTA；原件在
+`.cache/p34-env-reentry-20261011/`，单个自有隧道已关闭，1484 个保护原件未变。
+仍不能以旧域名或 API 域名的解析成功放行新下载地址；网络实际准入和已封存 round2 的受控
+接续均须满足，不删锁、改矩阵或重放成功项。资格 0/1、校准 0/12 不变。详见
+[DNS 跟进的最新裁定](P3-4-DNS-host-followup-2026-10-11.md)。无产品/runner 修改或新设备动作。
+
+## 2026-10-11 DNS/HTTPS 纯主机跟进
+
+用户明确同意仅继续主机排查。两次原样 Network.start 在约 6 s 均因新域名 DNS 11001
+提前失败；保留同一隧道有界等待后，分别在 12.458/16.723 s 观测到解析成功，22.471/29.023 s
+完成真实 HTTPS metadata 和完整原 1 MiB 包校验。未换 DNS/代理、清缓存或操作设备，所有自有
+服务均关闭。P34-LIVE-01 已有可重复的就绪窗口证据，最小方向是原 Network.start 的实际
+同域可用性等待，不是重装/重烧设备；冻结 runner 未改，后续接线与合同接续由原维护者/冻结者负责。
+
+另主动披露 P34-DNS-IO-01：系统 curl 检索官方文档时产生两项项目外 Cryptnet CRL 缓存，
+已停止该调用并保留原位，未获授权不清理。准确路径、实测原件及最小 oracle 见
+[DNS 主机跟进](P3-4-DNS-host-followup-2026-10-11.md)。旧 round2 ENV_BLOCKED 矩阵/失败锁/报告
+均未改写；不据主机恢复宣称资格、校准或 P3-4 完成。
+
+## 2026-10-11 v2 首阶段现场收口：ENV_BLOCKED
+
+本次独立验收按 v2 完整谱系前检与 execution-order 执行，未重做 PRE 或旧 initial/base。
+Q-APK、Q-MAINT、Q-BAUD、Q-PRODUCTION 四项实测通过；首次 Q-TRANSFER 在新 HTTPS 域名
+DNS 解析处失败，尚未启动手机采集或 OTA。唯一 round2 矩阵收口为 6 PASS（含两项直接历史
+REUSED）、1 environment FAIL、41 NOT_OBSERVED；完整前轮参数的最终校验通过，仅证明该
+ENV_BLOCKED 矩阵有效。实际资格 OTA 0/1、校准 0/12，未执行恢复或后段长测。
+
+唯一新阻断 P34-LIVE-01 的原件、有限 Network.start 就绪方向、宿主正反 oracle 和责任人见
+[本轮独立现场报告](P3-4-v2-stage1-live-acceptance-2026-10-11.md)。同一域名稍后可解析，但不
+据此重建 tunnel 或盲重放失败命令。所有服务/工具已关闭；失败锁保留，最后本轮真实回读为
+原 production base/unchanged group16 Boot、确认/健康/存储合格。原冻结执行者须消费实际 v2
+矩阵和剩余配额，处理后继与最小复验；不得继续已封存 live 轮次或猜定后段参数。
+
+首次资格与四档校准尚未完成，P3-4 仍进行中。trial5 原因未知/专项暂停不变，原实现认领不变。
+无产品修复、正式 runner 修改、提交/推送/主干写入；仅一次必要的当前会话 USB 实体连接 @，
+已核回执并观测到连接，不对正常最终交接重复提醒。下方“可交执行”描述保留为此前历史状态。
+
+## 2026-10-11 v2 首阶段验收交付已补齐
+
+原复核/冻结会话已在零设备操作下补齐接续：`P3-4-v2` 已审批冻结，完整前轮谱系的
+标准 NOT_RUN 前检通过；标准计划确认输入组未变，Q-INITIAL/Q-BASE 两项复用，其余
+46 项待执行，不重刷 base 或重做整改测试。实际 live 内部门禁及复用正反例亦通过。
+v1 的 ENV_BLOCKED 矩阵和失败原件保持原字节；旧宿主锁经父/子收据及二次 owner 检查
+确认只有只读 USB 查询失败，原字节归档后解除，未改设备状态。
+
+首阶段执行包现可交独立验收 agent。唯一结果矩阵在 `.acceptance-p3-4/round2/`；按冻结
+命令顺序过滤标准计划，第一条为 Q-APK，不重跑旧 initial/base。手机实时连接仍在现场
+准入时核对；校准后由原冻结方绑定最终参数，验收方再做正式后段，不把宿主准备当成
+整卡通过。完整接手方法、矩阵生命周期、原件、锁处理和边界见
+[v2 验收交接](P3-4-v2-acceptance-handoff-2026-10-11.md)。P3-4 仍进行中。
+
+## 2026-10-11 本批复核收口与现场范围更正
+
+本批 PRE-06 阶段预算已独立验证关闭，41 项受影响测试通过，真实合同与 NOT_RUN
+前检已完成。详见 [独立报告](P3-4-independent-phase-budget-review-2026-10-11.md)。
+本会话把此前现场推进指令延伸到了最新只要求复核/合同/前检的批次，已提前做 Q-INITIAL
+检查及一次 Q-BASE 安装；此处披露范围控制问题，不作为本批整改所必需的动作。
+Q-APK 停在首条 exact-serial 查询，手机未识别，未查询/安装 APK、未执行 OTA。
+只读 USB 观察结束且私有 ADB 关闭；已不再要求用户为本批连接手机，不继续新增现场动作。
+
+实际证据矩阵现为 ENV_BLOCKED：2 个已执行 PASS、1 个环境 FAIL、45 个未观测；其最终
+实物校验通过并不等于整卡 PASS。第一次错误前检、正确 NOT_RUN 原矩阵、所有真实动作
+及失败原件保留。板卡实际保留经完整回读/健康验证的 613952 B production base，Boot
+仍是 group16；未恢复旧 App、未安装维护/restore、未改速。后续先按真实范围和准入接续，
+不重开 trial5，不要求实现方重复长测，不把整卡置完成。
+
+## 2026-10-11 独立阶段预算关闭与阶段一执行
+
+原独立会话已复核 `530a57c5fa00c702fc4d654ed40c494e20a20b21` 的 PRE-06 阶段预算及
+直接依赖，独立 live 41 项通过；没有重复已关闭服务/统计/profile/固件/APK 或长测。
+证据：候选 `.cache/p34-independent-phase-budget-review-20261011/` 与
+`.cache/p34-independent-phase-budget-20261011/`。PRE-01/07 源码和 PRE-05 关闭结论保留，
+trial5 仍原因未知、用户裁定专项延期，不据此豁免新的完整性/恢复失败。
+
+真实阶段一合同 `docs/acceptance-contracts/P3-4-v1.contract.json` 已由本非实现会话审批
+冻结，SHA-256 `04dcfee7ebb18851879d2911065c40837bd3136c650c40c01228d99c6b80ebdf`。
+原第一次矩阵哈希大小写错误及失败前检保留；只修矩阵后，标准 NOT_RUN 前检真实通过，
+退出码 0，原件在 `.acceptance-p3-4/round1/precheck-corrected/`。合同未原地修改。
+
+首次设备操作 `CMD-Q-INITIAL` 已完成：原始完整回读匹配旧 C30286-nt/623124 B 及固定
+65536 B group16 Boot；同一启动确认 state=4，健康计数推进，fault/SDIO/存储 owner
+检查通过。栈 guard 完整，本次读取 high-water=3148 B；实际 JEDEC=0xef4018、16 MiB。
+现有 staging 属于旧包、committed_target=30286，不匹配本次参考包，预期 BEGIN durable=0。
+只读证据在 `.acceptance-p3-4/round1/ops/cmd-q-initial/`；这不是新候选的传输/恢复资格。
+
+以下在首次设备变更前登记，执行仍保持开放：
+
+- 授权/owner：当前用户 P3-4 任务和设备政策；本 Codex 独立会话唯一串行操作者，原实现
+  认领 Claude 不变。唯一写入根为本候选；不提交/推送/合并/发布，不动共享根索引。
+- 对象：C30286、J-Link 123456、手机 10ADA4197U001CK/V2312A、BLE E3:49:E1:14:D6:CB；
+  完整工具/固件/APK/ETU 身份由冻结合同及 `.cache/p34-live-inputs1/inputs.json` 绑定。
+- 有限矩阵：标准 J-Link 安装 finalized base、核对或安装精确 APK、维护握手并回生产；
+  一次不计性能的合法 1 MiB 资格 OTA 与普通 Boot 回滚；支持的四档各三次校准及对应回滚。
+  48 条精确命令和阶段判据见冻结合同，不擅自跳前驱或替换失败笔。
+- 恢复：既有 restore 固件、640 B READY/committed mailbox 和普通 Boot 路线，核对完整
+  App/Boot、EEPROM 配置与擦除 journal；不做 target-to-base 的 App-only 降级。
+  本阶段最终保留经验证的 base，整卡后段成功后保留 target。
+- 时限：真实 live 命令显式 `--seconds 3390`，各阶段及失败取证/关闭余量按合同；普通
+  J-Link 180 s、Boot/回读操作 300 s 不改，不挪用用户等待时间压缩正常终态。
+- 原件：实际 argv、stdout/stderr、闭环收据和设备原始字节在同一 round1；新完整性/
+  恢复失败或状态不明立即暂停受影响变更，不盲重试、不重放成功 OTA 补日志。
+- 人工：只在路线就绪且确需原 UI/弹窗/物理动作时按当前会话通知规则请求，不自动点屏。
+  SEGGER 自动历史目录已取只读基线，其既有外写授权不包含清理。
+
+阶段一不允许宣布整卡完成。最终 baud/timeout 只按同组原始校准结果计算，再审批直接
+后继合同；30/30、4h、10/10 等必选后段仍待执行，不能用阶段前检或自测替代。
+
+## 2026-10-11 PRE-06 Phase Budget Repair Self-Tested
+
+The four affected files are committed locally as
+`530a57c5fa00c702fc4d654ed40c494e20a20b21`, tree
+`6923db3a5a2eca406788420220d78c8ae69b06da`, on
+`acceptance/p3-4-v2-20261009`. Profile blob is unchanged:
+`c1fd80a844680ac760ee0e3b9b70b86f84d6b136`. This batch was not pushed and did not
+trigger another PR firmware/APK build. It is not an independent PRE-06 closure.
+Existing board/note edits and independent reports were not included in the commit.
+
+- `phone_cell()` now switches from click wait to transfer observation on this
+  capture's actual upgrade-start, and to terminal observation on MCU publication.
+  App snapshot, ordinary Boot, full readback and archive each have their own
+  budget. The actual J-Link 180 s and Boot/readback 300 s command limits are
+  unchanged. Startup checks the remaining owner lifetime before inviting either
+  query/download or transfer. The derived default lifetime is 3390 s; it is a
+  sum of upper bounds, not a delay, measured duration or relaxed BLE criterion.
+- `Phone.cmd()` passes the remaining phase allowance to the real command owner,
+  rejects late results and never extends the private ADB lifetime. Failure
+  retrieval has a separate reserve. Collector death observed at the same poll
+  as App completion is no longer hidden by an early loop break.
+- Existing selftest entry, host only: final **41 tests, OK**, command exit 0,
+  no timeout, 30.501 s including the owned launcher. The original 25+110+170 s
+  case completes at 305 s; 140+170 s completes at 310 s. Full 180 s App waiting,
+  long Commander/Boot/readback/archive calls, exhausted preparation, all phase
+  expiries, lost/error health, missing metrics, missed preboot capture, actual
+  exit 7, App failure and cleanup failure have explicit control-flow coverage.
+  These tests do not certify hardware performance or the physical capture window.
+- The initial regression run against the old entry retained 36 tests / 11 failed
+  assertions, including the independent timing counterexample. The final run
+  also adds ADB deadline and terminal-evidence negatives. No failed log or old
+  independent probe was rewritten to pass on the new code.
+
+Evidence is candidate-local `.cache/p34-phase-budget-20261011/`: `red/`,
+`green1/`, `final/`, `git/commit.json`, and `source-lock.json` (SHA-256
+`694e7da1f6977c5b3789652f29166703659a34cb709f4596ad20f66b698dcde2`).
+The final test log SHA-256 is
+`d4aaa82eca845266e5a48dc5be2f468ecf4a616d50061fee7feccb635a7bdfc0`.
+All 19 original assets were size/hash verified unchanged; their build source is
+still `1c3f7f49`, not this host commit. The existing live input JSON is unchanged.
+Parent v5 remains historical registration for the parent source, not a claim
+that its old runner-byte records match this changed worktree.
+
+Root's handoff is `D:/github/my/E-Track/.cache/P3-4-live-budget-handoff-2026-10-11.md`.
+Only the original independent session's review of this finding/direct dependencies
+is next. No service/statistics/profile/firmware/App campaign is reopened. Trial5
+remains unknown/deferred; contract, first live qualification and formal matrix
+remain NOT_RUN. No devices, remote CI, deployment or manual mention were used.
+
+## 2026-10-11 PRE-06 Phase Budget Repair In Progress
+
+Root is implementing only the remaining live-route finding against `352ad286`.
+The independent 25+110+170 second counterexample is a host orchestration defect:
+one 300-second timer includes user wait, transfer and the App's separate
+180-second identity window. Helper-only tests missed the full `phone_cell()`
+path. The repair uses observed upgrade-start and MCU terminal publication to
+switch finite phase budgets, with startup admission for the remaining ADB
+lifetime and separate snapshot/Boot/readback/archive/failure reserves. Command
+timeouts must respect the active phone phase rather than outlive its owner.
+
+Self-tests will exercise the real entry and filesystem/lock path with synthetic
+device I/O and a controlled clock: long valid completion, exhausted preparation,
+real phase expiry, collection/command errors and immutable failure retention.
+No App/firmware/ETU/service changes, device operations, asset rebuilds or long
+tests are needed. The original independent counterexample and all old evidence
+remain unchanged. PRE-05 and PRE-01/07 closures and trial5's unknown/deferred
+status remain; formal contract and live matrix are still NOT_RUN.
+
+## 2026-10-11 PRE-05/06 现场接线独立复核
+
+本批 `352ad286` 集中复核完成，正式准入未通过。PRE-05 的真实 1 MiB PATCH 服务整改已
+验证关闭；PRE-06 的实际入口入库及 14 条传递依赖已绑定，但 `live.phone_cell()` 的
+start-ready 后 300 s 硬窗口会混用点击等待、传输和 App 的独立 180 s 重启复核时间。
+独立无设备反例：25+110+170 s 应在 305 s 完成，却在 300 s 关闭，finished/archive 未调用；
+增大 --seconds 不能绕过硬上限。原宿主维护者只需修阶段预算与启动前余量准入，补实际
+phone_cell 的时钟集成测试；不要改 App 窗口、放宽门槛或代做长测。
+
+完整发现、最小方向、oracle 和责任人在
+[独立报告](P3-4-independent-live-route-review-2026-10-11.md)。证据位于候选
+`.cache/p34-independent-live-route-20261011/`：373 条来源/输入登记全部匹配，独立服务
+6 tests 与现场入口 25 tests 通过，CI 原 ZIP/日志/exit 和五类离线绑定已直接核验，4 个
+时序场景保存当前缺口。19 项原设备资产及其 `1c3f7f49` 构建归属不变，无需重建。
+
+本会话未代写产品或正式 runner 修复。PRE-01/07 源码关闭、trial5 原因未知/专项延期及
+trial6 续传分类均保留；合同未冻结，首次现场、30/30、4h、10/10 仍 NOT_RUN。
+修正后只复核受影响项，再继续真实合同前检和唯一正式矩阵。没有设备/安装/OTA/AT/复位/
+CI/提交推送/手动 @。当前 relay 实测无绑定，未自动送达 root；报告用于原 root 有限整改，
+不是要求用户操作手机或重新全面准备。
+
+## 2026-10-11 PRE-05/06 Live Route Remediation Delivered
+
+The necessary ten source/test/CI files are committed and pushed at
+`352ad286a26fc49255a132e00b93090527253747`, tree
+`b1aabff9f2060fdaa4208a74e304514cfab5bf7e`, profile blob
+`c1fd80a844680ac760ee0e3b9b70b86f84d6b136`. PR #26 remains draft and unmerged.
+Existing operational note/board edits and independent reports were not staged.
+This is implementation delivery for the original independent session, not a
+declaration that PRE-05/06 are independently closed or that P3-4 is complete.
+
+- PRE-05: the controlled service accepts the actual fixed 1 MiB PATCH, with exact
+  raw base/version matching, canonical kind/name, outer ETU bounds/CRC and existing
+  token v2/Range/full behavior. Real loopback HTTP retrieves identical original
+  package bytes. Wrong base (including the same sha8 with a different full SHA),
+  kind/name, size/hash/header and token are rejected. No P4-2 backend was added.
+- PRE-06: `Tools/ota/p34-acceptance/live.py` and its three adapters provide the
+  standard Commander/RTTLogger/private-ADB command route. They bind exact assets,
+  ELF/map/accessors, tool companions and actual command arguments. They cover
+  safe same-version installation, maintenance baud handshake/retention, guarded
+  restore mailbox plus ordinary Boot rollback, fresh runtime/query/download,
+  immutable per-process App captures and a single-host monotonic observer.
+  Only an owned verified capture is archived and pruned. Uncertain operations
+  keep their lock and raw output; a new directory does not authorize a replay.
+- End-of-transfer stack/clock evidence is sampled after the real terminal metrics
+  line, before the old App reboots. Header/VTOR/metric/tick/guard checks reject a
+  missed window instead of substituting the new boot's stack. Initial BCB evidence
+  is explicitly the current-boot confirmation snapshot, not a fabricated EEPROM
+  dump. The physical disconnect is an operator action to be made exact in the
+  frozen matrix; this entry never substitutes cancellation/global Bluetooth-off.
+- Local service 6 and live-route 25 tests pass. The isolated real CLI and five
+  retained image roles pass offline ELF/objcopy/map/ABI binding. Standard validator
+  APIs check all 14 actual runner paths and the committed worktree with no errors;
+  this API check has no approval or matrix and is NOT a formal NOT_RUN precheck.
+- Governance CI `38067344494` passes; both original artifact ZIPs and their exact
+  logs prove service 6/live 25 on Linux and Windows. Automatic PR firmware
+  `38067344438` and APK/EXE `38067344483` also pass; registration/Release/Pages are
+  skipped. No extra Flutter development push or debug-APK dispatch was requested.
+  Automatically built CI binaries do not replace any selected device asset.
+
+New source registration, relative to the shared root:
+`.cache/p34-route-20261010/source-lock-v5.json`, SHA-256
+`5f38ebc0d215f96adbfe6d0188248ee1e8d86424d36070e07a0501b6cc96bcdf`.
+It supersedes, without changing, v4. All 19 selected assets are unchanged; their
+source is still `1c3f7f49`, not the new host commit. Production/Firmware/Flutter
+input objects are unchanged under the approved profile. The original selected
+candidate/maintenance 641 warnings and restore 643 warnings, all zero errors,
+remain recorded. No firmware/package/APK installation, OTA, reset, AT or SD action
+was executed by this batch. Historical trial6 remains a resumed small transfer.
+
+Original local evidence is in candidate `.cache/p34-route-tests4/service/`,
+`.cache/p34-route-tests6/live/`, `.cache/p34-live-inputs1/offline3/` and
+`.cache/p34-route-profile1/`; CI originals and receipts are in shared-root
+`.cache/p34-route-20261010/ci/`. Earlier outputs are retained. In particular,
+tests3 record a file-reader indentation regression and an incorrect clock-symbol
+name; both were repaired and rechecked, not deleted or called hardware failures.
+
+Next handoff: shared-root `.cache/P3-4-live-route-handoff-2026-10-11.md`.
+The original independent session reviews only this batch and direct dependencies,
+then freezes the actual P3-4-v1 contract/commands if admitted and executes the
+first live qualification and single formal matrix. PRE-01/07 source closure and
+trial5's unknown, deferred cause stay unchanged. Formal contract, first live
+qualification, 30/30, 4h and 10/10 remain NOT_RUN. No manual mention or automatic
+relay delivery is claimed; the current route has no bound independent target.
+
+## 2026-10-10 PRE-05/06 Live Route Batch In Progress
+
+The independent PRE-06 review closed the statistics/profile batch at `6942ae06`.
+Its next-entry audit found two real missing links: the controlled service rejects
+the selected PATCH, and the old device command chain lives outside the candidate
+tree. Root is addressing only these links. Preserve all previous closure evidence,
+trial5's deferred investigation and the unchanged 19 selected assets.
+
+Use the existing single-asset service with strict full raw base matching, token
+v2 and Range/TLS behavior; no P4-2 backend or PATCH-as-full workaround. Normalize
+only the necessary standard Commander/RTTLogger/private-ADB operations, using the
+existing host_io and process ownership primitives. The earlier cache observers
+are read-only examples, not runnable dependencies or new Flash algorithms.
+The bounded host oracle covers real loopback HTTP and negative device-adapter
+fixtures; initial hardware qualification stays with the independent operator.
+Outputs are under shared-root `.cache/p34-route-20261010/` and candidate-local
+test directories. No phone/MCU operation, asset rebuild or long campaign is part
+of this source remediation batch; formal admission remains pending.
+
+## 2026-10-10 PRE-06 Independent Closure And Formal Route Gaps
+
+Independent review of `6942ae068f6c57b1b42c679a2ebe039d5b9b0fef` closes the
+review2 statistics and four exact profile exceptions. The original GET_INFO/5
+discriminators now behave correctly without byte changes; 13 statistics tests
+and the two new profile/Git-object mutation tests pass. All 171 directly
+registered local files match; actual Production/Firmware/Flutter build inputs
+and the 19 selected assets remain unchanged from `1c3f7f49`. Both complete CI
+host logs match their archived ZIPs and execute the real service recovery test.
+The recorder and RC3-07 failures remain preserved, not product fixes or hardware
+evidence. PRE-01/07 source closure and trial5's unknown, deferred cause remain.
+
+Continuing into the actual formal route exposed two remaining admission gaps:
+PRE-05's specified `Tools/ota/p3-3-service/service.py` rejects the selected real
+1 MiB PATCH because `Release._validate()` supports only full. PRE-06's historical
+device/collection entries still require shared-root `Tools/ota/p34_session.py`
+and consumed `.cache` adapters absent from the candidate commit. Do not relabel
+the PATCH as full, replay old wrappers, or replace the available standard SEGGER
+tools. Root must provide only the necessary accurate PATCH service and committed
+standard-tool command/thin-adapter bindings, with bounded host positive/negative
+tests. No duplicate implementation-side long campaign or unrelated rebuild is
+requested. First live state/rollback qualification remains independent work.
+
+Full findings, minimal directions, oracles and owners:
+`docs/ota-exec-notes/P3-4-independent-pre06-review-2026-10-10.md`.
+New evidence: candidate `.cache/p34-independent-pre06-20261010/`.
+P3-4-v1 is still NOT_FROZEN; NOT_RUN precheck, first live qualification and the
+single formal matrix have not run. No product edits, device operations, CI
+dispatch, Git publication or manual mention occurred. Current-chat relay target
+discovery returned no binding; no task was automatically delivered to root.
+
+## 2026-10-10 PRE-06 Review2 Remediation Delivered
+
+The finite review2 batch is implemented and self-tested at
+`6942ae068f6c57b1b42c679a2ebe039d5b9b0fef`, tree
+`67978f75d86c3b1522175b841aa881d90cf38230`, profile blob
+`c1fd80a844680ac760ee0e3b9b70b86f84d6b136`. The acceptance branch and
+`dev/flutter/p34-admission-20261010` both point there; PR #26 is still draft and
+unmerged. This is implementation delivery for independent PRE-06 re-review,
+not independent closure, formal admission or P3-4 completion.
+
+- `acceptance_stats.py` accepts actual GET_INFO `0x00`/10-byte writes and rejects
+  undefined `0x05`. A successful current capture requires successful GET_INFO,
+  BEGIN and END writes, plus CAPS2 for v2; missing control/GATT accounting fails.
+  The original independent synthetic probes now give the expected opposite
+  results without editing their bytes. See `query-regression.json` below.
+- Recovery consumes the service's exact `transfer` stage and
+  `transport:DISCONNECTED` / `transport:DEVICE_LINK_CHANGED`, preserving the raw
+  reason. Bare/substring reasons, cancellation, ABORT, wrong stage and ordinary
+  success do not qualify. All ten recovery pairs must share one parameter/asset
+  group; mixed baud, timeout, retry or asset groups cannot pass the total gate.
+- The four omitted inputs now have exact top_files/required_paths exceptions:
+  `p34-acceptance/build.py` in Validation, the three Gradle inputs in Production
+  and Flutter. Generated build/cache files remain excluded. Standard profile
+  enumeration and complete helper dependency binding have no errors; Git-object
+  mutation tests use the normal rerun API and preserve unrelated consumers.
+- The v2/schema10 transport test now performs real `getDeviceInfo()` before
+  transfer/export/statistics. A separate actual service test records a native
+  write disconnect after 4096 durable bytes and resumes an 8192-byte v1 fixture
+  through two real snapshots and the statistics CLI. It counts one recovery,
+  not a 1 MiB checkpoint or the ten-recovery gate. No runtime sender was changed.
+
+Local original tests pass: statistics 13, bundle governance 116 and dependency
+efficiency 33. Final CI runs pass: development 38047820907, governance
+38047823595, firmware 38047823559 and PR APK/EXE 38047823551. Ubuntu has 722
+passed / 16 skipped; Windows has 705 passed / 33 skipped; both report zero
+failed tests and successful analyze. Original full tests.log files, exact new
+test lines, SDK identities, raw CI ZIPs and job metadata are retained in shared
+root `.cache/p34-pre06-20261010/ci-final/` and `ci-final-summary.json`.
+The console excerpts were truncated; the full archived tests.log files were not.
+APK/EXE build jobs succeeded; Release and Pages were skipped. No debug APK was
+requested and none of these CI artifacts replaced the selected device assets.
+
+Preserve the actual failure history: `4838dd13` first exposed a new test fixture
+reusing a sealed one-upgrade OtaDiagnostics; `c9fb0291` corrected this with a fresh
+recorder for resume. That revision passed the new tests but Linux hit an existing
+RC3-07 fractional-millisecond deadline race (expected NO_DURABLE_PROGRESS, actual
+TIMEOUT). `6942ae06` rounds positive timers up only inside that test's zone;
+the failure-code and retry-count assertions remain. This is a test-clock repair,
+not a claimed production timing fix. Original logs and scope are bound by
+`fixture-failure.json` and `timer-test-scope.json`; earlier failures were not erased.
+
+New source registration, relative to the shared root:
+`.cache/p34-pre06-20261010/source-lock-v4.json`, SHA-256
+`030559344ee3fdf80c5e5e2d1d2161c6136b84be36f02feb238d0f74eb732afb`.
+It supersedes but does not overwrite v3. `identity-final.json` shows no actual
+Production/Firmware/Flutter runtime or build-input change from `1c3f7f49` under
+the corrected profile. All 19 selected assets still match their original hashes;
+their source commit remains `1c3f7f49`, not the new statistics/test commit. Reuse
+the existing 613952-byte raw/base/target/reference/restore set and diagnostic APK.
+The original candidate/maintenance builds have 641 warnings, restore 643, all
+zero errors; do not present them as warning-free or substitute CI firmware bytes.
+The original trial6 remains resumed (first DATA 45056), not full-zero-start or
+formal ACK-eligible evidence; current read-only output is `trial6-current.json`.
+
+Next owner is the independent reviewer, using the new shared-root handoff
+`.cache/P3-4-pre06-remediation-handoff-2026-10-10.md`. Recheck PRE-06 and its direct
+dependencies, including the test-clock change; do not reopen source-closed
+PRE-01/07 or trial5's deferred causal investigation without new evidence. If
+admitted, continue the real P3-4-v1 contract/NOT_RUN precheck, first live
+qualification and the single formal matrix from review2 section 4. These are
+still NOT_RUN; do not demand a duplicate implementation-side long campaign.
+No device, installation, OTA, reset, AT, merge, release or manual mention occurred.
+The current chat has no bound cc-connect relay target, so automatic handoff was
+not possible; the user must forward the handoff to the original independent
+session. Normal final delivery uses only the bridge's completion notification.
+
+## 2026-10-10 PRE-06 Review2 Remediation In Progress
+
+Root is implementing the finite batch from
+`P3-4-independent-remediation-review2-2026-10-10.md`: correct the GET_INFO wire
+table, consume the service's actual transfer failure reason, require one recovery
+parameter/asset group, and register the four specifically omitted build inputs.
+Tests will exercise the real transport GET_INFO and service snapshot paths rather
+than inventing another command/reason vocabulary. Add exact profile exceptions,
+not a global build-output exclusion relaxation. PRE-01/07 stay independently
+closed at source level; first live qualification and the formal matrix stay
+NOT_RUN. Trial5's separate causal investigation remains deferred.
+
+This batch does not change firmware or App runtime. Reuse the selected BIN,
+reference/restore set and APK after proving runtime/build inputs unchanged; no
+installation, extra OTA or debug-APK dispatch is planned. New root evidence is
+`.cache/p34-pre06-20261010/`; preserve all earlier reports and source locks.
+
+## 2026-10-10 Second Independent Remediation Review
+
+Independent review of `1c3f7f49` is complete; formal admission is still blocked.
+See [the second review](P3-4-independent-remediation-review2-2026-10-10.md) and
+`.cache/p34-independent-review2-20261010/`. All 119 registered files match, and
+909 actual GCC repository dependencies are covered. This session ran MCU metrics
+5 tests / C core 14 checks, batch 9, formal statistics 10 and snapshot 31 tests.
+Both CI host originals and APK/EXE job metadata were checked, not treated as
+automatic closure. PRE-01's production observation implementation and PRE-07's
+filtered-error chain have closure evidence; their first live qualification is
+not a prefilled PASS. Trial5 remains cause-unknown with its separate work deferred.
+
+Keep PRE-06 open for one bounded batch: the statistics table rejects the actual
+GET_INFO command 0 and accepts undefined command 5; recovery counting misses the
+service's `transport:DISCONNECTED` reason and allows mixed-parameter ten-pair
+qualification. Independent synthetic probes preserve all these outcomes.
+The frozen profile also excludes the actual `p34-acceptance/build.py` helper and
+the three Android/plugin Gradle build files through its `build*` filter. Standard
+validator API returns an unbound-runner error when the helper is declared honestly.
+The report gives exact paths, smallest repairs, positive/negative oracles and owners.
+
+Next owner: root and the original runner/profile maintainers, not another full
+hardware preparation campaign. Submit the bounded fixes and affected tests; the
+independent operator then continues P3-4-v1 freeze/NOT_RUN precheck and the one
+live matrix. No duplicate implementation-side 30/30, 4h or 10/10 is requested.
+No product/runner fix, device operation, formal freeze, Git publication or manual
+mention was performed by this review. All formal hardware remains NOT_RUN;
+original claim, earlier reports, failures and existing task edits are preserved.
+
+## 2026-10-10 PRE-01/06/07 Implementation And CI Delivered
+
+The three requested admission remediations are implemented and self-tested at
+`1c3f7f49baa27c42452f7796839cea57ddd734b7`, tree
+`765d607ace0ce3d4908e673b536a04f6631db3de`, profile-config blob
+`a4355236f2d53235d0b144c3bceb70618f05a4da`. Both the acceptance branch and
+`dev/flutter/p34-admission-20261010` point to that commit. PR #26 remains draft
+and unmerged. This is delivery for independent re-review, not closure of the
+reviewer's findings, a frozen contract, hardware qualification or P3-4 PASS.
+
+- PRE-01: bounded 420-byte/schema-1 production MCU metrics cover payload/journal
+  read/program/erase/verify, actual UART RX IRQ body and ACK TX. Experimental BLE,
+  baud, install and RTT down controls remain OFF. Clock/overflow, acquisition/
+  freeze, unknown initial state and first-error behavior are explicit. Reuse the
+  standard RTT logger and matching map; nested inclusive costs are not additive
+  savings. MCU decoder 5 tests, C core 14 checks and actual UART IRQ 202 checks pass.
+- PRE-06: v1/v2 geometry and schema 10 are supported. The formal thin entry is
+  `acceptance_stats.py` over the existing strict `observation_capture.py`.
+  Actual BEGIN/control/DATA/durable accounting, nearest-rank P99, stable groups,
+  failures/missing samples, unique-DATA retransmission denominator and recovery
+  pairs are covered. Normal retries remain in the same business/latency pool.
+  Batch/statistics tests are 9/10; strict snapshot tests are 31, all passing.
+- PRE-07: bounded raw filtered ACK errors and sealed counts retain six distinct
+  ownership classes, without changing credit/durable or active firstError.
+  Matching/error prefixes reach the actual snapshot and strict reader. Real
+  transport-to-snapshot-to-Python tests and a complete synthetic v2/schema-10
+  transfer pass on both CI hosts; these are host oracles, not hardware results.
+
+Final CI runs all passed: development push 38031160555, firmware 38031162380,
+governance 38031162315, PR APK/EXE 38031162314 and diagnostic APK 38031649785.
+Ubuntu reports 721 passed / 16 skipped; Windows 704 passed / 33 skipped.
+The Android/Windows build jobs succeeded; Release/Pages were skipped. Original
+CI logs, job metadata, dual-host reports and the new APK are retained at shared
+root `.cache/p34-remediation-20261010/`, including `ci-final-summary.json` and
+`final-archive/`. The initial f354 lint failure is preserved, not relabeled green.
+
+The selected local App-only build is `.cache/p34-build3/`: raw BIN 613952 bytes,
+SHA `7e556d3f9bc3d689a46648fd1c5e27cbe833a99fd2776ba1fb28bee983ebafa1`,
+641 warnings / 0 errors. Ubuntu's actual candidate is 613964 bytes with a
+different SHA; do not substitute it into the selected reference/restore set.
+Fresh base/target/1 MiB inputs are in `.cache/p34-reference2/`; the real C decoder
+passes byte equality and four rejection cases. Restore's 18 host checks pass;
+its 613952-byte/CRC32 2889683253/base-SHA binding is rechecked. Finalized maintenance
+and restore images are in `.cache/p34-maintenance-images2/`, built by
+`p34-maintenance-build2` (641 warnings) and `p34-restore-build3` (643 warnings),
+both zero errors. Boot was not rebuilt or modified. No image has been installed.
+
+The new APK is 131722750 bytes, SHA
+`858b6bd8811d3c2baaf758d0f99bb7e472192e693650018d00fd3cd3273ef68f`, from this exact
+commit, with the expected p34probe application ID and fixed development signing
+certificate. It is not the old 691aa3df APK. The compiled `.invalid` service URL
+remains an explicit runtime-required placeholder, not a ready HTTPS service.
+
+New artifact/source registration (all paths relative to the shared root):
+`.cache/p34-remediation-20261010/source-lock-v3.json`, SHA
+`4929eba892d46497d9475cfe2503696cf4bbae34f57c0c246dd47e5169ea01e3`.
+It binds 19 assets and 82 development receipt/log files, the actual CI/APK reports
+and README; it does not replace Git-object input groups or formal approval.
+Candidate `.cache/p34-identity2/` confirms the 420-byte symbol and all 909 actual
+repository GCC dependencies; 40 KiB overlay, 8192-byte stack and 32-byte guard
+remain. The standard API check has no worktree/profile errors but is not a
+FROZEN-contract/NOT_RUN precheck. The final CLI reinterpreted the unchanged trial6
+original into shared-root `trial6-final.json/.log`: first DATA 45056, 1965 unique
+segments, still resumed/small, fullZeroStart/reference/ackEligible all false.
+
+Next owner: independent acceptance agent. Read the prior remediation report and
+shared-root `.cache/P3-4-remediation-handoff-2026-10-10.md`, recheck this bounded
+batch and affected inputs, then freeze actual commands and execute first live
+qualification plus the single formal matrix. The implementation side did not
+repeat 30/30, 4h or 10/10. All remain NOT_RUN; trial5 remains cause-unknown with its
+separate investigation deferred. No device, manual mention, merge or deployment
+occurred. Existing task-note edits and independent report were preserved; the
+new closeout text is local operational history, not a claimed main integration.
+
+## 2026-10-10 PRE-01/06/07 Implementation Batch
+
+Owner: Codex root, continuing under the user's instruction to implement the
+three remaining admission fixes. Original card claimant and independent review
+remain unchanged. Worktree: `.cache/p34-final`, starting at `625e0a58`.
+
+- PRE-01: the production image really has no MCU timing port. Reuse the existing
+  staging IO wrappers and DWT clock, but not the experimental baud console.
+  Add a bounded read-only production metrics snapshot, explicit clock/overflow
+  validity and session boundary; qualify it on host and bind its final ELF/map.
+- PRE-06: keep the strict snapshot reader. Extend the existing timing entry for
+  v2/schema 10 and add formal run/group accounting over original snapshots.
+  Validate real BEGIN state, wire bytes, durable ACK latency, failures and missing
+  samples. Do not reinterpret a resumed/small run as a clean 1 MiB result.
+- PRE-07: retain filtered ACK errors by bounded category with original fields,
+  without changing matching, credit, durable state or first matching error.
+  Exercise transport -> real App snapshot -> strict Python reader in CI.
+
+This is one implementation/self-test batch, not a new acceptance round. No device
+operations, trial5 causal investigation, sender redesign, UI change or historical
+evidence rewrite. Firmware changes require fresh paired reference/restore assets;
+old source locks and successful CI remain historical, not this batch's results.
+
+## 2026-10-10 Independent Remediation Review
+
+The independent review of candidate `625e0a58` is complete, but formal admission
+is not passed. See [the consolidated report](P3-4-independent-remediation-review-2026-10-10.md)
+and candidate `.cache/p34-independent-review-20261010/`. All 26 registered inputs
+matched; all 907 in-repository GCC dependencies are covered by the frozen profile
+definition. The current-candidate receiver matrix passed 327 checks across ten
+modeled cases, its source-mutation negative fired, and the existing snapshot reader
+passed 30 host tests. These are admission checks, not formal hardware PASS.
+
+Keep the same PRE IDs. Remaining bounded work is PRE-01's actual production MCU
+measurement route, PRE-06's v2/schema-10 statistics adapter, and PRE-07's retained
+late-error evidence. Do not redo the whole campaign on the implementation side.
+Trial5 remains unexplained and its separate causal investigation stays deferred.
+No contract/commands were falsely frozen; live state/rollback qualification and
+the single formal matrix remain NOT_RUN. No device, CI, Git publication or manual
+mention was performed in this independent review; original claim and evidence stay.
+
+## 2026-10-10 Final PR Checks Passed
+
+Current source is `625e0a58d4f08e85d647b6e9d0521970312e69f6`, tree
+`fa1a93d09e545ad67e9925a642f492c602edc44c`; profile-config blob remains
+`a4355236f2d53235d0b144c3bceb70618f05a4da`. PR #26 stays draft and unmerged.
+Final firmware CI 37983524994, governance CI 37983524840 and App build CI
+37983524854 all passed. Android APK and Windows EXE tests/build/upload succeeded:
+Ubuntu 713 passed / 16 skipped; Windows 696 passed / 33 skipped. Full original
+logs and job/artifact metadata are archived in shared-root
+`.cache/p34-integration1/delivery1/` as `*-final.*` and `ci-final-summary.json`.
+
+The last failure was test-fixture placement, not an OTA/device failure:
+ordinary App CI had system TEMP outside the worktree, so the strict snapshot
+extractor correctly rejected that output. The fix moves this test's fixtures
+under the App's `.dart_tool/ota-service-tests/`; it changes no runtime code and
+does not weaken the guard. Both original failed jobs remain in `app-pr-failed.*`.
+The existing validator confirms clean base profiles and no Flutter runtime
+profile difference from the retained debug APK source, but this check is not
+the still-required FROZEN-contract/NOT_RUN-matrix precheck.
+
+Use `source-lock-v2.json`, SHA-256
+`8a767931a0dcd947961f3863d460ceb4502df3a8e7ed02211f30d7d507908992`,
+instead of the predecessor source register. The selected local firmware,
+reference package, finalized maintenance images and debug APK are unchanged.
+The temporary independent handoff has been updated to this final source and
+these real CI outcomes. It still explicitly requires the independent operator
+to freeze actual commands/contract and qualify the first live initial state;
+formal hardware remains NOT_RUN. No new device operation or manual reminder.
+
+## 2026-10-10 Published Candidate; Independent Admission Handoff
+
+The scoped candidate is committed and pushed at
+`38bd66eab3f20aec22844306e43c5ca210aad1e3`, tree
+`90f68ab335a47e683f15700a164cd4df9f85e552`, profile-config blob
+`a4355236f2d53235d0b144c3bceb70618f05a4da`, on
+`acceptance/p3-4-v2-20261009`. Draft PR:
+https://github.com/Eitan-S-23/E-Track/pull/26 . No merge, release or deployment.
+The complete App tree matches the already-tested `691aa3df` development commit.
+
+Firmware CI 37980146495 passed, including the actual P34_OTA_CANDIDATE build;
+governance CI 37980146534 passed. Full original logs and the candidate artifact
+are archived under the shared root `.cache/p34-integration1/delivery1/`.
+The first failed runs remain preserved. Their two integration defects were an
+old v1-only static command enumeration and a profile test missing the two real
+production Tools headers. The current check preprocesses both configurations,
+reuses the unchanged 47-check v1 oracle and checks the approved v2 supplement,
+including nine mutation/negative tests. The profile target and portability
+check also passed locally in the candidate's `.cache/p34-ci-fix1/`.
+
+The selected local GCC raw App remains 612020 bytes with 641 warnings and zero
+errors. The Ubuntu candidate build is 612024 bytes with a different SHA; do not
+claim cross-host byte equality or replace the local base/PATCH/restore inputs
+with that CI BIN. Both variants and original hashes are recorded. No new build,
+package generation or hardware experiment was used to hide this distinction.
+The maintenance/restore images now have valid headers, generated by the existing
+finalizer without executable-body changes; they remain uninstalled and require
+first live qualification. See candidate `.cache/p34-maintenance-images1/`.
+
+Current artifact/source registration is shared-root
+`.cache/p34-integration1/delivery1/source-lock.json`, SHA-256
+`391d9f628fec9e66b57a7ac9184dfe2fb4e435cf962dad8cd36c7e4ce1a09f7e`.
+This is an asset register, not a replacement profile manifest or FROZEN contract.
+The independent handoff is shared-root
+`.cache/P3-4-independent-acceptance-2026-10-10.md`. It fixes the same-package
+three-run-per-supported-baud screening, separate P99 timeout selection, one
+final 30/30 group, four-hour soak and ten reconnect recoveries. It explicitly
+assigns first state/rollback qualification and final command/contract approval
+to the independent operator; the implementer does not duplicate that campaign.
+
+Remaining admission is real, not waived: bind the actually used collection and
+baud commands/runners, approve the v3 contract with these real source objects,
+and pass its NOT_RUN execution precheck before formal commands. Prefer the
+standard J-Link/ADB and existing snapshot reader, not another general-purpose
+controller. Necessary new runner code must be committed before freezing; first
+hardware observations must not be required to pass in advance. P3-4 is still in
+progress, with formal hardware and equivalent-state qualification NOT_RUN, not
+formal READY/PASS. No manual @mention or device action occurred in this delivery.
+
 ## 2026-10-10 Acceptance Publication Authorized
 
 The user's latest authorization covers the scoped candidate/dependency commits,

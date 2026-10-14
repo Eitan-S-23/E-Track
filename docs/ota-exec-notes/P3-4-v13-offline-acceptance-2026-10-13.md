@@ -2,13 +2,14 @@
 
 Date: 2026-10-13. Same independent reviewer; no implementer role change.
 
-Latest continuation (2026-10-14): `P34-HOST-CLOSE-01` is independently CLOSED.
-The caller integration passes 20/20 affected-path checks; the primitive remains
-unchanged. This is not whole-card completion or an established explanation of
-the old interruption. The sealed v13 candidate-original-evidence PASS is unchanged.
-The local source/evidence closeout is prepared below. The user has now approved
-its bounded local Git-write scope; see Local Closeout Authorization. Do not ask
-again for the same in-scope commits or infer any new device/CI/main authority.
+Latest continuation (2026-10-14): candidate-stage independent acceptance is PASS
+under `P3-4-v15`. The verified local evidence commit is
+`15a025b9c2690e864456a32fb2820422846fb85b`, with 8838 raw Git blob checks and a
+successful standard validation at that commit. See Candidate Stage Closure below.
+The host repairs remain CLOSED; v11/v12/v13, the new v14 partial failure and 3/3
+are preserved. Local closeout and necessary same-scope continuation permissions
+are recorded and must not be requested again. Main integration, push/CI, device
+actions and P3-5/P5 final validation are not granted or claimed by this result.
 
 ## Why Work Continues
 
@@ -725,3 +726,99 @@ are recorded in `E/records-commit.json` and `E/write-audit.json`, respectively;
 neither is inferred from this plan. Shared main worktree/ref/index, devices,
 historical evidence and the cumulative 3/3 remain protected. Main integration,
 push, merge, CI and release are outside the current authority.
+
+## Candidate Stage Closure
+
+Date: 2026-10-14. This is the completed candidate-stage independent decision,
+not another Spec or a new physical campaign. The governing Spec is still
+`cb317aff:docs/ota-prompts/prompt-P3-4-experiment.md` and OTA-DEC-016.
+
+The current user explicitly approved P34-V14-PREFLIGHT-01 and subsequent
+necessary authorizations in this same local closeout. The original response is
+retained in `E/metadata-correction-authorization.json` and in the committed
+round15 inputs. Continue this bounded R/shared-Git-metadata chain without
+repeated per-command, per-commit or per-agent permission questions. This does
+not expand it to devices, additional OTA, shared main writes, publication,
+product/gate changes or unrelated work.
+
+The four v14 runner declarations were corrected under that authority; all
+pre-correction bytes and the rejected preflight remain preserved. The admitted
+v14 then completed its three reference commands and three transfer readers,
+but native `fc.exe` rejected a POSIX-spelled input filename with exit 2.
+Both actual inputs existed and were byte-identical. This reviewer preparation
+error is not a failure of the accepted host code or firmware. v14 was sealed as
+EVIDENCE_GAP with its complete reference EXECUTED PASS and its partial-command
+failure intact. Missing downstream command receipts were not fabricated.
+
+The direct v15 successor changes only the seven FC filename spellings to native
+absolute paths. It keeps the same source, criteria, thresholds and originals.
+The standard plan reuses the actual v14 reference PASS and requires 16 remaining
+offline commands. All 16 and the final standard lineage validation passed.
+
+| Criterion | Current execution | Decision and limit |
+| --- | --- | --- |
+| P34-CANDIDATE-REFERENCE | REUSED from v14 EXECUTED PASS | Same-group v10/v11 originals and valid MCU evidence; not an old v11 formal PASS or a new physical transfer. |
+| Q-PREP-RESTORE | EXECUTED, offline | Original v12 full base/Boot bytes, six mailbox samples, preserved configuration, confirmation/health and erased journal verified; no new restoration. |
+| Q-TRANSFER | EXECUTED, offline | Original zero-start 1 MiB App/MCU/RAM, one timely old-App sample, guard/clock/tick/WDT, later full target/Boot and actual archive/reader closure verified. Original v12 command exit remains missing. |
+| P34-CANDIDATE-CLOSEOUT | EXECUTED, offline | Actual source/CI applicability, four original archives, dual-host Flutter logs, seven firmware suites, receiver containment/mutant and the closed caller repair verified; no build, CI or product-test replay. |
+
+The adjudication is
+`.acceptance-p3-4/round15/adjudications/candidate-original-review.json`.
+The real contract/matrix are `docs/acceptance-contracts/P3-4-v15.contract.json`
+and `.acceptance-p3-4/round15/evidence-matrix.json`. The matrix contains one
+directly anchored REUSED criterion and three newly EXECUTED offline criteria.
+The contract is bound to source `fcbace8b3f782714a139a77a12cb9305dbaef7cc` and
+tree `7038ea9de58dba625d487caee57c6dfb130d04b6`.
+
+The historical baseline lacks the modern runtime stamp. Its rejected modern
+reader attempt and the two legacy record-shape mismatches are retained under
+round15 `host/`. The final evaluation uses the existing strict envelope/sample
+readers, recomputes the original timing/frame/discovery counts and verifies the
+hash-bound historical parser reports. It synthesizes no runtime fields and
+preserves missing/early ACK samples and parser exclusions. Original APK hashes,
+declared factors and full image/Boot readbacks were checked; the missing old
+source Git object is still not claimed to have been inspected.
+
+### Applicability And Remaining Work
+
+The supported candidate remains v2, 921600 baud, 2000 ms, retries 5, window 24,
+batch 12 and write payload 244. The three 1 MiB observations remain
+71.582792 / 71.316310 / 63.708034 seconds, each with 8192 usable ACK samples and
+zero DATA retries. Reference P99 is 827159 us; the supplemental three-observation
+P99 is 761183 us. Both support the unchanged 2000 ms clamp. These observations
+do not populate an old calibration ledger or a final 30-run campaign.
+
+115200 historical C0-C3 timing/factors are reconciled, including the absence of
+a clear reuse-only gain and the incomplete old ACK samples. 230400 remains
+unreconciled, not unsupported; the old 460800 failure/resume series is not an
+equivalent current-v2 comparison. No current-v2 causal speedup is claimed.
+BLE timing is not installation time; nested discovery and overlapping ACK work
+are not added as exclusive phases. These limits do not justify an automatic
+four-rate rerun or another OTA for this accepted candidate scope.
+
+No additional device observation is required to close this candidate decision.
+Final selected-group 30/30 and a genuine four-hour wall-clock campaign remain
+with P5-1; real-backend 10/10 recovery remains with P3-5; P5-2 owns the applicable
+physical-fault gaps. Their requirements come from the existing Spec and
+OTA-DEC-016, not this report. Three ordinary transfers and host models cannot
+prove those larger sample counts, continuous duration or real backend/physical
+fault behavior offline. Trial5 remains explicitly deferred, unresolved and not
+waived. Production release is still prohibited by the candidate contract.
+
+### Local Delivery
+
+The authorized evidence commit is
+`15a025b9c2690e864456a32fb2820422846fb85b`. It contains the required v1-v15
+history and original inputs without rewriting old results. 8838 exact selected
+paths were checked against staged raw blobs and the committed tree; targeted
+attributes preserve original P3-4 contract/evidence bytes across checkout.
+Normal hooks passed. `E/bundle/verified.json` records standard self-validation
+at the actual bundle commit. A later records-only commit registers the real
+v14/v15 freeze-index rows; it does not change the accepted bundle.
+
+The P3-4 candidate acceptance and local evidence delivery are complete. Main/PR
+integration remains a separate, unperformed delivery action, so the project card
+is not silently declared fully delivered. Shared main worktree/ref/index stay
+untouched; no push, merge, CI, release, device action or new OTA occurred. Current
+3.2.87/group16/CONFIRMED=4 remains a historical observation, not a fresh query.
+The cumulative physical chain stays 3/3, not a permanent whole-project limit.
