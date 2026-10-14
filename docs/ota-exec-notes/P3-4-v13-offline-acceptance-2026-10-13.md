@@ -887,3 +887,13 @@ Cloudflare registration; unchanged web-doc/backend paths do not request deployme
 
 At this entry, integration is in progress. No remote update, successful new CI,
 PR merge or synchronized main is claimed before its actual receipt exists.
+
+The governance merge is `9bdfc85` with both original parents retained. Its 62
+existing targeted governance/index tests had 61 passes and one failed guard:
+the updated P3-4 board text omitted the original post-approval production-parameter
+writeback sentence. That sentence was restored without altering the guard or any
+acceptance gate; the original failed log is retained. The imported historical
+host-remediation supplement also retains its byte-pinned final blank line rather
+than changing approved historical content merely to silence `git diff --check`.
+All other edited paths pass the whitespace check. The current progress entry is
+updated so its old October 7 preparation notes cannot be mistaken for new status.
