@@ -31,8 +31,10 @@ export function firmwareGitHub({ repository, token, fetcher = fetch, signal }) {
     }
     throw unavailable("GitHub inventory exceeds bounded complete listing");
   }
-  async function tagCommit(tag) {
-    let object = (await json(`/git/ref/tags/${encodeURIComponent(tag)}`)).object;
+  async function tagCommit(tag, allowMissing = false) {
+    const ref = await json(`/git/ref/tags/${encodeURIComponent(tag)}`, {}, allowMissing);
+    if (ref === null) return null;
+    let object = ref.object;
     for (let depth = 0; depth < 8; depth++) {
       if (!/^[0-9a-f]{40}$/.test(object?.sha)) throw conflict("Invalid tag identity");
       if (object.type === "commit") return object.sha;
@@ -101,17 +103,29 @@ export function firmwareGitHub({ repository, token, fetcher = fetch, signal }) {
       if (!bytes || bytes.length !== asset.sizeBytes || digest(bytes) !== asset.sha256) throw conflict("Local GitHub asset identity mismatch");
     }
     let release = await json(`/releases/tags/${metadata.releaseTag}`, {}, true);
-    if (release) {
-      if (release.tag_name !== metadata.releaseTag || release.prerelease || release.body !== metadata.releaseNotes
-        || await tagCommit(metadata.releaseTag) !== metadata.commitSha) throw conflict("Existing GitHub Release identity differs");
-    } else {
-      const existingTag = await json(`/git/ref/tags/${encodeURIComponent(metadata.releaseTag)}`, {}, true);
-      if (existingTag && await tagCommit(metadata.releaseTag) !== metadata.commitSha) throw conflict("Existing tag commit differs; do not retarget it");
+    if (!release) {
+      // The by-tag endpoint returns published releases. An interrupted draft
+      // must be found through the complete listing, even before its tag exists.
+      const matches = (await list("/releases")).filter(r => r.tag_name === metadata.releaseTag);
+      if (matches.length > 1) throw conflict("Ambiguous GitHub draft identity");
+      release = matches[0];
+      if (release && release.draft !== true) throw conflict("Published GitHub Release lookup is inconsistent");
+    }
+    if (!release) {
+      const existingCommit = await tagCommit(metadata.releaseTag, true);
+      if (existingCommit !== null && existingCommit !== metadata.commitSha) throw conflict("Existing tag commit differs; do not retarget it");
       release = await json("/releases", { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tag_name: metadata.releaseTag, target_commitish: metadata.commitSha,
           name: metadata.releaseTag, body: metadata.releaseNotes, draft: true, prerelease: false }) });
+      if (release.draft !== true) throw conflict("New GitHub Release must remain a draft");
     }
     if (!Number.isSafeInteger(release.id) || release.id <= 0) throw unavailable("Invalid GitHub Release identity");
+    if (release.tag_name !== metadata.releaseTag || release.prerelease !== false || release.body !== metadata.releaseNotes
+      || typeof release.draft !== "boolean" || (release.draft && release.target_commitish !== metadata.commitSha)) {
+      throw conflict("Existing GitHub Release identity differs");
+    }
+    const existingCommit = await tagCommit(metadata.releaseTag, release.draft);
+    if (existingCommit !== null && existingCommit !== metadata.commitSha) throw conflict("Existing GitHub Release tag commit differs");
     const before = await list(`/releases/${release.id}/assets`);
     if (before.some(a => !metadata.assets.some(expected => expected.fileName === a.name))
       || new Set(before.map(a => a.name)).size !== before.length) throw conflict("Unexpected or duplicate GitHub assets");
@@ -127,10 +141,14 @@ export function firmwareGitHub({ repository, token, fetcher = fetch, signal }) {
       if (response.status !== 201) throw unavailable(`GitHub asset upload failed: HTTP ${response.status}`);
       await download(await response.json(), asset);
     }
-    if (release.draft) await json(`/releases/${release.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ draft: false }) });
+    if (release.draft) {
+      const commit = await tagCommit(metadata.releaseTag, true);
+      if (commit !== null && commit !== metadata.commitSha) throw conflict("GitHub tag changed before draft publication");
+      await json(`/releases/${release.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draft: false }) });
+    }
     const after = await json(`/releases/${release.id}`);
-    if (after.draft || after.prerelease || after.tag_name !== metadata.releaseTag || after.body !== metadata.releaseNotes
+    if (after.id !== release.id || after.draft !== false || after.prerelease !== false || after.tag_name !== metadata.releaseTag || after.body !== metadata.releaseNotes
       || await tagCommit(metadata.releaseTag) !== metadata.commitSha) throw conflict("Published Release identity mismatch");
     const inventory = await list(`/releases/${release.id}/assets`);
     if (inventory.length !== metadata.assets.length || new Set(inventory.map(a => a.name)).size !== metadata.assets.length) {

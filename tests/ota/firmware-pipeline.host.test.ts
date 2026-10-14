@@ -58,12 +58,29 @@ async function counts() {
 // full-byte verification execute the actual production client, not a fake flow.
 class GitHubHttp {
   release: any = null;
+  otherReleases: any[] = [];
+  tag: string | null = null;
   assets = new Map<string, any>();
   bytes = new Map<number, Uint8Array>();
   calls: string[] = [];
   corrupt = false;
   redirect = false;
+  stopAfterUploads: number | null = null;
+  createdTarget: string | null = null;
+  tagAfterUploads: string | null = null;
   constructor(readonly metadata: any) {}
+  seedDraft() {
+    this.release = { id: 7, tag_name: this.metadata.releaseTag, target_commitish: this.metadata.commitSha,
+      name: this.metadata.releaseTag, body: this.metadata.releaseNotes, draft: true, prerelease: false };
+  }
+  store(name: string, bytes: Uint8Array) {
+    const asset = { id: 10 + this.assets.size, name, size: bytes.length, state: "uploaded", digest: `sha256:${digest(bytes)}` };
+    this.assets.set(name, asset); this.bytes.set(asset.id, bytes);
+    return asset;
+  }
+  interrupt() {
+    if (this.stopAfterUploads !== null && this.assets.size >= this.stopAfterUploads) throw new Error("injected GitHub interruption");
+  }
   fetch: typeof fetch = async (input, init = {}) => {
     const url = new URL(String(input)); const method = init.method ?? "GET";
     this.calls.push(`${method} ${url.hostname}${url.pathname}`);
@@ -71,15 +88,20 @@ class GitHubHttp {
       expect(init.headers).toBeUndefined();
       return new Response(this.bytes.get(Number(url.pathname.slice(1))));
     }
-    if (url.pathname.includes("/git/ref/tags/")) return Response.json({ object: { type: "commit", sha: this.metadata.commitSha } });
-    if (url.pathname.includes("/releases/tags/")) return this.release ? Response.json(this.release) : new Response(null, { status: 404 });
+    if (url.pathname.includes("/git/ref/tags/")) return this.tag
+      ? Response.json({ object: { type: "commit", sha: this.tag } }) : new Response(null, { status: 404 });
+    // GitHub's by-tag endpoint returns published releases, not drafts. A new
+    // draft can legitimately have no Git ref until it is published.
+    if (url.pathname.includes("/releases/tags/")) return this.release && !this.release.draft
+      ? Response.json(this.release) : new Response(null, { status: 404 });
     if (url.hostname === "uploads.github.com") {
       expect(method).toBe("POST");
+      this.interrupt();
       const name = url.searchParams.get("name")!;
       if (this.assets.has(name)) return new Response(null, { status: 409 });
       const body = new Uint8Array(await new Response(init.body).arrayBuffer());
-      const asset = { id: 10 + this.assets.size, name, size: body.length, state: "uploaded", digest: `sha256:${digest(body)}` };
-      this.assets.set(name, asset); this.bytes.set(asset.id, body);
+      const asset = this.store(name, body);
+      if (this.tagAfterUploads && this.assets.size === this.metadata.assets.length) this.tag = this.tagAfterUploads;
       return Response.json(asset, { status: 201 });
     }
     const match = url.pathname.match(/\/releases\/assets\/(\d+)$/);
@@ -91,13 +113,20 @@ class GitHubHttp {
     if (url.pathname.endsWith("/releases/7/assets")) return Response.json([...this.assets.values()]);
     if (url.pathname.endsWith("/releases/7")) {
       if (method === "PATCH") {
+        this.interrupt();
         expect(JSON.parse(String(init.body))).toEqual({ draft: false }); this.release.draft = false;
+        this.tag ??= this.release.target_commitish;
       }
       return Response.json(this.release);
     }
-    if (url.pathname.endsWith("/releases") && method === "POST") {
-      this.release = { id: 7, ...JSON.parse(String(init.body)) };
-      return Response.json(this.release, { status: 201 });
+    if (url.pathname.endsWith("/releases")) {
+      if (method === "GET") return Response.json([...(this.release ? [this.release] : []), ...this.otherReleases]);
+      if (method === "POST") {
+        if (this.release) return new Response(null, { status: 422 });
+        this.release = { id: 7, ...JSON.parse(String(init.body)) };
+        if (this.createdTarget) this.release.target_commitish = this.createdTarget;
+        return Response.json(this.release, { status: 201 });
+      }
     }
     throw new Error(`Unexpected GitHub fixture request: ${method} ${url.pathname}`);
   };
@@ -250,6 +279,76 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
     const s = await setup(); const http = new GitHubHttp(s.metadata); http.redirect = true;
     await expect(http.client().publish(s.metadata, new Map(s.metadata.assets.map(a => [a.fileName, bytesFor(a.kind)]))))
       .resolves.toMatchObject({ fullReadbackVerified: true });
+  });
+
+  it.each([0, 1, 3])("GitHub resumes the same untagged draft after interruption with %i uploaded assets", async completed => {
+    const s = await setup(); const http = new GitHubHttp(s.metadata);
+    const bytes = new Map(s.metadata.assets.map(a => [a.fileName, bytesFor(a.kind)]));
+    http.stopAfterUploads = completed;
+    await expect(http.client().publish(s.metadata, bytes)).rejects.toThrow(/injected GitHub interruption/);
+    expect(http.release).toMatchObject({ id: 7, draft: true, target_commitish: s.metadata.commitSha });
+    expect(http.tag).toBeNull(); expect(http.assets.size).toBe(completed);
+    const firstCalls = [...http.calls];
+    const existing = [...http.bytes].map(([id, value]) => ({ id, sha256: digest(value) }));
+    http.stopAfterUploads = null;
+    const result = await http.client().publish(s.metadata, bytes);
+    expect(result).toEqual({ releaseId: 7, assetCount: 3, fullReadbackVerified: true });
+    expect(http.release.draft).toBe(false); expect(http.tag).toBe(s.metadata.commitSha);
+    const retryCalls = http.calls.slice(firstCalls.length);
+    expect(retryCalls).toContain("GET api.github.com/repos/Eitan-S-23/Trace/releases");
+    expect(retryCalls.filter(v => v.startsWith("POST uploads.github.com"))).toHaveLength(3 - completed);
+    expect(http.calls.filter(v => v === "POST api.github.com/repos/Eitan-S-23/Trace/releases")).toHaveLength(1);
+    for (const item of existing) expect(digest(http.bytes.get(item.id)!)).toBe(item.sha256);
+    await writeOutput(root, path.join(s.assetsDir, "github-draft-retry.json"), JSON.stringify({ completed,
+      firstCalls, retryCalls, existing, result, tag: http.tag }, null, 2) + "\n");
+    console.info("P41_HOST_DRAFT_RETRY", { completed, releaseId: result.releaseId,
+      newUploads: 3 - completed, existingBytesUnchanged: true, fullReadbackVerified: true });
+  });
+
+  it.each(["wrong target", "mutable target", "conflicting tag", "ambiguous drafts", "changed notes", "prerelease"])
+    ("GitHub rejects %s in an existing draft before any mutation", async reason => {
+      const s = await setup(); const http = new GitHubHttp(s.metadata); http.seedDraft();
+      if (reason === "wrong target") http.release.target_commitish = "f".repeat(40);
+      if (reason === "mutable target") http.release.target_commitish = "main";
+      if (reason === "conflicting tag") http.tag = "f".repeat(40);
+      if (reason === "ambiguous drafts") http.otherReleases.push({ ...http.release, id: 8 });
+      if (reason === "changed notes") http.release.body = "different notes";
+      if (reason === "prerelease") http.release.prerelease = true;
+      await expect(http.client().publish(s.metadata, new Map(s.metadata.assets.map(a => [a.fileName, bytesFor(a.kind)]))))
+        .rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+      expect(http.calls.filter(v => !v.startsWith("GET"))).toEqual([]);
+      expect(http.assets.size).toBe(0); expect(http.release.draft).toBe(true);
+    });
+
+  it("GitHub still requires a tag for a published release", async () => {
+    const s = await setup(); const http = new GitHubHttp(s.metadata); http.seedDraft(); http.release.draft = false;
+    await expect(http.client().publish(s.metadata, new Map(s.metadata.assets.map(a => [a.fileName, bytesFor(a.kind)]))))
+      .rejects.toThrow();
+    expect(http.calls.filter(v => !v.startsWith("GET"))).toEqual([]);
+  });
+
+  it("GitHub validates a newly returned draft target before any asset upload", async () => {
+    const s = await setup(); const http = new GitHubHttp(s.metadata); http.createdTarget = "f".repeat(40);
+    await expect(http.client().publish(s.metadata, new Map(s.metadata.assets.map(a => [a.fileName, bytesFor(a.kind)]))))
+      .rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    expect(http.assets.size).toBe(0); expect(http.calls.some(v => v.startsWith("PATCH"))).toBe(false);
+  });
+
+  it("GitHub rechecks a conflicting tag created during upload before publishing", async () => {
+    const s = await setup(); const http = new GitHubHttp(s.metadata); http.tagAfterUploads = "f".repeat(40);
+    await expect(http.client().publish(s.metadata, new Map(s.metadata.assets.map(a => [a.fileName, bytesFor(a.kind)]))))
+      .rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    expect(http.assets.size).toBe(3); expect(http.release.draft).toBe(true);
+    expect(http.calls.some(v => v.startsWith("PATCH"))).toBe(false);
+  });
+
+  it("GitHub reads every existing draft asset before adding missing assets", async () => {
+    const s = await setup(); const http = new GitHubHttp(s.metadata); http.seedDraft();
+    const asset = s.metadata.assets[0]; http.store(asset.fileName, bytesFor(asset.kind)); http.corrupt = true;
+    await expect(http.client().publish(s.metadata, new Map(s.metadata.assets.map(a => [a.fileName, bytesFor(a.kind)]))))
+      .rejects.toThrow(/readback digest/);
+    expect(http.calls.filter(v => !v.startsWith("GET"))).toEqual([]);
+    expect(http.assets.size).toBe(1); expect(http.release.draft).toBe(true); expect(http.tag).toBeNull();
   });
 
   it("register cancellation does not retry and service paths cannot hide a wrong origin", async () => {

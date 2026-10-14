@@ -1,9 +1,11 @@
 # P4-1 Unattended Development
 
-Status: IN_PROGRESS (whole card). Unattended development implementation and
-validation are complete on `fa74905e84c489cccc248617d37ab9f56c8f961c`.
-Implementation self-tests are not independent acceptance. Main integration,
-real rehearsal and the retained external audit question are not declared complete.
+Status: IN_PROGRESS (whole card and current repair batch). The earlier checks-only
+dispatch passed on `fa74905e84c489cccc248617d37ab9f56c8f961c`, but actual PR checks
+and independent review found three required repairs below. Unattended development
+is not currently declared complete. Implementation self-tests are not independent
+acceptance. Main integration, real rehearsal and the retained external audit
+question are not declared complete.
 Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen references.
 
 ## Entry And Authority
@@ -33,6 +35,62 @@ Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen refer
 | P41-04 | Existing release step edits tags and clobbers assets, defaults to staging bucket, and has no production environment declaration. | Immutable publish/readback, explicit environment configuration, first-step gate and shared rehearsal path; no real publish execution this batch. | Pipeline host 20/20 and workflow 15/15 pass. External GitHub/R2 surfaces in those tests are doubles, not a real release/rehearsal. |
 | P41-05 | Canonical rehearsal provenance/rebuild comparison and version monotonicity are not wired. | Preserve frozen canonical `runId`; audit-only execution id; fail before remote writes on inconsistent inputs. | Approved-envelope byte replay and changed provenance/hash/version negatives pass. Actual approval and cloud binding observations remain NOT_RUN. |
 | P41-EXT | Actual isolated bindings/uploader credentials, approved formal base, rehearsal and independent approval unavailable. | P4-4/root configuration owner plus independent reviewer; keep real observations NOT_RUN. Do not retry expired login or D1 401. | NOT_RUN. |
+
+## PR And Independent Review Repair Batch
+
+Draft PR: <https://github.com/Eitan-S-23/E-Track/pull/27>, head
+`55eac1d49851b9024d6b7fcfb078e5fbae8fc5a9`, base
+`b42d3e25db85d6aba397cb4d0fb34bb5b653904f`, synthetic merge
+`bcaaeb6106b915d06a7281c2625eebaf35f8a56c`.
+Firmware PR run `38650328601` failed at version extraction; release-development
+checks passed and both cloud jobs were skipped. Governance PR run `38650328602`
+failed one of 126 governance regressions; both host-helper jobs passed. These
+failures do not overwrite the earlier successful dispatch observations.
+
+| ID | Required repair and invariant | Current feedback / owner |
+| --- | --- | --- |
+| P41-REVIEW-01 | Actual PR source `v2.7` fails strict three-part parsing. Normalize that legacy source only for non-release checks without an explicit input; never infer a formal/rehearsal version, accept suffixes or let huge integers wrap. | P4-1 implementer adds real Bash step regressions, then repairs the workflow. |
+| P41-REVIEW-02 | GitHub's by-tag lookup finds published releases, so an interrupted untagged draft cannot resume. Enumerate bounded drafts, require a unique exact full-commit identity, validate existing bytes, never retarget a tag. | P4-1 implementer corrects the HTTP double and exercises actual production-client retries and rejection paths. |
+| P41-REVIEW-03 | Readiness row already admits P4-1, but the exact governance expected set and section 9 dispatch registration were not updated together. | Add only P4-1 and its explicit dispatch record. Keep exact equality and other task states unchanged. |
+
+The non-implementing reviewer independently checked all 154 original archive
+files, the 153 inventory bindings, four ZIP identities and all 591 members, tool
+stream hashes, actual byte identities, counts and warnings. This is evaluation
+of existing originals, not a new build, real rehearsal or whole-card PASS. The
+same reviewer will adjudicate the repaired delta after local and PR feedback.
+
+The local red/green batch used the actual YAML Bash version step and production
+GitHub client, not a separate release implementation. Logs and closed receipts
+are under `.cache/logs/` pending archival with the new CI originals:
+
+| Command (root unless noted) | Before repair | After repair |
+| --- | --- | --- |
+| `node --test tests/ota/test_firmware_workflow.mjs` | `p41-version-red`: 31 pass, 8 fail, 39 total; exit 1 | `p41-version-fixed`: 39/39; exit 0 |
+| Worker cwd: `node node_modules/vitest/vitest.mjs run --config ../../../../../.github/scripts/p41-host.config.mjs` | `p41-draft-red`: 22 pass, 11 fail, 33 total; exit 1 | `p41-draft-fixed`: 33/33; exit 0 |
+| `python -X utf8 -B tests/ota/test_acceptance_bundle.py PostP26SpecGovernanceTests` | `p41-gov-red`: 21 pass, 1 fail, 22 total; exit 1 | `p41-gov-fixed`: 22/22; exit 0 |
+| Worker cwd: `node node_modules/typescript/bin/tsc --noEmit` | Not repeated before repair | `p41-types-fixed`: exit 0 |
+
+Draft interruption cases retain 0, 1 or 3 uploaded assets, resume release ID 7
+and upload only the remaining 3, 2 or 0 assets. Existing bytes are unchanged and
+the actual client completes its published-inventory/full-byte checks. Wrong
+draft target, mutable branch target, notes, prerelease, duplicate draft or tag
+conflict fail before any mutation. A tag changed during upload fails before the
+publish PATCH. A published release still requires its tag. These GitHub surfaces
+are explicit HTTP doubles, not actual Release operations or rehearsal evidence.
+
+The pre-repair version log also proves the old code accepted `2.7.0-rc.1` and
+wrapped `18446744073709551616.0.0` to code 0. Both now exit 1 without writing any
+step outputs; the maximum `429496.72.95` still yields 4294967295. Only implicit,
+non-release legacy source `v2.7` becomes `2.7.0`; MCU source is unchanged.
+
+The caller rescan found no new consumers: the changed GitHub client is imported
+only by `.github/scripts/firmware-release.mjs` and this host suite. Both release
+environments continue to use that same entry. The legacy workflow and other
+P4-2 script consumers retain the dispositions in the consumer table below.
+The next PR synchronization is checks/build-only: both cloud jobs require a
+dispatch event; backend/governance have no deployment; App path detection excludes
+these non-App files and its Release/Pages paths exclude PR events. No separate
+`publish=true` validation or redundant dispatch is planned.
 
 ## Batch Plan
 

@@ -88,7 +88,7 @@ on:
         required: false
         type: string
       version_name:
-        description: "固件版本名（如 2.8.0）；留空则取 Version.h 的 VERSION_SOFTWARE + 构建号"
+        description: "固件版本名（如 2.8.0）；正式链留空须源码已有三段版本，非发布检查兼容两段版本"
         required: false
         type: string
       release_notes:
@@ -235,6 +235,8 @@ jobs:
         shell: bash
         env:
           INPUT_VERSION_NAME: ${{ github.event.inputs.version_name }}
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
         run: |
           set -euo pipefail
 
@@ -247,18 +249,19 @@ jobs:
           build_number="$(git rev-list --count HEAD)"
           if [[ -n "${INPUT_VERSION_NAME:-}" ]]; then
             version_name="${INPUT_VERSION_NAME}"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            version_name="${base_version}"
           else
-            # push 自动构建：nightly 版本名带构建号便于区分，version_code 不变（候选不晋升不影响设备）
-            # （PRE-3：push 仅 artifact，不注册 CF；nightly 名仍用于 artifact 区分）
-            version_name="${base_version}-nightly.${build_number}"
+            version_name="${base_version}"
+            # Only a trusted legacy source label in checks may acquire a zero
+            # patch. Formal inputs must already be canonical, never inferred.
+            if [[ "${INPUT_PUBLISH:-false}" != "true" && "${INPUT_REHEARSAL:-false}" != "true" && "${base_version}" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)$ ]]; then
+              version_name="${base_version}.0"
+            fi
           fi
 
           # version_code = major*10000 + minor*100 + patch (u32; PRE-1 / PLAN-OTA.md §3.1)
           # Examples: 2.8.0→20800, 2.8.1→20801; legacy old-formula 2007(v2.7) < 20700(2.7.0).
           # Encode from the effective release name so version_name and version_code cannot diverge.
-          encode_src="${version_name%%-*}"
+          encode_src="${version_name}"
           if [[ ! "${encode_src}" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)$ ]]; then
             echo "::error title=Invalid version::version_name must contain three canonical version components"
             exit 1
@@ -266,6 +269,11 @@ jobs:
           major="${BASH_REMATCH[1]}"
           minor="${BASH_REMATCH[2]}"
           patch="${BASH_REMATCH[3]}"
+          # Bound digit length before arithmetic to prevent signed Bash wrap.
+          if (( ${#major} > 6 )) || (( 10#${major} > 429496 )); then
+            echo "::error title=Invalid version::version_code overflows u32 for ${version_name}"
+            exit 1
+          fi
           if (( 10#${minor} > 99 || 10#${patch} > 99 )); then
             echo "::error title=Invalid version::minor and patch must be 0..99 for version_code encoding"
             exit 1
@@ -274,6 +282,10 @@ jobs:
           if (( version_code < 0 || version_code > 4294967295 )); then
             echo "::error title=Invalid version::version_code overflows u32 for ${version_name}"
             exit 1
+          fi
+
+          if [[ -z "${INPUT_VERSION_NAME:-}" && "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]]; then
+            version_name="${version_name}-nightly.${build_number}"
           fi
 
           echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"

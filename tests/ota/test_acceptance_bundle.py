@@ -2595,7 +2595,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
                 self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
         self.assertEqual(
-            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-2"},
+            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-1", "P4-2"},
             dispatchable,
             "可派单集合必须精确受控：历次解锁及 OTA-DEC-014 新增 P3-8 均须同批登记 §9，不能用子集比较放宽",
         )
