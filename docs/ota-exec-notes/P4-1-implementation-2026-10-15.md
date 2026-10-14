@@ -101,3 +101,62 @@ Linux byte-generation CI is required before treating the host adapter as tested.
 The Windows test artifacts are deliberately synthetic, not an approved formal
 base or a rehearsal. The production transport must obtain and verify actual
 source provenance before calling this offline preparation entry.
+
+Linux byte feedback: commit `84aa6a7ef72955b3248d07fad7de548eb6868798`, run
+`38632973096`, passed the existing vendor CMake adapter build, 8 package tests,
+14 byte-preparation tests, 34 host tests, 156 native tests and GCC App/Boot build.
+Original ZIP `.cache/github/batch2-logs.zip` is 252337 bytes. This run still has
+no real R2 upload, D1 registration or rehearsal.
+
+## Batch 3: Publication Wiring
+
+- `firmware-release.mjs` captures same-run GCC App/Boot identities and is the
+  common rehearsal/production entry. Checks additionally run its development
+  path on the actual GCC build without cloud credentials or an invented base.
+- Formal base retrieval enumerates real formal GitHub releases, resolves the
+  tag's commit, selects the preceding version and downloads the whole pinned
+  App/recovery source. The normal byte verifier then validates the final image.
+- Production independently binds the approved rehearsal run/attempt, metadata,
+  evidence and preparation hashes; its current execution id is audit-only.
+  App/Boot inputs and the original envelope must reproduce exactly before any
+  cloud write. Rehearsal retries require their prior attempt's original artifact.
+- The GitHub client never replaces an asset or retargets a tag. A new Release is
+  populated as a draft, each asset is read back, then the published inventory and
+  every published byte are rechecked. Rehearsal has no GitHub write path and uses
+  a read-only token. Staging-only secret names avoid repository production-secret
+  fallback; both environments map to the same runtime configuration interface.
+- D1 monotonicity/unresolved-legacy and Worker environment checks precede writes.
+  The shared uploader verifies every byte before setting any local ready flags;
+  the actual P4-2 register client is last, followed by an idempotency replay.
+  Abort/failure prevents later steps. Shared remote binding startup remains NOT_RUN.
+
+Local pipeline tests are 19/19, using the actual P4-2 handler and SQLite host
+adapter. GitHub/R2 external surfaces are doubles, not remote observations. The
+first 13-case run had one oracle failure: an empty database legitimately gains
+two unpointed revision-zero channels on first registration. The corrected oracle
+checks those exact defaults and byte-identical channel state on replay, rather
+than treating initialization as a promotion. The original failure is preserved.
+Shared script regression is 17/17 and Worker typecheck exits 0.
+
+Workflow tests are 15/15, including nine actual Bash gate executions with expected
+0/1/2 exits and an actual execute-CLI rejection of a checks context before cloud
+entry. An initial harness dependency error (`yaml` is bundled, not an installed
+Worker module) was preserved and fixed using explicitly pinned PyYAML 6.0.3.
+No cloud gate was opened to test its failure. CI on this batch is pending.
+
+## Shared Consumers
+
+| Consumer | Impact / disposition | Next owner |
+| --- | --- | --- |
+| `.github/workflows/firmware-build.yml` | In scope; replaces removed single-bin flags with the shared v2 array pipeline, explicit bindings and immutable publication. | P4-1 |
+| `.github/workflows/mcu-firmware-release.yml` | Out of scope; still creates/edits/clobbers a Release BEFORE passing removed `--firmware-file`/`--device-model`/`--version-code` flags to the v2 builder, and its uploader omits `--asset`/`--remote`. It also has an optional real deploy path. Do not dispatch it as a fallback; retire/disable or separately migrate it before production use. No schema downgrade or incidental workflow edit was made here. | Root / legacy workflow owner |
+| `worker/test/firmware-scripts.host.test.ts` | Existing builder/uploader/register module and CLI consumer; explicitly executed separately from native tests. | P4-1 regression; P4-2 source ownership preserved |
+| `update-service/docs/README.md` | Already documents v2 explicit assets and readback; no compatibility fallback added. | Root / backend documentation owner |
+| Existing pack callers and golden vectors | Default random packaging remains unchanged; optional replay is fail-closed. Vendor scratch cwd and success checking now apply to all callers. | P4-1 tests; other task owners retain their frozen artifacts |
+
+The current checked-in Worker environments use `GITHUB_REPO=Trace`, whereas this
+firmware workflow publishes from `Eitan-S-23/E-Track`. A separately isolated
+firmware environment must configure the matching repository without breaking the
+Trace App updater's bindings. Existing staging D1 is not assumed disposable or
+independent. P4-4/root must verify actual Worker/D1/R2 identity and permissions;
+this implementation neither changes nor claims those deployed settings.

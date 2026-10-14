@@ -55,31 +55,12 @@ export async function uploadFirmwareAsset(metadata, fileName, bytes, bucket, req
     sha256: asset.sha256, sizeBytes: asset.sizeBytes, contentDigest: contentDigest(asset.sha256) };
 }
 
-async function main() {
-  const options = args(process.argv.slice(2), ["metadata", "assets-dir", "asset", "bucket", "account-id",
-    "wrangler-cwd", "output", "remote", "dry-run"], ["remote", "dry-run"]);
-  const metadataPath = path.resolve(required(options, "metadata", "TRACE_FIRMWARE_METADATA_JSON"));
-  const assetsDir = path.resolve(required(options, "assets-dir", "TRACE_FIRMWARE_ASSETS_DIR"));
-  const fileName = required(options, "asset");
-  const metadata = parseFirmwareRegistration(JSON.parse(await readFile(metadataPath, "utf8")), undefined, false);
-  if (!metadata.assets.some((a) => a.fileName === fileName)) throw new CliError("--asset must select one metadata array item");
-  const bytesByName = new Map();
-  // Check every local filename and byte identity before any remote side effect.
-  for (const asset of metadata.assets) {
-    const bytes = await readFile(path.join(assetsDir, asset.fileName));
-    if (bytes.length !== asset.sizeBytes || sha(bytes) !== asset.sha256) throw new CliError("Local asset mismatch", "INVALID_PARAMETER", 1);
-    bytesByName.set(asset.fileName, bytes);
-  }
-  if (options["dry-run"]) {
-    process.stdout.write(JSON.stringify({ ok: true, dryRun: true, verified: false, fileName }) + "\n");
-    return;
-  }
-  if (!options.remote) throw new CliError("Explicit --remote and separately authorized target are required");
-  const bucketName = required(options, "bucket", "TRACE_R2_BUCKET");
-  const accountId = required(options, "account-id", "CLOUDFLARE_ACCOUNT_ID");
+export async function withFirmwareBucket({ bucketName, accountId, root = projectRoot(), wranglerCwd, databaseId, databaseName }, operation) {
+  // Never fall back to an interactive or cached developer OAuth identity.
+  required({}, "api-token", "CLOUDFLARE_API_TOKEN");
   if (!/^[0-9a-f]{32}$/.test(accountId) || !/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(bucketName)) throw new CliError("Invalid account/bucket configuration");
-  const root = projectRoot();
-  const output = outputPath(root, options.output ?? metadataPath);
+  if ((databaseId || databaseName) && (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(databaseId ?? "")
+    || !/^[a-zA-Z0-9_-]+$/.test(databaseName ?? ""))) throw new CliError("Invalid explicit D1 binding");
   const temp = outputPath(root, path.join(root, ".cache", "firmware-uploader", crypto.randomUUID()));
   const configPath = outputPath(root, path.join(temp, "wrangler.json"));
   const controls = { TEMP: "tmp", TMP: "tmp", TMPDIR: "tmp", HOME: "home", USERPROFILE: "home",
@@ -93,20 +74,47 @@ async function main() {
   process.env.WRANGLER_LOG = "none";
   await writeOutput(root, configPath, JSON.stringify({ name: "trace-firmware-uploader", account_id: accountId,
     compatibility_date: "2026-06-28", compatibility_flags: ["nodejs_compat"],
-    r2_buckets: [{ binding: "ASSET_BUCKET", bucket_name: bucketName, remote: true }] }));
-  const cwd = path.resolve(options["wrangler-cwd"] ?? fileURLToPath(new URL("../worker/", import.meta.url)));
+    r2_buckets: [{ binding: "ASSET_BUCKET", bucket_name: bucketName, remote: true }],
+    ...(databaseId ? { d1_databases: [{ binding: "RELEASE_DB", database_id: databaseId, database_name: databaseName, remote: true }] } : {}) }));
+  const cwd = path.resolve(wranglerCwd ?? fileURLToPath(new URL("../worker/", import.meta.url)));
   const require = createRequire(path.join(cwd, "package.json"));
   const { getPlatformProxy } = await import(pathToFileURL(require.resolve("wrangler")).href);
   const platform = await getPlatformProxy({ configPath, envFiles: [], persist: false, remoteBindings: true });
-  try {
+  try { return await operation(platform.env.ASSET_BUCKET, platform.env.RELEASE_DB); }
+  finally { await platform.dispose(); }
+}
+
+async function main() {
+  const options = args(process.argv.slice(2), ["metadata", "assets-dir", "asset", "bucket", "account-id",
+    "wrangler-cwd", "output", "remote", "dry-run"], ["remote", "dry-run"]);
+  const metadataPath = path.resolve(required(options, "metadata", "TRACE_FIRMWARE_METADATA_JSON"));
+  const assetsDir = path.resolve(required(options, "assets-dir", "TRACE_FIRMWARE_ASSETS_DIR"));
+  const fileName = required(options, "asset");
+  const metadata = parseFirmwareRegistration(JSON.parse(await readFile(metadataPath, "utf8")), undefined, false);
+  if (!metadata.assets.some((a) => a.fileName === fileName)) throw new CliError("--asset must select one metadata array item");
+  const bytesByName = new Map();
+  for (const asset of metadata.assets) {
+    const bytes = await readFile(path.join(assetsDir, asset.fileName));
+    if (bytes.length !== asset.sizeBytes || sha(bytes) !== asset.sha256) throw new CliError("Local asset mismatch", "INVALID_PARAMETER", 1);
+    bytesByName.set(asset.fileName, bytes);
+  }
+  if (options["dry-run"]) {
+    process.stdout.write(JSON.stringify({ ok: true, dryRun: true, verified: false, fileName }) + "\n");
+    return;
+  }
+  if (!options.remote) throw new CliError("Explicit --remote and separately authorized target are required");
+  const root = projectRoot();
+  const output = outputPath(root, options.output ?? metadataPath);
+  await withFirmwareBucket({ root, bucketName: required(options, "bucket", "TRACE_R2_BUCKET"),
+    accountId: required(options, "account-id", "CLOUDFLARE_ACCOUNT_ID"), wranglerCwd: options["wrangler-cwd"] }, async bucket => {
     let timeout;
     const result = await Promise.race([
-      uploadFirmwareAsset(metadata, fileName, bytesByName.get(fileName), platform.env.ASSET_BUCKET),
+      uploadFirmwareAsset(metadata, fileName, bytesByName.get(fileName), bucket),
       new Promise((_, reject) => { timeout = setTimeout(() => reject(new CliError("R2 verification timed out", "R2_VERIFY_FAILED", 1)), 300000); })
     ]).finally(() => clearTimeout(timeout));
     metadata.assets.find((a) => a.fileName === fileName).r2Verified = true;
     await writeOutput(root, output, canonicalJson(metadata) + "\n");
     process.stdout.write(JSON.stringify(result) + "\n");
-  } finally { await platform.dispose(); }
+  });
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch(failure);

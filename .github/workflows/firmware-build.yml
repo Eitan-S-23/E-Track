@@ -2,10 +2,11 @@ name: MCU Firmware Build
 
 # 单片机固件 GCC 构建工作流（monorepo 路径隔离）：
 # - push 到 main/master 且固件相关路径变更 → 仅构建 + 上传 Actions artifact（14 天；不建 Release、不注册 CF）
-# - workflow_dispatch(publish=true) → 构建 + GitHub Release + 注册 CF 正式候选
+# - workflow_dispatch(rehearsal=true): isolated staging, never GitHub Release
+# - workflow_dispatch(publish=true): approved rehearsal rebuild and production gate
 # - 仅固件路径触发本工作流；Flutter 侧由 build.yml 的 changes job 隔离，互不触发
 # - 正式发布后在 CF admin 端将候选晋升为 stable 渠道当前版本
-# 现有 mcu-firmware-release.yml 保留为"手动上传已编译 bin"的后备通道。
+# mcu-firmware-release.yml is an out-of-scope legacy consumer, not a v2 fallback.
 
 on:
   push:
@@ -31,6 +32,14 @@ on:
       - "vendor/**"
       - "Simulator/LVGL.Simulator/lv_conf.h"
       - ".github/workflows/firmware-build.yml"
+      - ".github/scripts/firmware-*"
+      - ".github/scripts/bsdiff/**"
+      - ".github/scripts/p41-host.config.mjs"
+      - "Tools/etu_pack.py"
+      - "Tools/etu_unpack.py"
+      - "Tools/jlink/prepare-bootstrap-app.py"
+      - "tests/ota/*firmware*"
+      - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/*firmware*"
   pull_request:
     branches:
       - main
@@ -54,6 +63,14 @@ on:
       - "vendor/**"
       - "Simulator/LVGL.Simulator/lv_conf.h"
       - ".github/workflows/firmware-build.yml"
+      - ".github/scripts/firmware-*"
+      - ".github/scripts/bsdiff/**"
+      - ".github/scripts/p41-host.config.mjs"
+      - "Tools/etu_pack.py"
+      - "Tools/etu_unpack.py"
+      - "Tools/jlink/prepare-bootstrap-app.py"
+      - "tests/ota/*firmware*"
+      - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/*firmware*"
   workflow_dispatch:
     inputs:
       publish:
@@ -61,6 +78,15 @@ on:
         required: true
         type: boolean
         default: false
+      rehearsal:
+        description: "Use approved isolated staging bindings; never create a GitHub Release"
+        required: true
+        type: boolean
+        default: false
+      approved_rehearsal_run_id:
+        description: "Production only: independently approved rehearsal provenance run id"
+        required: false
+        type: string
       version_name:
         description: "固件版本名（如 2.8.0）；留空则取 Version.h 的 VERSION_SOFTWARE + 构建号"
         required: false
@@ -74,8 +100,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: firmware-build-${{ github.ref }}
-  cancel-in-progress: true
+  group: firmware-build-${{ github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.rehearsal) && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' || (!inputs.publish && !inputs.rehearsal) }}
 
 env:
   DEVICE_MODEL: e-track-at32f435
@@ -118,12 +144,14 @@ jobs:
         run: npm ci --registry=https://registry.npmjs.org --replace-registry-host=always
       - name: Run script and migration host tests explicitly (not workerd)
         run: npm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts
+      - name: Run release pipeline with real handlers and SQLite host ports (not rehearsal)
+        run: npm test -- --config ../../../../../.github/scripts/p41-host.config.mjs
       - name: Run native workerd D1 R2 and registration invariants (not host doubles)
         run: npm test -- --reporter=verbose
       - name: Check Worker and shared script types
         run: npm run check
       - name: Install byte test dependency
-        run: python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0
+        run: python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0 PyYAML==6.0.3
       - name: Build the existing vendor bsdiff for this host
         working-directory: .
         run: |
@@ -132,6 +160,9 @@ jobs:
       - name: Check real package generation and approved-envelope replay
         working-directory: .
         run: python3 -B tests/ota/test_firmware_pack.py
+      - name: Check workflow execution graph and configuration gates
+        working-directory: .
+        run: node --test tests/ota/test_firmware_workflow.mjs
       - name: Execute production byte preparation with isolated fixtures
         id: byte_tests
         working-directory: .
@@ -141,7 +172,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: p41-development-${{ github.sha }}
-          path: .cache/firmware-release-tests/
+          path: |
+            .cache/firmware-release-tests/
+            .cache/firmware-pipeline-tests/
           include-hidden-files: true
           retention-days: 14
           if-no-files-found: error
@@ -161,6 +194,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node for shared release helpers
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Contain build temporary and pip cache paths
+        shell: bash
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/build-tmp"
+          echo "TMPDIR=$GITHUB_WORKSPACE/.cache/build-tmp" >> "$GITHUB_ENV"
+          echo "PIP_CACHE_DIR=$GITHUB_WORKSPACE/.cache/build-pip" >> "$GITHUB_ENV"
 
       - name: Install Arm GNU Toolchain 13.3.Rel1
         uses: carlosperate/arm-none-eabi-gcc-action@v1
@@ -198,7 +244,7 @@ jobs:
           fi
           build_number="$(git rev-list --count HEAD)"
           if [[ -n "${INPUT_VERSION_NAME:-}" ]]; then
-            version_name="${INPUT_VERSION_NAME#v}"
+            version_name="${INPUT_VERSION_NAME}"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             version_name="${base_version}"
           else
@@ -211,14 +257,13 @@ jobs:
           # Examples: 2.8.0→20800, 2.8.1→20801; legacy old-formula 2007(v2.7) < 20700(2.7.0).
           # Encode from the effective release name so version_name and version_code cannot diverge.
           encode_src="${version_name%%-*}"
-          encode_src="${encode_src#v}"
-          if [[ ! "${encode_src}" =~ ^([0-9]+)\.([0-9]+)(\.([0-9]+))?$ ]]; then
-            echo "::error title=Invalid version::version_name must start with major.minor[.patch]: ${version_name}"
+          if [[ ! "${encode_src}" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)$ ]]; then
+            echo "::error title=Invalid version::version_name must contain three canonical version components"
             exit 1
           fi
           major="${BASH_REMATCH[1]}"
           minor="${BASH_REMATCH[2]}"
-          patch="${BASH_REMATCH[4]:-0}"
+          patch="${BASH_REMATCH[3]}"
           if (( 10#${minor} > 99 || 10#${patch} > 99 )); then
             echo "::error title=Invalid version::minor and patch must be 0..99 for version_code encoding"
             exit 1
@@ -404,6 +449,38 @@ jobs:
           echo "bin_size=${bin_size}" >> "$GITHUB_OUTPUT"
           echo "X-Track-App-GCC.bin: ${bin_size} bytes, sha256=${sha256}"
 
+      - name: Bind same-run GCC App and Boot inputs
+        shell: bash
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          node .github/scripts/firmware-release.mjs capture \
+            --app "$BUILD_DIR/app-gcc/X-Track-App-GCC.bin" \
+            --boot "$BUILD_DIR/boot/X-Track-Boot.bin" \
+            --version "${VERSION_NAME%%-*}" --commit "$GITHUB_SHA" \
+            --build-timestamp "$(git show -s --format=%ct "$GITHUB_SHA")" \
+            --output "$BUILD_DIR/app-gcc/gcc-build-inputs.json"
+
+      - name: Exercise production preparation on the real GCC build (development key only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/firmware-release.mjs development \
+            --app "$BUILD_DIR/app-gcc/X-Track-App-GCC.bin" \
+            --boot "$BUILD_DIR/boot/X-Track-Boot.bin" \
+            --build-inputs "$BUILD_DIR/app-gcc/gcc-build-inputs.json" \
+            --output-dir .cache/gcc-development
+
+      - name: Preserve non-publishable GCC packaging evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: p41-gcc-development-${{ github.sha }}
+          path: .cache/gcc-development/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+
       - name: Build the P3-4 acceptance candidate
         id: p34_candidate
         if: github.event_name == 'pull_request' && github.head_ref == 'acceptance/p3-4-v2-20261009'
@@ -439,6 +516,7 @@ jobs:
             ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.hex
             ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.elf
             ${{ env.BUILD_DIR }}/app-gcc/X-Track-App-GCC.map
+            ${{ env.BUILD_DIR }}/app-gcc/gcc-build-inputs.json
           retention-days: 14
           if-no-files-found: error
 
@@ -456,153 +534,253 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-  register-cloudflare:
-    name: Register firmware to Cloudflare
-    runs-on: ubuntu-latest
-    needs: build
-    environment: firmware-production
-    permissions:
-      contents: write
-    # PRE-3 / PLAN-OTA.md §6.1：仅 workflow_dispatch publish=true 走正式注册链；
-    # push/PR 永不进入本 job（nightly 不建 Release、不注册 CF）。
-    if: >-
-      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'
 
+  rehearse-cloudflare:
+    name: Firmware rehearsal (shared release implementation)
+    runs-on: ubuntu-latest
+    needs: [build, release-development-checks]
+    if: >-
+      github.event_name == 'workflow_dispatch' && github.event.inputs.rehearsal == 'true' && github.event.inputs.publish != 'true'
+    environment: firmware-rehearsal
+    permissions:
+      contents: read
+      actions: read
     steps:
-      - name: Block release until OTA boot chain is ready
+      - name: Enforce isolated locked-gate rehearsal
+        id: gate
         shell: bash
         env:
           OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
+          OTA_APPROVED_REHEARSAL_RUN_ID: ${{ vars.OTA_APPROVED_REHEARSAL_RUN_ID }}
+          OTA_APPROVED_REHEARSAL_ATTEMPT: ${{ vars.OTA_APPROVED_REHEARSAL_ATTEMPT }}
         run: |
           set -euo pipefail
-          if [[ "${OTA_BOOT_CHAIN_READY:-}" != "true" ]]; then
-            echo "::error title=OTA boot chain not ready::App starts at the OTA App origin and cannot boot from reset until P1-5 bootstrap and P4-1 release rehearsal pass"
+          if [[ "$OTA_BOOT_CHAIN_READY" != "false" || "$INPUT_PUBLISH" == "true" ]]; then
+            echo "::error::Rehearsal requires the locked boot-chain gate and must not request production"
             exit 1
           fi
+          if (( GITHUB_RUN_ATTEMPT > 1 )); then
+            echo "reference_run_id=$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+            echo "reference_attempt=$((GITHUB_RUN_ATTEMPT - 1))" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Checkout repository
+      - name: Checkout the exact build revision
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
 
-      - name: Download firmware artifact
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Download same-run GCC App inputs
         uses: actions/download-artifact@v4
         with:
           name: firmware-${{ needs.build.outputs.version_name }}
-          path: firmware-release-assets
+          path: .cache/release-build/app
 
-      - name: Finalize firmware header for release
+      - name: Download same-run Boot inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: boot-${{ needs.build.outputs.version_name }}
+          path: .cache/release-build/boot
+
+      - name: Download immutable rehearsal reference when required
+        if: steps.gate.outputs.reference_run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: p41-rehearsal-${{ steps.gate.outputs.reference_run_id }}-${{ steps.gate.outputs.reference_attempt }}
+          run-id: ${{ steps.gate.outputs.reference_run_id }}
+          github-token: ${{ github.token }}
+          path: .cache/reference
+
+      - name: Install pinned packaging dependencies without release secrets
         shell: bash
         env:
-          APP_BIN: firmware-release-assets/X-Track-App-GCC.bin
-          VERSION_NAME: ${{ needs.build.outputs.version_name }}
+          npm_config_cache: ${{ github.workspace }}/.cache/release-npm
+          PIP_CACHE_DIR: ${{ github.workspace }}/.cache/release-pip
         run: |
           set -euo pipefail
-          build_ts="$(git show -s --format=%ct "${GITHUB_SHA}")"
-          python3 Tools/etu_pack.py finalize \
-            --app "${APP_BIN}" \
-            --ver-name "${VERSION_NAME}" \
-            --build-ts "${build_ts}"
-          python3 - <<'PY'
-          import hashlib
-          import os
-          import sys
-          from pathlib import Path
+          python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0
+          npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker --registry=https://registry.npmjs.org --replace-registry-host=always
+          cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/bsdiff --target bsdiff
 
-          sys.path.insert(0, str(Path("Tools").resolve()))
-          from etu_unpack import verify_fw_header
-
-          app = Path(os.environ["APP_BIN"])
-          image = app.read_bytes()
-          verify_fw_header(image, "release")
-          print(
-              "RELEASE_FW_HEADER=FINALIZED "
-              f"size={len(image)} sha256={hashlib.sha256(image).hexdigest()}"
-          )
-          PY
-
-      - name: Check Cloudflare configuration
-        id: cloudflare_config
+      - name: Run the shared finalize verify upload register pipeline
+        id: release_execute
         shell: bash
         env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
-          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+          FIRMWARE_RELEASE_MODE: rehearsal
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version_name }}
+          INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          OTA_APPROVED_REHEARSAL_RUN_ID: ${{ vars.OTA_APPROVED_REHEARSAL_RUN_ID }}
+          OTA_APPROVED_REHEARSAL_ATTEMPT: ${{ vars.OTA_APPROVED_REHEARSAL_ATTEMPT }}
+          OTA_APPROVED_REHEARSAL_METADATA_SHA256: ${{ vars.OTA_APPROVED_REHEARSAL_METADATA_SHA256 }}
+          OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256: ${{ vars.OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256 }}
+          OTA_PREVIOUS_RELEASE_JSON: ${{ vars.OTA_PREVIOUS_RELEASE_JSON }}
+          TRACE_FIRMWARE_MIN_APP_VERSION_CODE: ${{ vars.TRACE_FIRMWARE_MIN_APP_VERSION_CODE }}
+          TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: ${{ vars.TRACE_FIRMWARE_MIN_PROTOCOL_VERSION }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN }}
+          OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}
+          TRACE_R2_BUCKET: ${{ vars.FIRMWARE_REHEARSAL_TRACE_R2_BUCKET }}
+          TRACE_D1_DATABASE_ID: ${{ vars.FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_ID }}
+          TRACE_D1_DATABASE_NAME: ${{ vars.FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" && -n "${CLOUDFLARE_API_TOKEN:-}" && -n "${TRACE_UPDATE_SERVICE_URL:-}" && -n "${TRACE_DEPLOY_TOKEN:-}" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::error title=Cloudflare secrets missing::publish=true 需要配置 CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN / TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN"
+          reference=()
+          if [[ -d .cache/reference ]]; then reference=(--reference-dir .cache/reference); fi
+          node .github/scripts/firmware-release.mjs execute \
+            --app .cache/release-build/app/X-Track-App-GCC.bin \
+            --boot .cache/release-build/boot/X-Track-Boot.bin \
+            --build-inputs .cache/release-build/app/gcc-build-inputs.json \
+            --output-dir .cache/release/prepared \
+            --bsdiff "$GITHUB_WORKSPACE/.cache/bsdiff/bin/bsdiff" "${reference[@]}"
+
+      - name: Preserve release attempt originals (not an approval)
+        if: always() && steps.release_execute.outcome != 'skipped' && steps.release_execute.outcome != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: p41-rehearsal-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/release/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+
+  register-cloudflare:
+    name: Firmware production (shared release implementation)
+    runs-on: ubuntu-latest
+    needs: [build, release-development-checks]
+    if: >-
+      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'
+    environment: firmware-production
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Block release until OTA boot chain is ready
+        id: gate
+        shell: bash
+        env:
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
+          OTA_APPROVED_REHEARSAL_RUN_ID: ${{ vars.OTA_APPROVED_REHEARSAL_RUN_ID }}
+          OTA_APPROVED_REHEARSAL_ATTEMPT: ${{ vars.OTA_APPROVED_REHEARSAL_ATTEMPT }}
+        run: |
+          set -euo pipefail
+          if [[ "$OTA_BOOT_CHAIN_READY" != "true" ]]; then
+            echo "::error::OTA boot chain is locked; P5 and independent owner/environment approval are required"
             exit 1
           fi
-
-      - name: Create GitHub Release
-        if: steps.cloudflare_config.outputs.enabled == 'true'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION_NAME: ${{ needs.build.outputs.version_name }}
-          RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
-        run: |
-          set -euo pipefail
-          # 仅正式发布链进入本 job：版本 tag，非 prerelease
-          release_tag="mcu-${DEVICE_MODEL}-v${VERSION_NAME}"
-          notes="${RELEASE_NOTES:-MCU firmware ${release_tag} (${GITHUB_SHA})}"
-          if gh release view "${release_tag}" >/dev/null 2>&1; then
-            gh release edit "${release_tag}" --target "${GITHUB_SHA}" --notes "${notes}"
-          else
-            gh release create "${release_tag}" --target "${GITHUB_SHA}" --title "${release_tag}" --notes "${notes}"
+          if [[ "$INPUT_REHEARSAL" == "true" || ! "$INPUT_APPROVED_REHEARSAL_RUN_ID" =~ ^[1-9][0-9]*$ || "$INPUT_APPROVED_REHEARSAL_RUN_ID" != "$OTA_APPROVED_REHEARSAL_RUN_ID" || ! "$OTA_APPROVED_REHEARSAL_ATTEMPT" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::Production requires the exact independently approved rehearsal run/attempt"
+            exit 2
           fi
-          gh release upload "${release_tag}" firmware-release-assets/X-Track-App-GCC.bin --clobber
-          echo "RELEASE_TAG=${release_tag}" >> "$GITHUB_ENV"
+          echo "reference_run_id=$OTA_APPROVED_REHEARSAL_RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "reference_attempt=$OTA_APPROVED_REHEARSAL_ATTEMPT" >> "$GITHUB_OUTPUT"
 
-      - name: Build Cloudflare firmware metadata
-        if: steps.cloudflare_config.outputs.enabled == 'true'
+      - name: Checkout the exact build revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Download same-run GCC App inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware-${{ needs.build.outputs.version_name }}
+          path: .cache/release-build/app
+
+      - name: Download same-run Boot inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: boot-${{ needs.build.outputs.version_name }}
+          path: .cache/release-build/boot
+
+      - name: Download immutable rehearsal reference when required
+        if: steps.gate.outputs.reference_run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: p41-rehearsal-${{ steps.gate.outputs.reference_run_id }}-${{ steps.gate.outputs.reference_attempt }}
+          run-id: ${{ steps.gate.outputs.reference_run_id }}
+          github-token: ${{ github.token }}
+          path: .cache/reference
+
+      - name: Install pinned packaging dependencies without release secrets
         shell: bash
+        env:
+          npm_config_cache: ${{ github.workspace }}/.cache/release-npm
+          PIP_CACHE_DIR: ${{ github.workspace }}/.cache/release-pip
         run: |
           set -euo pipefail
-          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/build-firmware-release-metadata.mjs \
-            --assets-dir firmware-release-assets \
-            --firmware-file firmware-release-assets/X-Track-App-GCC.bin \
-            --release-tag "${RELEASE_TAG}" \
-            --run-id "${GITHUB_RUN_ID}" \
-            --commit-sha "${GITHUB_SHA}" \
-            --repository "${GITHUB_REPOSITORY}" \
-            --device-model "${DEVICE_MODEL}" \
-            --version-name "${{ needs.build.outputs.version_name }}" \
-            --version-code "${{ needs.build.outputs.version_code }}" \
-            --release-notes "${{ github.event.inputs.release_notes || format('CI build {0}', github.sha) }}" \
-            --target-hardware "${TARGET_HARDWARE}" \
-            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
+          python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0
+          npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker --registry=https://registry.npmjs.org --replace-registry-host=always
+          cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/bsdiff --target bsdiff
 
-      - name: Install Cloudflare upload tooling
-        if: steps.cloudflare_config.outputs.enabled == 'true'
-        run: npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
-
-      - name: Upload Cloudflare R2 firmware asset
-        if: steps.cloudflare_config.outputs.enabled == 'true'
+      - name: Run the shared finalize verify upload register pipeline
+        id: release_execute
+        shell: bash
         env:
+          FIRMWARE_RELEASE_MODE: production
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version_name }}
+          INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          OTA_APPROVED_REHEARSAL_RUN_ID: ${{ vars.OTA_APPROVED_REHEARSAL_RUN_ID }}
+          OTA_APPROVED_REHEARSAL_ATTEMPT: ${{ vars.OTA_APPROVED_REHEARSAL_ATTEMPT }}
+          OTA_APPROVED_REHEARSAL_METADATA_SHA256: ${{ vars.OTA_APPROVED_REHEARSAL_METADATA_SHA256 }}
+          OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256: ${{ vars.OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256 }}
+          OTA_PREVIOUS_RELEASE_JSON: ${{ vars.OTA_PREVIOUS_RELEASE_JSON }}
+          TRACE_FIRMWARE_MIN_APP_VERSION_CODE: ${{ vars.TRACE_FIRMWARE_MIN_APP_VERSION_CODE }}
+          TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: ${{ vars.TRACE_FIRMWARE_MIN_PROTOCOL_VERSION }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET || 'trace-update-staging-releases' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs \
-            --assets-dir firmware-release-assets \
-            --metadata firmware-release-assets/cloudflare-firmware-release-metadata.json \
-            --bucket "${TRACE_R2_BUCKET}" \
-            --wrangler-cwd app/bluetooth_flutter_Trace/cloudflare/update-service/worker \
-            --output firmware-release-assets/cloudflare-firmware-release-metadata.json
-
-      - name: Register Cloudflare firmware candidate
-        if: steps.cloudflare_config.outputs.enabled == 'true'
-        env:
           TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
           TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
-        shell: bash
+          OTA_AES_KEY: ${{ secrets.OTA_AES_KEY }}
+          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET }}
+          TRACE_D1_DATABASE_ID: ${{ vars.TRACE_D1_DATABASE_ID }}
+          TRACE_D1_DATABASE_NAME: ${{ vars.TRACE_D1_DATABASE_NAME }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs \
-            firmware-release-assets/cloudflare-firmware-release-metadata.json
+          reference=()
+          if [[ -d .cache/reference ]]; then reference=(--reference-dir .cache/reference); fi
+          node .github/scripts/firmware-release.mjs execute \
+            --app .cache/release-build/app/X-Track-App-GCC.bin \
+            --boot .cache/release-build/boot/X-Track-Boot.bin \
+            --build-inputs .cache/release-build/app/gcc-build-inputs.json \
+            --output-dir .cache/release/prepared \
+            --bsdiff "$GITHUB_WORKSPACE/.cache/bsdiff/bin/bsdiff" "${reference[@]}"
+
+      - name: Preserve release attempt originals (not an approval)
+        if: always() && steps.release_execute.outcome != 'skipped' && steps.release_execute.outcome != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: p41-production-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/release/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
