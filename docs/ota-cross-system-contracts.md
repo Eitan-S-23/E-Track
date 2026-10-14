@@ -8,6 +8,7 @@
 - 任务状态唯一来源：`PLAN-OTA-EXEC.md` 的 P2-6 后 readiness 矩阵；本文不保存任务级 readiness 或派单资格。
 - 决策过程索引：`docs/ota-spec-decisions.md`。`OTA-DEC-001` 至 `OTA-DEC-012` 均为 `DECIDED`，对应裁定已传播到本文。本文冻结只授权符合 readiness 与依赖条件的任务派单，不授权生产部署；生产部署仍须等待 P5 验收。
 - 2026-09-15 增补：按用户要求及 `OTA-DEC-014` / 决策记录 11，增加 P3-4 链路诊断与 P3-8 Android 后台 OTA/通知要求。增补只约束后续实现和验收，不追溯改写 P3-3-v9 或其他历史冻结包，也不授予新的远端或真机操作权限。
+- 2026-10-13 验收组织按 `OTA-DEC-016`：候选阶段与最终长测分开，独立核验已有原件而非重复操作；P4 以隔离 rehearsal 进入 P5，生产晋升仍在 P5 之后。数值/协议门槛和历史冻结包不变。
 
 文中“必须”“不得”“仅”表示冻结规范性条款；“例如”“建议实现”“当前入口”属于非规范性说明。各条款的“裁定依据”只保留决定来源和审计链，不再构成决定阻断；实现和派单资格仍以 `PLAN-OTA-EXEC.md` readiness 矩阵为唯一来源。
 
@@ -1000,7 +1001,7 @@ CI 注册入口固定为 `POST /api/ci/firmware/releases`，仅接受 HTTPS：
 2. rehearsal 不得产生任何 production 副作用，也不得创建 GitHub prerelease。rehearsal environment 不得取得任何 production Worker、D1、R2 或发布凭据。
 3. rehearsal 与 production 必须运行同一 workflow、制包工具、schema 和注册客户端代码，只允许通过 environment bindings 切换 Worker、D1、R2 和凭据。
 4. required evidence 包含三资产 SHA/size、patch 逐字节自验、recovery 校验、metadata SHA、staging R2 全字节 readback、staging register ready/idempotency，以及 rehearsal 前后 production D1、R2、channel、GitHub Release 快照证明的零副作用。
-5. 独立 OTA 架构审查人必须不是该次 rehearsal 的实现作者。repository owner 只能在 reviewer 明确批准后，以人工且可审计方式设置 `OTA_BOOT_CHAIN_READY=true`。
+5. 独立 OTA 架构审查人必须不是该次 rehearsal 的实现作者。rehearsal 评审可在 P5 前完成；repository owner 只能在 reviewer 明确批准且 P5 验收通过后，以人工且可审计方式设置 `OTA_BOOT_CHAIN_READY=true`。P4 的 staging 完成不等于生产解锁，不把 P5 后的 production promotion 反作 P5 前置。
 6. 首次解锁后的 production 发布必须绑定已批准 rehearsal 的相同 commit、version 输入和 canonical metadata。production 必须把已批准 rehearsal run id 作为 `approvedRehearsalRunId` 复用到 metadata `runId`；自身 workflow run id 只写非 canonical audit。产生任何远端副作用前必须重新构建，并确认三资产及 metadata 摘要与 rehearsal 完全一致；不一致时硬失败并重新 rehearsal。
 7. production dispatch 仍须经过 `firmware-production` environment 的独立审批。
 
@@ -1059,9 +1060,22 @@ MCU 与 Flutter 都必须有可测试的状态转换日志，但日志不得包�
 
 ### OTA-XC-BLE-TUNING
 
-裁定依据：`OTA-DEC-003`。
+裁定依据：数值与统计口径为 `OTA-DEC-003`，后续验收归属为 `OTA-DEC-016`。
 
-P3-4 必须在 `115200..921600` 候选波特率中评估同一组 baud/timeout/retry 参数，并选择满足全部门槛的最高稳定档。不得从未来实测结果反向修改以下门槛，也不得从不同参数组合拼接通过结论。
+P3-4 在 `115200..921600` 候选波特率中评估同组 baud/timeout/retry 参数，先承接已有合格
+原件，再以有依据的有限筛选给出唯一候选。不是每换 agent 都重跑四档各三次；未知档位
+不能臆判合格或不支持。最终只能选择满足以下全部门槛的最高稳定档，不从结果反改门槛，
+不从不同参数组合拼接通过结论。候选阶段完成不代表最终稳定性或生产放行。
+
+| 验证内容 | 执行归属 | 共用与边界 |
+| --- | --- | --- |
+| 候选实现、参数依据、必要局部功能/安全检查 | P3-4 | 独立核验既有原件，只补真实缺口；原冻结资格失败不被本条洗白 |
+| 同组 30/30 完整成功、真实四小时 soak、性能统计 | P5-1 | 稳定交付候选上组织一套；可预先共用合格观察，不以空闲/恢复时间冒充连续传输 |
+| 真实后端的 10/10 断连恢复 | P3-5 | 同一最终候选参数/资产组；P3-4 不另复制一套，P5-2 按适用性核验原件 |
+| 其他持久化/电气/跨层故障条件 | P5-2 | 先对账上游覆盖，再补未覆盖或按真实依赖判定失效的条件；原件仍有效时不重跑，普通成功不是断连，复位不是物理断电 |
+
+P5 入场消费 P3-4 的候选阶段结果，不等待 P5 自己的长测；其他必要功能/安全前置仍须满足。
+若候选或采集依赖改变，按真实影响和执行合同最小复验，不能为共用原件隐去变化或失败。
 
 - `referencePackageBytes=1048576`，表示 BLE 实际传输的完整合法 `.etu` `total_len`，不是解包后的 `image_len`。
 - P95 完整耗时不超过 120 秒，任一单轮不超过 150 秒。
@@ -1082,7 +1096,8 @@ P3-4 必须在 `115200..921600` 候选波特率中评估同一组 baud/timeout/r
 
 P99 使用 nearest-rank：将 N 个样本升序排列，取第 `ceil(0.99*N)` 个，不插值，也不得删除合法高延迟样本。clean run 最终失败或存在无法确认的 DATA 段时，该轮不能通过成功门槛，也不得删除缺失样本美化 P99。
 
-发送端 timeout 固定由 `clamp(3*P99_ACK, 500ms, 2000ms)` 得出。最终生产 baud/timeout 组合是 P3-4 的实验输出，不是本合同提前指定的固定档位。
+发送端 timeout 固定由 `clamp(3*P99_ACK, 500ms, 2000ms)` 得出。P3-4 提出有同组原件依据的
+候选 baud/timeout；最终生产组合须经上述共同门槛确认，不是本合同提前指定的固定档位。
 
 ### OTA-XC-FLUTTER-TRANSPORT
 

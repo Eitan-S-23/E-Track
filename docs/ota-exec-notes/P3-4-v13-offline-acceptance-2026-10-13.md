@@ -11,6 +11,11 @@ are preserved. Local closeout and necessary same-scope continuation permissions
 are recorded and must not be requested again. Main integration, push/CI, device
 actions and P3-5/P5 final validation are not granted or claimed by this result.
 
+Git delivery continuation (2026-10-14): the user has now explicitly authorized
+the proposed PR/CI/main integration and safe task-record closeout. See Git
+Integration And Delivery below. This supersedes the earlier Git-only authority
+exclusions for this delivery, not the device pause or production-release barrier.
+
 ## Why Work Continues
 
 The previous reply stopped too early: completion of the bounded device plan did
@@ -822,3 +827,63 @@ is not silently declared fully delivered. Shared main worktree/ref/index stay
 untouched; no push, merge, CI, release, device action or new OTA occurred. Current
 3.2.87/group16/CONFIRMED=4 remains a historical observation, not a fresh query.
 The cumulative physical chain stays 3/3, not a permanent whole-project limit.
+
+## Git Integration And Delivery
+
+### Authorization And Scope
+
+Date: 2026-10-14. The user answered the concrete Git-delivery plan:
+
+> 那就做吧，全权授权给你
+
+That plan comprises checking and updating existing PR #26, integrating the
+approved governance and accepted commit history, necessary non-release CI,
+merge-commit delivery to main, safe main synchronization and task/index records.
+The same reviewer/root continues; routine steps within this scope need no new
+per-command, per-commit or per-agent approval. This is the user's authority,
+not permission created by this record or by candidate acceptance.
+
+The active worktree is `D:/github/my/E-Track/.cache/p34-final` (R). Its project-local
+delivery output is `.cache/p34-git-delivery-20261014`. The shared Git directory
+`D:/github/my/E-Track/.git` is writable for the named branch/PR/main delivery.
+The shared project `D:/github/my/E-Track` may be synchronized only without losing
+or publishing unrelated existing work. No reset, stash, cleanup, squash, rebase,
+force-push, global configuration change, device operation, extra OTA, release or
+deployment is part of this plan. Old failures, contracts and action accounts stay
+immutable; P3-5/P5 final campaigns are not executed by this Git closeout.
+
+### Verified Starting State And Plan
+
+- Local accepted branch: `acceptance/p3-4-v2-20261009`,
+  `e63ea9e41bfce2a3cb8a0dfc74ff68130ff613f0`; tracked source was clean.
+- Local main: `cb317affcd291695f42271084b4b305b0d7e6f8b`.
+- The actual remote PR #26 was OPEN/DRAFT, head
+  `352ad286a26fc49255a132e00b93090527253747`, base main
+  `4e5ae68ccbaff9134a268e8aa3d284450ead5a84`. Its earlier green checks do not
+  attest the new integration. The authenticated account has repository delivery
+  rights; authentication values were not logged or copied into the repository.
+- The initial protection inventory covers 31955 R files. The shared root has
+  54 tracked modifications and 1166 untracked files, including about 1.58 GB of
+  original content. Counts are this run's actual snapshot, not older handoff counts.
+- Merge governance `cb317aff` into the accepted branch preserving both parents.
+  Resolve document-only overlap by retaining v2 admission, the newer allocation
+  of final campaigns, historical records and the actual v15 candidate decision.
+  No firmware/App/host implementation or frozen bundle is changed by this merge.
+- Check required integration CI and the source -> bundle -> integration ancestry.
+  Historical bundles remain validated at their actual bundle commits, not rewritten
+  to make the new top-level governance tree match an old freeze.
+- After verified CI, deliver by merge commit, record real remote/main identities
+  and update candidate-stage completion and downstream ownership. Preserve shared
+  work in place if safe synchronization cannot retain its exact content.
+
+Raw Git/GitHub command receipts, the write inventory and pre/post hashes remain
+under the delivery output above. Publication preflight found no oversized Git
+blob. Its bounded secret-pattern scan found two historical controlled-service
+download signatures, both expired on 2026-10-11 under the existing 300-second
+exclusive-expiry gate. Neither is an account credential; values/URLs were not
+printed and original evidence was not altered. This scan is not a claim of a
+universal secret detector. Ordinary push/PR workflow gates exclude Release and
+Cloudflare registration; unchanged web-doc/backend paths do not request deployment.
+
+At this entry, integration is in progress. No remote update, successful new CI,
+PR merge or synchronized main is claimed before its actual receipt exists.

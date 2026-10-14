@@ -212,3 +212,102 @@ operation, firmware rebuild or historical acceptance rerun is needed. This is a
 notification-policy clarification, not approval of the v2 protocol or its formal
 acceptance scope. The update remains local until explicitly committed/delivered;
 do not claim other worktrees or running agents have received it.
+
+## PROJECT-07: Evaluate Existing Evidence Before Repeating Work
+
+DECIDED. User request, 2026-10-13: audit acceptance for every unfinished task,
+seek agreement from the already-bound codex-rawchat reviewer, implement the agreed
+changes, then have that reviewer assess the actual delta. Root owns implementation.
+This requested review is not a new permanent approval layer. Normative routing is
+[execution contract section 0](../acceptance-execution-contract.md) and
+[OTA-DEC-016](../ota-spec-decisions.md).
+
+### Findings And Direction
+
+- Freezing identifies the admitted inputs and criteria; it does not require a
+  third agent. Default to the implementer and one independent reviewer, who may
+  prepare/check/freeze/execute/adjudicate. Existing authorization remains bounded.
+- The board and templates asked for a second role-specific prompt while readiness
+  requires one canonical task Spec. Both roles now share that Spec and hand off
+  facts in the existing task note, not another normative instruction set.
+- An empty current matrix is not zero project progress. Evaluate earlier developer
+  and user observations against actual versions, parameters and original records.
+  Formal REUSED retains same-task original anchors. Hash-bound external originals
+  can support an independently executed offline evaluation, never a fictional new
+  device action, fabricated formal origin or unobserved field.
+- P5 instructions still required obsolete worktree manifests; P3-5 excluded failed
+  attempts and P5-1 automatically replayed anomalies. Use v3 Git identities and
+  real dependencies, retain failures and explain the smallest justified new
+  observation. Parser or packaging repair alone is not a reason to replay OTA.
+- P3/P5 reliability campaigns overlapped. One stable-candidate final campaign is
+  assigned below. Local functional and safety checks still occur before relying
+  on a change; actual battery, power-cut and background conditions are not replaced
+  by debugger power/reset or foreground success.
+- P4 completion required production release while P5 depended on P4 and barred
+  that release. Shared staging rehearsal now qualifies the P4 stage. Configuration
+  preparation uses implemented wiring, not completed upstream acceptance.
+  Production still requires P5, owner/environment approval and the existing
+  rebuild/hash-equivalence check. P5 does not depend on its own deferred tests.
+- P5-3 pure documentation review needs real link/command/risk checks and independent
+  judgement, not another hardware-style JSON bundle. Lightweight packaging never
+  waives required tests, CI or an existing frozen obligation.
+
+### Remaining-Task Disposition
+
+These are fourteen board entries, not fourteen findings of absent implementation
+or missing historical observations. Unknown coverage remains unreconciled, not
+automatically NOT_DONE. This change does not alter task status or dispatch eligibility.
+
+| Entries | Acceptance treatment |
+| --- | --- |
+| P1-6 | Reconcile fourteen recorded AUTO results by current dependencies; do not restart twenty cases. Preserve real power-cut gaps and share applicable originals with P5-2. |
+| P1-7 | Reconcile existing startup/power-hold records; measure only genuinely missing candidate timing, key-hold or battery conditions. |
+| P3-4 | Candidate implementation, parameter basis and necessary local checks. Reuse valid baud measurements; no default four-by-three or collector-only qualification OTA. v11 remains HARNESS_FAIL; missing pre-reboot RAM is not repaired by RTT reinterpretation or this policy. |
+| P3-5 | One real-backend ten-disconnect group on applicable candidate inputs, retaining all attempts. A controlled local service or ordinary success does not cover it. |
+| P3-8 | Real background/lock-screen ownership, durable progress, notification, final identity and teardown. No generic thirty-run campaign per UI scene. |
+| P4-1, P4-4 | One shared authorized staging rehearsal, separate pipeline/configuration judgements and unchanged production promotion barriers. |
+| P4-2 | Independently evaluate SQL uniqueness/atomicity and selection/API originals; no phone OTA solely to validate SQL. Real integration requirements remain in P3-5. |
+| P4-3 | Admin/transaction/retract/stop tests and necessary UI observations, not firmware replay. Share applicable integration originals for actual effects. |
+| P5-1 | Four SD/BLE x full/patch combinations plus one same-configuration 30/30 reference-1-MiB series and one real four-hour soak; eligible predeclared observations may serve multiple criteria. All numerical, retry, integrity and safety gates remain. |
+| P5-2 | Evaluate applicable P1-6/P3-5 originals, then inject only uncovered or invalidated conditions. No reset-as-power-cut, failed-run replacement or cross-configuration pooling. |
+| P5-3 | Independent document/link/command/risk review using existing product conclusions. No new OTA or mandatory separate formal contract for pure docs. |
+| CI-ARTIFACT-01, CI-ARTIFACT-02 | Source/host checks plus applicable real CI receipts. Missing remote evidence stays unknown; do not delete artifacts or dispatch only to prove reviewer tooling. |
+
+### Preserved Material And Review
+
+The pre-existing untracked historical host-remediation instruction was reclassified
+without content changes, not deleted or exempted from the uniqueness guard:
+
+- Old path: `docs/ota-prompts/prompt-P3-4-implementation.md`.
+- New path: [dated host-remediation supplement](../ota-prompts/supplement-P3-4-host-remediation-2026-09-20.md).
+- Original, pre-move snapshot and destination: 13533 bytes, SHA-256
+  `fc119919f0efef2be5c9295574a763982ab8027cc2bd1515cce04c0111c79158`.
+
+codex-rawchat explicitly agreed to `FLOW20261013-FULL-R1`, proposal SHA-256
+`b33e7769850431ab567fa016f5fd0a64983acae89e2b818ab140b1a2c3b36bac`, and
+`FLOW20261013-ROUTING`, addendum SHA-256
+`88e524b29c68100d96542f3a89e3d543f25ceade7b83b93248495d4b7de6d2ec`.
+The peer reviewed supplied material, not an independently accessed filesystem;
+plan agreement is not implementation approval or product acceptance.
+Original replies, pre-edit snapshots and test receipts are retained under
+`.cache/acceptance-flow-review-20261013/`. The baseline of 31 targeted tests had
+30 passes and one existing duplicate-prompt failure; that failed receipt remains
+unchanged. Post-edit verification and implementation review are recorded separately.
+
+Implementation review covered four actual-diff packets, not just the proposal.
+The peer identified three boundary issues: valid originals versus invalidated
+same-condition evidence; post-P5 published-asset verification; and single-sample
+retry limits versus justified later verification. Root accepted and corrected
+all three, including the corresponding positive/negative governance tests.
+The first post-edit run had 102/103 passes and one preserved wording-guard failure;
+after correction and added boundary tests, the affected suite passed 41/41.
+The other 64 checks, including 35 efficiency checks, passed in the first run and
+were not needlessly repeated. This is 105 checks covered across scoped runs, not
+a claim of one 105-test run, remote CI or product acceptance. Final peer verdicts
+and their exact reviewed material hashes are retained with the original receipts.
+
+Delivery is local and uncommitted until explicitly authorized. No device action,
+CI dispatch, remote configuration or publication is granted by this change.
+The p34-final worktree, its frozen bundles/tools/lock, original product work and
+Git index remain outside the edit scope. Do not claim another worktree or running
+agent has received these rules until an authorized delivery actually occurs.
