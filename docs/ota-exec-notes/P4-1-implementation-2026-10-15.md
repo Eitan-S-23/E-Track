@@ -1,11 +1,11 @@
 # P4-1 Unattended Development
 
-Status: IN_PROGRESS (whole card and current repair batch). The earlier checks-only
-dispatch passed on `fa74905e84c489cccc248617d37ab9f56c8f961c`, but actual PR checks
-and independent review found three required repairs below. Unattended development
-is not currently declared complete. Implementation self-tests are not independent
-acceptance. Main integration, real rehearsal and the retained external audit
-question are not declared complete.
+Status: IN_PROGRESS (whole card). Unattended development is COMPLETE on product
+`ae6cd49c2f756dd9094ee390121fc0825dbbceac`: actual PR checks passed and the
+non-implementing reviewer closed all three required repairs. See PR Remediation
+Closure below. Earlier dispatch successes and PR/red-test failures remain intact.
+This bounded development review is not whole-card acceptance. Main integration,
+real rehearsal and the retained external audit question are not declared complete.
 Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen references.
 
 ## Entry And Authority
@@ -49,15 +49,16 @@ failures do not overwrite the earlier successful dispatch observations.
 
 | ID | Required repair and invariant | Current feedback / owner |
 | --- | --- | --- |
-| P41-REVIEW-01 | Actual PR source `v2.7` fails strict three-part parsing. Normalize that legacy source only for non-release checks without an explicit input; never infer a formal/rehearsal version, accept suffixes or let huge integers wrap. | P4-1 implementer adds real Bash step regressions, then repairs the workflow. |
-| P41-REVIEW-02 | GitHub's by-tag lookup finds published releases, so an interrupted untagged draft cannot resume. Enumerate bounded drafts, require a unique exact full-commit identity, validate existing bytes, never retarget a tag. | P4-1 implementer corrects the HTTP double and exercises actual production-client retries and rejection paths. |
-| P41-REVIEW-03 | Readiness row already admits P4-1, but the exact governance expected set and section 9 dispatch registration were not updated together. | Add only P4-1 and its explicit dispatch record. Keep exact equality and other task states unchanged. |
+| P41-REVIEW-01 | Actual PR source `v2.7` fails strict three-part parsing. Normalize that legacy source only for non-release checks without an explicit input; never infer a formal/rehearsal version, accept suffixes or let huge integers wrap. | CLOSED by independent delta review: real Bash 39/39 locally and in PR CI; actual PR version is `2.7.0-nightly.310`. |
+| P41-REVIEW-02 | GitHub's by-tag lookup finds published releases, so an interrupted untagged draft cannot resume. Enumerate bounded drafts, require a unique exact full-commit identity, validate existing bytes, never retarget a tag. | CLOSED by independent delta review: actual production client 33/33 locally and in PR CI, including 0/1/3-asset recovery and no-mutation rejection cases. |
+| P41-REVIEW-03 | Readiness row already admits P4-1, but the exact governance expected set and section 9 dispatch registration were not updated together. | CLOSED: only P4-1 and its explicit dispatch record were added; equality and other task states unchanged. Local 22/22, main CI governance suite 126/126, independently checked. |
 
 The non-implementing reviewer independently checked all 154 original archive
 files, the 153 inventory bindings, four ZIP identities and all 591 members, tool
 stream hashes, actual byte identities, counts and warnings. This is evaluation
 of existing originals, not a new build, real rehearsal or whole-card PASS. The
-same reviewer will adjudicate the repaired delta after local and PR feedback.
+same reviewer subsequently adjudicated the repaired delta after local and PR
+feedback; its final message is preserved in the new archive below.
 
 The local red/green batch used the actual YAML Bash version step and production
 GitHub client, not a separate release implementation. Logs and closed receipts
@@ -211,10 +212,26 @@ in Final Hardening Feedback below.
 | Consumer | Impact / disposition | Next owner |
 | --- | --- | --- |
 | `.github/workflows/firmware-build.yml` | In scope; replaces removed single-bin flags with the shared v2 array pipeline, explicit bindings and immutable publication. | P4-1 |
+| `.github/scripts/firmware-release.mjs`, `tests/ota/firmware-pipeline.host.test.ts` | Sole callers of the new GitHub client; formal-base lookup remains strict, both formal execution modes retain the shared entry, and the host suite exercises real client draft recovery. | P4-1 |
 | `.github/workflows/mcu-firmware-release.yml` | Out of scope; still creates/edits/clobbers a Release BEFORE passing removed `--firmware-file`/`--device-model`/`--version-code` flags to the v2 builder, and its uploader omits `--asset`/`--remote`. It also has an optional real deploy path. Do not dispatch it as a fallback; retire/disable or separately migrate it before production use. No schema downgrade or incidental workflow edit was made here. | Root / legacy workflow owner |
 | `worker/test/firmware-scripts.host.test.ts` | Existing builder/uploader/register module and CLI consumer; explicitly executed separately from native tests. | P4-1 regression; P4-2 source ownership preserved |
 | `update-service/docs/README.md` | Already documents v2 explicit assets and readback; no compatibility fallback added. | Root / backend documentation owner |
 | Existing pack callers and golden vectors | Default random packaging remains unchanged; optional replay is fail-closed. Vendor scratch cwd and success checking now apply to all callers. | P4-1 tests; other task owners retain their frozen artifacts |
+
+The final executable-caller rescan also identified these exact shared-tool sites:
+`Tools/ota/p34-acceptance/reference.py`, `tests/ota/test_ota_update.py`,
+`tests/ota/p3_2_verify_build.py`, `tests/ota-vectors/gen_vectors.py`,
+`tests/ota-vectors/test_vectors.py`, `tests/ota/test_firmware_pack.py`,
+`tests/ota/test_firmware_release.mjs`, `tests/boot/test_prepare_bootstrap_app.py`,
+`Tools/jlink/deploy-ota-bootstrap.ps1`, `Tools/jlink/flash-recovery-container.ps1`,
+`.github/scripts/firmware-byte-check.py` and `scripts/prepare-firmware-release.mjs`
+under the update service. Finalize/recovery interfaces and default pack behavior
+are retained; the changed optional replay/vendor-check paths have actual package
+and byte tests. Existing golden tests ran 9/9 via the scoped `PYTHONPATH` repair.
+The historical vector generator also uses the lowercase `tools` path; its owner
+should correct that invocation if Linux regeneration is separately needed. It
+was not run and no historical vectors, accepted P3-4 campaign or device consumer
+were regenerated/reopened to exercise unchanged APIs.
 
 The current checked-in Worker environments use `GITHUB_REPO=Trace`, whereas this
 firmware workflow publishes from `Eitan-S-23/E-Track`. A separately isolated
@@ -269,8 +286,9 @@ nonces over partially uploaded keys. Archive originals before their 14-day expir
 
 ## Remaining Real Observations And Owners
 
-1. Root assigns a non-implementer to review this bounded branch, original tests
-   and the sole P4-1 Spec. Self-tests do not count as that review or acceptance.
+1. The bounded non-implementer candidate review is COMPLETE on `ae6cd49`; its
+   original verdict is below. This does not supply the still-missing independent
+   adjudication of a real rehearsal or count self-tests as independent execution.
 2. P4-4/root prepares and independently inventories actual isolated Worker/D1/R2,
    credentials, environment approval and the official finalized base. The prior
    D1 401/code 10000 and expired login were not retried. P42-EXT-02 stays with the
@@ -496,3 +514,126 @@ Root can reconcile that exact command/two event times rather than repeat product
 tests or scan unrelated credentials. At the post-push check, all 36 then-existing
 local child receipts were closed, none of their PIDs remained and the shared root
 index still matched its entry SHA.
+
+## PR Remediation Closure
+
+Current tested product: `ae6cd49c2f756dd9094ee390121fc0825dbbceac`, pushed as
+`Eitan-S-23` to `dev/p4-1/unattended-20261015`. PR #27 remains DRAFT and unmerged.
+Its actual CI checkout is merge `46934e6567616786e4b4e104d9ec6f7396feb2f3`, with
+parents `b42d3e25db85d6aba397cb4d0fb34bb5b653904f` and `ae6cd49`. The original GitHub
+commit API responses show both head and merge have tree
+`1df05946b03a53a81d425d1d46ea870e9369abe6`. Build manifests correctly identify the
+actual merge SHA, not a relabeled head run. Main has not advanced or been merged.
+
+| Actual PR workflow | Run / outcome | Original execution |
+| --- | --- | --- |
+| MCU Firmware Build | `38655458519`, SUCCESS | Same commands listed in the earlier dispatch table: host script/migration 34/34, pipeline host 33/33, native workerd 156/156, package 8/8, golden 9/9, workflow 39/39, production byte preparation 19/19, types and GCC App/Boot exit 0. |
+| Acceptance Governance | `38655458363`, SUCCESS | `test_acceptance_bundle.py` 126, `test_acceptance_efficiency.py` 36, `test_ac5_ram_budget.py` 3, `test_f435_build_bootstrap.py` 14, `test_p2_5_build_provenance.py` 11, `test_flutter_dev_checks.py` 62, `test_flutter_dev_apk.py` 39, `test_artifact_maintenance.py` 29; all pass. Existing Linux/Windows host-helper jobs and P2-6 spec probes also pass; no old physical campaign ran. |
+| Cloudflare Update Service Checks | `38655458606`, SUCCESS | Worker/native 156/156, Worker/Public/Admin type checks exit 0. These 156 repeat the same native suite and are not added to the firmware count. |
+| App path detection | `38655458526`, SUCCESS | Only changed-path detection runs; Android, Windows, Release and Pages are SKIPPED. No APK/EXE build or deployment. |
+
+URLs use `https://github.com/Eitan-S-23/E-Track/actions/runs/RUN_ID`. Both firmware
+cloud jobs and the P3-4 candidate-only build/upload are SKIPPED in the job API.
+The raw version step produces `2.7.0-nightly.310` and code 20700. GCC remains
+640 compiler/linker warnings and 0 errors, with 6 vendor bsdiff warnings.
+The 17 native `SQL_REJECT` lines and other expected rollback diagnostics are
+retained; none was hidden to obtain a passing result.
+
+The independent reviewer `/root/p41_independent_review` accepted this bounded
+development candidate and closed P41-REVIEW-01/02/03 after reading the new source,
+local red/green originals, actual CI command/step results and all four artifact
+identities. The exact final message and transport provenance are in
+`P4-1-pr-review-2026-10-15/independent-final-verdict.json`. The unavailable cc-connect
+route returned "no binding for this chat"; it was not guessed or reconfigured.
+The native non-implementer fallback performed no file writes, test reruns, cloud
+or device operations. This is not independent whole-card rehearsal acceptance.
+
+New archive: `docs/ota-exec-notes/P4-1-pr-review-2026-10-15/`, 102 files,
+4722809 bytes. Its inventory binds 101 files excluding itself; inventory SHA-256
+is `25b3c0d4812c0195b3ba327c31184913a9be175db0629ecb2b91477efc3a5d1a`.
+All 659 members of the four artifact ZIPs have recorded lengths, digests and ZIP
+timestamps. ZIP/API lengths and hashes, complete candidate byte equality and
+tool stdout/stderr hashes were rechecked before copying; no product rerun was
+used for this archival check. The earlier 154-file archive and every historical
+failure remain byte-unchanged. The new archive preserves the first PR failures
+and all three local red/green pairs, not just the final green logs.
+
+The current real-GCC development artifacts are not installable, a formal base or
+a rehearsal. `DEVELOPMENT-ONLY.json` retains that boundary, and every generated
+asset's metadata still has `r2Verified=false`. The unchanged placeholder App and
+Boot retain the lengths/digests in the earlier table. New finalized bytes bind
+this PR merge's version and timestamp, so they are not substituted for the older
+dispatch's distinct finalized image.
+
+| Current PR artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| GCC finalized App | 605072 | `cc751921c9df49408aa0206e50e54077333f4e10b5148c296f40bff0796805f1` |
+| GCC `e-track-at32f435-v2.7.0-full.etu` | 285674 | `e09a0a3f10efb94c3ac5eeb526423eae31e50493fa718e69b230d615a0bdf541` |
+| GCC `recovery-v2.7.0.bin` | 605080 | `f2b777c00fc7f5c6ecf0944578d76ba1bd5cc88161d522c7d79d2b855e1a8ac5` |
+| GCC unverified metadata | 1441 | `0453194e9c24400bff82557b922a86db4e02d7562465bab91ec4a9afcae6b394` |
+| GCC verification JSON | 7034 | `2ffcfcff38e587cccc7654fc2c726bf7cb72d70915a4f9523cfa5c4658b5a279` |
+| Synthetic full `v2.8.1` | 202 | `f22d87969b9a5ef787a905b987e1b93f9cebc598e307540c1c63d969f6e9d67d` |
+| Synthetic patch `v2.8.0-to-v2.8.1` | 208 | `7c05c3f84d6944a44f71e31a55e1b1a61acb07757528ff50147d8e401bb66130` |
+| Synthetic recovery `v2.8.1` | 8200 | `0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c` |
+| Synthetic unverified metadata | 1989 | `35f9b189b7a7fe152ed3a607452452f7f4460b6ff8eb161c60db8133c4cbc218` |
+
+The synthetic three-asset prefix is `firmware-release-tests/case-fwMuyr/prepared/`
+in artifact `11937130275`. Both actual full/patch applied outputs equal the exact
+8192-byte target with raw SHA
+`d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5`.
+This fixture is explicitly not an authoritative previous formal release.
+
+### Actual Remaining Inputs
+
+Read-only GitHub inventory returned no releases (`autonomous-releases.json`) and
+no environments (`autonomous-environments.json`, total_count 0) in Eitan-S-23/E-Track.
+There is therefore no verified preceding formal finalized App or configured
+release environment to consume. The original D1 HTTP 401/code 10000 and expired,
+non-refreshable Wrangler login remain the credential observations; no repeated
+login, refresh or cloud mutation was attempted. These facts cannot be repaired
+by substituting a fixture, guessing a repository/base or relaxing the frozen Spec.
+
+The next minimum owner work is authoritative formal-base provenance plus approved
+isolated Worker/D1/R2 bindings, a usable scoped uploader/register credential and
+the protected release-environment configuration listed above. Root/configuration
+owners must resolve those inputs; this is a P4-4 interface handoff, not starting
+P4-4. Then a separately authorized real rehearsal and independent production-zero-
+effect observer can supply the actual full R2 byte readback, D1 ready/idempotency
+and before/after snapshots. Those observations and whole-card acceptance remain
+NOT_RUN. No additional P4-1 product changes are justified merely to stay busy while
+those authoritative inputs are absent. P3-5, P4-3 and production remain outside
+this batch, and no main merge, tag, Release or deployment was performed.
+
+### Closing Audit And Lesson
+
+The pre-archive audit at `2026-10-15T00:00:39.155Z` found 50 completed child
+receipts, no workerd/bsdiff/bspatch helper, no project-local credential-file
+candidate, and the original shared-root index hash and timestamp. PID 18500 now
+belongs to `taskhostw.exe`; the earlier GitHub help receipt records a closed
+`gh.exe` at `2026-10-14T22:48:54.794Z`. This is PID reuse, not a surviving owned
+helper, and that unrelated process was not terminated.
+
+All selected source, fixture/cache, log, download and archival outputs stay under
+the exclusive worktree; only its authorized Git metadata uses the shared `.git`.
+The archival plan checked every normalized target and Windows reparse attribute
+before any copying, refused overwrites and matched plan SHA
+`d88b0b2bf12c439f8f9cf1607622fad0918f9696bf34d866af80b107e8b05575`.
+No credential value was written to a file; the Eitan-S-23 token existed only in
+process memory. No cleanup of old evidence or external paths was attempted.
+
+P41-AUDIT-01 remains ATTRIBUTION_UNRESOLVED. The same external startup cache was
+most recently observed at `2026-10-14T23:55:18.821Z`, size 1004 bytes. The earlier
+Export-StartLayout observations do not establish this later writer. No further
+unbounded task/event scan or external cleanup was undertaken. The other inspected
+PowerShell, npm, Wrangler, GitHub CLI and crash-cache files showed no modification
+since worktree creation. This is a bounded metadata audit, not a machine-wide
+zero-write claim. Root/host ownership is still needed only for that attribution.
+
+The failure mechanism was a test coverage/implicit-state gap (a checks dispatch
+with explicit version cannot cover default PR versions; an always-tagged GitHub
+double cannot cover interrupted drafts), plus missed governance propagation.
+The repair adds actual event/state regressions and exact registration rather than
+another Spec, relaxed assertions or a replacement pipeline. Future P4-1 changes
+must retain these now-executed cases and distinguish raw observations from green
+workflow labels. The remaining delivery change is records/evidence only; automatic
+PR synchronization is not another formal acceptance campaign.

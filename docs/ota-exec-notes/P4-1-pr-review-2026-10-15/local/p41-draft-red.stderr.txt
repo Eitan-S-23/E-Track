@@ -1,0 +1,108 @@
+(node:19292) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 0 uploaded assets
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 1 uploaded assets
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 3 uploaded assets
+Error: GitHub operation failed: HTTP 422
+ ❯ unavailable ../scripts/firmware-github-release.mjs:6:32
+      4|
+      5| const conflict = message => new CliError(message, "RELEASE_CONFLICT", …
+      6| const unavailable = message => new CliError(message, "BACKEND_UNAVAILA…
+       |                                ^
+      7|
+      8| export function firmwareGitHub({ repository, token, fetcher = fetch, s…
+ ❯ json ../scripts/firmware-github-release.mjs:21:29
+ ❯ Object.publish ../scripts/firmware-github-release.mjs:110:17
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:294:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'BACKEND_UNAVAILABLE', exitCode: 1, requestId: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects wrong target in an existing draft before any mutation
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects mutable target in an existing draft before any mutation
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects ambiguous drafts in an existing draft before any mutation
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects changed notes in an existing draft before any mutation
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects prerelease in an existing draft before any mutation
+AssertionError: expected Error: GitHub operation failed: HTTP 422 { …(3) } to match object { code: 'RELEASE_CONFLICT' }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "RELEASE_CONFLICT",
++ CliError {
++   "code": "BACKEND_UNAVAILABLE",
+  }
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:317:123
+    315|       if (reason === "changed notes") http.release.body = "different n…
+    316|       if (reason === "prerelease") http.release.prerelease = true;
+    317|       await expect(http.client().publish(s.metadata, new Map(s.metadat…
+       |                                                                                                                           ^
+    318|         .rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    319|       expect(http.calls.filter(v => !v.startsWith("GET"))).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub validates a newly returned draft target before any asset upload
+AssertionError: expected 3 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 3
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:334:30
+    332|     await expect(http.client().publish(s.metadata, new Map(s.metadata.…
+    333|       .rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    334|     expect(http.assets.size).toBe(0); expect(http.calls.some(v => v.st…
+       |                              ^
+    335|   });
+    336|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rechecks a conflicting tag created during upload before publishing
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:341:66
+    339|     await expect(http.client().publish(s.metadata, new Map(s.metadata.…
+    340|       .rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    341|     expect(http.assets.size).toBe(3); expect(http.release.draft).toBe(…
+       |                                                                  ^
+    342|     expect(http.calls.some(v => v.startsWith("PATCH"))).toBe(false);
+    343|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub reads every existing draft asset before adding missing assets
+AssertionError: expected [Function] to throw error matching /readback digest/ but got 'GitHub operation failed: HTTP 422'
+
+- Expected:
+/readback digest/
+
++ Received:
+"GitHub operation failed: HTTP 422"
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:348:121
+    346|     const s = await setup(); const http = new GitHubHttp(s.metadata); …
+    347|     const asset = s.metadata.assets[0]; http.store(asset.fileName, byt…
+    348|     await expect(http.client().publish(s.metadata, new Map(s.metadata.…
+       |                                                                                                                         ^
+    349|       .rejects.toThrow(/readback digest/);
+    350|     expect(http.calls.filter(v => !v.startsWith("GET"))).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+

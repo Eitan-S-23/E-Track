@@ -1,0 +1,1 @@
+Error: relay: no binding for this chat. Use /bind <project> first

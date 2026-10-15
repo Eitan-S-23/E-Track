@@ -1,0 +1,23 @@
+.................F....
+======================================================================
+FAIL: test_readiness_matrix_mirrors_board_order_and_derives_dispatch (__main__.PostP26SpecGovernanceTests.test_readiness_matrix_mirrors_board_order_and_derives_dispatch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p41-dev-20261015\tests\ota\test_acceptance_bundle.py", line 2597, in test_readiness_matrix_mirrors_board_order_and_derives_dispatch
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-2"},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dispatchable,
+        ^^^^^^^^^^^^^
+        "可派单集合必须精确受控：历次解锁及 OTA-DEC-014 新增 P3-8 均须同批登记 §9，不能用子集比较放宽",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Items in the second set but not the first:
+'P4-1' : 可派单集合必须精确受控：历次解锁及 OTA-DEC-014 新增 P3-8 均须同批登记 §9，不能用子集比较放宽
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.642s
+
+FAILED (failures=1)

@@ -1,0 +1,611 @@
+{
+  "testedCommit": "ae6cd49c2f756dd9094ee390121fc0825dbbceac",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "source": "Manual evidence byte-preservation rule"
+    },
+    {
+      "path": "artifact-members.json",
+      "sizeBytes": 223150,
+      "sha256": "86f3afcccf4c80110a879c7af677501bb40afc665c8ade1e119dd5e4d5177d3e",
+      "source": "Derived from all four original artifact ZIPs"
+    },
+    {
+      "path": "ci-inspection.json",
+      "sizeBytes": 27418,
+      "sha256": "fe192f8989c901e0e031646e9a64bbd1278cdb3018e4ac5271925e86e9a8b6ac",
+      "source": "Derived from the archived original logs and artifact bytes"
+    },
+    {
+      "path": "github/autonomous-environments.json",
+      "sizeBytes": 35,
+      "sha256": "310b1231b21edb0dde47b2ee59b26a0fc9b4cdd801864140a03561f16fb03c9d",
+      "source": ".cache/github/autonomous-environments.json"
+    },
+    {
+      "path": "github/autonomous-existing-prs.json",
+      "sizeBytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "source": ".cache/github/autonomous-existing-prs.json"
+    },
+    {
+      "path": "github/autonomous-main-ref.json",
+      "sizeBytes": 334,
+      "sha256": "971cdb32402069732bedecdeecbe30c5c9c828bc4cac50718e9cd7c68ac5f6e5",
+      "source": ".cache/github/autonomous-main-ref.json"
+    },
+    {
+      "path": "github/autonomous-pr-create.json",
+      "sizeBytes": 198,
+      "sha256": "79850f7c9bad567a2af73878d2baee4e56a1bf3e21a35116f3f7c9f6c3f2e130",
+      "source": ".cache/github/autonomous-pr-create.json"
+    },
+    {
+      "path": "github/autonomous-pr-detail.json",
+      "sizeBytes": 18025,
+      "sha256": "8bd33c9959990427f51ebf6ed5ba1d754c24d7e6b4bce48b3a5ee22ba238dda9",
+      "source": ".cache/github/autonomous-pr-detail.json"
+    },
+    {
+      "path": "github/autonomous-pr-runs.json",
+      "sizeBytes": 126089,
+      "sha256": "ebd488e6f3a0792dd1a2bb12c4b4b3a14908f3dcbf32454ff1b516cd5f07d990",
+      "source": ".cache/github/autonomous-pr-runs.json"
+    },
+    {
+      "path": "github/autonomous-releases.json",
+      "sizeBytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "source": ".cache/github/autonomous-releases.json"
+    },
+    {
+      "path": "github/delivery-push.json",
+      "sizeBytes": 229,
+      "sha256": "b8b098cdbdfde44ba6b42c09e3bfe407881155d1e4d22e461751a0205c8e09b5",
+      "source": ".cache/github/delivery-push.json"
+    },
+    {
+      "path": "github/delivery-remote-ref.json",
+      "sizeBytes": 417,
+      "sha256": "969e5c6362a4962f268bb52becf5640bd69dd387b3618ca46e6022080add1a6b",
+      "source": ".cache/github/delivery-remote-ref.json"
+    },
+    {
+      "path": "github/handoff-final-ref.json",
+      "sizeBytes": 417,
+      "sha256": "b8c96c1e9c9f26c618b76b9098b4feb50c6466269888ef87f297a4290d35c834",
+      "source": ".cache/github/handoff-final-ref.json"
+    },
+    {
+      "path": "github/handoff-push.json",
+      "sizeBytes": 229,
+      "sha256": "23eca323c2d97f40cb14e45281597a36fa416b43fc80877fcb7b923755426d2c",
+      "source": ".cache/github/handoff-push.json"
+    },
+    {
+      "path": "github/p41-repair-push.json",
+      "sizeBytes": 229,
+      "sha256": "cd30766cb1b422cb5e2926d18bd00befa2f09d5fc05012d17f57f62e275c8abb",
+      "source": ".cache/github/p41-repair-push.json"
+    },
+    {
+      "path": "github/p41-repair-remote.json",
+      "sizeBytes": 334,
+      "sha256": "971cdb32402069732bedecdeecbe30c5c9c828bc4cac50718e9cd7c68ac5f6e5",
+      "source": ".cache/github/p41-repair-remote.json"
+    },
+    {
+      "path": "github/pr1-app-jobs.json",
+      "sizeBytes": 5328,
+      "sha256": "4dd9f7188939479f67ccfe87e402145bcdcd2755c55fa5740e183c38a94f1573",
+      "source": ".cache/github/pr1-app-jobs.json"
+    },
+    {
+      "path": "github/pr1-backend-jobs.json",
+      "sizeBytes": 6937,
+      "sha256": "69e19bedf4939284c99d8370f29854d74dc3a57a9de6123141eaf36c60fb1643",
+      "source": ".cache/github/pr1-backend-jobs.json"
+    },
+    {
+      "path": "github/pr1-firmware-jobs.json",
+      "sizeBytes": 11351,
+      "sha256": "a0440be8acfc930c90620e5353c1ed15c691439da0d05a021c681570a1653db1",
+      "source": ".cache/github/pr1-firmware-jobs.json"
+    },
+    {
+      "path": "github/pr1-firmware-logs.zip",
+      "sizeBytes": 106861,
+      "sha256": "bb2d13a1cdcb42bfb3b56767d90480284352e10a8af9af553677b485bdca5d1f",
+      "source": ".cache/github/pr1-firmware-logs.zip"
+    },
+    {
+      "path": "github/pr1-governance-jobs.json",
+      "sizeBytes": 7237,
+      "sha256": "85fb0f96885321604f29507a8973a6464db212fc82735a665189a38fa0551fc0",
+      "source": ".cache/github/pr1-governance-jobs.json"
+    },
+    {
+      "path": "github/pr1-governance-logs.zip",
+      "sizeBytes": 44105,
+      "sha256": "020b31033bdea42c8c354df6b06b40a5c2a956862c86fe82f5dc8619cdba8c74",
+      "source": ".cache/github/pr1-governance-logs.zip"
+    },
+    {
+      "path": "github/pr2-app-jobs.json",
+      "sizeBytes": 5328,
+      "sha256": "6a60ccd303e0245f035361a09bf7e2a7e0a971c279d70dc59e0b58319dfb1d23",
+      "source": ".cache/github/pr2-app-jobs.json"
+    },
+    {
+      "path": "github/pr2-app-logs.zip",
+      "sizeBytes": 14015,
+      "sha256": "0c5abf1f0695b833129a1ffa23575674fa50eb48c3b53d044e3314241c1a6b31",
+      "source": ".cache/github/pr2-app-logs.zip"
+    },
+    {
+      "path": "github/pr2-artifact-11936686209.zip",
+      "sizeBytes": 1607240,
+      "sha256": "8ccca502810dbd213f91331a8de9da8da2ef0180efb7c0ecef797189c9a5c392",
+      "source": ".cache/github/pr2-artifact-11936686209.zip"
+    },
+    {
+      "path": "github/pr2-artifact-11936791219.zip",
+      "sizeBytes": 54830,
+      "sha256": "19d506e3eb91e1c097c357f89a448b3710926faa80d15850725eb057ea040554",
+      "source": ".cache/github/pr2-artifact-11936791219.zip"
+    },
+    {
+      "path": "github/pr2-artifact-11936856032.zip",
+      "sizeBytes": 1468555,
+      "sha256": "fb9da84db74429e9f477a637e433ab2da737a02eb116a2e8031880086b5223e1",
+      "source": ".cache/github/pr2-artifact-11936856032.zip"
+    },
+    {
+      "path": "github/pr2-artifact-11937130275.zip",
+      "sizeBytes": 256141,
+      "sha256": "07223d100583a160422a9f9045299857b580123dc458020d77ea94fdf3209066",
+      "source": ".cache/github/pr2-artifact-11937130275.zip"
+    },
+    {
+      "path": "github/pr2-backend-jobs.json",
+      "sizeBytes": 6937,
+      "sha256": "c41715e98b326fd286b03033cccf75379f4bb9bc6c0d3e340c2a2bf5281a36c6",
+      "source": ".cache/github/pr2-backend-jobs.json"
+    },
+    {
+      "path": "github/pr2-backend-logs.zip",
+      "sizeBytes": 48369,
+      "sha256": "fd89a7aebdd9977e9f55f9a4b33897271c9100b2e83e3c3717b8d750a8c518df",
+      "source": ".cache/github/pr2-backend-logs.zip"
+    },
+    {
+      "path": "github/pr2-detail.json",
+      "sizeBytes": 18022,
+      "sha256": "0bbb9b937294e53765365d70fe6e219cb2ba6145683f12d7eaa4a3b453146cba",
+      "source": ".cache/github/pr2-detail.json"
+    },
+    {
+      "path": "github/pr2-final-runs.json",
+      "sizeBytes": 52116,
+      "sha256": "ab35e304485ed5b9fb53e94ea3e0ab81aedfeed79ea24ae0dc3ce03bbf7f39a0",
+      "source": ".cache/github/pr2-final-runs.json"
+    },
+    {
+      "path": "github/pr2-firmware-artifacts.json",
+      "sizeBytes": 2952,
+      "sha256": "36f6b6b3c8b539a1f9895802a2ad25f290d61daf75169ce965f20d3b04ef7ed5",
+      "source": ".cache/github/pr2-firmware-artifacts.json"
+    },
+    {
+      "path": "github/pr2-firmware-jobs.json",
+      "sizeBytes": 11351,
+      "sha256": "018483c9926cc76d155cec483418329f650cc1cc5689578e448bd5b3e2aae400",
+      "source": ".cache/github/pr2-firmware-jobs.json"
+    },
+    {
+      "path": "github/pr2-firmware-logs.zip",
+      "sizeBytes": 275759,
+      "sha256": "3d204276202a2ff32abb1473fcb76403fbfb02e00a9b0da4b04a7e6231177bc7",
+      "source": ".cache/github/pr2-firmware-logs.zip"
+    },
+    {
+      "path": "github/pr2-governance-jobs.json",
+      "sizeBytes": 7237,
+      "sha256": "1283a43fbe48fe47e480afe70e7f4b082c90fb401c28625b0d32a8f8b6918410",
+      "source": ".cache/github/pr2-governance-jobs.json"
+    },
+    {
+      "path": "github/pr2-governance-logs.zip",
+      "sizeBytes": 63590,
+      "sha256": "d63b325ff099f27e40dde1e11dd5f2cbe4450bab9822372e2c3ebed5e358e5d5",
+      "source": ".cache/github/pr2-governance-logs.zip"
+    },
+    {
+      "path": "github/pr2-merge-commit.json",
+      "sizeBytes": 2607,
+      "sha256": "b012a2a675a87f8c0cf8f0a7b800d4a4df6b46588aedda50e2e5c9df8759e0a3",
+      "source": ".cache/github/pr2-merge-commit.json"
+    },
+    {
+      "path": "github/pr2-runs.json",
+      "sizeBytes": 52113,
+      "sha256": "cfda5f36e1a57bee5c56af173fa54f65b16509b74bac51a22ba7088f6f29db9a",
+      "source": ".cache/github/pr2-runs.json"
+    },
+    {
+      "path": "github/pr2-source-commit.json",
+      "sizeBytes": 1664,
+      "sha256": "700c07f3d2d5fa0d48d68508d6ff8e53975b6bb4b7b082902945f16374f21378",
+      "source": ".cache/github/pr2-source-commit.json"
+    },
+    {
+      "path": "independent-final-verdict.json",
+      "sizeBytes": 2946,
+      "sha256": "3c0af900385ef13970a23e8fc590c8c25ff2d6fa84cccec85380bf6cbde0ea4e",
+      "source": "Verbatim final message from the non-implementing native reviewer, with transport provenance"
+    },
+    {
+      "path": "local/archive-p41.py",
+      "sizeBytes": 13258,
+      "sha256": "e16f02d0ce2bdb1a2be52ee6689db6e42ae7194c8e4112dccc0254534a969cdc",
+      "source": ".cache/archive-p41.py"
+    },
+    {
+      "path": "local/delivery-commit.json",
+      "sizeBytes": 1996,
+      "sha256": "bbf0a5be441d2f5122a6d3cdde4282515c329f690c285ac745ff41ad0eb5dab6",
+      "source": ".cache/logs/delivery-commit.json"
+    },
+    {
+      "path": "local/delivery-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/delivery-commit.stderr.txt"
+    },
+    {
+      "path": "local/delivery-commit.stdout.txt",
+      "sizeBytes": 13997,
+      "sha256": "530910bdceb5927649b0aeca144caa3a7276e4fab3fccbc6a5dcc6f4f6077c07",
+      "source": ".cache/logs/delivery-commit.stdout.txt"
+    },
+    {
+      "path": "local/delivery-stage.json",
+      "sizeBytes": 2005,
+      "sha256": "81c6c1bb17ec4c2b5f854e712ce198930da0eba74e20e55575f4d8e4781077b0",
+      "source": ".cache/logs/delivery-stage.json"
+    },
+    {
+      "path": "local/delivery-stage.stderr.txt",
+      "sizeBytes": 272,
+      "sha256": "9f7639867ace80a3a38612a97176d9344ac3c8a864878bc9cb39a8d1156ce1ff",
+      "source": ".cache/logs/delivery-stage.stderr.txt"
+    },
+    {
+      "path": "local/delivery-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/delivery-stage.stdout.txt"
+    },
+    {
+      "path": "local/gh.cjs",
+      "sizeBytes": 5437,
+      "sha256": "9dd7f1d6788f608987223679a7be895d2944f21d4c4d43b34c4f1e71dcbb72c2",
+      "source": ".cache/gh.cjs"
+    },
+    {
+      "path": "local/handoff-commit.json",
+      "sizeBytes": 1992,
+      "sha256": "7953e2d24f466f0f6f38f117b780ce33b66514fbb6094895b671060b5a058f25",
+      "source": ".cache/logs/handoff-commit.json"
+    },
+    {
+      "path": "local/handoff-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/handoff-commit.stderr.txt"
+    },
+    {
+      "path": "local/handoff-commit.stdout.txt",
+      "sizeBytes": 160,
+      "sha256": "1866a5b5b1ba5637e2e4a2c4d4497581904ece02ef9c359663a233327776fbcb",
+      "source": ".cache/logs/handoff-commit.stdout.txt"
+    },
+    {
+      "path": "local/handoff-stage.json",
+      "sizeBytes": 1932,
+      "sha256": "ddad2d130d46ace93e2d49da3634faed12cba1abfdecef0b6b8741093ddecb1c",
+      "source": ".cache/logs/handoff-stage.json"
+    },
+    {
+      "path": "local/handoff-stage.stderr.txt",
+      "sizeBytes": 272,
+      "sha256": "9f7639867ace80a3a38612a97176d9344ac3c8a864878bc9cb39a8d1156ce1ff",
+      "source": ".cache/logs/handoff-stage.stderr.txt"
+    },
+    {
+      "path": "local/handoff-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/handoff-stage.stdout.txt"
+    },
+    {
+      "path": "local/p41-draft-fixed.json",
+      "sizeBytes": 1941,
+      "sha256": "4761e55cfc8a487c035a4cef5a144dfe2517435609cbdb6f33e1e9ee81b6659c",
+      "source": ".cache/logs/p41-draft-fixed.json"
+    },
+    {
+      "path": "local/p41-draft-fixed.stderr.txt",
+      "sizeBytes": 169,
+      "sha256": "916bc05b9134857dbc1266df3cf62ff248e650ed83740eebf1227bce78392d6c",
+      "source": ".cache/logs/p41-draft-fixed.stderr.txt"
+    },
+    {
+      "path": "local/p41-draft-fixed.stdout.txt",
+      "sizeBytes": 11605,
+      "sha256": "8b5eac677f460a305fea0d1ee1ff07d4769c099b5d03785f5b922a336e147724",
+      "source": ".cache/logs/p41-draft-fixed.stdout.txt"
+    },
+    {
+      "path": "local/p41-draft-red.json",
+      "sizeBytes": 1936,
+      "sha256": "b0376759510aefd5eb71a1c6029252edc388e164d3036808fe0c3e5436811637",
+      "source": ".cache/logs/p41-draft-red.json"
+    },
+    {
+      "path": "local/p41-draft-red.stderr.txt",
+      "sizeBytes": 6404,
+      "sha256": "e9b9902bb9a3e37a04684cb1903df443cbad00565a405ebd73a2edf249b37a62",
+      "source": ".cache/logs/p41-draft-red.stderr.txt"
+    },
+    {
+      "path": "local/p41-draft-red.stdout.txt",
+      "sizeBytes": 11663,
+      "sha256": "4a2e8a05bbb83dbb695557e6e2eaf2d9ae78f867c3346066a4bec74f9b6e183c",
+      "source": ".cache/logs/p41-draft-red.stdout.txt"
+    },
+    {
+      "path": "local/p41-gh-pr-help.json",
+      "sizeBytes": 1811,
+      "sha256": "b8facbb499ea6daa0d4af396790155e30fb0e62c042463a415ff1909abab36d4",
+      "source": ".cache/logs/p41-gh-pr-help.json"
+    },
+    {
+      "path": "local/p41-gh-pr-help.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-gh-pr-help.stderr.txt"
+    },
+    {
+      "path": "local/p41-gh-pr-help.stdout.txt",
+      "sizeBytes": 4244,
+      "sha256": "73b506a6c24282ccaa7637e4f0a62f338b79b40299f51acd772de0fc5f0b9311",
+      "source": ".cache/logs/p41-gh-pr-help.stdout.txt"
+    },
+    {
+      "path": "local/p41-gov-fixed.json",
+      "sizeBytes": 1859,
+      "sha256": "168c4e775aaac7c63bb8d1f1651423b00eb9191c8e5135590b416b255eefecd7",
+      "source": ".cache/logs/p41-gov-fixed.json"
+    },
+    {
+      "path": "local/p41-gov-fixed.stderr.txt",
+      "sizeBytes": 126,
+      "sha256": "6e71eb1b98ef5351be3c8a7799dc9e01ad98a9ff7b22a433fab19263083ec891",
+      "source": ".cache/logs/p41-gov-fixed.stderr.txt"
+    },
+    {
+      "path": "local/p41-gov-fixed.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-gov-fixed.stdout.txt"
+    },
+    {
+      "path": "local/p41-gov-red.json",
+      "sizeBytes": 1854,
+      "sha256": "57d9c7524e1caa3fb0abf30b7c6c3a61a42f977be4b13e715d55ab008cf5df9c",
+      "source": ".cache/logs/p41-gov-red.json"
+    },
+    {
+      "path": "local/p41-gov-red.stderr.txt",
+      "sizeBytes": 1366,
+      "sha256": "34690fda7df687f3eed384135c62bec41d7c9550db5806e1257f02ae61e7064f",
+      "source": ".cache/logs/p41-gov-red.stderr.txt"
+    },
+    {
+      "path": "local/p41-gov-red.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-gov-red.stdout.txt"
+    },
+    {
+      "path": "local/p41-pr-write-audit.json",
+      "sizeBytes": 9749,
+      "sha256": "abafd974c2c70920f378ce3ba8a968caab222da0296d09db3482c8f37773c29f",
+      "source": ".cache/logs/p41-pr-write-audit.json"
+    },
+    {
+      "path": "local/p41-pr-write-audit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-pr-write-audit.stderr.txt"
+    },
+    {
+      "path": "local/p41-pr-write-audit.stdout.txt",
+      "sizeBytes": 14403,
+      "sha256": "587523b3aeac5049e7d17b2d2845a83059918ab50b509d097b1d862b7cf4f0fc",
+      "source": ".cache/logs/p41-pr-write-audit.stdout.txt"
+    },
+    {
+      "path": "local/p41-relay-targets.json",
+      "sizeBytes": 1968,
+      "sha256": "cd0d7cfc173ac248d19386963b50eb323e5095a59c05275279e486c89597a95c",
+      "source": ".cache/logs/p41-relay-targets.json"
+    },
+    {
+      "path": "local/p41-relay-targets.stderr.txt",
+      "sizeBytes": 66,
+      "sha256": "434320e667d6a96eda33d026bef3b7b181dce548d4c4de63879ea65f97629546",
+      "source": ".cache/logs/p41-relay-targets.stderr.txt"
+    },
+    {
+      "path": "local/p41-relay-targets.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-relay-targets.stdout.txt"
+    },
+    {
+      "path": "local/p41-repair-commit.json",
+      "sizeBytes": 2059,
+      "sha256": "376720ed44491cf602bdae4cec35a7a3fe6a967ab0e4dca3a6d1873dafdd1eeb",
+      "source": ".cache/logs/p41-repair-commit.json"
+    },
+    {
+      "path": "local/p41-repair-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-repair-commit.stderr.txt"
+    },
+    {
+      "path": "local/p41-repair-commit.stdout.txt",
+      "sizeBytes": 156,
+      "sha256": "89a5dd278ac2d127f86b2408f6dab48ca8ccc19cb6fe6211d185560812ef42f7",
+      "source": ".cache/logs/p41-repair-commit.stdout.txt"
+    },
+    {
+      "path": "local/p41-repair-diff.json",
+      "sizeBytes": 1778,
+      "sha256": "f3dc38acfdd2d2254b37fb3c5ca60520c222f5eadad3d5f5fa7e3ad08d011f74",
+      "source": ".cache/logs/p41-repair-diff.json"
+    },
+    {
+      "path": "local/p41-repair-diff.stderr.txt",
+      "sizeBytes": 847,
+      "sha256": "d8e23ba54775b508f1228e6c3cbadbe7d4e41a1d21e343f21c2539294e22774c",
+      "source": ".cache/logs/p41-repair-diff.stderr.txt"
+    },
+    {
+      "path": "local/p41-repair-diff.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-repair-diff.stdout.txt"
+    },
+    {
+      "path": "local/p41-repair-stage.json",
+      "sizeBytes": 2171,
+      "sha256": "2395019bcbfd2d1555fbe6806b33013b5bb482155e4ef5aaa76ca69a5fca7fa7",
+      "source": ".cache/logs/p41-repair-stage.json"
+    },
+    {
+      "path": "local/p41-repair-stage.stderr.txt",
+      "sizeBytes": 847,
+      "sha256": "d8e23ba54775b508f1228e6c3cbadbe7d4e41a1d21e343f21c2539294e22774c",
+      "source": ".cache/logs/p41-repair-stage.stderr.txt"
+    },
+    {
+      "path": "local/p41-repair-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-repair-stage.stdout.txt"
+    },
+    {
+      "path": "local/p41-types-fixed.json",
+      "sizeBytes": 1872,
+      "sha256": "e199bad28970e3447059928cf30cce811f44658f4008960ce6db355a76e50e74",
+      "source": ".cache/logs/p41-types-fixed.json"
+    },
+    {
+      "path": "local/p41-types-fixed.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-types-fixed.stderr.txt"
+    },
+    {
+      "path": "local/p41-types-fixed.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-types-fixed.stdout.txt"
+    },
+    {
+      "path": "local/p41-version-fixed.json",
+      "sizeBytes": 1813,
+      "sha256": "4a9fdc9e531c4a1ead58911718637391edbd8a76f9f74e571716612ba1afeddf",
+      "source": ".cache/logs/p41-version-fixed.json"
+    },
+    {
+      "path": "local/p41-version-fixed.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-version-fixed.stderr.txt"
+    },
+    {
+      "path": "local/p41-version-fixed.stdout.txt",
+      "sizeBytes": 5648,
+      "sha256": "6607914083288d33f7c5c3c731ccd26819b1be1b29eba0b125d74b23e8450e3b",
+      "source": ".cache/logs/p41-version-fixed.stdout.txt"
+    },
+    {
+      "path": "local/p41-version-red.json",
+      "sizeBytes": 1809,
+      "sha256": "847cb5b8a2865a3c3154e1a1859d2f067925df5323b1a77690306b64fbfff136",
+      "source": ".cache/logs/p41-version-red.json"
+    },
+    {
+      "path": "local/p41-version-red.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-version-red.stderr.txt"
+    },
+    {
+      "path": "local/p41-version-red.stdout.txt",
+      "sizeBytes": 10575,
+      "sha256": "af81f658ce5a56a32b2f6cfc58ef6ecbf06db81d6b063a92face3bd17a0ca1d4",
+      "source": ".cache/logs/p41-version-red.stdout.txt"
+    },
+    {
+      "path": "local/run.cjs",
+      "sizeBytes": 3364,
+      "sha256": "ed8b4b6fbc1e63e13dc91d268f5f75eef18413f3cc80f204c0d6ee4a725609e3",
+      "source": ".cache/run.cjs"
+    },
+    {
+      "path": "selected/gcc-build-inputs.json",
+      "sizeBytes": 463,
+      "sha256": "a183f931b2b33a5d04c0cea4d99d73943b4d15a199e3799aaaf9cad36279e2a7",
+      "source": "github/pr2-artifact-11936856032.zip!gcc-build-inputs.json"
+    },
+    {
+      "path": "selected/gcc-development/DEVELOPMENT-ONLY.json",
+      "sizeBytes": 127,
+      "sha256": "cf1bd38281c979fb07a5e66c52043d4f7e311b8733b9baaa8b0c6b87095fd71a",
+      "source": "github/pr2-artifact-11936686209.zip!DEVELOPMENT-ONLY.json"
+    },
+    {
+      "path": "selected/gcc-development/cloudflare-firmware-release-metadata.json",
+      "sizeBytes": 1441,
+      "sha256": "0453194e9c24400bff82557b922a86db4e02d7562465bab91ec4a9afcae6b394",
+      "source": "github/pr2-artifact-11936686209.zip!cloudflare-firmware-release-metadata.json"
+    },
+    {
+      "path": "selected/gcc-development/verification.json",
+      "sizeBytes": 7034,
+      "sha256": "2ffcfcff38e587cccc7654fc2c726bf7cb72d70915a4f9523cfa5c4658b5a279",
+      "source": "github/pr2-artifact-11936686209.zip!verification.json"
+    },
+    {
+      "path": "selected/synthetic-three-assets/cloudflare-firmware-release-metadata.json",
+      "sizeBytes": 1989,
+      "sha256": "35f9b189b7a7fe152ed3a607452452f7f4460b6ff8eb161c60db8133c4cbc218",
+      "source": "github/pr2-artifact-11937130275.zip!firmware-release-tests/case-fwMuyr/prepared/cloudflare-firmware-release-metadata.json"
+    },
+    {
+      "path": "selected/synthetic-three-assets/verification.json",
+      "sizeBytes": 12585,
+      "sha256": "f4ff247e579bd7cedf429b8adffb123b0587f73fff675db2ba355839dce75ab5",
+      "source": "github/pr2-artifact-11937130275.zip!firmware-release-tests/case-fwMuyr/prepared/verification.json"
+    }
+  ]
+}
