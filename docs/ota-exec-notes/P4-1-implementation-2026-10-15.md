@@ -1615,3 +1615,126 @@ batch's key-build fixture root. The independent reviewer closed both key lifecyc
 findings against the actual 134-test original and reported no further blocker in
 that bounded development review. Native compilation and real CI are still the
 next validation step, not an already-passed result.
+
+### Actual Native CI And Readiness Archive
+
+The preceding pre-CI checkpoint is now followed by actual successful PR checks
+on `18c4da4d28c1f2bcf7175f4b461e2a6bf462a23e`. The runner checked out temporary merge
+`5b1c50f526f0edf90884b58c1c321593b7db0d1f`; source and checkout have the exact same
+tree `5a6977eeace9ea96668f800b50e02b259bfcfe45`. Main is still the original
+`b42d3e25db85d6aba397cb4d0fb34bb5b653904f`, and PR 27 stays draft/open/unmerged.
+
+| Actual PR workflow | Run ID | Observation |
+| --- | --- | --- |
+| MCU Firmware Build | 38788072495 | SUCCESS; ordinary and shared key-bound GCC App/Boot builds and tooling checks pass |
+| Cloudflare Update Service Checks | 38788072597 | SUCCESS; Worker native invariants and all three typechecks pass |
+| Acceptance Governance | 38788072424 | SUCCESS; main governance suites and both host-helper jobs pass |
+| Build APK and EXE Release | 38788072457 | SUCCESS; path detection only, build/deploy/release jobs skipped |
+
+The original tooling logs report separate suites of 34 script/migration, 134
+pipeline host, 156 native workerd, 57 workflow/Bash, 22 byte, 8 package and 9 golden
+tests. Governance counts are 127/36/3/14/11/62/39/29. The backend repeats the 156
+native suite; aggregate and step log copies are not additional cases. Local
+134/57/22/23 and typecheck receipts are all closed with exit 0.
+
+Ordinary GCC and keyed GCC each retain **640 compiler/linker warnings and zero
+errors**. Vendor tooling has six warnings. The keyed App raw input is 605056 bytes,
+SHA-256 `6757d819d080671a68de8d3db51140464cf184e8f9349f911dc58d59b76ff296`;
+its finalized App is `44a5e24b09118fe3eb3a5aff0cef9c9f55ef2b00cc8760f8e6773edb66d09797`.
+The matching 14724-byte Boot is
+`3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34`, identical
+to the ordinary build. This is a real public-fixture-key build, not a protected
+real-key candidate and not an assertion that Boot consumes AES.
+
+The actual keyed CMake cache is OFF, its Ninja launcher rules are cache-free,
+and compile-input/source/header fingerprints match build and packaging records.
+Both actual GCC paths preserve full/recovery byte equality; the separate synthetic
+fixture preserves full/patch/recovery equality. Cleanup succeeds and no
+`private-key.h` occurs in any uploaded artifact. Isolated binding qualification,
+rehearsal and production all remain skipped, not passed.
+
+New immutable originals:
+`docs/ota-exec-notes/P4-1-readiness-2026-10-16/`. The 98-file archive contains
+eight digest-verified artifact ZIPs, four raw CI log ZIPs, exact API identities,
+selected metadata and 15 closed local command receipts with their streams.
+Inventory SHA-256:
+`61c2710ad57e32bce8445de6bccbf36113f32e61616a6245c55dae176e2a7068`.
+Both archive dry-run and exclusive-create apply passed the same output plan
+`274dac582cf2563af71f80d00e2cb55eccaf8ee5b789f284879d3f013a1753e1`.
+No older inventory, bootstrap bytes or frozen acceptance bundle was modified.
+
+The archive also retains the reviewer's original key-lifecycle closure and its
+new preservation message for the four scope decisions. That message labels the
+old GOV-ENTRY decision as a summary because its verbatim message is unavailable;
+the key-approval/bootstrap excerpts and cloud-scope excerpt are identified as
+such. It does not backdate this new CI into earlier review evidence.
+
+Artifact retrieval had real transport failures: Node connection/overall timeouts,
+GitHub CLI EOF and a proxied curl timeout after 2292671/3160895 bytes. Partial
+responses were not saved as ZIPs. The existing Node API identity/redirect route
+plus installed curl direct HTTPS completed the same fixed downloads with TLS
+verification intact; all eight exact GitHub ZIP digests then passed. No CI rerun,
+new cloud mutation, proxy service or system setting change was used. One CLI error
+included a short-lived signed download URL in tool output, not a repository file;
+the adapter now redacts those URLs before reporting errors.
+
+### Remaining Real Owner Boundary
+
+The useful autonomous implementation/self-test/native-CI work for this follow-up
+is complete; **P4-1 as a whole is not complete or ready for the new acceptance
+agent**. P41-CF-CREDENTIAL-02 and real protected key/configuration remain genuine
+owner boundaries, not reasons to invent a main-first merge, token-management
+permission, another key-hash approval variable or a new bootstrap campaign.
+
+The owner must name/authorize a production-free Cloudflare test account and its
+test-only resource boundary, provide the corresponding constrained credential
+through a private local input or protected Secret, and authorize preparation of
+the existing `firmware-rehearsal` environment and non-development OTA key. Account
+changes require reviewed rebinding/migration of the pinned qualification fixtures.
+Do not copy the current account's provisioning token into CI or dispatch a job
+that would auto-create an unprotected environment. After configuration, qualify
+the existing native binding route and actual keyed candidate before handoff;
+exact target/descriptor approval and the single canonical rehearsal remain under
+their declared independent authority. No production gate unlock, main merge,
+Release/tag, device operation or P3-5/P4-3/P4-4 start is authorized by this record.
+
+### Record Regression And Boundary Audit
+
+The documentation delta passes `PostP26SpecGovernanceTests` 23/23, exit 0, under
+the contained runner (`p41-ready-record-governance`). The tracked operational-note
+`git diff --check` passes. The later full staged check exits 2 on original CRLF
+and trailing blank lines in byte-preserved logs/CMake outputs; those bytes are
+not rewritten. The explicit operational-note/README staged check passes separately.
+Git's two ordinary LF-to-CRLF notices for the operational notes are not compiler
+diagnostics and do not change the evidence directory's explicit `-text` policy.
+
+The read-only output audit passes with 7349 resolved existing entries, all 97
+original inventory bindings intact, 99 archive files and 927 ZIP members scanned.
+No private-key header or supplied credential value was found in those evidence
+bytes. All 18 earlier recorded commands are closed; their process IDs are absent
+from the current process list. The audit's own outer receipt subsequently closed
+with exit 0. Preflight-only directories/`p41-ready-gov-r2` and the deleted empty
+`20)` file are recorded as absent, not fabricated successful commands.
+
+The `20)` file was an earlier CMD redirection accident from an unquoted Node
+comparison: parsing failed before token access; the exact empty owned file was
+verified and deleted with apply_patch, never staged or committed. Subsequent
+read-only quoting/search errors created no files. These incidents and bounded
+download failures are preserved in the selected-output record, not hidden as
+successful operations.
+
+Shared-root index SHA-256 remains
+`2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`.
+Only the already-authorized exclusive-worktree Git metadata/common objects and
+own branch ref are outside the active worktree's selected write paths. No new
+PowerShell, local native/Flutter build, Cloudflare configuration mutation, main
+merge or device operation occurred. This audit does not settle the earlier
+P41-AUDIT-01 external PowerShell-cache attribution or authorize cleanup there.
+
+The independent bounded evidence/record review returns **NO FINDINGS**: all 97
+original inventory bindings, eight artifact digests/810 members, 14 selected
+originals and four log ZIPs/117 members match. It confirms the actual count,
+cache/key/byte/cleanup observations and the IN_PROGRESS/NOT_RUN boundaries.
+The verbatim response is preserved as `closeout/independent-readiness-review.json`
+in the new archive. Later closeout receipts/annotations are not automatically
+included in that review; none of this is a new whole-card acceptance decision.

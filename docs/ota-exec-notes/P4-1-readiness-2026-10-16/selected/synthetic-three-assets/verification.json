@@ -1,0 +1,319 @@
+{
+  "ok": true,
+  "commitSha": "1111111111111111111111111111111111111111",
+  "runId": "9001",
+  "versionName": "2.8.1",
+  "build": {
+    "commitSha": "1111111111111111111111111111111111111111",
+    "versionName": "2.8.1",
+    "versionCode": 20801,
+    "buildTimestamp": 1786320000,
+    "app": {
+      "fileName": "X-Track-App-GCC.bin",
+      "sizeBytes": 8192,
+      "sha256": "53d5a53ab0fa8746c7beb95adb8ecbf82a92481f6903d3fed8ae7d9f61153b63"
+    },
+    "boot": {
+      "fileName": "X-Track-Boot.bin",
+      "sizeBytes": 37,
+      "sha256": "25c8bdea3470cb14ca3d90f97b2676be70a501c238825a473acb4df0fb580895"
+    }
+  },
+  "base": {
+    "isFormalRelease": true,
+    "kind": "app",
+    "versionName": "2.8.0",
+    "versionCode": 20800,
+    "releaseTag": "mcu-e-track-at32f435-v2.8.0",
+    "commitSha": "2222222222222222222222222222222222222222",
+    "imageSha256": "074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1",
+    "sourceSha256": "074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1",
+    "sourceSizeBytes": 8192,
+    "sourceUrl": "https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.0/X-Track-App-GCC.bin"
+  },
+  "finalImage": {
+    "fileName": "app-final.bin",
+    "sizeBytes": 8192,
+    "sha256": "d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5"
+  },
+  "assets": [
+    {
+      "kind": "full",
+      "baseImageSha256": "",
+      "baseVersionCode": 0,
+      "fileName": "e-track-at32f435-v2.8.1-full.etu",
+      "sha256": "eb61269a3048c74ec1ad4929c13bc3ea1296325be8af353b632be10a7f0b31f8",
+      "sizeBytes": 202,
+      "githubUrl": "https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "r2Verified": false
+    },
+    {
+      "baseImageSha256": "074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1",
+      "baseVersionCode": 20800,
+      "kind": "patch",
+      "fileName": "e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "sha256": "c4ef9aebec606eefcb1c9863c5d866ca55e1abb44b655aab292f2a8331d15cc4",
+      "sizeBytes": 208,
+      "githubUrl": "https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "r2Verified": false
+    },
+    {
+      "kind": "recovery",
+      "baseImageSha256": "",
+      "baseVersionCode": 0,
+      "fileName": "recovery-v2.8.1.bin",
+      "sha256": "0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c",
+      "sizeBytes": 8200,
+      "githubUrl": "https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin",
+      "r2Verified": false
+    }
+  ],
+  "fullByteEqual": true,
+  "patchByteEqual": true,
+  "recoveryVerified": true,
+  "preparedMetadataSha256": "2bc35a62d9b8de014c62013a31321c734173a7a152ca0e386776a69d7abd2a7b",
+  "expectedReadyMetadataSha256": "3250e349e4c5843e13787749a6eb3ed3ab5eff2d39718046fdb833347f602b1b",
+  "r2Verified": false,
+  "steps": [
+    {
+      "label": "base-verify",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        ".github/scripts/firmware-byte-check.py",
+        "--input",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/base.bin",
+        "--kind",
+        "app",
+        "--version",
+        "2.8.0",
+        "--sha256",
+        "074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "e44820868d3edb505e1e676129c0e3d94af62e1db5f71791766d2180aeda7e2c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "base-extract",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        "Tools/jlink/prepare-bootstrap-app.py",
+        "prepare",
+        "--input",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/base.bin",
+        "--input-kind",
+        "app",
+        "--output",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/work/base-final.bin"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "cc9739c7c8f82cd1705c07cb9e39bafd590c07af4a9d467242fd09a80540609e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "finalize",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        "Tools/etu_pack.py",
+        "finalize",
+        "--app",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/X-Track-App-GCC.bin",
+        "--out",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/app-final.bin",
+        "--ver-name",
+        "2.8.1",
+        "--build-ts",
+        "1786320000"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "1c604b302ce19ece7fd3f2136594a8e538fbadcf24662acee2007f50492bf4a4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "finalized-verify",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        ".github/scripts/firmware-byte-check.py",
+        "--input",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/app-final.bin",
+        "--kind",
+        "app",
+        "--version",
+        "2.8.1",
+        "--sha256",
+        "d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5",
+        "--placeholder",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/X-Track-App-GCC.bin",
+        "--placeholder-sha256",
+        "53d5a53ab0fa8746c7beb95adb8ecbf82a92481f6903d3fed8ae7d9f61153b63"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "ebc5ba6dde09ac6905ded29b6ae8fe18c4975ef39c0a524bcb74730e59ea4daa",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "full-pack",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        "Tools/etu_pack.py",
+        "pack-full",
+        "--app",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/app-final.bin",
+        "--out",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/e-track-at32f435-v2.8.1-full.etu",
+        "--ver-name",
+        "2.8.1"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "7489944ffa40cbd8e0b2a7278eacf3b0b1c371c1ad755a6793c415fc10aaacac",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "full-apply",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        "Tools/etu_unpack.py",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/e-track-at32f435-v2.8.1-full.etu",
+        "--out",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/work/full-candidate.bin",
+        "--verify-fw-header"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "b81318ada1f1fa32a106fab6e968c64311a639ef5f69f5763f20b4cfcea99c24",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "full-outer-verify",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        ".github/scripts/firmware-byte-check.py",
+        "--input",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/app-final.bin",
+        "--kind",
+        "app",
+        "--version",
+        "2.8.1",
+        "--sha256",
+        "d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5",
+        "--package",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/e-track-at32f435-v2.8.1-full.etu"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "ebc5ba6dde09ac6905ded29b6ae8fe18c4975ef39c0a524bcb74730e59ea4daa",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "patch-pack",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        "Tools/etu_pack.py",
+        "pack-patch",
+        "--old",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/work/base-final.bin",
+        "--new",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/app-final.bin",
+        "--out",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+        "--ver-name",
+        "2.8.1",
+        "--base-ver-name",
+        "2.8.0",
+        "--bsdiff-exe",
+        "/home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "81690bf531eeb0cbb2185fcfeed88d14a4ea89182b55a9560de616240013fdd0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "patch-apply",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        "Tools/etu_unpack.py",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+        "--old",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/work/base-final.bin",
+        "--out",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/work/patch-candidate.bin",
+        "--verify-fw-header"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "63650e8eafa3038c61e01a257e0b028eca7529d50f1525949b482dc91a986607",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "patch-outer-verify",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        ".github/scripts/firmware-byte-check.py",
+        "--input",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/app-final.bin",
+        "--kind",
+        "app",
+        "--version",
+        "2.8.1",
+        "--sha256",
+        "d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5",
+        "--package",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+        "--base-image",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/work/base-final.bin"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "ebc5ba6dde09ac6905ded29b6ae8fe18c4975ef39c0a524bcb74730e59ea4daa",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "recovery-create",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        "Tools/jlink/prepare-bootstrap-app.py",
+        "prepare",
+        "--input",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/app-final.bin",
+        "--input-kind",
+        "app",
+        "--output",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/work/recovery-app.bin",
+        "--recovery-output",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/recovery-v2.8.1.bin"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "3fd1716113dbba7e43e2bec8ea6e735b57307948d1dc5efdb359e3e3c551f9ce",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "recovery-verify",
+      "executable": "python3",
+      "argv": [
+        "-B",
+        ".github/scripts/firmware-byte-check.py",
+        "--input",
+        "/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-zlzGyN/prepared/recovery-v2.8.1.bin",
+        "--kind",
+        "recovery",
+        "--version",
+        "2.8.1",
+        "--sha256",
+        "d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "e35b9cea9de36cca5865085a2e041f08bedffaeb57c4245209ac1cb74b073b41",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

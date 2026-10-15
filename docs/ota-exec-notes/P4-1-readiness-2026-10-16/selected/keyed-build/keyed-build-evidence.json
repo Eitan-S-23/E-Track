@@ -1,0 +1,128 @@
+{
+  "commitSha": "5b1c50f526f0edf90884b58c1c321593b7db0d1f",
+  "versionName": "2.7.0",
+  "keyBinding": {
+    "schemaVersion": 1,
+    "keyId": 1,
+    "source": "development-ci-key-v1",
+    "keySha256": "cc8cd41cef907c4d216069122c4b89936211361f9050a717a1e37ad1862e952f",
+    "headerSha256": "95088a84ad464c29db38f8496489bcdf876f3840f0e172a94e07f012b61bf957",
+    "keySourceSha256": "baf619c85412a9f87f249ee97a19bf781a9b802fe2aab68254fedca884609495"
+  },
+  "keyCompileCommand": {
+    "directory": "/home/runner/work/E-Track/E-Track/.cache/keyed-development-build",
+    "command": "/home/runner/gcc-arm-none-eabi-13.3.1-linux-x64/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc -DARDUINO=111 -DAT32F435RGT7 -DLIBRARY_VERSION -DOTA_TARGET_APP -D_RTE_ -D__AT32F435_437__ -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/cmake/compat-includes -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../ArduinoAPI -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../Platform/Core -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../Platform -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../Libraries -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../Libraries/SdFat/src -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../Simulator/LVGL.Simulator -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../segger_rtt -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Config -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Common/DataProc -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/StatusBar -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/StartUp -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/Dialplate -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/Menu -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/RouteImport -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/RouteSelect -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/LiveMap -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/SystemInfos -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Pages/_Template -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Resource -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/DataCenter -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/DataCenter/PingPongBuffer -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/Filters -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/GPX -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/GPX_Parser -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/lv_allocator -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/lv_anim_label -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/lv_img_png -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/lv_img_png/PNGdec/src -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/lv_poly_line -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/MapConv -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/MapConv/GPS_Transform -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/MapConv/TileSystem -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/PageManager -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/PointContainer -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/ResourceManager -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/StorageService -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/TonePlayer -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/Time -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/TileConv -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/App/Utils/TrackFilter -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/HAL -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../USER/lv_port -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../Libraries/cm_backtrace -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../RTE/_X-Track -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../RTE/Device/-AT32F435RGT7 -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../vendor/CMSIS/Include -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../vendor/AT32F435_437_DFP/Peripherals/inc -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../vendor/AT32F435_437_DFP/Device/Include -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../boot/include -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../bsdiff_lzma_AES128-main/bspatch/AES128_CTR -I/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/../../bsdiff_lzma_AES128-main/bspatch/lzma -include \"/home/runner/work/E-Track/E-Track/.cache/keyed-development-build/private-key.h\" -fstack-usage -include /home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated/cmake/gcc_compat.h -mfloat-abi=hard -mthumb -mfpu=fpv4-sp-d16 -mcpu=cortex-m4 -mlittle-endian -ffunction-sections -fdata-sections -fno-common -pipe -Wall -Wextra -funsigned-char -fshort-enums -fshort-wchar -Oz -std=c99 -o CMakeFiles/X_Track_App_GCC.dir/home/runner/work/E-Track/E-Track/Libraries/OTA/ota_keys.c.obj -c /home/runner/work/E-Track/E-Track/Libraries/OTA/ota_keys.c",
+    "file": "/home/runner/work/E-Track/E-Track/Libraries/OTA/ota_keys.c",
+    "output": "CMakeFiles/X_Track_App_GCC.dir/home/runner/work/E-Track/E-Track/Libraries/OTA/ota_keys.c.obj"
+  },
+  "artifacts": [
+    {
+      "path": "app/X-Track-App-GCC.bin",
+      "sizeBytes": 605056,
+      "sha256": "6757d819d080671a68de8d3db51140464cf184e8f9349f911dc58d59b76ff296",
+      "modifiedAt": "2026-10-15T18:45:42.698Z"
+    },
+    {
+      "path": "app/X-Track-App-GCC.elf",
+      "sizeBytes": 873176,
+      "sha256": "111306f4796306c8ebf02f76a4dac332adef5f5df142e1abbafe60c3865b0da1",
+      "modifiedAt": "2026-10-15T18:45:42.684Z"
+    },
+    {
+      "path": "app/X-Track-App-GCC.hex",
+      "sizeBytes": 1700560,
+      "sha256": "88ed8e62e7e667a56163f20a1e9d2cc2a4e785202fef0264ef15a6e2183b601e",
+      "modifiedAt": "2026-10-15T18:45:42.696Z"
+    },
+    {
+      "path": "app/X-Track-App-GCC.map",
+      "sizeBytes": 2644420,
+      "sha256": "d6581f90483fdc490728670f01f241d9d24934719493daf9dc439e7bada66682",
+      "modifiedAt": "2026-10-15T18:45:42.686Z"
+    },
+    {
+      "path": "boot/X-Track-Boot.bin",
+      "sizeBytes": 14724,
+      "sha256": "3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34",
+      "modifiedAt": "2026-10-15T18:45:42.232Z"
+    },
+    {
+      "path": "boot/X-Track-Boot.elf",
+      "sizeBytes": 36856,
+      "sha256": "1bb6165ab417e73c93a67dcdf0376a71ae899ff0a91120349d52a959a1d2b1d0",
+      "modifiedAt": "2026-10-15T18:45:42.227Z"
+    },
+    {
+      "path": "boot/X-Track-Boot.hex",
+      "sizeBytes": 41485,
+      "sha256": "dc4931290503fb9c47ca4b7a6754225a787e6103db022331c1b5d303c7a4ad64",
+      "modifiedAt": "2026-10-15T18:45:42.232Z"
+    },
+    {
+      "path": "boot/X-Track-Boot.map",
+      "sizeBytes": 106991,
+      "sha256": "0aaacc00a9c25993705c39a9b96cb6ab1f6b915be7670465974623dc230c8a25",
+      "modifiedAt": "2026-10-15T18:45:42.229Z"
+    }
+  ],
+  "steps": [
+    {
+      "label": "configure",
+      "executable": "cmake",
+      "argv": [
+        "-S",
+        "/home/runner/work/E-Track/E-Track/MDK-ARM_F435/cmake-generated",
+        "-B",
+        "/home/runner/work/E-Track/E-Track/.cache/keyed-development-build",
+        "-G",
+        "Ninja",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_OBJECT_PATH_MAX=1024",
+        "-DKEIL_GCC_COMPILER_CACHE:STRING=OFF",
+        "-DCMAKE_C_FLAGS=-include \"/home/runner/work/E-Track/E-Track/.cache/keyed-development-build/private-key.h\""
+      ],
+      "exitCode": 0,
+      "warningLines": 0,
+      "errorLines": 0,
+      "stdoutSha256": "c88c48ed773956abff9cc33cc54c187b25d1cd679e40e5805432fd8b1df48672",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "build",
+      "executable": "cmake",
+      "argv": [
+        "--build",
+        "/home/runner/work/E-Track/E-Track/.cache/keyed-development-build",
+        "--target",
+        "X_Track_App_GCC",
+        "X_Track_Boot",
+        "--parallel"
+      ],
+      "exitCode": 0,
+      "warningLines": 640,
+      "errorLines": 0,
+      "stdoutSha256": "181d594e3f780b36853a2f6f6ef86031814123dfbf024b179924512cf0452eb9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "size",
+      "executable": "arm-none-eabi-size",
+      "argv": [
+        "--format=berkeley",
+        "/home/runner/work/E-Track/E-Track/.cache/keyed-development-build/app-gcc/X-Track-App-GCC.elf",
+        "/home/runner/work/E-Track/E-Track/.cache/keyed-development-build/boot/X-Track-Boot.elf"
+      ],
+      "exitCode": 0,
+      "warningLines": 0,
+      "errorLines": 0,
+      "stdoutSha256": "526602e30b097ad8cc0b1b389ff68d62d98a5de99389128c623c48d7508d11bc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sourceDateEpoch": "1786320000",
+  "compilerCache": "DISABLED",
+  "compilerCacheConfigSha256": "4ea126d24969944e850c15a15c3e7a8dc02f2e466af13572b33a1bb07c666969",
+  "compilerLaunchersSha256": "7cfc5e158779de39c125d02629ab3acd67e87525719574be14371f13a9a4a324",
+  "bootKeyConsumer": false,
+  "note": "App decrypts ETU; matching Boot is built in the same invocation, not an AES consumer"
+}
