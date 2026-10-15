@@ -7,6 +7,7 @@ import { captureBuildInputs, digest, metadataBytes, prepareFirmwareRelease, read
 import { firmwareGitHub } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-github-release.mjs";
 import { publishPreparedRelease, releaseConfig, verifyPromotion } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
 import { withFirmwareBucket } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs";
+import { DEVELOPMENT_PACKAGING_KEY, verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
 
 async function main() {
   const [command, ...argv] = process.argv.slice(2);
@@ -38,7 +39,7 @@ async function main() {
         commitSha: build.commitSha, versionName: build.versionName, releaseNotes: "DEVELOPMENT ONLY; not a release or rehearsal",
         hardwareRevision: 1, layoutId: 1, minBootVersion: 1, minProtocolVersion: 1, targetHardware: "AT32F435RGT7", minAppVersionCode: 0 };
       const result = await prepareFirmwareRelease({ root, app, boot, build, release, outputDir,
-        repository: process.env.GITHUB_REPOSITORY ?? "Eitan-S-23/E-Track", aesKey: "01".repeat(16),
+        repository: process.env.GITHUB_REPOSITORY ?? "Eitan-S-23/E-Track", aesKey: DEVELOPMENT_PACKAGING_KEY,
         python: options.python ?? "python3" });
       await writeOutput(root, path.join(outputDir, "DEVELOPMENT-ONLY.json"), JSON.stringify({ installable: false,
         formalBase: "NOT_USED", rehearsal: "NOT_RUN", remoteEffects: "NOT_RUN", testKey: "isolated fixture key" }) + "\n");
@@ -47,6 +48,7 @@ async function main() {
     }
     const env = process.env;
     const config = releaseConfig(env);
+    verifyBuildKeyBinding(build, env);
     if (build.commitSha !== env.GITHUB_SHA || build.versionName !== env.RELEASE_VERSION
       || build.versionCode !== versionCodeFor(env.RELEASE_VERSION)) throw new CliError("Build artifact does not belong to this release run");
     const release = { releaseTag: `mcu-e-track-at32f435-v${build.versionName}`, runId: config.canonicalRunId,

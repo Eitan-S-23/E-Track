@@ -5,6 +5,7 @@ import { canonicalJson, parseFirmwareRegistration } from "./firmware-schema.mjs"
 import { digest, metadataBytes, readyProjection } from "./prepare-firmware-release.mjs";
 import { uploadFirmwareAsset } from "./upload-firmware-r2-asset.mjs";
 import { registerFirmware } from "./register-firmware-release.mjs";
+import { approvedFirmwareKey } from "./firmware-release-key.mjs";
 
 const fail = message => new CliError(message, "RELEASE_CONFLICT", 1);
 const cancelled = () => new CliError("Release execution cancelled", "BACKEND_UNAVAILABLE", 1);
@@ -12,7 +13,7 @@ const active = signal => { if (signal?.aborted) throw cancelled(); };
 
 export function releaseConfig(env) {
   const mode = env.FIRMWARE_RELEASE_MODE;
-  if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || !["rehearsal", "production"].includes(mode)
+  if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || env.INPUT_CHECK_BINDINGS === "true" || !["rehearsal", "production"].includes(mode)
     || (mode === "production" ? env.INPUT_PUBLISH !== "true" || env.INPUT_REHEARSAL === "true"
       : env.INPUT_REHEARSAL !== "true" || env.INPUT_PUBLISH === "true")) throw new CliError("Only an explicit, unambiguous release dispatch can use cloud bindings");
   if (env.OTA_BOOT_CHAIN_READY !== (mode === "production" ? "true" : "false")) throw fail("Boot-chain gate is not in the required state");
@@ -21,6 +22,7 @@ export function releaseConfig(env) {
     "GITHUB_REPOSITORY", "GITHUB_SHA", "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "OTA_PREVIOUS_RELEASE_JSON",
     "TRACE_FIRMWARE_MIN_APP_VERSION_CODE", "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION"];
   for (const key of keys) if (!env[key]) throw new CliError(`Missing release configuration: ${key}`);
+  approvedFirmwareKey(env);
   for (const key of ["CLOUDFLARE_API_TOKEN", "TRACE_DEPLOY_TOKEN", "GITHUB_TOKEN"]) {
     if (/\s/.test(env[key])) throw new CliError("Release credentials must not contain whitespace");
   }

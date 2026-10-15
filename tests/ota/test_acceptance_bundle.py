@@ -2304,7 +2304,6 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
     WORKFLOW = ROOT / ".github" / "workflows" / "acceptance-governance.yml"
     MATRIX_START = "<!-- post-p2-6-readiness:start -->"
     MATRIX_END = "<!-- post-p2-6-readiness:end -->"
-    P41_CANDIDATE_MATURITY = "REVIEWED"
     TYPE_BY_SUFFIX = {
         "implementation": "IMPLEMENTATION",
         "experiment": "EXPERIMENT",
@@ -2572,8 +2571,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 self.assertIn(row["dispatch_eligibility"], {"DISPATCHABLE", "NOT_DISPATCHABLE"})
                 expected_content = "DEFERRED_ACCEPTANCE" if row["type"] == "ACCEPTANCE" else "READY"
                 self.assertEqual(expected_content, row["content_readiness"])
-                expected_maturity = self.P41_CANDIDATE_MATURITY if row["task_id"] in {"P4-1", "P4-4"} else "FROZEN"
-                self.assertEqual(expected_maturity, row["governance_maturity"])
+                self.assertEqual("FROZEN", row["governance_maturity"])
                 expected_dispatch = (
                     "DISPATCHABLE"
                     if row["content_readiness"] == "READY"
@@ -2598,7 +2596,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
                 self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
         self.assertEqual(
-            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-2"},
+            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-1", "P4-2"},
             dispatchable,
             "可派单集合必须精确受控：历次解锁及 OTA-DEC-014 新增 P3-8 均须同批登记 §9，不能用子集比较放宽",
         )
@@ -2771,9 +2769,9 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         status_by_decision = dict(zip(ids, statuses))
         self.assertIn("OTA-DEC-017", status_by_decision)
         self.assertEqual(
-            {decision: "PROPOSED" if decision == "OTA-DEC-017" else "DECIDED" for decision in ids},
+            {decision: "DECIDED" for decision in ids},
             status_by_decision,
-            "只有 OTA-DEC-017 是待生效候选，不可把技术委托或开发测试冒充冻结",
+            "全部决定须有明确裁定；分支条款冻结不代替环境或正式执行审批",
         )
 
         reference_text = self.contract + "\n" + self.board
@@ -2823,11 +2821,14 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         self.assertIn("### 记录 9", self.decisions)
         self.assertEqual(1, self.decisions.count(authorization))
         self.assertIn("本轮新增条款成熟度：`FROZEN`", self.contract)
-        self.assertEqual(3, self.contract.count(f"`{self.P41_CANDIDATE_MATURITY}`"))
-        self.assertIn("主线集成并重新冻结前不得据此执行正式 rehearsal 或 production", self.contract)
+        self.assertNotIn("`REVIEWED`", self.contract)
+        self.assertIn("P41-GOV-ENTRY-01", self.contract)
+        self.assertIn("main 或待合并分支的精确已提交 revision", self.contract)
+        self.assertIn("不要求先合并整个 P4-1", self.contract)
+        self.assertIn("不把条款冻结当作配置就绪、descriptor 审批、rehearsal 实测或整卡验收", self.contract)
         self.assertNotIn("阻断决定：", self.contract)
 
-    def test_p41_bootstrap_candidate_keeps_source_and_execution_boundaries(self):
+    def test_p41_bootstrap_freeze_keeps_source_and_execution_boundaries(self):
         section = self.contract.split("### OTA-XC-BOOTSTRAP-BASE", 1)[1].split("### OTA-XC-", 1)[0]
         for token in (
             "OTA-DEC-017", "inaugural-bootstrap-v1", "isFormalRelease", "false", "sourceArtifactSha256",
@@ -2840,9 +2841,14 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 self.assertIn(token, section)
         for row in self.readiness_rows():
             if row["task_id"] in {"P4-1", "P4-4"}:
-                self.assertEqual("NOT_DISPATCHABLE", row["dispatch_eligibility"])
+                self.assertEqual("DISPATCHABLE" if row["task_id"] == "P4-1" else "NOT_DISPATCHABLE", row["dispatch_eligibility"])
                 self.assertIn("OTA-XC-BOOTSTRAP-BASE", row["contract_refs"])
         self.assertIn("1和2我都不清楚，你不知道吗？全权授权给你", self.decisions)
+        self.assertIn("### 记录 15", self.decisions)
+        decision = self.decisions.split("## OTA-DEC-017", 1)[1].split("## 用户裁定原文", 1)[0]
+        for token in ("P41-GOV-ENTRY-01", "2026-10-16", "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+                      "eec231646c0a1ad4af98ac889d7491db6c39ae4d", "不要求先合并整个 P4-1", "不等于环境已配置"):
+            self.assertIn(token, decision)
         gate = self.contract.split("### OTA-XC-RELEASE-GATE", 1)[1].split("## 7.", 1)[0]
         self.assertIn("e-track-firmware-p41-test-releases", gate)
         self.assertIn("禁止本链演练或生产使用它", gate)
@@ -2916,14 +2922,13 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
             for decision_id, status in decision_statuses.items()
             if status in self.ACTIVE_DECISION_STATUSES
         }
-        self.assertEqual({"OTA-DEC-017"}, active)
+        self.assertEqual(set(), active)
         for row, target, text in self.prompt_records():
             with self.subTest(task=row["task_id"]):
                 violations = self.proposed_decision_requirement_violations(text, active)
                 self.assertEqual([], violations, f"{target.name} 把未决决定写到了执行要求中")
                 blocking_section = text.split("## 阻断性决策", 1)[1]
-                expected = {"OTA-DEC-017"} if row["task_id"] in {"P4-1", "P4-4"} else set()
-                self.assertEqual(expected, set(re.findall(r"OTA-DEC-\d{3}", blocking_section)))
+                self.assertEqual(set(), set(re.findall(r"OTA-DEC-\d{3}", blocking_section)))
 
     def test_task_status_fields_only_appear_in_board_matrix(self):
         files = [self.CONTRACT, self.DECISIONS]
@@ -3093,10 +3098,10 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
             if status in {"OPEN", "PROPOSED"}
         }
         self.assertEqual(
-            {key: "PROPOSED" if key == "OTA-DEC-017" else "DECIDED" for key in decision_statuses},
+            {key: "DECIDED" for key in decision_statuses},
             decision_statuses,
         )
-        self.assertEqual({"OTA-DEC-017"}, blocking_decisions)
+        self.assertEqual(set(), blocking_decisions)
         clause_matches = list(re.finditer(r"(?m)^### (OTA-XC-[A-Z0-9-]+)$", self.contract))
         clause_sections = {}
         for index, match in enumerate(clause_matches):
@@ -3117,10 +3122,9 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
             affected_tasks = set(re.findall(r"(?:PRE|P\d+)-\d+", row["affected_tasks"]))
             clauses = set(re.findall(r"OTA-XC-[A-Z0-9-]+", row["条款 ID"]))
             self.assertIn(completeness, {"COMPLETE", "INCOMPLETE", "BLOCKED_BY_DECISION"})
-            candidate = row["Producer"] in {"GitHub immutable baseline archive", "GitHub environment/secrets"}
-            self.assertEqual("BLOCKED_BY_DECISION" if candidate else "COMPLETE", completeness)
-            self.assertEqual(self.P41_CANDIDATE_MATURITY if candidate else "FROZEN", maturity)
-            self.assertEqual({"OTA-DEC-017"} if candidate else set(), decisions, "仅候选来源/配置接口保留决定阻断")
+            self.assertEqual("COMPLETE", completeness)
+            self.assertEqual("FROZEN", maturity)
+            self.assertEqual(set(), decisions, "接口条款冻结不代替实际环境就绪")
             self.assertEqual(set(), decisions - known_decisions, "接口矩阵引用了不存在的决定")
             self.assertEqual(set(), decisions - blocking_decisions, "接口矩阵只能把 OPEN/PROPOSED 决定列为阻断")
             self.assertEqual(set(), affected_tasks - board_ids, "接口矩阵引用了不存在的任务")

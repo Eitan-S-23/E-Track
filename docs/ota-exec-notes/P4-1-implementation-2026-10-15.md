@@ -1,11 +1,12 @@
 # P4-1 Unattended Development
 
-Status: IN_PROGRESS (whole card). Unattended development is COMPLETE on product
-`ae6cd49c2f756dd9094ee390121fc0825dbbceac`: actual PR checks passed and the
-non-implementing reviewer closed all three required repairs. See PR Remediation
-Closure below. Earlier dispatch successes and PR/red-test failures remain intact.
-This bounded development review is not whole-card acceptance. Main integration,
-real rehearsal and the retained external audit question are not declared complete.
+Status: IN_PROGRESS (whole card and current readiness follow-up). The earlier
+bounded development checkpoint on `ae6cd49c2f756dd9094ee390121fc0825dbbceac`
+passed its actual PR checks and three independent repair reviews; that history
+is retained below, not a claim that all later readiness gaps are closed.
+The latest 2026-10-16 runtime/key follow-up is at the end of this note. Main
+integration, canonical rehearsal and whole-card independent acceptance remain
+unperformed; the new acceptance agent must not be handed an incomplete setup.
 Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen references.
 
 ## Entry And Authority
@@ -1446,3 +1447,171 @@ entries, the real read-only source/header identities and the appended scope
 annotations. Its verbatim verdict is `independent-closeout-review.json` in the
 new CI archive. This approves the bounded documentation-only delivery, not main
 integration, environment activation, canonical rehearsal or whole-card acceptance.
+
+## 2026-10-16 Runtime And Key Readiness Follow-Up
+
+The user requires finishing P4-1 implementation/readiness before a new independent
+acceptance agent starts. The current batch starts at `eec231646c0a1ad4af98ac889d7491db6c39ae4d`,
+on the same exclusive worktree and branch. No main merge, tag/Release, production
+write, gate unlock, device operation or other task start is admitted by this work.
+The prior isolated firmware setup authorization is retained; it does not authorize
+exporting its provisioning credential to CI or inventing an independent approval.
+
+### P41-GOV-ENTRY-01: Branch Freeze, Not Main Before Acceptance
+
+Disposition: DECIDED by the delegated root technical owner, independently reviewed
+by `/root/p41_bootstrap_review` on 2026-10-16. The acceptance execution contract,
+section 1 item 3, expressly permits a pending committed branch. The preceding
+main-before-acceptance requirement was an agent-added restriction and is superseded.
+The reviewed source/bucket candidate is `c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124`;
+its latest reviewed delivery record is `eec231646c0a1ad4af98ac889d7491db6c39ae4d`.
+
+OTA-DEC-017 and its two consumer interfaces are frozen on this pending branch.
+Actual formal execution still requires authorized approval, independent review
+and a v3 freeze against an exact committed revision, plus real protected
+configuration and inputs. Main delivery is separate authorized closeout after
+independent acceptance. The board restores only P4-1 implementation admission;
+P4-1 stays incomplete and P4-4 stays unstarted. Historical PROPOSED/REVIEWED records
+and frozen bundles are not modified.
+
+### P41-CF-RUNTIME-01: Supported Native Runtime Entry
+
+The observed Windows host is 10.0.19045.6456. Installed Wrangler 4.105.0 documents
+Windows 11, macOS 13.5+ or Linux glibc 2.35 as its supported hosts; installed workerd
+is 1.20260625.1. The existing Windows 0xc0000005 failure is preserved, not blindly
+retried. No WSL/system runtime installation or local native build was attempted.
+
+The uploader now rejects a known unsupported Windows host before creating runtime
+directories. Windows 11 is checked by build 22000, not kernel major 11. Ordinary
+Windows script/SQLite tests remain enabled. `verifyStoredFirmwareAsset` reuses the
+uploader's existing full streamed hash/length and conditional ETag readback; it has
+no upload fallback.
+
+The existing firmware workflow has a default-off `check_bindings` dispatch input
+and a protected, commit-bound Linux job. It reads only the three existing synthetic
+qualification objects, exact Worker settings and fixed D1 SELECTs, comparing the
+bounded before/after D1 observations. It neither creates a package nor registers,
+publishes, promotes or performs canonical rehearsal. Build/checks and dependency
+installation do not acquire cloud credentials; mixed release/check modes fail.
+The canonical Spec records exact inputs, error cases, evidence and deadlines.
+
+### P41-CF-CREDENTIAL-02: A Real Isolation Boundary, Not An Invalid Token
+
+The bounded GET-only inspection found no GitHub environments, no variables and
+only `ETRACK_DEV_SIGNING_KEYSTORE` among repository secrets. A missing gate is not
+an explicitly configured `false`. The current local Cloudflare provisioning token
+verified active; its token-policy GET returned 403. That does not invalidate the
+token or authorize requesting token-management permissions. Worker settings still
+match the separate existing firmware test R2/D1 resources. The private generated
+credential file contains deploy/download credentials, not an OTA AES key. No value
+was printed or transferred to CI, and no protected environment was auto-created.
+
+Independent consultation checked the installed Wrangler implementation and the
+current official Workers authorization documentation:
+https://developers.cloudflare.com/workers/authorization/workers/
+
+Per-Worker Editor permissions now exist, but editing a Worker's R2/D1 bindings
+does not require corresponding resource permissions. Thus a token restricted to
+editing one Worker is not proof that it cannot bind production data in the same
+account. Wrangler's native adapter uses `trace-firmware-uploader` and creates a
+temporary edge-preview session; `minimal` is not read-only authorization. Exact
+minimum permissions for that private preview endpoint were not independently
+probed. The job's fixed business reads are not a claim of zero control-plane writes.
+
+The strict existing isolation rule therefore cannot be satisfied merely by
+putting the account's provisioning token into a protected job. A test-only account
+with no production resources is the supported strict-isolation route without
+rewriting the adapter, and requires an owner-authorized account boundary and
+resource/configuration preparation. A same-account exception would require an
+explicit accepted risk and governance decision; it is not silently adopted here.
+Changing accounts also requires reviewing/rebinding the pinned qualification
+targets and moving or requalifying its fixture inputs. No new transport, proxy or
+temporary public service is being invented to avoid this boundary.
+
+The native cloud qualification remains NOT_RUN. Existing real S3-side qualification
+is retained, but is not relabelled as evidence for native Wrangler initialization.
+
+### P41-AES-01: Bind Compilation And Packaging To One Key Source
+
+The source `Libraries/OTA/ota_keys.c` defaults to a development key; only all four
+`OTA_AES_KEY_1_WORDx` definitions select an injected key. The previous GCC workflow
+did not provide those definitions. Setting only the packaging secret would not
+change the compiled receiver key. This is a P4-1 wiring gap as well as an owner
+configuration prerequisite, not a reason to call the old build release-ready.
+
+The two protected jobs now use the same GCC/CMake recipe with their existing
+environment's OTA secret. A private, project-contained header supplies all four
+words to the App key compilation; compile-command and header checks bind the
+result to the key fingerprint and source digest. The matching Boot is built in the
+same invocation. Current Boot sources do not consume AES, so the evidence does not
+claim a nonexistent Boot key. Raw App/Boot artifacts, compiler diagnostics and
+input identities are retained; the private header is excluded from the evidence
+directory and removed on normal completion and handled failures.
+
+The independent development review identified P41-KEY-CACHE-01 and
+P41-KEY-CLEANUP-01 before any real keyed build. The shared recipe now explicitly
+disables `KEIL_GCC_COMPILER_CACHE`, strips cache service variables and checks the
+actual CMake cache/launcher rules before compilation. Ordinary builds keep their
+existing cache policy. Exclusive-open ownership is recorded before writing key
+bytes; partial-write failures clean the owned file. The workflow has EXIT/INT/TERM
+traps and a separate always-run cleanup using exact commit/run/attempt ownership;
+artifact upload requires successful absence verification. Hard termination is
+handled by that separate cleanup route, not falsely attributed to JS `finally`.
+The 134/134 host pass includes a deliberately terminated owned Node fixture,
+wrong-owner refusal, actual cleanup CLI and a cache-launcher rejection; it did not
+run a native compiler. Originals: `.cache/logs/p41-ready-lifecycle-host.*`.
+
+The execute CLI rejects missing, development or mismatched key provenance before
+source retrieval or cloud operations. The source-defined default key, public
+packaging fixture and zero key are not admissible in rehearsal/production. The
+key's existing protected secret/environment approval is the authority; per
+P41-KEY-APPROVAL-01, no second key-hash approval variable is introduced. Hashes are
+automatically derived for build/packer/reference consistency, not self-approval.
+
+Ordinary GCC outputs remain unchanged by this route. A separate development-only
+CI build exercises the same key-injection recipe and packaging with the public
+fixture key, explicitly non-installable/non-publishable. Host compiler doubles
+test failure/cleanup and byte identities, not successful native compilation.
+Actual GitHub Actions compilation of the new recipe is still required before this
+batch's implementation result can be reported.
+
+### P41-BOOTSTRAP-KEY-01: Offline Base Is Not Device Key Compatibility
+
+Independent scope decision: keep the existing 3.2.7 archive byte-identical and do
+not add a second bootstrap-source campaign. Its old App was compiled with the
+development key and cannot decrypt a package encrypted with a new real key. P4-1
+staging patch-byte equality does not prove that device transition. First real key
+provisioning/receiver compatibility belongs to the authorized P3-5/P5 device owner.
+Recompiling a real-key base changes its raw SHA; the owner must use actual INFO/hash
+and select full or an independently approved exact new base, not claim it is the
+old archived patch base. This batch neither starts those cards nor operates a device.
+
+### Development Evidence And Remaining Owner Inputs
+
+The first local pass recorded host pipeline 123/123, workflow/Bash 56/56, existing
+script/migration 34/34, governance 23/23 and Worker types, all exit 0. The subsequent
+key-wiring compiler-double/source pass recorded 131/131 before the removal of the
+unnecessary second key approval variable. Those are staged development observations;
+the final reviewed batch and native CI results will be recorded separately.
+
+The only selected outputs so far are this worktree's source/doc edits, contained
+test fixtures, runtime directories and uniquely named closed command receipts.
+No PowerShell, real native local compile, Cloudflare mutation, GitHub environment
+mutation or production credential export occurred. P41-AUDIT-01 remains historically
+ATTRIBUTION_UNRESOLVED; this continuation does not clean or relabel its old caches.
+
+After local/code/CI completion, real readiness still needs the owner-authorized
+isolated runtime/configuration path and a non-development OTA secret. Exact target
+and descriptor approval must refer to the final real keyed build, not the earlier
+3.2.8 probe. Do not start the new whole-card acceptance agent or call P4-1 complete
+while those real prerequisites remain missing.
+
+The final pre-CI local batch passes host pipeline/key lifecycle 134/134, actual
+workflow/Bash gates 57/57, real fixture byte preparation 22/22, governance 23/23
+and Worker types, all exit 0. Source key values are not logged; the deliberate
+compiler-error test preserves its redacted error rather than suppressing it.
+All test subprocess receipts are closed and no `private-key.h` remains under this
+batch's key-build fixture root. The independent reviewer closed both key lifecycle
+findings against the actual 134-test original and reported no further blocker in
+that bounded development review. Native compilation and real CI are still the
+next validation step, not an already-passed result.

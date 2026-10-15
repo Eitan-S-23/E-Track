@@ -7,6 +7,7 @@ import { pathToFileURL } from "node:url";
 import { buildFirmwareMetadata } from "./build-firmware-release-metadata.mjs";
 import { args, CliError, failure, outputPath, projectRoot, required, writeOutput } from "./firmware-cli.mjs";
 import { assetFileName, canonicalJson, FIRMWARE_MODEL, parseFirmwareRegistration, sha256, versionCodeFor } from "./firmware-schema.mjs";
+import { validateKeyBinding } from "./firmware-release-key.mjs";
 
 export const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 export const BOOTSTRAP_PROVENANCE = "inaugural-bootstrap-v1";
@@ -21,14 +22,15 @@ export async function fileIdentity(file) {
   return { fileName: path.basename(file), sizeBytes: bytes.length, sha256: digest(bytes) };
 }
 
-export async function captureBuildInputs({ app, boot, commitSha, versionName, buildTimestamp }) {
+export async function captureBuildInputs({ app, boot, commitSha, versionName, buildTimestamp, keyBinding }) {
   if (path.basename(app) !== "X-Track-App-GCC.bin" || path.basename(boot) !== "X-Track-Boot.bin") {
     throw badInput("Release requires the GCC App and matching Boot, not AC5/legacy images");
   }
   if (!/^[0-9a-f]{40}$/.test(commitSha) || !Number.isSafeInteger(buildTimestamp)
     || buildTimestamp < 0 || buildTimestamp > 0xffffffff) throw new CliError("Invalid build identity");
   return { commitSha, versionName, versionCode: versionCodeFor(versionName), buildTimestamp,
-    app: await fileIdentity(app), boot: await fileIdentity(boot) };
+    app: await fileIdentity(app), boot: await fileIdentity(boot),
+    ...(keyBinding === undefined ? {} : { keyBinding: validateKeyBinding(keyBinding) }) };
 }
 
 export function validateBaseDescriptor(base, targetVersion, repository, targetCommit) {
@@ -117,7 +119,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   if (release.hardwareRevision !== 1 || release.layoutId !== 1 || release.minBootVersion !== 1
     || release.targetHardware !== "AT32F435RGT7") throw new CliError("Unsupported GCC hardware/layout identity");
   const observedBuild = await captureBuildInputs({ app, boot, commitSha: release.commitSha,
-    versionName: release.versionName, buildTimestamp: build.buildTimestamp });
+    versionName: release.versionName, buildTimestamp: build.buildTimestamp, keyBinding: build.keyBinding });
   if (canonicalJson(observedBuild) !== canonicalJson(build)) throw badInput("Cross-stage GCC input identity mismatch");
   if (base) {
     validateBaseDescriptor(base, release.versionName, repository, release.commitSha);
@@ -213,7 +215,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
     if (!verified || verified.sha256 !== asset.sha256 || verified.sizeBytes !== asset.sizeBytes) throw badInput("Asset changed after byte verification");
   }
   if (canonicalJson(await captureBuildInputs({ app, boot, commitSha: build.commitSha,
-    versionName: build.versionName, buildTimestamp: build.buildTimestamp })) !== canonicalJson(build)) throw badInput("GCC source changed during preparation");
+    versionName: build.versionName, buildTimestamp: build.buildTimestamp, keyBinding: build.keyBinding })) !== canonicalJson(build)) throw badInput("GCC source changed during preparation");
   const prepared = metadataBytes(metadata);
   await writeOutput(root, path.join(out, "cloudflare-firmware-release-metadata.json"), prepared);
   const summary = { ok: true, commitSha: release.commitSha, runId: release.runId, versionName: release.versionName,

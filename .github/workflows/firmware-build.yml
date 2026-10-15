@@ -4,6 +4,7 @@ name: MCU Firmware Build
 # - push 到 main/master 且固件相关路径变更 → 仅构建 + 上传 Actions artifact（14 天；不建 Release、不注册 CF）
 # - workflow_dispatch(rehearsal=true): isolated staging, never GitHub Release
 # - workflow_dispatch(publish=true): approved rehearsal rebuild and production gate
+# - workflow_dispatch(check_bindings=true): protected existing-object readback, not rehearsal
 # - 仅固件路径触发本工作流；Flutter 侧由 build.yml 的 changes job 隔离，互不触发
 # - 正式发布后在 CF admin 端将候选晋升为 stable 渠道当前版本
 # mcu-firmware-release.yml is an out-of-scope legacy consumer, not a v2 fallback.
@@ -83,6 +84,11 @@ on:
         required: true
         type: boolean
         default: false
+      check_bindings:
+        description: "Qualify protected isolated R2/D1 runtime using existing objects only; not rehearsal"
+        required: true
+        type: boolean
+        default: false
       approved_rehearsal_run_id:
         description: "Production only: independently approved rehearsal provenance run id"
         required: false
@@ -100,8 +106,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: firmware-build-${{ github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.rehearsal) && 'release' || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' || (!inputs.publish && !inputs.rehearsal) }}
+  group: firmware-build-${{ github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.rehearsal || inputs.check_bindings) && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' || (!inputs.publish && !inputs.rehearsal && !inputs.check_bindings) }}
 
 env:
   DEVICE_MODEL: e-track-at32f435
@@ -517,6 +523,46 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+      - name: Exercise the shared key-bound GCC build without protected credentials
+        id: keyed_development
+        shell: bash
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          cleanup_key() {
+            result=$?
+            trap - EXIT
+            node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/keyed-development-build || result=1
+            exit "$result"
+          }
+          trap cleanup_key EXIT
+          trap 'exit 130' INT
+          trap 'exit 143' TERM
+          node .github/scripts/firmware-gcc-keyed-build.mjs --development \
+            --build-dir .cache/keyed-development-build --evidence-dir .cache/keyed-development/build \
+            --version "${VERSION_NAME%%-*}"
+          node .github/scripts/firmware-release.mjs development \
+            --app .cache/keyed-development/build/app/X-Track-App-GCC.bin \
+            --boot .cache/keyed-development/build/boot/X-Track-Boot.bin \
+            --build-inputs .cache/keyed-development/build/gcc-build-inputs.json \
+            --output-dir .cache/keyed-development/prepared
+
+      - name: Check development key cleanup before archiving
+        id: keyed_development_cleanup
+        if: always() && steps.keyed_development.outcome != 'skipped' && steps.keyed_development.outcome != ''
+        run: node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/keyed-development-build
+
+      - name: Preserve non-publishable key-bound build and packaging evidence
+        if: always() && steps.keyed_development_cleanup.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p41-keyed-development-${{ github.sha }}
+          path: .cache/keyed-development/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+
       - name: Build the P3-4 acceptance candidate
         id: p34_candidate
         if: github.event_name == 'pull_request' && github.head_ref == 'acceptance/p3-4-v2-20261009'
@@ -571,6 +617,82 @@ jobs:
           if-no-files-found: error
 
 
+  check-firmware-bindings:
+    name: Isolated firmware binding qualification (not rehearsal)
+    runs-on: ubuntu-latest
+    needs: [release-development-checks]
+    timeout-minutes: 10
+    if: >-
+      github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true'
+    environment: firmware-rehearsal
+    permissions:
+      contents: read
+    steps:
+      - name: Enforce check-only locked-gate reviewed identity
+        id: gate
+        shell: bash
+        env:
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" != "workflow_dispatch" || "$INPUT_CHECK_BINDINGS" != "true" || "$INPUT_PUBLISH" != "false" || "$INPUT_REHEARSAL" != "false" || "$OTA_BOOT_CHAIN_READY" != "false" ]]; then
+            echo "::error::Binding qualification requires an explicit check-only dispatch with the gate locked"
+            exit 2
+          fi
+          if [[ "$GITHUB_REPOSITORY" != "Eitan-S-23/E-Track" || ! "$FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT" =~ ^[0-9a-f]{40}$ || "$GITHUB_SHA" != "$FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT" ]]; then
+            echo "::error::Binding qualification requires the exact protected reviewed source commit"
+            exit 2
+          fi
+
+      - name: Checkout the exact reviewed revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install pinned runtime dependencies without credentials
+        shell: bash
+        env:
+          npm_config_cache: ${{ github.workspace }}/.cache/bindings-npm
+        run: npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker --registry=https://registry.npmjs.org --replace-registry-host=always
+
+      - name: Read existing objects and D1 through the shared runtime
+        id: bindings_check
+        timeout-minutes: 5
+        shell: bash
+        env:
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL }}
+          TRACE_R2_BUCKET: ${{ vars.FIRMWARE_REHEARSAL_TRACE_R2_BUCKET }}
+          TRACE_D1_DATABASE_ID: ${{ vars.FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_ID }}
+          TRACE_D1_DATABASE_NAME: ${{ vars.FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME }}
+        run: node .github/scripts/firmware-bindings-check.mjs --output .cache/bindings-check/result.json
+
+      - name: Preserve binding qualification result (not approval or rehearsal)
+        if: success() && steps.bindings_check.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p41-bindings-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/bindings-check/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+
   rehearse-cloudflare:
     name: Firmware rehearsal (shared release implementation)
     runs-on: ubuntu-latest
@@ -589,12 +711,13 @@ jobs:
           OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
           INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
           OTA_APPROVED_REHEARSAL_RUN_ID: ${{ vars.OTA_APPROVED_REHEARSAL_RUN_ID }}
           OTA_APPROVED_REHEARSAL_ATTEMPT: ${{ vars.OTA_APPROVED_REHEARSAL_ATTEMPT }}
         run: |
           set -euo pipefail
-          if [[ "$OTA_BOOT_CHAIN_READY" != "false" || "$INPUT_PUBLISH" == "true" ]]; then
+          if [[ "$OTA_BOOT_CHAIN_READY" != "false" || "$INPUT_PUBLISH" == "true" || "$INPUT_CHECK_BINDINGS" == "true" ]]; then
             echo "::error::Rehearsal requires the locked boot-chain gate and must not request production"
             exit 1
           fi
@@ -614,17 +737,10 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Download same-run GCC App inputs
-        uses: actions/download-artifact@v4
+      - name: Install the same GCC toolchain for the protected key-bound build
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          name: firmware-${{ needs.build.outputs.version_name }}
-          path: .cache/release-build/app
-
-      - name: Download same-run Boot inputs
-        uses: actions/download-artifact@v4
-        with:
-          name: boot-${{ needs.build.outputs.version_name }}
-          path: .cache/release-build/boot
+          release: "13.3.Rel1"
 
       - name: Download immutable rehearsal reference when required
         if: steps.gate.outputs.reference_run_id != ''
@@ -647,11 +763,38 @@ jobs:
           cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build .cache/bsdiff --target bsdiff
 
+      - name: Build matching GCC inputs with the protected packaging key
+        id: keyed_build
+        timeout-minutes: 15
+        shell: bash
+        env:
+          FIRMWARE_RELEASE_MODE: rehearsal
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          cleanup_key() {
+            result=$?
+            trap - EXIT
+            node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/release-gcc || result=1
+            exit "$result"
+          }
+          trap cleanup_key EXIT
+          trap 'exit 130' INT
+          trap 'exit 143' TERM
+          node .github/scripts/firmware-gcc-keyed-build.mjs \
+            --build-dir .cache/release-gcc --evidence-dir .cache/release/keyed-build --version "$RELEASE_VERSION"
+
       - name: Run the shared finalize verify upload register pipeline
         id: release_execute
         shell: bash
         env:
           FIRMWARE_RELEASE_MODE: rehearsal
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
           INPUT_RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
@@ -680,14 +823,19 @@ jobs:
           reference=()
           if [[ -d .cache/reference ]]; then reference=(--reference-dir .cache/reference); fi
           node .github/scripts/firmware-release.mjs execute \
-            --app .cache/release-build/app/X-Track-App-GCC.bin \
-            --boot .cache/release-build/boot/X-Track-Boot.bin \
-            --build-inputs .cache/release-build/app/gcc-build-inputs.json \
+            --app .cache/release/keyed-build/app/X-Track-App-GCC.bin \
+            --boot .cache/release/keyed-build/boot/X-Track-Boot.bin \
+            --build-inputs .cache/release/keyed-build/gcc-build-inputs.json \
             --output-dir .cache/release/prepared \
             --bsdiff "$GITHUB_WORKSPACE/.cache/bsdiff/bin/bsdiff" "${reference[@]}"
 
+      - name: Check private key cleanup before archiving
+        id: key_cleanup
+        if: always() && steps.keyed_build.outcome != 'skipped' && steps.keyed_build.outcome != ''
+        run: node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/release-gcc
+
       - name: Preserve release attempt originals (not an approval)
-        if: always() && steps.release_execute.outcome != 'skipped' && steps.release_execute.outcome != ''
+        if: always() && steps.key_cleanup.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: p41-rehearsal-${{ github.run_id }}-${{ github.run_attempt }}
@@ -714,6 +862,7 @@ jobs:
           OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
           INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
           OTA_APPROVED_REHEARSAL_RUN_ID: ${{ vars.OTA_APPROVED_REHEARSAL_RUN_ID }}
           OTA_APPROVED_REHEARSAL_ATTEMPT: ${{ vars.OTA_APPROVED_REHEARSAL_ATTEMPT }}
@@ -723,7 +872,7 @@ jobs:
             echo "::error::OTA boot chain is locked; P5 and independent owner/environment approval are required"
             exit 1
           fi
-          if [[ "$INPUT_REHEARSAL" == "true" || ! "$INPUT_APPROVED_REHEARSAL_RUN_ID" =~ ^[1-9][0-9]*$ || "$INPUT_APPROVED_REHEARSAL_RUN_ID" != "$OTA_APPROVED_REHEARSAL_RUN_ID" || ! "$OTA_APPROVED_REHEARSAL_ATTEMPT" =~ ^[1-9][0-9]*$ ]]; then
+          if [[ "$INPUT_REHEARSAL" == "true" || "$INPUT_CHECK_BINDINGS" == "true" || ! "$INPUT_APPROVED_REHEARSAL_RUN_ID" =~ ^[1-9][0-9]*$ || "$INPUT_APPROVED_REHEARSAL_RUN_ID" != "$OTA_APPROVED_REHEARSAL_RUN_ID" || ! "$OTA_APPROVED_REHEARSAL_ATTEMPT" =~ ^[1-9][0-9]*$ ]]; then
             echo "::error::Production requires the exact independently approved rehearsal run/attempt"
             exit 2
           fi
@@ -741,17 +890,10 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Download same-run GCC App inputs
-        uses: actions/download-artifact@v4
+      - name: Install the same GCC toolchain for the protected key-bound build
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          name: firmware-${{ needs.build.outputs.version_name }}
-          path: .cache/release-build/app
-
-      - name: Download same-run Boot inputs
-        uses: actions/download-artifact@v4
-        with:
-          name: boot-${{ needs.build.outputs.version_name }}
-          path: .cache/release-build/boot
+          release: "13.3.Rel1"
 
       - name: Download immutable rehearsal reference when required
         if: steps.gate.outputs.reference_run_id != ''
@@ -774,11 +916,38 @@ jobs:
           cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build .cache/bsdiff --target bsdiff
 
+      - name: Build matching GCC inputs with the protected packaging key
+        id: keyed_build
+        timeout-minutes: 15
+        shell: bash
+        env:
+          FIRMWARE_RELEASE_MODE: production
+          INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+          INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
+          OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+          OTA_AES_KEY: ${{ secrets.OTA_AES_KEY }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          cleanup_key() {
+            result=$?
+            trap - EXIT
+            node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/release-gcc || result=1
+            exit "$result"
+          }
+          trap cleanup_key EXIT
+          trap 'exit 130' INT
+          trap 'exit 143' TERM
+          node .github/scripts/firmware-gcc-keyed-build.mjs \
+            --build-dir .cache/release-gcc --evidence-dir .cache/release/keyed-build --version "$RELEASE_VERSION"
+
       - name: Run the shared finalize verify upload register pipeline
         id: release_execute
         shell: bash
         env:
           FIRMWARE_RELEASE_MODE: production
+          INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
           INPUT_RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
@@ -807,14 +976,19 @@ jobs:
           reference=()
           if [[ -d .cache/reference ]]; then reference=(--reference-dir .cache/reference); fi
           node .github/scripts/firmware-release.mjs execute \
-            --app .cache/release-build/app/X-Track-App-GCC.bin \
-            --boot .cache/release-build/boot/X-Track-Boot.bin \
-            --build-inputs .cache/release-build/app/gcc-build-inputs.json \
+            --app .cache/release/keyed-build/app/X-Track-App-GCC.bin \
+            --boot .cache/release/keyed-build/boot/X-Track-Boot.bin \
+            --build-inputs .cache/release/keyed-build/gcc-build-inputs.json \
             --output-dir .cache/release/prepared \
             --bsdiff "$GITHUB_WORKSPACE/.cache/bsdiff/bin/bsdiff" "${reference[@]}"
 
+      - name: Check private key cleanup before archiving
+        id: key_cleanup
+        if: always() && steps.keyed_build.outcome != 'skipped' && steps.keyed_build.outcome != ''
+        run: node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/release-gcc
+
       - name: Preserve release attempt originals (not an approval)
-        if: always() && steps.release_execute.outcome != 'skipped' && steps.release_execute.outcome != ''
+        if: always() && steps.key_cleanup.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: p41-production-${{ github.run_id }}-${{ github.run_attempt }}

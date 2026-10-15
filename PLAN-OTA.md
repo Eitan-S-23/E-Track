@@ -187,7 +187,7 @@ cmd:0x00 GET_INFO{} → 0x80 INFO{model(8B ASCIIZ),hw_rev,layout_id,boot_ver,cur
 - **version_code 计算**:由**有效** `version_name`(手动 `workflow_dispatch` 输入优先,否则 `USER/App/Version.h` 的 `VERSION_SOFTWARE`)按 §3.1 公式编码;禁止再使用旧公式 `major*1000+minor`。映射验收:`2.8.0→20800`、`2.8.1→20801`;旧产物 `2007(v2.7 旧码) < 20700(2.7.0 新码)`,单调性向后成立。
 - **正式发布(workflow_dispatch)**:输入 version_name/notes(version_code **由 §3.1 公式从 version_name 推导,不单独手填**) → **GitHub environment `firmware-production` 保护(需人工审批)** → 校验 vcode>CF 现值 → **制包顺序(消解 fw_header 依赖)**:①构建含占位头 app.bin → ②`etu_pack.py --finalize` 回填 fw_header(SHA 双零法+CRC,§3.1 顺序)得最终 app.bin → ③以最终 app.bin 产 full.etu + patch.etu(基=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→ ④**bspatch 自验**:补丁应用于基版 bin,输出与最终 app.bin 逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)→ ⑤产 recovery 资产 `recovery-vX.Y.Z.bin`(最终 app.bin+尾部 8B:len u32+crc32 u32)→ ⑥GitHub Release(full/patch/recovery 三资产)→ 复用 `mcu-firmware-release.yml` 链(R2+worker 注册,isFormalRelease=true)。
 - paths 过滤与 Flutter build.yml 互不触发(已验证)。
-- **首发来源候选修订（OTA-DEC-017）**：没有上一正式版本时，不补造 Release 或省略 patch；按 `OTA-XC-BOOTSTRAP-BASE` 独立核验并归档真实 GCC finalized App，以显式非正式 provenance 和精确审批摘要绑定唯一首发目标。常规来源不变，三资产/逐字节自验/P5/gate/审批不变。该修订在获权主线集成与重新冻结前不授权正式演练或生产。
+- **首发来源修订（OTA-DEC-017）**：没有上一正式版本时，不补造 Release 或省略 patch；按 `OTA-XC-BOOTSTRAP-BASE` 独立核验并归档真实 GCC finalized App，以显式非正式 provenance 和精确审批摘要绑定唯一首发目标。常规来源不变，三资产/逐字节自验/P5/gate/审批不变。正式执行仍须获权审批、独立审查及绑定 main 或待合并分支的精确已提交 revision；不要求先合并整个 P4-1。主线交付是独立验收后的另行获权收口，不由条款冻结代替实际配置和执行审批。
 
 ### 6.2 CF 后台(v1.2.3 缺口重估)
 - **已有勿重建**:worker latest/注册 API、R2 签名下载、**admin Pages Functions 固件列表/渠道/发布/回滚路由([[path]].ts:231-300)**、审计基础。

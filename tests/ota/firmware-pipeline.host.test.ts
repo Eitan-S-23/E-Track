@@ -1,8 +1,11 @@
 import { env } from "cloudflare:workers";
 import { SELF } from "cloudflare:test";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
+import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import { bytesFor, metadata as fixtureMetadata } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-fixture";
 import { outputPath, projectRoot, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
@@ -11,10 +14,299 @@ import { firmwareGitHub } from "../../app/bluetooth_flutter_Trace/cloudflare/upd
 import { publishPreparedRelease, releaseConfig, verifyPromotion, verifyMonotonic } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
 import { registerFirmware } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs";
 import { canonicalJson } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
+import { assertFirmwareRuntime, verifyStoredFirmwareAsset } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs";
+import { bindingsCheckConfig, checkFirmwareBindings } from "../../.github/scripts/firmware-bindings-check.mjs";
+import { buildKeyedFirmware, cleanupPrivateBuildKey } from "../../.github/scripts/firmware-gcc-keyed-build.mjs";
+import { approvedFirmwareKey, DEVELOPMENT_PACKAGING_KEY, firmwareKeyBinding, verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
 
 const root = projectRoot();
+
+describe("firmware key wiring with a compiler double, never a local native build", () => {
+  const keyEnv = () => {
+    const key = randomBytes(16).toString("hex");
+    return { OTA_AES_KEY: key,
+      GITHUB_SHA: "a".repeat(40), GITHUB_EVENT_NAME: "workflow_dispatch", FIRMWARE_RELEASE_MODE: "rehearsal",
+      GITHUB_RUN_ID: "12345", GITHUB_RUN_ATTEMPT: "1",
+      INPUT_REHEARSAL: "true", INPUT_PUBLISH: "false", INPUT_CHECK_BINDINGS: "false", OTA_BOOT_CHAIN_READY: "false" };
+  };
+
+  it("rejects the source-defined development key, the public packaging fixture and zero", async () => {
+    const source = await readFile(path.join(root, "Libraries/OTA/ota_keys.c"), "utf8");
+    const key = [...source.matchAll(/^#define OTA_AES_KEY_1_WORD[0-3] 0x([0-9a-fA-F]{8})u\r?$/gm)].map(m => m[1]).join("");
+    for (const value of [key, DEVELOPMENT_PACKAGING_KEY, "00".repeat(16)]) {
+      expect(() => approvedFirmwareKey({ OTA_AES_KEY: value }))
+        .toThrow(/development or example/);
+    }
+  });
+
+  it("derives the key fingerprint and requires matching compiled-source provenance", () => {
+    const env = keyEnv(), binding = approvedFirmwareKey(env);
+    expect(verifyBuildKeyBinding({ keyBinding: binding }, env)).toEqual(binding);
+    expect(() => approvedFirmwareKey({ ...env, OTA_AES_KEY: "" })).toThrow(/32 hex/);
+    expect(() => verifyBuildKeyBinding({}, env)).toThrow(/provenance/);
+    for (const change of [{ source: "development-ci-key-v1" }, { keySha256: "f".repeat(64) },
+      { headerSha256: "f".repeat(64) }, { keySourceSha256: "f".repeat(64) }, { keyId: 2 }]) {
+      expect(() => verifyBuildKeyBinding({ keyBinding: { ...binding, ...change } }, env)).toThrow();
+    }
+    expect(firmwareKeyBinding(DEVELOPMENT_PACKAGING_KEY, "development-ci-key-v1").source).toBe("development-ci-key-v1");
+  });
+
+  async function fixture() {
+    const parent = outputPath(root, path.join(root, ".cache/firmware-key-build-tests"));
+    await mkdir(parent, { recursive: true }); const dir = await mkdtemp(path.join(parent, "case-"));
+    const env = keyEnv();
+    const state = { root, buildDir: path.join(dir, "gcc"), evidenceDir: path.join(dir, "evidence"),
+      versionName: "3.2.8", commitSha: env.GITHUB_SHA, buildTimestamp: 1786320000, env,
+      omitInclude: false, failBuild: false, cacheLauncher: false, keyHeader: "" };
+    const execute = vi.fn(async (tool: string, args: string[], options: any) => {
+      expect(options.env.OTA_AES_KEY).toBeUndefined();
+      expect(options.env.SCCACHE_BUCKET).toBeUndefined(); expect(options.env.CCACHE_DIR).toBeUndefined();
+      expect(options.env.SOURCE_DATE_EPOCH).toBe("1786320000");
+      state.keyHeader = path.join(state.buildDir, "private-key.h");
+      expect(existsSync(state.keyHeader)).toBe(tool === "cmake");
+      if (tool === "cmake" && args[0] === "-S") {
+        expect(args).toContain("-DCMAKE_BUILD_TYPE=Release"); expect(args).toContain("-DCMAKE_OBJECT_PATH_MAX=1024");
+        expect(args).toContain("-DKEIL_GCC_COMPILER_CACHE:STRING=OFF");
+        await writeOutput(root, path.join(state.buildDir, "CMakeCache.txt"), "KEIL_GCC_COMPILER_CACHE:STRING=OFF\n");
+        await writeOutput(root, path.join(state.buildDir, "CMakeFiles/rules.ninja"),
+          `command = cmake -E env SOURCE_DATE_EPOCH=1786320000 ${state.cacheLauncher ? "sccache " : ""}arm-none-eabi-gcc $FLAGS\n`);
+        const flag = state.omitInclude ? "-I" : "-include";
+        await writeOutput(root, path.join(state.buildDir, "compile_commands.json"), JSON.stringify([{
+          file: path.join(root, "Libraries/OTA/ota_keys.c"),
+          command: `arm-none-eabi-gcc ${flag} "${state.keyHeader.replaceAll("\\", "/")}" -o CMakeFiles/X_Track_App_GCC.dir/ota_keys.c.obj`
+        }]));
+      } else if (tool === "cmake") {
+        expect(args).toEqual(["--build", state.buildDir, "--target", "X_Track_App_GCC", "X_Track_Boot", "--parallel"]);
+        if (state.failBuild) return { status: 1, stdout: "", stderr: `error: fixture compiler diagnostic ${state.env.OTA_AES_KEY}` };
+        for (const [dir, name] of [["app-gcc", "X-Track-App-GCC"], ["boot", "X-Track-Boot"]]) {
+          for (const extension of ["bin", "elf", "hex", "map"]) await writeOutput(root,
+            path.join(state.buildDir, dir, `${name}.${extension}`), Buffer.from(`compiler-double-only-${dir}-${extension}`));
+        }
+      } else expect(tool).toBe("arm-none-eabi-size");
+      return { status: 0, stdout: "Compiler double, not an executed native build\n", stderr: "" };
+    });
+    return { ...state, execute, state };
+  }
+
+  it("uses one key input, verifies the App compile command, preserves both artifacts and removes the private header", async () => {
+    const f = await fixture(); const build = await buildKeyedFirmware(f);
+    expect(verifyBuildKeyBinding(build, f.env)).toEqual(approvedFirmwareKey(f.env));
+    expect(f.execute).toHaveBeenCalledTimes(3); expect(existsSync(f.state.keyHeader)).toBe(false);
+    const evidence = JSON.parse(await readFile(path.join(f.evidenceDir, "keyed-build-evidence.json"), "utf8"));
+    expect(evidence.artifacts).toHaveLength(8); expect(evidence.bootKeyConsumer).toBe(false);
+    expect(JSON.stringify(evidence)).not.toContain(f.env.OTA_AES_KEY);
+    expect(existsSync(path.join(f.evidenceDir, "DEVELOPMENT-ONLY.json"))).toBe(false);
+  });
+
+  it("rejects a compile recipe without the actual forced include before compiling", async () => {
+    const f = await fixture(); f.state.omitInclude = true;
+    await expect(buildKeyedFirmware(f)).rejects.toThrow(/does not consume/);
+    expect(f.execute).toHaveBeenCalledTimes(1); expect(existsSync(f.state.keyHeader)).toBe(false);
+    expect(existsSync(path.join(f.evidenceDir, "gcc-build-inputs.json"))).toBe(false);
+  });
+
+  it("preserves redacted compiler errors and cleans the private header after failure", async () => {
+    const f = await fixture(); f.state.failBuild = true;
+    await expect(buildKeyedFirmware(f)).rejects.toThrow(/build failed/);
+    const stderr = await readFile(path.join(f.evidenceDir, "steps/build.stderr.txt"), "utf8");
+    expect(stderr).toContain("error:"); expect(stderr).toContain("[REDACTED_KEY]"); expect(stderr).not.toContain(f.env.OTA_AES_KEY);
+    expect(existsSync(f.state.keyHeader)).toBe(false); expect(existsSync(path.join(f.evidenceDir, "gcc-build-inputs.json"))).toBe(false);
+  });
+
+  it("does not admit a missing key or a checks-mode request to the compiler", async () => {
+    const f = await fixture();
+    await expect(buildKeyedFirmware({ ...f, env: { ...f.env, OTA_AES_KEY: "" } })).rejects.toThrow(/32 hex/);
+    await expect(buildKeyedFirmware({ ...f, env: { ...f.env, INPUT_CHECK_BINDINGS: "true" } })).rejects.toThrow(/protected release context/);
+    expect(f.execute).not.toHaveBeenCalled(); expect(existsSync(f.buildDir)).toBe(false);
+  });
+
+  it("rejects a compiler-cache launcher before any key-bearing compilation", async () => {
+    const f = await fixture(); f.state.cacheLauncher = true;
+    await expect(buildKeyedFirmware({ ...f, env: { ...f.env, SCCACHE_BUCKET: "must-not-reach-child", CCACHE_DIR: "must-not-reach-child" } }))
+      .rejects.toThrow(/must not use a compiler cache/);
+    expect(f.execute).toHaveBeenCalledTimes(1); expect(existsSync(f.state.keyHeader)).toBe(false);
+  });
+
+  it("owns the header immediately after exclusive open and removes partial writes", async () => {
+    const f = await fixture();
+    await expect(buildKeyedFirmware({ ...f, writePrivateHeader: async (handle: any, bytes: string) => {
+      await handle.write(bytes.slice(0, 12)); throw new Error("injected partial write failure");
+    } })).rejects.toThrow(/partial write/);
+    expect(f.execute).not.toHaveBeenCalled(); expect(existsSync(path.join(f.buildDir, "private-key.h"))).toBe(false);
+  });
+
+  it("cleans an abruptly terminated owned fixture through the real cleanup CLI, never a different run", async () => {
+    const f = await fixture();
+    const module = path.join(root, ".github/scripts/firmware-gcc-keyed-build.mjs");
+    const script = `import { buildKeyedFirmware } from ${JSON.stringify(pathToFileURL(module).href)};
+      await buildKeyedFirmware({ root: ${JSON.stringify(root)}, buildDir: ${JSON.stringify(f.buildDir)},
+        evidenceDir: ${JSON.stringify(f.evidenceDir)}, versionName: '3.2.8', commitSha: process.env.GITHUB_SHA,
+        buildTimestamp: 1786320000, execute: async () => { process.kill(process.pid, 'SIGTERM'); await new Promise(() => {}); } });`;
+    const childEnv = { ...process.env, ...f.env };
+    const cancelled = spawnSync(process.execPath, ["--input-type=module", "-e", script], {
+      cwd: root, env: childEnv, windowsHide: true, encoding: "utf8", timeout: 15000 });
+    expect(cancelled.error).toBeUndefined(); expect(cancelled.status).not.toBe(0);
+    const header = path.join(f.buildDir, "private-key.h"); expect(existsSync(header)).toBe(true);
+    await expect(cleanupPrivateBuildKey({ root, buildDir: f.buildDir, env: { ...f.env, GITHUB_RUN_ATTEMPT: "2" } }))
+      .rejects.toThrow(/different key-build owner/);
+    expect(existsSync(header)).toBe(true);
+    const cleanup = spawnSync(process.execPath, [module, "cleanup", "--build-dir", f.buildDir], {
+      cwd: root, env: childEnv, windowsHide: true, encoding: "utf8", timeout: 15000 });
+    expect(cleanup.status, cleanup.stderr).toBe(0);
+    expect(JSON.parse(cleanup.stdout).privateBuildKeyAbsent).toBe(true); expect(existsSync(header)).toBe(false);
+  });
+
+  it("keeps the identical recipe's development run explicitly unpublishable", async () => {
+    const f = await fixture(); const env = { ...f.env, OTA_AES_KEY: undefined };
+    const build = await buildKeyedFirmware({ ...f, development: true, env });
+    expect(build.keyBinding.source).toBe("development-ci-key-v1");
+    expect(() => verifyBuildKeyBinding(build, f.env)).toThrow();
+    expect(JSON.parse(await readFile(path.join(f.evidenceDir, "DEVELOPMENT-ONLY.json"), "utf8"))).toMatchObject({ installable: false, publishable: false });
+    expect(existsSync(f.state.keyHeader)).toBe(false);
+  });
+});
+
+const qualificationEnv = {
+  GITHUB_EVENT_NAME: "workflow_dispatch", INPUT_CHECK_BINDINGS: "true", INPUT_PUBLISH: "false", INPUT_REHEARSAL: "false",
+  OTA_BOOT_CHAIN_READY: "false", GITHUB_REPOSITORY: "Eitan-S-23/E-Track", GITHUB_SHA: "a".repeat(40),
+  FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: "a".repeat(40), GITHUB_RUN_ID: "123", GITHUB_RUN_ATTEMPT: "1",
+  CLOUDFLARE_ACCOUNT_ID: "1".repeat(32), CLOUDFLARE_API_TOKEN: "fixture-only",
+  TRACE_UPDATE_SERVICE_URL: "https://e-track-firmware-p41-test.tangjichentudou.workers.dev",
+  TRACE_R2_BUCKET: "e-track-firmware-p41-test-releases", TRACE_D1_DATABASE_NAME: "e-track-firmware-p41-test",
+  TRACE_D1_DATABASE_ID: "2617e1e1-956f-42ce-a465-da56d84abf06"
+};
+
+describe("bounded binding qualification, host ports only (not remote observations)", () => {
+  it.each(["6.3.9600", "10.0.19045", "10.0.21999", "unknown"])("rejects unsupported Windows %s before runtime startup", release => {
+    expect(() => assertFirmwareRuntime("win32", release)).toThrow(/Windows 11.*Linux CI/);
+  });
+  it.each([["win32", "10.0.22000"], ["win32", "10.0.26100.1"], ["linux", "6.8.0"], ["darwin", "24.0.0"]])(
+    "does not misclassify %s/%s as unsupported Windows", (platform, release) => {
+      expect(() => assertFirmwareRuntime(platform, release)).not.toThrow();
+    });
+
+  it.each([
+    ["GITHUB_EVENT_NAME", "push"], ["INPUT_CHECK_BINDINGS", "false"], ["INPUT_PUBLISH", "true"],
+    ["INPUT_REHEARSAL", "true"], ["OTA_BOOT_CHAIN_READY", ""], ["OTA_BOOT_CHAIN_READY", "true"],
+    ["GITHUB_REPOSITORY", "Eitan-S-23/Trace"], ["GITHUB_SHA", "b".repeat(40)],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT", ""], ["GITHUB_RUN_ID", "0"], ["GITHUB_RUN_ATTEMPT", "01"],
+    ["TRACE_R2_BUCKET", "trace-update-staging-releases"], ["TRACE_D1_DATABASE_NAME", "production"],
+    ["TRACE_D1_DATABASE_ID", "11111111-1111-1111-1111-111111111111"],
+    ["TRACE_UPDATE_SERVICE_URL", "https://example.com"], ["CLOUDFLARE_ACCOUNT_ID", ""], ["CLOUDFLARE_API_TOKEN", ""]
+  ])("rejects invalid %s before any file or network access", async (key, value) => {
+    const connect = vi.fn(), fetcher = vi.fn();
+    await expect(checkFirmwareBindings({ root: "not-a-project", env: { ...qualificationEnv, [key]: value }, connect, fetcher }))
+      .rejects.toMatchObject({ exitCode: 2 });
+    expect(connect).not.toHaveBeenCalled(); expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  async function qualification() {
+    const dir = path.join(root, "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15");
+    const metadata = JSON.parse(await readFile(path.join(dir, "operations/verified-metadata.json"), "utf8"));
+    for (const asset of metadata.assets) await env.RELEASES_BUCKET.put(asset.r2Key,
+      await readFile(path.join(dir, "fixture", asset.fileName)), { customMetadata: { sha256: asset.sha256, kind: asset.kind } });
+    const bucket = { head: vi.fn((key: string) => env.RELEASES_BUCKET.head(key)),
+      get: vi.fn((key: string, options: R2GetOptions) => env.RELEASES_BUCKET.get(key, options)),
+      put: vi.fn(() => { throw new Error("Read-only qualification attempted PUT"); }) };
+    const sql: string[] = [];
+    const db = { prepare(query: string) {
+      expect(query).toMatch(/^SELECT /); sql.push(query); return env.DB.prepare(query);
+    } };
+    const settings = { success: true, result: { bindings: [
+      { name: "RELEASES_BUCKET", type: "r2_bucket", bucket_name: qualificationEnv.TRACE_R2_BUCKET },
+      { name: "DB", type: "d1", id: qualificationEnv.TRACE_D1_DATABASE_ID },
+      { name: "ENVIRONMENT", type: "plain_text", text: "staging" }
+    ] } };
+    const fetcher = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method ?? "GET").toBe("GET"); expect(init?.redirect).toBe("error");
+      if (String(input) === `${qualificationEnv.TRACE_UPDATE_SERVICE_URL}/healthz`) {
+        expect(init?.headers).toBeUndefined(); return Response.json({ ok: true, environment: "staging" });
+      }
+      expect(String(input)).toBe(`https://api.cloudflare.com/client/v4/accounts/${qualificationEnv.CLOUDFLARE_ACCOUNT_ID}/workers/scripts/e-track-firmware-p41-test/settings`);
+      return Response.json(settings);
+    });
+    const connect = vi.fn(async (_config: unknown, operation: Function) => operation(bucket, db));
+    return { root, env: { ...qualificationEnv }, connect, fetcher, bucket, db, metadata, settings, sql };
+  }
+
+  it("runs real full-byte readback and SQLite SELECTs without PUT or registration", async () => {
+    const q = await qualification();
+    expect(bindingsCheckConfig(q.env).bucketName).toBe(q.env.TRACE_R2_BUCKET);
+    const result = await checkFirmwareBindings(q);
+    expect(result).toMatchObject({ ok: true, canonicalRehearsal: "NOT_RUN", independentAcceptance: "NOT_RUN",
+      businessMutations: "NONE_REQUESTED", controlPlane: "WRANGLER_REMOTE_PREVIEW_SESSION" });
+    expect(result.assets.map((asset: any) => [asset.sha256, asset.sizeBytes])).toEqual(
+      q.metadata.assets.map((asset: any) => [asset.sha256, asset.sizeBytes]));
+    expect(result.database.before).toEqual(result.database.after);
+    expect(q.sql).toHaveLength(12); expect(q.fetcher).toHaveBeenCalledTimes(2);
+    expect(q.bucket.get).toHaveBeenCalledTimes(3); expect(q.bucket.put).not.toHaveBeenCalled();
+    expect(q.connect).toHaveBeenCalledTimes(1);
+    expect(q.connect.mock.calls[0][0]).toMatchObject({ root, bucketName: q.env.TRACE_R2_BUCKET,
+      accountId: q.env.CLOUDFLARE_ACCOUNT_ID, databaseId: q.env.TRACE_D1_DATABASE_ID, databaseName: q.env.TRACE_D1_DATABASE_NAME });
+  });
+
+  it("rejects a missing existing object instead of uploading a replacement", async () => {
+    const q = await qualification(); await env.RELEASES_BUCKET.delete(q.metadata.assets[0].r2Key);
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "R2_VERIFY_FAILED" });
+    expect(q.bucket.put).not.toHaveBeenCalled(); expect(q.bucket.get).not.toHaveBeenCalled();
+  });
+
+  it("rejects byte corruption despite matching object length and custom metadata", async () => {
+    const q = await qualification(); const asset = q.metadata.assets[0];
+    await env.RELEASES_BUCKET.put(asset.r2Key, new Uint8Array(asset.sizeBytes), {
+      customMetadata: { sha256: asset.sha256, kind: asset.kind } });
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "R2_OBJECT_CONFLICT" });
+    expect(q.bucket.put).not.toHaveBeenCalled();
+  });
+
+  it("rejects stale conditional readback without accepting HEAD alone", async () => {
+    const q = await qualification();
+    q.bucket.get.mockImplementation(async key => await env.RELEASES_BUCKET.head(key) as any);
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "R2_VERIFY_FAILED" });
+  });
+
+  it("rejects an unknown selected asset before storage access", async () => {
+    const q = await qualification();
+    await expect(verifyStoredFirmwareAsset(q.metadata, "unknown.etu", q.bucket as any)).rejects.toMatchObject({ exitCode: 2 });
+    expect(q.bucket.head).not.toHaveBeenCalled(); expect(q.bucket.get).not.toHaveBeenCalled();
+  });
+
+  it("rejects a Worker binding mismatch before connecting to R2 or D1", async () => {
+    const q = await qualification(); q.settings.result.bindings[1].id = "11111111-1111-1111-1111-111111111111";
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    expect(q.connect).not.toHaveBeenCalled();
+  });
+
+  it("rejects ambiguous Worker binding names even if one target matches", async () => {
+    const q = await qualification(); q.settings.result.bindings.push({ name: "DB", type: "d1", id: "unexpected" });
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    expect(q.connect).not.toHaveBeenCalled();
+  });
+
+  it("does not turn a failed settings request into a successful runtime check", async () => {
+    const q = await qualification(); q.fetcher.mockResolvedValueOnce(Response.json({ ok: true, environment: "staging" }))
+      .mockResolvedValueOnce(new Response(null, { status: 403 }));
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "BACKEND_UNAVAILABLE" });
+    expect(q.connect).not.toHaveBeenCalled();
+  });
+
+  it("rejects changed D1 observations rather than reporting zero business effects", async () => {
+    const q = await qualification(); const prepare = q.db.prepare.bind(q.db); let counts = 0;
+    q.db.prepare = (query: string) => {
+      const statement = prepare(query);
+      if (query === "SELECT COUNT(*) AS count FROM firmware_releases" && ++counts === 2) {
+        return { first: async () => ({ count: 999999 }) } as any;
+      }
+      return statement;
+    };
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    expect(q.bucket.put).not.toHaveBeenCalled();
+  });
+});
+
 let run = 9001;
 async function setup(omitKind?: string) {
+  const aesKey = randomBytes(16).toString("hex");
   const metadata = fixtureMetadata(); metadata.runId = String(++run);
   for (const a of metadata.assets) a.r2Verified = false;
   const parent = outputPath(root, path.join(root, ".cache/firmware-pipeline-tests"));
@@ -29,7 +321,7 @@ async function setup(omitKind?: string) {
     CLOUDFLARE_ACCOUNT_ID: "1".repeat(32), CLOUDFLARE_API_TOKEN: "isolated-fixture-token",
     TRACE_UPDATE_SERVICE_URL: "https://example.com", TRACE_DEPLOY_TOKEN: "test-deploy-token",
     TRACE_R2_BUCKET: "e-track-firmware-p41-test-releases", TRACE_D1_DATABASE_ID: "11111111-1111-1111-1111-111111111111",
-    TRACE_D1_DATABASE_NAME: "fixture-d1", OTA_AES_KEY: "01".repeat(16), GITHUB_TOKEN: "fixture-github-token",
+    TRACE_D1_DATABASE_NAME: "fixture-d1", OTA_AES_KEY: aesKey, GITHUB_TOKEN: "fixture-github-token",
     GITHUB_REPOSITORY: "Eitan-S-23/Trace", GITHUB_SHA: metadata.commitSha, GITHUB_RUN_ID: metadata.runId,
     GITHUB_RUN_ATTEMPT: "1", OTA_PREVIOUS_RELEASE_JSON: "fixture-only", TRACE_FIRMWARE_MIN_APP_VERSION_CODE: "0",
     TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: "1" };
@@ -303,8 +595,9 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
   it("checks/PR/nightly, ambiguous modes, missing config and crossed buckets fail closed", async () => {
     const s = await setup();
     for (const change of [{ GITHUB_EVENT_NAME: "push" }, { GITHUB_EVENT_NAME: "pull_request" },
-      { FIRMWARE_RELEASE_MODE: "checks" }, { INPUT_PUBLISH: "true" }, { TRACE_R2_BUCKET: "production-bucket" },
-      { OTA_AES_KEY: "" }, { CLOUDFLARE_API_TOKEN: "" }, { TRACE_D1_DATABASE_ID: "" }, { OTA_BOOT_CHAIN_READY: "true" }]) {
+      { FIRMWARE_RELEASE_MODE: "checks" }, { INPUT_PUBLISH: "true" }, { INPUT_CHECK_BINDINGS: "true" }, { TRACE_R2_BUCKET: "production-bucket" },
+      { OTA_AES_KEY: "" }, { OTA_AES_KEY: DEVELOPMENT_PACKAGING_KEY },
+      { CLOUDFLARE_API_TOKEN: "" }, { TRACE_D1_DATABASE_ID: "" }, { OTA_BOOT_CHAIN_READY: "true" }]) {
       expect(() => releaseConfig({ ...s.env, ...change })).toThrow();
     }
     expect(s.calls).toEqual([]);

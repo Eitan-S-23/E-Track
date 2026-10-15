@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { release as osRelease } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { canonicalJson, contentDigest, parseFirmwareRegistration } from "./firmware-schema.mjs";
@@ -27,6 +28,26 @@ async function readback(bucket, asset, head, uploaded) {
     }
   } finally { await reader.cancel(); }
   if (size !== asset.sizeBytes || hash.digest("hex") !== asset.sha256) throw mismatch();
+}
+
+export function assertFirmwareRuntime(platform = process.platform, release = osRelease()) {
+  if (platform !== "win32") return;
+  const version = /^(\d+)\.(\d+)\.(\d+)(?:\.\d+)?$/.exec(release);
+  // Windows 11 still reports kernel major 10. Wrangler requires build 22000+.
+  if (!version || Number(version[1]) < 10 || (Number(version[1]) === 10 && Number(version[3]) < 22000)) {
+    throw new CliError("Wrangler firmware bindings require Windows 11 or a supported Linux CI host; use the protected check_bindings dispatch instead of retrying this host");
+  }
+}
+
+export async function verifyStoredFirmwareAsset(metadata, fileName, bucket) {
+  const parsed = parseFirmwareRegistration(metadata, undefined, false);
+  const asset = parsed.assets.find(a => a.fileName === fileName);
+  if (!asset) throw new CliError("Readback must select one metadata asset");
+  const head = await bucket.head(asset.r2Key);
+  if (!head) throw new CliError("Required existing R2 object is absent; read-only checks never upload it", "R2_VERIFY_FAILED", 1);
+  await readback(bucket, asset, head, false);
+  return { ok: true, kind: asset.kind, fileName: asset.fileName, r2Key: asset.r2Key,
+    sha256: asset.sha256, sizeBytes: asset.sizeBytes, contentDigest: contentDigest(asset.sha256) };
 }
 
 export async function uploadFirmwareAsset(metadata, fileName, bytes, bucket, requestId = crypto.randomUUID()) {
@@ -61,6 +82,7 @@ export async function withFirmwareBucket({ bucketName, accountId, root = project
   if (!/^[0-9a-f]{32}$/.test(accountId) || !/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(bucketName)) throw new CliError("Invalid account/bucket configuration");
   if ((databaseId || databaseName) && (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(databaseId ?? "")
     || !/^[a-zA-Z0-9_-]+$/.test(databaseName ?? ""))) throw new CliError("Invalid explicit D1 binding");
+  assertFirmwareRuntime();
   const temp = outputPath(root, path.join(root, ".cache", "firmware-uploader", crypto.randomUUID()));
   const configPath = outputPath(root, path.join(temp, "wrangler.json"));
   const controls = { TEMP: "tmp", TMP: "tmp", TMPDIR: "tmp", HOME: "home", USERPROFILE: "home",

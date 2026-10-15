@@ -15,6 +15,7 @@ const workflow = JSON.parse(execFileSync(python, ["-B", "-c",
   { cwd: root, input: text, encoding: "utf8", windowsHide: true }));
 const production = workflow.jobs["register-cloudflare"];
 const rehearsal = workflow.jobs["rehearse-cloudflare"];
+const bindings = workflow.jobs["check-firmware-bindings"];
 const normalize = value => value.trim().replace(/\s+/g, " ");
 
 test("production remains explicit dispatch/publish with a first-step hard gate and protected environment", () => {
@@ -44,6 +45,35 @@ test("nightly/checks jobs cannot acquire release secrets or execute the cloud pi
   }
   assert.equal(workflow.on.workflow_dispatch.inputs.publish.default, "false");
   assert.equal(workflow.on.workflow_dispatch.inputs.rehearsal.default, "false");
+  assert.equal(workflow.on.workflow_dispatch.inputs.check_bindings.default, "false");
+});
+
+test("binding qualification is a protected explicit check-only Linux job with bounded execution", () => {
+  assert.equal(normalize(bindings.if), "github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true'");
+  assert.equal(bindings.environment, "firmware-rehearsal");
+  assert.equal(bindings["runs-on"], "ubuntu-latest");
+  assert.equal(bindings["timeout-minutes"], "10");
+  assert.deepEqual(bindings.permissions, { contents: "read" });
+  assert.deepEqual(bindings.needs, ["release-development-checks"]);
+  assert.equal(bindings.steps[0].id, "gate");
+  const checkout = bindings.steps.find(step => step.uses === "actions/checkout@v4");
+  assert.equal(checkout.with.ref, "${{ github.sha }}");
+  assert.equal(checkout.with["persist-credentials"], "false");
+  assert.match(workflow.concurrency.group, /inputs\.check_bindings/);
+  assert.match(workflow.concurrency["cancel-in-progress"], /!inputs\.check_bindings/);
+});
+
+test("binding check credentials are confined to readback after dependency installation", () => {
+  const run = bindings.steps.find(step => step.id === "bindings_check");
+  assert.equal(run["timeout-minutes"], "5");
+  assert.equal(run.run, "node .github/scripts/firmware-bindings-check.mjs --output .cache/bindings-check/result.json");
+  assert.equal(run.env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT, "${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT }}");
+  assert.equal(bindings.steps.filter(step => JSON.stringify(step.env ?? {}).includes("secrets.")).length, 1);
+  for (const value of Object.values(run.env)) if (value.includes("secrets.")) assert.match(value, /secrets\.FIRMWARE_REHEARSAL_/);
+  assert.doesNotMatch(JSON.stringify(bindings), /OTA_AES_KEY|TRACE_DEPLOY_TOKEN|OTA_PREVIOUS_RELEASE_JSON|OTA_APPROVED_BOOTSTRAP|firmware-release\.mjs execute|contents.*write/);
+  const artifact = bindings.steps.find(step => step.uses === "actions/upload-artifact@v4");
+  assert.equal(artifact.with["if-no-files-found"], "error");
+  assert.equal(artifact.with["retention-days"], "14");
 });
 
 test("both release environments use the identical production implementation and same-run App/Boot inputs", () => {
@@ -55,7 +85,8 @@ test("both release environments use the identical production implementation and 
     assert.match(run(job).run, /X-Track-Boot.bin/);
     assert.match(run(job).run, /gcc-build-inputs.json/);
     assert.doesNotMatch(run(job).run, /\$\{\{.*(release_notes|version_name)/);
-    assert.equal(job.steps.filter(step => JSON.stringify(step.env ?? {}).includes("secrets.")).length, 1);
+    assert.deepEqual(job.steps.filter(step => JSON.stringify(step.env ?? {}).includes("secrets.")).map(step => step.id),
+      ["keyed_build", "release_execute"]);
     assert.ok(job.steps.some(step => step.uses === "actions/download-artifact@v4" && step.with["run-id"]));
   }
   assert.doesNotMatch(text, /--clobber|release edit|delete-asset|wrangler deploy|\/tmp\/etfw/);
@@ -75,6 +106,34 @@ test("development wiring explicitly executes host, native, byte and production-G
   assert.match(build, /--target X_Track_App_GCC X_Track_Boot/);
   assert.match(build, /firmware-release.mjs capture/);
   assert.match(build, /firmware-release.mjs development/);
+  assert.match(build, /firmware-gcc-keyed-build.mjs --development/);
+});
+
+test("protected builds and packaging bind the same approved key without exposing cloud credentials to compilation", () => {
+  const keyed = job => job.steps.find(step => step.id === "keyed_build");
+  assert.equal(keyed(production).run, keyed(rehearsal).run);
+  for (const job of [production, rehearsal]) {
+    const build = keyed(job), release = job.steps.find(step => step.id === "release_execute");
+    assert.equal(build.env.OTA_AES_KEY, release.env.OTA_AES_KEY);
+    assert.equal(build["timeout-minutes"], "15");
+    assert.match(build.run, /firmware-gcc-keyed-build.mjs/);
+    assert.doesNotMatch(build.run, /--development/);
+    assert.match(build.run, /trap cleanup_key EXIT/);
+    assert.match(build.run, /trap 'exit 130' INT/);
+    assert.match(build.run, /trap 'exit 143' TERM/);
+    assert.match(build.run, /firmware-gcc-keyed-build.mjs cleanup --build-dir \.cache\/release-gcc/);
+    assert.match(release.run, /\.cache\/release\/keyed-build\/gcc-build-inputs.json/);
+    assert.doesNotMatch(JSON.stringify(build.env), /CLOUDFLARE_|TRACE_DEPLOY_TOKEN|GITHUB_TOKEN/);
+    assert.equal(job.steps.filter(step => step.uses === "carlosperate/arm-none-eabi-gcc-action@v1")[0].with.release, "13.3.Rel1");
+    assert.ok(job.steps.indexOf(build) < job.steps.indexOf(release));
+    const cleanup = job.steps.find(step => step.id === "key_cleanup");
+    const archive = job.steps.find(step => step.uses === "actions/upload-artifact@v4");
+    assert.match(cleanup.if, /always\(\)/);
+    assert.equal(cleanup.run, "node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/release-gcc");
+    assert.equal(archive.if, "always() && steps.key_cleanup.outcome == 'success'");
+    assert.ok(job.steps.indexOf(cleanup) < job.steps.indexOf(archive));
+  }
+  assert.doesNotMatch(text, /OTA_APPROVED_AES_KEY_SHA256/);
 });
 
 test("bootstrap approval is explicit environment configuration, never a development default", () => {
@@ -196,12 +255,24 @@ const cases = [
   ["production locked", production, { OTA_BOOT_CHAIN_READY: "false" }, 1],
   ["production missing approval", production, { OTA_BOOT_CHAIN_READY: "true", INPUT_APPROVED_REHEARSAL_RUN_ID: "" }, 2],
   ["production ambiguous mode", production, { OTA_BOOT_CHAIN_READY: "true", INPUT_REHEARSAL: "true" }, 2],
+  ["production rejects binding-check mode", production, { OTA_BOOT_CHAIN_READY: "true", INPUT_CHECK_BINDINGS: "true" }, 2],
   ["production wrong approval", production, { OTA_BOOT_CHAIN_READY: "true", INPUT_APPROVED_REHEARSAL_RUN_ID: "9002" }, 2],
   ["production approved shell gate only", production, { OTA_BOOT_CHAIN_READY: "true" }, 0],
   ["rehearsal locked", rehearsal, { OTA_BOOT_CHAIN_READY: "false" }, 0],
   ["rehearsal unlocked", rehearsal, { OTA_BOOT_CHAIN_READY: "true" }, 1],
   ["rehearsal cannot publish", rehearsal, { OTA_BOOT_CHAIN_READY: "false", INPUT_PUBLISH: "true" }, 1],
-  ["rehearsal retry binds original attempt", rehearsal, { OTA_BOOT_CHAIN_READY: "false", GITHUB_RUN_ATTEMPT: "2" }, 0]
+  ["rehearsal rejects binding-check mode", rehearsal, { INPUT_CHECK_BINDINGS: "true" }, 1],
+  ["rehearsal retry binds original attempt", rehearsal, { OTA_BOOT_CHAIN_READY: "false", GITHUB_RUN_ATTEMPT: "2" }, 0],
+  ["binding-check locked reviewed source", bindings, { INPUT_CHECK_BINDINGS: "true" }, 0],
+  ["binding-check rejects ordinary dispatch", bindings, {}, 2],
+  ["binding-check rejects push", bindings, { INPUT_CHECK_BINDINGS: "true", GITHUB_EVENT_NAME: "push" }, 2],
+  ["binding-check rejects missing gate", bindings, { INPUT_CHECK_BINDINGS: "true", OTA_BOOT_CHAIN_READY: "" }, 2],
+  ["binding-check rejects unlocked gate", bindings, { INPUT_CHECK_BINDINGS: "true", OTA_BOOT_CHAIN_READY: "true" }, 2],
+  ["binding-check rejects publication", bindings, { INPUT_CHECK_BINDINGS: "true", INPUT_PUBLISH: "true" }, 2],
+  ["binding-check rejects rehearsal", bindings, { INPUT_CHECK_BINDINGS: "true", INPUT_REHEARSAL: "true" }, 2],
+  ["binding-check rejects absent reviewed source", bindings, { INPUT_CHECK_BINDINGS: "true", FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: "" }, 2],
+  ["binding-check rejects changed source", bindings, { INPUT_CHECK_BINDINGS: "true", GITHUB_SHA: "b".repeat(40) }, 2],
+  ["binding-check rejects another repository", bindings, { INPUT_CHECK_BINDINGS: "true", GITHUB_REPOSITORY: "Eitan-S-23/Trace" }, 2]
 ];
 for (const [label, job, override, expected] of cases) test(`actual shell gate: ${label}`, async () => {
   const parent = outputPath(root, path.join(root, ".cache/firmware-workflow-tests"));
@@ -210,6 +281,8 @@ for (const [label, job, override, expected] of cases) test(`actual shell gate: $
   const output = outputPath(root, path.join(dir, "github-output.txt"));
   await writeOutput(root, output, "");
   const environment = { ...process.env, OTA_BOOT_CHAIN_READY: "false", INPUT_PUBLISH: "false", INPUT_REHEARSAL: "false",
+    INPUT_CHECK_BINDINGS: "false", GITHUB_EVENT_NAME: "workflow_dispatch", GITHUB_REPOSITORY: "Eitan-S-23/E-Track",
+    GITHUB_SHA: "a".repeat(40), FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: "a".repeat(40),
     INPUT_APPROVED_REHEARSAL_RUN_ID: "9001", OTA_APPROVED_REHEARSAL_RUN_ID: "9001", OTA_APPROVED_REHEARSAL_ATTEMPT: "1",
     GITHUB_RUN_ID: "9001", GITHUB_RUN_ATTEMPT: "1", GITHUB_OUTPUT: output.replaceAll("\\", "/"), ...override };
   const result = spawnSync(bash, ["--noprofile", "--norc", "-c", job.steps[0].run],

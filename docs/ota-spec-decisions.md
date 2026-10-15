@@ -216,19 +216,19 @@
 - 不变量：纯文档审阅简化封包，不豁免真实检查；原件采用不伪造正式来源、物理执行或缺失证据，不抹去失败，不修改历史冻结字节。此次不改任务状态、不恢复设备操作，不授予 CI、提交、发布或项目外写入。
 - 方案评述依据：`FLOW20261013-FULL-R1` 与 `FLOW20261013-ROUTING` 均获明确 AGREE；原始回复及方案哈希保留在项目内 `.cache/acceptance-flow-review-20261013/`，长期规则与结论同时落在根目录治理文件，不只留在缓存。
 
-## OTA-DEC-017 首发基线与独立演练桶候选修订
+## OTA-DEC-017 首发基线与独立演练桶修订
 
 - 问题描述：E-Track 没有正式 MCU Release；先有上一正式版才能演练、先演练/P5 才能首次发布形成循环。原冻结演练桶已被旧 Trace 服务占用，不能挪用现用服务。
 - 所属领域：P4-1 发布基版资格及 P4-4 配置消费边界。
-- 状态：`PROPOSED`。
+- 状态：`DECIDED`。
 - 用户委托：记录 14 授权 agent 自主查明并选择基线/桶方案，不再要求用户寻找不存在的前版或选择技术桶名。原有不合入 main、不创建 tag/Release、不操作生产/设备和不启动其他卡的限制保留。
-- 决策责任人：用户委托的 P4-1 root；非实现 reviewer 对精确候选差异独立复核。技术委托和开发验证不等于已生效冻结规范。
+- 决策责任人：用户委托的 P4-1 root。2026-10-16 按记录 14 的技术委托、记录 15 的先验收后合并安排及独立结论 `P41-GOV-ENTRY-01` 裁定；不是实现者代签 environment 或目标 descriptor 审批。
 - 受影响任务：`P4-1`、`P4-4`。
-- 推荐方案：显式非正式首发 provenance、不可变同仓库归档和受保护的 descriptor 审批摘要；保留常规正式基版路径。使用已获隔离资格的 `e-track-firmware-p41-test-releases`，生产拒绝它和旧 `trace-update-staging-releases` 两个桶。
+- 采用方案：显式非正式首发 provenance、不可变同仓库归档和受保护的 descriptor 审批摘要；保留常规正式基版路径。使用已获隔离资格的 `e-track-firmware-p41-test-releases`，生产拒绝它和旧 `trace-update-staging-releases` 两个桶。
 - 不变量：不补造 Release，不跳过 patch，不重标开发原件或改注册 schema；常规 formalBase 失败不得自动走首发。现有目标只允许受原演练批准约束的 production 重试，不能许可新演练或覆盖既有资产。P5、原 gate、独立审批、全量回读和生产零副作用要求不变。
 - 最终落盘目标：`OTA-XC-BOOTSTRAP-BASE`、`OTA-XC-RELEASE-CLI`、`OTA-XC-RELEASE-GATE`、`OTA-XC-SECRETS`、PLAN-OTA §6.1、两张消费 Spec 及 readiness；不会创建第二套 Spec 或启动 P4-4。
-- 当前边界：候选开发、自测与专属分支交付继续；正式演练/生产须等待候选独立复核、获权主线集成与重新冻结。独立复核后可把候选成熟度记为已审，不以此自动改成生效、完成或准许部署。
-- 原件与复核：现有 `P4-1-implementation-2026-10-15.md`、`P4-1-bootstrap-baseline-2026-10-15/`；来源为真实 run 38642386248/attempt 1/commit fa74905e84c489cccc248617d37ab9f56c8f961c。方案与原件已获非实现 agent 的有界评述，实施差异仍须另行复核。
+- 当前边界：共享条款在本待合并分支冻结。正式执行仍须获权审批、独立审查及绑定 main 或待合并分支的精确已提交 revision；按验收执行合同第 1 节第 3 项，不要求先合并整个 P4-1。主线交付是独立验收通过后的另行获权收口动作；冻结不等于环境已配置、目标已批准、已执行 rehearsal 或整卡完成。
+- 原件与复核：现有 `P4-1-implementation-2026-10-15.md`、`P4-1-bootstrap-baseline-2026-10-15/`；来源为真实 run 38642386248/attempt 1/commit fa74905e84c489cccc248617d37ab9f56c8f961c。非实现 reviewer `/root/p41_bootstrap_review` 已核验候选 `c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124` 及交付记录 `eec231646c0a1ad4af98ac889d7491db6c39ae4d`，并于 2026-10-16 明确纠正 main-before-acceptance 限制；历史 PROPOSED/REVIEWED 原件不改写。
 
 ## 用户裁定原文
 
@@ -551,6 +551,21 @@ P4-2 不依赖 P4-1
 这是自主查证、选择和实现候选方案的授权，不把开发样例变成正式版，也不解除该派单中
 明确禁止的 main 合并、tag/Release、生产或设备操作。候选独立审查、规范生效及实际
 rehearsal 证据仍各自保留，原授权/失败记录不改写。
+
+### 记录 15（2026-10-16，P4-1 先完成实现再独立验收）
+
+当前会话中的用户逐字要求：
+
+> P4-1还没验收收口吧？合并的事不该让验收收口agent做吗
+
+> 我打算让一个新agent来做验收工作，请将提示词用飞书代码块发给我
+
+> 那就做完了再让验收agent验收，弄吧
+
+结合记录 14 已委托的技术决定及验收执行合同第 1 节第 3 项，P41-GOV-ENTRY-01 纠正了
+先合并整个 P4-1 才能验收的额外限制。root 可落实经独立审阅的技术条款并在待合并分支
+交付，新的非实现 agent 随后冻结精确实现并验收。合并由验收收口阶段另行获权处理；
+这些原话不构成环境/凭据、descriptor、正式演练、production 或设备操作的隐含批准。
 
 ## CONFIRM_RECOMMENDED 参数快照
 
