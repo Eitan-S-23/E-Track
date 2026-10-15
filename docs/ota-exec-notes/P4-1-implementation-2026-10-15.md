@@ -769,3 +769,69 @@ credential. This qualification environment is explicitly not a formal rehearsal.
 Real fixture-based API/uploader observations may qualify the shared production
 tools, but cannot substitute for a formal base, canonical rehearsal bindings or
 whole-card acceptance. Those requirements remain NOT_RUN.
+
+### Qualification Checkpoint: CI Passed, D1 Provisioning Rejected
+
+The tested code increment is `cd4f2e4d651fb7eafe8253ce854b90242cede4d9`, pushed
+using `Eitan-S-23` on `dev/p4-1/unattended-20261015`. Primary run
+`https://github.com/Eitan-S-23/E-Track/actions/runs/38677391835` is an actual
+successful pull-request run. Its checkout is
+`45da975bcecd97f0248fbf1d86bdf802763405ef`; GitHub and local Git confirm that its
+tree equals the feature commit's tree
+`0a2eeb3771468dcf866a2d114861765268517277`.
+
+The original run/jobs/artifact JSON, complete log ZIP, selected exact step logs,
+bundle and fixture ZIPs are retained under
+`.cache/cf-firmware-setup-20261015/ci/`. Actual executed counts were host scripts/
+migrations 34, host pipeline 33, native workerd 156, workflow/Bash 41, byte
+preparation 19, package 8 and golden vectors 9, all passed with exit 0. The native
+suite is not combined with duplicate backend-CI executions. GCC emitted 640
+compiler warnings and zero errors; vendor bsdiff emitted six warnings. The Worker
+bundle emitted one non-blocking default-environment-selection warning. Both
+formal rehearsal and production jobs were skipped.
+
+The raw bundle step invokes the pinned Wrangler JS entry with `deploy --dry-run`
+and ends with `--dry-run: exiting now.` This is actual bundling, not a YAML-only
+check and not a deployment. Artifact `11946284512` contains the five expected
+regular files and the exact checkout marker; its executable `index.js` is
+144770 bytes, SHA-256
+`9ff814b0fd1731418a2250a3ae941ff1f6ce0db99233f6f1db42a1ba2c161082`.
+No local Worker/Flutter/Gradle/APK build was substituted for this CI result.
+
+Non-implementing agent `/root/p41_worker_bundle_review` independently reviewed
+the two changed code files and supplied CI originals: NO FINDINGS. Its verdict
+is recorded in `ci/independent-review.json`. It performed no writes, test reruns,
+credential access, cloud or device operations. This bounded review does not
+approve cloud rehearsal or whole-card acceptance.
+
+`P41-CF-SETUP-01` is a real provisioning failure, not a code-test failure:
+
+- The supplied token verifies as active and GET D1 inventory returns HTTP 200.
+- One POST to create the new `e-track-firmware-p41-test` database returned HTTP
+  401, code 10000, `Authentication error`; request identifier is
+  `a4abde947bcd138a-SJC` at `2026-10-15T03:52:09.498Z`.
+- The exact request (name only, no credential), failure response and their prior
+  inventory are preserved as `resource-d1-request.json`,
+  `resource-d1-created.json` and `resource-d1-precheck.json`. The response file's
+  SHA-256 is `1dea9c407c1e020770c14ce8ffb263fdd7c62568bea6131c79a770886c659cf0`.
+- A read-only reconciliation still finds three databases and no new target. The
+  existing Trace database retains its prior UUID and reported size. No KV, R2,
+  Worker, migration, registration or GitHub environment/secret mutation followed.
+- Reading this token's own permission metadata returned 403/code 9109. Do not
+  add token-management permissions merely to inspect it. Effective D1 creation
+  access is not established; the error does not prove which dashboard policy or
+  account-role condition is responsible.
+
+Do not retry creation without a credential-policy change or a diagnosed fix.
+The next necessary user input is the permission-summary screenshot for the
+actually supplied token, with the token value excluded, or confirmation that its
+Account / D1 / Edit policy for the approved account was corrected and saved.
+Operational authorization is already sufficient and must not be requested again.
+The current credential input remains in the ignored, current-user-only file for
+that in-place correction; no new copy/paste is needed. It is not stored in CI or
+observation files and will be removed when its bounded setup use is complete.
+
+The new environment is not created. Real upload/readback, D1 ready/idempotency,
+canonical rehearsal bindings, formal-base provenance, zero-production-effect
+acceptance and the whole card remain NOT_RUN/in progress as applicable. No
+historical failure, frozen evidence or completed P3/P4 card was rewritten.
