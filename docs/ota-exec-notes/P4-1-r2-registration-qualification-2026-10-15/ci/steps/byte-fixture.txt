@@ -1,0 +1,47 @@
+﻿2026-10-15T05:54:55.8976373Z ##[group]Run node --test tests/ota/test_firmware_release.mjs
+2026-10-15T05:54:55.8976622Z [36;1mnode --test tests/ota/test_firmware_release.mjs[0m
+2026-10-15T05:54:55.9026218Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:55.9026380Z env:
+2026-10-15T05:54:55.9026500Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:55.9026644Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:55.9026798Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:55.9026992Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:55.9027162Z   BUILD_TYPE: Release
+2026-10-15T05:54:55.9027285Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:55.9027421Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:55.9027619Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:55.9028207Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:55.9028435Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:55.9028670Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:55.9028849Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:55.9029035Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:55.9029228Z ##[endgroup]
+2026-10-15T05:54:56.5078053Z BYTE_FIXTURE {"path":"/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-FaZQtT/prepared","assets":[{"kind":"full","baseImageSha256":"","baseVersionCode":0,"fileName":"e-track-at32f435-v2.8.1-full.etu","sha256":"ff17d5e8fa17c2858af9676e83bcfb70deb55f5445ff65e25b0bc2b8137fee40","sizeBytes":202,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Verified":false},{"baseImageSha256":"074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1","baseVersionCode":20800,"kind":"patch","fileName":"e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","sha256":"4aba0aae9a055ab5d44d134e3e0a69b486476d14dff4d2b0acb16d9180654b56","sizeBytes":208,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Verified":false},{"kind":"recovery","baseImageSha256":"","baseVersionCode":0,"fileName":"recovery-v2.8.1.bin","sha256":"0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c","sizeBytes":8200,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Verified":false}],"finalImage":{"fileName":"app-final.bin","sizeBytes":8192,"sha256":"d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5"},"metadataSha256":"456ff65039a86b56af8f051f04083621ebc537479a680c409376714f803267aa"}
+2026-10-15T05:54:56.5083899Z ✔ real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundtrip (537.896132ms)
+2026-10-15T05:54:57.5350164Z ✔ approved-envelope reproduction is byte-identical, including canonical provenance (1026.489218ms)
+2026-10-15T05:54:58.1460737Z ✔ a fresh generation still uses independent random package nonces (611.114581ms)
+2026-10-15T05:54:58.1860605Z ✔ missing/invalid key fails configuration before outputs (missing) (39.878809ms)
+2026-10-15T05:54:58.2268684Z ✔ missing/invalid key fails configuration before outputs (invalid) (40.656164ms)
+2026-10-15T05:54:58.2676585Z ✔ wrong cross-stage GCC digest fails before preparation (40.702213ms)
+2026-10-15T05:54:58.3568681Z ✔ wrong base image SHA rejects before full/patch/recovery output (88.798796ms)
+2026-10-15T05:54:58.4003760Z ✔ base source drift, wrong version, nightly and ETU sources are rejected (43.648195ms)
+2026-10-15T05:54:58.8157058Z ✔ exit zero with a patch stdout failure does not advance to recovery or metadata (415.090858ms)
+2026-10-15T05:54:59.2270384Z ✔ a successful patch tool with wrong candidate bytes is rejected (411.246791ms)
+2026-10-15T05:54:59.7609677Z ✔ damaged recovery trailer fails actual verification before metadata (533.947538ms)
+2026-10-15T05:54:59.8016774Z ✔ builder refuses missing full/recovery assets instead of emitting metadata (40.628602ms)
+2026-10-15T05:54:59.8429967Z ✔ output path and unsupported compiled identity fail closed (41.142388ms)
+2026-10-15T05:55:00.4531916Z PREPARATION_CLI {"exitCode":0,"stdout":"{\"ok\":true,\"outputDir\":\"/home/runner/work/E-Track/E-Track/.cache/firmware-release-tests/case-g5ljMc/prepared\",\"assetsPrepared\":3,\"r2Verified\":false,\"metadataSha256\":\"1a88726f732239580584c426ab37148430d0db430d1f1ee1c61792d07705d0d8\"}\n","missingKeyExit":2,"missingKeyStderr":"{\"errorCode\":\"INVALID_PARAMETER\",\"message\":\"OTA_AES_KEY must be configured as 32 hex characters\",\"requestId\":\"571a4a67-e144-4995-934c-abe2c835b078\"}\n"}
+2026-10-15T05:55:00.4537328Z ✔ actual preparation CLI returns one JSON result and configuration exit 2 (610.765524ms)
+2026-10-15T05:55:00.7900266Z ✔ rejects ETU outer target drift despite a byte-equal unpack result (336.237226ms)
+2026-10-15T05:55:01.2879579Z ✔ rejects ETU outer base drift despite a byte-equal unpack result (497.909666ms)
+2026-10-15T05:55:01.6145090Z ✔ rejects ETU outer trailer drift despite a byte-equal unpack result (326.243548ms)
+2026-10-15T05:55:02.1571368Z ✔ late asset replacement cannot change the verified metadata identity (542.477614ms)
+2026-10-15T05:55:02.4018216Z ✔ an explicit error overrides a simultaneous success stdout marker (244.806543ms)
+2026-10-15T05:55:02.4110022Z ℹ tests 19
+2026-10-15T05:55:02.4110254Z ℹ suites 0
+2026-10-15T05:55:02.4110380Z ℹ pass 19
+2026-10-15T05:55:02.4110500Z ℹ fail 0
+2026-10-15T05:55:02.4110628Z ℹ cancelled 0
+2026-10-15T05:55:02.4110812Z ℹ skipped 0
+2026-10-15T05:55:02.4110931Z ℹ todo 0
+2026-10-15T05:55:02.4111079Z ℹ duration_ms 6480.592448

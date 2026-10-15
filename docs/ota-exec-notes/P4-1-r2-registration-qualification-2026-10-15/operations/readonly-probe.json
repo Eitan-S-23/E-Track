@@ -1,0 +1,44 @@
+{
+  "started": "2026-10-15T06:09:53.704Z",
+  "purpose": "Scoped read-only R2 access qualification, not rehearsal",
+  "bucket": "e-track-firmware-p41-test-releases",
+  "objects": [
+    "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+    "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+    "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin"
+  ],
+  "ttlSeconds": 900,
+  "permission": "object-read-only",
+  "observations": [
+    {
+      "operation": "verify-parent",
+      "status": 200,
+      "active": true
+    },
+    {
+      "operation": "mint-scoped-readonly",
+      "status": 200,
+      "cfRay": "a4aca86d59a41ec9-NRT",
+      "success": true,
+      "errors": []
+    },
+    {
+      "operation": "allowed-missing-object",
+      "key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "curlExitCode": 0,
+      "status": 404,
+      "stderr": "",
+      "responseHeaders": "HTTP/1.1 200 Connection established\r\n\r\nHTTP/1.1 404 Not Found\r\nDate: Thu, 15 Oct 2026 06:10:01 GMT\r\nContent-Type: text/plain;charset=UTF-8\r\nConnection: keep-alive\r\nServer: cloudflare\r\nCF-RAY: a4aca885bd2cc8eb-NRT\r\n\r\n"
+    },
+    {
+      "operation": "denied-outside-object-scope",
+      "key": "trace/firmware/e-track-at32f435/outside-qualification-scope.bin",
+      "curlExitCode": 0,
+      "status": 403,
+      "stderr": "",
+      "responseHeaders": "HTTP/1.1 200 Connection established\r\n\r\nHTTP/1.1 403 Forbidden\r\nDate: Thu, 15 Oct 2026 06:10:04 GMT\r\nContent-Type: text/plain;charset=UTF-8\r\nConnection: keep-alive\r\nServer: cloudflare\r\nCF-RAY: a4aca89a781e0a7c-NRT\r\n\r\n"
+    }
+  ],
+  "ok": true,
+  "finished": "2026-10-15T06:10:04.473Z"
+}

@@ -1,0 +1,173 @@
+﻿2026-10-15T05:54:42.0885801Z ##[group]Run npm test -- --config ../../../../../.github/scripts/p41-host.config.mjs
+2026-10-15T05:54:42.0886146Z [36;1mnpm test -- --config ../../../../../.github/scripts/p41-host.config.mjs[0m
+2026-10-15T05:54:42.0939232Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:42.0939389Z env:
+2026-10-15T05:54:42.0939510Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:42.0939655Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:42.0939815Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:42.0940016Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:42.0940191Z   BUILD_TYPE: Release
+2026-10-15T05:54:42.0940314Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:42.0940452Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:42.0940651Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:42.0940906Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:42.0941136Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:42.0941380Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:42.0941559Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:42.0941745Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:42.0942082Z ##[endgroup]
+2026-10-15T05:54:42.1651695Z 
+2026-10-15T05:54:42.1652745Z > @trace/update-service-worker@0.1.0 test
+2026-10-15T05:54:42.1653235Z > vitest run --config ../../../../../.github/scripts/p41-host.config.mjs
+2026-10-15T05:54:42.1653411Z 
+2026-10-15T05:54:42.3588790Z 
+2026-10-15T05:54:42.3629815Z [1m[30m[46m RUN [49m[39m[22m [36mv4.1.9 [39m[90m/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker[39m
+2026-10-15T05:54:42.3630421Z 
+2026-10-15T05:54:43.4243730Z [90mstdout[2m | ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22m[2mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22m[2muploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects
+2026-10-15T05:54:43.4244943Z [22m[39mP41_HOST_READY {
+2026-10-15T05:54:43.4245180Z   uploads: [
+2026-10-15T05:54:43.4245370Z     {
+2026-10-15T05:54:43.4245599Z       ok: [33mtrue[39m,
+2026-10-15T05:54:43.4245890Z       status: [32m'UPLOADED'[39m,
+2026-10-15T05:54:43.4246255Z       requestId: [32m'c7af4620-aa6f-4a07-a649-0d10a2ffbc6f'[39m,
+2026-10-15T05:54:43.4246480Z       kind: [32m'full'[39m,
+2026-10-15T05:54:43.4246704Z       fileName: [32m'e-track-at32f435-v20.0.1-full.etu'[39m,
+2026-10-15T05:54:43.4247151Z       r2Key: [32m'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/e-track-at32f435-v20.0.1-full.etu'[39m,
+2026-10-15T05:54:43.4247627Z       sha256: [32m'96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3'[39m,
+2026-10-15T05:54:43.4248168Z       sizeBytes: [33m18[39m,
+2026-10-15T05:54:43.4248644Z       contentDigest: [32m'sha-256=:lreWI+KQtL2hfankIyDEgGTj77UQw5J5mrKnsfm3WaM=:'[39m
+2026-10-15T05:54:43.4249023Z     },
+2026-10-15T05:54:43.4249186Z     {
+2026-10-15T05:54:43.4249384Z       ok: [33mtrue[39m,
+2026-10-15T05:54:43.4249646Z       status: [32m'UPLOADED'[39m,
+2026-10-15T05:54:43.4250044Z       requestId: [32m'0fcad6ac-08ef-4855-88da-e413e5caa7a2'[39m,
+2026-10-15T05:54:43.4250405Z       kind: [32m'patch'[39m,
+2026-10-15T05:54:43.4250812Z       fileName: [32m'e-track-at32f435-v2.8.0-to-v20.0.1-patch.etu'[39m,
+2026-10-15T05:54:43.4251602Z       r2Key: [32m'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/e-track-at32f435-v2.8.0-to-v20.0.1-patch.etu'[39m,
+2026-10-15T05:54:43.4252421Z       sha256: [32m'022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee'[39m,
+2026-10-15T05:54:43.4252855Z       sizeBytes: [33m19[39m,
+2026-10-15T05:54:43.4253319Z       contentDigest: [32m'sha-256=:Airbh5thY92uhXTQ+WLZtPgYsL1Fe1cuFEbqZ2f6Xu4=:'[39m
+2026-10-15T05:54:43.4253712Z     },
+2026-10-15T05:54:43.4253871Z     {
+2026-10-15T05:54:43.4254476Z       ok: [33mtrue[39m,
+2026-10-15T05:54:43.4254741Z       status: [32m'UPLOADED'[39m,
+2026-10-15T05:54:43.4255122Z       requestId: [32m'365f297e-285e-4196-a725-2f40e9476a17'[39m,
+2026-10-15T05:54:43.4255477Z       kind: [32m'recovery'[39m,
+2026-10-15T05:54:43.4255802Z       fileName: [32m'recovery-v20.0.1.bin'[39m,
+2026-10-15T05:54:43.4256432Z       r2Key: [32m'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/recovery-v20.0.1.bin'[39m,
+2026-10-15T05:54:43.4257157Z       sha256: [32m'd078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379'[39m,
+2026-10-15T05:54:43.4257594Z       sizeBytes: [33m22[39m,
+2026-10-15T05:54:43.4258192Z       contentDigest: [32m'sha-256=:0HgECu7QN5rndOsniBXA8vW/EHJRp5at/ReaIPicM3k=:'[39m
+2026-10-15T05:54:43.4258555Z     }
+2026-10-15T05:54:43.4258725Z   ],
+2026-10-15T05:54:43.4258902Z   registration: {
+2026-10-15T05:54:43.4259129Z     ok: [33mtrue[39m,
+2026-10-15T05:54:43.4259482Z     requestId: [32m'1dc71538-4871-4522-b7cf-13446d695cb2'[39m,
+2026-10-15T05:54:43.4260068Z     releaseId: [32m'fw_0186e30639e32b86b67f3bef8958a43a66a8306360d77a1329581265ccd72e7a'[39m,
+2026-10-15T05:54:43.4260509Z     state: [32m'ready'[39m,
+2026-10-15T05:54:43.4260968Z     idempotent: [33mfalse[39m,
+2026-10-15T05:54:43.4261264Z     assetsRegistered: [33m3[39m
+2026-10-15T05:54:43.4261493Z   },
+2026-10-15T05:54:43.4261664Z   replay: {
+2026-10-15T05:54:43.4261878Z     ok: [33mtrue[39m,
+2026-10-15T05:54:43.4262239Z     requestId: [32m'77d30d20-56b9-43a7-a5b1-b4f506a6175f'[39m,
+2026-10-15T05:54:43.4262819Z     releaseId: [32m'fw_0186e30639e32b86b67f3bef8958a43a66a8306360d77a1329581265ccd72e7a'[39m,
+2026-10-15T05:54:43.4263257Z     state: [32m'ready'[39m,
+2026-10-15T05:54:43.4263519Z     idempotent: [33mtrue[39m,
+2026-10-15T05:54:43.4263702Z     assetsRegistered: [33m3[39m
+2026-10-15T05:54:43.4263841Z   },
+2026-10-15T05:54:43.4264091Z   before: { releases: [33m0[39m, assets: [33m0[39m, audit: [33m0[39m, channels: [] },
+2026-10-15T05:54:43.4264318Z   after: {
+2026-10-15T05:54:43.4264453Z     releases: [33m1[39m,
+2026-10-15T05:54:43.4264604Z     assets: [33m3[39m,
+2026-10-15T05:54:43.4264751Z     audit: [33m1[39m,
+2026-10-15T05:54:43.4265019Z     channels: [ [36m[Object: null prototype][39m, [36m[Object: null prototype][39m ]
+2026-10-15T05:54:43.4265237Z   },
+2026-10-15T05:54:43.4265518Z   metadataSha256: [32m'f08d9540ba2fe252220241bb328f34f6145494f1853af3a02d2889de51b83231'[39m,
+2026-10-15T05:54:43.4265760Z   calls: [
+2026-10-15T05:54:43.4265894Z     [32m'GET /healthz'[39m,
+2026-10-15T05:54:43.4266092Z     [32m'POST /api/ci/firmware/releases'[39m,
+2026-10-15T05:54:43.4266306Z     [32m'POST /api/ci/firmware/releases'[39m,
+2026-10-15T05:54:43.4266488Z     [32m'GET /healthz'[39m,
+2026-10-15T05:54:43.4266674Z     [32m'POST /api/ci/firmware/releases'[39m,
+2026-10-15T05:54:43.4266879Z     [32m'POST /api/ci/firmware/releases'[39m
+2026-10-15T05:54:43.4267033Z   ]
+2026-10-15T05:54:43.4267141Z }
+2026-10-15T05:54:43.4267202Z 
+2026-10-15T05:54:43.4268275Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22muploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects[33m 805[2mms[22m[39m
+2026-10-15T05:54:43.6061236Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mmissing asset rejects before health, GitHub, R2 or registration[32m 7[2mms[22m[39m
+2026-10-15T05:54:43.6062554Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mbad digest rejects before health, GitHub, R2 or registration[32m 2[2mms[22m[39m
+2026-10-15T05:54:43.6063870Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22msame-key different bytes rejects without overwrite or register[32m 4[2mms[22m[39m
+2026-10-15T05:54:43.6065345Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mfalse-positive R2 put with missing readback never persists verified metadata or touches D1[32m 4[2mms[22m[39m
+2026-10-15T05:54:43.6066656Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22ma real registration audit failure rolls back ready/assets and stops without retry[32m 165[2mms[22m[39m
+2026-10-15T05:54:43.9630636Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mcancellation after the first upload stops subsequent uploads and registration[32m 5[2mms[22m[39m
+2026-10-15T05:54:43.9631961Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mmonotonicity rejects lower versions and same-version changed metadata before upload[33m 352[2mms[22m[39m
+2026-10-15T05:54:43.9933147Z [90mstdout[2m | ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22m[2mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22m[2mproduction reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register
+2026-10-15T05:54:43.9934245Z [22m[39mP41_HOST_PRODUCTION_ORDER [
+2026-10-15T05:54:43.9934521Z   [32m'preflight'[39m,
+2026-10-15T05:54:43.9934796Z   [32m'github-release-readback'[39m,
+2026-10-15T05:54:43.9935063Z   [32m'r2-readback'[39m,
+2026-10-15T05:54:43.9935290Z   [32m'r2-readback'[39m,
+2026-10-15T05:54:43.9935513Z   [32m'r2-readback'[39m,
+2026-10-15T05:54:43.9935781Z   [32m'register'[39m,
+2026-10-15T05:54:43.9936022Z   [32m'idempotent-replay'[39m
+2026-10-15T05:54:43.9936235Z ]
+2026-10-15T05:54:43.9936342Z 
+2026-10-15T05:54:44.0026690Z [90mstdout[2m | ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22m[2mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22m[2mGitHub resumes the same untagged draft after interruption with 0 uploaded assets
+2026-10-15T05:54:44.0027727Z [22m[39mP41_HOST_DRAFT_RETRY {
+2026-10-15T05:54:44.0028122Z   completed: [33m0[39m,
+2026-10-15T05:54:44.0028364Z   releaseId: [33m7[39m,
+2026-10-15T05:54:44.0028601Z   newUploads: [33m3[39m,
+2026-10-15T05:54:44.0028888Z   existingBytesUnchanged: [33mtrue[39m,
+2026-10-15T05:54:44.0029201Z   fullReadbackVerified: [33mtrue[39m
+2026-10-15T05:54:44.0029433Z }
+2026-10-15T05:54:44.0029526Z 
+2026-10-15T05:54:44.0062357Z [90mstdout[2m | ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22m[2mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22m[2mGitHub resumes the same untagged draft after interruption with 1 uploaded assets
+2026-10-15T05:54:44.0062938Z [22m[39mP41_HOST_DRAFT_RETRY {
+2026-10-15T05:54:44.0063108Z   completed: [33m1[39m,
+2026-10-15T05:54:44.0063263Z   releaseId: [33m7[39m,
+2026-10-15T05:54:44.0063412Z   newUploads: [33m2[39m,
+2026-10-15T05:54:44.0063592Z   existingBytesUnchanged: [33mtrue[39m,
+2026-10-15T05:54:44.0063791Z   fullReadbackVerified: [33mtrue[39m
+2026-10-15T05:54:44.0063936Z }
+2026-10-15T05:54:44.0063997Z 
+2026-10-15T05:54:44.0097923Z [90mstdout[2m | ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22m[2mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22m[2mGitHub resumes the same untagged draft after interruption with 3 uploaded assets
+2026-10-15T05:54:44.0098495Z [22m[39mP41_HOST_DRAFT_RETRY {
+2026-10-15T05:54:44.0098661Z   completed: [33m3[39m,
+2026-10-15T05:54:44.0098835Z   releaseId: [33m7[39m,
+2026-10-15T05:54:44.0099220Z   newUploads: [33m0[39m,
+2026-10-15T05:54:44.0099399Z   existingBytesUnchanged: [33mtrue[39m,
+2026-10-15T05:54:44.0099597Z   fullReadbackVerified: [33mtrue[39m
+2026-10-15T05:54:44.0099741Z }
+2026-10-15T05:54:44.0099805Z 
+2026-10-15T05:54:44.0386686Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mchecks/PR/nightly, ambiguous modes, missing config and crossed buckets fail closed[32m 9[2mms[22m[39m
+2026-10-15T05:54:44.0388859Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mproduction reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register[32m 21[2mms[22m[39m
+2026-10-15T05:54:44.0390255Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub full-byte readback catches false metadata and never publishes a corrupted draft[32m 3[2mms[22m[39m
+2026-10-15T05:54:44.0391329Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub signed redirect receives no repository credential[32m 3[2mms[22m[39m
+2026-10-15T05:54:44.0392655Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub resumes the same untagged draft after interruption with 0 uploaded assets[32m 4[2mms[22m[39m
+2026-10-15T05:54:44.0393645Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub resumes the same untagged draft after interruption with 1 uploaded assets[32m 4[2mms[22m[39m
+2026-10-15T05:54:44.0394673Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub resumes the same untagged draft after interruption with 3 uploaded assets[32m 4[2mms[22m[39m
+2026-10-15T05:54:44.0395756Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub rejects wrong target in an existing draft before any mutation[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0396859Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub rejects mutable target in an existing draft before any mutation[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0397957Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub rejects conflicting tag in an existing draft before any mutation[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0399373Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub rejects ambiguous drafts in an existing draft before any mutation[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0400330Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub rejects changed notes in an existing draft before any mutation[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0401360Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub rejects prerelease in an existing draft before any mutation[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0402267Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub still requires a tag for a published release[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0403312Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub validates a newly returned draft target before any asset upload[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0404277Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub rechecks a conflicting tag created during upload before publishing[32m 3[2mms[22m[39m
+2026-10-15T05:54:44.0405222Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mGitHub reads every existing draft asset before adding missing assets[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0406555Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mregister cancellation does not retry and service paths cannot hide a wrong origin[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0408005Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mrejects a stale register response even if body and response header agree[32m 2[2mms[22m[39m
+2026-10-15T05:54:44.0409543Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mformal base transport checks actual source/version/full SHA: valid[32m 1[2mms[22m[39m
+2026-10-15T05:54:44.0410771Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mformal base transport checks actual source/version/full SHA: wrong commit[32m 0[2mms[22m[39m
+2026-10-15T05:54:44.0411954Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mformal base transport checks actual source/version/full SHA: wrong digest[32m 1[2mms[22m[39m
+2026-10-15T05:54:44.0412916Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mformal base transport checks actual source/version/full SHA: not previous[32m 0[2mms[22m[39m
+2026-10-15T05:54:44.0413860Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mformal base transport checks actual source/version/full SHA: draft[32m 0[2mms[22m[39m
+2026-10-15T05:54:44.0414939Z  [32m✓[39m ../../../../../tests/ota/firmware-pipeline.host.test.ts[2m > [22mP4-1 production pipeline with existing handler and SQLite host ports[2m > [22mformal base transport checks actual source/version/full SHA: missing asset[32m 0[2mms[22m[39m
+2026-10-15T05:54:44.0415386Z 
+2026-10-15T05:54:44.0415565Z [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+2026-10-15T05:54:44.0415855Z [2m      Tests [22m [1m[32m33 passed[39m[22m[90m (33)[39m
+2026-10-15T05:54:44.0416098Z [2m   Start at [22m 05:54:42
+2026-10-15T05:54:44.0416462Z [2m   Duration [22m 1.68s[2m (transform 145ms, setup 40ms, import 123ms, tests 1.43s, environment 0ms)[22m
+2026-10-15T05:54:44.0416671Z 

@@ -1,0 +1,128 @@
+﻿2026-10-15T05:54:18.4943384Z ##[group]Run actions/checkout@v4
+2026-10-15T05:54:18.4943854Z with:
+2026-10-15T05:54:18.4944104Z   persist-credentials: false
+2026-10-15T05:54:18.4944394Z   repository: Eitan-S-23/E-Track
+2026-10-15T05:54:18.4946406Z   token: ***
+2026-10-15T05:54:18.4946641Z   ssh-strict: true
+2026-10-15T05:54:18.4946889Z   ssh-user: git
+2026-10-15T05:54:18.4947128Z   clean: true
+2026-10-15T05:54:18.4947379Z   sparse-checkout-cone-mode: true
+2026-10-15T05:54:18.4947674Z   fetch-depth: 1
+2026-10-15T05:54:18.4948115Z   fetch-tags: false
+2026-10-15T05:54:18.4948364Z   show-progress: true
+2026-10-15T05:54:18.4948616Z   lfs: false
+2026-10-15T05:54:18.4948842Z   submodules: false
+2026-10-15T05:54:18.4949094Z   set-safe-directory: true
+2026-10-15T05:54:18.4949377Z   allow-unsafe-pr-checkout: false
+2026-10-15T05:54:18.4949742Z env:
+2026-10-15T05:54:18.4949975Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:18.4950281Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:18.4950587Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:18.4950998Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:18.4951345Z   BUILD_TYPE: Release
+2026-10-15T05:54:18.4951603Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:18.4951891Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:18.4952280Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:18.4952780Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:18.4953234Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:18.4953655Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:18.4954015Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:18.4954376Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:18.4954759Z ##[endgroup]
+2026-10-15T05:54:18.5740000Z Syncing repository: Eitan-S-23/E-Track
+2026-10-15T05:54:18.5741857Z ##[group]Getting Git version info
+2026-10-15T05:54:18.5742467Z Working directory is '/home/runner/work/E-Track/E-Track'
+2026-10-15T05:54:18.5743460Z [command]/usr/bin/git version
+2026-10-15T05:54:18.5743891Z git version 2.55.0
+2026-10-15T05:54:18.5745222Z ##[endgroup]
+2026-10-15T05:54:18.5749443Z Temporarily overriding HOME='/home/runner/work/_temp/0b4c77b2-458b-4994-977a-264020708ed1' before making global git config changes
+2026-10-15T05:54:18.5750654Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-15T05:54:18.5751685Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+2026-10-15T05:54:18.5783086Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+2026-10-15T05:54:18.5786103Z ##[group]Initializing the repository
+2026-10-15T05:54:18.5791009Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+2026-10-15T05:54:18.6086978Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-15T05:54:18.6088246Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-15T05:54:18.6088908Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-15T05:54:18.6089323Z hint: call:
+2026-10-15T05:54:18.6089558Z hint:
+2026-10-15T05:54:18.6089881Z hint: 	git config --global init.defaultBranch <name>
+2026-10-15T05:54:18.6090227Z hint:
+2026-10-15T05:54:18.6090691Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-15T05:54:18.6091534Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-15T05:54:18.6091999Z hint:
+2026-10-15T05:54:18.6092236Z hint: 	git branch -m <name>
+2026-10-15T05:54:18.6092502Z hint:
+2026-10-15T05:54:18.6092848Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-15T05:54:18.6093542Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+2026-10-15T05:54:18.6098222Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+2026-10-15T05:54:18.6158168Z ##[endgroup]
+2026-10-15T05:54:18.6159027Z ##[group]Disabling automatic garbage collection
+2026-10-15T05:54:18.6161988Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-15T05:54:18.6194067Z ##[endgroup]
+2026-10-15T05:54:18.6194573Z ##[group]Setting up auth
+2026-10-15T05:54:18.6199851Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T05:54:18.6230491Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T05:54:18.6512579Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T05:54:18.6543464Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T05:54:18.6737354Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T05:54:18.6769107Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T05:54:18.6956249Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-15T05:54:18.6991797Z ##[endgroup]
+2026-10-15T05:54:18.6992581Z ##[group]Fetching the repository
+2026-10-15T05:54:18.6999588Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +ac4b40bac7f6067642b3a8d754574cd9b24ed5c0:refs/remotes/pull/27/merge
+2026-10-15T05:54:27.7450706Z From https://github.com/Eitan-S-23/E-Track
+2026-10-15T05:54:27.7451990Z  * [new ref]         ac4b40bac7f6067642b3a8d754574cd9b24ed5c0 -> pull/27/merge
+2026-10-15T05:54:27.7469194Z ##[endgroup]
+2026-10-15T05:54:27.7470533Z ##[group]Determining the checkout info
+2026-10-15T05:54:27.7471355Z ##[endgroup]
+2026-10-15T05:54:27.7471841Z [command]/usr/bin/git sparse-checkout disable
+2026-10-15T05:54:27.7515136Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-15T05:54:27.7574917Z ##[group]Checking out the ref
+2026-10-15T05:54:27.7577439Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/27/merge
+2026-10-15T05:54:28.8018429Z Updating files:  87% (12275/13988)
+2026-10-15T05:54:28.9655672Z Updating files:  88% (12310/13988)
+2026-10-15T05:54:28.9828657Z Updating files:  89% (12450/13988)
+2026-10-15T05:54:29.1807187Z Updating files:  90% (12590/13988)
+2026-10-15T05:54:29.4066051Z Updating files:  91% (12730/13988)
+2026-10-15T05:54:29.4948337Z Updating files:  92% (12869/13988)
+2026-10-15T05:54:29.5078044Z Updating files:  93% (13009/13988)
+2026-10-15T05:54:29.5277968Z Updating files:  94% (13149/13988)
+2026-10-15T05:54:29.5403307Z Updating files:  95% (13289/13988)
+2026-10-15T05:54:29.5530039Z Updating files:  96% (13429/13988)
+2026-10-15T05:54:29.5603955Z Updating files:  97% (13569/13988)
+2026-10-15T05:54:29.5728180Z Updating files:  98% (13709/13988)
+2026-10-15T05:54:29.5847728Z Updating files:  99% (13849/13988)
+2026-10-15T05:54:29.5848231Z Updating files: 100% (13988/13988)
+2026-10-15T05:54:29.5849537Z Updating files: 100% (13988/13988), done.
+2026-10-15T05:54:29.6034163Z Note: switching to 'refs/remotes/pull/27/merge'.
+2026-10-15T05:54:29.6034571Z 
+2026-10-15T05:54:29.6034767Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-15T05:54:29.6035367Z changes and commit them, and you can discard any commits you make in this
+2026-10-15T05:54:29.6035814Z state without impacting any branches by switching back to a branch.
+2026-10-15T05:54:29.6036132Z 
+2026-10-15T05:54:29.6036361Z If you want to create a new branch to retain commits you create, you may
+2026-10-15T05:54:29.6036805Z do so (now or later) by using -c with the switch command. Example:
+2026-10-15T05:54:29.6037174Z 
+2026-10-15T05:54:29.6037335Z   git switch -c <new-branch-name>
+2026-10-15T05:54:29.6037503Z 
+2026-10-15T05:54:29.6038231Z Or undo this operation with:
+2026-10-15T05:54:29.6038402Z 
+2026-10-15T05:54:29.6038503Z   git switch -
+2026-10-15T05:54:29.6038636Z 
+2026-10-15T05:54:29.6038854Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-15T05:54:29.6039172Z 
+2026-10-15T05:54:29.6039531Z HEAD is now at ac4b40b Merge 75eea2c7380cfe3dadf147af4514a1e443d6e5d8 into b42d3e25db85d6aba397cb4d0fb34bb5b653904f
+2026-10-15T05:54:29.6148640Z ##[endgroup]
+2026-10-15T05:54:29.6185062Z [command]/usr/bin/git log -1 --format=%H
+2026-10-15T05:54:29.6210857Z ac4b40bac7f6067642b3a8d754574cd9b24ed5c0
+2026-10-15T05:54:29.6222560Z ##[group]Removing auth
+2026-10-15T05:54:29.6223743Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T05:54:29.6254228Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T05:54:29.6455966Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T05:54:29.6482164Z http.https://github.com/.extraheader
+2026-10-15T05:54:29.6487215Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-15T05:54:29.6732509Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T05:54:29.6921255Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T05:54:29.6952574Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T05:54:29.7132595Z ##[endgroup]

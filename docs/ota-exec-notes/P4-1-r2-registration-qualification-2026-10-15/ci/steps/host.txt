@@ -1,0 +1,758 @@
+﻿2026-10-15T05:54:40.8224722Z ##[group]Run npm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts
+2026-10-15T05:54:40.8225298Z [36;1mnpm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts[0m
+2026-10-15T05:54:40.8287565Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:40.8287715Z env:
+2026-10-15T05:54:40.8287991Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:40.8288141Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:40.8288303Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:40.8288510Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:40.8288690Z   BUILD_TYPE: Release
+2026-10-15T05:54:40.8288816Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:40.8288960Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:40.8289167Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:40.8289434Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:40.8289693Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:40.8289915Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:40.8290103Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:40.8290319Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:40.8290522Z ##[endgroup]
+2026-10-15T05:54:40.9109779Z 
+2026-10-15T05:54:40.9110553Z > @trace/update-service-worker@0.1.0 test
+2026-10-15T05:54:40.9111077Z > vitest run --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts
+2026-10-15T05:54:40.9111347Z 
+2026-10-15T05:54:41.2025484Z 
+2026-10-15T05:54:41.2028445Z [1m[30m[46m RUN [49m[39m[22m [36mv4.1.9 [39m[90m/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker[39m
+2026-10-15T05:54:41.2028795Z 
+2026-10-15T05:54:41.5581713Z [90mstdout[2m | test/firmware-migration.host.test.ts[2m > [22m[2mP4-2 real SQLite forward migration and controlled backfill[2m > [22m[2mapplies the full migration chain to an empty database and emits the actual schema
+2026-10-15T05:54:41.5583117Z [22m[39mSQLITE_VERSION [Object: null prototype] { version: [32m'3.53.4'[39m }
+2026-10-15T05:54:41.5583515Z P42_SCHEMA_DUMP [
+2026-10-15T05:54:41.5583772Z   [Object: null prototype] {
+2026-10-15T05:54:41.5584581Z     type: [32m'index'[39m,
+2026-10-15T05:54:41.5584930Z     name: [32m'idx_firmware_channels_lookup'[39m,
+2026-10-15T05:54:41.5585377Z     sql: [32m'CREATE INDEX idx_firmware_channels_lookup\n'[39m +
+2026-10-15T05:54:41.5585902Z       [32m'  ON "firmware_channels_legacy"(app_id, device_model, name)'[39m
+2026-10-15T05:54:41.5586299Z   },
+2026-10-15T05:54:41.5586503Z   [Object: null prototype] {
+2026-10-15T05:54:41.5586784Z     type: [32m'index'[39m,
+2026-10-15T05:54:41.5587146Z     name: [32m'idx_firmware_idempotency_retained'[39m,
+2026-10-15T05:54:41.5588007Z     sql: [32m'CREATE INDEX idx_firmware_idempotency_retained ON firmware_admin_idempotency(retained_until)'[39m
+2026-10-15T05:54:41.5588487Z   },
+2026-10-15T05:54:41.5588685Z   [Object: null prototype] {
+2026-10-15T05:54:41.5588962Z     type: [32m'index'[39m,
+2026-10-15T05:54:41.5589339Z     name: [32m'idx_firmware_releases_app_model_state'[39m,
+2026-10-15T05:54:41.5589857Z     sql: [32m'CREATE INDEX idx_firmware_releases_app_model_state\n'[39m +
+2026-10-15T05:54:41.5590446Z       [32m'  ON "firmware_releases_legacy"(app_id, device_model, state)'[39m
+2026-10-15T05:54:41.5590804Z   },
+2026-10-15T05:54:41.5591007Z   [Object: null prototype] {
+2026-10-15T05:54:41.5591298Z     type: [32m'index'[39m,
+2026-10-15T05:54:41.5591665Z     name: [32m'idx_firmware_releases_r2'[39m,
+2026-10-15T05:54:41.5592116Z     sql: [32m'CREATE INDEX idx_firmware_releases_r2\n'[39m +
+2026-10-15T05:54:41.5592703Z       [32m'  ON "firmware_releases_legacy"(app_id, device_model, r2_state, archived)'[39m
+2026-10-15T05:54:41.5593151Z   },
+2026-10-15T05:54:41.5593764Z   [Object: null prototype] {
+2026-10-15T05:54:41.5594062Z     type: [32m'index'[39m,
+2026-10-15T05:54:41.5594504Z     name: [32m'idx_firmware_tombstone_expired'[39m,
+2026-10-15T05:54:41.5595236Z     sql: [32m'CREATE INDEX idx_firmware_tombstone_expired ON firmware_admin_idempotency_tombstones(expired_at)'[39m
+2026-10-15T05:54:41.5595743Z   },
+2026-10-15T05:54:41.5595960Z   [Object: null prototype] {
+2026-10-15T05:54:41.5596241Z     type: [32m'index'[39m,
+2026-10-15T05:54:41.5596613Z     name: [32m'idx_firmware_v2_assets_release'[39m,
+2026-10-15T05:54:41.5597287Z     sql: [32m'CREATE INDEX idx_firmware_v2_assets_release ON firmware_release_assets(release_id)'[39m
+2026-10-15T05:54:41.5597722Z   },
+2026-10-15T05:54:41.5598172Z   [Object: null prototype] {
+2026-10-15T05:54:41.5598439Z     type: [32m'index'[39m,
+2026-10-15T05:54:41.5598761Z     name: [32m'idx_firmware_v2_patch_base'[39m,
+2026-10-15T05:54:41.5599427Z     sql: [32m'CREATE INDEX idx_firmware_v2_patch_base ON firmware_release_assets(base_image_sha256,kind,r2_state)'[39m
+2026-10-15T05:54:41.5599932Z   },
+2026-10-15T05:54:41.5600141Z   [Object: null prototype] {
+2026-10-15T05:54:41.5600427Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5600771Z     name: [32m'firmware_admin_idempotency'[39m,
+2026-10-15T05:54:41.5601241Z     sql: [32m'CREATE TABLE firmware_admin_idempotency (\n'[39m +
+2026-10-15T05:54:41.5602063Z       [32m'  actor_canonical TEXT NOT NULL CHECK (length(trim(actor_canonical)) > 0 AND actor_canonical = lower(trim(actor_canonical))),\n'[39m +
+2026-10-15T05:54:41.5602869Z       [32m'  idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) = 36\n'[39m +
+2026-10-15T05:54:41.5603543Z       [32m"    AND substr(idempotency_key,9,1) = '-' AND substr(idempotency_key,14,1) = '-'\n"[39m +
+2026-10-15T05:54:41.5604234Z       [32m"    AND substr(idempotency_key,19,1) = '-' AND substr(idempotency_key,24,1) = '-'\n"[39m +
+2026-10-15T05:54:41.5605001Z       [32m"    AND substr(idempotency_key,15,1) = '4' AND substr(idempotency_key,20,1) IN ('8','9','a','b')\n"[39m +
+2026-10-15T05:54:41.5605874Z       [32m"    AND length(replace(idempotency_key,'-','')) = 32 AND replace(idempotency_key,'-','') NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5606738Z       [32m"  fingerprint TEXT NOT NULL CHECK (length(fingerprint) = 64 AND fingerprint NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5607622Z       [32m"  method TEXT NOT NULL CHECK (method = 'POST'),\n"[39m +
+2026-10-15T05:54:41.5608421Z       [32m'  canonical_path TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5608919Z       [32m"  action TEXT NOT NULL CHECK (action IN ('disable','recovery-download')),\n"[39m +
+2026-10-15T05:54:41.5609400Z       [32m'  release_id TEXT NOT NULL REFERENCES firmware_releases(id),\n'[39m +
+2026-10-15T05:54:41.5609741Z       [32m"  state TEXT NOT NULL CHECK (state IN ('pending','completed')),\n"[39m +
+2026-10-15T05:54:41.5610012Z       [32m'  status_code INTEGER,\n'[39m +
+2026-10-15T05:54:41.5610231Z       [32m'  response_body_json TEXT,\n'[39m +
+2026-10-15T05:54:41.5610442Z       [32m'  request_id TEXT,\n'[39m +
+2026-10-15T05:54:41.5610852Z       [32m"  created_epoch_seconds INTEGER NOT NULL CHECK (typeof(created_epoch_seconds) = 'integer' AND created_epoch_seconds >= 0),\n"[39m +
+2026-10-15T05:54:41.5611356Z       [32m'  retained_until INTEGER NOT NULL CHECK (retained_until = created_epoch_seconds + 86400),\n'[39m +
+2026-10-15T05:54:41.5611680Z       [32m'  original_expires_at INTEGER,\n'[39m +
+2026-10-15T05:54:41.5612007Z       [32m'  -- Deferred self-reference permits pending only inside the atomic batch.\n'[39m +
+2026-10-15T05:54:41.5612433Z       [32m"  completed_state TEXT NOT NULL DEFAULT 'completed' CHECK (completed_state = 'completed'),\n"[39m +
+2026-10-15T05:54:41.5612821Z       [32m'  PRIMARY KEY (actor_canonical,idempotency_key),\n'[39m +
+2026-10-15T05:54:41.5613218Z       [32m'  UNIQUE (actor_canonical,idempotency_key,completed_state),\n'[39m +
+2026-10-15T05:54:41.5613597Z       [32m'  FOREIGN KEY (actor_canonical,idempotency_key,state)\n'[39m +
+2026-10-15T05:54:41.5614151Z       [32m'    REFERENCES firmware_admin_idempotency(actor_canonical,idempotency_key,completed_state)\n'[39m +
+2026-10-15T05:54:41.5614492Z       [32m'    DEFERRABLE INITIALLY DEFERRED,\n'[39m +
+2026-10-15T05:54:41.5614847Z       [32m"  CHECK (canonical_path = '/api/admin/firmware/releases/' || release_id || '/' || action),\n"[39m +
+2026-10-15T05:54:41.5615280Z       [32m"  CHECK (state <> 'completed' OR (status_code IS NOT NULL AND status_code = 200\n"[39m +
+2026-10-15T05:54:41.5615668Z       [32m'    AND response_body_json IS NOT NULL AND json_valid(response_body_json)\n'[39m +
+2026-10-15T05:54:41.5616111Z       [32m"    AND json_type(response_body_json) = 'object' AND request_id IS NOT NULL AND length(request_id) > 0\n"[39m +
+2026-10-15T05:54:41.5616546Z       [32m"    AND COALESCE(json_type(response_body_json,'$.requestId'),'missing') = 'text'\n"[39m +
+2026-10-15T05:54:41.5616927Z       [32m"    AND json_extract(response_body_json,'$.requestId') = request_id)),\n"[39m +
+2026-10-15T05:54:41.5617276Z       [32m"  CHECK ((action = 'disable' AND original_expires_at IS NULL)\n"[39m +
+2026-10-15T05:54:41.5617597Z       [32m"    OR (action = 'recovery-download' AND (state = 'pending'\n"[39m +
+2026-10-15T05:54:41.5618123Z       [32m'      OR (original_expires_at IS NOT NULL AND original_expires_at = created_epoch_seconds + 300))))\n'[39m +
+2026-10-15T05:54:41.5618409Z       [32m')'[39m
+2026-10-15T05:54:41.5618542Z   },
+2026-10-15T05:54:41.5618668Z   [Object: null prototype] {
+2026-10-15T05:54:41.5618836Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5619056Z     name: [32m'firmware_admin_idempotency_tombstones'[39m,
+2026-10-15T05:54:41.5619358Z     sql: [32m'CREATE TABLE firmware_admin_idempotency_tombstones (\n'[39m +
+2026-10-15T05:54:41.5619830Z       [32m'  actor_canonical TEXT NOT NULL CHECK (length(trim(actor_canonical)) > 0 AND actor_canonical = lower(trim(actor_canonical))),\n'[39m +
+2026-10-15T05:54:41.5620290Z       [32m'  idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) = 36\n'[39m +
+2026-10-15T05:54:41.5620674Z       [32m"    AND substr(idempotency_key,9,1) = '-' AND substr(idempotency_key,14,1) = '-'\n"[39m +
+2026-10-15T05:54:41.5621069Z       [32m"    AND substr(idempotency_key,19,1) = '-' AND substr(idempotency_key,24,1) = '-'\n"[39m +
+2026-10-15T05:54:41.5621609Z       [32m"    AND substr(idempotency_key,15,1) = '4' AND substr(idempotency_key,20,1) IN ('8','9','a','b')\n"[39m +
+2026-10-15T05:54:41.5622090Z       [32m"    AND length(replace(idempotency_key,'-','')) = 32 AND replace(idempotency_key,'-','') NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5622581Z       [32m"  fingerprint TEXT NOT NULL CHECK (length(fingerprint) = 64 AND fingerprint NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5623004Z       [32m"  action TEXT NOT NULL CHECK (action IN ('disable','recovery-download')),\n"[39m +
+2026-10-15T05:54:41.5623354Z       [32m'  release_id TEXT NOT NULL REFERENCES firmware_releases(id),\n'[39m +
+2026-10-15T05:54:41.5623759Z       [32m"  expired_at INTEGER NOT NULL CHECK (typeof(expired_at) = 'integer' AND expired_at >= 86400),\n"[39m +
+2026-10-15T05:54:41.5624241Z       [32m"  tombstoned_at INTEGER NOT NULL CHECK (typeof(tombstoned_at) = 'integer' AND tombstoned_at >= expired_at),\n"[39m +
+2026-10-15T05:54:41.5624629Z       [32m'  PRIMARY KEY (actor_canonical,idempotency_key)\n'[39m +
+2026-10-15T05:54:41.5624840Z       [32m')'[39m
+2026-10-15T05:54:41.5624962Z   },
+2026-10-15T05:54:41.5625081Z   [Object: null prototype] {
+2026-10-15T05:54:41.5625246Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5625448Z     name: [32m'firmware_backfill_manifests'[39m,
+2026-10-15T05:54:41.5625713Z     sql: [32m'CREATE TABLE firmware_backfill_manifests (\n'[39m +
+2026-10-15T05:54:41.5626046Z       [32m'  release_id TEXT NOT NULL PRIMARY KEY REFERENCES firmware_releases(id),\n'[39m +
+2026-10-15T05:54:41.5626530Z       [32m"  manifest_sha256 TEXT NOT NULL CHECK (length(manifest_sha256) = 64 AND manifest_sha256 NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5627129Z       [32m"  manifest_json TEXT NOT NULL CHECK (json_valid(manifest_json) AND json_type(manifest_json) = 'object'),\n"[39m +
+2026-10-15T05:54:41.5627530Z       [32m"  created_at TEXT NOT NULL DEFAULT (datetime('now'))\n"[39m +
+2026-10-15T05:54:41.5627752Z       [32m')'[39m
+2026-10-15T05:54:41.5627973Z   },
+2026-10-15T05:54:41.5628094Z   [Object: null prototype] {
+2026-10-15T05:54:41.5628256Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5628436Z     name: [32m'firmware_channels'[39m,
+2026-10-15T05:54:41.5628663Z     sql: [32m'CREATE TABLE firmware_channels (\n'[39m +
+2026-10-15T05:54:41.5628899Z       [32m'  id TEXT NOT NULL PRIMARY KEY,\n'[39m +
+2026-10-15T05:54:41.5629186Z       [32m'  app_id TEXT NOT NULL REFERENCES apps(id) ON DELETE CASCADE,\n'[39m +
+2026-10-15T05:54:41.5629527Z       [32m'  device_model TEXT NOT NULL CHECK (length(trim(device_model)) > 0),\n'[39m +
+2026-10-15T05:54:41.5629859Z       [32m"  name TEXT NOT NULL CHECK (name IN ('stable','beta')),\n"[39m +
+2026-10-15T05:54:41.5630221Z       [32m'  current_release_id TEXT REFERENCES firmware_releases(id) ON DELETE SET NULL,\n'[39m +
+2026-10-15T05:54:41.5630627Z       [32m'  -- This is an unresolved migration marker, never a second distribution source.\n'[39m +
+2026-10-15T05:54:41.5631034Z       [32m'  legacy_current_release_id TEXT REFERENCES firmware_releases_legacy(id),\n'[39m +
+2026-10-15T05:54:41.5631463Z       [32m"  revision INTEGER NOT NULL DEFAULT 0 CHECK (typeof(revision) = 'integer' AND revision >= 0),\n"[39m +
+2026-10-15T05:54:41.5631873Z       [32m'  disable_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_latest IN (0,1)),\n'[39m +
+2026-10-15T05:54:41.5632275Z       [32m'  disable_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_downloads IN (0,1)),\n'[39m +
+2026-10-15T05:54:41.5632578Z       [32m'  maintenance_message TEXT,\n'[39m +
+2026-10-15T05:54:41.5633103Z       [32m"  last_action TEXT NOT NULL DEFAULT 'init' CHECK (last_action IN ('init','publish','retract','stop_latest','resume_latest','stop_downloads','resume_downloads')),\n"[39m +
+2026-10-15T05:54:41.5633520Z       [32m'  last_actor TEXT,\n'[39m +
+2026-10-15T05:54:41.5633894Z       [32m"  last_actor_type TEXT CHECK (last_actor_type IS NULL OR last_actor_type IN ('ci','access','system','test')),\n"[39m +
+2026-10-15T05:54:41.5634332Z       [32m'  last_request_id TEXT,\n'[39m +
+2026-10-15T05:54:41.5634529Z       [32m'  last_reason TEXT,\n'[39m +
+2026-10-15T05:54:41.5634730Z       [32m'  last_before_json TEXT,\n'[39m +
+2026-10-15T05:54:41.5634935Z       [32m'  last_after_json TEXT,\n'[39m +
+2026-10-15T05:54:41.5635191Z       [32m"  created_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5635492Z       [32m"  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5635842Z       [32m'  CHECK (current_release_id IS NULL OR legacy_current_release_id IS NULL),\n'[39m +
+2026-10-15T05:54:41.5636146Z       [32m'  UNIQUE (app_id,device_model,name)\n'[39m +
+2026-10-15T05:54:41.5636333Z       [32m')'[39m
+2026-10-15T05:54:41.5636451Z   },
+2026-10-15T05:54:41.5636576Z   [Object: null prototype] {
+2026-10-15T05:54:41.5636755Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5636950Z     name: [32m'firmware_channels_legacy'[39m,
+2026-10-15T05:54:41.5637217Z     sql: [32m'CREATE TABLE "firmware_channels_legacy" (\n'[39m +
+2026-10-15T05:54:41.5637458Z       [32m'  id TEXT PRIMARY KEY,\n'[39m +
+2026-10-15T05:54:41.5637672Z       [32m'  app_id TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5637976Z       [32m'  device_model TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5638247Z       [32m"  name TEXT NOT NULL CHECK (name IN ('stable', 'beta')),\n"[39m +
+2026-10-15T05:54:41.5638500Z       [32m'  current_release_id TEXT,\n'[39m +
+2026-10-15T05:54:41.5638774Z       [32m'  revision INTEGER NOT NULL DEFAULT 0 CHECK (revision >= 0),\n'[39m +
+2026-10-15T05:54:41.5639238Z       [32m'  disable_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_latest IN (0, 1)),\n'[39m +
+2026-10-15T05:54:41.5639664Z       [32m'  disable_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_downloads IN (0, 1)),\n'[39m +
+2026-10-15T05:54:41.5639983Z       [32m'  maintenance_message TEXT,\n'[39m +
+2026-10-15T05:54:41.5640242Z       [32m"  last_action TEXT NOT NULL DEFAULT 'init' CHECK (\n"[39m +
+2026-10-15T05:54:41.5640483Z       [32m'    last_action IN (\n'[39m +
+2026-10-15T05:54:41.5640673Z       [32m"      'init',\n"[39m +
+2026-10-15T05:54:41.5640862Z       [32m"      'publish',\n"[39m +
+2026-10-15T05:54:41.5641047Z       [32m"      'rollback',\n"[39m +
+2026-10-15T05:54:41.5641236Z       [32m"      'stop_latest',\n"[39m +
+2026-10-15T05:54:41.5641431Z       [32m"      'resume_latest',\n"[39m +
+2026-10-15T05:54:41.5641630Z       [32m"      'stop_downloads',\n"[39m +
+2026-10-15T05:54:41.5641831Z       [32m"      'resume_downloads'\n"[39m +
+2026-10-15T05:54:41.5642015Z       [32m'    )\n'[39m +
+2026-10-15T05:54:41.5642168Z       [32m'  ),\n'[39m +
+2026-10-15T05:54:41.5642339Z       [32m'  last_actor TEXT,\n'[39m +
+2026-10-15T05:54:41.5642713Z       [32m"  last_actor_type TEXT CHECK (last_actor_type IS NULL OR last_actor_type IN ('ci', 'access', 'system', 'test')),\n"[39m +
+2026-10-15T05:54:41.5643045Z       [32m'  last_request_id TEXT,\n'[39m +
+2026-10-15T05:54:41.5643250Z       [32m'  last_before_json TEXT,\n'[39m +
+2026-10-15T05:54:41.5643450Z       [32m'  last_after_json TEXT,\n'[39m +
+2026-10-15T05:54:41.5643701Z       [32m"  created_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5643998Z       [32m"  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5644313Z       [32m'  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,\n'[39m +
+2026-10-15T05:54:41.5644726Z       [32m'  FOREIGN KEY (current_release_id) REFERENCES "firmware_releases_legacy"(id) ON DELETE SET NULL,\n'[39m +
+2026-10-15T05:54:41.5645078Z       [32m'  UNIQUE (app_id, device_model, name)\n'[39m +
+2026-10-15T05:54:41.5645267Z       [32m')'[39m
+2026-10-15T05:54:41.5645384Z   },
+2026-10-15T05:54:41.5645499Z   [Object: null prototype] {
+2026-10-15T05:54:41.5645662Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5645853Z     name: [32m'firmware_release_assets'[39m,
+2026-10-15T05:54:41.5646238Z     sql: [32m'CREATE TABLE firmware_release_assets (\n'[39m +
+2026-10-15T05:54:41.5646533Z       [32m'  id TEXT NOT NULL PRIMARY KEY CHECK (length(trim(id)) > 0),\n'[39m +
+2026-10-15T05:54:41.5646900Z       [32m'  release_id TEXT NOT NULL REFERENCES firmware_releases(id) ON DELETE CASCADE,\n'[39m +
+2026-10-15T05:54:41.5647263Z       [32m"  kind TEXT NOT NULL CHECK (kind IN ('full','patch','recovery')),\n"[39m +
+2026-10-15T05:54:41.5647541Z       [32m'  file_name TEXT NOT NULL CHECK (\n'[39m +
+2026-10-15T05:54:41.5647992Z       [32m"    length(file_name) BETWEEN 1 AND 128 AND length(trim(file_name)) > 0 AND file_name NOT IN ('.','..')\n"[39m +
+2026-10-15T05:54:41.5648421Z       [32m"    AND file_name NOT GLOB '*[^ -~]*' AND instr(file_name,'/') = 0\n"[39m +
+2026-10-15T05:54:41.5648762Z       [32m'    AND instr(file_name,char(92)) = 0 AND instr(file_name,char(0)) = 0\n'[39m +
+2026-10-15T05:54:41.5649003Z       [32m'  ),\n'[39m +
+2026-10-15T05:54:41.5649303Z       [32m"  sha256 TEXT NOT NULL CHECK (length(sha256) = 64 AND sha256 NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5649725Z       [32m"  size_bytes INTEGER NOT NULL CHECK (typeof(size_bytes) = 'integer' AND size_bytes > 0),\n"[39m +
+2026-10-15T05:54:41.5650012Z       [32m'  r2_key TEXT,\n'[39m +
+2026-10-15T05:54:41.5650197Z       [32m'  r2_etag TEXT,\n'[39m +
+2026-10-15T05:54:41.5650785Z       [32m"  r2_state TEXT NOT NULL DEFAULT 'not_uploaded' CHECK (r2_state IN ('not_uploaded','available','archived','r2_deleted')),\n"[39m +
+2026-10-15T05:54:41.5651401Z       [32m"  github_url TEXT NOT NULL CHECK (length(trim(github_url)) > 0 AND instr(github_url,'/latest/download/') = 0),\n"[39m +
+2026-10-15T05:54:41.5651871Z       [32m"  base_image_sha256 TEXT NOT NULL DEFAULT '',\n"[39m +
+2026-10-15T05:54:41.5652217Z       [32m"  base_vcode INTEGER NOT NULL DEFAULT 0 CHECK (typeof(base_vcode) = 'integer'),\n"[39m +
+2026-10-15T05:54:41.5652572Z       [32m"  created_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5652873Z       [32m"  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5653183Z       [32m"  CHECK ((kind = 'patch' AND length(base_image_sha256) = 64\n"[39m +
+2026-10-15T05:54:41.5653528Z       [32m"          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)\n"[39m +
+2026-10-15T05:54:41.5653911Z       [32m"      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)),\n"[39m +
+2026-10-15T05:54:41.5654308Z       [32m"  CHECK (r2_state <> 'available' OR (r2_key IS NOT NULL AND length(trim(r2_key)) > 0\n"[39m +
+2026-10-15T05:54:41.5654665Z       [32m'    AND r2_etag IS NOT NULL AND length(trim(r2_etag)) > 0)),\n'[39m +
+2026-10-15T05:54:41.5654953Z       [32m'  UNIQUE (release_id,kind,base_image_sha256),\n'[39m +
+2026-10-15T05:54:41.5655200Z       [32m'  UNIQUE (release_id,file_name),\n'[39m +
+2026-10-15T05:54:41.5655405Z       [32m'  UNIQUE (r2_key)\n'[39m +
+2026-10-15T05:54:41.5655567Z       [32m')'[39m
+2026-10-15T05:54:41.5655689Z   },
+2026-10-15T05:54:41.5655806Z   [Object: null prototype] {
+2026-10-15T05:54:41.5655968Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5656151Z     name: [32m'firmware_releases'[39m,
+2026-10-15T05:54:41.5656373Z     sql: [32m'CREATE TABLE firmware_releases (\n'[39m +
+2026-10-15T05:54:41.5656657Z       [32m'  id TEXT NOT NULL PRIMARY KEY CHECK (length(trim(id)) > 0),\n'[39m +
+2026-10-15T05:54:41.5656979Z       [32m'  app_id TEXT NOT NULL REFERENCES apps(id) ON DELETE CASCADE,\n'[39m +
+2026-10-15T05:54:41.5657320Z       [32m'  device_model TEXT NOT NULL CHECK (length(trim(device_model)) > 0),\n'[39m +
+2026-10-15T05:54:41.5657673Z       [32m'  version_name TEXT NOT NULL CHECK (length(trim(version_name)) > 0),\n'[39m +
+2026-10-15T05:54:41.5658218Z       [32m"  version_code INTEGER NOT NULL CHECK (typeof(version_code) = 'integer' AND version_code BETWEEN 0 AND 4294967295),\n"[39m +
+2026-10-15T05:54:41.5658636Z       [32m'  release_tag TEXT NOT NULL CHECK (length(trim(release_tag)) > 0),\n'[39m +
+2026-10-15T05:54:41.5659153Z       [32m"  commit_sha TEXT NOT NULL CHECK (length(commit_sha) = 40 AND commit_sha NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5659523Z       [32m'  run_id TEXT NOT NULL CHECK (length(trim(run_id)) > 0),\n'[39m +
+2026-10-15T05:54:41.5659887Z       [32m"  state TEXT NOT NULL DEFAULT 'draft' CHECK (state IN ('draft','ready','disabled')),\n"[39m +
+2026-10-15T05:54:41.5660211Z       [32m"  release_notes TEXT NOT NULL DEFAULT '',\n"[39m +
+2026-10-15T05:54:41.5660652Z       [32m"  target_image_sha256 TEXT NOT NULL CHECK (length(target_image_sha256) = 64 AND target_image_sha256 NOT GLOB '*[^0-9a-f]*'),\n"[39m +
+2026-10-15T05:54:41.5661195Z       [32m"  hardware_rev INTEGER NOT NULL CHECK (typeof(hardware_rev) = 'integer' AND hardware_rev BETWEEN 0 AND 65535),\n"[39m +
+2026-10-15T05:54:41.5661683Z       [32m"  layout_id INTEGER NOT NULL CHECK (typeof(layout_id) = 'integer' AND layout_id BETWEEN 0 AND 255),\n"[39m +
+2026-10-15T05:54:41.5662205Z       [32m"  min_boot_version INTEGER NOT NULL CHECK (typeof(min_boot_version) = 'integer' AND min_boot_version BETWEEN 0 AND 255),\n"[39m +
+2026-10-15T05:54:41.5662787Z       [32m"  min_protocol_version INTEGER NOT NULL CHECK (typeof(min_protocol_version) = 'integer' AND min_protocol_version BETWEEN 0 AND 255),\n"[39m +
+2026-10-15T05:54:41.5663260Z       [32m'  target_hardware TEXT NOT NULL CHECK (length(trim(target_hardware)) > 0),\n'[39m +
+2026-10-15T05:54:41.5663621Z       [32m"  transport TEXT NOT NULL DEFAULT 'ble' CHECK (transport = 'ble'),\n"[39m +
+2026-10-15T05:54:41.5664149Z       [32m"  min_app_version_code INTEGER NOT NULL DEFAULT 0 CHECK (typeof(min_app_version_code) = 'integer' AND min_app_version_code BETWEEN 0 AND 2100000000),\n"[39m +
+2026-10-15T05:54:41.5664708Z       [32m'  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0,1)),\n'[39m +
+2026-10-15T05:54:41.5665226Z       [32m"  registration_json TEXT CHECK (registration_json IS NULL OR (json_valid(registration_json) AND json_type(registration_json) = 'object')),\n"[39m +
+2026-10-15T05:54:41.5665673Z       [32m"  created_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5665969Z       [32m"  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5666254Z       [32m'  UNIQUE (app_id,device_model,release_tag),\n'[39m +
+2026-10-15T05:54:41.5666528Z       [32m'  UNIQUE (app_id,device_model,version_code),\n'[39m +
+2026-10-15T05:54:41.5666787Z       [32m'  UNIQUE (app_id,device_model,run_id)\n'[39m +
+2026-10-15T05:54:41.5666975Z       [32m')'[39m
+2026-10-15T05:54:41.5667093Z   },
+2026-10-15T05:54:41.5667213Z   [Object: null prototype] {
+2026-10-15T05:54:41.5667377Z     type: [32m'table'[39m,
+2026-10-15T05:54:41.5667571Z     name: [32m'firmware_releases_legacy'[39m,
+2026-10-15T05:54:41.5667921Z     sql: [32m'CREATE TABLE "firmware_releases_legacy" (\n'[39m +
+2026-10-15T05:54:41.5668153Z       [32m'  id TEXT PRIMARY KEY,\n'[39m +
+2026-10-15T05:54:41.5668356Z       [32m'  app_id TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5668567Z       [32m'  device_model TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5668785Z       [32m'  version_name TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5669058Z       [32m'  version_code INTEGER NOT NULL CHECK (version_code >= 0),\n'[39m +
+2026-10-15T05:54:41.5669319Z       [32m'  release_tag TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5669530Z       [32m'  commit_sha TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5669739Z       [32m'  run_id TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5670067Z       [32m"  state TEXT NOT NULL DEFAULT 'candidate' CHECK (state IN ('candidate', 'disabled')),\n"[39m +
+2026-10-15T05:54:41.5670398Z       [32m"  release_notes TEXT NOT NULL DEFAULT '',\n"[39m +
+2026-10-15T05:54:41.5670625Z       [32m'  file_name TEXT NOT NULL,\n'[39m +
+2026-10-15T05:54:41.5670882Z       [32m'  sha256 TEXT NOT NULL CHECK (length(sha256) = 64),\n'[39m +
+2026-10-15T05:54:41.5671179Z       [32m'  size_bytes INTEGER NOT NULL CHECK (size_bytes > 0),\n'[39m +
+2026-10-15T05:54:41.5671552Z       [32m'  r2_key TEXT,\n'[39m +
+2026-10-15T05:54:41.5671956Z       [32m"  r2_state TEXT NOT NULL DEFAULT 'not_uploaded' CHECK (r2_state IN ('not_uploaded', 'available', 'r2_deleted', 'archived')),\n"[39m +
+2026-10-15T05:54:41.5672418Z       [32m"  github_url TEXT NOT NULL CHECK (instr(github_url, '/latest/download/') = 0),\n"[39m +
+2026-10-15T05:54:41.5672700Z       [32m'  target_hardware TEXT,\n'[39m +
+2026-10-15T05:54:41.5672937Z       [32m"  transport TEXT NOT NULL DEFAULT 'ble',\n"[39m +
+2026-10-15T05:54:41.5673286Z       [32m'  min_app_version_code INTEGER NOT NULL DEFAULT 0 CHECK (min_app_version_code >= 0),\n'[39m +
+2026-10-15T05:54:41.5673658Z       [32m'  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0, 1)),\n'[39m +
+2026-10-15T05:54:41.5673972Z       [32m"  created_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5674266Z       [32m"  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\n"[39m +
+2026-10-15T05:54:41.5674581Z       [32m'  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,\n'[39m +
+2026-10-15T05:54:41.5674882Z       [32m'  UNIQUE (app_id, device_model, release_tag),\n'[39m +
+2026-10-15T05:54:41.5675144Z       [32m'  UNIQUE (app_id, device_model, run_id),\n'[39m +
+2026-10-15T05:54:41.5675405Z       [32m'  UNIQUE (app_id, device_model, version_code)\n'[39m +
+2026-10-15T05:54:41.5675605Z       [32m')'[39m
+2026-10-15T05:54:41.5675723Z   },
+2026-10-15T05:54:41.5675838Z   [Object: null prototype] {
+2026-10-15T05:54:41.5676013Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5676395Z     name: [32m'firmware_asset_base_insert'[39m,
+2026-10-15T05:54:41.5676743Z     sql: [32m'CREATE TRIGGER firmware_asset_base_insert BEFORE INSERT ON firmware_release_assets\n'[39m +
+2026-10-15T05:54:41.5677085Z       [32m"WHEN NEW.kind = 'patch' AND NOT EXISTS (\n"[39m +
+2026-10-15T05:54:41.5677462Z       [32m'  SELECT 1 FROM firmware_releases WHERE id = NEW.release_id AND version_code > NEW.base_vcode)\n'[39m +
+2026-10-15T05:54:41.5677975Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware patch base version must precede target'); END"[39m
+2026-10-15T05:54:41.5678236Z   },
+2026-10-15T05:54:41.5678355Z   [Object: null prototype] {
+2026-10-15T05:54:41.5678531Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5678721Z     name: [32m'firmware_asset_identity'[39m,
+2026-10-15T05:54:41.5679002Z     sql: [32m'CREATE TRIGGER firmware_asset_identity BEFORE UPDATE OF\n'[39m +
+2026-10-15T05:54:41.5679480Z       [32m'  id,release_id,kind,file_name,sha256,size_bytes,github_url,base_image_sha256,base_vcode,created_at ON firmware_release_assets\n'[39m +
+2026-10-15T05:54:41.5679937Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware asset identity is immutable'); END"[39m
+2026-10-15T05:54:41.5680157Z   },
+2026-10-15T05:54:41.5680273Z   [Object: null prototype] {
+2026-10-15T05:54:41.5680445Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5680636Z     name: [32m'firmware_asset_no_delete'[39m,
+2026-10-15T05:54:41.5680976Z     sql: [32m'CREATE TRIGGER firmware_asset_no_delete BEFORE DELETE ON firmware_release_assets\n'[39m +
+2026-10-15T05:54:41.5681354Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware asset history is retained'); END"[39m
+2026-10-15T05:54:41.5681567Z   },
+2026-10-15T05:54:41.5681681Z   [Object: null prototype] {
+2026-10-15T05:54:41.5681849Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5682035Z     name: [32m'firmware_audit_reason'[39m,
+2026-10-15T05:54:41.5682330Z     sql: [32m'CREATE TRIGGER firmware_audit_reason BEFORE INSERT ON audit_logs\n'[39m +
+2026-10-15T05:54:41.5682723Z       [32m"WHEN NEW.target_type IN ('firmware_release','firmware_asset','firmware_channel')\n"[39m +
+2026-10-15T05:54:41.5683251Z       [32m"  AND NEW.actor_type = 'access' AND (NEW.reason IS NULL OR length(trim(NEW.reason,char(9)||char(10)||char(11)||char(12)||char(13)||' ')) = 0)\n"[39m +
+2026-10-15T05:54:41.5683690Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware admin reason required'); END"[39m
+2026-10-15T05:54:41.5684237Z   },
+2026-10-15T05:54:41.5684416Z   [Object: null prototype] {
+2026-10-15T05:54:41.5684671Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5684953Z     name: [32m'firmware_audit_values'[39m,
+2026-10-15T05:54:41.5685408Z     sql: [32m'CREATE TRIGGER firmware_audit_values BEFORE INSERT ON audit_logs\n'[39m +
+2026-10-15T05:54:41.5686067Z       [32m"WHEN NEW.target_type IN ('firmware_release','firmware_asset','firmware_channel') AND (\n"[39m +
+2026-10-15T05:54:41.5686727Z       [32m'  NEW.id IS NULL OR length(trim(NEW.id)) = 0 OR length(trim(NEW.actor)) = 0\n'[39m +
+2026-10-15T05:54:41.5687296Z       [32m'  OR length(trim(NEW.request_id)) = 0 OR NEW.after_json IS NULL\n'[39m +
+2026-10-15T05:54:41.5688028Z       [32m"  OR NOT json_valid(NEW.after_json) OR json_type(NEW.after_json) <> 'object'\n"[39m +
+2026-10-15T05:54:41.5688783Z       [32m"  OR (NEW.before_json IS NOT NULL AND (NOT json_valid(NEW.before_json) OR json_type(NEW.before_json) <> 'object')))\n"[39m +
+2026-10-15T05:54:41.5689542Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware audit identity and object snapshots required'); END"[39m
+2026-10-15T05:54:41.5689950Z   },
+2026-10-15T05:54:41.5690133Z   [Object: null prototype] {
+2026-10-15T05:54:41.5690417Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5690715Z     name: [32m'firmware_channel_audit'[39m,
+2026-10-15T05:54:41.5691219Z     sql: [32m'CREATE TRIGGER firmware_channel_audit AFTER UPDATE ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5691740Z       [32m'WHEN NEW.revision <> OLD.revision\n'[39m +
+2026-10-15T05:54:41.5692047Z       [32m'BEGIN\n'[39m +
+2026-10-15T05:54:41.5692743Z       [32m'  INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,\n'[39m +
+2026-10-15T05:54:41.5693320Z       [32m'    request_id,reason,before_json,after_json)\n'[39m +
+2026-10-15T05:54:41.5693862Z       [32m"  VALUES ('audit_' || lower(hex(randomblob(16))),NEW.app_id,NEW.last_actor,\n"[39m +
+2026-10-15T05:54:41.5694503Z       [32m"    NEW.last_actor_type,NEW.last_action,'firmware_channel',NEW.id,\n"[39m +
+2026-10-15T05:54:41.5695159Z       [32m'    NEW.last_request_id,NEW.last_reason,NEW.last_before_json,NEW.last_after_json);\n'[39m +
+2026-10-15T05:54:41.5695609Z       [32m'END'[39m
+2026-10-15T05:54:41.5695808Z   },
+2026-10-15T05:54:41.5695999Z   [Object: null prototype] {
+2026-10-15T05:54:41.5696294Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5696619Z     name: [32m'firmware_channel_identity'[39m,
+2026-10-15T05:54:41.5697330Z     sql: [32m'CREATE TRIGGER firmware_channel_identity BEFORE UPDATE OF id,app_id,device_model,name,created_at ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5698290Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware channel identity is immutable'); END"[39m
+2026-10-15T05:54:41.5698660Z   },
+2026-10-15T05:54:41.5698851Z   [Object: null prototype] {
+2026-10-15T05:54:41.5699138Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5699470Z     name: [32m'firmware_channel_mutation_guard'[39m,
+2026-10-15T05:54:41.5700068Z     sql: [32m'CREATE TRIGGER firmware_channel_mutation_guard BEFORE UPDATE ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5701011Z       [32m'WHEN (NEW.current_release_id IS NOT OLD.current_release_id OR NEW.legacy_current_release_id IS NOT OLD.legacy_current_release_id\n'[39m +
+2026-10-15T05:54:41.5701899Z       [32m'  OR NEW.disable_latest <> OLD.disable_latest OR NEW.disable_downloads <> OLD.disable_downloads\n'[39m +
+2026-10-15T05:54:41.5702500Z       [32m'  OR NEW.maintenance_message IS NOT OLD.maintenance_message)\n'[39m +
+2026-10-15T05:54:41.5702982Z       [32m'  AND NEW.revision <> OLD.revision + 1\n'[39m +
+2026-10-15T05:54:41.5703691Z       [32m'  AND NOT (OLD.legacy_current_release_id IS NOT NULL AND NEW.current_release_id = OLD.legacy_current_release_id\n'[39m +
+2026-10-15T05:54:41.5704455Z       [32m'    AND NEW.legacy_current_release_id IS NULL AND NEW.revision = OLD.revision\n'[39m +
+2026-10-15T05:54:41.5705191Z       [32m'    AND NEW.disable_latest = OLD.disable_latest AND NEW.disable_downloads = OLD.disable_downloads\n'[39m +
+2026-10-15T05:54:41.5706023Z       [32m'    AND NEW.maintenance_message IS OLD.maintenance_message\n'[39m +
+2026-10-15T05:54:41.5706707Z       [32m'    AND EXISTS (SELECT 1 FROM firmware_backfill_manifests WHERE release_id=NEW.current_release_id))\n'[39m +
+2026-10-15T05:54:41.5707437Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware channel mutation requires CAS revision'); END"[39m
+2026-10-15T05:54:41.5707961Z   },
+2026-10-15T05:54:41.5708150Z   [Object: null prototype] {
+2026-10-15T05:54:41.5708435Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5708790Z     name: [32m'firmware_channel_no_legacy_retarget'[39m,
+2026-10-15T05:54:41.5709530Z     sql: [32m'CREATE TRIGGER firmware_channel_no_legacy_retarget BEFORE UPDATE OF legacy_current_release_id ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5710483Z       [32m'WHEN NEW.legacy_current_release_id IS NOT NULL AND NEW.legacy_current_release_id IS NOT OLD.legacy_current_release_id\n'[39m +
+2026-10-15T05:54:41.5711217Z       [32m"BEGIN SELECT RAISE(ABORT,'legacy channel retarget forbidden'); END"[39m
+2026-10-15T05:54:41.5711563Z   },
+2026-10-15T05:54:41.5711751Z   [Object: null prototype] {
+2026-10-15T05:54:41.5712028Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5712359Z     name: [32m'firmware_channel_no_new_legacy'[39m,
+2026-10-15T05:54:41.5712935Z     sql: [32m'CREATE TRIGGER firmware_channel_no_new_legacy BEFORE INSERT ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5713518Z       [32m'WHEN NEW.legacy_current_release_id IS NOT NULL\n'[39m +
+2026-10-15T05:54:41.5714232Z       [32m"BEGIN SELECT RAISE(ABORT,'new legacy channel reference forbidden'); END"[39m
+2026-10-15T05:54:41.5714606Z   },
+2026-10-15T05:54:41.5714798Z   [Object: null prototype] {
+2026-10-15T05:54:41.5715069Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5715378Z     name: [32m'firmware_channel_revision'[39m,
+2026-10-15T05:54:41.5715976Z     sql: [32m'CREATE TRIGGER firmware_channel_revision BEFORE UPDATE OF revision ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5716690Z       [32m'WHEN NEW.revision <> OLD.revision AND (NEW.revision <> OLD.revision + 1\n'[39m +
+2026-10-15T05:54:41.5717272Z       [32m'  OR NEW.last_actor IS NULL OR length(trim(NEW.last_actor)) = 0\n'[39m +
+2026-10-15T05:54:41.5717993Z       [32m'  OR NEW.last_actor_type IS NULL OR NEW.last_request_id IS NULL\n'[39m +
+2026-10-15T05:54:41.5718553Z       [32m'  OR NEW.last_reason IS NULL OR length(trim(NEW.last_reason)) = 0\n'[39m +
+2026-10-15T05:54:41.5719149Z       [32m'  OR NEW.last_before_json IS NULL OR NOT json_valid(NEW.last_before_json)\n'[39m +
+2026-10-15T05:54:41.5719774Z       [32m'  OR NEW.last_after_json IS NULL OR NOT json_valid(NEW.last_after_json))\n'[39m +
+2026-10-15T05:54:41.5720444Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware mutation requires revision and audit context'); END"[39m
+2026-10-15T05:54:41.5720863Z   },
+2026-10-15T05:54:41.5721055Z   [Object: null prototype] {
+2026-10-15T05:54:41.5721352Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5721710Z     name: [32m'firmware_idempotency_delete_guard'[39m,
+2026-10-15T05:54:41.5722382Z     sql: [32m'CREATE TRIGGER firmware_idempotency_delete_guard BEFORE DELETE ON firmware_admin_idempotency\n'[39m +
+2026-10-15T05:54:41.5723112Z       [32m'WHEN NOT EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones t\n'[39m +
+2026-10-15T05:54:41.5723851Z       [32m'  WHERE t.actor_canonical = OLD.actor_canonical AND t.idempotency_key = OLD.idempotency_key\n'[39m +
+2026-10-15T05:54:41.5724509Z       [32m'    AND t.fingerprint = OLD.fingerprint AND t.action = OLD.action\n'[39m +
+2026-10-15T05:54:41.5725149Z       [32m'    AND t.release_id = OLD.release_id AND t.expired_at = OLD.retained_until)\n'[39m +
+2026-10-15T05:54:41.5725849Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware result cleanup requires matching tombstone first'); END"[39m
+2026-10-15T05:54:41.5726276Z   },
+2026-10-15T05:54:41.5726472Z   [Object: null prototype] {
+2026-10-15T05:54:41.5726957Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5727293Z     name: [32m'firmware_idempotency_immutable'[39m,
+2026-10-15T05:54:41.5728068Z     sql: [32m'CREATE TRIGGER firmware_idempotency_immutable BEFORE UPDATE ON firmware_admin_idempotency\n'[39m +
+2026-10-15T05:54:41.5728745Z       [32m"WHEN OLD.state = 'completed' OR NEW.state <> 'completed'\n"[39m +
+2026-10-15T05:54:41.5729441Z       [32m'  OR NEW.actor_canonical <> OLD.actor_canonical OR NEW.idempotency_key <> OLD.idempotency_key\n'[39m +
+2026-10-15T05:54:41.5730325Z       [32m'  OR NEW.fingerprint <> OLD.fingerprint OR NEW.method <> OLD.method OR NEW.canonical_path <> OLD.canonical_path\n'[39m +
+2026-10-15T05:54:41.5731059Z       [32m'  OR NEW.action <> OLD.action OR NEW.release_id <> OLD.release_id\n'[39m +
+2026-10-15T05:54:41.5731798Z       [32m'  OR NEW.created_epoch_seconds <> OLD.created_epoch_seconds OR NEW.retained_until <> OLD.retained_until\n'[39m +
+2026-10-15T05:54:41.5732525Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware idempotency result is immutable'); END"[39m
+2026-10-15T05:54:41.5732918Z   },
+2026-10-15T05:54:41.5733111Z   [Object: null prototype] {
+2026-10-15T05:54:41.5733407Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5733744Z     name: [32m'firmware_idempotency_no_reuse'[39m,
+2026-10-15T05:54:41.5734370Z     sql: [32m'CREATE TRIGGER firmware_idempotency_no_reuse BEFORE INSERT ON firmware_admin_idempotency\n'[39m +
+2026-10-15T05:54:41.5735067Z       [32m'WHEN EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones\n'[39m +
+2026-10-15T05:54:41.5735782Z       [32m'  WHERE actor_canonical = NEW.actor_canonical AND idempotency_key = NEW.idempotency_key)\n'[39m +
+2026-10-15T05:54:41.5736624Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware idempotency key is tombstoned'); END"[39m
+2026-10-15T05:54:41.5736978Z   },
+2026-10-15T05:54:41.5737169Z   [Object: null prototype] {
+2026-10-15T05:54:41.5737457Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5737979Z     name: [32m'firmware_idempotency_starts_pending'[39m,
+2026-10-15T05:54:41.5738661Z     sql: [32m'CREATE TRIGGER firmware_idempotency_starts_pending BEFORE INSERT ON firmware_admin_idempotency\n'[39m +
+2026-10-15T05:54:41.5739250Z       [32m"WHEN NEW.state <> 'pending'\n"[39m +
+2026-10-15T05:54:41.5739869Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware idempotency must reserve pending before completion'); END"[39m
+2026-10-15T05:54:41.5740319Z   },
+2026-10-15T05:54:41.5740505Z   [Object: null prototype] {
+2026-10-15T05:54:41.5740784Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5741138Z     name: [32m'firmware_legacy_channel_no_delete'[39m,
+2026-10-15T05:54:41.5741787Z     sql: [32m'CREATE TRIGGER firmware_legacy_channel_no_delete BEFORE DELETE ON firmware_channels_legacy\n'[39m +
+2026-10-15T05:54:41.5742451Z       [32m"BEGIN SELECT RAISE(ABORT,'legacy channel is retained'); END"[39m
+2026-10-15T05:54:41.5742803Z   },
+2026-10-15T05:54:41.5742998Z   [Object: null prototype] {
+2026-10-15T05:54:41.5743287Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5743643Z     name: [32m'firmware_legacy_channel_no_insert'[39m,
+2026-10-15T05:54:41.5744283Z     sql: [32m'CREATE TRIGGER firmware_legacy_channel_no_insert BEFORE INSERT ON firmware_channels_legacy\n'[39m +
+2026-10-15T05:54:41.5744921Z       [32m"BEGIN SELECT RAISE(ABORT,'legacy channel is read only'); END"[39m
+2026-10-15T05:54:41.5745251Z   },
+2026-10-15T05:54:41.5745431Z   [Object: null prototype] {
+2026-10-15T05:54:41.5745703Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5746047Z     name: [32m'firmware_legacy_channel_no_update'[39m,
+2026-10-15T05:54:41.5746700Z     sql: [32m'CREATE TRIGGER firmware_legacy_channel_no_update BEFORE UPDATE ON firmware_channels_legacy\n'[39m +
+2026-10-15T05:54:41.5747357Z       [32m"BEGIN SELECT RAISE(ABORT,'legacy channel is read only'); END"[39m
+2026-10-15T05:54:41.5747676Z   },
+2026-10-15T05:54:41.5748012Z   [Object: null prototype] {
+2026-10-15T05:54:41.5748308Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5748798Z     name: [32m'firmware_legacy_release_no_delete'[39m,
+2026-10-15T05:54:41.5749388Z     sql: [32m'CREATE TRIGGER firmware_legacy_release_no_delete BEFORE DELETE ON firmware_releases_legacy\n'[39m +
+2026-10-15T05:54:41.5750120Z       [32m"BEGIN SELECT RAISE(ABORT,'legacy firmware is retained'); END"[39m
+2026-10-15T05:54:41.5750449Z   },
+2026-10-15T05:54:41.5750632Z   [Object: null prototype] {
+2026-10-15T05:54:41.5750913Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5751254Z     name: [32m'firmware_legacy_release_no_insert'[39m,
+2026-10-15T05:54:41.5751864Z     sql: [32m'CREATE TRIGGER firmware_legacy_release_no_insert BEFORE INSERT ON firmware_releases_legacy\n'[39m +
+2026-10-15T05:54:41.5752524Z       [32m"BEGIN SELECT RAISE(ABORT,'legacy firmware is read only'); END"[39m
+2026-10-15T05:54:41.5752848Z   },
+2026-10-15T05:54:41.5753035Z   [Object: null prototype] {
+2026-10-15T05:54:41.5753324Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5753669Z     name: [32m'firmware_legacy_release_no_update'[39m,
+2026-10-15T05:54:41.5754304Z     sql: [32m'CREATE TRIGGER firmware_legacy_release_no_update BEFORE UPDATE ON firmware_releases_legacy\n'[39m +
+2026-10-15T05:54:41.5754960Z       [32m"BEGIN SELECT RAISE(ABORT,'legacy firmware is read only'); END"[39m
+2026-10-15T05:54:41.5755303Z   },
+2026-10-15T05:54:41.5755494Z   [Object: null prototype] {
+2026-10-15T05:54:41.5755780Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5756111Z     name: [32m'firmware_manifest_no_delete'[39m,
+2026-10-15T05:54:41.5756730Z     sql: [32m'CREATE TRIGGER firmware_manifest_no_delete BEFORE DELETE ON firmware_backfill_manifests\n'[39m +
+2026-10-15T05:54:41.5757569Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware manifest is retained'); END"[39m
+2026-10-15T05:54:41.5758072Z   },
+2026-10-15T05:54:41.5758263Z   [Object: null prototype] {
+2026-10-15T05:54:41.5758546Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5758874Z     name: [32m'firmware_manifest_no_update'[39m,
+2026-10-15T05:54:41.5759519Z     sql: [32m'CREATE TRIGGER firmware_manifest_no_update BEFORE UPDATE ON firmware_backfill_manifests\n'[39m +
+2026-10-15T05:54:41.5760164Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware manifest is immutable'); END"[39m
+2026-10-15T05:54:41.5760517Z   },
+2026-10-15T05:54:41.5760706Z   [Object: null prototype] {
+2026-10-15T05:54:41.5760986Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5761301Z     name: [32m'firmware_pointer_insert'[39m,
+2026-10-15T05:54:41.5761841Z     sql: [32m'CREATE TRIGGER firmware_pointer_insert BEFORE INSERT ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5762478Z       [32m'WHEN NEW.current_release_id IS NOT NULL AND NOT EXISTS (\n'[39m +
+2026-10-15T05:54:41.5763085Z       [32m'  SELECT 1 FROM firmware_releases r WHERE r.id = NEW.current_release_id\n'[39m +
+2026-10-15T05:54:41.5763856Z       [32m"    AND r.app_id = NEW.app_id AND r.device_model = NEW.device_model AND r.state = 'ready' AND r.archived = 0)\n"[39m +
+2026-10-15T05:54:41.5764646Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware channel requires same-scope ready release'); END"[39m
+2026-10-15T05:54:41.5765068Z   },
+2026-10-15T05:54:41.5765264Z   [Object: null prototype] {
+2026-10-15T05:54:41.5765566Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5765895Z     name: [32m'firmware_pointer_update'[39m,
+2026-10-15T05:54:41.5766647Z     sql: [32m'CREATE TRIGGER firmware_pointer_update BEFORE UPDATE OF current_release_id,app_id,device_model ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5767413Z       [32m'WHEN NEW.current_release_id IS NOT NULL AND NOT EXISTS (\n'[39m +
+2026-10-15T05:54:41.5768191Z       [32m'  SELECT 1 FROM firmware_releases r WHERE r.id = NEW.current_release_id\n'[39m +
+2026-10-15T05:54:41.5768980Z       [32m"    AND r.app_id = NEW.app_id AND r.device_model = NEW.device_model AND r.state = 'ready' AND r.archived = 0)\n"[39m +
+2026-10-15T05:54:41.5769745Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware channel requires same-scope ready release'); END"[39m
+2026-10-15T05:54:41.5770356Z   },
+2026-10-15T05:54:41.5770548Z   [Object: null prototype] {
+2026-10-15T05:54:41.5770845Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5771174Z     name: [32m'firmware_publish_regression'[39m,
+2026-10-15T05:54:41.5771897Z     sql: [32m'CREATE TRIGGER firmware_publish_regression BEFORE UPDATE OF current_release_id,revision ON firmware_channels\n'[39m +
+2026-10-15T05:54:41.5772647Z       [32m"WHEN NEW.revision <> OLD.revision AND NEW.last_action = 'publish'\n"[39m +
+2026-10-15T05:54:41.5773333Z       [32m'  AND (SELECT version_code FROM firmware_releases WHERE id = NEW.current_release_id)\n'[39m +
+2026-10-15T05:54:41.5774112Z       [32m'    <= COALESCE((SELECT version_code FROM firmware_releases WHERE id = OLD.current_release_id),\n'[39m +
+2026-10-15T05:54:41.5774918Z       [32m'      (SELECT version_code FROM firmware_releases_legacy WHERE id = OLD.legacy_current_release_id))\n'[39m +
+2026-10-15T05:54:41.5775577Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware version regression'); END"[39m
+2026-10-15T05:54:41.5775914Z   },
+2026-10-15T05:54:41.5776109Z   [Object: null prototype] {
+2026-10-15T05:54:41.5776406Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5776713Z     name: [32m'firmware_r2_identity'[39m,
+2026-10-15T05:54:41.5777335Z     sql: [32m'CREATE TRIGGER firmware_r2_identity BEFORE UPDATE OF r2_key,r2_etag ON firmware_release_assets\n'[39m +
+2026-10-15T05:54:41.5778232Z       [32m'WHEN (OLD.r2_key IS NOT NULL AND NEW.r2_key IS NOT OLD.r2_key)\n'[39m +
+2026-10-15T05:54:41.5778807Z       [32m'  OR (OLD.r2_etag IS NOT NULL AND NEW.r2_etag IS NOT OLD.r2_etag)\n'[39m +
+2026-10-15T05:54:41.5779616Z       [32m"BEGIN SELECT RAISE(ABORT,'verified firmware R2 identity is immutable'); END"[39m
+2026-10-15T05:54:41.5780021Z   },
+2026-10-15T05:54:41.5780219Z   [Object: null prototype] {
+2026-10-15T05:54:41.5780513Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5780863Z     name: [32m'firmware_ready_assets_sealed'[39m,
+2026-10-15T05:54:41.5781510Z     sql: [32m'CREATE TRIGGER firmware_ready_assets_sealed BEFORE INSERT ON firmware_release_assets\n'[39m +
+2026-10-15T05:54:41.5782263Z       [32m"WHEN EXISTS (SELECT 1 FROM firmware_releases WHERE id=NEW.release_id AND state='ready')\n"[39m +
+2026-10-15T05:54:41.5782915Z       [32m"BEGIN SELECT RAISE(ABORT,'ready firmware asset set is sealed'); END"[39m
+2026-10-15T05:54:41.5783274Z   },
+2026-10-15T05:54:41.5783468Z   [Object: null prototype] {
+2026-10-15T05:54:41.5783758Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5784068Z     name: [32m'firmware_ready_insert'[39m,
+2026-10-15T05:54:41.5784615Z     sql: [32m'CREATE TRIGGER firmware_ready_insert BEFORE INSERT ON firmware_releases\n'[39m +
+2026-10-15T05:54:41.5785121Z       [32m"WHEN NEW.state = 'ready'\n"[39m +
+2026-10-15T05:54:41.5785614Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware ready requires draft assets'); END"[39m
+2026-10-15T05:54:41.5785984Z   },
+2026-10-15T05:54:41.5786173Z   [Object: null prototype] {
+2026-10-15T05:54:41.5786467Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5786779Z     name: [32m'firmware_ready_update'[39m,
+2026-10-15T05:54:41.5787361Z     sql: [32m'CREATE TRIGGER firmware_ready_update BEFORE UPDATE OF state ON firmware_releases\n'[39m +
+2026-10-15T05:54:41.5788050Z       [32m"WHEN NEW.state = 'ready' AND (\n"[39m +
+2026-10-15T05:54:41.5788672Z       [32m"  (SELECT count(*) FROM firmware_release_assets WHERE release_id = NEW.id AND kind = 'full') <> 1\n"[39m +
+2026-10-15T05:54:41.5789401Z       [32m'  OR EXISTS (SELECT 1 FROM firmware_release_assets WHERE release_id = NEW.id\n'[39m +
+2026-10-15T05:54:41.5790050Z       [32m"    AND (r2_state <> 'available' OR r2_key IS NULL OR length(trim(r2_key)) = 0)))\n"[39m +
+2026-10-15T05:54:41.5790788Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware ready requires exactly one full and verified assets'); END"[39m
+2026-10-15T05:54:41.5791240Z   },
+2026-10-15T05:54:41.5791436Z   [Object: null prototype] {
+2026-10-15T05:54:41.5791729Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5792230Z     name: [32m'firmware_release_identity'[39m,
+2026-10-15T05:54:41.5792725Z     sql: [32m'CREATE TRIGGER firmware_release_identity BEFORE UPDATE OF\n'[39m +
+2026-10-15T05:54:41.5793388Z       [32m'  id,app_id,device_model,version_name,version_code,release_tag,commit_sha,run_id,\n'[39m +
+2026-10-15T05:54:41.5794131Z       [32m'  target_image_sha256,hardware_rev,layout_id,min_boot_version,min_protocol_version,\n'[39m +
+2026-10-15T05:54:41.5794959Z       [32m'  target_hardware,transport,min_app_version_code,registration_json,created_at ON firmware_releases\n'[39m +
+2026-10-15T05:54:41.5795684Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware release identity is immutable'); END"[39m
+2026-10-15T05:54:41.5796065Z   },
+2026-10-15T05:54:41.5796257Z   [Object: null prototype] {
+2026-10-15T05:54:41.5796552Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5796880Z     name: [32m'firmware_release_no_delete'[39m,
+2026-10-15T05:54:41.5797453Z     sql: [32m'CREATE TRIGGER firmware_release_no_delete BEFORE DELETE ON firmware_releases\n'[39m +
+2026-10-15T05:54:41.5798279Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware release history is retained'); END"[39m
+2026-10-15T05:54:41.5798647Z   },
+2026-10-15T05:54:41.5798837Z   [Object: null prototype] {
+2026-10-15T05:54:41.5799118Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5799446Z     name: [32m'firmware_release_referenced'[39m,
+2026-10-15T05:54:41.5800108Z     sql: [32m'CREATE TRIGGER firmware_release_referenced BEFORE UPDATE OF state,archived ON firmware_releases\n'[39m +
+2026-10-15T05:54:41.5800769Z       [32m"WHEN (NEW.state <> 'ready' OR NEW.archived = 1)\n"[39m +
+2026-10-15T05:54:41.5801558Z       [32m'  AND EXISTS (SELECT 1 FROM firmware_channels WHERE current_release_id = NEW.id)\n'[39m +
+2026-10-15T05:54:41.5802166Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware release is in use'); END"[39m
+2026-10-15T05:54:41.5802506Z   },
+2026-10-15T05:54:41.5802698Z   [Object: null prototype] {
+2026-10-15T05:54:41.5802993Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5803299Z     name: [32m'firmware_state_transition'[39m,
+2026-10-15T05:54:41.5803911Z     sql: [32m'CREATE TRIGGER firmware_state_transition BEFORE UPDATE OF state ON firmware_releases\n'[39m +
+2026-10-15T05:54:41.5804566Z       [32m"WHEN (OLD.state = 'disabled' AND NEW.state <> 'disabled')\n"[39m +
+2026-10-15T05:54:41.5805065Z       [32m"  OR (OLD.state = 'ready' AND NEW.state = 'draft')\n"[39m +
+2026-10-15T05:54:41.5805606Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware release state transition forbidden'); END"[39m
+2026-10-15T05:54:41.5805980Z   },
+2026-10-15T05:54:41.5806177Z   [Object: null prototype] {
+2026-10-15T05:54:41.5806455Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5806783Z     name: [32m'firmware_tombstone_consistent'[39m,
+2026-10-15T05:54:41.5807469Z     sql: [32m'CREATE TRIGGER firmware_tombstone_consistent BEFORE INSERT ON firmware_admin_idempotency_tombstones\n'[39m +
+2026-10-15T05:54:41.5808377Z       [32m'WHEN EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones t\n'[39m +
+2026-10-15T05:54:41.5809112Z       [32m'  WHERE t.actor_canonical = NEW.actor_canonical AND t.idempotency_key = NEW.idempotency_key\n'[39m +
+2026-10-15T05:54:41.5809808Z       [32m'    AND (t.fingerprint <> NEW.fingerprint OR t.action <> NEW.action\n'[39m +
+2026-10-15T05:54:41.5810437Z       [32m'      OR t.release_id <> NEW.release_id OR t.expired_at <> NEW.expired_at))\n'[39m +
+2026-10-15T05:54:41.5811008Z       [32m'  OR EXISTS (SELECT 1 FROM firmware_admin_idempotency i\n'[39m +
+2026-10-15T05:54:41.5811682Z       [32m'  WHERE i.actor_canonical = NEW.actor_canonical AND i.idempotency_key = NEW.idempotency_key\n'[39m +
+2026-10-15T05:54:41.5812482Z       [32m"    AND (i.state <> 'completed' OR i.fingerprint <> NEW.fingerprint OR i.action <> NEW.action\n"[39m +
+2026-10-15T05:54:41.5813190Z       [32m'      OR i.release_id <> NEW.release_id OR i.retained_until <> NEW.expired_at))\n'[39m +
+2026-10-15T05:54:41.5813835Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware tombstone integrity mismatch'); END"[39m
+2026-10-15T05:54:41.5814398Z   },
+2026-10-15T05:54:41.5814595Z   [Object: null prototype] {
+2026-10-15T05:54:41.5814898Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5815232Z     name: [32m'firmware_tombstone_no_delete'[39m,
+2026-10-15T05:54:41.5815917Z     sql: [32m'CREATE TRIGGER firmware_tombstone_no_delete BEFORE DELETE ON firmware_admin_idempotency_tombstones\n'[39m +
+2026-10-15T05:54:41.5816632Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware tombstone is permanent'); END"[39m
+2026-10-15T05:54:41.5816986Z   },
+2026-10-15T05:54:41.5817184Z   [Object: null prototype] {
+2026-10-15T05:54:41.5817476Z     type: [32m'trigger'[39m,
+2026-10-15T05:54:41.5817960Z     name: [32m'firmware_tombstone_no_update'[39m,
+2026-10-15T05:54:41.5818635Z     sql: [32m'CREATE TRIGGER firmware_tombstone_no_update BEFORE UPDATE ON firmware_admin_idempotency_tombstones\n'[39m +
+2026-10-15T05:54:41.5819353Z       [32m"BEGIN SELECT RAISE(ABORT,'firmware tombstone is immutable'); END"[39m
+2026-10-15T05:54:41.5819715Z   }
+2026-10-15T05:54:41.5819904Z ]
+2026-10-15T05:54:41.5820007Z 
+2026-10-15T05:54:41.6078253Z [90mstdout[2m | test/firmware-migration.host.test.ts[2m > [22m[2mP4-2 real SQLite forward migration and controlled backfill[2m > [22m[2mverifies artifacts/raw image/R2, safely maps published ready, preserves disabled/draft and replays without extra rows
+2026-10-15T05:54:41.6079422Z [22m[39mBACKFILL_BEFORE [
+2026-10-15T05:54:41.6079690Z   [Object: null prototype] {
+2026-10-15T05:54:41.6079986Z     id: [32m'legacy-0'[39m,
+2026-10-15T05:54:41.6080782Z     app_id: [32m'trace'[39m,
+2026-10-15T05:54:41.6081117Z     device_model: [32m'e-track-at32f435'[39m,
+2026-10-15T05:54:41.6081466Z     version_name: [32m'2.8.1'[39m,
+2026-10-15T05:54:41.6081777Z     version_code: [33m20801[39m,
+2026-10-15T05:54:41.6082148Z     release_tag: [32m'mcu-e-track-at32f435-v2.8.1'[39m,
+2026-10-15T05:54:41.6082611Z     commit_sha: [32m'1111111111111111111111111111111111111111'[39m,
+2026-10-15T05:54:41.6083009Z     run_id: [32m'legacy-run-0'[39m,
+2026-10-15T05:54:41.6083471Z     state: [32m'candidate'[39m,
+2026-10-15T05:54:41.6083899Z     release_notes: [32m'legacy notes'[39m,
+2026-10-15T05:54:41.6084409Z     file_name: [32m'e-track-at32f435-v2.8.1-full.etu'[39m,
+2026-10-15T05:54:41.6085269Z     sha256: [32m'96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3'[39m,
+2026-10-15T05:54:41.6085812Z     size_bytes: [33m18[39m,
+2026-10-15T05:54:41.6086644Z     r2_key: [32m'trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu'[39m,
+2026-10-15T05:54:41.6087385Z     r2_state: [32m'available'[39m,
+2026-10-15T05:54:41.6088376Z     github_url: [32m'https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu'[39m,
+2026-10-15T05:54:41.6089243Z     target_hardware: [32m'AT32F435RGT7'[39m,
+2026-10-15T05:54:41.6089669Z     transport: [32m'ble'[39m,
+2026-10-15T05:54:41.6090217Z     min_app_version_code: [33m0[39m,
+2026-10-15T05:54:41.6090600Z     archived: [33m0[39m,
+2026-10-15T05:54:41.6090994Z     created_at: [32m'2025-01-01 00:00:00'[39m,
+2026-10-15T05:54:41.6091498Z     updated_at: [32m'2026-10-15 05:54:41'[39m
+2026-10-15T05:54:41.6091853Z   },
+2026-10-15T05:54:41.6092194Z   [Object: null prototype] {
+2026-10-15T05:54:41.6092591Z     id: [32m'legacy-1'[39m,
+2026-10-15T05:54:41.6092950Z     app_id: [32m'trace'[39m,
+2026-10-15T05:54:41.6093427Z     device_model: [32m'e-track-at32f435'[39m,
+2026-10-15T05:54:41.6093855Z     version_name: [32m'2.8.2'[39m,
+2026-10-15T05:54:41.6094319Z     version_code: [33m20802[39m,
+2026-10-15T05:54:41.6115534Z     release_tag: [32m'mcu-e-track-at32f435-v2.8.2'[39m,
+2026-10-15T05:54:41.6116222Z     commit_sha: [32m'1111111111111111111111111111111111111111'[39m,
+2026-10-15T05:54:41.6116626Z     run_id: [32m'legacy-run-1'[39m,
+2026-10-15T05:54:41.6116943Z     state: [32m'disabled'[39m,
+2026-10-15T05:54:41.6117650Z     release_notes: [32m'legacy notes'[39m,
+2026-10-15T05:54:41.6118216Z     file_name: [32m'e-track-at32f435-v2.8.2-full.etu'[39m,
+2026-10-15T05:54:41.6118787Z     sha256: [32m'96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3'[39m,
+2026-10-15T05:54:41.6119232Z     size_bytes: [33m18[39m,
+2026-10-15T05:54:41.6119890Z     r2_key: [32m'trace/firmware/e-track-at32f435/20802-mcu-e-track-at32f435-v2.8.2/e-track-at32f435-v2.8.2-full.etu'[39m,
+2026-10-15T05:54:41.6120467Z     r2_state: [32m'available'[39m,
+2026-10-15T05:54:41.6121206Z     github_url: [32m'https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.2/e-track-at32f435-v2.8.2-full.etu'[39m,
+2026-10-15T05:54:41.6121883Z     target_hardware: [32m'AT32F435RGT7'[39m,
+2026-10-15T05:54:41.6122213Z     transport: [32m'ble'[39m,
+2026-10-15T05:54:41.6122515Z     min_app_version_code: [33m0[39m,
+2026-10-15T05:54:41.6122800Z     archived: [33m0[39m,
+2026-10-15T05:54:41.6123118Z     created_at: [32m'2025-01-01 00:00:00'[39m,
+2026-10-15T05:54:41.6123473Z     updated_at: [32m'2026-10-15 05:54:41'[39m
+2026-10-15T05:54:41.6123733Z   },
+2026-10-15T05:54:41.6123930Z   [Object: null prototype] {
+2026-10-15T05:54:41.6124200Z     id: [32m'legacy-2'[39m,
+2026-10-15T05:54:41.6124479Z     app_id: [32m'trace'[39m,
+2026-10-15T05:54:41.6124798Z     device_model: [32m'e-track-at32f435'[39m,
+2026-10-15T05:54:41.6125127Z     version_name: [32m'2.8.3'[39m,
+2026-10-15T05:54:41.6125428Z     version_code: [33m20803[39m,
+2026-10-15T05:54:41.6125791Z     release_tag: [32m'mcu-e-track-at32f435-v2.8.3'[39m,
+2026-10-15T05:54:41.6126416Z     commit_sha: [32m'1111111111111111111111111111111111111111'[39m,
+2026-10-15T05:54:41.6126796Z     run_id: [32m'legacy-run-2'[39m,
+2026-10-15T05:54:41.6127097Z     state: [32m'candidate'[39m,
+2026-10-15T05:54:41.6127417Z     release_notes: [32m'legacy notes'[39m,
+2026-10-15T05:54:41.6127937Z     file_name: [32m'e-track-at32f435-v2.8.3-full.etu'[39m,
+2026-10-15T05:54:41.6128515Z     sha256: [32m'96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3'[39m,
+2026-10-15T05:54:41.6128948Z     size_bytes: [33m18[39m,
+2026-10-15T05:54:41.6129579Z     r2_key: [32m'trace/firmware/e-track-at32f435/20803-mcu-e-track-at32f435-v2.8.3/e-track-at32f435-v2.8.3-full.etu'[39m,
+2026-10-15T05:54:41.6130150Z     r2_state: [32m'available'[39m,
+2026-10-15T05:54:41.6130885Z     github_url: [32m'https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.3/e-track-at32f435-v2.8.3-full.etu'[39m,
+2026-10-15T05:54:41.6131546Z     target_hardware: [32m'AT32F435RGT7'[39m,
+2026-10-15T05:54:41.6131877Z     transport: [32m'ble'[39m,
+2026-10-15T05:54:41.6132180Z     min_app_version_code: [33m0[39m,
+2026-10-15T05:54:41.6132467Z     archived: [33m0[39m,
+2026-10-15T05:54:41.6132772Z     created_at: [32m'2025-01-01 00:00:00'[39m,
+2026-10-15T05:54:41.6133127Z     updated_at: [32m'2026-10-15 05:54:41'[39m
+2026-10-15T05:54:41.6133383Z   }
+2026-10-15T05:54:41.6133563Z ]
+2026-10-15T05:54:41.6133743Z BACKFILL_AFTER [
+2026-10-15T05:54:41.6133958Z   [Object: null prototype] {
+2026-10-15T05:54:41.6134235Z     id: [32m'legacy-0'[39m,
+2026-10-15T05:54:41.6134500Z     state: [32m'ready'[39m,
+2026-10-15T05:54:41.6135056Z     target_image_sha256: [32m'1c947b92383b14434b0b67a95dcc0aa6ea54ae8e65850da74efc83234955d4e8'[39m,
+2026-10-15T05:54:41.6135596Z     created_at: [32m'2025-01-01 00:00:00'[39m
+2026-10-15T05:54:41.6135849Z   },
+2026-10-15T05:54:41.6136044Z   [Object: null prototype] {
+2026-10-15T05:54:41.6136312Z     id: [32m'legacy-1'[39m,
+2026-10-15T05:54:41.6136600Z     state: [32m'disabled'[39m,
+2026-10-15T05:54:41.6137160Z     target_image_sha256: [32m'1c947b92383b14434b0b67a95dcc0aa6ea54ae8e65850da74efc83234955d4e8'[39m,
+2026-10-15T05:54:41.6137690Z     created_at: [32m'2025-01-01 00:00:00'[39m
+2026-10-15T05:54:41.6138068Z   },
+2026-10-15T05:54:41.6138258Z   [Object: null prototype] {
+2026-10-15T05:54:41.6138524Z     id: [32m'legacy-2'[39m,
+2026-10-15T05:54:41.6138972Z     state: [32m'draft'[39m,
+2026-10-15T05:54:41.6139527Z     target_image_sha256: [32m'1c947b92383b14434b0b67a95dcc0aa6ea54ae8e65850da74efc83234955d4e8'[39m,
+2026-10-15T05:54:41.6140058Z     created_at: [32m'2025-01-01 00:00:00'[39m
+2026-10-15T05:54:41.6140315Z   }
+2026-10-15T05:54:41.6140486Z ] [
+2026-10-15T05:54:41.6140670Z   [Object: null prototype] {
+2026-10-15T05:54:41.6140938Z     kind: [32m'full'[39m,
+2026-10-15T05:54:41.6141225Z     base_image_sha256: [32m''[39m,
+2026-10-15T05:54:41.6141502Z     base_vcode: [33m0[39m
+2026-10-15T05:54:41.6141710Z   },
+2026-10-15T05:54:41.6141901Z   [Object: null prototype] {
+2026-10-15T05:54:41.6142160Z     kind: [32m'full'[39m,
+2026-10-15T05:54:41.6142439Z     base_image_sha256: [32m''[39m,
+2026-10-15T05:54:41.6142713Z     base_vcode: [33m0[39m
+2026-10-15T05:54:41.6142920Z   },
+2026-10-15T05:54:41.6143106Z   [Object: null prototype] {
+2026-10-15T05:54:41.6143367Z     kind: [32m'full'[39m,
+2026-10-15T05:54:41.6143649Z     base_image_sha256: [32m''[39m,
+2026-10-15T05:54:41.6143919Z     base_vcode: [33m0[39m
+2026-10-15T05:54:41.6144127Z   }
+2026-10-15T05:54:41.6144297Z ]
+2026-10-15T05:54:41.6144397Z 
+2026-10-15T05:54:41.6344026Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mapplies the full migration chain to an empty database and emits the actual schema[32m 9[2mms[22m[39m
+2026-10-15T05:54:41.6345878Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mpreserves all legacy bytes and isolates the unresolved channel without changing revision[32m 40[2mms[22m[39m
+2026-10-15T05:54:41.6348274Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mverifies artifacts/raw image/R2, safely maps published ready, preserves disabled/draft and replays without extra rows[32m 10[2mms[22m[39m
+2026-10-15T05:54:41.6349935Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published missing record[32m 9[2mms[22m[39m
+2026-10-15T05:54:41.6351366Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published missing identity[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.6352767Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published bad schema[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.6964104Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published missing approval[32m 5[2mms[22m[39m
+2026-10-15T05:54:41.6965512Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published legacy mismatch[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.6966740Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published raw mismatch[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.6968290Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published artifact missing[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.6969453Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mstops before every write on published evidence mismatch[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.6970335Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22misolates unverifiable unpublished rows without inventing zero/default identity[32m 5[2mms[22m[39m
+2026-10-15T05:54:41.6971898Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mrejects a changed manifest and an unapproved digest without overwriting identity[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.6973526Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mrejects missing recovery on a legitimate full-only backfilled release[32m 9[2mms[22m[39m
+2026-10-15T05:54:41.6974883Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mcannot map a published legacy row ready when its R2 object is gone[32m 5[2mms[22m[39m
+2026-10-15T05:54:41.6975754Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mrolls back all schema/data changes when the forward migration fails[32m 5[2mms[22m[39m
+2026-10-15T05:54:41.6976589Z  [32m✓[39m test/firmware-migration.host.test.ts[2m > [22mP4-2 real SQLite forward migration and controlled backfill[2m > [22mrolls back the complete backfill when its audit fails[32m 6[2mms[22m[39m
+2026-10-15T05:54:41.8973017Z [90mstdout[2m | test/firmware-scripts.host.test.ts[2m > [22m[2mP4-2 canonical metadata / upload / register scripts[2m > [22m[2mexecutes the builder CLI, preserves source files and returns a real exit code
+2026-10-15T05:54:41.8973602Z [22m[39mBUILDER_CLI {
+2026-10-15T05:54:41.8974043Z   exitCode: [33m0[39m,
+2026-10-15T05:54:41.8974575Z   stdout: [32m'{"ok":true,"output":"/home/runner/work/E-Track/E-Track/.cache/p4-2-script-fixtures/case-7BYqBi/metadata-cli.json","assetsPrepared":3,"r2Verified":false}\n'[39m,
+2026-10-15T05:54:41.8974987Z   stderr: [32m''[39m
+2026-10-15T05:54:41.8975119Z }
+2026-10-15T05:54:41.8975183Z 
+2026-10-15T05:54:41.9489871Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mbuilds the same canonical v2 fixture from actual files and keeps R2 unverified[32m 5[2mms[22m[39m
+2026-10-15T05:54:41.9490940Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mexecutes the builder CLI, preserves source files and returns a real exit code[32m 40[2mms[22m[39m
+2026-10-15T05:54:41.9491931Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22muploads with conditional create, canonical HTTP metadata and full readback; same bytes never rewrite[32m 14[2mms[22m[39m
+2026-10-15T05:54:41.9492911Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mrejects existing R2 metadata collision without overwrite[32m 1[2mms[22m[39m
+2026-10-15T05:54:41.9493744Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mrejects existing R2 bytes collision without overwrite[32m 1[2mms[22m[39m
+2026-10-15T05:54:41.9494529Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mrejects existing R2 size collision without overwrite[32m 0[2mms[22m[39m
+2026-10-15T05:54:41.9495335Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mcloses the HEAD/PUT race with onlyIf and verifies the winning object[32m 1[2mms[22m[39m
+2026-10-15T05:54:41.9496312Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mrejects false-positive put success when readback is missing[32m 1[2mms[22m[39m
+2026-10-15T05:54:41.9497085Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mrejects local byte mismatches before any R2 call[32m 0[2mms[22m[39m
+2026-10-15T05:54:41.9814712Z [90mstdout[2m | test/firmware-scripts.host.test.ts[2m > [22m[2mP4-2 canonical metadata / upload / register scripts[2m > [22m[2mkeeps dry-run metadata unverified and rejects the old skip-readback option
+2026-10-15T05:54:41.9815718Z [22m[39mUPLOADER_CLI { dryRunExit: [33m0[39m, refusedSkipExit: [33m2[39m }
+2026-10-15T05:54:41.9816001Z 
+2026-10-15T05:54:42.0395881Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mkeeps dry-run metadata unverified and rejects the old skip-readback option[32m 65[2mms[22m[39m
+2026-10-15T05:54:42.0397256Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mregister client consumes the same real handler/SQLite chain and replays idempotently[32m 52[2mms[22m[39m
+2026-10-15T05:54:42.0398454Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mdoes not retry a definitive HTTP 400[32m 1[2mms[22m[39m
+2026-10-15T05:54:42.0399613Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mdoes not retry a definitive HTTP 409[32m 1[2mms[22m[39m
+2026-10-15T05:54:42.0400747Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mdoes not retry a definitive HTTP 503[32m 1[2mms[22m[39m
+2026-10-15T05:54:42.0402422Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mbounds network-only retries and requires the registration result contract[32m 2[2mms[22m[39m
+2026-10-15T05:54:42.0403899Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mrejects insecure origins, invalid config and unknown schema before fetch[32m 1[2mms[22m[39m
+2026-10-15T05:54:42.0405189Z  [32m✓[39m test/firmware-scripts.host.test.ts[2m > [22mP4-2 canonical metadata / upload / register scripts[2m > [22mprevents script outputs escaping the active worktree[32m 0[2mms[22m[39m
+2026-10-15T05:54:42.0418314Z 
+2026-10-15T05:54:42.0458744Z [2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+2026-10-15T05:54:42.0459248Z [2m      Tests [22m [1m[32m34 passed[39m[22m[90m (34)[39m
+2026-10-15T05:54:42.0459606Z [2m   Start at [22m 05:54:41
+2026-10-15T05:54:42.0460177Z [2m   Duration [22m 835ms[2m (transform 202ms, setup 127ms, import 181ms, tests 356ms, environment 0ms)[22m
+2026-10-15T05:54:42.0460561Z 

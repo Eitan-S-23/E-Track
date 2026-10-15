@@ -1,0 +1,1 @@
+{"phase":"first-upload","ok":false,"error":{"name":"AssertionError","code":"ERR_ASSERTION","message":"curl transport failed; inspect the preserved receipt\n\n35 !== 0\n"},"receiptPath":"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload.json"}

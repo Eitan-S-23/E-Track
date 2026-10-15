@@ -1,0 +1,209 @@
+{
+  "runId": 38689324267,
+  "event": "pull_request",
+  "headSha": "75eea2c7380cfe3dadf147af4514a1e443d6e5d8",
+  "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/38689324267",
+  "productCommit": "cd4f2e4d651fb7eafe8253ce854b90242cede4d9",
+  "reviewedSourcePaths": [
+    ".github/workflows/firmware-build.yml",
+    "Tools/etu_pack.py",
+    "Tools/etu_unpack.py",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker",
+    "tests/ota"
+  ],
+  "productDiffExitCode": 0,
+  "counts": {
+    "hostScriptsAndMigration": 34,
+    "pipelineHost": 33,
+    "nativeWorkerd": 156,
+    "bytePreparation": 19,
+    "packageAndVectors": [
+      8,
+      9
+    ],
+    "workflow": 41
+  },
+  "gccWarnings": 640,
+  "gccErrors": 0,
+  "vendorWarnings": 6,
+  "jobs": [
+    {
+      "id": 116271326810,
+      "name": "Build firmware (arm-none-eabi-gcc)",
+      "conclusion": "success"
+    },
+    {
+      "id": 116271327082,
+      "name": "Release tooling development checks (no cloud credentials)",
+      "conclusion": "success"
+    },
+    {
+      "id": 116271731366,
+      "name": "Firmware rehearsal (shared release implementation)",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 116271731620,
+      "name": "Firmware production (shared release implementation)",
+      "conclusion": "skipped"
+    }
+  ],
+  "selected": [
+    {
+      "name": "host",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/6_Run script and migration host tests explicitly (not workerd).txt",
+      "sizeBytes": 74982,
+      "sha256": "121c57f2f7b2716866c7fa3ad070ccb77da313428eae0b2d7d1e95f088b556a6",
+      "commandLines": [
+        "﻿2026-10-15T05:54:40.8224722Z ##[group]Run npm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts"
+      ],
+      "resultLines": [
+        "2026-10-15T05:54:42.0459248Z       Tests  34 passed (34)"
+      ]
+    },
+    {
+      "name": "pipeline",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/7_Run release pipeline with real handlers and SQLite host ports (not rehearsal).txt",
+      "sizeBytes": 20236,
+      "sha256": "06491b25eb2d4a4b4098bd4231bb85911de949bc1be88bf57aec74878d64c8a2",
+      "commandLines": [
+        "﻿2026-10-15T05:54:42.0885801Z ##[group]Run npm test -- --config ../../../../../.github/scripts/p41-host.config.mjs"
+      ],
+      "resultLines": [
+        "2026-10-15T05:54:44.0415855Z       Tests  33 passed (33)"
+      ]
+    },
+    {
+      "name": "native-workerd",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/8_Run native workerd D1 R2 and registration invariants (not host doubles).txt",
+      "sizeBytes": 50949,
+      "sha256": "fdf71c46b5d0afd3f270976bc6f86da6637ce082d91ae6a431daf1316831ed4f",
+      "commandLines": [
+        "﻿2026-10-15T05:54:44.0688504Z ##[group]Run npm test -- --reporter=verbose"
+      ],
+      "resultLines": [
+        "2026-10-15T05:54:48.2174483Z       Tests  156 passed (156)"
+      ]
+    },
+    {
+      "name": "types",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/9_Check Worker and shared script types.txt",
+      "sizeBytes": 1434,
+      "sha256": "00b6dd6e0f803d61f90b5b34be5805bfda5c94ac2733c75d64559c221e667284",
+      "commandLines": [
+        "﻿2026-10-15T05:54:48.2832801Z ##[group]Run npm run check"
+      ],
+      "resultLines": []
+    },
+    {
+      "name": "worker-bundle",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/10_Build tested Worker deployment input without cloud access.txt",
+      "sizeBytes": 5168,
+      "sha256": "504615bd9838627ee6017e14e5086a4648d7312ca8d69d4bcec06cde30fda32a",
+      "commandLines": [
+        "﻿2026-10-15T05:54:49.9212924Z ##[group]Run set -euo pipefail"
+      ],
+      "resultLines": []
+    },
+    {
+      "name": "vendor-build",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/12_Build the existing vendor bsdiff for this host.txt",
+      "sizeBytes": 9353,
+      "sha256": "c2535c3d1401ad97dbf7c15c10aee3fbe49eeaa6c0ab4dbbffcf3404995dbe62",
+      "commandLines": [
+        "﻿2026-10-15T05:54:53.2973264Z ##[group]Run cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release"
+      ],
+      "resultLines": []
+    },
+    {
+      "name": "byte-tests",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/13_Check real package generation and approved-envelope replay.txt",
+      "sizeBytes": 8398,
+      "sha256": "aedc8f1eca25cbf68d6609d5b72a8e7b6420e0dbe471f0810157e70f3238c4e0",
+      "commandLines": [
+        "﻿2026-10-15T05:54:55.2549028Z ##[group]Run python3 -B tests/ota/test_firmware_pack.py"
+      ],
+      "resultLines": [
+        "2026-10-15T05:54:55.4361007Z Ran 8 tests in 0.016s",
+        "2026-10-15T05:54:55.4361220Z OK",
+        "2026-10-15T05:54:55.4935358Z Ran 9 tests in 0.002s",
+        "2026-10-15T05:54:55.4935582Z OK"
+      ]
+    },
+    {
+      "name": "workflow-tests",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/14_Check workflow execution graph and configuration gates.txt",
+      "sizeBytes": 9492,
+      "sha256": "c11cc665a124e349b3224e4def1a6a9ed636bbcbed8fd0d078bbd897abd56f8d",
+      "commandLines": [
+        "﻿2026-10-15T05:54:55.5041486Z ##[group]Run node --test tests/ota/test_firmware_workflow.mjs"
+      ],
+      "resultLines": [
+        "2026-10-15T05:54:55.8876968Z ℹ tests 41",
+        "2026-10-15T05:54:55.8878250Z ℹ pass 41",
+        "2026-10-15T05:54:55.8878638Z ℹ fail 0",
+        "2026-10-15T05:54:55.8879048Z ℹ cancelled 0",
+        "2026-10-15T05:54:55.8879427Z ℹ skipped 0",
+        "2026-10-15T05:54:55.8879766Z ℹ todo 0"
+      ]
+    },
+    {
+      "name": "byte-fixture",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/15_Execute production byte preparation with isolated fixtures.txt",
+      "sizeBytes": 6181,
+      "sha256": "da7186284a810533eed9253224d8c9ee3f14b713d0d92ab5e707c7ac3236497a",
+      "commandLines": [
+        "﻿2026-10-15T05:54:55.8976373Z ##[group]Run node --test tests/ota/test_firmware_release.mjs"
+      ],
+      "resultLines": [
+        "2026-10-15T05:55:02.4110022Z ℹ tests 19",
+        "2026-10-15T05:55:02.4110380Z ℹ pass 19",
+        "2026-10-15T05:55:02.4110500Z ℹ fail 0",
+        "2026-10-15T05:55:02.4110628Z ℹ cancelled 0",
+        "2026-10-15T05:55:02.4110812Z ℹ skipped 0",
+        "2026-10-15T05:55:02.4110931Z ℹ todo 0"
+      ]
+    },
+    {
+      "name": "checkout-development",
+      "zipEntry": "Release tooling development checks (no cloud credentials)/2_Checkout repository.txt",
+      "sizeBytes": 10074,
+      "sha256": "60018f185a6654ccbe7735016fb70ff4854f66dd6dab7aaffcb658da37ad5e90",
+      "commandLines": [
+        "﻿2026-10-15T05:54:18.4943384Z ##[group]Run actions/checkout@v4"
+      ],
+      "resultLines": []
+    },
+    {
+      "name": "checkout-gcc",
+      "zipEntry": "Build firmware (arm-none-eabi-gcc)/2_Checkout repository.txt",
+      "sizeBytes": 17736,
+      "sha256": "2935818e46959ded4dd218fc4577e4793283a533f646225af359429163090745",
+      "commandLines": [
+        "﻿2026-10-15T05:54:19.6699035Z ##[group]Run actions/checkout@v4"
+      ],
+      "resultLines": []
+    },
+    {
+      "name": "gcc-build",
+      "zipEntry": "Build firmware (arm-none-eabi-gcc)/11_Build firmware.txt",
+      "sizeBytes": 378072,
+      "sha256": "a1ac4c8a601ba5653f405e681076ccddbf66000cc10a9438d09e2d7ed0a5a8a9",
+      "commandLines": [
+        "﻿2026-10-15T05:54:50.7672896Z ##[group]Run set -euo pipefail"
+      ],
+      "resultLines": []
+    },
+    {
+      "name": "gcc-byte-preparation",
+      "zipEntry": "Build firmware (arm-none-eabi-gcc)/17_Exercise production preparation on the real GCC build (development key only).txt",
+      "sizeBytes": 6952,
+      "sha256": "f02e38a61744399c0cf232856d0a76e3c003d66aeb5edd0be5d046e6ab105206",
+      "commandLines": [
+        "﻿2026-10-15T05:55:28.9565723Z ##[group]Run set -euo pipefail"
+      ],
+      "resultLines": []
+    }
+  ]
+}

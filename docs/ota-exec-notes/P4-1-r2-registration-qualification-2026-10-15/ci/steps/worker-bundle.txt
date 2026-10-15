@@ -1,0 +1,54 @@
+﻿2026-10-15T05:54:49.9212924Z ##[group]Run set -euo pipefail
+2026-10-15T05:54:49.9213138Z [36;1mset -euo pipefail[0m
+2026-10-15T05:54:49.9213434Z [36;1mnode node_modules/wrangler/bin/wrangler.js deploy --dry-run --outdir "$GITHUB_WORKSPACE/.cache/p41-worker-bundle"[0m
+2026-10-15T05:54:49.9213831Z [36;1mprintf '%s\n' "$GITHUB_SHA" > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/source-commit.txt"[0m
+2026-10-15T05:54:49.9214239Z [36;1mprintf '%s\n' 'Build-only input; no deployment or rehearsal performed.' > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/purpose.txt"[0m
+2026-10-15T05:54:49.9268369Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:49.9268523Z env:
+2026-10-15T05:54:49.9268647Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:49.9268812Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:49.9268977Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:49.9269186Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:49.9269367Z   BUILD_TYPE: Release
+2026-10-15T05:54:49.9269495Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:49.9269674Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:49.9269881Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:49.9270143Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:49.9270378Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:49.9270596Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:49.9270781Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:49.9270971Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:49.9271209Z   HOME: /home/runner/work/E-Track/E-Track/.cache/p41/worker-home
+2026-10-15T05:54:49.9271462Z   XDG_CONFIG_HOME: /home/runner/work/E-Track/E-Track/.cache/p41/worker-config
+2026-10-15T05:54:49.9271724Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/p41/worker-cache
+2026-10-15T05:54:49.9271931Z   CLOUDFLARE_API_TOKEN: 
+2026-10-15T05:54:49.9272063Z   CLOUDFLARE_ACCOUNT_ID: 
+2026-10-15T05:54:49.9272196Z ##[endgroup]
+2026-10-15T05:54:50.5406000Z 
+2026-10-15T05:54:50.5407041Z  ⛅️ wrangler 4.105.0
+2026-10-15T05:54:50.5407403Z ────────────────────
+2026-10-15T05:54:50.5775818Z [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mMultiple environments are defined in the Wrangler configuration file, but no target environment was specified for the deploy command.[0m
+2026-10-15T05:54:50.5776259Z 
+2026-10-15T05:54:50.5776710Z   To avoid unintentional changes to the wrong environment, it is recommended to explicitly specify the target environment using the `-e|--env` flag or CLOUDFLARE_ENV env variable.
+2026-10-15T05:54:50.5777436Z   If your intention is to use the top-level environment of your configuration simply pass an empty string to the flag to target such environment. For example `--env=""`.
+2026-10-15T05:54:50.5778480Z 
+2026-10-15T05:54:50.5778488Z 
+2026-10-15T05:54:50.6308053Z Total Upload: 141.38 KiB / gzip: 34.50 KiB
+2026-10-15T05:54:50.6326651Z Your Worker has access to the following bindings:
+2026-10-15T05:54:50.6327246Z Binding                                                                Resource                  
+2026-10-15T05:54:50.6328108Z env.RATE_LIMITER (RateLimiter)                                         Durable Object            
+2026-10-15T05:54:50.6328752Z env.MANIFEST_CACHE (00000000000000000000000000000001)                  KV Namespace              
+2026-10-15T05:54:50.6329418Z env.DB (trace-update-dev)                                              D1 Database               
+2026-10-15T05:54:50.6330086Z env.RELEASES_BUCKET (trace-update-dev-releases)                        R2 Bucket                 
+2026-10-15T05:54:50.6330645Z env.ENVIRONMENT ("dev")                                                Environment Variable      
+2026-10-15T05:54:50.6331165Z env.APP_ID ("trace")                                                   Environment Variable      
+2026-10-15T05:54:50.6331664Z env.GITHUB_OWNER ("Eitan-S-23")                                        Environment Variable      
+2026-10-15T05:54:50.6332552Z env.GITHUB_REPO ("Trace")                                              Environment Variable      
+2026-10-15T05:54:50.6333059Z env.MANIFEST_CACHE_TTL_SECONDS ("60")                                  Environment Variable      
+2026-10-15T05:54:50.6333586Z env.DOWNLOAD_TOKEN_TTL_SECONDS ("300")                                 Environment Variable      
+2026-10-15T05:54:50.6334147Z env.DOWNLOAD_TOKEN_KEY_VERSION ("dev")                                 Environment Variable      
+2026-10-15T05:54:50.6334719Z env.RATE_LIMIT_WINDOW_SECONDS ("60")                                   Environment Variable      
+2026-10-15T05:54:50.6335259Z env.RATE_LIMIT_MAX_REQUESTS ("60")                                     Environment Variable      
+2026-10-15T05:54:50.6335830Z env.ENABLE_DIRECT_ADMIN_API ("false")                                  Environment Variable      
+2026-10-15T05:54:50.6336116Z 
+2026-10-15T05:54:50.6336234Z --dry-run: exiting now.

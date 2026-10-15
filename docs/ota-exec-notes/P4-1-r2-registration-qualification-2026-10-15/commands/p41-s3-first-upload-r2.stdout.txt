@@ -1,0 +1,1 @@
+{"phase":"first-upload-r2","ok":true,"upload":"UPLOADED","receiptPath":"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2.json"}

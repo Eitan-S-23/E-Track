@@ -1,0 +1,1 @@
+{"phase":"assets-register","ok":true,"passedCases":9,"ready":"ready","receiptPath":"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\assets-register.json"}

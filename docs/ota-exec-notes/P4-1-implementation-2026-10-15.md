@@ -1043,3 +1043,189 @@ are in `P4-1-cloud-qualification-delivery-2026-10-15/`, separately inventoried
 without changing the reviewed 55-file archive. The product code is still the
 previously tested `cd4f2e4`; this final record append does not repair or waive
 P41-CF-RUNTIME-01 or any NOT_RUN requirement above.
+
+### 2026-10-15 Scoped S3 Upload And Ready Qualification
+
+The user's authorized isolated qualification continued from branch HEAD
+`75eea2c7380cfe3dadf147af4514a1e443d6e5d8`. Product code remains
+`cd4f2e4d651fb7eafe8253ce854b90242cede4d9`: no workflow, production script,
+Worker, migration, package or device code changed. The existing affected-caller
+list remains applicable; this continuation adds no shared consumer.
+
+The real Windows `withFirmwareBucket` startup failure is not retried or erased.
+Instead, a bounded test-side adapter uses installed curl's S3 SigV4 transport and
+calls the **unchanged** `uploadFirmwareAsset` and `registerFirmware` functions.
+The former still owns immutable-object handling and full-stream length/SHA-256
+verification; the deployed existing Worker independently reads R2 before its
+atomic D1 registration. This qualifies those business paths against real R2/D1,
+not the Wrangler initializer, an actual release workflow or canonical rehearsal.
+
+#### First Feedback And Credential Boundary
+
+- Cloudflare temporary-credential creation returned HTTP 200. A read-only,
+  900-second credential was restricted to the three exact qualification keys;
+  HEAD of an allowed missing key returned 404, while another key in the same
+  test bucket returned 403. No account/token-management permission was added.
+- The first full upload attempt exited 1: HEAD returned 404, then curl's PUT
+  connection failed during TLS handshake, curl exit 35, with no R2 HTTP response.
+  No verified result or register call followed. Its original receipt and raw
+  headers remain in `operations/first-upload*`; the absent PUT body file is not
+  fabricated as a successful or empty object.
+- A separate bounded retry rechecked HEAD, received PUT 200, HEAD 200 and GET
+  200, and the production uploader verified all 202 bytes. It exited 0; D1 was
+  empty both before and after this first upload. Only then was the matrix widened.
+- The read/write credentials were likewise restricted to those exact three keys
+  in `e-track-firmware-p41-test-releases`, with a 900-second TTL. They existed
+  only in process memory and were supplied to curl through stdin, never command
+  arguments, GitHub secrets, CI, tracked files or console output. The broad
+  provisioning input was used only for credential issuance and SELECT/readback.
+
+The executed commands, all from the exclusive worktree, were:
+
+    node --use-env-proxy .cache/cf-r2-qualification-20261015/probe-temporary-access.mjs
+    node .cache/run.cjs p41-s3-first-upload . node --use-env-proxy .cache/cf-r2-qualification-20261015/qualify-s3.mjs first-upload
+    node .cache/run.cjs p41-s3-first-upload-r2 . node --use-env-proxy .cache/cf-r2-qualification-20261015/qualify-s3.mjs first-upload-r2
+    node .cache/run.cjs p41-s3-assets-register . node --use-env-proxy .cache/cf-r2-qualification-20261015/qualify-s3.mjs assets-register
+
+Their exit codes are respectively 0, 1, 0 and 0. The matrix completed at
+`2026-10-15T06:32:29.489Z`, with **9 named cases passed**:
+
+| Case | Actual observation |
+| --- | --- |
+| Partial R2 assets | Real register returned 503 `BACKEND_UNAVAILABLE`; exact release/asset/channel/audit snapshots remained empty. |
+| Bad local digest | Shared uploader rejected with `INVALID_PARAMETER` before any remote call. |
+| Three-asset upload/readback | Full returned `ALREADY_PRESENT`; patch/recovery returned `UPLOADED`; every successful GET matched the complete local file. |
+| Identical upload replay | All three returned `ALREADY_PRESENT`, with no PUT requests. |
+| Different bytes, same key | Shared uploader rejected with `R2_OBJECT_CONFLICT`; no PUT or GET followed its HEAD check. |
+| Real S3 conditional rejection | Existing-key conditional PUT and stale-ETag GET both returned 412 `PreconditionFailed`; this is a transport-only negative. |
+| First real register | HTTP 201, `state=ready`, three registered assets. |
+| Identical register replay | HTTP 200, same release ID, `idempotent=true`, identical full D1 rows. |
+| Conflicting register | HTTP 409 `RELEASE_CONFLICT`, one request, identical full D1 rows. |
+
+The negative imported-function tests assert the shared client's `exitCode=1`
+property; they are **not** separately executed production CLI process exits.
+The qualification runner exits 0 after verifying these expected failures.
+Existing CI separately covers actual CLI process exits. No negative result is
+hidden or relabelled as a successful upload/register.
+
+#### Bytes And Database Outcome
+
+The inputs remain the previously byte-tested synthetic case
+`firmware-release-tests/case-R5kVz9` from CI `38677391835`, with synthetic
+`commitSha`/`runId=9001` and explicit non-installable notes. They are not a formal
+base, production firmware or firmware-scale performance test.
+
+| Verified file | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Full | 202 | `cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799` |
+| Patch | 208 | `8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67` |
+| Recovery | 8200 | `0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c` |
+| Verified metadata file, including LF | 2026 | `c963239dadf175bc097bc2d1329f9dba41d95c2380dc3ce276b81411de53efd6` |
+| Canonical HTTP/D1 metadata, without LF | 2025 | `2fbc0a4c167c310fc0a58f2e8b6eda1dfe6238d5d6ee9b94155b70b9b5020c62` |
+
+The original 2029-byte unverified metadata is unchanged. `r2Verified=true` was
+saved to a separate file only after all three real readbacks succeeded. R2
+length, custom SHA/kind/content-digest, content type/disposition and cache policy
+were checked; ETags and Last-Modified values remained unchanged after replay and
+collision/conditional negatives. There were 25 real S3 requests in the matrix,
+all curl exits 0; HTTP 404/412 are the explicitly expected storage observations.
+
+The real release ID is
+`fw_e1abd9e066161562fb72322b81ee7c06bf4719df7d6f89e769811a7460373648`.
+Exact SELECT snapshots show one ready release, three available assets, one
+registration audit and two automatically initialized **empty** channels.
+Both channels have null release pointers, revision 0 and `last_action=init`.
+No publish endpoint was called. IDs, timestamps, canonical registration JSON,
+asset ETags and all other returned fields are identical after HTTP 201, the 200
+replay and the 409 conflict. No D1 business row was manually inserted or edited.
+
+#### CI Originals And Audit
+
+The previously uninspected record HEAD `75eea2c` has actual successful firmware
+CI `38689324267`. Its raw ZIP and selected step originals confirm separate
+script/migration host 34, pipeline host 33, native workerd 156, workflow 41,
+byte-preparation 19, package 8 and vector 9 tests, all passed. GCC reports 640
+warnings and zero errors; the vendor build reports six warnings. Worker/shared
+types and the build-only Worker bundle step passed. Rehearsal and production
+jobs were skipped. Product-path diff from `cd4f2e4` to that head is empty.
+The CI fixtures generated in this later run are not substituted for the earlier
+qualification input or its random package nonces.
+
+Two local CI-log-reader attempts exited 1 because the first parser expected TAP
+and Python summaries for steps actually using Vitest and Node's spec reporter.
+Both failures are preserved. The corrected reader checks the real reporter's
+passed/total and zero failure/skip/cancel counts and exited 0. No CI test was
+changed, rerun merely for parsing, or counted from workflow colour alone.
+
+The new original archive is
+`P4-1-r2-registration-qualification-2026-10-15/`: 132 files, including its
+131-entry length/SHA inventory. Inventory SHA-256:
+`37a1335c3cd928d66d45d27e35d000b9db74af84588167a2f66d3011f2603e99`.
+It preserves failure/success receipts, raw S3 responses and downloaded bytes,
+SELECT/register responses, fixtures, source snapshots and actual CI logs.
+Operational scripts are evidence snapshots at their original worktree locations,
+not portable commands to run from the archive. Earlier reviewed archives remain
+byte-unchanged.
+
+The protected old Trace database's observed migrations/counts and the old
+Worker's observable bindings are unchanged. GitHub still reports zero Releases,
+zero environments and main `b42d3e25`. These limited observations are not a
+complete production R2/channel-identity/Release zero-side-effect proof.
+`operations/closeout-audit.json` confirms closed owned upload/runner processes,
+no workerd process, project-contained selected outputs and no supplied-token,
+test-secret or expired-readonly-secret matches in the scanned qualification files.
+The expired read-only credential file was removed from the private input.
+Still-needed provisioning/test credentials remain in their ignored user-only
+directory to avoid another token paste; no credential was exported to CI.
+The shared-root index still hashes to
+`2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`.
+No PowerShell, local build, deployment, device action or system installation was
+used in this continuation. Historical P41-AUDIT-01 remains disclosed and unchanged.
+
+#### Remaining Inputs And Next Owners
+
+The configuration-name/scope table above remains the workflow handoff. This
+test-only S3 adapter introduces **no new production or rehearsal configuration**.
+The Cloudflare D1 permission issue is resolved; no extra token permission or
+account login is requested for this result.
+
+- Implementation/configuration owner: P41-CF-RUNTIME-01 remains open for real
+  `withFirmwareBucket` startup in a functioning isolated execution context.
+  Successful S3 qualification does not prove that initializer or its permissions.
+- Root/release owner: provide authoritative preceding finalized App provenance.
+  This repository still has no formal Release; the fixture is not a substitute.
+- Root/configuration owner: resolve the frozen rehearsal bucket name already
+  owned by the protected old Trace service, then supply the protected
+  `firmware-rehearsal` environment and approved bindings/package key/base inputs.
+  Keep the old service untouched; any contract change needs its proper decision
+  and review, not a silent bucket rename or a second rehearsal specification.
+- Independent OTA reviewer/observer: adjudicate one actual canonical workflow
+  rehearsal, including complete before/after production-zero-effect evidence.
+  That rehearsal, firmware-scale formal assets and whole-card acceptance remain
+  NOT_RUN. This qualification is not their replacement.
+
+The autonomous development candidate and the additionally authorized isolated
+R2/register qualification now have actual feedback. P4-1 remains IN_PROGRESS;
+no main integration, production unlock/promotion or P3-5/P4-3/P4-4 task starts
+follow from this checkpoint.
+
+#### Record Validation And Independent Review
+
+Non-implementing agent `/root/p41_r2_qualification_review` returned **NO FINDINGS**
+for both the bounded technical qualification and the final record/archive.
+The original verdicts are preserved separately in
+`P4-1-r2-registration-review-2026-10-15.json`, without modifying the 132-file
+archive. The reviewer checked all 131 staged Git blobs against the inventory,
+all 13 extracted CI steps against the original ZIP, the actual byte/metadata and
+D1 snapshots, and the stated limitations. It performed no cloud request, private
+credential read, build, device action or file write. This is independent bounded
+review, not canonical rehearsal or whole-card acceptance.
+
+The readiness regression ran via `.cache/run.cjs p41-s3-board-readiness`, 1/1
+passed, exit 0. Full staged `git diff --check` with CRLF recognition returned 2
+because untouched CI originals have trailing spaces and HTTP responses have
+required final blank lines; its full diagnostic remains in
+`.cache/logs/p41-s3-staged-whitespace.*`. It is not reported as green. The separate
+authored-record/script/JSON whitespace check, `p41-s3-authored-whitespace`,
+returned 0. Original bytes, historical failures and Git's persistent whitespace
+configuration were not changed to suppress those diagnostics.
