@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "checkedAt": "2026-10-15T04:53:00.882Z",
+  "comparison": "All sqlite_master SQL after CRLF normalization only",
+  "migrations": [
+    {
+      "id": 1,
+      "name": "0001_init.sql",
+      "applied_at": "2026-10-15 04:50:39"
+    },
+    {
+      "id": 2,
+      "name": "0002_patch_formats.sql",
+      "applied_at": "2026-10-15 04:50:39"
+    },
+    {
+      "id": 3,
+      "name": "0003_firmware_releases.sql",
+      "applied_at": "2026-10-15 04:50:39"
+    },
+    {
+      "id": 4,
+      "name": "0004_announcements.sql",
+      "applied_at": "2026-10-15 04:50:39"
+    },
+    {
+      "id": 5,
+      "name": "0005_firmware_multi_asset.sql",
+      "applied_at": "2026-10-15 04:50:39"
+    }
+  ],
+  "counts": {
+    "table": 19,
+    "index": 55,
+    "trigger": 45
+  },
+  "foreignKeyViolations": 0,
+  "remoteReceiptSha256": "780c5dea83c4542b4de0e1e7c7034d10fe4ab27bcc5556819863d4f5f74c5e3f"
+}

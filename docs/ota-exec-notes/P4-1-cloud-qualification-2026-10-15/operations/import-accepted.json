@@ -1,0 +1,57 @@
+{
+  "operation": "import-accepted",
+  "started": "2026-10-15T04:50:29.013Z",
+  "finished": "2026-10-15T04:50:41.782Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "args": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\wrangler\\bin\\wrangler.js",
+    "d1",
+    "execute",
+    "e-track-firmware-p41-test",
+    "--remote",
+    "--config",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\wrangler.json",
+    "--file",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\accepted-migrations.sql",
+    "--yes",
+    "--json"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "migrationInputs": [
+    {
+      "name": "0001_init.sql",
+      "sizeBytes": 10845,
+      "sha256": "bb508ac23607f997317e3103709c7905c43e57bc8ee9e1fb63dbcab68a915e88"
+    },
+    {
+      "name": "0002_patch_formats.sql",
+      "sizeBytes": 2037,
+      "sha256": "83fa45f2836b95fadcdefd8f3adb60ef5b1af548d9f852a3e9a2c894e3368691"
+    },
+    {
+      "name": "0003_firmware_releases.sql",
+      "sizeBytes": 3977,
+      "sha256": "02c09ad0a51c9d027c9c0d382660b995c58fd5a3ccbf0961c340a2d7fbe88837"
+    },
+    {
+      "name": "0004_announcements.sql",
+      "sizeBytes": 706,
+      "sha256": "db564998c6e4af330339fb88737f06e2e7c2d3a3afba84fa09cbeddfe8191bce"
+    },
+    {
+      "name": "0005_firmware_multi_asset.sql",
+      "sizeBytes": 22864,
+      "sha256": "fb0be4bce51333586841e93973457feca91c1366ec56838e3c24b1ea35ba4e4e"
+    },
+    {
+      "name": "accepted-migrations.sql",
+      "sizeBytes": 40786,
+      "sha256": "c0ccf1c47f6bcedb96d6a1ea804787945cf1f896855ed89623eaf61079aba497"
+    }
+  ],
+  "error": null,
+  "stdout": "├ Checking if file needs uploading\n│\n├ 🌀 Uploading 2617e1e1-956f-42ce-a465-da56d84abf06.cb2b3905d90fd4c4.sql\n│ 🌀 Uploading complete.\n│\n[\n  {\n    \"results\": [\n      {\n        \"Total queries executed\": 105,\n        \"Rows read\": 1253,\n        \"Rows written\": 238,\n        \"Database size (MB)\": \"0.37\"\n      }\n    ],\n    \"success\": true,\n    \"finalBookmark\": \"00000003-00000010-00005105-d1fa20e9c4548610969b4f628d409384\",\n    \"meta\": {\n      \"served_by\": \"v3-prod\",\n      \"served_by_region\": \"WNAM\",\n      \"served_by_colo\": \"LAX\",\n      \"served_by_primary\": true,\n      \"timings\": {\n        \"sql_duration_ms\": 63.3129\n      },\n      \"duration\": 63.3129,\n      \"changes\": 6,\n      \"last_row_id\": 5,\n      \"changed_db\": true,\n      \"size_after\": 368640,\n      \"rows_read\": 1253,\n      \"rows_written\": 238,\n      \"num_tables\": 18,\n      \"total_attempts\": 1\n    }\n  }\n]\n",
+  "stderr": "\u001b[33m▲ \u001b[43;33m[\u001b[43;30mWARNING\u001b[43;33m]\u001b[0m \u001b[1mProxy environment variables detected. We'll use your proxy for fetch requests.\u001b[0m\n\n\n",
+  "closed": true
+}

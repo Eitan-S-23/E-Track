@@ -1,0 +1,239 @@
+{
+  "purpose": "ISOLATED_SYNTHETIC_QUALIFICATION_NOT_REHEARSAL",
+  "phase": "protected-after",
+  "started": "2026-10-15T05:11:38.416Z",
+  "worker": "e-track-firmware-p41-test",
+  "databaseId": "2617e1e1-956f-42ce-a465-da56d84abf06",
+  "bucket": "e-track-firmware-p41-test-releases",
+  "observations": [
+    {
+      "action": "PROTECTED_D1_SELECT_ONLY",
+      "sql": "SELECT name, applied_at FROM d1_migrations ORDER BY id; SELECT 'app_releases' AS kind, COUNT(*) AS row_count FROM releases UNION ALL SELECT 'app_assets', COUNT(*) FROM release_assets UNION ALL SELECT 'firmware_releases', COUNT(*) FROM firmware_releases UNION ALL SELECT 'app_channels', COUNT(*) FROM channels UNION ALL SELECT 'firmware_channels', COUNT(*) FROM firmware_channels; SELECT 'app' AS family, COUNT(*) AS populated_channels FROM channels WHERE current_release_id IS NOT NULL UNION ALL SELECT 'firmware', COUNT(*) FROM firmware_channels WHERE current_release_id IS NOT NULL; SELECT state, COUNT(*) AS row_count FROM firmware_releases GROUP BY state ORDER BY state;",
+      "status": 200,
+      "cfRay": "a4ac53196d2325c6-NRT",
+      "body": {
+        "result": [
+          {
+            "results": [
+              {
+                "name": "0001_init.sql",
+                "applied_at": "2026-06-28 16:11:42"
+              },
+              {
+                "name": "0002_patch_formats.sql",
+                "applied_at": "2026-06-29 17:20:31"
+              },
+              {
+                "name": "0003_firmware_releases.sql",
+                "applied_at": "2026-06-30 22:34:40"
+              },
+              {
+                "name": "0004_announcements.sql",
+                "applied_at": "2026-07-07 13:36:49"
+              }
+            ],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "DFW",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 0.7006
+              },
+              "duration": 0.7006,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 11395072,
+              "rows_read": 4,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          },
+          {
+            "results": [
+              {
+                "kind": "app_releases",
+                "row_count": 53
+              },
+              {
+                "kind": "app_assets",
+                "row_count": 100
+              },
+              {
+                "kind": "firmware_releases",
+                "row_count": 0
+              },
+              {
+                "kind": "app_channels",
+                "row_count": 2
+              },
+              {
+                "kind": "firmware_channels",
+                "row_count": 0
+              }
+            ],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "DFW",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 0.2394
+              },
+              "duration": 0.2394,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 11395072,
+              "rows_read": 157,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          },
+          {
+            "results": [
+              {
+                "family": "app",
+                "populated_channels": 2
+              },
+              {
+                "family": "firmware",
+                "populated_channels": 0
+              }
+            ],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "DFW",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 0.1442
+              },
+              "duration": 0.1442,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 11395072,
+              "rows_read": 3,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          },
+          {
+            "results": [],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "DFW",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 0.0669
+              },
+              "duration": 0.0669,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 11395072,
+              "rows_read": 2,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          }
+        ],
+        "errors": [],
+        "messages": [],
+        "success": true
+      }
+    },
+    {
+      "action": "PROTECTED_WORKER_OBSERVABLE_BINDINGS_UNCHANGED",
+      "status": 200,
+      "cfRay": "a4ac5327bcd925c6-NRT",
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "type": "plain_text",
+          "text": "trace"
+        },
+        {
+          "name": "DB",
+          "type": "d1",
+          "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+          "database_id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "type": "plain_text",
+          "text": "false"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "type": "plain_text",
+          "text": "staging"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "type": "plain_text",
+          "text": "Eitan-S-23"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "type": "plain_text",
+          "text": "Trace"
+        },
+        {
+          "name": "MANIFEST_CACHE",
+          "type": "kv_namespace",
+          "namespace_id": "fe3b08f2e0774072a44bdf140c44174a"
+        },
+        {
+          "name": "MANIFEST_CACHE_TTL_SECONDS",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMITER",
+          "type": "durable_object_namespace",
+          "namespace_id": "cced0ccc57664e36b007d64d88de4bd5",
+          "class_name": "RateLimiter"
+        },
+        {
+          "name": "RATE_LIMIT_MAX_REQUESTS",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMIT_WINDOW_SECONDS",
+          "type": "plain_text"
+        },
+        {
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket",
+          "bucket_name": "trace-update-staging-releases"
+        }
+      ]
+    }
+  ],
+  "ok": true,
+  "limitations": "Count and observable binding comparison only; not complete production R2/Release/channel identity acceptance.",
+  "finished": "2026-10-15T05:11:44.872Z"
+}

@@ -1,0 +1,18 @@
+{
+  "purpose": "ISOLATED_QUALIFICATION_NOT_REHEARSAL",
+  "accountId": "af6dd848e6a21f1cd26d44b1b656af7b",
+  "workerName": "e-track-firmware-p41-test",
+  "policyChange": "User confirmed adding D1 Edit after the preserved 401 rejection",
+  "d1": {
+    "name": "e-track-firmware-p41-test",
+    "id": "2617e1e1-956f-42ce-a465-da56d84abf06"
+  },
+  "kv": {
+    "name": "e-track-firmware-p41-test-manifest-cache",
+    "id": "9581ef5b95154abaa7d441fd07c2f220"
+  },
+  "r2": {
+    "name": "e-track-firmware-p41-test-releases",
+    "id": null
+  }
+}

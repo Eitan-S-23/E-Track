@@ -1,0 +1,19 @@
+{
+  "operation": "deploy",
+  "started": "2026-10-15T04:53:16.590Z",
+  "finished": "2026-10-15T04:53:45.611Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "args": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\wrangler\\bin\\wrangler.js",
+    "deploy",
+    "--no-bundle",
+    "--config",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\wrangler.json"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "\n ⛅️ wrangler 4.105.0\n────────────────────\nAttaching additional modules:\n┌───────────────────┬──────┬──────────┐\n│ Name              │ Type │ Size     │\n├───────────────────┼──────┼──────────┤\n│ purpose.txt       │ text │ 0.05 KiB │\n├───────────────────┼──────┼──────────┤\n│ source-commit.txt │ text │ 0.04 KiB │\n├───────────────────┼──────┼──────────┤\n│ Total (2 modules) │      │ 0.09 KiB │\n└───────────────────┴──────┴──────────┘\nTotal Upload: 141.47 KiB / gzip: 34.58 KiB\nWorker Startup Time: 2 ms\nYour Worker has access to the following bindings:\nBinding                                                                  Resource                  \nenv.RATE_LIMITER (RateLimiter)                                           Durable Object            \nenv.MANIFEST_CACHE (9581ef5b95154abaa7d441fd07c2f220)                    KV Namespace              \nenv.DB (e-track-firmware-p41-test)                                       D1 Database               \nenv.RELEASES_BUCKET (e-track-firmware-p41-test-releases)                 R2 Bucket                 \nenv.ENVIRONMENT (\"staging\")                                              Environment Variable      \nenv.APP_ID (\"trace\")                                                     Environment Variable      \nenv.GITHUB_OWNER (\"Eitan-S-23\")                                          Environment Variable      \nenv.GITHUB_REPO (\"E-Track\")                                              Environment Variable      \nenv.MANIFEST_CACHE_TTL_SECONDS (\"60\")                                    Environment Variable      \nenv.DOWNLOAD_TOKEN_TTL_SECONDS (\"300\")                                   Environment Variable      \nenv.DOWNLOAD_TOKEN_KEY_VERSION (\"p41-test-1\")                            Environment Variable      \nenv.FIRMWARE_V2_CUTOVER_EPOCH (\"1792039926\")                             Environment Variable      \nenv.RATE_LIMIT_WINDOW_SECONDS (\"60\")                                     Environment Variable      \nenv.RATE_LIMIT_MAX_REQUESTS (\"60\")                                       Environment Variable      \nenv.ENABLE_DIRECT_ADMIN_API (\"false\")                                    Environment Variable      \n\nUploaded e-track-firmware-p41-test (7.17 sec)\nDeployed e-track-firmware-p41-test triggers (5.05 sec)\n  https://e-track-firmware-p41-test.tangjichentudou.workers.dev\n  schedule: 0 * * * *\nCurrent Version ID: 26389b5f-123f-402c-847d-d62d1f8c7b2c\n",
+  "stderr": "\u001b[33m▲ \u001b[43;33m[\u001b[43;30mWARNING\u001b[43;33m]\u001b[0m \u001b[1mProxy environment variables detected. We'll use your proxy for fetch requests.\u001b[0m\n\n\n",
+  "closed": true
+}

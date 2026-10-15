@@ -1,0 +1,24 @@
+{
+  "operation": "inspect-before",
+  "started": "2026-10-15T04:48:07.731Z",
+  "finished": "2026-10-15T04:48:14.625Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "args": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\wrangler\\bin\\wrangler.js",
+    "d1",
+    "execute",
+    "e-track-firmware-p41-test",
+    "--remote",
+    "--config",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\wrangler.json",
+    "--command",
+    "SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY type,name; SELECT id,name,applied_at FROM d1_migrations ORDER BY id;",
+    "--json"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "\u001b[33m▲ \u001b[43;33m[\u001b[43;30mWARNING\u001b[43;33m]\u001b[0m \u001b[1mProxy environment variables detected. We'll use your proxy for fetch requests.\u001b[0m\n\n\n",
+  "closed": true
+}

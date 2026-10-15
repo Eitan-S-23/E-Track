@@ -1,0 +1,55 @@
+{
+  "runId": 38677391835,
+  "head": "cd4f2e4d651fb7eafe8253ce854b90242cede4d9",
+  "sourceCommit": "45da975bcecd97f0248fbf1d86bdf802763405ef",
+  "scriptHostTests": 34,
+  "pipelineHostTests": 33,
+  "nativeWorkerdTests": 156,
+  "pythonPackageTests": 8,
+  "goldenVectorTests": 9,
+  "gccCompilerWarnings": 640,
+  "gccCompilerErrors": 0,
+  "vendorWarnings": 6,
+  "selected": [
+    {
+      "name": "Release tooling development checks (no cloud credentials)/14_Check workflow execution graph and configuration gates.txt",
+      "lastLines": [
+        "2026-10-15T03:40:13.7869620Z ✔ actual shell gate: rehearsal unlocked (4.561ms)",
+        "2026-10-15T03:40:13.7909584Z GATE_CASE {\"label\":\"rehearsal cannot publish\",\"exitCode\":1}",
+        "2026-10-15T03:40:13.7917396Z ✔ actual shell gate: rehearsal cannot publish (4.669894ms)",
+        "2026-10-15T03:40:13.7963320Z GATE_CASE {\"label\":\"rehearsal retry binds original attempt\",\"exitCode\":0}",
+        "2026-10-15T03:40:13.7969638Z ✔ actual shell gate: rehearsal retry binds original attempt (5.265775ms)",
+        "2026-10-15T03:40:13.8520102Z ✔ actual execute CLI rejects a checks context with exit 2 before any cloud path (55.075007ms)",
+        "2026-10-15T03:40:13.8623277Z ℹ tests 41",
+        "2026-10-15T03:40:13.8623732Z ℹ suites 0",
+        "2026-10-15T03:40:13.8624228Z ℹ pass 41",
+        "2026-10-15T03:40:13.8624673Z ℹ fail 0",
+        "2026-10-15T03:40:13.8625175Z ℹ cancelled 0",
+        "2026-10-15T03:40:13.8626108Z ℹ skipped 0",
+        "2026-10-15T03:40:13.8626571Z ℹ todo 0",
+        "2026-10-15T03:40:13.8627053Z ℹ duration_ms 494.668051",
+        ""
+      ]
+    },
+    {
+      "name": "Release tooling development checks (no cloud credentials)/15_Execute production byte preparation with isolated fixtures.txt",
+      "lastLines": [
+        "2026-10-15T03:40:20.2931299Z ✔ actual preparation CLI returns one JSON result and configuration exit 2 (851.757482ms)",
+        "2026-10-15T03:40:20.7540188Z ✔ rejects ETU outer target drift despite a byte-equal unpack result (461.823213ms)",
+        "2026-10-15T03:40:21.3966771Z ✔ rejects ETU outer base drift despite a byte-equal unpack result (642.45726ms)",
+        "2026-10-15T03:40:21.8569218Z ✔ rejects ETU outer trailer drift despite a byte-equal unpack result (459.96018ms)",
+        "2026-10-15T03:40:22.6089918Z ✔ late asset replacement cannot change the verified metadata identity (751.949447ms)",
+        "2026-10-15T03:40:22.9506032Z ✔ an explicit error overrides a simultaneous success stdout marker (341.698099ms)",
+        "2026-10-15T03:40:22.9622017Z ℹ tests 19",
+        "2026-10-15T03:40:22.9622421Z ℹ suites 0",
+        "2026-10-15T03:40:22.9622884Z ℹ pass 19",
+        "2026-10-15T03:40:22.9623232Z ℹ fail 0",
+        "2026-10-15T03:40:22.9623572Z ℹ cancelled 0",
+        "2026-10-15T03:40:22.9623843Z ℹ skipped 0",
+        "2026-10-15T03:40:22.9624119Z ℹ todo 0",
+        "2026-10-15T03:40:22.9624394Z ℹ duration_ms 9041.888963",
+        ""
+      ]
+    }
+  ]
+}

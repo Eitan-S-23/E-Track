@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-15T03:52:09.498Z",
+  "method": "POST",
+  "url": "https://api.cloudflare.com/client/v4/accounts/af6dd848e6a21f1cd26d44b1b656af7b/d1/database",
+  "status": 401,
+  "cfRay": "a4abde947bcd138a-SJC",
+  "body": {
+    "result": null,
+    "success": false,
+    "errors": [
+      {
+        "code": 10000,
+        "message": "Authentication error"
+      }
+    ],
+    "messages": []
+  }
+}

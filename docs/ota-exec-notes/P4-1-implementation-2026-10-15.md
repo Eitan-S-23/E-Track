@@ -835,3 +835,183 @@ The new environment is not created. Real upload/readback, D1 ready/idempotency,
 canonical rehearsal bindings, formal-base provenance, zero-production-effect
 acceptance and the whole card remain NOT_RUN/in progress as applicable. No
 historical failure, frozen evidence or completed P3/P4 card was rewritten.
+
+### 2026-10-15 Qualification Setup After D1 Edit Correction
+
+This checkpoint follows the user's correction of D1 Edit, under the already
+recorded authorization for a separate firmware test environment. The previous
+statement that D1 Read was sufficient applied to SELECT-only inspection, not to
+creating a database or initializing its schema. D1 Edit is required for those
+provisioning writes. The corrected token created the database successfully;
+P41-CF-SETUP-01's earlier 401 remains historical evidence, not a current blocker.
+The Cloudflare account and the GitHub push identity need not share a login name.
+No additional permission or token-value request is justified by the host failure
+described below.
+
+The tested product code remains `cd4f2e4d651fb7eafe8253ce854b90242cede4d9` and the
+CI run remains `38677391835`, with the exact checkout/tree and separate test
+counts recorded above. No product source, accepted migration, package version or
+workflow changed in this checkpoint. The newly archived originals are in
+`P4-1-cloud-qualification-2026-10-15/`: 55 files, including its inventory,
+operational scripts, failed/successful command receipts and original CI ZIPs.
+The inventory SHA-256 is
+`5346fa790bd4edda81588d9cab35eb4dcdb65440114d5d462004225e1354f463`.
+Archived operational scripts are evidence copies, not portable entry points;
+their original invocation locations and working directories are in the receipts.
+
+#### Created And Verified Test Bindings
+
+| Binding | Isolated qualification value |
+| --- | --- |
+| Worker/origin | `e-track-firmware-p41-test`, `https://e-track-firmware-p41-test.tangjichentudou.workers.dev` |
+| D1 | `e-track-firmware-p41-test`, UUID `2617e1e1-956f-42ce-a465-da56d84abf06` |
+| R2 | `e-track-firmware-p41-test-releases` |
+| KV manifest cache | `e-track-firmware-p41-test-manifest-cache`, ID `9581ef5b95154abaa7d441fd07c2f220` |
+| Repository/environment | `Eitan-S-23/E-Track`, `ENVIRONMENT=staging`, direct Admin API disabled |
+| Download configuration | `DOWNLOAD_TOKEN_KEY_VERSION=p41-test-1`, `FIRMWARE_V2_CUTOVER_EPOCH=1792039926` (`2026-10-15T04:52:06Z`) |
+| Worker secret names only | `DEPLOY_TOKEN_SHA256`, `DOWNLOAD_HMAC_KEY_CURRENT`; independent new test values, no old secret replacement |
+
+`operations/remote-preflight.json` contains successful HTTP 200 readback of the
+actual Worker bindings and `/healthz`, before the separate local proxy startup
+failure. Deployment used the already checked CI bundle with `deploy --no-bundle`;
+no local Worker build was substituted. The deploy receipt reports version
+`26389b5f-123f-402c-847d-d62d1f8c7b2c`; subsequent secret installation is recorded
+separately. Both commands exited 0. The bundle's length/hash remain 144770 bytes /
+`9ff814b0fd1731418a2250a3ae941ff1f6ce0db99233f6f1db42a1ba2c161082`.
+
+These are **qualification**, not canonical rehearsal, bindings. No GitHub
+environment/secret was populated with the account-wide provisioning token.
+The frozen rehearsal bucket name still belongs to the protected old Trace App
+service in this account; this work neither changes that contract nor repoints
+the old resources.
+
+#### Migration Invocation Failure And Recovery
+
+The initial official `d1 migrations apply --remote` failed with exit 1, HTTP 400,
+`incomplete input: SQLITE_ERROR [code: 7500]`. This was not an authorization error.
+Inspection found only D1's internal/tracking tables and no applied migrations.
+One inspection initially suppressed its JSON through `WRANGLER_LOG=info`; its
+empty-output receipt is preserved. Setting the logger to `log` restored the
+actual query output, without changing the query or claiming the empty output
+proved a schema result.
+
+Wrangler 4.105.0 sends migration SQL through `/query`; its documented `d1 execute
+--file` route uses transactional `/import`. The latter successfully executed
+the five unchanged accepted migration files, with the same migration-tracking
+inserts used by Wrangler, in one import. No trigger was removed and no business
+release/ready row was handwritten. The supported-route distinction is proven;
+the exact internal reason for the `/query` parser failure is not established.
+
+`import-accepted.json` records 105 executed queries and exit 0. Readback confirms
+migrations 0001 through 0005, zero foreign-key violations, and 19 tables, 55
+indexes and 45 triggers excluding `_cf_KV`. `verify-schema.cjs` independently
+compared all returned `sqlite_master` entries with the accepted migrations
+executed in in-memory SQLite, normalizing CRLF only; it exited 0. That local
+schema comparison is not another native workerd suite or independent acceptance.
+The import file is 40786 bytes, SHA-256
+`c0ccf1c47f6bcedb96d6a1ea804787945cf1f896855ed89623eaf61079aba497`.
+
+#### Actual API Feedback And Remaining Uploader Block
+
+The operational commands run from the exclusive worktree were:
+
+    node .cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler-operation.cjs import-accepted
+    node .cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler-operation.cjs inspect-after
+    node .cache/cf-firmware-setup-20261015/d1-edit-r2/verify-schema.cjs
+    node .cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler-operation.cjs deploy
+    node .cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler-operation.cjs secrets
+    node .cache/run.cjs p41-cf-qualification-preflight . node --use-env-proxy .cache/cf-firmware-setup-20261015/d1-edit-r2/qualify-remote.mjs preflight
+    node .cache/run.cjs p41-cf-qualification-api-negative . node --use-env-proxy .cache/cf-firmware-setup-20261015/d1-edit-r2/qualify-remote.mjs api-negative
+    node .cache/run.cjs p41-cf-protected-after . node --use-env-proxy .cache/cf-firmware-setup-20261015/d1-edit-r2/qualify-remote.mjs protected-after
+
+The storage probe called the real production `withFirmwareBucket` module with
+only the new D1/R2 bindings. Its Windows workerd proxy crashed at startup with
+`0xc0000005`, consistent with the previously documented native Windows failure.
+The failed attempt exited 1 after the owned Node/child processes were closed.
+No R2 upload was reached. Do not repeat this input unchanged, install system
+runtimes outside the authorized boundary, replace the uploader with a success
+stub, or export the provisioning token into a checks-only CI job.
+
+The independent executable API portion used the actual metadata builder and
+register client against the deployed new Worker. Its four negative cases passed
+with overall exit 0; each produced exactly one HTTP response, not a retry loop:
+
+| Negative input | Actual result |
+| --- | --- |
+| Claimed readback but R2 assets absent | 503 `BACKEND_UNAVAILABLE`; actual register client rejects with exit-code property 1 |
+| Invalid Bearer credential | 401 `TOKEN_INVALID`; actual register client rejects with exit-code property 1 |
+| Unknown schema field, sent to the real API | 400 `INVALID_PARAMETER` |
+| `isFormalRelease=false`, sent to the real API | 403 `FORMAL_RELEASE_REQUIRED` |
+
+The deliberately false readback claims exist only as negative request inputs;
+saved qualification metadata retains `r2Verified=false` for every asset. D1
+SELECTs before and after confirm zero releases, assets, channels, registration
+audits and ready rows. The shared-client exit-code properties above are not
+misreported as separately executed CLI-process exit codes.
+
+The fixture is the byte-tested CI case `firmware-release-tests/case-R5kVz9`, not
+an authoritative formal base or installable firmware. Its synthetic provenance
+(`commitSha` of repeated `1`, `runId=9001`) is explicitly retained and labelled;
+the metadata builder changes only the qualification repository/notes as recorded.
+
+| Qualification input | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Final App fixture | 8192 | `d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5` |
+| Full fixture | 202 | `cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799` |
+| Patch fixture | 208 | `8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67` |
+| Recovery fixture | 8200 | `0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c` |
+| Qualification metadata, unverified | 2029 | `fbbd9b4756e8858e45a3ea5bf8c93d7c26b23a50740035a4f18ff5d0c5427ed7` |
+
+The protected-state readback exited 0: the old Trace Worker's previously
+observable bindings and compatibility settings are unchanged; its four applied
+migrations, 53 App releases, 100 App assets and two populated App channels match
+the earlier snapshot. Those counts/bindings are not a complete production R2,
+channel-identity or GitHub Release zero-side-effect acceptance claim.
+
+#### Follow-Up Ownership And Audit
+
+- P41-CF-RUNTIME-01: implementation/configuration owner must qualify the existing
+  production storage module in a functioning, isolated Linux execution context,
+  with a credential boundary reviewed before any credential is supplied there.
+  Existing Linux CI proves native runtime support, not real remote access.
+  The user's D1 permission is no longer the blocker. No broad token-management
+  permission, account login or repeated token paste is requested.
+- Formal rehearsal still needs the authoritative previous finalized App,
+  canonical isolated staging bindings/credentials, the protected workflow
+  environment and before/after production observations. Root/configuration owner
+  must resolve the already-used frozen bucket name without touching the old
+  service or silently amending the contract; the OTA reviewer owns independent
+  rehearsal adjudication. This does not start P4-4, P3-5 or P4-3.
+- Real successful three-asset upload/full readback, D1 ready/idempotency,
+  canonical rehearsal and whole-card independent acceptance remain NOT_RUN.
+  The failed remote-proxy attempt remains FAILED, not relabelled NOT_RUN or PASS.
+  Production, tags/Releases, main merge and `OTA_BOOT_CHAIN_READY` remain untouched.
+- `operations/wrapup-audit.json` records project-contained outputs, 150 scanned
+  setup files without supplied/generated credential values outside the private
+  input, closed owned PIDs, and the unchanged shared-root index hash. The five
+  disposable `.wrangler` files created in the worktree by the failed proxy were
+  hash-inventoried and removed after process closure. An accidental zero-byte
+  `[k` file from cmd quoting was also removed with `apply_patch`; no external
+  path was involved. No new Windows crash dump was found and no PowerShell or
+  system installation was invoked. Historical P41-AUDIT-01 remains disclosed.
+- The corrected provisioning token and generated test credentials remain only
+  in the ignored, current-user-only input directory while the authorized
+  qualification is open. They were not printed, archived, committed or copied
+  into CI. Retaining this input prevents another unnecessary user copy/paste;
+  remove it when its remaining bounded use is actually complete.
+
+No new shared product consumer changed in this checkpoint. The existing affected
+caller list and out-of-scope legacy workflow handoff above remain authoritative.
+This cloud setup and its self-tests do not upgrade the earlier independent
+bundle-code review into whole-card acceptance.
+
+Record validation re-read all 54 inventory entries by exact length and SHA-256.
+The affected readiness test
+`PostP26SpecGovernanceTests.test_readiness_matrix_mirrors_board_order_and_derives_dispatch`
+ran through `.cache/run.cjs p41-cf-board-readiness`, 1/1 passed, exit 0. Node syntax
+checks passed for both operational entry points. Plain staged `git diff --check`
+returns 2 because the byte-preserved SQL original contains CRLF; its original
+diagnostic is `.cache/logs/p41-cf-raw-whitespace.stdout.txt`. The same check with
+`core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol` returns 0.
+This recognizes the preserved line ending while retaining the actual whitespace
+checks; neither the SQL evidence nor Git's persistent configuration was changed.

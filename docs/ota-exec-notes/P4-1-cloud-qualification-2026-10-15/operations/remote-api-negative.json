@@ -1,0 +1,173 @@
+{
+  "purpose": "ISOLATED_SYNTHETIC_QUALIFICATION_NOT_REHEARSAL",
+  "phase": "api-negative",
+  "started": "2026-10-15T05:07:53.979Z",
+  "worker": "e-track-firmware-p41-test",
+  "databaseId": "2617e1e1-956f-42ce-a465-da56d84abf06",
+  "bucket": "e-track-firmware-p41-test-releases",
+  "observations": [
+    {
+      "action": "D1_NEGATIVES_BEFORE",
+      "sql": "SELECT (SELECT count(*) FROM firmware_releases) AS releases, (SELECT count(*) FROM firmware_release_assets) AS assets, (SELECT count(*) FROM firmware_channels) AS channels, (SELECT count(*) FROM audit_logs WHERE action='register_firmware_release') AS register_audits, (SELECT count(*) FROM firmware_releases WHERE state='ready') AS ready",
+      "status": 200,
+      "cfRay": "a4ac4d907f9ad51f-NRT",
+      "body": {
+        "result": [
+          {
+            "results": [
+              {
+                "releases": 0,
+                "assets": 0,
+                "channels": 0,
+                "register_audits": 0,
+                "ready": 0
+              }
+            ],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "LAX",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 1.1725
+              },
+              "duration": 1.1725,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 368640,
+              "rows_read": 2,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          }
+        ],
+        "errors": [],
+        "messages": [],
+        "success": true
+      }
+    },
+    {
+      "action": "REAL_REGISTER_HTTP",
+      "status": 503,
+      "requestId": "f8a127b8-5cb7-4ad6-9b25-520b0232d86f",
+      "body": {
+        "errorCode": "BACKEND_UNAVAILABLE",
+        "message": "Update backend unavailable",
+        "requestId": "f8a127b8-5cb7-4ad6-9b25-520b0232d86f"
+      }
+    },
+    {
+      "action": "REAL_REGISTER_HTTP",
+      "status": 401,
+      "requestId": "1f9fdf4a-b6f0-4625-a0eb-57bae8ec3ff7",
+      "body": {
+        "errorCode": "TOKEN_INVALID",
+        "message": "Invalid CI token",
+        "requestId": "1f9fdf4a-b6f0-4625-a0eb-57bae8ec3ff7"
+      }
+    },
+    {
+      "action": "REAL_REGISTER_HTTP",
+      "status": 400,
+      "requestId": "fdf76cca-3acc-40f6-8f7f-7b84582ceb1d",
+      "body": {
+        "errorCode": "INVALID_PARAMETER",
+        "message": "Unknown body field: unexpectedQualificationField",
+        "requestId": "fdf76cca-3acc-40f6-8f7f-7b84582ceb1d"
+      }
+    },
+    {
+      "action": "REAL_REGISTER_HTTP",
+      "status": 403,
+      "requestId": "db16dfe9-b7d4-49c5-88a4-1512203da7a2",
+      "body": {
+        "errorCode": "FORMAL_RELEASE_REQUIRED",
+        "message": "Formal firmware release required",
+        "requestId": "db16dfe9-b7d4-49c5-88a4-1512203da7a2"
+      }
+    },
+    {
+      "action": "D1_NEGATIVES_AFTER",
+      "sql": "SELECT (SELECT count(*) FROM firmware_releases) AS releases, (SELECT count(*) FROM firmware_release_assets) AS assets, (SELECT count(*) FROM firmware_channels) AS channels, (SELECT count(*) FROM audit_logs WHERE action='register_firmware_release') AS register_audits, (SELECT count(*) FROM firmware_releases WHERE state='ready') AS ready",
+      "status": 200,
+      "cfRay": "a4ac4dc60f7bd779-NRT",
+      "body": {
+        "result": [
+          {
+            "results": [
+              {
+                "releases": 0,
+                "assets": 0,
+                "channels": 0,
+                "register_audits": 0,
+                "ready": 0
+              }
+            ],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "LAX",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 0.4293
+              },
+              "duration": 0.4293,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 368640,
+              "rows_read": 2,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          }
+        ],
+        "errors": [],
+        "messages": [],
+        "success": true
+      }
+    }
+  ],
+  "ok": true,
+  "fixtureMetadataSha256": "fbbd9b4756e8858e45a3ea5bf8c93d7c26b23a50740035a4f18ff5d0c5427ed7",
+  "fixtureProvenance": {
+    "ciRun": "38677391835",
+    "archiveSha256": "44fe3d9f8923f8d9f570be3835c8893d458b0572e842cf1b19aea3f7ca9abb90",
+    "case": "firmware-release-tests/case-R5kVz9/prepared",
+    "syntheticCommit": "1111111111111111111111111111111111111111",
+    "syntheticRunId": "9001"
+  },
+  "noD1BusinessEffects": true,
+  "cases": [
+    {
+      "label": "MISSING_R2_ASSETS",
+      "errorCode": "BACKEND_UNAVAILABLE",
+      "httpStatus": 503,
+      "requests": 1,
+      "expectedExitCode": 1
+    },
+    {
+      "label": "INVALID_BEARER",
+      "errorCode": "TOKEN_INVALID",
+      "httpStatus": 401,
+      "requests": 1,
+      "expectedExitCode": 1
+    },
+    {
+      "label": "UNKNOWN_SCHEMA_FIELD",
+      "errorCode": "INVALID_PARAMETER",
+      "httpStatus": 400,
+      "requests": 1
+    },
+    {
+      "label": "NONFORMAL_INPUT",
+      "errorCode": "FORMAL_RELEASE_REQUIRED",
+      "httpStatus": 403,
+      "requests": 1
+    }
+  ],
+  "finished": "2026-10-15T05:08:04.221Z"
+}

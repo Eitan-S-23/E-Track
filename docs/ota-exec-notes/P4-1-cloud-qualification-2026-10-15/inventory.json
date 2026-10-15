@@ -1,0 +1,330 @@
+{
+  "purpose": "Isolated synthetic qualification, not formal rehearsal or independent acceptance",
+  "testedCodeCommit": "cd4f2e4d651fb7eafe8253ce854b90242cede4d9",
+  "files": [
+    {
+      "path": "operations/resources-created.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/resources-created.json",
+      "sizeBytes": 538,
+      "sha256": "dd952fd15aeac287f1e8c91997396e57dfcf7ab7605e715026396251e6e7703a"
+    },
+    {
+      "path": "operations/d1-create-request.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/d1-create-request.json",
+      "sizeBytes": 219,
+      "sha256": "88fc88bfaed0363b4fe0a4713d3c71295acaca2fa55e88cee015fab53028297f"
+    },
+    {
+      "path": "operations/d1-create-response.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/d1-create-response.json",
+      "sizeBytes": 539,
+      "sha256": "4a6d56631d26d475a385d9c0a74acb7d21c6c79a9f01be8f79d85b1c33a933e6"
+    },
+    {
+      "path": "operations/kv-create-request.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/kv-create-request.json",
+      "sizeBytes": 245,
+      "sha256": "eb77ec1b0327897112e48adac6f24b91e057557495efd40f67607fed147351f3"
+    },
+    {
+      "path": "operations/kv-create-response.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/kv-create-response.json",
+      "sizeBytes": 332,
+      "sha256": "ff97fc12a3296bcb9bf323ec1126edfd8526d4185702629bf2e95c6b13f99e15"
+    },
+    {
+      "path": "operations/r2-create-request.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/r2-create-request.json",
+      "sizeBytes": 227,
+      "sha256": "21a045a1ae8df49f3da2ed2567d365b5de8c1003362268b9ced28c7329035609"
+    },
+    {
+      "path": "operations/r2-create-response.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/r2-create-response.json",
+      "sizeBytes": 385,
+      "sha256": "c821ade39c0fed0a000df1558394d9e37338bcaba7ef0d1847f9cb4a8728a470"
+    },
+    {
+      "path": "operations/migrate.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/migrate.json",
+      "sizeBytes": 1458,
+      "sha256": "38b194db4af8be9a1faec8f142a9752324ecc794e49fad4403bee9e093cf2165"
+    },
+    {
+      "path": "operations/inspect-before.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/inspect-before.json",
+      "sizeBytes": 1013,
+      "sha256": "1d4ebfecca43056a03ecb09ca6b92009838046c78522013c5f0fda06b446ede3"
+    },
+    {
+      "path": "operations/inspect-before-r2.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/inspect-before-r2.json",
+      "sizeBytes": 3002,
+      "sha256": "54c065d79c3a2abcf0e638335eb559ac52f6181408896c6e92a7e936c2ba5cf2"
+    },
+    {
+      "path": "operations/accepted-migrations.sql",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/accepted-migrations.sql",
+      "sizeBytes": 40786,
+      "sha256": "c0ccf1c47f6bcedb96d6a1ea804787945cf1f896855ed89623eaf61079aba497"
+    },
+    {
+      "path": "operations/import-accepted.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/import-accepted.json",
+      "sizeBytes": 2989,
+      "sha256": "de23b2f5b82f18ecc2ba6689b0cb0b7e6c8ea6a19734932206953d787a71430c"
+    },
+    {
+      "path": "operations/inspect-after.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/inspect-after.json",
+      "sizeBytes": 62091,
+      "sha256": "780c5dea83c4542b4de0e1e7c7034d10fe4ab27bcc5556819863d4f5f74c5e3f"
+    },
+    {
+      "path": "operations/schema-comparison.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/schema-comparison.json",
+      "sizeBytes": 898,
+      "sha256": "52175f27af7d1756d37fd7855a947ea177da6534cddee05000c5af08d3817968"
+    },
+    {
+      "path": "operations/deploy.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/deploy.json",
+      "sizeBytes": 3722,
+      "sha256": "024820bbcb8c0ef195335f27caf224c32b26ce06c6da1e05167b5d50ad07016e"
+    },
+    {
+      "path": "operations/secrets.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/secrets.json",
+      "sizeBytes": 1269,
+      "sha256": "da436178f40f5df9b320df96c3b754bd99cb01310425cd4ff54365c068903935"
+    },
+    {
+      "path": "operations/remote-preflight.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/remote-preflight.json",
+      "sizeBytes": 4781,
+      "sha256": "422124456842170e7f6303c17436a1b08b70d4fad3e24e3866551c119875065e"
+    },
+    {
+      "path": "operations/remote-api-negative.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/remote-api-negative.json",
+      "sizeBytes": 5479,
+      "sha256": "da5e9768c980b59c82086afa209042a19f1b900b2bb827a2560edba4a5afcac6"
+    },
+    {
+      "path": "operations/remote-protected-after.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/remote-protected-after.json",
+      "sizeBytes": 7374,
+      "sha256": "8ca04c084d99759e064908a9d9f06cfbfd5161a8f650e4fb734ff6916858cba8"
+    },
+    {
+      "path": "operations/qualification-metadata.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/qualification-metadata.json",
+      "sizeBytes": 2029,
+      "sha256": "fbbd9b4756e8858e45a3ea5bf8c93d7c26b23a50740035a4f18ff5d0c5427ed7"
+    },
+    {
+      "path": "operations/wrapup-audit.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/wrapup-audit.json",
+      "sizeBytes": 3388,
+      "sha256": "da3a5a4f0795e10aa15b82094f6c5f1d1fbce3e174c37dc21f63a878fd8d7680"
+    },
+    {
+      "path": "operations/wrangler.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler.json",
+      "sizeBytes": 1414,
+      "sha256": "23e88250ff52aa907111b9890f5897c0c9d83655b5955e18ca4f926d2411762a"
+    },
+    {
+      "path": "operations/wrangler-operation.cjs",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler-operation.cjs",
+      "sizeBytes": 7681,
+      "sha256": "17df2f0a508f901ded0f534e10f21188f1a48406abeadfe931d1110d25663245"
+    },
+    {
+      "path": "operations/verify-schema.cjs",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/verify-schema.cjs",
+      "sizeBytes": 2390,
+      "sha256": "71313bef7af7e5828160ee5fafcd1734427e0eafabe0d5e7a19bd6ed7e13274a"
+    },
+    {
+      "path": "operations/qualify-remote.mjs",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/qualify-remote.mjs",
+      "sizeBytes": 15100,
+      "sha256": "c99cf80fe74acaca5ed1dbabe0b07fc48970b2e478733940621e4be2463b31e4"
+    },
+    {
+      "path": "operations/archive-current.mjs",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/archive-current.mjs",
+      "sizeBytes": 8994,
+      "sha256": "774a2fd424d67b572b1c16aac965f34fc3892e08805366416a4962c67dd13153"
+    },
+    {
+      "path": "earlier-failure/resource-d1-request.json",
+      "source": ".cache/cf-firmware-setup-20261015/resource-d1-request.json",
+      "sizeBytes": 272,
+      "sha256": "d0112ecdc831a5fe006e9e795627727fa8e609ba7dcd8f8f83a6b4e4fe4c43db"
+    },
+    {
+      "path": "earlier-failure/resource-d1-created.json",
+      "source": ".cache/cf-firmware-setup-20261015/resource-d1-created.json",
+      "sizeBytes": 396,
+      "sha256": "1dea9c407c1e020770c14ce8ffb263fdd7c62568bea6131c79a770886c659cf0"
+    },
+    {
+      "path": "protected-before/d1-inventory.json",
+      "source": ".cache/cf-readonly-20261015-r1/d1-inventory.json",
+      "sizeBytes": 4388,
+      "sha256": "bafda5f86eef65ff9ec5fd0e69650b2d7e5f0d6c2ef4a16f67e4582888b7090e"
+    },
+    {
+      "path": "protected-before/bindings.json",
+      "source": ".cache/cf-readonly-20261015-r1/bindings.json",
+      "sizeBytes": 3024,
+      "sha256": "b031655d48ceda955b5b1379e09689514d6ae4458014f09de9fcc50734d4cdf1"
+    },
+    {
+      "path": "ci/run.json",
+      "source": ".cache/cf-firmware-setup-20261015/ci/run.json",
+      "sizeBytes": 12535,
+      "sha256": "3bcef6d4053d278caa64380c1a14186c95d8564da382199d4b0ab7b1376acf67"
+    },
+    {
+      "path": "ci/jobs.json",
+      "source": ".cache/cf-firmware-setup-20261015/ci/jobs.json",
+      "sizeBytes": 11731,
+      "sha256": "665881e349dd61f0f2caaf7aa556ebcbfd7362d235a77b0a00d587d4fb4cf06e"
+    },
+    {
+      "path": "ci/artifacts.json",
+      "source": ".cache/cf-firmware-setup-20261015/ci/artifacts.json",
+      "sizeBytes": 3698,
+      "sha256": "89ccf2c43949e4fca774def894a311889c0166ec43561594a52c050d54fcdcc5"
+    },
+    {
+      "path": "ci/logs.zip",
+      "source": ".cache/cf-firmware-setup-20261015/ci/logs.zip",
+      "sizeBytes": 283683,
+      "sha256": "96606909c7a82010f0f07d08ac115d64031775f3bd0cb8bd90f4771a850e9d28"
+    },
+    {
+      "path": "ci/worker-bundle.zip",
+      "source": ".cache/cf-firmware-setup-20261015/ci/worker-bundle.zip",
+      "sizeBytes": 98865,
+      "sha256": "259fe353c1b6dfed1690a44d804214de84424bb9811cf0a6dba801b33e113373"
+    },
+    {
+      "path": "ci/development-fixtures.zip",
+      "source": ".cache/cf-firmware-setup-20261015/ci/development-fixtures.zip",
+      "sizeBytes": 256089,
+      "sha256": "44fe3d9f8923f8d9f570be3835c8893d458b0572e842cf1b19aea3f7ca9abb90"
+    },
+    {
+      "path": "ci/selected-step-logs.json",
+      "source": ".cache/cf-firmware-setup-20261015/ci/selected-step-logs.json",
+      "sizeBytes": 200472,
+      "sha256": "f386bc66449a2d94849d3247ceedf8c9cc5417120f00fc22e135cc5463e27d6d"
+    },
+    {
+      "path": "ci/verification-summary.json",
+      "source": ".cache/cf-firmware-setup-20261015/ci/verification-summary.json",
+      "sizeBytes": 3059,
+      "sha256": "2254ccb85954cda1cb18b87520b18026fc09815c8a0689aab2d3e7b0ab0d65b5"
+    },
+    {
+      "path": "ci/source-tree-binding.json",
+      "source": ".cache/cf-firmware-setup-20261015/ci/source-tree-binding.json",
+      "sizeBytes": 382,
+      "sha256": "188a2aa5fd5de6cf4fb1ab1b5a2f4c1ad449695787e5790f548202b53a9b1be5"
+    },
+    {
+      "path": "ci/independent-review.json",
+      "source": ".cache/cf-firmware-setup-20261015/ci/independent-review.json",
+      "sizeBytes": 845,
+      "sha256": "57ff5e3f1c7e4f3559189fde51770bc84102d37f3a0af6d3cdc5d94489465dbc"
+    },
+    {
+      "path": "commands/p41-qualification-extract.json",
+      "source": ".cache/logs/p41-qualification-extract.json",
+      "sizeBytes": 1966,
+      "sha256": "c06f68ed2c0780da3b3150a984e04307afa54d707edf44395b9b1665f16b2289"
+    },
+    {
+      "path": "commands/p41-qualification-extract.stdout.txt",
+      "source": ".cache/logs/p41-qualification-extract.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-qualification-extract.stderr.txt",
+      "source": ".cache/logs/p41-qualification-extract.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-cf-qualification-preflight.json",
+      "source": ".cache/logs/p41-cf-qualification-preflight.json",
+      "sizeBytes": 1893,
+      "sha256": "9ccc046cb71459dde04245c8026c5ac496c840432909172c2c83176743336e83"
+    },
+    {
+      "path": "commands/p41-cf-qualification-preflight.stdout.txt",
+      "source": ".cache/logs/p41-cf-qualification-preflight.stdout.txt",
+      "sizeBytes": 723,
+      "sha256": "e8233c4f8766dd544577f341403bc7977b446a1c3c0944fc9e8921936d58fc67"
+    },
+    {
+      "path": "commands/p41-cf-qualification-preflight.stderr.txt",
+      "source": ".cache/logs/p41-cf-qualification-preflight.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-cf-qualification-api-negative.json",
+      "source": ".cache/logs/p41-cf-qualification-api-negative.json",
+      "sizeBytes": 1902,
+      "sha256": "fb4a14b08076bdb2b465b18600f1870f814b65967b56d3a2118902d5e1d95239"
+    },
+    {
+      "path": "commands/p41-cf-qualification-api-negative.stdout.txt",
+      "source": ".cache/logs/p41-cf-qualification-api-negative.stdout.txt",
+      "sizeBytes": 174,
+      "sha256": "65d7760c780cdd19e82208c7f8055e85403fbf75f39c4031cee7e9c472a257cd"
+    },
+    {
+      "path": "commands/p41-cf-qualification-api-negative.stderr.txt",
+      "source": ".cache/logs/p41-cf-qualification-api-negative.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-cf-protected-after.json",
+      "source": ".cache/logs/p41-cf-protected-after.json",
+      "sizeBytes": 1883,
+      "sha256": "cdf7ca14471ec7b8db7a9d3e18db859017c073ab46c84d10b4b314b67865994e"
+    },
+    {
+      "path": "commands/p41-cf-protected-after.stdout.txt",
+      "source": ".cache/logs/p41-cf-protected-after.stdout.txt",
+      "sizeBytes": 180,
+      "sha256": "7625a5bf70461a804782801dd45a9512f682d4795532c04caa08f53ecce38964"
+    },
+    {
+      "path": "commands/p41-cf-protected-after.stderr.txt",
+      "source": ".cache/logs/p41-cf-protected-after.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/run.cjs",
+      "source": ".cache/run.cjs",
+      "sizeBytes": 3364,
+      "sha256": "ed8b4b6fbc1e63e13dc91d268f5f75eef18413f3cc80f204c0d6ee4a725609e3"
+    },
+    {
+      "path": ".gitattributes",
+      "source": "docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/.gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    }
+  ]
+}

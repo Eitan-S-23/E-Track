@@ -1,0 +1,115 @@
+[
+  {
+    "started": "2026-10-15T02:50:42.357Z",
+    "finished": "2026-10-15T02:50:43.532Z",
+    "method": "GET",
+    "route": "accounts/af6dd848e6a21f1cd26d44b1b656af7b/workers/scripts/trace-update-service-staging/settings",
+    "status": 200,
+    "cfRay": "a4ab84956e678ac8-SJC",
+    "success": true,
+    "errors": [],
+    "result": {
+      "compatibility_date": "2026-06-28",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "type": "plain_text",
+          "text": "trace"
+        },
+        {
+          "name": "DB",
+          "type": "d1",
+          "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+          "database_id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "type": "plain_text",
+          "text": "false"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "type": "plain_text",
+          "text": "staging"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "type": "plain_text",
+          "text": "Eitan-S-23"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "type": "plain_text",
+          "text": "Trace"
+        },
+        {
+          "name": "MANIFEST_CACHE",
+          "type": "kv_namespace",
+          "namespace_id": "fe3b08f2e0774072a44bdf140c44174a"
+        },
+        {
+          "name": "MANIFEST_CACHE_TTL_SECONDS",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMITER",
+          "type": "durable_object_namespace",
+          "namespace_id": "cced0ccc57664e36b007d64d88de4bd5",
+          "class_name": "RateLimiter"
+        },
+        {
+          "name": "RATE_LIMIT_MAX_REQUESTS",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMIT_WINDOW_SECONDS",
+          "type": "plain_text"
+        },
+        {
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket",
+          "bucket_name": "trace-update-staging-releases"
+        }
+      ]
+    }
+  },
+  {
+    "started": "2026-10-15T02:50:43.533Z",
+    "finished": "2026-10-15T02:50:43.945Z",
+    "method": "GET",
+    "route": "accounts/af6dd848e6a21f1cd26d44b1b656af7b/workers/scripts/trace-update-service-staging/subdomain",
+    "status": 200,
+    "cfRay": "a4ab84989f4c8ac8-SJC",
+    "success": true,
+    "errors": [],
+    "result": {
+      "enabled": true,
+      "previews_enabled": true
+    }
+  },
+  {
+    "started": "2026-10-15T02:50:43.945Z",
+    "url": "https://trace-update-service-staging.tangjichentudou.workers.dev/healthz",
+    "method": "GET",
+    "error": "fetch failed"
+  }
+]

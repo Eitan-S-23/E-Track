@@ -1,0 +1,1 @@
+{"phase":"protected-after","ok":true,"resultFile":"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\remote-protected-after.json"}

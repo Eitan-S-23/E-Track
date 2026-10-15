@@ -1,0 +1,24 @@
+{
+  "operation": "inspect-before-r2",
+  "started": "2026-10-15T04:49:09.316Z",
+  "finished": "2026-10-15T04:49:14.341Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "args": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\wrangler\\bin\\wrangler.js",
+    "d1",
+    "execute",
+    "e-track-firmware-p41-test",
+    "--remote",
+    "--config",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\wrangler.json",
+    "--command",
+    "SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY type,name; SELECT id,name,applied_at FROM d1_migrations ORDER BY id;",
+    "--json"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "[\n  {\n    \"results\": [\n      {\n        \"type\": \"index\",\n        \"name\": \"sqlite_autoindex_d1_migrations_1\",\n        \"tbl_name\": \"d1_migrations\",\n        \"sql\": null\n      },\n      {\n        \"type\": \"table\",\n        \"name\": \"_cf_KV\",\n        \"tbl_name\": \"_cf_KV\",\n        \"sql\": \"CREATE TABLE _cf_KV (\\n        key TEXT PRIMARY KEY,\\n        value BLOB\\n      ) WITHOUT ROWID\"\n      },\n      {\n        \"type\": \"table\",\n        \"name\": \"d1_migrations\",\n        \"tbl_name\": \"d1_migrations\",\n        \"sql\": \"CREATE TABLE \\\"d1_migrations\\\"(\\n\\t\\tid         INTEGER PRIMARY KEY AUTOINCREMENT,\\n\\t\\tname       TEXT UNIQUE,\\n\\t\\tapplied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL\\n)\"\n      },\n      {\n        \"type\": \"table\",\n        \"name\": \"sqlite_sequence\",\n        \"tbl_name\": \"sqlite_sequence\",\n        \"sql\": \"CREATE TABLE sqlite_sequence(name,seq)\"\n      }\n    ],\n    \"success\": true,\n    \"meta\": {\n      \"served_by\": \"v3-prod\",\n      \"served_by_region\": \"WNAM\",\n      \"served_by_colo\": \"LAX\",\n      \"served_by_primary\": true,\n      \"timings\": {\n        \"sql_duration_ms\": 0.2664\n      },\n      \"duration\": 0.2664,\n      \"changes\": 0,\n      \"last_row_id\": 0,\n      \"changed_db\": false,\n      \"size_after\": 24576,\n      \"rows_read\": 8,\n      \"rows_written\": 0,\n      \"total_attempts\": 1\n    }\n  },\n  {\n    \"results\": [],\n    \"success\": true,\n    \"meta\": {\n      \"served_by\": \"v3-prod\",\n      \"served_by_region\": \"WNAM\",\n      \"served_by_colo\": \"LAX\",\n      \"served_by_primary\": true,\n      \"timings\": {\n        \"sql_duration_ms\": 0.3745\n      },\n      \"duration\": 0.3745,\n      \"changes\": 0,\n      \"last_row_id\": 0,\n      \"changed_db\": false,\n      \"size_after\": 24576,\n      \"rows_read\": 1,\n      \"rows_written\": 0,\n      \"total_attempts\": 1\n    }\n  }\n]\n",
+  "stderr": "\u001b[33m▲ \u001b[43;33m[\u001b[43;30mWARNING\u001b[43;33m]\u001b[0m \u001b[1mProxy environment variables detected. We'll use your proxy for fetch requests.\u001b[0m\n\n\n",
+  "closed": true
+}

@@ -1,0 +1,22 @@
+{
+  "operation": "migrate",
+  "started": "2026-10-15T04:33:51.998Z",
+  "finished": "2026-10-15T04:33:58.755Z",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "args": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\wrangler\\bin\\wrangler.js",
+    "d1",
+    "migrations",
+    "apply",
+    "e-track-firmware-p41-test",
+    "--remote",
+    "--config",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\wrangler.json"
+  ],
+  "exitCode": 1,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "\u001b[33m▲ \u001b[43;33m[\u001b[43;30mWARNING\u001b[43;33m]\u001b[0m \u001b[1mProxy environment variables detected. We'll use your proxy for fetch requests.\u001b[0m\n\n\n\u001b[31mX \u001b[41;31m[\u001b[41;97mERROR\u001b[41;31m]\u001b[0m \u001b[1mA request to the Cloudflare API (/accounts/af6dd848e6a21f1cd26d44b1b656af7b/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query) failed.\u001b[0m\n\n  incomplete input: SQLITE_ERROR [code: 7500]\n  \n  If you think this is a bug, please open an issue at: \u001b[4mhttps://github.com/cloudflare/workers-sdk/issues/new/choose\u001b[0m\n\n\n🪵  Logs were written to \"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2\\runtime\\logs\\wrangler-2026-10-15_04-33-53_363.log\"\n",
+  "closed": true
+}
