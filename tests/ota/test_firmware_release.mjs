@@ -53,6 +53,17 @@ async function input() {
     outputDir: path.join(dir, "prepared"), aesKey, bsdiff, python };
 }
 
+function bootstrapBase(options) {
+  const { releaseTag: _, ...base } = options.base;
+  const archiveCommit = "3".repeat(40), archivePath = "docs/ota-exec-notes/P4-1-bootstrap-baseline-fixture";
+  return { ...base, provenanceKind: "inaugural-bootstrap-v1", isFormalRelease: false,
+    buildTimestamp: 1786320000, archiveCommit, archivePath,
+    sourceUrl: `https://raw.githubusercontent.com/${repository}/${archiveCommit}/${archivePath}/app-final.bin`,
+    sourceRunId: "12345", sourceRunAttempt: "1", sourceArtifactId: "67890", sourceArtifactSha256: "a".repeat(64),
+    provenanceSha256: "b".repeat(64), targetVersionName: options.release.versionName,
+    targetCommitSha: options.release.commitSha };
+}
+
 test("real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundtrip", async () => {
   const options = await input();
   const result = await prepareFirmwareRelease(options);
@@ -71,6 +82,41 @@ test("real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundt
   assert.equal(digest(metadataBytes(readyProjection(result.metadata))), result.summary.expectedReadyMetadataSha256);
   process.stdout.write(`BYTE_FIXTURE ${JSON.stringify({ path: options.outputDir, assets: result.metadata.assets,
     finalImage: result.summary.finalImage, metadataSha256: result.summary.preparedMetadataSha256 })}\n`);
+});
+
+test("explicit bootstrap provenance still generates and byte-applies a real patch", async () => {
+  const options = await input(); options.base = bootstrapBase(options);
+  const result = await prepareFirmwareRelease(options);
+  assert.deepEqual(result.metadata.assets.map(a => a.kind), ["full", "patch", "recovery"]);
+  assert.equal(result.summary.patchByteEqual, true);
+  assert.equal(result.summary.base.isFormalRelease, false);
+  assert.equal(result.summary.base.provenanceKind, "inaugural-bootstrap-v1");
+  assert.equal(result.metadata.assets[1].baseImageSha256, options.base.imageSha256);
+  assert.equal(result.metadata.runId, options.release.runId);
+  assert.notEqual(result.metadata.runId, options.base.sourceRunId);
+  assert.deepEqual(await readFile(path.join(options.outputDir, "work/patch-candidate.bin")),
+    await readFile(path.join(options.outputDir, "app-final.bin")));
+});
+
+test("bootstrap base timestamp and placeholder sources fail before target preparation", async () => {
+  const options = await input(); options.base = bootstrapBase(options);
+  options.base.buildTimestamp++;
+  await assert.rejects(prepareFirmwareRelease(options), /base build timestamp/);
+  assert.equal(existsSync(path.join(options.outputDir, "app-final.bin")), false);
+  const other = await input(); other.base = bootstrapBase(other);
+  other.baseFile = path.join(other.dir, "old-placeholder.bin");
+  other.base.imageSha256 = other.base.sourceSha256 = digest(await readFile(other.baseFile));
+  await assert.rejects(prepareFirmwareRelease(other), /base-verify/);
+  assert.equal(existsSync(path.join(other.outputDir, "app-final.bin")), false);
+});
+
+test("bootstrap target binding and version monotonicity fail before output creation", async () => {
+  const options = await input(); options.base = bootstrapBase(options);
+  for (const change of [{ targetCommitSha: "f".repeat(40) }, { targetVersionName: "2.8.2" },
+    { versionCode: 20801 }, { versionName: "2.8.1", versionCode: 20801 }]) {
+    await assert.rejects(prepareFirmwareRelease({ ...options, base: { ...options.base, ...change } }));
+    assert.equal(existsSync(options.outputDir), false);
+  }
 });
 
 test("approved-envelope reproduction is byte-identical, including canonical provenance", async () => {

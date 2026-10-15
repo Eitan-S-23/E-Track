@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { SELF } from "cloudflare:test";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -9,6 +10,7 @@ import { digest, metadataBytes, readyProjection } from "../../app/bluetooth_flut
 import { firmwareGitHub } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-github-release.mjs";
 import { publishPreparedRelease, releaseConfig, verifyPromotion, verifyMonotonic } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
 import { registerFirmware } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs";
+import { canonicalJson } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
 
 const root = projectRoot();
 let run = 9001;
@@ -26,7 +28,7 @@ async function setup(omitKind?: string) {
     INPUT_PUBLISH: "false", INPUT_REHEARSAL: "true", OTA_BOOT_CHAIN_READY: "false",
     CLOUDFLARE_ACCOUNT_ID: "1".repeat(32), CLOUDFLARE_API_TOKEN: "isolated-fixture-token",
     TRACE_UPDATE_SERVICE_URL: "https://example.com", TRACE_DEPLOY_TOKEN: "test-deploy-token",
-    TRACE_R2_BUCKET: "trace-update-staging-releases", TRACE_D1_DATABASE_ID: "11111111-1111-1111-1111-111111111111",
+    TRACE_R2_BUCKET: "e-track-firmware-p41-test-releases", TRACE_D1_DATABASE_ID: "11111111-1111-1111-1111-111111111111",
     TRACE_D1_DATABASE_NAME: "fixture-d1", OTA_AES_KEY: "01".repeat(16), GITHUB_TOKEN: "fixture-github-token",
     GITHUB_REPOSITORY: "Eitan-S-23/Trace", GITHUB_SHA: metadata.commitSha, GITHUB_RUN_ID: metadata.runId,
     GITHUB_RUN_ATTEMPT: "1", OTA_PREVIOUS_RELEASE_JSON: "fixture-only", TRACE_FIRMWARE_MIN_APP_VERSION_CODE: "0",
@@ -133,6 +135,86 @@ class GitHubHttp {
   client() { return firmwareGitHub({ repository: "Eitan-S-23/Trace", token: "fixture-only", fetcher: this.fetch }); }
 }
 
+// Synthetic HTTP bytes qualify only provenance transport. Actual firmware/header
+// and patch application are exercised separately by test_firmware_release.mjs.
+function bootstrapHttp() {
+  const repository = "Eitan-S-23/Trace";
+  const bytes = Buffer.alloc(8192, 0x5a);
+  const target = { versionName: "2.8.2", commitSha: "4".repeat(40), releaseTag: "mcu-e-track-at32f435-v2.8.2" };
+  const descriptor: any = { provenanceKind: "inaugural-bootstrap-v1", isFormalRelease: false, kind: "app",
+    versionName: "2.8.0", versionCode: 20800, commitSha: "1".repeat(40), buildTimestamp: 1786320000,
+    imageSha256: digest(bytes), sourceSha256: digest(bytes), sourceSizeBytes: bytes.length,
+    archiveCommit: "3".repeat(40), archivePath: "docs/ota-exec-notes/P4-1-bootstrap-baseline-fixture",
+    sourceRunId: "12345", sourceRunAttempt: "1", sourceArtifactId: "67890", sourceArtifactSha256: "a".repeat(64),
+    targetVersionName: target.versionName, targetCommitSha: target.commitSha, provenanceSha256: "",
+    sourceUrl: "" };
+  descriptor.sourceUrl = `https://raw.githubusercontent.com/${repository}/${descriptor.archiveCommit}/${descriptor.archivePath}/app-final.bin`;
+  const provenance = { schemaVersion: 1, provenanceKind: descriptor.provenanceKind, repository,
+    run: { id: 12345, run_attempt: 1, path: ".github/workflows/firmware-build.yml", status: "completed",
+      conclusion: "success", event: "workflow_dispatch", head_sha: descriptor.commitSha, head_branch: "dev/fixture",
+      repository: { id: 7, full_name: repository }, head_repository: { id: 7, full_name: repository } },
+    artifact: { id: 67890, name: `p41-gcc-development-${descriptor.commitSha}`,
+      digest: `sha256:${descriptor.sourceArtifactSha256}`, workflow_run: { id: 12345, repository_id: 7,
+        head_repository_id: 7, head_sha: descriptor.commitSha, head_branch: "dev/fixture" } },
+    verification: { ok: true, commitSha: descriptor.commitSha, runId: descriptor.sourceRunId,
+      versionName: descriptor.versionName, build: { commitSha: descriptor.commitSha,
+        versionName: descriptor.versionName, versionCode: descriptor.versionCode, buildTimestamp: descriptor.buildTimestamp,
+        app: { fileName: "X-Track-App-GCC.bin", sizeBytes: bytes.length, sha256: "b".repeat(64) },
+        boot: { fileName: "X-Track-Boot.bin", sizeBytes: 16384, sha256: "c".repeat(64) } },
+      finalImage: { fileName: "app-final.bin", sizeBytes: bytes.length, sha256: descriptor.imageSha256 },
+      base: null, fullByteEqual: true, patchByteEqual: null, recoveryVerified: true, r2Verified: false },
+    developmentOnly: { installable: false, formalBase: "NOT_USED", rehearsal: "NOT_RUN", remoteEffects: "NOT_RUN" } };
+  const state = { descriptor, provenance, target, bytes, provenanceBytes: Buffer.alloc(0), approval: "",
+    releases: [] as any[], tag: null as string | null, corrupt: false, wrongPath: false,
+    archiveType: "file", encoding: "base64", missing: false, redirected: false, calls: [] as string[],
+    mode: "rehearsal", treeMode: "100644", treeType: "blob", truncatedTree: false,
+    wrongCommit: false, wrongTree: false, wrongBlob: false, invalidBase64: false,
+    oversizedFile: false, oversizedResponse: false, invalidListing: false, failPageTwo: false, laterReleases: [] as any[] };
+  const blob = (data: Buffer) => createHash("sha1").update(Buffer.from(`blob ${data.length}\0`)).update(data).digest("hex");
+  const seal = () => {
+    state.provenanceBytes = Buffer.from(JSON.stringify(provenance));
+    descriptor.provenanceSha256 = digest(state.provenanceBytes);
+    state.approval = digest(Buffer.from(canonicalJson(descriptor)));
+  };
+  seal();
+  const fetcher: typeof fetch = async (input, init = {}) => {
+    const url = new URL(String(input));
+    state.calls.push(`${init.method ?? "GET"} ${url.hostname}${url.pathname}`);
+    expect(init.method ?? "GET").toBe("GET");
+    expect(url.origin).toBe("https://api.github.com");
+    expect(init.redirect).toBe("error");
+    if (url.pathname.endsWith("/releases")) {
+      if (state.invalidListing) return Response.json({ incomplete: true });
+      if (url.searchParams.get("page") === "2") return state.failPageTwo
+        ? new Response(null, { status: 503 }) : Response.json(state.laterReleases);
+      return Response.json(state.releases);
+    }
+    if (url.pathname.includes("/git/ref/tags/")) return state.tag
+      ? Response.json({ object: { type: "commit", sha: state.tag } }) : new Response(null, { status: 404 });
+    if (url.pathname.includes("/git/commits/")) return Response.json({ sha: state.wrongCommit ? "f".repeat(40) : descriptor.archiveCommit,
+      tree: { sha: "5".repeat(40) } });
+    if (url.pathname.includes("/git/trees/")) return Response.json({ sha: (state.wrongTree ? "f" : "5").repeat(40), truncated: state.truncatedTree,
+      tree: [["provenance.json", state.provenanceBytes], ["app-final.bin", bytes]].map(([name, data]) => ({
+        path: `${descriptor.archivePath}/${name}`, type: state.treeType, mode: state.treeMode,
+        sha: state.wrongBlob ? "f".repeat(40) : blob(data as Buffer) })) });
+    const prefix = `/repos/${repository}/contents/`;
+    if (url.pathname.startsWith(prefix)) {
+      expect(url.searchParams.get("ref")).toBe(descriptor.archiveCommit);
+      if (state.missing) return new Response(null, { status: 404 });
+      if (state.redirected) return new Response(null, { status: 302, headers: { Location: "https://untrusted.invalid/archive" } });
+      if (state.oversizedResponse) return new Response(" ".repeat(131072 * 2 + 8193));
+      const requested = decodeURIComponent(url.pathname.slice(prefix.length));
+      const data = requested.endsWith("/provenance.json") ? state.provenanceBytes
+        : state.corrupt ? Buffer.alloc(bytes.length) : bytes;
+      return Response.json({ type: state.archiveType, path: state.wrongPath ? "wrong-path" : requested,
+        encoding: state.encoding, size: state.oversizedFile ? 983041 : data.length, sha: blob(data),
+        content: data.toString("base64") + (state.invalidBase64 ? "!" : "") });
+    }
+    throw new Error(`Unexpected bootstrap fixture request: ${url.pathname}`);
+  };
+  return { state, seal, client: () => firmwareGitHub({ repository, token: "fixture-only", fetcher }) };
+}
+
 describe("P4-1 production pipeline with existing handler and SQLite host ports", () => {
   it("uploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects", async () => {
     const s = await setup(); const before = await counts();
@@ -230,6 +312,29 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
       { TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: "not-a-number" }, { TRACE_DEPLOY_TOKEN: "two credentials" }]) {
       expect(() => releaseConfig({ ...s.env, ...change })).toThrow();
     }
+  });
+
+  it.each([
+    ["rehearsal", "e-track-firmware-p41-test-releases", true],
+    ["rehearsal", "trace-update-staging-releases", false],
+    ["rehearsal", "production-fixture-bucket", false],
+    ["production", "e-track-firmware-p41-test-releases", false],
+    ["production", "trace-update-staging-releases", false],
+    ["production", "production-fixture-bucket", true]
+  ])("P41_BUCKET_ROLES %s bucket %s admitted=%s", async (mode, bucket, admitted) => {
+    const s = await setup();
+    const production = mode === "production";
+    const selected = { ...s.env, FIRMWARE_RELEASE_MODE: mode, TRACE_R2_BUCKET: bucket,
+      INPUT_PUBLISH: String(production), INPUT_REHEARSAL: String(!production),
+      OTA_BOOT_CHAIN_READY: String(production), GITHUB_RUN_ID: production ? "999999" : s.env.GITHUB_RUN_ID,
+      INPUT_APPROVED_REHEARSAL_RUN_ID: s.env.GITHUB_RUN_ID,
+      OTA_APPROVED_REHEARSAL_RUN_ID: s.env.GITHUB_RUN_ID, OTA_APPROVED_REHEARSAL_ATTEMPT: "1",
+      OTA_APPROVED_REHEARSAL_METADATA_SHA256: "1".repeat(64),
+      OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256: "2".repeat(64) };
+    if (admitted) expect(releaseConfig(selected)).toMatchObject({ mode, bucketName: bucket });
+    else expect(() => releaseConfig(selected)).toThrow(/bucket bindings/);
+    expect(s.calls).toEqual([]);
+    expect(s.github.publish).not.toHaveBeenCalled();
   });
 
   it("production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register", async () => {
@@ -392,7 +497,117 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
         throw new Error("Unexpected formal base fixture request");
       });
       const client = firmwareGitHub({ repository: "Eitan-S-23/Trace", token: "fixture-only", fetcher });
-      if (reason === "valid") expect((await client.formalBase(descriptor, "2.8.2")).bytes).toEqual(Buffer.from(bytes));
-      else await expect(client.formalBase(descriptor, "2.8.2")).rejects.toThrow();
+      const target = { versionName: "2.8.2", commitSha: "4".repeat(40) };
+      if (reason === "valid") {
+        expect((await client.formalBase(descriptor, "2.8.2")).bytes).toEqual(Buffer.from(bytes));
+        expect((await client.releaseBase(descriptor, target)).bytes).toEqual(Buffer.from(bytes));
+      } else {
+        await expect(client.formalBase(descriptor, "2.8.2")).rejects.toThrow();
+        await expect(client.releaseBase(descriptor, target)).rejects.toThrow();
+      }
+      expect(fetcher.mock.calls.some(([url]) => String(url).includes("/contents/"))).toBe(false);
+    });
+
+  it.each(["first attempt", "exact published retry", "exact untagged draft retry"])
+    ("P41_BOOTSTRAP_VALID %s preserves non-formal provenance without cloud writes", async reason => {
+      const h = bootstrapHttp(); const s = h.state;
+      if (reason !== "first attempt") {
+        s.mode = "production";
+        s.releases.push({ id: 99, tag_name: s.target.releaseTag, prerelease: false,
+          draft: reason.includes("draft"), target_commitish: s.target.commitSha });
+        if (!reason.includes("draft")) s.tag = s.target.commitSha;
+      }
+      const source = await h.client().releaseBase(s.descriptor, s.target, s.approval, s.mode);
+      expect(source.bytes).toEqual(s.bytes);
+      expect(source.evidence).toMatchObject({ provenanceKind: "inaugural-bootstrap-v1", isFormalRelease: false,
+        sourceSha256: s.descriptor.sourceSha256, sourceRunId: "12345", sourceArtifactId: "67890" });
+      expect(s.calls.every(call => call.startsWith("GET api.github.com/"))).toBe(true);
+    });
+
+  it.each(["missing approval", "missing mode", "missing target commit", "wrong approval", "wrong target", "unapproved descriptor", "mutable archive",
+    "path traversal", "formal disguise", "unknown field"])("P41_BOOTSTRAP_REJECT %s before network", async reason => {
+      const h = bootstrapHttp(); const s = h.state;
+      if (reason === "missing approval") s.approval = "";
+      if (reason === "missing mode") s.mode = "";
+      if (reason === "missing target commit") s.target.commitSha = undefined as any;
+      if (reason === "wrong approval") s.approval = "0".repeat(64);
+      if (reason === "wrong target") s.target.commitSha = "f".repeat(40);
+      if (reason === "unapproved descriptor") s.descriptor.sourceRunId = "23456";
+      if (reason === "mutable archive") s.descriptor.archiveCommit = "main";
+      if (reason === "path traversal") s.descriptor.archivePath += "/../other";
+      if (reason === "formal disguise") s.descriptor.isFormalRelease = true;
+      if (reason === "unknown field") s.descriptor.approved = true;
+      await expect(h.client().releaseBase(s.descriptor, s.target, s.approval, s.mode)).rejects.toThrow();
+      expect(s.calls).toEqual([]);
+    });
+
+  it.each(["previous release", "newer release", "other draft", "prerelease target", "ambiguous target", "blank tag", "control tag",
+    "wrong published tag", "missing published tag", "wrong draft target", "malformed MCU version", "existing target during rehearsal"])
+    ("P41_BOOTSTRAP_REJECT %s without archive reads", async reason => {
+      const h = bootstrapHttp(); const s = h.state;
+      s.mode = reason === "existing target during rehearsal" ? "rehearsal" : "production";
+      const target = { id: 99, tag_name: s.target.releaseTag, prerelease: false, draft: false,
+        target_commitish: s.target.commitSha };
+      if (reason === "previous release") target.tag_name = "mcu-e-track-at32f435-v2.8.0";
+      if (reason === "newer release") target.tag_name = "mcu-e-track-at32f435-v2.8.3";
+      if (reason === "other draft") { target.tag_name = "mcu-e-track-at32f435-v2.8.1"; target.draft = true; }
+      if (reason === "prerelease target") target.prerelease = true;
+      if (reason === "blank tag") target.tag_name = "";
+      if (reason === "control tag") target.tag_name = "mcu-e-track-at32f435-v2.8.2\n";
+      if (reason === "wrong published tag") s.tag = "f".repeat(40);
+      if (reason === "wrong draft target") { target.draft = true; target.target_commitish = "main"; }
+      if (reason === "malformed MCU version") target.tag_name = "mcu-e-track-at32f435-v2.8.2-rc.1";
+      if (reason === "existing target during rehearsal") s.tag = s.target.commitSha;
+      s.releases.push(target);
+      if (reason === "ambiguous target") s.releases.push({ ...target, id: 100 });
+      await expect(h.client().releaseBase(s.descriptor, s.target, s.approval, s.mode)).rejects.toThrow();
+      expect(s.calls.some(call => call.includes("/contents/"))).toBe(false);
+    });
+
+  it.each(["bad source bytes", "bad provenance digest", "symlink", "Git symlink", "Git submodule", "truncated Git tree",
+    "wrong Git commit", "wrong Git tree", "wrong Git blob", "invalid base64", "oversized file", "oversized response",
+    "wrong path", "wrong encoding", "missing archive",
+    "redirected archive", "failed CI", "fork CI", "wrong source commit", "wrong run attempt", "wrong artifact",
+    "wrong verification", "rewritten development label"])("P41_BOOTSTRAP_REJECT %s after read-only archive access", async reason => {
+      const h = bootstrapHttp(); const s = h.state;
+      if (reason === "bad source bytes") s.corrupt = true;
+      if (reason === "symlink") s.archiveType = "symlink";
+      if (reason === "Git symlink") s.treeMode = "120000";
+      if (reason === "Git submodule") { s.treeMode = "160000"; s.treeType = "commit"; }
+      if (reason === "truncated Git tree") s.truncatedTree = true;
+      if (reason === "wrong Git commit") s.wrongCommit = true;
+      if (reason === "wrong Git tree") s.wrongTree = true;
+      if (reason === "wrong Git blob") s.wrongBlob = true;
+      if (reason === "invalid base64") s.invalidBase64 = true;
+      if (reason === "oversized file") s.oversizedFile = true;
+      if (reason === "oversized response") s.oversizedResponse = true;
+      if (reason === "wrong path") s.wrongPath = true;
+      if (reason === "wrong encoding") s.encoding = "none";
+      if (reason === "missing archive") s.missing = true;
+      if (reason === "redirected archive") s.redirected = true;
+      if (reason === "failed CI") s.provenance.run.conclusion = "failure";
+      if (reason === "fork CI") s.provenance.run.head_repository.full_name = "somebody/Trace";
+      if (reason === "wrong source commit") s.provenance.run.head_sha = "f".repeat(40);
+      if (reason === "wrong run attempt") s.provenance.run.run_attempt = 2;
+      if (reason === "wrong artifact") s.provenance.artifact.workflow_run.id = 23456;
+      if (reason === "wrong verification") s.provenance.verification.finalImage.sha256 = "f".repeat(64);
+      if (reason === "rewritten development label") s.provenance.developmentOnly.installable = true;
+      h.seal();
+      if (reason === "bad provenance digest") s.provenanceBytes = Buffer.from("{}");
+      await expect(h.client().releaseBase(s.descriptor, s.target, s.approval, s.mode)).rejects.toThrow();
+      expect(s.calls.every(call => call.startsWith("GET api.github.com/"))).toBe(true);
+    });
+
+  it.each(["predecessor on page two", "failed page two", "malformed listing"])
+    ("P41_BOOTSTRAP_REJECT %s never treats an incomplete inventory as empty", async reason => {
+      const h = bootstrapHttp(); const s = h.state;
+      s.releases = Array.from({ length: 100 }, (_, n) => ({ id: n + 1, tag_name: `app-v${n}`, draft: false, prerelease: false }));
+      if (reason === "predecessor on page two") s.laterReleases = [
+        { id: 101, tag_name: "mcu-e-track-at32f435-v2.8.0", draft: false, prerelease: false }];
+      if (reason === "failed page two") s.failPageTwo = true;
+      if (reason === "malformed listing") s.invalidListing = true;
+      await expect(h.client().releaseBase(s.descriptor, s.target, s.approval, s.mode)).rejects.toThrow();
+      expect(s.calls.filter(call => call.endsWith("/releases"))).toHaveLength(reason === "malformed listing" ? 1 : 2);
+      expect(s.calls.some(call => call.includes("/contents/"))).toBe(false);
     });
 });

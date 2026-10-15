@@ -1,6 +1,7 @@
+import { createHash } from "node:crypto";
 import { CliError } from "./firmware-cli.mjs";
-import { FIRMWARE_MODEL, parseFirmwareRegistration, versionCodeFor } from "./firmware-schema.mjs";
-import { digest, validateBaseDescriptor } from "./prepare-firmware-release.mjs";
+import { canonicalJson, FIRMWARE_MODEL, parseFirmwareRegistration, versionCodeFor } from "./firmware-schema.mjs";
+import { BOOTSTRAP_PROVENANCE, digest, validateBaseDescriptor, validateBootstrapProvenance } from "./prepare-firmware-release.mjs";
 
 const conflict = message => new CliError(message, "RELEASE_CONFLICT", 1);
 const unavailable = message => new CliError(message, "BACKEND_UNAVAILABLE", 1);
@@ -96,6 +97,96 @@ export function firmwareGitHub({ repository, token, fetcher = fetch, signal }) {
     return { bytes, evidence: { releaseId: previous.id, releaseTag: previous.tag_name,
       commitSha: descriptor.commitSha, assetId: matches[0].id, sourceSha256: digest(bytes), sourceSizeBytes: bytes.length } };
   }
+  async function archiveTree(descriptor) {
+    const commit = await json(`/git/commits/${descriptor.archiveCommit}`);
+    if (commit?.sha !== descriptor.archiveCommit || !/^[0-9a-f]{40}$/.test(commit.tree?.sha)) {
+      throw conflict("Bootstrap archive commit identity mismatch");
+    }
+    const tree = await json(`/git/trees/${commit.tree.sha}?recursive=1`);
+    if (tree?.sha !== commit.tree.sha || tree.truncated !== false || !Array.isArray(tree.tree)) {
+      throw conflict("Bootstrap archive requires a complete immutable Git tree");
+    }
+    const files = new Map();
+    for (const name of ["provenance.json", "app-final.bin"]) {
+      const filePath = `${descriptor.archivePath}/${name}`;
+      const matches = tree.tree.filter(entry => entry.path === filePath);
+      if (matches.length !== 1 || matches[0].type !== "blob" || matches[0].mode !== "100644"
+        || !/^[0-9a-f]{40}$/.test(matches[0].sha)) throw conflict("Bootstrap archive entry must be a regular Git file");
+      files.set(filePath, matches[0].sha);
+    }
+    return files;
+  }
+  async function archiveFile(commit, filePath, maxBytes, expectedSha, expectedBlob) {
+    const encoded = filePath.split("/").map(encodeURIComponent).join("/");
+    const response = await request(`${base}/contents/${encoded}?ref=${commit}`, { timeoutMs: 300000 });
+    if (response.status !== 200 || !response.body) throw unavailable("Bootstrap archive is unavailable");
+    const reader = response.body.getReader();
+    const chunks = []; let size = 0;
+    try {
+      for (;;) {
+        const part = await reader.read();
+        if (part.done) break;
+        size += part.value.byteLength;
+        if (size > maxBytes * 2 + 8192) throw conflict("Bootstrap archive response exceeds its bound");
+        chunks.push(Buffer.from(part.value));
+      }
+    } finally { await reader.cancel(); }
+    let file;
+    try { file = JSON.parse(Buffer.concat(chunks).toString("utf8")); }
+    catch { throw conflict("Invalid bootstrap archive response"); }
+    if (file?.type !== "file" || file.path !== filePath || file.target || file.submodule_git_url
+      || file.encoding !== "base64" || typeof file.content !== "string" || !Number.isSafeInteger(file.size)
+      || file.size <= 0 || file.size > maxBytes) throw conflict("Bootstrap archive must contain a bounded regular file");
+    const content = file.content.replace(/\r?\n/g, "");
+    const bytes = Buffer.from(content, "base64");
+    const blob = createHash("sha1").update(Buffer.from(`blob ${bytes.length}\0`)).update(bytes).digest("hex");
+    if (bytes.toString("base64") !== content || bytes.length !== file.size || file.sha !== blob || blob !== expectedBlob
+      || digest(bytes) !== expectedSha) throw conflict("Bootstrap archive full byte identity mismatch");
+    return bytes;
+  }
+  async function releaseBase(descriptor, target, approvedBootstrapHash, mode) {
+    validateBaseDescriptor(descriptor, target.versionName, repository, target.commitSha);
+    if (descriptor.provenanceKind !== BOOTSTRAP_PROVENANCE) return formalBase(descriptor, target.versionName);
+    if (!["rehearsal", "production"].includes(mode)) throw new CliError("Explicit bootstrap release mode is required");
+    const descriptorSha256 = digest(Buffer.from(canonicalJson(descriptor)));
+    if (!/^[0-9a-f]{64}$/.test(approvedBootstrapHash ?? "") || approvedBootstrapHash !== descriptorSha256) {
+      throw new CliError("An independently approved bootstrap descriptor hash is required");
+    }
+    const releases = await list("/releases");
+    if (releases.some(r => typeof r?.tag_name !== "string" || !r.tag_name || /[\s\x00-\x1f\x7f]/.test(r.tag_name)
+      || typeof r.draft !== "boolean" || typeof r.prerelease !== "boolean")) {
+      throw conflict("Invalid bootstrap Release inventory");
+    }
+    const targetTag = `mcu-${FIRMWARE_MODEL}-v${target.versionName}`;
+    const lineage = releases.filter(r => r.tag_name.startsWith(`mcu-${FIRMWARE_MODEL}-v`));
+    if (lineage.length > 1 || lineage.some(r => r.tag_name !== targetTag || r.prerelease
+      || !Number.isSafeInteger(r.id) || r.id <= 0 || (r.draft && r.target_commitish !== target.commitSha))) {
+      throw conflict("Bootstrap is restricted to the inaugural firmware lineage or its exact retry");
+    }
+    if (lineage.length && mode !== "production") {
+      throw conflict("An existing bootstrap target permits only the approved production replay, not a new rehearsal");
+    }
+    const commit = await tagCommit(targetTag, !lineage.length || lineage[0].draft);
+    if (commit !== null && commit !== target.commitSha) throw conflict("Bootstrap target tag commit mismatch");
+    // This archive survives Actions retention. Its descriptor hash is approved
+    // in the protected environment; it is never inferred from an arbitrary CI run.
+    const files = await archiveTree(descriptor);
+    const proofPath = `${descriptor.archivePath}/provenance.json`, sourcePath = `${descriptor.archivePath}/app-final.bin`;
+    const proofBytes = await archiveFile(descriptor.archiveCommit, proofPath,
+      131072, descriptor.provenanceSha256, files.get(proofPath));
+    let proof;
+    try { proof = JSON.parse(proofBytes); } catch { throw conflict("Invalid bootstrap provenance JSON"); }
+    validateBootstrapProvenance(descriptor, proof, repository);
+    const bytes = await archiveFile(descriptor.archiveCommit, sourcePath,
+      descriptor.sourceSizeBytes, descriptor.sourceSha256, files.get(sourcePath));
+    if (bytes.length !== descriptor.sourceSizeBytes) throw conflict("Bootstrap source length mismatch");
+    return { bytes, evidence: { provenanceKind: BOOTSTRAP_PROVENANCE, isFormalRelease: false,
+      archiveCommit: descriptor.archiveCommit, archivePath: descriptor.archivePath, descriptorSha256,
+      provenanceSha256: descriptor.provenanceSha256, commitSha: descriptor.commitSha,
+      sourceRunId: descriptor.sourceRunId, sourceRunAttempt: descriptor.sourceRunAttempt,
+      sourceArtifactId: descriptor.sourceArtifactId, sourceArtifactSha256: descriptor.sourceArtifactSha256,
+      sourceSha256: digest(bytes), sourceSizeBytes: bytes.length } };
+  }
   async function publish(metadata, bytesByName) {
     metadata = parseFirmwareRegistration(metadata, repository, false);
     for (const asset of metadata.assets) {
@@ -161,5 +252,5 @@ export function firmwareGitHub({ repository, token, fetcher = fetch, signal }) {
     }
     return { releaseId: release.id, assetCount: inventory.length, fullReadbackVerified: true };
   }
-  return { formalBase, publish, json };
+  return { formalBase, releaseBase, publish, json };
 }

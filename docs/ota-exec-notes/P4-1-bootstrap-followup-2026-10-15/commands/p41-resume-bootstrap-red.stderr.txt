@@ -1,0 +1,19 @@
+(node:14712) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_VALID first attempt preserves non-formal provenance without cloud writes
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_VALID exact published retry preserves non-formal provenance without cloud writes
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_VALID exact untagged draft retry preserves non-formal provenance without cloud writes
+TypeError: h.client(...).releaseBase is not a function
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:495:39
+    493|         if (!reason.includes("draft")) s.tag = s.target.commitSha;
+    494|       }
+    495|       const source = await h.client().releaseBase(s.descriptor, s.targ…
+       |                                       ^
+    496|       expect(source.bytes).toEqual(s.bytes);
+    497|       expect(source.evidence).toMatchObject({ provenanceKind: "inaugur…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+

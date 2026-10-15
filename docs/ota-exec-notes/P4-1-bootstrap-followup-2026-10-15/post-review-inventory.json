@@ -1,0 +1,55 @@
+{
+  "baseCommit": "a29d0efef0fa408e786c739ea76b085ad2f95991",
+  "scope": "Post-review-addendum-only",
+  "previousInventorySha256": "80644f18a3ebd40f7ac62e4b2a3f208e8fd7d24594c46b6963b95c9037df755f",
+  "files": [
+    {
+      "path": "commands/p41-resume-archive-schema.json",
+      "source": ".cache/logs/p41-resume-archive-schema.json",
+      "sizeBytes": 2822,
+      "sha256": "f7f1366c51d4457de7dd7471c6a5cfc77c53cf3a4bc43213990326c047dffefe"
+    },
+    {
+      "path": "commands/p41-resume-archive-schema.stdout.txt",
+      "source": ".cache/logs/p41-resume-archive-schema.stdout.txt",
+      "sizeBytes": 201,
+      "sha256": "e41e183236d54bf32f91fdb1184a4fafb400e3172e353b5fea45e1ed4258a0e9"
+    },
+    {
+      "path": "commands/p41-resume-archive-schema.stderr.txt",
+      "source": ".cache/logs/p41-resume-archive-schema.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-resume-governance-reviewed.json",
+      "source": ".cache/logs/p41-resume-governance-reviewed.json",
+      "sizeBytes": 1893,
+      "sha256": "86198c56eff9c0cb3783b556aa02db35d5915a933c991ad2b62eaef0630072ec"
+    },
+    {
+      "path": "commands/p41-resume-governance-reviewed.stdout.txt",
+      "source": ".cache/logs/p41-resume-governance-reviewed.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-resume-governance-reviewed.stderr.txt",
+      "source": ".cache/logs/p41-resume-governance-reviewed.stderr.txt",
+      "sizeBytes": 127,
+      "sha256": "2053cd0098184e7035325c85e018a6457278567418889c6a28b052cffdd4726c"
+    },
+    {
+      "path": ".gitattributes",
+      "source": "manual-review-record-or-attributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "independent-final-review.json",
+      "source": "manual-review-record-or-attributes",
+      "sizeBytes": 2203,
+      "sha256": "44040f4cfa7e61d395a172f8515e12a305030ccd4ffb303ca7ac4983cb53a808"
+    }
+  ]
+}

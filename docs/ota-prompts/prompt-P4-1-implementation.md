@@ -38,6 +38,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 - `OTA-XC-IMAGE-IDENTITY`
 - `OTA-XC-ASSET-NAMING`
 - `OTA-XC-RELEASE-CLI`
+- `OTA-XC-BOOTSTRAP-BASE`
 - `OTA-XC-RELEASE-METADATA`
 - `OTA-XC-SCHEMA-FIXTURE`
 - `OTA-XC-R2-UPLOAD`
@@ -62,7 +63,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 ## 输入输出与调用方向
 
 - build job 输出未 finalize GCC App/Boot 四件套和版本信息；release job 下载同一 run artifact。
-- release job 取得上一正式版“最终 App bin”作为 patch 基版，并验证其 releaseTag/version/hash，不得使用 nightly、placeholder 或 `.etu` 反解结果代替权威基版。
+- release job 默认取得上一正式版“最终 App bin”作为 patch 基版，并验证其 releaseTag/version/hash。首次发布的显式候选例外只能按 `OTA-XC-BOOTSTRAP-BASE` 获取独立核验、不可变归档的非正式基线；不得自动回退到 nightly、placeholder 或 `.etu` 反解结果。
 - metadata builder 接收三类已验证资产和 release 身份，输出 `OTA-XC-RELEASE-METADATA`。
 - uploader 对每个 asset 执行 immutable put/identical no-op/readback，再把 r2Verified metadata 交给 register API。
 - 输出与退出码严格遵守 `OTA-XC-RELEASE-CLI`。
@@ -88,7 +89,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 - `Tools/etu_pack.py`、recovery/验证 helper，只做正式链所需的可复用 CLI 增量。
 - `app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/` 的 firmware metadata/upload/register 脚本。
 - `.github/scripts/` 和 `tests/ota/` 下发布链单元/静态测试。
-- 必要的 workflow 文档注释，但不修改冻结合同。
+- 必要的 workflow 文档注释。用户委托的首发来源与演练桶候选修订仅限对应共享条款及消费记录，不修改历史冻结合同或在候选生效前执行正式演练。
 
 ## 禁止修改与生产红线
 
@@ -112,7 +113,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 ## 完成判据
 
 - 在共享冻结合同下的 rehearsal 路径生成 full/patch/recovery，所有 hash/size 与 metadata 一致。
-- patch 对上一正式最终 App 自验逐字节一致，recovery 验证通过。
+- patch 对获准基版自验逐字节一致，recovery 验证通过；首发例外只改变来源资格，不降低三资产或真实字节要求。
 - staging R2 三资产与本次产物/metadata 同字节，register ready/idempotency 和 rehearsal 前后 production D1/R2/channel/GitHub Release 零副作用均有证据；本阶段不创建 GitHub Release 或 prerelease。
 - register 后 D1 release 达到 P4-2 的 ready 门槛；失败路径无 ready 残留。
 - nightly/pull request 行为不回退，warning/error/退出码明确报告。
@@ -129,7 +130,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 
 - 镜像摘要、正式资产命名或 rehearsal/production gate 的共享条款发生未重新冻结的变更时停止正式发布动作。
 - `P4-2` 的真实 schema/register/D1 ready 链未完成时停止，不建立临时 stub 或兼容双写。
-- 无法取得可验证的上一正式 finalized App bin 时不得生成 patch 或用近似基版替代。
+- 无法取得可验证的上一正式 finalized App bin，且不存在按共享首发条款独立核验并获准的基线时，不得生成发布 patch 或用近似基版替代。
 - Worker 仍只接受单资产或不能原子 ready 时停止注册，不做兼容双写。
 - 需要降低 frozen finalize/patch/recovery 校验才能通过时停止。
 
@@ -143,4 +144,4 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 
 ## 阻断性决策
 
-- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。
+- `OTA-DEC-017`：首发来源和独立桶候选修订的独立复核与主线生效尚未完成；当前不是正式执行授权。已授权开发、自测和专属分支交付继续，实际资格引用看板 readiness 本行。

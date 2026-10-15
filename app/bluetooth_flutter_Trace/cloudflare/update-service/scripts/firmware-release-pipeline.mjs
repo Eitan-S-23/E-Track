@@ -38,7 +38,13 @@ export function releaseConfig(env) {
   let url;
   try { url = new URL(env.TRACE_UPDATE_SERVICE_URL); } catch { throw new CliError("Invalid Worker origin configuration"); }
   if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname !== "/") throw new CliError("Worker binding must be a credential-free HTTPS origin");
-  if ((mode === "rehearsal") !== (env.TRACE_R2_BUCKET === "trace-update-staging-releases")) throw new CliError("Staging and production bucket bindings must remain isolated");
+  // Renaming the rehearsal bucket must not admit the protected old Trace bucket
+  // to production. Neither non-production bucket is a production destination.
+  const rehearsalBucket = "e-track-firmware-p41-test-releases";
+  if (mode === "rehearsal" ? env.TRACE_R2_BUCKET !== rehearsalBucket
+    : [rehearsalBucket, "trace-update-staging-releases"].includes(env.TRACE_R2_BUCKET)) {
+    throw new CliError("Staging and production bucket bindings must remain isolated");
+  }
   let canonicalRunId = env.GITHUB_RUN_ID;
   if (mode === "production") {
     canonicalRunId = env.INPUT_APPROVED_REHEARSAL_RUN_ID;

@@ -70,11 +70,11 @@ async function main() {
     const github = firmwareGitHub({ repository: env.GITHUB_REPOSITORY, token: env.GITHUB_TOKEN, signal: controller.signal });
     const base = JSON.parse(env.OTA_PREVIOUS_RELEASE_JSON);
     if (referencePreparation && canonicalJson(JSON.parse(referencePreparation).base) !== canonicalJson(base)) {
-      throw new CliError("Formal base provenance changed since rehearsal");
+      throw new CliError("Patch base provenance changed since rehearsal");
     }
-    const source = await github.formalBase(base, release.versionName);
+    const source = await github.releaseBase(base, release, env.OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256, config.mode);
     const inputs = outputPath(root, path.join(path.dirname(outputDir), "inputs"));
-    const baseFile = outputPath(root, path.join(inputs, "formal-base-source.bin"));
+    const baseFile = outputPath(root, path.join(inputs, "base-source.bin"));
     await writeOutput(root, baseFile, source.bytes);
     await writeOutput(root, path.join(inputs, "base-provenance.json"), JSON.stringify(source.evidence, null, 2) + "\n");
     const prepared = await prepareFirmwareRelease({ root, app, boot, build, release, repository: env.GITHUB_REPOSITORY,

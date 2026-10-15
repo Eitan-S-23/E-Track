@@ -1,0 +1,82 @@
+✔ production remains explicit dispatch/publish with a first-step hard gate and protected environment (7.232ms)
+✔ rehearsal has only separately named staging secrets and read-only GitHub permissions (0.4709ms)
+✔ nightly/checks jobs cannot acquire release secrets or execute the cloud pipeline (1.8288ms)
+✔ both release environments use the identical production implementation and same-run App/Boot inputs (1.1793ms)
+✔ development wiring explicitly executes host, native, byte and production-GCC paths (0.805ms)
+✔ bootstrap approval is explicit environment configuration, never a development default (0.5047ms)
+✔ Worker bundle is a credential-free CI build input, not a deployment (0.8439ms)
+✔ Worker bundle guard rejects an actual deployment or an injected extra command (7.8984ms)
+✔ version inputs use environment mappings rather than shell interpolation (0.4613ms)
+VERSION_CASE {"label":"legacy source PR","exitCode":0,"output":"version_name=2.7.0-nightly.315\nversion_code=20700\nbuild_number=315\n"}
+✔ actual version shell: legacy source PR (838.3166ms)
+VERSION_CASE {"label":"legacy source push","exitCode":0,"output":"version_name=2.7.0-nightly.315\nversion_code=20700\nbuild_number=315\n"}
+✔ actual version shell: legacy source push (1731.0993ms)
+VERSION_CASE {"label":"legacy source checks dispatch","exitCode":0,"output":"version_name=2.7.0\nversion_code=20700\nbuild_number=315\n"}
+✔ actual version shell: legacy source checks dispatch (669.2027ms)
+VERSION_CASE {"label":"explicit formal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=315\n"}
+✔ actual version shell: explicit formal version (2132.9071ms)
+VERSION_CASE {"label":"explicit rehearsal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=315\n"}
+✔ actual version shell: explicit rehearsal version (510.9321ms)
+VERSION_CASE {"label":"canonical source formal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=315\n"}
+✔ actual version shell: canonical source formal version (1478.984ms)
+VERSION_CASE {"label":"canonical source rehearsal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=315\n"}
+✔ actual version shell: canonical source rehearsal version (508.7441ms)
+VERSION_CASE {"label":"legacy source cannot choose formal version","exitCode":1,"output":""}
+✔ actual version shell: legacy source cannot choose formal version (493.5734ms)
+VERSION_CASE {"label":"legacy source cannot choose rehearsal version","exitCode":1,"output":""}
+✔ actual version shell: legacy source cannot choose rehearsal version (2452.5387ms)
+VERSION_CASE {"label":"explicit short version","exitCode":1,"output":""}
+✔ actual version shell: explicit short version (474.7387ms)
+VERSION_CASE {"label":"explicit prefixed version","exitCode":1,"output":""}
+✔ actual version shell: explicit prefixed version (1486.4468ms)
+VERSION_CASE {"label":"leading zero major","exitCode":1,"output":""}
+✔ actual version shell: leading zero major (476.1828ms)
+VERSION_CASE {"label":"leading zero minor","exitCode":1,"output":""}
+✔ actual version shell: leading zero minor (491.908ms)
+VERSION_CASE {"label":"leading zero patch","exitCode":1,"output":""}
+✔ actual version shell: leading zero patch (1451.379ms)
+VERSION_CASE {"label":"explicit prerelease suffix","exitCode":1,"output":""}
+✔ actual version shell: explicit prerelease suffix (492.128ms)
+VERSION_CASE {"label":"explicit nightly suffix","exitCode":1,"output":""}
+✔ actual version shell: explicit nightly suffix (1592.3253ms)
+VERSION_CASE {"label":"u32 maximum","exitCode":0,"output":"version_name=429496.72.95\nversion_code=4294967295\nbuild_number=315\n"}
+✔ actual version shell: u32 maximum (513.6526ms)
+VERSION_CASE {"label":"u32 overflow","exitCode":1,"output":""}
+✔ actual version shell: u32 overflow (484.3934ms)
+VERSION_CASE {"label":"major overflow","exitCode":1,"output":""}
+✔ actual version shell: major overflow (2573.1852ms)
+VERSION_CASE {"label":"huge major must not wrap Bash arithmetic","exitCode":1,"output":""}
+✔ actual version shell: huge major must not wrap Bash arithmetic (490.844ms)
+VERSION_CASE {"label":"malformed legacy source","exitCode":1,"output":""}
+✔ actual version shell: malformed legacy source (1384.6572ms)
+VERSION_CASE {"label":"leading zero legacy source","exitCode":1,"output":""}
+✔ actual version shell: leading zero legacy source (450.2982ms)
+VERSION_CASE {"label":"source prerelease suffix","exitCode":1,"output":""}
+✔ actual version shell: source prerelease suffix (539.015ms)
+GATE_CASE {"label":"production locked","exitCode":1}
+✔ actual shell gate: production locked (1079.4442ms)
+GATE_CASE {"label":"production missing approval","exitCode":2}
+✔ actual shell gate: production missing approval (227.738ms)
+GATE_CASE {"label":"production ambiguous mode","exitCode":2}
+✔ actual shell gate: production ambiguous mode (187.7775ms)
+GATE_CASE {"label":"production wrong approval","exitCode":2}
+✔ actual shell gate: production wrong approval (182.7905ms)
+GATE_CASE {"label":"production approved shell gate only","exitCode":0}
+✔ actual shell gate: production approved shell gate only (368.1308ms)
+GATE_CASE {"label":"rehearsal locked","exitCode":0}
+✔ actual shell gate: rehearsal locked (1129.5136ms)
+GATE_CASE {"label":"rehearsal unlocked","exitCode":1}
+✔ actual shell gate: rehearsal unlocked (529.6946ms)
+GATE_CASE {"label":"rehearsal cannot publish","exitCode":1}
+✔ actual shell gate: rehearsal cannot publish (211.3991ms)
+GATE_CASE {"label":"rehearsal retry binds original attempt","exitCode":0}
+✔ actual shell gate: rehearsal retry binds original attempt (160.3527ms)
+✔ actual execute CLI rejects a checks context with exit 2 before any cloud path (1901.8773ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32156.0029

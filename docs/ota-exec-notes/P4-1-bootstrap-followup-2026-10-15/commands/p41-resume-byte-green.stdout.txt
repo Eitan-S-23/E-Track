@@ -1,0 +1,32 @@
+BYTE_FIXTURE {"path":"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\firmware-release-tests\\case-W6edXQ\\prepared","assets":[{"kind":"full","baseImageSha256":"","baseVersionCode":0,"fileName":"e-track-at32f435-v2.8.1-full.etu","sha256":"ce8936c527e367b83ba58f096c7184267e6f0876b9cc26eab61eddf1dc799f7f","sizeBytes":202,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Verified":false},{"baseImageSha256":"074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1","baseVersionCode":20800,"kind":"patch","fileName":"e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","sha256":"69fc9780722496af2d5b5723c4b9f6ba3f3d16f34d21bc55e9e87934d9c2e087","sizeBytes":208,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Verified":false},{"kind":"recovery","baseImageSha256":"","baseVersionCode":0,"fileName":"recovery-v2.8.1.bin","sha256":"0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c","sizeBytes":8200,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Verified":false}],"finalImage":{"fileName":"app-final.bin","sizeBytes":8192,"sha256":"d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5"},"metadataSha256":"18f48dd70b1ac52ae97ae6b2b361f1f135f6a772bdad84027a60c5bae59b282c"}
+✔ real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundtrip (7340.0101ms)
+✔ explicit bootstrap provenance still generates and byte-applies a real patch (7719.042ms)
+✔ bootstrap base timestamp and placeholder sources fail before target preparation (2553.9534ms)
+✔ bootstrap target binding and version monotonicity fail before output creation (316.9376ms)
+✔ approved-envelope reproduction is byte-identical, including canonical provenance (12657.9898ms)
+✔ a fresh generation still uses independent random package nonces (8701.1449ms)
+✔ missing/invalid key fails configuration before outputs (missing) (352.0959ms)
+✔ missing/invalid key fails configuration before outputs (invalid) (292.6522ms)
+✔ wrong cross-stage GCC digest fails before preparation (287.4388ms)
+✔ wrong base image SHA rejects before full/patch/recovery output (1565.9058ms)
+✔ base source drift, wrong version, nightly and ETU sources are rejected (298.4136ms)
+✔ exit zero with a patch stdout failure does not advance to recovery or metadata (5045.5007ms)
+✔ a successful patch tool with wrong candidate bytes is rejected (5184.6676ms)
+✔ damaged recovery trailer fails actual verification before metadata (7087.0597ms)
+✔ builder refuses missing full/recovery assets instead of emitting metadata (301.9871ms)
+✔ output path and unsupported compiled identity fail closed (316.8447ms)
+PREPARATION_CLI {"exitCode":0,"stdout":"{\"ok\":true,\"outputDir\":\"D:\\\\github\\\\my\\\\E-Track\\\\.cache\\\\p41-dev-20261015\\\\.cache\\\\firmware-release-tests\\\\case-IEVpiB\\\\prepared\",\"assetsPrepared\":3,\"r2Verified\":false,\"metadataSha256\":\"ad0b698ded7fc1b3ecd2267085937c134f95423970274f4a467f674839051e72\"}\n","missingKeyExit":2,"missingKeyStderr":"{\"errorCode\":\"INVALID_PARAMETER\",\"message\":\"OTA_AES_KEY must be configured as 32 hex characters\",\"requestId\":\"12f96654-99b7-466b-b061-782a91475557\"}\n"}
+✔ actual preparation CLI returns one JSON result and configuration exit 2 (7247.9405ms)
+✔ rejects ETU outer target drift despite a byte-equal unpack result (3258.2051ms)
+✔ rejects ETU outer base drift despite a byte-equal unpack result (6182.6178ms)
+✔ rejects ETU outer trailer drift despite a byte-equal unpack result (3351.7407ms)
+✔ late asset replacement cannot change the verified metadata identity (6887.4437ms)
+✔ an explicit error overrides a simultaneous success stdout marker (3060.0772ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90231.9375

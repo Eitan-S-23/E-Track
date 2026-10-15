@@ -1229,3 +1229,106 @@ required final blank lines; its full diagnostic remains in
 authored-record/script/JSON whitespace check, `p41-s3-authored-whitespace`,
 returned 0. Original bytes, historical failures and Git's persistent whitespace
 configuration were not changed to suppress those diagnostics.
+
+## Interrupted-Session Follow-Up: Inaugural Source And Bucket Candidate
+
+The identified implementation session's last completed delivery was `a29d0ef`.
+Its later user instruction delegated the absent predecessor and bucket decisions
+to the agent. The subsequent continuation ended with provider errors rather than
+a completed implementation. This follow-up resumes that bounded P4-1 work; it
+does not ask the user to locate a nonexistent formal predecessor or repeat the
+already resolved Cloudflare permission work.
+
+Authenticated read-only GitHub observations in `.cache/github/p41-resume-main.json`
+and `p41-resume-releases.json` confirm main remains `b42d3e25` and E-Track has zero
+Releases. No main merge, tag, Release, deployment, D1/R2/channel operation, secret
+configuration or device action was performed in this follow-up. P3-5, P4-3 and
+P4-4 implementation/configuration tasks were not started.
+
+### Candidate Changes And Decisions
+
+| ID | Disposition and implemented direction | Verification boundary |
+| --- | --- | --- |
+| P41-BOOTSTRAP-01 | Explicit `inaugural-bootstrap-v1` descriptor, independently qualified raw GCC App archive, protected canonical descriptor hash, complete Release inventory and unchanged ordinary formal lookup. No automatic fallback or fictional Release. | Header/raw/placeholder originals independently checked; local source/pipeline and actual patch tests executed. Candidate contract is not yet effective. |
+| P41-BUCKET-01 | Rehearsal admits only `e-track-firmware-p41-test-releases`; production rejects that bucket and protected old `trace-update-staging-releases`. Old Trace setup/publish/backfill consumers stay unchanged. | Six role combinations discriminate the old behavior; full pipeline regression passes. No bucket mutation or new cloud observation. |
+| P41-BOOTSTRAP-02 | Reviewer found that missing execution-target commit could pass the helper. The bootstrap descriptor now requires exact target-commit equality, including rejecting omission before any fetch. | New missing-target negative plus full source/pipeline suite passes; actual CLI always supplies its selected commit. |
+| P41-BOOTSTRAP-RETRY | Existing matching MCU target is forbidden in rehearsal. Only production replay can reach the existing-target exception, retaining the original reference and later full promotion/asset/notes verification before cloud writes. | Exact published/draft retries and conflicts are host transport tests, not production execution. |
+
+The single candidate governance amendment is `OTA-DEC-017`; its canonical fields
+are in `OTA-XC-BOOTSTRAP-BASE`, not a new task Spec or registration schema. The
+current decision stays `PROPOSED`. Only the source-admission and environment
+interfaces, and their P4-1/P4-4 readiness consumers, lose frozen execution
+admission while the candidate is reviewed and awaits authorized integration.
+Previously frozen metadata/Worker/protocol behavior and historical bundles remain
+unchanged. Explicitly authorized development continues under execution contract
+section 7.3.1; candidate review is not formal rehearsal or whole-card acceptance.
+
+The new baseline archive is `P4-1-bootstrap-baseline-2026-10-15/`. Its nine-entry
+inventory SHA-256 is
+`e105229cdd6372998d026187b9b58757719c0ab89a4b1ca086ea9977b4812cab`;
+`provenance.json` SHA-256 is
+`0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28`.
+It preserves the six selected original files and development label. Complete ZIPs,
+API listings and CI step originals are already retained at `a29d0ef` under
+`P4-1-ci-2026-10-15/github/`, so they are referenced without duplication. Source
+run `38642386248`, attempt 1, commit `fa74905e` produced the 605072-byte 3.2.7 raw
+App `aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f`.
+This is not permission to use its development-key packages as release assets.
+
+### Actual Development Feedback
+
+All commands used the existing `.cache/run.cjs`, explicit worktree-relative cwd,
+contained runtime/home/temp/cache paths and uniquely named closed receipts under
+`.cache/logs/`. The representative command suffixes are:
+
+    node node_modules/vitest/vitest.mjs run --config ../../../../../.github/scripts/p41-host.config.mjs
+    node --test tests/ota/test_firmware_release.mjs
+    node --test tests/ota/test_firmware_workflow.mjs
+    python -B -X utf8 tests/ota/test_acceptance_bundle.py PostP26SpecGovernanceTests
+
+| Receipt label | Actual result |
+| --- | --- |
+| `p41-resume-bucket-red` | exit 1; 3 failed, 3 passed, 33 intentionally filtered tests. Preserved evidence of wrong bucket roles. |
+| `p41-resume-bucket-green` | exit 0; 39/39 full host pipeline tests passed. |
+| `p41-resume-bootstrap-red` | exit 1; three positive source tests failed because the new entry did not yet exist; 70 filtered tests. |
+| `p41-resume-bootstrap-green` | exit 0; 73/73 passed before the final mode/tree/omitted-target tightening. |
+| `p41-resume-bootstrap-r2` | exit 0; 90/90 full host pipeline/source tests passed, including later-page conflict, incomplete inventory, raw/Git hashes, links/submodules, bounds, encoding and redirect policy. |
+| `p41-resume-byte-green` | exit 0; 22/22 actual finalize/full/patch/recovery and failure tests passed. Fixtures remain synthetic; not a firmware-scale rehearsal. |
+| `p41-resume-workflow` | exit 0; 42/42 static, actual Bash and CLI tests passed. Checks/nightly still receive no release credentials. |
+| `p41-resume-governance` | exit 1; 23 tests, two failures exposed remaining all-decisions-frozen assumptions and missing interface-state propagation. |
+| `p41-resume-governance-r2` | exit 0; 23/23 passed with exact one-decision/two-consumer candidate expectations, not arbitrary status relaxation. |
+
+Node reports its SQLite experimental warning; it is not hidden. No local compiler
+or Flutter/Gradle build was run. Native workerd, full CI typechecks and GCC remain
+the separate branch-CI gate; their new-commit results are recorded below only
+after the actual runs. Earlier Windows remote-proxy and audit failures remain
+historical open facts, not waived by these local results.
+
+### Next Admitted Work
+
+Commit/push only the independently reviewed exclusive-branch delta using
+`Eitan-S-23`, inspect its actual build/check logs, and preserve the
+new evidence. Form any real bootstrap descriptor only after its archive and
+target commits exist; do not invent commit self-references or silently configure
+an approval variable. Main integration, candidate contract activation, protected
+environment setup and canonical rehearsal remain distinct gates. No user token
+paste or technical bucket choice is required for this development batch.
+
+The independent `/root/p41_bootstrap_review` consolidated review found no
+remaining blocking defect and closed P41-BOOTSTRAP-02. It checked all six selected
+files against committed ZIP members, all nine baseline inventory entries, all
+29 follow-up inventory entries against original cache files, composed-provenance
+semantic identity and actual host/byte/workflow/governance outputs. Only candidate
+maturity is now `REVIEWED`; the decision remains `PROPOSED`, formal dispatch is
+still unadmitted, and P4-1/P4-4 are not completed. The source/byte self-tests are
+not mislabelled as independently executed cloud observations.
+
+The verbatim final review and its snapshot hashes are retained in
+`P4-1-bootstrap-followup-2026-10-15/independent-final-review.json`. The subsequent
+archive-schema check passed on the actual selected raw App and provenance;
+`remoteDownload` remains `NOT_RUN`. After the permitted maturity-only annotation,
+`p41-resume-governance-reviewed` passed 23/23. Both complete receipt/log triplets,
+the final review and the byte-preservation attributes have a separate
+`post-review-inventory.json`; the original baseline and 29-entry follow-up
+inventories are unchanged. Later closeout annotations are explicitly outside
+the reviewer's 16-file diff snapshot, not retroactively claimed as reviewed.

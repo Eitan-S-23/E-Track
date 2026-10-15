@@ -33,6 +33,7 @@ task_id: P4-4
 
 - `OTA-XC-SECRETS`
 - `OTA-XC-RELEASE-GATE`
+- `OTA-XC-BOOTSTRAP-BASE`
 - `OTA-XC-SECURITY`
 - `OTA-XC-R2-IMMUTABILITY`
 - `OTA-XC-RETRY-POLICY`
@@ -48,6 +49,7 @@ task_id: P4-4
 
 - 用户输入 secret/variable 到平台配置界面；agent 只验证名称存在性、权限结果和工作流脱敏输出。
 - workflow 读取 GitHub secrets/variables，Wrangler 调 Cloudflare，register client 调 Worker。
+- 首发候选配置须消费 `OTA-XC-BOOTSTRAP-BASE` 的非正式 descriptor/审批摘要，演练桶改名不能让旧 Trace 桶进入 production；不得自行回退或修改旧服务。这只是 P4-1 交付接口传播，不启动本卡或授予配置操作。
 - 输出为平台侧配置清单（只含名称/是否存在/权限范围描述）、environment 审批证据和 P4-1 run 结果。
 
 ## 状态机与生命周期所有者
@@ -111,4 +113,4 @@ task_id: P4-4
 
 ## 阻断性决策
 
-- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。
+- `OTA-DEC-017`：共享首发来源/演练桶候选修订的独立复核、获权集成和生效尚未完成。具体资格只引用看板 readiness 本行，不因 P4-1 的开发验证而自动获准。

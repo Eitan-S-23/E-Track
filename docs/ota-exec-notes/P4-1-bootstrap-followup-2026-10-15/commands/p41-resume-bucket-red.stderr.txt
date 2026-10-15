@@ -1,0 +1,40 @@
+(node:24432) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket e-track-firmware-p41-test-releases admitted=true
+Error: Staging and production bucket bindings must remain isolated
+ ❯ releaseConfig ../scripts/firmware-release-pipeline.mjs:41:99
+     39|   try { url = new URL(env.TRACE_UPDATE_SERVICE_URL); } catch { throw n…
+     40|   if (url.protocol !== "https:" || url.username || url.password || url…
+     41|   if ((mode === "rehearsal") !== (env.TRACE_R2_BUCKET === "trace-updat…
+       |                                                                                                   ^
+     42|   let canonicalRunId = env.GITHUB_RUN_ID;
+     43|   if (mode === "production") {
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:252:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'INVALID_PARAMETER', exitCode: 2, requestId: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket trace-update-staging-releases admitted=false
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket e-track-firmware-p41-test-releases admitted=false
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:253:48
+    251|       OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256: "2".repeat(64) };
+    252|     if (admitted) expect(releaseConfig(selected)).toMatchObject({ mode…
+    253|     else expect(() => releaseConfig(selected)).toThrow(/bucket binding…
+       |                                                ^
+    254|     expect(s.calls).toEqual([]);
+    255|     expect(s.github.publish).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+

@@ -751,11 +751,12 @@
 ## 7. P4 CI/CF(估时 2-3d;门槛:P0 完成,可与 P1/P2 并行;验收:正式发布→推送→BLE 升级全链演练)
 
 #### P4-1 firmware-build.yml 正式发布链
-状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-15(开发候选及 cd4f2e4 的实际 CI 已验证；独立测试环境的三资产真实 S3 上传/全字节回读及 register 201/200/409 已通过，9 项资格测试通过且渠道未发布；测试侧 S3 适配器未替代正式上传代理资格，正式基版、canonical rehearsal、完整生产零副作用及整卡独立验收仍 NOT_RUN，未合入 main)
+状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-15(原 a29d0ef 已完成隔离三资产真实 S3/注册资格；中断恢复后自主核验真实 GCC 首发基线并实施 OTA-DEC-017 候选来源/桶修订，候选自测与独立复核继续；正式上传代理、canonical rehearsal、完整生产零副作用和整卡独立验收仍未完成，未合入 main)
 - 目标: §6.1 制包顺序①-⑥:构建占位头 app.bin→`etu_pack.py --finalize`→full.etu+patch.etu(基版=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→**bspatch 自验逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)**→recovery 资产(app.bin+尾 8B)→GitHub Release 三资产→注册链;`firmware-production` environment 人工审批;vcode>CF 现值校验;PRE-1 新编码。
 - 依赖: PRE-3/4、P0-2、P4-2；P4-2 是前置任务，P4-1 不得先行。
 - 验收: P5 前按 OTA-XC-RELEASE-GATE 完成一次获授权的隔离 staging rehearsal，三资产/readback/metadata/注册及生产零副作用证据齐全；不创建 production Release。与 P4-4 共用这次原件。正式 Release/晋升在 P5 通过及 owner/environment 审批后，仍须规定的重建与哈希一致性检查。
 - 证据: `docs/ota-exec-notes/P4-1-implementation-2026-10-15.md`；专属分支 `dev/p4-1/unattended-20261015`，仅后续获授权的独立测试云资源发生设置；不合入 main、不操作设备、旧 Trace 服务或生产资源。
+- 候选修订: `OTA-DEC-017` 只解除首发无前版的规则循环并隔离旧 Trace 桶；完整来源字段见 `OTA-XC-BOOTSTRAP-BASE`。开发不要求用户提供不存在的 Release；获权主线集成和重新冻结前不执行修订下的正式演练，不把本次自测或基线核验写成整卡完成。
 - 开发交付: 原开发 PR 宿主脚本/迁移 34、编排 33、原生 workerd 156、制包 8、golden 9、workflow 39、字节 19 均通过；GCC App/Boot 与真实 GCC 开发制包通过，主治理套件 126/126。firmware 38655458519、governance 38655458363、backend 38655458606、App 路径检测 38655458526 均成功且发布/部署跳过。两批归档分别保留原始 dispatch 和 PR 红绿证据；编译/链接 640 条 warning、vendor 6 条 warning 不隐藏。后续 cd4f2e4 的 38677391835 另验证 41 项 workflow 测试并输出 CI Worker bundle；独立测试环境、55 文件新原件及未运行项见同一任务记录。正式基版、隔离 rehearsal、整卡独立验收及 P41-AUDIT-01 归因均未冒充完成。
 
 #### P4-2 D1 多资产模型与 latest 选包
@@ -809,7 +810,7 @@
 <!-- post-p2-6-readiness:start -->
 ## 8.1 P2-6 后 OTA Spec readiness 矩阵
 
-本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。用户已批准 `OTA-DEC-001` 至 `OTA-DEC-012`，并按记录 10/11 增补任务边界和 Android 后台 OTA 要求，共享合同成熟度为 `FROZEN`：P3/P4 任务的内容状态为 `READY`，P5 验收任务为 `DEFERRED_ACCEPTANCE`。派单资格由内容状态、规范成熟度和实际依赖共同派生；当前可派单集合为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P3-8`、`P4-1`、`P4-2`，均为 `DISPATCHABLE`（历次解锁、2026-09-15 P3-8 立卡及 `P4-1-DISPATCH-20261015` 已登记 §9；已完成卡的资格不表示重开）。生产部署仍须等待 P5 验收，不因规范冻结而解锁；派单资格也不授予真机操作。
+本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。既有已批准规范保持 `FROZEN`；`OTA-DEC-017` 候选修订的两个消费者 `P4-1`/`P4-4` 为 `REVIEWED`，仅表示精确候选已获独立复核，不得据此启动正式执行。P3/P4 内容为 `READY`，P5 为 `DEFERRED_ACCEPTANCE`。派单资格由内容、规范成熟度和实际依赖共同派生；当前可派单集合精确为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P3-8`、`P4-2`（历次变化及本次候选边界见 §9；已完成卡不重开）。按执行合同 §7.3.1 明确授权的 P4-1 既有开发、自测、审查及专属分支交付继续，不把正式准入反套为停止开发的条件。P4-4 未启动；生产/P5/设备权限不变。
 
 依赖方向统一解释为“前置任务 -> 后置任务”。用户裁定固定新增 `P4-2 -> P4-1`、`P4-2 -> P3-5`；P4-1 与 P3-5 之间无自动依赖，P4-2 不依赖 P4-1。
 
@@ -823,10 +824,10 @@
 | 6 | P3-6 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-6-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1 已完成并合入 main，两套 BLE 测试文件已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 7 | P3-7 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-7-implementation.md |  | `OTA-XC-BLE-LIFECYCLE` | READY | FROZEN | SATISFIED | P3-1、P3-6 均已完成并合入 main，三条待接脚本已是跟踪文件 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 8 | P3-8 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-8-implementation.md |  | `OTA-XC-ANDROID-OTA-BACKGROUND`, `OTA-XC-OTA-PROGRESS`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | SATISFIED | P3-3 已完成并合入 main；设备操作须另批 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | PRE-3/4、P0-2、P4-2 已完成并交付 main；开发验证及后续独立测试环境设置已授权，正式 rehearsal/生产门槛不变 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
+| 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-BOOTSTRAP-BASE`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | REVIEWED | SATISFIED | 既有产品依赖已完成；候选来源/桶已独立复核，仍待获权主线集成并重新冻结，已授权开发验证继续 | NOT_DISPATCHABLE | OTA-DEC-017_CANDIDATE_NOT_EFFECTIVE |
 | 10 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
-| 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1 工作流接口、P4-2 目标环境就绪，再共用 rehearsal | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1, P4-2 |
+| 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE`, `OTA-XC-BOOTSTRAP-BASE` | READY | REVIEWED | BLOCKED_BY_DEPENDENCY | P4-1 工作流接口、P4-2 目标环境及 OTA-DEC-017 生效后再共用 rehearsal；本卡未启动 | NOT_DISPATCHABLE | OTA-DEC-017_CANDIDATE_AND_COMPONENT_DEPENDENCIES |
 | 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS`, `OTA-XC-BLE-TUNING` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用候选/rehearsal阶段完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
 | 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
 | 15 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
@@ -894,6 +895,8 @@
 | 2026-09-15 | P3-4/P3-8 / Codex 需求治理 | 用户要求 BLE 提速及 Android 后台 OTA/状态栏进度；现有逐分片发现热点未实测定因，后台是主动安全暂停 | OTA-DEC-014/记录 11：P3-4 增加链路诊断与最小热点优化，新增 P3-8 前台服务实际接管/安全回退/durable 通知；同步 AGENTS、共享合同、Spec、readiness 精确派单集合及治理回归 | 用户明确要求写入项目规范；旧 BLE 性能门槛和 P3-3-v9 冻结包不变；P3-8 只依赖 P3-3，P3-5 仍等待 P3-4/P4-2，不增加硬件或远端授权 | 已落盘；首跑 37 项、复核修订后 22 项宿主治理测试通过，独立复核两项发现关闭；远端 CI/产品实测 NOT_RUN |
 | 2026-09-16 | P3-4/P3-8 / Codex 规范 Git 收口 | 用户明确授权提交、推送本会话规范改动并要求新 agent 派工提示词 | 精确提交 9 份已复核文件为 d5a0b58，使用 Eitan-S-23 推送 main；自然触发治理回归与路径检测，随后独立回写 CI/收口记录 | 不改产品、历史冻结包或 CI；旧未跟踪资产保留；本次授权不外延至新 agent 的设备实验、发布或主干操作 | 规范已入 main；治理 CI 35008183321 success，243 项宿主测试及 P2-6 探针通过；两卡仍待办，产品实测 NOT_RUN |
 | 2026-10-15 | P4-1 / Codex 实现 agent / `P4-1-DISPATCH-20261015` | P4-2 已独立实现验收并交付 main，P4-1 readiness 行已更新但精确可派单集合及本表未同步，实际 PR 治理回归失败 | 仅将 P4-1 加入精确集合并登记本次开发验证派单；保留集合相等断言，不修改冻结合同或其他任务状态 | 依据用户本次仅推进 P4-1 的明确派单及 `docs/ota-exec-notes/P4-2-acceptance-2026-10-15.md`，承接 main `b42d3e25db85d6aba397cb4d0fb34bb5b653904f`；P3-5 暂不开展是用户安排而非新增依赖，P4-3/P4-4 不启动；真实 rehearsal、P5/生产及独立验收门槛不变 | 已登记/开发修复与验证中 |
+
+| 2026-10-15 | P4-1 / Codex 中断恢复 / `P41-BOOTSTRAP-01`、`P41-BUCKET-01` | 无上一正式 MCU Release 的循环前置和旧 Trace 桶占用 | OTA-DEC-017 候选首发 provenance/归档/审批摘要及独立桶角色校验；只把 P4-1/P4-4 的候选治理准入改为待复核，其他卡冻结/状态不变 | 用户明确把前版/桶技术决定委托给 agent；既有分支开发/CI 授权继续，不授权 main、生产/设备或启动 P4-4；候选独立审阅不等于正式冻结或整卡完成 | 候选实施与实际自测中，正式执行仍未准入 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
 

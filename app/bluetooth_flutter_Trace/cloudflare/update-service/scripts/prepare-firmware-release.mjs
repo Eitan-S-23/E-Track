@@ -9,6 +9,7 @@ import { args, CliError, failure, outputPath, projectRoot, required, writeOutput
 import { assetFileName, canonicalJson, FIRMWARE_MODEL, parseFirmwareRegistration, sha256, versionCodeFor } from "./firmware-schema.mjs";
 
 export const digest = bytes => createHash("sha256").update(bytes).digest("hex");
+export const BOOTSTRAP_PROVENANCE = "inaugural-bootstrap-v1";
 const badInput = message => new CliError(message, "INVALID_PARAMETER", 1);
 export const readyProjection = value => parseFirmwareRegistration({ ...value,
   assets: value.assets.map(asset => ({ ...asset, r2Verified: true })) });
@@ -30,19 +31,78 @@ export async function captureBuildInputs({ app, boot, commitSha, versionName, bu
     app: await fileIdentity(app), boot: await fileIdentity(boot) };
 }
 
-export function validateBaseDescriptor(base, targetVersion, repository) {
-  if (!base || base.isFormalRelease !== true || !["app", "recovery"].includes(base.kind)
+export function validateBaseDescriptor(base, targetVersion, repository, targetCommit) {
+  if (!base || !["app", "recovery"].includes(base.kind)
     || base.versionCode !== versionCodeFor(base.versionName) || base.versionCode >= versionCodeFor(targetVersion)
-    || base.releaseTag !== `mcu-${FIRMWARE_MODEL}-v${base.versionName}` || !/^[0-9a-f]{40}$/.test(base.commitSha)) {
-    throw badInput("Base must identify the preceding formal finalized App");
+    || !/^[0-9a-f]{40}$/.test(base.commitSha)) {
+    throw badInput("Base must identify a lower-version finalized App");
   }
   for (const key of ["imageSha256", "sourceSha256"]) sha256(base[key], key);
   if (!Number.isSafeInteger(base.sourceSizeBytes) || base.sourceSizeBytes <= 0) throw badInput("Invalid base length");
+  if (base.provenanceKind === BOOTSTRAP_PROVENANCE) {
+    const keys = ["provenanceKind", "isFormalRelease", "kind", "versionName", "versionCode", "commitSha", "buildTimestamp",
+      "imageSha256", "sourceSha256", "sourceSizeBytes", "sourceUrl", "archiveCommit", "archivePath", "sourceRunId",
+      "sourceRunAttempt", "sourceArtifactId", "sourceArtifactSha256", "provenanceSha256", "targetVersionName", "targetCommitSha"];
+    if (canonicalJson(Object.keys(base).sort()) !== canonicalJson(keys.sort()) || base.isFormalRelease !== false
+      || base.kind !== "app" || base.imageSha256 !== base.sourceSha256 || base.sourceSizeBytes < 0x460
+      || base.sourceSizeBytes > 0xf0000 || !/^[0-9a-f]{40}$/.test(base.archiveCommit)
+      || !/^docs\/ota-exec-notes\/P4-1-bootstrap-baseline-[a-z0-9-]{1,64}$/.test(base.archivePath)
+      || base.targetVersionName !== targetVersion || !/^[0-9a-f]{40}$/.test(base.targetCommitSha)
+      || base.targetCommitSha !== targetCommit
+      || !Number.isSafeInteger(base.buildTimestamp) || base.buildTimestamp < 0 || base.buildTimestamp > 0xffffffff) {
+      throw badInput("Invalid explicit inaugural bootstrap provenance or target identity");
+    }
+    for (const key of ["sourceRunId", "sourceRunAttempt", "sourceArtifactId"]) {
+      if (typeof base[key] !== "string" || !/^[1-9][0-9]*$/.test(base[key]) || !Number.isSafeInteger(Number(base[key]))) {
+        throw badInput("Invalid bootstrap CI identity");
+      }
+    }
+    for (const key of ["sourceArtifactSha256", "provenanceSha256"]) sha256(base[key], key);
+    if (base.sourceUrl !== `https://raw.githubusercontent.com/${repository}/${base.archiveCommit}/${base.archivePath}/app-final.bin`) {
+      throw badInput("Bootstrap source must be an immutable same-repository archive");
+    }
+    return base;
+  }
+  if (base.provenanceKind !== undefined || base.isFormalRelease !== true
+    || base.releaseTag !== `mcu-${FIRMWARE_MODEL}-v${base.versionName}`) {
+    throw badInput("Base must identify the preceding formal finalized App");
+  }
   const name = base.kind === "recovery" ? assetFileName("recovery", base.versionName) : "X-Track-App-GCC.bin";
   if (base.sourceUrl !== `https://github.com/${repository}/releases/download/${base.releaseTag}/${name}`) {
     throw badInput("Base source must be a pinned formal Release App or recovery, never nightly or ETU");
   }
   return base;
+}
+
+export function validateBootstrapProvenance(base, proof, repository) {
+  const run = proof?.run, artifact = proof?.artifact, verified = proof?.verification;
+  const build = verified?.build, development = proof?.developmentOnly;
+  if (proof?.schemaVersion !== 1 || proof.provenanceKind !== BOOTSTRAP_PROVENANCE || proof.repository !== repository
+    || String(run?.id) !== base.sourceRunId || String(run.run_attempt) !== base.sourceRunAttempt
+    || run.path !== ".github/workflows/firmware-build.yml" || run.event !== "workflow_dispatch"
+    || run.status !== "completed" || run.conclusion !== "success" || run.head_sha !== base.commitSha
+    || run.repository?.full_name !== repository || run.head_repository?.full_name !== repository
+    || !Number.isSafeInteger(run.repository?.id) || run.repository.id <= 0 || run.head_repository.id !== run.repository.id
+    || String(artifact?.id) !== base.sourceArtifactId || artifact.name !== `p41-gcc-development-${base.commitSha}`
+    || artifact.digest !== `sha256:${base.sourceArtifactSha256}` || artifact.workflow_run?.id !== run.id
+    || artifact.workflow_run.repository_id !== run.repository.id || artifact.workflow_run.head_repository_id !== run.repository.id
+    || artifact.workflow_run.head_sha !== base.commitSha || artifact.workflow_run.head_branch !== run.head_branch
+    || verified?.ok !== true || verified.commitSha !== base.commitSha || verified.runId !== base.sourceRunId
+    || verified.versionName !== base.versionName || verified.base !== null || verified.fullByteEqual !== true
+    || verified.patchByteEqual !== null || verified.recoveryVerified !== true || verified.r2Verified !== false
+    || verified.finalImage?.fileName !== "app-final.bin" || verified.finalImage.sha256 !== base.imageSha256
+    || verified.finalImage.sizeBytes !== base.sourceSizeBytes || build?.commitSha !== base.commitSha
+    || build.versionName !== base.versionName || build.versionCode !== base.versionCode || build.buildTimestamp !== base.buildTimestamp
+    || build.app?.fileName !== "X-Track-App-GCC.bin" || build.app.sizeBytes !== base.sourceSizeBytes
+    || build.boot?.fileName !== "X-Track-Boot.bin" || !Number.isSafeInteger(build.boot.sizeBytes)
+    || build.boot.sizeBytes <= 0 || build.boot.sizeBytes > 0x10000
+    || development?.installable !== false || development.formalBase !== "NOT_USED"
+    || development.rehearsal !== "NOT_RUN" || development.remoteEffects !== "NOT_RUN") {
+    throw badInput("Archived bootstrap CI/build/development provenance mismatch");
+  }
+  sha256(build.app.sha256, "bootstrap GCC App SHA");
+  sha256(build.boot.sha256, "bootstrap Boot SHA");
+  return proof;
 }
 
 export async function prepareFirmwareRelease({ root, app, boot, build, release, repository,
@@ -60,11 +120,11 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
     versionName: release.versionName, buildTimestamp: build.buildTimestamp });
   if (canonicalJson(observedBuild) !== canonicalJson(build)) throw badInput("Cross-stage GCC input identity mismatch");
   if (base) {
-    validateBaseDescriptor(base, release.versionName, repository);
+    validateBaseDescriptor(base, release.versionName, repository, release.commitSha);
     const source = await fileIdentity(baseFile);
     if (source.sha256 !== base.sourceSha256 || source.sizeBytes !== base.sourceSizeBytes) throw badInput("Base source byte identity mismatch");
     if (!bsdiff || !existsSync(bsdiff)) throw new CliError("A validated bsdiff executable is required for patch generation");
-  } else if (baseFile) throw new CliError("Base file requires its formal provenance descriptor");
+  } else if (baseFile) throw new CliError("Base file requires its provenance descriptor");
   const out = outputPath(root, outputDir);
   if (existsSync(out)) throw new CliError("Use a fresh output directory; do not overwrite a prior attempt");
   const names = [assetFileName("full", release.versionName),
@@ -101,7 +161,10 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   }
   let baseApp;
   if (base) {
-    await verify(baseFile, base.kind, base.versionName, base.imageSha256, "base-verify");
+    const fields = await verify(baseFile, base.kind, base.versionName, base.imageSha256, "base-verify");
+    if (base.provenanceKind === BOOTSTRAP_PROVENANCE && fields.build_ts !== base.buildTimestamp) {
+      throw badInput("Bootstrap base build timestamp differs from its CI provenance");
+    }
     baseApp = path.join(out, "work", "base-final.bin");
     await run("base-extract", "Tools/jlink/prepare-bootstrap-app.py", ["prepare", "--input", baseFile,
       "--input-kind", base.kind, "--output", baseApp], "P1_5_APP_PREPARE=PASS");

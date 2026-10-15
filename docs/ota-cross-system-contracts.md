@@ -1,16 +1,17 @@
 # P2-6 后 OTA 跨系统合同
 
-本文是 MCU、Flutter、HTTP、D1、GitHub Actions、R2 和 admin 之间的冻结共享规范。本文不覆盖 `docs/ota-binary-contracts.md` 的 BLE/.etu 字节定义，也不改变 `PLAN-OTA.md` 或 `PLAN-OTA-EXEC.md` 的任务范围。
+本文保存 MCU、Flutter、HTTP、D1、GitHub Actions、R2 和 admin 之间的冻结共享规范，以及下方明确标注的候选修订。本文不覆盖 `docs/ota-binary-contracts.md` 的 BLE/.etu 字节定义。
 
 - 规范层级：用户批准的冻结规范；冻结授权记录在 `docs/ota-spec-decisions.md` 记录 9。
 - 本轮新增条款成熟度：`FROZEN`。
+- 2026-10-15 候选修订：`OTA-DEC-017` 的首发基线与演练桶变更为 `REVIEWED`，仅表示本分支精确候选已获独立复核；主线集成并重新冻结前不得据此执行正式 rehearsal 或 production。上行冻结声明只覆盖既有已批准条款，不把本候选修订或历史实测变成已生效规范。
 - 二进制协议唯一来源：`docs/ota-binary-contracts.md`，本文只引用其章节和语义，不复制字节偏移表。
 - 任务状态唯一来源：`PLAN-OTA-EXEC.md` 的 P2-6 后 readiness 矩阵；本文不保存任务级 readiness 或派单资格。
 - 决策过程索引：`docs/ota-spec-decisions.md`。`OTA-DEC-001` 至 `OTA-DEC-012` 均为 `DECIDED`，对应裁定已传播到本文。本文冻结只授权符合 readiness 与依赖条件的任务派单，不授权生产部署；生产部署仍须等待 P5 验收。
 - 2026-09-15 增补：按用户要求及 `OTA-DEC-014` / 决策记录 11，增加 P3-4 链路诊断与 P3-8 Android 后台 OTA/通知要求。增补只约束后续实现和验收，不追溯改写 P3-3-v9 或其他历史冻结包，也不授予新的远端或真机操作权限。
 - 2026-10-13 验收组织按 `OTA-DEC-016`：候选阶段与最终长测分开，独立核验已有原件而非重复操作；P4 以隔离 rehearsal 进入 P5，生产晋升仍在 P5 之后。数值/协议门槛和历史冻结包不变。
 
-文中“必须”“不得”“仅”表示冻结规范性条款；“例如”“建议实现”“当前入口”属于非规范性说明。各条款的“裁定依据”只保留决定来源和审计链，不再构成决定阻断；实现和派单资格仍以 `PLAN-OTA-EXEC.md` readiness 矩阵为唯一来源。
+已生效条款中的“必须”“不得”“仅”表示冻结规范性要求；“例如”“建议实现”“当前入口”属于非规范性说明。候选修订中的相同用词描述待审执行合同，不授予执行资格。实现和派单资格仍以 `PLAN-OTA-EXEC.md` readiness 矩阵为唯一来源。
 
 ## 1. 范围与非目标
 
@@ -35,7 +36,7 @@
 
 ## 2. 接口矩阵
 
-所有行的 `clause_maturity` 均取其所引用条款的最低成熟度。`interface_completeness` 只允许 `COMPLETE`、`INCOMPLETE` 或 `BLOCKED_BY_DECISION`。本轮决定均已冻结，因此所有当前接口行为 `COMPLETE`，`clause_maturity=FROZEN`，`blocking_decisions` 为空；未来若出现新的 `OPEN` 或 `PROPOSED` 决定，必须重新传播决定阻断并降低对应接口成熟度。
+所有行的 `clause_maturity` 均取其所引用条款的最低成熟度。`interface_completeness` 只允许 `COMPLETE`、`INCOMPLETE` 或 `BLOCKED_BY_DECISION`。仅 `OTA-DEC-017` 的来源准入和配置接口传播候选阻断；其余已冻结接口不受影响。来源准入与 P4-2 不变的注册 metadata 分行表示，不把来源例外写入注册 schema。
 
 | Producer | Consumer | 传输介质 | 条款 ID | schema 或结构引用 | 生命周期所有者 | 错误语义 | 幂等规则 | 兼容规则 | interface_completeness | clause_maturity | blocking_decisions | affected_tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -46,13 +47,14 @@
 | Flutter BLE transport | MCU BLE transport | FFF2 下行/FFF1 上行 | `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-BLE-TUNING`, `OTA-XC-FLUTTER-TRANSPORT` | `docs/ota-binary-contracts.md` §5 | Flutter 管发送窗口，MCU 管 session/staging durable 状态 | 状态码唯一来源为二进制合同 §5.7 | 已提交 DATA 重传按 §5.5 幂等 | proto/max window 由 `INFO` 协商 | `COMPLETE` | `FROZEN` | — | `P3-1`, `P3-3`, `P3-4`, `P3-5`, `P3-8`, `P5-1`, `P5-2` |
 | OTA runtime | Android foreground service / UI / notification | 平台桥接与只读任务快照 | `OTA-XC-ANDROID-OTA-BACKGROUND`, `OTA-XC-OTA-PROGRESS` | 本文任务键、接管确认与阶段进度语义 | 同一 OTA 任务的唯一执行所有者；页面与通知只投影状态 | 接管失败安全回退，旧代次事件拒绝；不伪造 BLE 状态码 | 同任务接管/停止幂等，不影响其他任务 | 仅 Android 后台能力；其他平台保持安全回退 | `COMPLETE` | `FROZEN` | — | `P3-8` |
 | Flutter / MCU timing probes | P3-4 experiment runner | 单调计时与原始日志 | `OTA-XC-BLE-PERFORMANCE`, `OTA-XC-BLE-TUNING` | 分阶段耗时、调用次数、链路与资产身份 | 各时钟域独立测量；实验 runner 汇总 | 缺日志或时钟无效不能宣告提速 | 同一输入组可独立复放，不混组 | 不改变冻结线端协议和生产门槛 | `COMPLETE` | `FROZEN` | — | `P3-4` |
-| GitHub Actions release job | metadata builder | 文件 + JSON | `OTA-XC-RELEASE-CLI`, `OTA-XC-ASSET-NAMING`, `OTA-XC-RELEASE-METADATA` | `FirmwareReleaseRegistration` | release job | 任一步非零即整链失败 | 相同输入产生相同 canonical metadata | schema v2；未知资产 kind 拒绝 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
+| GitHub immutable baseline archive | release base client | 固定 Git commit/blob + 原始 App | `OTA-XC-BOOTSTRAP-BASE`, `OTA-XC-RELEASE-CLI` | 显式非正式首发 descriptor、原件和审批摘要 | 发布责任人/独立审查人；client 校验来源 | 拒绝缺批准/来源/字节不一致，不自动回退 | 精确首发目标；现有目标仅批准 production 重试 | 不改 P4-2 metadata、镜像摘要域或制包格式 | `BLOCKED_BY_DECISION` | `REVIEWED` | `OTA-DEC-017` | `P4-1`, `P4-4` |
+| GitHub Actions release job | metadata builder | 文件 + JSON | `OTA-XC-ASSET-NAMING`, `OTA-XC-RELEASE-METADATA` | `FirmwareReleaseRegistration` | release job | 任一步非零即整链失败 | 相同输入产生相同 canonical metadata | schema v2；未知资产 kind 拒绝 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
 | GitHub Actions R2 uploader | R2 immutable object | Wrangler/R2 object write | `OTA-XC-R2-UPLOAD`, `OTA-XC-R2-IMMUTABILITY` | `R2AssetUploadResult` | uploader 负责 put、HEAD/readback 和机器结果 | 失败输出稳定 JSON 且不得继续注册 | 同 key 同长度/摘要为 `ALREADY_PRESENT` | 媒体类型、长度和 RFC 9530 摘要稳定 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
 | register client | Worker register API | HTTPS JSON | `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-METADATA`, `OTA-XC-SECURITY` | `FirmwareReleaseRegistration` / `FirmwareReleaseRegistrationResult` | Worker | `OTA-XC-HTTP-ERROR` | 完全相同 metadata 重放返回 200 | schema v2；未知字段拒绝 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2`, `P4-4` |
 | register API | D1/R2 | D1 batch + R2 HEAD/readback | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-STATE`, `OTA-XC-D1-MIGRATION`, `OTA-XC-R2-IMMUTABILITY` | release、asset、channel、audit 记录 | Worker | 验证失败不产生 ready release | `OTA-XC-IDEMPOTENCY` | manifest 可验证记录进入 v2；其余 legacy 隔离 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-2` |
 | D1 latest state | Worker latest API | D1 query | `OTA-XC-ASSET-SELECTION`, `OTA-XC-D1-RETENTION` | ready release + available assets + channel revision | Worker | 不完整/不可用资产不得返回 | 只读 | recovery 永不自动分发；引用保护后才可清理 | `COMPLETE` | `FROZEN` | — | `P3-3`, `P3-5`, `P4-2`, `P4-3`, `P5-1`, `P5-2` |
 | admin operator | firmware channel/release | Access-authenticated HTTPS | `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-IDEMPOTENCY`, `OTA-XC-D1-RETENTION` | `FirmwareAdminListResponse`, `FirmwareAdminChannelMutationRequest/Result`, `FirmwareAdminReleaseActionRequest/Result`, `FirmwareAdminRecoveryDownloadResult` | admin API | `OTA-XC-HTTP-ERROR`；CAS/幂等冲突不得部分更新 | channel 使用 expectedRevision；release action 使用 `Idempotency-Key` | channel 只指向 ready；recovery 仅 token v2 | `COMPLETE` | `FROZEN` | — | `P4-2`, `P4-3`, `P5-2` |
-| GitHub environment/secrets | release job | Actions secret/variable | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | `firmware-rehearsal` / `firmware-production` environment | 仓库 owner/发布责任人 | 缺项或证据不一致必须硬失败 | 配置重放不产生资产 | rehearsal 与 production 凭据和资源隔离 | `COMPLETE` | `FROZEN` | — | `P4-1`, `P4-4` |
+| GitHub environment/secrets | release job | Actions secret/variable | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE` | `firmware-rehearsal` / `firmware-production` environment | 仓库 owner/发布责任人 | 缺项或证据不一致必须硬失败 | 配置重放不产生资产 | rehearsal 与 production 凭据和资源隔离 | `BLOCKED_BY_DECISION` | `REVIEWED` | `OTA-DEC-017` | `P4-1`, `P4-4` |
 
 ## 3. 设备身份与字段映射
 
@@ -104,7 +106,7 @@ MCU、Dart、JSON、SQL 的摘要字符串统一为 64 个小写十六进制字�
 
 | 名称 | 算法与覆盖字节 | 正确来源/流向 | 禁止流向 |
 |---|---|---|---|
-| `.etu base_sha8` | SHA-256(上一正式版最终 `app.bin` 全部 `image_len` 字节) 的前 8B | 只供 .etu 外层头的差分基版快速拒绝，并与当前设备 raw 镜像 SHA 前 8B 比较 | 不得写入 `INFO.image_sha256`、latest、D1 `target_image_sha256` 或 asset 摘要 |
+| `.etu base_sha8` | SHA-256(获准差分基版最终 `app.bin` 全部 `image_len` 字节) 的前 8B；常规来源为上一正式版，首发候选例外见 `OTA-XC-BOOTSTRAP-BASE` | 只供 .etu 外层头的差分基版快速拒绝，并与当前设备 raw 镜像 SHA 前 8B 比较 | 不得写入 `INFO.image_sha256`、latest、D1 `target_image_sha256` 或 asset 摘要 |
 | `ETSL.sha8` | 写入 candidate/backup/recovery 槽的 `fw_header.image_sha256` 双零法完整摘要的前 8B | 只供片上槽头完整性/快速识别和启动前槽校验；槽校验必须与同一 header digest 的前 8B 比较 | 不得作为 patch 基版完整身份、latest 查询值或 release target identity |
 | 包/patch header digest | `fw_header.image_sha256` 的 SHA 双零法：完整镜像中 `image_sha256` 与 `header_crc32` 字段按全零参与 | 只供 Boot/header 校验、槽头 `sha8` 填充和 `verify-fw-header` 证据 | 不得进入 `INFO.image_sha256`、latest、patch `baseImageSha256` 或 release target |
 | `candidateImageSha8` | candidate apply 结果的 `fw_header.image_sha256` 双零法完整摘要的前 8B；与该 candidate ETSL.sha8 同域同值 | 只作本地/证据层的 header-integrity 截断别名，可与 candidate `ETSL.sha8` 交叉核对 | 不得替代 32B raw SHA，不得签发 URL 或作为 D1 唯一键 |
@@ -850,7 +852,7 @@ deviceModel/role 使用小写，版本数字保持规范版本原样。完整 AS
 P4-1 必须把现有脚本扩展成一次处理资产数组的确定性链。规范输入：
 
 - 占位头 GCC App bin、版本名、由冻结公式派生的 versionCode、build timestamp。
-- 上一正式版最终 App bin 及其版本码/镜像摘要。
+- 上一正式版最终 App bin 及其版本码/镜像摘要；仅首次发布谱系可按候选 `OTA-XC-BOOTSTRAP-BASE` 使用独立核验的非正式首发基线，不自动回退到任意 CI 产物。
 - releaseTag、commitSha、canonical provenance runId、release notes、deviceModel、target hardware；首次 production promotion 的 provenance runId 固定为已批准 rehearsal runId。
 - `OTA_AES_KEY` secret；不得把 key 放入参数回显、metadata 或 artifact。
 - 资产输出目录和 metadata 输出路径。
@@ -866,6 +868,53 @@ P4-1 必须把现有脚本扩展成一次处理资产数组的确定性链。规
 - `1`：输入、摘要、制包、自验、上传、回读、注册或幂等冲突失败。
 
 任何失败都不得继续发布后续资产或把 release 标 ready。
+
+### OTA-XC-BOOTSTRAP-BASE
+
+候选依据：`OTA-DEC-017`。生效边界见本文开头；本条不是历史正式 Release 的补造，也不授予演练、生产、设备或主线合并权限。
+
+#### 范围与入口
+
+仅在同仓库、同 MCU 首次发布没有上一正式版本时，允许一次明确绑定的首发谱系使用已经独立核验的 GCC finalized App。常规来源仍走 `formalBase(descriptor, targetVersion)`；失败不得自动调用首发例外。共同入口为 `releaseBase(descriptor, target, approvedBootstrapHash, mode)`，其中 `target` 含当前目标的 `versionName` 和 `commitSha`，`mode` 必须显式为 `rehearsal` 或 `production`。
+
+`OTA_PREVIOUS_RELEASE_JSON` 的首发 descriptor 必须恰含以下字段，不得混入未知字段或 `releaseTag`：
+
+| 字段 | 合同 |
+| --- | --- |
+| `provenanceKind`, `isFormalRelease`, `kind` | 精确为 `inaugural-bootstrap-v1`、`false`、`app`；不得伪称历史正式版本 |
+| `versionName`, `versionCode` | 规范基版版本和冻结公式编码，严格小于目标版本 |
+| `commitSha`, `buildTimestamp` | 原 GCC 源提交的完整 40 位 SHA 与 u32 构建时间；匹配归档 build 和真实 fw_header |
+| `imageSha256`, `sourceSha256`, `sourceSizeBytes` | 两个 SHA 均为相同 raw App 全字节摘要；长度在 `0x460..0xf0000`，不得指向 placeholder、ETU 或近似 bin |
+| `archiveCommit`, `archivePath`, `sourceUrl` | 完整 40 位归档提交；目录为 `docs/ota-exec-notes/P4-1-bootstrap-baseline-` 加 1..64 个小写字母、数字或连字符；URL 精确为同仓库 `https://raw.githubusercontent.com/{repository}/{archiveCommit}/{archivePath}/app-final.bin` |
+| `sourceRunId`, `sourceRunAttempt`, `sourceArtifactId`, `sourceArtifactSha256` | 原成功 CI 的规范正整数字符串及原 artifact ZIP SHA；不得用目标执行的 runId 替代来源 |
+| `provenanceSha256` | 同目录 `provenance.json` 原始字节 SHA-256 |
+| `targetVersionName`, `targetCommitSha` | 首发目标的精确版本和完整提交，禁止把同一批准移用于后续版本/提交 |
+
+受保护的两个 release environment 分别提供 `OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256`，值为独立审阅后的 `SHA256(UTF8(canonicalJson(descriptor)))`，不含尾换行。此字段是批准绑定，不是 secret；缺失或不匹配时在网络访问前退出 2。先存在归档和目标提交，再生成 descriptor 及审批摘要，禁止提交自引用。后续正式基版不要求这个例外配置。
+
+#### 原件、下载与生存期
+
+归档保留真实 finalized/placeholder App、对应 Boot、build manifest、原 verification 和 `DEVELOPMENT-ONLY.json`。原 API run/artifact、完整 ZIP/step 原件可引用已入库的精确提交/路径，不重复复制、不改写。独立审查必须逐字节核对 ZIP 成员、原摘要、源提交/构建和 fw_header；其结论只把精确 raw App 认定为首发基线，不把开发制包 key、包、CI 或无 patch 的原 preparation 变成正式结果。
+
+`provenance.json` 使用 `schemaVersion=1` 和相同 `provenanceKind`，携带 `repository`、未改语义的 `run`、`artifact`、`verification` 和 `developmentOnly` 原始对象。执行器必须核对：同仓库成功 `workflow_dispatch`、`.github/workflows/firmware-build.yml`、run/attempt/commit、artifact 的 run/repository/commit/ZIP SHA、`p41-gcc-development-{commitSha}` 名称、build 的版本/时间/GCC App/Boot，以及 final App SHA/长度。原 verification 必须保留 `base=null`、`patchByteEqual=null`、`r2Verified=false`，development 标识不得被移除或改成可安装。不能仅凭 `ok=true` 准入。
+
+运行时先解析精确归档提交和完整 Git tree，要求 `provenance.json`、`app-final.bin` 均为唯一 `100644` blob。通过固定同仓库 Contents API 和精确 `ref` 读取，校验 Git blob SHA、严格 Base64、路径、长度和原始 SHA。来源体最大 960 KiB，provenance 最大 128 KiB；响应流另设上限。缺文件、截断 tree、链接/submodule、外部 URL、重定向或编码异常均拒绝，不跟随 `download_url`，不把凭据转发给其他 host。运行不依赖短期 Actions artifact 仍在线；归档字节/来源必须已被独立审阅和审批摘要固定。
+
+#### 谱系、重试与失败
+
+完整分页枚举同仓库 Release。存在其他同 MCU 正式版、草稿、prerelease、非法匹配版本或歧义时拒绝首发例外；分页未完成或失败不能当空列表。演练要求没有任何同 MCU Release。生产只可在既有原演练 reference 通过 `verifyPromotion` 后执行；其只读来源检查可接受唯一同目标 draft/published Release，但必须核对目标 tag commit，draft 还须精确 `target_commitish`。随后仍由原发布客户端在任何 R2/注册写入前核对全部既有资产和 notes，不覆盖不同字节、不补写已发布的不完整资产。此例外不能许可一次新演练绕开重试检查。
+
+首发基线仅改变来源资格，不改变三资产、patch 真实 apply/逐字节相等、recovery、D1 单调/ready/幂等、完整 R2 回读、canonical `runId`、生产零副作用、独立批准或 P5/gate/environment 要求。基线 sourceRunId 永不进入目标 canonical metadata。基版、descriptor 或 reference 漂移均硬失败。
+
+| 验证情形 | 必须观察 |
+| --- | --- |
+| 合法首发、合法正式基版 | 保持各自来源；生成 full/patch/recovery，实际 patch 逐字节相等 |
+| 缺批准/配置或模式 | exit 2；零网络/云端写入 |
+| 错目标/版本、摘要、CI 绑定、placeholder | exit 1；不产目标包，不触发云端写入 |
+| 其他版本、后页冲突、歧义或演练遇已有目标 | 拒绝；不能把枚举失败当不存在 |
+| 精确 production 重试 | 原 reference、notes/资产全字节和现有 gate 均通过才可继续 |
+
+必需回归为 `test_firmware_release.mjs` 的真实字节/placeholder/时间/目标负例、`firmware-pipeline.host.test.ts` 的来源/审批/分页/重试/下载负例，以及 `test_firmware_workflow.mjs` 的共同入口与配置隔离。HTTP doubles 不冒充远端取证。错误做法是把开发 descriptor 的 `isFormalRelease` 改为 true；正确做法是保留 false，以独立核验和精确首发审批进入这个显式分支。
 
 ### OTA-XC-RELEASE-METADATA
 
@@ -997,7 +1046,7 @@ CI 注册入口固定为 `POST /api/ci/firmware/releases`，仅接受 HTTPS：
 
 解锁采用两阶段流程：
 
-1. `OTA_BOOT_CHAIN_READY=false` 时，只允许在 GitHub environment `firmware-rehearsal` 使用独立 staging Worker、独立 staging D1 和 R2 bucket `trace-update-staging-releases` 完成三资产、metadata、全字节 readback、register ready/idempotency 演练。
+1. `OTA_BOOT_CHAIN_READY=false` 时，只允许在 GitHub environment `firmware-rehearsal` 使用独立 staging Worker、独立 staging D1 和 R2 bucket `e-track-firmware-p41-test-releases` 完成三资产、metadata、全字节 readback、register ready/idempotency 演练。桶名为 `OTA-DEC-017` 候选修订；旧 `trace-update-staging-releases` 已由受保护的 Trace 服务使用，禁止本链演练或生产使用它，不能通过改名把旧桶放入生产允许集合。
 2. rehearsal 不得产生任何 production 副作用，也不得创建 GitHub prerelease。rehearsal environment 不得取得任何 production Worker、D1、R2 或发布凭据。
 3. rehearsal 与 production 必须运行同一 workflow、制包工具、schema 和注册客户端代码，只允许通过 environment bindings 切换 Worker、D1、R2 和凭据。
 4. required evidence 包含三资产 SHA/size、patch 逐字节自验、recovery 校验、metadata SHA、staging R2 全字节 readback、staging register ready/idempotency，以及 rehearsal 前后 production D1、R2、channel、GitHub Release 快照证明的零副作用。
@@ -1227,7 +1276,8 @@ P4-4 配置面：
 | `TRACE_UPDATE_SERVICE_URL` | GitHub secret | register client | HTTPS origin，不含 token |
 | `TRACE_DEPLOY_TOKEN` | GitHub secret | register client | Bearer，日志脱敏 |
 | `OTA_AES_KEY` | GitHub secret | `Tools/etu_pack.py` | 32 hex；正式链缺失必须硬失败，禁止开发示例 key |
-| `TRACE_R2_BUCKET` | GitHub variable | uploader | production 明确生产 bucket；rehearsal 固定 `trace-update-staging-releases`，不得共享凭据 |
+| `TRACE_R2_BUCKET` | GitHub variable | uploader | production 明确生产 bucket且拒绝新旧两个测试桶；rehearsal 候选固定 `e-track-firmware-p41-test-releases`，保留旧 Trace 桶，不共享凭据；见 `OTA-DEC-017` |
+| `OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256` | GitHub environment variable | release base client | 仅首发例外必填；精确绑定经独立审阅的 descriptor，见 `OTA-XC-BOOTSTRAP-BASE`；不得作为任意 CI 基版的默认批准 |
 | `OTA_BOOT_CHAIN_READY` | GitHub variable | release gate | 仅精确 `true` 解锁；时序见 `OTA-XC-RELEASE-GATE` |
 | `firmware-rehearsal` | GitHub environment | rehearsal job | 独立 staging Worker/D1/R2 bindings，无 production 凭据，不允许 production 副作用 |
 | `firmware-production` | GitHub environment | release job | 至少一名独立审批人，job 必须声明 environment |

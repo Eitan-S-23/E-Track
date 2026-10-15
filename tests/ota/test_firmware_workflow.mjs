@@ -77,6 +77,16 @@ test("development wiring explicitly executes host, native, byte and production-G
   assert.match(build, /firmware-release.mjs development/);
 });
 
+test("bootstrap approval is explicit environment configuration, never a development default", () => {
+  for (const job of [production, rehearsal]) {
+    const step = job.steps.find(value => value.id === "release_execute");
+    assert.equal(step.env.OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256, "${{ vars.OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256 }}");
+  }
+  for (const id of ["build", "release-development-checks"]) {
+    assert.doesNotMatch(JSON.stringify(workflow.jobs[id]), /OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256/);
+  }
+});
+
 const workerBundle = workflow.jobs["release-development-checks"].steps.find(step => step.id === "worker_bundle");
 function assertBuildOnlyWorkerBundle(step) {
   assert.deepEqual(step.run.trim().split("\n"), [
