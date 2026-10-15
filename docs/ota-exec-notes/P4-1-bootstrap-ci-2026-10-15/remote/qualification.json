@@ -1,0 +1,98 @@
+{
+  "startedAt": "2026-10-15T15:28:56.865Z",
+  "testedCommit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+  "pid": 25344,
+  "helperSha256": "ba17fe19c7e139620253830040ca6f9b552a7f29f59d4e708870a249106a8b04",
+  "scope": "Development-only authenticated bootstrap download through the existing client",
+  "approvalOrigin": "LOCAL_TEST_EXPECTATION_NOT_PROTECTED_APPROVAL",
+  "protectedConfigurationChanged": false,
+  "targetFirmwareBuilt": false,
+  "rehearsal": "NOT_RUN",
+  "production": "NOT_RUN",
+  "remoteWrites": 0,
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://api.github.com/user",
+      "file": "identity.json",
+      "status": 200,
+      "sizeBytes": 1450,
+      "sha256": "9f97810b7001bd7bdb3062a45817fff3597c579ef7f977f32e1f161ff6da554a",
+      "identitySanitized": true
+    },
+    {
+      "method": "GET",
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/releases?per_page=100&page=1",
+      "file": "releases.json",
+      "status": 200,
+      "sizeBytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identitySanitized": false
+    },
+    {
+      "method": "GET",
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/git/ref/tags/mcu-e-track-at32f435-v3.2.8",
+      "file": "target-tag.json",
+      "status": 404,
+      "sizeBytes": 114,
+      "sha256": "e2e3c64edab172132f77ce89a0e8c190db1cd30936a096344f45893bd5b75f8a",
+      "identitySanitized": false
+    },
+    {
+      "method": "GET",
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/git/commits/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+      "file": "archive-commit.json",
+      "status": 200,
+      "sizeBytes": 1665,
+      "sha256": "521fb27b0483527c77103ef1958599c7400b18bb24ab1051892e858ae307de2b",
+      "identitySanitized": false
+    },
+    {
+      "method": "GET",
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/git/trees/e823a55cfb45549dc355e58e56ed0e2aceabc769?recursive=1",
+      "file": "archive-tree.json",
+      "status": 200,
+      "sizeBytes": 4551906,
+      "sha256": "6d8c481aeedd98843989951e146af59c8fe6cffdbd7ac47b99ffc5b6e2a89c7f",
+      "identitySanitized": false
+    },
+    {
+      "method": "GET",
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/contents/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/provenance.json?ref=c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+      "file": "provenance-contents.json",
+      "status": 200,
+      "sizeBytes": 33785,
+      "sha256": "077eb85591ba95f566ce3919e881013829bc035ba30698c6838fa4116953ce48",
+      "identitySanitized": false
+    },
+    {
+      "method": "GET",
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/contents/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin?ref=c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+      "file": "app-contents.json",
+      "status": 200,
+      "sizeBytes": 834966,
+      "sha256": "53ef01b60b7fa250e3b1cfb694db74cd168b3f4d32483b71c7468b2ace5c4162",
+      "identitySanitized": false
+    }
+  ],
+  "ok": true,
+  "missingApprovalRejectedBeforeNetwork": true,
+  "sourceEvidence": {
+    "provenanceKind": "inaugural-bootstrap-v1",
+    "isFormalRelease": false,
+    "archiveCommit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+    "archivePath": "docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15",
+    "descriptorSha256": "dc73db65c5475f7949cb2571bd63ef66a335513fc2f9ab62aa960124c3488f7a",
+    "provenanceSha256": "0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28",
+    "commitSha": "fa74905e84c489cccc248617d37ab9f56c8f961c",
+    "sourceRunId": "38642386248",
+    "sourceRunAttempt": "1",
+    "sourceArtifactId": "11931006831",
+    "sourceArtifactSha256": "4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149",
+    "sourceSha256": "aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f",
+    "sourceSizeBytes": 605072
+  },
+  "remoteDownload": "PASS",
+  "endedAt": "2026-10-15T15:29:19.802Z",
+  "closed": true
+}

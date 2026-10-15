@@ -1,0 +1,317 @@
+{
+  "testedCommit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "source": "Evidence byte-preservation rule"
+    },
+    {
+      "path": "artifact-members.json",
+      "sizeBytes": 264152,
+      "sha256": "12bfbcb0ce1c822c19052c64b2748d166fdc68198d2cd59bdb01a9de30d70cc9",
+      "source": "Derived from the seven original artifact ZIPs"
+    },
+    {
+      "path": "ci-inspection.json",
+      "sizeBytes": 40765,
+      "sha256": "f106e19fd2dabea85cc9937109803181e0f4e44a0422f855de892cc9b8d134ce",
+      "source": "Derived from retained original logs, API responses and artifact bytes"
+    },
+    {
+      "path": "commands/p41-resume-commit.json",
+      "sizeBytes": 2065,
+      "sha256": "b3b56975231848800205816b220a23ba629107864f440c59caeca29bbe2f904f",
+      "source": ".cache/logs/p41-resume-commit.json"
+    },
+    {
+      "path": "commands/p41-resume-commit.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-resume-commit.stderr.txt"
+    },
+    {
+      "path": "commands/p41-resume-commit.stdout.txt",
+      "sizeBytes": 5557,
+      "sha256": "d55c2cbd6555c010636b3ca17f51184ff2431e6ad57b71e13552bfe0c9ad0da0",
+      "source": ".cache/logs/p41-resume-commit.stdout.txt"
+    },
+    {
+      "path": "commands/p41-resume-remote-header.json",
+      "sizeBytes": 2262,
+      "sha256": "b821ef361fde8f6cb88f7a81451ffcfc2cd99a76176564bd1e321a3cc5170dc7",
+      "source": ".cache/logs/p41-resume-remote-header.json"
+    },
+    {
+      "path": "commands/p41-resume-remote-header.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-resume-remote-header.stderr.txt"
+    },
+    {
+      "path": "commands/p41-resume-remote-header.stdout.txt",
+      "sizeBytes": 280,
+      "sha256": "9531f514fb4dbc93c04c5570fa63011b4c61315c7f92053b809b172b3eeab69f",
+      "source": ".cache/logs/p41-resume-remote-header.stdout.txt"
+    },
+    {
+      "path": "commands/p41-resume-stage.json",
+      "sizeBytes": 2844,
+      "sha256": "6b38bdfbc51e6720914fa1a149951cb81a570c956c82cf931f3716e34c99e399",
+      "source": ".cache/logs/p41-resume-stage.json"
+    },
+    {
+      "path": "commands/p41-resume-stage.stderr.txt",
+      "sizeBytes": 2096,
+      "sha256": "fd85cf14af0891eedb6c45a31ac0471aea04db2c4f22fdb079541024f4e05712",
+      "source": ".cache/logs/p41-resume-stage.stderr.txt"
+    },
+    {
+      "path": "commands/p41-resume-stage.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-resume-stage.stdout.txt"
+    },
+    {
+      "path": "github/p41-resume-app-jobs.json",
+      "sizeBytes": 5328,
+      "sha256": "b888b442049213915ded46727a87b8ae65a34a8bca629a16b9d959b006cc152d",
+      "source": ".cache/github/p41-resume-app-jobs.json"
+    },
+    {
+      "path": "github/p41-resume-app-logs.zip",
+      "sizeBytes": 14436,
+      "sha256": "b0376564732e7069c157cb3892c6c1e7ec879195d72b21558c865e3e95a2d752",
+      "source": ".cache/github/p41-resume-app-logs.zip"
+    },
+    {
+      "path": "github/p41-resume-artifact-11984993121.zip",
+      "sizeBytes": 98864,
+      "sha256": "48a2dfcbadc5405c36ec71d4dc822a819db192b6f6ab6d0c9e243faae0c10f2b",
+      "source": ".cache/github/p41-resume-artifact-11984993121.zip"
+    },
+    {
+      "path": "github/p41-resume-artifact-11985027937.zip",
+      "sizeBytes": 7764,
+      "sha256": "20a60e5056bf55182fba8a68fd47c69b69daaad3824220d4901a89a111417e89",
+      "source": ".cache/github/p41-resume-artifact-11985027937.zip"
+    },
+    {
+      "path": "github/p41-resume-artifact-11985177807.zip",
+      "sizeBytes": 1468555,
+      "sha256": "eb0f9cd1fefad9fe5f83663f2a651bb981d01801659cd2e6a35269d194c2c265",
+      "source": ".cache/github/p41-resume-artifact-11985177807.zip"
+    },
+    {
+      "path": "github/p41-resume-artifact-11985271812.zip",
+      "sizeBytes": 7622,
+      "sha256": "c55acb138b162c8f610291fa1e7636832275c230753421efe870f81f6349b26b",
+      "source": ".cache/github/p41-resume-artifact-11985271812.zip"
+    },
+    {
+      "path": "github/p41-resume-artifact-11985436767.zip",
+      "sizeBytes": 54830,
+      "sha256": "21915e2fb2450473482e58f345116e9ebcdf4cbc68f279e4aba16ae52edc2b20",
+      "source": ".cache/github/p41-resume-artifact-11985436767.zip"
+    },
+    {
+      "path": "github/p41-resume-artifact-11985631395.zip",
+      "sizeBytes": 292603,
+      "sha256": "c42ad3cb1d692151482094d6db0b6f200063034d81475c4151733f8593958265",
+      "source": ".cache/github/p41-resume-artifact-11985631395.zip"
+    },
+    {
+      "path": "github/p41-resume-artifact-11985646589.zip",
+      "sizeBytes": 1607219,
+      "sha256": "56719adb98c0137b319602742f976f24a640b55dc79184f3d22a2bd30d8c3bc7",
+      "source": ".cache/github/p41-resume-artifact-11985646589.zip"
+    },
+    {
+      "path": "github/p41-resume-cf-jobs.json",
+      "sizeBytes": 6937,
+      "sha256": "6bf7f1cfd14c1ade7f29a95fffeddb62de0d4904fd68f9151c4bf138bfc90162",
+      "source": ".cache/github/p41-resume-cf-jobs.json"
+    },
+    {
+      "path": "github/p41-resume-cf-logs.zip",
+      "sizeBytes": 49552,
+      "sha256": "54cf76c3d76562420dfbb05f4a6302d6670de92b7ec3a3adb8520b67c724e087",
+      "source": ".cache/github/p41-resume-cf-logs.zip"
+    },
+    {
+      "path": "github/p41-resume-fw-artifacts.json",
+      "sizeBytes": 3698,
+      "sha256": "dcc7b95d2c6e51aeb01a3d44347a6b036e14e1a22065ba50ab91e2693bfe731f",
+      "source": ".cache/github/p41-resume-fw-artifacts.json"
+    },
+    {
+      "path": "github/p41-resume-fw-jobs.json",
+      "sizeBytes": 11731,
+      "sha256": "dd6760a0faed6ac2d538d67bb81a9ebfbbbbed6cd810ff2e23c6e7c2ef7f2fc3",
+      "source": ".cache/github/p41-resume-fw-jobs.json"
+    },
+    {
+      "path": "github/p41-resume-fw-logs.zip",
+      "sizeBytes": 286800,
+      "sha256": "bb5fdf9a6c36ec6266303eb4d5c184ad1ffd92b20c76b937d1ec806b10d78649",
+      "source": ".cache/github/p41-resume-fw-logs.zip"
+    },
+    {
+      "path": "github/p41-resume-gov-artifacts-r2.json",
+      "sizeBytes": 1488,
+      "sha256": "ec6045d06f3978d44e99f7aa2cbd766bd80fb9fc4490c034dc966a6ed879d6fe",
+      "source": ".cache/github/p41-resume-gov-artifacts-r2.json"
+    },
+    {
+      "path": "github/p41-resume-gov-jobs.json",
+      "sizeBytes": 7237,
+      "sha256": "2b530177add08a642f2bd2b275813aead26ac8e8ddff8c3eae9654bb1504f419",
+      "source": ".cache/github/p41-resume-gov-jobs.json"
+    },
+    {
+      "path": "github/p41-resume-gov-logs.zip",
+      "sizeBytes": 63237,
+      "sha256": "db07dae27e919a50bbe0f92b5ee7cf7b3b0219e1a7ea9f09da169b5ac5364fdd",
+      "source": ".cache/github/p41-resume-gov-logs.zip"
+    },
+    {
+      "path": "github/p41-resume-merge-commit.json",
+      "sizeBytes": 2607,
+      "sha256": "28d6b5c76863faaf85ed7199eee64164fb4a29a54a162185d84da27bee4f0710",
+      "source": ".cache/github/p41-resume-merge-commit.json"
+    },
+    {
+      "path": "github/p41-resume-pr.json",
+      "sizeBytes": 18026,
+      "sha256": "6c68ed04fc80f42e25eac2b62585df785d86e560437b744543ef0b52eb8b7433",
+      "source": ".cache/github/p41-resume-pr.json"
+    },
+    {
+      "path": "github/p41-resume-push.json",
+      "sizeBytes": 229,
+      "sha256": "75e405b8b98bb03db047c13e3bfb43681d04878c5cbfeacf8b1fccd57ddecff7",
+      "source": ".cache/github/p41-resume-push.json"
+    },
+    {
+      "path": "github/p41-resume-runs-2.json",
+      "sizeBytes": 52121,
+      "sha256": "3dfdf79181746637ba433b825d2a320fd20814562b8586ff1bb1cb3dc3e30d3d",
+      "source": ".cache/github/p41-resume-runs-2.json"
+    },
+    {
+      "path": "github/p41-resume-runs.json",
+      "sizeBytes": 52112,
+      "sha256": "098266eddf4f65dad6f5aaa643f00bfd6f4f4dfc5b97e17409d61bb2fc47f3e7",
+      "source": ".cache/github/p41-resume-runs.json"
+    },
+    {
+      "path": "github/p41-resume-source-commit.json",
+      "sizeBytes": 1665,
+      "sha256": "521fb27b0483527c77103ef1958599c7400b18bb24ab1051892e858ae307de2b",
+      "source": ".cache/github/p41-resume-source-commit.json"
+    },
+    {
+      "path": "helpers/archive-p41-bootstrap.py",
+      "sizeBytes": 16638,
+      "sha256": "f8d9d30dec2052a0f8f9d1b5ed3c2eff4a07c65efd6975df0d7cb59fab0502e5",
+      "source": ".cache/archive-p41-bootstrap.py"
+    },
+    {
+      "path": "helpers/p41-bootstrap-readonly.mjs",
+      "sizeBytes": 7392,
+      "sha256": "ba17fe19c7e139620253830040ca6f9b552a7f29f59d4e708870a249106a8b04",
+      "source": ".cache/p41-bootstrap-readonly.mjs"
+    },
+    {
+      "path": "remote/app-contents.json",
+      "sizeBytes": 834966,
+      "sha256": "53ef01b60b7fa250e3b1cfb694db74cd168b3f4d32483b71c7468b2ace5c4162",
+      "source": ".cache/p41-bootstrap-readonly/app-contents.json"
+    },
+    {
+      "path": "remote/archive-commit.json",
+      "sizeBytes": 1665,
+      "sha256": "521fb27b0483527c77103ef1958599c7400b18bb24ab1051892e858ae307de2b",
+      "source": ".cache/p41-bootstrap-readonly/archive-commit.json"
+    },
+    {
+      "path": "remote/archive-tree.json",
+      "sizeBytes": 4551906,
+      "sha256": "6d8c481aeedd98843989951e146af59c8fe6cffdbd7ac47b99ffc5b6e2a89c7f",
+      "source": ".cache/p41-bootstrap-readonly/archive-tree.json"
+    },
+    {
+      "path": "remote/descriptor-development-only.json",
+      "sizeBytes": 1131,
+      "sha256": "055faac1e293748aaa3f8caac898cec7261354f042ec71cd4318e11678bf145c",
+      "source": ".cache/p41-bootstrap-readonly/descriptor-development-only.json"
+    },
+    {
+      "path": "remote/identity.json",
+      "sizeBytes": 145,
+      "sha256": "186ab99d9b62667e4fdbae2d1b742250941c1be38b18fa80f18e3800a523ec4c",
+      "source": ".cache/p41-bootstrap-readonly/identity.json"
+    },
+    {
+      "path": "remote/provenance-contents.json",
+      "sizeBytes": 33785,
+      "sha256": "077eb85591ba95f566ce3919e881013829bc035ba30698c6838fa4116953ce48",
+      "source": ".cache/p41-bootstrap-readonly/provenance-contents.json"
+    },
+    {
+      "path": "remote/qualification.json",
+      "sizeBytes": 3996,
+      "sha256": "fb77a3bd004ba6a6567829dad98a3f739a38a160282eb21c3df3b9c5d9ae24a4",
+      "source": ".cache/p41-bootstrap-readonly/qualification.json"
+    },
+    {
+      "path": "remote/releases.json",
+      "sizeBytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "source": ".cache/p41-bootstrap-readonly/releases.json"
+    },
+    {
+      "path": "remote/target-tag.json",
+      "sizeBytes": 114,
+      "sha256": "e2e3c64edab172132f77ce89a0e8c190db1cd30936a096344f45893bd5b75f8a",
+      "source": ".cache/p41-bootstrap-readonly/target-tag.json"
+    },
+    {
+      "path": "selected/gcc-build-inputs.json",
+      "sizeBytes": 463,
+      "sha256": "5c54f8bb40157eca425b2306696cbc696107e442803b07a535c59c81bf30b86f",
+      "source": "github/p41-resume-artifact-11985177807.zip!gcc-build-inputs.json"
+    },
+    {
+      "path": "selected/gcc-development/DEVELOPMENT-ONLY.json",
+      "sizeBytes": 127,
+      "sha256": "cf1bd38281c979fb07a5e66c52043d4f7e311b8733b9baaa8b0c6b87095fd71a",
+      "source": "github/p41-resume-artifact-11985646589.zip!DEVELOPMENT-ONLY.json"
+    },
+    {
+      "path": "selected/gcc-development/cloudflare-firmware-release-metadata.json",
+      "sizeBytes": 1441,
+      "sha256": "e68d8419342b9257bdf7ceadf21155dd3a5df9c1e2603fde67309d0354075d8b",
+      "source": "github/p41-resume-artifact-11985646589.zip!cloudflare-firmware-release-metadata.json"
+    },
+    {
+      "path": "selected/gcc-development/verification.json",
+      "sizeBytes": 7034,
+      "sha256": "92948b734d75cfa63dcb3bcdaeb2b929359d5b42abe52c5864aa8ba1a7c9d350",
+      "source": "github/p41-resume-artifact-11985646589.zip!verification.json"
+    },
+    {
+      "path": "selected/synthetic-three-assets/cloudflare-firmware-release-metadata.json",
+      "sizeBytes": 1989,
+      "sha256": "002d7a7770467231aa5c4c4647254f600f78bb3eb20056081da300c312efdc96",
+      "source": "github/p41-resume-artifact-11985631395.zip!firmware-release-tests/case-O64MKu/prepared/cloudflare-firmware-release-metadata.json"
+    },
+    {
+      "path": "selected/synthetic-three-assets/verification.json",
+      "sizeBytes": 12585,
+      "sha256": "5e4c120f194b0dc4099deebbec5d34f95970dbe38e33a7703f8158697db8f146",
+      "source": "github/p41-resume-artifact-11985631395.zip!firmware-release-tests/case-O64MKu/prepared/verification.json"
+    }
+  ]
+}

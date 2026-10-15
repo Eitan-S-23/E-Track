@@ -1332,3 +1332,117 @@ the final review and the byte-preservation attributes have a separate
 `post-review-inventory.json`; the original baseline and 29-entry follow-up
 inventories are unchanged. Later closeout annotations are explicitly outside
 the reviewer's 16-file diff snapshot, not retroactively claimed as reviewed.
+
+### Candidate Delivery And Actual PR CI
+
+The implementation and reviewed baseline archive were committed and pushed as
+`c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124` by `Eitan-S-23`. PR #27 remains
+DRAFT and unmerged. Its actual temporary merge checkout is
+`76e8c8a924fe4dba642c9972fa6f9d698ff00436`; authenticated Git commit responses
+prove both use tree `e823a55cfb45549dc355e58e56ed0e2aceabc769`, with main
+`b42d3e25` and the candidate as the merge parents. This does not mean main was
+updated. The exact staged 65-file binary diff SHA-256 was
+`9ea95c490ce7a7f66f9380a8a1e69ca97fca6f5c95bde56b7415d58ede30713b`.
+Authored-source whitespace, staged scope/credential-pattern checks, all original
+9/29/8 inventory entries, and evidence Git blob bytes/mode `100644` passed.
+
+| Workflow | Actual attempt-1 result and scope |
+| --- | --- |
+| MCU Firmware Build, `38759988453` | SUCCESS. Host scripts/migration 34/34, pipeline/source 90/90, native workerd 156/156, workflow 42/42, real byte preparation 22/22, pack 8/8 and golden vectors 9/9. Worker types and build-only bundle pass. GCC App/Boot configure/build, host/layout checks and development-key full/recovery preparation pass. Rehearsal and production jobs are SKIPPED. |
+| Cloudflare Update Service Checks, `38759987935` | SUCCESS. Public Pages, Admin Facade and Worker typechecks pass; native invariants 156/156. This repeated native suite is not added to the firmware run's count. No deployment. |
+| Acceptance Governance, `38759987663` | SUCCESS. Ordered regression suite counts are 127, 36, 3, 14, 11, 62, 39 and 29. Existing Linux/Windows host-helper jobs and P2-6 probes also pass; no physical acceptance campaign ran. |
+| Build APK and EXE Release, `38759988139` | SUCCESS for path detection only. APK, EXE, GitHub Pages and GitHub Release jobs are SKIPPED. |
+
+The actual GCC build contains **640 compiler/linker warning lines and zero error
+lines**; the vendor bsdiff build contains six warning lines. No warning suppression
+or out-of-scope firmware repair was used. App size is text 603632, data 940,
+bss 561992; the raw App is 605072 bytes and Boot is 14724 bytes. Original timestamps,
+ELF/map/bin member hashes and all seven artifact ZIP/API digests are retained.
+The five firmware artifacts include the Worker build-only bundle; the other two
+are governance host-test originals, not hardware observations.
+
+This PR's normal development version is `2.7.0`, with artifact suffix
+`2.7.0-nightly.317`. Its finalized raw App SHA-256 is
+`982cc4d3e05ee24dbb5e607a21aa5aa33b6bbc4224bd0d19a02bde4488d54278`.
+Its GCC placeholder and Boot match the previously recorded raw source digests.
+It is not relabelled as a built `3.2.8` target. The synthetic three-asset fixture
+has actual full/patch/recovery byte equality; the real GCC development package
+has no base and therefore no patch. Neither is a canonical inaugural rehearsal.
+
+### Actual Read-Only Bootstrap Retrieval
+
+After the archive commit existed remotely, a bounded probe invoked the unchanged
+`firmwareGitHub.releaseBase` on that exact archive. It admitted seven exact
+authenticated GET endpoints only: sanitized user identity, complete one-page
+Release inventory, target-tag absence, archive commit/tree and both Contents
+responses. Redirects, repeated requests and all mutation methods were forbidden.
+The original repository inventory remains empty; the probe target tag is absent.
+The complete immutable tree, regular-file modes, Git blob hashes, provenance and
+raw App SHA/length all passed through the real client, not a transport double.
+
+The 605072-byte downloaded App is byte-for-byte equal to the independently
+qualified `3.2.7` source. The existing `firmware-byte-check.py` then passed its
+actual header/CRC/SHA/version and GCC-placeholder comparison, exit 0. Its receipt
+is `p41-resume-remote-header`. A missing approval digest was also rejected before
+any source request.
+
+The positive probe supplied a **LOCAL_TEST_EXPECTATION_NOT_PROTECTED_APPROVAL**
+digest and a probe-only target `3.2.8`/`c860b3b`. Its descriptor digest is
+`dc73db65c5475f7949cb2571bd63ef66a335513fc2f9ab62aa960124c3488f7a`.
+This is test input, not an approved formal target, environment variable,
+production configuration or permission receipt. No protected approval was read
+or configured, no target firmware was built by this probe, and no R2/D1/Worker,
+tag, Release or device operation was performed. `remoteDownload=PASS` refers
+only to this source-reader development check; canonical `rehearsal` and
+`production` remain `NOT_RUN`.
+
+### Retained Originals And Remaining Gates
+
+`P4-1-bootstrap-ci-2026-10-15/` retains 53 files, 9922663 bytes. Its inventory
+SHA-256 is `9d39bafeeb848d69b9ecdf44b30590103cc10c4b57d2fd123880f9ca08be5270`.
+It includes original run/job/log responses, all seven artifact ZIPs, member
+digests, selected verification metadata, original source-read responses and the
+exact probe/inspection helpers. The earlier baseline and follow-up inventories
+remain unchanged. The archive reuses existing stdlib ZIP operations and packaging
+summary checks; it does not execute another build or replace any product tool.
+
+One artifact-list retrieval returned `fetch failed` before creating an output.
+A single bounded GET retry succeeded; no workflow, build or successful remote
+operation was rerun. Both the event and recovery are explicit in the inspection.
+
+This resolves the implementation-side nonexistent-predecessor/bucket choices and
+qualifies the real archived-source retrieval route. Those technical choices are
+not returned to the user. P41-CF-RUNTIME-01's stock uploader initialization remains
+separate from the earlier S3 adapter qualification. The next integration owner
+must obtain the still-excluded main-merge authorization, integrate/activate the
+reviewed candidate under the shared governance rules, and separately admit the
+protected configuration and one canonical staging rehearsal. A finalized target,
+approved descriptor, actual uploader/three-asset/readback/registration and full
+independent production-zero-effect evidence remain required. This does not start
+P3-5, P4-3 or P4-4, unlock `OTA_BOOT_CHAIN_READY`, or complete P4-1.
+
+### Record Check And Boundary Audit
+
+After these annotations, `p41-resume-record-governance` passed 23/23, exit 0.
+The archive dry-run and exclusive-create apply passed with the same output plan
+SHA-256 `60bf49076ec2dddc5465c6c5b9d76f13965d91728c089daa639660b799979cfe`.
+Their complete receipts/logs and the final independent closeout verdict are
+retained separately under `closeout-inventory.json`, without changing the
+53-file original CI/source archive inventory.
+
+The pre-delivery audit resolved the selected paths and inspected 5387 existing
+output entries within the exclusive worktree, finding no links or escaped
+outputs. All 18 then-recorded owned command/probe process IDs were absent from
+the process list. The shared-root index remains SHA-256
+`2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`.
+Only the already-authorized exclusive-branch Git metadata uses the common `.git`.
+No PowerShell, local native/Flutter build, new Cloudflare mutation or device
+operation was invoked. Historical P41-AUDIT-01 remains disclosed; this scoped
+audit does not claim to resolve its earlier external-cache attribution.
+
+The independent closeout reviewer returned **NO FINDINGS**, confirming the
+original CI scope/counts, all seven artifact ZIP digests, all 52 indexed archive
+entries, the real read-only source/header identities and the appended scope
+annotations. Its verbatim verdict is `independent-closeout-review.json` in the
+new CI archive. This approves the bounded documentation-only delivery, not main
+integration, environment activation, canonical rehearsal or whole-card acceptance.
