@@ -637,3 +637,135 @@ another Spec, relaxed assertions or a replacement pipeline. Future P4-1 changes
 must retain these now-executed cases and distinguish raw observations from green
 workflow labels. The remaining delivery change is records/evidence only; automatic
 PR synchronization is not another formal acceptance campaign.
+
+### 2026-10-15 Follow-Up: User-Provided Read-Only Cloudflare Access
+
+This is a new observation using a user-provided token, not a rewrite of the
+earlier HTTP 401/code 10000 or expired Wrangler evidence. Token verification
+returned `active`. Ten Cloudflare control-plane requests returned HTTP 200:
+eight GETs and two SELECT-only D1 query requests containing six statements.
+Every SQL result reported `rows_written=0` and `changed_db=false`. No deployment,
+remote preview, upload, migration, registration, secret/configuration mutation,
+CI dispatch or device operation was performed.
+
+Sanitized request/response observations, exact SELECT text, timestamps and
+Cloudflare request identifiers are in the exclusive worktree's ignored
+`.cache/cf-readonly-20261015-r1/`. `summary.json` binds the lengths and SHA-256 of
+six observation files; `audit.json` records the final local write/cleanup audit.
+This local diagnostic archive is not a frozen rehearsal/acceptance bundle and
+does not modify either previously committed evidence archive.
+
+Observed existing resources:
+
+| Resource | Actual observation | P4-1 consequence |
+| --- | --- | --- |
+| Worker `trace-update-service-staging` | Last modified `2026-07-07T13:37:56.578162Z`; `ENVIRONMENT=staging`; GitHub origin is `Eitan-S-23/Trace`, not `Eitan-S-23/E-Track`. | Existing Trace App bindings must not be repointed as a firmware setup shortcut. |
+| R2 `trace-update-staging-releases` | Bucket exists and is bound to that Worker. | Existence is not uploader permission, object byte readback or rehearsal evidence. |
+| D1 `trace-update-staging` | UUID `0133ad9e-d4a2-4fef-a659-4f2bf3d3a645`; migrations 0001 through 0004 applied; `0005_firmware_multi_asset.sql` absent. | The deployed schema is still the legacy single-asset firmware schema; the repository's accepted P4-2 v2 implementation is not thereby deployed. |
+| Existing D1 data | 53 App releases, 100 App asset rows, two App channels with non-null release pointers; zero firmware releases/channels. | This is not an empty disposable database. Zero firmware rows is a dated read-only observation, not migration/cutover authority. |
+| Public Worker health | One credential-free `/healthz` request failed with `fetch failed`; no HTTP response and no repeated probe. | Transport observation failed; runtime health remains unverified despite successful control-plane access. |
+
+The new token resolves the ability to inspect the account and D1 with this
+credential only. It does not establish write/uploader/remote-preview capability,
+an isolated firmware deployment, a formal base, R2 byte verification or ready/
+idempotency. Those real rehearsal requirements and whole-card acceptance remain
+NOT_RUN. No product change or product-test rerun was needed for this inspection.
+
+Next owner remains the root/configuration owner: approve a bounded firmware-only
+test-environment setup that preserves the existing Trace App service and data,
+qualify resource/credential isolation, and supply the formal-base and protected
+environment inputs already listed above. The original prohibition on remote
+mutations was not lifted by supplying a token for read-only inspection. This
+handoff does not start P4-4, P3-5, P4-3 or a production path.
+
+The user entered the token into an ignored, current-Windows-user-only file under
+`.cache/cf-auth-input/`; it was used only in process-memory Authorization headers.
+No token value was printed, committed or copied into observation files. After
+the inspection, the exact temporary token file and its empty private directory
+were deleted and absence was verified. No Cloudflare token was revoked or
+otherwise changed remotely. All selected outputs and cleanup targets are inside
+the exclusive worktree; no external path or shared-root index was modified.
+
+### 2026-10-15 Follow-Up: Firmware Test-Environment Setup Authorized
+
+The user subsequently authorized the explicitly proposed firmware-only test
+service/database/environment setup and instructed the agent not to request the
+same authorization again. That bounded setup may now proceed autonomously once
+its technical prerequisites exist. Existing Trace App Worker/database/channel
+state and production remain protected. Main merge, tags/Releases, device work,
+production gate activation and starting unrelated task cards remain excluded.
+
+The preceding read-only token's local copy was already deleted as promised; it
+cannot be recovered from its verification response or GitHub. No replacement
+Cloudflare deployment credential is currently available in the designated input.
+This is a missing credential, not a request to reauthorize the operation. No
+expired credential was retried and no login was initiated.
+
+The private, ignored `.cache/cf-auth-input/token.txt` entry was recreated empty.
+The deployment-setup credential requirements are Account Settings Read, Workers
+Scripts Edit, D1 Edit, Workers KV Storage Edit and Workers R2 Storage Edit, limited
+to the approved project account. KV is required by the existing manifest-cache
+binding; no new cache implementation is proposed. These exact permission names
+were checked against the current Cloudflare permission reference. No Global API
+Key, all-accounts grant, DNS, Pages or user/token-management permission is needed
+for the planned worker/storage setup.
+
+This is a local provisioning credential, not automatically a rehearsal runtime
+credential. The fixed rehearsal bucket already exists in the active Trace App
+bindings. Qualify resource and credential isolation before binding or uploading;
+different Worker/database names alone do not prove isolation. Do not put an
+account-wide production-capable credential into the rehearsal environment or
+change the frozen bucket contract to bypass this check. Formal-base provenance,
+remote uploader/readback, ready/idempotency and independent rehearsal evidence
+remain required and NOT_RUN.
+
+Only the empty credential entry and this task record changed for this setup
+checkpoint. No product code, cloud resource, GitHub environment or remote secret
+was changed, and no product test or CI rerun was claimed. Input-path containment,
+Windows ACL and final local audit are recorded in the ignored
+`.cache/cf-setup-credential-input-audit.json`. The credential file will be removed
+after its bounded use; it currently contains no credential.
+
+### 2026-10-15 Firmware Environment Qualification: First Feedback
+
+A replacement credential was supplied after its permissions were updated. Its
+verification status is `active` and the approved account remains unchanged.
+Request originals are under `.cache/cf-firmware-setup-20261015/`; the credential
+itself remains only in the private input and process memory, not those records.
+The earlier deleted input and failed probes are not rewritten as successful.
+
+The previously inconclusive public-health request was a local transport problem:
+curl returned HTTP 200, and the actual Node fetch returned HTTP 200 after enabling
+the existing proxy with `NODE_USE_ENV_PROXY=1`. Both responses identify the old
+service as `staging`. No login or old-Worker modification was needed.
+
+The existing `bootstrap-staging.mjs` was inspected but is not safe to run for
+this target: it rewrites the tracked staging bindings, deploys the old Worker
+name, and prints the generated deploy token. Its documented alternate resource
+names do not fix the Worker-name/configuration/logging risks. Reuse the existing
+Worker, migrations and official deployment tooling with explicit new targets,
+not a new backend, crypto implementation or generalized provisioning framework.
+
+The first code increment only adds a credential-free Worker bundle artifact to
+the existing `firmware-build.yml` development-checks job. The pinned Wrangler
+CLI runs `deploy --dry-run`; its home/config/cache and output are contained in
+the CI workspace, account/token inputs are empty, and publication keeps the
+existing gates. The bundle carries its exact source commit and an explicit
+build-only label. Artifact upload requires the job's checks to succeed.
+
+Local command `node .cache/run.cjs p41-worker-bundle-wiring . node --test
+tests/ota/test_firmware_workflow.mjs` executed 41 tests, 41 passed, exit 0. The
+added negative checks reject removing `--dry-run`, injecting an extra command or
+supplying a credential to that build step. Existing shell version/gate rejection
+cases still executed. Originals are `.cache/logs/p41-worker-bundle-wiring.*`.
+This is wiring feedback, not proof of deployment or cloud-side asset behavior;
+the exact CI command/output and later remote results remain to be collected.
+
+The authorized next target is a separately named firmware qualification Worker,
+D1, KV and bucket, with no old Trace bindings or data changed. The fixed formal
+rehearsal bucket is already in the active Trace App bindings; do not silently
+reuse it, rename the frozen contract or give CI a production-capable account
+credential. This qualification environment is explicitly not a formal rehearsal.
+Real fixture-based API/uploader observations may qualify the shared production
+tools, but cannot substitute for a formal base, canonical rehearsal bindings or
+whole-card acceptance. Those requirements remain NOT_RUN.

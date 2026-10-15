@@ -77,6 +77,40 @@ test("development wiring explicitly executes host, native, byte and production-G
   assert.match(build, /firmware-release.mjs development/);
 });
 
+const workerBundle = workflow.jobs["release-development-checks"].steps.find(step => step.id === "worker_bundle");
+function assertBuildOnlyWorkerBundle(step) {
+  assert.deepEqual(step.run.trim().split("\n"), [
+    "set -euo pipefail",
+    'node node_modules/wrangler/bin/wrangler.js deploy --dry-run --outdir "$GITHUB_WORKSPACE/.cache/p41-worker-bundle"',
+    'printf \'%s\\n\' "$GITHUB_SHA" > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/source-commit.txt"',
+    'printf \'%s\\n\' \'Build-only input; no deployment or rehearsal performed.\' > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/purpose.txt"'
+  ]);
+  assert.equal(step.env.CLOUDFLARE_API_TOKEN, "");
+  assert.equal(step.env.CLOUDFLARE_ACCOUNT_ID, "");
+  for (const key of ["HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"]) {
+    assert.match(step.env[key], /^\$\{\{ github.workspace \}\}\/\.cache\/p41\/worker-/);
+  }
+}
+
+test("Worker bundle is a credential-free CI build input, not a deployment", () => {
+  assertBuildOnlyWorkerBundle(workerBundle);
+  const artifact = workflow.jobs["release-development-checks"].steps.find(step =>
+    step.uses === "actions/upload-artifact@v4" && step.with.name.startsWith("p41-worker-bundle-"));
+  assert.equal(artifact.if, "success() && steps.worker_bundle.outcome == 'success'");
+  assert.equal(artifact.with.path, ".cache/p41-worker-bundle/");
+  assert.equal(artifact.with["if-no-files-found"], "error");
+  assert.equal(artifact.with["retention-days"], "14");
+});
+
+test("Worker bundle guard rejects an actual deployment or an injected extra command", () => {
+  assert.throws(() => assertBuildOnlyWorkerBundle({ ...workerBundle,
+    run: workerBundle.run.replace(" --dry-run", "") }));
+  assert.throws(() => assertBuildOnlyWorkerBundle({ ...workerBundle,
+    run: workerBundle.run + "\necho unexpected\n" }));
+  assert.throws(() => assertBuildOnlyWorkerBundle({ ...workerBundle,
+    env: { ...workerBundle.env, CLOUDFLARE_API_TOKEN: "must-not-reach-build" } }));
+});
+
 const bash = process.platform === "win32"
   ? path.join(path.dirname(path.dirname(execFileSync("where", ["git"], { encoding: "utf8", windowsHide: true }).trim().split(/\r?\n/)[0])), "bin/bash.exe")
   : "bash";

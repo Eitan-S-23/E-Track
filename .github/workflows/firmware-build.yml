@@ -150,6 +150,19 @@ jobs:
         run: npm test -- --reporter=verbose
       - name: Check Worker and shared script types
         run: npm run check
+      - name: Build tested Worker deployment input without cloud access
+        id: worker_bundle
+        env:
+          HOME: ${{ github.workspace }}/.cache/p41/worker-home
+          XDG_CONFIG_HOME: ${{ github.workspace }}/.cache/p41/worker-config
+          XDG_CACHE_HOME: ${{ github.workspace }}/.cache/p41/worker-cache
+          CLOUDFLARE_API_TOKEN: ""
+          CLOUDFLARE_ACCOUNT_ID: ""
+        run: |
+          set -euo pipefail
+          node node_modules/wrangler/bin/wrangler.js deploy --dry-run --outdir "$GITHUB_WORKSPACE/.cache/p41-worker-bundle"
+          printf '%s\n' "$GITHUB_SHA" > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/source-commit.txt"
+          printf '%s\n' 'Build-only input; no deployment or rehearsal performed.' > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/purpose.txt"
       - name: Install byte test dependency
         run: python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0 PyYAML==6.0.3
       - name: Build the existing vendor bsdiff for this host
@@ -177,6 +190,15 @@ jobs:
           path: |
             .cache/firmware-release-tests/
             .cache/firmware-pipeline-tests/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+      - name: Preserve tested Worker deployment input
+        if: success() && steps.worker_bundle.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p41-worker-bundle-${{ github.sha }}
+          path: .cache/p41-worker-bundle/
           include-hidden-files: true
           retention-days: 14
           if-no-files-found: error
