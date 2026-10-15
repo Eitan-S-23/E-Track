@@ -1015,3 +1015,31 @@ diagnostic is `.cache/logs/p41-cf-raw-whitespace.stdout.txt`. The same check wit
 `core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol` returns 0.
 This recognizes the preserved line ending while retaining the actual whitespace
 checks; neither the SQL evidence nor Git's persistent configuration was changed.
+
+### Qualification Record Delivery And Independent Review
+
+The cloud record/evidence commit is
+`f1154ead58892a94e361edd99da63eb4706549f1`, pushed as `Eitan-S-23` to the same
+exclusive branch. Remote main still equals `b42d3e25`; the shared-root index and
+all 54 committed original blobs were rechecked unchanged/by exact hash.
+
+Its automatic PR runs completed successfully: firmware `38687352718`, governance
+`38687352778`, backend `38687352737`, and App path detection `38687352802`.
+Original command output confirms host scripts/migrations 34, pipeline host 33,
+native workerd 156, workflow 41, byte preparation 19, package 8 and vectors 9.
+GCC warnings/errors remain 640/0; vendor bsdiff has six warnings. Rehearsal,
+production, APK, EXE, GitHub Release and Pages deployment jobs were skipped.
+No credentials were supplied to these checks and no manual CI rerun was needed.
+
+Non-implementing agent `/root/p41_cloud_record_review` returned **NO FINDINGS**
+for `001c7cfe -> f1154ead`, independently checking the 55-file archive, migration
+inputs/readback, deployed bindings/health, four API rejections, preserved host
+failure and limited protected-state comparison. It performed no cloud/device
+operations, credential access or product-test reruns. This is bounded record
+review, not formal rehearsal or whole-card acceptance.
+
+Verbatim review, delivery receipts, new CI originals and local record-check logs
+are in `P4-1-cloud-qualification-delivery-2026-10-15/`, separately inventoried
+without changing the reviewed 55-file archive. The product code is still the
+previously tested `cd4f2e4`; this final record append does not repair or waive
+P41-CF-RUNTIME-01 or any NOT_RUN requirement above.
