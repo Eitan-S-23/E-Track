@@ -2051,3 +2051,79 @@ Closed local receipt/stream triplets are under `.cache/logs/` with those labels;
 the archive retains the actual source-bound CI development originals. All
 selected outputs are worktree-local apart from the previously authorized own
 Git metadata/object/ref scope. No PowerShell, local native build or device action.
+
+## Independent Acceptance Takeover, 2026-10-16
+
+The user asked the current non-implementing root agent to take over acceptance
+after the previous acceptance session ended with a model rate limit and then an
+invalid encrypted-content response. The actual worktree remains
+`D:/github/my/E-Track/.cache/p41-dev-20261015`, branch
+`dev/p4-1/unattended-20261015`, HEAD `a52d5b567ddfe5982063f5ac6af5c0a0b0170a18`.
+The four uncommitted delegation documents and three acceptance helpers belong to
+that interrupted acceptance preparation, not a new product implementation.
+The existing P41-STAGING-DELEGATION-20261016 scope applies; production, device
+operations, other cards and other worktree contents remain out of scope.
+
+The original offline evaluation at
+`.cache/p41-acceptance-20261016/review/origins-preparation.json` passed. Its
+originals will be reused, not rebuilt or recollected because of agent turnover.
+No formal contract, freeze, canonical rehearsal or whole-card PASS exists yet.
+The acceptance helper self-test failed before those steps; its original
+`review/selftest.json` and command receipt remain untouched.
+
+| Finding | Evidence and impact | Direction and invariant | Verification and owner |
+| --- | --- | --- | --- |
+| P41-HARNESS-01 | `inspect.py:selftest` replaced placeholder byte 0 with zero, but the original starts `0080052065b60108`; one intended negative was identical to the positive input. This is an acceptance-test construction error, not a firmware failure. | Flip a bit, assert that the probe differs, and identify each rejected case. Keep the byte-validation gate and original failure unchanged. | Acceptance owner runs only the corrected offline self-test, expecting one valid baseline and five real rejections; no cloud/device action. |
+
+Next: review the bounded product and harness dependencies, preserve and resolve
+all discovered preparation findings, qualify the read-only snapshot route, then
+commit the stable acceptance inputs and bind the approved 3.2.8 descriptor to that
+exact revision. Freeze and precheck before the sole shared staging rehearsal;
+retain actual approval, byte, R2/D1 and protected-resource observations separately
+from development evidence. Merge/closeout remains conditional on all required
+criteria passing, with original Git commit IDs preserved.
+
+### Stable Acceptance Input Review
+
+P41-HARNESS-01 is resolved by the actual offline result
+`review/selftest-ready.json`: one positive baseline, five genuinely changed and
+rejected inputs. `commands/final-controller-preparation.*` has five passing
+control-plane checks; the cloud read helper passes Node syntax checking.
+Local governance regressions pass 128/128 (`governance-bundle-preparation`) and
+36/36 (`governance-efficiency-preparation`). These are preparation checks, not
+the missing canonical rehearsal. The old failed self-test is retained.
+
+The review followed the shared workflow -> keyed GCC recipe -> byte preparation
+-> base provenance -> immutable uploader -> register/replay paths. No product
+source was changed. Existing original host/native/failure observations remain
+applicable; formal actual-key GCC, patch and remote-state criteria are still new
+observations. `OTA_BLE_INFO_PROTO_VER` is 1 in the actual firmware, independently
+of BLE v2 framing. The approved target parameters are 3.2.8, protocol minimum 1,
+App minimum 0, the immutable 3.2.7 raw base and the existing protected key source.
+The workflow input is `version_name`, not an invented `version` parameter.
+
+The existing vendor/CLI path remains the product runner. Acceptance adds only a
+thin GitHub transport/receipt adapter, S3 GET capture through installed curl, and
+offline inspection/sealing around the existing validator. Mutations are limited
+to four missing test-environment variables, one reserved staging dispatch and
+its delegated approval. Unknown POST outcomes are reconciled, never repeated.
+Downloads and every controllable cache/log/temp destination stay in this worktree.
+Existing original provisioning credentials are read for snapshots, not exported.
+
+Profile review: Firmware covers the actual MCU build/layout; Cloudflare covers
+the shared API/schema/uploader consumers; P41Release covers the shared CI and
+byte entry points. P41Execution contains only capture/control adapters, while
+P41Evaluation contains offline inspection/sealing. Changing an offline evaluator
+does not invalidate the actual shared workflow run. The broader Validation and
+Governance groups apply to the source-bound PR CI admission, not every remote
+byte observation. Versioned contract/evidence and the board remain outside all
+profiles; no frozen historical profile or evidence is rewritten.
+
+The global Git hooks were read before commit preparation. Structured CLI JSON
+output is intentional, not debugging; the hook's supported debug-check override
+may be used for that false positive, without disabling secret/conflict checks.
+The contained child environment removes the unrelated WeChat notification key;
+explicit commit messages do not invoke the hook's optional AI generation. Only
+the already-authorized worktree index/HEAD and own common Git objects/branch/ref
+metadata are writable outside the worktree content boundary, not another
+worktree's index or files.

@@ -51,6 +51,15 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 - `OTA-XC-SECRETS`
 - `PLAN-OTA.md` §6.1
 
+## 本次独立验收授权
+
+`P41-STAGING-DELEGATION-20261016` 是仅限本次 P4-1 staging 的用户委托例外，见
+`docs/acceptance-execution-contract.md` §7.3.4。新的非实现验收者可配置经审阅的目标及
+descriptor，提交/推送验收输入，代表用户审批对应 `firmware-rehearsal` run，并在全部
+判据 PASS 后以保留提交 ID 的 merge commit 收口 PR #27。审批须如实登记为
+“用户委托的 agent 审批”，保留 required reviewer、分支限制、回执及历史证据。
+这不改变本 Spec 的完成判据，不授权 production 审批/发布、解锁、设备或其他任务。
+
 ## 现有组件和代码入口
 
 - `.github/workflows/firmware-build.yml`：GCC build、placeholder 检查、finalize、单 bin Release/R2/register。

@@ -752,6 +752,8 @@
 
 #### P4-1 firmware-build.yml 正式发布链
 状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-16(用户批准的同一 check-only run 38859822756 成功，原生共享绑定验证通过，三份现有 R2 对象及 D1 计数/channel 前后一致；18 文件原件已归档。测试环境五个 secret 已齐，gate=false。实现侧前置已齐，可交新独立 agent 集中预审、核定目标/descriptor 并冻结；真实密钥构建、唯一 canonical rehearsal、生产零副作用与整卡 PASS 由其统一正式验证，不再要求提前复制一轮。实际两套 GCC 各 640 warnings/0 errors、vendor 6 warnings；不合并 main，不操作生产或设备)
+
+- Independent acceptance: Codex root takeover, 2026-10-16, preparation in progress under P41-STAGING-DELEGATION-20261016. P41-HARNESS-01 is a no-op negative fixture, not a product failure; original failure retained. No formal freeze, rehearsal, PASS or merge yet. See the existing P4-1 execution note.
 - 目标: §6.1 制包顺序①-⑥:构建占位头 app.bin→`etu_pack.py --finalize`→full.etu+patch.etu(基版=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→**bspatch 自验逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)**→recovery 资产(app.bin+尾 8B)→GitHub Release 三资产→注册链;`firmware-production` environment 人工审批;vcode>CF 现值校验;PRE-1 新编码。
 - 依赖: PRE-3/4、P0-2、P4-2；P4-2 是前置任务，P4-1 不得先行。
 - 验收: P5 前按 OTA-XC-RELEASE-GATE 完成一次获授权的隔离 staging rehearsal，三资产/readback/metadata/注册及生产零副作用证据齐全；不创建 production Release。与 P4-4 共用这次原件。正式 Release/晋升在 P5 通过及 owner/environment 审批后，仍须规定的重建与哈希一致性检查。

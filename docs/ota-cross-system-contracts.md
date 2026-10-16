@@ -1050,7 +1050,7 @@ CI 注册入口固定为 `POST /api/ci/firmware/releases`，仅接受 HTTPS：
 2. rehearsal 不得产生任何 production 副作用，也不得创建 GitHub prerelease。rehearsal environment 不得取得任何 production Worker、D1、R2 或发布凭据；用户批准的 `P41-CF-CREDENTIAL-02` 同账户专用 Cloudflare Token 例外仅按 `OTA-XC-SECRETS` 执行，不放宽生产操作红线。
 3. rehearsal 与 production 必须运行同一 workflow、制包工具、schema 和注册客户端代码，只允许通过 environment bindings 切换 Worker、D1、R2 和凭据。
 4. required evidence 包含三资产 SHA/size、patch 逐字节自验、recovery 校验、metadata SHA、staging R2 全字节 readback、staging register ready/idempotency，以及 rehearsal 前后 production D1、R2、channel、GitHub Release 快照证明的零副作用。
-5. 独立 OTA 架构审查人必须不是该次 rehearsal 的实现作者。rehearsal 评审可在 P5 前完成；repository owner 只能在 reviewer 明确批准且 P5 验收通过后，以人工且可审计方式设置 `OTA_BOOT_CHAIN_READY=true`。P4 的 staging 完成不等于生产解锁，不把 P5 后的 production promotion 反作 P5 前置。
+5. 独立 OTA 架构审查人必须不是该次 rehearsal 的实现作者。rehearsal 评审可在 P5 前完成；repository owner 只能在 reviewer 明确批准且 P5 验收通过后，以人工且可审计方式设置 `OTA_BOOT_CHAIN_READY=true`。P4 的 staging 完成不等于生产解锁，不把 P5 后的 production promotion 反作 P5 前置。本次 P4-1 staging 的委托审批仅按 `P41-STAGING-DELEGATION-20261016` 执行，不适用于解锁或 production。
 6. 首次解锁后的 production 发布必须绑定已批准 rehearsal 的相同 commit、version 输入和 canonical metadata。production 必须把已批准 rehearsal run id 作为 `approvedRehearsalRunId` 复用到 metadata `runId`；自身 workflow run id 只写非 canonical audit。产生任何远端副作用前必须重新构建，并确认三资产及 metadata 摘要与 rehearsal 完全一致；不一致时硬失败并重新 rehearsal。
 7. production dispatch 仍须经过 `firmware-production` environment 的独立审批。
 
@@ -1309,6 +1309,15 @@ P4-4 配置面：
 用户接受的能力边界、实际配置与 API/原生观测；固定测试目标，不执行生产操作，不复用
 旧 Trace deploy/download secret 或 GitHub 发布写凭据。回归必须守住上述资源、凭据来源、
 源码/人工审批和失败边界，原 CLI 的错绑定、错提交、混合模式反例继续有效。
+
+#### P41-STAGING-DELEGATION-20261016
+
+本次 P4-1 staging 唯一审批例外见 `docs/acceptance-execution-contract.md` §7.3.4 及
+`docs/ota-spec-decisions.md` 记录 17：新的非实现验收 agent 可代表用户审批其对应的
+`firmware-rehearsal` run，必须标记“用户委托的 agent 审批”并保留回执、required reviewer
+及精确分支限制。此前的人工审批要求仅在这个显式委托范围内由代理执行，不修改历史记录。
+`firmware-production` 独立审批、P5、生产零副作用和 `OTA_BOOT_CHAIN_READY=false` 不变；
+不授权生产审批、解锁、设备或 P4-4 操作，不把同账户凭据解释为硬性生产隔离。
 
 Worker 侧 `DEPLOY_TOKEN_SHA256`、download HMAC current/previous key 及 key version 继续按现有 Worker secret 管理；P4-4 验收不得读取或打印 secret 明文。
 

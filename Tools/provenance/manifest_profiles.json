@@ -198,6 +198,44 @@
       "exclude_prefixes": [],
       "required_paths": ["Tools/jlink/jlink-common.ps1", "Tools/provenance/worktree_guard.ps1"]
     },
+    "P41Release": {
+      "category": "production_source",
+      "root_patterns": [".github/scripts/"],
+      "top_files": [
+        ".github/workflows/firmware-build.yml", "Tools/etu_pack.py", "Tools/etu_unpack.py",
+        "Tools/jlink/prepare-bootstrap-app.py"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": [
+        ".github/scripts/firmware-release.mjs", ".github/scripts/firmware-gcc-keyed-build.mjs",
+        ".github/scripts/firmware-byte-check.py", "Tools/etu_unpack.py", "Tools/jlink/prepare-bootstrap-app.py"
+      ]
+    },
+    "P41Execution": {
+      "category": "validation_inputs",
+      "root_patterns": [],
+      "top_files": [
+        "docs/acceptance-contracts/P4-1-v1/tools/session.cjs",
+        "docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": [
+        "docs/acceptance-contracts/P4-1-v1/tools/session.cjs",
+        "docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs"
+      ]
+    },
+    "P41Evaluation": {
+      "category": "validation_inputs",
+      "root_patterns": [],
+      "top_files": [
+        "docs/acceptance-contracts/P4-1-v1/tools/inspect.py",
+        "docs/acceptance-contracts/P4-1-v1/tools/bundle.py"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": ["docs/acceptance-contracts/P4-1-v1/tools/inspect.py", "docs/acceptance-contracts/P4-1-v1/tools/bundle.py"]
+    },
     "Evidence": {
       "category": "validation_inputs",
       "root_patterns": ["Tools/acceptance/"],
