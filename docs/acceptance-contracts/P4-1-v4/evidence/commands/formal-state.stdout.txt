@@ -1,0 +1,1 @@
+{"ok": true, "mode": "states", "output": ".cache/p41-acceptance-20261017/review/states-formal.json", "error": null, "sha256": "aaa833d01f058d6760c3fd8dd1b4c70c7c485759aa804effcd361ccb743f2e85"}

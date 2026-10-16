@@ -1,0 +1,29 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "docs/acceptance-contracts/P4-1-v2/tools/bundle.py",
+    "archive"
+  ],
+  "pid": 24472,
+  "started": "2026-10-16T19:13:58.669Z",
+  "ended": "2026-10-16T19:14:11.686Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-failure-archive.stdout.txt",
+      "size_bytes": 84,
+      "sha256": "777be05cc339db2a2370716d48e714764adf208ec945480b722ac60a23e4247f"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-failure-archive.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

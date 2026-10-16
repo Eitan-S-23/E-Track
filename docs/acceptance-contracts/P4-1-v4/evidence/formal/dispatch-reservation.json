@@ -1,0 +1,25 @@
+{
+  "created": "2026-10-16T18:23:17.551Z",
+  "commitSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+  "contractSha256": "07d81467bc901eae78bbb2901a093b9234056cb248f04829887c7db43ffedc4a",
+  "previous": {
+    "contractSha256": "8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d",
+    "matrixSha256": "aa980b1b64777f9ccf8ec46c0e34945e3c59fee5dcc638ef92c0cc19d3a54da0",
+    "runId": 38897470681,
+    "attempt": 1,
+    "result": "PRODUCT_FAIL",
+    "repairCommit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c"
+  },
+  "priorStagingExecutions": 1,
+  "plannedNewDispatches": 1,
+  "request": {
+    "ref": "dev/p4-1/unattended-20261015",
+    "inputs": {
+      "version_name": "3.2.8",
+      "publish": "false",
+      "rehearsal": "true",
+      "check_bindings": "false",
+      "release_notes": "P4-1 v2 repair-bound staging after P41-NATIVE-01; v1 failure retained; not a production release."
+    }
+  }
+}

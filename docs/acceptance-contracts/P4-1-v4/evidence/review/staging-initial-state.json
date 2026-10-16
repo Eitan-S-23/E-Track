@@ -1,0 +1,29 @@
+{
+  "time": "2026-10-16T18:23:15.839Z",
+  "newVersionCode": 30208,
+  "existingTestVersionCodes": [
+    20801
+  ],
+  "testRows": {
+    "announcements": 0,
+    "app_config": 1,
+    "apps": 1,
+    "audit_logs": 1,
+    "channel_history": 0,
+    "channels": 0,
+    "d1_migrations": 5,
+    "firmware_admin_idempotency": 0,
+    "firmware_admin_idempotency_tombstones": 0,
+    "firmware_backfill_manifests": 0,
+    "firmware_channels": 2,
+    "firmware_channels_legacy": 0,
+    "firmware_release_assets": 3,
+    "firmware_releases": 1,
+    "firmware_releases_legacy": 0,
+    "patches": 0,
+    "release_assets": 0,
+    "releases": 0
+  },
+  "newCloudRequests": 0,
+  "mutations": 0
+}

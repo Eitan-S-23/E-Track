@@ -1,0 +1,671 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P4-1-v4",
+  "version": 4,
+  "task_id": "P4-1",
+  "parent_contract_sha256": "0c975a7420c72292fa1624817b7dfa95d61d843f848c0f6539a797e2563c89e0",
+  "status": "FROZEN",
+  "approved_by": "Codex independent acceptance root, user-delegated P41-STAGING-DELEGATION-20261016",
+  "approved_at": "2026-10-16T20:14:04.316Z",
+  "implementation_ref": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+  "freeze_commit": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+  "freeze_tree": "618e4761f8fc4ee99182d0e503b44baeea1d9c47",
+  "profile_config_blob": "bb590b65c20e600bfa4748e64ed46b88b6f400d4",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "firmware",
+      "profile": "Firmware",
+      "category": "production_source"
+    },
+    {
+      "id": "cloudflare",
+      "profile": "Cloudflare",
+      "category": "production_source"
+    },
+    {
+      "id": "release",
+      "profile": "P41Release",
+      "category": "production_source"
+    },
+    {
+      "id": "execution",
+      "profile": "P41Execution",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "evaluation",
+      "profile": "P41Evaluation",
+      "category": "validation_inputs"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "target",
+      "category": "fixture",
+      "description": "P4-1 target exact approved input identity",
+      "fingerprint": "sha256:6dd82ca8a36aa2f30d56dbda1dd73578f7bce7ec979dca279c4fa2b6e53b363a",
+      "evidence_path": "formal/target.json",
+      "evidence_sha256": "6dd82ca8a36aa2f30d56dbda1dd73578f7bce7ec979dca279c4fa2b6e53b363a"
+    },
+    {
+      "id": "history",
+      "category": "fixture",
+      "description": "P4-1 history exact approved input identity",
+      "fingerprint": "sha256:d546daf9158691c4be081049579bcd9488975429e8d1ed0edf5a6be9f5541ce3",
+      "evidence_path": "inputs/history.json",
+      "evidence_sha256": "d546daf9158691c4be081049579bcd9488975429e8d1ed0edf5a6be9f5541ce3"
+    },
+    {
+      "id": "v2-rehearsal",
+      "category": "fixture",
+      "description": "Original successful canonical workflow artifact, run 38946949709 attempt 1; captured by the original independent reviewer.",
+      "fingerprint": "sha256:032fe5d1b2f4e1c3766ca8105ec6ede38d0c421a9d05b93194710d4d8cef826e",
+      "evidence_path": "formal/completed/rehearsal.zip",
+      "evidence_sha256": "032fe5d1b2f4e1c3766ca8105ec6ede38d0c421a9d05b93194710d4d8cef826e"
+    },
+    {
+      "id": "v2-cloud-before",
+      "category": "fixture",
+      "description": "Original v2 pre-run read-only Cloudflare receipt; binds every original raw file by size and SHA.",
+      "fingerprint": "sha256:52500e6f6dc855df1e5f5d8a760ccb54db4fdce464ea3e3012ae672b2fbd746d",
+      "evidence_path": "cloud/before/receipt.json",
+      "evidence_sha256": "52500e6f6dc855df1e5f5d8a760ccb54db4fdce464ea3e3012ae672b2fbd746d"
+    },
+    {
+      "id": "v2-cloud-after",
+      "category": "fixture",
+      "description": "Original v2 post-run read-only Cloudflare receipt; binds every original raw file by size and SHA.",
+      "fingerprint": "sha256:76108bb295f163a579f1e50462e9286b30da9c675a1ce1255e1d6c24d4d1f17f",
+      "evidence_path": "cloud/after/receipt.json",
+      "evidence_sha256": "76108bb295f163a579f1e50462e9286b30da9c675a1ce1255e1d6c24d4d1f17f"
+    },
+    {
+      "id": "v2-github-before",
+      "category": "fixture",
+      "description": "Original v2 GitHub/configuration snapshot before the successful canonical run.",
+      "fingerprint": "sha256:2e9c23088a9502ed213e12999df3abc349e3c14d0ad4a33a5140f409f996ce47",
+      "evidence_path": "formal/github-before/snapshot.json",
+      "evidence_sha256": "2e9c23088a9502ed213e12999df3abc349e3c14d0ad4a33a5140f409f996ce47"
+    },
+    {
+      "id": "v2-github-after",
+      "category": "fixture",
+      "description": "Original v2 GitHub/configuration snapshot after the successful canonical run.",
+      "fingerprint": "sha256:68cfa2a0f3a7b82611b4a2d3679019598213988d3111475d28698b4028ac7bfe",
+      "evidence_path": "formal/github-after/snapshot.json",
+      "evidence_sha256": "68cfa2a0f3a7b82611b4a2d3679019598213988d3111475d28698b4028ac7bfe"
+    },
+    {
+      "id": "v4-transport",
+      "category": "environment",
+      "description": "Read-only collection uses an independently qualified direct route instead of the failed proxy route; unchanged frozen collector and per-request deadline.",
+      "fingerprint": "sha256:c0f20c41bb2f6bd13017fb0f2bfa4c600450d97269a29cac6ad375e2393f854f",
+      "evidence_path": "inputs/v4-transport-route.json",
+      "evidence_sha256": "c0f20c41bb2f6bd13017fb0f2bfa4c600450d97269a29cac6ad375e2393f854f"
+    }
+  ],
+  "commands": [
+    {
+      "id": "formal-origins",
+      "description": "evidence: independently evaluate retained originals, no rebuild/device action; timeout 15 minutes.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-origins . python -X utf8 -B docs/acceptance-contracts/P4-1-v2/tools/inspect.py origins --output .cache/p41-acceptance-20261017/review/origins-formal.json",
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "release",
+        "validation"
+      ],
+      "runner_paths": [
+        "Libraries/OTA/ota_layout.h",
+        "Tools/jlink/prepare-bootstrap-app.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/inspect.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-oracle",
+      "description": "evidence: independently evaluate retained originals, no rebuild/device action; timeout 15 minutes.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-oracle . python -X utf8 -B docs/acceptance-contracts/P4-1-v2/tools/inspect.py selftest --output .cache/p41-acceptance-20261017/review/selftest-formal.json",
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "Libraries/OTA/ota_layout.h",
+        "Tools/jlink/prepare-bootstrap-app.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/inspect.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-controller",
+      "description": "preflight/control: exact approved source and test environment only; each HTTP request <=60 seconds. Dispatch/approval reserve once before POST; uncertain responses require reconciliation, never blind retry.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-controller . node docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs selftest",
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-ci",
+      "description": "preflight/control: exact approved source and test environment only; each HTTP request <=60 seconds. Dispatch/approval reserve once before POST; uncertain responses require reconciliation, never blind retry.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-ci . node docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs ci",
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "firmware",
+        "governance",
+        "release",
+        "validation"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-dispatch",
+      "description": "preflight/control: exact approved source and test environment only; each HTTP request <=60 seconds. Dispatch/approval reserve once before POST; uncertain responses require reconciliation, never blind retry.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-dispatch . node docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs dispatch",
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-discover",
+      "description": "preflight/control: exact approved source and test environment only; each HTTP request <=60 seconds. Dispatch/approval reserve once before POST; uncertain responses require reconciliation, never blind retry.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-discover . node docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs discover dispatch-discovery",
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-approve",
+      "description": "preflight/control: exact approved source and test environment only; each HTTP request <=60 seconds. Dispatch/approval reserve once before POST; uncertain responses require reconciliation, never blind retry.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-approve . node docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs approve approval-check",
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-collect",
+      "description": "preflight/control: exact approved source and test environment only; each HTTP request <=60 seconds. Dispatch/approval reserve once before POST; uncertain responses require reconciliation, never blind retry.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-collect . node docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs collect",
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-bytes",
+      "description": "Offline caller correction only: use the supported absolute artifact path with the unchanged v2 inspector; same retained canonical run, no build or dispatch.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run v3-formal-bytes . python -X utf8 -B docs/acceptance-contracts/P4-1-v2/tools/inspect.py rehearsal --output .cache/p41-acceptance-20261017/review/rehearsal-formal.json --artifact D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/p41-acceptance-20261017/formal/completed/rehearsal.zip --target .cache/p41-acceptance-20261017/formal/target.json",
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "Libraries/OTA/ota_layout.h",
+        "Tools/jlink/prepare-bootstrap-app.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/inspect.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-r2",
+      "description": "evidence recovery: one read-only three-object batch on process-local NO_PROXY=* as bound by v4-transport; same frozen collector, <=4 requests and <=60 seconds per request. Preserve any failure; no staging, upload, registration or retry loop.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run v4-formal-r2 . node docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs assets assets .cache/p41-acceptance-20261017/review/rehearsal-formal.json",
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "evaluation"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-state",
+      "description": "evidence: independently evaluate retained originals, no rebuild/device action; timeout 15 minutes.",
+      "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run formal-state . python -X utf8 -B docs/acceptance-contracts/P4-1-v2/tools/inspect.py states --output .cache/p41-acceptance-20261017/review/states-formal.json",
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "Libraries/OTA/ota_layout.h",
+        "Tools/jlink/prepare-bootstrap-app.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/inspect.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "P41-ORIGINS-1",
+      "description": "Independently evaluate original CI/raw bootstrap/synthetic negatives; not a new native or device campaign.",
+      "path": "review/origins-formal.json"
+    },
+    {
+      "id": "P41-ADMISSION-1",
+      "description": "Discriminating acceptance oracle and actual source-bound PR CI pass; APK/EXE skipped jobs are not new builds.",
+      "path": "review/selftest-formal.json"
+    },
+    {
+      "id": "P41-ADMISSION-2",
+      "description": "Discriminating acceptance oracle and actual source-bound PR CI pass; APK/EXE skipped jobs are not new builds.",
+      "path": "formal/ci.json"
+    },
+    {
+      "id": "P41-REHEARSAL-1",
+      "description": "One repair-bound successor staging workflow after P41-NATIVE-01, same shared implementation, real protected GCC key; required reviewer preserved and explicit delegated approval, no production job or release. Workflow finite job limits apply; root observes at <=1-minute intervals and stops at terminal state. The actual v1 run 38897470681 remains PRODUCT_FAIL; one prior staging execution and one new v2 dispatch are counted. Lost responses are reconciled, not redispatched; any further execution needs changed evidence, reviewed scope and a new minimum-rerun decision.",
+      "path": "formal/collected.json"
+    },
+    {
+      "id": "P41-REHEARSAL-2",
+      "description": "One repair-bound successor staging workflow after P41-NATIVE-01, same shared implementation, real protected GCC key; required reviewer preserved and explicit delegated approval, no production job or release. Workflow finite job limits apply; root observes at <=1-minute intervals and stops at terminal state. The actual v1 run 38897470681 remains PRODUCT_FAIL; one prior staging execution and one new v2 dispatch are counted. Lost responses are reconciled, not redispatched; any further execution needs changed evidence, reviewed scope and a new minimum-rerun decision.",
+      "path": "formal/approval-reservation.json"
+    },
+    {
+      "id": "P41-REHEARSAL-3",
+      "description": "One repair-bound successor staging workflow after P41-NATIVE-01, same shared implementation, real protected GCC key; required reviewer preserved and explicit delegated approval, no production job or release. Workflow finite job limits apply; root observes at <=1-minute intervals and stops at terminal state. The actual v1 run 38897470681 remains PRODUCT_FAIL; one prior staging execution and one new v2 dispatch are counted. Lost responses are reconciled, not redispatched; any further execution needs changed evidence, reviewed scope and a new minimum-rerun decision.",
+      "path": "formal/completed/rehearsal.zip"
+    },
+    {
+      "id": "P41-BYTES-1",
+      "description": "Exact approved key/source, eight GCC artifacts, actual full/patch candidate bytes, recovery trailer and metadata agree.",
+      "path": "review/rehearsal-formal.json"
+    },
+    {
+      "id": "P41-R2-1",
+      "description": "Independent S3 GET retains all three exact R2 object bodies and checks full SHA/length.",
+      "path": "cloud/assets/receipt.json"
+    },
+    {
+      "id": "P41-STATE-1",
+      "description": "Protected D1/R2/channel/GitHub Release snapshots unchanged; only one new test ready release, three assets and one audit row; idempotent replay and unchanged pre-existing test data. Wrangler temporary preview state is not claimed globally absent.",
+      "path": "review/states-formal.json"
+    },
+    {
+      "id": "P41-STATE-2",
+      "description": "Protected D1/R2/channel/GitHub Release snapshots unchanged; only one new test ready release, three assets and one audit row; idempotent replay and unchanged pre-existing test data. Wrangler temporary preview state is not claimed globally absent.",
+      "path": "cloud/before/receipt.json"
+    },
+    {
+      "id": "P41-STATE-3",
+      "description": "Protected D1/R2/channel/GitHub Release snapshots unchanged; only one new test ready release, three assets and one audit row; idempotent replay and unchanged pre-existing test data. Wrangler temporary preview state is not claimed globally absent.",
+      "path": "cloud/after/receipt.json"
+    },
+    {
+      "id": "P41-STATE-4",
+      "description": "Protected D1/R2/channel/GitHub Release snapshots unchanged; only one new test ready release, three assets and one audit row; idempotent replay and unchanged pre-existing test data. Wrangler temporary preview state is not claimed globally absent.",
+      "path": "formal/github-before/snapshot.json"
+    },
+    {
+      "id": "P41-STATE-5",
+      "description": "Protected D1/R2/channel/GitHub Release snapshots unchanged; only one new test ready release, three assets and one audit row; idempotent replay and unchanged pre-existing test data. Wrangler temporary preview state is not claimed globally absent.",
+      "path": "formal/github-after/snapshot.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P41-ORIGINS",
+      "description": "Independently evaluate original CI/raw bootstrap/synthetic negatives; not a new native or device campaign.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "release",
+        "validation"
+      ],
+      "dependency_rationale": "Firmware supplies layout/build inputs; release supplies actual GCC and byte tools; cloudflare supplies schema, runtime/uploader/register consumers where listed. Execution owns API/process capture; evaluation owns offline interpretation. Only groups consumed by the listed commands are included.",
+      "external_inputs": [
+        "target",
+        "history"
+      ],
+      "command_ids": [
+        "formal-origins"
+      ],
+      "artifact_ids": [
+        "P41-ORIGINS-1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P41-ADMISSION",
+      "description": "Discriminating acceptance oracle and actual source-bound PR CI pass; APK/EXE skipped jobs are not new builds.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "governance",
+        "release",
+        "validation"
+      ],
+      "dependency_rationale": "Firmware supplies layout/build inputs; release supplies actual GCC and byte tools; cloudflare supplies schema, runtime/uploader/register consumers where listed. Execution owns API/process capture; evaluation owns offline interpretation. Only groups consumed by the listed commands are included.",
+      "external_inputs": [
+        "target",
+        "history"
+      ],
+      "command_ids": [
+        "formal-oracle",
+        "formal-controller",
+        "formal-ci"
+      ],
+      "artifact_ids": [
+        "P41-ADMISSION-1",
+        "P41-ADMISSION-2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P41-REHEARSAL",
+      "description": "One repair-bound successor staging workflow after P41-NATIVE-01, same shared implementation, real protected GCC key; required reviewer preserved and explicit delegated approval, no production job or release. Workflow finite job limits apply; root observes at <=1-minute intervals and stops at terminal state. The actual v1 run 38897470681 remains PRODUCT_FAIL; one prior staging execution and one new v2 dispatch are counted. Lost responses are reconciled, not redispatched; any further execution needs changed evidence, reviewed scope and a new minimum-rerun decision.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "dependency_rationale": "Firmware supplies layout/build inputs; release supplies actual GCC and byte tools; cloudflare supplies schema, runtime/uploader/register consumers where listed. Execution owns API/process capture; evaluation owns offline interpretation. Only groups consumed by the listed commands are included.",
+      "external_inputs": [
+        "target",
+        "history"
+      ],
+      "command_ids": [
+        "formal-dispatch",
+        "formal-discover",
+        "formal-approve",
+        "formal-collect"
+      ],
+      "artifact_ids": [
+        "P41-REHEARSAL-1",
+        "P41-REHEARSAL-2",
+        "P41-REHEARSAL-3"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P41-BYTES",
+      "description": "Exact approved key/source, eight GCC artifacts, actual full/patch candidate bytes, recovery trailer and metadata agree. Same retained v2 original; the corrected caller supplies an absolute input pathname.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "dependency_rationale": "Firmware supplies layout/build inputs; release supplies actual GCC and byte tools; cloudflare supplies schema, runtime/uploader/register consumers where listed. Execution owns API/process capture; evaluation owns offline interpretation. Only groups consumed by the listed commands are included.",
+      "external_inputs": [
+        "target",
+        "history",
+        "v2-rehearsal"
+      ],
+      "command_ids": [
+        "formal-bytes"
+      ],
+      "artifact_ids": [
+        "P41-BYTES-1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P41-R2",
+      "description": "Independent S3 GET retains all three exact R2 object bodies and checks full SHA/length.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "execution",
+        "evaluation"
+      ],
+      "dependency_rationale": "Cloudflare defines the asset identity contract, execution owns the unchanged read-only S3 capture, and evaluation produces the expected metadata report consumed by the GET verifier.",
+      "external_inputs": [
+        "target",
+        "history",
+        "v2-rehearsal",
+        "v4-transport"
+      ],
+      "command_ids": [
+        "formal-r2"
+      ],
+      "artifact_ids": [
+        "P41-R2-1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P41-STATE",
+      "description": "Protected D1/R2/channel/GitHub Release snapshots unchanged; only one new test ready release, three assets and one audit row; idempotent replay and unchanged pre-existing test data. Wrangler temporary preview state is not claimed globally absent. Offline evaluation of the original v2 before/after observations, not another capture or workflow.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation",
+        "execution",
+        "firmware",
+        "release"
+      ],
+      "dependency_rationale": "The existing firmware/release/cloudflare inputs define the observed assets and state contracts; execution pins the original v2 capture tools, evaluation interprets their hash-bound originals and the independent R2 readback. No new before/after capture is required.",
+      "external_inputs": [
+        "target",
+        "history",
+        "v2-rehearsal",
+        "v2-cloud-before",
+        "v2-cloud-after",
+        "v2-github-before",
+        "v2-github-after",
+        "v4-transport"
+      ],
+      "command_ids": [
+        "formal-state"
+      ],
+      "artifact_ids": [
+        "P41-STATE-1",
+        "P41-STATE-2",
+        "P41-STATE-3",
+        "P41-STATE-4",
+        "P41-STATE-5"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": []
+}

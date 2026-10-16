@@ -1,0 +1,41 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P4-1-v4.contract.json",
+    "--matrix",
+    ".cache/p41-acceptance-20261017/final-evidence-matrix-v4.json",
+    "--repo-root",
+    ".",
+    "--previous-contract",
+    "docs/acceptance-contracts/P4-1-v3.contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P4-1-v3/evidence/evidence-matrix.json",
+    "--reuse-source",
+    "docs/acceptance-contracts/P4-1-v2.contract.json",
+    "docs/acceptance-contracts/P4-1-v2/evidence/evidence-matrix.json"
+  ],
+  "pid": 19320,
+  "started": "2026-10-16T20:27:30.804Z",
+  "ended": "2026-10-16T20:27:58.246Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v4-final-validate.stdout.txt",
+      "size_bytes": 69,
+      "sha256": "0fc57838ca3f317bf62cbaddb1c1068ca1137d2bd6062b8a45d53337e94bfff4"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v4-final-validate.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

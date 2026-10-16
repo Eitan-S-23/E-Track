@@ -1,0 +1,28 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs",
+    "assets",
+    "assets",
+    ".cache/p41-acceptance-20261017/review/rehearsal-formal.json"
+  ],
+  "pid": 14044,
+  "started": "2026-10-16T20:22:29.822Z",
+  "ended": "2026-10-16T20:22:43.203Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v4-formal-r2.stdout.txt",
+      "size_bytes": 154,
+      "sha256": "fd444be5b198534671ff1c80762faaf5499ab9aff8659e9d450ce11346aafa9a"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v4-formal-r2.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

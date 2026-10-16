@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T18:46:27.410Z",
+  "ended": "2026-10-16T18:46:28.017Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100&page=1",
+  "status": 200,
+  "requestId": "AEAF:22F48F:18EECD3:259449E:6AD27103",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/github-after/protected-config/policies-page-1.json",
+    "size_bytes": 160,
+    "sha256": "d8658cd9c160a2a9dc49d2025f5e6a54f1c777c4866e9b732d91aea9b5b93c13"
+  }
+}

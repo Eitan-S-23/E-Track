@@ -1,0 +1,27 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+    "discover",
+    "dispatch-discovery"
+  ],
+  "pid": 7064,
+  "started": "2026-10-16T18:24:13.944Z",
+  "ended": "2026-10-16T18:24:15.946Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/formal-discover.stdout.txt",
+      "size_bytes": 116,
+      "sha256": "2dad6d1019648e5cb4120b37bdc2e3a7ea6f61b1523135343a6c423d8c3da113"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/formal-discover.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

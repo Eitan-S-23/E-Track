@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-16T20:42:14.008Z",
+  "output_roots": [
+    ".cache/p41-acceptance-20261017",
+    "docs/acceptance-contracts/P4-1-v3",
+    "docs/acceptance-contracts/P4-1-v4"
+  ],
+  "entries_checked": 1363,
+  "all_paths_resolve_within_authorized_worktree": true,
+  "parent_index_sha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "local_main_ref": "b42d3e25db85d6aba397cb4d0fb34bb5b653904f",
+  "authority": "Task worktree plus its explicit Git object/index/task-branch metadata only.",
+  "scope": "Controllable acceptance output paths; cmd.exe only, no PowerShell, local workerd/build or device action. Does not resolve historical P41-AUDIT-01 attribution."
+}

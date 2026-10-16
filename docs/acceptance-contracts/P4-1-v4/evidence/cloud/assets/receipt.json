@@ -1,0 +1,162 @@
+{
+  "mode": "assets",
+  "label": "assets",
+  "started": "2026-10-16T20:22:30.011Z",
+  "accountSha256": "01910e669500c221e2154f608e9f4e856b0a08297026e1ea98f1d18dd8cf9742",
+  "purpose": "P4-1 protected-resource and test-resource read-only evidence",
+  "credentialSource": "Existing local provisioning credential; never exported or persisted",
+  "requests": [
+    {
+      "sequence": 1,
+      "method": "GET",
+      "route": "user/tokens/verify",
+      "started": "2026-10-16T20:22:30.015Z",
+      "ended": "2026-10-16T20:22:31.071Z",
+      "status": 200,
+      "cfRay": "a4b9c6ac0b6c7af7-SJC",
+      "responseSha256": "a7545ba668a31ec6a3b2b489f92e7342138d6454176206080539d18d8511f525",
+      "success": true,
+      "tokenActive": true
+    },
+    {
+      "sequence": 2,
+      "method": "GET",
+      "operation": "GetObject",
+      "object": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.8-full.etu",
+      "bucket": "e-track-firmware-p41-test-releases",
+      "started": "2026-10-16T20:22:31.228Z",
+      "ended": "2026-10-16T20:22:35.463Z",
+      "status": 200,
+      "exitCode": 0,
+      "pid": 22812,
+      "processClosed": true,
+      "stderr": "",
+      "files": [
+        {
+          "path": ".cache/p41-acceptance-20261017/cloud/assets/002-s3.headers",
+          "size_bytes": 697,
+          "sha256": "19e1cb5276f66a239fd159571d1edde8c1fa0b56f33fe32b9ad367c59ff9adc3"
+        },
+        {
+          "path": ".cache/p41-acceptance-20261017/cloud/assets/002-s3.body",
+          "size_bytes": 285794,
+          "sha256": "0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127"
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "method": "GET",
+      "operation": "GetObject",
+      "object": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+      "bucket": "e-track-firmware-p41-test-releases",
+      "started": "2026-10-16T20:22:35.596Z",
+      "ended": "2026-10-16T20:22:37.135Z",
+      "status": 200,
+      "exitCode": 0,
+      "pid": 25232,
+      "processClosed": true,
+      "stderr": "",
+      "files": [
+        {
+          "path": ".cache/p41-acceptance-20261017/cloud/assets/003-s3.headers",
+          "size_bytes": 706,
+          "sha256": "fbd009dde9e47efebf3140cceaf89d2f83d778e83aa45febd2b45f75005afbbb"
+        },
+        {
+          "path": ".cache/p41-acceptance-20261017/cloud/assets/003-s3.body",
+          "size_bytes": 379,
+          "sha256": "5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05"
+        }
+      ]
+    },
+    {
+      "sequence": 4,
+      "method": "GET",
+      "operation": "GetObject",
+      "object": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin",
+      "bucket": "e-track-firmware-p41-test-releases",
+      "started": "2026-10-16T20:22:37.271Z",
+      "ended": "2026-10-16T20:22:43.155Z",
+      "status": 200,
+      "exitCode": 0,
+      "pid": 14136,
+      "processClosed": true,
+      "stderr": "",
+      "files": [
+        {
+          "path": ".cache/p41-acceptance-20261017/cloud/assets/004-s3.headers",
+          "size_bytes": 685,
+          "sha256": "3fb2d6cdde05e43525b3abf0c5c82ffe8bb135048bdc0e15fbeb50b6795d5995"
+        },
+        {
+          "path": ".cache/p41-acceptance-20261017/cloud/assets/004-s3.body",
+          "size_bytes": 605080,
+          "sha256": "45eda4d7fcf8a59f5e489262f5b19c4463f4bc80183e2180c61862dd8ce5c1c3"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": ".cache/p41-acceptance-20261017/cloud/assets/002-s3.headers",
+      "size_bytes": 697,
+      "sha256": "19e1cb5276f66a239fd159571d1edde8c1fa0b56f33fe32b9ad367c59ff9adc3"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/cloud/assets/002-s3.body",
+      "size_bytes": 285794,
+      "sha256": "0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/cloud/assets/003-s3.headers",
+      "size_bytes": 706,
+      "sha256": "fbd009dde9e47efebf3140cceaf89d2f83d778e83aa45febd2b45f75005afbbb"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/cloud/assets/003-s3.body",
+      "size_bytes": 379,
+      "sha256": "5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/cloud/assets/004-s3.headers",
+      "size_bytes": 685,
+      "sha256": "3fb2d6cdde05e43525b3abf0c5c82ffe8bb135048bdc0e15fbeb50b6795d5995"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/cloud/assets/004-s3.body",
+      "size_bytes": 605080,
+      "sha256": "45eda4d7fcf8a59f5e489262f5b19c4463f4bc80183e2180c61862dd8ce5c1c3"
+    }
+  ],
+  "ok": true,
+  "mutationsRequested": 0,
+  "assets": [
+    {
+      "kind": "full",
+      "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.8-full.etu",
+      "fileName": "e-track-at32f435-v3.2.8-full.etu",
+      "sizeBytes": 285794,
+      "sha256": "0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127",
+      "requestSequence": 2
+    },
+    {
+      "kind": "patch",
+      "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+      "fileName": "e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+      "sizeBytes": 379,
+      "sha256": "5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05",
+      "requestSequence": 3
+    },
+    {
+      "kind": "recovery",
+      "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin",
+      "fileName": "recovery-v3.2.8.bin",
+      "sizeBytes": 605080,
+      "sha256": "45eda4d7fcf8a59f5e489262f5b19c4463f4bc80183e2180c61862dd8ce5c1c3",
+      "requestSequence": 4
+    }
+  ],
+  "ended": "2026-10-16T20:22:43.160Z",
+  "closed": true
+}

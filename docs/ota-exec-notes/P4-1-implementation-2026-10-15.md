@@ -2625,3 +2625,78 @@ or SigV4 adapter. Preserve and index v3 first, retain its occupied asset directo
 before reusing the fixed working slot, and bind this actual route change in the
 successor external inputs. If it fails again, retain the new failure and reassess;
 do not loop. No staging replay or remote mutation is authorized by this recovery.
+
+### P4-1 V4 Independent Acceptance PASS
+
+The final caller/environment-only successor is `P4-1-v4`, contract SHA-256
+`54f88de3a3a87e542a76468d44ca81b271025cea79bcf633321e46b25e00f979`.
+Its freeze remains `b9d7d18c76e6495fbebf6758df6e4427e79e97b5`, tree
+`618e4761f8fc4ee99182d0e503b44baeea1d9c47`, profile blob
+`bb590b65c20e600bfa4748e64ed46b88b6f400d4`. Product code and all five frozen
+helpers are unchanged. The computed plan and NOT_RUN precheck passed with only
+`formal-r2` and `formal-state` required. ORIGINS, ADMISSION and REHEARSAL bind
+their original v2 EXECUTED PASS; BYTES binds its original v3 EXECUTED PASS.
+
+The one direct-route read batch completed in 13.15 seconds: one token verification
+and three S3 GETs, all HTTP 200; every GET exited 0 and retained its complete body.
+The environment override was confined to that child process, with its launch
+receipt bound to the frozen transport input. There was no proxy configuration
+edit, timeout extension, extra batch, upload or registration. The old seven-file
+v3 asset directory remains byte-identical in both its frozen archive and
+`cloud/assets-v3-failed`, with an explicit retention mapping.
+
+| Verified artifact | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Final App | 605072 | a94bca52f7e84064aac4d063273bc69f90e220cbbeaded8d0137e731dd5d99c6 |
+| Full ETU | 285794 | 0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127 |
+| Patch ETU | 379 | 5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05 |
+| Recovery | 605080 | 45eda4d7fcf8a59f5e489262f5b19c4463f4bc80183e2180c61862dd8ce5c1c3 |
+
+Canonical metadata SHA-256 is
+`fe435e1a0bc6afea344566846b1a63e8de39ee9335a98a874e97fbcc82b543a4`.
+The independent R2 receipt SHA-256 is
+`2afea580a4b2183952b1ddc87bbc7d49e7d4552eeebe0b4f144820c0242ace23`.
+The actual offline STATE evaluator passed with report SHA-256
+`aaa833d01f058d6760c3fd8dd1b4c70c7c485759aa804effcd361ccb743f2e85`:
+protected D1 schema/content, protected R2 inventory, existing Worker deployments
+and bindings, GitHub Releases/assets and channels were unchanged. Test D1 gained
+exactly one expected ready release, three matching asset rows and one audit row;
+the original shared-pipeline replay was idempotent, and pre-existing test rows
+and R2 objects were unchanged. The new test R2 keys are exactly the three assets.
+This is business-resource evidence, not a claim that Wrangler created no temporary
+preview control-plane state.
+
+Final matrix SHA-256 is
+`88c5ffa68de66d90e3c483b22cdfaf1753ebde9583e4f783696b521173ae3240`.
+All six required criteria are PASS: four direct original reuses and two actual
+v4 executions. Working and archived final validators returned
+`VALIDATION=PASS ... overall=PASS`.
+The compact archive contains 429 hash-bound originals plus contract and matrix;
+late sealing/secret-audit receipts are kept separately. The opaque-credential
+audit covered 434 working files and 123 ZIP members with no findings. The original
+v1 PRODUCT_FAIL, v2 HARNESS_FAIL and v3 ENV_BLOCKED are not changed by this result.
+
+P41-NATIVE-01 is independently resolved for this staging candidate. P4-1's approved
+pre-P5 implementation/staging completion boundary is met, not production
+promotion. The ledger remains two actual staging workflows total. GCC retains
+640 warnings per ordinary/protected build and vendor tools retain six warnings,
+with no compilation errors; they are not reported as warning-free builds.
+No production approval, release, gate unlock, device action or other task started.
+`OTA_BOOT_CHAIN_READY=false` and the protected reviewer/branch policy remain.
+P4-4 and subsequent owners may evaluate these same originals under their own
+criteria instead of requesting another rehearsal. P5 and production obligations
+remain open; historical P41-AUDIT-01 attribution remains unresolved and untouched.
+
+Evidence/index delivery and exact-head CI are the remaining authorized PR #27
+closeout steps. Any merge must preserve the frozen commit IDs. Shared-parent
+worktree/index/main synchronization is outside this writable boundary and stays
+with that worktree's owner; it is not a prerequisite for remote PR delivery.
+
+The closing controlled-output audit checked 1,363 entries under the active
+acceptance output and v3/v4 archive roots. All resolved inside the authorized
+worktree; the shared parent index remained SHA-256
+`2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`.
+No frozen v1/v2/v3 archive delta was introduced. The audit does not attribute or
+clean historical external PowerShell caches. Its receipt is retained with the
+two successful validators and opaque-credential scan in v4's separate sealing
+directory; final Git delivery will be audited separately.

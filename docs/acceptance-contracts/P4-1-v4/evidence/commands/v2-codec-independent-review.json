@@ -1,0 +1,31 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker",
+  "executable": "node",
+  "args": [
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "test/vitest.host.config.ts",
+    "test/firmware-scripts.host.test.ts",
+    "-t",
+    "P41-NATIVE-01"
+  ],
+  "pid": 23976,
+  "started": "2026-10-16T17:31:22.976Z",
+  "ended": "2026-10-16T17:31:46.799Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-codec-independent-review.stdout.txt",
+      "size_bytes": 7278,
+      "sha256": "ccab1a187cea5ce34f1640c5b38d270bea3fd7fd2f4f254e9b92adf81b5fb5f2"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-codec-independent-review.stderr.txt",
+      "size_bytes": 169,
+      "sha256": "3d8459c870f1ae89d6abc81e9c66c2582480bd39ab10a459e1a1e84cda54e4a7"
+    }
+  ],
+  "closed": true
+}

@@ -1,0 +1,17 @@
+HTTP/1.1 200 OK
+Date: Fri, 16 Oct 2026 20:22:34 GMT
+Content-Type: application/vnd.e-track.etu
+Content-Length: 285794
+Connection: keep-alive
+Accept-Ranges: bytes
+Cache-Control: public, max-age=31536000, immutable
+Content-Disposition: attachment; filename="e-track-at32f435-v3.2.8-full.etu"
+ETag: "241c52fa1d1a70d9d787ada723ee3902"
+Last-Modified: Fri, 16 Oct 2026 18:32:30 GMT
+x-amz-checksum-sha256: De4gwEZ6usORze3Y0dd9n/GxP7LYk2cp/Tt2h2lO0Sc=
+x-amz-meta-content-digest: sha-256=:De4gwEZ6usORze3Y0dd9n/GxP7LYk2cp/Tt2h2lO0Sc=:
+x-amz-meta-kind: full
+x-amz-meta-sha256: 0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127
+Server: cloudflare
+CF-RAY: a4b9c6c149ea5e55-SJC
+

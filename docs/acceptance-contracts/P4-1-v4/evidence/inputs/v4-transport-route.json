@@ -1,0 +1,25 @@
+{
+  "schema": "p41-acceptance-transport-v1",
+  "finding_id": "P41-TRANSPORT-01",
+  "approved_at": "2026-10-16T20:14:04.316Z",
+  "scope": "One read-only three-object collection against existing P4-1 test assets, then offline state evaluation; no new staging.",
+  "environment": {
+    "NO_PROXY": "*"
+  },
+  "lifetime": "Only the child process executing formal-r2; no global proxy/configuration change.",
+  "previous_proxy_fingerprint": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+  "previous_failure_receipt_sha256": "a7dbbfdb4d515c26188a149ee0ad5900ba6ef66eeeb1d4cdf20189aab98c9b88",
+  "preparation": {
+    "path": "review/transport-preparation/direct.json",
+    "sha256": "3f0699f003aa0267e492c06b9e8cea4ee5ffbae871e0f6d6b9f1cea204de6fb8",
+    "observation": "Unauthenticated direct HEAD completed TLS and HTTP 400 in 1.150441 seconds, curl exit 0. This proves route reachability only, not credential or asset correctness."
+  },
+  "collector": "docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs",
+  "limits": {
+    "maximum_new_asset_batches": 1,
+    "maximum_requests": 4,
+    "per_request_timeout_seconds": 60
+  },
+  "preservation": "V3 original assets are archived and separately retained as cloud/assets-v3-failed; no failure was overwritten.",
+  "stop_condition": "Preserve any failure; no retry loop, no relaxed bytes/hash gate and no remote mutation."
+}
