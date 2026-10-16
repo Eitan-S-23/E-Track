@@ -1,10 +1,15 @@
 import { env } from "cloudflare:workers";
 import { SELF } from "cloudflare:test";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { createHTTPReducers, Headers as MiniflareHeaders, Request as MiniflareRequest,
+  Response as MiniflareResponse, stringifyWithStreams, structuredSerializableReducers,
+  type PlatformImpl } from "miniflare";
 import { buildFirmwareMetadata } from "../../scripts/build-firmware-release-metadata.mjs";
 import { uploadFirmwareAsset } from "../../scripts/upload-firmware-r2-asset.mjs";
 import { registerFirmware } from "../../scripts/register-firmware-release.mjs";
@@ -15,6 +20,16 @@ import { bytesFor, metadata, SCHEMA_FIXTURE, uploadFixture } from "./firmware-fi
 const root = projectRoot();
 const scripts = fileURLToPath(new URL("../../scripts/", import.meta.url));
 const worker = fileURLToPath(new URL("../", import.meta.url));
+// Use the SDK's actual constructors/reducers, without creating a native runtime.
+const codecPlatform = {
+  Blob, File, Headers: MiniflareHeaders, Request: MiniflareRequest, Response: MiniflareResponse,
+  isReadableStream: (value: unknown) => value instanceof ReadableStream,
+  bufferReadableStream: (stream: ReadableStream) => new Response(stream).arrayBuffer(),
+  unbufferReadableStream: (buffer: ArrayBuffer) => new Response(buffer).body!
+} as unknown as PlatformImpl<ReadableStream>;
+const codecReducers = { ...structuredSerializableReducers, ...createHTTPReducers(codecPlatform) };
+const encodePut = (argv: unknown[]) => stringifyWithStreams(codecPlatform, argv, codecReducers, true);
+
 async function files() {
   const base = outputPath(root, path.join(root, ".cache", "p4-2-script-fixtures"));
   await mkdir(base, { recursive: true });
@@ -49,20 +64,62 @@ describe("P4-2 canonical metadata / upload / register scripts", () => {
     expect(JSON.parse(await readFile(output, "utf8")).assets).toHaveLength(3);
     expect(new Uint8Array(await readFile(path.join(dir, "app.bin")))).toEqual(bytesFor("final-image"));
   });
-  it("uploads with conditional create, canonical HTTP metadata and full readback; same bytes never rewrite", async () => {
-    const value = metadata(); const asset = value.assets[0];
-    const put = vi.spyOn(env.RELEASES_BUCKET, "put");
+  it("P41-NATIVE-01 retains the pinned codec's Node Headers rejection and SDK Headers control", async () => {
+    const requireWorker = createRequire(path.join(worker, "package.json"));
+    const lock = JSON.parse(await readFile(path.join(worker, "package-lock.json"), "utf8"));
+    const miniflareVersion = requireWorker("miniflare/package.json").version;
+    const wranglerVersion = requireWorker("wrangler/package.json").version;
+    expect(miniflareVersion).toBe(lock.packages["node_modules/miniflare"].version);
+    expect(wranglerVersion).toBe(lock.packages["node_modules/wrangler"].version);
+    expect(Headers).not.toBe(MiniflareHeaders);
+    const asset = metadata().assets[0];
+    const headers = { "Content-Type": "application/vnd.e-track.etu", "Content-Length": String(asset.sizeBytes),
+      "Content-Digest": contentDigest(asset.sha256), "Content-Disposition": `attachment; filename="${asset.fileName}"`,
+      "Cache-Control": "public, max-age=31536000, immutable" };
+    const options = { onlyIf: { etagDoesNotMatch: "*" }, sha256: asset.sha256,
+      customMetadata: { sha256: asset.sha256, kind: asset.kind, "content-digest": contentDigest(asset.sha256) } };
+    let rejection;
+    try { encodePut([asset.r2Key, bytesFor("full"), { ...options, httpMetadata: new Headers(headers) }]); }
+    catch (error) { rejection = error; }
+    expect(rejection).toMatchObject({ name: "DevalueError", message: "Cannot stringify arbitrary non-POJOs", path: "[2].httpMetadata" });
+    const encoded = await encodePut([asset.r2Key, bytesFor("full"), { ...options, httpMetadata: new MiniflareHeaders(headers) }]);
+    expect(encoded.value.length).toBeGreaterThan(0);
+    console.info("P41_NATIVE_CODEC_CONTROL", { node: process.version, wranglerVersion, miniflareVersion,
+      sdkSha256: createHash("sha256").update(await readFile(requireWorker.resolve("miniflare"))).digest("hex"),
+      rejected: { name: (rejection as Error).name, path: "[2].httpMetadata" }, sdkHeadersAccepted: true });
+  });
+  it.each(["full", "patch", "recovery"])("P41-NATIVE-01 uploads %s through the real SDK codec with immutable metadata and full readback", async (kind) => {
+    const value = metadata(); const asset = value.assets.find(a => a.kind === kind)!; const bytes = bytesFor(kind);
+    const originalPut = env.RELEASES_BUCKET.put.bind(env.RELEASES_BUCKET);
+    const put = vi.spyOn(env.RELEASES_BUCKET, "put").mockImplementation(async (...argv) => {
+      // Serialize the unmodified production arguments before the memory adapter.
+      const encoded = await encodePut(argv);
+      expect(encoded.value.length).toBeGreaterThan(0);
+      return originalPut(...argv);
+    });
+    const get = vi.spyOn(env.RELEASES_BUCKET, "get");
     try {
-      const result = await uploadFirmwareAsset(value, asset.fileName, bytesFor("full"), env.RELEASES_BUCKET);
-      expect(result).toMatchObject({ ok: true, status: "UPLOADED", contentDigest: contentDigest(asset.sha256) });
+      const result = await uploadFirmwareAsset(value, asset.fileName, bytes, env.RELEASES_BUCKET);
+      expect(result).toMatchObject({ ok: true, status: "UPLOADED", kind, sizeBytes: bytes.byteLength,
+        sha256: asset.sha256, contentDigest: contentDigest(asset.sha256) });
+      expect(put.mock.calls[0][0]).toBe(asset.r2Key);
+      expect(put.mock.calls[0][1]).toBe(bytes);
       const options = put.mock.calls[0][2]!;
       expect(options.onlyIf).toEqual({ etagDoesNotMatch: "*" });
-      expect(options.customMetadata).toMatchObject({ sha256: asset.sha256, kind: "full" });
-      expect(new Headers(options.httpMetadata as Headers).get("Content-Digest")).toBe(contentDigest(asset.sha256));
-      expect(new Headers(options.httpMetadata as Headers).get("Content-Length")).toBe(String(asset.sizeBytes));
-      expect(await uploadFirmwareAsset(value, asset.fileName, bytesFor("full"), env.RELEASES_BUCKET)).toMatchObject({ status: "ALREADY_PRESENT" });
+      expect(options.sha256).toBe(asset.sha256);
+      expect(options.customMetadata).toEqual({ sha256: asset.sha256, kind, "content-digest": contentDigest(asset.sha256) });
+      expect(Object.getPrototypeOf(options.httpMetadata)).toBe(Object.prototype);
+      expect(options.httpMetadata).toEqual({
+        contentType: kind === "recovery" ? "application/octet-stream" : "application/vnd.e-track.etu",
+        contentDisposition: `attachment; filename="${asset.fileName}"`, cacheControl: "public, max-age=31536000, immutable"
+      });
+      const head = await env.RELEASES_BUCKET.head(asset.r2Key);
+      expect(get.mock.calls).toEqual([[asset.r2Key, { onlyIf: { etagMatches: head!.etag } }]]);
+      expect(await uploadFirmwareAsset(value, asset.fileName, bytes, env.RELEASES_BUCKET)).toMatchObject({ status: "ALREADY_PRESENT" });
       expect(put).toHaveBeenCalledTimes(1);
-    } finally { put.mockRestore(); }
+      expect(get.mock.calls).toEqual(Array.from({ length: 2 }, () => [asset.r2Key, { onlyIf: { etagMatches: head!.etag } }]));
+      console.info("P41_NATIVE_CODEC_UPLOAD", { kind, status: result.status, options, fullReadbacks: get.mock.calls.length });
+    } finally { put.mockRestore(); get.mockRestore(); }
   });
   it.each(["metadata", "bytes", "size"])("rejects existing R2 %s collision without overwrite", async (kind) => {
     const value = metadata(); const asset = value.assets[0];
@@ -87,12 +144,32 @@ describe("P4-2 canonical metadata / upload / register scripts", () => {
     try { await expect(uploadFirmwareAsset(value, asset.fileName, bytesFor("full"), env.RELEASES_BUCKET)).rejects.toMatchObject({ code: "R2_VERIFY_FAILED" }); }
     finally { get.mockRestore(); }
   });
-  it("rejects local byte mismatches before any R2 call", async () => {
-    const value = metadata(); const head = vi.spyOn(env.RELEASES_BUCKET, "head");
+  it.each(["short", "long", "digest"])("rejects a %s multi-chunk readback despite matching HEAD metadata", async (failure) => {
+    const value = metadata(); const asset = value.assets[0]; const bytes = bytesFor("full");
+    const changed = failure === "short" ? bytes.slice(0, -1)
+      : failure === "long" ? new Uint8Array([...bytes, 0]) : bytes.slice();
+    if (failure === "digest") changed[changed.length - 1] ^= 1;
+    const originalGet = env.RELEASES_BUCKET.get.bind(env.RELEASES_BUCKET);
+    const get = vi.spyOn(env.RELEASES_BUCKET, "get").mockImplementation(async (key, options) => {
+      const object = await originalGet(key, options);
+      if (!object || !("body" in object)) throw new Error("Expected stored fixture");
+      return { ...object, writeHttpMetadata: object.writeHttpMetadata.bind(object), body: new ReadableStream<Uint8Array>({ start(controller) {
+        controller.enqueue(changed.slice(0, 4)); controller.enqueue(changed.slice(4)); controller.close();
+      } }) };
+    });
     try {
-      await expect(uploadFirmwareAsset(value, value.assets[0].fileName, new Uint8Array(3), env.RELEASES_BUCKET)).rejects.toMatchObject({ code: "INVALID_PARAMETER" });
-      expect(head).not.toHaveBeenCalled();
-    } finally { head.mockRestore(); }
+      await expect(uploadFirmwareAsset(value, asset.fileName, bytes, env.RELEASES_BUCKET)).rejects.toMatchObject({ code: "R2_VERIFY_FAILED" });
+      expect(get).toHaveBeenCalledTimes(1);
+    } finally { get.mockRestore(); }
+  });
+  it.each(["length", "digest"])("rejects local %s mismatches before any R2 call", async (failure) => {
+    const value = metadata(); const head = vi.spyOn(env.RELEASES_BUCKET, "head");
+    const put = vi.spyOn(env.RELEASES_BUCKET, "put"); const get = vi.spyOn(env.RELEASES_BUCKET, "get");
+    try {
+      const bytes = new Uint8Array(failure === "length" ? 3 : value.assets[0].sizeBytes);
+      await expect(uploadFirmwareAsset(value, value.assets[0].fileName, bytes, env.RELEASES_BUCKET)).rejects.toMatchObject({ code: "INVALID_PARAMETER" });
+      expect(head).not.toHaveBeenCalled(); expect(put).not.toHaveBeenCalled(); expect(get).not.toHaveBeenCalled();
+    } finally { head.mockRestore(); put.mockRestore(); get.mockRestore(); }
   });
   it("keeps dry-run metadata unverified and rejects the old skip-readback option", async () => {
     const dir = await files();

@@ -59,14 +59,14 @@ export async function uploadFirmwareAsset(metadata, fileName, bytes, bucket, req
   let head = await bucket.head(asset.r2Key);
   let status = "ALREADY_PRESENT";
   if (!head) {
-    const headers = new Headers({
-      "Content-Type": asset.kind === "recovery" ? "application/octet-stream" : "application/vnd.e-track.etu",
-      "Content-Length": String(asset.sizeBytes), "Content-Digest": contentDigest(asset.sha256),
-      "Content-Disposition": `attachment; filename="${asset.fileName}"`,
-      "Cache-Control": "public, max-age=31536000, immutable"
-    });
+    // Plain R2 metadata crosses Wrangler's proxy without Node/SDK Headers identity.
+    const httpMetadata = {
+      contentType: asset.kind === "recovery" ? "application/octet-stream" : "application/vnd.e-track.etu",
+      contentDisposition: `attachment; filename="${asset.fileName}"`,
+      cacheControl: "public, max-age=31536000, immutable"
+    };
     const created = await bucket.put(asset.r2Key, bytes, { onlyIf: { etagDoesNotMatch: "*" },
-      httpMetadata: headers, customMetadata: { sha256: asset.sha256, kind: asset.kind,
+      httpMetadata, customMetadata: { sha256: asset.sha256, kind: asset.kind,
         "content-digest": contentDigest(asset.sha256) }, sha256: asset.sha256 });
     status = created ? "UPLOADED" : "ALREADY_PRESENT";
     head = await bucket.head(asset.r2Key);

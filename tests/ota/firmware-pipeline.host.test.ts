@@ -551,16 +551,21 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
     } finally { put.mockRestore(); }
   });
 
-  it("false-positive R2 put with missing readback never persists verified metadata or touches D1", async () => {
+  it.each(["full", "patch", "recovery"])("false-positive R2 put with missing %s readback never persists verified metadata or touches D1", async (kind) => {
     const s = await setup(); const before = await counts();
-    const get = vi.spyOn(s.bucket, "get").mockResolvedValue(null);
+    const failedAsset = s.metadata.assets.find(a => a.kind === kind)!;
+    const originalGet = s.bucket.get.bind(s.bucket);
+    const get = vi.spyOn(s.bucket, "get").mockImplementation((key, options) => key === failedAsset.r2Key
+      ? Promise.resolve(null) : originalGet(key, options));
+    const put = vi.spyOn(s.bucket, "put");
     try {
       await expect(publishPreparedRelease(s)).rejects.toMatchObject({ code: "R2_VERIFY_FAILED" });
+      expect(put).toHaveBeenCalledTimes(s.metadata.assets.indexOf(failedAsset) + 1);
       expect(await counts()).toEqual(before);
       const stored = JSON.parse(await readFile(path.join(s.assetsDir, "cloudflare-firmware-release-metadata.json"), "utf8"));
       expect(stored.assets.every((a: any) => a.r2Verified === false)).toBe(true);
       expect(s.calls.some(v => v.startsWith("POST"))).toBe(false);
-    } finally { get.mockRestore(); }
+    } finally { get.mockRestore(); put.mockRestore(); }
   });
 
   it("a real registration audit failure rolls back ready/assets and stops without retry", async () => {

@@ -2293,3 +2293,90 @@ triple to FREEZE-INDEX. Read the handoff directly with
 This branch delivery remains pending main integration; the original implementation
 claimant is unchanged. No product fix, successor acceptance, merge or release is
 claimed by sealing the failed round.
+
+## P41-NATIVE-01 Implementation Remediation, 2026-10-16
+
+This is a separately assigned implementation repair, not independent acceptance.
+Entry HEAD is `53b78608cac6bb5c2e9253362471b6383f5c31ff`, on the existing
+`dev/p4-1/unattended-20261015` branch in
+`D:/github/my/E-Track/.cache/p41-dev-20261015`; the worktree was clean.
+The original implementation claimant, sole P4-1 Spec and v1 PRODUCT_FAIL remain
+unchanged. No v1 contract/tools/evidence/sealing/delivery or FREEZE-INDEX entry
+may be rewritten. Bundle `7f014a8887dc79646ff392ee8cfa6a1ce2c9cf67` remains
+the original failed-round anchor.
+
+The bounded repair is a plain R2 HTTP metadata object in
+`uploadFirmwareAsset`, retaining type/disposition/immutable caching, actual
+length/SHA validation, conditional create, checksum/custom metadata, complete
+ETag-conditional readback and all-assets-before-registration ordering. The
+installed and locked Wrangler/Miniflare versions are 4.105.0/4.20260625.0;
+`createHTTPReducers` uses its own Undici Headers constructor. R2HTTPMetadata
+does not have Content-Length/Content-Digest fields; byte checks and custom
+metadata retain these identities, without changing public response contracts.
+
+Before changing the uploader, extend the existing script host suite to send its
+actual intercepted put arguments through the pinned `stringifyWithStreams` and
+HTTP reducers. Retain a Node-global Headers rejection and SDK-Headers positive
+control, cover full/patch/recovery metadata and complete readback, and extend
+the existing pipeline failure test to each asset. The pipeline config resolves
+to `tests/ota/firmware-pipeline.host.test.ts`, not a second uploader or harness.
+Record the old implementation's real failing run before applying the repair.
+
+Development uses the existing `.cache/run.cjs` containment/logging adapter and
+the three established npm host/type commands, then checks-only PR Linux CI for
+native workerd. Its controllable outputs are `.cache/logs/p41-native-01-*`,
+`.cache/runtime/`, existing project-local fixture directories and Worker-local
+Vite caches. The prospective paths and ancestors passed realpath/directory-boundary
+and native `fsutil reparsepoint query` checks before writes. No PowerShell,
+Windows workerd, cloud qualification, staging dispatch, configuration/secret
+change, merge, production or device action is part of this repair.
+
+User authority continues scoped development commits/pushes as `Eitan-S-23` and
+existing checks-only CI. After real feedback and source-bound log retention,
+return this batch to the original independent reviewer, who owns consolidated
+review and successor-contract minimum-rerun analysis against the actual v1
+final failure matrix. Successful codec/development tests cannot prove R2 write
+permission, remote upload/readback, ready registration or whole-card PASS.
+
+### Local Red/Green Development Feedback
+
+Only the uploader and two existing host tests changed. Product code replaces
+the Node Headers construction with `contentType`, `contentDisposition` and
+`cacheControl` on a plain object. No dependency, Worker handler, registration
+rule, D1 schema, MCU, Flutter, workflow or credential change is included.
+The unchanged `firmware_download.ts` still derives Content-Length from the
+asset/body size and full-response Content-Digest from the registered SHA-256.
+
+All commands below ran in the Worker directory using the existing Node/npm
+installation through `.cache/run.cjs`; Windows npm explicitly used
+`--script-shell=cmd.exe`. Each label has untouched `.stdout.txt`, `.stderr.txt`
+and a closed `.json` receipt in `.cache/logs/`. Node was v24.13.0, Windows
+10.0.19045, Vitest 4.1.9; the codec control recorded Wrangler 4.105.0,
+Miniflare 4.20260625.0 and SDK SHA-256
+`fb489dfb0eff95a0303f1ac093bd8e6e1f46bb227f65ce105694832f971f3edd`.
+
+| Command | Original label | Actual result |
+| --- | --- | --- |
+| `npm test -- --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts` before product edit | `p41-native-01-red` | exit 1; 38 passed, 3 failed, 41 total. All three real uploader codec cases fail with DevalueError at `[2].httpMetadata`; the SDK-Headers control passes. |
+| Same command, after plain metadata repair | `p41-native-01-green` | exit 0; 41/41 passed. |
+| `npm test -- --config ../../../../../.github/scripts/p41-host.config.mjs` | `p41-native-01-pipeline` | exit 0; 136/136 passed, including failure at full, patch or recovery readback with no registration/ready effects. |
+| `npm run check` | `p41-native-01-types` | exit 2; one TS2345 in the new multi-chunk test double, which omitted the inherited writeHttpMetadata method during object spread. |
+| `npm run check`, after explicitly preserving that method binding | `p41-native-01-types-fixed` | exit 0; no diagnostic. No product adjustment was needed. |
+| Original host command on the final test bytes | `p41-native-01-host-final` | exit 0; 41/41 passed. The codec path is unchanged from the red/green test; only the unrelated multi-chunk object's method binding changed. |
+
+`p41-native-01-red-inputs` binds the pre-repair uploader and added tests by
+working-byte SHA-256 and Git blob identity, plus branch/HEAD, locked dependencies
+and the shared-index baseline. The three metadata cases validate exact supported
+keys, checksum/custom digest, immutable conditional create and two complete
+ETag-conditional GETs (initial upload and identical-object replay). Additional
+negative cases reject short/long/corrupt-final-chunk readback and local length or
+same-length digest mismatches; the existing collision/race and register rollback
+tests are retained. The host adapter remains in-memory R2 plus real SQLite SQL,
+not a successful remote upload.
+
+Both host files emit the existing SQLite ExperimentalWarning; pipeline output
+also contains the intentionally redacted compiler-double failure diagnostic from
+its passing negative test. The failed type-check receipt is preserved rather than
+relabelled green. A final diff check has no whitespace errors; Git reports its
+normal LF-to-CRLF checkout warnings. Checks-only PR CI and durable original-log
+delivery follow this local checkpoint; independent acceptance remains pending.
