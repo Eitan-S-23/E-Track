@@ -2127,3 +2127,12 @@ explicit commit messages do not invoke the hook's optional AI generation. Only
 the already-authorized worktree index/HEAD and own common Git objects/branch/ref
 metadata are writable outside the worktree content boundary, not another
 worktree's index or files.
+
+P41-HARNESS-02: the first post-commit push wrapper exited before any network
+operation because a second contained process no longer knew the original
+read-only GitHub credential configuration location. Original closed receipt:
+`commands/acceptance-input-push.json`, exit 1. The adapter now propagates only
+`P41_GH_CREDENTIAL_CONFIG` to nested helpers; the token is still retrieved lazily
+for the authorized GitHub operation and never supplied to general tests/logs.
+This is a transport-preparation repair before target binding or formal freeze,
+not a failed product run or permission retry. Commit `256111c` remains in history.

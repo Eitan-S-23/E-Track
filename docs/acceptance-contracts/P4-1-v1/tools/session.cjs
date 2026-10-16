@@ -11,6 +11,11 @@ const repository = 'Eitan-S-23/E-Track';
 const branch = 'dev/p4-1/unattended-20261015';
 const outputRoot = '.cache/p41-acceptance-20261016';
 const initialEnvironment = { ...process.env };
+const credentialConfigs = [initialEnvironment.P41_GH_CREDENTIAL_CONFIG, initialEnvironment.GH_CONFIG_DIR,
+  initialEnvironment.APPDATA && path.join(initialEnvironment.APPDATA, 'GitHub CLI'),
+  initialEnvironment.APPDATA && path.join(initialEnvironment.APPDATA, 'gh'),
+  initialEnvironment.USERPROFILE && path.join(initialEnvironment.USERPROFILE, '.config/gh')]
+  .filter(Boolean).filter(p => fs.existsSync(path.join(p, 'hosts.yml')));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
 function guard(value) {
@@ -44,6 +49,8 @@ function environment() {
     if (/^(GH_|GITHUB_TOKEN|CLOUDFLARE_|CF_|TRACE_|OTA_|GIT_|NODE_OPTIONS|NODE_COMPILE_CACHE|OPENAI_|ANTHROPIC_|CC_CONNECT)/i.test(name)) delete env[name];
   }
   delete env.WECHAT_WEBHOOK_KEY;
+  // Nested contained adapters retain only this read-only input location, not a token.
+  if (credentialConfigs.length) env.P41_GH_CREDENTIAL_CONFIG = credentialConfigs[0];
   const directories = { TEMP: 'tmp', TMP: 'tmp', TMPDIR: 'tmp', HOME: 'home', USERPROFILE: 'home',
     APPDATA: 'appdata', LOCALAPPDATA: 'localappdata', XDG_CONFIG_HOME: 'config', XDG_CACHE_HOME: 'cache',
     XDG_DATA_HOME: 'data', GH_CONFIG_DIR: 'config/gh', npm_config_cache: 'npm-cache',
@@ -67,15 +74,10 @@ function git(args) {
 let token;
 function githubToken() {
   if (token) return token;
-  const candidates = [initialEnvironment.GH_CONFIG_DIR,
-    initialEnvironment.APPDATA && path.join(initialEnvironment.APPDATA, 'GitHub CLI'),
-    initialEnvironment.APPDATA && path.join(initialEnvironment.APPDATA, 'gh'),
-    initialEnvironment.USERPROFILE && path.join(initialEnvironment.USERPROFILE, '.config/gh')]
-    .filter(Boolean).filter(p => fs.existsSync(path.join(p, 'hosts.yml')));
-  assert(candidates.length > 0, 'Existing GitHub credential configuration unavailable');
+  assert(credentialConfigs.length > 0, 'Existing GitHub credential configuration unavailable');
   // auth token is read-only. Its original config is an input; update checks and
   // all controllable runtime/cache destinations remain disabled or contained.
-  const env = { ...environment(), GH_CONFIG_DIR: candidates[0] };
+  const env = { ...environment(), GH_CONFIG_DIR: credentialConfigs[0] };
   const result = cp.spawnSync('C:/Program Files/GitHub CLI/gh.exe',
     ['auth', 'token', '--hostname', 'github.com', '--user', 'Eitan-S-23'],
     { cwd: root, env, windowsHide: true, encoding: 'utf8', timeout: 15000 });
