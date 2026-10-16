@@ -1,0 +1,35 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "docs/acceptance-contracts/P4-1-v2/tools/inspect.py",
+    "rehearsal",
+    "--output",
+    ".cache/p41-acceptance-20261017/review/rehearsal-absolute-path-preparation.json",
+    "--artifact",
+    "D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/p41-acceptance-20261017/formal/completed/rehearsal.zip",
+    "--target",
+    ".cache/p41-acceptance-20261017/formal/target.json"
+  ],
+  "pid": 23592,
+  "started": "2026-10-16T18:57:38.864Z",
+  "ended": "2026-10-16T18:57:39.620Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v3-absolute-path-preparation.stdout.txt",
+      "size_bytes": 220,
+      "sha256": "fb8f2af5b409115c9c160ccac62e55759647231067550282536af5fc5ce60b1a"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v3-absolute-path-preparation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

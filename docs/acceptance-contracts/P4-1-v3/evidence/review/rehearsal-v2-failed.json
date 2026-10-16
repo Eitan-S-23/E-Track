@@ -1,0 +1,12 @@
+{
+  "started": "2026-10-16T18:41:29.944864+00:00",
+  "mode": "rehearsal",
+  "ok": false,
+  "error": {
+    "type": "ValueError",
+    "message": "'.cache\\\\p41-acceptance-20261017\\\\formal\\\\completed\\\\rehearsal.zip' is not in the subpath of 'D:\\\\github\\\\my\\\\E-Track\\\\.cache\\\\p41-dev-20261015'",
+    "file": "_local.py",
+    "line": 385
+  },
+  "ended": "2026-10-16T18:41:30.223047+00:00"
+}

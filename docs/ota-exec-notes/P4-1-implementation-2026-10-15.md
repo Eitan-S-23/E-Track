@@ -2582,3 +2582,46 @@ separate late sealing receipts). Working and archived validators both returned
 `VALIDATION=PASS ... overall=HARNESS_FAIL`; 362 contract/evidence/sealing Git
 blobs were checked against their original bytes before commit. The subsequent
 FREEZE-INDEX entry preserves this result; it is not a product failure or a PASS.
+
+### V3 Byte PASS And Preserved R2 Transport Failure
+
+The caller-only v3 contract keeps the same `b9d7d18` input tree and unchanged
+versioned helpers. Contract SHA-256 is
+`0c975a7420c72292fa1624817b7dfa95d61d843f848c0f6539a797e2563c89e0`.
+The actual v2 archived failed matrix is its predecessor. The computed plan and
+genuine NOT_RUN precheck passed: ORIGINS, ADMISSION and REHEARSAL reuse their
+original v2 EXECUTED PASS; only BYTES, R2 and offline STATE require execution.
+The failed v2 working byte report was retained byte-for-byte as
+`review/rehearsal-v2-failed.json`, with an explicit retention mapping; its frozen
+archive remains untouched. The corrected absolute-path v3 command completed the
+full byte evaluation with exit 0 and report SHA-256
+`8b943dcd58ce0db7414e9348aacaf7e42c099aaf0b0c319b22182cf07a9648fe`.
+
+P41-TRANSPORT-01 is an environment/collection failure, not a proved product or
+credential failure. The independent S3 collector made four read-only requests:
+token verification, full GET, patch GET and recovery GET. Full (285,794 bytes)
+and patch (379 bytes) matched exactly. Recovery returned HTTP 200 with the
+expected Content-Length 605,080 and checksum metadata, but curl exit 28 at the
+fixed 60-second deadline left 573,440 bytes. The partial body, complete response
+headers and closed failed receipt are preserved; no readback success is inferred
+from response metadata. STATE was not invoked because it requires that readback.
+
+V3 is sealed as ENV_BLOCKED: three original PASS criteria reused, BYTES EXECUTED
+PASS, R2 environment FAIL and STATE NOT_OBSERVED. Its final validator passed with
+that honest result. The staging ledger remains two executions total, not three:
+v1 product failure and v2 canonical success. V3 did not dispatch, approve, build,
+upload, register, deploy or operate a device.
+
+Before another collection attempt, the original headers showed the configured
+HTTP proxy CONNECT route. One unauthenticated direct HEAD to the exact recovery
+object completed TLS and an HTTP 400 response in 1.15 seconds, curl exit 0;
+this qualifies reachability only, not authorization, bandwidth or asset bytes.
+The raw preparation receipt is `review/transport-preparation/direct.json`.
+The smallest successor uses the same collector with a process-local `NO_PROXY=*`
+route, a fresh receipt label and the same 60-second per-request bound. It makes
+one bounded three-object read batch because the supported collector has no
+single-object/resume mode; this is preferable to implementing another credential
+or SigV4 adapter. Preserve and index v3 first, retain its occupied asset directory
+before reusing the fixed working slot, and bind this actual route change in the
+successor external inputs. If it fails again, retain the new failure and reassess;
+do not loop. No staging replay or remote mutation is authorized by this recovery.

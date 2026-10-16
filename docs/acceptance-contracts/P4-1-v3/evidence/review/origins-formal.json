@@ -1,0 +1,254 @@
+{
+  "started": "2026-10-16T18:13:01.138278+00:00",
+  "mode": "origins",
+  "scope": "INDEPENDENT_OFFLINE_EVALUATION_OF_EXISTING_ORIGINALS",
+  "source_commit": "a52d5b567ddfe5982063f5ac6af5c0a0b0170a18",
+  "remediation_review": {
+    "scope": "INDEPENDENT_OFFLINE_REVIEW_OF_REMEDIATION_ORIGINALS",
+    "repairCommit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c",
+    "inventories": [
+      {
+        "inventory": {
+          "path": "docs/ota-exec-notes/P4-1-native-01-remediation-2026-10-16/inventory.json",
+          "size_bytes": 13540,
+          "sha256": "4465fcd64c5a3cbb6e7688f6cc4e284586f3e9cbb9cfbefafd61063382397b0d"
+        },
+        "files_verified": 56,
+        "zip_members_verified": 0
+      },
+      {
+        "inventory": {
+          "path": "docs/ota-exec-notes/P4-1-native-01-remediation-2026-10-16/closing/inventory.json",
+          "size_bytes": 787,
+          "sha256": "eca7b18bbc5e4de02ffd6a3511c8267e343001b584c8ba01e894e5676654ad3a"
+        },
+        "files_verified": 3,
+        "zip_members_verified": 0
+      }
+    ],
+    "zipMembersVerified": 117,
+    "sourceBindings": [
+      {
+        "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs",
+        "gitBlob": "0ae4df3d8be402cd5beeb5846c326382e35a9cfe"
+      },
+      {
+        "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-scripts.host.test.ts",
+        "gitBlob": "53440f88cc9020c70e0496b43187d04eea0976cf"
+      },
+      {
+        "path": "tests/ota/firmware-pipeline.host.test.ts",
+        "gitBlob": "7ba22f37cd05be7c0c31b778379f2d9a3f9be29e"
+      },
+      {
+        "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/package-lock.json",
+        "gitBlob": "2b43563f0f5d32cba2f06e4f7e91b3deb5c52d3d"
+      }
+    ],
+    "oldProductFailures": 3,
+    "localHost": 41,
+    "localPipeline": 136,
+    "originalCiCounts": {
+      "host": 41,
+      "pipeline": 136,
+      "native": 156
+    },
+    "ciRuns": {
+      "firmware-build.yml": 38929267144,
+      "acceptance-governance.yml": 38929267147,
+      "cloudflare-update-service.yml": 38929267218,
+      "build.yml": 38929267169
+    },
+    "actualCheckout": "9811af20b122442bd8cf91902b8455403e3d84fa",
+    "sourceAndCheckoutTreeEqual": true,
+    "historicalTypeFailurePreserved": true,
+    "realR2WriteOrReadyProven": false
+  },
+  "inventories": [
+    {
+      "inventory": {
+        "path": "docs/ota-exec-notes/P4-1-readiness-2026-10-16/inventory.json",
+        "size_bytes": 23407,
+        "sha256": "61c2710ad57e32bce8445de6bccbf36113f32e61616a6245c55dae176e2a7068"
+      },
+      "files_verified": 97,
+      "zip_members_verified": 810
+    },
+    {
+      "inventory": {
+        "path": "docs/ota-exec-notes/P4-1-bindings-2026-10-16/inventory.json",
+        "size_bytes": 4376,
+        "sha256": "b458472d12da56111dc9d440d5525c52aefea4cb9152654159e650dfd9cb3f39"
+      },
+      "files_verified": 17,
+      "zip_members_verified": 63
+    },
+    {
+      "inventory": {
+        "path": "docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/inventory.json",
+        "size_bytes": 1511,
+        "sha256": "e105229cdd6372998d026187b9b58757719c0ab89a4b1ca086ea9977b4812cab"
+      },
+      "files_verified": 9,
+      "zip_members_verified": 0
+    },
+    {
+      "inventory": {
+        "path": "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/inventory.json",
+        "size_bytes": 34889,
+        "sha256": "37a1335c3cd928d66d45d27e35d000b9db74af84588167a2f66d3011f2603e99"
+      },
+      "files_verified": 131,
+      "zip_members_verified": 0
+    }
+  ],
+  "runtime_equivalence": {
+    "from": "18c4da4d28c1f2bcf7175f4b461e2a6bf462a23e",
+    "to": "a52d5b567ddfe5982063f5ac6af5c0a0b0170a18",
+    "changed_product_paths": []
+  },
+  "native_qualification": {
+    "run_id": 38859822756,
+    "original_operator": "Eitan-S-23 approved; implementation workflow executed",
+    "assets": [
+      {
+        "ok": true,
+        "kind": "full",
+        "fileName": "e-track-at32f435-v2.8.1-full.etu",
+        "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+        "sha256": "cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799",
+        "sizeBytes": 202,
+        "contentDigest": "sha-256=:yzRxt3kMlii7GD2gfD/F2GYTVTe5QSy74zhD9Qv0d5k=:"
+      },
+      {
+        "ok": true,
+        "kind": "patch",
+        "fileName": "e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+        "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+        "sha256": "8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67",
+        "sizeBytes": 208,
+        "contentDigest": "sha-256=:ioJbt07F/cy6dD0xU9uXx0fhiMpZI1VAAIivJKYnPGc=:"
+      },
+      {
+        "ok": true,
+        "kind": "recovery",
+        "fileName": "recovery-v2.8.1.bin",
+        "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin",
+        "sha256": "0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c",
+        "sizeBytes": 8200,
+        "contentDigest": "sha-256=:AXHEfbOfhLDprxOfMmWEfkA/dZfMPfX6Qw72rAUllkw=:"
+      }
+    ],
+    "database": {
+      "before": {
+        "counts": {
+          "firmware_releases": 1,
+          "firmware_releases_legacy": 0,
+          "firmware_release_assets": 3,
+          "firmware_channels": 2,
+          "audit_logs": 1
+        },
+        "channels": [
+          {
+            "id": "fw_ch_trace_e-track-at32f435_beta",
+            "name": "beta",
+            "current_release_id": null,
+            "legacy_current_release_id": null,
+            "revision": 0
+          },
+          {
+            "id": "fw_ch_trace_e-track-at32f435_stable",
+            "name": "stable",
+            "current_release_id": null,
+            "legacy_current_release_id": null,
+            "revision": 0
+          }
+        ]
+      },
+      "after": {
+        "counts": {
+          "firmware_releases": 1,
+          "firmware_releases_legacy": 0,
+          "firmware_release_assets": 3,
+          "firmware_channels": 2,
+          "audit_logs": 1
+        },
+        "channels": [
+          {
+            "id": "fw_ch_trace_e-track-at32f435_beta",
+            "name": "beta",
+            "current_release_id": null,
+            "legacy_current_release_id": null,
+            "revision": 0
+          },
+          {
+            "id": "fw_ch_trace_e-track-at32f435_stable",
+            "name": "stable",
+            "current_release_id": null,
+            "legacy_current_release_id": null,
+            "revision": 0
+          }
+        ]
+      }
+    },
+    "control_plane": "WRANGLER_REMOTE_PREVIEW_SESSION",
+    "not_full_production_snapshot": true
+  },
+  "development_counts": {
+    "host_script": 34,
+    "pipeline_host": 134,
+    "native_workerd": 156,
+    "workflow": 57,
+    "byte": 22,
+    "pack": 8,
+    "golden": 9
+  },
+  "diagnostics": {
+    "ordinary_gcc": {
+      "warnings": 640,
+      "errors": 0
+    },
+    "development_key_gcc": {
+      "warnings": 640,
+      "errors": 0
+    },
+    "vendor": {
+      "warnings": 6,
+      "errors": 0
+    }
+  },
+  "bootstrap": {
+    "archive_commit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+    "source_commit": "fa74905e84c489cccc248617d37ab9f56c8f961c",
+    "run_id": 38642386248,
+    "artifact_id": 11931006831,
+    "header": {
+      "version_code": 30207,
+      "version_name": "3.2.7",
+      "build_ts": 1792014177,
+      "image_len": 605072,
+      "image_crc32": 393815867,
+      "initial_msp": 537231360,
+      "reset_handler": 134329957
+    },
+    "raw_app": {
+      "path": "docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin",
+      "size_bytes": 605072,
+      "sha256": "aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f"
+    },
+    "development_labels_preserved": true
+  },
+  "original_remote_negatives": {
+    "statuses": [
+      503,
+      201,
+      200,
+      409
+    ],
+    "no_ready_after_partial_assets": true,
+    "no_d1_change_after_replay_or_conflict": true,
+    "scope": "Historical synthetic R2/S3 qualification, independently evaluated offline, not a second rehearsal"
+  },
+  "ok": true,
+  "ended": "2026-10-16T18:13:03.676946+00:00"
+}

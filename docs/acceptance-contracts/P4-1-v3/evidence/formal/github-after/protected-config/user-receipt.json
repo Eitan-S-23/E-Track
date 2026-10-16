@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T18:46:25.206Z",
+  "ended": "2026-10-16T18:46:26.058Z",
+  "method": "GET",
+  "route": "/user",
+  "status": 200,
+  "requestId": "AEB0:DA9BA:18EE068:2596582:6AD27101",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/github-after/protected-config/user.json",
+    "size_bytes": 1450,
+    "sha256": "201ab5fe442a7d1edb8c068a3daa9a5f66501bf58309961073e49ea514074dbd"
+  }
+}

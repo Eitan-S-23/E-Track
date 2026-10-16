@@ -1,0 +1,50 @@
+{
+  "purpose": "Late closed validation and opaque-secret audit receipts, separate from immutable v3 matrix",
+  "files": [
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-final-validate.json",
+      "size_bytes": 1124,
+      "sha256": "808eb89e6489c716d91db951fafe2e9227ccb84f6951d67ee5f55c24145d3772"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-final-validate.stdout.txt",
+      "size_bytes": 76,
+      "sha256": "e0c6af06904213aada555b962773adc753fa4a3ef4558f6900e2efc4ee861b9d"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-final-validate.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-archive-validate.json",
+      "size_bytes": 1140,
+      "sha256": "662a8bada0b56eb0f379d6375fee819fc6b13cc7e0014967c6c4cf0c2887f229"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-archive-validate.stdout.txt",
+      "size_bytes": 76,
+      "sha256": "e0c6af06904213aada555b962773adc753fa4a3ef4558f6900e2efc4ee861b9d"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-archive-validate.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-secrets-audit.json",
+      "size_bytes": 779,
+      "sha256": "49a894bc91c35243bedbeae64113283db145f8e7ae58383a078bd55efdac6d3d"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-secrets-audit.stdout.txt",
+      "size_bytes": 184,
+      "sha256": "355d5130ecf8554939d71bfcea87a2510165e928f261e9a84154ac4f96bad3e6"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v3/sealing/v3-secrets-audit.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

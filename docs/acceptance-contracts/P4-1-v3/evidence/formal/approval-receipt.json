@@ -1,0 +1,20 @@
+{
+  "started": "2026-10-16T18:31:09.243Z",
+  "ended": "2026-10-16T18:31:12.038Z",
+  "method": "POST",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38946949709/pending_deployments",
+  "request": {
+    "environment_ids": [
+      24458272742
+    ],
+    "state": "approved",
+    "comment": "User-delegated agent approval, P41-STAGING-DELEGATION-20261016; staging only; contract SHA256 07d81467bc901eae78bbb2901a093b9234056cb248f04829887c7db43ffedc4a; commit b9d7d18c76e6495fbebf6758df6e4427e79e97b5"
+  },
+  "status": 200,
+  "requestId": "AE51:1AFBF0:18C60C8:253D0A8:6AD26D6C",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/approval.json",
+    "size_bytes": 3880,
+    "sha256": "3f2c915928983c708cc76f660418fea0428765a6429d1d229fe5f5f822c8db8c"
+  }
+}
