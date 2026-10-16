@@ -1,0 +1,137 @@
+{
+  "startedAt": "2026-10-16T06:11:09.405Z",
+  "commit": "c715ec6b00f8d9b06a820213da72421694b1e44c",
+  "branch": "dev/p4-1/unattended-20261015",
+  "environment": "firmware-rehearsal",
+  "requests": [
+    {
+      "method": "GET",
+      "route": "/user",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/git/ref/heads/dev/p4-1/unattended-20261015",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/pulls/27",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/git/ref/heads/main",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/actions/workflows/firmware-build.yml/runs?event=workflow_dispatch&per_page=100",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/repos/Eitan-S-23/E-Track/actions/workflows/firmware-build.yml/dispatches",
+      "status": 204
+    }
+  ],
+  "secretUploads": [
+    {
+      "name": "FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID",
+      "pid": 11832,
+      "exitCode": 0,
+      "closed": true,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN",
+      "pid": 4756,
+      "exitCode": 0,
+      "closed": true,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL",
+      "pid": 22796,
+      "exitCode": 0,
+      "closed": true,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "approvalsPerformed": 0,
+  "cloudflareWrites": 0,
+  "productionModified": false,
+  "main": "b42d3e25db85d6aba397cb4d0fb34bb5b653904f",
+  "secretNames": [
+    "FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID",
+    "FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN",
+    "FIRMWARE_REHEARSAL_OTA_AES_KEY",
+    "FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL"
+  ],
+  "variables": {
+    "OTA_BOOT_CHAIN_READY": "false",
+    "FIRMWARE_REHEARSAL_TRACE_R2_BUCKET": "e-track-firmware-p41-test-releases",
+    "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME": "e-track-firmware-p41-test",
+    "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_ID": "2617e1e1-956f-42ce-a465-da56d84abf06",
+    "FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT": "c715ec6b00f8d9b06a820213da72421694b1e44c"
+  },
+  "dispatchStartedAt": "2026-10-16T06:11:34.334Z",
+  "dispatchStatus": 204,
+  "pending": "Find the exact check-only run; the human owner must approve the environment. No approval API is called.",
+  "ok": true,
+  "endedAt": "2026-10-16T06:11:36.146Z",
+  "closed": true
+}

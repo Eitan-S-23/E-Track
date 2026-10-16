@@ -4,9 +4,12 @@ Status: IN_PROGRESS (whole card and current readiness follow-up). The earlier
 bounded development checkpoint on `ae6cd49c2f756dd9094ee390121fc0825dbbceac`
 passed its actual PR checks and three independent repair reviews; that history
 is retained below, not a claim that all later readiness gaps are closed.
-The latest 2026-10-16 runtime/key follow-up is at the end of this note. Main
-integration, canonical rehearsal and whole-card independent acceptance remain
-unperformed; the new acceptance agent must not be handed an incomplete setup.
+The latest 2026-10-16 checkpoint is
+[Native Qualification Passed, Implementation Handoff Ready](#native-qualification-passed-implementation-handoff-ready).
+The implementation-side environment and development prerequisites are complete;
+the new independent agent may perform consolidated review, target/descriptor
+approval and execution freezing. Main integration, canonical rehearsal and
+whole-card independent acceptance remain unperformed, not pre-claimed PASS.
 Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen references.
 
 ## Entry And Authority
@@ -1938,3 +1941,113 @@ workflow, registration schema and fixed qualification targets remain unchanged.
 The next action is to bind the protected configuration to the committed revision
 and dispatch only `check_bindings=true,publish=false,rehearsal=false`; the human
 owner, not the implementation agent, approves the existing environment gate.
+
+### Protected Configuration And The Original Approval Wait
+
+The owner decision, original read checks and 24-case governance delta are committed
+and pushed as `c715ec6b00f8d9b06a820213da72421694b1e44c`. All four actual PR workflows
+succeed: firmware `38859667045`, governance `38859667041`, backend `38859667046`
+and App path detection `38859667032`. PR 27 remains draft/open/unmerged; main is
+still `b42d3e25db85d6aba397cb4d0fb34bb5b653904f`.
+
+Five protected-environment writes added the D1 ID and exact bindings-check commit
+variables plus the account ID, dedicated CI token and test-service URL secrets.
+The existing real OTA key, required human reviewer, exact branch policy and
+`OTA_BOOT_CHAIN_READY=false` remain unchanged. Secrets were encrypted/uploaded by
+the existing GitHub CLI through stdin; the local provisioning token was not
+exported. No Cloudflare mutation or production configuration change occurred.
+Rehearsal deploy-token and bootstrap descriptor approval are intentionally not
+configured by this check-only step.
+
+One explicit `check_bindings=true,publish=false,rehearsal=false` dispatch was
+accepted and resolved to run `38859822756` at that exact commit. The original
+checkpoint had successful development/GCC prerequisites and native job
+`116839623888` waiting for `firmware-rehearsal` approval. The owner subsequently
+approved that same run; its completed result is recorded below. No agent approval,
+bypass, replacement dispatch or setup replay was performed.
+
+### Native Qualification Passed, Implementation Handoff Ready
+
+The same run completed successfully at `2026-10-16T06:30:59Z`. Original approval
+history records `Eitan-S-23` approving only `firmware-rehearsal`; pending approvals
+are now empty. Native job `116839623888` ran on Linux and succeeded. Production
+and canonical rehearsal jobs remained skipped.
+
+`docs/ota-exec-notes/P4-1-bindings-2026-10-16/` retains 18 files, including original
+GitHub responses, the complete log ZIP, artifact `12029386620`, its original
+`result.json`, member digests and a derived inspection. Artifact ZIP SHA-256 is
+`14939267855d505b63f24a33598921780a84a10cffa64244871024940d554287`;
+archive inventory SHA-256 is
+`b458472d12da56111dc9d440d5525c52aefea4cb9152654159e650dfd9cb3f39`.
+
+- P41-CF-RUNTIME-01 is closed for the actual shared native read/verification route:
+  fixed Worker bindings match, and all three existing synthetic R2 objects match
+  the fixture's names, keys, full-byte SHA-256 values and lengths (202/208/8200).
+- D1 before/after counts are identical: releases 1, legacy 0, assets 3, channels 2,
+  audit logs 1. Both channel pointers remain null at revision 0. This is a count
+  and channel comparison, not a full database-content snapshot.
+- The runtime requested no R2/D1 business writes. It created temporary Wrangler
+  remote-preview control-plane state; this is not globally read-only execution.
+  The shared call returned and job post-steps completed. No separate remote
+  ephemeral-state inventory or production-zero-effect campaign is claimed.
+- Actual step logs independently yield host/script 34, pipeline host 134, native
+  workerd 156, workflow 57, byte 22, pack 8 and golden 9 passing checks. Ordinary
+  and development-key GCC each have 640 warnings and zero errors; vendor tools
+  have six warnings and zero errors. Repeated/aggregate log counts are not added.
+
+The existing authorized preparation was also completed by uploading the test-only
+`FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN` via GitHub CLI stdin. The first attempt
+failed on public-key GET with EOF, before upload; the one bounded retry first
+confirmed the secret was still absent, then succeeded. Both closed receipts are
+retained. Secret metadata now confirms all five rehearsal secrets. The protected
+reviewer, exact branch policy, fixed test bindings and gate=false are unchanged.
+GitHub does not expose secret-value readback; actual protected key/registration
+consumption remains part of the canonical run, not proved by metadata alone.
+
+There is no remaining known implementation-side configuration blocker to handing
+this stable batch to the new independent acceptance agent. Per execution contract
+section 7.3 item 4, first formal product observations must be in its execution
+plan, not required to pass once in advance as another admission campaign.
+**P4-1 remains IN_PROGRESS until that independent acceptance succeeds.**
+
+The next owner is the user-selected non-implementing acceptance agent, using the
+same sole P4-1 Spec, not a replacement specification. Its bounded next actions are:
+
+1. Review the delivered branch and existing original evidence as one batch. Reuse
+   the independently qualified immutable 3.2.7 raw base at archive commit
+   `c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124`; do not rebuild or relabel that base.
+2. Bind the proposed first target `3.2.8` and bootstrap descriptor to the exact
+   final execution commit after any acceptance-runner changes. The old
+   probe-only descriptor is not approval. Independently review its canonical
+   digest before authorized configuration of `OTA_PREVIOUS_RELEASE_JSON` and
+   `OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256`; implementation has not set either.
+3. Prepare and freeze the v3 execution inputs and NOT_RUN matrix on the unmerged
+   branch, with original production-state snapshot scope and explicit execution
+   authority. No main-before-acceptance prerequisite or separate freeze agent.
+4. Execute one authorized canonical staging rehearsal for P4-1/P4-4 shared
+   evidence: protected real-key GCC build, full/patch/recovery byte checks, R2
+   upload/readback, ready/idempotency and production D1/R2/channel/GitHub Release
+   before/after zero-effect evidence. These formal observations are NOT_RUN.
+5. Adjudicate independently, return any consolidated implementation findings,
+   and only then perform separately authorized merge/closeout. Do not start P4-4,
+   operate hardware, create production assets or unlock the boot-chain gate here.
+
+The old base's development key still cannot establish receiver compatibility
+with the new real key; P3-5/P5 retain device provisioning/identity ownership.
+Historical P41-AUDIT-01 remains attribution-unresolved and has not been cleaned.
+
+For already-authorized UI actions during an open execution, use the existing real
+cc-connect @mention route, check its receipt and observe the state change without
+requiring an "approved" chat reply. The owner had already acted in this case, so
+no retrospective/duplicate mention was sent and no notification rule was changed.
+
+The bounded record regression `p41-approved-governance` passes 24/24, exit 0.
+The pre-delivery audit `p41-approved-output-audit` verifies the old 97-entry
+readiness inventory and this archive's 17 inventory entries, scans 1053 ZIP
+members with the real OTA key and dedicated CI token included, and finds no
+credential matches, private key headers or lingering recorded processes. The
+shared-root index remains `2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`.
+Closed local receipt/stream triplets are under `.cache/logs/` with those labels;
+the archive retains the actual source-bound CI development originals. All
+selected outputs are worktree-local apart from the previously authorized own
+Git metadata/object/ref scope. No PowerShell, local native build or device action.

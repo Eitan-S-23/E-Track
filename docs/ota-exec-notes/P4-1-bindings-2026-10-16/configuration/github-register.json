@@ -1,0 +1,54 @@
+{
+  "startedAt": "2026-10-16T06:53:06.725Z",
+  "environment": "firmware-rehearsal",
+  "branch": "dev/p4-1/unattended-20261015",
+  "requests": [
+    {
+      "method": "GET",
+      "route": "/user",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets?per_page=100",
+      "status": 200
+    }
+  ],
+  "secretUploads": [
+    {
+      "name": "FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN",
+      "pid": 18168,
+      "exitCode": 1,
+      "closed": true,
+      "stdout": "",
+      "stderr": "failed to fetch public key: Get \"https://api.github.com/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets/public-key\": EOF\n"
+    }
+  ],
+  "approvalsPerformed": 0,
+  "dispatches": 0,
+  "cloudflareWrites": 0,
+  "productionModified": false,
+  "descriptorApprovalConfigured": false,
+  "ok": false,
+  "error": {
+    "name": "AssertionError",
+    "message": "Secret upload failed; preserve the receipt before recovery\n\n1 !== 0\n"
+  },
+  "endedAt": "2026-10-16T06:53:16.215Z",
+  "closed": true
+}

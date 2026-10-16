@@ -1,0 +1,107 @@
+{
+  "startedAt": "2026-10-16T06:54:20.822Z",
+  "environment": "firmware-rehearsal",
+  "branch": "dev/p4-1/unattended-20261015",
+  "requests": [
+    {
+      "method": "GET",
+      "route": "/user",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100",
+      "status": 200
+    }
+  ],
+  "secretUploads": [
+    {
+      "name": "FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN",
+      "pid": 2056,
+      "exitCode": 0,
+      "closed": true,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "approvalsPerformed": 0,
+  "dispatches": 0,
+  "cloudflareWrites": 0,
+  "productionModified": false,
+  "descriptorApprovalConfigured": false,
+  "retryOf": "github-register.json: public-key GET EOF, before upload",
+  "secretNames": [
+    "FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID",
+    "FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN",
+    "FIRMWARE_REHEARSAL_OTA_AES_KEY",
+    "FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN",
+    "FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL"
+  ],
+  "variables": [
+    {
+      "name": "FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT",
+      "value": "c715ec6b00f8d9b06a820213da72421694b1e44c",
+      "created_at": "2026-10-16T06:11:22Z",
+      "updated_at": "2026-10-16T06:11:22Z"
+    },
+    {
+      "name": "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_ID",
+      "value": "2617e1e1-956f-42ce-a465-da56d84abf06",
+      "created_at": "2026-10-16T06:11:21Z",
+      "updated_at": "2026-10-16T06:11:21Z"
+    },
+    {
+      "name": "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME",
+      "value": "e-track-firmware-p41-test",
+      "created_at": "2026-10-16T04:24:30Z",
+      "updated_at": "2026-10-16T04:24:30Z"
+    },
+    {
+      "name": "FIRMWARE_REHEARSAL_TRACE_R2_BUCKET",
+      "value": "e-track-firmware-p41-test-releases",
+      "created_at": "2026-10-16T04:24:29Z",
+      "updated_at": "2026-10-16T04:24:29Z"
+    },
+    {
+      "name": "OTA_BOOT_CHAIN_READY",
+      "value": "false",
+      "created_at": "2026-10-16T04:24:28Z",
+      "updated_at": "2026-10-16T04:24:28Z"
+    }
+  ],
+  "source": "Existing test-only credential; not the old Trace service credential",
+  "runtimeSecretReadback": "NOT_AVAILABLE: GitHub returns secret metadata only",
+  "ok": true,
+  "endedAt": "2026-10-16T06:54:34.851Z",
+  "closed": true
+}
