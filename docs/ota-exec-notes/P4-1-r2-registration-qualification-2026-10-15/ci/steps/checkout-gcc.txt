@@ -1,0 +1,191 @@
+﻿2026-10-15T05:54:19.6699035Z ##[group]Run actions/checkout@v4
+2026-10-15T05:54:19.6700883Z with:
+2026-10-15T05:54:19.6701754Z   fetch-depth: 0
+2026-10-15T05:54:19.6702775Z   persist-credentials: false
+2026-10-15T05:54:19.6704016Z   repository: Eitan-S-23/E-Track
+2026-10-15T05:54:19.6714675Z   token: ***
+2026-10-15T05:54:19.6715584Z   ssh-strict: true
+2026-10-15T05:54:19.6716385Z   ssh-user: git
+2026-10-15T05:54:19.6717150Z   clean: true
+2026-10-15T05:54:19.6717976Z   sparse-checkout-cone-mode: true
+2026-10-15T05:54:19.6718974Z   fetch-tags: false
+2026-10-15T05:54:19.6720169Z   show-progress: true
+2026-10-15T05:54:19.6721086Z   lfs: false
+2026-10-15T05:54:19.6721960Z   submodules: false
+2026-10-15T05:54:19.6722811Z   set-safe-directory: true
+2026-10-15T05:54:19.6723795Z   allow-unsafe-pr-checkout: false
+2026-10-15T05:54:19.6725174Z env:
+2026-10-15T05:54:19.6725973Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:19.6726950Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:19.6727985Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:19.6729351Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:19.6730923Z   BUILD_TYPE: Release
+2026-10-15T05:54:19.6731785Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:19.6732679Z ##[endgroup]
+2026-10-15T05:54:19.7786551Z Syncing repository: Eitan-S-23/E-Track
+2026-10-15T05:54:19.7790844Z ##[group]Getting Git version info
+2026-10-15T05:54:19.7792905Z Working directory is '/home/runner/work/E-Track/E-Track'
+2026-10-15T05:54:19.7796040Z [command]/usr/bin/git version
+2026-10-15T05:54:19.7933019Z git version 2.55.0
+2026-10-15T05:54:19.7990173Z ##[endgroup]
+2026-10-15T05:54:19.8006552Z Temporarily overriding HOME='/home/runner/work/_temp/a9c828e6-c4ed-4cf1-92d4-2c0d1c6fb0e3' before making global git config changes
+2026-10-15T05:54:19.8012146Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-15T05:54:19.8016152Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+2026-10-15T05:54:19.8074687Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+2026-10-15T05:54:19.8083901Z ##[group]Initializing the repository
+2026-10-15T05:54:19.8086164Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+2026-10-15T05:54:19.8246722Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-15T05:54:19.8249951Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-15T05:54:19.8251835Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-15T05:54:19.8253286Z hint: call:
+2026-10-15T05:54:19.8254020Z hint:
+2026-10-15T05:54:19.8254987Z hint: 	git config --global init.defaultBranch <name>
+2026-10-15T05:54:19.8256129Z hint:
+2026-10-15T05:54:19.8257273Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-15T05:54:19.8259031Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-15T05:54:19.8260694Z hint:
+2026-10-15T05:54:19.8261460Z hint: 	git branch -m <name>
+2026-10-15T05:54:19.8262352Z hint:
+2026-10-15T05:54:19.8263523Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-15T05:54:19.8269448Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+2026-10-15T05:54:19.8303018Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+2026-10-15T05:54:19.8355563Z ##[endgroup]
+2026-10-15T05:54:19.8358049Z ##[group]Disabling automatic garbage collection
+2026-10-15T05:54:19.8360521Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-15T05:54:19.8405703Z ##[endgroup]
+2026-10-15T05:54:19.8408174Z ##[group]Setting up auth
+2026-10-15T05:54:19.8414457Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T05:54:19.8458300Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T05:54:19.8888290Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T05:54:19.8928445Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T05:54:19.9164344Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T05:54:19.9205741Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T05:54:19.9440848Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-15T05:54:19.9484411Z ##[endgroup]
+2026-10-15T05:54:19.9485976Z ##[group]Fetching the repository
+2026-10-15T05:54:19.9496671Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +ac4b40bac7f6067642b3a8d754574cd9b24ed5c0:refs/remotes/pull/27/merge
+2026-10-15T05:54:26.6620348Z From https://github.com/Eitan-S-23/E-Track
+2026-10-15T05:54:26.6622000Z  * [new branch]      acceptance/p3-4-v2-20261009              -> origin/acceptance/p3-4-v2-20261009
+2026-10-15T05:54:26.6623452Z  * [new branch]      codex/acceptance-batch-governance-20260907 -> origin/codex/acceptance-batch-governance-20260907
+2026-10-15T05:54:26.6624893Z  * [new branch]      dev/flutter/apk/p3-3-admission           -> origin/dev/flutter/apk/p3-3-admission
+2026-10-15T05:54:26.6626503Z  * [new branch]      dev/flutter/apk/p3-3-batch6              -> origin/dev/flutter/apk/p3-3-batch6
+2026-10-15T05:54:26.6627760Z  * [new branch]      dev/flutter/apk/p3-3-t1a                 -> origin/dev/flutter/apk/p3-3-t1a
+2026-10-15T05:54:26.6629972Z  * [new branch]      dev/flutter/fixed-development-signing-20261001 -> origin/dev/flutter/fixed-development-signing-20261001
+2026-10-15T05:54:26.6633146Z  * [new branch]      dev/flutter/p3-4-batch12-20261003        -> origin/dev/flutter/p3-4-batch12-20261003
+2026-10-15T05:54:26.6634045Z  * [new branch]      dev/flutter/p3-4-batched-link-candidates -> origin/dev/flutter/p3-4-batched-link-candidates
+2026-10-15T05:54:26.6634983Z  * [new branch]      dev/flutter/p3-4-baud-sweep              -> origin/dev/flutter/p3-4-baud-sweep
+2026-10-15T05:54:26.6635964Z  * [new branch]      dev/flutter/p3-4-begin-retry-20260924    -> origin/dev/flutter/p3-4-begin-retry-20260924
+2026-10-15T05:54:26.6637033Z  * [new branch]      dev/flutter/p3-4-durable-retry           -> origin/dev/flutter/p3-4-durable-retry
+2026-10-15T05:54:26.6637861Z  * [new branch]      dev/flutter/p3-4-info-retry-20261004     -> origin/dev/flutter/p3-4-info-retry-20261004
+2026-10-15T05:54:26.6638703Z  * [new branch]      dev/flutter/p3-4-link-stats              -> origin/dev/flutter/p3-4-link-stats
+2026-10-15T05:54:26.6639834Z  * [new branch]      dev/flutter/p3-4-mobile-reconnect-20261002 -> origin/dev/flutter/p3-4-mobile-reconnect-20261002
+2026-10-15T05:54:26.6640691Z  * [new branch]      dev/flutter/p3-4-observation-log         -> origin/dev/flutter/p3-4-observation-log
+2026-10-15T05:54:26.6641429Z  * [new branch]      dev/flutter/p3-4-phy-logfix-20261004     -> origin/dev/flutter/p3-4-phy-logfix-20261004
+2026-10-15T05:54:26.6642197Z  * [new branch]      dev/flutter/p3-4-phy-observation-20261004 -> origin/dev/flutter/p3-4-phy-observation-20261004
+2026-10-15T05:54:26.6642974Z  * [new branch]      dev/flutter/p3-4-probe-reuse-20261003    -> origin/dev/flutter/p3-4-probe-reuse-20261003
+2026-10-15T05:54:26.6643689Z  * [new branch]      dev/flutter/p3-4-r07-mutation            -> origin/dev/flutter/p3-4-r07-mutation
+2026-10-15T05:54:26.6644437Z  * [new branch]      dev/flutter/p3-4-radio-policy-20261002   -> origin/dev/flutter/p3-4-radio-policy-20261002
+2026-10-15T05:54:26.6645379Z  * [new branch]      dev/flutter/p3-4-reboot-discovery-20261002 -> origin/dev/flutter/p3-4-reboot-discovery-20261002
+2026-10-15T05:54:26.6646253Z  * [new branch]      dev/flutter/p3-4-reconnect-20261001      -> origin/dev/flutter/p3-4-reconnect-20261001
+2026-10-15T05:54:26.6647264Z  * [new branch]      dev/flutter/p3-4-sender-window-20260924  -> origin/dev/flutter/p3-4-sender-window-20260924
+2026-10-15T05:54:26.6648038Z  * [new branch]      dev/flutter/p3-4-three-frame-20261002    -> origin/dev/flutter/p3-4-three-frame-20261002
+2026-10-15T05:54:26.6648789Z  * [new branch]      dev/flutter/p3-4-unified-probe-20260924  -> origin/dev/flutter/p3-4-unified-probe-20260924
+2026-10-15T05:54:26.6649838Z  * [new branch]      dev/flutter/p34-acceptance-config-20261010 -> origin/dev/flutter/p34-acceptance-config-20261010
+2026-10-15T05:54:26.6650684Z  * [new branch]      dev/flutter/p34-admission-20261010       -> origin/dev/flutter/p34-admission-20261010
+2026-10-15T05:54:26.6651601Z  * [new branch]      dev/flutter/p34-fixed-candidate-20261009 -> origin/dev/flutter/p34-fixed-candidate-20261009
+2026-10-15T05:54:26.6652464Z  * [new branch]      dev/flutter/p34-gatt-observation-20261008 -> origin/dev/flutter/p34-gatt-observation-20261008
+2026-10-15T05:54:26.6653365Z  * [new branch]      dev/flutter/p34-main-dispatch-20261009   -> origin/dev/flutter/p34-main-dispatch-20261009
+2026-10-15T05:54:26.6654130Z  * [new branch]      dev/flutter/p34-native-timing-20261008   -> origin/dev/flutter/p34-native-timing-20261008
+2026-10-15T05:54:26.6654865Z  * [new branch]      dev/flutter/p34-pipeline-20261007        -> origin/dev/flutter/p34-pipeline-20261007
+2026-10-15T05:54:26.6655626Z  * [new branch]      dev/flutter/p34-pipeline-link-20261007   -> origin/dev/flutter/p34-pipeline-link-20261007
+2026-10-15T05:54:26.6656392Z  * [new branch]      dev/flutter/p34-v2-first-error-20261009  -> origin/dev/flutter/p34-v2-first-error-20261009
+2026-10-15T05:54:26.6657269Z  * [new branch]      dev/p4-1/unattended-20261015             -> origin/dev/p4-1/unattended-20261015
+2026-10-15T05:54:26.6658023Z  * [new branch]      docs/flutter-debug-skill-feedback-20260922 -> origin/docs/flutter-debug-skill-feedback-20260922
+2026-10-15T05:54:26.6658872Z  * [new branch]      governance/acceptance-policy-followup    -> origin/governance/acceptance-policy-followup
+2026-10-15T05:54:26.6659744Z  * [new branch]      main                                     -> origin/main
+2026-10-15T05:54:26.6660461Z  * [new branch]      ota/p3-1-ble-frame-closeout              -> origin/ota/p3-1-ble-frame-closeout
+2026-10-15T05:54:26.6661200Z  * [new branch]      ota/p3-1-closeout-writeback              -> origin/ota/p3-1-closeout-writeback
+2026-10-15T05:54:26.6661867Z  * [new branch]      ota/p3-2-closeout                        -> origin/ota/p3-2-closeout
+2026-10-15T05:54:26.6662542Z  * [new branch]      ota/p3-2-closeout-sync                   -> origin/ota/p3-2-closeout-sync
+2026-10-15T05:54:26.6663218Z  * [new branch]      ota/p3-6-ci-wiring                       -> origin/ota/p3-6-ci-wiring
+2026-10-15T05:54:26.6663843Z  * [new branch]      ota/p3-6-closeout                        -> origin/ota/p3-6-closeout
+2026-10-15T05:54:26.6664452Z  * [new branch]      ota/p3-7-card                            -> origin/ota/p3-7-card
+2026-10-15T05:54:26.6665127Z  * [new branch]      ota/p3-7-host-test-wiring                -> origin/ota/p3-7-host-test-wiring
+2026-10-15T05:54:26.6665780Z  * [new branch]      p2-4-20260731                            -> origin/p2-4-20260731
+2026-10-15T05:54:26.6666358Z  * [new branch]      p2-5-20260801                            -> origin/p2-5-20260801
+2026-10-15T05:54:26.6667002Z  * [new branch]      p2-6-board-writeback-r6                  -> origin/p2-6-board-writeback-r6
+2026-10-15T05:54:26.6667732Z  * [new branch]      p2-6-implementation-20260819             -> origin/p2-6-implementation-20260819
+2026-10-15T05:54:26.6668444Z  * [new branch]      p2-6-sd-r6-harness-fix                   -> origin/p2-6-sd-r6-harness-fix
+2026-10-15T05:54:26.6669157Z  * [new branch]      p2-6-spec-probe-ci-20260816              -> origin/p2-6-spec-probe-ci-20260816
+2026-10-15T05:54:26.6670123Z  * [new branch]      p4-2-implementation-20261014             -> origin/p4-2-implementation-20261014
+2026-10-15T05:54:26.6671084Z  * [new branch]      post-p2-6-ota-spec-review-20260818       -> origin/post-p2-6-ota-spec-review-20260818
+2026-10-15T05:54:26.6671769Z  * [new ref]         ac4b40bac7f6067642b3a8d754574cd9b24ed5c0 -> pull/27/merge
+2026-10-15T05:54:26.6673295Z ##[endgroup]
+2026-10-15T05:54:26.6673756Z ##[group]Determining the checkout info
+2026-10-15T05:54:26.6674238Z ##[endgroup]
+2026-10-15T05:54:26.6674550Z [command]/usr/bin/git sparse-checkout disable
+2026-10-15T05:54:26.6695914Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-15T05:54:26.6736084Z ##[group]Checking out the ref
+2026-10-15T05:54:26.6740091Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/27/merge
+2026-10-15T05:54:27.7003036Z Updating files:  72% (10183/13988)
+2026-10-15T05:54:27.7198645Z Updating files:  73% (10212/13988)
+2026-10-15T05:54:27.7266672Z Updating files:  74% (10352/13988)
+2026-10-15T05:54:27.7466924Z Updating files:  75% (10491/13988)
+2026-10-15T05:54:27.7582383Z Updating files:  76% (10631/13988)
+2026-10-15T05:54:27.8018879Z Updating files:  77% (10771/13988)
+2026-10-15T05:54:27.8178311Z Updating files:  78% (10911/13988)
+2026-10-15T05:54:27.8386132Z Updating files:  79% (11051/13988)
+2026-10-15T05:54:27.8504825Z Updating files:  80% (11191/13988)
+2026-10-15T05:54:27.8570923Z Updating files:  81% (11331/13988)
+2026-10-15T05:54:27.8655017Z Updating files:  82% (11471/13988)
+2026-10-15T05:54:27.8743531Z Updating files:  83% (11611/13988)
+2026-10-15T05:54:27.9201334Z Updating files:  84% (11750/13988)
+2026-10-15T05:54:27.9322060Z Updating files:  85% (11890/13988)
+2026-10-15T05:54:27.9470355Z Updating files:  86% (12030/13988)
+2026-10-15T05:54:28.1968210Z Updating files:  87% (12170/13988)
+2026-10-15T05:54:28.4222725Z Updating files:  88% (12310/13988)
+2026-10-15T05:54:28.4455952Z Updating files:  89% (12450/13988)
+2026-10-15T05:54:28.7002874Z Updating files:  90% (12590/13988)
+2026-10-15T05:54:28.7085292Z Updating files:  90% (12662/13988)
+2026-10-15T05:54:29.0084859Z Updating files:  91% (12730/13988)
+2026-10-15T05:54:29.1275770Z Updating files:  92% (12869/13988)
+2026-10-15T05:54:29.1450315Z Updating files:  93% (13009/13988)
+2026-10-15T05:54:29.1735013Z Updating files:  94% (13149/13988)
+2026-10-15T05:54:29.1915363Z Updating files:  95% (13289/13988)
+2026-10-15T05:54:29.2096911Z Updating files:  96% (13429/13988)
+2026-10-15T05:54:29.2191018Z Updating files:  97% (13569/13988)
+2026-10-15T05:54:29.2364778Z Updating files:  98% (13709/13988)
+2026-10-15T05:54:29.2530368Z Updating files:  99% (13849/13988)
+2026-10-15T05:54:29.2531288Z Updating files: 100% (13988/13988)
+2026-10-15T05:54:29.2532071Z Updating files: 100% (13988/13988), done.
+2026-10-15T05:54:29.2717611Z Note: switching to 'refs/remotes/pull/27/merge'.
+2026-10-15T05:54:29.2717928Z 
+2026-10-15T05:54:29.2718171Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-15T05:54:29.2718745Z changes and commit them, and you can discard any commits you make in this
+2026-10-15T05:54:29.2719392Z state without impacting any branches by switching back to a branch.
+2026-10-15T05:54:29.2719918Z 
+2026-10-15T05:54:29.2720146Z If you want to create a new branch to retain commits you create, you may
+2026-10-15T05:54:29.2720692Z do so (now or later) by using -c with the switch command. Example:
+2026-10-15T05:54:29.2721003Z 
+2026-10-15T05:54:29.2721139Z   git switch -c <new-branch-name>
+2026-10-15T05:54:29.2721349Z 
+2026-10-15T05:54:29.2721475Z Or undo this operation with:
+2026-10-15T05:54:29.2721665Z 
+2026-10-15T05:54:29.2721774Z   git switch -
+2026-10-15T05:54:29.2721928Z 
+2026-10-15T05:54:29.2722183Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-15T05:54:29.2722574Z 
+2026-10-15T05:54:29.2723004Z HEAD is now at ac4b40b Merge 75eea2c7380cfe3dadf147af4514a1e443d6e5d8 into b42d3e25db85d6aba397cb4d0fb34bb5b653904f
+2026-10-15T05:54:29.2814365Z ##[endgroup]
+2026-10-15T05:54:29.2864726Z [command]/usr/bin/git log -1 --format=%H
+2026-10-15T05:54:29.2914320Z ac4b40bac7f6067642b3a8d754574cd9b24ed5c0
+2026-10-15T05:54:29.2918795Z ##[group]Removing auth
+2026-10-15T05:54:29.2923897Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T05:54:29.2960238Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T05:54:29.3204647Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T05:54:29.3231706Z http.https://github.com/.extraheader
+2026-10-15T05:54:29.3240347Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-15T05:54:29.3276569Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T05:54:29.3514968Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T05:54:29.3549229Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T05:54:29.3782015Z ##[endgroup]

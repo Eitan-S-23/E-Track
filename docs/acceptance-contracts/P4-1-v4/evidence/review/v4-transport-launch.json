@@ -1,0 +1,10 @@
+{
+  "started": "2026-10-16T20:22:29.479Z",
+  "contract_sha256": "54f88de3a3a87e542a76468d44ca81b271025cea79bcf633321e46b25e00f979",
+  "command": "node docs/acceptance-contracts/P4-1-v2/tools/session.cjs run v4-formal-r2 . node docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs assets assets .cache/p41-acceptance-20261017/review/rehearsal-formal.json",
+  "environment": {
+    "NO_PROXY": "*"
+  },
+  "maximum_new_batches": 1,
+  "mutation_permission": false
+}

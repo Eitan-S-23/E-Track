@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-15T04:26:58.504Z",
+  "method": "POST",
+  "url": "https://api.cloudflare.com/client/v4/accounts/af6dd848e6a21f1cd26d44b1b656af7b/storage/kv/namespaces",
+  "body": {
+    "title": "e-track-firmware-p41-test-manifest-cache"
+  }
+}

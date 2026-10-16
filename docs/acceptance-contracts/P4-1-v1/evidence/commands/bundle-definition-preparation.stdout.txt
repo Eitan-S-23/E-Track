@@ -1,0 +1,15 @@
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-origins . python -X utf8 -B docs/acceptance-contracts/P4-1-v1/tools/inspect.py origins --output .cache/p41-acceptance-20261016/review/origins-formal.json
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-oracle . python -X utf8 -B docs/acceptance-contracts/P4-1-v1/tools/inspect.py selftest --output .cache/p41-acceptance-20261016/review/selftest-formal.json
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-controller . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs selftest
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-ci . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs ci
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-github-before . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs github-snapshot github-before
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-cloud-before . node docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs snapshot before
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-dispatch . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs dispatch
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-discover . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs discover dispatch-discovery
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-approve . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs approve approval-check
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-collect . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs collect
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-bytes . python -X utf8 -B docs/acceptance-contracts/P4-1-v1/tools/inspect.py rehearsal --output .cache/p41-acceptance-20261016/review/rehearsal-formal.json --artifact .cache/p41-acceptance-20261016/formal/completed/rehearsal.zip --target .cache/p41-acceptance-20261016/formal/target.json
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-r2 . node docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs assets assets .cache/p41-acceptance-20261016/review/rehearsal-formal.json
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-cloud-after . node docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs snapshot after
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-github-after . node docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs github-snapshot github-after
+node docs/acceptance-contracts/P4-1-v1/tools/session.cjs run formal-state . python -X utf8 -B docs/acceptance-contracts/P4-1-v1/tools/inspect.py states --output .cache/p41-acceptance-20261016/review/states-formal.json

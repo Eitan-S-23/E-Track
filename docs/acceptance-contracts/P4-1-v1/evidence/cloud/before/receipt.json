@@ -1,0 +1,1661 @@
+{
+  "mode": "snapshot",
+  "label": "before",
+  "started": "2026-10-16T11:42:45.428Z",
+  "accountSha256": "01910e669500c221e2154f608e9f4e856b0a08297026e1ea98f1d18dd8cf9742",
+  "purpose": "P4-1 protected-resource and test-resource read-only evidence",
+  "credentialSource": "Existing local provisioning credential; never exported or persisted",
+  "requests": [
+    {
+      "sequence": 1,
+      "method": "GET",
+      "route": "user/tokens/verify",
+      "started": "2026-10-16T11:42:45.432Z",
+      "ended": "2026-10-16T11:42:46.705Z",
+      "status": 200,
+      "cfRay": "a4b6cd5b9ae828cb-LAX",
+      "responseSha256": "a7545ba668a31ec6a3b2b489f92e7342138d6454176206080539d18d8511f525",
+      "success": true,
+      "tokenActive": true
+    },
+    {
+      "sequence": 2,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/workers/scripts",
+      "started": "2026-10-16T11:42:46.706Z",
+      "ended": "2026-10-16T11:42:47.376Z",
+      "status": 200,
+      "cfRay": "a4b6cd5e184728cb-LAX",
+      "responseSha256": "96c79f58b9e323686073750013bc20a1f5f197b6d07a32c7529759aba178ae9a",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/002-api.json",
+        "size_bytes": 5819,
+        "sha256": "96c79f58b9e323686073750013bc20a1f5f197b6d07a32c7529759aba178ae9a"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 3,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/r2/buckets",
+      "started": "2026-10-16T11:42:47.394Z",
+      "ended": "2026-10-16T11:42:48.012Z",
+      "status": 200,
+      "cfRay": "a4b6cd62a92b28cb-LAX",
+      "responseSha256": "5461544c950ed0c2deb588c33d54362054000898a60c32376edd4fe74c4a3889",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/003-api.json",
+        "size_bytes": 238,
+        "sha256": "5461544c950ed0c2deb588c33d54362054000898a60c32376edd4fe74c4a3889"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 4,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/d1/database?per_page=100",
+      "started": "2026-10-16T11:42:48.027Z",
+      "ended": "2026-10-16T11:42:48.410Z",
+      "status": 200,
+      "cfRay": "a4b6cd66887228cb-LAX",
+      "responseSha256": "aef0b74ca069ec2ec694c4c0a58d0eb082cba40fa4968f6714311a568d8dff90",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/004-api.json",
+        "size_bytes": 898,
+        "sha256": "aef0b74ca069ec2ec694c4c0a58d0eb082cba40fa4968f6714311a568d8dff90"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 5,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/workers/scripts/trace-update-service-staging/settings",
+      "started": "2026-10-16T11:42:48.436Z",
+      "ended": "2026-10-16T11:42:49.291Z",
+      "status": 200,
+      "cfRay": "a4b6cd68fd4128cb-LAX",
+      "responseSha256": "2b50befde466d93c112e021555c3b33de5d6a3e1fe3e83e86889b93029b156ee",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/005-api.json",
+        "size_bytes": 2756,
+        "sha256": "2b50befde466d93c112e021555c3b33de5d6a3e1fe3e83e86889b93029b156ee"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 6,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/workers/scripts/e-track-firmware-p41-test/settings",
+      "started": "2026-10-16T11:42:49.313Z",
+      "ended": "2026-10-16T11:42:50.256Z",
+      "status": 200,
+      "cfRay": "a4b6cd6e794628cb-LAX",
+      "responseSha256": "aa75c8f859891fa02fa332df4b61f2a39944c5d12ded12e509ced14120af2de6",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/006-api.json",
+        "size_bytes": 2798,
+        "sha256": "aa75c8f859891fa02fa332df4b61f2a39944c5d12ded12e509ced14120af2de6"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 7,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT name,type,sql FROM sqlite_master WHERE type IN ('table','index','trigger') ORDER BY type,name",
+      "started": "2026-10-16T11:42:50.270Z",
+      "ended": "2026-10-16T11:42:50.839Z",
+      "status": 200,
+      "cfRay": "a4b6cd749d4428cb-LAX",
+      "responseSha256": "e8e3ba7490bdcd5841ad52eeca8a4c5253f1572f5d3f7076228ecef73e555688",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/007-api.json",
+        "size_bytes": 19437,
+        "sha256": "e8e3ba7490bdcd5841ad52eeca8a4c5253f1572f5d3f7076228ecef73e555688"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 8,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"announcements\"",
+      "started": "2026-10-16T11:42:50.854Z",
+      "ended": "2026-10-16T11:42:52.190Z",
+      "status": 200,
+      "cfRay": "a4b6cd781d2f28cb-LAX",
+      "responseSha256": "f6e07af626f2f6debec720236887da071cd7e6f7f16e5d15ff9f27488b2ee1a8",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/008-api.json",
+        "size_bytes": 373,
+        "sha256": "f6e07af626f2f6debec720236887da071cd7e6f7f16e5d15ff9f27488b2ee1a8"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 9,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"announcements\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:42:52.256Z",
+      "ended": "2026-10-16T11:42:52.586Z",
+      "status": 200,
+      "cfRay": "a4b6cd80de2c28cb-LAX",
+      "responseSha256": "9e08193ae01c45cae366e211594913523e1c1ab09d01416cc2a5737f55b38bf1",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/009-api.json",
+        "size_bytes": 816,
+        "sha256": "9e08193ae01c45cae366e211594913523e1c1ab09d01416cc2a5737f55b38bf1"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 10,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"app_config\"",
+      "started": "2026-10-16T11:42:52.602Z",
+      "ended": "2026-10-16T11:42:52.948Z",
+      "status": 200,
+      "cfRay": "a4b6cd82fa4428cb-LAX",
+      "responseSha256": "124781631d05d488b40196f76afb3f4c24840ea89e7b21f8b5011181c3312393",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/010-api.json",
+        "size_bytes": 373,
+        "sha256": "124781631d05d488b40196f76afb3f4c24840ea89e7b21f8b5011181c3312393"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 11,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"app_config\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:42:52.961Z",
+      "ended": "2026-10-16T11:42:53.583Z",
+      "status": 200,
+      "cfRay": "a4b6cd854f1928cb-LAX",
+      "responseSha256": "1b53aa7cdf842c7281c3e0a73d7266313f26ce9e38e087393ac30aeecadda4e3",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/011-api.json",
+        "size_bytes": 619,
+        "sha256": "1b53aa7cdf842c7281c3e0a73d7266313f26ce9e38e087393ac30aeecadda4e3"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 12,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"apps\"",
+      "started": "2026-10-16T11:42:53.597Z",
+      "ended": "2026-10-16T11:42:53.930Z",
+      "status": 200,
+      "cfRay": "a4b6cd893f0f28cb-LAX",
+      "responseSha256": "40812f1318e8a4e1c5c7492374a18d760e5dd9c72b7761acdc9516f5dac14d1f",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/012-api.json",
+        "size_bytes": 373,
+        "sha256": "40812f1318e8a4e1c5c7492374a18d760e5dd9c72b7761acdc9516f5dac14d1f"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 13,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"apps\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:42:53.946Z",
+      "ended": "2026-10-16T11:42:54.311Z",
+      "status": 200,
+      "cfRay": "a4b6cd8b6b6828cb-LAX",
+      "responseSha256": "0bba84bc015ee69b595b0f1e9ece08a66c684b850351fd92c5cc7fb3f8641313",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/013-api.json",
+        "size_bytes": 461,
+        "sha256": "0bba84bc015ee69b595b0f1e9ece08a66c684b850351fd92c5cc7fb3f8641313"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 14,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"audit_logs\"",
+      "started": "2026-10-16T11:42:54.324Z",
+      "ended": "2026-10-16T11:42:55.342Z",
+      "status": 200,
+      "cfRay": "a4b6cd8dd85728cb-LAX",
+      "responseSha256": "54214098f69fda3326356355aebe08260586344f8aad71e7b2e4f12fa8c348cc",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/014-api.json",
+        "size_bytes": 377,
+        "sha256": "54214098f69fda3326356355aebe08260586344f8aad71e7b2e4f12fa8c348cc"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 15,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"audit_logs\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:42:55.371Z",
+      "ended": "2026-10-16T11:43:01.842Z",
+      "status": 200,
+      "cfRay": "a4b6cd945faf28cb-LAX",
+      "responseSha256": "49e1fe1ab76efa79ef389708dc6862205ba636d10e02d342d39209cc52fdbfb6",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/015-api.json",
+        "size_bytes": 9984726,
+        "sha256": "49e1fe1ab76efa79ef389708dc6862205ba636d10e02d342d39209cc52fdbfb6"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 16,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"channel_history\"",
+      "started": "2026-10-16T11:43:02.049Z",
+      "ended": "2026-10-16T11:43:03.122Z",
+      "status": 200,
+      "cfRay": "a4b6cdbe289428cb-LAX",
+      "responseSha256": "4081ffcaad4010ad1c05f8fb41551112c576a4524ea20399b88ce58e25d99790",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/016-api.json",
+        "size_bytes": 375,
+        "sha256": "4081ffcaad4010ad1c05f8fb41551112c576a4524ea20399b88ce58e25d99790"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 17,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"channel_history\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:03.139Z",
+      "ended": "2026-10-16T11:43:06.443Z",
+      "status": 200,
+      "cfRay": "a4b6cdc4fe6e28cb-LAX",
+      "responseSha256": "c8c8cd702f0cfeffa95249755626acffa4e43e380c3d48ee443cb3db4b4493a6",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/017-api.json",
+        "size_bytes": 9631314,
+        "sha256": "c8c8cd702f0cfeffa95249755626acffa4e43e380c3d48ee443cb3db4b4493a6"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 18,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"channels\"",
+      "started": "2026-10-16T11:43:06.561Z",
+      "ended": "2026-10-16T11:43:06.959Z",
+      "status": 200,
+      "cfRay": "a4b6cdda3b0428cb-LAX",
+      "responseSha256": "c8c4df075c2b57d1efe0238d9b0a8b9fae24d0207a7143e949177c4e6fed7a66",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/018-api.json",
+        "size_bytes": 373,
+        "sha256": "c8c4df075c2b57d1efe0238d9b0a8b9fae24d0207a7143e949177c4e6fed7a66"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 19,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"channels\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:06.972Z",
+      "ended": "2026-10-16T11:43:07.313Z",
+      "status": 200,
+      "cfRay": "a4b6cddcc95028cb-LAX",
+      "responseSha256": "cfb3e347ca82bb98a2a08737f34f649bd5bb25f67183ef88d21980d26a4dd097",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/019-api.json",
+        "size_bytes": 2410,
+        "sha256": "cfb3e347ca82bb98a2a08737f34f649bd5bb25f67183ef88d21980d26a4dd097"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 20,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"d1_migrations\"",
+      "started": "2026-10-16T11:43:07.326Z",
+      "ended": "2026-10-16T11:43:08.448Z",
+      "status": 200,
+      "cfRay": "a4b6cddf0e1128cb-LAX",
+      "responseSha256": "fe43a42b9bd7d63e74835b1e9ab981eb42d3d9365b7720668c9312b94979aae0",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/020-api.json",
+        "size_bytes": 373,
+        "sha256": "fe43a42b9bd7d63e74835b1e9ab981eb42d3d9365b7720668c9312b94979aae0"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 21,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"d1_migrations\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:08.497Z",
+      "ended": "2026-10-16T11:43:08.819Z",
+      "status": 200,
+      "cfRay": "a4b6cde65e5628cb-LAX",
+      "responseSha256": "c9d533dae883d1053dcf2bd1c773dcb18ee76b4e3b499f3278ba34abd2130099",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/021-api.json",
+        "size_bytes": 660,
+        "sha256": "c9d533dae883d1053dcf2bd1c773dcb18ee76b4e3b499f3278ba34abd2130099"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 22,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_channels\"",
+      "started": "2026-10-16T11:43:08.834Z",
+      "ended": "2026-10-16T11:43:09.185Z",
+      "status": 200,
+      "cfRay": "a4b6cde87b3b28cb-LAX",
+      "responseSha256": "dd8a22b344013d5474a2dbdcffb24a80111b05f89f2ff58339ecd14acfb2c5ee",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/022-api.json",
+        "size_bytes": 373,
+        "sha256": "dd8a22b344013d5474a2dbdcffb24a80111b05f89f2ff58339ecd14acfb2c5ee"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 23,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_releases\"",
+      "started": "2026-10-16T11:43:09.199Z",
+      "ended": "2026-10-16T11:43:09.534Z",
+      "status": 200,
+      "cfRay": "a4b6cdeac93428cb-LAX",
+      "responseSha256": "4c5f2ffe6b1ddc0502fb6fb244826f61ac48ffaaf74efdcf4315f368711796f7",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/023-api.json",
+        "size_bytes": 373,
+        "sha256": "4c5f2ffe6b1ddc0502fb6fb244826f61ac48ffaaf74efdcf4315f368711796f7"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 24,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"patches\"",
+      "started": "2026-10-16T11:43:09.548Z",
+      "ended": "2026-10-16T11:43:09.922Z",
+      "status": 200,
+      "cfRay": "a4b6cdecee7028cb-LAX",
+      "responseSha256": "c9cab054a8dc334ac12fb749bd8d365e34627239e28cb20945daa5ed7f69d7cb",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/024-api.json",
+        "size_bytes": 375,
+        "sha256": "c9cab054a8dc334ac12fb749bd8d365e34627239e28cb20945daa5ed7f69d7cb"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 25,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"patches\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:09.937Z",
+      "ended": "2026-10-16T11:43:10.377Z",
+      "status": 200,
+      "cfRay": "a4b6cdef6bbd28cb-LAX",
+      "responseSha256": "499fa5aed1d89fe5626ed528f22e16c9e91f523e4b2be312fb15e53e3e7abfe7",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/025-api.json",
+        "size_bytes": 44315,
+        "sha256": "499fa5aed1d89fe5626ed528f22e16c9e91f523e4b2be312fb15e53e3e7abfe7"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 26,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"release_assets\"",
+      "started": "2026-10-16T11:43:10.391Z",
+      "ended": "2026-10-16T11:43:11.336Z",
+      "status": 200,
+      "cfRay": "a4b6cdf2296628cb-LAX",
+      "responseSha256": "7c2495d80087bae74fb445f30557ee8195cc20093e89c94ac47a7f5fcefbfdde",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/026-api.json",
+        "size_bytes": 377,
+        "sha256": "7c2495d80087bae74fb445f30557ee8195cc20093e89c94ac47a7f5fcefbfdde"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 27,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"release_assets\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:11.360Z",
+      "ended": "2026-10-16T11:43:11.800Z",
+      "status": 200,
+      "cfRay": "a4b6cdf85f4928cb-LAX",
+      "responseSha256": "3c4723c9b80da51d38ec4e825f4699d412ee9ab72eee21c74a82acb3eb3b705f",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/027-api.json",
+        "size_bytes": 63889,
+        "sha256": "3c4723c9b80da51d38ec4e825f4699d412ee9ab72eee21c74a82acb3eb3b705f"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 28,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"releases\"",
+      "started": "2026-10-16T11:43:11.815Z",
+      "ended": "2026-10-16T11:43:12.157Z",
+      "status": 200,
+      "cfRay": "a4b6cdfb0cfe28cb-LAX",
+      "responseSha256": "98057950cb194e29febd22701d0057350b1d6eebe0b28dbe1d19737c83a2afd6",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/028-api.json",
+        "size_bytes": 375,
+        "sha256": "98057950cb194e29febd22701d0057350b1d6eebe0b28dbe1d19737c83a2afd6"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 29,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT * FROM \"releases\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:12.173Z",
+      "ended": "2026-10-16T11:43:13.207Z",
+      "status": 200,
+      "cfRay": "a4b6cdfd59c028cb-LAX",
+      "responseSha256": "81bb7020c7bc4be915bb182f795dd955f5f5721f614d03571b0665a7472ec317",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/029-api.json",
+        "size_bytes": 81327,
+        "sha256": "81bb7020c7bc4be915bb182f795dd955f5f5721f614d03571b0665a7472ec317"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 30,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT name,type,sql FROM sqlite_master WHERE type IN ('table','index','trigger') ORDER BY type,name",
+      "started": "2026-10-16T11:43:13.673Z",
+      "ended": "2026-10-16T11:43:15.420Z",
+      "status": 200,
+      "cfRay": "a4b6ce06ad6828cb-LAX",
+      "responseSha256": "b898fd0414cddcef44f60e0dbfcdcae4bfbc791a2452e4a1781a72264e3fc2f8",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/030-api.json",
+        "size_bytes": 45148,
+        "sha256": "b898fd0414cddcef44f60e0dbfcdcae4bfbc791a2452e4a1781a72264e3fc2f8"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 31,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"announcements\"",
+      "started": "2026-10-16T11:43:15.434Z",
+      "ended": "2026-10-16T11:43:15.792Z",
+      "status": 200,
+      "cfRay": "a4b6ce11be3128cb-LAX",
+      "responseSha256": "898d8df5e213151544f47ff6ce0c0613e16c981c949659de1e4f5f23a8b8f902",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/031-api.json",
+        "size_bytes": 367,
+        "sha256": "898d8df5e213151544f47ff6ce0c0613e16c981c949659de1e4f5f23a8b8f902"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 32,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"app_config\"",
+      "started": "2026-10-16T11:43:15.808Z",
+      "ended": "2026-10-16T11:43:16.171Z",
+      "status": 200,
+      "cfRay": "a4b6ce140ad328cb-LAX",
+      "responseSha256": "1b9831cd0b9570dc4d3d539fb1992f58acdda8206a81162674aca02341dedf31",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/032-api.json",
+        "size_bytes": 371,
+        "sha256": "1b9831cd0b9570dc4d3d539fb1992f58acdda8206a81162674aca02341dedf31"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 33,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT * FROM \"app_config\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:16.185Z",
+      "ended": "2026-10-16T11:43:16.529Z",
+      "status": 200,
+      "cfRay": "a4b6ce166f9b28cb-LAX",
+      "responseSha256": "061cf931bf28417ea240f6cd4f92977e0fe2cfadee5dacb63e5773673d3c2f57",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/033-api.json",
+        "size_bytes": 619,
+        "sha256": "061cf931bf28417ea240f6cd4f92977e0fe2cfadee5dacb63e5773673d3c2f57"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 34,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"apps\"",
+      "started": "2026-10-16T11:43:16.542Z",
+      "ended": "2026-10-16T11:43:16.853Z",
+      "status": 200,
+      "cfRay": "a4b6ce189bc928cb-LAX",
+      "responseSha256": "cf1c2fb35b26388fe903e89df2a430844c7963d8b8aecd612868e8fc20544374",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/034-api.json",
+        "size_bytes": 371,
+        "sha256": "cf1c2fb35b26388fe903e89df2a430844c7963d8b8aecd612868e8fc20544374"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 35,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT * FROM \"apps\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:16.867Z",
+      "ended": "2026-10-16T11:43:17.227Z",
+      "status": 200,
+      "cfRay": "a4b6ce1ac83428cb-LAX",
+      "responseSha256": "35c678325c38629bad1a2ed334d45cba2cd0d2dded73925345b2ff442de15b35",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/035-api.json",
+        "size_bytes": 455,
+        "sha256": "35c678325c38629bad1a2ed334d45cba2cd0d2dded73925345b2ff442de15b35"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 36,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"audit_logs\"",
+      "started": "2026-10-16T11:43:17.243Z",
+      "ended": "2026-10-16T11:43:17.580Z",
+      "status": 200,
+      "cfRay": "a4b6ce1d0d3b28cb-LAX",
+      "responseSha256": "4b7258d04ac6bdc99f342da9fd7c537b3c58c4b1f798989c1fed7c5f0ffdc3cc",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/036-api.json",
+        "size_bytes": 371,
+        "sha256": "4b7258d04ac6bdc99f342da9fd7c537b3c58c4b1f798989c1fed7c5f0ffdc3cc"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 37,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT * FROM \"audit_logs\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:17.600Z",
+      "ended": "2026-10-16T11:43:17.944Z",
+      "status": 200,
+      "cfRay": "a4b6ce1f39c028cb-LAX",
+      "responseSha256": "37b3556cdbf3a8891e439f8e5cc9cf2660a205bf3a2c5cc6c9dd3b62f68f408d",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/037-api.json",
+        "size_bytes": 911,
+        "sha256": "37b3556cdbf3a8891e439f8e5cc9cf2660a205bf3a2c5cc6c9dd3b62f68f408d"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 38,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"channel_history\"",
+      "started": "2026-10-16T11:43:17.958Z",
+      "ended": "2026-10-16T11:43:18.353Z",
+      "status": 200,
+      "cfRay": "a4b6ce217e5a28cb-LAX",
+      "responseSha256": "54c85170a55d3af01503e42a48daadca69de3e15e99f707ec66bacd60d126915",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/038-api.json",
+        "size_bytes": 371,
+        "sha256": "54c85170a55d3af01503e42a48daadca69de3e15e99f707ec66bacd60d126915"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 39,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"channels\"",
+      "started": "2026-10-16T11:43:18.367Z",
+      "ended": "2026-10-16T11:43:18.714Z",
+      "status": 200,
+      "cfRay": "a4b6ce240b9628cb-LAX",
+      "responseSha256": "44d8c3fef5c45b55461b957674e854fe5b47ec99fe497d13d69d15a381760162",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/039-api.json",
+        "size_bytes": 371,
+        "sha256": "44d8c3fef5c45b55461b957674e854fe5b47ec99fe497d13d69d15a381760162"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 40,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"d1_migrations\"",
+      "started": "2026-10-16T11:43:18.732Z",
+      "ended": "2026-10-16T11:43:19.078Z",
+      "status": 200,
+      "cfRay": "a4b6ce2648ef28cb-LAX",
+      "responseSha256": "8c55e556f02028f99773e3b03b98dadfd42ae5ebaec58378eaeb1e79d5065520",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/040-api.json",
+        "size_bytes": 371,
+        "sha256": "8c55e556f02028f99773e3b03b98dadfd42ae5ebaec58378eaeb1e79d5065520"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 41,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT * FROM \"d1_migrations\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:19.092Z",
+      "ended": "2026-10-16T11:43:19.433Z",
+      "status": 200,
+      "cfRay": "a4b6ce288e2528cb-LAX",
+      "responseSha256": "d928690eb6ba9afdd41bc487e4372738bb288db5756f69084c8dad5358e2ca42",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/041-api.json",
+        "size_bytes": 739,
+        "sha256": "d928690eb6ba9afdd41bc487e4372738bb288db5756f69084c8dad5358e2ca42"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 42,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_admin_idempotency\"",
+      "started": "2026-10-16T11:43:19.447Z",
+      "ended": "2026-10-16T11:43:19.772Z",
+      "status": 200,
+      "cfRay": "a4b6ce2acb1b28cb-LAX",
+      "responseSha256": "03d32a71df758754083c89ad3cfbc19665ca9f7b606992953b55bf56bc8470fc",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/042-api.json",
+        "size_bytes": 371,
+        "sha256": "03d32a71df758754083c89ad3cfbc19665ca9f7b606992953b55bf56bc8470fc"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 43,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_admin_idempotency_tombstones\"",
+      "started": "2026-10-16T11:43:19.786Z",
+      "ended": "2026-10-16T11:43:20.163Z",
+      "status": 200,
+      "cfRay": "a4b6ce2d180a28cb-LAX",
+      "responseSha256": "f168873915ad41ecf4cd844958d1fe91b97d3e7050ec1bfbd8ea458fe3fee806",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/043-api.json",
+        "size_bytes": 371,
+        "sha256": "f168873915ad41ecf4cd844958d1fe91b97d3e7050ec1bfbd8ea458fe3fee806"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 44,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_backfill_manifests\"",
+      "started": "2026-10-16T11:43:20.176Z",
+      "ended": "2026-10-16T11:43:20.598Z",
+      "status": 200,
+      "cfRay": "a4b6ce2f5ca128cb-LAX",
+      "responseSha256": "c3990b74e345b71589503783559a3783eaf5d24ad5b9102994e20b1012fd13fc",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/044-api.json",
+        "size_bytes": 371,
+        "sha256": "c3990b74e345b71589503783559a3783eaf5d24ad5b9102994e20b1012fd13fc"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 45,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_channels\"",
+      "started": "2026-10-16T11:43:20.613Z",
+      "ended": "2026-10-16T11:43:20.961Z",
+      "status": 200,
+      "cfRay": "a4b6ce3219cf28cb-LAX",
+      "responseSha256": "4936a0b01b14415ec9712870b1f5fb47aea3c6aed3e711aa4a88b5011c6c7174",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/045-api.json",
+        "size_bytes": 371,
+        "sha256": "4936a0b01b14415ec9712870b1f5fb47aea3c6aed3e711aa4a88b5011c6c7174"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 46,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT * FROM \"firmware_channels\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:20.975Z",
+      "ended": "2026-10-16T11:43:21.406Z",
+      "status": 200,
+      "cfRay": "a4b6ce345e1528cb-LAX",
+      "responseSha256": "c40c896419d7d47b61df73fef2e7cfceeecaf3772a813496b552c75b44a6a008",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/046-api.json",
+        "size_bytes": 1301,
+        "sha256": "c40c896419d7d47b61df73fef2e7cfceeecaf3772a813496b552c75b44a6a008"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 47,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_channels_legacy\"",
+      "started": "2026-10-16T11:43:21.420Z",
+      "ended": "2026-10-16T11:43:21.762Z",
+      "status": 200,
+      "cfRay": "a4b6ce371bf928cb-LAX",
+      "responseSha256": "fb907d6f5db0b37ada609e207c87e245c14db1708bba6aab0af4d7a2b30a26dd",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/047-api.json",
+        "size_bytes": 371,
+        "sha256": "fb907d6f5db0b37ada609e207c87e245c14db1708bba6aab0af4d7a2b30a26dd"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 48,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_release_assets\"",
+      "started": "2026-10-16T11:43:21.775Z",
+      "ended": "2026-10-16T11:43:22.122Z",
+      "status": 200,
+      "cfRay": "a4b6ce3958bd28cb-LAX",
+      "responseSha256": "9c4dfce3b8dcfc270e8e996188429769df7ed30f4f6f8723d460d5b44c18866a",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/048-api.json",
+        "size_bytes": 371,
+        "sha256": "9c4dfce3b8dcfc270e8e996188429769df7ed30f4f6f8723d460d5b44c18866a"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 49,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT * FROM \"firmware_release_assets\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:22.135Z",
+      "ended": "2026-10-16T11:43:22.508Z",
+      "status": 200,
+      "cfRay": "a4b6ce3b8d9828cb-LAX",
+      "responseSha256": "99c5a134d5c2fb8c0688760439dd34a772fb8335a6f0d9e8f01352586364afc7",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/049-api.json",
+        "size_bytes": 2653,
+        "sha256": "99c5a134d5c2fb8c0688760439dd34a772fb8335a6f0d9e8f01352586364afc7"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 50,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_releases\"",
+      "started": "2026-10-16T11:43:22.522Z",
+      "ended": "2026-10-16T11:43:22.850Z",
+      "status": 200,
+      "cfRay": "a4b6ce3dfa8d28cb-LAX",
+      "responseSha256": "5652745364272870a6b05d14b27eb2b22f507ee9582a31cf9b7f8b93dcb054e1",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/050-api.json",
+        "size_bytes": 371,
+        "sha256": "5652745364272870a6b05d14b27eb2b22f507ee9582a31cf9b7f8b93dcb054e1"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 51,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT * FROM \"firmware_releases\" ORDER BY rowid LIMIT 500 OFFSET 0",
+      "started": "2026-10-16T11:43:22.869Z",
+      "ended": "2026-10-16T11:43:23.492Z",
+      "status": 200,
+      "cfRay": "a4b6ce402e7428cb-LAX",
+      "responseSha256": "a7334e33b4cedabcd7a527b446ec7cd2a52b5fb6e43aa95f2686e45084485361",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/051-api.json",
+        "size_bytes": 3291,
+        "sha256": "a7334e33b4cedabcd7a527b446ec7cd2a52b5fb6e43aa95f2686e45084485361"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 52,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_releases_legacy\"",
+      "started": "2026-10-16T11:43:23.506Z",
+      "ended": "2026-10-16T11:43:24.103Z",
+      "status": 200,
+      "cfRay": "a4b6ce442f3d28cb-LAX",
+      "responseSha256": "d42728094953686b30dc05ebe63bb4c6ab7c4a8f20cbc1961bf13a707a26cc06",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/052-api.json",
+        "size_bytes": 369,
+        "sha256": "d42728094953686b30dc05ebe63bb4c6ab7c4a8f20cbc1961bf13a707a26cc06"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 53,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"patches\"",
+      "started": "2026-10-16T11:43:24.116Z",
+      "ended": "2026-10-16T11:43:24.467Z",
+      "status": 200,
+      "cfRay": "a4b6ce481f4228cb-LAX",
+      "responseSha256": "72f8a1462acb7986d52b7f2d681613c2521643d0236f34f6420e2fc4968417b0",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/053-api.json",
+        "size_bytes": 371,
+        "sha256": "72f8a1462acb7986d52b7f2d681613c2521643d0236f34f6420e2fc4968417b0"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 54,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"release_assets\"",
+      "started": "2026-10-16T11:43:24.483Z",
+      "ended": "2026-10-16T11:43:24.822Z",
+      "status": 200,
+      "cfRay": "a4b6ce4a4c4628cb-LAX",
+      "responseSha256": "f77bd0a7b5b739c03ac6b4eb53abad340f7d76038d2914a7a4104a750f0a02b0",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/054-api.json",
+        "size_bytes": 371,
+        "sha256": "f77bd0a7b5b739c03ac6b4eb53abad340f7d76038d2914a7a4104a750f0a02b0"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 55,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT COUNT(*) AS count FROM \"releases\"",
+      "started": "2026-10-16T11:43:24.836Z",
+      "ended": "2026-10-16T11:43:25.184Z",
+      "status": 200,
+      "cfRay": "a4b6ce4c68dd28cb-LAX",
+      "responseSha256": "384e8f68d97858c25e33379d2a768b90b7128a39b98fec7157c881105f092951",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/055-api.json",
+        "size_bytes": 371,
+        "sha256": "384e8f68d97858c25e33379d2a768b90b7128a39b98fec7157c881105f092951"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 56,
+      "method": "GET",
+      "operation": "ListObjectsV2",
+      "bucket": "trace-update-staging-releases",
+      "started": "2026-10-16T11:43:25.395Z",
+      "ended": "2026-10-16T11:43:30.260Z",
+      "status": 200,
+      "exitCode": 0,
+      "pid": 14844,
+      "processClosed": true,
+      "stderr": "",
+      "files": [
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/before/056-s3.headers",
+          "size_bytes": 223,
+          "sha256": "719f8f070e37c4cd1054142178074b97c03e20a32223a4635e1ccc176f5e9448"
+        },
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/before/056-s3.body",
+          "size_bytes": 18601,
+          "sha256": "97a0d78355394115466ab6be7356b0d49b9c5734f7434b3571a2cfbddf81eab6"
+        }
+      ]
+    },
+    {
+      "sequence": 57,
+      "method": "GET",
+      "operation": "ListObjectsV2",
+      "bucket": "e-track-firmware-p41-test-releases",
+      "started": "2026-10-16T11:43:30.390Z",
+      "ended": "2026-10-16T11:43:33.999Z",
+      "status": 200,
+      "exitCode": 0,
+      "pid": 25652,
+      "processClosed": true,
+      "stderr": "",
+      "files": [
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/before/057-s3.headers",
+          "size_bytes": 222,
+          "sha256": "72991161dd52d558c4b47f40d650c3176e4f4ebcb95a6391d49d42a4e9544d59"
+        },
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/before/057-s3.body",
+          "size_bytes": 1125,
+          "sha256": "13d36905a94c3ca98069e60abc33a940be9ba10eca23e6d03fcfe45964c37b25"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/002-api.json",
+      "size_bytes": 5819,
+      "sha256": "96c79f58b9e323686073750013bc20a1f5f197b6d07a32c7529759aba178ae9a"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/003-api.json",
+      "size_bytes": 238,
+      "sha256": "5461544c950ed0c2deb588c33d54362054000898a60c32376edd4fe74c4a3889"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/004-api.json",
+      "size_bytes": 898,
+      "sha256": "aef0b74ca069ec2ec694c4c0a58d0eb082cba40fa4968f6714311a568d8dff90"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/005-api.json",
+      "size_bytes": 2756,
+      "sha256": "2b50befde466d93c112e021555c3b33de5d6a3e1fe3e83e86889b93029b156ee"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/006-api.json",
+      "size_bytes": 2798,
+      "sha256": "aa75c8f859891fa02fa332df4b61f2a39944c5d12ded12e509ced14120af2de6"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/007-api.json",
+      "size_bytes": 19437,
+      "sha256": "e8e3ba7490bdcd5841ad52eeca8a4c5253f1572f5d3f7076228ecef73e555688"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/008-api.json",
+      "size_bytes": 373,
+      "sha256": "f6e07af626f2f6debec720236887da071cd7e6f7f16e5d15ff9f27488b2ee1a8"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/009-api.json",
+      "size_bytes": 816,
+      "sha256": "9e08193ae01c45cae366e211594913523e1c1ab09d01416cc2a5737f55b38bf1"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/010-api.json",
+      "size_bytes": 373,
+      "sha256": "124781631d05d488b40196f76afb3f4c24840ea89e7b21f8b5011181c3312393"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/011-api.json",
+      "size_bytes": 619,
+      "sha256": "1b53aa7cdf842c7281c3e0a73d7266313f26ce9e38e087393ac30aeecadda4e3"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/012-api.json",
+      "size_bytes": 373,
+      "sha256": "40812f1318e8a4e1c5c7492374a18d760e5dd9c72b7761acdc9516f5dac14d1f"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/013-api.json",
+      "size_bytes": 461,
+      "sha256": "0bba84bc015ee69b595b0f1e9ece08a66c684b850351fd92c5cc7fb3f8641313"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/014-api.json",
+      "size_bytes": 377,
+      "sha256": "54214098f69fda3326356355aebe08260586344f8aad71e7b2e4f12fa8c348cc"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/015-api.json",
+      "size_bytes": 9984726,
+      "sha256": "49e1fe1ab76efa79ef389708dc6862205ba636d10e02d342d39209cc52fdbfb6"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/016-api.json",
+      "size_bytes": 375,
+      "sha256": "4081ffcaad4010ad1c05f8fb41551112c576a4524ea20399b88ce58e25d99790"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/017-api.json",
+      "size_bytes": 9631314,
+      "sha256": "c8c8cd702f0cfeffa95249755626acffa4e43e380c3d48ee443cb3db4b4493a6"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/018-api.json",
+      "size_bytes": 373,
+      "sha256": "c8c4df075c2b57d1efe0238d9b0a8b9fae24d0207a7143e949177c4e6fed7a66"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/019-api.json",
+      "size_bytes": 2410,
+      "sha256": "cfb3e347ca82bb98a2a08737f34f649bd5bb25f67183ef88d21980d26a4dd097"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/020-api.json",
+      "size_bytes": 373,
+      "sha256": "fe43a42b9bd7d63e74835b1e9ab981eb42d3d9365b7720668c9312b94979aae0"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/021-api.json",
+      "size_bytes": 660,
+      "sha256": "c9d533dae883d1053dcf2bd1c773dcb18ee76b4e3b499f3278ba34abd2130099"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/022-api.json",
+      "size_bytes": 373,
+      "sha256": "dd8a22b344013d5474a2dbdcffb24a80111b05f89f2ff58339ecd14acfb2c5ee"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/023-api.json",
+      "size_bytes": 373,
+      "sha256": "4c5f2ffe6b1ddc0502fb6fb244826f61ac48ffaaf74efdcf4315f368711796f7"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/024-api.json",
+      "size_bytes": 375,
+      "sha256": "c9cab054a8dc334ac12fb749bd8d365e34627239e28cb20945daa5ed7f69d7cb"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/025-api.json",
+      "size_bytes": 44315,
+      "sha256": "499fa5aed1d89fe5626ed528f22e16c9e91f523e4b2be312fb15e53e3e7abfe7"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/026-api.json",
+      "size_bytes": 377,
+      "sha256": "7c2495d80087bae74fb445f30557ee8195cc20093e89c94ac47a7f5fcefbfdde"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/027-api.json",
+      "size_bytes": 63889,
+      "sha256": "3c4723c9b80da51d38ec4e825f4699d412ee9ab72eee21c74a82acb3eb3b705f"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/028-api.json",
+      "size_bytes": 375,
+      "sha256": "98057950cb194e29febd22701d0057350b1d6eebe0b28dbe1d19737c83a2afd6"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/029-api.json",
+      "size_bytes": 81327,
+      "sha256": "81bb7020c7bc4be915bb182f795dd955f5f5721f614d03571b0665a7472ec317"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/protected-d1.json",
+      "size_bytes": 19898200,
+      "sha256": "f6ad3a0ffdfbadc0306e6d3fa259d09ec6b134a5eab618aa554f7f36012c417d"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/030-api.json",
+      "size_bytes": 45148,
+      "sha256": "b898fd0414cddcef44f60e0dbfcdcae4bfbc791a2452e4a1781a72264e3fc2f8"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/031-api.json",
+      "size_bytes": 367,
+      "sha256": "898d8df5e213151544f47ff6ce0c0613e16c981c949659de1e4f5f23a8b8f902"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/032-api.json",
+      "size_bytes": 371,
+      "sha256": "1b9831cd0b9570dc4d3d539fb1992f58acdda8206a81162674aca02341dedf31"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/033-api.json",
+      "size_bytes": 619,
+      "sha256": "061cf931bf28417ea240f6cd4f92977e0fe2cfadee5dacb63e5773673d3c2f57"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/034-api.json",
+      "size_bytes": 371,
+      "sha256": "cf1c2fb35b26388fe903e89df2a430844c7963d8b8aecd612868e8fc20544374"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/035-api.json",
+      "size_bytes": 455,
+      "sha256": "35c678325c38629bad1a2ed334d45cba2cd0d2dded73925345b2ff442de15b35"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/036-api.json",
+      "size_bytes": 371,
+      "sha256": "4b7258d04ac6bdc99f342da9fd7c537b3c58c4b1f798989c1fed7c5f0ffdc3cc"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/037-api.json",
+      "size_bytes": 911,
+      "sha256": "37b3556cdbf3a8891e439f8e5cc9cf2660a205bf3a2c5cc6c9dd3b62f68f408d"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/038-api.json",
+      "size_bytes": 371,
+      "sha256": "54c85170a55d3af01503e42a48daadca69de3e15e99f707ec66bacd60d126915"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/039-api.json",
+      "size_bytes": 371,
+      "sha256": "44d8c3fef5c45b55461b957674e854fe5b47ec99fe497d13d69d15a381760162"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/040-api.json",
+      "size_bytes": 371,
+      "sha256": "8c55e556f02028f99773e3b03b98dadfd42ae5ebaec58378eaeb1e79d5065520"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/041-api.json",
+      "size_bytes": 739,
+      "sha256": "d928690eb6ba9afdd41bc487e4372738bb288db5756f69084c8dad5358e2ca42"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/042-api.json",
+      "size_bytes": 371,
+      "sha256": "03d32a71df758754083c89ad3cfbc19665ca9f7b606992953b55bf56bc8470fc"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/043-api.json",
+      "size_bytes": 371,
+      "sha256": "f168873915ad41ecf4cd844958d1fe91b97d3e7050ec1bfbd8ea458fe3fee806"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/044-api.json",
+      "size_bytes": 371,
+      "sha256": "c3990b74e345b71589503783559a3783eaf5d24ad5b9102994e20b1012fd13fc"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/045-api.json",
+      "size_bytes": 371,
+      "sha256": "4936a0b01b14415ec9712870b1f5fb47aea3c6aed3e711aa4a88b5011c6c7174"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/046-api.json",
+      "size_bytes": 1301,
+      "sha256": "c40c896419d7d47b61df73fef2e7cfceeecaf3772a813496b552c75b44a6a008"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/047-api.json",
+      "size_bytes": 371,
+      "sha256": "fb907d6f5db0b37ada609e207c87e245c14db1708bba6aab0af4d7a2b30a26dd"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/048-api.json",
+      "size_bytes": 371,
+      "sha256": "9c4dfce3b8dcfc270e8e996188429769df7ed30f4f6f8723d460d5b44c18866a"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/049-api.json",
+      "size_bytes": 2653,
+      "sha256": "99c5a134d5c2fb8c0688760439dd34a772fb8335a6f0d9e8f01352586364afc7"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/050-api.json",
+      "size_bytes": 371,
+      "sha256": "5652745364272870a6b05d14b27eb2b22f507ee9582a31cf9b7f8b93dcb054e1"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/051-api.json",
+      "size_bytes": 3291,
+      "sha256": "a7334e33b4cedabcd7a527b446ec7cd2a52b5fb6e43aa95f2686e45084485361"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/052-api.json",
+      "size_bytes": 369,
+      "sha256": "d42728094953686b30dc05ebe63bb4c6ab7c4a8f20cbc1961bf13a707a26cc06"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/053-api.json",
+      "size_bytes": 371,
+      "sha256": "72f8a1462acb7986d52b7f2d681613c2521643d0236f34f6420e2fc4968417b0"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/054-api.json",
+      "size_bytes": 371,
+      "sha256": "f77bd0a7b5b739c03ac6b4eb53abad340f7d76038d2914a7a4104a750f0a02b0"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/055-api.json",
+      "size_bytes": 371,
+      "sha256": "384e8f68d97858c25e33379d2a768b90b7128a39b98fec7157c881105f092951"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/test-d1.json",
+      "size_bytes": 58676,
+      "sha256": "d8b212b14c290d3cddcdf49c7f62f7364efe290e385644dc40db0903ed8c9c99"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/056-s3.headers",
+      "size_bytes": 223,
+      "sha256": "719f8f070e37c4cd1054142178074b97c03e20a32223a4635e1ccc176f5e9448"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/056-s3.body",
+      "size_bytes": 18601,
+      "sha256": "97a0d78355394115466ab6be7356b0d49b9c5734f7434b3571a2cfbddf81eab6"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/057-s3.headers",
+      "size_bytes": 222,
+      "sha256": "72991161dd52d558c4b47f40d650c3176e4f4ebcb95a6391d49d42a4e9544d59"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/before/057-s3.body",
+      "size_bytes": 1125,
+      "sha256": "13d36905a94c3ca98069e60abc33a940be9ba10eca23e6d03fcfe45964c37b25"
+    }
+  ],
+  "ok": true,
+  "mutationsRequested": 0,
+  "inventory": {
+    "workers": [
+      {
+        "id": "deepseek-mail",
+        "etag": "d2fcf217290b3d1dee98b0c954da9df6387a2783083c1da856583a783c120846",
+        "modified_on": "2026-05-18T06:02:36.289912Z"
+      },
+      {
+        "id": "e-track-firmware-p41-test",
+        "etag": "e106f789a1385841130cc67dd462b33c1031d0bc89871b1f751b1c0d973f39bc",
+        "modified_on": "2026-10-15T04:53:33.335565Z"
+      },
+      {
+        "id": "edge-key",
+        "etag": "2fa75007c534d8585de25cc9af19fd06fe6a90fa2e3e72f2dcb5f1affbcffd13",
+        "modified_on": "2026-04-27T08:37:59.364122Z"
+      },
+      {
+        "id": "online-resource-library",
+        "etag": "98bede8db1bd2018eff4fad397e0949a5bf9ede3fd6c4749b4b496ac3c03567b",
+        "modified_on": "2026-06-12T12:05:09.229356Z"
+      },
+      {
+        "id": "trace-update-service-staging",
+        "etag": "33d74f82059c2f285805d16c9a4bcb2a14fd26fe63bba81fc2cf7f41a3b99ef5",
+        "modified_on": "2026-07-07T13:37:56.578162Z"
+      }
+    ],
+    "databases": [
+      {
+        "name": "e-track-firmware-p41-test",
+        "id": "2617e1e1-956f-42ce-a465-da56d84abf06"
+      },
+      {
+        "name": "trace-update-staging",
+        "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645"
+      },
+      {
+        "name": "online-resource-library",
+        "id": "ef3cb255-7b58-425b-81ad-f3daa5266e0f"
+      },
+      {
+        "name": "edgekey-db",
+        "id": "e8c43f91-7511-406d-b67f-0f583ea39af5"
+      }
+    ],
+    "buckets": [
+      "e-track-firmware-p41-test-releases",
+      "trace-update-staging-releases"
+    ]
+  },
+  "bindings": [
+    {
+      "name": "trace-update-service-staging",
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "text": "trace",
+          "type": "plain_text"
+        },
+        {
+          "database_id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+          "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "text": "staging",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "text": "300",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "text": "false",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "text": "staging",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "text": "Eitan-S-23",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "text": "Trace",
+          "type": "plain_text"
+        },
+        {
+          "name": "MANIFEST_CACHE",
+          "namespace_id": "fe3b08f2e0774072a44bdf140c44174a",
+          "type": "kv_namespace"
+        },
+        {
+          "name": "MANIFEST_CACHE_TTL_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "class_name": "RateLimiter",
+          "name": "RATE_LIMITER",
+          "namespace_id": "cced0ccc57664e36b007d64d88de4bd5",
+          "type": "durable_object_namespace"
+        },
+        {
+          "name": "RATE_LIMIT_MAX_REQUESTS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMIT_WINDOW_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "bucket_name": "trace-update-staging-releases",
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket"
+        }
+      ]
+    },
+    {
+      "name": "e-track-firmware-p41-test",
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "text": "trace",
+          "type": "plain_text"
+        },
+        {
+          "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+          "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "text": "p41-test-1",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "text": "300",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "text": "false",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "text": "staging",
+          "type": "plain_text"
+        },
+        {
+          "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+          "text": "1792039926",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "text": "Eitan-S-23",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "text": "E-Track",
+          "type": "plain_text"
+        },
+        {
+          "name": "MANIFEST_CACHE",
+          "namespace_id": "9581ef5b95154abaa7d441fd07c2f220",
+          "type": "kv_namespace"
+        },
+        {
+          "name": "MANIFEST_CACHE_TTL_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "class_name": "RateLimiter",
+          "name": "RATE_LIMITER",
+          "namespace_id": "51fbc6056abd4797bf28feb2f8863307",
+          "type": "durable_object_namespace"
+        },
+        {
+          "name": "RATE_LIMIT_MAX_REQUESTS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMIT_WINDOW_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "bucket_name": "e-track-firmware-p41-test-releases",
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket"
+        }
+      ]
+    }
+  ],
+  "databases": [
+    {
+      "role": "protected",
+      "name": "trace-update-staging",
+      "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+      "artifact": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/protected-d1.json",
+        "size_bytes": 19898200,
+        "sha256": "f6ad3a0ffdfbadc0306e6d3fa259d09ec6b134a5eab618aa554f7f36012c417d"
+      }
+    },
+    {
+      "role": "test",
+      "name": "e-track-firmware-p41-test",
+      "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+      "artifact": {
+        "path": ".cache/p41-acceptance-20261016/cloud/before/test-d1.json",
+        "size_bytes": 58676,
+        "sha256": "d8b212b14c290d3cddcdf49c7f62f7364efe290e385644dc40db0903ed8c9c99"
+      }
+    }
+  ],
+  "r2": [
+    {
+      "role": "protected",
+      "name": "trace-update-staging-releases",
+      "complete": true,
+      "pages": [
+        {
+          "sequence": 56,
+          "method": "GET",
+          "operation": "ListObjectsV2",
+          "bucket": "trace-update-staging-releases",
+          "started": "2026-10-16T11:43:25.395Z",
+          "ended": "2026-10-16T11:43:30.260Z",
+          "status": 200,
+          "exitCode": 0,
+          "pid": 14844,
+          "processClosed": true,
+          "stderr": "",
+          "files": [
+            {
+              "path": ".cache/p41-acceptance-20261016/cloud/before/056-s3.headers",
+              "size_bytes": 223,
+              "sha256": "719f8f070e37c4cd1054142178074b97c03e20a32223a4635e1ccc176f5e9448"
+            },
+            {
+              "path": ".cache/p41-acceptance-20261016/cloud/before/056-s3.body",
+              "size_bytes": 18601,
+              "sha256": "97a0d78355394115466ab6be7356b0d49b9c5734f7434b3571a2cfbddf81eab6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "test",
+      "name": "e-track-firmware-p41-test-releases",
+      "complete": true,
+      "pages": [
+        {
+          "sequence": 57,
+          "method": "GET",
+          "operation": "ListObjectsV2",
+          "bucket": "e-track-firmware-p41-test-releases",
+          "started": "2026-10-16T11:43:30.390Z",
+          "ended": "2026-10-16T11:43:33.999Z",
+          "status": 200,
+          "exitCode": 0,
+          "pid": 25652,
+          "processClosed": true,
+          "stderr": "",
+          "files": [
+            {
+              "path": ".cache/p41-acceptance-20261016/cloud/before/057-s3.headers",
+              "size_bytes": 222,
+              "sha256": "72991161dd52d558c4b47f40d650c3176e4f4ebcb95a6391d49d42a4e9544d59"
+            },
+            {
+              "path": ".cache/p41-acceptance-20261016/cloud/before/057-s3.body",
+              "size_bytes": 1125,
+              "sha256": "13d36905a94c3ca98069e60abc33a940be9ba10eca23e6d03fcfe45964c37b25"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ended": "2026-10-16T11:43:34.000Z",
+  "closed": true
+}

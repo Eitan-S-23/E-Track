@@ -1,0 +1,28 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "tests/ota/test_acceptance_efficiency.py"
+  ],
+  "pid": 11452,
+  "started": "2026-10-16T17:33:07.546Z",
+  "ended": "2026-10-16T17:45:21.062Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-rerun-regression-preparation.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-rerun-regression-preparation.stderr.txt",
+      "size_bytes": 5510,
+      "sha256": "cf09f6ed858a77e5c35b57826e99e640cc760d01c55e4d0199e9d5bd1d22c924"
+    }
+  ],
+  "closed": true
+}

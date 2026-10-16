@@ -1,0 +1,1 @@
+{"mode":"assets","label":"assets","ok":false,"requests":4,"mutationsRequested":0,"receipt":".cache\\p41-acceptance-20261017\\cloud\\assets\\receipt.json","error":{"name":"AssertionError","message":"S3 read transport failed; preserve receipt without retry"}}

@@ -1,0 +1,67 @@
+{
+  "testedCommit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+  "scope": "Closeout-addendum-only",
+  "originalInventorySha256": "9d39bafeeb848d69b9ecdf44b30590103cc10c4b57d2fd123880f9ca08be5270",
+  "files": [
+    {
+      "path": "commands/p41-resume-ci-archive-dry.json",
+      "source": ".cache/logs/p41-resume-ci-archive-dry.json",
+      "sizeBytes": 1845,
+      "sha256": "286a631801eefa4a8b71235b41dee8f89936ba3a8d393b6ca5710af55f775fad"
+    },
+    {
+      "path": "commands/p41-resume-ci-archive-dry.stdout.txt",
+      "source": ".cache/logs/p41-resume-ci-archive-dry.stdout.txt",
+      "sizeBytes": 9339,
+      "sha256": "60eea409b1a41e12512f7cbcb3041ec5b411df288753aef0f1a08a88b06f7cf7"
+    },
+    {
+      "path": "commands/p41-resume-ci-archive-dry.stderr.txt",
+      "source": ".cache/logs/p41-resume-ci-archive-dry.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-resume-ci-archive-apply.json",
+      "source": ".cache/logs/p41-resume-ci-archive-apply.json",
+      "sizeBytes": 1963,
+      "sha256": "c542a6a6155678d29f925a3ad04cc06f5e5d28867f0b720bb1121462a3840e86"
+    },
+    {
+      "path": "commands/p41-resume-ci-archive-apply.stdout.txt",
+      "source": ".cache/logs/p41-resume-ci-archive-apply.stdout.txt",
+      "sizeBytes": 9449,
+      "sha256": "cb4287bb275654ffdf5fd4c9b23d3fbe6c383d392695db0f60784c88db8a144b"
+    },
+    {
+      "path": "commands/p41-resume-ci-archive-apply.stderr.txt",
+      "source": ".cache/logs/p41-resume-ci-archive-apply.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-resume-record-governance.json",
+      "source": ".cache/logs/p41-resume-record-governance.json",
+      "sizeBytes": 1889,
+      "sha256": "6eae820addb3d68e8cfc51579cc1659ceae2daed43eac7c1ad20d40d9baad1d7"
+    },
+    {
+      "path": "commands/p41-resume-record-governance.stdout.txt",
+      "source": ".cache/logs/p41-resume-record-governance.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-resume-record-governance.stderr.txt",
+      "source": ".cache/logs/p41-resume-record-governance.stderr.txt",
+      "sizeBytes": 127,
+      "sha256": "37ed9044f15ce9e5a468f486ca1b8e9a61d05cae51af516ee95c5457b1023ab7"
+    },
+    {
+      "path": "independent-closeout-review.json",
+      "source": "Native-collaboration-final-response",
+      "sizeBytes": 2025,
+      "sha256": "fe80da13fe89df0f6e1bf3416e0d4d161e64680bc2e57bcc3ee23513603c4099"
+    }
+  ]
+}

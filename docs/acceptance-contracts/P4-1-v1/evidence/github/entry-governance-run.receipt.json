@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:20:23.786Z",
+  "ended": "2026-10-16T08:20:25.244Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38866887953",
+  "status": 200,
+  "requestId": "AE43:141F:65E67D:978A02:6AD1DE49",
+  "date": "Fri, 16 Oct 2026 08:20:26 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-governance-run.json",
+    "size_bytes": 12560,
+    "sha256": "84a5ccabedbe1bfed00277bfa347b07dcf0f8fa92e5ec8309e11a8da9bed6798"
+  }
+}

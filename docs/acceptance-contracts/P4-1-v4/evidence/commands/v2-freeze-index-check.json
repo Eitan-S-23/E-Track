@@ -1,0 +1,30 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "tests/ota/test_acceptance_bundle.py",
+    "AcceptanceBundleTests.test_freeze_index_rows_bind_reachable_bundle_and_input_commits",
+    "AcceptanceBundleTests.test_freeze_index_allows_growth_and_truthful_historical_results"
+  ],
+  "pid": 22196,
+  "started": "2026-10-16T19:20:46.504Z",
+  "ended": "2026-10-16T19:21:01.822Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-freeze-index-check.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-freeze-index-check.stderr.txt",
+      "size_bytes": 106,
+      "sha256": "164ab7a262cefb2c5bd58eae6d258cc6ee79df568ea4b9fc19771281b83f1b28"
+    }
+  ],
+  "closed": true
+}

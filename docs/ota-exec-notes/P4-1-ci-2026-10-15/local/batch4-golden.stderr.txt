@@ -1,0 +1,16 @@
+[warn] OTA_AES_KEY 未设，使用 vendor 示例 key（仅开发）
+test_contract_samples_regression (__main__.GoldenVectorsTest.test_contract_samples_regression) ... ok
+test_etu_image_sha256_consistency (__main__.GoldenVectorsTest.test_etu_image_sha256_consistency)
+各 .etu 条目 image_sha256 == candidate fw_header.image_sha256 双零值 ... ok
+test_full_outer_header (__main__.GoldenVectorsTest.test_full_outer_header) ... ok
+test_full_roundtrip (__main__.GoldenVectorsTest.test_full_roundtrip) ... ok
+test_patch_inner_full_fields (__main__.GoldenVectorsTest.test_patch_inner_full_fields) ... ok
+test_patch_outer_header (__main__.GoldenVectorsTest.test_patch_outer_header) ... ok
+test_patch_roundtrip (__main__.GoldenVectorsTest.test_patch_roundtrip) ... ok
+test_seq_arbiter (__main__.GoldenVectorsTest.test_seq_arbiter) ... ok
+test_toy_fw_header_fields (__main__.GoldenVectorsTest.test_toy_fw_header_fields) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.016s
+
+OK

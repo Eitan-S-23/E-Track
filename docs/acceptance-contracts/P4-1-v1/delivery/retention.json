@@ -1,0 +1,83 @@
+{
+  "kind": "failed-round-delivery-records",
+  "bundleCommit": "7f014a8887dc79646ff392ee8cfa6a1ce2c9cf67",
+  "contractId": "P4-1-v1",
+  "roundId": "P41-20261016-01",
+  "overallResult": "PRODUCT_FAIL",
+  "created": "2026-10-16T14:59:29.312Z",
+  "scope": "Closure-only receipts after the immutable evidence bundle commit. No changed frozen evidence or product inputs.",
+  "artifacts": [
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-stage.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-stage.json",
+      "size_bytes": 1211,
+      "sha256": "39ddd27335212693d475d0a52b106fed0a15861d00aa42a297312503edef771c"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-stage.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-stage.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-stage.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-stage.stderr.txt",
+      "size_bytes": 146,
+      "sha256": "7d2f3df6e08f3454586e9ea071ea12d8280c8693d7e5c225b1b74fe96ab10d74"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-commit-validation.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-commit-validation.json",
+      "size_bytes": 986,
+      "sha256": "b88e7d55d0ca88a8f4c2bf1de356b33002c2563c4f26bd553389a7448c71606f"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-commit-validation.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-commit-validation.stdout.txt",
+      "size_bytes": 77,
+      "sha256": "a1b05d6d4ac48708d32b4fdc1073c294bc3d49edbc4da86a3b09b3a118d6feb6"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-commit-validation.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-commit-validation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failure-index-regression.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failure-index-regression.json",
+      "size_bytes": 1114,
+      "sha256": "611e313464102610512f841f4ba136a94d9909ef1dd400a293e9bf83c2235565"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failure-index-regression.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failure-index-regression.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failure-index-regression.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failure-index-regression.stderr.txt",
+      "size_bytes": 108,
+      "sha256": "219fc3c8b097ea9dfe80f3161741624c4596194333d6bfa958badf3097c82631"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-write-preflight.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-write-preflight.json",
+      "size_bytes": 5994,
+      "sha256": "613b19994185772a77cf22ba0cbedf17fa0b071c6456db5f033d2bafdeecb21b"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-index-byte-audit.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-index-byte-audit.json",
+      "size_bytes": 142,
+      "sha256": "f649fd08eed4528ddd2c4b441ae6866aeb0d3eaba9eda918e3357f2b0f519f22"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-commit.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/delivery/failed-bundle-commit.json",
+      "size_bytes": 44801,
+      "sha256": "c48252a82895350bd8cfdc4edb191b11dc2292b5e0b204b29e4fb1b2df0a3e2c"
+    }
+  ]
+}

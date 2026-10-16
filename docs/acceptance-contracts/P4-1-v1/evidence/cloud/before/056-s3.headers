@@ -1,0 +1,10 @@
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 200 OK
+Date: Fri, 16 Oct 2026 11:43:30 GMT
+Content-Type: application/xml
+Content-Length: 18601
+Connection: keep-alive
+Server: cloudflare
+CF-RAY: a4b6ce662b95634b-NRT
+

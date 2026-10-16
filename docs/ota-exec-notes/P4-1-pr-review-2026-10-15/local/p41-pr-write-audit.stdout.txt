@@ -1,0 +1,511 @@
+{
+  "scope": "Pre-archive read-only audit; not machine-wide zero-write proof",
+  "observedAt": "2026-10-15T00:00:39.155Z",
+  "activeRoot": "D:/github/my/E-Track/.cache/p41-dev-20261015",
+  "receiptCount": 50,
+  "receipts": [
+    {
+      "path": ".cache/logs/batch1-commit.json",
+      "pid": 1584,
+      "started": "2026-10-14T20:16:10.920Z",
+      "ended": "2026-10-14T20:16:13.177Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-host-portable.json",
+      "pid": 19984,
+      "started": "2026-10-14T20:17:40.729Z",
+      "ended": "2026-10-14T20:17:47.903Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-host.json",
+      "pid": 21536,
+      "started": "2026-10-14T20:14:26.481Z",
+      "ended": "2026-10-14T20:14:31.679Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-native.json",
+      "pid": 3680,
+      "started": "2026-10-14T20:14:31.883Z",
+      "ended": "2026-10-14T20:14:49.427Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-npm-ci.json",
+      "pid": 11704,
+      "started": "2026-10-14T20:02:26.460Z",
+      "ended": "2026-10-14T20:10:41.209Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-npm-registry-recovery.json",
+      "pid": 19072,
+      "started": "2026-10-14T20:12:30.163Z",
+      "ended": "2026-10-14T20:12:50.676Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-portable-commit.json",
+      "pid": 17976,
+      "started": "2026-10-14T20:18:29.305Z",
+      "ended": "2026-10-14T20:18:29.797Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-portable-stage.json",
+      "pid": 1824,
+      "started": "2026-10-14T20:18:28.680Z",
+      "ended": "2026-10-14T20:18:28.931Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-stage.json",
+      "pid": 7052,
+      "started": "2026-10-14T20:16:09.192Z",
+      "ended": "2026-10-14T20:16:09.727Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch1-types.json",
+      "pid": 21844,
+      "started": "2026-10-14T20:17:48.154Z",
+      "ended": "2026-10-14T20:17:53.834Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch2-byte.json",
+      "pid": 19588,
+      "started": "2026-10-14T20:30:23.765Z",
+      "ended": "2026-10-14T20:31:07.958Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch2-commit.json",
+      "pid": 19084,
+      "started": "2026-10-14T20:32:32.951Z",
+      "ended": "2026-10-14T20:32:34.386Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch2-pack-fixed.json",
+      "pid": 8356,
+      "started": "2026-10-14T20:31:37.246Z",
+      "ended": "2026-10-14T20:31:38.562Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch2-pack.json",
+      "pid": 17868,
+      "started": "2026-10-14T20:30:20.368Z",
+      "ended": "2026-10-14T20:30:23.239Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch2-stage.json",
+      "pid": 16772,
+      "started": "2026-10-14T20:32:32.282Z",
+      "ended": "2026-10-14T20:32:32.553Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-commit.json",
+      "pid": 21792,
+      "started": "2026-10-14T21:17:03.460Z",
+      "ended": "2026-10-14T21:17:04.078Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-pipeline-bound.json",
+      "pid": 23680,
+      "started": "2026-10-14T21:08:44.957Z",
+      "ended": "2026-10-14T21:08:49.964Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-pipeline-fixed.json",
+      "pid": 20604,
+      "started": "2026-10-14T20:54:37.776Z",
+      "ended": "2026-10-14T20:54:42.908Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-pipeline-host.json",
+      "pid": 472,
+      "started": "2026-10-14T20:49:47.926Z",
+      "ended": "2026-10-14T20:49:54.687Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-shared-host.json",
+      "pid": 18996,
+      "started": "2026-10-14T20:49:55.846Z",
+      "ended": "2026-10-14T20:50:01.618Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-stage.json",
+      "pid": 23156,
+      "started": "2026-10-14T21:17:01.813Z",
+      "ended": "2026-10-14T21:17:02.110Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-types.json",
+      "pid": 24628,
+      "started": "2026-10-14T20:54:43.819Z",
+      "ended": "2026-10-14T20:54:49.116Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-workflow-fixed.json",
+      "pid": 6700,
+      "started": "2026-10-14T21:13:36.856Z",
+      "ended": "2026-10-14T21:13:40.508Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch3-workflow.json",
+      "pid": 24280,
+      "started": "2026-10-14T21:08:43.656Z",
+      "ended": "2026-10-14T21:08:43.991Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch4-bytes.json",
+      "pid": 24724,
+      "started": "2026-10-14T21:23:06.918Z",
+      "ended": "2026-10-14T21:24:21.580Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch4-commit.json",
+      "pid": 22656,
+      "started": "2026-10-14T21:36:08.795Z",
+      "ended": "2026-10-14T21:36:09.417Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch4-golden.json",
+      "pid": 1696,
+      "started": "2026-10-14T21:32:50.138Z",
+      "ended": "2026-10-14T21:32:50.659Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch4-pipeline.json",
+      "pid": 19080,
+      "started": "2026-10-14T21:23:16.851Z",
+      "ended": "2026-10-14T21:23:24.622Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch4-shared-host.json",
+      "pid": 21500,
+      "started": "2026-10-14T21:24:56.985Z",
+      "ended": "2026-10-14T21:25:01.979Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch4-stage.json",
+      "pid": 21856,
+      "started": "2026-10-14T21:36:07.071Z",
+      "ended": "2026-10-14T21:36:07.349Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch4-types.json",
+      "pid": 2972,
+      "started": "2026-10-14T21:32:50.890Z",
+      "ended": "2026-10-14T21:32:56.232Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch5-commit.json",
+      "pid": 23196,
+      "started": "2026-10-14T21:42:56.891Z",
+      "ended": "2026-10-14T21:42:57.428Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch5-stage.json",
+      "pid": 4524,
+      "started": "2026-10-14T21:42:56.313Z",
+      "ended": "2026-10-14T21:42:56.496Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/batch5-workflow.json",
+      "pid": 14900,
+      "started": "2026-10-14T21:42:51.050Z",
+      "ended": "2026-10-14T21:42:56.116Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/delivery-commit.json",
+      "pid": 11208,
+      "started": "2026-10-14T22:17:20.291Z",
+      "ended": "2026-10-14T22:17:20.949Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/delivery-stage.json",
+      "pid": 24824,
+      "started": "2026-10-14T22:16:06.316Z",
+      "ended": "2026-10-14T22:16:08.591Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/handoff-commit.json",
+      "pid": 1748,
+      "started": "2026-10-14T22:25:03.116Z",
+      "ended": "2026-10-14T22:25:03.607Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/handoff-stage.json",
+      "pid": 8020,
+      "started": "2026-10-14T22:24:27.586Z",
+      "ended": "2026-10-14T22:24:27.866Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-draft-fixed.json",
+      "pid": 18444,
+      "started": "2026-10-14T23:33:43.382Z",
+      "ended": "2026-10-14T23:33:52.194Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-draft-red.json",
+      "pid": 8464,
+      "started": "2026-10-14T23:29:29.320Z",
+      "ended": "2026-10-14T23:29:38.148Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-gh-pr-help.json",
+      "pid": 18500,
+      "started": "2026-10-14T22:48:54.518Z",
+      "ended": "2026-10-14T22:48:54.794Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-gov-fixed.json",
+      "pid": 23780,
+      "started": "2026-10-14T23:34:18.131Z",
+      "ended": "2026-10-14T23:34:19.456Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-gov-red.json",
+      "pid": 8520,
+      "started": "2026-10-14T23:30:05.985Z",
+      "ended": "2026-10-14T23:30:07.395Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-relay-targets.json",
+      "pid": 15700,
+      "started": "2026-10-14T22:38:09.247Z",
+      "ended": "2026-10-14T22:38:09.547Z",
+      "exitCode": 1,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-repair-commit.json",
+      "pid": 17748,
+      "started": "2026-10-14T23:39:17.925Z",
+      "ended": "2026-10-14T23:39:18.418Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-repair-diff.json",
+      "pid": 17996,
+      "started": "2026-10-14T23:38:47.139Z",
+      "ended": "2026-10-14T23:38:47.417Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-repair-stage.json",
+      "pid": 15944,
+      "started": "2026-10-14T23:39:17.302Z",
+      "ended": "2026-10-14T23:39:17.529Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-types-fixed.json",
+      "pid": 9448,
+      "started": "2026-10-14T23:34:19.939Z",
+      "ended": "2026-10-14T23:34:24.664Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-version-fixed.json",
+      "pid": 4000,
+      "started": "2026-10-14T23:33:12.833Z",
+      "ended": "2026-10-14T23:33:37.312Z",
+      "exitCode": 0,
+      "closed": true
+    },
+    {
+      "path": ".cache/logs/p41-version-red.json",
+      "pid": 5428,
+      "started": "2026-10-14T23:28:39.567Z",
+      "ended": "2026-10-14T23:29:06.899Z",
+      "exitCode": 1,
+      "closed": true
+    }
+  ],
+  "ownedReceiptPidsStillPresent": [
+    {
+      "name": "taskhostw.exe",
+      "pid": 18500
+    }
+  ],
+  "namedTestHelpersPresent": [],
+  "rootIndexSha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "rootIndexMtime": "2026-10-12T19:53:21.544Z",
+  "sharedRootBranch": "archive/p34-root-before-delivery-20261014",
+  "sharedRootHead": "cb317affcd291695f42271084b4b305b0d7e6f8b",
+  "localMain": "b42d3e25db85d6aba397cb4d0fb34bb5b653904f",
+  "runtimeCredentialFileCandidates": [],
+  "externalCacheMetadataChecks": [
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\PowerShell",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 12,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 3,
+      "filesModifiedSinceWorktreeCreation": [
+        {
+          "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell\\StartupProfileData-NonInteractive",
+          "mtime": "2026-10-14T23:55:18.821Z",
+          "sizeBytes": 1004
+        }
+      ],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\npm-cache\\_logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.npm\\_logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\CrashDumps",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 2,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Roaming\\xdg.config\\.wrangler\\logs",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 2,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.wrangler\\logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.config\\.wrangler\\logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Roaming\\GitHub CLI",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 2,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\GitHub CLI",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 313,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.config\\gh",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": [],
+      "reparseNotFollowed": []
+    }
+  ],
+  "temporaryCredentialFilesCreated": false,
+  "githubCredentialHandling": "Eitan-S-23 token read into process memory only; no credential file copied",
+  "cloudLoginOrMutation": false,
+  "localShell": "cmd.exe, login:false",
+  "retainedIssue": "P41-AUDIT-01: Export-StartLayout startup cache invoker remains unestablished; no cleanup performed"
+}

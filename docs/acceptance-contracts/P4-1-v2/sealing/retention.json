@@ -1,0 +1,59 @@
+{
+  "scope": "Late sealing receipts; v2 HARNESS_FAIL is preserved",
+  "artifacts": [
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-failure-validation.json",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-failure-validation.json",
+      "size_bytes": 1129,
+      "sha256": "19b66167dc5c2df3046525b4d6067d2fa8b86d488d33214418506733599b6bf5"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-failure-validation.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-failure-validation.stdout.txt",
+      "size_bytes": 77,
+      "sha256": "5c1d9f756ddb869568d37757b35f904febe4512c9fad1eb03ce0dea6314e8ad1"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-failure-validation.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-failure-validation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-failure-archive.json",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-failure-archive.json",
+      "size_bytes": 792,
+      "sha256": "7751412e51562a048e33ef8b6cfe2c78f71babab9c3874f68b5d112c07436db0"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-failure-archive.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-failure-archive.stdout.txt",
+      "size_bytes": 84,
+      "sha256": "777be05cc339db2a2370716d48e714764adf208ec945480b722ac60a23e4247f"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-failure-archive.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-failure-archive.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-archived-failure-validation.json",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-archived-failure-validation.json",
+      "size_bytes": 1162,
+      "sha256": "32cf7ea256f0b945c3512989bb384006d08fa17e9cb38ff50d696e81218f0ed7"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-archived-failure-validation.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-archived-failure-validation.stdout.txt",
+      "size_bytes": 77,
+      "sha256": "5c1d9f756ddb869568d37757b35f904febe4512c9fad1eb03ce0dea6314e8ad1"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261017/commands/v2-archived-failure-validation.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v2/sealing/v2-archived-failure-validation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

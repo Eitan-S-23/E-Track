@@ -1,0 +1,110 @@
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+stdout | ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > uploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects
+P41_HOST_READY {
+  uploads: [
+    {
+      ok: true,
+      status: 'UPLOADED',
+      requestId: 'c7024136-4e54-46f8-bdcd-3a8c30b5a1a4',
+      kind: 'full',
+      fileName: 'e-track-at32f435-v20.0.1-full.etu',
+      r2Key: 'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/e-track-at32f435-v20.0.1-full.etu',
+      sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3',
+      sizeBytes: 18,
+      contentDigest: 'sha-256=:lreWI+KQtL2hfankIyDEgGTj77UQw5J5mrKnsfm3WaM=:'
+    },
+    {
+      ok: true,
+      status: 'UPLOADED',
+      requestId: 'd3d43ff5-0f26-43f7-a579-956f1f45b1de',
+      kind: 'patch',
+      fileName: 'e-track-at32f435-v2.8.0-to-v20.0.1-patch.etu',
+      r2Key: 'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/e-track-at32f435-v2.8.0-to-v20.0.1-patch.etu',
+      sha256: '022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee',
+      sizeBytes: 19,
+      contentDigest: 'sha-256=:Airbh5thY92uhXTQ+WLZtPgYsL1Fe1cuFEbqZ2f6Xu4=:'
+    },
+    {
+      ok: true,
+      status: 'UPLOADED',
+      requestId: '54d68f98-0996-4cd1-b9af-2c06757f9bc1',
+      kind: 'recovery',
+      fileName: 'recovery-v20.0.1.bin',
+      r2Key: 'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/recovery-v20.0.1.bin',
+      sha256: 'd078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379',
+      sizeBytes: 22,
+      contentDigest: 'sha-256=:0HgECu7QN5rndOsniBXA8vW/EHJRp5at/ReaIPicM3k=:'
+    }
+  ],
+  registration: {
+    ok: true,
+    requestId: 'a77c6c28-e6c5-438f-8812-c4e7557a7c35',
+    releaseId: 'fw_0186e30639e32b86b67f3bef8958a43a66a8306360d77a1329581265ccd72e7a',
+    state: 'ready',
+    idempotent: false,
+    assetsRegistered: 3
+  },
+  replay: {
+    ok: true,
+    requestId: 'f201297b-901d-45ac-a695-2785e0f36ac8',
+    releaseId: 'fw_0186e30639e32b86b67f3bef8958a43a66a8306360d77a1329581265ccd72e7a',
+    state: 'ready',
+    idempotent: true,
+    assetsRegistered: 3
+  },
+  before: { releases: 0, assets: 0, audit: 0, channels: [] },
+  after: {
+    releases: 1,
+    assets: 3,
+    audit: 1,
+    channels: [ [Object: null prototype], [Object: null prototype] ]
+  },
+  metadataSha256: 'f08d9540ba2fe252220241bb328f34f6145494f1853af3a02d2889de51b83231',
+  calls: [
+    'GET /healthz',
+    'POST /api/ci/firmware/releases',
+    'POST /api/ci/firmware/releases',
+    'GET /healthz',
+    'POST /api/ci/firmware/releases',
+    'POST /api/ci/firmware/releases'
+  ]
+}
+
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > uploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects 541ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > missing asset rejects before health, GitHub, R2 or registration 44ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > bad digest rejects before health, GitHub, R2 or registration 51ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > same-key different bytes rejects without overwrite or register 73ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing readback never persists verified metadata or touches D1 75ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > a real registration audit failure rolls back ready/assets and stops without retry 127ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > cancellation after the first upload stops subsequent uploads and registration 90ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > monotonicity rejects lower versions and same-version changed metadata before upload 149ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > checks/PR/nightly, ambiguous modes, missing config and crossed buckets fail closed 54ms
+stdout | ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register
+P41_HOST_PRODUCTION_ORDER [
+  'preflight',
+  'github-release-readback',
+  'r2-readback',
+  'r2-readback',
+  'r2-readback',
+  'register',
+  'idempotent-replay'
+]
+
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register 274ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub full-byte readback catches false metadata and never publishes a corrupted draft 51ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub signed redirect receives no repository credential 61ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > register cancellation does not retry and service paths cannot hide a wrong origin 51ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: valid 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: wrong commit 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: wrong digest 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: not previous 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: draft 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: missing asset 1ms
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  05:08:46
+   Duration  3.70s (transform 571ms, setup 144ms, import 1.38s, tests 1.68s, environment 0ms)
+

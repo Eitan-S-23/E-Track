@@ -1,0 +1,7 @@
+
+> @trace/update-service-worker@0.1.0 check
+> tsc --noEmit
+
+test/firmware-scripts.host.test.ts(153,73): error TS2345: Argument of type '(key: string, options: R2GetOptions | undefined) => Promise<{ body: ReadableStream<Uint8Array<ArrayBufferLike>>; bodyUsed: boolean; ... 16 more ...; ssecKeyMd5?: string | undefined; }>' is not assignable to parameter of type '(key: string, options?: R2GetOptions | undefined) => Promise<R2ObjectBody | null>'.
+  Type 'Promise<{ body: ReadableStream<Uint8Array<ArrayBufferLike>>; bodyUsed: boolean; arrayBuffer(): Promise<ArrayBuffer>; ... 15 more ...; ssecKeyMd5?: string | undefined; }>' is not assignable to type 'Promise<R2ObjectBody | null>'.
+    Property 'writeHttpMetadata' is missing in type '{ body: ReadableStream<Uint8Array<ArrayBufferLike>>; bodyUsed: boolean; arrayBuffer(): Promise<ArrayBuffer>; bytes(): Promise<Uint8Array>; ... 14 more ...; ssecKeyMd5?: string; }' but required in type 'R2ObjectBody'.

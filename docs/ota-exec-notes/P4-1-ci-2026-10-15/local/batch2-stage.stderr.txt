@@ -1,0 +1,6 @@
+warning: in the working copy of 'docs/ota-exec-notes/P4-1-implementation-2026-10-15.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/scripts/bsdiff/CMakeLists.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/scripts/firmware-byte-check.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/test_firmware_pack.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/test_firmware_release.mjs', LF will be replaced by CRLF the next time Git touches it

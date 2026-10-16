@@ -1,0 +1,36 @@
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > builds the same canonical v2 fixture from actual files and keeps R2 unverified 54ms
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > executes the builder CLI, preserves source files and returns a real exit code
+BUILDER_CLI {
+  exitCode: 0,
+  stdout: '{"ok":true,"output":"D:\\\\github\\\\my\\\\E-Track\\\\.cache\\\\p41-dev-20261015\\\\.cache\\\\p4-2-script-fixtures\\\\case-5K2g7c\\\\metadata-cli.json","assetsPrepared":3,"r2Verified":false}\n',
+  stderr: ''
+}
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > executes the builder CLI, preserves source files and returns a real exit code 548ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > uploads with conditional create, canonical HTTP metadata and full readback; same bytes never rewrite 33ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 metadata collision without overwrite 2ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 bytes collision without overwrite 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 size collision without overwrite 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > closes the HEAD/PUT race with onlyIf and verifies the winning object 2ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects false-positive put success when readback is missing 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects local byte mismatches before any R2 call 1ms
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > keeps dry-run metadata unverified and rejects the old skip-readback option
+UPLOADER_CLI { dryRunExit: 0, refusedSkipExit: 2 }
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > keeps dry-run metadata unverified and rejects the old skip-readback option 1552ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > register client consumes the same real handler/SQLite chain and replays idempotently 225ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 400 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 409 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 503 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > bounds network-only retries and requires the registration result contract 2ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects insecure origins, invalid config and unknown schema before fetch 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > prevents script outputs escaping the active worktree 3ms
+
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+   Start at  04:49:57
+   Duration  3.82s (transform 485ms, setup 169ms, import 478ms, tests 2.46s, environment 0ms)
+

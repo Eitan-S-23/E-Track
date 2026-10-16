@@ -38,6 +38,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 - `OTA-XC-IMAGE-IDENTITY`
 - `OTA-XC-ASSET-NAMING`
 - `OTA-XC-RELEASE-CLI`
+- `OTA-XC-BOOTSTRAP-BASE`
 - `OTA-XC-RELEASE-METADATA`
 - `OTA-XC-SCHEMA-FIXTURE`
 - `OTA-XC-R2-UPLOAD`
@@ -50,6 +51,15 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 - `OTA-XC-SECRETS`
 - `PLAN-OTA.md` §6.1
 
+## 本次独立验收授权
+
+`P41-STAGING-DELEGATION-20261016` 是仅限本次 P4-1 staging 的用户委托例外，见
+`docs/acceptance-execution-contract.md` §7.3.4。新的非实现验收者可配置经审阅的目标及
+descriptor，提交/推送验收输入，代表用户审批对应 `firmware-rehearsal` run，并在全部
+判据 PASS 后以保留提交 ID 的 merge commit 收口 PR #27。审批须如实登记为
+“用户委托的 agent 审批”，保留 required reviewer、分支限制、回执及历史证据。
+这不改变本 Spec 的完成判据，不授权 production 审批/发布、解锁、设备或其他任务。
+
 ## 现有组件和代码入口
 
 - `.github/workflows/firmware-build.yml`：GCC build、placeholder 检查、finalize、单 bin Release/R2/register。
@@ -61,8 +71,8 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 
 ## 输入输出与调用方向
 
-- build job 输出未 finalize GCC App/Boot 四件套和版本信息；release job 下载同一 run artifact。
-- release job 取得上一正式版“最终 App bin”作为 patch 基版，并验证其 releaseTag/version/hash，不得使用 nightly、placeholder 或 `.etu` 反解结果代替权威基版。
+- 普通 build job 输出无凭据的未 finalize GCC App/Boot 四件套和版本信息，仅用于开发。两个受保护 release job 用同一 GCC/CMake recipe 和各自已批准的 OTA secret 生成同一 run 的 key-bound App/Boot 四件套，再制包；禁止拿普通开发 artifact 冒充已配置接收端 key。
+- release job 默认取得上一正式版“最终 App bin”作为 patch 基版，并验证其 releaseTag/version/hash。首次发布的显式例外只能按 `OTA-XC-BOOTSTRAP-BASE` 获取独立核验、不可变归档的非正式基线；不得自动回退到 nightly、placeholder 或 `.etu` 反解结果。
 - metadata builder 接收三类已验证资产和 release 身份，输出 `OTA-XC-RELEASE-METADATA`。
 - uploader 对每个 asset 执行 immutable put/identical no-op/readback，再把 r2Verified metadata 交给 register API。
 - 输出与退出码严格遵守 `OTA-XC-RELEASE-CLI`。
@@ -73,6 +83,59 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 - `etu_pack.py` 是 finalize/full/patch 字节 owner，recovery helper 是 recovery 容器 owner。
 - R2 uploader 是对象存在性/回读 owner；register API 是 draft/ready 原子门槛 owner。
 - 任一步失败后 release 不得继续到下一不可逆步骤；重跑只通过幂等合同恢复。
+
+### 编译与制包密钥接线
+
+共用入口为 `.github/scripts/firmware-gcc-keyed-build.mjs --build-dir <项目内新目录>
+--evidence-dir <独立的新证据目录> --version <精确版本>`。仅受保护且已过原 gate 的
+rehearsal/production 步骤取得对应 OTA secret；不把云端或 GitHub 发布凭据交给编译器。
+现有 GCC 13.3.Rel1、Release/Ninja、SOURCE_DATE_EPOCH=1786320000 和对象路径设置保持。
+
+四个 `OTA_AES_KEY_1_WORDx` 由私有头文件注入实际 App `ota_keys.c` 编译命令，匹配的 Boot
+同次构建；Boot 当前不消费 AES。私有头文件不进入证据目录，正常或已处理失败后删除。
+keyed recipe 显式禁用编译缓存并核对实际 launcher，不允许 key 进入全局/远端 cache。
+exclusive open 后立即记录所有权；取消/退出 trap 和独立 always cleanup 按精确
+commit/run/attempt 校验自有路径，上传须先确认私有头文件不存在，不清理其他 run。
+保留原始 bin/elf/hex/map、退出码/警告/错误、编译命令与自动派生的 `keyBinding`：
+schemaVersion=1、keyId=1、source、keySha256、headerSha256、keySourceSha256。
+这不是注册 schema 的新增字段，也不是另一个审批系统；批准来源仍是已受保护的 secret。
+
+`firmware-release.mjs execute` 在网络前比对 build keyBinding 与 packer 同一 secret；
+缺失、未知、开发来源、已知示例 key、编译/制包 fingerprint 不一致均退出 2。
+编译失败或实际 App 命令未消费头文件退出 1，不生成合格 manifest。普通 CI 仅用
+`--development` 显式运行同 recipe 的开发副本，并保留不可安装/不可发布标识；不能只
+翻转源码 development 标记就宣称合格。实际编译证据必须来自 CI，不用宿主编译器替身代替。
+
+现有首发归档是 raw patch 字节来源，不保证设备能以旧开发 key 解密新真实 key 包；
+P3-5/P5 的设备 owner 负责实际 key provisioning/INFO 身份和 full 或精确新基版选择。
+重新编译基版后 raw SHA 变化，不能继续冒用旧归档身份，不在本卡追加设备操作。
+
+### 开发运行时资格检查
+
+本入口只为验证原生 Wrangler 绑定能力，不生成目标制包或代替后续唯一 canonical rehearsal。
+现有 workflow 的 `workflow_dispatch(check_bindings=true, publish=false, rehearsal=false)` 调用：
+
+    node .github/scripts/firmware-bindings-check.mjs --output .cache/bindings-check/result.json
+
+- job 使用 Linux 和 `firmware-rehearsal` environment，运行前必须已具备受保护的环境、经核验隔离的凭据及变量；禁止借 dispatch 自动创建无保护 environment。
+- 同账户凭据仅按 `OTA-XC-SECRETS` 的 `P41-CF-CREDENTIAL-02` 用户例外：复用现有测试 Worker/D1/R2 和专用 CI Token，不要求开户；不声明硬性的生产权限隔离，不转存本地 provisioning token，不免除精确源码/人工审批或生产零副作用证据。
+- `FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT` 必须等于实际 `GITHUB_SHA`；repository、run/attempt、三个显式模式输入和 `OTA_BOOT_CHAIN_READY=false` 均须校验。它只批准固定源码的开发检查，不是首发 descriptor 或发布批准。
+- 实际检查步骤仅接收 `FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID`、`FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN`、`FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL` 三个 secret，以及对应 R2/D1 变量；安装依赖和普通 build/checks 不接触这些凭据。没有 AES key、deploy token、GitHub 写 token 或注册动作。
+- 固定输入为已提交 `P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json` 的三个既有 synthetic 对象；通过原 uploader 的 `verifyStoredFirmwareAsset(metadata, fileName, bucket)` 复用全字节/长度/条件 ETag 校验，缺失即失败，绝不补传。
+- `withFirmwareBucket` 保持原生 Wrangler 路径；Windows 10 在创建 runtime 目录前拒绝，Windows 11 按 build 22000 判别而非 kernel major。此检查不保证其他平台的全部先决条件，真实 runtime 资格仍须实测。
+- Worker health/配置 GET 验证精确隔离目标，D1 只运行固定表的 count 和有界 channel SELECT 并比对前后结果；job/检查 step 分别限制 10/5 分钟，结束由原 adapter dispose。Wrangler remote bindings 会建立临时远端 preview session，所以只声明无 R2/D1 业务写请求，不能声明全局零远端写入或完整生产零副作用。
+
+| 输入/结果 | 判定与负例 |
+| --- | --- |
+| 已批准提交、明确锁定 gate、隔离绑定且三对象完整 | 返回 `RUNTIME_BINDING_QUALIFICATION` 及实际读回摘要，rehearsal/独立验收仍未执行 |
+| 普通 CI、缺配置、错提交、混合 publish/rehearsal/check | exit 2，在网络调用前失败；两个正式 job 也拒绝混合 check 模式 |
+| 对象缺失、错误 metadata/字节、条件 GET 失败 | exit 1，不 PUT、不 register，不写成功结果 |
+| Worker 绑定不符、查询失败、前后 D1 状态变化 | exit 1，保留失败日志，不报告资格通过 |
+
+回归点是 `firmware-pipeline.host.test.ts` 的真实读回/SQLite 宿主检查和
+`test_firmware_workflow.mjs` 的实际 Bash 门禁与 secret 隔离；宿主替身不冒充真实云端。
+错误做法是重试 Windows workerd 崩溃、转存 provisioning token 或缺对象就上传；正确做法
+是在已审且隔离的配置具备后执行一次有界原生 Linux 检查。
 
 ## 错误、超时、重试、取消、恢复与幂等
 
@@ -88,7 +151,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 - `Tools/etu_pack.py`、recovery/验证 helper，只做正式链所需的可复用 CLI 增量。
 - `app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/` 的 firmware metadata/upload/register 脚本。
 - `.github/scripts/` 和 `tests/ota/` 下发布链单元/静态测试。
-- 必要的 workflow 文档注释，但不修改冻结合同。
+- 必要的 workflow 文档注释。用户委托的首发来源与演练桶修订仅限对应共享条款及消费记录，不修改历史冻结合同。正式执行须绑定获审的精确已提交分支 revision，不以整个 P4-1 先合并 main 为前置。
 
 ## 禁止修改与生产红线
 
@@ -112,7 +175,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 ## 完成判据
 
 - 在共享冻结合同下的 rehearsal 路径生成 full/patch/recovery，所有 hash/size 与 metadata 一致。
-- patch 对上一正式最终 App 自验逐字节一致，recovery 验证通过。
+- patch 对获准基版自验逐字节一致，recovery 验证通过；首发例外只改变来源资格，不降低三资产或真实字节要求。
 - staging R2 三资产与本次产物/metadata 同字节，register ready/idempotency 和 rehearsal 前后 production D1/R2/channel/GitHub Release 零副作用均有证据；本阶段不创建 GitHub Release 或 prerelease。
 - register 后 D1 release 达到 P4-2 的 ready 门槛；失败路径无 ready 残留。
 - nightly/pull request 行为不回退，warning/error/退出码明确报告。
@@ -129,7 +192,7 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 
 - 镜像摘要、正式资产命名或 rehearsal/production gate 的共享条款发生未重新冻结的变更时停止正式发布动作。
 - `P4-2` 的真实 schema/register/D1 ready 链未完成时停止，不建立临时 stub 或兼容双写。
-- 无法取得可验证的上一正式 finalized App bin 时不得生成 patch 或用近似基版替代。
+- 无法取得可验证的上一正式 finalized App bin，且不存在按共享首发条款独立核验并获准的基线时，不得生成发布 patch 或用近似基版替代。
 - Worker 仍只接受单资产或不能原子 ready 时停止注册，不做兼容双写。
 - 需要降低 frozen finalize/patch/recovery 校验才能通过时停止。
 
@@ -143,4 +206,4 @@ environment 审批之后，不以生产 Release 作为进入 P5 的前置。
 
 ## 阻断性决策
 
-- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。
+- 无未决规范决定。受保护的环境配置、隔离凭据、真实目标/descriptor 审批、运行时资格及正式执行型验收冻结仍是实际前置；不由条款冻结代替。已授权开发、自测和专属分支交付继续，实际资格引用看板 readiness 本行。

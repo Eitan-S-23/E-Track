@@ -1,0 +1,131 @@
+{
+  "reviewedCommit": "f1154ead58892a94e361edd99da63eb4706549f1",
+  "files": [
+    {
+      "path": "delivery-ci.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/delivery-ci.json",
+      "sizeBytes": 3517,
+      "sha256": "ad31dd684772eacb879a822122abe9e7302f8ac7dd3a611ded7ed1c30c945ed4"
+    },
+    {
+      "path": "independent-review-f1154ead.json",
+      "source": ".cache/cf-firmware-setup-20261015/d1-edit-r2/independent-review-f1154ead.json",
+      "sizeBytes": 1891,
+      "sha256": "b9f6416e98e9393d69220b98046a5c1a90bbd7b0cb38b92b0b763bf5e98bd83d"
+    },
+    {
+      "path": "github/p41-cf-ci-initial.json",
+      "source": ".cache/github/p41-cf-ci-initial.json",
+      "sizeBytes": 50281,
+      "sha256": "b3f351f7fbfacf0bbcefe1711aa9a85a82cbbf5938b7ea4e079b1fa4c5780049"
+    },
+    {
+      "path": "github/p41-cf-ci-firmware-jobs.json",
+      "source": ".cache/github/p41-cf-ci-firmware-jobs.json",
+      "sizeBytes": 11731,
+      "sha256": "5b6cb8ddde2a23772e6f18e906e8743b606c0b0582eaa675a9696dad07d64e96"
+    },
+    {
+      "path": "github/p41-cf-ci-backend-jobs.json",
+      "source": ".cache/github/p41-cf-ci-backend-jobs.json",
+      "sizeBytes": 6937,
+      "sha256": "c50afc1a9794c117004aee9daf6107ff534b36224f88e05e1cf22e0ea606ebc9"
+    },
+    {
+      "path": "github/p41-cf-ci-app-jobs.json",
+      "source": ".cache/github/p41-cf-ci-app-jobs.json",
+      "sizeBytes": 5328,
+      "sha256": "2e5613c72671761424222605f416dd85197ee2b87a8fe526f0ec81a5aac0e50c"
+    },
+    {
+      "path": "github/p41-cf-ci-firmware.zip",
+      "source": ".cache/github/p41-cf-ci-firmware.zip",
+      "sizeBytes": 283508,
+      "sha256": "a0b14a32e48af0ddb403ba44ca316edc4a0592f605dedd06f643c1814fe1297b"
+    },
+    {
+      "path": "github/p41-cf-ci-governance.zip",
+      "source": ".cache/github/p41-cf-ci-governance.zip",
+      "sizeBytes": 63580,
+      "sha256": "a667cbda7686d407f24eb4f9056d3c165d175825e3eebd2b7bd14babd54fcc34"
+    },
+    {
+      "path": "github/p41-cf-delivery.json",
+      "source": ".cache/github/p41-cf-delivery.json",
+      "sizeBytes": 229,
+      "sha256": "a0498d1d5b89f9443d2541671b24c1390110a7cd5618e274255a2eb6fb827d65"
+    },
+    {
+      "path": "github/p41-cf-remote-ref.json",
+      "source": ".cache/github/p41-cf-remote-ref.json",
+      "sizeBytes": 417,
+      "sha256": "7287402d780820d26532028d4720649592b53d0b665bc7f470cb301a7a6a7026"
+    },
+    {
+      "path": "github/p41-cf-main-ref.json",
+      "source": ".cache/github/p41-cf-main-ref.json",
+      "sizeBytes": 334,
+      "sha256": "971cdb32402069732bedecdeecbe30c5c9c828bc4cac50718e9cd7c68ac5f6e5"
+    },
+    {
+      "path": "commands/p41-cf-board-readiness.json",
+      "source": ".cache/logs/p41-cf-board-readiness.json",
+      "sizeBytes": 1939,
+      "sha256": "5a64b45adb9d2cc212c4dcb0d360eb7c6832d3d8a3567741b8ebe606fee6f9d0"
+    },
+    {
+      "path": "commands/p41-cf-board-readiness.stdout.txt",
+      "source": ".cache/logs/p41-cf-board-readiness.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-cf-board-readiness.stderr.txt",
+      "source": ".cache/logs/p41-cf-board-readiness.stderr.txt",
+      "sizeBytes": 103,
+      "sha256": "fe160044f7d57c1d50b48689cb470e2803c50141407882ab386b2ce5842b0fc7"
+    },
+    {
+      "path": "commands/p41-cf-raw-whitespace.json",
+      "source": ".cache/logs/p41-cf-raw-whitespace.json",
+      "sizeBytes": 1806,
+      "sha256": "019638f9f7314e1fe096dcdf9c79f338cf971f305f53f2c199b9f218fa07898a"
+    },
+    {
+      "path": "commands/p41-cf-raw-whitespace.stdout.txt",
+      "source": ".cache/logs/p41-cf-raw-whitespace.stdout.txt",
+      "sizeBytes": 132479,
+      "sha256": "d05ca533d11477562771faf77e99f31b1a864c19e0dc81ab751da6f22cd41f21"
+    },
+    {
+      "path": "commands/p41-cf-raw-whitespace.stderr.txt",
+      "source": ".cache/logs/p41-cf-raw-whitespace.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-cf-crlf-whitespace.json",
+      "source": ".cache/logs/p41-cf-crlf-whitespace.json",
+      "sizeBytes": 1894,
+      "sha256": "cee9f83439af12ef1dac067002dde4d62ba3889ba17ab17df38d517a1cf6b349"
+    },
+    {
+      "path": "commands/p41-cf-crlf-whitespace.stdout.txt",
+      "source": ".cache/logs/p41-cf-crlf-whitespace.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-cf-crlf-whitespace.stderr.txt",
+      "source": ".cache/logs/p41-cf-crlf-whitespace.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".gitattributes",
+      "source": "docs/ota-exec-notes/P4-1-cloud-qualification-delivery-2026-10-15/.gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    }
+  ]
+}

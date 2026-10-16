@@ -1,0 +1,6 @@
+[dev/p4-1/unattended-20261015 18c4da4] P4-1: bind release keys and harden readiness validation
+ 20 files changed, 1230 insertions(+), 97 deletions(-)
+ create mode 100644 .github/scripts/firmware-bindings-check.mjs
+ create mode 100644 .github/scripts/firmware-gcc-keyed-build.mjs
+ create mode 100644 app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.d.mts
+ create mode 100644 app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs

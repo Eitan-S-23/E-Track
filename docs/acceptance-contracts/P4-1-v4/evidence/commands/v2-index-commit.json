@@ -1,0 +1,9 @@
+{
+  "started": "2026-10-16T19:22:58.359Z",
+  "ended": "2026-10-16T19:23:01.159Z",
+  "exitCode": 0,
+  "closed": true,
+  "stdout": "[dev/p4-1/unattended-20261015 1da32fb] docs(p4-1): index v2 harness failure before offline correction\n 2 files changed, 8 insertions(+)\n",
+  "stderr": "\u001b[0;32m✅ Pre-commit 检查通过\u001b[0m\n",
+  "head": "1da32fbe2b3431e878e0a303f09590d014385148"
+}

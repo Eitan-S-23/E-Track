@@ -1,0 +1,35 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "curl.exe",
+  "args": [
+    "--disable",
+    "--silent",
+    "--show-error",
+    "--fail",
+    "--header",
+    "Accept:text/markdown",
+    "--connect-timeout",
+    "15",
+    "--max-time",
+    "45",
+    "https://developers.cloudflare.com/r2/api/tokens/"
+  ],
+  "pid": 13576,
+  "started": "2026-10-16T08:21:50.541Z",
+  "ended": "2026-10-16T08:21:54.331Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/docs-r2-token.stdout.txt",
+      "size_bytes": 10670,
+      "sha256": "80a22d05cdc014b799f987f5678707b0bfd137f586ae8a94ef11cb1d16e881cb"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/docs-r2-token.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

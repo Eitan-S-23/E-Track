@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T11:00:52.088Z",
+  "ended": "2026-10-16T11:00:52.649Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100&page=1",
+  "status": 200,
+  "requestId": "AE56:DA9BA:C613E4:126DB8A:6AD203E5",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/configure-after/variables-page-1.json",
+    "size_bytes": 2520,
+    "sha256": "55072739603bf3a76b3a3ef6d907727b305342455c87e88b605e631df81f8a2e"
+  }
+}

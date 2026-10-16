@@ -1,0 +1,3 @@
+warning: in the working copy of '.github/workflows/firmware-build.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-exec-notes/P4-1-implementation-2026-10-15.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/test_firmware_workflow.mjs', LF will be replaced by CRLF the next time Git touches it

@@ -1,0 +1,121 @@
+{
+  "startedAt": "2026-10-16T04:24:23.011Z",
+  "scope": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+  "requests": [
+    {
+      "method": "GET",
+      "route": "/user",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 404,
+      "errorMessage": "Not Found"
+    },
+    {
+      "method": "PUT",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets?per_page=100",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "status": 200
+    }
+  ],
+  "approvalsPerformed": 0,
+  "dispatches": 0,
+  "productionModified": false,
+  "cloudCredentialExported": false,
+  "createdEnvironmentId": 24458272742,
+  "secretUpload": {
+    "secretName": "FIRMWARE_REHEARSAL_OTA_AES_KEY",
+    "exitCode": 0,
+    "pid": 18392,
+    "closed": true,
+    "stdout": "",
+    "stderr": ""
+  },
+  "environment": {
+    "name": "firmware-rehearsal",
+    "requiredReviewer": "Eitan-S-23",
+    "preventSelfReview": false,
+    "allowedBranches": [
+      {
+        "name": "dev/p4-1/unattended-20261015",
+        "type": "branch"
+      }
+    ],
+    "gate": "false",
+    "variables": {
+      "OTA_BOOT_CHAIN_READY": "false",
+      "FIRMWARE_REHEARSAL_TRACE_R2_BUCKET": "e-track-firmware-p41-test-releases",
+      "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME": "e-track-firmware-p41-test"
+    },
+    "secretNames": [
+      "FIRMWARE_REHEARSAL_OTA_AES_KEY"
+    ]
+  },
+  "reviewPolicy": "The human repository owner must approve any future run. The local agent uses the same GitHub identity for dispatch, so prevent_self_review=true would block that sole owner; no approval API is called and this is not independent production approval.",
+  "key": {
+    "secretName": "FIRMWARE_REHEARSAL_OTA_AES_KEY",
+    "nonDevelopment": true,
+    "keySha256": "a94ae0f006b3d6be51279b861dc19b8a0892833939d0a4db5a81ee7af511fe9e",
+    "privateOwnerCopy": ".cache/cf-auth-input/p41-rehearsal-ota-key.json",
+    "runtimeValueVerified": false
+  },
+  "missing": [
+    "Production-free Cloudflare test account and its dedicated token",
+    "Actual target Worker/D1/R2 fixture preparation and binding variables",
+    "Reviewed bindings-check commit and later manual environment approval"
+  ],
+  "ok": true,
+  "endedAt": "2026-10-16T04:24:34.402Z",
+  "closed": true
+}

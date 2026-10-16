@@ -1,0 +1,1 @@
+{"ok": true, "positive_contract": 1, "missing_dependency_rejected": 1, "commands": 15, "criteria": 6}

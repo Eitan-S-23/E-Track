@@ -1,0 +1,29 @@
+BYTE_FIXTURE {"path":"D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\firmware-release-tests\\case-TA3y1k\\prepared","assets":[{"kind":"full","baseImageSha256":"","baseVersionCode":0,"fileName":"e-track-at32f435-v2.8.1-full.etu","sha256":"a445aa10c9b08df94214f9cc8514d1eab5d6f961af1f0f3623f0fbf573019740","sizeBytes":202,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu","r2Verified":false},{"baseImageSha256":"074cf9b001e70a3d4fa7341fd09c5c5889c3a190d5666c0cf20817f65e2500b1","baseVersionCode":20800,"kind":"patch","fileName":"e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","sha256":"f3112724d58f9e632b3189405a2f47a0ce307ff4c0ab6284c060e3d6e78f22a1","sizeBytes":208,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu","r2Verified":false},{"kind":"recovery","baseImageSha256":"","baseVersionCode":0,"fileName":"recovery-v2.8.1.bin","sha256":"0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c","sizeBytes":8200,"githubUrl":"https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Key":"trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin","r2Verified":false}],"finalImage":{"fileName":"app-final.bin","sizeBytes":8192,"sha256":"d8b49b46428a5c0873d6c783daf4f3789d4678117e68ec73ead77f300c4b5cb5"},"metadataSha256":"d7279041f91d35303a3d4f7336de914b6c2e45e87b2b4b914c818d9975aa98dc"}
+✔ real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundtrip (6783.1813ms)
+✔ approved-envelope reproduction is byte-identical, including canonical provenance (14883.5698ms)
+✔ a fresh generation still uses independent random package nonces (6205.5687ms)
+✔ missing/invalid key fails configuration before outputs (missing) (282.1404ms)
+✔ missing/invalid key fails configuration before outputs (invalid) (1162.4767ms)
+✔ wrong cross-stage GCC digest fails before preparation (321.5611ms)
+✔ wrong base image SHA rejects before full/patch/recovery output (624.7787ms)
+✔ base source drift, wrong version, nightly and ETU sources are rejected (1292.852ms)
+✔ exit zero with a patch stdout failure does not advance to recovery or metadata (3758.5205ms)
+✔ a successful patch tool with wrong candidate bytes is rejected (4701.2088ms)
+✔ damaged recovery trailer fails actual verification before metadata (6509.6404ms)
+✔ builder refuses missing full/recovery assets instead of emitting metadata (281.558ms)
+✔ output path and unsupported compiled identity fail closed (277.3597ms)
+PREPARATION_CLI {"exitCode":0,"stdout":"{\"ok\":true,\"outputDir\":\"D:\\\\github\\\\my\\\\E-Track\\\\.cache\\\\p41-dev-20261015\\\\.cache\\\\firmware-release-tests\\\\case-WDRes6\\\\prepared\",\"assetsPrepared\":3,\"r2Verified\":false,\"metadataSha256\":\"c31118fddb19f80c30be349956f79765eeeb3b708a5b78cfb38e627b2f56d1b3\"}\n","missingKeyExit":2,"missingKeyStderr":"{\"errorCode\":\"INVALID_PARAMETER\",\"message\":\"OTA_AES_KEY must be configured as 32 hex characters\",\"requestId\":\"a470682b-8b24-4726-89ef-d2b1b4c3de6b\"}\n"}
+✔ actual preparation CLI returns one JSON result and configuration exit 2 (6256.1855ms)
+✔ rejects ETU outer target drift despite a byte-equal unpack result (4237.7983ms)
+✔ rejects ETU outer base drift despite a byte-equal unpack result (5190.1184ms)
+✔ rejects ETU outer trailer drift despite a byte-equal unpack result (3218.2935ms)
+✔ late asset replacement cannot change the verified metadata identity (4664.2345ms)
+✔ an explicit error overrides a simultaneous success stdout marker (3583.1884ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 74454.9035

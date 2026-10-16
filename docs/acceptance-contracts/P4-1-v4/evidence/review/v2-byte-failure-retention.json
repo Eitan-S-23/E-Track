@@ -1,0 +1,13 @@
+{
+  "time": "2026-10-16T19:24:50.739Z",
+  "operation": "Preserve working failed output under an explicit v2 name after immutable bundle/index commits",
+  "original_path": ".cache/p41-acceptance-20261017/review/rehearsal-formal.json",
+  "retained_path": ".cache/p41-acceptance-20261017/review/rehearsal-v2-failed.json",
+  "archive_path": "docs/acceptance-contracts/P4-1-v2/evidence/review/rehearsal-formal.json",
+  "archive_commit": "00041e535a89c238a7dde9b035663b82b1fe4698",
+  "index_commit": "1da32fbe2b3431e878e0a303f09590d014385148",
+  "size_bytes": 403,
+  "sha256": "71eccb8c6e2dda06a996a6bba510f6f5fbf3026ef3efd1a84c1ea43d8e29eef1",
+  "completed": true,
+  "note": "No archived original, contract, matrix or helper changed. The old working slot is now free for the new versioned command."
+}

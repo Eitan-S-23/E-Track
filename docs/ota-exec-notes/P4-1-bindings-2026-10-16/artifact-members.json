@@ -1,0 +1,380 @@
+[
+  {
+    "archive": "github/logs-1.zip",
+    "member": "2_Isolated firmware binding qualification (not rehearsal).txt",
+    "sizeBytes": 23525,
+    "sha256": "71a194a2bcfaa825795156610853cbfbd3e211cffbc4001cee5dacf56a620c22"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/system.txt",
+    "sizeBytes": 975,
+    "sha256": "f387edc9cd9e2b7b13f49ed33d2f81c979b5d2e10e02e271244f2d7f9064e2d0"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/1_Set up job.txt",
+    "sizeBytes": 2203,
+    "sha256": "6b94f3b08f0dbda4dd543742cda078b413ec0968e38faa0a5fdb4ce8f3eef33e"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/2_Enforce check-only locked-gate reviewed identity.txt",
+    "sizeBytes": 1951,
+    "sha256": "f373a581d456009cde135e000ec01828c749d48bef9081f150b8c0a7c8d84b72"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/3_Checkout the exact reviewed revision.txt",
+    "sizeBytes": 9635,
+    "sha256": "cc6c13e3a4ef04f520e9e77b18135d8dff63a6756781f3b45892db2f89abe9f1"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/4_Set up Node.txt",
+    "sizeBytes": 1093,
+    "sha256": "9d76917aad6d02908454d524a93738ed06ea90d13af974e0780e041439c9fc16"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/5_Install pinned runtime dependencies without credentials.txt",
+    "sizeBytes": 2466,
+    "sha256": "e943eab59e425fc60770f8a7598f9f701d700d60096cd56837ceef836fa57792"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/6_Read existing objects and D1 through the shared runtime.txt",
+    "sizeBytes": 1763,
+    "sha256": "c7e87498634702c650529821adcc974049ecdca99a2d8e175df6d7735b0f9a7a"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/7_Preserve binding qualification result (not approval or rehearsal).txt",
+    "sizeBytes": 2487,
+    "sha256": "d10c3167543d635f0e69a9ac361a3eb9c505e2205b2051dd2584092ff1a8f4fc"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/13_Post Set up Node.txt",
+    "sizeBytes": 50,
+    "sha256": "5bc1366e3a526515a717f8f3e09fbcb40ff86189fa34391287e79f3c3cda47bf"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/14_Post Checkout the exact reviewed revision.txt",
+    "sizeBytes": 1528,
+    "sha256": "c7b9f4b96c489fa1569a0b12d532570ad77bfc95e2c4c07f9d417acf70e82897"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Isolated firmware binding qualification (not rehearsal)/15_Complete job.txt",
+    "sizeBytes": 376,
+    "sha256": "661d7189a9f8056bda768c08ec2fc2655c7987e5cf637066491c4b288aaf7c83"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "3_Build firmware (arm-none-eabi-gcc).txt",
+    "sizeBytes": 1296809,
+    "sha256": "a0390c7902fde885f4849b0678eba66ba1eda509fc81c1afadd740f02501a687"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/system.txt",
+    "sizeBytes": 603,
+    "sha256": "63d925449b3a3e16647234eec8a3a7ab78fcb2729dc026af0b1dffebfeba11e1"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/1_Set up job.txt",
+    "sizeBytes": 2328,
+    "sha256": "4975dba533fa1f790abdbe93eb7b50a9ba01beef234e0e2f76438aa61ae2cea0"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/2_Checkout repository.txt",
+    "sizeBytes": 16608,
+    "sha256": "f28d2c1a6cce555c852bdd9f30571a48aa2be178e5e3fc636941401a0d149dbc"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/3_Set up Node for shared release helpers.txt",
+    "sizeBytes": 1093,
+    "sha256": "6e61aaf79f31802b1d55e7fbc8ec7c1a56f0fa0cab23fc844ff19177fd9f1a6f"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/4_Contain build temporary and pip cache paths.txt",
+    "sizeBytes": 962,
+    "sha256": "6f323bfb53031e22e75cc4740c3d1785d2b563f30b8a4cb2353c50865a17453b"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/5_Install Arm GNU Toolchain 13.3.Rel1.txt",
+    "sizeBytes": 1717,
+    "sha256": "25e5290f9492429d6663e104f65094d82f7f8beeb6355378923744796975ec41"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/6_Install Ninja.txt",
+    "sizeBytes": 6540,
+    "sha256": "574bc94fdc376bd4522724a5b3bce3e6dd41f1efdbb6dc6d7ba7e5d4b3057800"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/7_Install OTA host test dependencies.txt",
+    "sizeBytes": 1715,
+    "sha256": "5330e565ed94080bfa9bb8bd4ee4cc03d9d30b80c217315f4811dae569ca2da0"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/8_Verify reproducible GCC timestamps.txt",
+    "sizeBytes": 1323,
+    "sha256": "2f18142a41312142ad9008d5fd72457b21f9c3993278631bb4943e7bbc6dbb6d"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/9_Extract firmware version.txt",
+    "sizeBytes": 5658,
+    "sha256": "8dfb3c89582c16bfae050c0228c04a77324cf9018f8f30394264c98f9d120d98"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/10_Configure (CMake + Ninja).txt",
+    "sizeBytes": 2387,
+    "sha256": "c8b45cd1d8abe3831575a2f4af9ecf0e94072c875c64d2dac73a49e22d9d0290"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/11_Build firmware.txt",
+    "sizeBytes": 378072,
+    "sha256": "4b57d294fdfdd342d274cf531d8acc4d222b3e8c6a1ee4e689cee331c4a4e782"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/12_Run host tests (boot vectors, OTA host tests, P3-1 product regressions).txt",
+    "sizeBytes": 453316,
+    "sha256": "a1de6f27ead3a5dddb120108d7db5bac2214f80121ab8d8fbb6913bdc1d14ff3"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/13_Validate OTA App layout.txt",
+    "sizeBytes": 9646,
+    "sha256": "4ad33e4a1ce12aafb95832722a0f450006816f605ce9e32b08e4931493b66aff"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/14_Validate OTA Boot skeleton.txt",
+    "sizeBytes": 1374,
+    "sha256": "d68c509763249a03da20db25003d5214df6cd462beb3b7d6feedf6b40a28dbbd"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/15_Report firmware artifacts.txt",
+    "sizeBytes": 1883,
+    "sha256": "dc6e69d4fa15a2376732622df991e1778d9106598e744b27b6f34e0a613ad592"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/16_Bind same-run GCC App and Boot inputs.txt",
+    "sizeBytes": 1928,
+    "sha256": "2529f04fe68e968b2f22e290bc648df976cbfcdca7ccf6718bc69e3f7c0210a0"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/17_Exercise production preparation on the real GCC build (development key only).txt",
+    "sizeBytes": 6952,
+    "sha256": "c9bb9b6a5f9b1df0a50b021436473ca9768278ff9695fbdfaef33cabc0f1e5f0"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/18_Preserve non-publishable GCC packaging evidence.txt",
+    "sizeBytes": 2785,
+    "sha256": "206616adad5d167722d76ad2d6d4c6701c6eafebe232ee2d9ea49dc74ce7d34e"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/19_Exercise the shared key-bound GCC build without protected credentials.txt",
+    "sizeBytes": 388039,
+    "sha256": "a187d2330638b950dbe32cb618750f373ee9e811e854ff2e814410df705aa2a0"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/20_Check development key cleanup before archiving.txt",
+    "sizeBytes": 1069,
+    "sha256": "4526a86f2cba406d73f8daf08c5cd817300cfe24afbb2f715f05c6b2ba744864"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/21_Preserve non-publishable key-bound build and packaging evidence.txt",
+    "sizeBytes": 2793,
+    "sha256": "15bea1b3cf7eea2d6953e2b7efa185645bf082b9f0326ed28375c1870ce6e10f"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/24_Upload firmware artifact.txt",
+    "sizeBytes": 3269,
+    "sha256": "622705dfcba2bf79f95642b1d091b78f0cdd63ca4e72a8b8e07ebcb659074160"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/25_Upload Boot artifact.txt",
+    "sizeBytes": 3150,
+    "sha256": "b1b24f0539be49760b574122623af8f6246b975824462f959b691baf220aa79f"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/49_Post Set up Node for shared release helpers.txt",
+    "sizeBytes": 50,
+    "sha256": "995641688fad2fde604ff9633d38037a6afc1b736d60051bade2354888c6ffe5"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/50_Post Checkout repository.txt",
+    "sizeBytes": 1528,
+    "sha256": "322fd5f9c492057aa14c819e8d1a97d57c5aef49fef6ea231b5a7fd9ebe60b3f"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/51_Complete job.txt",
+    "sizeBytes": 699,
+    "sha256": "f0e962eaa68001fd9312f7ee16594d4abee6bc8093ca3ccdeca3a3ce00487d85"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "4_Release tooling development checks (no cloud credentials).txt",
+    "sizeBytes": 248661,
+    "sha256": "ddb60bec130ef83645584e06fbcce3a97a0d6ac004d3c81ee6a8744e68b92d51"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/system.txt",
+    "sizeBytes": 624,
+    "sha256": "79c179ec373fd864868ae39e9843246d40ddf067ec03678fa62e3e491f112a38"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/1_Set up job.txt",
+    "sizeBytes": 2202,
+    "sha256": "07f7e408e39a567f6629990246396e690aa1a0270ddb56e22b6c24d1bf73221f"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/2_Checkout repository.txt",
+    "sizeBytes": 10327,
+    "sha256": "863951a1e3817a1561a802c2a9ddbca1b1b0314489fab2b0e352a8dc47769df9"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/3_Set up Node.txt",
+    "sizeBytes": 1703,
+    "sha256": "073d41ff459efd44e4bb044668792df475307a988280f6fcb48076a7f0dbdf28"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/4_Prepare contained test temporary directory.txt",
+    "sizeBytes": 1268,
+    "sha256": "3c08dccf3d3d5573cb2051f16bc566c0e9222da546da91942c035d889652cbb0"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/5_Install pinned Worker dependencies.txt",
+    "sizeBytes": 2803,
+    "sha256": "bf7e3d0204c2a35f4acade9c87cd33603c0604524237ef4c265e7d273f410bb2"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/6_Run script and migration host tests explicitly (not workerd).txt",
+    "sizeBytes": 74996,
+    "sha256": "6a9f71e75be8977eeac873c47143b89ee538b531dd1faa0d31b7afd142a6ae88"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/7_Run release pipeline with real handlers and SQLite host ports (not rehearsal).txt",
+    "sizeBytes": 49703,
+    "sha256": "27a18ad4868dad26068381153263a50f638d17b0e45993541cd27582eff29c6a"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/8_Run native workerd D1 R2 and registration invariants (not host doubles).txt",
+    "sizeBytes": 50952,
+    "sha256": "e716cc9d62594655f20cf8b77a7e2a7988ea572805c140c594983a6a094d461e"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/9_Check Worker and shared script types.txt",
+    "sizeBytes": 1434,
+    "sha256": "5cf9b61364af63193277464d6d332ba9009ab36051aa9c9976e79869a52b4fb2"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/10_Build tested Worker deployment input without cloud access.txt",
+    "sizeBytes": 5168,
+    "sha256": "7d5f4bd46127abbc67bedda047b6a966214d1d9e0774fe58ccb33339ba1ef98d"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/11_Install byte test dependency.txt",
+    "sizeBytes": 2730,
+    "sha256": "9d9d7df0e9fd0ae8ecd0dab58f5f21a3e39103148021f492a2b2865eec23787d"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/12_Build the existing vendor bsdiff for this host.txt",
+    "sizeBytes": 9353,
+    "sha256": "6ad89a35a9e704a5054be1e87677f6997298073c4f302939e3cfa2412ed79b9b"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/13_Check real package generation and approved-envelope replay.txt",
+    "sizeBytes": 8398,
+    "sha256": "d8829174913e1db4604358ab9aab78d75c59042012a7b1bf9e4c4cb76d5632d7"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/14_Check workflow execution graph and configuration gates.txt",
+    "sizeBytes": 12476,
+    "sha256": "f870b46d4dbe947e611145608610e5a104e8084f7472d8381d2a3005b791e026"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/15_Execute production byte preparation with isolated fixtures.txt",
+    "sizeBytes": 6557,
+    "sha256": "c1a6d030cf21554e5f4869174dc720dfc938e01f10fab7cd0b818d3595cc1f2b"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/16_Preserve development byte fixtures and step originals.txt",
+    "sizeBytes": 3495,
+    "sha256": "7625b71422575553e46b843bc1f9112e89443ea4168808c6c3172a4124ace6ad"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/17_Preserve tested Worker deployment input.txt",
+    "sizeBytes": 3199,
+    "sha256": "38fc412ef596cb4b086e5a2bf465c9be7cc6785076a5ee3e639a693f149ba0c4"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/33_Post Set up Node.txt",
+    "sizeBytes": 50,
+    "sha256": "f50de2e5341acf3744fab79cff5c3538afd435b2fc86802608ecf81f69c2209b"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/34_Post Checkout repository.txt",
+    "sizeBytes": 1528,
+    "sha256": "9342210a1ff3e62b7ef1a36d7f66005d72c03be5a604e8f76617e3c549e4013b"
+  },
+  {
+    "archive": "github/logs-1.zip",
+    "member": "Release tooling development checks (no cloud credentials)/35_Complete job.txt",
+    "sizeBytes": 376,
+    "sha256": "c2409e1a90ac0906723c718ebf63ddb93571d2b926f6cbfc29ece9ce7cd4dd26"
+  },
+  {
+    "archive": "github/bindings-1.zip",
+    "member": "result.json",
+    "sizeBytes": 3207,
+    "sha256": "05fa8664970c0b4a49c795542bb172222f3e8eb5b2d7dc20e265917885729cb8"
+  }
+]

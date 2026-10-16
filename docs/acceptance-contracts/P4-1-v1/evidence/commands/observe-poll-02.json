@@ -1,0 +1,27 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs",
+    "status",
+    "poll-02"
+  ],
+  "pid": 19480,
+  "started": "2026-10-16T12:26:31.710Z",
+  "ended": "2026-10-16T12:26:42.073Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/observe-poll-02.stdout.txt",
+      "size_bytes": 615,
+      "sha256": "1bcb55a4b177b1d8c1564bf15cc6659b726a1e437974f954107e80f14e859b28"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/observe-poll-02.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

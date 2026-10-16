@@ -573,6 +573,32 @@ dispatch/复跑 `flutter-dev-checks.yml`、读取日志或将产物下载到已�
 预算限制。账号额度未知时保持未知，不按仓库字节数猜测。具体命令、输入与错误矩阵见
 `docs/flutter-development-validation.md` 的 Artifact Maintenance；后续更窄授权或禁止优先。
 
+#### 7.3.4 P41-STAGING-DELEGATION-20261016
+
+2026-10-16 用户明确委托新的非实现验收 agent 完成本次 P4-1 独立验收与通过后的收口，
+原文保留于 `docs/ota-spec-decisions.md` 记录 17。此例外仅限 P4-1 staging，不是通用
+代理审批许可，也不回改既有审批、失败或冻结证据。
+
+- 在 `D:/github/my/E-Track/.cache/p41-dev-20261015` 和
+  `dev/p4-1/unattended-20261015` 内准备、提交、推送验收 runner、合同、证据和记录；
+  先提交真实输入，再冻结和执行。不得修改产品实现后继续自称该范围的独立验收者。
+- 验收者可审定本次目标和 bootstrap descriptor，配置 `firmware-rehearsal` 并执行
+  唯一 canonical staging rehearsal。限定 `rehearsal=true,publish=false,check_bindings=false`，
+  `OTA_BOOT_CHAIN_READY=false`，沿用已核验的测试 Worker/D1/R2 和专用 CI Token。
+- 可使用已有且具备权限的 GitHub 身份 `Eitan-S-23`，代表用户审批本次对应的
+  `firmware-rehearsal` workflow run。如实记为“用户委托的 agent 审批”，绑定实际
+  run/attempt、执行提交、合同 SHA-256、审批主体和 API 回执。required reviewer、精确分支
+  限制及审计历史必须保留；不得删除规则、绕过门禁或冒称用户亲自点击。
+- 全部 required 判据通过后，可合并 PR #27 并按第 1/8 节先提交证据包、后登记
+  FREEZE-INDEX，使用保留原提交 ID 的 merge commit，禁止 squash/rebase-merge。
+  不覆盖其他 worktree 的未提交修改；写入边界不允许同步的 worktree 交其 owner 处理。
+- 不包括 production 发布或环境审批、`OTA_BOOT_CHAIN_READY` 解锁、生产服务/数据修改、
+  设备操作、其他任务或扩大文件系统写入边界。生产 D1/R2/channel/GitHub Release 仅按
+  本次演练的获权只读前后取证使用，不能把只读授权转成部署、迁移或数据修补。
+
+本条只替代本次交接中测试环境必须用户逐次手动审批、agent 不得代理测试审批及 PASS 后
+仍须另请合并授权的限制；独立验收、字节门槛、生产零副作用、失败保留和最小复验不变。
+
 ### 7.4 任务级设备实验授权
 
 用户于 2026-09-22 要求放宽 OTA 策略并持续执行到真正需要介入。新设备开发批次遵守

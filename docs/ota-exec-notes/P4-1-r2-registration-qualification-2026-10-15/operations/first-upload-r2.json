@@ -1,0 +1,227 @@
+{
+  "purpose": "ISOLATED_SYNTHETIC_S3_QUALIFICATION_NOT_REHEARSAL",
+  "phase": "first-upload-r2",
+  "started": "2026-10-15T06:23:30.463Z",
+  "bucket": "e-track-firmware-p41-test-releases",
+  "databaseId": "2617e1e1-956f-42ce-a465-da56d84abf06",
+  "productionModule": "upload-firmware-r2-asset.mjs:uploadFirmwareAsset",
+  "transport": "Test-side curl S3 adapter; not withFirmwareBucket or a workflow run",
+  "inputMetadataSha256": "fbbd9b4756e8858e45a3ea5bf8c93d7c26b23a50740035a4f18ff5d0c5427ed7",
+  "objects": [
+    "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+    "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+    "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin"
+  ],
+  "observations": [
+    {
+      "action": "accounts/af6dd848e6a21f1cd26d44b1b656af7b/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "status": 200,
+      "cfRay": "a4acbc5d6a811bf2-NRT",
+      "success": true,
+      "errors": []
+    },
+    {
+      "action": "D1_BEFORE_FIRST_UPLOAD",
+      "sql": "SELECT (SELECT count(*) FROM firmware_releases) AS releases, (SELECT count(*) FROM firmware_release_assets) AS assets, (SELECT count(*) FROM firmware_channels) AS channels, (SELECT count(*) FROM audit_logs WHERE action='register_firmware_release') AS register_audits, (SELECT count(*) FROM firmware_releases WHERE state='ready') AS ready",
+      "body": {
+        "result": [
+          {
+            "results": [
+              {
+                "releases": 0,
+                "assets": 0,
+                "channels": 0,
+                "register_audits": 0,
+                "ready": 0
+              }
+            ],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "LAX",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 1.0496
+              },
+              "duration": 1.0496,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 368640,
+              "rows_read": 2,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          }
+        ],
+        "errors": [],
+        "messages": [],
+        "success": true
+      }
+    },
+    {
+      "action": "user/tokens/verify",
+      "status": 200,
+      "cfRay": "a4acbc63fbd31bf2-NRT",
+      "success": true,
+      "errors": []
+    },
+    {
+      "action": "accounts/af6dd848e6a21f1cd26d44b1b656af7b/r2/temp-access-credentials",
+      "status": 200,
+      "cfRay": "a4acbc760ee81bf2-NRT",
+      "success": true,
+      "errors": []
+    },
+    {
+      "sequence": 1,
+      "method": "HEAD",
+      "key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "requestHeaders": {},
+      "status": 404,
+      "curlExitCode": 0,
+      "pid": 23656,
+      "processClosed": true,
+      "stderr": "",
+      "responseHeaders": "HTTP/1.1 200 Connection established\r\n\r\nHTTP/1.1 404 Not Found\r\nDate: Thu, 15 Oct 2026 06:23:42 GMT\r\nContent-Type: text/plain;charset=UTF-8\r\nConnection: keep-alive\r\nServer: cloudflare\r\nCF-RAY: a4acbc90aaafda78-NRT\r\n\r\n",
+      "responseBodyLength": 216,
+      "responseBodySha256": "c9c1e52093e3b4284f055aa1f2a6e92b382330ee6869acbc0ed342477ba1e1fb",
+      "headerPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\001-head.headers",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\001-head.body"
+    },
+    {
+      "sequence": 2,
+      "method": "PUT",
+      "key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "requestHeaders": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-digest": "sha-256=:yzRxt3kMlii7GD2gfD/F2GYTVTe5QSy74zhD9Qv0d5k=:",
+        "content-disposition": "attachment; filename=\"e-track-at32f435-v2.8.1-full.etu\"",
+        "content-length": "202",
+        "content-type": "application/vnd.e-track.etu",
+        "If-None-Match": "*",
+        "X-Amz-Content-Sha256": "cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799",
+        "Content-MD5": "hDPlhBeucHYW3NU7GK3NZA==",
+        "x-amz-meta-sha256": "cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799",
+        "x-amz-meta-kind": "full",
+        "x-amz-meta-content-digest": "sha-256=:yzRxt3kMlii7GD2gfD/F2GYTVTe5QSy74zhD9Qv0d5k=:"
+      },
+      "status": 200,
+      "curlExitCode": 0,
+      "pid": 18912,
+      "processClosed": true,
+      "stderr": "",
+      "responseHeaders": "HTTP/1.1 200 Connection established\r\n\r\nHTTP/1.1 200 OK\r\nDate: Thu, 15 Oct 2026 06:23:46 GMT\r\nContent-Type: text/plain;charset=UTF-8\r\nContent-Length: 0\r\nConnection: keep-alive\r\nETag: \"8433e58417ae707616dcd53b18adcd64\"\r\nx-amz-checksum-crc64nvme: ctRSIo02sIc=\r\nx-amz-version-id: 7e5ec1c4da551f4c60da79bc5bbadf63\r\nServer: cloudflare\r\nCF-RAY: a4acbca7bd8d6468-NRT\r\n\r\n",
+      "responseBodyLength": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headerPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\002-put.headers",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\002-put.body"
+    },
+    {
+      "sequence": 3,
+      "method": "HEAD",
+      "key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "requestHeaders": {},
+      "status": 200,
+      "curlExitCode": 0,
+      "pid": 24936,
+      "processClosed": true,
+      "stderr": "",
+      "responseHeaders": "HTTP/1.1 200 Connection established\r\n\r\nHTTP/1.1 200 OK\r\nDate: Thu, 15 Oct 2026 06:23:48 GMT\r\nContent-Type: application/vnd.e-track.etu\r\nContent-Length: 202\r\nConnection: keep-alive\r\nAccept-Ranges: bytes\r\nCache-Control: public, max-age=31536000, immutable\r\nContent-Disposition: attachment; filename=\"e-track-at32f435-v2.8.1-full.etu\"\r\nETag: \"8433e58417ae707616dcd53b18adcd64\"\r\nLast-Modified: Thu, 15 Oct 2026 06:23:46 GMT\r\nx-amz-meta-content-digest: sha-256=:yzRxt3kMlii7GD2gfD/F2GYTVTe5QSy74zhD9Qv0d5k=:\r\nx-amz-meta-kind: full\r\nx-amz-meta-sha256: cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799\r\nServer: cloudflare\r\nCF-RAY: a4acbcb59f90e39d-NRT\r\n\r\n",
+      "responseBodyLength": 664,
+      "responseBodySha256": "ca30e815c97660d436b48cee0ccbfe1ee51f2464d9f43dc232c3743c7c68ee95",
+      "headerPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\003-head.headers",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\003-head.body"
+    },
+    {
+      "sequence": 4,
+      "method": "GET",
+      "key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "requestHeaders": {
+        "If-Match": "\"8433e58417ae707616dcd53b18adcd64\""
+      },
+      "status": 200,
+      "curlExitCode": 0,
+      "pid": 23768,
+      "processClosed": true,
+      "stderr": "",
+      "responseHeaders": "HTTP/1.1 200 Connection established\r\n\r\nHTTP/1.1 200 OK\r\nDate: Thu, 15 Oct 2026 06:23:50 GMT\r\nContent-Type: application/vnd.e-track.etu\r\nContent-Length: 202\r\nConnection: keep-alive\r\nAccept-Ranges: bytes\r\nCache-Control: public, max-age=31536000, immutable\r\nContent-Disposition: attachment; filename=\"e-track-at32f435-v2.8.1-full.etu\"\r\nETag: \"8433e58417ae707616dcd53b18adcd64\"\r\nLast-Modified: Thu, 15 Oct 2026 06:23:46 GMT\r\nx-amz-meta-content-digest: sha-256=:yzRxt3kMlii7GD2gfD/F2GYTVTe5QSy74zhD9Qv0d5k=:\r\nx-amz-meta-kind: full\r\nx-amz-meta-sha256: cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799\r\nServer: cloudflare\r\nCF-RAY: a4acbcc35cffe07e-NRT\r\n\r\n",
+      "responseBodyLength": 202,
+      "responseBodySha256": "cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799",
+      "headerPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\004-get.headers",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015\\first-upload-r2\\004-get.body"
+    },
+    {
+      "action": "accounts/af6dd848e6a21f1cd26d44b1b656af7b/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "status": 200,
+      "cfRay": "a4acbcd749753326-NRT",
+      "success": true,
+      "errors": []
+    },
+    {
+      "action": "D1_AFTER_FIRST_UPLOAD",
+      "sql": "SELECT (SELECT count(*) FROM firmware_releases) AS releases, (SELECT count(*) FROM firmware_release_assets) AS assets, (SELECT count(*) FROM firmware_channels) AS channels, (SELECT count(*) FROM audit_logs WHERE action='register_firmware_release') AS register_audits, (SELECT count(*) FROM firmware_releases WHERE state='ready') AS ready",
+      "body": {
+        "result": [
+          {
+            "results": [
+              {
+                "releases": 0,
+                "assets": 0,
+                "channels": 0,
+                "register_audits": 0,
+                "ready": 0
+              }
+            ],
+            "success": true,
+            "meta": {
+              "served_by": "v3-prod",
+              "served_by_region": "WNAM",
+              "served_by_colo": "LAX",
+              "served_by_primary": true,
+              "timings": {
+                "sql_duration_ms": 0.4868
+              },
+              "duration": 0.4868,
+              "changes": 0,
+              "last_row_id": 0,
+              "changed_db": false,
+              "size_after": 368640,
+              "rows_read": 2,
+              "rows_written": 0,
+              "total_attempts": 1
+            }
+          }
+        ],
+        "errors": [],
+        "messages": [],
+        "success": true
+      }
+    }
+  ],
+  "ok": true,
+  "credentialScope": {
+    "permission": "object-read-write",
+    "ttlSeconds": 900,
+    "objects": [
+      "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin"
+    ],
+    "persisted": false,
+    "passedToCurl": "stdin only"
+  },
+  "uploadResult": {
+    "ok": true,
+    "status": "UPLOADED",
+    "requestId": "41423760-3638-4f2a-8ecd-066bd6c5ba5f",
+    "kind": "full",
+    "fileName": "e-track-at32f435-v2.8.1-full.etu",
+    "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+    "sha256": "cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799",
+    "sizeBytes": 202,
+    "contentDigest": "sha-256=:yzRxt3kMlii7GD2gfD/F2GYTVTe5QSy74zhD9Qv0d5k=:"
+  },
+  "finished": "2026-10-15T06:23:53.415Z"
+}

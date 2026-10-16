@@ -1,0 +1,87 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-1-v1",
+  "contract_sha256": "8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d",
+  "round_id": "P41-20261016-01",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P41-ORIGINS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not yet observed under this frozen contract"
+    },
+    {
+      "id": "P41-ADMISSION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not yet observed under this frozen contract"
+    },
+    {
+      "id": "P41-REHEARSAL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not yet observed under this frozen contract"
+    },
+    {
+      "id": "P41-BYTES",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not yet observed under this frozen contract"
+    },
+    {
+      "id": "P41-R2",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not yet observed under this frozen contract"
+    },
+    {
+      "id": "P41-STATE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not yet observed under this frozen contract"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

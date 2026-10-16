@@ -1,0 +1,28 @@
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'D:\github\my\E-Track\.cache\p41-dev-20261015\app\bluetooth_flutter_Trace\cloudflare\update-service\worker\node_modules\unenv\dist\runtime\node\internal\async_hooks'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\unenv\\dist\\runtime\\node\\internal\\async_hooks'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\@poppinss\\dumper',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'D:\github\my\E-Track\.cache\p41-dev-20261015\app\bluetooth_flutter_Trace\cloudflare\update-service\worker\node_modules\@poppinss\dumper'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\@poppinss\\dumper'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]
+npm error code ECONNRESET
+npm error network aborted
+npm error network This is a problem related to network connectivity.
+npm error network In most cases you are behind a proxy or have bad network settings.
+npm error network
+npm error network If you are behind a proxy, please make sure that the
+npm error network 'proxy' config is set properly.  See: 'npm help config'
+npm error A complete log of this run can be found in: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\runtime\npm-cache\_logs\2026-10-14T20_02_26_858Z-debug-0.log

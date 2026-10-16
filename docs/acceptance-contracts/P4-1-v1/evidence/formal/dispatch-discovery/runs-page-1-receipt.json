@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T11:59:49.605Z",
+  "ended": "2026-10-16T11:59:51.207Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/workflows/firmware-build.yml/runs?branch=dev%2Fp4-1%2Funattended-20261015&event=workflow_dispatch&per_page=100&page=1",
+  "status": 200,
+  "requestId": "AE00:38B8E4:E02654:14F6DCB:6AD211B6",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/dispatch-discovery/runs-page-1.json",
+    "size_bytes": 87464,
+    "sha256": "870aadb86723352c56b6636bd1bd8d60ebb4fb12e61f416185c1313620c3d8c3"
+  }
+}

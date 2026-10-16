@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T17:56:12.338Z",
+  "ended": "2026-10-16T17:56:18.373Z",
+  "method": "GET",
+  "route": "/user",
+  "status": 200,
+  "requestId": "AE07:1C73F2:17C1731:23D00DD:6AD2653F",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/configure-before/user.json",
+    "size_bytes": 1450,
+    "sha256": "201ab5fe442a7d1edb8c068a3daa9a5f66501bf58309961073e49ea514074dbd"
+  }
+}

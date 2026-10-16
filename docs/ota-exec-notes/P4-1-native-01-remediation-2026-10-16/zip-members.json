@@ -1,0 +1,704 @@
+[
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "3_Release tooling development checks (no cloud credentials).txt",
+    "sizeBytes": 256925,
+    "sha256": "439954fa589ab6c488d9a7b0b6b63645a2fdfdbd36b499654ce21822a374944e"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/system.txt",
+    "sizeBytes": 603,
+    "sha256": "4771e39438e91000b7ea280b4073b42b1a9297f1ba6c1796529e7d2b8285e25a"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/1_Set up job.txt",
+    "sizeBytes": 2205,
+    "sha256": "2d862af80b718f98f7c8774304be551e4e8d40768cc6a69abc169b60458fe3c7"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/2_Checkout repository.txt",
+    "sizeBytes": 10458,
+    "sha256": "8fc7c5f6ee936aa8ebcca032040b028ecbaf96a39a2373499b506ae412fdf9a7"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/3_Set up Node.txt",
+    "sizeBytes": 1703,
+    "sha256": "0a18d43c7996e8c7b458d1e22515258998a0cadeccc2d99f81cc084dc8325a7f"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/4_Prepare contained test temporary directory.txt",
+    "sizeBytes": 1268,
+    "sha256": "528542221d35ea9da8b7ecdaf972841a0fd7179f272bb3459882d8c4b7a81cc8"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/5_Install pinned Worker dependencies.txt",
+    "sizeBytes": 2803,
+    "sha256": "42f947102c7422e62095dab37d072e4924f57d0ff7d318b665ec0fb8b7ca540e"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/6_Run script and migration host tests explicitly (not workerd).txt",
+    "sizeBytes": 82516,
+    "sha256": "4ddd025ca8ba9a5030907aaae3ec1256d929b545192b7a50098ac334353a65a9"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/7_Run release pipeline with real handlers and SQLite host ports (not rehearsal).txt",
+    "sizeBytes": 50327,
+    "sha256": "6694c15bf166a10197cb180323c02fade795ddf21061c0d5edec8cd25ceb5936"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/8_Run native workerd D1 R2 and registration invariants (not host doubles).txt",
+    "sizeBytes": 50950,
+    "sha256": "547913bbf50c0f7fb073608b1c38d01ebefd9fbdc7e668d3cfbe91027da02a00"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/9_Check Worker and shared script types.txt",
+    "sizeBytes": 1434,
+    "sha256": "1abb0ec8937e646fbb37bbf0969efa4a0be499ec880d599b10a65ebbcedba258"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/10_Build tested Worker deployment input without cloud access.txt",
+    "sizeBytes": 5168,
+    "sha256": "7c99de17c0479bcccfc9a43e3288220f5092bae011cfa2ec01c20fad2f25a90c"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/11_Install byte test dependency.txt",
+    "sizeBytes": 2730,
+    "sha256": "c680e88473893c737b9f6b022de97e3ced0d750c2a21124c89a2098dd3bb943b"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/12_Build the existing vendor bsdiff for this host.txt",
+    "sizeBytes": 9353,
+    "sha256": "7191629c3ebf2e1da858ea0d93ae03059e5b8208917a6f78e1918d05e419f090"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/13_Check real package generation and approved-envelope replay.txt",
+    "sizeBytes": 8398,
+    "sha256": "9b540741bb1605d5a18ef3adb547b89957db9b842f30b22b51f29c75dda004f8"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/14_Check workflow execution graph and configuration gates.txt",
+    "sizeBytes": 12468,
+    "sha256": "01b6f0a6ce8c561e0187ec11d7b521682d31e6b9261a8dcf15b82d4ea3a58103"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/15_Execute production byte preparation with isolated fixtures.txt",
+    "sizeBytes": 6553,
+    "sha256": "4e5534bc201834d23cb762b53fd2b856ad385fc0b5c311ea520c84562f8a950c"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/16_Preserve development byte fixtures and step originals.txt",
+    "sizeBytes": 3495,
+    "sha256": "f38f8baf74698af268928702dde0d24c994baf7131967b418fea76897b72fddf"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/17_Preserve tested Worker deployment input.txt",
+    "sizeBytes": 3199,
+    "sha256": "3fd4ae0284496a43585352d6524e6e3955055a2a3dac57beeedc463609b73922"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/33_Post Set up Node.txt",
+    "sizeBytes": 50,
+    "sha256": "bbc5a4b0da15fd06db9e23df1f71829c3e12f1b6919d6ba9d3a9f6bd24c6eefc"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/34_Post Checkout repository.txt",
+    "sizeBytes": 1528,
+    "sha256": "5193e983b056db7885c1a6b625f7847f5cd196e77534f6f1908c89cf0d2daccd"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Release tooling development checks (no cloud credentials)/35_Complete job.txt",
+    "sizeBytes": 376,
+    "sha256": "ffb22cb572bf706f10cc360ea334011de89e947b04884be2113795bae676e50a"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "4_Build firmware (arm-none-eabi-gcc).txt",
+    "sizeBytes": 1298291,
+    "sha256": "ae3f1f1c0c4cfd3c65ccad0f99ef629bd824cab23031ecd43efb43788719e20e"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/system.txt",
+    "sizeBytes": 582,
+    "sha256": "2f04301d7cffacbdded30511c2aadf2127fb8fe2ed0eb3605149f51979b5fb20"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/1_Set up job.txt",
+    "sizeBytes": 2326,
+    "sha256": "c2f0b6144fcb4a5474c87edb64df2e5a4e7b38d128559a2c2ec26ba49a16ff48"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/2_Checkout repository.txt",
+    "sizeBytes": 17992,
+    "sha256": "3d67cac4a65c5927da7ffc21de901d23b6d66c498d35be2ba3b7b1c377c1edf2"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/3_Set up Node for shared release helpers.txt",
+    "sizeBytes": 1093,
+    "sha256": "8752162796fc16406f1cf19252f7a9733b26250fcfce92ff40eadbf051eada27"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/4_Contain build temporary and pip cache paths.txt",
+    "sizeBytes": 962,
+    "sha256": "efbd0e9698ff55a90b8ddeb7c13853641950ad91691bb84a4099aa36194bb763"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/5_Install Arm GNU Toolchain 13.3.Rel1.txt",
+    "sizeBytes": 1719,
+    "sha256": "c2ff7635384903777fe5bf602b28c8b0d89df60ef603cd6e09b70c6635b493f1"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/6_Install Ninja.txt",
+    "sizeBytes": 6540,
+    "sha256": "f38438d0a8b2ae984586862d673249160d69d7d6b90e1c7ad3d6d783d775d1cf"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/7_Install OTA host test dependencies.txt",
+    "sizeBytes": 1715,
+    "sha256": "ead3beace09d96fecad7089b02b2a0bee051c53b8e0e06aca97343a7fbb5913a"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/8_Verify reproducible GCC timestamps.txt",
+    "sizeBytes": 1323,
+    "sha256": "bb50e42cd99375998bffb1bbac20e63b615d558796304fb13b68344b2f302aa4"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/9_Extract firmware version.txt",
+    "sizeBytes": 5660,
+    "sha256": "a0df00f97418fb23fcece26a78061b7f70873d661babfe52e842e746b1f605fe"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/10_Configure (CMake + Ninja).txt",
+    "sizeBytes": 2387,
+    "sha256": "e51262c670d58f52bed730cfe1ada28676577fe097208642da217db9ed53873e"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/11_Build firmware.txt",
+    "sizeBytes": 378072,
+    "sha256": "fc68103f8d385255dbb9fe2a6f2ed270e311575a9bb571aeab20f228faa9a33b"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/12_Run host tests (boot vectors, OTA host tests, P3-1 product regressions).txt",
+    "sizeBytes": 453316,
+    "sha256": "1e5d109c4510b913ba39ddaaf59a75b3869bbd97012e192f36c79bc85c2e797f"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/13_Validate OTA App layout.txt",
+    "sizeBytes": 9646,
+    "sha256": "4f2f1f21ff847dc8e339f960ce8e2c5fb650799c899780116fb1f9a4c3cbfa3b"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/14_Validate OTA Boot skeleton.txt",
+    "sizeBytes": 1374,
+    "sha256": "c2962b62b3a25525a96dcaffd5481ef911a66b3b216726664fb42d56d6c84a65"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/15_Report firmware artifacts.txt",
+    "sizeBytes": 1883,
+    "sha256": "b6040356504091e664eb04cfcd7817a2254699ad8f9c7ec8effbf71b36632183"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/16_Bind same-run GCC App and Boot inputs.txt",
+    "sizeBytes": 1940,
+    "sha256": "69462ea659f90e960e51246fb3c6479a3290ac9d2f86533e638f9b34a3828b8f"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/17_Exercise production preparation on the real GCC build (development key only).txt",
+    "sizeBytes": 6952,
+    "sha256": "3a2099f65495cef083262937ffb12dbb9901f1e24bc9e0e75d477da060c8b6b6"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/18_Preserve non-publishable GCC packaging evidence.txt",
+    "sizeBytes": 2785,
+    "sha256": "6ab150b2c76b5dc46fa29b6ca5c5a880b3c34c9a56528040c6c0e3f096b42c10"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/19_Exercise the shared key-bound GCC build without protected credentials.txt",
+    "sizeBytes": 388051,
+    "sha256": "efb84fd624ccd82fb90739fbd29152fe738a909ee873ae705af97caf373008e2"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/20_Check development key cleanup before archiving.txt",
+    "sizeBytes": 1069,
+    "sha256": "40628867cc62da7050cf2e7d2af97a1b92eadac282e1b352952e24e13ac344d3"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/21_Preserve non-publishable key-bound build and packaging evidence.txt",
+    "sizeBytes": 2793,
+    "sha256": "4316df192b4e632548666d7d54f5fb4b844948a90be695f6c85a8d7280da991e"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/24_Upload firmware artifact.txt",
+    "sizeBytes": 3305,
+    "sha256": "01500c0a08757351a3b3f454d8a06b5b8bcab0325c421c44352529db88ea6df9"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/25_Upload Boot artifact.txt",
+    "sizeBytes": 3186,
+    "sha256": "3b5dee1995703301de8473d6bbe99198b391bb8685cfef58e2c718717ff15422"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/49_Post Set up Node for shared release helpers.txt",
+    "sizeBytes": 50,
+    "sha256": "106a774ab3636679120cc27868d3d957312fca5e17c39b502dcc1b64bd3a2f86"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/50_Post Checkout repository.txt",
+    "sizeBytes": 1528,
+    "sha256": "285ffc88dde43ccb30eb7b4c371908def14e4b387aa6aa55af7f25218a5f7cc6"
+  },
+  {
+    "archive": "github/p41-native-01-fw-logs.zip",
+    "member": "Build firmware (arm-none-eabi-gcc)/51_Complete job.txt",
+    "sizeBytes": 699,
+    "sha256": "11745e4d3a0ad3333256155e3c9adf32d262373759f95ca1126752367c3ab3c0"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "0_Worker Typecheck and Invariants.txt",
+    "sizeBytes": 42784,
+    "sha256": "d89ef5d2a8c0a57268d79066dcc0d30119fbfdd3fbe3bdebbc9edc9f67dc823b"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/system.txt",
+    "sizeBytes": 594,
+    "sha256": "04f7771e2d227d41ae4bd6adfa2a08bcc0e8aa40e807042133d638780a019653"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/1_Set up job.txt",
+    "sizeBytes": 2047,
+    "sha256": "0da49605557764baee3f2f05dafa7141a5adcae11f31801c74be544b49082827"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/2_Checkout repository.txt",
+    "sizeBytes": 9400,
+    "sha256": "181ffecee74c0aa472fbbd0272b56ed7ec7665f217505d24bc7c5c11ca2cb85e"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/3_Set up Node.txt",
+    "sizeBytes": 1741,
+    "sha256": "95c977a74b15af311709daa8ec2f3fff7a61b96976ec20d2aa8bd03c6fc78404"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/4_Install dependencies.txt",
+    "sizeBytes": 1618,
+    "sha256": "0eb0c6fcb3b65e64e98f3ea089317e62b506ccc1364bca4007f7188865426afb"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/5_Generate Wrangler Env types.txt",
+    "sizeBytes": 5042,
+    "sha256": "6040180b11c4c949bcee31691a3f094f44b4e23767376f8807896e5707cbe477"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/6_Typecheck.txt",
+    "sizeBytes": 388,
+    "sha256": "6d501eff5b29f913db68a201153509f3dd756ac699bfe442bf72e09ddeabfa95"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/7_Run invariant tests.txt",
+    "sizeBytes": 18208,
+    "sha256": "0e37e96ff626da9276b36178d1235e71bbf46ef9234450ed3ab45f0e98c53f8b"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/13_Post Set up Node.txt",
+    "sizeBytes": 226,
+    "sha256": "a921a579186070a03b3652f52d8781d9ae22342e2c7298bfff43b467f70129c5"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/14_Post Checkout repository.txt",
+    "sizeBytes": 4080,
+    "sha256": "43553202ee54d60f1fb240fa44aa481f393920c8a1794729ce4907fea4d0104c"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Worker Typecheck and Invariants/15_Complete job.txt",
+    "sizeBytes": 61,
+    "sha256": "660b4eb0163efd6bc1791a3dc665d6f2d7ef82d7e533887666de4f11c407fef3"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "1_Admin Facade Typecheck.txt",
+    "sizeBytes": 19245,
+    "sha256": "01c446df67cd2969de35a53a416615e84a909f667d15bb64ea49a71c5d5ba0a7"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/system.txt",
+    "sizeBytes": 593,
+    "sha256": "0329f100e87c2a5186c133f6dc810333bf97aba695b7987a5bfd7d8403906643"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/1_Set up job.txt",
+    "sizeBytes": 2035,
+    "sha256": "b8997327366618d915036fd225ac05935ec51f464e7d749491b2d92141b8855c"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/2_Checkout repository.txt",
+    "sizeBytes": 9400,
+    "sha256": "62e36b53c02e03e963cb5d36aef12c0c768326452ba74026cf9ebcccceb01dd3"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/3_Set up Node.txt",
+    "sizeBytes": 1655,
+    "sha256": "c0d0e00f2691b83939980bc4941b38b6f84ba7ae670a82fcf686e3b930f28055"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/4_Install dependencies.txt",
+    "sizeBytes": 1422,
+    "sha256": "2ff9366672df2d43821ca4810592ee535eaebe2fc4e8fca3d033441bddc3ea02"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/5_Typecheck.txt",
+    "sizeBytes": 387,
+    "sha256": "b2a6bf64d4e9cae0288355b306a7a19f55c9645991f3e300c9ba7bfec847b901"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/9_Post Set up Node.txt",
+    "sizeBytes": 226,
+    "sha256": "c81627ef19435bd91eea36768b8d926e879ee11c73332532e23491a30406d7d1"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/10_Post Checkout repository.txt",
+    "sizeBytes": 4080,
+    "sha256": "7ad426526b04746866d3a59dee43b197b6fe1de8f195c5c5e1afa9ebd0a5538a"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Admin Facade Typecheck/11_Complete job.txt",
+    "sizeBytes": 61,
+    "sha256": "135bbb3406d7ec64750d3bec6c29ff5e407456e2fb539bf8fc8ce3c43c0c37fc"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "2_Public Pages Typecheck.txt",
+    "sizeBytes": 19254,
+    "sha256": "a9a58b3ca968b36cf68632f9396f224c8d26563aed3a981d0fe5602573e0a83a"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/system.txt",
+    "sizeBytes": 594,
+    "sha256": "0677bb3b1be8283372c425384377692f6722a02ca910ff632fda0fc4a1cfdac8"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/1_Set up job.txt",
+    "sizeBytes": 2043,
+    "sha256": "b0a7ee645ceeed00728fd848bbb0f4367cb5c730d0aeacd012e36c0c67e7ede5"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/2_Checkout repository.txt",
+    "sizeBytes": 9400,
+    "sha256": "9cd93ee50fbfade7b509582400af30904a4dd127e589c5aaaacbb3576b0b31a1"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/3_Set up Node.txt",
+    "sizeBytes": 1655,
+    "sha256": "ad586a680fead6bfc730fd357e9ab81ddb25272c8c6296b4d9e809c7397b7a1c"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/4_Install dependencies.txt",
+    "sizeBytes": 1422,
+    "sha256": "3e3dc64fffa5cc840770764a0ee359ab84d4bb2ce4b40ae94220e39cb5aad43c"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/5_Typecheck.txt",
+    "sizeBytes": 388,
+    "sha256": "c99a1fc8f2cfb3b8be6c12bcbdda2f1e4b025d76bb563eb7a3f7ffe011433d93"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/9_Post Set up Node.txt",
+    "sizeBytes": 226,
+    "sha256": "5b70320f7c4d8564c2200ab1be72cc2e514f2203a21196e9b5ae38ff572e4e13"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/10_Post Checkout repository.txt",
+    "sizeBytes": 4080,
+    "sha256": "a203bb62e3b16f17033dfab563945f49d1b877f2c4ceb5d05ba3f674f730bfbb"
+  },
+  {
+    "archive": "github/p41-native-01-cf-logs.zip",
+    "member": "Public Pages Typecheck/11_Complete job.txt",
+    "sizeBytes": 61,
+    "sha256": "52b5ef64ba9c8d62e2decf2a26bdd87842a03cbfd2dccd94eb3e53c952615308"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "0_Flutter debugging skill (ubuntu-latest).txt",
+    "sizeBytes": 20057,
+    "sha256": "628c3a37cd9d4554f345c7774539c6f0ace41ea604c5a39dbb5c2fd7809f881f"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/system.txt",
+    "sizeBytes": 603,
+    "sha256": "8aded3dbabba851124a54ea7799108092d2f224dea7087db0251ff3594bfe2d8"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/1_Set up job.txt",
+    "sizeBytes": 2058,
+    "sha256": "f6a264b1c12baa6785a062c66f883b27bf71089ad82b6fabc46fba225fd2365d"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/2_Run actions_checkout@v4.txt",
+    "sizeBytes": 9055,
+    "sha256": "e9257da9ef90117cfdde8467d6fcec25dcacb1e235e94ec93873704be1f57ee2"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/3_Test host helpers (Linux).txt",
+    "sizeBytes": 3407,
+    "sha256": "26d5ef234d294c6e2890ab5539c5b89613fb9b739ac75ef37476b5a3e182e834"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/5_Test P3-4 controlled service and live adapters (Linux).txt",
+    "sizeBytes": 983,
+    "sha256": "bb2d7833d61dde7a7fbfc3e2f068ca930b726d11b5392abc65a4c722cf54559e"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/7_Preserve P3-4 adapter self-test originals.txt",
+    "sizeBytes": 2487,
+    "sha256": "3393af337324533f7948772943922eeac5fb7fe31d34b938702a6a1e7ccad0f2"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/14_Post Run actions_checkout@v4.txt",
+    "sizeBytes": 1709,
+    "sha256": "5d8e16e0a1a1ce8ff7df732d004ce562f39f4c716ec6b6fb4d0e7e51227cdcd2"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (ubuntu-latest)/15_Complete job.txt",
+    "sizeBytes": 376,
+    "sha256": "3eac555ecc00ae87e69e7fc9dce1cfe562d0af132f28b79931a41e801038d790"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "1_Validate acceptance and build governance.txt",
+    "sizeBytes": 63191,
+    "sha256": "a0e704fe91df9e17b3ea47fb7b6f45362e682b049abd9534acf7ad11803fbb73"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/system.txt",
+    "sizeBytes": 600,
+    "sha256": "6fd4d0df6111cf7cb6fa83bcef3ab426f11308449907a2205bff7421e30fb584"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/1_Set up job.txt",
+    "sizeBytes": 2073,
+    "sha256": "7dfa00a316bc8e3733490ff668a1051e5e265012a52085964dd0090b54dbeada"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/2_Checkout.txt",
+    "sizeBytes": 15599,
+    "sha256": "b01ebcffcfcd4e03e320def7bebdf73fda3408bf4679b516a325c05446a57162"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/3_Verify PowerShell.txt",
+    "sizeBytes": 305,
+    "sha256": "5c0416a9d75231a85dfca42a4e8506ca366723f6ae1a0cf778a648f70b8457bc"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/4_Run governance regression tests.txt",
+    "sizeBytes": 35566,
+    "sha256": "525edcabf1e6df4858f3238099230e0201c50277d2e11b2efdee3d0bb789064a"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/5_Install Arm GNU Toolchain 13.3.Rel1.txt",
+    "sizeBytes": 1176,
+    "sha256": "b8989da8a4614d77557f1167d47139442b6d2be6d0f2ce37fe85d0de0a37b045"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/6_Run P2-6 spec probes.txt",
+    "sizeBytes": 6436,
+    "sha256": "a6f4ee9986384f3f919dffad5c8757321d4a29a189cc8099829df8df1762fde5"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/12_Post Checkout.txt",
+    "sizeBytes": 1709,
+    "sha256": "1ef278a26108a008a715a762ed64d9619d8c5dd5a94ccd5fb52d48dcb8c6aad4"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Validate acceptance and build governance/13_Complete job.txt",
+    "sizeBytes": 348,
+    "sha256": "220e2527a2faf6e1c851c8618a10c0020da0a0cb50d2f0bc93069ee01e6aeabe"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "2_Flutter debugging skill (windows-latest).txt",
+    "sizeBytes": 21544,
+    "sha256": "df64188e2000876cb52b4406e3a6d36d27fdaa4d2ec3f0c38ab49d43935d17ed"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/system.txt",
+    "sizeBytes": 604,
+    "sha256": "920d8c892d035de546d897fe169ca611e614b2e2538eb55ee37b5edecb40dd6d"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/1_Set up job.txt",
+    "sizeBytes": 2151,
+    "sha256": "81adb9d18d949079cc738ea56ce34936c98c40e3f3641c92f086beb0873c1e34"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/2_Run actions_checkout@v4.txt",
+    "sizeBytes": 10123,
+    "sha256": "65e301173db2e0d1157f0b5f13eb71624d2f70171b5fcb599794881855663336"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/4_Test host helpers (Windows).txt",
+    "sizeBytes": 3349,
+    "sha256": "eeda7b547ad67b82f0e7d8bea89d0df0b39e3c0dd6984ded860ebe10607ad4b4"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/6_Test P3-4 controlled service and live adapters (Windows).txt",
+    "sizeBytes": 1143,
+    "sha256": "cccad247b5dda77dc105c57f0d2fd229b1dc17329db6844cc310f75d94234fe3"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/7_Preserve P3-4 adapter self-test originals.txt",
+    "sizeBytes": 2503,
+    "sha256": "a2293ba0518389fe986cdc6c205779181b3205e52eef2921755e93aa0f1f06fb"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/14_Post Run actions_checkout@v4.txt",
+    "sizeBytes": 1915,
+    "sha256": "dc433acbdd30dac211d47a2bc40f6dd0406e3155146d1adb47f0787a9001921f"
+  },
+  {
+    "archive": "github/p41-native-01-gov-logs.zip",
+    "member": "Flutter debugging skill (windows-latest)/15_Complete job.txt",
+    "sizeBytes": 378,
+    "sha256": "5266dab099fe9a5d2ae823b3f598ee5cfe2ac3f533479ea1611a1e7250bbc890"
+  },
+  {
+    "archive": "github/p41-native-01-app-logs.zip",
+    "member": "4_Detect changed paths.txt",
+    "sizeBytes": 27041,
+    "sha256": "4a854e13909d97754b9ebb3479352d0ef936246b5e4524b66bc010afd6ad53f3"
+  },
+  {
+    "archive": "github/p41-native-01-app-logs.zip",
+    "member": "Detect changed paths/system.txt",
+    "sizeBytes": 575,
+    "sha256": "1a99713793640351c12def97e32de478c17aa7425db0d14a98302a8512ce0032"
+  },
+  {
+    "archive": "github/p41-native-01-app-logs.zip",
+    "member": "Detect changed paths/1_Set up job.txt",
+    "sizeBytes": 1957,
+    "sha256": "fb6a0e15837503a914228f0ef8a3c106cc3a4ad4dc93f7c0d75151560b0ad8cf"
+  },
+  {
+    "archive": "github/p41-native-01-app-logs.zip",
+    "member": "Detect changed paths/2_Checkout repository.txt",
+    "sizeBytes": 17803,
+    "sha256": "e5959c8431ae1e95dde12d3020ac02fdf881c62c07a7fc7f64bd9133ad2ea169"
+  },
+  {
+    "archive": "github/p41-native-01-app-logs.zip",
+    "member": "Detect changed paths/3_Detect docs and app build inputs.txt",
+    "sizeBytes": 2978,
+    "sha256": "4de1ef0209129799e72276f72504f83eb2a73c3b743ca2983f8f109bf4be8b17"
+  },
+  {
+    "archive": "github/p41-native-01-app-logs.zip",
+    "member": "Detect changed paths/6_Post Checkout repository.txt",
+    "sizeBytes": 4080,
+    "sha256": "b6f6ecc1cc84c07c6278fdac1b5adfe721cbd2201f55ddaec4c84fee1257a478"
+  },
+  {
+    "archive": "github/p41-native-01-app-logs.zip",
+    "member": "Detect changed paths/7_Complete job.txt",
+    "sizeBytes": 235,
+    "sha256": "592af4975832129074f343f022546086312cbe7917b2d68092a90f30a78511d4"
+  }
+]

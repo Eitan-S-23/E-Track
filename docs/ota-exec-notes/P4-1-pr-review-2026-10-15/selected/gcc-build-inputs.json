@@ -1,0 +1,16 @@
+{
+  "commitSha": "46934e6567616786e4b4e104d9ec6f7396feb2f3",
+  "versionName": "2.7.0",
+  "versionCode": 20700,
+  "buildTimestamp": 1792021189,
+  "app": {
+    "fileName": "X-Track-App-GCC.bin",
+    "sizeBytes": 605072,
+    "sha256": "5f7c42bd43acef12a262e53c378fa1fee3f44a6571c081a373d60b494d23fe8e"
+  },
+  "boot": {
+    "fileName": "X-Track-Boot.bin",
+    "sizeBytes": 14724,
+    "sha256": "3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34"
+  }
+}

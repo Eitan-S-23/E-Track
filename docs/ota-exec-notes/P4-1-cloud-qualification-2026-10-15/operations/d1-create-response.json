@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-15T04:26:58.116Z",
+  "status": 200,
+  "cfRay": "a4ac118a8d4e2db2-SJC",
+  "body": {
+    "result": {
+      "uuid": "2617e1e1-956f-42ce-a465-da56d84abf06",
+      "name": "e-track-firmware-p41-test",
+      "created_at": "2026-10-15T04:26:57.648Z",
+      "version": "production",
+      "file_size": 8192,
+      "num_tables": 0,
+      "created_in_region": "WNAM",
+      "jurisdiction": null,
+      "read_replication": {
+        "mode": "disabled"
+      }
+    },
+    "errors": [],
+    "messages": [],
+    "success": true
+  }
+}

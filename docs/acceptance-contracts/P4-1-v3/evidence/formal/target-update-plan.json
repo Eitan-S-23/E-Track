@@ -1,0 +1,20 @@
+{
+  "previous": {
+    "contractSha256": "8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d",
+    "matrixSha256": "aa980b1b64777f9ccf8ec46c0e34945e3c59fee5dcc638ef92c0cc19d3a54da0",
+    "runId": 38897470681,
+    "attempt": 1,
+    "result": "PRODUCT_FAIL",
+    "repairCommit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c"
+  },
+  "changes": [
+    {
+      "name": "OTA_PREVIOUS_RELEASE_JSON",
+      "value": "{\"archiveCommit\":\"c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124\",\"archivePath\":\"docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15\",\"buildTimestamp\":1792014177,\"commitSha\":\"fa74905e84c489cccc248617d37ab9f56c8f961c\",\"imageSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"isFormalRelease\":false,\"kind\":\"app\",\"provenanceKind\":\"inaugural-bootstrap-v1\",\"provenanceSha256\":\"0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28\",\"sourceArtifactId\":\"11931006831\",\"sourceArtifactSha256\":\"4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149\",\"sourceRunAttempt\":\"1\",\"sourceRunId\":\"38642386248\",\"sourceSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"sourceSizeBytes\":605072,\"sourceUrl\":\"https://raw.githubusercontent.com/Eitan-S-23/E-Track/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin\",\"targetCommitSha\":\"b9d7d18c76e6495fbebf6758df6e4427e79e97b5\",\"targetVersionName\":\"3.2.8\",\"versionCode\":30207,\"versionName\":\"3.2.7\"}"
+    },
+    {
+      "name": "OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256",
+      "value": "184aaee01d10ed482792fee94dd1f57ef6d25d262f7b891f1af11ecbd383c1a5"
+    }
+  ]
+}

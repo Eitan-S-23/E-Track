@@ -1,0 +1,40 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "git",
+  "args": [
+    "-c",
+    "core.fsmonitor=false",
+    "add",
+    "--",
+    "PLAN-OTA-EXEC.md",
+    "Tools/provenance/manifest_profiles.json",
+    "docs/acceptance-execution-contract.md",
+    "docs/ota-cross-system-contracts.md",
+    "docs/ota-exec-notes/P4-1-implementation-2026-10-15.md",
+    "docs/ota-prompts/prompt-P4-1-implementation.md",
+    "docs/ota-spec-decisions.md",
+    "docs/acceptance-contracts/P4-1-v1/tools/session.cjs",
+    "docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs",
+    "docs/acceptance-contracts/P4-1-v1/tools/inspect.py",
+    "docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs",
+    "docs/acceptance-contracts/P4-1-v1/tools/bundle.py"
+  ],
+  "pid": 26096,
+  "started": "2026-10-16T10:51:54.875Z",
+  "ended": "2026-10-16T10:51:55.264Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/acceptance-stage-inputs.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/acceptance-stage-inputs.stderr.txt",
+      "size_bytes": 663,
+      "sha256": "502cac51ef95c6224ade8a5c7a1887775413a1c99460d38c3a8a829957ab2da9"
+    }
+  ],
+  "closed": true
+}

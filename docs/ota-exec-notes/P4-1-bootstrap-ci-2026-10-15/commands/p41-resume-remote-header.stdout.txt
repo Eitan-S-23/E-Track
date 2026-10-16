@@ -1,0 +1,1 @@
+{"ok": true, "kind": "app", "sha256": "aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f", "version_code": 30207, "version_name": "3.2.7", "build_ts": 1792014177, "image_len": 605072, "image_crc32": 393815867, "initial_msp": 537231360, "reset_handler": 134329957}

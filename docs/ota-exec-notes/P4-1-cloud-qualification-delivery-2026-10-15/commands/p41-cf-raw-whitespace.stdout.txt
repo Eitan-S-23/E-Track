@@ -1,0 +1,1562 @@
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:1: trailing whitespace.
++PRAGMA foreign_keys = ON;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:2: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:3: trailing whitespace.
++CREATE TABLE IF NOT EXISTS apps (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:4: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:5: trailing whitespace.
++  name TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:6: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:7: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:8: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:9: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:10: trailing whitespace.
++CREATE TABLE IF NOT EXISTS app_config (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:11: trailing whitespace.
++  app_id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:12: trailing whitespace.
++  default_channel TEXT NOT NULL DEFAULT 'stable' CHECK (default_channel IN ('stable', 'beta')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:13: trailing whitespace.
++  min_supported_client_version_code INTEGER NOT NULL DEFAULT 0 CHECK (min_supported_client_version_code >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:14: trailing whitespace.
++  emergency_manifest_url TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:15: trailing whitespace.
++  disable_all_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_all_latest IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:16: trailing whitespace.
++  disable_all_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_all_downloads IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:17: trailing whitespace.
++  maintenance_message TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:18: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:19: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:20: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:21: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:22: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:23: trailing whitespace.
++CREATE TABLE IF NOT EXISTS releases (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:24: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:25: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:26: trailing whitespace.
++  platform TEXT NOT NULL CHECK (platform IN ('android', 'windows')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:27: trailing whitespace.
++  version_name TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:28: trailing whitespace.
++  version_code INTEGER NOT NULL CHECK (version_code >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:29: trailing whitespace.
++  release_tag TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:30: trailing whitespace.
++  commit_sha TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:31: trailing whitespace.
++  run_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:32: trailing whitespace.
++  state TEXT NOT NULL DEFAULT 'candidate' CHECK (state IN ('candidate', 'disabled')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:33: trailing whitespace.
++  payload_signature_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:34: trailing whitespace.
++  security_payload_json TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:35: trailing whitespace.
++  release_notes TEXT NOT NULL DEFAULT '',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:36: trailing whitespace.
++  min_client_version_code INTEGER NOT NULL DEFAULT 0 CHECK (min_client_version_code >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:37: trailing whitespace.
++  capabilities_json TEXT NOT NULL DEFAULT '[]',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:38: trailing whitespace.
++  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:39: trailing whitespace.
++  fallback_only INTEGER NOT NULL DEFAULT 0 CHECK (fallback_only IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:40: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:41: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:42: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:43: trailing whitespace.
++  UNIQUE (app_id, platform, release_tag),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:44: trailing whitespace.
++  UNIQUE (app_id, platform, run_id),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:45: trailing whitespace.
++  UNIQUE (app_id, platform, version_code)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:46: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:47: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:48: trailing whitespace.
++CREATE TABLE IF NOT EXISTS release_assets (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:49: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:50: trailing whitespace.
++  release_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:51: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:52: trailing whitespace.
++  platform TEXT NOT NULL CHECK (platform IN ('android', 'windows')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:53: trailing whitespace.
++  asset_type TEXT NOT NULL CHECK (asset_type IN ('apk', 'windows_zip', 'windows_exe', 'manifest', 'patch')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:54: trailing whitespace.
++  file_name TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:55: trailing whitespace.
++  sha256 TEXT NOT NULL CHECK (length(sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:56: trailing whitespace.
++  size_bytes INTEGER NOT NULL CHECK (size_bytes > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:57: trailing whitespace.
++  r2_key TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:58: trailing whitespace.
++  r2_state TEXT NOT NULL DEFAULT 'not_uploaded' CHECK (r2_state IN ('not_uploaded', 'available', 'r2_deleted', 'archived')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:59: trailing whitespace.
++  github_url TEXT NOT NULL CHECK (instr(github_url, '/latest/download/') = 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:60: trailing whitespace.
++  disabled INTEGER NOT NULL DEFAULT 0 CHECK (disabled IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:61: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:62: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:63: trailing whitespace.
++  FOREIGN KEY (release_id) REFERENCES releases(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:64: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:65: trailing whitespace.
++  UNIQUE (release_id, platform, asset_type, file_name),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:66: trailing whitespace.
++  UNIQUE (app_id, platform, github_url)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:67: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:68: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:69: trailing whitespace.
++CREATE TABLE IF NOT EXISTS patches (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:70: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:71: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:72: trailing whitespace.
++  platform TEXT NOT NULL CHECK (platform IN ('android', 'windows')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:73: trailing whitespace.
++  to_release_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:74: trailing whitespace.
++  asset_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:75: trailing whitespace.
++  from_version_code INTEGER NOT NULL CHECK (from_version_code >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:76: trailing whitespace.
++  old_sha256 TEXT NOT NULL CHECK (length(old_sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:77: trailing whitespace.
++  patch_format TEXT NOT NULL DEFAULT 'tracepatch' CHECK (patch_format IN ('tracepatch', 'vcdiff')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:78: trailing whitespace.
++  patch_sha256 TEXT NOT NULL CHECK (length(patch_sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:79: trailing whitespace.
++  patch_size_bytes INTEGER NOT NULL CHECK (patch_size_bytes > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:80: trailing whitespace.
++  output_sha256 TEXT NOT NULL CHECK (length(output_sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:81: trailing whitespace.
++  output_size_bytes INTEGER NOT NULL CHECK (output_size_bytes > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:82: trailing whitespace.
++  disabled INTEGER NOT NULL DEFAULT 0 CHECK (disabled IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:83: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:84: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:85: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:86: trailing whitespace.
++  FOREIGN KEY (to_release_id) REFERENCES releases(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:87: trailing whitespace.
++  FOREIGN KEY (asset_id) REFERENCES release_assets(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:88: trailing whitespace.
++  UNIQUE (app_id, platform, to_release_id, from_version_code, old_sha256, patch_format)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:89: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:90: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:91: trailing whitespace.
++CREATE TABLE IF NOT EXISTS channels (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:92: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:93: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:94: trailing whitespace.
++  platform TEXT NOT NULL CHECK (platform IN ('android', 'windows')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:95: trailing whitespace.
++  name TEXT NOT NULL CHECK (name IN ('stable', 'beta')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:96: trailing whitespace.
++  current_release_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:97: trailing whitespace.
++  revision INTEGER NOT NULL DEFAULT 0 CHECK (revision >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:98: trailing whitespace.
++  disable_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_latest IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:99: trailing whitespace.
++  disable_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_downloads IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:100: trailing whitespace.
++  maintenance_admin_only INTEGER NOT NULL DEFAULT 0 CHECK (maintenance_admin_only IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:101: trailing whitespace.
++  maintenance_message TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:102: trailing whitespace.
++  last_action TEXT NOT NULL DEFAULT 'init' CHECK (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:103: trailing whitespace.
++    last_action IN (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:104: trailing whitespace.
++      'init',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:105: trailing whitespace.
++      'publish',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:106: trailing whitespace.
++      'rollback',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:107: trailing whitespace.
++      'stop_latest',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:108: trailing whitespace.
++      'resume_latest',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:109: trailing whitespace.
++      'stop_downloads',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:110: trailing whitespace.
++      'resume_downloads',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:111: trailing whitespace.
++      'edit_notes'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:112: trailing whitespace.
++    )
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:113: trailing whitespace.
++  ),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:114: trailing whitespace.
++  last_actor TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:115: trailing whitespace.
++  last_actor_type TEXT CHECK (last_actor_type IS NULL OR last_actor_type IN ('ci', 'access', 'system', 'test')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:116: trailing whitespace.
++  last_request_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:117: trailing whitespace.
++  last_before_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:118: trailing whitespace.
++  last_after_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:119: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:120: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:121: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:122: trailing whitespace.
++  FOREIGN KEY (current_release_id) REFERENCES releases(id) ON DELETE SET NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:123: trailing whitespace.
++  UNIQUE (app_id, platform, name)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:124: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:125: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:126: trailing whitespace.
++CREATE TABLE IF NOT EXISTS channel_history (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:127: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:128: trailing whitespace.
++  channel_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:129: trailing whitespace.
++  release_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:130: trailing whitespace.
++  revision INTEGER NOT NULL CHECK (revision >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:131: trailing whitespace.
++  action TEXT NOT NULL CHECK (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:132: trailing whitespace.
++    action IN (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:133: trailing whitespace.
++      'publish',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:134: trailing whitespace.
++      'rollback',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:135: trailing whitespace.
++      'stop_latest',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:136: trailing whitespace.
++      'resume_latest',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:137: trailing whitespace.
++      'stop_downloads',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:138: trailing whitespace.
++      'resume_downloads',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:139: trailing whitespace.
++      'edit_notes'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:140: trailing whitespace.
++    )
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:141: trailing whitespace.
++  ),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:142: trailing whitespace.
++  actor TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:143: trailing whitespace.
++  actor_type TEXT NOT NULL CHECK (actor_type IN ('ci', 'access', 'system', 'test')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:144: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:145: trailing whitespace.
++  request_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:146: trailing whitespace.
++  before_json TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:147: trailing whitespace.
++  after_json TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:148: trailing whitespace.
++  FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:149: trailing whitespace.
++  FOREIGN KEY (release_id) REFERENCES releases(id) ON DELETE SET NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:150: trailing whitespace.
++  UNIQUE (channel_id, revision)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:151: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:152: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:153: trailing whitespace.
++CREATE TABLE IF NOT EXISTS audit_logs (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:154: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:155: trailing whitespace.
++  app_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:156: trailing whitespace.
++  actor TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:157: trailing whitespace.
++  actor_type TEXT NOT NULL CHECK (actor_type IN ('ci', 'access', 'system', 'test')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:158: trailing whitespace.
++  action TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:159: trailing whitespace.
++  target_type TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:160: trailing whitespace.
++  target_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:161: trailing whitespace.
++  request_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:162: trailing whitespace.
++  ip TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:163: trailing whitespace.
++  user_agent TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:164: trailing whitespace.
++  before_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:165: trailing whitespace.
++  after_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:166: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:167: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE SET NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:168: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:169: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:170: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_releases_app_platform_state ON releases(app_id, platform, state);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:171: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_release_assets_release_platform_type ON release_assets(release_id, platform, asset_type);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:172: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_release_assets_app_platform_type ON release_assets(app_id, platform, asset_type);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:173: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_patches_lookup ON patches(app_id, platform, to_release_id, from_version_code, old_sha256);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:174: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_channels_lookup ON channels(app_id, platform, name);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:175: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_channel_history_channel_revision ON channel_history(channel_id, revision);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:176: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_channel_history_release_created ON channel_history(release_id, created_at);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:177: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:178: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_audit_logs_actor_created_at ON audit_logs(actor, created_at);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:179: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:180: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS channels_reject_disabled_release_insert
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:181: trailing whitespace.
++BEFORE INSERT ON channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:182: trailing whitespace.
++WHEN NEW.current_release_id IS NOT NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:183: trailing whitespace.
++  AND EXISTS (SELECT 1 FROM releases WHERE id = NEW.current_release_id AND state = 'disabled')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:184: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:185: trailing whitespace.
++  SELECT RAISE(ABORT, 'channel cannot point at disabled release');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:186: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:187: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:188: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS channels_reject_disabled_release_update
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:189: trailing whitespace.
++BEFORE UPDATE OF current_release_id ON channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:190: trailing whitespace.
++WHEN NEW.current_release_id IS NOT NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:191: trailing whitespace.
++  AND EXISTS (SELECT 1 FROM releases WHERE id = NEW.current_release_id AND state = 'disabled')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:192: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:193: trailing whitespace.
++  SELECT RAISE(ABORT, 'channel cannot point at disabled release');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:194: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:195: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:196: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS releases_reject_disable_when_published
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:197: trailing whitespace.
++BEFORE UPDATE OF state ON releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:198: trailing whitespace.
++WHEN NEW.state = 'disabled'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:199: trailing whitespace.
++  AND EXISTS (SELECT 1 FROM channels WHERE current_release_id = NEW.id)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:200: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:201: trailing whitespace.
++  SELECT RAISE(ABORT, 'published release cannot be disabled');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:202: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:203: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:204: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS channels_append_history
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:205: trailing whitespace.
++AFTER UPDATE OF current_release_id, revision, disable_latest, disable_downloads, maintenance_admin_only, maintenance_message ON channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:206: trailing whitespace.
++WHEN NEW.revision > OLD.revision AND NEW.last_action <> 'init'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:207: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:208: trailing whitespace.
++  INSERT INTO channel_history (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:209: trailing whitespace.
++    id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:210: trailing whitespace.
++    channel_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:211: trailing whitespace.
++    release_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:212: trailing whitespace.
++    revision,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:213: trailing whitespace.
++    action,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:214: trailing whitespace.
++    actor,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:215: trailing whitespace.
++    actor_type,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:216: trailing whitespace.
++    request_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:217: trailing whitespace.
++    before_json,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:218: trailing whitespace.
++    after_json
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:219: trailing whitespace.
++  )
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:220: trailing whitespace.
++  VALUES (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:221: trailing whitespace.
++    'hist_' || lower(hex(randomblob(16))),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:222: trailing whitespace.
++    NEW.id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:223: trailing whitespace.
++    NEW.current_release_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:224: trailing whitespace.
++    NEW.revision,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:225: trailing whitespace.
++    NEW.last_action,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:226: trailing whitespace.
++    COALESCE(NEW.last_actor, 'system'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:227: trailing whitespace.
++    COALESCE(NEW.last_actor_type, 'system'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:228: trailing whitespace.
++    COALESCE(NEW.last_request_id, 'unknown'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:229: trailing whitespace.
++    COALESCE(NEW.last_before_json, '{}'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:230: trailing whitespace.
++    COALESCE(NEW.last_after_json, '{}')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:231: trailing whitespace.
++  );
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:232: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:233: trailing whitespace.
++  INSERT INTO audit_logs (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:234: trailing whitespace.
++    id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:235: trailing whitespace.
++    app_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:236: trailing whitespace.
++    actor,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:237: trailing whitespace.
++    actor_type,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:238: trailing whitespace.
++    action,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:239: trailing whitespace.
++    target_type,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:240: trailing whitespace.
++    target_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:241: trailing whitespace.
++    request_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:242: trailing whitespace.
++    before_json,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:243: trailing whitespace.
++    after_json
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:244: trailing whitespace.
++  )
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:245: trailing whitespace.
++  VALUES (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:246: trailing whitespace.
++    'audit_' || lower(hex(randomblob(16))),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:247: trailing whitespace.
++    NEW.app_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:248: trailing whitespace.
++    COALESCE(NEW.last_actor, 'system'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:249: trailing whitespace.
++    COALESCE(NEW.last_actor_type, 'system'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:250: trailing whitespace.
++    NEW.last_action,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:251: trailing whitespace.
++    'channel',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:252: trailing whitespace.
++    NEW.id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:253: trailing whitespace.
++    COALESCE(NEW.last_request_id, 'unknown'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:254: trailing whitespace.
++    COALESCE(NEW.last_before_json, '{}'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:255: trailing whitespace.
++    COALESCE(NEW.last_after_json, '{}')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:256: trailing whitespace.
++  );
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:257: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:258: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:259: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS channel_history_no_update
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:260: trailing whitespace.
++BEFORE UPDATE ON channel_history
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:261: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:262: trailing whitespace.
++  SELECT RAISE(ABORT, 'channel_history is append-only');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:263: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:264: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:265: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS channel_history_no_delete
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:266: trailing whitespace.
++BEFORE DELETE ON channel_history
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:267: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:268: trailing whitespace.
++  SELECT RAISE(ABORT, 'channel_history is append-only');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:269: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:270: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:271: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS audit_logs_no_update
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:272: trailing whitespace.
++BEFORE UPDATE ON audit_logs
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:273: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:274: trailing whitespace.
++  SELECT RAISE(ABORT, 'audit_logs are append-only');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:275: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:276: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:277: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS audit_logs_no_delete
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:278: trailing whitespace.
++BEFORE DELETE ON audit_logs
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:279: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:280: trailing whitespace.
++  SELECT RAISE(ABORT, 'audit_logs are append-only');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:281: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:284: trailing whitespace.
++PRAGMA foreign_keys = OFF;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:285: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:286: trailing whitespace.
++DROP INDEX IF EXISTS idx_patches_lookup;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:287: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:288: trailing whitespace.
++CREATE TABLE IF NOT EXISTS patches_new (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:289: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:290: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:291: trailing whitespace.
++  platform TEXT NOT NULL CHECK (platform IN ('android', 'windows')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:292: trailing whitespace.
++  to_release_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:293: trailing whitespace.
++  asset_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:294: trailing whitespace.
++  from_version_code INTEGER NOT NULL CHECK (from_version_code >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:295: trailing whitespace.
++  old_sha256 TEXT NOT NULL CHECK (length(old_sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:296: trailing whitespace.
++  patch_format TEXT NOT NULL DEFAULT 'tracepatch' CHECK (patch_format IN ('tracepatch', 'vcdiff')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:297: trailing whitespace.
++  patch_sha256 TEXT NOT NULL CHECK (length(patch_sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:298: trailing whitespace.
++  patch_size_bytes INTEGER NOT NULL CHECK (patch_size_bytes > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:299: trailing whitespace.
++  output_sha256 TEXT NOT NULL CHECK (length(output_sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:300: trailing whitespace.
++  output_size_bytes INTEGER NOT NULL CHECK (output_size_bytes > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:301: trailing whitespace.
++  disabled INTEGER NOT NULL DEFAULT 0 CHECK (disabled IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:302: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:303: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:304: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:305: trailing whitespace.
++  FOREIGN KEY (to_release_id) REFERENCES releases(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:306: trailing whitespace.
++  FOREIGN KEY (asset_id) REFERENCES release_assets(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:307: trailing whitespace.
++  UNIQUE (app_id, platform, to_release_id, from_version_code, old_sha256, patch_format)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:308: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:309: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:310: trailing whitespace.
++INSERT OR IGNORE INTO patches_new (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:311: trailing whitespace.
++  id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:312: trailing whitespace.
++  app_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:313: trailing whitespace.
++  platform,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:314: trailing whitespace.
++  to_release_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:315: trailing whitespace.
++  asset_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:316: trailing whitespace.
++  from_version_code,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:317: trailing whitespace.
++  old_sha256,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:318: trailing whitespace.
++  patch_format,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:319: trailing whitespace.
++  patch_sha256,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:320: trailing whitespace.
++  patch_size_bytes,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:321: trailing whitespace.
++  output_sha256,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:322: trailing whitespace.
++  output_size_bytes,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:323: trailing whitespace.
++  disabled,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:324: trailing whitespace.
++  created_at,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:325: trailing whitespace.
++  updated_at
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:326: trailing whitespace.
++)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:327: trailing whitespace.
++SELECT
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:328: trailing whitespace.
++  id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:329: trailing whitespace.
++  app_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:330: trailing whitespace.
++  platform,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:331: trailing whitespace.
++  to_release_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:332: trailing whitespace.
++  asset_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:333: trailing whitespace.
++  from_version_code,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:334: trailing whitespace.
++  old_sha256,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:335: trailing whitespace.
++  'tracepatch',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:336: trailing whitespace.
++  patch_sha256,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:337: trailing whitespace.
++  patch_size_bytes,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:338: trailing whitespace.
++  output_sha256,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:339: trailing whitespace.
++  output_size_bytes,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:340: trailing whitespace.
++  disabled,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:341: trailing whitespace.
++  created_at,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:342: trailing whitespace.
++  updated_at
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:343: trailing whitespace.
++FROM patches;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:344: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:345: trailing whitespace.
++DROP TABLE patches;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:346: trailing whitespace.
++ALTER TABLE patches_new RENAME TO patches;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:347: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:348: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_patches_lookup
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:349: trailing whitespace.
++  ON patches(app_id, platform, to_release_id, from_version_code, old_sha256);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:350: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:351: trailing whitespace.
++PRAGMA foreign_keys = ON;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:354: trailing whitespace.
++PRAGMA foreign_keys = ON;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:355: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:356: trailing whitespace.
++CREATE TABLE IF NOT EXISTS firmware_releases (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:357: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:358: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:359: trailing whitespace.
++  device_model TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:360: trailing whitespace.
++  version_name TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:361: trailing whitespace.
++  version_code INTEGER NOT NULL CHECK (version_code >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:362: trailing whitespace.
++  release_tag TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:363: trailing whitespace.
++  commit_sha TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:364: trailing whitespace.
++  run_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:365: trailing whitespace.
++  state TEXT NOT NULL DEFAULT 'candidate' CHECK (state IN ('candidate', 'disabled')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:366: trailing whitespace.
++  release_notes TEXT NOT NULL DEFAULT '',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:367: trailing whitespace.
++  file_name TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:368: trailing whitespace.
++  sha256 TEXT NOT NULL CHECK (length(sha256) = 64),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:369: trailing whitespace.
++  size_bytes INTEGER NOT NULL CHECK (size_bytes > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:370: trailing whitespace.
++  r2_key TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:371: trailing whitespace.
++  r2_state TEXT NOT NULL DEFAULT 'not_uploaded' CHECK (r2_state IN ('not_uploaded', 'available', 'r2_deleted', 'archived')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:372: trailing whitespace.
++  github_url TEXT NOT NULL CHECK (instr(github_url, '/latest/download/') = 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:373: trailing whitespace.
++  target_hardware TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:374: trailing whitespace.
++  transport TEXT NOT NULL DEFAULT 'ble',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:375: trailing whitespace.
++  min_app_version_code INTEGER NOT NULL DEFAULT 0 CHECK (min_app_version_code >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:376: trailing whitespace.
++  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:377: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:378: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:379: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:380: trailing whitespace.
++  UNIQUE (app_id, device_model, release_tag),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:381: trailing whitespace.
++  UNIQUE (app_id, device_model, run_id),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:382: trailing whitespace.
++  UNIQUE (app_id, device_model, version_code)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:383: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:384: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:385: trailing whitespace.
++CREATE TABLE IF NOT EXISTS firmware_channels (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:386: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:387: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:388: trailing whitespace.
++  device_model TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:389: trailing whitespace.
++  name TEXT NOT NULL CHECK (name IN ('stable', 'beta')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:390: trailing whitespace.
++  current_release_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:391: trailing whitespace.
++  revision INTEGER NOT NULL DEFAULT 0 CHECK (revision >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:392: trailing whitespace.
++  disable_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_latest IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:393: trailing whitespace.
++  disable_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_downloads IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:394: trailing whitespace.
++  maintenance_message TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:395: trailing whitespace.
++  last_action TEXT NOT NULL DEFAULT 'init' CHECK (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:396: trailing whitespace.
++    last_action IN (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:397: trailing whitespace.
++      'init',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:398: trailing whitespace.
++      'publish',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:399: trailing whitespace.
++      'rollback',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:400: trailing whitespace.
++      'stop_latest',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:401: trailing whitespace.
++      'resume_latest',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:402: trailing whitespace.
++      'stop_downloads',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:403: trailing whitespace.
++      'resume_downloads'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:404: trailing whitespace.
++    )
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:405: trailing whitespace.
++  ),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:406: trailing whitespace.
++  last_actor TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:407: trailing whitespace.
++  last_actor_type TEXT CHECK (last_actor_type IS NULL OR last_actor_type IN ('ci', 'access', 'system', 'test')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:408: trailing whitespace.
++  last_request_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:409: trailing whitespace.
++  last_before_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:410: trailing whitespace.
++  last_after_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:411: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:412: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:413: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:414: trailing whitespace.
++  FOREIGN KEY (current_release_id) REFERENCES firmware_releases(id) ON DELETE SET NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:415: trailing whitespace.
++  UNIQUE (app_id, device_model, name)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:416: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:417: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:418: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_firmware_releases_app_model_state
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:419: trailing whitespace.
++  ON firmware_releases(app_id, device_model, state);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:420: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_firmware_releases_r2
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:421: trailing whitespace.
++  ON firmware_releases(app_id, device_model, r2_state, archived);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:422: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_firmware_channels_lookup
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:423: trailing whitespace.
++  ON firmware_channels(app_id, device_model, name);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:424: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:425: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS firmware_channels_reject_disabled_release_insert
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:426: trailing whitespace.
++BEFORE INSERT ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:427: trailing whitespace.
++WHEN NEW.current_release_id IS NOT NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:428: trailing whitespace.
++  AND EXISTS (SELECT 1 FROM firmware_releases WHERE id = NEW.current_release_id AND state = 'disabled')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:429: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:430: trailing whitespace.
++  SELECT RAISE(ABORT, 'firmware channel cannot point at disabled release');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:431: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:432: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:433: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS firmware_channels_reject_disabled_release_update
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:434: trailing whitespace.
++BEFORE UPDATE OF current_release_id ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:435: trailing whitespace.
++WHEN NEW.current_release_id IS NOT NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:436: trailing whitespace.
++  AND EXISTS (SELECT 1 FROM firmware_releases WHERE id = NEW.current_release_id AND state = 'disabled')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:437: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:438: trailing whitespace.
++  SELECT RAISE(ABORT, 'firmware channel cannot point at disabled release');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:439: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:440: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:441: trailing whitespace.
++CREATE TRIGGER IF NOT EXISTS firmware_releases_reject_disable_when_published
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:442: trailing whitespace.
++BEFORE UPDATE OF state ON firmware_releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:443: trailing whitespace.
++WHEN NEW.state = 'disabled'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:444: trailing whitespace.
++  AND EXISTS (SELECT 1 FROM firmware_channels WHERE current_release_id = NEW.id)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:445: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:446: trailing whitespace.
++  SELECT RAISE(ABORT, 'published firmware release cannot be disabled');
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:447: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:450: trailing whitespace.
++PRAGMA foreign_keys = ON;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:451: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:452: trailing whitespace.
++CREATE TABLE IF NOT EXISTS announcements (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:453: trailing whitespace.
++  id TEXT PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:454: trailing whitespace.
++  app_id TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:455: trailing whitespace.
++  title TEXT NOT NULL CHECK (length(title) BETWEEN 1 AND 120),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:456: trailing whitespace.
++  body TEXT NOT NULL CHECK (length(body) BETWEEN 1 AND 8000),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:457: trailing whitespace.
++  pinned INTEGER NOT NULL DEFAULT 0 CHECK (pinned IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:458: trailing whitespace.
++  published INTEGER NOT NULL DEFAULT 1 CHECK (published IN (0, 1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:459: trailing whitespace.
++  published_at TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:460: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:461: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:462: trailing whitespace.
++  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:463: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:464: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:465: trailing whitespace.
++CREATE INDEX IF NOT EXISTS idx_announcements_public
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:466: trailing whitespace.
++ON announcements(app_id, published, pinned, published_at, updated_at);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:469: trailing whitespace.
++-- Run as one D1 migration transaction. Keep every legacy byte until an approved
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:470: trailing whitespace.
++-- manifest and artifact readback authorize backfill; never invent image identity.
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:471: trailing whitespace.
++DROP TRIGGER firmware_channels_reject_disabled_release_insert;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:472: trailing whitespace.
++DROP TRIGGER firmware_channels_reject_disabled_release_update;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:473: trailing whitespace.
++DROP TRIGGER firmware_releases_reject_disable_when_published;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:474: trailing whitespace.
++ALTER TABLE firmware_channels RENAME TO firmware_channels_legacy;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:475: trailing whitespace.
++ALTER TABLE firmware_releases RENAME TO firmware_releases_legacy;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:476: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:477: trailing whitespace.
++CREATE TABLE firmware_releases (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:478: trailing whitespace.
++  id TEXT NOT NULL PRIMARY KEY CHECK (length(trim(id)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:479: trailing whitespace.
++  app_id TEXT NOT NULL REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:480: trailing whitespace.
++  device_model TEXT NOT NULL CHECK (length(trim(device_model)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:481: trailing whitespace.
++  version_name TEXT NOT NULL CHECK (length(trim(version_name)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:482: trailing whitespace.
++  version_code INTEGER NOT NULL CHECK (typeof(version_code) = 'integer' AND version_code BETWEEN 0 AND 4294967295),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:483: trailing whitespace.
++  release_tag TEXT NOT NULL CHECK (length(trim(release_tag)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:484: trailing whitespace.
++  commit_sha TEXT NOT NULL CHECK (length(commit_sha) = 40 AND commit_sha NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:485: trailing whitespace.
++  run_id TEXT NOT NULL CHECK (length(trim(run_id)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:486: trailing whitespace.
++  state TEXT NOT NULL DEFAULT 'draft' CHECK (state IN ('draft','ready','disabled')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:487: trailing whitespace.
++  release_notes TEXT NOT NULL DEFAULT '',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:488: trailing whitespace.
++  target_image_sha256 TEXT NOT NULL CHECK (length(target_image_sha256) = 64 AND target_image_sha256 NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:489: trailing whitespace.
++  hardware_rev INTEGER NOT NULL CHECK (typeof(hardware_rev) = 'integer' AND hardware_rev BETWEEN 0 AND 65535),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:490: trailing whitespace.
++  layout_id INTEGER NOT NULL CHECK (typeof(layout_id) = 'integer' AND layout_id BETWEEN 0 AND 255),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:491: trailing whitespace.
++  min_boot_version INTEGER NOT NULL CHECK (typeof(min_boot_version) = 'integer' AND min_boot_version BETWEEN 0 AND 255),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:492: trailing whitespace.
++  min_protocol_version INTEGER NOT NULL CHECK (typeof(min_protocol_version) = 'integer' AND min_protocol_version BETWEEN 0 AND 255),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:493: trailing whitespace.
++  target_hardware TEXT NOT NULL CHECK (length(trim(target_hardware)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:494: trailing whitespace.
++  transport TEXT NOT NULL DEFAULT 'ble' CHECK (transport = 'ble'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:495: trailing whitespace.
++  min_app_version_code INTEGER NOT NULL DEFAULT 0 CHECK (typeof(min_app_version_code) = 'integer' AND min_app_version_code BETWEEN 0 AND 2100000000),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:496: trailing whitespace.
++  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0,1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:497: trailing whitespace.
++  registration_json TEXT CHECK (registration_json IS NULL OR (json_valid(registration_json) AND json_type(registration_json) = 'object')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:498: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:499: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:500: trailing whitespace.
++  UNIQUE (app_id,device_model,release_tag),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:501: trailing whitespace.
++  UNIQUE (app_id,device_model,version_code),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:502: trailing whitespace.
++  UNIQUE (app_id,device_model,run_id)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:503: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:504: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:505: trailing whitespace.
++CREATE TABLE firmware_release_assets (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:506: trailing whitespace.
++  id TEXT NOT NULL PRIMARY KEY CHECK (length(trim(id)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:507: trailing whitespace.
++  release_id TEXT NOT NULL REFERENCES firmware_releases(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:508: trailing whitespace.
++  kind TEXT NOT NULL CHECK (kind IN ('full','patch','recovery')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:509: trailing whitespace.
++  file_name TEXT NOT NULL CHECK (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:510: trailing whitespace.
++    length(file_name) BETWEEN 1 AND 128 AND length(trim(file_name)) > 0 AND file_name NOT IN ('.','..')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:511: trailing whitespace.
++    AND file_name NOT GLOB '*[^ -~]*' AND instr(file_name,'/') = 0
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:512: trailing whitespace.
++    AND instr(file_name,char(92)) = 0 AND instr(file_name,char(0)) = 0
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:513: trailing whitespace.
++  ),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:514: trailing whitespace.
++  sha256 TEXT NOT NULL CHECK (length(sha256) = 64 AND sha256 NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:515: trailing whitespace.
++  size_bytes INTEGER NOT NULL CHECK (typeof(size_bytes) = 'integer' AND size_bytes > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:516: trailing whitespace.
++  r2_key TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:517: trailing whitespace.
++  r2_etag TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:518: trailing whitespace.
++  r2_state TEXT NOT NULL DEFAULT 'not_uploaded' CHECK (r2_state IN ('not_uploaded','available','archived','r2_deleted')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:519: trailing whitespace.
++  github_url TEXT NOT NULL CHECK (length(trim(github_url)) > 0 AND instr(github_url,'/latest/download/') = 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:520: trailing whitespace.
++  base_image_sha256 TEXT NOT NULL DEFAULT '',
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:521: trailing whitespace.
++  base_vcode INTEGER NOT NULL DEFAULT 0 CHECK (typeof(base_vcode) = 'integer'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:522: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:523: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:524: trailing whitespace.
++  CHECK ((kind = 'patch' AND length(base_image_sha256) = 64
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:525: trailing whitespace.
++          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:526: trailing whitespace.
++      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:527: trailing whitespace.
++  CHECK (r2_state <> 'available' OR (r2_key IS NOT NULL AND length(trim(r2_key)) > 0
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:528: trailing whitespace.
++    AND r2_etag IS NOT NULL AND length(trim(r2_etag)) > 0)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:529: trailing whitespace.
++  UNIQUE (release_id,kind,base_image_sha256),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:530: trailing whitespace.
++  UNIQUE (release_id,file_name),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:531: trailing whitespace.
++  UNIQUE (r2_key)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:532: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:533: trailing whitespace.
++CREATE INDEX idx_firmware_v2_assets_release ON firmware_release_assets(release_id);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:534: trailing whitespace.
++CREATE INDEX idx_firmware_v2_patch_base ON firmware_release_assets(base_image_sha256,kind,r2_state);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:535: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:536: trailing whitespace.
++CREATE TABLE firmware_channels (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:537: trailing whitespace.
++  id TEXT NOT NULL PRIMARY KEY,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:538: trailing whitespace.
++  app_id TEXT NOT NULL REFERENCES apps(id) ON DELETE CASCADE,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:539: trailing whitespace.
++  device_model TEXT NOT NULL CHECK (length(trim(device_model)) > 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:540: trailing whitespace.
++  name TEXT NOT NULL CHECK (name IN ('stable','beta')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:541: trailing whitespace.
++  current_release_id TEXT REFERENCES firmware_releases(id) ON DELETE SET NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:542: trailing whitespace.
++  -- This is an unresolved migration marker, never a second distribution source.
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:543: trailing whitespace.
++  legacy_current_release_id TEXT REFERENCES firmware_releases_legacy(id),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:544: trailing whitespace.
++  revision INTEGER NOT NULL DEFAULT 0 CHECK (typeof(revision) = 'integer' AND revision >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:545: trailing whitespace.
++  disable_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_latest IN (0,1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:546: trailing whitespace.
++  disable_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_downloads IN (0,1)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:547: trailing whitespace.
++  maintenance_message TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:548: trailing whitespace.
++  last_action TEXT NOT NULL DEFAULT 'init' CHECK (last_action IN ('init','publish','retract','stop_latest','resume_latest','stop_downloads','resume_downloads')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:549: trailing whitespace.
++  last_actor TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:550: trailing whitespace.
++  last_actor_type TEXT CHECK (last_actor_type IS NULL OR last_actor_type IN ('ci','access','system','test')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:551: trailing whitespace.
++  last_request_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:552: trailing whitespace.
++  last_reason TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:553: trailing whitespace.
++  last_before_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:554: trailing whitespace.
++  last_after_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:555: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:556: trailing whitespace.
++  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:557: trailing whitespace.
++  CHECK (current_release_id IS NULL OR legacy_current_release_id IS NULL),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:558: trailing whitespace.
++  UNIQUE (app_id,device_model,name)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:559: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:560: trailing whitespace.
++INSERT INTO firmware_channels (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:561: trailing whitespace.
++  id,app_id,device_model,name,legacy_current_release_id,revision,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:562: trailing whitespace.
++  disable_latest,disable_downloads,maintenance_message,last_action,last_actor,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:563: trailing whitespace.
++  last_actor_type,last_request_id,last_before_json,last_after_json,created_at,updated_at
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:564: trailing whitespace.
++)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:565: trailing whitespace.
++SELECT id,app_id,device_model,name,current_release_id,revision,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:566: trailing whitespace.
++  disable_latest,disable_downloads,maintenance_message,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:567: trailing whitespace.
++  CASE last_action WHEN 'rollback' THEN 'retract' ELSE last_action END,last_actor,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:568: trailing whitespace.
++  last_actor_type,last_request_id,last_before_json,last_after_json,created_at,updated_at
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:569: trailing whitespace.
++FROM firmware_channels_legacy;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:570: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:571: trailing whitespace.
++CREATE TABLE firmware_backfill_manifests (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:572: trailing whitespace.
++  release_id TEXT NOT NULL PRIMARY KEY REFERENCES firmware_releases(id),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:573: trailing whitespace.
++  manifest_sha256 TEXT NOT NULL CHECK (length(manifest_sha256) = 64 AND manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:574: trailing whitespace.
++  manifest_json TEXT NOT NULL CHECK (json_valid(manifest_json) AND json_type(manifest_json) = 'object'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:575: trailing whitespace.
++  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:576: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:577: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:578: trailing whitespace.
++ALTER TABLE audit_logs ADD COLUMN reason TEXT;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:579: trailing whitespace.
++CREATE TRIGGER firmware_audit_reason BEFORE INSERT ON audit_logs
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:580: trailing whitespace.
++WHEN NEW.target_type IN ('firmware_release','firmware_asset','firmware_channel')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:581: trailing whitespace.
++  AND NEW.actor_type = 'access' AND (NEW.reason IS NULL OR length(trim(NEW.reason,char(9)||char(10)||char(11)||char(12)||char(13)||' ')) = 0)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:582: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware admin reason required'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:583: trailing whitespace.
++CREATE TRIGGER firmware_audit_values BEFORE INSERT ON audit_logs
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:584: trailing whitespace.
++WHEN NEW.target_type IN ('firmware_release','firmware_asset','firmware_channel') AND (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:585: trailing whitespace.
++  NEW.id IS NULL OR length(trim(NEW.id)) = 0 OR length(trim(NEW.actor)) = 0
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:586: trailing whitespace.
++  OR length(trim(NEW.request_id)) = 0 OR NEW.after_json IS NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:587: trailing whitespace.
++  OR NOT json_valid(NEW.after_json) OR json_type(NEW.after_json) <> 'object'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:588: trailing whitespace.
++  OR (NEW.before_json IS NOT NULL AND (NOT json_valid(NEW.before_json) OR json_type(NEW.before_json) <> 'object')))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:589: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware audit identity and object snapshots required'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:590: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:591: trailing whitespace.
++CREATE TRIGGER firmware_asset_base_insert BEFORE INSERT ON firmware_release_assets
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:592: trailing whitespace.
++WHEN NEW.kind = 'patch' AND NOT EXISTS (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:593: trailing whitespace.
++  SELECT 1 FROM firmware_releases WHERE id = NEW.release_id AND version_code > NEW.base_vcode)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:594: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware patch base version must precede target'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:595: trailing whitespace.
++CREATE TRIGGER firmware_ready_assets_sealed BEFORE INSERT ON firmware_release_assets
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:596: trailing whitespace.
++WHEN EXISTS (SELECT 1 FROM firmware_releases WHERE id=NEW.release_id AND state='ready')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:597: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'ready firmware asset set is sealed'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:598: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:599: trailing whitespace.
++CREATE TRIGGER firmware_ready_insert BEFORE INSERT ON firmware_releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:600: trailing whitespace.
++WHEN NEW.state = 'ready'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:601: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware ready requires draft assets'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:602: trailing whitespace.
++CREATE TRIGGER firmware_ready_update BEFORE UPDATE OF state ON firmware_releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:603: trailing whitespace.
++WHEN NEW.state = 'ready' AND (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:604: trailing whitespace.
++  (SELECT count(*) FROM firmware_release_assets WHERE release_id = NEW.id AND kind = 'full') <> 1
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:605: trailing whitespace.
++  OR EXISTS (SELECT 1 FROM firmware_release_assets WHERE release_id = NEW.id
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:606: trailing whitespace.
++    AND (r2_state <> 'available' OR r2_key IS NULL OR length(trim(r2_key)) = 0)))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:607: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware ready requires exactly one full and verified assets'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:608: trailing whitespace.
++CREATE TRIGGER firmware_state_transition BEFORE UPDATE OF state ON firmware_releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:609: trailing whitespace.
++WHEN (OLD.state = 'disabled' AND NEW.state <> 'disabled')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:610: trailing whitespace.
++  OR (OLD.state = 'ready' AND NEW.state = 'draft')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:611: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware release state transition forbidden'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:612: trailing whitespace.
++CREATE TRIGGER firmware_release_referenced BEFORE UPDATE OF state,archived ON firmware_releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:613: trailing whitespace.
++WHEN (NEW.state <> 'ready' OR NEW.archived = 1)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:614: trailing whitespace.
++  AND EXISTS (SELECT 1 FROM firmware_channels WHERE current_release_id = NEW.id)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:615: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware release is in use'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:616: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:617: trailing whitespace.
++CREATE TRIGGER firmware_pointer_insert BEFORE INSERT ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:618: trailing whitespace.
++WHEN NEW.current_release_id IS NOT NULL AND NOT EXISTS (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:619: trailing whitespace.
++  SELECT 1 FROM firmware_releases r WHERE r.id = NEW.current_release_id
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:620: trailing whitespace.
++    AND r.app_id = NEW.app_id AND r.device_model = NEW.device_model AND r.state = 'ready' AND r.archived = 0)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:621: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware channel requires same-scope ready release'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:622: trailing whitespace.
++CREATE TRIGGER firmware_pointer_update BEFORE UPDATE OF current_release_id,app_id,device_model ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:623: trailing whitespace.
++WHEN NEW.current_release_id IS NOT NULL AND NOT EXISTS (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:624: trailing whitespace.
++  SELECT 1 FROM firmware_releases r WHERE r.id = NEW.current_release_id
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:625: trailing whitespace.
++    AND r.app_id = NEW.app_id AND r.device_model = NEW.device_model AND r.state = 'ready' AND r.archived = 0)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:626: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware channel requires same-scope ready release'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:627: trailing whitespace.
++CREATE TRIGGER firmware_publish_regression BEFORE UPDATE OF current_release_id,revision ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:628: trailing whitespace.
++WHEN NEW.revision <> OLD.revision AND NEW.last_action = 'publish'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:629: trailing whitespace.
++  AND (SELECT version_code FROM firmware_releases WHERE id = NEW.current_release_id)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:630: trailing whitespace.
++    <= COALESCE((SELECT version_code FROM firmware_releases WHERE id = OLD.current_release_id),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:631: trailing whitespace.
++      (SELECT version_code FROM firmware_releases_legacy WHERE id = OLD.legacy_current_release_id))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:632: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware version regression'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:633: trailing whitespace.
++CREATE TRIGGER firmware_channel_identity BEFORE UPDATE OF id,app_id,device_model,name,created_at ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:634: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware channel identity is immutable'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:635: trailing whitespace.
++CREATE TRIGGER firmware_channel_no_new_legacy BEFORE INSERT ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:636: trailing whitespace.
++WHEN NEW.legacy_current_release_id IS NOT NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:637: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'new legacy channel reference forbidden'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:638: trailing whitespace.
++CREATE TRIGGER firmware_channel_no_legacy_retarget BEFORE UPDATE OF legacy_current_release_id ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:639: trailing whitespace.
++WHEN NEW.legacy_current_release_id IS NOT NULL AND NEW.legacy_current_release_id IS NOT OLD.legacy_current_release_id
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:640: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'legacy channel retarget forbidden'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:641: trailing whitespace.
++CREATE TRIGGER firmware_channel_mutation_guard BEFORE UPDATE ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:642: trailing whitespace.
++WHEN (NEW.current_release_id IS NOT OLD.current_release_id OR NEW.legacy_current_release_id IS NOT OLD.legacy_current_release_id
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:643: trailing whitespace.
++  OR NEW.disable_latest <> OLD.disable_latest OR NEW.disable_downloads <> OLD.disable_downloads
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:644: trailing whitespace.
++  OR NEW.maintenance_message IS NOT OLD.maintenance_message)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:645: trailing whitespace.
++  AND NEW.revision <> OLD.revision + 1
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:646: trailing whitespace.
++  AND NOT (OLD.legacy_current_release_id IS NOT NULL AND NEW.current_release_id = OLD.legacy_current_release_id
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:647: trailing whitespace.
++    AND NEW.legacy_current_release_id IS NULL AND NEW.revision = OLD.revision
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:648: trailing whitespace.
++    AND NEW.disable_latest = OLD.disable_latest AND NEW.disable_downloads = OLD.disable_downloads
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:649: trailing whitespace.
++    AND NEW.maintenance_message IS OLD.maintenance_message
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:650: trailing whitespace.
++    AND EXISTS (SELECT 1 FROM firmware_backfill_manifests WHERE release_id=NEW.current_release_id))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:651: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware channel mutation requires CAS revision'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:652: trailing whitespace.
++CREATE TRIGGER firmware_channel_revision BEFORE UPDATE OF revision ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:653: trailing whitespace.
++WHEN NEW.revision <> OLD.revision AND (NEW.revision <> OLD.revision + 1
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:654: trailing whitespace.
++  OR NEW.last_actor IS NULL OR length(trim(NEW.last_actor)) = 0
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:655: trailing whitespace.
++  OR NEW.last_actor_type IS NULL OR NEW.last_request_id IS NULL
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:656: trailing whitespace.
++  OR NEW.last_reason IS NULL OR length(trim(NEW.last_reason)) = 0
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:657: trailing whitespace.
++  OR NEW.last_before_json IS NULL OR NOT json_valid(NEW.last_before_json)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:658: trailing whitespace.
++  OR NEW.last_after_json IS NULL OR NOT json_valid(NEW.last_after_json))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:659: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware mutation requires revision and audit context'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:660: trailing whitespace.
++CREATE TRIGGER firmware_channel_audit AFTER UPDATE ON firmware_channels
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:661: trailing whitespace.
++WHEN NEW.revision <> OLD.revision
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:662: trailing whitespace.
++BEGIN
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:663: trailing whitespace.
++  INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:664: trailing whitespace.
++    request_id,reason,before_json,after_json)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:665: trailing whitespace.
++  VALUES ('audit_' || lower(hex(randomblob(16))),NEW.app_id,NEW.last_actor,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:666: trailing whitespace.
++    NEW.last_actor_type,NEW.last_action,'firmware_channel',NEW.id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:667: trailing whitespace.
++    NEW.last_request_id,NEW.last_reason,NEW.last_before_json,NEW.last_after_json);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:668: trailing whitespace.
++END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:669: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:670: trailing whitespace.
++CREATE TRIGGER firmware_release_identity BEFORE UPDATE OF
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:671: trailing whitespace.
++  id,app_id,device_model,version_name,version_code,release_tag,commit_sha,run_id,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:672: trailing whitespace.
++  target_image_sha256,hardware_rev,layout_id,min_boot_version,min_protocol_version,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:673: trailing whitespace.
++  target_hardware,transport,min_app_version_code,registration_json,created_at ON firmware_releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:674: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware release identity is immutable'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:675: trailing whitespace.
++CREATE TRIGGER firmware_asset_identity BEFORE UPDATE OF
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:676: trailing whitespace.
++  id,release_id,kind,file_name,sha256,size_bytes,github_url,base_image_sha256,base_vcode,created_at ON firmware_release_assets
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:677: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware asset identity is immutable'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:678: trailing whitespace.
++CREATE TRIGGER firmware_r2_identity BEFORE UPDATE OF r2_key,r2_etag ON firmware_release_assets
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:679: trailing whitespace.
++WHEN (OLD.r2_key IS NOT NULL AND NEW.r2_key IS NOT OLD.r2_key)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:680: trailing whitespace.
++  OR (OLD.r2_etag IS NOT NULL AND NEW.r2_etag IS NOT OLD.r2_etag)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:681: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'verified firmware R2 identity is immutable'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:682: trailing whitespace.
++CREATE TRIGGER firmware_release_no_delete BEFORE DELETE ON firmware_releases
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:683: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware release history is retained'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:684: trailing whitespace.
++CREATE TRIGGER firmware_asset_no_delete BEFORE DELETE ON firmware_release_assets
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:685: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware asset history is retained'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:686: trailing whitespace.
++CREATE TRIGGER firmware_manifest_no_update BEFORE UPDATE ON firmware_backfill_manifests
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:687: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware manifest is immutable'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:688: trailing whitespace.
++CREATE TRIGGER firmware_manifest_no_delete BEFORE DELETE ON firmware_backfill_manifests
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:689: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware manifest is retained'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:690: trailing whitespace.
++CREATE TRIGGER firmware_legacy_release_no_insert BEFORE INSERT ON firmware_releases_legacy
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:691: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'legacy firmware is read only'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:692: trailing whitespace.
++CREATE TRIGGER firmware_legacy_release_no_update BEFORE UPDATE ON firmware_releases_legacy
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:693: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'legacy firmware is read only'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:694: trailing whitespace.
++CREATE TRIGGER firmware_legacy_release_no_delete BEFORE DELETE ON firmware_releases_legacy
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:695: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'legacy firmware is retained'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:696: trailing whitespace.
++CREATE TRIGGER firmware_legacy_channel_no_insert BEFORE INSERT ON firmware_channels_legacy
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:697: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'legacy channel is read only'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:698: trailing whitespace.
++CREATE TRIGGER firmware_legacy_channel_no_update BEFORE UPDATE ON firmware_channels_legacy
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:699: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'legacy channel is read only'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:700: trailing whitespace.
++CREATE TRIGGER firmware_legacy_channel_no_delete BEFORE DELETE ON firmware_channels_legacy
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:701: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'legacy channel is retained'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:702: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:703: trailing whitespace.
++CREATE TABLE firmware_admin_idempotency (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:704: trailing whitespace.
++  actor_canonical TEXT NOT NULL CHECK (length(trim(actor_canonical)) > 0 AND actor_canonical = lower(trim(actor_canonical))),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:705: trailing whitespace.
++  idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) = 36
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:706: trailing whitespace.
++    AND substr(idempotency_key,9,1) = '-' AND substr(idempotency_key,14,1) = '-'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:707: trailing whitespace.
++    AND substr(idempotency_key,19,1) = '-' AND substr(idempotency_key,24,1) = '-'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:708: trailing whitespace.
++    AND substr(idempotency_key,15,1) = '4' AND substr(idempotency_key,20,1) IN ('8','9','a','b')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:709: trailing whitespace.
++    AND length(replace(idempotency_key,'-','')) = 32 AND replace(idempotency_key,'-','') NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:710: trailing whitespace.
++  fingerprint TEXT NOT NULL CHECK (length(fingerprint) = 64 AND fingerprint NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:711: trailing whitespace.
++  method TEXT NOT NULL CHECK (method = 'POST'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:712: trailing whitespace.
++  canonical_path TEXT NOT NULL,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:713: trailing whitespace.
++  action TEXT NOT NULL CHECK (action IN ('disable','recovery-download')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:714: trailing whitespace.
++  release_id TEXT NOT NULL REFERENCES firmware_releases(id),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:715: trailing whitespace.
++  state TEXT NOT NULL CHECK (state IN ('pending','completed')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:716: trailing whitespace.
++  status_code INTEGER,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:717: trailing whitespace.
++  response_body_json TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:718: trailing whitespace.
++  request_id TEXT,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:719: trailing whitespace.
++  created_epoch_seconds INTEGER NOT NULL CHECK (typeof(created_epoch_seconds) = 'integer' AND created_epoch_seconds >= 0),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:720: trailing whitespace.
++  retained_until INTEGER NOT NULL CHECK (retained_until = created_epoch_seconds + 86400),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:721: trailing whitespace.
++  original_expires_at INTEGER,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:722: trailing whitespace.
++  -- Deferred self-reference permits pending only inside the atomic batch.
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:723: trailing whitespace.
++  completed_state TEXT NOT NULL DEFAULT 'completed' CHECK (completed_state = 'completed'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:724: trailing whitespace.
++  PRIMARY KEY (actor_canonical,idempotency_key),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:725: trailing whitespace.
++  UNIQUE (actor_canonical,idempotency_key,completed_state),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:726: trailing whitespace.
++  FOREIGN KEY (actor_canonical,idempotency_key,state)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:727: trailing whitespace.
++    REFERENCES firmware_admin_idempotency(actor_canonical,idempotency_key,completed_state)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:728: trailing whitespace.
++    DEFERRABLE INITIALLY DEFERRED,
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:729: trailing whitespace.
++  CHECK (canonical_path = '/api/admin/firmware/releases/' || release_id || '/' || action),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:730: trailing whitespace.
++  CHECK (state <> 'completed' OR (status_code IS NOT NULL AND status_code = 200
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:731: trailing whitespace.
++    AND response_body_json IS NOT NULL AND json_valid(response_body_json)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:732: trailing whitespace.
++    AND json_type(response_body_json) = 'object' AND request_id IS NOT NULL AND length(request_id) > 0
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:733: trailing whitespace.
++    AND COALESCE(json_type(response_body_json,'$.requestId'),'missing') = 'text'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:734: trailing whitespace.
++    AND json_extract(response_body_json,'$.requestId') = request_id)),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:735: trailing whitespace.
++  CHECK ((action = 'disable' AND original_expires_at IS NULL)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:736: trailing whitespace.
++    OR (action = 'recovery-download' AND (state = 'pending'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:737: trailing whitespace.
++      OR (original_expires_at IS NOT NULL AND original_expires_at = created_epoch_seconds + 300))))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:738: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:739: trailing whitespace.
++CREATE INDEX idx_firmware_idempotency_retained ON firmware_admin_idempotency(retained_until);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:740: trailing whitespace.
++CREATE TRIGGER firmware_idempotency_starts_pending BEFORE INSERT ON firmware_admin_idempotency
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:741: trailing whitespace.
++WHEN NEW.state <> 'pending'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:742: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware idempotency must reserve pending before completion'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:743: trailing whitespace.
++
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:744: trailing whitespace.
++CREATE TABLE firmware_admin_idempotency_tombstones (
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:745: trailing whitespace.
++  actor_canonical TEXT NOT NULL CHECK (length(trim(actor_canonical)) > 0 AND actor_canonical = lower(trim(actor_canonical))),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:746: trailing whitespace.
++  idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) = 36
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:747: trailing whitespace.
++    AND substr(idempotency_key,9,1) = '-' AND substr(idempotency_key,14,1) = '-'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:748: trailing whitespace.
++    AND substr(idempotency_key,19,1) = '-' AND substr(idempotency_key,24,1) = '-'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:749: trailing whitespace.
++    AND substr(idempotency_key,15,1) = '4' AND substr(idempotency_key,20,1) IN ('8','9','a','b')
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:750: trailing whitespace.
++    AND length(replace(idempotency_key,'-','')) = 32 AND replace(idempotency_key,'-','') NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:751: trailing whitespace.
++  fingerprint TEXT NOT NULL CHECK (length(fingerprint) = 64 AND fingerprint NOT GLOB '*[^0-9a-f]*'),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:752: trailing whitespace.
++  action TEXT NOT NULL CHECK (action IN ('disable','recovery-download')),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:753: trailing whitespace.
++  release_id TEXT NOT NULL REFERENCES firmware_releases(id),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:754: trailing whitespace.
++  expired_at INTEGER NOT NULL CHECK (typeof(expired_at) = 'integer' AND expired_at >= 86400),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:755: trailing whitespace.
++  tombstoned_at INTEGER NOT NULL CHECK (typeof(tombstoned_at) = 'integer' AND tombstoned_at >= expired_at),
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:756: trailing whitespace.
++  PRIMARY KEY (actor_canonical,idempotency_key)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:757: trailing whitespace.
++);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:758: trailing whitespace.
++CREATE INDEX idx_firmware_tombstone_expired ON firmware_admin_idempotency_tombstones(expired_at);
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:759: trailing whitespace.
++CREATE TRIGGER firmware_tombstone_consistent BEFORE INSERT ON firmware_admin_idempotency_tombstones
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:760: trailing whitespace.
++WHEN EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones t
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:761: trailing whitespace.
++  WHERE t.actor_canonical = NEW.actor_canonical AND t.idempotency_key = NEW.idempotency_key
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:762: trailing whitespace.
++    AND (t.fingerprint <> NEW.fingerprint OR t.action <> NEW.action
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:763: trailing whitespace.
++      OR t.release_id <> NEW.release_id OR t.expired_at <> NEW.expired_at))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:764: trailing whitespace.
++  OR EXISTS (SELECT 1 FROM firmware_admin_idempotency i
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:765: trailing whitespace.
++  WHERE i.actor_canonical = NEW.actor_canonical AND i.idempotency_key = NEW.idempotency_key
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:766: trailing whitespace.
++    AND (i.state <> 'completed' OR i.fingerprint <> NEW.fingerprint OR i.action <> NEW.action
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:767: trailing whitespace.
++      OR i.release_id <> NEW.release_id OR i.retained_until <> NEW.expired_at))
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:768: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware tombstone integrity mismatch'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:769: trailing whitespace.
++CREATE TRIGGER firmware_tombstone_no_update BEFORE UPDATE ON firmware_admin_idempotency_tombstones
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:770: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware tombstone is immutable'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:771: trailing whitespace.
++CREATE TRIGGER firmware_tombstone_no_delete BEFORE DELETE ON firmware_admin_idempotency_tombstones
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:772: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware tombstone is permanent'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:773: trailing whitespace.
++CREATE TRIGGER firmware_idempotency_no_reuse BEFORE INSERT ON firmware_admin_idempotency
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:774: trailing whitespace.
++WHEN EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:775: trailing whitespace.
++  WHERE actor_canonical = NEW.actor_canonical AND idempotency_key = NEW.idempotency_key)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:776: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware idempotency key is tombstoned'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:777: trailing whitespace.
++CREATE TRIGGER firmware_idempotency_immutable BEFORE UPDATE ON firmware_admin_idempotency
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:778: trailing whitespace.
++WHEN OLD.state = 'completed' OR NEW.state <> 'completed'
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:779: trailing whitespace.
++  OR NEW.actor_canonical <> OLD.actor_canonical OR NEW.idempotency_key <> OLD.idempotency_key
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:780: trailing whitespace.
++  OR NEW.fingerprint <> OLD.fingerprint OR NEW.method <> OLD.method OR NEW.canonical_path <> OLD.canonical_path
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:781: trailing whitespace.
++  OR NEW.action <> OLD.action OR NEW.release_id <> OLD.release_id
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:782: trailing whitespace.
++  OR NEW.created_epoch_seconds <> OLD.created_epoch_seconds OR NEW.retained_until <> OLD.retained_until
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:783: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware idempotency result is immutable'); END;
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:784: trailing whitespace.
++CREATE TRIGGER firmware_idempotency_delete_guard BEFORE DELETE ON firmware_admin_idempotency
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:785: trailing whitespace.
++WHEN NOT EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones t
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:786: trailing whitespace.
++  WHERE t.actor_canonical = OLD.actor_canonical AND t.idempotency_key = OLD.idempotency_key
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:787: trailing whitespace.
++    AND t.fingerprint = OLD.fingerprint AND t.action = OLD.action
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:788: trailing whitespace.
++    AND t.release_id = OLD.release_id AND t.expired_at = OLD.retained_until)
+docs/ota-exec-notes/P4-1-cloud-qualification-2026-10-15/operations/accepted-migrations.sql:789: trailing whitespace.
++BEGIN SELECT RAISE(ABORT,'firmware result cleanup requires matching tombstone first'); END;

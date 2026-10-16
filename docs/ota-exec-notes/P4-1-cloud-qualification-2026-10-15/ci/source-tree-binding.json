@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-15T04:04:16.374Z",
+  "identity": "Eitan-S-23",
+  "featureCommit": "cd4f2e4d651fb7eafe8253ce854b90242cede4d9",
+  "ciCheckout": "45da975bcecd97f0248fbf1d86bdf802763405ef",
+  "treeSha": "0a2eeb3771468dcf866a2d114861765268517277",
+  "equal": true,
+  "parentShas": [
+    "b42d3e25db85d6aba397cb4d0fb34bb5b653904f",
+    "cd4f2e4d651fb7eafe8253ce854b90242cede4d9"
+  ]
+}

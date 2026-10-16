@@ -1,0 +1,152 @@
+{
+  "purpose": "ISOLATED_SYNTHETIC_QUALIFICATION_NOT_REHEARSAL",
+  "phase": "preflight",
+  "started": "2026-10-15T04:59:42.239Z",
+  "worker": "e-track-firmware-p41-test",
+  "databaseId": "2617e1e1-956f-42ce-a465-da56d84abf06",
+  "bucket": "e-track-firmware-p41-test-releases",
+  "observations": [
+    {
+      "action": "GET_NEW_WORKER_SETTINGS",
+      "status": 200,
+      "cfRay": "a4ac419b2b3480e4-NRT",
+      "body": {
+        "result": {
+          "placement": {},
+          "compatibility_date": "2026-06-28",
+          "compatibility_flags": [
+            "nodejs_compat"
+          ],
+          "usage_model": "standard",
+          "tags": [],
+          "tail_consumers": [],
+          "logpush": false,
+          "observability": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "redact_query_string": false,
+            "logs": {
+              "enabled": true,
+              "head_sampling_rate": 1,
+              "persist": true,
+              "invocation_logs": true
+            },
+            "traces": {
+              "enabled": false,
+              "persist": true,
+              "head_sampling_rate": 1
+            }
+          },
+          "annotations": {
+            "workers/triggered_by": "secret"
+          },
+          "bindings": [
+            {
+              "name": "APP_ID",
+              "text": "trace",
+              "type": "plain_text"
+            },
+            {
+              "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+              "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+              "name": "DB",
+              "type": "d1"
+            },
+            {
+              "name": "DEPLOY_TOKEN_SHA256",
+              "type": "secret_text"
+            },
+            {
+              "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+              "type": "secret_text"
+            },
+            {
+              "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+              "text": "p41-test-1",
+              "type": "plain_text"
+            },
+            {
+              "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+              "text": "300",
+              "type": "plain_text"
+            },
+            {
+              "name": "ENABLE_DIRECT_ADMIN_API",
+              "text": "false",
+              "type": "plain_text"
+            },
+            {
+              "name": "ENVIRONMENT",
+              "text": "staging",
+              "type": "plain_text"
+            },
+            {
+              "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+              "text": "1792039926",
+              "type": "plain_text"
+            },
+            {
+              "name": "GITHUB_OWNER",
+              "text": "Eitan-S-23",
+              "type": "plain_text"
+            },
+            {
+              "name": "GITHUB_REPO",
+              "text": "E-Track",
+              "type": "plain_text"
+            },
+            {
+              "name": "MANIFEST_CACHE",
+              "namespace_id": "9581ef5b95154abaa7d441fd07c2f220",
+              "type": "kv_namespace"
+            },
+            {
+              "name": "MANIFEST_CACHE_TTL_SECONDS",
+              "text": "60",
+              "type": "plain_text"
+            },
+            {
+              "class_name": "RateLimiter",
+              "name": "RATE_LIMITER",
+              "namespace_id": "51fbc6056abd4797bf28feb2f8863307",
+              "type": "durable_object_namespace"
+            },
+            {
+              "name": "RATE_LIMIT_MAX_REQUESTS",
+              "text": "60",
+              "type": "plain_text"
+            },
+            {
+              "name": "RATE_LIMIT_WINDOW_SECONDS",
+              "text": "60",
+              "type": "plain_text"
+            },
+            {
+              "bucket_name": "e-track-firmware-p41-test-releases",
+              "name": "RELEASES_BUCKET",
+              "type": "r2_bucket"
+            }
+          ]
+        },
+        "success": true,
+        "errors": [],
+        "messages": []
+      }
+    },
+    {
+      "action": "GET_NEW_WORKER_HEALTH",
+      "status": 200,
+      "body": {
+        "ok": true,
+        "service": "trace-update-service",
+        "environment": "staging"
+      }
+    }
+  ],
+  "ok": false,
+  "error": {
+    "name": "Error",
+    "message": "Failed to start the remote proxy session. Failed to start ProxyWorker or InspectorProxyWorker: The Workers runtime failed to start. There was likely a problem with the workerd binary or your configuration.\nRuntime stderr:\n*** Received structured exception #0xc0000005: access violation; stack: 7ffaf46c8c33 7ff7b1e2d96d 7ff7b1e2da33 7ff7b1e0b0dc 7ff7b1e0b090 7ff7b129fa16 7ff7b12a019f 7ff7afdc5e2f 7ff7b144c3f2 7ff7b14532f6 7ff7b144c94b 7ff7b14532f6 7ff7b1449e9b 7ff7afdb1e77 7ff7b326999e 7ffb2f2e7373 7ffb2fc9cc90"
+  },
+  "finished": "2026-10-15T05:00:00.410Z"
+}

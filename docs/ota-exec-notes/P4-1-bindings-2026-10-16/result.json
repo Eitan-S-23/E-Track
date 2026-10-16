@@ -1,0 +1,96 @@
+{
+  "ok": true,
+  "scope": "RUNTIME_BINDING_QUALIFICATION",
+  "canonicalRehearsal": "NOT_RUN",
+  "independentAcceptance": "NOT_RUN",
+  "repository": "Eitan-S-23/E-Track",
+  "commitSha": "c715ec6b00f8d9b06a820213da72421694b1e44c",
+  "runId": "38859822756",
+  "runAttempt": "1",
+  "fixturePath": "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json",
+  "fixtureSha256": "c963239dadf175bc097bc2d1329f9dba41d95c2380dc3ce276b81411de53efd6",
+  "workerBindingsMatched": true,
+  "assets": [
+    {
+      "ok": true,
+      "kind": "full",
+      "fileName": "e-track-at32f435-v2.8.1-full.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu",
+      "sha256": "cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799",
+      "sizeBytes": 202,
+      "contentDigest": "sha-256=:yzRxt3kMlii7GD2gfD/F2GYTVTe5QSy74zhD9Qv0d5k=:"
+    },
+    {
+      "ok": true,
+      "kind": "patch",
+      "fileName": "e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "sha256": "8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67",
+      "sizeBytes": 208,
+      "contentDigest": "sha-256=:ioJbt07F/cy6dD0xU9uXx0fhiMpZI1VAAIivJKYnPGc=:"
+    },
+    {
+      "ok": true,
+      "kind": "recovery",
+      "fileName": "recovery-v2.8.1.bin",
+      "r2Key": "trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/recovery-v2.8.1.bin",
+      "sha256": "0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c",
+      "sizeBytes": 8200,
+      "contentDigest": "sha-256=:AXHEfbOfhLDprxOfMmWEfkA/dZfMPfX6Qw72rAUllkw=:"
+    }
+  ],
+  "database": {
+    "before": {
+      "counts": {
+        "firmware_releases": 1,
+        "firmware_releases_legacy": 0,
+        "firmware_release_assets": 3,
+        "firmware_channels": 2,
+        "audit_logs": 1
+      },
+      "channels": [
+        {
+          "id": "fw_ch_trace_e-track-at32f435_beta",
+          "name": "beta",
+          "current_release_id": null,
+          "legacy_current_release_id": null,
+          "revision": 0
+        },
+        {
+          "id": "fw_ch_trace_e-track-at32f435_stable",
+          "name": "stable",
+          "current_release_id": null,
+          "legacy_current_release_id": null,
+          "revision": 0
+        }
+      ]
+    },
+    "after": {
+      "counts": {
+        "firmware_releases": 1,
+        "firmware_releases_legacy": 0,
+        "firmware_release_assets": 3,
+        "firmware_channels": 2,
+        "audit_logs": 1
+      },
+      "channels": [
+        {
+          "id": "fw_ch_trace_e-track-at32f435_beta",
+          "name": "beta",
+          "current_release_id": null,
+          "legacy_current_release_id": null,
+          "revision": 0
+        },
+        {
+          "id": "fw_ch_trace_e-track-at32f435_stable",
+          "name": "stable",
+          "current_release_id": null,
+          "legacy_current_release_id": null,
+          "revision": 0
+        }
+      ]
+    }
+  },
+  "businessMutations": "NONE_REQUESTED",
+  "controlPlane": "WRANGLER_REMOTE_PREVIEW_SESSION"
+}

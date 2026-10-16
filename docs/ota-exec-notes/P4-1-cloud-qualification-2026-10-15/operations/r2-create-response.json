@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-15T04:27:01.128Z",
+  "status": 200,
+  "cfRay": "a4ac11a0d8332db2-SJC",
+  "body": {
+    "success": true,
+    "errors": [],
+    "messages": [],
+    "result": {
+      "name": "e-track-firmware-p41-test-releases",
+      "creation_date": "2026-10-15T04:27:01.156Z",
+      "location": "WNAM",
+      "storage_class": "Standard",
+      "jurisdiction": "default"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "docs/acceptance-contracts/P4-1-v1/tools/inspect.py",
+    "selftest",
+    "--output",
+    ".cache/p41-acceptance-20261016/review/selftest-takeover.json"
+  ],
+  "pid": 25808,
+  "started": "2026-10-16T09:52:38.688Z",
+  "ended": "2026-10-16T09:52:39.170Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/offline-oracle-selftest-takeover.stdout.txt",
+      "size_bytes": 201,
+      "sha256": "addb812d84fce9e1772e11d774540931b1fbf59a55e2b29f37f7c57dd2ff7f96"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/offline-oracle-selftest-takeover.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

@@ -1,0 +1,34 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "tests/ota/test_acceptance_bundle.py",
+    "PostP26SpecGovernanceTests"
+  ],
+  "pid": 12960,
+  "started": "2026-10-15T21:40:06.395Z",
+  "ended": "2026-10-15T21:40:07.817Z",
+  "exitCode": 0,
+  "signal": null,
+  "outputs": {
+    "TEMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMPDIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "USERPROFILE": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "APPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\appdata",
+    "LOCALAPPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\localappdata",
+    "XDG_CONFIG_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\config",
+    "XDG_CACHE_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\cache",
+    "XDG_DATA_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\data",
+    "npm_config_cache": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\npm-cache",
+    "PIP_CACHE_DIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\pip-cache",
+    "WRANGLER_LOG_PATH": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\wrangler-logs"
+  },
+  "stdoutPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\p41-ready-record-final.stdout.txt",
+  "stderrPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\p41-ready-record-final.stderr.txt",
+  "closed": true
+}

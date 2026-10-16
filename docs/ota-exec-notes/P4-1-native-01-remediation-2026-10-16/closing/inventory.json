@@ -1,0 +1,23 @@
+{
+  "scope": "post_retention_write_audit",
+  "files": [
+    {
+      "path": "p41-native-01-handoff-audit.json",
+      "source": ".cache/logs/p41-native-01-handoff-audit.json",
+      "sha256": "f91893c03267d5a40e5d6b42f0ad9135fbe2913d88ebf9743fbb57919cdcb689",
+      "sizeBytes": 4475
+    },
+    {
+      "path": "p41-native-01-handoff-audit.stdout.txt",
+      "source": ".cache/logs/p41-native-01-handoff-audit.stdout.txt",
+      "sha256": "60392157b626c53d89e0188ed06dd22609eefbb40747555935a26adc20fd0d4e",
+      "sizeBytes": 1940
+    },
+    {
+      "path": "p41-native-01-handoff-audit.stderr.txt",
+      "source": ".cache/logs/p41-native-01-handoff-audit.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sizeBytes": 0
+    }
+  ]
+}

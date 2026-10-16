@@ -27,12 +27,14 @@ task_id: P4-4
 - P4-2 Worker/R2 endpoint 已部署到目标环境。
 - 以上是配置准备所需的已实现接线与环境，不是要求 P4-1 已完成验收。按 `OTA-DEC-016`，两卡共用一次 staging rehearsal，分别判定发布链与配置要求，不相互等待完成态。
 - rehearsal 与 production 的隔离、证据、独立 reviewer、人工 gate 和 production 审批已传播到并冻结在 `OTA-XC-RELEASE-GATE` 与 `OTA-XC-SECRETS`。
+- 现有账户专用 CI Token 按 `OTA-XC-SECRETS` 的 `P41-CF-CREDENTIAL-02` 用户例外消费；复用测试资源，不重复开户/订阅，不转存本地 provisioning token，不把同账户能力边界或配置回执冒充硬权限隔离及演练通过。本接口修订不启动本卡。
 - 用户/owner 可操作 GitHub environment、repository secrets/variables、Cloudflare token/bucket/Worker secrets。
 
 ## 权威合同
 
 - `OTA-XC-SECRETS`
 - `OTA-XC-RELEASE-GATE`
+- `OTA-XC-BOOTSTRAP-BASE`
 - `OTA-XC-SECURITY`
 - `OTA-XC-R2-IMMUTABILITY`
 - `OTA-XC-RETRY-POLICY`
@@ -48,6 +50,7 @@ task_id: P4-4
 
 - 用户输入 secret/variable 到平台配置界面；agent 只验证名称存在性、权限结果和工作流脱敏输出。
 - workflow 读取 GitHub secrets/variables，Wrangler 调 Cloudflare，register client 调 Worker。
+- 首发配置须消费 `OTA-XC-BOOTSTRAP-BASE` 的非正式 descriptor/审批摘要，演练桶改名不能让旧 Trace 桶进入 production；不得自行回退或修改旧服务。接口允许按精确已提交的待合并分支审查和冻结，不要求整个 P4-1 先合并 main。这只是交付接口传播，不启动本卡或授予配置操作。
 - 输出为平台侧配置清单（只含名称/是否存在/权限范围描述）、environment 审批证据和 P4-1 run 结果。
 
 ## 状态机与生命周期所有者
@@ -111,4 +114,4 @@ task_id: P4-4
 
 ## 阻断性决策
 
-- 无。全部相关决定已由用户批准；执行要求以“权威合同”章节引用的冻结 OTA-XC 条款为准。
+- 无未决规范决定。目标环境、最小权限凭据、独立审批与共享 rehearsal 原件仍须实际具备；条款冻结不启动本卡，也不授予配置操作。具体资格只引用看板 readiness 本行。

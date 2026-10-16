@@ -1,0 +1,967 @@
+{
+  "ok": true,
+  "sourceCommit": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+  "workflows": [
+    {
+      "name": "firmware-build.yml",
+      "runId": 38943100799,
+      "attempt": 1,
+      "headSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+      "jobs": [
+        {
+          "name": "Build firmware (arm-none-eabi-gcc)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:14Z"
+            },
+            {
+              "name": "Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:14Z",
+              "completed_at": "2026-10-16T17:53:25Z"
+            },
+            {
+              "name": "Set up Node for shared release helpers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:25Z",
+              "completed_at": "2026-10-16T17:53:28Z"
+            },
+            {
+              "name": "Contain build temporary and pip cache paths",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:28Z",
+              "completed_at": "2026-10-16T17:53:28Z"
+            },
+            {
+              "name": "Install Arm GNU Toolchain 13.3.Rel1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:28Z",
+              "completed_at": "2026-10-16T17:53:31Z"
+            },
+            {
+              "name": "Install Ninja",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-10-16T17:53:31Z",
+              "completed_at": "2026-10-16T17:53:47Z"
+            },
+            {
+              "name": "Install OTA host test dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-16T17:53:47Z",
+              "completed_at": "2026-10-16T17:53:50Z"
+            },
+            {
+              "name": "Verify reproducible GCC timestamps",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8,
+              "started_at": "2026-10-16T17:53:50Z",
+              "completed_at": "2026-10-16T17:53:50Z"
+            },
+            {
+              "name": "Extract firmware version",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-10-16T17:53:50Z",
+              "completed_at": "2026-10-16T17:53:50Z"
+            },
+            {
+              "name": "Configure (CMake + Ninja)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10,
+              "started_at": "2026-10-16T17:53:50Z",
+              "completed_at": "2026-10-16T17:53:52Z"
+            },
+            {
+              "name": "Build firmware",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11,
+              "started_at": "2026-10-16T17:53:52Z",
+              "completed_at": "2026-10-16T17:54:13Z"
+            },
+            {
+              "name": "Run host tests (boot vectors, OTA host tests, P3-1 product regressions)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12,
+              "started_at": "2026-10-16T17:54:13Z",
+              "completed_at": "2026-10-16T17:54:28Z"
+            },
+            {
+              "name": "Validate OTA App layout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13,
+              "started_at": "2026-10-16T17:54:28Z",
+              "completed_at": "2026-10-16T17:54:28Z"
+            },
+            {
+              "name": "Validate OTA Boot skeleton",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14,
+              "started_at": "2026-10-16T17:54:28Z",
+              "completed_at": "2026-10-16T17:54:28Z"
+            },
+            {
+              "name": "Report firmware artifacts",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15,
+              "started_at": "2026-10-16T17:54:28Z",
+              "completed_at": "2026-10-16T17:54:28Z"
+            },
+            {
+              "name": "Bind same-run GCC App and Boot inputs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16,
+              "started_at": "2026-10-16T17:54:28Z",
+              "completed_at": "2026-10-16T17:54:28Z"
+            },
+            {
+              "name": "Exercise production preparation on the real GCC build (development key only)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17,
+              "started_at": "2026-10-16T17:54:28Z",
+              "completed_at": "2026-10-16T17:54:29Z"
+            },
+            {
+              "name": "Preserve non-publishable GCC packaging evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18,
+              "started_at": "2026-10-16T17:54:29Z",
+              "completed_at": "2026-10-16T17:54:29Z"
+            },
+            {
+              "name": "Exercise the shared key-bound GCC build without protected credentials",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19,
+              "started_at": "2026-10-16T17:54:29Z",
+              "completed_at": "2026-10-16T17:54:52Z"
+            },
+            {
+              "name": "Check development key cleanup before archiving",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20,
+              "started_at": "2026-10-16T17:54:52Z",
+              "completed_at": "2026-10-16T17:54:52Z"
+            },
+            {
+              "name": "Preserve non-publishable key-bound build and packaging evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21,
+              "started_at": "2026-10-16T17:54:52Z",
+              "completed_at": "2026-10-16T17:54:53Z"
+            },
+            {
+              "name": "Build the P3-4 acceptance candidate",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 22,
+              "started_at": "2026-10-16T17:54:53Z",
+              "completed_at": "2026-10-16T17:54:53Z"
+            },
+            {
+              "name": "Preserve the P3-4 candidate build evidence",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 23,
+              "started_at": "2026-10-16T17:54:53Z",
+              "completed_at": "2026-10-16T17:54:53Z"
+            },
+            {
+              "name": "Upload firmware artifact",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24,
+              "started_at": "2026-10-16T17:54:53Z",
+              "completed_at": "2026-10-16T17:54:54Z"
+            },
+            {
+              "name": "Upload Boot artifact",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25,
+              "started_at": "2026-10-16T17:54:54Z",
+              "completed_at": "2026-10-16T17:54:54Z"
+            },
+            {
+              "name": "Post Set up Node for shared release helpers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 49,
+              "started_at": "2026-10-16T17:54:54Z",
+              "completed_at": "2026-10-16T17:54:55Z"
+            },
+            {
+              "name": "Post Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 50,
+              "started_at": "2026-10-16T17:54:55Z",
+              "completed_at": "2026-10-16T17:54:55Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 51,
+              "started_at": "2026-10-16T17:54:55Z",
+              "completed_at": "2026-10-16T17:54:55Z"
+            }
+          ]
+        },
+        {
+          "name": "Release tooling development checks (no cloud credentials)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:13Z"
+            },
+            {
+              "name": "Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:23Z"
+            },
+            {
+              "name": "Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:23Z",
+              "completed_at": "2026-10-16T17:53:23Z"
+            },
+            {
+              "name": "Prepare contained test temporary directory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:23Z",
+              "completed_at": "2026-10-16T17:53:23Z"
+            },
+            {
+              "name": "Install pinned Worker dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:23Z",
+              "completed_at": "2026-10-16T17:53:31Z"
+            },
+            {
+              "name": "Run script and migration host tests explicitly (not workerd)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-10-16T17:53:31Z",
+              "completed_at": "2026-10-16T17:53:32Z"
+            },
+            {
+              "name": "Run release pipeline with real handlers and SQLite host ports (not rehearsal)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-16T17:53:32Z",
+              "completed_at": "2026-10-16T17:53:35Z"
+            },
+            {
+              "name": "Run native workerd D1 R2 and registration invariants (not host doubles)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8,
+              "started_at": "2026-10-16T17:53:35Z",
+              "completed_at": "2026-10-16T17:53:39Z"
+            },
+            {
+              "name": "Check Worker and shared script types",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-10-16T17:53:39Z",
+              "completed_at": "2026-10-16T17:53:41Z"
+            },
+            {
+              "name": "Build tested Worker deployment input without cloud access",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10,
+              "started_at": "2026-10-16T17:53:41Z",
+              "completed_at": "2026-10-16T17:53:42Z"
+            },
+            {
+              "name": "Install byte test dependency",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11,
+              "started_at": "2026-10-16T17:53:42Z",
+              "completed_at": "2026-10-16T17:53:44Z"
+            },
+            {
+              "name": "Build the existing vendor bsdiff for this host",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12,
+              "started_at": "2026-10-16T17:53:44Z",
+              "completed_at": "2026-10-16T17:53:46Z"
+            },
+            {
+              "name": "Check real package generation and approved-envelope replay",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13,
+              "started_at": "2026-10-16T17:53:46Z",
+              "completed_at": "2026-10-16T17:53:46Z"
+            },
+            {
+              "name": "Check workflow execution graph and configuration gates",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14,
+              "started_at": "2026-10-16T17:53:46Z",
+              "completed_at": "2026-10-16T17:53:47Z"
+            },
+            {
+              "name": "Execute production byte preparation with isolated fixtures",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15,
+              "started_at": "2026-10-16T17:53:47Z",
+              "completed_at": "2026-10-16T17:53:53Z"
+            },
+            {
+              "name": "Preserve development byte fixtures and step originals",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16,
+              "started_at": "2026-10-16T17:53:53Z",
+              "completed_at": "2026-10-16T17:53:54Z"
+            },
+            {
+              "name": "Preserve tested Worker deployment input",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17,
+              "started_at": "2026-10-16T17:53:54Z",
+              "completed_at": "2026-10-16T17:53:55Z"
+            },
+            {
+              "name": "Post Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 33,
+              "started_at": "2026-10-16T17:53:55Z",
+              "completed_at": "2026-10-16T17:53:55Z"
+            },
+            {
+              "name": "Post Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 34,
+              "started_at": "2026-10-16T17:53:55Z",
+              "completed_at": "2026-10-16T17:53:56Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 35,
+              "started_at": "2026-10-16T17:53:56Z",
+              "completed_at": "2026-10-16T17:53:56Z"
+            }
+          ]
+        },
+        {
+          "name": "Isolated firmware binding qualification (not rehearsal)",
+          "conclusion": "skipped",
+          "steps": []
+        },
+        {
+          "name": "Firmware production (shared release implementation)",
+          "conclusion": "skipped",
+          "steps": []
+        },
+        {
+          "name": "Firmware rehearsal (shared release implementation)",
+          "conclusion": "skipped",
+          "steps": []
+        }
+      ]
+    },
+    {
+      "name": "acceptance-governance.yml",
+      "runId": 38943100737,
+      "attempt": 1,
+      "headSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+      "jobs": [
+        {
+          "name": "Flutter debugging skill (ubuntu-latest)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:13Z"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:25Z"
+            },
+            {
+              "name": "Test host helpers (Linux)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:25Z",
+              "completed_at": "2026-10-16T17:53:25Z"
+            },
+            {
+              "name": "Test host helpers (Windows)",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:25Z",
+              "completed_at": "2026-10-16T17:53:25Z"
+            },
+            {
+              "name": "Test P3-4 controlled service and live adapters (Linux)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:25Z",
+              "completed_at": "2026-10-16T17:53:54Z"
+            },
+            {
+              "name": "Test P3-4 controlled service and live adapters (Windows)",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 6,
+              "started_at": "2026-10-16T17:53:54Z",
+              "completed_at": "2026-10-16T17:53:54Z"
+            },
+            {
+              "name": "Preserve P3-4 adapter self-test originals",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-16T17:53:54Z",
+              "completed_at": "2026-10-16T17:53:55Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14,
+              "started_at": "2026-10-16T17:53:55Z",
+              "completed_at": "2026-10-16T17:53:55Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15,
+              "started_at": "2026-10-16T17:53:55Z",
+              "completed_at": "2026-10-16T17:53:55Z"
+            }
+          ]
+        },
+        {
+          "name": "Validate acceptance and build governance",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:14Z"
+            },
+            {
+              "name": "Checkout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:14Z",
+              "completed_at": "2026-10-16T17:53:25Z"
+            },
+            {
+              "name": "Verify PowerShell",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:25Z",
+              "completed_at": "2026-10-16T17:53:31Z"
+            },
+            {
+              "name": "Run governance regression tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:31Z",
+              "completed_at": "2026-10-16T17:53:49Z"
+            },
+            {
+              "name": "Install Arm GNU Toolchain 13.3.Rel1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:49Z",
+              "completed_at": "2026-10-16T17:53:53Z"
+            },
+            {
+              "name": "Run P2-6 spec probes",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-10-16T17:53:53Z",
+              "completed_at": "2026-10-16T17:54:02Z"
+            },
+            {
+              "name": "Post Checkout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12,
+              "started_at": "2026-10-16T17:54:02Z",
+              "completed_at": "2026-10-16T17:54:02Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13,
+              "started_at": "2026-10-16T17:54:02Z",
+              "completed_at": "2026-10-16T17:54:02Z"
+            }
+          ]
+        },
+        {
+          "name": "Flutter debugging skill (windows-latest)",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:14Z"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:14Z",
+              "completed_at": "2026-10-16T17:53:32Z"
+            },
+            {
+              "name": "Test host helpers (Linux)",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:32Z",
+              "completed_at": "2026-10-16T17:53:32Z"
+            },
+            {
+              "name": "Test host helpers (Windows)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:32Z",
+              "completed_at": "2026-10-16T17:53:35Z"
+            },
+            {
+              "name": "Test P3-4 controlled service and live adapters (Linux)",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:35Z",
+              "completed_at": "2026-10-16T17:53:35Z"
+            },
+            {
+              "name": "Test P3-4 controlled service and live adapters (Windows)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-10-16T17:53:35Z",
+              "completed_at": "2026-10-16T17:54:04Z"
+            },
+            {
+              "name": "Preserve P3-4 adapter self-test originals",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-16T17:54:04Z",
+              "completed_at": "2026-10-16T17:54:06Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14,
+              "started_at": "2026-10-16T17:54:06Z",
+              "completed_at": "2026-10-16T17:54:07Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15,
+              "started_at": "2026-10-16T17:54:07Z",
+              "completed_at": "2026-10-16T17:54:07Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cloudflare-update-service.yml",
+      "runId": 38943100716,
+      "attempt": 1,
+      "headSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+      "jobs": [
+        {
+          "name": "Public Pages Typecheck",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:13Z"
+            },
+            {
+              "name": "Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:26Z"
+            },
+            {
+              "name": "Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:26Z",
+              "completed_at": "2026-10-16T17:53:28Z"
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:28Z",
+              "completed_at": "2026-10-16T17:53:35Z"
+            },
+            {
+              "name": "Typecheck",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:35Z",
+              "completed_at": "2026-10-16T17:53:37Z"
+            },
+            {
+              "name": "Post Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-10-16T17:53:37Z",
+              "completed_at": "2026-10-16T17:53:37Z"
+            },
+            {
+              "name": "Post Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10,
+              "started_at": "2026-10-16T17:53:37Z",
+              "completed_at": "2026-10-16T17:53:37Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11,
+              "started_at": "2026-10-16T17:53:37Z",
+              "completed_at": "2026-10-16T17:53:37Z"
+            }
+          ]
+        },
+        {
+          "name": "Worker Typecheck and Invariants",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:14Z"
+            },
+            {
+              "name": "Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:14Z",
+              "completed_at": "2026-10-16T17:53:27Z"
+            },
+            {
+              "name": "Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:27Z",
+              "completed_at": "2026-10-16T17:53:30Z"
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:30Z",
+              "completed_at": "2026-10-16T17:53:39Z"
+            },
+            {
+              "name": "Generate Wrangler Env types",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:39Z",
+              "completed_at": "2026-10-16T17:53:41Z"
+            },
+            {
+              "name": "Typecheck",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-10-16T17:53:41Z",
+              "completed_at": "2026-10-16T17:53:42Z"
+            },
+            {
+              "name": "Run invariant tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-16T17:53:42Z",
+              "completed_at": "2026-10-16T17:53:49Z"
+            },
+            {
+              "name": "Post Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13,
+              "started_at": "2026-10-16T17:53:49Z",
+              "completed_at": "2026-10-16T17:53:49Z"
+            },
+            {
+              "name": "Post Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14,
+              "started_at": "2026-10-16T17:53:49Z",
+              "completed_at": "2026-10-16T17:53:50Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15,
+              "started_at": "2026-10-16T17:53:50Z",
+              "completed_at": "2026-10-16T17:53:50Z"
+            }
+          ]
+        },
+        {
+          "name": "Admin Facade Typecheck",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:14Z"
+            },
+            {
+              "name": "Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:14Z",
+              "completed_at": "2026-10-16T17:53:30Z"
+            },
+            {
+              "name": "Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:30Z",
+              "completed_at": "2026-10-16T17:53:34Z"
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-16T17:53:34Z",
+              "completed_at": "2026-10-16T17:53:40Z"
+            },
+            {
+              "name": "Typecheck",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-16T17:53:40Z",
+              "completed_at": "2026-10-16T17:53:41Z"
+            },
+            {
+              "name": "Post Set up Node",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-10-16T17:53:41Z",
+              "completed_at": "2026-10-16T17:53:41Z"
+            },
+            {
+              "name": "Post Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10,
+              "started_at": "2026-10-16T17:53:41Z",
+              "completed_at": "2026-10-16T17:53:42Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11,
+              "started_at": "2026-10-16T17:53:42Z",
+              "completed_at": "2026-10-16T17:53:42Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "build.yml",
+      "runId": 38943100719,
+      "attempt": 1,
+      "headSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+      "jobs": [
+        {
+          "name": "Detect changed paths",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:13Z"
+            },
+            {
+              "name": "Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-16T17:53:13Z",
+              "completed_at": "2026-10-16T17:53:23Z"
+            },
+            {
+              "name": "Detect docs and app build inputs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-16T17:53:23Z",
+              "completed_at": "2026-10-16T17:53:23Z"
+            },
+            {
+              "name": "Post Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-10-16T17:53:23Z",
+              "completed_at": "2026-10-16T17:53:23Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-16T17:53:23Z",
+              "completed_at": "2026-10-16T17:53:24Z"
+            }
+          ]
+        },
+        {
+          "name": "Deploy GitHub Pages",
+          "conclusion": "skipped",
+          "steps": []
+        },
+        {
+          "name": "Build Android APK",
+          "conclusion": "skipped",
+          "steps": []
+        },
+        {
+          "name": "Build Windows EXE",
+          "conclusion": "skipped",
+          "steps": []
+        },
+        {
+          "name": "Create GitHub Release",
+          "conclusion": "skipped",
+          "steps": []
+        }
+      ]
+    }
+  ]
+}

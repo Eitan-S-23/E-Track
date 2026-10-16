@@ -1,0 +1,85 @@
+{
+  "startedAt": "2026-10-16T05:50:38.924Z",
+  "scope": "CURRENT_ACCOUNT_CI_CREDENTIAL_READS",
+  "requests": [
+    {
+      "method": "GET",
+      "route": "/user/tokens/verify",
+      "status": 200,
+      "success": true,
+      "errors": []
+    },
+    {
+      "method": "GET",
+      "route": "/accounts/[REDACTED]",
+      "status": 200,
+      "success": true,
+      "errors": []
+    },
+    {
+      "method": "GET",
+      "route": "/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/settings",
+      "status": 200,
+      "success": true,
+      "errors": []
+    },
+    {
+      "method": "GET",
+      "route": "/accounts/[REDACTED]/r2/buckets/e-track-firmware-p41-test-releases",
+      "status": 200,
+      "success": true,
+      "errors": []
+    },
+    {
+      "method": "GET",
+      "route": "/accounts/[REDACTED]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06",
+      "status": 200,
+      "success": true,
+      "errors": []
+    }
+  ],
+  "tokenDistinctFromProvisioning": true,
+  "tokenFormat": "unprefixed",
+  "tokenPolicyVerified": false,
+  "hardProductionPermissionIsolation": false,
+  "resourceWritesRequested": 0,
+  "previewSessionsCreated": 0,
+  "nativeQualification": "NOT_RUN",
+  "tokenVerification": {
+    "status": 200,
+    "active": true
+  },
+  "account": {
+    "status": 200,
+    "matchesSelectedAccount": true
+  },
+  "worker": {
+    "status": 200,
+    "worker": "e-track-firmware-p41-test",
+    "bucketMatches": true,
+    "databaseMatches": true,
+    "environmentMatches": true
+  },
+  "bucket": {
+    "status": 200,
+    "nameMatches": true
+  },
+  "database": {
+    "status": 200,
+    "nameMatches": true,
+    "idMatches": true
+  },
+  "health": {
+    "exitCode": 0,
+    "closed": true,
+    "error": "",
+    "observation": {
+      "ok": true,
+      "service": "trace-update-service",
+      "environment": "staging"
+    }
+  },
+  "ok": true,
+  "endedAt": "2026-10-16T05:50:45.160Z",
+  "closed": true
+}

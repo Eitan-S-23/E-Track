@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "runId": 38946949709,
+  "conclusion": "success",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/completed/rehearsal.zip",
+    "size_bytes": 4154000,
+    "sha256": "032fe5d1b2f4e1c3766ca8105ec6ede38d0c421a9d05b93194710d4d8cef826e"
+  },
+  "artifactId": 12067107408,
+  "approvals": 1
+}

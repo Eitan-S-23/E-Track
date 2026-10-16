@@ -1,0 +1,10 @@
+{
+  "started": "2026-10-16T17:50:23.884Z",
+  "ended": "2026-10-16T17:50:51.200Z",
+  "exitCode": 0,
+  "signal": null,
+  "closed": true,
+  "stdout": "[dev/p4-1/unattended-20261015 b9d7d18] test(p4-1): prepare repair-bound v2 acceptance\n 8 files changed, 1637 insertions(+), 10 deletions(-)\n create mode 100644 docs/acceptance-contracts/P4-1-v2/tools/bundle.py\n create mode 100644 docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs\n create mode 100644 docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs\n create mode 100644 docs/acceptance-contracts/P4-1-v2/tools/inspect.py\n create mode 100644 docs/acceptance-contracts/P4-1-v2/tools/session.cjs\n",
+  "stderr": "\u001b[0;32m✅ Pre-commit 检查通过\u001b[0m\n",
+  "head": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5"
+}

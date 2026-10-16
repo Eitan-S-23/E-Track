@@ -1,0 +1,55 @@
+{
+  "scope": "DEVELOPMENT_QUALIFICATION_NOT_ACCEPTANCE",
+  "commit": "c715ec6b00f8d9b06a820213da72421694b1e44c",
+  "runId": 38859822756,
+  "runAttempt": 1,
+  "ok": true,
+  "runtimeBindingQualification": "PASS",
+  "canonicalRehearsal": "NOT_RUN",
+  "realKeyBuild": "NOT_RUN",
+  "productionZeroEffectCampaign": "NOT_RUN",
+  "independentAcceptance": "NOT_RUN",
+  "counts": {
+    "hostAndNative": [
+      34,
+      134,
+      156
+    ],
+    "workflowAndBytes": [
+      57,
+      22
+    ],
+    "packageAndGolden": [
+      8,
+      9
+    ]
+  },
+  "diagnostics": {
+    "ordinaryGcc": {
+      "warnings": 640,
+      "errors": 0
+    },
+    "developmentKeyGcc": {
+      "warnings": 640,
+      "errors": 0
+    },
+    "vendor": {
+      "warnings": 6,
+      "errors": 0
+    }
+  },
+  "countPolicy": "Separate suites; aggregate and step duplicates are not added together",
+  "resultSha256": "05fa8664970c0b4a49c795542bb172222f3e8eb5b2d7dc20e265917885729cb8",
+  "artifactDigestMatched": true,
+  "allThreeExistingAssetsMatched": true,
+  "d1CountsAndChannelsUnchanged": true,
+  "protectedApprovalObserved": true,
+  "pendingApprovals": 0,
+  "lifecycle": "Callback completed, shared adapter returned, job post-steps completed; remote preview state not inventoried",
+  "businessMutations": "NONE_REQUESTED",
+  "controlPlane": "WRANGLER_REMOTE_PREVIEW_SESSION",
+  "registrationSecretMetadataPresent": true,
+  "configurationRetry": "One public-key GET EOF before upload; original retained",
+  "productionAndRehearsalSkipped": true,
+  "privateCredentialMatches": 0
+}

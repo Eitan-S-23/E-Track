@@ -1,0 +1,7 @@
+{
+  "exitCode": 0,
+  "closed": true,
+  "stdout": "[dev/p4-1/unattended-20261015 256111c] test(p4-1):prepare-independent-acceptance-inputs\n 12 files changed, 1602 insertions(+), 1 deletion(-)\n create mode 100644 docs/acceptance-contracts/P4-1-v1/tools/bundle.py\n create mode 100644 docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs\n create mode 100644 docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs\n create mode 100644 docs/acceptance-contracts/P4-1-v1/tools/inspect.py\n create mode 100644 docs/acceptance-contracts/P4-1-v1/tools/session.cjs\n",
+  "stderr": "\u001b[0;32m✅ Pre-commit 检查通过\u001b[0m\n",
+  "head": "256111c8d94a862fce7e107146abb242c3ddf795"
+}

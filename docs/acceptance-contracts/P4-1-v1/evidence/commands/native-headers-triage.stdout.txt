@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "scope": "OFFLINE_SDK_CODEC_TRIAGE_NOT_FORMAL_REHEARSAL",
+  "node": "v24.13.0",
+  "miniflare": "4.20260625.0",
+  "sdkSha256": "fb489dfb0eff95a0303f1ac093bd8e6e1f46bb227f65ce105694832f971f3edd",
+  "globalHeadersMatchSDK": false,
+  "results": [
+    {
+      "name": "node-global-headers",
+      "accepted": false,
+      "expected": false,
+      "error": {
+        "name": "DevalueError",
+        "message": "Cannot stringify arbitrary non-POJOs",
+        "path": "[2].httpMetadata"
+      }
+    },
+    {
+      "name": "miniflare-headers",
+      "accepted": true,
+      "expected": true
+    },
+    {
+      "name": "plain-r2-metadata",
+      "accepted": true,
+      "expected": true
+    }
+  ],
+  "spawnAttempts": 0,
+  "remoteRequests": 0
+}

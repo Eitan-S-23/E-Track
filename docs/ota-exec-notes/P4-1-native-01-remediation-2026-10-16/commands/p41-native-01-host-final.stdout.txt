@@ -1,0 +1,820 @@
+
+> @trace/update-service-worker@0.1.0 test
+> vitest run --config test/vitest.host.config.ts test/firmware-scripts.host.test.ts test/firmware-migration.host.test.ts
+
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > builds the same canonical v2 fixture from actual files and keeps R2 unverified 57ms
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > executes the builder CLI, preserves source files and returns a real exit code
+BUILDER_CLI {
+  exitCode: 0,
+  stdout: '{"ok":true,"output":"D:\\\\github\\\\my\\\\E-Track\\\\.cache\\\\p41-dev-20261015\\\\.cache\\\\p4-2-script-fixtures\\\\case-C2hUMW\\\\metadata-cli.json","assetsPrepared":3,"r2Verified":false}\n',
+  stderr: ''
+}
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > executes the builder CLI, preserves source files and returns a real exit code 347ms
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 retains the pinned codec's Node Headers rejection and SDK Headers control
+P41_NATIVE_CODEC_CONTROL {
+  node: 'v24.13.0',
+  wranglerVersion: '4.105.0',
+  miniflareVersion: '4.20260625.0',
+  sdkSha256: 'fb489dfb0eff95a0303f1ac093bd8e6e1f46bb227f65ce105694832f971f3edd',
+  rejected: { name: 'DevalueError', path: '[2].httpMetadata' },
+  sdkHeadersAccepted: true
+}
+
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads full through the real SDK codec with immutable metadata and full readback
+P41_NATIVE_CODEC_UPLOAD {
+  kind: 'full',
+  status: 'UPLOADED',
+  options: {
+    onlyIf: { etagDoesNotMatch: '*' },
+    httpMetadata: {
+      contentType: 'application/vnd.e-track.etu',
+      contentDisposition: 'attachment; filename="e-track-at32f435-v20.0.2-full.etu"',
+      cacheControl: 'public, max-age=31536000, immutable'
+    },
+    customMetadata: {
+      sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3',
+      kind: 'full',
+      'content-digest': 'sha-256=:lreWI+KQtL2hfankIyDEgGTj77UQw5J5mrKnsfm3WaM=:'
+    },
+    sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3'
+  },
+  fullReadbacks: 2
+}
+
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads patch through the real SDK codec with immutable metadata and full readback
+P41_NATIVE_CODEC_UPLOAD {
+  kind: 'patch',
+  status: 'UPLOADED',
+  options: {
+    onlyIf: { etagDoesNotMatch: '*' },
+    httpMetadata: {
+      contentType: 'application/vnd.e-track.etu',
+      contentDisposition: 'attachment; filename="e-track-at32f435-v2.8.0-to-v20.0.3-patch.etu"',
+      cacheControl: 'public, max-age=31536000, immutable'
+    },
+    customMetadata: {
+      sha256: '022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee',
+      kind: 'patch',
+      'content-digest': 'sha-256=:Airbh5thY92uhXTQ+WLZtPgYsL1Fe1cuFEbqZ2f6Xu4=:'
+    },
+    sha256: '022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee'
+  },
+  fullReadbacks: 2
+}
+
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads recovery through the real SDK codec with immutable metadata and full readback
+P41_NATIVE_CODEC_UPLOAD {
+  kind: 'recovery',
+  status: 'UPLOADED',
+  options: {
+    onlyIf: { etagDoesNotMatch: '*' },
+    httpMetadata: {
+      contentType: 'application/octet-stream',
+      contentDisposition: 'attachment; filename="recovery-v20.0.4.bin"',
+      cacheControl: 'public, max-age=31536000, immutable'
+    },
+    customMetadata: {
+      sha256: 'd078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379',
+      kind: 'recovery',
+      'content-digest': 'sha-256=:0HgECu7QN5rndOsniBXA8vW/EHJRp5at/ReaIPicM3k=:'
+    },
+    sha256: 'd078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379'
+  },
+  fullReadbacks: 2
+}
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 retains the pinned codec's Node Headers rejection and SDK Headers control 28ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads full through the real SDK codec with immutable metadata and full readback 10ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads patch through the real SDK codec with immutable metadata and full readback 3ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads recovery through the real SDK codec with immutable metadata and full readback 3ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 metadata collision without overwrite 3ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 bytes collision without overwrite 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 size collision without overwrite 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > closes the HEAD/PUT race with onlyIf and verifies the winning object 2ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects false-positive put success when readback is missing 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects a short multi-chunk readback despite matching HEAD metadata 2ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects a long multi-chunk readback despite matching HEAD metadata 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects a digest multi-chunk readback despite matching HEAD metadata 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects local length mismatches before any R2 call 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects local digest mismatches before any R2 call 1ms
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > keeps dry-run metadata unverified and rejects the old skip-readback option
+UPLOADER_CLI { dryRunExit: 0, refusedSkipExit: 2 }
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > keeps dry-run metadata unverified and rejects the old skip-readback option 1464ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > register client consumes the same real handler/SQLite chain and replays idempotently 215ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 400 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 409 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 503 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > bounds network-only retries and requires the registration result contract 3ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects insecure origins, invalid config and unknown schema before fetch 1ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > prevents script outputs escaping the active worktree 3ms
+stdout | test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > applies the full migration chain to an empty database and emits the actual schema
+SQLITE_VERSION [Object: null prototype] { version: '3.50.4' }
+P42_SCHEMA_DUMP [
+  [Object: null prototype] {
+    type: 'index',
+    name: 'idx_firmware_channels_lookup',
+    sql: 'CREATE INDEX idx_firmware_channels_lookup\r\n' +
+      '  ON "firmware_channels_legacy"(app_id, device_model, name)'
+  },
+  [Object: null prototype] {
+    type: 'index',
+    name: 'idx_firmware_idempotency_retained',
+    sql: 'CREATE INDEX idx_firmware_idempotency_retained ON firmware_admin_idempotency(retained_until)'
+  },
+  [Object: null prototype] {
+    type: 'index',
+    name: 'idx_firmware_releases_app_model_state',
+    sql: 'CREATE INDEX idx_firmware_releases_app_model_state\r\n' +
+      '  ON "firmware_releases_legacy"(app_id, device_model, state)'
+  },
+  [Object: null prototype] {
+    type: 'index',
+    name: 'idx_firmware_releases_r2',
+    sql: 'CREATE INDEX idx_firmware_releases_r2\r\n' +
+      '  ON "firmware_releases_legacy"(app_id, device_model, r2_state, archived)'
+  },
+  [Object: null prototype] {
+    type: 'index',
+    name: 'idx_firmware_tombstone_expired',
+    sql: 'CREATE INDEX idx_firmware_tombstone_expired ON firmware_admin_idempotency_tombstones(expired_at)'
+  },
+  [Object: null prototype] {
+    type: 'index',
+    name: 'idx_firmware_v2_assets_release',
+    sql: 'CREATE INDEX idx_firmware_v2_assets_release ON firmware_release_assets(release_id)'
+  },
+  [Object: null prototype] {
+    type: 'index',
+    name: 'idx_firmware_v2_patch_base',
+    sql: 'CREATE INDEX idx_firmware_v2_patch_base ON firmware_release_assets(base_image_sha256,kind,r2_state)'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_admin_idempotency',
+    sql: 'CREATE TABLE firmware_admin_idempotency (\r\n' +
+      '  actor_canonical TEXT NOT NULL CHECK (length(trim(actor_canonical)) > 0 AND actor_canonical = lower(trim(actor_canonical))),\r\n' +
+      '  idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) = 36\r\n' +
+      "    AND substr(idempotency_key,9,1) = '-' AND substr(idempotency_key,14,1) = '-'\r\n" +
+      "    AND substr(idempotency_key,19,1) = '-' AND substr(idempotency_key,24,1) = '-'\r\n" +
+      "    AND substr(idempotency_key,15,1) = '4' AND substr(idempotency_key,20,1) IN ('8','9','a','b')\r\n" +
+      "    AND length(replace(idempotency_key,'-','')) = 32 AND replace(idempotency_key,'-','') NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      "  fingerprint TEXT NOT NULL CHECK (length(fingerprint) = 64 AND fingerprint NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      "  method TEXT NOT NULL CHECK (method = 'POST'),\r\n" +
+      '  canonical_path TEXT NOT NULL,\r\n' +
+      "  action TEXT NOT NULL CHECK (action IN ('disable','recovery-download')),\r\n" +
+      '  release_id TEXT NOT NULL REFERENCES firmware_releases(id),\r\n' +
+      "  state TEXT NOT NULL CHECK (state IN ('pending','completed')),\r\n" +
+      '  status_code INTEGER,\r\n' +
+      '  response_body_json TEXT,\r\n' +
+      '  request_id TEXT,\r\n' +
+      "  created_epoch_seconds INTEGER NOT NULL CHECK (typeof(created_epoch_seconds) = 'integer' AND created_epoch_seconds >= 0),\r\n" +
+      '  retained_until INTEGER NOT NULL CHECK (retained_until = created_epoch_seconds + 86400),\r\n' +
+      '  original_expires_at INTEGER,\r\n' +
+      '  -- Deferred self-reference permits pending only inside the atomic batch.\r\n' +
+      "  completed_state TEXT NOT NULL DEFAULT 'completed' CHECK (completed_state = 'completed'),\r\n" +
+      '  PRIMARY KEY (actor_canonical,idempotency_key),\r\n' +
+      '  UNIQUE (actor_canonical,idempotency_key,completed_state),\r\n' +
+      '  FOREIGN KEY (actor_canonical,idempotency_key,state)\r\n' +
+      '    REFERENCES firmware_admin_idempotency(actor_canonical,idempotency_key,completed_state)\r\n' +
+      '    DEFERRABLE INITIALLY DEFERRED,\r\n' +
+      "  CHECK (canonical_path = '/api/admin/firmware/releases/' || release_id || '/' || action),\r\n" +
+      "  CHECK (state <> 'completed' OR (status_code IS NOT NULL AND status_code = 200\r\n" +
+      '    AND response_body_json IS NOT NULL AND json_valid(response_body_json)\r\n' +
+      "    AND json_type(response_body_json) = 'object' AND request_id IS NOT NULL AND length(request_id) > 0\r\n" +
+      "    AND COALESCE(json_type(response_body_json,'$.requestId'),'missing') = 'text'\r\n" +
+      "    AND json_extract(response_body_json,'$.requestId') = request_id)),\r\n" +
+      "  CHECK ((action = 'disable' AND original_expires_at IS NULL)\r\n" +
+      "    OR (action = 'recovery-download' AND (state = 'pending'\r\n" +
+      '      OR (original_expires_at IS NOT NULL AND original_expires_at = created_epoch_seconds + 300))))\r\n' +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_admin_idempotency_tombstones',
+    sql: 'CREATE TABLE firmware_admin_idempotency_tombstones (\r\n' +
+      '  actor_canonical TEXT NOT NULL CHECK (length(trim(actor_canonical)) > 0 AND actor_canonical = lower(trim(actor_canonical))),\r\n' +
+      '  idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) = 36\r\n' +
+      "    AND substr(idempotency_key,9,1) = '-' AND substr(idempotency_key,14,1) = '-'\r\n" +
+      "    AND substr(idempotency_key,19,1) = '-' AND substr(idempotency_key,24,1) = '-'\r\n" +
+      "    AND substr(idempotency_key,15,1) = '4' AND substr(idempotency_key,20,1) IN ('8','9','a','b')\r\n" +
+      "    AND length(replace(idempotency_key,'-','')) = 32 AND replace(idempotency_key,'-','') NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      "  fingerprint TEXT NOT NULL CHECK (length(fingerprint) = 64 AND fingerprint NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      "  action TEXT NOT NULL CHECK (action IN ('disable','recovery-download')),\r\n" +
+      '  release_id TEXT NOT NULL REFERENCES firmware_releases(id),\r\n' +
+      "  expired_at INTEGER NOT NULL CHECK (typeof(expired_at) = 'integer' AND expired_at >= 86400),\r\n" +
+      "  tombstoned_at INTEGER NOT NULL CHECK (typeof(tombstoned_at) = 'integer' AND tombstoned_at >= expired_at),\r\n" +
+      '  PRIMARY KEY (actor_canonical,idempotency_key)\r\n' +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_backfill_manifests',
+    sql: 'CREATE TABLE firmware_backfill_manifests (\r\n' +
+      '  release_id TEXT NOT NULL PRIMARY KEY REFERENCES firmware_releases(id),\r\n' +
+      "  manifest_sha256 TEXT NOT NULL CHECK (length(manifest_sha256) = 64 AND manifest_sha256 NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      "  manifest_json TEXT NOT NULL CHECK (json_valid(manifest_json) AND json_type(manifest_json) = 'object'),\r\n" +
+      "  created_at TEXT NOT NULL DEFAULT (datetime('now'))\r\n" +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_channels',
+    sql: 'CREATE TABLE firmware_channels (\r\n' +
+      '  id TEXT NOT NULL PRIMARY KEY,\r\n' +
+      '  app_id TEXT NOT NULL REFERENCES apps(id) ON DELETE CASCADE,\r\n' +
+      '  device_model TEXT NOT NULL CHECK (length(trim(device_model)) > 0),\r\n' +
+      "  name TEXT NOT NULL CHECK (name IN ('stable','beta')),\r\n" +
+      '  current_release_id TEXT REFERENCES firmware_releases(id) ON DELETE SET NULL,\r\n' +
+      '  -- This is an unresolved migration marker, never a second distribution source.\r\n' +
+      '  legacy_current_release_id TEXT REFERENCES firmware_releases_legacy(id),\r\n' +
+      "  revision INTEGER NOT NULL DEFAULT 0 CHECK (typeof(revision) = 'integer' AND revision >= 0),\r\n" +
+      '  disable_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_latest IN (0,1)),\r\n' +
+      '  disable_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_downloads IN (0,1)),\r\n' +
+      '  maintenance_message TEXT,\r\n' +
+      "  last_action TEXT NOT NULL DEFAULT 'init' CHECK (last_action IN ('init','publish','retract','stop_latest','resume_latest','stop_downloads','resume_downloads')),\r\n" +
+      '  last_actor TEXT,\r\n' +
+      "  last_actor_type TEXT CHECK (last_actor_type IS NULL OR last_actor_type IN ('ci','access','system','test')),\r\n" +
+      '  last_request_id TEXT,\r\n' +
+      '  last_reason TEXT,\r\n' +
+      '  last_before_json TEXT,\r\n' +
+      '  last_after_json TEXT,\r\n' +
+      "  created_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      "  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      '  CHECK (current_release_id IS NULL OR legacy_current_release_id IS NULL),\r\n' +
+      '  UNIQUE (app_id,device_model,name)\r\n' +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_channels_legacy',
+    sql: 'CREATE TABLE "firmware_channels_legacy" (\r\n' +
+      '  id TEXT PRIMARY KEY,\r\n' +
+      '  app_id TEXT NOT NULL,\r\n' +
+      '  device_model TEXT NOT NULL,\r\n' +
+      "  name TEXT NOT NULL CHECK (name IN ('stable', 'beta')),\r\n" +
+      '  current_release_id TEXT,\r\n' +
+      '  revision INTEGER NOT NULL DEFAULT 0 CHECK (revision >= 0),\r\n' +
+      '  disable_latest INTEGER NOT NULL DEFAULT 0 CHECK (disable_latest IN (0, 1)),\r\n' +
+      '  disable_downloads INTEGER NOT NULL DEFAULT 0 CHECK (disable_downloads IN (0, 1)),\r\n' +
+      '  maintenance_message TEXT,\r\n' +
+      "  last_action TEXT NOT NULL DEFAULT 'init' CHECK (\r\n" +
+      '    last_action IN (\r\n' +
+      "      'init',\r\n" +
+      "      'publish',\r\n" +
+      "      'rollback',\r\n" +
+      "      'stop_latest',\r\n" +
+      "      'resume_latest',\r\n" +
+      "      'stop_downloads',\r\n" +
+      "      'resume_downloads'\r\n" +
+      '    )\r\n' +
+      '  ),\r\n' +
+      '  last_actor TEXT,\r\n' +
+      "  last_actor_type TEXT CHECK (last_actor_type IS NULL OR last_actor_type IN ('ci', 'access', 'system', 'test')),\r\n" +
+      '  last_request_id TEXT,\r\n' +
+      '  last_before_json TEXT,\r\n' +
+      '  last_after_json TEXT,\r\n' +
+      "  created_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      "  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      '  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,\r\n' +
+      '  FOREIGN KEY (current_release_id) REFERENCES "firmware_releases_legacy"(id) ON DELETE SET NULL,\r\n' +
+      '  UNIQUE (app_id, device_model, name)\r\n' +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_release_assets',
+    sql: 'CREATE TABLE firmware_release_assets (\r\n' +
+      '  id TEXT NOT NULL PRIMARY KEY CHECK (length(trim(id)) > 0),\r\n' +
+      '  release_id TEXT NOT NULL REFERENCES firmware_releases(id) ON DELETE CASCADE,\r\n' +
+      "  kind TEXT NOT NULL CHECK (kind IN ('full','patch','recovery')),\r\n" +
+      '  file_name TEXT NOT NULL CHECK (\r\n' +
+      "    length(file_name) BETWEEN 1 AND 128 AND length(trim(file_name)) > 0 AND file_name NOT IN ('.','..')\r\n" +
+      "    AND file_name NOT GLOB '*[^ -~]*' AND instr(file_name,'/') = 0\r\n" +
+      '    AND instr(file_name,char(92)) = 0 AND instr(file_name,char(0)) = 0\r\n' +
+      '  ),\r\n' +
+      "  sha256 TEXT NOT NULL CHECK (length(sha256) = 64 AND sha256 NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      "  size_bytes INTEGER NOT NULL CHECK (typeof(size_bytes) = 'integer' AND size_bytes > 0),\r\n" +
+      '  r2_key TEXT,\r\n' +
+      '  r2_etag TEXT,\r\n' +
+      "  r2_state TEXT NOT NULL DEFAULT 'not_uploaded' CHECK (r2_state IN ('not_uploaded','available','archived','r2_deleted')),\r\n" +
+      "  github_url TEXT NOT NULL CHECK (length(trim(github_url)) > 0 AND instr(github_url,'/latest/download/') = 0),\r\n" +
+      "  base_image_sha256 TEXT NOT NULL DEFAULT '',\r\n" +
+      "  base_vcode INTEGER NOT NULL DEFAULT 0 CHECK (typeof(base_vcode) = 'integer'),\r\n" +
+      "  created_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      "  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      "  CHECK ((kind = 'patch' AND length(base_image_sha256) = 64\r\n" +
+      "          AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)\r\n" +
+      "      OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0)),\r\n" +
+      "  CHECK (r2_state <> 'available' OR (r2_key IS NOT NULL AND length(trim(r2_key)) > 0\r\n" +
+      '    AND r2_etag IS NOT NULL AND length(trim(r2_etag)) > 0)),\r\n' +
+      '  UNIQUE (release_id,kind,base_image_sha256),\r\n' +
+      '  UNIQUE (release_id,file_name),\r\n' +
+      '  UNIQUE (r2_key)\r\n' +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_releases',
+    sql: 'CREATE TABLE firmware_releases (\r\n' +
+      '  id TEXT NOT NULL PRIMARY KEY CHECK (length(trim(id)) > 0),\r\n' +
+      '  app_id TEXT NOT NULL REFERENCES apps(id) ON DELETE CASCADE,\r\n' +
+      '  device_model TEXT NOT NULL CHECK (length(trim(device_model)) > 0),\r\n' +
+      '  version_name TEXT NOT NULL CHECK (length(trim(version_name)) > 0),\r\n' +
+      "  version_code INTEGER NOT NULL CHECK (typeof(version_code) = 'integer' AND version_code BETWEEN 0 AND 4294967295),\r\n" +
+      '  release_tag TEXT NOT NULL CHECK (length(trim(release_tag)) > 0),\r\n' +
+      "  commit_sha TEXT NOT NULL CHECK (length(commit_sha) = 40 AND commit_sha NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      '  run_id TEXT NOT NULL CHECK (length(trim(run_id)) > 0),\r\n' +
+      "  state TEXT NOT NULL DEFAULT 'draft' CHECK (state IN ('draft','ready','disabled')),\r\n" +
+      "  release_notes TEXT NOT NULL DEFAULT '',\r\n" +
+      "  target_image_sha256 TEXT NOT NULL CHECK (length(target_image_sha256) = 64 AND target_image_sha256 NOT GLOB '*[^0-9a-f]*'),\r\n" +
+      "  hardware_rev INTEGER NOT NULL CHECK (typeof(hardware_rev) = 'integer' AND hardware_rev BETWEEN 0 AND 65535),\r\n" +
+      "  layout_id INTEGER NOT NULL CHECK (typeof(layout_id) = 'integer' AND layout_id BETWEEN 0 AND 255),\r\n" +
+      "  min_boot_version INTEGER NOT NULL CHECK (typeof(min_boot_version) = 'integer' AND min_boot_version BETWEEN 0 AND 255),\r\n" +
+      "  min_protocol_version INTEGER NOT NULL CHECK (typeof(min_protocol_version) = 'integer' AND min_protocol_version BETWEEN 0 AND 255),\r\n" +
+      '  target_hardware TEXT NOT NULL CHECK (length(trim(target_hardware)) > 0),\r\n' +
+      "  transport TEXT NOT NULL DEFAULT 'ble' CHECK (transport = 'ble'),\r\n" +
+      "  min_app_version_code INTEGER NOT NULL DEFAULT 0 CHECK (typeof(min_app_version_code) = 'integer' AND min_app_version_code BETWEEN 0 AND 2100000000),\r\n" +
+      '  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0,1)),\r\n' +
+      "  registration_json TEXT CHECK (registration_json IS NULL OR (json_valid(registration_json) AND json_type(registration_json) = 'object')),\r\n" +
+      "  created_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      "  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      '  UNIQUE (app_id,device_model,release_tag),\r\n' +
+      '  UNIQUE (app_id,device_model,version_code),\r\n' +
+      '  UNIQUE (app_id,device_model,run_id)\r\n' +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'table',
+    name: 'firmware_releases_legacy',
+    sql: 'CREATE TABLE "firmware_releases_legacy" (\r\n' +
+      '  id TEXT PRIMARY KEY,\r\n' +
+      '  app_id TEXT NOT NULL,\r\n' +
+      '  device_model TEXT NOT NULL,\r\n' +
+      '  version_name TEXT NOT NULL,\r\n' +
+      '  version_code INTEGER NOT NULL CHECK (version_code >= 0),\r\n' +
+      '  release_tag TEXT NOT NULL,\r\n' +
+      '  commit_sha TEXT NOT NULL,\r\n' +
+      '  run_id TEXT NOT NULL,\r\n' +
+      "  state TEXT NOT NULL DEFAULT 'candidate' CHECK (state IN ('candidate', 'disabled')),\r\n" +
+      "  release_notes TEXT NOT NULL DEFAULT '',\r\n" +
+      '  file_name TEXT NOT NULL,\r\n' +
+      '  sha256 TEXT NOT NULL CHECK (length(sha256) = 64),\r\n' +
+      '  size_bytes INTEGER NOT NULL CHECK (size_bytes > 0),\r\n' +
+      '  r2_key TEXT,\r\n' +
+      "  r2_state TEXT NOT NULL DEFAULT 'not_uploaded' CHECK (r2_state IN ('not_uploaded', 'available', 'r2_deleted', 'archived')),\r\n" +
+      "  github_url TEXT NOT NULL CHECK (instr(github_url, '/latest/download/') = 0),\r\n" +
+      '  target_hardware TEXT,\r\n' +
+      "  transport TEXT NOT NULL DEFAULT 'ble',\r\n" +
+      '  min_app_version_code INTEGER NOT NULL DEFAULT 0 CHECK (min_app_version_code >= 0),\r\n' +
+      '  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0, 1)),\r\n' +
+      "  created_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      "  updated_at TEXT NOT NULL DEFAULT (datetime('now')),\r\n" +
+      '  FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,\r\n' +
+      '  UNIQUE (app_id, device_model, release_tag),\r\n' +
+      '  UNIQUE (app_id, device_model, run_id),\r\n' +
+      '  UNIQUE (app_id, device_model, version_code)\r\n' +
+      ')'
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_asset_base_insert',
+    sql: 'CREATE TRIGGER firmware_asset_base_insert BEFORE INSERT ON firmware_release_assets\r\n' +
+      "WHEN NEW.kind = 'patch' AND NOT EXISTS (\r\n" +
+      '  SELECT 1 FROM firmware_releases WHERE id = NEW.release_id AND version_code > NEW.base_vcode)\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware patch base version must precede target'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_asset_identity',
+    sql: 'CREATE TRIGGER firmware_asset_identity BEFORE UPDATE OF\r\n' +
+      '  id,release_id,kind,file_name,sha256,size_bytes,github_url,base_image_sha256,base_vcode,created_at ON firmware_release_assets\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware asset identity is immutable'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_asset_no_delete',
+    sql: 'CREATE TRIGGER firmware_asset_no_delete BEFORE DELETE ON firmware_release_assets\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware asset history is retained'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_audit_reason',
+    sql: 'CREATE TRIGGER firmware_audit_reason BEFORE INSERT ON audit_logs\r\n' +
+      "WHEN NEW.target_type IN ('firmware_release','firmware_asset','firmware_channel')\r\n" +
+      "  AND NEW.actor_type = 'access' AND (NEW.reason IS NULL OR length(trim(NEW.reason,char(9)||char(10)||char(11)||char(12)||char(13)||' ')) = 0)\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware admin reason required'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_audit_values',
+    sql: 'CREATE TRIGGER firmware_audit_values BEFORE INSERT ON audit_logs\r\n' +
+      "WHEN NEW.target_type IN ('firmware_release','firmware_asset','firmware_channel') AND (\r\n" +
+      '  NEW.id IS NULL OR length(trim(NEW.id)) = 0 OR length(trim(NEW.actor)) = 0\r\n' +
+      '  OR length(trim(NEW.request_id)) = 0 OR NEW.after_json IS NULL\r\n' +
+      "  OR NOT json_valid(NEW.after_json) OR json_type(NEW.after_json) <> 'object'\r\n" +
+      "  OR (NEW.before_json IS NOT NULL AND (NOT json_valid(NEW.before_json) OR json_type(NEW.before_json) <> 'object')))\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware audit identity and object snapshots required'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_channel_audit',
+    sql: 'CREATE TRIGGER firmware_channel_audit AFTER UPDATE ON firmware_channels\r\n' +
+      'WHEN NEW.revision <> OLD.revision\r\n' +
+      'BEGIN\r\n' +
+      '  INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,\r\n' +
+      '    request_id,reason,before_json,after_json)\r\n' +
+      "  VALUES ('audit_' || lower(hex(randomblob(16))),NEW.app_id,NEW.last_actor,\r\n" +
+      "    NEW.last_actor_type,NEW.last_action,'firmware_channel',NEW.id,\r\n" +
+      '    NEW.last_request_id,NEW.last_reason,NEW.last_before_json,NEW.last_after_json);\r\n' +
+      'END'
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_channel_identity',
+    sql: 'CREATE TRIGGER firmware_channel_identity BEFORE UPDATE OF id,app_id,device_model,name,created_at ON firmware_channels\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware channel identity is immutable'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_channel_mutation_guard',
+    sql: 'CREATE TRIGGER firmware_channel_mutation_guard BEFORE UPDATE ON firmware_channels\r\n' +
+      'WHEN (NEW.current_release_id IS NOT OLD.current_release_id OR NEW.legacy_current_release_id IS NOT OLD.legacy_current_release_id\r\n' +
+      '  OR NEW.disable_latest <> OLD.disable_latest OR NEW.disable_downloads <> OLD.disable_downloads\r\n' +
+      '  OR NEW.maintenance_message IS NOT OLD.maintenance_message)\r\n' +
+      '  AND NEW.revision <> OLD.revision + 1\r\n' +
+      '  AND NOT (OLD.legacy_current_release_id IS NOT NULL AND NEW.current_release_id = OLD.legacy_current_release_id\r\n' +
+      '    AND NEW.legacy_current_release_id IS NULL AND NEW.revision = OLD.revision\r\n' +
+      '    AND NEW.disable_latest = OLD.disable_latest AND NEW.disable_downloads = OLD.disable_downloads\r\n' +
+      '    AND NEW.maintenance_message IS OLD.maintenance_message\r\n' +
+      '    AND EXISTS (SELECT 1 FROM firmware_backfill_manifests WHERE release_id=NEW.current_release_id))\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware channel mutation requires CAS revision'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_channel_no_legacy_retarget',
+    sql: 'CREATE TRIGGER firmware_channel_no_legacy_retarget BEFORE UPDATE OF legacy_current_release_id ON firmware_channels\r\n' +
+      'WHEN NEW.legacy_current_release_id IS NOT NULL AND NEW.legacy_current_release_id IS NOT OLD.legacy_current_release_id\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'legacy channel retarget forbidden'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_channel_no_new_legacy',
+    sql: 'CREATE TRIGGER firmware_channel_no_new_legacy BEFORE INSERT ON firmware_channels\r\n' +
+      'WHEN NEW.legacy_current_release_id IS NOT NULL\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'new legacy channel reference forbidden'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_channel_revision',
+    sql: 'CREATE TRIGGER firmware_channel_revision BEFORE UPDATE OF revision ON firmware_channels\r\n' +
+      'WHEN NEW.revision <> OLD.revision AND (NEW.revision <> OLD.revision + 1\r\n' +
+      '  OR NEW.last_actor IS NULL OR length(trim(NEW.last_actor)) = 0\r\n' +
+      '  OR NEW.last_actor_type IS NULL OR NEW.last_request_id IS NULL\r\n' +
+      '  OR NEW.last_reason IS NULL OR length(trim(NEW.last_reason)) = 0\r\n' +
+      '  OR NEW.last_before_json IS NULL OR NOT json_valid(NEW.last_before_json)\r\n' +
+      '  OR NEW.last_after_json IS NULL OR NOT json_valid(NEW.last_after_json))\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware mutation requires revision and audit context'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_idempotency_delete_guard',
+    sql: 'CREATE TRIGGER firmware_idempotency_delete_guard BEFORE DELETE ON firmware_admin_idempotency\r\n' +
+      'WHEN NOT EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones t\r\n' +
+      '  WHERE t.actor_canonical = OLD.actor_canonical AND t.idempotency_key = OLD.idempotency_key\r\n' +
+      '    AND t.fingerprint = OLD.fingerprint AND t.action = OLD.action\r\n' +
+      '    AND t.release_id = OLD.release_id AND t.expired_at = OLD.retained_until)\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware result cleanup requires matching tombstone first'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_idempotency_immutable',
+    sql: 'CREATE TRIGGER firmware_idempotency_immutable BEFORE UPDATE ON firmware_admin_idempotency\r\n' +
+      "WHEN OLD.state = 'completed' OR NEW.state <> 'completed'\r\n" +
+      '  OR NEW.actor_canonical <> OLD.actor_canonical OR NEW.idempotency_key <> OLD.idempotency_key\r\n' +
+      '  OR NEW.fingerprint <> OLD.fingerprint OR NEW.method <> OLD.method OR NEW.canonical_path <> OLD.canonical_path\r\n' +
+      '  OR NEW.action <> OLD.action OR NEW.release_id <> OLD.release_id\r\n' +
+      '  OR NEW.created_epoch_seconds <> OLD.created_epoch_seconds OR NEW.retained_until <> OLD.retained_until\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware idempotency result is immutable'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_idempotency_no_reuse',
+    sql: 'CREATE TRIGGER firmware_idempotency_no_reuse BEFORE INSERT ON firmware_admin_idempotency\r\n' +
+      'WHEN EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones\r\n' +
+      '  WHERE actor_canonical = NEW.actor_canonical AND idempotency_key = NEW.idempotency_key)\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware idempotency key is tombstoned'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_idempotency_starts_pending',
+    sql: 'CREATE TRIGGER firmware_idempotency_starts_pending BEFORE INSERT ON firmware_admin_idempotency\r\n' +
+      "WHEN NEW.state <> 'pending'\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware idempotency must reserve pending before completion'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_legacy_channel_no_delete',
+    sql: 'CREATE TRIGGER firmware_legacy_channel_no_delete BEFORE DELETE ON firmware_channels_legacy\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'legacy channel is retained'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_legacy_channel_no_insert',
+    sql: 'CREATE TRIGGER firmware_legacy_channel_no_insert BEFORE INSERT ON firmware_channels_legacy\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'legacy channel is read only'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_legacy_channel_no_update',
+    sql: 'CREATE TRIGGER firmware_legacy_channel_no_update BEFORE UPDATE ON firmware_channels_legacy\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'legacy channel is read only'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_legacy_release_no_delete',
+    sql: 'CREATE TRIGGER firmware_legacy_release_no_delete BEFORE DELETE ON firmware_releases_legacy\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'legacy firmware is retained'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_legacy_release_no_insert',
+    sql: 'CREATE TRIGGER firmware_legacy_release_no_insert BEFORE INSERT ON firmware_releases_legacy\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'legacy firmware is read only'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_legacy_release_no_update',
+    sql: 'CREATE TRIGGER firmware_legacy_release_no_update BEFORE UPDATE ON firmware_releases_legacy\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'legacy firmware is read only'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_manifest_no_delete',
+    sql: 'CREATE TRIGGER firmware_manifest_no_delete BEFORE DELETE ON firmware_backfill_manifests\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware manifest is retained'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_manifest_no_update',
+    sql: 'CREATE TRIGGER firmware_manifest_no_update BEFORE UPDATE ON firmware_backfill_manifests\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware manifest is immutable'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_pointer_insert',
+    sql: 'CREATE TRIGGER firmware_pointer_insert BEFORE INSERT ON firmware_channels\r\n' +
+      'WHEN NEW.current_release_id IS NOT NULL AND NOT EXISTS (\r\n' +
+      '  SELECT 1 FROM firmware_releases r WHERE r.id = NEW.current_release_id\r\n' +
+      "    AND r.app_id = NEW.app_id AND r.device_model = NEW.device_model AND r.state = 'ready' AND r.archived = 0)\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware channel requires same-scope ready release'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_pointer_update',
+    sql: 'CREATE TRIGGER firmware_pointer_update BEFORE UPDATE OF current_release_id,app_id,device_model ON firmware_channels\r\n' +
+      'WHEN NEW.current_release_id IS NOT NULL AND NOT EXISTS (\r\n' +
+      '  SELECT 1 FROM firmware_releases r WHERE r.id = NEW.current_release_id\r\n' +
+      "    AND r.app_id = NEW.app_id AND r.device_model = NEW.device_model AND r.state = 'ready' AND r.archived = 0)\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware channel requires same-scope ready release'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_publish_regression',
+    sql: 'CREATE TRIGGER firmware_publish_regression BEFORE UPDATE OF current_release_id,revision ON firmware_channels\r\n' +
+      "WHEN NEW.revision <> OLD.revision AND NEW.last_action = 'publish'\r\n" +
+      '  AND (SELECT version_code FROM firmware_releases WHERE id = NEW.current_release_id)\r\n' +
+      '    <= COALESCE((SELECT version_code FROM firmware_releases WHERE id = OLD.current_release_id),\r\n' +
+      '      (SELECT version_code FROM firmware_releases_legacy WHERE id = OLD.legacy_current_release_id))\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware version regression'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_r2_identity',
+    sql: 'CREATE TRIGGER firmware_r2_identity BEFORE UPDATE OF r2_key,r2_etag ON firmware_release_assets\r\n' +
+      'WHEN (OLD.r2_key IS NOT NULL AND NEW.r2_key IS NOT OLD.r2_key)\r\n' +
+      '  OR (OLD.r2_etag IS NOT NULL AND NEW.r2_etag IS NOT OLD.r2_etag)\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'verified firmware R2 identity is immutable'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_ready_assets_sealed',
+    sql: 'CREATE TRIGGER firmware_ready_assets_sealed BEFORE INSERT ON firmware_release_assets\r\n' +
+      "WHEN EXISTS (SELECT 1 FROM firmware_releases WHERE id=NEW.release_id AND state='ready')\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'ready firmware asset set is sealed'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_ready_insert',
+    sql: 'CREATE TRIGGER firmware_ready_insert BEFORE INSERT ON firmware_releases\r\n' +
+      "WHEN NEW.state = 'ready'\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware ready requires draft assets'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_ready_update',
+    sql: 'CREATE TRIGGER firmware_ready_update BEFORE UPDATE OF state ON firmware_releases\r\n' +
+      "WHEN NEW.state = 'ready' AND (\r\n" +
+      "  (SELECT count(*) FROM firmware_release_assets WHERE release_id = NEW.id AND kind = 'full') <> 1\r\n" +
+      '  OR EXISTS (SELECT 1 FROM firmware_release_assets WHERE release_id = NEW.id\r\n' +
+      "    AND (r2_state <> 'available' OR r2_key IS NULL OR length(trim(r2_key)) = 0)))\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware ready requires exactly one full and verified assets'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_release_identity',
+    sql: 'CREATE TRIGGER firmware_release_identity BEFORE UPDATE OF\r\n' +
+      '  id,app_id,device_model,version_name,version_code,release_tag,commit_sha,run_id,\r\n' +
+      '  target_image_sha256,hardware_rev,layout_id,min_boot_version,min_protocol_version,\r\n' +
+      '  target_hardware,transport,min_app_version_code,registration_json,created_at ON firmware_releases\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware release identity is immutable'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_release_no_delete',
+    sql: 'CREATE TRIGGER firmware_release_no_delete BEFORE DELETE ON firmware_releases\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware release history is retained'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_release_referenced',
+    sql: 'CREATE TRIGGER firmware_release_referenced BEFORE UPDATE OF state,archived ON firmware_releases\r\n' +
+      "WHEN (NEW.state <> 'ready' OR NEW.archived = 1)\r\n" +
+      '  AND EXISTS (SELECT 1 FROM firmware_channels WHERE current_release_id = NEW.id)\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware release is in use'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_state_transition',
+    sql: 'CREATE TRIGGER firmware_state_transition BEFORE UPDATE OF state ON firmware_releases\r\n' +
+      "WHEN (OLD.state = 'disabled' AND NEW.state <> 'disabled')\r\n" +
+      "  OR (OLD.state = 'ready' AND NEW.state = 'draft')\r\n" +
+      "BEGIN SELECT RAISE(ABORT,'firmware release state transition forbidden'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_tombstone_consistent',
+    sql: 'CREATE TRIGGER firmware_tombstone_consistent BEFORE INSERT ON firmware_admin_idempotency_tombstones\r\n' +
+      'WHEN EXISTS (SELECT 1 FROM firmware_admin_idempotency_tombstones t\r\n' +
+      '  WHERE t.actor_canonical = NEW.actor_canonical AND t.idempotency_key = NEW.idempotency_key\r\n' +
+      '    AND (t.fingerprint <> NEW.fingerprint OR t.action <> NEW.action\r\n' +
+      '      OR t.release_id <> NEW.release_id OR t.expired_at <> NEW.expired_at))\r\n' +
+      '  OR EXISTS (SELECT 1 FROM firmware_admin_idempotency i\r\n' +
+      '  WHERE i.actor_canonical = NEW.actor_canonical AND i.idempotency_key = NEW.idempotency_key\r\n' +
+      "    AND (i.state <> 'completed' OR i.fingerprint <> NEW.fingerprint OR i.action <> NEW.action\r\n" +
+      '      OR i.release_id <> NEW.release_id OR i.retained_until <> NEW.expired_at))\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware tombstone integrity mismatch'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_tombstone_no_delete',
+    sql: 'CREATE TRIGGER firmware_tombstone_no_delete BEFORE DELETE ON firmware_admin_idempotency_tombstones\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware tombstone is permanent'); END"
+  },
+  [Object: null prototype] {
+    type: 'trigger',
+    name: 'firmware_tombstone_no_update',
+    sql: 'CREATE TRIGGER firmware_tombstone_no_update BEFORE UPDATE ON firmware_admin_idempotency_tombstones\r\n' +
+      "BEGIN SELECT RAISE(ABORT,'firmware tombstone is immutable'); END"
+  }
+]
+
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > applies the full migration chain to an empty database and emits the actual schema 29ms
+stdout | test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > verifies artifacts/raw image/R2, safely maps published ready, preserves disabled/draft and replays without extra rows
+BACKFILL_BEFORE [
+  [Object: null prototype] {
+    id: 'legacy-0',
+    app_id: 'trace',
+    device_model: 'e-track-at32f435',
+    version_name: '2.8.1',
+    version_code: 20801,
+    release_tag: 'mcu-e-track-at32f435-v2.8.1',
+    commit_sha: '1111111111111111111111111111111111111111',
+    run_id: 'legacy-run-0',
+    state: 'candidate',
+    release_notes: 'legacy notes',
+    file_name: 'e-track-at32f435-v2.8.1-full.etu',
+    sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3',
+    size_bytes: 18,
+    r2_key: 'trace/firmware/e-track-at32f435/20801-mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu',
+    r2_state: 'available',
+    github_url: 'https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.1/e-track-at32f435-v2.8.1-full.etu',
+    target_hardware: 'AT32F435RGT7',
+    transport: 'ble',
+    min_app_version_code: 0,
+    archived: 0,
+    created_at: '2025-01-01 00:00:00',
+    updated_at: '2026-10-16 16:01:53'
+  },
+  [Object: null prototype] {
+    id: 'legacy-1',
+    app_id: 'trace',
+    device_model: 'e-track-at32f435',
+    version_name: '2.8.2',
+    version_code: 20802,
+    release_tag: 'mcu-e-track-at32f435-v2.8.2',
+    commit_sha: '1111111111111111111111111111111111111111',
+    run_id: 'legacy-run-1',
+    state: 'disabled',
+    release_notes: 'legacy notes',
+    file_name: 'e-track-at32f435-v2.8.2-full.etu',
+    sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3',
+    size_bytes: 18,
+    r2_key: 'trace/firmware/e-track-at32f435/20802-mcu-e-track-at32f435-v2.8.2/e-track-at32f435-v2.8.2-full.etu',
+    r2_state: 'available',
+    github_url: 'https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.2/e-track-at32f435-v2.8.2-full.etu',
+    target_hardware: 'AT32F435RGT7',
+    transport: 'ble',
+    min_app_version_code: 0,
+    archived: 0,
+    created_at: '2025-01-01 00:00:00',
+    updated_at: '2026-10-16 16:01:53'
+  },
+  [Object: null prototype] {
+    id: 'legacy-2',
+    app_id: 'trace',
+    device_model: 'e-track-at32f435',
+    version_name: '2.8.3',
+    version_code: 20803,
+    release_tag: 'mcu-e-track-at32f435-v2.8.3',
+    commit_sha: '1111111111111111111111111111111111111111',
+    run_id: 'legacy-run-2',
+    state: 'candidate',
+    release_notes: 'legacy notes',
+    file_name: 'e-track-at32f435-v2.8.3-full.etu',
+    sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3',
+    size_bytes: 18,
+    r2_key: 'trace/firmware/e-track-at32f435/20803-mcu-e-track-at32f435-v2.8.3/e-track-at32f435-v2.8.3-full.etu',
+    r2_state: 'available',
+    github_url: 'https://github.com/Eitan-S-23/Trace/releases/download/mcu-e-track-at32f435-v2.8.3/e-track-at32f435-v2.8.3-full.etu',
+    target_hardware: 'AT32F435RGT7',
+    transport: 'ble',
+    min_app_version_code: 0,
+    archived: 0,
+    created_at: '2025-01-01 00:00:00',
+    updated_at: '2026-10-16 16:01:53'
+  }
+]
+BACKFILL_AFTER [
+  [Object: null prototype] {
+    id: 'legacy-0',
+    state: 'ready',
+    target_image_sha256: '1c947b92383b14434b0b67a95dcc0aa6ea54ae8e65850da74efc83234955d4e8',
+    created_at: '2025-01-01 00:00:00'
+  },
+  [Object: null prototype] {
+    id: 'legacy-1',
+    state: 'disabled',
+    target_image_sha256: '1c947b92383b14434b0b67a95dcc0aa6ea54ae8e65850da74efc83234955d4e8',
+    created_at: '2025-01-01 00:00:00'
+  },
+  [Object: null prototype] {
+    id: 'legacy-2',
+    state: 'draft',
+    target_image_sha256: '1c947b92383b14434b0b67a95dcc0aa6ea54ae8e65850da74efc83234955d4e8',
+    created_at: '2025-01-01 00:00:00'
+  }
+] [
+  [Object: null prototype] {
+    kind: 'full',
+    base_image_sha256: '',
+    base_vcode: 0
+  },
+  [Object: null prototype] {
+    kind: 'full',
+    base_image_sha256: '',
+    base_vcode: 0
+  },
+  [Object: null prototype] {
+    kind: 'full',
+    base_image_sha256: '',
+    base_vcode: 0
+  }
+]
+
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > preserves all legacy bytes and isolates the unresolved channel without changing revision 58ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > verifies artifacts/raw image/R2, safely maps published ready, preserves disabled/draft and replays without extra rows 41ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published missing record 28ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published missing identity 210ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published bad schema 696ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published missing approval 42ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published legacy mismatch 38ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published raw mismatch 45ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published artifact missing 49ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > stops before every write on published evidence mismatch 27ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > isolates unverifiable unpublished rows without inventing zero/default identity 21ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > rejects a changed manifest and an unapproved digest without overwriting identity 19ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > rejects missing recovery on a legitimate full-only backfilled release 23ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > cannot map a published legacy row ready when its R2 object is gone 23ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > rolls back all schema/data changes when the forward migration fails 16ms
+ ✓ test/firmware-migration.host.test.ts > P4-2 real SQLite forward migration and controlled backfill > rolls back the complete backfill when its audit fails 17ms
+
+ Test Files  2 passed (2)
+      Tests  41 passed (41)
+   Start at  00:01:47
+   Duration  7.49s (transform 622ms, setup 187ms, import 2.72s, tests 3.58s, environment 0ms)
+

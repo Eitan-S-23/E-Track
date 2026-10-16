@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:20:20.130Z",
+  "ended": "2026-10-16T08:20:23.580Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38866888180/jobs?per_page=100",
+  "status": 200,
+  "requestId": "AE3A:11EC6A:638F63:952D72:6AD1DE46",
+  "date": "Fri, 16 Oct 2026 08:20:24 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-firmware-jobs.json",
+    "size_bytes": 13257,
+    "sha256": "38b3a12f0bd1292f53a8dd126ecf35a33dc442857eb547802f92fe303058db67"
+  }
+}

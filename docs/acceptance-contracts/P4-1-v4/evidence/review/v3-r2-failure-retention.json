@@ -1,0 +1,44 @@
+{
+  "source": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\p41-acceptance-20261017\\cloud\\assets",
+  "destination": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\p41-acceptance-20261017\\cloud\\assets-v3-failed",
+  "archived": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\docs\\acceptance-contracts\\P4-1-v3\\evidence\\cloud\\assets",
+  "archived_matrix_sha256": "109d93c24b59e05878e8d0772b7b500f325e516d97060ac824c26497e2af85be",
+  "purpose": "Preserve every byte of the failed v3 read-only collection before reusing the frozen helper fixed working slot; never use the repurposed working v3 matrix as predecessor.",
+  "files": [
+    {
+      "name": "002-s3.body",
+      "size_bytes": 285794,
+      "sha256": "0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127"
+    },
+    {
+      "name": "002-s3.headers",
+      "size_bytes": 736,
+      "sha256": "a6bfdb6f68540794b2b90825793e943437bba1fd79ca9c8f0653521d35cbf98e"
+    },
+    {
+      "name": "003-s3.body",
+      "size_bytes": 379,
+      "sha256": "5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05"
+    },
+    {
+      "name": "003-s3.headers",
+      "size_bytes": 745,
+      "sha256": "2efd005b07c6a58e58355a4264e09807420593d0b96ff8a5b3a0c1c21feed17d"
+    },
+    {
+      "name": "004-s3.body",
+      "size_bytes": 573440,
+      "sha256": "e30c45ee0748760798869b498b1f0e47e5fcbf8e66e5978dfdf38599b6680ceb"
+    },
+    {
+      "name": "004-s3.headers",
+      "size_bytes": 724,
+      "sha256": "85be0a8f3dcc2b8a5a5955fb82f177aeebba3f468dc9309e3c7a472d5d97eda1"
+    },
+    {
+      "name": "receipt.json",
+      "size_bytes": 5738,
+      "sha256": "a7dbbfdb4d515c26188a149ee0ad5900ba6ef66eeeb1d4cdf20189aab98c9b88"
+    }
+  ]
+}

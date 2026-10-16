@@ -1,0 +1,31 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "tests/ota/test_acceptance_bundle.py",
+    "AcceptanceBundleTests",
+    "CriterionDependencyTests",
+    "AcceptanceExecutionPolicyTests"
+  ],
+  "pid": 15224,
+  "started": "2026-10-16T17:32:55.108Z",
+  "ended": "2026-10-16T17:39:35.715Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-governance-preparation.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-governance-preparation.stderr.txt",
+      "size_bytes": 183,
+      "sha256": "690422605cedf8f906ae1a115fa2585b16702ede75ffb07b7236b242432bd4f3"
+    }
+  ],
+  "closed": true
+}

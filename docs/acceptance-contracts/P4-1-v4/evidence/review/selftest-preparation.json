@@ -1,0 +1,16 @@
+{
+  "started": "2026-10-16T17:29:13.890426+00:00",
+  "mode": "selftest",
+  "positive": 1,
+  "discriminating_negative_cases": 5,
+  "rejected_cases": [
+    "trailing_bytes",
+    "wrong_version",
+    "wrong_timestamp",
+    "changed_payload",
+    "wrong_digest"
+  ],
+  "device_or_remote_actions": 0,
+  "ok": true,
+  "ended": "2026-10-16T17:29:14.065227+00:00"
+}

@@ -1,0 +1,41 @@
+{
+  "name": "e-track-firmware-p41-test",
+  "account_id": "af6dd848e6a21f1cd26d44b1b656af7b",
+  "main": "../worker-bundle/index.js",
+  "compatibility_date": "2026-06-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {
+    "ENVIRONMENT": "staging",
+    "APP_ID": "trace",
+    "GITHUB_OWNER": "Eitan-S-23",
+    "GITHUB_REPO": "E-Track",
+    "MANIFEST_CACHE_TTL_SECONDS": "60",
+    "DOWNLOAD_TOKEN_TTL_SECONDS": "300",
+    "DOWNLOAD_TOKEN_KEY_VERSION": "p41-test-1",
+    "FIRMWARE_V2_CUTOVER_EPOCH": "1792039926",
+    "RATE_LIMIT_WINDOW_SECONDS": "60",
+    "RATE_LIMIT_MAX_REQUESTS": "60",
+    "ENABLE_DIRECT_ADMIN_API": "false"
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "e-track-firmware-p41-test",
+    "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+    "migrations_dir": "../../../app/bluetooth_flutter_Trace/cloudflare/update-service/migrations"
+  }],
+  "kv_namespaces": [{
+    "binding": "MANIFEST_CACHE",
+    "id": "9581ef5b95154abaa7d441fd07c2f220"
+  }],
+  "r2_buckets": [{
+    "binding": "RELEASES_BUCKET",
+    "bucket_name": "e-track-firmware-p41-test-releases"
+  }],
+  "durable_objects": {
+    "bindings": [{"name": "RATE_LIMITER", "class_name": "RateLimiter"}]
+  },
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["RateLimiter"]}],
+  "triggers": {"crons": ["0 * * * *"]},
+  "observability": {"enabled": true, "head_sampling_rate": 1}
+}

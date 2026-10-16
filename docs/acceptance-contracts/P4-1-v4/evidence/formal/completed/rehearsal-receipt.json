@@ -1,0 +1,17 @@
+{
+  "route": "/repos/Eitan-S-23/E-Track/actions/artifacts/12067107408/zip",
+  "method": "GITHUB_CLI_GET",
+  "started": "2026-10-16T18:38:04.655Z",
+  "ended": "2026-10-16T18:38:43.526Z",
+  "exitCode": 0,
+  "signal": null,
+  "closed": true,
+  "stderr": "",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/completed/rehearsal.zip",
+    "size_bytes": 4154000,
+    "sha256": "032fe5d1b2f4e1c3766ca8105ec6ede38d0c421a9d05b93194710d4d8cef826e"
+  },
+  "expectedSize": 4154000,
+  "expectedDigest": "sha256:032fe5d1b2f4e1c3766ca8105ec6ede38d0c421a9d05b93194710d4d8cef826e"
+}

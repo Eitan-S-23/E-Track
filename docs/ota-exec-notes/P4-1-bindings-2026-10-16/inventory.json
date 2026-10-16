@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "testedCommit": "c715ec6b00f8d9b06a820213da72421694b1e44c",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "kind": "AUTHORED_RECORD"
+    },
+    {
+      "path": "README.md",
+      "sizeBytes": 1736,
+      "sha256": "afab31bbb31cacae442858a76867feb1918584094ac86881c6acc7fe55131f2b",
+      "kind": "AUTHORED_RECORD"
+    },
+    {
+      "path": "github/run-1.json",
+      "sizeBytes": 12512,
+      "sha256": "f4ac4a7ca60345b8562cf37b7ddc7d92577e6d8b3ff6c6857b366684b62f290c",
+      "source": ".cache/github/p41-approved-run-1.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "github/jobs-1.json",
+      "sizeBytes": 15056,
+      "sha256": "a62f0a22bd93f93fa7beed1fadbd2d9b2a1786109059ace4abed7445a58f75e9",
+      "source": ".cache/github/p41-approved-jobs-1.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "github/pending-1.json",
+      "sizeBytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "source": ".cache/github/p41-approved-pending-1.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "github/artifacts-1.json",
+      "sizeBytes": 5139,
+      "sha256": "ea978c8dcf53e23e26e7474e86f9e855cab932ab8da2e1e1a57370c64c66b468",
+      "source": ".cache/github/p41-approved-artifacts-1.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "github/reviews-1.json",
+      "sizeBytes": 1396,
+      "sha256": "26d7644ff5e18194a3c2a78984e0546fe9139d0587790dcc305e205983bb3184",
+      "source": ".cache/github/p41-approved-reviews-1.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "github/logs-1.zip",
+      "sizeBytes": 379036,
+      "sha256": "3892531b04a85b32eab67b0fe551f1bd01983362337a6a8609743cbd73306c47",
+      "source": ".cache/github/p41-approved-logs-1.zip",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "github/bindings-1.zip",
+      "sizeBytes": 1190,
+      "sha256": "14939267855d505b63f24a33598921780a84a10cffa64244871024940d554287",
+      "source": ".cache/github/p41-approved-bindings-1.zip",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "configuration/github-register.json",
+      "sizeBytes": 1531,
+      "sha256": "3bae756cb6f73d7716cfb960c2680ae3d10a55b4992fb06443e7e261cfa6ff3b",
+      "source": ".cache/p41-approved-20261016/github-register.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "configuration/github-register-retry.json",
+      "sizeBytes": 3199,
+      "sha256": "a6ba5eaadc03b8d40de2351bb53b8daba3d6de6659f7262416dd2e4befa9b96f",
+      "source": ".cache/p41-approved-20261016/github-register-retry.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "configuration/configure-register.cjs",
+      "sizeBytes": 7533,
+      "sha256": "e7da21cba9f49774720fe89f7f91d68d8374c8729715777c876aa0b71233af2d",
+      "source": ".cache/p41-approved-20261016/configure-register.cjs",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "configuration/github-bindings.json",
+      "sizeBytes": 3975,
+      "sha256": "6b5665f2cdddcf3b70ea9a8c4e29510c5069520664bcd599c914f58fc4b957f4",
+      "source": ".cache/p41-existing-account-20261016/github-bindings.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "archive-bindings.cjs",
+      "sizeBytes": 11671,
+      "sha256": "760e5203db0c6ad8000a73876e48af1ad4c44df0648450ade28281f6621584a6",
+      "source": ".cache/p41-approved-20261016/archive-bindings.cjs",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "result.json",
+      "sizeBytes": 3207,
+      "sha256": "05fa8664970c0b4a49c795542bb172222f3e8eb5b2d7dc20e265917885729cb8",
+      "source": "github/bindings-1.zip!result.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "artifact-members.json",
+      "sizeBytes": 15933,
+      "sha256": "92b535c60e85c880b198c5a7e9c2b003f41174df727b73d851b35579b99db32f",
+      "source": "Derived native tar ZIP inventory",
+      "kind": "DERIVED"
+    },
+    {
+      "path": "inspection.json",
+      "sizeBytes": 1543,
+      "sha256": "bd3fac1cbe65b3df4a3a43ef00c91b4d00f836f98c305f44e2d92807a7911bd1",
+      "source": "Derived original-byte and log checks",
+      "kind": "DERIVED"
+    }
+  ]
+}

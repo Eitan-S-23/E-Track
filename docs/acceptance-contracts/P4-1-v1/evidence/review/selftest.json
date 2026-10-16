@@ -1,0 +1,10 @@
+{
+  "started": "2026-10-16T09:02:10.993311+00:00",
+  "mode": "selftest",
+  "ok": false,
+  "error": {
+    "type": "AssertionError",
+    "message": ""
+  },
+  "ended": "2026-10-16T09:02:11.044591+00:00"
+}

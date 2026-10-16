@@ -1,0 +1,99 @@
+﻿2026-10-15T05:54:55.5041486Z ##[group]Run node --test tests/ota/test_firmware_workflow.mjs
+2026-10-15T05:54:55.5041749Z [36;1mnode --test tests/ota/test_firmware_workflow.mjs[0m
+2026-10-15T05:54:55.5092859Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:55.5093001Z env:
+2026-10-15T05:54:55.5093123Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:55.5093269Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:55.5093435Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:55.5093628Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:55.5093801Z   BUILD_TYPE: Release
+2026-10-15T05:54:55.5093928Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:55.5094067Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:55.5094266Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:55.5094525Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:55.5094759Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:55.5095004Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:55.5095185Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:55.5095373Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:55.5095566Z ##[endgroup]
+2026-10-15T05:54:55.6271866Z ✔ production remains explicit dispatch/publish with a first-step hard gate and protected environment (1.2637ms)
+2026-10-15T05:54:55.6273226Z ✔ rehearsal has only separately named staging secrets and read-only GitHub permissions (0.173299ms)
+2026-10-15T05:54:55.6274043Z ✔ nightly/checks jobs cannot acquire release secrets or execute the cloud pipeline (0.215352ms)
+2026-10-15T05:54:55.6274849Z ✔ both release environments use the identical production implementation and same-run App/Boot inputs (0.392557ms)
+2026-10-15T05:54:55.6275671Z ✔ development wiring explicitly executes host, native, byte and production-GCC paths (0.209813ms)
+2026-10-15T05:54:55.6276328Z ✔ Worker bundle is a credential-free CI build input, not a deployment (0.164716ms)
+2026-10-15T05:54:55.6277349Z ✔ Worker bundle guard rejects an actual deployment or an injected extra command (1.289979ms)
+2026-10-15T05:54:55.6278182Z ✔ version inputs use environment mappings rather than shell interpolation (0.130315ms)
+2026-10-15T05:54:55.6366351Z VERSION_CASE {"label":"legacy source PR","exitCode":0,"output":"version_name=2.7.0-nightly.1\nversion_code=20700\nbuild_number=1\n"}
+2026-10-15T05:54:55.6372479Z ✔ actual version shell: legacy source PR (12.85944ms)
+2026-10-15T05:54:55.6441179Z VERSION_CASE {"label":"legacy source push","exitCode":0,"output":"version_name=2.7.0-nightly.1\nversion_code=20700\nbuild_number=1\n"}
+2026-10-15T05:54:55.6446341Z ✔ actual version shell: legacy source push (7.494242ms)
+2026-10-15T05:54:55.6515224Z VERSION_CASE {"label":"legacy source checks dispatch","exitCode":0,"output":"version_name=2.7.0\nversion_code=20700\nbuild_number=1\n"}
+2026-10-15T05:54:55.6520426Z ✔ actual version shell: legacy source checks dispatch (7.239386ms)
+2026-10-15T05:54:55.6601924Z VERSION_CASE {"label":"explicit formal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=1\n"}
+2026-10-15T05:54:55.6610530Z ✔ actual version shell: explicit formal version (8.564067ms)
+2026-10-15T05:54:55.6675592Z VERSION_CASE {"label":"explicit rehearsal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=1\n"}
+2026-10-15T05:54:55.6678204Z ✔ actual version shell: explicit rehearsal version (7.36889ms)
+2026-10-15T05:54:55.6746218Z VERSION_CASE {"label":"canonical source formal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=1\n"}
+2026-10-15T05:54:55.6749739Z ✔ actual version shell: canonical source formal version (7.005236ms)
+2026-10-15T05:54:55.6816633Z VERSION_CASE {"label":"canonical source rehearsal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=1\n"}
+2026-10-15T05:54:55.6820576Z ✔ actual version shell: canonical source rehearsal version (7.017044ms)
+2026-10-15T05:54:55.6894664Z VERSION_CASE {"label":"legacy source cannot choose formal version","exitCode":1,"output":""}
+2026-10-15T05:54:55.6897664Z ✔ actual version shell: legacy source cannot choose formal version (7.762432ms)
+2026-10-15T05:54:55.6962555Z VERSION_CASE {"label":"legacy source cannot choose rehearsal version","exitCode":1,"output":""}
+2026-10-15T05:54:55.6965607Z ✔ actual version shell: legacy source cannot choose rehearsal version (6.764926ms)
+2026-10-15T05:54:55.7030220Z VERSION_CASE {"label":"explicit short version","exitCode":1,"output":""}
+2026-10-15T05:54:55.7033128Z ✔ actual version shell: explicit short version (6.681031ms)
+2026-10-15T05:54:55.7098617Z VERSION_CASE {"label":"explicit prefixed version","exitCode":1,"output":""}
+2026-10-15T05:54:55.7101648Z ✔ actual version shell: explicit prefixed version (6.73025ms)
+2026-10-15T05:54:55.7165627Z VERSION_CASE {"label":"leading zero major","exitCode":1,"output":""}
+2026-10-15T05:54:55.7170334Z ✔ actual version shell: leading zero major (6.708482ms)
+2026-10-15T05:54:55.7239749Z VERSION_CASE {"label":"leading zero minor","exitCode":1,"output":""}
+2026-10-15T05:54:55.7242597Z ✔ actual version shell: leading zero minor (7.304914ms)
+2026-10-15T05:54:55.7306749Z VERSION_CASE {"label":"leading zero patch","exitCode":1,"output":""}
+2026-10-15T05:54:55.7309241Z ✔ actual version shell: leading zero patch (6.62105ms)
+2026-10-15T05:54:55.7374586Z VERSION_CASE {"label":"explicit prerelease suffix","exitCode":1,"output":""}
+2026-10-15T05:54:55.7376982Z ✔ actual version shell: explicit prerelease suffix (6.727911ms)
+2026-10-15T05:54:55.7440133Z VERSION_CASE {"label":"explicit nightly suffix","exitCode":1,"output":""}
+2026-10-15T05:54:55.7446669Z ✔ actual version shell: explicit nightly suffix (6.530546ms)
+2026-10-15T05:54:55.7516927Z VERSION_CASE {"label":"u32 maximum","exitCode":0,"output":"version_name=429496.72.95\nversion_code=4294967295\nbuild_number=1\n"}
+2026-10-15T05:54:55.7519777Z ✔ actual version shell: u32 maximum (7.619465ms)
+2026-10-15T05:54:55.7582384Z VERSION_CASE {"label":"u32 overflow","exitCode":1,"output":""}
+2026-10-15T05:54:55.7586191Z ✔ actual version shell: u32 overflow (6.524696ms)
+2026-10-15T05:54:55.7651118Z VERSION_CASE {"label":"major overflow","exitCode":1,"output":""}
+2026-10-15T05:54:55.7653447Z ✔ actual version shell: major overflow (6.74011ms)
+2026-10-15T05:54:55.7726544Z VERSION_CASE {"label":"huge major must not wrap Bash arithmetic","exitCode":1,"output":""}
+2026-10-15T05:54:55.7732819Z ✔ actual version shell: huge major must not wrap Bash arithmetic (7.499866ms)
+2026-10-15T05:54:55.7820096Z VERSION_CASE {"label":"malformed legacy source","exitCode":1,"output":""}
+2026-10-15T05:54:55.7826769Z ✔ actual version shell: malformed legacy source (9.229352ms)
+2026-10-15T05:54:55.7899428Z VERSION_CASE {"label":"leading zero legacy source","exitCode":1,"output":""}
+2026-10-15T05:54:55.7903561Z ✔ actual version shell: leading zero legacy source (7.945896ms)
+2026-10-15T05:54:55.7998110Z VERSION_CASE {"label":"source prerelease suffix","exitCode":1,"output":""}
+2026-10-15T05:54:55.8004811Z ✔ actual version shell: source prerelease suffix (9.697037ms)
+2026-10-15T05:54:55.8044232Z GATE_CASE {"label":"production locked","exitCode":1}
+2026-10-15T05:54:55.8046895Z ✔ actual shell gate: production locked (4.503244ms)
+2026-10-15T05:54:55.8089807Z GATE_CASE {"label":"production missing approval","exitCode":2}
+2026-10-15T05:54:55.8090703Z ✔ actual shell gate: production missing approval (4.180892ms)
+2026-10-15T05:54:55.8131565Z GATE_CASE {"label":"production ambiguous mode","exitCode":2}
+2026-10-15T05:54:55.8139189Z ✔ actual shell gate: production ambiguous mode (4.511176ms)
+2026-10-15T05:54:55.8188273Z GATE_CASE {"label":"production wrong approval","exitCode":2}
+2026-10-15T05:54:55.8189174Z ✔ actual shell gate: production wrong approval (4.267131ms)
+2026-10-15T05:54:55.8218402Z GATE_CASE {"label":"production approved shell gate only","exitCode":0}
+2026-10-15T05:54:55.8229015Z ✔ actual shell gate: production approved shell gate only (4.302494ms)
+2026-10-15T05:54:55.8256576Z GATE_CASE {"label":"rehearsal locked","exitCode":0}
+2026-10-15T05:54:55.8260386Z ✔ actual shell gate: rehearsal locked (3.767504ms)
+2026-10-15T05:54:55.8294909Z GATE_CASE {"label":"rehearsal unlocked","exitCode":1}
+2026-10-15T05:54:55.8302250Z ✔ actual shell gate: rehearsal unlocked (3.77172ms)
+2026-10-15T05:54:55.8348665Z GATE_CASE {"label":"rehearsal cannot publish","exitCode":1}
+2026-10-15T05:54:55.8351763Z ✔ actual shell gate: rehearsal cannot publish (5.258684ms)
+2026-10-15T05:54:55.8386110Z GATE_CASE {"label":"rehearsal retry binds original attempt","exitCode":0}
+2026-10-15T05:54:55.8391475Z ✔ actual shell gate: rehearsal retry binds original attempt (3.693534ms)
+2026-10-15T05:54:55.8801357Z ✔ actual execute CLI rejects a checks context with exit 2 before any cloud path (40.835646ms)
+2026-10-15T05:54:55.8876968Z ℹ tests 41
+2026-10-15T05:54:55.8877632Z ℹ suites 0
+2026-10-15T05:54:55.8878250Z ℹ pass 41
+2026-10-15T05:54:55.8878638Z ℹ fail 0
+2026-10-15T05:54:55.8879048Z ℹ cancelled 0
+2026-10-15T05:54:55.8879427Z ℹ skipped 0
+2026-10-15T05:54:55.8879766Z ℹ todo 0
+2026-10-15T05:54:55.8880146Z ℹ duration_ms 345.798741

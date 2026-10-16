@@ -1,0 +1,48 @@
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmpv_32b_nb\one.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=6c66ac0092d0d5fbf847b2d5c74cf9d7
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=5d4c0aa8
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmpv_32b_nb\two.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=2380254f6350c1a1d4449516e4f9d2ef
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=c568cb26
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmpry7bl_6c\one.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=0b0ed6c244956806143f2a5ce226f338
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=2ac6a2a7
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmpzygkrzl1\one.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=de195dbbfaa878f896221efd667042ba
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=63afb6fb
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmprwcvw31e\one.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=28f47fb3da05d05e68b51d205c65da26
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=11a9ebab
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmp86ljh1ve\one.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=464d54838648d86742a743b01675fc7d
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=2c9bfdd1
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmpxaty7hpu\one.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=e078b7fd4894b1ab0634c62de983cc2a
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=b96ad61b
+pack-full OK: D:\github\my\E-Track\.cache\p41-dev-20261015\.cache\firmware-pack-tests\tmpxaty7hpu\two.etu
+  app_len=4096 payload_len=264 etu_total=328
+  target_vcode=20801 flags=0x000b key_id=1
+  aes_nonce=e078b7fd4894b1ab0634c62de983cc2a
+  image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+  header_crc32=b96ad61b

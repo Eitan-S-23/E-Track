@@ -1,0 +1,26 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+    "selftest"
+  ],
+  "pid": 13712,
+  "started": "2026-10-16T17:29:09.784Z",
+  "ended": "2026-10-16T17:29:10.146Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-controller-preparation.stdout.txt",
+      "size_bytes": 42,
+      "sha256": "b097e3f2a274c81be7648b227d32e50980389899906ae9e7117113013196b4a0"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-controller-preparation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

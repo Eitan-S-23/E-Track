@@ -1,0 +1,15 @@
+{
+  "created": "2026-10-16T11:59:45.211Z",
+  "commitSha": "2d3daae4ac5441d3eb736b654c237ae53760067c",
+  "contractSha256": "8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d",
+  "request": {
+    "ref": "dev/p4-1/unattended-20261015",
+    "inputs": {
+      "version_name": "3.2.8",
+      "publish": "false",
+      "rehearsal": "true",
+      "check_bindings": "false",
+      "release_notes": "P4-1 canonical staging qualification; not a production release."
+    }
+  }
+}

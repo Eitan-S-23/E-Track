@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T09:52:39.675Z",
+  "ended": "2026-10-16T09:52:44.654Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/pulls/27",
+  "status": 200,
+  "requestId": "AE83:DA9BA:A0CD81:EED0C6:6AD1F3EA",
+  "date": "Fri, 16 Oct 2026 09:52:43 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/takeover-pr.json",
+    "size_bytes": 18023,
+    "sha256": "38a139e81daa139baad0c0309fc921141fc3062a21ab05e73b36bd219bcbb680"
+  }
+}

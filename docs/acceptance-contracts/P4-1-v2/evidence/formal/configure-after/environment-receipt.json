@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T17:56:27.529Z",
+  "ended": "2026-10-16T17:56:28.639Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+  "status": 200,
+  "requestId": "AE07:1C73F2:17C235F:23D1459:6AD2654A",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/configure-after/environment.json",
+    "size_bytes": 1659,
+    "sha256": "389b239fd13aea1bb302c7518caa3cd13b331df93d53450465f5989e9fab16a1"
+  }
+}

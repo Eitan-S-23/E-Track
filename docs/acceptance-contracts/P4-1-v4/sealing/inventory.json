@@ -1,0 +1,55 @@
+{
+  "purpose": "Late closed final validators, opaque-credential scan and controlled-output audit; separate from immutable final matrix",
+  "files": [
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/write-audit.json",
+      "size_bytes": 690,
+      "sha256": "793e9257f594d49ed3e994d9afa05006bf63c7b410b40c1e7cbea67b3585e6fa"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-final-validate.json",
+      "size_bytes": 1272,
+      "sha256": "03abaf37fefdb66a901eeb8c03b90d15c0fa8ed5d9b247e1f1d868083020b35e"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-final-validate.stdout.txt",
+      "size_bytes": 69,
+      "sha256": "0fc57838ca3f317bf62cbaddb1c1068ca1137d2bd6062b8a45d53337e94bfff4"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-final-validate.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-archive-validate.json",
+      "size_bytes": 1288,
+      "sha256": "70c557f63bbaf8fc395c1ab3eb069da0349ef69b7041d74270b715ad152c371b"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-archive-validate.stdout.txt",
+      "size_bytes": 69,
+      "sha256": "0fc57838ca3f317bf62cbaddb1c1068ca1137d2bd6062b8a45d53337e94bfff4"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-archive-validate.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-secrets-audit.json",
+      "size_bytes": 779,
+      "sha256": "c1cd3d5333f7c306b0ca25d6d9b7e748c49246c03936100b6d963489f64a997e"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-secrets-audit.stdout.txt",
+      "size_bytes": 184,
+      "sha256": "c464dd24eb57760e5149986fa2e7e7afd34cae6870e7861dd503103c9c886827"
+    },
+    {
+      "path": "docs/acceptance-contracts/P4-1-v4/sealing/v4-secrets-audit.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

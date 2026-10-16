@@ -1,0 +1,10 @@
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 412 Precondition Failed
+Date: Thu, 15 Oct 2026 06:31:35 GMT
+Content-Type: application/xml
+Content-Length: 165
+Connection: keep-alive
+Server: cloudflare
+CF-RAY: a4acc81f0c897955-NRT
+

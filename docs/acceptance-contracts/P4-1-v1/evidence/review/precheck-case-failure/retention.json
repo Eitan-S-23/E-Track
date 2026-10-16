@@ -1,0 +1,26 @@
+{
+  "reason": "Retain_failed_preflight_before_digest_case_correction;contract_unchanged;map_original_stream_paths_to_retained_paths;normal_precheck_slot_is_for_genuine_corrected_run",
+  "created": "2026-10-16T11:24:55.156Z",
+  "items": [
+    {
+      "original_path": ".cache\\p41-acceptance-20261016\\commands\\formal-precheck.json",
+      "retained_path": ".cache\\p41-acceptance-20261016\\review\\precheck-case-failure\\formal-precheck.json",
+      "sha256": "32d75418f0d9a1a1426af50b6979db6faff1c12d67453ee72525aa29c98c2c2b"
+    },
+    {
+      "original_path": ".cache\\p41-acceptance-20261016\\commands\\formal-precheck.stdout.txt",
+      "retained_path": ".cache\\p41-acceptance-20261016\\review\\precheck-case-failure\\formal-precheck.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache\\p41-acceptance-20261016\\commands\\formal-precheck.stderr.txt",
+      "retained_path": ".cache\\p41-acceptance-20261016\\review\\precheck-case-failure\\formal-precheck.stderr.txt",
+      "sha256": "7db0d643472db510f0a2aefe13b8da6f71ac4cecbd5316bb7c85e7f3842923d1"
+    },
+    {
+      "original_path": ".cache\\p41-acceptance-20261016\\evidence-matrix.json",
+      "retained_path": ".cache\\p41-acceptance-20261016\\review\\precheck-case-failure\\evidence-matrix.json",
+      "sha256": "1ff3ff934b7738dc6ea2f50828dc7d6fafa7758007bdc032ced4a047365e49f6"
+    }
+  ]
+}

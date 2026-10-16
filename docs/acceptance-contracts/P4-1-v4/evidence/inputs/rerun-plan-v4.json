@@ -1,0 +1,74 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P4-1-v4",
+  "current_contract_sha256": "54F88DE3A3A87E542A76468D44CA81B271025CEA79BCF633321E46B25E00F979",
+  "previous_contract_id": "P4-1-v3",
+  "previous_contract_sha256": "0C975A7420C72292FA1624817B7DFA95D61D843F848C0F6539A797E2563C89E0",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P41-20261017-04",
+  "previous_round_id": "P41-20261017-03",
+  "previous_matrix_sha256": "109D93C24B59E05878E8D0772B7B500F325E516D97060AC824C26497E2AF85BE",
+  "changed_input_groups": [],
+  "changed_external_inputs": [
+    "v4-transport"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P41-R2",
+      "reasons": [
+        "command_definition_changed:formal-r2",
+        "criterion_definition_changed",
+        "external_input_changed:v4-transport",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P41-STATE",
+      "reasons": [
+        "criterion_definition_changed",
+        "external_input_changed:v4-transport",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [
+    "P41-ADMISSION",
+    "P41-BYTES",
+    "P41-ORIGINS",
+    "P41-REHEARSAL"
+  ],
+  "reuse_origins": {
+    "P41-ORIGINS": {
+      "contract_sha256": "07D81467BC901EAE78BBB2901A093B9234056CB248F04829887C7DB43FFEDC4A",
+      "matrix_sha256": "F54C56D39904BFD9C35015497DB96D3113120261C62F1608D20902C97B76BA3C",
+      "round_id": "P41-20261017-02"
+    },
+    "P41-ADMISSION": {
+      "contract_sha256": "07D81467BC901EAE78BBB2901A093B9234056CB248F04829887C7DB43FFEDC4A",
+      "matrix_sha256": "F54C56D39904BFD9C35015497DB96D3113120261C62F1608D20902C97B76BA3C",
+      "round_id": "P41-20261017-02"
+    },
+    "P41-REHEARSAL": {
+      "contract_sha256": "07D81467BC901EAE78BBB2901A093B9234056CB248F04829887C7DB43FFEDC4A",
+      "matrix_sha256": "F54C56D39904BFD9C35015497DB96D3113120261C62F1608D20902C97B76BA3C",
+      "round_id": "P41-20261017-02"
+    },
+    "P41-BYTES": {
+      "contract_sha256": "0C975A7420C72292FA1624817B7DFA95D61D843F848C0F6539A797E2563C89E0",
+      "matrix_sha256": "109D93C24B59E05878E8D0772B7B500F325E516D97060AC824C26497E2AF85BE",
+      "round_id": "P41-20261017-03"
+    }
+  },
+  "required_commands": [
+    "formal-r2",
+    "formal-state"
+  ],
+  "required_artifacts": [
+    "P41-R2-1",
+    "P41-STATE-1",
+    "P41-STATE-2",
+    "P41-STATE-3",
+    "P41-STATE-4",
+    "P41-STATE-5"
+  ]
+}

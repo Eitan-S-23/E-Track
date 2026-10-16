@@ -1,0 +1,7 @@
+{
+  "exitCode": 0,
+  "closed": true,
+  "stdout": "[dev/p4-1/unattended-20261015 2d3daae] fix(p4-1):preserve-contained-credential-input-location\n 2 files changed, 18 insertions(+), 7 deletions(-)\n",
+  "stderr": "\u001b[0;32m✅ Pre-commit 检查通过\u001b[0m\n",
+  "head": "2d3daae4ac5441d3eb736b654c237ae53760067c"
+}

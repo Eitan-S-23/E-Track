@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:20:33.176Z",
+  "ended": "2026-10-16T08:20:34.676Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38866887988/jobs?per_page=100",
+  "status": 200,
+  "requestId": "AE56:DA9BA:66331A:97E868:6AD1DE52",
+  "date": "Fri, 16 Oct 2026 08:20:35 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-app-jobs.json",
+    "size_bytes": 5328,
+    "sha256": "92708e5d24f2766a8a18c99398c16e112691ec7e27361c7987245172495f3cbf"
+  }
+}

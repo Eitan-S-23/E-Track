@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:20:17.915Z",
+  "ended": "2026-10-16T08:20:19.730Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38866888180",
+  "status": 200,
+  "requestId": "AE38:4BB60:644F2E:95E705:6AD1DE44",
+  "date": "Fri, 16 Oct 2026 08:20:20 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-firmware-run.json",
+    "size_bytes": 12549,
+    "sha256": "bb0a7b19f92c6a44a48c476c956a6d2a49f4db1be7b26ce45e964454a6acbfc5"
+  }
+}

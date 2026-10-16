@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T18:46:22.813Z",
+  "ended": "2026-10-16T18:46:25.169Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/releases?per_page=100&page=1",
+  "status": 200,
+  "requestId": "AEAF:22F48F:18EE901:2593E7A:6AD27100",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/github-after/releases-page-1.json",
+    "size_bytes": 2,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  }
+}

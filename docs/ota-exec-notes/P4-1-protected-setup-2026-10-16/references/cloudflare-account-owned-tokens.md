@@ -1,0 +1,121 @@
+---
+description: Learn what account API tokens are, when to use them, and what they currently work with
+title: Account API tokens
+image: https://developers.cloudflare.com/fundamentals/api/get-started/account-owned-tokens/og.png?v=1f30c8f2ac4920d4
+---
+
+[Skip to content](#main-content)
+
+> Documentation Index  
+> Fetch the complete documentation index at: https://developers.cloudflare.com/fundamentals/llms.txt  
+> Use this file to discover all available pages before exploring further.
+
+# Account API tokens
+
+Last updated Sep 28, 2026|Copy as Markdown| [View as Markdown](https://developers.cloudflare.com/fundamentals/api/get-started/account-owned-tokens/index.md)| [Agent setup](https://developers.cloudflare.com/agent-setup/)
+
+While user tokens act on behalf of a particular user and inherit a subset of that user's permissions, account API tokens allow you to set up durable integrations that can act as service principals with their own specific set of permissions. This approach is ideal for scenarios like CI/CD, or building integrations with external services like SIEMs where it is important that the integration continues working, even long after the user who configured the integration may have left your organization altogether. User tokens are better for ad hoc tasks like scripting, where acting as the user is ideal and durability is less of a concern.
+
+New account API tokens use the `cfat_` prefixed [scannable format](https://developers.cloudflare.com/fundamentals/api/get-started/token-formats/), which allows credential scanning tools to detect leaked tokens.
+
+## Create an account owned token
+
+In order to create account API tokens, members either require API Token Provisioning capabilities or Super Administrator status.
+
+While Super Administrators can view and manage all account API tokens in a respective account, other members can only view and manage tokens which they created.
+
+Note
+
+Account members may only grant account API tokens permissions which are a subset of their own account permissions.
+
+1. Log in to the [Cloudflare dashboard ↗︎](https://dash.cloudflare.com) and select your account.
+2. Go to **Manage account** > **Account API tokens**.
+3. Select **Create Token** and fill in the token name, permissions, and an optional expiration date.
+4. Select **Continue to summary** and review the details.
+5. Select **Create Token**.
+
+Newly created account-owned tokens also contain helpful metadata regarding creator attribution and provisioning details.
+
+Alternatively, you can create a token using the [account API token creation API](https://developers.cloudflare.com/api/resources/accounts/subresources/tokens/methods/create/).
+
+Refer to the [blog post ↗︎](https://blog.cloudflare.com/account-owned-tokens-automated-actions-zaraz/) for more information.
+
+## Compatibility matrix
+
+Account API tokens are generally available for all accounts. Some services may not support account API tokens yet. Refer to the compatibility matrix below for the latest status.
+
+| Product | Compatibility |
+| --- | --- |
+| Access | ✅ |
+| Account Analytics | ✅ |
+| Account Management | ✅ |
+| AI Gateway | ✅ |
+| API Shield | ✅ |
+| Argo | ✅ |
+| Billing | ✅ |
+| Browser Run | ✅ |
+| Bulk Redirects | ✅ |
+| Cache | ✅ |
+| Tiered Cache | ✅ |
+| Client-side security (formerly Page Shield) | ✅ |
+| Cloud Connector | ✅ |
+| Configuration Rules | ✅ |
+| Custom Lists | ✅ |
+| Custom Pages | ✅ |
+| D1 | ✅ |
+| Data Loss Prevention | ✅ |
+| Digital Experience Monitoring | ✅ |
+| Distributed Web | ✅ |
+| DNS | ✅ |
+| Durable Objects | ✅ |
+| Email Relay | ✅ |
+| Secure Web Gateway | ✅ |
+| Healthchecks | ✅ |
+| Hyperdrive | ✅ |
+| Images | ✅ |
+| Intel Data Platform | ❌ |
+| Load Balancing | ✅ |
+| Log Explorer | ✅ |
+| Network Flow | ✅ |
+| Magic Transit | ✅ |
+| Cloudflare WAN | ✅ |
+| Managed Rules | ✅ |
+| Network Error Logging | ✅ |
+| Page Rules | ❌ |
+| Pages | ✅ |
+| R2 | ✅ |
+| Radar | ✅ |
+| Registrar | ❌ |
+| Rulesets | ✅ |
+| Spectrum | ✅ |
+| Speed | ✅ |
+| SSL/TLS | ✅ |
+| Stream | ✅ |
+| Super Bot Fight Mode | ❌ |
+| Trace | ✅ |
+| Tunnels | ✅ |
+| Turnstile | ❌ |
+| Vectorize | ✅ |
+| Waiting Room | ✅ |
+| Workers | ✅ |
+| Workers AI | ✅ |
+| Workers KV | ✅ |
+| Workers Observability | ✅ |
+| Workers Queues | ✅ |
+| Workflows | ✅ |
+| Zaraz | ✅ |
+| Zero Trust Client Platform | ❌ |
+| Zero Trust Devices and Services | ✅ |
+| Zone/Domain Management | ✅ |
+
+Was this helpful?
+
+YesNo
+
+## On this page
+
+[![](https://developers.cloudflare.com/_astro/logo.te5VL_aD.svg)Docs](https://developers.cloudflare.com/)
+
+```json
+{"@context":"https://schema.org","@type":"TechArticle","@id":"https://developers.cloudflare.com/fundamentals/api/get-started/account-owned-tokens/#page","headline":"Account API tokens","description":"Learn what account API tokens are, when to use them, and what they currently work with","url":"https://developers.cloudflare.com/fundamentals/api/get-started/account-owned-tokens/","inLanguage":"en","image":"https://developers.cloudflare.com/fundamentals/api/get-started/account-owned-tokens/og.png?v=1f30c8f2ac4920d4","dateModified":"2026-09-28","publisher":{"@type":"Organization","name":"Cloudflare","description":"One platform for your apps, agents, and workforce. Build, secure, and scale without managing infrastructure","url":"https://www.cloudflare.com/","sameAs":["https://github.com/cloudflare","https://www.linkedin.com/company/cloudflare","https://x.com/cloudflare"],"logo":{"@type":"ImageObject","url":"https://developers.cloudflare.com/logo.svg"},"address":{"@type":"PostalAddress","streetAddress":"101 Townsend St","addressLocality":"San Francisco","addressRegion":"CA","postalCode":"94107","addressCountry":"US"},"contactPoint":[{"@type":"ContactPoint","contactType":"Customer Support","url":"https://support.cloudflare.com/","availableLanguage":["English"]},{"@type":"ContactPoint","contactType":"Sales","url":"https://www.cloudflare.com/contact/","availableLanguage":["English"]}]},"isPartOf":{"@type":"WebSite","@id":"https://developers.cloudflare.com/#website","name":"Cloudflare Docs","url":"https://developers.cloudflare.com/"}}
+```

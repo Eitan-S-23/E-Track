@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T11:31:15.293Z",
+  "ended": "2026-10-16T11:31:16.885Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs?head_sha=2d3daae4ac5441d3eb736b654c237ae53760067c",
+  "status": 200,
+  "requestId": "AE00:38B8E4:D29B95:13B2190:6AD20B05",
+  "date": "Fri, 16 Oct 2026 11:31:17 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/input-ci-status.json",
+    "size_bytes": 49914,
+    "sha256": "86c60baa73a7adcfa0c75b19b0fbcb7d6a4543b9f9cfc271a83111dfd2063fe5"
+  }
+}

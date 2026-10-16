@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T20:16:49.887Z",
+  "ended": "2026-10-16T20:16:52.378Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/pulls/27",
+  "status": 200,
+  "requestId": "AEC0:33DD21:1AEC011:28A80F7:6AD28633",
+  "date": "Fri, 16 Oct 2026 20:16:52 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/github/v4-pr-before-seal.json",
+    "size_bytes": 18025,
+    "sha256": "c62c4c3d0ec0d9dab3339873c531aee662ebc5a2ab9c8038607dede8ba1712cd"
+  }
+}

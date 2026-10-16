@@ -1,0 +1,269 @@
+﻿2026-10-15T05:54:44.0688504Z ##[group]Run npm test -- --reporter=verbose
+2026-10-15T05:54:44.0688736Z [36;1mnpm test -- --reporter=verbose[0m
+2026-10-15T05:54:44.0740840Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:44.0740988Z env:
+2026-10-15T05:54:44.0741111Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:44.0741259Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:44.0741414Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:44.0741613Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:44.0741786Z   BUILD_TYPE: Release
+2026-10-15T05:54:44.0741920Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:44.0742063Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:44.0742264Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:44.0742524Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:44.0742758Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:44.0742971Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:44.0743178Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:44.0743365Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:44.0743556Z ##[endgroup]
+2026-10-15T05:54:44.1434652Z 
+2026-10-15T05:54:44.1435214Z > @trace/update-service-worker@0.1.0 test
+2026-10-15T05:54:44.1435502Z > vitest run --reporter=verbose
+2026-10-15T05:54:44.1435612Z 
+2026-10-15T05:54:44.9723356Z 
+2026-10-15T05:54:44.9726156Z [1m[30m[46m RUN [49m[39m[22m [36mv4.1.9 [39m[90m/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker[39m
+2026-10-15T05:54:44.9726848Z 
+2026-10-15T05:54:46.1892366Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mdetects CAS conflict without writing channel_history[32m 27[2mms[22m[39m
+2026-10-15T05:54:46.1893972Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mkeeps channel audit snapshots bounded across repeated publishes[32m 14[2mms[22m[39m
+2026-10-15T05:54:46.1903397Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22missues a recovery-only URL for unpublished ready firmware and a sanitized atomic audit[32m 52[2mms[22m[39m
+2026-10-15T05:54:46.1948313Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mregisters all three assets atomically and replays canonical reordered metadata without another audit[32m 50[2mms[22m[39m
+2026-10-15T05:54:46.2045072Z [90mstdout[2m | test/invariants.test.ts[2m > [22m[2mPhase 1 update-service invariants[2m > [22m[2mgates GitHub fallback through D1 state and immutable tag URLs
+2026-10-15T05:54:46.2050519Z [22m[39m{"level":"info","event":"download_redirect","requestId":"c0756d8a-589a-46b8-b436-e0df5eb1166a","releaseId":"rel_trace_fallback_77a37b420d724ee6b9fcef4a0231f959_android_v3_0_0","assetId":"asset_rel_trace_fallback_77a37b420d724ee6b9fcef4a0231f959_android_v3_0_0_apk_ble_monitor_android_apk","channel":"ch_trace_fallback_77a37b420d724ee6b9fcef4a0231f959_android_stable","status":"redirect","mode":"github-fallback"}
+2026-10-15T05:54:46.2051835Z 
+2026-10-15T05:54:46.2342361Z [90mstdout[2m | test/invariants.test.ts[2m > [22m[2mPhase 1 update-service invariants[2m > [22m[2mstreams primary downloads from R2 when the asset is available
+2026-10-15T05:54:46.2345077Z [22m[39m{"level":"info","event":"download_stream","requestId":"502accd1-f58b-4cf8-ae48-165b266afd3c","releaseId":"rel_trace_r2stream_4a563f137a634c9bb99296f0edf09574_android_v3_5_0","assetId":"asset_rel_trace_r2stream_4a563f137a634c9bb99296f0edf09574_android_v3_5_0_apk_ble_monitor_android_apk","channel":"ch_trace_r2stream_4a563f137a634c9bb99296f0edf09574_android_stable","assetType":"apk","bytes":123456,"status":"ok","mode":"primary"}
+2026-10-15T05:54:46.2346699Z 
+2026-10-15T05:54:46.3003778Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mconflicts on changed releaseNotes[32m 22[2mms[22m[39m
+2026-10-15T05:54:46.3008135Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mconflicts on changed commitSha[32m 24[2mms[22m[39m
+2026-10-15T05:54:46.3029802Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mconflicts on changed runId[32m 18[2mms[22m[39m
+2026-10-15T05:54:46.3030723Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mconflicts on changed targetImageSha256[32m 28[2mms[22m[39m
+2026-10-15T05:54:46.3045218Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects unknown root before SQL side effects[32m 5[2mms[22m[39m
+2026-10-15T05:54:46.3046319Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects unknown asset before SQL side effects[32m 3[2mms[22m[39m
+2026-10-15T05:54:46.3052985Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects unknown kind before SQL side effects[32m 3[2mms[22m[39m
+2026-10-15T05:54:46.3055226Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects duplicate full before SQL side effects[32m 3[2mms[22m[39m
+2026-10-15T05:54:46.3067610Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects missing recovery before SQL side effects[32m 4[2mms[22m[39m
+2026-10-15T05:54:46.3072719Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects null full base before SQL side effects[32m 7[2mms[22m[39m
+2026-10-15T05:54:46.3216453Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mkeeps disabled releases invisible and not downloadable[32m 26[2mms[22m[39m
+2026-10-15T05:54:46.3219648Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mgates GitHub fallback through D1 state and immutable tag URLs[32m 17[2mms[22m[39m
+2026-10-15T05:54:46.3220432Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mstreams primary downloads from R2 when the asset is available[32m 25[2mms[22m[39m
+2026-10-15T05:54:46.3222276Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mrejects CI R2 metadata when the uploaded object is missing[32m 4[2mms[22m[39m
+2026-10-15T05:54:46.3222954Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mrejects CI metadata asset names with control characters[32m 2[2mms[22m[39m
+2026-10-15T05:54:46.3224001Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mregisters and renders tracepatch and vcdiff patches for the same source APK[32m 43[2mms[22m[39m
+2026-10-15T05:54:46.4029113Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mreturns the identical URL and original requestId on replay without another audit[32m 31[2mms[22m[39m
+2026-10-15T05:54:46.4030756Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrejects changed reason/action fingerprints across both endpoints[32m 29[2mms[22m[39m
+2026-10-15T05:54:46.4054352Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects bad version before SQL side effects[32m 6[2mms[22m[39m
+2026-10-15T05:54:46.4055439Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects wrong formula before SQL side effects[32m 24[2mms[22m[39m
+2026-10-15T05:54:46.4056309Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects u32 overflow before SQL side effects[32m 4[2mms[22m[39m
+2026-10-15T05:54:46.4057144Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects App overflow before SQL side effects[32m 4[2mms[22m[39m
+2026-10-15T05:54:46.4058371Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects unverified before SQL side effects[32m 4[2mms[22m[39m
+2026-10-15T05:54:46.4059216Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects asset path before SQL side effects[32m 3[2mms[22m[39m
+2026-10-15T05:54:46.4060154Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects mutable URL before SQL side effects[32m 4[2mms[22m[39m
+2026-10-15T05:54:46.4061119Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects wrong URL file before SQL side effects[32m 3[2mms[22m[39m
+2026-10-15T05:54:46.4062165Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects wrong R2 key before SQL side effects[32m 3[2mms[22m[39m
+2026-10-15T05:54:46.4063071Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects non-formal releases and invalid/multiple bearer credentials[32m 7[2mms[22m[39m
+2026-10-15T05:54:46.4063893Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrequires Content-Type[32m 2[2mms[22m[39m
+2026-10-15T05:54:46.4064393Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrequires Accept[32m 2[2mms[22m[39m
+2026-10-15T05:54:46.4065118Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects R2 missing mismatch without partial registration[32m 13[2mms[22m[39m
+2026-10-15T05:54:46.4074060Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects R2 size mismatch without partial registration[32m 13[2mms[22m[39m
+2026-10-15T05:54:46.4075128Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects R2 metadata digest mismatch without partial registration[32m 14[2mms[22m[39m
+2026-10-15T05:54:46.4232606Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mallows R2 backfill for an existing release without changing release identity[32m 43[2mms[22m[39m
+2026-10-15T05:54:46.4233699Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mrejects R2 backfill when commit identity does not match the existing release[32m 11[2mms[22m[39m
+2026-10-15T05:54:46.4240145Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mrejects rollback to archived releases[32m 9[2mms[22m[39m
+2026-10-15T05:54:46.4252273Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mreturns v1-compatible and v2 manifests from the same origin-scoped cache[32m 47[2mms[22m[39m
+2026-10-15T05:54:46.4253455Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mfails CI and download requests with invalid tokens[32m 4[2mms[22m[39m
+2026-10-15T05:54:46.4254265Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mhonors stop switches for latest and downloads[32m 23[2mms[22m[39m
+2026-10-15T05:54:46.4308558Z [90mstderr[2m | test/invariants.test.ts[2m > [22m[2mPhase 1 update-service invariants[2m > [22m[2mfails closed when D1 is unavailable
+2026-10-15T05:54:46.4311472Z [22m[39m{"level":"error","event":"latest_failed","requestId":"113630e3-2e60-4a05-906b-b8ee9eb905af","message":"D1 failed"}
+2026-10-15T05:54:46.4311873Z 
+2026-10-15T05:54:46.5199958Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mhandles 20 concurrent same-key requests with one completed result and one audit[32m 160[2mms[22m[39m
+2026-10-15T05:54:46.5204596Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mexpires the original URL at exactly 300 seconds; a new key is required[32m 32[2mms[22m[39m
+2026-10-15T05:54:46.5205707Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mstarts issuance time after R2 verification, not before a slow readback[32m 23[2mms[22m[39m
+2026-10-15T05:54:46.5207087Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mdifferent canonical owners can reuse a key but reason bytes are exact[32m 33[2mms[22m[39m
+2026-10-15T05:54:46.5284271Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mfails closed when D1 is unavailable[32m 8[2mms[22m[39m
+2026-10-15T05:54:46.5285650Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mallows releaseNotes edits without changing payload signature[32m 33[2mms[22m[39m
+2026-10-15T05:54:46.5287439Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mserves manual announcements with the current release notes announcement[32m 15[2mms[22m[39m
+2026-10-15T05:54:46.5289204Z  [32m✓[39m test/invariants.test.ts[2m > [22mPhase 1 update-service invariants[2m > [22mregisters published MCU firmware and streams it from R2[32m 50[2mms[22m[39m
+2026-10-15T05:54:46.5706979Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrejects R2 bytes mismatch without partial registration[32m 13[2mms[22m[39m
+2026-10-15T05:54:46.5710033Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mrolls back release/assets/channels when audit insertion fails[32m 22[2mms[22m[39m
+2026-10-15T05:54:46.5786871Z exception = workerd/api/streams/internal.c++:2563: disconnected: pump canceled
+2026-10-15T05:54:46.5790494Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3217293 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fc7450 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@27845b0 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@53a07a0 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2227e50
+2026-10-15T05:54:46.6409317Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrecords a tombstone on an expired conflicting request before result cleanup[32m 30[2mms[22m[39m
+2026-10-15T05:54:46.6410399Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrevokes recovery URLs immediately when the asset becomes archived[32m 42[2mms[22m[39m
+2026-10-15T05:54:46.6411205Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mkeeps the 24h key guard under request-first scheduling[32m 27[2mms[22m[39m
+2026-10-15T05:54:46.6411930Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mkeeps the 24h key guard under cleanup-first scheduling[32m 26[2mms[22m[39m
+2026-10-15T05:54:46.6761023Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 register/schema v2[2m > [22mserializes 20 identical concurrent registrations to one release and audit[32m 135[2mms[22m[39m
+2026-10-15T05:54:46.6762336Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mdistinguishes raw R2 conditions from quoted HTTP entity tags[32m 9[2mms[22m[39m
+2026-10-15T05:54:46.6763425Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects a noncanonical stored HTTP entity tag "opaque"[32m 16[2mms[22m[39m
+2026-10-15T05:54:46.6764383Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects a noncanonical stored HTTP entity tag "W/\"opaque\""[32m 14[2mms[22m[39m
+2026-10-15T05:54:46.6765035Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects a noncanonical stored HTTP entity tag "\"\""[32m 14[2mms[22m[39m
+2026-10-15T05:54:46.6765738Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects a noncanonical stored HTTP entity tag "\"bad\"quote\""[32m 15[2mms[22m[39m
+2026-10-15T05:54:46.6766404Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects a noncanonical stored HTTP entity tag "\"bad\netag\""[32m 17[2mms[22m[39m
+2026-10-15T05:54:46.6795946Z uncaught exception; exception = workerd/io/actor-sqlite.c++:1204: failed: expected false; jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+2026-10-15T05:54:46.6803569Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@334e7d4 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@33a40a1 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@30cad62 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3356631 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3353410 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@333ea20 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d6b630 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbc130 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbc370 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbd00c /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@539b038 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d3d3e8
+2026-10-15T05:54:46.6808092Z uncaught exception; exception = workerd/io/actor-sqlite.c++:1204: failed: expected false; jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+2026-10-15T05:54:46.6811389Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@334e7d4 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@33a40a1 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@30cad62 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3356631 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3353410 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@333ea20 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d6b630
+2026-10-15T05:54:46.6831148Z uncaught exception; source = Uncaught (in promise); stack = Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+2026-10-15T05:54:46.6832237Z     at async Object.fetch (file:///home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/miniflare/dist/src/workers/shared/object-entry.worker.js:15:12)
+2026-10-15T05:54:46.6833380Z uncaught exception; exception = workerd/jsg/_virtual_includes/iterator/workerd/jsg/value.h:1480: failed: jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+2026-10-15T05:54:46.6835363Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbc370 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbd00c /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@539b038 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d3d3e8
+2026-10-15T05:54:46.7678407Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mkeeps the 24h key guard under concurrent scheduling[32m 26[2mms[22m[39m
+2026-10-15T05:54:46.7679779Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mkeeps disable replay valid until the exclusive 24h boundary and never re-enables disabled firmware[32m 25[2mms[22m[39m
+2026-10-15T05:54:46.7681232Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22muses real SQL to prevent pending commits, body deletion without tombstone, and tombstone deletion[32m 30[2mms[22m[39m
+2026-10-15T05:54:46.7682447Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrolls back result cleanup if a tombstone cannot be written[32m 25[2mms[22m[39m
+2026-10-15T05:54:46.7770670Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mhonors independent latest/download stop flags with already-issued URLs[32m 67[2mms[22m[39m
+2026-10-15T05:54:46.8704893Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrolls back pending/result/audit and disable mutation on an audit failure[32m 47[2mms[22m[39m
+2026-10-15T05:54:46.8711837Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrejects recovery for draft[32m 5[2mms[22m[39m
+2026-10-15T05:54:46.8713146Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrejects recovery for disabled[32m 22[2mms[22m[39m
+2026-10-15T05:54:46.8714350Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrejects recovery for archived[32m 16[2mms[22m[39m
+2026-10-15T05:54:46.8715878Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrejects recovery for asset archived[32m 17[2mms[22m[39m
+2026-10-15T05:54:46.8717064Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrejects recovery for not uploaded[32m 16[2mms[22m[39m
+2026-10-15T05:54:46.8718816Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mrejects recovery for R2 missing[32m 19[2mms[22m[39m
+2026-10-15T05:54:46.9090149Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mfails closed on a deliberately corrupted draft channel read model[32m 55[2mms[22m[39m
+2026-10-15T05:54:46.9091604Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mfails closed on a deliberately corrupted missing full channel read model[32m 43[2mms[22m[39m
+2026-10-15T05:54:46.9093008Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mselects exact raw-SHA patch, falls back to full, hides recovery and returns no update[32m 49[2mms[22m[39m
+2026-10-15T05:54:47.0191942Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mfalls back when matching patch is archived but rejects an archived full even when patch matches[32m 40[2mms[22m[39m
+2026-10-15T05:54:47.0193686Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest appVersionCode= without download information[32m 21[2mms[22m[39m
+2026-10-15T05:54:47.0195388Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest appVersionCode=1e2 without download information[32m 25[2mms[22m[39m
+2026-10-15T05:54:47.0196904Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest appVersionCode=-1 without download information[32m 44[2mms[22m[39m
+2026-10-15T05:54:47.0225728Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mcannot disable a channel-referenced release or publish a draft/stale revision/regression[32m 31[2mms[22m[39m
+2026-10-15T05:54:47.0227357Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mpublishes and audits atomically; rejects SQL disable and identity changes on a referenced release[32m 42[2mms[22m[39m
+2026-10-15T05:54:47.1473965Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest appVersionCode=2100000001 without download information[32m 24[2mms[22m[39m
+2026-10-15T05:54:47.1475439Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest currentImageSha=11 without download information[32m 21[2mms[22m[39m
+2026-10-15T05:54:47.1476995Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest currentImageSha=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA without download information[32m 23[2mms[22m[39m
+2026-10-15T05:54:47.1478674Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest deviceModel=igpsport-bsc300 without download information[32m 28[2mms[22m[39m
+2026-10-15T05:54:47.1487216Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 owner recovery and permanent idempotency[2m > [22mreturns the versioned multi-asset admin read model[32m 67[2mms[22m[39m
+2026-10-15T05:54:47.1489005Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mvalidates a real test JWT and preserves original requestId in replay JSON and header[32m 21[2mms[22m[39m
+2026-10-15T05:54:47.1490855Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects an expired valid JWT and malformed response-correlation headers[32m 18[2mms[22m[39m
+2026-10-15T05:54:47.1492675Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mreturns TOKEN_INVALID/401 for missing assertion before network or database access[32m 0[2mms[22m[39m
+2026-10-15T05:54:47.1494079Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mreturns TOKEN_INVALID/401 for wrong segment count before network or database access[32m 1[2mms[22m[39m
+2026-10-15T05:54:47.1495647Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mreturns TOKEN_INVALID/401 for unsupported algorithm before network or database access[32m 0[2mms[22m[39m
+2026-10-15T05:54:47.1497276Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mreturns TOKEN_INVALID/401 for invalid Base64URL before network or database access[32m 1[2mms[22m[39m
+2026-10-15T05:54:47.1499123Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mreturns TOKEN_INVALID/401 for invalid header JSON before network or database access[32m 0[2mms[22m[39m
+2026-10-15T05:54:47.1500392Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mreturns TOKEN_INVALID/401 for null header before network or database access[32m 0[2mms[22m[39m
+2026-10-15T05:54:47.1501644Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mreturns TOKEN_INVALID/401 for null payload before network or database access[32m 1[2mms[22m[39m
+2026-10-15T05:54:47.1503205Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mkeeps invalid signatures as TOKEN_INVALID/401 without a database access[32m 1[2mms[22m[39m
+2026-10-15T05:54:47.1504350Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mkeeps JWKS HTTP failure as BACKEND_UNAVAILABLE/503[32m 0[2mms[22m[39m
+2026-10-15T05:54:47.1505471Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mkeeps JWKS invalid JSON as BACKEND_UNAVAILABLE/503[32m 1[2mms[22m[39m
+2026-10-15T05:54:47.1506587Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mkeeps JWKS network failure as BACKEND_UNAVAILABLE/503[32m 1[2mms[22m[39m
+2026-10-15T05:54:47.1507960Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mdoes not classify an unexpected decoder failure as invalid credentials[32m 1[2mms[22m[39m
+2026-10-15T05:54:47.1509127Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects publisher without a success audit[32m 16[2mms[22m[39m
+2026-10-15T05:54:47.2494760Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects unknown actor without a success audit[32m 61[2mms[22m[39m
+2026-10-15T05:54:47.2495800Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects origin without a success audit[32m 18[2mms[22m[39m
+2026-10-15T05:54:47.2496788Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects csrf without a success audit[32m 15[2mms[22m[39m
+2026-10-15T05:54:47.2498005Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects bad key without a success audit[32m 18[2mms[22m[39m
+2026-10-15T05:54:47.2499076Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects empty reason without a success audit[32m 24[2mms[22m[39m
+2026-10-15T05:54:47.2500129Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects unknown field without a success audit[32m 14[2mms[22m[39m
+2026-10-15T05:54:47.2503898Z  [32m✓[39m test/firmware-admin.test.ts[2m > [22mP4-2 existing Access Pages facade[2m > [22mrejects invalid JWT without a success audit[32m 15[2mms[22m[39m
+2026-10-15T05:54:47.2593210Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest unknown=x without download information[32m 68[2mms[22m[39m
+2026-10-15T05:54:47.2595283Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest hardwareRevision=2 without download information[32m 27[2mms[22m[39m
+2026-10-15T05:54:47.2596996Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest layoutId=2 without download information[32m 40[2mms[22m[39m
+2026-10-15T05:54:47.3638270Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest bootVersion=0 without download information[32m 29[2mms[22m[39m
+2026-10-15T05:54:47.3639413Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects latest protocolVersion=2 without download information[32m 25[2mms[22m[39m
+2026-10-15T05:54:47.3640134Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mapplies App gate before the ordered hardware/layout/Boot/protocol checks[32m 23[2mms[22m[39m
+2026-10-15T05:54:47.3640806Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects missing or duplicate query parameters[32m 7[2mms[22m[39m
+2026-10-15T05:54:47.3641770Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mdefensively rejects missing and duplicate full read models[32m 14[2mms[22m[39m
+2026-10-15T05:54:47.4828662Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22menforces headers, byte identity and correct full/partial digest semantics[32m 48[2mms[22m[39m
+2026-10-15T05:54:47.4829707Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects Range bytes=-3[32m 32[2mms[22m[39m
+2026-10-15T05:54:47.4830567Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects Range bytes=1-2[32m 52[2mms[22m[39m
+2026-10-15T05:54:47.5992337Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects Range bytes=1-,3-[32m 34[2mms[22m[39m
+2026-10-15T05:54:47.5993590Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects Range bytes=1e2-[32m 34[2mms[22m[39m
+2026-10-15T05:54:47.5994785Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrejects Range items=1-[32m 32[2mms[22m[39m
+2026-10-15T05:54:47.7099000Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mreturns 416 at/past EOF and rejects a mutated immutable R2 object[32m 44[2mms[22m[39m
+2026-10-15T05:54:47.7100109Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 latest and public download[2m > [22mrevokes public URLs when the release is no longer published[32m 69[2mms[22m[39m
+2026-10-15T05:54:47.7101225Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mmatches the frozen 67-byte token golden vector[32m 0[2mms[22m[39m
+2026-10-15T05:54:47.8117934Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects missing token mutation[32m 37[2mms[22m[39m
+2026-10-15T05:54:47.8120342Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects empty token mutation[32m 35[2mms[22m[39m
+2026-10-15T05:54:47.8121620Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects duplicate token mutation[32m 36[2mms[22m[39m
+2026-10-15T05:54:47.9218715Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects unknown token mutation[32m 39[2mms[22m[39m
+2026-10-15T05:54:47.9219526Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects purpose token mutation[32m 36[2mms[22m[39m
+2026-10-15T05:54:47.9220093Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects kind token mutation[32m 54[2mms[22m[39m
+2026-10-15T05:54:48.0335706Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects asset token mutation[32m 40[2mms[22m[39m
+2026-10-15T05:54:48.0337098Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mrejects signature token mutation[32m 39[2mms[22m[39m
+2026-10-15T05:54:48.1404854Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mexpires v2 at the exact deadline and never signs v1[32m 43[2mms[22m[39m
+2026-10-15T05:54:48.1406160Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22maccepts a rotated previous v2 key and binds actual asset kind, not just the signature[32m 45[2mms[22m[39m
+2026-10-15T05:54:48.1550711Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mdatabase rejects the second full, not an application precheck
+2026-10-15T05:54:48.1552315Z [22m[39mSQL_REJECT XC-D1-DUP-FULL: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+2026-10-15T05:54:48.1553062Z 
+2026-10-15T05:54:48.1588213Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mdatabase rejects the second patch for the same raw base
+2026-10-15T05:54:48.1589313Z [22m[39mSQL_REJECT XC-D1-DUP-PATCH: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+2026-10-15T05:54:48.1589876Z 
+2026-10-15T05:54:48.1619992Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mdatabase rejects the second recovery asset
+2026-10-15T05:54:48.1621110Z [22m[39mSQL_REJECT duplicate-recovery: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+2026-10-15T05:54:48.1621826Z 
+2026-10-15T05:54:48.1639635Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: NULL full
+2026-10-15T05:54:48.1640681Z [22m[39mSQL_REJECT NULL full: Error: D1_ERROR: NOT NULL constraint failed: firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_NOTNULL)
+2026-10-15T05:54:48.1641384Z 
+2026-10-15T05:54:48.1660620Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: full with SHA
+2026-10-15T05:54:48.1661826Z [22m[39mSQL_REJECT full with SHA: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+2026-10-15T05:54:48.1662219Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+2026-10-15T05:54:48.1662889Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+2026-10-15T05:54:48.1663138Z 
+2026-10-15T05:54:48.1684152Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: full with version
+2026-10-15T05:54:48.1685133Z [22m[39mSQL_REJECT full with version: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+2026-10-15T05:54:48.1686013Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+2026-10-15T05:54:48.1686620Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+2026-10-15T05:54:48.1686999Z 
+2026-10-15T05:54:48.1708222Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: empty patch
+2026-10-15T05:54:48.1709163Z [22m[39mSQL_REJECT empty patch: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+2026-10-15T05:54:48.1709724Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+2026-10-15T05:54:48.1710257Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+2026-10-15T05:54:48.1710501Z 
+2026-10-15T05:54:48.1731678Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: zero patch version
+2026-10-15T05:54:48.1732381Z [22m[39mSQL_REJECT zero patch version: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+2026-10-15T05:54:48.1732759Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+2026-10-15T05:54:48.1733169Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+2026-10-15T05:54:48.1733634Z 
+2026-10-15T05:54:48.1754307Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: uppercase SHA
+2026-10-15T05:54:48.1755098Z [22m[39mSQL_REJECT uppercase SHA: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+2026-10-15T05:54:48.1755486Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+2026-10-15T05:54:48.1755872Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+2026-10-15T05:54:48.1756129Z 
+2026-10-15T05:54:48.1776371Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: unknown kind
+2026-10-15T05:54:48.1777579Z [22m[39mSQL_REJECT unknown kind: Error: D1_ERROR: CHECK constraint failed: kind IN ('full','patch','recovery'): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+2026-10-15T05:54:48.1778423Z 
+2026-10-15T05:54:48.1798420Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: recovery base
+2026-10-15T05:54:48.1799245Z [22m[39mSQL_REJECT recovery base: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+2026-10-15T05:54:48.1799816Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+2026-10-15T05:54:48.1800251Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+2026-10-15T05:54:48.1800564Z 
+2026-10-15T05:54:48.1818814Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mSQL rejects illegal kind/base: patch ahead of target
+2026-10-15T05:54:48.1819998Z [22m[39mSQL_REJECT patch ahead of target: Error: D1_ERROR: firmware patch base version must precede target: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+2026-10-15T05:54:48.1820394Z 
+2026-10-15T05:54:48.1845225Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mdatabase rejects ready without full, and retains draft
+2026-10-15T05:54:48.1846320Z [22m[39mSQL_REJECT XC-D1-NO-FULL-READY: Error: D1_ERROR: firmware ready requires exactly one full and verified assets: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+2026-10-15T05:54:48.1846985Z 
+2026-10-15T05:54:48.1884366Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mdatabase rejects unpublished asset readiness and draft/cross-scope channel pointers
+2026-10-15T05:54:48.1885710Z [22m[39mSQL_REJECT unverified-ready: Error: D1_ERROR: firmware ready requires exactly one full and verified assets: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+2026-10-15T05:54:48.1886275Z 
+2026-10-15T05:54:48.1893956Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mdatabase rejects unpublished asset readiness and draft/cross-scope channel pointers
+2026-10-15T05:54:48.1894938Z [22m[39mSQL_REJECT draft-pointer: Error: D1_ERROR: firmware channel requires same-scope ready release: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+2026-10-15T05:54:48.1895246Z 
+2026-10-15T05:54:48.2121941Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mrejects direct channel changes without CAS and admin audit without a reason
+2026-10-15T05:54:48.2123247Z [22m[39mSQL_REJECT channel-CAS: Error: D1_ERROR: firmware channel mutation requires CAS revision: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+2026-10-15T05:54:48.2123720Z 
+2026-10-15T05:54:48.2133054Z [90mstdout[2m | test/firmware-v2.test.ts[2m > [22m[2mP4-2 actual SQL constraints[2m > [22m[2mrejects direct channel changes without CAS and admin audit without a reason
+2026-10-15T05:54:48.2134022Z [22m[39mSQL_REJECT admin-reason: Error: D1_ERROR: firmware admin reason required: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+2026-10-15T05:54:48.2134294Z 
+2026-10-15T05:54:48.2144048Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22maccepts only public v1 inside the fixed cutover window and rejects at cutoff[32m 72[2mms[22m[39m
+2026-10-15T05:54:48.2145170Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 token v2 and bounded v1 verifier[2m > [22mfails signing closed without an auditable cutover[32m 0[2mms[22m[39m
+2026-10-15T05:54:48.2146227Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mdatabase rejects the second full, not an application precheck[32m 5[2mms[22m[39m
+2026-10-15T05:54:48.2147262Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mdatabase rejects the second patch for the same raw base[32m 4[2mms[22m[39m
+2026-10-15T05:54:48.2148333Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mdatabase rejects the second recovery asset[32m 3[2mms[22m[39m
+2026-10-15T05:54:48.2149253Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: NULL full[32m 2[2mms[22m[39m
+2026-10-15T05:54:48.2150172Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: full with SHA[32m 2[2mms[22m[39m
+2026-10-15T05:54:48.2151015Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: full with version[32m 2[2mms[22m[39m
+2026-10-15T05:54:48.2151784Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: empty patch[32m 3[2mms[22m[39m
+2026-10-15T05:54:48.2152760Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: zero patch version[32m 2[2mms[22m[39m
+2026-10-15T05:54:48.2153746Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: uppercase SHA[32m 2[2mms[22m[39m
+2026-10-15T05:54:48.2154730Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: unknown kind[32m 3[2mms[22m[39m
+2026-10-15T05:54:48.2155600Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: recovery base[32m 2[2mms[22m[39m
+2026-10-15T05:54:48.2156192Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mSQL rejects illegal kind/base: patch ahead of target[32m 2[2mms[22m[39m
+2026-10-15T05:54:48.2156799Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mdatabase rejects ready without full, and retains draft[32m 4[2mms[22m[39m
+2026-10-15T05:54:48.2157491Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mdatabase rejects unpublished asset readiness and draft/cross-scope channel pointers[32m 3[2mms[22m[39m
+2026-10-15T05:54:48.2158462Z  [32m✓[39m test/firmware-v2.test.ts[2m > [22mP4-2 actual SQL constraints[2m > [22mrejects direct channel changes without CAS and admin audit without a reason[32m 24[2mms[22m[39m
+2026-10-15T05:54:48.2171607Z 
+2026-10-15T05:54:48.2173881Z [2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+2026-10-15T05:54:48.2174483Z [2m      Tests [22m [1m[32m156 passed[39m[22m[90m (156)[39m
+2026-10-15T05:54:48.2174843Z [2m   Start at [22m 05:54:44
+2026-10-15T05:54:48.2175429Z [2m   Duration [22m 3.24s[2m (transform 414ms, setup 749ms, import 212ms, tests 3.73s, environment 1ms)[22m
+2026-10-15T05:54:48.2176432Z 

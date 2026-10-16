@@ -1,0 +1,31 @@
+(node:11872) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14232) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads full through the real SDK codec with immutable metadata and full readback
+ FAIL  test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads patch through the real SDK codec with immutable metadata and full readback
+ FAIL  test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads recovery through the real SDK codec with immutable metadata and full readback
+DevalueError: Cannot stringify arbitrary non-POJOs
+ ❯ flatten node_modules/.pnpm/devalue@5.6.3/node_modules/devalue/src/stringify.js:268:12
+ ❯ flatten node_modules/.pnpm/devalue@5.6.3/node_modules/devalue/src/stringify.js:318:42
+ ❯ flatten node_modules/.pnpm/devalue@5.6.3/node_modules/devalue/src/stringify.js:127:14
+ ❯ stringify2 node_modules/.pnpm/devalue@5.6.3/node_modules/devalue/src/stringify.js:330:15
+ ❯ stringify node_modules/miniflare/src/workers/core/devalue.ts:271:26
+ ❯ encodePut test/firmware-scripts.host.test.ts:31:40
+     29| } as unknown as PlatformImpl<ReadableStream>;
+     30| const codecReducers = { ...structuredSerializableReducers, ...createHT…
+     31| const encodePut = (argv: unknown[]) => stringifyWithStreams(codecPlatf…
+       |                                        ^
+     32|
+     33| async function files() {
+ ❯ MemoryBucket.<anonymous> test/firmware-scripts.host.test.ts:96:29
+ ❯ uploadFirmwareAsset ../scripts/upload-firmware-r2-asset.mjs:68:34
+ ❯ test/firmware-scripts.host.test.ts:102:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { path: '[2].httpMetadata', value: { constructor: 'Function<Headers>', append: 'Function<append>', delete: 'Function<delete>', get: 'Function<get>', has: 'Function<has>', set: 'Function<set>', getSetCookie: 'Function<getSetCookie>', keys: 'Function<keys>', values: 'Function<values>', entries: 'Function<entries>', forEach: 'Function<forEach>' }, root: [ 'trace/firmware/e-track-at32f435/200002-mcu-e-track-at32f435-v20.0.2/e-track-at32f435-v20.0.2-full.etu', '<Uint8Array(18) ...>', { onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { constructor: 'Function<Headers>', append: 'Function<append>', delete: 'Function<delete>', get: 'Function<get>', has: 'Function<has>', set: 'Function<set>', getSetCookie: 'Function<getSetCookie>', keys: 'Function<keys>', values: 'Function<values>', entries: 'Function<entries>', forEach: 'Function<forEach>' }, customMetadata: { sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3', kind: 'full', 'content-digest': 'sha-256=:lreWI+KQtL2hfankIyDEgGTj77UQw5J5mrKnsfm3WaM=:' }, sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3' } ] }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+

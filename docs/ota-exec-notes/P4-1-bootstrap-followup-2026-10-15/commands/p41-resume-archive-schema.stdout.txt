@@ -1,0 +1,1 @@
+{"ok":true,"scope":"archived-provenance-contract","remoteDownload":"NOT_RUN","sourceRunId":"38642386248","sizeBytes":605072,"sha256":"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f"}

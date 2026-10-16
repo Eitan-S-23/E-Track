@@ -1,0 +1,10 @@
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+
+ Test Files  no tests
+      Tests  no tests
+     Errors  3 errors
+   Start at  04:14:36
+   Duration  2.46s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

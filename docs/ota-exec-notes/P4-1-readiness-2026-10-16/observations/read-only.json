@@ -1,0 +1,143 @@
+{
+  "startedAt": "2026-10-15T16:58:40.911Z",
+  "mode": "READ_ONLY",
+  "requests": [
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/user/tokens/verify",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/user/tokens/2ff44daaf6f9f379c67aa7e6419b38b3",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/af6dd848e6a21f1cd26d44b1b656af7b/workers/scripts/e-track-firmware-p41-test/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "api.github.com",
+      "path": "/user",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/variables",
+      "status": 200
+    }
+  ],
+  "cloudflareTokenActive": true,
+  "cloudflarePolicy": {
+    "status": 403,
+    "readable": false
+  },
+  "testWorker": {
+    "status": 200,
+    "bindings": [
+      {
+        "name": "APP_ID",
+        "type": "plain_text"
+      },
+      {
+        "name": "DB",
+        "type": "d1",
+        "d1TargetMatches": true
+      },
+      {
+        "name": "DEPLOY_TOKEN_SHA256",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+        "type": "plain_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENABLE_DIRECT_ADMIN_API",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENVIRONMENT",
+        "type": "plain_text"
+      },
+      {
+        "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_OWNER",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_REPO",
+        "type": "plain_text"
+      },
+      {
+        "name": "MANIFEST_CACHE",
+        "type": "kv_namespace"
+      },
+      {
+        "name": "MANIFEST_CACHE_TTL_SECONDS",
+        "type": "plain_text"
+      },
+      {
+        "name": "RATE_LIMITER",
+        "type": "durable_object_namespace"
+      },
+      {
+        "name": "RATE_LIMIT_MAX_REQUESTS",
+        "type": "plain_text"
+      },
+      {
+        "name": "RATE_LIMIT_WINDOW_SECONDS",
+        "type": "plain_text"
+      },
+      {
+        "name": "RELEASES_BUCKET",
+        "type": "r2_bucket",
+        "r2TargetMatches": true
+      }
+    ]
+  },
+  "githubIdentity": "Eitan-S-23",
+  "repositorySecrets": {
+    "status": 200,
+    "total": 1,
+    "names": [
+      "ETRACK_DEV_SIGNING_KEYSTORE"
+    ]
+  },
+  "repositoryVariables": {
+    "status": 200,
+    "total": 0,
+    "names": [],
+    "productionGateUnlocked": false
+  },
+  "privateInputFieldNames": [
+    "TRACE_DEPLOY_TOKEN",
+    "DEPLOY_TOKEN_SHA256",
+    "DOWNLOAD_HMAC_KEY_CURRENT"
+  ],
+  "ok": true,
+  "endedAt": "2026-10-15T16:58:50.573Z"
+}

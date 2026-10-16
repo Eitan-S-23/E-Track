@@ -1,0 +1,17 @@
+{
+  "original_operator": "Separate implementation owner plus original independent acceptance reviewer",
+  "source_commit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c",
+  "original_date": "2026-10-16/17",
+  "previous_contract_sha256": "8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d",
+  "previous_matrix_sha256": "aa980b1b64777f9ccf8ec46c0e34945e3c59fee5dcc638ef92c0cc19d3a54da0",
+  "previous_bundle_commit": "7f014a8887dc79646ff392ee8cfa6a1ce2c9cf67",
+  "previous_staging_run": 38897470681,
+  "previous_staging_attempt": 1,
+  "previous_result": "PRODUCT_FAIL",
+  "prior_staging_executions": 1,
+  "planned_new_dispatches": 1,
+  "bootstrap_archive_commit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+  "original_evaluation_sha256": "c6b67effcee124d95420fe0dccc2449747f00b17212ee5021937e208c38b42c6",
+  "repair_review_sha256": "e2792ad26222242b95876a89faf9f0b76f3696c36fa37e01511fd0824017d33f",
+  "applicability": "P41-NATIVE-01 changes only the shared R2 metadata representation plus regression tests. The original failed round and partial key/byte observations are preserved, not relabeled. One successor canonical workflow supplies the missing real upload/readback/ready and new before/after state evidence. Its unchanged workflow requires source-bound same-run GCC/pack outputs; no separate qualification or build campaign is added."
+}

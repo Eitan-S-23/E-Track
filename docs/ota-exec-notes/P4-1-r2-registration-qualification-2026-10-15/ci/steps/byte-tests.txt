@@ -1,0 +1,96 @@
+﻿2026-10-15T05:54:55.2549028Z ##[group]Run python3 -B tests/ota/test_firmware_pack.py
+2026-10-15T05:54:55.2549280Z [36;1mpython3 -B tests/ota/test_firmware_pack.py[0m
+2026-10-15T05:54:55.2549548Z [36;1mPYTHONPATH="$GITHUB_WORKSPACE/Tools" python3 -B tests/ota-vectors/test_vectors.py[0m
+2026-10-15T05:54:55.2599319Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:55.2599465Z env:
+2026-10-15T05:54:55.2599586Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:55.2599736Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:55.2599893Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:55.2600090Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:55.2600264Z   BUILD_TYPE: Release
+2026-10-15T05:54:55.2600389Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:55.2600530Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:55.2600731Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:55.2600990Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:55.2601245Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:55.2601459Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:55.2601648Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:55.2601835Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:55.2602031Z ##[endgroup]
+2026-10-15T05:54:55.4217269Z test_bsdiff_error_line_overrides_success_marker (__main__.PackageReplayTests.test_bsdiff_error_line_overrides_success_marker) ... ok
+2026-10-15T05:54:55.4227598Z test_bsdiff_exit_zero_and_a_file_do_not_replace_stdout_verification (__main__.PackageReplayTests.test_bsdiff_exit_zero_and_a_file_do_not_replace_stdout_verification) ... ok
+2026-10-15T05:54:55.4251580Z test_default_nonce_remains_random (__main__.PackageReplayTests.test_default_nonce_remains_random) ... ok
+2026-10-15T05:54:55.4293568Z test_refuses_corrupted_reference (__main__.PackageReplayTests.test_refuses_corrupted_reference) ... ok
+2026-10-15T05:54:55.4309644Z test_refuses_different_header_identity (__main__.PackageReplayTests.test_refuses_different_header_identity) ... ok
+2026-10-15T05:54:55.4327570Z test_refuses_different_key (__main__.PackageReplayTests.test_refuses_different_key) ... ok
+2026-10-15T05:54:55.4344374Z test_refuses_different_plaintext_before_output (__main__.PackageReplayTests.test_refuses_different_plaintext_before_output) ... ok
+2026-10-15T05:54:55.4360015Z test_replays_actual_full_package (__main__.PackageReplayTests.test_replays_actual_full_package) ... ok
+2026-10-15T05:54:55.4360425Z 
+2026-10-15T05:54:55.4360670Z ----------------------------------------------------------------------
+2026-10-15T05:54:55.4361007Z Ran 8 tests in 0.016s
+2026-10-15T05:54:55.4361141Z 
+2026-10-15T05:54:55.4361220Z OK
+2026-10-15T05:54:55.4361702Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmp58nc3xgy/one.etu
+2026-10-15T05:54:55.4362254Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4362547Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4362831Z   aes_nonce=3574e7253bbd5a6982c358ef793556bb
+2026-10-15T05:54:55.4363223Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4363595Z   header_crc32=a13759f0
+2026-10-15T05:54:55.4364033Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmp58nc3xgy/two.etu
+2026-10-15T05:54:55.4364454Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4364723Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4364990Z   aes_nonce=f13d954d3d48c80d54bbfa766f73db04
+2026-10-15T05:54:55.4365382Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4365724Z   header_crc32=cd7ac5e9
+2026-10-15T05:54:55.4366196Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmpr43up7tz/one.etu
+2026-10-15T05:54:55.4366609Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4366872Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4367369Z   aes_nonce=ffa14d979a488e4a48ee7a42b259db98
+2026-10-15T05:54:55.4367737Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4368248Z   header_crc32=cca53d4f
+2026-10-15T05:54:55.4368676Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmpvfoggiix/one.etu
+2026-10-15T05:54:55.4369086Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4369349Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4369611Z   aes_nonce=0ad25849ca71ebea8a7eaae2cbb81127
+2026-10-15T05:54:55.4369981Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4370315Z   header_crc32=14d307b0
+2026-10-15T05:54:55.4370724Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmp2i6a_vrg/one.etu
+2026-10-15T05:54:55.4371135Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4371398Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4371671Z   aes_nonce=6368dd528ba806b92c7b6590e3ba3b4f
+2026-10-15T05:54:55.4372042Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4372374Z   header_crc32=41c62236
+2026-10-15T05:54:55.4372781Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmpph3dpqy9/one.etu
+2026-10-15T05:54:55.4373171Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4373440Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4373699Z   aes_nonce=6000eff2753e6d7e952683d087c06749
+2026-10-15T05:54:55.4374063Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4374383Z   header_crc32=17d00b93
+2026-10-15T05:54:55.4374782Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmpywuw8bw_/one.etu
+2026-10-15T05:54:55.4375163Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4375414Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4375676Z   aes_nonce=eeac851b7f24d4c82f8a92319aa28430
+2026-10-15T05:54:55.4376034Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4376513Z   header_crc32=43a361a5
+2026-10-15T05:54:55.4376906Z pack-full OK: /home/runner/work/E-Track/E-Track/.cache/firmware-pack-tests/tmpywuw8bw_/two.etu
+2026-10-15T05:54:55.4377278Z   app_len=4096 payload_len=264 etu_total=328
+2026-10-15T05:54:55.4377538Z   target_vcode=20801 flags=0x000b key_id=1
+2026-10-15T05:54:55.4377908Z   aes_nonce=eeac851b7f24d4c82f8a92319aa28430
+2026-10-15T05:54:55.4378271Z   image_sha256=c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193
+2026-10-15T05:54:55.4378589Z   header_crc32=43a361a5
+2026-10-15T05:54:55.4913873Z [warn] OTA_AES_KEY 未设，使用 vendor 示例 key（仅开发）
+2026-10-15T05:54:55.4914605Z test_contract_samples_regression (__main__.GoldenVectorsTest.test_contract_samples_regression) ... ok
+2026-10-15T05:54:55.4915300Z test_etu_image_sha256_consistency (__main__.GoldenVectorsTest.test_etu_image_sha256_consistency)
+2026-10-15T05:54:55.4915998Z 各 .etu 条目 image_sha256 == candidate fw_header.image_sha256 双零值 ... ok
+2026-10-15T05:54:55.4916683Z test_full_outer_header (__main__.GoldenVectorsTest.test_full_outer_header) ... ok
+2026-10-15T05:54:55.4923186Z test_full_roundtrip (__main__.GoldenVectorsTest.test_full_roundtrip) ... ok
+2026-10-15T05:54:55.4924269Z test_patch_inner_full_fields (__main__.GoldenVectorsTest.test_patch_inner_full_fields) ... ok
+2026-10-15T05:54:55.4924974Z test_patch_outer_header (__main__.GoldenVectorsTest.test_patch_outer_header) ... ok
+2026-10-15T05:54:55.4932568Z test_patch_roundtrip (__main__.GoldenVectorsTest.test_patch_roundtrip) ... ok
+2026-10-15T05:54:55.4932928Z test_seq_arbiter (__main__.GoldenVectorsTest.test_seq_arbiter) ... ok
+2026-10-15T05:54:55.4933631Z test_toy_fw_header_fields (__main__.GoldenVectorsTest.test_toy_fw_header_fields) ... ok
+2026-10-15T05:54:55.4933903Z 
+2026-10-15T05:54:55.4934031Z ----------------------------------------------------------------------
+2026-10-15T05:54:55.4935358Z Ran 9 tests in 0.002s
+2026-10-15T05:54:55.4935504Z 
+2026-10-15T05:54:55.4935582Z OK

@@ -1,0 +1,27 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs",
+    "snapshot",
+    "before"
+  ],
+  "pid": 20268,
+  "started": "2026-10-16T18:15:36.983Z",
+  "ended": "2026-10-16T18:16:31.819Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/formal-cloud-before.stdout.txt",
+      "size_bytes": 157,
+      "sha256": "9148ca1a13d025b5b3f63128c297c324d7e9bcc8ee922e00f22ba817ff3561d3"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/formal-cloud-before.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

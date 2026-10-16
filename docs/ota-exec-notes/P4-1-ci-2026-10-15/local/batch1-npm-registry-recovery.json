@@ -1,0 +1,39 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker",
+  "executable": "node",
+  "args": [
+    "D:/install/nvm/nodejs/node_modules/npm/bin/npm-cli.js",
+    "ci",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+    "--prefer-offline",
+    "--fetch-timeout=60000",
+    "--fetch-retries=1",
+    "--registry=https://registry.npmjs.org",
+    "--replace-registry-host=always"
+  ],
+  "pid": 19072,
+  "started": "2026-10-14T20:12:30.163Z",
+  "ended": "2026-10-14T20:12:50.676Z",
+  "exitCode": 0,
+  "signal": null,
+  "outputs": {
+    "TEMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMPDIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "USERPROFILE": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "APPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\appdata",
+    "LOCALAPPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\localappdata",
+    "XDG_CONFIG_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\config",
+    "XDG_CACHE_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\cache",
+    "XDG_DATA_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\data",
+    "npm_config_cache": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\npm-cache",
+    "PIP_CACHE_DIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\pip-cache",
+    "WRANGLER_LOG_PATH": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\wrangler-logs"
+  },
+  "stdoutPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\batch1-npm-registry-recovery.stdout.txt",
+  "stderrPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\batch1-npm-registry-recovery.stderr.txt",
+  "closed": true
+}

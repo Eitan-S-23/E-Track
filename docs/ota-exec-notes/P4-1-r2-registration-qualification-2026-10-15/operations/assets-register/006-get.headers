@@ -1,0 +1,18 @@
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 200 OK
+Date: Thu, 15 Oct 2026 06:30:26 GMT
+Content-Type: application/vnd.e-track.etu
+Content-Length: 208
+Connection: keep-alive
+Accept-Ranges: bytes
+Cache-Control: public, max-age=31536000, immutable
+Content-Disposition: attachment; filename="e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu"
+ETag: "62eb51acc4b7d224c5e2b5ef4a40bcb6"
+Last-Modified: Thu, 15 Oct 2026 06:30:19 GMT
+x-amz-meta-content-digest: sha-256=:ioJbt07F/cy6dD0xU9uXx0fhiMpZI1VAAIivJKYnPGc=:
+x-amz-meta-kind: patch
+x-amz-meta-sha256: 8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67
+Server: cloudflare
+CF-RAY: a4acc669d954d766-NRT
+

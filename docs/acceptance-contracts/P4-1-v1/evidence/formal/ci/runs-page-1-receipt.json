@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T11:32:19.768Z",
+  "ended": "2026-10-16T11:32:22.059Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs?event=pull_request&head_sha=2d3daae4ac5441d3eb736b654c237ae53760067c&per_page=100&page=1",
+  "status": 200,
+  "requestId": "AE28:22F48F:D3A5D6:13C6555:6AD20B45",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/ci/runs-page-1.json",
+    "size_bytes": 49914,
+    "sha256": "86c60baa73a7adcfa0c75b19b0fbcb7d6a4543b9f9cfc271a83111dfd2063fe5"
+  }
+}

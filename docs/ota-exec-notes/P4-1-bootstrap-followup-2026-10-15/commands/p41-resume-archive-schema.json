@@ -1,0 +1,31 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "-e",
+    "import('./app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs').then(function(m){fs=require('fs');dir='docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/';p=JSON.parse(fs.readFileSync(dir+'provenance.json'));base={sourceRunId:'38642386248',sourceRunAttempt:'1',sourceArtifactId:'11931006831',sourceArtifactSha256:'4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149',commitSha:'fa74905e84c489cccc248617d37ab9f56c8f961c',versionName:'3.2.7',versionCode:30207,buildTimestamp:1792014177,imageSha256:'aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f',sourceSizeBytes:605072};m.validateBootstrapProvenance(base,p,'Eitan-S-23/E-Track');b=fs.readFileSync(dir+'app-final.bin');require('assert').strictEqual(m.digest(b),base.imageSha256);require('assert').strictEqual(b.length,base.sourceSizeBytes);console.log(JSON.stringify({ok:true,scope:'archived-provenance-contract',remoteDownload:'NOT_RUN',sourceRunId:base.sourceRunId,sizeBytes:b.length,sha256:m.digest(b)}))})"
+  ],
+  "pid": 20340,
+  "started": "2026-10-15T15:10:39.862Z",
+  "ended": "2026-10-15T15:10:40.077Z",
+  "exitCode": 0,
+  "signal": null,
+  "outputs": {
+    "TEMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMPDIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "USERPROFILE": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "APPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\appdata",
+    "LOCALAPPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\localappdata",
+    "XDG_CONFIG_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\config",
+    "XDG_CACHE_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\cache",
+    "XDG_DATA_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\data",
+    "npm_config_cache": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\npm-cache",
+    "PIP_CACHE_DIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\pip-cache",
+    "WRANGLER_LOG_PATH": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\wrangler-logs"
+  },
+  "stdoutPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\p41-resume-archive-schema.stdout.txt",
+  "stderrPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\p41-resume-archive-schema.stderr.txt",
+  "closed": true
+}

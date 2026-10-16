@@ -1,0 +1,172 @@
+{
+  "started": "2026-10-16T18:57:39.304859+00:00",
+  "mode": "rehearsal",
+  "scope": "INDEPENDENT_CANONICAL_REHEARSAL_ARTIFACT_EVALUATION",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/completed/rehearsal.zip",
+    "size_bytes": 4154000,
+    "sha256": "032fe5d1b2f4e1c3766ca8105ec6ede38d0c421a9d05b93194710d4d8cef826e"
+  },
+  "commitSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+  "runId": "38946949709",
+  "versionName": "3.2.8",
+  "header": {
+    "version_code": 30208,
+    "version_name": "3.2.8",
+    "build_ts": 1792173038,
+    "image_len": 605072,
+    "image_crc32": 3014026167,
+    "initial_msp": 537231360,
+    "reset_handler": 134329957
+  },
+  "keyBinding": {
+    "schemaVersion": 1,
+    "keyId": 1,
+    "source": "approved-ci-key-v1",
+    "keySha256": "a94ae0f006b3d6be51279b861dc19b8a0892833939d0a4db5a81ee7af511fe9e",
+    "headerSha256": "aac414ffff84f3997298fe631a81190bce1d7efe5f4d1718cc1f05103b1f4622",
+    "keySourceSha256": "baf619c85412a9f87f249ee97a19bf781a9b802fe2aab68254fedca884609495"
+  },
+  "diagnostics": [
+    {
+      "label": "configure",
+      "exitCode": 0,
+      "warningLines": 0,
+      "errorLines": 0
+    },
+    {
+      "label": "build",
+      "exitCode": 0,
+      "warningLines": 640,
+      "errorLines": 0
+    },
+    {
+      "label": "size",
+      "exitCode": 0,
+      "warningLines": 0,
+      "errorLines": 0
+    }
+  ],
+  "metadataSha256": "fe435e1a0bc6afea344566846b1a63e8de39ee9335a98a874e97fbcc82b543a4",
+  "metadata": {
+    "appId": "trace",
+    "assets": [
+      {
+        "baseImageSha256": "",
+        "baseVersionCode": 0,
+        "fileName": "e-track-at32f435-v3.2.8-full.etu",
+        "githubUrl": "https://github.com/Eitan-S-23/E-Track/releases/download/mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.8-full.etu",
+        "kind": "full",
+        "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.8-full.etu",
+        "r2Verified": true,
+        "sha256": "0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127",
+        "sizeBytes": 285794
+      },
+      {
+        "baseImageSha256": "aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f",
+        "baseVersionCode": 30207,
+        "fileName": "e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+        "githubUrl": "https://github.com/Eitan-S-23/E-Track/releases/download/mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+        "kind": "patch",
+        "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+        "r2Verified": true,
+        "sha256": "5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05",
+        "sizeBytes": 379
+      },
+      {
+        "baseImageSha256": "",
+        "baseVersionCode": 0,
+        "fileName": "recovery-v3.2.8.bin",
+        "githubUrl": "https://github.com/Eitan-S-23/E-Track/releases/download/mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin",
+        "kind": "recovery",
+        "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin",
+        "r2Verified": true,
+        "sha256": "45eda4d7fcf8a59f5e489262f5b19c4463f4bc80183e2180c61862dd8ce5c1c3",
+        "sizeBytes": 605080
+      }
+    ],
+    "commitSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+    "deviceModel": "e-track-at32f435",
+    "hardwareRevision": 1,
+    "isFormalRelease": true,
+    "layoutId": 1,
+    "minAppVersionCode": 0,
+    "minBootVersion": 1,
+    "minProtocolVersion": 1,
+    "releaseNotes": "P4-1 v2 repair-bound staging after P41-NATIVE-01; v1 failure retained; not a production release.",
+    "releaseTag": "mcu-e-track-at32f435-v3.2.8",
+    "runId": "38946949709",
+    "schemaVersion": 2,
+    "targetHardware": "AT32F435RGT7",
+    "targetImageSha256": "a94bca52f7e84064aac4d063273bc69f90e220cbbeaded8d0137e731dd5d99c6",
+    "transport": "ble",
+    "versionCode": 30208,
+    "versionName": "3.2.8"
+  },
+  "remote_evidence": {
+    "mode": "rehearsal",
+    "commitSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+    "canonicalRunId": "38946949709",
+    "executionRunId": "38946949709",
+    "executionAttempt": "1",
+    "metadataSha256": "fe435e1a0bc6afea344566846b1a63e8de39ee9335a98a874e97fbcc82b543a4",
+    "preparationSha256": "85edb1b45d5eb650ac6cdd617bd430609e430aca7a90dc4bb6625f2a6c186bf5",
+    "github": null,
+    "uploads": [
+      {
+        "ok": true,
+        "status": "UPLOADED",
+        "requestId": "74c970f5-01e6-4a0a-8f4c-885cf193ebaa",
+        "kind": "full",
+        "fileName": "e-track-at32f435-v3.2.8-full.etu",
+        "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.8-full.etu",
+        "sha256": "0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127",
+        "sizeBytes": 285794,
+        "contentDigest": "sha-256=:De4gwEZ6usORze3Y0dd9n/GxP7LYk2cp/Tt2h2lO0Sc=:"
+      },
+      {
+        "ok": true,
+        "status": "UPLOADED",
+        "requestId": "ae02c5e3-f2d8-477c-9cc6-d17c1dd028e1",
+        "kind": "patch",
+        "fileName": "e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+        "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu",
+        "sha256": "5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05",
+        "sizeBytes": 379,
+        "contentDigest": "sha-256=:XTszuFzq7yYsAiaDrE2X7ILVKgoOkAdUlmoowpO3ywU=:"
+      },
+      {
+        "ok": true,
+        "status": "UPLOADED",
+        "requestId": "d55eebb1-d222-4ac2-8907-ba73222e2650",
+        "kind": "recovery",
+        "fileName": "recovery-v3.2.8.bin",
+        "r2Key": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin",
+        "sha256": "45eda4d7fcf8a59f5e489262f5b19c4463f4bc80183e2180c61862dd8ce5c1c3",
+        "sizeBytes": 605080,
+        "contentDigest": "sha-256=:Re2k1/z4pZ9eSJJi9bGcRGP0vIAYPiGAxhhi3YzlwcM=:"
+      }
+    ],
+    "registration": {
+      "ok": true,
+      "requestId": "b325f1ef-5fbf-4424-9828-4e5e6b936a9e",
+      "releaseId": "fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c",
+      "state": "ready",
+      "idempotent": false,
+      "assetsRegistered": 3
+    },
+    "replay": {
+      "ok": true,
+      "requestId": "fcbb5e49-64c1-4083-998f-6d24575db549",
+      "releaseId": "fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c",
+      "state": "ready",
+      "idempotent": true,
+      "assetsRegistered": 3
+    }
+  },
+  "eight_gcc_artifacts_verified": true,
+  "actual_full_patch_candidates_equal": true,
+  "recovery_verified": true,
+  "ok": true,
+  "ended": "2026-10-16T18:57:39.590326+00:00"
+}

@@ -1,0 +1,11 @@
+{
+  "started": "2026-10-16T12:51:04.241Z",
+  "ended": "2026-10-16T12:51:31.579Z",
+  "route": "/repos/Eitan-S-23/E-Track/actions/artifacts/12044718607/zip",
+  "transport": "GitHub_CLI",
+  "exitCode": 0,
+  "stderr": "",
+  "size": 4151958,
+  "sha256": "69eaf3d2012fbbce0456f50f185cd6889e41e08172982ef74601069899c9ddd6",
+  "expectedSha256": "69eaf3d2012fbbce0456f50f185cd6889e41e08172982ef74601069899c9ddd6"
+}

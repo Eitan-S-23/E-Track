@@ -1,0 +1,35 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker",
+  "executable": "node",
+  "args": [
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "test/vitest.host.config.ts",
+    "test/firmware-scripts.host.test.ts",
+    "test/firmware-migration.host.test.ts"
+  ],
+  "pid": 19984,
+  "started": "2026-10-14T20:17:40.729Z",
+  "ended": "2026-10-14T20:17:47.903Z",
+  "exitCode": 0,
+  "signal": null,
+  "outputs": {
+    "TEMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMPDIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "USERPROFILE": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "APPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\appdata",
+    "LOCALAPPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\localappdata",
+    "XDG_CONFIG_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\config",
+    "XDG_CACHE_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\cache",
+    "XDG_DATA_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\data",
+    "npm_config_cache": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\npm-cache",
+    "PIP_CACHE_DIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\pip-cache",
+    "WRANGLER_LOG_PATH": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\wrangler-logs"
+  },
+  "stdoutPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\batch1-host-portable.stdout.txt",
+  "stderrPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\batch1-host-portable.stderr.txt",
+  "closed": true
+}

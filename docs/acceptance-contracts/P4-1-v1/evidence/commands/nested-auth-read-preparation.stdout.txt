@@ -1,0 +1,1 @@
+{"status":200,"route":"/user","artifact":{"path":".cache/p41-acceptance-20261016/github/nested-auth-read.json","size_bytes":1450,"sha256":"7725c06b286790dc13616a101fd3210cd0573b8231be7b1806af5569229436ba"}}

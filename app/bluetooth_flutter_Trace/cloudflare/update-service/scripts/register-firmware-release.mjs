@@ -1,27 +1,30 @@
-#!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { canonicalJson, parseFirmwareRegistration } from "./firmware-schema.mjs";
 import { CliError, failure } from "./firmware-cli.mjs";
 
-export async function registerFirmware(metadata, { serviceUrl, deployToken, fetcher = fetch, retries = 3, timeoutMs = 30000 }) {
+export async function registerFirmware(metadata, { serviceUrl, deployToken, fetcher = fetch, retries = 3, timeoutMs = 30000, signal }) {
   if (!serviceUrl || !deployToken) throw new CliError("Service URL and deploy token are required");
-  const url = new URL(serviceUrl);
-  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) throw new CliError("Registration requires a credential-free HTTPS origin");
+  if (/\s/.test(deployToken)) throw new CliError("Deploy token must be one credential without whitespace");
+  let url;
+  try { url = new URL(serviceUrl); } catch { throw new CliError("Invalid registration origin"); }
+  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname !== "/") throw new CliError("Registration requires a credential-free HTTPS origin");
   if (!Number.isInteger(retries) || retries < 1 || retries > 3 || !Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30000) {
     throw new CliError("Invalid registration retry/timeout bounds");
   }
   const input = parseFirmwareRegistration(metadata);
   const requestId = crypto.randomUUID();
   for (let attempt = 0; attempt < retries; attempt++) {
+    if (signal?.aborted) throw new CliError("Registration cancelled", "BACKEND_UNAVAILABLE", 1);
     let response;
     try {
       response = await fetcher(new URL("/api/ci/firmware/releases", url), { method: "POST", redirect: "error",
-        signal: AbortSignal.timeout(timeoutMs), headers: { Authorization: `Bearer ${deployToken}`,
+        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs), headers: { Authorization: `Bearer ${deployToken}`,
           "Content-Type": "application/json", Accept: "application/json", "X-Request-Id": requestId },
         body: canonicalJson(input) });
     } catch {
+      if (signal?.aborted) throw new CliError("Registration cancelled", "BACKEND_UNAVAILABLE", 1);
       if (attempt + 1 < retries) continue;
       throw new CliError("Registration network request failed", "BACKEND_UNAVAILABLE", 1);
     }
@@ -36,6 +39,7 @@ export async function registerFirmware(metadata, { serviceUrl, deployToken, fetc
     const result = await response.json();
     if (result.ok !== true || result.state !== "ready" || typeof result.releaseId !== "string" || !result.releaseId
       || result.assetsRegistered !== input.assets.length || typeof result.requestId !== "string"
+      || result.requestId !== requestId
       || result.requestId !== response.headers.get("X-Request-Id")
       || result.idempotent !== (response.status === 200)) throw new CliError("Invalid registration result", "BACKEND_UNAVAILABLE", 1);
     return result;

@@ -1,0 +1,461 @@
+{
+  "scope": "Read-only closeout audit, not independent acceptance",
+  "observedAt": "2026-10-14T22:05:05.224452+00:00",
+  "activeRoot": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "worktreeCreatedAt": "2026-10-14T19:58:12.273101+00:00",
+  "ownedReceiptCount": 34,
+  "receipts": [
+    {
+      "path": ".cache/logs/batch1-commit.json",
+      "pid": 1584,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:16:10.920Z",
+      "ended": "2026-10-14T20:16:13.177Z"
+    },
+    {
+      "path": ".cache/logs/batch1-host-portable.json",
+      "pid": 19984,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:17:40.729Z",
+      "ended": "2026-10-14T20:17:47.903Z"
+    },
+    {
+      "path": ".cache/logs/batch1-host.json",
+      "pid": 21536,
+      "exitCode": 1,
+      "closed": true,
+      "started": "2026-10-14T20:14:26.481Z",
+      "ended": "2026-10-14T20:14:31.679Z"
+    },
+    {
+      "path": ".cache/logs/batch1-native.json",
+      "pid": 3680,
+      "exitCode": 1,
+      "closed": true,
+      "started": "2026-10-14T20:14:31.883Z",
+      "ended": "2026-10-14T20:14:49.427Z"
+    },
+    {
+      "path": ".cache/logs/batch1-npm-ci.json",
+      "pid": 11704,
+      "exitCode": 1,
+      "closed": true,
+      "started": "2026-10-14T20:02:26.460Z",
+      "ended": "2026-10-14T20:10:41.209Z"
+    },
+    {
+      "path": ".cache/logs/batch1-npm-registry-recovery.json",
+      "pid": 19072,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:12:30.163Z",
+      "ended": "2026-10-14T20:12:50.676Z"
+    },
+    {
+      "path": ".cache/logs/batch1-portable-commit.json",
+      "pid": 17976,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:18:29.305Z",
+      "ended": "2026-10-14T20:18:29.797Z"
+    },
+    {
+      "path": ".cache/logs/batch1-portable-stage.json",
+      "pid": 1824,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:18:28.680Z",
+      "ended": "2026-10-14T20:18:28.931Z"
+    },
+    {
+      "path": ".cache/logs/batch1-stage.json",
+      "pid": 7052,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:16:09.192Z",
+      "ended": "2026-10-14T20:16:09.727Z"
+    },
+    {
+      "path": ".cache/logs/batch1-types.json",
+      "pid": 21844,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:17:48.154Z",
+      "ended": "2026-10-14T20:17:53.834Z"
+    },
+    {
+      "path": ".cache/logs/batch2-byte.json",
+      "pid": 19588,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:30:23.765Z",
+      "ended": "2026-10-14T20:31:07.958Z"
+    },
+    {
+      "path": ".cache/logs/batch2-commit.json",
+      "pid": 19084,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:32:32.951Z",
+      "ended": "2026-10-14T20:32:34.386Z"
+    },
+    {
+      "path": ".cache/logs/batch2-pack-fixed.json",
+      "pid": 8356,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:31:37.246Z",
+      "ended": "2026-10-14T20:31:38.562Z"
+    },
+    {
+      "path": ".cache/logs/batch2-pack.json",
+      "pid": 17868,
+      "exitCode": 1,
+      "closed": true,
+      "started": "2026-10-14T20:30:20.368Z",
+      "ended": "2026-10-14T20:30:23.239Z"
+    },
+    {
+      "path": ".cache/logs/batch2-stage.json",
+      "pid": 16772,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:32:32.282Z",
+      "ended": "2026-10-14T20:32:32.553Z"
+    },
+    {
+      "path": ".cache/logs/batch3-commit.json",
+      "pid": 21792,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:17:03.460Z",
+      "ended": "2026-10-14T21:17:04.078Z"
+    },
+    {
+      "path": ".cache/logs/batch3-pipeline-bound.json",
+      "pid": 23680,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:08:44.957Z",
+      "ended": "2026-10-14T21:08:49.964Z"
+    },
+    {
+      "path": ".cache/logs/batch3-pipeline-fixed.json",
+      "pid": 20604,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:54:37.776Z",
+      "ended": "2026-10-14T20:54:42.908Z"
+    },
+    {
+      "path": ".cache/logs/batch3-pipeline-host.json",
+      "pid": 472,
+      "exitCode": 1,
+      "closed": true,
+      "started": "2026-10-14T20:49:47.926Z",
+      "ended": "2026-10-14T20:49:54.687Z"
+    },
+    {
+      "path": ".cache/logs/batch3-shared-host.json",
+      "pid": 18996,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:49:55.846Z",
+      "ended": "2026-10-14T20:50:01.618Z"
+    },
+    {
+      "path": ".cache/logs/batch3-stage.json",
+      "pid": 23156,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:17:01.813Z",
+      "ended": "2026-10-14T21:17:02.110Z"
+    },
+    {
+      "path": ".cache/logs/batch3-types.json",
+      "pid": 24628,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T20:54:43.819Z",
+      "ended": "2026-10-14T20:54:49.116Z"
+    },
+    {
+      "path": ".cache/logs/batch3-workflow-fixed.json",
+      "pid": 6700,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:13:36.856Z",
+      "ended": "2026-10-14T21:13:40.508Z"
+    },
+    {
+      "path": ".cache/logs/batch3-workflow.json",
+      "pid": 24280,
+      "exitCode": 1,
+      "closed": true,
+      "started": "2026-10-14T21:08:43.656Z",
+      "ended": "2026-10-14T21:08:43.991Z"
+    },
+    {
+      "path": ".cache/logs/batch4-bytes.json",
+      "pid": 24724,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:23:06.918Z",
+      "ended": "2026-10-14T21:24:21.580Z"
+    },
+    {
+      "path": ".cache/logs/batch4-commit.json",
+      "pid": 22656,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:36:08.795Z",
+      "ended": "2026-10-14T21:36:09.417Z"
+    },
+    {
+      "path": ".cache/logs/batch4-golden.json",
+      "pid": 1696,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:32:50.138Z",
+      "ended": "2026-10-14T21:32:50.659Z"
+    },
+    {
+      "path": ".cache/logs/batch4-pipeline.json",
+      "pid": 19080,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:23:16.851Z",
+      "ended": "2026-10-14T21:23:24.622Z"
+    },
+    {
+      "path": ".cache/logs/batch4-shared-host.json",
+      "pid": 21500,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:24:56.985Z",
+      "ended": "2026-10-14T21:25:01.979Z"
+    },
+    {
+      "path": ".cache/logs/batch4-stage.json",
+      "pid": 21856,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:36:07.071Z",
+      "ended": "2026-10-14T21:36:07.349Z"
+    },
+    {
+      "path": ".cache/logs/batch4-types.json",
+      "pid": 2972,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:32:50.890Z",
+      "ended": "2026-10-14T21:32:56.232Z"
+    },
+    {
+      "path": ".cache/logs/batch5-commit.json",
+      "pid": 23196,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:42:56.891Z",
+      "ended": "2026-10-14T21:42:57.428Z"
+    },
+    {
+      "path": ".cache/logs/batch5-stage.json",
+      "pid": 4524,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:42:56.313Z",
+      "ended": "2026-10-14T21:42:56.496Z"
+    },
+    {
+      "path": ".cache/logs/batch5-workflow.json",
+      "pid": 14900,
+      "exitCode": 0,
+      "closed": true,
+      "started": "2026-10-14T21:42:51.050Z",
+      "ended": "2026-10-14T21:42:56.116Z"
+    }
+  ],
+  "ownedReceiptPidsStillPresent": [],
+  "namedTestHelpersPresent": [],
+  "rootIndexSha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "rootIndexMtime": "2026-10-12T19:53:21.543911+00:00",
+  "expectedRootIndexSha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "externalCacheMetadataChecks": [
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\PowerShell",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 12,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 3,
+      "filesModifiedSinceWorktreeCreation": [
+        {
+          "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell\\StartupProfileData-NonInteractive",
+          "mtime": "2026-10-14T21:55:19.828153+00:00"
+        }
+      ]
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\npm-cache\\_logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.npm\\_logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\CrashDumps",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 2,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Roaming\\xdg.config\\.wrangler\\logs",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 2,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.wrangler\\logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.config\\.wrangler\\logs",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Roaming\\GitHub CLI",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 2,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\AppData\\Local\\GitHub CLI",
+      "exists": true,
+      "filesInspectedByMetadataOnly": 313,
+      "filesModifiedSinceWorktreeCreation": []
+    },
+    {
+      "directory": "C:\\Users\\SU\\.config\\gh",
+      "exists": false,
+      "filesInspectedByMetadataOnly": 0,
+      "filesModifiedSinceWorktreeCreation": []
+    }
+  ],
+  "temporaryCredentialFilesCreated": false,
+  "cloudCredentialsReadOrRefreshed": false,
+  "githubCredentialHandling": "Eitan-S-23 token in subprocess memory only; no token/config file copied",
+  "localShell": "cmd.exe, login:false; Python audit uses -X utf8 -B",
+  "backendInputDiffExitCode": 0,
+  "outputBoundary": "Implementation, dependency/test cache, downloads and evidence under activeRoot; own Git worktree metadata only under D:/github/my/E-Track/.git",
+  "powerShellEventInspection": {
+    "exitCode": 0,
+    "events": [
+      {
+        "eventId": "600",
+        "time": "2026-10-14T21:55:19.4544266Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      },
+      {
+        "eventId": "600",
+        "time": "2026-10-14T21:55:19.4554025Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      },
+      {
+        "eventId": "600",
+        "time": "2026-10-14T21:55:19.4554025Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      },
+      {
+        "eventId": "600",
+        "time": "2026-10-14T21:55:19.4580085Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      },
+      {
+        "eventId": "600",
+        "time": "2026-10-14T21:55:19.4580085Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      },
+      {
+        "eventId": "600",
+        "time": "2026-10-14T21:55:19.4580085Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      },
+      {
+        "eventId": "400",
+        "time": "2026-10-14T21:55:19.4687459Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      },
+      {
+        "eventId": "403",
+        "time": "2026-10-14T21:55:19.8261990Z",
+        "mentionsCurrentWorktree": false,
+        "mentionsTaskHelper": false,
+        "mentionsGitHubCLI": false,
+        "mentionsCmd": false,
+        "mentionsCodex": false
+      }
+    ],
+    "stderr": ""
+  },
+  "externalObservation": {
+    "id": "P41-AUDIT-01",
+    "disposition": "ATTRIBUTION_UNRESOLVED",
+    "path": "C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive",
+    "content": "Windows PowerShell noninteractive startup profile cache",
+    "mtime": "2026-10-14T21:55:19.828153+00:00",
+    "basis": "All task-selected shell calls use cmd.exe/login:false. A bounded read-only Windows PowerShell event query confirms a concurrent engine start/stop but does not reference this worktree or its helpers. This does not prove attribution.",
+    "action": "No modification, move or cleanup. Root may reconcile host/session activity; any cleanup still requires path-specific user authority.",
+    "claimLimit": "Do not turn a clean Git status or receipt-PID check into a claim that the entire machine had no writes."
+  },
+  "retrievalFailure": {
+    "artifactId": 11930961851,
+    "toolSessionId": 58113,
+    "exitCode": 1,
+    "toolOutput": "terminated",
+    "firstOutputFileCreated": false,
+    "disposition": "Retrieval failure only. Small artifact downloads succeeded; the exact immutable App artifact was downloaded once more and verified against the API digest. No CI or product observation was rerun."
+  }
+}

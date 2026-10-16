@@ -1,0 +1,142 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P4-1-v2",
+  "current_contract_sha256": "07D81467BC901EAE78BBB2901A093B9234056CB248F04829887C7DB43FFEDC4A",
+  "previous_contract_id": "P4-1-v1",
+  "previous_contract_sha256": "8AB64574CC062A6FD58C7A25E024D6B2D2CD085CAA81B8446D60C6701807597D",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P41-20261017-02",
+  "previous_round_id": "P41-20261016-01",
+  "previous_matrix_sha256": "AA980B1B64777F9CCF8EC46C0E34945E3C59FEE5DCC638EF92C0CC19D3A54DA0",
+  "changed_input_groups": [
+    "cloudflare",
+    "evaluation",
+    "execution",
+    "production",
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "history",
+    "target"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P41-ORIGINS",
+      "reasons": [
+        "command_definition_changed:formal-origins",
+        "criterion_definition_changed",
+        "external_input_changed:history",
+        "external_input_changed:target",
+        "input_group_changed:cloudflare",
+        "input_group_changed:evaluation",
+        "input_group_changed:execution",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P41-ADMISSION",
+      "reasons": [
+        "command_definition_changed:formal-ci",
+        "command_definition_changed:formal-controller",
+        "command_definition_changed:formal-oracle",
+        "external_input_changed:history",
+        "external_input_changed:target",
+        "input_group_changed:cloudflare",
+        "input_group_changed:evaluation",
+        "input_group_changed:execution",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P41-REHEARSAL",
+      "reasons": [
+        "artifact_definition_changed:P41-REHEARSAL-1",
+        "artifact_definition_changed:P41-REHEARSAL-2",
+        "artifact_definition_changed:P41-REHEARSAL-3",
+        "command_definition_changed:formal-approve",
+        "command_definition_changed:formal-collect",
+        "command_definition_changed:formal-discover",
+        "command_definition_changed:formal-dispatch",
+        "criterion_definition_changed",
+        "external_input_changed:history",
+        "external_input_changed:target",
+        "input_group_changed:cloudflare",
+        "input_group_changed:execution",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P41-BYTES",
+      "reasons": [
+        "command_definition_changed:formal-bytes",
+        "external_input_changed:history",
+        "external_input_changed:target",
+        "input_group_changed:cloudflare",
+        "input_group_changed:evaluation",
+        "input_group_changed:execution",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P41-R2",
+      "reasons": [
+        "command_definition_changed:formal-r2",
+        "external_input_changed:history",
+        "external_input_changed:target",
+        "input_group_changed:cloudflare",
+        "input_group_changed:execution",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P41-STATE",
+      "reasons": [
+        "command_definition_changed:formal-cloud-after",
+        "command_definition_changed:formal-cloud-before",
+        "command_definition_changed:formal-github-after",
+        "command_definition_changed:formal-github-before",
+        "command_definition_changed:formal-state",
+        "external_input_changed:history",
+        "external_input_changed:target",
+        "input_group_changed:cloudflare",
+        "input_group_changed:evaluation",
+        "input_group_changed:execution",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "formal-approve",
+    "formal-bytes",
+    "formal-ci",
+    "formal-cloud-after",
+    "formal-cloud-before",
+    "formal-collect",
+    "formal-controller",
+    "formal-discover",
+    "formal-dispatch",
+    "formal-github-after",
+    "formal-github-before",
+    "formal-oracle",
+    "formal-origins",
+    "formal-r2",
+    "formal-state"
+  ],
+  "required_artifacts": [
+    "P41-ADMISSION-1",
+    "P41-ADMISSION-2",
+    "P41-BYTES-1",
+    "P41-ORIGINS-1",
+    "P41-R2-1",
+    "P41-REHEARSAL-1",
+    "P41-REHEARSAL-2",
+    "P41-REHEARSAL-3",
+    "P41-STATE-1",
+    "P41-STATE-2",
+    "P41-STATE-3",
+    "P41-STATE-4",
+    "P41-STATE-5"
+  ]
+}

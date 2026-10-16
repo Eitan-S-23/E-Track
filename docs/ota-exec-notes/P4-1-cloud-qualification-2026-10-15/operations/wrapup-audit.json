@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-10-15T05:16:52.675Z",
+  "activeRoot": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "sharedIndexSha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "closedOwnedPids": [
+    24672,
+    24220,
+    5092,
+    5596,
+    25324
+  ],
+  "processQueryExitCode": 0,
+  "removedDisposableFiles": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.wrangler\\cache\\cf.json",
+      "sizeBytes": 2034,
+      "sha256": "d861dbd7ddd1010f33e00060a39a9f12082c89e330acbc25171dfcf7e56e84e9"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.wrangler\\tmp\\bundle-EVCykP\\middleware-insertion-facade.js",
+      "sizeBytes": 868,
+      "sha256": "d979b653911fbc1e531f46f27ee767351b34108585671196073df9d695ea62cf"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.wrangler\\tmp\\bundle-EVCykP\\middleware-loader.entry.ts",
+      "sizeBytes": 4271,
+      "sha256": "78e9ec7db00e2c8855b900169dc10120909735787df3c1a4d1194042efc6d6f0"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.wrangler\\tmp\\dev-TLkcNY\\ProxyServerWorker.js",
+      "sizeBytes": 108680,
+      "sha256": "6fbf6e9619b2dd1b70e57f14ae3b7bd400db3551560c0bd81b4000922550562d"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.wrangler\\tmp\\dev-TLkcNY\\ProxyServerWorker.js.map",
+      "sizeBytes": 183293,
+      "sha256": "34dbda6397fe6d5d2c532d2e3fb80e80993f931acfbc0ca977ea68cd22b18741"
+    }
+  ],
+  "priorShellQuotingAccident": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\[k",
+    "bytes": 0,
+    "removed": true,
+    "cause": "cmd interpreted an inline JavaScript arrow as redirection; the empty file was removed with apply_patch"
+  },
+  "outputs": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\d1-edit-r2",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-firmware-setup-20261015\\qualification-fixture",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\docs\\ota-exec-notes\\P4-1-cloud-qualification-2026-10-15"
+  ],
+  "credentialScan": {
+    "files": 150,
+    "suppliedOrGeneratedCredentialValuesOutsidePrivateInput": 0
+  },
+  "retainedCredentialInputs": {
+    "directory": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-auth-input",
+    "reason": "Authorized qualification is still open; retain the user-corrected input to avoid another copy/paste request.",
+    "exportedToCi": false,
+    "acl": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-auth-input DESKTOP-AODKGQR\\SU:(OI)(CI)(F)\n\n�ѳɹ����� 1 ���ļ�; ���� 0 ���ļ�ʱʧ��"
+  },
+  "externalReadOnlyCrashCheck": {
+    "directory": "C:/Users/SU/AppData/Local/CrashDumps",
+    "files": [
+      {
+        "name": "explorer.exe.2296.dmp",
+        "modified": "2026-09-21T13:28:02.047Z"
+      },
+      {
+        "name": "python.exe.10812.dmp",
+        "modified": "2026-09-26T12:16:05.007Z"
+      }
+    ],
+    "newCrashDumpObserved": false
+  },
+  "externalWriteAssessment": "No new outside-project write observed in the controlled paths and crash checks; no PowerShell or system installation was invoked. Historical P41-AUDIT-01 is unchanged."
+}

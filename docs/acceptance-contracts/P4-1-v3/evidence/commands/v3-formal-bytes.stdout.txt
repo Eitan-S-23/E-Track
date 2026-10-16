@@ -1,0 +1,1 @@
+{"ok": true, "mode": "rehearsal", "output": ".cache/p41-acceptance-20261017/review/rehearsal-formal.json", "error": null, "sha256": "8b943dcd58ce0db7414e9348aacaf7e42c099aaf0b0c319b22182cf07a9648fe"}

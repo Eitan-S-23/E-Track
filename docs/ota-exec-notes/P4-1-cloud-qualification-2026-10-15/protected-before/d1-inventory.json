@@ -1,0 +1,148 @@
+{
+  "started": "2026-10-15T02:59:07.783Z",
+  "finished": "2026-10-15T02:59:08.985Z",
+  "method": "POST",
+  "operation": "SELECT only",
+  "route": "accounts/af6dd848e6a21f1cd26d44b1b656af7b/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+  "sql": "SELECT name, applied_at FROM d1_migrations ORDER BY id; SELECT 'app_releases' AS kind, COUNT(*) AS row_count FROM releases UNION ALL SELECT 'app_assets', COUNT(*) FROM release_assets UNION ALL SELECT 'firmware_releases', COUNT(*) FROM firmware_releases UNION ALL SELECT 'app_channels', COUNT(*) FROM channels UNION ALL SELECT 'firmware_channels', COUNT(*) FROM firmware_channels; SELECT 'app' AS family, COUNT(*) AS populated_channels FROM channels WHERE current_release_id IS NOT NULL UNION ALL SELECT 'firmware', COUNT(*) FROM firmware_channels WHERE current_release_id IS NOT NULL; SELECT state, COUNT(*) AS row_count FROM firmware_releases GROUP BY state ORDER BY state;",
+  "status": 200,
+  "cfRay": "a4ab90ec295f50a1-SJC",
+  "body": {
+    "result": [
+      {
+        "results": [
+          {
+            "name": "0001_init.sql",
+            "applied_at": "2026-06-28 16:11:42"
+          },
+          {
+            "name": "0002_patch_formats.sql",
+            "applied_at": "2026-06-29 17:20:31"
+          },
+          {
+            "name": "0003_firmware_releases.sql",
+            "applied_at": "2026-06-30 22:34:40"
+          },
+          {
+            "name": "0004_announcements.sql",
+            "applied_at": "2026-07-07 13:36:49"
+          }
+        ],
+        "success": true,
+        "meta": {
+          "served_by": "v3-prod",
+          "served_by_region": "WNAM",
+          "served_by_colo": "DFW",
+          "served_by_primary": true,
+          "timings": {
+            "sql_duration_ms": 0.1672
+          },
+          "duration": 0.1672,
+          "changes": 0,
+          "last_row_id": 0,
+          "changed_db": false,
+          "size_after": 11395072,
+          "rows_read": 4,
+          "rows_written": 0,
+          "total_attempts": 1
+        }
+      },
+      {
+        "results": [
+          {
+            "kind": "app_releases",
+            "row_count": 53
+          },
+          {
+            "kind": "app_assets",
+            "row_count": 100
+          },
+          {
+            "kind": "firmware_releases",
+            "row_count": 0
+          },
+          {
+            "kind": "app_channels",
+            "row_count": 2
+          },
+          {
+            "kind": "firmware_channels",
+            "row_count": 0
+          }
+        ],
+        "success": true,
+        "meta": {
+          "served_by": "v3-prod",
+          "served_by_region": "WNAM",
+          "served_by_colo": "DFW",
+          "served_by_primary": true,
+          "timings": {
+            "sql_duration_ms": 0.9755
+          },
+          "duration": 0.9755,
+          "changes": 0,
+          "last_row_id": 0,
+          "changed_db": false,
+          "size_after": 11395072,
+          "rows_read": 157,
+          "rows_written": 0,
+          "total_attempts": 1
+        }
+      },
+      {
+        "results": [
+          {
+            "family": "app",
+            "populated_channels": 2
+          },
+          {
+            "family": "firmware",
+            "populated_channels": 0
+          }
+        ],
+        "success": true,
+        "meta": {
+          "served_by": "v3-prod",
+          "served_by_region": "WNAM",
+          "served_by_colo": "DFW",
+          "served_by_primary": true,
+          "timings": {
+            "sql_duration_ms": 0.6538
+          },
+          "duration": 0.6538,
+          "changes": 0,
+          "last_row_id": 0,
+          "changed_db": false,
+          "size_after": 11395072,
+          "rows_read": 3,
+          "rows_written": 0,
+          "total_attempts": 1
+        }
+      },
+      {
+        "results": [],
+        "success": true,
+        "meta": {
+          "served_by": "v3-prod",
+          "served_by_region": "WNAM",
+          "served_by_colo": "DFW",
+          "served_by_primary": true,
+          "timings": {
+            "sql_duration_ms": 0.2374
+          },
+          "duration": 0.2374,
+          "changes": 0,
+          "last_row_id": 0,
+          "changed_db": false,
+          "size_after": 11395072,
+          "rows_read": 2,
+          "rows_written": 0,
+          "total_attempts": 1
+        }
+      }
+    ],
+    "errors": [],
+    "messages": [],
+    "success": true
+  }
+}

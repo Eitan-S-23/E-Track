@@ -1,0 +1,16 @@
+{
+  "started": "2026-10-16T20:24:20.191627+00:00",
+  "mode": "states",
+  "protected_d1_unchanged": true,
+  "protected_r2_unchanged": true,
+  "github_releases_unchanged": true,
+  "worker_bindings_unchanged": true,
+  "test_channels_unchanged": true,
+  "new_test_release": "fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c",
+  "new_test_assets": 3,
+  "new_test_audit_rows": 1,
+  "independent_full_byte_r2_readback": true,
+  "scope": "Business-resource snapshots, not a claim of no Wrangler preview control-plane state",
+  "ok": true,
+  "ended": "2026-10-16T20:24:21.036320+00:00"
+}

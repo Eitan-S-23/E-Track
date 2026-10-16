@@ -1,0 +1,1 @@
+{"mode":"assets","label":"assets","ok":true,"requests":4,"mutationsRequested":0,"receipt":".cache\\p41-acceptance-20261017\\cloud\\assets\\receipt.json"}

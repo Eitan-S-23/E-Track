@@ -1,0 +1,93 @@
+﻿2026-10-15T05:54:53.2973264Z ##[group]Run cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+2026-10-15T05:54:53.2973708Z [36;1mcmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release[0m
+2026-10-15T05:54:53.2973999Z [36;1mcmake --build .cache/bsdiff --target bsdiff[0m
+2026-10-15T05:54:53.3027167Z shell: /usr/bin/bash -e {0}
+2026-10-15T05:54:53.3027327Z env:
+2026-10-15T05:54:53.3027455Z   DEVICE_MODEL: e-track-at32f435
+2026-10-15T05:54:53.3027602Z   TARGET_HARDWARE: AT32F435RGT7
+2026-10-15T05:54:53.3027762Z   CMAKE_PROJECT_DIR: MDK-ARM_F435/cmake-generated
+2026-10-15T05:54:53.3028151Z   BUILD_DIR: /home/runner/work/E-Track/E-Track/.cache/etfw
+2026-10-15T05:54:53.3028326Z   BUILD_TYPE: Release
+2026-10-15T05:54:53.3028449Z   SOURCE_DATE_EPOCH: 1786320000
+2026-10-15T05:54:53.3028588Z   WRANGLER_SEND_METRICS: false
+2026-10-15T05:54:53.3028791Z   WRANGLER_LOG_PATH: /home/runner/work/E-Track/E-Track/.cache/p41/wrangler-logs
+2026-10-15T05:54:53.3029049Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/p41/npm
+2026-10-15T05:54:53.3029400Z   PIP_CACHE_DIR: /home/runner/work/E-Track/E-Track/.cache/p41/pip
+2026-10-15T05:54:53.3029618Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/p41/tmp
+2026-10-15T05:54:53.3029809Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-15T05:54:53.3029996Z   BSDIFF_EXE: /home/runner/work/E-Track/E-Track/.cache/bsdiff/bin/bsdiff
+2026-10-15T05:54:53.3030193Z ##[endgroup]
+2026-10-15T05:54:54.0610304Z -- The C compiler identification is GNU 13.3.0
+2026-10-15T05:54:54.1764898Z -- Detecting C compiler ABI info
+2026-10-15T05:54:54.3210761Z -- Detecting C compiler ABI info - done
+2026-10-15T05:54:54.3321583Z -- Check for working C compiler: /usr/bin/cc - skipped
+2026-10-15T05:54:54.3361283Z -- Detecting C compile features
+2026-10-15T05:54:54.3396824Z -- Detecting C compile features - done
+2026-10-15T05:54:54.3643254Z -- Configuring done (0.7s)
+2026-10-15T05:54:54.3689608Z -- Generating done (0.0s)
+2026-10-15T05:54:54.3692345Z -- Build files have been written to: /home/runner/work/E-Track/E-Track/.cache/bsdiff
+2026-10-15T05:54:54.4284378Z [1/22] Building C object vendor/CMakeFiles/bsdiff.dir/bsdiff/bsdiff_wrapper.c.o
+2026-10-15T05:54:54.4385382Z [2/22] Building C object vendor/CMakeFiles/bsdiff.dir/user/bs_user_interface.c.o
+2026-10-15T05:54:54.4394242Z [3/22] Building C object vendor/CMakeFiles/bsdiff.dir/file/vFile.c.o
+2026-10-15T05:54:54.4541910Z [4/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/7zAlloc.c.o
+2026-10-15T05:54:54.4587430Z [5/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/7zBuf.c.o
+2026-10-15T05:54:54.4714130Z [6/22] Building C object vendor/CMakeFiles/bsdiff.dir/lib/crc32.c.o
+2026-10-15T05:54:54.5026815Z [7/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/7zCrcOpt.c.o
+2026-10-15T05:54:54.5031530Z [8/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/7zCrc.c.o
+2026-10-15T05:54:54.5389940Z [9/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/7zFile.c.o
+2026-10-15T05:54:54.5549275Z [10/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/CpuArch.c.o
+2026-10-15T05:54:54.5577723Z [11/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/7zStream.c.o
+2026-10-15T05:54:54.5594704Z [12/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/Alloc.c.o
+2026-10-15T05:54:54.6018929Z [13/22] Building C object vendor/CMakeFiles/bsdiff.dir/main.c.o
+2026-10-15T05:54:54.6030115Z /home/runner/work/E-Track/E-Track/bsdiff_lzma_AES128-main/bsdiff/main.c: In function ‘main’:
+2026-10-15T05:54:54.6031747Z /home/runner/work/E-Track/E-Track/bsdiff_lzma_AES128-main/bsdiff/main.c:531:40: warning: format ‘%lld’ expects argument of type ‘long long int’, but argument 2 has type ‘int64_t’ {aka ‘long int’} [-Wformat=]
+2026-10-15T05:54:54.6032815Z   531 |     printf("Uncompressed diff size: %lld bytes\n", diff_size);
+2026-10-15T05:54:54.6033330Z       |                                     ~~~^           ~~~~~~~~~
+2026-10-15T05:54:54.6033766Z       |                                        |           |
+2026-10-15T05:54:54.6034231Z       |                                        |           int64_t {aka long int}
+2026-10-15T05:54:54.6035101Z       |                                        long long int
+2026-10-15T05:54:54.6035521Z       |                                     %ld
+2026-10-15T05:54:54.6036744Z /home/runner/work/E-Track/E-Track/bsdiff_lzma_AES128-main/bsdiff/main.c:621:35: warning: format ‘%lld’ expects argument of type ‘long long int’, but argument 2 has type ‘int64_t’ {aka ‘long int’} [-Wformat=]
+2026-10-15T05:54:54.6037742Z   621 |     printf("Input buffer size: %lld bytes\n", diff_size);
+2026-10-15T05:54:54.6038356Z       |                                ~~~^           ~~~~~~~~~
+2026-10-15T05:54:54.6038772Z       |                                   |           |
+2026-10-15T05:54:54.6039204Z       |                                   |           int64_t {aka long int}
+2026-10-15T05:54:54.6039630Z       |                                   long long int
+2026-10-15T05:54:54.6040024Z       |                                %ld
+2026-10-15T05:54:54.6041244Z /home/runner/work/E-Track/E-Track/bsdiff_lzma_AES128-main/bsdiff/main.c:725:40: warning: format ‘%lld’ expects argument of type ‘long long int’, but argument 2 has type ‘int64_t’ {aka ‘long int’} [-Wformat=]
+2026-10-15T05:54:54.6042205Z   725 |     printf("  - Original file size: %lld bytes\n", old_size);
+2026-10-15T05:54:54.6065664Z       |                                     ~~~^           ~~~~~~~~
+2026-10-15T05:54:54.6066167Z       |                                        |           |
+2026-10-15T05:54:54.6066723Z       |                                        |           int64_t {aka long int}
+2026-10-15T05:54:54.6081402Z       |                                        long long int
+2026-10-15T05:54:54.6081880Z       |                                     %ld
+2026-10-15T05:54:54.6083205Z /home/runner/work/E-Track/E-Track/bsdiff_lzma_AES128-main/bsdiff/main.c:726:35: warning: format ‘%lld’ expects argument of type ‘long long int’, but argument 2 has type ‘int64_t’ {aka ‘long int’} [-Wformat=]
+2026-10-15T05:54:54.6084208Z   726 |     printf("  - New file size: %lld bytes\n", new_size);
+2026-10-15T05:54:54.6084686Z       |                                ~~~^           ~~~~~~~~
+2026-10-15T05:54:54.6085116Z       |                                   |           |
+2026-10-15T05:54:54.6085563Z       |                                   |           int64_t {aka long int}
+2026-10-15T05:54:54.6086000Z       |                                   long long int
+2026-10-15T05:54:54.6086398Z       |                                %ld
+2026-10-15T05:54:54.6087550Z /home/runner/work/E-Track/E-Track/bsdiff_lzma_AES128-main/bsdiff/main.c:727:44: warning: format ‘%lld’ expects argument of type ‘long long int’, but argument 2 has type ‘int64_t’ {aka ‘long int’} [-Wformat=]
+2026-10-15T05:54:54.6089002Z   727 |     printf("  - Uncompressed diff size: %lld bytes\n", diff_size);
+2026-10-15T05:54:54.6089508Z       |                                         ~~~^           ~~~~~~~~~
+2026-10-15T05:54:54.6089949Z       |                                            |           |
+2026-10-15T05:54:54.6090423Z       |                                            |           int64_t {aka long int}
+2026-10-15T05:54:54.6090889Z       |                                            long long int
+2026-10-15T05:54:54.6091562Z       |                                         %ld
+2026-10-15T05:54:54.6092706Z /home/runner/work/E-Track/E-Track/bsdiff_lzma_AES128-main/bsdiff/main.c:728:43: warning: format ‘%lld’ expects argument of type ‘long long int’, but argument 2 has type ‘long int’ [-Wformat=]
+2026-10-15T05:54:54.6093699Z   728 |     printf("  - Compressed patch size: %lld bytes\n", (int64_t)final_patch_stat.st_size);
+2026-10-15T05:54:54.6094289Z       |                                        ~~~^           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2026-10-15T05:54:54.6094751Z       |                                           |           |
+2026-10-15T05:54:54.6095182Z       |                                           |           long int
+2026-10-15T05:54:54.6095795Z       |                                           long long int
+2026-10-15T05:54:54.6096205Z       |                                        %ld
+2026-10-15T05:54:54.6118659Z [14/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/LzFindOpt.c.o
+2026-10-15T05:54:54.6525053Z [15/22] Building C object vendor/CMakeFiles/bsdiff.dir/bsdiff/bsdiff.c.o
+2026-10-15T05:54:54.7269072Z [16/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/Threads.c.o
+2026-10-15T05:54:54.8379021Z [17/22] Building C object vendor/CMakeFiles/bsdiff.dir/AES128_CTR/aes_core.c.o
+2026-10-15T05:54:54.8656482Z [18/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/LzFindMt.c.o
+2026-10-15T05:54:54.9486700Z [19/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/LzmaDec.c.o
+2026-10-15T05:54:55.1843878Z [20/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/LzmaEnc.c.o
+2026-10-15T05:54:55.2356857Z [21/22] Building C object vendor/CMakeFiles/bsdiff.dir/lzma/LzFind.c.o
+2026-10-15T05:54:55.2502152Z [22/22] Linking C executable bin/bsdiff

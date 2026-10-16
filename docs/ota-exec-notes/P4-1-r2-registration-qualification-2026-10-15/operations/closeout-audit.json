@@ -1,0 +1,174 @@
+{
+  "started": "2026-10-15T06:43:12.381Z",
+  "action": "audit",
+  "root": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "ok": true,
+  "sharedIndexSha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "closedOwnedProcesses": [
+    {
+      "pid": 21112,
+      "name": "node.exe"
+    },
+    {
+      "pid": 18584,
+      "name": "node.exe"
+    },
+    {
+      "pid": 24568,
+      "name": "node.exe"
+    },
+    {
+      "pid": 25004,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 11724,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 23656,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 18912,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 24936,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 23768,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 15888,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 15728,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 23372,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 7968,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 21976,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 24664,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 6988,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 19104,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 18612,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 21416,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 23920,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 22364,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 1944,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 20100,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 7164,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 23316,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 14452,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 20704,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 10712,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 15328,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 2848,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 20720,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 18536,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 248,
+      "name": "curl.exe"
+    },
+    {
+      "pid": 8560,
+      "name": "curl.exe"
+    }
+  ],
+  "workerdProcessCount": 0,
+  "credentialScan": {
+    "files": 77,
+    "suppliedTokenTestSecretsAndExpiredReadonlyValueMatches": 0,
+    "shortLivedReadWriteCredentials": "Minted only in process memory; passed by stdin; never written or exported to CI."
+  },
+  "removedExpiredCredential": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-auth-input\\r2-qualification\\readonly-credentials.json",
+    "bytes": 1333,
+    "reason": "Read-only 900-second credential expired; completed probe retained without the secret."
+  },
+  "retainedPrivateInputs": {
+    "directory": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-auth-input",
+    "names": [
+      "token.txt",
+      "firmware-test-secrets.json"
+    ],
+    "reason": "Authorized isolated environment remains open for subsequent configuration qualification; do not force another token paste.",
+    "acl": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-auth-input DESKTOP-AODKGQR\\SU:(OI)(CI)(F)\n\n�ѳɹ����� 1 ���ļ�; ���� 0 ���ļ�ʱʧ��"
+  },
+  "outputs": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\cf-r2-qualification-20261015",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\github",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\docs\\ota-exec-notes\\P4-1-r2-registration-qualification-2026-10-15",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\docs\\ota-exec-notes\\P4-1-implementation-2026-10-15.md"
+  ],
+  "externalWriteAssessment": "All selected outputs and controllable child homes/temp/cache paths are project-contained; no PowerShell, workerd, build, deployment or system installation was invoked. Prior P41-AUDIT-01 is unchanged.",
+  "finished": "2026-10-15T06:43:13.718Z"
+}

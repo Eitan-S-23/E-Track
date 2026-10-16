@@ -1,0 +1,51 @@
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > uploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > missing asset rejects before health, GitHub, R2 or registration
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > bad digest rejects before health, GitHub, R2 or registration
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > same-key different bytes rejects without overwrite or register
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing readback never persists verified metadata or touches D1
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > a real registration audit failure rolls back ready/assets and stops without retry
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > cancellation after the first upload stops subsequent uploads and registration
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > monotonicity rejects lower versions and same-version changed metadata before upload
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > checks/PR/nightly, ambiguous modes, missing config and crossed buckets fail closed
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket e-track-firmware-p41-test-releases admitted=true 89ms
+   → Staging and production bucket bindings must remain isolated
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket trace-update-staging-releases admitted=false 77ms
+   → expected [Function] to throw an error
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket production-fixture-bucket admitted=false 72ms
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket e-track-firmware-p41-test-releases admitted=false 60ms
+   → expected [Function] to throw an error
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket trace-update-staging-releases admitted=false 73ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket production-fixture-bucket admitted=true 64ms
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub full-byte readback catches false metadata and never publishes a corrupted draft
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub signed redirect receives no repository credential
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 0 uploaded assets
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 1 uploaded assets
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 3 uploaded assets
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects wrong target in an existing draft before any mutation
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects mutable target in an existing draft before any mutation
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects conflicting tag in an existing draft before any mutation
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects ambiguous drafts in an existing draft before any mutation
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects changed notes in an existing draft before any mutation
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects prerelease in an existing draft before any mutation
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub still requires a tag for a published release
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub validates a newly returned draft target before any asset upload
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rechecks a conflicting tag created during upload before publishing
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub reads every existing draft asset before adding missing assets
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > register cancellation does not retry and service paths cannot hide a wrong origin
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > rejects a stale register response even if body and response header agree
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: valid
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: wrong commit
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: wrong digest
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: not previous
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: draft
+ ↓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: missing asset
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed | 33 skipped (39)
+   Start at  22:10:13
+   Duration  3.29s (transform 2.01s, setup 155ms, import 2.13s, tests 463ms, environment 0ms)
+

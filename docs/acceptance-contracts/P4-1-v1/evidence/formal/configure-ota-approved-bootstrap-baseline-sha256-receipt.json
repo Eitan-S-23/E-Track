@@ -1,0 +1,17 @@
+{
+  "started": "2026-10-16T11:00:46.054Z",
+  "ended": "2026-10-16T11:00:47.096Z",
+  "method": "POST",
+  "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+  "request": {
+    "name": "OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256",
+    "value": "0f7e3801bbb73e63f3df96e905053f8435c00c9a04983c918e799fdc0fbf50dd"
+  },
+  "status": 201,
+  "requestId": "AE5D:38B051:C48599:1253164:6AD203DF",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/configure-ota-approved-bootstrap-baseline-sha256.json",
+    "size_bytes": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  }
+}

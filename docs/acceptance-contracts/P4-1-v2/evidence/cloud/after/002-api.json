@@ -1,0 +1,225 @@
+{
+  "result": [
+    {
+      "created_on": "2026-05-17T16:27:22.18854Z",
+      "modified_on": "2026-05-18T06:02:36.289912Z",
+      "id": "deepseek-mail",
+      "tag": "acacb6e3af744fc38c41e835818b82e6",
+      "tags": [],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "has_assets": false,
+      "has_modules": true,
+      "etag": "d2fcf217290b3d1dee98b0c954da9df6387a2783083c1da856583a783c120846",
+      "handlers": [
+        "fetch",
+        "email"
+      ],
+      "last_deployed_from": "wrangler",
+      "compatibility_date": "2025-01-01",
+      "usage_model": "standard",
+      "routes": null
+    },
+    {
+      "created_on": "2026-10-15T04:53:29.736996Z",
+      "modified_on": "2026-10-15T04:53:33.335565Z",
+      "id": "e-track-firmware-p41-test",
+      "tag": "155c63e2359a4e2cab8f243ebecd5ae3",
+      "tags": null,
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": false,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      },
+      "has_assets": false,
+      "has_modules": true,
+      "etag": "e106f789a1385841130cc67dd462b33c1031d0bc89871b1f751b1c0d973f39bc",
+      "handlers": [
+        "fetch",
+        "scheduled"
+      ],
+      "named_handlers": [
+        {
+          "name": "RateLimiter",
+          "handlers": [
+            "class"
+          ]
+        }
+      ],
+      "last_deployed_from": "wrangler",
+      "migration_tag": "v1",
+      "compatibility_date": "2026-06-28",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "routes": null
+    },
+    {
+      "created_on": "2026-04-27T08:36:24.101235Z",
+      "modified_on": "2026-04-27T08:37:59.364122Z",
+      "id": "edge-key",
+      "tag": "87e3683d369949f2bf3557e561dc7c0f",
+      "tags": [],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 0.1,
+        "redact_query_string": false,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 0.1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 0.1
+        }
+      },
+      "has_assets": true,
+      "has_modules": true,
+      "etag": "2fa75007c534d8585de25cc9af19fd06fe6a90fa2e3e72f2dcb5f1affbcffd13",
+      "handlers": [
+        "fetch",
+        "server"
+      ],
+      "last_deployed_from": "wrangler",
+      "compatibility_date": "2026-03-12",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "routes": null
+    },
+    {
+      "created_on": "2026-06-12T08:38:02.896685Z",
+      "modified_on": "2026-06-12T12:05:09.229356Z",
+      "id": "online-resource-library",
+      "tag": "18a9528111c54488a93ba42b52b3d6b0",
+      "tags": [],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": false,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      },
+      "has_assets": false,
+      "has_modules": true,
+      "etag": "98bede8db1bd2018eff4fad397e0949a5bf9ede3fd6c4749b4b496ac3c03567b",
+      "handlers": [
+        "get",
+        "post",
+        "put",
+        "delete",
+        "options",
+        "patch",
+        "all",
+        "on",
+        "use",
+        "router",
+        "getPath",
+        "_basePath",
+        "routes",
+        "errorHandler",
+        "onError",
+        "notFound",
+        "fetch",
+        "request",
+        "fire",
+        "route",
+        "basePath",
+        "mount"
+      ],
+      "last_deployed_from": "wrangler",
+      "compatibility_date": "2025-06-01",
+      "usage_model": "standard",
+      "routes": null
+    },
+    {
+      "created_on": "2026-06-28T16:11:51.288241Z",
+      "modified_on": "2026-07-07T13:37:56.578162Z",
+      "id": "trace-update-service-staging",
+      "tag": "0007e75ff5bf4cfcb14cf3a711a3c2c8",
+      "tags": [
+        "cf:service=trace-update-service-dev",
+        "cf:environment=staging"
+      ],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": false,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      },
+      "has_assets": false,
+      "has_modules": true,
+      "etag": "33d74f82059c2f285805d16c9a4bcb2a14fd26fe63bba81fc2cf7f41a3b99ef5",
+      "handlers": [
+        "fetch"
+      ],
+      "named_handlers": [
+        {
+          "name": "RateLimiter",
+          "handlers": [
+            "class"
+          ]
+        }
+      ],
+      "last_deployed_from": "wrangler",
+      "migration_tag": "v1",
+      "compatibility_date": "2026-06-28",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "routes": null
+    }
+  ],
+  "success": true,
+  "errors": [],
+  "messages": []
+}

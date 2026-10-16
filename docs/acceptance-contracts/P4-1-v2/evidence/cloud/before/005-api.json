@@ -1,0 +1,120 @@
+{
+  "result": {
+    "placement": {},
+    "compatibility_date": "2026-06-28",
+    "compatibility_flags": [
+      "nodejs_compat"
+    ],
+    "usage_model": "standard",
+    "tags": [
+      "cf:service=trace-update-service-dev",
+      "cf:environment=staging"
+    ],
+    "tail_consumers": [],
+    "logpush": false,
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "redact_query_string": false,
+      "logs": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "persist": true,
+        "invocation_logs": true
+      },
+      "traces": {
+        "enabled": false,
+        "persist": true,
+        "head_sampling_rate": 1
+      }
+    },
+    "annotations": {
+      "workers/triggered_by": "version_upload"
+    },
+    "bindings": [
+      {
+        "name": "APP_ID",
+        "text": "trace",
+        "type": "plain_text"
+      },
+      {
+        "database_id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+        "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+        "name": "DB",
+        "type": "d1"
+      },
+      {
+        "name": "DEPLOY_TOKEN_SHA256",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+        "text": "staging",
+        "type": "plain_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+        "text": "300",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENABLE_DIRECT_ADMIN_API",
+        "text": "false",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENVIRONMENT",
+        "text": "staging",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_OWNER",
+        "text": "Eitan-S-23",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_REPO",
+        "text": "Trace",
+        "type": "plain_text"
+      },
+      {
+        "name": "MANIFEST_CACHE",
+        "namespace_id": "fe3b08f2e0774072a44bdf140c44174a",
+        "type": "kv_namespace"
+      },
+      {
+        "name": "MANIFEST_CACHE_TTL_SECONDS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "class_name": "RateLimiter",
+        "name": "RATE_LIMITER",
+        "namespace_id": "cced0ccc57664e36b007d64d88de4bd5",
+        "type": "durable_object_namespace"
+      },
+      {
+        "name": "RATE_LIMIT_MAX_REQUESTS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "name": "RATE_LIMIT_WINDOW_SECONDS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "bucket_name": "trace-update-staging-releases",
+        "name": "RELEASES_BUCKET",
+        "type": "r2_bucket"
+      }
+    ]
+  },
+  "success": true,
+  "errors": [],
+  "messages": []
+}

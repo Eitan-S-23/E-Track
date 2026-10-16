@@ -1,0 +1,6 @@
+{
+  "generated_path": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\p41-acceptance-20261017\\.cache\\p41-acceptance-20261017\\inputs\\rerun-plan-v4.json",
+  "retained_copy": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\p41-acceptance-20261017\\inputs\\rerun-plan-v4.json",
+  "sha256": "dbbea86f489dba71576461eee60a872c7ff34677e156f490a0ef7725691f8ff8",
+  "note": "Validator resolves write-rerun-plan relative to the matrix directory. The accidentally repeated project-local prefix is retained; copied bytes are identical, and no observation was rerun."
+}

@@ -1,0 +1,30 @@
+{
+  "audit": "PASS",
+  "scope": "selected_outputs_only_not_historical_P41_AUDIT_01_attribution",
+  "sourceCommit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c",
+  "inventoryFiles": 56,
+  "inventorySha256": "4465fcd64c5a3cbb6e7688f6cc4e284586f3e9cbb9cfbefafd61063382397b0d",
+  "cacheEntriesChecked": 3993,
+  "cacheRoots": [
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\appdata",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\localappdata",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\config",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\cache",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\data",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\npm-cache",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\pip-cache",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\wrangler-logs",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\p41-native-01-remediation",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\p4-2-script-fixtures",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\firmware-key-build-tests",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\firmware-pipeline-tests",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\.vite",
+    "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\worker\\node_modules\\.vite-temp"
+  ],
+  "sharedIndexUnchanged": true,
+  "mainUnchanged": true,
+  "frozenV1Unchanged": true,
+  "productAndTestsUnchangedSinceCI": true
+}

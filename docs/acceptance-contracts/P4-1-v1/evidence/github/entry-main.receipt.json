@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:06:22.518Z",
+  "ended": "2026-10-16T08:06:23.765Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/git/ref/heads/main",
+  "status": 200,
+  "requestId": "AE97:14652C:5C427E:899473:6AD1DB00",
+  "date": "Fri, 16 Oct 2026 08:06:24 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-main.json",
+    "size_bytes": 334,
+    "sha256": "971cdb32402069732bedecdeecbe30c5c9c828bc4cac50718e9cd7c68ac5f6e5"
+  }
+}

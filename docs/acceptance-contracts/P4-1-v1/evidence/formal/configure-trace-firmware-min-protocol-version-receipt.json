@@ -1,0 +1,17 @@
+{
+  "started": "2026-10-16T11:00:48.007Z",
+  "ended": "2026-10-16T11:00:48.629Z",
+  "method": "POST",
+  "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+  "request": {
+    "name": "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION",
+    "value": "1"
+  },
+  "status": 201,
+  "requestId": "AE5D:38B051:C4887A:12535DF:6AD203E0",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/configure-trace-firmware-min-protocol-version.json",
+    "size_bytes": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  }
+}

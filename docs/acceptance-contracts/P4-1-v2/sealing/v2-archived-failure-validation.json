@@ -1,0 +1,38 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P4-1-v2/evidence/contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P4-1-v2/evidence/evidence-matrix.json",
+    "--repo-root",
+    ".",
+    "--previous-contract",
+    "docs/acceptance-contracts/P4-1-v1.contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P4-1-v1/evidence/evidence-matrix.json"
+  ],
+  "pid": 26220,
+  "started": "2026-10-16T19:15:55.047Z",
+  "ended": "2026-10-16T19:16:17.207Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-archived-failure-validation.stdout.txt",
+      "size_bytes": 77,
+      "sha256": "5c1d9f756ddb869568d37757b35f904febe4512c9fad1eb03ce0dea6314e8ad1"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-archived-failure-validation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

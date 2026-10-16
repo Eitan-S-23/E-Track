@@ -1,0 +1,29 @@
+{
+  "purpose": "One unauthenticated read-only HEAD to qualify direct TLS/S3 transport after proxied v3 GET timeout. Not an asset byte evaluation.",
+  "started": "2026-10-16T19:50:38.039Z",
+  "ended": "2026-10-16T19:50:39.266Z",
+  "method": "HEAD",
+  "bucket": "e-track-firmware-p41-test-releases",
+  "object": "trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin",
+  "credentialUsed": false,
+  "proxyBypassed": true,
+  "priorProxyConfigured": true,
+  "priorProxyFingerprint": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+  "priorReceiptSha256": "a7dbbfdb4d515c26188a149ee0ad5900ba6ef66eeeb1d4cdf20189aab98c9b88",
+  "exitCode": 0,
+  "metrics": "400 0.400495 0.910574 1.149247 1.150441",
+  "stderr": "",
+  "closed": true,
+  "files": [
+    {
+      "path": ".cache/p41-acceptance-20261017/review/transport-preparation/direct.headers",
+      "size_bytes": 179,
+      "sha256": "eeb484d7699c4549536392bc9f5917b9210092e86ce767a884c122ccddabc30e"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/review/transport-preparation/direct.body",
+      "size_bytes": 179,
+      "sha256": "eeb484d7699c4549536392bc9f5917b9210092e86ce767a884c122ccddabc30e"
+    }
+  ]
+}

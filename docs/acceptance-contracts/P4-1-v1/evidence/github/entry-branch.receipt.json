@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:06:24.006Z",
+  "ended": "2026-10-16T08:06:26.432Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/git/ref/heads/dev/p4-1/unattended-20261015",
+  "status": 200,
+  "requestId": "AE98:21990F:5C6159:89B7F1:6AD1DB02",
+  "date": "Fri, 16 Oct 2026 08:06:27 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-branch.json",
+    "size_bytes": 417,
+    "sha256": "65836a00bda50dda268d694f898dad7b456791e8a91e7b492604c94c4b151089"
+  }
+}
