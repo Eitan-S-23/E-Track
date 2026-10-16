@@ -2700,3 +2700,12 @@ No frozen v1/v2/v3 archive delta was introduced. The audit does not attribute or
 clean historical external PowerShell caches. Its receipt is retained with the
 two successful validators and opaque-credential scan in v4's separate sealing
 directory; final Git delivery will be audited separately.
+
+The v4 bundle is committed as `7f136c07505f56582640761944ab5add093252e4`.
+All 443 contract/evidence/sealing Git blobs were checked against their original
+working bytes before commit; no line-ending conversion changed frozen evidence.
+The next commit registers this exact bundle in FREEZE-INDEX and the shared
+handoff index. These are pre-merge records on `dev/p4-1/unattended-20261015`;
+authorized delivery uses PR #27 only after exact-head CI, with a merge commit
+preserving every source and failed/successful evidence commit. The actual remote
+merge receipt and final main SHA are delivery facts, not changes to this bundle.
