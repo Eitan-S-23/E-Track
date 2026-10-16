@@ -1,0 +1,342 @@
+{
+  "sourceCommit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c",
+  "scope": "P41-NATIVE-01 development self-tests, not independent acceptance",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "source": "Byte-preserving Git attributes for this new development archive"
+    },
+    {
+      "path": "commands/p41-native-01-red-inputs.json",
+      "source": ".cache/logs/p41-native-01-red-inputs.json",
+      "sizeBytes": 3030,
+      "sha256": "7240da3045284c157ffd87477f148fb77102aa0b0c5e6e01b5d64cf99fc405cb"
+    },
+    {
+      "path": "commands/p41-native-01-red-inputs.stdout.txt",
+      "source": ".cache/logs/p41-native-01-red-inputs.stdout.txt",
+      "sizeBytes": 1556,
+      "sha256": "86ff2042c7a1d5a468e3b275bc6071a93eab4a88db323f01492df9d79f0db51a"
+    },
+    {
+      "path": "commands/p41-native-01-red-inputs.stderr.txt",
+      "source": ".cache/logs/p41-native-01-red-inputs.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-native-01-red.json",
+      "source": ".cache/logs/p41-native-01-red.json",
+      "sizeBytes": 2071,
+      "sha256": "0a73e4a583d27bf88fb4d6ece30e2fa6ec14ac69f674cab73ecee12badd56bb9"
+    },
+    {
+      "path": "commands/p41-native-01-red.stdout.txt",
+      "source": ".cache/logs/p41-native-01-red.stdout.txt",
+      "sizeBytes": 47120,
+      "sha256": "a811d08d0c3ec6361c671ee24216b384c8d7e17e2f7fe235a0c5aa8d7214c85d"
+    },
+    {
+      "path": "commands/p41-native-01-red.stderr.txt",
+      "source": ".cache/logs/p41-native-01-red.stderr.txt",
+      "sizeBytes": 3342,
+      "sha256": "8aa615ca01d321ce31ff3bca518033c79acdb596d660cf1ca1aa84c3ad62b259"
+    },
+    {
+      "path": "commands/p41-native-01-green.json",
+      "source": ".cache/logs/p41-native-01-green.json",
+      "sizeBytes": 2075,
+      "sha256": "85c21598b493cfd89dec0fe661f56f3fd18a251502a7055c09afa8d3130ab647"
+    },
+    {
+      "path": "commands/p41-native-01-green.stdout.txt",
+      "source": ".cache/logs/p41-native-01-green.stdout.txt",
+      "sizeBytes": 49530,
+      "sha256": "ad18d24c73f7e3848291963e5069c478d2a17dc91456e339572ffd775bcb63cd"
+    },
+    {
+      "path": "commands/p41-native-01-green.stderr.txt",
+      "source": ".cache/logs/p41-native-01-green.stderr.txt",
+      "sizeBytes": 338,
+      "sha256": "a04e56a2c1b97d8013e23a92356217478a36bd2723709e5f9c3e1b5ad7cfa4bb"
+    },
+    {
+      "path": "commands/p41-native-01-pipeline.json",
+      "source": ".cache/logs/p41-native-01-pipeline.json",
+      "sizeBytes": 2019,
+      "sha256": "a8435be6f32b44a90e2e0699634cfc6de6345069f2e365d3ad2017464241af5c"
+    },
+    {
+      "path": "commands/p41-native-01-pipeline.stdout.txt",
+      "source": ".cache/logs/p41-native-01-pipeline.stdout.txt",
+      "sizeBytes": 33675,
+      "sha256": "608a8cfc3e489782cf56d0e45d06c30a45234826aed4e1eaa641f0fe08a04ba5"
+    },
+    {
+      "path": "commands/p41-native-01-pipeline.stderr.txt",
+      "source": ".cache/logs/p41-native-01-pipeline.stderr.txt",
+      "sizeBytes": 217,
+      "sha256": "12fee39b18e494f9d253f32cc3009f6f1b17236f22fa3ca050c86c1d921863e3"
+    },
+    {
+      "path": "commands/p41-native-01-types.json",
+      "source": ".cache/logs/p41-native-01-types.json",
+      "sizeBytes": 1941,
+      "sha256": "f1b6150c3918d39217f0c65d6d1bff42be48778e8841fa8f45e334f2c801bea5"
+    },
+    {
+      "path": "commands/p41-native-01-types.stdout.txt",
+      "source": ".cache/logs/p41-native-01-types.stdout.txt",
+      "sizeBytes": 956,
+      "sha256": "8336a651a689c81f4074d366b5f95d227a8dc0bb2df78126d70a68a59127f0dd"
+    },
+    {
+      "path": "commands/p41-native-01-types.stderr.txt",
+      "source": ".cache/logs/p41-native-01-types.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-native-01-types-fixed.json",
+      "source": ".cache/logs/p41-native-01-types-fixed.json",
+      "sizeBytes": 1953,
+      "sha256": "55e541b4f9fa58b7e14bf7bb696136f7174601638d50f06fdf59bbd3e3298395"
+    },
+    {
+      "path": "commands/p41-native-01-types-fixed.stdout.txt",
+      "source": ".cache/logs/p41-native-01-types-fixed.stdout.txt",
+      "sizeBytes": 60,
+      "sha256": "e2a85aae4d5b52f9fcb8a8f4d33a6f36dfcb7bdffa345147ccdbb7b8e514ddec"
+    },
+    {
+      "path": "commands/p41-native-01-types-fixed.stderr.txt",
+      "source": ".cache/logs/p41-native-01-types-fixed.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-native-01-host-final.json",
+      "source": ".cache/logs/p41-native-01-host-final.json",
+      "sizeBytes": 2085,
+      "sha256": "e8b861ec5327d9df09ddac6ce3f734034fcdacff745a5e4ffe434005adb82ccf"
+    },
+    {
+      "path": "commands/p41-native-01-host-final.stdout.txt",
+      "source": ".cache/logs/p41-native-01-host-final.stdout.txt",
+      "sizeBytes": 49532,
+      "sha256": "377a5905d48debb1ffe748912f71aefc9732850b88278c53042e8984b1d33465"
+    },
+    {
+      "path": "commands/p41-native-01-host-final.stderr.txt",
+      "source": ".cache/logs/p41-native-01-host-final.stderr.txt",
+      "sizeBytes": 337,
+      "sha256": "4592352dd17fdb3f62866ed75db30838f21d714de4be76ea0cf058545c1f6942"
+    },
+    {
+      "path": "commands/p41-native-01-final-inputs.json",
+      "source": ".cache/logs/p41-native-01-final-inputs.json",
+      "sizeBytes": 2829,
+      "sha256": "68b6360f7bd1a2f5aa4ee36b884b308274c6ff2b4922d25a4d1498e10f5e941a"
+    },
+    {
+      "path": "commands/p41-native-01-final-inputs.stdout.txt",
+      "source": ".cache/logs/p41-native-01-final-inputs.stdout.txt",
+      "sizeBytes": 1158,
+      "sha256": "4d154c589f16dceefc8c5aaf0ed57c68b0812ebd80c779307378e7530210e998"
+    },
+    {
+      "path": "commands/p41-native-01-final-inputs.stderr.txt",
+      "source": ".cache/logs/p41-native-01-final-inputs.stderr.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-native-01-diff-check.json",
+      "source": ".cache/logs/p41-native-01-diff-check.json",
+      "sizeBytes": 1795,
+      "sha256": "4aba500e862480ca9ed8282033ae9959cd07d27ca6717e73c24d9099b5d25335"
+    },
+    {
+      "path": "commands/p41-native-01-diff-check.stdout.txt",
+      "source": ".cache/logs/p41-native-01-diff-check.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-native-01-diff-check.stderr.txt",
+      "source": ".cache/logs/p41-native-01-diff-check.stderr.txt",
+      "sizeBytes": 650,
+      "sha256": "9ca051a9ded1f62d2f80f09a3e09da1989994d4701e9186638419491ebd1ba33"
+    },
+    {
+      "path": "commands/p41-native-01-add.json",
+      "source": ".cache/logs/p41-native-01-add.json",
+      "sizeBytes": 2191,
+      "sha256": "a5221110cfc32f34b8be5cbc135297f7d06d66f7d2cc27bfd967504494c2b566"
+    },
+    {
+      "path": "commands/p41-native-01-add.stdout.txt",
+      "source": ".cache/logs/p41-native-01-add.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/p41-native-01-add.stderr.txt",
+      "source": ".cache/logs/p41-native-01-add.stderr.txt",
+      "sizeBytes": 650,
+      "sha256": "9ca051a9ded1f62d2f80f09a3e09da1989994d4701e9186638419491ebd1ba33"
+    },
+    {
+      "path": "commands/p41-native-01-implementation-commit.json",
+      "source": ".cache/logs/p41-native-01-implementation-commit.json",
+      "sizeBytes": 2117,
+      "sha256": "7d15816832fbe85b8c46176f6c006f89c263a7b048010e951283325ca93f7d8c"
+    },
+    {
+      "path": "commands/p41-native-01-implementation-commit.stdout.txt",
+      "source": ".cache/logs/p41-native-01-implementation-commit.stdout.txt",
+      "sizeBytes": 150,
+      "sha256": "1e43567d29545753d26d8c979afb22b8d0430b6c930894b39136774441141856"
+    },
+    {
+      "path": "commands/p41-native-01-implementation-commit.stderr.txt",
+      "source": ".cache/logs/p41-native-01-implementation-commit.stderr.txt",
+      "sizeBytes": 39,
+      "sha256": "9a4a51226f959aa02b84c048340535cbf33d5d661257c809ab33387c9c184944"
+    },
+    {
+      "path": "github/p41-native-01-app-jobs.json",
+      "source": ".cache/github/p41-native-01-app-jobs.json",
+      "sizeBytes": 5328,
+      "sha256": "88f6076827161f5f4004829ed0d3073fac6d5b1d07c492ec3c383aed1622dfb7"
+    },
+    {
+      "path": "github/p41-native-01-app-logs.zip",
+      "source": ".cache/github/p41-native-01-app-logs.zip",
+      "sizeBytes": 14529,
+      "sha256": "4af1968354d5dff374e47ee078bcca64bf05d680348a4022a37241ea96b4d58e"
+    },
+    {
+      "path": "github/p41-native-01-cf-jobs.json",
+      "source": ".cache/github/p41-native-01-cf-jobs.json",
+      "sizeBytes": 6937,
+      "sha256": "0a912fc4262d5659315c9bfca3689276bf08ec0e2f33028f981e63320e45daf1"
+    },
+    {
+      "path": "github/p41-native-01-cf-logs.zip",
+      "source": ".cache/github/p41-native-01-cf-logs.zip",
+      "sizeBytes": 48451,
+      "sha256": "ceb2c6d492068f5b971b250451cad9c173ffd72086d3c99e869bf3b1d43fee96"
+    },
+    {
+      "path": "github/p41-native-01-checkout-commit.json",
+      "source": ".cache/github/p41-native-01-checkout-commit.json",
+      "sizeBytes": 2607,
+      "sha256": "b29efc20dd49d072e8790aa087216f11ae24c9d00009a123083530be2b843408"
+    },
+    {
+      "path": "github/p41-native-01-ci-final.json",
+      "source": ".cache/github/p41-native-01-ci-final.json",
+      "sizeBytes": 51162,
+      "sha256": "c07be27b6b1a2797375c3af899a386abd00b28a0aee2af58f7bb7356b28f68ed"
+    },
+    {
+      "path": "github/p41-native-01-ci-initial.json",
+      "source": ".cache/github/p41-native-01-ci-initial.json",
+      "sizeBytes": 51159,
+      "sha256": "4ac982a2268dcbb45cba236de5cc6a44f0eb0f76e36f2d1bce0b17b7fd42ee3e"
+    },
+    {
+      "path": "github/p41-native-01-fw-jobs-1.json",
+      "source": ".cache/github/p41-native-01-fw-jobs-1.json",
+      "sizeBytes": 11140,
+      "sha256": "83d6ced1e61a5b98b9401d8f0530c6e66fd1dc507d9c073221a5d7680bbeb256"
+    },
+    {
+      "path": "github/p41-native-01-fw-jobs.json",
+      "source": ".cache/github/p41-native-01-fw-jobs.json",
+      "sizeBytes": 13257,
+      "sha256": "57ba39e5b6a7607f968d51e1a41b5e46dd207b83235e02f22b0ddddb8d99c04f"
+    },
+    {
+      "path": "github/p41-native-01-fw-logs.zip",
+      "source": ".cache/github/p41-native-01-fw-logs.zip",
+      "sizeBytes": 364786,
+      "sha256": "f360c4231fbd04795c262bedd3f354167266a3ff700f805d8c12ccc52431c818"
+    },
+    {
+      "path": "github/p41-native-01-gov-jobs.json",
+      "source": ".cache/github/p41-native-01-gov-jobs.json",
+      "sizeBytes": 7237,
+      "sha256": "2d7063651b3f3c40cb80c16974a40f2a76ad459bb7e13deaec09f1d23f26efcd"
+    },
+    {
+      "path": "github/p41-native-01-gov-logs.zip",
+      "source": ".cache/github/p41-native-01-gov-logs.zip",
+      "sizeBytes": 63312,
+      "sha256": "274d7abf1b65ed8780ac9504c0299dfc72fcd84d530376c37b3d7a65e7e8c53f"
+    },
+    {
+      "path": "github/p41-native-01-implementation-push.json",
+      "source": ".cache/github/p41-native-01-implementation-push.json",
+      "sizeBytes": 229,
+      "sha256": "431129e9442d09b87b5a14675b6e989de4af6e5cca8b5ece8ad74e1ad8f69897"
+    },
+    {
+      "path": "github/p41-native-01-pr-after-push.json",
+      "source": ".cache/github/p41-native-01-pr-after-push.json",
+      "sizeBytes": 18027,
+      "sha256": "816bf0af3efade1516a14bc53e9535ab54552121855d39cc9331e59efe271dd7"
+    },
+    {
+      "path": "github/p41-native-01-pr-current.json",
+      "source": ".cache/github/p41-native-01-pr-current.json",
+      "sizeBytes": 18025,
+      "sha256": "66cf066a815368d8569dbed364ecf262a998b1f089d9fe82cdee90c747f19c90"
+    },
+    {
+      "path": "github/p41-native-01-prepush-pr.json",
+      "source": ".cache/github/p41-native-01-prepush-pr.json",
+      "sizeBytes": 18025,
+      "sha256": "3a40c7bfc75fe59e1786782f3ddbbe42f9b1ce085f00b4a3afa7c570711e7aa4"
+    },
+    {
+      "path": "github/p41-native-01-source-commit.json",
+      "source": ".cache/github/p41-native-01-source-commit.json",
+      "sizeBytes": 1425,
+      "sha256": "2938caef2a0d82d22a4961b6ca439dab14b249b2cf7d066dd5ddf1b8b260464e"
+    },
+    {
+      "path": "ci-inspection.json",
+      "source": "Derived from original closed receipts, GitHub API and complete job log ZIPs",
+      "sizeBytes": 20704,
+      "sha256": "367737646847b302495f4e642211ec9952564dc2ca0aaa51269f383cf74ef16e"
+    },
+    {
+      "path": "zip-members.json",
+      "source": "SHA-256 of original CI ZIP members read without extraction",
+      "sizeBytes": 29225,
+      "sha256": "59ad549c0f352137896ba937af96a09d809917ec89f7543ba1275935b7c0875e"
+    },
+    {
+      "path": "helpers/run.cjs",
+      "source": ".cache/run.cjs",
+      "sizeBytes": 3364,
+      "sha256": "ed8b4b6fbc1e63e13dc91d268f5f75eef18413f3cc80f204c0d6ee4a725609e3"
+    },
+    {
+      "path": "helpers/gh.cjs",
+      "source": ".cache/gh.cjs",
+      "sizeBytes": 8859,
+      "sha256": "ac92eca84b1852a14873547109204927d08c34e000ae167f74d7e6c3a0740a9a"
+    },
+    {
+      "path": "helpers/retain.cjs",
+      "source": ".cache/p41-native-01-remediation/retain.cjs",
+      "sizeBytes": 10112,
+      "sha256": "7b7bbf64b21075db6c3541cde077ef13dd65630f6b6a1c6b2c11c94b6fe484de"
+    }
+  ]
+}

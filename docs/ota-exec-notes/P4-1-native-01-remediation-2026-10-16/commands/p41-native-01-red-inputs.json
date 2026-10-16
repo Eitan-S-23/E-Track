@@ -1,0 +1,31 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "-e",
+    "fs=require('node:fs');cp=require('node:child_process');hash=function(b){return(require('node:crypto').createHash('sha256').update(b).digest('hex'))};git=function(a){return(cp.execFileSync('git',a,{cwd:process.cwd(),encoding:'utf8',windowsHide:true}).trim())};files=['app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs','app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-scripts.host.test.ts','tests/ota/firmware-pipeline.host.test.ts','app/bluetooth_flutter_Trace/cloudflare/update-service/worker/package-lock.json','.cache/run.cjs'];console.log(JSON.stringify({scope:'DEVELOPMENT_RED_INPUTS',node:process.version,os:require('node:os').release(),head:git(['rev-parse','HEAD']),branch:git(['branch','--show-current']),main:git(['rev-parse','refs/heads/main']),sharedIndexSha256:hash(fs.readFileSync('D:/github/my/E-Track/.git/index')),files:files.map(function(p){return({path:p,sha256:hash(fs.readFileSync(p)),gitBlob:git(['hash-object','--',p])})}),frozenDiff:git(['diff','--name-status','53b78608cac6bb5c2e9253362471b6383f5c31ff','--','docs/acceptance-contracts/P4-1-v1','docs/acceptance-contracts/P4-1-v1.contract.json','docs/acceptance-contracts/FREEZE-INDEX.md'])},null,2))"
+  ],
+  "pid": 22692,
+  "started": "2026-10-16T15:58:11.054Z",
+  "ended": "2026-10-16T15:58:12.260Z",
+  "exitCode": 0,
+  "signal": null,
+  "outputs": {
+    "TEMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMP": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "TMPDIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\tmp",
+    "HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "USERPROFILE": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\home",
+    "APPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\appdata",
+    "LOCALAPPDATA": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\localappdata",
+    "XDG_CONFIG_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\config",
+    "XDG_CACHE_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\cache",
+    "XDG_DATA_HOME": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\data",
+    "npm_config_cache": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\npm-cache",
+    "PIP_CACHE_DIR": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\pip-cache",
+    "WRANGLER_LOG_PATH": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\runtime\\wrangler-logs"
+  },
+  "stdoutPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\p41-native-01-red-inputs.stdout.txt",
+  "stderrPath": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015\\.cache\\logs\\p41-native-01-red-inputs.stderr.txt",
+  "closed": true
+}

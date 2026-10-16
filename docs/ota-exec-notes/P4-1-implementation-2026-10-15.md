@@ -2380,3 +2380,92 @@ its passing negative test. The failed type-check receipt is preserved rather tha
 relabelled green. A final diff check has no whitespace errors; Git reports its
 normal LF-to-CRLF checkout warnings. Checks-only PR CI and durable original-log
 delivery follow this local checkpoint; independent acceptance remains pending.
+
+### Source-Bound CI And Return To The Original Reviewer
+
+The repair and its tests were committed and pushed as
+`5d4d07571451905ac156a1a721fa8b8ce764ed7c`, using the already-authorized
+`Eitan-S-23` push identity on `dev/p4-1/unattended-20261015`. The original
+four-file implementation commit contains only the uploader, the two existing
+host test files and this task note. No runtime dependency or workflow changed.
+Local work began on 2026-10-16; CI/record closeout is 2026-10-17 Asia/Shanghai.
+
+All four ordinary PR synchronization runs completed successfully, attempt 1:
+
+| Workflow | Run | Actual checks and limitations |
+| --- | --- | --- |
+| MCU Firmware Build | <https://github.com/Eitan-S-23/E-Track/actions/runs/38929267144> | Host scripts/migration 41/41, pipeline host 136/136, native Linux workerd 156/156; Worker types passed. Workflow/byte Node suites 57/57 and 22/22; package/golden Python suites 8/8 and 9/9. Binding qualification, staging rehearsal and production jobs all skipped. |
+| Cloudflare Update Service Checks | <https://github.com/Eitan-S-23/E-Track/actions/runs/38929267218> | Public/Admin/Worker typechecks passed; native Worker suite 156/156. This is the same suite run by a second workflow, not 312 distinct tests or real cloud evidence. |
+| Acceptance Governance | <https://github.com/Eitan-S-23/E-Track/actions/runs/38929267147> | All jobs passed; primary governance regression 128/128. Other actual suite counts are 36, 3, 14, 11, 62, 39 and 29, retained separately in the inspection. No v1 product acceptance was rerun. |
+| Build APK and EXE Release | <https://github.com/Eitan-S-23/E-Track/actions/runs/38929267169> | Path detection passed. Android APK, Windows EXE, Pages deployment and GitHub Release all skipped. |
+
+GitHub API reports source HEAD `5d4d07571451905ac156a1a721fa8b8ce764ed7c`.
+The actual PR checkout in the original job logs is
+`9811af20b122442bd8cf91902b8455403e3d84fa`. Both Git objects have tree
+`bd380a8f989bda73f8a4f7221302d3bd35cb5f6a`; raw commit API responses and
+checkout logs bind this equality. The immediate post-push PR response still
+contained the old merge SHA; it is preserved, not used as the tested identity.
+Successful CI command steps have runner conclusion `success`; GitHub's jobs API
+does not expose a separate numeric per-command exit code. Local numeric exits
+are in the closed receipts above, including the retained exits 1 and 2.
+
+The ordinary and development-key GCC builds each reported 640 warnings and
+zero errors; vendor bsdiff reported six warnings and zero errors. These are
+checks-only development builds, not another protected real-key rehearsal and
+not new evidence of remote R2 writes. No additional artifact/build campaign was
+requested to repair this metadata issue.
+
+Originals are retained under
+`docs/ota-exec-notes/P4-1-native-01-remediation-2026-10-16/`: a 57-file core,
+including untouched local red/green/type-failure receipts and streams, all four
+CI log ZIPs, original GitHub run/job/commit/PR responses, the existing invocation
+helpers and a bounded retention helper. `ci-inspection.json` records the actual
+counts/identities; `zip-members.json` hashes every original log member;
+`inventory.json` binds that core except itself. Inventory SHA-256 is
+`4465fcd64c5a3cbb6e7688f6cc4e284586f3e9cbb9cfbefafd61063382397b0d`.
+This is development evidence, not a new acceptance contract/bundle or Spec.
+Four later files under `closing/` retain the actual write-audit receipt and
+streams plus their own inventory, for 61 files in total. That audit reread the
+core hashes and checked 3,993 cache/temp entries against the active boundary;
+it confirmed unchanged parent index/main, frozen v1 paths and tested code.
+`closing/inventory.json` SHA-256 is
+`eca7b18bbc5e4de02ffd6a3511c8267e343001b584c8ba01e894e5676654ad3a`.
+The previous archive helper has fixed historical input/output paths, so this
+retention uses the existing containment guard plus read-only tar and byte copies
+to a new directory. No frozen helper or historical archive is changed.
+
+| Finding | Implementation disposition | Next owner and oracle |
+| --- | --- | --- |
+| P41-NATIVE-01 | Required product defect repaired and developer-self-tested. The actual uploader arguments now serialize with the pinned SDK; old Node Headers still reject. Integrity, conditional create, metadata, complete conditional readback, conflicts and all-three-assets registration gates remain checked. | Original independent acceptance reviewer performs consolidated review of this complete batch. This implementation does not close the card or adjudicate independent PASS. |
+
+Recommended affected scope is the shared uploader and its immediate
+upload/readback/registration consumers. The reviewer should use the actual v1
+final PRODUCT_FAIL matrix and bundle `7f014a8887dc79646ff392ee8cfa6a1ce2c9cf67`
+as predecessor, review source/dependency changes, and prepare the successor
+contract and minimum observations. No successor contract is frozen or executed
+by this implementation session. Preserve v1 ORIGINS/ADMISSION PASS, its actual
+failed rehearsal and dependent NOT_OBSERVED results. The partial actual-key GCC
+and full/patch/recovery byte observations remain available for lawful independent
+evaluation/reuse; do not reclassify the old combined BYTES criterion as PASS or
+repeat successful unchanged observations just because the uploader changed.
+
+Real native R2 write permission, new three-asset upload and complete cloud
+readback, ready registration/idempotency, and the successor run's production
+zero-effect evidence are still unverified by this repair. Do not infer a
+credential defect from the old generic BACKEND_UNAVAILABLE or request another
+qualification upload. Any admitted staging observation, exact target/descriptor
+rebinding and environment approval remain with the original independent owner.
+
+The archive audit found no GitHub credential pattern in retained files or ZIP
+members. Frozen v1 paths and FREEZE-INDEX have no delta from entry; the parent
+worktree index hash remains
+`2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`.
+All selected local logs, npm/Vite/runtime caches, fixtures and archive outputs
+remain inside the active worktree, plus only its expressly authorized Git
+object/index/branch metadata. No local PowerShell or Windows workerd was started;
+no staging/qualification dispatch, secret/configuration change, merge, release,
+deployment, production/device operation or other task was performed. Historical
+P41-AUDIT-01 attribution remains unresolved and was not cleaned up or rewritten.
+Structured archived console traces may use only the global hook's supported
+debug-check override; secret/conflict checks remain enabled. This branch handoff
+is pending main integration by its authorized owner, not delivered to main here.

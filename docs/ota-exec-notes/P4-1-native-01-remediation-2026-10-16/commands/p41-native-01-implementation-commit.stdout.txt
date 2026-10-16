@@ -1,0 +1,2 @@
+[dev/p4-1/unattended-20261015 5d4d075] fix(p4-1): serialize native R2 metadata as a plain object
+ 4 files changed, 193 insertions(+), 24 deletions(-)

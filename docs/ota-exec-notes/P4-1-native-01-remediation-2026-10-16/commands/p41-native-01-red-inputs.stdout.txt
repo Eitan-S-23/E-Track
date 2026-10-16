@@ -1,0 +1,37 @@
+{
+  "scope": "DEVELOPMENT_RED_INPUTS",
+  "node": "v24.13.0",
+  "os": "10.0.19045",
+  "head": "53b78608cac6bb5c2e9253362471b6383f5c31ff",
+  "branch": "dev/p4-1/unattended-20261015",
+  "main": "b42d3e25db85d6aba397cb4d0fb34bb5b653904f",
+  "sharedIndexSha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "files": [
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs",
+      "sha256": "f645ab6c87f7757a631dfa53666e5fde72c5ebdebf76eebcfc4f02798fdd91ed",
+      "gitBlob": "85b089fd3a84cfa59894c8c4555f94209cd5eb88"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-scripts.host.test.ts",
+      "sha256": "04312841333383d36d7a90dfb08a692fde8de7444dd45e6cdd75a10bcdab058c",
+      "gitBlob": "7acdf5f88c6282be0312da22980c3485c3aa84a3"
+    },
+    {
+      "path": "tests/ota/firmware-pipeline.host.test.ts",
+      "sha256": "7fa5e543b53c1b882fc5404f6ce2880cf495302dc0325c49300316f21f756beb",
+      "gitBlob": "7ba22f37cd05be7c0c31b778379f2d9a3f9be29e"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/package-lock.json",
+      "sha256": "9edd77419205f1f851959650a7822364cc2ff97eb5353fc6e70736b952e6bb9b",
+      "gitBlob": "2b43563f0f5d32cba2f06e4f7e91b3deb5c52d3d"
+    },
+    {
+      "path": ".cache/run.cjs",
+      "sha256": "ed8b4b6fbc1e63e13dc91d268f5f75eef18413f3cc80f204c0d6ee4a725609e3",
+      "gitBlob": "2dd0b1fa9678b280039e5a9fd329ca1c99615729"
+    }
+  ],
+  "frozenDiff": ""
+}

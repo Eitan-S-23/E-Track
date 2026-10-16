@@ -1,0 +1,791 @@
+{
+  "scope": "P41-NATIVE-01 development self-tests, not independent acceptance",
+  "sourceCommit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c",
+  "branch": "dev/p4-1/unattended-20261015",
+  "actualPrCheckout": "9811af20b122442bd8cf91902b8455403e3d84fa",
+  "sourceAndCheckoutTree": "bd380a8f989bda73f8a4f7221302d3bd35cb5f6a",
+  "runs": {
+    "fw": 38929267144,
+    "cf": 38929267218,
+    "gov": 38929267147,
+    "app": 38929267169
+  },
+  "local": [
+    {
+      "label": "red-inputs",
+      "exitCode": 0,
+      "started": "2026-10-16T15:58:11.054Z",
+      "ended": "2026-10-16T15:58:12.260Z",
+      "testSummaries": []
+    },
+    {
+      "label": "red",
+      "exitCode": 1,
+      "started": "2026-10-16T15:58:12.477Z",
+      "ended": "2026-10-16T15:58:27.425Z",
+      "testSummaries": [
+        "Tests  3 failed | 38 passed (41)"
+      ]
+    },
+    {
+      "label": "green",
+      "exitCode": 0,
+      "started": "2026-10-16T15:58:57.694Z",
+      "ended": "2026-10-16T15:59:08.934Z",
+      "testSummaries": [
+        "Tests  41 passed (41)"
+      ]
+    },
+    {
+      "label": "pipeline",
+      "exitCode": 0,
+      "started": "2026-10-16T15:59:24.696Z",
+      "ended": "2026-10-16T15:59:43.152Z",
+      "testSummaries": [
+        "Tests  136 passed (136)"
+      ]
+    },
+    {
+      "label": "types",
+      "exitCode": 2,
+      "started": "2026-10-16T15:59:50.622Z",
+      "ended": "2026-10-16T15:59:55.988Z",
+      "testSummaries": []
+    },
+    {
+      "label": "types-fixed",
+      "exitCode": 0,
+      "started": "2026-10-16T16:00:48.210Z",
+      "ended": "2026-10-16T16:00:54.900Z",
+      "testSummaries": []
+    },
+    {
+      "label": "host-final",
+      "exitCode": 0,
+      "started": "2026-10-16T16:01:45.796Z",
+      "ended": "2026-10-16T16:01:55.071Z",
+      "testSummaries": [
+        "Tests  41 passed (41)"
+      ]
+    },
+    {
+      "label": "final-inputs",
+      "exitCode": 0,
+      "started": "2026-10-16T16:04:38.325Z",
+      "ended": "2026-10-16T16:04:39.246Z",
+      "testSummaries": []
+    },
+    {
+      "label": "diff-check",
+      "exitCode": 0,
+      "started": "2026-10-16T16:04:39.581Z",
+      "ended": "2026-10-16T16:04:40.030Z",
+      "testSummaries": []
+    },
+    {
+      "label": "add",
+      "exitCode": 0,
+      "started": "2026-10-16T16:05:40.178Z",
+      "ended": "2026-10-16T16:05:40.422Z",
+      "testSummaries": []
+    },
+    {
+      "label": "implementation-commit",
+      "exitCode": 0,
+      "started": "2026-10-16T16:05:40.845Z",
+      "ended": "2026-10-16T16:05:43.580Z",
+      "testSummaries": []
+    }
+  ],
+  "ciCounts": {
+    "firmwareToolingSuites": [
+      41,
+      136,
+      156
+    ],
+    "backendNative": [
+      156
+    ],
+    "nodeSuites": [
+      57,
+      22
+    ],
+    "pythonToolingSuites": [
+      8,
+      9
+    ],
+    "governanceSuites": [
+      128,
+      36,
+      3,
+      14,
+      11,
+      62,
+      39,
+      29
+    ]
+  },
+  "countPolicy": "Distinct suites; repeated native runs and duplicated aggregate/step logs are not summed.",
+  "diagnostics": {
+    "gcc": {
+      "warnings": 640,
+      "errors": 0
+    },
+    "keyedDevelopmentGcc": {
+      "warnings": 640,
+      "errors": 0
+    },
+    "vendorBsdiff": {
+      "warnings": 6,
+      "errors": 0
+    }
+  },
+  "jobs": {
+    "fw": [
+      {
+        "id": 117068739873,
+        "name": "Build firmware (arm-none-eabi-gcc)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Set up Node for shared release helpers",
+            "conclusion": "success"
+          },
+          {
+            "number": 4,
+            "name": "Contain build temporary and pip cache paths",
+            "conclusion": "success"
+          },
+          {
+            "number": 5,
+            "name": "Install Arm GNU Toolchain 13.3.Rel1",
+            "conclusion": "success"
+          },
+          {
+            "number": 6,
+            "name": "Install Ninja",
+            "conclusion": "success"
+          },
+          {
+            "number": 7,
+            "name": "Install OTA host test dependencies",
+            "conclusion": "success"
+          },
+          {
+            "number": 8,
+            "name": "Verify reproducible GCC timestamps",
+            "conclusion": "success"
+          },
+          {
+            "number": 9,
+            "name": "Extract firmware version",
+            "conclusion": "success"
+          },
+          {
+            "number": 10,
+            "name": "Configure (CMake + Ninja)",
+            "conclusion": "success"
+          },
+          {
+            "number": 11,
+            "name": "Build firmware",
+            "conclusion": "success"
+          },
+          {
+            "number": 12,
+            "name": "Run host tests (boot vectors, OTA host tests, P3-1 product regressions)",
+            "conclusion": "success"
+          },
+          {
+            "number": 13,
+            "name": "Validate OTA App layout",
+            "conclusion": "success"
+          },
+          {
+            "number": 14,
+            "name": "Validate OTA Boot skeleton",
+            "conclusion": "success"
+          },
+          {
+            "number": 15,
+            "name": "Report firmware artifacts",
+            "conclusion": "success"
+          },
+          {
+            "number": 16,
+            "name": "Bind same-run GCC App and Boot inputs",
+            "conclusion": "success"
+          },
+          {
+            "number": 17,
+            "name": "Exercise production preparation on the real GCC build (development key only)",
+            "conclusion": "success"
+          },
+          {
+            "number": 18,
+            "name": "Preserve non-publishable GCC packaging evidence",
+            "conclusion": "success"
+          },
+          {
+            "number": 19,
+            "name": "Exercise the shared key-bound GCC build without protected credentials",
+            "conclusion": "success"
+          },
+          {
+            "number": 20,
+            "name": "Check development key cleanup before archiving",
+            "conclusion": "success"
+          },
+          {
+            "number": 21,
+            "name": "Preserve non-publishable key-bound build and packaging evidence",
+            "conclusion": "success"
+          },
+          {
+            "number": 22,
+            "name": "Build the P3-4 acceptance candidate",
+            "conclusion": "skipped"
+          },
+          {
+            "number": 23,
+            "name": "Preserve the P3-4 candidate build evidence",
+            "conclusion": "skipped"
+          },
+          {
+            "number": 24,
+            "name": "Upload firmware artifact",
+            "conclusion": "success"
+          },
+          {
+            "number": 25,
+            "name": "Upload Boot artifact",
+            "conclusion": "success"
+          },
+          {
+            "number": 49,
+            "name": "Post Set up Node for shared release helpers",
+            "conclusion": "success"
+          },
+          {
+            "number": 50,
+            "name": "Post Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 51,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117068740467,
+        "name": "Release tooling development checks (no cloud credentials)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 4,
+            "name": "Prepare contained test temporary directory",
+            "conclusion": "success"
+          },
+          {
+            "number": 5,
+            "name": "Install pinned Worker dependencies",
+            "conclusion": "success"
+          },
+          {
+            "number": 6,
+            "name": "Run script and migration host tests explicitly (not workerd)",
+            "conclusion": "success"
+          },
+          {
+            "number": 7,
+            "name": "Run release pipeline with real handlers and SQLite host ports (not rehearsal)",
+            "conclusion": "success"
+          },
+          {
+            "number": 8,
+            "name": "Run native workerd D1 R2 and registration invariants (not host doubles)",
+            "conclusion": "success"
+          },
+          {
+            "number": 9,
+            "name": "Check Worker and shared script types",
+            "conclusion": "success"
+          },
+          {
+            "number": 10,
+            "name": "Build tested Worker deployment input without cloud access",
+            "conclusion": "success"
+          },
+          {
+            "number": 11,
+            "name": "Install byte test dependency",
+            "conclusion": "success"
+          },
+          {
+            "number": 12,
+            "name": "Build the existing vendor bsdiff for this host",
+            "conclusion": "success"
+          },
+          {
+            "number": 13,
+            "name": "Check real package generation and approved-envelope replay",
+            "conclusion": "success"
+          },
+          {
+            "number": 14,
+            "name": "Check workflow execution graph and configuration gates",
+            "conclusion": "success"
+          },
+          {
+            "number": 15,
+            "name": "Execute production byte preparation with isolated fixtures",
+            "conclusion": "success"
+          },
+          {
+            "number": 16,
+            "name": "Preserve development byte fixtures and step originals",
+            "conclusion": "success"
+          },
+          {
+            "number": 17,
+            "name": "Preserve tested Worker deployment input",
+            "conclusion": "success"
+          },
+          {
+            "number": 33,
+            "name": "Post Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 34,
+            "name": "Post Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 35,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117069128156,
+        "name": "Isolated firmware binding qualification (not rehearsal)",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 117069526550,
+        "name": "Firmware production (shared release implementation)",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 117069527201,
+        "name": "Firmware rehearsal (shared release implementation)",
+        "conclusion": "skipped",
+        "steps": []
+      }
+    ],
+    "cf": [
+      {
+        "id": 117068739223,
+        "name": "Public Pages Typecheck",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 4,
+            "name": "Install dependencies",
+            "conclusion": "success"
+          },
+          {
+            "number": 5,
+            "name": "Typecheck",
+            "conclusion": "success"
+          },
+          {
+            "number": 9,
+            "name": "Post Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 10,
+            "name": "Post Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 11,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117068739632,
+        "name": "Admin Facade Typecheck",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 4,
+            "name": "Install dependencies",
+            "conclusion": "success"
+          },
+          {
+            "number": 5,
+            "name": "Typecheck",
+            "conclusion": "success"
+          },
+          {
+            "number": 9,
+            "name": "Post Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 10,
+            "name": "Post Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 11,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117068739715,
+        "name": "Worker Typecheck and Invariants",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 4,
+            "name": "Install dependencies",
+            "conclusion": "success"
+          },
+          {
+            "number": 5,
+            "name": "Generate Wrangler Env types",
+            "conclusion": "success"
+          },
+          {
+            "number": 6,
+            "name": "Typecheck",
+            "conclusion": "success"
+          },
+          {
+            "number": 7,
+            "name": "Run invariant tests",
+            "conclusion": "success"
+          },
+          {
+            "number": 13,
+            "name": "Post Set up Node",
+            "conclusion": "success"
+          },
+          {
+            "number": 14,
+            "name": "Post Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 15,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ],
+    "gov": [
+      {
+        "id": 117068739013,
+        "name": "Flutter debugging skill (ubuntu-latest)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Test host helpers (Linux)",
+            "conclusion": "success"
+          },
+          {
+            "number": 4,
+            "name": "Test host helpers (Windows)",
+            "conclusion": "skipped"
+          },
+          {
+            "number": 5,
+            "name": "Test P3-4 controlled service and live adapters (Linux)",
+            "conclusion": "success"
+          },
+          {
+            "number": 6,
+            "name": "Test P3-4 controlled service and live adapters (Windows)",
+            "conclusion": "skipped"
+          },
+          {
+            "number": 7,
+            "name": "Preserve P3-4 adapter self-test originals",
+            "conclusion": "success"
+          },
+          {
+            "number": 14,
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "number": 15,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117068739192,
+        "name": "Flutter debugging skill (windows-latest)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Test host helpers (Linux)",
+            "conclusion": "skipped"
+          },
+          {
+            "number": 4,
+            "name": "Test host helpers (Windows)",
+            "conclusion": "success"
+          },
+          {
+            "number": 5,
+            "name": "Test P3-4 controlled service and live adapters (Linux)",
+            "conclusion": "skipped"
+          },
+          {
+            "number": 6,
+            "name": "Test P3-4 controlled service and live adapters (Windows)",
+            "conclusion": "success"
+          },
+          {
+            "number": 7,
+            "name": "Preserve P3-4 adapter self-test originals",
+            "conclusion": "success"
+          },
+          {
+            "number": 14,
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "number": 15,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117068739353,
+        "name": "Validate acceptance and build governance",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Checkout",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Verify PowerShell",
+            "conclusion": "success"
+          },
+          {
+            "number": 4,
+            "name": "Run governance regression tests",
+            "conclusion": "success"
+          },
+          {
+            "number": 5,
+            "name": "Install Arm GNU Toolchain 13.3.Rel1",
+            "conclusion": "success"
+          },
+          {
+            "number": 6,
+            "name": "Run P2-6 spec probes",
+            "conclusion": "success"
+          },
+          {
+            "number": 12,
+            "name": "Post Checkout",
+            "conclusion": "success"
+          },
+          {
+            "number": 13,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ],
+    "app": [
+      {
+        "id": 117068739349,
+        "name": "Detect changed paths",
+        "conclusion": "success",
+        "steps": [
+          {
+            "number": 1,
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "number": 2,
+            "name": "Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 3,
+            "name": "Detect docs and app build inputs",
+            "conclusion": "success"
+          },
+          {
+            "number": 6,
+            "name": "Post Checkout repository",
+            "conclusion": "success"
+          },
+          {
+            "number": 7,
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117068867244,
+        "name": "Deploy GitHub Pages",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 117068867673,
+        "name": "Build Android APK",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 117068867851,
+        "name": "Build Windows EXE",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 117068868473,
+        "name": "Create GitHub Release",
+        "conclusion": "skipped",
+        "steps": []
+      }
+    ]
+  },
+  "oldV1Result": "PRODUCT_FAIL",
+  "frozenPathsUnchanged": true,
+  "sharedIndexUnchanged": true,
+  "cloudUploadReadbackReady": "NOT_VERIFIED_BY_THIS_REPAIR",
+  "r2WritePermission": "NOT_VERIFIED",
+  "stagingDispatches": 0,
+  "newQualificationUploads": 0,
+  "independentAcceptance": "PENDING_ORIGINAL_REVIEWER"
+}
