@@ -2279,3 +2279,17 @@ separate commit. These changes do not imply P4-1 completion or authorize a merge
 P41-NATIVE-01 remains required remediation by a separate implementation owner;
 the actual final failure matrix, not a fresh NOT_RUN matrix, is the predecessor
 for the successor contract and its minimum-rerun analysis.
+
+The failed evidence/records bundle is committed as
+`7f014a8887dc79646ff392ee8cfa6a1ce2c9cf67` on
+`dev/p4-1/unattended-20261015`. All 444 staged contract/evidence/sealing Git blobs
+matched their working bytes before commit; original CRLF/log whitespace was
+intentionally retained. The existing validator was then actually executed at that
+bundle commit and again returned `VALIDATION=PASS ... overall=PRODUCT_FAIL`.
+The later index-delivery commit retains these closure receipts under
+`docs/acceptance-contracts/P4-1-v1/delivery/` and appends the immutable bundle/input
+triple to FREEZE-INDEX. Read the handoff directly with
+`git show 7f014a8887dc79646ff392ee8cfa6a1ce2c9cf67:docs/ota-exec-notes/P4-1-implementation-2026-10-15.md`.
+This branch delivery remains pending main integration; the original implementation
+claimant is unchanged. No product fix, successor acceptance, merge or release is
+claimed by sealing the failed round.

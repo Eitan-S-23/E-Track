@@ -1,0 +1,32 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "tests/ota/test_acceptance_bundle.py",
+    "AcceptanceBundleTests.test_freeze_index_rows_bind_reachable_bundle_and_input_commits",
+    "AcceptanceBundleTests.test_freeze_index_allows_growth_and_truthful_historical_results",
+    "AcceptanceBundleTests.test_freeze_index_rejects_malformed_rows",
+    "AcceptanceBundleTests.test_board_and_freeze_index_are_outside_every_profile"
+  ],
+  "pid": 12604,
+  "started": "2026-10-16T14:58:02.962Z",
+  "ended": "2026-10-16T14:58:16.610Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/failure-index-regression.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/failure-index-regression.stderr.txt",
+      "size_bytes": 108,
+      "sha256": "219fc3c8b097ea9dfe80f3161741624c4596194333d6bfa958badf3097c82631"
+    }
+  ],
+  "closed": true
+}

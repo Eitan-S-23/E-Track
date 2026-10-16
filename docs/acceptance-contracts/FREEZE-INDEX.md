@@ -46,6 +46,7 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 | P3-3-v9 | v3 | `5695abc5d7cd1402bd0815017a3e383c57571662` | `ceaf8d2b7bb8e78968462af51a57ff1250731b61` | `4fd600a48a25654fe82db3cb6fd6f6338392bc48` | VALIDATION=PASS，overall=PASS（2026-09-15 当前有效独立验收，五项全部 PASS；本次主会话按移交命令完整性复校通过，非新验收轮次） |
 | P3-4-v14 | v3 | `15a025b9c2690e864456a32fb2820422846fb85b` | `fcbace8b3f782714a139a77a12cb9305dbaef7cc` | `7038ea9de58dba625d487caee57c6dfb130d04b6` | VALIDATION=PASS, overall=EVIDENCE_GAP(2026-10-14 partial offline round; native FC failure and one reference EXECUTED PASS preserved; zero device actions) |
 | P3-4-v15 | v3 | `15a025b9c2690e864456a32fb2820422846fb85b` | `fcbace8b3f782714a139a77a12cb9305dbaef7cc` | `7038ea9de58dba625d487caee57c6dfb130d04b6` | VALIDATION=PASS, overall=PASS(2026-10-14 candidate stage only; one direct reference reuse and three offline criteria; P3-5/P5 and production release excluded) |
+| P4-1-v1 | v3 | `7f014a8887dc79646ff392ee8cfa6a1ce2c9cf67` | `2d3daae4ac5441d3eb736b654c237ae53760067c` | `b51a3ba2f22ff86caea394464747171db60ecb51` | VALIDATION=PASS, overall=PRODUCT_FAIL(2026-10-16 canonical staging run 38897470681 attempt 1; P41-NATIVE-01 blocks R2 upload; original failures and partial byte checks preserved; no production/device action or merge) |
 
 备注：
 
