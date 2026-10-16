@@ -1,0 +1,31 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "docs/acceptance-contracts/P4-1-v2/tools/inspect.py",
+    "origins",
+    "--output",
+    ".cache/p41-acceptance-20261017/review/origins-preparation.json"
+  ],
+  "pid": 24248,
+  "started": "2026-10-16T17:29:15.748Z",
+  "ended": "2026-10-16T17:29:20.578Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-origins-preparation.stdout.txt",
+      "size_bytes": 202,
+      "sha256": "6664d528d7b90850f2373e4fe9192626c725257e0e12dfe7ab93b89fe51dbbc2"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-origins-preparation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

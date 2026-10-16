@@ -1,0 +1,65 @@
+{
+  "started": "2026-10-16T17:28:40.171387+00:00",
+  "mode": "remediation",
+  "scope": "INDEPENDENT_OFFLINE_REVIEW_OF_REMEDIATION_ORIGINALS",
+  "repairCommit": "5d4d07571451905ac156a1a721fa8b8ce764ed7c",
+  "inventories": [
+    {
+      "inventory": {
+        "path": "docs/ota-exec-notes/P4-1-native-01-remediation-2026-10-16/inventory.json",
+        "size_bytes": 13540,
+        "sha256": "4465fcd64c5a3cbb6e7688f6cc4e284586f3e9cbb9cfbefafd61063382397b0d"
+      },
+      "files_verified": 56,
+      "zip_members_verified": 0
+    },
+    {
+      "inventory": {
+        "path": "docs/ota-exec-notes/P4-1-native-01-remediation-2026-10-16/closing/inventory.json",
+        "size_bytes": 787,
+        "sha256": "eca7b18bbc5e4de02ffd6a3511c8267e343001b584c8ba01e894e5676654ad3a"
+      },
+      "files_verified": 3,
+      "zip_members_verified": 0
+    }
+  ],
+  "zipMembersVerified": 117,
+  "sourceBindings": [
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs",
+      "gitBlob": "0ae4df3d8be402cd5beeb5846c326382e35a9cfe"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-scripts.host.test.ts",
+      "gitBlob": "53440f88cc9020c70e0496b43187d04eea0976cf"
+    },
+    {
+      "path": "tests/ota/firmware-pipeline.host.test.ts",
+      "gitBlob": "7ba22f37cd05be7c0c31b778379f2d9a3f9be29e"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/package-lock.json",
+      "gitBlob": "2b43563f0f5d32cba2f06e4f7e91b3deb5c52d3d"
+    }
+  ],
+  "oldProductFailures": 3,
+  "localHost": 41,
+  "localPipeline": 136,
+  "originalCiCounts": {
+    "host": 41,
+    "pipeline": 136,
+    "native": 156
+  },
+  "ciRuns": {
+    "firmware-build.yml": 38929267144,
+    "acceptance-governance.yml": 38929267147,
+    "cloudflare-update-service.yml": 38929267218,
+    "build.yml": 38929267169
+  },
+  "actualCheckout": "9811af20b122442bd8cf91902b8455403e3d84fa",
+  "sourceAndCheckoutTreeEqual": true,
+  "historicalTypeFailurePreserved": true,
+  "realR2WriteOrReadyProven": false,
+  "ok": true,
+  "ended": "2026-10-16T17:28:48.406152+00:00"
+}

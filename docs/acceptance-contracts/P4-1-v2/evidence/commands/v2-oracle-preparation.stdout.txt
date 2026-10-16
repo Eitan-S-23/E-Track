@@ -1,0 +1,1 @@
+{"ok": true, "mode": "selftest", "output": ".cache/p41-acceptance-20261017/review/selftest-preparation.json", "error": null, "sha256": "82ed4b2ce32bb221e0b66c399f08872ee99035b26613398abb1a9a4619241919"}

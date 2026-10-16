@@ -1,0 +1,29 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "docs/acceptance-contracts/P4-1-v2/tools/bundle.py",
+    "selftest"
+  ],
+  "pid": 16112,
+  "started": "2026-10-16T17:29:54.049Z",
+  "ended": "2026-10-16T17:29:56.842Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-contract-structure-preparation.stdout.txt",
+      "size_bytes": 103,
+      "sha256": "4ae589e3efc80fd6ad3bbe4e7eec1df63f8f9b7d3000bca4a10c62f3190efcc7"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-contract-structure-preparation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

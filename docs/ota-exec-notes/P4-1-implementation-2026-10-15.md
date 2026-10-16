@@ -2531,3 +2531,47 @@ The relevant acceptance/profile/dependency host regression passed 77/77 and the
 minimum-rerun regression passed 36/36. Both original processes completed and
 their receipts are closed before input delivery; no product or physical campaign
 was started by these preparation checks.
+
+### V2 Canonical Success And Preserved Evaluator Failure
+
+Frozen input is `b9d7d18c76e6495fbebf6758df6e4427e79e97b5`. V2 contract SHA-256 is
+`07d81467bc901eae78bbb2901a093b9234056cb248f04829887c7db43ffedc4a`; target
+descriptor SHA-256 is `184aaee01d10ed482792fee94dd1f57ef6d25d262f7b891f1af11ecbd383c1a5`.
+The exact-head four PR workflows passed, and the actual predecessor-based plan
+and NOT_RUN precheck passed. Six criteria were invalidated by the disclosed
+target/runner/repair inputs; this did not create another qualification campaign.
+Only two existing target variables were PATCHed from their verified v1 values.
+
+One successor dispatch created run `38946949709`, attempt 1, at the frozen input.
+Its ordinary build, development checks and protected rehearsal job all succeeded;
+binding qualification and production jobs were skipped. The original reviewer
+approved only firmware-rehearsal under the recorded user delegation. Original
+approval, run/jobs and logs are retained in this round's formal directory. Artifact
+`12067107408` is 4,154,000 bytes with SHA-256
+`032fe5d1b2f4e1c3766ca8105ec6ede38d0c421a9d05b93194710d4d8cef826e`, retrieved by
+the installed GitHub CLI and matched to the server's digest/length.
+
+P41-HARNESS-05 is an acceptance invocation failure, not another product upload
+failure. The pinned inspector's identity(file) calls relative_to(ROOT) without
+first making file absolute. V2 supplied a relative --artifact path; the checker
+reached its result construction and then reported ValueError. Its failed output
+and exit 1 remain unchanged. A bounded preparation check with the same artifact
+and inspector, but an absolute --artifact argument and a fresh output path,
+passed the full key/eight-GCC-artifact/full/patch/recovery/metadata/ready/replay
+evaluation. No product code or frozen helper needs modification.
+
+V2 is therefore sealed as HARNESS_FAIL: ORIGINS, ADMISSION and the actual canonical
+REHEARSAL are PASS; BYTES is harness FAIL; the dependent independent R2 and final
+STATE adjudications are NOT_OBSERVED. Both original after snapshots completed,
+including another 57 read-only Cloudflare requests, before moving the branch.
+The successful absolute-path preparation does not retroactively change the
+failed frozen v2 command or matrix.
+
+The minimum successor will change only the caller's artifact path and use a fresh
+command label. It will independently read the three existing R2 assets once and
+evaluate the already-retained before/after snapshots offline. V2 originals must
+be committed and indexed first; any reused working output slot must preserve its
+old failed file byte-for-byte with an explicit archive/retention mapping. There
+will be no further staging dispatch, build, approval or remote mutation for this
+path correction. The staging execution ledger remains two runs total: v1 product
+failure and v2 canonical success.

@@ -1,0 +1,17 @@
+{
+  "started": "2026-10-16T17:56:22.146Z",
+  "ended": "2026-10-16T17:56:24.068Z",
+  "method": "PATCH",
+  "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables/OTA_PREVIOUS_RELEASE_JSON",
+  "request": {
+    "name": "OTA_PREVIOUS_RELEASE_JSON",
+    "value": "{\"archiveCommit\":\"c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124\",\"archivePath\":\"docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15\",\"buildTimestamp\":1792014177,\"commitSha\":\"fa74905e84c489cccc248617d37ab9f56c8f961c\",\"imageSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"isFormalRelease\":false,\"kind\":\"app\",\"provenanceKind\":\"inaugural-bootstrap-v1\",\"provenanceSha256\":\"0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28\",\"sourceArtifactId\":\"11931006831\",\"sourceArtifactSha256\":\"4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149\",\"sourceRunAttempt\":\"1\",\"sourceRunId\":\"38642386248\",\"sourceSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"sourceSizeBytes\":605072,\"sourceUrl\":\"https://raw.githubusercontent.com/Eitan-S-23/E-Track/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin\",\"targetCommitSha\":\"b9d7d18c76e6495fbebf6758df6e4427e79e97b5\",\"targetVersionName\":\"3.2.8\",\"versionCode\":30207,\"versionName\":\"3.2.7\"}"
+  },
+  "status": 204,
+  "requestId": "AE07:1C73F2:17C1E70:23D0C9E:6AD26546",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/configure-ota-previous-release-json.json",
+    "size_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

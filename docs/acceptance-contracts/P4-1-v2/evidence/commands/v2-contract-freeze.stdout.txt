@@ -1,0 +1,1 @@
+{"contract_sha256": "07d81467bc901eae78bbb2901a093b9234056cb248f04829887c7db43ffedc4a", "freeze_commit": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5", "commands": 15, "criteria": 6}

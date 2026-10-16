@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T18:13:09.141Z",
+  "ended": "2026-10-16T18:13:09.890Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38943100799/attempts/1/jobs?per_page=100&page=1",
+  "status": 200,
+  "requestId": "AE04:16FE55:1862593:24A863E:6AD26934",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/ci/38943100799-jobs-page-1.json",
+    "size_bytes": 13257,
+    "sha256": "131c493519653e1f81f455612e98ae48a8ac67d91478db7c0485bdce66909eb0"
+  }
+}

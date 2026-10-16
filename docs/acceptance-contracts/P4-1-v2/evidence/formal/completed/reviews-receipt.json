@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T18:37:51.427Z",
+  "ended": "2026-10-16T18:37:53.467Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38946949709/approvals",
+  "status": 200,
+  "requestId": "AE10:14652C:18F1460:2580B45:6AD26F00",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261017/formal/completed/reviews.json",
+    "size_bytes": 1603,
+    "sha256": "cff19753f8dff81f8e876c5092277a38688becd8c4c562c5a2933e1a148a9582"
+  }
+}

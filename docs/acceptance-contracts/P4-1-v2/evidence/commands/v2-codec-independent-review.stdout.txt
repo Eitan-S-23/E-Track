@@ -1,0 +1,106 @@
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p41-dev-20261015/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > builds the same canonical v2 fixture from actual files and keeps R2 unverified
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > executes the builder CLI, preserves source files and returns a real exit code
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 retains the pinned codec's Node Headers rejection and SDK Headers control
+P41_NATIVE_CODEC_CONTROL {
+  node: 'v24.13.0',
+  wranglerVersion: '4.105.0',
+  miniflareVersion: '4.20260625.0',
+  sdkSha256: 'fb489dfb0eff95a0303f1ac093bd8e6e1f46bb227f65ce105694832f971f3edd',
+  rejected: { name: 'DevalueError', path: '[2].httpMetadata' },
+  sdkHeadersAccepted: true
+}
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 retains the pinned codec's Node Headers rejection and SDK Headers control 741ms
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads full through the real SDK codec with immutable metadata and full readback
+P41_NATIVE_CODEC_UPLOAD {
+  kind: 'full',
+  status: 'UPLOADED',
+  options: {
+    onlyIf: { etagDoesNotMatch: '*' },
+    httpMetadata: {
+      contentType: 'application/vnd.e-track.etu',
+      contentDisposition: 'attachment; filename="e-track-at32f435-v20.0.2-full.etu"',
+      cacheControl: 'public, max-age=31536000, immutable'
+    },
+    customMetadata: {
+      sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3',
+      kind: 'full',
+      'content-digest': 'sha-256=:lreWI+KQtL2hfankIyDEgGTj77UQw5J5mrKnsfm3WaM=:'
+    },
+    sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3'
+  },
+  fullReadbacks: 2
+}
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads full through the real SDK codec with immutable metadata and full readback 103ms
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads patch through the real SDK codec with immutable metadata and full readback
+P41_NATIVE_CODEC_UPLOAD {
+  kind: 'patch',
+  status: 'UPLOADED',
+  options: {
+    onlyIf: { etagDoesNotMatch: '*' },
+    httpMetadata: {
+      contentType: 'application/vnd.e-track.etu',
+      contentDisposition: 'attachment; filename="e-track-at32f435-v2.8.0-to-v20.0.3-patch.etu"',
+      cacheControl: 'public, max-age=31536000, immutable'
+    },
+    customMetadata: {
+      sha256: '022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee',
+      kind: 'patch',
+      'content-digest': 'sha-256=:Airbh5thY92uhXTQ+WLZtPgYsL1Fe1cuFEbqZ2f6Xu4=:'
+    },
+    sha256: '022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee'
+  },
+  fullReadbacks: 2
+}
+
+stdout | test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads recovery through the real SDK codec with immutable metadata and full readback
+P41_NATIVE_CODEC_UPLOAD {
+  kind: 'recovery',
+  status: 'UPLOADED',
+  options: {
+    onlyIf: { etagDoesNotMatch: '*' },
+    httpMetadata: {
+      contentType: 'application/octet-stream',
+      contentDisposition: 'attachment; filename="recovery-v20.0.4.bin"',
+      cacheControl: 'public, max-age=31536000, immutable'
+    },
+    customMetadata: {
+      sha256: 'd078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379',
+      kind: 'recovery',
+      'content-digest': 'sha-256=:0HgECu7QN5rndOsniBXA8vW/EHJRp5at/ReaIPicM3k=:'
+    },
+    sha256: 'd078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379'
+  },
+  fullReadbacks: 2
+}
+
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads patch through the real SDK codec with immutable metadata and full readback 6ms
+ ✓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > P41-NATIVE-01 uploads recovery through the real SDK codec with immutable metadata and full readback 4ms
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 metadata collision without overwrite
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 bytes collision without overwrite
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects existing R2 size collision without overwrite
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > closes the HEAD/PUT race with onlyIf and verifies the winning object
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects false-positive put success when readback is missing
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects a short multi-chunk readback despite matching HEAD metadata
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects a long multi-chunk readback despite matching HEAD metadata
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects a digest multi-chunk readback despite matching HEAD metadata
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects local length mismatches before any R2 call
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects local digest mismatches before any R2 call
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > keeps dry-run metadata unverified and rejects the old skip-readback option
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > register client consumes the same real handler/SQLite chain and replays idempotently
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 400
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 409
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > does not retry a definitive HTTP 503
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > bounds network-only retries and requires the registration result contract
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > rejects insecure origins, invalid config and unknown schema before fetch
+ ↓ test/firmware-scripts.host.test.ts > P4-2 canonical metadata / upload / register scripts > prevents script outputs escaping the active worktree
+
+ Test Files  1 passed (1)
+      Tests  4 passed | 20 skipped (24)
+   Start at  01:31:32
+   Duration  14.17s (transform 1.15s, setup 342ms, import 10.77s, tests 1.41s, environment 0ms)
+

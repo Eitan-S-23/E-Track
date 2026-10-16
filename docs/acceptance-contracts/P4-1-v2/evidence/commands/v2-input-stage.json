@@ -1,0 +1,43 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "git",
+  "args": [
+    "--no-optional-locks",
+    "-c",
+    "core.fsmonitor=false",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+    "-c",
+    "core.hooksPath=C:/Users/SU/.git-hooks",
+    "-c",
+    "user.name=eitan",
+    "-c",
+    "user.email=example@ggbond",
+    "add",
+    "--",
+    "PLAN-OTA-EXEC.md",
+    "Tools/provenance/manifest_profiles.json",
+    "docs/ota-exec-notes/P4-1-implementation-2026-10-15.md",
+    "docs/acceptance-contracts/P4-1-v2/tools"
+  ],
+  "pid": 12640,
+  "started": "2026-10-16T17:48:14.932Z",
+  "ended": "2026-10-16T17:48:19.060Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-input-stage.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261017/commands/v2-input-stage.stderr.txt",
+      "size_bytes": 278,
+      "sha256": "42a772ed460c44310ca5bb8570a876b793967feb60f4ef6357db42aa9da442d6"
+    }
+  ],
+  "closed": true
+}
