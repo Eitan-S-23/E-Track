@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:06:28.460Z",
+  "ended": "2026-10-16T08:06:29.879Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100",
+  "status": 200,
+  "requestId": "AE9E:169B0D:5A9FBA:87F62A:6AD1DB06",
+  "date": "Fri, 16 Oct 2026 08:06:30 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-policies.json",
+    "size_bytes": 160,
+    "sha256": "d8658cd9c160a2a9dc49d2025f5e6a54f1c777c4866e9b732d91aea9b5b93c13"
+  }
+}

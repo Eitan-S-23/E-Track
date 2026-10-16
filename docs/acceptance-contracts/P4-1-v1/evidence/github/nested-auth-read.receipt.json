@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T10:53:16.217Z",
+  "ended": "2026-10-16T10:53:17.873Z",
+  "method": "GET",
+  "route": "/user",
+  "status": 200,
+  "requestId": "AE58:13BB41:BFF21F:11EBC2A:6AD2021E",
+  "date": "Fri, 16 Oct 2026 10:53:18 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/nested-auth-read.json",
+    "size_bytes": 1450,
+    "sha256": "7725c06b286790dc13616a101fd3210cd0573b8231be7b1806af5569229436ba"
+  }
+}

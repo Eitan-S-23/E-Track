@@ -1,0 +1,31 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "docs/acceptance-contracts/P4-1-v1/tools/inspect.py",
+    "selftest",
+    "--output",
+    ".cache/p41-acceptance-20261016/review/selftest.json"
+  ],
+  "pid": 13396,
+  "started": "2026-10-16T09:02:10.765Z",
+  "ended": "2026-10-16T09:02:11.070Z",
+  "exitCode": 1,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/offline-oracle-selftest.stdout.txt",
+      "size_bytes": 230,
+      "sha256": "6067ff6e229f173624192c301517bc9e9bbed6eefe610845b621f4215d3e1b22"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/offline-oracle-selftest.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T12:14:09.670Z",
+  "ended": "2026-10-16T12:14:13.427Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38897470681/pending_deployments",
+  "status": 200,
+  "requestId": "AEDC:22F48F:E715E2:159E04E:6AD21511",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/approval-check/pending.json",
+    "size_bytes": 1417,
+    "sha256": "c5c024b0054a48f022edd53d65b69289fedc267cf546c8090df2c8023adfe357"
+  }
+}

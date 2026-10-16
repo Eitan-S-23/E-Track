@@ -1,0 +1,1 @@
+{"ok": true, "mode": "origins", "output": ".cache/p41-acceptance-20261016/review/origins-formal.json", "error": null, "sha256": "44d610214f8c6545074e8f601c8fc7aa0caa96f3c02a365067af67010f682c9f"}

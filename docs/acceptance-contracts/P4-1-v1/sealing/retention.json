@@ -1,0 +1,81 @@
+{
+  "kind": "late-sealing-records",
+  "contractId": "P4-1-v1",
+  "roundId": "P41-20261016-01",
+  "created": "2026-10-16T14:32:58.981Z",
+  "scope": "Post-snapshot sealing records only. The 428 original evidence hashes and final matrix are unchanged. The premature archived validation failure remains alongside the later completed PASS validation of overall PRODUCT_FAIL.",
+  "artifacts": [
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-round-validation.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/failed-round-validation.json",
+      "size_bytes": 955,
+      "sha256": "1e46210f86a2031db4771d4103469d637d7760c1f25b0e5cce29799e48323432"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-round-validation.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/failed-round-validation.stdout.txt",
+      "size_bytes": 77,
+      "sha256": "a1b05d6d4ac48708d32b4fdc1073c294bc3d49edbc4da86a3b09b3a118d6feb6"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-round-validation.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/failed-round-validation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-archive.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/failed-bundle-archive.json",
+      "size_bytes": 798,
+      "sha256": "1c0be6304da62da9738341058a298d38e30bd6e492bea026f7fb790ac8611b1a"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-archive.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/failed-bundle-archive.stdout.txt",
+      "size_bytes": 84,
+      "sha256": "bb9983eb16811f1ab684607ca09b9fab76d091aaacb11d6de213fce89167445f"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/failed-bundle-archive.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/failed-bundle-archive.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/archived-failure-validation.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/archived-failure-validation.json",
+      "size_bytes": 978,
+      "sha256": "ce78b090cec80a0a03b74a5769cc587d3f174c5b9b83a45b4b390706f59c7d7f"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/archived-failure-validation.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/archived-failure-validation.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/archived-failure-validation.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/archived-failure-validation.stderr.txt",
+      "size_bytes": 118,
+      "sha256": "eecf442090739d701c2e452fde76332446d7d5c8dbfa5f92301a2cdfb4bf3422"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/archived-failure-validation-ready.json",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/archived-failure-validation-ready.json",
+      "size_bytes": 990,
+      "sha256": "6a9bae2fd457c4aff0b4e3e0edef2911af91d22856da9e57c5840e4aa3fa3314"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/archived-failure-validation-ready.stdout.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/archived-failure-validation-ready.stdout.txt",
+      "size_bytes": 77,
+      "sha256": "a1b05d6d4ac48708d32b4fdc1073c294bc3d49edbc4da86a3b09b3a118d6feb6"
+    },
+    {
+      "original_path": ".cache/p41-acceptance-20261016/commands/archived-failure-validation-ready.stderr.txt",
+      "path": "docs/acceptance-contracts/P4-1-v1/sealing/archived-failure-validation-ready.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

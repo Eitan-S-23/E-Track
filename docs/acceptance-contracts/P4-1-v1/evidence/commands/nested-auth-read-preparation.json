@@ -1,0 +1,28 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v1/tools/session.cjs",
+    "get",
+    "nested-auth-read",
+    "/user"
+  ],
+  "pid": 9000,
+  "started": "2026-10-16T10:53:15.979Z",
+  "ended": "2026-10-16T10:53:17.962Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/nested-auth-read-preparation.stdout.txt",
+      "size_bytes": 207,
+      "sha256": "8c93efed694f2afa480de3de5947a3b755b95ff8cfad6db0e0d994a890049e6e"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/nested-auth-read-preparation.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

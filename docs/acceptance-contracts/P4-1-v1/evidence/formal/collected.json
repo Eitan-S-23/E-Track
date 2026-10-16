@@ -1,0 +1,20 @@
+{
+  "ok": false,
+  "runId": 38897470681,
+  "conclusion": "failure",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/completed/rehearsal.zip",
+    "size_bytes": 4151958,
+    "sha256": "69eaf3d2012fbbce0456f50f185cd6889e41e08172982ef74601069899c9ddd6"
+  },
+  "artifactId": 12044718607,
+  "approvals": 1,
+  "collectionRecovery": {
+    "primaryCommand": "formal-collect",
+    "primaryExitCode": 1,
+    "failure": "Node artifact download timed out; original log and API captures were retained",
+    "recoveryReceipt": "formal/completed/rehearsal-gh-download.json",
+    "method": "Existing GitHub CLI GET of the same artifact ID; no workflow or product replay",
+    "originalGitHubDigestAndSizeMatched": true
+  }
+}

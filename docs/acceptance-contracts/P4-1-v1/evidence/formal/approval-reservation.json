@@ -1,0 +1,14 @@
+{
+  "runId": 38897470681,
+  "attempt": 1,
+  "contractSha256": "8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d",
+  "actor": "Eitan-S-23",
+  "execution": "USER_DELEGATED_AGENT_APPROVAL",
+  "request": {
+    "environment_ids": [
+      24458272742
+    ],
+    "state": "approved",
+    "comment": "User-delegated agent approval, P41-STAGING-DELEGATION-20261016; staging only; contract SHA256 8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d; commit 2d3daae4ac5441d3eb736b654c237ae53760067c"
+  }
+}

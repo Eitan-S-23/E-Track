@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:06:18.069Z",
+  "ended": "2026-10-16T08:06:20.168Z",
+  "method": "GET",
+  "route": "/user",
+  "status": 200,
+  "requestId": "AE92:4BB60:5B7FFD:88CB26:6AD1DAFC",
+  "date": "Fri, 16 Oct 2026 08:06:20 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-user.json",
+    "size_bytes": 1450,
+    "sha256": "d5495bf586b1e82bfdf8191187daa86bbf5016a48b3e3adcf8e341d695f4be1e"
+  }
+}

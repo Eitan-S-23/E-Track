@@ -1,0 +1,28 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    ".cache/p41-acceptance-20261016/review/partial-rehearsal-inspection.py"
+  ],
+  "pid": 18532,
+  "started": "2026-10-16T13:12:13.980Z",
+  "ended": "2026-10-16T13:12:14.543Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/partial-rehearsal-inspection.stdout.txt",
+      "size_bytes": 3148,
+      "sha256": "bd44543697df2f453bea4f079f6624feed54728c243f4c1ee67535cfb2f6ed53"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/partial-rehearsal-inspection.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

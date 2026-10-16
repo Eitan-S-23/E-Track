@@ -1,0 +1,509 @@
+{
+  "mode": "preflight",
+  "label": "entry",
+  "started": "2026-10-16T08:47:20.064Z",
+  "accountSha256": "01910e669500c221e2154f608e9f4e856b0a08297026e1ea98f1d18dd8cf9742",
+  "purpose": "P4-1 protected-resource and test-resource read-only evidence",
+  "credentialSource": "Existing local provisioning credential; never exported or persisted",
+  "requests": [
+    {
+      "sequence": 1,
+      "method": "GET",
+      "route": "user/tokens/verify",
+      "started": "2026-10-16T08:47:20.068Z",
+      "ended": "2026-10-16T08:47:21.088Z",
+      "status": 200,
+      "cfRay": "a4b5cc628e1ce16d-SJC",
+      "responseSha256": "a7545ba668a31ec6a3b2b489f92e7342138d6454176206080539d18d8511f525",
+      "success": true,
+      "tokenActive": true
+    },
+    {
+      "sequence": 2,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/workers/scripts",
+      "started": "2026-10-16T08:47:21.088Z",
+      "ended": "2026-10-16T08:47:21.550Z",
+      "status": 200,
+      "cfRay": "a4b5cc64880ae16d-SJC",
+      "responseSha256": "96c79f58b9e323686073750013bc20a1f5f197b6d07a32c7529759aba178ae9a",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/entry/002-api.json",
+        "size_bytes": 5819,
+        "sha256": "96c79f58b9e323686073750013bc20a1f5f197b6d07a32c7529759aba178ae9a"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 3,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/r2/buckets",
+      "started": "2026-10-16T08:47:21.573Z",
+      "ended": "2026-10-16T08:47:22.033Z",
+      "status": 200,
+      "cfRay": "a4b5cc678af6e16d-SJC",
+      "responseSha256": "5461544c950ed0c2deb588c33d54362054000898a60c32376edd4fe74c4a3889",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/entry/003-api.json",
+        "size_bytes": 238,
+        "sha256": "5461544c950ed0c2deb588c33d54362054000898a60c32376edd4fe74c4a3889"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 4,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/d1/database?per_page=100",
+      "started": "2026-10-16T08:47:22.047Z",
+      "ended": "2026-10-16T08:47:22.371Z",
+      "status": 200,
+      "cfRay": "a4b5cc6a8e04e16d-SJC",
+      "responseSha256": "aef0b74ca069ec2ec694c4c0a58d0eb082cba40fa4968f6714311a568d8dff90",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/entry/004-api.json",
+        "size_bytes": 898,
+        "sha256": "aef0b74ca069ec2ec694c4c0a58d0eb082cba40fa4968f6714311a568d8dff90"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 5,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/workers/scripts/trace-update-service-staging/settings",
+      "started": "2026-10-16T08:47:22.387Z",
+      "ended": "2026-10-16T08:47:23.436Z",
+      "status": 200,
+      "cfRay": "a4b5cc6d1871e16d-SJC",
+      "responseSha256": "2b50befde466d93c112e021555c3b33de5d6a3e1fe3e83e86889b93029b156ee",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/entry/005-api.json",
+        "size_bytes": 2756,
+        "sha256": "2b50befde466d93c112e021555c3b33de5d6a3e1fe3e83e86889b93029b156ee"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 6,
+      "method": "GET",
+      "route": "accounts/[ACCOUNT]/workers/scripts/e-track-firmware-p41-test/settings",
+      "started": "2026-10-16T08:47:23.471Z",
+      "ended": "2026-10-16T08:47:25.051Z",
+      "status": 200,
+      "cfRay": "a4b5cc7669d4e16d-SJC",
+      "responseSha256": "aa75c8f859891fa02fa332df4b61f2a39944c5d12ded12e509ced14120af2de6",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/entry/006-api.json",
+        "size_bytes": 2798,
+        "sha256": "aa75c8f859891fa02fa332df4b61f2a39944c5d12ded12e509ced14120af2de6"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 7,
+      "method": "HEAD",
+      "operation": "HeadBucket",
+      "bucket": "trace-update-staging-releases",
+      "started": "2026-10-16T08:47:25.199Z",
+      "ended": "2026-10-16T08:47:30.084Z",
+      "status": 200,
+      "exitCode": 0,
+      "pid": 14644,
+      "processClosed": true,
+      "stderr": "",
+      "files": [
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/entry/007-s3.headers",
+          "size_bytes": 196,
+          "sha256": "008b1f5cfd82ba1f3cd3508740b709b40f99686336e7e25b79df4221c2758e6c"
+        },
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/entry/007-s3.body",
+          "size_bytes": 196,
+          "sha256": "008b1f5cfd82ba1f3cd3508740b709b40f99686336e7e25b79df4221c2758e6c"
+        }
+      ]
+    },
+    {
+      "sequence": 8,
+      "method": "HEAD",
+      "operation": "HeadBucket",
+      "bucket": "e-track-firmware-p41-test-releases",
+      "started": "2026-10-16T08:47:30.209Z",
+      "ended": "2026-10-16T08:47:32.381Z",
+      "status": 200,
+      "exitCode": 0,
+      "pid": 17740,
+      "processClosed": true,
+      "stderr": "",
+      "files": [
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/entry/008-s3.headers",
+          "size_bytes": 196,
+          "sha256": "17c05826a57550f1fff9ea36b4ce7a2248de124fe4aae1451907dbe0915c3a4a"
+        },
+        {
+          "path": ".cache/p41-acceptance-20261016/cloud/entry/008-s3.body",
+          "size_bytes": 196,
+          "sha256": "17c05826a57550f1fff9ea36b4ce7a2248de124fe4aae1451907dbe0915c3a4a"
+        }
+      ]
+    },
+    {
+      "sequence": 9,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+      "sql": "SELECT name,type,sql FROM sqlite_master WHERE type IN ('table','index','trigger') ORDER BY type,name",
+      "started": "2026-10-16T08:47:32.382Z",
+      "ended": "2026-10-16T08:47:35.080Z",
+      "status": 200,
+      "cfRay": "a4b5ccab0f20e16d-SJC",
+      "responseSha256": "23425597e3a8a28bb525bb10089c0de4f3fdcfc67e46b7e088e4150ec1a2b9b9",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/entry/009-api.json",
+        "size_bytes": 19437,
+        "sha256": "23425597e3a8a28bb525bb10089c0de4f3fdcfc67e46b7e088e4150ec1a2b9b9"
+      },
+      "responseSanitized": false
+    },
+    {
+      "sequence": 10,
+      "method": "POST",
+      "route": "accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "sql": "SELECT name,type,sql FROM sqlite_master WHERE type IN ('table','index','trigger') ORDER BY type,name",
+      "started": "2026-10-16T08:47:35.095Z",
+      "ended": "2026-10-16T08:47:35.612Z",
+      "status": 200,
+      "cfRay": "a4b5ccbc0820e16d-SJC",
+      "responseSha256": "9352f34460fd2fcaae6782f2b37dab66d0c8ebf548b3def4973b4f25964dd3bf",
+      "success": true,
+      "response": {
+        "path": ".cache/p41-acceptance-20261016/cloud/entry/010-api.json",
+        "size_bytes": 45148,
+        "sha256": "9352f34460fd2fcaae6782f2b37dab66d0c8ebf548b3def4973b4f25964dd3bf"
+      },
+      "responseSanitized": false
+    }
+  ],
+  "files": [
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/002-api.json",
+      "size_bytes": 5819,
+      "sha256": "96c79f58b9e323686073750013bc20a1f5f197b6d07a32c7529759aba178ae9a"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/003-api.json",
+      "size_bytes": 238,
+      "sha256": "5461544c950ed0c2deb588c33d54362054000898a60c32376edd4fe74c4a3889"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/004-api.json",
+      "size_bytes": 898,
+      "sha256": "aef0b74ca069ec2ec694c4c0a58d0eb082cba40fa4968f6714311a568d8dff90"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/005-api.json",
+      "size_bytes": 2756,
+      "sha256": "2b50befde466d93c112e021555c3b33de5d6a3e1fe3e83e86889b93029b156ee"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/006-api.json",
+      "size_bytes": 2798,
+      "sha256": "aa75c8f859891fa02fa332df4b61f2a39944c5d12ded12e509ced14120af2de6"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/007-s3.headers",
+      "size_bytes": 196,
+      "sha256": "008b1f5cfd82ba1f3cd3508740b709b40f99686336e7e25b79df4221c2758e6c"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/007-s3.body",
+      "size_bytes": 196,
+      "sha256": "008b1f5cfd82ba1f3cd3508740b709b40f99686336e7e25b79df4221c2758e6c"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/008-s3.headers",
+      "size_bytes": 196,
+      "sha256": "17c05826a57550f1fff9ea36b4ce7a2248de124fe4aae1451907dbe0915c3a4a"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/008-s3.body",
+      "size_bytes": 196,
+      "sha256": "17c05826a57550f1fff9ea36b4ce7a2248de124fe4aae1451907dbe0915c3a4a"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/009-api.json",
+      "size_bytes": 19437,
+      "sha256": "23425597e3a8a28bb525bb10089c0de4f3fdcfc67e46b7e088e4150ec1a2b9b9"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/cloud/entry/010-api.json",
+      "size_bytes": 45148,
+      "sha256": "9352f34460fd2fcaae6782f2b37dab66d0c8ebf548b3def4973b4f25964dd3bf"
+    }
+  ],
+  "ok": true,
+  "mutationsRequested": 0,
+  "inventory": {
+    "workers": [
+      {
+        "id": "deepseek-mail",
+        "etag": "d2fcf217290b3d1dee98b0c954da9df6387a2783083c1da856583a783c120846",
+        "modified_on": "2026-05-18T06:02:36.289912Z"
+      },
+      {
+        "id": "e-track-firmware-p41-test",
+        "etag": "e106f789a1385841130cc67dd462b33c1031d0bc89871b1f751b1c0d973f39bc",
+        "modified_on": "2026-10-15T04:53:33.335565Z"
+      },
+      {
+        "id": "edge-key",
+        "etag": "2fa75007c534d8585de25cc9af19fd06fe6a90fa2e3e72f2dcb5f1affbcffd13",
+        "modified_on": "2026-04-27T08:37:59.364122Z"
+      },
+      {
+        "id": "online-resource-library",
+        "etag": "98bede8db1bd2018eff4fad397e0949a5bf9ede3fd6c4749b4b496ac3c03567b",
+        "modified_on": "2026-06-12T12:05:09.229356Z"
+      },
+      {
+        "id": "trace-update-service-staging",
+        "etag": "33d74f82059c2f285805d16c9a4bcb2a14fd26fe63bba81fc2cf7f41a3b99ef5",
+        "modified_on": "2026-07-07T13:37:56.578162Z"
+      }
+    ],
+    "databases": [
+      {
+        "name": "e-track-firmware-p41-test",
+        "id": "2617e1e1-956f-42ce-a465-da56d84abf06"
+      },
+      {
+        "name": "trace-update-staging",
+        "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645"
+      },
+      {
+        "name": "online-resource-library",
+        "id": "ef3cb255-7b58-425b-81ad-f3daa5266e0f"
+      },
+      {
+        "name": "edgekey-db",
+        "id": "e8c43f91-7511-406d-b67f-0f583ea39af5"
+      }
+    ],
+    "buckets": [
+      "e-track-firmware-p41-test-releases",
+      "trace-update-staging-releases"
+    ]
+  },
+  "bindings": [
+    {
+      "name": "trace-update-service-staging",
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "text": "trace",
+          "type": "plain_text"
+        },
+        {
+          "database_id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+          "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645",
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "text": "staging",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "text": "300",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "text": "false",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "text": "staging",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "text": "Eitan-S-23",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "text": "Trace",
+          "type": "plain_text"
+        },
+        {
+          "name": "MANIFEST_CACHE",
+          "namespace_id": "fe3b08f2e0774072a44bdf140c44174a",
+          "type": "kv_namespace"
+        },
+        {
+          "name": "MANIFEST_CACHE_TTL_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "class_name": "RateLimiter",
+          "name": "RATE_LIMITER",
+          "namespace_id": "cced0ccc57664e36b007d64d88de4bd5",
+          "type": "durable_object_namespace"
+        },
+        {
+          "name": "RATE_LIMIT_MAX_REQUESTS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMIT_WINDOW_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "bucket_name": "trace-update-staging-releases",
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket"
+        }
+      ]
+    },
+    {
+      "name": "e-track-firmware-p41-test",
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "text": "trace",
+          "type": "plain_text"
+        },
+        {
+          "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+          "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "text": "p41-test-1",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "text": "300",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "text": "false",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "text": "staging",
+          "type": "plain_text"
+        },
+        {
+          "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+          "text": "1792039926",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "text": "Eitan-S-23",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "text": "E-Track",
+          "type": "plain_text"
+        },
+        {
+          "name": "MANIFEST_CACHE",
+          "namespace_id": "9581ef5b95154abaa7d441fd07c2f220",
+          "type": "kv_namespace"
+        },
+        {
+          "name": "MANIFEST_CACHE_TTL_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "class_name": "RateLimiter",
+          "name": "RATE_LIMITER",
+          "namespace_id": "51fbc6056abd4797bf28feb2f8863307",
+          "type": "durable_object_namespace"
+        },
+        {
+          "name": "RATE_LIMIT_MAX_REQUESTS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMIT_WINDOW_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "bucket_name": "e-track-firmware-p41-test-releases",
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket"
+        }
+      ]
+    }
+  ],
+  "scope": {
+    "protected": {
+      "worker": "trace-update-service-staging",
+      "database": {
+        "role": "protected",
+        "name": "trace-update-staging",
+        "id": "0133ad9e-d4a2-4fef-a659-4f2bf3d3a645"
+      },
+      "bucket": {
+        "role": "protected",
+        "name": "trace-update-staging-releases"
+      }
+    },
+    "test": {
+      "worker": "e-track-firmware-p41-test",
+      "database": {
+        "role": "test",
+        "name": "e-track-firmware-p41-test",
+        "id": "2617e1e1-956f-42ce-a465-da56d84abf06"
+      },
+      "bucket": {
+        "role": "test",
+        "name": "e-track-firmware-p41-test-releases"
+      }
+    },
+    "note": "Old Trace is protected despite its staging label. No separate firmware-production resource is assumed."
+  },
+  "ended": "2026-10-16T08:47:35.628Z",
+  "closed": true
+}

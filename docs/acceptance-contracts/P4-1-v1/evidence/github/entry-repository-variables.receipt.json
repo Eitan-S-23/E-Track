@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:06:31.902Z",
+  "ended": "2026-10-16T08:06:33.552Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/variables?per_page=100",
+  "status": 200,
+  "requestId": "AEA1:2475CB:5BD239:891FF0:6AD1DB09",
+  "date": "Fri, 16 Oct 2026 08:06:34 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-repository-variables.json",
+    "size_bytes": 32,
+    "sha256": "8fb236d9855d43b214ea37db3296df40b54f11ee84dd9c96394813c4fbdf6423"
+  }
+}

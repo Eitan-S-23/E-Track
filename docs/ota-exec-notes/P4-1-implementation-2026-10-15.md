@@ -2136,3 +2136,146 @@ read-only GitHub credential configuration location. Original closed receipt:
 for the authorized GitHub operation and never supplied to general tests/logs.
 This is a transport-preparation repair before target binding or formal freeze,
 not a failed product run or permission retry. Commit `256111c` remains in history.
+
+### Formal Freeze And Canonical Dispatch
+
+The stable acceptance inputs were pushed as
+`2d3daae4ac5441d3eb736b654c237ae53760067c`; its actual PR firmware, governance,
+Cloudflare and App path-check runs `38890265629`, `38890265493`, `38890265755`,
+and `38890265816` all passed. APK, EXE, Pages and GitHub Release jobs were skipped,
+not rebuilt or deployed. Nested credential recovery was verified by a real
+read-only `/user` call before the successful push.
+
+The independently reviewed 3.2.8 bootstrap descriptor has canonical SHA-256
+`0f7e3801bbb73e63f3df96e905053f8435c00c9a04983c918e799fdc0fbf50dd` and binds that
+exact execution commit. Four missing variables were created in the existing
+`firmware-rehearsal` environment; no secret, reviewer, branch policy, production
+environment or gate was changed. The fixed test bindings and gate=false were
+read back before and after configuration.
+
+`P4-1-v1.contract.json` freezes that commit with six criteria and fifteen exact
+commands. Contract SHA-256 is
+`8ab64574cc062a6fd58c7a25e024d6b2d2cd085caa81b8446d60c6701807597d`.
+P41-HARNESS-03 was a matrix serialization mismatch: the first NOT_RUN matrix used
+lowercase digest characters while the validator compares its contract digest in
+uppercase. The digest bytes and frozen contract were identical. The original
+failed matrix and three closed precheck files were retained byte-for-byte under
+`review/precheck-case-failure/`, with `retention.json` mapping their original
+stream paths. Only the matrix digest spelling was corrected. The normal precheck
+slot then captured the genuinely rerun validator:
+`VALIDATION=PASS contract=P4-1-v1 round=P41-20261016-01 overall=NOT_RUN`.
+No frozen code/contract or product observation was changed or replayed.
+
+Frozen offline original evaluation, discriminating self-tests and actual PR CI
+reconciliation passed. The GitHub before snapshot contains zero Releases/assets;
+the Cloudflare before snapshot completed 57 read-only requests for existing
+protected/test Worker bindings, all business D1 tables and complete R2 listings.
+These before snapshots alone are not a zero-effect verdict.
+
+One reserved dispatch created canonical run `38897470681`, attempt 1, for 3.2.8
+at the frozen commit, with `rehearsal=true,publish=false,check_bindings=false`.
+Its ordinary GCC and development checks passed; production/check-only jobs were
+skipped. The acceptance agent approved only its `firmware-rehearsal` environment
+under P41-STAGING-DELEGATION-20261016. The reservation, actual request/response,
+run identity, actor and contract binding are in `formal/approval*`; the comment
+explicitly records user-delegated agent approval, not a manual user click.
+No replacement dispatch, production release or device action was performed.
+Final key/byte/R2/D1 and protected after-snapshot results remain pending below.
+
+### P4-1-v1 Result: PRODUCT_FAIL
+
+Canonical run `38897470681`, attempt 1, failed in the shared upload/register
+step. The protected actual-key GCC build succeeded with 640 warnings and zero
+errors. Original artifact `12044718607` is 4,151,958 bytes, SHA-256
+`69eaf3d2012fbbce0456f50f185cd6889e41e08172982ef74601069899c9ddd6`.
+Node download timed out after the original run/log/API captures had completed;
+the installed GitHub CLI retrieved that same artifact ID and matched the original
+GitHub size/digest. No workflow was retried to repair this host retrieval failure.
+
+Independent partial inspection verifies the approved key fingerprint, actual
+private-header compile consumption, eight GCC artifact hashes, finalized header,
+and byte equality of full/patch/recovery candidates. Final App is 605,072 bytes,
+SHA-256 `64e1af5ad06d42f6cddf148106db29c655548591f303742493a5153f3a962950`.
+The full, patch and recovery files are 285,712, 379 and 605,080 bytes. This is
+partial offline failure triage, not a fabricated PASS for the frozen combined
+success evaluator, which requires the missing final release evidence.
+
+Both protected and test D1 business tables are byte-equivalent after normalized
+JSON loading. Protected R2 remains 67 objects; test R2 remains the three existing
+synthetic objects, with no added keys or changed entries. GitHub Releases remain
+absent and the captured approval/configuration is unchanged. The original
+`prepared/release-steps.json` contains only successful preflight (max version
+20801, no legacy maximum/unresolved channels), no completed R2 readback or
+registration. No ready record, partial asset registration or channel change was
+created. These business facts do not claim absence of temporary Wrangler preview
+control-plane state.
+
+| Finding | Evidence and impact | Preferred repair and invariants | Verification and next owner |
+| --- | --- | --- | --- |
+| P41-NATIVE-01, required product repair | `upload-firmware-r2-asset.mjs:uploadFirmwareAsset` passes Node global `Headers` as `R2.put` `httpMetadata`. The exact pinned Miniflare 4.20260625.0 codec only recognizes its npm Undici Headers. Pure codec reproduction rejects the actual shape with `DevalueError: Cannot stringify arbitrary non-POJOs`, path `[2].httpMetadata`, before an R2 request. This matches the first-upload stop and unchanged remote inventory. | Use a plain supported R2 HTTP metadata object rather than a cross-realm Headers instance. Preserve content type/disposition/cache policy, actual body length/SHA verification, `onlyIf` immutability, custom digest/kind metadata, full readback and registration ordering. Do not swap credentials, replace the native runtime or relax readback. | Implementation owner changes the uploader and its host regression as one batch. Exercise the real uploader options through the pinned `stringifyWithStreams` codec: old global Headers rejects; corrected plain metadata serializes, preserving actual upload/readback assertions. Development test first, then root reviews the batch and computes a successor-contract minimal rerun. No Windows workerd or extra qualification upload is needed. |
+| P41-HARNESS-04, recovered retrieval | The first Node artifact transfer timed out; original `commands/formal-collect.*` records exit 1. The existing GitHub CLI recovered the original ZIP with matching server digest/length. | Keep both receipts and the original workflow failure; do not relabel the collector or product as successful. | Recovery receipt is `formal/completed/rehearsal-gh-download.json`; `formal/collected.json` explicitly discloses the transport recovery. |
+
+The codec probe uses the SDK version pinned by the committed lockfile, records
+its file hash and Node version, forbids child processes and reports zero native
+spawns/remote requests. SDK Headers and plain R2 metadata are discriminating
+positive controls. This is diagnosis, not a second native campaign or a claim
+that R2 write permissions have been tested successfully.
+
+The v1 matrix records ORIGINS/ADMISSION PASS, REHEARSAL product FAIL and dependent
+full BYTES/R2/STATE success criteria NOT_OBSERVED. Captures and partial byte facts
+are preserved, not erased or inflated. Validator result is
+`VALIDATION=PASS ... overall=PRODUCT_FAIL`. The successful validator validates
+the honest failed evidence bundle, not the product. P4-1 remains IN_PROGRESS;
+PR #27 stays draft/open/unmerged, gate=false, with no production/device action.
+
+No product code was edited by this acceptance owner. An attempted existing
+cc-connect relay discovery in the current `codex-muyuan` chat returned
+`no binding for this chat`; no other agent was contacted or new binding created.
+The next required owner is a separately authorized implementation agent for
+P41-NATIVE-01. Root must retain independent acceptance and the v1 failure, then
+review the corrected batch, freeze its successor inputs/target and calculate the
+minimal retry instead of blindly redispatching v1. This is a real role/transport
+handoff, not a Cloudflare-account or per-approval request.
+
+The evidence audit checks opaque provisioning/CI/deploy/GitHub credentials and
+the OTA key's textual forms, plus private header archive entries: 425 files and
+121 ZIP members, no matches. Intended key-bound firmware binaries remain required
+firmware evidence; private inputs/configurations are not copied. Only the approved
+worktree and its own Git metadata were selected for output. No PowerShell or
+system temporary directory was used; no Node crash dump was found after the
+read-only command parsing failure. Frozen input and historical failure bytes stay
+unchanged.
+
+### Failed Round Sealing And Handoff
+
+The immutable failed-round snapshot is
+`docs/acceptance-contracts/P4-1-v1/evidence/`: 430 files, comprising the frozen
+contract, final matrix and 428 SHA-256-bound originals. The matrix SHA-256 is
+`aa980b1b64777f9ccf8ec46c0e34945e3c59fee5dcc638ef92c0cc19d3a54da0`.
+All 428 evidence digests were independently reread before delivery. Frozen input
+commit/tree are `2d3daae4ac5441d3eb736b654c237ae53760067c` /
+`b51a3ba2f22ff86caea394464747171db60ecb51`; the profile configuration blob is
+`6bf0537f27714d1ea0d630e1ef7c0b2ca2a40e3e`.
+
+Post-snapshot closure receipts are retained separately under
+`docs/acceptance-contracts/P4-1-v1/sealing/retention.json`, with original path,
+size and SHA-256 for each stream/receipt. They include the premature archive
+validation that ran before the copy process had finished and the later successful
+validation after its actual completion. Neither failed output was overwritten;
+no historical evidence, matrix or frozen helper was changed to hide it.
+The successful closed receipt ends with:
+
+    VALIDATION=PASS contract=P4-1-v1 round=P41-20261016-01 overall=PRODUCT_FAIL
+
+The credential/private-header audit originals remain inside the frozen snapshot
+at `review/secret-audit.json`, `review/secret-audit.stdout.txt` and
+`review/secret-audit.stderr.txt`. This audits selected evidence, not unrelated
+historical filesystem activity: implementation finding P41-AUDIT-01 remains
+attribution-unresolved. The current acceptance closure selects only project-local
+output plus this worktree's already-authorized Git objects/branch metadata.
+
+Delivery is evidence/records first, then an append-only FREEZE-INDEX entry in a
+separate commit. These changes do not imply P4-1 completion or authorize a merge.
+P41-NATIVE-01 remains required remediation by a separate implementation owner;
+the actual final failure matrix, not a fresh NOT_RUN matrix, is the predecessor
+for the successor contract and its minimum-rerun analysis.

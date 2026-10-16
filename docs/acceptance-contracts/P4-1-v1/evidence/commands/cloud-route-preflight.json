@@ -1,0 +1,27 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs",
+    "preflight",
+    "entry"
+  ],
+  "pid": 17944,
+  "started": "2026-10-16T08:47:19.872Z",
+  "ended": "2026-10-16T08:47:35.661Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/cloud-route-preflight.stdout.txt",
+      "size_bytes": 156,
+      "sha256": "64bebbf52a786ceb2f6428a7a1270c06856a97fa5737f3f717f2976120fec811"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/cloud-route-preflight.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

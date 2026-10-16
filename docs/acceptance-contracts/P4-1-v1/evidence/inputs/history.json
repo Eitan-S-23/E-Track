@@ -1,0 +1,8 @@
+{
+  "original_operator": "Implementation CI plus previous independent acceptance preparation",
+  "source_commit": "a52d5b567ddfe5982063f5ac6af5c0a0b0170a18",
+  "original_date": "2026-10-15/16",
+  "bootstrap_archive_commit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+  "original_evaluation_sha256": "ec3282516ffdb67a248d2bd05fc12f91561b20464be8c8e93f6a9f42ef0f3ece",
+  "applicability": "Product sources unchanged by acceptance tooling; original byte/CI observations evaluated offline. Formal true-key, real patch, R2 and full protected snapshots are new required observations, not inferred from development."
+}

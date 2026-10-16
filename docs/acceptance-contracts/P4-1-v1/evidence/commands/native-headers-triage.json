@@ -1,0 +1,25 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    ".cache/p41-acceptance-20261016/review/native-headers-probe.cjs"
+  ],
+  "pid": 2396,
+  "started": "2026-10-16T13:04:45.308Z",
+  "ended": "2026-10-16T13:04:47.593Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/native-headers-triage.stdout.txt",
+      "size_bytes": 752,
+      "sha256": "41f79daae7e5bbf420c360a94e3607f1bc4a281f1619318e19fa9725fde4971f"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/native-headers-triage.stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "closed": true
+}

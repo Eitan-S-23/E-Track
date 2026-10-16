@@ -1,0 +1,34 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P4-1-v1.contract.json",
+    "--matrix",
+    ".cache/p41-acceptance-20261016/evidence-matrix.json",
+    "--repo-root",
+    "."
+  ],
+  "pid": 9064,
+  "started": "2026-10-16T11:00:51.770Z",
+  "ended": "2026-10-16T11:00:52.015Z",
+  "exitCode": 1,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/formal-precheck.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/formal-precheck.stderr.txt",
+      "size_bytes": 90,
+      "sha256": "7db0d643472db510f0a2aefe13b8da6f71ac4cecbd5316bb7c85e7f3842923d1"
+    }
+  ],
+  "closed": true
+}

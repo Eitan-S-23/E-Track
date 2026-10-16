@@ -1,0 +1,28 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "git",
+  "args": [
+    "add",
+    "--",
+    "docs/acceptance-contracts/P4-1-v1/tools/session.cjs",
+    "docs/ota-exec-notes/P4-1-implementation-2026-10-15.md"
+  ],
+  "pid": 12880,
+  "started": "2026-10-16T10:53:49.452Z",
+  "ended": "2026-10-16T10:53:49.746Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/acceptance-auth-stage.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/acceptance-auth-stage.stderr.txt",
+      "size_bytes": 146,
+      "sha256": "7d2f3df6e08f3454586e9ea071ea12d8280c8693d7e5c225b1b74fe96ab10d74"
+    }
+  ],
+  "closed": true
+}

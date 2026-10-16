@@ -1,0 +1,13 @@
+{
+  "started": "2026-10-16T12:35:12.925Z",
+  "ended": "2026-10-16T12:35:13.433Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/git/ref/heads/dev/p4-1/unattended-20261015",
+  "status": 200,
+  "requestId": "AE5E:16FE55:F4BF88:16CA223:6AD219FE",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/github-after/protected-config/branch.json",
+    "size_bytes": 417,
+    "sha256": "ad9a4b7fac835bb3677c91148c6a1855d6d35a0c409c205f7487e70deea1b74b"
+  }
+}

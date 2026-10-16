@@ -1,0 +1,23 @@
+{
+  "started": "2026-10-16T11:59:45.250Z",
+  "ended": "2026-10-16T11:59:48.939Z",
+  "method": "POST",
+  "route": "/repos/Eitan-S-23/E-Track/actions/workflows/firmware-build.yml/dispatches",
+  "request": {
+    "ref": "dev/p4-1/unattended-20261015",
+    "inputs": {
+      "version_name": "3.2.8",
+      "publish": "false",
+      "rehearsal": "true",
+      "check_bindings": "false",
+      "release_notes": "P4-1 canonical staging qualification; not a production release."
+    }
+  },
+  "status": 204,
+  "requestId": "AEBC:1785DE:DF7ECA:14E728E:6AD211B2",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/dispatch.json",
+    "size_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

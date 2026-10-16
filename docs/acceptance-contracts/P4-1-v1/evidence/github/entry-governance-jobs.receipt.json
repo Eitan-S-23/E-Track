@@ -1,0 +1,14 @@
+{
+  "started": "2026-10-16T08:20:25.477Z",
+  "ended": "2026-10-16T08:20:26.895Z",
+  "method": "GET",
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38866887953/jobs?per_page=100",
+  "status": 200,
+  "requestId": "AE46:17CCC:655BF7:96F6D4:6AD1DE4B",
+  "date": "Fri, 16 Oct 2026 08:20:27 GMT",
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/github/entry-governance-jobs.json",
+    "size_bytes": 7237,
+    "sha256": "ccafcc28f096eae6816b16c9dec74aeae9d8f7312a3c1afd00a5c7dc3a572c05"
+  }
+}

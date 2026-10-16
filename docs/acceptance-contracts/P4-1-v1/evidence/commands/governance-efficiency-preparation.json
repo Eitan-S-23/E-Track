@@ -1,0 +1,28 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "python",
+  "args": [
+    "-X",
+    "utf8",
+    "-B",
+    "tests/ota/test_acceptance_efficiency.py"
+  ],
+  "pid": 9108,
+  "started": "2026-10-16T10:28:27.844Z",
+  "ended": "2026-10-16T10:32:43.354Z",
+  "exitCode": 0,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/governance-efficiency-preparation.stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/governance-efficiency-preparation.stderr.txt",
+      "size_bytes": 5510,
+      "sha256": "f4ea0d44aa3e81b950869e6794914566c3fb3d54791689a1ab19d6e301a8972c"
+    }
+  ],
+  "closed": true
+}

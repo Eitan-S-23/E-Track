@@ -1,0 +1,9 @@
+{
+  "route": "/repos/Eitan-S-23/E-Track/actions/runs/38897470681/attempts/1/logs",
+  "status": 200,
+  "artifact": {
+    "path": ".cache/p41-acceptance-20261016/formal/completed/logs.zip",
+    "size_bytes": 452221,
+    "sha256": "09cb8633fbb39350680a7c91c81e3b62bfff8f5b498ec6bcb24f2dee8e77c4f1"
+  }
+}

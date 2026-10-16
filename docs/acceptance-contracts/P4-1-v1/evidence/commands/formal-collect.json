@@ -1,0 +1,26 @@
+{
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p41-dev-20261015",
+  "executable": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs",
+    "collect"
+  ],
+  "pid": 25144,
+  "started": "2026-10-16T12:33:14.152Z",
+  "ended": "2026-10-16T12:37:35.392Z",
+  "exitCode": 1,
+  "signal": null,
+  "streams": [
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/formal-collect.stdout.txt",
+      "size_bytes": 615,
+      "sha256": "1bcb55a4b177b1d8c1564bf15cc6659b726a1e437974f954107e80f14e859b28"
+    },
+    {
+      "path": ".cache/p41-acceptance-20261016/commands/formal-collect.stderr.txt",
+      "size_bytes": 53,
+      "sha256": "dd9aa8a2c9f73bda5001f9e5e34dc97de3b7d58a50bbc8798e548fb81bd1cf01"
+    }
+  ],
+  "closed": true
+}
