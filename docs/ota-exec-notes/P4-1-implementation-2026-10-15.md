@@ -2469,3 +2469,65 @@ P41-AUDIT-01 attribution remains unresolved and was not cleaned up or rewritten.
 Structured archived console traces may use only the global hook's supported
 debug-check override; secret/conflict checks remain enabled. This branch handoff
 is pending main integration by its authorized owner, not delivered to main here.
+
+## Independent Repair Review And V2 Preparation, 2026-10-17
+
+The original non-implementing acceptance owner resumed on the clean handoff
+`cab1877bbdce6921b996aa6ac3df08f0bcde2d68`. The bounded product delta from
+`53b7860` is the uploader's plain HTTP metadata object; only its two existing
+host test files accompany it. The independently inspected installed Workers
+types expose contentType/contentDisposition/cacheControl, not Content-Length or
+Content-Digest fields. Conditional create, put checksum, custom digest/kind,
+full conditional readback and registration ordering are unchanged.
+
+Independent offline review verified both original inventories (61 archive files
+including inventories), all 117 CI ZIP members, the old uploader's Git identity,
+the final four source/lockfile Git identities, actual red/green/type-failure
+receipts, four successful PR runs and the source/actual-checkout tree equality.
+It retained the three original codec failures, 41/41 host, 136/136 pipeline and
+156/156 native CI results without adding repeated runs into the counts. Original
+review output is `.cache/p41-acceptance-20261017/review/remediation-preparation.json`;
+the source defect is ready for successor acceptance, not already real-R2 PASS.
+
+V1's controller and evaluator have fixed round directories, single-use labels
+and create-only target configuration. Reusing those paths would collide with
+retained failed observations. The smallest supported successor is versioned
+copies of the same five tools under `P4-1-v2/tools`, with new round output paths,
+an explicit v1 parent, an offline remediation-original review and controlled
+updates to only the descriptor and its digest. Before either PATCH, the observed
+old value must equal the archived v1 value; reviewer/branch/gate/secrets and all
+other variables remain unchanged. Existing current P41Execution/P41Evaluation
+profiles point at v2; v1 continues to use its own frozen profile blob.
+
+V2 reuses the installed GitHub CLI for ZIP retrieval because it recovered the
+same v1 artifact after Node timed out. Size/digest binding and closed receipts
+remain mandatory; no new uploader/runtime or product tool is implemented.
+The scope is one repair-bound successor canonical workflow under the existing
+P41-STAGING-DELEGATION-20261016 and execution-contract minimum-rerun rules. The
+one prior actual staging run remains PRODUCT_FAIL and is counted, not reset.
+No extra qualification upload, device operation or production action is added.
+The unchanged shared workflow requires same-run/source-bound GCC and package
+outputs, so its necessary build cannot be replaced by relabeling the old key-bound
+artifact. Existing partial key/byte observations remain preserved as history.
+
+The six criterion IDs and product gates are retained. The old final failed
+matrix is the actual predecessor for the validator's computed plan, including
+ORIGINS/ADMISSION PASS and the downstream NOT_OBSERVED results. New target,
+uploader and versioned-runner inputs are disclosed rather than hidden to force
+reuse. Formal freeze/target binding and execution follow stable input delivery
+and genuine NOT_RUN precheck; preparation results are not formal acceptance.
+
+The original reviewer also executed only the four P41-NATIVE-01 codec tests
+against the current actual uploader: 4 passed, 20 unrelated script cases skipped.
+The Node Headers negative control still rejects; full/patch/recovery serialize
+without argument rewriting and each performs two complete conditional memory-R2
+readbacks. This is an independent targeted host review, not remote R2 evidence.
+The existing SQLite experimental warning remains visible. V2 controller checks
+passed 11 cases; the byte oracle retained one positive/five discriminating
+negatives, and the contract structure accepted the real dependencies and rejected
+an omitted evaluator. All originals are in the new round's commands/review paths.
+
+The relevant acceptance/profile/dependency host regression passed 77/77 and the
+minimum-rerun regression passed 36/36. Both original processes completed and
+their receipts are closed before input delivery; no product or physical campaign
+was started by these preparation checks.

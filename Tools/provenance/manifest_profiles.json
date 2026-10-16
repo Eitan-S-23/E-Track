@@ -215,26 +215,26 @@
       "category": "validation_inputs",
       "root_patterns": [],
       "top_files": [
-        "docs/acceptance-contracts/P4-1-v1/tools/session.cjs",
-        "docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs",
-        "docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs"
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs"
       ],
       "exclude_prefixes": [],
       "required_paths": [
-        "docs/acceptance-contracts/P4-1-v1/tools/session.cjs",
-        "docs/acceptance-contracts/P4-1-v1/tools/campaign.cjs",
-        "docs/acceptance-contracts/P4-1-v1/tools/cloud-read.cjs"
+        "docs/acceptance-contracts/P4-1-v2/tools/session.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/campaign.cjs",
+        "docs/acceptance-contracts/P4-1-v2/tools/cloud-read.cjs"
       ]
     },
     "P41Evaluation": {
       "category": "validation_inputs",
       "root_patterns": [],
       "top_files": [
-        "docs/acceptance-contracts/P4-1-v1/tools/inspect.py",
-        "docs/acceptance-contracts/P4-1-v1/tools/bundle.py"
+        "docs/acceptance-contracts/P4-1-v2/tools/inspect.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/bundle.py"
       ],
       "exclude_prefixes": [],
-      "required_paths": ["docs/acceptance-contracts/P4-1-v1/tools/inspect.py", "docs/acceptance-contracts/P4-1-v1/tools/bundle.py"]
+      "required_paths": ["docs/acceptance-contracts/P4-1-v2/tools/inspect.py", "docs/acceptance-contracts/P4-1-v2/tools/bundle.py"]
     },
     "Evidence": {
       "category": "validation_inputs",
