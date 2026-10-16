@@ -2575,3 +2575,10 @@ old failed file byte-for-byte with an explicit archive/retention mapping. There
 will be no further staging dispatch, build, approval or remote mutation for this
 path correction. The staging execution ledger remains two runs total: v1 product
 failure and v2 canonical success.
+
+V2's honest failed matrix and 349 hash-bound originals were sealed as bundle
+`00041e535a89c238a7dde9b035663b82b1fe4698` (351 evidence-directory files plus
+separate late sealing receipts). Working and archived validators both returned
+`VALIDATION=PASS ... overall=HARNESS_FAIL`; 362 contract/evidence/sealing Git
+blobs were checked against their original bytes before commit. The subsequent
+FREEZE-INDEX entry preserves this result; it is not a product failure or a PASS.
