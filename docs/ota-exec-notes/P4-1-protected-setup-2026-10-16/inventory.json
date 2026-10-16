@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "scope": "AUTHORIZED_SETUP_NOT_ACCEPTANCE",
+  "startingCommit": "fefcb3f2b493527e14affa236207a8d5f4deb682",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sizeBytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "kind": "AUTHORED_RECORD"
+    },
+    {
+      "path": "README.md",
+      "sizeBytes": 2655,
+      "sha256": "be75a4bc5be1e5c27872a0678d35300c81e9db79a3e53a2bc1d270b030e28f6a",
+      "kind": "AUTHORED_RECORD"
+    },
+    {
+      "path": "operations/create-account-plan.json",
+      "sizeBytes": 350,
+      "sha256": "7d39d652e5cbb003d1db8878c7fad432ceb8a9161a7a19211ba9476f4c270cba",
+      "source": ".cache/p41-setup-20261016/create-account-plan.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "operations/create-account.json",
+      "sizeBytes": 503,
+      "sha256": "b6e2eaa2ed01eb0e844a3e0d8ff0ade54aecfa0ad2c6514c2f50a27209443a98",
+      "source": ".cache/p41-setup-20261016/create-account.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "operations/github-configuration.json",
+      "sizeBytes": 3728,
+      "sha256": "512085d8da2beecd0a0376a4a7961b3f91834b99709015639cae6bc15db8f2ff",
+      "source": ".cache/p41-setup-20261016/github-configuration.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "operations/read-only.sanitized.json",
+      "sizeBytes": 3275,
+      "sha256": "30aebf1d80992583a5e1d472f8ff2859081e1b0289de08f81f3b27527e8de51d",
+      "source": ".cache/p41-setup-20261016/read-only.json",
+      "kind": "SANITIZED_DERIVATIVE"
+    },
+    {
+      "path": "references/cloudflare-account-setup.md",
+      "sizeBytes": 8338,
+      "sha256": "3e9184024ec7e95941009d4222d454e445c344f8d22540847e1edb747ba8862a",
+      "source": ".cache/p41-setup-20261016/cloudflare-account-setup.md",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "references/cloudflare-account-owned-tokens.md",
+      "sizeBytes": 6189,
+      "sha256": "78aa0dac12131a55c1b26a11195896aa8fc0638e81a8b7bbb0435a4cc607036d",
+      "source": ".cache/p41-setup-20261016/cloudflare-account-owned-tokens.md",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "references/cloudflare-permissions.md",
+      "sizeBytes": 73137,
+      "sha256": "64d247bf75f8e521e73f775218e72a8d5b1c5ceebf3b4126463efd4da94d4408",
+      "source": ".cache/p41-setup-20261016/cloudflare-permissions.md",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "references/cloudflare-r2-start.md",
+      "sizeBytes": 4106,
+      "sha256": "01942d28ec61a22145b806905e4d3d33527b6564a4dea5b05b956878a35e1915",
+      "source": ".cache/p41-setup-20261016/cloudflare-r2-start.md",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "references/github-environments.md",
+      "sizeBytes": 9021,
+      "sha256": "38d6db3131cb721a6cf36fd8800ed07726a31a8ee2617b6b53ca2a4a39aa24c8",
+      "source": ".cache/p41-setup-20261016/github-environments.md",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "references/github-branch-policies.md",
+      "sizeBytes": 9793,
+      "sha256": "cb10a381e885247a0c8146d67c43ddcbd89a943b16a22826f35d61ac7d5e4f9c",
+      "source": ".cache/p41-setup-20261016/github-branch-policies.md",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "references/github-secrets.md",
+      "sizeBytes": 35615,
+      "sha256": "a1cd9a00d7d97e902de3f5dae6423324e3d68c9e5b06d023ce764a0d53172e3e",
+      "source": ".cache/p41-setup-20261016/github-secrets.md",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "helpers/probe-setup.cjs",
+      "sizeBytes": 4746,
+      "sha256": "9cb333247dbc5d5f3627c276770b4a72faaddc23081b923dd8fcce94542456e5",
+      "source": ".cache/p41-setup-20261016/probe-setup.cjs",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "helpers/create-account.cjs",
+      "sizeBytes": 4155,
+      "sha256": "fa9b19d204571fc30c5176912cdd90ff947104fb95573ff11f5cd0fdb6c240ab",
+      "source": ".cache/p41-setup-20261016/create-account.cjs",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "helpers/configure-github.cjs",
+      "sizeBytes": 8848,
+      "sha256": "3508df8157a2265947783df6963a68f14e632b2d29da7f97d1e0a5f651f37fec",
+      "source": ".cache/p41-setup-20261016/configure-github.cjs",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "helpers/archive-setup.cjs",
+      "sizeBytes": 6025,
+      "sha256": "5a2fbc7c5b09bdbcd5a1e0b9369fb8b6d48d45f821a8a6e75ad7627182679d48",
+      "source": ".cache/p41-setup-20261016/archive-setup.cjs",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "helpers/run.cjs",
+      "sizeBytes": 3364,
+      "sha256": "ed8b4b6fbc1e63e13dc91d268f5f75eef18413f3cc80f204c0d6ee4a725609e3",
+      "source": ".cache/run.cjs",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "commands/p41-setup-governance.json",
+      "sizeBytes": 1872,
+      "sha256": "89635966813b8fa5bc463a0245621a5941da7c96163e148da3c9fddf37d8a10b",
+      "source": ".cache/logs/p41-setup-governance.json",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "commands/p41-setup-governance.stdout.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": ".cache/logs/p41-setup-governance.stdout.txt",
+      "kind": "BYTE_IDENTICAL_COPY"
+    },
+    {
+      "path": "commands/p41-setup-governance.stderr.txt",
+      "sizeBytes": 127,
+      "sha256": "da9c7eab3f3353c6493e9ac36199a7f4849e3f34afafad562ef51ced10563605",
+      "source": ".cache/logs/p41-setup-governance.stderr.txt",
+      "kind": "BYTE_IDENTICAL_COPY"
+    }
+  ]
+}

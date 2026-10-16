@@ -1,0 +1,7 @@
+{
+  "name": "e-track-firmware-p41-validation",
+  "type": "standard",
+  "standalone": true,
+  "idempotencyKey": "e-track-p41-standalone-20261016-fefcb3f-v1",
+  "authority": "Current user authorized preparing an independent production-free Cloudflare test account and P4-1 resources. No paid plan, old-account mutation, production or device action."
+}

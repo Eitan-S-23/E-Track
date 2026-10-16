@@ -16,10 +16,13 @@ Sole Spec: `docs/ota-prompts/prompt-P4-1-implementation.md` and its frozen refer
   actual v2 schema, scripts, versioned fixture, business handlers and tests.
 - Exclusive branch: `dev/p4-1/unattended-20261015`; worktree:
   `D:/github/my/E-Track/.cache/p41-dev-20261015`.
-- User authorizes scoped implementation/WIP commits, pushes as `Eitan-S-23`,
+- At initial entry, the user authorizes scoped implementation/WIP commits, pushes as `Eitan-S-23`,
   existing checks/build-only Actions and project-contained evidence retrieval.
   No main merge, tag, Release, deployment, cloud resource/configuration write,
   device operation, external filesystem write or other-task work is authorized.
+  The later bounded setup authorization is recorded under
+  [Authorized Protected Setup And Account Blocker](#authorized-protected-setup-and-account-blocker);
+  it does not expand main, production, device or other-task authority.
 - Shared archive worktree, main's historical evidence, and the pre-existing
   initializing P4-1 worktree remain untouched. No reset/clean/stash is used.
 - P3-5 is paused by this dispatch, not by a new dependency. P4-3/P4-4 are not
@@ -1738,3 +1741,132 @@ cache/key/byte/cleanup observations and the IN_PROGRESS/NOT_RUN boundaries.
 The verbatim response is preserved as `closeout/independent-readiness-review.json`
 in the new archive. Later closeout receipts/annotations are not automatically
 included in that review; none of this is a new whole-card acceptance decision.
+
+## Authorized Protected Setup And Account Blocker
+
+### P41-SETUP-AUTH-01: Owner-Delegated Preparation
+
+On 2026-10-16 the user authorized this agent to prepare the production-free
+Cloudflare test account/resources, the `firmware-rehearsal` protected environment
+and a non-development OTA key, asking to be told what genuinely needs their
+action. This supersedes the missing-setup-authorization part of the preceding
+checkpoint, not its missing runtime observations. The exclusive worktree and
+scoped WIP commit/push authority remain unchanged. No main merge, production gate
+unlock, tag/Release, device operation, billing/paid-plan change or start of the
+P3-5/P4-3/P4-4 cards is included.
+
+This setup starts from record commit
+`fefcb3f2b493527e14affa236207a8d5f4deb682`; implementation source remains
+`18c4da4d28c1f2bcf7175f4b461e2a6bf462a23e`. PR 27 remains draft/open/unmerged.
+The prior readiness archive is not edited or re-created. New setup observations
+are retained in `docs/ota-exec-notes/P4-1-protected-setup-2026-10-16/`.
+
+### P41-CF-CREDENTIAL-02: Account Creation Needs Owner Action
+
+The current token can list one visible existing Cloudflare account. That is only
+its visibility, not proof the user owns no others. The fresh official account
+setup documentation permits an additional Free standalone account through the
+dashboard or a user-owned token with `User Details Read`; an account-owned token
+cannot create accounts. The legacy API reference's Global API key example does
+not make a Global API key necessary.
+
+The actual prerequisite `GET /user` returned HTTP 403 / Cloudflare code 9109
+(`Unauthorized to access requested resource`). The helper stopped there:
+**no `POST /accounts` was sent, no account was created and no Cloudflare mutation
+occurred in this setup batch**. The stable creation idempotency key in the retained
+plan is unused. Do not repeat the same permission failure, broaden the existing
+provisioning token or export that token to CI.
+
+The selected production-free account name is
+`e-track-firmware-p41-validation`. The owner can create it with their existing
+Cloudflare login at Accounts > Create Account; a new login/email is not required.
+Eligibility remains subject to Cloudflare's documented user age, role and account
+limits. Native preview isolation still requires this separate account, not merely
+a Worker-specific edit policy in an account containing production data.
+
+### Protected GitHub Configuration Completed
+
+The actual readback confirms environment `firmware-rehearsal`, ID `24458272742`,
+with required human reviewer `Eitan-S-23` (user ID `204050265`) and exactly one
+custom branch policy: `dev/p4-1/unattended-20261015`. There is no wait timer.
+`prevent_self_review=false` is intentional: the agent's dispatch uses that same
+owner identity, so setting it true would prevent the sole human owner approving.
+Human approval is still required; the agent performed no approval and this is
+not independent production approval.
+
+| Environment-scoped setting | Actual configured value / observation |
+| --- | --- |
+| `OTA_BOOT_CHAIN_READY` | `false`; no repository or production gate change |
+| `FIRMWARE_REHEARSAL_TRACE_R2_BUCKET` | `e-track-firmware-p41-test-releases` |
+| `FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME` | `e-track-firmware-p41-test` |
+| `FIRMWARE_REHEARSAL_OTA_AES_KEY` | Secret uploaded; metadata readback confirms its name |
+
+The key was generated with `crypto.randomBytes(16)`, checked by the production
+`approvedFirmwareKey` validator and encrypted/uploaded by `gh secret set` through
+stdin, never argv or console. Its non-secret SHA-256 fingerprint is
+`a94ae0f006b3d6be51279b861dc19b8a0892833939d0a4db5a81ee7af511fe9e`.
+The ignored owner copy is `.cache/cf-auth-input/p41-rehearsal-ota-key.json` inside
+the exclusive worktree. Readback of the file and parent NTFS ACL grants only the
+current `SU` account inherited full control. Retain this private copy for later
+authorized provisioning/recovery; do not print, commit, archive or rotate it.
+Secret metadata is not runtime verification: **no actual protected real-key
+compilation has run**, and `runtimeValueVerified=false` remains explicit.
+
+There were six GitHub writes: environment creation, one branch policy, three
+variables and one secret upload. No workflow dispatch, approval or Cloudflare
+credential export occurred. `firmware-production` was not created or modified.
+Account/token, Worker URL/deploy token, D1 ID, bindings-check commit and bootstrap
+descriptor approval remain intentionally unconfigured. A partial environment
+must not be used to dispatch the qualification job.
+
+### Exact Owner Input And Next Action
+
+The owner's remaining input is bounded to the new account:
+
+1. Create `e-track-firmware-p41-validation` as an additional Free account, using
+   the existing login. Do not change the production account or its token.
+2. In that account, enable R2 at Storage & databases > R2 > Overview if needed.
+   Cloudflare requires its checkout flow; R2 has included free usage but is
+   usage-billed. The owner handles any payment confirmation. No Workers paid-plan
+   upgrade is requested or authorized.
+3. Create a dedicated account-owned token at Manage account > Account API tokens
+   > Create Token, restricted to that account: `Workers Scripts Edit`,
+   `Workers R2 Storage Edit`, `D1 Edit`, `Workers KV Storage Edit` and
+   `Account Settings Read`. Do not grant production-account, DNS/zone, billing,
+   user-details or token-management permissions. The official compatibility
+   matrix includes Workers, D1, R2 and KV; exact native-preview capability still
+   needs the bounded real qualification, not a documentation-based PASS.
+4. Fill `account_id` and `api_token` in the already-created private file
+   `D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/p41-isolated-account-input.json`.
+   Keep `account_name` and `token_kind=account-owned`; do not send credentials in
+   Feishu. The file is ignored and its NTFS ACL was checked, not added to evidence.
+
+After that input, the implementation owner validates account/token isolation,
+prepares the exact test resources and reviewed fixture rebinding, and completes
+the remaining protected settings. The bounded native Linux qualification still
+requires the exact source binding and later human environment approval. Final
+real-key target/descriptor approval and the one canonical rehearsal retain their
+declared independent owners; implementation must not duplicate that campaign.
+The old 3.2.7 bootstrap archive and its development-key device limitation remain
+unchanged under P41-BOOTSTRAP-KEY-01.
+
+P4-1 stays **IN_PROGRESS, not ready for the new whole-card acceptance agent**.
+No new permission request is needed for already-authorized preparation; the
+blocking item is the owner's unavailable account/token/checkout capability.
+
+The affected documentation regression, `PostP26SpecGovernanceTests`, passes 23/23
+with exit 0 (`p41-setup-governance`). Its original closed receipt and streams are
+retained with the new setup evidence. This is a lightweight governance self-test,
+not a repeated cloud/hardware campaign or an independent acceptance conclusion.
+
+The new archive contains 22 files; its inventory SHA-256 is
+`9d605ad6fc325be20a58fa219de55ab818128d1dc15472ac03f55a62807e0948`.
+The pre-commit output audit checks all 21 setup inventory entries, the old 97-entry
+inventory and 927 ZIP members, including the new real OTA key in the leak scan:
+no credential match, private key header or lingering recorded process. A separate
+read-only check verifies the old 19-entry closeout inventory unchanged. The shared
+root index still hashes to
+`2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd`.
+All selected setup outputs are worktree-local; only the previously authorized own
+Git metadata/object/ref scope is excepted for branch delivery. No PowerShell or
+local native build was used. Historical P41-AUDIT-01 remains attribution-unresolved.

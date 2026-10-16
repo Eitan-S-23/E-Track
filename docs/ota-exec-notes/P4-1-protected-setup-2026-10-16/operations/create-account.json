@@ -1,0 +1,22 @@
+{
+  "startedAt": "2026-10-16T04:15:20.676Z",
+  "scope": "ONE_STANDALONE_FREE_TEST_ACCOUNT",
+  "requests": [
+    {
+      "method": "GET",
+      "route": "user",
+      "status": 403,
+      "success": false,
+      "errors": [
+        {
+          "code": 9109,
+          "message": "Unauthorized to access requested resource"
+        }
+      ]
+    }
+  ],
+  "created": false,
+  "blocker": "USER_DETAILS_READ_UNAVAILABLE_NO_ACCOUNT_CREATE_ATTEMPT",
+  "endedAt": "2026-10-16T04:15:30.399Z",
+  "closed": true
+}

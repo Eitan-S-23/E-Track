@@ -1,0 +1,111 @@
+{
+  "evidenceKind": "SANITIZED_DERIVATIVE",
+  "source": {
+    "path": ".cache/p41-setup-20261016/read-only.json",
+    "sizeBytes": 2711,
+    "sha256": "af065c88a160c5a497268ca8dadf6e88ac6cd246a27d8e8f6506a94247ec7a80",
+    "archived": false
+  },
+  "redactedFields": [
+    "cloudflareAccounts.accounts[*].id",
+    "cloudflareAccounts.accounts[*].name"
+  ],
+  "observation": {
+    "startedAt": "2026-10-16T04:09:16.018Z",
+    "mode": "READ_ONLY_SETUP_CAPABILITY",
+    "requests": [
+      {
+        "method": "GET",
+        "host": "api.cloudflare.com",
+        "path": "/client/v4/accounts",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "host": "api.github.com",
+        "path": "/user",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "host": "api.github.com",
+        "path": "/repos/Eitan-S-23/E-Track",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "host": "api.github.com",
+        "path": "/repos/Eitan-S-23/E-Track/environments",
+        "status": 200
+      }
+    ],
+    "references": [
+      {
+        "url": "https://developers.cloudflare.com/api/resources/accounts/methods/create/",
+        "resolvedUrl": "https://developers.cloudflare.com/api/resources/accounts/methods/create/",
+        "file": "cloudflare-create-account.md",
+        "status": 200,
+        "contentType": "text/markdown; charset=utf-8",
+        "bytes": 12698,
+        "sha256": "b85051d9ce9cb2984920bc711bde4198555ba3865ad74df074d63f249bed969d"
+      },
+      {
+        "url": "https://developers.cloudflare.com/fundamentals/setup/account/create-account/",
+        "resolvedUrl": "https://developers.cloudflare.com/fundamentals/account/create-account/",
+        "file": "cloudflare-account-setup.md",
+        "status": 200,
+        "contentType": "text/markdown; charset=utf-8",
+        "bytes": 8338,
+        "sha256": "3e9184024ec7e95941009d4222d454e445c344f8d22540847e1edb747ba8862a"
+      },
+      {
+        "url": "https://docs.github.com/en/rest/deployments/environments?apiVersion=2022-11-28",
+        "resolvedUrl": "https://docs.github.com/en/rest/deployments/environments?apiVersion=2022-11-28",
+        "file": "github-environments.md",
+        "status": 200,
+        "contentType": "text/markdown; charset=utf-8",
+        "bytes": 9021,
+        "sha256": "38d6db3131cb721a6cf36fd8800ed07726a31a8ee2617b6b53ca2a4a39aa24c8"
+      }
+    ],
+    "cloudflareAccounts": {
+      "status": 200,
+      "success": true,
+      "totalVisible": 1,
+      "accounts": [
+        {
+          "id": "[REDACTED_EXISTING_ACCOUNT_ID]",
+          "name": "[REDACTED_EXISTING_ACCOUNT_NAME]",
+          "type": "standard"
+        }
+      ],
+      "errors": []
+    },
+    "githubIdentity": {
+      "login": "Eitan-S-23",
+      "id": 204050265,
+      "type": "User"
+    },
+    "repository": {
+      "id": 1310649784,
+      "visibility": "public",
+      "owner": "Eitan-S-23",
+      "permissions": {
+        "admin": true,
+        "maintain": true,
+        "push": true,
+        "triage": true,
+        "pull": true
+      },
+      "defaultBranch": "main"
+    },
+    "environments": {
+      "status": 200,
+      "total": 0,
+      "entries": []
+    },
+    "ok": true,
+    "endedAt": "2026-10-16T04:09:34.321Z",
+    "closed": true
+  }
+}
