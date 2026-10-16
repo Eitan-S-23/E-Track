@@ -1047,7 +1047,7 @@ CI 注册入口固定为 `POST /api/ci/firmware/releases`，仅接受 HTTPS：
 解锁采用两阶段流程：
 
 1. `OTA_BOOT_CHAIN_READY=false` 时，只允许在 GitHub environment `firmware-rehearsal` 使用独立 staging Worker、独立 staging D1 和 R2 bucket `e-track-firmware-p41-test-releases` 完成三资产、metadata、全字节 readback、register ready/idempotency 演练。桶名按 `OTA-DEC-017` 冻结；旧 `trace-update-staging-releases` 已由受保护的 Trace 服务使用，禁止本链演练或生产使用它，不能通过改名把旧桶放入生产允许集合。
-2. rehearsal 不得产生任何 production 副作用，也不得创建 GitHub prerelease。rehearsal environment 不得取得任何 production Worker、D1、R2 或发布凭据。
+2. rehearsal 不得产生任何 production 副作用，也不得创建 GitHub prerelease。rehearsal environment 不得取得任何 production Worker、D1、R2 或发布凭据；用户批准的 `P41-CF-CREDENTIAL-02` 同账户专用 Cloudflare Token 例外仅按 `OTA-XC-SECRETS` 执行，不放宽生产操作红线。
 3. rehearsal 与 production 必须运行同一 workflow、制包工具、schema 和注册客户端代码，只允许通过 environment bindings 切换 Worker、D1、R2 和凭据。
 4. required evidence 包含三资产 SHA/size、patch 逐字节自验、recovery 校验、metadata SHA、staging R2 全字节 readback、staging register ready/idempotency，以及 rehearsal 前后 production D1、R2、channel、GitHub Release 快照证明的零副作用。
 5. 独立 OTA 架构审查人必须不是该次 rehearsal 的实现作者。rehearsal 评审可在 P5 前完成；repository owner 只能在 reviewer 明确批准且 P5 验收通过后，以人工且可审计方式设置 `OTA_BOOT_CHAIN_READY=true`。P4 的 staging 完成不等于生产解锁，不把 P5 后的 production promotion 反作 P5 前置。
@@ -1279,8 +1279,36 @@ P4-4 配置面：
 | `TRACE_R2_BUCKET` | GitHub variable | uploader | production 明确生产 bucket且拒绝新旧两个测试桶；rehearsal 固定 `e-track-firmware-p41-test-releases`，保留旧 Trace 桶，不共享凭据；见 `OTA-DEC-017` |
 | `OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256` | GitHub environment variable | release base client | 仅首发例外必填；精确绑定经独立审阅的 descriptor，见 `OTA-XC-BOOTSTRAP-BASE`；不得作为任意 CI 基版的默认批准 |
 | `OTA_BOOT_CHAIN_READY` | GitHub variable | release gate | 仅精确 `true` 解锁；时序见 `OTA-XC-RELEASE-GATE` |
-| `firmware-rehearsal` | GitHub environment | rehearsal job | 独立 staging Worker/D1/R2 bindings，无 production 凭据，不允许 production 副作用 |
+| `firmware-rehearsal` | GitHub environment | rehearsal job | 独立 staging Worker/D1/R2 bindings，不复用 production 凭据；同账户专用 Token 仅限下述 P41-CF-CREDENTIAL-02，不允许 production 副作用 |
 | `firmware-production` | GitHub environment | release job | 至少一名独立审批人，job 必须声明 environment |
+
+#### P41-CF-CREDENTIAL-02 同账户专用 CI Token
+
+2026-10-16 用户在获知同账户 Workers 编辑权限可能通过绑定访问其他 R2/D1 后，明确选择
+现有 CF 账户并提供单独的 CI Token，原话见 `docs/ota-spec-decisions.md` 记录 16。
+此例外只适用于 P4-1 已有测试 Worker/D1 `e-track-firmware-p41-test` 和桶
+`e-track-firmware-p41-test-releases`；P4-4 只消费同一配置，不因此启动该卡。
+不再要求新建账户或 R2 checkout，不声明硬性的生产权限隔离；生产零副作用仍须原件证明。
+
+接口不变：开发资格使用
+`workflow_dispatch(check_bindings=true, publish=false, rehearsal=false)`；正式 rehearsal 仍按
+既有独立审批和冻结准入。专用 Token 只进入 `firmware-rehearsal` 的
+`FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN`，账户由私有
+`FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID` 指定；不得将本地 provisioning token 转存 CI。
+不新增第二个 Token/hash 审批变量，既有 environment、精确分支和人工审批保持生效；资格
+检查继续以 `FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT` 绑定实际 `GITHUB_SHA`。
+
+| 情形 | 准入及结果 |
+| --- | --- |
+| 独立账户、隔离资源和专用凭据 | 原规则仍有效；不要求已有合格环境改用同账户 |
+| 本次用户批准的同账户、专用 CI Token、精确测试绑定和受保护源码 | 可按既有权限执行开发资格或已独立准入的 rehearsal；明确保留潜在同账户数据访问能力 |
+| 本地 provisioning token、生产绑定、缺少人工审批或源码不符 | 不准入；不得上传该凭据、扩大目标或放宽门禁 |
+| Token 验证/只读 API 成功，但未运行原生绑定或缺少生产前后快照 | 只证明实际读能力；不能写成最小权限、原生资格或生产零副作用已通过 |
+
+错误做法：仅凭资源名称不同或 Token active 就声称权限完全隔离。正确做法：分别记录
+用户接受的能力边界、实际配置与 API/原生观测；固定测试目标，不执行生产操作，不复用
+旧 Trace deploy/download secret 或 GitHub 发布写凭据。回归必须守住上述资源、凭据来源、
+源码/人工审批和失败边界，原 CLI 的错绑定、错提交、混合模式反例继续有效。
 
 Worker 侧 `DEPLOY_TOKEN_SHA256`、download HMAC current/previous key 及 key version 继续按现有 Worker secret 管理；P4-4 验收不得读取或打印 secret 明文。
 

@@ -109,6 +109,7 @@ P3-5/P5 的设备 owner 负责实际 key provisioning/INFO 身份和 full 或精
     node .github/scripts/firmware-bindings-check.mjs --output .cache/bindings-check/result.json
 
 - job 使用 Linux 和 `firmware-rehearsal` environment，运行前必须已具备受保护的环境、经核验隔离的凭据及变量；禁止借 dispatch 自动创建无保护 environment。
+- 同账户凭据仅按 `OTA-XC-SECRETS` 的 `P41-CF-CREDENTIAL-02` 用户例外：复用现有测试 Worker/D1/R2 和专用 CI Token，不要求开户；不声明硬性的生产权限隔离，不转存本地 provisioning token，不免除精确源码/人工审批或生产零副作用证据。
 - `FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT` 必须等于实际 `GITHUB_SHA`；repository、run/attempt、三个显式模式输入和 `OTA_BOOT_CHAIN_READY=false` 均须校验。它只批准固定源码的开发检查，不是首发 descriptor 或发布批准。
 - 实际检查步骤仅接收 `FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID`、`FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN`、`FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL` 三个 secret，以及对应 R2/D1 变量；安装依赖和普通 build/checks 不接触这些凭据。没有 AES key、deploy token、GitHub 写 token 或注册动作。
 - 固定输入为已提交 `P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json` 的三个既有 synthetic 对象；通过原 uploader 的 `verifyStoredFirmwareAsset(metadata, fileName, bucket)` 复用全字节/长度/条件 ETag 校验，缺失即失败，绝不补传。

@@ -2853,6 +2853,31 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         self.assertIn("e-track-firmware-p41-test-releases", gate)
         self.assertIn("禁止本链演练或生产使用它", gate)
 
+    def test_p41_same_account_token_exception_preserves_execution_limits(self):
+        secrets = self.contract.split("### OTA-XC-SECRETS", 1)[1].split("## 9.", 1)[0]
+        exception = secrets.split("#### P41-CF-CREDENTIAL-02", 1)[1]
+        for token in (
+            "记录 16", "e-track-firmware-p41-test", "e-track-firmware-p41-test-releases",
+            "不声明硬性的生产权限隔离", "生产零副作用仍须原件证明",
+            "workflow_dispatch(check_bindings=true, publish=false, rehearsal=false)",
+            "FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN", "FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID",
+            "不得将本地 provisioning token 转存 CI", "不新增第二个 Token/hash 审批变量",
+            "FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT", "GITHUB_SHA",
+            "缺少人工审批或源码不符", "不准入", "不执行生产操作",
+            "不能写成最小权限、原生资格或生产零副作用已通过",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, exception)
+        gate = self.contract.split("### OTA-XC-RELEASE-GATE", 1)[1].split("## 7.", 1)[0]
+        self.assertIn("P41-CF-CREDENTIAL-02", gate)
+        self.assertIn("不放宽生产操作红线", gate)
+        self.assertIn("就用现在这个cf账号，具体怎么做，告诉我", self.decisions)
+        self.assertIn("human environment 审批不由 agent 代签", self.decisions)
+        for name in ("prompt-P4-1-implementation.md", "prompt-P4-4-integration.md"):
+            text = (self.PROMPT_ROOT / name).read_text(encoding="utf-8")
+            self.assertIn("P41-CF-CREDENTIAL-02", text)
+            self.assertIn("不转存本地 provisioning token", text)
+
     def test_decision_status_transition_releases_prompt_blocking(self):
         decision_id = "OTA-DEC-999"
         declared = {decision_id: {"P3-1"}}

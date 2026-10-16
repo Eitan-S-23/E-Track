@@ -1870,3 +1870,71 @@ root index still hashes to
 All selected setup outputs are worktree-local; only the previously authorized own
 Git metadata/object/ref scope is excepted for branch delivery. No PowerShell or
 local native build was used. Historical P41-AUDIT-01 remains attribution-unresolved.
+
+## Existing Account Selected By Owner
+
+On 2026-10-16, after the distinction between resource separation and account-level
+credential isolation was explained, the user explicitly selected the existing
+Cloudflare account. P41-CF-CREDENTIAL-02 now follows this bounded same-account
+owner decision. The earlier request to create an additional account and repeat
+R2 checkout is superseded, not a remaining user prerequisite. Its original
+403/no-create receipt and the protected-setup archive remain unchanged.
+
+Reuse the existing `e-track-firmware-p41-test` Worker and D1, the
+`e-track-firmware-p41-test-releases` bucket and their existing qualification
+fixtures. The account ID is already known privately. No new account, resource
+migration, fixture rebinding or new R2 subscription is needed for this route.
+Same-account Workers edit capability can reach other data through bindings; this
+accepted limitation must not be relabelled as hard production-permission isolation.
+It does not authorize an operation on the old Trace service or production data.
+
+The remaining owner input is a dedicated `e-track-p41-ci` account-owned API token
+for the existing account, not reuse/export of the local provisioning credential.
+The suggested initial CI permissions are `Account Settings Read`,
+`Workers Scripts Edit`, `Workers R2 Storage Edit` and `D1 Read`. The native adapter
+binds only R2/D1, D1 snapshots use SELECT, and registration uses the separate
+test-Worker deploy token. This CI route does not deploy the service, migrate D1
+or provision KV, so `Workers KV Storage Edit` and `D1 Edit` from the local setup
+credential are not requested for it. Exact native-preview compatibility is still
+unqualified; these permissions are not an experimentally proved minimum or a PASS.
+
+The already-created private input is
+`D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/p41-ci-token.txt`.
+The owner only fills its token value; the earlier blank isolated-account JSON is
+not the input for this route. Do not request another account ID, a Global API key,
+all-accounts access, DNS/zone, billing or token-management permissions.
+
+Before credential export or protected dispatch, propagate this owner decision to
+the applicable current shared contract/Spec and verify the exact configuration.
+The existing native Linux qualification, human environment approval, target/base
+approval and independent acceptance obligations remain. No actual cloud/GitHub
+mutation or dispatch is performed by recording this decision. P4-1 stays in
+progress; no main merge, production unlock, release, device action, unrelated
+card start or independent-acceptance claim is included.
+
+### Dedicated CI Credential Received And Read-Checked
+
+The user supplied a separate token through `.cache/cf-auth-input/p41-ci-token.txt`.
+It differs from the local provisioning token. On 2026-10-16, five actual
+Cloudflare GETs succeeded: token verification (`active`), the expected account,
+the existing test Worker settings, its exact R2 bucket and its exact D1 database.
+The public test Worker health check also succeeded with `environment=staging`.
+The token is unprefixed and the standard user-token verification endpoint accepts
+it; do not claim account-owned status or invent a prefix requirement. Its full
+policy was not inspected, and no minimal-permission or hard-isolation claim is made.
+
+The sanitized closed receipt is `.cache/p41-existing-account-20261016/probe.json`;
+the helper records only selected fields and redacts the account ID and credentials.
+No resource write, preview session, schema change or fixture upload occurred.
+Native Wrangler qualification and actual protected real-key compilation are still
+unperformed. The updated current shared contracts and both consumer Specs now
+record the actual same-account owner decision, with production/approval limits
+unchanged; historical setup/readiness evidence is not rewritten.
+
+The bounded governance regression passes 24/24, exit 0, including the new scope
+guard. Original sanitized probe/helper/documentation and closed test streams are
+retained in `docs/ota-exec-notes/P4-1-current-account-2026-10-16/`. Product runtime,
+workflow, registration schema and fixed qualification targets remain unchanged.
+The next action is to bind the protected configuration to the committed revision
+and dispatch only `check_bindings=true,publish=false,rehearsal=false`; the human
+owner, not the implementation agent, approves the existing environment gate.

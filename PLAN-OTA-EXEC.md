@@ -751,7 +751,7 @@
 ## 7. P4 CI/CF(估时 2-3d;门槛:P0 完成,可与 P1/P2 并行;验收:正式发布→推送→BLE 升级全链演练)
 
 #### P4-1 firmware-build.yml 正式发布链
-状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-16(18c4da4 实现整改及四条实际 PR CI 通过，普通/密钥绑定 GCC 各 640 warnings/0 errors，原件已归档。用户授权后已配置 firmware-rehearsal 环境、精确分支/人工审批及非开发 OTA Secret，gate 保持 false；Cloudflare GET user 返回 403/9109，未发创建请求，需 owner 创建无生产资源的测试 account、完成 R2 checkout 并填入私有 Token。真实原生绑定/密钥运行验证、目标/descriptor 审批、canonical rehearsal、完整生产零副作用及新 agent 整卡验收未完成；不先合并 main)
+状态: 进行中 ｜ 认领: Codex(P4-1 实现 agent) / 2026-10-15 ｜ 更新: 2026-10-16(18c4da4 开发自测及 7b85f9f 记录提交的四条实际 PR CI 通过，既有 GCC 原件各 640 warnings/0 errors。受保护环境/真实 OTA Secret 已配置，gate=false。用户选择现有 CF account 的局部权限例外已传播到共享合同和两份 Spec，治理回归 24/24；新专用 CI Token 验证及 account/Worker/R2/D1 GET、测试服务 health 均通过，未写云资源。接下来绑定精确提交并发起 check-only 原生检查，仍需人工 environment 审批；真实密钥验证、目标/descriptor、canonical rehearsal、生产零副作用及新 agent 整卡验收未完成，不先合并 main)
 - 目标: §6.1 制包顺序①-⑥:构建占位头 app.bin→`etu_pack.py --finalize`→full.etu+patch.etu(基版=上一正式版**最终** bin,从 R2/Release 取,记录 from_image_sha256)→**bspatch 自验逐字节比对(工具 exit code 恒 0,以 stdout+比对判定)**→recovery 资产(app.bin+尾 8B)→GitHub Release 三资产→注册链;`firmware-production` environment 人工审批;vcode>CF 现值校验;PRE-1 新编码。
 - 依赖: PRE-3/4、P0-2、P4-2；P4-2 是前置任务，P4-1 不得先行。
 - 验收: P5 前按 OTA-XC-RELEASE-GATE 完成一次获授权的隔离 staging rehearsal，三资产/readback/metadata/注册及生产零副作用证据齐全；不创建 production Release。与 P4-4 共用这次原件。正式 Release/晋升在 P5 通过及 owner/environment 审批后，仍须规定的重建与哈希一致性检查。

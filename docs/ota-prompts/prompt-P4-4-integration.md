@@ -27,6 +27,7 @@ task_id: P4-4
 - P4-2 Worker/R2 endpoint 已部署到目标环境。
 - 以上是配置准备所需的已实现接线与环境，不是要求 P4-1 已完成验收。按 `OTA-DEC-016`，两卡共用一次 staging rehearsal，分别判定发布链与配置要求，不相互等待完成态。
 - rehearsal 与 production 的隔离、证据、独立 reviewer、人工 gate 和 production 审批已传播到并冻结在 `OTA-XC-RELEASE-GATE` 与 `OTA-XC-SECRETS`。
+- 现有账户专用 CI Token 按 `OTA-XC-SECRETS` 的 `P41-CF-CREDENTIAL-02` 用户例外消费；复用测试资源，不重复开户/订阅，不转存本地 provisioning token，不把同账户能力边界或配置回执冒充硬权限隔离及演练通过。本接口修订不启动本卡。
 - 用户/owner 可操作 GitHub environment、repository secrets/variables、Cloudflare token/bucket/Worker secrets。
 
 ## 权威合同

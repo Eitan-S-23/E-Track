@@ -100,7 +100,7 @@
 - 候选方案：A. 两阶段：锁内只做三资产和 metadata/R2 staging 演练，独立复核通过后人工置 true，再做一次 production dispatch；B. 临时置 true 完成演练后再决定是否保留；C. 移除 gate。
 - 推荐方案及理由：推荐 A。它保留冻结的 fail-closed gate，不用临时绕过生产保护；第二阶段才创建正式 Release 和 ready 记录。需进一步明确 staging 资源和“演练通过”的证据边界。
 - 状态：`DECIDED`。
-- 用户裁定：`A`；独立 rehearsal/staging、生产零副作用证据、独立 reviewer 和人工可审计 gate。原话见记录 6。
+- 用户裁定：`A`；独立 rehearsal/staging、生产零副作用证据、独立 reviewer 和人工可审计 gate。原话见记录 6。2026-10-16 的 `P41-CF-CREDENTIAL-02` 仅接受已有测试资源所在账户的专用 CI Token 潜在能力边界，见记录 16；不解除生产操作、独立验收或 gate 限制。
 - 决策责任人：仓库 owner + 发布治理审查人。
 - 受影响任务：`P4-1`, `P4-4`, `P5-1`, `P5-2`。
 - 最终落盘目标：`docs/ota-cross-system-contracts.md` 的 `OTA-XC-RELEASE-GATE`、`OTA-XC-SECRETS`。
@@ -566,6 +566,23 @@ rehearsal 证据仍各自保留，原授权/失败记录不改写。
 先合并整个 P4-1 才能验收的额外限制。root 可落实经独立审阅的技术条款并在待合并分支
 交付，新的非实现 agent 随后冻结精确实现并验收。合并由验收收口阶段另行获权处理；
 这些原话不构成环境/凭据、descriptor、正式演练、production 或设备操作的隐含批准。
+
+### 记录 16（2026-10-16，P4-1 现有 CF 账户与专用 CI Token）
+
+在 agent 说明同账户测试资源独立、审批和操作受控，但 Token 不具备硬性的生产权限隔离后，
+用户逐字要求：
+
+> 就用现在这个cf账号，具体怎么做，告诉我
+
+agent 随后给出专用 CI Token 的配置和私有输入文件，用户逐字回复：
+
+> 已填
+
+这是对本次 `P41-CF-CREDENTIAL-02` 同账户方案的选择和专用凭据提供，不是对账户级硬隔离
+的证明。复用已建测试 Worker/D1/R2，不重建账户或订阅。允许按已授权范围配置受保护环境
+并进行开发绑定资格检查；原生结果仍须实测，human environment 审批不由 agent 代签。
+不授权 production 数据/服务操作、发布解锁、main 合并、设备操作或启动其他任务卡；
+canonical rehearsal、生产零副作用证据与新的独立整卡验收仍按既有责任归属执行。
 
 ## CONFIRM_RECOMMENDED 参数快照
 
