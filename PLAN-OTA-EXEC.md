@@ -773,7 +773,7 @@
 - 启用交接: P42-EXT-02 的真实 legacy/manifest 仍由 Cloudflare/D1 迁移责任人与 OTA 发布链审查人共同负责，root 协调；P42-EXT-03 的绑定/cutover/Access/真实上传回读按验收记录交 P4-4、P4-3、P4-1/P3-5 的相应门槛。均未宣称实测通过，不得未对账就启用规范读取；P5/生产门槛不变。
 
 #### P4-3 admin 撤回语义与运营开关
-状态: 进行中 ｜ 认领: Codex P4-3 实现 agent / 2026-10-17 ｜ 更新: 2026-10-17(独占 worktree 开工，开发自测与独立验收分离)
+状态: 进行中 ｜ 认领: Codex P4-3 实现 agent / 2026-10-17 ｜ 更新: 2026-10-17(API/UI 开发自测与原生 CI 通过；933b790 的 Admin 编译路由 3/3，部署输入已绑定来源与哈希；真实环境演练仍未完成，不具备整卡完成验收交接条件)
 - 目标: §6.2-3+"回滚→撤回(retract)"更名:UI 文案/API 注释/确认弹窗写明"仅影响未升级设备,已升级设备不可降级,救治=发更高 vcode";渠道停发开关、reason 必填、差分基版保留策略、晋升事务原子性验证。
 - 验收: admin 端演练截图+接口测试。
 - 证据: `docs/ota-exec-notes/P4-3-implementation-2026-10-17.md`；基线 `a96aa03da14a912aaf783d875d6a379846c21289`，P4-2 实现已交付；真实 Access/Admin 演练及本卡独立验收尚未执行。
@@ -908,6 +908,7 @@
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
 
+- 2026-10-17 | Codex P4-3 implementation continuation | P4-3 only, IN_PROGRESS | Source 933b790; Cloudflare 39018754889 checks/build-only input successful: native Worker 259/259, mock UI 12/12, compiled router 3/3. Initial smoke 0/4 failure and offline parser failure retained. Real Admin exercise remains NOT_RUN pending the specific target/fixture scope and live Access owner input; it is still implementation-owned, not a full-card acceptance handoff. No deployment/platform mutation, other card, main merge or device action.
 - 2026-10-17 | Codex P4-3 implementation | P4-3 only, IN_PROGRESS | Authorized exclusive worktree and branch start at a96aa03; reconcile the delivered P4-2 dependency and exact dispatch set without changing dependency rules. Development checks, native CI, real Access exercise and independent acceptance remain distinct. See docs/ota-exec-notes/P4-3-implementation-2026-10-17.md. No other card, main merge, deployment, platform mutation or device operation.
 
 - 2026-10-15 ｜ Codex(P4-2 接续) ｜ P4-2(进行中) ｜ 承接原会话完成专属分支提交/推送及原生后端 CI，修复 R2 HTTP/raw ETag 混用，校正替身与新增反例；最终 `fc4fbbb` 的 CI `38591559979` 三项 job 成功、Worker 156/156，本地完整回归 190/190。三轮原件已归档，R2 修复独立复核另行登记；真实 legacy/D1/R2/Access 与正式验收仍待办，不合并 main、不部署、不追加 OTA。详见 `docs/ota-exec-notes/P4-2-implementation-2026-10-14.md`。
