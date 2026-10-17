@@ -1,0 +1,16 @@
+{
+  "label": "live-evidence-archive-03",
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+  "command": "node",
+  "args": [
+    ".cache\\p43-evidence.cjs",
+    "archive-live",
+    "03"
+  ],
+  "started": "2026-10-17T13:31:38.114Z",
+  "ended": "2026-10-17T13:31:46.358Z",
+  "exitCode": 0,
+  "signal": null,
+  "node": "v24.13.0",
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\.cache\\p43\\logs\\live-evidence-archive-03.log"
+}

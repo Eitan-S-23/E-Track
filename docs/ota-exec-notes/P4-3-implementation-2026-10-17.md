@@ -84,8 +84,8 @@ TLS, credential or Git configuration was modified.
 | P43-DEP-01 | Inherited dependency advisories, including runtime Hono; not caused by new Playwright | Exposure analysis now bound to checked Admin/live Worker bytes; listed vulnerable paths not used by this deployment. Root dependency triage remains open; no blanket audit fix or risk waiver. |
 | P43-EXT-01 | Real Access/Admin exercise and original before/after/audit/screenshots | NOT_RUN, implementation-owned. Isolated operation authority is granted; current Pages authentication, real Access role inputs and P43-OBS-01 remain actual prerequisites, not a request to approve the task again. |
 | P43-AUTH-01 | Existing platform identity/capability and unnecessary repeated login work | Pages entry resolved by the original Edge's successful official OAuth callback, same-account readback and real Pages list/create/configure. Previous timeouts remain. This is platform authentication, not a real Admin Access owner session. |
-| P43-ACCESS-01 | Actual Access configuration capability and existing role inputs | All three available same-account credentials reject the exact new Access application with 403/code 1010/auth.forbidden; readback finds no application. Need an existing Access-capable private credential, not another Pages login or repeated task approval. Old secret names are configured but their values are not readable. |
-| P43-OBS-01 | Test Worker persists invocation logs with URL query redaction disabled | Block signed-URL issue/use pending the narrowly scoped logging disposition below; no probe using a live signed URL, and no unapproved Worker setting change. |
+| P43-ACCESS-01 | Actual Access configuration capability and existing role inputs | All three same-account credentials rejected application creation with 403/1010. Current OAuth is explicitly limited to Pages write plus identity/account reads; both API tokens remain active but own-policy reads return 403/9109. Exact API-token scopes remain unknown. Official refresh works without another login. Need Access-capable same-account input, not repeated task approval or token-management permission. |
+| P43-OBS-01 | Test Worker persists invocation logs with URL query redaction disabled | Signed-URL issue/use remains blocked pending the narrow logging disposition. Both existing API tokens also reject a dry, exact-Worker telemetry query with 403/10000; no unobservable health marker or signed URL was sent. Actual log verification remains NOT_OBSERVED; no unapproved setting change. |
 | P43-ACCEPT-01 | Full-card acceptance handoff to the original non-implementer | NOT_READY for a full-card completion handoff while P43-EXT-01 is missing. Code pre-review alone is possible; independent acceptance NOT_RUN. |
 | P43-REPORT-01 | Agent said the work was finished and acceptance could begin despite the missing required exercise | Reporting/early-handoff error corrected here. Development results remain valid; they do not waive missing evidence or transfer its production to the reviewer. |
 
@@ -760,3 +760,138 @@ product remains the checked `933b790` input, with no new product test claim and
 no duplicate CI/build solely for these configuration records. This increment
 does not unlock another card, authorize broader credentials/Worker changes,
 complete P43-EXT-01 or constitute independent acceptance.
+
+## Existing Token Capability Reconciliation
+
+This continuation starts at committed/pushed
+`9a3d2322954ed57933ac350b93a08d5e78f71941` in the same exclusive worktree and
+branch. The user asked why the existing access token could not complete the
+remaining work. The operation authority is already granted; this investigation
+does not request it again. Product input remains `933b790`, with no product edit,
+build, CI rerun, new account, cloud configuration mutation or Admin exercise.
+
+### Actual Credential Observations
+
+The original project and P41 API credentials each return HTTP 200 with
+`status=active` from `GET /user/tokens/verify`. Their own-token detail requests
+each return HTTP 403/code 9109, `Unauthorized to access requested resource`.
+Raw response bodies remain private; public receipts contain no credential value.
+Neither response discloses the exact policy. These observations must not be
+reported as invalid credentials, proof of a particular missing API-token scope,
+or a reason to request API-token management permissions. The existing P41
+`token-policy-diagnostic.json` has the same historical limitation.
+
+The successful original-Edge OAuth configuration explicitly records only:
+`user:read`, `account:read`, `pages:write`, `offline_access`. It contains no Access
+write grant. The official API reference for application creation requires
+`Access: Apps and Policies Write`; the separate token-detail endpoint requires
+`API Tokens Read` or `API Tokens Write`. The latter is only diagnostic and is not
+needed for the P4-3 operation. No existing token, permission or role was changed,
+and none of the three refused Access creation attempts was repeated.
+
+The official Pages documentation was checked as an alternative existing route.
+Its built-in access switch initially protects preview URLs, not this project's
+main `pages.dev` origin. Protecting the main origin still requires configuring
+the Access application's public hostname. No undocumented endpoint, wildcard
+application, everyone/bypass policy, old-Trace edit or unprotected deployment was
+used to evade that requirement.
+
+The known original E-Track/standalone Trace secret inputs, the standalone
+`.bootstrap/staging-summary.json`, and the current process environment were
+checked for the six existing Access/role/origin fields. None supplies those
+values. This is a bounded original-input check, not a claim that no other private
+input exists. The deployed old-Trace secret names remain configured but not
+value-readable. No owner email is guessed from platform or GitHub identity.
+
+### Normal Refresh, Not Another Login
+
+The existing OAuth access token expired at `2026-10-17T13:07:12.283Z`. The thin
+Pages adapter now uses the installed official Wrangler's noninteractive refresh
+when needed, with `CI=true`, ignored stdin and all controlled state under the
+existing private worktree directory. The installed auth implementation was
+checked: failed noninteractive refresh exits rather than launching another login.
+The adapter also verifies that refresh does not change the stored scopes.
+
+`live-pages-readback-03` completed with exit 0. The refreshed expiry is
+`2026-10-17T14:25:02.334Z`, scopes are unchanged, and both exact-account Pages
+GETs returned 200. The isolated production/preview settings equal their earlier
+readback; the old Trace settings and canonical deployment remain unchanged.
+The new origin still returns 522 without an Access redirect because no code or
+Access application has been deployed. It is not an owner-login-ready URL.
+No user-directory configuration was updated or browser session requested.
+
+### Safe Log Observation Route
+
+Before sending even a harmless health query marker, the existing API tokens were
+checked against the documented telemetry query endpoint. Each request is limited
+to `cloudflare-workers`, the exact `e-track-firmware-p41-test` service, a unique
+non-secret marker, a two-second initial window, 10 results and `dry=true`; no
+query/result is requested to be persisted. Both return HTTP 403/code 10000.
+Accordingly no health marker was sent and no absence-of-logs claim is made.
+The API documents `Workers Observability Write` for this read query despite its
+non-persisting semantics. No attempt to add that permission was made.
+
+P43-OBS-01 retains the established settings-based risk. It still needs a scoped
+test-Worker logging disposition and an effective observation route before any
+signed URL is issued or used. A harmless-marker readback is prepared but its
+successful branch has not run. Syntax checks are not live-log evidence.
+
+### Minimum Remaining Intervention And Ownership
+
+P43-ACCESS-01 is a credential-capability/input gap, not another request to approve
+Pages deployment or the authorized stable/beta matrix. Supply an existing private
+same-account credential that can edit Access applications/policies and read the
+existing organization/IdP configuration. If none exists, creating or widening
+a credential requires a new, specifically scoped owner decision because the
+current grant explicitly excludes permission expansion. Do not add token
+management, switch accounts or request another Pages OAuth login for this task.
+
+P43-OBS-01 separately requires permission to change only the named test Worker's
+invocation/query-redaction settings, without code upload or binding changes, and
+to observe the non-secret verification event. This was not implicitly authorized
+by the user's question about possessing a token. Root/owner must resolve that
+precise additional boundary; safe preparation and the already-granted work do
+not need reauthorization. No cookie/JWT/token should be sent in chat.
+
+After those prerequisites, this implementation agent still owns Access setup,
+the checked Admin deployment, authentic owner login preparation, the finite live
+matrix and final-state evidence. The original independent reviewer receives one
+completed stable batch, not responsibility for doing these missing steps.
+Required real UI/session/revision/audit evidence remains NOT_RUN. The prior native
+259/259, mock UI 12/12 and router 3/3 results remain source-bound development
+evidence only; this continuation adds no product-test or acceptance pass count.
+
+### Third Live Increment And Write Audit
+
+`live-channel-state-03` completed three SELECT-only requests, each HTTP 200 with
+`rows_written=0` and `changed_db=false`. Both channels remain null/revision 0/both
+flags 0, both sample releases remain ready/unarchived and Admin idempotency is
+empty. No final high-pointer state is claimed before the exercise runs.
+
+`P4-3-dev-2026-10-17/live-preparation-03.zip` contains 85 verified entries,
+158860 bytes, SHA-256
+`673fe9b91329ef9108f1b3b31dd6003c37d5d9cbbec12b561d7caccb46aff8d1`.
+The inventory verifies every extracted byte and all four preceding archives;
+known-secret and authorized-URL scans pass. The adjacent `-archive.log` and
+`-archive.json` are byte-identical copies of the completed archive output and
+receipt. Private API bodies, OAuth configuration and all credential values are
+excluded. No previous archive or failure is rewritten.
+
+The increment retains 22 closed tool receipts, all exit 0, and 11 individual HTTP
+receipts: seven 200 and four 403. Collector exit 0 means the diagnostic completed,
+not that a denied API succeeded. The Pages-origin 522 is separately recorded in
+its readback summary. These are collection counts, not product-test counts.
+An early read-only inline Node command again failed on cmd argument quoting before
+any write; its original output remains in the tool transcript, not a test log.
+Subsequent scripts avoid that route. Helper syntax checks and the record diff
+check pass; Git's LF-to-CRLF advisory remains visible.
+
+`live-write-audit-03` exited 0, checking 9754 files / 1967 directories with no
+links, escaped paths or traversal errors, and no remaining live collector.
+All task-selected writes are in this worktree, apart from the previously approved
+task Git metadata. The global Wrangler/npm/portable-browser locations show no
+matching changes. Concurrent normal-Chrome and Windows PowerShell startup-cache
+timestamps remain attribution-unknown; no browser or PowerShell was launched and
+no external path was cleaned. The normal refresh only updated the contained
+private Wrangler configuration. This record-only increment is not deployment,
+independent acceptance or a transfer of the unfinished work to the reviewer.
