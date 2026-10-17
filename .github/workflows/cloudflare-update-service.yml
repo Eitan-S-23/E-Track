@@ -20,6 +20,12 @@ on:
       - "app/bluetooth_flutter_Trace/CF-UPDATE-BACKEND-PLAN.md"
       - "CF-UPDATE-BACKEND-REVIEW-LOG.md"
   workflow_dispatch:
+    inputs:
+      prepare_admin_bundle:
+        description: "Build a source-bound Admin input without deploying or using cloud credentials"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -133,3 +139,88 @@ jobs:
 
       - name: Run invariant tests
         run: npm test
+
+  admin-bundle:
+    name: Admin Deployment Input (No Cloud Writes)
+    if: github.event_name == 'workflow_dispatch' && inputs.prepare_admin_bundle
+    needs: [public, admin, worker]
+    runs-on: ubuntu-latest
+    env:
+      HOME: ${{ github.workspace }}/.cache/admin-bundle-home
+      XDG_CONFIG_HOME: ${{ github.workspace }}/.cache/admin-bundle-config
+      XDG_CACHE_HOME: ${{ github.workspace }}/.cache/admin-bundle-cache
+      TMPDIR: ${{ github.workspace }}/.cache/admin-bundle-tmp
+      npm_config_cache: ${{ github.workspace }}/.cache/admin-bundle-npm
+      WRANGLER_LOG_PATH: ${{ github.workspace }}/.cache/admin-bundle-logs/wrangler.log
+      WRANGLER_SEND_METRICS: "false"
+      CLOUDFLARE_API_TOKEN: ""
+      CLOUDFLARE_ACCOUNT_ID: ""
+      P43_ADMIN_BUNDLE_DIR: ${{ github.workspace }}/.cache/admin-deployment-input
+    defaults:
+      run:
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/admin
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Prepare contained build paths
+        run: |
+          test ! -L "$GITHUB_WORKSPACE/.cache"
+          test "$(realpath -m "$P43_ADMIN_BUNDLE_DIR")" = "$(realpath "$GITHUB_WORKSPACE")/.cache/admin-deployment-input"
+          mkdir -p "$HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$TMPDIR" "$GITHUB_WORKSPACE/.cache/admin-bundle-logs" "$P43_ADMIN_BUNDLE_DIR/public"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: app/bluetooth_flutter_Trace/cloudflare/update-service/admin/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Compile Admin Pages input only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -a public/. "$P43_ADMIN_BUNDLE_DIR/public/"
+          node node_modules/wrangler/bin/wrangler.js pages functions build functions --outdir "$P43_ADMIN_BUNDLE_DIR/public/_worker.js" --output-routes-path "$P43_ADMIN_BUNDLE_DIR/public/_routes.json" --build-output-directory "$P43_ADMIN_BUNDLE_DIR/public" --compatibility-date 2026-06-28 --compatibility-flag nodejs_compat --metafile "$P43_ADMIN_BUNDLE_DIR/bundle-meta.json" 2>&1 | tee "$GITHUB_WORKSPACE/.cache/admin-bundle-logs/build.log"
+          cmp public/index.html "$P43_ADMIN_BUNDLE_DIR/public/index.html"
+          test -s "$P43_ADMIN_BUNDLE_DIR/public/_worker.js/index.js"
+          test -s "$P43_ADMIN_BUNDLE_DIR/public/_routes.json"
+
+      - name: Check compiled routing in native workerd
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test test-bundle.mjs 2>&1 | tee "$GITHUB_WORKSPACE/.cache/admin-bundle-logs/native-smoke.log"
+
+      - name: Bind deployment input to source and bytes
+        run: |
+          git rev-parse HEAD > "$P43_ADMIN_BUNDLE_DIR/source-commit.txt"
+          printf '%s\n' "$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT" > "$P43_ADMIN_BUNDLE_DIR/source-run.txt"
+          printf '%s\n' 'BUILD ONLY. Not deployed, no real Access session or Admin exercise. No environment configuration or secret is included. Verify the approved isolated target/bindings before any deployment.' > "$P43_ADMIN_BUNDLE_DIR/purpose.txt"
+          cd "$P43_ADMIN_BUNDLE_DIR"
+          find public -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Preserve build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-bundle-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/admin-bundle-logs/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Preserve checked deployment input
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-deployment-input-${{ github.sha }}
+          path: .cache/admin-deployment-input/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

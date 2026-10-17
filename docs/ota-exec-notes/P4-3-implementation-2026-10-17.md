@@ -246,3 +246,44 @@ with zero links, escapes or unreadable paths. All controllable local outputs,
 downloads and cleanup targets were inside the authorized worktree; only task Git
 metadata used the explicitly approved shared `.git`. Hosted CI uses the approved
 workflow runners; its new UI outputs are contained in `GITHUB_WORKSPACE`.
+
+## Continued Real Exercise Preparation
+
+The continuation starts at `15923306da6d249604ddbd6818141c69be191adc` in the same
+exclusive worktree. P43-EXT-01 remains owned by this implementation agent.
+
+On 2026-10-17 at 06:56 UTC, a bounded credential-free GET batch obtained current
+entry observations, not an authenticated exercise:
+
+| Read-only target | Observation / limit |
+| --- | --- |
+| Existing `trace-update-admin-staging.pages.dev` home, session and firmware channel list | All return 302 to the `sulovehuang.cloudflareaccess.com` login service. Redirects were not followed; cookie values and login query tokens were not persisted. This proves an Access gate is reachable, not a valid owner session or P4-3 deployment. |
+| Existing `e-track-firmware-p41-test.tangjichentudou.workers.dev/healthz` | HTTP 200, `environment=staging`, requestId `fdc38f43-26a8-4840-aefd-f70b0972104f`. Health is not proof of current data/bindings or authority to mutate this P4-1 resource. |
+| Current task process | No task-provided Admin origin, Access session state or Cloudflare/Access configuration variables are present. No private credential file or user browser profile was read; this is not a claim that no credentials exist elsewhere. |
+
+Original sanitized observations are `.cache/p43/live-entry-01.json`; the closed
+command receipt/log is `live-entry-01` under `.cache/p43/logs/`. Ordinary logs
+contain no cookie value, JWT, signature, secret or raw idempotency key.
+
+The tracked Admin deployment configuration still binds `trace-update-staging`
+(`0133ad9e-d4a2-4fef-a659-4f2bf3d3a645`) and `trace-update-staging-releases`.
+Those protected old Trace resources must not be used as an assumed P4-3 sandbox.
+The existing deploy helper's `--project-name` changes the Pages name, not these
+bindings. It was read, not executed. The P4-1 record identifies isolated D1
+`2617e1e1-956f-42ce-a465-da56d84abf06` and bucket
+`e-track-firmware-p41-test-releases`, but their P4-1 authorization is not reused.
+
+The checks workflow now has an explicit build-only `prepare_admin_bundle` input.
+Its optional job depends on all checks, has blank cloud credentials and contained
+paths, uses official Pages Functions compilation, exercises the compiled router
+in native workerd, and archives exact source/run/file hashes. This closes the
+previous absence of a checked Admin deployment input without building locally,
+deploying, touching real channels or rerunning P4-1's release rehearsal.
+Native execution and artifact results for this new input are pending below.
+
+The next real-operation entry needs a specifically approved P4-3 Admin target
+and D1/R2 fixture scope, plus an actual owner Access login route. The existing
+authorization covers this branch's worktree/Git/two check workflows, not the
+deployment/configuration/channel mutations explicitly excluded at entry. The
+implementation agent must provide the exact proposed isolated operation boundary
+rather than silently use the old service or claim mock evidence is sufficient.

@@ -127,3 +127,21 @@ blocked. It covers bilingual confirmation/cancel/conflict, role controls,
 independent switches, unknown results, same-key recovery replay, actor changes,
 failed reads and mobile layout. CI preserves screenshots, raw UI output and the
 checkout SHA for 14 days. These are development checks, not independent acceptance.
+
+## Source-Bound Deployment Input
+
+For a separately authorized real exercise, dispatch the existing
+`cloudflare-update-service.yml` at the intended source commit with
+`prepare_admin_bundle=true`. After all three check jobs pass, Linux builds Pages
+Functions with the pinned Wrangler and copies the unchanged static UI. A native
+workerd smoke check exercises the compiled router and unauthenticated rejection.
+The artifact includes source SHA/run, per-file SHA-256 and a build-only notice;
+it includes no deployment configuration or credential. This does not deploy or
+establish a real Access session.
+
+Do not blindly run the historical staging deploy command for P4-3. The tracked
+`admin/wrangler.jsonc` still names the protected old Trace staging database and
+bucket. `--project-name` alone does not rebind them. The approved isolated target,
+actual D1/R2 bindings, matching Access issuer/audience/owner, firmware download
+origin/signing configuration and ready fixtures must be reconciled first.
+Do not modify the old service or import another task's operation authorization.
