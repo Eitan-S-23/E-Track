@@ -23,6 +23,8 @@ before(async () => {
   runtime = new Miniflare({
     modules: true,
     scriptPath: entry,
+    // The compiled artifact is outside the package cwd; module names cannot start with "..".
+    modulesRoot: path.dirname(entry),
     compatibilityDate: "2026-06-28",
     compatibilityFlags: ["nodejs_compat"],
     bindings: {

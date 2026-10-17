@@ -281,6 +281,18 @@ previous absence of a checked Admin deployment input without building locally,
 deploying, touching real channels or rerunning P4-1's release rehearsal.
 Native execution and artifact results for this new input are pending below.
 
+`89050bcb7a7a0ed884c149a8fb53c324eb2e27c6` was pushed successfully and dispatched
+with the build input enabled as run `39018015096`. Public/Admin/Worker checks
+passed, and Pages Functions compilation succeeded. The native bundle smoke
+failed before requests: Miniflare used the package cwd as its module root while
+the artifact lives under the worktree `.cache`, producing a `..` module name
+that workerd rejects. Node reports 0 passed / 4 failed / 0 skipped, including the
+failed cleanup hook. The failure and exit 1 remain in `bundle-input-failed-log-01`
+and the original run ZIP. This is P43-BUNDLE-01, a new smoke-harness configuration
+failure, not evidence of deployed routing behavior. The minimal repair explicitly
+sets `modulesRoot` to the checked artifact entry directory. No assertion, runtime
+guard, cloud credential or product behavior changes; a new native run is required.
+
 The next real-operation entry needs a specifically approved P4-3 Admin target
 and D1/R2 fixture scope, plus an actual owner Access login route. The existing
 authorization covers this branch's worktree/Git/two check workflows, not the
