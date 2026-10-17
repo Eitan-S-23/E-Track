@@ -1,0 +1,46 @@
+{
+  "purpose": "Closed receipt for the second live-preparation increment",
+  "runnerReceipt": {
+    "label": "live-preparation-archive-02",
+    "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+    "command": "node",
+    "args": [
+      ".cache/p43-evidence.cjs",
+      "archive-live",
+      "02"
+    ],
+    "started": "2026-10-17T12:44:35.657Z",
+    "ended": "2026-10-17T12:44:42.898Z",
+    "exitCode": 0,
+    "signal": null,
+    "node": "v24.13.0",
+    "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\.cache\\p43\\logs\\live-preparation-archive-02.log"
+  },
+  "output": {
+    "archive": {
+      "path": "live-preparation-02.zip",
+      "sizeBytes": 76514,
+      "sha256": "dd41696aab400cf09f2baee8012176dcb6594e12e7038ae38a82d51c742dead5",
+      "entries": 80
+    },
+    "checks": {
+      "entryListingAndEveryExtractedByteVerified": true,
+      "knownSecretsScan": "PASS",
+      "authorizedUrlScan": "PASS"
+    },
+    "observations": {
+      "closedToolReceipts": 19,
+      "collectorExitCodes": {
+        "0": 14,
+        "1": 4,
+        "128": 1
+      },
+      "httpReceipts": 23,
+      "httpStatusCounts": {
+        "200": 19,
+        "403": 4
+      },
+      "interruptedCollectorWithoutExit": "original-capabilities-01"
+    }
+  }
+}

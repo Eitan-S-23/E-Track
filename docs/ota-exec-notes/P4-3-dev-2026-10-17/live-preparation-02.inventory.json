@@ -1,0 +1,469 @@
+{
+  "createdAt": "2026-10-17T12:44:42.766Z",
+  "baseline": "a96aa03da14a912aaf783d875d6a379846c21289",
+  "recordedHead": "9faade453d3d920c21335e1a0764434ce234600e",
+  "testedAdminSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+  "nature": "Live preparation/read-only observations and preserved tooling failures. NOT a completed real Admin exercise or independent acceptance.",
+  "precedingArchives": [
+    {
+      "path": "originals.zip",
+      "sizeBytes": 32034177,
+      "sha256": "4233f1b5ed8f3254c2f5380acfafd8a90aa5bd0cce27072ad001ca9bc9576a94",
+      "entries": 182
+    },
+    {
+      "path": "continuation-01.zip",
+      "sizeBytes": 17673827,
+      "sha256": "0b63d44c60fe0c6bf0a6294da23c400ee67eaec1026571c676e6985de13ba79e",
+      "entries": 135
+    },
+    {
+      "path": "live-preparation-01.zip",
+      "sizeBytes": 109261,
+      "sha256": "91ddaca28bf8abd4a0b1d19dd293fb6d68b19744b096abceb925a9ffec9eec10",
+      "entries": 132
+    }
+  ],
+  "archive": {
+    "path": "live-preparation-02.zip",
+    "sizeBytes": 76514,
+    "sha256": "dd41696aab400cf09f2baee8012176dcb6594e12e7038ae38a82d51c742dead5",
+    "entries": 80
+  },
+  "checks": {
+    "entryListingAndEveryExtractedByteVerified": true,
+    "knownSecretsScan": "PASS",
+    "authorizedUrlScan": "PASS"
+  },
+  "observations": {
+    "closedToolReceipts": 19,
+    "collectorExitCodes": {
+      "0": 14,
+      "1": 4,
+      "128": 1
+    },
+    "httpReceipts": 23,
+    "httpStatusCounts": {
+      "200": 19,
+      "403": 4
+    },
+    "interruptedCollectorWithoutExit": "original-capabilities-01"
+  },
+  "exclusions": [
+    "Private inputs/configuration/OAuth URLs/browser state",
+    "Worker private multipart source",
+    "Browser binaries/partial downloads/caches",
+    "Earlier unchanged evidence"
+  ],
+  "requiredLiveAdminExercise": "NOT_RUN",
+  "newProductTests": 0,
+  "cloudBusinessMutations": 0,
+  "cloudConfigurationChanges": [
+    "Created the isolated P4-3 Pages project",
+    "Configured only its production test bindings and matching signing settings"
+  ],
+  "accessCreation": "Rejected with HTTP 403/auth.forbidden for all three existing credentials; no application created",
+  "login": "Original Edge official OAuth succeeded; matched the approved account; not Admin Access",
+  "entries": [
+    {
+      "path": ".cache/p43-edge-session-probe.py",
+      "sizeBytes": 3054,
+      "sha256": "6c5546c7e7575b55eb43581669d3fafd8eac5e99f4b7edd108f1d76f36764217"
+    },
+    {
+      "path": ".cache/p43-evidence.cjs",
+      "sizeBytes": 18395,
+      "sha256": "986ebf20a9e4c6a3fdb4b19be9f42190aab0a8d189b002e9a8d574fc63b6a1dc"
+    },
+    {
+      "path": ".cache/p43-live.mjs",
+      "sizeBytes": 18812,
+      "sha256": "3b82761dd9920301c38e7b095ed20e54cf7cfef1008bd2ea0886975a68cb7a36"
+    },
+    {
+      "path": ".cache/p43-pages.mjs",
+      "sizeBytes": 15157,
+      "sha256": "9f1f52db1c8ad1e0d8e482bbfd6ec5d2582ef45cb489da71db36849d50348e10"
+    },
+    {
+      "path": ".cache/p43-platform-login.mjs",
+      "sizeBytes": 14237,
+      "sha256": "b3d2553055f22cbe1342805d94770e6fe02dd8b6b44c12025559d536a6d83f75"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-channels-final-receipt.json",
+      "sizeBytes": 555,
+      "sha256": "819527c8bc16211cdd508a8170b43ca76c091124811353a52e5832103bf562f9"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-channels-final.json",
+      "sizeBytes": 1122,
+      "sha256": "26e603bb76db01e91a942ce806ce5a240723fb674d2b2063e0b536e605c0c3b8"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-idempotency-final-receipt.json",
+      "sizeBytes": 547,
+      "sha256": "b96869ec03a47a835e28eaba8b684dfc90156f44c12719f4063148760f4ed96a"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-idempotency-final.json",
+      "sizeBytes": 460,
+      "sha256": "aeb4fae14ca67f3e7a375795571e44e7dafaca6b7fc5868e53b86f8adb892932"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-private-input-shape.json",
+      "sizeBytes": 392,
+      "sha256": "845c3c4d837ad7fb17f12dc5f1334ecc43bb476041ec374009f10f676e304a28"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-releases-final-receipt.json",
+      "sizeBytes": 526,
+      "sha256": "29eca94ed7fc50d9db458b08b03277b2f456e110ce538b2d5247ebdd3c1c2749"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-releases-final.json",
+      "sizeBytes": 1166,
+      "sha256": "98d2ba69936894f11d3b584b2e06b673d56993e7f4247fafa486816c30ebc29f"
+    },
+    {
+      "path": ".cache/p43/live/channel-state-01-summary.json",
+      "sizeBytes": 2003,
+      "sha256": "c56cf10713c06d984a312e2f2fab5c2348bb4d637fe0abeb788c42398fed73b7"
+    },
+    {
+      "path": ".cache/p43/live/edge-session-probe-01.json",
+      "sizeBytes": 666,
+      "sha256": "8895ec896c9cf6d12fc73f2af68655de8b29bfb3941501275b24bf388b296081"
+    },
+    {
+      "path": ".cache/p43/live/pages-configure-01-project-after-configure-receipt.json",
+      "sizeBytes": 351,
+      "sha256": "5f3e440b1a8bb409cba4169ee85f71a8de13503135a1edf340d0eda0d95d8d7b"
+    },
+    {
+      "path": ".cache/p43/live/pages-configure-01-project-before-configure-receipt.json",
+      "sizeBytes": 352,
+      "sha256": "4d70afc88e34299ef01edcf0ecd2b718592678e651ee43cdccc6b103dd00cbaf"
+    },
+    {
+      "path": ".cache/p43/live/pages-configure-01-project-configure-receipt.json",
+      "sizeBytes": 347,
+      "sha256": "595a596db770d42ab078157d79a8daa5bc5bd9c7d0664388ee4061f5fc6807e7"
+    },
+    {
+      "path": ".cache/p43/live/pages-configure-01-summary.json",
+      "sizeBytes": 3715,
+      "sha256": "306e8d9974ed36518f36c8ab130a08a81232a1f6c8d6c088fc0770102594656e"
+    },
+    {
+      "path": ".cache/p43/live/pages-create-01-project-after-create-receipt.json",
+      "sizeBytes": 348,
+      "sha256": "ba3a4953132114398b169832e4ad001ab14fd8091a3a5f0f8907422466273232"
+    },
+    {
+      "path": ".cache/p43/live/pages-create-01-summary.json",
+      "sizeBytes": 1438,
+      "sha256": "84a567aa824325200d09bdf9bafda96f01ee165dc8ab81a92af5d4cf01df003c"
+    },
+    {
+      "path": ".cache/p43/live/pages-inventory-01-access-apps-receipt.json",
+      "sizeBytes": 316,
+      "sha256": "f7cd0aa10aa9bdfb65d9bf9326f058941267c4005c921f7cc15c8eb54e674c36"
+    },
+    {
+      "path": ".cache/p43/live/pages-inventory-01-access-idps-receipt.json",
+      "sizeBytes": 317,
+      "sha256": "6f209a4f44953dbc2472ff31761d46695a95b683bccf97158f9ed12e498f3da4"
+    },
+    {
+      "path": ".cache/p43/live/pages-inventory-01-access-org-receipt.json",
+      "sizeBytes": 388,
+      "sha256": "6f501826386f03e08a699485b19a705885b8cc38d02acf34c92530f1273c1fd7"
+    },
+    {
+      "path": ".cache/p43/live/pages-inventory-01-pages-1-receipt.json",
+      "sizeBytes": 323,
+      "sha256": "0dc765ce2155bd405cda50b1fdfc1e031fa8526d0b9082abe04a163c8594798a"
+    },
+    {
+      "path": ".cache/p43/live/pages-inventory-01-project-trace-update-admin-staging-receipt.json",
+      "sizeBytes": 357,
+      "sha256": "aa9870c461fafd361361dd78e231c8628ac331e02310af5c258f86a1819648c1"
+    },
+    {
+      "path": ".cache/p43/live/pages-inventory-01-summary.json",
+      "sizeBytes": 6539,
+      "sha256": "c9f7d15e9d3004518f3fe4b2c3070a4efda7784c1416b06192df6d0da978b1c3"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-01-app-protect-receipt.json",
+      "sizeBytes": 369,
+      "sha256": "5a7a040b3dbe0939b0cdc19887362b37dda6bebd9c643b7f8bdad0f87257a7aa"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-01-apps-after-protect-receipt.json",
+      "sizeBytes": 323,
+      "sha256": "6d1bd94dbb584a6d55b040e163e4a7da0402103c862ea10ee0c668ed64b063e7"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-01-apps-before-protect-receipt.json",
+      "sizeBytes": 324,
+      "sha256": "d69e5e553b2d6170ae1d7451a9b20600362a9ff4dd6b6dffc2f5e81061288179"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-01-summary.json",
+      "sizeBytes": 1542,
+      "sha256": "a2965a727c343367aaa51c2267cb175bac226dfc9cbe4d6a935ba9d63aa387ff"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-original-01-app-protect-receipt.json",
+      "sizeBytes": 374,
+      "sha256": "f0cbd6aae849557d174528ac430270f64a28c83c698a8ec37cb1907b37d0ddf8"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-original-01-apps-after-protect-receipt.json",
+      "sizeBytes": 323,
+      "sha256": "e05545dd7d8d49f44c251a7706ba311a1337d3288b5b571a25af11fd370443e5"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-original-01-apps-before-protect-receipt.json",
+      "sizeBytes": 324,
+      "sha256": "2fc429a15dcbe417f7ac14a76a46d81f747eedd0636aae8eff141d27b99ce833"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-original-01-summary.json",
+      "sizeBytes": 1564,
+      "sha256": "8ff042be5a205604861317288d363689e61b84aae9b0d2b8474ca413e41a82da"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-p41-01-app-protect-receipt.json",
+      "sizeBytes": 374,
+      "sha256": "2c1aca7d423cf932c1873fdd289e0237b7d5a23bc3fb2e78eed01e857bb13477"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-p41-01-apps-after-protect-receipt.json",
+      "sizeBytes": 323,
+      "sha256": "a2687ab8ea27b101029ed0970584db2de95afc4ebcdeadabb31b4b4c5d7c6d28"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-p41-01-apps-before-protect-receipt.json",
+      "sizeBytes": 324,
+      "sha256": "d782e10d0d8989cb8f751fd4f47980b2fc5a797dc790ec4f48098fb69a2e1dd9"
+    },
+    {
+      "path": ".cache/p43/live/pages-protect-p41-01-summary.json",
+      "sizeBytes": 1554,
+      "sha256": "b2dadf59fc978775163e1a93ed31a55b3aadd3aaf1adf30412adbc7318f88856"
+    },
+    {
+      "path": ".cache/p43/live/pages-readback-01-original-project-final-receipt.json",
+      "sizeBytes": 345,
+      "sha256": "c93ead421576c9a945a98afe3f270d1157e30e5f754044cfa9d6bc1063a4dc5b"
+    },
+    {
+      "path": ".cache/p43/live/pages-readback-01-project-final-receipt.json",
+      "sizeBytes": 341,
+      "sha256": "44f88dd93cbdf64947a1ad89a8bdd2fb593bac00c07aac7fa99cfb8ca2abbb5e"
+    },
+    {
+      "path": ".cache/p43/live/pages-readback-01-summary.json",
+      "sizeBytes": 3326,
+      "sha256": "105b278eabb9f27469d940495eae1293b0746091aa7c9becbb4996a1db1a73b1"
+    },
+    {
+      "path": ".cache/p43/live/platform-login-04.json",
+      "sizeBytes": 2475,
+      "sha256": "d58039091e990e47727994a9204e21cbd2616f875c7442fbbd9d623f97352ff4"
+    },
+    {
+      "path": ".cache/p43/logs/live-channel-state-01.json",
+      "sizeBytes": 506,
+      "sha256": "0457f5327e045eb7f56882d1a04a0e33b930cf6d73acb527aeabe7d83c8fdf2d"
+    },
+    {
+      "path": ".cache/p43/logs/live-channel-state-01.log",
+      "sizeBytes": 269,
+      "sha256": "f6d709ac845900e12cc9ca42491a3245b7252b090896fc2bd92e778a78bfaae6"
+    },
+    {
+      "path": ".cache/p43/logs/live-edge-entry-negative-01.json",
+      "sizeBytes": 565,
+      "sha256": "18b2cedf8fbc64cbcc0e9a21271beeb7178294fe5e2213335fab0d19c423fdd8"
+    },
+    {
+      "path": ".cache/p43/logs/live-edge-entry-negative-01.log",
+      "sizeBytes": 300,
+      "sha256": "9b06b56e14673a00b510a279c0c058a194e98b0cc782043c9e6ea47bbfdf353d"
+    },
+    {
+      "path": ".cache/p43/logs/live-edge-session-probe-01.json",
+      "sizeBytes": 477,
+      "sha256": "4434d6ec87c296f992affc069d88114b9ace29dc34dbf890069d5afcde72a660"
+    },
+    {
+      "path": ".cache/p43/logs/live-edge-session-probe-01.log",
+      "sizeBytes": 621,
+      "sha256": "1a59c0bf6cd597957d97bfe6f4ebe8598b8a09e7df7edddfc97bda40a9730462"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-configure-01.json",
+      "sizeBytes": 509,
+      "sha256": "5bd6b75c9ec67ccf670f85c6212b66ac86fec9eca34bc7427d511011db87b6e3"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-configure-01.log",
+      "sizeBytes": 3715,
+      "sha256": "306e8d9974ed36518f36c8ab130a08a81232a1f6c8d6c088fc0770102594656e"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-create-01.json",
+      "sizeBytes": 497,
+      "sha256": "6844a9b8952b8fb6ae4f35e50e377396ad241a89770f618da5a096b4b6355b9c"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-create-01.log",
+      "sizeBytes": 1438,
+      "sha256": "84a567aa824325200d09bdf9bafda96f01ee165dc8ab81a92af5d4cf01df003c"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-inventory-01.json",
+      "sizeBytes": 509,
+      "sha256": "8a0e8278ee141c14bddb2795d71ee221471f953685aaf0940df0850a42c39f49"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-inventory-01.log",
+      "sizeBytes": 6539,
+      "sha256": "c9f7d15e9d3004518f3fe4b2c3070a4efda7784c1416b06192df6d0da978b1c3"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-protect-01.json",
+      "sizeBytes": 501,
+      "sha256": "ed6d4cd033ee9f0fd91c8390e00b55eb0430c2a10a877ff3604fa38eaf090e48"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-protect-01.log",
+      "sizeBytes": 1542,
+      "sha256": "a2965a727c343367aaa51c2267cb175bac226dfc9cbe4d6a935ba9d63aa387ff"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-protect-original-01.json",
+      "sizeBytes": 544,
+      "sha256": "7b556612f532d2190a71a21ec595bdce6449320aa3542e872b2c66b67b14e212"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-protect-original-01.log",
+      "sizeBytes": 1564,
+      "sha256": "8ff042be5a205604861317288d363689e61b84aae9b0d2b8474ca413e41a82da"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-protect-p41-01.json",
+      "sizeBytes": 524,
+      "sha256": "5244fcb5cf525a02e3808a21b36cf9e09c56f40c425d62de12f42d592fe780ba"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-protect-p41-01.log",
+      "sizeBytes": 1554,
+      "sha256": "b2dadf59fc978775163e1a93ed31a55b3aadd3aaf1adf30412adbc7318f88856"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-readback-01.json",
+      "sizeBytes": 505,
+      "sha256": "2c8b06ab710a2c96a9ef37d85085ddde71f459adc598247f24112f98f798a65d"
+    },
+    {
+      "path": ".cache/p43/logs/live-pages-readback-01.log",
+      "sizeBytes": 3326,
+      "sha256": "105b278eabb9f27469d940495eae1293b0746091aa7c9becbb4996a1db1a73b1"
+    },
+    {
+      "path": ".cache/p43/logs/live-platform-login-04.json",
+      "sizeBytes": 499,
+      "sha256": "919201d980cef82e3dea72572c57fb3bc20578da04d165fd304521a7b914efa4"
+    },
+    {
+      "path": ".cache/p43/logs/live-platform-login-04.log",
+      "sizeBytes": 2480,
+      "sha256": "9ef4a6a572046e9d903def2eb1997ad2f5f15b7ea8eab8d783f03229f83df6c7"
+    },
+    {
+      "path": ".cache/p43/logs/live-preparation-archive-01.json",
+      "sizeBytes": 475,
+      "sha256": "bdd10a472711ec316943cfeadbea838b66edfaec28f5a03bb02eb9d99f703f74"
+    },
+    {
+      "path": ".cache/p43/logs/live-preparation-archive-01.log",
+      "sizeBytes": 470,
+      "sha256": "3f7a4d59d8c079688ed8bb7ba0ad5f49303f88bff458f38620212b64598e49b5"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-commit-01.json",
+      "sizeBytes": 480,
+      "sha256": "9f2775d10f8b21ce8b91c6d441e0b3b74e6f2d815f690cf2770fde38377af98a"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-commit-01.log",
+      "sizeBytes": 469,
+      "sha256": "82fbd9052dd43627481ab6acdaaec25fb782d948ff30c0720472cf22572c99bc"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-diff-check-01.json",
+      "sizeBytes": 445,
+      "sha256": "9ec84d8604286cf15d24fd053b9d581661d9936378b259d750b6a707a68e0a04"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-diff-check-01.log",
+      "sizeBytes": 146,
+      "sha256": "4d037df2b304ad2d1c162606c99e5c85d7d26181f3a2534d427d48f021d70d49"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-push-01.json",
+      "sizeBytes": 523,
+      "sha256": "945f5d12504963c53885596fbab1fc28ac7185341664f962a558478fd5da0976"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-push-01.log",
+      "sizeBytes": 135,
+      "sha256": "17d700ca871ce8b4bd4554bf86b318d9a0e234ad7c6c98948dd0b4b3963b8880"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-push-02.json",
+      "sizeBytes": 559,
+      "sha256": "bf47374d38adc43236903ec98d27643d243161db7cac19c7aa942186a9cee40a"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-push-02.log",
+      "sizeBytes": 135,
+      "sha256": "88e3b366f6a83fe69dc47f620d76c323330267148009dd39c95c8ea344691e6d"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-remote-check-01.json",
+      "sizeBytes": 591,
+      "sha256": "b61ada438e82064a3603e359f131f3eb43fac4c3e16bee78bdc121da1afa83ed"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-remote-check-01.log",
+      "sizeBytes": 85,
+      "sha256": "4bab8b4381f8def55ebf18cfb173a3b663d6da7eb1ddd7940b6c57e600bee69f"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-stage-01.json",
+      "sizeBytes": 723,
+      "sha256": "1747fc7f5f9fa46e6bc384cf5ffd18cc303b8028f9e56a7a86a5b0258877a855"
+    },
+    {
+      "path": ".cache/p43/logs/live-record-stage-01.log",
+      "sizeBytes": 146,
+      "sha256": "4d037df2b304ad2d1c162606c99e5c85d7d26181f3a2534d427d48f021d70d49"
+    },
+    {
+      "path": ".cache/p43/logs/live-write-audit-02.json",
+      "sizeBytes": 447,
+      "sha256": "06453785b4ae523f85900888932b6ee41b5a45cdd60293556b8bba88d30ad005"
+    },
+    {
+      "path": ".cache/p43/logs/live-write-audit-02.log",
+      "sizeBytes": 19264,
+      "sha256": "8a282cd3b2e5b661f56d4619f4294585a21885d14a4ebcf70a8225bf0bce0cdf"
+    }
+  ]
+}

@@ -83,7 +83,8 @@ TLS, credential or Git configuration was modified.
 | P43-BUNDLE-01 | Native smoke could not start the compiled Pages router because the module name escaped its default root | Fixed in `933b790`; compiled router 3/3 in native Linux run `39018754889`; original 0/4 failure retained |
 | P43-DEP-01 | Inherited dependency advisories, including runtime Hono; not caused by new Playwright | Exposure analysis now bound to checked Admin/live Worker bytes; listed vulnerable paths not used by this deployment. Root dependency triage remains open; no blanket audit fix or risk waiver. |
 | P43-EXT-01 | Real Access/Admin exercise and original before/after/audit/screenshots | NOT_RUN, implementation-owned. Isolated operation authority is granted; current Pages authentication, real Access role inputs and P43-OBS-01 remain actual prerequisites, not a request to approve the task again. |
-| P43-AUTH-01 | Existing platform identity/capability and unnecessary repeated login work | Original project and P41 inputs name the same account. Both active tokens return Pages 403/code 10000. No successful OAuth callback or Access owner session was recorded. User selected the already-open Edge account; no alternative account or further repeated login attempt. |
+| P43-AUTH-01 | Existing platform identity/capability and unnecessary repeated login work | Pages entry resolved by the original Edge's successful official OAuth callback, same-account readback and real Pages list/create/configure. Previous timeouts remain. This is platform authentication, not a real Admin Access owner session. |
+| P43-ACCESS-01 | Actual Access configuration capability and existing role inputs | All three available same-account credentials reject the exact new Access application with 403/code 1010/auth.forbidden; readback finds no application. Need an existing Access-capable private credential, not another Pages login or repeated task approval. Old secret names are configured but their values are not readable. |
 | P43-OBS-01 | Test Worker persists invocation logs with URL query redaction disabled | Block signed-URL issue/use pending the narrowly scoped logging disposition below; no probe using a live signed URL, and no unapproved Worker setting change. |
 | P43-ACCEPT-01 | Full-card acceptance handoff to the original non-implementer | NOT_READY for a full-card completion handoff while P43-EXT-01 is missing. Code pre-review alone is possible; independent acceptance NOT_RUN. |
 | P43-REPORT-01 | Agent said the work was finished and acceptance could begin despite the missing required exercise | Reporting/early-handoff error corrected here. Development results remain valid; they do not waive missing evidence or transfer its production to the reviewer. |
@@ -615,3 +616,147 @@ original user-directory Wrangler file remains untouched. Git writes use only
 the already-authorized task branch and shared Git metadata boundary. Delivery
 of this record increment does not deliver a live deployment, close P43-EXT-01,
 or transfer the unfinished exercise to the independent reviewer.
+
+## Original Edge Session And Isolated Project Created
+
+This continuation starts at committed/pushed `9faade453d3d920c21335e1a0764434ce234600e`.
+The same exclusive worktree, branch, product source `933b790` and granted operation
+scope remain in force. No product edit, rebuild, new CI run or deployment occurred.
+
+### P43-AUTH-01 Resolution
+
+A scoped read-only SQLite URI probe of the user-selected Edge Cloudflare cookie
+storage failed with `SQLITE_CANTOPEN`; an independent read-only file-open check
+returned `EBUSY`. No cookie value was read or decrypted, and no profile was copied,
+unlocked or restarted. This establishes a real session-reuse limitation without
+bypassing browser protection. Python was 3.13.12, SQLite 3.50.4, with `-B` and
+contained process outputs.
+
+The earlier loopback entry did not check which browser actually opened it. Thus
+its previous intended-Edge label did not prove an Edge navigation, and a default
+browser handoff was a hypothesis, not the established cause of those timeouts.
+The bounded adapter now requires an actual Edge navigation before starting the
+official flow and explains in Chinese how to use the already-open Edge. Its
+non-Edge negative request returned 403 without another login. This browser check
+is an operational guard only; it never replaces Cloudflare authentication.
+
+`platform-login-04` observed Edge 155.0.0.0, received the official successful
+Wrangler callback, and then obtained HTTP 200 for the precise approved account
+with `matchesApprovedAccount=true`. The callback and local entry closed normally.
+OAuth/refresh material remains only in the private worktree configuration; the
+original global Wrangler file is unchanged. The same least-scope connection is
+available for normal official CLI refresh later; do not start another OAuth flow
+just because the short-lived access token expires.
+
+The first authenticated Pages list returned HTTP 400/code 8000024 because the
+adapter requested `per_page=100`. The installed official CLI uses pages of 10.
+Using that exact pagination returned HTTP 200 and two existing projects, the old
+Trace Admin and Public. No P4-3 project existed. The 400 is preserved and is not
+misreported as another authentication failure.
+
+### Actual Authorized Configuration
+
+The official CLI created `e-track-firmware-p43-admin-test` on the same account,
+then the API readback verified its name, `pages.dev` subdomain, `main` production
+branch, `2026-06-28` compatibility date and `nodejs_compat`. The project has no Git
+auto-deploy source and no deployment. No other project was created or changed.
+
+Only this new project's production settings were configured and read back:
+
+| Setting | Verified value / provenance |
+| --- | --- |
+| D1 `DB` | `2617e1e1-956f-42ce-a465-da56d84abf06` |
+| R2 `RELEASES_BUCKET` | `e-track-firmware-p41-test-releases` |
+| `APP_ID` / `ENVIRONMENT` | `trace` / `staging` |
+| `FIRMWARE_DOWNLOAD_ORIGIN` | `https://e-track-firmware-p41-test.tangjichentudou.workers.dev` |
+| `FIRMWARE_V2_CUTOVER_EPOCH` / `DOWNLOAD_TOKEN_KEY_VERSION` | `1792039926` / `p41-test-1` |
+| `DOWNLOAD_HMAC_KEY_CURRENT` | Copied only into the new Pages secret from the existing approved test-secret input. Secret name/type read back; the API intentionally does not return its value. No Worker/API credential rotation and no signed-download verification yet. |
+
+The preview settings remained unchanged and have no D1/R2/secret binding. The
+readback also proves the old `trace-update-admin-staging` configuration and
+canonical deployment `c0eb2689-d7a1-4e84-ad1b-eaf9b6e3fcca` are unchanged. The old
+project's Access and role secret names exist; the first collector's `present=false`
+meant no readable value, not absence of a configured secret. Later observations
+use separate `configured` and `valueVisible` fields.
+
+The new origin is `https://e-track-firmware-p43-admin-test.pages.dev`, but it is
+NOT an owner-login-ready endpoint: the unauthenticated probe returned 522, no
+redirect, and the project still has no deployment or Access protection. Do not
+send the user there as though it were the prepared protected Admin UI.
+
+### Exact Remaining Access Capability
+
+The only Access create intent was a self-hosted application for this exact new
+domain, with no allow policy, no everyone/bypass and no existing-app edit. The
+current OAuth credential returned HTTP 403/code 1010/`auth.forbidden`. The two
+distinct, already-existing same-account API credentials were then checked with
+the same bounded intent; each was also rejected with the same result. Each
+attempt had fresh before/after reads, with no matching application created.
+There is no ambiguous write result to replay. These are three credential-bound
+capability observations, not three successful operations or an Admin role test.
+
+Read-only reconciliation also confirmed that the historical standalone Trace
+configuration names this same account and contains the same original API token;
+it is not a fourth credential. No secret file or product source in that repository
+was modified or copied. No other account or inferred GitHub identity was used.
+
+P43-ACCESS-01 now needs a private path to an existing credential on this same
+account with Access application/policy edit capability and organization/IdP
+read access. If no such credential exists, changing/creating its permissions is
+outside the grant's no-permission-expansion boundary and requires root's exact
+additional disposition. Do not ask for another P4-3 operation approval, repeat
+Pages login, ask for a chat token, guess an owner email, weaken Access or change
+the old Trace policy. Implementation will inspect existing policy/IdP information,
+finish only the isolated application, prepare the real owner entry, and perform
+the already-authorized exercise after this genuine prerequisite is supplied.
+
+P43-OBS-01 also remains open: the test Worker's persistent unredacted invocation
+logs require the previously described, narrowly scoped logging disposition before
+signed-URL issue/use. No Worker metadata/code, real D1 schema, R2 object, channel,
+release state or gate was changed in this continuation.
+
+The final D1 SELECTs still show both channels at null/revision 0/both flags 0,
+both approved releases ready and unarchived, and no Admin idempotency result.
+The user-approved high-pointer/both-stops final exercise state has not been
+executed because no channel exercise has started; no SQL shortcut was used.
+LIVE-00 and the project/binding part of LIVE-01 have genuine evidence, while
+Access protection, Admin deployment, LIVE-02 through LIVE-12 and P43-EXT-01
+remain unfinished and implementation-owned. No independent PASS or main merge.
+
+### Second Live Increment And Audit
+
+The compact `P4-3-dev-2026-10-17/live-preparation-02.zip` has 80 byte-verified
+entries, 76514 bytes, SHA-256
+`dd41696aab400cf09f2baee8012176dcb6594e12e7038ae38a82d51c742dead5`.
+Its adjacent inventory and completed packaging receipt preserve the exact
+sources/results. All three preceding archives were hash-checked, not rewritten.
+Current access/refresh tokens and existing API/HMAC values were included only
+in the in-memory secret scan, never in the archive. Both secret and authorized-URL
+scans pass. Browser state, raw private API responses/configuration and credentials
+remain outside Git.
+
+The increment includes 19 closed command receipts: 14 exit 0, four exit 1 and
+one exit 128. The 23 individually saved HTTP receipts are 19 HTTP 200 and four
+HTTP 403; the authenticated Pages 400 is separately retained in the login
+summary, and the empty origin's 522 is in the final readback summary. These counts
+do not include every internal CLI request and are not test or acceptance counts.
+The preserved exit-128 Git TLS failure from the preceding delivery was resolved
+only after remote reconciliation, using OpenSSL/HTTP 1.1 without disabling TLS
+verification. No failure, callback timeout or collector diagnostic was erased.
+
+`live-write-audit-02` exited 0: 9657 files / 1967 directories checked, with no
+links, escaped paths or traversal errors. Selected npm/global Wrangler/portable
+browser locations remained unchanged. Concurrent normal-Chrome and Windows
+PowerShell startup-cache timestamps remain attribution-unknown; no PowerShell,
+normal-browser launch or external cleanup was performed here. The successful
+OAuth helper and every Pages/configuration collector have closed receipts.
+Only project-local ignored helpers/logs/private configuration and the authorized
+record/evidence paths were written; the original Edge profile was read-probed
+unsuccessfully, not altered by the agent. User-performed Edge navigation is
+separate from agent-selected filesystem output.
+
+Record syntax/diff checks pass with the existing Git LF-to-CRLF advisory. The
+product remains the checked `933b790` input, with no new product test claim and
+no duplicate CI/build solely for these configuration records. This increment
+does not unlock another card, authorize broader credentials/Worker changes,
+complete P43-EXT-01 or constitute independent acceptance.
