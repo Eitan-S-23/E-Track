@@ -15,8 +15,8 @@ The root page loads the current Access session, Android channels, and Android re
 - `POST /api/admin/releases/:releaseId/notes`
 - `POST /api/admin/releases/:releaseId/disable`
 
-For the Android API above, `stable` publish and disable require `owner`.
-`beta` publish and release note edits require `publisher` or `owner`.
+For the Android API above, `stable` publish/rollback and disable require `owner`.
+`beta` publish/rollback and release note edits require `publisher` or `owner`.
 Read-only endpoints allow `viewer`.
 
 ## Firmware Controls

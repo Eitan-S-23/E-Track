@@ -1,7 +1,8 @@
 # P4-3 Implementation And Development Handoff
 
-Status: IN_PROGRESS. Implementation and development self-tests only; the original
-independent reviewer owns acceptance. This record is not a second Spec.
+Status: STABLE_IMPLEMENTATION_BATCH_FOR_REVIEW. The card remains in progress:
+real-environment evidence and independent acceptance are outstanding. This record
+reports implementation/development self-tests only and is not a second Spec.
 
 ## Entry And Authority
 
@@ -73,11 +74,13 @@ TLS, credential or Git configuration was modified.
 
 | ID | Scope / next action | Status / oracle |
 | --- | --- | --- |
-| P43-API-01 | Fixed channel endpoints, role/reason/type gates, atomic CAS and snapshots | Implemented; local tests pass, native CI pending |
+| P43-API-01 | Fixed channel endpoints, role/reason/type gates, atomic CAS and snapshots | Fixed; host and native CI pass |
 | P43-UI-01 | New DTO wiring, bilingual retract/stop controls, confirmation and reconciliation | Implemented; 12 mock browser tests pass, real exercise outstanding |
 | P43-RACE-01 | Download blocking, release disable, idempotency expiry and cleanup races | Existing transactions/tombstones reused; demonstrated post-lookup race repaired |
+| P43-UI-02 | First-load busy state left buttons disabled until another render | Fixed; complete 12-test browser matrix passes on Windows and Linux |
+| P43-DEP-01 | Inherited dependency advisories, including runtime Hono; not caused by new Playwright | Open root dependency/security triage; no blanket audit fix or risk waiver |
 | P43-EXT-01 | Real Access/owner Admin exercise and original before/after/audit/screenshots | NOT_RUN; root supplies the actual environment and separately authorizes its operations |
-| P43-ACCEPT-01 | Stable committed batch and originals to the original non-implementer | NOT_RUN; no self-declared independent PASS |
+| P43-ACCEPT-01 | Stable committed batch and originals to the original non-implementer | Ready for root to route to the original independent reviewer; independent acceptance NOT_RUN |
 
 ## Implementation And Test Mapping
 
@@ -136,13 +139,71 @@ real Access, D1 or deployment evidence.
 
 ## Delivery And Native Validation
 
-Product batch commit/push and the two authorized workflow dispatches are the
-next operations. `cloudflare-update-service.yml` retains native Node 24/workerd
-tests and adds contained mock Chromium UI outputs, strict failure propagation,
-checkout SHA and 14-day evidence artifacts. No release/deployment step is added.
-Native D1/R2 is currently NOT_RUN; local SQLite/platform doubles do not substitute
-for it. The final CI identity/results and compact original-evidence inventory
-will be recorded after execution.
+Product/test/workflow batch `cd352c5a7e9e7d1619ec31678c20a017f95a9adc` was committed
+and pushed as `Eitan-S-23` to `dev/p4-3/admin-controls-20261017`. The following
+records-only delivery preserves this tested product. No PR was created, no main
+merge/update was performed, and no platform or device action was taken.
+
+| Exact-commit workflow | Actual result |
+| --- | --- |
+| [Cloudflare checks 39005456600](https://github.com/Eitan-S-23/E-Track/actions/runs/39005456600) | All 3 jobs successful. Public/Admin/Worker typechecks and Wrangler typegen exit 0. Native workerd: 259 passed, 0 failed/skipped across 3 files (150 admin, 91 firmware-v2, 18 invariants). Mock UI: 12 passed, 0 failed/skipped. |
+| [Governance 39005466976](https://github.com/Eitan-S-23/E-Track/actions/runs/39005466976) | All 3 jobs successful. Main Python suites: 323 passed. Linux helper: 14 passed/3 Windows-only skipped; Windows helper: 17 passed. Existing service/live adapters: 6+134 passed per OS. Total Python 634 passed/3 skipped/0 failed; separate P2-6 classifier selfchecks 20 and native probes 8 passed. |
+
+All checkout logs report the full `cd352c5...` SHA. The downloaded UI artifact's
+`checkout-sha.txt` independently matches it. Linux backend host: Ubuntu 24.04.5,
+Node v24.21.0, Wrangler 4.105.0, workerd 1.20260625.1, locked dependencies.
+The existing governance host/probe jobs are not Flutter/MCU builds, device
+experiments, P4-1 staging, or newly opened cards.
+
+Native diagnostics are retained: one intentional D1-failure error event and four
+workerd FOREIGN KEY uncaught-exception lines from the existing pending-commit
+rejection oracle. The accepted P4-2 run `38591559979` has the same four diagnostic
+lines; this comparison explains the diagnostics, not reuse of its PASS as P4-3
+evidence. The current 259 tests independently ran. Cloudflare CI also emits 18
+npm install-script warning lines, 2 upload-action deprecation warnings and 1
+Node-action deprecation annotation. Governance emits 4 upload deprecation
+warnings and 3 Node-action deprecation annotations. None was suppressed.
+
+CI npm audit reports Admin/Public 4 high advisories each and Worker 8 high/3
+moderate (no critical). Separate `npm audit --json` runs exit 1 and preserve the
+full details. Every affected lockfile entry equals the baseline; the three new
+Playwright packages are not affected. Most findings concern development tools;
+Hono 4.12.27 is a runtime dependency, so this is not a claim that all advisories
+are unreachable. Root should own a separate assessed dependency uplift, then
+rerun locked host/native regression. No security risk acceptance is implied.
+
+One GitHub metadata retrieval hit an EOF; its failure receipt is retained beside
+the successful second retrieval. Both original GitHub log ZIPs and all current
+mock artifacts were downloaded, not just green status metadata.
+
+## Evidence And Next Owner
+
+`P4-3-dev-2026-10-17/inventory.json` binds a compact `originals.zip` byte-for-byte
+to its source files. The archive contains this task's failed/successful raw local
+logs and command receipts, CI metadata and original ZIPs, local/CI mock screenshots,
+dependency audit details, output-boundary audit and the session-local execution
+adapter. No old P4-1/P4-2 acceptance package is copied into this bundle. `tar`
+creates the archive; every extracted entry is hashed and compared to its source.
+Capture verified 182 entries, 32,034,177 archive bytes, SHA-256
+`4233f1b5ed8f3254c2f5380acfafd8a90aa5bd0cce27072ad001ca9bc9576a94`.
+Browser binaries, package caches and test databases are excluded. The inventory
+is an evidence manifest, not a replacement task or acceptance specification.
+
+The requirements mapping above and committed tests are the API/SQL development
+oracles. Random test actors, IDs, channel revisions and audit snapshots are
+synthetic; no real-environment requestId/revision/before-after/audit is invented.
+The real Access owner/publisher/viewer exercise, stable/beta success/conflict/cancel
+screenshots and corresponding actual request/audit originals remain NOT_RUN
+under P43-EXT-01/P42-EXT-03B. Root must provide the actual isolated target/session
+and authorize those environment operations. P4-2 implementation PASS and P4-1
+staging originals do not discharge this obligation or authorize a repeat release.
+
+Next owner: root routes this stable batch and the consolidated table to the
+original independent reviewer. Review may consume these originals under the
+execution contract without repeating unchanged physical work. This agent does
+not declare independent acceptance PASS or change the sole Spec's completion
+boundary. No evidence freeze agent, parallel Spec, production Release or
+OTA_BOOT_CHAIN_READY unlock is created.
 
 ## Write Boundary Audit
 
@@ -151,4 +212,16 @@ Before creation, `D:/`, `D:/github`, `D:/github/my`, the project root, `.cache` 
 checked recursively before tooling. Active outputs are inside the authorized
 worktree, plus the explicitly approved Git metadata. No user-directory cleanup,
 PowerShell launch, other worktree changes or cloud/device mutation is authorized.
-Final audit and delivered commit/CI identities remain to be recorded.
+`boundary-audit-01` traversed 1,665 output directories / 8,827 files, finding zero
+links, escapes or unreadable paths. It also checked the default Chrome user-data
+timestamps read-only during the failed launch window (no matches); the log proves
+12 process exits and 12 temporary-profile cleanups. Only the contained Playwright
+transform cache remains, not a running browser profile. HKCU/HKLM Chrome UserDataDir
+policy was absent and was not modified. This is a bounded path/timestamp audit,
+not a machine-wide write trace. The final audit repeats containment after evidence
+collection. Shared dirty-root product files and local main remain untouched.
+The pre-archive repeat `boundary-audit-02` checked 1,861 directories / 8,997 files
+with zero links, escapes or unreadable paths. All controllable local outputs,
+downloads and cleanup targets were inside the authorized worktree; only task Git
+metadata used the explicitly approved shared `.git`. Hosted CI uses the approved
+workflow runners; its new UI outputs are contained in `GITHUB_WORKSPACE`.
