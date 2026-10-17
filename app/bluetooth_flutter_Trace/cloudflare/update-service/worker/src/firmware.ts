@@ -23,9 +23,18 @@ export async function firmwareOperation(action: () => Promise<Response>): Promis
 }
 
 export function requireFirmwareJsonHeaders(request: Request): void {
+  const acceptsJson = request.headers.get("Accept")?.split(",").some((entry) => {
+    const [mediaType, ...parameters] = entry.split(";").map((value) => value.trim());
+    if (mediaType.toLowerCase() !== "application/json") return false;
+    const quality = parameters.filter((value) => /^q\s*=/i.test(value));
+    if (quality.length === 0) return true;
+    if (quality.length !== 1) return false;
+    const match = /^q\s*=\s*(0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/i.exec(quality[0]);
+    return !!match && Number(match[1]) > 0;
+  });
   if (new URL(request.url).protocol !== "https:"
     || request.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase() !== "application/json"
-    || !request.headers.get("Accept")?.split(",").some((v) => v.split(";")[0].trim() === "application/json")) {
+    || !acceptsJson) {
     throw invalidParameter("HTTPS, Content-Type and Accept application/json are required");
   }
 }

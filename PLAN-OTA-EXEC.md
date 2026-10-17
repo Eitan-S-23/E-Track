@@ -773,10 +773,10 @@
 - 启用交接: P42-EXT-02 的真实 legacy/manifest 仍由 Cloudflare/D1 迁移责任人与 OTA 发布链审查人共同负责，root 协调；P42-EXT-03 的绑定/cutover/Access/真实上传回读按验收记录交 P4-4、P4-3、P4-1/P3-5 的相应门槛。均未宣称实测通过，不得未对账就启用规范读取；P5/生产门槛不变。
 
 #### P4-3 admin 撤回语义与运营开关
-状态: 待办 ｜ 认领: — ｜ 更新: —
+状态: 进行中 ｜ 认领: Codex P4-3 实现 agent / 2026-10-17 ｜ 更新: 2026-10-17(独占 worktree 开工，开发自测与独立验收分离)
 - 目标: §6.2-3+"回滚→撤回(retract)"更名:UI 文案/API 注释/确认弹窗写明"仅影响未升级设备,已升级设备不可降级,救治=发更高 vcode";渠道停发开关、reason 必填、差分基版保留策略、晋升事务原子性验证。
 - 验收: admin 端演练截图+接口测试。
-- 证据: —
+- 证据: `docs/ota-exec-notes/P4-3-implementation-2026-10-17.md`；基线 `a96aa03da14a912aaf783d875d6a379846c21289`，P4-2 实现已交付；真实 Access/Admin 演练及本卡独立验收尚未执行。
 
 #### P4-4 Secrets 与 environment 配置
 状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **需用户操作**
@@ -814,7 +814,7 @@
 <!-- post-p2-6-readiness:start -->
 ## 8.1 P2-6 后 OTA Spec readiness 矩阵
 
-本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。共享条款为 `FROZEN`，其中 `OTA-DEC-017` 按 P41-GOV-ENTRY-01 在待合并分支冻结，主线交付仍待获权收口。P3/P4 内容为 `READY`，P5 为 `DEFERRED_ACCEPTANCE`。派单资格由内容、规范成熟度和实际依赖共同派生；当前可派单集合精确为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P3-8`、`P4-1`、`P4-2`（历次变化及本次边界见 §9；已完成卡不重开）。P4-1 的实现派单资格不等于受保护配置、真实目标/descriptor 审批、运行时资格或正式执行型验收已具备。开发、自测和专属分支交付继续；不以整个 P4-1 先合并 main 作为验收前置。P4-4 未启动；生产/P5/设备权限不变。
+本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。共享条款为 `FROZEN`，其中 `OTA-DEC-017` 按 P41-GOV-ENTRY-01 在待合并分支冻结，主线交付仍待获权收口。P3/P4 内容为 `READY`，P5 为 `DEFERRED_ACCEPTANCE`。派单资格由内容、规范成熟度和实际依赖共同派生；当前可派单集合精确为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P3-8`、`P4-1`、`P4-2`、`P4-3`（历次变化及本次边界见 §9；已完成卡不重开）。P4-1 的实现派单资格不等于受保护配置、真实目标/descriptor 审批、运行时资格或正式执行型验收已具备。开发、自测和专属分支交付继续；不以整个 P4-1 先合并 main 作为验收前置。P4-3 仅承接已交付的 P4-2 实现，真实 Access/Admin 演练另行取证。P4-4 未启动；生产/P5/设备权限不变。
 
 依赖方向统一解释为“前置任务 -> 后置任务”。用户裁定固定新增 `P4-2 -> P4-1`、`P4-2 -> P3-5`；P4-1 与 P3-5 之间无自动依赖，P4-2 不依赖 P4-1。
 
@@ -830,7 +830,7 @@
 | 8 | P3-8 | IMPLEMENTATION | docs/ota-prompts/prompt-P3-8-implementation.md |  | `OTA-XC-ANDROID-OTA-BACKGROUND`, `OTA-XC-OTA-PROGRESS`, `OTA-XC-BLE-LIFECYCLE`, `OTA-XC-FLUTTER-TRANSPORT` | READY | FROZEN | SATISFIED | P3-3 已完成并合入 main；设备操作须另批 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-BOOTSTRAP-BASE`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | 既有产品依赖已完成；来源/桶修订按 P41-GOV-ENTRY-01 在待合并分支冻结；实现继续，真实配置/目标审批/执行冻结仍须另行具备 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 10 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-2 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-2 |
+| 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | SATISFIED | P4-2 已独立实现验收并交付 main；P42-EXT-03B 真实 Access/Admin 演练仍按本卡单独取证 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE`, `OTA-XC-BOOTSTRAP-BASE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1 工作流接口与 P4-2 目标环境的实际配置交接仍需确认；具备后共用同一次 rehearsal，不等 P4-1 先完成该演练；本卡未启动 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1 interface and P4-2 environment handoff |
 | 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS`, `OTA-XC-BLE-TUNING` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用候选/rehearsal阶段完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
 | 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
@@ -904,7 +904,11 @@
 
 | 2026-10-16 | P4-1 / 用户委托 root / `P41-GOV-ENTRY-01` | 候选已独立复核，但此前附加的主线先合并条件与用户先验收后收口安排冲突 | 按验收执行合同第 1 节第 3 项，在待合并分支冻结 OTA-DEC-017 及两个消费接口，恢复 P4-1 实现派单资格；历史候选原件不改写 | 非实现 reviewer 复核 `c860b3b` / `eec2316`；受保护配置、隔离凭据、目标/descriptor 审批及正式执行冻结仍独立必需；不授权 main 合并、生产/设备或启动 P4-4 | 条款分支冻结；实现继续，整卡未完成 |
 
+| 2026-10-17 | P4-3 / Codex 实现 agent / `P43-DISPATCH-20261017` | P4-2 已独立实现验收并交付 main，但 P4-3 仍记旧依赖阻塞 | 仅修正 P4-3 行、派单摘要与精确集合相等断言，并登记本卡认领和开发记录；不改派生规则，不删除集合断言，不启动其他卡 | 用户明确派单，并批准独占 worktree/分支及本卡 Git/开发 CI 范围；基线 a96aa03 包含 P4-1/P4-2 交付。真实环境和独立验收义务不因实现依赖满足而关闭 | 已对账/开发中 |
+
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-17 | Codex P4-3 implementation | P4-3 only, IN_PROGRESS | Authorized exclusive worktree and branch start at a96aa03; reconcile the delivered P4-2 dependency and exact dispatch set without changing dependency rules. Development checks, native CI, real Access exercise and independent acceptance remain distinct. See docs/ota-exec-notes/P4-3-implementation-2026-10-17.md. No other card, main merge, deployment, platform mutation or device operation.
 
 - 2026-10-15 ｜ Codex(P4-2 接续) ｜ P4-2(进行中) ｜ 承接原会话完成专属分支提交/推送及原生后端 CI，修复 R2 HTTP/raw ETag 混用，校正替身与新增反例；最终 `fc4fbbb` 的 CI `38591559979` 三项 job 成功、Worker 156/156，本地完整回归 190/190。三轮原件已归档，R2 修复独立复核另行登记；真实 legacy/D1/R2/Access 与正式验收仍待办，不合并 main、不部署、不追加 OTA。详见 `docs/ota-exec-notes/P4-2-implementation-2026-10-14.md`。
 

@@ -9,6 +9,11 @@ import type { FirmwareChannelRow, FirmwareReleaseRow, FirmwareSigningEnv, Firmwa
 
 export type FirmwareAdminEnv = FirmwareStorageEnv & FirmwareSigningEnv & { FIRMWARE_DOWNLOAD_ORIGIN?: string };
 export interface FirmwareAdminActor { email: string; requestId: string }
+export const FIRMWARE_CHANNEL_ACTIONS = {
+  publish: "publish", retract: "retract", "stop-latest": "stop_latest", "resume-latest": "resume_latest",
+  "stop-downloads": "stop_downloads", "resume-downloads": "resume_downloads"
+} as const;
+export type FirmwareChannelAction = typeof FIRMWARE_CHANNEL_ACTIONS[keyof typeof FIRMWARE_CHANNEL_ACTIONS];
 type Action = "disable" | "recovery-download";
 interface IdempotencyRow {
   actor_canonical: string; idempotency_key: string; fingerprint: string; action: Action; release_id: string;
@@ -62,39 +67,90 @@ export function channelSnapshot(c: FirmwareChannelRow) {
 }
 
 export function publishFirmware(env: FirmwareStorageEnv, actor: FirmwareAdminActor, name: string, body: unknown): Promise<Response> {
+  return mutateFirmwareChannel(env, actor, name, "publish", body);
+}
+
+export function mutateFirmwareChannel(env: FirmwareStorageEnv, actor: FirmwareAdminActor, name: string,
+  action: FirmwareChannelAction, body: unknown): Promise<Response> {
   return firmwareOperation(async () => {
-    const input = exactObject(body, ["appId", "deviceModel", "releaseId", "expectedRevision", "reason"]);
+    if (!["stable", "beta"].includes(name) || !Object.values(FIRMWARE_CHANNEL_ACTIONS).includes(action)) {
+      throw invalidParameter("Invalid firmware channel action");
+    }
+    const pointerAction = action === "publish" || action === "retract";
+    const stopping = action === "stop_latest" || action === "stop_downloads";
+    const input = exactObject(body, ["appId", "deviceModel", "expectedRevision", "reason",
+      ...(pointerAction ? ["releaseId"] : stopping ? ["maintenanceMessage"] : [])]);
     scope(input);
-    const releaseId = releaseIdentity(text(input.releaseId, "releaseId"));
-    const revision = integer(input.expectedRevision, "expectedRevision");
+    const requestedRelease = pointerAction ? releaseIdentity(text(input.releaseId, "releaseId")) : null;
+    const revision = integer(input.expectedRevision, "expectedRevision", Number.MAX_SAFE_INTEGER - 1);
     const reason = text(input.reason, "reason");
+    const maintenance = input.maintenanceMessage === undefined ? undefined : text(input.maintenanceMessage, "maintenanceMessage", true);
     const channel = await env.DB.prepare("SELECT * FROM firmware_channels WHERE app_id=? AND device_model=? AND name=?")
       .bind("trace", FIRMWARE_MODEL, name).first<FirmwareChannelRow>();
     if (!channel) throw new ApiError("RELEASE_NOT_FOUND", "Firmware channel not found", 404);
     if (channel.revision !== revision) throw new ApiError("CAS_CONFLICT", "Firmware channel changed", 409);
-    const target = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(releaseId).first<FirmwareReleaseRow>();
-    ready(target);
-    const assets = await firmwareAssets(env.DB, target.id);
-    if (assets.some((a) => a.r2_state === "archived" || a.r2_state === "r2_deleted")) throw new ApiError("ASSET_ARCHIVED", "Firmware asset archived", 409);
-    requireFirmwareFull(target, assets);
-    if (assets.some((a) => !usableFirmwareAsset(a))) throw new ApiError("RELEASE_INCOMPLETE", "Firmware asset unavailable", 409);
-    const current = channel.current_release_id
-      ? await env.DB.prepare("SELECT version_code FROM firmware_releases WHERE id=?").bind(channel.current_release_id).first<{ version_code: number }>()
-      : channel.legacy_current_release_id
-        ? await env.DB.prepare("SELECT version_code FROM firmware_releases_legacy WHERE id=?").bind(channel.legacy_current_release_id).first<{ version_code: number }>()
-        : null;
-    if (current && target.version_code <= current.version_code) throw new ApiError("VERSION_REGRESSION", "Publish must advance firmware version", 409);
-    const after = { ...channelSnapshot(channel), currentReleaseId: releaseId, revision: revision + 1 };
-    // The schema trigger inserts the audit in this same statement/transaction.
-    const result = await env.DB.batch<FirmwareChannelRow>([env.DB.prepare(`UPDATE firmware_channels SET current_release_id=?,
-      legacy_current_release_id=NULL,revision=revision+1,last_action='publish',last_actor=?,last_actor_type='access',
-      last_request_id=?,last_reason=?,last_before_json=?,last_after_json=?,updated_at=datetime('now')
-      WHERE id=? AND revision=? RETURNING *`).bind(releaseId, actor.email, actor.requestId, reason,
-      canonicalJson(channelSnapshot(channel)), canonicalJson(after), channel.id, revision)]);
+    const before = channelSnapshot(channel);
+    const releaseId = pointerAction ? requestedRelease : channel.current_release_id;
+    const after = { ...before, currentReleaseId: releaseId, revision: revision + 1 };
+    if (action === "stop_latest" || action === "resume_latest") after.disableLatest = stopping;
+    if (action === "stop_downloads" || action === "resume_downloads") after.disableDownloads = stopping;
+    if (stopping && maintenance !== undefined) after.maintenanceMessage = maintenance;
+    if (!pointerAction && !stopping && !after.disableLatest && !after.disableDownloads) after.maintenanceMessage = null;
+
+    const needsReady = pointerAction || !stopping;
+    if (needsReady) {
+      const target = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(releaseId).first<FirmwareReleaseRow>();
+      ready(target);
+      const assets = await firmwareAssets(env.DB, target.id);
+      if (assets.some((a) => a.r2_state === "archived" || a.r2_state === "r2_deleted")) throw new ApiError("ASSET_ARCHIVED", "Firmware asset archived", 409);
+      if (assets.some((a) => !usableFirmwareAsset(a))) throw new ApiError("RELEASE_INCOMPLETE", "Firmware asset unavailable", 409);
+      requireFirmwareFull(target, assets);
+      if (pointerAction && !target.release_notes.trim()) throw new ApiError("RELEASE_NOTES_REQUIRED", "Firmware release notes are required", 409);
+      if (action === "publish") {
+        const current = channel.current_release_id
+          ? await env.DB.prepare("SELECT version_code FROM firmware_releases WHERE id=?").bind(channel.current_release_id).first<{ version_code: number }>()
+          : channel.legacy_current_release_id
+            ? await env.DB.prepare("SELECT version_code FROM firmware_releases_legacy WHERE id=?").bind(channel.legacy_current_release_id).first<{ version_code: number }>()
+            : null;
+        if (current && target.version_code <= current.version_code) throw new ApiError("VERSION_REGRESSION", "Publish must advance firmware version", 409);
+      }
+      for (const asset of assets) {
+        try {
+          const etag = await verifyFirmwareObject(env.RELEASES_BUCKET, {
+            r2Key: asset.r2_key!, kind: asset.kind, sha256: asset.sha256, sizeBytes: asset.size_bytes });
+          if (etag !== asset.r2_etag) throw new Error("R2 identity changed");
+        } catch { throw new ApiError("R2_VERIFY_FAILED", "Firmware R2 readback could not be confirmed", 503); }
+      }
+    }
+
+    // R2 readback is outside D1. Recheck the mutable SQL gates in the same batch
+    // as the CAS/audit so a concurrent archival cannot reopen distribution.
+    const gate = needsReady ? ` AND EXISTS (SELECT 1 FROM firmware_releases r WHERE r.id=?
+      AND r.app_id='trace' AND r.device_model=? AND r.state='ready' AND r.archived=0
+      AND (SELECT count(*) FROM firmware_release_assets a WHERE a.release_id=r.id AND a.kind='full')=1
+      AND NOT EXISTS (SELECT 1 FROM firmware_release_assets a WHERE a.release_id=r.id AND
+        (a.r2_state<>'available' OR a.r2_key IS NULL OR length(trim(a.r2_key))=0
+         OR a.r2_etag IS NULL OR length(trim(a.r2_etag))=0)))` : "";
+    const gateValues = needsReady ? [releaseId, FIRMWARE_MODEL] : [];
+    const idempotent = !pointerAction && after.disableLatest === before.disableLatest
+      && after.disableDownloads === before.disableDownloads && after.maintenanceMessage === before.maintenanceMessage;
+    const statement = idempotent
+      ? env.DB.prepare(`SELECT * FROM firmware_channels WHERE id=? AND revision=?${gate}`).bind(channel.id, revision, ...gateValues)
+      : env.DB.prepare(`UPDATE firmware_channels SET current_release_id=?,legacy_current_release_id=?,
+          disable_latest=?,disable_downloads=?,maintenance_message=?,revision=revision+1,
+          last_action=?,last_actor=?,last_actor_type='access',last_request_id=?,last_reason=?,
+          last_before_json=?,last_after_json=?,updated_at=datetime('now')
+          WHERE id=? AND revision=?${gate} RETURNING *`)
+        .bind(releaseId, pointerAction ? null : channel.legacy_current_release_id,
+          Number(after.disableLatest), Number(after.disableDownloads), after.maintenanceMessage,
+          action, actor.email.trim().toLowerCase(), actor.requestId, reason, canonicalJson(before), canonicalJson(after),
+          channel.id, revision, ...gateValues);
+    // The existing schema trigger inserts the audit in this transaction.
+    const result = await env.DB.batch<FirmwareChannelRow>([statement]);
     const updated = result[0].results[0];
     if (!updated) throw new ApiError("CAS_CONFLICT", "Firmware channel changed", 409);
-    return json({ ok: true, requestId: actor.requestId, action: "publish", channel: updated.name,
-      ...channelSnapshot(updated), idempotent: false });
+    return json({ ok: true, requestId: actor.requestId, action, channel: updated.name,
+      ...channelSnapshot(updated), idempotent });
   });
 }
 
@@ -161,69 +217,75 @@ export function firmwareReleaseAction(request: Request, env: FirmwareAdminEnv, a
     const fingerprint = await sha256Hex(canonicalJson({ method: "POST", path, body }));
     const existing = await replayResult(env.DB, actorCanonical, key, fingerprint, lookupEpoch);
     if (existing) return existing;
-    const release = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(releaseId).first<FirmwareReleaseRow>();
-    if (!release || release.app_id !== body.appId || release.device_model !== body.deviceModel) throw new ApiError("RELEASE_NOT_FOUND", "Firmware release not found", 404);
-    if (release.archived) throw new ApiError("RELEASE_ARCHIVED", "Firmware release archived", 410);
-    if (release.state === "disabled") throw new ApiError("RELEASE_DISABLED", "Firmware release disabled", 410);
-    const auditId = crypto.randomUUID();
-    const statements: D1PreparedStatement[] = [];
-    let now: number;
-    let result: Record<string, unknown>;
-    let expiresAt: number | null = null;
-    if (action === "disable") {
-      if (await env.DB.prepare("SELECT id FROM firmware_channels WHERE current_release_id=?").bind(releaseId).first()) {
-        throw new ApiError("RELEASE_IN_USE", "Firmware release is still referenced", 409);
+    try {
+      const release = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(releaseId).first<FirmwareReleaseRow>();
+      if (!release || release.app_id !== body.appId || release.device_model !== body.deviceModel) throw new ApiError("RELEASE_NOT_FOUND", "Firmware release not found", 404);
+      if (release.archived) throw new ApiError("RELEASE_ARCHIVED", "Firmware release archived", 410);
+      if (release.state === "disabled") throw new ApiError("RELEASE_DISABLED", "Firmware release disabled", 410);
+      const auditId = crypto.randomUUID();
+      const statements: D1PreparedStatement[] = [];
+      let now: number;
+      let result: Record<string, unknown>;
+      let expiresAt: number | null = null;
+      if (action === "disable") {
+        if (await env.DB.prepare("SELECT id FROM firmware_channels WHERE current_release_id=?").bind(releaseId).first()) {
+          throw new ApiError("RELEASE_IN_USE", "Firmware release is still referenced", 409);
+        }
+        now = Math.floor(Date.now() / 1000);
+        statements.push(env.DB.prepare("UPDATE firmware_releases SET state='disabled',updated_at=datetime('now') WHERE id=? AND state=? AND archived=0")
+          .bind(releaseId, release.state));
+        statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,reason,before_json,after_json)
+          SELECT ?,?,?,'access','disable_release','firmware_release',?,?,?,?,? WHERE changes()=1`)
+          .bind(auditId, release.app_id, actorCanonical, releaseId, actor.requestId, reason,
+            canonicalJson({ state: release.state, archived: release.archived }), canonicalJson({ state: "disabled", archived: release.archived })));
+        result = { ok: true, requestId: actor.requestId, action: "disable_release", releaseId, state: "disabled", idempotent: false };
+      } else {
+        ready(release);
+        const recovery = (await firmwareAssets(env.DB, releaseId)).filter((a) => a.kind === "recovery");
+        if (recovery.length !== 1) throw new ApiError("RECOVERY_ASSET_UNAVAILABLE", "Exactly one recovery asset is required", 409);
+        const asset = recovery[0];
+        if (["archived", "r2_deleted"].includes(asset.r2_state)) throw new ApiError("ASSET_ARCHIVED", "Recovery asset archived", 409);
+        if (!usableFirmwareAsset(asset)) throw new ApiError("RECOVERY_ASSET_UNAVAILABLE", "Recovery asset is incomplete", 409);
+        try {
+          const etag = await verifyFirmwareObject(env.RELEASES_BUCKET, { r2Key: asset.r2_key!, kind: "recovery", sha256: asset.sha256, sizeBytes: asset.size_bytes });
+          if (etag !== asset.r2_etag) throw new Error("R2 identity changed");
+        } catch { throw new ApiError("R2_VERIFY_FAILED", "Recovery R2 readback could not be confirmed", 503); }
+        if (!env.FIRMWARE_DOWNLOAD_ORIGIN) throw backendUnavailable("Firmware download origin is not configured");
+        now = Math.floor(Date.now() / 1000);
+        // HMAC calculation is pure. The capability is issued only if this batch commits.
+        const signed = await signFirmwareDownload(env, env.FIRMWARE_DOWNLOAD_ORIGIN, asset, "admin-recovery", now);
+        expiresAt = signed.expiresAt;
+        const identity = { releaseId, assetId: asset.id, kind: "recovery", r2State: asset.r2_state, sha256: asset.sha256, sizeBytes: asset.size_bytes };
+        statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,reason,before_json,after_json)
+          SELECT ?,?,?,'access','issue_recovery_download','firmware_asset',?,?,?,?,?
+          FROM firmware_release_assets a JOIN firmware_releases r ON r.id=a.release_id
+          WHERE a.id=? AND r.id=? AND r.state='ready' AND r.archived=0 AND a.kind='recovery'
+            AND a.r2_state='available' AND a.r2_key=? AND a.r2_etag=? AND a.sha256=? AND a.size_bytes=?`)
+          .bind(auditId, release.app_id, actorCanonical, asset.id, actor.requestId, reason, canonicalJson(identity),
+            canonicalJson({ ...identity, purpose: "admin-recovery", expiresAt }), asset.id, releaseId,
+            asset.r2_key, asset.r2_etag, asset.sha256, asset.size_bytes));
+        result = { ok: true, requestId: actor.requestId, action: "issue_recovery_download", releaseId, assetId: asset.id,
+          kind: "recovery", fileName: asset.file_name, sha256: asset.sha256, sizeBytes: asset.size_bytes, ...signed, idempotent: false };
       }
-      now = Math.floor(Date.now() / 1000);
-      statements.push(env.DB.prepare("UPDATE firmware_releases SET state='disabled',updated_at=datetime('now') WHERE id=? AND state=? AND archived=0")
-        .bind(releaseId, release.state));
-      statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,reason,before_json,after_json)
-        SELECT ?,?,?,'access','disable_release','firmware_release',?,?,?,?,? WHERE changes()=1`)
-        .bind(auditId, release.app_id, actorCanonical, releaseId, actor.requestId, reason,
-          canonicalJson({ state: release.state, archived: release.archived }), canonicalJson({ state: "disabled", archived: release.archived })));
-      result = { ok: true, requestId: actor.requestId, action: "disable_release", releaseId, state: "disabled", idempotent: false };
-    } else {
-      ready(release);
-      const recovery = (await firmwareAssets(env.DB, releaseId)).filter((a) => a.kind === "recovery");
-      if (recovery.length !== 1) throw new ApiError("RECOVERY_ASSET_UNAVAILABLE", "Exactly one recovery asset is required", 409);
-      const asset = recovery[0];
-      if (["archived", "r2_deleted"].includes(asset.r2_state)) throw new ApiError("ASSET_ARCHIVED", "Recovery asset archived", 409);
-      if (!usableFirmwareAsset(asset)) throw new ApiError("RECOVERY_ASSET_UNAVAILABLE", "Recovery asset is incomplete", 409);
-      try {
-        const etag = await verifyFirmwareObject(env.RELEASES_BUCKET, { r2Key: asset.r2_key!, kind: "recovery", sha256: asset.sha256, sizeBytes: asset.size_bytes });
-        if (etag !== asset.r2_etag) throw new Error("R2 identity changed");
-      } catch { throw new ApiError("R2_VERIFY_FAILED", "Recovery R2 readback could not be confirmed", 503); }
-      if (!env.FIRMWARE_DOWNLOAD_ORIGIN) throw backendUnavailable("Firmware download origin is not configured");
-      now = Math.floor(Date.now() / 1000);
-      // HMAC calculation is pure. The capability is issued only if this batch commits.
-      const signed = await signFirmwareDownload(env, env.FIRMWARE_DOWNLOAD_ORIGIN, asset, "admin-recovery", now);
-      expiresAt = signed.expiresAt;
-      const identity = { releaseId, assetId: asset.id, kind: "recovery", r2State: asset.r2_state, sha256: asset.sha256, sizeBytes: asset.size_bytes };
-      statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,reason,before_json,after_json)
-        SELECT ?,?,?,'access','issue_recovery_download','firmware_asset',?,?,?,?,?
-        FROM firmware_release_assets a JOIN firmware_releases r ON r.id=a.release_id
-        WHERE a.id=? AND r.id=? AND r.state='ready' AND r.archived=0 AND a.kind='recovery'
-          AND a.r2_state='available' AND a.r2_key=? AND a.r2_etag=? AND a.sha256=? AND a.size_bytes=?`)
-        .bind(auditId, release.app_id, actorCanonical, asset.id, actor.requestId, reason, canonicalJson(identity),
-          canonicalJson({ ...identity, purpose: "admin-recovery", expiresAt }), asset.id, releaseId,
-          asset.r2_key, asset.r2_etag, asset.sha256, asset.size_bytes));
-      result = { ok: true, requestId: actor.requestId, action: "issue_recovery_download", releaseId, assetId: asset.id,
-        kind: "recovery", fileName: asset.file_name, sha256: asset.sha256, sizeBytes: asset.size_bytes, ...signed, idempotent: false };
-    }
-    statements.unshift(
-      env.DB.prepare("SELECT fingerprint FROM firmware_admin_idempotency_tombstones WHERE actor_canonical=? AND idempotency_key=?").bind(actorCanonical, key),
-      env.DB.prepare("SELECT state FROM firmware_admin_idempotency WHERE actor_canonical=? AND idempotency_key=?").bind(actorCanonical, key),
-      env.DB.prepare(`INSERT INTO firmware_admin_idempotency
-        (actor_canonical,idempotency_key,fingerprint,method,canonical_path,action,release_id,state,created_epoch_seconds,retained_until)
-        VALUES (?,?,?,'POST',?,?,?,'pending',?,?)`).bind(actorCanonical, key, fingerprint, path, action, releaseId, now, now + 86400)
-    );
-    statements.push(env.DB.prepare(`UPDATE firmware_admin_idempotency SET state='completed',status_code=200,
-      response_body_json=?,request_id=?,original_expires_at=? WHERE actor_canonical=? AND idempotency_key=?
-      AND state='pending' AND EXISTS (SELECT 1 FROM audit_logs WHERE id=?)`)
-      .bind(canonicalJson(result), actor.requestId, expiresAt, actorCanonical, key, auditId));
-    try { await env.DB.batch(statements); } catch {
+      statements.unshift(
+        env.DB.prepare("SELECT fingerprint FROM firmware_admin_idempotency_tombstones WHERE actor_canonical=? AND idempotency_key=?").bind(actorCanonical, key),
+        env.DB.prepare("SELECT state FROM firmware_admin_idempotency WHERE actor_canonical=? AND idempotency_key=?").bind(actorCanonical, key),
+        env.DB.prepare(`INSERT INTO firmware_admin_idempotency
+          (actor_canonical,idempotency_key,fingerprint,method,canonical_path,action,release_id,state,created_epoch_seconds,retained_until)
+          VALUES (?,?,?,'POST',?,?,?,'pending',?,?)`).bind(actorCanonical, key, fingerprint, path, action, releaseId, now, now + 86400)
+      );
+      statements.push(env.DB.prepare(`UPDATE firmware_admin_idempotency SET state='completed',status_code=200,
+        response_body_json=?,request_id=?,original_expires_at=? WHERE actor_canonical=? AND idempotency_key=?
+        AND state='pending' AND EXISTS (SELECT 1 FROM audit_logs WHERE id=?)`)
+        .bind(canonicalJson(result), actor.requestId, expiresAt, actorCanonical, key, auditId));
+      await env.DB.batch(statements);
+      return json(result, 200, { "X-Request-Id": actor.requestId });
+    } catch (error) {
+      // A competing request can commit after lookup, including before our state
+      // checks or R2 readback. Only its durable key/fingerprint result proves replay.
       const concurrent = await replayResult(env.DB, actorCanonical, key, fingerprint, Math.floor(Date.now() / 1000));
       if (concurrent) return concurrent;
+      if (error instanceof ApiError) throw error;
       const current = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(releaseId).first<FirmwareReleaseRow>();
       if (current?.archived) throw new ApiError("RELEASE_ARCHIVED", "Firmware release archived", 410);
       if (current?.state === "disabled") throw new ApiError("RELEASE_DISABLED", "Firmware release disabled", 410);
@@ -232,6 +294,5 @@ export function firmwareReleaseAction(request: Request, env: FirmwareAdminEnv, a
       }
       throw backendUnavailable("Firmware action did not commit");
     }
-    return json(result, 200, { "X-Request-Id": actor.requestId });
   });
 }

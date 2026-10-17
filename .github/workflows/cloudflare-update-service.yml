@@ -50,8 +50,14 @@ jobs:
         run: npm run check
 
   admin:
-    name: Admin Facade Typecheck
+    name: Admin Typecheck and Mock UI
     runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.cache/admin-browsers
+      PW_OUTPUT_DIR: ${{ github.workspace }}/.cache/admin-ui/results
+      TMPDIR: ${{ github.workspace }}/.cache/admin-tmp
+      XDG_CACHE_HOME: ${{ github.workspace }}/.cache/admin-xdg
+      npm_config_cache: ${{ github.workspace }}/.cache/admin-npm
     defaults:
       run:
         working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/admin
@@ -59,6 +65,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Prepare contained UI outputs and checkout identity
+        run: |
+          mkdir -p "$TMPDIR" "$XDG_CACHE_HOME" "$GITHUB_WORKSPACE/.cache/admin-ui"
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/.cache/admin-ui/checkout-sha.txt"
+          node --version
 
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -72,6 +84,25 @@ jobs:
 
       - name: Typecheck
         run: npm run check
+
+      - name: Install Chromium headless shell
+        run: npm exec -- playwright install chromium --only-shell
+
+      - name: Run mock Admin UI tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:ui 2>&1 | tee "$GITHUB_WORKSPACE/.cache/admin-ui/playwright.log"
+
+      - name: Preserve mock UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-mock-ui-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/admin-ui/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
 
   worker:
     name: Worker Typecheck and Invariants

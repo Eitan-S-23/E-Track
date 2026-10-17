@@ -2596,10 +2596,18 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
                 self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
         self.assertEqual(
-            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-1", "P4-2"},
+            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-1", "P4-2", "P4-3"},
             dispatchable,
             "可派单集合必须精确受控：历次解锁及 OTA-DEC-014 新增 P3-8 均须同批登记 §9，不能用子集比较放宽",
         )
+
+    def test_p43_dispatch_retains_real_access_obligation(self):
+        row = next(item for item in self.readiness_rows() if item["task_id"] == "P4-3")
+        self.assertEqual("SATISFIED", row["dependency_state"])
+        self.assertEqual("DISPATCHABLE", row["dispatch_eligibility"])
+        self.assertIn("P4-2", row["blocking_dependencies"])
+        self.assertIn("P42-EXT-03B", row["blocking_dependencies"])
+        self.assertIn("P43-DISPATCH-20261017", self.board)
 
     def test_ble_performance_policy_preserves_measurement_and_link_boundaries(self):
         section = self.contract.split("### OTA-XC-BLE-PERFORMANCE", 1)[1].split("### ", 1)[0]

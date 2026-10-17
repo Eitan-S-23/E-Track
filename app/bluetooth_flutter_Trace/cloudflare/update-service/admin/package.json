@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "test:ui": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@cloudflare/workers-types": "4.20260628.1",
     "typescript": "6.0.3",
     "wrangler": "4.105.0"
