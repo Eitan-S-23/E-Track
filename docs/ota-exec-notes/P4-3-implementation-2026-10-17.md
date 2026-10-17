@@ -81,8 +81,10 @@ TLS, credential or Git configuration was modified.
 | P43-RACE-01 | Download blocking, release disable, idempotency expiry and cleanup races | Existing transactions/tombstones reused; demonstrated post-lookup race repaired |
 | P43-UI-02 | First-load busy state left buttons disabled until another render | Fixed; complete 12-test browser matrix passes on Windows and Linux |
 | P43-BUNDLE-01 | Native smoke could not start the compiled Pages router because the module name escaped its default root | Fixed in `933b790`; compiled router 3/3 in native Linux run `39018754889`; original 0/4 failure retained |
-| P43-DEP-01 | Inherited dependency advisories, including runtime Hono; not caused by new Playwright | Open root dependency/security triage; no blanket audit fix or risk waiver |
-| P43-EXT-01 | Real Access/Admin exercise and original before/after/audit/screenshots | NOT_RUN, required P4-3 delivery unfinished. Implementation agent owns the exercise/evidence; reconcile the current approved target and Access inputs with root's configuration owner. |
+| P43-DEP-01 | Inherited dependency advisories, including runtime Hono; not caused by new Playwright | Exposure analysis now bound to checked Admin/live Worker bytes; listed vulnerable paths not used by this deployment. Root dependency triage remains open; no blanket audit fix or risk waiver. |
+| P43-EXT-01 | Real Access/Admin exercise and original before/after/audit/screenshots | NOT_RUN, implementation-owned. Isolated operation authority is granted; current Pages authentication, real Access role inputs and P43-OBS-01 remain actual prerequisites, not a request to approve the task again. |
+| P43-AUTH-01 | Existing platform identity/capability and unnecessary repeated login work | Original project and P41 inputs name the same account. Both active tokens return Pages 403/code 10000. No successful OAuth callback or Access owner session was recorded. User selected the already-open Edge account; no alternative account or further repeated login attempt. |
+| P43-OBS-01 | Test Worker persists invocation logs with URL query redaction disabled | Block signed-URL issue/use pending the narrowly scoped logging disposition below; no probe using a live signed URL, and no unapproved Worker setting change. |
 | P43-ACCEPT-01 | Full-card acceptance handoff to the original non-implementer | NOT_READY for a full-card completion handoff while P43-EXT-01 is missing. Code pre-review alone is possible; independent acceptance NOT_RUN. |
 | P43-REPORT-01 | Agent said the work was finished and acceptance could begin despite the missing required exercise | Reporting/early-handoff error corrected here. Development results remain valid; they do not waive missing evidence or transfer its production to the reviewer. |
 
@@ -429,3 +431,187 @@ machine-wide process write trace. After archive creation, `continuation-audit-02
 checked 1,882 directories / 9,152 files with zero links, escapes or unreadable
 paths. The task Git worktree metadata, object directory and task branch/ref-log
 directories were also confirmed not to be reparse points before delivery.
+
+## P43-LIVE-AUTH-20261017 And Finite Exercise
+
+The user granted a new, bounded P4-3 live-operation authorization after `c3f73eb`.
+It supersedes the earlier deployment/configuration exclusions only for this scope;
+it is not a blanket approval of the proposal and does not reuse P4-1 authority.
+Prefer a suitable existing P4-3 Admin project, otherwise create
+`e-track-firmware-p43-admin-test`. Deploy only the verified `933b790` Admin input.
+Allowed bindings are D1 `2617e1e1-956f-42ce-a465-da56d84abf06`, bucket
+`e-track-firmware-p41-test-releases`, and the named P41 public Worker. Read back
+actual bindings/source/configuration. Configure Access only for the precise P4-3
+origin, without everyone/bypass or changes to old Trace/production/other apps.
+Reuse and verify existing private account/IdP/role inputs; never infer an Access
+owner from GitHub identity. No Worker redeploy, migration, asset write/delete,
+credential rotation, privilege expansion, release/gate or device action is granted.
+
+Historical candidates from `P4-1-v4/evidence/cloud/after/test-d1.json`, pending
+fresh state/byte/reference checks, are low `20801` /
+`fw_e1abd9e066161562fb72322b81ee7c06bf4719df7d6f89e769811a7460373648`
+and high `30208` /
+`fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c`.
+The low sample is synthetic and strictly cloud-control-plane-only. High 3.2.8
+must remain ready with unchanged identity/assets. Only the low sample may be
+disabled, last, after every comparison/recovery requirement is finished and
+current references, other dependencies and restoration requirements permit it.
+Never substitute another target or restore disabled state through SQL.
+
+Before business writes, verify channel occupancy against current records/runs and
+fresh D1 state. Normally restore initial pointers/independent flags via audited
+API actions. If current initial pointers remain null, the user-approved final
+state is high 3.2.8 on both channels, with both stop flags true. Revisions/audit
+remain appended. Any other unrestorable initial condition is reported first.
+
+| ID | Bounded operation / target | Oracle and final-state constraint |
+| --- | --- | --- |
+| LIVE-00 | Read account capabilities, P4-3/legacy Pages configuration, existing Access/IdP/roles, actual test Worker/D1/R2 and the two candidates; review dependency reachability and occupancy | No business writes; exact identities, ready/asset bytes and available authority established before dependent actions |
+| LIVE-01 | Protect the exact isolated Admin origin and deploy the unchanged checked input with the specified bindings | Actual deployment/source/binding readback; unauthenticated gate and fail-closed API; no old Trace mutation |
+| LIVE-02 | Worktree-contained real owner browser session and GET session/firmware lists | Real verified Access owner, issuer/audience/origin/CSRF; available real publisher/viewer negative coverage, otherwise explicit gap |
+| LIVE-03 | English/Chinese confirmation and cancel on stable/beta | Required no-downgrade wording; cancel produces zero request/revision/audit mutation; labeled real screenshots |
+| LIVE-04 | Guard both channels with independent stop flags, then publish verified high if initial pointer is null | Only named scope changes; reason/CAS/owner and atomic before/after/audit; no unintended public issuance during setup |
+| LIVE-05 | Per-channel retract to low, public lower/higher current-version queries, run LIVE-10 inside this low-pointer window, then publish high | Low clients can select low; upgraded clients receive NO_UPDATE; release identities/assets unchanged; no device installation |
+| LIVE-06 | Two owner tabs/requests using one prior revision | One intended commit and one CAS_CONFLICT, exactly one corresponding successful audit; fresh read and explicit new confirmation, no automatic replay |
+| LIVE-07 | Exercise the four independent latest/download flag combinations, one channel at a time | Correct latest business result and actual pre-issued URL download/block behavior; account for conservative blocking if the other channel references the same stopped release |
+| LIVE-08 | Stop/resume same-value request after current read | Explicit no-op result, unchanged revision and no additional successful audit; opposite switch preserved |
+| LIVE-09 | Real recovery issue and manually confirmed exact-key replay on a verified sample | Same URL/requestId before expiry, one audit; URL kept private, ordinary records contain digest/expiry only; no recovery publication |
+| LIVE-10 | Within LIVE-05 and before publishing high again, confirm pointer-protected disable rejection only on low while it is referenced | RELEASE_IN_USE and no mutation/audit; never send disable for high |
+| LIVE-11 | Restore approved pointers/flags, verify low is unreferenced and unused, conditionally disable low last and replay | High remains ready and untouched; low disable irreversible and only if all conditions hold; otherwise retain explicit evidence gap |
+| LIVE-12 | Final authenticated/read-only snapshots, immutable release/asset comparison, audit/requestId/revision correlation and bilingual screenshots | Both channels at approved final state; no raw key/token/authorized URL in logs or screenshots; hand the complete batch to the original non-implementer |
+
+Results are still NOT_RUN until actual observations exist. The 86400-second and
+cleanup-race checks reuse the existing source-bound native test evidence, not a
+modified real database clock. Unknown write results require read-only reconciliation.
+All private browser/configuration and selected raw outputs stay in this worktree.
+The existing Pages helper cannot select safe isolated bindings merely by project
+name, so use a thin invocation/configuration adapter around the installed official
+CLI, not its old default config or a new deployment platform.
+
+### Live Preparation Results And Original Account
+
+Continuation started from committed/pushed `c3f73eb4fb774d08bc65cf16c61b6dd61698a8ab`
+in the same exclusive worktree/branch. No product source or CI input changed.
+`live-admin-input-verify-01` rechecked the `933b790` source/run/file manifest and
+all three serving-file SHA-256 values. The existing native 259/259, mock UI 12/12
+and compiled-router 3/3 observations remain bound to run `39018754889`; these
+counts are not new tests or a claim that the live exercise passed.
+
+Current read-only originals are under `.cache/p43/live/`, with command receipts
+under `.cache/p43/logs/`; the compact live-preparation increment below preserves
+them without the private inputs or browser profiles.
+
+| Observation | Actual result and limitation |
+| --- | --- |
+| Approved D1/R2/Worker | Read back the exact D1 UUID and R2 binding, fixed cutover `1792039926`, key version `p41-test-1`, disabled direct Admin API, and Worker version `db7d28f6-453d-439b-b37e-ef98361e56d9`. No binding write. |
+| Actual Worker bytes | Full source GET retained privately; `index.js` is 144770 bytes, SHA-256 `9ff814b0fd1731418a2250a3ae941ff1f6ce0db99233f6f1db42a1ba2c161082`, matching the qualified prior artifact. Embedded source metadata says `45da975bcecd97f0248fbf1d86bdf802763405ef`; that object is absent from this Git object database, so it is not presented as a locally verified P4-3 source checkout. |
+| Two approved releases | Low 20801 and high 30208 are both ready and unarchived. All six R2 objects passed complete size/SHA-256 readback: low full/patch/recovery 202/208/8200 bytes; high 285794/379/605080 bytes. The low sample remains synthetic/cloud-only. |
+| Channels and dependencies | Global channel query contains the two approved rows, each null pointer/revision 0/both flags 0. Two patch bases are 20800 and 30207, not either candidate target. Admin idempotency results are empty. These are timestamped observations, not permanent absence of other use or a disable authorization by themselves. |
+| Occupancy | Repository in-progress workflow query returned an empty array. No global human/session lock is claimed. Fresh ownership/state reconciliation is still required immediately before business writes. |
+| Existing account credentials | The original project's `.github-actions-secrets.staging.local.json` and P41 configuration identify the same account. Both distinct tokens verify as active (HTTP 200), but both Pages project-list requests return HTTP 403/code 10000. The original config has no Access role fields. No token value is printed or copied into ordinary evidence. |
+| Access inputs | Both observed app-list responses are byte-identical to the empty result. IdP lists are empty; organization reads return 403/code 10000. This does not establish that the account has no configuration globally, or authorize guessing the owner from GitHub/platform identity. |
+| Original Edge | Read-only process inspection found the running original Edge Default profile, without a remote-debugging interface or DevToolsActivePort. It was not restarted, reconfigured, copied or used to extract cookies. User navigation to the local entry redirected to official OAuth, but no successful CLI callback was recorded. |
+
+The user reiterated that the original account already open in Microsoft Edge is
+the only account to use and that existing task authorization must not be requested
+again. The earlier separate Chromium login route was unnecessary before complete
+existing-input reconciliation and is closed. Its first navigation timeout,
+second official callback timeout, and the existing-Edge callback timeout remain
+preserved, not reclassified as success. No new account or service credential was
+created, no existing credential was rotated, and no authenticated Admin operation
+occurred. Further unchanged OAuth retries are stopped. The remaining platform
+entry is an authentication/capability problem, not missing P4-3 operation approval.
+
+### Reachability And P43-OBS-01
+
+`dependency-reachability-01.json` binds the analysis to the checked Admin and
+actual Worker hashes. Admin contains no Hono, sharp, Miniflare or npm undici;
+Wrangler inputs are its Pages template/unenv wrappers, not the transitive tooling
+advisories. The inspected existing Worker routes pass raw Requests to first-party
+validators and do not install the affected CORS/language/proxy/SSR/SSG/parseBody
+paths. Tooling advisories remain tracked; this is not a dependency-risk waiver.
+
+The actual test Worker settings are `observability.enabled=true`, sampling 1,
+`redact_query_string=false`, and logs `enabled=true`, `persist=true`,
+`invocation_logs=true`. Official Workers Logs documentation describes Fetch
+invocation messages as `<Method> <URL>`; the reference excerpt is retained.
+This directly exposes signed-query material to ordinary persistent logs if a
+signed URL is used. No such URL was issued/used to demonstrate the risk.
+
+P43-OBS-01 is OUT_OF_SCOPE for silent configuration mutation under the current
+Admin-only grant. Root's minimum disposition is limited to this named test Worker:
+disable invocation logs while retaining sanitized application/audit records, or
+enable and prove effective query redaction. The oracle is actual settings
+readback plus a non-secret query marker check, with unchanged code/bindings and
+no signed probe until safe. No Worker redeploy, metadata change or production
+operation has been performed. Unrelated safe preparation continues.
+
+### Preserved Collection Failures
+
+The live asset adapter first rejected an incorrect R2 prefix assumption before
+HTTP, then rejected an underscore in its evidence filename, then hit a transport
+failure after one complete object. The corrected run reuses that complete first
+observation and verifies the remaining five, without replacing any failure.
+The first multipart source parser incorrectly assumed a file instead of a string
+form field; its repair evaluated the same captured response without another GET.
+
+Unneeded browser downloads are closed: the stalled Playwright installer exited 1
+after terminating only its verified owned subtree; a direct download timed out
+at 180 seconds (exit 28, 10255111/207073013 bytes). Partial bytes remain ignored
+and were not extracted. Portable Chromium 147.0.7727.15 was qualified, then its
+login route was retired in favor of the user's original Edge account.
+
+`original-capabilities-01` was interrupted around a user message: its three
+completed HTTP receipts remain, but there is no closing collector receipt or
+known exit code. Only the missing original-token IdP/organization reads were
+continued under `original-remaining-01`, which exited 0. That collector completion
+does not turn the organization 403 into a successful authentication check.
+
+A direct unauthenticated platform HEAD diagnostic printed a transient `__cf_bm`
+challenge cookie to tool output. This was not an Access/OAuth/API credential,
+was never reused, and is not copied into the evidence archive or commit. This
+handling error is retained explicitly; subsequent credential/header handling
+remains private or filtered.
+
+No real UI screenshot, owner/publisher/viewer session, revision/audit mutation,
+recovery issuance or final channel state is claimed. LIVE-01 through LIVE-12
+remain unexecuted; LIVE-00 is partially observed with the exact gaps above. The
+implementation agent still owns completing them, followed by one stable-batch
+handoff to the original independent reviewer. No independent PASS or main merge.
+
+### Live Increment And Write Audit
+
+`P4-3-dev-2026-10-17/live-preparation-01.zip` contains 132 verified entries,
+109261 bytes, SHA-256
+`91ddaca28bf8abd4a0b1d19dd293fb6d68b19744b096abceb925a9ffec9eec10`.
+The adjacent inventory binds every extracted entry; both earlier archives were
+hash-checked and remain unchanged. The completed archive receipt is separately
+retained alongside it because an archive cannot include its own final output.
+The internal empty packaging-log snapshot is not completion evidence.
+
+There are 22 closed preparation/tool receipts: 13 exit 0, 8 exit 1 and one exit
+28, plus the explicitly interrupted collector with unknown exit. The 28 retained
+HTTP receipts comprise 24 HTTP 200 and four HTTP 403. These are collection/status
+counts, not product tests; no new product tests or live Admin pass count is
+invented. Node was 24.13.0 on Windows. Syntax checks and the record diff check
+pass; Git reports its existing LF-to-CRLF advisory. Auth, collection and download
+failures above are preserved rather than hidden to make the preparation green.
+
+`live-write-audit-01` exited 0 and checked 9546 contained files / 1963 directories,
+with no links, escaped paths or traversal errors. No owned live collector or
+login process remained. Selected npm/Wrangler/portable-browser default locations
+had no matching timestamp changes. The already-running normal Chrome profile
+and `C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+had timestamp activity from concurrent/unattributed processes. No PowerShell
+command or normal Chrome launch was performed by these adapters, and no such
+external path was modified, moved or cleaned by this task. Timestamps alone are
+not an attribution claim or proof of global inactivity.
+
+All task-selected new configuration, profile, downloads (including partials),
+logs and evidence stayed in the authorized worktree. OAuth URLs/configuration,
+credentials, browser state and private Worker source are excluded from Git;
+known-secret and authorized-URL scans pass on the archived candidates. The
+original user-directory Wrangler file remains untouched. Git writes use only
+the already-authorized task branch and shared Git metadata boundary. Delivery
+of this record increment does not deliver a live deployment, close P43-EXT-01,
+or transfer the unfinished exercise to the independent reviewer.
