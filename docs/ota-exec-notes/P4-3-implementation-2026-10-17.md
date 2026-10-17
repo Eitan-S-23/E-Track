@@ -1,8 +1,10 @@
 # P4-3 Implementation And Development Handoff
 
-Status: STABLE_IMPLEMENTATION_BATCH_FOR_REVIEW. The card remains in progress:
-real-environment evidence and independent acceptance are outstanding. This record
-reports implementation/development self-tests only and is not a second Spec.
+Status: DEVELOPMENT_SELF_TESTS_PASSED; REQUIRED_ADMIN_EXERCISE_INCOMPLETE.
+Only code pre-review is ready. This is not full-card acceptance readiness or a
+completed P4-3 implementation delivery. The implementation agent still owns the
+required exercise and evidence; the independent reviewer does not inherit that
+unfinished work. This record is not a second Spec.
 
 ## Entry And Authority
 
@@ -79,8 +81,9 @@ TLS, credential or Git configuration was modified.
 | P43-RACE-01 | Download blocking, release disable, idempotency expiry and cleanup races | Existing transactions/tombstones reused; demonstrated post-lookup race repaired |
 | P43-UI-02 | First-load busy state left buttons disabled until another render | Fixed; complete 12-test browser matrix passes on Windows and Linux |
 | P43-DEP-01 | Inherited dependency advisories, including runtime Hono; not caused by new Playwright | Open root dependency/security triage; no blanket audit fix or risk waiver |
-| P43-EXT-01 | Real Access/owner Admin exercise and original before/after/audit/screenshots | NOT_RUN; root supplies the actual environment and separately authorizes its operations |
-| P43-ACCEPT-01 | Stable committed batch and originals to the original non-implementer | Ready for root to route to the original independent reviewer; independent acceptance NOT_RUN |
+| P43-EXT-01 | Real Access/Admin exercise and original before/after/audit/screenshots | NOT_RUN, required P4-3 delivery unfinished. Implementation agent owns the exercise/evidence; reconcile the current approved target and Access inputs with root's configuration owner. |
+| P43-ACCEPT-01 | Full-card acceptance handoff to the original non-implementer | NOT_READY for a full-card completion handoff while P43-EXT-01 is missing. Code pre-review alone is possible; independent acceptance NOT_RUN. |
+| P43-REPORT-01 | Agent said the work was finished and acceptance could begin despite the missing required exercise | Reporting/early-handoff error corrected here. Development results remain valid; they do not waive missing evidence or transfer its production to the reviewer. |
 
 ## Implementation And Test Mapping
 
@@ -194,16 +197,34 @@ oracles. Random test actors, IDs, channel revisions and audit snapshots are
 synthetic; no real-environment requestId/revision/before-after/audit is invented.
 The real Access owner/publisher/viewer exercise, stable/beta success/conflict/cancel
 screenshots and corresponding actual request/audit originals remain NOT_RUN
-under P43-EXT-01/P42-EXT-03B. Root must provide the actual isolated target/session
-and authorize those environment operations. P4-2 implementation PASS and P4-1
-staging originals do not discharge this obligation or authorize a repeat release.
+under P43-EXT-01/P42-EXT-03B. The implementation agent must reconcile the current
+isolated target, applicable authority, live Access session and fixture readiness
+with root's configuration owner, then perform the required exercise and retain
+its originals. A genuinely missing input/authority must be reported precisely,
+not used to declare the rest of the card ready for completion acceptance.
+The historical P4-2 login/API failures do not establish current P4-3 environment
+unavailability. P4-2 implementation PASS and P4-1 staging originals do not discharge
+this obligation, prove a live Admin owner action, or authorize a repeat release.
 
-Next owner: root routes this stable batch and the consolidated table to the
-original independent reviewer. Review may consume these originals under the
-execution contract without repeating unchanged physical work. This agent does
-not declare independent acceptance PASS or change the sole Spec's completion
-boundary. No evidence freeze agent, parallel Spec, production Release or
+Next owner for the unfinished delivery: the P4-3 implementation agent. Continue
+authorized preparation and evidence work; do not stop merely because code/CI are
+green. The original independent reviewer may pre-review the stable code but is
+not asked to produce the missing implementation exercise evidence. Once the
+required delivery is complete, route the consolidated batch to that reviewer.
+Existing valid originals remain reusable under the execution contract, without
+repeating unchanged physical work. No independent PASS, lowered completion
+boundary, extra freeze agent, parallel Spec, production Release or
 OTA_BOOT_CHAIN_READY unlock is created.
+
+### Acceptance Wording Correction (2026-10-17)
+
+The agent's follow-up answer that implementation/self-tests were complete and
+acceptance could start was too broad. It confused code-review readiness with
+full-card acceptance readiness. The sole Spec's completion criteria and evidence
+section still require the Admin exercise and its originals. The missing work is
+owned here, not moved to P4-2, root's reviewer or a later card. `cd352c5` and its
+successful development runs remain unchanged; the previously archived originals
+and reporting history are preserved, not rewritten to hide this correction.
 
 ## Write Boundary Audit
 
