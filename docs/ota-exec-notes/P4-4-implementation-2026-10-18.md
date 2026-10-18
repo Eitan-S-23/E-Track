@@ -329,3 +329,83 @@ The clarification is pushed on `dev/p4-4/config-integration-20261018`, still
 pending main integration. Select both reusable governance commits `7e838c3` and
 `875c3ca` for independent review/integration; neither requires the intervening
 P4-4 board/configuration changes. Reload active agents after delivery to main.
+
+## Resumed P4-4 Implementation
+
+Entry source `cd9093e8f2677b8921ee5d492193a0c9fa0bf707`, same exclusive worktree
+and branch. Remote main remains `0779f677507fa2c8a88c1799c8d2909bbae5a0a0`.
+The user's continuation and project-wide token-use authority are consumed
+directly. No new token or repeat general authorization was requested.
+
+Current configuration/resource discovery is E6 in the configuration note. The
+existing e-track-ci successfully reads Worker settings, D1 inventory and R2
+inventory. The first R2 list encountered ECONNRESET; only that failed read was
+retried, successfully. Its failure receipt remains. Pages GET still returns
+403/10000. Management/catalog access was not reprobed, provisioning credentials
+were not used for network calls, and denied Pages access is not interpreted as
+publication failure. All configuration reads are projected/redacted.
+
+Actual production settings are absent: no production environment secrets, only
+the false gate, and no owner-selected production binding among visible project
+resources. D1's version=production field is not a deployment environment. The
+old Trace staging Worker/bucket and placeholder prod JSON are not substituted.
+The existing production protection settings remain unchanged; both environments
+expose can_admins_bypass=true. A read-only GraphQL schema query found no bypass
+input on UpdateEnvironmentInput; no guessed field/mutation or bypass was used.
+
+The resumed actual workflow suite passes 85/85, zero failures/skips. It executes
+the real parser and shell/CLI guards with synthetic inputs, including missing
+names, malformed token/URL/bucket, wrong source/binding mode, mixed modes and
+log-value suppression. These are host tests, not live permission qualification.
+
+Two bounded real HTTP negative checks add E7: test Worker
+`/api/ci/firmware/releases`, POST with missing/wrong deploy credentials, and `{}`
+as an invalid registration body. Both returned 401/TOKEN_INVALID and matching
+body/header requestId. No valid deploy credential or registration was submitted;
+the source-bound authentication branch precedes parsing, D1 and R2 operations.
+Normal request telemetry may occur. These are implementation observations, not
+formal acceptance, successful registration, a full business-state snapshot or
+a GitHub reviewer rejection. No successful upload/registration/Admin/rehearsal
+operation was repeated, and no production job or device was touched.
+
+Source/script discovery had two read-only rg invocations naming nonexistent
+paths; those diagnostics remain in the tool transcript. The adapter's targets
+mode keeps arbitrary secrets out of output and redirects post-authentication gh
+API configuration/cache paths into this worktree. It reuses the existing bounded
+transport adapter rather than adding a deployment framework.
+
+The dependency/readiness decision stays DISPATCHABLE with exact-set assertions;
+actual execution remains BLOCKED_BY_OWNER_CONFIGURATION, not ready for whole-card
+independent acceptance. The configuration note's consolidated packet identifies
+P44-TARGET-01, P44-CREDENTIAL-01 and P44-EVID-01 with concrete preferred targets,
+protected-input routes, effects, retained gates and next owners. All safe work
+above was completed before escalation. Actual secret values, production target
+selection and live reviewer actions are the retained owner boundary, not grounds
+to invent values or claim the implementation complete.
+
+### Resumed Validation And Write Audit
+
+The unchanged readiness suite passes 26/26, preserving the exact dispatchable
+set and existing qualification rule. This continuation changed no tracked
+product, workflow, governed contract or test source; the prior exact-source
+governance CI remains historical evidence, not a newly executed run. No new CI
+or deployment was triggered merely for the record-only update.
+
+At `2026-10-18T14:36:19.677Z`, the bounded audit checked 539 files and 290
+directories, with all selected outputs inside the authorized worktree and only
+the standing task-Git metadata exception. The initial/CI/registry archive hashes
+are unchanged. The known Windows PowerShell startup cache remains 1004 bytes,
+mtime now `2026-10-18T14:25:21.305Z`; writer attribution remains unresolved.
+Other recorded cache/CRL metadata is unchanged. No external cleanup or
+machine-wide zero-write assertion was made. Subsequent report/archive/Git outputs
+use the same preflighted locations and do not modify those external files.
+
+The resumed archive `P4-4-integration-2026-10-18/resume.zip` contains 32
+byte-verified entries, 38392 bytes, SHA-256
+`0e6dc38e333c38fa4bbede3e48bb9b80ffdfc4c2392956c277bfee25cb614f22`.
+Its adjacent inventory binds the current adapter, schema query, metadata/auth
+observations, 85/26-test outputs and audit. Known-credential scanning and native
+tar listing/extraction checks passed. No earlier ZIP or frozen evidence changed.
+This is an implementation-progress/owner-decision handoff, not a claim that the
+whole card is ready for independent acceptance. The same branch receives this
+record-only increment; main remains untouched.

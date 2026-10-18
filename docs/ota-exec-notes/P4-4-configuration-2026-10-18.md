@@ -18,6 +18,8 @@ not a missing-token observation or unconditional new-token requirement. See
 | E3 | `.cache/p44/evidence/capability-01.json`, 2026-10-18 12:40:25..12:40:33 UTC | Existing CI and local provisioning tokens active, but self-policy/permission-catalog access denied with 403/9109. No token creation, permission expansion or CI export. |
 | E4 | P4-1-v4 at `7f136c07505f56582640761944ab5add093252e4` | Direct sources: v2 ORIGINS/ADMISSION/REHEARSAL, v3 BYTES, v4 R2/STATE. Canonical run 38946949709/1 at b9d7d18; not P4-4 formal REUSED/PASS. |
 | E5 | P43-DELIVERY-20261018, delivery inventory/archive on main 0779f67 | Exact deployment ed9c6a39, source 0067b6c, public origin/cutover/signing and owner observations. Private originals stay at their published controlled locations. |
+| E6 | `.cache/p44/evidence/targets-01.json`, 2026-10-18 14:21:51..14:22:54 UTC; `r2-targets-02.json`, 14:24:59..14:25:04 UTC | Existing e-track-ci reads actual Worker/D1/R2 metadata; nine GitHub configuration GETs. Initial R2 ECONNRESET and Pages 403 remain recorded. The R2-only retry succeeded; no token-management probe, provisioning-token use or configuration mutation. |
+| E7 | `.cache/p44/evidence/auth-negative-01.json`, 2026-10-18 14:29:47..14:29:53 UTC | Two real test-Worker POST denials, missing/wrong deploy token, empty metadata, both 401/TOKEN_INVALID with exact requestId echoes. Not an upload, successful registration, approval rejection or production test. |
 
 O1 = existing repository owner `Eitan-S-23`, configuration/key lifecycle owner.
 O2 = user-assigned main agent, independent OTA reviewer, not this implementer.
@@ -106,8 +108,8 @@ do not authorize this implementer to impersonate a reviewer or edit old evidence
    logs. Do not export the local provisioning credential to any CI environment.
 3. Deploy credentials require coordinated target digest and environment-secret
    replacement. Revoke the old dedicated token through its owner-controlled
-    platform entry. Do not copy the rehearsal token under test-only authority to
-    solve production absence; credential-use changes remain owner decisions.
+   platform entry. Do not copy the rehearsal token under test-only authority to
+   solve production absence; credential-use changes remain owner decisions.
 4. Signing rotation uses a complete current/previous version-key pair on both
    signer and verifier. Retain the previous pair for the actual maximum issued
    capability lifetime, then remove it only under the scoped rotation authority.
@@ -141,3 +143,46 @@ configuration and affected evidence, without repeating successful staging work.
 This matrix is not acceptance-ready while these required production rows remain
 absent. Real environment rejection and the stated role/runtime gaps must be
 honestly adjudicated by O2; production job execution remains after P5.
+
+## Current Live Reconciliation
+
+E6 supersedes only the observation time, not old receipts. The protected test
+settings are unchanged; no write was needed. Worker settings still bind the
+exact E-Track test DB/bucket, ENVIRONMENT=staging, fixed cutover=1792039926,
+download key version=p41-test-1, TTL=300 and query redaction=true. Its current
+ETag is `e106f789a1385841130cc67dd462b33c1031d0bc89871b1f751b1c0d973f39bc`.
+
+| Surface | Current observation | Meaning and remaining action |
+| --- | --- | --- |
+| Visible project Workers | e-track-firmware-p41-test and trace-update-service-staging; five scripts returned overall, unrelated names omitted | Neither is an approved production target. Old Trace staging identifies repository Trace, not E-Track, and lacks the E-Track fixed-cutover binding. Do not repurpose it. Visibility is not proof about inaccessible resources. |
+| Visible project D1 databases | e-track-firmware-p41-test and trace-update-staging; page 1 returned 4/4 total databases | API field version=production is a D1 service generation, not ENVIRONMENT=prod or an owner-selected OTA production database. No row/schema/backfill was changed. |
+| Visible R2 inventory | Only e-track-firmware-p41-test-releases and trace-update-staging-releases; returned 2/2 total | Both are explicitly rejected as production buckets by the actual workflow. R2 read works; the initial transport failure is not a token-permission failure. |
+| firmware-production | No secrets; only variable OTA_BOOT_CHAIN_READY=false; reviewer Eitan-S-23, prevent_self_review=true, only main branch | Required production config is genuinely absent. Do not populate placeholder bindings, guess secret values or transfer old candidate approvals. |
+| firmware-rehearsal | Same five secrets/nine variables and exact P4-1 branch; gate=false | Existing receipts remain inputs. No new branch, key or secret was installed; successful rehearsal is not repeated. |
+| Admin bypass setting | Both environment GETs report can_admins_bypass=true | Configuration capability, not an exercised bypass. Read-only GraphQL UpdateEnvironmentInput introspection exposes no bypass input; no guessed mutation was sent. O1 owns any separate UI hardening. |
+| Pages metadata | Existing CI token still receives 403/10000 | Endpoint-specific read limitation, not token absence. P43 deployment originals remain the source; no refresh of a different credential or replay of Admin actions. |
+| Deploy authentication | E7: missing and wrong deploy token each rejected with 401/TOKEN_INVALID | Real negative evidence for the current test Worker; neither validates a future production credential nor supplies missing GitHub approval/rejection evidence. |
+
+The production placeholders in tracked `worker/wrangler.jsonc` have zero-like
+D1/KV IDs and repository Trace. They are not an approved production handoff.
+User-wide CF-CI-01 authority permits this agent to use the existing token for
+the current configuration task; it does not silently select a production CI
+consumer or amend the frozen staging/production credential boundary.
+
+## Consolidated Owner Decisions
+
+This is the precise remaining decision packet, not a request for another token
+by default. Earlier generic authority and project-wide agent use are already
+recognized and will not be requested again.
+
+| ID | Required decision/input | Preferred bounded direction; effects and next owner |
+| --- | --- | --- |
+| P44-TARGET-01 | O1 confirms the actual production Worker/D1/R2 target and public origin | Prefer a new, empty E-Track namespace: Worker/D1 e-track-firmware-production and R2 e-track-firmware-production-releases, in the existing account; origin based on that confirmed Worker. This would create new resources and deploy the accepted Worker, not publish firmware or touch old Trace. If an existing target is intended, supply its exact identity instead. Empty-database setup is distinct from P42-EXT-02 legacy/backfill, which remains with O3. |
+| P44-CREDENTIAL-01 | O1 specifies the protected production workflow credential source/isolation decision, device AES key source and deploy/HMAC provisioning route | Existing e-track-ci remains available for authorized configuration. Do not assume it must be replaced, but do not silently make a test credential a production CI credential. Prefer the already approved device AES key to preserve package identity; new deploy/HMAC values need protected owner provisioning or explicit generation authority. An existing protected file locator or direct platform configuration is enough; no plaintext in chat. |
+| P44-EVID-01 | O1/O2 selects the actor/route for one actual rehearsal-environment rejection observation, plus candidate/descriptor approval binding | The task-scoped P4-1-only delegation does not authorize P4-4 agent approval. A denial-only observation must not execute the release steps or repeat a successful rehearsal. Do not widen the exact P4-1 branch policy merely to run a probe; root/reviewer must bind the minimum safe route. Production approval/execution remains after P5. |
+
+Once these decisions are available, implement only the selected missing settings,
+read them back, run affected host checks and assess evidence invalidation before
+any necessary minimum runtime observation. Real publisher/viewer sessions, the
+unexercised admin-bypass route and inherited dependency/cache limitations are
+still explicit; nothing here reopens P4-1/P4-2/P4-3 acceptance or completes P4-4.
