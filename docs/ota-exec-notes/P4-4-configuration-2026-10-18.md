@@ -4,6 +4,11 @@ This is a timestamped implementation inventory, not a new Spec or acceptance
 matrix. Evidence E1/E2/E3 refers to the unchanged JSON receipts in the evidence
 archive accompanying this note. Secret presence never implies value correctness.
 
+Current interpretation (2026-10-18 correction): CF-CI-01 / `e-track-ci` exists.
+`P44-CREDENTIAL-01` is an unresolved production-use/target/configuration decision,
+not a missing-token observation or unconditional new-token requirement. See
+`docs/agent-collaboration/credential-registry.md` before any credential request.
+
 ## Evidence And Owners
 
 | ID | Original / observation | Applicability |
@@ -28,8 +33,8 @@ contains only the unrelated existing development-signing secret.
 
 | Runtime name | Rehearsal secret | Presence / UTC updated_at | Production presence | Binding / evidence | Gap, owner and next step |
 | --- | --- | --- | --- | --- | --- |
-| CLOUDFLARE_ACCOUNT_ID | FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID | Present, 2026-10-16 06:11:25 | Absent | Same privately identified account; E1/E4 | O1: configure with the separate approved production credential/target, without printing the ID. |
-| CLOUDFLARE_API_TOKEN | FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN | Present, 2026-10-16 06:11:27 | Absent | P41-CF-CREDENTIAL-02 dedicated token; E1/E3/E4 | P44-CREDENTIAL-01: independent production token and policy are not supplied/qualified. Never reuse the test or local provisioning token as production CI input. |
+| CLOUDFLARE_ACCOUNT_ID | FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID | Present, 2026-10-16 06:11:25 | Absent | Same privately identified account; E1/E4 | O1: confirm the approved production target/account before filling the absent setting. |
+| CLOUDFLARE_API_TOKEN | FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN | Present, 2026-10-16 06:11:27 | Absent | CF-CI-01 e-track-ci / e-track-p41-ci, P41-CF-CREDENTIAL-02; E1/E3/E4 | P44-CREDENTIAL-01: confirm production-use/isolation scope and protected consumer; do not infer a new-token requirement from management 403. Existing test authority does not permit production reuse; provisioning-token CI export stays prohibited. |
 | TRACE_UPDATE_SERVICE_URL | FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL | Present, 2026-10-16 06:11:31 | Absent | Test HTTPS origin, health=staging; E1/E4 | O1: bind the actual production HTTPS origin, not the legacy Trace or test endpoint. |
 | TRACE_DEPLOY_TOKEN | FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN | Present, 2026-10-16 06:54:34 | Absent | Successful canonical registration, secret metadata unchanged; E1/E4 | O1: separate target deploy credential; Worker stores only its digest. Runtime pairing still needs its own evidence. |
 | OTA_AES_KEY | FIRMWARE_REHEARSAL_OTA_AES_KEY | Present, 2026-10-16 04:24:34 | Absent | Protected real-key App/packer binding at b9d7d18; E1/E4 | O1/O2: approved production key must preserve approved package/compiler identity. Device compatibility remains P3-5/P5, not inferred from CI. |
@@ -66,8 +71,9 @@ Production scope is not silently equated with an existing Trace `prod` example.
 No production Worker/D1/R2 has been created or claimed ready. A safe proposed
 dedicated namespace is `e-track-firmware-production` and
 `e-track-firmware-production-releases`, subject to actual configuration ownership
-and existing-resource checks once the independent production credential is
-available. Do not claim nonexistence of hidden resources from a token's visibility.
+and existing-resource checks under confirmed target/credential-use authority.
+This is not a request for a new token. Do not claim nonexistence of hidden
+resources from a token's visibility.
 
 ## Worker And Access
 
@@ -100,7 +106,8 @@ do not authorize this implementer to impersonate a reviewer or edit old evidence
    logs. Do not export the local provisioning credential to any CI environment.
 3. Deploy credentials require coordinated target digest and environment-secret
    replacement. Revoke the old dedicated token through its owner-controlled
-   platform entry. Do not copy the rehearsal token to solve production absence.
+    platform entry. Do not copy the rehearsal token under test-only authority to
+    solve production absence; credential-use changes remain owner decisions.
 4. Signing rotation uses a complete current/previous version-key pair on both
    signer and verifier. Retain the previous pair for the actual maximum issued
    capability lifetime, then remove it only under the scoped rotation authority.
@@ -113,19 +120,23 @@ do not authorize this implementer to impersonate a reviewer or edit old evidence
    response. Do not delete firmware assets, rewrite audits, re-enable channels,
    issue recovery capabilities or perform device operations as a cleanup shortcut.
 
-## Remaining Protected Input
+## Remaining Owner Configuration
 
-`P44-CREDENTIAL-01` is a protected-input/capability blocker, not a request for
-another general authorization. Current credentials cannot safely establish the
-policy for a separate production CI token; no create request was guessed after
-the permission catalog was denied. No management permission has been added.
+`P44-CREDENTIAL-01` previously requested a separate production token because
+self-policy/catalog reads failed. That inference is SUPERSEDED: those 403s only
+establish management-read denial. Existing `e-track-ci` is already an observed,
+active dedicated input, not a credential the user must create again. No management
+permission has been added, no token created/rotated and no secret uploaded here.
 
-Owner entry (currently empty, never tracked):
+Historical proposed owner entry (empty, ignored, no longer the default request):
 `D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/private/production-ci-token.txt`.
-O1 can instead configure the environment secret directly and provide a redacted
-policy/target receipt. Do not put the token into chat. The next implementation
-step is verify its actual scope, bind a real distinct production target, then
-finish the absent rows without repeating successful staging observations.
+Its emptiness is not evidence that CF-CI-01 or a platform secret is missing.
+O1 must confirm the actual production target and credential-use/isolation boundary
+before absent production rows are populated. Prefer existing protected inputs and
+redacted owner scope receipts; create a new token only for an evidenced need and
+an explicit owner decision. Do not put credentials into chat or reinterpret the
+frozen test exception as production authority. Then verify only the changed
+configuration and affected evidence, without repeating successful staging work.
 
 This matrix is not acceptance-ready while these required production rows remain
 absent. Real environment rejection and the stated role/runtime gaps must be

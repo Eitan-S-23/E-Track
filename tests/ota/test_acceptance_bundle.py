@@ -2709,6 +2709,9 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         self.assertIn("不能为证明配置而提前生产发布", card)
         self.assertIn("配置变化影响的证据另作最小验证", card)
         self.assertIn("P4-4-implementation-2026-10-18.md", card)
+        self.assertIn("不是 e-track-ci 缺失或必须新建 token", card)
+        self.assertIn("docs/agent-collaboration/credential-registry.md", card)
+        self.assertIn("不把测试授权扩展为生产授权", card)
 
     def test_ble_performance_policy_preserves_measurement_and_link_boundaries(self):
         section = self.contract.split("### OTA-XC-BLE-PERFORMANCE", 1)[1].split("### ", 1)[0]

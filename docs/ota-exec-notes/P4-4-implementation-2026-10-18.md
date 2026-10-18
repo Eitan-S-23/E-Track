@@ -1,6 +1,9 @@
 # P4-4 Configuration Integration
 
-Status: BLOCKED_BY_PROTECTED_INPUT (P44-CREDENTIAL-01). Independent acceptance belongs to the
+Status: BLOCKED_BY_OWNER_CONFIGURATION (P44-CREDENTIAL-01, corrected below).
+The existing `e-track-ci` is not missing; a new token is not a default requirement.
+Production target/credential-use scope and absent configuration remain unresolved.
+Independent acceptance belongs to the
 user's main agent. The sole Spec remains
 `docs/ota-prompts/prompt-P4-4-integration.md`; this is an execution record, not a
 replacement specification or a formal acceptance matrix.
@@ -122,7 +125,8 @@ match. CI-token Pages readback remains 403, and both existing tokens return 403
 for the self-policy/permission catalog. No guessed token-management call or
 expanded credential scope was used to manufacture production readiness.
 
-`P44-CREDENTIAL-01` is now the required protected-input blocker. General task
+Historical conclusion, SUPERSEDED by the credential-discovery correction below:
+`P44-CREDENTIAL-01` was reported as the required protected-input blocker. General task
 authority is present; a separate production CI credential and its real policy
 are not. The private input slot is empty and grants only the current SU account
 access; it is ignored by Git. The existing test token and local provisioning
@@ -137,13 +141,13 @@ deletion, channel change or device operation was repeated.
 
 ## Next Owner And Minimum Continuation
 
-O1 supplies the separate production CI token through the private entry, or
-configures its protected environment secret and supplies a redacted target/policy
-receipt. No new general authorization, fresh account or subscription is requested.
-This implementer then verifies scope and completes the remaining production rows
-under the existing authority. O2 independently evaluates the shared originals
-and missing observations after the implementation is genuinely ready. Do not
-dispatch whole-card acceptance merely because the host tests pass.
+O1 confirms the actual production target and authorized credential-use/isolation
+boundary, using existing protected configuration and a redacted scope receipt
+where possible. A new token is not requested by default. Frozen test-only
+authority is not production permission, and a policy-catalog 403 cannot decide
+that boundary. The implementer then fills only evidenced, authorized missing rows.
+O2 independently evaluates originals and missing observations when implementation
+is ready; host tests do not admit whole-card acceptance by themselves.
 
 ## Initial Archive And Scoped Delivery
 
@@ -207,3 +211,36 @@ timestamps are `2026-10-18T05:11:29.717Z`, predating this task's command activit
 the B6E pair remains at `2026-10-18T01:03:00.875Z`. Exact paths are in the audit
 original. Host attribution belongs to a separately scoped investigation, not
 unapproved cleanup or a reason to hide these observations.
+
+## Credential Discovery Correction
+
+User direction on 2026-10-18: make the existing `e-track-ci` discoverable to new
+agents and prevent repeated replacement requests. `P44-CREDENTIAL-01` is
+reclassified from a missing-new-token claim to an owner configuration/scope
+decision. E1/E3 already used the existing dedicated token. A self-policy/catalog
+403 proves only those reads were denied; it neither disproves publishing
+capability nor requires a new credential. The original receipts and initial/CI
+archives are unchanged; the overstrong conclusion above is retained as superseded.
+
+The project registry is `docs/agent-collaboration/credential-registry.md`, ID
+`CF-CI-01`. It gives the canonical name, `e-track-p41-ci` alias, protected locator,
+provisioning distinction, dated evidence and owner/rotation/revocation boundaries.
+Normative discovery/error interpretation rules live in the existing collaboration
+contract, linked directly from both AGENTS entries and the shared index. This
+does not alter the unique P4-4 Spec or P41-CF-CREDENTIAL-02. No new token value,
+scope change, production target or repeated successful rehearsal was introduced.
+
+Governance-only commit `7e838c3` is independently selectable for main integration;
+it excludes P4-4's board/configuration/receipt changes. Its local command was
+`python -X utf8 -B tests/ota/test_acceptance_bundle.py GovernancePromptScopeTests PostP26SpecGovernanceTests`:
+48/48 passed, including five new credential-discovery tests and the unchanged
+exact dispatch-set assertion. They are document/host regressions, not Cloudflare
+capability or formal acceptance evidence. No need to replay the prior 85-case
+workflow run for this documentation-only correction.
+
+The former empty `production-ci-token.txt` slot is not the active request and
+does not prove the existing credential absent. It remains empty/ignored; no
+external input or old cache has been deleted to conceal the earlier mistake.
+Production settings and real rejection/role/runtime gaps remain as recorded in
+the corrected matrix. This corrective batch can be independently reviewed;
+the whole P4-4 card is not being declared complete or formally accepted.
