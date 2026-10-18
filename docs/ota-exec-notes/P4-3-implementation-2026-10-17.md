@@ -1,10 +1,12 @@
 # P4-3 Implementation And Development Handoff
 
-Status: DEVELOPMENT_SELF_TESTS_PASSED; REQUIRED_ADMIN_EXERCISE_INCOMPLETE.
-Only code pre-review is ready. This is not full-card acceptance readiness or a
-completed P4-3 implementation delivery. The implementation agent still owns the
-required exercise and evidence; the independent reviewer does not inherit that
-unfinished work. This record is not a second Spec.
+Status: DEVELOPMENT_SELF_TESTS_PASSED; REQUIRED_ADMIN_EXERCISE_EXECUTED;
+INDEPENDENT_ACCEPTANCE_PENDING.
+The remaining real exercise completed in drill-06 after the P43-CSRF-01 repair.
+Original successful, failed and interrupted observations remain distinct. The
+complete batch is now ready for independent offline evaluation, not an automatic
+whole-card PASS or a claim that the reviewer repeated cloud operations. This
+record is not a second Spec.
 
 ## Entry And Authority
 
@@ -77,17 +79,19 @@ TLS, credential or Git configuration was modified.
 | ID | Scope / next action | Status / oracle |
 | --- | --- | --- |
 | P43-API-01 | Fixed channel endpoints, role/reason/type gates, atomic CAS and snapshots | Fixed; host and native CI pass |
-| P43-UI-01 | New DTO wiring, bilingual retract/stop controls, confirmation and reconciliation | Implemented; 12 mock browser tests pass, real exercise outstanding |
+| P43-UI-01 | New DTO wiring, bilingual retract/stop controls, confirmation and reconciliation | Implemented; 12 mock tests and real bilingual success/conflict/cancel observations available across probe-03 and drills 01/04/05/06 |
 | P43-RACE-01 | Download blocking, release disable, idempotency expiry and cleanup races | Existing transactions/tombstones reused; demonstrated post-lookup race repaired |
 | P43-UI-02 | First-load busy state left buttons disabled until another render | Fixed; complete 12-test browser matrix passes on Windows and Linux |
 | P43-BUNDLE-01 | Native smoke could not start the compiled Pages router because the module name escaped its default root | Fixed in `933b790`; compiled router 3/3 in native Linux run `39018754889`; original 0/4 failure retained |
 | P43-DEP-01 | Inherited dependency advisories, including runtime Hono; not caused by new Playwright | Exposure analysis now bound to checked Admin/live Worker bytes; listed vulnerable paths not used by this deployment. Root dependency triage remains open; no blanket audit fix or risk waiver. |
-| P43-EXT-01 | Real Access/Admin exercise and original before/after/audit/screenshots | NOT_RUN, implementation-owned. Isolated operation authority is granted; current Pages authentication, real Access role inputs and P43-OBS-01 remain actual prerequisites, not a request to approve the task again. |
+| P43-EXT-01 | Real Access/Admin exercise and original before/after/audit/screenshots | EXECUTED by implementation; drill-06 completes the outstanding CAS, expiry, conditional disable and final-state observations. Original batches form one coverage ledger; real publisher/viewer sessions remain unavailable. Independent adjudication pending. |
 | P43-AUTH-01 | Existing platform identity/capability and unnecessary repeated login work | Pages entry resolved by the original Edge's successful official OAuth callback, same-account readback and real Pages list/create/configure. Previous timeouts remain. This is platform authentication, not a real Admin Access owner session. |
-| P43-ACCESS-01 | Actual Access configuration capability and existing role inputs | All three same-account credentials rejected application creation with 403/1010. Current OAuth is explicitly limited to Pages write plus identity/account reads; both API tokens remain active but own-policy reads return 403/9109. Exact API-token scopes remain unknown. Official refresh works without another login. Need Access-capable same-account input, not repeated task approval or token-management permission. |
-| P43-OBS-01 | Test Worker persists invocation logs with URL query redaction disabled | Signed-URL issue/use remains blocked pending the narrow logging disposition. Both existing API tokens also reject a dry, exact-Worker telemetry query with 403/10000; no unobservable health marker or signed URL was sent. Actual log verification remains NOT_OBSERVED; no unapproved setting change. |
-| P43-ACCEPT-01 | Full-card acceptance handoff to the original non-implementer | NOT_READY for a full-card completion handoff while P43-EXT-01 is missing. Code pre-review alone is possible; independent acceptance NOT_RUN. |
+| P43-ACCESS-01 | Actual Access configuration capability and existing role inputs | Configuration and real owner resolved through the original dedicated credential, protected isolated origin and owner-login-05/drill-06 API verification. Original credential-specific 403s remain. Publisher/viewer have native signed-test-JWT negatives, not real Access sessions. |
+| P43-OBS-01 | Test Worker persists invocation logs with URL query redaction disabled | Resolved before signed-URL use: only `observability.redact_query_string` changed to true; source deployments/bindings/settings otherwise unchanged. A real stored invocation was correlated to the non-secret health query with marker absent throughout. |
+| P43-LOGIN-01 | Login observer monitored the wrong browser after the user copied its link into Edge | Corrected using official existing-Edge Access transfer. Real owner-login-05 and drill-06 owner verification passed; drill-06 renewed via existing organization SSO without another interactive login. Previous collector failures remain. |
+| P43-ACCEPT-01 | Full-card acceptance handoff to a non-implementer | READY_FOR_INDEPENDENT_OFFLINE_EVALUATION of the complete real evidence batch; final acceptance still pending. No new cloud campaign is requested. |
 | P43-REPORT-01 | Agent said the work was finished and acceptance could begin despite the missing required exercise | Reporting/early-handoff error corrected here. Development results remain valid; they do not waive missing evidence or transfer its production to the reviewer. |
+| P43-CSRF-01 | Session GET rotates a shared CSRF cookie and invalidates another open tab before its CAS request | Fixed in 972e74c; red/green host regression, native 270/270 and both real two-tab CAS paths in drill-06 pass. Original drill-05 PRODUCT_FAIL remains preserved; security gates unchanged. |
 
 ## Implementation And Test Mapping
 
@@ -473,10 +477,10 @@ remain appended. Any other unrestorable initial condition is reported first.
 | LIVE-03 | English/Chinese confirmation and cancel on stable/beta | Required no-downgrade wording; cancel produces zero request/revision/audit mutation; labeled real screenshots |
 | LIVE-04 | Guard both channels with independent stop flags, then publish verified high if initial pointer is null | Only named scope changes; reason/CAS/owner and atomic before/after/audit; no unintended public issuance during setup |
 | LIVE-05 | Per-channel retract to low, public lower/higher current-version queries, run LIVE-10 inside this low-pointer window, then publish high | Low clients can select low; upgraded clients receive NO_UPDATE; release identities/assets unchanged; no device installation |
-| LIVE-06 | Two owner tabs/requests using one prior revision | One intended commit and one CAS_CONFLICT, exactly one corresponding successful audit; fresh read and explicit new confirmation, no automatic replay |
+| LIVE-06 | Per channel/language, two owner tabs/requests using one prior revision | One intended commit and one CAS_CONFLICT, exactly one corresponding successful audit; fresh read and explicit new confirmation, no automatic replay |
 | LIVE-07 | Exercise the four independent latest/download flag combinations, one channel at a time | Correct latest business result and actual pre-issued URL download/block behavior; account for conservative blocking if the other channel references the same stopped release |
 | LIVE-08 | Stop/resume same-value request after current read | Explicit no-op result, unchanged revision and no additional successful audit; opposite switch preserved |
-| LIVE-09 | Real recovery issue and manually confirmed exact-key replay on a verified sample | Same URL/requestId before expiry, one audit; URL kept private, ordinary records contain digest/expiry only; no recovery publication |
+| LIVE-09 | Two bounded logical recovery issuances on the verified low sample: one UI-confirmed issue plus exact replay, then one concurrent same-key first-request pair; include different-reason and cross-release conflicts and original-URL expiry | One audit per logical issuance, same URL/requestId on valid replay and 409 on mismatch/expiry; private URL/key storage only. Observe expiry before conditional low disable; no recovery publication or clock modification |
 | LIVE-10 | Within LIVE-05 and before publishing high again, confirm pointer-protected disable rejection only on low while it is referenced | RELEASE_IN_USE and no mutation/audit; never send disable for high |
 | LIVE-11 | Restore approved pointers/flags, verify low is unreferenced and unused, conditionally disable low last and replay | High remains ready and untouched; low disable irreversible and only if all conditions hold; otherwise retain explicit evidence gap |
 | LIVE-12 | Final authenticated/read-only snapshots, immutable release/asset comparison, audit/requestId/revision correlation and bilingual screenshots | Both channels at approved final state; no raw key/token/authorized URL in logs or screenshots; hand the complete batch to the original non-implementer |
@@ -895,3 +899,383 @@ timestamps remain attribution-unknown; no browser or PowerShell was launched and
 no external path was cleaned. The normal refresh only updated the contained
 private Wrangler configuration. This record-only increment is not deployment,
 independent acceptance or a transfer of the unfinished work to the reviewer.
+
+## Updated E-Track-CI Authorization
+
+Continuation entry: `309d8dce560370e2b0d9d914b634bbdf66d5c9de`, same exclusive
+worktree and branch. The user confirmed that the requested permissions have
+been granted and named the existing token `e-track-ci`. Reconcile the known
+private credential inputs through actual same-account API observations, without
+requesting the token in chat, creating another credential, or requiring token
+management permissions just to read its display name.
+
+This confirmation follows the precise Access configuration, telemetry access and
+test-Worker logging request. It authorizes continuing that bounded remediation:
+only the isolated P4-3 Access/Pages origin and, for P43-OBS-01, the named test
+Worker's query-redaction/invocation-log settings with readback. No Worker code
+upload, other binding/secret change, migration, R2 write/delete, other account,
+production or device operation is added. The existing business matrix and
+conditional low-release disable/final-state obligations are unchanged.
+
+The user further clarified that `e-track-ci` is `e-track-p41-ci`. The actual
+dedicated input is the already-existing
+`D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/p41-ci-token.txt`,
+documented in the P4-1 handoff and distinct from its local `token.txt` provisioning
+credential. The preceding P4-3 inventory omitted this known private input. Its
+claim about all available credentials was incomplete; the earlier 403 receipts
+remain valid only for the credentials actually tested. No additional credential
+value or repeated permission request is needed to investigate the dedicated one.
+
+The dedicated token now returns 200 for the actual Access app/IdP/organization
+inventory. The isolated application was created as
+`ca168030-0227-49a5-bd0c-bf030c9c86ea`; its separate policy copies only the two
+explicit allowed email identities from the old Admin policy. The old policy was
+read back byte-equivalent and not edited. An Access allowlist is not an Admin
+role mapping: the next login uses only GET on the existing protected
+`https://trace-update-admin-staging.pages.dev/api/admin/session` to read the
+actual operator's established role, then configures the isolated Pages role for
+that verified identity. This avoids guessing an owner or weakening a role. No
+old Admin business mutation is allowed by the browser adapter, and no old
+P4-1 publishing/release exercise is repeated. Browser state and full session
+responses remain in the worktree's private directory; no login screenshot may
+expose a code, cookie, JWT or CSRF token.
+
+### Actual Configuration And Query-Redaction Results
+
+- `access-policy-ci-01-summary.json` records isolated policy
+  `07a07cf0-b199-4116-aceb-9e65f969a07f`, with only the old policy's two
+  explicit identities and no everyone/bypass. The old app
+  `0d826613-3097-41ea-ba20-a8174d6822dd` and policy
+  `8632118d-1ca8-4a14-8776-e7a1af2924c8` were not modified.
+- `access-gate-ci-04-summary.json` binds the actual 302 at
+  `https://e-track-firmware-p43-admin-test.pages.dev` to
+  `https://sulovehuang.cloudflareaccess.com`. This is a real protection check,
+  not an authenticated Admin exercise; serving code has not yet been deployed.
+- `log-redact-ci-01-configuration-result.json` records the one-field PATCH to
+  the named test Worker's script settings, with independent before/after
+  deployment and binding readbacks. No Worker module was uploaded.
+- `log-redacted-probe-01-health-marker.json` records the single successful
+  harmless curl query at `2026-10-17T14:29:04.657Z`, application requestId
+  `b42a56f9-4f2c-42cc-93d8-b02d83ab3b1b`, CF-Ray
+  `a4bffe487a5714c7-SJC`. `log-redacted-lookup-01-log-lookup-result.json`
+  finds its real stored invocation and checks marker absence from metadata
+  URL, metadata message and the complete raw event. The earlier Node fetch
+  failure is preserved. The telemetry requestId is not the CF-Ray; the initial
+  wrong-field lookup returned no matches, then the same successful request
+  was correlated by script and its bounded timestamp window without reissuing it.
+- `business-state-04` still shows both authorized channels at null pointer,
+  revision 0 and both flags 0, both samples ready/unarchived, and no Admin
+  idempotency result. No P4-3 business mutation has occurred.
+
+### Existing Edge Login And Collector Correction
+
+The user reports copying the popup browser's URL into the already-open Edge
+and receiving the Access OTP there. Earlier `owner-login-01/02/03` receipts
+describe only the worktree-owned Chromium: one early closed observation, one
+ten-minute window and a no-redirect GET returning 302. They do not describe
+Edge and do not prove that the user's login failed. The prior conclusion about
+missing login must be limited accordingly. No replacement account, new token
+permission or repeated platform OAuth is required.
+
+At `2026-10-17T15:08:47Z`, `edge-observe-01` independently observed the
+user-owned Edge's current `/api/admin/session` window, without launching,
+restarting or attaching a debugging session to it. Its process has no remote
+debugging flag or DevTools endpoint file. No cookie value was read/decrypted,
+no profile was copied, and no browser navigation or input was sent. Two
+read-only MSAA probes and the Windows UI Automation adapter did not obtain a
+task response body. A later guarded read refused after the user changed tabs.
+These are collector limitations, not role or authentication-negative evidence.
+
+The dedicated CI token's read-only Access authentication-log queries returned
+403/10000 (`access-login-read-01`), although its previously demonstrated app,
+policy and Worker-log capabilities remain valid. This optional log endpoint is
+not a new permission prerequisite: no further token-scope request is made, and
+no login-negative conclusion is inferred from its failure.
+
+The bounded replacement uses the installed official `cloudflared 2026.9.1`
+Access transfer, not a new authentication protocol or a browser-cookie exporter.
+The exact binary version and original help output are retained. The upstream
+version's `token/launch_browser_windows.go`, `token/transfer.go` and
+`token/path.go` define its launcher, encrypted transfer and local storage.
+Only a loopback entry, process deadline, contained home, private console output
+and source/response checks are added. An empty contained PATH suppresses the
+CLI's default-browser `cmd` launcher; the user opens the transfer in the same
+Edge that received the code. Its authentic app/org tokens are stored under
+`.cache/p43/private/access-connect/home/.cloudflared`, then imported only into
+the owned browser profile for a real existing-Admin session GET. The API must
+actually verify the Access identity and return `owner` before the isolated
+Pages owner is configured. An Access token's shape, decoded claim, browser
+title or policy allowlist cannot replace that verification.
+
+This replaces the incorrect browser observation route. It does not change the
+finite LIVE matrix, bypass Access/CSRF or grant authority to old Admin writes.
+The previous collectors are closed. The new entry's receipt/deadline and actual
+outcome are recorded separately; preparation or a delivered reminder is not a
+successful owner session. No screenshot containing session credentials is taken.
+
+### Real Owner And Exact-Input Deployment
+
+The existing-Edge official Access transfer completed at
+`2026-10-17T15:25:27Z`. Its CLI exited 0; the wrapper initially failed because
+it incorrectly required an exportable three-part organization token. The app
+token was already valid. The 13-byte organization-token file was not imported
+as a credential. `access-connect-01-reconciled.json` evaluates the same saved
+result without repeating the successful login; the failed wrapper receipt and
+its exact source copy remain unchanged. `owner-login-04` then received real
+HTTP 200/owner and matching secure HTTP-only CSRF, requestId
+`0974b390-b059-4550-8536-d0d8155b2f0f`, on the old read-only session endpoint.
+
+`pages-access-config-01` added only the four required Access/origin/verified-owner
+secrets to the isolated project's production configuration. Independent readback
+preserves the test D1/R2/download/key settings and preview configuration. Official
+OAuth refreshed noninteractively with unchanged scope; no new platform login.
+
+The first deployment CLI failed at its proxied project GET, before a deployment
+was created. Direct REST readback showed the unchanged project and no deployment.
+A direct-TLS, read-only Wrangler Pages list then exited 0. Its display-oriented
+JSON uses `Project Name`, not the REST `name`; that parser failure was corrected
+against the same saved successful output without repeating the read. The second
+deployment uses that qualified child-process transport, with TLS verification
+unchanged and no system proxy setting change.
+
+`pages-deploy-02` is the actual successful isolated deployment:
+
+- Deployment `89805318-12e8-4ea1-9838-b794ae03580d`, main origin
+  `https://e-track-firmware-p43-admin-test.pages.dev`, deploy stage success.
+- Source `933b790e69e04ee551ad255398e08f12a1b2a107`, input run
+  `39018754889/1`; all three serving-file sizes/SHA-256 values were checked
+  before and after. `--no-bundle`, no local rebuild and no source-map upload.
+- Actual project production/preview configurations remained identical across
+  deployment. No Worker module, D1 schema or R2 asset was changed.
+
+The old app's audience was not used to impersonate the new app. A second,
+application-specific official transfer in the same existing Edge completed at
+`2026-10-17T15:46:37Z`; it supplied the isolated app's legitimate session.
+`owner-login-05` received real HTTP 200/owner at the deployed P4-3 origin,
+requestId `d4cc7a1b-7585-41c5-b19c-3475b75e2d51`, CF-Ray
+`a4c07502bbdf963f-SJC`. Its actor matches the established owner by SHA-256;
+the issuer, new app audience, validity period and CSRF cookie/header source
+are bound to this real response. Metadata inspection follows, rather than
+replaces, the live API's cryptographic authentication.
+
+`live-occupancy-05` found no in-progress repository workflow, while
+`business-state-05` independently still reads both null/revision-0/un-stopped
+channels, ready samples and zero Admin idempotency results. This is not a global
+human-session lock. No business mutation has yet occurred at this checkpoint.
+
+The read-only live UI collector preserves two setup failures: `probe-01` queried
+cookies at `/`, omitting the correctly path-scoped `/api/admin` CSRF cookie;
+`probe-02` used seven UNION terms, which the real D1 API rejected with
+`too many terms in compound SELECT`. Both failed before a business write.
+The corrected collector queries the exact session path and uses a single SELECT
+with scalar JSON aggregates. Source bytes are copied and hashed before each run;
+the original HTTP responses and failures remain, and neither changes product code.
+
+`probe-03` completed six real checks, 6 passed / 0 failed / 0 skipped, with
+0 console warnings/errors and 0 business writes. It verifies the served HTML's
+exact 265348 bytes/SHA-256, real owner/CSRF, current D1 state, bilingual stable/beta
+retract confirmation and cancellation, and identical complete before/after
+snapshots. Six screenshots are genuine isolated-site captures, not mocks; owner
+email is visually masked. These are LIVE-01/02/03 development observations,
+not completed business exercise or independent acceptance.
+
+### Continued Business Observations And Transport Qualification
+
+`drill-01` completed seven actual validation negatives, both independent stops
+on each channel and the stable UI publish. Its beta UI refresh encountered
+`ERR_CONNECTION_CLOSED` before a beta request was sent. The collector reconciled
+D1, then used the formally authorized publish API to retain high on beta too.
+Both channels are at revision 3, high pointer, both flags true. Six successful
+channel mutations each have their matching atomic audit; nothing was SQL-restored.
+
+`drill-02` failed during a read-only SSO navigation and performed no business
+write. `drill-03` reused the still-valid recorded session and an explicit direct
+browser transport. Its UI recovery request committed once, requestId
+`9add84bf-d3a2-49c9-9693-37e57ee95d42`. The collector's five-second result-dialog
+wait expired while the UI was reconciling state; the original 200 response/key
+and completed D1 row were retained, not reissued. Subsequent waits use the
+existing 45-second bounded response/refresh observation, without changing any
+product assertion or server behavior.
+
+`drill-04` executed the second already-planned logical recovery issuance through
+the real UI alongside an identical concurrent API request. Both returned 200,
+one original and one idempotent result, with exactly the same URL and requestId
+`bbe9de35-6ef1-42bd-8d76-821ee772dc27`; D1 has one added audit/result, not two.
+The actual UI success screenshot exists. Windows-system curl then failed to
+connect for the actual binary read; that is NOT a successful download or a
+stop-gate rejection. No channel pointer/flag changed in either recovery batch.
+The attempted closing read also encountered a transient fetch failure; later
+`state-after-network-01` independently reads both high/revision-3/stopped channels,
+both samples ready and completed recovery records.
+
+The bounded public-network diagnosis kept the same origin and TLS verification:
+Windows-system curl 8.13 timed out directly and through the already-configured
+local proxy; verbose output reached proxy CONNECT 200 but failed the TLS
+handshake. The existing Git-bundled curl 8.18, explicitly using that same proxy and
+HTTP/1.1, received the real staging `/healthz` response. No proxy setting, DNS
+configuration, certificate validation, Worker code or account was changed.
+Its actual `--version` reports Schannel too, not OpenSSL. The diagnostic filename
+and early helper/operation labels mentioning OpenSSL were mistaken assumptions;
+their originals remain, and the library name is corrected here rather than in
+an immutable audit. The observations establish a usable command profile, not a
+proved TLS-library root cause.
+
+LIVE-09 continuation is limited to one additional new-key recovery issuance if
+both original URLs have actually expired before the qualified download route
+can use them. First reconcile the two completed results and require the old key
+to return the frozen expiry error; then explicitly confirm the new UI intent.
+This is the contract's new-key-after-expiry case, not a repeat of either prior
+mutation or permission to create/modify assets. The first two genuine issuance
+and concurrent replay originals remain; the additional URL must be kept private
+and allowed to expire before conditional low disable. Other unspent LIVE items
+continue without replaying the six setup mutations.
+
+### 2026-10-18 Root Takeover And Remaining Work
+
+The user asked the current root to take over session
+`01a148fd-56df-7d72-bd94-c6d7799f61e2`, with full task authority and continuous
+execution unless user intervention is genuinely necessary. The active writable
+root remains this exclusive worktree, plus its previously approved shared Git
+metadata. The unrelated dirty main workspace remains read-only. Scoped fixes,
+tests, commits/pushes, source-bound CI input and necessary redeployment to the
+same isolated P4-3 Admin are covered; production, physical assets, other cards,
+credentials and device operations are not expanded by this takeover.
+
+The prior session ended at `2026-10-17T18:53:30.827Z` with the host error
+`400 / invalid_encrypted_content`, not a task completion or pending permission.
+`drill-05` retains 26 PASS and one FAIL. It completed both channel version/stop
+matrices and an actually downloaded/replayed new-key recovery after the first
+two URLs expired. The failure is LIVE-06 stable: another tab's session GET and
+the winning tab's refresh rotate the shared cookie while the stale tab keeps
+its prior header token. This is a product lifecycle defect, not a reason to
+isolate tabs artificially, bypass CSRF or relabel 403 as CAS success.
+
+The last authenticated/D1 closing observation has high 3.2.8 on both channels,
+both stop flags true, stable revision 11 and beta revision 9. The browser was
+closed. These are historical observations, not a fresh claim about cloud state.
+Remaining observations are the repaired two-tab CAS paths, final original-URL
+expiry, conditional low disable/replay and final integrity/evidence checks.
+Real publisher/viewer sessions remain absent and must not be represented by the
+real owner or by mock/native role tests. Existing successful mutations are not
+repeated merely because ownership or the evidence packer changed.
+
+P43-CSRF-01 now has discriminating local regression evidence:
+`csrf-regression-red-01` reproduced three failures (8 passed, 150 intentionally
+deselected), including both channel CAS requests returning 403 instead of 409.
+The repaired `csrf-regression-green-01` runs the entire Admin host file with
+161 passed, 0 failed/skipped. `csrf-admin-typecheck-01` and
+`csrf-worker-typecheck-01` exit 0. The SQLite experimental warning remains in
+the original log. A valid existing UUIDv4 cookie is retained/renewed; missing or
+malformed cookies get a fresh value. Access, roles, origins, double-submit
+validation and cookie security attributes are unchanged. This does not yet
+claim native CI, deployment or repaired live CAS success.
+
+`takeover-state-01` independently confirms the historical final pointers/flags
+and revisions are still current, both releases remain ready, and the three
+recovery results are completed. All three Cloudflare SELECT receipts show zero
+rows written. No business operation was repeated during takeover preflight.
+
+### Repaired Candidate And Deployment Reconciliation
+
+Product repair `972e74c43cd36b7a308e457296aaf7bb06120e78` contains only the
+session facade change and eleven regression cases. Original native CI
+`39084376785/1` is successful: Worker 270/270, mock UI 12/12 and compiled-router
+3/3. All four jobs and three serving-file SHA-256 values were independently
+checked against the downloaded source/run manifest. HTML and routing bytes are
+unchanged. The compiled facade is 107858 bytes, SHA-256
+`b0eb4d01e862343b06ad2dcc7aadee3748ce107d6c240c1b5f835f7550e0bf24`.
+Inherited npm advisories, npm warnings, two Actions warning annotations and
+four expected native negative-test exception lines remain in the original CI
+logs; none is hidden as a clean warning-free run.
+
+The non-implementing `p43_independent_review` agent reviewed this exact product
+commit and returned no blocking findings. It explicitly retained the fail-closed
+cold-start race when two clients simultaneously have no cookie; the repair fixes
+established shared-browser token invalidation, not every possible cross-tab 403.
+This was pre-review, not final acceptance or a claim the reviewer ran our tests.
+
+`pages-csrf-01` refreshed the existing OAuth noninteractively with unchanged
+scopes. Its single deployment actually completed at `2026-10-18T01:07:44Z`, ID
+`406adf06-caf4-49b6-a83d-9554ba393da1`, but the CLI's exit wait hit its 180-second
+deadline (null exit / SIGTERM). The original failure is preserved. Both the
+immediate platform response and the independent `pages-csrf-02` GET confirm the
+same successful deployment, exact repaired source and unchanged production/
+preview settings. No second deployment was sent. No Worker module, D1 schema,
+R2 byte or Access role/policy was changed by this repair.
+
+### External-Write Audit Exception
+
+The independent pre-review's two public documentation GETs used Windows curl
+8.13/Schannel without first accounting for its implicit Windows CRL cache.
+Read-only follow-up found the following probable external writes beneath
+`C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/`:
+
+| Exact relative path | Bytes | UTC modification | Observation |
+| --- | --- | --- | --- |
+| `Content/ABD721CDC3648033BA8C827AF15A4543` | 309 | 2026-10-18T01:02:18.774Z | Newly created Google Trust Services CRL |
+| `MetaData/ABD721CDC3648033BA8C827AF15A4543` | 192 | 2026-10-18T01:02:18.777Z | Newly created CRL metadata |
+| `Content/B6E4D06BF128A1673A8DAFB4E25B990D` | 308 | 2026-10-18T01:03:00.875Z | Existing CRL refreshed; creation 2026-10-15 |
+| `MetaData/B6E4D06BF128A1673A8DAFB4E25B990D` | 192 | 2026-10-18T01:03:00.875Z | Existing CRL metadata refreshed |
+
+Metadata names the public `c.pki.goog/we1/33DeR1nk-bY.crl` and
+`c.pki.goog/we1/5LEPkv8cGMA.crl` endpoints. Timing and TLS backend strongly support
+attribution to those requests, but no before-snapshot proves exclusive causation.
+Root disclosed the exception immediately. Neither root nor reviewer cleaned,
+moved or modified these four files; cleanup needs path-specific user permission.
+No zero-external-write claim is made for this turn.
+
+Native curl/Schannel calls were stopped. The installed Git curl also remains
+Schannel when `CURL_SSL_BACKEND=openssl` is requested, so that attempted backend
+selection is not treated as containment. `public-node-probe-01` instead qualifies
+the existing undici 7.28 / Node 24.13 / OpenSSL 3.5.4 route through the same
+loopback proxy, HTTP/1.1 and full TLS verification: actual Worker health 200.
+Subsequent public reads use this library with bounded time/body size and no
+native certificate-cache dependency. Controlled logs, private responses and
+browser state remain in the active worktree; existing remote and filesystem
+permissions are not widened.
+
+### Completed Remaining Live Observations
+
+`drill-06` ran from `2026-10-18T01:18:05Z` to `01:20:55Z`, collector SHA-256
+`94761eaa358ae7860a5d7a2abede82dc5485f7eec44da1209793c8232adfedf7`.
+It passed 8/8 checks with no request failures or warnings; two browser console
+error lines are the two expected real HTTP 409 conflict responses. Browser
+closure is recorded. All mutation and snapshot originals are preserved.
+
+- Existing organization SSO renewed the application session without interactive
+  login. The new origin returned real owner/CSRF, and the full starting D1
+  snapshot matched drill-05's reconciled final state.
+- Stable and beta each produced one successful CAS winner, one stale-revision
+  `CAS_CONFLICT/409`, no loser audit/state change and an empty fresh reason
+  requiring explicit confirmation. No old intent was automatically replayed.
+- The third, previously issued recovery URL returned actual `TOKEN_EXPIRED/401`;
+  its original key returned `IDEMPOTENCY_RESULT_EXPIRED/409` without a new URL
+  or audit. No new recovery capability was issued in this continuation.
+- Low 2.8.1 was unreferenced, not a patch base and had no backfill dependency;
+  all three recovery URLs were expired. Its single final disable succeeded,
+  exact-key replay returned the same requestId/result, and a new key returned
+  `RELEASE_DISABLED/410`. High 3.2.8 and all six asset rows stayed unchanged.
+- Exactly five successful mutations added five matching audits: two CAS winners,
+  two independent stop restorations and one low disable. Final stable revision
+  13 and beta revision 11 both point to high 3.2.8 with both flags true.
+
+Seven new real screenshots include both conflict/fresh-confirmation languages,
+the conditional disable success and bilingual final state. Root visually checked
+the Chinese conflict and final-state captures; their text, revisions, stop flags,
+high/low identities and redaction agree with HTTP/D1 observations.
+
+Coverage is assembled without repeating successful work: probe-03 supplies
+LIVE-03 cancellation; drill-01 supplies LIVE-02 negatives and LIVE-04 setup;
+drills 03/04/05 supply issuance/concurrency/replay and the actual binary read;
+drill-05 supplies both LIVE-05/07/08/10 matrices; drill-06 supplies repaired
+LIVE-06 and final LIVE-09/11/12. Failures remain attached to their original
+attempts and sources, not renamed to PASS.
+
+The public development increment `P4-3-dev-2026-10-17/live-preparation-04.zip`
+contains 585 verified entries / 25197295 bytes, SHA-256
+`865730da8d32bba4de6cab9cc821639c8b41638f8e119928e3cd4f0eadef942b`.
+Its inventory verifies the listing and every extracted byte, and scans known
+secrets, signed URLs and JWTs before packaging. Private cookies, signing inputs,
+raw capability URLs and user-browser state are excluded, not silently published.
+This is development evidence for independent evaluation, not the final
+acceptance verdict itself.

@@ -773,10 +773,10 @@
 - 启用交接: P42-EXT-02 的真实 legacy/manifest 仍由 Cloudflare/D1 迁移责任人与 OTA 发布链审查人共同负责，root 协调；P42-EXT-03 的绑定/cutover/Access/真实上传回读按验收记录交 P4-4、P4-3、P4-1/P3-5 的相应门槛。均未宣称实测通过，不得未对账就启用规范读取；P5/生产门槛不变。
 
 #### P4-3 admin 撤回语义与运营开关
-状态: 进行中 ｜ 认领: Codex P4-3 实现 agent / 2026-10-17 ｜ 更新: 2026-10-17(API/UI 开发自测与原生 CI 通过；933b790 的 Admin 编译路由 3/3，部署输入已绑定来源与哈希；真实环境演练仍未完成，不具备整卡完成验收交接条件)
+状态: 进行中 ｜ 认领: Codex P4-3 实现 agent / 2026-10-17 ｜ 更新: 2026-10-18(root 接管；972e74c 修复多标签页 CSRF，原生 Worker 270/270、UI 12/12、编译路由 3/3；隔离部署及剩余真实演练 drill-06 8/8 通过，等待独立离线验收)
 - 目标: §6.2-3+"回滚→撤回(retract)"更名:UI 文案/API 注释/确认弹窗写明"仅影响未升级设备,已升级设备不可降级,救治=发更高 vcode";渠道停发开关、reason 必填、差分基版保留策略、晋升事务原子性验证。
 - 验收: admin 端演练截图+接口测试。
-- 证据: `docs/ota-exec-notes/P4-3-implementation-2026-10-17.md`；基线 `a96aa03da14a912aaf783d875d6a379846c21289`，P4-2 实现已交付；真实 Access/Admin 演练及本卡独立验收尚未执行。
+- 证据: `docs/ota-exec-notes/P4-3-implementation-2026-10-17.md`、`docs/ota-exec-notes/P4-3-dev-2026-10-17/live-preparation-04.inventory.json`；基线 `a96aa03da14a912aaf783d875d6a379846c21289`，P4-2 实现已交付；真实 owner/Admin 演练已执行，旧失败保留，publisher/viewer 无真实会话仍明确记录，本卡独立验收尚未完成。
 
 #### P4-4 Secrets 与 environment 配置
 状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **需用户操作**
