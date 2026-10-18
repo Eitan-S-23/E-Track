@@ -5,7 +5,10 @@ Latest result: **formal PASS**, contract `P4-3-v1`, round
 `1ddd948bbf7d0dc2097c14d87def767314342f8f`; product source remains 0067b6c.
 See the final formal-result section and `docs/acceptance-contracts/P4-3-v1/`.
 The pre-review/NOT_RUN statements below are dated history, not the latest result.
-No new deployment, main merge or production-role certification is claimed.
+Delivery follow-up is now authorized and IN_PROGRESS under P43-DELIVERY-20261018
+below. Formal PASS is unchanged; main integration and isolated deployment are
+not complete until their independent readbacks are recorded. No production-role
+certification is claimed.
 
 Latest review: **P43-ACCEPT-02 CLOSED / remediation re-review PASS** on
 `0067b6c3caa9ee263c53ae372fdc63cc7f74250f`, delivery
@@ -520,3 +523,59 @@ preserved using only a scoped `cr-at-eol` whitespace attribute, not by rewriting
 the evidence. Final post-commit validation, branch readback and bounded path/cache
 audit are performed before the session handoff; this is not a claim of a
 machine-wide filesystem trace or attribution of unrelated cache timestamp changes.
+
+## P43-DELIVERY-20261018: Authorized Delivery Follow-Up
+
+The user explicitly assigned the remaining main integration, isolated Admin
+deployment and minimal verification to this root acceptance agent and instructed
+it to proceed without another implementation handoff unless a product correction
+is actually needed. This is new delivery authority, not a retroactive change to
+the acceptance result or its earlier no-merge/no-deployment boundary.
+
+The writable worktree remains
+`D:/github/my/E-Track/.cache/p4-3-implementation-20261017`, with its necessary
+shared Git objects, task index and task-branch refs under
+`D:/github/my/E-Track/.git`. The dirty shared main worktree is read-only and must
+not be checked out, reset, stashed, committed or synchronized by this follow-up.
+Remote main integration will use the existing GitHub route with a merge commit,
+retaining 1ddd948 -> 7e11e96 -> bbcaf0b ancestry. No squash, rebase, force push,
+branch-protection bypass, branch deletion or unrelated main changes are planned.
+
+Read-only entry checks confirm remote main remains a96aa03, the task branch is
+clean at bbcaf0b, no P4-3 PR exists, merge commits are enabled, and main has no
+active branch-protection/ruleset requirements. Existing CI remains mandatory
+evidence, not a reason to bypass a failing integration check. Main/PR workflow
+review found no automatic firmware release or Admin deployment for these paths;
+the app workflow is path-gated and no app-build/docs-publishing input changed.
+The repository's existing main-push notification is left unchanged.
+
+The bounded delivery sequence is:
+
+1. Create the scoped PR, inspect its changed paths and required integration CI,
+   then merge only the observed head while preserving commit IDs.
+2. Reuse the already accepted Admin artifact from CI 39098302062/1, source
+   0067b6c, and deploy once to `e-track-firmware-p43-admin-test` only. Preserve
+   D1 `2617e1e1-956f-42ce-a465-da56d84abf06`, R2
+   `e-track-firmware-p41-test-releases`, Access policies, signing configuration
+   and all other project settings. Do not rebuild the artifact or replay the
+   CAS/recovery/disable exercise.
+3. Verify platform deployment/source, the served HTML digest, unauthenticated
+   Access protection and bounded authenticated GET-only state as available.
+   Reconcile an uncertain CLI result by readback, never by blind redeployment.
+4. Integrate the delivery record and evidence into main and verify the final
+   remote ancestry and scoped filesystem boundary before claiming delivery done.
+
+The inspected existing `.cache/p43-pages.mjs` only admits its old inaugural
+deployment as the prior state and pins the pre-remediation HTML digest, while
+`.cache/p43-deploy-reconcile.mjs` hardcodes already-used output filenames. These
+are evidenced invocation limitations, not product defects. A small task-local
+adapter will reuse the installed Wrangler CLI, existing official OAuth refresh
+and checked TLS transport, changing only the exact old/new identities, output
+labels and readback gates. It will not replace the deployment protocol or edit
+historical tooling/evidence.
+
+Formal contract, matrix, frozen runners and original archives stay immutable.
+Real publisher/viewer sessions, inherited dependency advisories and external
+cache attribution remain explicit limits. This grant does not start P4-4/P5,
+unlock production, change credentials/scopes or business data, operate devices,
+or authorize project-external cleanup. Current delivery result: IN_PROGRESS.
