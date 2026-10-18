@@ -1,3 +1,4 @@
 # Preserve the original P3-4 contract bytes on add and checkout.
 .gitattributes -text
 P3-4-v*.contract.json -text
+P4-3-v1.contract.json -text

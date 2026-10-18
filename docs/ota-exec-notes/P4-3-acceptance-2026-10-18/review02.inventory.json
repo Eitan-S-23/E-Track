@@ -1,0 +1,97 @@
+{
+  "schema": "p43-independent-prereview-evidence-v1",
+  "reviewId": "P43-REVIEW-20261018-02",
+  "createdAt": "2026-10-18T06:49:25.243Z",
+  "candidate": "0067b6c3caa9ee263c53ae372fdc63cc7f74250f",
+  "inputHead": "21f5b89bddb6b5e823909d237724f8dc448e9dd5",
+  "findingId": "P43-ACCEPT-02",
+  "disposition": "PASS",
+  "scope": "Independent-remediation-review-only",
+  "formalExecution": "NOT_RUN",
+  "archive": {
+    "path": "review02-originals.zip",
+    "sizeBytes": 17116,
+    "sha256": "2c80e9b45524d654eb09859e83e6d2233fbf63b23d15502aa6cb98b848e35243",
+    "entries": 13
+  },
+  "entries": [
+    {
+      "path": ".cache/p43/logs/p43-review02-probe-01.json",
+      "sizeBytes": 472,
+      "sha256": "853eb6697d70463753a6b433a20b0d6a3e4d55d8c2b2ddccca37b2a9d426d576"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-probe-01.log",
+      "sizeBytes": 3079,
+      "sha256": "23790acf6778a1f6ab114a9e07806117a343ff0649549beb9bc0e719efad919f"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-ci-01.json",
+      "sizeBytes": 537,
+      "sha256": "78cc9b7093b5e858ffc98ea6607d45252394ac7f5ee81c92ecbfce2dbd046037"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-ci-01.log",
+      "sizeBytes": 2083,
+      "sha256": "41eb957be6bfbeca758455773ad280cfea51ecc538275aa524567f19f39483b8"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-evidence-01.json",
+      "sizeBytes": 2275,
+      "sha256": "d81b2a9851e9c564c5bbf82b3a18025e31529928c99e75059063a7b4a3b47b97"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-evidence-01.log",
+      "sizeBytes": 642,
+      "sha256": "1b98ebda97f9ac12bfdcf84cc1ce5f6b5adcb18031bf3dbf95971d2e8b075ebd"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-compatibility-01.json",
+      "sizeBytes": 3082,
+      "sha256": "6f55af1b59c4d59aa956c1b1cbd0ec35866c6c60bba78f93dda9f550f34e1e9c"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-compatibility-01.log",
+      "sizeBytes": 557,
+      "sha256": "0f1f3bae5b75eeea3ad68a77cc110bd398c3dab4f35c697a47eabb5f6ee10cd2"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-remote-01.json",
+      "sizeBytes": 1685,
+      "sha256": "ef8c0465a4b7f1054d6d5552053e8d1a4c5e7bf3a8e13f17d2c4bef482e3c211"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-remote-01.log",
+      "sizeBytes": 757,
+      "sha256": "2fd272251e3a796aaa24fc35d94b867ac99a3fe8e837a6c79a769daa69dbd6fe"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-preserve-01.json",
+      "sizeBytes": 936,
+      "sha256": "8c3113b4202e0fe127bff23b4c1eba7bc919a0d37cdc81ce3196b751f254e0e3"
+    },
+    {
+      "path": ".cache/p43/logs/p43-review02-preserve-01.log",
+      "sizeBytes": 221,
+      "sha256": "b6df2ae0958e60d152d96b8d4c09d96025a726f81be21e48a7d9d5017f76401c"
+    },
+    {
+      "path": ".cache/p43-review02/before-acceptance-report.md",
+      "sizeBytes": 15569,
+      "sha256": "d99da352bcb5a288157fef1e2552647dec0321bd2b9ce374f4eabf1562bfc0fe"
+    }
+  ],
+  "priorReviewArchive": {
+    "path": "review-originals.zip",
+    "sizeBytes": 18497,
+    "sha256": "81efe70aaf1c35c70584c882ec5fbd84feefc390ef7154484bfcda5f0dc85092",
+    "entries": 14
+  },
+  "checks": {
+    "listingAndEveryExtractedEntryVerified": true,
+    "originalFailedReviewPreserved": true,
+    "priorReviewArchiveUnchanged": true
+  },
+  "privateOriginalsIncluded": false,
+  "productFilesModified": false
+}

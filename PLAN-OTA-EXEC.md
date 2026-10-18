@@ -773,9 +773,11 @@
 - 启用交接: P42-EXT-02 的真实 legacy/manifest 仍由 Cloudflare/D1 迁移责任人与 OTA 发布链审查人共同负责，root 协调；P42-EXT-03 的绑定/cutover/Access/真实上传回读按验收记录交 P4-4、P4-3、P4-1/P3-5 的相应门槛。均未宣称实测通过，不得未对账就启用规范读取；P5/生产门槛不变。
 
 #### P4-3 admin 撤回语义与运营开关
-状态: 进行中 ｜ 认领: Codex P4-3 实现 agent / 2026-10-17 ｜ 更新: 2026-10-18(root 接管；972e74c 修复多标签页 CSRF，原生 Worker 270/270、UI 12/12、编译路由 3/3；隔离部署及剩余真实演练 drill-06 8/8 通过，等待独立离线验收)
+状态: 进行中 ｜ 认领: Codex P4-3 实现 agent / 2026-10-17 ｜ 更新: 2026-10-18(0067b6c 的 P43-ACCEPT-02 整改独立复验通过：原探针 6/6，源绑定 CI 270/36/3；21f5b89 已推送，正式验收待输入入库冻结；新 UI 未部署)
 - 目标: §6.2-3+"回滚→撤回(retract)"更名:UI 文案/API 注释/确认弹窗写明"仅影响未升级设备,已升级设备不可降级,救治=发更高 vcode";渠道停发开关、reason 必填、差分基版保留策略、晋升事务原子性验证。
 - 验收: admin 端演练截图+接口测试。
+- 独立预审: Codex P4-3 验收 agent / 2026-10-18，`PRODUCT_FAIL`（`P43-ACCEPT-02`：未知结果对账遇 401/403/429 丢失原幂等 key）；正式执行验收 `NOT_RUN`，原认领人与进行中状态不变。六包 1,199 条目及真实 HTTP/D1/下载原件已核对，不重做云端演练。报告：`docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`。
+- 整改复验: 同一独立验收者 `P43-REVIEW-20261018-02` 对 0067b6c 判定 `P43-ACCEPT-02 CLOSED / PASS`，158 条增量原件及 270/36/3 核对一致；首轮失败原件保留。正式 v3 验收尚未执行，等待验收 runner/profile 入库及有界 Git/治理 CI 授权；未重做云端演练、不声明线上修复或整卡 PASS。
 - 证据: `docs/ota-exec-notes/P4-3-implementation-2026-10-17.md`、`docs/ota-exec-notes/P4-3-dev-2026-10-17/live-preparation-04.inventory.json`；基线 `a96aa03da14a912aaf783d875d6a379846c21289`，P4-2 实现已交付；真实 owner/Admin 演练已执行，旧失败保留，publisher/viewer 无真实会话仍明确记录，本卡独立验收尚未完成。
 
 #### P4-4 Secrets 与 environment 配置
@@ -907,6 +909,10 @@
 | 2026-10-17 | P4-3 / Codex 实现 agent / `P43-DISPATCH-20261017` | P4-2 已独立实现验收并交付 main，但 P4-3 仍记旧依赖阻塞 | 仅修正 P4-3 行、派单摘要与精确集合相等断言，并登记本卡认领和开发记录；不改派生规则，不删除集合断言，不启动其他卡 | 用户明确派单，并批准独占 worktree/分支及本卡 Git/开发 CI 范围；基线 a96aa03 包含 P4-1/P4-2 交付。真实环境和独立验收义务不因实现依赖满足而关闭 | 已对账/开发中 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-18 | Codex P4-3 independent re-review | P4-3 only, IN_PROGRESS | P43-ACCEPT-02 CLOSED on 0067b6c: unchanged original probe independently 6/6, 158 increment entries byte-verified, native CI 39098302062 source/counts/serving bytes 270/36/3 verified. Remote delivery is 21f5b89; server executable bytes unchanged except a generated comment. Windows timeout history, real-role and CRL gaps retained. No product edit, cloud operation, commit or push. Formal execution remains NOT_RUN pending scoped runner/profile input delivery and Git/governance-CI authority; no whole-card PASS. See docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md.
+
+- 2026-10-18 | Codex P4-3 independent acceptance | P4-3 only, IN_PROGRESS | Concentrated pre-review PRODUCT_FAIL: P43-ACCEPT-02 loses an unresolved release-action key after auth/CSRF/rate-limit replay rejection; original-function probe 4 FAIL / 2 PASS controls. Independently verified six archives (1199 entries), source-bound CI 270/12/3 and original HTTP/D1/public evidence with 24 channel + 3 recovery + 1 disable effects. Formal acceptance NOT_RUN; no product edits, cloud/device mutation, commit, push or merge. Remote task ref is still 972e74c, evidence 0827724 local-only; real publisher/viewer and historical CRL limits retained. See docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md.
 
 - 2026-10-17 | Codex P4-3 implementation continuation | P4-3 only, IN_PROGRESS | Source 933b790; Cloudflare 39018754889 checks/build-only input successful: native Worker 259/259, mock UI 12/12, compiled router 3/3. Initial smoke 0/4 failure and offline parser failure retained. Real Admin exercise remains NOT_RUN pending the specific target/fixture scope and live Access owner input; it is still implementation-owned, not a full-card acceptance handoff. No deployment/platform mutation, other card, main merge or device action.
 - 2026-10-17 | Codex P4-3 implementation | P4-3 only, IN_PROGRESS | Authorized exclusive worktree and branch start at a96aa03; reconcile the delivered P4-2 dependency and exact dispatch set without changing dependency rules. Development checks, native CI, real Access exercise and independent acceptance remain distinct. See docs/ota-exec-notes/P4-3-implementation-2026-10-17.md. No other card, main merge, deployment, platform mutation or device operation.

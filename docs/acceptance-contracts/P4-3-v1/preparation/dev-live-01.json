@@ -1,0 +1,15 @@
+{
+  "label": "dev-live-01",
+  "command": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-3-v1/tools/inspect-live.cjs"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+  "started": "2026-10-18T07:29:02.714Z",
+  "ended": "2026-10-18T07:29:14.669Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "node": "v24.13.0",
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\.cache\\p43-formal\\development\\dev-live-01.log"
+}

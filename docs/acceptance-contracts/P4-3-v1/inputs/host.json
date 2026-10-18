@@ -1,0 +1,18 @@
+{
+  "node": {
+    "version": "v24.13.0",
+    "executable": "D:\\install\\nvm\\nodejs\\node.exe",
+    "sha256": "d14ba95cdce1ef7dc9ad3ac74949ca5db38b27378ee30f30a23cf26f9e875a11"
+  },
+  "tar": {
+    "executable": "C:\\Windows\\System32\\tar.exe",
+    "version": "bsdtar 3.5.2 - libarchive 3.5.2 zlib/1.2.5.f-ipp",
+    "sha256": "dfef7a04a700b8c9a1d6249dc995c2e91a4be7583d5b534ed4c9aec546616478"
+  },
+  "python": "Python 3.13.12",
+  "platform": "win32",
+  "arch": "x64",
+  "root": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+  "temporaryOutputs": ".cache/p43-formal",
+  "newCloudBusinessRequests": 0
+}

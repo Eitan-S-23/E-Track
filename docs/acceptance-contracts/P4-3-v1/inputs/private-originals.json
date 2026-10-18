@@ -1,0 +1,943 @@
+{
+  "schema": "p43-private-originals-v1",
+  "purpose": "Immutable private retrieval registry, not published credentials; each read also matches the original public receipt and projection.",
+  "originalOperator": "P4-3 implementation agent",
+  "originalSources": [
+    "933b790e69e04ee551ad255398e08f12a1b2a107",
+    "972e74c43cd36b7a308e457296aaf7bb06120e78"
+  ],
+  "captured": "2026-10-17/2026-10-18; exact timestamps remain in each source receipt",
+  "retrieval": "Same authorized task worktree only; do not recreate an absent original by rerunning cloud mutations.",
+  "entries": [
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/001-before-d1-original.json",
+      "sizeBytes": 12201,
+      "sha256": "505fc6d6d1161658f6e56fe5ea80e16d64dba2fb81534c1dc6a50e32dfd2203f"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/002-negative-origin-request.json",
+      "sizeBytes": 333,
+      "sha256": "b557d030749f7d7fd61013e266981c75d486c0119a0d101cccf9d5d7bcd2b863"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/002-negative-origin-response-original.json",
+      "sizeBytes": 132,
+      "sha256": "3baf25755762c53969586d94e40a79e130506ad867e4d000e23655765c40851f"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/003-negative-csrf-request.json",
+      "sizeBytes": 333,
+      "sha256": "b557d030749f7d7fd61013e266981c75d486c0119a0d101cccf9d5d7bcd2b863"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/003-negative-csrf-response-original.json",
+      "sizeBytes": 113,
+      "sha256": "bb4d9806acb938a8341aaee508c0a0cead01a40d1a1ba60d1509aeb615a034b5"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/004-negative-content-type-request.json",
+      "sizeBytes": 333,
+      "sha256": "b557d030749f7d7fd61013e266981c75d486c0119a0d101cccf9d5d7bcd2b863"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/004-negative-content-type-response-original.json",
+      "sizeBytes": 157,
+      "sha256": "cf9da87077ba42cf090a1ab9dfc7c49d5351f1891cccc069fb8941e167976f76"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/005-negative-accept-request.json",
+      "sizeBytes": 333,
+      "sha256": "b557d030749f7d7fd61013e266981c75d486c0119a0d101cccf9d5d7bcd2b863"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/005-negative-accept-response-original.json",
+      "sizeBytes": 157,
+      "sha256": "e81fb5679edafee06479dbc977879aa94c8fc5db50137e068e5d908be16c83d1"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/006-negative-reason-request.json",
+      "sizeBytes": 302,
+      "sha256": "570fe8659c9cf32842181eb5ce919a9d9a61ce2bf31da07d57b6e5f49b8b701a"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/006-negative-reason-response-original.json",
+      "sizeBytes": 126,
+      "sha256": "ceb499438d70b210e4b088a2610225cab939b9e61a55b0e2b5f1bc17e9acf418"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/007-negative-revision-type-request.json",
+      "sizeBytes": 335,
+      "sha256": "42a67998bc196c032d6a23ccc70c6129c0920f59c48028d11eacdc7162fbf3f2"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/007-negative-revision-type-response-original.json",
+      "sizeBytes": 155,
+      "sha256": "458c4263e88a3dc1e0ef3ae293c7cfaada4eab60b92eb7755b93cd1cdc118426"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/008-negative-unknown-rollback-field-request.json",
+      "sizeBytes": 355,
+      "sha256": "159c191f887a1a4117078ce5271906552afa1872bd18789fb8bcbb64b31ba143"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/008-negative-unknown-rollback-field-response-original.json",
+      "sizeBytes": 125,
+      "sha256": "bacb04ccbdbfc1f4710ba200b8679b513762da215eaea36bc77b27ed38bc5539"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/009-after-negative-validation-d1-original.json",
+      "sizeBytes": 12201,
+      "sha256": "f936466d9207f64deb27c0224f95c41f749ce339ae4dc13ca11a00de22f36d6b"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/010-guard-stable-stop-latest-request.json",
+      "sizeBytes": 338,
+      "sha256": "c040fd75094e252f00944d4110aa4d4d3a5eff1553f994dd57e6ea74644f5a31"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/010-guard-stable-stop-latest-response-original.json",
+      "sizeBytes": 232,
+      "sha256": "a268959a8ceaa7b0bbce39b762fbfb1eb5c4c952d3ffc676dede86ee7f28eecb"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/011-after-guard-stable-stop-latest-d1-original.json",
+      "sizeBytes": 13352,
+      "sha256": "2dc229e0d1b660c46ef61d363b6f666b960406456accd4af3d74dedc4d7326db"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/012-guard-stable-stop-downloads-request.json",
+      "sizeBytes": 344,
+      "sha256": "762f435c62e8477e5f7e9132a1b66939099a3b15162e5d295ef96a5fd99cd9e8"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/012-guard-stable-stop-downloads-response-original.json",
+      "sizeBytes": 234,
+      "sha256": "9d8c4e6a689ba76cbc04bca7df956724627afeb5859190f13a9f1e7855c6ba1b"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/013-after-guard-stable-stop-downloads-d1-original.json",
+      "sizeBytes": 14115,
+      "sha256": "fd67de78d8a8e438bf0557a28a4659b3ad67c074d947a400dee7c7f69cf94a25"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/014-guard-beta-stop-latest-request.json",
+      "sizeBytes": 334,
+      "sha256": "a7ce1e7a534d2ff6ac5f0159e10bc30471ca69eef41d241019c4b44046a3e50f"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/014-guard-beta-stop-latest-response-original.json",
+      "sizeBytes": 230,
+      "sha256": "a50f193e85a8ddcfcad04e11e0589f96ff85398e11c7f8f0314e8f1e7c1aa794"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/015-after-guard-beta-stop-latest-d1-original.json",
+      "sizeBytes": 15264,
+      "sha256": "d1e08d31f22314357fce396a5d5a896f7680ea9380c313ebb87cb89365dd5a5c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/016-guard-beta-stop-downloads-request.json",
+      "sizeBytes": 340,
+      "sha256": "c1f2eb78e8a4a1de9b09c5e498392fac663e65c29a0a6b2f6ec7aab84628b48c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/016-guard-beta-stop-downloads-response-original.json",
+      "sizeBytes": 232,
+      "sha256": "dc816c58ae298ab102d8555a6d8f3d2278b9ad89e66975df4b91babe8df46d09"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/017-after-guard-beta-stop-downloads-d1-original.json",
+      "sizeBytes": 16025,
+      "sha256": "eb0261f79dba1f35ab8ca65ef9038eba8d049b3fed4a1ec5545abd673594d51e"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/018-publish-high-stable-request.json",
+      "sizeBytes": 417,
+      "sha256": "ce340d94b03b276d4246af9d6423e5e75113b5af3981f9e2e8d755012896ed02"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/018-publish-high-stable-response-original.json",
+      "sizeBytes": 292,
+      "sha256": "2e0e30be0ebda89954f502f87e9e5d7d1815818d3c91d2e5198fb485d4aa7f64"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/019-after-publish-high-stable-d1-original.json",
+      "sizeBytes": 16965,
+      "sha256": "f6fa9be4ef7a93a230ab13f7dcc81c9b6747eaeccc8283c6a25e95ec17c6c34d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/020-failure-reconciliation-d1-original.json",
+      "sizeBytes": 16967,
+      "sha256": "64decaf64de9599f8415f43dfa9a6fb2ce4e11e8fc1058f5305f5108650def6d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/021-failure-high-beta-request.json",
+      "sizeBytes": 413,
+      "sha256": "2374e5a85afbb84b6f276594af21f3398ead74f91ff3cfbec05982f844b76f21"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/021-failure-high-beta-response-original.json",
+      "sizeBytes": 290,
+      "sha256": "078596e7b18bcd9ce4d4a12b8da524a5fdb0e1ea19dfd03a4254980b8b60d3cc"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-01/022-after-failure-high-beta-d1-original.json",
+      "sizeBytes": 17903,
+      "sha256": "3ca78ba452d13943c40ecf9542d1df6745d776d06b8584be25d15e9f717c7adb"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-03/001-before-d1-original.json",
+      "sizeBytes": 17903,
+      "sha256": "c314d4ea41a6d141cdf5b3335f6595404c0516b2a747b2c12a7a761d95ea8431"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-03/002-recovery-ui-request.json",
+      "sizeBytes": 418,
+      "sha256": "2a0df3ea25ca5b7a0988ed994e49d0ec490ece617b5e904812aa2f5819831698"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-03/002-recovery-ui-response-original.json",
+      "sizeBytes": 867,
+      "sha256": "12cd48efa9098d01ab4887926c99cbc9886de6fe53a8b181212a149da759ff59"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-03/003-failure-reconciliation-d1-original.json",
+      "sizeBytes": 19853,
+      "sha256": "9102be8e10dd7f4dbc12197a44c8b034143fdddaa4578fab62e8e1ed82fa728c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-04/001-before-d1-original.json",
+      "sizeBytes": 19853,
+      "sha256": "b152da305b0fbeb5dc178dc9dc8537ed369cba7dad4be00ab98f7a58c9e0d569"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-04/002-recovery-concurrent-ui-request.json",
+      "sizeBytes": 450,
+      "sha256": "74b7bff5641c909e6c917b74c7f434d90db270b65e98c2cd8ca278a5b761f4da"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-04/002-recovery-concurrent-ui-response-original.json",
+      "sizeBytes": 867,
+      "sha256": "e75fe3ca76d821c2bbdb7bf4a166a22086323d5ffdce0962d6d615ea7ad40a92"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-04/003-recovery-concurrent-peer-request.json",
+      "sizeBytes": 450,
+      "sha256": "74b7bff5641c909e6c917b74c7f434d90db270b65e98c2cd8ca278a5b761f4da"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-04/003-recovery-concurrent-peer-response-original.json",
+      "sizeBytes": 866,
+      "sha256": "ed5455294adfd7367d823907341c5d882898fc05952dcbc2ae5ee5cff8b51d8c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-04/004-after-second-recovery-d1-original.json",
+      "sizeBytes": 21837,
+      "sha256": "0ccda6004984dd79b75fd264494fc68e86da7fa2408986d01ddd96e5ec37e2be"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/001-before-d1-original.json",
+      "sizeBytes": 21836,
+      "sha256": "fbe67bedaa73245ca4b9e857a3dc65976f4572e4aabf6eedef57b337302ec6bd"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/002-old-pair-expired-request.json",
+      "sizeBytes": 450,
+      "sha256": "74b7bff5641c909e6c917b74c7f434d90db270b65e98c2cd8ca278a5b761f4da"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/002-old-pair-expired-response-original.json",
+      "sizeBytes": 156,
+      "sha256": "4401b567661e396bf8feaa489757fb758c1e73700eb1ace7b8bf5e15c3466d6d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/003-after-old-pair-expiry-d1-original.json",
+      "sizeBytes": 21834,
+      "sha256": "3989e7ee7fef728dc65e4550b8f541350a785238803d0ae9ba8e00d01e09dc96"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/004-recovery-new-key-after-expiry-request.json",
+      "sizeBytes": 451,
+      "sha256": "6317980d62053ede24b993968168ed30b6c87d2a9e1105bf471b142faeab7e0a"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/004-recovery-new-key-after-expiry-response-original.json",
+      "sizeBytes": 867,
+      "sha256": "7e6b6e37ea0c15c4f82f4773785120af1c0d9d701c7016f0a76de5bf431a0629"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/005-after-renewed-recovery-d1-original.json",
+      "sizeBytes": 23821,
+      "sha256": "9988546c8ef2b58b4174aa29fe9d29c4260530c55f8387e67124246fc9c359a4"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/006-renewed-recovery-download-body.bin",
+      "sizeBytes": 8200,
+      "sha256": "0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/007-renewed-recovery-exact-replay-request.json",
+      "sizeBytes": 451,
+      "sha256": "6317980d62053ede24b993968168ed30b6c87d2a9e1105bf471b142faeab7e0a"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/007-renewed-recovery-exact-replay-response-original.json",
+      "sizeBytes": 866,
+      "sha256": "8fc5d691095a99cca1ac76b8ca4a13d2d627d1774adc225580060615dbe54b47"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/008-after-renewed-replay-d1-original.json",
+      "sizeBytes": 23821,
+      "sha256": "99eded448053f8649532cf514695f4520bb760aa46ac9bbd778b7b9a2cd360dc"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/009-recovery-conflict-reason-request.json",
+      "sizeBytes": 459,
+      "sha256": "af1eff2ecb7dcd347a817023198d6818c3db60c8fefdc74f242b4bc99b4c9533"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/009-recovery-conflict-reason-response-original.json",
+      "sizeBytes": 127,
+      "sha256": "0419b297fc530705c2c857541fbf5dc07ab08191d5045f1b0e06b95174852931"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/010-recovery-conflict-release-request.json",
+      "sizeBytes": 451,
+      "sha256": "ec019a97ec505e977fe406c0f4071e8f98fd199da1884912e5711e441931e6b2"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/010-recovery-conflict-release-response-original.json",
+      "sizeBytes": 127,
+      "sha256": "1a989f2e73f97a9a0fa235b36aede06fb1a6f7de46f8256a76afa47b822fec4c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/011-after-release-conflicts-d1-original.json",
+      "sizeBytes": 23821,
+      "sha256": "e2e5116e6ff459e6753bef89af333747898c18e3496f340909571ff2f37531bf"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/012-retract-stable-request.json",
+      "sizeBytes": 412,
+      "sha256": "d21506e3cb0f9911e9ae7b7a85e0e51fc1f855a2a5a16393e07158e39533992c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/012-retract-stable-response-original.json",
+      "sizeBytes": 292,
+      "sha256": "d3f7988ae1ca9ba1ac32b364cdba1dc0fdd0dd5bd74c427f345bdacbe5c1a91a"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/013-after-retract-stable-d1-original.json",
+      "sizeBytes": 24771,
+      "sha256": "5665f2447ce8415923202401f6ce6fe15447f278fca397d6308d38d2e1004096"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/014-referenced-disable-stable-request.json",
+      "sizeBytes": 404,
+      "sha256": "5c4f7e620fef3523e276f061944a9ddcbdf8cec7b83b0de0ce767068463a4633"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/014-referenced-disable-stable-response-original.json",
+      "sizeBytes": 130,
+      "sha256": "1d990b66cc0ddc56e29f9df82733ffdb478087424a66dfd4e9293c40a9cde6ed"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/015-cross-action-key-stable-request.json",
+      "sizeBytes": 441,
+      "sha256": "b8111df64b0505fa7b28c908238a76963257abfcdf8a33e3df5699bbb60ab3e1"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/015-cross-action-key-stable-response-original.json",
+      "sizeBytes": 127,
+      "sha256": "120aa6866ce0eb998bad37b871c4cb57eeac24cb6184ba393725cf2fdfae777d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/016-after-referenced-disable-stable-d1-original.json",
+      "sizeBytes": 24771,
+      "sha256": "ab9ae855827d82143832fa02214a788d440930316801cd3449030020600aceb1"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/017-open-latest-stable-request.json",
+      "sizeBytes": 334,
+      "sha256": "ed05d614d2d159e6104dd576fde16fab711f553623d8275e46d77d0372f58a63"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/017-open-latest-stable-response-original.json",
+      "sizeBytes": 299,
+      "sha256": "313387429b6ba27d533e7ea5ea3ee22af26311da449f51abf9cece8dae368b87"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/018-after-open-latest-stable-d1-original.json",
+      "sizeBytes": 25677,
+      "sha256": "4d5a63cbc489e4fedf236ec2b8af8048d7037f298ff391ab4930b790ab08caa5"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/019-latest-low-client-stable-body.bin",
+      "sizeBytes": 1394,
+      "sha256": "4572240692471b62165d2f49d319bf51d4143c09642101b2ba27bcb04d859f21"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/020-latest-upgraded-stable-20801-body.bin",
+      "sizeBytes": 118,
+      "sha256": "bb2f098ba44ba9d7c71d7c46931a7842a183536c285abab1135d294542fd4041"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/021-latest-upgraded-stable-30208-body.bin",
+      "sizeBytes": 118,
+      "sha256": "18acd0247a237cacd0685fa2d1defd91e43dcda01387f5da1da07b165f4205d9"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/022-download-stopped-stable-body.bin",
+      "sizeBytes": 125,
+      "sha256": "44814852e0781bb1f4f0bb8736dce5c66f2967c5089871bc2117f9b0cb892b63"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/023-open-downloads-stable-request.json",
+      "sizeBytes": 340,
+      "sha256": "f3af3157ff6783a05e8f68b0d36bd1327c594b54b2a264c73053aaca0eae0f2c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/023-open-downloads-stable-response-original.json",
+      "sizeBytes": 303,
+      "sha256": "f6df61cea629b9fcae91438eedeb37f60c41146e08ce9d366c6828ea3c5305d9"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/024-after-open-downloads-stable-d1-original.json",
+      "sizeBytes": 26586,
+      "sha256": "a844794a4bd8663b86ff9f7cc7db783f59d184b17d8e72dca5267ebcf9ba0ecb"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/025-old-url-open-stable-body.bin",
+      "sizeBytes": 208,
+      "sha256": "8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/026-resume-noop-stable-request.json",
+      "sizeBytes": 337,
+      "sha256": "c191205919e43e6d3e617dfbe49b7307391d7c7e4c47ee00c2fb3c7b390569d6"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/026-resume-noop-stable-response-original.json",
+      "sizeBytes": 302,
+      "sha256": "bdea27defcefe39c4eedcbb2e71387084ec5340a9bd62941b8ea8367999246ea"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/027-after-resume-noop-stable-d1-original.json",
+      "sizeBytes": 26588,
+      "sha256": "32de21c22478648d0e1c747eac30c40fcfb69e1d304731fe5f4a488764653bba"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/028-stop-latest-stable-request.json",
+      "sizeBytes": 332,
+      "sha256": "3dea01f20e3fe3f1517704f089871ecea9d554d53fddc644e97bc95e548c9a7a"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/028-stop-latest-stable-response-original.json",
+      "sizeBytes": 297,
+      "sha256": "6dac1f730cc0b2c0de716f2153274dbc9ca2e59060799df490aca32101ae603c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/029-after-stop-latest-stable-d1-original.json",
+      "sizeBytes": 27475,
+      "sha256": "22a02b874d4d97e7cfeb0ac933a824a9d54f45ffb3b0a30b3408ab90a63f5004"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/030-latest-stopped-stable-body.bin",
+      "sizeBytes": 150,
+      "sha256": "712baca414f016ad77584252ab8992ba0818306efd8088ae180756539fad9919"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/031-old-url-latest-stopped-stable-body.bin",
+      "sizeBytes": 208,
+      "sha256": "8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/032-stop-downloads-stable-request.json",
+      "sizeBytes": 338,
+      "sha256": "5d0299115627d561fb61563a0ce02955473ab3be51140efa1286fcc2371eea46"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/032-stop-downloads-stable-response-original.json",
+      "sizeBytes": 299,
+      "sha256": "f4615148bce752b57eaa85a9355e6b318b94c612749c702450bd342ef2ec98af"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/033-after-stop-downloads-stable-d1-original.json",
+      "sizeBytes": 28378,
+      "sha256": "3812bbf774a5cb9d378c3d42e5026a174abd1f60876cd9c9d65db068b32891f4"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/034-old-url-blocked-stable-body.bin",
+      "sizeBytes": 125,
+      "sha256": "b83edb96830b454189f771f6f1fb641303c0bae16486703899934824e1b86d16"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/035-stop-noop-stable-request.json",
+      "sizeBytes": 333,
+      "sha256": "7074613ea406f92ce71847dcad6400a4c71a223f5fa08dbed05aa2acb6f51208"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/035-stop-noop-stable-response-original.json",
+      "sizeBytes": 298,
+      "sha256": "3a3512c25b030ee3338e21573ab0b0e53202b8c9fa6d4adf6c4050a05ef116db"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/036-after-stop-noop-stable-d1-original.json",
+      "sizeBytes": 28378,
+      "sha256": "478a168420d8356fbaedea5eaa1bcd07221e9da25e7377eefb7bfb905efb739f"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/037-return-high-stable-request.json",
+      "sizeBytes": 416,
+      "sha256": "ef89a44377ff01d476655562bda15639d4ea93a34e50c9bd9c3c60690c5d207c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/037-return-high-stable-response-original.json",
+      "sizeBytes": 292,
+      "sha256": "9f435fb3bc8ec59b28a3daaf458c3c301d241a41eb74b1619d266fe45fa7fac6"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/038-after-return-high-stable-d1-original.json",
+      "sizeBytes": 29255,
+      "sha256": "53e9782640cd0996c1d858c5910e2122f5f5d5b1a14902a57b9201d0740929f4"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/039-retract-beta-request.json",
+      "sizeBytes": 408,
+      "sha256": "67dff04afba88d54975fa53abd99199621d7a8f00369146062eaeff7f1a921a8"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/039-retract-beta-response-original.json",
+      "sizeBytes": 290,
+      "sha256": "9d0da6e0a3d312ddfbc15889af3b59f03e033d7c05c9f68517e63dda70890b54"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/040-after-retract-beta-d1-original.json",
+      "sizeBytes": 30201,
+      "sha256": "03f27af69fd1ce6bc9993a1b005b4c32f0a695dd230cc50499a6c9d938a16672"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/041-referenced-disable-beta-request.json",
+      "sizeBytes": 404,
+      "sha256": "1f5050d06a6520ee63368e3dada6236873ce73d3a18247a72ee2ebeae0e6f242"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/041-referenced-disable-beta-response-original.json",
+      "sizeBytes": 130,
+      "sha256": "4cb68da61a4c5592a7a7e39d2eb40ad8e2b3b912def4a0b91312e6eaa0d6322b"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/042-cross-action-key-beta-request.json",
+      "sizeBytes": 441,
+      "sha256": "b8111df64b0505fa7b28c908238a76963257abfcdf8a33e3df5699bbb60ab3e1"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/042-cross-action-key-beta-response-original.json",
+      "sizeBytes": 127,
+      "sha256": "e0d75f9553e26686b6e49efbc433a5972d8bc1d37d4a9c5c0c5b8e1bd831b0b2"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/043-after-referenced-disable-beta-d1-original.json",
+      "sizeBytes": 30201,
+      "sha256": "47ffaaa74668fd649a1096a49a0a999ba282894bf58c7cce219121f097eff85e"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/044-open-latest-beta-request.json",
+      "sizeBytes": 330,
+      "sha256": "dcb01c217f9af0311bed787c071c58284b38e321b6e13c97989f1e438d87a52a"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/044-open-latest-beta-response-original.json",
+      "sizeBytes": 297,
+      "sha256": "9c8216a682b1abed2748ced74ab9228a998123d67debe1a5ecff35b83bc2bb8c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/045-after-open-latest-beta-d1-original.json",
+      "sizeBytes": 31103,
+      "sha256": "733a97e1b1d6d3dc70b6c585f4238c5023ab6a8099962c27164eb3414be4ad4d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/046-latest-low-client-beta-body.bin",
+      "sizeBytes": 1392,
+      "sha256": "fec3a3418ab598e8e8b93455a2e96292c305c1bf6913c4ee69b498f7a535dd14"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/047-latest-upgraded-beta-20801-body.bin",
+      "sizeBytes": 118,
+      "sha256": "348cb725f6ec3e391cb81ea6ebf945705088ee1d4e0fd55a1ed001ec6a5dfda9"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/048-latest-upgraded-beta-30208-body.bin",
+      "sizeBytes": 118,
+      "sha256": "e709933ef2813224304ad01d595238a7f39d479bf31469503d5940b5bcedcc19"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/049-download-stopped-beta-body.bin",
+      "sizeBytes": 125,
+      "sha256": "70eeb5abb1a4f1332d67ca3bc4975b8ec2b70d2b46594335a34462b577929e15"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/050-open-downloads-beta-request.json",
+      "sizeBytes": 336,
+      "sha256": "e203c2d1fc1338928b4689a7282a14d8974b8de2d84cb72f3c9cb8cb387c843b"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/050-open-downloads-beta-response-original.json",
+      "sizeBytes": 301,
+      "sha256": "30dc596c46a95499534cd73214f1974cd716979d903b0f7f0b7099078bd73b60"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/051-after-open-downloads-beta-d1-original.json",
+      "sizeBytes": 32010,
+      "sha256": "033e852cbddbadd0453fdda1cdf8143249f526cd1d51628312ea5bfbdee60f3e"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/052-old-url-open-beta-body.bin",
+      "sizeBytes": 208,
+      "sha256": "8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/053-resume-noop-beta-request.json",
+      "sizeBytes": 333,
+      "sha256": "0d9105d2c0b9b9d4921cd3a6f19de1378f81bea62f652925078becf11f967786"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/053-resume-noop-beta-response-original.json",
+      "sizeBytes": 300,
+      "sha256": "332603bc36167fb2b17c608c7ba900a1a71634197d1e1e4a8a90928bbc3b8d54"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/054-after-resume-noop-beta-d1-original.json",
+      "sizeBytes": 32010,
+      "sha256": "04bc83cc9df142d7374a898b60478de942ed137961dd4691a32c13a1d6cdd905"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/055-stop-latest-beta-request.json",
+      "sizeBytes": 328,
+      "sha256": "17b4537caae12ec41bccd1ef1056ab55f61ce8dded72cdb1dc9529e543473435"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/055-stop-latest-beta-response-original.json",
+      "sizeBytes": 295,
+      "sha256": "5196b064c3316cad2a4b4bf2ed00294b634aacb2d0b9eff40c3d8632d98df447"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/056-after-stop-latest-beta-d1-original.json",
+      "sizeBytes": 32893,
+      "sha256": "accaa0a041c6cadf6ae38138350cb284e4a9238d730c445bd3d4ce90829c54d9"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/057-latest-stopped-beta-body.bin",
+      "sizeBytes": 150,
+      "sha256": "718e4f82bd5d567c8f660749d52067dba1f8f6d28e9091757d04f5906d218b1b"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/058-old-url-latest-stopped-beta-body.bin",
+      "sizeBytes": 208,
+      "sha256": "8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/059-stop-downloads-beta-request.json",
+      "sizeBytes": 334,
+      "sha256": "b13322435d086521fe2baf673d0d34c09f9428e6e31eb768b70a3cacfc2c275e"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/059-stop-downloads-beta-response-original.json",
+      "sizeBytes": 297,
+      "sha256": "53b6060185e9ee4d23852430d9cf61647a42babba13a07752798f28fa1b19b7e"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/060-after-stop-downloads-beta-d1-original.json",
+      "sizeBytes": 33790,
+      "sha256": "4728bab14e23ad2d434d0c4c3e1d04f2d6caa44cbf4f3554ef42f700d755f4b4"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/061-old-url-blocked-beta-body.bin",
+      "sizeBytes": 125,
+      "sha256": "c210de385ed69dc6bd511644ddee2e2b1e910473f73cc540bcb77095105e7af8"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/062-stop-noop-beta-request.json",
+      "sizeBytes": 329,
+      "sha256": "e459690a24a00b6582475d76a9da7521df2b2c104c95d0441cb512687c7b2ba3"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/062-stop-noop-beta-response-original.json",
+      "sizeBytes": 296,
+      "sha256": "1b4e6f1ae335286adf41ec49ffd5296ce68bc66cc81e7da4d5623b1d48435c98"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/063-after-stop-noop-beta-d1-original.json",
+      "sizeBytes": 33792,
+      "sha256": "40ab8121cfe8991baa9ea52366c05095ec253bc59db2a851a2312c7e17180b96"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/064-return-high-beta-request.json",
+      "sizeBytes": 412,
+      "sha256": "a5f8e88bca952a939c753554e72cc57a1cf970819738e07bd5746b66a06347d8"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/064-return-high-beta-response-original.json",
+      "sizeBytes": 290,
+      "sha256": "85ca5f03c1b409ee161f6b079a0ff989c0b0773e1705a19c5d7dbd1ca64f5e76"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/065-after-return-high-beta-d1-original.json",
+      "sizeBytes": 34665,
+      "sha256": "8e226437fa8fe1aac5d9b8331e1d4ab04bd18bfc3053f367c61656cb6a59d57d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/066-cas-winner-stable-request.json",
+      "sizeBytes": 337,
+      "sha256": "2b8911dafdf4b90a09baf2c47c75cf64b7c635b7e215f42ae55a64cb62342489"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/066-cas-winner-stable-response-original.json",
+      "sizeBytes": 300,
+      "sha256": "1a34e368cb1d570ad212f7cb1cf05db1876e6fd43e4527d1a07c7bb119432ff1"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/067-after-cas-winner-stable-d1-original.json",
+      "sizeBytes": 35576,
+      "sha256": "14e813d9b877a8fcb68ed9c1fb98356f842f892de0d8d172c1ac90bce5e1da2e"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/068-cas-loser-stable-request.json",
+      "sizeBytes": 335,
+      "sha256": "94abfb80fc9f1ccfc3f2f56ab362ee47eeadb7d819f592d377fdafbf93ac4fc1"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/068-cas-loser-stable-response-original.json",
+      "sizeBytes": 113,
+      "sha256": "2d8a673b61d23aef06a41c1d41a5a9773fe8779a4ff531b3e64b34ce78a87460"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/069-failure-reconciliation-d1-original.json",
+      "sizeBytes": 35576,
+      "sha256": "9ea4452d20fa8ecb9b35d53ccd73e1534457d32fd0b7f04de8b63816966da078"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/070-failure-stop-latest-stable-request.json",
+      "sizeBytes": 341,
+      "sha256": "559636f3faebe1d74600c40eed35c0024475c5814b53ca3910e70c72faec2afb"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/070-failure-stop-latest-stable-response-original.json",
+      "sizeBytes": 297,
+      "sha256": "13b054f094146ad7acc75130eb10af11e14a70b0c84817bcb13b6c2ec8260f17"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-05/071-after-failure-stop-latest-stable-d1-original.json",
+      "sizeBytes": 36483,
+      "sha256": "e5d8893a2b84623eff71e51888da51dbbc39341bc1d14629052f6300674fdd38"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/001-before-d1-original.json",
+      "sizeBytes": 36482,
+      "sha256": "204fb38386320cb1fc5d500c3dbd3e193ab9558a1e2fa8afa115dcc9f5977a47"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/002-cas-winner-stable-request.json",
+      "sizeBytes": 338,
+      "sha256": "6ca483b0a3d35a3fad221da11746478a83a5e343560c8fc57fd37ea90df5e267"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/002-cas-winner-stable-response-original.json",
+      "sizeBytes": 300,
+      "sha256": "c37ec3049b9fd94223a0502e31c7d8292677213917cf0f8301cc92558fd9b17f"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/003-after-cas-winner-stable-d1-original.json",
+      "sizeBytes": 37379,
+      "sha256": "5540358aa0908b0bce8c19b11aafc2275c11e67fd89d10caa691a4385162c029"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/004-cas-loser-stable-request.json",
+      "sizeBytes": 336,
+      "sha256": "4aba977a65643fd23be3fcf6eeb54fe53aeb3b4216f08cd12da14dacd919da3e"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/004-cas-loser-stable-response-original.json",
+      "sizeBytes": 116,
+      "sha256": "f1bc2f672338627b3d3604621efa36114a773865b50ae7e210c2eae703929747"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/005-after-cas-conflict-stable-d1-original.json",
+      "sizeBytes": 37379,
+      "sha256": "244c330ce0d93898069f89e78c7953309134f3cdaca8f85fd52263e9d5716891"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/006-cas-restored-stable-request.json",
+      "sizeBytes": 334,
+      "sha256": "27e656e44b4d6ea29e209265d64cdc874d9f1394c82a4dad47a4792b5f9c3e31"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/006-cas-restored-stable-response-original.json",
+      "sizeBytes": 297,
+      "sha256": "67a0c10def7127a45e690893f8b11ddc3e0bfa8813652cafd21f284283389a2d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/007-after-cas-restored-stable-d1-original.json",
+      "sizeBytes": 38271,
+      "sha256": "3e61b4daad6ccd7c7a0ddd1052899bc2f02509287d883356d2f881e48aa26dc6"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/008-cas-winner-beta-request.json",
+      "sizeBytes": 333,
+      "sha256": "cd5d90aa474dc30a3a076d2ecafd3a5e4030cd2904fa6ef579cd7083291e7922"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/008-cas-winner-beta-response-original.json",
+      "sizeBytes": 298,
+      "sha256": "375a8f700a6d3094b9d5bacdcfc04abc13b92a3a4742aaa873084b2ec62864b5"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/009-after-cas-winner-beta-d1-original.json",
+      "sizeBytes": 39178,
+      "sha256": "69bdebcfbbb36f9cab6eff85914104b1ef54f37a94fa808c6462d60aab2c26ae"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/010-cas-loser-beta-request.json",
+      "sizeBytes": 331,
+      "sha256": "f05421132f4e25a2ceef60463301332a6a3bbdec91f34d1126da202549ad9b61"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/010-cas-loser-beta-response-original.json",
+      "sizeBytes": 116,
+      "sha256": "7cb8398bd3799dc686c1c7dd68bd2b7a159d92aaa4b14d4d732b8bd05d6d3ef9"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/011-after-cas-conflict-beta-d1-original.json",
+      "sizeBytes": 39178,
+      "sha256": "c0db46e36bfaf6b8be30fbd0f21ee4af1b0d536e8d3beb78d188c991e566e6b0"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/012-cas-restored-beta-request.json",
+      "sizeBytes": 330,
+      "sha256": "dc8a754bba21df74ec28a50d27db026977701763be32561ae03008ba824bb3a1"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/012-cas-restored-beta-response-original.json",
+      "sizeBytes": 295,
+      "sha256": "1fea6cdf0e952b0247fce70341d05cde11734f991f828d41138f9be8cf709f15"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/013-after-cas-restored-beta-d1-original.json",
+      "sizeBytes": 40065,
+      "sha256": "203b1c9c0fbc796ecfc665e62f308b0d4fc55d929508c6a026c5afbeec1524b2"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/014-expired-recovery-replay-request.json",
+      "sizeBytes": 451,
+      "sha256": "6317980d62053ede24b993968168ed30b6c87d2a9e1105bf471b142faeab7e0a"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/014-expired-recovery-replay-response-original.json",
+      "sizeBytes": 156,
+      "sha256": "47248bf98512a07bf91ec30e0fef01e8f9867244c8f20cfb53a6064300eab3cb"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/015-expired-recovery-url-body.bin",
+      "sizeBytes": 124,
+      "sha256": "e6fa19d743454df58e923eb084fd843b5d8afbaff3d4e72f4a9c10b534300144"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/016-after-expiry-d1-original.json",
+      "sizeBytes": 40067,
+      "sha256": "e1bec47c34f9092484ad902cabc14ac9b06f166aaa557d1fe030b4425dadccdb"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/017-pre-disable-d1-original.json",
+      "sizeBytes": 40067,
+      "sha256": "b8af33c7345d0a1aac870dc3b45240344263640546af6c58fbfabdd5854ac193"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/018-low-backfill-dependencies-d1-original.json",
+      "sizeBytes": 360,
+      "sha256": "82744540b33b15fa8730c08dc9bcd15fc81055bb93249838d9b6b1c561bef8ee"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/019-final-low-disable-request.json",
+      "sizeBytes": 461,
+      "sha256": "6ced09ac54d4b7e34f0edba851a4db973e109026f4e380987c01f786b03f736d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/019-final-low-disable-response-original.json",
+      "sizeBytes": 209,
+      "sha256": "1c20aba0d606db17968909862e60ff0480c87201a6b397bf80615380b9020f25"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/020-after-final-disable-d1-original.json",
+      "sizeBytes": 41332,
+      "sha256": "daeeb9c5471e28589bbe99361f62036c68f5e7bfcf61b95c1c2b86d99e604bc7"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/021-disable-exact-replay-request.json",
+      "sizeBytes": 461,
+      "sha256": "6ced09ac54d4b7e34f0edba851a4db973e109026f4e380987c01f786b03f736d"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/021-disable-exact-replay-response-original.json",
+      "sizeBytes": 208,
+      "sha256": "10003444741c3134dcb0e94acb62d609673a55e793126d5c64c3985a5283918f"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/022-disable-fresh-key-reject-request.json",
+      "sizeBytes": 461,
+      "sha256": "5e1498a01b9400b6883950766a731073b444d7a444c49688d1e11ae138ae3e62"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/022-disable-fresh-key-reject-response-original.json",
+      "sizeBytes": 121,
+      "sha256": "74f01c8db7ea4a5fe4d296342bbc46ee124ea726bdde3391eb1233ee4dc5c5fc"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/023-after-disable-replays-d1-original.json",
+      "sizeBytes": 41332,
+      "sha256": "f3acae4df20e6fdc60041f82ea989e498876283ab9c1407678c78225f02bd1c9"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/024-final-d1-original.json",
+      "sizeBytes": 41332,
+      "sha256": "08239d7d056321dde76dfc8e8a2c43d6f92f80a4578d12c4621e512842199ef4"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/served-index.html",
+      "sizeBytes": 265348,
+      "sha256": "94a3337689719a2cc93eeb5820db15926b60abe701b13e5e560869bc39bf9d8c"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/drill-06/session-original.json",
+      "sizeBytes": 1185,
+      "sha256": "56872208996c8e7eed2fbb47b08b7a1ea4168b760062857af0b9b597334cf4ea"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/probe-02/001-before-d1-original.json",
+      "sizeBytes": 128,
+      "sha256": "5fdaba81d9c7f16645f26c45f8aefb4fd320aa96cec9f88a3a60974f204088e3"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/probe-03/001-before-d1-original.json",
+      "sizeBytes": 12201,
+      "sha256": "c29074aabf684f218ae83e88639e2cca267e678fb1213c36bba9fcfad175c272"
+    },
+    {
+      "path": ".cache/p43/private/live-drill/probe-03/002-after-cancel-d1-original.json",
+      "sizeBytes": 12201,
+      "sha256": "fdc520e06d03c71bfe273c67fd582feb9a75552cae4e5ce143681b9e9faf18f9"
+    },
+    {
+      "path": ".cache/p43/private/pages/pages-csrf-01-project-after-deploy.json",
+      "sizeBytes": 10499,
+      "sha256": "1455bdc26cf97a5666d73cc84a526a80d66a3a81e7e5e26dc5a55cfa98023861"
+    },
+    {
+      "path": ".cache/p43/private/pages/pages-csrf-01-project-before-deploy.json",
+      "sizeBytes": 9879,
+      "sha256": "b1851a689231904ed07948efe98847e3d34e07f54775449576c901a7eb049e8e"
+    },
+    {
+      "path": ".cache/p43/private/pages/pages-csrf-02-readback.json",
+      "sizeBytes": 10499,
+      "sha256": "1455bdc26cf97a5666d73cc84a526a80d66a3a81e7e5e26dc5a55cfa98023861"
+    }
+  ]
+}

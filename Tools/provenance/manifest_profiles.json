@@ -236,6 +236,31 @@
       "exclude_prefixes": [],
       "required_paths": ["docs/acceptance-contracts/P4-1-v2/tools/inspect.py", "docs/acceptance-contracts/P4-1-v2/tools/bundle.py"]
     },
+    "P43Evaluation": {
+      "category": "validation_inputs",
+      "root_patterns": [
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/"
+      ],
+      "top_files": [
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts",
+        "docs/acceptance-contracts/P4-3-v1/tools/io.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/run.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/inspect-live.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/ui-reconcile-probe.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/bundle.cjs"
+      ],
+      "exclude_prefixes": [],
+      "required_paths": [
+        "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/vitest.config.ts",
+        "docs/acceptance-contracts/P4-3-v1/tools/io.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/run.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/inspect-live.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/ui-reconcile-probe.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/bundle.cjs"
+      ]
+    },
     "Evidence": {
       "category": "validation_inputs",
       "root_patterns": ["Tools/acceptance/"],

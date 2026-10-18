@@ -93,6 +93,7 @@ TLS, credential or Git configuration was modified.
 | P43-ACCEPT-01 | Full-card acceptance handoff to a non-implementer | READY_FOR_INDEPENDENT_OFFLINE_EVALUATION of the complete real evidence batch; final acceptance still pending. No new cloud campaign is requested. |
 | P43-REPORT-01 | Agent said the work was finished and acceptance could begin despite the missing required exercise | Reporting/early-handoff error corrected here. Development results remain valid; they do not waive missing evidence or transfer its production to the reviewer. |
 | P43-CSRF-01 | Session GET rotates a shared CSRF cookie and invalidates another open tab before its CAS request | Fixed in 972e74c; red/green host regression, native 270/270 and both real two-tab CAS paths in drill-06 pass. Original drill-05 PRODUCT_FAIL remains preserved; security gates unchanged. |
+| P43-ACCEPT-02 | Independent pre-review: unknown-result reconciliation drops the original release-action key on 401/403/429, permitting a new-key recovery action before resolving the original | CLOSED by the original independent acceptance agent on 0067b6c, P43-REVIEW-20261018-02: unchanged original probe independently 6/6; 158 increment entries and source-bound CI 270/36/3 verified. Original 4 FAIL / 2 PASS pre-review and Windows failures remain. Next owner: root acceptance for authorized input freeze/formal evaluation; no deployment or whole-card PASS. See `P4-3-acceptance-2026-10-18.md`. |
 
 ## Implementation And Test Mapping
 

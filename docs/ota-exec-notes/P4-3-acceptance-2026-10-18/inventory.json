@@ -1,0 +1,89 @@
+{
+  "schema": "p43-independent-prereview-evidence-v1",
+  "reviewId": "P43-REVIEW-20261018-01",
+  "createdAt": "2026-10-18T03:14:20.583Z",
+  "candidate": "972e74c43cd36b7a308e457296aaf7bb06120e78",
+  "inputHead": "08277242b3326541b27f306aee16233cd344ea95",
+  "disposition": "PRODUCT_FAIL",
+  "formalExecution": "NOT_RUN",
+  "archive": {
+    "path": "review-originals.zip",
+    "sizeBytes": 18497,
+    "sha256": "81efe70aaf1c35c70584c882ec5fbd84feefc390ef7154484bfcda5f0dc85092",
+    "entries": 14
+  },
+  "entries": [
+    {
+      "path": ".cache/p43-acceptance-20261018/ui-reconcile-probe.cjs",
+      "sizeBytes": 6471,
+      "sha256": "a90152a6c9edaffeb215742cbcdd86aafe1ec4527cec514fe8032c58ea728523"
+    },
+    {
+      "path": ".cache/p43-acceptance-20261018/inspect-originals.cjs",
+      "sizeBytes": 16653,
+      "sha256": "9edac87cb130b98cb7679ced4bd2475c233853ff0a06d9d94982c6ce79a43bf0"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-ui-reconcile-01.json",
+      "sizeBytes": 490,
+      "sha256": "34c56949b9adb055633fb094084fa9da78a4035d5fdff3e405759360411343ce"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-ui-reconcile-01.log",
+      "sizeBytes": 3091,
+      "sha256": "ed3cbfe4ce31724a05ec6de4705e2a3c99f0e38698941d0d7e06a7fdb4d200b8"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-archives-01.json",
+      "sizeBytes": 1986,
+      "sha256": "00d9a7a1394eee42e777e92a678e660d7c2c812e0be80980046101a63e3fe504"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-archives-01.log",
+      "sizeBytes": 1635,
+      "sha256": "09e8db5d2512453bf3b73cc51d0c8516ef1b7e39db1d439deda3884dad560092"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-ci-01.json",
+      "sizeBytes": 460,
+      "sha256": "73ed58eb040ee0d9ed490a9f69ce08c46660d3b8306a37b6f7e69db0f0213eaf"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-ci-01.log",
+      "sizeBytes": 2008,
+      "sha256": "2d24745bbddf5c674c20450e14a97d06fee7ea1d0067f47b50c251b5ff11601d"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-originals-01.json",
+      "sizeBytes": 483,
+      "sha256": "e36da1ce605a7b28a6701b7c93ecb9855d07198b588c4efa7981b8febee0f70d"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-originals-01.log",
+      "sizeBytes": 4383,
+      "sha256": "40860211e4e4522728bacb9494884d705f7f5b6a0ba2d19da32d686d510c1dea"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-identity-01.json",
+      "sizeBytes": 2480,
+      "sha256": "f42b059c855deec5da3355c599aec94fa87096f0f538a1408c5ab2047a0b9d21"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-identity-01.log",
+      "sizeBytes": 555,
+      "sha256": "7ec445a08c0d5ef6960b866fcfb2f3bb49226ce0bf71bd507398436f7430b5d5"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-platform-01.json",
+      "sizeBytes": 1693,
+      "sha256": "fb7412ad4c3040804559552d0781a65fbb719658b95d09bb95b0f6ac51ca8fa9"
+    },
+    {
+      "path": ".cache/p43/logs/p43-acceptance-platform-01.log",
+      "sizeBytes": 757,
+      "sha256": "5ffa04f9653ae815946cb392f2b15ab3d995a112bca24a623527f12dde715b63"
+    }
+  ],
+  "privateOriginalsIncluded": false,
+  "productFilesModified": false
+}
