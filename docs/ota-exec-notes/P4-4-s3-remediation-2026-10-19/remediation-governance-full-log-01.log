@@ -1,0 +1,997 @@
+Validate acceptance and build governance	Set up job	﻿2026-10-18T23:12:55.3821601Z Current runner version: '2.337.0'
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3850308Z ##[group]Runner Image Provisioner
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3851357Z Hosted Compute Agent
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3852218Z Version: 20261012.601
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3853002Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3853880Z Build Date: 2026-10-12T17:48:21Z
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3854974Z Worker ID: {ddb6e49f-0a21-46bf-818b-333070a466fe}
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3855831Z Region: westcentralus
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3856667Z Cloud: Azure
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3857338Z ##[endgroup]
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3859339Z ##[group]Operating System
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3860190Z Ubuntu
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3860880Z 24.04.5
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3861488Z LTS
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3862268Z ##[endgroup]
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3862936Z ##[group]Runner Image
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3863725Z Image: ubuntu-24.04
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3864683Z Version: 20261012.334.1
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3865988Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3868047Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3869230Z ##[endgroup]
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3870644Z ##[group]GITHUB_TOKEN Permissions
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3873174Z Contents: read
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3873919Z Metadata: read
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3874790Z ##[endgroup]
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3877698Z Secret source: Actions
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3878815Z Cache mode: write
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.3879810Z Prepare workflow directory
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.4263835Z Prepare all required actions
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.4319716Z Getting action download info
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.7375627Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:55.8445733Z Download action repository 'carlosperate/arm-none-eabi-gcc-action@v1' (SHA:0edbb000a5a98e2292b051b463bff6f512547118)
+Validate acceptance and build governance	Set up job	2026-10-18T23:12:56.6055711Z Complete job name: Validate acceptance and build governance
+Validate acceptance and build governance	Checkout	﻿2026-10-18T23:12:56.6963602Z ##[group]Run actions/checkout@v4
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6965158Z with:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6965741Z   fetch-depth: 0
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6966345Z   repository: Eitan-S-23/E-Track
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6971156Z   token: ***
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6971734Z   ssh-strict: true
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6972308Z   ssh-user: git
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6972898Z   persist-credentials: true
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6973538Z   clean: true
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6974117Z   sparse-checkout-cone-mode: true
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6975120Z   fetch-tags: false
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6975703Z   show-progress: true
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6976274Z   lfs: false
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6976798Z   submodules: false
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6977397Z   set-safe-directory: true
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6978029Z   allow-unsafe-pr-checkout: false
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.6979162Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8125625Z Syncing repository: Eitan-S-23/E-Track
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8128150Z ##[group]Getting Git version info
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8129072Z Working directory is '/home/runner/work/E-Track/E-Track'
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8130682Z [command]/usr/bin/git version
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8147237Z git version 2.55.0
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8177550Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8189992Z Temporarily overriding HOME='/home/runner/work/_temp/a0035239-b5c9-48e8-a7eb-275c319b479f' before making global git config changes
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8192997Z Adding repository directory to the temporary git global config as a safe directory
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8195508Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8243592Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8253056Z ##[group]Initializing the repository
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8256505Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8350043Z hint: Using 'master' as the name for the initial branch. This default branch name
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8352318Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8354995Z hint: to use in all of your new repositories, which will suppress this warning,
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8356628Z hint: call:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8357837Z hint:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8358933Z hint: 	git config --global init.defaultBranch <name>
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8360254Z hint:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8361513Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8363508Z hint: 'development'. The just-created branch can be renamed via this command:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8365332Z hint:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8366272Z hint: 	git branch -m <name>
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8367365Z hint:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8368855Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8371470Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8381699Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8429616Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8431345Z ##[group]Disabling automatic garbage collection
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8435394Z [command]/usr/bin/git config --local gc.auto 0
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8472800Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8474539Z ##[group]Setting up auth
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8479636Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8519297Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8885138Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.8933498Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.9229879Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.9274964Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.9555443Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.9606591Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.9607690Z ##[group]Fetching the repository
+Validate acceptance and build governance	Checkout	2026-10-18T23:12:56.9617559Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5376121Z From https://github.com/Eitan-S-23/E-Track
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5377339Z  * [new branch]      acceptance/p3-4-v2-20261009 -> origin/acceptance/p3-4-v2-20261009
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5378503Z  * [new branch]      codex/acceptance-batch-governance-20260907 -> origin/codex/acceptance-batch-governance-20260907
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5379443Z  * [new branch]      dev/flutter/apk/p3-3-admission -> origin/dev/flutter/apk/p3-3-admission
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5380273Z  * [new branch]      dev/flutter/apk/p3-3-batch6 -> origin/dev/flutter/apk/p3-3-batch6
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5380927Z  * [new branch]      dev/flutter/apk/p3-3-t1a -> origin/dev/flutter/apk/p3-3-t1a
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5381815Z  * [new branch]      dev/flutter/fixed-development-signing-20261001 -> origin/dev/flutter/fixed-development-signing-20261001
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5382745Z  * [new branch]      dev/flutter/p3-4-batch12-20261003 -> origin/dev/flutter/p3-4-batch12-20261003
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5383638Z  * [new branch]      dev/flutter/p3-4-batched-link-candidates -> origin/dev/flutter/p3-4-batched-link-candidates
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5384821Z  * [new branch]      dev/flutter/p3-4-baud-sweep -> origin/dev/flutter/p3-4-baud-sweep
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5385643Z  * [new branch]      dev/flutter/p3-4-begin-retry-20260924 -> origin/dev/flutter/p3-4-begin-retry-20260924
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5386503Z  * [new branch]      dev/flutter/p3-4-durable-retry -> origin/dev/flutter/p3-4-durable-retry
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5387712Z  * [new branch]      dev/flutter/p3-4-info-retry-20261004 -> origin/dev/flutter/p3-4-info-retry-20261004
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5388553Z  * [new branch]      dev/flutter/p3-4-link-stats -> origin/dev/flutter/p3-4-link-stats
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5389468Z  * [new branch]      dev/flutter/p3-4-mobile-reconnect-20261002 -> origin/dev/flutter/p3-4-mobile-reconnect-20261002
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5390616Z  * [new branch]      dev/flutter/p3-4-observation-log -> origin/dev/flutter/p3-4-observation-log
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5391625Z  * [new branch]      dev/flutter/p3-4-phy-logfix-20261004 -> origin/dev/flutter/p3-4-phy-logfix-20261004
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5392661Z  * [new branch]      dev/flutter/p3-4-phy-observation-20261004 -> origin/dev/flutter/p3-4-phy-observation-20261004
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5393673Z  * [new branch]      dev/flutter/p3-4-probe-reuse-20261003 -> origin/dev/flutter/p3-4-probe-reuse-20261003
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5394827Z  * [new branch]      dev/flutter/p3-4-r07-mutation -> origin/dev/flutter/p3-4-r07-mutation
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5396088Z  * [new branch]      dev/flutter/p3-4-radio-policy-20261002 -> origin/dev/flutter/p3-4-radio-policy-20261002
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5397455Z  * [new branch]      dev/flutter/p3-4-reboot-discovery-20261002 -> origin/dev/flutter/p3-4-reboot-discovery-20261002
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5399164Z  * [new branch]      dev/flutter/p3-4-reconnect-20261001 -> origin/dev/flutter/p3-4-reconnect-20261001
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5400602Z  * [new branch]      dev/flutter/p3-4-sender-window-20260924 -> origin/dev/flutter/p3-4-sender-window-20260924
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5402034Z  * [new branch]      dev/flutter/p3-4-three-frame-20261002 -> origin/dev/flutter/p3-4-three-frame-20261002
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5403784Z  * [new branch]      dev/flutter/p3-4-unified-probe-20260924 -> origin/dev/flutter/p3-4-unified-probe-20260924
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5405341Z  * [new branch]      dev/flutter/p34-acceptance-config-20261010 -> origin/dev/flutter/p34-acceptance-config-20261010
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5406604Z  * [new branch]      dev/flutter/p34-admission-20261010 -> origin/dev/flutter/p34-admission-20261010
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5407481Z  * [new branch]      dev/flutter/p34-fixed-candidate-20261009 -> origin/dev/flutter/p34-fixed-candidate-20261009
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5408495Z  * [new branch]      dev/flutter/p34-gatt-observation-20261008 -> origin/dev/flutter/p34-gatt-observation-20261008
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5409438Z  * [new branch]      dev/flutter/p34-main-dispatch-20261009 -> origin/dev/flutter/p34-main-dispatch-20261009
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5410364Z  * [new branch]      dev/flutter/p34-native-timing-20261008 -> origin/dev/flutter/p34-native-timing-20261008
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5411188Z  * [new branch]      dev/flutter/p34-pipeline-20261007 -> origin/dev/flutter/p34-pipeline-20261007
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5412013Z  * [new branch]      dev/flutter/p34-pipeline-link-20261007 -> origin/dev/flutter/p34-pipeline-link-20261007
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5412870Z  * [new branch]      dev/flutter/p34-v2-first-error-20261009 -> origin/dev/flutter/p34-v2-first-error-20261009
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5413655Z  * [new branch]      dev/p4-1/unattended-20261015 -> origin/dev/p4-1/unattended-20261015
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5414660Z  * [new branch]      dev/p4-3/admin-controls-20261017 -> origin/dev/p4-3/admin-controls-20261017
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5415467Z  * [new branch]      dev/p4-4/config-integration-20261018 -> origin/dev/p4-4/config-integration-20261018
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5416401Z  * [new branch]      docs/flutter-debug-skill-feedback-20260922 -> origin/docs/flutter-debug-skill-feedback-20260922
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5417354Z  * [new branch]      governance/acceptance-policy-followup -> origin/governance/acceptance-policy-followup
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5418053Z  * [new branch]      main                    -> origin/main
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5418660Z  * [new branch]      ota/p3-1-ble-frame-closeout -> origin/ota/p3-1-ble-frame-closeout
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5419538Z  * [new branch]      ota/p3-1-closeout-writeback -> origin/ota/p3-1-closeout-writeback
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5420559Z  * [new branch]      ota/p3-2-closeout       -> origin/ota/p3-2-closeout
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5421186Z  * [new branch]      ota/p3-2-closeout-sync  -> origin/ota/p3-2-closeout-sync
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5421806Z  * [new branch]      ota/p3-6-ci-wiring      -> origin/ota/p3-6-ci-wiring
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5422387Z  * [new branch]      ota/p3-6-closeout       -> origin/ota/p3-6-closeout
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5422951Z  * [new branch]      ota/p3-7-card           -> origin/ota/p3-7-card
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5423581Z  * [new branch]      ota/p3-7-host-test-wiring -> origin/ota/p3-7-host-test-wiring
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5424362Z  * [new branch]      p2-4-20260731           -> origin/p2-4-20260731
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5424913Z  * [new branch]      p2-5-20260801           -> origin/p2-5-20260801
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5425515Z  * [new branch]      p2-6-board-writeback-r6 -> origin/p2-6-board-writeback-r6
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5426214Z  * [new branch]      p2-6-implementation-20260819 -> origin/p2-6-implementation-20260819
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5426927Z  * [new branch]      p2-6-sd-r6-harness-fix  -> origin/p2-6-sd-r6-harness-fix
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5427598Z  * [new branch]      p2-6-spec-probe-ci-20260816 -> origin/p2-6-spec-probe-ci-20260816
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5428319Z  * [new branch]      p4-2-implementation-20261014 -> origin/p4-2-implementation-20261014
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5429132Z  * [new branch]      post-p2-6-ota-spec-review-20260818 -> origin/post-p2-6-ota-spec-review-20260818
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5431275Z [command]/usr/bin/git branch --list --remote origin/dev/p4-4/config-integration-20261018
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5438820Z   origin/dev/p4-4/config-integration-20261018
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5450956Z [command]/usr/bin/git rev-parse refs/remotes/origin/dev/p4-4/config-integration-20261018
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5482510Z b56534d7b6c993c0795010d0404fb8a81f7eeb9d
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5487777Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5488632Z ##[group]Determining the checkout info
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5490096Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5496116Z [command]/usr/bin/git sparse-checkout disable
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5563068Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5601289Z ##[group]Checking out the ref
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:08.5605830Z [command]/usr/bin/git checkout --progress --force -B dev/p4-4/config-integration-20261018 refs/remotes/origin/dev/p4-4/config-integration-20261018
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.5976114Z Updating files:  60% (9808/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.7337713Z Updating files:  61% (9942/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.7686965Z Updating files:  62% (10105/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.7877653Z Updating files:  63% (10268/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.7967660Z Updating files:  64% (10431/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.8252860Z Updating files:  65% (10594/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.8831446Z Updating files:  66% (10757/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.9062464Z Updating files:  67% (10920/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.9366132Z Updating files:  68% (11083/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.9453469Z Updating files:  69% (11246/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.9562222Z Updating files:  70% (11409/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:09.9664402Z Updating files:  71% (11572/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:10.0280394Z Updating files:  72% (11735/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:10.0455885Z Updating files:  73% (11898/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:10.0679078Z Updating files:  74% (12061/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:10.5631062Z Updating files:  75% (12224/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:10.5809425Z Updating files:  76% (12387/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:10.5966788Z Updating files:  76% (12462/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:10.9320482Z Updating files:  77% (12550/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.3076092Z Updating files:  78% (12713/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.4570953Z Updating files:  79% (12876/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.5188394Z Updating files:  80% (13039/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.5711579Z Updating files:  81% (13202/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.5851212Z Updating files:  82% (13365/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.5900279Z Updating files:  82% (13428/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.6599352Z Updating files:  83% (13528/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.7070880Z Updating files:  84% (13691/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.7536535Z Updating files:  85% (13854/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.8038222Z Updating files:  86% (14017/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.8208615Z Updating files:  87% (14180/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.9060979Z Updating files:  88% (14343/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:11.9152163Z Updating files:  89% (14506/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.0141552Z Updating files:  90% (14669/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.0367740Z Updating files:  91% (14832/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.1419072Z Updating files:  92% (14995/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.1629759Z Updating files:  93% (15158/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.1815702Z Updating files:  94% (15321/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.2002847Z Updating files:  95% (15484/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.2195281Z Updating files:  96% (15647/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.3762394Z Updating files:  97% (15810/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.4054952Z Updating files:  98% (15973/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.4277185Z Updating files:  99% (16136/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.4277835Z Updating files: 100% (16298/16298)
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.4278401Z Updating files: 100% (16298/16298), done.
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.5937517Z Switched to a new branch 'dev/p4-4/config-integration-20261018'
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.5940476Z branch 'dev/p4-4/config-integration-20261018' set up to track 'origin/dev/p4-4/config-integration-20261018'.
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.6053647Z ##[endgroup]
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.6115884Z [command]/usr/bin/git log -1 --format=%H
+Validate acceptance and build governance	Checkout	2026-10-18T23:13:12.6151235Z b56534d7b6c993c0795010d0404fb8a81f7eeb9d
+Validate acceptance and build governance	Verify PowerShell	﻿2026-10-18T23:13:12.6392392Z ##[group]Run $PSVersionTable.PSVersion.ToString()
+Validate acceptance and build governance	Verify PowerShell	2026-10-18T23:13:12.6392921Z ^[[36;1m$PSVersionTable.PSVersion.ToString()^[[0m
+Validate acceptance and build governance	Verify PowerShell	2026-10-18T23:13:12.6428906Z shell: /usr/bin/pwsh -command ". '{0}'"
+Validate acceptance and build governance	Verify PowerShell	2026-10-18T23:13:12.6429267Z ##[endgroup]
+Validate acceptance and build governance	Verify PowerShell	2026-10-18T23:13:15.8563029Z 7.6.6
+Validate acceptance and build governance	Run governance regression tests	﻿2026-10-18T23:13:17.6748756Z ##[group]Run set -euo pipefail
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6749177Z ^[[36;1mset -euo pipefail^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6749566Z ^[[36;1mpython3 tests/ota/test_acceptance_bundle.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6750019Z ^[[36;1mpython3 tests/ota/test_acceptance_efficiency.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6750442Z ^[[36;1mpython3 tests/ota/test_ac5_ram_budget.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6750841Z ^[[36;1mpython3 tests/ota/test_f435_build_bootstrap.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6751265Z ^[[36;1mpython3 tests/ota/test_p2_5_build_provenance.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6751678Z ^[[36;1mpython3 -B tests/ota/test_flutter_dev_checks.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6752090Z ^[[36;1mpython3 -B tests/ota/test_flutter_dev_apk.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6752510Z ^[[36;1mpython3 -B tests/ota/test_artifact_maintenance.py^[[0m
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6829645Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6830050Z env:
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6830301Z   PYTHONDONTWRITEBYTECODE: 1
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6830606Z   OTA_REQUIRE_SYMLINK_TEST: 1
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:17.6830926Z ##[endgroup]
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:22.5701428Z .........................................................................................................................................
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:22.5702304Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:22.5702760Z Ran 137 tests in 4.719s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:22.5702947Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:22.5703067Z OK
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:22.9263674Z test_archived_raw_input_allows_real_offline_evaluation_without_device_replay (__main__.AcceptanceEfficiencyTests.test_archived_raw_input_allows_real_offline_evaluation_without_device_replay) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.1955688Z test_archived_raw_input_missing_or_tampered_cannot_pass (__main__.AcceptanceEfficiencyTests.test_archived_raw_input_missing_or_tampered_cannot_pass) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.3071357Z test_collector_change_requires_new_observation (__main__.AcceptanceEfficiencyTests.test_collector_change_requires_new_observation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.3716408Z test_component_profiles_cover_flutter_and_cloudflare (__main__.AcceptanceEfficiencyTests.test_component_profiles_cover_flutter_and_cloudflare) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.4327662Z test_criterion_cannot_omit_command_dependency (__main__.AcceptanceEfficiencyTests.test_criterion_cannot_omit_command_dependency) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.6062147Z test_current_round_cannot_be_its_own_origin (__main__.AcceptanceEfficiencyTests.test_current_round_cannot_be_its_own_origin) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.7192277Z test_flutter_change_does_not_repeat_firmware_observation (__main__.AcceptanceEfficiencyTests.test_flutter_change_does_not_repeat_firmware_observation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.8325377Z test_forged_origin_and_changed_inputs_are_rejected (__main__.AcceptanceEfficiencyTests.test_forged_origin_and_changed_inputs_are_rejected) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:23.8935955Z test_functional_criterion_cannot_omit_product (__main__.AcceptanceEfficiencyTests.test_functional_criterion_cannot_omit_product) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:24.3015601Z test_inline_interpreter_variants_cannot_hide_unbound_code (__main__.AcceptanceEfficiencyTests.test_inline_interpreter_variants_cannot_hide_unbound_code) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:24.5120378Z test_intermediate_reuse_cannot_launder_a_previous_failure (__main__.AcceptanceEfficiencyTests.test_intermediate_reuse_cannot_launder_a_previous_failure) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:24.5746433Z test_later_failure_cannot_be_hidden_by_old_pass (__main__.AcceptanceEfficiencyTests.test_later_failure_cannot_be_hidden_by_old_pass) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:24.7507762Z test_missing_intermediate_plan_is_not_laundered (__main__.AcceptanceEfficiencyTests.test_missing_intermediate_plan_is_not_laundered) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:24.9048677Z test_missing_original_fails_without_silent_reexecution (__main__.AcceptanceEfficiencyTests.test_missing_original_fails_without_silent_reexecution) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:25.2960170Z test_mixed_history_cannot_launder_unplanned_execution (__main__.AcceptanceEfficiencyTests.test_mixed_history_cannot_launder_unplanned_execution) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:25.4764143Z test_module_and_basename_entry_cannot_hide_collector (__main__.AcceptanceEfficiencyTests.test_module_and_basename_entry_cannot_hide_collector) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:25.5759133Z test_module_entry_cannot_be_covered_by_an_unrelated_script (__main__.AcceptanceEfficiencyTests.test_module_entry_cannot_be_covered_by_an_unrelated_script) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:25.9025003Z test_new_failure_is_recorded_and_its_fix_can_be_retested (__main__.AcceptanceEfficiencyTests.test_new_failure_is_recorded_and_its_fix_can_be_retested) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:26.1032424Z test_offline_evaluator_cannot_supply_unobserved_or_mismatched_fields (__main__.AcceptanceEfficiencyTests.test_offline_evaluator_cannot_supply_unobserved_or_mismatched_fields) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:26.4395465Z test_p34_build_input_mutations_invalidate_only_their_consumers (__main__.AcceptanceEfficiencyTests.test_p34_build_input_mutations_invalidate_only_their_consumers) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:26.5513152Z test_packager_change_does_not_repeat_product_observation (__main__.AcceptanceEfficiencyTests.test_packager_change_does_not_repeat_product_observation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:26.8258153Z test_plan_generation_does_not_approve_unplanned_execution (__main__.AcceptanceEfficiencyTests.test_plan_generation_does_not_approve_unplanned_execution) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:26.9367920Z test_product_change_requires_new_observation (__main__.AcceptanceEfficiencyTests.test_product_change_requires_new_observation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.0296245Z test_registered_product_build_script_is_a_bound_runner (__main__.AcceptanceEfficiencyTests.test_registered_product_build_script_is_a_bound_runner) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.1251886Z test_scoped_contract_and_frozen_runner_coverage (__main__.AcceptanceEfficiencyTests.test_scoped_contract_and_frozen_runner_coverage) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.3070613Z test_tampered_original_raw_evidence_fails (__main__.AcceptanceEfficiencyTests.test_tampered_original_raw_evidence_fails) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.4882941Z test_three_rounds_reuse_original_executed_evidence_end_to_end (__main__.AcceptanceEfficiencyTests.test_three_rounds_reuse_original_executed_evidence_end_to_end) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.6210607Z test_undeclared_or_uncovered_runner_fails (__main__.AcceptanceEfficiencyTests.test_undeclared_or_uncovered_runner_fails) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7498555Z test_unknown_profile_and_category_laundering_fail (__main__.AcceptanceEfficiencyTests.test_unknown_profile_and_category_laundering_fail) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7500109Z test_invalidated_success_can_execute (__main__.PlannedExecutionTests.test_invalidated_success_can_execute) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7501622Z test_missing_command_is_not_an_execution_scope_escape (__main__.PlannedExecutionTests.test_missing_command_is_not_an_execution_scope_escape) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7503324Z test_new_failure_or_gap_is_not_hidden_by_old_pass (__main__.PlannedExecutionTests.test_new_failure_or_gap_is_not_hidden_by_old_pass) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7504981Z test_reusable_success_cannot_start_an_extra_command (__main__.PlannedExecutionTests.test_reusable_success_cannot_start_an_extra_command) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7506340Z test_reused_evidence_is_not_a_new_execution (__main__.PlannedExecutionTests.test_reused_evidence_is_not_a_new_execution) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7507697Z test_shared_command_cannot_pull_in_unplanned_commands (__main__.PlannedExecutionTests.test_shared_command_cannot_pull_in_unplanned_commands) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7509182Z test_shared_required_command_does_not_force_a_second_run (__main__.PlannedExecutionTests.test_shared_required_command_does_not_force_a_second_run) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7509908Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7510351Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7510909Z Ran 36 tests in 5.018s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.7511091Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8174967Z OK
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8175396Z ...
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8175858Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8176727Z Ran 3 tests in 0.001s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8176891Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8176998Z OK
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8888439Z ..............
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8888855Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8889283Z Ran 14 tests in 0.012s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8889462Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:27.8889562Z OK
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:31.8617306Z ...........
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:31.8617897Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:31.8618423Z Ran 11 tests in 3.854s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:31.8618605Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:31.8618703Z OK
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.0121649Z Host fixtures: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks-tests/run-f7c17cebddb14265b0d9829aa7f4f821
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.1417295Z test_analysis_failure_collects_tests_but_never_builds_apk (__main__.FlutterDevelopmentChecksTests.test_analysis_failure_collects_tests_but_never_builds_apk) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.2094547Z test_analysis_timeout_is_red_but_cleaned_up_tests_can_run (__main__.FlutterDevelopmentChecksTests.test_analysis_timeout_is_red_but_cleaned_up_tests_can_run) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.2765620Z test_analyze_failure_still_collects_tests_and_fails_overall (__main__.FlutterDevelopmentChecksTests.test_analyze_failure_still_collects_tests_and_fails_overall) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.2767820Z test_apk_blocks_when_starting_checkout_is_not_clean (__main__.FlutterDevelopmentChecksTests.test_apk_blocks_when_starting_checkout_is_not_clean)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.3721997Z 起点不干净就没有"未改动的提交检出"可言，APK 必须挡住。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.3722973Z test_apk_fails_when_build_drift_escapes_bound_toolchain_regen (__main__.FlutterDevelopmentChecksTests.test_apk_fails_when_build_drift_escapes_bound_toolchain_regen)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.4921439Z 构建期改写落在白名单之外时，不得被"恢复即未变"洗白。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.6097744Z test_apk_failure_propagates_and_does_not_collect_an_artifact (__main__.FlutterDevelopmentChecksTests.test_apk_failure_propagates_and_does_not_collect_an_artifact) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.6222376Z test_apk_requires_full_scope_and_linux (__main__.FlutterDevelopmentChecksTests.test_apk_requires_full_scope_and_linux) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.7418188Z test_apk_restores_toolchain_regen_files_after_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regen_files_after_build) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.8620535Z test_apk_restores_toolchain_regenerated_files_before_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regenerated_files_before_build) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.9605569Z test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist (__main__.FlutterDevelopmentChecksTests.test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.9674820Z test_artifact_retention_is_tiered_without_weakening_uploads (__main__.FlutterDevelopmentChecksTests.test_artifact_retention_is_tiered_without_weakening_uploads) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:32.9676998Z test_bind_toolchain_regen_fails_closed_on_collection_failure (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_fails_closed_on_collection_failure)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.0278863Z 收集失败必须显式炸开，不得留下字段为 null 的"已绑定"记录。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.0279954Z test_bind_toolchain_regen_records_effective_and_committed_bytes (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_records_effective_and_committed_bytes)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.0894733Z 恢复前必须绑定生效字节，否则白名单等于"改了也算没改"。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1302844Z test_bound_regen_exemption_rejects_paths_outside_the_whitelist (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_rejects_paths_outside_the_whitelist) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1305457Z test_bound_regen_exemption_requires_complete_current_evidence (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_requires_complete_current_evidence)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1370720Z 豁免判据必须核对证据本身，而不是只核对路径出现过。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1455051Z test_boundary_checks_nonexistent_leaf_and_all_existing_parents (__main__.FlutterDevelopmentChecksTests.test_boundary_checks_nonexistent_leaf_and_all_existing_parents) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1526539Z test_boundary_rejects_parent_escape_and_sibling_prefix (__main__.FlutterDevelopmentChecksTests.test_boundary_rejects_parent_escape_and_sibling_prefix) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1645465Z test_cli_cannot_turn_a_push_into_an_apk_request (__main__.FlutterDevelopmentChecksTests.test_cli_cannot_turn_a_push_into_an_apk_request) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1726245Z test_cli_refuses_local_sdk_initialization (__main__.FlutterDevelopmentChecksTests.test_cli_refuses_local_sdk_initialization) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1801849Z test_cli_rejects_mismatched_workspace (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_mismatched_workspace) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.1912447Z test_cli_rejects_non_validation_branches (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_non_validation_branches) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.2003926Z test_command_scopes_are_bounded_and_lock_enforced (__main__.FlutterDevelopmentChecksTests.test_command_scopes_are_bounded_and_lock_enforced) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.2616806Z test_dependency_failure_leaves_analysis_and_tests_not_run (__main__.FlutterDevelopmentChecksTests.test_dependency_failure_leaves_analysis_and_tests_not_run) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.2788415Z test_diagnostic_counts_use_full_log_and_unknown_is_not_zero (__main__.FlutterDevelopmentChecksTests.test_diagnostic_counts_use_full_log_and_unknown_is_not_zero) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.2883042Z test_diagnostic_failures_do_not_hide_original_command_status (__main__.FlutterDevelopmentChecksTests.test_diagnostic_failures_do_not_hide_original_command_status) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.2995370Z test_diagnostic_sdk_identity_and_control_sequences (__main__.FlutterDevelopmentChecksTests.test_diagnostic_sdk_identity_and_control_sequences) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.3228115Z test_environment_contains_standard_sdk_cache_home_and_temp_outputs (__main__.FlutterDevelopmentChecksTests.test_environment_contains_standard_sdk_cache_home_and_temp_outputs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.3477413Z test_existing_log_cannot_be_overwritten (__main__.FlutterDevelopmentChecksTests.test_existing_log_cannot_be_overwritten) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.3479593Z test_identity_fingerprints_distinguish_successive_content_changes (__main__.FlutterDevelopmentChecksTests.test_identity_fingerprints_distinguish_successive_content_changes)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.4048078Z 同一条脏路径的两次不同内容必须产生不同语义指纹。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.4049465Z test_identity_keeps_crlf_only_rewrite_out_of_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_keeps_crlf_only_rewrite_out_of_semantic)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.4444080Z 真正的纯行尾差异仍必须放行，否则工具链改写会假红。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.4445714Z test_identity_parses_rename_records_without_mangling_paths (__main__.FlutterDevelopmentChecksTests.test_identity_parses_rename_records_without_mangling_paths)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.4854759Z `-z` 的重命名记录多带一个原路径字段，误当成新记录会切掉三个字符。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.5209019Z test_identity_treats_deletion_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_deletion_as_semantic) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.5211110Z test_identity_treats_untracked_directory_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_directory_as_semantic)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.5577547Z `--untracked-files=normal` 把未跟踪目录折叠成一条 `dir/` 记录。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.5578462Z test_identity_treats_untracked_files_as_semantic_not_eol (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_files_as_semantic_not_eol)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.6002957Z RC3-02 反例：`git diff` 看不见未跟踪文件。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.6079017Z test_invalid_scope_fails_before_any_run_output (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_fails_before_any_run_output) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.6163774Z test_invalid_scope_from_environment_is_not_a_shell_argument (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_from_environment_is_not_a_shell_argument) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.6788293Z test_lockfile_drift_fails_before_analysis (__main__.FlutterDevelopmentChecksTests.test_lockfile_drift_fails_before_analysis) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.6959604Z test_machine_diagnostics_remain_json_and_private_blocks_cannot_leak_after_truncation (__main__.FlutterDevelopmentChecksTests.test_machine_diagnostics_remain_json_and_private_blocks_cannot_leak_after_truncation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.7201172Z test_missing_executable_is_error_not_pass (__main__.FlutterDevelopmentChecksTests.test_missing_executable_is_error_not_pass) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.7294737Z test_missing_lock_does_not_silently_resolve_dependencies (__main__.FlutterDevelopmentChecksTests.test_missing_lock_does_not_silently_resolve_dependencies) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.8545935Z test_missing_log_and_broken_summary_fail_without_relabeling_test_exit (__main__.FlutterDevelopmentChecksTests.test_missing_log_and_broken_summary_fail_without_relabeling_test_exit) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:33.9813353Z test_new_run_preserves_previous_report_and_logs (__main__.FlutterDevelopmentChecksTests.test_new_run_preserves_previous_report_and_logs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:34.0376335Z test_real_failure_output_is_published_redacted_without_changing_raw_log (__main__.FlutterDevelopmentChecksTests.test_real_failure_output_is_published_redacted_without_changing_raw_log) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:34.0498105Z test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root (__main__.FlutterDevelopmentChecksTests.test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:34.1053156Z test_real_process_preserves_stdout_stderr_and_exit_code (__main__.FlutterDevelopmentChecksTests.test_real_process_preserves_stdout_stderr_and_exit_code) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:36.1317297Z test_real_timeout_and_invalid_utf8_remain_visible_in_diagnostics (__main__.FlutterDevelopmentChecksTests.test_real_timeout_and_invalid_utf8_remain_visible_in_diagnostics) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.1575613Z test_real_timeout_terminates_parent_and_child_without_hanging (__main__.FlutterDevelopmentChecksTests.test_real_timeout_terminates_parent_and_child_without_hanging) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.1647637Z test_release_build_does_not_mask_analysis_failures (__main__.FlutterDevelopmentChecksTests.test_release_build_does_not_mask_analysis_failures) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.1714869Z test_runner_workflow_and_docs_have_profile_and_ci_ownership (__main__.FlutterDevelopmentChecksTests.test_runner_workflow_and_docs_have_profile_and_ci_ownership) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.2261393Z test_sdk_setup_failure_does_not_pretend_checks_executed (__main__.FlutterDevelopmentChecksTests.test_sdk_setup_failure_does_not_pretend_checks_executed) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.2262819Z test_source_unchanged_sees_content_change_on_an_already_dirty_path (__main__.FlutterDevelopmentChecksTests.test_source_unchanged_sees_content_change_on_an_already_dirty_path)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.2979306Z 只比脏路径列表会漏掉"同一个已脏文件内容又变了"。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.3084472Z test_standing_authorization_is_not_a_mainline_or_release_grant (__main__.FlutterDevelopmentChecksTests.test_standing_authorization_is_not_a_mainline_or_release_grant) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.3750768Z test_success_is_development_only_with_all_raw_logs (__main__.FlutterDevelopmentChecksTests.test_success_is_development_only_with_all_raw_logs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.4418392Z test_test_failure_is_not_masked (__main__.FlutterDevelopmentChecksTests.test_test_failure_is_not_masked) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.6459059Z test_test_failure_prevents_apk_and_success_preserves_phase_order (__main__.FlutterDevelopmentChecksTests.test_test_failure_prevents_apk_and_success_preserves_phase_order) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.7099109Z test_unproven_process_cleanup_stops_downstream_work (__main__.FlutterDevelopmentChecksTests.test_unproven_process_cleanup_stops_downstream_work) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.7165021Z test_windows_batch_quoting_and_exit_propagation (__main__.FlutterDevelopmentChecksTests.test_windows_batch_quoting_and_exit_propagation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.7228699Z test_windows_job_assignment_failure_never_starts_the_command (__main__.FlutterDevelopmentChecksTests.test_windows_job_assignment_failure_never_starts_the_command) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.7329734Z test_workflow_disk_preflight (__main__.FlutterDevelopmentChecksTests.test_workflow_disk_preflight) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.7397547Z test_workflow_is_development_only_and_covers_both_hosts (__main__.FlutterDevelopmentChecksTests.test_workflow_is_development_only_and_covers_both_hosts) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.7474948Z test_workflow_requests_apk_only_on_explicit_dispatch (__main__.FlutterDevelopmentChecksTests.test_workflow_requests_apk_only_on_explicit_dispatch) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.8516579Z test_workflow_sparse_inputs (__main__.FlutterDevelopmentChecksTests.test_workflow_sparse_inputs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.8517158Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.8517353Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.8517767Z Ran 62 tests in 7.841s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.8517936Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.8518100Z OK
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:39.9912770Z APK helper fixtures: /home/runner/work/E-Track/E-Track/.cache/flutter-dev-apk-tests/run-941102b8d31d4a84bae1822c2c0c4653
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.0288779Z test_actual_signer_requires_exact_one_verified_certificate (__main__.DevelopmentApkTests.test_actual_signer_requires_exact_one_verified_certificate) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.0687150Z test_apk_identity_is_read_from_the_artifact_not_the_build_intent (__main__.DevelopmentApkTests.test_apk_identity_is_read_from_the_artifact_not_the_build_intent) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.1152330Z test_archive_rejects_escape_before_writing_any_member (__main__.DevelopmentApkTests.test_archive_rejects_escape_before_writing_any_member) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.1510340Z test_archive_rejects_symlinks (__main__.DevelopmentApkTests.test_archive_rejects_symlinks) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.1961612Z test_artifact_collection_binds_bytes_commit_and_debug_classification (__main__.DevelopmentApkTests.test_artifact_collection_binds_bytes_commit_and_debug_classification) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.2369654Z test_bad_checksum_never_extracts_distribution (__main__.DevelopmentApkTests.test_bad_checksum_never_extracts_distribution) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.2727520Z test_cli_never_builds_or_downloads_locally (__main__.DevelopmentApkTests.test_cli_never_builds_or_downloads_locally) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.3159356Z test_collect_records_link_candidate_as_intent_not_performance_evidence (__main__.DevelopmentApkTests.test_collect_records_link_candidate_as_intent_not_performance_evidence) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.3603398Z test_collect_records_the_verified_observation_configuration (__main__.DevelopmentApkTests.test_collect_records_the_verified_observation_configuration) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.4191696Z test_collect_refuses_an_apk_without_the_injected_observation_constants (__main__.DevelopmentApkTests.test_collect_refuses_an_apk_without_the_injected_observation_constants) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.4576821Z test_collect_rejects_an_apk_whose_real_application_id_differs (__main__.DevelopmentApkTests.test_collect_rejects_an_apk_whose_real_application_id_differs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.5010303Z test_collect_without_observation_keeps_the_previous_metadata (__main__.DevelopmentApkTests.test_collect_without_observation_keeps_the_previous_metadata) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.5352679Z test_debug_application_id_suffix_is_explicit_and_validated (__main__.DevelopmentApkTests.test_debug_application_id_suffix_is_explicit_and_validated) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.5693829Z test_device_observation_injection_reaches_the_build_command (__main__.DevelopmentApkTests.test_device_observation_injection_reaches_the_build_command) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.6035350Z test_device_observation_is_opt_in_and_absent_by_default (__main__.DevelopmentApkTests.test_device_observation_is_opt_in_and_absent_by_default) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.6037582Z test_device_observation_rejects_encoded_and_disguised_credential_keys (__main__.DevelopmentApkTests.test_device_observation_rejects_encoded_and_disguised_credential_keys)
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.6382606Z OBS-SEC-01 回归：编码键名、大小写、token 别名与未知参数都不得绕过。 ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.6730446Z test_device_observation_rejects_incomplete_or_credentialed_config (__main__.DevelopmentApkTests.test_device_observation_rejects_incomplete_or_credentialed_config) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.7139049Z test_environment_redirects_android_java_outputs_and_drops_signing_secrets (__main__.DevelopmentApkTests.test_environment_redirects_android_java_outputs_and_drops_signing_secrets) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.7618725Z test_fixed_signing_environment_is_contained_and_disabled_secret_removed (__main__.DevelopmentApkTests.test_fixed_signing_environment_is_contained_and_disabled_secret_removed) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.7978775Z test_fixed_signing_keytool_failure_rejected (__main__.DevelopmentApkTests.test_fixed_signing_keytool_failure_rejected) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.8414820Z test_fixed_signing_metadata_records_verified_certificate_only (__main__.DevelopmentApkTests.test_fixed_signing_metadata_records_verified_certificate_only) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.8758892Z test_fixed_signing_missing_malformed_and_oversized_secret_fail_before_writes (__main__.DevelopmentApkTests.test_fixed_signing_missing_malformed_and_oversized_secret_fail_before_writes) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.9101341Z test_fixed_signing_rejects_invalid_mode_and_production_identity (__main__.DevelopmentApkTests.test_fixed_signing_rejects_invalid_mode_and_production_identity) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.9486346Z test_fixed_signing_validates_key_and_refuses_overwrite (__main__.DevelopmentApkTests.test_fixed_signing_validates_key_and_refuses_overwrite) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:40.9848688Z test_fixed_signing_wrong_certificate_rejected (__main__.DevelopmentApkTests.test_fixed_signing_wrong_certificate_rejected) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.0197972Z test_link_candidates_form_an_explicit_bounded_build_matrix (__main__.DevelopmentApkTests.test_link_candidates_form_an_explicit_bounded_build_matrix) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.0547333Z test_missing_android_package_stops_wrapper_install (__main__.DevelopmentApkTests.test_missing_android_package_stops_wrapper_install) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.0934990Z test_missing_apk_or_commit_cannot_be_reported_as_generated (__main__.DevelopmentApkTests.test_missing_apk_or_commit_cannot_be_reported_as_generated) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.1276945Z test_missing_jdk_is_failure_not_silent_fallback (__main__.DevelopmentApkTests.test_missing_jdk_is_failure_not_silent_fallback) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.1623305Z test_pipeline_build_is_explicit_and_preserves_runtime_observation_guards (__main__.DevelopmentApkTests.test_pipeline_build_is_explicit_and_preserves_runtime_observation_guards) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.1967370Z test_plan_is_debug_only_and_bounded (__main__.DevelopmentApkTests.test_plan_is_debug_only_and_bounded) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.2453655Z test_prepare_verifies_download_and_preserves_tracked_wrapper_properties (__main__.DevelopmentApkTests.test_prepare_verifies_download_and_preserves_tracked_wrapper_properties) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.2829478Z test_release_signing_file_is_rejected_without_download (__main__.DevelopmentApkTests.test_release_signing_file_is_rejected_without_download) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.3177242Z test_runtime_build_can_use_an_explicit_non_live_default_endpoint (__main__.DevelopmentApkTests.test_runtime_build_can_use_an_explicit_non_live_default_endpoint) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.3521738Z test_runtime_experiment_requires_mac_observation_and_keeps_rates_out_of_builds (__main__.DevelopmentApkTests.test_runtime_experiment_requires_mac_observation_and_keeps_rates_out_of_builds) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.3907420Z test_stale_apk_is_rejected_without_download (__main__.DevelopmentApkTests.test_stale_apk_is_rejected_without_download) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.4327670Z test_tracked_inputs_cannot_be_overwritten_as_generated_outputs (__main__.DevelopmentApkTests.test_tracked_inputs_cannot_be_overwritten_as_generated_outputs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.4678379Z test_versions_are_derived_from_tracked_inputs (__main__.DevelopmentApkTests.test_versions_are_derived_from_tracked_inputs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.5361500Z test_wrapper_install_checks_sdk_and_preserves_other_local_properties (__main__.DevelopmentApkTests.test_wrapper_install_checks_sdk_and_preserves_other_local_properties) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.5362712Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.5362969Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.5363547Z Ran 39 tests in 1.546s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.5363775Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.5363913Z OK
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6742724Z test_active_and_expired_artifacts_are_excluded (__main__.ArtifactMaintenanceTests.test_active_and_expired_artifacts_are_excluded) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6748395Z test_age_count_pins_and_branch_isolation (__main__.ArtifactMaintenanceTests.test_age_count_pins_and_branch_isolation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6751787Z test_apply_preserves_non_target_assets_and_records_real_receipts (__main__.ArtifactMaintenanceTests.test_apply_preserves_non_target_assets_and_records_real_receipts) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6753336Z test_approved_dry_run_is_still_read_only (__main__.ArtifactMaintenanceTests.test_approved_dry_run_is_still_read_only) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6757827Z test_approved_id_parser_is_bounded_and_rejects_ambiguous_inputs (__main__.ArtifactMaintenanceTests.test_approved_id_parser_is_bounded_and_rejects_ambiguous_inputs) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6761434Z test_approved_ids_allow_only_the_exact_plan_in_any_order (__main__.ArtifactMaintenanceTests.test_approved_ids_allow_only_the_exact_plan_in_any_order) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6770921Z test_approved_ids_do_not_select_extra_or_partial_candidates (__main__.ArtifactMaintenanceTests.test_approved_ids_do_not_select_extra_or_partial_candidates) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.6773266Z test_capacity_warning_is_not_an_account_quota_or_a_deletion_override (__main__.ArtifactMaintenanceTests.test_capacity_warning_is_not_an_account_quota_or_a_deletion_override) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7143417Z test_cli_dry_run_writes_checked_reports_and_budget_warning_without_upload (__main__.ArtifactMaintenanceTests.test_cli_dry_run_writes_checked_reports_and_budget_warning_without_upload) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7167348Z test_cli_local_entry_never_creates_output_or_api_client (__main__.ArtifactMaintenanceTests.test_cli_local_entry_never_creates_output_or_api_client) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7729331Z test_cli_passes_reviewed_ids_and_keeps_scheduled_policy_behavior (__main__.ArtifactMaintenanceTests.test_cli_passes_reviewed_ids_and_keeps_scheduled_policy_behavior) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7732772Z test_committed_policy_and_workflow_are_bounded_and_governed (__main__.ArtifactMaintenanceTests.test_committed_policy_and_workflow_are_bounded_and_governed) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7774379Z test_complete_inventory_is_required_before_any_deletion (__main__.ArtifactMaintenanceTests.test_complete_inventory_is_required_before_any_deletion) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7776012Z test_default_is_a_read_only_dry_run (__main__.ArtifactMaintenanceTests.test_default_is_a_read_only_dry_run) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7834934Z test_delete_cap_reports_backlog_instead_of_expanding_scope (__main__.ArtifactMaintenanceTests.test_delete_cap_reports_backlog_instead_of_expanding_scope) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7839019Z test_deterministic_id_tie_break_and_completed_rolling_slots (__main__.ArtifactMaintenanceTests.test_deterministic_id_tie_break_and_completed_rolling_slots) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7846829Z test_every_id_is_revalidated_and_changes_stop_the_batch (__main__.ArtifactMaintenanceTests.test_every_id_is_revalidated_and_changes_stop_the_batch) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7849094Z test_final_inventory_failure_does_not_claim_known_freed_bytes (__main__.ArtifactMaintenanceTests.test_final_inventory_failure_does_not_claim_known_freed_bytes) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7864963Z test_forged_or_incomplete_target_metadata_fails_closed (__main__.ArtifactMaintenanceTests.test_forged_or_incomplete_target_metadata_fails_closed) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7868334Z test_invalid_approved_ids_fail_before_api_access (__main__.ArtifactMaintenanceTests.test_invalid_approved_ids_fail_before_api_access) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7871421Z test_journal_failure_before_delete_cannot_start_a_mutation (__main__.ArtifactMaintenanceTests.test_journal_failure_before_delete_cannot_start_a_mutation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7930884Z test_manual_apply_requires_reviewed_ids_before_output_or_api_creation (__main__.ArtifactMaintenanceTests.test_manual_apply_requires_reviewed_ids_before_output_or_api_creation) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7938204Z test_new_pin_or_active_run_invalidates_reviewed_ids_before_any_delete (__main__.ArtifactMaintenanceTests.test_new_pin_or_active_run_invalidates_reviewed_ids_before_any_delete) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7942995Z test_old_attempt_is_checked_against_its_own_run_metadata (__main__.ArtifactMaintenanceTests.test_old_attempt_is_checked_against_its_own_run_metadata) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.7947938Z test_partial_failure_keeps_receipts_and_stops_remaining_ids (__main__.ArtifactMaintenanceTests.test_partial_failure_keeps_receipts_and_stops_remaining_ids) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8164929Z test_production_transport_rejects_non_artifact_deletion_and_redirects (__main__.ArtifactMaintenanceTests.test_production_transport_rejects_non_artifact_deletion_and_redirects) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8170853Z test_repo_workflow_and_policy_cannot_widen_scope (__main__.ArtifactMaintenanceTests.test_repo_workflow_and_policy_cannot_widen_scope) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8175291Z test_trusted_ci_context_rejects_forks_refs_events_and_checkout_drift (__main__.ArtifactMaintenanceTests.test_trusted_ci_context_rejects_forks_refs_events_and_checkout_drift) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8182546Z test_uncertain_delete_is_reconciled_once_without_retry_or_byte_credit (__main__.ArtifactMaintenanceTests.test_uncertain_delete_is_reconciled_once_without_retry_or_byte_credit) ... ok
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8183326Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8183516Z ----------------------------------------------------------------------
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8184426Z Ran 29 tests in 0.145s
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8184615Z 
+Validate acceptance and build governance	Run governance regression tests	2026-10-18T23:13:41.8184720Z OK
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	﻿2026-10-18T23:13:41.8421368Z ##[group]Run carlosperate/arm-none-eabi-gcc-action@v1
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:41.8421773Z with:
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:41.8422016Z   release: 13.3.Rel1
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:41.8422280Z ##[endgroup]
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:42.1669742Z Cache hit for: gcc-arm-none-eabi-13.3.1-linux-x64-sha256-95c011cee430e64dd6087c75c800f04b9c49832cc1000127a92a97f9c8d83af4
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:43.3815459Z Received 33554432 of 225756257 (14.9%), 31.9 MBs/sec
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:44.3798781Z Received 201326592 of 225756257 (89.2%), 95.9 MBs/sec
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:44.5019540Z Received 225756257 of 225756257 (100.0%), 101.4 MBs/sec
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:44.5021363Z Cache Size: ~215 MB (225756257 B)
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:44.5062222Z [command]/usr/bin/tar -xf /home/runner/work/_temp/1a511ed9-38f3-4fd9-969b-9a5ebf1e3dc7/cache.tzst -P -C /home/runner/work/E-Track/E-Track --use-compress-program unzstd
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:46.3976723Z Cache restored successfully
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:46.4094960Z Cached version loaded: /home/runner/gcc-arm-none-eabi-13.3.1-linux-x64
+Validate acceptance and build governance	Install Arm GNU Toolchain 13.3.Rel1	2026-10-18T23:13:46.4476164Z Adding /home/runner/gcc-arm-none-eabi-13.3.1-linux-x64/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin to PATH.
+Validate acceptance and build governance	Run P2-6 spec probes	﻿2026-10-18T23:13:46.4684144Z ##[group]Run set -euo pipefail
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4684821Z ^[[36;1mset -euo pipefail^[[0m
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4685162Z ^[[36;1marm-none-eabi-gcc --version | head -n1^[[0m
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4685536Z ^[[36;1mgcc --version | head -n1^[[0m
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4685910Z ^[[36;1mpython3 tests/ota/spec-probes/p2-6/run_all.py^[[0m
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4766016Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4766433Z env:
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4766689Z   PYTHONDONTWRITEBYTECODE: 1
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4766988Z ##[endgroup]
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4890252Z arm-none-eabi-gcc (Arm GNU Toolchain 13.3.Rel1 (Build arm-13.24)) 13.3.1 20240614
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:46.4938256Z gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8031870Z 仓库根: /home/runner/work/E-Track/E-Track
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8032571Z 生成物根: /home/runner/work/E-Track/E-Track/.cache/p2-6-spec-probe-run
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8032931Z 
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8033138Z === harness 自检（分类与汇总的四个负例）===
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8033695Z   自检输出目录: /home/runner/work/E-Track/E-Track/.cache/p2-6-spec-probe-run/selftest
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8034983Z   [PASS] classify(rc=0) = PASS（期望 PASS）  退出码 0 即通过
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8035679Z   [PASS] classify(rc=2) = ENV_BLOCKED（期望 ENV_BLOCKED）  退出码 2 + 规范化标记 = 真实环境阻塞
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8036302Z   [PASS] classify(rc=2) = HARNESS_FAIL（期望 HARNESS_FAIL）  退出码 2 + 空输出
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8036958Z   [PASS] classify(rc=2) = HARNESS_FAIL（期望 HARNESS_FAIL）  退出码 2 + 正文中间出现 ENV_BLOCKED 一词
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8037609Z   [PASS] classify(rc=2) = HARNESS_FAIL（期望 HARNESS_FAIL）  退出码 2 + 旧格式（无标记）
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8038182Z   [PASS] classify(rc=1) = HARNESS_FAIL（期望 HARNESS_FAIL）  标记行但退出码不是 2
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8038760Z   [PASS] classify(rc=-11) = HARNESS_FAIL（期望 HARNESS_FAIL）  被信号杀死的负退出码
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8039349Z   [PASS] classify(rc=1) = HARNESS_FAIL（期望 HARNESS_FAIL）  普通断言失败
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8039814Z   [PASS] aggregate([]) = 1（期望 1）  空序列不得视为通过
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8040243Z   [PASS] aggregate(['PASS', 'PASS']) = 0（期望 0）  全通过
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8040752Z   [PASS] aggregate(['PASS', 'ENV_BLOCKED']) = 2（期望 2）  纯环境阻塞
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8041304Z   [PASS] aggregate(['ENV_BLOCKED', 'HARNESS_FAIL']) = 1（期望 1）  失败优先于环境阻塞
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8041873Z   [PASS] aggregate(['HARNESS_FAIL', 'ENV_BLOCKED']) = 1（期望 1）  顺序无关
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8042354Z   [PASS] aggregate(['HARNESS_FAIL']) = 1（期望 1）  纯失败
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8042954Z   [PASS] N1 rc=1（期望 1） 标记=['HARNESS_FAIL']（期望 ['HARNESS_FAIL']）  探针脚本缺失必须是 harness 失败，不是环境阻塞
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8043714Z   [PASS] N2 rc=1（期望 1） 标记=['HARNESS_FAIL']（期望 ['HARNESS_FAIL']）  退出码 2 但无规范化标记（含旧格式输出）必须是 harness 失败
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8044827Z   [PASS] N3 rc=1（期望 1） 标记=['ENV_BLOCKED', 'HARNESS_FAIL']（期望 ['ENV_BLOCKED', 'HARNESS_FAIL']）  真实环境阻塞与 harness 失败混合时，失败优先，退出码必须是 1
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8046000Z   [PASS] N4 rc=2（期望 2） 标记=['PASS', 'ENV_BLOCKED']（期望 ['PASS', 'ENV_BLOCKED']）  纯环境阻塞（无任何失败）才允许退出码 2
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8046715Z   [PASS] P1 rc=0（期望 0） 标记=['PASS', 'PASS']（期望 ['PASS', 'PASS']）  全部通过必须退出码 0（否则分类可能恒判失败）
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8047365Z   [PASS] 条目数门禁 rc=1（期望 1） 已执行探针=False（期望 False）  探针被增删时不得静默少跑
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8047732Z   
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8048029Z   --- 自检汇总 ---
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8048421Z   全部 20 项判据通过：ENV_BLOCKED 仅由规范化标记签发，harness 失败优先于环境阻塞。
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8048874Z 自检通过：ENV_BLOCKED 只能由规范化标记签发，harness 失败优先于环境阻塞。
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8049104Z 
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8049434Z [PASS] guard_layout         rc=0  日志: .cache/p2-6-spec-probe-run/guard_layout.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8050000Z          判据: 九条链接期 ASSERT 各自具备鉴别力（含 A6 独立负例）+ 两层间接宏必要性
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8050519Z [PASS] wrap_probe           rc=0  日志: .cache/p2-6-spec-probe-run/wrap_probe.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8051085Z          判据: --wrap 拦截层选型：required 层为 lv_tlsf_*；生产构型测量符号全消失
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8051669Z [PASS] stack_usage          rc=0  日志: .cache/p2-6-spec-probe-run/stack_usage.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8052182Z          判据: -fstack-usage 产出可用性 + 本构型无单调性反例
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8052724Z [PASS] stack_usage/scan     rc=0  日志: .cache/p2-6-spec-probe-run/stack_usage_scan.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8053535Z          判据: 插桩位置×快照大小扫描：21 配置无反例
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8054040Z [PASS] stack_usage/scan2    rc=0  日志: .cache/p2-6-spec-probe-run/stack_usage_scan2.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8054819Z          判据: 多调用点构型扫描：18 配置无反例
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8055311Z [PASS] stack_usage/scan3    rc=0  日志: .cache/p2-6-spec-probe-run/stack_usage_scan3.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8055806Z          判据: 插桩体积扫描：7 档 BULK 无反例
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8056280Z [PASS] stack_usage/scan4    rc=0  日志: .cache/p2-6-spec-probe-run/stack_usage_scan4.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8056856Z          判据: 定向反例：采集点 noinline 使父帧 992B→520B，链上求和反而更深
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8057374Z [PASS] host_scan            rc=0  日志: .cache/p2-6-spec-probe-run/host_scan.log
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8057992Z          判据: guard 落在栈区最低字会让扫描恒返回满栈（故 guard 必须外置）；BLANK 必须与哨兵常量同步
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8058261Z 
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8058383Z === 汇总 ===
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8058631Z 通过 8/8
+Validate acceptance and build governance	Run P2-6 spec probes	2026-10-18T23:13:51.8058937Z 全部探针与记录结论一致。日志可直接绑定进证据包（按 SHA-256）。
+Validate acceptance and build governance	Post Checkout	﻿2026-10-18T23:13:51.8255650Z Post job cleanup.
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9231236Z [command]/usr/bin/git version
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9281474Z git version 2.55.0
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9327381Z Temporarily overriding HOME='/home/runner/work/_temp/985105a3-745e-4150-9a44-35afe2a0cf30' before making global git config changes
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9328543Z Adding repository directory to the temporary git global config as a safe directory
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9333917Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9379960Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9419544Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9739163Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9769573Z http.https://github.com/.extraheader
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9782492Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:51.9825755Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:52.0195394Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Validate acceptance and build governance	Post Checkout	2026-10-18T23:13:52.0229266Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Validate acceptance and build governance	Complete job	﻿2026-10-18T23:13:52.0818327Z Cleaning up orphan processes
+Validate acceptance and build governance	Complete job	2026-10-18T23:13:52.1152337Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter debugging skill (ubuntu-latest)	Set up job	﻿2026-10-18T23:12:54.9506721Z Current runner version: '2.337.0'
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9523070Z ##[group]Runner Image Provisioner
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9523727Z Hosted Compute Agent
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9524123Z Version: 20261012.601
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9524528Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9525093Z Build Date: 2026-10-12T17:48:21Z
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9525550Z Worker ID: {9271e225-d5c1-44d2-92f7-dc824ab813bc}
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9526037Z Region: centralus
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9526406Z Cloud: Azure
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9526752Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9527690Z ##[group]Operating System
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9528096Z Ubuntu
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9528442Z 24.04.5
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9528792Z LTS
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9529136Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9529549Z ##[group]Runner Image
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9529939Z Image: ubuntu-24.04
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9530416Z Version: 20261012.334.1
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9531457Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9532740Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9533371Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9534103Z ##[group]GITHUB_TOKEN Permissions
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9535794Z Contents: read
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9536212Z Metadata: read
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9536588Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9537973Z Secret source: Actions
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9538856Z Cache mode: write
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9539371Z Prepare workflow directory
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9787561Z Prepare all required actions
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:54.9821840Z Getting action download info
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:55.1843419Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:55.2985219Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Flutter debugging skill (ubuntu-latest)	Set up job	2026-10-18T23:12:55.4940003Z Complete job name: Flutter debugging skill (ubuntu-latest)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	﻿2026-10-18T23:12:55.5427640Z ##[group]Run actions/checkout@v4
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5428252Z with:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5428605Z   repository: Eitan-S-23/E-Track
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5431423Z   token: ***
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5431821Z   ssh-strict: true
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5432172Z   ssh-user: git
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5432534Z   persist-credentials: true
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5432918Z   clean: true
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5433259Z   sparse-checkout-cone-mode: true
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5433699Z   fetch-depth: 1
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5434050Z   fetch-tags: false
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5434399Z   show-progress: true
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5434760Z   lfs: false
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5435151Z   submodules: false
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5435543Z   set-safe-directory: true
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5435932Z   allow-unsafe-pr-checkout: false
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.5436471Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6147174Z Syncing repository: Eitan-S-23/E-Track
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6149179Z ##[group]Getting Git version info
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6149964Z Working directory is '/home/runner/work/E-Track/E-Track'
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6151426Z [command]/usr/bin/git version
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6212092Z git version 2.55.0
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6234454Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6240021Z Temporarily overriding HOME='/home/runner/work/_temp/e429442b-8eda-4122-8453-23be2cc9130e' before making global git config changes
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6242084Z Adding repository directory to the temporary git global config as a safe directory
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6244451Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6276507Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6279643Z ##[group]Initializing the repository
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6281988Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6369813Z hint: Using 'master' as the name for the initial branch. This default branch name
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6371768Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6373451Z hint: to use in all of your new repositories, which will suppress this warning,
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6374952Z hint: call:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6375661Z hint:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6376417Z hint: 	git config --global init.defaultBranch <name>
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6377431Z hint:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6378296Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6379432Z hint: 'development'. The just-created branch can be renamed via this command:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6380381Z hint:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6381698Z hint: 	git branch -m <name>
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6382571Z hint:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6383201Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6383987Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6385301Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6433068Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6434277Z ##[group]Disabling automatic garbage collection
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6435450Z [command]/usr/bin/git config --local gc.auto 0
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6459798Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6460987Z ##[group]Setting up auth
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6464718Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6500347Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6774101Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6794893Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6933501Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.6953656Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7089069Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7121388Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7122134Z ##[group]Fetching the repository
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7128564Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +b56534d7b6c993c0795010d0404fb8a81f7eeb9d:refs/remotes/origin/dev/p4-4/config-integration-20261018
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9019599Z From https://github.com/Eitan-S-23/E-Track
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9020662Z  * [new ref]         b56534d7b6c993c0795010d0404fb8a81f7eeb9d -> origin/dev/p4-4/config-integration-20261018
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9030073Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9030972Z ##[group]Determining the checkout info
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9031695Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9034007Z [command]/usr/bin/git sparse-checkout disable
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9084037Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9152031Z ##[group]Checking out the ref
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:07.9154277Z [command]/usr/bin/git checkout --progress --force -B dev/p4-4/config-integration-20261018 refs/remotes/origin/dev/p4-4/config-integration-20261018
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.1314002Z Updating files:  75% (12287/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.1530682Z Updating files:  76% (12387/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.4038667Z Updating files:  77% (12550/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.6831099Z Updating files:  78% (12713/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.7867393Z Updating files:  79% (12876/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.8303548Z Updating files:  80% (13039/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.8606932Z Updating files:  81% (13202/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.8747323Z Updating files:  82% (13365/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9139857Z Updating files:  83% (13528/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9293836Z Updating files:  84% (13691/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9362052Z Updating files:  84% (13711/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9628026Z Updating files:  85% (13854/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9907719Z Updating files:  86% (14017/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9969202Z Updating files:  87% (14180/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.0455815Z Updating files:  88% (14343/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.0497186Z Updating files:  89% (14506/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.1178267Z Updating files:  90% (14669/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.1307018Z Updating files:  91% (14832/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.1707302Z Updating files:  92% (14995/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.1849448Z Updating files:  93% (15158/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.3232614Z Updating files:  94% (15321/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.3362837Z Updating files:  95% (15484/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.3497772Z Updating files:  96% (15647/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.4777165Z Updating files:  97% (15810/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.4969702Z Updating files:  98% (15973/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.5104612Z Updating files:  99% (16136/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.5105113Z Updating files: 100% (16298/16298)
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.5105427Z Updating files: 100% (16298/16298), done.
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.6128966Z Switched to a new branch 'dev/p4-4/config-integration-20261018'
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.6133600Z branch 'dev/p4-4/config-integration-20261018' set up to track 'origin/dev/p4-4/config-integration-20261018'.
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.6191464Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.6229628Z [command]/usr/bin/git log -1 --format=%H
+Flutter debugging skill (ubuntu-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.6251503Z b56534d7b6c993c0795010d0404fb8a81f7eeb9d
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	﻿2026-10-18T23:13:10.6460339Z ##[group]Run python3 -I -S -B -X utf8 .agents/skills/e-track-flutter-debug/scripts/selftest.py --root "$GITHUB_WORKSPACE" --out "$GITHUB_WORKSPACE/.cache/flutter-debug-skill-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:10.6461713Z ^[[36;1mpython3 -I -S -B -X utf8 .agents/skills/e-track-flutter-debug/scripts/selftest.py --root "$GITHUB_WORKSPACE" --out "$GITHUB_WORKSPACE/.cache/flutter-debug-skill-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"^[[0m
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:10.6752434Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:10.6752897Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:10.9860609Z test_atomic_status_has_no_pending_file_after_success (__main__.HostTests.test_atomic_status_has_no_pending_file_after_success) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:10.9861669Z test_device_namespace_and_drive_relative_are_rejected (__main__.HostTests.test_device_namespace_and_drive_relative_are_rejected) ... skipped 'Windows path syntax'
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.0746979Z test_disappearing_leaf_is_treated_as_a_new_output (__main__.HostTests.test_disappearing_leaf_is_treated_as_a_new_output) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3062756Z test_existing_pending_evidence_is_not_deleted (__main__.HostTests.test_existing_pending_evidence_is_not_deleted) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3063514Z test_extended_path_spelling_is_normalized (__main__.HostTests.test_extended_path_spelling_is_normalized) ... skipped 'Windows path syntax'
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3088029Z test_invalid_retry_budget_and_clock_fail (__main__.HostTests.test_invalid_retry_budget_and_clock_fail) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3092502Z test_missing_nested_output_is_contained (__main__.HostTests.test_missing_nested_output_is_contained) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3097761Z test_parent_traversal_and_sibling_prefix_are_rejected (__main__.HostTests.test_parent_traversal_and_sibling_prefix_are_rejected) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3108236Z test_persistent_and_unrelated_errors_fail (__main__.HostTests.test_persistent_and_unrelated_errors_fail) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3115133Z test_real_internal_symlink_is_rejected (__main__.HostTests.test_real_internal_symlink_is_rejected) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3115803Z test_real_windows_reader_lock_is_tolerated (__main__.HostTests.test_real_windows_reader_lock_is_tolerated) ... skipped 'actual Windows file sharing'
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3117485Z test_relative_root_is_rejected (__main__.HostTests.test_relative_root_is_rejected) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3121055Z test_reparse_attribute_is_rejected (__main__.HostTests.test_reparse_attribute_is_rejected) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3137928Z test_retry_only_repeats_the_same_rename (__main__.HostTests.test_retry_only_repeats_the_same_rename) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3167649Z test_skill_references_resolve_to_real_project_files (__main__.HostTests.test_skill_references_resolve_to_real_project_files) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3172348Z test_volatile_leaf_is_never_resolved (__main__.HostTests.test_volatile_leaf_is_never_resolved) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3344416Z test_write_once_does_not_overwrite_receipt (__main__.HostTests.test_write_once_does_not_overwrite_receipt) ... ok
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3345254Z 
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3345694Z ----------------------------------------------------------------------
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3346293Z Ran 17 tests in 0.427s
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3346542Z 
+Flutter debugging skill (ubuntu-latest)	Test host helpers (Linux)	2026-10-18T23:13:11.3346681Z OK (skipped=3)
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	﻿2026-10-18T23:13:11.4047698Z ##[group]Run python3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py service --out "$GITHUB_WORKSPACE/.cache/p34-service-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:11.4048831Z ^[[36;1mpython3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py service --out "$GITHUB_WORKSPACE/.cache/p34-service-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"^[[0m
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:11.4049711Z ^[[36;1mpython3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py live --out "$GITHUB_WORKSPACE/.cache/p34-live-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"^[[0m
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:11.4087391Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:11.4087774Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:11.4565717Z P34_COMMAND test_p34_service_patch.py
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:12.1760005Z {"group": "service", "passed": true, "tests": 1}
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:12.2202409Z P34_COMMAND test_p34_live_route.py
+Flutter debugging skill (ubuntu-latest)	Test P3-4 controlled service and live adapters (Linux)	2026-10-18T23:13:36.2349888Z {"group": "live", "passed": true, "tests": 1}
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	﻿2026-10-18T23:13:36.2487122Z ##[group]Run actions/upload-artifact@v4
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2487433Z with:
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2487682Z   name: p34-live-host-ubuntu-latest-39175558187-1
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2488246Z   path: .cache/p34-service-39175558187-1/*.json
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	.cache/p34-service-39175558187-1/*.log
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	.cache/p34-live-39175558187-1/*.json
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	.cache/p34-live-39175558187-1/*.log
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2488757Z   if-no-files-found: error
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2489033Z   include-hidden-files: true
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2489281Z   retention-days: 14
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2489517Z   compression-level: 6
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2489749Z   overwrite: false
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.2489963Z ##[endgroup]
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.3673783Z (node:2159) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.3674649Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.3764233Z Multiple search paths detected. Calculating the least common ancestor of all paths
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.3765718Z The least common ancestor is /home/runner/work/E-Track/E-Track/.cache. This will be the root directory of the artifact
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.3766636Z With the provided path, there will be 6 files uploaded
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.3767254Z Artifact name is valid!
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.3767641Z Root directory input is valid!
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.6353092Z Beginning upload of artifact content to blob storage
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.6544229Z (node:2159) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.8296587Z Uploaded bytes 7760
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.8738623Z Finished uploading artifact content to blob storage!
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.8739814Z SHA256 digest of uploaded artifact zip is db8705abd2617981bd366cc31e489e3beccba32e92d322d832327d0a4d36e73e
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:36.8740656Z Finalizing artifact upload
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:37.1230115Z Artifact p34-live-host-ubuntu-latest-39175558187-1.zip successfully finalized. Artifact ID 12154720086
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:37.1230941Z Artifact p34-live-host-ubuntu-latest-39175558187-1 has been successfully uploaded! Final size is 7760 bytes. Artifact ID is 12154720086
+Flutter debugging skill (ubuntu-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:37.1237156Z Artifact download URL: https://github.com/Eitan-S-23/E-Track/actions/runs/39175558187/artifacts/12154720086
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	﻿2026-10-18T23:13:37.1400217Z Post job cleanup.
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2038572Z [command]/usr/bin/git version
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2072340Z git version 2.55.0
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2102144Z Temporarily overriding HOME='/home/runner/work/_temp/52c8916d-5f25-4adc-bee0-378e72777119' before making global git config changes
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2102875Z Adding repository directory to the temporary git global config as a safe directory
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2107196Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2135860Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2159981Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2331509Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2348888Z http.https://github.com/.extraheader
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2360202Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2382777Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2556442Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter debugging skill (ubuntu-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:37.2580498Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Flutter debugging skill (ubuntu-latest)	Complete job	﻿2026-10-18T23:13:37.2844562Z Cleaning up orphan processes
+Flutter debugging skill (ubuntu-latest)	Complete job	2026-10-18T23:13:37.3034219Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Flutter debugging skill (windows-latest)	Set up job	﻿2026-10-18T23:12:55.0514473Z Current runner version: '2.337.0'
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0555619Z ##[group]Runner Image Provisioner
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0556364Z Hosted Compute Agent
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0556707Z Version: 20261002.596
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0557057Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0557448Z Build Date: 2026-10-02T22:28:27Z
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0557840Z Worker ID: {aeaf905b-1f0a-484b-83e5-35f6918f75db}
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0558231Z Region: westus3
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0558523Z Cloud: Azure
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0558831Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0559734Z ##[group]Operating System
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0560135Z Microsoft Windows Server 2025
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0560473Z 10.0.26100
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0560770Z Datacenter
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0561072Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0561368Z ##[group]Runner Image
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0561703Z Image: windows-2025-vs2026
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0562040Z Version: 20261007.264.1
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0562654Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261007.264/images/windows/Windows2025-VS2026-Readme.md
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0563750Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261007.264
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0564272Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0564895Z ##[group]GITHUB_TOKEN Permissions
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0566117Z Contents: read
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0566441Z Metadata: read
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0566776Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0568068Z Secret source: Actions
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0568527Z Cache mode: write
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0568926Z Prepare workflow directory
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0804695Z Prepare all required actions
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.0836345Z Getting action download info
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.3626336Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.4509019Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Flutter debugging skill (windows-latest)	Set up job	2026-10-18T23:12:55.6662761Z Complete job name: Flutter debugging skill (windows-latest)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	﻿2026-10-18T23:12:55.7587575Z ##[group]Run actions/checkout@v4
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7588538Z with:
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7588778Z   repository: Eitan-S-23/E-Track
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7590801Z   token: ***
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7591024Z   ssh-strict: true
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7591255Z   ssh-user: git
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7591491Z   persist-credentials: true
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7591751Z   clean: true
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7591989Z   sparse-checkout-cone-mode: true
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7592263Z   fetch-depth: 1
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7592488Z   fetch-tags: false
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7592719Z   show-progress: true
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7592949Z   lfs: false
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7593161Z   submodules: false
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7593398Z   set-safe-directory: true
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7593664Z   allow-unsafe-pr-checkout: false
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.7594029Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.8589520Z Syncing repository: Eitan-S-23/E-Track
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.8591096Z ##[group]Getting Git version info
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.8591615Z Working directory is 'D:\a\E-Track\E-Track'
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:55.9090837Z [command]"C:\Program Files\Git\bin\git.exe" version
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.2628359Z git version 2.56.0.windows.2
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.2658856Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.2671160Z Temporarily overriding HOME='D:\a\_temp\fdc063b1-920c-4fd3-9a59-c5d4fd37bb45' before making global git config changes
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.2671833Z Adding repository directory to the temporary git global config as a safe directory
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.2678133Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\E-Track\E-Track
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.3213182Z Deleting the contents of 'D:\a\E-Track\E-Track'
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.3216824Z ##[group]Initializing the repository
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.3222435Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\E-Track\E-Track
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.3955847Z Initialized empty Git repository in D:/a/E-Track/E-Track/.git/
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.3982580Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/Eitan-S-23/E-Track
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.4493903Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.4494339Z ##[group]Disabling automatic garbage collection
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.4499692Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.4729805Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.4730185Z ##[group]Setting up auth
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.4737548Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:56.4965515Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:57.7224410Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:57.7497847Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:58.0982602Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:58.1237547Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:58.5350131Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:58.5595670Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:58.5596030Z ##[group]Fetching the repository
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:12:58.5604104Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +b56534d7b6c993c0795010d0404fb8a81f7eeb9d:refs/remotes/origin/dev/p4-4/config-integration-20261018
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.2736776Z From https://github.com/Eitan-S-23/E-Track
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.2739836Z  * [new ref]         b56534d7b6c993c0795010d0404fb8a81f7eeb9d -> origin/dev/p4-4/config-integration-20261018
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.2771587Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.2771958Z ##[group]Determining the checkout info
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.2772908Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.2780048Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.3176635Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.3439219Z ##[group]Checking out the ref
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:08.3446063Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B dev/p4-4/config-integration-20261018 refs/remotes/origin/dev/p4-4/config-integration-20261018
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.4037246Z Updating files:  39% (6504/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.4191006Z Updating files:  40% (6520/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.4396957Z Updating files:  41% (6683/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.4598638Z Updating files:  42% (6846/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.4759232Z Updating files:  43% (7009/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.4947223Z Updating files:  44% (7172/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.5143903Z Updating files:  45% (7335/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.5341885Z Updating files:  46% (7498/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.5534415Z Updating files:  47% (7661/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.5735825Z Updating files:  48% (7824/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.5948833Z Updating files:  49% (7987/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.6161302Z Updating files:  50% (8149/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.6371857Z Updating files:  51% (8312/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.6551661Z Updating files:  52% (8475/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.6698180Z Updating files:  53% (8638/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.8473250Z Updating files:  54% (8801/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.8743462Z Updating files:  55% (8964/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9051709Z Updating files:  56% (9127/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9240838Z Updating files:  57% (9290/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9512086Z Updating files:  58% (9453/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:09.9757807Z Updating files:  59% (9616/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.0315699Z Updating files:  60% (9779/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.1861981Z Updating files:  61% (9942/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.2385818Z Updating files:  62% (10105/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.2671926Z Updating files:  63% (10268/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.2851883Z Updating files:  64% (10431/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.3315820Z Updating files:  65% (10594/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.4043230Z Updating files:  66% (10757/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.4171011Z Updating files:  67% (10920/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.4391792Z Updating files:  67% (11014/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.4800737Z Updating files:  68% (11083/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.4971315Z Updating files:  69% (11246/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.5193392Z Updating files:  70% (11409/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.5384832Z Updating files:  71% (11572/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.6942931Z Updating files:  72% (11735/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.7214273Z Updating files:  73% (11898/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:10.7539333Z Updating files:  74% (12061/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:11.4232804Z Updating files:  75% (12224/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:11.6680564Z Updating files:  75% (12353/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:11.7377189Z Updating files:  76% (12387/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.0787101Z Updating files:  77% (12550/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.3496276Z Updating files:  78% (12713/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.4558511Z Updating files:  79% (12876/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.4811575Z Updating files:  79% (12900/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.5484948Z Updating files:  80% (13039/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.6032502Z Updating files:  81% (13202/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.7591611Z Updating files:  82% (13365/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.8300196Z Updating files:  83% (13528/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.8761919Z Updating files:  84% (13691/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:12.9448638Z Updating files:  85% (13854/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.0014973Z Updating files:  86% (14017/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.0244218Z Updating files:  87% (14180/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.1162373Z Updating files:  88% (14343/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.1331082Z Updating files:  89% (14506/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.2365154Z Updating files:  90% (14669/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.2663395Z Updating files:  91% (14832/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.3246465Z Updating files:  92% (14995/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.5937419Z Updating files:  93% (15158/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.6069423Z Updating files:  93% (15204/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.6338698Z Updating files:  94% (15321/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.6610377Z Updating files:  95% (15484/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.6877314Z Updating files:  96% (15647/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.8348301Z Updating files:  97% (15810/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.8712018Z Updating files:  98% (15973/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.9022822Z Updating files:  99% (16136/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.9023633Z Updating files: 100% (16298/16298)
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.9023905Z Updating files: 100% (16298/16298), done.
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.9244300Z Switched to a new branch 'dev/p4-4/config-integration-20261018'
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.9299559Z branch 'dev/p4-4/config-integration-20261018' set up to track 'origin/dev/p4-4/config-integration-20261018'.
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:13.9885121Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:14.0327306Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+Flutter debugging skill (windows-latest)	Run actions/checkout@v4	2026-10-18T23:13:14.0582491Z b56534d7b6c993c0795010d0404fb8a81f7eeb9d
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	﻿2026-10-18T23:13:14.0924394Z ##[group]Run python -I -S -B -X utf8 .agents/skills/e-track-flutter-debug/scripts/selftest.py --root "%GITHUB_WORKSPACE%" --out "%GITHUB_WORKSPACE%\.cache\flutter-debug-skill-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:14.0925333Z ^[[36;1mpython -I -S -B -X utf8 .agents/skills/e-track-flutter-debug/scripts/selftest.py --root "%GITHUB_WORKSPACE%" --out "%GITHUB_WORKSPACE%\.cache\flutter-debug-skill-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"^[[0m
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:14.0949764Z shell: C:\Windows\system32\cmd.EXE /D /E:ON /V:OFF /S /C "CALL "{0}""
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:14.0949984Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:15.9940882Z test_atomic_status_has_no_pending_file_after_success (__main__.HostTests.test_atomic_status_has_no_pending_file_after_success) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:15.9948230Z test_device_namespace_and_drive_relative_are_rejected (__main__.HostTests.test_device_namespace_and_drive_relative_are_rejected) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:15.9973628Z test_disappearing_leaf_is_treated_as_a_new_output (__main__.HostTests.test_disappearing_leaf_is_treated_as_a_new_output) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.0026290Z test_existing_pending_evidence_is_not_deleted (__main__.HostTests.test_existing_pending_evidence_is_not_deleted) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.0033640Z test_extended_path_spelling_is_normalized (__main__.HostTests.test_extended_path_spelling_is_normalized) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.0083292Z test_invalid_retry_budget_and_clock_fail (__main__.HostTests.test_invalid_retry_budget_and_clock_fail) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.0091637Z test_missing_nested_output_is_contained (__main__.HostTests.test_missing_nested_output_is_contained) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.0100429Z test_parent_traversal_and_sibling_prefix_are_rejected (__main__.HostTests.test_parent_traversal_and_sibling_prefix_are_rejected) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.0118230Z test_persistent_and_unrelated_errors_fail (__main__.HostTests.test_persistent_and_unrelated_errors_fail) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.0132298Z test_real_internal_symlink_is_rejected (__main__.HostTests.test_real_internal_symlink_is_rejected) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2277462Z test_real_windows_reader_lock_is_tolerated (__main__.HostTests.test_real_windows_reader_lock_is_tolerated) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2283595Z test_relative_root_is_rejected (__main__.HostTests.test_relative_root_is_rejected) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2290576Z test_reparse_attribute_is_rejected (__main__.HostTests.test_reparse_attribute_is_rejected) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2317540Z test_retry_only_repeats_the_same_rename (__main__.HostTests.test_retry_only_repeats_the_same_rename) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2372626Z test_skill_references_resolve_to_real_project_files (__main__.HostTests.test_skill_references_resolve_to_real_project_files) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2380572Z test_volatile_leaf_is_never_resolved (__main__.HostTests.test_volatile_leaf_is_never_resolved) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2413660Z test_write_once_does_not_overwrite_receipt (__main__.HostTests.test_write_once_does_not_overwrite_receipt) ... ok
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2414098Z 
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2414216Z ----------------------------------------------------------------------
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2414432Z Ran 17 tests in 0.289s
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2414512Z 
+Flutter debugging skill (windows-latest)	Test host helpers (Windows)	2026-10-18T23:13:16.2414566Z OK
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	﻿2026-10-18T23:13:16.2903783Z ##[group]Run python -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py service --out "%GITHUB_WORKSPACE%\.cache\p34-service-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:16.2904547Z ^[[36;1mpython -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py service --out "%GITHUB_WORKSPACE%\.cache\p34-service-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"^[[0m
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:16.2904932Z ^[[36;1mif errorlevel 1 exit /b 1^[[0m
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:16.2905286Z ^[[36;1mpython -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py live --out "%GITHUB_WORKSPACE%\.cache\p34-live-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"^[[0m
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:16.2905644Z ^[[36;1mif errorlevel 1 exit /b 1^[[0m
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:16.2923917Z shell: C:\Windows\system32\cmd.EXE /D /E:ON /V:OFF /S /C "CALL "{0}""
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:16.2924150Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:16.5193641Z P34_COMMAND test_p34_service_patch.py
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:17.6407803Z {"group": "service", "passed": true, "tests": 1}
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:17.9727597Z P34_COMMAND test_p34_live_route.py
+Flutter debugging skill (windows-latest)	Test P3-4 controlled service and live adapters (Windows)	2026-10-18T23:13:48.0468029Z {"group": "live", "passed": true, "tests": 1}
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	﻿2026-10-18T23:13:48.0714175Z ##[group]Run actions/upload-artifact@v4
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0714593Z with:
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0714748Z   name: p34-live-host-windows-latest-39175558187-1
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0715172Z   path: .cache/p34-service-39175558187-1/*.json
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	.cache/p34-service-39175558187-1/*.log
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	.cache/p34-live-39175558187-1/*.json
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	.cache/p34-live-39175558187-1/*.log
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0715543Z   if-no-files-found: error
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0715691Z   include-hidden-files: true
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0715832Z   retention-days: 14
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0715958Z   compression-level: 6
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0716081Z   overwrite: false
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.0716201Z ##[endgroup]
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.2070386Z (node:7304) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.2070853Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.2130565Z Multiple search paths detected. Calculating the least common ancestor of all paths
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.2132487Z The least common ancestor is D:\a\E-Track\E-Track\.cache. This will be the root directory of the artifact
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.2132892Z With the provided path, there will be 6 files uploaded
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.2136287Z Artifact name is valid!
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.2137005Z Root directory input is valid!
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.5778850Z Beginning upload of artifact content to blob storage
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.5995849Z (node:7304) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.7958297Z Uploaded bytes 7625
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.8509562Z Finished uploading artifact content to blob storage!
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.8510709Z SHA256 digest of uploaded artifact zip is 7b4b9187e564a8669ed6a4eee858e97de234da865c5a02689e4da73cf21a3b1c
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:48.8512117Z Finalizing artifact upload
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:49.0934408Z Artifact p34-live-host-windows-latest-39175558187-1.zip successfully finalized. Artifact ID 12154440897
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:49.0935303Z Artifact p34-live-host-windows-latest-39175558187-1 has been successfully uploaded! Final size is 7625 bytes. Artifact ID is 12154440897
+Flutter debugging skill (windows-latest)	Preserve P3-4 adapter self-test originals	2026-10-18T23:13:49.0943012Z Artifact download URL: https://github.com/Eitan-S-23/E-Track/actions/runs/39175558187/artifacts/12154440897
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	﻿2026-10-18T23:13:49.6409665Z Post job cleanup.
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:49.8047028Z [command]"C:\Program Files\Git\bin\git.exe" version
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:49.8362332Z git version 2.56.0.windows.2
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:49.8668365Z Temporarily overriding HOME='D:\a\_temp\3ea5d57f-9575-4f91-975d-10b56597c0ee' before making global git config changes
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:49.8670859Z Adding repository directory to the temporary git global config as a safe directory
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:49.8677237Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\E-Track\E-Track
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:49.9064574Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:49.9381069Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:50.3957931Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:50.4280434Z http.https://github.com/.extraheader
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:50.4313770Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:50.4576830Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:50.8503198Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+Flutter debugging skill (windows-latest)	Post Run actions/checkout@v4	2026-10-18T23:13:50.8786811Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Flutter debugging skill (windows-latest)	Complete job	﻿2026-10-18T23:13:51.3060217Z Cleaning up orphan processes
+Flutter debugging skill (windows-latest)	Complete job	2026-10-18T23:13:51.3479162Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
