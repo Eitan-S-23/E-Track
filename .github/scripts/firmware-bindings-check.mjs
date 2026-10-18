@@ -25,6 +25,14 @@ export function bindingsCheckConfig(env) {
     || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? "") || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ATTEMPT ?? "")) {
     throw new CliError("Bindings qualification requires the exact protected reviewed commit and run identity");
   }
+  const preflightMetadataPath = env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH;
+  const preflightMetadataSha256 = env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256;
+  if (typeof preflightMetadataPath !== "string" || preflightMetadataPath.length > 1024
+    || !/^(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+\.json$/.test(preflightMetadataPath)
+    || preflightMetadataPath.split("/").some(part => part === "." || part === "..")
+    || !/^[0-9a-f]{64}$/.test(preflightMetadataSha256 ?? "")) {
+    throw new CliError("Bindings qualification requires a reviewed project-relative preflight metadata path and raw SHA-256");
+  }
   s3Credentials(env);
   if (env.TRACE_UPDATE_SERVICE_URL !== target.serviceUrl || env.TRACE_R2_BUCKET !== target.bucketName
     || env.TRACE_D1_DATABASE_ID || env.TRACE_D1_DATABASE_NAME
@@ -32,7 +40,7 @@ export function bindingsCheckConfig(env) {
     || !env.TRACE_DEPLOY_TOKEN || /\s/.test(env.TRACE_DEPLOY_TOKEN)) {
     throw new CliError("Bindings qualification requires the explicit isolated Worker, R2 and credential configuration");
   }
-  return { ...target, accountId: env.CLOUDFLARE_ACCOUNT_ID };
+  return { ...target, accountId: env.CLOUDFLARE_ACCOUNT_ID, preflightMetadataPath, preflightMetadataSha256 };
 }
 
 export async function checkFirmwareBindings({ root, env, connect = withFirmwareBucket, fetcher = fetch }) {
@@ -40,7 +48,12 @@ export async function checkFirmwareBindings({ root, env, connect = withFirmwareB
   // These are existing synthetic qualification objects, never an approved firmware target.
   const bytes = await readFile(path.join(root, fixturePath));
   const metadata = parseFirmwareRegistration(JSON.parse(bytes), config.repository);
-  const check = () => preflightFirmware(metadata, { serviceUrl: config.serviceUrl,
+  // The storage fixture is not a publication candidate. Preserve the separately
+  // reviewed candidate/current registration identity, including its old commit.
+  const preflightBytes = await readFile(outputPath(root, path.join(root, config.preflightMetadataPath)));
+  if (digest(preflightBytes) !== config.preflightMetadataSha256) throw new CliError("Preflight metadata does not match its reviewed raw SHA-256");
+  const preflightMetadata = parseFirmwareRegistration(JSON.parse(preflightBytes), config.repository, false);
+  const check = () => preflightFirmware(preflightMetadata, { serviceUrl: config.serviceUrl,
     deployToken: env.TRACE_DEPLOY_TOKEN, mode: "rehearsal", fetcher });
   const before = await check();
   return connect({ root, accountId: config.accountId, bucketName: config.bucketName,
@@ -52,7 +65,11 @@ export async function checkFirmwareBindings({ root, env, connect = withFirmwareB
     if (canonicalJson(projection(before)) !== canonicalJson(projection(after))) throw new CliError("Preflight state changed during qualification", "RELEASE_CONFLICT", 1);
     return { ok: true, scope: "READ_ONLY_RELEASE_PATH_QUALIFICATION", canonicalRehearsal: "NOT_RUN", independentAcceptance: "NOT_RUN",
       repository: config.repository, commitSha: env.GITHUB_SHA, runId: env.GITHUB_RUN_ID, runAttempt: env.GITHUB_RUN_ATTEMPT,
-      fixturePath, fixtureSha256: digest(bytes), assets, preflight: { before, after },
+      fixturePath, fixtureSha256: digest(bytes), assets,
+      preflightInput: { path: config.preflightMetadataPath, sha256: config.preflightMetadataSha256, sourceCommit: env.GITHUB_SHA,
+        releaseTag: preflightMetadata.releaseTag, versionCode: preflightMetadata.versionCode,
+        commitSha: preflightMetadata.commitSha, runId: preflightMetadata.runId },
+      preflight: { before, after },
       businessMutations: "NONE_REQUESTED", controlPlane: "NONE", physicalBindingAttestation: "SEPARATE_DEPLOYMENT_REVIEW_REQUIRED" };
   });
 }

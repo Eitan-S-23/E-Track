@@ -122,6 +122,8 @@ P44-CREDENTIAL-01（2026-10-19 owner 裁定）将本入口同步到标准 S3/Wor
 - `FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT` 必须等于实际 `GITHUB_SHA`；repository、run/attempt、三个显式模式输入和 `OTA_BOOT_CHAIN_READY=false` 均须校验。它只批准固定源码的开发检查，不是首发 descriptor 或发布批准。
 - 实际检查步骤仅接收 FIRMWARE_REHEARSAL_ 前缀的 `CLOUDFLARE_ACCOUNT_ID`、`TRACE_R2_ACCESS_KEY_ID`、`TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL`、`TRACE_DEPLOY_TOKEN` secrets 和 R2 bucket 变量。安装依赖和普通 build/checks 不接触这些凭据。无 AES、GitHub 写 token 或注册动作；deploy token 仅用于固定只读预检。
 - 固定输入为已提交 `P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json` 的三个既有 synthetic 对象；通过原 uploader 的 `verifyStoredFirmwareAsset(metadata, fileName, bucket)` 复用全字节/长度/条件 ETag 校验，缺失即失败，绝不补传。
+- 上述旧 `2.8.1` 输入仅供存储读回，不能作 D1 单调预检候选。预检通过受保护 `FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH` / `FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256` 绑定已审 checkout 内独立 JSON 及其原始字节 SHA；禁止绝对/越界/非规范路径、错摘要和自动回退。reviewer 选择真实受审候选或当前已注册 release 的精确 canonical identity，不改高版本凑通过、不清库、不动旧 fixture。
+- `preflightInput.sourceCommit` 是检查源码 `GITHUB_SHA`，不是 metadata 内的发布 `commitSha`；输出保留输入 path/原始 SHA 和原发布 releaseTag/versionCode/commitSha/runId。两次预检使用同一未篡改 metadata，返回的 canonical 投影摘要另行比较。输入批准仅限只读资格，不转授发布批准。
 - `withFirmwareBucket` 使用标准 S3 SDK，只接受显式桶凭据，无默认身份/OAuth/旧 API token 回退。它不启动 Wrangler/workerd；旧 Windows 11 uploader 限制不再适用，原生 Worker 开发回归仍在支持的 CI 宿主执行。
 - 通过目标 Worker `/api/ci/firmware/preflight` 比较两次固定三项单调性摘要及 requestId/环境/metadata SHA，S3 仅回读既有对象；不接受 SQL/DB 参数，不调用控制面 settings。job/step 仍限制 10/5 分钟。只声明无业务写请求，不冒充物理绑定证明、完整 D1 快照或生产零副作用；这些由主验收部署/观测计划单独核验。
 
@@ -129,7 +131,11 @@ P44-CREDENTIAL-01（2026-10-19 owner 裁定）将本入口同步到标准 S3/Wor
 | --- | --- |
 | 已批准提交、明确锁定 gate、隔离目标且三对象完整 | 返回 `READ_ONLY_RELEASE_PATH_QUALIFICATION` 及实际读回/预检摘要，rehearsal/独立验收仍未执行 |
 | 普通 CI、缺配置、错提交、混合 publish/rehearsal/check | exit 2，在网络调用前失败；两个正式 job 也拒绝混合 check 模式 |
+| 缺独立预检路径/原始 SHA、路径非法、字节摘要变化或错误 repository | 网络前拒绝，不退回旧存储 fixture |
+| 当前 D1 已有较新 release，预检是其精确 canonical identity | 保留历史发布提交/版本，三旧对象仍可只读校验；不得由空库自测代替此回归 |
+| 预检候选确实过期或同版本 canonical 不同 | exit 1，RELEASE_CONFLICT；任何 S3 连接或 GitHub/R2 写入前拒绝 |
 | 对象缺失、错误 metadata/字节、条件 GET 失败 | exit 1，不 PUT、不 register，不写成功结果 |
+| 已有对象 readback 流中断/abort | exit 1，脱敏 R2_VERIFY_FAILED；不能误报已证明的 R2_OBJECT_CONFLICT，不盲重试 |
 | Worker 绑定不符、查询失败、前后 D1 状态变化 | exit 1，保留失败日志，不报告资格通过 |
 
 回归点是 `firmware-pipeline.host.test.ts` 的真实读回/SQLite 宿主检查和

@@ -7,7 +7,7 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { bytesFor, metadata as fixtureMetadata } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/firmware-fixture";
 import { outputPath, projectRoot, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { digest, metadataBytes, readyProjection } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
@@ -19,6 +19,8 @@ import { verifyStoredFirmwareAsset } from "../../app/bluetooth_flutter_Trace/clo
 import { bindingsCheckConfig, checkFirmwareBindings } from "../../.github/scripts/firmware-bindings-check.mjs";
 import { buildKeyedFirmware, cleanupPrivateBuildKey } from "../../.github/scripts/firmware-gcc-keyed-build.mjs";
 import { approvedFirmwareKey, DEVELOPMENT_PACKAGING_KEY, firmwareKeyBinding, verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
+import { SqliteD1 } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/host/sqlite-d1";
+import { firmwareReleaseInsert } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/src/firmware";
 
 const root = projectRoot();
 
@@ -171,10 +173,33 @@ const qualificationEnv = {
   GITHUB_EVENT_NAME: "workflow_dispatch", INPUT_CHECK_BINDINGS: "true", INPUT_PUBLISH: "false", INPUT_REHEARSAL: "false",
   OTA_BOOT_CHAIN_READY: "false", GITHUB_REPOSITORY: "Eitan-S-23/E-Track", GITHUB_SHA: "a".repeat(40),
   FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: "a".repeat(40), GITHUB_RUN_ID: "123", GITHUB_RUN_ATTEMPT: "1",
+  FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH: "reviewed/preflight.json",
+  FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256: "1".repeat(64),
   CLOUDFLARE_ACCOUNT_ID: "1".repeat(32), TRACE_R2_ACCESS_KEY_ID: "a".repeat(32), TRACE_R2_SECRET_ACCESS_KEY: "b".repeat(64), TRACE_DEPLOY_TOKEN: "test-deploy-token",
   TRACE_UPDATE_SERVICE_URL: "https://e-track-firmware-p41-test.tangjichentudou.workers.dev",
   TRACE_R2_BUCKET: "e-track-firmware-p41-test-releases"
 };
+
+const qualificationDbs: SqliteD1[] = [];
+afterEach(() => { for (const db of qualificationDbs.splice(0)) db.sqlite.close(); });
+
+function freshHistoryDb() {
+  const db = new SqliteD1(); qualificationDbs.push(db);
+  for (const migration of env.TEST_MIGRATIONS) db.migrate(migration.sql);
+  return db;
+}
+
+async function seedReleaseHistory(db: SqliteD1, metadata: any, id: string) {
+  await db.prepare("INSERT OR IGNORE INTO apps(id,name) VALUES ('trace','trace')").run();
+  await firmwareReleaseInsert(db as unknown as D1Database, metadata, id, canonicalJson(metadata)).run();
+  for (const [index, asset] of metadata.assets.entries()) {
+    await db.prepare(`INSERT INTO firmware_release_assets
+      (id,release_id,kind,file_name,sha256,size_bytes,r2_key,r2_etag,r2_state,github_url,base_image_sha256,base_vcode)
+      VALUES (?,?,?,?,?,?,?,?,'available',?,?,?)`).bind(`${id}-${index}`, id, asset.kind, asset.fileName,
+        asset.sha256, asset.sizeBytes, asset.r2Key, `history-${index}`, asset.githubUrl, asset.baseImageSha256, asset.baseVersionCode).run();
+  }
+  await db.prepare("UPDATE firmware_releases SET state='ready' WHERE id=?").bind(id).run();
+}
 
 describe("bounded S3 and authenticated preflight qualification, host ports only", () => {
   it.each([
@@ -185,7 +210,16 @@ describe("bounded S3 and authenticated preflight qualification, host ports only"
     ["TRACE_R2_BUCKET", "e-track-firmware-production-releases"], ["TRACE_D1_DATABASE_NAME", "forbidden"],
     ["TRACE_D1_DATABASE_ID", "forbidden"], ["CLOUDFLARE_API_TOKEN", "forbidden"],
     ["TRACE_UPDATE_SERVICE_URL", "https://example.com"], ["CLOUDFLARE_ACCOUNT_ID", ""],
-    ["TRACE_R2_ACCESS_KEY_ID", ""], ["TRACE_R2_SECRET_ACCESS_KEY", ""], ["TRACE_DEPLOY_TOKEN", ""]
+    ["TRACE_R2_ACCESS_KEY_ID", ""], ["TRACE_R2_SECRET_ACCESS_KEY", ""], ["TRACE_DEPLOY_TOKEN", ""],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", ""],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", "../preflight.json"],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", "/preflight.json"],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", "D:/preflight.json"],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", "reviewed\\preflight.json"],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", "reviewed/../preflight.json"],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", "reviewed//preflight.json"],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256", ""],
+    ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256", "A".repeat(64)]
   ])("rejects invalid %s before file or network access", async (key, value) => {
     const connect = vi.fn(), fetcher = vi.fn();
     await expect(checkFirmwareBindings({ root: "not-a-project", env: { ...qualificationEnv, [key]: value }, connect, fetcher }))
@@ -193,9 +227,25 @@ describe("bounded S3 and authenticated preflight qualification, host ports only"
     expect(connect).not.toHaveBeenCalled(); expect(fetcher).not.toHaveBeenCalled();
   });
 
-  async function qualification() {
+  async function qualification(seedHistory = true) {
     const dir = path.join(root, "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15");
     const metadata = JSON.parse(await readFile(path.join(dir, "operations/verified-metadata.json"), "utf8"));
+    const original = await readFile(path.join(root, "docs/acceptance-contracts/P4-1-v4/evidence/cloud/after/test-d1.json"));
+    expect(digest(original)).toBe("7cea1292f8f7e26549a7bf1bdca0b09d3aeeeb0576adb31e240edd9ef6bf2b6e");
+    const row = JSON.parse(original.toString()).tables.firmware_releases.find((value: any) => value.version_code === 30208);
+    const preflightMetadata = JSON.parse(row.registration_json);
+    expect(preflightMetadata).toMatchObject({ versionName: "3.2.8", versionCode: 30208,
+      commitSha: "b9d7d18c76e6495fbebf6758df6e4427e79e97b5", runId: "38946949709" });
+    const preflightBytes = Buffer.from(row.registration_json + "\n");
+    expect(digest(preflightBytes)).toBe("fe435e1a0bc6afea344566846b1a63e8de39ee9335a98a874e97fbcc82b543a4");
+    const parent = outputPath(root, path.join(root, ".cache/firmware-pipeline-tests"));
+    await mkdir(parent, { recursive: true });
+    const inputPath = path.join(await mkdtemp(path.join(parent, "qualification-")), "preflight.json");
+    await writeOutput(root, inputPath, preflightBytes);
+    const db = freshHistoryDb();
+    if (seedHistory) await seedReleaseHistory(db, preflightMetadata, row.id);
+    const databaseBefore = db.sqlite.prepare("SELECT * FROM firmware_releases ORDER BY id").all();
+    const queries = vi.spyOn(db, "prepare");
     for (const asset of metadata.assets) await env.RELEASES_BUCKET.put(asset.r2Key,
       await readFile(path.join(dir, "fixture", asset.fileName)), { customMetadata: { sha256: asset.sha256, kind: asset.kind } });
     const bucket = { head: vi.fn((key: string) => env.RELEASES_BUCKET.head(key)),
@@ -208,7 +258,7 @@ describe("bounded S3 and authenticated preflight qualification, host ports only"
       state.calls++;
       if (state.failure === "denied") return new Response(null, { status: 403 });
       const response = await worker.fetch(new Request(input, init),
-        { ...env, ENVIRONMENT: "staging", GITHUB_REPO: "E-Track" }, createExecutionContext());
+        { ...env, DB: db as unknown as D1Database, ENVIRONMENT: "staging", GITHUB_REPO: "E-Track" }, createExecutionContext());
       const body: any = await response.json();
       if (state.failure === "environment") body.environment = "prod";
       if (state.failure === "digest") body.metadataSha256 = "0".repeat(64);
@@ -216,10 +266,13 @@ describe("bounded S3 and authenticated preflight qualification, host ports only"
       return Response.json(body, { status: response.status, headers: response.headers });
     });
     const connect = vi.fn(async (_config: unknown, operation: Function) => operation(bucket));
-    return { root, env: { ...qualificationEnv }, connect, fetcher, bucket, metadata, state };
+    return { root, env: { ...qualificationEnv,
+      FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH: path.relative(root, inputPath).replaceAll("\\", "/"),
+      FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256: digest(preflightBytes) },
+      connect, fetcher, bucket, metadata, preflightMetadata, inputPath, state, db, databaseBefore, queries };
   }
 
-  it("reads complete objects and fixed Worker preflight without control-plane access", async () => {
+  it("reads old objects with the exact newer registered identity through the real Worker and SQLite", async () => {
     const q = await qualification();
     expect(bindingsCheckConfig(q.env).bucketName).toBe(q.env.TRACE_R2_BUCKET);
     const result = await checkFirmwareBindings(q);
@@ -227,8 +280,52 @@ describe("bounded S3 and authenticated preflight qualification, host ports only"
       canonicalRehearsal: "NOT_RUN", physicalBindingAttestation: "SEPARATE_DEPLOYMENT_REVIEW_REQUIRED" });
     expect(result.assets.map((a: any) => [a.sha256, a.sizeBytes])).toEqual(q.metadata.assets.map((a: any) => [a.sha256, a.sizeBytes]));
     expect(result.preflight.before.metadataSha256).toBe(result.preflight.after.metadataSha256);
+    expect(result.preflight.before.maxVersionCode).toBe(30208);
+    expect(result.preflightInput).toEqual({ path: q.env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH,
+      sha256: q.env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256, sourceCommit: q.env.GITHUB_SHA,
+      releaseTag: q.preflightMetadata.releaseTag, versionCode: 30208,
+      commitSha: "b9d7d18c76e6495fbebf6758df6e4427e79e97b5", runId: "38946949709" });
+    expect(q.metadata.versionCode).toBe(20801);
+    expect(q.queries.mock.calls).toHaveLength(6);
+    expect(q.queries.mock.calls.every(([sql]) => sql.startsWith("SELECT "))).toBe(true);
+    expect(q.db.sqlite.prepare("SELECT * FROM firmware_releases ORDER BY id").all()).toEqual(q.databaseBefore);
+    expect(q.db.sqlite.prepare("SELECT COUNT(*) AS n FROM audit_logs").get()!.n).toBe(0);
+    expect(q.db.sqlite.prepare("SELECT COUNT(*) AS n FROM firmware_channels").get()!.n).toBe(0);
     expect(q.fetcher).toHaveBeenCalledTimes(2); expect(q.bucket.get).toHaveBeenCalledTimes(3);
     expect(q.bucket.put).not.toHaveBeenCalled(); expect(q.connect).toHaveBeenCalledTimes(1);
+  });
+  it("keeps the reviewed metadata identity unchanged for an empty database", async () => {
+    const q = await qualification(false);
+    const result = await checkFirmwareBindings(q);
+    expect(result.preflight.before.maxVersionCode).toBeNull();
+    expect(result.preflightInput.commitSha).toBe(q.preflightMetadata.commitSha);
+    expect(q.bucket.get).toHaveBeenCalledTimes(3); expect(q.bucket.put).not.toHaveBeenCalled();
+    expect(q.db.sqlite.prepare("SELECT COUNT(*) AS n FROM firmware_releases").get()!.n).toBe(0);
+  });
+  it.each(["stale", "same-version conflict"])("rejects a %s preflight input before S3", async reason => {
+    const q = await qualification();
+    const input = reason === "stale" ? q.metadata : { ...q.preflightMetadata, releaseNotes: "conflicting reviewed notes" };
+    const bytes = Buffer.from(canonicalJson(input) + "\n");
+    await writeOutput(root, q.inputPath, bytes);
+    q.env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256 = digest(bytes);
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ code: "RELEASE_CONFLICT" });
+    expect(q.fetcher).toHaveBeenCalledTimes(1); expect(q.queries).toHaveBeenCalledTimes(3);
+    expect(q.connect).not.toHaveBeenCalled(); expect(q.bucket.put).not.toHaveBeenCalled();
+  });
+  it("rejects changed raw metadata bytes even when parsed JSON is identical", async () => {
+    const q = await qualification();
+    await writeOutput(root, q.inputPath, JSON.stringify(q.preflightMetadata, null, 2) + "\n");
+    await expect(checkFirmwareBindings(q)).rejects.toMatchObject({ exitCode: 2 });
+    expect(q.fetcher).not.toHaveBeenCalled(); expect(q.connect).not.toHaveBeenCalled();
+  });
+  it("rejects a reviewed file from another repository before network access", async () => {
+    const q = await qualification();
+    const input = structuredClone(q.preflightMetadata);
+    for (const asset of input.assets) asset.githubUrl = asset.githubUrl.replace("Eitan-S-23/E-Track", "Eitan-S-23/Trace");
+    const bytes = Buffer.from(canonicalJson(input) + "\n");
+    await writeOutput(root, q.inputPath, bytes); q.env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256 = digest(bytes);
+    await expect(checkFirmwareBindings(q)).rejects.toThrow();
+    expect(q.fetcher).not.toHaveBeenCalled(); expect(q.connect).not.toHaveBeenCalled();
   });
   it("rejects absent existing objects without replacement", async () => {
     const q = await qualification(); await env.RELEASES_BUCKET.delete(q.metadata.assets[0].r2Key);
@@ -305,6 +402,21 @@ async function counts() {
     audit: (await env.DB.prepare("SELECT COUNT(*) AS n FROM audit_logs").first<{ n: number }>())!.n,
     channels: (await env.DB.prepare("SELECT * FROM firmware_channels ORDER BY id").all()).results
   };
+}
+
+async function promotionFixture(s: Awaited<ReturnType<typeof setup>>) {
+  const approvedMetadata = await readFile(path.join(s.assetsDir, "cloudflare-firmware-release-metadata.json"));
+  const approvedEvidence = await readFile(path.join(s.assetsDir, "release-evidence.json"));
+  const approvedPreparation = await readFile(path.join(s.assetsDir, "verification.json"));
+  const envProduction = { ...s.env, FIRMWARE_RELEASE_MODE: "production", INPUT_PUBLISH: "true", INPUT_REHEARSAL: "false",
+    OTA_BOOT_CHAIN_READY: "true", TRACE_R2_BUCKET: "e-track-firmware-production-releases", GITHUB_RUN_ID: "999999",
+    INPUT_APPROVED_REHEARSAL_RUN_ID: s.metadata.runId, OTA_APPROVED_REHEARSAL_RUN_ID: s.metadata.runId,
+    OTA_APPROVED_REHEARSAL_ATTEMPT: "1", OTA_APPROVED_REHEARSAL_METADATA_SHA256: digest(approvedMetadata),
+    OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256: digest(approvedEvidence) };
+  const approvedRun = { id: Number(s.metadata.runId), head_sha: s.metadata.commitSha, path: ".github/workflows/firmware-build.yml",
+    event: "workflow_dispatch", conclusion: "success", run_attempt: 1 };
+  return { config: releaseConfig(envProduction), envProduction,
+    approval: { approvedMetadata, approvedEvidence, approvedPreparation, approvedRun } };
 }
 
 // Only the GitHub HTTP/storage surface is doubled. Publication ordering and
@@ -596,18 +708,8 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
 
   it("production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register", async () => {
     const s = await setup(); const stage = await publishPreparedRelease(s);
-    const approvedMetadata = await readFile(path.join(s.assetsDir, "cloudflare-firmware-release-metadata.json"));
-    const approvedEvidence = await readFile(path.join(s.assetsDir, "release-evidence.json"));
-    const approvedPreparation = await readFile(path.join(s.assetsDir, "verification.json"));
-    const envProduction = { ...s.env, FIRMWARE_RELEASE_MODE: "production", INPUT_PUBLISH: "true", INPUT_REHEARSAL: "false",
-      OTA_BOOT_CHAIN_READY: "true", TRACE_R2_BUCKET: "e-track-firmware-production-releases", GITHUB_RUN_ID: "999999",
-      INPUT_APPROVED_REHEARSAL_RUN_ID: s.metadata.runId, OTA_APPROVED_REHEARSAL_RUN_ID: s.metadata.runId,
-      OTA_APPROVED_REHEARSAL_ATTEMPT: "1", OTA_APPROVED_REHEARSAL_METADATA_SHA256: digest(approvedMetadata),
-      OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256: digest(approvedEvidence) };
-    const config = releaseConfig(envProduction);
-    const approvedRun = { id: Number(s.metadata.runId), head_sha: s.metadata.commitSha, path: ".github/workflows/firmware-build.yml",
-      event: "workflow_dispatch", conclusion: "success", run_attempt: 1 };
-    const approval = { approvedMetadata, approvedEvidence, approvedPreparation, approvedRun };
+    const { config, envProduction, approval } = await promotionFixture(s);
+    const { approvedEvidence, approvedRun } = approval;
     const oldEvidence = JSON.parse(approvedEvidence.toString()); delete oldEvidence.publicationProtocol;
     const oldBytes = Buffer.from(JSON.stringify(oldEvidence));
     expect(() => verifyPromotion(s.metadata, { ...approval, approvedEvidence: oldBytes, config,
@@ -632,6 +734,28 @@ describe("P4-1 production pipeline with existing handler and SQLite host ports",
     expect(again.assetCount).toBe(3);
     expect(http.calls.filter(v => v.startsWith("POST uploads.github.com"))).toHaveLength(3);
     console.info("P41_HOST_PRODUCTION_ORDER", events.map((v: any) => v.step));
+  });
+
+  it.each(["stale", "same-version conflict"])("production rejects a %s candidate before GitHub or R2 writes", async reason => {
+    const s = await setup(); await publishPreparedRelease(s);
+    const { config, envProduction, approval } = await promotionFixture(s);
+    const db = freshHistoryDb();
+    const registered = reason === "stale" ? readyProjection((await setup()).metadata)
+      : { ...readyProjection(s.metadata), releaseNotes: "different existing canonical registration" };
+    await seedReleaseHistory(db, registered, "registered-target");
+    const before = db.sqlite.prepare("SELECT * FROM firmware_releases").all();
+    const denied = vi.fn(() => { throw new Error("Monotonic failure reached a publication side effect"); });
+    const bucket = { head: denied, get: denied, put: denied }, github = { publish: denied };
+    const fetcher = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).endsWith("/healthz")) return Response.json({ ok: true, environment: "prod" });
+      expect(String(input)).toBe("https://example.com/api/ci/firmware/preflight");
+      return worker.fetch(new Request(input, init), { ...env, DB: db as unknown as D1Database, ENVIRONMENT: "prod" }, createExecutionContext());
+    });
+    await expect(publishPreparedRelease({ ...s, config, env: envProduction, approval, fetcher, bucket, github }))
+      .rejects.toMatchObject({ code: "RELEASE_CONFLICT", exitCode: 1 });
+    expect(fetcher).toHaveBeenCalledTimes(2); expect(denied).not.toHaveBeenCalled();
+    expect(db.sqlite.prepare("SELECT * FROM firmware_releases").all()).toEqual(before);
+    expect(db.sqlite.prepare("SELECT COUNT(*) AS n FROM audit_logs").get()!.n).toBe(0);
   });
 
   it("GitHub full-byte readback catches false metadata and never publishes a corrupted draft", async () => {

@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { test } from "node:test";
 import { createFirmwareS3Bucket, s3Credentials } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-s3.mjs";
-import { uploadFirmwareAsset } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs";
+import { uploadFirmwareAsset, verifyStoredFirmwareAsset } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs";
 
 const require = createRequire(new URL("../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/package.json", import.meta.url));
 const { S3Client } = require("@aws-sdk/client-s3");
@@ -15,7 +15,7 @@ const bytesFor = kind => Buffer.from(`P4-2-${kind}-fixture\n`);
 
 async function fixture(t) {
   const objects = new Map(), requests = [];
-  const state = { corrupt: "", deny: false, race: false, failPut: 0, putCount: 0, heldHeads: [] };
+  const state = { corrupt: "", interrupt: "", deny: false, race: false, failPut: 0, putCount: 0, heldHeads: [] };
   const server = createServer(async (req, res) => {
     const chunks = []; for await (const chunk of req) chunks.push(chunk);
     const body = Buffer.concat(chunks), key = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
@@ -44,7 +44,12 @@ async function fixture(t) {
       if (state.corrupt === "long") bytes = Buffer.concat([bytes, Buffer.from([0])]);
       const headers = { ...object.headers, "content-length": String(bytes.length) };
       if (state.corrupt === "etag") headers.etag = '"different"';
-      res.writeHead(200, headers); res.end(bytes);
+      res.writeHead(200, headers);
+      if (state.interrupt) {
+        res.flushHeaders();
+        if (state.interrupt === "partial") res.write(bytes.subarray(0, 4));
+        setTimeout(() => res.destroy(), 10);
+      } else res.end(bytes);
     } else { res.writeHead(405); res.end(); }
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
@@ -94,6 +99,51 @@ for (const corrupt of ["digest", "short", "long", "etag"]) test(`SDK ${corrupt} 
   const asset = metadata.assets[0];
   await assert.rejects(uploadFirmwareAsset(metadata, asset.fileName, bytesFor(asset.kind), f.bucket), { code: "R2_VERIFY_FAILED" });
 });
+
+for (const corrupt of ["digest", "short", "long"]) test(`existing-object SDK ${corrupt} mismatch stays a proved conflict`, async t => {
+  const f = await fixture(t), asset = metadata.assets[0];
+  await uploadFirmwareAsset(metadata, asset.fileName, bytesFor(asset.kind), f.bucket);
+  f.state.corrupt = corrupt;
+  await assert.rejects(uploadFirmwareAsset(metadata, asset.fileName, bytesFor(asset.kind), f.bucket), { code: "R2_OBJECT_CONFLICT" });
+  assert.equal(f.state.putCount, 1);
+});
+
+for (const interrupt of ["empty", "partial"]) test(`existing-object SDK ${interrupt} transport interruption is not a byte conflict`, { timeout: 5000 }, async t => {
+  const f = await fixture(t), asset = metadata.assets[0];
+  await uploadFirmwareAsset(metadata, asset.fileName, bytesFor(asset.kind), f.bucket);
+  f.state.interrupt = interrupt;
+  await assert.rejects(uploadFirmwareAsset(metadata, asset.fileName, bytesFor(asset.kind), f.bucket), { code: "R2_VERIFY_FAILED" });
+  assert.equal(f.state.putCount, 1);
+  assert.equal(f.requests.filter(request => request.method === "GET").length, 2);
+});
+
+for (const operation of ["replay", "qualification"]) for (const failure of ["empty", "partial", "abort"]) {
+  test(`${operation} ${failure} stream failure projects a sanitized verification error`, async () => {
+    const asset = metadata.assets[0], bytes = bytesFor(asset.kind);
+    let reads = 0, puts = 0;
+    const secretDiagnostic = "https://upstream.invalid/object?X-Amz-Signature=private-fixture";
+    const upstream = failure === "abort" ? new DOMException(secretDiagnostic, "AbortError")
+      : Object.assign(new Error(secretDiagnostic), { code: "R2_OBJECT_CONFLICT" });
+    const bucket = {
+      async head() { return { size: bytes.length, etag: "fixture", customMetadata: { sha256: asset.sha256, kind: asset.kind } }; },
+      async get() { return { body: new ReadableStream({ pull(controller) {
+        reads++;
+        if (failure === "partial" && reads === 1) controller.enqueue(bytes.subarray(0, 4));
+        else controller.error(upstream);
+      } }) }; },
+      async put() { puts++; throw new Error("Unexpected PUT"); }
+    };
+    const result = operation === "replay" ? uploadFirmwareAsset(metadata, asset.fileName, bytes, bucket)
+      : verifyStoredFirmwareAsset(metadata, asset.fileName, bucket);
+    await assert.rejects(result, error => {
+      assert.equal(error.code, "R2_VERIFY_FAILED"); assert.equal(error.exitCode, 1);
+      assert.equal(error.message, "R2 readback interrupted before verification completed");
+      assert.doesNotMatch(String(error), /https:|private-fixture|X-Amz|different byte identity/);
+      return true;
+    });
+    assert.equal(reads, failure === "partial" ? 2 : 1); assert.equal(puts, 0);
+  });
+}
 
 test("SDK access rejection leaks neither credentials nor upstream response", async t => {
   const f = await fixture(t); f.state.deny = true;

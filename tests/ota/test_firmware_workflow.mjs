@@ -120,6 +120,10 @@ test("binding check credentials are confined to readback after dependency instal
   assert.equal(run["timeout-minutes"], "5");
   assert.equal(run.run, "node .github/scripts/firmware-bindings-check.mjs --output .cache/bindings-check/result.json");
   assert.equal(run.env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT, "${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT }}");
+  for (const name of ["FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH", "FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256"]) {
+    assert.equal(run.env[name], "${{ vars." + name + " }}");
+    assert.equal(bindings.steps[0].env[name], run.env[name]);
+  }
   assert.equal(bindings.steps.filter(step => JSON.stringify(step.env ?? {}).includes("secrets.")).length, 1);
   for (const value of Object.values(run.env)) if (value.includes("secrets.")) assert.match(value, /secrets\.FIRMWARE_REHEARSAL_/);
   assert.doesNotMatch(JSON.stringify(bindings), /OTA_AES_KEY|CLOUDFLARE_API_TOKEN|TRACE_D1_DATABASE|OTA_PREVIOUS_RELEASE_JSON|OTA_APPROVED_BOOTSTRAP|firmware-release\.mjs execute|contents.*write/);
@@ -324,6 +328,9 @@ const cases = [
   ["binding-check rejects publication", bindings, { INPUT_CHECK_BINDINGS: "true", INPUT_PUBLISH: "true" }, 2],
   ["binding-check rejects rehearsal", bindings, { INPUT_CHECK_BINDINGS: "true", INPUT_REHEARSAL: "true" }, 2],
   ["binding-check rejects absent reviewed source", bindings, { INPUT_CHECK_BINDINGS: "true", FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: "" }, 2],
+  ["binding-check rejects absent preflight source", bindings, { INPUT_CHECK_BINDINGS: "true", FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH: "" }, 2],
+  ["binding-check rejects absent preflight hash", bindings, { INPUT_CHECK_BINDINGS: "true", FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256: "" }, 2],
+  ["binding-check rejects invalid preflight hash", bindings, { INPUT_CHECK_BINDINGS: "true", FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256: "A".repeat(64) }, 2],
   ["binding-check rejects changed source", bindings, { INPUT_CHECK_BINDINGS: "true", GITHUB_SHA: "b".repeat(40) }, 2],
   ["binding-check rejects another repository", bindings, { INPUT_CHECK_BINDINGS: "true", GITHUB_REPOSITORY: "Eitan-S-23/Trace" }, 2]
 ];
@@ -336,6 +343,8 @@ for (const [label, job, override, expected] of cases) test(`actual shell gate: $
   const environment = { ...process.env, OTA_BOOT_CHAIN_READY: "false", INPUT_PUBLISH: "false", INPUT_REHEARSAL: "false",
     INPUT_CHECK_BINDINGS: "false", GITHUB_EVENT_NAME: "workflow_dispatch", GITHUB_REPOSITORY: "Eitan-S-23/E-Track",
     GITHUB_SHA: "a".repeat(40), FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: "a".repeat(40),
+    FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH: "reviewed/preflight.json",
+    FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256: "b".repeat(64),
     INPUT_APPROVED_REHEARSAL_RUN_ID: "9001", OTA_APPROVED_REHEARSAL_RUN_ID: "9001", OTA_APPROVED_REHEARSAL_ATTEMPT: "1",
     GITHUB_RUN_ID: "9001", GITHUB_RUN_ATTEMPT: "1", GITHUB_OUTPUT: output.replaceAll("\\", "/"), ...override };
   const result = spawnSync(bash, ["--noprofile", "--norc", "-c", job.steps[0].run],

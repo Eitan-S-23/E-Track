@@ -637,6 +637,8 @@ jobs:
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
           FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT }}
+          FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH }}
+          FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256 }}
         run: |
           set -euo pipefail
           if [[ "$GITHUB_EVENT_NAME" != "workflow_dispatch" || "$INPUT_CHECK_BINDINGS" != "true" || "$INPUT_PUBLISH" != "false" || "$INPUT_REHEARSAL" != "false" || "$OTA_BOOT_CHAIN_READY" != "false" ]]; then
@@ -645,6 +647,10 @@ jobs:
           fi
           if [[ "$GITHUB_REPOSITORY" != "Eitan-S-23/E-Track" || ! "$FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT" =~ ^[0-9a-f]{40}$ || "$GITHUB_SHA" != "$FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT" ]]; then
             echo "::error::Binding qualification requires the exact protected reviewed source commit"
+            exit 2
+          fi
+          if [[ -z "$FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH" || ! "$FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::Binding qualification requires separately reviewed preflight metadata and its raw SHA-256"
             exit 2
           fi
 
@@ -675,6 +681,8 @@ jobs:
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
           OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
           FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT }}
+          FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH }}
+          FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256: ${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256 }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID }}
           TRACE_R2_ACCESS_KEY_ID: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID }}
           TRACE_R2_SECRET_ACCESS_KEY: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY }}

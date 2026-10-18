@@ -2744,6 +2744,13 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         uploader = (root / "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs").read_text(encoding="utf-8")
         self.assertNotIn("getPlatformProxy", uploader)
         self.assertIn("createFirmwareS3Bucket", uploader)
+        qualifier = (root / ".github/scripts/firmware-bindings-check.mjs").read_text(encoding="utf-8")
+        for name in ("FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH",
+                     "FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256"):
+            for text in (self.contract, workflow, qualifier,
+                         (self.PROMPT_ROOT / "prompt-P4-1-implementation.md").read_text(encoding="utf-8"),
+                         (self.PROMPT_ROOT / "prompt-P4-4-integration.md").read_text(encoding="utf-8")):
+                self.assertIn(name, text)
 
     def test_ble_performance_policy_preserves_measurement_and_link_boundaries(self):
         section = self.contract.split("### OTA-XC-BLE-PERFORMANCE", 1)[1].split("### ", 1)[0]

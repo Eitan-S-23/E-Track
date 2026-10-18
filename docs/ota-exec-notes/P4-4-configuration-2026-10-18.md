@@ -20,6 +20,7 @@ e-track-ci authority and historical token receipts remain valid for their scope.
 | TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN and rehearsal-prefixed counterparts | Existing environment secrets | Also consumed by the fixed read-only preflight endpoint; original values not rotated or rewritten. |
 | CLOUDFLARE_API_TOKEN and TRACE_D1_DATABASE_ID/NAME | Historical platform entries | Not mapped by new workflow; nonempty legacy client configuration is rejected. No platform deletion or overwrite performed. |
 | Worker POST /api/ci/firmware/preflight | New code only on the task branch | Native development CI passed; NOT_DEPLOYED. Auth precedes the three fixed queries. Main verifies actual deployment/bindings. |
+| FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH / FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256 | GitHub firmware-rehearsal variables, check-only entry | P44-REVIEW-01 remediation adds explicit reviewed preflight JSON path/raw-byte digest. NOT_CONFIGURED by this code batch. Main binds a real candidate or exact current registration, separately from the old 2.8.1 object fixture and from the qualification source commit. Not required by ordinary rehearsal/production. |
 | AES / deploy-HMAC pairs / approved resources / reviewer / gate | Existing platform configuration | No mutation in this remediation; gate=false. Configuration and old runtime evidence are not new-chain qualification. |
 
 The implementation/validation entry is P4-4-s3-interface-2026-10-19.md. Creation,

@@ -997,6 +997,8 @@ P44-CREDENTIAL-01 的 2026-10-19 owner 裁定将当前发布链改为标准 S3 S
 
 当前 S3 适配必须在 PutObject 上发送原子 `If-None-Match: *`，不能用 HEAD/PUT 两步替代条件创建。412 后仅回读获胜对象并按相同身份规则判定；409、鉴权、网络或读回失败不得降级为无条件 PUT。GetObject 必须携带 HEAD 的 `If-Match`，完整校验长度和 SHA-256。S3 metadata 保存 `sha256`、`kind`、RFC 9530 `content-digest`，下载服务继续按既有合同生成 HTTP Content-Digest。新发布证据标记 `publicationProtocol=s3-worker-preflight-v1`；生产晋升拒绝缺少此标记/匹配预检摘要的旧链 rehearsal 原件。
 
+`R2_OBJECT_CONFLICT` 只表示已证明的现有对象身份/完整长度/完整摘要不一致。流在首字节前或部分读取后中断、abort 和未知传输错误不能证明字节冲突，统一脱敏为 `R2_VERIFY_FAILED`；不得透传上游消息、URL、签名或凭据。完整流的真实短/长/digest 不符仍按原 mismatch 规则处理。分类修正不授予盲重试、覆盖、删除或跳过完整读回。
+
 #### 鉴权只读发布预检
 
 `POST /api/ci/firmware/preflight` 是既有 Worker 的 CI 业务接口，不是上传、管理代理或任意 SQL 接口。它使用同一环境的 `TRACE_DEPLOY_TOKEN` / `DEPLOY_TOKEN_SHA256`，必须先鉴权，再检查 HTTPS/JSON、严格字段和环境，最后才读 DB。请求仅包含 `schemaVersion:1`、`environment:staging|prod`、v2 `metadata`，不接受 account、database、bucket、SQL 或其他字段。
@@ -1004,6 +1006,10 @@ P44-CREDENTIAL-01 的 2026-10-19 owner 裁定将当前发布链改为标准 S3 S
 Worker 固定复用 verifyMonotonic 三项 SELECT：未解决 legacy 指针必须为零；legacy 最大版本必须小于目标；当前最大版本不得高于目标，等版本必须与 canonical registration 完全一致。比较时 r2Verified=true 只是最终身份投影，不证明尚未上传的资产已验证。响应绑定 requestId（头/体一致）、environment、metadataSha256 和三个摘要字段；客户端拒绝错摘要/环境/状态、过大响应及失败结果，在任何生产 GitHub/R2 写入之前停止。预检不创建 release/channel/audit、不写 D1 或 R2，不削弱注册端的原有验证和约束。
 
 客户端不持有 D1 凭据或数据库选择参数。物理 Worker/D1/R2 绑定由独立部署读回核验；预检响应不能冒充控制面绑定证明或全业务零副作用快照。check_bindings 入口保留精确源码/gate/environment 条件，改为现有对象只读 S3 回读和两次固定预检摘要比较，不再读取控制面 settings 或启动临时 Worker。部署、真实能力和 reviewer 拒绝由主验收的明确计划安排。
+
+资格检查的旧 `2.8.1` 存储 fixture 仅绑定三对象读回，不是单调发布预检候选。预检另取受保护 `FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH`（已审 checkout 内相对 JSON 路径，无绝对路径、反斜杠或 `.`/`..` 段）及 `FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256`（文件原始字节 SHA-256）。读取后须在网络前核对原始 SHA，并按相同 repository/schema 校验；不得自动回退 fixture、改版本或清历史。输入必须由 reviewer 绑定真实受审候选或当前已注册 release 的精确 canonical identity。
+
+结果 `preflightInput` 分别记录输入 path、原始 sha256、检查源码 `sourceCommit` 与 metadata 原有 `releaseTag/versionCode/commitSha/runId`；后者不能被 `GITHUB_SHA` 改写。两次 endpoint 响应继续按既有 canonical JSON + LF 的投影摘要比较，与文件原始 SHA 是不同字段。当前已注册 `3.2.8` 与旧存储 fixture 共存时应允许精确 canonical 预检并读取三个旧对象；真实过期或同版本冲突候选仍须在 GitHub/R2 写前拒绝。资格源码/输入绑定不是发布批准。
 
 成功时进程退出码为 0，并向 stdout 输出恰一个 `R2AssetUploadResult` JSON object：
 
@@ -1293,6 +1299,7 @@ P4-4 配置面：
 | `OTA_BOOT_CHAIN_READY` | GitHub variable | release gate | 仅精确 `true` 解锁；时序见 `OTA-XC-RELEASE-GATE` |
 | `firmware-rehearsal` | GitHub environment | rehearsal job | 独立 staging Worker/D1/R2 bindings，不复用 production 凭据；同账户专用 Token 仅限下述 P41-CF-CREDENTIAL-02，不允许 production 副作用 |
 | `firmware-production` | GitHub environment | release job | 至少一名独立审批人，job 必须声明 environment |
+| `FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH` / `FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256` | GitHub firmware-rehearsal variables，仅 check_bindings | 只读资格检查 | reviewer 绑定的独立预检 JSON 相对路径及原始字节摘要；不是 S3 fixture、token hash 或生产晋升批准；与检查源码变量共同核验 |
 
 生产新链只接受 `e-track-firmware-production-releases`；演练仍只接受 `e-track-firmware-p41-test-releases`。生产使用上述不带前缀 secrets；演练对应 `FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID`、`FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY` 及既有 FIRMWARE_REHEARSAL_ account/origin/deploy/AES。拒绝回退到 SDK 默认凭据链、OAuth、旧 API token 或跨环境桶。旧 `TRACE_D1_DATABASE_ID/NAME` 不再接入工作流，客户端非空指定数据库必须拒绝；实际部署绑定记录仍保留。旧平台配置不要求为实现整改删除或重写，任何平台变更按主验收计划执行。
 

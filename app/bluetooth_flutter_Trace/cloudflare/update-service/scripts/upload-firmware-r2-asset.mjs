@@ -19,14 +19,15 @@ async function readback(bucket, asset, head, uploaded) {
   const reader = object.body.getReader();
   try {
     for (;;) {
-      const part = await reader.read();
+      let part;
+      try { part = await reader.read(); }
+      catch { throw new CliError("R2 readback interrupted before verification completed", "R2_VERIFY_FAILED", 1); }
       if (part.done) break;
       size += part.value.byteLength;
       if (size > asset.sizeBytes) throw mismatch();
       hash.update(part.value);
     }
-  } catch { throw mismatch(); }
-  finally { await reader.cancel().catch(() => {}); }
+  } finally { await reader.cancel().catch(() => {}); }
   if (size !== asset.sizeBytes || hash.digest("hex") !== asset.sha256) throw mismatch();
 }
 
@@ -50,7 +51,7 @@ export async function uploadFirmwareAsset(metadata, fileName, bytes, bucket, req
   let head = await bucket.head(asset.r2Key);
   let status = "ALREADY_PRESENT";
   if (!head) {
-    // Plain R2 metadata crosses Wrangler's proxy without Node/SDK Headers identity.
+    // The shared storage port takes plain metadata, not host-specific Headers.
     const httpMetadata = {
       contentType: asset.kind === "recovery" ? "application/octet-stream" : "application/vnd.e-track.etu",
       contentDisposition: `attachment; filename="${asset.fileName}"`,
